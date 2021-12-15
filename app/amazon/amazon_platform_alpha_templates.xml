@@ -1,0 +1,16 @@
+<?xml version="1.0" encoding="ASCII"?>
+<model:MDescriptors xmlns:model="http://www.silabs.com/ss/Studio.ecore">
+  <descriptors name="aws_tests" label="Amazon - AWS - Tests" description="Project to run AWS Tests on Silicon Labs boards.">
+    <properties key="namespace" value="template.uc"/>
+    <properties key="keywords" value="universal\ configurator"/>
+    <properties key="projectFilePaths" value="example/aws_tests/aws_tests.slcp"/>
+    <properties key="readmeFiles" value=""/>
+    <properties key="boardCompatibility" value="brd4180a brd4180b brd4181a brd4181b brd4181c com.silabs.board.none"/>
+    <properties key="partCompatibility" value=".*bgm1.* .*bgm13.* .*bgm22.* .*efm32g.* .*efm32gg.* .*efm32gg11b.* .*efm32gg12b.* .*efm32hg.* .*efm32lg.* .*efm32pg12b.* .*efm32pg1b.* .*efm32pg22.* .*efm32pg23.* .*efm32tg.* .*efm32tg11b.* .*efm32wg.* .*efm32zg.* .*efr32bg12p.* .*efr32bg13p.* .*efr32bg1b.* .*efr32bg1p.* .*efr32bg22.* .*efr32fg12p.* .*efr32fg13p.* .*efr32fg14p.* .*efr32fg1p.* .*efr32fg23.* .*efr32mg12p.* .*efr32mg13p.* .*efr32mg14p.* .*efr32mg1p.* .*efr32mg21.* .*efr32mg22.* .*efr32mg24.* .*efr32zg13l.* .*efr32zg13p.* .*efr32zg13s.* .*efr32zg14p.* .*efr32zg23.* .*mgm1.* .*mgm12.* .*mgm13.* .*mgm21.* .*mgm22.* .*mgm24.* .*wgm160.* .*zgm13.* .*zgm23.*"/>
+    <properties key="ideCompatibility" value="iar-embedded-workbench makefile-ide segger-embedded-studio simplicity-ide"/>
+    <properties key="toolchainCompatibility" value="gcc iar segger"/>
+    <properties key="category" value="Example|AWS IoT"/>
+    <properties key="quality" value="ALPHA"/>
+    <properties key="stockConfigCompatibility" value="com.silabs.ss.framework.project.toolchain.core.default"/>
+  </descriptors>
+</model:MDescriptors>

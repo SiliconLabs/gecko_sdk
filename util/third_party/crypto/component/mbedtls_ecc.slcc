@@ -1,0 +1,37 @@
+id: mbedtls_ecc
+package: platform
+label: Mbed TLS Support for ECC
+description: >-
+  This component provides support for Elliptic Curve Cryptography (ECC) using
+  Mbed TLS. The primary purpose of this component is to enable the software
+  fallback implementation of ECC in PSA Crypto.
+category: Platform|Security
+quality: production
+source:
+  - path: util/third_party/crypto/mbedtls/library/ecp.c
+  - path: util/third_party/crypto/mbedtls/library/ecp_curves.c
+  - path: util/third_party/crypto/mbedtls/library/ecdh.c
+  - path: util/third_party/crypto/mbedtls/library/ecdsa.c
+include:
+  - path: util/third_party/crypto/mbedtls/include
+    file_list:
+      - path: mbedtls/ecp.h
+      - path: mbedtls/ecdh.h
+      - path: mbedtls/ecdsa.h
+      - path: mbedtls/md.h
+  - path: util/third_party/crypto/mbedtls/library
+    file_list:
+      - path: ecp_internal_alt.h
+provides:
+  - name: mbedtls_ecc
+requires:
+  - name: mbedtls_ecc_curve
+  - name: mbedtls_mpi
+  - name: mbedtls_core
+  - name: mbedtls_random
+recommends:
+  - id: mbedtls_ecc_secp256r1
+template_contribution:
+  - name: mbedtls_config
+    value: MBEDTLS_ECP_C
+

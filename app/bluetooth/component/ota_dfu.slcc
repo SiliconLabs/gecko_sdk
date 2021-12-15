@@ -1,0 +1,33 @@
+id: ota_dfu
+label: OTA DFU
+package: Bluetooth
+description: Component that provides over-the-air (OTA) device firmware upgrade (DFU) functionality.
+category: Bluetooth|OTA
+quality: production
+root_path: app/bluetooth/common/ota_dfu
+config_file:
+  - path: ota_dfu.xml
+    directory: btconf
+include:
+  - path: .
+    file_list:
+      - path: sl_ota_dfu.h
+source:
+  - path: sl_ota_dfu.c
+provides:
+  - name: ota_dfu
+requires:
+  - name: app_assert
+  - name: apploader
+  - name: bluetooth_feature_connection
+  - name: bluetooth_feature_gatt_server
+  - name: bluetooth_feature_system
+  - name: bluetooth_stack
+  - name: bootloader_interface
+  - name: gatt_configuration
+template_contribution:
+  - name: bluetooth_on_event
+    value:
+      include: sl_ota_dfu.h
+      function: sl_bt_ota_dfu_on_event
+    priority: -9000

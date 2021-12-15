@@ -1,0 +1,26 @@
+Gecko Platform 4.0.0.0
+* CMSIS Device
+  * Added support for ZGM230S modules
+* Drivers
+  * Added support for RBG LEDs in the LED driver
+* Services
+  * Added password and session protection in the CLI
+* Middleware
+  * Fixed vulnerabilities in Micrium OS Net
+  * Deprecated Micrium OS USB Device and USB Host
+  * Deprecated Gecko USB
+* Security
+  * Mbed TLS is updated to version 3.0.0
+  * Gecko Bootloader is provided as a full-source delivery
+* Operating System
+  * Changed default configurations of the Micrium OS Kernel to reduce code size
+* Gecko Bootloader
+  * Projects now supported in Project Configurator
+  * Provided as a full-source delivery
+* Machine Learning
+  * Updated TensorFlow Lite Micro version and updated quality to production level
+  * Added accelerated kernels and automatic initialization of TensorFlow Lite Micro
+* Examples
+  * Added emode demo
+  * Added new machine learning examples
+	

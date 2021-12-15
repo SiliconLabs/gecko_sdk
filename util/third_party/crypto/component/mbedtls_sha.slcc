@@ -1,0 +1,15 @@
+id: mbedtls_sha
+package: platform
+label: Mbed TLS Support for SHA Function Families for Hashing
+description: >-
+  This component provides support for all SHA hash functions supported by
+  Silicon Labs in Mbed TLS. This includes SHA-1, SHA-224, SHA-256, SHA-384,
+  and SHA-512.
+category: Platform|Security
+quality: production
+provides:
+  - name: mbedtls_sha
+requires:
+  - name: mbedtls_sha1
+  - name: mbedtls_sha256
+  - name: mbedtls_sha512

@@ -1,0 +1,18 @@
+#ifndef SL_DEVICE_INIT_HFRCO_CONFIG_H
+#define SL_DEVICE_INIT_HFRCO_CONFIG_H
+
+// <<< Use Configuration Wizard in Context Menu >>>
+
+// <o SL_DEVICE_INIT_HFRCO_BAND> Frequency Band
+// <i> RC Oscillator Frequency Band
+// <cmuHFRCOBand_1MHz=> 1 MHz
+// <cmuHFRCOBand_7MHz=> 7 MHz
+// <cmuHFRCOBand_11MHz=> 11 MHz
+// <cmuHFRCOBand_14MHz=> 14 MHz
+// <cmuHFRCOBand_21MHz=> 21 MHz
+// <i> Default: cmuHFRCOBand_21MHz
+#define SL_DEVICE_INIT_HFRCO_BAND           cmuHFRCOBand_21MHz
+
+// <<< end of configuration section >>>
+
+#endif // SL_DEVICE_INIT_HFRCO_CONFIG_H

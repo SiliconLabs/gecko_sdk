@@ -1,0 +1,17 @@
+id: mbedtls_tls_server
+package: platform
+label: Mbed TLS Support for TLS Server
+description: >-
+  This component provides support for using TLS (as a server) in Mbed TLS.
+category: Platform|Security
+quality: production
+provides:
+  - name: mbedtls_tls_server
+requires:
+  - name: mbedtls_tls
+template_contribution:
+  - name: mbedtls_config
+    value: MBEDTLS_SSL_SRV_C
+documentation:
+  docset: mbed-tls
+  document: group-ssltls-communication-module

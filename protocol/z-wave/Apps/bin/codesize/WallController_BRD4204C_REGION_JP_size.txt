@@ -1,0 +1,40 @@
+
+==========================================================
+The output of the size tool: (e.g. arm-none-ambi-size.exe)
+==========================================================
+
+/mnt/raid/workspaces/ws.LQjRPMcMF/overlay/super/prebuilt-samples/Z-Wave/WallController-brd4204c-gcc-makefile-cp-REGION_JP/build/debug/WallController.out  :
+section                 size         addr
+.text                0x35540    0x8006000
+_cc_handlers_v3        0x1a4    0x803b540
+.ARM.exidx               0x8    0x803b6e4
+.stack                0x1000   0x20000000
+.data                  0x6ec   0x20001000
+.reset_info              0x4   0x200016ec
+.bss                  0xae00   0x200016f0
+.heap                 0x3b10   0x2000c4f0
+.internal_storage    0x2a000    0x803b6ec
+.zwave_nvm            0x6000    0x80656ec
+.nvm                  0xa000    0x806b6ec
+.ARM.attributes         0x36          0x0
+.comment                0x4d          0x0
+.debug_frame          0x9e64          0x0
+.debug_info         0x8cd85d          0x0
+.debug_abbrev        0x15cdf          0x0
+.debug_loc           0x42129          0x0
+.debug_aranges        0x3708          0x0
+.debug_ranges         0x6948          0x0
+.debug_line          0x41ae0          0x0
+.debug_str           0x734c1          0x0
+.stabstr               0x14d          0x0
+Total               0xa6dd76
+
+The calculated FLASH and SRAM usage summary:
+============================================
+FLASH used as program memory:  (Including only the sections: .text, .ARM.exidx, .data)
+   458200
+FLASH used for storage: (Including only the sections: .nvm3App, .simee)
+   0
+SRAM usage:             (Including only the sections: .data, .bss, .heap, .stack_dummy, .reset_info)
+   65536
+

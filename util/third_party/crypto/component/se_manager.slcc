@@ -1,0 +1,61 @@
+id: se_manager
+label: SE Manager
+package: platform
+description: >-
+  Driver for interacting with the SE or Root Code on Series 2 devices. The
+  available functionality varies accross parts: device management utilities
+  are available on all parts; on parts with the SE subsystem, a low level
+  crypto API is available; finally, Vault High devices also include key storage
+  functionality.
+category: Platform|Security
+quality: production
+component_root_path: util/third_party/crypto/sl_component/se_manager
+source:
+  - path: src/sl_se_manager.c
+  - path: src/sl_se_manager_cipher.c
+  - path: src/sl_se_manager_entropy.c
+  - path: src/sl_se_manager_hash.c
+  - path: src/sl_se_manager_key_derivation.c
+  - path: src/sl_se_manager_key_handling.c
+  - path: src/sl_se_manager_signature.c
+  - path: src/sl_se_manager_util.c
+  - path: src/sl_se_manager_attestation.c
+include:
+  - path: inc
+    file_list:
+      - path: sl_se_manager.h
+      - path: sl_se_manager_check_config.h
+      - path: sl_se_manager_cipher.h
+      - path: sl_se_manager_config.h
+      - path: sl_se_manager_defines.h
+      - path: sl_se_manager_entropy.h
+      - path: sl_se_manager_hash.h
+      - path: sl_se_manager_key_derivation.h
+      - path: sl_se_manager_key_handling.h
+      - path: sl_se_manager_signature.h
+      - path: sl_se_manager_types.h
+      - path: sl_se_manager_util.h
+      - path: sl_se_manager_attestation.h
+      - path: sl_se_manager_internal_keys.h
+      - path: sli_se_manager_internal.h
+  - path: src
+    file_list:
+      - path: sli_se_manager_osal.h
+      - path: sli_se_manager_osal_baremetal.h
+        unless: [cmsis_rtos2]
+      - path: sli_se_manager_osal_cmsis_rtos2.h
+        condition: [cmsis_rtos2]
+requires:
+  - name: device
+  - name: emlib_common
+  - name: emlib_core
+  - name: emlib_se
+  - name: status
+provides:
+  - name: se_manager
+documentation:
+    docset: gecko-platform
+    document: service/api/group-sl-se-manager
+template_contribution:
+  - name: component_catalog
+    value: se_manager

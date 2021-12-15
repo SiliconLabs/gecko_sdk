@@ -1,0 +1,29 @@
+id: psa_its
+package: platform
+label: PSA persistent storage support (ITS)
+description: >-
+  This component provides an implementation of the PSA ITS (Internal Trusted
+  Storage) API based on Silicon Labs NVM3. For example, this component is
+  required for enabling the use of persistent key storage in PSA Crypto.
+category: Platform|Security
+quality: production
+component_root_path: util/third_party/crypto/
+include:
+  - path: sl_component/sl_psa_driver/inc
+    file_list:
+      - path: psa/internal_trusted_storage.h
+      - path: psa/error.h
+source:
+  - path: sl_component/sl_psa_driver/src/sl_psa_its_nvm3.c
+provides:
+  - name: psa_its
+requires:
+  - name: psa_crypto_common
+  - name: nvm3_default
+template_contribution:
+  - name: mbedtls_config
+    value: MBEDTLS_PSA_CRYPTO_STORAGE_C
+  - name: psa_its_files
+    value:
+      name: psa_its_files_minimum
+      count: 1

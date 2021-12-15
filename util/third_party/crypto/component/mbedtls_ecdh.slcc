@@ -1,0 +1,17 @@
+id: mbedtls_ecdh
+package: platform
+label: Mbed TLS Support for ECDH
+description: >-
+  This component provides support for key agreement with the ECDH protocol
+  using Mbed TLS. The primary purpose of this component is to enable the 
+  software fallback implementation of ECDH in PSA Crypto.
+category: Platform|Security
+quality: production
+provides:
+  - name: mbedtls_ecdh
+requires:
+  - name: mbedtls_ecc
+template_contribution:
+  - name: mbedtls_config
+    value: MBEDTLS_ECDH_C
+

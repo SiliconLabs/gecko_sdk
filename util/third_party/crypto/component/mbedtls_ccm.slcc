@@ -1,0 +1,28 @@
+id: mbedtls_ccm
+package: platform
+label: Mbed TLS Support for CCM
+description: >-
+  This component provides support for authenticated encryption and decryption
+  in CCM mode for block ciphers using Mbed TLS.
+category: Platform|Security
+quality: production
+source:
+  - path: util/third_party/crypto/mbedtls/library/ccm.c
+include:
+  - path: util/third_party/crypto/mbedtls/include
+    file_list:
+      - path: mbedtls/ccm.h
+provides:
+  - name: mbedtls_ccm
+requires:
+  - name: mbedtls_cipher
+  - name: mbedtls_block_cipher
+  - name: mbedtls_core
+recommends:
+  - id: mbedtls_aes
+template_contribution:
+  - name: mbedtls_config
+    value: MBEDTLS_CCM_C
+documentation:
+  docset: mbed-tls
+  document: group-sl-crypto-ccm

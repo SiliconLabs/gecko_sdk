@@ -1,0 +1,16 @@
+id: cpc_packed_secondary
+label: Frame packing endpoint for Secondary Device
+package: platform
+description: Co-Processor Communication (CPC) frame packing endpoint for Secondary Device
+category: Services|Co-Processor Communication
+quality: alpha
+root_path: platform/service/cpc
+ui_hints:
+  visibility: never
+provides:
+  - name: cpc_packed_secondary
+requires:
+  - name: cpc_secondary
+template_contribution:
+  - name: component_catalog
+    value: cpc_packed_secondary

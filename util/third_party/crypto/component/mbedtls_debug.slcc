@@ -1,0 +1,21 @@
+id: mbedtls_debug
+package: platform
+label: Mbed TLS Support for DEBUG
+description: >
+ This component provides support for the DEBUG API in Mbed TLS provided
+ by the debug.h file.
+category: Platform|Security
+quality: production
+source:
+  - path: util/third_party/crypto/mbedtls/library/debug.c
+include:
+  - path: util/third_party/crypto/mbedtls/include
+    file_list:
+      - path: mbedtls/debug.h
+provides:
+  - name: mbedtls_debug
+requires:
+  - name: mbedtls_hmac
+template_contribution:
+  - name: mbedtls_config
+    value: MBEDTLS_DEBUG_C

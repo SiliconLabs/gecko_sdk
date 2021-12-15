@@ -1,0 +1,67 @@
+id: cryptoacc_library
+package: platform
+label: Crypto library for EFR32xG22
+description:
+  "Hardware acceleration library for the CRYPTOACC hardware peripheral.\n
+
+  NOTE: This component is primarily meant for internal (Silicon Labs) use."
+category: Platform|Security|Internal
+quality: production
+component_root_path: util/third_party/crypto/sl_component/sl_cryptoacc_library
+source:
+  - path: src/ba414ep_config.c
+  - path: src/ba431_config.c
+  - path: src/cryptodma_internal.c
+  - path: src/cryptolib_types.c
+  - path: src/sx_aes.c
+  - path: src/sx_blk_cipher.c
+  - path: src/sx_dh_alg.c
+  - path: src/sx_ecc_curves.c
+  - path: src/sx_ecc_keygen_alg.c
+  - path: src/sx_ecdsa_alg.c
+  - path: src/sx_hash.c
+  - path: src/sx_math.c
+  - path: src/sx_memcmp.c
+  - path: src/sx_memcpy.c
+  - path: src/sx_primitives.c
+  - path: src/sx_rng.c
+  - path: src/sx_trng.c
+include:
+  - path: include
+    file_list:
+      - path: ba411e_config.h
+      - path: ba413_config.h
+      - path: ba414ep_config.h
+      - path: ba417_config.h
+      - path: ba418_config.h
+      - path: ba431_config.h
+      - path: compiler_extentions.h
+      - path: cryptodma_internal.h
+      - path: cryptolib_def.h
+      - path: cryptolib_types.h
+      - path: sx_aes.h
+      - path: sx_blk_cipher.h
+      - path: sx_blk_cipher_common.h
+      - path: sx_config.h
+      - path: sx_debug.h
+      - path: sx_dh_alg.h
+      - path: sx_dma.h
+      - path: sx_drbg_hash.h
+      - path: sx_ecc_curves.h
+      - path: sx_ecc_keygen_alg.h
+      - path: sx_ecdsa_alg.h
+      - path: sx_errors.h
+      - path: sx_features.h
+      - path: sx_hash.h
+      - path: sx_hw_cfg.h
+      - path: sx_math.h
+      - path: sx_memcmp.h
+      - path: sx_memcpy.h
+      - path: sx_primitives.h
+      - path: sx_rng.h
+      - path: sx_trng.h
+      - path: sxregs.h
+requires:
+  - name: device_has_cryptoacc
+provides:
+  - name: cryptoacc_library

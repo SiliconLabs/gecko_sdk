@@ -1,0 +1,30 @@
+id: mbedtls_sha256
+package: platform
+label: Mbed TLS Support for SHA-224 and SHA-256
+description: >-
+  This component provides support for SHA-224 and SHA-256 hash functions using mbedTLS.
+category: Platform|Security
+quality: production
+source:
+  - path: util/third_party/crypto/mbedtls/library/sha256.c
+include:
+  - path: util/third_party/crypto/mbedtls/include
+    file_list:
+      - path: mbedtls/sha256.h
+provides:
+  - name: mbedtls_sha256
+  - name: mbedtls_hash_function
+    allow_multiple: true
+  - name: mbedtls_sha_function
+    allow_multiple: true
+requires:
+  - name: mbedtls_core
+template_contribution:
+  - name: mbedtls_config
+    value: MBEDTLS_SHA256_C
+  - name: mbedtls_config
+    value: MBEDTLS_SHA224_C
+documentation:
+  docset: mbed-tls
+  document:
+    - page: group-sl-crypto-sha256

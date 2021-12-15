@@ -1,0 +1,64 @@
+project_name: tensorflow_model_profiler
+package: platform
+quality: production
+label: Model Profiler
+description: >
+  This application is designed to profile a Tensorflow Lite Micro model on
+  Silicon Labs hardware. The model used by the application is provided by
+  a Tensorflow Lite flatbuffer file called model.tflite in the config/tflite
+  subdirectory. The profiler will measure the number of CPU clock cycles and
+  elapsed time in each layer of the model when performing an inference. It
+  will also produce a summary when inference is done. The input layer of
+  the model is filled with all zeroes before performing a single inference.
+  Profiling results are transmitted over VCOM.
+category: Example|Platform
+include:
+  - path: .
+    file_list:
+      - path: app.h
+      - path: model_profiler.h
+source:
+  - path: app.c
+  - path: main.c
+  - path: model_profiler.cc
+component:
+  - id: emlib_cmu
+  - id: sl_memory
+  - id: sl_system
+  - id: device_init
+  - id: component_catalog
+  - id: tensorflow_lite_micro
+  - id: iostream_retarget_stdio
+  - id: iostream_recommended_stream
+config_file:
+  - path: config/tflite/model.tflite
+    directory: tflite
+define:
+  - name: TF_LITE_STATIC_MEMORY
+  - name: NDEBUG
+configuration:
+  - name: SL_BOARD_ENABLE_VCOM
+    value: "1"
+  - name: SL_IOSTREAM_USART_VCOM_CONVERT_BY_DEFAULT_LF_TO_CRLF
+    value: "1"
+  - name: SL_IOSTREAM_EUSART_VCOM_CONVERT_BY_DEFAULT_LF_TO_CRLF
+    value: "1"
+  - name: SL_HEAP_SIZE
+    value: "0x3000"
+  - name: SL_TFLITE_MICRO_INTERPRETER_INIT_ENABLE
+    value: "0"
+toolchain_settings:
+  - option: gcc_compiler_option
+    value: "-Wno-unused-parameter"
+  - option: gcc_linker_option
+    value: "-u _printf_float"
+  - option: optimize
+#   "value": "none"
+    "value": "speed"
+readme:
+  - path: readme.html
+ui_hints:
+  highlight: readme.html
+tag:
+  - hardware:device:ram:64
+  - hardware:device:flash:400

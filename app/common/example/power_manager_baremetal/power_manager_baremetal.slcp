@@ -1,0 +1,37 @@
+project_name: power_manager_baremetal
+package: platform
+quality: production
+label: Platform - Power Manager Bare-metal
+description: > 
+  This example project demonstrates use of the Power Manager module
+  in a bare metal application.
+category: Example|Platform
+source:
+  - path: app.c
+  - path: main.c
+  - path: power_manager_app.c
+include:
+  - path: .
+    file_list:
+    - path: app.h
+    - path: power_manager_app.h
+component:
+  - id: sl_system
+  - id: device_init
+  - id: power_manager
+  - id: sleeptimer
+  - id: simple_button
+    instance:
+      - btn0
+      - btn1
+define:
+  - name: DEBUG_EFM
+configuration:
+  - name: SL_POWER_MANAGER_DEBUG
+    value: 1
+  - name: SL_POWER_MANAGER_LOWEST_EM_ALLOWED
+    value: 3
+readme:
+  - path: "readme.html"
+tag:
+  - hardware:component:button:2+

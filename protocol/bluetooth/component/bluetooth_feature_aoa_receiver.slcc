@@ -1,0 +1,25 @@
+id: "bluetooth_feature_aoa_receiver"
+label: "AoA Receiver"
+package: "Bluetooth"
+description: >
+  The Bluetooth Angle of Arrival (AoA) Constant Tone Extension (CTE) receiving feature
+category: "Bluetooth|Stack|Direction Finding"
+quality: "production"
+root_path: "protocol/bluetooth"
+requires:
+  - name: bluetooth_controller
+  - name: device_supports_bluetooth_cte
+  - name: device_supports_bluetooth_iq_sampling
+  - name: device_supports_bluetooth_antenna_switching
+  - name: rail_util_aox
+provides:
+  - name: "bluetooth_feature_aoa_receiver"
+template_contribution:
+  - name: bluetooth_bgapi_class
+    value:
+      class: "cte_receiver"
+    priority: 10
+  - name: bluetooth_controller_feature_init
+    value:
+      function: "sl_btctrl_init_cte()"
+    priority: 10

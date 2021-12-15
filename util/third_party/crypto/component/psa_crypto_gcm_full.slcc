@@ -1,0 +1,19 @@
+id: psa_crypto_gcm_full
+package: platform
+label: PSA Crypto Support for accelerated GCM with IV lengths != 12 bytes
+description: >-
+  This component extends the hardware implementations of AES-GCM with the
+  software capability to accept IV input which is larger or smaller than
+  the common 12 byte length.
+category: Platform|Security
+quality: production
+component_root_path: util/third_party/crypto/sl_component/sl_psa_driver
+source:
+  - path: src/sli_psa_driver_ghash.c
+provides:
+  - name: psa_crypto_gcm_full
+requires:
+  - name: psa_crypto_gcm
+  - name: psa_driver
+define:
+  - name: SLI_PSA_SUPPORT_GCM_IV_CALCULATION

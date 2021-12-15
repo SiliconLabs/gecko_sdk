@@ -1,0 +1,31 @@
+id: "sl_ecdh_key_exchange"
+label: "ECDH Key Exchange"
+package: "Flex"
+category: "Connect|Test"
+quality: "production"
+description: "This component includes the core functionality for network key exchanging mechanism between two devices."
+root_path: "app/flex/component/connect/sl_ecdh_key_exchange"
+provides:
+  - name: "sl_ecdh_key_exchange"
+source:
+  - path: "sl_ecdh_key_exchange.c"
+include:
+  - path: "."  
+    file_list:
+      - path: "sl_ecdh_key_exchange.h"
+config_file:
+   - path: "config/sl_ecdh_key_exchange_config.h"
+requires:
+  - name: mbedtls_ecdh
+  - name: mbedtls_random
+  - name: mbedtls_slcrypto
+  - name: mbedtls_aes
+  - name: connect_aes_security
+  - name: app_log
+  - name: app_assert
+#-------------- Template Contribution ----------------
+template_contribution:
+#---------------- Component Catalog ------------------
+  - name: component_catalog
+    value: sl_ecdh_key_exchange
+

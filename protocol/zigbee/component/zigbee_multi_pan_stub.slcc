@@ -1,0 +1,34 @@
+id: zigbee_multi_pan_stub
+label: Multi PAN Stub
+package: Zigbee
+category: Zigbee|Stack
+quality: production
+
+description: Provides stub implementations of multi-PAN functionality.
+
+provides:
+  - name: zigbee_multi_pan_stub
+  - name: zigbee_multi_pan_feature
+
+requires:
+  - name: zigbee_multi_pan_stub_implementation
+  - name: zigbee_multi_pan_stub_library
+    condition:
+     - zigbee_force_libraries
+
+recommends:
+  - id: zigbee_multi_pan_stub_source
+
+include:
+  - path: protocol/zigbee/stack/core
+    file_list:
+      - path: multi-pan.h
+
+template_contribution:
+  - name: component_catalog
+    value: zigbee_multi_pan_stub
+
+
+documentation:
+  docset: zigbee
+  document: zigbee-af-api/multi-pan-stub

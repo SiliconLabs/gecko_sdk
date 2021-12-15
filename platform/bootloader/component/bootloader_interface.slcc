@@ -1,0 +1,67 @@
+id: bootloader_interface
+label: Bootloader Application Interface
+package: bootloader
+description: >
+  This component must be added to a project in order to use the Gecko Bootloader.
+  When this component is part of a project a part of flash memory will be reserved
+  for Bootloader usage in the application linker file. This component also provides
+  a bootloader interface for interacting with the Gecko Bootloader.
+category: Platform|Bootloader
+quality: production
+source:
+  - path: platform/bootloader/api/btl_interface.c
+  - path: platform/bootloader/api/btl_interface_storage.c
+include:
+  - path: platform/bootloader
+  - path: platform/bootloader/api
+    file_list:
+    - path: application_properties.h
+    - path: btl_errorcode.h
+    - path: btl_interface.h
+    - path: btl_interface_parser.h
+    - path: btl_interface_storage.h
+    - path: btl_reset_info.h
+provides:
+  - name: bootloader_interface
+requires:
+  - name: cmsis_core
+  - name: device
+  - name: bootloader_app_properties
+template_contribution:
+  - name: bootloader_size
+    value: 16384
+    condition:
+    - device_sdid_80
+  - name: bootloader_size
+    value: 18432
+    condition:
+    - device_sdid_89
+    - bootloader_in_main_flash
+  - name: bootloader_size
+    value: 18432
+    condition:
+    - device_sdid_95
+    - bootloader_in_main_flash
+  - name: bootloader_size
+    value: 16384
+    condition:
+    - device_sdid_200
+  - name: bootloader_size
+    value: 24576
+    condition:
+    - device_sdid_205
+  - name: bootloader_size
+    value: 24576
+    condition:
+    - device_sdid_210
+  - name: bootloader_size
+    value: 24576
+    condition:
+    - device_sdid_215
+  - name: bootloader_size
+    value: 24576
+    condition:
+    - device_sdid_220
+documentation:
+  docset: mcu-bootloader
+  document: group-Interface

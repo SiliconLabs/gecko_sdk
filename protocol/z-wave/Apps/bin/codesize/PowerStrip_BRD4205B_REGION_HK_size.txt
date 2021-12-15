@@ -1,0 +1,40 @@
+
+==========================================================
+The output of the size tool: (e.g. arm-none-ambi-size.exe)
+==========================================================
+
+/mnt/raid/workspaces/ws.h8Mt6z7B2/overlay/super/prebuilt-samples/Z-Wave/PowerStrip-brd4205b-gcc-makefile-cp-REGION_HK/build/debug/PowerStrip.out  :
+section                 size         addr
+.text                0x37748    0x8006000
+_cc_handlers_v3        0x230    0x803d748
+.ARM.exidx               0x8    0x803d978
+.stack                0x1000   0x20000000
+.data                  0x738   0x20001000
+.reset_info              0x4   0x20001738
+.bss                  0xaf24   0x2000173c
+.heap                 0x39a0   0x2000c660
+.internal_storage    0x2a000    0x803d980
+.zwave_nvm            0x6000    0x8067980
+.nvm                  0xa000    0x806d980
+.ARM.attributes         0x36          0x0
+.comment                0x4d          0x0
+.debug_frame          0xaa20          0x0
+.debug_info         0xa59350          0x0
+.debug_abbrev        0x182cd          0x0
+.debug_loc           0x46b55          0x0
+.debug_aranges        0x3b88          0x0
+.debug_ranges         0x72d0          0x0
+.debug_line          0x46d30          0x0
+.debug_str           0x76a77          0x0
+.stabstr               0x14d          0x0
+Total               0xc0cce1
+
+The calculated FLASH and SRAM usage summary:
+============================================
+FLASH used as program memory:  (Including only the sections: .text, .ARM.exidx, .data)
+   467128
+FLASH used for storage: (Including only the sections: .nvm3App, .simee)
+   0
+SRAM usage:             (Including only the sections: .data, .bss, .heap, .stack_dummy, .reset_info)
+   65536
+

@@ -1,0 +1,49 @@
+package: Zigbee
+description: This is the UART implementation of EZSP.
+label: EZSP UART
+quality: production
+id: zigbee_ezsp_uart
+category: Zigbee|Utility
+toolchain_settings: []
+ui_hints: {}
+template_file: []
+provides:
+   - name: "zigbee_ezsp_serial_interface"
+   - name: "zigbee_ezsp_uart"
+requires:
+   - name: "zigbee_ezsp"
+   - name: "device_host"
+   - name: "cli_ash_host"
+define:
+   - name: "EZSP_UART"
+   - name: "EZSP_ASH"
+source:
+  - path: "protocol/zigbee/app/util/ezsp/serial-interface-uart.c"
+  - path: "protocol/zigbee/app/ezsp-host/ash/ash-host-ui.c"
+  - path: "protocol/zigbee/app/ezsp-host/ash/ash-host.c"
+  - path: "platform/service/legacy_ncp_ash/src/ash-common.c"
+  - path: "protocol/zigbee/app/util/gateway/backchannel-stub.c"
+    condition:
+      - zigbee_host_simulation
+  - path: "protocol/zigbee/app/ezsp-host/ezsp-host-io-sim.c"
+    condition:
+      - zigbee_host_simulation
+  - path: "protocol/zigbee/app/ezsp-host/ezsp-host-queues.c"
+    condition:
+      - zigbee_host_simulation
+  - path: "protocol/zigbee/app/ezsp-host/ezsp-host-ui.c"
+    condition:
+      - zigbee_host_simulation
+include:
+  - path: "platform/service/"
+    file_list:
+      - path: legacy_ncp_ash/inc/ash-protocol.h
+  - path: protocol/zigbee/app/ezsp-host/ash
+    file_list:
+      - path: ash-host.h
+      - path: ash-host-priv.h
+      - path: ash-host-ui.h
+
+template_contribution:
+  - name: component_catalog
+    value: zigbee_ezsp_uart

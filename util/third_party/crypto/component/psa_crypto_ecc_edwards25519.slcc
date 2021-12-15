@@ -1,0 +1,20 @@
+id: psa_crypto_ecc_edwards25519
+package: platform
+label: PSA Crypto support for the Twisted Edwards 25519 ECC curve.
+description: >-
+  This component adds support for the Twisted Edwards 255-bit
+  ECC curve in PSA Crypto. This curve is only supported on Vault High devices.
+category: Platform|Security
+quality: production
+provides:
+  - name: psa_crypto_ecc_edwards25519
+  - name: psa_crypto_ecc_curve
+    allow_multiple: true
+  - name: psa_crypto_ecc_edwards_curve
+    allow_multiple: true
+requires:
+  - name: device_security_vault
+  - name: psa_crypto_ecc
+template_contribution:
+  - name: psa_crypto_config
+    value: PSA_WANT_ECC_TWISTED_EDWARDS_255

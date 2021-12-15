@@ -1,0 +1,21 @@
+usb-device-loader-application {
+  name=USB Device Loader
+  dir=usb-device-loader-application/template/
+  isc=usb-device-loader-application/template/usb-device-loader-application.isc
+  architecture=efm32~family[GI]~series[1]~device_configuration[1], efm32~family[GI]~series[1]~device_configuration[2]
+
+  USB Device Loader Example
+}
+
+usb-host-loader-application {
+  name=USB Host Loader
+  dir=usb-host-loader-application/template/
+  isc=usb-host-loader-application/template/usb-host-loader-application.isc
+  architecture=efm32~family[GI]~series[1]~device_configuration[1], efm32~family[GI]~series[1]~device_configuration[2]
+
+  USB Host Loader Example
+}
+
+
+
+

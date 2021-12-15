@@ -1,0 +1,16 @@
+id: zw_cc_powerlevel
+label: PowerLevel Command Class
+category: Z-Wave|Command Classes
+description: PowerLevel Command Class!
+package: Z-Wave
+quality: production
+source:
+  - path: protocol/z-wave/ZAF/CommandClasses/PowerLevel/CC_PowerLevel.c
+include:
+  - path: protocol/z-wave/ZAF/CommandClasses/PowerLevel
+    file_list:
+     - path: CC_PowerLevel.h
+provides:
+  - name: zw_cc_powerlevel
+requires:
+  - name: zw_core

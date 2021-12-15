@@ -1,0 +1,8 @@
+Zigbee EmberZNet SDK 7.0.0.0
+* Integrated with Gecko Platform component-based architecture
+* 802.15.4 Radio Co-Processor (RCP)
+* RCP Host for Raspberry Pi (Docker image)
+
+
+
+

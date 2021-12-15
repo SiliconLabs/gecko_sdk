@@ -1,0 +1,16 @@
+id: zw_cc_battery
+label: Battery Command Class
+category: Z-Wave|Command Classes
+description: Battery Command Class!
+package: Z-Wave
+quality: production
+source:
+  - path: protocol/z-wave/ZAF/CommandClasses/Battery/CC_Battery.c
+include:
+  - path: protocol/z-wave/ZAF/CommandClasses/Battery/
+    file_list:
+     - path: CC_Battery.h
+provides:
+  - name: zw_cc_battery
+requires:
+  - name: zw_core

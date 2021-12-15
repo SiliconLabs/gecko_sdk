@@ -1,0 +1,29 @@
+id: mbedtls_jpake
+package: platform
+label: Mbed TLS Support for J-PAKE over Elliptic Curves
+description: >-
+  This component provides support for Elliptic Curve (EC) J-PAKE using Mbed TLS.
+  This password-authenticated key agreement protocol is typically used in a Thread 
+  network stack for key exchanges.
+category: Platform|Security
+quality: production
+source:
+  - path: util/third_party/crypto/mbedtls/library/ecjpake.c
+include:
+  - path: util/third_party/crypto/mbedtls/include
+    file_list:
+      - path: mbedtls/ecjpake.h
+provides:
+  - name: mbedtls_jpake
+requires:
+  - name: mbedtls_ecc
+  - name: mbedtls_hash
+  - name: mbedtls_core
+template_contribution:
+  - name: mbedtls_config
+    value: MBEDTLS_ECJPAKE_C
+  - name: mbedtls_config
+    value: MBEDTLS_KEY_EXCHANGE_ECJPAKE_ENABLED
+documentation:
+  docset: mbed-tls
+  document: group-sl-crypto-jpake

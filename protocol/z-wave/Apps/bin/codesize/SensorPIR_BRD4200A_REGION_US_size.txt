@@ -1,0 +1,40 @@
+
+==========================================================
+The output of the size tool: (e.g. arm-none-ambi-size.exe)
+==========================================================
+
+/mnt/raid/workspaces/ws.oa0ZqD9zJ/overlay/super/prebuilt-samples/Z-Wave/SensorPIR-brd4200a-gcc-makefile-cp-REGION_US/build/debug/SensorPIR.out  :
+section                 size         addr
+.text                0x2ee1c          0x0
+_cc_handlers_v3        0x1a4      0x2ee1c
+.ARM.exidx               0x8      0x2efc0
+.stack                0x1000   0x20000000
+.data                  0x488   0x20001000
+.reset_info              0x4   0x20001488
+.bss                  0x9f04   0x2000148c
+.heap                 0x4c70   0x2000b390
+.internal_storage    0x3a000      0x2efc8
+.zwave_nvm            0x3000      0x68fc8
+.nvm                  0x9000      0x6bfc8
+.ARM.attributes         0x2e          0x0
+.comment                0x4d          0x0
+.debug_frame          0x6ee4          0x0
+.debug_info         0x89054b          0x0
+.debug_abbrev        0x112f5          0x0
+.debug_aranges        0x29f0          0x0
+.debug_ranges         0x4af8          0x0
+.debug_line          0x2dfc2          0x0
+.debug_str           0x6b811          0x0
+.debug_loc           0x253d6          0x0
+.stabstr               0x14d          0x0
+Total               0x9f3945
+
+The calculated FLASH and SRAM usage summary:
+============================================
+FLASH used as program memory:  (Including only the sections: .text, .ARM.exidx, .data)
+   480336
+FLASH used for storage: (Including only the sections: .nvm3App, .simee)
+   0
+SRAM usage:             (Including only the sections: .data, .bss, .heap, .stack_dummy, .reset_info)
+   65536
+

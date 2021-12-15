@@ -1,0 +1,20 @@
+project_name: empty_cpp
+package: platform
+quality: production
+label: Platform - Empty C++ Example
+description: > 
+  This example project shows an empty configuration that can be used as a starting point to add components and functionality.
+category: Example|Platform
+source:
+  - path: app.cpp
+  - path: main.cpp
+include:
+  - path: .
+    file_list:
+    - path: app.h
+component:
+  - id: sl_system
+  - id: device_init
+  - id: cpp_support
+define:
+  - name: DEBUG_EFM

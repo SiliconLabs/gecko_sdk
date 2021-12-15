@@ -1,0 +1,236 @@
+id: zw_core
+label: Z-Wave Core Component
+category: Z-Wave
+description: Core Component
+package: Z-Wave
+quality: production
+template_contribution:
+  - name: linker_zwave_nvm
+    value: true
+  - name: event_handler
+    value:
+      event: stack_init
+      include: ZW_basis_api.h
+      handler: sl_zwave_protocol_startup
+  - name: event_handler
+    priority: 9999 # Ensure this is the last platform item
+    value:
+      event: platform_init
+      include: ZW_basis_api.h
+      handler: sl_zwave_platform_startup
+  - name: application_type
+    value: "APPLICATION_TYPE_ZWAVE"
+requires:
+  - name: zw_build_mode
+  - name: zw_quality_mode
+  - name: zw_versions
+  - name: device_supports_zwave
+  - name: sleeptimer
+  - name: power_manager
+  - name: freertos
+  - name: bootloader_interface
+  - name: nvm3_default
+  - name: emlib
+  - name: status
+  - name: rail_lib
+  - name: simple_led_core
+  - name: led
+  - name: mbedtls_sha1
+  - name: psa_its
+  - name: psa_crypto
+  - name: psa_driver
+  - name: psa_crypto_ecdh
+  - name: psa_crypto_cmac
+  - name: psa_crypto_ccm
+  - name: psa_crypto_ecc_curve25519
+  - name: psa_builtin_key_support_se
+    condition: [device_has_semailbox]
+recommends:
+  - id: zw_production
+  - id: zw_release
+include:
+  - path: "protocol/z-wave/ZWave/API"
+    file_list:
+      - path: "ZW_security_api.h"
+      - path: "ZW_typedefs.h"
+      - path: "ZW_classcmd.h"
+      - path: "ZW_transport_api.h"
+      - path: "ZW_basis_api.h"
+      - path: "ZW_radio_api.h"
+      - path: "ZW_system_startup_api.h"
+      - path: "ZW_application_transport_interface.h"
+      - path: "ZW_slave_api.h"
+      - path: "ZW_global_definitions.h"
+      - path: "ZW_UserTask.h"
+  - path: "protocol/z-wave/Components/SwTimer"
+    file_list:
+      - path: "SwTimer.h"
+      - path: "SwTimerLiaison.h"
+  - path: "protocol/z-wave/Components/Utils"
+    file_list:
+      - path: "SizeOf.h"
+  - path: "protocol/z-wave/Components/QueueNotifying"
+    file_list:
+      - path: "QueueNotifying.h"
+  - path: "protocol/z-wave/Components/NodeMask"
+    file_list:
+      - path: "NodeMask.h"
+  - path: "protocol/z-wave/Components/DebugPrint"
+    file_list:
+      - path: "DebugPrint.h"
+      - path: "DebugPrintConfig.h"
+  - path: "protocol/z-wave/ZAF/ApplicationUtilities/PowerManagement"
+    file_list:
+      - path: "ZAF_PM_Wrapper.h"
+  - path: "protocol/z-wave/Components/PowerManager"
+    file_list:
+      - path: "PowerManager.h"
+  - path: "protocol/z-wave/Components/Assert"
+    file_list:
+      - path: "Assert.h"
+  - path: "protocol/z-wave/ZAF/ApplicationUtilities/TargetSpecificIncludes"
+    file_list:
+      - path: "target_boards.h"
+      - path: "extension_board_8029a.h"
+      - path: "extension_board_8029a_efr32xg13.h"
+        condition: "device_sdid_89"
+      - path: "extension_board_8029a_efr32zg23.h"
+        condition: "device_sdid_210"
+      - path: "radio_board_zgm130s.h"
+        condition: "device_sdid_89"
+      - path: "radio_board_efr32zg23.h"
+        condition: "device_sdid_210"
+  - path: "protocol/z-wave/ZAF/ApplicationUtilities/EventHandling"
+    file_list:
+      - path: "zaf_event_helper.h"
+      - path: "zaf_job_helper.h"
+  - path: "protocol/z-wave/Processor/gecko/hal-config"
+    file_list:
+      - path: "hal-config.h"
+      - path: "hal-config-board-700.h"
+        condition: "device_sdid_89"
+      - path: "hal-config-board-800.h"
+        condition: "device_sdid_210"
+  - path: "platform/halconfig/inc/hal-config"
+    file_list:
+      - path: "hal-config-types.h"
+  - path: "protocol/z-wave/ZAF/ApplicationUtilities/TrueStatusEngine"
+    file_list:
+      - path: "ZAF_TSE.h"
+  - path: "protocol/z-wave/ZAF/ApplicationUtilities/Actuator"
+    file_list:
+      - path: "ZAF_Actuator.h"
+  - path: "protocol/z-wave/ZAF/ApplicationUtilities/_commonIF"
+    file_list:
+      - path: "ZAF_Common_interface.h"
+      - path: "ZAF_Common_helper.h"
+  - path: "protocol/z-wave/Components/RetentionRegisterBank"
+    file_list:
+      - path: "RetentionRegisterBank.h"
+  - path: "protocol/z-wave/Components/CRC"
+    file_list:
+      - path: "CRC.h"
+  - path: "protocol/z-wave/"
+    file_list:
+      - path: "BootLoader/OTA/bootloader-slot-configuration.h"
+  - path: "protocol/z-wave/Components/EventDistributor"
+    file_list:
+      - path: "EventDistributor.h"
+define:
+  - name: EFR32ZG
+    value: 1
+  - name: ZW_SLAVE_ENHANCED_232
+    value: 1
+  - name: ZW_SLAVE
+    value: 1
+  - name: EFR32ZG23
+    value: 1
+    condition: "device_sdid_210"
+  - name: RADIO_BOARD_EFR32ZG23
+    value: 1
+    condition: "device_sdid_210"
+  - name: RADIO_BOARD_ZGM130S
+    value: 1
+    condition: "device_sdid_89"
+  - name: RADIO_BOARD_ZGM230S
+    value: 1
+    condition: "device_sdid_210"
+  - name: ZGM23
+    value: 1
+    condition: "device_sdid_210"
+  - name: EXT_BOARD_8029A
+    value: 1
+  - name: DISABLE_USART1
+    value: 1
+# BUILDING_WITH_UC is used to ensure that non-UC builds still work as intended in the transition phase.
+  - name: BUILDING_WITH_UC
+    value: 1
+  # TODO: Integration hooks needed in FreeRTOS wrapper to register functions for pre/post sleep hooks
+  - name: configPRE_SLEEP_PROCESSING(ms)
+    value: enterPowerDown(ms)
+  - name: configPOST_SLEEP_PROCESSING(ms)
+    value: exitPowerDown(ms)
+  - name: ZWAVE_SERIES_700
+    condition: [device_supports_zwave, device_sdid_89]
+  - name: ZWAVE_SERIES_800
+    condition: [device_supports_zwave, device_sdid_210]
+  - name: SL_IOSTREAM_UART_FLUSH_TX_BUFFER
+  - name: CONFIG_MBEDTLS_USE_FREERTOS_PVCALLOC
+
+# Set GCC error flags as in CMake builds 
+toolchain_settings:
+  - option: gcc_compiler_option
+    value: "-s"
+  - option: optimize # options: none, debug, speed, size
+    value: debug
+    condition: [zw_debug]
+  - option: optimize
+    value: size
+    condition: [zw_release]
+#  - option: gcc_compiler_option
+#    value: "-flto"
+#  - option: gcc_compiler_option
+#    value: "-ffat-lto-objects"
+  - option: gcc_compiler_option
+    value: "-fmerge-all-constants"
+  - option: gcc_compiler_option
+    value: "-Wall"
+  - option: gcc_compiler_option
+    value: "-Werror"
+    condition: [zw_release]
+  - option: gcc_compiler_option
+    value: "-Werror=vla"
+  - option: gcc_compiler_option
+    value: "-Werror=unused-parameter"
+  # Allow implicit function declaration until freertos has an integration hook    
+  - option: gcc_compiler_option
+    value: "-Wno-implicit-function-declaration"
+  # Linker flags
+  - option: gcc_linker_option
+    value: "-Wl,--start-group -lgcc -lc -Wl,--end-group"
+  # Studio warnings:
+  - tool: compiler
+    option: warnings.pedantic
+    value: true
+  - tool: compiler
+    option: warnings.conversion
+    value: true
+  - tool: compiler
+    option: warnings.extra
+    value: true
+
+provides:
+  - name: zw_core
+  - name: wireless_stack
+    allow_multiple: true
+
+validation_helper:
+  - path: protocol/z-wave/component/scripts/zw_core_validation.lua
+
+config_file:
+  - path: protocol/z-wave/config/zw_region_config.h
+    file_id: region_config
+  - path: protocol/z-wave/config/zw_build_no.h
+    file_id: build_no
+  - path: protocol/z-wave/config/zw_config_rf.h
+    file_id: config_rf

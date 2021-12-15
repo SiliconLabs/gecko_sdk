@@ -1,0 +1,35 @@
+project_name: memlcd_baremetal
+package: platform
+quality: production
+label: Platform - MEMLCD Bare-metal
+description: > 
+  This example project demonstrates use of the Memory Liquid Crystal Display (LCD) 
+  module in a baremetal application, using Silicon Labs Graphics Library (glib).
+category: Example|Platform
+source:
+  - path: app.c
+  - path: main.c
+  - path: memlcd_app.c
+include:
+  - path: .
+    file_list:
+    - path: app.h
+    - path: memlcd_app.h
+component:
+  - id: sl_system
+  - id: device_init
+  - id: board_control
+  - id: memlcd
+  - id: dmd_memlcd
+  - id: glib
+  - id: simple_button
+    instance:
+      - btn0
+      - btn1
+define:
+  - name: DEBUG_EFM
+readme:
+  - path: "readme.html"
+tag:
+  - hardware:component:display
+  - prebuilt_demo

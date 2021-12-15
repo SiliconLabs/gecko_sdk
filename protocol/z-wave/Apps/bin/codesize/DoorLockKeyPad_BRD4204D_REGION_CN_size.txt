@@ -1,0 +1,40 @@
+
+==========================================================
+The output of the size tool: (e.g. arm-none-ambi-size.exe)
+==========================================================
+
+/mnt/raid/workspaces/ws.yqxIQ4TRr/overlay/super/prebuilt-samples/Z-Wave/DoorLockKeyPad-brd4204d-gcc-makefile-cp-REGION_CN/build/debug/DoorLockKeyPad.out  :
+section                 size         addr
+.text                0x361bc    0x8006000
+_cc_handlers_v3        0x1c0    0x803c1bc
+.ARM.exidx               0x8    0x803c37c
+.stack                0x1000   0x20000000
+.data                  0x5b4   0x20001000
+.reset_info              0x4   0x200015b4
+.bss                  0xadf0   0x200015b8
+.heap                 0x3c58   0x2000c3a8
+.internal_storage    0x2a000    0x803c384
+.zwave_nvm            0x6000    0x8066384
+.nvm                  0xa000    0x806c384
+.ARM.attributes         0x36          0x0
+.comment                0x4d          0x0
+.debug_frame          0xa390          0x0
+.debug_info         0x932428          0x0
+.debug_abbrev        0x168a5          0x0
+.debug_loc           0x43dbb          0x0
+.debug_aranges        0x38d8          0x0
+.debug_ranges         0x6ce0          0x0
+.debug_line          0x4392e          0x0
+.debug_str           0x75406          0x0
+.stabstr               0x14d          0x0
+Total               0xada658
+
+The calculated FLASH and SRAM usage summary:
+============================================
+FLASH used as program memory:  (Including only the sections: .text, .ARM.exidx, .data)
+   461112
+FLASH used for storage: (Including only the sections: .nvm3App, .simee)
+   0
+SRAM usage:             (Including only the sections: .data, .bss, .heap, .stack_dummy, .reset_info)
+   65536
+

@@ -1,0 +1,30 @@
+id: zigbee_debug_extended
+label: Debug Extended
+package: Zigbee
+category: Zigbee|Stack
+quality: production
+
+description: Provides extended debug functionality, including API traces and debug statistics.
+
+provides:
+  - name: zigbee_debug_extended
+
+requires:
+  - name: zigbee_debug_extended_implementation
+  - name: zigbee_debug_extended_library
+    condition:
+     - zigbee_force_libraries
+  - name: zigbee_debug_basic
+  - name: legacy_printf
+
+recommends:
+  - id: zigbee_debug_extended_source
+
+template_contribution:
+  - name: component_catalog
+    value: zigbee_debug_extended
+
+
+documentation:
+  docset: zigbee
+  document: zigbee-af-api/debug-extended
