@@ -1,0 +1,22 @@
+id: mbedtls_hkdf
+package: platform
+label: Mbed TLS Support for HKDF
+description: >-
+  This component provides support for key derivation using HKDF in Mbed TLS.
+  The primary purpose of this component is to enable the software fallback
+  implementation of HKDF in PSA Crypto.
+category: Platform|Security
+quality: production
+source:
+  - path: util/third_party/crypto/mbedtls/library/hkdf.c
+include:
+  - path: util/third_party/crypto/mbedtls/include
+    file_list:
+      - path: mbedtls/hkdf.h
+provides:
+  - name: mbedtls_hkdf
+requires:
+  - name: mbedtls_hmac
+template_contribution:
+  - name: mbedtls_config
+    value: MBEDTLS_HKDF_C

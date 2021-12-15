@@ -1,0 +1,40 @@
+
+==========================================================
+The output of the size tool: (e.g. arm-none-ambi-size.exe)
+==========================================================
+
+/mnt/raid/workspaces/ws.AnypEJawt/overlay/super/prebuilt-samples/Z-Wave/LEDBulb-brd4207a-gcc-makefile-cp-REGION_US/build/debug/LEDBulb.out  :
+section                 size         addr
+.text                0x2e884          0x0
+_cc_handlers_v3        0x1a4      0x2e884
+.ARM.exidx               0x8      0x2ea28
+.stack                0x1000   0x20000000
+.data                  0x610   0x20001000
+.reset_info              0x4   0x20001610
+.bss                  0x9e44   0x20001614
+.heap                 0x4ba8   0x2000b458
+.internal_storage    0x3a000      0x2ea30
+.zwave_nvm            0x3000      0x68a30
+.nvm                  0x9000      0x6ba30
+.ARM.attributes         0x2e          0x0
+.comment                0x4d          0x0
+.debug_frame          0x6f90          0x0
+.debug_info         0x88c8b7          0x0
+.debug_abbrev        0x112fa          0x0
+.debug_loc           0x25c24          0x0
+.debug_aranges        0x2a30          0x0
+.debug_ranges         0x4e30          0x0
+.debug_line          0x2dc3c          0x0
+.debug_str           0x6920b          0x0
+.stabstr               0x14d          0x0
+Total               0x9eda04
+
+The calculated FLASH and SRAM usage summary:
+============================================
+FLASH used as program memory:  (Including only the sections: .text, .ARM.exidx, .data)
+   479296
+FLASH used for storage: (Including only the sections: .nvm3App, .simee)
+   0
+SRAM usage:             (Including only the sections: .data, .bss, .heap, .stack_dummy, .reset_info)
+   65536
+

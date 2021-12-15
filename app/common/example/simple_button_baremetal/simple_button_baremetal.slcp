@@ -1,0 +1,32 @@
+project_name: simple_button_baremetal
+package: platform
+quality: production
+label: Platform - Simple Button Bare-metal
+description: > 
+  This example project shows how to toggle LEDs using buttons in a bare-metal environment.
+category: Example|Platform
+source:
+  - path: app.c
+  - path: main.c
+  - path: simple_button_baremetal.c
+include:
+  - path: .
+    file_list:
+    - path: app.h
+    - path: simple_button_baremetal.h
+component:
+  - id: sl_system
+  - id: device_init
+  - id: power_manager
+  - id: simple_led
+    instance:
+      - led0
+  - id: simple_button
+    instance:
+      - btn0
+tag:
+  - hardware:component:led:1+
+  - hardware:component:button:1+
+  - hardware:!shared:button:led
+define:
+  - name: DEBUG_EFM

@@ -1,0 +1,60 @@
+project_name: bootloader-storage-internal
+package: bootloader
+quality: production
+label: Internal Storage Bootloader (multiple images on 1MB device)
+description: > 
+  Application Bootloader for all EFR32 and EFM32 devices with 1MB or larger flash, using the internal flash memory to store upgrade images received by the application over the air in an application specific way. This sample configuration supports storing multiple firmware update images simultaneously by configuring multiple storage slots. The storage layout is designed for 1024 kB EFR32xG12 devices, and the layout of the storage should be modified before being run on other devices.
+
+  component:
+    - id: bootloader_core: This sample configuration of the Gecko bootloader configures the bootloader to use the internal main flash to store firmware update images. The storage configuration is set up to store up to two firmware update images at a time, in two storage slots.
+
+  This sample configuration is designed to be used on 1024 kB EFR32xG12 devices, and needs to be re-configured to be used on other devices.
+
+  This sample configuration is designed to be used with the following memory layout:
+  Address
+  0 - 320 kB Application
+  320 kB - 356 kB reserved for SimEE (1 or 2) NVM
+  356 kB - 360 kB Bootload Info
+  360 kB - 690 kB Storage slot 0
+  690 kB - 1020 kB Storage slot 1
+  1020 kB - 1024 kB reserved for PStore NVM
+
+  In order to use this sample bootloader configuration with applications, the applications also need to be built to account for the fact that part of the main flash is also used for firmware update image storage. For EmberZNet, Silicon Labs Thread and Flex Application Builder projects, this can be achieved by configuring the project to build for the "Local Storage Bootloader", and setting the macro INTERNAL_STORAGE_SIZE_KB to 668, reserving 668 kB for storage (i.e. everything from address 356 kB and up). For Bluetooth projects, the size of the application needs to be manually changed in the linker file.
+
+  The "bootload info" meta-information, which tells the bootloader which storage slot to install the next firmware update from, is configured under "Components->Common Storage" to be placed at address 0x59000 (356 kB). The first storage slot is configured to start at address 0x5A000 (360 kB), because the bootload info takes up 2 flash pages of 2 kB.
+
+  See UG489: Gecko Bootloader User's Guide to learn more about how to configure the bootloader, configure storage layout, enable security features, etc.
+
+category: Example|Bootloader
+
+component:
+  - id: bootloader_core
+  - id: bootloader_crc
+  - id: bootloader_aes_sha_ecdsa
+  - id: bootloader_internal_storage
+  - id: bootloader_image_parser
+  - id: bootloader_common_storage
+  - id: bootloader_token_management
+  - id: bootloader_debug
+
+configuration:
+  - name: BTL_STORAGE_BASE_ADDRESS
+    value: 364544
+  - name: SLOT0_ENABLE
+    value: 1
+  - name: SLOT0_START
+    value: 368640
+  - name: SLOT0_SIZE
+    value: 337920
+  - name: SLOT1_ENABLE
+    value: 1
+  - name: SLOT1_START
+    value: 706560
+  - name: SLOT1_SIZE
+    value: 337920
+
+tag:
+  - hardware:device:flash:1024
+
+other_file:
+  - path: ../../script/postbuild/postbuild.sh

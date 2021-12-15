@@ -1,0 +1,40 @@
+
+==========================================================
+The output of the size tool: (e.g. arm-none-ambi-size.exe)
+==========================================================
+
+/mnt/raid/workspaces/ws.r3Vu4xKUr/overlay/super/prebuilt-samples/Z-Wave/MultilevelSensor-brd4204b-gcc-makefile-cp-REGION_IL/build/debug/MultilevelSensor.out  :
+section                 size         addr
+.text                0x38f20    0x8006000
+_cc_handlers_v3        0x1c0    0x803ef20
+.ARM.exidx               0x8    0x803f0e0
+.stack                0x1000   0x20000000
+.data                  0x5f8   0x20001000
+.reset_info              0x4   0x200015f8
+.bss                  0xadbc   0x200015fc
+.heap                 0x3c48   0x2000c3b8
+.internal_storage    0x2a000    0x803f0e8
+.zwave_nvm            0x6000    0x80690e8
+.nvm                  0xa000    0x806f0e8
+.ARM.attributes         0x36          0x0
+.comment                0x4d          0x0
+.debug_frame          0xb0e0          0x0
+.debug_info         0x93cf87          0x0
+.debug_abbrev        0x18504          0x0
+.debug_aranges        0x3d10          0x0
+.debug_ranges         0x7948          0x0
+.debug_line          0x49b24          0x0
+.debug_str           0x7618e          0x0
+.debug_loc           0x4e2d4          0x0
+.stabstr               0x14d          0x0
+Total               0xafce01
+
+The calculated FLASH and SRAM usage summary:
+============================================
+FLASH used as program memory:  (Including only the sections: .text, .ARM.exidx, .data)
+   472800
+FLASH used for storage: (Including only the sections: .nvm3App, .simee)
+   0
+SRAM usage:             (Including only the sections: .data, .bss, .heap, .stack_dummy, .reset_info)
+   65536
+

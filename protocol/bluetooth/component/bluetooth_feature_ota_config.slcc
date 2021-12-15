@@ -1,0 +1,19 @@
+id: "bluetooth_feature_ota_config"
+label: "OTA Configuration"
+package: "Bluetooth"
+description: >
+  OTA configuration
+
+  Provides commands to configure OTA device name, address and flags etc.
+category: "Bluetooth|OTA"
+quality: "production"
+root_path: "protocol/bluetooth"
+requires:
+  - name: "bluetooth_stack"
+provides:
+  - name: "bluetooth_feature_ota_config"
+template_contribution:
+  - name: bluetooth_bgapi_class
+    value:
+      class: "ota"
+    priority: 10

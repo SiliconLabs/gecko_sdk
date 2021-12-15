@@ -1,0 +1,13 @@
+id: bootloader_serial_driver
+label: Bootloader Serial Driver
+package: bootloader
+description: >
+  DMA-driven Serial driver.
+category: Platform|Bootloader|Drivers
+quality: production
+provides:
+  - name: bootloader_serial_driver
+requires:
+  - name: bootloader_serial_transport
+ui_hints:
+  visibility: never

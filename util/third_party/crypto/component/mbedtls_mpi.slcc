@@ -1,0 +1,27 @@
+id: mbedtls_mpi
+package: platform
+label: Mbed TLS Support for Multi-Precision Integers
+description: >-
+  This component enables the Mbed TLS multi-precision integer (MPI) library.
+category: Platform|Security
+quality: production
+source:
+  - path: util/third_party/crypto/mbedtls/library/bignum.c
+include:
+  - path: util/third_party/crypto/mbedtls/include
+    file_list:
+      - path: mbedtls/bignum.h
+  - path: util/third_party/crypto/mbedtls/library
+    file_list:
+      - path: bn_mul.h
+provides:
+  - name: mbedtls_mpi
+requires:
+  - name: mbedtls_core
+template_contribution:
+  - name: mbedtls_config
+    value: MBEDTLS_BIGNUM_C
+  # Default to support 256 bit MPI numbers. This can be increase by 
+  # other components when needed.
+  - name: mbedtls_mpi_max
+    value: 32

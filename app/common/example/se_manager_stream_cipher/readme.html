@@ -1,0 +1,47 @@
+<!DOCTYPE html><html><head><meta charset="utf-8"><title>readme.html</title><style></style></head><body id="preview">
+<h1 class="code-line" data-line-start=0 data-line-end=1><a id="SE_Manager_Stream_Cipher_0"></a>SE Manager Stream Cipher</h1>
+<p class="has-line-data" data-line-start="2" data-line-end="3">This example uses the SE Manager API to perform the stream ciphers on the supported Series 2 device.</p>
+<p class="has-line-data" data-line-start="4" data-line-end="5">In this example, test vectors are used to verify the stream ciphers.</p>
+<p class="has-line-data" data-line-start="6" data-line-end="7">The example redirects standard I/O to the virtual serial port (VCOM) of the kit. By default, the serial port setting is 115200 bps and 8-N-1 configuration.</p>
+<p class="has-line-data" data-line-start="8" data-line-end="9">The example has been instrumented with code to count the number of clock cycles spent in different operations. The results are printed on the VCOM serial port console. This feature can be disabled by defining <code>SE_MANAGER_PRINT=0</code> (default is 1) in the IDE setting (<code>Preprocessor-&gt;Defined symbols</code>).</p>
+<h2 class="code-line" data-line-start=10 data-line-end=11><a id="Cipher_Algorithm_10"></a>Cipher Algorithm</h2>
+<p class="has-line-data" data-line-start="12" data-line-end="13">The following cipher algorithms are supported in this example:</p>
+<ul>
+<li class="has-line-data" data-line-start="14" data-line-end="15"><code>AES CMAC</code></li>
+<li class="has-line-data" data-line-start="15" data-line-end="16"><code>AES GCM</code></li>
+<li class="has-line-data" data-line-start="16" data-line-end="18"><code>ChaCha20</code> (Secure Vault High only)</li>
+</ul>
+<h2 class="code-line" data-line-start=18 data-line-end=19><a id="SE_Manager_API_18"></a>SE Manager API</h2>
+<p class="has-line-data" data-line-start="20" data-line-end="21">The following SE Manager APIs are used in this example:</p>
+<ul>
+<li class="has-line-data" data-line-start="22" data-line-end="23"><code>sl_se_init</code></li>
+<li class="has-line-data" data-line-start="23" data-line-end="24"><code>sl_se_deinit</code></li>
+<li class="has-line-data" data-line-start="24" data-line-end="25"><code>sl_se_init_command_context</code></li>
+<li class="has-line-data" data-line-start="25" data-line-end="26"><code>sl_se_deinit_command_context</code></li>
+<li class="has-line-data" data-line-start="26" data-line-end="27"><code>sl_se_validate_key</code></li>
+<li class="has-line-data" data-line-start="27" data-line-end="28"><code>sl_se_get_storage_size</code></li>
+<li class="has-line-data" data-line-start="28" data-line-end="29"><code>sl_se_generate_key</code></li>
+<li class="has-line-data" data-line-start="29" data-line-end="30"><code>sl_se_cmac_multipart_starts</code></li>
+<li class="has-line-data" data-line-start="30" data-line-end="31"><code>sl_se_cmac_multipart_update</code></li>
+<li class="has-line-data" data-line-start="31" data-line-end="32"><code>sl_se_cmac_multipart_finish</code></li>
+<li class="has-line-data" data-line-start="32" data-line-end="33"><code>sl_se_gcm_multipart_starts</code></li>
+<li class="has-line-data" data-line-start="33" data-line-end="34"><code>sl_se_gcm_multipart_update</code></li>
+<li class="has-line-data" data-line-start="34" data-line-end="35"><code>sl_se_gcm_multipart_finish</code></li>
+<li class="has-line-data" data-line-start="35" data-line-end="37"><code>sl_se_chacha20_crypt</code> (Secure Vault High only)</li>
+</ul>
+<h2 class="code-line" data-line-start=37 data-line-end=38><a id="Getting_Started_37"></a>Getting Started</h2>
+<ol>
+<li class="has-line-data" data-line-start="39" data-line-end="40">Upgrade the kit’s firmware to the latest version (see <code>Adapter Firmware</code> under <a href="https://docs.silabs.com/simplicity-studio-5-users-guide/latest/ss-5-users-guide-about-the-launcher/welcome-and-device-tabs#general-device-information">General Device Information</a> in Simplicity Studio 5 Users Guide).</li>
+<li class="has-line-data" data-line-start="40" data-line-end="41">Upgrade the device’s SE firmware to the latest version (see <code>Secure Firmware</code> under <a href="https://docs.silabs.com/simplicity-studio-5-users-guide/latest/ss-5-users-guide-about-the-launcher/welcome-and-device-tabs#general-device-information">General Device Information</a> in Simplicity Studio 5 Users Guide).</li>
+<li class="has-line-data" data-line-start="41" data-line-end="42">Open any terminal program and connect to the kit’s VCOM port.</li>
+<li class="has-line-data" data-line-start="42" data-line-end="43">Create this platform example project in the Simplicity IDE (see <a href="https://docs.silabs.com/simplicity-studio-5-users-guide/latest/ss-5-users-guide-getting-started/start-a-project#examples">Examples</a> in Simplicity Studio 5 Users Guide, check <code>Platform()</code> checkbox to browse the platform examples).</li>
+<li class="has-line-data" data-line-start="43" data-line-end="44">Build the example and download it to the kit (see <a href="https://docs.silabs.com/simplicity-studio-5-users-guide/latest/ss-5-users-guide-building-and-flashing/building#simple-build">Simple Build</a> and <a href="https://docs.silabs.com/simplicity-studio-5-users-guide/latest/ss-5-users-guide-building-and-flashing/flashing#flash-programmer">Flash Programmer</a> in Simplicity Studio 5 Users Guide).</li>
+<li class="has-line-data" data-line-start="44" data-line-end="46">Run the example and the console should display the process steps of this example.</li>
+</ol>
+<h2 class="code-line" data-line-start=46 data-line-end=47><a id="Additional_Information_46"></a>Additional Information</h2>
+<ol>
+<li class="has-line-data" data-line-start="48" data-line-end="50">The default optimization level is <code>Optimize for debugging (-Og)</code> on Simplicity IDE and <code>None</code> on IAR Embedded Workbench.</li>
+</ol>
+<h2 class="code-line" data-line-start=50 data-line-end=51><a id="Resources_50"></a>Resources</h2>
+<p class="has-line-data" data-line-start="52" data-line-end="53"><a href="https://docs.silabs.com/gecko-platform/latest/service/api/group-sl-se-manager">SE Manager API</a></p>
+</body></html>

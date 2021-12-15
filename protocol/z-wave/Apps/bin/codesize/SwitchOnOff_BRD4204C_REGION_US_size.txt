@@ -1,0 +1,40 @@
+
+==========================================================
+The output of the size tool: (e.g. arm-none-ambi-size.exe)
+==========================================================
+
+/mnt/raid/workspaces/ws.DrpTER744/overlay/super/prebuilt-samples/Z-Wave/SwitchOnOff-brd4204c-gcc-makefile-cp-REGION_US/build/debug/SwitchOnOff.out  :
+section                 size         addr
+.text                0x35000    0x8006000
+_cc_handlers_v3        0x188    0x803b000
+.ARM.exidx               0x8    0x803b188
+.stack                0x1000   0x20000000
+.data                  0x5bc   0x20001000
+.reset_info              0x4   0x200015bc
+.bss                  0xad08   0x200015c0
+.heap                 0x3d38   0x2000c2c8
+.internal_storage    0x2a000    0x803b190
+.zwave_nvm            0x6000    0x8065190
+.nvm                  0xa000    0x806b190
+.ARM.attributes         0x36          0x0
+.comment                0x4d          0x0
+.debug_frame          0x9e88          0x0
+.debug_info         0x86e928          0x0
+.debug_abbrev        0x15c81          0x0
+.debug_loc           0x41e56          0x0
+.debug_aranges        0x3710          0x0
+.debug_ranges         0x6920          0x0
+.debug_line          0x4140b          0x0
+.debug_str           0x7304c          0x0
+.stabstr               0x14d          0x0
+Total               0xa0da6e
+
+The calculated FLASH and SRAM usage summary:
+============================================
+FLASH used as program memory:  (Including only the sections: .text, .ARM.exidx, .data)
+   456524
+FLASH used for storage: (Including only the sections: .nvm3App, .simee)
+   0
+SRAM usage:             (Including only the sections: .data, .bss, .heap, .stack_dummy, .reset_info)
+   65536
+

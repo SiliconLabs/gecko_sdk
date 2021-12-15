@@ -1,0 +1,315 @@
+<?xml version="1.0" encoding="ASCII"?>
+<model:MDescriptors xmlns:model="http://www.silabs.com/ss/Studio.ecore">
+  <descriptors name="ncp_btmesh_empty" label="Bluetooth Mesh - NCP Empty" description="Bluetooth Mesh NCP (Network Co-Processor) target demonstrates the bare minimum needed for a Bluetooth Mesh NCP Target C application, that makes it possible for the NCP Host Controller to access the Bluetooth Mesh stack via UART. It provides access to the host layer via BGAPI and not to the link layer via HCI. The communication between the Host Controller and the target can be secured by installing the Secure NCP component. This example requires the BGAPI UART DFU Bootloader.&#xA;">
+    <properties key="namespace" value="template.uc"/>
+    <properties key="keywords" value="universal\ configurator"/>
+    <properties key="projectFilePaths" value="example/ncp_btmesh_empty/ncp_btmesh_empty.slcp"/>
+    <properties key="readmeFiles" value=""/>
+    <properties key="boardCompatibility" value="brd4103a brd4104a brd4158a brd4159a brd4161a brd4162a brd4163a brd4164a brd4165b brd4166a brd4167a brd4168a brd4170a brd4171a brd4172a brd4172b brd4173a brd4174a brd4174b brd4175a brd4176a brd4177a brd4179b brd4180a brd4180b brd4181a brd4181b brd4181c brd4190a brd4304a brd4305a brd4305c brd4305d brd4305e brd4306a brd4306b brd4306c brd4306d brd4308a brd4308b brd4308c brd4308d brd4309a brd4309b com.silabs.board.none"/>
+    <properties key="partCompatibility" value=".*bgm13.* .*bgm21.* .*efr32bg12p.* .*efr32bg13p.* .*efr32bg21.* .*efr32mg12p.* .*efr32mg13p.* .*efr32mg21.* .*mgm12.* .*mgm13.* .*mgm21.*"/>
+    <properties key="ideCompatibility" value="iar-embedded-workbench makefile-ide segger-embedded-studio simplicity-ide"/>
+    <properties key="toolchainCompatibility" value="gcc iar segger"/>
+    <properties key="category" value="Bluetooth Mesh Examples"/>
+    <properties key="quality" value="PRODUCTION"/>
+    <properties key="stockConfigCompatibility" value="com.silabs.ss.framework.project.toolchain.core.default"/>
+  </descriptors>
+  <descriptors name="ncp_btmesh_empty" label="Bluetooth Mesh - NCP Empty" description="Bluetooth Mesh NCP (Network Co-Processor) target demonstrates the bare minimum needed for a Bluetooth Mesh NCP Target C application, that makes it possible for the NCP Host Controller to access the Bluetooth Mesh stack via UART. It provides access to the host layer via BGAPI and not to the link layer via HCI. This example is recommended for EFR32xG22 which has  limited RAM and Flash, therefore some of the stack classes are disabled by  default. The required stack class components need to be enabled and the stack parameters need to be configured before use. The communication between the Host Controller and the target can be secured by installing the Secure NCP component. This example requires the BGAPI UART DFU Bootloader.&#xA;">
+    <properties key="namespace" value="template.uc"/>
+    <properties key="keywords" value="universal\ configurator"/>
+    <properties key="projectFilePaths" value="example/ncp_btmesh_empty/ncp_btmesh_empty_xg22.slcp"/>
+    <properties key="readmeFiles" value=""/>
+    <properties key="boardCompatibility" value="brd4182a brd4183a brd4183c brd4184a brd4184b brd4311a brd4311b brd4312a com.silabs.board.none"/>
+    <properties key="partCompatibility" value=".*bgm22.*hna.* .*efr32bg22.*f512.* .*efr32mg22.* .*mgm22.*"/>
+    <properties key="ideCompatibility" value="iar-embedded-workbench makefile-ide segger-embedded-studio simplicity-ide"/>
+    <properties key="toolchainCompatibility" value="gcc iar segger"/>
+    <properties key="category" value="Bluetooth Mesh Examples"/>
+    <properties key="quality" value="PRODUCTION"/>
+    <properties key="stockConfigCompatibility" value="com.silabs.ss.framework.project.toolchain.core.default"/>
+  </descriptors>
+  <descriptors name="soc_btmesh_empty" label="Bluetooth Mesh - SoC Empty" description="This example demonstrates the bare minimum needed for a Bluetooth Mesh C application that allows Over-the-Air Device Firmware Upgrading (OTA DFU). The application starts Unprovisioned Device Beaconing after boot waiting  to be provisioned to a Mesh Network. This Software Example can be used as  a starting point for an SoC project and it can be customized by adding new components from the Component Browser or by modifying the application  (app.c). This example requires one of the Internal Storage Bootloader (single image) variants depending on device memory.&#xA;">
+    <properties key="namespace" value="template.uc"/>
+    <properties key="keywords" value="universal\ configurator"/>
+    <properties key="projectFilePaths" value="example/soc_btmesh_empty/soc_btmesh_empty.slcp"/>
+    <properties key="readmeFiles" value=""/>
+    <properties key="boardCompatibility" value="brd4103a brd4104a brd4158a brd4159a brd4161a brd4162a brd4163a brd4164a brd4165b brd4166a brd4167a brd4168a brd4170a brd4171a brd4172a brd4172b brd4173a brd4174a brd4174b brd4175a brd4176a brd4177a brd4179b brd4180a brd4180b brd4181a brd4181b brd4181c brd4182a brd4183a brd4183c brd4184a brd4184b brd4190a brd4304a brd4305a brd4305c brd4305d brd4305e brd4306a brd4306b brd4306c brd4306d brd4308a brd4308b brd4308c brd4308d brd4309a brd4309b brd4311a brd4311b brd4312a com.silabs.board.none"/>
+    <properties key="partCompatibility" value=".*bgm13.* .*bgm21.* .*bgm22.*hna.* .*efr32bg12p.* .*efr32bg13p.* .*efr32bg21.* .*efr32bg22.*f512.* .*efr32mg12p.* .*efr32mg13p.* .*efr32mg21.* .*efr32mg22.* .*mgm12.* .*mgm13.* .*mgm21.* .*mgm22.*"/>
+    <properties key="ideCompatibility" value="iar-embedded-workbench makefile-ide segger-embedded-studio simplicity-ide"/>
+    <properties key="toolchainCompatibility" value="gcc iar segger"/>
+    <properties key="category" value="Bluetooth Mesh Examples"/>
+    <properties key="quality" value="PRODUCTION"/>
+    <properties key="stockConfigCompatibility" value="com.silabs.ss.framework.project.toolchain.core.default"/>
+  </descriptors>
+  <descriptors name="soc_btmesh_hsl" label="Bluetooth Mesh - SoC HSL Light" description="This example is an out-of-the-box Software Demo where the LEDs of the  Thunderboard Sense 2 can be controlled by push button presses on another  device (soc_btmesh_switch). Beside switching on and off the LEDs, their lighting intensity can also be set. Hue and saturation (only by UART logs) can be set by hsl client. The example also tries to establish friendship as Friend node and prints its status to the UART. The example is based on the Bluetooth Mesh Generic On/Off Model, the Light Lightness Model, HSL Model and LC Model. This example requires Internal Storage Bootloader (single image on 1MB device).&#xA;">
+    <properties key="namespace" value="template.uc"/>
+    <properties key="keywords" value="universal\ configurator"/>
+    <properties key="projectFilePaths" value="example/soc_btmesh_hsl/soc_btmesh_hsl_brd4166a.slcp"/>
+    <properties key="readmeFiles" value=""/>
+    <properties key="boardCompatibility" value="brd4166a"/>
+    <properties key="partCompatibility" value=".*efr32mg12p.*"/>
+    <properties key="ideCompatibility" value="iar-embedded-workbench makefile-ide segger-embedded-studio simplicity-ide"/>
+    <properties key="toolchainCompatibility" value="gcc iar segger"/>
+    <properties key="category" value="Bluetooth Mesh Examples"/>
+    <properties key="quality" value="PRODUCTION"/>
+    <properties key="stockConfigCompatibility" value="com.silabs.ss.framework.project.toolchain.core.default"/>
+  </descriptors>
+  <descriptors name="soc_btmesh_hsl" label="Bluetooth Mesh - SoC HSL Light" description="This example is an out-of-the-box Software Demo where the LEDs of the WSTK can be controlled by push button presses on another device (soc_btmesh_switch). Beside switching on and off the LEDs, their lighting intensity can also be set. Hue and saturation (only displayed on the LCD) can be set by hsl client. The example also tries to establish friendship as Friend node and prints its status to the LCD. The example is based on the Bluetooth Mesh Generic On/Off Model, the Light Lightness Model, HSL Model and LC Model. This example requires one of the Internal Storage Bootloader (single image) variants depending on device memory.&#xA;">
+    <properties key="namespace" value="template.uc"/>
+    <properties key="keywords" value="universal\ configurator"/>
+    <properties key="projectFilePaths" value="example/soc_btmesh_hsl/soc_btmesh_hsl_display.slcp"/>
+    <properties key="readmeFiles" value=""/>
+    <properties key="boardCompatibility" value="brd4103a brd4104a brd4158a brd4159a brd4161a brd4162a brd4163a brd4164a brd4165b brd4167a brd4168a brd4170a brd4171a brd4172a brd4172b brd4173a brd4174a brd4174b brd4175a brd4176a brd4177a brd4180a brd4180b brd4181a brd4181b brd4181c brd4190a brd4304a brd4305a brd4305c brd4305d brd4305e brd4306a brd4306b brd4306c brd4306d brd4308a brd4308b brd4308c brd4308d"/>
+    <properties key="partCompatibility" value=".*bgm13.* .*bgm21.* .*efr32bg12p.* .*efr32bg13p.* .*efr32bg21.* .*efr32mg12p.* .*efr32mg13p.* .*efr32mg21.* .*mgm12.* .*mgm13.* .*mgm21.*"/>
+    <properties key="ideCompatibility" value="iar-embedded-workbench makefile-ide segger-embedded-studio simplicity-ide"/>
+    <properties key="toolchainCompatibility" value="gcc iar segger"/>
+    <properties key="category" value="Bluetooth Mesh Examples"/>
+    <properties key="quality" value="PRODUCTION"/>
+    <properties key="stockConfigCompatibility" value="com.silabs.ss.framework.project.toolchain.core.default"/>
+  </descriptors>
+  <descriptors name="soc_btmesh_hsl" label="Bluetooth Mesh - SoC HSL Light" description="This example is an out-of-the-box Software Demo where the LEDs of the WSTK can be controlled by push button presses on another device (soc_btmesh_switch). Beside switching on and off the LEDs, their lighting intensity can also be set. Hue and saturation (only by UART logs) can be set by hsl client. The example also tries to establish friendship as Friend node and prints its status to the UART. The example is based on the Bluetooth Mesh Generic On/Off Model, the Light Lightness Model, HSL Model and LC Model. This example requires one of the Internal Storage Bootloader (single image) variants depending on device memory.&#xA;">
+    <properties key="namespace" value="template.uc"/>
+    <properties key="keywords" value="universal\ configurator"/>
+    <properties key="projectFilePaths" value="example/soc_btmesh_hsl/soc_btmesh_hsl_log.slcp"/>
+    <properties key="readmeFiles" value=""/>
+    <properties key="boardCompatibility" value="brd4179b brd4309a brd4309b"/>
+    <properties key="partCompatibility" value=".*bgm13.* .*bgm21.* .*efr32bg12p.* .*efr32bg13p.* .*efr32bg21.* .*efr32mg12p.* .*efr32mg13p.* .*efr32mg21.* .*mgm12.* .*mgm13.* .*mgm21.*"/>
+    <properties key="ideCompatibility" value="iar-embedded-workbench makefile-ide segger-embedded-studio simplicity-ide"/>
+    <properties key="toolchainCompatibility" value="gcc iar segger"/>
+    <properties key="category" value="Bluetooth Mesh Examples"/>
+    <properties key="quality" value="PRODUCTION"/>
+    <properties key="stockConfigCompatibility" value="com.silabs.ss.framework.project.toolchain.core.default"/>
+  </descriptors>
+  <descriptors name="soc_btmesh_light" label="Bluetooth Mesh - SoC Light" description="This example is an out-of-the-box Software Demo where the LEDs of the  Thunderboard Sense 2 can be controlled by push button presses on another  device (soc_btmesh_switch). Beside switching on and off the LEDs, their  lighting intensity, color temperature and delta UV can also be set. The  example is based on the Bluetooth Mesh Generic On/Off Model, the Light  Lightness Model, CTL Model and LC Model. This example requires Internal Storage Bootloader (single image on 1MB device).&#xA;">
+    <properties key="namespace" value="template.uc"/>
+    <properties key="keywords" value="universal\ configurator"/>
+    <properties key="projectFilePaths" value="example/soc_btmesh_light/soc_btmesh_light_brd4166a.slcp"/>
+    <properties key="readmeFiles" value=""/>
+    <properties key="boardCompatibility" value="brd4166a"/>
+    <properties key="partCompatibility" value=".*efr32mg12p.*"/>
+    <properties key="ideCompatibility" value="iar-embedded-workbench makefile-ide segger-embedded-studio simplicity-ide"/>
+    <properties key="toolchainCompatibility" value="gcc iar segger"/>
+    <properties key="category" value="Bluetooth Mesh Examples"/>
+    <properties key="quality" value="PRODUCTION"/>
+    <properties key="stockConfigCompatibility" value="com.silabs.ss.framework.project.toolchain.core.default"/>
+  </descriptors>
+  <descriptors name="soc_btmesh_light" label="Bluetooth Mesh - SoC Light" description="This example is an out-of-the-box Software Demo where the LEDs of the  WSTK can be controlled by push button presses on another device  (soc_btmesh_switch). Beside switching on and off the LEDs, their  lighting intensity, color temperature and delta UV (only displayed  on the LCD) can also be set. The example also tries to establish  friendship as Friend node and prints its status to the LCD. The example  is based on the Bluetooth Mesh Generic On/Off Model, the Light Lightness  Model, CTL Model and LC Model. This example requires one of the Internal Storage Bootloader (single image) variants depending on device memory.&#xA;">
+    <properties key="namespace" value="template.uc"/>
+    <properties key="keywords" value="universal\ configurator"/>
+    <properties key="projectFilePaths" value="example/soc_btmesh_light/soc_btmesh_light_display.slcp"/>
+    <properties key="readmeFiles" value=""/>
+    <properties key="boardCompatibility" value="brd4103a brd4104a brd4158a brd4159a brd4161a brd4162a brd4163a brd4164a brd4165b brd4167a brd4168a brd4170a brd4171a brd4172a brd4172b brd4173a brd4174a brd4174b brd4175a brd4176a brd4177a brd4180a brd4180b brd4181a brd4181b brd4181c brd4190a brd4304a brd4305a brd4305c brd4305d brd4305e brd4306a brd4306b brd4306c brd4306d brd4308a brd4308b brd4308c brd4308d"/>
+    <properties key="partCompatibility" value=".*bgm13.* .*bgm21.* .*efr32bg12p.* .*efr32bg13p.* .*efr32bg21.* .*efr32mg12p.* .*efr32mg13p.* .*efr32mg21.* .*mgm12.* .*mgm13.* .*mgm21.*"/>
+    <properties key="ideCompatibility" value="iar-embedded-workbench makefile-ide segger-embedded-studio simplicity-ide"/>
+    <properties key="toolchainCompatibility" value="gcc iar segger"/>
+    <properties key="category" value="Bluetooth Mesh Examples"/>
+    <properties key="quality" value="PRODUCTION"/>
+    <properties key="stockConfigCompatibility" value="com.silabs.ss.framework.project.toolchain.core.default"/>
+  </descriptors>
+  <descriptors name="soc_btmesh_light" label="Bluetooth Mesh - SoC Light" description="This example is an out-of-the-box Software Demo where the LEDs of the  WSTK can be controlled by push button presses on another device  (soc_btmesh_switch). Beside switching on and off the LEDs, their  lighting intensity, color temperature and delta UV (only by UART logs)  can also be set. The example also tries to establish friendship as Friend  node and prints its status to the UART. The example is based on the  Bluetooth Mesh Generic On/Off Model, the Light Lightness Model, CTL Model  and LC Model. This example requires one of the Internal Storage Bootloader (single image) variants depending on device memory.&#xA;">
+    <properties key="namespace" value="template.uc"/>
+    <properties key="keywords" value="universal\ configurator"/>
+    <properties key="projectFilePaths" value="example/soc_btmesh_light/soc_btmesh_light_log.slcp"/>
+    <properties key="readmeFiles" value=""/>
+    <properties key="boardCompatibility" value="brd4179b brd4309a brd4309b"/>
+    <properties key="partCompatibility" value=".*bgm13.* .*bgm21.* .*efr32bg12p.* .*efr32bg13p.* .*efr32bg21.* .*efr32mg12p.* .*efr32mg13p.* .*efr32mg21.* .*mgm12.* .*mgm13.* .*mgm21.*"/>
+    <properties key="ideCompatibility" value="iar-embedded-workbench makefile-ide segger-embedded-studio simplicity-ide"/>
+    <properties key="toolchainCompatibility" value="gcc iar segger"/>
+    <properties key="category" value="Bluetooth Mesh Examples"/>
+    <properties key="quality" value="PRODUCTION"/>
+    <properties key="stockConfigCompatibility" value="com.silabs.ss.framework.project.toolchain.core.default"/>
+  </descriptors>
+  <descriptors name="soc_btmesh_sensor_client" label="Bluetooth Mesh - SoC Sensor Client" description="This example demonstrates the Bluetooth Mesh Sensor Client Model. It  collects and displays sensor measurement data from remote device(s)  (eg soc_btmesh_sensor_server). The current status is displayed on the  LCD and also sent to UART. This example requires one of the Internal  Storage Bootloader (single image) variants depending on device memory.&#xA;">
+    <properties key="namespace" value="template.uc"/>
+    <properties key="keywords" value="universal\ configurator"/>
+    <properties key="projectFilePaths" value="example/soc_btmesh_sensor_client/soc_btmesh_sensor_client_display.slcp"/>
+    <properties key="readmeFiles" value=""/>
+    <properties key="boardCompatibility" value="brd4103a brd4104a brd4158a brd4159a brd4161a brd4162a brd4163a brd4164a brd4165b brd4167a brd4168a brd4170a brd4171a brd4172a brd4172b brd4173a brd4174a brd4174b brd4175a brd4176a brd4177a brd4180a brd4180b brd4181a brd4181b brd4181c brd4182a brd4190a brd4304a brd4305a brd4305c brd4305d brd4305e brd4306a brd4306b brd4306c brd4306d brd4308a brd4308b brd4308c brd4308d brd4311a brd4311b brd4312a"/>
+    <properties key="partCompatibility" value=".*bgm13.* .*bgm21.* .*bgm22.*hna.* .*efr32bg12p.* .*efr32bg13p.* .*efr32bg21.* .*efr32bg22.*f512.* .*efr32mg12p.* .*efr32mg13p.* .*efr32mg21.* .*efr32mg22.* .*mgm12.* .*mgm13.* .*mgm21.* .*mgm22.*"/>
+    <properties key="ideCompatibility" value="iar-embedded-workbench makefile-ide segger-embedded-studio simplicity-ide"/>
+    <properties key="toolchainCompatibility" value="gcc iar segger"/>
+    <properties key="category" value="Bluetooth Mesh Examples"/>
+    <properties key="quality" value="PRODUCTION"/>
+    <properties key="stockConfigCompatibility" value="com.silabs.ss.framework.project.toolchain.core.default"/>
+  </descriptors>
+  <descriptors name="soc_btmesh_sensor_client" label="Bluetooth Mesh - SoC Sensor Client" description="This example demonstrates the Bluetooth Mesh Sensor Client Model. It  collects and displays sensor measurement data from remote device(s)  (eg soc_btmesh_sensor_server). The current status is sent to UART. This example requires one of the Internal Storage Bootloader (single image) variants depending on device memory.&#xA;">
+    <properties key="namespace" value="template.uc"/>
+    <properties key="keywords" value="universal\ configurator"/>
+    <properties key="projectFilePaths" value="example/soc_btmesh_sensor_client/soc_btmesh_sensor_client_log.slcp"/>
+    <properties key="readmeFiles" value=""/>
+    <properties key="boardCompatibility" value="brd4166a brd4179b brd4309a brd4309b"/>
+    <properties key="partCompatibility" value=".*bgm13.* .*bgm21.* .*bgm22.*hna.* .*efr32bg12p.* .*efr32bg13p.* .*efr32bg21.* .*efr32bg22.*f512.* .*efr32mg12p.* .*efr32mg13p.* .*efr32mg21.* .*efr32mg22.* .*mgm12.* .*mgm13.* .*mgm21.* .*mgm22.*"/>
+    <properties key="ideCompatibility" value="iar-embedded-workbench makefile-ide segger-embedded-studio simplicity-ide"/>
+    <properties key="toolchainCompatibility" value="gcc iar segger"/>
+    <properties key="category" value="Bluetooth Mesh Examples"/>
+    <properties key="quality" value="PRODUCTION"/>
+    <properties key="stockConfigCompatibility" value="com.silabs.ss.framework.project.toolchain.core.default"/>
+  </descriptors>
+  <descriptors name="soc_btmesh_sensor_client" label="Bluetooth Mesh - SoC Sensor Client" description="This example demonstrates the Bluetooth Mesh Sensor Client Model. It  collects and displays sensor measurement data from remote device(s)  (eg soc_btmesh_sensor_server). The current status is displayed on the  LCD and also sent to UART. CLI commands can substitute button presses as on the selected board only one Push Button is wired. This example requires one of the Internal Storage Bootloader (single image) variants depending on device memory.&#xA;">
+    <properties key="namespace" value="template.uc"/>
+    <properties key="keywords" value="universal\ configurator"/>
+    <properties key="projectFilePaths" value="example/soc_btmesh_sensor_client/soc_btmesh_sensor_client_log_single.slcp"/>
+    <properties key="readmeFiles" value=""/>
+    <properties key="boardCompatibility" value="brd4183a brd4183c brd4184a brd4184b"/>
+    <properties key="partCompatibility" value=".*bgm13.* .*bgm21.* .*bgm22.*hna.* .*efr32bg12p.* .*efr32bg13p.* .*efr32bg21.* .*efr32bg22.*f512.* .*efr32mg12p.* .*efr32mg13p.* .*efr32mg21.* .*efr32mg22.* .*mgm12.* .*mgm13.* .*mgm21.* .*mgm22.*"/>
+    <properties key="ideCompatibility" value="iar-embedded-workbench makefile-ide segger-embedded-studio simplicity-ide"/>
+    <properties key="toolchainCompatibility" value="gcc iar segger"/>
+    <properties key="category" value="Bluetooth Mesh Examples"/>
+    <properties key="quality" value="PRODUCTION"/>
+    <properties key="stockConfigCompatibility" value="com.silabs.ss.framework.project.toolchain.core.default"/>
+  </descriptors>
+  <descriptors name="soc_btmesh_sensor_server" label="Bluetooth Mesh - SoC Sensor Server" description="This example demonstrates the Bluetooth Mesh Sensor Server Model and  Sensor Setup Server Model. It measures temperature and people count  and sends the mearurement data to a remote device (eg  soc_btmesh_sensor_client). The current status is displayed on the  LCD and also sent to UART. This example requires one of the Internal Storage Bootloader (single image) variants depending on device memory.&#xA;">
+    <properties key="namespace" value="template.uc"/>
+    <properties key="keywords" value="universal\ configurator"/>
+    <properties key="projectFilePaths" value="example/soc_btmesh_sensor_server/soc_btmesh_sensor_server_display.slcp"/>
+    <properties key="readmeFiles" value=""/>
+    <properties key="boardCompatibility" value="brd4103a brd4104a brd4158a brd4159a brd4161a brd4162a brd4163a brd4164a brd4165b brd4167a brd4168a brd4170a brd4171a brd4172a brd4172b brd4173a brd4174a brd4174b brd4175a brd4176a brd4177a brd4182a brd4190a brd4304a brd4305a brd4305c brd4305d brd4305e brd4306a brd4306b brd4306c brd4306d brd4311a brd4311b brd4312a"/>
+    <properties key="partCompatibility" value=".*bgm13.* .*bgm21.* .*bgm22.*hna.* .*efr32bg12p.* .*efr32bg13p.* .*efr32bg21.* .*efr32bg22.*f512.* .*efr32mg12p.* .*efr32mg13p.* .*efr32mg21.* .*efr32mg22.* .*mgm12.* .*mgm13.* .*mgm21.* .*mgm22.*"/>
+    <properties key="ideCompatibility" value="iar-embedded-workbench makefile-ide segger-embedded-studio simplicity-ide"/>
+    <properties key="toolchainCompatibility" value="gcc iar segger"/>
+    <properties key="category" value="Bluetooth Mesh Examples"/>
+    <properties key="quality" value="PRODUCTION"/>
+    <properties key="stockConfigCompatibility" value="com.silabs.ss.framework.project.toolchain.core.default"/>
+  </descriptors>
+  <descriptors name="soc_btmesh_sensor_server" label="Bluetooth Mesh - SoC Sensor Server" description="This example demonstrates the Bluetooth Mesh Sensor Server Model and  Sensor Setup Server Model. It measures temperature and people count  and sends the mearurement data to a remote device (eg  soc_btmesh_sensor_client). The current status is displayed on the  LCD and also sent to UART. This example requires one of the Internal  Storage Bootloader (single image) variants depending on device memory.&#xA;">
+    <properties key="namespace" value="template.uc"/>
+    <properties key="keywords" value="universal\ configurator"/>
+    <properties key="projectFilePaths" value="example/soc_btmesh_sensor_server/soc_btmesh_sensor_server_mock_display.slcp"/>
+    <properties key="readmeFiles" value=""/>
+    <properties key="boardCompatibility" value="brd4180a brd4180b brd4181a brd4181b brd4181c brd4308a brd4308b brd4308c brd4308d"/>
+    <properties key="partCompatibility" value=".*bgm13.* .*bgm21.* .*bgm22.*hna.* .*efr32bg12p.* .*efr32bg13p.* .*efr32bg21.* .*efr32bg22.*f512.* .*efr32mg12p.* .*efr32mg13p.* .*efr32mg21.* .*efr32mg22.* .*mgm12.* .*mgm13.* .*mgm21.* .*mgm22.*"/>
+    <properties key="ideCompatibility" value="iar-embedded-workbench makefile-ide segger-embedded-studio simplicity-ide"/>
+    <properties key="toolchainCompatibility" value="gcc iar segger"/>
+    <properties key="category" value="Bluetooth Mesh Examples"/>
+    <properties key="quality" value="PRODUCTION"/>
+    <properties key="stockConfigCompatibility" value="com.silabs.ss.framework.project.toolchain.core.default"/>
+  </descriptors>
+  <descriptors name="soc_btmesh_sensor_server" label="Bluetooth Mesh - SoC Sensor Server" description="This example demonstrates the Bluetooth Mesh Sensor Server Model and  Sensor Setup Server Model. It measures temperature and people count  and sends the mearurement data to a remote device (eg  soc_btmesh_sensor_client). The current status is sent to UART. This example requires one of the Internal Storage Bootloader  (single image) variants depending on device memory.&#xA;">
+    <properties key="namespace" value="template.uc"/>
+    <properties key="keywords" value="universal\ configurator"/>
+    <properties key="projectFilePaths" value="example/soc_btmesh_sensor_server/soc_btmesh_sensor_server_mock_log.slcp"/>
+    <properties key="readmeFiles" value=""/>
+    <properties key="boardCompatibility" value="brd4179b brd4309a brd4309b"/>
+    <properties key="partCompatibility" value=".*bgm13.* .*bgm21.* .*bgm22.*hna.* .*efr32bg12p.* .*efr32bg13p.* .*efr32bg21.* .*efr32bg22.*f512.* .*efr32mg12p.* .*efr32mg13p.* .*efr32mg21.* .*efr32mg22.* .*mgm12.* .*mgm13.* .*mgm21.* .*mgm22.*"/>
+    <properties key="ideCompatibility" value="iar-embedded-workbench makefile-ide segger-embedded-studio simplicity-ide"/>
+    <properties key="toolchainCompatibility" value="gcc iar segger"/>
+    <properties key="category" value="Bluetooth Mesh Examples"/>
+    <properties key="quality" value="PRODUCTION"/>
+    <properties key="stockConfigCompatibility" value="com.silabs.ss.framework.project.toolchain.core.default"/>
+  </descriptors>
+  <descriptors name="soc_btmesh_sensor_server" label="Bluetooth Mesh - SoC Sensor Server" description="This example demonstrates the Bluetooth Mesh Sensor Server Model and  Sensor Setup Server Model. It measures temperature and people count  and sends the measurement data to a remote device (eg  soc_btmesh_sensor_client). The current status is sent to UART. CLI  commands can substitute button presses as on the selected board only  one Push Button is wired. This example requires one of the Internal  Storage Bootloader (single image) variants depending on device memory.&#xA;">
+    <properties key="namespace" value="template.uc"/>
+    <properties key="keywords" value="universal\ configurator"/>
+    <properties key="projectFilePaths" value="example/soc_btmesh_sensor_server/soc_btmesh_sensor_server_mock_log_single.slcp"/>
+    <properties key="readmeFiles" value=""/>
+    <properties key="boardCompatibility" value="brd4183a brd4183c"/>
+    <properties key="partCompatibility" value=".*bgm13.* .*bgm21.* .*bgm22.*hna.* .*efr32bg12p.* .*efr32bg13p.* .*efr32bg21.* .*efr32bg22.*f512.* .*efr32mg12p.* .*efr32mg13p.* .*efr32mg21.* .*efr32mg22.* .*mgm12.* .*mgm13.* .*mgm21.* .*mgm22.*"/>
+    <properties key="ideCompatibility" value="iar-embedded-workbench makefile-ide segger-embedded-studio simplicity-ide"/>
+    <properties key="toolchainCompatibility" value="gcc iar segger"/>
+    <properties key="category" value="Bluetooth Mesh Examples"/>
+    <properties key="quality" value="PRODUCTION"/>
+    <properties key="stockConfigCompatibility" value="com.silabs.ss.framework.project.toolchain.core.default"/>
+  </descriptors>
+  <descriptors name="soc_btmesh_sensor_server" label="Bluetooth Mesh - SoC Sensor Server" description="This example demonstrates the Bluetooth Mesh Sensor Server Model and  Sensor Setup Server Model. It measures temperature, people count and  illuminance and sends the mearurement data to a remote device (eg  soc_btmesh_sensor_client). The current status is sent to UART. CLI  commands can substitute button presses as on the selected board only  one Push Button is available. This example requires Internal Storage  Bootloader (single image on 512kB device).&#xA;">
+    <properties key="namespace" value="template.uc"/>
+    <properties key="keywords" value="universal\ configurator"/>
+    <properties key="projectFilePaths" value="example/soc_btmesh_sensor_server/soc_btmesh_sensor_server_tbbg22a.slcp"/>
+    <properties key="readmeFiles" value=""/>
+    <properties key="boardCompatibility" value="brd4184a"/>
+    <properties key="partCompatibility" value=".*efr32bg22c224f512im40.*"/>
+    <properties key="ideCompatibility" value="iar-embedded-workbench makefile-ide segger-embedded-studio simplicity-ide"/>
+    <properties key="toolchainCompatibility" value="gcc iar segger"/>
+    <properties key="category" value="Bluetooth Mesh Examples"/>
+    <properties key="quality" value="PRODUCTION"/>
+    <properties key="stockConfigCompatibility" value="com.silabs.ss.framework.project.toolchain.core.default"/>
+  </descriptors>
+  <descriptors name="soc_btmesh_sensor_server" label="Bluetooth Mesh - SoC Sensor Server" description="This example demonstrates the Bluetooth Mesh Sensor Server Model and  Sensor Setup Server Model. It measures temperature, people count and  illuminance and sends the mearurement data to a remote device (eg  soc_btmesh_sensor_client). The current status is sent to UART. CLI  commands can substitute button presses as on the selected board only  one Push Button is available. This example requires Internal Storage  Bootloader (single image on 512kB device).&#xA;">
+    <properties key="namespace" value="template.uc"/>
+    <properties key="keywords" value="universal\ configurator"/>
+    <properties key="projectFilePaths" value="example/soc_btmesh_sensor_server/soc_btmesh_sensor_server_tbbg22b.slcp"/>
+    <properties key="readmeFiles" value=""/>
+    <properties key="boardCompatibility" value="brd4184b"/>
+    <properties key="partCompatibility" value=".*efr32bg22c224f512im40.*"/>
+    <properties key="ideCompatibility" value="iar-embedded-workbench makefile-ide segger-embedded-studio simplicity-ide"/>
+    <properties key="toolchainCompatibility" value="gcc iar segger"/>
+    <properties key="category" value="Bluetooth Mesh Examples"/>
+    <properties key="quality" value="PRODUCTION"/>
+    <properties key="stockConfigCompatibility" value="com.silabs.ss.framework.project.toolchain.core.default"/>
+  </descriptors>
+  <descriptors name="soc_btmesh_sensor_server" label="Bluetooth Mesh - SoC Sensor Server" description="This example demonstrates the Bluetooth Mesh Sensor Server Model and  Sensor Setup Server Model. It measures temperature, people count and  illuminance and sends the mearurement data to a remote device (eg  soc_btmesh_sensor_client). The current status is sent to UART. This example requires Internal Storage Bootloader (single image  on 1MB device).&#xA;">
+    <properties key="namespace" value="template.uc"/>
+    <properties key="keywords" value="universal\ configurator"/>
+    <properties key="projectFilePaths" value="example/soc_btmesh_sensor_server/soc_btmesh_sensor_server_tbsense.slcp"/>
+    <properties key="readmeFiles" value=""/>
+    <properties key="boardCompatibility" value="brd4166a"/>
+    <properties key="partCompatibility" value=".*efr32mg12p332f1024gl125.*"/>
+    <properties key="ideCompatibility" value="iar-embedded-workbench makefile-ide segger-embedded-studio simplicity-ide"/>
+    <properties key="toolchainCompatibility" value="gcc iar segger"/>
+    <properties key="category" value="Bluetooth Mesh Examples"/>
+    <properties key="quality" value="PRODUCTION"/>
+    <properties key="stockConfigCompatibility" value="com.silabs.ss.framework.project.toolchain.core.default"/>
+  </descriptors>
+  <descriptors name="soc_btmesh_switch" label="Bluetooth Mesh - SoC Switch" description="This example is an out-of-the-box Software Demo optimized for user experience where the device acts as a switch. Push Button presses on the WSTK or CLI commands can control the state, lightness and color temperature of the LEDs and also scenes on a remote device (soc_btmesh_light). The example also acts as a LPN and tries to establish friendship. The status messages are also displayed on the LCD and sent to UART. The example is based on the Bluetooth Mesh Generic On/Off Client Model, the Light Lightness Client Model, CTL Client Model and Scene Client Model. This example requires one of the Internal Storage Bootloader (single image) variants depending on device memory.&#xA;">
+    <properties key="namespace" value="template.uc"/>
+    <properties key="keywords" value="universal\ configurator"/>
+    <properties key="projectFilePaths" value="example/soc_btmesh_switch/soc_btmesh_switch_display.slcp"/>
+    <properties key="readmeFiles" value=""/>
+    <properties key="boardCompatibility" value="brd4103a brd4104a brd4158a brd4159a brd4161a brd4162a brd4163a brd4164a brd4165b brd4167a brd4168a brd4170a brd4171a brd4172a brd4172b brd4173a brd4174a brd4174b brd4175a brd4176a brd4177a brd4180a brd4180b brd4181a brd4181b brd4181c brd4182a brd4190a brd4304a brd4305a brd4305c brd4305d brd4305e brd4306a brd4306b brd4306c brd4306d brd4308a brd4308b brd4308c brd4308d brd4311a brd4311b brd4312a"/>
+    <properties key="partCompatibility" value=".*bgm13.* .*bgm21.* .*bgm22.*hna.* .*efr32bg12p.* .*efr32bg13p.* .*efr32bg21.* .*efr32bg22.*f512.* .*efr32mg12p.* .*efr32mg13p.* .*efr32mg21.* .*efr32mg22.* .*mgm12.* .*mgm13.* .*mgm21.* .*mgm22.*"/>
+    <properties key="ideCompatibility" value="iar-embedded-workbench makefile-ide segger-embedded-studio simplicity-ide"/>
+    <properties key="toolchainCompatibility" value="gcc iar segger"/>
+    <properties key="category" value="Bluetooth Mesh Examples"/>
+    <properties key="quality" value="PRODUCTION"/>
+    <properties key="stockConfigCompatibility" value="com.silabs.ss.framework.project.toolchain.core.default"/>
+  </descriptors>
+  <descriptors name="soc_btmesh_switch" label="Bluetooth Mesh - SoC Switch" description="This example is an out-of-the-box Software Demo optimized for user experience where the device acts as a switch. Push Button presses on the development board or CLI commands can control the state, lightness and color temperature of the LEDs and also scenes on a remote device (soc_btmesh_light). The example also acts as a LPN and tries to establish friendship. The status messages are also sent to UART. The example is based on the Bluetooth Mesh Generic On/Off Client Model, the Light Lightness Client Model, CTL Client Model and Scene Client Model. This example requires one of the Internal Storage Bootloader (single image) variants depending on device memory.&#xA;">
+    <properties key="namespace" value="template.uc"/>
+    <properties key="keywords" value="universal\ configurator"/>
+    <properties key="projectFilePaths" value="example/soc_btmesh_switch/soc_btmesh_switch_log.slcp"/>
+    <properties key="readmeFiles" value=""/>
+    <properties key="boardCompatibility" value="brd4166a brd4179b brd4309a brd4309b"/>
+    <properties key="partCompatibility" value=".*bgm13.* .*bgm21.* .*bgm22.*hna.* .*efr32bg12p.* .*efr32bg13p.* .*efr32bg21.* .*efr32bg22.*f512.* .*efr32mg12p.* .*efr32mg13p.* .*efr32mg21.* .*efr32mg22.* .*mgm12.* .*mgm13.* .*mgm21.* .*mgm22.*"/>
+    <properties key="ideCompatibility" value="iar-embedded-workbench makefile-ide segger-embedded-studio simplicity-ide"/>
+    <properties key="toolchainCompatibility" value="gcc iar segger"/>
+    <properties key="category" value="Bluetooth Mesh Examples"/>
+    <properties key="quality" value="PRODUCTION"/>
+    <properties key="stockConfigCompatibility" value="com.silabs.ss.framework.project.toolchain.core.default"/>
+  </descriptors>
+  <descriptors name="soc_btmesh_switch" label="Bluetooth Mesh - SoC Switch" description="This example is an out-of-the-box Software Demo optimized for user experience where the device acts as a switch. Push Button presses on the development board (only PB0 is functional) or CLI commands can control the state, lightness and color temperature of the LEDs and also scenes on a remote device (soc_btmesh_light). The example also acts as a LPN and tries to establish friendship. The status messages are also sent to UART. The example is based on the Bluetooth Mesh Generic On/Off Client Model, the Light Lightness Client Model, CTL Client Model and Scene Client Model. This example requires one of the Internal Storage Bootloader (single image) variants depending on device memory.&#xA;">
+    <properties key="namespace" value="template.uc"/>
+    <properties key="keywords" value="universal\ configurator"/>
+    <properties key="projectFilePaths" value="example/soc_btmesh_switch/soc_btmesh_switch_log_single.slcp"/>
+    <properties key="readmeFiles" value=""/>
+    <properties key="boardCompatibility" value="brd4183a brd4183c brd4184a brd4184b"/>
+    <properties key="partCompatibility" value=".*bgm13.* .*bgm21.* .*bgm22.*hna.* .*efr32bg12p.* .*efr32bg13p.* .*efr32bg21.* .*efr32bg22.*f512.* .*efr32mg12p.* .*efr32mg13p.* .*efr32mg21.* .*efr32mg22.* .*mgm12.* .*mgm13.* .*mgm21.* .*mgm22.*"/>
+    <properties key="ideCompatibility" value="iar-embedded-workbench makefile-ide segger-embedded-studio simplicity-ide"/>
+    <properties key="toolchainCompatibility" value="gcc iar segger"/>
+    <properties key="category" value="Bluetooth Mesh Examples"/>
+    <properties key="quality" value="PRODUCTION"/>
+    <properties key="stockConfigCompatibility" value="com.silabs.ss.framework.project.toolchain.core.default"/>
+  </descriptors>
+  <descriptors name="soc_btmesh_switch_low_power" label="Bluetooth Mesh - SoC Switch Low Power" description="This example is an out-of-the-box Software Demo optimized for low current consumption where the device acts as a switch. It has disabled CLI, logging and LCD. Push Button presses on the development board can control the state, lightness and color temperature of the LEDs and also scenes on a remote device (soc_btmesh_light). The example also acts as a LPN and tries to establish friendship. The example is based on the Bluetooth Mesh Generic On/Off Client Model, the Light Lightness Client Model, CTL Client Model and Scene Client Model. This example requires one of the Internal Storage Bootloader (single image) variants depending on device memory.&#xA;">
+    <properties key="namespace" value="template.uc"/>
+    <properties key="keywords" value="universal\ configurator"/>
+    <properties key="projectFilePaths" value="example/soc_btmesh_switch/soc_btmesh_switch_low_power.slcp"/>
+    <properties key="readmeFiles" value=""/>
+    <properties key="boardCompatibility" value="brd4103a brd4104a brd4158a brd4159a brd4161a brd4162a brd4163a brd4164a brd4165b brd4166a brd4167a brd4168a brd4170a brd4171a brd4172a brd4172b brd4173a brd4174a brd4174b brd4175a brd4176a brd4177a brd4179b brd4180a brd4180b brd4181a brd4181b brd4181c brd4182a brd4190a brd4304a brd4305a brd4305c brd4305d brd4305e brd4306a brd4306b brd4306c brd4306d brd4308a brd4308b brd4308c brd4308d brd4309a brd4309b brd4311a brd4311b brd4312a"/>
+    <properties key="partCompatibility" value=".*bgm13.* .*bgm21.* .*bgm22.*hna.* .*efr32bg12p.* .*efr32bg13p.* .*efr32bg21.* .*efr32bg22.*f512.* .*efr32mg12p.* .*efr32mg13p.* .*efr32mg21.* .*efr32mg22.* .*mgm12.* .*mgm13.* .*mgm21.* .*mgm22.*"/>
+    <properties key="ideCompatibility" value="iar-embedded-workbench makefile-ide segger-embedded-studio simplicity-ide"/>
+    <properties key="toolchainCompatibility" value="gcc iar segger"/>
+    <properties key="category" value="Bluetooth Mesh Examples"/>
+    <properties key="quality" value="PRODUCTION"/>
+    <properties key="stockConfigCompatibility" value="com.silabs.ss.framework.project.toolchain.core.default"/>
+  </descriptors>
+  <descriptors name="soc_btmesh_switch_low_power" label="Bluetooth Mesh - SoC Switch Low Power" description="This example is an out-of-the-box Software Demo optimized for low current consumption where the device acts as a switch. It has disabled CLI, logging and LCD. Push Button presses on the development board (only PB0 is functional) can control the state, lightness and color temperature of the LEDs and also scenes on a remote device (soc_btmesh_light). The example also acts as a LPN and tries to establish friendship. The example is based on the Bluetooth Mesh Generic On/Off Client Model, the Light Lightness Client Model, CTL Client Model and Scene Client Model. This example requires one of the Internal Storage Bootloader (single image) variants depending on device memory.&#xA;">
+    <properties key="namespace" value="template.uc"/>
+    <properties key="keywords" value="universal\ configurator"/>
+    <properties key="projectFilePaths" value="example/soc_btmesh_switch/soc_btmesh_switch_low_power_single.slcp"/>
+    <properties key="readmeFiles" value=""/>
+    <properties key="boardCompatibility" value="brd4183a brd4183c brd4184a brd4184b"/>
+    <properties key="partCompatibility" value=".*bgm13.* .*bgm21.* .*bgm22.*hna.* .*efr32bg12p.* .*efr32bg13p.* .*efr32bg21.* .*efr32bg22.*f512.* .*efr32mg12p.* .*efr32mg13p.* .*efr32mg21.* .*efr32mg22.* .*mgm12.* .*mgm13.* .*mgm21.* .*mgm22.*"/>
+    <properties key="ideCompatibility" value="iar-embedded-workbench makefile-ide segger-embedded-studio simplicity-ide"/>
+    <properties key="toolchainCompatibility" value="gcc iar segger"/>
+    <properties key="category" value="Bluetooth Mesh Examples"/>
+    <properties key="quality" value="PRODUCTION"/>
+    <properties key="stockConfigCompatibility" value="com.silabs.ss.framework.project.toolchain.core.default"/>
+  </descriptors>
+</model:MDescriptors>

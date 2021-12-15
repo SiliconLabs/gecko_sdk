@@ -1,0 +1,94 @@
+<?xml version="1.0" encoding="ASCII"?>
+<model:MDescriptors xmlns:model="http://www.silabs.com/ss/Studio.ecore">
+  <descriptors name="DoorLockKeyPad" label="DoorLockKeyPad" description="The Z-Wave certified Door Lock application shows a lock implementation. It will support user codes to open a door and thereby eliminate the need for traditional keys. It is possible to both lock and unlock the door remotely through the Z-Wave protocol.">
+    <properties key="namespace" value="template.uc"/>
+    <properties key="keywords" value="universal\ configurator"/>
+    <properties key="projectFilePaths" value="Apps/DoorLockKeyPad/DoorLockKeyPad.slcp"/>
+    <properties key="readmeFiles" value=""/>
+    <properties key="boardCompatibility" value="brd4200a brd4202a brd4204a brd4204b brd4204c brd4204d brd4205a brd4205b brd4207a brd4209a brd4210a com.silabs.board.none"/>
+    <properties key="partCompatibility" value=".*efr32zg13l.* .*efr32zg13p.* .*efr32zg13s.* .*efr32zg14p.* .*efr32zg23.* .*zgm13.* .*zgm23.*"/>
+    <properties key="ideCompatibility" value="iar-embedded-workbench makefile-ide segger-embedded-studio simplicity-ide"/>
+    <properties key="toolchainCompatibility" value="gcc iar segger"/>
+    <properties key="category" value="Z-Wave|Apps"/>
+    <properties key="quality" value="PRODUCTION"/>
+    <properties key="stockConfigCompatibility" value="com.silabs.ss.framework.project.toolchain.core.default"/>
+  </descriptors>
+  <descriptors name="LEDBulb" label="LEDBulb" description="The Z-Wave certified LED Bulb application shows an implementation of a remotely controlled color switch. An example is a LED bulb or any other color capable device.">
+    <properties key="namespace" value="template.uc"/>
+    <properties key="keywords" value="universal\ configurator"/>
+    <properties key="projectFilePaths" value="Apps/LEDBulb/LEDBulb.slcp"/>
+    <properties key="readmeFiles" value=""/>
+    <properties key="boardCompatibility" value="brd4200a brd4202a brd4204a brd4204b brd4204c brd4204d brd4205a brd4205b brd4207a brd4209a brd4210a com.silabs.board.none"/>
+    <properties key="partCompatibility" value=".*efr32zg13l.* .*efr32zg13p.* .*efr32zg13s.* .*efr32zg14p.* .*efr32zg23.* .*zgm13.* .*zgm23.*"/>
+    <properties key="ideCompatibility" value="iar-embedded-workbench makefile-ide segger-embedded-studio simplicity-ide"/>
+    <properties key="toolchainCompatibility" value="gcc iar segger"/>
+    <properties key="category" value="Z-Wave|Apps"/>
+    <properties key="quality" value="PRODUCTION"/>
+    <properties key="stockConfigCompatibility" value="com.silabs.ss.framework.project.toolchain.core.default"/>
+  </descriptors>
+  <descriptors name="PowerStrip" label="PowerStrip" description="The Z-Wave certified Power Strip application shows an extension block implementation used to turn on several devices that are connected to power. Examples include lights, appliances, etc.">
+    <properties key="namespace" value="template.uc"/>
+    <properties key="keywords" value="universal\ configurator"/>
+    <properties key="projectFilePaths" value="Apps/PowerStrip/PowerStrip.slcp"/>
+    <properties key="readmeFiles" value=""/>
+    <properties key="boardCompatibility" value="brd4200a brd4202a brd4204a brd4204b brd4204c brd4204d brd4205a brd4205b brd4207a brd4209a brd4210a com.silabs.board.none"/>
+    <properties key="partCompatibility" value=".*efr32zg13l.* .*efr32zg13p.* .*efr32zg13s.* .*efr32zg14p.* .*efr32zg23.* .*zgm13.* .*zgm23.*"/>
+    <properties key="ideCompatibility" value="iar-embedded-workbench makefile-ide segger-embedded-studio simplicity-ide"/>
+    <properties key="toolchainCompatibility" value="gcc iar segger"/>
+    <properties key="category" value="Z-Wave|Apps"/>
+    <properties key="quality" value="PRODUCTION"/>
+    <properties key="stockConfigCompatibility" value="com.silabs.ss.framework.project.toolchain.core.default"/>
+  </descriptors>
+  <descriptors name="SensorPIR" label="SensorPIR" description="The Z-Wave certified Sensor PIR application shows a presence/movement detector implementation for controlling other devices and for sending notifications.">
+    <properties key="namespace" value="template.uc"/>
+    <properties key="keywords" value="universal\ configurator"/>
+    <properties key="projectFilePaths" value="Apps/SensorPIR/SensorPIR.slcp"/>
+    <properties key="readmeFiles" value=""/>
+    <properties key="boardCompatibility" value="brd4200a brd4202a brd4204a brd4204b brd4204c brd4204d brd4205a brd4205b brd4207a brd4209a brd4210a com.silabs.board.none"/>
+    <properties key="partCompatibility" value=".*efr32zg13l.* .*efr32zg13p.* .*efr32zg13s.* .*efr32zg14p.* .*efr32zg23.* .*zgm13.* .*zgm23.*"/>
+    <properties key="ideCompatibility" value="iar-embedded-workbench makefile-ide segger-embedded-studio simplicity-ide"/>
+    <properties key="toolchainCompatibility" value="gcc iar segger"/>
+    <properties key="category" value="Z-Wave|Apps"/>
+    <properties key="quality" value="PRODUCTION"/>
+    <properties key="stockConfigCompatibility" value="com.silabs.ss.framework.project.toolchain.core.default"/>
+  </descriptors>
+  <descriptors name="SwitchOnOff" label="SwitchOnOff" description="The Z-Wave certified Switch On/Off application shows a switch implementation that turns on any device that is connected to power. Examples include lights, appliances, etc.">
+    <properties key="namespace" value="template.uc"/>
+    <properties key="keywords" value="universal\ configurator"/>
+    <properties key="projectFilePaths" value="Apps/SwitchOnOff/SwitchOnOff.slcp"/>
+    <properties key="readmeFiles" value=""/>
+    <properties key="boardCompatibility" value="brd4200a brd4202a brd4204a brd4204b brd4204c brd4204d brd4205a brd4205b brd4207a brd4209a brd4210a com.silabs.board.none"/>
+    <properties key="partCompatibility" value=".*efr32zg13l.* .*efr32zg13p.* .*efr32zg13s.* .*efr32zg14p.* .*efr32zg23.* .*zgm13.* .*zgm23.*"/>
+    <properties key="ideCompatibility" value="iar-embedded-workbench makefile-ide segger-embedded-studio simplicity-ide"/>
+    <properties key="toolchainCompatibility" value="gcc iar segger"/>
+    <properties key="category" value="Z-Wave|Apps"/>
+    <properties key="quality" value="PRODUCTION"/>
+    <properties key="stockConfigCompatibility" value="com.silabs.ss.framework.project.toolchain.core.default"/>
+  </descriptors>
+  <descriptors name="WallController" label="WallController" description="The Z-Wave certified Wall Controller application shows a push-button switch panel implementation to control devices in the Z-Wave network from push buttons (physical or virtual) on a device that is meant to be mounted on a wall. Examples include scene and zone controller and wall-mounted AV controllers.">
+    <properties key="namespace" value="template.uc"/>
+    <properties key="keywords" value="universal\ configurator"/>
+    <properties key="projectFilePaths" value="Apps/WallController/WallController.slcp"/>
+    <properties key="readmeFiles" value=""/>
+    <properties key="boardCompatibility" value="brd4200a brd4202a brd4204a brd4204b brd4204c brd4204d brd4205a brd4205b brd4207a brd4209a brd4210a com.silabs.board.none"/>
+    <properties key="partCompatibility" value=".*efr32zg13l.* .*efr32zg13p.* .*efr32zg13s.* .*efr32zg14p.* .*efr32zg23.* .*zgm13.* .*zgm23.*"/>
+    <properties key="ideCompatibility" value="iar-embedded-workbench makefile-ide segger-embedded-studio simplicity-ide"/>
+    <properties key="toolchainCompatibility" value="gcc iar segger"/>
+    <properties key="category" value="Z-Wave|Apps"/>
+    <properties key="quality" value="PRODUCTION"/>
+    <properties key="stockConfigCompatibility" value="com.silabs.ss.framework.project.toolchain.core.default"/>
+  </descriptors>
+  <descriptors name="MultilevelSensor" label="MultilevelSensor" description="The Z-Wave Switch Multilevel Sensor application shows the ability to advertise numerical sensor readings, such as temperature, and humidity. Multiple parameters can be set for the minimum and maximum values, and a notification will be send if the measured temperature value is out of the range.">
+    <properties key="namespace" value="template.uc"/>
+    <properties key="keywords" value="universal\ configurator"/>
+    <properties key="projectFilePaths" value="NonCertified_Apps/MultilevelSensor/MultilevelSensor.slcp"/>
+    <properties key="readmeFiles" value=""/>
+    <properties key="boardCompatibility" value="brd4200a brd4202a brd4204a brd4204b brd4204c brd4204d brd4205a brd4205b brd4207a brd4209a brd4210a com.silabs.board.none"/>
+    <properties key="partCompatibility" value=".*efr32zg13l.* .*efr32zg13p.* .*efr32zg13s.* .*efr32zg14p.* .*efr32zg23.* .*zgm13.* .*zgm23.*"/>
+    <properties key="ideCompatibility" value="iar-embedded-workbench makefile-ide segger-embedded-studio simplicity-ide"/>
+    <properties key="toolchainCompatibility" value="gcc iar segger"/>
+    <properties key="category" value="Z-Wave|Apps"/>
+    <properties key="quality" value="PRODUCTION"/>
+    <properties key="stockConfigCompatibility" value="com.silabs.ss.framework.project.toolchain.core.default"/>
+  </descriptors>
+</model:MDescriptors>

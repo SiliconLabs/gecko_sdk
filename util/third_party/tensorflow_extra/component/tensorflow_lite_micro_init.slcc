@@ -1,0 +1,32 @@
+id: tensorflow_lite_micro_init
+package: platform
+label: TensorFlow Lite Micro Init
+description: >
+  This component provides initialization of TensorFlow Lite Micro by creating
+  an opcode resolver and interpreter for the given flatbuffer. In addition
+  it creates the tensor arena buffer.
+category: Platform|Machine Learning|TensorFlow
+quality: production
+provides:
+  - name: tensorflow_lite_micro_init
+requires:
+  - name: tensorflow_lite_micro
+  - name: emlib_common
+root_path: util/third_party/tensorflow_extra
+include:
+  - path: inc
+    file_list:
+      - path: sl_tflite_micro_init.h
+source:
+  - path: src/sl_tflite_micro_init.cc
+config_file:
+  - path: "config/sl_tflite_micro_config.h"
+template_contribution:
+  - name: event_handler
+    value:
+      event: internal_app_init
+      include: sl_tflite_micro_init.h
+      handler: sl_tflite_micro_init
+documentation:
+  docset: gecko-platform
+  document: machine_learning/tensorflow/overview

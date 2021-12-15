@@ -1,0 +1,164 @@
+pluginDirectory=./
+
+plugin(core) {
+  name=Application Core
+  category=Core
+  architecture=efm32~series[1]
+  description=Core library for bootloader applications
+
+  root=$DEVICE/SiliconLabs/
+
+  # Files that are released in source
+  (efm32~family[GI]~series[1]~device_configuration[2]+gcc):EFM32GG12B/Source/GCC/startup_efm32gg12b.c
+  (efm32~family[GI]~series[1]~device_configuration[1]+gcc):EFM32GG11B/Source/GCC/startup_efm32gg11b.c
+
+  (efm32~family[GI]~series[1]~device_configuration[2]+iar):EFM32GG12B/Source/IAR/startup_efm32gg12b.c
+  (efm32~family[GI]~series[1]~device_configuration[1]+iar):EFM32GG11B/Source/IAR/startup_efm32gg11b.c
+}
+
+plugin(bootloader-interface) {
+  name=Bootloader 
+  category=Core
+  architecture=efm32~series[1]
+  description=Bootloader api
+
+  root=$BOOTLOADER/api
+
+  #common files 
+  btl_interface.c
+  btl_interface_storage.c
+}
+
+plugin(emlib) {
+  name=EMLIB
+  category=Utils
+  architecture=efr32~series[1],efr32~series[2],efm32~series[1]
+  description=EMLIB Peripheral Library
+
+  root=$EMLIB/src
+
+  # Files that are released in source
+  em_assert.c
+  em_cmu.c
+  em_emu.c
+  em_gpio.c
+  em_core.c
+  em_msc.c
+  em_rmu.c
+  em_system.c
+  em_timer.c
+  em_usart.c
+  em_ebi.c
+
+  setup(additionalFiles) {
+    PATH(ABSOLUTE):$EMLIB/inc
+  }
+}
+
+plugin(usbd-driver){
+  name=USB Device Driver
+  category=Drivers
+  architecture=efm32~family[GI]~series[1]~device_configuration[1], efm32~family[GI]~series[1]~device_configuration[2]
+  description=USB Device driver
+
+  root=$KIT/common/drivers
+
+  msdd.c
+  retargetio.c
+  retargetserial.c
+
+  setup(additionalFiles) {
+    PATH(ABSOLUTE):$KIT/common/drivers
+    PATH(ABSOLUTE):$KIT/common/bsp
+    PATH(ABSOLUTE):$BOOTLOADER/application/config/usb-device/
+  }
+
+  headerFiles(efm32~family[GI]~series[1]~device_configuration[1])=../../SLSTK3701A_EFM32GG11/config/retargetserialconfig.h
+  headerFiles(efm32~family[GI]~series[1]~device_configuration[1])=../../SLSTK3701A_EFM32GG11/config/bspconfig.h
+
+  headerFiles(efm32~family[GI]~series[1]~device_configuration[2])=../../SLTB009A_EFM32GG12/config/retargetserialconfig.h
+  headerFiles(efm32~family[GI]~series[1]~device_configuration[2])=../../SLTB009A_EFM32GG12/config/bspconfig.h
+
+}
+
+plugin(usbh-driver){
+
+  name=USB Host Driver
+  category=Drivers
+  architecture=efm32~family[GI]~series[1]~device_configuration[1], efm32~family[GI]~series[1]~device_configuration[2]
+  description=USB Host driver
+
+
+  root=$KIT/common/drivers
+
+
+  #common files 
+  msdh.c
+  msdscsi.c
+  msdbot.c
+  retargetio.c
+  retargetserial.c
+  ../bsp/bsp_trace.c
+  ../bsp/bsp_bcc.c
+  ../bsp/bsp_stk.c
+
+
+  setup(additionalFiles) {
+  PATH(ABSOLUTE):$KIT/common/drivers
+  PATH(ABSOLUTE):$KIT/common/bsp
+  PATH(ABSOLUTE):$BOOTLOADER/application/config/usb-host/
+}
+
+  headerFiles(efm32~family[GI]~series[1]~device_configuration[1])=../../../../hardware/kit/SLSTK3701A_EFM32GG11/config/retargetserialconfig.h
+  headerFiles(efm32~family[GI]~series[1]~device_configuration[1])=../../../../hardware/kit/SLSTK3701A_EFM32GG11/config/bspconfig.h
+  headerFiles(efm32~family[GI]~series[1]~device_configuration[1])=../../../../hardware/kit/SLSTK3701A_EFM32GG11/config/traceconfig.h
+
+  headerFiles(efm32~family[GI]~series[1]~device_configuration[2])=../../../../hardware/kit/SLTB009A_EFM32GG12/config/retargetserialconfig.h
+  headerFiles(efm32~family[GI]~series[1]~device_configuration[2])=../../../../hardware/kit/SLTB009A_EFM32GG12/config/bspconfig.h
+  headerFiles(efm32~family[GI]~series[1]~device_configuration[2])=../../../../hardware/kit/SLTB009A_EFM32GG12/config/traceconfig.h
+
+
+}
+
+plugin(gecko-usb) {
+  name=USB
+  category=Utils
+  architecture=efm32~family[GI]~series[1]~device_configuration[1], efm32~family[GI]~series[1]~device_configuration[2]
+  description=USB Pheripheral Library
+
+  root=$USB_GECKO/src
+
+  #Files released in source 
+  em_usbd.c
+  em_usbdch9.c
+  em_usbdep.c
+  em_usbdint.c
+  em_usbhint.c
+  em_usbh.c
+  em_usbhal.c
+  em_usbhep.c
+  em_usbtimer.c
+
+
+  setup(additionalFiles) {
+  PATH(ABSOLUTE):$USB_GECKO/inc
+  }
+}
+
+plugin(fatfs){
+  name=FatFs
+  category=Utils
+  architecture=efm32~family[GI]~series[1]~device_configuration[1], efm32~family[GI]~series[1]~device_configuration[2]
+  description=Fat filesystem module
+
+  root=$FATFS/src
+
+  #Files released in source
+  msddiskio.c
+  ff.c
+
+  setup(additionalFiles) {
+  $FATFS/inc
+  }
+
+}

@@ -1,0 +1,22 @@
+id: bootloader_ezsp_spi
+label: "EZSP-SPI"
+package: bootloader
+description: Firmware upgrade over SPI using the EZSP protocol. Configure pinout in the SPI Peripheral component
+category: Platform|Bootloader|Communication
+quality: production
+source:
+  - path: platform/bootloader/communication/ezsp-spi/btl_ezsp_spi.c
+include:
+  - path: platform/bootloader/communication
+    file_list:
+    - path: ezsp-spi/btl_ezsp_spi.h
+    - path: btl_communication.h
+define:
+  - name: BOOTLOADER_SUPPORT_COMMUNICATION
+    value: 1
+provides:
+  - name: bootloader_ezsp_spi
+requires:
+  - name: bootloader_spi_peripheral_driver
+  - name: bootloader_xmodem_parser
+  - name: bootloader_image_parser

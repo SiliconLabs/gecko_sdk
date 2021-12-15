@@ -1,0 +1,11 @@
+id: linux_arch_32
+label: Linux OS (32 bit)
+package: platform
+description: OS component for 32 bit Linux build targets.
+category: Platform|Device|Native
+quality: production
+requires:
+  - name: linux
+provides:
+  - name: linux_arch
+  - name: linux_arch_32

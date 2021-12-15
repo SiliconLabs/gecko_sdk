@@ -1,0 +1,14 @@
+id: zw_cc_version
+label: Version Command Class
+category: Z-Wave|Command Classes
+description: Version Command Class!
+package: Z-Wave
+quality: production
+include:
+  - path: protocol/z-wave/ZAF/CommandClasses/Version/
+    file_list:
+     - path: CC_Version.h
+provides:
+  - name: zw_cc_version
+requires:
+  - name: zw_core

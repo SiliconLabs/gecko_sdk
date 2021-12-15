@@ -1,0 +1,42 @@
+<!DOCTYPE html><html><head><meta charset="utf-8"><title>readme.html</title><style></style></head><body id="preview">
+<h1 class="code-line" data-line-start=0 data-line-end=1><a id="SE_Manager_Host_Firmware_Upgrade_and_Debug_Lock_0"></a>SE Manager Host Firmware Upgrade and Debug Lock</h1>
+<p class="has-line-data" data-line-start="2" data-line-end="3">This example uses the SE Manager API to upgrade the host firmware and enable debug lock on the supported Series 2 device.</p>
+<p class="has-line-data" data-line-start="4" data-line-end="5">The host firmware image (<code>.bin</code>) can be converted to a C source file by SEGGER free utility <a href="https://www.segger.com/free-utilities/bin2c/">Bin2C.exe</a>. Copy the host firmware image data array (discard the last <code>NULL-0x00</code> character) in converted C file to <code>host_firmware_image[]</code> array in <code>app_host_firmware_image.c</code>.</p>
+<p class="has-line-data" data-line-start="6" data-line-end="7">The example redirects standard I/O to the virtual serial port (VCOM) of the kit. By default, the serial port setting is 115200 bps and 8-N-1 configuration.</p>
+<p class="has-line-data" data-line-start="8" data-line-end="9">The example has been instrumented with code to count the number of clock cycles spent in different operations. The results are printed on the VCOM serial port console. This feature can be disabled by defining <code>SE_MANAGER_PRINT=0</code> (default is 1) in the IDE setting (<code>Preprocessor-&gt;Defined symbols</code>).</p>
+<h2 class="code-line" data-line-start=10 data-line-end=11><a id="SE_Manager_API_10"></a>SE Manager API</h2>
+<p class="has-line-data" data-line-start="12" data-line-end="13">The following SE Manager APIs are used in this example:</p>
+<ul>
+<li class="has-line-data" data-line-start="14" data-line-end="15"><code>sl_se_init</code></li>
+<li class="has-line-data" data-line-start="15" data-line-end="16"><code>sl_se_deinit</code></li>
+<li class="has-line-data" data-line-start="16" data-line-end="17"><code>sl_se_init_command_context</code></li>
+<li class="has-line-data" data-line-start="17" data-line-end="18"><code>sl_se_deinit_command_context</code></li>
+<li class="has-line-data" data-line-start="18" data-line-end="19"><code>sl_se_get_upgrade_status_host_image</code></li>
+<li class="has-line-data" data-line-start="19" data-line-end="20"><code>sl_se_check_host_image</code></li>
+<li class="has-line-data" data-line-start="20" data-line-end="21"><code>sl_se_apply_host_image</code></li>
+<li class="has-line-data" data-line-start="21" data-line-end="22"><code>sl_se_get_se_version</code></li>
+<li class="has-line-data" data-line-start="22" data-line-end="23"><code>sl_se_get_debug_lock_status</code></li>
+<li class="has-line-data" data-line-start="23" data-line-end="24"><code>sl_se_apply_debug_lock</code></li>
+<li class="has-line-data" data-line-start="24" data-line-end="25"><code>sl_se_read_executed_command</code> (VSE only)</li>
+<li class="has-line-data" data-line-start="25" data-line-end="27"><code>sl_se_ack_command</code> (VSE only)</li>
+</ul>
+<h2 class="code-line" data-line-start=27 data-line-end=28><a id="Getting_Started_27"></a>Getting Started</h2>
+<ol>
+<li class="has-line-data" data-line-start="29" data-line-end="30">Upgrade the kit’s firmware to the latest version (see <code>Adapter Firmware</code> under <a href="https://docs.silabs.com/simplicity-studio-5-users-guide/latest/ss-5-users-guide-about-the-launcher/welcome-and-device-tabs#general-device-information">General Device Information</a> in Simplicity Studio 5 Users Guide).</li>
+<li class="has-line-data" data-line-start="30" data-line-end="31">Upgrade the device’s SE firmware to the latest version (see <code>Secure Firmware</code> under <a href="https://docs.silabs.com/simplicity-studio-5-users-guide/latest/ss-5-users-guide-about-the-launcher/welcome-and-device-tabs#general-device-information">General Device Information</a> in Simplicity Studio 5 Users Guide).</li>
+<li class="has-line-data" data-line-start="31" data-line-end="32">Open any terminal program and connect to the kit’s VCOM port (if using <code>Device Console</code> in Simplicity Studio 5, <code>Line terminator:</code> must be set to <code>None</code>).</li>
+<li class="has-line-data" data-line-start="32" data-line-end="33">Create this platform example project in the Simplicity IDE (see <a href="https://docs.silabs.com/simplicity-studio-5-users-guide/latest/ss-5-users-guide-getting-started/start-a-project#examples">Examples</a> in Simplicity Studio 5 Users Guide, check <code>Platform()</code> checkbox to browse the platform examples).</li>
+<li class="has-line-data" data-line-start="33" data-line-end="34">Build the example and download it to the kit (see <a href="https://docs.silabs.com/simplicity-studio-5-users-guide/latest/ss-5-users-guide-building-and-flashing/building#simple-build">Simple Build</a> and <a href="https://docs.silabs.com/simplicity-studio-5-users-guide/latest/ss-5-users-guide-building-and-flashing/flashing#flash-programmer">Flash Programmer</a> in Simplicity Studio 5 Users Guide).</li>
+<li class="has-line-data" data-line-start="34" data-line-end="36">Run the example and follow the instructions shown on the console.</li>
+</ol>
+<h2 class="code-line" data-line-start=36 data-line-end=37><a id="Additional_Information_36"></a>Additional Information</h2>
+<ol>
+<li class="has-line-data" data-line-start="38" data-line-end="39">The current host firmware image in <code>app_host_firmware_image.c</code> is the <code>I/O Stream USART Bare-metal</code> or <code>I/O Stream EUSART Bare-metal</code> platform example.</li>
+<li class="has-line-data" data-line-start="39" data-line-end="40">For a device with VSE, a reset will be issued when running specified SE Manager APIs.</li>
+<li class="has-line-data" data-line-start="40" data-line-end="41">The xG22 devices require SE firmware version <code>v1.2.5</code> or above to enable debug lock through SE Manager API.</li>
+<li class="has-line-data" data-line-start="41" data-line-end="42">The device should disconnect from the debugger when upgrading the host firmware or applying the debug lock.</li>
+<li class="has-line-data" data-line-start="42" data-line-end="44">The default optimization level is <code>Optimize for debugging (-Og)</code> on Simplicity IDE and <code>None</code> on IAR Embedded Workbench.</li>
+</ol>
+<h2 class="code-line" data-line-start=44 data-line-end=45><a id="Resources_44"></a>Resources</h2>
+<p class="has-line-data" data-line-start="46" data-line-end="47"><a href="https://docs.silabs.com/gecko-platform/latest/service/api/group-sl-se-manager">SE Manager API</a></p>
+</body></html>

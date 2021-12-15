@@ -1,0 +1,124 @@
+id: mbedtls_core
+package: platform
+label: Mbed TLS
+description:
+  "This component contains the core files needed for any project using Mbed TLS, \
+  as well as common header and source files. Additionally, this component is also \
+  responsible for generating the Mbed TLS configuration which is copied over to \
+  the project.\n
+
+  In order to use certain algorithms (with device acceleration) through the \
+  Mbed TLS APIs, the corresponding component(s) have to be selected."
+category: Platform|Security
+quality: production
+template_file:
+  - path: util/third_party/crypto/sl_component/sl_mbedtls_support/config/template/mbedtls_config_autogen.h.jinja
+  - path: util/third_party/crypto/sl_component/sl_mbedtls_support/config/template/sl_mbedtls_config_transform_autogen.h.jinja
+config_file:
+  - path: util/third_party/crypto/sl_component/sl_mbedtls_support/config/template/mbedtls_config.h
+    file_id: mbedtls_config
+source:
+  - path: util/third_party/crypto/mbedtls/library/threading.c
+  - path: util/third_party/crypto/mbedtls/library/platform.c
+  - path: util/third_party/crypto/mbedtls/library/platform_util.c
+include:
+  - path: util/third_party/crypto/sl_component/sl_mbedtls_support/config
+    file_list:
+      - path: config-device-acceleration.h
+      - path: config-sl-crypto-all-acceleration.h
+  - path: util/third_party/crypto/mbedtls/include
+    file_list:
+      - path: mbedtls/aes.h
+      - path: mbedtls/aria.h
+      - path: mbedtls/asn1.h
+      - path: mbedtls/asn1write.h
+      - path: mbedtls/base64.h
+      - path: mbedtls/bignum.h
+      - path: mbedtls/build_info.h
+      - path: mbedtls/camellia.h
+      - path: mbedtls/ccm.h
+      - path: mbedtls/chacha20.h
+      - path: mbedtls/chachapoly.h
+      - path: mbedtls/check_config.h
+      - path: mbedtls/cipher.h
+      - path: mbedtls/cmac.h
+      - path: mbedtls/compat-2.x.h
+      - path: mbedtls/config_psa.h
+      - path: mbedtls/ctr_drbg.h
+      - path: mbedtls/debug.h
+      - path: mbedtls/des.h
+      - path: mbedtls/dhm.h
+      - path: mbedtls/ecdh.h
+      - path: mbedtls/ecdsa.h
+      - path: mbedtls/ecjpake.h
+      - path: mbedtls/ecp.h
+      - path: mbedtls/entropy.h
+      - path: mbedtls/error.h
+      - path: mbedtls/gcm.h
+      - path: mbedtls/hkdf.h
+      - path: mbedtls/hmac_drbg.h
+      - path: mbedtls/mbedtls_config.h
+      - path: mbedtls/md.h
+      - path: mbedtls/md5.h
+      - path: mbedtls/memory_buffer_alloc.h
+      - path: mbedtls/net_sockets.h
+      - path: mbedtls/nist_kw.h
+      - path: mbedtls/oid.h
+      - path: mbedtls/pem.h
+      - path: mbedtls/pk.h
+      - path: mbedtls/pkcs12.h
+      - path: mbedtls/pkcs5.h
+      - path: mbedtls/platform.h
+      - path: mbedtls/platform_time.h
+      - path: mbedtls/platform_util.h
+      - path: mbedtls/poly1305.h
+      - path: mbedtls/private_access.h
+      - path: mbedtls/psa_util.h
+      - path: mbedtls/ripemd160.h
+      - path: mbedtls/rsa.h
+      - path: mbedtls/sha1.h
+      - path: mbedtls/sha256.h
+      - path: mbedtls/sha512.h
+      - path: mbedtls/ssl.h
+      - path: mbedtls/ssl_cache.h
+      - path: mbedtls/ssl_ciphersuites.h
+      - path: mbedtls/ssl_cookie.h
+      - path: mbedtls/ssl_ticket.h
+      - path: mbedtls/threading.h
+      - path: mbedtls/timing.h
+      - path: mbedtls/version.h
+      - path: mbedtls/x509.h
+      - path: mbedtls/x509_crl.h
+      - path: mbedtls/x509_crt.h
+      - path: mbedtls/x509_csr.h
+
+  - path: util/third_party/crypto/mbedtls/library
+    file_list:
+      - path: common.h
+      - path: ecp_invasive.h
+      - path: entropy_poll.h
+      - path: pk_wrap.h
+      - path: md_wrap.h
+      - path: ssl_invasive.h
+      - path: ssl_tls13_keys.h
+      - path: bn_mul.h
+
+requires:
+  - name: device
+  - name: silabs_core_sl_malloc
+    condition: [device_cortexm]
+  - name: mbedtls_slcrypto_driver
+    condition: [device_cortexm]
+recommends:
+  - id: mbedtls_slcrypto
+    condition: [device_cortexm]
+define:
+  - name: MBEDTLS_CONFIG_FILE
+    value: "<mbedtls_config.h>"
+    unless: [test_mbedtls_classic_common]
+provides:
+  - name: mbedtls_core
+  - name: mbedtls_config
+documentation:
+  docset: mbed-tls
+  document: index

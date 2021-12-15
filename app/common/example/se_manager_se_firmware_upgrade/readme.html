@@ -1,0 +1,43 @@
+<!DOCTYPE html><html><head><meta charset="utf-8"><title>readme.html</title><style></style></head><body id="preview">
+<h1 class="code-line" data-line-start=0 data-line-end=1><a id="SE_Manager_SE_Firmware_Upgrade_0"></a>SE Manager SE Firmware Upgrade</h1>
+<p class="has-line-data" data-line-start="2" data-line-end="3">This example uses the SE Manager API to upgrade the SE firmware on the supported Series 2 device.</p>
+<p class="has-line-data" data-line-start="4" data-line-end="5">The SE upgrade firmware image must be stored to the device’s internal flash in <code>.seu</code> format. The latest SE firmware image (<code>.sec</code> and <code>.hex</code>) and release notes can be found in the Windows folders below (<code>version</code> should be <code>v3.1</code> or above).</p>
+<p class="has-line-data" data-line-start="6" data-line-end="7"><em>C:\SiliconLabs\SimplicityStudio\v5\developer\sdks\gecko_sdk_suite&lt;version&gt;\util\se_release\public</em></p>
+<p class="has-line-data" data-line-start="8" data-line-end="9">The SE firmware image (<code>.sec</code>) can be converted to a C source file by SEGGER free utility <a href="https://www.segger.com/free-utilities/bin2c/">Bin2C.exe</a>. Copy the SE firmware image data array (discard the last <code>NULL-0x00</code> character) in converted C file to <code>se_firmware_image[]</code> array in <code>app_se_firmware_image.c</code>.</p>
+<p class="has-line-data" data-line-start="10" data-line-end="11">The SE firmware image validation will fail if the image version is equal to or less than the current SE firmware version.</p>
+<p class="has-line-data" data-line-start="12" data-line-end="13">The example redirects standard I/O to the virtual serial port (VCOM) of the kit. By default, the serial port setting is 115200 bps and 8-N-1 configuration.</p>
+<p class="has-line-data" data-line-start="14" data-line-end="15">The example has been instrumented with code to count the number of clock cycles spent in different operations. The results are printed on the VCOM serial port console. This feature can be disabled by defining <code>SE_MANAGER_PRINT=0</code> (default is 1) in the IDE setting (<code>Preprocessor-&gt;Defined symbols</code>).</p>
+<h2 class="code-line" data-line-start=16 data-line-end=17><a id="SE_Manager_API_16"></a>SE Manager API</h2>
+<p class="has-line-data" data-line-start="18" data-line-end="19">The following SE Manager APIs are used in this example:</p>
+<ul>
+<li class="has-line-data" data-line-start="20" data-line-end="21"><code>sl_se_init</code></li>
+<li class="has-line-data" data-line-start="21" data-line-end="22"><code>sl_se_deinit</code></li>
+<li class="has-line-data" data-line-start="22" data-line-end="23"><code>sl_se_init_command_context</code></li>
+<li class="has-line-data" data-line-start="23" data-line-end="24"><code>sl_se_deinit_command_context</code></li>
+<li class="has-line-data" data-line-start="24" data-line-end="25"><code>sl_se_get_se_version</code></li>
+<li class="has-line-data" data-line-start="25" data-line-end="26"><code>sl_se_get_upgrade_status_se_image</code></li>
+<li class="has-line-data" data-line-start="26" data-line-end="27"><code>sl_se_check_se_image</code></li>
+<li class="has-line-data" data-line-start="27" data-line-end="28"><code>sl_se_apply_se_image</code></li>
+<li class="has-line-data" data-line-start="28" data-line-end="29"><code>sl_se_read_executed_command</code> (VSE only)</li>
+<li class="has-line-data" data-line-start="29" data-line-end="31"><code>sl_se_ack_command</code> (VSE only)</li>
+</ul>
+<h2 class="code-line" data-line-start=31 data-line-end=32><a id="Getting_Started_31"></a>Getting Started</h2>
+<ol>
+<li class="has-line-data" data-line-start="33" data-line-end="34">Upgrade the kit’s firmware to the latest version (see <code>Adapter Firmware</code> under <a href="https://docs.silabs.com/simplicity-studio-5-users-guide/latest/ss-5-users-guide-about-the-launcher/welcome-and-device-tabs#general-device-information">General Device Information</a> in Simplicity Studio 5 Users Guide).</li>
+<li class="has-line-data" data-line-start="34" data-line-end="35">Upgrade the device’s SE firmware to the latest version (see <code>Secure Firmware</code> under <a href="https://docs.silabs.com/simplicity-studio-5-users-guide/latest/ss-5-users-guide-about-the-launcher/welcome-and-device-tabs#general-device-information">General Device Information</a> in Simplicity Studio 5 Users Guide).</li>
+<li class="has-line-data" data-line-start="35" data-line-end="36">Open any terminal program and connect to the kit’s VCOM port (if using <code>Device Console</code> in Simplicity Studio 5, <code>Line terminator:</code> must be set to <code>None</code>).</li>
+<li class="has-line-data" data-line-start="36" data-line-end="37">Create this platform example project in the Simplicity IDE (see <a href="https://docs.silabs.com/simplicity-studio-5-users-guide/latest/ss-5-users-guide-getting-started/start-a-project#examples">Examples</a> in Simplicity Studio 5 Users Guide, check <code>Platform()</code> checkbox to browse the platform examples).</li>
+<li class="has-line-data" data-line-start="37" data-line-end="38">Build the example and download it to the kit (see <a href="https://docs.silabs.com/simplicity-studio-5-users-guide/latest/ss-5-users-guide-building-and-flashing/building#simple-build">Simple Build</a> and <a href="https://docs.silabs.com/simplicity-studio-5-users-guide/latest/ss-5-users-guide-building-and-flashing/flashing#flash-programmer">Flash Programmer</a> in Simplicity Studio 5 Users Guide).</li>
+<li class="has-line-data" data-line-start="38" data-line-end="40">Run the example and follow the instructions shown on the console.</li>
+</ol>
+<h2 class="code-line" data-line-start=40 data-line-end=41><a id="Additional_Information_40"></a>Additional Information</h2>
+<ol>
+<li class="has-line-data" data-line-start="42" data-line-end="43">The current version for HSE or VSE firmware upgrade can be found in the <code>app_se_firmware_image.c</code>.</li>
+<li class="has-line-data" data-line-start="43" data-line-end="44">For a device with VSE, a reset will be issued when running specified SE Manager APIs.</li>
+<li class="has-line-data" data-line-start="44" data-line-end="45">The device should disconnect from the debugger when upgrading the HSE or VSE firmware.</li>
+<li class="has-line-data" data-line-start="45" data-line-end="47">The default optimization level is <code>Optimize for debugging (-Og)</code> on Simplicity IDE and <code>None</code> on IAR Embedded Workbench.</li>
+</ol>
+<h2 class="code-line" data-line-start=47 data-line-end=48><a id="Resources_47"></a>Resources</h2>
+<p class="has-line-data" data-line-start="49" data-line-end="50"><a href="https://docs.silabs.com/gecko-platform/latest/service/api/group-sl-se-manager">SE Manager API</a></p>
+<p class="has-line-data" data-line-start="51" data-line-end="52"><a href="https://www.silabs.com/documents/public/application-notes/an1222-efr32xg2x-production-programming.pdf">AN1222: Production Programming of Series 2 Devices</a></p>
+</body></html>

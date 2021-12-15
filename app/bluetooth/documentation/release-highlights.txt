@@ -1,0 +1,12 @@
+Bluetooth SDK 3.3.0.0
+*  Bluetooth v5.3 qualified
+*  New Co-Processor Communication (CPC) transport for RCP/HCI
+*  RTOS support in RCP mode
+*  Improved tools for Angle-of-Arrival evaluation and development
+*  Interoperability testing example added to the SDK
+
+
+
+
+
+  

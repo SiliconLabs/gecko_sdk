@@ -1,0 +1,28 @@
+id: mbedtls_sha1
+package: platform
+label: Mbed TLS Support for SHA-1
+description: >-
+  This component provides support for the SHA-1 hash function using mbedTLS.
+category: Platform|Security
+quality: production
+source:
+  - path: util/third_party/crypto/mbedtls/library/sha1.c
+include:
+  - path: util/third_party/crypto/mbedtls/include
+    file_list:
+      - path: mbedtls/sha1.h
+provides:
+  - name: mbedtls_sha1
+  - name: mbedtls_hash_function
+    allow_multiple: true
+  - name: mbedtls_sha_function
+    allow_multiple: true
+requires:
+  - name: mbedtls_core
+template_contribution:
+  - name: mbedtls_config
+    value: MBEDTLS_SHA1_C
+documentation:
+  docset: mbed-tls
+  document:
+    - page: group-sl-crypto-sha1

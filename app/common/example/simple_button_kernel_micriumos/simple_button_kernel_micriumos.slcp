@@ -1,0 +1,33 @@
+project_name: simple_button_kernel_micriumos
+package: platform
+quality: production
+label: Platform - Simple Button on Micrium OS kernel
+description: > 
+  This example project shows how to toggle LEDs using buttons in a Micrium OS kernel task.
+category: Example|Platform
+source:
+  - path: app.c
+  - path: main.c
+  - path: simple_button_kernel.c
+include:
+  - path: .
+    file_list:
+    - path: app.h
+    - path: simple_button_kernel.h
+component:
+  - id: sl_system
+  - id: device_init
+  - id: micriumos_kernel
+  - id: power_manager
+  - id: simple_led
+    instance:
+      - led0
+  - id: simple_button
+    instance:
+      - btn0
+tag:
+  - hardware:component:led:1+
+  - hardware:component:button:1+
+  - hardware:!shared:button:led
+define:
+  - name: DEBUG_EFM

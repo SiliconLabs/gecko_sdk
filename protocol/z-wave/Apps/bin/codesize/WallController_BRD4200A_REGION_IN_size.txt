@@ -1,0 +1,40 @@
+
+==========================================================
+The output of the size tool: (e.g. arm-none-ambi-size.exe)
+==========================================================
+
+/mnt/raid/workspaces/ws.sb20Fw8Up/overlay/super/prebuilt-samples/Z-Wave/WallController-brd4200a-gcc-makefile-cp-REGION_IN/build/debug/WallController.out  :
+section                 size         addr
+.text                0x2df64          0x0
+_cc_handlers_v3        0x1a4      0x2df64
+.ARM.exidx               0x8      0x2e108
+.stack                0x1000   0x20000000
+.data                  0x580   0x20001000
+.reset_info              0x4   0x20001580
+.bss                  0x9ecc   0x20001584
+.heap                 0x4bb0   0x2000b450
+.internal_storage    0x3a000      0x2e110
+.zwave_nvm            0x3000      0x68110
+.nvm                  0x9000      0x6b110
+.ARM.attributes         0x2e          0x0
+.comment                0x4d          0x0
+.debug_frame          0x69f8          0x0
+.debug_info         0x88875f          0x0
+.debug_abbrev        0x102af          0x0
+.debug_loc           0x239e5          0x0
+.debug_aranges        0x2818          0x0
+.debug_ranges         0x4898          0x0
+.debug_line          0x2ba99          0x0
+.debug_str           0x68a0c          0x0
+.stabstr               0x14d          0x0
+Total               0x9e2618
+
+The calculated FLASH and SRAM usage summary:
+============================================
+FLASH used as program memory:  (Including only the sections: .text, .ARM.exidx, .data)
+   476816
+FLASH used for storage: (Including only the sections: .nvm3App, .simee)
+   0
+SRAM usage:             (Including only the sections: .data, .bss, .heap, .stack_dummy, .reset_info)
+   65536
+

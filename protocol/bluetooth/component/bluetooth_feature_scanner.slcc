@@ -1,0 +1,34 @@
+id: "bluetooth_feature_scanner"
+label: "Scanner"
+package: "Bluetooth"
+description: >
+  Bluetooth Low Energy scanning feature
+category: "Bluetooth|Feature"
+quality: "production"
+root_path: "protocol/bluetooth"
+requires:
+  - name: "bluetooth_controller"
+provides:
+  - name: "bluetooth_feature_scanner"
+  - name: "bluetooth_feature_central_connection"
+  - name: "bluetooth_feature_connection_creation"
+    allow_multiple: true
+template_contribution:
+  - name: component_catalog
+    value: bluetooth_feature_scanner
+  - name: component_catalog
+    value: bluetooth_extended_scanning_incompatible
+    condition: 
+      - "device_sdid_80"
+  - name: bluetooth_bgapi_class
+    value:
+      class: "scanner"
+    priority: 3
+  - name: bluetooth_controller_init
+    value:
+      function: sl_btctrl_init_scan()
+    priority: 4
+  - name: bluetooth_controller_init
+    value:
+      function: sl_btctrl_init_scan_ext()
+    priority: 8

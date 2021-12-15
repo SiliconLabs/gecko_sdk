@@ -1,0 +1,27 @@
+id: "bluetooth_hci_test_commands"
+label: Bluetooth Controller HCI debug commands
+package: Bluetooth
+description: "Provides vendor specific HCI debug commands for Bluetooth Controller"
+
+category: Bluetooth|Controller
+quality: production
+root_path: protocol/bluetooth/bgstack/ll
+include:
+  - path: inc
+    file_list:
+      - path: sl_btctrl_hci.h
+      - path: sli_btctrl.h
+provides:
+  - name: "bluetooth_hci_test_commands"
+template_contribution:
+  - name: bluetooth_controller_init
+    value:
+      include: sl_btctrl_hci.h
+      function: "hci_enableVendorSpecificDebugging()"
+    condition: ["bluetooth_controller_debug"]
+    priority: 10
+  - name: bluetooth_controller_feature_init
+    value:
+      function: "test_protocol_init()"
+    condition: ["rail_lib_multiprotocol", "bluetooth_controller_debug"]
+    priority: 20

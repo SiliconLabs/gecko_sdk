@@ -1,0 +1,24 @@
+id: zw_production
+label: Z-Wave Production
+category: Z-Wave
+description: defines and paths used for official z-wave package
+package: Z-Wave
+quality: production
+provides:
+- name: zw_production
+- name: zw_quality_mode
+library:
+  - path: protocol/z-wave/ZWave/lib/libZWaveSlave_ZGM13.a
+    condition: [device_sdid_89, device_is_module]
+  - path: protocol/z-wave/ZWave/lib/libZWaveSlave_EFR32ZG13P32.a
+    condition: [efr32zg13p531f512gm32]
+  - path: protocol/z-wave/ZWave/lib/libZWaveSlave_EFR32ZG13P48.a
+    condition: [efr32zg13p531f512gm48]
+  - path: protocol/z-wave/ZWave/lib/libZWaveSlave_EFR32ZG13L.a
+    condition: [device_family_efr32zg13l]
+  - path: protocol/z-wave/ZWave/lib/libZWaveSlave_EFR32ZG13S.a
+    condition: [device_family_efr32zg13s]
+  - path: protocol/z-wave/ZWave/lib/libZWaveSlave_ZGM23.a
+    condition: [device_family_zgm23]
+  - path: protocol/z-wave/ZWave/lib/libZWaveSlave_EFR32ZG23.a
+    condition: [device_family_efr32zg23]

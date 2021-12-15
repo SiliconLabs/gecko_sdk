@@ -1,0 +1,42 @@
+id: "sl_wisun_app_core"
+label: "Application Core"
+package: "wisun"
+description: "Provides Wi-SUN application core functionalities, such as helper functions for connection to the network, and implements core events."
+category: "Wi-SUN|Wi-SUN Services"
+quality: "production"
+root_path: "app/wisun/component/app_core"
+provides:
+  - name: sl_wisun_app_core
+source:
+  - path: "sl_wisun_app_core.c"
+  - path: "sl_wisun_app_core_util.c"
+
+include:
+  - path: "."
+    file_list:
+    - path: "sl_wisun_app_core.h"
+    - path: "sl_wisun_app_core_util.h"
+
+requires:
+  - name: "sl_wisun_event_mgr"      # for handling core events
+  - name: "sleeptimer"
+  - name: "wisun_test_certificates"
+
+config_file:
+  - path: "config/sl_wisun_app_core_util_config.h"
+
+#-------------- Template Contribution ----------------
+template_contribution:
+#---------------- Component Catalog ------------------
+  - name: "event_handler"
+    value:
+      event: "internal_app_init"
+      include: "sl_wisun_app_core.h"
+      handler: "app_wisun_core_init"
+
+  - name: component_catalog
+    value: wisun_app_core
+
+documentation:
+  docset: wisun
+  document: wisun-stack-api/sl-wisun-app-core-api

@@ -1,0 +1,16 @@
+id: bootloader_xmodem_parser
+label: "XMODEM Parser"
+package: bootloader
+description: XMODEM parser implementation.
+category: Platform|Bootloader|Communication
+quality: production
+source:
+  - path: platform/bootloader/communication/xmodem-parser/btl_xmodem.c
+include:
+  - path: platform/bootloader/communication/xmodem-parser
+    file_list:
+    - path: btl_xmodem.h
+provides:
+  - name: bootloader_xmodem_parser
+requires:
+  - name: bootloader_crc

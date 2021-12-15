@@ -1,0 +1,152 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<project contentRoot=".">
+  <!--                         -->
+  <!-- Static File Definitions -->
+  <!--                         -->
+
+  <!--                      -->
+  <!-- Static Include Paths -->
+  <!--                      -->
+  <includePath languageCompatibility="c asm" uri="$(pathVar_CMSIS)/Include"/>
+  <includePath languageCompatibility="c asm" uri="$(pathVar_HARDWARE_MODULE)/config"/>
+  <includePath languageCompatibility="c asm" uri="$(pathVar_HALCONFIG)/inc/hal-config"/>
+
+  <!--                          -->
+  <!-- Static Macro Definitions -->
+  <!--                          -->
+  <macroDefinition languageCompatibility="c asm" toolchainCompatibility="com.silabs.ide.si32.gcc"  name="__STARTUP_CLEAR_BSS" value="1"/>
+  <macroDefinition languageCompatibility="c asm" toolchainCompatibility="com.silabs.ide.si32.gcc" name="__START" value="main"/>
+  <macroDefinition languageCompatibility="c asm" name="BOOTLOADER_SECOND_STAGE" value="1"/>
+  <!--<macroDefinition languageCompatibility="c asm" name="BTL_CONFIG_FILE" value="&quot;bootloader-config.h&quot;"/>-->
+
+  <!--                                -->
+  <!-- Static Tool Option Definitions -->
+  <!--                                -->
+  <!--turning log initialization decisions to true-->
+  <toolOption toolId="iar.arm.toolchain.linker.v5.4.0" optionId="iar.arm.toolchain.linker.option.logFileInitializationDecisions.v5.4.0" value="true"/>
+  <!--Enable preserve comments-->
+  <toolOption toolId="iar.arm.toolchain.compiler.v5.4.1" optionId="iar.arm.toolchain.compiler.option.preserveComments.v6.2.0" value="true"/>
+  <!---->
+  <toolOption toolId="iar.arm.toolchain.assembler.v5.4.0" optionId="iar.arm.toolchain.assembler.option.debugInfo.v5.4.0" value="true"/>
+  <!--Number of lines/page-->
+  <toolOption toolId="iar.arm.toolchain.assembler.v5.4.0" optionId="iar.arm.toolchain.assembler.option.linesPerPage.v5.4.0" value="80"/>
+  <!--Macro definitions-->
+  <toolOption toolId="iar.arm.toolchain.assembler.v5.4.0" optionId="iar.arm.toolchain.assembler.option.includeMacroDefinitions.v6.2.0" value="false"/>
+  <!---->
+  <toolOption toolId="iar.arm.toolchain.project.exe.configuration.debug.toolchain.v5.4.0" optionId="iar.arm.toolchain.option.bufferedOutput.v6.1.0" value="false"/>
+  <!--Log veener statistics-->
+  <toolOption toolId="iar.arm.toolchain.linker.v5.4.0" optionId="iar.arm.toolchain.linker.option.logFileVeenerStatistics.v5.4.0" value="true"/>
+  <!---->
+  <toolOption toolId="iar.arm.toolchain.compiler.v5.4.1" optionId="iar.arm.toolchain.compiler.option.debugInfo.v5.4.0" value="true"/>
+  <!--Generate log file-->
+  <toolOption toolId="iar.arm.toolchain.linker.v5.4.0" optionId="iar.arm.toolchain.linker.option.logFile.v6.2.2" value="true"/>
+  <!--Use CMSIS-->
+  <toolOption toolId="iar.arm.toolchain.project.exe.configuration.debug.toolchain.v5.4.0" optionId="iar.arm.toolchain.option.useCMSIS.v6.2.2" value="false"/>
+  <!--Generate #line directives-->
+  <toolOption toolId="iar.arm.toolchain.compiler.v5.4.1" optionId="iar.arm.toolchain.compiler.option.generateLineDirectives.v6.2.0" value="false"/>
+  <!---->
+  <toolOption toolId="iar.arm.toolchain.linker.v5.4.0" optionId="iar.arm.toolchain.linker.option.logFileSectionSelections.v5.4.0" value="true"/>
+  <!--Generate intel extended output format: .hex-->
+  <toolOption toolId="iar.arm.toolchain.linker.v5.4.0" optionId="iar.arm.toolchain.linker.option.outFormat.v5.5.2" value="iar.arm.toolchain.linker.option.outFormat.intelExtended.v5.5.2"/>
+  <!--Generate Motorola S-record output format: .s37-->
+  <toolOption toolId="iar.arm.toolchain.linker.v5.4.0" optionId="iar.arm.toolchain.linker.option.outFormat.type.motorola.v5.5.2" value="true"/>
+  <toolOption toolId="iar.arm.toolchain.linker.v5.4.0" optionId="iar.arm.toolchain.linker.option.altOutputFile.motorola.v5.5.2" value="${ProjName}.s37"/>
+  <!--Language: C in this case-->
+  <toolOption toolId="iar.arm.toolchain.compiler.v5.4.1" optionId="iar.arm.toolchain.compiler.option.language.v6.1.0" value="iar.arm.toolchain.compiler.option.language.c.v6.1.0"/>
+  <!--Optimization level->high, size in this case-->
+  <toolOption toolId="iar.arm.toolchain.compiler.v5.4.1" optionId="iar.arm.toolchain.compiler.option.optLevel.v5.4.0" value="iar.arm.toolchain.compiler.option.optLevel.highSize.v5.4.0"/>
+  <!---->
+  <toolOption toolId="iar.arm.toolchain.assembler.v5.4.0" optionId="iar.arm.toolchain.assembler.option.asmListContents.v6.2.0" value="true"/>
+  <!--Treat these as errors-->
+  <toolOption toolId="iar.arm.toolchain.compiler.v5.4.1" optionId="iar.arm.toolchain.compiler.option.treatAsErrors.v5.4.0" value=""/>
+  <!---->
+  <toolOption toolId="iar.arm.toolchain.project.exe.configuration.debug.toolchain.v5.4.0" optionId="iar.arm.toolchain.option.mfc.v5.5.2" value="false"/>
+  <!--Generate linker map file-->
+  <toolOption toolId="iar.arm.toolchain.linker.v5.4.0" optionId="iar.arm.toolchain.linker.option.mapFile.v6.2.2" value="true"/>
+  <!--Multiline code-->
+  <toolOption toolId="iar.arm.toolchain.assembler.v5.4.0" optionId="iar.arm.toolchain.assembler.option.includeMultilineCode.v6.2.0" value="false"/>
+  <!--Treat these as remarks-->
+  <toolOption toolId="iar.arm.toolchain.compiler.v5.4.1" optionId="iar.arm.toolchain.compiler.option.treatAsRemarks.v5.4.0" value=""/>
+  <!---->
+  <toolOption toolId="iar.arm.toolchain.linker.v5.4.0" optionId="iar.arm.toolchain.linker.option.generateAdditonalOutput.v5.5.2" value="true"/>
+  <!--Macro expansions-->
+  <toolOption toolId="iar.arm.toolchain.assembler.v5.4.0" optionId="iar.arm.toolchain.assembler.option.includeMacroExpansions.v6.2.0" value="true"/>
+  <!---->
+  <toolOption toolId="iar.arm.toolchain.assembler.v5.4.0" optionId="iar.arm.toolchain.assembler.option.generateListFile.v5.4.0" value="true"/>
+  <!--Disable type-based alias analysis-->
+  <toolOption toolId="iar.arm.toolchain.compiler.v5.4.1" optionId="iar.arm.toolchain.compiler.option.optAliasAnalysis.v5.4.0" value="false"/>
+  <!---->
+  <toolOption toolId="iar.arm.toolchain.linker.v5.4.0" optionId="iar.arm.toolchain.linker.option.entryOverride.v6.2.3" value="true"/>
+  <!--Assembled lines only-->
+  <toolOption toolId="iar.arm.toolchain.assembler.v5.4.0" optionId="iar.arm.toolchain.assembler.option.includeAsmLinesOnly.v6.2.0" value="false"/>
+  <!--Tab spacing-->
+  <toolOption toolId="iar.arm.toolchain.assembler.v5.4.0" optionId="iar.arm.toolchain.assembler.option.tabSpacing.v5.4.0" value="2"/>
+  <!---->
+  <toolOption toolId="iar.arm.toolchain.linker.v5.4.0" optionId="iar.arm.toolchain.linker.option.logFileRedirectedSymbols.v5.5.0" value="false"/>
+  <!--Library config which is either Normal, Full, Custom or Null-->
+  <toolOption toolId="iar.arm.toolchain.project.exe.configuration.debug.toolchain.v5.4.0" optionId="iar.arm.toolchain.option.libraryConfig.v5.4.0" value="iar.arm.toolchain.option.libraryConfig.normal.v5.4.0"/>
+  <!--Endian mode-->
+  <toolOption toolId="iar.arm.toolchain.project.exe.configuration.debug.toolchain.v5.4.0" optionId="iar.arm.toolchain.option.endianMode.v5.4.0" value="iar.arm.toolchain.option.endianMode.little.v5.4.0"/>
+  <!--Log automatic library selection-->
+  <toolOption toolId="iar.arm.toolchain.linker.v5.4.0" optionId="iar.arm.toolchain.linker.option.logFileLibrarySelections.v5.5.0" value="false"/>
+  <!---->
+  <toolOption toolId="iar.arm.toolchain.assembler.v5.4.0" optionId="iar.arm.toolchain.assembler.option.omitHeader.v5.4.0" value="true"/>
+  <!---->
+  <toolOption toolId="iar.arm.toolchain.linker.v5.4.0" optionId="iar.arm.toolchain.linker.option.logFileUnusedFragments.v5.5.0" value="false"/>
+  <!---->
+  <toolOption toolId="iar.arm.toolchain.compiler.v5.4.1" optionId="iar.arm.toolchain.compiler.option.additionalUserOptions" value="--no_path_in_file_macros"/>
+  <!---->
+  <toolOption toolId="iar.arm.toolchain.linker.v5.4.0" optionId="iar.arm.toolchain.linker.option.logFileModuleSelections.v5.4.0" value="true"/>
+  <!--Treat these as errors-->
+  <toolOption toolId="iar.arm.toolchain.linker.v5.4.0" optionId="iar.arm.toolchain.linker.option.treatAsErrors.v5.4.0" value=""/>
+  <!--C++ without RTTI-->
+  <toolOption toolId="iar.arm.toolchain.compiler.v5.4.1" optionId="iar.arm.toolchain.compiler.option.noRTTI.v6.1.0" value="true"/>
+  <!--Treat these as warnings-->
+  <toolOption toolId="iar.arm.toolchain.compiler.v5.4.1" optionId="iar.arm.toolchain.compiler.option.treatAsWarnings.v5.4.0" value=""/>
+  <!--Enable MISRA-C-->
+  <toolOption toolId="iar.arm.toolchain.project.exe.configuration.debug.toolchain.v5.4.0" optionId="iar.arm.toolchain.option.misra-c.enable" value="false"/>
+  <!--Preprocessor output to file-->
+  <toolOption toolId="iar.arm.toolchain.compiler.v5.4.1" optionId="iar.arm.toolchain.compiler.option.preprocessorOut.v6.2.0" value="true"/>
+  <!--Disable code motion-->
+  <toolOption toolId="iar.arm.toolchain.compiler.v5.4.1" optionId="iar.arm.toolchain.compiler.option.optCodeMotion.v5.4.0" value="false"/>
+  <!-- Disable common subexpression elimination -->
+  <toolOption toolId="iar.arm.toolchain.compiler.v5.4.1" optionId="iar.arm.toolchain.compiler.option.optCSE.v5.4.0" value="false"/>
+  <!-- Disable loop unrolling -->
+  <toolOption toolId="iar.arm.toolchain.compiler.v5.4.1" optionId="iar.arm.toolchain.compiler.option.optUnroll.v5.4.0" value="false"/>
+  <!-- Disable inlining -->
+  <toolOption toolId="iar.arm.toolchain.compiler.v5.4.1" optionId="iar.arm.toolchain.compiler.option.optInline.v5.4.0" value="false"/>
+  <!-- Disable static clustering -->
+  <toolOption toolId="iar.arm.toolchain.compiler.v5.4.1" optionId="iar.arm.toolchain.compiler.option.optStaticClustering.v5.4.0" value="false"/>
+  <!-- Disable instruction scheduling -->
+  <toolOption toolId="iar.arm.toolchain.compiler.v5.4.1" optionId="iar.arm.toolchain.compiler.option.optScheduling.v5.4.0" value="false"/>
+  <!---->
+  <toolOption toolId="iar.arm.toolchain.project.exe.configuration.debug.toolchain.v5.4.0" optionId="iar.arm.toolchain.option.semihosted.v5.4.0" value="false"/>
+  <!--keep symbols-->
+  <toolOption toolId="iar.arm.toolchain.linker.v5.4.0" optionId="iar.arm.toolchain.linker.option.keep.v5.4.0" value=""/>
+  <!---->
+  <toolOption toolId="iar.arm.toolchain.linker.v5.4.0" optionId="iar.arm.toolchain.linker.option.enableRemarks.v5.4.0" value="true"/>
+  <!--Treat these as warnings-->
+  <toolOption toolId="iar.arm.toolchain.linker.v5.4.0" optionId="iar.arm.toolchain.linker.option.treatAsWarnings.v5.4.0" value=""/>
+  <!---->
+  <toolOption toolId="iar.arm.toolchain.compiler.v5.4.1" optionId="iar.arm.toolchain.compiler.option.noExceptions.v6.1.0" value="true"/>
+
+
+  <!-- Optimize for size (-Os) -->
+  <toolOption toolId="com.silabs.ide.si32.gcc.cdt.managedbuild.tool.gnu.c.compiler.base" optionId="gnu.c.compiler.option.optimization.level" value="gnu.c.optimization.level.size"/>
+  <!-- Set dialect to C99 (-std=c99) -->
+  <toolOption toolId="com.silabs.ide.si32.gcc.cdt.managedbuild.tool.gnu.c.compiler.base" optionId="com.silabs.ide.si32.gcc.cdt.managedbuild.tool.gnu.c.compiler.misc.dialect" value="com.silabs.ide.si32.gcc.cdt.managedbuild.tool.gnu.c.compiler.misc.dialect.c99"/>
+  <!-- Enable extra warnings (-Wextra) -->
+  <toolOption toolId="com.silabs.ide.si32.gcc.cdt.managedbuild.tool.gnu.c.compiler.base" optionId="gnu.c.compiler.option.warnings.extrawarn" value="true"/>
+  <!-- Treat warnings as errors (-Werror) -->
+  <toolOption toolId="com.silabs.ide.si32.gcc.cdt.managedbuild.tool.gnu.c.compiler.base" optionId="gnu.c.compiler.option.warnings.toerrors" value="true"/>
+
+  <!-- Use custom linker script -->
+  <toolOption toolchainCompatibility="com.silabs.ide.si32.gcc" toolId="com.silabs.ide.si32.gcc.cdt.managedbuild.toolchain.exe" optionId="com.silabs.ide.si32.gcc.cdt.managedbuild.tool.gnu.c.linker.usescript" value="true"/>
+  <toolOption toolId="com.silabs.ide.si32.gcc.cdt.managedbuild.tool.gnu.c.linker.base" optionId="com.silabs.ide.si32.gcc.cdt.managedbuild.tool.gnu.c.linker.nostdlibs" value="false"/>
+  <toolOption toolId="com.silabs.ide.si32.gcc.cdt.managedbuild.tool.gnu.c.linker.base" optionId="com.silabs.ide.si32.gcc.cdt.managedbuild.tool.gnu.c.linker.circulardependency" value="true"/>
+  <!-- Disable float printf -->
+  <toolOption toolId="com.silabs.ide.si32.gcc.cdt.managedbuild.tool.gnu.c.linker.base" optionId="com.silabs.ide.si32.gcc.cdt.managedbuild.tool.gnu.c.linker.printffloat" value="false"/>
+
+  <libraryFile name="nosys" toolchainCompatibility="com.silabs.ide.si32.gcc" />
+</project>

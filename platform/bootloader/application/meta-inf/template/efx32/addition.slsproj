@@ -1,0 +1,33 @@
+<?xml version="1.0" encoding="UTF-8"?>
+  <project id="com.silabs.ember.stack.bootloader.addition" partCompatibility=".*" toolchainCompatibility="com.silabs.ide.si32.iar com.silabs.ide.si32.gcc" sdkCompatibility="" contentRoot=".">
+  <macroDefinition name="$(partName:toUpper)"/>
+
+  <!-- Dynamic Macro Definitions -->
+  <macroDefinition languageCompatibility="c asm" name="$--partNumber;U--$" value="1" partCompatibility=".*"/>
+
+  <!--                       -->
+  <!-- Dynamic Include Paths -->
+  <!--                       -->
+   <includePath languageCompatibility="c asm" uri="$--pathVar_DEVICE--$/SiliconLabs/$(partGroupName:toUpper)/Include/" partCompatibility=".*"/>
+
+  <!--                         -->
+  <!-- Dynamic File Definitions -->
+  <!--                         -->
+  <folder name="CMSIS" partCompatibility=".*">
+    <file name="system_$(partGroupName:toLower).c" uri="$--pathVar_DEVICE--$/SiliconLabs/$(partGroupName:toUpper)/Source/system_$(partGroupName:toLower).c" partCompatibility=".*"/>
+  </folder>
+
+
+  <postbuildStep>sh "${ProjDirPath}/$--deviceName--$_postbuild.sh" ${BuildArtifactFileBaseName} ${StudioSdkPath}</postbuildStep>
+
+  <!-- Dynamic Tool Options -->
+  <!-- IAR -->
+  <toolOption partCompatibility=".*" toolId="iar.arm.toolchain.linker.v5.4.0" optionId="iar.arm.toolchain.linker.option.configSymbolDefs.v6.2.0" value="$--linkerOptionsSlsproj--$"/>
+  <toolOption partCompatibility=".*" toolId="iar.arm.toolchain.linker.v5.4.0" optionId="iar.arm.toolchain.linker.option.icfFile.v5.4.0" value="$--linkerIcfFile--$"/>
+
+
+  <!-- GCC -->
+  <toolOption toolchainCompatibility=".*gcc.*" toolId="com.silabs.ide.si32.gcc.cdt.managedbuild.toolchain.exe" optionId="com.silabs.ide.si32.gcc.cdt.managedbuild.tool.gnu.c.linker.script" value="$--linkerLdFile--$"/>
+
+  <!-- Replacement Misc Options -->
+</project>

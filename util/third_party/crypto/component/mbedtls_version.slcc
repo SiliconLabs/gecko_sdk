@@ -1,0 +1,23 @@
+id: mbedtls_version
+package: platform
+label: Mbed TLS Run-time Version Information component
+description: >-
+  This component enables the Mbed TLS run-time version information API functions.
+category: Platform|Security
+quality: production
+source:
+  - path: util/third_party/crypto/mbedtls/library/version.c
+  - path: util/third_party/crypto/sl_component/sl_mbedtls_support/src/version_features.c
+include:
+  - path: util/third_party/crypto/mbedtls/include
+    file_list:
+      - path: mbedtls/version.h
+provides:
+  - name: mbedtls_version
+requires:
+  - name: mbedtls_core
+template_contribution:
+  - name: mbedtls_config
+    value: MBEDTLS_VERSION_C
+  - name: mbedtls_config
+    value: MBEDTLS_VERSION_FEATURES

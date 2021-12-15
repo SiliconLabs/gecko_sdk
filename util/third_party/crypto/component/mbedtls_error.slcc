@@ -1,0 +1,20 @@
+id: mbedtls_error
+package: platform
+label: Mbed TLS Support for strerror
+description: >
+ This component provides an implementation for mbedtls_strerror().
+category: Platform|Security
+quality: production
+source:
+  - path: util/third_party/crypto/sl_component/sl_mbedtls_support/src/error.c
+include:
+  - path: util/third_party/crypto/mbedtls/include
+    file_list:
+      - path: mbedtls/error.h
+provides:
+  - name: mbedtls_error
+requires:
+  - name: mbedtls_core
+template_contribution:
+  - name: mbedtls_config
+    value: MBEDTLS_ERROR_C

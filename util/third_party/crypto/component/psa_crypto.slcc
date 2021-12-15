@@ -1,0 +1,106 @@
+id: psa_crypto
+package: platform
+label: PSA Crypto
+description:
+  "This component provides the PSA Crypto API, a high-level interface to various \
+  cryptographic functions.\n
+
+  In order to enable the PSA Crypto core functionality, this component includes \
+  function APIs, a set of PSA drivers for various devices from Silicon Labs, \
+  and built-in support for the Mbed TLS library functions. The Mbed TLS software \
+  functions are provided as a mean to 'fallback' when there is no support for \
+  hardware acceleration on the device.\n
+
+  Certain algorithms need to be manually enabled in order to be supported: \
+  this is done by selecting the corresponding component. In order to use ECDH \
+  for key agreement, for example, the 'PSA Crypto Support for ECDH' component \
+  needs to be selected. Note that just because a separate component does not \
+  exist for a certain algorithm, it does not mean that it is not supported and \
+  accelerated -- this is a work in progress.\n
+
+  For configuration of PSA Crypto, please refer to the 'Mbed TLS' component."
+category: Platform|Security
+quality: production
+component_root_path: util/third_party/crypto/mbedtls
+source:
+  - path: library/cipher.c
+  - path: library/cipher_wrap.c
+  - path: library/psa_crypto.c
+  - path: library/psa_crypto_aead.c
+  - path: library/psa_crypto_cipher.c
+  - path: library/psa_crypto_driver_wrappers.c
+  - path: library/psa_crypto_slot_management.c
+  - path: library/psa_crypto_storage.c
+  - path: library/psa_crypto_ecp.c
+  - path: library/psa_crypto_hash.c
+  - path: library/psa_crypto_mac.c
+  - path: library/psa_crypto_rsa.c
+  - path: library/psa_crypto_se.c
+  - path: library/psa_its_file.c
+    unless: [psa_its]
+include:
+  - path: library
+    file_list:
+      - path: check_crypto_config.h
+      - path: cipher_wrap.h
+      - path: md_wrap.h
+      - path: pk_wrap.h
+      - path: psa_crypto_aead.h
+      - path: psa_crypto_cipher.h
+      - path: psa_crypto_core.h
+      - path: psa_crypto_driver_wrappers.h
+      - path: psa_crypto_ecp.h
+      - path: psa_crypto_hash.h
+      - path: psa_crypto_invasive.h
+      - path: psa_crypto_its.h
+      - path: psa_crypto_mac.h
+      - path: psa_crypto_random_impl.h
+      - path: psa_crypto_rsa.h
+      - path: psa_crypto_se.h
+      - path: psa_crypto_slot_management.h
+      - path: psa_crypto_storage.h
+requires:
+  - name: mbedtls_core
+  - name: psa_driver
+    condition: [device_series_1]
+  - name: psa_driver
+    condition: [device_series_2]
+  - name: psa_crypto_common
+  # For devices with non-errata TRNG, specifically include the PSA
+  # TRNG provider, which will act as the authoritative entropy source
+  - name: psa_crypto_trng
+    condition: [device_series_2]
+  - name: psa_crypto_trng
+    condition: [device_sdid_84]
+  - name: psa_crypto_trng
+    condition: [device_sdid_100]
+  - name: psa_crypto_trng
+    condition: [device_sdid_103]
+  - name: psa_crypto_trng
+    condition: [device_sdid_106]
+  # For all devices which don't have a fully-qualified TRNG, the PSA
+  # Core needs to rely on mbed TLS's DRBG implementation
+  - name: mbedtls_random
+    condition: [device_series_0]
+  - name: mbedtls_random
+    condition: [device_sdid_80]
+  - name: mbedtls_random
+    condition: [device_sdid_89]
+  - name: mbedtls_random
+    condition: [device_sdid_95]
+provides:
+  - name: psa_crypto
+  - name: psa_crypto_config
+  - name: mbedtls
+    condition: [psa_crypto]
+template_contribution:
+  - name: mbedtls_config
+    value: MBEDTLS_PSA_CRYPTO_C
+  - name: mbedtls_config
+    value: MBEDTLS_USE_PSA_CRYPTO
+  - name: mbedtls_config
+    value: MBEDTLS_CIPHER_C
+  - name: psa_key_slots
+    value:
+      name: psa_key_slots_minimum
+      count: 1

@@ -1,0 +1,1319 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<demos xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns:model="http://www.silabs.com/ss/Studio.ecore" xsi:noNamespaceSchemaLocation="http://www.silabs.com/ss/Demo.ecore">
+  <demo name="ZW_SerialAPI_Controller_7_17_0_EFR32ZG14_REGION_ANZ" label="Controller SerialAPI ANZ Region 7_17_0">
+    <model:property key="demos.blurb" value="Controller SerialAPI ANZ 7_17_0"/>
+    <model:property key="core.category" value="SerialAPI"/>
+    <model:property key="core.priority" value="1"/>
+    <model:property key="core.partCompatibility" value="mcu.arm.efr32.zg14.*"/>
+    <model:property key="demos.imageFile" value="asset://com.silabs.sdk.stack.super_4.0.0/protocol/z-wave/Apps/bin/ZW_SerialAPI_Controller_7_17_0_284_EFR32ZG14_REGION_ANZ.hex"/>
+    <model:description>Z-Wave Controller SerialAPI ANZ 7_17_0.
+  &lt;pre>
+ATTENTION: If reprogramming the chip with a SerialAPI build
+for another frequency than the one currently used on chip,
+remember to communicate the new frequency to SerialAPI as well
+after reprogramming, otherwise the previous used frequency will
+be used. This can for instance be done from the PC Controller
+software under Transmit Settings.&lt;/pre>
+      </model:description>
+  </demo>
+  <demo name="ZW_SerialAPI_Controller_7_17_0_EFR32ZG23_REGION_ANZ" label="Controller SerialAPI ANZ Region 7_17_0">
+    <model:property key="demos.blurb" value="Controller SerialAPI ANZ 7_17_0"/>
+    <model:property key="core.category" value="SerialAPI"/>
+    <model:property key="core.priority" value="1"/>
+    <model:property key="core.partCompatibility" value=".*efr32zg23.*"/>
+    <model:property key="demos.imageFile" value="asset://com.silabs.sdk.stack.super_4.0.0/protocol/z-wave/Apps/bin/ZW_SerialAPI_Controller_7_17_0_284_EFR32ZG23_REGION_ANZ.hex"/>
+    <model:description>Z-Wave Controller SerialAPI ANZ 7_17_0.
+  &lt;pre>
+ATTENTION: If reprogramming the chip with a SerialAPI build
+for another frequency than the one currently used on chip,
+remember to communicate the new frequency to SerialAPI as well
+after reprogramming, otherwise the previous used frequency will
+be used. This can for instance be done from the PC Controller
+software under Transmit Settings.&lt;/pre>
+      </model:description>
+  </demo>
+  <demo name="ZW_SerialAPI_Controller_7_17_0_ZGM130S_REGION_ANZ" label="Controller SerialAPI ANZ Region 7_17_0">
+    <model:property key="demos.blurb" value="Controller SerialAPI ANZ 7_17_0"/>
+    <model:property key="core.category" value="SerialAPI"/>
+    <model:property key="core.priority" value="1"/>
+    <model:property key="core.partCompatibility" value=".*zgm130s037hgn.*"/>
+    <model:property key="demos.imageFile" value="asset://com.silabs.sdk.stack.super_4.0.0/protocol/z-wave/Apps/bin/ZW_SerialAPI_Controller_7_17_0_284_ZGM130S_REGION_ANZ.hex"/>
+    <model:description>Z-Wave Controller SerialAPI ANZ 7_17_0.
+  &lt;pre>
+ATTENTION: If reprogramming the chip with a SerialAPI build
+for another frequency than the one currently used on chip,
+remember to communicate the new frequency to SerialAPI as well
+after reprogramming, otherwise the previous used frequency will
+be used. This can for instance be done from the PC Controller
+software under Transmit Settings.&lt;/pre>
+      </model:description>
+  </demo>
+  <demo name="ZW_SerialAPI_Controller_7_17_0_ZGM230S_REGION_ANZ" label="Controller SerialAPI ANZ Region 7_17_0">
+    <model:property key="demos.blurb" value="Controller SerialAPI ANZ 7_17_0"/>
+    <model:property key="core.category" value="SerialAPI"/>
+    <model:property key="core.priority" value="1"/>
+    <model:property key="core.partCompatibility" value=".*zgm230sb27hgn.*"/>
+    <model:property key="demos.imageFile" value="asset://com.silabs.sdk.stack.super_4.0.0/protocol/z-wave/Apps/bin/ZW_SerialAPI_Controller_7_17_0_284_ZGM230S_REGION_ANZ.hex"/>
+    <model:description>Z-Wave Controller SerialAPI ANZ 7_17_0.
+  &lt;pre>
+ATTENTION: If reprogramming the chip with a SerialAPI build
+for another frequency than the one currently used on chip,
+remember to communicate the new frequency to SerialAPI as well
+after reprogramming, otherwise the previous used frequency will
+be used. This can for instance be done from the PC Controller
+software under Transmit Settings.&lt;/pre>
+      </model:description>
+  </demo>
+  <demo name="ZW_SerialAPI_Controller_7_17_0_EFR32ZG14_REGION_CN" label="Controller SerialAPI CN Region 7_17_0">
+    <model:property key="demos.blurb" value="Controller SerialAPI CN 7_17_0"/>
+    <model:property key="core.category" value="SerialAPI"/>
+    <model:property key="core.priority" value="1"/>
+    <model:property key="core.partCompatibility" value="mcu.arm.efr32.zg14.*"/>
+    <model:property key="demos.imageFile" value="asset://com.silabs.sdk.stack.super_4.0.0/protocol/z-wave/Apps/bin/ZW_SerialAPI_Controller_7_17_0_284_EFR32ZG14_REGION_CN.hex"/>
+    <model:description>Z-Wave Controller SerialAPI CN 7_17_0.
+  &lt;pre>
+ATTENTION: If reprogramming the chip with a SerialAPI build
+for another frequency than the one currently used on chip,
+remember to communicate the new frequency to SerialAPI as well
+after reprogramming, otherwise the previous used frequency will
+be used. This can for instance be done from the PC Controller
+software under Transmit Settings.&lt;/pre>
+      </model:description>
+  </demo>
+  <demo name="ZW_SerialAPI_Controller_7_17_0_EFR32ZG23_REGION_CN" label="Controller SerialAPI CN Region 7_17_0">
+    <model:property key="demos.blurb" value="Controller SerialAPI CN 7_17_0"/>
+    <model:property key="core.category" value="SerialAPI"/>
+    <model:property key="core.priority" value="1"/>
+    <model:property key="core.partCompatibility" value=".*efr32zg23.*"/>
+    <model:property key="demos.imageFile" value="asset://com.silabs.sdk.stack.super_4.0.0/protocol/z-wave/Apps/bin/ZW_SerialAPI_Controller_7_17_0_284_EFR32ZG23_REGION_CN.hex"/>
+    <model:description>Z-Wave Controller SerialAPI CN 7_17_0.
+  &lt;pre>
+ATTENTION: If reprogramming the chip with a SerialAPI build
+for another frequency than the one currently used on chip,
+remember to communicate the new frequency to SerialAPI as well
+after reprogramming, otherwise the previous used frequency will
+be used. This can for instance be done from the PC Controller
+software under Transmit Settings.&lt;/pre>
+      </model:description>
+  </demo>
+  <demo name="ZW_SerialAPI_Controller_7_17_0_ZGM130S_REGION_CN" label="Controller SerialAPI CN Region 7_17_0">
+    <model:property key="demos.blurb" value="Controller SerialAPI CN 7_17_0"/>
+    <model:property key="core.category" value="SerialAPI"/>
+    <model:property key="core.priority" value="1"/>
+    <model:property key="core.partCompatibility" value=".*zgm130s037hgn.*"/>
+    <model:property key="demos.imageFile" value="asset://com.silabs.sdk.stack.super_4.0.0/protocol/z-wave/Apps/bin/ZW_SerialAPI_Controller_7_17_0_284_ZGM130S_REGION_CN.hex"/>
+    <model:description>Z-Wave Controller SerialAPI CN 7_17_0.
+  &lt;pre>
+ATTENTION: If reprogramming the chip with a SerialAPI build
+for another frequency than the one currently used on chip,
+remember to communicate the new frequency to SerialAPI as well
+after reprogramming, otherwise the previous used frequency will
+be used. This can for instance be done from the PC Controller
+software under Transmit Settings.&lt;/pre>
+      </model:description>
+  </demo>
+  <demo name="ZW_SerialAPI_Controller_7_17_0_ZGM230S_REGION_CN" label="Controller SerialAPI CN Region 7_17_0">
+    <model:property key="demos.blurb" value="Controller SerialAPI CN 7_17_0"/>
+    <model:property key="core.category" value="SerialAPI"/>
+    <model:property key="core.priority" value="1"/>
+    <model:property key="core.partCompatibility" value=".*zgm230sb27hgn.*"/>
+    <model:property key="demos.imageFile" value="asset://com.silabs.sdk.stack.super_4.0.0/protocol/z-wave/Apps/bin/ZW_SerialAPI_Controller_7_17_0_284_ZGM230S_REGION_CN.hex"/>
+    <model:description>Z-Wave Controller SerialAPI CN 7_17_0.
+  &lt;pre>
+ATTENTION: If reprogramming the chip with a SerialAPI build
+for another frequency than the one currently used on chip,
+remember to communicate the new frequency to SerialAPI as well
+after reprogramming, otherwise the previous used frequency will
+be used. This can for instance be done from the PC Controller
+software under Transmit Settings.&lt;/pre>
+      </model:description>
+  </demo>
+  <demo name="ZW_SerialAPI_Controller_7_17_0_EFR32ZG14_REGION_EU" label="Controller SerialAPI EU Region 7_17_0">
+    <model:property key="demos.blurb" value="Controller SerialAPI EU 7_17_0"/>
+    <model:property key="core.category" value="SerialAPI"/>
+    <model:property key="core.priority" value="1"/>
+    <model:property key="core.partCompatibility" value="mcu.arm.efr32.zg14.*"/>
+    <model:property key="demos.imageFile" value="asset://com.silabs.sdk.stack.super_4.0.0/protocol/z-wave/Apps/bin/ZW_SerialAPI_Controller_7_17_0_284_EFR32ZG14_REGION_EU.hex"/>
+    <model:description>Z-Wave Controller SerialAPI EU 7_17_0.
+  &lt;pre>
+ATTENTION: If reprogramming the chip with a SerialAPI build
+for another frequency than the one currently used on chip,
+remember to communicate the new frequency to SerialAPI as well
+after reprogramming, otherwise the previous used frequency will
+be used. This can for instance be done from the PC Controller
+software under Transmit Settings.&lt;/pre>
+      </model:description>
+  </demo>
+  <demo name="ZW_SerialAPI_Controller_7_17_0_EFR32ZG23_REGION_EU" label="Controller SerialAPI EU Region 7_17_0">
+    <model:property key="demos.blurb" value="Controller SerialAPI EU 7_17_0"/>
+    <model:property key="core.category" value="SerialAPI"/>
+    <model:property key="core.priority" value="1"/>
+    <model:property key="core.partCompatibility" value=".*efr32zg23.*"/>
+    <model:property key="demos.imageFile" value="asset://com.silabs.sdk.stack.super_4.0.0/protocol/z-wave/Apps/bin/ZW_SerialAPI_Controller_7_17_0_284_EFR32ZG23_REGION_EU.hex"/>
+    <model:description>Z-Wave Controller SerialAPI EU 7_17_0.
+  &lt;pre>
+ATTENTION: If reprogramming the chip with a SerialAPI build
+for another frequency than the one currently used on chip,
+remember to communicate the new frequency to SerialAPI as well
+after reprogramming, otherwise the previous used frequency will
+be used. This can for instance be done from the PC Controller
+software under Transmit Settings.&lt;/pre>
+      </model:description>
+  </demo>
+  <demo name="ZW_SerialAPI_Controller_7_17_0_ZGM130S_REGION_EU" label="Controller SerialAPI EU Region 7_17_0">
+    <model:property key="demos.blurb" value="Controller SerialAPI EU 7_17_0"/>
+    <model:property key="core.category" value="SerialAPI"/>
+    <model:property key="core.priority" value="1"/>
+    <model:property key="core.partCompatibility" value=".*zgm130s037hgn.*"/>
+    <model:property key="demos.imageFile" value="asset://com.silabs.sdk.stack.super_4.0.0/protocol/z-wave/Apps/bin/ZW_SerialAPI_Controller_7_17_0_284_ZGM130S_REGION_EU.hex"/>
+    <model:description>Z-Wave Controller SerialAPI EU 7_17_0.
+  &lt;pre>
+ATTENTION: If reprogramming the chip with a SerialAPI build
+for another frequency than the one currently used on chip,
+remember to communicate the new frequency to SerialAPI as well
+after reprogramming, otherwise the previous used frequency will
+be used. This can for instance be done from the PC Controller
+software under Transmit Settings.&lt;/pre>
+      </model:description>
+  </demo>
+  <demo name="ZW_SerialAPI_Controller_7_17_0_ZGM230S_REGION_EU" label="Controller SerialAPI EU Region 7_17_0">
+    <model:property key="demos.blurb" value="Controller SerialAPI EU 7_17_0"/>
+    <model:property key="core.category" value="SerialAPI"/>
+    <model:property key="core.priority" value="1"/>
+    <model:property key="core.partCompatibility" value=".*zgm230sb27hgn.*"/>
+    <model:property key="demos.imageFile" value="asset://com.silabs.sdk.stack.super_4.0.0/protocol/z-wave/Apps/bin/ZW_SerialAPI_Controller_7_17_0_284_ZGM230S_REGION_EU.hex"/>
+    <model:description>Z-Wave Controller SerialAPI EU 7_17_0.
+  &lt;pre>
+ATTENTION: If reprogramming the chip with a SerialAPI build
+for another frequency than the one currently used on chip,
+remember to communicate the new frequency to SerialAPI as well
+after reprogramming, otherwise the previous used frequency will
+be used. This can for instance be done from the PC Controller
+software under Transmit Settings.&lt;/pre>
+      </model:description>
+  </demo>
+  <demo name="ZW_SerialAPI_Controller_7_17_0_EFR32ZG14_REGION_HK" label="Controller SerialAPI HK Region 7_17_0">
+    <model:property key="demos.blurb" value="Controller SerialAPI HK 7_17_0"/>
+    <model:property key="core.category" value="SerialAPI"/>
+    <model:property key="core.priority" value="1"/>
+    <model:property key="core.partCompatibility" value="mcu.arm.efr32.zg14.*"/>
+    <model:property key="demos.imageFile" value="asset://com.silabs.sdk.stack.super_4.0.0/protocol/z-wave/Apps/bin/ZW_SerialAPI_Controller_7_17_0_284_EFR32ZG14_REGION_HK.hex"/>
+    <model:description>Z-Wave Controller SerialAPI HK 7_17_0.
+  &lt;pre>
+ATTENTION: If reprogramming the chip with a SerialAPI build
+for another frequency than the one currently used on chip,
+remember to communicate the new frequency to SerialAPI as well
+after reprogramming, otherwise the previous used frequency will
+be used. This can for instance be done from the PC Controller
+software under Transmit Settings.&lt;/pre>
+      </model:description>
+  </demo>
+  <demo name="ZW_SerialAPI_Controller_7_17_0_EFR32ZG23_REGION_HK" label="Controller SerialAPI HK Region 7_17_0">
+    <model:property key="demos.blurb" value="Controller SerialAPI HK 7_17_0"/>
+    <model:property key="core.category" value="SerialAPI"/>
+    <model:property key="core.priority" value="1"/>
+    <model:property key="core.partCompatibility" value=".*efr32zg23.*"/>
+    <model:property key="demos.imageFile" value="asset://com.silabs.sdk.stack.super_4.0.0/protocol/z-wave/Apps/bin/ZW_SerialAPI_Controller_7_17_0_284_EFR32ZG23_REGION_HK.hex"/>
+    <model:description>Z-Wave Controller SerialAPI HK 7_17_0.
+  &lt;pre>
+ATTENTION: If reprogramming the chip with a SerialAPI build
+for another frequency than the one currently used on chip,
+remember to communicate the new frequency to SerialAPI as well
+after reprogramming, otherwise the previous used frequency will
+be used. This can for instance be done from the PC Controller
+software under Transmit Settings.&lt;/pre>
+      </model:description>
+  </demo>
+  <demo name="ZW_SerialAPI_Controller_7_17_0_ZGM130S_REGION_HK" label="Controller SerialAPI HK Region 7_17_0">
+    <model:property key="demos.blurb" value="Controller SerialAPI HK 7_17_0"/>
+    <model:property key="core.category" value="SerialAPI"/>
+    <model:property key="core.priority" value="1"/>
+    <model:property key="core.partCompatibility" value=".*zgm130s037hgn.*"/>
+    <model:property key="demos.imageFile" value="asset://com.silabs.sdk.stack.super_4.0.0/protocol/z-wave/Apps/bin/ZW_SerialAPI_Controller_7_17_0_284_ZGM130S_REGION_HK.hex"/>
+    <model:description>Z-Wave Controller SerialAPI HK 7_17_0.
+  &lt;pre>
+ATTENTION: If reprogramming the chip with a SerialAPI build
+for another frequency than the one currently used on chip,
+remember to communicate the new frequency to SerialAPI as well
+after reprogramming, otherwise the previous used frequency will
+be used. This can for instance be done from the PC Controller
+software under Transmit Settings.&lt;/pre>
+      </model:description>
+  </demo>
+  <demo name="ZW_SerialAPI_Controller_7_17_0_ZGM230S_REGION_HK" label="Controller SerialAPI HK Region 7_17_0">
+    <model:property key="demos.blurb" value="Controller SerialAPI HK 7_17_0"/>
+    <model:property key="core.category" value="SerialAPI"/>
+    <model:property key="core.priority" value="1"/>
+    <model:property key="core.partCompatibility" value=".*zgm230sb27hgn.*"/>
+    <model:property key="demos.imageFile" value="asset://com.silabs.sdk.stack.super_4.0.0/protocol/z-wave/Apps/bin/ZW_SerialAPI_Controller_7_17_0_284_ZGM230S_REGION_HK.hex"/>
+    <model:description>Z-Wave Controller SerialAPI HK 7_17_0.
+  &lt;pre>
+ATTENTION: If reprogramming the chip with a SerialAPI build
+for another frequency than the one currently used on chip,
+remember to communicate the new frequency to SerialAPI as well
+after reprogramming, otherwise the previous used frequency will
+be used. This can for instance be done from the PC Controller
+software under Transmit Settings.&lt;/pre>
+      </model:description>
+  </demo>
+  <demo name="ZW_SerialAPI_Controller_7_17_0_EFR32ZG14_REGION_IL" label="Controller SerialAPI IL Region 7_17_0">
+    <model:property key="demos.blurb" value="Controller SerialAPI IL 7_17_0"/>
+    <model:property key="core.category" value="SerialAPI"/>
+    <model:property key="core.priority" value="1"/>
+    <model:property key="core.partCompatibility" value="mcu.arm.efr32.zg14.*"/>
+    <model:property key="demos.imageFile" value="asset://com.silabs.sdk.stack.super_4.0.0/protocol/z-wave/Apps/bin/ZW_SerialAPI_Controller_7_17_0_284_EFR32ZG14_REGION_IL.hex"/>
+    <model:description>Z-Wave Controller SerialAPI IL 7_17_0.
+  &lt;pre>
+ATTENTION: If reprogramming the chip with a SerialAPI build
+for another frequency than the one currently used on chip,
+remember to communicate the new frequency to SerialAPI as well
+after reprogramming, otherwise the previous used frequency will
+be used. This can for instance be done from the PC Controller
+software under Transmit Settings.&lt;/pre>
+      </model:description>
+  </demo>
+  <demo name="ZW_SerialAPI_Controller_7_17_0_EFR32ZG23_REGION_IL" label="Controller SerialAPI IL Region 7_17_0">
+    <model:property key="demos.blurb" value="Controller SerialAPI IL 7_17_0"/>
+    <model:property key="core.category" value="SerialAPI"/>
+    <model:property key="core.priority" value="1"/>
+    <model:property key="core.partCompatibility" value=".*efr32zg23.*"/>
+    <model:property key="demos.imageFile" value="asset://com.silabs.sdk.stack.super_4.0.0/protocol/z-wave/Apps/bin/ZW_SerialAPI_Controller_7_17_0_284_EFR32ZG23_REGION_IL.hex"/>
+    <model:description>Z-Wave Controller SerialAPI IL 7_17_0.
+  &lt;pre>
+ATTENTION: If reprogramming the chip with a SerialAPI build
+for another frequency than the one currently used on chip,
+remember to communicate the new frequency to SerialAPI as well
+after reprogramming, otherwise the previous used frequency will
+be used. This can for instance be done from the PC Controller
+software under Transmit Settings.&lt;/pre>
+      </model:description>
+  </demo>
+  <demo name="ZW_SerialAPI_Controller_7_17_0_ZGM130S_REGION_IL" label="Controller SerialAPI IL Region 7_17_0">
+    <model:property key="demos.blurb" value="Controller SerialAPI IL 7_17_0"/>
+    <model:property key="core.category" value="SerialAPI"/>
+    <model:property key="core.priority" value="1"/>
+    <model:property key="core.partCompatibility" value=".*zgm130s037hgn.*"/>
+    <model:property key="demos.imageFile" value="asset://com.silabs.sdk.stack.super_4.0.0/protocol/z-wave/Apps/bin/ZW_SerialAPI_Controller_7_17_0_284_ZGM130S_REGION_IL.hex"/>
+    <model:description>Z-Wave Controller SerialAPI IL 7_17_0.
+  &lt;pre>
+ATTENTION: If reprogramming the chip with a SerialAPI build
+for another frequency than the one currently used on chip,
+remember to communicate the new frequency to SerialAPI as well
+after reprogramming, otherwise the previous used frequency will
+be used. This can for instance be done from the PC Controller
+software under Transmit Settings.&lt;/pre>
+      </model:description>
+  </demo>
+  <demo name="ZW_SerialAPI_Controller_7_17_0_ZGM230S_REGION_IL" label="Controller SerialAPI IL Region 7_17_0">
+    <model:property key="demos.blurb" value="Controller SerialAPI IL 7_17_0"/>
+    <model:property key="core.category" value="SerialAPI"/>
+    <model:property key="core.priority" value="1"/>
+    <model:property key="core.partCompatibility" value=".*zgm230sb27hgn.*"/>
+    <model:property key="demos.imageFile" value="asset://com.silabs.sdk.stack.super_4.0.0/protocol/z-wave/Apps/bin/ZW_SerialAPI_Controller_7_17_0_284_ZGM230S_REGION_IL.hex"/>
+    <model:description>Z-Wave Controller SerialAPI IL 7_17_0.
+  &lt;pre>
+ATTENTION: If reprogramming the chip with a SerialAPI build
+for another frequency than the one currently used on chip,
+remember to communicate the new frequency to SerialAPI as well
+after reprogramming, otherwise the previous used frequency will
+be used. This can for instance be done from the PC Controller
+software under Transmit Settings.&lt;/pre>
+      </model:description>
+  </demo>
+  <demo name="ZW_SerialAPI_Controller_7_17_0_EFR32ZG14_REGION_IN" label="Controller SerialAPI IN Region 7_17_0">
+    <model:property key="demos.blurb" value="Controller SerialAPI IN 7_17_0"/>
+    <model:property key="core.category" value="SerialAPI"/>
+    <model:property key="core.priority" value="1"/>
+    <model:property key="core.partCompatibility" value="mcu.arm.efr32.zg14.*"/>
+    <model:property key="demos.imageFile" value="asset://com.silabs.sdk.stack.super_4.0.0/protocol/z-wave/Apps/bin/ZW_SerialAPI_Controller_7_17_0_284_EFR32ZG14_REGION_IN.hex"/>
+    <model:description>Z-Wave Controller SerialAPI IN 7_17_0.
+  &lt;pre>
+ATTENTION: If reprogramming the chip with a SerialAPI build
+for another frequency than the one currently used on chip,
+remember to communicate the new frequency to SerialAPI as well
+after reprogramming, otherwise the previous used frequency will
+be used. This can for instance be done from the PC Controller
+software under Transmit Settings.&lt;/pre>
+      </model:description>
+  </demo>
+  <demo name="ZW_SerialAPI_Controller_7_17_0_EFR32ZG23_REGION_IN" label="Controller SerialAPI IN Region 7_17_0">
+    <model:property key="demos.blurb" value="Controller SerialAPI IN 7_17_0"/>
+    <model:property key="core.category" value="SerialAPI"/>
+    <model:property key="core.priority" value="1"/>
+    <model:property key="core.partCompatibility" value=".*efr32zg23.*"/>
+    <model:property key="demos.imageFile" value="asset://com.silabs.sdk.stack.super_4.0.0/protocol/z-wave/Apps/bin/ZW_SerialAPI_Controller_7_17_0_284_EFR32ZG23_REGION_IN.hex"/>
+    <model:description>Z-Wave Controller SerialAPI IN 7_17_0.
+  &lt;pre>
+ATTENTION: If reprogramming the chip with a SerialAPI build
+for another frequency than the one currently used on chip,
+remember to communicate the new frequency to SerialAPI as well
+after reprogramming, otherwise the previous used frequency will
+be used. This can for instance be done from the PC Controller
+software under Transmit Settings.&lt;/pre>
+      </model:description>
+  </demo>
+  <demo name="ZW_SerialAPI_Controller_7_17_0_ZGM130S_REGION_IN" label="Controller SerialAPI IN Region 7_17_0">
+    <model:property key="demos.blurb" value="Controller SerialAPI IN 7_17_0"/>
+    <model:property key="core.category" value="SerialAPI"/>
+    <model:property key="core.priority" value="1"/>
+    <model:property key="core.partCompatibility" value=".*zgm130s037hgn.*"/>
+    <model:property key="demos.imageFile" value="asset://com.silabs.sdk.stack.super_4.0.0/protocol/z-wave/Apps/bin/ZW_SerialAPI_Controller_7_17_0_284_ZGM130S_REGION_IN.hex"/>
+    <model:description>Z-Wave Controller SerialAPI IN 7_17_0.
+  &lt;pre>
+ATTENTION: If reprogramming the chip with a SerialAPI build
+for another frequency than the one currently used on chip,
+remember to communicate the new frequency to SerialAPI as well
+after reprogramming, otherwise the previous used frequency will
+be used. This can for instance be done from the PC Controller
+software under Transmit Settings.&lt;/pre>
+      </model:description>
+  </demo>
+  <demo name="ZW_SerialAPI_Controller_7_17_0_ZGM230S_REGION_IN" label="Controller SerialAPI IN Region 7_17_0">
+    <model:property key="demos.blurb" value="Controller SerialAPI IN 7_17_0"/>
+    <model:property key="core.category" value="SerialAPI"/>
+    <model:property key="core.priority" value="1"/>
+    <model:property key="core.partCompatibility" value=".*zgm230sb27hgn.*"/>
+    <model:property key="demos.imageFile" value="asset://com.silabs.sdk.stack.super_4.0.0/protocol/z-wave/Apps/bin/ZW_SerialAPI_Controller_7_17_0_284_ZGM230S_REGION_IN.hex"/>
+    <model:description>Z-Wave Controller SerialAPI IN 7_17_0.
+  &lt;pre>
+ATTENTION: If reprogramming the chip with a SerialAPI build
+for another frequency than the one currently used on chip,
+remember to communicate the new frequency to SerialAPI as well
+after reprogramming, otherwise the previous used frequency will
+be used. This can for instance be done from the PC Controller
+software under Transmit Settings.&lt;/pre>
+      </model:description>
+  </demo>
+  <demo name="ZW_SerialAPI_Controller_7_17_0_EFR32ZG14_REGION_JP" label="Controller SerialAPI JP Region 7_17_0">
+    <model:property key="demos.blurb" value="Controller SerialAPI JP 7_17_0"/>
+    <model:property key="core.category" value="SerialAPI"/>
+    <model:property key="core.priority" value="1"/>
+    <model:property key="core.partCompatibility" value="mcu.arm.efr32.zg14.*"/>
+    <model:property key="demos.imageFile" value="asset://com.silabs.sdk.stack.super_4.0.0/protocol/z-wave/Apps/bin/ZW_SerialAPI_Controller_7_17_0_284_EFR32ZG14_REGION_JP.hex"/>
+    <model:description>Z-Wave Controller SerialAPI JP 7_17_0.
+  &lt;pre>
+ATTENTION: If reprogramming the chip with a SerialAPI build
+for another frequency than the one currently used on chip,
+remember to communicate the new frequency to SerialAPI as well
+after reprogramming, otherwise the previous used frequency will
+be used. This can for instance be done from the PC Controller
+software under Transmit Settings.&lt;/pre>
+      </model:description>
+  </demo>
+  <demo name="ZW_SerialAPI_Controller_7_17_0_EFR32ZG23_REGION_JP" label="Controller SerialAPI JP Region 7_17_0">
+    <model:property key="demos.blurb" value="Controller SerialAPI JP 7_17_0"/>
+    <model:property key="core.category" value="SerialAPI"/>
+    <model:property key="core.priority" value="1"/>
+    <model:property key="core.partCompatibility" value=".*efr32zg23.*"/>
+    <model:property key="demos.imageFile" value="asset://com.silabs.sdk.stack.super_4.0.0/protocol/z-wave/Apps/bin/ZW_SerialAPI_Controller_7_17_0_284_EFR32ZG23_REGION_JP.hex"/>
+    <model:description>Z-Wave Controller SerialAPI JP 7_17_0.
+  &lt;pre>
+ATTENTION: If reprogramming the chip with a SerialAPI build
+for another frequency than the one currently used on chip,
+remember to communicate the new frequency to SerialAPI as well
+after reprogramming, otherwise the previous used frequency will
+be used. This can for instance be done from the PC Controller
+software under Transmit Settings.&lt;/pre>
+      </model:description>
+  </demo>
+  <demo name="ZW_SerialAPI_Controller_7_17_0_ZGM130S_REGION_JP" label="Controller SerialAPI JP Region 7_17_0">
+    <model:property key="demos.blurb" value="Controller SerialAPI JP 7_17_0"/>
+    <model:property key="core.category" value="SerialAPI"/>
+    <model:property key="core.priority" value="1"/>
+    <model:property key="core.partCompatibility" value=".*zgm130s037hgn.*"/>
+    <model:property key="demos.imageFile" value="asset://com.silabs.sdk.stack.super_4.0.0/protocol/z-wave/Apps/bin/ZW_SerialAPI_Controller_7_17_0_284_ZGM130S_REGION_JP.hex"/>
+    <model:description>Z-Wave Controller SerialAPI JP 7_17_0.
+  &lt;pre>
+ATTENTION: If reprogramming the chip with a SerialAPI build
+for another frequency than the one currently used on chip,
+remember to communicate the new frequency to SerialAPI as well
+after reprogramming, otherwise the previous used frequency will
+be used. This can for instance be done from the PC Controller
+software under Transmit Settings.&lt;/pre>
+      </model:description>
+  </demo>
+  <demo name="ZW_SerialAPI_Controller_7_17_0_ZGM230S_REGION_JP" label="Controller SerialAPI JP Region 7_17_0">
+    <model:property key="demos.blurb" value="Controller SerialAPI JP 7_17_0"/>
+    <model:property key="core.category" value="SerialAPI"/>
+    <model:property key="core.priority" value="1"/>
+    <model:property key="core.partCompatibility" value=".*zgm230sb27hgn.*"/>
+    <model:property key="demos.imageFile" value="asset://com.silabs.sdk.stack.super_4.0.0/protocol/z-wave/Apps/bin/ZW_SerialAPI_Controller_7_17_0_284_ZGM230S_REGION_JP.hex"/>
+    <model:description>Z-Wave Controller SerialAPI JP 7_17_0.
+  &lt;pre>
+ATTENTION: If reprogramming the chip with a SerialAPI build
+for another frequency than the one currently used on chip,
+remember to communicate the new frequency to SerialAPI as well
+after reprogramming, otherwise the previous used frequency will
+be used. This can for instance be done from the PC Controller
+software under Transmit Settings.&lt;/pre>
+      </model:description>
+  </demo>
+  <demo name="ZW_SerialAPI_Controller_7_17_0_EFR32ZG14_REGION_KR" label="Controller SerialAPI KR Region 7_17_0">
+    <model:property key="demos.blurb" value="Controller SerialAPI KR 7_17_0"/>
+    <model:property key="core.category" value="SerialAPI"/>
+    <model:property key="core.priority" value="1"/>
+    <model:property key="core.partCompatibility" value="mcu.arm.efr32.zg14.*"/>
+    <model:property key="demos.imageFile" value="asset://com.silabs.sdk.stack.super_4.0.0/protocol/z-wave/Apps/bin/ZW_SerialAPI_Controller_7_17_0_284_EFR32ZG14_REGION_KR.hex"/>
+    <model:description>Z-Wave Controller SerialAPI KR 7_17_0.
+  &lt;pre>
+ATTENTION: If reprogramming the chip with a SerialAPI build
+for another frequency than the one currently used on chip,
+remember to communicate the new frequency to SerialAPI as well
+after reprogramming, otherwise the previous used frequency will
+be used. This can for instance be done from the PC Controller
+software under Transmit Settings.&lt;/pre>
+      </model:description>
+  </demo>
+  <demo name="ZW_SerialAPI_Controller_7_17_0_EFR32ZG23_REGION_KR" label="Controller SerialAPI KR Region 7_17_0">
+    <model:property key="demos.blurb" value="Controller SerialAPI KR 7_17_0"/>
+    <model:property key="core.category" value="SerialAPI"/>
+    <model:property key="core.priority" value="1"/>
+    <model:property key="core.partCompatibility" value=".*efr32zg23.*"/>
+    <model:property key="demos.imageFile" value="asset://com.silabs.sdk.stack.super_4.0.0/protocol/z-wave/Apps/bin/ZW_SerialAPI_Controller_7_17_0_284_EFR32ZG23_REGION_KR.hex"/>
+    <model:description>Z-Wave Controller SerialAPI KR 7_17_0.
+  &lt;pre>
+ATTENTION: If reprogramming the chip with a SerialAPI build
+for another frequency than the one currently used on chip,
+remember to communicate the new frequency to SerialAPI as well
+after reprogramming, otherwise the previous used frequency will
+be used. This can for instance be done from the PC Controller
+software under Transmit Settings.&lt;/pre>
+      </model:description>
+  </demo>
+  <demo name="ZW_SerialAPI_Controller_7_17_0_ZGM130S_REGION_KR" label="Controller SerialAPI KR Region 7_17_0">
+    <model:property key="demos.blurb" value="Controller SerialAPI KR 7_17_0"/>
+    <model:property key="core.category" value="SerialAPI"/>
+    <model:property key="core.priority" value="1"/>
+    <model:property key="core.partCompatibility" value=".*zgm130s037hgn.*"/>
+    <model:property key="demos.imageFile" value="asset://com.silabs.sdk.stack.super_4.0.0/protocol/z-wave/Apps/bin/ZW_SerialAPI_Controller_7_17_0_284_ZGM130S_REGION_KR.hex"/>
+    <model:description>Z-Wave Controller SerialAPI KR 7_17_0.
+  &lt;pre>
+ATTENTION: If reprogramming the chip with a SerialAPI build
+for another frequency than the one currently used on chip,
+remember to communicate the new frequency to SerialAPI as well
+after reprogramming, otherwise the previous used frequency will
+be used. This can for instance be done from the PC Controller
+software under Transmit Settings.&lt;/pre>
+      </model:description>
+  </demo>
+  <demo name="ZW_SerialAPI_Controller_7_17_0_ZGM230S_REGION_KR" label="Controller SerialAPI KR Region 7_17_0">
+    <model:property key="demos.blurb" value="Controller SerialAPI KR 7_17_0"/>
+    <model:property key="core.category" value="SerialAPI"/>
+    <model:property key="core.priority" value="1"/>
+    <model:property key="core.partCompatibility" value=".*zgm230sb27hgn.*"/>
+    <model:property key="demos.imageFile" value="asset://com.silabs.sdk.stack.super_4.0.0/protocol/z-wave/Apps/bin/ZW_SerialAPI_Controller_7_17_0_284_ZGM230S_REGION_KR.hex"/>
+    <model:description>Z-Wave Controller SerialAPI KR 7_17_0.
+  &lt;pre>
+ATTENTION: If reprogramming the chip with a SerialAPI build
+for another frequency than the one currently used on chip,
+remember to communicate the new frequency to SerialAPI as well
+after reprogramming, otherwise the previous used frequency will
+be used. This can for instance be done from the PC Controller
+software under Transmit Settings.&lt;/pre>
+      </model:description>
+  </demo>
+  <demo name="ZW_SerialAPI_Controller_7_17_0_EFR32ZG14_REGION_RU" label="Controller SerialAPI RU Region 7_17_0">
+    <model:property key="demos.blurb" value="Controller SerialAPI RU 7_17_0"/>
+    <model:property key="core.category" value="SerialAPI"/>
+    <model:property key="core.priority" value="1"/>
+    <model:property key="core.partCompatibility" value="mcu.arm.efr32.zg14.*"/>
+    <model:property key="demos.imageFile" value="asset://com.silabs.sdk.stack.super_4.0.0/protocol/z-wave/Apps/bin/ZW_SerialAPI_Controller_7_17_0_284_EFR32ZG14_REGION_RU.hex"/>
+    <model:description>Z-Wave Controller SerialAPI RU 7_17_0.
+  &lt;pre>
+ATTENTION: If reprogramming the chip with a SerialAPI build
+for another frequency than the one currently used on chip,
+remember to communicate the new frequency to SerialAPI as well
+after reprogramming, otherwise the previous used frequency will
+be used. This can for instance be done from the PC Controller
+software under Transmit Settings.&lt;/pre>
+      </model:description>
+  </demo>
+  <demo name="ZW_SerialAPI_Controller_7_17_0_EFR32ZG23_REGION_RU" label="Controller SerialAPI RU Region 7_17_0">
+    <model:property key="demos.blurb" value="Controller SerialAPI RU 7_17_0"/>
+    <model:property key="core.category" value="SerialAPI"/>
+    <model:property key="core.priority" value="1"/>
+    <model:property key="core.partCompatibility" value=".*efr32zg23.*"/>
+    <model:property key="demos.imageFile" value="asset://com.silabs.sdk.stack.super_4.0.0/protocol/z-wave/Apps/bin/ZW_SerialAPI_Controller_7_17_0_284_EFR32ZG23_REGION_RU.hex"/>
+    <model:description>Z-Wave Controller SerialAPI RU 7_17_0.
+  &lt;pre>
+ATTENTION: If reprogramming the chip with a SerialAPI build
+for another frequency than the one currently used on chip,
+remember to communicate the new frequency to SerialAPI as well
+after reprogramming, otherwise the previous used frequency will
+be used. This can for instance be done from the PC Controller
+software under Transmit Settings.&lt;/pre>
+      </model:description>
+  </demo>
+  <demo name="ZW_SerialAPI_Controller_7_17_0_ZGM130S_REGION_RU" label="Controller SerialAPI RU Region 7_17_0">
+    <model:property key="demos.blurb" value="Controller SerialAPI RU 7_17_0"/>
+    <model:property key="core.category" value="SerialAPI"/>
+    <model:property key="core.priority" value="1"/>
+    <model:property key="core.partCompatibility" value=".*zgm130s037hgn.*"/>
+    <model:property key="demos.imageFile" value="asset://com.silabs.sdk.stack.super_4.0.0/protocol/z-wave/Apps/bin/ZW_SerialAPI_Controller_7_17_0_284_ZGM130S_REGION_RU.hex"/>
+    <model:description>Z-Wave Controller SerialAPI RU 7_17_0.
+  &lt;pre>
+ATTENTION: If reprogramming the chip with a SerialAPI build
+for another frequency than the one currently used on chip,
+remember to communicate the new frequency to SerialAPI as well
+after reprogramming, otherwise the previous used frequency will
+be used. This can for instance be done from the PC Controller
+software under Transmit Settings.&lt;/pre>
+      </model:description>
+  </demo>
+  <demo name="ZW_SerialAPI_Controller_7_17_0_ZGM230S_REGION_RU" label="Controller SerialAPI RU Region 7_17_0">
+    <model:property key="demos.blurb" value="Controller SerialAPI RU 7_17_0"/>
+    <model:property key="core.category" value="SerialAPI"/>
+    <model:property key="core.priority" value="1"/>
+    <model:property key="core.partCompatibility" value=".*zgm230sb27hgn.*"/>
+    <model:property key="demos.imageFile" value="asset://com.silabs.sdk.stack.super_4.0.0/protocol/z-wave/Apps/bin/ZW_SerialAPI_Controller_7_17_0_284_ZGM230S_REGION_RU.hex"/>
+    <model:description>Z-Wave Controller SerialAPI RU 7_17_0.
+  &lt;pre>
+ATTENTION: If reprogramming the chip with a SerialAPI build
+for another frequency than the one currently used on chip,
+remember to communicate the new frequency to SerialAPI as well
+after reprogramming, otherwise the previous used frequency will
+be used. This can for instance be done from the PC Controller
+software under Transmit Settings.&lt;/pre>
+      </model:description>
+  </demo>
+  <demo name="ZW_SerialAPI_Controller_7_17_0_EFR32ZG14_REGION_US" label="Controller SerialAPI US Region 7_17_0">
+    <model:property key="demos.blurb" value="Controller SerialAPI US 7_17_0"/>
+    <model:property key="core.category" value="SerialAPI"/>
+    <model:property key="core.priority" value="1"/>
+    <model:property key="core.partCompatibility" value="mcu.arm.efr32.zg14.*"/>
+    <model:property key="demos.imageFile" value="asset://com.silabs.sdk.stack.super_4.0.0/protocol/z-wave/Apps/bin/ZW_SerialAPI_Controller_7_17_0_284_EFR32ZG14_REGION_US.hex"/>
+    <model:description>Z-Wave Controller SerialAPI US 7_17_0.
+  &lt;pre>
+ATTENTION: If reprogramming the chip with a SerialAPI build
+for another frequency than the one currently used on chip,
+remember to communicate the new frequency to SerialAPI as well
+after reprogramming, otherwise the previous used frequency will
+be used. This can for instance be done from the PC Controller
+software under Transmit Settings.&lt;/pre>
+      </model:description>
+  </demo>
+  <demo name="ZW_SerialAPI_Controller_7_17_0_EFR32ZG23_REGION_US" label="Controller SerialAPI US Region 7_17_0">
+    <model:property key="demos.blurb" value="Controller SerialAPI US 7_17_0"/>
+    <model:property key="core.category" value="SerialAPI"/>
+    <model:property key="core.priority" value="1"/>
+    <model:property key="core.partCompatibility" value=".*efr32zg23.*"/>
+    <model:property key="demos.imageFile" value="asset://com.silabs.sdk.stack.super_4.0.0/protocol/z-wave/Apps/bin/ZW_SerialAPI_Controller_7_17_0_284_EFR32ZG23_REGION_US.hex"/>
+    <model:description>Z-Wave Controller SerialAPI US 7_17_0.
+  &lt;pre>
+ATTENTION: If reprogramming the chip with a SerialAPI build
+for another frequency than the one currently used on chip,
+remember to communicate the new frequency to SerialAPI as well
+after reprogramming, otherwise the previous used frequency will
+be used. This can for instance be done from the PC Controller
+software under Transmit Settings.&lt;/pre>
+      </model:description>
+  </demo>
+  <demo name="ZW_SerialAPI_Controller_7_17_0_ZGM130S_REGION_US" label="Controller SerialAPI US Region 7_17_0">
+    <model:property key="demos.blurb" value="Controller SerialAPI US 7_17_0"/>
+    <model:property key="core.category" value="SerialAPI"/>
+    <model:property key="core.priority" value="1"/>
+    <model:property key="core.partCompatibility" value=".*zgm130s037hgn.*"/>
+    <model:property key="demos.imageFile" value="asset://com.silabs.sdk.stack.super_4.0.0/protocol/z-wave/Apps/bin/ZW_SerialAPI_Controller_7_17_0_284_ZGM130S_REGION_US.hex"/>
+    <model:description>Z-Wave Controller SerialAPI US 7_17_0.
+  &lt;pre>
+ATTENTION: If reprogramming the chip with a SerialAPI build
+for another frequency than the one currently used on chip,
+remember to communicate the new frequency to SerialAPI as well
+after reprogramming, otherwise the previous used frequency will
+be used. This can for instance be done from the PC Controller
+software under Transmit Settings.&lt;/pre>
+      </model:description>
+  </demo>
+  <demo name="ZW_SerialAPI_Controller_7_17_0_ZGM230S_REGION_US" label="Controller SerialAPI US Region 7_17_0">
+    <model:property key="demos.blurb" value="Controller SerialAPI US 7_17_0"/>
+    <model:property key="core.category" value="SerialAPI"/>
+    <model:property key="core.priority" value="1"/>
+    <model:property key="core.partCompatibility" value=".*zgm230sb27hgn.*"/>
+    <model:property key="demos.imageFile" value="asset://com.silabs.sdk.stack.super_4.0.0/protocol/z-wave/Apps/bin/ZW_SerialAPI_Controller_7_17_0_284_ZGM230S_REGION_US.hex"/>
+    <model:description>Z-Wave Controller SerialAPI US 7_17_0.
+  &lt;pre>
+ATTENTION: If reprogramming the chip with a SerialAPI build
+for another frequency than the one currently used on chip,
+remember to communicate the new frequency to SerialAPI as well
+after reprogramming, otherwise the previous used frequency will
+be used. This can for instance be done from the PC Controller
+software under Transmit Settings.&lt;/pre>
+      </model:description>
+  </demo>
+  <demo name="ZW_SerialAPI_Controller_7_17_0_EFR32ZG14_REGION_US_LR" label="Controller SerialAPI US_LR Region 7_17_0">
+    <model:property key="demos.blurb" value="Controller SerialAPI US_LR 7_17_0"/>
+    <model:property key="core.category" value="SerialAPI"/>
+    <model:property key="core.priority" value="1"/>
+    <model:property key="core.partCompatibility" value="mcu.arm.efr32.zg14.*"/>
+    <model:property key="demos.imageFile" value="asset://com.silabs.sdk.stack.super_4.0.0/protocol/z-wave/Apps/bin/ZW_SerialAPI_Controller_7_17_0_284_EFR32ZG14_REGION_US_LR.hex"/>
+    <model:description>Z-Wave Controller SerialAPI US_LR 7_17_0.
+  &lt;pre>
+ATTENTION: If reprogramming the chip with a SerialAPI build
+for another frequency than the one currently used on chip,
+remember to communicate the new frequency to SerialAPI as well
+after reprogramming, otherwise the previous used frequency will
+be used. This can for instance be done from the PC Controller
+software under Transmit Settings.&lt;/pre>
+      </model:description>
+  </demo>
+  <demo name="ZW_SerialAPI_Controller_7_17_0_EFR32ZG23_REGION_US_LR" label="Controller SerialAPI US_LR Region 7_17_0">
+    <model:property key="demos.blurb" value="Controller SerialAPI US_LR 7_17_0"/>
+    <model:property key="core.category" value="SerialAPI"/>
+    <model:property key="core.priority" value="1"/>
+    <model:property key="core.partCompatibility" value=".*efr32zg23.*"/>
+    <model:property key="demos.imageFile" value="asset://com.silabs.sdk.stack.super_4.0.0/protocol/z-wave/Apps/bin/ZW_SerialAPI_Controller_7_17_0_284_EFR32ZG23_REGION_US_LR.hex"/>
+    <model:description>Z-Wave Controller SerialAPI US_LR 7_17_0.
+  &lt;pre>
+ATTENTION: If reprogramming the chip with a SerialAPI build
+for another frequency than the one currently used on chip,
+remember to communicate the new frequency to SerialAPI as well
+after reprogramming, otherwise the previous used frequency will
+be used. This can for instance be done from the PC Controller
+software under Transmit Settings.&lt;/pre>
+      </model:description>
+  </demo>
+  <demo name="ZW_SerialAPI_Controller_7_17_0_ZGM130S_REGION_US_LR" label="Controller SerialAPI US_LR Region 7_17_0">
+    <model:property key="demos.blurb" value="Controller SerialAPI US_LR 7_17_0"/>
+    <model:property key="core.category" value="SerialAPI"/>
+    <model:property key="core.priority" value="1"/>
+    <model:property key="core.partCompatibility" value=".*zgm130s037hgn.*"/>
+    <model:property key="demos.imageFile" value="asset://com.silabs.sdk.stack.super_4.0.0/protocol/z-wave/Apps/bin/ZW_SerialAPI_Controller_7_17_0_284_ZGM130S_REGION_US_LR.hex"/>
+    <model:description>Z-Wave Controller SerialAPI US_LR 7_17_0.
+  &lt;pre>
+ATTENTION: If reprogramming the chip with a SerialAPI build
+for another frequency than the one currently used on chip,
+remember to communicate the new frequency to SerialAPI as well
+after reprogramming, otherwise the previous used frequency will
+be used. This can for instance be done from the PC Controller
+software under Transmit Settings.&lt;/pre>
+      </model:description>
+  </demo>
+  <demo name="ZW_SerialAPI_Controller_7_17_0_ZGM230S_REGION_US_LR" label="Controller SerialAPI US_LR Region 7_17_0">
+    <model:property key="demos.blurb" value="Controller SerialAPI US_LR 7_17_0"/>
+    <model:property key="core.category" value="SerialAPI"/>
+    <model:property key="core.priority" value="1"/>
+    <model:property key="core.partCompatibility" value=".*zgm230sb27hgn.*"/>
+    <model:property key="demos.imageFile" value="asset://com.silabs.sdk.stack.super_4.0.0/protocol/z-wave/Apps/bin/ZW_SerialAPI_Controller_7_17_0_284_ZGM230S_REGION_US_LR.hex"/>
+    <model:description>Z-Wave Controller SerialAPI US_LR 7_17_0.
+  &lt;pre>
+ATTENTION: If reprogramming the chip with a SerialAPI build
+for another frequency than the one currently used on chip,
+remember to communicate the new frequency to SerialAPI as well
+after reprogramming, otherwise the previous used frequency will
+be used. This can for instance be done from the PC Controller
+software under Transmit Settings.&lt;/pre>
+      </model:description>
+  </demo>
+  <demo name="ZW_ZnifferPTI_7_17_0_REGION_ANZ" label="Z-Wave ZnifferPTI ANZ Region 7_17_0">
+    <model:property key="demos.blurb" value="Z-Wave ZnifferPTI ANZ Region 7_17_0"/>
+    <model:property key="core.category" value="ZnifferPTI"/>
+    <model:property key="core.priority" value="2"/>
+    <model:property key="core.partCompatibility" value=".*efr32zg23.*"/>
+    <model:property key="demos.imageFile" value="asset://com.silabs.sdk.stack.super_4.0.0/protocol/z-wave/Apps/bin/ZW_ZnifferPTI_7_17_0_284_EFR32ZG23_REGION_ANZ.hex"/>
+    <model:description>Z-Wave ZnifferPTI ANZ Region 7_17_0
+  &lt;pre>This application can be used as repeater only. It represents Z-Wave Long Range Zniffer with PTI enabled.
+  It cannot be included in Z-Wave network.&lt;/pre>
+      </model:description>
+  </demo>
+  <demo name="ZW_ZnifferPTI_7_17_0_REGION_ANZ" label="Z-Wave ZnifferPTI ANZ Region 7_17_0">
+    <model:property key="demos.blurb" value="Z-Wave ZnifferPTI ANZ Region 7_17_0"/>
+    <model:property key="core.category" value="ZnifferPTI"/>
+    <model:property key="core.priority" value="2"/>
+    <model:property key="core.partCompatibility" value=".*zgm130s037hgn.*"/>
+    <model:property key="demos.imageFile" value="asset://com.silabs.sdk.stack.super_4.0.0/protocol/z-wave/Apps/bin/ZW_ZnifferPTI_7_17_0_284_ZGM130S_REGION_ANZ.hex"/>
+    <model:description>Z-Wave ZnifferPTI ANZ Region 7_17_0
+  &lt;pre>This application can be used as repeater only. It represents Z-Wave Long Range Zniffer with PTI enabled.
+  It cannot be included in Z-Wave network.&lt;/pre>
+      </model:description>
+  </demo>
+  <demo name="ZW_ZnifferPTI_7_17_0_REGION_ANZ" label="Z-Wave ZnifferPTI ANZ Region 7_17_0">
+    <model:property key="demos.blurb" value="Z-Wave ZnifferPTI ANZ Region 7_17_0"/>
+    <model:property key="core.category" value="ZnifferPTI"/>
+    <model:property key="core.priority" value="2"/>
+    <model:property key="core.partCompatibility" value=".*zgm230sb27hgn.*"/>
+    <model:property key="demos.imageFile" value="asset://com.silabs.sdk.stack.super_4.0.0/protocol/z-wave/Apps/bin/ZW_ZnifferPTI_7_17_0_284_ZGM230S_REGION_ANZ.hex"/>
+    <model:description>Z-Wave ZnifferPTI ANZ Region 7_17_0
+  &lt;pre>This application can be used as repeater only. It represents Z-Wave Long Range Zniffer with PTI enabled.
+  It cannot be included in Z-Wave network.&lt;/pre>
+      </model:description>
+  </demo>
+  <demo name="ZW_ZnifferPTI_7_17_0_REGION_CN" label="Z-Wave ZnifferPTI CN Region 7_17_0">
+    <model:property key="demos.blurb" value="Z-Wave ZnifferPTI CN Region 7_17_0"/>
+    <model:property key="core.category" value="ZnifferPTI"/>
+    <model:property key="core.priority" value="2"/>
+    <model:property key="core.partCompatibility" value=".*efr32zg23.*"/>
+    <model:property key="demos.imageFile" value="asset://com.silabs.sdk.stack.super_4.0.0/protocol/z-wave/Apps/bin/ZW_ZnifferPTI_7_17_0_284_EFR32ZG23_REGION_CN.hex"/>
+    <model:description>Z-Wave ZnifferPTI CN Region 7_17_0
+  &lt;pre>This application can be used as repeater only. It represents Z-Wave Long Range Zniffer with PTI enabled.
+  It cannot be included in Z-Wave network.&lt;/pre>
+      </model:description>
+  </demo>
+  <demo name="ZW_ZnifferPTI_7_17_0_REGION_CN" label="Z-Wave ZnifferPTI CN Region 7_17_0">
+    <model:property key="demos.blurb" value="Z-Wave ZnifferPTI CN Region 7_17_0"/>
+    <model:property key="core.category" value="ZnifferPTI"/>
+    <model:property key="core.priority" value="2"/>
+    <model:property key="core.partCompatibility" value=".*zgm130s037hgn.*"/>
+    <model:property key="demos.imageFile" value="asset://com.silabs.sdk.stack.super_4.0.0/protocol/z-wave/Apps/bin/ZW_ZnifferPTI_7_17_0_284_ZGM130S_REGION_CN.hex"/>
+    <model:description>Z-Wave ZnifferPTI CN Region 7_17_0
+  &lt;pre>This application can be used as repeater only. It represents Z-Wave Long Range Zniffer with PTI enabled.
+  It cannot be included in Z-Wave network.&lt;/pre>
+      </model:description>
+  </demo>
+  <demo name="ZW_ZnifferPTI_7_17_0_REGION_CN" label="Z-Wave ZnifferPTI CN Region 7_17_0">
+    <model:property key="demos.blurb" value="Z-Wave ZnifferPTI CN Region 7_17_0"/>
+    <model:property key="core.category" value="ZnifferPTI"/>
+    <model:property key="core.priority" value="2"/>
+    <model:property key="core.partCompatibility" value=".*zgm230sb27hgn.*"/>
+    <model:property key="demos.imageFile" value="asset://com.silabs.sdk.stack.super_4.0.0/protocol/z-wave/Apps/bin/ZW_ZnifferPTI_7_17_0_284_ZGM230S_REGION_CN.hex"/>
+    <model:description>Z-Wave ZnifferPTI CN Region 7_17_0
+  &lt;pre>This application can be used as repeater only. It represents Z-Wave Long Range Zniffer with PTI enabled.
+  It cannot be included in Z-Wave network.&lt;/pre>
+      </model:description>
+  </demo>
+  <demo name="ZW_ZnifferPTI_7_17_0_REGION_EU" label="Z-Wave ZnifferPTI EU Region 7_17_0">
+    <model:property key="demos.blurb" value="Z-Wave ZnifferPTI EU Region 7_17_0"/>
+    <model:property key="core.category" value="ZnifferPTI"/>
+    <model:property key="core.priority" value="2"/>
+    <model:property key="core.partCompatibility" value=".*efr32zg23.*"/>
+    <model:property key="demos.imageFile" value="asset://com.silabs.sdk.stack.super_4.0.0/protocol/z-wave/Apps/bin/ZW_ZnifferPTI_7_17_0_284_EFR32ZG23_REGION_EU.hex"/>
+    <model:description>Z-Wave ZnifferPTI EU Region 7_17_0
+  &lt;pre>This application can be used as repeater only. It represents Z-Wave Long Range Zniffer with PTI enabled.
+  It cannot be included in Z-Wave network.&lt;/pre>
+      </model:description>
+  </demo>
+  <demo name="ZW_ZnifferPTI_7_17_0_REGION_EU" label="Z-Wave ZnifferPTI EU Region 7_17_0">
+    <model:property key="demos.blurb" value="Z-Wave ZnifferPTI EU Region 7_17_0"/>
+    <model:property key="core.category" value="ZnifferPTI"/>
+    <model:property key="core.priority" value="2"/>
+    <model:property key="core.partCompatibility" value=".*zgm130s037hgn.*"/>
+    <model:property key="demos.imageFile" value="asset://com.silabs.sdk.stack.super_4.0.0/protocol/z-wave/Apps/bin/ZW_ZnifferPTI_7_17_0_284_ZGM130S_REGION_EU.hex"/>
+    <model:description>Z-Wave ZnifferPTI EU Region 7_17_0
+  &lt;pre>This application can be used as repeater only. It represents Z-Wave Long Range Zniffer with PTI enabled.
+  It cannot be included in Z-Wave network.&lt;/pre>
+      </model:description>
+  </demo>
+  <demo name="ZW_ZnifferPTI_7_17_0_REGION_EU" label="Z-Wave ZnifferPTI EU Region 7_17_0">
+    <model:property key="demos.blurb" value="Z-Wave ZnifferPTI EU Region 7_17_0"/>
+    <model:property key="core.category" value="ZnifferPTI"/>
+    <model:property key="core.priority" value="2"/>
+    <model:property key="core.partCompatibility" value=".*zgm230sb27hgn.*"/>
+    <model:property key="demos.imageFile" value="asset://com.silabs.sdk.stack.super_4.0.0/protocol/z-wave/Apps/bin/ZW_ZnifferPTI_7_17_0_284_ZGM230S_REGION_EU.hex"/>
+    <model:description>Z-Wave ZnifferPTI EU Region 7_17_0
+  &lt;pre>This application can be used as repeater only. It represents Z-Wave Long Range Zniffer with PTI enabled.
+  It cannot be included in Z-Wave network.&lt;/pre>
+      </model:description>
+  </demo>
+  <demo name="ZW_ZnifferPTI_7_17_0_REGION_HK" label="Z-Wave ZnifferPTI HK Region 7_17_0">
+    <model:property key="demos.blurb" value="Z-Wave ZnifferPTI HK Region 7_17_0"/>
+    <model:property key="core.category" value="ZnifferPTI"/>
+    <model:property key="core.priority" value="2"/>
+    <model:property key="core.partCompatibility" value=".*efr32zg23.*"/>
+    <model:property key="demos.imageFile" value="asset://com.silabs.sdk.stack.super_4.0.0/protocol/z-wave/Apps/bin/ZW_ZnifferPTI_7_17_0_284_EFR32ZG23_REGION_HK.hex"/>
+    <model:description>Z-Wave ZnifferPTI HK Region 7_17_0
+  &lt;pre>This application can be used as repeater only. It represents Z-Wave Long Range Zniffer with PTI enabled.
+  It cannot be included in Z-Wave network.&lt;/pre>
+      </model:description>
+  </demo>
+  <demo name="ZW_ZnifferPTI_7_17_0_REGION_HK" label="Z-Wave ZnifferPTI HK Region 7_17_0">
+    <model:property key="demos.blurb" value="Z-Wave ZnifferPTI HK Region 7_17_0"/>
+    <model:property key="core.category" value="ZnifferPTI"/>
+    <model:property key="core.priority" value="2"/>
+    <model:property key="core.partCompatibility" value=".*zgm130s037hgn.*"/>
+    <model:property key="demos.imageFile" value="asset://com.silabs.sdk.stack.super_4.0.0/protocol/z-wave/Apps/bin/ZW_ZnifferPTI_7_17_0_284_ZGM130S_REGION_HK.hex"/>
+    <model:description>Z-Wave ZnifferPTI HK Region 7_17_0
+  &lt;pre>This application can be used as repeater only. It represents Z-Wave Long Range Zniffer with PTI enabled.
+  It cannot be included in Z-Wave network.&lt;/pre>
+      </model:description>
+  </demo>
+  <demo name="ZW_ZnifferPTI_7_17_0_REGION_HK" label="Z-Wave ZnifferPTI HK Region 7_17_0">
+    <model:property key="demos.blurb" value="Z-Wave ZnifferPTI HK Region 7_17_0"/>
+    <model:property key="core.category" value="ZnifferPTI"/>
+    <model:property key="core.priority" value="2"/>
+    <model:property key="core.partCompatibility" value=".*zgm230sb27hgn.*"/>
+    <model:property key="demos.imageFile" value="asset://com.silabs.sdk.stack.super_4.0.0/protocol/z-wave/Apps/bin/ZW_ZnifferPTI_7_17_0_284_ZGM230S_REGION_HK.hex"/>
+    <model:description>Z-Wave ZnifferPTI HK Region 7_17_0
+  &lt;pre>This application can be used as repeater only. It represents Z-Wave Long Range Zniffer with PTI enabled.
+  It cannot be included in Z-Wave network.&lt;/pre>
+      </model:description>
+  </demo>
+  <demo name="ZW_ZnifferPTI_7_17_0_REGION_IL" label="Z-Wave ZnifferPTI IL Region 7_17_0">
+    <model:property key="demos.blurb" value="Z-Wave ZnifferPTI IL Region 7_17_0"/>
+    <model:property key="core.category" value="ZnifferPTI"/>
+    <model:property key="core.priority" value="2"/>
+    <model:property key="core.partCompatibility" value=".*efr32zg23.*"/>
+    <model:property key="demos.imageFile" value="asset://com.silabs.sdk.stack.super_4.0.0/protocol/z-wave/Apps/bin/ZW_ZnifferPTI_7_17_0_284_EFR32ZG23_REGION_IL.hex"/>
+    <model:description>Z-Wave ZnifferPTI IL Region 7_17_0
+  &lt;pre>This application can be used as repeater only. It represents Z-Wave Long Range Zniffer with PTI enabled.
+  It cannot be included in Z-Wave network.&lt;/pre>
+      </model:description>
+  </demo>
+  <demo name="ZW_ZnifferPTI_7_17_0_REGION_IL" label="Z-Wave ZnifferPTI IL Region 7_17_0">
+    <model:property key="demos.blurb" value="Z-Wave ZnifferPTI IL Region 7_17_0"/>
+    <model:property key="core.category" value="ZnifferPTI"/>
+    <model:property key="core.priority" value="2"/>
+    <model:property key="core.partCompatibility" value=".*zgm130s037hgn.*"/>
+    <model:property key="demos.imageFile" value="asset://com.silabs.sdk.stack.super_4.0.0/protocol/z-wave/Apps/bin/ZW_ZnifferPTI_7_17_0_284_ZGM130S_REGION_IL.hex"/>
+    <model:description>Z-Wave ZnifferPTI IL Region 7_17_0
+  &lt;pre>This application can be used as repeater only. It represents Z-Wave Long Range Zniffer with PTI enabled.
+  It cannot be included in Z-Wave network.&lt;/pre>
+      </model:description>
+  </demo>
+  <demo name="ZW_ZnifferPTI_7_17_0_REGION_IL" label="Z-Wave ZnifferPTI IL Region 7_17_0">
+    <model:property key="demos.blurb" value="Z-Wave ZnifferPTI IL Region 7_17_0"/>
+    <model:property key="core.category" value="ZnifferPTI"/>
+    <model:property key="core.priority" value="2"/>
+    <model:property key="core.partCompatibility" value=".*zgm230sb27hgn.*"/>
+    <model:property key="demos.imageFile" value="asset://com.silabs.sdk.stack.super_4.0.0/protocol/z-wave/Apps/bin/ZW_ZnifferPTI_7_17_0_284_ZGM230S_REGION_IL.hex"/>
+    <model:description>Z-Wave ZnifferPTI IL Region 7_17_0
+  &lt;pre>This application can be used as repeater only. It represents Z-Wave Long Range Zniffer with PTI enabled.
+  It cannot be included in Z-Wave network.&lt;/pre>
+      </model:description>
+  </demo>
+  <demo name="ZW_ZnifferPTI_7_17_0_REGION_IN" label="Z-Wave ZnifferPTI IN Region 7_17_0">
+    <model:property key="demos.blurb" value="Z-Wave ZnifferPTI IN Region 7_17_0"/>
+    <model:property key="core.category" value="ZnifferPTI"/>
+    <model:property key="core.priority" value="2"/>
+    <model:property key="core.partCompatibility" value=".*efr32zg23.*"/>
+    <model:property key="demos.imageFile" value="asset://com.silabs.sdk.stack.super_4.0.0/protocol/z-wave/Apps/bin/ZW_ZnifferPTI_7_17_0_284_EFR32ZG23_REGION_IN.hex"/>
+    <model:description>Z-Wave ZnifferPTI IN Region 7_17_0
+  &lt;pre>This application can be used as repeater only. It represents Z-Wave Long Range Zniffer with PTI enabled.
+  It cannot be included in Z-Wave network.&lt;/pre>
+      </model:description>
+  </demo>
+  <demo name="ZW_ZnifferPTI_7_17_0_REGION_IN" label="Z-Wave ZnifferPTI IN Region 7_17_0">
+    <model:property key="demos.blurb" value="Z-Wave ZnifferPTI IN Region 7_17_0"/>
+    <model:property key="core.category" value="ZnifferPTI"/>
+    <model:property key="core.priority" value="2"/>
+    <model:property key="core.partCompatibility" value=".*zgm130s037hgn.*"/>
+    <model:property key="demos.imageFile" value="asset://com.silabs.sdk.stack.super_4.0.0/protocol/z-wave/Apps/bin/ZW_ZnifferPTI_7_17_0_284_ZGM130S_REGION_IN.hex"/>
+    <model:description>Z-Wave ZnifferPTI IN Region 7_17_0
+  &lt;pre>This application can be used as repeater only. It represents Z-Wave Long Range Zniffer with PTI enabled.
+  It cannot be included in Z-Wave network.&lt;/pre>
+      </model:description>
+  </demo>
+  <demo name="ZW_ZnifferPTI_7_17_0_REGION_IN" label="Z-Wave ZnifferPTI IN Region 7_17_0">
+    <model:property key="demos.blurb" value="Z-Wave ZnifferPTI IN Region 7_17_0"/>
+    <model:property key="core.category" value="ZnifferPTI"/>
+    <model:property key="core.priority" value="2"/>
+    <model:property key="core.partCompatibility" value=".*zgm230sb27hgn.*"/>
+    <model:property key="demos.imageFile" value="asset://com.silabs.sdk.stack.super_4.0.0/protocol/z-wave/Apps/bin/ZW_ZnifferPTI_7_17_0_284_ZGM230S_REGION_IN.hex"/>
+    <model:description>Z-Wave ZnifferPTI IN Region 7_17_0
+  &lt;pre>This application can be used as repeater only. It represents Z-Wave Long Range Zniffer with PTI enabled.
+  It cannot be included in Z-Wave network.&lt;/pre>
+      </model:description>
+  </demo>
+  <demo name="ZW_ZnifferPTI_7_17_0_REGION_JP" label="Z-Wave ZnifferPTI JP Region 7_17_0">
+    <model:property key="demos.blurb" value="Z-Wave ZnifferPTI JP Region 7_17_0"/>
+    <model:property key="core.category" value="ZnifferPTI"/>
+    <model:property key="core.priority" value="2"/>
+    <model:property key="core.partCompatibility" value=".*efr32zg23.*"/>
+    <model:property key="demos.imageFile" value="asset://com.silabs.sdk.stack.super_4.0.0/protocol/z-wave/Apps/bin/ZW_ZnifferPTI_7_17_0_284_EFR32ZG23_REGION_JP.hex"/>
+    <model:description>Z-Wave ZnifferPTI JP Region 7_17_0
+  &lt;pre>This application can be used as repeater only. It represents Z-Wave Long Range Zniffer with PTI enabled.
+  It cannot be included in Z-Wave network.&lt;/pre>
+      </model:description>
+  </demo>
+  <demo name="ZW_ZnifferPTI_7_17_0_REGION_JP" label="Z-Wave ZnifferPTI JP Region 7_17_0">
+    <model:property key="demos.blurb" value="Z-Wave ZnifferPTI JP Region 7_17_0"/>
+    <model:property key="core.category" value="ZnifferPTI"/>
+    <model:property key="core.priority" value="2"/>
+    <model:property key="core.partCompatibility" value=".*zgm130s037hgn.*"/>
+    <model:property key="demos.imageFile" value="asset://com.silabs.sdk.stack.super_4.0.0/protocol/z-wave/Apps/bin/ZW_ZnifferPTI_7_17_0_284_ZGM130S_REGION_JP.hex"/>
+    <model:description>Z-Wave ZnifferPTI JP Region 7_17_0
+  &lt;pre>This application can be used as repeater only. It represents Z-Wave Long Range Zniffer with PTI enabled.
+  It cannot be included in Z-Wave network.&lt;/pre>
+      </model:description>
+  </demo>
+  <demo name="ZW_ZnifferPTI_7_17_0_REGION_JP" label="Z-Wave ZnifferPTI JP Region 7_17_0">
+    <model:property key="demos.blurb" value="Z-Wave ZnifferPTI JP Region 7_17_0"/>
+    <model:property key="core.category" value="ZnifferPTI"/>
+    <model:property key="core.priority" value="2"/>
+    <model:property key="core.partCompatibility" value=".*zgm230sb27hgn.*"/>
+    <model:property key="demos.imageFile" value="asset://com.silabs.sdk.stack.super_4.0.0/protocol/z-wave/Apps/bin/ZW_ZnifferPTI_7_17_0_284_ZGM230S_REGION_JP.hex"/>
+    <model:description>Z-Wave ZnifferPTI JP Region 7_17_0
+  &lt;pre>This application can be used as repeater only. It represents Z-Wave Long Range Zniffer with PTI enabled.
+  It cannot be included in Z-Wave network.&lt;/pre>
+      </model:description>
+  </demo>
+  <demo name="ZW_ZnifferPTI_7_17_0_REGION_KR" label="Z-Wave ZnifferPTI KR Region 7_17_0">
+    <model:property key="demos.blurb" value="Z-Wave ZnifferPTI KR Region 7_17_0"/>
+    <model:property key="core.category" value="ZnifferPTI"/>
+    <model:property key="core.priority" value="2"/>
+    <model:property key="core.partCompatibility" value=".*efr32zg23.*"/>
+    <model:property key="demos.imageFile" value="asset://com.silabs.sdk.stack.super_4.0.0/protocol/z-wave/Apps/bin/ZW_ZnifferPTI_7_17_0_284_EFR32ZG23_REGION_KR.hex"/>
+    <model:description>Z-Wave ZnifferPTI KR Region 7_17_0
+  &lt;pre>This application can be used as repeater only. It represents Z-Wave Long Range Zniffer with PTI enabled.
+  It cannot be included in Z-Wave network.&lt;/pre>
+      </model:description>
+  </demo>
+  <demo name="ZW_ZnifferPTI_7_17_0_REGION_KR" label="Z-Wave ZnifferPTI KR Region 7_17_0">
+    <model:property key="demos.blurb" value="Z-Wave ZnifferPTI KR Region 7_17_0"/>
+    <model:property key="core.category" value="ZnifferPTI"/>
+    <model:property key="core.priority" value="2"/>
+    <model:property key="core.partCompatibility" value=".*zgm130s037hgn.*"/>
+    <model:property key="demos.imageFile" value="asset://com.silabs.sdk.stack.super_4.0.0/protocol/z-wave/Apps/bin/ZW_ZnifferPTI_7_17_0_284_ZGM130S_REGION_KR.hex"/>
+    <model:description>Z-Wave ZnifferPTI KR Region 7_17_0
+  &lt;pre>This application can be used as repeater only. It represents Z-Wave Long Range Zniffer with PTI enabled.
+  It cannot be included in Z-Wave network.&lt;/pre>
+      </model:description>
+  </demo>
+  <demo name="ZW_ZnifferPTI_7_17_0_REGION_KR" label="Z-Wave ZnifferPTI KR Region 7_17_0">
+    <model:property key="demos.blurb" value="Z-Wave ZnifferPTI KR Region 7_17_0"/>
+    <model:property key="core.category" value="ZnifferPTI"/>
+    <model:property key="core.priority" value="2"/>
+    <model:property key="core.partCompatibility" value=".*zgm230sb27hgn.*"/>
+    <model:property key="demos.imageFile" value="asset://com.silabs.sdk.stack.super_4.0.0/protocol/z-wave/Apps/bin/ZW_ZnifferPTI_7_17_0_284_ZGM230S_REGION_KR.hex"/>
+    <model:description>Z-Wave ZnifferPTI KR Region 7_17_0
+  &lt;pre>This application can be used as repeater only. It represents Z-Wave Long Range Zniffer with PTI enabled.
+  It cannot be included in Z-Wave network.&lt;/pre>
+      </model:description>
+  </demo>
+  <demo name="ZW_ZnifferPTI_7_17_0_REGION_RU" label="Z-Wave ZnifferPTI RU Region 7_17_0">
+    <model:property key="demos.blurb" value="Z-Wave ZnifferPTI RU Region 7_17_0"/>
+    <model:property key="core.category" value="ZnifferPTI"/>
+    <model:property key="core.priority" value="2"/>
+    <model:property key="core.partCompatibility" value=".*efr32zg23.*"/>
+    <model:property key="demos.imageFile" value="asset://com.silabs.sdk.stack.super_4.0.0/protocol/z-wave/Apps/bin/ZW_ZnifferPTI_7_17_0_284_EFR32ZG23_REGION_RU.hex"/>
+    <model:description>Z-Wave ZnifferPTI RU Region 7_17_0
+  &lt;pre>This application can be used as repeater only. It represents Z-Wave Long Range Zniffer with PTI enabled.
+  It cannot be included in Z-Wave network.&lt;/pre>
+      </model:description>
+  </demo>
+  <demo name="ZW_ZnifferPTI_7_17_0_REGION_RU" label="Z-Wave ZnifferPTI RU Region 7_17_0">
+    <model:property key="demos.blurb" value="Z-Wave ZnifferPTI RU Region 7_17_0"/>
+    <model:property key="core.category" value="ZnifferPTI"/>
+    <model:property key="core.priority" value="2"/>
+    <model:property key="core.partCompatibility" value=".*zgm130s037hgn.*"/>
+    <model:property key="demos.imageFile" value="asset://com.silabs.sdk.stack.super_4.0.0/protocol/z-wave/Apps/bin/ZW_ZnifferPTI_7_17_0_284_ZGM130S_REGION_RU.hex"/>
+    <model:description>Z-Wave ZnifferPTI RU Region 7_17_0
+  &lt;pre>This application can be used as repeater only. It represents Z-Wave Long Range Zniffer with PTI enabled.
+  It cannot be included in Z-Wave network.&lt;/pre>
+      </model:description>
+  </demo>
+  <demo name="ZW_ZnifferPTI_7_17_0_REGION_RU" label="Z-Wave ZnifferPTI RU Region 7_17_0">
+    <model:property key="demos.blurb" value="Z-Wave ZnifferPTI RU Region 7_17_0"/>
+    <model:property key="core.category" value="ZnifferPTI"/>
+    <model:property key="core.priority" value="2"/>
+    <model:property key="core.partCompatibility" value=".*zgm230sb27hgn.*"/>
+    <model:property key="demos.imageFile" value="asset://com.silabs.sdk.stack.super_4.0.0/protocol/z-wave/Apps/bin/ZW_ZnifferPTI_7_17_0_284_ZGM230S_REGION_RU.hex"/>
+    <model:description>Z-Wave ZnifferPTI RU Region 7_17_0
+  &lt;pre>This application can be used as repeater only. It represents Z-Wave Long Range Zniffer with PTI enabled.
+  It cannot be included in Z-Wave network.&lt;/pre>
+      </model:description>
+  </demo>
+  <demo name="ZW_ZnifferPTI_7_17_0_REGION_US" label="Z-Wave ZnifferPTI US Region 7_17_0">
+    <model:property key="demos.blurb" value="Z-Wave ZnifferPTI US Region 7_17_0"/>
+    <model:property key="core.category" value="ZnifferPTI"/>
+    <model:property key="core.priority" value="2"/>
+    <model:property key="core.partCompatibility" value=".*efr32zg23.*"/>
+    <model:property key="demos.imageFile" value="asset://com.silabs.sdk.stack.super_4.0.0/protocol/z-wave/Apps/bin/ZW_ZnifferPTI_7_17_0_284_EFR32ZG23_REGION_US.hex"/>
+    <model:description>Z-Wave ZnifferPTI US Region 7_17_0
+  &lt;pre>This application can be used as repeater only. It represents Z-Wave Long Range Zniffer with PTI enabled.
+  It cannot be included in Z-Wave network.&lt;/pre>
+      </model:description>
+  </demo>
+  <demo name="ZW_ZnifferPTI_7_17_0_REGION_US" label="Z-Wave ZnifferPTI US Region 7_17_0">
+    <model:property key="demos.blurb" value="Z-Wave ZnifferPTI US Region 7_17_0"/>
+    <model:property key="core.category" value="ZnifferPTI"/>
+    <model:property key="core.priority" value="2"/>
+    <model:property key="core.partCompatibility" value=".*zgm130s037hgn.*"/>
+    <model:property key="demos.imageFile" value="asset://com.silabs.sdk.stack.super_4.0.0/protocol/z-wave/Apps/bin/ZW_ZnifferPTI_7_17_0_284_ZGM130S_REGION_US.hex"/>
+    <model:description>Z-Wave ZnifferPTI US Region 7_17_0
+  &lt;pre>This application can be used as repeater only. It represents Z-Wave Long Range Zniffer with PTI enabled.
+  It cannot be included in Z-Wave network.&lt;/pre>
+      </model:description>
+  </demo>
+  <demo name="ZW_ZnifferPTI_7_17_0_REGION_US" label="Z-Wave ZnifferPTI US Region 7_17_0">
+    <model:property key="demos.blurb" value="Z-Wave ZnifferPTI US Region 7_17_0"/>
+    <model:property key="core.category" value="ZnifferPTI"/>
+    <model:property key="core.priority" value="2"/>
+    <model:property key="core.partCompatibility" value=".*zgm230sb27hgn.*"/>
+    <model:property key="demos.imageFile" value="asset://com.silabs.sdk.stack.super_4.0.0/protocol/z-wave/Apps/bin/ZW_ZnifferPTI_7_17_0_284_ZGM230S_REGION_US.hex"/>
+    <model:description>Z-Wave ZnifferPTI US Region 7_17_0
+  &lt;pre>This application can be used as repeater only. It represents Z-Wave Long Range Zniffer with PTI enabled.
+  It cannot be included in Z-Wave network.&lt;/pre>
+      </model:description>
+  </demo>
+  <demo name="ZW_ZnifferPTI_7_17_0_REGION_US_LR" label="Z-Wave ZnifferPTI US_LR Region 7_17_0">
+    <model:property key="demos.blurb" value="Z-Wave ZnifferPTI US_LR Region 7_17_0"/>
+    <model:property key="core.category" value="ZnifferPTI"/>
+    <model:property key="core.priority" value="2"/>
+    <model:property key="core.partCompatibility" value=".*efr32zg23.*"/>
+    <model:property key="demos.imageFile" value="asset://com.silabs.sdk.stack.super_4.0.0/protocol/z-wave/Apps/bin/ZW_ZnifferPTI_7_17_0_284_EFR32ZG23_REGION_US_LR.hex"/>
+    <model:description>Z-Wave ZnifferPTI US_LR Region 7_17_0
+  &lt;pre>This application can be used as repeater only. It represents Z-Wave Long Range Zniffer with PTI enabled.
+  It cannot be included in Z-Wave network.&lt;/pre>
+      </model:description>
+  </demo>
+  <demo name="ZW_ZnifferPTI_7_17_0_REGION_US_LR" label="Z-Wave ZnifferPTI US_LR Region 7_17_0">
+    <model:property key="demos.blurb" value="Z-Wave ZnifferPTI US_LR Region 7_17_0"/>
+    <model:property key="core.category" value="ZnifferPTI"/>
+    <model:property key="core.priority" value="2"/>
+    <model:property key="core.partCompatibility" value=".*zgm130s037hgn.*"/>
+    <model:property key="demos.imageFile" value="asset://com.silabs.sdk.stack.super_4.0.0/protocol/z-wave/Apps/bin/ZW_ZnifferPTI_7_17_0_284_ZGM130S_REGION_US_LR.hex"/>
+    <model:description>Z-Wave ZnifferPTI US_LR Region 7_17_0
+  &lt;pre>This application can be used as repeater only. It represents Z-Wave Long Range Zniffer with PTI enabled.
+  It cannot be included in Z-Wave network.&lt;/pre>
+      </model:description>
+  </demo>
+  <demo name="ZW_ZnifferPTI_7_17_0_REGION_US_LR" label="Z-Wave ZnifferPTI US_LR Region 7_17_0">
+    <model:property key="demos.blurb" value="Z-Wave ZnifferPTI US_LR Region 7_17_0"/>
+    <model:property key="core.category" value="ZnifferPTI"/>
+    <model:property key="core.priority" value="2"/>
+    <model:property key="core.partCompatibility" value=".*zgm230sb27hgn.*"/>
+    <model:property key="demos.imageFile" value="asset://com.silabs.sdk.stack.super_4.0.0/protocol/z-wave/Apps/bin/ZW_ZnifferPTI_7_17_0_284_ZGM230S_REGION_US_LR.hex"/>
+    <model:description>Z-Wave ZnifferPTI US_LR Region 7_17_0
+  &lt;pre>This application can be used as repeater only. It represents Z-Wave Long Range Zniffer with PTI enabled.
+  It cannot be included in Z-Wave network.&lt;/pre>
+      </model:description>
+  </demo>
+  <demo name="ZW_ZnifferPTI_7_17_0_REGION_US_LR_END_DEVICE" label="Z-Wave ZnifferPTI US_LR_END_DEVICE Region 7_17_0">
+    <model:property key="demos.blurb" value="Z-Wave ZnifferPTI US_LR_END_DEVICE Region 7_17_0"/>
+    <model:property key="core.category" value="ZnifferPTI"/>
+    <model:property key="core.priority" value="2"/>
+    <model:property key="core.partCompatibility" value=".*efr32zg23.*"/>
+    <model:property key="demos.imageFile" value="asset://com.silabs.sdk.stack.super_4.0.0/protocol/z-wave/Apps/bin/ZW_ZnifferPTI_7_17_0_284_EFR32ZG23_REGION_US_LR_END_DEVICE.hex"/>
+    <model:description>Z-Wave ZnifferPTI US_LR_END_DEVICE Region 7_17_0
+  &lt;pre>This application can be used as repeater only. It represents Z-Wave Long Range Zniffer with PTI enabled.
+  It cannot be included in Z-Wave network.&lt;/pre>
+      </model:description>
+  </demo>
+  <demo name="ZW_ZnifferPTI_7_17_0_REGION_US_LR_END_DEVICE" label="Z-Wave ZnifferPTI US_LR_END_DEVICE Region 7_17_0">
+    <model:property key="demos.blurb" value="Z-Wave ZnifferPTI US_LR_END_DEVICE Region 7_17_0"/>
+    <model:property key="core.category" value="ZnifferPTI"/>
+    <model:property key="core.priority" value="2"/>
+    <model:property key="core.partCompatibility" value=".*zgm130s037hgn.*"/>
+    <model:property key="demos.imageFile" value="asset://com.silabs.sdk.stack.super_4.0.0/protocol/z-wave/Apps/bin/ZW_ZnifferPTI_7_17_0_284_ZGM130S_REGION_US_LR_END_DEVICE.hex"/>
+    <model:description>Z-Wave ZnifferPTI US_LR_END_DEVICE Region 7_17_0
+  &lt;pre>This application can be used as repeater only. It represents Z-Wave Long Range Zniffer with PTI enabled.
+  It cannot be included in Z-Wave network.&lt;/pre>
+      </model:description>
+  </demo>
+  <demo name="ZW_ZnifferPTI_7_17_0_REGION_US_LR_END_DEVICE" label="Z-Wave ZnifferPTI US_LR_END_DEVICE Region 7_17_0">
+    <model:property key="demos.blurb" value="Z-Wave ZnifferPTI US_LR_END_DEVICE Region 7_17_0"/>
+    <model:property key="core.category" value="ZnifferPTI"/>
+    <model:property key="core.priority" value="2"/>
+    <model:property key="core.partCompatibility" value=".*zgm230sb27hgn.*"/>
+    <model:property key="demos.imageFile" value="asset://com.silabs.sdk.stack.super_4.0.0/protocol/z-wave/Apps/bin/ZW_ZnifferPTI_7_17_0_284_ZGM230S_REGION_US_LR_END_DEVICE.hex"/>
+    <model:description>Z-Wave ZnifferPTI US_LR_END_DEVICE Region 7_17_0
+  &lt;pre>This application can be used as repeater only. It represents Z-Wave Long Range Zniffer with PTI enabled.
+  It cannot be included in Z-Wave network.&lt;/pre>
+      </model:description>
+  </demo>
+  <demo name="ota-ZGM13_BRD4200A-combined.s37" label="Z-Wave ota BRD4200A Bootloader">
+    <model:property key="demos.blurb" value="Z-Wave ota BRD4200A Bootloader"/>
+    <model:property key="core.category" value="Bootloader"/>
+    <model:property key="core.priority" value="2"/>
+    <model:property key="core.boardCompatibility" value="brd4200a"/>
+    <model:property key="demos.imageFile" value="asset://com.silabs.sdk.stack.super_4.0.0/protocol/z-wave/Apps/bin/ota-ZGM13_BRD4200A-combined.s37"/>
+    <model:description> ota Bootloader for BRD4200A board </model:description>
+  </demo>
+  <demo name="ota-EFR32ZG13L_BRD4201C-combined.s37" label="Z-Wave ota BRD4201C Bootloader">
+    <model:property key="demos.blurb" value="Z-Wave ota BRD4201C Bootloader"/>
+    <model:property key="core.category" value="Bootloader"/>
+    <model:property key="core.priority" value="2"/>
+    <model:property key="core.boardCompatibility" value="brd4201c"/>
+    <model:property key="demos.imageFile" value="asset://com.silabs.sdk.stack.super_4.0.0/protocol/z-wave/Apps/bin/ota-EFR32ZG13L_BRD4201C-combined.s37"/>
+    <model:description> ota Bootloader for BRD4201C board </model:description>
+  </demo>
+  <demo name="ota-EFR32ZG13S_BRD4201D-combined.s37" label="Z-Wave ota BRD4201D Bootloader">
+    <model:property key="demos.blurb" value="Z-Wave ota BRD4201D Bootloader"/>
+    <model:property key="core.category" value="Bootloader"/>
+    <model:property key="core.priority" value="2"/>
+    <model:property key="core.boardCompatibility" value="brd4201d"/>
+    <model:property key="demos.imageFile" value="asset://com.silabs.sdk.stack.super_4.0.0/protocol/z-wave/Apps/bin/ota-EFR32ZG13S_BRD4201D-combined.s37"/>
+    <model:description> ota Bootloader for BRD4201D board </model:description>
+  </demo>
+  <demo name="ota-ZGM130S_BRD4202A-combined.s37" label="Z-Wave ota BRD4202A Bootloader">
+    <model:property key="demos.blurb" value="Z-Wave ota BRD4202A Bootloader"/>
+    <model:property key="core.category" value="Bootloader"/>
+    <model:property key="core.priority" value="2"/>
+    <model:property key="core.boardCompatibility" value="brd4202a"/>
+    <model:property key="demos.imageFile" value="asset://com.silabs.sdk.stack.super_4.0.0/protocol/z-wave/Apps/bin/ota-ZGM130S_BRD4202A-combined.s37"/>
+    <model:description> ota Bootloader for BRD4202A board </model:description>
+  </demo>
+  <demo name="ota-EFR32ZG23_BRD4204A-crc.s37" label="Z-Wave ota BRD4204A Bootloader">
+    <model:property key="demos.blurb" value="Z-Wave ota BRD4204A Bootloader"/>
+    <model:property key="core.category" value="Bootloader"/>
+    <model:property key="core.priority" value="2"/>
+    <model:property key="core.boardCompatibility" value="brd4204a"/>
+    <model:property key="demos.imageFile" value="asset://com.silabs.sdk.stack.super_4.0.0/protocol/z-wave/Apps/bin/ota-EFR32ZG23_BRD4204A-crc.s37"/>
+    <model:description> ota Bootloader for BRD4204A board </model:description>
+  </demo>
+  <demo name="ota-EFR32ZG23_BRD4204B-crc.s37" label="Z-Wave ota BRD4204B Bootloader">
+    <model:property key="demos.blurb" value="Z-Wave ota BRD4204B Bootloader"/>
+    <model:property key="core.category" value="Bootloader"/>
+    <model:property key="core.priority" value="2"/>
+    <model:property key="core.boardCompatibility" value="brd4204b"/>
+    <model:property key="demos.imageFile" value="asset://com.silabs.sdk.stack.super_4.0.0/protocol/z-wave/Apps/bin/ota-EFR32ZG23_BRD4204B-crc.s37"/>
+    <model:description> ota Bootloader for BRD4204B board </model:description>
+  </demo>
+  <demo name="ota-EFR32ZG23_BRD4204C-crc.s37" label="Z-Wave ota BRD4204C Bootloader">
+    <model:property key="demos.blurb" value="Z-Wave ota BRD4204C Bootloader"/>
+    <model:property key="core.category" value="Bootloader"/>
+    <model:property key="core.priority" value="2"/>
+    <model:property key="core.boardCompatibility" value="brd4204c"/>
+    <model:property key="demos.imageFile" value="asset://com.silabs.sdk.stack.super_4.0.0/protocol/z-wave/Apps/bin/ota-EFR32ZG23_BRD4204C-crc.s37"/>
+    <model:description> ota Bootloader for BRD4204C board </model:description>
+  </demo>
+  <demo name="ota-EFR32ZG23_BRD4204D-crc.s37" label="Z-Wave ota BRD4204D Bootloader">
+    <model:property key="demos.blurb" value="Z-Wave ota BRD4204D Bootloader"/>
+    <model:property key="core.category" value="Bootloader"/>
+    <model:property key="core.priority" value="2"/>
+    <model:property key="core.boardCompatibility" value="brd4204d"/>
+    <model:property key="demos.imageFile" value="asset://com.silabs.sdk.stack.super_4.0.0/protocol/z-wave/Apps/bin/ota-EFR32ZG23_BRD4204D-crc.s37"/>
+    <model:description> ota Bootloader for BRD4204D board </model:description>
+  </demo>
+  <demo name="ota-ZGM230S_BRD4205A-crc.s37" label="Z-Wave ota BRD4205A Bootloader">
+    <model:property key="demos.blurb" value="Z-Wave ota BRD4205A Bootloader"/>
+    <model:property key="core.category" value="Bootloader"/>
+    <model:property key="core.priority" value="2"/>
+    <model:property key="core.boardCompatibility" value="brd4205a"/>
+    <model:property key="demos.imageFile" value="asset://com.silabs.sdk.stack.super_4.0.0/protocol/z-wave/Apps/bin/ota-ZGM230S_BRD4205A-crc.s37"/>
+    <model:description> ota Bootloader for BRD4205A board </model:description>
+  </demo>
+  <demo name="ota-ZGM230S_BRD4205B-crc.s37" label="Z-Wave ota BRD4205B Bootloader">
+    <model:property key="demos.blurb" value="Z-Wave ota BRD4205B Bootloader"/>
+    <model:property key="core.category" value="Bootloader"/>
+    <model:property key="core.priority" value="2"/>
+    <model:property key="core.boardCompatibility" value="brd4205b"/>
+    <model:property key="demos.imageFile" value="asset://com.silabs.sdk.stack.super_4.0.0/protocol/z-wave/Apps/bin/ota-ZGM230S_BRD4205B-crc.s37"/>
+    <model:description> ota Bootloader for BRD4205B board </model:description>
+  </demo>
+  <demo name="ota-ZGM130S_BRD4207A-combined.s37" label="Z-Wave ota BRD4207A Bootloader">
+    <model:property key="demos.blurb" value="Z-Wave ota BRD4207A Bootloader"/>
+    <model:property key="core.category" value="Bootloader"/>
+    <model:property key="core.priority" value="2"/>
+    <model:property key="core.boardCompatibility" value="brd4207a"/>
+    <model:property key="demos.imageFile" value="asset://com.silabs.sdk.stack.super_4.0.0/protocol/z-wave/Apps/bin/ota-ZGM130S_BRD4207A-combined.s37"/>
+    <model:description> ota Bootloader for BRD4207A board </model:description>
+  </demo>
+  <demo name="ota-EFR32RZ13_BRD4209A-combined.s37" label="Z-Wave ota BRD4209A Bootloader">
+    <model:property key="demos.blurb" value="Z-Wave ota BRD4209A Bootloader"/>
+    <model:property key="core.category" value="Bootloader"/>
+    <model:property key="core.priority" value="2"/>
+    <model:property key="core.boardCompatibility" value="brd4209a"/>
+    <model:property key="demos.imageFile" value="asset://com.silabs.sdk.stack.super_4.0.0/protocol/z-wave/Apps/bin/ota-EFR32RZ13_BRD4209A-combined.s37"/>
+    <model:description> ota Bootloader for BRD4209A board </model:description>
+  </demo>
+  <demo name="ota-EFR32ZG23_BRD4210A-crc.s37" label="Z-Wave ota BRD4210A Bootloader">
+    <model:property key="demos.blurb" value="Z-Wave ota BRD4210A Bootloader"/>
+    <model:property key="core.category" value="Bootloader"/>
+    <model:property key="core.priority" value="2"/>
+    <model:property key="core.boardCompatibility" value="brd4210a"/>
+    <model:property key="demos.imageFile" value="asset://com.silabs.sdk.stack.super_4.0.0/protocol/z-wave/Apps/bin/ota-EFR32ZG23_BRD4210A-crc.s37"/>
+    <model:description> ota Bootloader for BRD4210A board </model:description>
+  </demo>
+  <demo name="otw-ZGM13_BRD4200A-combined.s37" label="Z-Wave otw BRD4200A Bootloader">
+    <model:property key="demos.blurb" value="Z-Wave otw BRD4200A Bootloader"/>
+    <model:property key="core.category" value="Bootloader"/>
+    <model:property key="core.priority" value="2"/>
+    <model:property key="core.boardCompatibility" value="brd4200a"/>
+    <model:property key="demos.imageFile" value="asset://com.silabs.sdk.stack.super_4.0.0/protocol/z-wave/Apps/bin/otw-ZGM13_BRD4200A-combined.s37"/>
+    <model:description> otw Bootloader for BRD4200A board </model:description>
+  </demo>
+  <demo name="otw-EFR32ZG14_BRD4201A-combined.s37" label="Z-Wave otw BRD4201A Bootloader">
+    <model:property key="demos.blurb" value="Z-Wave otw BRD4201A Bootloader"/>
+    <model:property key="core.category" value="Bootloader"/>
+    <model:property key="core.priority" value="2"/>
+    <model:property key="core.boardCompatibility" value="brd4201a"/>
+    <model:property key="demos.imageFile" value="asset://com.silabs.sdk.stack.super_4.0.0/protocol/z-wave/Apps/bin/otw-EFR32ZG14_BRD4201A-combined.s37"/>
+    <model:description> otw Bootloader for BRD4201A board </model:description>
+  </demo>
+  <demo name="otw-ZGM130S_BRD4202A-combined.s37" label="Z-Wave otw BRD4202A Bootloader">
+    <model:property key="demos.blurb" value="Z-Wave otw BRD4202A Bootloader"/>
+    <model:property key="core.category" value="Bootloader"/>
+    <model:property key="core.priority" value="2"/>
+    <model:property key="core.boardCompatibility" value="brd4202a"/>
+    <model:property key="demos.imageFile" value="asset://com.silabs.sdk.stack.super_4.0.0/protocol/z-wave/Apps/bin/otw-ZGM130S_BRD4202A-combined.s37"/>
+    <model:description> otw Bootloader for BRD4202A board </model:description>
+  </demo>
+  <demo name="otw-EFR32ZG23_BRD4204A-crc.s37" label="Z-Wave otw BRD4204A Bootloader">
+    <model:property key="demos.blurb" value="Z-Wave otw BRD4204A Bootloader"/>
+    <model:property key="core.category" value="Bootloader"/>
+    <model:property key="core.priority" value="2"/>
+    <model:property key="core.boardCompatibility" value="brd4204a"/>
+    <model:property key="demos.imageFile" value="asset://com.silabs.sdk.stack.super_4.0.0/protocol/z-wave/Apps/bin/otw-EFR32ZG23_BRD4204A-crc.s37"/>
+    <model:description> otw Bootloader for BRD4204A board </model:description>
+  </demo>
+  <demo name="otw-EFR32ZG23_BRD4204B-crc.s37" label="Z-Wave otw BRD4204B Bootloader">
+    <model:property key="demos.blurb" value="Z-Wave otw BRD4204B Bootloader"/>
+    <model:property key="core.category" value="Bootloader"/>
+    <model:property key="core.priority" value="2"/>
+    <model:property key="core.boardCompatibility" value="brd4204b"/>
+    <model:property key="demos.imageFile" value="asset://com.silabs.sdk.stack.super_4.0.0/protocol/z-wave/Apps/bin/otw-EFR32ZG23_BRD4204B-crc.s37"/>
+    <model:description> otw Bootloader for BRD4204B board </model:description>
+  </demo>
+  <demo name="otw-EFR32ZG23_BRD4204C-crc.s37" label="Z-Wave otw BRD4204C Bootloader">
+    <model:property key="demos.blurb" value="Z-Wave otw BRD4204C Bootloader"/>
+    <model:property key="core.category" value="Bootloader"/>
+    <model:property key="core.priority" value="2"/>
+    <model:property key="core.boardCompatibility" value="brd4204c"/>
+    <model:property key="demos.imageFile" value="asset://com.silabs.sdk.stack.super_4.0.0/protocol/z-wave/Apps/bin/otw-EFR32ZG23_BRD4204C-crc.s37"/>
+    <model:description> otw Bootloader for BRD4204C board </model:description>
+  </demo>
+  <demo name="otw-EFR32ZG23_BRD4204D-crc.s37" label="Z-Wave otw BRD4204D Bootloader">
+    <model:property key="demos.blurb" value="Z-Wave otw BRD4204D Bootloader"/>
+    <model:property key="core.category" value="Bootloader"/>
+    <model:property key="core.priority" value="2"/>
+    <model:property key="core.boardCompatibility" value="brd4204d"/>
+    <model:property key="demos.imageFile" value="asset://com.silabs.sdk.stack.super_4.0.0/protocol/z-wave/Apps/bin/otw-EFR32ZG23_BRD4204D-crc.s37"/>
+    <model:description> otw Bootloader for BRD4204D board </model:description>
+  </demo>
+  <demo name="otw-ZGM230S_BRD4205A-crc.s37" label="Z-Wave otw BRD4205A Bootloader">
+    <model:property key="demos.blurb" value="Z-Wave otw BRD4205A Bootloader"/>
+    <model:property key="core.category" value="Bootloader"/>
+    <model:property key="core.priority" value="2"/>
+    <model:property key="core.boardCompatibility" value="brd4205a"/>
+    <model:property key="demos.imageFile" value="asset://com.silabs.sdk.stack.super_4.0.0/protocol/z-wave/Apps/bin/otw-ZGM230S_BRD4205A-crc.s37"/>
+    <model:description> otw Bootloader for BRD4205A board </model:description>
+  </demo>
+  <demo name="otw-ZGM230S_BRD4205B-crc.s37" label="Z-Wave otw BRD4205B Bootloader">
+    <model:property key="demos.blurb" value="Z-Wave otw BRD4205B Bootloader"/>
+    <model:property key="core.category" value="Bootloader"/>
+    <model:property key="core.priority" value="2"/>
+    <model:property key="core.boardCompatibility" value="brd4205b"/>
+    <model:property key="demos.imageFile" value="asset://com.silabs.sdk.stack.super_4.0.0/protocol/z-wave/Apps/bin/otw-ZGM230S_BRD4205B-crc.s37"/>
+    <model:description> otw Bootloader for BRD4205B board </model:description>
+  </demo>
+  <demo name="otw-EFR32ZG14_BRD4206A-combined.s37" label="Z-Wave otw BRD4206A Bootloader">
+    <model:property key="demos.blurb" value="Z-Wave otw BRD4206A Bootloader"/>
+    <model:property key="core.category" value="Bootloader"/>
+    <model:property key="core.priority" value="2"/>
+    <model:property key="core.boardCompatibility" value="brd4206a"/>
+    <model:property key="demos.imageFile" value="asset://com.silabs.sdk.stack.super_4.0.0/protocol/z-wave/Apps/bin/otw-EFR32ZG14_BRD4206A-combined.s37"/>
+    <model:description> otw Bootloader for BRD4206A board </model:description>
+  </demo>
+  <demo name="otw-ZGM130S_BRD4207A-combined.s37" label="Z-Wave otw BRD4207A Bootloader">
+    <model:property key="demos.blurb" value="Z-Wave otw BRD4207A Bootloader"/>
+    <model:property key="core.category" value="Bootloader"/>
+    <model:property key="core.priority" value="2"/>
+    <model:property key="core.boardCompatibility" value="brd4207a"/>
+    <model:property key="demos.imageFile" value="asset://com.silabs.sdk.stack.super_4.0.0/protocol/z-wave/Apps/bin/otw-ZGM130S_BRD4207A-combined.s37"/>
+    <model:description> otw Bootloader for BRD4207A board </model:description>
+  </demo>
+  <demo name="otw-EFR32ZG14_BRD4208A-combined.s37" label="Z-Wave otw BRD4208A Bootloader">
+    <model:property key="demos.blurb" value="Z-Wave otw BRD4208A Bootloader"/>
+    <model:property key="core.category" value="Bootloader"/>
+    <model:property key="core.priority" value="2"/>
+    <model:property key="core.boardCompatibility" value="brd4208a"/>
+    <model:property key="demos.imageFile" value="asset://com.silabs.sdk.stack.super_4.0.0/protocol/z-wave/Apps/bin/otw-EFR32ZG14_BRD4208A-combined.s37"/>
+    <model:description> otw Bootloader for BRD4208A board </model:description>
+  </demo>
+  <demo name="otw-EFR32RZ13_BRD4209A-combined.s37" label="Z-Wave otw BRD4209A Bootloader">
+    <model:property key="demos.blurb" value="Z-Wave otw BRD4209A Bootloader"/>
+    <model:property key="core.category" value="Bootloader"/>
+    <model:property key="core.priority" value="2"/>
+    <model:property key="core.boardCompatibility" value="brd4209a"/>
+    <model:property key="demos.imageFile" value="asset://com.silabs.sdk.stack.super_4.0.0/protocol/z-wave/Apps/bin/otw-EFR32RZ13_BRD4209A-combined.s37"/>
+    <model:description> otw Bootloader for BRD4209A board </model:description>
+  </demo>
+  <demo name="otw-EFR32ZG23_BRD4210A-crc.s37" label="Z-Wave otw BRD4210A Bootloader">
+    <model:property key="demos.blurb" value="Z-Wave otw BRD4210A Bootloader"/>
+    <model:property key="core.category" value="Bootloader"/>
+    <model:property key="core.priority" value="2"/>
+    <model:property key="core.boardCompatibility" value="brd4210a"/>
+    <model:property key="demos.imageFile" value="asset://com.silabs.sdk.stack.super_4.0.0/protocol/z-wave/Apps/bin/otw-EFR32ZG23_BRD4210A-crc.s37"/>
+    <model:description> otw Bootloader for BRD4210A board </model:description>
+  </demo>
+</demos>

@@ -1,0 +1,42 @@
+#ISD afv6
+# ISD version: 4.21.0.201709251649-886
+
+# Application configuration
+appId: application
+frameworkRoot: platform/bootloader/application
+architecture: EFM32GG11B820F2048GL192+BRD2204A+gcc
+deviceName: bootloader application
+generationDirectory: PATH(ISC_RELATIVE):.
+
+# Devices
+
+# Plugin configuration
+appPlugin: msd-usb-device-loader=false
+appPlugin: msd-usb-host-loader=true
+appPlugin: emlib=true
+appPlugin: usbd-driver=false
+appPlugin: usbh-driver=true
+appPlugin: gecko-usb=true
+appPlugin: core=true
+appPlugin: bootloader-interface=true
+appPlugin: fatfs=true
+
+
+# Setup configurations
+
+{setupId:information
+\{key:description
+USB Host Mass Storage Device GBL loader example.
+
+The device is required to be flashed with the Internal Storage Bootloader from Gecko Bootloader Examples in order for this example to work. 
+
+This example project uses the USB host and the MSD modules in the drivers directory to implement support for Mass Storage Device's (MSD). Info about the MSD device will be output on the VCOM port. When a MSD device is connected and detected as valid, this application will start looking for a valid gbl file. Once the gbl file is found, the flash memory allocated for the bootloader storage is reprogrammed with the gbl file. Right after the bootloader storage is reprogrammed, the bootloader upgrade procedure starts and a software reset is performed.
+
+\}
+}
+{setupId:macros
+}
+{setupId:template
+}
+
+# Plugin options

@@ -1,0 +1,19 @@
+id: "bluetooth_feature_sm"
+label: "Security Manager"
+package: "Bluetooth"
+description: >
+  Bluetooth security manager (SM) feature
+category: "Bluetooth|Stack"
+quality: "production"
+root_path: "protocol/bluetooth"
+requires:
+  - name: "bluetooth_stack"
+provides:
+  - name: "bluetooth_feature_sm"
+template_contribution:
+  - name: component_catalog
+    value: bluetooth_feature_sm
+  - name: bluetooth_bgapi_class
+    value:
+      class: "sm"
+    priority: 10

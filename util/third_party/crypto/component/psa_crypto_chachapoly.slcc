@@ -1,0 +1,40 @@
+id: psa_crypto_chachapoly
+package: platform
+label: PSA Crypto support for ChachaPoly
+description: >-
+  This component provides support for authenticated encryption and decryption
+  with ChaChaPoly in the PSA Crypto AEAD APIs.
+  The hardware acceleration of ChaChaPoly is only supported on Vault High devices.
+  However the special case where both the message and additional data length
+  are zero is not supported. Hence if the user needs zero data lengths he will
+  need to apply the 'Mbed TLS Support for ChaChaPoly' component in order to
+  include fallback to the software implementation in the Mbed TLS library.
+
+  NOTE: This component does not suppport Chacha20 in the PSA cipher APIs.
+  In order to support Chacha20 cipher as a standalone stream cipher, the user
+  must include 'PSA Crypto support for Chacha20'.
+category: Platform|Security
+quality: production
+provides:
+  - name: psa_crypto_chachapoly
+requires:
+  - name: psa_crypto
+  - name: mbedtls_chachapoly
+    condition: [device_series_0]
+  - name: mbedtls_chachapoly
+    condition: [device_series_1]
+  - name: mbedtls_chachapoly
+    condition: [device_security_se]
+  - name: mbedtls_chachapoly
+    condition: [device_security_rot]
+template_contribution:
+  - name: psa_crypto_config
+    value: PSA_WANT_ALG_CHACHA20_POLY1305
+  - name: psa_crypto_config
+    value: "MBEDTLS_PSA_BUILTIN_ALG_CHACHA20_POLY1305 1"
+    condition: [mbedtls_chachapoly]
+  - name: psa_crypto_config
+    value: PSA_WANT_KEY_TYPE_CHACHA20
+  - name: psa_crypto_config
+    value: "MBEDTLS_PSA_BUILTIN_KEY_TYPE_CHACHA20 1"
+    condition: [mbedtls_chachapoly]

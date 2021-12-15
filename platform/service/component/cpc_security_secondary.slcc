@@ -1,0 +1,34 @@
+id: cpc_security_secondary
+label: CPC SECURITY
+package: platform
+description: Co-Processor Communication (CPC) security endpoint
+category: Services|Co-Processor Communication
+ui_hints:
+  visibility: never
+quality: alpha
+root_path: platform/service/cpc
+source:
+  - path: src/sl_cpc_security.c
+include:
+  - path: inc
+    file_list:
+      - path: sl_cpc_security.h
+provides:
+  - name: cpc_security_secondary
+requires:
+  - name: cpc_core
+  - name: psa_its
+  - name: psa_crypto
+  - name: psa_crypto_aes
+  - name: psa_crypto_gcm
+  - name: psa_crypto_sha256
+template_contribution:
+  - name: component_catalog
+    value: cpc
+  - name: event_handler
+    unless: [cpc_test_unity]
+    value:
+      event: service_init
+      include: sl_cpc_security.h
+      handler: sl_cpc_security_init
+      priority: -1

@@ -1,0 +1,30 @@
+id: mbedtls_rsa
+package: platform
+label: Mbed TLS Support for RSA operations
+description: >-
+  This component provides support for operations using RSA keys.
+category: Platform|Security
+quality: alpha
+include:
+  - path: util/third_party/crypto/mbedtls/library
+    file_list:
+      - path: rsa_alt_helpers.h
+source:
+  - path: util/third_party/crypto/mbedtls/library/rsa.c
+  - path: util/third_party/crypto/mbedtls/library/rsa_alt_helpers.c
+provides:
+  - name: mbedtls_rsa
+requires:
+  - name: mbedtls_mpi
+  - name: mbedtls_hash
+  - name: mbedtls_core
+  - name: mbedtls_rsa_size
+  - name: mbedtls_x509
+template_contribution:
+  - name: mbedtls_config
+    value: MBEDTLS_RSA_C
+recommends:
+  - id: mbedtls_rsa_2048
+documentation:
+  docset: mbed-tls
+  document: group-rsa-module
