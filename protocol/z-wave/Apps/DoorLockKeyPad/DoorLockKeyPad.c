@@ -14,13 +14,7 @@
 #include "SizeOf.h"
 #include "Assert.h"
 
-//To enable DEBUGPRINT you must first undefine DISABLE_USART0
-//In Simplicity Studio open Project->Properties->C/C++ General->Paths and Symbols
-//Remove DISABLE_USART0 from list found under # Symbols->GNU C
-#if !defined(DISABLE_USART1) || !defined(DISABLE_USART0)
 //#define DEBUGPRINT
-#endif
-
 #include "DebugPrint.h"
 #include "DebugPrintConfig.h"
 #include "config_app.h"
@@ -1493,6 +1487,11 @@ CC_UserCode_getId_handler(
   uint8_t endpoint)
 {
   UNUSED(endpoint);
+  // Make sure identifier is valid
+  if (0 == identifier || USER_ID_MAX < identifier)
+  {
+    return false;
+  }
   SUserCode userCodeData[USER_ID_MAX];
 
   Ecode_t errCode = nvm3_readData(pFileSystemApplication, ZAF_FILE_ID_USERCODE, userCodeData, ZAF_FILE_SIZE_USERCODE);

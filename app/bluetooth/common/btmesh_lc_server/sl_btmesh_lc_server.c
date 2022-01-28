@@ -237,7 +237,7 @@ static sl_status_t lc_state_load(void)
   size_t ps_len = 0;
   struct lc_state ps_data;
 
-  sc = sl_bt_nvm_load(LC_SERVER_PS_KEY,
+  sc = sl_bt_nvm_load(SL_BTMESH_LC_SERVER_PS_KEY_CFG_VAL,
                       sizeof(ps_data),
                       &ps_len,
                       (uint8_t *)&ps_data);
@@ -278,7 +278,7 @@ static sl_status_t lc_state_load(void)
  ******************************************************************************/
 static int lc_state_store(void)
 {
-  sl_status_t sc = sl_bt_nvm_save(LC_SERVER_PS_KEY,
+  sl_status_t sc = sl_bt_nvm_save(SL_BTMESH_LC_SERVER_PS_KEY_CFG_VAL,
                                   sizeof(struct lc_state),
                                   (const uint8_t *)&lc_state);
 
@@ -297,7 +297,7 @@ static int lc_state_store(void)
 static void lc_state_changed(void)
 {
   sl_status_t sc = sl_simple_timer_start(&lc_save_state_timer,
-                                         LC_SERVER_NVM_SAVE_TIME,
+                                         SL_BTMESH_LC_SERVER_NVM_SAVE_TIME_CFG_VAL,
                                          lc_save_state_timer_cb,
                                          NO_CALLBACK_DATA,
                                          false);
@@ -393,7 +393,7 @@ static sl_status_t lc_property_state_load(void)
   size_t ps_len = 0;
   struct lc_property_state ps_data;
 
-  sc = sl_bt_nvm_load(LC_SERVER_PROPERTY_PS_KEY,
+  sc = sl_bt_nvm_load(SL_BTMESH_LC_SERVER_PROPERTY_PS_KEY_CFG_VAL,
                       sizeof(ps_data),
                       &ps_len,
                       (uint8_t *)&ps_data);
@@ -401,27 +401,27 @@ static sl_status_t lc_property_state_load(void)
   // Set default values if ps_load fail or size of lc_property_state has changed
   if ((sc != SL_STATUS_OK) || (ps_len != sizeof(lc_property_state))) {
     memset(&lc_property_state, 0, sizeof(lc_property_state));
-#if LC_SERVER_PROPERTY_STATE_DEFAULT_ENABLE
+#if SL_BTMESH_LC_SERVER_PROPERTY_STATE_DEFAULT_ENABLE_CFG_VAL
     lc_property_state.time_occupancy_delay =
-      LC_SERVER_TIME_OCCUPANCY_DELAY_DEFAULT;
-    lc_property_state.time_fade_on = LC_SERVER_TIME_FADE_ON_DEFAULT;
-    lc_property_state.time_run_on = LC_SERVER_TIME_RUN_ON_DEFAULT;
-    lc_property_state.time_fade = LC_SERVER_TIME_FADE_DEFAULT;
-    lc_property_state.time_prolong = LC_SERVER_TIME_PROLONG_DEFAULT;
+      SL_BTMESH_LC_SERVER_TIME_OCCUPANCY_DELAY_DEFAULT_CFG_VAL;
+    lc_property_state.time_fade_on = SL_BTMESH_LC_SERVER_TIME_FADE_ON_DEFAULT_CFG_VAL;
+    lc_property_state.time_run_on = SL_BTMESH_LC_SERVER_TIME_RUN_ON_DEFAULT_CFG_VAL;
+    lc_property_state.time_fade = SL_BTMESH_LC_SERVER_TIME_FADE_DEFAULT_CFG_VAL;
+    lc_property_state.time_prolong = SL_BTMESH_LC_SERVER_TIME_PROLONG_DEFAULT_CFG_VAL;
     lc_property_state.time_fade_standby_auto =
-      LC_SERVER_TIME_FADE_STANDBY_AUTO_DEFAULT;
+      SL_BTMESH_LC_SERVER_TIME_FADE_STANDBY_AUTO_DEFAULT_CFG_VAL;
     lc_property_state.time_fade_standby_manual =
-      LC_SERVER_TIME_FADE_STANDBY_MANUAL_DEFAULT;
-    lc_property_state.lightness_on = LC_SERVER_LIGHTNESS_ON_DEFAULT;
-    lc_property_state.lightness_prolong = LC_SERVER_LIGHTNESS_PROLONG_DEFAULT;
-    lc_property_state.lightness_standby = LC_SERVER_LIGHTNESS_STANDBY_DEFAULT;
+      SL_BTMESH_LC_SERVER_TIME_FADE_STANDBY_MANUAL_DEFAULT_CFG_VAL;
+    lc_property_state.lightness_on = SL_BTMESH_LC_SERVER_LIGHTNESS_ON_DEFAULT_CFG_VAL;
+    lc_property_state.lightness_prolong = SL_BTMESH_LC_SERVER_LIGHTNESS_PROLONG_DEFAULT_CFG_VAL;
+    lc_property_state.lightness_standby = SL_BTMESH_LC_SERVER_LIGHTNESS_STANDBY_DEFAULT_CFG_VAL;
     lc_property_state.ambient_luxlevel_on =
-      LC_SERVER_AMBIENT_LUX_LEVEL_ON_DEFAULT;
+      SL_BTMESH_LC_SERVER_AMBIENT_LUX_LEVEL_ON_DEFAULT_CFG_VAL;
     lc_property_state.ambient_luxlevel_prolong =
-      LC_SERVER_AMBIENT_LUX_LEVEL_PROLONG_DEFAULT;
+      SL_BTMESH_LC_SERVER_AMBIENT_LUX_LEVEL_PROLONG_DEFAULT_CFG_VAL;
     lc_property_state.ambient_luxlevel_standby =
-      LC_SERVER_AMBIENT_LUX_LEVEL_STANDBY_DEFAULT;
-#endif // LC_SERVER_PROPERTY_STATE_DEFAULT_ENABLE
+      SL_BTMESH_LC_SERVER_AMBIENT_LUX_LEVEL_STANDBY_DEFAULT_CFG_VAL;
+#endif // SL_BTMESH_LC_SERVER_PROPERTY_STATE_DEFAULT_ENABLE_CFG_VAL
     lc_property_state.regulator_kiu       = LC_REGULATOR_KIU_DEFAULT;
     lc_property_state.regulator_kid       = LC_REGULATOR_KID_DEFAULT;
     lc_property_state.regulator_kpu       = LC_REGULATOR_KPU_DEFAULT;
@@ -461,7 +461,7 @@ static int lc_property_state_store(void)
 {
   sl_status_t sc;
 
-  sc = sl_bt_nvm_save(LC_SERVER_PROPERTY_PS_KEY,
+  sc = sl_bt_nvm_save(SL_BTMESH_LC_SERVER_PROPERTY_PS_KEY_CFG_VAL,
                       sizeof(struct lc_property_state),
                       (const uint8_t *)&lc_property_state);
 
@@ -480,7 +480,7 @@ static int lc_property_state_store(void)
 static void lc_property_state_changed(void)
 {
   sl_status_t sc = sl_simple_timer_start(&lc_save_property_state_timer,
-                                         LC_SERVER_NVM_SAVE_TIME,
+                                         SL_BTMESH_LC_SERVER_NVM_SAVE_TIME_CFG_VAL,
                                          lc_save_property_state_timer_cb,
                                          NO_CALLBACK_DATA,
                                          false);
@@ -1166,8 +1166,8 @@ void sl_btmesh_lc_server_on_event(sl_btmesh_msg_t *evt)
       break;
 
     case sl_btmesh_evt_node_reset_id:
-      sl_bt_nvm_erase(LC_SERVER_PS_KEY);
-      sl_bt_nvm_erase(LC_SERVER_PROPERTY_PS_KEY);
+      sl_bt_nvm_erase(SL_BTMESH_LC_SERVER_PS_KEY_CFG_VAL);
+      sl_bt_nvm_erase(SL_BTMESH_LC_SERVER_PROPERTY_PS_KEY_CFG_VAL);
       break;
 
     default:

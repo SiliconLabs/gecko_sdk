@@ -12,7 +12,7 @@ class RM_Register_SYNTH_IPVERSION(Base_RM_Register):
             0xa8018000, 0x000,
             'IPVERSION', 'SYNTH.IPVERSION', 'read-only',
             u"",
-            0x00000002, 0xFFFFFFFF,
+            0x00000001, 0xFFFFFFFF,
             0x00001000, 0x00002000,
             0x00003000)
 
@@ -104,7 +104,7 @@ class RM_Register_SYNTH_CTRL(Base_RM_Register):
             0xa8018000, 0x010,
             'CTRL', 'SYNTH.CTRL', 'read-write',
             u"",
-            0x00000003, 0xD9F70007,
+            0x00000003, 0xD9770007,
             0x00001000, 0x00002000,
             0x00003000)
 
@@ -114,8 +114,6 @@ class RM_Register_SYNTH_CTRL(Base_RM_Register):
         self.zz_fdict['PRSMUX0'] = self.PRSMUX0
         self.PRSMUX1 = RM_Field_SYNTH_CTRL_PRSMUX1(self)
         self.zz_fdict['PRSMUX1'] = self.PRSMUX1
-        self.DISCLKSYNTH = RM_Field_SYNTH_CTRL_DISCLKSYNTH(self)
-        self.zz_fdict['DISCLKSYNTH'] = self.DISCLKSYNTH
         self.INVCLKSYNTH = RM_Field_SYNTH_CTRL_INVCLKSYNTH(self)
         self.zz_fdict['INVCLKSYNTH'] = self.INVCLKSYNTH
         self.TRISTATEPOSTPONE = RM_Field_SYNTH_CTRL_TRISTATEPOSTPONE(self)

@@ -66,7 +66,15 @@ class IPhy(object):
                 guid = None
 
             phy = ModelPhy(phy_name, phy_description, profile, phy_group_name, readable_name=readable_name, act_logic=act_logic, tags=tags, phy_points_to = phy_points_to, locked=locked, guid=guid)
-            modem_model.phys.append(phy)
+            #Before appending, make sure that this PHY doesn't already exist in the model
+            try:
+                duplicate_phy = getattr(modem_model, phy_name)
+            except AttributeError:
+                #If no duplicates found then go ahead and append the phy
+                modem_model.phys.append(phy)
+            else:
+                raise Exception("Error: duplicate definition found for %s" %phy_name)
+
             return phy
         else:
             #Return the already existing PHY
@@ -101,21 +109,51 @@ class IPhy(object):
         #If we did not find a caller name then raise an exception
         raise AssertionError('Did not find a PHY method to name the PHY group, check that the method is named correctly')
 
-    def __get_phy_already_created(self,model):
-        #Return the already created phy object
-        stack = inspect.stack()
-        for entry in reversed(stack):
-            caller_name = entry[3]
-            if caller_name.startswith("PHY_"):
-                try:
-                    #Look for the PHY as an object in model.phys
-                    phy = getattr(model.phys, caller_name)
-                    return phy
-                except AttributeError:
-                    #If the PHY isn't in the model yet, then return None
-                    return None
-        #If we did not find the phy as already created then return None
-        return None
+    def __get_phy_already_created(self, model):
+
+        #This method allows, in certain cases, for an existing PHY object in the model to be reused instead of creating
+        #a new one. This is intended to be used when a top-level PHY calls makePhy, and then calls a sub-PHY that
+        #also calls makePhy. In this case we want the sub-PHY to act on the top-level PHY object.
+
+        stack_frame = inspect.currentframe()
+        last_frame = None
+        lowest_phy_frame = None
+        highest_phy_frame = None
+
+        while lowest_phy_frame is None or highest_phy_frame is None:
+            if stack_frame.f_code.co_name.startswith("PHY_"):
+                if lowest_phy_frame is None:
+                    lowest_phy_frame = stack_frame
+            else:
+                if lowest_phy_frame is not None:
+                    highest_phy_frame = last_frame
+            try:
+                last_frame = stack_frame
+                stack_frame = stack_frame.f_back
+            except AttributeError:
+                #End of stack, abort
+                break
+
+        if lowest_phy_frame is None:
+            # We did not find any PHYs, raise an exception
+            raise Exception('Did not find a PHY method to name the PHY, check that the method is named correctly')
+        elif lowest_phy_frame == highest_phy_frame:
+            # If there are no PHYs calling other PHYs, then we will check for duplicates later when appending the
+            # new PHY to the model
+            return None
+        else:
+            # We have one PHY calling another, so we will reuse the parent PHY in the model if it exists
+            try:
+                highest_phy_name = highest_phy_frame.f_code.co_name
+                highest_phy = getattr(model.phys, highest_phy_name)
+            except AttributeError:
+                # If we can't find a phy in the model that matches the calling PHY, then don't return anything
+                return None
+            else:
+                # If we can find a PHY in the model that matches the calling PHY, we can just use that phy object
+                # in place of creating a new phy. The caveat to this is that we are assuming the top-level PHY
+                # method name matches its entry in the model -- any renaming is going to break this
+                return highest_phy
 
     def __get_points_to_phy(self):
         # Get the call stack and go through it in reverse order, looking for a PROD PHY

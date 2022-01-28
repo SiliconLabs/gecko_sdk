@@ -148,7 +148,7 @@ sl_status_t app_scheduler_remove(app_scheduler_task_handle_t handle)
  * Add a periodic task to be scheduled with optional data parameter
  ******************************************************************************/
 sl_status_t app_scheduler_add_periodic(app_scheduler_task_t task,
-                                       uint16_t period_ms,
+                                       uint32_t period_ms,
                                        void *data,
                                        size_t size,
                                        app_scheduler_task_handle_t *handle)
@@ -170,6 +170,10 @@ sl_status_t app_scheduler_add_periodic(app_scheduler_task_t task,
   }
   if (task == NULL) {
     sc = SL_STATUS_NULL_POINTER;
+  }
+  // Check period
+  if (period_ms > sl_sleeptimer_get_max_ms32_conversion()) {
+    sc = SL_STATUS_INVALID_PARAMETER;
   }
 
   if (sc == SL_STATUS_OK) {
@@ -208,7 +212,7 @@ sl_status_t app_scheduler_add_periodic(app_scheduler_task_t task,
  * Add a task to be scheduled with optional data parameter and a delay
  ******************************************************************************/
 sl_status_t app_scheduler_add_delayed(app_scheduler_task_t task,
-                                      uint16_t delay_ms,
+                                      uint32_t delay_ms,
                                       void *data,
                                       size_t size,
                                       app_scheduler_task_handle_t *handle)
@@ -226,6 +230,9 @@ sl_status_t app_scheduler_add_delayed(app_scheduler_task_t task,
 
   // Check parameters
   if (size > APP_SCHEDULER_MAX_DATA_SIZE) {
+    sc = SL_STATUS_INVALID_PARAMETER;
+  }
+  if (delay_ms > sl_sleeptimer_get_max_ms32_conversion()) {
     sc = SL_STATUS_INVALID_PARAMETER;
   }
   if (task == NULL) {

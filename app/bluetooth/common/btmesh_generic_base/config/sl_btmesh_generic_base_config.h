@@ -34,137 +34,137 @@
 
 // <h> Generic Base configuration
 
-// <o GENERIC_BASE_INCREMENT> Register size increment <0-10>
+// <o SL_BTMESH_GENERIC_BASE_INCREMENT_CFG_VAL> Register size increment <0-10>
 // <i> Default: 3
 // <i> The dynamically reallocated array will grow in size by this value.
 // <i> Setting this value to 0 will disable reallocation.
-#define GENERIC_BASE_INCREMENT                       3
+#define SL_BTMESH_GENERIC_BASE_INCREMENT_CFG_VAL                       3
 
 // </h>
 
 // <h> Generic Models Initialization configuration
 
-// <e GENERIC_BASE_SERVER> Enable Generic Server Models
+// <e SL_BTMESH_GENERIC_BASE_SERVER_CFG_VAL> Enable Generic Server Models
 // <i> Default: 0
 // <i> Enable Generic Server functionality.
-#define GENERIC_BASE_SERVER                          0
+#define SL_BTMESH_GENERIC_BASE_SERVER_CFG_VAL                          0
 
-// <q GENERIC_ON_OFF_SERVER_INIT> Generic On/Off Server
+// <q SL_BTMESH_GENERIC_ON_OFF_SERVER_INIT_CFG_VAL> Generic On/Off Server
 // <i> Default: 0
 // <i> Initialize Generic On/Off Server.
-#define GENERIC_ON_OFF_SERVER_INIT                   0
+#define SL_BTMESH_GENERIC_ON_OFF_SERVER_INIT_CFG_VAL                   0
 
-// <q GENERIC_LEVEL_SERVER_INIT> Generic Level Server
+// <q SL_BTMESH_GENERIC_LEVEL_SERVER_INIT_CFG_VAL> Generic Level Server
 // <i> Default: 0
 // <i> Initialize Generic Level Server.
-#define GENERIC_LEVEL_SERVER_INIT                    0
+#define SL_BTMESH_GENERIC_LEVEL_SERVER_INIT_CFG_VAL                    0
 
-// <q GENERIC_DEFAULT_TRANSITION_TIME_SERVER_INIT> Generic Default Transition Time Server
+// <q SL_BTMESH_GENERIC_DEFAULT_TRANSITION_TIME_SERVER_INIT_CFG_VAL> Generic Default Transition Time Server
 // <i> Default: 0
 // <i> Initialize Generic Default Transition Time Server.
-#define GENERIC_DEFAULT_TRANSITION_TIME_SERVER_INIT  0
+#define SL_BTMESH_GENERIC_DEFAULT_TRANSITION_TIME_SERVER_INIT_CFG_VAL  0
 
-// <q GENERIC_POWER_ON_OFF_SERVER_INIT> Generic Power On/Off Server
+// <q SL_BTMESH_GENERIC_POWER_ON_OFF_SERVER_INIT_CFG_VAL> Generic Power On/Off Server
 // <i> Default: 0
 // <i> Initialize Generic Power On/Off Server.
-#define GENERIC_POWER_ON_OFF_SERVER_INIT             0
+#define SL_BTMESH_GENERIC_POWER_ON_OFF_SERVER_INIT_CFG_VAL             0
 
-// <q GENERIC_POWER_LEVEL_SERVER_INIT> Generic Power Level Server
+// <q SL_BTMESH_GENERIC_POWER_LEVEL_SERVER_INIT_CFG_VAL> Generic Power Level Server
 // <i> Default: 0
 // <i> Initialize Generic Power Level Server.
-#define GENERIC_POWER_LEVEL_SERVER_INIT              0
+#define SL_BTMESH_GENERIC_POWER_LEVEL_SERVER_INIT_CFG_VAL              0
 
-// <q GENERIC_BATTERY_SERVER_INIT> Generic Battery Server
+// <q SL_BTMESH_GENERIC_BATTERY_SERVER_INIT_CFG_VAL> Generic Battery Server
 // <i> Default: 0
 // <i> Initialize Generic Battery Server.
-#define GENERIC_BATTERY_SERVER_INIT                  0
+#define SL_BTMESH_GENERIC_BATTERY_SERVER_INIT_CFG_VAL                  0
 
-// <q GENERIC_LOCATION_SERVER_INIT> Generic Location Server
+// <q SL_BTMESH_GENERIC_LOCATION_SERVER_INIT_CFG_VAL> Generic Location Server
 // <i> Default: 0
 // <i> Initialize Generic Location Server.
-#define GENERIC_LOCATION_SERVER_INIT                 0
+#define SL_BTMESH_GENERIC_LOCATION_SERVER_INIT_CFG_VAL                 0
 
-// <q GENERIC_PROPERTY_SERVER_INIT> Generic Property Server
+// <q SL_BTMESH_GENERIC_PROPERTY_SERVER_INIT_CFG_VAL> Generic Property Server
 // <i> Default: 0
 // <i> Initialize Generic Property Server.
-#define GENERIC_PROPERTY_SERVER_INIT                 0
+#define SL_BTMESH_GENERIC_PROPERTY_SERVER_INIT_CFG_VAL                 0
 
-// <q GENERIC_LIGHTNESS_SERVER_INIT> Light Lightness Server
+// <q SL_BTMESH_GENERIC_LIGHTNESS_SERVER_INIT_CFG_VAL> Light Lightness Server
 // <i> Default: 0
 // <i> Initialize Light Lightness Server.
-#define GENERIC_LIGHTNESS_SERVER_INIT                0
+#define SL_BTMESH_GENERIC_LIGHTNESS_SERVER_INIT_CFG_VAL                0
 
-// <q GENERIC_CTL_SERVER_INIT> Light CTL Server
+// <q SL_BTMESH_GENERIC_CTL_SERVER_INIT_CFG_VAL> Light CTL Server
 // <i> Default: 0
 // <i> Initialize Light CTL Server.
-#define GENERIC_CTL_SERVER_INIT                      0
+#define SL_BTMESH_GENERIC_CTL_SERVER_INIT_CFG_VAL                      0
 
-// <q GENERIC_HSL_SERVER_INIT> Light HSL Server
+// <q SL_BTMESH_GENERIC_HSL_SERVER_INIT_CFG_VAL> Light HSL Server
 // <i> Default: 0
 // <i> Initialize Light HSL Server.
-#define GENERIC_HSL_SERVER_INIT                      0
+#define SL_BTMESH_GENERIC_HSL_SERVER_INIT_CFG_VAL                      0
 
 // </e>
 
-// <e GENERIC_BASE_CLIENT> Enable Generic Client Models
+// <e SL_BTMESH_GENERIC_BASE_CLIENT_CFG_VAL> Enable Generic Client Models
 // <i> Default: 0
 // <i> Enable Generic Client functionality.
-#define GENERIC_BASE_CLIENT                          0
+#define SL_BTMESH_GENERIC_BASE_CLIENT_CFG_VAL                          0
 
-// <q GENERIC_ON_OFF_CLIENT_INIT> Generic On/Off Client
+// <q SL_BTMESH_GENERIC_ON_OFF_CLIENT_INIT_CFG_VAL> Generic On/Off Client
 // <i> Default: 0
 // <i> Initialize Generic On/Off Client.
-#define GENERIC_ON_OFF_CLIENT_INIT                   0
+#define SL_BTMESH_GENERIC_ON_OFF_CLIENT_INIT_CFG_VAL                   0
 
-// <q GENERIC_LEVEL_CLIENT_INIT> Generic Level Client
+// <q SL_BTMESH_GENERIC_LEVEL_CLIENT_INIT_CFG_VAL> Generic Level Client
 // <i> Default: 0
 // <i> Initialize Generic Level Client.
-#define GENERIC_LEVEL_CLIENT_INIT                    0
+#define SL_BTMESH_GENERIC_LEVEL_CLIENT_INIT_CFG_VAL                    0
 
-// <q GENERIC_DEFAULT_TRANSITION_TIME_CLIENT_INIT> Generic Default Transition Time Client
+// <q SL_BTMESH_GENERIC_DEFAULT_TRANSITION_TIME_CLIENT_INIT_CFG_VAL> Generic Default Transition Time Client
 // <i> Default: 0
 // <i> Initialize Generic Default Transition Time Client.
-#define GENERIC_DEFAULT_TRANSITION_TIME_CLIENT_INIT  0
+#define SL_BTMESH_GENERIC_DEFAULT_TRANSITION_TIME_CLIENT_INIT_CFG_VAL  0
 
-// <q GENERIC_POWER_ON_OFF_CLIENT_INIT> Generic Power On/Off Client
+// <q SL_BTMESH_GENERIC_POWER_ON_OFF_CLIENT_INIT_CFG_VAL> Generic Power On/Off Client
 // <i> Default: 0
 // <i> Initialize Generic Power On/Off Client.
-#define GENERIC_POWER_ON_OFF_CLIENT_INIT             0
+#define SL_BTMESH_GENERIC_POWER_ON_OFF_CLIENT_INIT_CFG_VAL             0
 
-// <q GENERIC_POWER_LEVEL_CLIENT_INIT> Generic Power Level Client
+// <q SL_BTMESH_GENERIC_POWER_LEVEL_CLIENT_INIT_CFG_VAL> Generic Power Level Client
 // <i> Default: 0
 // <i> Initialize Generic Power Level Client.
-#define GENERIC_POWER_LEVEL_CLIENT_INIT              0
+#define SL_BTMESH_GENERIC_POWER_LEVEL_CLIENT_INIT_CFG_VAL              0
 
-// <q GENERIC_BATTERY_CLIENT_INIT> Generic Battery Client
+// <q SL_BTMESH_GENERIC_BATTERY_CLIENT_INIT_CFG_VAL> Generic Battery Client
 // <i> Default: 0
 // <i> Initialize Generic Battery Client.
-#define GENERIC_BATTERY_CLIENT_INIT                  0
+#define SL_BTMESH_GENERIC_BATTERY_CLIENT_INIT_CFG_VAL                  0
 
-// <q GENERIC_LOCATION_CLIENT_INIT> Generic Location Client
+// <q SL_BTMESH_GENERIC_LOCATION_CLIENT_INIT_CFG_VAL> Generic Location Client
 // <i> Default: 0
 // <i> Initialize Generic Location Client.
-#define GENERIC_LOCATION_CLIENT_INIT                 0
+#define SL_BTMESH_GENERIC_LOCATION_CLIENT_INIT_CFG_VAL                 0
 
-// <q GENERIC_PROPERTY_CLIENT_INIT> Generic Property Client
+// <q SL_BTMESH_GENERIC_PROPERTY_CLIENT_INIT_CFG_VAL> Generic Property Client
 // <i> Default: 0
 // <i> Initialize Generic Property Client.
-#define GENERIC_PROPERTY_CLIENT_INIT                 0
+#define SL_BTMESH_GENERIC_PROPERTY_CLIENT_INIT_CFG_VAL                 0
 
-// <q GENERIC_LIGHTNESS_CLIENT_INIT> Light Lightness Client
+// <q SL_BTMESH_GENERIC_LIGHTNESS_CLIENT_INIT_CFG_VAL> Light Lightness Client
 // <i> Default: 0
 // <i> Initialize Lightness Client.
-#define GENERIC_LIGHTNESS_CLIENT_INIT                0
+#define SL_BTMESH_GENERIC_LIGHTNESS_CLIENT_INIT_CFG_VAL                0
 
-// <q GENERIC_CTL_CLIENT_INIT> Light CTL Client
+// <q SL_BTMESH_GENERIC_CTL_CLIENT_INIT_CFG_VAL> Light CTL Client
 // <i> Default: 0
 // <i> Initialize Light CTL Client.
-#define GENERIC_CTL_CLIENT_INIT                      0
+#define SL_BTMESH_GENERIC_CTL_CLIENT_INIT_CFG_VAL                      0
 
-// <q GENERIC_HSL_CLIENT_INIT> Light HSL Client
+// <q SL_BTMESH_GENERIC_HSL_CLIENT_INIT_CFG_VAL> Light HSL Client
 // <i> Default: 0
 // <i> Initialize Light HSL Client.
-#define GENERIC_HSL_CLIENT_INIT                      0
+#define SL_BTMESH_GENERIC_HSL_CLIENT_INIT_CFG_VAL                      0
 
 // </e>
 

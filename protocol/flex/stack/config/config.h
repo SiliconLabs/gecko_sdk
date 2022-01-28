@@ -40,12 +40,12 @@
 /**
  * @brief The major version of the release. First digit of A.B.C.D.
  */
-#define EMBER_MAJOR_VERSION   3
+#define EMBER_MAJOR_VERSION   4
 
 /**
  * @brief The minor version of the release. Second digit of A.B.C.D
  */
-#define EMBER_MINOR_VERSION   2
+#define EMBER_MINOR_VERSION   0
 
 /**
  * @brief The patch version of the release. Third digit of A.B.C.D
@@ -53,7 +53,7 @@
  * Patch versions are fully backwards compatible as long as the major and minor
  * version matches.
  */
-#define EMBER_PATCH_VERSION   3
+#define EMBER_PATCH_VERSION   1
 
 /**
  * @brief Special version of the release. Fourth digit of A.B.C.D
@@ -63,7 +63,7 @@
 /**
  * @brief Build number of the release. Should be stored on 2 bytes.
  */
-#define EMBER_BUILD_NUMBER   284
+#define EMBER_BUILD_NUMBER   344
 
 /**
  * @brief Full version number stored on 2 bytes, with each of the four digits

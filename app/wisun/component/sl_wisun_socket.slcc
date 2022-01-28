@@ -13,7 +13,6 @@ source:
   - path: "socket.c"
   - path: "socket_event.c"
   - path: "socket_hnd.c"
-  - path: "errno.c"
 
 include:
   - path: "."
@@ -21,13 +20,14 @@ include:
     - "path": "external_socket.h"
     - "path": "socket.h"
     - "path": "socket_hnd.h"
-    - "path": "errno.h"
 
 requires:
+  - name: "errno"
   - name: "sl_wisun_event_mgr"    # for handling socket events
 
 config_file:
   - path: "config/socket_config.h"
+
 
 #-------------- Template Contribution ----------------
 template_contribution:

@@ -104,6 +104,13 @@ void sleeptimer_hal_enable_int(uint8_t local_flag);
 void sleeptimer_hal_disable_int(uint8_t local_flag);
 
 /*******************************************************************************
+ * Hardware Abstraction Layer to set timer interrupts.
+ *
+ * @param local_flag Internal interrupt flag.
+ ******************************************************************************/
+void sleeptimer_hal_set_int(uint8_t local_flag);
+
+/*******************************************************************************
  * Process the timer interrupt.
  *
  * @param flags Internal interrupt flag.

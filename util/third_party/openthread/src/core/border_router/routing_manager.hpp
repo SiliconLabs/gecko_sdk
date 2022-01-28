@@ -194,11 +194,11 @@ private:
     static constexpr uint32_t kMaxRtrAdvInterval           = 600;  // Max Router Advertisement Interval. In sec.
     static constexpr uint32_t kMinRtrAdvInterval           = kMaxRtrAdvInterval / 3; // Min RA Interval. In sec.
     static constexpr uint32_t kMaxInitRtrAdvInterval       = 16;                     // Max Initial RA Interval. In sec.
-    static constexpr uint32_t kMaxRaDelayTime              = 500; // Max delay of sending RA after rx RS. In msec.
-    static constexpr uint32_t kRtrSolicitationInterval     = 4;   // Interval between RSs. In sec.
-    static constexpr uint32_t kMaxRtrSolicitationDelay     = 1;   // Max delay for initial solicitation. In sec.
-    static constexpr uint32_t kMaxRoutingPolicyDelay       = 1;   // Max delay for routing policy evaluation. In sec.
-    static constexpr uint32_t kRtrSolicitationRetryDelay   = 60;  // The delay before retrying failed RS tx. In Sec.
+    static constexpr uint32_t kRaReplyJitter               = 500;    // Jitter for sending RA after rx RS. In msec.
+    static constexpr uint32_t kRtrSolicitationInterval     = 4;      // Interval between RSs. In sec.
+    static constexpr uint32_t kMaxRtrSolicitationDelay     = 1;      // Max delay for initial solicitation. In sec.
+    static constexpr uint32_t kRoutingPolicyEvaluationJitter = 1000; // Jitter for routing policy evaluation. In msec.
+    static constexpr uint32_t kRtrSolicitationRetryDelay     = 60;   // The delay before retrying failed RS tx. In Sec.
 
     // The STALE_RA_TIME in seconds. The Routing Manager will consider the prefixes
     // and learned RA parameters STALE when they are not refreshed in STALE_RA_TIME
@@ -279,7 +279,8 @@ private:
     const Ip6::Prefix *EvaluateOnLinkPrefix(void);
 
     void  EvaluateRoutingPolicy(void);
-    void  StartRoutingPolicyEvaluationDelay(void);
+    void  StartRoutingPolicyEvaluationJitter(uint32_t aJitterMilli);
+    void  StartRoutingPolicyEvaluationDelay(uint32_t aDelayMilli);
     void  EvaluateOmrPrefix(OmrPrefixArray &aNewOmrPrefixes);
     Error PublishLocalOmrPrefix(void);
     void  UnpublishLocalOmrPrefix(void);
@@ -288,11 +289,12 @@ private:
     void  StartRouterSolicitationDelay(void);
     Error SendRouterSolicitation(void);
     void  SendRouterAdvertisement(const OmrPrefixArray &aNewOmrPrefixes, const Ip6::Prefix *aNewOnLinkPrefix);
+    bool  IsRouterSolicitationInProgress(void) const;
 
-    static void HandleRouterAdvertisementTimer(Timer &aTimer);
-    void        HandleRouterAdvertisementTimer(void);
+#if OPENTHREAD_CONFIG_BORDER_ROUTING_VICARIOUS_RS_ENABLE
     static void HandleVicariousRouterSolicitTimer(Timer &aTimer);
     void        HandleVicariousRouterSolicitTimer(void);
+#endif
     static void HandleRouterSolicitTimer(Timer &aTimer);
     void        HandleRouterSolicitTimer(void);
     static void HandleDiscoveredPrefixInvalidTimer(Timer &aTimer);
@@ -306,12 +308,13 @@ private:
     void DeprecateOnLinkPrefix(void);
     void HandleRouterSolicit(const Ip6::Address &aSrcAddress, const uint8_t *aBuffer, uint16_t aBufferLength);
     void HandleRouterAdvertisement(const Ip6::Address &aSrcAddress, const uint8_t *aBuffer, uint16_t aBufferLength);
-    bool UpdateDiscoveredPrefixes(const RouterAdv::PrefixInfoOption &aPio);
-    bool UpdateDiscoveredPrefixes(const RouterAdv::RouteInfoOption &aRio);
-    bool InvalidateDiscoveredPrefixes(const Ip6::Prefix *aPrefix = nullptr, bool aIsOnLinkPrefix = true);
+    bool UpdateDiscoveredOnLinkPrefix(const RouterAdv::PrefixInfoOption &aPio);
+    void UpdateDiscoveredOmrPrefix(const RouterAdv::RouteInfoOption &aRio);
+    void InvalidateDiscoveredPrefixes(const Ip6::Prefix *aPrefix = nullptr, bool aIsOnLinkPrefix = true);
     void InvalidateAllDiscoveredPrefixes(void);
     bool NetworkDataContainsOmrPrefix(const Ip6::Prefix &aPrefix) const;
     bool UpdateRouterAdvMessage(const RouterAdv::RouterAdvMessage *aRouterAdvMessage);
+    void ResetDiscoveredPrefixStaleTimer(void);
 
     static bool IsValidOmrPrefix(const NetworkData::OnMeshPrefixConfig &aOnMeshPrefixConfig);
     static bool IsValidOmrPrefix(const Ip6::Prefix &aOmrPrefix);
@@ -367,15 +370,17 @@ private:
     // and updated with RA messages initiated from infra interface.
     RouterAdv::RouterAdvMessage mRouterAdvMessage;
     TimeMilli                   mTimeRouterAdvMessageLastUpdate;
+    bool                        mLearntRouterAdvMessageFromHost;
 
     TimerMilli mDiscoveredPrefixInvalidTimer;
     TimerMilli mDiscoveredPrefixStaleTimer;
 
-    TimerMilli mRouterAdvertisementTimer;
-    uint32_t   mRouterAdvertisementCount;
+    uint32_t mRouterAdvertisementCount;
 
+#if OPENTHREAD_CONFIG_BORDER_ROUTING_VICARIOUS_RS_ENABLE
     TimerMilli mVicariousRouterSolicitTimer;
     TimeMilli  mTimeVicariousRouterSolicitStart;
+#endif
     TimerMilli mRouterSolicitTimer;
     TimeMilli  mTimeRouterSolicitStart;
     uint8_t    mRouterSolicitCount;

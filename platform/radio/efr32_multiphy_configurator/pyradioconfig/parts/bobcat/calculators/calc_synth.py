@@ -266,10 +266,8 @@ class Calc_Synth_Bobcat(CALC_Synth_ocelot):
 
     def calc_synth_misc(self, model):
 
-        part_family = model.part_family.lower()
-
         # Setting this value to POR
-        self._reg_write_default(model.vars.SYNTH_LPFCTRL2TX_VCMLVLTX, part_family)
+        self._reg_write_default(model.vars.SYNTH_LPFCTRL2TX_VCMLVLTX)
 
         # : Set this value to 3 regardless of modem in OFF/TX/RX states
         # : https://jira.silabs.com/browse/MCUW_RADIO_CFG-1745

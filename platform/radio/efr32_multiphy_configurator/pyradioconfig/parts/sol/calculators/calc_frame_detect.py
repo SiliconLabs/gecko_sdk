@@ -24,3 +24,20 @@ class Calc_Frame_Detect_Sol(CALC_Frame_Detect_Ocelot):
 
         # Write the register
         self._reg_write(model.vars.MODEM_CTRL1_SYNCERRORS, syncerrors)
+
+    def calc_syncword_tx_skip(self, model):
+
+        #Read in model vars
+        syncword_tx_skip = model.vars.syncword_tx_skip.value
+        softmodem_active = (model.vars.softmodem_modulation_type.value != model.vars.softmodem_modulation_type.var_enum.NONE)
+
+        #Skip the syncword TX in the hardmodem if we are using the softmodem, or if explicitly instructed to skip
+        if syncword_tx_skip or softmodem_active:
+            syncdata = 1
+        else:
+            syncdata = 0
+
+        #Write the reg
+        self._reg_write(model.vars.MODEM_CTRL1_SYNCDATA, syncdata)
+
+

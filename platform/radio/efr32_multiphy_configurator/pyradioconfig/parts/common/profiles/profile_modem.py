@@ -42,11 +42,7 @@ def buildModemAdvancedInputs(model, profile, family):
         IProfile.make_hidden_input(profile, model.vars.dsa_enable                     , 'Advanced', readable_name="Enable DSA")
         IProfile.make_linked_io(profile, model.vars.agc_scheme                        , 'Advanced', readable_name="AGC backoff scheme")
         IProfile.make_linked_io(profile, model.vars.etsi_cat1_compatible              , 'Advanced', readable_name="ETSI Category 1 Compatibility")
-        if family != "ocelot":
-            IProfile.make_linked_io(profile, model.vars.target_osr, 'Advanced',readable_name="Target oversampling rate", value_limit_min=3, value_limit_max=8)
-        else:
-            #BCR demod in Ocelot allows for much larger OSR
-            IProfile.make_linked_io(profile, model.vars.target_osr, 'Advanced',readable_name="Target oversampling rate", value_limit_min=3, value_limit_max=127)
+        IProfile.make_linked_io(profile, model.vars.target_osr, 'Advanced',readable_name="Target oversampling rate", value_limit_min=3, value_limit_max=8)
 
     if family == "dumbo":
         IProfile.make_linked_io(profile, model.vars.ook_slicer_level                  , 'Advanced', readable_name="OOK slicer level",
@@ -95,8 +91,5 @@ def buildRailOutputs(model, profile):
     profile.outputs.append(ModelOutput(model.vars.rx_ch_hopping_delay_usec, '', ModelOutputType.RAIL_CONFIG,readable_name='For receive scanning PHYs: delay in microseconds to look for RX on a particular PHY'))
     profile.outputs.append(ModelOutput(model.vars.div_antdivmode, '', ModelOutputType.RAIL_CONFIG, readable_name='Antenna diversity mode'))
     profile.outputs.append(ModelOutput(model.vars.div_antdivrepeatdis, '', ModelOutputType.RAIL_CONFIG, readable_name='Disable repeated measurement of first antenna when Select-Best algorithm is used'))
-    if model.part_family.lower() == "ocelot":
-        profile.outputs.append(ModelOutput(model.vars.ppnd_0, '', ModelOutputType.RAIL_CONFIG, readable_name='DCDC Pulse Period for first quarter of synth region'))
-        profile.outputs.append(ModelOutput(model.vars.ppnd_1, '', ModelOutputType.RAIL_CONFIG, readable_name='DCDC Pulse Period for second quarter of synth region'))
-        profile.outputs.append(ModelOutput(model.vars.ppnd_2, '', ModelOutputType.RAIL_CONFIG, readable_name='DCDC Pulse Period for third quarter of synth region'))
-        profile.outputs.append(ModelOutput(model.vars.ppnd_3, '', ModelOutputType.RAIL_CONFIG, readable_name='DCDC Pulse Period for forth quarter of synth region'))
+    if model.part_family.lower() not in ["dumbo", "jumbo", "nerio", "nixi", "unit_test_part"]:
+        profile.outputs.append(ModelOutput(model.vars.rssi_adjust_db, '', ModelOutputType.RAIL_CONFIG, readable_name='RSSI compensation value calculated from decimation and digital gains'))

@@ -1,7 +1,7 @@
 project_name: "ncp-uart-hw"
 label: "ncp-uart-hw"
 package: "Zigbee"
-category: "ZigBee Application"
+category: "Zigbee Application"
 quality: "production"
 
 description: |-

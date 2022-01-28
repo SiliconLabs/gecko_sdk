@@ -40,6 +40,17 @@ COEX_HAL_GpioConfig_t sli_coex_phySelectCfg = {
 };
 #endif //SL_RAIL_UTIL_COEX_PHY_SELECT_PORT
 
+#ifdef SL_RAIL_UTIL_COEX_WIFI_TX_PORT
+COEX_HAL_GpioConfig_t sli_coex_wifiTxCfg = {
+  .signal = INVALID_SIGNAL,
+  .source = INVALID_SOURCE,
+  .intNo = INVALID_INTERRUPT,
+  .port = SL_RAIL_UTIL_COEX_WIFI_TX_PORT,
+  .pin = SL_RAIL_UTIL_COEX_WIFI_TX_PIN,
+  .polarity = SL_RAIL_UTIL_COEX_WIFI_TX_ASSERT_LEVEL
+};
+#endif //SL_RAIL_UTIL_COEX_WIFI_TX_PORT
+
 #ifdef SL_RAIL_UTIL_COEX_GNT_PORT
 COEX_HAL_GpioConfig_t sli_coex_ptaGntCfg = {
   .signal = INVALID_SIGNAL,
@@ -101,6 +112,9 @@ static void (*reqCallback)(void) = NULL;
 static void (*gntCallback)(void) = NULL;
 static void (*rhoCallback)(void) = NULL;
 static void (*phySelectCallback)(void) = NULL;
+#ifdef SL_RAIL_UTIL_COEX_WIFI_TX_PORT
+static void (*wifiTxCallback)(void) = NULL;
+#endif
 
 static void COEX_HAL_REQ_ISR(uint8_t pin, void *callbackCtx)
 {
@@ -133,6 +147,15 @@ static void COEX_HAL_PHY_SELECT_ISR(uint8_t pin, void *callbackCtx)
 
   phySelectCallback();
 }
+
+#ifdef SL_RAIL_UTIL_COEX_WIFI_TX_PORT
+static void COEX_HAL_WIFI_TX_ISR(uint8_t pin, void *callbackCtx)
+{
+  (void)pin;
+  (void)callbackCtx;
+  wifiTxCallback();
+}
+#endif
 
 static void setGpioConfig(COEX_GpioHandle_t gpioHandle)
 {
@@ -332,6 +355,25 @@ bool COEX_HAL_ConfigPhySelect(COEX_HAL_GpioConfig_t *gpioConfig)
   return status;
 }
 
+#ifdef SL_RAIL_UTIL_COEX_WIFI_TX_PORT
+bool COEX_HAL_ConfigWifiTx(COEX_HAL_GpioConfig_t *gpioConfig)
+{
+  bool status = false;
+
+  gpioConfig->isr = &COEX_HAL_WIFI_TX_ISR;
+  status = COEX_ConfigWifiTx(gpioConfig);
+  if (status) {
+    wifiTxCallback = gpioConfig->config.cb;
+  }
+  return status;
+}
+
+bool COEX_HAL_GetWifiTx(void)
+{
+  return isGpioInSet((COEX_GpioHandle_t)&sli_coex_wifiTxCfg, false);
+}
+#endif
+
 bool COEX_HAL_ConfigRequest(COEX_HAL_GpioConfig_t *gpioConfig)
 {
   bool status = false;
@@ -509,6 +551,9 @@ void COEX_HAL_Init(void)
   #ifdef SL_RAIL_UTIL_COEX_PHY_SELECT_PORT
   COEX_HAL_ConfigPhySelect(&sli_coex_phySelectCfg);
   #endif //SL_RAIL_UTIL_COEX_PHY_ENABLE_PORT
+  #ifdef SL_RAIL_UTIL_COEX_WIFI_TX_PORT
+  COEX_HAL_ConfigWifiTx(&sli_coex_wifiTxCfg);
+  #endif //SL_RAIL_UTIL_COEX_WIFI_TX_PORT
   #ifdef SL_RAIL_UTIL_COEX_REQ_PORT
   COEX_HAL_ConfigRequest(&sli_coex_ptaReqCfg);
   #endif //SL_RAIL_UTIL_COEX_REQ_PORT

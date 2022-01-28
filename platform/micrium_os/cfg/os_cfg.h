@@ -89,6 +89,9 @@
 // <i> Default: 64
 #define  OS_CFG_STK_SIZE_MIN                                64u
 
+// <o OS_CFG_ERRNO_EN> Add threadsafe errno support
+// <i> Default: 0
+#define OS_CFG_ERRNO_EN                                     0
 // </h>
 
 /********************************************************************************************************

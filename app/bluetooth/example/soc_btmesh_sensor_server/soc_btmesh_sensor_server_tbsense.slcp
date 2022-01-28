@@ -73,7 +73,7 @@ config_file:
     directory: btmeshconf
 
 readme:
-  - path: ../../documentation/example/soc_btmesh_sensor_server/readme.html
+  - path: ../../documentation/example/soc_btmesh_sensor_server/readme.md
 
 other_file:
   - path: ../../script/create_bl_files.bat
@@ -153,5 +153,5 @@ ui_hints:
       focus: false
     - path: config/btmeshconf/dcd_config.btmeshconf
       focus: false
-    - path: readme.html
+    - path: readme.md
       focus: true

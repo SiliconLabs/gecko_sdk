@@ -170,6 +170,9 @@ void app_test(bool start)
       sc = throughput_peripheral_start(type);
       if (sc != SL_STATUS_OK) {
         app_log_warning("Failed to start test." APP_LOG_NEW_LINE);
+        if (sc == SL_STATUS_INVALID_STATE) {
+          app_log_warning("Not in subscribed state!" APP_LOG_NEW_LINE);
+        }
       }
     } else {
       sc = throughput_central_set_type(type);
@@ -179,6 +182,9 @@ void app_test(bool start)
         sc = throughput_central_start();
         if (sc != SL_STATUS_OK) {
           app_log_warning("Failed to start test." APP_LOG_NEW_LINE);
+          if (sc == SL_STATUS_INVALID_STATE) {
+            app_log_warning("Not in subscribed state!" APP_LOG_NEW_LINE);
+          }
         }
       }
     }

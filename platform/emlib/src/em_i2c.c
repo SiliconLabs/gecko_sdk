@@ -745,7 +745,9 @@ I2C_TransferReturn_TypeDef I2C_Transfer(I2C_TypeDef *i2c)
           /* Must read out data not to block further progress. */
           data = (uint8_t)(i2c->RXDATA);
 
-#if defined(_SILICON_LABS_32B_SERIES_2_CONFIG_3)
+#if (defined(_SILICON_LABS_32B_SERIES_2_CONFIG_1)         \
+          || defined(_SILICON_LABS_32B_SERIES_2_CONFIG_2) \
+          || defined(_SILICON_LABS_32B_SERIES_2_CONFIG_3))
           // Errata I2C_E303. I2C Fails to Indicate New Incoming Data.
           uint32_t status = i2c->STATUS;
           // look for invalid RXDATAV = 0 and RXFULL = 1 condition

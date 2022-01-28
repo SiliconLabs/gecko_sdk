@@ -3,38 +3,38 @@
 The output of the size tool: (e.g. arm-none-ambi-size.exe)
 ==========================================================
 
-/mnt/raid/workspaces/ws.uV4sMGEzd/overlay/super/prebuilt-samples/Z-Wave/SwitchOnOff-brd4202a-gcc-makefile-cp-REGION_ANZ/build/debug/SwitchOnOff.out  :
+SwitchOnOff.out  :
 section                 size         addr
-.text                0x2da24          0x0
-_cc_handlers_v3        0x188      0x2da24
-.ARM.exidx               0x8      0x2dbac
+.text                0x2dd8c          0x0
+_cc_handlers_v3        0x188      0x2dd8c
+.ARM.exidx               0x8      0x2df14
 .stack                0x1000   0x20000000
-.data                  0x450   0x20001000
-.reset_info              0x4   0x20001450
-.bss                  0x9dd4   0x20001454
-.heap                 0x4dd8   0x2000b228
-.internal_storage    0x3a000      0x2dbb4
-.zwave_nvm            0x3000      0x67bb4
-.nvm                  0x9000      0x6abb4
+.data                  0x410   0x20001000
+.reset_info              0x4   0x20001410
+.bss                  0x9e78   0x20001414
+.heap                 0x4d70   0x2000b290
+.internal_storage    0x3a000      0x2df1c
+.zwave_nvm            0x3000      0x67f1c
+.nvm                  0x9000      0x6af1c
 .ARM.attributes         0x2e          0x0
 .comment                0x4d          0x0
-.debug_frame          0x6a1c          0x0
-.debug_info         0x829841          0x0
-.debug_abbrev        0x10251          0x0
-.debug_loc           0x236d9          0x0
-.debug_aranges        0x2820          0x0
-.debug_ranges         0x4838          0x0
-.debug_line          0x2b3ec          0x0
-.debug_str           0x68587          0x0
+.debug_frame          0x6b6c          0x0
+.debug_info         0x82ac98          0x0
+.debug_abbrev        0x106e5          0x0
+.debug_loc           0x23f8d          0x0
+.debug_aranges        0x28b0          0x0
+.debug_ranges         0x48f0          0x0
+.debug_line          0x2c16d          0x0
+.debug_str           0x68e7a          0x0
 .stabstr               0x14d          0x0
-Total               0x9822ce
+Total               0x9860dd
 
 The calculated FLASH and SRAM usage summary:
 ============================================
-FLASH used as program memory:  (Including only the sections: .text, .ARM.exidx, .data)
-   475140
-FLASH used for storage: (Including only the sections: .nvm3App, .simee)
-   0
+FLASH used as program memory:  (Including only the sections: .text, .ARM.exidx, .data, _cc_handlers_v3, internal_storage)
+   426796
+FLASH used for storage: (Including only the sections: .nvm3App, .simee, .nvm, .zwave_nvm)
+   49152
 SRAM usage:             (Including only the sections: .data, .bss, .heap, .stack_dummy, .reset_info)
-   65536
+   65532
 

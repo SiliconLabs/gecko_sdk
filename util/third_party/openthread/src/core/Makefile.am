@@ -183,7 +183,10 @@ SOURCES_COMMON                                  = \
     coap/coap.cpp                                 \
     coap/coap_message.cpp                         \
     coap/coap_secure.cpp                          \
+    common/appender.cpp                           \
+    common/binary_search.cpp                      \
     common/crc16.cpp                              \
+    common/data.cpp                               \
     common/error.cpp                              \
     common/heap.cpp                               \
     common/heap_data.cpp                          \
@@ -316,7 +319,6 @@ SOURCES_COMMON                                  = \
     utils/heap.cpp                                \
     utils/history_tracker.cpp                     \
     utils/jam_detector.cpp                        \
-    utils/lookup_table.cpp                        \
     utils/otns.cpp                                \
     utils/parse_cmdline.cpp                       \
     utils/ping_sender.cpp                         \
@@ -333,6 +335,7 @@ RADIO_SOURCES_COMMON                       = \
     api/logging_api.cpp                      \
     api/random_noncrypto_api.cpp             \
     api/tasklet_api.cpp                      \
+    common/binary_search.cpp                 \
     common/error.cpp                         \
     common/instance.cpp                      \
     common/logging.cpp                       \
@@ -356,7 +359,6 @@ RADIO_SOURCES_COMMON                       = \
     radio/radio_callbacks.cpp                \
     radio/radio_platform.cpp                 \
     thread/link_quality.cpp                  \
-    utils/lookup_table.cpp                   \
     utils/parse_cmdline.cpp                  \
     $(NULL)
 
@@ -418,9 +420,11 @@ HEADERS_COMMON                                  = \
     coap/coap.hpp                                 \
     coap/coap_message.hpp                         \
     coap/coap_secure.hpp                          \
+    common/appender.hpp                           \
     common/arg_macros.hpp                         \
     common/array.hpp                              \
     common/as_core_type.hpp                       \
+    common/binary_search.hpp                      \
     common/bit_vector.hpp                         \
     common/clearable.hpp                          \
     common/code_utils.hpp                         \
@@ -433,6 +437,7 @@ HEADERS_COMMON                                  = \
     common/error.hpp                              \
     common/extension.hpp                          \
     common/heap.hpp                               \
+    common/heap_allocatable.hpp                   \
     common/heap_data.hpp                          \
     common/heap_string.hpp                        \
     common/instance.hpp                           \
@@ -446,9 +451,13 @@ HEADERS_COMMON                                  = \
     common/non_copyable.hpp                       \
     common/notifier.hpp                           \
     common/numeric_limits.hpp                     \
+    common/owned_ptr.hpp                          \
+    common/owning_list.hpp                        \
     common/pool.hpp                               \
+    common/ptr_wrapper.hpp                        \
     common/random.hpp                             \
     common/random_manager.hpp                     \
+    common/retain_ptr.hpp                         \
     common/settings.hpp                           \
     common/settings_driver.hpp                    \
     common/string.hpp                             \
@@ -616,7 +625,6 @@ HEADERS_COMMON                                  = \
     utils/heap.hpp                                \
     utils/history_tracker.hpp                     \
     utils/jam_detector.hpp                        \
-    utils/lookup_table.hpp                        \
     utils/otns.hpp                                \
     utils/parse_cmdline.hpp                       \
     utils/ping_sender.hpp                         \

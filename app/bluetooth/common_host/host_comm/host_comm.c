@@ -55,7 +55,6 @@
 #define DEFAUKT_TCP_ADDRESS           ""
 #define DEFAULT_TCP_PORT              "4901"
 #define MAX_OPT_LEN                   255
-#define DEFAULT_HOST_BUFLEN           1024
 
 #define IS_EMPTY_STRING(s)            ((s)[0] == '\0')
 #define HANDLE_VALUE_MIN              0
@@ -270,6 +269,12 @@ void *msg_recv_func(void *ptr)
     if (len < 0) {
       // Peek is not supported, read data one by one
       len = 1;
+    }
+    if (len > sizeof(buf_in.buf)) {
+      // If readable data exceeds the buffer size then
+      // read it one by one to avoid overflow
+      len = 1;
+      app_log_warning("Input buffer size too low, please increase it." APP_LOG_NL);
     }
     if (len > 0) {
       memset(&buf_tmp, 0, sizeof(buf_tmp));

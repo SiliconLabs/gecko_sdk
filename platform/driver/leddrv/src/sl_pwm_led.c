@@ -107,7 +107,7 @@ static CMU_Clock_TypeDef pwm_led_get_timer_clock(TIMER_TypeDef *timer)
   return timer_clock;
 }
 
-static void pwm_led_start(void *led_handler)
+void sl_pwm_led_start(void *led_handler)
 {
   sl_led_pwm_t *led = (sl_led_pwm_t *)led_handler;
   // Enable PWM output
@@ -124,7 +124,7 @@ static void pwm_led_start(void *led_handler)
 #endif
 }
 
-static void pwm_led_stop(void *led_handler)
+void sl_pwm_led_stop(void *led_handler)
 {
   sl_led_pwm_t *led = (sl_led_pwm_t *)led_handler;
   // Disable PWM output
@@ -185,7 +185,7 @@ sl_status_t sl_pwm_led_init(void *led_handler)
   // User configuration values are OK. Continue with the initialization...
 
   // Set CC channel parameters
-  channel_init.outInvert = led->polarity;
+  channel_init.outInvert = !!led->polarity;
   TIMER_InitCC(led->timer, led->channel, &channel_init);
 
   // Set PWM pin as output
@@ -231,18 +231,15 @@ if (top < (led->resolution - 1)) {
 }
 TIMER_TopSet(led->timer, top);
 
-// Set the initial duty cycles and LED state to OFF
-TIMER_CompareSet(led->timer, led->channel, 0UL);
-
 // Initialize TIMER
 TIMER_Init_TypeDef timer_init = TIMER_INIT_DEFAULT;
 TIMER_Init(led->timer, &timer_init);
 
 // Initialize the level settings values
-led->level = 0UL;
+sl_pwm_led_set_color(led, led->level);
 
-// Enable output
-pwm_led_start(led);
+// Set LED state to Off.
+sl_pwm_led_stop(led);
 
 return SL_STATUS_OK;
 }
@@ -254,9 +251,9 @@ void sl_pwm_led_set_color(void *led_handler, uint16_t color)
   uint32_t level_increments = TIMER_TopGet(led->timer) / (led->resolution - 1);
   led->level = color;
 
-  pwm_led_stop(led);
+  sl_pwm_led_stop(led);
   TIMER_CompareBufSet(led->timer, led->channel, led->level * level_increments);
-  pwm_led_start(led);
+  sl_pwm_led_start(led);
 }
 
 void sl_pwm_led_get_color(void *led_handler, uint16_t *color)

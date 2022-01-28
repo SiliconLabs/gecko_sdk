@@ -54,6 +54,39 @@ class IRegMapRegister(object):
     # Query Methods
 
     @abstractmethod
+    def registerAddressToNamesCb(self, addressToNamesCb):
+        """
+        Internal function used by the device module initialization.
+
+        Args:
+            addressToNamesCb: The top-level callable to decode register address.
+
+        """
+        pass
+
+    @abstractmethod
+    def getAliasedNames(self):
+        """
+        Get names of other registers at this register's address.
+
+        Returns:
+            List[str]: Register full names mapped to the same address.
+
+        """
+        pass
+
+    @abstractmethod
+    def isAliased(self):
+        """
+        Check for other registers at this register's address.
+
+        Returns:
+            Bool: True if there are other registers mapped to this address.
+
+        """
+        pass
+
+    @abstractmethod
     def getFieldNames(self):
         """
         Return a list of all 'PERIPHERAL.REGISTER.FIELD' names in this register.

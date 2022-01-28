@@ -216,7 +216,7 @@ tag:
   - hardware:
       device:
         memory:
-          flash: 125
+          flash: 126
           ram: 19
       board:
         rf_bands:

@@ -1,7 +1,7 @@
 project_name: gpd-switch
 label: "GPD Switch"
 package: "Zigbee"
-category: "ZigBee Application"
+category: "Zigbee Application"
 quality: production
 
 # Silicon Labs Project Configuration Tools: slcp, v0, Component selection file.

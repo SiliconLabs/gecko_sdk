@@ -819,11 +819,6 @@ sl_status_t sl_mac_receive_callback(uint8_t mac_index, PacketHeader rawHeader)
   uint8_t phyPacketLength = rawHeaderContents[0];
   uint16_t internalMacFcf = HIGH_LOW_TO_INT(rawHeaderContents[2], rawHeaderContents[1]);
 
-  if ((internalMacFcf & EMBER_MAC_HEADER_FC_FRAME_TYPE_MASK) == EMBER_MAC_HEADER_FC_FRAME_TYPE_ACK) {
-    // drop 15.4 ACKs in MAC mode.
-    return SL_STATUS_FAIL;
-  }
-
   // Get the appended info
   uint8_t appendedInfo[NUM_APPENDED_INFO_BYTES] = { 0 };
   MEMCOPY(appendedInfo,
@@ -841,9 +836,15 @@ sl_status_t sl_mac_receive_callback(uint8_t mac_index, PacketHeader rawHeader)
       (*emMfglibRxCallback)(rawHeaderContents,
                             appendedInfo[APPENDED_INFO_LQI_BYTE_INDEX],
                             (int8_t) appendedInfo[APPENDED_INFO_RSSI_BYTE_INDEX]);
-      return SL_STATUS_OK;
     }
+    return SL_STATUS_OK;
   }
+
+  if ((internalMacFcf & EMBER_MAC_HEADER_FC_FRAME_TYPE_MASK) == EMBER_MAC_HEADER_FC_FRAME_TYPE_ACK) {
+    // drop 15.4 ACKs in MAC mode.
+    return SL_STATUS_FAIL;
+  }
+
   uint8_t rawMacHeaderLength = sl_mac_flat_mac_header_length(rawMacHeader, false);
 
   // Expect a valid packet

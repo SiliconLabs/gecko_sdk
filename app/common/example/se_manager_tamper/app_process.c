@@ -496,16 +496,24 @@ static void print_tamper_conf(void)
          1 << conf->tamper_filter_period);
   printf("  + Activation threshold for the tamper filter: %d\n",
          256 / (1 << conf->tamper_filter_threshold));
-  if (conf->tamper_flags) {
+  if (conf->tamper_flags & SL_SE_TAMPER_FLAG_DGLITCH_ALWAYS_ON) {
     printf("  + Digital glitch detector always on: Enabled\n");
   } else {
     printf("  + Digital glitch detector always on: Disabled\n");
   }
+#if (_SILICON_LABS_32B_SERIES_2_CONFIG > 2)
+  if (get_se_otp_conf_buf_ptr()->tamper_flags & (1UL << 2)) {
+    printf("  + Keep tamper alive during sleep: Enabled\n");
+  } else {
+    printf("  + Keep tamper alive during sleep: Disabled\n");
+  }
+#endif
   printf("  + Tamper reset threshold: %d\n", conf->tamper_reset_threshold);
 
   // Check tamper configuration can run on this example or not
   if (conf->tamper_levels[SL_SE_TAMPER_SIGNAL_FILTER_COUNTER] == SL_SE_TAMPER_LEVEL_INTERRUPT
       && conf->tamper_levels[SL_SE_TAMPER_SIGNAL_PRS0] == SL_SE_TAMPER_LEVEL_INTERRUPT
+      && conf->tamper_levels[SL_SE_TAMPER_SIGNAL_PRS1] == SL_SE_TAMPER_LEVEL_INTERRUPT
       && conf->tamper_levels[SL_SE_TAMPER_SIGNAL_PRS2] == SL_SE_TAMPER_LEVEL_FILTER
       && conf->tamper_levels[SL_SE_TAMPER_SIGNAL_PRS4] == SL_SE_TAMPER_LEVEL_RESET
       && conf->tamper_levels[SL_SE_TAMPER_SIGNAL_PRS5] == SL_SE_TAMPER_LEVEL_RESET

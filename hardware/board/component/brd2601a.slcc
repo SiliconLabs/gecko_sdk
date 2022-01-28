@@ -28,6 +28,7 @@
   - id: i2cspm
     instance:
     - sensor
+  - id: pressure_driver_bmp3xx
   - id: mic_i2s_driver
   - id: simple_led
     instance:

@@ -22,21 +22,18 @@
 #include <stdint.h>
 #include "sl_si70xx.h"
 #include "MultilevelSensor_si7021.h"
+
+#if defined(BUILDING_WITH_UC)
+#include "sl_i2cspm_instances.h"
+#else
+#include "sl_i2cspm_instances_nonuc.h"
+#endif 
+
 // -----------------------------------------------------------------------------
 //                Macros and Typedefs
 // -----------------------------------------------------------------------------
 #define SL_I2CSPM_SENSOR_REFERENCE_CLOCK     0
 #define SL_I2CSPM_SENSOR_SPEED_MODE          0
-
-// I2C0 SCL on PC10
-#define SL_I2CSPM_SENSOR_SCL_PORT        gpioPortC
-#define SL_I2CSPM_SENSOR_SCL_PIN         10
-#define SL_I2CSPM_SENSOR_SCL_LOC         14
-
-// I2C0 SDA on PC11
-#define SL_I2CSPM_SENSOR_SDA_PORT        gpioPortC
-#define SL_I2CSPM_SENSOR_SDA_PIN         11
-#define SL_I2CSPM_SENSOR_SDA_LOC         16
 
 #define SL_BOARD_ENABLE_SENSOR_RHT_PORT      gpioPortB
 #define SL_BOARD_ENABLE_SENSOR_RHT_PIN       10
@@ -62,26 +59,15 @@
 // -----------------------------------------------------------------------------
 //                Global Variables
 // -----------------------------------------------------------------------------
+#ifndef BUILDING_WITH_UC
+
+sl_i2cspm_t *sl_i2cspm_sensor = SL_I2CSPM_SENSOR_PERIPHERAL;
+
+#endif
 
 // -----------------------------------------------------------------------------
 //                Static Variables
 // -----------------------------------------------------------------------------
-sl_i2cspm_t *sl_i2cspm_sensor = SL_I2CSPM_SENSOR_PERIPHERAL;
-
-static I2CSPM_Init_TypeDef init_sensor = {
-  .port  = SL_I2CSPM_SENSOR_PERIPHERAL,
-  .sclPort = SL_I2CSPM_SENSOR_SCL_PORT,
-  .sclPin  = SL_I2CSPM_SENSOR_SCL_PIN,
-  .sdaPort = SL_I2CSPM_SENSOR_SDA_PORT,
-  .sdaPin  = SL_I2CSPM_SENSOR_SDA_PIN,
-#if defined(_SILICON_LABS_32B_SERIES_1)
-  .portLocationScl = SL_I2CSPM_SENSOR_SCL_LOC,
-  .portLocationSda = SL_I2CSPM_SENSOR_SDA_LOC,
-#endif
-  .i2cRefFreq = 0,
-  .i2cMaxFreq = SL_I2CSPM_SENSOR_MAX_FREQ,
-  .i2cClhr = SL_I2CSPM_SENSOR_HLR
-};
 
 static bool is_sensor_inited = false;
 // -----------------------------------------------------------------------------
@@ -106,7 +92,6 @@ bool Sensor_si7021_init(void)
   if(is_sensor_inited == false)
   {
     GPIO_PinModeSet(SL_BOARD_ENABLE_SENSOR_RHT_PORT, SL_BOARD_ENABLE_SENSOR_RHT_PIN, gpioModePushPull, 1);
-    I2CSPM_Init(&init_sensor);
     is_sensor_inited = true;
 
     if( SL_STATUS_OK != sl_si70xx_init(sl_i2cspm_sensor, SI7021_ADDR))

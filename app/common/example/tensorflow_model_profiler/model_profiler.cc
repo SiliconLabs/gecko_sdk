@@ -189,7 +189,8 @@ void harvest_output_matrix(int operation_index)
 class SlProfiler : public tflite::MicroProfiler {
   public:
     SlProfiler() : total_cpu_cycles_(0), total_mvp_instructions_(0),
-                   total_mvp_stall_cycles_(0), operation_index_(0) {}
+                  total_mvp_programs_(0), total_mvp_stall_cycles_(0),
+                  operation_index_(0) {}
 
     ~SlProfiler() override = default;
 
@@ -202,6 +203,7 @@ class SlProfiler : public tflite::MicroProfiler {
 #endif
 #if defined(SL_CATALOG_MVP_PRESENT)
       sli_mvp_perfcnt_reset_all();
+      sli_mvp_progcnt_reset();
 #endif
       cpu_cycles = DWT->CYCCNT;
       return 0;
@@ -212,23 +214,27 @@ class SlProfiler : public tflite::MicroProfiler {
 #if defined(SL_CATALOG_MVP_PRESENT)
       uint32_t mvp_instructions;
       uint32_t mvp_stall_cycles;
+      uint32_t mvp_programs;
 #endif
 
       cpu_cycles = DWT->CYCCNT - cpu_cycles;
       total_cpu_cycles_ += cpu_cycles;
-      sli_print_time("Execution time:   ", cpu_cycles);
-      sli_print_ui32("CPU cycle count:  ", cpu_cycles, "\n");
+      sli_print_time("Execution time:    ", cpu_cycles);
+      sli_print_ui32("CPU cycle count:   ", cpu_cycles, "\n");
 
 #if defined(SL_CATALOG_MVP_PRESENT)
       mvp_instructions = sli_mvp_perfcnt_get(0);
       if (mvp_instructions > 0) {
         mvp_stall_cycles = sli_mvp_perfcnt_get(1);
+        mvp_programs = sli_mvp_progcnt_get();
 
         total_mvp_instructions_ += mvp_instructions;
         total_mvp_stall_cycles_ += mvp_stall_cycles;
+        total_mvp_programs_ += mvp_programs;
 
-        sli_print_ui32("MVP instructions: ", mvp_instructions, "\n");
-        sli_print_ui32("MVP stall cycles: ", mvp_stall_cycles, "\n");
+        sli_print_ui32("MVP instructions:  ", mvp_instructions, "\n");
+        sli_print_ui32("MVP stall cycles:  ", mvp_stall_cycles, "\n");
+        sli_print_ui32("MVP program count: ", mvp_programs, "\n");
       }
 #endif
 #if defined(SL_PRINT_MATRIX_DATA)
@@ -239,6 +245,7 @@ class SlProfiler : public tflite::MicroProfiler {
 
     uint32_t total_cpu_cycles(void) { return total_cpu_cycles_; }
     uint32_t total_mvp_instructions(void) { return total_mvp_instructions_; }
+    uint32_t total_mvp_programs(void) { return total_mvp_programs_; }
     uint32_t total_mvp_stall_cycles(void) { return total_mvp_stall_cycles_; }
     uint32_t operation_index(void) { return operation_index_; }
 
@@ -246,6 +253,7 @@ class SlProfiler : public tflite::MicroProfiler {
     uint32_t cpu_cycles;
     uint32_t total_cpu_cycles_;
     uint32_t total_mvp_instructions_;
+    uint32_t total_mvp_programs_;
     uint32_t total_mvp_stall_cycles_;
     int operation_index_;
     TF_LITE_REMOVE_VIRTUAL_DELETE
@@ -373,6 +381,7 @@ void model_profiler_process_action(void)
   if (total_mvp_instructions > 0) {
     sli_print_ui32("Total MVP instructions: ", total_mvp_instructions, "\n");
     sli_print_ui32("Total MVP stall cycles: ", profiler.total_mvp_stall_cycles(), "\n");
+    sli_print_ui32("Total MVP programs:     ", profiler.total_mvp_programs(), "\n");
   }
 #endif
   printf("--------------------------------------------\n");

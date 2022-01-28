@@ -11,10 +11,6 @@
 // <i> Default: 0
 #define SL_BOARD_ENABLE_DISPLAY                 0
 
-// <q SL_BOARD_ENABLE_SENSOR_RHT> Enable Relative Humidity and Temperature sensor
-// <i> Default: 0
-#define SL_BOARD_ENABLE_SENSOR_RHT              0
-
 // <q SL_BOARD_DISABLE_MEMORY_SPI> Disable SPI Flash
 // <i> Default: 1
 #define SL_BOARD_DISABLE_MEMORY_SPI             1
@@ -34,12 +30,6 @@
 #define SL_BOARD_ENABLE_DISPLAY_PORT            gpioPortB
 #define SL_BOARD_ENABLE_DISPLAY_PIN             5
 // [GPIO_SL_BOARD_ENABLE_DISPLAY]$
-
-// <gpio> SL_BOARD_ENABLE_SENSOR_RHT
-// $[GPIO_SL_BOARD_ENABLE_SENSOR_RHT]
-#define SL_BOARD_ENABLE_SENSOR_RHT_PORT         gpioPortC
-#define SL_BOARD_ENABLE_SENSOR_RHT_PIN          8
-// [GPIO_SL_BOARD_ENABLE_SENSOR_RHT]$
 
 // <<< sl:end pin_tool >>>
 

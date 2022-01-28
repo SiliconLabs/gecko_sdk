@@ -66,6 +66,8 @@ uint32_t emAfGetMSFromTimerDurationAndUnit(uint16_t duration,
 //A function to initialize the Event mechanism used to drive the application framework.
 void emAfInitEvents(void);
 
+uint32_t emberAfMsToNextEventExtended(uint32_t maxMs, uint8_t* returnIndex);
+
 const char * emberAfGetEventString(uint8_t index);
 
 #endif // SILABS_AF_EVENT_H

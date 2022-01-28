@@ -107,6 +107,27 @@ target_link_libraries(ot-test-array
         ${COMMON_LIBS}
 )
 
+add_executable(ot-test-binary-search
+    test_binary_search.cpp
+)
+
+target_include_directories(ot-test-binary-search
+    PRIVATE
+        ${COMMON_INCLUDES}
+)
+
+target_compile_options(ot-test-binary-search
+    PRIVATE
+        ${COMMON_COMPILE_OPTIONS}
+)
+
+target_link_libraries(ot-test-binary-search
+    PRIVATE
+        ${COMMON_LIBS}
+)
+
+add_test(NAME ot-test-binary-search COMMAND ot-test-binary-search)
+
 add_executable(ot-test-child
     test_child.cpp
 )
@@ -430,27 +451,6 @@ target_link_libraries(ot-test-linked-list
 
 add_test(NAME ot-test-linked-list COMMAND ot-test-linked-list)
 
-add_executable(ot-test-lookup-table
-    test_lookup_table.cpp
-)
-
-target_include_directories(ot-test-lookup-table
-    PRIVATE
-        ${COMMON_INCLUDES}
-)
-
-target_compile_options(ot-test-lookup-table
-    PRIVATE
-        ${COMMON_COMPILE_OPTIONS}
-)
-
-target_link_libraries(ot-test-lookup-table
-    PRIVATE
-        ${COMMON_LIBS}
-)
-
-add_test(NAME ot-test-lookup-table COMMAND ot-test-lookup-table)
-
 add_executable(ot-test-lowpan
     test_lowpan.cpp
 )
@@ -704,6 +704,27 @@ target_link_libraries(ot-test-pskc
 )
 
 add_test(NAME ot-test-pskc COMMAND ot-test-pskc)
+
+add_executable(ot-test-smart-ptrs
+    test_smart_ptrs.cpp
+)
+
+target_include_directories(ot-test-smart-ptrs
+    PRIVATE
+        ${COMMON_INCLUDES}
+)
+
+target_compile_options(ot-test-smart-ptrs
+    PRIVATE
+        ${COMMON_COMPILE_OPTIONS}
+)
+
+target_link_libraries(ot-test-smart-ptrs
+    PRIVATE
+        ${COMMON_LIBS}
+)
+
+add_test(NAME ot-test-smart-ptrs COMMAND ot-test-smart-ptrs)
 
 add_executable(ot-test-meshcop
     test_meshcop.cpp

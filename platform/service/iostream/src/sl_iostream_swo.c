@@ -181,6 +181,9 @@ static sl_status_t swo_write(void *context,
                              size_t buffer_length)
 {
   sl_status_t ret = SL_STATUS_OK;
+  uint32_t *buf_32 = (uint32_t*)(buffer);
+  uint16_t *buf_16;
+  uint8_t *buf_8;
 #if defined(SL_CATALOG_KERNEL_PRESENT)
   swo_stream_context_t *swo_context = (swo_stream_context_t *)context;
   if (osKernelGetState() == osKernelRunning) {
@@ -195,31 +198,32 @@ static sl_status_t swo_write(void *context,
 
   // Write the maximum number of words
   while (buffer_length >= sizeof(uint32_t)) {
-    ret = sl_debug_swo_write_u32(0, *(uint32_t*)(buffer));
+    ret = sl_debug_swo_write_u32(0, *buf_32);
     if (ret != SL_STATUS_OK) {
       goto early_return;
     }
-    buffer += sizeof(uint32_t);
+    buf_32++;
     buffer_length -= sizeof(uint32_t);
   }
 
   // Write a last half-word if remaining
+  buf_16 = (uint16_t*)buf_32;
   if (buffer_length >= sizeof(uint16_t)) {
-    ret = sl_debug_swo_write_u16(0, *(uint16_t*)(buffer));
+    ret = sl_debug_swo_write_u16(0, *buf_16);
     if (ret != SL_STATUS_OK) {
       goto early_return;
     }
-    buffer += sizeof(uint16_t);
+    buf_16++;
     buffer_length -= sizeof(uint16_t);
   }
 
   // Write the last byte if remaining
+  buf_8 = (uint8_t*)buf_16;
   if (buffer_length == sizeof(uint8_t)) {
-    ret = sl_debug_swo_write_u8(0, *(uint8_t*)(buffer));
+    ret = sl_debug_swo_write_u8(0, *buf_8);
   }
 
   early_return:
-
 #if defined(SL_CATALOG_KERNEL_PRESENT)
   if (osKernelGetState() == osKernelRunning) {
     // Bypass lock if we print before the kernel is running

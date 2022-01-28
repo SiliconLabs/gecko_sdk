@@ -52,7 +52,7 @@ btmesh_conf_job_t *btmesh_conf_job_create_default(uint16_t enc_netkey_index,
                                 task_tree,
                                 on_job_notification,
                                 BTMESH_CONF_VARG_NULL,
-                                BTMESH_CONF_JOB_AUTO_DESTROY,
+                                SL_BTMESH_CONF_JOB_AUTO_DESTROY_CFG_VAL,
                                 NULL);
 }
 

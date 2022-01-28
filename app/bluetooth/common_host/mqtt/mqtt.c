@@ -61,7 +61,7 @@ static const char * mqtt_err2str(int rc);
 static sl_status_t mqtt_add_topic(mqtt_handle_t *handle, const char *topic);
 static sl_status_t mqtt_remove_topic(mqtt_handle_t *handle, const char *topic);
 static sl_status_t mqtt_get_topic_by_index(mqtt_handle_t *handle,
-                                           uint8_t index,
+                                           uint32_t index,
                                            char **topic);
 static void mqtt_destroy_topics(mqtt_handle_t *handle);
 /**************************************************************************//**
@@ -276,7 +276,7 @@ sl_status_t mqtt_deinit(mqtt_handle_t *handle)
 static void mqtt_on_connect(struct mosquitto *mosq, void *obj, int rc)
 {
   mqtt_handle_t *handle = (mqtt_handle_t *)obj;
-  uint8_t i = 0;
+  uint32_t i = 0;
   char *topic;
   int ret = MOSQ_ERR_SUCCESS;
 
@@ -404,9 +404,9 @@ static void mqtt_destroy_topics(mqtt_handle_t *handle)
   handle->head_topic = NULL;
 }
 
-static sl_status_t mqtt_get_topic_by_index(mqtt_handle_t *handle, uint8_t index, char **topic)
+static sl_status_t mqtt_get_topic_by_index(mqtt_handle_t *handle, uint32_t index, char **topic)
 {
-  uint8_t i = 0;
+  uint32_t i = 0;
   mqtt_topic_node_t *current = handle->head_topic;
 
   if (NULL == handle->head_topic) {

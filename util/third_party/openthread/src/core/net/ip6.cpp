@@ -80,13 +80,13 @@ Ip6::Ip6(Instance &aInstance)
 
 Message *Ip6::NewMessage(uint16_t aReserved, const Message::Settings &aSettings)
 {
-    return Get<MessagePool>().New(Message::kTypeIp6,
-                                  sizeof(Header) + sizeof(HopByHopHeader) + sizeof(OptionMpl) + aReserved, aSettings);
+    return Get<MessagePool>().Allocate(
+        Message::kTypeIp6, sizeof(Header) + sizeof(HopByHopHeader) + sizeof(OptionMpl) + aReserved, aSettings);
 }
 
 Message *Ip6::NewMessage(const uint8_t *aData, uint16_t aDataLength, const Message::Settings &aSettings)
 {
-    Message *message = Get<MessagePool>().New(Message::kTypeIp6, 0, aSettings);
+    Message *message = Get<MessagePool>().Allocate(Message::kTypeIp6, /* aReserveHeader */ 0, aSettings);
 
     VerifyOrExit(message != nullptr);
 
@@ -307,7 +307,7 @@ Error Ip6::InsertMplOption(Message &aMessage, Header &aHeader, MessageInfo &aMes
 
             if ((messageCopy = aMessage.Clone()) != nullptr)
             {
-                IgnoreError(HandleDatagram(*messageCopy, nullptr, nullptr, true));
+                IgnoreError(HandleDatagram(*messageCopy, nullptr, nullptr, /* aFromNcpHost */ true));
                 otLogInfoIp6("Message copy for indirect transmission to sleepy children");
             }
             else
@@ -540,7 +540,7 @@ void Ip6::HandleSendQueue(void)
     while ((message = mSendQueue.GetHead()) != nullptr)
     {
         mSendQueue.Dequeue(*message);
-        IgnoreError(HandleDatagram(*message, nullptr, nullptr, false));
+        IgnoreError(HandleDatagram(*message, nullptr, nullptr, /* aFromNcpHost */ false));
     }
 }
 
@@ -1084,7 +1084,7 @@ exit:
     return error;
 }
 
-Error Ip6::SendRaw(Message &aMessage)
+Error Ip6::SendRaw(Message &aMessage, bool aFromNcpHost)
 {
     Error       error = kErrorNone;
     Header      header;
@@ -1103,7 +1103,7 @@ Error Ip6::SendRaw(Message &aMessage)
         SuccessOrExit(error = InsertMplOption(aMessage, header, messageInfo));
     }
 
-    error = HandleDatagram(aMessage, nullptr, nullptr, true);
+    error = HandleDatagram(aMessage, nullptr, nullptr, aFromNcpHost);
     freed = true;
 
 exit:
@@ -1213,6 +1213,7 @@ start:
         {
             // Remove encapsulating header and start over.
             aMessage.RemoveHeader(aMessage.GetOffset());
+            Get<MeshForwarder>().LogMessage(MeshForwarder::kMessageReceive, aMessage, nullptr, kErrorNone);
             goto start;
         }
 
@@ -1509,52 +1510,15 @@ exit:
 
 const char *Ip6::IpProtoToString(uint8_t aIpProto)
 {
-    const char *retval;
+    static constexpr Stringify::Entry kIpProtoTable[] = {
+        {kProtoHopOpts, "HopOpts"}, {kProtoTcp, "TCP"},         {kProtoUdp, "UDP"},
+        {kProtoIp6, "IP6"},         {kProtoRouting, "Routing"}, {kProtoFragment, "Frag"},
+        {kProtoIcmp6, "ICMP6"},     {kProtoNone, "None"},       {kProtoDstOpts, "DstOpts"},
+    };
 
-    switch (aIpProto)
-    {
-    case kProtoHopOpts:
-        retval = "HopOpts";
-        break;
+    static_assert(Stringify::IsSorted(kIpProtoTable), "kIpProtoTable is not sorted");
 
-    case kProtoTcp:
-        retval = "TCP";
-        break;
-
-    case kProtoUdp:
-        retval = "UDP";
-        break;
-
-    case kProtoIp6:
-        retval = "IP6";
-        break;
-
-    case kProtoRouting:
-        retval = "Routing";
-        break;
-
-    case kProtoFragment:
-        retval = "Frag";
-        break;
-
-    case kProtoIcmp6:
-        retval = "ICMP6";
-        break;
-
-    case kProtoNone:
-        retval = "None";
-        break;
-
-    case kProtoDstOpts:
-        retval = "DstOpts";
-        break;
-
-    default:
-        retval = "Unknown";
-        break;
-    }
-
-    return retval;
+    return Stringify::Lookup(aIpProto, kIpProtoTable, "Unknown");
 }
 
 // LCOV_EXCL_STOP

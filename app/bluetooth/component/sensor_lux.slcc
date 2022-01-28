@@ -20,6 +20,7 @@ requires:
   - name: sensor_select
   - name: veml6035_driver
   - name: i2cspm
+  - name: app_assert
 template_contribution:
   - name: component_catalog
     value: sensor_lux

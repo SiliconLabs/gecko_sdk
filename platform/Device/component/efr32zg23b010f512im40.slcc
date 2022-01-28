@@ -100,6 +100,7 @@
   - name: cortexm33
   - name: armv8m.main
   - name: device_security_vault
+  - name: device_pa_14dbm
   - name: device_has_acmp
   - name: device_has_acmp0
   - name: device_has_acmp1

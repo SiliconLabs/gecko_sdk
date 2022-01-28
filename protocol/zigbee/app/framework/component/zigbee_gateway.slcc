@@ -34,6 +34,10 @@ template_contribution:
     value: zigbee_gateway
   - name: zigbee_af_callback
     value:
+      callback_type: event_init
+      function_name: emberAfPluginGatewayInitCallback  
+  - name: zigbee_af_callback
+    value:
       callback_type: init_done
       function_name: emberAfPluginGatewayInitCallback
   - name: cli_group
@@ -45,11 +49,7 @@ template_contribution:
     value:
       group: gateway
       name: time-sync-local
-      handler: emberAfPluginGatewaySupportTimeSyncLocal 
-  - name: zigbee_af_callback
-    value:
-      callback_type: tick
-      function_name: emberAfPluginGatewayTickCallback
+      handler: emberAfPluginGatewaySupportTimeSyncLocal
 documentation:
   docset: zigbee
   document: zigbee-af-api/gateway

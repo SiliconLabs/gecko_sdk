@@ -290,6 +290,8 @@ RAILModel:
                                 dataType: FieldDataType.UINT32_T
                               - name: rxBaudRate
                                 dataType: FieldDataType.UINT32_T
+                              - name: rateInfo
+                                dataType: FieldDataType.UINT32_T
                               - name: baudPerSymbol
                                 dataType: FieldDataType.UINT8_T
                               - name: bitsPerSymbol

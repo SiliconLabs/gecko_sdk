@@ -847,6 +847,7 @@ void sli_cpc_drv_notify_tx_complete(sl_cpc_buffer_handle_t *buffer_handle)
 #if defined(CPC_DEBUG_TRACE)
   if (buffer_handle->endpoint != NULL) {
     SLI_CPC_DEBUG_TRACE_ENDPOINT_FRAME_TRANSMIT_COMPLETED(buffer_handle->endpoint);
+    SLI_CPC_DEBUG_TRACE_CORE_TXD_TRANSMIT_COMPLETED();
   }
 #endif
 
@@ -877,9 +878,6 @@ void sli_cpc_drv_notify_tx_complete(sl_cpc_buffer_handle_t *buffer_handle)
       }
       buffer_handle->data = NULL;
       sli_cpc_free_closed_arg(arg);
-      // Cannot trace DATA_FRAME_TRANSMIT_COMPLETED because the endpoint is already closed
-    } else {
-      SLI_CPC_DEBUG_TRACE_CORE_TXD_TRANSMIT_COMPLETED();
     }
     // Free handle and data buffer
     sli_cpc_drop_buffer_handle(buffer_handle);
@@ -1303,7 +1301,6 @@ static void decode_packet(void)
     }
   }
 
-  SLI_CPC_DEBUG_TRACE_CORE_RXD_VALID_FRAME();
   address = sli_cpc_hdlc_get_address(rx_handle->hdlc_header);
   control = sli_cpc_hdlc_get_control(rx_handle->hdlc_header);
   data_length = sli_cpc_hdlc_get_length(rx_handle->hdlc_header);
@@ -1337,11 +1334,14 @@ static void decode_packet(void)
       sli_cpc_drop_buffer_handle(rx_handle);
       SLI_CPC_DEBUG_TRACE_ENDPOINT_RXD_SUPERVISORY_DROPPED(endpoint);
     } else if (type == SLI_CPC_HDLC_FRAME_TYPE_DATA) {
+      SLI_CPC_DEBUG_TRACE_CORE_RXD_VALID_IFRAME();
       receive_iframe(endpoint, rx_handle, address, control, seq);
     } else if (type == SLI_CPC_HDLC_FRAME_TYPE_SUPERVISORY) {
       receive_sframe(endpoint, rx_handle, control, data_length);
+      SLI_CPC_DEBUG_TRACE_CORE_RXD_VALID_SFRAME();
     } else if (type == SLI_CPC_HDLC_FRAME_TYPE_UNNUMBERED) {
       receive_uframe(endpoint, rx_handle, control, data_length);
+      SLI_CPC_DEBUG_TRACE_CORE_RXD_VALID_UFRAME();
     } else {
       transmit_reject(endpoint, address, endpoint->ack, SL_CPC_REJECT_ERROR);
       sli_cpc_drop_buffer_handle(rx_handle);
@@ -1508,6 +1508,7 @@ static void receive_iframe(sl_cpc_endpoint_t *endpoint,
   fcs = sli_cpc_hdlc_get_fcs(rx_handle->data, rx_buffer_payload_len);
   if (!sli_cpc_validate_crc_sw(rx_handle->data, rx_buffer_payload_len, fcs)) {
     transmit_reject(endpoint, address, endpoint->ack, SL_CPC_REJECT_CHECKSUM_MISMATCH);
+    SLI_CPC_DEBUG_TRACE_CORE_INVALID_PAYLOAD_CHECKSUM();
     sli_cpc_drop_buffer_handle(rx_handle);
     return;
   }
@@ -1702,6 +1703,7 @@ static void receive_uframe(sl_cpc_endpoint_t *endpoint,
     SLI_CPC_SYSVIEW_MARK_EVENT_ON_ENDPOINT(SLI_CPC_SYSVIEW_INVALID_FCS_EVENT, endpoint->id);
     sli_cpc_drop_buffer_handle(rx_handle);
     SLI_CPC_DEBUG_TRACE_ENDPOINT_RXD_UNNUMBERED_DROPPED(endpoint);
+    SLI_CPC_DEBUG_TRACE_CORE_INVALID_PAYLOAD_CHECKSUM();
     return;
   }
 
@@ -1824,6 +1826,7 @@ static sl_status_t re_transmit_frame(sl_cpc_endpoint_t* endpoint)
   sli_cpc_signal_event(SL_CPC_SIGNAL_TX);
 
   SLI_CPC_DEBUG_TRACE_ENDPOINT_RETXD_DATA_FRAME(endpoint);
+  SLI_CPC_DEBUG_TRACE_CORE_RE_TRANSMIT_FRAME();
 
   return SL_STATUS_OK;
 }

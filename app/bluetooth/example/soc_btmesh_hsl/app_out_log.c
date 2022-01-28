@@ -82,7 +82,7 @@ void sl_btmesh_friend_on_friendship_terminated(uint16_t netkey_index,
 /*******************************************************************************
  * Called when the UI shall be updated with the changed HSL Model state during
  * a transition. The rate of this callback can be controlled by changing the
- * HSL_SERVER_HUE_UI_UPDATE_PERIOD macro.
+ * SL_BTMESH_HSL_SERVER_HUE_UI_UPDATE_PERIOD_CFG_VAL macro.
  *
  * @param[in] hue  Hue value.
  ******************************************************************************/
@@ -95,7 +95,7 @@ void sl_btmesh_hsl_hue_on_ui_update(uint16_t hue)
 /*******************************************************************************
  * Called when the UI shall be updated with the changed HSL Model state during
  * a transition. The rate of this callback can be controlled by changing the
- * HSL_SERVER_SATURATION_UI_UPDATE_PERIOD macro.
+ * SL_BTMESH_HSL_SERVER_SATURATION_UI_UPDATE_PERIOD_CFG_VAL macro.
  *
  * @param[in] saturation  Saturation value.
  ******************************************************************************/
@@ -112,7 +112,7 @@ void sl_btmesh_hsl_saturation_on_ui_update(uint16_t saturation)
 /*******************************************************************************
  * Called when the UI shall be updated with the changed state of
  * lightning server during a transition. The rate of this callback can be
- * controlled by changing the LIGHTING_SERVER_UI_UPDATE_PERIOD macro.
+ * controlled by changing the SL_BTMESH_LIGHTING_SERVER_UI_UPDATE_PERIOD_CFG_VAL macro.
  *
  * @param[in] lightness_level lightness level (0x0001 - FFFE)
  *

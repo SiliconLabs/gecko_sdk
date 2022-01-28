@@ -926,17 +926,51 @@ extern EmberMulticastTableEntry emberMulticastTable[];
  */
 extern uint8_t emberMulticastTableSize;
 
-/** @brief Set the number of broadcast passive acknowledgments required before
- * terminating a broadcast transmission. A value of 0xFF causes the node to wait
- * for all neighbors to re-broadcast the packet before terminating the
- * transmission. The default value is 0xFF.
+/** @brief Allows the higher layers to control the broadcast behaviour of
+ * a routing device. The originating device will rebroadcast the maximum number of times and
+ * The configurations below only restrict the number of broadcasts from neighbouring routers.
+ * The configuration settings must be done on each node.
+ *
+ * @param config         of the type sl_passive_ack_config_enum_t
+ *                        SL_PASSIVE_ACK_DEFAULT_CONFIG - All non originating configured nodes check for passive acks from
+ *                                                all neighbours. if no passive acks received it will rebroadcast max times.
+ *                        SL_PASSIVE_ACK_DISABLE - disable passive ack. All configured nodes rebroadcast the incoming processed
+ *                                                broadcast the maximum configured number of times.
+ *                        SL_PASSIVE_ACK_THRESHOLD_WITH_REBROADCAST - All non originating configured nodes check for passive acks from
+ *                                                minAcksNeeded neighbours. They will rebroadcast received message atleast once even
+ *                                                if all passive acks have been received. if no passive acks received it will rebroadcast max times.
+ *
+ *                        SL_PASSIVE_ACK_THRESHOLD_NO_REBROADCAST - All non originating configured nodes check for passive acks from
+ *                                                minAcksNeeded neighbours. They will not rebroadcast received message
+ *                                                if all passive acks have been received. if no passive acks received it will rebroadcast max times.
  *
  * @param minAcksNeeded  The minimum number of acknowledgments (re-broadcasts)
  * to wait for until deeming the broadcast transmission complete.
  *
  * @return None.
  */
-void emberBroadcastSetMinAcksNeeded(uint8_t minAcksNeeded);
+typedef enum {
+  SL_PASSIVE_ACK_DEFAULT_CONFIG,
+  SL_PASSIVE_ACK_DISABLE,
+  SL_PASSIVE_ACK_THRESHOLD_WITH_REBROADCAST,
+  SL_PASSIVE_ACK_THRESHOLD_NO_REBROADCAST
+} sl_passive_ack_config_enum_t;
+
+void sl_set_passive_ack_config(sl_passive_ack_config_enum_t config, uint8_t minAcksNeeded);
+
+/** @brief Set the number of broadcast passive acknowledgments required before
+ * terminating a broadcast transmission. A value of 0xFF causes the node to wait
+ * for all neighbors to re-broadcast the packet before terminating the
+ * transmission. The default value is 0xFF.
+ * API is kept for backwards compatability.
+ *
+ * @param minAcksNeeded  The minimum number of acknowledgments (re-broadcasts)
+ * to wait for until deeming the broadcast transmission complete.
+ *
+ * @return None.
+ */
+#define emberBroadcastSetMinAcksNeeded(minAcksNeeded) \
+  sl_set_passive_ack_config(SL_PASSIVE_ACK_THRESHOLD_WITH_REBROADCAST, minAcksNeeded)
 
 /** @brief Intercept an incoming packet from the stack and hands off to a plugin
  * for further processing

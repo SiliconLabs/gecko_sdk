@@ -16,6 +16,7 @@ requires:
   - name: component_catalog
   - name: rail_lib
   - name: rail_util_pa
+  - name: rail_util_rssi
   - name: emlib_msc
   - name: emlib_rmu
   - name: sleeptimer
@@ -38,6 +39,9 @@ requires:
   - name: ot_subghz_phy
     condition:
     - hardware_board_supports_ot_subghz
+  - name: gatt_configuration
+    condition:
+    - bluetooth_stack
   - name: toolchain_gcc
 config_file:
   - path: protocol/openthread/config/sl_openthread_rtos_config.h

@@ -71,7 +71,7 @@ private:
  * Certain fixed multicast addresses are defined as a set of chained (linked-list) constant `otNetifMulticastAddress`
  * entries:
  *
- * LinkLocalAllRouters -> RealmLocalAllRouters -> LinkLocalAll -> RealmLocalAll -> RealmLocalAllMplForwarders -> nullptr
+ * LinkLocalAllRouters -> RealmLocalAllRouters -> LinkLocalAll -> RealmLocalAll -> RealmLocalAllMplForwarders.
  *
  * All or a portion of the chain is appended to the end of `mMulticastAddresses` linked-list. If the interface is
  * subscribed to all-routers multicast addresses (using `SubscribeAllRoutersMulticast()`) then all the five entries
@@ -399,7 +399,7 @@ Error Netif::SubscribeExternalMulticast(const Address &aAddress)
 
     for (const MulticastAddress *cur = &linkLocalAllRoutersAddress; cur; cur = cur->GetNext())
     {
-        VerifyOrExit(cur->GetAddress() != aAddress, error = kErrorInvalidArgs);
+        VerifyOrExit(cur->GetAddress() != aAddress, error = kErrorRejected);
     }
 
     entry = mExtMulticastAddressPool.Allocate();

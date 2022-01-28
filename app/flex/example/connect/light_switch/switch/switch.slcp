@@ -40,8 +40,6 @@ component:
   - id: printf
   - id: iostream_recommended_stream
   - id: iostream_retarget_stdio
-#-------------- Restriction rules -------------------
-  - id: sl_flex_restrictions
 #------------Memory Protection Unit-------------------
   - id: mpu
 #-------------- Restriction rules -------------------

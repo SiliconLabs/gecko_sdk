@@ -151,13 +151,8 @@ void init_tamper_prs(void)
   PRS_ConnectConsumer(SW_RST_TAMPER_PRS_CH, prsTypeAsync,
                       offsetof(PRS_TypeDef, CONSUMER_SE_TAMPERSRC5));
 #else
-#if defined(_SILICON_LABS_32B_SERIES_2_CONFIG_5)
   PRS_ConnectConsumer(TAMPER_INT_PRS_CH, prsTypeAsync,
                       offsetof(PRS_TypeDef, CONSUMER_SETAMPER_TAMPERSRC26));
-#else
-  PRS_ConnectConsumer(TAMPER_INT_PRS_CH, prsTypeAsync,
-                      offsetof(PRS_TypeDef, CONSUMER_SETAMPER_TAMPERSRC25));
-#endif
   PRS_ConnectConsumer(TAMPER_CNT_PRS_CH, prsTypeAsync,
                       offsetof(PRS_TypeDef, CONSUMER_SETAMPER_TAMPERSRC27));
   PRS_ConnectConsumer(HW_RST_TAMPER_PRS_CH, prsTypeAsync,

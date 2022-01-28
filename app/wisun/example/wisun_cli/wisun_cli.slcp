@@ -69,17 +69,28 @@ configuration:
     value: "16384"
     condition: [micriumos_kernel]
 
+readme:
+  - path: ../../documentation/example/wisun_cli/readme.md
+
+other_file:
+  - path: ../../documentation/example/wisun_cli/readme_img0.png
+
 #--------------------- Toolchain ------------------------
 toolchain_settings:
   - option: optimize
     value: debug
+
+ui_hints:
+  highlight:
+    - path: readme.md
+      focus: true
 
 tag:
   - prebuilt_demo
   - hardware:
       device:
         memory:
-          flash: 611
+          flash: 615
           ram: 120
       board:
         rf_bands:
@@ -87,3 +98,4 @@ tag:
         communication:
           - vcom
           - pti
+  

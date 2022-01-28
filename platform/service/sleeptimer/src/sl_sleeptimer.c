@@ -314,7 +314,7 @@ sl_status_t sl_sleeptimer_stop_timer(sl_sleeptimer_timer_handle_t *handle)
     return SL_STATUS_NULL_POINTER;
   }
 
-  CORE_ENTER_ATOMIC();
+  CORE_ENTER_CRITICAL();
   update_delta_list();
 
   // If first timer in list, update timer comparator.
@@ -324,7 +324,7 @@ sl_status_t sl_sleeptimer_stop_timer(sl_sleeptimer_timer_handle_t *handle)
 
   error = delta_list_remove_timer(handle);
   if (error != SL_STATUS_OK) {
-    CORE_EXIT_ATOMIC();
+    CORE_EXIT_CRITICAL();
     return error;
   }
 
@@ -334,7 +334,7 @@ sl_status_t sl_sleeptimer_stop_timer(sl_sleeptimer_timer_handle_t *handle)
     sleeptimer_hal_disable_int(SLEEPTIMER_EVENT_COMP);
   }
 
-  CORE_EXIT_ATOMIC();
+  CORE_EXIT_CRITICAL();
   return SL_STATUS_OK;
 }
 
@@ -1178,12 +1178,19 @@ static sl_status_t delta_list_remove_timer(sl_sleeptimer_timer_handle_t *handle)
  ******************************************************************************/
 static void set_comparator_for_next_timer(void)
 {
-  sl_sleeptimer_tick_count_t compare_value;
+  if (timer_head->delta > 0) {
+    sl_sleeptimer_tick_count_t compare_value;
 
-  compare_value = last_delta_update_count + timer_head->delta;
+    compare_value = last_delta_update_count + timer_head->delta;
 
-  sleeptimer_hal_enable_int(SLEEPTIMER_EVENT_COMP);
-  sleeptimer_hal_set_compare(compare_value);
+    sleeptimer_hal_enable_int(SLEEPTIMER_EVENT_COMP);
+    sleeptimer_hal_set_compare(compare_value);
+  } else {
+    // In case timer has already expire, don't attempt to set comparator. Just
+    // trigger compare match interrupt.
+    sleeptimer_hal_enable_int(SLEEPTIMER_EVENT_COMP);
+    sleeptimer_hal_set_int(SLEEPTIMER_EVENT_COMP);
+  }
 
   update_next_timer_to_expire_is_power_manager();
 }
@@ -1259,7 +1266,7 @@ static sl_status_t create_timer(sl_sleeptimer_timer_handle_t *handle,
     }
   }
 
-  CORE_ENTER_ATOMIC();
+  CORE_ENTER_CRITICAL();
   update_delta_list();
   delta_list_insert_timer(handle, timeout_initial);
 
@@ -1268,7 +1275,7 @@ static sl_status_t create_timer(sl_sleeptimer_timer_handle_t *handle,
     set_comparator_for_next_timer();
   }
 
-  CORE_EXIT_ATOMIC();
+  CORE_EXIT_CRITICAL();
 
   return SL_STATUS_OK;
 }

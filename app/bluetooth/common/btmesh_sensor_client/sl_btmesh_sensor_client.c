@@ -81,7 +81,7 @@
 static const uint16_t PUBLISH_ADDRESS = 0x0000;
 
 typedef struct {
-  uint16_t address_table[SENSOR_CLIENT_DISPLAYED_SENSORS];
+  uint16_t address_table[SL_BTMESH_SENSOR_CLIENT_DISPLAYED_SENSORS_CFG_VAL];
   uint8_t count;
 } mesh_registered_device_properties_address_t;
 
@@ -166,10 +166,10 @@ sl_status_t sl_btmesh_sensor_client_update_registered_devices(mesh_device_proper
                                               NO_FLAGS,
                                               property);
   if (SL_STATUS_OK == sc) {
-    log_info(SENSOR_CLIENT_LOGGING_START_REGISTERING_DEVICES, property);
+    log_info(SL_BTMESH_SENSOR_CLIENT_LOGGING_START_REGISTERING_DEVICES_CFG_VAL, property);
   } else {
     log_btmesh_status_f(sc,
-                        SENSOR_CLIENT_LOGGING_REGISTERING_DEVICES_FAILED,
+                        SL_BTMESH_SENSOR_CLIENT_LOGGING_REGISTERING_DEVICES_FAILED_CFG_VAL,
                         property);
   }
   return sc;
@@ -190,7 +190,7 @@ static void handle_sensor_client_descriptor_status(
                                          SIZE_OF_DESCRIPTOR);
     uint8_t number_of_devices = registered_devices.count;
     if (descriptor.property_id == registering_property
-        && number_of_devices < SENSOR_CLIENT_DISPLAYED_SENSORS
+        && number_of_devices < SL_BTMESH_SENSOR_CLIENT_DISPLAYED_SENSORS_CFG_VAL
         && !mesh_address_already_exists(&registered_devices,
                                         evt->server_address)) {
       registered_devices.address_table[number_of_devices] = evt->server_address;
@@ -215,10 +215,10 @@ sl_status_t sl_btmesh_sensor_client_get_sensor_data(mesh_device_properties_t pro
                                    property);
 
   if (SL_STATUS_OK == sc) {
-    log_info(SENSOR_CLIENT_LOGGING_GET_DATA_FROM_PROPERTY, property);
+    log_info(SL_BTMESH_SENSOR_CLIENT_LOGGING_GET_DATA_FROM_PROPERTY_CFG_VAL, property);
   } else {
     log_btmesh_status_f(sc,
-                        SENSOR_CLIENT_LOGGING_GET_DATA_FROM_PROPERTY_FAIL,
+                        SL_BTMESH_SENSOR_CLIENT_LOGGING_GET_DATA_FROM_PROPERTY_FAIL_CFG_VAL,
                         property);
   }
   return sc;
@@ -331,7 +331,7 @@ static void handle_sensor_client_status(sl_btmesh_evt_sensor_client_status_t *ev
           }
 
           default:
-            log(SENSOR_CLIENT_LOGGING_UNSUPPORTED_PROPERTY, property_id);
+            log(SL_BTMESH_SENSOR_CLIENT_LOGGING_UNSUPPORTED_PROPERTY_CFG_VAL, property_id);
             break;
         }
       }
@@ -413,7 +413,7 @@ static bool mesh_address_already_exists(mesh_registered_device_properties_addres
 {
   bool address_exists = false;
   if (property != NULL) {
-    for (int i = 0; i < SENSOR_CLIENT_DISPLAYED_SENSORS; i++) {
+    for (int i = 0; i < SL_BTMESH_SENSOR_CLIENT_DISPLAYED_SENSORS_CFG_VAL; i++) {
       if (address == property->address_table[i]) {
         address_exists = true;
         break;
@@ -436,7 +436,7 @@ static uint8_t mesh_get_sensor_index(mesh_registered_device_properties_address_t
 {
   uint8_t sensor_index = SENSOR_INDEX_NOT_FOUND;
   if (property != NULL) {
-    for (int i = 0; i < SENSOR_CLIENT_DISPLAYED_SENSORS; i++) {
+    for (int i = 0; i < SL_BTMESH_SENSOR_CLIENT_DISPLAYED_SENSORS_CFG_VAL; i++) {
       if (address == property->address_table[i]) {
         sensor_index = i;
         break;

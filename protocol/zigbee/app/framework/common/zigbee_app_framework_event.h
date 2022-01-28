@@ -170,15 +170,15 @@ uint32_t sl_zigbee_event_get_remaining_ms(sl_zigbee_event_t *event);
 // - bits [4-7] are currently unused
 // byte 1 is used to store the endpoint (if the event is multiplexed by endpoint)
 // bytes [2-3] are unused
-#define SLI_ZIGBEE_EVENT_CONTROL_FIELD_MASK             0x000000FF
-#define SLI_ZIGBEE_EVENT_CONTROL_FIELD_OFFSET           0
-#define SLI_ZIGBEE_EVENT_CONTROL_IS_NETWORK_EVENT_BIT   0x01
-#define SLI_ZIGBEE_EVENT_CONTROL_IS_ENDPOINT_EVENT_BIT  0x02
-#define SLI_ZIGBEE_EVENT_CONTROL_NETWORK_INDEX_MASK     0x0C
-#define SLI_ZIGBEE_EVENT_CONTROL_NETWORK_INDEX_OFFSET   2
-#define SLI_ZIGBEE_EVENT_CONTROL_UNUSED_MASK            0xF0
-#define SLI_ZIGBEE_EVENT_ENDPOINT_FIELD_MASK            0x0000FF00
-#define SLI_ZIGBEE_EVENT_ENDPOINT_FIELD_OFFSET          8
+#define SLI_ZIGBEE_EVENT_CONTROL_FIELD_MASK             0x000000FFu
+#define SLI_ZIGBEE_EVENT_CONTROL_FIELD_OFFSET           0u
+#define SLI_ZIGBEE_EVENT_CONTROL_IS_NETWORK_EVENT_BIT   0x01u
+#define SLI_ZIGBEE_EVENT_CONTROL_IS_ENDPOINT_EVENT_BIT  0x02u
+#define SLI_ZIGBEE_EVENT_CONTROL_NETWORK_INDEX_MASK     0x0Cu
+#define SLI_ZIGBEE_EVENT_CONTROL_NETWORK_INDEX_OFFSET   2u
+#define SLI_ZIGBEE_EVENT_CONTROL_UNUSED_MASK            0xF0u
+#define SLI_ZIGBEE_EVENT_ENDPOINT_FIELD_MASK            0x0000FF00u
+#define SLI_ZIGBEE_EVENT_ENDPOINT_FIELD_OFFSET          8u
 
 #define sli_zigbee_event_get_control_field(event)                  \
   ((uint8_t)(((event)->data & SLI_ZIGBEE_EVENT_CONTROL_FIELD_MASK) \
@@ -260,25 +260,25 @@ void sl_zigbee_network_event_init(sl_zigbee_event_t *event,
                                   void (*handler)(sl_zigbee_event_t *));
 
 #define sl_zigbee_event_set_delay_qs(event, delay) \
-  emberEventSetDelayMs(sli_zigbee_get_event_ptr((event), 0xFF), (delay * 250u))
+  emberEventSetDelayMs(sli_zigbee_get_event_ptr((event), 0xFF), ((delay) * 250u))
 
 // For conversion from minutes to ms, multiply by 60,000 instead of << 16
 // This leads to a 10% difference between the time requested vs the actual time
 // leading to a large discrepancy for longer delays
 #define sl_zigbee_event_set_delay_minutes(event, delay) \
-  emberEventSetDelayMs(sli_zigbee_get_event_ptr((event), 0xFF), (delay * 60000u))
+  emberEventSetDelayMs(sli_zigbee_get_event_ptr((event), 0xFF), ((delay) * 60000u))
 
 #define sl_zigbee_endpoint_event_set_delay_ms(event, endpoint, delay) \
   emberEventSetDelayMs(sli_zigbee_get_event_ptr((event), (endpoint)), (delay))
 
 #define sl_zigbee_endpoint_event_set_delay_qs(event, endpoint, delay) \
-  emberEventSetDelayMs(sli_zigbee_get_event_ptr((event), (endpoint)), (delay * 250u))
+  emberEventSetDelayMs(sli_zigbee_get_event_ptr((event), (endpoint)), ((delay) * 250u))
 
 // For conversion from minutes to ms, multiply by 60,000 instead of << 16
 // This leads to a 10% difference between the time requested vs the actual time
 // leading to a large discrepancy for longer delays
 #define sl_zigbee_endpoint_event_set_delay_minutes(event, endpoint, delay) \
-  emberEventSetDelayMs(sli_zigbee_get_event_ptr((event), (endpoint)), (delay * 60000u))
+  emberEventSetDelayMs(sli_zigbee_get_event_ptr((event), (endpoint)), ((delay) * 60000u))
 
 #define sl_zigbee_endpoint_event_set_active(event, endpoint) \
   emberEventSetActive(sli_zigbee_get_event_ptr((event), (endpoint)))

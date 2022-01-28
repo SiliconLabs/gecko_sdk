@@ -38,8 +38,6 @@
 #define APP_ASSERT(expr, ...) app_assert(expr,__VA_ARGS__)
 #else
  #define APP_ASSERT(expr, string ,rail_handle, error_code) \
-  (void)(rail_handle);         \
-  (void)(error_code);          \
   do {                         \
     if (!(expr)) {             \
       while (1) ;              \
@@ -59,6 +57,8 @@ __WEAK
 void sl_rail_util_on_assert_failed(RAIL_Handle_t rail_handle,
                                    RAIL_AssertErrorCodes_t error_code)
 {
+  (void) rail_handle;
+  (void) error_code;
   APP_ASSERT(false,
              "rail_handle: 0x%X, error_code: %d",
              rail_handle,

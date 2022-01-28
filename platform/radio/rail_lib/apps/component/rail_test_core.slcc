@@ -2293,3 +2293,9 @@ template_contribution:
           help: "0=Disable 1=Enable"
         - type: uint8
           help: "Mode 1=BLE1Mbps 2=BLE2Mbps"
+
+  - name: rail_util_ieee802154_phy_select_callbacks
+    value:
+      runtime_phy_select_stack_support: 1
+      update_active_radio_config: sl_railtest_update_154_radio_config
+    priority: -9020

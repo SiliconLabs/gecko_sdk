@@ -1,18 +1,20 @@
 from pyradioconfig.parts.nixi.profiles.Profile_LongRange import Profile_Long_Range_Nixi
 from pyradioconfig.parts.common.profiles.ocelot_regs import build_modem_regs_ocelot
 from pyradioconfig.parts.common.profiles.profile_common import buildCrcOutputs, buildFecOutputs, buildFrameOutputs, \
-    buildWhiteOutputs, build_ircal_sw_vars
-from pyradioconfig.parts.ocelot.profiles.profile_modem import *
+    buildWhiteOutputs
+from pyradioconfig.parts.ocelot.profiles.sw_profile_outputs_common import sw_profile_outputs_common_ocelot
+from pyradioconfig.parts.common.utils.units_multiplier import UnitsMultiplier
 
 class Profile_Long_Range_Ocelot(Profile_Long_Range_Nixi):
 
     def __init__(self):
         super(Profile_Long_Range_Ocelot, self).__init__()
         self._family = 'ocelot'
+        self._sw_profile_outputs_common = sw_profile_outputs_common_ocelot()
 
     def build_required_profile_inputs(self, model, profile):
         super().build_required_profile_inputs(model, profile)
-        IProfile.make_required_input(profile, model.vars.xtal_frequency_hz, "crystal",
+        self.make_required_input(profile, model.vars.xtal_frequency_hz, "crystal",
                                      readable_name="Crystal Frequency", value_limit_min=38000000,
                                      value_limit_max=40000000, units_multiplier=UnitsMultiplier.MEGA)
 
@@ -20,16 +22,16 @@ class Profile_Long_Range_Ocelot(Profile_Long_Range_Nixi):
         pass
 
     def build_advanced_profile_inputs(self, model, profile):
-        IProfile.make_linked_io(profile, model.vars.fec_en, 'Channel_Coding', readable_name="FEC Algorithm")
+        self.make_linked_io(profile, model.vars.fec_en, 'Channel_Coding', readable_name="FEC Algorithm")
 
     def build_hidden_profile_inputs(self, model, profile):
         # Hidden inputs to allow for fixed frame length testing
-        IProfile.make_hidden_input(profile, model.vars.frame_length_type, 'frame_general',
+        self.make_hidden_input(profile, model.vars.frame_length_type, 'frame_general',
                                    readable_name="Frame Length Algorithm")
-        IProfile.make_hidden_input(profile, model.vars.fixed_length_size, category='frame_fixed_length',
+        self.make_hidden_input(profile, model.vars.fixed_length_size, category='frame_fixed_length',
                                    readable_name="Fixed Payload Size", value_limit_min=0, value_limit_max=0x7fffffff)
         # Hidden inputs to allow for keeping absolute tolerance the same when testing at 915M
-        IProfile.make_hidden_input(profile, model.vars.freq_offset_hz, 'Advanced',
+        self.make_hidden_input(profile, model.vars.freq_offset_hz, 'Advanced',
                                 readable_name="Frequency Offset Compensation (AFC) Limit", value_limit_min=0,
                                 value_limit_max=500000, units_multiplier=UnitsMultiplier.KILO)
 
@@ -46,8 +48,8 @@ class Profile_Long_Range_Ocelot(Profile_Long_Range_Nixi):
         buildFecOutputs(model, profile)
 
     def build_variable_profile_outputs(self, model, profile):
-        buildRailOutputs(model, profile)
-        build_ircal_sw_vars(model, profile)
+        self._sw_profile_outputs_common.build_rail_outputs(model, profile)
+        self._sw_profile_outputs_common.build_ircal_outputs(model, profile)
 
     def _fixed_longrange_vars(self, model):
         """ Modulation Type """

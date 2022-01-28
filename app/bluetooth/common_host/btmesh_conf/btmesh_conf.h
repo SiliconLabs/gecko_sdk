@@ -143,7 +143,7 @@ sl_status_t btmesh_conf_deinit(void);
  * over the ownership of the job and consequently the application is no longer
  * allowed to modify the submitted job or its tasks.
  * If the submit operation fails and @ref btmesh_conf_job_t::auto_destroy is set
- * and @ref BTMESH_CONF_JOB_AUTO_DESTROY_ON_SUBMIT_FAILURE is turned on then the
+ * and @ref SL_BTMESH_CONF_JOB_AUTO_DESTROY_ON_SUBMIT_FAILURE_CFG_VAL is turned on then the
  * job is deallocated automatically in the submit call and consequently the job
  * shall not be referenced when the submit returns with failure.
  *

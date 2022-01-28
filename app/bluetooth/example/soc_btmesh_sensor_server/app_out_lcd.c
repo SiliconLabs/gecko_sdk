@@ -63,7 +63,7 @@ void sl_btmesh_factory_reset_on_full_reset(void)
 {
   app_log("Factory reset\r\n");
   sl_status_t status = sl_btmesh_LCD_write("Factory reset",
-                                           BTMESH_WSTK_LCD_ROW_STATUS);
+                                           SL_BTMESH_WSTK_LCD_ROW_STATUS_CFG_VAL);
   app_log_status_level_f(APP_LOG_LEVEL_ERROR, status, "LCD write failed");
 }
 
@@ -74,7 +74,7 @@ void sl_btmesh_factory_reset_on_node_reset(void)
 {
   app_log("Node reset\r\n");
   sl_status_t status = sl_btmesh_LCD_write("Node reset",
-                                           BTMESH_WSTK_LCD_ROW_STATUS);
+                                           SL_BTMESH_WSTK_LCD_ROW_STATUS_CFG_VAL);
   app_log_status_level_f(APP_LOG_LEVEL_ERROR, status, "LCD write failed");
 }
 
@@ -91,7 +91,7 @@ void sl_btmesh_sensor_server_on_temperature_measurement(temperature_8_t temperat
       == temperature) {
     app_log("Temperature: UNKNOWN\r\n");
     status = sl_btmesh_LCD_write("Temperature: N/K ",
-                                 BTMESH_WSTK_LCD_ROW_TEMPERATURE);
+                                 SL_BTMESH_WSTK_LCD_ROW_TEMPERATURE_CFG_VAL);
   } else {
     char str[LCD_ROW_LEN];
     app_log("Temperature:    %3d.%1d  °C\r\n",
@@ -102,7 +102,7 @@ void sl_btmesh_sensor_server_on_temperature_measurement(temperature_8_t temperat
              "Temperature:  %3d.%1d C",
              INT_TEMP(temperature),
              FRAC_TEMP(temperature));
-    status = sl_btmesh_LCD_write(str, BTMESH_WSTK_LCD_ROW_TEMPERATURE);
+    status = sl_btmesh_LCD_write(str, SL_BTMESH_WSTK_LCD_ROW_TEMPERATURE_CFG_VAL);
   }
   app_log_status_level_f(APP_LOG_LEVEL_ERROR, status, "LCD write failed");
 }
@@ -115,7 +115,7 @@ void sl_btmesh_sensor_server_on_light_measurement(illuminance_t light)
   if ((illuminance_t)SL_BTMESH_SENSOR_LIGHT_VALUE_IS_NOT_KNOWN == light) {
     app_log("Illuminance: UNKNOWN\r\n");
     status = sl_btmesh_LCD_write("Illuminance: N/K",
-                                 BTMESH_WSTK_LCD_ROW_ILLUMINANCE);
+                                 SL_BTMESH_WSTK_LCD_ROW_ILLUMINANCE_CFG_VAL);
   } else {
     app_log("Illuminance:   %4lu.%02lu lx\r\n",
             INT_ILLUM(light),
@@ -127,7 +127,7 @@ void sl_btmesh_sensor_server_on_light_measurement(illuminance_t light)
              INT_ILLUM(light),
              FRAC_ILLUM(light));
     app_log(str);
-    status = sl_btmesh_LCD_write(str, BTMESH_WSTK_LCD_ROW_ILLUMINANCE);
+    status = sl_btmesh_LCD_write(str, SL_BTMESH_WSTK_LCD_ROW_ILLUMINANCE_CFG_VAL);
   }
   app_log_status_level_f(APP_LOG_LEVEL_ERROR, status, "LCD write failed");
 }
@@ -142,7 +142,7 @@ void sl_btmesh_sensor_server_on_people_count_measurement(count16_t people)
       == people) {
     app_log("People count: UNKNOWN\r\n");
     status = sl_btmesh_LCD_write("People count:     N/K",
-                                 BTMESH_WSTK_LCD_ROW_PEOPLE_COUNT);
+                                 SL_BTMESH_WSTK_LCD_ROW_PEOPLE_COUNT_CFG_VAL);
   } else {
     app_log("People count: %5u\r\n", people);
     char str[LCD_ROW_LEN];
@@ -150,7 +150,7 @@ void sl_btmesh_sensor_server_on_people_count_measurement(count16_t people)
              LCD_ROW_LEN,
              "People count:   %5u",
              people);
-    status = sl_btmesh_LCD_write(str, BTMESH_WSTK_LCD_ROW_PEOPLE_COUNT);
+    status = sl_btmesh_LCD_write(str, SL_BTMESH_WSTK_LCD_ROW_PEOPLE_COUNT_CFG_VAL);
   }
   app_log_status_level_f(APP_LOG_LEVEL_ERROR, status, "LCD write failed");
 }
@@ -170,7 +170,7 @@ void sl_btmesh_on_provision_init_status(bool provisioned,
   } else {
     app_log("BT mesh node is unprovisioned, started unprovisioned beaconing...\r\n");
     sl_status_t status = sl_btmesh_LCD_write("unprovisioned",
-                                             BTMESH_WSTK_LCD_ROW_STATUS);
+                                             SL_BTMESH_WSTK_LCD_ROW_STATUS_CFG_VAL);
     app_log_status_level_f(APP_LOG_LEVEL_ERROR, status, "LCD write failed");
   }
 }
@@ -182,7 +182,7 @@ void app_show_btmesh_node_provisioning_started(uint16_t result)
 {
   app_log("BT mesh node provisioning is started (result: 0x%04x)\r\n", result);
   sl_status_t status = sl_btmesh_LCD_write("provisioning...",
-                                           BTMESH_WSTK_LCD_ROW_STATUS);
+                                           SL_BTMESH_WSTK_LCD_ROW_STATUS_CFG_VAL);
   app_log_status_level_f(APP_LOG_LEVEL_ERROR, status, "LCD write failed");
   (void)result;
 }
@@ -197,7 +197,7 @@ void app_show_btmesh_node_provisioned(uint16_t address,
           address,
           iv_index);
   sl_status_t status = sl_btmesh_LCD_write("provisioned",
-                                           BTMESH_WSTK_LCD_ROW_STATUS);
+                                           SL_BTMESH_WSTK_LCD_ROW_STATUS_CFG_VAL);
   app_log_status_level_f(APP_LOG_LEVEL_ERROR, status, "LCD write failed");
   (void)address;
   (void)iv_index;
@@ -210,7 +210,7 @@ void sl_btmesh_on_node_provisioning_failed(uint16_t result)
 {
   app_log("BT mesh node provisioning failed (result: 0x%04x)\r\n", result);
   sl_status_t status = sl_btmesh_LCD_write("prov failed...",
-                                           BTMESH_WSTK_LCD_ROW_STATUS);
+                                           SL_BTMESH_WSTK_LCD_ROW_STATUS_CFG_VAL);
   app_log_status_level_f(APP_LOG_LEVEL_ERROR, status, "LCD write failed");
   (void)result;
 }

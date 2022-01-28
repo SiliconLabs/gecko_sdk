@@ -44,6 +44,17 @@
 
 // </h> End Receive Thread Configuration
 
+// <h> Receive / Transmit buffer configuration
+
+// <o DEFAULT_HOST_BUFLEN> Buffer length
+// <i> Defines the size of the receive and transmit buffer for host
+// <i> Default: 2048
+#ifndef DEFAULT_HOST_BUFLEN
+#define DEFAULT_HOST_BUFLEN     2048
+#endif
+
+// </h> End Receive / Transmit buffer configuration
+
 // <<< end of configuration section >>>
 
 #endif // HOST_COMM_CONFIG_H

@@ -3,7 +3,7 @@
  * @brief Core application logic.
  *******************************************************************************
  * # License
- * <b>Copyright 2020 Silicon Laboratories Inc. www.silabs.com</b>
+ * <b>Copyright 2022 Silicon Laboratories Inc. www.silabs.com</b>
  *******************************************************************************
  *
  * SPDX-License-Identifier: Zlib
@@ -29,6 +29,7 @@
  ******************************************************************************/
 
 #include <stdbool.h>
+#include <stdio.h>
 #include "em_common.h"
 #include "em_emu.h"
 #include "em_gpio.h"
@@ -105,9 +106,10 @@
 #endif // SL_CATALOG_SENSOR_SOUND_PRESENT
 
 // -----------------------------------------------------------------------------
-// Configuration
+// Macros
 
 #define SHUTDOWN_TIMEOUT_MS             60000
+#define FW_REV_STR_LEN                  6
 // -----------------------------------------------------------------------------
 // Private variables
 
@@ -132,9 +134,9 @@ void app_init(void)
   app_log_nl();
   sl_power_supply_probe();
   shutdown_start_timer();
-#ifdef BOARD_RGBLED_PRESENT
+#if defined(BOARD_RGBLED_COUNT) && (BOARD_RGBLED_COUNT > 0)
   rgb_led_init();
-#endif // BOARD_RGBLED_PRESENT
+#endif // BOARD_RGBLED_COUNT
 }
 
 SL_WEAK void app_process_action(void)
@@ -159,7 +161,20 @@ void sl_bt_on_event(sl_bt_msg_t *evt)
 
   switch (SL_BT_MSG_ID(evt->header)) {
     // -------------------------------
-    case sl_bt_evt_system_boot_id:
+    case sl_bt_evt_system_boot_id: {
+      // Set Firmware Revision string. Use the BLE stack version.
+      char fw_rev[FW_REV_STR_LEN];
+      snprintf(fw_rev,
+               FW_REV_STR_LEN,
+               "%1d.%1d.%1d",
+               evt->data.evt_system_boot.major,
+               evt->data.evt_system_boot.minor,
+               evt->data.evt_system_boot.patch);
+      sc = sl_bt_gatt_server_write_attribute_value(gattdb_firmware_rev,
+                                                   0,
+                                                   FW_REV_STR_LEN - 1,
+                                                   (uint8_t *)fw_rev);
+      app_log_status_error(sc);
       // Print boot message.
       app_log_info("Bluetooth stack booted: v%d.%d.%d-b%d",
                    evt->data.evt_system_boot.major,
@@ -197,6 +212,7 @@ void sl_bt_on_event(sl_bt_msg_t *evt)
       app_assert_status(sc);
       advertise_init(unique_id);
       break;
+    }
 
     // -------------------------------
     case sl_bt_evt_connection_opened_id:
@@ -211,9 +227,9 @@ void sl_bt_on_event(sl_bt_msg_t *evt)
     case sl_bt_evt_connection_closed_id:
       app_log_info("Connection closed");
       app_log_nl();
-      advertise_start();
       shutdown_start_timer();
       sensor_deinit();
+      advertise_start();
       break;
 
     // -------------------------------
@@ -243,10 +259,11 @@ static void shutdown(sl_simple_timer_t *timer, void *data)
   EMU_EM4Init_TypeDef em4_init = EMU_EM4INIT_DEFAULT;
   em4_init.pinRetentionMode = emuPinRetentionEm4Exit;
   EMU_EM4Init(&em4_init);
-  // Set up for EM4 wakeup from button 0. Need to enable glitch filter
-  sl_simple_button_context_t *button = sl_button_btn0.context;
+
+  // Set up EM4 wake-up for the chosen button. Need to enable glitch filter.
+  sl_simple_button_context_t *button = BOARD_EM4WUEN_BTN.context;
   GPIO_PinModeSet(button->port, button->pin, gpioModeInputPullFilter, 1);
-  GPIO_EM4EnablePinWakeup( (BOARD_BUTTON0_EM4WUEN_MASK << _GPIO_EM4WUEN_EM4WUEN_SHIFT), 0);
+  GPIO_EM4EnablePinWakeup((BOARD_EM4WUEN_MASK << _GPIO_EM4WUEN_EM4WUEN_SHIFT), 0);
 
   advertise_stop();
 
@@ -319,11 +336,11 @@ static void sensor_deinit(void)
 #ifdef SL_CATALOG_SENSOR_IMU_PRESENT
   sl_sensor_imu_deinit();
 #endif // SL_CATALOG_SENSOR_IMU_PRESENT
-#ifdef BOARD_RGBLED_PRESENT
+#if defined(BOARD_RGBLED_COUNT) && (BOARD_RGBLED_COUNT > 0)
   rgb_led_deinit();
-#endif // BOARD_RGBLED_PRESENT
+#endif // BOARD_RGBLED_COUNT
 #ifdef SL_CATALOG_SENSOR_PRESSURE_PRESENT
-  sl_pressure_deinit();
+  sl_sensor_pressure_deinit();
 #endif // SL_CATALOG_SENSOR_PRESSURE_PRESENT
 #ifdef SL_CATALOG_SENSOR_GAS_PRESENT
   if (!sl_power_supply_is_low_power()) {
@@ -451,7 +468,7 @@ void sl_gatt_service_imu_enable(bool enable)
 }
 #endif
 
-#if defined(SL_CATALOG_GATT_SERVICE_RGB_PRESENT) && defined(BOARD_RGBLED_PRESENT)
+#if defined(SL_CATALOG_GATT_SERVICE_RGB_PRESENT) && defined(BOARD_RGBLED_COUNT) && (BOARD_RGBLED_COUNT > 0)
 void sl_gatt_service_rgb_set_led(uint8_t m, uint8_t r, uint8_t g, uint8_t b)
 {
   if (!sl_power_supply_is_low_power()) {
@@ -460,13 +477,18 @@ void sl_gatt_service_rgb_set_led(uint8_t m, uint8_t r, uint8_t g, uint8_t b)
     app_log_nl();
   }
 }
+
+uint8_t sl_gatt_service_rgb_get_led_mask(void)
+{
+  return BOARD_RGBLED_MASK;
+}
 #endif
 
 #if defined(SL_CATALOG_GATT_SERVICE_PRESSURE_PRESENT) && defined(SL_CATALOG_SENSOR_PRESSURE_PRESENT)
 sl_status_t sl_gatt_service_pressure_get(float *pressure)
 {
   sl_status_t sc;
-  sc = sl_pressure_get(pressure);
+  sc = sl_sensor_pressure_get(pressure);
   if (SL_STATUS_OK == sc) {
     app_log_info("Pressure = %0.3f mbar", *pressure);
     app_log_nl();

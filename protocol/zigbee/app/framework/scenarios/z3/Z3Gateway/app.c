@@ -138,6 +138,7 @@ void emberAfMainInitCallback(void)
                                       zcl_ias_ace_cluster_server_command_handler);
 }
 
+#ifdef SL_CATALOG_CLI_PRESENT
 //-------------------------------------
 // Custom CLI commands and related code
 
@@ -273,3 +274,5 @@ void setTxPowerCommand(sl_cli_command_arg_t *arguments)
 
   emberSetRadioPower(dBm);
 }
+
+#endif

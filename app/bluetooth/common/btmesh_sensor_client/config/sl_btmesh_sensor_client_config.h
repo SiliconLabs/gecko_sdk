@@ -34,35 +34,35 @@
 
 // <h> Sensor Client configuration
 
-// <o SENSOR_CLIENT_DISPLAYED_SENSORS> How many sensors can fit on screen
+// <o SL_BTMESH_SENSOR_CLIENT_DISPLAYED_SENSORS_CFG_VAL> How many sensors can fit on screen
 // <i> Default: 5
 // <i> Defines the number of sensors which can fit on the LCD screen.
-#define SENSOR_CLIENT_DISPLAYED_SENSORS   (5)
+#define SL_BTMESH_SENSOR_CLIENT_DISPLAYED_SENSORS_CFG_VAL   (5)
 
-// <e SENSOR_CLIENT_LOGGING> Enable Logging
+// <e SL_BTMESH_SENSOR_CLIENT_LOGGING_CFG_VAL> Enable Logging
 // <i> Default: 1
 // <i> Enable / disable Logging for Sensor Client model specific messages for this component.
-#define SENSOR_CLIENT_LOGGING   (1)
+#define SL_BTMESH_SENSOR_CLIENT_LOGGING_CFG_VAL   (1)
 
-// <s.128 SENSOR_CLIENT_LOGGING_START_REGISTERING_DEVICES> Log text when registering devices starts
+// <s.128 SL_BTMESH_SENSOR_CLIENT_LOGGING_START_REGISTERING_DEVICES_CFG_VAL> Log text when registering devices starts
 // <i> Set Log text in case the registration of devices with a specific sensor property ID is started
-#define SENSOR_CLIENT_LOGGING_START_REGISTERING_DEVICES "Registration of devices for property ID %4.4x started\r\n"
+#define SL_BTMESH_SENSOR_CLIENT_LOGGING_START_REGISTERING_DEVICES_CFG_VAL "Registration of devices for property ID %4.4x started\r\n"
 
-// <s.128 SENSOR_CLIENT_LOGGING_REGISTERING_DEVICES_FAILED> Log text when registering devices fails
+// <s.128 SL_BTMESH_SENSOR_CLIENT_LOGGING_REGISTERING_DEVICES_FAILED_CFG_VAL> Log text when registering devices fails
 // <i> Set Log text in case the registration of devices with a specific sensor property ID is failed
-#define SENSOR_CLIENT_LOGGING_REGISTERING_DEVICES_FAILED "Registration of devices for property ID %4.4x failed\r\n"
+#define SL_BTMESH_SENSOR_CLIENT_LOGGING_REGISTERING_DEVICES_FAILED_CFG_VAL "Registration of devices for property ID %4.4x failed\r\n"
 
-// <s.128 SENSOR_CLIENT_LOGGING_UNSUPPORTED_PROPERTY> Log text when unsupported sensor property ID
+// <s.128 SL_BTMESH_SENSOR_CLIENT_LOGGING_UNSUPPORTED_PROPERTY_CFG_VAL> Log text when unsupported sensor property ID
 // <i> Set Log text in case the specific sensor property ID is not available on the remote device (e.g. no sensor)
-#define SENSOR_CLIENT_LOGGING_UNSUPPORTED_PROPERTY "Unsupported property id %4.4x\r\n"
+#define SL_BTMESH_SENSOR_CLIENT_LOGGING_UNSUPPORTED_PROPERTY_CFG_VAL "Unsupported property id %4.4x\r\n"
 
-// <s.128 SENSOR_CLIENT_LOGGING_GET_DATA_FROM_PROPERTY> Log text when sensor data with property ID is requested
+// <s.128 SL_BTMESH_SENSOR_CLIENT_LOGGING_GET_DATA_FROM_PROPERTY_CFG_VAL> Log text when sensor data with property ID is requested
 // <i> Set Log text in case property ID specific sensor data is requested from the remote device(s)
-#define SENSOR_CLIENT_LOGGING_GET_DATA_FROM_PROPERTY "Get Sensor Data from property ID %4.4x started\r\n"
+#define SL_BTMESH_SENSOR_CLIENT_LOGGING_GET_DATA_FROM_PROPERTY_CFG_VAL "Get Sensor Data from property ID %4.4x started\r\n"
 
-// <s.128 SENSOR_CLIENT_LOGGING_GET_DATA_FROM_PROPERTY_FAIL> Log text when sensor data request with property ID fails
+// <s.128 SL_BTMESH_SENSOR_CLIENT_LOGGING_GET_DATA_FROM_PROPERTY_FAIL_CFG_VAL> Log text when sensor data request with property ID fails
 // <i> Set Log text in case property ID specific sensor data request is failed
-#define SENSOR_CLIENT_LOGGING_GET_DATA_FROM_PROPERTY_FAIL "Get Sensor Data from property ID %4.4x failed\r\n"
+#define SL_BTMESH_SENSOR_CLIENT_LOGGING_GET_DATA_FROM_PROPERTY_FAIL_CFG_VAL "Get Sensor Data from property ID %4.4x failed\r\n"
 
 // </e>
 

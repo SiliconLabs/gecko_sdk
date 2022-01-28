@@ -123,9 +123,9 @@ static void send_scene_recall_request(uint8_t retrans)
                                                  delay);
 
   if (SL_STATUS_OK == sc) {
-    log_info(SCENE_CLIENT_LOGGING_RECALL_SUCCESS, scene_trid, delay);
+    log_info(SL_BTMESH_SCENE_CLIENT_LOGGING_RECALL_SUCCESS_CFG_VAL, scene_trid, delay);
   } else {
-    log_btmesh_status_f(sc, SCENE_CLIENT_LOGGING_RECALL_FAIL);
+    log_btmesh_status_f(sc, SL_BTMESH_SCENE_CLIENT_LOGGING_RECALL_FAIL_CFG_VAL);
   }
 
   // Keep track of how many requests has been sent
@@ -150,9 +150,9 @@ void sl_btmesh_select_scene(uint8_t scene_to_recall)
   scene_number = scene_to_recall;
 
   // Recall scene using Scene Client model
-  log(SCENE_CLIENT_LOGGING_RECALL, scene_number);
+  log(SL_BTMESH_SCENE_CLIENT_LOGGING_RECALL_CFG_VAL, scene_number);
   // Request is sent multiple times to improve reliability
-  scene_request_count = SCENE_CLIENT_RETRANSMISSION_COUNT;
+  scene_request_count = SL_BTMESH_SCENE_CLIENT_RETRANSMISSION_COUNT_CFG_VAL;
 
   send_scene_recall_request(0);  // Send the first request
 
@@ -160,7 +160,7 @@ void sl_btmesh_select_scene(uint8_t scene_to_recall)
   // to trigger retransmission of the request after 50 ms delay
   if (scene_request_count > 0) {
     sl_status_t sc = sl_simple_timer_start(&app_scene_retransmission_timer,
-                                           SCENE_CLIENT_RETRANSMISSION_TIMEOUT,
+                                           SL_BTMESH_SCENE_CLIENT_RETRANSMISSION_TIMEOUT_CFG_VAL,
                                            scene_retransmission_timer_cb,
                                            NO_CALLBACK_DATA,
                                            true);

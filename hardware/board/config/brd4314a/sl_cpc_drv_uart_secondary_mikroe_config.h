@@ -46,12 +46,18 @@
 // <o SL_CPC_DRV_UART_MIKROE_BAUDRATE> UART Baudrate
 // <i> Default: 115200
 #define SL_CPC_DRV_UART_MIKROE_BAUDRATE              115200
+
+// <o SL_CPC_DRV_UART_MIKROE_FLOW_CONTROL_TYPE> Flow control
+// <usartHwFlowControlNone=> None
+// <usartHwFlowControlCtsAndRts=> CTS/RTS
+// <i> Default: usartHwFlowControlNone
+#define SL_CPC_DRV_UART_MIKROE_FLOW_CONTROL_TYPE usartHwFlowControlNone
 // </h>
 
 // <<< end of configuration section >>>
 
 // <<< sl:start pin_tool >>>
-// <usart signal=TX,RX> SL_CPC_DRV_UART_MIKROE
+// <usart signal=TX,RX,(CTS),(RTS)> SL_CPC_DRV_UART_MIKROE
 // $[USART_SL_CPC_DRV_UART_MIKROE]
 #define SL_CPC_DRV_UART_MIKROE_PERIPHERAL        USART1
 #define SL_CPC_DRV_UART_MIKROE_PERIPHERAL_NO     1
@@ -63,6 +69,8 @@
 // USART1 RX on PB02
 #define SL_CPC_DRV_UART_MIKROE_RX_PORT           gpioPortB
 #define SL_CPC_DRV_UART_MIKROE_RX_PIN            2
+
+
 
 // [USART_SL_CPC_DRV_UART_MIKROE]$
 // <<< sl:end pin_tool >>>

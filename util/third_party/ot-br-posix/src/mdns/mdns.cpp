@@ -33,7 +33,10 @@
 
 #include "mdns/mdns.hpp"
 
+#include <assert.h>
+
 #include "common/code_utils.hpp"
+#include "utils/dns_utils.hpp"
 
 namespace otbr {
 
@@ -74,6 +77,86 @@ otbrError Publisher::EncodeTxtData(const TxtList &aTxtList, std::vector<uint8_t>
 
 exit:
     return error;
+}
+
+void Publisher::RemoveSubscriptionCallbacks(uint64_t aSubscriberId)
+{
+    size_t erased;
+
+    OTBR_UNUSED_VARIABLE(erased);
+
+    assert(aSubscriberId > 0);
+
+    erased = mDiscoveredCallbacks.erase(aSubscriberId);
+
+    assert(erased == 1);
+}
+
+uint64_t Publisher::AddSubscriptionCallbacks(Publisher::DiscoveredServiceInstanceCallback aInstanceCallback,
+                                             Publisher::DiscoveredHostCallback            aHostCallback)
+{
+    uint64_t subscriberId = mNextSubscriberId++;
+
+    assert(subscriberId > 0);
+
+    mDiscoveredCallbacks.emplace(subscriberId, std::make_pair(std::move(aInstanceCallback), std::move(aHostCallback)));
+    return subscriberId;
+}
+
+void Publisher::OnServiceResolved(const std::string &aType, const DiscoveredInstanceInfo &aInstanceInfo)
+{
+    otbrLogInfo("Service %s is resolved successfully: %s %s host %s addresses %zu", aType.c_str(),
+                aInstanceInfo.mRemoved ? "remove" : "add", aInstanceInfo.mName.c_str(), aInstanceInfo.mHostName.c_str(),
+                aInstanceInfo.mAddresses.size());
+
+    DnsUtils::CheckServiceNameSanity(aType);
+
+    assert(aInstanceInfo.mNetifIndex > 0);
+
+    if (!aInstanceInfo.mRemoved)
+    {
+        DnsUtils::CheckHostnameSanity(aInstanceInfo.mHostName);
+    }
+
+    for (const auto &subCallback : mDiscoveredCallbacks)
+    {
+        if (subCallback.second.first != nullptr)
+        {
+            subCallback.second.first(aType, aInstanceInfo);
+        }
+    }
+}
+
+void Publisher::OnServiceRemoved(uint32_t aNetifIndex, const std::string &aType, const std::string &aInstanceName)
+{
+    DiscoveredInstanceInfo instanceInfo;
+
+    otbrLogInfo("Service %s.%s is removed from netif %u.", aInstanceName.c_str(), aType.c_str(), aNetifIndex);
+
+    instanceInfo.mRemoved    = true;
+    instanceInfo.mNetifIndex = aNetifIndex;
+    instanceInfo.mName       = aInstanceName;
+
+    OnServiceResolved(aType, instanceInfo);
+}
+
+void Publisher::OnHostResolved(const std::string &aHostName, const Publisher::DiscoveredHostInfo &aHostInfo)
+{
+    otbrLogInfo("Host %s is resolved successfully: host %s addresses %zu ttl %u", aHostName.c_str(),
+                aHostInfo.mHostName.c_str(), aHostInfo.mAddresses.size(), aHostInfo.mTtl);
+
+    if (!aHostInfo.mHostName.empty())
+    {
+        DnsUtils::CheckHostnameSanity(aHostInfo.mHostName);
+    }
+
+    for (const auto &subCallback : mDiscoveredCallbacks)
+    {
+        if (subCallback.second.second != nullptr)
+        {
+            subCallback.second.second(aHostName, aHostInfo);
+        }
+    }
 }
 
 } // namespace Mdns

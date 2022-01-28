@@ -1,3 +1,2 @@
-Silicon Labs OpenThread SDK 2.0.0.0
-* Multiprotocol and multi-PAN radio coprocessor (RCP) model
-* Thread Duckhorn feature support
+What's new in Silicon Labs OpenThread SDK 2.0.1.0
+- Selected quality improvements and bug fixes

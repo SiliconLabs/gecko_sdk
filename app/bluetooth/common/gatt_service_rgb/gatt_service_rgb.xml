@@ -8,6 +8,13 @@
       <informativeText/>
       <value length="4" type="user" variable_length="false"/>
       <properties read="true" read_requirement="optional" write="true" write_requirement="optional"/>
+
+      <!--RGB LED Mask-->
+      <descriptor const="false" discoverable="true" id="ui_rgbled_mask" name="RGB LED Mask" sourceId="" uuid="1c694489-8825-45cc-8720-28b54b1fbf00">
+        <informativeText/>
+        <value length="1" type="hex" variable_length="false">00</value>
+        <properties read="true" read_requirement="optional"/>
+      </descriptor>
     </characteristic>
   </service>
 </gatt>

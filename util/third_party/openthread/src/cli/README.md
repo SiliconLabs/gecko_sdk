@@ -89,12 +89,13 @@ Done
 - [prefix](#prefix)
 - [promiscuous](#promiscuous)
 - [pskc](#pskc--p-keypassphrase)
+- [radiofilter](#radiofilter)
 - [rcp](#rcp)
 - [region](#region)
 - [releaserouterid](#releaserouterid-routerid)
 - [reset](#reset)
 - [rloc16](#rloc16)
-- [route](#route-add-prefix-s-prf)
+- [route](#route)
 - [router](#router-list)
 - [routerdowngradethreshold](#routerdowngradethreshold)
 - [routereligible](#routereligible)
@@ -108,6 +109,7 @@ Done
 - [srp](README_SRP.md)
 - [thread](#thread-start)
 - [trel](#trel-enable)
+- [tvcheck](#tvcheck-enable)
 - [txpower](#txpower)
 - [udp](README_UDP.md)
 - [unsecureport](#unsecureport-add-port)
@@ -1277,6 +1279,16 @@ fe80:0:0:0:f3d9:2a82:c8d8:fe43
 Done
 ```
 
+Use `-v` to get more verbose informations about the address.
+
+```bash
+> ipaddr -v
+fdde:ad00:beef:0:0:ff:fe00:0 origin:thread
+fdde:ad00:beef:0:558:f56b:d688:799 origin:thread
+fe80:0:0:0:f3d9:2a82:c8d8:fe43 origin:thread
+Done
+```
+
 ### ipaddr add \<ipaddr\>
 
 Add an IPv6 address to the Thread interface.
@@ -2183,6 +2195,44 @@ Disable radio promiscuous operation.
 Done
 ```
 
+### radiofilter
+
+`OPENTHREAD_CONFIG_MAC_FILTER_ENABLE` is required.
+
+The radio filter is mainly intended for testing. It can be used to temporarily block all tx/rx on the IEEE 802.15.4 radio.
+
+When radio filter is enabled, radio is put to sleep instead of receive (to ensure device does not receive any frame and/or potentially send ack). Also the frame transmission requests return immediately without sending the frame over the air (return "no ack" error if ack is requested, otherwise return success).
+
+Get radio filter status (enabled or disabled).
+
+```bash
+> radiofilter
+Disabled
+Done
+```
+
+### radiofilter enable
+
+`OPENTHREAD_CONFIG_MAC_FILTER_ENABLE` is required.
+
+Enable radio radio filter.
+
+```bash
+> radiofilter enable
+Done
+```
+
+### radiofilter disable
+
+`OPENTHREAD_CONFIG_MAC_FILTER_ENABLE` is required.
+
+Disable radio radio filter.
+
+```bash
+> radiofilter disable
+Done
+```
+
 ### rcp
 
 RCP-related commands.
@@ -2591,6 +2641,32 @@ Disable TREL radio link.
 
 ```bash
 > trel disable
+Done
+```
+
+### tvcheck enable
+
+Enable thread version check when upgrading to router or leader.
+
+Note: Thread version check is enabled by default.
+
+`OPENTHREAD_CONFIG_REFERENCE_DEVICE_ENABLE` is required.
+
+```bash
+> tvcheck enable
+Done
+```
+
+### tvcheck disable
+
+Enable thread version check when upgrading to router or leader.
+
+Note: Thread version check is enabled by default.
+
+`OPENTHREAD_CONFIG_REFERENCE_DEVICE_ENABLE` is required.
+
+```bash
+> tvcheck disable
 Done
 ```
 

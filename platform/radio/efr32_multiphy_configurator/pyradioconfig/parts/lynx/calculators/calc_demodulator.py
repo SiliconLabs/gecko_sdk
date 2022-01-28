@@ -28,3 +28,6 @@ class CALC_Demodulator_lynx(CALC_Demodulator_panther):
         else:
             # set to default reset value
             model.vars.viterbi_demod_expect_patt.value = 0x123556B7
+
+    def calc_rssi_rf_adjust_db(self, model):
+        model.vars.rssi_rf_adjust_db.value = -11.0

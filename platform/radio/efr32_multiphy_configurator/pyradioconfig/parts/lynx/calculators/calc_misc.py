@@ -24,8 +24,6 @@ class CALC_Misc_lynx(CALC_Misc_panther):
 
         #AGC default values are located in calc_agc.py and the calc_agc_misc() function
 
-        part_family = model.part_family.lower()
-
         self._reg_write(model.vars.FRC_DFLCTRL_DFLBOIOFFSET, 0)
         self._reg_write(model.vars.FRC_CTRL_LPMODEDIS, 1)
         self._reg_write(model.vars.FRC_CTRL_WAITEOFEN, 0)
@@ -46,32 +44,6 @@ class CALC_Misc_lynx(CALC_Misc_panther):
         self._reg_write(model.vars.FRC_DSLCTRL_STORESUP, 0)
         self._reg_write(model.vars.FRC_DSLCTRL_SUPSHFFACTOR, 0)
         self._reg_write(model.vars.FRC_WCNTCMP4_SUPPLENGTH, 0)
-        self._reg_write(model.vars.MODEM_SHAPING5_COEFF20, 0)
-        self._reg_write(model.vars.MODEM_SHAPING5_COEFF21, 0)
-        self._reg_write(model.vars.MODEM_SHAPING6_COEFF24, 0)
-        self._reg_write(model.vars.MODEM_SHAPING6_COEFF25, 0)
-        self._reg_write(model.vars.MODEM_SHAPING6_COEFF26, 0)
-        self._reg_write(model.vars.MODEM_SHAPING6_COEFF27, 0)
-        self._reg_write(model.vars.MODEM_SHAPING7_COEFF28, 0)
-        self._reg_write(model.vars.MODEM_SHAPING7_COEFF29, 0)
-        self._reg_write(model.vars.MODEM_SHAPING7_COEFF30, 0)
-        self._reg_write(model.vars.MODEM_SHAPING7_COEFF31, 0)
-        self._reg_write(model.vars.MODEM_SHAPING8_COEFF32, 0)
-        self._reg_write(model.vars.MODEM_SHAPING8_COEFF33, 0)
-        self._reg_write(model.vars.MODEM_SHAPING8_COEFF34, 0)
-        self._reg_write(model.vars.MODEM_SHAPING8_COEFF35, 0)
-        self._reg_write(model.vars.MODEM_SHAPING9_COEFF36, 0)
-        self._reg_write(model.vars.MODEM_SHAPING9_COEFF37, 0)
-        self._reg_write(model.vars.MODEM_SHAPING9_COEFF38, 0)
-        self._reg_write(model.vars.MODEM_SHAPING9_COEFF39, 0)
-        self._reg_write(model.vars.MODEM_SHAPING10_COEFF40, 0)
-        self._reg_write(model.vars.MODEM_SHAPING10_COEFF41, 0)
-        self._reg_write(model.vars.MODEM_SHAPING10_COEFF42, 0)
-        self._reg_write(model.vars.MODEM_SHAPING10_COEFF43, 0)
-        self._reg_write(model.vars.MODEM_SHAPING11_COEFF44, 0)
-        self._reg_write(model.vars.MODEM_SHAPING11_COEFF45, 0)
-        self._reg_write(model.vars.MODEM_SHAPING11_COEFF46, 0)
-        self._reg_write(model.vars.MODEM_SHAPING11_COEFF47, 0)
         self._reg_write(model.vars.MODEM_DIGMIXCTRL_DIGMIXFB, 0)
         self._reg_write(model.vars.MODEM_VTTRACK_SYNCTIMEOUTSEL, 1)
         self._reg_write(model.vars.MODEM_LRFRC_LRCORRMODE, 1)
@@ -132,8 +104,8 @@ class CALC_Misc_lynx(CALC_Misc_panther):
         self._reg_write(model.vars.RAC_SYMMDCTRL_SYMMDMODE, 2)
         self._reg_write(model.vars.RAC_SYNTHCTRL_MMDPOWERBALANCEDISABLE, 1)
         self._reg_write(model.vars.RAC_SYNTHREGCTRL_MMDLDOVREFTRIM, 3)
-        self._reg_write_default(model.vars.RAC_IFADCTRIM0_IFADCSIDETONEAMP, part_family)
-        self._reg_write_default(model.vars.FRC_AUTOCG_AUTOCGEN, part_family)
+        self._reg_write_default(model.vars.RAC_IFADCTRIM0_IFADCSIDETONEAMP)
+        self._reg_write_default(model.vars.FRC_AUTOCG_AUTOCGEN)
 
         #Fairly confident that these CAL values are not actually used, but can not modify validated PHYs
         #at this point and Design can not confirm these are unused. So if the value isn't forced then these

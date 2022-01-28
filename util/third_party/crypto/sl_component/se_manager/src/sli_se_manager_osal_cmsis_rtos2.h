@@ -39,6 +39,10 @@
 
 #if defined(SL_CATALOG_FREERTOS_KERNEL_PRESENT)
   #include "FreeRTOSConfig.h"
+  #if (configSUPPORT_STATIC_ALLOCATION == 1)
+    #include "FreeRTOS.h"  // StaticSemaphore_t
+    #include <string.h>
+  #endif
 #else
   #include "em_core.h"
 #endif
@@ -88,13 +92,19 @@ extern "C" {
 
 /// Completion object used to wait for and signal end of an operation.
 typedef struct se_manager_osal_completion {
+#if defined(SL_CATALOG_FREERTOS_KERNEL_PRESENT) && (configSUPPORT_STATIC_ALLOCATION == 1)
   osSemaphoreAttr_t semaphore_attr;
+  StaticSemaphore_t static_sem_object;
+#endif
   osSemaphoreId_t   semaphore_ID;
 } se_manager_osal_completion_t;
 
 /// SE manager mutex definition for CMSIS RTOS2.
 typedef struct se_manager_osal_mutex {
+#if defined(SL_CATALOG_FREERTOS_KERNEL_PRESENT) && (configSUPPORT_STATIC_ALLOCATION == 1)
   osMutexAttr_t mutex_attr;
+  StaticSemaphore_t static_sem_object;
+#endif
   osMutexId_t   mutex_ID;
 } se_manager_osal_mutex_t;
 
@@ -109,7 +119,15 @@ sl_status_t se_manager_osal_init_mutex(se_manager_osal_mutex_t *mutex)
     return SL_STATUS_FAIL;
   }
 
+#if defined(SL_CATALOG_FREERTOS_KERNEL_PRESENT) && (configSUPPORT_STATIC_ALLOCATION == 1)
+  // Zeroize all members of the mutex attributes object and setup the static control block.
+  memset(&mutex->mutex_attr, 0, sizeof(mutex->mutex_attr));
+  mutex->mutex_attr.cb_mem = &mutex->static_sem_object;
+  mutex->mutex_attr.cb_size = sizeof(mutex->static_sem_object);
   mutex->mutex_ID = osMutexNew(&mutex->mutex_attr);
+#else
+  mutex->mutex_ID = osMutexNew(NULL);
+#endif
 
   return (mutex->mutex_ID == NULL ? SL_STATUS_FAIL : SL_STATUS_OK);
 }
@@ -179,9 +197,16 @@ se_manager_osal_init_completion(se_manager_osal_completion_t *p_comp)
     return SL_STATUS_FAIL;
   }
 
-  p_comp->semaphore_ID = osSemaphoreNew(1u,
-                                        0u,
-                                        &p_comp->semaphore_attr);
+#if defined(SL_CATALOG_FREERTOS_KERNEL_PRESENT) && (configSUPPORT_STATIC_ALLOCATION == 1)
+  // Zeroize all members of the semaphore attributes object and setup the static control block.
+  memset(&p_comp->semaphore_attr, 0, sizeof(p_comp->semaphore_attr));
+  p_comp->semaphore_attr.cb_mem = &p_comp->static_sem_object;
+  p_comp->semaphore_attr.cb_size = sizeof(p_comp->static_sem_object);
+  p_comp->semaphore_ID = osSemaphoreNew(1u, 0u, &p_comp->semaphore_attr);
+#else
+  p_comp->semaphore_ID = osSemaphoreNew(1u, 0u, NULL);
+#endif
+
   return (p_comp->semaphore_ID == NULL ? SL_STATUS_FAIL : SL_STATUS_OK);
 }
 

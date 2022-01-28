@@ -193,19 +193,37 @@
 #define HAL_SERIAL_APP_TX_QUEUE_SIZE          (128UL)
 #define HAL_SERIAL_APP_FLOW_CONTROL           (HAL_USART_FLOW_CONTROL_NONE)
 
+#ifndef BSP_SERIAL_APP_TX_PIN
 #define BSP_SERIAL_APP_TX_PIN                 (8U)
+#endif
+#ifndef BSP_SERIAL_APP_TX_PORT
 #define BSP_SERIAL_APP_TX_PORT                (gpioPortA)
-
+#endif
+#ifndef BSP_SERIAL_APP_RX_PIN
 #define BSP_SERIAL_APP_RX_PIN                 (9U)
+#else
+#endif
+#ifndef BSP_SERIAL_APP_RX_PORT
 #define BSP_SERIAL_APP_RX_PORT                (gpioPortA)
-
+#endif
+#ifndef BSP_SERIAL_APP_CTS_PIN
 #define BSP_SERIAL_APP_CTS_PIN                (10U)
+#endif
+#ifndef BSP_SERIAL_APP_CTS_PORT
 #define BSP_SERIAL_APP_CTS_PORT               (gpioPortA)
+#endif
+#ifndef BSP_SERIAL_APP_CTS_LOC
 #define BSP_SERIAL_APP_CTS_LOC                (30U)
-
+#endif
+#ifndef BSP_SERIAL_APP_RTS_PIN
 #define BSP_SERIAL_APP_RTS_PIN                (0U)
+#endif
+#ifndef BSP_SERIAL_APP_RTS_PORT
 #define BSP_SERIAL_APP_RTS_PORT               (gpioPortA)
+#endif
+#ifndef BSP_SERIAL_APP_RTS_LOC
 #define BSP_SERIAL_APP_RTS_LOC                (30U)
+#endif
 // [SERIAL]$
 
 // $[SPIDISPLAY]
@@ -291,7 +309,7 @@
 
 #if defined(_SILICON_LABS_MODULE)
 // Currently there is no support for ZGM23 (21q4) in sl_module.h hence this ifndef
-#ifndef ZGM23
+#if (!defined(ZGM23A)) && (!defined(ZGM23B))
 #include "sl_module.h"
 #endif
 #endif

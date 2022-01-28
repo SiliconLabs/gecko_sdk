@@ -18,7 +18,6 @@ class CALC_AGC_ocelot(CALC_AGC_panther):
         self._reg_write(model.vars.AGC_CTRL0_DISPNGAINUP,0)
         self._reg_write(model.vars.AGC_CTRL0_ENRSSIRESET,0)
         self._reg_write(model.vars.AGC_CTRL1_PWRPERIOD, 1)
-        self._reg_write(model.vars.AGC_CTRL1_CCATHRSH, 100)
         self._reg_write(model.vars.AGC_CTRL2_DISRFPKD,0)
         self._reg_write(model.vars.AGC_CTRL2_DMASEL,0)
         self._reg_write(model.vars.AGC_CTRL2_PRSDEBUGEN,0)

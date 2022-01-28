@@ -66,6 +66,9 @@ component:
 #----------------- Require list ----------------------
 requires:
   - name: kernel
+  - name: rail_util_ant_div
+    condition:
+      - "hardware_board_has_rfswitch"
 
 #----------------- Project files ---------------------
 source:
@@ -145,6 +148,13 @@ configuration:
     value: "1"
   - name: SL_RAIL_UTIL_INIT_EVENT_CAL_NEEDED_INST0_ENABLE
     value: "1"
+#------------- ANT_DIV_CONFIG settings ----------------
+  - name: SL_RAIL_UTIL_ANT_DIV_RX_MODE
+    value: "SL_RAIL_UTIL_ANT_DIV_DIVERSITY"
+  - name: SL_RAIL_UTIL_ANT_DIV_TX_MODE
+    value: "SL_RAIL_UTIL_ANT_DIV_DISABLED"
+  - name: SL_RAIL_UTIL_ANT_DIV_RX_RUNTIME_PHY_SELECT
+    value: "0"
 #------------- USART settings ----------------
   - name: SL_BOARD_ENABLE_VCOM
     value: "1"
@@ -187,7 +197,7 @@ tag:
   - hardware:
       device:
         memory:
-          flash: 302
+          flash: 303
           ram: 53
       board:
         rf_bands:

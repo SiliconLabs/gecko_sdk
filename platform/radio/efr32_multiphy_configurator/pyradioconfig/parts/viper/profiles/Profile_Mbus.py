@@ -1,10 +1,10 @@
 from pyradioconfig.parts.common.profiles.viper_regs import build_modem_regs_viper
 from pyradioconfig.parts.common.profiles.profile_common import *
-from pyradioconfig.parts.ocelot.profiles.profile_modem import *
 from pyradioconfig.calculator_model_framework.interfaces.iprofile import IProfile
 from pyradioconfig.parts.common.utils.units_multiplier import UnitsMultiplier
 from pyradioconfig.parts.ocelot.profiles.profile_mbus_modes import *
 from pyradioconfig.parts.bobcat.profiles.Profile_Mbus import Profile_Mbus_Bobcat
+from pyradioconfig.parts.viper.profiles.sw_profile_outputs_common import sw_profile_outputs_common_viper
 
 class profile_mbus_viper(Profile_Mbus_Bobcat):
 
@@ -19,6 +19,7 @@ class profile_mbus_viper(Profile_Mbus_Bobcat):
         self._description = "Profile used for Mbus phys"
         self._default = False
         self._activation_logic = ""
+        self._sw_profile_outputs_common = sw_profile_outputs_common_viper()
 
 
     """
@@ -77,10 +78,10 @@ class profile_mbus_viper(Profile_Mbus_Bobcat):
 
 
         # Informational output
-        buildModemInfoOutputs(model, profile)
+        self._sw_profile_outputs_common.build_info_outputs(model, profile)
 
         # RAIL Outputs
-        buildRailOutputs(model, profile)
+        self._sw_profile_outputs_common.build_rail_outputs(model, profile)
 
         # Output fields
         buildFrameOutputs(model, profile, family=family)

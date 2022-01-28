@@ -64,6 +64,18 @@ configuration:
   - name: "LIB_MEM_CFG_HEAP_SIZE"
     value: "16384"
     condition: [micriumos_kernel]
+  - name: "configUSE_POSIX_ERRNO"
+    value: "1"
+    condition: [freertos]
+  - name: "OS_CFG_ERRNO_EN"
+    value: "1"
+    condition: [micriumos_kernel]
+
+readme:
+  - path: ../../documentation/example/wisun_empty/readme.md
+
+other_file:
+  - path: ../../documentation/example/wisun_empty/readme_img0.png
 
 ui_hints:
   highlight:
@@ -79,7 +91,7 @@ tag:
       device:
         memory:
           flash: 555
-          ram: 118
+          ram: 117
       board:
         rf_bands:
           - 434|490|868|915

@@ -40,17 +40,18 @@ while [[ $# -gt 0 ]]; do
             exit
             ;;
         -T|--ot-ctl)
-            docker exec -it multiprotocol service otbr start
-            sleep 3
-            docker exec -it multiprotocol ot-ctl
+            docker exec -it multiprotocol systemctl start otbr
+            echo "OTBR started. Attempting to run ot-ctl..."
+            while 
+                docker exec -it multiprotocol ot-ctl
+                [[ $? -eq 1 ]]
+            do
+                sleep 1
+            done
             exit
             ;;
         -Z|--zigbee-host)
-            # >>>>>> Workaround for Systemd issue
-            docker exec -it multiprotocol service zigbeed-socat start
-            sleep 2
-            # <<<<<<
-            docker exec -it multiprotocol service zigbeed start
+            docker exec -it multiprotocol systemctl start zigbeed
             sleep 3
             docker exec -it multiprotocol /usr/local/bin/Z3Gateway -p ttyZigbeeNCP
             exit
@@ -60,13 +61,7 @@ while [[ $# -gt 0 ]]; do
             sudo service bluetooth stop
             # disable bluetoothd on the host
             sudo systemctl mask bluetooth.service
-            # >>>>>> Workaround for Systemd issue
-            docker exec -it multiprotocol service cpc-hci-bridge start
-            sleep 2
-            docker exec -it multiprotocol service bluetooth start
-            sleep 2
-            # <<<<<<
-            docker exec -it multiprotocol service hciattach start
+            docker exec -it multiprotocol systemctl start hciattach
             docker exec -it multiprotocol bluetoothctl
             exit
             ;;
@@ -105,7 +100,7 @@ if [ -e "$CPCD_CONFIG_FILE" ]; then
     echo "Using host's cpcd config file: $CPCD_CONFIG_FILE"
     RUN_ARGS+=" -v $CPCD_CONFIG_FILE:/usr/local/etc/cpcd.conf:ro"
 fi
-RUN_ARGS+=" -v $(pwd)/log:/var/log/" # Add in logging folder
+RUN_ARGS+=" -v /tmp/multiprotocol-container/log:/var/log/" # Add in logging folder
 RUN_ARGS+=" -v /accept_silabs_msla" # Accept the MSLA for Zigbeed
 RUN_ARGS+=" --privileged --cap-add SYS_ADMIN" # Add in security permissions
 RUN_ARGS+=" --cap-add=SYS_ADMIN --cap-add=NET_ADMIN --net=host" # Add bluetooth

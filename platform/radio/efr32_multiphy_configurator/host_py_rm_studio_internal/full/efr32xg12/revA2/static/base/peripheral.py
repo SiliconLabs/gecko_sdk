@@ -9,7 +9,7 @@ from .. interface import IRegMapPeripheral
 
 class Base_RM_Peripheral(IRegMapPeripheral):
 
-    def __init__(self, rmio, label, baseAddress, name, description):
+    def __init__(self, rmio, label, baseAddress, name, description, alt_peripherals=None):
         self.__dict__['zz_frozen'] = False
         self.zz_rmio = rmio
         self.zz_label = label
@@ -17,6 +17,10 @@ class Base_RM_Peripheral(IRegMapPeripheral):
         self.baseAddress = baseAddress
         self.name = name
         self.description = description
+        if alt_peripherals is None:
+            self._alt_peripherals = []
+        else:
+            self._alt_peripherals = alt_peripherals
 
     def __setattr__(self, name, value):
         if self.__dict__['zz_frozen']:
@@ -48,6 +52,26 @@ class Base_RM_Peripheral(IRegMapPeripheral):
         for key in self.zz_rdict:
             reg = self.zz_rdict[key]
             addrNameDict[reg.baseAddress + reg.addressOffset] = reg.fullname
+
+    def getAddressNamesMap(self, addrNamesDict):
+        for key in self.zz_rdict:
+            reg = self.zz_rdict[key]
+            try:
+                addrNamesDict[reg.baseAddress + reg.addressOffset].append(reg.fullname)
+            except KeyError:
+                addrNamesDict[reg.baseAddress + reg.addressOffset] = [reg.fullname]
+
+    def registerAddressToNamesCb(self, addressToNamesCb):
+        if addressToNamesCb is not None:
+            assert callable(addressToNamesCb), "addressToNamesCb must be callable or None"
+        for key in self.zz_rdict:
+            self.zz_rdict[key].registerAddressToNamesCb(addressToNamesCb)
+
+    def getAliasedNames(self):
+        return self._alt_peripherals
+
+    def isAliased(self):
+        return self.getAliasedNames() != []
 
     def setAccessedFlags(self):
         for key in self.zz_rdict:

@@ -51,6 +51,13 @@ extern  "C" {
 #endif
 
 /********************************************************************************************************
+ *                                             GLOBAL VARIABLES
+ *******************************************************************************************************/
+#if (OS_CFG_ERRNO_EN == 1)
+extern int micriumos_errno;
+#endif
+
+/********************************************************************************************************
  *                                           FLOATING POINT DEFINES
  *******************************************************************************************************/
 
@@ -509,6 +516,15 @@ void OSTaskSwHook(void)
     if (stk_status != DEF_OK) {
       OSRedzoneHitHook(OSTCBCurPtr);
     }
+  }
+#endif
+
+#if (OS_CFG_ERRNO_EN == 1)
+  if (OSTCBCurPtr != DEF_NULL) {
+    OSTCBCurPtr->local_errno = micriumos_errno;
+  }
+  if (OSTCBHighRdyPtr != DEF_NULL) {
+    micriumos_errno = OSTCBHighRdyPtr->local_errno;
   }
 #endif
 }

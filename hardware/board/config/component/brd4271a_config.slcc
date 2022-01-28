@@ -34,12 +34,6 @@
   - condition:
     - brd4001a
     override:
-      component: bootloader_ezsp_gpio_activation
-      file_id: ezsp_gpio_activation_cfg
-    path: brd4271a_brd4001a/btl_ezsp_gpio_activation_cfg.h
-  - condition:
-    - brd4001a
-    override:
       component: bootloader_gpio_activation
       file_id: btl_gpio_activation_cfg
     path: brd4271a_brd4001a/btl_gpio_activation_cfg.h
@@ -225,17 +219,17 @@
       instance: exp
     path: brd4271a_brd4001a/sl_uartdrv_eusart_exp_config.h
   - condition:
+    - brd4001a
+    override:
+      component: usb_device_driver_dwc_otg_fs
+      file_id: usbd_driver_config
+    path: brd4271a_brd4001a/sl_usbd_driver_config.h
+  - condition:
     - brd4002a
     override:
       component: bootloader_euart_driver
       file_id: btl_euart_driver_cfg
     path: brd4271a_brd4002a/btl_euart_driver_cfg.h
-  - condition:
-    - brd4002a
-    override:
-      component: bootloader_ezsp_gpio_activation
-      file_id: ezsp_gpio_activation_cfg
-    path: brd4271a_brd4002a/btl_ezsp_gpio_activation_cfg.h
   - condition:
     - brd4002a
     override:
@@ -423,3 +417,9 @@
       file_id: uartdrv_eusart_config
       instance: exp
     path: brd4271a_brd4002a/sl_uartdrv_eusart_exp_config.h
+  - condition:
+    - brd4002a
+    override:
+      component: usb_device_driver_dwc_otg_fs
+      file_id: usbd_driver_config
+    path: brd4271a_brd4002a/sl_usbd_driver_config.h

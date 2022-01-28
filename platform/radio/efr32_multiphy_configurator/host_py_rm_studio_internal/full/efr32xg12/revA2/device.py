@@ -102,7 +102,7 @@ class RM_Device_EFR32XG12XFULL_RevA2(Base_RM_Device):
         self.__dict__['zz_frozen'] = False
         super(RM_Device_EFR32XG12XFULL_RevA2, self).__init__(rmio, label,
             'EFR32XG12XFULL',
-            RM_SVD_Info('EFR32XG12XFULL_SEQ.svd', '95903d6cc445c791e0e6abb0acb83afc'))
+            RM_SVD_Info('EFR32XG12XFULL_SEQ.svd', 'f50f054f8c847bcf4639864e55bdf3f3'))
 
         self.AGC = RM_Peripheral_AGC(self.zz_rmio, self.zz_label)
         self.zz_pdict['AGC'] = self.AGC
@@ -123,9 +123,15 @@ class RM_Device_EFR32XG12XFULL_RevA2(Base_RM_Device):
             # assign the default reset values to the simulated register dictionary
             for key in self.zz_pdict:
                 self.zz_pdict[key].assignRegDefault()
-        # build the register address-to-name mapping
+        # build the register address-to-names mapping
         for pkey in self.zz_pdict:
-            self.zz_pdict[pkey].getAddressNameMap(self.zz_reg_addr_to_name)
+            per_obj = self.zz_pdict[pkey]
+            # TODO: Remove deprecated self.zz_reg_addr_to_name in future pyrmsvd 2.x release
+            per_obj.getAddressNameMap(self.zz_reg_addr_to_name)
+            per_obj.getAddressNamesMap(self.zz_reg_addr_to_names)
+            if per_obj.isAliased():
+                # register device-level method to query the self.zz_reg_addr_to_names dict
+                per_obj.registerAddressToNamesCb(self.addressToNames)
 
         self.__dict__['zz_frozen'] = True
 

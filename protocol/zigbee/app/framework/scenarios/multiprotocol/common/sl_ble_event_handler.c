@@ -501,7 +501,7 @@ void BeaconAdvertisements(uint16_t devId)
   status = sl_bt_legacy_advertiser_start(adv_handle[HANDLE_IBEACON],
                                          advertiser_non_connectable);
   if (status != SL_STATUS_OK) {
-    emberAfCorePrintln("Error iBeacon sl_bt_legacy_advertiser_start code: ", status);
+    emberAfCorePrintln("Error iBeacon sl_bt_legacy_advertiser_start code: 0x%0x", status);
     return;
   }
 
@@ -816,6 +816,22 @@ void sl_bt_on_event(sl_bt_msg_t* evt)
       sl_dmp_ui_bluetooth_connected(true);
     }
     break;
+
+    case sl_bt_evt_gatt_service_id: {
+      sl_bt_evt_gatt_service_t* service_evt =
+        (sl_bt_evt_gatt_service_t*) &(evt->data);
+      uint8_t i;
+      emberAfCorePrintln(
+        "GATT service, conn_handle=0x%x, service_handle=0x%4x",
+        service_evt->connection, service_evt->service);
+      emberAfCorePrint("UUID=[");
+      for (i = 0; i < service_evt->uuid.len; i++) {
+        emberAfCorePrint("0x%x ", service_evt->uuid.data[i]);
+      }
+      emberAfCorePrintln("]");
+    }
+    break;
+
     default:
       break;
   }

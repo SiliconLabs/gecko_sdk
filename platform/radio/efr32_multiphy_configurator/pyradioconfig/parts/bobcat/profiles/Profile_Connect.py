@@ -4,6 +4,7 @@ from pyradioconfig.calculator_model_framework.interfaces.iprofile import IProfil
 class Profile_Connect_Bobcat(Profile_Base_Bobcat):
 
     def __init__(self):
+        super().__init__()
         self._profileName = "Connect"
         self._readable_name = "Connect Profile"
         self._category = ""

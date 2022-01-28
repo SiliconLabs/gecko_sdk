@@ -69,7 +69,13 @@ configuration:
   - name: "LIB_MEM_CFG_HEAP_SIZE"
     value: "16384"
     condition: [micriumos_kernel]
-    
+  - name: "configUSE_POSIX_ERRNO"
+    value: "1"
+    condition: [freertos]
+  - name: "OS_CFG_ERRNO_EN"
+    value: "1"
+    condition: [micriumos_kernel]
+
   # SDK components config specialization
   - name: "SL_WISUN_PING_MAX_PAYLOAD_LENGTH"
     value: "1024"
@@ -80,6 +86,12 @@ configuration:
   - name: "WISUN_NETWORK_SIZE"
     value: "SL_WISUN_NETWORK_SIZE_SMALL"
 
+readme:
+  - path: ../../documentation/example/wisun_network_measurement/readme.md
+
+other_file:
+  - path: ../../documentation/example/wisun_network_measurement/readme_img0.png
+  - path: ../../documentation/example/wisun_network_measurement/readme_img1.png
 
 ui_hints:
   highlight:
@@ -94,8 +106,8 @@ tag:
   - hardware:
       device:
         memory:
-          flash: 616
-          ram: 171
+          flash: 617
+          ram: 172
       board:
         rf_bands:
           - 434|490|868|915

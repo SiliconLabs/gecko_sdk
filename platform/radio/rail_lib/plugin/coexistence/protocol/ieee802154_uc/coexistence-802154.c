@@ -17,6 +17,7 @@
 #include "rail.h"
 #include "sl_status.h"
 #include "coexistence/protocol/ieee802154_uc/coexistence-802154.h"
+#include "rail_ieee802154.h"
 
 #ifdef RTOS
   #include "rtos/rtos.h"
@@ -269,6 +270,17 @@ static void coexEventsCb(COEX_Events_t events);
 static void phySelectIsr(void);
 #endif//SL_RAIL_UTIL_COEX_RUNTIME_PHY_SELECT
 
+#if SL_RAIL_UTIL_COEX_SIGNAL_IDENTIFIER_ENABLED
+static void wifiTxIsr(void)
+{
+  if (COEX_HAL_GetWifiTx()) {
+    RAIL_IEEE802154_EnableSignalIdentifier(emPhyRailHandle, false);
+  } else {
+    RAIL_IEEE802154_EnableSignalIdentifier(emPhyRailHandle, true);
+  }
+}
+#endif
+
 void sli_rail_util_ieee802154_coex_on_event(COEX_Events_t events)
 {
   if ((events & COEX_EVENT_HOLDOFF_CHANGED) != 0U) {
@@ -279,6 +291,11 @@ void sli_rail_util_ieee802154_coex_on_event(COEX_Events_t events)
     phySelectIsr();
   }
  #endif//SL_RAIL_UTIL_COEX_RUNTIME_PHY_SELECT
+ #if SL_RAIL_UTIL_COEX_SIGNAL_IDENTIFIER_ENABLED
+  if ((events & COEX_EVENT_WIFI_TX_CHANGED) != 0U) {
+    wifiTxIsr();
+  }
+ #endif
   coexEventsCb(events);
 }
 
@@ -592,6 +609,11 @@ sl_rail_util_ieee802154_stack_status_t sl_rail_util_coex_on_event(
           (void) sl_rail_util_coex_set_rx_request(sl_rail_util_coex_frame_detect_req(), NULL);
           cancelTimer(&ptaRxRetryTimer);
           setTimer(&ptaRxTimer, SL_RAIL_UTIL_COEX_RX_TIMEOUT_US, &ptaRxTimerCb);
+        #if SL_RAIL_UTIL_COEX_SIGNAL_IDENTIFIER_ENABLED
+          // Disable signal identifier if RX started before signal detected event happened
+          RAIL_IEEE802154_EnableSignalIdentifier(emPhyRailHandle, false);
+          COEX_EnableWifiTxIsr(false);
+        #endif
         }
       }
       break;
@@ -611,6 +633,7 @@ sl_rail_util_ieee802154_stack_status_t sl_rail_util_coex_on_event(
     case SL_RAIL_UTIL_IEEE802154_STACK_EVENT_RX_CORRUPTED:
     case SL_RAIL_UTIL_IEEE802154_STACK_EVENT_RX_ACK_BLOCKED:
     case SL_RAIL_UTIL_IEEE802154_STACK_EVENT_RX_ACK_ABORTED:
+    case SL_RAIL_UTIL_IEEE802154_STACK_EVENT_SIGNAL_DETECTED:
       if (sl_rail_util_coex_is_enabled()) {
         if ((sl_rail_util_coex_get_options() & SL_RAIL_UTIL_COEX_OPT_RX_RETRY_REQ) != 0U) {
           cancelTimer(&ptaRxTimer);
@@ -634,6 +657,9 @@ sl_rail_util_ieee802154_stack_status_t sl_rail_util_coex_on_event(
         cancelTimer(&ptaRxRetryTimer);
         if (!isReceivingFrame) {
           (void) sl_rail_util_coex_set_rx_request(SL_RAIL_UTIL_COEX_REQ_OFF, NULL);
+        #if RAIL_UTIL_COEX_SIGNAL_IDENTIFIER_ENABLED
+          COEX_EnableWifiTxIsr(true);
+        #endif
         }
       }
       break;
@@ -1031,4 +1057,8 @@ void sl_rail_util_coex_init(void)
 #if defined(SL_RAIL_UTIL_COEX_REQ_PORT) || defined(SL_RAIL_UTIL_COEX_GNT_PORT)
   sl_rail_util_coex_set_enable(true);
 #endif //defined(SL_RAIL_UTIL_COEX_REQ_PORT) || defined(SL_RAIL_UTIL_COEX_GNT_PORT)
+#if SL_RAIL_UTIL_COEX_SIGNAL_IDENTIFIER_ENABLED
+  COEX_EnableWifiTxIsr(true);
+  RAIL_IEEE802154_ConfigSignalIdentifier(emPhyRailHandle);
+#endif
 }

@@ -214,16 +214,6 @@ class RM_Field_SYNTH_CTRL_PRSMUX1(Base_RM_Field):
         self.__dict__['zz_frozen'] = True
 
 
-class RM_Field_SYNTH_CTRL_DISCLKSYNTH(Base_RM_Field):
-    def __init__(self, register):
-        self.__dict__['zz_frozen'] = False
-        super(RM_Field_SYNTH_CTRL_DISCLKSYNTH, self).__init__(register,
-            'DISCLKSYNTH', 'SYNTH.CTRL.DISCLKSYNTH', 'read-write',
-            u"",
-            23, 1)
-        self.__dict__['zz_frozen'] = True
-
-
 class RM_Field_SYNTH_CTRL_INVCLKSYNTH(Base_RM_Field):
     def __init__(self, register):
         self.__dict__['zz_frozen'] = False

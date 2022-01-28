@@ -414,7 +414,7 @@ static void _ping_task_fnc(void *args)
     // reset previous response
     memset(&_icmp_resp, 0, sizeof(_icmp_resp));
     _icmp_req.identifier = htons(req.identifier);
-    _icmp_req.sequence_number = htons(req.sequence_number);
+    _icmp_req.sequence_number = app_wisun_trace_swap_u16(req.sequence_number);
 
     // send request
     r = sendto(_sockid, (const void *) &_icmp_req, req.packet_length, 0,

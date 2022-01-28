@@ -46,7 +46,7 @@
 #elif defined(RADIO_BOARD_ZGM130S)
 #include "radio_board_zgm130s.h"
 
-#elif defined(RADIO_BOARD_ZGM230S)
+#elif defined(RADIO_BOARD_ZGM230SA) || defined(RADIO_BOARD_ZGM230SB)
 #include "radio_board_zgm230s.h"
 #endif
 

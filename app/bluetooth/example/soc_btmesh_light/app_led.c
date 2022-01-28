@@ -58,7 +58,7 @@
 void app_led_set_level(uint16_t level)
 {
   uint16_t pwm_duty_cycle = (uint16_t)((uint32_t)level * PWM_MAX_DUTY_CYCLE
-                                       / LIGHTING_SERVER_PWM_MAXIMUM_BRIGHTNESS);
+                                       / SL_BTMESH_LIGHTING_SERVER_PWM_MAXIMUM_BRIGHTNESS_CFG_VAL);
 
   if (pwm_duty_cycle > PWM_MAX_DUTY_CYCLE) {
     pwm_duty_cycle = PWM_MAX_DUTY_CYCLE;
@@ -85,7 +85,7 @@ void app_led_set_color(uint16_t color)
  ******************************************************************************/
 uint16_t app_led_get_max(void)
 {
-  return LIGHTING_SERVER_PWM_MAXIMUM_BRIGHTNESS;
+  return SL_BTMESH_LIGHTING_SERVER_PWM_MAXIMUM_BRIGHTNESS_CFG_VAL;
 }
 
 /*******************************************************************************

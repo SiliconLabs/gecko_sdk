@@ -18,3 +18,5 @@ toolchain_settings:
     value: "-m32"
     condition:
       - build_32bit
+tag:
+  - device:opn:linux_64

@@ -107,6 +107,16 @@ const char * app_wisun_trace_util_reg_domain_to_str(const uint32_t val);
 const char * app_wisun_trace_util_nw_size_to_str(const uint32_t val);
 
 /**************************************************************************//**
+ * @brief Swapping short unsigned integer endianess
+ * @details It swaps the value pointed.
+ * @param[in] num The swappng number
+ * @return uint16_t integer 
+ *****************************************************************************/
+inline uint16_t app_wisun_trace_swap_u16(uint16_t num) {
+  return (((num & 0xFF) << 8) | ((num & 0xFF00) >> 8));
+}
+
+/**************************************************************************//**
  * @brief Macro to check a status and print a message if the state is not OK
  * @details Use this print a short message on any location where unhandled state
  *          should be noted.

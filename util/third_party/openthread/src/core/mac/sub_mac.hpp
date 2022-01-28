@@ -128,7 +128,7 @@ public:
         /**
          * This method notifies user of `SubMac` of a received frame.
          *
-         * @param[in]  aFrame    A pointer to the received frame or nullptr if the receive operation failed.
+         * @param[in]  aFrame    A pointer to the received frame or `nullptr` if the receive operation failed.
          * @param[in]  aError    kErrorNone when successfully received a frame,
          *                       kErrorAbort when reception was aborted and a frame was not received,
          *                       kErrorNoBufs when a frame could not be received due to lack of rx buffer space.
@@ -156,7 +156,7 @@ public:
          * of a frame transmission, this method is invoked on all frame transmission attempts.
          *
          * @param[in] aFrame      The transmitted frame.
-         * @param[in] aAckFrame   A pointer to the ACK frame, or nullptr if no ACK was received.
+         * @param[in] aAckFrame   A pointer to the ACK frame, or `nullptr` if no ACK was received.
          * @param[in] aError      kErrorNone when the frame was transmitted successfully,
          *                        kErrorNoAck when the frame was transmitted but no ACK was received,
          *                        kErrorChannelAccessFailure tx failed due to activity on the channel,
@@ -177,7 +177,7 @@ public:
          * the received ACK frame.
          *
          * @param[in]  aFrame     The transmitted frame.
-         * @param[in]  aAckFrame  A pointer to the ACK frame, nullptr if no ACK was received.
+         * @param[in]  aAckFrame  A pointer to the ACK frame, `nullptr` if no ACK was received.
          * @param[in]  aError     kErrorNone when the frame was transmitted,
          *                        kErrorNoAck when the frame was transmitted but no ACK was received,
          *                        kErrorChannelAccessFailure tx failed due to activity on the channel,
@@ -274,7 +274,7 @@ public:
      * This method registers a callback to provide received packet capture for IEEE 802.15.4 frames.
      *
      * @param[in]  aPcapCallback     A pointer to a function that is called when receiving an IEEE 802.15.4 link frame
-     *                                or nullptr to disable the callback.
+     *                               or `nullptr` to disable the callback.
      * @param[in]  aCallbackContext  A pointer to application-specific context.
      *
      */
@@ -551,6 +551,29 @@ public:
      */
     void SetFrameCounter(uint32_t aFrameCounter);
 
+#if OPENTHREAD_CONFIG_MAC_FILTER_ENABLE
+    /**
+     * This method enables/disables the radio filter.
+     *
+     * When radio filter is enabled, radio is put to sleep instead of receive (to ensure device does not receive any
+     * frame and/or potentially send ack). Also the frame transmission requests return immediately without sending the
+     * frame over the air (return "no ack" error if ack is requested, otherwise return success).
+     *
+     * @param[in] aFilterEnabled    TRUE to enable radio filter, FALSE to disable.
+     *
+     */
+    void SetRadioFilterEnabled(bool aFilterEnabled) { mRadioFilterEnabled = aFilterEnabled; }
+
+    /**
+     * This method indicates whether the radio filter is enabled or not.
+     *
+     * @retval TRUE   If the radio filter is enabled.
+     * @retval FALSE  If the radio filter is disabled.
+     *
+     */
+    bool IsRadioFilterEnabled(void) const { return mRadioFilterEnabled; }
+#endif
+
 private:
 #if OPENTHREAD_CONFIG_MAC_CSL_RECEIVER_ENABLE
     static void HandleCslTimer(Timer &aTimer);
@@ -648,13 +671,16 @@ private:
     static const char *CslStateToString(CslState aCslState);
 #endif
 
-    otRadioCaps        mRadioCaps;
-    State              mState;
-    uint8_t            mCsmaBackoffs;
-    uint8_t            mTransmitRetries;
-    ShortAddress       mShortAddress;
-    ExtAddress         mExtAddress;
-    bool               mRxOnWhenBackoff;
+    otRadioCaps  mRadioCaps;
+    State        mState;
+    uint8_t      mCsmaBackoffs;
+    uint8_t      mTransmitRetries;
+    ShortAddress mShortAddress;
+    ExtAddress   mExtAddress;
+    bool         mRxOnWhenBackoff : 1;
+#if OPENTHREAD_CONFIG_MAC_FILTER_ENABLE
+    bool mRadioFilterEnabled : 1;
+#endif
     int8_t             mEnergyScanMaxRssi;
     TimeMilli          mEnergyScanEndTime;
     TxFrame &          mTransmitFrame;

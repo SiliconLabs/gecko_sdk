@@ -118,6 +118,10 @@
 #define OS_CFG_TICK_EN OS_CFG_TASK_TICK_EN
 #endif
 
+#ifndef OS_CFG_ERRNO_EN
+#define OS_CFG_ERRNO_EN  0
+#endif
+
 #if (OS_CFG_TICK_EN == DEF_ENABLED)
 #include  <sl_sleeptimer.h>
 #endif
@@ -859,6 +863,10 @@ struct os_tcb {
 
 #if (OS_CFG_TRACE_EN == DEF_ENABLED)
   CPU_INT16U TaskID;                                            ///< Unique ID for third-party debuggers and tracers.
+#endif
+
+#if (OS_CFG_ERRNO_EN == 1)
+  int local_errno;
 #endif
 };
 

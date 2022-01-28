@@ -629,6 +629,21 @@ uint32_t sli_mvp_perfcnt_get(unsigned id);
 
 /**
  * @brief
+ *   Reset program count counter.
+ */
+void sli_mvp_progcnt_reset(void);
+
+/**
+ * @brief
+ *   Fetch the current aggregated value of the program count counter.
+ *
+ * @return
+ *   Program count counter value.
+ */
+uint32_t sli_mvp_progcnt_get(void);
+
+/**
+ * @brief
  *  Start a MVP program loop.
  *
  * @param[in] p Pointer to MVP program context.

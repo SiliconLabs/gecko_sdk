@@ -190,6 +190,9 @@ typedef enum {
 /// Glitch detector mask
 #define GLITCH_DETECTOR_MASK    (0x00020000)
 
+/// Keep tamper alive during sleep mask
+#define SLEEP_ALIVE_MASK        (0x00040000)
+
 /// Tamper reset threshold shift
 #define TAMPER_RESET_SHIFT      (24)
 

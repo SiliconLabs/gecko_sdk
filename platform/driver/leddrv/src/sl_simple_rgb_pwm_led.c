@@ -48,9 +48,10 @@ sl_status_t sl_simple_rgb_pwm_led_init(void *rgb)
 void sl_simple_rgb_pwm_led_turn_on(void *rgb)
 {
   sl_simple_rgb_pwm_led_context_t *context = (sl_simple_rgb_pwm_led_context_t *)rgb;
-  context->red->set_color(context->red, context->red->level);
-  context->green->set_color(context->green, context->green->level);
-  context->blue->set_color(context->blue, context->blue->level);
+
+  sl_pwm_led_start(context->red);
+  sl_pwm_led_start(context->green);
+  sl_pwm_led_start(context->blue);
 
   context->state = SL_LED_CURRENT_STATE_ON;
 }
@@ -59,9 +60,9 @@ void sl_simple_rgb_pwm_led_turn_off(void *rgb)
 {
   sl_simple_rgb_pwm_led_context_t *context = (sl_simple_rgb_pwm_led_context_t *)rgb;
 
-  context->red->set_color(context->red, SL_SIMPLE_RGB_PWM_LED_VALUE_OFF);
-  context->green->set_color(context->green, SL_SIMPLE_RGB_PWM_LED_VALUE_OFF);
-  context->blue->set_color(context->blue, SL_SIMPLE_RGB_PWM_LED_VALUE_OFF);
+  sl_pwm_led_stop(context->red);
+  sl_pwm_led_stop(context->green);
+  sl_pwm_led_stop(context->blue);
 
   context->state = SL_LED_CURRENT_STATE_OFF;
 }
@@ -79,37 +80,23 @@ void sl_simple_rgb_pwm_led_toggle(void *rgb)
 sl_led_state_t sl_simple_rgb_pwm_led_get_state(void *rgb)
 {
   sl_simple_rgb_pwm_led_context_t *context = (sl_simple_rgb_pwm_led_context_t *)rgb;
-  if (context->red->level == SL_SIMPLE_RGB_PWM_LED_VALUE_OFF
-      && context->green->level == SL_SIMPLE_RGB_PWM_LED_VALUE_OFF
-      && context->blue->level == SL_SIMPLE_RGB_PWM_LED_VALUE_OFF) {
-    context->state = SL_LED_CURRENT_STATE_OFF;
-    return context->state;
-  } else {
-    context->state = SL_LED_CURRENT_STATE_ON;
-    return context->state;
-  }
+
+  return context->state;
 }
 
 void sl_simple_rgb_pwm_led_set_color(void *rgb, uint16_t red, uint16_t green, uint16_t blue)
 {
   sl_simple_rgb_pwm_led_context_t *context = (sl_simple_rgb_pwm_led_context_t *)rgb;
+
   context->red->set_color(context->red, red);
   context->red->set_color(context->green, green);
   context->red->set_color(context->blue, blue);
-
-  if ((red == SL_SIMPLE_RGB_PWM_LED_VALUE_OFF)
-      && (green == SL_SIMPLE_RGB_PWM_LED_VALUE_OFF)
-      && (blue == SL_SIMPLE_RGB_PWM_LED_VALUE_OFF)) {
-    // All colors set to OFF. I.e. the same as if the user issued a turn off command
-    sl_simple_rgb_pwm_led_turn_off(context);
-  } else {
-    sl_simple_rgb_pwm_led_turn_on(context);
-  }
 }
 
 void sl_simple_rgb_pwm_led_get_color(void *rgb, uint16_t *red, uint16_t *green, uint16_t *blue)
 {
   sl_simple_rgb_pwm_led_context_t *context = (sl_simple_rgb_pwm_led_context_t *)rgb;
+
   context->red->get_color(context->red, red);
   context->red->get_color(context->green, green);
   context->red->get_color(context->blue, blue);

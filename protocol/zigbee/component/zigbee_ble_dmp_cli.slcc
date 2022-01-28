@@ -1,7 +1,7 @@
 id: "zigbee_ble_dmp_cli"
 label: "Zigbee BLE DMP Command Line Interface"
 package: "Zigbee"
-category: "Zigbee|ZigBee 3.0"
+category: "Zigbee|Zigbee 3.0"
 quality: "production"
 
 description: "Zigbee Bluetooth LE DMP Command Line Interface"

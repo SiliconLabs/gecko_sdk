@@ -92,6 +92,7 @@
   - name: hardware_board_has_hfxo
   - name: hardware_board_has_lfxo
   - name: device_security_rot
+  - name: device_pa_8dbm
   - name: device_has_agc
   - name: device_has_amuxcp
   - name: device_has_amuxcp0

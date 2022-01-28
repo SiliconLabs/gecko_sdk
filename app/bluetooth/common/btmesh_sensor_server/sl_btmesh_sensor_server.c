@@ -152,11 +152,11 @@ void sl_btmesh_sensor_server_node_init(void)
 #ifdef SL_CATALOG_BTMESH_SENSOR_PEOPLE_COUNT_PRESENT
     {
       .property_id = PEOPLE_COUNT,
-      .positive_tolerance = SENSOR_PEOPLE_COUNT_POSITIVE_TOLERANCE,
-      .negative_tolerance = SENSOR_PEOPLE_COUNT_NEGATIVE_TOLERANCE,
-      .sampling_function = SENSOR_PEOPLE_COUNT_SAMPLING_FUNCTION,
-      .measurement_period = SENSOR_PEOPLE_COUNT_MEASUREMENT_PERIOD,
-      .update_interval = SENSOR_PEOPLE_COUNT_UPDATE_INTERVAL
+      .positive_tolerance = SL_BTMESH_SENSOR_PEOPLE_COUNT_POSITIVE_TOLERANCE_CFG_VAL,
+      .negative_tolerance = SL_BTMESH_SENSOR_PEOPLE_COUNT_NEGATIVE_TOLERANCE_CFG_VAL,
+      .sampling_function = SL_BTMESH_SENSOR_PEOPLE_COUNT_SAMPLING_FUNCTION_CFG_VAL,
+      .measurement_period = SL_BTMESH_SENSOR_PEOPLE_COUNT_MEASUREMENT_PERIOD_CFG_VAL,
+      .update_interval = SL_BTMESH_SENSOR_PEOPLE_COUNT_UPDATE_INTERVAL_CFG_VAL
     },
 #endif // SL_CATALOG_BTMESH_SENSOR_PEOPLE_COUNT_PRESENT
 #if defined(SL_BOARD_ENABLE_SENSOR_LIGHT) \
@@ -222,11 +222,11 @@ void sl_btmesh_sensor_server_node_init(void)
   uint32_t update_interval;
   sl_btmesh_sensor_people_count_cadence_init(0);
   sl_btmesh_sensor_thermometer_cadence_init(get_temperature());
-  update_interval = MIN(SENSOR_THERMOMETER_UPDATE_INTERVAL, SENSOR_PEOPLE_COUNT_UPDATE_INTERVAL);
+  update_interval = MIN(SENSOR_THERMOMETER_UPDATE_INTERVAL, SL_BTMESH_SENSOR_PEOPLE_COUNT_UPDATE_INTERVAL_CFG_VAL);
 #elif SENSOR_PEOPLE_COUNT_CADENCE
   uint32_t update_interval;
   sl_btmesh_sensor_people_count_cadence_init(0);
-  update_interval = SENSOR_PEOPLE_COUNT_UPDATE_INTERVAL;
+  update_interval = SL_BTMESH_SENSOR_PEOPLE_COUNT_UPDATE_INTERVAL_CFG_VAL;
 #elif SENSOR_THERMOMETER_CADENCE
   uint32_t update_interval;
   sl_btmesh_sensor_thermometer_cadence_init(get_temperature());

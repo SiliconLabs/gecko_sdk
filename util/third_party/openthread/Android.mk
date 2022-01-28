@@ -220,7 +220,10 @@ LOCAL_SRC_FILES                                                  := \
     src/core/coap/coap.cpp                                          \
     src/core/coap/coap_message.cpp                                  \
     src/core/coap/coap_secure.cpp                                   \
+    src/core/common/appender.cpp                                    \
+    src/core/common/binary_search.cpp                               \
     src/core/common/crc16.cpp                                       \
+    src/core/common/data.cpp                                        \
     src/core/common/error.cpp                                       \
     src/core/common/heap.cpp                                        \
     src/core/common/heap_data.cpp                                   \
@@ -353,7 +356,6 @@ LOCAL_SRC_FILES                                                  := \
     src/core/utils/heap.cpp                                         \
     src/core/utils/history_tracker.cpp                              \
     src/core/utils/jam_detector.cpp                                 \
-    src/core/utils/lookup_table.cpp                                 \
     src/core/utils/otns.cpp                                         \
     src/core/utils/parse_cmdline.cpp                                \
     src/core/utils/ping_sender.cpp                                  \
@@ -369,6 +371,7 @@ LOCAL_SRC_FILES                                                  := \
     src/posix/platform/backbone.cpp                                 \
     src/posix/platform/daemon.cpp                                   \
     src/posix/platform/entropy.cpp                                  \
+    src/posix/platform/firewall.cpp                                 \
     src/posix/platform/hdlc_interface.cpp                           \
     src/posix/platform/infra_if.cpp                                 \
     src/posix/platform/logging.cpp                                  \
@@ -384,6 +387,7 @@ LOCAL_SRC_FILES                                                  := \
     src/posix/platform/system.cpp                                   \
     src/posix/platform/trel_udp6.cpp                                \
     src/posix/platform/udp.cpp                                      \
+    src/posix/platform/utils.cpp                                    \
     third_party/mbedtls/repo/library/aes.c                          \
     third_party/mbedtls/repo/library/aesni.c                        \
     third_party/mbedtls/repo/library/arc4.c                         \

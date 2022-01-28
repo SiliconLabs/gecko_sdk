@@ -20,6 +20,7 @@ provides:
 
 requires:
   - name: bluetooth_stack
+  - name: zigbee_pro_stack_support
 
 config_file:
   - path: protocol/zigbee/app/framework/plugin-soc/dmp-tuning/config/dmp-tuning-config.h
@@ -225,6 +226,13 @@ template_contribution:
       group: rail
       handler: emberAfPluginDmpTuningGetRailConfigSchedulerEventsEnabled
       help: Gets the enable state of the RAIL config scheduler events.
+      
+  - name: cli_command
+    value:
+      name: stop-radio
+      group: rail
+      handler: emberAfPluginDmpTuningStopRadioCommand
+      help: Stops the Radio. Requires Reset to re-activate.
 
 documentation:
   docset: zigbee

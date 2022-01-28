@@ -114,7 +114,6 @@ class Calc_Global_Sol(CALC_Global_ocelot):
         self._addModelRegister(model, 'FEFILT1.SRC.SRCENABLE',          int, ModelVariableFormat.HEX)
         self._addModelRegister(model, 'FEFILT1.SRC.SRCSRD',          int, ModelVariableFormat.HEX)
         self._addModelRegister(model, 'FEFILT1.SRCCHF.SRCDECEN2',           int, ModelVariableFormat.HEX)
-        self._addModelRegister(model, 'FEFILT1.SRCCHF.INTOSR',              int, ModelVariableFormat.HEX)
         self._addModelRegister(model, 'FEFILT1.DIGIGAINCTRL.DIGIGAINEN', int, ModelVariableFormat.HEX)
         self._addModelRegister(model, 'FEFILT1.DIGIGAINCTRL.DIGIGAIN', int, ModelVariableFormat.HEX)
         self._addModelRegister(model, 'FEFILT1.DIGIGAINCTRL.DEC0GAIN', int, ModelVariableFormat.HEX)
@@ -332,3 +331,7 @@ class Calc_Global_Sol(CALC_Global_ocelot):
         self._addModelRegister(model, 'MODEM.RXRESTART.ANTSWRSTFLTTDIS', int, ModelVariableFormat.HEX)
         self._addModelRegister(model, 'MODEM.RXRESTART.RXRESTARTB4PREDET', int, ModelVariableFormat.HEX)
         self._addModelRegister(model, 'MODEM.RXRESTART.RXRESTARTUPONMARSSI', int, ModelVariableFormat.HEX)
+
+    def _add_baudrate_variable(self, model):
+        self._addModelVariable(model, 'baudrate', float, ModelVariableFormat.DECIMAL)
+

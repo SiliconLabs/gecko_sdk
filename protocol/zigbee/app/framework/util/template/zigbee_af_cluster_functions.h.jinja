@@ -1,5 +1,5 @@
 /*******************************************************************************
- * @file zigbee_af_cluster_funtions.h
+ * @file zigbee_af_cluster_functions.h
  * @brief Cluster action callback definitions
  *******************************************************************************
  * # License
@@ -43,40 +43,50 @@ EmberAfStatus {{ cluster['pre_attribute_changed_function'] }} (uint8_t endpoint,
 {% endfor -%}
 
 {# BUILD  FUNCTION STRUCTURES ARRAY #}
-// Array of cluster function (aka cluster action callbacks) stuctures.
-// First entry is a dummy, otherwise an empty array would fail IAR builds
+// Array of cluster function (aka cluster action callbacks) structures.
+// Last entry is a dummy, otherwise an empty array would fail IAR builds.
 #define GENERATED_FUNCTION_STRUCTURES_ARRAY  { \
-  {0x8000, 0x00, 0x00}, \
   {% for cluster in cluster_functions -%}
-{ {{ cluster['cluster_id']}}, \
-  {% if cluster['cluster_type'] == "server"  -%} CLUSTER_MASK_SERVER {% endif -%}
-  {% if cluster['cluster_type'] == "client"  -%} CLUSTER_MASK_CLIENT {% endif -%}
-  {% if cluster['init_function'] | length  -%} | CLUSTER_MASK_INIT_FUNCTION {% endif -%}
-  {% if cluster['attribute_changed_function'] | length  -%} | CLUSTER_MASK_ATTRIBUTE_CHANGED_FUNCTION {% endif -%}
-  {% if cluster['default_response_function'] | length  -%} | CLUSTER_MASK_DEFAULT_RESPONSE_FUNCTION {% endif -%}
-  {% if cluster['message_sent_function'] | length  -%} | CLUSTER_MASK_MESSAGE_SENT_FUNCTION {% endif -%}
-  {% if cluster['manufacturer_specific_attribute_changed_function'] | length  -%} | CLUSTER_MASK_MANUFACTURER_SPECIFIC_ATTRIBUTE_CHANGED_FUNCTION {% endif -%}
-  {% if cluster['pre_attribute_changed_function'] | length  -%} | CLUSTER_MASK_PRE_ATTRIBUTE_CHANGED_FUNCTION {% endif -%},\
+  {% set cid = cluster['cluster_id'] -%}
+  {% set side = '' -%}
+  {% set bit = '' -%}
+  {% set func = '' -%}
+  {% if cluster['cluster_type'] == "server"  -%}
+    {% set side = 'CLUSTER_MASK_SERVER' -%}
+  {% elif cluster['cluster_type'] == "client"  -%}
+    {% set side = 'CLUSTER_MASK_CLIENT' -%}
+  {% endif -%}
   {% if cluster['init_function'] | length  -%}
-  (EmberAfGenericClusterFunction){{cluster['init_function']}}, \
+    {% set bit = 'CLUSTER_MASK_INIT_FUNCTION' -%}
+    {% set func = cluster['init_function'] -%}
+  {% elif cluster['attribute_changed_function'] | length  -%}
+    {% set bit = 'CLUSTER_MASK_ATTRIBUTE_CHANGED_FUNCTION' -%}
+    {% set func = cluster['attribute_changed_function'] -%}
+  {% elif cluster['default_response_function'] | length  -%}
+    {% set bit = 'CLUSTER_MASK_DEFAULT_RESPONSE_FUNCTION' -%}
+    {% set func = cluster['default_response_function'] -%}
+  {% elif cluster['message_sent_function'] | length  -%}
+    {% set bit = 'CLUSTER_MASK_MESSAGE_SENT_FUNCTION' -%}
+    {% set func = cluster['message_sent_function'] -%}
+  {% elif cluster['manufacturer_specific_attribute_changed_function'] | length  -%}
+    {% set bit = 'CLUSTER_MASK_MANUFACTURER_SPECIFIC_ATTRIBUTE_CHANGED_FUNCTION' -%}
+    {% set func = cluster['manufacturer_specific_attribute_changed_function'] -%}
+  {% elif cluster['pre_attribute_changed_function'] | length  -%}
+    {% set bit = 'CLUSTER_MASK_PRE_ATTRIBUTE_CHANGED_FUNCTION' -%}
+    {% set func = cluster['pre_attribute_changed_function'] -%}
   {% endif -%}
-  {% if cluster['attribute_changed_function'] | length  -%}
-  (EmberAfGenericClusterFunction){{cluster['attribute_changed_function']}}, \
-  {% endif -%}
-  {% if cluster['default_response_function'] | length  -%}
-  (EmberAfGenericClusterFunction){{cluster['default_response_function']}}, \
-  {% endif -%}
-  {% if cluster['message_sent_function'] | length  -%}
-  (EmberAfGenericClusterFunction){{cluster['message_sent_function']}}, \
-  {% endif -%}
-  {% if cluster['manufacturer_specific_attribute_changed_function'] | length  -%}
-  (EmberAfGenericClusterFunction){{cluster['manufacturer_specific_attribute_changed_function']}}, \
-  {% endif -%}
-  {% if cluster['pre_attribute_changed_function'] | length  -%}
-  (EmberAfGenericClusterFunction){{cluster['pre_attribute_changed_function']}}, \
-  {% endif -%}
+  {% if func | length -%}
+  {\
+    {{ cid }}u,\
+    ({{ side }} | {{ bit }}),\
+    (EmberAfGenericClusterFunction){{ func }}\
   },\
+  {% endif -%}
   {% endfor -%}
+  { 0x8000u,\
+    0x00u,\
+    (EmberAfGenericClusterFunction)((void *)0)\
+  }\
 }
 
 {# TEST FOR DUPLICATE CALLBACKS  #}

@@ -39,6 +39,11 @@
 #include "em_core.h"
 
 // -----------------------------------------------------------------------------
+// Definitions
+
+#define LONG_TIMER_CHECK(timer) (0 != timer->overflow_max)
+
+// -----------------------------------------------------------------------------
 // Private variables
 
 /// Number of the triggered timers.
@@ -91,6 +96,9 @@ sl_status_t sl_simple_timer_start(sl_simple_timer_t *timer,
                                   bool is_periodic)
 {
   sl_status_t sc;
+  uint32_t timeout_initial_tick;
+  uint32_t timer_freq;
+  uint64_t required_tick;
 
   // Check input parameters.
   if ((timeout_ms == 0) && is_periodic) {
@@ -102,31 +110,56 @@ sl_status_t sl_simple_timer_start(sl_simple_timer_t *timer,
   if (SL_STATUS_OK != sc) {
     return sc;
   }
-  timer->triggered = false;
 
-  // Start sleeptimer.
-  if (is_periodic) {
-    sc = sl_sleeptimer_start_periodic_timer_ms(
-      &timer->sleeptimer_handle,
-      timeout_ms,
-      simple_timer_callback,
-      (void*)timer,
-      0,
-      0);
+  timer->triggered = false;
+  timer->overflow_counter = 0;
+  timer->overflow_max = 0;
+
+  // Check if the timer has to be a long one
+  if (timeout_ms > sl_sleeptimer_get_max_ms32_conversion()) {
+    // Calculate the required ticks
+    timer_freq = sl_sleeptimer_get_timer_frequency();
+    required_tick = ((uint64_t)timeout_ms * (uint64_t)timer_freq + 999)
+                    / 1000;
+
+    // Calculate the initial time in ticks for the first run and the number of
+    // maximum-time runs
+    timeout_initial_tick = (uint32_t)(required_tick % UINT32_MAX);
+    timer->overflow_max = (uint16_t)(required_tick / UINT32_MAX);
+
+    // Start the timer with the initial time
+    sc = sl_sleeptimer_start_periodic_timer(&timer->sleeptimer_handle,
+                                            timeout_initial_tick,
+                                            simple_timer_callback,
+                                            (void*)timer,
+                                            0,
+                                            0);
   } else {
-    sc = sl_sleeptimer_start_timer_ms(
-      &timer->sleeptimer_handle,
-      timeout_ms,
-      simple_timer_callback,
-      (void*)timer,
-      0,
-      0);
+    // Start sleeptimer with the given timeout/period.
+    if (is_periodic) {
+      sc = sl_sleeptimer_start_periodic_timer_ms(
+        &timer->sleeptimer_handle,
+        timeout_ms,
+        simple_timer_callback,
+        (void*)timer,
+        0,
+        0);
+    } else {
+      sc = sl_sleeptimer_start_timer_ms(
+        &timer->sleeptimer_handle,
+        timeout_ms,
+        simple_timer_callback,
+        (void*)timer,
+        0,
+        0);
+    }
   }
 
   if (SL_STATUS_OK == sc) {
     timer->callback = callback;
     timer->callback_data = callback_data;
     timer->periodic = is_periodic;
+    timer->timeout_ms = timeout_ms;
     append_simple_timer(timer);
   }
   return sc;
@@ -208,9 +241,37 @@ static void simple_timer_callback(sl_sleeptimer_timer_handle_t *handle,
                                   void *data)
 {
   (void)handle;
-  if (((sl_simple_timer_t*)data)->triggered == false) {
-    ((sl_simple_timer_t*)data)->triggered = true;
-    ++trigger_count;
+  sl_simple_timer_t *timer = (sl_simple_timer_t*)data;
+  if (timer->triggered == false) {
+    if (timer->overflow_counter < timer->overflow_max) {
+      // Timer has to run
+      if (timer->overflow_counter == 0) {
+        // For the first round, restart periodic timer with maximum value
+        sl_sleeptimer_restart_periodic_timer(&timer->sleeptimer_handle,
+                                             UINT32_MAX,
+                                             simple_timer_callback,
+                                             (void*)timer,
+                                             0,
+                                             0);
+      }
+      timer->overflow_counter++;
+    } else {
+      if (LONG_TIMER_CHECK(timer)) {
+        if (timer->periodic) {
+          // Restart long timer
+          sl_simple_timer_start(timer,
+                                timer->timeout_ms,
+                                timer->callback,
+                                timer->callback_data,
+                                true);
+        } else {
+          // Stop periodic timer
+          sl_sleeptimer_stop_timer(&timer->sleeptimer_handle);
+        }
+      }
+      timer->triggered = true;
+      ++trigger_count;
+    }
   }
 }
 

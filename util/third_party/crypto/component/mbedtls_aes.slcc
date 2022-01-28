@@ -11,6 +11,9 @@ include:
   - path: util/third_party/crypto/mbedtls/include
     file_list:
       - path: mbedtls/aes.h
+  - path: util/third_party/crypto/mbedtls/library
+    file_list:
+      - path: padlock.h
 provides:
   - name: mbedtls_aes
   - name: mbedtls_block_cipher

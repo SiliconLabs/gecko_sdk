@@ -44,7 +44,9 @@ extern "C" {
 /***************************************************************************//**
  * @addtogroup timer
  * @{
- ******************************************************************************/
+ ******************************************************************************
+ * @deprecated
+ *   Deprecated macro TIMER_CH_VALID for SDID 80, new code should use TIMER_REF_CH_VALID.*/
 
 /*******************************************************************************
  *******************************   DEFINES   ***********************************
@@ -59,11 +61,22 @@ extern "C" {
 #if defined(_SILICON_LABS_32B_SERIES_0)
 #define TIMER_CH_VALID(ch)    ((ch) < 3)
 #elif defined(_SILICON_LABS_32B_SERIES_1)
+#if defined(_SILICON_LABS_GECKO_INTERNAL_SDID_80)
+#define TIMER_CH_VALID(ch) _Pragma("GCC warning \"'TIMER_CH_VALID' macro is deprecated for EFR32xG1, Use TIMER_REF_CH_VALID instead\"") ((ch) < 4)
+#else
 #define TIMER_CH_VALID(ch)    ((ch) < 4)
+#endif
 #elif defined(_SILICON_LABS_32B_SERIES_2)
 #define TIMER_CH_VALID(ch)    ((ch) < 3)
 #else
 #error "Unknown device. Undefined number of channels."
+#endif
+
+#if defined(_SILICON_LABS_GECKO_INTERNAL_SDID_80)
+#define TIMER_REF_CH_VALID(ref, ch) ((ref == TIMER0) ? ((ch) < 3) : ((ch) < 4))
+#define TIMER_REF_CH_VALIDATE(ref, ch) TIMER_REF_CH_VALID(ref, ch)
+#else
+#define TIMER_REF_CH_VALIDATE(ref, ch) TIMER_CH_VALID(ch)
 #endif
 
 /** @endcond */

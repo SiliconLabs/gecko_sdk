@@ -73,9 +73,40 @@ config_file:
     path: gatt_configuration.btconf
     directory: btconf
 
+readme:
+  - path: ../../documentation/example/soc_light_std_dmp/readme.md
+
 other_file:
   - path: ../../script/create_bl_files.bat
   - path: ../../script/create_bl_files.sh
+  - path: ../../documentation/example/soc_light_std_dmp/readme_img0.png
+    folder: images
+  - path: ../../documentation/example/soc_light_std_dmp/readme_img1.png
+    folder: images
+  - path: ../../documentation/example/soc_light_std_dmp/readme_img2.png
+    folder: images
+  - path: ../../documentation/example/soc_light_std_dmp/readme_img3.png
+    folder: images
+  - path: ../../documentation/example/soc_light_std_dmp/readme_img4.png
+    folder: images
+  - path: ../../documentation/example/soc_light_std_dmp/readme_img5.png
+    folder: images
+  - path: ../../documentation/example/soc_light_std_dmp/readme_img6.png
+    folder: images
+  - path: ../../documentation/example/soc_light_std_dmp/readme_img7.png
+    folder: images
+  - path: ../../documentation/example/soc_light_std_dmp/readme_img8.png
+    folder: images
+  - path: ../../documentation/example/soc_light_std_dmp/readme_img9.png
+    folder: images
+  - path: ../../documentation/example/soc_light_std_dmp/readme_img10.png
+    folder: images
+  - path: ../../documentation/example/soc_light_std_dmp/readme_img11.png
+    folder: images
+  - path: ../../documentation/example/soc_light_std_dmp/readme_img12.png
+    folder: images
+  - path: ../../documentation/example/soc_light_std_dmp/readme_img13.png
+    folder: images
 
 configuration:
   - name: SL_STACK_SIZE
@@ -371,4 +402,5 @@ tag:
 ui_hints:
   highlight:
     - path: config/btconf/gatt_configuration.btconf
+    - path: readme.md
       focus: true

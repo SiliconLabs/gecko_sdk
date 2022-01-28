@@ -11,7 +11,8 @@ class RM_Peripheral_SEQ(Base_RM_Peripheral):
         self.__dict__['zz_frozen'] = False
         super(RM_Peripheral_SEQ, self).__init__(rmio, label,
             0xB0001FE0, 'SEQ',
-            u"")
+            u"",
+            [])
         self.SPARE0 = RM_Register_SEQ_SPARE0(self.zz_rmio, self.zz_label)
         self.zz_rdict['SPARE0'] = self.SPARE0
         self.SPARE1 = RM_Register_SEQ_SPARE1(self.zz_rmio, self.zz_label)

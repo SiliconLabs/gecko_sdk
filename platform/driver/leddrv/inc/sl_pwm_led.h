@@ -52,6 +52,22 @@ typedef struct {
 sl_status_t sl_pwm_led_init(void *context);
 
 /***************************************************************************//**
+ * Start the PWM LED. This enables the GPIO timer route.
+ *
+ * @param[in] context         Pointer to PWM LED specific data
+ *
+ ******************************************************************************/
+void sl_pwm_led_start(void *context);
+
+/***************************************************************************//**
+ * Stop the PWM LED.  This disables the GPIO timer route.
+ *
+ * @param[in] context         Pointer to PWM LED specific data
+ *
+ ******************************************************************************/
+void sl_pwm_led_stop(void *context);
+
+/***************************************************************************//**
  * Set color of PWM LED.
  *
  * @param[in] context         Pointer to PWM LED specific data.

@@ -278,8 +278,8 @@ uint16_t sl_btmesh_get_lightness_onpowerup(void)
   return lightbulb_state.onpowerup;
 }
 
-#if defined(LIGHTING_SERVER_DEBUG_PRINTS_FOR_STATE_CHANGE_EVENTS) \
-  && LIGHTING_SERVER_DEBUG_PRINTS_FOR_STATE_CHANGE_EVENTS
+#if defined(SL_BTMESH_LIGHTING_SERVER_DEBUG_PRINTS_FOR_STATE_CHANGE_EVENTS_CFG_VAL) \
+  && SL_BTMESH_LIGHTING_SERVER_DEBUG_PRINTS_FOR_STATE_CHANGE_EVENTS_CFG_VAL
 /***************************************************************************//**
  * This function prints debug information for mesh server state change event.
  *
@@ -318,11 +318,11 @@ void sl_btmesh_lighting_server_on_event(sl_btmesh_msg_t *evt)
       }
       break;
     case sl_btmesh_evt_node_reset_id:
-      sl_bt_nvm_erase(LIGHTING_SERVER_PS_KEY);
+      sl_bt_nvm_erase(SL_BTMESH_LIGHTING_SERVER_PS_KEY_CFG_VAL);
       break;
     case sl_btmesh_evt_generic_server_state_changed_id:
-#if defined(LIGHTING_SERVER_DEBUG_PRINTS_FOR_STATE_CHANGE_EVENTS) \
-      && LIGHTING_SERVER_DEBUG_PRINTS_FOR_STATE_CHANGE_EVENTS
+#if defined(SL_BTMESH_LIGHTING_SERVER_DEBUG_PRINTS_FOR_STATE_CHANGE_EVENTS_CFG_VAL) \
+      && SL_BTMESH_LIGHTING_SERVER_DEBUG_PRINTS_FOR_STATE_CHANGE_EVENTS_CFG_VAL
       server_state_changed(&(evt->data.evt_generic_server_state_changed));
 #endif // LOG_ENABLE
       break;
@@ -2267,7 +2267,7 @@ static void init_models(void)
 /***************************************************************************//**
  * This function loads the saved light state from Persistent Storage and
  * copies the data in the global variable lightbulb_state.
- * If PS key with ID LIGHTING_SERVER_PS_KEY does not exist or loading failed,
+ * If PS key with ID SL_BTMESH_LIGHTING_SERVER_PS_KEY_CFG_VAL does not exist or loading failed,
  * lightbulb_state is set to zero and some default values are written to it.
  *
  * @return Returns SL_STATUS_OK (0) if succeed, non-zero otherwise.
@@ -2278,7 +2278,7 @@ static sl_status_t lightbulb_state_load(void)
   size_t ps_len = 0;
   struct lightbulb_state ps_data;
 
-  sc = sl_bt_nvm_load(LIGHTING_SERVER_PS_KEY,
+  sc = sl_bt_nvm_load(SL_BTMESH_LIGHTING_SERVER_PS_KEY_CFG_VAL,
                       sizeof(ps_data),
                       &ps_len,
                       (uint8_t *)&ps_data);
@@ -2288,8 +2288,8 @@ static sl_status_t lightbulb_state_load(void)
     memset(&lightbulb_state, 0, sizeof(struct lightbulb_state));
     lightbulb_state.lightness_last    = LIGHTNESS_LAST_DEFAULT;
     lightbulb_state.lightness_default = LIGHTNESS_DEFAULT_DEFAULT;
-    lightbulb_state.lightness_min     = LIGHTING_SERVER_LIGHTNESS_MIN;
-    lightbulb_state.lightness_max     = LIGHTING_SERVER_LIGHTNESS_MAX;
+    lightbulb_state.lightness_min     = SL_BTMESH_LIGHTING_SERVER_LIGHTNESS_MIN_CFG_VAL;
+    lightbulb_state.lightness_max     = SL_BTMESH_LIGHTING_SERVER_LIGHTNESS_MAX_CFG_VAL;
 
     // Check if default values are valid and correct them if needed
     lightbulb_state_validate_and_correct();
@@ -2349,7 +2349,7 @@ static void lightbulb_state_validate_and_correct(void)
  * This function saves the current light state in Persistent Storage so that
  * the data is preserved over reboots and power cycles.
  * The light state is hold in a global variable lightbulb_state.
- * A PS key with ID LIGHTING_SERVER_PS_KEY is used to store the whole struct.
+ * A PS key with ID SL_BTMESH_LIGHTING_SERVER_PS_KEY_CFG_VAL is used to store the whole struct.
  *
  * @return Returns SL_STATUS_OK (0) if succeed, non-zero otherwise.
  ******************************************************************************/
@@ -2357,7 +2357,7 @@ static sl_status_t lightbulb_state_store(void)
 {
   sl_status_t sc;
 
-  sc = sl_bt_nvm_save(LIGHTING_SERVER_PS_KEY,
+  sc = sl_bt_nvm_save(SL_BTMESH_LIGHTING_SERVER_PS_KEY_CFG_VAL,
                       sizeof(struct lightbulb_state),
                       (const uint8_t*)&lightbulb_state);
 
@@ -2376,7 +2376,7 @@ static sl_status_t lightbulb_state_store(void)
 static void lightbulb_state_changed(void)
 {
   sl_status_t sc = sl_simple_timer_start(&lighting_state_store_timer,
-                                         LIGHTING_SERVER_NVM_SAVE_TIME,
+                                         SL_BTMESH_LIGHTING_SERVER_NVM_SAVE_TIME_CFG_VAL,
                                          lighting_state_store_timer_cb,
                                          NO_CALLBACK_DATA,
                                          false);

@@ -64,6 +64,9 @@
 //beginning.  ECC code lowers it
 uint16_t emMaxPhyToMacQueueLength = 1000;
 
+uint8_t emMfglibMode = 0u;
+int8_t emSynthFreqOffset; //mfglib
+
 // Some of the default CSMA default values.
 
 // Comes from phy/phy.h (in lower-mac.h)
@@ -670,9 +673,11 @@ void emLowerMacEventHandler(void)
       return;
     }
 #endif
-
+    // We turn off the autoAck in mfglib mode (see radioSetTx()) hence emLowerMacState should never set
+    // to EMBER_MAC_STATE_TX_WAITING_FOR_ACK, otherwise loweMacState would never call txComplete or idle
+    // and hence subsequent operations will be stalled.
     ATOMIC(
-      emLowerMacState = (sl_mac_flat_ack_requested(currentOutgoingPacket, true)
+      emLowerMacState = ((sl_mac_flat_ack_requested(currentOutgoingPacket, true) && (emMfglibMode == 0u))
                          ? EMBER_MAC_STATE_TX_WAITING_FOR_ACK
                          : EMBER_MAC_STATE_TX_NO_ACK);
       setInternalFlag(FLAG_ONGOING_TX_DATA, true);
@@ -1131,6 +1136,7 @@ sl_status_t sl_mac_lower_mac_set_radio_channel(uint8_t mac_index, uint8_t channe
     radioSetRx();
   }
 
+  (void) RAIL_SetFreqOffset(connectRailHandle, ((int16_t)emSynthFreqOffset) << 7);
   return SL_STATUS_OK;
 }
 
@@ -1510,7 +1516,8 @@ static void packetReceivedCallback(void)
                                      sizeof(macHdr),
                                      0) == sizeof(macHdr));
 
-  if (sl_mac_flat_frame_type(rxPacket, true) == EMBER_MAC_HEADER_FC_FRAME_TYPE_ACK) {
+  if (emMfglibMode == 0u  // no autoAck in promiscuous mode hence this `if` block is not needed in mfglibmode.
+      && sl_mac_flat_frame_type(rxPacket, true) == EMBER_MAC_HEADER_FC_FRAME_TYPE_ACK) {
     LOWER_MAC_DEBUG_ADD_ACTION(LOWER_MAC_DEBUG_ACTION_RX_PACKET,
                                (1 | ((uint64_t)sl_mac_flat_sequence_number(rxPacket, true) << 32)));
     (void) onPtaStackEvent(SL_RAIL_UTIL_IEEE802154_STACK_EVENT_RX_ENDED,
@@ -1550,8 +1557,6 @@ static void packetReceivedCallback(void)
         RAIL_YieldRadio(connectRailHandle);
       }
     }
-
-    // ACKs are not passed up the stack.
     return;
   }
 
@@ -1585,7 +1590,7 @@ static void packetReceivedCallback(void)
 #ifdef CSL_SUPPORT
   // Check if this is a Wakeup Frame
   uint8_t ieIndex = 0;
-  if (isWakeupFrame(rxPacket, &ieIndex)) {
+  if (emMfglibMode == 0u && isWakeupFrame(rxPacket, &ieIndex)) {
     // Get the rendezvous time and setup event to clear things after reception of the data frame
     if (wakeupFrameReceived == false) {
       sl_mac_rendezvous_ie_t *rendezvous_ie = (sl_mac_rendezvous_ie_t *)&rxPacket[ieIndex];
@@ -1696,15 +1701,18 @@ static void packetReceivedCallback(void)
   // 2. For all other packets (unicast), tag the incoming packet with the network index if the
   //    pan id matches.
   // 3. Check if a scan is in progress.
+  // 4. If mfglibMode is enabled then item 1 and 2 is not needed, instead tag all packets to current nwk index.
 
   // Check if broadcast pan is set for the incoming packet
-  if (sl_mac_is_broadcast_pan(rxPacket, true)) {
-    // Get all active network indices on the current radio channel
-    sl_mac_get_matching_nwk_index_bitmask(0, EMBER_BROADCAST_PAN_ID, currentRadioChannel, &nwk_index_bitmask);
-  } else {
-    // Get network indices matching the incoming pan id and add it to the current bitbask
-    if (sl_mac_get_pan_id(rxPacket, true, &pan_id) == SL_STATUS_OK) {
-      sl_mac_get_matching_nwk_index_bitmask(0, pan_id, currentRadioChannel, &nwk_index_bitmask);
+  if (emMfglibMode == 0u) {
+    if (sl_mac_is_broadcast_pan(rxPacket, true)) {
+      // Get all active network indices on the current radio channel
+      sl_mac_get_matching_nwk_index_bitmask(0, EMBER_BROADCAST_PAN_ID, currentRadioChannel, &nwk_index_bitmask);
+    } else {
+      // Get network indices matching the incoming pan id and add it to the current bitbask
+      if (sl_mac_get_pan_id(rxPacket, true, &pan_id) == SL_STATUS_OK) {
+        sl_mac_get_matching_nwk_index_bitmask(0, pan_id, currentRadioChannel, &nwk_index_bitmask);
+      }
     }
   }
 
@@ -2015,6 +2023,9 @@ static void railCallbackHandler(RAIL_Handle_t railHandle, RAIL_Events_t events)
   if (events & (RAIL_EVENT_RX_SYNC1_DETECT | RAIL_EVENT_RX_SYNC2_DETECT)) {
     (void) onPtaStackEvent(SL_RAIL_UTIL_IEEE802154_STACK_EVENT_RX_STARTED,
                            (uint32_t) isReceivingFrame());
+  }
+  if (events & RAIL_EVENT_SIGNAL_DETECTED) {
+    (void) onPtaStackEvent(SL_RAIL_UTIL_IEEE802154_STACK_EVENT_SIGNAL_DETECTED, 0U);
   }
 #endif//SLI_COEX_SUPPORTED
 
@@ -2438,9 +2449,6 @@ static void addFirstWakeupFrameInFifo(uint8_t* payload)
                              numWakeupFrameBeingSent + 1);
 }
 #endif // CSL_SUPPORT
-
-// Moved variable definition up as it is being accessed inside the function radioSetTx
-uint8_t emMfglibMode = 0;
 
 static RAIL_SchedulerInfo_t txSchedulerInfo = {
   .priority = RADIO_SCHEDULER_TX_DEFAULT_PRIORITY,
@@ -3134,7 +3142,6 @@ bool emRadioAutoAckEnabled(void)
 //----end of mfglib calls
 
 #ifdef EMBER_TEST
-int8_t emSynthFreqOffset; //mfglib
 volatile bool emMfglibTransmitComplete = false; //mfglib
 
 uint16_t emGetTxPowerMode(void)
@@ -3149,7 +3156,7 @@ bool emRadioPacketTraceEnabled(void)
   return false;
 }
 
-#endif
+#endif // EMBER_TEST
 
 EmberStatus emberSetTxPowerMode(uint16_t txPowerMode)
 {
@@ -3371,6 +3378,7 @@ static void changeDynamicEvents(void)
                                   | RAIL_EVENT_TX_CHANNEL_CLEAR
                                   | RAIL_EVENT_TX_CCA_RETRY
                                   | RAIL_EVENT_TX_START_CCA
+                                  | RAIL_EVENT_SIGNAL_DETECTED
   ;
   RAIL_Events_t eventValues = RAIL_EVENTS_NONE;
 

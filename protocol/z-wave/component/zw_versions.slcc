@@ -13,18 +13,18 @@ define:
 - name: ZW_VERSION_MINOR
   value: 17
 - name: ZW_VERSION_PATCH
-  value: 0
+  value: 1
 # Z-Wave Plus Framework and Apps
 - name: ZAF_VERSION_MAJOR
   value: 10
 - name: ZAF_VERSION_MINOR
   value: 17
 - name: ZAF_VERSION_PATCH
-  value: 0
+  value: 1
 # SDK
 - name: SDK_VERSION_MAJOR
   value: 7
 - name: SDK_VERSION_MINOR
   value: 17
 - name: SDK_VERSION_PATCH
-  value: 0
+  value: 1

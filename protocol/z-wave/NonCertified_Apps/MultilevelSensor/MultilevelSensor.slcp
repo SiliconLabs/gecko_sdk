@@ -30,10 +30,16 @@ component:
   - id: zw_cc_multilevelsensor
   - id: sl_system
   - id: device_init
-  - id: iostream_recommended_stream
+  - id: iostream_usart
+    instance: [vcom]
   - id: mpu # disable execution from RAM
   # Unlatch pin retention
   - id: app_em4h_reset
+  - id: si70xx_driver
+  - id: i2cspm
+    instance:
+      - sensor
+  - id: emlib_i2c
 source:
   - path: MultilevelSensor.c
   - path: Configuration_interface.c
@@ -51,15 +57,6 @@ include:
       - path: MultilevelSensor_si7021.h
       - path: Configuration_interface.h
       - path: MultilevelSensor_interface.h
-  - path: "../../../../platform/driver/i2cspm/inc"
-    file_list:
-      - path: "sl_i2cspm.h"
-  - path: "../../../../hardware/driver/si70xx/inc"
-    file_list:
-      - path: "sl_si70xx.h"
-  - path: "../../../../platform/emlib/inc"
-    file_list:
-      - path: "em_i2c.h"
 configuration:
   - name: NVM3_DEFAULT_MAX_OBJECT_SIZE
     value: 1900
@@ -116,9 +113,12 @@ configuration:
     value: 2
     condition: ["device_series_2"]
 
+define:
+  - name: APP_PROPERTIES_CONFIG_FILE
+    value: <config_app.h>
+
 other_file:
   - path: ../../DevTools/postbuild.sh
-    condition: [device_series_2]
 
 tag:
   - prebuilt_demo

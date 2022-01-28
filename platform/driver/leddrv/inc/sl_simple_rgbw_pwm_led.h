@@ -49,8 +49,6 @@
 #define SL_SIMPLE_RGBW_PWM_LED_COLOR_B              2U  ///< LED Blue
 #define SL_SIMPLE_RGBW_PWM_LED_COLOR_W              3U  ///< LED White
 
-#define SL_SIMPLE_RGBW_PWM_LED_VALUE_OFF            0U  ///< LED off value
-
 #define SL_SIMPLE_RGBW_PWM_LED_NUM_CC_REQUIRED      4U  ///< Number of Timer Capture Channels required (1 for each RGBW color)
 
 /*******************************************************************************

@@ -111,7 +111,7 @@ static bool checkPhySwitch(void)
 
 #endif//RUNTIME_PHY_SELECT
 
-sl_rail_util_ieee802154_radio_config_t sl_rail_util_get_active_radio_config(void)
+sl_rail_util_ieee802154_radio_config_t sl_rail_util_ieee802154_get_active_radio_config(void)
 {
   return active_radio_config;
 }
@@ -151,7 +151,7 @@ sl_rail_util_ieee802154_radio_config_t sl_rail_util_get_active_radio_config(void
   && (SL_RAIL_UTIL_COEX_RUNTIME_PHY_SELECT || SL_RAIL_UTIL_COEX_PHY_ENABLED)  \
   && (SL_FEM_UTIL_RUNTIME_PHY_SELECT || SL_FEM_UTIL_OPTIMIZED_PHY_ENABLE))
 
-RAIL_Status_t sl_rail_util_plugin_config_2p4ghz_radio(RAIL_Handle_t railHandle)
+RAIL_Status_t sl_rail_util_ieee802154_config_radio(RAIL_Handle_t railHandle)
 {
   // Establish the proper radio config
   RAIL_Status_t status = RAIL_STATUS_INVALID_STATE;

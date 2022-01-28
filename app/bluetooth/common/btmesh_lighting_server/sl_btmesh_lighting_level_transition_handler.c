@@ -101,7 +101,7 @@ static void transition_timer_cb(sl_simple_timer_t *handle,
   // Initialize the variable to UI update period in order to trigger a UI update
   // at the beginning of the transition.
   static uint16_t time_elapsed_since_ui_update =
-    LIGHTING_SERVER_UI_UPDATE_PERIOD;
+    SL_BTMESH_LIGHTING_SERVER_UI_UPDATE_PERIOD_CFG_VAL;
 
   if (!level_transitioning) {
     sl_status_t sc = sl_simple_timer_stop(&transition_timer);
@@ -117,7 +117,7 @@ static void transition_timer_cb(sl_simple_timer_t *handle,
 
       // Set the variable to UI update period in order to trigger a UI update
       // at the beginning of the next transition.
-      time_elapsed_since_ui_update = LIGHTING_SERVER_UI_UPDATE_PERIOD;
+      time_elapsed_since_ui_update = SL_BTMESH_LIGHTING_SERVER_UI_UPDATE_PERIOD_CFG_VAL;
 
       // Trigger a UI update in order to provide the target values at the end
       // of the current transition
@@ -137,12 +137,12 @@ static void transition_timer_cb(sl_simple_timer_t *handle,
       }
 
       // When transition is ongoing generate an event to application once every
-      // CTL_SERVER_UI_UPDATE_PERIOD ms because the event is used to update display
+      // SL_BTMESH_CTL_SERVER_UI_UPDATE_PERIOD_CFG_VAL ms because the event is used to update display
       // status and therefore the rate should not be too high
-      time_elapsed_since_ui_update += LIGHTING_SERVER_PWM_UPDATE_PERIOD;
+      time_elapsed_since_ui_update += SL_BTMESH_LIGHTING_SERVER_PWM_UPDATE_PERIOD_CFG_VAL;
 
-      if (LIGHTING_SERVER_UI_UPDATE_PERIOD <= time_elapsed_since_ui_update) {
-        time_elapsed_since_ui_update -= LIGHTING_SERVER_UI_UPDATE_PERIOD;
+      if (SL_BTMESH_LIGHTING_SERVER_UI_UPDATE_PERIOD_CFG_VAL <= time_elapsed_since_ui_update) {
+        time_elapsed_since_ui_update -= SL_BTMESH_LIGHTING_SERVER_UI_UPDATE_PERIOD_CFG_VAL;
         sl_btmesh_lighting_server_on_ui_update(current_level);
       }
     }
@@ -185,7 +185,7 @@ void sl_btmesh_lighting_set_level(uint16_t level, uint32_t transition_ms)
   // enabling timer IRQ -> the PWM level is adjusted in timer interrupt
   // gradually until target level is reached.
   sl_status_t sc = sl_simple_timer_start(&transition_timer,
-                                         LIGHTING_SERVER_PWM_UPDATE_PERIOD,
+                                         SL_BTMESH_LIGHTING_SERVER_PWM_UPDATE_PERIOD_CFG_VAL,
                                          transition_timer_cb,
                                          NO_CALLBACK_DATA,
                                          true);
@@ -205,16 +205,16 @@ void  sl_btmesh_set_state(int state)
 
   switch (state) {
     case LED_STATE_OFF:
-      sl_btmesh_lighting_set_level(LIGHTING_SERVER_PWM_MINIMUM_BRIGHTNESS, 0);
+      sl_btmesh_lighting_set_level(SL_BTMESH_LIGHTING_SERVER_PWM_MINIMUM_BRIGHTNESS_CFG_VAL, 0);
       break;
     case LED_STATE_ON:
-      sl_btmesh_lighting_set_level(LIGHTING_SERVER_PWM_MAXIMUM_BRIGHTNESS, 0);
+      sl_btmesh_lighting_set_level(SL_BTMESH_LIGHTING_SERVER_PWM_MAXIMUM_BRIGHTNESS_CFG_VAL, 0);
       break;
     case LED_STATE_PROV:
       if (++toggle % 2) {
-        sl_btmesh_lighting_set_level(LIGHTING_SERVER_PWM_MINIMUM_BRIGHTNESS, 0);
+        sl_btmesh_lighting_set_level(SL_BTMESH_LIGHTING_SERVER_PWM_MINIMUM_BRIGHTNESS_CFG_VAL, 0);
       } else {
-        sl_btmesh_lighting_set_level(LIGHTING_SERVER_PWM_MAXIMUM_BRIGHTNESS, 0);
+        sl_btmesh_lighting_set_level(SL_BTMESH_LIGHTING_SERVER_PWM_MAXIMUM_BRIGHTNESS_CFG_VAL, 0);
       }
       break;
 

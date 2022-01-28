@@ -2,6 +2,7 @@ from pyradioconfig.parts.bobcat.profiles.Profile_WiSUN import Profile_WiSUN_Bobc
 from pyradioconfig.parts.common.profiles.viper_regs import build_modem_regs_viper
 from pyradioconfig.parts.common.profiles.profile_common import buildCrcOutputs, buildFecOutputs, buildFrameOutputs, \
     buildWhiteOutputs
+from pyradioconfig.parts.viper.profiles.sw_profile_outputs_common import sw_profile_outputs_common_viper
 
 class profile_wisun_viper(Profile_WiSUN_Bobcat):
 
@@ -13,6 +14,10 @@ class profile_wisun_viper(Profile_WiSUN_Bobcat):
         self._default = False
         self._activation_logic = ""
         self._family = "viper"
+        self._sw_profile_outputs_common = sw_profile_outputs_common_viper()
+
+    def build_advanced_profile_inputs(self, model, profile):
+        pass
 
     def build_register_profile_outputs(self, model, profile):
         family = self._family

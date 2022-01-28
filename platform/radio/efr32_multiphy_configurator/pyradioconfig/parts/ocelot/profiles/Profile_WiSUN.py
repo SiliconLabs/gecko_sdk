@@ -2,9 +2,9 @@ from pyradioconfig.parts.jumbo.profiles.Profile_WiSUN import Profile_WiSUN_Jumbo
 from pyradioconfig.parts.common.profiles.ocelot_regs import build_modem_regs_ocelot
 from pyradioconfig.parts.common.profiles.profile_common import buildCrcOutputs, buildFecOutputs, buildFrameOutputs, \
     buildWhiteOutputs, build_ircal_sw_vars
-from pyradioconfig.parts.ocelot.profiles.profile_modem import buildRailOutputs
 from pyradioconfig.parts.common.utils.units_multiplier import UnitsMultiplier
 from pycalcmodel.core.output import ModelOutput, ModelOutputType
+from pyradioconfig.parts.ocelot.profiles.sw_profile_outputs_common import sw_profile_outputs_common_ocelot
 
 class Profile_WiSUN_Ocelot(Profile_WiSUN_Jumbo):
 
@@ -16,6 +16,7 @@ class Profile_WiSUN_Ocelot(Profile_WiSUN_Jumbo):
         self._default = False
         self._activation_logic = ""
         self._family = "ocelot"
+        self._sw_profile_outputs_common = sw_profile_outputs_common_ocelot()
 
     def build_optional_profile_inputs(self, model, profile):
         #Start with the same optional Profile Inputs as Series 1
@@ -25,11 +26,11 @@ class Profile_WiSUN_Ocelot(Profile_WiSUN_Jumbo):
         self.make_optional_input(profile, model.vars.fec_tx_enable, 'Channel_Coding',
                                      readable_name="Enable FEC",
                                      default=model.vars.fec_tx_enable.var_enum.DISABLED)
+
     def build_advanced_profile_inputs(self, model, profile):
         self.make_linked_io(profile, model.vars.antdivmode, 'Advanced', readable_name="Antenna diversity mode")
         self.make_linked_io(profile, model.vars.antdivrepeatdis, 'Advanced', readable_name="Diversity Select-Best repeat")
         self.make_linked_io(profile, model.vars.skip2ant, 'Advanced', 'Skip 2nd antenna check with phase demod antenna diversity')
-        pass
 
     def build_hidden_profile_inputs(self, model, profile):
         # Hidden inputs to allow for fixed frame length testing
@@ -63,8 +64,8 @@ class Profile_WiSUN_Ocelot(Profile_WiSUN_Jumbo):
         buildFecOutputs(model, profile)
 
     def build_variable_profile_outputs(self, model, profile):
-        buildRailOutputs(model, profile)
-        build_ircal_sw_vars(model, profile)
+        self._sw_profile_outputs_common.build_rail_outputs(model, profile)
+        self._sw_profile_outputs_common.build_ircal_outputs(model, profile)
         profile.outputs.append(ModelOutput(model.vars.wisun_phy_mode_id, '', ModelOutputType.RAIL_CONFIG,
                                            readable_name='WiSUN PhyModeID'))
         profile.outputs.append(ModelOutput(model.vars.wisun_mode_switch_phr, '', ModelOutputType.RAIL_CONFIG,

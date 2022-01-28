@@ -7,6 +7,48 @@
 #define SL_CPC_DRV_UART_TX_QUEUE_SIZE                SL_CPC_DRV_UART_{{ instance | upper }}_TX_QUEUE_SIZE
 #define SL_CPC_DRV_UART_BAUDRATE                     SL_CPC_DRV_UART_{{ instance | upper }}_BAUDRATE
 
+#if !defined(SL_CPC_DRV_UART_{{ instance | upper }}_FLOW_CONTROL_TYPE)
+#define SL_CPC_DRV_UART_FLOW_CONTROL_TYPE usartHwFlowControlNone
+#else
+#define SL_CPC_DRV_UART_FLOW_CONTROL_TYPE SL_CPC_DRV_UART_{{ instance | upper }}_FLOW_CONTROL_TYPE
+#endif
+
+#if !defined(SL_CPC_DRV_UART_{{ instance | upper }}_CTS_PORT)
+#define SL_CPC_DRV_UART_CTS_PORT 0
+#else
+#define SL_CPC_DRV_UART_CTS_PORT SL_CPC_DRV_UART_{{ instance | upper }}_CTS_PORT
+#endif
+
+#if !defined(SL_CPC_DRV_UART_{{ instance | upper }}_CTS_PIN)
+#define SL_CPC_DRV_UART_CTS_PIN 0
+#else
+#define SL_CPC_DRV_UART_CTS_PIN SL_CPC_DRV_UART_{{ instance | upper }}_CTS_PIN
+#endif
+
+#if !defined(SL_CPC_DRV_UART_{{ instance | upper }}_CTS_LOC)
+#define SL_CPC_DRV_UART_CTS_LOC 0
+#else
+#define SL_CPC_DRV_UART_CTS_LOC SL_CPC_DRV_UART_{{ instance | upper }}_CTS_LOC
+#endif
+
+#if !defined(SL_CPC_DRV_UART_{{ instance | upper }}_RTS_PORT)
+#define SL_CPC_DRV_UART_RTS_PORT 0
+#else
+#define SL_CPC_DRV_UART_RTS_PORT SL_CPC_DRV_UART_{{ instance | upper }}_RTS_PORT
+#endif
+
+#if !defined(SL_CPC_DRV_UART_{{ instance | upper }}_RTS_PIN)
+#define SL_CPC_DRV_UART_RTS_PIN 0
+#else
+#define SL_CPC_DRV_UART_RTS_PIN SL_CPC_DRV_UART_{{ instance | upper }}_RTS_PIN
+#endif
+
+#if !defined(SL_CPC_DRV_UART_{{ instance | upper }}_RTS_LOC)
+#define SL_CPC_DRV_UART_RTS_LOC 0
+#else
+#define SL_CPC_DRV_UART_RTS_LOC SL_CPC_DRV_UART_{{ instance | upper }}_RTS_LOC
+#endif
+
 #define SL_CPC_DRV_UART_PERIPHERAL                   SL_CPC_DRV_UART_{{ instance | upper }}_PERIPHERAL
 #define SL_CPC_DRV_UART_PERIPHERAL_NO                SL_CPC_DRV_UART_{{ instance | upper }}_PERIPHERAL_NO
 
@@ -17,5 +59,6 @@
 #define SL_CPC_DRV_UART_RX_PORT                      SL_CPC_DRV_UART_{{ instance | upper }}_RX_PORT
 #define SL_CPC_DRV_UART_RX_PIN                       SL_CPC_DRV_UART_{{ instance | upper }}_RX_PIN
 #define SL_CPC_DRV_UART_RX_LOC                       SL_CPC_DRV_UART_{{ instance | upper }}_RX_LOC
+
 {% endfor %}
 #endif

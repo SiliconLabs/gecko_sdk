@@ -23,7 +23,9 @@
 #include "app/framework/util/util.h"
 #include "app/util/serial/sl_zigbee_command_interpreter.h"
 #include "test-harness.h"
+#ifdef SL_CATALOG_CLI_PRESENT
 #include "test-harness-cli.h"
+#endif
 
 #ifdef UC_BUILD
 #include "sl_component_catalog.h"
@@ -840,7 +842,7 @@ bool emAfKeyEstablishmentTestHarnessMessageSendCallback(uint8_t message)
   return false;
 }
 
-#ifdef UC_BUILD
+#if defined(UC_BUILD) && defined(SL_CATALOG_CLI_PRESENT)
 
 void emberAfPluginTestHarnessCertMangleCommand(sl_cli_command_arg_t *arguments)
 {
@@ -1336,7 +1338,7 @@ void emberAfPluginTestHarnessAddChildCommand(sl_cli_command_arg_t *arguments)
 #endif
 }
 
-#else //UC_BUILD
+#elif !defined(UC_BUILD)
 
 void emberAfPluginTestHarnessCertMangleCommand(void)
 {
@@ -1801,6 +1803,7 @@ void emberAfPluginTestHarnessAddChildCommand(void)
 
 #endif //UC_BUILD
 
+#if (!defined(UC_BUILD) || defined(SL_CATALOG_CLI_PRESENT))
 void emberAfPluginTestHarnessSetNodeDescriptorComplianceRevision(SL_CLI_COMMAND_ARG)
 {
   uint8_t val = (uint8_t)emberUnsignedCommandArgument(0);
@@ -1854,3 +1857,4 @@ void emberAfPluginTestHarnessSetNeighborTableSize(SL_CLI_COMMAND_ARG)
 #endif
   emberAfCorePrintln("Set neighbor table size to %d", neighborTableSize);
 }
+#endif

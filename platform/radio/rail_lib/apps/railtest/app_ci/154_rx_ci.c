@@ -39,10 +39,34 @@
 #include "rail_ieee802154.h"
 #include "app_common.h"
 
+#if defined(SL_COMPONENT_CATALOG_PRESENT)
+  #include "sl_component_catalog.h"
+#endif
+
 bool ieee802154EnhAckEnabled = false;
 uint8_t ieee802154PhrLen = 1U; // Default is 1-byte PHY Header (length byte)
 bool setFpByDefault = false;
 uint32_t dataReqLatencyUs = 0U;
+
+RAIL_Handle_t emPhyRailHandle;
+
+#ifdef SL_CATALOG_RAIL_UTIL_IEEE802154_STACK_EVENT_PRESENT
+extern RAIL_Status_t sl_rail_util_ieee802154_config_radio(RAIL_Handle_t railHandle);
+#endif // SL_CATALOG_RAIL_UTIL_IEEE802154_STACK_EVENT_PRESENT
+
+void sl_railtest_update_154_radio_config(void)
+{
+#ifdef SL_CATALOG_RAIL_UTIL_IEEE802154_STACK_EVENT_PRESENT
+  if (RAIL_IEEE802154_IsEnabled(railHandle)) {
+    RAIL_RadioState_t currentState = RAIL_GetRadioState(railHandle);
+    RAIL_Idle(railHandle, RAIL_IDLE_ABORT, false);
+    sl_rail_util_ieee802154_config_radio(railHandle);
+    if (currentState != RAIL_RF_STATE_IDLE) {
+      RAIL_StartRx(railHandle, channel, NULL);
+    }
+  }
+#endif //SL_CATALOG_RAIL_UTIL_IEEE802154_STACK_EVENT_PRESENT
+}
 
 void ieee802154Enable(sl_cli_command_arg_t *args)
 {
@@ -125,6 +149,7 @@ void ieee802154Enable(sl_cli_command_arg_t *args)
   if (status != RAIL_STATUS_NO_ERROR) {
     responsePrintError(sl_cli_get_command_string(args, 0), status, "Call to RAIL_IEEE802154_Init returned an error");
   } else {
+    emPhyRailHandle = railHandle;
     responsePrint(sl_cli_get_command_string(args, 0),
                   "802.15.4:%s,"
                   "rxDefaultState:%s,"

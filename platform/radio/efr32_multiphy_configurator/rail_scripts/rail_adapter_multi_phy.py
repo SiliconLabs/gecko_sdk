@@ -513,6 +513,10 @@ class RAILAdapter_MultiPhy(RAILAdapter):
       data.dcdcRetimingConfig.value = phyConfigEntry.dcdcRetimingConfigEntry.value
     if self.partFamily.lower() not in ["dumbo", "jumbo", "nerio", "nixi", "panther"]:
       data.hfxoRetimingConfig.value = phyConfigEntry.hfxoRetimingTableEntry.value
+    if getattr(outputs, 'rssi_adjust_db', None) != None:
+      rssiAdjustDb = int(outputs.get_output('rssi_adjust_db').var_value)
+    else:
+      rssiAdjustDb = 0
 
     # For the timingConfig, we give priority to the channelConfigOptions, and then
     # the baseConfigOptions; we use "get" to avoid raising exception if the key
@@ -522,13 +526,21 @@ class RAILAdapter_MultiPhy(RAILAdapter):
     data.antDivRxAutoConfig.value = antDivConfiguration
     data.src1Denominator.value = int(outputs.get_output('src1_calcDenominator').var_value or 0)
     data.src2Denominator.value = int(outputs.get_output('src2_calcDenominator').var_value or 0)
-    data.txBaudRate.value = outputs.get_output('tx_baud_rate_actual').var_value
+
+    modType = model.vars.modulation_type.value
+    if hasattr(model.vars.modulation_type.var_enum, 'OFDM') and modType == model.vars.modulation_type.var_enum.OFDM:
+      # In OFDM txBaudRate contains the symbol rate
+      data.txBaudRate.value = outputs.get_output('ofdm_symbol_rate').var_value
+    else:
+      data.txBaudRate.value = outputs.get_output('tx_baud_rate_actual').var_value
+
     data.rxBaudRate.value = model.vars.rx_baud_rate_actual.value #outputs.get_output('rx_baud_rate_actual').var_value
     data.baudPerSymbol.value = outputs.get_output('baud_per_symbol_actual').var_value
     data.bitsPerSymbol.value = outputs.get_output('bits_per_symbol_actual').var_value
     data.synthCache.value = int(model.vars.SYNTH_IFFREQ_IFFREQ.value or 0) \
                             | (model.vars.lodiv_actual.value << 25)
     data.zWaveChannelHopTiming.value = int(outputs.get_output('rx_ch_hopping_delay_usec').var_value or 0)
+    data.rateInfo.value = (rssiAdjustDb & 0xFF) << 16 | data.baudPerSymbol.value << 8 | data.bitsPerSymbol.value
     if self.partFamily.lower() not in ["dumbo","jumbo","nerio","nixi"]:
       # Cap DEC0 at 3, since the decimation value for all values above 3 is 8.
       # Also don't use value 2, in case that's useful in the future

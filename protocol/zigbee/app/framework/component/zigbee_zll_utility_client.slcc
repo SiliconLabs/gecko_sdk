@@ -6,7 +6,7 @@ description: Silicon Labs implementation of the ZLL Utility client cluster. The 
   way.
 id: zigbee_zll_utility_client
 label: ZLL Utility Client Cluster
-category: Zigbee|ZigBee Light Link
+category: Zigbee|Zigbee Light Link
 quality: production
 provides:
    - name: "zigbee_zll_utility_client"

@@ -11,7 +11,8 @@ class RM_Peripheral_FRC(Base_RM_Peripheral):
         self.__dict__['zz_frozen'] = False
         super(RM_Peripheral_FRC, self).__init__(rmio, label,
             0xA8004000, 'FRC',
-            u"")
+            u"",
+            [])
         self.IPVERSION = RM_Register_FRC_IPVERSION(self.zz_rmio, self.zz_label)
         self.zz_rdict['IPVERSION'] = self.IPVERSION
         self.EN = RM_Register_FRC_EN(self.zz_rmio, self.zz_label)
@@ -106,8 +107,6 @@ class RM_Peripheral_FRC(Base_RM_Peripheral):
         self.zz_rdict['DSLCTRL'] = self.DSLCTRL
         self.WCNTCMP4 = RM_Register_FRC_WCNTCMP4(self.zz_rmio, self.zz_label)
         self.zz_rdict['WCNTCMP4'] = self.WCNTCMP4
-        self.WCNTCMP5 = RM_Register_FRC_WCNTCMP5(self.zz_rmio, self.zz_label)
-        self.zz_rdict['WCNTCMP5'] = self.WCNTCMP5
         self.PKTBUFCTRL = RM_Register_FRC_PKTBUFCTRL(self.zz_rmio, self.zz_label)
         self.zz_rdict['PKTBUFCTRL'] = self.PKTBUFCTRL
         self.PKTBUFSTATUS = RM_Register_FRC_PKTBUFSTATUS(self.zz_rmio, self.zz_label)
@@ -176,6 +175,4 @@ class RM_Peripheral_FRC(Base_RM_Peripheral):
         self.zz_rdict['INTELEMENT14'] = self.INTELEMENT14
         self.INTELEMENT15 = RM_Register_FRC_INTELEMENT15(self.zz_rmio, self.zz_label)
         self.zz_rdict['INTELEMENT15'] = self.INTELEMENT15
-        self.AHBCONFIG = RM_Register_FRC_AHBCONFIG(self.zz_rmio, self.zz_label)
-        self.zz_rdict['AHBCONFIG'] = self.AHBCONFIG
         self.__dict__['zz_frozen'] = True

@@ -1400,7 +1400,7 @@ Error MeshForwarder::FrameToMessage(const uint8_t *     aFrame,
     error = GetFramePriority(aFrame, aFrameLength, aMacSource, aMacDest, priority);
     SuccessOrExit(error);
 
-    aMessage = Get<MessagePool>().New(Message::kTypeIp6, 0, priority);
+    aMessage = Get<MessagePool>().Allocate(Message::kTypeIp6, /* aReserveHeader */ 0, Message::Settings(priority));
     VerifyOrExit(aMessage, error = kErrorNoBufs);
 
     headerLength =
@@ -1547,7 +1547,7 @@ Error MeshForwarder::SendEmptyMessage(void)
                      Get<Mle::MleRouter>().GetParent().IsStateValidOrRestoring(),
                  error = kErrorInvalidState);
 
-    message = Get<MessagePool>().New(Message::kTypeMacEmptyData, 0);
+    message = Get<MessagePool>().Allocate(Message::kTypeMacEmptyData);
     VerifyOrExit(message != nullptr, error = kErrorNoBufs);
 
     SuccessOrExit(error = SendMessage(*message));
@@ -1773,7 +1773,7 @@ void MeshForwarder::LogIp6Message(MessageAction       aAction,
              aMessage.GetLength(), checksum,
              (aMacAddress == nullptr) ? "" : ((aAction == kMessageReceive) ? ", from:" : ", to:"),
              (aMacAddress == nullptr) ? "" : aMacAddress->ToString().AsCString(),
-             aMessage.IsLinkSecurityEnabled() ? "yes" : "no",
+             ToYesNo(aMessage.IsLinkSecurityEnabled()),
              (aError == kErrorNone) ? "" : ", error:", (aError == kErrorNone) ? "" : ErrorToString(aError),
              MessagePriorityToString(aMessage), shouldLogRss ? ", rss:" : "",
              shouldLogRss ? aMessage.GetRssAverager().ToString().AsCString() : "", shouldLogRadio ? ", radio:" : "",
@@ -1854,7 +1854,7 @@ void MeshForwarder::LogFragmentFrameDrop(Error                         aError,
     otLogNoteMac("Dropping rx frag frame, error:%s, len:%d, src:%s, dst:%s, tag:%d, offset:%d, dglen:%d, sec:%s",
                  ErrorToString(aError), aFrameLength, aMacSource.ToString().AsCString(),
                  aMacDest.ToString().AsCString(), aFragmentHeader.GetDatagramTag(), aFragmentHeader.GetDatagramOffset(),
-                 aFragmentHeader.GetDatagramSize(), aIsSecure ? "yes" : "no");
+                 aFragmentHeader.GetDatagramSize(), ToYesNo(aIsSecure));
 }
 
 void MeshForwarder::LogLowpanHcFrameDrop(Error               aError,
@@ -1864,8 +1864,7 @@ void MeshForwarder::LogLowpanHcFrameDrop(Error               aError,
                                          bool                aIsSecure)
 {
     otLogNoteMac("Dropping rx lowpan HC frame, error:%s, len:%d, src:%s, dst:%s, sec:%s", ErrorToString(aError),
-                 aFrameLength, aMacSource.ToString().AsCString(), aMacDest.ToString().AsCString(),
-                 aIsSecure ? "yes" : "no");
+                 aFrameLength, aMacSource.ToString().AsCString(), aMacDest.ToString().AsCString(), ToYesNo(aIsSecure));
 }
 
 #else // #if (OPENTHREAD_CONFIG_LOG_LEVEL >= OT_LOG_LEVEL_NOTE) && (OPENTHREAD_CONFIG_LOG_MAC == 1)

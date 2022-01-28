@@ -653,8 +653,11 @@ void PRS_Combine(unsigned int chA, unsigned int chB, PRS_Logic_t logic)
                                  | _PRS_ASYNC_CH_CTRL_AUXSEL_MASK))
                             | ((uint32_t)logic << _PRS_ASYNC_CH_CTRL_FNSEL_SHIFT)
                             | ((uint32_t)chB << _PRS_ASYNC_CH_CTRL_AUXSEL_SHIFT);
-  PRS->ASYNC_CH[chB].CTRL = (PRS->ASYNC_CH[chB].CTRL & ~_PRS_ASYNC_CH_CTRL_FNSEL_MASK)
-                            | PRS_ASYNC_CH_CTRL_FNSEL_DEFAULT;
+  // Preventing 'FNSEL resets to default' when both channels are configured as same.
+  if (chA != chB) {
+    PRS->ASYNC_CH[chB].CTRL = (PRS->ASYNC_CH[chB].CTRL & ~_PRS_ASYNC_CH_CTRL_FNSEL_MASK)
+                              | PRS_ASYNC_CH_CTRL_FNSEL_DEFAULT;
+  }
 #endif
 }
 #endif

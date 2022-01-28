@@ -34,37 +34,37 @@
 
 // <h> CTL Client configuration
 
-// <o CTL_CLIENT_RETRANSMISSION_COUNT> CTL model retransmission count
+// <o SL_BTMESH_CTL_CLIENT_RETRANSMISSION_COUNT_CFG_VAL> CTL model retransmission count
 // <i> Default: 3
 // <i> CTL model retransmission count (How many times CTL model messages are to be sent out for reliability).
-#define CTL_CLIENT_RETRANSMISSION_COUNT   (3)
+#define SL_BTMESH_CTL_CLIENT_RETRANSMISSION_COUNT_CFG_VAL   (3)
 
-// <o CTL_CLIENT_RETRANSMISSION_TIMEOUT> CTL model retransmission timeout [ms] <0-1275:5>
+// <o SL_BTMESH_CTL_CLIENT_RETRANSMISSION_TIMEOUT_CFG_VAL> CTL model retransmission timeout [ms] <0-1275:5>
 // <i> Default: 50
 // <i> CTL model retransmission timeout.
-#define CTL_CLIENT_RETRANSMISSION_TIMEOUT   (50)
+#define SL_BTMESH_CTL_CLIENT_RETRANSMISSION_TIMEOUT_CFG_VAL   (50)
 
-// <q CTL_CLIENT_TEMPERATURE_WRAP_ENABLED> Enable color temperature wraparound
+// <q SL_BTMESH_CTL_CLIENT_TEMPERATURE_WRAP_ENABLED_CFG_VAL> Enable color temperature wraparound
 // <i> Default: 0
 // <i> If the color temperature reaches the max or min value then it wraps around.
-#define CTL_CLIENT_TEMPERATURE_WRAP_ENABLED   (0)
+#define SL_BTMESH_CTL_CLIENT_TEMPERATURE_WRAP_ENABLED_CFG_VAL   (0)
 
-// <e CTL_CLIENT_LOGGING> Enable Logging
+// <e SL_BTMESH_CTL_CLIENT_LOGGING_CFG_VAL> Enable Logging
 // <i> Default: 1
 // <i> Enable / disable Logging for CTL Client model specific messages for this component.
-#define CTL_CLIENT_LOGGING   (1)
+#define SL_BTMESH_CTL_CLIENT_LOGGING_CFG_VAL   (1)
 
-// <s.128 CTL_CLIENT_LOGGING_NEW_TEMP_SET> Log text when new color temperature has been set.
+// <s.128 SL_BTMESH_CTL_CLIENT_LOGGING_NEW_TEMP_SET_CFG_VAL> Log text when new color temperature has been set.
 // <i> Set Log text when new color temperature has been set
-#define CTL_CLIENT_LOGGING_NEW_TEMP_SET "Set temperature to %u %% / level %u K\r\n"
+#define SL_BTMESH_CTL_CLIENT_LOGGING_NEW_TEMP_SET_CFG_VAL "Set temperature to %u %% / level %u K\r\n"
 
-// <s.128 CTL_CLIENT_LOGGING_CLIENT_PUBLISH_FAIL> Log text when sending a CTL message fails.
+// <s.128 SL_BTMESH_CTL_CLIENT_LOGGING_CLIENT_PUBLISH_FAIL_CFG_VAL> Log text when sending a CTL message fails.
 // <i> Set Log text in case sending a CTL message fails
-#define CTL_CLIENT_LOGGING_CLIENT_PUBLISH_FAIL "CTL Client Publish failed\r\n"
+#define SL_BTMESH_CTL_CLIENT_LOGGING_CLIENT_PUBLISH_FAIL_CFG_VAL "CTL Client Publish failed\r\n"
 
-// <s.128 CTL_CLIENT_LOGGING_RECALL_SUCCESS> Log text when recalling a scene recall is successful.
+// <s.128 SL_BTMESH_CTL_CLIENT_LOGGING_RECALL_SUCCESS_CFG_VAL> Log text when recalling a scene recall is successful.
 // <i> Set Log text a scene recall is successful.
-#define CTL_CLIENT_LOGGING_RECALL_SUCCESS "CTL request sent, trid = %u, delay = %u\r\n"
+#define SL_BTMESH_CTL_CLIENT_LOGGING_RECALL_SUCCESS_CFG_VAL "CTL request sent, trid = %u, delay = %u\r\n"
 
 // </e>
 

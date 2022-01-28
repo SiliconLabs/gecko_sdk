@@ -1,7 +1,7 @@
-Zigbee EmberZNet SDK 7.0.0.0
-* Integrated with Gecko Platform component-based architecture
-* 802.15.4 Radio Co-Processor (RCP)
-* RCP Host for Raspberry Pi (Docker image)
+Zigbee EmberZNet SDK 7.0.1.0
+- Added sl_set_passive_ack_config, which allows the higher layers to control the broadcast behavior of  a routing device.
+- The Known Issues table in the release notes has been scrubbed. Issues fixed in version 7.0.0.0 are now reflected in the Fixed Issues section. 
+- Other selected quality improvements and bug fixes
 
 
 

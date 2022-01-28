@@ -11,7 +11,8 @@ class RM_Peripheral_MODEM(Base_RM_Peripheral):
         self.__dict__['zz_frozen'] = False
         super(RM_Peripheral_MODEM, self).__init__(rmio, label,
             0x40086000, 'MODEM',
-            u"")
+            u"",
+            [])
         self.STATUS = RM_Register_MODEM_STATUS(self.zz_rmio, self.zz_label)
         self.zz_rdict['STATUS'] = self.STATUS
         self.TIMDETSTATUS = RM_Register_MODEM_TIMDETSTATUS(self.zz_rmio, self.zz_label)

@@ -1,4 +1,4 @@
-32-Bit MCU SDK 6.2.0.0
-* Gecko USB has been deprecated
+32-Bit MCU SDK 6.2.1.0
+- Underlying platform changes only
 
 

@@ -15,6 +15,20 @@ class Calc_Misc_Bobcat(CALC_Misc_ocelot):
         self._reg_write(model.vars.MODEM_LONGRANGE_LRDEC, 0)
         self._reg_write(model.vars.MODEM_LONGRANGE_LRTIMCORRTHD, 0x0FA)
 
+        self._reg_write(model.vars.MODEM_COCURRMODE_CONCURRENT, 0)
+
+    def calc_aox_misc(self, model):
+        # Always force these to zero so all AoX features are disabled.
+        # RAIL will dynamically set these when an AoX  packet is detected.
+        # Still write them in the RC so other PHYs are guarenteed to have AoX features disabled and we can
+        # exclude ETSLOC, ANTSWTIMSTART, ANTSWTIMSTOP
+        self._reg_write(model.vars.MODEM_ANTSWCTRL_ANTSWENABLE, 0)
+        self._reg_write(model.vars.MODEM_ANTSWCTRL_CFGANTPATTEN, 0)
+
+    def calc_OOKSHPING_misc(self, model):
+        pass
+
+    def calc_adpc_regs(self, model):
         self._reg_write(model.vars.MODEM_ADPC10_ADBBSSAMPJUMP, 0)
         self._reg_write(model.vars.MODEM_ADPC10_ADBBSSCHANGEEN, 0)
         self._reg_write(model.vars.MODEM_ADPC10_ADBBSSCHGDNTHR, 0)
@@ -34,21 +48,6 @@ class Calc_Misc_Bobcat(CALC_Misc_ocelot):
         self._reg_write(model.vars.MODEM_ADPC9_ADBBSSDNTHR, 0)
         self._reg_write(model.vars.MODEM_ADPC9_ADBBSSSYNCEN, 0)
         self._reg_write(model.vars.MODEM_ADPC9_ADBBSSUPTHR, 0)
-        self._reg_write(model.vars.MODEM_ADQUAL8_ADBACORRTHR2, 0xFFFF)
-
-        self._reg_write(model.vars.MODEM_ADQUAL8_ADBAAGCTHR, 0)
-        self._reg_write(model.vars.MODEM_ADQUAL8_ADBAMODE, 0)
-        self._reg_write(model.vars.MODEM_ADQUAL7_ADBARSSITHR, 1023)
-        self._reg_write(model.vars.MODEM_ADQUAL7_ADBARSSIDIFF, 0)
-        self._reg_write(model.vars.MODEM_ADQUAL6_ADBACORRTHR, 65535)
-        self._reg_write(model.vars.MODEM_ADQUAL6_ADBACORRDIFF, 0)
-        self._reg_write(model.vars.MODEM_ADQUAL5_ADDIRECTCORR, 65535)
-        self._reg_write(model.vars.MODEM_ADQUAL4_ADAGCGRTHR, 63)
-        self._reg_write(model.vars.MODEM_ADQUAL4_ADRSSIGRTHR, 512)
-        self._reg_write(model.vars.MODEM_ADQUAL4_ADGRMODE, 0)
-        self._reg_write(model.vars.MODEM_ADFSM0_ADSTATREAD, 0)
-        self._reg_write(model.vars.MODEM_ADFSM0_ADSTAT1SEL, 0)
-        self._reg_write(model.vars.MODEM_ADFSM0_ADSTAT2SEL, 0)
         self._reg_write(model.vars.MODEM_ADPC2_ADENCORR32, 0)
         self._reg_write(model.vars.MODEM_ADPC3_ADBBSSEN, 0)
         self._reg_write(model.vars.MODEM_ADPC3_ADBBSSFILTLENGTH, 4)
@@ -71,15 +70,20 @@ class Calc_Misc_Bobcat(CALC_Misc_ocelot):
         self._reg_write(model.vars.MODEM_ADPC7_ADBBSSAMPLUT14, 13)
         self._reg_write(model.vars.MODEM_ADPC7_ADBBSSAMPLUT15, 12)
 
-        self._reg_write(model.vars.MODEM_COCURRMODE_CONCURRENT, 0)
+    def calc_adqual_regs(self, model):
+        self._reg_write(model.vars.MODEM_ADQUAL8_ADBAAGCTHR, 0)
+        self._reg_write(model.vars.MODEM_ADQUAL8_ADBAMODE, 0)
+        self._reg_write(model.vars.MODEM_ADQUAL7_ADBARSSITHR, 1023)
+        self._reg_write(model.vars.MODEM_ADQUAL7_ADBARSSIDIFF, 0)
+        self._reg_write(model.vars.MODEM_ADQUAL6_ADBACORRTHR, 65535)
+        self._reg_write(model.vars.MODEM_ADQUAL6_ADBACORRDIFF, 0)
+        self._reg_write(model.vars.MODEM_ADQUAL5_ADDIRECTCORR, 65535)
+        self._reg_write(model.vars.MODEM_ADQUAL4_ADAGCGRTHR, 63)
+        self._reg_write(model.vars.MODEM_ADQUAL4_ADRSSIGRTHR, 512)
+        self._reg_write(model.vars.MODEM_ADQUAL4_ADGRMODE, 0)
+        self._reg_write(model.vars.MODEM_ADQUAL8_ADBACORRTHR2, 0xFFFF)
 
-    def calc_aox_misc(self, model):
-        # Always force these to zero so all AoX features are disabled.
-        # RAIL will dynamically set these when an AoX  packet is detected.
-        # Still write them in the RC so other PHYs are guarenteed to have AoX features disabled and we can
-        # exclude ETSLOC, ANTSWTIMSTART, ANTSWTIMSTOP
-        self._reg_write(model.vars.MODEM_ANTSWCTRL_ANTSWENABLE, 0)
-        self._reg_write(model.vars.MODEM_ANTSWCTRL_CFGANTPATTEN, 0)
-
-    def calc_OOKSHPING_misc(self, model):
-        pass
+    def calc_adfsm_regs(self, model):
+        self._reg_write(model.vars.MODEM_ADFSM0_ADSTATREAD, 0)
+        self._reg_write(model.vars.MODEM_ADFSM0_ADSTAT1SEL, 0)
+        self._reg_write(model.vars.MODEM_ADFSM0_ADSTAT2SEL, 0)

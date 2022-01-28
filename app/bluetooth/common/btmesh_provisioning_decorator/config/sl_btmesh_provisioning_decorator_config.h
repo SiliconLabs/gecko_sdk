@@ -34,15 +34,15 @@
 
 // <h> Provisioning decorator configuration
 
-// <e PROVISIONING_DECORATOR_LOGGING> Enable Logging
+// <e SL_BTMESH_PROVISIONING_DECORATOR_LOGGING_CFG_VAL> Enable Logging
 // <i> Default: 1
 // <i> Enable or disable Logging for Provisioning Decorator specific messages for this component.
-#define PROVISIONING_DECORATOR_LOGGING   (1)
+#define SL_BTMESH_PROVISIONING_DECORATOR_LOGGING_CFG_VAL   (1)
 
 // </e>
 
-// <o PROVISIONING_DECORATOR_RESTART_TIMER_TIMEOUT> Timeout for system restart after provisioning fails
-#define PROVISIONING_DECORATOR_RESTART_TIMER_TIMEOUT          (2000)
+// <o SL_BTMESH_PROVISIONING_DECORATOR_RESTART_TIMER_TIMEOUT_CFG_VAL> Timeout for system restart after provisioning fails
+#define SL_BTMESH_PROVISIONING_DECORATOR_RESTART_TIMER_TIMEOUT_CFG_VAL          (2000)
 
 // </h>
 

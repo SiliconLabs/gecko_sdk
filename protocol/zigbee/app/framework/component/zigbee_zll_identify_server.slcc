@@ -9,7 +9,7 @@ description: Silicon Labs implementation of the original Zigbee Light Link profi
 label: ZLL Identify Server
 quality: production
 id: zigbee_zll_identify_server
-category: Zigbee|ZigBee Light Link
+category: Zigbee|Zigbee Light Link
 provides:
    - name: "zigbee_zll_identify_server"
 requires:

@@ -110,6 +110,7 @@ if OPENTHREAD_ENABLE_FTD
 check_PROGRAMS                                                     += \
     ot-test-aes                                                       \
     ot-test-array                                                     \
+    ot-test-binary-search                                             \
     ot-test-checksum                                                  \
     ot-test-child                                                     \
     ot-test-child-table                                               \
@@ -125,7 +126,6 @@ check_PROGRAMS                                                     += \
     ot-test-ip-address                                                \
     ot-test-link-quality                                              \
     ot-test-linked-list                                               \
-    ot-test-lookup-table                                              \
     ot-test-lowpan                                                    \
     ot-test-mac-frame                                                 \
     ot-test-macros                                                    \
@@ -139,6 +139,7 @@ check_PROGRAMS                                                     += \
     ot-test-pool                                                      \
     ot-test-priority-queue                                            \
     ot-test-pskc                                                      \
+    ot-test-smart-ptrs                                                \
     ot-test-string                                                    \
     ot-test-timer                                                     \
     $(NULL)
@@ -186,6 +187,9 @@ ot_test_aes_SOURCES             = $(COMMON_SOURCES) test_aes.cpp
 
 ot_test_array_LDADD             = $(COMMON_LDADD)
 ot_test_array_SOURCES           = $(COMMON_SOURCES) test_array.cpp
+
+ot_test_binary_search_LDADD     = $(COMMON_LDADD)
+ot_test_binary_search_SOURCES   = $(COMMON_SOURCES) test_binary_search.cpp
 
 ot_test_checksum_LDADD          = $(COMMON_LDADD)
 ot_test_checksum_SOURCES        = $(COMMON_SOURCES) test_checksum.cpp
@@ -235,9 +239,6 @@ ot_test_link_quality_SOURCES    = $(COMMON_SOURCES) test_link_quality.cpp
 ot_test_linked_list_LDADD       = $(COMMON_LDADD)
 ot_test_linked_list_SOURCES     = $(COMMON_SOURCES) test_linked_list.cpp
 
-ot_test_lookup_table_LDADD      = $(COMMON_LDADD)
-ot_test_lookup_table_SOURCES    = $(COMMON_SOURCES) test_lookup_table.cpp
-
 ot_test_lowpan_LDADD            = $(COMMON_LDADD)
 ot_test_lowpan_SOURCES          = $(COMMON_SOURCES) test_lowpan.cpp
 
@@ -276,6 +277,9 @@ ot_test_priority_queue_SOURCES  = $(COMMON_SOURCES) test_priority_queue.cpp
 
 ot_test_pskc_LDADD              = $(COMMON_LDADD)
 ot_test_pskc_SOURCES            = $(COMMON_SOURCES) test_pskc.cpp
+
+ot_test_smart_ptrs_LDADD        = $(COMMON_LDADD)
+ot_test_smart_ptrs_SOURCES      = $(COMMON_SOURCES) test_smart_ptrs.cpp
 
 ot_test_meshcop_LDADD           = $(COMMON_LDADD)
 ot_test_meshcop_SOURCES         = $(COMMON_SOURCES) test_meshcop.cpp

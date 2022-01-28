@@ -11,7 +11,8 @@ class RM_Peripheral_RAC(Base_RM_Peripheral):
         self.__dict__['zz_frozen'] = False
         super(RM_Peripheral_RAC, self).__init__(rmio, label,
             0x40084000, 'RAC',
-            u"")
+            u"",
+            [])
         self.RXENSRCEN = RM_Register_RAC_RXENSRCEN(self.zz_rmio, self.zz_label)
         self.zz_rdict['RXENSRCEN'] = self.RXENSRCEN
         self.STATUS = RM_Register_RAC_STATUS(self.zz_rmio, self.zz_label)

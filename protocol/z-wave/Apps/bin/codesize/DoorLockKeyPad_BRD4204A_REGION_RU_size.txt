@@ -3,38 +3,38 @@
 The output of the size tool: (e.g. arm-none-ambi-size.exe)
 ==========================================================
 
-/mnt/raid/workspaces/ws.LFApF4GwQ/overlay/super/prebuilt-samples/Z-Wave/DoorLockKeyPad-brd4204a-gcc-makefile-cp-REGION_RU/build/debug/DoorLockKeyPad.out  :
+DoorLockKeyPad.out  :
 section                 size         addr
-.text                0x38414    0x8006000
-_cc_handlers_v3        0x1c0    0x803e414
-.ARM.exidx               0x8    0x803e5d4
+.text                0x38cec    0x8006000
+_cc_handlers_v3        0x1c0    0x803ecec
+.ARM.exidx               0x8    0x803eeac
 .stack                0x1000   0x20000000
-.data                  0x5b4   0x20001000
-.reset_info              0x4   0x200015b4
-.bss                  0xacb8   0x200015b8
-.heap                 0x3d90   0x2000c270
-.internal_storage    0x2a000    0x803e5dc
-.zwave_nvm            0x6000    0x80685dc
-.nvm                  0xa000    0x806e5dc
+.data                  0x56c   0x20001000
+.reset_info              0x4   0x2000156c
+.bss                  0xad40   0x20001570
+.heap                 0x3d50   0x2000c2b0
+.internal_storage    0x2a000    0x803eeb4
+.zwave_nvm            0x6000    0x8068eb4
+.nvm                  0xa000    0x806eeb4
 .ARM.attributes         0x36          0x0
 .comment                0x4d          0x0
-.debug_frame          0xae88          0x0
-.debug_info         0x93892b          0x0
-.debug_abbrev        0x178fb          0x0
-.debug_loc           0x4b586          0x0
-.debug_aranges        0x3c10          0x0
-.debug_ranges         0x7398          0x0
-.debug_line          0x479a4          0x0
-.debug_str           0x75f28          0x0
+.debug_frame          0xb450          0x0
+.debug_info         0x941db6          0x0
+.debug_abbrev        0x185d5          0x0
+.debug_loc           0x4eda9          0x0
+.debug_aranges        0x3df8          0x0
+.debug_ranges         0x76e0          0x0
+.debug_line          0x4a982          0x0
+.debug_str           0x7742f          0x0
 .stabstr               0x14d          0x0
-Total               0xaf1654
+Total               0xb04891
 
 The calculated FLASH and SRAM usage summary:
 ============================================
-FLASH used as program memory:  (Including only the sections: .text, .ARM.exidx, .data)
-   469904
-FLASH used for storage: (Including only the sections: .nvm3App, .simee)
-   0
+FLASH used as program memory:  (Including only the sections: .text, .ARM.exidx, .data, _cc_handlers_v3, internal_storage)
+   406560
+FLASH used for storage: (Including only the sections: .nvm3App, .simee, .nvm, .zwave_nvm)
+   65536
 SRAM usage:             (Including only the sections: .data, .bss, .heap, .stack_dummy, .reset_info)
    65536
 

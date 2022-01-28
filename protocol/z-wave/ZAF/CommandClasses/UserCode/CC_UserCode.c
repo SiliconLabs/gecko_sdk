@@ -79,10 +79,13 @@ CC_UserCode_handler(
       }
       else
       {
-        CC_UserCode_getId_handler(
+        if(false == CC_UserCode_getId_handler(
             pCmd->ZW_UserCodeGetFrame.userIdentifier,
             (user_id_status_t*)&(pTxBuf->ZW_UserCodeReport1byteFrame.userIdStatus),
-            rxOpt->destNode.endpoint);
+            rxOpt->destNode.endpoint))
+        {
+          return RECEIVED_FRAME_STATUS_FAIL;
+        }
 
         if(false == CC_UserCode_Report_handler(
             pCmd->ZW_UserCodeGetFrame.userIdentifier,
@@ -167,7 +170,8 @@ CC_UserCode_handler(
                 // Build up new CC data structure
                 memset(&userCodeData, 0, sizeof(s_CC_userCode_data_t));
                 userCodeData.rxOptions = *rxOpt;
-                userCodeData.userIdentifier = pCmd->ZW_UserCodeGetFrame.userIdentifier;
+                userCodeData.userIdentifier = user_id;
+
                 /* We cannot know if the same User Identifier was modified several times
                 or not, so do not overwrite_previous_trigger. Also we want to know if a
                 User Code was updated, even for a very short time */
@@ -304,10 +308,15 @@ void CC_UserCode_report_stx(
   pTxBuf->ZW_UserCodeReport1byteFrame.cmd = USER_CODE_REPORT;
   pTxBuf->ZW_UserCodeReport1byteFrame.userIdentifier = pUserCodeData->userIdentifier;
 
-  CC_UserCode_getId_handler(
+  if(false == CC_UserCode_getId_handler(
       pUserCodeData->userIdentifier,
       (user_id_status_t*)&(pTxBuf->ZW_UserCodeReport1byteFrame.userIdStatus),
-      pUserCodeData->rxOptions.destNode.endpoint);
+      pUserCodeData->rxOptions.destNode.endpoint))
+  {
+    DPRINTF("%s(): CC_UserCode_getId_handler() failed. \n", __func__);
+    return;
+
+  }
 
   if(false == CC_UserCode_Report_handler(
       pUserCodeData->userIdentifier,

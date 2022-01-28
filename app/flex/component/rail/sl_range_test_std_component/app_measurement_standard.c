@@ -48,7 +48,9 @@
 #include "sl_rail_util_pa_config.h"
 #include "pa_curve_types_efr32.h"
 #include "pa_conversions_efr32.h"
-
+#ifdef SL_CATALOG_RAIL_UTIL_ANT_DIV_PRESENT
+#include "sl_rail_util_ant_div.h"
+#endif
 // -----------------------------------------------------------------------------
 //                              Macros and Typedefs
 // -----------------------------------------------------------------------------
@@ -61,7 +63,9 @@ static void range_test_generate_remainder(uint8_t *remainder);
 // -----------------------------------------------------------------------------
 //                                Global Variables
 // -----------------------------------------------------------------------------
-
+#ifdef SL_CATALOG_RAIL_UTIL_ANT_DIV_PRESENT
+RAIL_Handle_t emPhyRailHandle;
+#endif
 // -----------------------------------------------------------------------------
 //                                Static Variables
 // -----------------------------------------------------------------------------
@@ -102,6 +106,15 @@ static range_test_std_phys_t range_test_std_phys[NUM_OF_PREDEFINED_PHYS] = {
     .phy = IEEE802154_250KBPS,
     .protocol = PROT_IEEE802154,
 #if RAIL_SUPPORTS_PROTOCOL_IEEE802154
+    .is_supported = true
+#else
+    .is_supported = false
+#endif
+  },
+  {
+    .phy = IEEE802154_250KBPS_ANTDIV,
+    .protocol = PROT_IEEE802154,
+#if RAIL_SUPPORTS_PROTOCOL_IEEE802154 && defined(SL_CATALOG_RAIL_UTIL_ANT_DIV_PRESENT)
     .is_supported = true
 #else
     .is_supported = false
@@ -278,6 +291,12 @@ void init_ranget_test_standard_phys(uint8_t* number_of_phys)
     if (PROT_IEEE802154 == i) {
       // Configure RAIL instance to run in IEEE 802.15.4 mode
       status = RAIL_IEEE802154_Init(rail_handles[i], &rail_ieee802154_config);
+#ifdef SL_CATALOG_RAIL_UTIL_ANT_DIV_PRESENT
+      emPhyRailHandle = rail_handles[i];
+      sl_rail_util_ant_div_init();
+	  sl_rail_util_ant_div_set_rx_antenna_mode(SL_RAIL_UTIL_ANTENNA_MODE_DISABLED);
+      sl_rail_util_ant_div_update_antenna_config();
+#endif
       if (status != RAIL_STATUS_NO_ERROR) {
         app_log_error("RAIL_IEEE802154_Init failed");
       }
@@ -441,7 +460,7 @@ void set_ieee_handler_to_idle(void)
  ******************************************************************************/
 bool is_current_phy_ble(void)
 {
-  if (current_phy_standard_value() > IEEE802154_250KBPS) {
+  if (current_phy_standard_value() > IEEE802154_250KBPS_ANTDIV) {
     return true;
   } else {
     return false;
@@ -485,7 +504,7 @@ void reset_payload_length_for_standard(void)
  ******************************************************************************/
 void handle_payload_length_for_standard(void)
 {
-  if (current_phy_standard_value() == IEEE802154_250KBPS) {
+  if (current_phy_standard_value() == IEEE802154_250KBPS || current_phy_standard_value() == IEEE802154_250KBPS_ANTDIV) {
     if (range_test_settings.payload_length > IEEE802154_PAYLOAD_LEN_MAX) {
       reset_payload_length_for_standard();
     }
@@ -511,7 +530,10 @@ void print_standard_name(char *print_buffer)
     sprintf(print_buffer, "IEEE 802.15.4");
     range_test_settings.channel = IEEE802154_CHANNEL;
 #endif
-  } else {
+  } else if(current_phy_standard_value() == IEEE802154_250KBPS_ANTDIV){
+      sprintf(print_buffer, "IEEE 802.ANTDIV");
+      range_test_settings.channel = IEEE802154_CHANNEL;
+  }else {
     switch (current_phy_standard_value()) {
 #if RAIL_BLE_SUPPORTS_CODED_PHY
       case BLE_125KBPS:
@@ -545,7 +567,7 @@ void print_standard_name(char *print_buffer)
  ******************************************************************************/
 void set_standard_phy_channel(void)
 {
-  if (current_phy_standard_value() == IEEE802154_250KBPS) {
+  if (current_phy_standard_value() == IEEE802154_250KBPS || current_phy_standard_value() == IEEE802154_250KBPS_ANTDIV) {
     range_test_settings.channel = IEEE802154_CHANNEL;
   } else {
     range_test_settings.channel = BLE_PHYSICAL_CH;
@@ -564,7 +586,7 @@ range_test_packet_t* get_start_of_payload_for_standard(uint8_t* received_buffer)
 {
   range_test_packet_t* payload = NULL;
   uint8_t current_std_phy = current_phy_standard_value();
-  if (current_std_phy == IEEE802154_250KBPS) {
+  if (current_std_phy == IEEE802154_250KBPS || current_std_phy == IEEE802154_250KBPS_ANTDIV) {
     // 1st byte is the length field (PHR)
     data_frame_format_t* data_frame = (data_frame_format_t *) &received_buffer[1];
     payload = &data_frame->payload;
@@ -699,7 +721,22 @@ void prepare_ble_advertising_channel_pdu(uint16_t packet_number, uint8_t *tx_buf
 void menu_set_std_phy(bool init)
 {
   if (is_current_phy_standard()) {
-    if (current_phy_standard_value() != IEEE802154_250KBPS) {
+    if (current_phy_standard_value() == IEEE802154_250KBPS ) {
+#ifdef SL_CATALOG_RAIL_UTIL_ANT_DIV_PRESENT
+        sl_rail_util_ant_div_set_rx_antenna_mode(SL_RAIL_UTIL_ANTENNA_MODE_DISABLED);
+        sl_rail_util_ant_div_update_antenna_config();
+#endif
+        RAIL_IEEE802154_Config2p4GHzRadio(rail_handles[PROT_IEEE802154]);
+    }else if(current_phy_standard_value() == IEEE802154_250KBPS_ANTDIV){
+#ifdef SL_CATALOG_RAIL_UTIL_ANT_DIV_PRESENT
+        sl_rail_util_ant_div_set_rx_antenna_mode(SL_RAIL_UTIL_ANTENNA_MODE_DIVERSITY);
+        sl_rail_util_ant_div_update_antenna_config();
+        RAIL_IEEE802154_Config2p4GHzRadioAntDiv(rail_handles[PROT_IEEE802154]);
+#else
+        range_test_settings.current_phy++;
+        menu_set_std_phy(false);
+#endif
+    }else{
       while (true) {
         if (!ble_protocol_change()) {
           range_test_settings.current_phy++;
@@ -792,7 +829,7 @@ void get_rail_standard_config_data(uint32_t *base_frequency, uint32_t *channel_s
  ******************************************************************************/
 void get_rail_standard_channel_range(uint16_t *min, uint16_t *max)
 {
-  if (current_phy_standard_value() == IEEE802154_250KBPS) {
+  if (current_phy_standard_value() == IEEE802154_250KBPS || current_phy_standard_value() == IEEE802154_250KBPS_ANTDIV) {
     *min = IEEE802154_CHANNEL;
     *max = IEEE802154_CHANNEL;
   } else {
@@ -819,6 +856,9 @@ void std_phy_list_generation(uint8_t phy_index, uint8_t *buffer, uint8_t *length
       case IEEE802154_250KBPS:
         sprintf((char*)(&buffer[*length]), "%u:IEEE 802.15.4,", phy_index);
         break;
+      case IEEE802154_250KBPS_ANTDIV:
+              sprintf((char*)(&buffer[*length]), "%u:IEEE 802.15.4 ANTDIV,", phy_index);
+              break;
 #endif
 #if RAIL_BLE_SUPPORTS_CODED_PHY
       case BLE_125KBPS:
@@ -853,7 +893,7 @@ void std_phy_list_generation(uint8_t phy_index, uint8_t *buffer, uint8_t *length
  ******************************************************************************/
 void get_rail_standard_payload_range(uint8_t *payload_min, uint8_t *payload_max)
 {
-  if (current_phy_standard_value() == IEEE802154_250KBPS) {
+  if (current_phy_standard_value() == IEEE802154_250KBPS || current_phy_standard_value() == IEEE802154_250KBPS_ANTDIV) {
     *payload_min = PAYLOAD_LEN_MIN;
     *payload_max = IEEE802154_PAYLOAD_LEN_MAX;
   } else {

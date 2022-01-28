@@ -4,6 +4,7 @@ import types
 from pyradioconfig.calculator_model_framework.Utils.Version import Version
 from pycalcmodel.core.variable import ModelVariable
 from pyradioconfig.calculator_model_framework.Utils.LogMgr import LogMgr
+from host_py_rm_studio_internal.full.efr32xg1.revA2.static.common import errors
 
 """
 Calculations interface file
@@ -76,6 +77,14 @@ class ICalculator(object):
 
         var.svd_mapping = svd_mapping
 
+        reg_model = getattr(modem_model, 'reg_model')
+        if reg_model is not None:
+            try:
+                rm = reg_model.getObjectByName(svd_mapping)
+            except:
+                rm = None
+            var.rm = rm
+
         modem_model.vars.append(var)
         return var
 
@@ -106,8 +115,8 @@ class ICalculator(object):
     """
     ### These are the main calls that should be use as they are flexible
 
-    def _reg_write(self, varname, value=None, part_family=None, default=False, do_not_care=False, limit_upper=None,
-                   limit_lower=None, check_saturation=False, neg_twos_comp=True):
+    def _reg_write(self, varname, value=None, default=False, do_not_care=False, limit_upper=None,
+                   limit_lower=None, check_saturation=False, allow_neg=False, neg_twos_comp=True):
 
         #First handle writing the register value
 
@@ -117,50 +126,53 @@ class ICalculator(object):
             if value >= 0:
                value_before_limiting = value
             else:
-                if neg_twos_comp:
-                    value_before_limiting = self._convert_twos_comp(value,varname.get_bit_width(part_family))
+                if allow_neg:
+                    if neg_twos_comp:
+                        value_before_limiting = self._convert_twos_comp(value, varname.get_bit_width())
+                    else:
+                        value_before_limiting = self._convert_ones_comp(value, varname.get_bit_width())
                 else:
-                    value_before_limiting = self._convert_ones_comp(value,varname.get_bit_width(part_family))
+                    LogMgr.Error('Error: attempting to assign negative value to %s when it is not allowed' % varname.name)
 
             #Now handle saturating or limiting the register value
             self._reg_limit_write(varname, value_before_limiting, limit_upper=limit_upper, limit_lower=limit_lower,
-                                  check_saturation=check_saturation, part_family=part_family)
+                                  check_saturation=check_saturation)
 
         elif default:
-            self._reg_write_default(varname, part_family)
+            self._reg_write_default(varname)
 
         #Now handle the don't care attribute
         if do_not_care:
             self._reg_do_not_care(varname)
 
-    def _reg_write_by_name(self, model, reg_name_str, value=None, part_family=None, default=False, do_not_care=False,
+    def _reg_write_by_name(self, model, reg_name_str, value=None, default=False, do_not_care=False,
                            limit_upper=None, limit_lower=None, check_saturation=False, neg_twos_comp=True):
 
         var = getattr(model.vars, reg_name_str)
 
-        self._reg_write(var, value, part_family=part_family, default=default, do_not_care=do_not_care,
+        self._reg_write(var, value, default=default, do_not_care=do_not_care,
                         limit_upper=limit_upper, limit_lower=limit_lower, check_saturation=check_saturation,
                         neg_twos_comp=neg_twos_comp)
 
-    def _reg_write_by_name_concat(self, model, reg_name_str1, reg_name_str2, value=None, part_family=None,
+    def _reg_write_by_name_concat(self, model, reg_name_str1, reg_name_str2, value=None,
                                  default=False, do_not_care=False, limit_upper=None, limit_lower=None,
                                  check_saturation=False, neg_twos_comp=True):
 
         reg_name_str = reg_name_str1 + '_' + reg_name_str2
 
-        self._reg_write_by_name(model, reg_name_str, value, part_family=part_family, default=default,
+        self._reg_write_by_name(model, reg_name_str, value, default=default,
                                 do_not_care=do_not_care, limit_upper=limit_upper, limit_lower=limit_lower,
                                 check_saturation=check_saturation, neg_twos_comp=neg_twos_comp)
 
     ### These are lower-level calls that are used in some places in the calculator, but not recommended
 
-    def _reg_write_default(self, varname, part_family):
-        varname.set_to_reset_val(part_family)
+    def _reg_write_default(self, varname):
+        varname.set_to_reset_val()
 
     def _reg_do_not_care(self, varname):
         varname.value_do_not_care = True
 
-    def _reg_limit_write(self, varname, value, limit_upper=None, limit_lower=None, check_saturation=False, part_family=None):
+    def _reg_limit_write(self, varname, value, limit_upper=None, limit_lower=None, check_saturation=False):
 
         #First check the value vs limit_upper and limit_lower parameters
         if limit_upper is not None:
@@ -184,12 +196,12 @@ class ICalculator(object):
 
         #If we want to check for saturation, then do that
         if check_saturation:
-            self._reg_sat_write(varname,value_after_lower_limit,part_family)
+            self._reg_sat_write(varname,value_after_lower_limit)
         else:
             varname.value = value_after_lower_limit
 
-    def _reg_sat_write(self, varname, value, part_family):
-        bit_width = varname.get_bit_width(part_family)
+    def _reg_sat_write(self, varname, value):
+        bit_width = varname.get_bit_width()
         if value > (pow(2, bit_width) - 1):
             value = pow(2, bit_width) - 1
             LogMgr.Debug("WARNING: Saturation applied when writing to %s" % varname.name)

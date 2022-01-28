@@ -243,7 +243,7 @@ void TIMER_InitCC(TIMER_TypeDef *timer,
                   const TIMER_InitCC_TypeDef *init)
 {
   EFM_ASSERT(TIMER_REF_VALID(timer));
-  EFM_ASSERT(TIMER_CH_VALID(ch));
+  EFM_ASSERT(TIMER_REF_CH_VALIDATE(timer, ch));
 
 #if defined (_TIMER_CC_CFG_MASK)
   TIMER_SyncWait(timer);
@@ -431,7 +431,7 @@ void TIMER_Reset(TIMER_TypeDef *timer)
   /* Do not reset the route register, setting should be done independently. */
   /* Note: The ROUTE register may be locked by the DTLOCK register. */
 
-  for (i = 0; TIMER_CH_VALID(i); i++) {
+  for (i = 0; TIMER_REF_CH_VALIDATE(timer, i); i++) {
     timer->CC[i].CTRL = _TIMER_CC_CTRL_RESETVALUE;
 #if defined (_TIMER_CC_CCV_RESETVALUE) && defined (_TIMER_CC_CCVB_RESETVALUE)
     timer->CC[i].CCV  = _TIMER_CC_CCV_RESETVALUE;
@@ -469,7 +469,7 @@ void TIMER_Reset(TIMER_TypeDef *timer)
   }
 #endif
   timer->CFG = _TIMER_CFG_RESETVALUE;
-  for (i = 0; TIMER_CH_VALID(i); i++) {
+  for (i = 0; TIMER_REF_CH_VALIDATE(timer, i); i++) {
     timer->CC[i].CFG = _TIMER_CC_CFG_RESETVALUE;
   }
   timer->DTCFG = _TIMER_DTCFG_RESETVALUE;

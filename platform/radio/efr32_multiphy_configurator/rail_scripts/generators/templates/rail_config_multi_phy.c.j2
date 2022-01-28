@@ -162,7 +162,7 @@ static const uint32_t {{phyInfoEntryName}}[] = {
   {{phyInfoEntry.phyInfoData.src1Denominator}}UL,
   {{phyInfoEntry.phyInfoData.src2Denominator}}UL,
   {{phyInfoEntry.phyInfoData.txBaudRate|int}}UL,
-  ({{phyInfoEntry.phyInfoData.baudPerSymbol}}UL << 8) | {{phyInfoEntry.phyInfoData.bitsPerSymbol}}UL,
+  {{"0x{:08X}".format(phyInfoEntry.phyInfoData.rateInfo)}}UL,
   {{"0x{:08X}".format(phyInfoEntry.phyInfoData.synthCache)}}UL,
 {%- if phyInfoEntry.phyInfoData.dcdcRetimingConfig %}
   (uint32_t) {{phyInfoEntry.phyInfoData.dcdcRetimingConfig._uniqueName}},
@@ -318,8 +318,8 @@ const RAIL_IEEE802154_ModeSwitchPhr_t wisun_modeSwitchPhrs[{{multiPhyConfig.comm
 {%- endfor %}
 };
 {%- endif %}
-{% if accelerationBufferSize > 0 %}
+{%- if accelerationBufferSize > 0 %}
 uint32_t {{protocol}}AccelerationBuffer[{{accelerationBufferSize}}];
-{% endif %}
+{%- endif %}
 {% raw %}{% endraw %}
 {%- endblock %}

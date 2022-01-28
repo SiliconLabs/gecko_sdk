@@ -32,26 +32,26 @@
 
 // <<< Use Configuration Wizard in Context Menu >>>
 
-#define SENSOR_PEOPLE_COUNT_STATUS_TRIGGER_TYPE_DISCRETE_VALUE   0
-#define SENSOR_PEOPLE_COUNT_STATUS_TRIGGER_TYPE_PERCENTAGE       1
+#define SL_BTMESH_SENSOR_PEOPLE_COUNT_STATUS_TRIGGER_TYPE_DISCRETE_VALUE_CFG_VAL   0
+#define SL_BTMESH_SENSOR_PEOPLE_COUNT_STATUS_TRIGGER_TYPE_PERCENTAGE_CFG_VAL       1
 
 // <h> Bluetooth Mesh - People Count
 
 // <h> Sensor attributes
 
-// <o SENSOR_PEOPLE_COUNT_POSITIVE_TOLERANCE> Positive tolerance of sensor.
+// <o SL_BTMESH_SENSOR_PEOPLE_COUNT_POSITIVE_TOLERANCE_CFG_VAL> Positive tolerance of sensor.
 // <0-4095:1>
 // <i> Default: 0 (Unspecified)
 // <i> 12-bit Positive Tolerance value (1 - 4095) or Unspecified (0). The value is derived as ERR_P [%] = 100 [%] * x / 4095
-#define SENSOR_PEOPLE_COUNT_POSITIVE_TOLERANCE 0
+#define SL_BTMESH_SENSOR_PEOPLE_COUNT_POSITIVE_TOLERANCE_CFG_VAL 0
 
-// <o SENSOR_PEOPLE_COUNT_NEGATIVE_TOLERANCE> Negative tolerance of sensor.
+// <o SL_BTMESH_SENSOR_PEOPLE_COUNT_NEGATIVE_TOLERANCE_CFG_VAL> Negative tolerance of sensor.
 // <0-4095:1>
 // <i> Default: 0 (Unspecified)
 // <i> 12-bit Negative Tolerance value (1 - 4095) or Unspecified (0). The value is derived as ERR_N [%] = 100 [%] * x / 4095
-#define SENSOR_PEOPLE_COUNT_NEGATIVE_TOLERANCE 0
+#define SL_BTMESH_SENSOR_PEOPLE_COUNT_NEGATIVE_TOLERANCE_CFG_VAL 0
 
-// <o SENSOR_PEOPLE_COUNT_SAMPLING_FUNCTION> Sampling function
+// <o SL_BTMESH_SENSOR_PEOPLE_COUNT_SAMPLING_FUNCTION_CFG_VAL> Sampling function
 // <SAMPLING_UNSPECIFIED=> Unspecified
 // <SAMPLING_INSTANTANEOUS=> Instantaneous sampling
 // <SAMPLING_ARITHMETIC_MEAN=> Arithmetic mean
@@ -63,42 +63,42 @@
 // <SAMPLING_COUNT=> Number of "events" over the period of time defined by the Measurement Period
 // <SAMPLING_RFU=> Reserved for Future Use
 // <i> Default: Unspecified
-#define SENSOR_PEOPLE_COUNT_SAMPLING_FUNCTION       SAMPLING_UNSPECIFIED
+#define SL_BTMESH_SENSOR_PEOPLE_COUNT_SAMPLING_FUNCTION_CFG_VAL       SAMPLING_UNSPECIFIED
 
-// <o SENSOR_PEOPLE_COUNT_MEASUREMENT_PERIOD> Measurement Period of sensor.
+// <o SL_BTMESH_SENSOR_PEOPLE_COUNT_MEASUREMENT_PERIOD_CFG_VAL> Measurement Period of sensor.
 // <0-255:1>
 // <i> Default: 0 (Not Applicable)
 // <i> 8 bit value (1 - 255) or Not Applicable (0). Time period in seconds is derived as T [s] = 1.1 ^ (x - 64)
-#define SENSOR_PEOPLE_COUNT_MEASUREMENT_PERIOD 0
+#define SL_BTMESH_SENSOR_PEOPLE_COUNT_MEASUREMENT_PERIOD_CFG_VAL 0
 
-// <o SENSOR_PEOPLE_COUNT_UPDATE_INTERVAL> Update Interval of sensor.
+// <o SL_BTMESH_SENSOR_PEOPLE_COUNT_UPDATE_INTERVAL_CFG_VAL> Update Interval of sensor.
 // <0-255:1>
 // <i> Default: 0 (Not Applicable)
 // <i> 8 bit value (1 - 255) or Not Applicable (0). Time period in seconds is derived as T [s] = 1.1 ^ (x - 64)
-#define SENSOR_PEOPLE_COUNT_UPDATE_INTERVAL 0
+#define SL_BTMESH_SENSOR_PEOPLE_COUNT_UPDATE_INTERVAL_CFG_VAL 0
 
 // </h>
 
-// <e SENSOR_PEOPLE_COUNT_CADENCE_ENABLE> Sensor cadence
+// <e SL_BTMESH_SENSOR_PEOPLE_COUNT_CADENCE_ENABLE_CFG_VAL> Sensor cadence
 // <i> Enables Cadence.
 // <i> Default: 0
-#define SENSOR_PEOPLE_COUNT_CADENCE_ENABLE              0
+#define SL_BTMESH_SENSOR_PEOPLE_COUNT_CADENCE_ENABLE_CFG_VAL              0
 
-// <o SENSOR_PEOPLE_COUNT_FAST_CADENCE_PERIOD_DIVISOR> Fast Cadence Period Divisor
+// <o SL_BTMESH_SENSOR_PEOPLE_COUNT_FAST_CADENCE_PERIOD_DIVISOR_CFG_VAL> Fast Cadence Period Divisor
 // <0-15:1>
 // <i> Default: 0 (Divisor of 1)
 // <i> 7 bit value (0-15), other values are Prohibited. The value is represented as a 2 ^ n divisor of the Publish Period.
 // <i> For example value 0x00 would have a divisor of 1, the Publish Period would not change.
-#define SENSOR_PEOPLE_COUNT_FAST_CADENCE_PERIOD_DIVISOR 0
+#define SL_BTMESH_SENSOR_PEOPLE_COUNT_FAST_CADENCE_PERIOD_DIVISOR_CFG_VAL 0
 
-// <o SENSOR_PEOPLE_COUNT_STATUS_TRIGGER_TYPE> Status Trigger Type
-// <SENSOR_PEOPLE_COUNT_STATUS_TRIGGER_TYPE_DISCRETE_VALUE=> Discrete Value
-// <SENSOR_PEOPLE_COUNT_STATUS_TRIGGER_TYPE_PERCENTAGE=> Percentage
-// <i> Default: SENSOR_PEOPLE_COUNT_STATUS_TRIGGER_TYPE_DISCRETE_VALUE
+// <o SL_BTMESH_SENSOR_PEOPLE_COUNT_STATUS_TRIGGER_TYPE_CFG_VAL> Status Trigger Type
+// <SL_BTMESH_SENSOR_PEOPLE_COUNT_STATUS_TRIGGER_TYPE_DISCRETE_VALUE_CFG_VAL=> Discrete Value
+// <SL_BTMESH_SENSOR_PEOPLE_COUNT_STATUS_TRIGGER_TYPE_PERCENTAGE_CFG_VAL=> Percentage
+// <i> Default: SL_BTMESH_SENSOR_PEOPLE_COUNT_STATUS_TRIGGER_TYPE_DISCRETE_VALUE_CFG_VAL
 // <i> Defines the unit and format of the Status Trigger Delta fields
-#define SENSOR_PEOPLE_COUNT_STATUS_TRIGGER_TYPE         SENSOR_PEOPLE_COUNT_STATUS_TRIGGER_TYPE_DISCRETE_VALUE
+#define SL_BTMESH_SENSOR_PEOPLE_COUNT_STATUS_TRIGGER_TYPE_CFG_VAL         SL_BTMESH_SENSOR_PEOPLE_COUNT_STATUS_TRIGGER_TYPE_DISCRETE_VALUE_CFG_VAL
 
-// <o SENSOR_PEOPLE_COUNT_STATUS_TRIGGER_DELTA_DOWN> Status Trigger Delta Down
+// <o SL_BTMESH_SENSOR_PEOPLE_COUNT_STATUS_TRIGGER_DELTA_DOWN_CFG_VAL> Status Trigger Delta Down
 // <0-65535:1>
 // <i> Default: 0
 // <i> The Status Trigger Delta Down field shall control the negative change of a measured quantity that
@@ -106,9 +106,9 @@
 // <i> In case of percentage Status Trigger Type the value is represented unitless with a resolution of 0.01 percent,
 // <i> e.g. value 1534 represents 15.34%. In case of discrete Status Trigger Type the format represents
 // <i> the people count value.
-#define SENSOR_PEOPLE_COUNT_STATUS_TRIGGER_DELTA_DOWN   0
+#define SL_BTMESH_SENSOR_PEOPLE_COUNT_STATUS_TRIGGER_DELTA_DOWN_CFG_VAL   0
 
-// <o SENSOR_PEOPLE_COUNT_STATUS_TRIGGER_DELTA_UP> Status Trigger Delta Up
+// <o SL_BTMESH_SENSOR_PEOPLE_COUNT_STATUS_TRIGGER_DELTA_UP_CFG_VAL> Status Trigger Delta Up
 // <0-65535:1>
 // <i> Default: 0
 // <i> The Status Trigger Delta Up field shall control the positive change of a measured quantity that
@@ -116,29 +116,29 @@
 // <i> In case of percentage Status Trigger Type the value is represented unitless with a resolution of 0.01 percent,
 // <i> e.g. value 1534 represents 15.34%. In case of discrete Status Trigger Type the format represents
 // <i> the people count value.
-#define SENSOR_PEOPLE_COUNT_STATUS_TRIGGER_DELTA_UP     0
+#define SL_BTMESH_SENSOR_PEOPLE_COUNT_STATUS_TRIGGER_DELTA_UP_CFG_VAL     0
 
-// <o SENSOR_PEOPLE_COUNT_STATUS_MIN_INTERVAL> Status Min Interval
+// <o SL_BTMESH_SENSOR_PEOPLE_COUNT_STATUS_MIN_INTERVAL_CFG_VAL> Status Min Interval
 // <0-26:1>
 // <i> Default: 0
 // <i> 8 bit value (0-26), other values are Prohibited. The value is represented as a 2 ^ n milliseconds.
 // <i> For example, the value 10 would represent an interval of 1024ms.
 // <i> The Status Min Interval field shall control the minimum interval between publishing two consecutive Sensor Status messages.
-#define SENSOR_PEOPLE_COUNT_STATUS_MIN_INTERVAL         0
+#define SL_BTMESH_SENSOR_PEOPLE_COUNT_STATUS_MIN_INTERVAL_CFG_VAL         0
 
-// <o SENSOR_PEOPLE_COUNT_FAST_CADENCE_LOW> Fast Cadence Low
+// <o SL_BTMESH_SENSOR_PEOPLE_COUNT_FAST_CADENCE_LOW_CFG_VAL> Fast Cadence Low
 // <0-65535:1>
 // <i> Default: 0
 // <i> The Fast Cadence Low field shall define the lower boundary of a range of measured quantities when
 // <i> the publishing cadence is increased as defined by the Fast Cadence Period Divisor field.
-#define SENSOR_PEOPLE_COUNT_FAST_CADENCE_LOW            0
+#define SL_BTMESH_SENSOR_PEOPLE_COUNT_FAST_CADENCE_LOW_CFG_VAL            0
 
-// <o SENSOR_PEOPLE_COUNT_FAST_CADENCE_HIGH> Fast Cadence High
+// <o SL_BTMESH_SENSOR_PEOPLE_COUNT_FAST_CADENCE_HIGH_CFG_VAL> Fast Cadence High
 // <0-65535:1>
 // <i> Default: 0
 // <i> The Fast Cadence High field shall define the upper boundary of a range of measured quantities when
 // <i> the publishing cadence is increased as defined by the Fast Cadence Period Divisor field.
-#define SENSOR_PEOPLE_COUNT_FAST_CADENCE_HIGH           0
+#define SL_BTMESH_SENSOR_PEOPLE_COUNT_FAST_CADENCE_HIGH_CFG_VAL           0
 
 // </e>
 

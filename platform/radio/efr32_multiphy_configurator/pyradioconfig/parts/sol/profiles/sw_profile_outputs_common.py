@@ -1,6 +1,7 @@
 from pyradioconfig.calculator_model_framework.interfaces.iprofile import ModelOutput, ModelOutputType
+from pyradioconfig.parts.ocelot.profiles.sw_profile_outputs_common import sw_profile_outputs_common_ocelot
 
-class sw_profile_outputs_common_sol(object):
+class sw_profile_outputs_common_sol(sw_profile_outputs_common_ocelot):
 
     def build_ircal_outputs(self, model, profile):
         # Output Software Variables
@@ -92,3 +93,5 @@ class sw_profile_outputs_common_sol(object):
                                            readable_name='Antenna diversity mode'))
         profile.outputs.append(ModelOutput(model.vars.div_antdivrepeatdis, '', ModelOutputType.RAIL_CONFIG,
                                            readable_name='Disable repeated measurement of first antenna when Select-Best algorithm is used'))
+        profile.outputs.append(ModelOutput(model.vars.rssi_adjust_db, '', ModelOutputType.RAIL_CONFIG,
+                                           readable_name='RSSI compensation value calculated from decimation and digital gains'))

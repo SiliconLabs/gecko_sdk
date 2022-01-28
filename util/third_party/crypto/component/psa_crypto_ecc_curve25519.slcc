@@ -17,12 +17,26 @@ requires:
   - name: mbedtls_ecc_curve25519
     condition: [device_series_1]
   - name: mbedtls_ecc_curve25519
-    condition: [device_security_se]
-  - name: mbedtls_ecc_curve25519
     condition: [device_security_rot]
+
+  # Curve25519 has not always been supported on xG21A/xG23A devices. For the
+  # time being, we will choose an approach where we always include SW fallback.
+  # This will change in the future as more users can be assumed to have upgraded
+  # their SE FWs.
+  - name: mbedtls_ecc_curve25519
+    condition: [device_security_se, device_sdid_200]
+  - name: mbedtls_ecc_curve25519
+    condition: [device_security_se, device_sdid_210]
+
 template_contribution:
   - name: psa_crypto_config
     value: PSA_WANT_ECC_MONTGOMERY_255
   - name: psa_crypto_config
     value: "MBEDTLS_PSA_BUILTIN_ECC_MONTGOMERY_255 1"
+    condition: [mbedtls_ecc_curve25519]
+  - name: psa_crypto_config
+    value: "MBEDTLS_PSA_BUILTIN_KEY_TYPE_ECC_KEY_PAIR 1"
+    condition: [mbedtls_ecc_curve25519]
+  - name: psa_crypto_config
+    value: "MBEDTLS_PSA_BUILTIN_KEY_TYPE_ECC_PUBLIC_KEY 1"
     condition: [mbedtls_ecc_curve25519]

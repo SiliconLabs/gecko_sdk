@@ -62,13 +62,11 @@ sl_status_t sl_se_ecc_sign(sl_se_command_context_t *cmd_ctx,
   SE_Command_t *se_cmd = &cmd_ctx->command;
   sl_status_t status;
   uint32_t command_word = SLI_SE_COMMAND_SIGNATURE_SIGN;
-#if defined(SL_SE_KEY_TYPE_ECC_EDDSA)
+
   if ((key->type & SL_SE_KEY_TYPE_ALGORITHM_MASK)
       == SL_SE_KEY_TYPE_ECC_EDDSA) {
     command_word = SLI_SE_COMMAND_EDDSA_SIGN;
-  } else
-#endif
-  {
+  } else {
     if (hashed_message == false) {
       switch (hash_alg) {
         case SL_SE_HASH_SHA1:
@@ -112,13 +110,11 @@ sl_status_t sl_se_ecc_sign(sl_se_command_context_t *cmd_ctx,
   SE_DataTransfer_t message_buffer = SE_DATATRANSFER_DEFAULT(message, message_len);
   SE_addDataInput(se_cmd, &message_buffer);
 
-  #if defined(SL_SE_KEY_TYPE_ECC_EDDSA)
   // EdDSA requires the message twice
   SE_DataTransfer_t repeated_message_buffer = SE_DATATRANSFER_DEFAULT(message, message_len);
   if ((key->type & SL_SE_KEY_TYPE_ALGORITHM_MASK) == SL_SE_KEY_TYPE_ECC_EDDSA) {
     SE_addDataInput(se_cmd, &repeated_message_buffer);
   }
-  #endif
 
   SE_DataTransfer_t signature_buffer = SE_DATATRANSFER_DEFAULT(signature, signature_len);
   SE_addDataOutput(se_cmd, &signature_buffer);
@@ -149,13 +145,11 @@ sl_status_t sl_se_ecc_verify(sl_se_command_context_t *cmd_ctx,
   SE_Command_t *se_cmd = &cmd_ctx->command;
   sl_status_t status;
   uint32_t command_word = SLI_SE_COMMAND_SIGNATURE_VERIFY;
-#if defined(SL_SE_KEY_TYPE_ECC_EDDSA)
+
   if ((key->type & SL_SE_KEY_TYPE_ALGORITHM_MASK)
       == SL_SE_KEY_TYPE_ECC_EDDSA) {
     command_word = SLI_SE_COMMAND_EDDSA_VERIFY;
-  } else
-#endif
-  {
+  } else {
     if (hashed_message == false) {
       switch (hash_alg) {
         case SL_SE_HASH_SHA1:
@@ -202,13 +196,10 @@ sl_status_t sl_se_ecc_verify(sl_se_command_context_t *cmd_ctx,
   SE_DataTransfer_t signature_buffer = SE_DATATRANSFER_DEFAULT(signature,
                                                                signature_len);
 
-  #if defined(SL_SE_KEY_TYPE_ECC_EDDSA)
   if ((key->type & SL_SE_KEY_TYPE_ALGORITHM_MASK) == SL_SE_KEY_TYPE_ECC_EDDSA) {
     SE_addDataInput(se_cmd, &signature_buffer);
     SE_addDataInput(se_cmd, &message_buffer);
-  } else
-  #endif
-  {
+  } else {
     SE_addDataInput(se_cmd, &message_buffer);
     SE_addDataInput(se_cmd, &signature_buffer);
   }

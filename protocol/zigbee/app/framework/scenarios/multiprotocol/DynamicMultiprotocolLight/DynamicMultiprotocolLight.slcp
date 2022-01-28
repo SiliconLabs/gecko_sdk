@@ -1,7 +1,7 @@
 project_name: "DynamicMultiprotocolLight"
 label: "DynamicMultiprotocolLight"
 package: "Zigbee"
-category: "ZigBee Application"
+category: "Zigbee Application"
 quality: "production"
 
 component:

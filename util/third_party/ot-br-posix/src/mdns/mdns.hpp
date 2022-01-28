@@ -35,11 +35,13 @@
 #define OTBR_AGENT_MDNS_HPP_
 
 #include <functional>
+#include <map>
 #include <string>
 #include <vector>
 
 #include <sys/select.h>
 
+#include "common/code_utils.hpp"
 #include "common/types.hpp"
 
 namespace otbr {
@@ -59,7 +61,7 @@ namespace Mdns {
  * This interface defines the functionality of mDNS publisher.
  *
  */
-class Publisher
+class Publisher : private NonCopyable
 {
 public:
     /**
@@ -97,14 +99,16 @@ public:
      */
     struct DiscoveredInstanceInfo
     {
-        std::string             mName;         ///< Instance name.
-        std::string             mHostName;     ///< Full host name.
-        std::vector<Ip6Address> mAddresses;    ///< IPv6 addresses.
-        uint16_t                mPort     = 0; ///< Port.
-        uint16_t                mPriority = 0; ///< Service priority.
-        uint16_t                mWeight   = 0; ///< Service weight.
-        std::vector<uint8_t>    mTxtData;      ///< TXT RDATA bytes.
-        uint32_t                mTtl = 0;      ///< Service TTL.
+        bool                    mRemoved    = false; ///< The Service Instance is removed.
+        uint32_t                mNetifIndex = 0;     ///< Network interface.
+        std::string             mName;               ///< Instance name.
+        std::string             mHostName;           ///< Full host name.
+        std::vector<Ip6Address> mAddresses;          ///< IPv6 addresses.
+        uint16_t                mPort     = 0;       ///< Port.
+        uint16_t                mPriority = 0;       ///< Service priority.
+        uint16_t                mWeight   = 0;       ///< Service weight.
+        std::vector<uint8_t>    mTxtData;            ///< TXT RDATA bytes.
+        uint32_t                mTtl = 0;            ///< Service TTL.
     };
 
     /**
@@ -233,7 +237,9 @@ public:
      *                          to provide specific host name. Otherwise, the caller MUST publish the host
      *                          with method PublishHost.
      * @param[in] aPort         The port number of this service.
-     * @param[in] aName         The name of this service.
+     * @param[in] aName         The name of this service. Note that the published service name may be different from the
+     *                          original name due to renaming. You should always pass in the original name here to make
+     *                          sure you are referring to the intended service.
      * @param[in] aType         The type of this service.
      * @param[in] aSubTypeList  A list of service subtypes.
      * @param[in] aTxtList      A list of TXT name/value pairs.
@@ -252,7 +258,9 @@ public:
     /**
      * This method un-publishes a service.
      *
-     * @param[in] aName  The name of this service.
+     * @param[in] aName  The name of this service. Note that the published service name may be different from the
+     *                   original name due to renaming. You should always pass in the original name here to make
+     *                   sure you are referring to the intended service.
      * @param[in] aType  The type of this service.
      *
      * @retval OTBR_ERROR_NONE   Successfully un-published the service.
@@ -346,13 +354,19 @@ public:
      * @param[in] aInstanceCallback  The callback function to receive discovered service instances.
      * @param[in] aHostCallback      The callback function to receive discovered hosts.
      *
+     * @returns  The Subscriber ID for the callbacks.
+     *
      */
-    void SetSubscriptionCallbacks(DiscoveredServiceInstanceCallback aInstanceCallback,
-                                  DiscoveredHostCallback            aHostCallback)
-    {
-        mDiscoveredServiceInstanceCallback = std::move(aInstanceCallback);
-        mDiscoveredHostCallback            = std::move(aHostCallback);
-    }
+    uint64_t AddSubscriptionCallbacks(DiscoveredServiceInstanceCallback aInstanceCallback,
+                                      DiscoveredHostCallback            aHostCallback);
+
+    /**
+     * This method cancels callbacks for subscriptions.
+     *
+     * @param[in] aSubscriberId  The Subscriber ID previously returned by `AddSubscriptionCallbacks`.
+     *
+     */
+    void RemoveSubscriptionCallbacks(uint64_t aSubscriberId);
 
     virtual ~Publisher(void) = default;
 
@@ -411,14 +425,19 @@ protected:
         kMaxTextEntrySize = 255,
     };
 
+    void OnServiceResolved(const std::string &aType, const DiscoveredInstanceInfo &aInstanceInfo);
+    void OnServiceRemoved(uint32_t aNetifIndex, const std::string &aType, const std::string &aInstanceName);
+    void OnHostResolved(const std::string &aHostName, const DiscoveredHostInfo &aHostInfo);
+
     PublishServiceHandler mServiceHandler        = nullptr;
     void *                mServiceHandlerContext = nullptr;
 
     PublishHostHandler mHostHandler        = nullptr;
     void *             mHostHandlerContext = nullptr;
 
-    DiscoveredServiceInstanceCallback mDiscoveredServiceInstanceCallback = nullptr;
-    DiscoveredHostCallback            mDiscoveredHostCallback            = nullptr;
+    uint64_t mNextSubscriberId = 1;
+
+    std::map<uint64_t, std::pair<DiscoveredServiceInstanceCallback, DiscoveredHostCallback>> mDiscoveredCallbacks;
 };
 
 /**

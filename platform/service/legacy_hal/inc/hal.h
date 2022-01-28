@@ -72,7 +72,12 @@
  * @{
  ******************************************************************************/
 
-#ifndef EZSP_HOST
+#ifndef EMBER_TEST
+#define simulatedTimePasses()
+#else
+void simulatedTimePasses(void);
+#endif // EMBER_TEST
+
 uint16_t halCommonGetInt16uMillisecondTick(void);
 uint32_t halCommonGetInt32uMillisecondTick(void);
 uint64_t halCommonGetInt64uMillisecondTick(void);
@@ -82,15 +87,13 @@ void halCommonDelayMicroseconds(uint16_t us);
 void halCommonDelayMilliseconds(uint16_t ms);
 EmberStatus halCommonIdleForMilliseconds(uint32_t *duration);
 void halStackSymbolDelayAIsr(void);
-#define simulatedTimePasses()
-
 void halStackRadioPowerMainControl(bool powerUp);
 void halStackRadioPowerUpBoard(void);
 void halStackRadioPowerDownBoard(void);
 void halStackProcessBootCount(void);
 EmberStatus emDebugInit(void);
 void emRadioSeedRandom(void);
-#endif
+
 /** @} (end addtogroup legacyhal) */
 
 #endif // HAL_H

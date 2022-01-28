@@ -1,7 +1,7 @@
 project_name: "Z3Switch"
 label: "Z3Switch"
 package: "Zigbee"
-category: "ZigBee Application"
+category: "Zigbee Application"
 quality: "production"
 
 component:

@@ -31,6 +31,8 @@ source:
     condition: [device_has_semailbox]
   - path: src/sli_se_driver_cipher.c
     condition: [device_has_semailbox]
+  - path: src/sli_se_version_dependencies.c
+    condition: [device_has_semailbox]
 
   # Transparent drivers
   - path: src/sli_crypto_transparent_driver_cipher.c
@@ -114,6 +116,8 @@ include:
       - path: sli_se_transparent_functions.h
         condition: [device_has_semailbox]
       - path: sli_se_transparent_types.h
+        condition: [device_has_semailbox]
+      - path: sli_se_version_dependencies.h
         condition: [device_has_semailbox]
 
 requires:
@@ -272,12 +276,6 @@ template_contribution:
     value: "MBEDTLS_PSA_BUILTIN_KEY_TYPE_ECC_PUBLIC_KEY 1"
     condition: [device_sdid_200, device_security_se, psa_crypto_ecc_secp521r1]
   - name: psa_crypto_config
-    value: "MBEDTLS_PSA_BUILTIN_KEY_TYPE_ECC_KEY_PAIR 1"
-    condition: [device_sdid_200, device_security_se, psa_crypto_ecc_curve25519]
-  - name: psa_crypto_config
-    value: "MBEDTLS_PSA_BUILTIN_KEY_TYPE_ECC_PUBLIC_KEY 1"
-    condition: [device_sdid_200, device_security_se, psa_crypto_ecc_curve25519]
-  - name: psa_crypto_config
     value: MBEDTLS_PSA_ACCEL_ALG_ECDSA
     condition: [device_sdid_200]
   - name: psa_crypto_config
@@ -301,12 +299,6 @@ template_contribution:
   - name: psa_crypto_config
     value: "MBEDTLS_PSA_BUILTIN_ALG_ECDH 1"
     condition: [device_sdid_200, device_security_se, psa_crypto_ecc_secp521r1, psa_crypto_ecdh]
-  - name: psa_crypto_config
-    value: "MBEDTLS_PSA_BUILTIN_ALG_ECDSA 1"
-    condition: [device_sdid_200, device_security_se, psa_crypto_ecc_curve25519, psa_crypto_ecdsa]
-  - name: psa_crypto_config
-    value: "MBEDTLS_PSA_BUILTIN_ALG_ECDH 1"
-    condition: [device_sdid_200, device_security_se, psa_crypto_ecc_curve25519, psa_crypto_ecdh]
   - name: psa_crypto_config
     value: MBEDTLS_PSA_ACCEL_ECC_SECP_R1_192
     condition: [device_sdid_200]
@@ -345,12 +337,6 @@ template_contribution:
     value: "MBEDTLS_PSA_BUILTIN_KEY_TYPE_ECC_PUBLIC_KEY 1"
     condition: [device_sdid_205, psa_crypto_ecc_secp521r1]
   - name: psa_crypto_config
-    value: "MBEDTLS_PSA_BUILTIN_KEY_TYPE_ECC_KEY_PAIR 1"
-    condition: [device_sdid_205, psa_crypto_ecc_curve25519]
-  - name: psa_crypto_config
-    value: "MBEDTLS_PSA_BUILTIN_KEY_TYPE_ECC_PUBLIC_KEY 1"
-    condition: [device_sdid_205, psa_crypto_ecc_curve25519]
-  - name: psa_crypto_config
     value: "MBEDTLS_PSA_BUILTIN_ALG_ECDH 1"
     condition: [device_sdid_205, psa_crypto_ecc_secp384r1, psa_crypto_ecdh]
   - name: psa_crypto_config
@@ -362,12 +348,6 @@ template_contribution:
   - name: psa_crypto_config
     value: "MBEDTLS_PSA_BUILTIN_ALG_ECDSA 1"
     condition: [device_sdid_205, psa_crypto_ecc_secp521r1, psa_crypto_ecdsa]
-  - name: psa_crypto_config
-    value: "MBEDTLS_PSA_BUILTIN_ALG_ECDH 1"
-    condition: [device_sdid_205, psa_crypto_ecc_curve25519, psa_crypto_ecdh]
-  - name: psa_crypto_config
-    value: "MBEDTLS_PSA_BUILTIN_ALG_ECDSA 1"
-    condition: [device_sdid_205, psa_crypto_ecc_curve25519, psa_crypto_ecdsa]
   - name: psa_crypto_config
     value: MBEDTLS_PSA_ACCEL_ALG_ECDSA
     condition: [device_sdid_205]
@@ -406,12 +386,6 @@ template_contribution:
     value: "MBEDTLS_PSA_BUILTIN_KEY_TYPE_ECC_PUBLIC_KEY 1"
     condition: [device_sdid_210, device_security_se, psa_crypto_ecc_secp521r1]
   - name: psa_crypto_config
-    value: "MBEDTLS_PSA_BUILTIN_KEY_TYPE_ECC_KEY_PAIR 1"
-    condition: [device_sdid_210, device_security_se, psa_crypto_ecc_curve25519]
-  - name: psa_crypto_config
-    value: "MBEDTLS_PSA_BUILTIN_KEY_TYPE_ECC_PUBLIC_KEY 1"
-    condition: [device_sdid_210, device_security_se, psa_crypto_ecc_curve25519]
-  - name: psa_crypto_config
     value: MBEDTLS_PSA_ACCEL_ALG_ECDSA
     condition: [device_sdid_210]
   - name: psa_crypto_config
@@ -429,12 +403,6 @@ template_contribution:
   - name: psa_crypto_config
     value: "MBEDTLS_PSA_BUILTIN_ALG_ECDH 1"
     condition: [device_sdid_210, device_security_se, psa_crypto_ecc_secp521r1, psa_crypto_ecdh]
-  - name: psa_crypto_config
-    value: "MBEDTLS_PSA_BUILTIN_ALG_ECDSA 1"
-    condition: [device_sdid_210, device_security_se, psa_crypto_ecc_curve25519, psa_crypto_ecdsa]
-  - name: psa_crypto_config
-    value: "MBEDTLS_PSA_BUILTIN_ALG_ECDH 1"
-    condition: [device_sdid_210, device_security_se, psa_crypto_ecc_curve25519, psa_crypto_ecdh]
   - name: psa_crypto_config
     value: MBEDTLS_PSA_ACCEL_ECC_SECP_R1_192
     condition: [device_sdid_210]
@@ -476,12 +444,6 @@ template_contribution:
     value: "MBEDTLS_PSA_BUILTIN_KEY_TYPE_ECC_PUBLIC_KEY 1"
     condition: [device_sdid_215, device_security_se, psa_crypto_ecc_secp521r1]
   - name: psa_crypto_config
-    value: "MBEDTLS_PSA_BUILTIN_KEY_TYPE_ECC_KEY_PAIR 1"
-    condition: [device_sdid_215, device_security_se, psa_crypto_ecc_curve25519]
-  - name: psa_crypto_config
-    value: "MBEDTLS_PSA_BUILTIN_KEY_TYPE_ECC_PUBLIC_KEY 1"
-    condition: [device_sdid_215, device_security_se, psa_crypto_ecc_curve25519]
-  - name: psa_crypto_config
     value: MBEDTLS_PSA_ACCEL_ALG_ECDSA
     condition: [device_sdid_215]
   - name: psa_crypto_config
@@ -499,12 +461,6 @@ template_contribution:
   - name: psa_crypto_config
     value: "MBEDTLS_PSA_BUILTIN_ALG_ECDH 1"
     condition: [device_sdid_215, device_security_se, psa_crypto_ecc_secp521r1, psa_crypto_ecdh]
-  - name: psa_crypto_config
-    value: "MBEDTLS_PSA_BUILTIN_ALG_ECDSA 1"
-    condition: [device_sdid_215, device_security_se, psa_crypto_ecc_curve25519, psa_crypto_ecdsa]
-  - name: psa_crypto_config
-    value: "MBEDTLS_PSA_BUILTIN_ALG_ECDH 1"
-    condition: [device_sdid_215, device_security_se, psa_crypto_ecc_curve25519, psa_crypto_ecdh]
   - name: psa_crypto_config
     value: MBEDTLS_PSA_ACCEL_ECC_SECP_R1_192
     condition: [device_sdid_215]
@@ -546,12 +502,6 @@ template_contribution:
     value: "MBEDTLS_PSA_BUILTIN_KEY_TYPE_ECC_PUBLIC_KEY 1"
     condition: [device_sdid_220, device_security_se, psa_crypto_ecc_secp521r1]
   - name: psa_crypto_config
-    value: "MBEDTLS_PSA_BUILTIN_KEY_TYPE_ECC_KEY_PAIR 1"
-    condition: [device_sdid_220, device_security_se, psa_crypto_ecc_curve25519]
-  - name: psa_crypto_config
-    value: "MBEDTLS_PSA_BUILTIN_KEY_TYPE_ECC_PUBLIC_KEY 1"
-    condition: [device_sdid_220, device_security_se, psa_crypto_ecc_curve25519]
-  - name: psa_crypto_config
     value: MBEDTLS_PSA_ACCEL_ALG_ECDSA
     condition: [device_sdid_220]
   - name: psa_crypto_config
@@ -569,12 +519,6 @@ template_contribution:
   - name: psa_crypto_config
     value: "MBEDTLS_PSA_BUILTIN_ALG_ECDH 1"
     condition: [device_sdid_220, device_security_se, psa_crypto_ecc_secp521r1, psa_crypto_ecdh]
-  - name: psa_crypto_config
-    value: "MBEDTLS_PSA_BUILTIN_ALG_ECDSA 1"
-    condition: [device_sdid_220, device_security_se, psa_crypto_ecc_curve25519, psa_crypto_ecdsa]
-  - name: psa_crypto_config
-    value: "MBEDTLS_PSA_BUILTIN_ALG_ECDH 1"
-    condition: [device_sdid_220, device_security_se, psa_crypto_ecc_curve25519, psa_crypto_ecdh]
   - name: psa_crypto_config
     value: MBEDTLS_PSA_ACCEL_ECC_SECP_R1_192
     condition: [device_sdid_220]

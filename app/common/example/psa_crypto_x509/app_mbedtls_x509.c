@@ -28,7 +28,7 @@
 //                          Static Function Declarations
 // -----------------------------------------------------------------------------
 /***************************************************************************//**
- * Callback function for mbedtls_x509_crt_verify().
+ * Callback function for mbedtls_x509_crt_verify_with_profile().
  *
  * @param data Pointer to parameter.
  * @param crt Certificate in the chain.
@@ -467,7 +467,7 @@ void free_cert_ctx(void)
 //                          Static Function Definitions
 // -----------------------------------------------------------------------------
 /***************************************************************************//**
- * Callback function for mbedtls_x509_crt_verify().
+ * Callback function for mbedtls_x509_crt_verify_with_profile().
  ******************************************************************************/
 static int verify_callback(void *data,
                            mbedtls_x509_crt *crt,

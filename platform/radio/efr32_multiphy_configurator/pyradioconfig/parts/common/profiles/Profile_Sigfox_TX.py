@@ -63,8 +63,6 @@ class Profile_Sigfox_TX(IProfile):
             build_modem_regs_jumbo(model, profile, family = family)   # Clean this up as a next step...
         elif family == "nixi":
             build_modem_regs_nixi(model, profile, family = family)    # Clean this up as a next step...
-        elif family == "ocelot":
-            build_modem_regs_ocelot(model, profile, family=family)
 
         if family == 'nerio' or family == "nixi":
             buildLongRangeOutputs(model, profile)

@@ -304,7 +304,7 @@
 /**
  * \def SL_SE_SUPPORT_FW_PRIOR_TO_1_2_2
  *
- * Enable software fallback for ECDH and ECC public key validation on EFR32xG21 devices
+ * Enable software fallback for ECDH and ECC public key validation on xG21 devices
  * running SE firmware versions lower than 1.2.2.
  *
  * Due to other stability concerns, it is strongly recommended to upgrade these devices to
@@ -323,11 +323,65 @@
  * key verification operations.
  */
 #define SL_SE_ASSUME_FW_AT_LEAST_1_2_2
+/**
+ * \def SL_SE_ASSUME_FW_AT_LEAST_1_2_10
+ *
+ * For code size savings: if it is guaranteed that all devices on which this
+ * library will run are updated to at least SE FW 1.2.10 (on the 1.x.x branch),
+ * then enabling this option will disable the software fallback implementation
+ * for key exchange using X25519 (and related key handling operations). This
+ * option is targeted at xG21A devices, which did not support hardware
+ * acceleration of Curve25519 operations before this SE version.
+ */
+#define SL_SE_ASSUME_FW_AT_LEAST_1_2_10
+/**
+ * \def SL_SE_ASSUME_FW_AT_LEAST_2_1_7
+ *
+ * For code size savings: if it is guaranteed that all devices on which this
+ * library will run are updated to at least SE FW 2.1.7 (on the 2.x.x branch),
+ * then enabling this option will disable the software fallback implementation
+ * for key exchange using X25519 (and related key handling operations). This
+ * option is targeted at xG23A devices, which did not support hardware
+ * acceleration of Curve25519 operations before this SE version.
+ */
+#define SL_SE_ASSUME_FW_AT_LEAST_2_1_7
+/**
+ * \def SL_SE_ASSUME_FW_UNAFFECTED_BY_ED25519_ERRATA
+ *
+ * For minimal code size and performance savings: if it is guaranteed that none
+ * of the devices running this library has SE FWs in the range [1.2.2, 1.2.8],
+ * then enabling this option will disable runtime version checks.
+ */
+#define SL_SE_ASSUME_FW_UNAFFECTED_BY_ED25519_ERRATA
 #else
-/* Default configuration: check for incompatible firmware revisions at runtime, but don't
- * include fallback code unless specifically requested. */
-//#define SL_SE_SUPPORT_FW_PRIOR_TO_1_2_2
-//#define SL_SE_ASSUME_FW_AT_LEAST_1_2_2
+/* Default configuration for pubkey validation: check for incompatible firmware
+ * revisions at runtime, but don't include fallback code unless specifically
+ * requested. */
+// #define SL_SE_SUPPORT_FW_PRIOR_TO_1_2_2
+// #define SL_SE_ASSUME_FW_AT_LEAST_1_2_2
+
+/* Default configuration for X25519/Ed25519 support on Vault mid devices:
+ * assume that SE firmware has not been updated. */
+// #define SL_SE_ASSUME_FW_AT_LEAST_1_2_10
+// #define SL_SE_ASSUME_FW_AT_LEAST_2_1_7
+
+/* Default configuration for Ed25519 errata runtime checking: assume that the SE
+ * firmware is among the affected versions. */
+// #define SL_SE_ASSUME_FW_UNAFFECTED_BY_ED25519_ERRATA
+#endif
+
+/* Additional SE FW version assumption handling. */
+#if defined(SL_SE_ASSUME_FW_AT_LEAST_1_2_10)
+  #define SL_SE_ASSUME_FW_AT_LEAST_1_2_2
+  #define SL_SE_ASSUME_FW_UNAFFECTED_BY_ED25519_ERRATA
+#endif
+#if !defined(_SILICON_LABS_32B_SERIES_2_CONFIG_1)
+  #undef SL_SE_ASSUME_FW_AT_LEAST_1_2_2
+  #undef SL_SE_ASSUME_FW_AT_LEAST_1_2_10
+  #undef SL_SE_ASSUME_FW_UNAFFECTED_BY_ED25519_ERRATA
+#endif
+#if !defined(_SILICON_LABS_32B_SERIES_2_CONFIG_3)
+  #undef SL_SE_ASSUME_FW_AT_LEAST_2_1_7
 #endif
 
 #if  !defined(MBEDTLS_ECP_DP_SECP224R1_ENABLED) \
@@ -344,7 +398,9 @@
  * use the standard mbedTLS library. */
 
   #if !( (_SILICON_LABS_SECURITY_FEATURE == _SILICON_LABS_SECURITY_FEATURE_SE) \
-  && (defined(MBEDTLS_ECP_DP_CURVE25519_ENABLED)                               \
+  && ((defined(MBEDTLS_ECP_DP_CURVE25519_ENABLED)                              \
+  && !(defined(SL_SE_ASSUME_FW_AT_LEAST_1_2_10)                                \
+  || defined(SL_SE_ASSUME_FW_AT_LEAST_2_1_7)))                                 \
   || defined(MBEDTLS_ECP_DP_SECP384R1_ENABLED)                                 \
   || defined(MBEDTLS_ECP_DP_SECP521R1_ENABLED)  ) )
     #if defined(SE_COMMAND_CREATE_KEY)

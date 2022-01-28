@@ -40,7 +40,7 @@
 void sl_gatt_service_rgb_on_event(sl_bt_msg_t* evt);
 
 /**************************************************************************//**
- * Setter for RGB Leds characteristic value.
+ * Setter for RGB LEDs characteristic value.
  * @param[in] m LED bitmask.
  * @param[in] r Red intensity.
  * @param[in] g Green intensity.
@@ -48,5 +48,12 @@ void sl_gatt_service_rgb_on_event(sl_bt_msg_t* evt);
  * @note To be implemented in user code.
  *****************************************************************************/
 void sl_gatt_service_rgb_set_led(uint8_t m, uint8_t r, uint8_t g, uint8_t b);
+
+/**************************************************************************//**
+ * Returns a bitmask corresponding to the RGB LEDs the board has.
+ * @return RGB LED mask.
+ * @note To be implemented in user code.
+ *****************************************************************************/
+uint8_t sl_gatt_service_rgb_get_led_mask(void);
 
 #endif // SL_GATT_SERVICE_RGB_H

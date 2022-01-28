@@ -143,6 +143,10 @@ static sl_zigbee_event_context_t *find_event_context(uint8_t endpoint,
 #endif //EMBER_AF_GENERATED_UC_EVENT_CONTEXT_COUNT
   return NULL;
 }
+uint32_t emberAfMsToNextEventExtended(uint32_t maxMs, uint8_t* returnIndex)
+{
+  return emberMsToNextQueueEvent(&emAppEventQueue);
+}
 
 EmberStatus sl_zigbee_zcl_schedule_tick_extended(uint8_t endpoint,
                                                  EmberAfClusterId clusterId,

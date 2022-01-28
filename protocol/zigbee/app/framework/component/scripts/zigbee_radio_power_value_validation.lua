@@ -43,6 +43,7 @@ local zigbee_zll_commissioning_common_enabled = slc.is_selected("zigbee_zll_comm
 local zigbee_network_steering_enabled = slc.is_selected("zigbee_network_steering")
 local zigbee_network_find_enabled = slc.is_selected("zigbee_network_find")
 local zigbee_network_find_sub_ghz_enabled = slc.is_selected("zigbee_network_find_sub_ghz")
+local zigbee_network_creator_enabled = slc.is_selected("zigbee_network_creator")
 
 local function has_value(radio_powers, val)
     for index, value in ipairs(radio_powers) do
@@ -79,4 +80,8 @@ end
 if zigbee_network_find_sub_ghz_enabled then
     local radio_power_val = slc.config("EMBER_AF_PLUGIN_NETWORK_FIND_SUB_GHZ_RADIO_TX_POWER")
     validate_value("EMBER_AF_PLUGIN_NETWORK_FIND_SUB_GHZ_RADIO_TX_POWER", radio_power_val)
+end
+if zigbee_network_creator_enabled then
+    local radio_power_val = slc.config("EMBER_AF_PLUGIN_NETWORK_CREATOR_RADIO_POWER")
+    validate_value("EMBER_AF_PLUGIN_NETWORK_CREATOR_RADIO_POWER", radio_power_val)
 end

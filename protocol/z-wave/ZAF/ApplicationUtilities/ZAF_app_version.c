@@ -19,26 +19,26 @@
  */
 
 #include "ZAF_app_version.h"
-#include "application_properties.h"
+#include "api/application_properties.h"
 
-extern const ApplicationProperties_t app_properties;
+extern const ApplicationProperties_t sl_app_properties;
 
 uint32_t ZAF_GetAppVersion(void)
 {
-  return app_properties.app.version;
+  return sl_app_properties.app.version;
 }
 
 uint8_t ZAF_GetAppVersionMajor(void)
 {
-  return (app_properties.app.version >> 16) & 0xFF;
+  return (sl_app_properties.app.version >> 16) & 0xFF;
 }
 
 uint8_t ZAF_GetAppVersionMinor(void)
 {
-  return (app_properties.app.version >> 8) & 0xFF;
+  return (sl_app_properties.app.version >> 8) & 0xFF;
 }
 
 uint8_t ZAF_GetAppVersionPatchLevel(void)
 {
-  return app_properties.app.version & 0xFF;
+  return sl_app_properties.app.version & 0xFF;
 }

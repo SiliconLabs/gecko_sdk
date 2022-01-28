@@ -87,7 +87,7 @@ class CALC_Diversity(ICalculator):
         flag_using_Viterbi_demod = False
 
         # Viterbi does not exist in Dumbo:
-        if model.part_family.lower() in ["jumbo", "nerio", "nixi", "panther", "lynx", "ocelot", "leopard"]:
+        if model.part_family.lower() in ["jumbo", "nerio", "nixi", "panther", "lynx", "leopard"]:
             flag_using_Viterbi_demod = (model.vars.MODEM_VITERBIDEMOD_VTDEMODEN.value == 1)
 
         if (not flag_using_Viterbi_demod):

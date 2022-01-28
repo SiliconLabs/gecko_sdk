@@ -119,7 +119,7 @@ CC_UserCode_Set_handler(
 /**
  * @brief The User Code Get ID.
  * @param[in] identifier User Identifier.
- * @param[in] pId pointer to return Id.
+ * @param[out] pId pointer to return Id.
  * @param[in] endpoint is the destination endpoint
  * @return status valid boolean.
  */

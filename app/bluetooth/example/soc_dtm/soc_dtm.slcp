@@ -18,6 +18,7 @@ component:
   - id: bluetooth_feature_sm
   - id: bluetooth_feature_system
   - id: bluetooth_feature_test
+  - id: bluetooth_feature_afh
   - id: bt_fp_aoa
   - id: ota_dfu
   - id: bootloader_interface
@@ -42,8 +43,11 @@ include:
       - path: app.h
       - path: dtm.h
 
+config_file:
+  - path: config/dtm_config.h
+
 readme:
-  - path: ../../documentation/example/soc_dtm/readme.html
+  - path: ../../documentation/example/soc_dtm/readme.md
 
 other_file:
   - path: ../../script/create_bl_files.bat
@@ -69,5 +73,5 @@ tag:
 ui_hints:
   highlight:
     - path: config/btconf/gatt_configuration.btconf
-    - path: readme.html
+    - path: readme.md
       focus: true

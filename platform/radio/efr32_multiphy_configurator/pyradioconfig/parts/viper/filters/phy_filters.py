@@ -4,7 +4,8 @@ from pyradioconfig.calculator_model_framework.interfaces.iphy_filter import IPhy
 class phy_filters_viper(IPhyFilter):
 
     # Studio black list (files removed before Studio distribution)
-    customer_phy_groups = ['Phys_Internal_Base_Experimental',
+    customer_phy_groups = ['Phys_imagotag',
+                           'Phys_Internal_Base_Experimental',
                            'Phys_Internal_Base_Utility',
                            'Phys_Internal_Base_ValOnly',
                            'Phys_Internal_Connect',
@@ -12,7 +13,7 @@ class phy_filters_viper(IPhyFilter):
                            'Phys_RAIL_Base_Standard_BLE',
                            'Phys_RAIL_Base_Standard_IEEE802154',
                            'Phys_RAIL_Base_Standard_ZWave'
-                        ]
+                           ]
 
     # Studio white list (these PHYs show in Studio as proprietary starting points)
     simplicity_studio_phy_groups = []

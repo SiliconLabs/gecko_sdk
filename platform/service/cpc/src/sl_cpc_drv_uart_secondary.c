@@ -210,6 +210,7 @@ sl_status_t sli_cpc_drv_init(void)
   GPIO_PinModeSet(SL_CPC_DRV_VCOM_ENABLE_PORT, SL_CPC_DRV_VCOM_ENABLE_PIN, gpioModePushPull, 1);
 #endif
 
+  init.hwFlowControl = SL_CPC_DRV_UART_FLOW_CONTROL_TYPE;
   init.baudrate = SL_CPC_DRV_UART_BAUDRATE;
   init.enable = usartDisable;
 
@@ -242,6 +243,32 @@ sl_status_t sli_cpc_drv_init(void)
     (SL_CPC_DRV_UART_RX_PORT << _GPIO_USART_RXROUTE_PORT_SHIFT)
     | (SL_CPC_DRV_UART_RX_PIN << _GPIO_USART_RXROUTE_PIN_SHIFT);
 #endif
+
+  if (SL_CPC_DRV_UART_FLOW_CONTROL_TYPE == usartHwFlowControlCtsAndRts) {
+    GPIO_PinModeSet(SL_CPC_DRV_UART_CTS_PORT, SL_CPC_DRV_UART_CTS_PIN, gpioModeInputPull, 0);
+
+#if defined(_USART_ROUTEPEN_RTSPEN_MASK) && defined(_USART_ROUTEPEN_CTSPEN_MASK)
+    SL_CPC_DRV_UART_PERIPHERAL->ROUTELOC1 = (SL_CPC_DRV_UART_CTS_LOC << _USART_ROUTELOC1_CTSLOC_SHIFT);
+    SL_CPC_DRV_UART_PERIPHERAL->CTRLX    |= USART_CTRLX_CTSEN;
+    SL_CPC_DRV_UART_PERIPHERAL->ROUTEPEN |= USART_ROUTEPEN_CTSPEN;
+#elif defined(_GPIO_USART_ROUTEEN_MASK)
+    GPIO->USARTROUTE_SET[SL_CPC_DRV_UART_PERIPHERAL_NO].CTSROUTE = (SL_CPC_DRV_UART_CTS_PORT << _GPIO_USART_CTSROUTE_PORT_SHIFT)
+                                                                   | (SL_CPC_DRV_UART_CTS_PIN << _GPIO_USART_CTSROUTE_PIN_SHIFT);
+    SL_CPC_DRV_UART_PERIPHERAL->CTRLX_SET = USART_CTRLX_CTSEN;
+#endif
+
+    GPIO_PinModeSet(SL_CPC_DRV_UART_RTS_PORT, SL_CPC_DRV_UART_RTS_PIN, gpioModePushPull, 0);
+
+#if defined(_USART_ROUTEPEN_RTSPEN_MASK) && defined(_USART_ROUTEPEN_CTSPEN_MASK)
+    SL_CPC_DRV_UART_PERIPHERAL->ROUTELOC1 |= (SL_CPC_DRV_UART_RTS_LOC << _USART_ROUTELOC1_RTSLOC_SHIFT);
+    SL_CPC_DRV_UART_PERIPHERAL->ROUTEPEN |= USART_ROUTEPEN_RTSPEN;
+
+#elif defined(_GPIO_USART_ROUTEEN_MASK)
+    GPIO->USARTROUTE_SET[SL_CPC_DRV_UART_PERIPHERAL_NO].ROUTEEN = GPIO_USART_ROUTEEN_RTSPEN;
+    GPIO->USARTROUTE_SET[SL_CPC_DRV_UART_PERIPHERAL_NO].RTSROUTE = (SL_CPC_DRV_UART_RTS_PORT << _GPIO_USART_RTSROUTE_PORT_SHIFT)
+                                                                   | (SL_CPC_DRV_UART_RTS_PIN << _GPIO_USART_RTSROUTE_PIN_SHIFT);
+#endif
+  }
 
   // Enabled TX complete interrupt
   USART_IntEnable(SL_CPC_DRV_UART_PERIPHERAL, USART_IF_TXC);
@@ -530,6 +557,7 @@ void SL_CPC_ISR_RX_HANDLER(SL_CPC_DRV_UART_PERIPHERAL_NO)(void)
   uint32_t flag = USART_IntGet(SL_CPC_DRV_UART_PERIPHERAL);
 
   USART_IntClear(SL_CPC_DRV_UART_PERIPHERAL, flag);
+  EFM_ASSERT(header_expected_next == true); // Can't resync when waiting for a payload
 
   if (flag & USART_IF_RXDATAV) {
     uint8_t data = SL_CPC_DRV_UART_PERIPHERAL->RXDATA;
@@ -571,8 +599,6 @@ void SL_CPC_ISR_RX_HANDLER(SL_CPC_DRV_UART_PERIPHERAL_NO)(void)
 
       if (payload_len > 0) {
         header_expected_next = false;
-      } else {
-        header_expected_next = true;
       }
 
       if (current_rx_entry == NULL) {
@@ -660,6 +686,8 @@ static bool rx_dma_complete(unsigned int channel,
   (void)sequenceNo;
   (void)userParam;
 
+  EFM_ASSERT(completed_desc != NULL);
+
   rx_descriptor_head = (LDMA_Descriptor_t *)(uint32_t)(rx_descriptor_head->xfer.linkAddr << _LDMA_CH_LINK_LINKADDR_SHIFT);
 
   if (rx_descriptor_head == NULL) {
@@ -685,8 +713,21 @@ static bool rx_dma_complete(unsigned int channel,
       // Validate HCS
       hcs = sli_cpc_hdlc_get_hcs(current_rx_buffer);
       if (!sli_cpc_validate_crc_sw(current_rx_buffer, SLI_CPC_HDLC_HEADER_SIZE, hcs)) {
-        start_re_synch();
-        return false;
+        DMADRV_StopTransfer(read_channel);
+
+        uint16_t already_recvd_cnt;
+        uint32_t dest = LDMA->CH[read_channel].DST;
+        uint32_t ctrl;
+
+        // Rewind the DMA destination to discard previously received bytes
+        ctrl = LDMA->CH[read_channel].CTRL;
+        dest = LDMA->CH[read_channel].DST;
+        already_recvd_cnt = (((SLI_CPC_RX_DATA_MAX_LENGTH < DMA_MAX_XFER_LEN) ? SLI_CPC_RX_DATA_MAX_LENGTH : DMA_MAX_XFER_LEN) - 1) - ((ctrl & _LDMA_CH_CTRL_XFERCNT_MASK) >> _LDMA_CH_CTRL_XFERCNT_SHIFT);
+        LDMA->CH[read_channel].DST = (dest - already_recvd_cnt);
+        USART_IntEnable(SL_CPC_DRV_UART_PERIPHERAL, USART_IF_RXDATAV);
+        SLI_CPC_DEBUG_TRACE_CORE_DRIVER_PACKET_DROPPED();
+        SLI_CPC_DEBUG_TRACE_CORE_INVALID_HEADER_CHECKSUM();
+        break;
       }
 
       next_rx_payload_len = sli_cpc_hdlc_get_length(current_rx_buffer);
@@ -740,6 +781,7 @@ static bool rx_dma_complete(unsigned int channel,
       current_rx_entry->handle->data_length = next_rx_payload_len;
 
       if (next_rx_payload_len > SLI_CPC_RX_DATA_MAX_LENGTH) {
+        SLI_CPC_DEBUG_TRACE_CORE_DRIVER_PACKET_DROPPED();
         notify_core_error(SL_CPC_REJECT_ERROR);
         current_rx_entry = NULL;
       } else if (next_rx_payload_len == 0) { // A header is expected next
@@ -1089,6 +1131,12 @@ static void notify_core_error(sl_cpc_reject_reason_t reason)
 static void start_re_synch(void)
 {
   DMADRV_StopTransfer(read_channel);
+
+  SLI_CPC_DEBUG_TRACE_CORE_DRIVER_PACKET_DROPPED();
+
+  // A header is expected next
+  header_expected_next = true;
+
   sli_cpc_push_back_buffer_handle(&rx_free_list_head, &current_rx_entry->node, current_rx_entry->handle);
   current_rx_entry = NULL;
   USART_IntEnable(SL_CPC_DRV_UART_PERIPHERAL, USART_IF_RXDATAV);

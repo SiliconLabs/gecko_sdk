@@ -1,9 +1,9 @@
 from pyradioconfig.parts.common.profiles.ocelot_regs import *
 from pyradioconfig.parts.common.profiles.profile_common import *
-from pyradioconfig.parts.ocelot.profiles.profile_modem import *
 
 from pyradioconfig.calculator_model_framework.interfaces.iprofile import IProfile
 from pyradioconfig.parts.common.utils.units_multiplier import UnitsMultiplier
+from pyradioconfig.parts.ocelot.profiles.sw_profile_outputs_common import sw_profile_outputs_common_ocelot
 
 from pyradioconfig.parts.ocelot.profiles.profile_mbus_modes import *
 
@@ -21,6 +21,7 @@ class Profile_Mbus_Ocelot(IProfile):
         self._description = "Profile used for Mbus phys"
         self._default = False
         self._activation_logic = ""
+        self._sw_profile_outputs_common = sw_profile_outputs_common_ocelot()
 
 
     """
@@ -110,24 +111,27 @@ class Profile_Mbus_Ocelot(IProfile):
 
 
         # Informational output
-        buildModemInfoOutputs(model, profile)
+        self._sw_profile_outputs_common.build_info_outputs(model, profile)
 
         # RAIL Outputs
-        buildRailOutputs(model, profile)
+        self._sw_profile_outputs_common.build_rail_outputs(model, profile)
+
+        # IRCal outputs
+        self._sw_profile_outputs_common.build_ircal_outputs(model, profile)
 
         # Output fields
         buildFrameOutputs(model, profile, family=family)
         buildCrcOutputs(model, profile, family)
         buildWhiteOutputs(model, profile)
         buildFecOutputs(model, profile)
-        build_modem_regs_ocelot(model, profile, family = family)
-        build_ircal_sw_vars(model, profile)
+        self._add_reg_profile_outputs(model, profile)
 
         return profile
 
+    def _add_reg_profile_outputs(self, model, profile):
+        build_modem_regs_ocelot(model, profile, family=self._family)
 
     def mbus_profile_frame_format_common(self, model):
-        family = self._family
 
         # Whitening
         model.vars.header_white_en.value_forced = False

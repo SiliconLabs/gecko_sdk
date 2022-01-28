@@ -47,9 +47,7 @@ class CALC_Demodulator_ocelot(ICalculator):
             ])
         self._addModelVariable(model, 'adc_xo_mult', int, ModelVariableFormat.DECIMAL)
         self._addModelActual(model, 'adc_freq', int, ModelVariableFormat.DECIMAL)
-        self._addModelActual(model, 'baudrate', int, ModelVariableFormat.DECIMAL)
         self._addModelVariable(model, 'datafilter_taps', int, ModelVariableFormat.DECIMAL)
-        self._addModelActual(model, 'demod_rate', int, ModelVariableFormat.DECIMAL)
         self._addModelVariable(model, 'enable_high_mod_trecs', int, ModelVariableFormat.DECIMAL)
         self._addModelActual(model, 'adc_xo_mult', int, ModelVariableFormat.DECIMAL)
         self._addModelVariable(model, 'lo_target_freq', long, ModelVariableFormat.DECIMAL)
@@ -91,6 +89,10 @@ class CALC_Demodulator_ocelot(ICalculator):
         self._addModelVariable(model, 'max_src2', float, ModelVariableFormat.DECIMAL)
         self._addModelVariable(model, 'bandwidth_tol', float, ModelVariableFormat.DECIMAL)
 
+        self._add_demod_rate_variable(model)
+
+    def _add_demod_rate_variable(self, model):
+        self._addModelActual(model, 'demod_rate', int, ModelVariableFormat.DECIMAL)
 
     def return_solution(self, model, demod_select):
 
@@ -360,6 +362,11 @@ class CALC_Demodulator_ocelot(ICalculator):
 
             target_src2 = 1.0
             best_error = 999
+
+            # default values
+            best_dec2 = 1
+            best_src2 = (8 * dec0 * dec1 * baudrate) * target_osr / float(adc_freq)
+
             for dec2 in range(dec2_min, dec2_max + 1):
                 src2 = dec2 * (8 * dec0 * dec1 * baudrate) * target_osr / float(adc_freq)
                 error = abs(target_src2 - src2)
@@ -550,9 +557,9 @@ class CALC_Demodulator_ocelot(ICalculator):
             rxbrnum = 1
 
         #Write registers
-        self._reg_sat_write(model.vars.MODEM_RXBR_RXBRINT, rxbrint, model.part_family)
-        self._reg_sat_write(model.vars.MODEM_RXBR_RXBRNUM, rxbrnum, model.part_family)
-        self._reg_sat_write(model.vars.MODEM_RXBR_RXBRDEN, rxbrden, model.part_family)
+        self._reg_sat_write(model.vars.MODEM_RXBR_RXBRINT, rxbrint)
+        self._reg_sat_write(model.vars.MODEM_RXBR_RXBRNUM, rxbrnum)
+        self._reg_sat_write(model.vars.MODEM_RXBR_RXBRDEN, rxbrden)
 
 
     def calc_rxbr_actual(self,model):
@@ -845,7 +852,7 @@ class CALC_Demodulator_ocelot(ICalculator):
             bw_carson = baudrate + 2*deviation
 
         #Load local variables back into model variables
-        model.vars.bandwidth_carson_hz.value = bw_carson
+        model.vars.bandwidth_carson_hz.value = int(bw_carson)
 
     def calc_rx_tx_ppm(self,model):
         #This function calculates the default RX and TX HFXO tolerance in PPM
@@ -1618,7 +1625,7 @@ class CALC_Demodulator_ocelot(ICalculator):
     def calc_ksi1_reg(self, model):
         phscale_actual = model.vars.phscale_actual.value
         ksi1_calculated = self.return_ksi1_calc(model, phscale_actual)
-        self._reg_sat_write(model.vars.MODEM_VITERBIDEMOD_VITERBIKSI1, ksi1_calculated, model.part_family)
+        self._reg_sat_write(model.vars.MODEM_VITERBIDEMOD_VITERBIKSI1, ksi1_calculated)
 
     def calc_syncbits_actual(self, model):
 
@@ -1884,7 +1891,7 @@ class CALC_Demodulator_ocelot(ICalculator):
         model.vars.bandwidth_tol.value = 0.0
 
 
-    def return_osr_dec0_dec1(self, model, demod_select, withremod=False, relaxsrc2=False):
+    def return_osr_dec0_dec1(self, model, demod_select, withremod=False, relaxsrc2=False, quitatfirstvalid=True):
 
         # Load model variables into local variables
         bandwidth = model.vars.bandwidth_hz.value  # from calc_target_bandwidth
@@ -1924,7 +1931,7 @@ class CALC_Demodulator_ocelot(ICalculator):
 
                 # define integer range for dec1
                 min_dec1 = int(max(1, ceil(float(adc_freq) * min_bwsel / (8 * dec0 * bandwidth*(1+bw_var)))))
-                max_dec1 = int(min(65535, floor(float(adc_freq) * max_bwsel / (8 * dec0 * bandwidth*(1-bw_var)))))
+                max_dec1 = int(min(11500, floor(float(adc_freq) * max_bwsel / (8 * dec0 * bandwidth*(1-bw_var)))))
                 if min_dec1 <= max_dec1:
                     # Order list from highest to lowest, bwsel from highest to lowest
                     dec1_list = range(max_dec1,min_dec1-1,-1)
@@ -1982,7 +1989,8 @@ class CALC_Demodulator_ocelot(ICalculator):
                             best_dec1 = dec1
                             best_bwsel = bwsel
 
-            if best_osr > 0:
+            if best_osr > 0 and quitatfirstvalid:
+
                 # break out of the osr loop on first successful configuration
                 break
 
@@ -2455,3 +2463,91 @@ class CALC_Demodulator_ocelot(ICalculator):
         #For Ocelot always set to 0
         self._reg_write(model.vars.MODEM_CTRL0_DETDIS, 0)
 
+    def calc_dec1gain_actual(self, model):
+        """given register settings return actual DEC1GAIN used
+
+        Args:
+            model (ModelRoot) : Data model to read and write variables from
+        """
+
+        reg = model.vars.MODEM_CF_DEC1GAIN.value
+
+        if reg == 0:
+            val = 0
+        elif reg == 1:
+            val = 6
+        else:
+            val = 12
+
+        model.vars.dec1gain_actual.value = val
+
+    def calc_rssi_dig_adjust_db(self, model):
+        #These variables are passed to RAIL so that RSSI corrections can be made to more accurately measure power
+
+        #Read in model vars
+        dec0gain = model.vars.MODEM_DIGIGAINCTRL_DEC0GAIN.value
+        dec1_actual = model.vars.dec1_actual.value
+        dec1gain_actual = model.vars.dec1gain_actual.value
+        digigainen = model.vars.MODEM_DIGIGAINCTRL_DIGIGAINEN.value
+        digigainsel = model.vars.MODEM_DIGIGAINCTRL_DIGIGAINSEL.value
+        digigaindouble = model.vars.MODEM_DIGIGAINCTRL_DIGIGAINDOUBLE.value
+        digigainhalf = model.vars.MODEM_DIGIGAINCTRL_DIGIGAINHALF.value
+
+        #Calculate gains
+
+        dec0_gain_db = 6.0*dec0gain
+
+        dec1_gain_linear = (dec1_actual**4) * (2**(-1*math.floor(4*math.log2(dec1_actual)-4)))
+        dec1_gain_db = 20*math.log10(dec1_gain_linear/16) + dec1gain_actual #Normalize so that dec1=0 gives gain=16
+
+        if digigainen:
+            digigain_db = -3+(digigainsel*0.25)
+        else:
+            digigain_db = 0
+        digigain_db += 6*digigaindouble-6*digigainhalf
+
+        # For consistency / simplicity, let's treat the rssi_adjust_db  output from the calculator like RAIL handles
+        # EFR32_FEATURE_SW_CORRECTED_RSSI_OFFSET in that the value is thought to be added to the RSSI
+        # So to compensate for the digital gain, the value should be the negative of the excess gain
+        # Note that RSSISHIFT is actually subtracted from the RSSI, but EFR32_FEATURE_SW_CORRECTED_RSSI_OFFSET is
+        # subtracted from the default RSSISHIFT so that the proper sign is maintained
+        rssi_dig_adjust_db = -(dec0_gain_db + dec1_gain_db + digigain_db)
+
+        #Write the vars
+        model.vars.rssi_dig_adjust_db.value = rssi_dig_adjust_db
+
+    def calc_rssi_rf_adjust_db(self, model):
+
+        #Read in model vars
+        rf_band = model.vars.rf_band.value
+
+        #Calculate rf adjustment based on band
+        if rf_band == model.vars.rf_band.var_enum.BAND_169:
+            rssi_rf_adjust_db = -15.5
+        elif rf_band == model.vars.rf_band.var_enum.BAND_315:
+            rssi_rf_adjust_db = -16.4
+        elif rf_band == model.vars.rf_band.var_enum.BAND_434:
+            rssi_rf_adjust_db = -14.3
+        elif rf_band == model.vars.rf_band.var_enum.BAND_490:
+            rssi_rf_adjust_db = -14.3
+        elif rf_band == model.vars.rf_band.var_enum.BAND_868 or \
+            rf_band == model.vars.rf_band.var_enum.BAND_915:
+            rssi_rf_adjust_db = -10.4
+        else:
+            LogMgr.Warning("Warning: No RSSI adjustment available for this band")
+            rssi_rf_adjust_db = 0.0
+
+        #Write the model var
+        model.vars.rssi_rf_adjust_db.value = rssi_rf_adjust_db
+
+    def calc_rssi_adjust_db(self, model):
+
+        #Read in model vars
+        rssi_dig_adjust_db = model.vars.rssi_dig_adjust_db.value
+        rssi_rf_adjust_db = model.vars.rssi_rf_adjust_db.value
+
+        #Add digital and RF adjustments
+        rssi_adjust_db = rssi_dig_adjust_db + rssi_rf_adjust_db
+
+        #Write the model var
+        model.vars.rssi_adjust_db.value = rssi_adjust_db

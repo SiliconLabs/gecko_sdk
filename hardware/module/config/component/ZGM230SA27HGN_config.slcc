@@ -26,3 +26,7 @@
       component: rail_util_pa
       file_id: rail_util_pa_config
     path: ZGM230SA27HGN/sl_rail_util_pa_config.h
+  - override:
+      component: device_init_dcdc
+      file_id: device_init_dcdc_config
+    path: ZGM230SA27HGN/sl_device_init_dcdc_config.h

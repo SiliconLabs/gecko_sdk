@@ -170,7 +170,7 @@ RAIL_TxPowerLevel_t RAIL_ConvertDbmToRaw(RAIL_Handle_t railHandle,
                                          RAIL_TxPower_t power)
 {
   uint32_t powerLevel;
-  int16_t powerIndex = 0;
+  uint32_t powerIndex = 0U;
   uint32_t minPowerLevel;
 
   (void)railHandle;
@@ -200,18 +200,25 @@ RAIL_TxPowerLevel_t RAIL_ConvertDbmToRaw(RAIL_Handle_t railHandle,
 
   // If we're in low power mode, just use the simple lookup table
   if (modeInfo->algorithm == RAIL_PA_ALGORITHM_MAPPING_TABLE) {
-    // Loop through the lookup table to find the closest power level
+    // Binary search through the lookup table to find the closest power level
     // without going over.
-    for (powerIndex = (int16_t)(modeInfo->max - minPowerLevel);
-         (powerIndex != 0) && (power < modeInfo->conversion.mappingTable[powerIndex]);
-         powerIndex--) {
-      // Searching...
+    uint32_t lower = 0U;
+    // Track the high side of the estimate
+    powerIndex = modeInfo->max - minPowerLevel;
+
+    while (lower < powerIndex) {
+      // Calculate the midpoint of the current range
+      uint32_t index = powerIndex - (powerIndex - lower) / 2U;
+      if (power < modeInfo->conversion.mappingTable[index]) {
+        powerIndex = index - 1U;
+      } else {
+        lower = index;
+      }
     }
     return powerIndex + minPowerLevel;
   }
 
   // Here we know we're using the piecewise linear conversion
-  RAIL_TxPowerCurveSegment_t const *powerParams;
   RAIL_TxPowerCurveAlt_t const *paParams = modeInfo->conversion.powerCurve;
 
   // Check for valid paParams before using them
@@ -245,19 +252,20 @@ RAIL_TxPowerLevel_t RAIL_ConvertDbmToRaw(RAIL_Handle_t railHandle,
   //using values different than the default - RAIL_TX_POWER_CURVE_DEFAULT_MAX
   // and RAIL_TX_POWER_CURVE_DEFAULT_INCREMENT.
   if ((paParams->powerParams[0].maxPowerLevel) == RAIL_TX_POWER_LEVEL_INVALID) {
-    powerIndex += 1;
+    powerIndex += 1U;
     txPowerMax = paParams->powerParams[0].slope;
     txPowerIncrement = paParams->powerParams[0].intercept;
   }
 
   powerIndex += ((txPowerMax - power) / txPowerIncrement);
-  if (powerIndex > (int16_t)(modeInfo->segments - 1U)) {
-    powerIndex = (int16_t)(modeInfo->segments - 1U);
+  if (powerIndex > (modeInfo->segments - 1U)) {
+    powerIndex = (modeInfo->segments - 1U);
   }
 
   do {
     // Select the correct piecewise segment to use for conversion.
-    powerParams = &paParams->powerParams[powerIndex];
+    RAIL_TxPowerCurveSegment_t const *powerParams =
+      &paParams->powerParams[powerIndex];
 
     // powerLevel can only go down to 0.
     if (powerParams->intercept + powerParams->slope * power < 0) {
@@ -272,12 +280,12 @@ RAIL_TxPowerLevel_t RAIL_ConvertDbmToRaw(RAIL_Handle_t railHandle,
     // In case it turns out the resultant power level was too low and we have
     // to recalculate with the next curve...
     powerIndex++;
-  } while ((powerIndex < (int16_t)modeInfo->segments)
+  } while ((powerIndex < modeInfo->segments)
            && (powerLevel <= paParams->powerParams[powerIndex].maxPowerLevel));
 
   // We already know that powerIndex is at most modeInfo->segments
-  if (powerLevel > paParams->powerParams[powerIndex - 1].maxPowerLevel) {
-    powerLevel = paParams->powerParams[powerIndex - 1].maxPowerLevel;
+  if (powerLevel > paParams->powerParams[powerIndex - 1U].maxPowerLevel) {
+    powerLevel = paParams->powerParams[powerIndex - 1U].maxPowerLevel;
   }
 
   // If we go below the minimum we want included in the curve fit, force it.

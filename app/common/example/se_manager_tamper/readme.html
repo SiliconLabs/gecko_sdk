@@ -418,13 +418,13 @@
 <td>25</td>
 <td>PRS0</td>
 <td>0</td>
-<td>1 (PRS source: Push button PB0)</td>
+<td>1 (PRS source: None)</td>
 </tr>
 <tr>
 <td>26</td>
 <td>PRS1</td>
 <td>0</td>
-<td>1 (PRS source: None)</td>
+<td>1 (PRS source: Push button PB0)</td>
 </tr>
 <tr>
 <td>27</td>
@@ -460,7 +460,7 @@
 </table>
 <p class="has-line-data" data-line-start="108" data-line-end="109">The disable tamper command simply reverts all masked tamper sources (<code>TAMPER_DISABLE_MASK</code> in <code>app_se_manager_tamper_disable.h</code>) to the hardcoded configuration (default levels in table above).</p>
 <p class="has-line-data" data-line-start="110" data-line-end="111">For EFR32xG21B devices, the default value of <code>TAMPER_DISABLE_MASK</code> is <code>0x00fa0000</code>. It restores PRS7, PRS6, PRS5, PRS4, PRS3, and PRS1 to the default level 0 (Ignore) after running the disable tamper command.</p>
-<p class="has-line-data" data-line-start="112" data-line-end="113">For other Series 2 Secure Vault High devices, the default value of <code>TAMPER_DISABLE_MASK</code> is <code>0xf4000000</code>. It restores PRS6, PRS5, PRS4, PRS3, and PRS1 to the default level 0 (Ignore) after running the disable tamper command.</p>
+<p class="has-line-data" data-line-start="112" data-line-end="113">For other Series 2 Secure Vault High devices, the default value of <code>TAMPER_DISABLE_MASK</code> is <code>0xf2000000</code>. It restores PRS6, PRS5, PRS4, PRS3, and PRS0 to the default level 0 (Ignore) after running the disable tamper command.</p>
 <h2 class="code-line" data-line-start=114 data-line-end=115><a id="Tamper_Settings_114"></a>Tamper Settings</h2>
 <table class="table table-striped table-bordered">
 <thead>
@@ -479,8 +479,12 @@
 <td>~33 seconds</td>
 </tr>
 <tr>
-<td>Flags</td>
+<td>Flag</td>
 <td>Digital Glitch Detector Always On: Disabled</td>
+</tr>
+<tr>
+<td>Flag (not available on EFR32xG21B devices)</td>
+<td>Keep Tamper Alive During Sleep: Disabled</td>
 </tr>
 <tr>
 <td>Reset threshold</td>
@@ -488,47 +492,47 @@
 </tr>
 </tbody>
 </table>
-<h2 class="code-line" data-line-start=123 data-line-end=124><a id="SE_Manager_API_123"></a>SE Manager API</h2>
-<p class="has-line-data" data-line-start="125" data-line-end="126">The following SE Manager APIs are used in this example:</p>
+<h2 class="code-line" data-line-start=124 data-line-end=125><a id="SE_Manager_API_124"></a>SE Manager API</h2>
+<p class="has-line-data" data-line-start="126" data-line-end="127">The following SE Manager APIs are used in this example:</p>
 <ul>
-<li class="has-line-data" data-line-start="127" data-line-end="128"><code>sl_se_init</code></li>
-<li class="has-line-data" data-line-start="128" data-line-end="129"><code>sl_se_deinit</code></li>
-<li class="has-line-data" data-line-start="129" data-line-end="130"><code>sl_se_init_command_context</code></li>
-<li class="has-line-data" data-line-start="130" data-line-end="131"><code>sl_se_deinit_command_context</code></li>
-<li class="has-line-data" data-line-start="131" data-line-end="132"><code>sl_se_get_reset_cause</code></li>
-<li class="has-line-data" data-line-start="132" data-line-end="133"><code>sl_se_get_status</code></li>
-<li class="has-line-data" data-line-start="133" data-line-end="134"><code>sl_se_read_otp</code></li>
-<li class="has-line-data" data-line-start="134" data-line-end="135"><code>sl_se_init_otp</code></li>
-<li class="has-line-data" data-line-start="135" data-line-end="136"><code>sl_se_validate_key</code></li>
-<li class="has-line-data" data-line-start="136" data-line-end="137"><code>sl_se_get_storage_size</code></li>
-<li class="has-line-data" data-line-start="137" data-line-end="138"><code>sl_se_generate_key</code></li>
-<li class="has-line-data" data-line-start="138" data-line-end="139"><code>sl_se_export_public_key</code></li>
-<li class="has-line-data" data-line-start="139" data-line-end="140"><code>sl_se_read_pubkey</code></li>
-<li class="has-line-data" data-line-start="140" data-line-end="141"><code>sl_se_init_otp_key</code></li>
-<li class="has-line-data" data-line-start="141" data-line-end="142"><code>sl_se_get_serialnumber</code></li>
-<li class="has-line-data" data-line-start="142" data-line-end="143"><code>sl_se_get_challenge</code></li>
-<li class="has-line-data" data-line-start="143" data-line-end="144"><code>sl_se_ecc_sign</code></li>
-<li class="has-line-data" data-line-start="144" data-line-end="145"><code>sl_se_disable_tamper</code></li>
-<li class="has-line-data" data-line-start="145" data-line-end="147"><code>sl_se_roll_challenge</code></li>
+<li class="has-line-data" data-line-start="128" data-line-end="129"><code>sl_se_init</code></li>
+<li class="has-line-data" data-line-start="129" data-line-end="130"><code>sl_se_deinit</code></li>
+<li class="has-line-data" data-line-start="130" data-line-end="131"><code>sl_se_init_command_context</code></li>
+<li class="has-line-data" data-line-start="131" data-line-end="132"><code>sl_se_deinit_command_context</code></li>
+<li class="has-line-data" data-line-start="132" data-line-end="133"><code>sl_se_get_reset_cause</code></li>
+<li class="has-line-data" data-line-start="133" data-line-end="134"><code>sl_se_get_status</code></li>
+<li class="has-line-data" data-line-start="134" data-line-end="135"><code>sl_se_read_otp</code></li>
+<li class="has-line-data" data-line-start="135" data-line-end="136"><code>sl_se_init_otp</code></li>
+<li class="has-line-data" data-line-start="136" data-line-end="137"><code>sl_se_validate_key</code></li>
+<li class="has-line-data" data-line-start="137" data-line-end="138"><code>sl_se_get_storage_size</code></li>
+<li class="has-line-data" data-line-start="138" data-line-end="139"><code>sl_se_generate_key</code></li>
+<li class="has-line-data" data-line-start="139" data-line-end="140"><code>sl_se_export_public_key</code></li>
+<li class="has-line-data" data-line-start="140" data-line-end="141"><code>sl_se_read_pubkey</code></li>
+<li class="has-line-data" data-line-start="141" data-line-end="142"><code>sl_se_init_otp_key</code></li>
+<li class="has-line-data" data-line-start="142" data-line-end="143"><code>sl_se_get_serialnumber</code></li>
+<li class="has-line-data" data-line-start="143" data-line-end="144"><code>sl_se_get_challenge</code></li>
+<li class="has-line-data" data-line-start="144" data-line-end="145"><code>sl_se_ecc_sign</code></li>
+<li class="has-line-data" data-line-start="145" data-line-end="146"><code>sl_se_disable_tamper</code></li>
+<li class="has-line-data" data-line-start="146" data-line-end="148"><code>sl_se_roll_challenge</code></li>
 </ul>
-<h2 class="code-line" data-line-start=147 data-line-end=148><a id="Getting_Started_147"></a>Getting Started</h2>
+<h2 class="code-line" data-line-start=148 data-line-end=149><a id="Getting_Started_148"></a>Getting Started</h2>
 <ol>
-<li class="has-line-data" data-line-start="149" data-line-end="150">Upgrade the kit’s firmware to the latest version (see <code>Adapter Firmware</code> under <a href="https://docs.silabs.com/simplicity-studio-5-users-guide/latest/ss-5-users-guide-about-the-launcher/welcome-and-device-tabs#general-device-information">General Device Information</a> in Simplicity Studio 5 Users Guide).</li>
-<li class="has-line-data" data-line-start="150" data-line-end="151">Upgrade the device’s SE firmware to the latest version (see <code>Secure Firmware</code> under <a href="https://docs.silabs.com/simplicity-studio-5-users-guide/latest/ss-5-users-guide-about-the-launcher/welcome-and-device-tabs#general-device-information">General Device Information</a> in Simplicity Studio 5 Users Guide).</li>
-<li class="has-line-data" data-line-start="151" data-line-end="152">Open any terminal program and connect to the kit’s VCOM port (if using <code>Device Console</code> in Simplicity Studio 5, <code>Line terminator:</code> must be set to <code>None</code>).</li>
-<li class="has-line-data" data-line-start="152" data-line-end="153">Create this platform example project in the Simplicity IDE (see <a href="https://docs.silabs.com/simplicity-studio-5-users-guide/latest/ss-5-users-guide-getting-started/start-a-project#examples">Examples</a> in Simplicity Studio 5 Users Guide, check <code>Platform()</code> checkbox to browse the platform examples).</li>
-<li class="has-line-data" data-line-start="153" data-line-end="154">Build the example and download it to the kit (see <a href="https://docs.silabs.com/simplicity-studio-5-users-guide/latest/ss-5-users-guide-building-and-flashing/building#simple-build">Simple Build</a> and <a href="https://docs.silabs.com/simplicity-studio-5-users-guide/latest/ss-5-users-guide-building-and-flashing/flashing#flash-programmer">Flash Programmer</a> in Simplicity Studio 5 Users Guide).</li>
-<li class="has-line-data" data-line-start="154" data-line-end="156">Run the example and follow the instructions shown on the console.</li>
+<li class="has-line-data" data-line-start="150" data-line-end="151">Upgrade the kit’s firmware to the latest version (see <code>Adapter Firmware</code> under <a href="https://docs.silabs.com/simplicity-studio-5-users-guide/latest/ss-5-users-guide-about-the-launcher/welcome-and-device-tabs#general-device-information">General Device Information</a> in Simplicity Studio 5 Users Guide).</li>
+<li class="has-line-data" data-line-start="151" data-line-end="152">Upgrade the device’s SE firmware to the latest version (see <code>Secure Firmware</code> under <a href="https://docs.silabs.com/simplicity-studio-5-users-guide/latest/ss-5-users-guide-about-the-launcher/welcome-and-device-tabs#general-device-information">General Device Information</a> in Simplicity Studio 5 Users Guide).</li>
+<li class="has-line-data" data-line-start="152" data-line-end="153">Open any terminal program and connect to the kit’s VCOM port (if using <code>Device Console</code> in Simplicity Studio 5, <code>Line terminator:</code> must be set to <code>None</code>).</li>
+<li class="has-line-data" data-line-start="153" data-line-end="154">Create this platform example project in the Simplicity IDE (see <a href="https://docs.silabs.com/simplicity-studio-5-users-guide/latest/ss-5-users-guide-getting-started/start-a-project#examples">Examples</a> in Simplicity Studio 5 Users Guide, check <code>Platform()</code> checkbox to browse the platform examples).</li>
+<li class="has-line-data" data-line-start="154" data-line-end="155">Build the example and download it to the kit (see <a href="https://docs.silabs.com/simplicity-studio-5-users-guide/latest/ss-5-users-guide-building-and-flashing/building#simple-build">Simple Build</a> and <a href="https://docs.silabs.com/simplicity-studio-5-users-guide/latest/ss-5-users-guide-building-and-flashing/flashing#flash-programmer">Flash Programmer</a> in Simplicity Studio 5 Users Guide).</li>
+<li class="has-line-data" data-line-start="155" data-line-end="157">Run the example and follow the instructions shown on the console.</li>
 </ol>
-<h2 class="code-line" data-line-start=156 data-line-end=157><a id="Additional_Information_156"></a>Additional Information</h2>
+<h2 class="code-line" data-line-start=157 data-line-end=158><a id="Additional_Information_157"></a>Additional Information</h2>
 <ol>
-<li class="has-line-data" data-line-start="158" data-line-end="159">The hard-coded private command key is an insecure method so the user should find a way to import the signed access certificate for tamper disable.</li>
-<li class="has-line-data" data-line-start="159" data-line-end="160">This example does not enable the secure boot when provisioning the tamper configuration in <code>app_se_manager_tamper.c</code>.</li>
-<li class="has-line-data" data-line-start="160" data-line-end="161">The device should disconnect from the debugger when running this example.</li>
-<li class="has-line-data" data-line-start="161" data-line-end="162"><strong>Warning:</strong> Loading the tamper configuration and a public command key into the SE are a <strong>ONE-TIME-ONLY</strong> process. Both of these assignment operations are irrevocable and persist for the life of the device.</li>
-<li class="has-line-data" data-line-start="162" data-line-end="164">The default optimization level is <code>Optimize for debugging (-Og)</code> on Simplicity IDE and <code>None</code> on IAR Embedded Workbench.</li>
+<li class="has-line-data" data-line-start="159" data-line-end="160">The hard-coded private command key is an insecure method so the user should find a way to import the signed access certificate for tamper disable.</li>
+<li class="has-line-data" data-line-start="160" data-line-end="161">This example does not enable the secure boot when provisioning the tamper configuration in <code>app_se_manager_tamper.c</code>.</li>
+<li class="has-line-data" data-line-start="161" data-line-end="162">The device should disconnect from the debugger when running this example.</li>
+<li class="has-line-data" data-line-start="162" data-line-end="163"><strong>Warning:</strong> Loading the tamper configuration and a public command key into the SE are a <strong>ONE-TIME-ONLY</strong> process. Both of these assignment operations are irrevocable and persist for the life of the device.</li>
+<li class="has-line-data" data-line-start="163" data-line-end="165">The default optimization level is <code>Optimize for debugging (-Og)</code> on Simplicity IDE and <code>None</code> on IAR Embedded Workbench.</li>
 </ol>
-<h2 class="code-line" data-line-start=164 data-line-end=165><a id="Resources_164"></a>Resources</h2>
-<p class="has-line-data" data-line-start="166" data-line-end="168"><a href="https://docs.silabs.com/gecko-platform/latest/service/api/group-sl-se-manager">SE Manager API</a><br>
-<a href="https://www.silabs.com/documents/public/application-notes/an1247-efr32-secure-vault-tamper.pdf">AN1247: Anti-Tamper Protection Configuration and Use</a></p>
+<h2 class="code-line" data-line-start=165 data-line-end=166><a id="Resources_165"></a>Resources</h2>
+<p class="has-line-data" data-line-start="167" data-line-end="168"><a href="https://docs.silabs.com/gecko-platform/latest/service/api/group-sl-se-manager">SE Manager API</a>&lt;br&gt;</p>
+<p class="has-line-data" data-line-start="169" data-line-end="170"><a href="https://www.silabs.com/documents/public/application-notes/an1247-efr32-secure-vault-tamper.pdf">AN1247: Anti-Tamper Protection Configuration and Use</a></p>
 </body></html>

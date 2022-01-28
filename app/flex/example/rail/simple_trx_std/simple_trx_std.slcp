@@ -399,7 +399,7 @@ tag:
   - hardware:
       device:
         memory:
-          flash: 100
+          flash: 101
           ram: 8
       board:
         rf_bands:

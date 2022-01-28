@@ -72,6 +72,7 @@ MleRouter::MleRouter(Instance &aInstance)
 #if OPENTHREAD_CONFIG_REFERENCE_DEVICE_ENABLE
     , mPreferredLeaderPartitionId(0)
     , mCcmEnabled(false)
+    , mThreadVersionCheckEnabled(true)
 #endif
     , mRouterEligible(true)
     , mAddressSolicitPending(false)
@@ -132,8 +133,14 @@ bool MleRouter::IsRouterEligible(void) const
     }
     if (!secPolicy.mRoutersEnabled)
     {
+#if OPENTHREAD_CONFIG_REFERENCE_DEVICE_ENABLE
+        VerifyOrExit(!mThreadVersionCheckEnabled ||
+                     secPolicy.mVersionThresholdForRouting + SecurityPolicy::kVersionThresholdOffsetVersion <=
+                         kThreadVersion);
+#else
         VerifyOrExit(secPolicy.mVersionThresholdForRouting + SecurityPolicy::kVersionThresholdOffsetVersion <=
                      kThreadVersion);
+#endif
     }
 #endif
 
@@ -1063,7 +1070,7 @@ uint8_t MleRouter::GetLinkCost(uint8_t aRouterId)
 
     router = mRouterTable.GetRouter(aRouterId);
 
-    // nullptr aRouterId indicates non-existing next hop, hence return kMaxRouteCost for it.
+    // `nullptr` aRouterId indicates non-existing next hop, hence return kMaxRouteCost for it.
     VerifyOrExit(router != nullptr);
 
     rval = mRouterTable.GetLinkCost(*router);
@@ -1552,7 +1559,7 @@ void MleRouter::UpdateRoutes(const RouteTlv &aRoute, uint8_t aRouterId)
                      (router.GetNextHop() == kInvalidRouterId) ? 0xffff : Rloc16FromRouterId(router.GetNextHop()),
                      router.GetCost(), mRouterTable.GetLinkCost(router), router.GetLinkInfo().GetLinkQuality(),
                      router.GetLinkQualityOut(),
-                     router.GetRloc16() == GetRloc16() ? "device" : (router.IsStateValid() ? "yes" : "no"));
+                     router.GetRloc16() == GetRloc16() ? "device" : ToYesNo(router.IsStateValid()));
     }
 
 #else

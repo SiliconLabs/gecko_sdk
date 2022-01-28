@@ -12,6 +12,11 @@ class CALC_Synth_ocelot(CALC_Synth_lynx):
     fvcomin = 4450e6
     fvcomax = 5950e6
 
+    def __init__(self):
+        super().__init__()
+        self.synth_freq_min_limit = 2300000000
+        self.synth_freq_max_limit = 2900000000
+
     def buildVariables(self, model):
         """Populates a list of needed variables for this calculator
         Args:
@@ -840,14 +845,12 @@ class CALC_Synth_ocelot(CALC_Synth_lynx):
 
     def calc_synth_misc(self, model):
 
-        part_family = model.part_family.lower()
-
         #Setting these regs to static values
         self._reg_write(model.vars.RAC_SYNTHENCTRL_MMDPOWERBALANCEDISABLE, 0)
 
         # Setting these values to POR
-        self._reg_write_default(model.vars.SYNTH_LPFCTRL2TX_VCMLVLTX, part_family)
-        self._reg_write_default(model.vars.RAC_SYNTHREGCTRL_MMDLDOVREFTRIM, part_family)
+        self._reg_write_default(model.vars.SYNTH_LPFCTRL2TX_VCMLVLTX)
+        self._reg_write_default(model.vars.RAC_SYNTHREGCTRL_MMDLDOVREFTRIM)
 
         # Fairly confident that these CAL values are not actually used, but Design can not confirm these are unused.
         # So if the value isn't forced then these are a do not care.

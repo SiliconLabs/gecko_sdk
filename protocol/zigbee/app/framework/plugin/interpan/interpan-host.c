@@ -51,7 +51,7 @@ void emberAfPluginInterpanNcpInitCallback(bool memoryAllocation)
   if (memoryAllocation) {
     status = ezspSetConfigurationValue(EZSP_CONFIG_MAC_FILTER_TABLE_SIZE,
                                        (sizeof(filters)
-                                        / sizeof(EmberMacFilterMatchData)));
+                                        / sizeof(EmberMacFilterMatchData)) + 1);
     if (status != EZSP_SUCCESS) {
       emberAfAppPrintln("%s%s failed 0x%02X",
                         "Error: ",
@@ -78,7 +78,7 @@ void emberAfPluginInterpanNcpInitCallback(bool memoryAllocation)
   if (memoryAllocation) {
     status = ezspSetConfigurationValue(EZSP_CONFIG_MAC_FILTER_TABLE_SIZE,
                                        (sizeof(filters)
-                                        / sizeof(EmberMacFilterMatchData)));
+                                        / sizeof(EmberMacFilterMatchData)) + 1);
     if (status != EZSP_SUCCESS) {
       emberAfAppPrintln("%p%p failed 0x%x",
                         "Error: ",

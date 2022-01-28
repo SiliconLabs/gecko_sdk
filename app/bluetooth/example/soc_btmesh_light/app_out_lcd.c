@@ -62,7 +62,7 @@ void sl_btmesh_friend_on_friendship_established(uint16_t netkey_index,
           netkey_index,
           lpn_address);
   sl_status_t status = sl_btmesh_LCD_write("FRIEND",
-                                           BTMESH_WSTK_LCD_ROW_FRIEND);
+                                           SL_BTMESH_WSTK_LCD_ROW_FRIEND_CFG_VAL);
   app_log_status_level_f(APP_LOG_LEVEL_ERROR, status, "LCD write failed");
   (void)netkey_index;
   (void)lpn_address;
@@ -86,7 +86,7 @@ void sl_btmesh_friend_on_friendship_terminated(uint16_t netkey_index,
           lpn_address,
           reason);
   sl_status_t status = sl_btmesh_LCD_write("NO LPN",
-                                           BTMESH_WSTK_LCD_ROW_FRIEND);
+                                           SL_BTMESH_WSTK_LCD_ROW_FRIEND_CFG_VAL);
   app_log_status_level_f(APP_LOG_LEVEL_ERROR, status, "LCD write failed");
   (void)netkey_index;
   (void)lpn_address;
@@ -99,7 +99,7 @@ void sl_btmesh_friend_on_friendship_terminated(uint16_t netkey_index,
 /*******************************************************************************
  * Called when the UI shall be updated with the changed CTL Model state during
  * a transition. The rate of this callback can be controlled by changing the
- * CTL_SERVER_UI_UPDATE_PERIOD macro.
+ * SL_BTMESH_CTL_SERVER_UI_UPDATE_PERIOD_CFG_VAL macro.
  *
  * @param[in] temperature Temperature of color.
  * @param[in] deltauv     Delta UV value.
@@ -118,12 +118,12 @@ void sl_btmesh_ctl_on_ui_update(uint16_t temperature,
   snprintf(tmp_str, LCD_ROW_LEN, "ColorTemp: %5uK", temperature);
   app_log("BT mesh CTL Color temperature: %5uK\r\n", temperature);
   sl_status_t status = sl_btmesh_LCD_write(tmp_str,
-                                           BTMESH_WSTK_LCD_ROW_TEMPERATURE);
+                                           SL_BTMESH_WSTK_LCD_ROW_TEMPERATURE_CFG_VAL);
   app_log_status_level_f(APP_LOG_LEVEL_ERROR, status, "LCD write failed");
 
   snprintf(tmp_str, LCD_ROW_LEN, "Delta UV: %6s ", deltauv_str);
   app_log("BT mesh CTL Delta UV: %6s\r\n", deltauv_str);
-  status = sl_btmesh_LCD_write(tmp_str, BTMESH_WSTK_LCD_ROW_DELTAUV);
+  status = sl_btmesh_LCD_write(tmp_str, SL_BTMESH_WSTK_LCD_ROW_DELTAUV_CFG_VAL);
   app_log_status_level_f(APP_LOG_LEVEL_ERROR, status, "LCD write failed");
 }
 
@@ -133,7 +133,7 @@ void sl_btmesh_ctl_on_ui_update(uint16_t temperature,
 /*******************************************************************************
  * Called when the UI shall be updated with the changed state of
  * lightning server during a transition. The rate of this callback can be
- * controlled by changing the LIGHTING_SERVER_UI_UPDATE_PERIOD macro.
+ * controlled by changing the SL_BTMESH_LIGHTING_SERVER_UI_UPDATE_PERIOD_CFG_VAL macro.
  *
  * @param[in] lightness_level lightness level (0x0001 - FFFE)
  ******************************************************************************/
@@ -146,7 +146,7 @@ void sl_btmesh_lighting_server_on_ui_update(uint16_t lightness_level)
   app_log("BT mesh Lightness: %5u%%\r\n", lightness_percent);
   snprintf(tmp_str, LCD_ROW_LEN, "Lightness: %5u%%", lightness_percent);
   sl_status_t status = sl_btmesh_LCD_write(tmp_str,
-                                           BTMESH_WSTK_LCD_ROW_LIGHTNESS);
+                                           SL_BTMESH_WSTK_LCD_ROW_LIGHTNESS_CFG_VAL);
   app_log_status_level_f(APP_LOG_LEVEL_ERROR, status, "LCD write failed");
 }
 
@@ -172,7 +172,7 @@ void sl_btmesh_on_provision_init_status(bool provisioned,
     app_log("BT mesh node is unprovisioned, "
             "started unprovisioned beaconing...\r\n");
     sl_status_t status = sl_btmesh_LCD_write("unprovisioned",
-                                             BTMESH_WSTK_LCD_ROW_STATUS);
+                                             SL_BTMESH_WSTK_LCD_ROW_STATUS_CFG_VAL);
     app_log_status_level_f(APP_LOG_LEVEL_ERROR, status, "LCD write failed");
   }
 }
@@ -187,7 +187,7 @@ void app_show_btmesh_node_provisioning_started(uint16_t result)
   app_log("BT mesh node provisioning is started (result: 0x%04x)\r\n",
           result);
   sl_status_t status = sl_btmesh_LCD_write("provisioning...",
-                                           BTMESH_WSTK_LCD_ROW_STATUS);
+                                           SL_BTMESH_WSTK_LCD_ROW_STATUS_CFG_VAL);
   app_log_status_level_f(APP_LOG_LEVEL_ERROR, status, "LCD write failed");
   (void)result;
 }
@@ -207,7 +207,7 @@ void app_show_btmesh_node_provisioned(uint16_t address,
           address,
           iv_index);
   sl_status_t status = sl_btmesh_LCD_write("provisioned",
-                                           BTMESH_WSTK_LCD_ROW_STATUS);
+                                           SL_BTMESH_WSTK_LCD_ROW_STATUS_CFG_VAL);
   app_log_status_level_f(APP_LOG_LEVEL_ERROR, status, "LCD write failed");
   (void)address;
   (void)iv_index;
@@ -222,7 +222,7 @@ void sl_btmesh_on_node_provisioning_failed(uint16_t result)
 {
   app_log("BT mesh node provisioning failed (result: 0x%04x)\r\n", result);
   sl_status_t status = sl_btmesh_LCD_write("prov failed...",
-                                           BTMESH_WSTK_LCD_ROW_STATUS);
+                                           SL_BTMESH_WSTK_LCD_ROW_STATUS_CFG_VAL);
   app_log_status_level_f(APP_LOG_LEVEL_ERROR, status, "LCD write failed");
   (void)result;
 }
@@ -237,7 +237,7 @@ void app_show_btmesh_node_reset(void)
 {
   app_log("Node reset\r\n");
   sl_status_t status = sl_btmesh_LCD_write("Node reset",
-                                           BTMESH_WSTK_LCD_ROW_STATUS);
+                                           SL_BTMESH_WSTK_LCD_ROW_STATUS_CFG_VAL);
   app_log_status_level_f(APP_LOG_LEVEL_ERROR, status, "LCD write failed");
 }
 
@@ -248,6 +248,6 @@ void sl_btmesh_factory_reset_on_full_reset(void)
 {
   app_log("Factory reset\r\n");
   sl_status_t status = sl_btmesh_LCD_write("Factory reset",
-                                           BTMESH_WSTK_LCD_ROW_STATUS);
+                                           SL_BTMESH_WSTK_LCD_ROW_STATUS_CFG_VAL);
   app_log_status_level_f(APP_LOG_LEVEL_ERROR, status, "LCD write failed");
 }

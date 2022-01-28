@@ -84,7 +84,7 @@ class IRegMapPeripheral(object):
     @abstractmethod
     def getAddressNameMap(self, addrNameDict):
         """
-        Update passed dictionary with address key and register name value
+        Update passed dictionary with address key and register name string value
         for all registers in this peripheral.
 
         .. note:: This is an internal function used by the device container.
@@ -95,6 +95,52 @@ class IRegMapPeripheral(object):
                              value
         """
         pass
+
+    @abstractmethod
+    def getAddressNamesMap(self, addrNameDict):
+        """
+        Update passed dictionary with address key and register name list value
+        for all registers in this peripheral.
+
+        .. note:: This is an internal function used by the device container.
+                  Do not call directly.
+
+        :type  addrNameDict: ``dict`` of ``long`` : ``list`` item
+        :param addrNameDict: The items of address key and 'PERIPHERAL.REGISTER'
+                             value
+        """
+        pass
+
+    @abstractmethod
+    def registerAddressToNamesCb(self, addressToNamesCb):
+        """
+        Register top-level method to query the list of aliased names.
+
+        Args:
+            addressToNamesCb: Callable method or None.
+
+        """
+    pass
+
+    @abstractmethod
+    def getAliasedNames(self):
+        """
+        Get list of other peripheral names mapped to the same base address.
+
+        Returns:
+            List[str]: The peripherals names or empty list.
+
+        """
+
+    @abstractmethod
+    def isAliased(self):
+        """
+        Check for other peripherals at this peripheral's base address.
+
+        Returns:
+            Bool: True if there are other peripherals mapped to this base address.
+
+        """
 
     @abstractmethod
     def getExcludedDumpRegisterNames(self):

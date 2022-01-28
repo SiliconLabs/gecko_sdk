@@ -175,6 +175,11 @@
 #define configNUM_USER_THREAD_LOCAL_STORAGE_POINTERS 0
 // </h>
 
+//  <q> Use Threadsafe Errno
+//  <i> Enable Threadsafe Errno support.
+//  <i> Default: 0
+#define configUSE_POSIX_ERRNO                 0
+
 //------------- <<< end of configuration section >>> ---------------------------
 
 /* Defines needed by FreeRTOS to implement CMSIS RTOS2 API. Do not change! */

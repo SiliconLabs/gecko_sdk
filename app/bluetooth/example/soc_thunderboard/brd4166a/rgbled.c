@@ -3,7 +3,7 @@
  * @brief RGB LED driver for BRD4166A
  *******************************************************************************
  * # License
- * <b>Copyright 2020 Silicon Laboratories Inc. www.silabs.com</b>
+ * <b>Copyright 2022 Silicon Laboratories Inc. www.silabs.com</b>
  *******************************************************************************
  *
  * SPDX-License-Identifier: Zlib
@@ -28,9 +28,10 @@
  *
  ******************************************************************************/
 
-#include "sl_simple_rgbw_pwm_led_instances.h"
-#include "sl_simple_rgbw_pwm_led.h"
 #include "em_gpio.h"
+#include "sl_simple_rgb_pwm_led_instances.h"
+#include "sl_simple_rgb_pwm_led.h"
+#include "app_log.h"
 #include "board.h"
 
 // -----------------------------------------------------------------------------
@@ -61,26 +62,31 @@ static const uint8_t light_levels[] = {
 
 static void rgb_led_enable(bool enable, uint8_t mask)
 {
-  if ( ( (mask != 0) && (enable == true) ) || ( ( (mask & 0xf) == 0xf) && (enable == false) ) ) {
-    if ( enable ) {
-      GPIO_PinOutSet(BOARD_RGBLED_PWR_EN_PORT, BOARD_RGBLED_PWR_EN_PIN);
-    } else {
-      GPIO_PinOutClear(BOARD_RGBLED_PWR_EN_PORT, BOARD_RGBLED_PWR_EN_PIN);
-    }
+  // Make sure the mask corresponds to the RGB LEDs of the board.
+  if (mask != (mask & BOARD_RGBLED_MASK)) {
+    mask = mask & BOARD_RGBLED_MASK;
+    app_log_error("Undefined RGB LED is trying to be set." APP_LOG_NL);
   }
 
-  int i;
-  uint8_t pins[4] = { BOARD_RGBLED_COM0_PIN,
-                      BOARD_RGBLED_COM1_PIN,
-                      BOARD_RGBLED_COM2_PIN,
-                      BOARD_RGBLED_COM3_PIN };
+  if ((mask != 0) && enable) {
+    // Enable RGB LED power if any of the LEDs are enabled.
+    GPIO_PinOutSet(BOARD_RGBLED_PWR_EN_PORT, BOARD_RGBLED_PWR_EN_PIN);
+  } else if ((mask == BOARD_RGBLED_MASK) && !enable) {
+    // Disable RGB LED power if all of the LEDs are disabled.
+    GPIO_PinOutClear(BOARD_RGBLED_PWR_EN_PORT, BOARD_RGBLED_PWR_EN_PIN);
+  }
 
-  for ( i = 0; i < 4; i++ ) {
-    if ( ( (mask >> i) & 1) == 1 ) {
-      if ( enable ) {
-        GPIO_PinOutSet(BOARD_RGBLED_COM_PORT, pins[3 - i]);
+  uint8_t pins[BOARD_RGBLED_COUNT] = { BOARD_RGBLED_COM0_PIN,
+                                       BOARD_RGBLED_COM1_PIN,
+                                       BOARD_RGBLED_COM2_PIN,
+                                       BOARD_RGBLED_COM3_PIN };
+
+  for (int i = 0; i < BOARD_RGBLED_COUNT; i++) {
+    if (((1 << i) & mask) != 0) {
+      if (enable) {
+        GPIO_PinOutSet(BOARD_RGBLED_COM_PORT, pins[i]);
       } else {
-        GPIO_PinOutClear(BOARD_RGBLED_COM_PORT, pins[3 - i]);
+        GPIO_PinOutClear(BOARD_RGBLED_COM_PORT, pins[i]);
       }
     }
   }
@@ -93,21 +99,39 @@ static void rgb_led_enable(bool enable, uint8_t mask)
 
 void rgb_led_init(void)
 {
-  GPIO_PinModeSet(BOARD_RGBLED_PWR_EN_PORT, BOARD_RGBLED_PWR_EN_PIN, gpioModePushPull, 0);
-  GPIO_PinModeSet(BOARD_RGBLED_COM0_PORT, BOARD_RGBLED_COM0_PIN, gpioModePushPull, 0);
-  GPIO_PinModeSet(BOARD_RGBLED_COM1_PORT, BOARD_RGBLED_COM1_PIN, gpioModePushPull, 0);
-  GPIO_PinModeSet(BOARD_RGBLED_COM2_PORT, BOARD_RGBLED_COM2_PIN, gpioModePushPull, 0);
-  GPIO_PinModeSet(BOARD_RGBLED_COM3_PORT, BOARD_RGBLED_COM3_PIN, gpioModePushPull, 0);
+  GPIO_PinModeSet(BOARD_RGBLED_PWR_EN_PORT,
+                  BOARD_RGBLED_PWR_EN_PIN,
+                  gpioModePushPull,
+                  0);
+  GPIO_PinModeSet(BOARD_RGBLED_COM0_PORT,
+                  BOARD_RGBLED_COM0_PIN,
+                  gpioModePushPull,
+                  0);
+  GPIO_PinModeSet(BOARD_RGBLED_COM1_PORT,
+                  BOARD_RGBLED_COM1_PIN,
+                  gpioModePushPull,
+                  0);
+  GPIO_PinModeSet(BOARD_RGBLED_COM2_PORT,
+                  BOARD_RGBLED_COM2_PIN,
+                  gpioModePushPull,
+                  0);
+  GPIO_PinModeSet(BOARD_RGBLED_COM3_PORT,
+                  BOARD_RGBLED_COM3_PIN,
+                  gpioModePushPull,
+                  0);
 }
 
 void rgb_led_deinit(void)
 {
-  rgb_led_enable(false, 0xf);
+  rgb_led_enable(false, BOARD_RGBLED_MASK);
 }
 
 void rgb_led_set(uint8_t m, uint8_t r, uint8_t g, uint8_t b)
 {
-  rgb_led_enable(false, ~m);
+  rgb_led_enable(false, (~m & BOARD_RGBLED_MASK));
   rgb_led_enable(true, m);
-  sl_led_set_rgbw_color(&sl_led_rgb, light_levels[r], light_levels[g], light_levels[b], 0);
+  sl_led_set_rgb_color(&sl_led_rgb,
+                       light_levels[r],
+                       light_levels[g],
+                       light_levels[b]);
 }

@@ -83,14 +83,14 @@ class HmacSha256;
  */
 
 /**
- * This macro frees a given message buffer if not nullptr.
+ * This macro frees a given message buffer if not `nullptr`.
  *
  * This macro and the ones that follow contain small but common code patterns used in many of the core modules. They
  * are intentionally defined as macros instead of inline methods/functions to ensure that they are fully inlined.
  * Note that an `inline` method/function is not necessarily always inlined by the toolchain and not inlining such
  * small implementations can add a rather large code-size overhead.
  *
- * @param[in] aMessage    A pointer to a `Message` to free (can be nullptr).
+ * @param[in] aMessage    A pointer to a `Message` to free (can be `nullptr`).
  *
  */
 #define FreeMessage(aMessage)      \
@@ -105,9 +105,9 @@ class HmacSha256;
 /**
  * This macro frees a given message buffer if a given `Error` indicates an error.
  *
- * The parameter @p aMessage can be nullptr in which case this macro does nothing.
+ * The parameter @p aMessage can be `nullptr` in which case this macro does nothing.
  *
- * @param[in] aMessage    A pointer to a `Message` to free (can be nullptr).
+ * @param[in] aMessage    A pointer to a `Message` to free (can be `nullptr`).
  * @param[in] aError      The `Error` to check.
  *
  */
@@ -123,7 +123,7 @@ class HmacSha256;
 /**
  * This macro frees a given message buffer if a given `Error` indicates an error and sets the `aMessage` to `nullptr`.
  *
- * @param[in] aMessage    A pointer to a `Message` to free (can be nullptr).
+ * @param[in] aMessage    A pointer to a `Message` to free (can be `nullptr`).
  * @param[in] aError      The `Error` to check.
  *
  */
@@ -346,13 +346,24 @@ public:
     {
     public:
         /**
-         * This constructor initializes the Settings object.
+         * This constructor initializes the `Settings` object.
          *
          * @param[in]  aSecurityMode  A link security mode.
          * @param[in]  aPriority      A message priority.
          *
          */
         Settings(LinkSecurityMode aSecurityMode, Priority aPriority);
+
+        /**
+         * This constructor initializes the `Settings` with a given message priority and link security enabled.
+         *
+         * @param[in]  aPriority      A message priority.
+         *
+         */
+        explicit Settings(Priority aPriority)
+            : Settings(kWithLinkSecurity, aPriority)
+        {
+        }
 
         /**
          * This method gets the message priority.
@@ -402,7 +413,7 @@ public:
     /**
      * This method returns a pointer to the next message.
      *
-     * @returns A pointer to the next message in the list or nullptr if at the end of the list.
+     * @returns A pointer to the next message in the list or `nullptr` if at the end of the list.
      *
      */
     Message *GetNext(void) const;
@@ -697,12 +708,14 @@ public:
      * @param[in]  aOffset    Byte offset within the message to read from for the comparison.
      * @param[in]  aBuf       A pointer to a data buffer to compare with the bytes from message.
      * @param[in]  aLength    Number of bytes in @p aBuf.
+     * @param[in]  aMatcher   A `ByteMatcher` function pointer to match the bytes. If `nullptr` then bytes are directly
+     *                        compared.
      *
      * @returns TRUE if there are enough bytes available in @p aMessage and they match the bytes from @p aBuf,
      *          FALSE otherwise.
      *
      */
-    bool CompareBytes(uint16_t aOffset, const void *aBuf, uint16_t aLength) const;
+    bool CompareBytes(uint16_t aOffset, const void *aBuf, uint16_t aLength, ByteMatcher aMatcher = nullptr) const;
 
     /**
      * This method compares the bytes in the message at a given offset with bytes read from another message.
@@ -714,11 +727,17 @@ public:
      * @param[in]  aOtherMessage  The other message to compare with.
      * @param[in]  aOtherOffset   Byte offset within @p aOtherMessage to read from for the comparison.
      * @param[in]  aLength        Number of bytes to compare.
+     * @param[in]  aMatcher       A `ByteMatcher` function pointer to match the bytes. If `nullptr` then bytes are
+     *                            directly compared.
      *
      * @returns TRUE if there are enough bytes available in both messages and they all match. FALSE otherwise.
      *
      */
-    bool CompareBytes(uint16_t aOffset, const Message &aOtherMessage, uint16_t aOtherOffset, uint16_t aLength) const;
+    bool CompareBytes(uint16_t       aOffset,
+                      const Message &aOtherMessage,
+                      uint16_t       aOtherOffset,
+                      uint16_t       aLength,
+                      ByteMatcher    aMatcher = nullptr) const;
 
     /**
      * This method compares the bytes in the message at a given offset with an object.
@@ -812,7 +831,7 @@ public:
      * `Type`, `SubType`, `LinkSecurity`, `Offset`, `InterfaceId`, and `Priority` fields on the cloned message are also
      * copied from the original one.
      *
-     * @returns A pointer to the message or nullptr if insufficient message buffers are available.
+     * @returns A pointer to the message or `nullptr` if insufficient message buffers are available.
      *
      */
     Message *Clone(void) const { return Clone(GetLength()); }
@@ -1091,7 +1110,7 @@ public:
     /**
      * This method returns a pointer to the message queue (if any) where this message is queued.
      *
-     * @returns A pointer to the message queue or nullptr if not in any message queue.
+     * @returns A pointer to the message queue or `nullptr` if not in any message queue.
      *
      */
     MessageQueue *GetMessageQueue(void) const
@@ -1102,7 +1121,7 @@ public:
     /**
      * This method returns a pointer to the priority message queue (if any) where this message is queued.
      *
-     * @returns A pointer to the priority queue or nullptr if not in any priority queue.
+     * @returns A pointer to the priority queue or `nullptr` if not in any priority queue.
      *
      */
     PriorityQueue *GetPriorityQueue(void) const
@@ -1371,7 +1390,7 @@ public:
      *
      * @param[in] aPriority   Priority level.
      *
-     * @returns A pointer to the first message with given priority level or nullptr if there is no messages with
+     * @returns A pointer to the first message with given priority level or `nullptr` if there is no messages with
      *          this priority level.
      *
      */
@@ -1453,32 +1472,18 @@ public:
     explicit MessagePool(Instance &aInstance);
 
     /**
-     * This method is used to obtain a new message.
-     *
-     * The link security is enabled by default on the newly obtained message.
-     *
-     * @param[in]  aType           The message type.
-     * @param[in]  aReserveHeader  The number of header bytes to reserve.
-     * @param[in]  aPriority       The priority level of the message.
-     *
-     * @returns A pointer to the message or nullptr if no message buffers are available.
-     *
-     */
-    Message *New(Message::Type aType, uint16_t aReserveHeader, Message::Priority aPriority);
-
-    /**
-     * This method is used to obtain a new message with specified settings.
+     * This method allocates a new message with specified settings.
      *
      * @param[in]  aType           The message type.
      * @param[in]  aReserveHeader  The number of header bytes to reserve.
      * @param[in]  aSettings       The message settings.
      *
-     * @returns A pointer to the message or nullptr if no message buffers are available.
+     * @returns A pointer to the message or `nullptr` if no message buffers are available.
      *
      */
-    Message *New(Message::Type            aType,
-                 uint16_t                 aReserveHeader,
-                 const Message::Settings &aSettings = Message::Settings::GetDefault());
+    Message *Allocate(Message::Type            aType,
+                      uint16_t                 aReserveHeader = 0,
+                      const Message::Settings &aSettings      = Message::Settings::GetDefault());
 
     /**
      * This method is used to free a message and return all message buffers to the buffer pool.

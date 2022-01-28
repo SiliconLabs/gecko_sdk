@@ -3027,7 +3027,7 @@ static sl_status_t btmesh_conf_task_dcd_process(btmesh_conf_task_t *const self,
   } else if (false != node->dcd_available) {
     process_dcd_status = SL_STATUS_INVALID_STATE;
   } else {
-    char node_str[BTMESH_CONF_MAX_LOG_MSG_FRAGMENT_SIZE];
+    char node_str[SL_BTMESH_CONF_MAX_LOG_MSG_FRAGMENT_SIZE_CFG_VAL];
     uint16_t remaining_size = self->ext.dcd.raw_dcd_data_size;
     btmesh_conf_dcd_raw_header_t *dcd_raw_hdr =
       (btmesh_conf_dcd_raw_header_t*) self->ext.dcd.raw_dcd_data;
@@ -3139,7 +3139,7 @@ static sl_status_t btmesh_conf_task_dcd_element_iterate(uint16_t enc_netkey_inde
   uint16_t remaining_size = raw_dcd_data_size;
   uint16_t data_idx = 0;
   uint16_t element_index = 0;
-  char node_str[BTMESH_CONF_MAX_LOG_MSG_FRAGMENT_SIZE];
+  char node_str[SL_BTMESH_CONF_MAX_LOG_MSG_FRAGMENT_SIZE_CFG_VAL];
 
   if (remaining_size < sizeof(btmesh_conf_dcd_raw_header_t)) {
     return SL_STATUS_INVALID_COUNT;

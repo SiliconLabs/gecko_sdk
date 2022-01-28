@@ -188,6 +188,16 @@ void sleeptimer_hal_disable_int(uint8_t local_flag)
   RTC_IntDisable(rtc_int_clr);
 }
 
+/*******************************************************************************
+ * Hardware Abstraction Layer to set timer interrupts.
+ ******************************************************************************/
+void sleeptimer_hal_set_int(uint8_t local_flag)
+{
+  if (local_flag & SLEEPTIMER_EVENT_COMP) {
+    RTC_IntSet(SLEEPTIMER_RTC_COMP);
+  }
+}
+
 /******************************************************************************
  * Gets status of specified interrupt.
  *

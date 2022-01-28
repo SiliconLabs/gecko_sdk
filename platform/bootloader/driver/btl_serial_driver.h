@@ -16,7 +16,15 @@
  ******************************************************************************/
 #ifndef BTL_DRIVER_UART_H
 #define BTL_DRIVER_UART_H
-
+/**
+ * @addtogroup Driver
+ * @{
+ * @addtogroup UART
+ * @brief Serial UART Interface Driver
+ * @details Flexible UART driver implementation for communication with
+ *          external devices.
+ * @{
+ */
 #include "em_device.h"
 #include <stdbool.h>
 #include <stddef.h>

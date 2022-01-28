@@ -67,7 +67,7 @@ void sl_btmesh_lighting_level_pwm_cb(uint16_t level);
 /***************************************************************************//**
  * Called when the UI shall be updated with the changed state of
  * lightning server during a transition. The rate of this callback can be
- * controlled by changing the LIGHTING_SERVER_UI_UPDATE_PERIOD macro.
+ * controlled by changing the SL_BTMESH_LIGHTING_SERVER_UI_UPDATE_PERIOD_CFG_VAL macro.
  *
  * This is a callback which can be implemented in the application.
  * @note If no implementation is provided in the application then a default weak

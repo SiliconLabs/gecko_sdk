@@ -255,9 +255,9 @@ btmesh_conf_executor_t *btmesh_conf_executor_create(uint16_t id,
     self->state = BTMESH_CONF_EXEC_STATE_IDLE;
     self->current_job = NULL;
     self->local_retry_counter = 0;
-    self->local_retry_max = BTMESH_CONF_REQUEST_BUSY_RETRY_MAX;
+    self->local_retry_max = SL_BTMESH_CONF_REQUEST_BUSY_RETRY_MAX_CFG_VAL;
     self->communication_retry_counter = 0;
-    self->communication_retry_max = BTMESH_CONF_COMMUNICATION_RETRY_MAX;
+    self->communication_retry_max = SL_BTMESH_CONF_COMMUNICATION_RETRY_MAX_CFG_VAL;
     self->timer_active = false;
   }
   return self;
@@ -370,8 +370,8 @@ static sl_status_t executor_conf_request(btmesh_conf_executor_t *const self,
   btmesh_conf_job_t *job = self->current_job;
   bool conf_request_required = true;
   bool current_task_failed = false;
-  char task_str[BTMESH_CONF_MAX_LOG_MSG_FRAGMENT_SIZE];
-  char node_str[BTMESH_CONF_MAX_LOG_MSG_FRAGMENT_SIZE];
+  char task_str[SL_BTMESH_CONF_MAX_LOG_MSG_FRAGMENT_SIZE_CFG_VAL];
+  char node_str[SL_BTMESH_CONF_MAX_LOG_MSG_FRAGMENT_SIZE_CFG_VAL];
 
   // Loop is necessary because it is possible that BT Mesh Stack configuration
   // request of the current task fails. If a configuration request fails with
@@ -492,8 +492,8 @@ static void executor_process_task_status(btmesh_conf_executor_t *const self,
   bool current_task_finished = true;
   bool retry_required = false;
   btmesh_conf_job_t *job = self->current_job;
-  char task_str[BTMESH_CONF_MAX_LOG_MSG_FRAGMENT_SIZE];
-  char node_str[BTMESH_CONF_MAX_LOG_MSG_FRAGMENT_SIZE];
+  char task_str[SL_BTMESH_CONF_MAX_LOG_MSG_FRAGMENT_SIZE_CFG_VAL];
+  char node_str[SL_BTMESH_CONF_MAX_LOG_MSG_FRAGMENT_SIZE_CFG_VAL];
 
   // If any log level is enabled which is used in this function then it is
   // necessary to build the log message fragments.
@@ -712,7 +712,7 @@ static void executor_state_transition(btmesh_conf_executor_t *const self,
                     "request busy retry timer." NL,
                     self->id);
       sc = sl_simple_timer_start(&self->timer,
-                                 BTMESH_CONF_REQUEST_BUSY_RETRY_INTERVAL_MS,
+                                 SL_BTMESH_CONF_REQUEST_BUSY_RETRY_INTERVAL_MS_CFG_VAL,
                                  executor_on_timer_elapsed,
                                  self,
                                  false);
@@ -728,7 +728,7 @@ static void executor_state_transition(btmesh_conf_executor_t *const self,
                     "waiting for event timeout timer." NL,
                     self->id);
       sc = sl_simple_timer_start(&self->timer,
-                                 BTMESH_CONF_EVENT_WAIT_TIMEOUT_MS,
+                                 SL_BTMESH_CONF_EVENT_WAIT_TIMEOUT_MS_CFG_VAL,
                                  executor_on_timer_elapsed,
                                  self,
                                  false);

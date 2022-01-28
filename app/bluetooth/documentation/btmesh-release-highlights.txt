@@ -1,8 +1,5 @@
-Bluetooth Mesh SDK 2.2.0.0
-* New example embedded Provisioner application
-* NCP Commander support for Mesh
-* Multiple improvements to the Mesh BGAPI
-* Support for Amazon Bluetooth Mesh Simple Setup (BSS)
+Bluetooth Mesh SDK 2.2.1.0
+- Selected quality improvements and bug fixes
 
 
 

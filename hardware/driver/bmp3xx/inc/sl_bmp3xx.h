@@ -146,6 +146,10 @@ void sl_bmp3xx_deinit(sl_i2cspm_t *i2cspm);
  * @param[in] cfg
  *    Structure, which holds the configuration parameters
  *
+ * @note
+ *   Make sure to pass by Sleep Mode before switching between forced mode
+ *   and normal mode. Refer to datasheet for more details.
+ *
  * @retval SL_STATUS_OK Success
  * @retval SL_STATUS_FAIL Sensor configuration failed
  ******************************************************************************/

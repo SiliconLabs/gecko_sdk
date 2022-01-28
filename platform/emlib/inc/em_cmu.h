@@ -323,14 +323,15 @@ typedef enum {
   cmuClock_LESENSEHFCLK = (CMU_LESENSEHF_BRANCH << CMU_CLK_BRANCH_POS),         /**< LESENSE high frequency clock. */
   cmuClock_LESENSECLK = (CMU_LESENSE_BRANCH << CMU_CLK_BRANCH_POS),             /**< LESENSE low frequency clock. */
 #endif
-  /*********************/
-  /* Peripheral clocks */
-  /*********************/
 
   cmuClock_CORE = (CMU_CORE_BRANCH << CMU_CLK_BRANCH_POS),                      /**< Cortex-M33 core clock. */
 #if defined(PDM_PRESENT)
   cmuClock_PDMREF = (CMU_PDMREF_BRANCH << CMU_CLK_BRANCH_POS),                  /**< PDMREF clock. */
 #endif
+  /*********************/
+  /* Peripheral clocks */
+  /*********************/
+
   cmuClock_LDMA = (CMU_CLKEN0_EN_REG << CMU_EN_REG_POS)
                   | (_CMU_CLKEN0_LDMA_SHIFT << CMU_EN_BIT_POS),                 /**< LDMA clock. */
   cmuClock_LDMAXBAR = (CMU_CLKEN0_EN_REG << CMU_EN_REG_POS)

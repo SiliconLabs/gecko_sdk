@@ -29,5 +29,8 @@ template_contribution:
       event: internal_app_init
       include: app_log.h
       handler: app_log_init
+validation_library:
+  - path: ../../validation/autonumber_common.lua
+    name: autonumber_common
 validation_helper:
   - path: app_log_validation.lua

@@ -1,9 +1,9 @@
 /***************************************************************************//**
  * @file
- * @brief Air pressure sensor
+ * @brief Air Pressure Sensor
  *******************************************************************************
  * # License
- * <b>Copyright 2020 Silicon Laboratories Inc. www.silabs.com</b>
+ * <b>Copyright 2022 Silicon Laboratories Inc. www.silabs.com</b>
  *******************************************************************************
  *
  * SPDX-License-Identifier: Zlib
@@ -30,7 +30,7 @@
 
 #include <stddef.h>
 #include "sl_board_control.h"
-#include "sl_bmp280.h"
+#include "sl_pressure.h"
 #include "sl_sensor_select.h"
 #include "app_assert.h"
 #include "sl_sensor_pressure.h"
@@ -46,19 +46,19 @@ void sl_sensor_pressure_init(void)
   app_assert((SL_STATUS_OK == sc) && (NULL != pressure_sensor),
              "[E: %#04x] Pressure sensor not available\n",
              sc);
-  sc = sl_bmp280_init(pressure_sensor);
+  sc = sl_pressure_init(pressure_sensor);
   app_assert_status(sc);
 }
 
-void sl_pressure_deinit(void)
+void sl_sensor_pressure_deinit(void)
 {
   (void)sl_board_disable_sensor(SL_BOARD_SENSOR_PRESSURE);
 }
 
-sl_status_t sl_pressure_get(float *pressure)
+sl_status_t sl_sensor_pressure_get(float *pressure)
 {
   sl_status_t sc;
   sl_i2cspm_t *pressure_sensor = sl_sensor_select(SL_BOARD_SENSOR_PRESSURE);
-  sc = sl_bmp280_measure_pressure(pressure_sensor, pressure);
+  sc = sl_pressure_measure_temperature(pressure_sensor, pressure);
   return sc;
 }

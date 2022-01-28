@@ -94,9 +94,6 @@ class profile_base_leopard(Profile_Base_Lynx):
                                      readable_name="Baudrate Tolerance", value_limit_min=0, value_limit_max=200000)
         self.make_required_input(profile, model.vars.shaping_filter, "modem", readable_name="Shaping Filter")
         self.make_required_input(profile, model.vars.fsk_symbol_map, "modem", readable_name="FSK symbol map")
-        self.make_required_input(profile, model.vars.shaping_filter_param, "modem",
-                                     readable_name="Shaping Filter Parameter (BT or R)", value_limit_min=0.3,
-                                     value_limit_max=1.5, fractional_digits=2)
         self.make_required_input(profile, model.vars.diff_encoding_mode, "symbol_coding",
                                  readable_name="Differential Encoding Mode")
         self.make_required_input(profile, model.vars.dsss_chipping_code, "symbol_coding",
@@ -122,6 +119,9 @@ class profile_base_leopard(Profile_Base_Lynx):
                                      default=model.vars.manchester_mapping.var_enum.Default)
         self.make_optional_input(profile, model.vars.test_ber, "testing",
                                      readable_name="Reconfigure for BER testing", default=False)
+        self.make_optional_input(profile, model.vars.shaping_filter_param, "modem",
+                                 readable_name="Shaping Filter Parameter (BT or R)", value_limit_min=0.3,
+                                 value_limit_max=1.5, fractional_digits=2, default=0.5)
 
     def build_advanced_profile_inputs(self, model, profile):
         self.make_linked_io(profile, model.vars.lo_injection_side, "Advanced",

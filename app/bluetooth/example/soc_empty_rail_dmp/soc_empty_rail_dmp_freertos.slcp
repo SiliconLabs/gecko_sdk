@@ -56,6 +56,9 @@ include:
     file_list:
       - path: app_proprietary.h
 
+readme:
+  - path: ../../documentation/example/soc_empty_rail_dmp/readme.md
+
 config_file:
   - override:
       component: gatt_configuration
@@ -66,6 +69,18 @@ config_file:
 other_file:
   - path: ../../script/create_bl_files.bat
   - path: ../../script/create_bl_files.sh
+  - path: ../../documentation/example/soc_empty_rail_dmp/readme_img0.png
+    folder: images
+  - path: ../../documentation/example/soc_empty_rail_dmp/readme_img1.png
+    folder: images
+  - path: ../../documentation/example/soc_empty_rail_dmp/readme_img2.png
+    folder: images
+  - path: ../../documentation/example/soc_empty_rail_dmp/readme_img3.png
+    folder: images
+  - path: ../../documentation/example/soc_empty_rail_dmp/readme_img4.png
+    folder: images
+  - path: ../../documentation/example/soc_empty_rail_dmp/readme_img5.png
+    folder: images
 
 configuration:
   - name: SL_STACK_SIZE
@@ -224,4 +239,5 @@ ui_hints:
   highlight:
     - path: config/btconf/gatt_configuration.btconf
     - path: config/rail/radio_settings.radioconf
+    - path: readme.md
       focus: true

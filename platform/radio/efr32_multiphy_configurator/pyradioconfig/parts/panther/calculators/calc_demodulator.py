@@ -1,10 +1,19 @@
 from pyradioconfig.parts.nixi.calculators.calc_demodulator import CALC_Demodulator_nixi
+from pycalcmodel.core.variable import ModelVariableFormat
 import math
 import itertools
 
 from py_2_and_3_compatibility import *
 
 class CALC_Demodulator_panther(CALC_Demodulator_nixi):
+
+    def buildVariables(self, model):
+        #Build all vars from inherited file
+        super().buildVariables(model)
+
+        self._addModelVariable(model, 'rssi_adjust_db', float, ModelVariableFormat.DECIMAL)
+        self._addModelVariable(model, 'rssi_dig_adjust_db', float, ModelVariableFormat.DECIMAL)
+        self._addModelVariable(model, 'rssi_rf_adjust_db', float, ModelVariableFormat.DECIMAL)
 
     def calc_fxo_or_fdec8(self, model):
         if (model.phy.name.find("CTUNE") > 0) or (model.phy.name.find("CW") > 0):
@@ -125,3 +134,48 @@ class CALC_Demodulator_panther(CALC_Demodulator_nixi):
         # Unless specified otherwise by optional inputs
         model.vars.input_decimation_filter_allow_dec3.value = model.vars.input_decimation_filter_allow_dec3.value
         model.vars.input_decimation_filter_allow_dec8.value = model.vars.input_decimation_filter_allow_dec8.value
+
+    def calc_rssi_dig_adjust_db(self, model):
+        #These variables are passed to RAIL so that RSSI corrections can be made to more accurately measure power
+
+        #Read in model vars
+        dec0gain = model.vars.MODEM_DIGIGAINCTRL_DEC0GAIN.value
+        dec1_actual = model.vars.dec1_actual.value
+        dec1gain_actual = model.vars.dec1gain_actual.value
+        digigainen = model.vars.MODEM_DIGIGAINCTRL_DIGIGAINEN.value
+        digigainsel = model.vars.MODEM_DIGIGAINCTRL_DIGIGAINSEL.value
+        digigaindouble = model.vars.MODEM_DIGIGAINCTRL_DIGIGAINDOUBLE.value
+        digigainhalf = model.vars.MODEM_DIGIGAINCTRL_DIGIGAINHALF.value
+
+        #Calculate gains
+
+        dec0_gain_db = 6.0*dec0gain
+
+        dec1_gain_linear = (dec1_actual**4) * (2**(-1*math.floor(4*math.log2(dec1_actual)-4)))
+        dec1_gain_db = 20*math.log10(dec1_gain_linear/16) + dec1gain_actual #Normalize so that dec1=0 gives gain=16
+
+        if digigainen:
+            digigain_db = -3+(digigainsel*0.25)
+        else:
+            digigain_db = 0
+        digigain_db += 6*digigaindouble-6*digigainhalf
+
+        rssi_dig_adjust_db = dec0_gain_db + dec1_gain_db + digigain_db
+
+        #Write the vars
+        model.vars.rssi_dig_adjust_db.value = rssi_dig_adjust_db
+
+    def calc_rssi_rf_adjust_db(self, model):
+        model.vars.rssi_rf_adjust_db.value = 0.0
+
+    def calc_rssi_adjust_db(self, model):
+
+        #Read in model vars
+        rssi_dig_adjust_db = model.vars.rssi_dig_adjust_db.value
+        rssi_rf_adjust_db = model.vars.rssi_rf_adjust_db.value
+
+        #Add digital and RF adjustments
+        rssi_adjust_db = rssi_dig_adjust_db + rssi_rf_adjust_db
+
+        #Write the model var
+        model.vars.rssi_adjust_db.value = rssi_adjust_db

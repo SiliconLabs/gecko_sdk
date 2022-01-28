@@ -79,13 +79,13 @@ extern "C" {
 
 /// @cond DO_NOT_INCLUDE_WITH_DOXYGEN
 
-#define nvm3_halOpen(hal, a, b)           hal->open(a, b)
-#define nvm3_halClose(hal)                hal->close()
-#define nvm3_halGetInfo(hal, a)           hal->getInfo(a)
-#define nvm3_halNvmAccess(hal, a)         hal->access(a)
-#define nvm3_halReadWords(hal, a, b, c)   hal->readWords(a, b, c)
-#define nvm3_halWriteWords(hal, a, b, c)  hal->writeWords(a, b, c)
-#define nvm3_halPageErase(hal, a)         hal->pageErase(a)
+#define nvm3_halOpen(hal, a, b)           ((hal)->open((a), (b)))
+#define nvm3_halClose(hal)                ((hal)->close())
+#define nvm3_halGetInfo(hal, a)           ((hal)->getInfo(a))
+#define nvm3_halNvmAccess(hal, a)         ((hal)->access(a))
+#define nvm3_halReadWords(hal, a, b, c)   ((hal)->readWords((a), (b), (c)))
+#define nvm3_halWriteWords(hal, a, b, c)  ((hal)->writeWords((a), (b), (c)))
+#define nvm3_halPageErase(hal, a)         ((hal)->pageErase(a))
 
 /// @endcond
 

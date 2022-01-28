@@ -57,7 +57,7 @@ extern "C" {
  */
 
 /**
- * @defgroup radio-types Types
+ * @defgroup radio-types Radio Types
  *
  * @brief
  *   This module includes the platform abstraction for a radio frame.
@@ -401,7 +401,7 @@ typedef struct otLinkMetrics
  */
 
 /**
- * @defgroup radio-config Configuration
+ * @defgroup radio-config Radio Configuration
  *
  * @brief
  *   This module includes the platform abstraction for radio configuration.
@@ -645,7 +645,7 @@ uint32_t otPlatRadioGetBusSpeed(otInstance *aInstance);
  */
 
 /**
- * @defgroup radio-operation Operation
+ * @defgroup radio-operation Radio Operation
  *
  * @brief
  *   This module includes the platform abstraction for radio operations.

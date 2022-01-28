@@ -331,5 +331,8 @@ template_contribution:
       help: "Read allowlist table"
     condition:
       - "cli"
+validation_library:
+  - path: ../../../common/validation/autonumber_common.lua
+    name: autonumber_common
 validation_helper:
   - path: throughput_central_validation.lua

@@ -115,6 +115,11 @@ OS_TICK OSDelayMaxTick = 0u;
 CPU_INT32U OS_SleeptimerFrequency_Hz = 0u;
 #endif
 
+#if (OS_CFG_ERRNO_EN == 1)
+// Errno Variable
+int micriumos_errno;
+#endif
+
 /*
  *********************************************************************************************************
  *                                        HOOK WEAK REFERENCES

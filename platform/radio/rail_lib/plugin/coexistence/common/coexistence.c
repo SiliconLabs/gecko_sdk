@@ -56,6 +56,11 @@ static COEX_GpioHandle_t priHandle = NULL;
 /** PHY select GPIO configuration */
 static COEX_GpioHandle_t phySelectHandle = NULL;
 
+#ifdef SL_RAIL_UTIL_COEX_WIFI_TX_PORT
+/** Wifi Tx GPIO configuration */
+static COEX_GpioHandle_t wifiTxHandle = NULL;
+#endif
+
 typedef struct COEX_Cfg {
   /** PTA request states*/
   COEX_ReqState_t *reqHead;
@@ -70,6 +75,9 @@ static void COEX_REQ_ISR(void);
 static void COEX_GNT_ISR(void);
 static void COEX_RHO_ISR(void);
 static void COEX_PHY_SEL_ISR(void);
+#ifdef SL_RAIL_UTIL_COEX_WIFI_TX_PORT
+static void COEX_WIFI_TX_ISR(void);
+#endif
 
 static COEX_Cfg_t coexCfg;
 
@@ -80,6 +88,17 @@ static COEX_GpioConfig_t phySelectCfg = {
   .options = (COEX_GpioOptions_t)(COEX_GPIO_OPTION_INT_ASSERTED),
   .cb = &COEX_PHY_SEL_ISR
 };
+
+#ifdef SL_RAIL_UTIL_COEX_WIFI_TX_PORT
+static COEX_GpioConfig_t wifiTxCfg = {
+#if SL_RAIL_UTIL_COEX_OVERRIDE_GPIO_INPUT
+  .index = COEX_GPIO_INDEX_WIFI_TX,
+#endif //SL_RAIL_UTIL_COEX_OVERRIDE_GPIO_INPUT
+  .options = (COEX_GpioOptions_t)(COEX_GPIO_OPTION_INT_ASSERTED
+                                  | COEX_GPIO_OPTION_INT_DEASSERTED),
+  .cb = &COEX_WIFI_TX_ISR
+};
+#endif
 
 static COEX_GpioConfig_t rhoCfg = {
 #if SL_RAIL_UTIL_COEX_OVERRIDE_GPIO_INPUT
@@ -512,6 +531,19 @@ bool COEX_ConfigPhySelect(COEX_GpioHandle_t gpioHandle)
   return true;
 }
 
+#ifdef SL_RAIL_UTIL_COEX_WIFI_TX_PORT
+bool COEX_ConfigWifiTx(COEX_GpioHandle_t gpioHandle)
+{
+#if SL_RAIL_UTIL_COEX_OVERRIDE_GPIO_INPUT
+  overrideGpioHandles[COEX_GPIO_INDEX_WIFI_TX] = gpioHandle;
+#endif //SL_RAIL_UTIL_COEX_OVERRIDE_GPIO_INPUT
+  // Register chip specific Wifi Tx interrupt
+  configGpio(gpioHandle, &wifiTxHandle, &wifiTxCfg);
+  COEX_WIFI_TX_ISR();
+  return true;
+}
+#endif
+
 bool COEX_ConfigRadioHoldOff(COEX_GpioHandle_t gpioHandle)
 {
 #if SL_RAIL_UTIL_COEX_OVERRIDE_GPIO_INPUT
@@ -620,6 +652,33 @@ void COEX_EnablePhySelectIsr(bool enable)
     disableGpioInt(phySelectHandle);
   }
 }
+
+#ifdef SL_RAIL_UTIL_COEX_WIFI_TX_PORT
+static void COEX_WIFI_TX_ISR(void)
+{
+  disableGpioInt(wifiTxHandle);
+  coexEventCallback(COEX_EVENT_WIFI_TX_CHANGED);
+}
+
+static void enableWifiTxIsr(void *args)
+{
+  (void)args;
+  enableGpioInt(wifiTxHandle, NULL);
+  if (isGpioInSet(wifiTxHandle, false)) {
+    COEX_WIFI_TX_ISR();
+  }
+}
+
+void COEX_EnableWifiTxIsr(bool enable)
+{
+  if (enable) {
+    clearGpioFlag(wifiTxHandle);
+    COEX_HAL_CallAtomic(enableWifiTxIsr, NULL);
+  } else {
+    disableGpioInt(wifiTxHandle);
+  }
+}
+#endif
 
 #if COEX_HAL_FAST_REQUEST
 #if SL_RAIL_UTIL_COEX_OVERRIDE_GPIO_INPUT

@@ -30,7 +30,7 @@
    "cteLength":20,
    "slotDuration":1,
    "reportMode":"ANGLE",
-   "allowlist":[
+   "allowList":[
       "ble-pd-AAAAAAAAAAAA",
       "ble-pd-BBBBBBBBBBBB"
    ],

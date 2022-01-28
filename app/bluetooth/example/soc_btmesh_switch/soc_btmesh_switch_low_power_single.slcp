@@ -60,7 +60,7 @@ config_file:
     directory: btmeshconf
 
 readme:
-  - path: ../../documentation/example/soc_btmesh_switch/readme_low_power.html
+  - path: ../../documentation/example/soc_btmesh_switch/readme_low_power.md
 
 other_file:
   - path: ../../script/create_bl_files.bat
@@ -85,13 +85,13 @@ other_file:
     folder: images
 
 configuration:
-  - name: CTL_CLIENT_TEMPERATURE_WRAP_ENABLED
+  - name: SL_BTMESH_CTL_CLIENT_TEMPERATURE_WRAP_ENABLED_CFG_VAL
     value: "1"
-  - name: LPN_POLL_TIMEOUT
+  - name: SL_BTMESH_LPN_POLL_TIMEOUT_CFG_VAL
     value: 120000
   - name: NVM3_DEFAULT_CACHE_SIZE
     value: 100
-  - name: LIGHT_LIGHTNESS_WRAP_ENABLED
+  - name: SL_BTMESH_LIGHT_LIGHTNESS_WRAP_ENABLED_CFG_VAL
     value: "1"
   - name: SL_HEAP_SIZE
     value: "0x4000"
@@ -124,5 +124,5 @@ ui_hints:
       focus: false
     - path: config/btmeshconf/dcd_config.btmeshconf
       focus: false
-    - path: readme_low_power.html
+    - path: readme_low_power.md
       focus: true

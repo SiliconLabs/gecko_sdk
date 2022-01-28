@@ -150,6 +150,16 @@ void sleeptimer_hal_disable_int(uint8_t local_flag)
   sl_sysrtc_disable_group_interrupts(0u, sysrtc_int_dis);
 }
 
+/*******************************************************************************
+ * Hardware Abstraction Layer to set timer interrupts.
+ ******************************************************************************/
+void sleeptimer_hal_set_int(uint8_t local_flag)
+{
+  if (local_flag & SLEEPTIMER_EVENT_COMP) {
+    SYSRTC0->GRP0_IF_SET = SYSRTC_GRP0_IF_CMP0;
+  }
+}
+
 /******************************************************************************
  * Gets status of specified interrupt.
  *

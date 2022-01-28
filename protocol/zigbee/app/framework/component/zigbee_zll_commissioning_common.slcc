@@ -4,7 +4,7 @@ description: Common code for the Zigbee 3.0 Touchlink commissioning mechanism. T
 label: ZLL Commissioning Common
 quality: production
 id: zigbee_zll_commissioning_common
-category: Zigbee|ZigBee Light Link
+category: Zigbee|Zigbee Light Link
 provides:
    - name: "zigbee_zll_profile"
    - name: "zigbee_zll_commissioning_common"

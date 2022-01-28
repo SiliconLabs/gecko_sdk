@@ -7,7 +7,7 @@ description: (NOTE This component is deprecated as it is not compliant with Zigb
 label: ZLL Commissioning Network
 quality: production
 id: zigbee_zll_commissioning_network
-category: Zigbee|ZigBee Light Link
+category: Zigbee|Zigbee Light Link
 provides:
    - name: "zigbee_zll_commissioning_network"
 requires:

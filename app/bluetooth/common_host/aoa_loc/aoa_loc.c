@@ -45,13 +45,14 @@
   if ((x) != SL_RTL_ERROR_SUCCESS) \
     return SL_STATUS_FAIL
 
-#define ROUND_DIV(num, den) (((num) + ((den) / 2)) / (den))
-
 // -----------------------------------------------------------------------------
 // Default values of configuration parameters.
 
 // Location estimation mode.
 #define AOA_LOC_ESTIMATION_MODE         SL_RTL_LOC_ESTIMATION_MODE_THREE_DIM_HIGH_ACCURACY
+
+// Max sequence diff
+#define AOA_LOC_MAX_SEQUENCE_DIFF       20u
 
 // Estimation interval in seconds.
 // This value should approximate the time interval between two consecutive CTEs.
@@ -75,7 +76,9 @@ typedef struct aoa_asset_tag_node aoa_asset_tag_node_t;
 static sl_status_t aoa_loc_init_asset_tag(aoa_asset_tag_t *tag);
 static sl_status_t aoa_loc_deinit_asset_tag(aoa_asset_tag_t *tag);
 static sl_status_t aoa_loc_run_estimation(aoa_asset_tag_t *tag,
-                                          aoa_corr_angles_t *correlated_angles);
+                                          uint32_t angle_count,
+                                          aoa_angle_t *angle_list,
+                                          aoa_id_t *locator_list);
 static void aoa_loc_destroy_tags(void);
 static void aoa_loc_destroy_locators(void);
 
@@ -101,6 +104,7 @@ static aoa_locator_node_t *head_locator = NULL;
 // Configuration parameters
 aoa_loc_config_t aoa_loc_config = {
   0,
+  AOA_LOC_MAX_SEQUENCE_DIFF,
   AOA_LOC_ESTIMATION_MODE,
   AOA_LOC_VALIDATION_MODE,
   AOA_LOC_ESTIMATION_INTERVAL_SEC,
@@ -109,30 +113,48 @@ aoa_loc_config_t aoa_loc_config = {
   true
 };
 
-// The expected number of angles depends on the slot index. A slot with smaller
-// index (i.e. with more recent sequence number) expects more angles, while a
-// slot with higher index (i.e. with older sequence number) requires less
-// angles.
-// This module implements a linear connection, thus the first slot expects
-// an angle from all locators, while the last slot needs only 2 locators.
-static uint32_t *expected_angles_count;
+// RTL lib location instance for tags
+static sl_rtl_loc_libitem loc_libitem;
 
 // -----------------------------------------------------------------------------
 // Public function definitions.
 
 /**************************************************************************//**
- * Initializes the expected angle count for the module.
+ * Initializes the locator engine.
  *****************************************************************************/
-void aoa_loc_init_expected_angle_count(void)
+sl_status_t aoa_loc_init(void)
 {
-  uint32_t coeff;
+  enum sl_rtl_error_code ec;
 
-  // Init the expected angles
-  expected_angles_count = (uint32_t *)malloc(aoa_corr_angles_config.sequence_id_slots * sizeof(uint32_t));
-  coeff = (aoa_loc_config.locator_count < 2) ? 0 : (aoa_loc_config.locator_count - 2);
-  for (uint32_t i = 0; i < aoa_corr_angles_config.sequence_id_slots; i++) {
-    expected_angles_count[i] = aoa_loc_config.locator_count  - ROUND_DIV(i * coeff, aoa_corr_angles_config.sequence_id_slots - 1);
+  ec = sl_rtl_loc_init(&loc_libitem);
+  CHECK_ERROR(ec);
+
+  return SL_STATUS_OK;
+}
+
+/**************************************************************************//**
+ * Finalizes the configuration.
+ *****************************************************************************/
+sl_status_t aoa_loc_finalize_config(void)
+{
+  enum sl_rtl_error_code ec;
+
+  // Select estimation mode.
+  ec = sl_rtl_loc_set_mode(&loc_libitem, aoa_loc_config.estimation_mode);
+  CHECK_ERROR(ec);
+
+  // Create position estimator.
+  ec = sl_rtl_loc_create_position_estimator(&loc_libitem);
+  CHECK_ERROR(ec);
+
+  if (aoa_loc_config.is_feedback_enabled) {
+    // Turn on the bad angle detection mechanism.
+    ec = sl_rtl_loc_set_measurement_validation(&loc_libitem,
+                                               aoa_loc_config.validation_method);
+    CHECK_ERROR(ec);
   }
+
+  return SL_STATUS_OK;
 }
 
 /**************************************************************************//**
@@ -142,6 +164,8 @@ sl_status_t aoa_loc_add_locator(aoa_id_t locator_id,
                                 struct sl_rtl_loc_locator_item item,
                                 aoa_locator_t **locator)
 {
+  enum sl_rtl_error_code ec;
+
   aoa_locator_node_t *new = (aoa_locator_node_t *)malloc(sizeof(aoa_locator_node_t));
   if (NULL == new) {
     return SL_STATUS_ALLOCATION_FAILED;
@@ -157,6 +181,9 @@ sl_status_t aoa_loc_add_locator(aoa_id_t locator_id,
   new->locator.item.orientation_x_axis_degrees = item.orientation_x_axis_degrees;
   new->locator.item.orientation_y_axis_degrees = item.orientation_y_axis_degrees;
   new->locator.item.orientation_z_axis_degrees = item.orientation_z_axis_degrees;
+
+  ec = sl_rtl_loc_add_locator(&loc_libitem, &new->locator.item, &new->locator.loc_id);
+  CHECK_ERROR(ec);
 
   *locator = &(new->locator);
 
@@ -180,7 +207,9 @@ sl_status_t aoa_loc_get_locator_by_id(aoa_id_t locator_id,
   while (NULL != current) {
     if (0 == aoa_id_compare(current->locator.id, locator_id)) {
       *locator = &(current->locator);
-      *locator_idx = i;
+      if (NULL != locator_idx) {
+        *locator_idx = i;
+      }
       return SL_STATUS_OK;
     }
     i++;
@@ -218,9 +247,9 @@ sl_status_t aoa_loc_get_locator_by_index(uint32_t locator_idx,
 /**************************************************************************//**
  * Returns the number of locators on the list.
  *****************************************************************************/
-size_t aoa_loc_get_number_of_locators(void)
+uint32_t aoa_loc_get_number_of_locators(void)
 {
-  size_t i = 0;
+  uint32_t i = 0;
   aoa_locator_node_t *current = head_locator;
 
   while (NULL != current) {
@@ -304,55 +333,50 @@ sl_status_t aoa_loc_get_tag_by_index(uint32_t index,
 /**************************************************************************//**
  * Calculates the asset tag position and notify the app.
  *****************************************************************************/
-sl_status_t aoa_loc_calc_position(aoa_asset_tag_t *tag,
-                                  int32_t start_slot,
-                                  aoa_corr_angles_t *corr_angles_array,
-                                  uint32_t *last_updated_slot)
+sl_status_t aoa_loc_calc_position(aoa_id_t tag_id,
+                                  uint32_t angle_count,
+                                  aoa_angle_t *angle_list,
+                                  aoa_id_t *locator_list)
 {
   sl_status_t sc;
+  aoa_asset_tag_t *tag;
   aoa_locator_t *locator;
+  aoa_correction_t correction;
+  uint32_t locator_index = 0;
 
-  if (start_slot < 0) {
-    return SL_STATUS_FAIL;
+  sc = aoa_loc_get_tag_by_id(tag_id, &tag);
+  if (sc != SL_STATUS_OK) {
+    return sc;
   }
-  *last_updated_slot = aoa_corr_angles_config.sequence_id_slots;
-  // Check start from the oldest slots to keep in order and complete as many
-  // slots as possible.
-  for (int32_t i = aoa_corr_angles_config.sequence_id_slots - 1; i >= start_slot; i--) {
-    if (corr_angles_array[i].num_angles >= expected_angles_count[i]) {
-      sc = aoa_loc_run_estimation(tag, &corr_angles_array[i]);
-      if (SL_STATUS_OK != sc) {
-        return sc;
-      }
 
-      // Notify the application
-      aoa_loc_on_position_ready(tag);
-      *last_updated_slot = i;
+  sc = aoa_loc_run_estimation(tag, angle_count, angle_list, locator_list);
+  if (sc != SL_STATUS_OK) {
+    return sc;
+  }
 
-      // Check if some of the locators require correction.
-      if (aoa_loc_config.is_feedback_enabled && sl_rtl_loc_get_number_disabled(&tag->loc) > 0) {
-        aoa_correction_t correction;
+  // Notify the application
+  aoa_loc_on_position_ready(tag);
 
-        for (uint32_t j = 0; j < aoa_loc_config.locator_count; j++) {
-          if (corr_angles_array[i].has_angle[j]) {
-            sc = sl_rtl_loc_get_expected_direction(&tag->loc,
-                                                   tag->loc_id[j],
-                                                   &correction.direction.azimuth,
-                                                   &correction.direction.elevation,
-                                                   &correction.direction.distance);
-            if (sc == SL_RTL_ERROR_INCORRECT_MEASUREMENT) {
-              sl_rtl_loc_get_expected_deviation(&tag->loc,
-                                                tag->loc_id[j],
-                                                &correction.deviation.azimuth,
-                                                &correction.deviation.elevation,
-                                                &correction.deviation.distance);
-              correction.sequence = tag->position.sequence;
-              aoa_loc_get_locator_by_index(j, &locator);
-              // The first angle in the correlated angle list is the most recent one.
-              aoa_loc_on_correction_ready(tag, corr_angles_array[0].sequence, locator->id, j, &correction);
-            }
-          }
-        }
+  // Check if some of the locators require correction.
+  if (aoa_loc_config.is_feedback_enabled && sl_rtl_loc_get_number_disabled_tag(&loc_libitem, tag->tag_id) > 0) {
+    for (uint32_t i = 0; i < angle_count; i++) {
+      aoa_loc_get_locator_by_id(locator_list[i], &locator_index, &locator);
+      sc = sl_rtl_loc_get_expected_direction_tag(&loc_libitem,
+                                                 locator->loc_id,
+                                                 &correction.direction.azimuth,
+                                                 &correction.direction.elevation,
+                                                 &correction.direction.distance,
+                                                 tag->tag_id);
+      if (sc == SL_RTL_ERROR_INCORRECT_MEASUREMENT) {
+        sl_rtl_loc_get_expected_deviation_tag(&loc_libitem,
+                                              locator->loc_id,
+                                              &correction.deviation.azimuth,
+                                              &correction.deviation.elevation,
+                                              &correction.deviation.distance,
+                                              tag->tag_id);
+        correction.sequence = tag->position.sequence;
+        // The first angle in the angle list is the most recent.
+        aoa_loc_on_correction_ready(tag, angle_list[0].sequence, locator->id, locator_index, &correction);
       }
     }
   }
@@ -365,9 +389,9 @@ sl_status_t aoa_loc_calc_position(aoa_asset_tag_t *tag,
  *****************************************************************************/
 void aoa_loc_destroy(void)
 {
-  free(expected_angles_count);
   aoa_loc_destroy_tags();
   aoa_loc_destroy_locators();
+  sl_rtl_loc_deinit(&loc_libitem);
 }
 
 /**************************************************************************//**
@@ -418,43 +442,17 @@ SL_WEAK void aoa_loc_angle_deinit(aoa_asset_tag_t *tag,
 static sl_status_t aoa_loc_init_asset_tag(aoa_asset_tag_t *tag)
 {
   enum sl_rtl_error_code ec;
-  aoa_locator_node_t *current_locator = head_locator;
 
   // Invalid sequence
   tag->position.sequence = -1;
 
   tag->aoa_state = NULL;
 
-  // Initialize locator ids for the tag
-  tag->loc_id = (uint32_t *)malloc(aoa_loc_config.locator_count * sizeof(uint32_t));
-
-  // Initialize RTL library
-  ec = sl_rtl_loc_init(&tag->loc);
+  ec = sl_rtl_loc_add_tag(&loc_libitem, &tag->tag_id);
   CHECK_ERROR(ec);
-
-  // Select estimation mode.
-  ec = sl_rtl_loc_set_mode(&tag->loc, aoa_loc_config.estimation_mode);
-  CHECK_ERROR(ec);
-
-  // Provide locator configurations to the position estimator.
-  for (size_t i = 0; i < aoa_loc_config.locator_count; i++) {
-    ec = sl_rtl_loc_add_locator(&tag->loc, &current_locator->locator.item, &tag->loc_id[i]);
-    current_locator = current_locator->next;
-    CHECK_ERROR(ec);
-  }
 
   // Initialize the angle calculation.
   aoa_loc_angle_init(tag, aoa_loc_config.locator_count);
-
-  // Create position estimator.
-  ec = sl_rtl_loc_create_position_estimator(&tag->loc);
-  CHECK_ERROR(ec);
-
-  if (aoa_loc_config.is_feedback_enabled) {
-    // Turn on the bad angle detection mechanism.
-    ec = sl_rtl_loc_set_measurement_validation(&tag->loc, aoa_loc_config.validation_method);
-    CHECK_ERROR(ec);
-  }
 
   if (aoa_loc_config.filtering_enabled == true) {
     // Initialize util functions.
@@ -480,7 +478,7 @@ static sl_status_t aoa_loc_deinit_asset_tag(aoa_asset_tag_t *tag)
   enum sl_rtl_error_code ec;
 
   aoa_loc_angle_deinit(tag, aoa_loc_config.locator_count);
-  ec = sl_rtl_loc_deinit(&tag->loc);
+  ec = sl_rtl_loc_remove_tag(&loc_libitem, tag->tag_id);
   CHECK_ERROR(ec);
 
   if (aoa_loc_config.filtering_enabled == true) {
@@ -497,74 +495,84 @@ static sl_status_t aoa_loc_deinit_asset_tag(aoa_asset_tag_t *tag)
  * Run position estimation algorithm for a given asset tag.
  *****************************************************************************/
 static sl_status_t aoa_loc_run_estimation(aoa_asset_tag_t *tag,
-                                          aoa_corr_angles_t *correlated_angles)
+                                          uint32_t angle_count,
+                                          aoa_angle_t *angle_list,
+                                          aoa_id_t *locator_list)
 {
-  enum sl_rtl_error_code ec;
   sl_status_t sc;
+  enum sl_rtl_error_code ec;
   float time_step = aoa_loc_config.estimation_interval_sec;
   int32_t seq_diff;
+  aoa_locator_t *locator;
+
   // Feed measurement values into RTL lib.
-  for (uint32_t i = 0; i < aoa_loc_config.locator_count; i++) {
-    if (correlated_angles->has_angle[i]) {
-      ec = sl_rtl_loc_set_locator_measurement(&tag->loc,
-                                              tag->loc_id[i],
-                                              SL_RTL_LOC_LOCATOR_MEASUREMENT_AZIMUTH,
-                                              correlated_angles->angles[i].azimuth);
+  for (uint32_t i = 0; i < angle_count; i++) {
+    aoa_loc_get_locator_by_id(locator_list[i], NULL, &locator);
+    ec = sl_rtl_loc_set_locator_measurement_tag(&loc_libitem,
+                                                locator->loc_id,
+                                                SL_RTL_LOC_LOCATOR_MEASUREMENT_AZIMUTH,
+                                                angle_list[i].azimuth,
+                                                tag->tag_id);
 
+    CHECK_ERROR(ec);
+
+    ec = sl_rtl_loc_set_locator_measurement_tag(&loc_libitem,
+                                                locator->loc_id,
+                                                SL_RTL_LOC_LOCATOR_MEASUREMENT_ELEVATION,
+                                                angle_list[i].elevation,
+                                                tag->tag_id);
+    CHECK_ERROR(ec);
+
+    // Feeding RSSI distance measurement to the RTL library improves location
+    // accuracy when the measured distance is reasonably correct.
+    // If the received signal strength of the incoming signal is altered for any
+    // other reason than the distance between the TX and RX itself, it will lead
+    // to incorrect measurement and it will lead to incorrect position estimates.
+    // For this reason the RSSI distance usage is disabled by default in the
+    // multilocator case.
+    // Single locator mode however always requires the distance measurement in
+    // addition to the angle, please note the if-condition below.
+    // In case the distance estimation should be used in the  multilocator case,
+    // you can enable it by commenting out the condition.
+    if (aoa_loc_config.locator_count == 1) {
+      ec = sl_rtl_loc_set_locator_measurement_tag(&loc_libitem,
+                                                  locator->loc_id,
+                                                  SL_RTL_LOC_LOCATOR_MEASUREMENT_DISTANCE,
+                                                  angle_list[i].distance,
+                                                  tag->tag_id);
       CHECK_ERROR(ec);
-
-      ec = sl_rtl_loc_set_locator_measurement(&tag->loc,
-                                              tag->loc_id[i],
-                                              SL_RTL_LOC_LOCATOR_MEASUREMENT_ELEVATION,
-                                              correlated_angles->angles[i].elevation);
-      CHECK_ERROR(ec);
-
-      // Feeding RSSI distance measurement to the RTL library improves location
-      // accuracy when the measured distance is reasonably correct.
-      // If the received signal strength of the incoming signal is altered for any
-      // other reason than the distance between the TX and RX itself, it will lead
-      // to incorrect measurement and it will lead to incorrect position estimates.
-      // For this reason the RSSI distance usage is disabled by default in the
-      // multilocator case.
-      // Single locator mode however always requires the distance measurement in
-      // addition to the angle, please note the if-condition below.
-      // In case the distance estimation should be used in the  multilocator case,
-      // you can enable it by commenting out the condition.
-      if (aoa_loc_config.locator_count == 1) {
-        ec = sl_rtl_loc_set_locator_measurement(&tag->loc,
-                                                tag->loc_id[i],
-                                                SL_RTL_LOC_LOCATOR_MEASUREMENT_DISTANCE,
-                                                correlated_angles->angles[i].distance);
-        CHECK_ERROR(ec);
-      }
     }
   }
 
   // Estimate the time step based on the sequence number.
-  seq_diff = aoa_sequence_compare(correlated_angles->sequence,
+  seq_diff = aoa_sequence_compare(angle_list[0].sequence,
                                   tag->position.sequence);
-  if (seq_diff <= aoa_corr_angles_config.max_sequence_diff) {
+
+  if (seq_diff <= aoa_loc_config.max_sequence_diff) {
     time_step *= (float)seq_diff;
   }
 
   // Process new measurements, time step given in seconds.
-  sc = sl_rtl_loc_process(&tag->loc, time_step);
-  tag->position.sequence = correlated_angles->sequence;
+  sc = sl_rtl_loc_process_tag(&loc_libitem, time_step, tag->tag_id);
+  tag->position.sequence = angle_list[0].sequence;
 
   CHECK_ERROR(sc);
 
   // Get results from the estimator.
-  sc = sl_rtl_loc_get_result(&tag->loc,
-                             SL_RTL_LOC_RESULT_POSITION_X,
-                             &tag->position.x);
+  sc = sl_rtl_loc_get_result_tag(&loc_libitem,
+                                 SL_RTL_LOC_RESULT_POSITION_X,
+                                 &tag->position.x,
+                                 tag->tag_id);
   CHECK_ERROR(sc);
-  sc = sl_rtl_loc_get_result(&tag->loc,
-                             SL_RTL_LOC_RESULT_POSITION_Y,
-                             &tag->position.y);
+  sc = sl_rtl_loc_get_result_tag(&loc_libitem,
+                                 SL_RTL_LOC_RESULT_POSITION_Y,
+                                 &tag->position.y,
+                                 tag->tag_id);
   CHECK_ERROR(sc);
-  sc = sl_rtl_loc_get_result(&tag->loc,
-                             SL_RTL_LOC_RESULT_POSITION_Z,
-                             &tag->position.z);
+  sc = sl_rtl_loc_get_result_tag(&loc_libitem,
+                                 SL_RTL_LOC_RESULT_POSITION_Z,
+                                 &tag->position.z,
+                                 tag->tag_id);
   CHECK_ERROR(sc);
 
   if (aoa_loc_config.filtering_enabled == true) {
@@ -584,7 +592,7 @@ static sl_status_t aoa_loc_run_estimation(aoa_asset_tag_t *tag,
   }
 
   // Clear measurements.
-  ec = sl_rtl_loc_clear_measurements(&tag->loc);
+  ec = sl_rtl_loc_clear_measurements_tag(&loc_libitem, tag->tag_id);
   CHECK_ERROR(ec);
 
   return SL_STATUS_OK;
@@ -601,7 +609,6 @@ static void aoa_loc_destroy_tags(void)
   for (current = head_tag; current != NULL; current = next) {
     next = current->next;
     aoa_loc_deinit_asset_tag(&current->tag);
-    free(current->tag.loc_id);
     free(current);
   }
 

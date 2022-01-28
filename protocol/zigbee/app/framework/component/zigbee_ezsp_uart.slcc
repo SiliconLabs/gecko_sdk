@@ -1,12 +1,11 @@
 package: Zigbee
-description: This is the UART implementation of EZSP.
 label: EZSP UART
 quality: production
 id: zigbee_ezsp_uart
 category: Zigbee|Utility
-toolchain_settings: []
-ui_hints: {}
-template_file: []
+
+description: This is the UART implementation of EZSP.
+
 provides:
    - name: "zigbee_ezsp_serial_interface"
    - name: "zigbee_ezsp_uart"
@@ -14,6 +13,8 @@ requires:
    - name: "zigbee_ezsp"
    - name: "device_host"
    - name: "cli_ash_host"
+     condition:
+      - cli
 define:
    - name: "EZSP_UART"
    - name: "EZSP_ASH"

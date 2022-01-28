@@ -77,6 +77,13 @@
   #define GET_PRO2PLUS_RADIO_TX_POWER(chanPg)   0
 #endif
 
+WEAK(void emberUnusedPanIdFoundHandler(
+       // The unused panID which has been found.
+       EmberPanId panId,
+       // The channel that the unused panID was found on.
+       uint8_t channel)){
+}
+
 // We can't include ember.h or ezsp.h from this file since it is used
 // for both host and node-size libraries.  However the emberStartScan()
 // API is identical in both.
@@ -420,17 +427,7 @@ static void panIdScanComplete(void)
   for (i = 0; i < NUM_PAN_ID_CANDIDATES; i++) {
     if (panIdCandidates[i] != 0xFFFF) {
       const EmberPanId panId = panIdCandidates[i];
-      emberFormAndJoinCleanup(EMBER_SUCCESS);
-
-#ifdef SL_CATALOG_ZIGBEE_NETWORK_FIND_PRESENT
-      emAfPluginNetworkFindUnusedPanIdFoundCallback(panId, channelCache);
-#endif // SL_CATALOG_ZIGBEE_NETWORK_FIND_PRESENT
-
-#ifdef SL_CATALOG_ZIGBEE_ZLL_COMMISSIONING_NETWORK_PRESENT
-      emAfPluginZllCommissioningNetworkUnusedPanIdFoundCallback(panId, channelCache);
-#endif // SL_CATALOG_ZIGBEE_ZLL_COMMISSIONING_NETWORK_PRESENT
-
-      emberAfUnusedPanIdFoundCallback(panId, channelCache);
+      emberUnusedPanIdFoundHandler(panId, channelCache);
       return;
     }
   }
@@ -806,14 +803,6 @@ void emAfPluginFormAndJoinUnusedPanIdFoundCallback(EmberPanId panId, uint8_t cha
 {
   if (emberFormAndJoinIsScanning()) {
     emberFormAndJoinCleanup(EMBER_SUCCESS);
-
-#ifdef SL_CATALOG_ZIGBEE_NETWORK_FIND_PRESENT
-    emAfPluginNetworkFindUnusedPanIdFoundCallback(panId, channel);
-#endif // SL_CATALOG_ZIGBEE_NETWORK_FIND_PRESENT
-
-#ifdef SL_CATALOG_ZIGBEE_ZLL_COMMISSIONING_NETWORK_PRESENT
-    emAfPluginZllCommissioningNetworkUnusedPanIdFoundCallback(panId, channel);
-#endif // SL_CATALOG_ZIGBEE_ZLL_COMMISSIONING_NETWORK_PRESENT
   }
 }
 #else

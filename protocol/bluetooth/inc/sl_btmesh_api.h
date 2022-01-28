@@ -5365,7 +5365,7 @@ sl_status_t sl_btmesh_test_set_relay(uint8_t enabled,
  * sl_btmesh_prov_init for the settings to take effect.
  *
  * @param[in] adv_interval_min Minimum advertisement interval. Value is in units
- *   of 0.625 ms. Default value is 1 (0.625 ms).
+ *   of 0.625 ms. Default value is 32 (20 ms).
  * @param[in] adv_interval_max Maximum advertisement interval. Value is in units
  *   of 0.625 ms. Must be equal to or greater than the minimum interval. Default
  *   value is 32 (20 ms).

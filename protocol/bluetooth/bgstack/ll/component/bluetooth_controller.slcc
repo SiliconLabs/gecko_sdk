@@ -10,6 +10,7 @@ root_path: "protocol/bluetooth/bgstack/ll"
 config_file:
   - path: "inc/sl_bt_ll_config.h"
   - path: "config/sl_btctrl_config.h"
+  - path: "config/sl_btctrl_acceptance_list_config.h"
 provides:
   - name: "bluetooth_controller"
   - name: "wireless_stack"

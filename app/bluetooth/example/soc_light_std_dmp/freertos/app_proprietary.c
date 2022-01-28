@@ -122,20 +122,12 @@ static prop_msg_t proprietary_queue_storage[PROPRIETARY_QUEUE_SIZE];
 static StaticQueue_t proprietary_queue_buffer;
 
 /// Transmit FIFO
-static union {
-  // Used to align this buffer as needed
-  RAIL_FIFO_ALIGNMENT_TYPE align[TX_PAYLOAD_LENGTH / RAIL_FIFO_ALIGNMENT];
-  uint8_t fifo[TX_PAYLOAD_LENGTH];
-} tx_payload = { .fifo = {
-                   0x0F, 0x16, 0x11, 0x22, 0x33, 0x44, 0x55, 0x66,
-                   0x77, 0x88, 0x99, 0xAA, 0xBB, 0xCC, 0xFF, 0x00,
-                 } };
+static __ALIGNED(RAIL_FIFO_ALIGNMENT) uint8_t tx_payload[TX_PAYLOAD_LENGTH] = {
+  0x0F, 0x16, 0x11, 0x22, 0x33, 0x44, 0x55, 0x66,
+  0x77, 0x88, 0x99, 0xAA, 0xBB, 0xCC, 0xFF, 0x00
+};
 
-static union {
-  // Used to align this buffer as needed
-  RAIL_FIFO_ALIGNMENT_TYPE align[RAIL_FIFO_SIZE / RAIL_FIFO_ALIGNMENT];
-  uint8_t fifo[RAIL_FIFO_SIZE];
-} tx_fifo;
+static __ALIGNED(RAIL_FIFO_ALIGNMENT) uint8_t tx_fifo[RAIL_FIFO_SIZE];
 
 /// Transmit app buffer
 static uint8_t tx_frame_buff[RAIL_FIFO_SIZE];
@@ -143,7 +135,7 @@ static uint8_t tx_frame_buff[RAIL_FIFO_SIZE];
 static volatile bool re_start_rx = false;
 
 /// Receive FIFO
-static uint8_t rx_fifo[RAIL_FIFO_SIZE];
+static __ALIGNED(RAIL_FIFO_ALIGNMENT) uint8_t rx_fifo[RAIL_FIFO_SIZE];
 
 static uint8_t standard_rx_buf[PROP_RX_BUF_SIZE];
 
@@ -259,7 +251,7 @@ int16_t app_set_rail_tx_fifo(RAIL_Handle_t rail_handle)
   // RAIL FIFO size allocated by RAIL_SetTxFifo() call
   uint16_t allocated_tx_fifo_size = 0;
 
-  allocated_tx_fifo_size = RAIL_SetTxFifo(rail_handle, tx_fifo.fifo,
+  allocated_tx_fifo_size = RAIL_SetTxFifo(rail_handle, tx_fifo,
                                           0u, RAIL_FIFO_SIZE);
   app_assert(allocated_tx_fifo_size == RAIL_FIFO_SIZE,
              "RAIL_SetTxFifo() failed to allocate a large enough fifo"
@@ -394,38 +386,38 @@ static void standardTxPacket(prop_pkt pktType)
                                           .transactionTime = 200 };
 
   // address of light
-  memcpy((void *)&tx_payload.fifo[PACKET_HEADER_LEN],
+  memcpy((void *)&tx_payload[PACKET_HEADER_LEN],
          (void *)demo.own_addr.addr,
          sizeof(demo.own_addr.addr));
   // light role
-  tx_payload.fifo[LIGHT_CONTROL_DATA_BYTE] &= ~DEMO_CONTROL_PAYLOAD_SRC_ROLE_BIT;
-  tx_payload.fifo[LIGHT_CONTROL_DATA_BYTE] |=
+  tx_payload[LIGHT_CONTROL_DATA_BYTE] &= ~DEMO_CONTROL_PAYLOAD_SRC_ROLE_BIT;
+  tx_payload[LIGHT_CONTROL_DATA_BYTE] |=
     (DEMO_CONTROL_ROLE_LIGHT << DEMO_CONTROL_PAYLOAD_SRC_ROLE_BIT_SHIFT)
     & DEMO_CONTROL_PAYLOAD_SRC_ROLE_BIT;
   // advertisement packet
   if (PROP_PKT_ADVERTISE == pktType) {
-    tx_payload.fifo[LIGHT_CONTROL_DATA_BYTE] &= ~DEMO_CONTROL_PAYLOAD_CMD_MASK;
-    tx_payload.fifo[LIGHT_CONTROL_DATA_BYTE] |=
+    tx_payload[LIGHT_CONTROL_DATA_BYTE] &= ~DEMO_CONTROL_PAYLOAD_CMD_MASK;
+    tx_payload[LIGHT_CONTROL_DATA_BYTE] |=
       ((uint8_t)DEMO_CONTROL_CMD_ADVERTISE
         << DEMO_CONTROL_PAYLOAD_CMD_MASK_SHIFT)
       & DEMO_CONTROL_PAYLOAD_CMD_MASK;
     // status packet
   } else if (PROP_PKT_STATUS == pktType) {
-    tx_payload.fifo[LIGHT_CONTROL_DATA_BYTE] &= ~DEMO_CONTROL_PAYLOAD_CMD_MASK;
-    tx_payload.fifo[LIGHT_CONTROL_DATA_BYTE] |=
+    tx_payload[LIGHT_CONTROL_DATA_BYTE] &= ~DEMO_CONTROL_PAYLOAD_CMD_MASK;
+    tx_payload[LIGHT_CONTROL_DATA_BYTE] |=
       ((uint8_t)DEMO_CONTROL_CMD_LIGHT_STATE_REPORT
         << DEMO_CONTROL_PAYLOAD_CMD_MASK_SHIFT)
       & DEMO_CONTROL_PAYLOAD_CMD_MASK;
-    tx_payload.fifo[LIGHT_CONTROL_DATA_BYTE] &= ~0x01;
-    tx_payload.fifo[LIGHT_CONTROL_DATA_BYTE] |= (uint8_t)demo.light;
+    tx_payload[LIGHT_CONTROL_DATA_BYTE] &= ~0x01;
+    tx_payload[LIGHT_CONTROL_DATA_BYTE] |= (uint8_t)demo.light;
   } else {
   }
 
 #ifdef SL_CATALOG_FLEX_IEEE802154_SUPPORT_PRESENT
   // Prepare packet
   sl_flex_ieee802154_prepare_sending(&tx_frame,
-                                     (uint8_t *)tx_payload.fifo,
-                                     sizeof(tx_payload.fifo));
+                                     tx_payload,
+                                     sizeof(tx_payload));
   // packs the data frame using the parameter information and the packed
   // frame is copied into the fifo
   (void)sl_flex_ieee802154_pack_data_frame(sl_flex_ieee802154_get_std(),
@@ -445,7 +437,7 @@ static void standardTxPacket(prop_pkt pktType)
   // Prepare packet
   // set ble_send_packet pointer to tx app buff
   ble_send_packet = sl_flex_ble_get_packet(tx_frame_buff);
-  sl_flex_ble_prepare_packet(ble_send_packet, tx_payload.fifo, sizeof(tx_payload.fifo));
+  sl_flex_ble_prepare_packet(ble_send_packet, tx_payload, sizeof(tx_payload));
   packet_size = sl_flex_ble_get_packet_size(ble_send_packet);
   // Send Packet
   rail_status = RAIL_WriteTxFifo(rail_handle, tx_frame_buff, packet_size, true);
@@ -623,7 +615,7 @@ void sl_rail_util_on_rf_ready(RAIL_Handle_t rail_handle)
 RAIL_Status_t RAILCb_SetupRxFifo(RAIL_Handle_t railHandle)
 {
   uint16_t rxFifoSize = RAIL_FIFO_SIZE;
-  RAIL_Status_t status = RAIL_SetRxFifo(railHandle, &rx_fifo[0], &rxFifoSize);
+  RAIL_Status_t status = RAIL_SetRxFifo(railHandle, rx_fifo, &rxFifoSize);
   if (rxFifoSize != RAIL_FIFO_SIZE) {
     // We set up an incorrect FIFO size
     return RAIL_STATUS_INVALID_PARAMETER;

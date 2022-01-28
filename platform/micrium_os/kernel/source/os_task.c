@@ -2219,6 +2219,10 @@ void OS_TaskInitTCB(OS_TCB *p_tcb)
   p_tcb->DbgNextPtr = DEF_NULL;
   p_tcb->DbgNamePtr = (CPU_CHAR *)((void *)" ");
 #endif
+
+#if (OS_CFG_ERRNO_EN == 1)
+  p_tcb->local_errno = 0;
+#endif
 }
 
 /****************************************************************************************************//**

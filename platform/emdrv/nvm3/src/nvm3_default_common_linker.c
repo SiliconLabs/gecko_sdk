@@ -41,13 +41,19 @@ __attribute__((used)) uint8_t nvm3_default_storage[NVM3_DEFAULT_NVM_SIZE] __attr
 nvm3_Handle_t  nvm3_defaultHandleData;
 nvm3_Handle_t *nvm3_defaultHandle = &nvm3_defaultHandleData;
 
+#if (NVM3_DEFAULT_CACHE_SIZE != 0)
 static nvm3_CacheEntry_t defaultCache[NVM3_DEFAULT_CACHE_SIZE];
+#endif
 
 nvm3_Init_t nvm3_defaultInitData =
 {
   (nvm3_HalPtr_t)NVM3_BASE,
   NVM3_DEFAULT_NVM_SIZE,
+#if (NVM3_DEFAULT_CACHE_SIZE != 0)
   defaultCache,
+#else
+  NULL,
+#endif
   NVM3_DEFAULT_CACHE_SIZE,
   NVM3_DEFAULT_MAX_OBJECT_SIZE,
   NVM3_DEFAULT_REPACK_HEADROOM,

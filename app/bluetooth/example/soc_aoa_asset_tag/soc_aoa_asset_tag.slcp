@@ -49,7 +49,7 @@ config_file:
     directory: btconf
 
 readme:
-  - path: ../../documentation/example/soc_aoa_asset_tag/readme.html
+  - path: ../../documentation/example/soc_aoa_asset_tag/readme.md
 
 other_file:
   - path: ../../script/create_bl_files.bat
@@ -82,5 +82,5 @@ tag:
 ui_hints:
   highlight:
     - path: config/btconf/gatt_configuration.btconf
-    - path: readme.html
+    - path: readme.md
       focus: true

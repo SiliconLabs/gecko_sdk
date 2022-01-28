@@ -1,10 +1,12 @@
 from pyradioconfig.parts.ocelot.profiles.Profile_Mbus import Profile_Mbus_Ocelot
+from pyradioconfig.parts.sol.profiles.sw_profile_outputs_common import sw_profile_outputs_common_sol
 
 class Profile_Mbus_Sol(Profile_Mbus_Ocelot):
 
     def __init__(self):
         super().__init__()
         self._family = "sol"
+        self._sw_profile_outputs_common = sw_profile_outputs_common_sol()
 
     def mbus_profile_radio_common(self, model):
         super().mbus_profile_radio_common(model)

@@ -1,4 +1,4 @@
-__version__ = '2.4.16'
-host_py_radio_config_commit = 'e27de45a1d67fef41bf5b91688882c8103c3f301'
-efr32_multi_phy_radio_configurator_commit = 'f451262d5354dfa0570c1fd69c2ae9d94a9a91c8'
+__version__ = '2.4.18'
+host_py_radio_config_commit = '6f8b94cf6509b09851ebbb0534ea8b68e01b1a6e'
+efr32_multi_phy_radio_configurator_commit = 'caa4d20ce8ba9a262f11613be298a8982ff6049a'
 

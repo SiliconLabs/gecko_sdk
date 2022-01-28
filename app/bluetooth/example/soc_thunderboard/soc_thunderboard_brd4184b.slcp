@@ -3,7 +3,7 @@ package: Bluetooth
 label: Bluetooth - SoC Thunderboard EFR32BG22 (BRD4184B)
 description: >
   Demonstrates the features of the Thunderboard EFR32BG22 Kit.
-  This can be tested with the Thunderboard mobile app.
+  This can be tested with the EFR Connect mobile app.
 category: Bluetooth Examples
 quality: production
 
@@ -64,14 +64,14 @@ source:
 include:
   - path: .
     file_list:
-    - path: advertise.h
-    - path: app.h
+      - path: advertise.h
+      - path: app.h
   - path: brd4184b
     file_list:
-    - path: board.h
+      - path: board.h
 
 readme:
-  - path: ../../documentation/example/soc_thunderboard/readme.html
+  - path: ../../documentation/example/soc_thunderboard/readme.md
 
 config_file:
   - override:
@@ -121,5 +121,5 @@ tag:
 ui_hints:
   highlight:
     - path: config/btconf/gatt_configuration_brd4184b.btconf
-    - path: readme.html
+    - path: readme.md
       focus: true

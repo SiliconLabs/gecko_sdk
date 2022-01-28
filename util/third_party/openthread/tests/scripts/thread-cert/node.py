@@ -137,6 +137,21 @@ class OtbrDocker:
 
         assert launch_ok
 
+        self.start_ot_ctl()
+
+    def __repr__(self):
+        return f'OtbrDocker<{self.nodeid}>'
+
+    def start_otbr_service(self):
+        self.bash('service otbr-agent start')
+        self.simulator.go(3)
+        self.start_ot_ctl()
+
+    def stop_otbr_service(self):
+        self.stop_ot_ctl()
+        self.bash('service otbr-agent stop')
+
+    def start_ot_ctl(self):
         cmd = f'docker exec -i {self._docker_name} ot-ctl'
         self.pexpect = pexpect.popen_spawn.PopenSpawn(cmd, timeout=30)
         if self.verbose:
@@ -152,8 +167,10 @@ class OtbrDocker:
             except pexpect.TIMEOUT:
                 timeout -= 0.1
 
-    def __repr__(self):
-        return f'OtbrDocker<{self.nodeid}>'
+    def stop_ot_ctl(self):
+        self.pexpect.sendeof()
+        self.pexpect.wait()
+        self.pexpect.proc.kill()
 
     def destroy(self):
         logging.info("Destroying %s", self)
@@ -819,6 +836,21 @@ class NodeImpl:
         if rssi is not None:
             cmd += ' %s' % rssi
 
+        self.send_command(cmd)
+        self._expect_done()
+
+    def radiofilter_is_enabled(self) -> bool:
+        states = [r'Disabled', r'Enabled']
+        self.send_command('radiofilter')
+        return self._expect_result(states) == 'Enabled'
+
+    def radiofilter_enable(self):
+        cmd = 'radiofilter enable'
+        self.send_command(cmd)
+        self._expect_done()
+
+    def radiofilter_disable(self):
+        cmd = 'radiofilter disable'
         self.send_command(cmd)
         self._expect_done()
 
@@ -1687,7 +1719,7 @@ class NodeImpl:
         omr_addrs = []
         for addr in self.get_addrs():
             for prefix in prefixes:
-                if (addr.startswith(prefix)):
+                if (addr.startswith(prefix)) and (addr != self.__getDua()):
                     omr_addrs.append(addr)
                     break
 
@@ -1982,6 +2014,18 @@ class NodeImpl:
                     'lqi': lqi,
                 })
             return networks
+
+    def scan_energy(self, timeout=10):
+        self.send_command('scan energy')
+        self.simulator.go(timeout)
+        rssi_list = []
+        for line in self._expect_command_output()[2:]:
+            _, channel, rssi, _ = line.split('|')
+            rssi_list.append({
+                'channel': int(channel.strip()),
+                'rssi': int(rssi.strip()),
+            })
+        return rssi_list
 
     def ping(self, ipaddr, num_responses=1, size=8, timeout=5, count=1, interval=1, hoplimit=64, interface=None):
         args = f'{ipaddr} {size} {count} {interval} {hoplimit} {timeout}'
@@ -3293,6 +3337,10 @@ class OtbrNode(LinuxHost, NodeImpl, OtbrDocker):
 
     def add_ipaddr(self, addr):
         cmd = f'ip -6 addr add {addr}/64 dev {self.TUN_DEV}'
+        self.bash(cmd)
+
+    def add_ipmaddr_tun(self, ip: str):
+        cmd = f'python3 /app/third_party/openthread/repo/tests/scripts/thread-cert/mcast6.py {self.TUN_DEV} {ip} &'
         self.bash(cmd)
 
 

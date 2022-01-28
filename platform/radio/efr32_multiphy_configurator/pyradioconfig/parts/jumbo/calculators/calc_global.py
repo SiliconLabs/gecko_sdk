@@ -21,6 +21,9 @@ class CALC_Global_jumbo(CALC_Global):
         # Build variables from the global calculations
         super().buildVariables(model)
 
+        # Add register groups
+        self._add_SHAPING_regs(model)
+
         # Add some variables for Jumbo
         self._addModelRegister(model, 'MODEM.SRCCHF.SRCRATIO1',           int, ModelVariableFormat.HEX)
         self._addModelRegister(model, 'MODEM.SRCCHF.SRCENABLE1',          int, ModelVariableFormat.HEX)
@@ -132,38 +135,6 @@ class CALC_Global_jumbo(CALC_Global):
         self._addModelRegister(model, 'MODEM.INTAFC.FOEPREAVG3',           int, ModelVariableFormat.HEX)
 
         self._addModelRegister(model, 'MODEM.CGCLKSTOP.FORCEOFF', int, ModelVariableFormat.HEX)
-
-        self._addModelRegister(model, 'MODEM.SHAPING2.COEFF9'	         , int, ModelVariableFormat.HEX )
-        self._addModelRegister(model, 'MODEM.SHAPING2.COEFF10'	         , int, ModelVariableFormat.HEX )
-        self._addModelRegister(model, 'MODEM.SHAPING2.COEFF11'	         , int, ModelVariableFormat.HEX )
-        self._addModelRegister(model, 'MODEM.SHAPING3.COEFF12'	         , int, ModelVariableFormat.HEX )
-        self._addModelRegister(model, 'MODEM.SHAPING3.COEFF13'	         , int, ModelVariableFormat.HEX )
-        self._addModelRegister(model, 'MODEM.SHAPING3.COEFF14'	         , int, ModelVariableFormat.HEX )
-        self._addModelRegister(model, 'MODEM.SHAPING3.COEFF15'	         , int, ModelVariableFormat.HEX )
-        self._addModelRegister(model, 'MODEM.SHAPING4.COEFF16'	         , int, ModelVariableFormat.HEX )
-        self._addModelRegister(model, 'MODEM.SHAPING4.COEFF17'	         , int, ModelVariableFormat.HEX )
-        self._addModelRegister(model, 'MODEM.SHAPING4.COEFF18'	         , int, ModelVariableFormat.HEX )
-        self._addModelRegister(model, 'MODEM.SHAPING4.COEFF19'	         , int, ModelVariableFormat.HEX )
-        self._addModelRegister(model, 'MODEM.SHAPING4.COEFF20'	         , int, ModelVariableFormat.HEX )
-        self._addModelRegister(model, 'MODEM.SHAPING4.COEFF21'	         , int, ModelVariableFormat.HEX )
-        self._addModelRegister(model, 'MODEM.SHAPING5.COEFF22'	         , int, ModelVariableFormat.HEX )
-        self._addModelRegister(model, 'MODEM.SHAPING5.COEFF23'	         , int, ModelVariableFormat.HEX )
-        self._addModelRegister(model, 'MODEM.SHAPING5.COEFF24'	         , int, ModelVariableFormat.HEX )
-        self._addModelRegister(model, 'MODEM.SHAPING5.COEFF25'	         , int, ModelVariableFormat.HEX )
-        self._addModelRegister(model, 'MODEM.SHAPING5.COEFF26'	         , int, ModelVariableFormat.HEX )
-        self._addModelRegister(model, 'MODEM.SHAPING5.COEFF27'	         , int, ModelVariableFormat.HEX )
-        self._addModelRegister(model, 'MODEM.SHAPING5.COEFF28'	         , int, ModelVariableFormat.HEX )
-        self._addModelRegister(model, 'MODEM.SHAPING5.COEFF29'	         , int, ModelVariableFormat.HEX )
-        self._addModelRegister(model, 'MODEM.SHAPING6.COEFF30'	         , int, ModelVariableFormat.HEX )
-        self._addModelRegister(model, 'MODEM.SHAPING6.COEFF31'	         , int, ModelVariableFormat.HEX )
-        self._addModelRegister(model, 'MODEM.SHAPING6.COEFF32'	         , int, ModelVariableFormat.HEX )
-        self._addModelRegister(model, 'MODEM.SHAPING6.COEFF33'	         , int, ModelVariableFormat.HEX )
-        self._addModelRegister(model, 'MODEM.SHAPING6.COEFF34'	         , int, ModelVariableFormat.HEX )
-        self._addModelRegister(model, 'MODEM.SHAPING6.COEFF35'	         , int, ModelVariableFormat.HEX )
-        self._addModelRegister(model, 'MODEM.SHAPING6.COEFF36'	         , int, ModelVariableFormat.HEX )
-        self._addModelRegister(model, 'MODEM.SHAPING6.COEFF37'	         , int, ModelVariableFormat.HEX )
-        self._addModelRegister(model, 'MODEM.SHAPING6.COEFF38'	         , int, ModelVariableFormat.HEX )
-        self._addModelRegister(model, 'MODEM.SHAPING6.COEFF39'	         , int, ModelVariableFormat.HEX )
 
         self._addModelRegister(model, 'FRC.FCD0.ADDTRAILTXDATA'          , int, ModelVariableFormat.HEX )
         self._addModelRegister(model, 'FRC.FCD1.ADDTRAILTXDATA'          , int, ModelVariableFormat.HEX )
@@ -285,6 +256,40 @@ class CALC_Global_jumbo(CALC_Global):
 
         # Chip Identifier
         self._addModelVariable(model, 'family',                           str,   ModelVariableFormat.ASCII)
+
+    def _add_SHAPING_regs(self, model):
+
+        self._addModelRegister(model, 'MODEM.SHAPING2.COEFF9'	, int, ModelVariableFormat.HEX )
+        self._addModelRegister(model, 'MODEM.SHAPING2.COEFF10'	         , int, ModelVariableFormat.HEX )
+        self._addModelRegister(model, 'MODEM.SHAPING2.COEFF11'	         , int, ModelVariableFormat.HEX )
+        self._addModelRegister(model, 'MODEM.SHAPING3.COEFF12'	         , int, ModelVariableFormat.HEX )
+        self._addModelRegister(model, 'MODEM.SHAPING3.COEFF13'	         , int, ModelVariableFormat.HEX )
+        self._addModelRegister(model, 'MODEM.SHAPING3.COEFF14'	         , int, ModelVariableFormat.HEX )
+        self._addModelRegister(model, 'MODEM.SHAPING3.COEFF15'	         , int, ModelVariableFormat.HEX )
+        self._addModelRegister(model, 'MODEM.SHAPING4.COEFF16'	         , int, ModelVariableFormat.HEX )
+        self._addModelRegister(model, 'MODEM.SHAPING4.COEFF17'	         , int, ModelVariableFormat.HEX )
+        self._addModelRegister(model, 'MODEM.SHAPING4.COEFF18'	         , int, ModelVariableFormat.HEX )
+        self._addModelRegister(model, 'MODEM.SHAPING4.COEFF19'	         , int, ModelVariableFormat.HEX )
+        self._addModelRegister(model, 'MODEM.SHAPING4.COEFF20'	         , int, ModelVariableFormat.HEX )
+        self._addModelRegister(model, 'MODEM.SHAPING4.COEFF21'	         , int, ModelVariableFormat.HEX )
+        self._addModelRegister(model, 'MODEM.SHAPING5.COEFF22'	         , int, ModelVariableFormat.HEX )
+        self._addModelRegister(model, 'MODEM.SHAPING5.COEFF23'	         , int, ModelVariableFormat.HEX )
+        self._addModelRegister(model, 'MODEM.SHAPING5.COEFF24'	         , int, ModelVariableFormat.HEX )
+        self._addModelRegister(model, 'MODEM.SHAPING5.COEFF25'	         , int, ModelVariableFormat.HEX )
+        self._addModelRegister(model, 'MODEM.SHAPING5.COEFF26'	         , int, ModelVariableFormat.HEX )
+        self._addModelRegister(model, 'MODEM.SHAPING5.COEFF27'	         , int, ModelVariableFormat.HEX )
+        self._addModelRegister(model, 'MODEM.SHAPING5.COEFF28'	         , int, ModelVariableFormat.HEX )
+        self._addModelRegister(model, 'MODEM.SHAPING5.COEFF29'	         , int, ModelVariableFormat.HEX )
+        self._addModelRegister(model, 'MODEM.SHAPING6.COEFF30'	         , int, ModelVariableFormat.HEX )
+        self._addModelRegister(model, 'MODEM.SHAPING6.COEFF31'	         , int, ModelVariableFormat.HEX )
+        self._addModelRegister(model, 'MODEM.SHAPING6.COEFF32'	         , int, ModelVariableFormat.HEX )
+        self._addModelRegister(model, 'MODEM.SHAPING6.COEFF33'	         , int, ModelVariableFormat.HEX )
+        self._addModelRegister(model, 'MODEM.SHAPING6.COEFF34'	         , int, ModelVariableFormat.HEX )
+        self._addModelRegister(model, 'MODEM.SHAPING6.COEFF35'	         , int, ModelVariableFormat.HEX )
+        self._addModelRegister(model, 'MODEM.SHAPING6.COEFF36'	         , int, ModelVariableFormat.HEX )
+        self._addModelRegister(model, 'MODEM.SHAPING6.COEFF37'	         , int, ModelVariableFormat.HEX )
+        self._addModelRegister(model, 'MODEM.SHAPING6.COEFF38'	         , int, ModelVariableFormat.HEX )
+        self._addModelRegister(model, 'MODEM.SHAPING6.COEFF39'	         , int, ModelVariableFormat.HEX )
 
     def calc_family_name(self, model):
         model.vars.family.value = "jumbo"

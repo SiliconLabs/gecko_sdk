@@ -33,7 +33,7 @@ include:
       - path: app.h
 
 readme:
-  - path: ../../documentation/example/rcp/readme.html
+  - path: ../../documentation/example/rcp/readme.md
 
 other_file:
   - path: ../../documentation/example/rcp/readme_img0.png
@@ -48,13 +48,15 @@ other_file:
 
 configuration:
   - name: SL_HEAP_SIZE
-    value: "9700"
+    value: "11000"
+  - name: SL_BT_CONTROLLER_BUFFER_MEMORY
+    value: 7168
   - name: SL_BT_CONFIG_USER_ADVERTISERS
     value: 2
   - name: SL_BOARD_ENABLE_VCOM
     value: 1
   - name: SL_UARTDRV_USART_VCOM_FLOW_CONTROL_TYPE
-    value: uartdrvFlowControlHw
+    value: uartdrvFlowControlNone
   - name: SL_PSA_KEY_USER_SLOT_COUNT
     value: "0"
     condition:
@@ -65,5 +67,5 @@ tag:
 
 ui_hints:
   highlight:
-    - path: readme.html
+    - path: readme.md
       focus: true

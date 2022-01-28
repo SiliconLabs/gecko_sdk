@@ -381,6 +381,23 @@ typedef enum
 } sm_bonding_key_t;
 
 /*
+ * Deprecated and replaced by sl_bt_sm_bonding_data_t.
+ */
+typedef enum
+{
+  sm_bonding_data_remote_address       = 0x0,
+  sm_bonding_data_remote_ltk           = 0x1,
+  sm_bonding_data_local_ltk            = 0x2,
+  sm_bonding_data_remote_master_inf    = 0x3,
+  sm_bonding_data_local_master_inf     = 0x4,
+  sm_bonding_data_irk                  = 0x5,
+  sm_bonding_data_meta                 = 0x6,
+  sm_bonding_data_gatt_client_config   = 0x7,
+  sm_bonding_data_gatt_client_features = 0x8,
+  sm_bonding_data_gatt_db_hash         = 0x9
+} sm_bonding_data_t;
+
+/*
  * Deprecated and replaced by sl_bt_sm_io_capability_t.
  */
 typedef enum

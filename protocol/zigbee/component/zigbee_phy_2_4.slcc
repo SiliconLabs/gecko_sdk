@@ -1,5 +1,5 @@
 id: zigbee_phy_2_4
-label: ZigBee 2.4GHz Device
+label: Zigbee 2.4GHz Device
 package: Zigbee
 category: Zigbee|Stack|PHY support
 quality: production

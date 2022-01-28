@@ -34,10 +34,10 @@
 
 // <h> Scheduler Server configuration
 
-// <e SCHEDULER_SERVER_LOGGING> Enable Logging
+// <e SL_BTMESH_SCHEDULER_SERVER_LOGGING_CFG_VAL> Enable Logging
 // <i> Default: 1
 // <i> Enable / disable Logging for Scheduler Server model specific messages for this component.
-#define SCHEDULER_SERVER_LOGGING   (1)
+#define SL_BTMESH_SCHEDULER_SERVER_LOGGING_CFG_VAL   (1)
 
 // </e>
 

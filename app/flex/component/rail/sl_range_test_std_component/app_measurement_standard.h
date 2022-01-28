@@ -145,6 +145,7 @@ typedef struct {
 /// Enumeration of the Predefined PHYs. Newly added predefined PHY shall be placed before _NUM_OF_PREDEFINED_PHYS
 typedef enum {
   IEEE802154_250KBPS,    ///> IEEE80215.4, 250kbps
+  IEEE802154_250KBPS_ANTDIV,    ///> IEEE80215.4, 250kbps with ANT DIV
   BLE_125KBPS,           ///> BLE 125kbps
   BLE_500KBPS,           ///> BLE 500kbps
   BLE_1MBPS,             ///> BLE 1Mbps

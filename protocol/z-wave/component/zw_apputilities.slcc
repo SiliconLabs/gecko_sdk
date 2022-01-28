@@ -44,7 +44,6 @@ source:
   - path: "protocol/z-wave/ZAF/ApplicationUtilities/ZAF_network_management.c"
   - path: "protocol/z-wave/ZAF/ApplicationUtilities/ZW_TransportSecProtocol.c"
   - path: "protocol/z-wave/ZAF/ApplicationUtilities/ZW_TransportMulticast.c"
-  - path: "protocol/z-wave/ZAF/ApplicationUtilities/application_properties.c"
   - path: "protocol/z-wave/ZAF/ApplicationUtilities/ZAF_tx_mutex.c"
   - path: "protocol/z-wave/ZAF/ApplicationUtilities/ZAF_command_class_utils.c"
   - path: "protocol/z-wave/ZAF/ApplicationUtilities/ZAF_nvm3_app.c"

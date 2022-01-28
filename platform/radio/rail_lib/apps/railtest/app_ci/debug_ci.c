@@ -453,17 +453,14 @@ void setDebugSignal(sl_cli_command_arg_t *args)
   }
 
   // Determine port from pinArg
-  debugPort = (uint8_t)gpioPortA + (pinArg[1] - ((pinArg[1] >= 'a') ? 'a' : 'A'));
-  if (((pinArg[0] != 'P') && (pinArg[0] != 'p')) || (debugPort > gpioPortD) || (strlen(pinArg) >= 5)) {
-    responsePrintError(sl_cli_get_command_string(args, 0), 0x50, "%s is not a valid pin name", sl_cli_get_argument_string(args, 0));
-    return;
-  }
+  debugPort = (pinArg[1] - ((pinArg[1] >= 'a') ? 'a' : 'A'));
+  // Skip the first two chars from the string and convert the remainder into an integer
+  pinNumber = strtoul(&pinArg[2], NULL, 10);
 
-  // Remove the first two chars from the string and convert the remainder into an integer
-  pinArg += 2;
-  pinNumber = strtoul(pinArg, &pinArg, 10);
-
-  if (pinNumber > 15) {
+  if (((pinArg[0] != 'P') && (pinArg[0] != 'p'))
+      || (strlen(pinArg) >= 5)
+      || (!GPIO_PORT_VALID(debugPort))
+      || (!GPIO_PORT_PIN_VALID(debugPort, pinNumber))) {
     responsePrintError(sl_cli_get_command_string(args, 0), 0x50, "%s is not a valid pin name", sl_cli_get_argument_string(args, 0));
     return;
   }
@@ -591,7 +588,7 @@ void setDebugSignal(sl_cli_command_arg_t *args)
 #if defined(_SILICON_LABS_32B_SERIES_2)
     // On series 2 there are many PRS channels that can go to each GPIO, so choose the first valid available one
     // XG24 parts have 4 extra channels available for ports A and B, so do some extra logic to include them in the search
-    if ((debugPort == gpioPortA) || (debugPort == gpioPortB)) {
+    if (debugPort < 2U) { // gpioPortA or gpioPortB
       for (i = FIRST_PAB_CHANNEL; i <= LAST_PAB_CHANNEL; i++) {
         #if defined(_SILICON_LABS_32B_SERIES_2_CONFIG_4)
         if (((i < FIRST_PCD_CHANNEL) || (i > LAST_PCD_CHANNEL)) && (pinForPRSChannel[i][0] == '\0'))

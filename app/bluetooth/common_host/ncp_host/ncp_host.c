@@ -34,10 +34,10 @@
 #include "ncp_host.h"
 #include "app_sleep.h"
 #include "ncp_host_config.h"
+#include "host_comm_config.h"
 
 // Default parameter values.
 #define MAX_OPT_LEN                   255
-#define DEFAULT_NCP_HOST_BUFLEN       1024
 
 #if PEEK_US_SLEEP == 0
 #define MSG_RECV_TIMEOUT_COUNT        10000
@@ -61,7 +61,7 @@
 // RX/TX buffer
 typedef struct {
   uint16_t len;
-  uint8_t buf[DEFAULT_NCP_HOST_BUFLEN];
+  uint8_t buf[DEFAULT_HOST_BUFLEN];
 } buf_ncp_host_t;
 
 static buf_ncp_host_t buf_ncp_raw = { 0 };
@@ -221,7 +221,7 @@ int32_t ncp_host_peek(void)
       }
       msg_len = buf_ncp_raw.buf[1] + 2;
       // Check if length will fit to buffer
-      if (msg_len >= DEFAULT_NCP_HOST_BUFLEN - 2) {
+      if (msg_len >= DEFAULT_HOST_BUFLEN - 2) {
         return -1;
       }
       ret = ncp_host_peek_timeout(msg_len, MSG_RECV_TIMEOUT_COUNT);
@@ -260,7 +260,7 @@ int32_t ncp_host_peek(void)
 #if defined(SECURITY) && SECURITY == 1
 void ncp_sec_host_command_handler(buf_ncp_host_t *buf)
 {
-  uint8_t response[DEFAULT_NCP_HOST_BUFLEN];
+  uint8_t response[DEFAULT_HOST_BUFLEN];
   sl_bt_msg_t *command = NULL;
   sl_bt_msg_t *resp_cmd = NULL;
   int32_t ret;

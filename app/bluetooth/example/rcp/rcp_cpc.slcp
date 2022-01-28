@@ -35,24 +35,21 @@ include:
       - path: app.h
 
 readme:
-  - path: ../../documentation/example/rcp/readme.html
+  - path: ../../documentation/example/rcp_cpc/readme.md
 
 other_file:
-  - path: ../../documentation/example/rcp/readme_img0.png
+  - path: ../../documentation/example/rcp_cpc/readme_img0.png
     folder: images
-  - path: ../../documentation/example/rcp/readme_img1.png
+  - path: ../../documentation/example/rcp_cpc/readme_img1.png
     folder: images
-  - path: ../../documentation/example/rcp/readme_img2.png
+  - path: ../../documentation/example/rcp_cpc/readme_img2.png
     folder: images
-  - path: ../../documentation/example/rcp/readme_img3.png
-    folder: images
-  - path: ../../documentation/example/rcp/readme_img4.png
 
 configuration:
   - name: SL_STACK_SIZE
     value: 2752
   - name: SL_HEAP_SIZE
-    value: "10700"
+    value: "16000"
   - name: SL_BOARD_ENABLE_VCOM
     value: 1
   - name: SL_BT_CONFIG_USER_ADVERTISERS
@@ -84,5 +81,5 @@ tag:
 
 ui_hints:
   highlight:
-    - path: readme.html
+    - path: readme.md
       focus: true

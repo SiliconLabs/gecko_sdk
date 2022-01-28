@@ -1,5 +1,6 @@
 from pyradioconfig.parts.ocelot.profiles.Profile_WiSUN import Profile_WiSUN_Ocelot
 from pyradioconfig.parts.common.utils.units_multiplier import UnitsMultiplier
+from pyradioconfig.parts.sol.profiles.sw_profile_outputs_common import sw_profile_outputs_common_sol
 
 class Profile_WiSUN_FSK_Sol(Profile_WiSUN_Ocelot):
 
@@ -11,6 +12,7 @@ class Profile_WiSUN_FSK_Sol(Profile_WiSUN_Ocelot):
         self._default = False
         self._activation_logic = ""
         self._family = "sol"
+        self._sw_profile_outputs_common = sw_profile_outputs_common_sol()
 
     def _fixed_wisun_vars(self, model):
 
@@ -61,6 +63,10 @@ class Profile_WiSUN_FSK_Sol(Profile_WiSUN_Ocelot):
 
         self.make_hidden_input(profile, model.vars.afc_run_mode, 'Advanced', readable_name="afc_run_mode")
         self.make_hidden_input(profile, model.vars.trecs_enabled, 'Advanced', readable_name="trecs_enabled")
+
+        # Hidden input for dual front-end filter support
+        self.make_hidden_input(profile, model.vars.dual_fefilt, "Advanced",
+                               readable_name="Dual front-end filter enable")
 
     def _lookup_from_crc_type(self, model):
         # This function sets CRC parameters based on the CRC specified

@@ -21,6 +21,7 @@ requires:
   - name: sensor_select
   - name: si1133_driver
   - name: i2cspm
+  - name: app_assert
 template_contribution:
   - name: component_catalog
     value: sensor_light

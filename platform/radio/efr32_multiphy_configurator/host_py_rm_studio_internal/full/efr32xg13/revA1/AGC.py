@@ -11,7 +11,8 @@ class RM_Peripheral_AGC(Base_RM_Peripheral):
         self.__dict__['zz_frozen'] = False
         super(RM_Peripheral_AGC, self).__init__(rmio, label,
             0x40087000, 'AGC',
-            u"")
+            u"",
+            [])
         self.STATUS0 = RM_Register_AGC_STATUS0(self.zz_rmio, self.zz_label)
         self.zz_rdict['STATUS0'] = self.STATUS0
         self.STATUS1 = RM_Register_AGC_STATUS1(self.zz_rmio, self.zz_label)

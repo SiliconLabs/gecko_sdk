@@ -26,3 +26,7 @@
       file_id: iot_flash_cfg
       instance: msc
     path: MGM240SA22VNA/iot_flash_cfg_msc.h
+  - override:
+      component: device_init_dcdc
+      file_id: device_init_dcdc_config
+    path: MGM240SA22VNA/sl_device_init_dcdc_config.h

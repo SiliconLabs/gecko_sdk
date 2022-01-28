@@ -46,6 +46,13 @@ const CPU_CHAR *os_cpu_c__c = "$Id: $";
 extern  "C" {
 #endif
 
+/********************************************************************************************************
+ *                                             GLOBAL VARIABLES
+ *******************************************************************************************************/
+#if (OS_CFG_ERRNO_EN == 1)
+extern int micriumos_errno;
+#endif
+
 /*****************************************************************************************************//**
  *                                         OSIdleContextPowerManagerHook
  *
@@ -385,6 +392,15 @@ void OSTaskSwHook(void)
     if (stk_status != DEF_OK) {
       OSRedzoneHitHook(OSTCBCurPtr);
     }
+  }
+#endif
+
+#if (OS_CFG_ERRNO_EN == 1)
+  if (OSTCBCurPtr != DEF_NULL) {
+    OSTCBCurPtr->local_errno = micriumos_errno;
+  }
+  if (OSTCBHighRdyPtr != DEF_NULL) {
+    micriumos_errno = OSTCBHighRdyPtr->local_errno;
   }
 #endif
 }

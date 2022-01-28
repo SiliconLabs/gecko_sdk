@@ -28,10 +28,9 @@
 #include "sl_wisun_api.h"
 #include "sl_wisun_trace_api.h"
 
+#include "app_default_phy.h"
+
 #define APP_SETTINGS_WISUN_DEFAULT_NETWORK_NAME  "Wi-SUN Network"
-#define APP_SETTINGS_WISUN_DEFAULT_REGULATORY_DOMAIN  SL_WISUN_REGULATORY_DOMAIN_EU
-#define APP_SETTINGS_WISUN_DEFAULT_OPERATING_CLASS  SL_WISUN_OPERATING_CLASS_1
-#define APP_SETTINGS_WISUN_DEFAULT_OPERATING_MODE  SL_WISUN_OPERATING_MODE_1A
 #define APP_SETTINGS_WISUN_DEFAULT_NETWORK_SIZE  SL_WISUN_NETWORK_SIZE_TEST
 #define APP_SETTINGS_WISUN_DEFAULT_TX_POWER  20
 #define APP_SETTINGS_WISUN_DEFAULT_UC_DWELL_INTERVAL  255
@@ -201,6 +200,7 @@ static const app_enum_t app_settings_phy_channel_spacing_enum[] =
 
 const app_enum_t app_settings_wisun_join_state_enum[] =
 {
+  { "Disconnected", SL_WISUN_JOIN_STATE_DISCONNECTED },
   { "Select PAN", SL_WISUN_JOIN_STATE_SELECT_PAN },
   { "Authenticate", SL_WISUN_JOIN_STATE_AUTHENTICATE },
   { "Acquire PAN Config", SL_WISUN_JOIN_STATE_ACQUIRE_PAN_CONFIG },

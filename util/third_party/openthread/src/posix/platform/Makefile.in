@@ -217,17 +217,18 @@ libopenthread_posix_a_DEPENDENCIES = $(call \
 	$(call \
 	ot_list_objects,$(top_builddir)/src/lib/platform/libopenthread-platform.a)
 am__libopenthread_posix_a_SOURCES_DIST = alarm.cpp backbone.cpp \
-	daemon.cpp entropy.cpp hdlc_interface.cpp infra_if.cpp \
-	logging.cpp mainloop.cpp memory.cpp misc.cpp \
+	daemon.cpp entropy.cpp firewall.cpp hdlc_interface.cpp \
+	infra_if.cpp logging.cpp mainloop.cpp memory.cpp misc.cpp \
 	multicast_routing.cpp netif.cpp radio.cpp radio_url.cpp \
 	settings.cpp spi_interface.cpp system.cpp trel_udp6.cpp \
-	udp.cpp virtual_time.cpp cpc_interface.cpp
+	udp.cpp utils.cpp virtual_time.cpp cpc_interface.cpp
 @OPENTHREAD_ENABLE_CPC_TRUE@am__objects_1 = libopenthread_posix_a-cpc_interface.$(OBJEXT)
 am_libopenthread_posix_a_OBJECTS =  \
 	libopenthread_posix_a-alarm.$(OBJEXT) \
 	libopenthread_posix_a-backbone.$(OBJEXT) \
 	libopenthread_posix_a-daemon.$(OBJEXT) \
 	libopenthread_posix_a-entropy.$(OBJEXT) \
+	libopenthread_posix_a-firewall.$(OBJEXT) \
 	libopenthread_posix_a-hdlc_interface.$(OBJEXT) \
 	libopenthread_posix_a-infra_if.$(OBJEXT) \
 	libopenthread_posix_a-logging.$(OBJEXT) \
@@ -243,6 +244,7 @@ am_libopenthread_posix_a_OBJECTS =  \
 	libopenthread_posix_a-system.$(OBJEXT) \
 	libopenthread_posix_a-trel_udp6.$(OBJEXT) \
 	libopenthread_posix_a-udp.$(OBJEXT) \
+	libopenthread_posix_a-utils.$(OBJEXT) \
 	libopenthread_posix_a-virtual_time.$(OBJEXT) $(am__objects_1)
 libopenthread_posix_a_OBJECTS = $(am_libopenthread_posix_a_OBJECTS)
 am_test_settings_OBJECTS = test_settings-settings.$(OBJEXT)
@@ -663,11 +665,11 @@ libopenthread_posix_a_CPPFLAGS = -I$(top_srcdir)/include \
 	-DOPENTHREAD_FTD=1 -DOPENTHREAD_MTD=0 -DOPENTHREAD_RADIO=0 \
 	$(NULL) $(am__append_1)
 libopenthread_posix_a_SOURCES = alarm.cpp backbone.cpp daemon.cpp \
-	entropy.cpp hdlc_interface.cpp infra_if.cpp logging.cpp \
-	mainloop.cpp memory.cpp misc.cpp multicast_routing.cpp \
-	netif.cpp radio.cpp radio_url.cpp settings.cpp \
-	spi_interface.cpp system.cpp trel_udp6.cpp udp.cpp \
-	virtual_time.cpp $(NULL) $(am__append_2)
+	entropy.cpp firewall.cpp hdlc_interface.cpp infra_if.cpp \
+	logging.cpp mainloop.cpp memory.cpp misc.cpp \
+	multicast_routing.cpp netif.cpp radio.cpp radio_url.cpp \
+	settings.cpp spi_interface.cpp system.cpp trel_udp6.cpp \
+	udp.cpp utils.cpp virtual_time.cpp $(NULL) $(am__append_2)
 libopenthread_posix_a_LIBADD = \
     $(call ot_list_objects,$(top_builddir)/src/lib/url/libopenthread-url.a)           \
     $(call ot_list_objects,$(top_builddir)/src/lib/platform/libopenthread-platform.a) \
@@ -791,6 +793,7 @@ distclean-compile:
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/libopenthread_posix_a-cpc_interface.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/libopenthread_posix_a-daemon.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/libopenthread_posix_a-entropy.Po@am__quote@
+@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/libopenthread_posix_a-firewall.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/libopenthread_posix_a-hdlc_interface.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/libopenthread_posix_a-infra_if.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/libopenthread_posix_a-logging.Po@am__quote@
@@ -806,6 +809,7 @@ distclean-compile:
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/libopenthread_posix_a-system.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/libopenthread_posix_a-trel_udp6.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/libopenthread_posix_a-udp.Po@am__quote@
+@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/libopenthread_posix_a-utils.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/libopenthread_posix_a-virtual_time.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/test_settings-settings.Po@am__quote@
 
@@ -888,6 +892,20 @@ libopenthread_posix_a-entropy.obj: entropy.cpp
 @AMDEP_TRUE@@am__fastdepCXX_FALSE@	$(AM_V_CXX)source='entropy.cpp' object='libopenthread_posix_a-entropy.obj' libtool=no @AMDEPBACKSLASH@
 @AMDEP_TRUE@@am__fastdepCXX_FALSE@	DEPDIR=$(DEPDIR) $(CXXDEPMODE) $(depcomp) @AMDEPBACKSLASH@
 @am__fastdepCXX_FALSE@	$(AM_V_CXX@am__nodep@)$(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(libopenthread_posix_a_CPPFLAGS) $(CPPFLAGS) $(AM_CXXFLAGS) $(CXXFLAGS) -c -o libopenthread_posix_a-entropy.obj `if test -f 'entropy.cpp'; then $(CYGPATH_W) 'entropy.cpp'; else $(CYGPATH_W) '$(srcdir)/entropy.cpp'; fi`
+
+libopenthread_posix_a-firewall.o: firewall.cpp
+@am__fastdepCXX_TRUE@	$(AM_V_CXX)$(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(libopenthread_posix_a_CPPFLAGS) $(CPPFLAGS) $(AM_CXXFLAGS) $(CXXFLAGS) -MT libopenthread_posix_a-firewall.o -MD -MP -MF $(DEPDIR)/libopenthread_posix_a-firewall.Tpo -c -o libopenthread_posix_a-firewall.o `test -f 'firewall.cpp' || echo '$(srcdir)/'`firewall.cpp
+@am__fastdepCXX_TRUE@	$(AM_V_at)$(am__mv) $(DEPDIR)/libopenthread_posix_a-firewall.Tpo $(DEPDIR)/libopenthread_posix_a-firewall.Po
+@AMDEP_TRUE@@am__fastdepCXX_FALSE@	$(AM_V_CXX)source='firewall.cpp' object='libopenthread_posix_a-firewall.o' libtool=no @AMDEPBACKSLASH@
+@AMDEP_TRUE@@am__fastdepCXX_FALSE@	DEPDIR=$(DEPDIR) $(CXXDEPMODE) $(depcomp) @AMDEPBACKSLASH@
+@am__fastdepCXX_FALSE@	$(AM_V_CXX@am__nodep@)$(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(libopenthread_posix_a_CPPFLAGS) $(CPPFLAGS) $(AM_CXXFLAGS) $(CXXFLAGS) -c -o libopenthread_posix_a-firewall.o `test -f 'firewall.cpp' || echo '$(srcdir)/'`firewall.cpp
+
+libopenthread_posix_a-firewall.obj: firewall.cpp
+@am__fastdepCXX_TRUE@	$(AM_V_CXX)$(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(libopenthread_posix_a_CPPFLAGS) $(CPPFLAGS) $(AM_CXXFLAGS) $(CXXFLAGS) -MT libopenthread_posix_a-firewall.obj -MD -MP -MF $(DEPDIR)/libopenthread_posix_a-firewall.Tpo -c -o libopenthread_posix_a-firewall.obj `if test -f 'firewall.cpp'; then $(CYGPATH_W) 'firewall.cpp'; else $(CYGPATH_W) '$(srcdir)/firewall.cpp'; fi`
+@am__fastdepCXX_TRUE@	$(AM_V_at)$(am__mv) $(DEPDIR)/libopenthread_posix_a-firewall.Tpo $(DEPDIR)/libopenthread_posix_a-firewall.Po
+@AMDEP_TRUE@@am__fastdepCXX_FALSE@	$(AM_V_CXX)source='firewall.cpp' object='libopenthread_posix_a-firewall.obj' libtool=no @AMDEPBACKSLASH@
+@AMDEP_TRUE@@am__fastdepCXX_FALSE@	DEPDIR=$(DEPDIR) $(CXXDEPMODE) $(depcomp) @AMDEPBACKSLASH@
+@am__fastdepCXX_FALSE@	$(AM_V_CXX@am__nodep@)$(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(libopenthread_posix_a_CPPFLAGS) $(CPPFLAGS) $(AM_CXXFLAGS) $(CXXFLAGS) -c -o libopenthread_posix_a-firewall.obj `if test -f 'firewall.cpp'; then $(CYGPATH_W) 'firewall.cpp'; else $(CYGPATH_W) '$(srcdir)/firewall.cpp'; fi`
 
 libopenthread_posix_a-hdlc_interface.o: hdlc_interface.cpp
 @am__fastdepCXX_TRUE@	$(AM_V_CXX)$(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(libopenthread_posix_a_CPPFLAGS) $(CPPFLAGS) $(AM_CXXFLAGS) $(CXXFLAGS) -MT libopenthread_posix_a-hdlc_interface.o -MD -MP -MF $(DEPDIR)/libopenthread_posix_a-hdlc_interface.Tpo -c -o libopenthread_posix_a-hdlc_interface.o `test -f 'hdlc_interface.cpp' || echo '$(srcdir)/'`hdlc_interface.cpp
@@ -1098,6 +1116,20 @@ libopenthread_posix_a-udp.obj: udp.cpp
 @AMDEP_TRUE@@am__fastdepCXX_FALSE@	$(AM_V_CXX)source='udp.cpp' object='libopenthread_posix_a-udp.obj' libtool=no @AMDEPBACKSLASH@
 @AMDEP_TRUE@@am__fastdepCXX_FALSE@	DEPDIR=$(DEPDIR) $(CXXDEPMODE) $(depcomp) @AMDEPBACKSLASH@
 @am__fastdepCXX_FALSE@	$(AM_V_CXX@am__nodep@)$(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(libopenthread_posix_a_CPPFLAGS) $(CPPFLAGS) $(AM_CXXFLAGS) $(CXXFLAGS) -c -o libopenthread_posix_a-udp.obj `if test -f 'udp.cpp'; then $(CYGPATH_W) 'udp.cpp'; else $(CYGPATH_W) '$(srcdir)/udp.cpp'; fi`
+
+libopenthread_posix_a-utils.o: utils.cpp
+@am__fastdepCXX_TRUE@	$(AM_V_CXX)$(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(libopenthread_posix_a_CPPFLAGS) $(CPPFLAGS) $(AM_CXXFLAGS) $(CXXFLAGS) -MT libopenthread_posix_a-utils.o -MD -MP -MF $(DEPDIR)/libopenthread_posix_a-utils.Tpo -c -o libopenthread_posix_a-utils.o `test -f 'utils.cpp' || echo '$(srcdir)/'`utils.cpp
+@am__fastdepCXX_TRUE@	$(AM_V_at)$(am__mv) $(DEPDIR)/libopenthread_posix_a-utils.Tpo $(DEPDIR)/libopenthread_posix_a-utils.Po
+@AMDEP_TRUE@@am__fastdepCXX_FALSE@	$(AM_V_CXX)source='utils.cpp' object='libopenthread_posix_a-utils.o' libtool=no @AMDEPBACKSLASH@
+@AMDEP_TRUE@@am__fastdepCXX_FALSE@	DEPDIR=$(DEPDIR) $(CXXDEPMODE) $(depcomp) @AMDEPBACKSLASH@
+@am__fastdepCXX_FALSE@	$(AM_V_CXX@am__nodep@)$(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(libopenthread_posix_a_CPPFLAGS) $(CPPFLAGS) $(AM_CXXFLAGS) $(CXXFLAGS) -c -o libopenthread_posix_a-utils.o `test -f 'utils.cpp' || echo '$(srcdir)/'`utils.cpp
+
+libopenthread_posix_a-utils.obj: utils.cpp
+@am__fastdepCXX_TRUE@	$(AM_V_CXX)$(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(libopenthread_posix_a_CPPFLAGS) $(CPPFLAGS) $(AM_CXXFLAGS) $(CXXFLAGS) -MT libopenthread_posix_a-utils.obj -MD -MP -MF $(DEPDIR)/libopenthread_posix_a-utils.Tpo -c -o libopenthread_posix_a-utils.obj `if test -f 'utils.cpp'; then $(CYGPATH_W) 'utils.cpp'; else $(CYGPATH_W) '$(srcdir)/utils.cpp'; fi`
+@am__fastdepCXX_TRUE@	$(AM_V_at)$(am__mv) $(DEPDIR)/libopenthread_posix_a-utils.Tpo $(DEPDIR)/libopenthread_posix_a-utils.Po
+@AMDEP_TRUE@@am__fastdepCXX_FALSE@	$(AM_V_CXX)source='utils.cpp' object='libopenthread_posix_a-utils.obj' libtool=no @AMDEPBACKSLASH@
+@AMDEP_TRUE@@am__fastdepCXX_FALSE@	DEPDIR=$(DEPDIR) $(CXXDEPMODE) $(depcomp) @AMDEPBACKSLASH@
+@am__fastdepCXX_FALSE@	$(AM_V_CXX@am__nodep@)$(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(libopenthread_posix_a_CPPFLAGS) $(CPPFLAGS) $(AM_CXXFLAGS) $(CXXFLAGS) -c -o libopenthread_posix_a-utils.obj `if test -f 'utils.cpp'; then $(CYGPATH_W) 'utils.cpp'; else $(CYGPATH_W) '$(srcdir)/utils.cpp'; fi`
 
 libopenthread_posix_a-virtual_time.o: virtual_time.cpp
 @am__fastdepCXX_TRUE@	$(AM_V_CXX)$(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(libopenthread_posix_a_CPPFLAGS) $(CPPFLAGS) $(AM_CXXFLAGS) $(CXXFLAGS) -MT libopenthread_posix_a-virtual_time.o -MD -MP -MF $(DEPDIR)/libopenthread_posix_a-virtual_time.Tpo -c -o libopenthread_posix_a-virtual_time.o `test -f 'virtual_time.cpp' || echo '$(srcdir)/'`virtual_time.cpp

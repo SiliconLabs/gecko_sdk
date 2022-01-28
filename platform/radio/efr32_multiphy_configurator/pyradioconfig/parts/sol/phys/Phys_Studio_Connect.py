@@ -11,6 +11,12 @@ class PHYS_Studio_Connect_Sol(PHYS_connect_Ocelot):
         return phy
 
     # Owner: Casey Weltzin
+    # Jira Link: https://jira.silabs.com/browse/PGSOLVALTEST-2192
+    def PHY_Studio_Connect_915mhz_oqpsk_2Mcps_250kbps(self, model, phy_name=None):
+        phy = super().PHY_Studio_Connect_915mhz_oqpsk_2Mcps_250kbps(model)
+        return phy
+
+    # Owner: Casey Weltzin
     # Jira Link: https://jira.silabs.com/browse/PGSOLVALTEST-43
     def PHY_Studio_Connect_915MHz_2GFSK_500kbps(self, model, phy_name=None):
         phy = super().PHY_Studio_Connect_915MHz_2GFSK_500kbps(model)

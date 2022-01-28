@@ -1,7 +1,7 @@
 id: zigbee_display
 package: Zigbee
 label: "Zigbee LCD Display"
-category: "Zigbee|ZigBee 3.0"
+category: "Zigbee|Zigbee 3.0"
 quality: "production"
 description: "DMP applications use this component to display graphics on the LCD."
 

@@ -19,6 +19,10 @@
   - name: hardware_board_has_lfxo
 - recommends:
   - id: brd4001a
+  - id: iostream_eusart
+    instance:
+    - vcom
+  - id: bootloader_uart_driver
   - id: mx25_flash_shutdown_usart
   - id: bootloader_spi_controller_usart_driver
 - template_contribution:
@@ -34,6 +38,8 @@
   - board:variant:A
   - board:revision:A00
   - board:device:efr32bg22c224f512im40
+  - hardware:has:vcom
+  - hardware:has:pti
   - hardware:has:led:0
   - hardware:has:button:0
   - hardware:has:memory:spi:mx25r8035f

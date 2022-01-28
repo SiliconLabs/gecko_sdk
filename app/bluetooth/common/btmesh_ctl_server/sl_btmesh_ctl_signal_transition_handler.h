@@ -81,7 +81,7 @@ void sl_btmesh_lighting_color_pwm_cb(uint16_t color);
 /***************************************************************************//**
  * Called when the UI shall be updated with the changed CTL Model state during
  * a transition. The rate of this callback can be controlled by changing the
- * CTL_SERVER_UI_UPDATE_PERIOD macro.
+ * SL_BTMESH_CTL_SERVER_UI_UPDATE_PERIOD_CFG_VAL macro.
  *
  * This is a callback which can be implemented in the application.
  * @note If no implementation is provided in the application then a default weak

@@ -33,6 +33,8 @@ component:
   - id: printf
   - id: iostream_retarget_stdio
   - id: iostream_recommended_stream
+requires:
+  - name: device_has_semailbox
 configuration:
   - name: SL_STATUS_STRING_ENABLE_BLUETOOTH
     value: 0

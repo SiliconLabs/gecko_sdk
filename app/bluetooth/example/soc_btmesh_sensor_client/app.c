@@ -223,7 +223,7 @@ static void set_device_name(bd_addr *addr)
   }
 
   // Show device name on the LCD
-  lcd_print(name, BTMESH_WSTK_LCD_ROW_NAME);
+  lcd_print(name, SL_BTMESH_WSTK_LCD_ROW_NAME_CFG_VAL);
 }
 
 /***************************************************************************//**
@@ -277,7 +277,7 @@ static void handle_boot_event(void)
     sc = sl_btmesh_node_init();
     if (sc != SL_STATUS_OK) {
       snprintf(buf, BOOT_ERR_MSG_BUF_LEN, "init failed (0x%lx)", sc);
-      lcd_print(buf, BTMESH_WSTK_LCD_ROW_STATUS);
+      lcd_print(buf, SL_BTMESH_WSTK_LCD_ROW_STATUS_CFG_VAL);
     }
   }
 }
@@ -350,14 +350,14 @@ static void handle_le_connection_events(sl_bt_msg_t *evt)
   switch (SL_BT_MSG_ID(evt->header)) {
     case sl_bt_evt_connection_opened_id:
       num_connections++;
-      lcd_print("connected", BTMESH_WSTK_LCD_ROW_CONNECTION);
+      lcd_print("connected", SL_BTMESH_WSTK_LCD_ROW_CONNECTION_CFG_VAL);
       app_log("Connected\r\n");
       break;
 
     case sl_bt_evt_connection_closed_id:
       if (num_connections > 0) {
         if (--num_connections == 0) {
-          lcd_print("", BTMESH_WSTK_LCD_ROW_CONNECTION);
+          lcd_print("", SL_BTMESH_WSTK_LCD_ROW_CONNECTION_CFG_VAL);
           app_log("Disconnected\r\n");
         }
       }

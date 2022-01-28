@@ -47,8 +47,26 @@ class Calc_Demodulator_Sol(CALC_Demodulator_ocelot):
         self._addModelVariable(model, 'ofdm_fft_size', int, ModelVariableFormat.DECIMAL, desc='FFT size for OFDM demod')
         self._addModelVariable(model, 'dual_fefilt', bool, ModelVariableFormat.ASCII, desc='PHY uses both FEFILT paths')
 
+    def _add_demod_rate_variable(self, model):
+        self._addModelActual(model, 'demod_rate', float, ModelVariableFormat.DECIMAL)
+
     def calc_init_advanced(self, model):
         pass
+
+    def calc_demod_rate_actual(self,model):
+        #This function calculates the actual sample rate at the demod
+
+        # Load model variables into local variables
+        adc_freq_actual = model.vars.adc_freq_actual.value
+        dec0_actual = model.vars.dec0_actual.value
+        dec1_actual = model.vars.dec1_actual.value
+        dec2_actual = model.vars.dec2_actual.value
+        src2_actual = model.vars.src2_ratio_actual.value
+
+        demod_rate_actual = adc_freq_actual * src2_actual / (8 * dec0_actual * dec1_actual * dec2_actual)
+
+        #Load local variables back into model variables
+        model.vars.demod_rate_actual.value = demod_rate_actual
 
     def calc_mod_type_reg(self, model):
         #This function writes the modulation type register
@@ -77,7 +95,7 @@ class Calc_Demodulator_Sol(CALC_Demodulator_ocelot):
 
             demod_select = model.vars.demod_select.var_enum.SOFT_DEMOD
 
-            [target_osr, dec0, dec1, min_osr, max_osr] = self.return_osr_dec0_dec1(model, demod_select)
+            [target_osr, dec0, dec1, min_osr, max_osr] = self.return_osr_dec0_dec1(model, demod_select, quitatfirstvalid=False)
 
             if target_osr == 0:
                 raise CalculationException('WARNING: target_osr=0 in calc_choose_demod()')
@@ -360,46 +378,49 @@ class Calc_Demodulator_Sol(CALC_Demodulator_ocelot):
         #Load local variables back into model variables
         model.vars.dec2_actual.value = dec2_actual
 
+    def calc_bitrate_gross(self, model):
+
+        mod_type = model.vars.modulation_type.value
+        bitrate = model.vars.bitrate.value
+
+        if mod_type == model.vars.modulation_type.var_enum.OFDM:
+            model.vars.bitrate_gross.value = bitrate
+        else:
+            super().calc_bitrate_gross(model)
+
     def calc_baudrate(self, model):
         # This function calculates baudrate based on the input bitrate and modulation/encoding settings
 
         # Load model variables into local variables
         mod_type = model.vars.modulation_type.value
-        bitrate = model.vars.bitrate.value
+        bitrate_gross = model.vars.bitrate_gross.value
         encoding = model.vars.symbol_encoding.value
         spreading_factor = model.vars.dsss_spreading_factor.value
-        mbus_encoding = model.vars.mbus_symbol_encoding.value
-        fec_enabled = model.vars.fec_enabled.value
-        ofdm_fft_size = model.vars.ofdm_fft_size.value
 
-        # Based on modulation type calculate baudrate from bitrate
-        if (mod_type == model.vars.modulation_type.var_enum.OQPSK) or \
-                (mod_type == model.vars.modulation_type.var_enum.OOK) or \
-                (mod_type == model.vars.modulation_type.var_enum.ASK) or \
-                (mod_type == model.vars.modulation_type.var_enum.FSK2) or \
-                (mod_type == model.vars.modulation_type.var_enum.BPSK) or \
-                (mod_type == model.vars.modulation_type.var_enum.DBPSK) or \
-                (mod_type == model.vars.modulation_type.var_enum.MSK):
-            baudrate = bitrate
-        elif (mod_type == model.vars.modulation_type.var_enum.FSK4):
-            baudrate = bitrate / 2
-        elif (mod_type == model.vars.modulation_type.var_enum.OFDM):
-            baudrate = int(1/self.ofdm_tsym_useful*ofdm_fft_size)
+        if (mod_type == model.vars.modulation_type.var_enum.OFDM):
+            ofdm_fft_size = model.vars.ofdm_fft_size.value
+            baudrate = 1.0/self.ofdm_tsym_useful*ofdm_fft_size
         else:
-            raise CalculationException('ERROR: modulation type not supported in calc_baudrate()')
+            # Based on modulation type calculate baudrate from bitrate
+            if (mod_type == model.vars.modulation_type.var_enum.OQPSK) or \
+                    (mod_type == model.vars.modulation_type.var_enum.OOK) or \
+                    (mod_type == model.vars.modulation_type.var_enum.ASK) or \
+                    (mod_type == model.vars.modulation_type.var_enum.FSK2) or \
+                    (mod_type == model.vars.modulation_type.var_enum.MSK) or \
+                    (mod_type == model.vars.modulation_type.var_enum.BPSK) or \
+                    (mod_type == model.vars.modulation_type.var_enum.DBPSK):
+                baudrate = bitrate_gross * 1.0
+            elif (mod_type == model.vars.modulation_type.var_enum.FSK4):
+                baudrate = bitrate_gross / 2.0
+            else:
+                raise CalculationException('ERROR: modulation type not supported in calc_baudrate()')
 
-        # Adjust baudrate based on symbol encoding
-        if (encoding == model.vars.symbol_encoding.var_enum.Manchester or encoding == model.vars.symbol_encoding.var_enum.Inv_Manchester):
-            baudrate *= 2
-        if (encoding == model.vars.symbol_encoding.var_enum.DSSS):
-            baudrate *= spreading_factor
-        if (mbus_encoding == model.vars.mbus_symbol_encoding.var_enum.MBUS_3OF6):
-            baudrate *= 1.5
-        if fec_enabled:
-            baudrate *= 2
+            # Account for the DSSS spreading factor
+            if (encoding == model.vars.symbol_encoding.var_enum.DSSS):
+                baudrate *= spreading_factor
 
         # Load local variables back into model variables
-        model.vars.baudrate.value = int(round(baudrate))
+        model.vars.baudrate.value = baudrate
 
 
     def calc_chfilt_reg(self,model):
@@ -718,7 +739,7 @@ class Calc_Demodulator_Sol(CALC_Demodulator_ocelot):
                 osr_list = [4, 5]
                 min_osr = 4
                 max_osr = 5
-                min_src2 = 0.8
+                min_src2 = 0.79
                 max_src2 = 1.0
                 min_dec2 = 1
                 max_dec2 = 2
@@ -1013,12 +1034,16 @@ class Calc_Demodulator_Sol(CALC_Demodulator_ocelot):
 
         #Read in model vars
         demod_select = model.vars.demod_select.value
+        softmodem_modulation_type = model.vars.softmodem_modulation_type.value
+        demod_rate_actual = model.vars.demod_rate_actual.value
 
-        #Add case for softmodem
-        if demod_select == model.vars.demod_select.var_enum.SOFT_DEMOD:
-            disable_subfrac_divider=True
-
-        super().calc_baudrate_actual(model, disable_subfrac_divider=disable_subfrac_divider)
+        if softmodem_modulation_type == model.vars.softmodem_modulation_type.var_enum.SUN_OFDM:
+            baudrate = demod_rate_actual/2.0
+            model.vars.rx_baud_rate_actual.value = baudrate
+        else:
+            if demod_select == model.vars.demod_select.var_enum.SOFT_DEMOD:
+                disable_subfrac_divider=True
+            super().calc_baudrate_actual(model, disable_subfrac_divider=disable_subfrac_divider)
 
     def calc_bwsel(self, model, softmodem_narrowing=False):
 
@@ -1043,19 +1068,6 @@ class Calc_Demodulator_Sol(CALC_Demodulator_ocelot):
             softmodem_narrowing = True
 
         super().calc_lock_bandwidth(model, softmodem_narrowing=softmodem_narrowing)
-
-    def calc_detdis_reg(self, model):
-
-        #Read in model vars
-        softmodem_modulation_type = model.vars.softmodem_modulation_type.value
-
-        #Set DETDIS=1 for SUN OQPSK on softmodem
-        if softmodem_modulation_type == model.vars.softmodem_modulation_type.var_enum.SUN_OQPSK:
-            detdis = 1
-        else:
-            detdis = 0
-
-        self._reg_write(model.vars.MODEM_CTRL0_DETDIS, detdis)
 
     def calc_interpolation_gain_actual(self, model):
         #This function calculates the actual interpolation gain
@@ -1125,6 +1137,47 @@ class Calc_Demodulator_Sol(CALC_Demodulator_ocelot):
 
         self._reg_write_by_name_concat(model, fefilt_selected, 'DIGIGAINCTRL_BBSS', bbss)
 
+    def calc_dec1gain_actual(self, model):
+        #given register settings return actual DEC1GAIN used
 
+        reg = Calc_Utilities_Sol().get_fefilt_actual(model, 'DIGIGAINCTRL_DEC1GAIN')
 
+        if reg == 0:
+            val = 0
+        elif reg == 1:
+            val = 6
+        else:
+            val = 12
 
+        model.vars.dec1gain_actual.value = val
+
+    def calc_rssi_dig_adjust_db(self, model):
+        #These variables are passed to RAIL so that RSSI corrections can be made to more accurately measure power
+
+        #Read in model vars
+        dec0gain = Calc_Utilities_Sol().get_fefilt_actual(model, 'DIGIGAINCTRL_DEC0GAIN')
+        dec1_actual = model.vars.dec1_actual.value
+        dec1gain_actual = model.vars.dec1gain_actual.value
+        digigainen = Calc_Utilities_Sol().get_fefilt_actual(model, 'DIGIGAINCTRL_DIGIGAINEN')
+        digigain = Calc_Utilities_Sol().get_fefilt_actual(model, 'DIGIGAINCTRL_DIGIGAIN')
+
+        #Calculate gains
+
+        dec0_gain_db = 6.0*dec0gain
+
+        dec1_gain_linear = (dec1_actual**4) * (2**(-1*floor(4*log2(dec1_actual)-4)))
+        dec1_gain_db = 20*log10(dec1_gain_linear/16) + dec1gain_actual #Normalize so that dec1=0 gives gain=16
+
+        if digigainen:
+            digigain_db = -3+(digigain*0.25)
+        else:
+            digigain_db = 0
+
+        rssi_dig_adjust_db = dec0_gain_db + dec1_gain_db + digigain_db
+
+        #Write the vars
+        model.vars.rssi_dig_adjust_db.value = rssi_dig_adjust_db
+
+    def calc_rssi_rf_adjust_db(self, model):
+        #Temporary, to be entered based on measured validation data
+        model.vars.rssi_rf_adjust_db.value = 0.0

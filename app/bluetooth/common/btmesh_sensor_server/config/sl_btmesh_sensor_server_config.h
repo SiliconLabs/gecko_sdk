@@ -34,10 +34,10 @@
 
 // <h> Sensor Server configuration
 
-// <e SENSOR_SERVER_LOGGING> Enable Logging
+// <e SL_BTMESH_SENSOR_SERVER_LOGGING_CFG_VAL> Enable Logging
 // <i> Default: 1
 // <i> Enable / disable Logging for Sensor Server model specific messages for this component.
-#define SENSOR_SERVER_LOGGING   (1)
+#define SL_BTMESH_SENSOR_SERVER_LOGGING_CFG_VAL   (1)
 // </e>
 
 // </h>

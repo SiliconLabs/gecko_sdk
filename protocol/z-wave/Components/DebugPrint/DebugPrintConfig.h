@@ -17,10 +17,10 @@
 
 /**
 * Function pointer type for the DebugPrint printing.
-* @param[in]  const uint8_t*  Pointer to data to be printed.
-* @param[in]  uint32_t        Length of data to be printed.
+* @param[in]  p_data       Pointer to data to be printed.
+* @param[in]  data_length  Length of data to be printed.
 */
-typedef void(*DebugPrintPrinter)(const uint8_t*, uint32_t);
+typedef void(*DebugPrintPrinter)(const uint8_t* p_data, uint32_t data_length);
 
 /**
 * Configures DebugPrint.

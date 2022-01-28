@@ -1,7 +1,7 @@
 project_name: "ncp-spi"
 label: "ncp-spi"
 package: "Zigbee"
-category: "ZigBee Application"
+category: "Zigbee Application"
 quality: "production"
 
 description: |-

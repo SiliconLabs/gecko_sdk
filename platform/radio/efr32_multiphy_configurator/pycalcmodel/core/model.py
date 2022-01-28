@@ -16,6 +16,7 @@ from pycalcmodel.core.phy import *
 from pycalcmodel.core.parser import ModelParser
 from pycalcmodel.core.profile import ModelProfileContainer, ModelProfileTypeXml, ModelProfileInstanceXml
 from pycalcmodel.core.variable import ModelVariableContainer, ModelVariableTypeXml, ModelVariableInstanceXml
+from pycalcmodel.core.reg_model import RegModel
 from pycalcmodel.core.default_phy import *
 from pycalcmodel.core.feature import *
 from datetime import datetime
@@ -39,7 +40,8 @@ class ModelRoot(object):
         self.profiles = ModelProfileContainer(self.parser)
         self.vars = ModelVariableContainer()
         self.logs = None
-        self.calc_routine_execution = None  #This variable is not serialized/deserialized to XML, only used for unit tests
+        self.calc_routine_execution = None  # This variable is not serialized/deserialized to XML, only used for unit tests
+        self._reg_model = RegModel.get_reg_model(part_family)  # Reg model object is passed by reference
         if target is not None:
             self.target = target
 
@@ -73,6 +75,10 @@ class ModelRoot(object):
     def target(self, value):
         assert isinstance(value, basestring)
         self._target = value
+
+    @property
+    def reg_model(self):
+        return self._reg_model
 
     def validate(self):
         """

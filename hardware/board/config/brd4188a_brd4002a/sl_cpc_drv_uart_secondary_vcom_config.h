@@ -46,12 +46,18 @@
 // <o SL_CPC_DRV_UART_VCOM_BAUDRATE> UART Baudrate
 // <i> Default: 115200
 #define SL_CPC_DRV_UART_VCOM_BAUDRATE              115200
+
+// <o SL_CPC_DRV_UART_VCOM_FLOW_CONTROL_TYPE> Flow control
+// <usartHwFlowControlNone=> None
+// <usartHwFlowControlCtsAndRts=> CTS/RTS
+// <i> Default: usartHwFlowControlNone
+#define SL_CPC_DRV_UART_VCOM_FLOW_CONTROL_TYPE usartHwFlowControlNone
 // </h>
 
 // <<< end of configuration section >>>
 
 // <<< sl:start pin_tool >>>
-// <usart signal=TX,RX> SL_CPC_DRV_UART_VCOM
+// <usart signal=TX,RX,(CTS),(RTS)> SL_CPC_DRV_UART_VCOM
 // $[USART_SL_CPC_DRV_UART_VCOM]
 #define SL_CPC_DRV_UART_VCOM_PERIPHERAL          USART0
 #define SL_CPC_DRV_UART_VCOM_PERIPHERAL_NO       0
@@ -63,6 +69,14 @@
 // USART0 RX on PA09
 #define SL_CPC_DRV_UART_VCOM_RX_PORT             gpioPortA
 #define SL_CPC_DRV_UART_VCOM_RX_PIN              9
+
+// USART0 CTS on PB05
+#define SL_CPC_DRV_UART_VCOM_CTS_PORT            gpioPortB
+#define SL_CPC_DRV_UART_VCOM_CTS_PIN             5
+
+// USART0 RTS on PA00
+#define SL_CPC_DRV_UART_VCOM_RTS_PORT            gpioPortA
+#define SL_CPC_DRV_UART_VCOM_RTS_PIN             0
 
 // [USART_SL_CPC_DRV_UART_VCOM]$
 // <<< sl:end pin_tool >>>

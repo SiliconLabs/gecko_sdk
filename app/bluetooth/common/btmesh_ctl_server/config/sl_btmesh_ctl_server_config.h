@@ -34,50 +34,50 @@
 
 // <h> CTL Server configuration
 
-// <o CTL_SERVER_NVM_SAVE_TIME> Timeout [ms] for saving States of the model to NVM.
+// <o SL_BTMESH_CTL_SERVER_NVM_SAVE_TIME_CFG_VAL> Timeout [ms] for saving States of the model to NVM.
 // <i> Default: 5000
 // <i> Timeout [ms] for saving States of the model to NVM.
-#define CTL_SERVER_NVM_SAVE_TIME   (5000)
+#define SL_BTMESH_CTL_SERVER_NVM_SAVE_TIME_CFG_VAL   (5000)
 
-// <o CTL_SERVER_PS_KEY> PS Key for NVM Page where the States of the Lighting Model are saved.
+// <o SL_BTMESH_CTL_SERVER_PS_KEY_CFG_VAL> PS Key for NVM Page where the States of the Lighting Model are saved.
 // <i> Default: 0x4005
 // <i> PS Key for NVM Page where the States of the Lighting Model are saved.
-#define CTL_SERVER_PS_KEY   (0x4005)
+#define SL_BTMESH_CTL_SERVER_PS_KEY_CFG_VAL   (0x4005)
 
-// <o CTL_SERVER_PWM_UPDATE_PERIOD> Periodicity [ms] for updating the PWM duty cycle during a transition.
+// <o SL_BTMESH_CTL_SERVER_PWM_UPDATE_PERIOD_CFG_VAL> Periodicity [ms] for updating the PWM duty cycle during a transition.
 // <i> Default: 1
 // <i> Periodicity [ms] for updating the PWM duty cycle during a transition.
-#define CTL_SERVER_PWM_UPDATE_PERIOD   (1)
+#define SL_BTMESH_CTL_SERVER_PWM_UPDATE_PERIOD_CFG_VAL   (1)
 
-// <o CTL_SERVER_UI_UPDATE_PERIOD> Periodicity [ms] for updating the UI with temperature & delta UV during a transition.
+// <o SL_BTMESH_CTL_SERVER_UI_UPDATE_PERIOD_CFG_VAL> Periodicity [ms] for updating the UI with temperature & delta UV during a transition.
 // <i> Default: 100
 // <i> Periodicity [ms] for updating the temperature & delta UV values on the UI.
-#define CTL_SERVER_UI_UPDATE_PERIOD   (100)
+#define SL_BTMESH_CTL_SERVER_UI_UPDATE_PERIOD_CFG_VAL   (100)
 
-// <o CTL_SERVER_DEFAULT_TEMPERATURE> Default Color Temperature
+// <o SL_BTMESH_CTL_SERVER_DEFAULT_TEMPERATURE_CFG_VAL> Default Color Temperature
 // <i> Default: 6500
 // <i> Default Color Temperature value.
-#define CTL_SERVER_DEFAULT_TEMPERATURE   (6500)
+#define SL_BTMESH_CTL_SERVER_DEFAULT_TEMPERATURE_CFG_VAL   (6500)
 
-// <o CTL_SERVER_DEFAULT_DELTAUV> Default Delta UV
+// <o SL_BTMESH_CTL_SERVER_DEFAULT_DELTAUV_CFG_VAL> Default Delta UV
 // <i> Default: 0
 // <i> Default Delta UV.
-#define CTL_SERVER_DEFAULT_DELTAUV   (0)
+#define SL_BTMESH_CTL_SERVER_DEFAULT_DELTAUV_CFG_VAL   (0)
 
-// <o CTL_SERVER_MINIMUM_TEMPERATURE> Minimum Color Temperature
+// <o SL_BTMESH_CTL_SERVER_MINIMUM_TEMPERATURE_CFG_VAL> Minimum Color Temperature
 // <i> Default: 800
 // <i> Minimum Color Temperature.
-#define CTL_SERVER_MINIMUM_TEMPERATURE   (800)
+#define SL_BTMESH_CTL_SERVER_MINIMUM_TEMPERATURE_CFG_VAL   (800)
 
-// <o CTL_SERVER_MAXIMUM_TEMPERATURE> Maximum Color Temperature
+// <o SL_BTMESH_CTL_SERVER_MAXIMUM_TEMPERATURE_CFG_VAL> Maximum Color Temperature
 // <i> Default: 800
 // <i> Maximum Color Temperature.
-#define CTL_SERVER_MAXIMUM_TEMPERATURE   (20000)
+#define SL_BTMESH_CTL_SERVER_MAXIMUM_TEMPERATURE_CFG_VAL   (20000)
 
-// <e CTL_SERVER_LOGGING> Enable Logging
+// <e SL_BTMESH_CTL_SERVER_LOGGING_CFG_VAL> Enable Logging
 // <i> Default: 1
 // <i> Enable / disable Logging for Lighting Server model specific messages for this component.
-#define CTL_SERVER_LOGGING   (1)
+#define SL_BTMESH_CTL_SERVER_LOGGING_CFG_VAL   (1)
 
 // </e>
 
@@ -86,8 +86,8 @@
 // <<< end of configuration section >>>
 
 // The PWM update period shall not be greater than the UI update period
-#if (CTL_SERVER_UI_UPDATE_PERIOD) < (CTL_SERVER_PWM_UPDATE_PERIOD)
-#error "The CTL_SERVER_PWM_UPDATE_PERIOD shall be less than CTL_SERVER_UI_UPDATE_PERIOD."
+#if (SL_BTMESH_CTL_SERVER_UI_UPDATE_PERIOD_CFG_VAL) < (SL_BTMESH_CTL_SERVER_PWM_UPDATE_PERIOD_CFG_VAL)
+#error "The SL_BTMESH_CTL_SERVER_PWM_UPDATE_PERIOD_CFG_VAL shall be less than SL_BTMESH_CTL_SERVER_UI_UPDATE_PERIOD_CFG_VAL."
 #endif
 
 #endif // SL_BTMESH_CTL_SERVER_CONFIG_H

@@ -98,7 +98,9 @@ sl_status_t app_scheduler_add(app_scheduler_task_t task,
  * Add a task to be scheduled with optional data parameter
  *
  * @param[in] task Task function to be scheduled
- * @param[in] delay_ms Initial delay in ms.
+ * @param[in] delay_ms Initial delay in ms. The maximum value is limited by
+ *                     the value returned by
+ *                     sl_sleeptimer_get_max_ms32_conversion
  * @param[in] data The data that is passed to the task.
  * @param[in] size The size of the data.
  * @param[out] handle Handle of the task. NULL can be specified if
@@ -111,7 +113,7 @@ sl_status_t app_scheduler_add(app_scheduler_task_t task,
  * @return Status of the operation.
  ******************************************************************************/
 sl_status_t app_scheduler_add_delayed(app_scheduler_task_t task,
-                                      uint16_t delay_ms,
+                                      uint32_t delay_ms,
                                       void *data,
                                       size_t size,
                                       app_scheduler_task_handle_t *handle);
@@ -120,7 +122,8 @@ sl_status_t app_scheduler_add_delayed(app_scheduler_task_t task,
  * Add a periodic task to be scheduled with optional data parameter
  *
  * @param[in] task Task function to be scheduled
- * @param[in] period_ms Period in ms.
+ * @param[in] period_ms Period in ms. The maximum value is limited by the
+ *                      value returned by sl_sleeptimer_get_max_ms32_conversion
  * @param[in] data The data that is passed to the task.
  * @param[in] size The size of the data.
  * @param[out] handle Handle of the task
@@ -133,7 +136,7 @@ sl_status_t app_scheduler_add_delayed(app_scheduler_task_t task,
  * @return Status of the operation.
  ******************************************************************************/
 sl_status_t app_scheduler_add_periodic(app_scheduler_task_t task,
-                                       uint16_t period_ms,
+                                       uint32_t period_ms,
                                        void *data,
                                        size_t size,
                                        app_scheduler_task_handle_t *handle);

@@ -3,7 +3,7 @@
  * @brief Air pressure sensor header
  *******************************************************************************
  * # License
- * <b>Copyright 2020 Silicon Laboratories Inc. www.silabs.com</b>
+ * <b>Copyright 2022 Silicon Laboratories Inc. www.silabs.com</b>
  *******************************************************************************
  *
  * SPDX-License-Identifier: Zlib
@@ -49,13 +49,13 @@ void sl_sensor_pressure_init(void);
  * function disables other sensors, because they're on the same enable pin.
  * Please use with caution.
  *****************************************************************************/
-void sl_pressure_deinit(void);
+void sl_sensor_pressure_deinit(void);
 
 /**************************************************************************//**
  * Getter for pressure sensor measurement data.
  * @param[out] pressure Barometric pressure (in millibars).
  * @return Status of the operation.
  *****************************************************************************/
-sl_status_t sl_pressure_get(float *pressure);
+sl_status_t sl_sensor_pressure_get(float *pressure);
 
 #endif // SL_SENSOR_PRESSURE_H

@@ -22,6 +22,9 @@ include:
 source:
   - path: src/sl_bmp280.c
   - path: bosch/BMP280_driver/bmp280.c
+template_contribution:
+  - name: component_catalog
+    value: bmp280_driver
 documentation:
     docset: gecko-platform
     document: hardware-driver/api/group-bmp280

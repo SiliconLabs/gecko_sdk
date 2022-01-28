@@ -432,8 +432,6 @@ class CALC_Frame(ICalculator):
             model (ModelRoot) : Data model to read and write variables from
         """
 
-        part_family = model.part_family.lower()
-
         self._reg_write(model.vars.FRC_WCNTCMP0_FRAMELENGTH, 0)
 
         self._reg_write(model.vars.FRC_WCNTCMP1_LENGTHFIELDLOC, model.vars.var_length_loc.value)
@@ -442,7 +440,7 @@ class CALC_Frame(ICalculator):
         self._reg_write(model.vars.FRC_DFLCTRL_DFLINCLUDECRC, int(model.vars.var_length_includecrc.value == True))
         self._reg_write(model.vars.FRC_DFLCTRL_MINLENGTH, model.vars.var_length_minlength.value+model.vars.header_size_internal.value-1)
         self._reg_write(model.vars.FRC_DFLCTRL_DFLBITS, model.vars.var_length_numbits.value)
-        self._reg_write(model.vars.FRC_DFLCTRL_DFLOFFSET, model.vars.header_size_internal.value + model.vars.var_length_adjust.value -1, part_family=part_family)
+        self._reg_write(model.vars.FRC_DFLCTRL_DFLOFFSET, model.vars.header_size_internal.value + model.vars.var_length_adjust.value-1, allow_neg=True)
         self._reg_write(model.vars.FRC_DFLCTRL_DFLSHIFT, model.vars.var_length_shift.value)
         if (model.vars.var_length_bitendian.value.value != model.vars.frame_bitendian.value.value):
             self._reg_write(model.vars.FRC_DFLCTRL_DFLBITORDER, 1)

@@ -270,6 +270,59 @@ static bool rmrInit(sl_cli_command_arg_t *args)
   return true;
 }
 
+void CI_printRmrStructureLocations(sl_cli_command_arg_t *args)
+{
+  if (!rmrInit(args)) {
+    return;
+  }
+
+  responsePrintHeader(sl_cli_get_command_string(args, 0), "Id:%u,Address:0x%x,Size:%u");
+  responsePrintMulti("Id:%u,Address:0x%x,Size:%u",
+                     RMR_STRUCT_PHY_INFO,
+                     (uint8_t *) &(rmrState->phyInfo),
+                     sizeof(rmrState->phyInfo));
+  responsePrintMulti("Id:%u,Address:0x%x,Size:%u",
+                     RMR_STRUCT_IRCAL_CONFIG,
+                     (uint8_t *) &(rmrState->irCalConfig),
+                     sizeof(rmrState->irCalConfig));
+  responsePrintMulti("Id:%u,Address:0x%x,Size:%u",
+                     RMR_STRUCT_MODEM_CONFIG,
+                     (uint8_t *) &(rmrState->modemConfigEntry),
+                     sizeof(rmrState->modemConfigEntry));
+  responsePrintMulti("Id:%u,Address:0x%x,Size:%u",
+                     RMR_STRUCT_FRAME_TYPE_CONFIG,
+                     (uint8_t *) &(rmrState->frameTypeConfig),
+                     sizeof(rmrState->frameTypeConfig));
+  responsePrintMulti("Id:%u,Address:0x%x,Size:%u",
+                     RMR_STRUCT_FRAME_LENGTH_LIST,
+                     (uint8_t *) &(rmrState->frameLenList),
+                     sizeof(rmrState->frameLenList));
+  responsePrintMulti("Id:%u,Address:0x%x,Size:%u",
+                     RMR_STRUCT_FRAME_CODING_TABLE,
+                     (uint8_t *) &(rmrState->frameCodingTable),
+                     sizeof(rmrState->frameCodingTable));
+  responsePrintMulti("Id:%u,Address:0x%x,Size:%u",
+                     RMR_STRUCT_CHANNEL_CONFIG_ATTRIBUTES,
+                     (uint8_t *) &(rmrState->generatedEntryAttr),
+                     sizeof(rmrState->generatedEntryAttr));
+  responsePrintMulti("Id:%u,Address:0x%x,Size:%u",
+                     RMR_STRUCT_CHANNEL_CONFIG_ENTRY,
+                     (uint8_t *) &(rmrState->generatedChannels),
+                     sizeof(rmrState->generatedChannels));
+#if (_SILICON_LABS_32B_SERIES_2_CONFIG >= 3)
+  responsePrintMulti("Id:%u,Address:0x%x,Size:%u",
+                     RMR_STRUCT_DCDC_RETIMING_CONFIG,
+                     (uint8_t *) &(rmrState->dcdcRetimingConfig),
+                     sizeof(rmrState->dcdcRetimingConfig));
+#endif
+#if (_SILICON_LABS_32B_SERIES_2_CONFIG >= 2)
+  responsePrintMulti("Id:%u,Address:0x%x,Size:%u",
+                     RMR_STRUCT_HFXO_RETIMING_CONFIG,
+                     (uint8_t *) &(rmrState->hfxoRetimingConfig),
+                     sizeof(rmrState->hfxoRetimingConfig));
+#endif
+}
+
 void CI_writeRmrStructure(sl_cli_command_arg_t *args)
 {
   uint8_t count = sl_cli_get_argument_uint8(args, RMR_CI_COUNT);

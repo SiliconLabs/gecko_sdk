@@ -41,7 +41,7 @@
 #define SL_RAIL_UTIL_PA_POWER_DECI_DBM      100
 
 // <o SL_RAIL_UTIL_PA_RAMP_TIME_US> PA Ramp Time (microseconds)
-// <0-65535:1>
+// <10-10:1>
 // <i> Default: 10
 #define SL_RAIL_UTIL_PA_RAMP_TIME_US        10
 

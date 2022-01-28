@@ -1,7 +1,7 @@
 project_name: "DynamicMultiprotocolLightMinimal"
 label: "DynamicMultiprotocolLight without LCD, LEDs or buttons"
 package: "Zigbee"
-category: "ZigBee Application"
+category: "Zigbee Application"
 quality: "production"
 
 component:

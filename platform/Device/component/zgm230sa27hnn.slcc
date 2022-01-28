@@ -101,6 +101,7 @@
   - name: device_is_module
   - name: hardware_board_has_hfxo
   - name: device_security_se
+  - name: device_pa_4dbm
   - name: device_has_acmp
   - name: device_has_acmp0
   - name: device_has_acmp1

@@ -296,7 +296,7 @@ void Interpreter::ProcessLine(char *aBuf)
     }
 #endif
 
-    command = Utils::LookupTable::Find(args[0].GetCString(), sCommands);
+    command = BinarySearch::Find(args[0].GetCString(), sCommands);
 
     if (command != nullptr)
     {
@@ -464,24 +464,17 @@ otError Interpreter::ProcessBorderAgent(Arg aArgs[])
     }
     else if (aArgs[0] == "state")
     {
-        const char *state;
+        static const char *const kStateStrings[] = {
+            "Stopped"  // (0) OT_BORDER_AGENT_STATE_STOPPED
+            "Started", // (1) OT_BORDER_AGENT_STATE_STARTED
+            "Active",  // (2) OT_BORDER_AGENT_STATE_ACTIVE
+        };
 
-        switch (otBorderAgentGetState(GetInstancePtr()))
-        {
-        case OT_BORDER_AGENT_STATE_STOPPED:
-            state = "Stopped";
-            break;
-        case OT_BORDER_AGENT_STATE_STARTED:
-            state = "Started";
-            break;
-        case OT_BORDER_AGENT_STATE_ACTIVE:
-            state = "Active";
-            break;
-        default:
-            state = "Unknown";
-            break;
-        }
-        OutputLine(state);
+        static_assert(0 == OT_BORDER_AGENT_STATE_STOPPED, "OT_BORDER_AGENT_STATE_STOPPED value is incorrect");
+        static_assert(1 == OT_BORDER_AGENT_STATE_STARTED, "OT_BORDER_AGENT_STATE_STARTED value is incorrect");
+        static_assert(2 == OT_BORDER_AGENT_STATE_ACTIVE, "OT_BORDER_AGENT_STATE_ACTIVE value is incorrect");
+
+        OutputLine("%s", Stringify(otBorderAgentGetState(GetInstancePtr()), kStateStrings));
     }
     else
     {
@@ -676,18 +669,17 @@ otError Interpreter::ProcessBackboneRouterLocal(Arg aArgs[])
     }
     else if (aArgs[0] == "state")
     {
-        switch (otBackboneRouterGetState(GetInstancePtr()))
-        {
-        case OT_BACKBONE_ROUTER_STATE_DISABLED:
-            OutputLine("Disabled");
-            break;
-        case OT_BACKBONE_ROUTER_STATE_SECONDARY:
-            OutputLine("Secondary");
-            break;
-        case OT_BACKBONE_ROUTER_STATE_PRIMARY:
-            OutputLine("Primary");
-            break;
-        }
+        static const char *const kStateStrings[] = {
+            "Disabled",  // (0) OT_BACKBONE_ROUTER_STATE_DISABLED
+            "Secondary", // (1) OT_BACKBONE_ROUTER_STATE_SECONDARY
+            "Primary",   // (2) OT_BACKBONE_ROUTER_STATE_PRIMARY
+        };
+
+        static_assert(0 == OT_BACKBONE_ROUTER_STATE_DISABLED, "OT_BACKBONE_ROUTER_STATE_DISABLED value is incorrect");
+        static_assert(1 == OT_BACKBONE_ROUTER_STATE_SECONDARY, "OT_BACKBONE_ROUTER_STATE_SECONDARY value is incorrect");
+        static_assert(2 == OT_BACKBONE_ROUTER_STATE_PRIMARY, "OT_BACKBONE_ROUTER_STATE_PRIMARY value is incorrect");
+
+        OutputLine("%s", Stringify(otBackboneRouterGetState(GetInstancePtr()), kStateStrings));
     }
     else if (aArgs[0] == "config")
     {
@@ -867,6 +859,21 @@ otError Interpreter::ProcessCcm(Arg aArgs[])
 exit:
     return error;
 }
+
+otError Interpreter::ProcessThreadVersionCheck(Arg aArgs[])
+{
+    otError error = OT_ERROR_NONE;
+    bool    enable;
+
+    VerifyOrExit(!aArgs[0].IsEmpty(), error = OT_ERROR_INVALID_COMMAND);
+
+    SuccessOrExit(error = ParseEnableOrDisable(aArgs[0], enable));
+    otThreadSetThreadVersionCheckEnabled(GetInstancePtr(), enable);
+
+exit:
+    return error;
+}
+
 #endif
 
 otError Interpreter::ProcessChannel(Arg aArgs[])
@@ -1765,7 +1772,7 @@ const char *EidCacheStateToString(otCacheEntryState aState)
         "retry",
     };
 
-    return static_cast<uint8_t>(aState) < OT_ARRAY_LENGTH(kStateStrings) ? kStateStrings[aState] : "unknown";
+    return Interpreter::Stringify(aState, kStateStrings);
 }
 
 void Interpreter::OutputEidCacheEntry(const otCacheEntryInfo &aEntry)
@@ -2053,9 +2060,33 @@ exit:
     return error;
 }
 
+const char *Interpreter::AddressOriginToString(uint8_t aOrigin)
+{
+    static const char *const kOriginStrings[4] = {
+        "thread", // 0, OT_ADDRESS_ORIGIN_THREAD
+        "slaac",  // 1, OT_ADDRESS_ORIGIN_SLAAC
+        "dhcp6",  // 2, OT_ADDRESS_ORIGIN_DHCPV6
+        "manual", // 3, OT_ADDRESS_ORIGIN_MANUAL
+    };
+
+    static_assert(0 == OT_ADDRESS_ORIGIN_THREAD, "OT_ADDRESS_ORIGIN_THREAD value is incorrect");
+    static_assert(1 == OT_ADDRESS_ORIGIN_SLAAC, "OT_ADDRESS_ORIGIN_SLAAC value is incorrect");
+    static_assert(2 == OT_ADDRESS_ORIGIN_DHCPV6, "OT_ADDRESS_ORIGIN_DHCPV6 value is incorrect");
+    static_assert(3 == OT_ADDRESS_ORIGIN_MANUAL, "OT_ADDRESS_ORIGIN_MANUAL value is incorrect");
+
+    return Stringify(aOrigin, kOriginStrings);
+}
+
 otError Interpreter::ProcessIpAddr(Arg aArgs[])
 {
-    otError error = OT_ERROR_NONE;
+    otError error   = OT_ERROR_NONE;
+    bool    verbose = false;
+
+    if (aArgs[0] == "-v")
+    {
+        aArgs++;
+        verbose = true;
+    }
 
     if (aArgs[0].IsEmpty())
     {
@@ -2063,7 +2094,12 @@ otError Interpreter::ProcessIpAddr(Arg aArgs[])
 
         for (const otNetifAddress *addr = unicastAddrs; addr; addr = addr->mNext)
         {
-            OutputIp6AddressLine(addr->mAddress);
+            OutputIp6Address(addr->mAddress);
+            if (verbose)
+            {
+                OutputFormat(" origin:%s", AddressOriginToString(addr->mAddressOrigin));
+            }
+            OutputLine("");
         }
     }
     else
@@ -2100,12 +2136,20 @@ exit:
 
 otError Interpreter::ProcessIpMulticastAddrAdd(Arg aArgs[])
 {
-    otError      error;
     otIp6Address address;
 
+#if OPENTHREAD_CONFIG_REFERENCE_DEVICE_ENABLE
+    otError error = OT_ERROR_INVALID_ARGS;
+    for (Arg *arg = &aArgs[0]; !arg->IsEmpty(); arg++)
+    {
+        SuccessOrExit(error = arg->ParseAsIp6Address(address));
+        SuccessOrExit(error = otIp6SubscribeMulticastAddress(GetInstancePtr(), &address));
+    }
+#else
+    otError error;
     SuccessOrExit(error = aArgs[0].ParseAsIp6Address(address));
     error = otIp6SubscribeMulticastAddress(GetInstancePtr(), &address);
-
+#endif
 exit:
     return error;
 }
@@ -2336,43 +2380,32 @@ void Interpreter::HandleLinkMetricsEnhAckProbingIe(otShortAddress             aS
 
 const char *Interpreter::LinkMetricsStatusToStr(uint8_t aStatus)
 {
-    uint8_t            strIndex                = 0;
-    static const char *linkMetricsStatusText[] = {
-        "Success",
-        "Cannot support new series",
-        "Series ID already registered",
-        "Series ID not recognized",
-        "No matching series ID",
-        "Other error",
-        "Unknown error",
+    static const char *const kStatusStrings[] = {
+        "Success",                      // (0) OT_LINK_METRICS_STATUS_SUCCESS
+        "Cannot support new series",    // (1) OT_LINK_METRICS_STATUS_CANNOT_SUPPORT_NEW_SERIES
+        "Series ID already registered", // (2) OT_LINK_METRICS_STATUS_SERIESID_ALREADY_REGISTERED
+        "Series ID not recognized",     // (3) OT_LINK_METRICS_STATUS_SERIESID_NOT_RECOGNIZED
+        "No matching series ID",        // (4) OT_LINK_METRICS_STATUS_NO_MATCHING_FRAMES_RECEIVED
     };
 
-    switch (aStatus)
+    const char *str = "Unknown error";
+
+    static_assert(0 == OT_LINK_METRICS_STATUS_SUCCESS, "STATUS_SUCCESS is incorrect");
+    static_assert(1 == OT_LINK_METRICS_STATUS_CANNOT_SUPPORT_NEW_SERIES, "CANNOT_SUPPORT_NEW_SERIES is incorrect");
+    static_assert(2 == OT_LINK_METRICS_STATUS_SERIESID_ALREADY_REGISTERED, "SERIESID_ALREADY_REGISTERED is incorrect");
+    static_assert(3 == OT_LINK_METRICS_STATUS_SERIESID_NOT_RECOGNIZED, "SERIESID_NOT_RECOGNIZED is incorrect");
+    static_assert(4 == OT_LINK_METRICS_STATUS_NO_MATCHING_FRAMES_RECEIVED, "NO_MATCHING_FRAMES_RECEIVED is incorrect");
+
+    if (aStatus < OT_ARRAY_LENGTH(kStatusStrings))
     {
-    case OT_LINK_METRICS_STATUS_SUCCESS:
-        strIndex = 0;
-        break;
-    case OT_LINK_METRICS_STATUS_CANNOT_SUPPORT_NEW_SERIES:
-        strIndex = 1;
-        break;
-    case OT_LINK_METRICS_STATUS_SERIESID_ALREADY_REGISTERED:
-        strIndex = 2;
-        break;
-    case OT_LINK_METRICS_STATUS_SERIESID_NOT_RECOGNIZED:
-        strIndex = 3;
-        break;
-    case OT_LINK_METRICS_STATUS_NO_MATCHING_FRAMES_RECEIVED:
-        strIndex = 4;
-        break;
-    case OT_LINK_METRICS_STATUS_OTHER_ERROR:
-        strIndex = 5;
-        break;
-    default:
-        strIndex = 6;
-        break;
+        str = kStatusStrings[aStatus];
+    }
+    else if (aStatus == OT_LINK_METRICS_STATUS_OTHER_ERROR)
+    {
+        str = "Other error";
     }
 
-    return linkMetricsStatusText[strIndex];
+    return str;
 }
 
 otError Interpreter::ProcessLinkMetrics(Arg aArgs[])
@@ -3675,6 +3708,28 @@ exit:
 otError Interpreter::ProcessPreferRouterId(Arg aArgs[])
 {
     return ProcessSet(aArgs, otThreadSetPreferredRouterId);
+}
+#endif
+
+#if OPENTHREAD_CONFIG_MAC_FILTER_ENABLE && OPENTHREAD_CONFIG_RADIO_LINK_IEEE_802_15_4_ENABLE
+otError Interpreter::ProcessRadioFilter(Arg aArgs[])
+{
+    otError error = OT_ERROR_NONE;
+
+    if (aArgs[0].IsEmpty())
+    {
+        OutputEnabledDisabledStatus(otLinkIsRadioFilterEnabled(GetInstancePtr()));
+    }
+    else
+    {
+        bool enable;
+
+        SuccessOrExit(error = ParseEnableOrDisable(aArgs[0], enable));
+        otLinkSetRadioFilterEnabled(GetInstancePtr(), enable);
+    }
+
+exit:
+    return error;
 }
 #endif
 
@@ -5009,6 +5064,7 @@ void Interpreter::Initialize(otInstance *aInstance, otCliOutputCallback aCallbac
 
 void Interpreter::OutputPrompt(void)
 {
+#if OPENTHREAD_CONFIG_CLI_PROMPT_ENABLE
     static const char sPrompt[] = "> ";
 
     // The `OutputFormat()` below is adding the prompt which is not
@@ -5019,6 +5075,7 @@ void Interpreter::OutputPrompt(void)
     SetEmittingCommandOutput(false);
     OutputFormat("%s", sPrompt);
     SetEmittingCommandOutput(true);
+#endif // OPENTHREAD_CONFIG_CLI_PROMPT_ENABLE
 }
 
 void Interpreter::HandleTimer(Timer &aTimer)

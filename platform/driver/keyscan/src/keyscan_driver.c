@@ -24,6 +24,7 @@
 #include "keyscan_driver_config.h"
 #include "em_core.h"
 #include "em_gpio.h"
+
 /*******************************************************************************
  **************************   LOCAL VARIABLES   ********************************
  ******************************************************************************/
@@ -104,8 +105,6 @@ sl_status_t sl_keyscan_driver_start_scan(void)
     return SL_STATUS_OK;
   }
 
-  // TODO set requirement for power manager
-
   // Start the scan if not already started
   sli_keyscan_driver_hal_start_scan(true);
 
@@ -129,8 +128,6 @@ sl_status_t sl_keyscan_driver_stop_scan(void)
   // Stop the scan
   sli_keyscan_driver_hal_stop_scan();
 
-  // TODO remove requirement for power manager
-
   // Clear keyscan matrix
   for (i = 0; i < SL_KEYSCAN_DRIVER_COLUMN_NUMBER; i++) {
     keyscan_matrix[i] = 0;
@@ -149,7 +146,6 @@ void sli_keyscan_process_irq(uint8_t local_flags)
 
   // Event "wake-up from sleep" handling.
   if (local_flags & KEYSCAN_DRIVER_EVENT_WAKEUP) {
-    // TODO set requirement for power manager
     // Start the scan
     sli_keyscan_driver_hal_start_scan(false);
   }
@@ -175,7 +171,7 @@ void sli_keyscan_process_irq(uint8_t local_flags)
       }
     }
 
-    // Clear keycan matrix
+    // Clear keyscan matrix
     for (i = 0; i < SL_KEYSCAN_DRIVER_COLUMN_NUMBER; i++) {
       keyscan_matrix[i] = 0;
     }
@@ -183,11 +179,19 @@ void sli_keyscan_process_irq(uint8_t local_flags)
 
   // Event "scanned complete with no key pressed" handling.
   if (local_flags & KEYSCAN_DRIVER_EVENT_SCANNED) {
-    // Once we fall in the condition "keypad scan was completed without any key press detected",
-    // we remove the Power requirement without stopping the scan process. Because if we
-    // stopped the scan and the power manager decided not to fall back to EM2/3, we would not be able
-    // to start the scan again. That way we continue the scan until we potentially fall back to sleep.
-    // TODO remove requirement for power manager
+    // Clear keyscan matrix
+    for (i = 0; i < SL_KEYSCAN_DRIVER_COLUMN_NUMBER; i++) {
+      keyscan_matrix[i] = 0;
+    }
+
+    if (sli_keyscan_driver_hal_is_singlepress_enabled()) {
+      // If in single-press mode, keypress released is after event "all columns scanned" is triggered.
+      // Scanned interrupt is active when scan logic completes an entire column-by-column scan without detecting
+      // any key presses.
+      SL_SLIST_FOR_EACH_ENTRY(keyscan_driver_process_keyscan_event_list, handle, sl_keyscan_driver_process_keyscan_event_handle_t, node) {
+        handle->on_event(keyscan_matrix, SL_KEYSCAN_STATUS_KEYPRESS_RELEASED);
+      }
+    }
   }
 }
 
@@ -198,21 +202,8 @@ static void keyscan_set_keypress(void)
 {
   uint8_t column;
   uint8_t row;
-  //uint8_t i;
 
   sli_keyscan_driver_hal_get_column_row(&column, &row);
 
-  keyscan_matrix[column] = row; // TODO do we AND or do we replace?
-
-  // TODO implement same code as in Z-Wave driver ?
-  // TODO why clear ?
-#if 0
-  // Clear the rows in between the last column and the current
-  i = (column == (SL_KEYSCAN_DRIVER_COLUMN_NUMBER - 1)) ? 0 : (column + 1);
-  while (i != column) {
-    keyscan_matrix[i] = 0;
-    i = (i == (SL_KEYSCAN_DRIVER_COLUMN_NUMBER - 1)) ? 0 : i++;
-  }
-#endif
-  // TODO Check for key combination error ?
+  keyscan_matrix[column] = row;
 }

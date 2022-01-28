@@ -1,5 +1,5 @@
 <?xml version="1.0" ?>
-<api device_id="4" device_name="bt" version="3.3.0">
+<api device_id="4" device_name="bt" version="3.3.1">
     <datatypes>
         <datatype base="uint16" name="errorcode"/>
         <datatype base="int16" name="int16"/>
@@ -2354,6 +2354,16 @@
                 <param datatype="errorcode" name="result" type="uint16"/>
             </returns>
         </command>
+        <command index="28" name="set_bonding_data" >
+            <params>
+                <param datatype="connection" name="connection" type="uint8"/>
+                <param datatype="uint8" name="type" type="uint8"/>
+                <param datatype="uint8array" name="data" type="uint8array"/>
+            </params>
+            <returns>
+                <param datatype="errorcode" name="result" type="uint16"/>
+            </returns>
+        </command>
         <event index="0" name="passkey_display">
             <params>
                 <param datatype="connection" name="connection" type="uint8"/>
@@ -2404,6 +2414,18 @@
             <enum name="bonding_key_remote_ltk" value="0x1"/>
             <enum name="bonding_key_local_ltk" value="0x2"/>
             <enum name="bonding_key_irk" value="0x3"/>
+        </enums>
+        <enums name="bonding_data">
+            <enum name="bonding_data_remote_address" value="0x0"/>
+            <enum name="bonding_data_remote_ltk" value="0x1"/>
+            <enum name="bonding_data_local_ltk" value="0x2"/>
+            <enum name="bonding_data_remote_master_inf" value="0x3"/>
+            <enum name="bonding_data_local_master_inf" value="0x4"/>
+            <enum name="bonding_data_irk" value="0x5"/>
+            <enum name="bonding_data_meta" value="0x6"/>
+            <enum name="bonding_data_gatt_client_config" value="0x7"/>
+            <enum name="bonding_data_gatt_client_features" value="0x8"/>
+            <enum name="bonding_data_gatt_db_hash" value="0x9"/>
         </enums>
         <enums name="io_capability">
             <enum name="io_capability_displayonly" value="0x0"/>

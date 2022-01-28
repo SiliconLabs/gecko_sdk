@@ -19,7 +19,6 @@ component:
   - id: sl_system
   - id: device_init
   - id: board_control
-  - id: memlcd
   - id: dmd_memlcd
   - id: glib
   - id: simple_button

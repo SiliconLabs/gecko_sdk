@@ -34,10 +34,10 @@
 
 // <h> Friend configuration
 
-// <e FRIEND_LOGGING> Enable Logging
+// <e SL_BTMESH_FRIEND_LOGGING_CFG_VAL> Enable Logging
 // <i> Default: 1
 // <i> Enable or disable Logging for Friend specific messages for this component.
-#define FRIEND_LOGGING   (1)
+#define SL_BTMESH_FRIEND_LOGGING_CFG_VAL   (1)
 
 // </e>
 

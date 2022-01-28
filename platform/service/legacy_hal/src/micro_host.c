@@ -57,11 +57,6 @@ void otaServerSetClientDelayUnits(void)
   //stub
 }
 
-void simulatedTimePasses(void)
-{
-  // nothing to do for host
-}
-
 void setMicroRebootHandler(void (*handler)(void))
 {
   microRebootHandler = handler;

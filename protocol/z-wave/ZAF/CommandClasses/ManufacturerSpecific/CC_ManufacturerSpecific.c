@@ -11,6 +11,7 @@
 #include <ZW_TransportEndpoint.h>
 #include <string.h>
 #include <ZW_product_id_enum.h>
+#include "config/CC_ManufacturerSpecific_config.h"
 
 /****************************************************************************/
 /*                      PRIVATE TYPES and DEFINITIONS                       */
@@ -61,10 +62,12 @@ CC_ManufacturerSpecific_handler(
       uint16_t productID      = 0;
       CC_ManufacturerSpecific_ManufacturerSpecificGet_handler(&manufacturerID,
                                                               &productID);
+      uint16_t productTypeID = CC_ManufacturerSpecific_get_product_type_id();
+
       pFrameOut->ZW_ManufacturerSpecificReportV2Frame.manufacturerId1 = (uint8_t)(manufacturerID >> 8);
       pFrameOut->ZW_ManufacturerSpecificReportV2Frame.manufacturerId2 = (uint8_t)(manufacturerID &  0xFF);
-      pFrameOut->ZW_ManufacturerSpecificReportV2Frame.productTypeId1  = (((uint16_t)PRODUCT_TYPE_ID_ZWAVE_PLUS_V2)  >> 8);
-      pFrameOut->ZW_ManufacturerSpecificReportV2Frame.productTypeId2  = (((uint16_t)PRODUCT_TYPE_ID_ZWAVE_PLUS_V2)  &  0xFF);
+      pFrameOut->ZW_ManufacturerSpecificReportV2Frame.productTypeId1  = (uint8_t)(productTypeID  >> 8);
+      pFrameOut->ZW_ManufacturerSpecificReportV2Frame.productTypeId2  = (uint8_t)(productTypeID  &  0xFF);
       pFrameOut->ZW_ManufacturerSpecificReportV2Frame.productId1      = (uint8_t)(productID      >> 8);
       pFrameOut->ZW_ManufacturerSpecificReportV2Frame.productId2      = (uint8_t)(productID      &  0xFF);
 

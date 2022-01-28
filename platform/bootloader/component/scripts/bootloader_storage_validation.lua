@@ -26,8 +26,9 @@ elseif slc.is_provided("device_series_2") then
     flash_page_size = 8192
 end
 
--- Check is slots are aligned to flash page size
-for slotID = 1,3,1
+if (not slc.is_selected("bootloader_spiflash_storage")) and (not slc.is_selected("bootloader_spiflash_storage_sfdp")) then
+    -- Check is slots are aligned to flash page size
+    for slotID = 1,3,1
     do
         -- Check alignment for all enabled slots
 	 	if isSlotEnabled[slotID] == "1" then
@@ -38,6 +39,7 @@ for slotID = 1,3,1
 	 		end
 	 	end
 	end
+end
 
 -- Check for storage slot overlaps
 -- No need to check for slot0 as there needs to be atleast 2 slots enabled to check for overlap
@@ -69,7 +71,7 @@ if slot0_enable.value == "1" and slot1_enable.value == "1" and slot2_enable.valu
 		validation.error('Overlap detected between storage slot 1 and slot 2',validation.target_for_project())
     end
 
-	if ((tonumber(slot1_start_addr.value,16)) > (tonumber(slot2_start_addr.value,10))) and ((tonumber(slot2_start_addr.value,10) + tonumber(slot2_size.value,10)) > tonumber(slot1_start_addr.value,10)) then
+	if ((tonumber(slot1_start_addr.value,10)) > (tonumber(slot2_start_addr.value,10))) and ((tonumber(slot2_start_addr.value,10) + tonumber(slot2_size.value,10)) > tonumber(slot1_start_addr.value,10)) then
 		validation.error('Overlap detected between storage slot 1 and slot 2',validation.target_for_project())
     end
 

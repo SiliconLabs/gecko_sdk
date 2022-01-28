@@ -80,7 +80,7 @@ void app_led_set_color(uint16_t color)
  ******************************************************************************/
 uint16_t app_led_get_max(void)
 {
-  return LIGHTING_SERVER_PWM_MAXIMUM_BRIGHTNESS;
+  return SL_BTMESH_LIGHTING_SERVER_PWM_MAXIMUM_BRIGHTNESS_CFG_VAL;
 }
 
 /*******************************************************************************

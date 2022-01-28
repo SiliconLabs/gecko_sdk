@@ -45,8 +45,6 @@
 #define SL_SIMPLE_RGB_PWM_LED_COLOR_G              1U  ///< LED Green
 #define SL_SIMPLE_RGB_PWM_LED_COLOR_B              2U  ///< LED Blue
 
-#define SL_SIMPLE_RGB_PWM_LED_VALUE_OFF            0U  ///< LED off value
-
 #define SL_SIMPLE_RGB_PWM_LED_NUM_CC_REQUIRED      3U  ///< Number of Timer Capture Channels required (1 for each RGB color)
 
 /*******************************************************************************
@@ -96,7 +94,7 @@ sl_status_t sl_simple_rgb_pwm_led_init(void *rgb);
 /***************************************************************************//**
  * Turn on an RBG LED.
  *   Turns on at previously set color levels
- *   If no previous levels set, turns on at max level for all four RGB LEDs
+ *   If no previous levels set, turns on at max level for all RGB LEDs
  *
  * @param[in] led_handle         Pointer to rgb_pwm-led specific data.
  *

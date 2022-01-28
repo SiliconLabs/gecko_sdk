@@ -11,7 +11,8 @@ class RM_Peripheral_SYNTH(Base_RM_Peripheral):
         self.__dict__['zz_frozen'] = False
         super(RM_Peripheral_SYNTH, self).__init__(rmio, label,
             0x40083000, 'SYNTH',
-            u"")
+            u"",
+            [])
         self.STATUS = RM_Register_SYNTH_STATUS(self.zz_rmio, self.zz_label)
         self.zz_rdict['STATUS'] = self.STATUS
         self.CMD = RM_Register_SYNTH_CMD(self.zz_rmio, self.zz_label)

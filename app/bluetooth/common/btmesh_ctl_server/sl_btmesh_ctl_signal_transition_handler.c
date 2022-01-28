@@ -61,7 +61,7 @@
 #define HIGH_PRIORITY         0              // High Priority
 
 /// current temperature level
-static uint16_t current_temperature = CTL_SERVER_DEFAULT_TEMPERATURE;
+static uint16_t current_temperature = SL_BTMESH_CTL_SERVER_DEFAULT_TEMPERATURE_CFG_VAL;
 /// starting level of temperature transition
 static uint16_t start_temperature;
 /// target level of temperature transition
@@ -111,7 +111,7 @@ static void transition_timer_cb(sl_simple_timer_t *timer, void *data)
   (void)timer;
   // Initialize the variable to UI update period in order to trigger a UI update
   // at the beginning of the transition.
-  static uint16_t time_elapsed_since_ui_update = CTL_SERVER_UI_UPDATE_PERIOD;
+  static uint16_t time_elapsed_since_ui_update = SL_BTMESH_CTL_SERVER_UI_UPDATE_PERIOD_CFG_VAL;
 
   if (!temp_transitioning) {
     sl_status_t sc = sl_simple_timer_stop(&transition_timer);
@@ -128,7 +128,7 @@ static void transition_timer_cb(sl_simple_timer_t *timer, void *data)
 
       // Set the variable to UI update period in order to trigger a UI update
       // at the beginning of the next transition.
-      time_elapsed_since_ui_update = CTL_SERVER_UI_UPDATE_PERIOD;
+      time_elapsed_since_ui_update = SL_BTMESH_CTL_SERVER_UI_UPDATE_PERIOD_CFG_VAL;
 
       // Trigger a UI update in order to provide the target values at the end
       // of the current transition
@@ -160,12 +160,12 @@ static void transition_timer_cb(sl_simple_timer_t *timer, void *data)
       }
 
       // When transition is ongoing generate an event to application once every
-      // CTL_SERVER_UI_UPDATE_PERIOD ms because the event is used to update
+      // SL_BTMESH_CTL_SERVER_UI_UPDATE_PERIOD_CFG_VAL ms because the event is used to update
       // display status and therefore the rate should not be too high
-      time_elapsed_since_ui_update += CTL_SERVER_PWM_UPDATE_PERIOD;
+      time_elapsed_since_ui_update += SL_BTMESH_CTL_SERVER_PWM_UPDATE_PERIOD_CFG_VAL;
 
-      if (CTL_SERVER_UI_UPDATE_PERIOD <= time_elapsed_since_ui_update) {
-        time_elapsed_since_ui_update -= CTL_SERVER_UI_UPDATE_PERIOD;
+      if (SL_BTMESH_CTL_SERVER_UI_UPDATE_PERIOD_CFG_VAL <= time_elapsed_since_ui_update) {
+        time_elapsed_since_ui_update -= SL_BTMESH_CTL_SERVER_UI_UPDATE_PERIOD_CFG_VAL;
         sl_btmesh_ctl_on_ui_update(current_temperature, current_deltauv);
       }
     }
@@ -185,10 +185,10 @@ void sl_btmesh_ctl_set_temperature_deltauv_level(uint16_t temperature,
                                                  int16_t deltauv,
                                                  uint32_t transition_ms)
 {
-  if (temperature < CTL_SERVER_MINIMUM_TEMPERATURE) {
-    temperature = CTL_SERVER_MINIMUM_TEMPERATURE;
-  } else if (temperature > CTL_SERVER_MAXIMUM_TEMPERATURE) {
-    temperature = CTL_SERVER_MAXIMUM_TEMPERATURE;
+  if (temperature < SL_BTMESH_CTL_SERVER_MINIMUM_TEMPERATURE_CFG_VAL) {
+    temperature = SL_BTMESH_CTL_SERVER_MINIMUM_TEMPERATURE_CFG_VAL;
+  } else if (temperature > SL_BTMESH_CTL_SERVER_MAXIMUM_TEMPERATURE_CFG_VAL) {
+    temperature = SL_BTMESH_CTL_SERVER_MAXIMUM_TEMPERATURE_CFG_VAL;
   }
 
   if (transition_ms == 0) {
@@ -221,7 +221,7 @@ void sl_btmesh_ctl_set_temperature_deltauv_level(uint16_t temperature,
   // enabling timer IRQ -> the temperature is adjusted in timer interrupt
   // gradually until target temperature is reached.
   sl_status_t sc = sl_simple_timer_start(&transition_timer,
-                                         CTL_SERVER_PWM_UPDATE_PERIOD,
+                                         SL_BTMESH_CTL_SERVER_PWM_UPDATE_PERIOD_CFG_VAL,
                                          transition_timer_cb,
                                          NO_CALLBACK_DATA,
                                          true);

@@ -44,12 +44,24 @@ configuration:
   - name: OS_CFG_TASK_PROFILE_EN
     value: "1"
 
+readme:
+  - path: ../../documentation/example/wisun_rcp/readme.md
+
+other_file:
+  - path: ../../documentation/example/wisun_rcp/readme_img0.png
+  - path: ../../documentation/example/wisun_rcp/readme_img1.png
+
+ui_hints:
+  highlight:
+    - path: readme.md
+      focus: true
+
 tag:
   - prebuilt_demo
   - hardware:
       device:
         memory:
-          flash: 201
+          flash: 200
           ram: 80
       board:
         rf_bands:

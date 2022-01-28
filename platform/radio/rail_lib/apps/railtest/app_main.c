@@ -108,6 +108,10 @@ STATIC_ASSERT(sizeof(RailAppEvent_t) <= 36,
 #define RAIL_SKIP_CALIBRATIONS_BOOL false
 #endif
 
+#ifdef SL_CATALOG_RAIL_UTIL_IEEE802154_STACK_EVENT_PRESENT
+extern void sl_rail_util_ieee801254_on_rail_event(RAIL_Handle_t railHandle, RAIL_Events_t events);
+#endif // SL_CATALOG_RAIL_UTIL_IEEE802154_STACK_EVENT_PRESENT
+
 // External control and status variables
 Counters_t counters = { 0 };
 bool receiveModeEnabled = false;
@@ -868,6 +872,9 @@ void sl_rail_util_on_event(RAIL_Handle_t railHandle, RAIL_Events_t events)
   if (events & RAIL_EVENT_PA_PROTECTION) {
     counters.paProtect++;
   }
+#ifdef SL_CATALOG_RAIL_UTIL_IEEE802154_STACK_EVENT_PRESENT
+  sl_rail_util_ieee801254_on_rail_event(railHandle, events);
+#endif //SL_CATALOG_RAIL_UTIL_IEEE802154_STACK_EVENT_PRESENT
 }
 
 volatile bool allowPowerManagerSleep = false;

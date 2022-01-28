@@ -110,7 +110,7 @@ static uint8_t data_packet[] =
 };
 
 /// Receive FIFO
-static uint8_t rx_fifo[RAIL_FIFO_SIZE];
+static __ALIGNED(RAIL_FIFO_ALIGNMENT) uint8_t rx_fifo[RAIL_FIFO_SIZE];
 
 static uint8_t proprietary_rx_buf[PROP_RX_BUF_SIZE];
 
@@ -436,7 +436,7 @@ static void proprietary_app_task(void *p_arg)
 RAIL_Status_t RAILCb_SetupRxFifo(RAIL_Handle_t railHandle)
 {
   uint16_t rxFifoSize = RAIL_FIFO_SIZE;
-  RAIL_Status_t status = RAIL_SetRxFifo(railHandle, &rx_fifo[0], &rxFifoSize);
+  RAIL_Status_t status = RAIL_SetRxFifo(railHandle, rx_fifo, &rxFifoSize);
   if (rxFifoSize != RAIL_FIFO_SIZE) {
     // We set up an incorrect FIFO size
     return RAIL_STATUS_INVALID_PARAMETER;

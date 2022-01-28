@@ -54,6 +54,7 @@
 // select() call to yield forever if there are no events scheduled.
 #define MAX_READ_TIMEOUT_MS  EMBER_AF_PLUGIN_GATEWAY_SUPPORT_MAX_WAIT_FOR_EVENTS_TIMEOUT_MS
 #define MAX_FDS              EMBER_AF_PLUGIN_GATEWAY_MAX_FDS
+#define MIN_READ_TIMEOUT_MS 1000
 #define INVALID_FD           -1
 
 static const char* debugLabel = "gateway-debug";
@@ -143,6 +144,23 @@ static void debugPrintYieldDuration(uint32_t msToNextEvent, uint8_t eventIndex)
 }
 #endif // UC_BUILD
 
+#ifdef UC_BUILD
+sl_zigbee_event_t emberAfPluginGatewayTickCallbackEvent;
+void emberAfPluginGatewayTickCallbackEventHandler(SLXU_UC_EVENT)
+{
+  sl_zigbee_event_set_delay_ms(&emberAfPluginGatewayTickCallbackEvent,
+                               MIN_READ_TIMEOUT_MS);
+  uint8_t index;
+  uint32_t msToNextEvent = emberAfMsToNextEventExtended(0xFFFFFFFFUL, &index);
+
+  msToNextEvent = (msToNextEvent > MAX_READ_TIMEOUT_MS
+                   ? MAX_READ_TIMEOUT_MS
+                   : msToNextEvent);
+  emberAfPluginFileDescriptorDispatchWaitForEvents(msToNextEvent);
+}
+
+#else
+
 void emberAfPluginGatewayTickCallback(void)
 {
   // If the CLI process is waiting for the 'go-ahead' to prompt the user
@@ -152,7 +170,6 @@ void emberAfPluginGatewayTickCallback(void)
   emberSerialSendReadyToRead(APP_SERIAL);
 #endif
 
-#ifndef UC_BUILD
   uint8_t index;
   uint32_t msToNextEvent = emberAfMsToNextEventExtended(0xFFFFFFFFUL, &index);
   debugPrintYieldDuration(msToNextEvent, index);
@@ -161,61 +178,69 @@ void emberAfPluginGatewayTickCallback(void)
                    : msToNextEvent);
 
   emberAfPluginFileDescriptorDispatchWaitForEvents(msToNextEvent);
-#endif
 }
+#endif //#!UC_BUILD
 
 void emberAfPluginGatewayInitCallback(SLXU_INIT_ARG)
 {
-  SLXU_INIT_UNUSED_ARG;
+  #ifdef UC_BUILD
+  if (init_level == SL_ZIGBEE_INIT_LEVEL_EVENT) {
+    slxu_zigbee_event_init(&emberAfPluginGatewayTickCallbackEvent,
+                           emberAfPluginGatewayTickCallbackEventHandler);
+    sl_zigbee_event_set_delay_ms(&emberAfPluginGatewayTickCallbackEvent,
+                                 MIN_READ_TIMEOUT_MS);
+  } else
+  #endif
+  {
+    int fdList[MAX_FDS];
+    int count = 0;
+    int i;
 
-  int fdList[MAX_FDS];
-  int count = 0;
-  int i;
-
-  EmberAfFileDescriptorDispatchStruct dispatchStruct = {
-    NULL,   // callback
-    NULL,   // data passed to callback
-    EMBER_AF_FILE_DESCRIPTOR_OPERATION_READ,
-    -1,
-  };
-  dispatchStruct.fileDescriptor = emberSerialGetInputFd(0);
-  if (dispatchStruct.fileDescriptor != -1
-      && EMBER_SUCCESS != emberAfPluginFileDescriptorDispatchAdd(&dispatchStruct)) {
-    emberAfCorePrintln("Error: Gateway Plugin failed to register serial Port 0 FD");
-  }
-  dispatchStruct.fileDescriptor = emberSerialGetInputFd(1);
-#if defined(ZA_CLI_FULL)
-  if (dispatchStruct.fileDescriptor != -1
-      && EMBER_SUCCESS != emberAfPluginFileDescriptorDispatchAdd(&dispatchStruct)) {
-    emberAfCorePrintln("Error: Gateway Plugin failed to register serial Port 1 FD");
-  }
-#endif
-  // For SPI, we need the nHOST_INT line as well
-  EmberAfFileDescriptorDispatchStruct spiDispatchStruct = {
-    NULL,   // callback
-    NULL,   // data passed to callback
-    EMBER_AF_FILE_DESCRIPTOR_OPERATION_EXCEPT,
-    -1,
-  };
-  spiDispatchStruct.fileDescriptor = serialGetSpiFd();
-  if (spiDispatchStruct.fileDescriptor != -1
-      && EMBER_SUCCESS != emberAfPluginFileDescriptorDispatchAdd(&spiDispatchStruct)) {
-    emberAfCorePrintln("Error: Gateway Plugin failed to register SPI FD");
-  }
-
-  ezspSerialPortRegisterCallback(ezspSerialPortCallback);
-  if (ezspSerialGetFd() != NULL_FILE_DESCRIPTOR) {
-    ezspSerialPortCallback(EZSP_SERIAL_PORT_OPENED, ezspSerialGetFd());
-  }
-
-  MEMSET(fdList, 0xFF, sizeof(int) * MAX_FDS);
-  count = emberAfPluginGatewaySelectFileDescriptorsCallback(fdList, MAX_FDS);
-  for (i = 0; i < count; i++) {
-    dispatchStruct.fileDescriptor = fdList[i];
-    if (EMBER_SUCCESS != emberAfPluginFileDescriptorDispatchAdd(&dispatchStruct)) {
-      emberAfCorePrintln("Error: Gateway plugin failed to add FD %d for watching.", fdList[i]);
+    EmberAfFileDescriptorDispatchStruct dispatchStruct = {
+      NULL, // callback
+      NULL, // data passed to callback
+      EMBER_AF_FILE_DESCRIPTOR_OPERATION_READ,
+      -1,
+    };
+    dispatchStruct.fileDescriptor = emberSerialGetInputFd(0);
+    if (dispatchStruct.fileDescriptor != -1
+        && EMBER_SUCCESS != emberAfPluginFileDescriptorDispatchAdd(&dispatchStruct)) {
+      emberAfCorePrintln("Error: Gateway Plugin failed to register serial Port 0 FD");
     }
-  }
+    dispatchStruct.fileDescriptor = emberSerialGetInputFd(1);
+#if defined(ZA_CLI_FULL)
+    if (dispatchStruct.fileDescriptor != -1
+        && EMBER_SUCCESS != emberAfPluginFileDescriptorDispatchAdd(&dispatchStruct)) {
+      emberAfCorePrintln("Error: Gateway Plugin failed to register serial Port 1 FD");
+    }
+#endif
+    // For SPI, we need the nHOST_INT line as well
+    EmberAfFileDescriptorDispatchStruct spiDispatchStruct = {
+      NULL, // callback
+      NULL, // data passed to callback
+      EMBER_AF_FILE_DESCRIPTOR_OPERATION_EXCEPT,
+      -1,
+    };
+    spiDispatchStruct.fileDescriptor = serialGetSpiFd();
+    if (spiDispatchStruct.fileDescriptor != -1
+        && EMBER_SUCCESS != emberAfPluginFileDescriptorDispatchAdd(&spiDispatchStruct)) {
+      emberAfCorePrintln("Error: Gateway Plugin failed to register SPI FD");
+    }
+
+    ezspSerialPortRegisterCallback(ezspSerialPortCallback);
+    if (ezspSerialGetFd() != NULL_FILE_DESCRIPTOR) {
+      ezspSerialPortCallback(EZSP_SERIAL_PORT_OPENED, ezspSerialGetFd());
+    }
+
+    MEMSET(fdList, 0xFF, sizeof(int) * MAX_FDS);
+    count = emberAfPluginGatewaySelectFileDescriptorsCallback(fdList, MAX_FDS);
+    for (i = 0; i < count; i++) {
+      dispatchStruct.fileDescriptor = fdList[i];
+      if (EMBER_SUCCESS != emberAfPluginFileDescriptorDispatchAdd(&dispatchStruct)) {
+        emberAfCorePrintln("Error: Gateway plugin failed to add FD %d for watching.", fdList[i]);
+      }
+    }
+  } // endof else SL_ZIGBEE_INIT_LEVEL_EVENT
 }
 
 static void debugPrint(const char* formatString, ...)

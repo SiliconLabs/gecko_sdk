@@ -2,6 +2,7 @@ from pyradioconfig.parts.ocelot.profiles.Profile_WiSUN import Profile_WiSUN_Ocel
 from pyradioconfig.parts.common.profiles.bobcat_regs import build_modem_regs_bobcat
 from pyradioconfig.parts.common.profiles.profile_common import buildCrcOutputs, buildFecOutputs, buildFrameOutputs, \
     buildWhiteOutputs
+from pyradioconfig.parts.bobcat.profiles.sw_profile_outputs_common import sw_profile_outputs_common_bobcat
 
 class Profile_WiSUN_Bobcat(Profile_WiSUN_Ocelot):
 
@@ -13,6 +14,7 @@ class Profile_WiSUN_Bobcat(Profile_WiSUN_Ocelot):
         self._default = False
         self._activation_logic = ""
         self._family = "bobcat"
+        self._sw_profile_outputs_common = sw_profile_outputs_common_bobcat()
 
     def build_register_profile_outputs(self, model, profile):
         family = self._family

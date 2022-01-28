@@ -618,20 +618,38 @@ RemoveAssociationsFromGroup(
     for (int8_t indx = MAX_ASSOCIATION_IN_GROUP - 1; indx >= 0; indx--)
     {
       destination_info_t * pCurrentNode = GetNode(ep, groupId, (uint8_t)indx);
-      // Remove node if:
-      // List of simple and multichannel nodes is zero (remove everything)
-      // OR Remove single node with specified NodeId, EP and bitmask, and it is found in list of multichannel associations
-      // OR Only EP was specified, but not NodeID. Then remove all associations with matching End Point.
-      if (!IsFree(pCurrentNode) &&
-          (true == HasEndpoint(pCurrentNode)) &&
-          ((0 == pListOfNodes->noOfNodes && 0 == pListOfNodes->noOfMulchanNodes) ||
-              (((pCurrentNode->node.nodeId == pListOfNodes->pMulChanNodeId[i].nodeId) ||
-                  (0 == pListOfNodes->pMulChanNodeId[i].nodeId)) &&
-                  (pCurrentNode->node.endpoint == pListOfNodes->pMulChanNodeId[i].endpoint) &&
-                  (pCurrentNode->node.BitAddress == pListOfNodes->pMulChanNodeId[i].BitAddress))))
+      // Remove node if one of following conditions is met:
+      // 1. List of simple and multichannel nodes is zero (remove everything)
+      // 2. Remove single node with specified NodeId, EP and bitmask, and it is found in list of multichannel associations
+      // 3.  Only EP was specified, but not NodeID. Then remove all associations with matching End Point.
+      if (IsFree(pCurrentNode) || (false == HasEndpoint(pCurrentNode)))
       {
-        DPRINTF("mlc: Remove %u.%u\n", pCurrentNode->node.nodeId, pCurrentNode->node.endpoint);
-        Free(pCurrentNode);
+        // Current node is empty, or it's not multichannel node -> nothing to delete
+        continue;
+      }
+
+      bool condition = false; // Condition to delete current node
+      if (0 == pListOfNodes->noOfNodes && 0 == pListOfNodes->noOfMulchanNodes)
+      {
+        // List of simple and multichannel nodes is zero (remove everything)
+        condition  = true;
+      }
+      else if (0 != pListOfNodes->noOfMulchanNodes)
+      {
+        // List of multichannel nodes is not empty -> check if this node should be deleted
+        bool bMatchingNodeId = ((pCurrentNode->node.nodeId == pListOfNodes->pMulChanNodeId[i].nodeId)
+            || (0 == pListOfNodes->pMulChanNodeId[i].nodeId));
+        bool bMatchingEP = (pCurrentNode->node.endpoint == pListOfNodes->pMulChanNodeId[i].endpoint);
+        bool bAddr = (pCurrentNode->node.BitAddress == pListOfNodes->pMulChanNodeId[i].BitAddress);
+
+        condition = bMatchingNodeId && bMatchingEP && bAddr;
+      }
+
+      if (condition)
+      {
+        DPRINTF("mlc: Remove %u.%u\n", pCurrentNode->node.nodeId,
+                pCurrentNode->node.endpoint);
+        Free (pCurrentNode);
 
         /*
          * In case specific multi channel destinations are specified, we need to reorder those that

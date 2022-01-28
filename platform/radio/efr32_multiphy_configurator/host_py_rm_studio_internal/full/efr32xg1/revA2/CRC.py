@@ -11,7 +11,8 @@ class RM_Peripheral_CRC(Base_RM_Peripheral):
         self.__dict__['zz_frozen'] = False
         super(RM_Peripheral_CRC, self).__init__(rmio, label,
             0x40082000, 'CRC',
-            u"")
+            u"",
+            [])
         self.CTRL = RM_Register_CRC_CTRL(self.zz_rmio, self.zz_label)
         self.zz_rdict['CTRL'] = self.CTRL
         self.STATUS = RM_Register_CRC_STATUS(self.zz_rmio, self.zz_label)

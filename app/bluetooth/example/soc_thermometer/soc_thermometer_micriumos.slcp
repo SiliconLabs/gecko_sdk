@@ -51,7 +51,7 @@ include:
       - path: app.h
 
 readme:
-  - path: ../../documentation/example/soc_thermometer_rtos/readme.html
+  - path: ../../documentation/example/soc_thermometer_rtos/readme.md
 
 config_file:
   - override:
@@ -134,5 +134,5 @@ tag:
 ui_hints:
   highlight:
     - path: config/btconf/gatt_configuration.btconf
-    - path: readme.html
+    - path: readme.md
       focus: true

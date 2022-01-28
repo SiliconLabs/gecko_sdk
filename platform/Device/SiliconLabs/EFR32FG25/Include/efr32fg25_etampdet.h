@@ -58,14 +58,12 @@ typedef struct {
   __IOM uint32_t CHNLSEEDVAL0;                  /**< CHNL0 LFSR Seed Ctrl Register                      */
   __IOM uint32_t CHNLSEEDVAL1;                  /**< CHNL1 LFSR Seed Ctrl Register                      */
   __IOM uint32_t CLKPRESCVAL;                   /**< Prescaler Ctrl Register                            */
-  __IM uint32_t  CHNLLFSRVAL0;                  /**< CHNL0 LFSR Value Read Back Register                */
-  __IM uint32_t  CHNLLFSRVAL1;                  /**< CHNL1 LFSR Value Read Back Register                */
-  __IM uint32_t  STATUSDBG;                     /**< PERCLK Signal LVL Read Back Register               */
+  uint32_t       RESERVED1[3U];                 /**< Reserved for future use                            */
   __IOM uint32_t LOCK;                          /**< Configuration Lock Register                        */
-  uint32_t       RESERVED1[1005U];              /**< Reserved for future use                            */
+  uint32_t       RESERVED2[1005U];              /**< Reserved for future use                            */
   __IM uint32_t  IPVERSION_SET;                 /**< IP version ID                                      */
   __IOM uint32_t EN_SET;                        /**< Module Enable Register                             */
-  uint32_t       RESERVED2[1U];                 /**< Reserved for future use                            */
+  uint32_t       RESERVED3[1U];                 /**< Reserved for future use                            */
   __IOM uint32_t CFG_SET;                       /**< Configuration Register                             */
   __IOM uint32_t CNTMISMATCHMAX_SET;            /**< Filter Threshold Register                          */
   __IOM uint32_t CHNLFILTWINSIZE_SET;           /**< Filter moving window size Register                 */
@@ -78,14 +76,12 @@ typedef struct {
   __IOM uint32_t CHNLSEEDVAL0_SET;              /**< CHNL0 LFSR Seed Ctrl Register                      */
   __IOM uint32_t CHNLSEEDVAL1_SET;              /**< CHNL1 LFSR Seed Ctrl Register                      */
   __IOM uint32_t CLKPRESCVAL_SET;               /**< Prescaler Ctrl Register                            */
-  __IM uint32_t  CHNLLFSRVAL0_SET;              /**< CHNL0 LFSR Value Read Back Register                */
-  __IM uint32_t  CHNLLFSRVAL1_SET;              /**< CHNL1 LFSR Value Read Back Register                */
-  __IM uint32_t  STATUSDBG_SET;                 /**< PERCLK Signal LVL Read Back Register               */
+  uint32_t       RESERVED4[3U];                 /**< Reserved for future use                            */
   __IOM uint32_t LOCK_SET;                      /**< Configuration Lock Register                        */
-  uint32_t       RESERVED3[1005U];              /**< Reserved for future use                            */
+  uint32_t       RESERVED5[1005U];              /**< Reserved for future use                            */
   __IM uint32_t  IPVERSION_CLR;                 /**< IP version ID                                      */
   __IOM uint32_t EN_CLR;                        /**< Module Enable Register                             */
-  uint32_t       RESERVED4[1U];                 /**< Reserved for future use                            */
+  uint32_t       RESERVED6[1U];                 /**< Reserved for future use                            */
   __IOM uint32_t CFG_CLR;                       /**< Configuration Register                             */
   __IOM uint32_t CNTMISMATCHMAX_CLR;            /**< Filter Threshold Register                          */
   __IOM uint32_t CHNLFILTWINSIZE_CLR;           /**< Filter moving window size Register                 */
@@ -98,14 +94,12 @@ typedef struct {
   __IOM uint32_t CHNLSEEDVAL0_CLR;              /**< CHNL0 LFSR Seed Ctrl Register                      */
   __IOM uint32_t CHNLSEEDVAL1_CLR;              /**< CHNL1 LFSR Seed Ctrl Register                      */
   __IOM uint32_t CLKPRESCVAL_CLR;               /**< Prescaler Ctrl Register                            */
-  __IM uint32_t  CHNLLFSRVAL0_CLR;              /**< CHNL0 LFSR Value Read Back Register                */
-  __IM uint32_t  CHNLLFSRVAL1_CLR;              /**< CHNL1 LFSR Value Read Back Register                */
-  __IM uint32_t  STATUSDBG_CLR;                 /**< PERCLK Signal LVL Read Back Register               */
+  uint32_t       RESERVED7[3U];                 /**< Reserved for future use                            */
   __IOM uint32_t LOCK_CLR;                      /**< Configuration Lock Register                        */
-  uint32_t       RESERVED5[1005U];              /**< Reserved for future use                            */
+  uint32_t       RESERVED8[1005U];              /**< Reserved for future use                            */
   __IM uint32_t  IPVERSION_TGL;                 /**< IP version ID                                      */
   __IOM uint32_t EN_TGL;                        /**< Module Enable Register                             */
-  uint32_t       RESERVED6[1U];                 /**< Reserved for future use                            */
+  uint32_t       RESERVED9[1U];                 /**< Reserved for future use                            */
   __IOM uint32_t CFG_TGL;                       /**< Configuration Register                             */
   __IOM uint32_t CNTMISMATCHMAX_TGL;            /**< Filter Threshold Register                          */
   __IOM uint32_t CHNLFILTWINSIZE_TGL;           /**< Filter moving window size Register                 */
@@ -118,9 +112,7 @@ typedef struct {
   __IOM uint32_t CHNLSEEDVAL0_TGL;              /**< CHNL0 LFSR Seed Ctrl Register                      */
   __IOM uint32_t CHNLSEEDVAL1_TGL;              /**< CHNL1 LFSR Seed Ctrl Register                      */
   __IOM uint32_t CLKPRESCVAL_TGL;               /**< Prescaler Ctrl Register                            */
-  __IM uint32_t  CHNLLFSRVAL0_TGL;              /**< CHNL0 LFSR Value Read Back Register                */
-  __IM uint32_t  CHNLLFSRVAL1_TGL;              /**< CHNL1 LFSR Value Read Back Register                */
-  __IM uint32_t  STATUSDBG_TGL;                 /**< PERCLK Signal LVL Read Back Register               */
+  uint32_t       RESERVED10[3U];                /**< Reserved for future use                            */
   __IOM uint32_t LOCK_TGL;                      /**< Configuration Lock Register                        */
 } ETAMPDET_TypeDef;
 /** @} End of group EFR32FG25_ETAMPDET */
@@ -636,31 +628,6 @@ typedef struct {
 #define ETAMPDET_CLKPRESCVAL_UPPERPRESC_DivideBy32                                (_ETAMPDET_CLKPRESCVAL_UPPERPRESC_DivideBy32 << 8) /**< Shifted mode DivideBy32 for ETAMPDET_CLKPRESCVAL*/
 #define ETAMPDET_CLKPRESCVAL_UPPERPRESC_DivideBy64                                (_ETAMPDET_CLKPRESCVAL_UPPERPRESC_DivideBy64 << 8) /**< Shifted mode DivideBy64 for ETAMPDET_CLKPRESCVAL*/
 #define ETAMPDET_CLKPRESCVAL_UPPERPRESC_Reserved                                  (_ETAMPDET_CLKPRESCVAL_UPPERPRESC_Reserved << 8)   /**< Shifted mode Reserved for ETAMPDET_CLKPRESCVAL*/
-
-/* Bit fields for ETAMPDET CHNLLFSRVAL0 */
-#define _ETAMPDET_CHNLLFSRVAL0_RESETVALUE                                         0x00000000UL                                       /**< Default value for ETAMPDET_CHNLLFSRVAL0     */
-#define _ETAMPDET_CHNLLFSRVAL0_MASK                                               0xFFFFFFFFUL                                       /**< Mask for ETAMPDET_CHNLLFSRVAL0              */
-#define _ETAMPDET_CHNLLFSRVAL0_CHNLLFSRVAL0_SHIFT                                 0                                                  /**< Shift value for ETAMPDET_CHNLLFSRVAL0       */
-#define _ETAMPDET_CHNLLFSRVAL0_CHNLLFSRVAL0_MASK                                  0xFFFFFFFFUL                                       /**< Bit mask for ETAMPDET_CHNLLFSRVAL0          */
-#define _ETAMPDET_CHNLLFSRVAL0_CHNLLFSRVAL0_DEFAULT                               0x00000000UL                                       /**< Mode DEFAULT for ETAMPDET_CHNLLFSRVAL0      */
-#define ETAMPDET_CHNLLFSRVAL0_CHNLLFSRVAL0_DEFAULT                                (_ETAMPDET_CHNLLFSRVAL0_CHNLLFSRVAL0_DEFAULT << 0) /**< Shifted mode DEFAULT for ETAMPDET_CHNLLFSRVAL0*/
-
-/* Bit fields for ETAMPDET CHNLLFSRVAL1 */
-#define _ETAMPDET_CHNLLFSRVAL1_RESETVALUE                                         0x00000000UL                                       /**< Default value for ETAMPDET_CHNLLFSRVAL1     */
-#define _ETAMPDET_CHNLLFSRVAL1_MASK                                               0xFFFFFFFFUL                                       /**< Mask for ETAMPDET_CHNLLFSRVAL1              */
-#define _ETAMPDET_CHNLLFSRVAL1_CHNLLFSRVAL1_SHIFT                                 0                                                  /**< Shift value for ETAMPDET_CHNLLFSRVAL1       */
-#define _ETAMPDET_CHNLLFSRVAL1_CHNLLFSRVAL1_MASK                                  0xFFFFFFFFUL                                       /**< Bit mask for ETAMPDET_CHNLLFSRVAL1          */
-#define _ETAMPDET_CHNLLFSRVAL1_CHNLLFSRVAL1_DEFAULT                               0x00000000UL                                       /**< Mode DEFAULT for ETAMPDET_CHNLLFSRVAL1      */
-#define ETAMPDET_CHNLLFSRVAL1_CHNLLFSRVAL1_DEFAULT                                (_ETAMPDET_CHNLLFSRVAL1_CHNLLFSRVAL1_DEFAULT << 0) /**< Shifted mode DEFAULT for ETAMPDET_CHNLLFSRVAL1*/
-
-/* Bit fields for ETAMPDET STATUSDBG */
-#define _ETAMPDET_STATUSDBG_RESETVALUE                                            0x00000000UL                                   /**< Default value for ETAMPDET_STATUSDBG        */
-#define _ETAMPDET_STATUSDBG_MASK                                                  0x00000001UL                                   /**< Mask for ETAMPDET_STATUSDBG                 */
-#define ETAMPDET_STATUSDBG_PERCLKRDVAL                                            (0x1UL << 0)                                   /**< Signal level of CLK_PER                     */
-#define _ETAMPDET_STATUSDBG_PERCLKRDVAL_SHIFT                                     0                                              /**< Shift value for ETAMPDET_PERCLKRDVAL        */
-#define _ETAMPDET_STATUSDBG_PERCLKRDVAL_MASK                                      0x1UL                                          /**< Bit mask for ETAMPDET_PERCLKRDVAL           */
-#define _ETAMPDET_STATUSDBG_PERCLKRDVAL_DEFAULT                                   0x00000000UL                                   /**< Mode DEFAULT for ETAMPDET_STATUSDBG         */
-#define ETAMPDET_STATUSDBG_PERCLKRDVAL_DEFAULT                                    (_ETAMPDET_STATUSDBG_PERCLKRDVAL_DEFAULT << 0) /**< Shifted mode DEFAULT for ETAMPDET_STATUSDBG */
 
 /* Bit fields for ETAMPDET LOCK */
 #define _ETAMPDET_LOCK_RESETVALUE                                                 0x0000AEE8UL                          /**< Default value for ETAMPDET_LOCK             */

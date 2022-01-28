@@ -1041,6 +1041,13 @@ static void print_otp_conf(void)
     } else {
       printf("  + Digital glitch detector always on: Disabled\n");
     }
+    if (device_name[DEVICE_INDEX] > DEVICE_XG22) {
+      if (cmd_resp_buf[6] & SLEEP_ALIVE_MASK) {
+        printf("  + Keep tamper alive during sleep: Enabled\n");
+      } else {
+        printf("  + Keep tamper alive during sleep: Disabled\n");
+      }
+    }
     printf("  + Tamper reset threshold: %lu\n", cmd_resp_buf[6] >> TAMPER_RESET_SHIFT);
 #endif
   }

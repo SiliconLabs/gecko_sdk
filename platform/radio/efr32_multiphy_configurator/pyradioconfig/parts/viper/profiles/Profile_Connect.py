@@ -3,6 +3,7 @@ from pyradioconfig.parts.viper.profiles.Profile_Base import profile_base_viper
 class Profile_Connect_Bobcat(profile_base_viper):
 
     def __init__(self):
+        super().__init__()
         self._profileName = "Connect"
         self._readable_name = "Connect Profile"
         self._category = ""

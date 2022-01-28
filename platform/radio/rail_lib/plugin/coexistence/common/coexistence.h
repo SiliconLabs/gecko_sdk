@@ -100,6 +100,7 @@ COEX_ENUM(COEX_GpioIndex_t) {
   COEX_GPIO_INDEX_REQ = 2,
   COEX_GPIO_INDEX_GNT = 3,
   COEX_GPIO_INDEX_PHY_SELECT = 4,
+  COEX_GPIO_INDEX_WIFI_TX = 5,
   COEX_GPIO_INDEX_COUNT
 };
 
@@ -138,7 +139,9 @@ COEX_ENUM_GENERIC(COEX_Events_t, uint32_t) {
   /** Shift position of \ref COEX_EVENT_TX_ABORTED bit */
   COEX_EVENT_TX_ABORTED_SHIFT,
   /** Shift position of \ref COEX_EVENT_PHY_SELECT_CHANGED bit */
-  COEX_EVENT_PHY_SELECT_CHANGED_SHIFT
+  COEX_EVENT_PHY_SELECT_CHANGED_SHIFT,
+  /** Shift position of \ref COEX_EVENT_WIFI_TX_CHANGED bit */
+  COEX_EVENT_WIFI_TX_CHANGED_SHIFT
 };
 
 /** Value representing no events */
@@ -159,6 +162,8 @@ COEX_ENUM_GENERIC(COEX_Events_t, uint32_t) {
 #define COEX_EVENT_TX_ABORTED (1U << COEX_EVENT_TX_ABORTED_SHIFT)
 /** The COEX optimized PHY should be enabled or disabled */
 #define COEX_EVENT_PHY_SELECT_CHANGED (1U << COEX_EVENT_PHY_SELECT_CHANGED_SHIFT)
+/** The Wifi Tx GPIO is asserted or deasserted */
+#define COEX_EVENT_WIFI_TX_CHANGED (1U << COEX_EVENT_WIFI_TX_CHANGED_SHIFT)
 /** Events only needed if there is an active request **/
 #define COEX_EVENT_REQUEST_EVENTS (COEX_EVENT_NONE               \
                                    | COEX_EVENT_REQUEST_RELEASED \
@@ -524,6 +529,20 @@ bool COEX_ConfigRadioHoldOff(COEX_GpioHandle_t gpioHandle);
 bool COEX_ConfigPhySelect(COEX_GpioHandle_t gpioHandle);
 
 /**
+ * Configure the COEX Wifi Tx GPIO.
+ *
+ * @param[in] gpioHandle A GPIO instance handle.
+ * @return This function returns true if the Wifi Tx GPIO
+ *  was successfully configured, false otherwise.
+ *
+ * If the COEX_OPTION_SIGNAL_IDENTIFIER is enabled, deasserting
+ * Wifi Tx will enable signal identifier for 802.15.4 signal detection.
+ *
+ * @note Pass NULL to disable the COEX Wifi Tx GPIO.
+ */
+bool COEX_ConfigWifiTx(COEX_GpioHandle_t gpioHandle);
+
+/**
  * Set the COEX configuration options
  *
  * @param[in] options New COEX configuration options.
@@ -643,6 +662,13 @@ bool COEX_SetGpioInputOverride(COEX_GpioIndex_t gpioIndex, bool enabled);
  * @param[in] enable if true, enable PHY select interrupt; else disable interrupt.
  */
 void COEX_EnablePhySelectIsr(bool enable);
+
+/**
+ * Enable/disable COEX Wifi Tx interrupt.
+ *
+ * @param[in] enable if true, enable Wifi Tx interrupt; else disable interrupt.
+ */
+void COEX_EnableWifiTxIsr(bool enable);
 
 /**
  * Coexistence event handler.

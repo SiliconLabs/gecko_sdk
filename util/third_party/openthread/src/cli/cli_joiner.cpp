@@ -108,7 +108,7 @@ otError Joiner::ProcessStart(Arg aArgs[])
 
     error = otJoinerStart(GetInstancePtr(),
                           aArgs[0].GetCString(),           // aPskd
-                          aArgs[1].GetCString(),           // aProvisioningUrl (nullptr if aArgs[1] is empty)
+                          aArgs[1].GetCString(),           // aProvisioningUrl (`nullptr` if aArgs[1] is empty)
                           PACKAGE_NAME,                    // aVendorName
                           OPENTHREAD_CONFIG_PLATFORM_INFO, // aVendorModel
                           PACKAGE_VERSION,                 // aVendorSwVersion
@@ -128,6 +128,15 @@ otError Joiner::ProcessStop(Arg aArgs[])
     return OT_ERROR_NONE;
 }
 
+otError Joiner::ProcessState(Arg aArgs[])
+{
+    OT_UNUSED_VARIABLE(aArgs);
+
+    OutputLine("%s", otJoinerStateToString(otJoinerGetState(GetInstancePtr())));
+
+    return OT_ERROR_NONE;
+}
+
 otError Joiner::Process(Arg aArgs[])
 {
     otError        error = OT_ERROR_INVALID_COMMAND;
@@ -139,7 +148,7 @@ otError Joiner::Process(Arg aArgs[])
         ExitNow();
     }
 
-    command = Utils::LookupTable::Find(aArgs[0].GetCString(), sCommands);
+    command = BinarySearch::Find(aArgs[0].GetCString(), sCommands);
     VerifyOrExit(command != nullptr);
 
     error = (this->*command->mHandler)(aArgs + 1);

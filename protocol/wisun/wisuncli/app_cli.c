@@ -27,7 +27,7 @@
 #include "sl_slist.h"
 #include "app_settings.h"
 #include "sl_wisun_rf_test.h"
-
+#include "sl_wisun_cli_core.h"
 #include "sl_wisun_api.h"
 #include "sl_wisun_trace_api.h"
 
@@ -174,8 +174,6 @@ typedef struct
   uint16_t remote_port;
 } app_socket_entry_t;
 
-osMutexId_t app_mutex;
-
 #define APP_MAX_SOCKET_ENTRIES 10
 static sl_slist_node_t *app_socket_entry_list_free;
 static sl_slist_node_t *app_socket_entry_list;
@@ -224,16 +222,6 @@ static app_socket_entry_t *app_socket_entry(sl_wisun_socket_id_t socket_id)
   return NULL;
 }
 
-static void app_command_mutex_acquire()
-{
-  assert(osMutexAcquire(app_mutex, osWaitForever) == osOK);
-}
-
-static void app_command_mutex_release()
-{
-  assert(osMutexRelease(app_mutex) == osOK);
-}
-
 /*******************************************************************************
  **************************   GLOBAL FUNCTIONS   *******************************
  ******************************************************************************/
@@ -249,16 +237,6 @@ void app_cli_init(void)
   for (i = 0; i < APP_MAX_SOCKET_ENTRIES; ++i) {
     sl_slist_push(&app_socket_entry_list_free, &app_socket_entries[i].node);
   }
-
-  const osMutexAttr_t app_mutex_attr = {
-    "App Command Mutex",
-    osMutexRecursive,
-    NULL,
-    0
-  };
-
-  app_mutex = osMutexNew(&app_mutex_attr);
-  assert(app_mutex != NULL);
 }
 
 static void app_handle_network_update_ind(sl_wisun_evt_t *evt)
@@ -501,7 +479,7 @@ static void app_handle_join_state_ind(sl_wisun_evt_t *evt)
 
 void sl_wisun_on_event(sl_wisun_evt_t *evt)
 {
-  app_command_mutex_acquire();
+  app_wisun_cli_mutex_lock();
 
   switch (evt->header.id) {
     case SL_WISUN_MSG_NETWORK_UPDATE_IND_ID:
@@ -541,7 +519,7 @@ void sl_wisun_on_event(sl_wisun_evt_t *evt)
       printf("[Unknown event: %d]\r\n", evt->header.id);
   }
 
-  app_command_mutex_release();
+  app_wisun_cli_mutex_unlock();
 }
 
 void app_connect(sl_cli_command_arg_t *arguments)
@@ -549,7 +527,7 @@ void app_connect(sl_cli_command_arg_t *arguments)
   sl_status_t ret;
   (void)arguments;
 
-  app_command_mutex_acquire();
+  app_wisun_cli_mutex_lock();
 
   if (app_connection_state != APP_CONNECTION_STATE_NOT_CONNECTED) {
     printf("[Failed: already connecting or connected]\r\n");
@@ -628,7 +606,7 @@ void app_connect(sl_cli_command_arg_t *arguments)
 
 cleanup:
 
-  app_command_mutex_release();
+  app_wisun_cli_mutex_unlock();
 }
 
 void app_disconnect(sl_cli_command_arg_t *arguments)
@@ -636,7 +614,7 @@ void app_disconnect(sl_cli_command_arg_t *arguments)
   sl_status_t ret;
   (void)arguments;
 
-  app_command_mutex_acquire();
+  app_wisun_cli_mutex_lock();
 
   if (app_connection_state == APP_CONNECTION_STATE_NOT_CONNECTED) {
     printf("[Failed: already disconnected]\r\n");
@@ -653,7 +631,7 @@ void app_disconnect(sl_cli_command_arg_t *arguments)
 
 cleanup:
 
-  app_command_mutex_release();
+  app_wisun_cli_mutex_unlock();
 }
 
 #define APP_ICMPV6_TYPE_ECHO_REQUEST 128
@@ -675,7 +653,7 @@ void app_ping(sl_cli_command_arg_t *arguments)
   uint8_t *payload_data = NULL;
   (void)arguments;
 
-  app_command_mutex_acquire();
+  app_wisun_cli_mutex_lock();
 
   arg_remote_address = sl_cli_get_argument_string(arguments, 0);
   ret = app_get_ip_address(&remote_address, arg_remote_address);
@@ -757,7 +735,7 @@ cleanup:
   sl_free(packet_data);
   packet_data = NULL;
 
-  app_command_mutex_release();
+  app_wisun_cli_mutex_unlock();
 }
 
 void app_tcp_client(sl_cli_command_arg_t *arguments)
@@ -768,7 +746,7 @@ void app_tcp_client(sl_cli_command_arg_t *arguments)
   sl_wisun_ip_address_t remote_address;
   uint16_t remote_port;
 
-  app_command_mutex_acquire();
+  app_wisun_cli_mutex_lock();
 
   // Parameters
   arg_remote_address = sl_cli_get_argument_string(arguments, 0);
@@ -822,7 +800,7 @@ error_handler:
 
 cleanup:
 
-  app_command_mutex_release();
+  app_wisun_cli_mutex_unlock();
 
 }
 
@@ -832,7 +810,7 @@ void app_tcp_server(sl_cli_command_arg_t *arguments)
   app_socket_entry_t* entry;
   uint16_t local_port;
 
-  app_command_mutex_acquire();
+  app_wisun_cli_mutex_lock();
 
   // Parameters
   local_port = sl_cli_get_argument_uint16(arguments, 0);
@@ -884,7 +862,7 @@ error_handler:
 
 cleanup:
 
-  app_command_mutex_release();
+  app_wisun_cli_mutex_unlock();
 }
 
 void app_udp_client(sl_cli_command_arg_t *arguments)
@@ -895,7 +873,7 @@ void app_udp_client(sl_cli_command_arg_t *arguments)
   sl_wisun_ip_address_t remote_address;
   uint16_t remote_port;
 
-  app_command_mutex_acquire();
+  app_wisun_cli_mutex_lock();
 
   // Parameters
   arg_remote_address = sl_cli_get_argument_string(arguments, 0);
@@ -949,7 +927,7 @@ error_handler:
 
 cleanup:
 
-  app_command_mutex_release();
+  app_wisun_cli_mutex_unlock();
 }
 
 void app_udp_server(sl_cli_command_arg_t *arguments)
@@ -958,7 +936,7 @@ void app_udp_server(sl_cli_command_arg_t *arguments)
   app_socket_entry_t* entry;
   uint16_t local_port;
 
-  app_command_mutex_acquire();
+  app_wisun_cli_mutex_lock();
 
   // Parameters
   local_port = sl_cli_get_argument_uint16(arguments, 0);
@@ -1004,7 +982,7 @@ error_handler:
 
 cleanup:
 
-  app_command_mutex_release();
+  app_wisun_cli_mutex_unlock();
 }
 
 void app_socket_close(sl_cli_command_arg_t *arguments)
@@ -1013,7 +991,7 @@ void app_socket_close(sl_cli_command_arg_t *arguments)
   app_socket_entry_t* entry;
   sl_wisun_socket_id_t socket_id;
 
-  app_command_mutex_acquire();
+  app_wisun_cli_mutex_lock();
 
   // Parameters
   socket_id = sl_cli_get_argument_uint32(arguments, 0);
@@ -1036,7 +1014,7 @@ void app_socket_close(sl_cli_command_arg_t *arguments)
 
 cleanup:
 
-  app_command_mutex_release();
+  app_wisun_cli_mutex_unlock();
 }
 
 void app_socket_read(sl_cli_command_arg_t *arguments)
@@ -1051,7 +1029,7 @@ void app_socket_read(sl_cli_command_arg_t *arguments)
   app_printable_data_ctx_t printable_data_ctx;
   char *printable_data;
 
-  app_command_mutex_acquire();
+  app_wisun_cli_mutex_lock();
 
   // Parameters
   socket_id = sl_cli_get_argument_uint32(arguments, 0);
@@ -1097,7 +1075,7 @@ void app_socket_read(sl_cli_command_arg_t *arguments)
 
 cleanup:
 
-  app_command_mutex_release();
+  app_wisun_cli_mutex_unlock();
 }
 
 void app_socket_write(sl_cli_command_arg_t *arguments)
@@ -1107,7 +1085,7 @@ void app_socket_write(sl_cli_command_arg_t *arguments)
   const char *data;
   sl_wisun_socket_id_t socket_id;
 
-  app_command_mutex_acquire();
+  app_wisun_cli_mutex_lock();
 
   // Parameters
   socket_id = sl_cli_get_argument_uint32(arguments, 0);
@@ -1144,7 +1122,7 @@ void app_socket_write(sl_cli_command_arg_t *arguments)
 
 cleanup:
 
-  app_command_mutex_release();
+  app_wisun_cli_mutex_unlock();
 }
 
 void app_socket_writeto(sl_cli_command_arg_t *arguments)
@@ -1157,7 +1135,7 @@ void app_socket_writeto(sl_cli_command_arg_t *arguments)
   const char *data;
   sl_wisun_socket_id_t socket_id;
 
-  app_command_mutex_acquire();
+  app_wisun_cli_mutex_lock();
 
   // Parameters
   socket_id = sl_cli_get_argument_uint32(arguments, 0);
@@ -1202,7 +1180,7 @@ void app_socket_writeto(sl_cli_command_arg_t *arguments)
 
 cleanup:
 
-  app_command_mutex_release();
+  app_wisun_cli_mutex_unlock();
 }
 
 void app_socket_list(sl_cli_command_arg_t *arguments)
@@ -1211,7 +1189,7 @@ void app_socket_list(sl_cli_command_arg_t *arguments)
   char info_str[64];
   (void)arguments;
 
-  app_command_mutex_acquire();
+  app_wisun_cli_mutex_lock();
 
   printf("!  ##  Type        Info\r\n");
 
@@ -1223,7 +1201,7 @@ void app_socket_list(sl_cli_command_arg_t *arguments)
 
   printf("!\r\n");
 
-  app_command_mutex_release();
+  app_wisun_cli_mutex_unlock();
 }
 
 void app_socket_set_option(sl_cli_command_arg_t *arguments)
@@ -1236,7 +1214,7 @@ void app_socket_set_option(sl_cli_command_arg_t *arguments)
   const app_socket_option_t *iter;
   SL_ALIGN(4) sl_wisun_socket_option_data_t option_data SL_ATTRIBUTE_ALIGN(4);
 
-  app_command_mutex_acquire();
+  app_wisun_cli_mutex_lock();
 
   // Parameters
   socket_id = sl_cli_get_argument_uint32(arguments, 0);
@@ -1292,7 +1270,7 @@ void app_socket_set_option(sl_cli_command_arg_t *arguments)
 
 cleanup:
 
-  app_command_mutex_release();
+  app_wisun_cli_mutex_unlock();
 }
 
 static sl_status_t app_socket_event_mode_handler(sl_wisun_socket_option_data_t *option_data,
@@ -1413,7 +1391,7 @@ void app_mac_allow(sl_cli_command_arg_t *arguments)
   sl_wisun_mac_address_t address;
   const app_enum_t* value_enum;
 
-  app_command_mutex_acquire();
+  app_wisun_cli_mutex_lock();
 
   address_str = sl_cli_get_argument_string(arguments, 0);
 
@@ -1440,7 +1418,7 @@ void app_mac_allow(sl_cli_command_arg_t *arguments)
 
 cleanup:
 
-  app_command_mutex_release();
+  app_wisun_cli_mutex_unlock();
 }
 
 void app_mac_deny(sl_cli_command_arg_t *arguments)
@@ -1450,7 +1428,7 @@ void app_mac_deny(sl_cli_command_arg_t *arguments)
   sl_wisun_mac_address_t address;
   const app_enum_t* value_enum;
 
-  app_command_mutex_acquire();
+  app_wisun_cli_mutex_lock();
 
   address_str = sl_cli_get_argument_string(arguments, 0);
 
@@ -1477,7 +1455,7 @@ void app_mac_deny(sl_cli_command_arg_t *arguments)
 
 cleanup:
 
-  app_command_mutex_release();
+  app_wisun_cli_mutex_unlock();
 }
 
 void app_socket_get_option(sl_cli_command_arg_t *arguments)
@@ -1489,7 +1467,7 @@ void app_socket_get_option(sl_cli_command_arg_t *arguments)
   const app_socket_option_t *iter;
   SL_ALIGN(4) sl_wisun_socket_option_data_t option_data SL_ATTRIBUTE_ALIGN(4);
 
-  app_command_mutex_acquire();
+  app_wisun_cli_mutex_lock();
 
   if (sl_cli_get_argument_count(arguments) == 0) {
     iter = app_socket_options;
@@ -1552,7 +1530,7 @@ void app_socket_get_option(sl_cli_command_arg_t *arguments)
 
 cleanup:
 
-  app_command_mutex_release();
+  app_wisun_cli_mutex_unlock();
 }
 
 void app_clear_credential_cache(sl_cli_command_arg_t *arguments)
@@ -1560,7 +1538,7 @@ void app_clear_credential_cache(sl_cli_command_arg_t *arguments)
   sl_status_t ret;
   (void)arguments;
 
-  app_command_mutex_acquire();
+  app_wisun_cli_mutex_lock();
 
   ret = sl_wisun_clear_credential_cache();
   if (ret == SL_STATUS_OK) {
@@ -1569,7 +1547,7 @@ void app_clear_credential_cache(sl_cli_command_arg_t *arguments)
     printf("[Credential cache clear failed: %lu]\r\n", ret);
   }
 
-  app_command_mutex_release();
+  app_wisun_cli_mutex_unlock();
 }
 
 void app_reset_statistics(sl_cli_command_arg_t *arguments)
@@ -1577,7 +1555,7 @@ void app_reset_statistics(sl_cli_command_arg_t *arguments)
   sl_status_t ret;
   (void)arguments;
 
-  app_command_mutex_acquire();
+  app_wisun_cli_mutex_lock();
 
   ret = sl_wisun_reset_statistics(SL_WISUN_STATISTICS_TYPE_PHY);
   if (ret != SL_STATUS_OK) {
@@ -1612,7 +1590,7 @@ cleanup:
     printf("[Statistics reset failed: %lu]\r\n", ret);
   }
 
-  app_command_mutex_release();
+  app_wisun_cli_mutex_unlock();
 }
 
 
@@ -1725,7 +1703,7 @@ void app_set_trace_level(sl_cli_command_arg_t *arguments)
   int res;
   const app_enum_t *value_enum;
 
-  app_command_mutex_acquire();
+  app_wisun_cli_mutex_lock();
 
   trace_config_string = sl_cli_get_argument_string(arguments, 0);
   trace_config = sl_malloc(SL_WISUN_TRACE_GROUP_COUNT * sizeof(sl_wisun_trace_group_config_t));
@@ -1803,5 +1781,5 @@ cleanup:
     printf("[Error when setting trace level: %lu]\r\n", ret);
   }
 
-  app_command_mutex_release();
+  app_wisun_cli_mutex_unlock();
 }

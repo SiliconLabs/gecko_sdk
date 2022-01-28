@@ -34,6 +34,8 @@
 #ifndef OTBR_AGENT_MDNS_AVAHI_HPP_
 #define OTBR_AGENT_MDNS_AVAHI_HPP_
 
+#include <memory>
+#include <set>
 #include <vector>
 
 #include <avahi-client/client.h>
@@ -43,6 +45,7 @@
 #include <avahi-common/watch.h>
 
 #include "mdns.hpp"
+#include "common/code_utils.hpp"
 #include "common/mainloop.hpp"
 #include "common/time.hpp"
 
@@ -211,6 +214,7 @@ private:
     struct Service
     {
         std::string      mName;
+        std::string      mCurrentName; // The current instance name. May be different from mName due to renaming.
         std::string      mType;
         SubTypeList      mSubTypeList;
         std::string      mHostName;
@@ -228,7 +232,7 @@ private:
         AvahiEntryGroup *mGroup   = nullptr;
     };
 
-    struct Subscription
+    struct Subscription : private ::NonCopyable
     {
         PublisherAvahi *mPublisherAvahi;
 
@@ -245,7 +249,6 @@ private:
             , mType(std::move(aType))
             , mInstanceName(std::move(aInstanceName))
             , mServiceBrowser(nullptr)
-            , mServiceResolver(nullptr)
         {
         }
 
@@ -255,7 +258,8 @@ private:
                      AvahiProtocol      aProtocol,
                      const std::string &aInstanceName,
                      const std::string &aType);
-        void GetAddrInfo(uint32_t aInterfaceIndex);
+        void AddServiceResolver(AvahiServiceResolver *aServiceResolver);
+        void RemoveServiceResolver(AvahiServiceResolver *aServiceResolver);
 
         static void HandleBrowseResult(AvahiServiceBrowser *  aServiceBrowser,
                                        AvahiIfIndex           aInterfaceIndex,
@@ -303,11 +307,10 @@ private:
                                  AvahiStringList *      aTxt,
                                  AvahiLookupResultFlags aFlags);
 
-        std::string            mType;
-        std::string            mInstanceName;
-        DiscoveredInstanceInfo mInstanceInfo;
-        AvahiServiceBrowser *  mServiceBrowser;
-        AvahiServiceResolver * mServiceResolver;
+        std::string                      mType;
+        std::string                      mInstanceName;
+        AvahiServiceBrowser *            mServiceBrowser;
+        std::set<AvahiServiceResolver *> mServiceResolvers;
     };
 
     struct HostSubscription : public Subscription
@@ -349,9 +352,9 @@ private:
         AvahiRecordBrowser *mRecordBrowser;
     };
 
-    typedef std::vector<Host>                Hosts;
-    typedef std::vector<ServiceSubscription> ServiceSubscriptionList;
-    typedef std::vector<HostSubscription>    HostSubscriptionList;
+    typedef std::vector<Host>                                 Hosts;
+    typedef std::vector<std::unique_ptr<ServiceSubscription>> ServiceSubscriptionList;
+    typedef std::vector<std::unique_ptr<HostSubscription>>    HostSubscriptionList;
 
     static void HandleClientState(AvahiClient *aClient, AvahiClientState aState, void *aContext);
     void        HandleClientState(AvahiClient *aClient, AvahiClientState aState);
@@ -385,9 +388,7 @@ private:
 
     static std::string MakeFullName(const std::string &aName);
 
-    void        OnServiceResolved(ServiceSubscription &aService);
     static void OnServiceResolveFailed(const ServiceSubscription &aService, int aErrorCode);
-    void        OnHostResolved(HostSubscription &aHost);
     void        OnHostResolveFailed(const HostSubscription &aHost, int aErrorCode);
 
     AvahiClient *mClient;

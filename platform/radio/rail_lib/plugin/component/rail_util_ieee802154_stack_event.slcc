@@ -20,6 +20,10 @@ include:
   - path: platform/radio/rail_lib/plugin/rail_util_ieee802154
     file_list:
       - path: sl_rail_util_ieee802154_stack_event.h
+source:
+  - path: platform/radio/rail_lib/plugin/rail_util_ieee802154/sl_rail_util_ieee802154_rail_event.c
+    condition:
+      - rail_test_core
 template_file:
   - path: platform/radio/rail_lib/plugin/rail_util_ieee802154/sl_rail_util_ieee802154_stack_event.c.jinja
 template_contribution:

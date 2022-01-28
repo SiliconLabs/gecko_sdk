@@ -11,7 +11,8 @@ class RM_Peripheral_SEQ(Base_RM_Peripheral):
         self.__dict__['zz_frozen'] = False
         super(RM_Peripheral_SEQ, self).__init__(rmio, label,
             0x21000FEC, 'SEQ',
-            u"")
+            u"",
+            [])
         self.DYNAMIC_CHPWR_TABLE = RM_Register_SEQ_DYNAMIC_CHPWR_TABLE(self.zz_rmio, self.zz_label)
         self.zz_rdict['DYNAMIC_CHPWR_TABLE'] = self.DYNAMIC_CHPWR_TABLE
         self.PHYINFO = RM_Register_SEQ_PHYINFO(self.zz_rmio, self.zz_label)

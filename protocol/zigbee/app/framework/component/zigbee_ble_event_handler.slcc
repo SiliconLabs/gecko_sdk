@@ -1,7 +1,7 @@
 id: zigbee_ble_event_handler
 package: Zigbee
 label: "BLE Event handler sample implementation"
-category: "Zigbee|ZigBee 3.0"
+category: "Zigbee|Zigbee 3.0"
 quality: "production"
 description: "Sample Bluetooth LE (BLE) Event handler code for Zigbee-BLE DMP examples."
 

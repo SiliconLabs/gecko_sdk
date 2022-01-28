@@ -3032,6 +3032,27 @@ sl_status_t sl_bt_sm_set_remote_oob(uint8_t enable,
 
 }
 
+sl_status_t sl_bt_sm_set_bonding_data(uint8_t connection,
+                                      uint8_t type,
+                                      size_t data_len,
+                                      const uint8_t* data) {
+    struct sl_bt_packet *cmd = (struct sl_bt_packet *)sl_bt_cmd_msg;
+
+    struct sl_bt_packet *rsp = (struct sl_bt_packet *)sl_bt_rsp_msg;
+
+    cmd->data.cmd_sm_set_bonding_data.connection=connection;
+    cmd->data.cmd_sm_set_bonding_data.type=type;
+    cmd->data.cmd_sm_set_bonding_data.data.len=data_len;
+    memcpy(cmd->data.cmd_sm_set_bonding_data.data.data,data,data_len);
+
+    cmd->header=sl_bt_cmd_sm_set_bonding_data_id+(((3+data_len)&0xff)<<8)+(((3+data_len)&0x700)>>8);
+
+
+    sl_bt_host_handle_command();
+    return rsp->data.rsp_sm_set_bonding_data.result;
+
+}
+
 sl_status_t sl_bt_ota_set_device_name(size_t name_len, const uint8_t* name) {
     struct sl_bt_packet *cmd = (struct sl_bt_packet *)sl_bt_cmd_msg;
 

@@ -43,7 +43,7 @@
 // <i> The timeout (seconds) to restore the GPD incoming security frame counter in the Flash (0 being never).
 #define EMBER_GP_INCOMING_FC_TOKEN_TIMEOUT   7
 
-// <o Green Power incoming FC (as part of proxy table) table token table size <0-126>
+// <o EMBER_GP_INCOMING_FC_TOKEN_TABLE_SIZE> Green Power incoming FC (as part of proxy table) table token table size <0-126>
 // <i> Default: 0
 // <i> The maximum table size to restore the GPD incoming security frame counter in the Flash (being either 0 or EMBER_GP_PROXY_TABLE_SIZE).
 #define EMBER_GP_INCOMING_FC_TOKEN_TABLE_SIZE   0

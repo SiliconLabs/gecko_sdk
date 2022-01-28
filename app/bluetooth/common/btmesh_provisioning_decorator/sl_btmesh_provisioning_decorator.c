@@ -176,11 +176,11 @@ void sl_btmesh_handle_provisioning_decorator_event(sl_btmesh_msg_t *evt)
       sl_btmesh_on_node_provisioning_failed(evt->data.evt_node_provisioning_failed.result);
 
       log("BT mesh system reset timer is started with %d ms timeout.\r\n",
-          PROVISIONING_DECORATOR_RESTART_TIMER_TIMEOUT);
+          SL_BTMESH_PROVISIONING_DECORATOR_RESTART_TIMER_TIMEOUT_CFG_VAL);
 
       sl_status_t sc =
         sl_simple_timer_start(&restart_timer,
-                              PROVISIONING_DECORATOR_RESTART_TIMER_TIMEOUT,
+                              SL_BTMESH_PROVISIONING_DECORATOR_RESTART_TIMER_TIMEOUT_CFG_VAL,
                               prov_decor_restart_timer_cb,
                               NO_CALLBACK_DATA,
                               false);

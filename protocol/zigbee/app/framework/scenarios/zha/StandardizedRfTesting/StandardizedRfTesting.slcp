@@ -1,7 +1,7 @@
 project_name: "StandardizedRfTesting"
 label: "StandardizedRfTesting"
 package: "Zigbee"
-category: "ZigBee Application"
+category: "Zigbee Application"
 quality: "production"
 
 component:

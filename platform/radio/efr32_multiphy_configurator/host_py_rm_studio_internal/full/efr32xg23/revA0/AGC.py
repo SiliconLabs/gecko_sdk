@@ -11,7 +11,8 @@ class RM_Peripheral_AGC(Base_RM_Peripheral):
         self.__dict__['zz_frozen'] = False
         super(RM_Peripheral_AGC, self).__init__(rmio, label,
             0xA800C000, 'AGC',
-            u"")
+            u"",
+            [])
         self.IPVERSION = RM_Register_AGC_IPVERSION(self.zz_rmio, self.zz_label)
         self.zz_rdict['IPVERSION'] = self.IPVERSION
         self.EN = RM_Register_AGC_EN(self.zz_rmio, self.zz_label)

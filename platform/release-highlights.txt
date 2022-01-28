@@ -1,26 +1,10 @@
-Gecko Platform 4.0.0.0
-* CMSIS Device
-  * Added support for ZGM230S modules
-* Drivers
-  * Added support for RBG LEDs in the LED driver
-* Services
-  * Added password and session protection in the CLI
-* Middleware
-  * Fixed vulnerabilities in Micrium OS Net
-  * Deprecated Micrium OS USB Device and USB Host
-  * Deprecated Gecko USB
-* Security
-  * Mbed TLS is updated to version 3.0.0
-  * Gecko Bootloader is provided as a full-source delivery
-* Operating System
-  * Changed default configurations of the Micrium OS Kernel to reduce code size
-* Gecko Bootloader
-  * Projects now supported in Project Configurator
-  * Provided as a full-source delivery
-* Machine Learning
-  * Updated TensorFlow Lite Micro version and updated quality to production level
-  * Added accelerated kernels and automatic initialization of TensorFlow Lite Micro
-* Examples
-  * Added emode demo
-  * Added new machine learning examples
-	
+Gecko Platform 4.0.1.0
+- CMSIS: Added module- and part-specific DCDC initialization headers to have more control on DCDC configuration.
+- Security: X25519 and Ed25519 algorithms, along with related key management functionality, are now accelerated on Series-2 Secure Vault Mid devices.
+- Operating System: Added new errno module. 
+- Boards and External Devices: Created pressure driver that abstracts bmp280 and bmp3xx.
+- RAIL Library:
+  - Restricted the SL_RAIL_UTIL_PA_RAMP_TIME_US to 10 us on some EFR32 modules to match the certification conditions.
+  - Updated the Z-Wave PHYs for the EFR32xG23 to prevent a sensitivity degradation on the R2 (9.6 kbps) PHY.
+- Selected quality improvements and bug fixes throughout.
+

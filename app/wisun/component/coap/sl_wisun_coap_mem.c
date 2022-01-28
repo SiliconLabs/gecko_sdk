@@ -230,7 +230,6 @@ void _wisun_coap_mem_free(void *addr)
   for (uint8_t i = 0; i < WISUN_COAP_MEMORY_OPTION_COUNT; ++i) {
     if (sl_mempool_is_addr_in_buff(&_mem[i].mempool, addr)) {
       sl_mempool_free(&_mem[i].mempool, addr);
-      addr = NULL;
     }
   }
 

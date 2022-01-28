@@ -1,7 +1,8 @@
 id: "gatt_configuration"
 label: "Configuration"
 package: "Bluetooth"
-description: "GATT Configuration"
+description: >
+  Adds basic GATT Configuration to the project that can be customized with the GATT Configurator tool.
 category: "Bluetooth|GATT"
 quality: "production"
 root_path: "app/bluetooth/common/gatt_configuration"
@@ -16,5 +17,3 @@ requires:
 template_contribution:
   - name: component_catalog
     value: gatt_configuration
-ui_hints:
-  visibility: never

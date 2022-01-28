@@ -1,6 +1,4 @@
 Flex SDK 3.3.0.0
-* Added support for Z-Wave on EFR32xG23 parts
-* Added support for new ZGM230 modules
-* Updated the default PA curves for EFR32xG23 parts to be more accurate on Silicon Labs radio boards
+- Selected quality improvements and bug fixes 
 
 

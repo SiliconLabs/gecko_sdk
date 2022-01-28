@@ -136,9 +136,9 @@ sl_status_t sl_bmp280_configure(sl_i2cspm_t *i2cspm, sl_bmp280_config_t *cfg)
   result = 0;
 
   result |= bmp280_set_work_mode(cfg->oversampling);
-  result |= bmp280_set_power_mode(cfg->powerMode);
-  bmp280_power_mode = cfg->powerMode;
-  result |= bmp280_set_standby_durn(cfg->standbyTime);
+  result |= bmp280_set_power_mode(cfg->power_mode);
+  bmp280_power_mode = cfg->power_mode;
+  result |= bmp280_set_standby_durn(cfg->standby_time);
 
   if (result != SUCCESS) {
     return SL_STATUS_FAIL;

@@ -48,6 +48,7 @@
 #define __WEAK          __attribute__((weak))
 #endif
 #define __CLZ           count_leading_zeros
+#define __RBIT          reverse_bits_in_word
 #define __USED          __attribute__((used))
 #define __NOP()         asm("NOP")
 #define __isb()
@@ -107,6 +108,22 @@ __STATIC_INLINE int count_leading_zeros(uint32_t  x)
     return __builtin_clz(x);
 #endif
   }
+}
+
+__STATIC_INLINE uint32_t reverse_bits_in_word(uint32_t value)
+{
+  uint32_t result;
+  uint32_t s = (4U /*sizeof(v)*/ * 8U) - 1U; /* extra shift needed at end */
+
+  result = value;                      /* r will be reversed bits of v; first get LSB of v */
+  for (value >>= 1U; value != 0U; value >>= 1U)
+  {
+    result <<= 1U;
+    result |= value & 1U;
+    s--;
+  }
+  result <<= s;                        /* shift when v's highest bits are zero */
+  return result;
 }
 
 #include "simulation_event_sc12.h"

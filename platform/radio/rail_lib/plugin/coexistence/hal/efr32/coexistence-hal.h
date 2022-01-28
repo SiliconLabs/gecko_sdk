@@ -79,7 +79,10 @@ bool COEX_HAL_ConfigDp(uint8_t pulseWidthUs);
 uint8_t COEX_HAL_GetDpPulseWidth(void);
 bool COEX_HAL_SetDpPulseWidth(uint8_t pulseWidthUs);
 uint16_t COEX_HAL_GetPseudoRandom(uint16_t min_value, uint16_t max_value);
-
+#ifdef SL_RAIL_UTIL_COEX_WIFI_TX_PORT
+bool COEX_HAL_ConfigWifiTx(COEX_HAL_GpioConfig_t *gpioConfig);
+bool COEX_HAL_GetWifiTx(void);
+#endif
 void sli_coex_enableGpioInt(COEX_GpioHandle_t gpioHandle,
                             bool enabled,
                             bool *wasAsserted);
@@ -126,6 +129,10 @@ extern COEX_HAL_GpioConfig_t sli_coex_ptaPwmReqCfg;
 #ifdef SL_RAIL_UTIL_COEX_RHO_PORT
 extern COEX_HAL_GpioConfig_t sli_coex_rhoCfg;
 #endif //SL_RAIL_UTIL_COEX_RHO_PORT
+
+#ifdef SL_RAIL_UTIL_COEX_WIFI_TX_PORT
+extern COEX_HAL_GpioConfig_t sli_coex_wifiTxCfg;
+#endif //SL_RAIL_UTIL_COEX_WIFI_TX_PORT
 
 #if defined(HAL_COEX_OVERRIDE_GPIO_INPUT) && !defined(SL_RAIL_UTIL_COEX_OVERRIDE_GPIO_INPUT)
 #define SL_RAIL_UTIL_COEX_OVERRIDE_GPIO_INPUT HAL_COEX_OVERRIDE_GPIO_INPUT

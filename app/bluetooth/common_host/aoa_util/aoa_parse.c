@@ -956,7 +956,7 @@ static sl_status_t aoa_parse_find_locator_config(cJSON **locator,
   cJSON *param;
   cJSON *array;
   cJSON *item;
-  uint8_t i = 0;
+  uint32_t i = 0;
 
   array = cJSON_GetObjectItem(root, "locators");
   CHECK_TYPE(array, cJSON_Array);

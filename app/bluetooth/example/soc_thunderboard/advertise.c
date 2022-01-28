@@ -3,7 +3,7 @@
  * @brief Thunderboard advertising
  *******************************************************************************
  * # License
- * <b>Copyright 2020 Silicon Laboratories Inc. www.silabs.com</b>
+ * <b>Copyright 2022 Silicon Laboratories Inc. www.silabs.com</b>
  *******************************************************************************
  *
  * SPDX-License-Identifier: Zlib
@@ -28,10 +28,12 @@
  *
  ******************************************************************************/
 
+#include <stdio.h>
 #include "sl_bluetooth.h"
+#include "gatt_db.h"
 #include "sl_simple_timer.h"
-#include "sl_simple_led_instances.h"
 #include "app_assert.h"
+#include "board.h"
 #include "advertise.h"
 
 typedef enum {
@@ -43,7 +45,6 @@ typedef enum {
 // Configuration
 
 #define ADV_ALTERNATE_TIME_MS 1000
-#define ADV_LED               SL_SIMPLE_LED_INSTANCE(0)
 #define ADV_TYPE_DEFAULT      ADV_TYPE_SCAN_RESPONSE
 
 // -----------------------------------------------------------------------------
@@ -71,11 +72,10 @@ typedef enum {
 
 /** Complete local name. */
 #define ADVERTISE_TYPE_LOCAL_NAME                   0x09
-
-#define ADVERTISE_DEVICE_NAME_LENGTH                19
-
-#define ADVERTISE_DEVICE_NAME_DEFAULT               "Thunderboard #00000"
-#define ADVERTISE_DEVICE_NAME_FORMAT_STRING         "Thunderboard #%05d"
+#define ADVERTISE_DEVICE_NAME_LEN_MAX               20
+#define ADVERTISE_DEVICE_NAME_DEFAULT_PREFIX        "Thunderboard "
+#define ADVERTISE_DEVICE_NAME_DEFAULT_SUFFIX        "#00000"
+#define ADVERTISE_DEVICE_NAME_FORMAT_STRING         "#%05d"
 
 // -------------------------------
 // iBeacon
@@ -146,7 +146,7 @@ typedef struct {
   uint8_t firmware_id[2];        /**< Firmware ID */
   uint8_t local_name_length;     /**< Length of the local name field. */
   uint8_t local_name_type;       /**< Type of the local name field. */
-  uint8_t local_name[ADVERTISE_DEVICE_NAME_LENGTH]; /**< Local name field. */
+  uint8_t local_name[ADVERTISE_DEVICE_NAME_LEN_MAX]; /**< Local name field. */
 } advertise_scan_response_t;
 
 #define ADVERTISE_SCAN_RESPONSE_DEFAULT                                  \
@@ -159,9 +159,10 @@ typedef struct {
     .mandatory_data_type   = ADVERTISE_MANDATORY_DATA_TYPE_MANUFACTURER, \
     .company_id            = UINT16_TO_BYTES(ADVERTISE_COMPANY_ID),      \
     .firmware_id           = UINT16_TO_BYTES(ADVERTISE_FIRMWARE_ID),     \
-    .local_name_length     = ADVERTISE_DEVICE_NAME_LENGTH + 1,           \
+    .local_name_length     = ADVERTISE_DEVICE_NAME_LEN_MAX + 1,          \
     .local_name_type       = ADVERTISE_TYPE_LOCAL_NAME,                  \
-    .local_name            = ADVERTISE_DEVICE_NAME_DEFAULT               \
+    .local_name            = ADVERTISE_DEVICE_NAME_DEFAULT_PREFIX        \
+                             ADVERTISE_DEVICE_NAME_DEFAULT_SUFFIX        \
   }
 
 // -----------------------------------------------------------------------------
@@ -212,7 +213,7 @@ static void adv_timer_cb(sl_simple_timer_t *timer, void *data)
             : ADV_TYPE_IBEACON;
   adv_set_data(advType);
   // Toggle advertising LED state
-  sl_led_toggle(ADV_LED);
+  adv_led_toggle();
 }
 
 // -----------------------------------------------------------------------------
@@ -221,27 +222,39 @@ static void adv_timer_cb(sl_simple_timer_t *timer, void *data)
 void advertise_init(uint32_t unique_id)
 {
   sl_status_t sc;
-  int local_name_length;
-  // Helper buffer to hold device name + string terminating null character
-  char local_name[ADVERTISE_DEVICE_NAME_LENGTH + 1];
+
+  // Read device name from the local GATT table
+  size_t local_name_length;
+  // Helper buffer to hold device name string and the terminating null character
+  uint8_t local_name[ADVERTISE_DEVICE_NAME_LEN_MAX + 1];
+  sc = sl_bt_gatt_server_read_attribute_value(gattdb_device_name,
+                                              0,
+                                              sizeof(local_name) - 1,
+                                              &local_name_length,
+                                              local_name);
+  app_log_status_error(sc);
 
   // Update iBeacon data
   adv_ibeacon.minor[1] = (uint8_t)unique_id;
   adv_ibeacon.minor[0] = (uint8_t)(unique_id >> 8);
   adv_ibeacon.major[1] = (uint8_t)(unique_id >> 16);
 
+  // Search for device name suffix
+  char *suffix;
+  suffix = strstr((char *)local_name, ADVERTISE_DEVICE_NAME_DEFAULT_SUFFIX);
+  app_assert(suffix != NULL,
+             "Device name substring cannot be found: %s\n",
+             (char *)local_name);
+
   // Update Scan Response data
-  local_name_length = snprintf(local_name,
-                               ADVERTISE_DEVICE_NAME_LENGTH + 1,
-                               ADVERTISE_DEVICE_NAME_FORMAT_STRING,
-                               (int)(unique_id & 0xFFFF));
-  app_assert(local_name_length == ADVERTISE_DEVICE_NAME_LENGTH,
-             "Local name length mismatch: %d != %d\n",
-             local_name_length,
-             ADVERTISE_DEVICE_NAME_LENGTH);
+  (void)snprintf(suffix,
+                 strlen(ADVERTISE_DEVICE_NAME_DEFAULT_SUFFIX) + 1,
+                 ADVERTISE_DEVICE_NAME_FORMAT_STRING,
+                 (int)(unique_id & 0xFFFF));
   (void)memcpy(adv_scan_response.local_name,
                local_name,
-               ADVERTISE_DEVICE_NAME_LENGTH);
+               local_name_length + 1);
+  adv_scan_response.local_name_length = local_name_length + 1;
 
   // Create an advertising set
   sc = sl_bt_advertiser_create_set(&adv_set_handle);
@@ -267,7 +280,7 @@ void advertise_start(void)
   adv_set_data(ADV_TYPE_DEFAULT);
 
   // Turn on advertising LED
-  sl_led_turn_on(ADV_LED);
+  adv_led_turn_on();
 
   // Start user defined advertising and enable connections
   sc = sl_bt_advertiser_start(adv_set_handle,
@@ -295,5 +308,5 @@ void advertise_stop(void)
   app_assert_status(sc);
 
   // Turn off advertising LED
-  sl_led_turn_off(ADV_LED);
+  adv_led_turn_off();
 }

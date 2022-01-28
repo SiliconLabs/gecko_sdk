@@ -239,8 +239,8 @@ class CALC_Demodulator_jumbo(CALC_Demodulator):
                     if dec1 < 1:
                         dec1 = 1
 
-                    if dec1 > 16384:
-                        dec1 = 16384
+                    if dec1 > 11500:
+                        dec1 = 11500
 
                     eliminate0 = 0
 

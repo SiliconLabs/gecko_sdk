@@ -9,3 +9,5 @@ class wisun_profile_outputs_common_sol(object):
                                            readable_name='WiSUN Mode Switch PHR'))
         profile.outputs.append(ModelOutput(model.vars.bch_lut_data, '', ModelOutputType.RAIL_CONFIG,
                                            readable_name='BCH lookup table for error correction'))
+        profile.outputs.append(ModelOutput(model.vars.ofdm_symbol_rate, '', ModelOutputType.RAIL_CONFIG,
+                                           readable_name='Number of symbols sent in 1 second'))

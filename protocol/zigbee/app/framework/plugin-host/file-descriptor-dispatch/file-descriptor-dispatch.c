@@ -23,6 +23,7 @@
 
 #include <stdlib.h>     // for malloc()
 #include <sys/time.h>   // for select()
+#include <sys/select.h> // for fd_set
 #include <sys/types.h>  // ""
 #define __USE_MISC
 #include <unistd.h>     // ""

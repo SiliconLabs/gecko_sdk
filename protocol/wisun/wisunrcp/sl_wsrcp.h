@@ -39,6 +39,7 @@ struct sl_wsrcp_app {
 #else
     USART_TypeDef *sdk_uart;
 #endif
+    osMutexId_t uart_tx_lock;
     uint8_t rx_buf_data[4096];
     struct ring rx_buf;
 

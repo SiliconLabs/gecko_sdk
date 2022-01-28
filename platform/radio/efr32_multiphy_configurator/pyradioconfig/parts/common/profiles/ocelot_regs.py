@@ -25,11 +25,11 @@ def build_modem_regs_ocelot(model,profile, family):
         build_modem_regs_sol_only(model, profile, family)
 
     # Ocelot-Sol-specific.
-    if model.part_family.lower() in ["ocelot", "sol"]:
+    if model.part_family.lower() in ["ocelot", "sol", "margay"]:
         build_modem_regs_ocelot_only(model, profile, family)    
 
     # Ocelot shared
-    if model.part_family.lower() in ["ocelot", "bobcat", "sol", "viper"]:
+    if model.part_family.lower() in ["ocelot", "bobcat", "sol", "viper", "margay"]:
         build_modem_regs_ocelot_shared(model, profile, family)
 
 def build_modem_regs_ocelot_shared(model, profile, family):
@@ -116,8 +116,9 @@ def build_modem_regs_ocelot_shared(model, profile, family):
     # profile.outputs.append(ModelOutput(model.vars.MODEM_SEQIF_SOFTRESETDONE, '',         ModelOutputType.SVD_REG_FIELD, readable_name='MODEM.SEQIF.SOFTRESETDONE'           ))
     # profile.outputs.append(ModelOutput(model.vars.MODEM_SEQIEN_SOFTRESETDONE, '',         ModelOutputType.SVD_REG_FIELD, readable_name='MODEM.SEQIEN.SOFTRESETDONE'           ))
 
-    profile.outputs.append(ModelOutput(model.vars.MODEM_RXRESTART_FLTRSTEN, '', ModelOutputType.SVD_REG_FIELD, readable_name='MODEM.RXRESTART.FLTRSTEN'))
-    profile.outputs.append(ModelOutput(model.vars.MODEM_RXRESTART_ANTSWRSTFLTTDIS, '', ModelOutputType.SVD_REG_FIELD, readable_name='MODEM.RXRESTART.ANTSWRSTFLTTDIS'))
+    if model.part_family.lower() not in ['viper']:
+        profile.outputs.append(ModelOutput(model.vars.MODEM_RXRESTART_FLTRSTEN, '', ModelOutputType.SVD_REG_FIELD, readable_name='MODEM.RXRESTART.FLTRSTEN'))
+        profile.outputs.append(ModelOutput(model.vars.MODEM_RXRESTART_ANTSWRSTFLTTDIS, '', ModelOutputType.SVD_REG_FIELD, readable_name='MODEM.RXRESTART.ANTSWRSTFLTTDIS'))        
     profile.outputs.append(ModelOutput(model.vars.MODEM_RXRESTART_RXRESTARTB4PREDET, '', ModelOutputType.SVD_REG_FIELD, readable_name='MODEM.RXRESTART.RXRESTARTB4PREDET'))
     profile.outputs.append(ModelOutput(model.vars.MODEM_RXRESTART_RXRESTARTUPONMARSSI, '', ModelOutputType.SVD_REG_FIELD, readable_name='MODEM.RXRESTART.RXRESTARTUPONMARSSI'))
 
@@ -135,22 +136,23 @@ def build_modem_regs_ocelot_shared(model, profile, family):
     profile.outputs.append(ModelOutput(model.vars.MODEM_AFCADJTX_AFCSCALEE, '',         ModelOutputType.SVD_REG_FIELD, readable_name='MODEM.AFCADJTX.AFCSCALEE'           ))
     profile.outputs.append(ModelOutput(model.vars.MODEM_TRECSCFG_TRECSOSR, '',         ModelOutputType.SVD_REG_FIELD, readable_name='MODEM.TRECSCFG.TRECSOSR'           ))
     profile.outputs.append(ModelOutput(model.vars.MODEM_TRECSCFG_PMOFFSET, '',         ModelOutputType.SVD_REG_FIELD, readable_name='MODEM.TRECSCFG.PMOFFSET'           ))
-    profile.outputs.append(ModelOutput(model.vars.MODEM_SHAPING12_COEFF48, '',         ModelOutputType.SVD_REG_FIELD, readable_name='MODEM.SHAPING12.COEFF48'           ))
-    profile.outputs.append(ModelOutput(model.vars.MODEM_SHAPING12_COEFF49, '',         ModelOutputType.SVD_REG_FIELD, readable_name='MODEM.SHAPING12.COEFF49'           ))
-    profile.outputs.append(ModelOutput(model.vars.MODEM_SHAPING12_COEFF50, '',         ModelOutputType.SVD_REG_FIELD, readable_name='MODEM.SHAPING12.COEFF50'           ))
-    profile.outputs.append(ModelOutput(model.vars.MODEM_SHAPING12_COEFF51, '',         ModelOutputType.SVD_REG_FIELD, readable_name='MODEM.SHAPING12.COEFF51'           ))
-    profile.outputs.append(ModelOutput(model.vars.MODEM_SHAPING13_COEFF52, '',         ModelOutputType.SVD_REG_FIELD, readable_name='MODEM.SHAPING13.COEFF52'           ))
-    profile.outputs.append(ModelOutput(model.vars.MODEM_SHAPING13_COEFF53, '',         ModelOutputType.SVD_REG_FIELD, readable_name='MODEM.SHAPING13.COEFF53'           ))
-    profile.outputs.append(ModelOutput(model.vars.MODEM_SHAPING13_COEFF54, '',         ModelOutputType.SVD_REG_FIELD, readable_name='MODEM.SHAPING13.COEFF54'           ))
-    profile.outputs.append(ModelOutput(model.vars.MODEM_SHAPING13_COEFF55, '',         ModelOutputType.SVD_REG_FIELD, readable_name='MODEM.SHAPING13.COEFF55'           ))
-    profile.outputs.append(ModelOutput(model.vars.MODEM_SHAPING14_COEFF56, '',         ModelOutputType.SVD_REG_FIELD, readable_name='MODEM.SHAPING14.COEFF56'           ))
-    profile.outputs.append(ModelOutput(model.vars.MODEM_SHAPING14_COEFF57, '',         ModelOutputType.SVD_REG_FIELD, readable_name='MODEM.SHAPING14.COEFF57'           ))
-    profile.outputs.append(ModelOutput(model.vars.MODEM_SHAPING14_COEFF58, '',         ModelOutputType.SVD_REG_FIELD, readable_name='MODEM.SHAPING14.COEFF58'           ))
-    profile.outputs.append(ModelOutput(model.vars.MODEM_SHAPING14_COEFF59, '',         ModelOutputType.SVD_REG_FIELD, readable_name='MODEM.SHAPING14.COEFF59'           ))
-    profile.outputs.append(ModelOutput(model.vars.MODEM_SHAPING15_COEFF60, '',         ModelOutputType.SVD_REG_FIELD, readable_name='MODEM.SHAPING15.COEFF60'           ))
-    profile.outputs.append(ModelOutput(model.vars.MODEM_SHAPING15_COEFF61, '',         ModelOutputType.SVD_REG_FIELD, readable_name='MODEM.SHAPING15.COEFF61'           ))
-    profile.outputs.append(ModelOutput(model.vars.MODEM_SHAPING15_COEFF62, '',         ModelOutputType.SVD_REG_FIELD, readable_name='MODEM.SHAPING15.COEFF62'           ))
-    profile.outputs.append(ModelOutput(model.vars.MODEM_SHAPING15_COEFF63, '',         ModelOutputType.SVD_REG_FIELD, readable_name='MODEM.SHAPING15.COEFF63'           ))
+    if model.part_family.lower() not in ["viper"]:
+        profile.outputs.append(ModelOutput(model.vars.MODEM_SHAPING12_COEFF48, '',         ModelOutputType.SVD_REG_FIELD, readable_name='MODEM.SHAPING12.COEFF48'           ))
+        profile.outputs.append(ModelOutput(model.vars.MODEM_SHAPING12_COEFF49, '',         ModelOutputType.SVD_REG_FIELD, readable_name='MODEM.SHAPING12.COEFF49'           ))
+        profile.outputs.append(ModelOutput(model.vars.MODEM_SHAPING12_COEFF50, '',         ModelOutputType.SVD_REG_FIELD, readable_name='MODEM.SHAPING12.COEFF50'           ))
+        profile.outputs.append(ModelOutput(model.vars.MODEM_SHAPING12_COEFF51, '',         ModelOutputType.SVD_REG_FIELD, readable_name='MODEM.SHAPING12.COEFF51'           ))
+        profile.outputs.append(ModelOutput(model.vars.MODEM_SHAPING13_COEFF52, '',         ModelOutputType.SVD_REG_FIELD, readable_name='MODEM.SHAPING13.COEFF52'           ))
+        profile.outputs.append(ModelOutput(model.vars.MODEM_SHAPING13_COEFF53, '',         ModelOutputType.SVD_REG_FIELD, readable_name='MODEM.SHAPING13.COEFF53'           ))
+        profile.outputs.append(ModelOutput(model.vars.MODEM_SHAPING13_COEFF54, '',         ModelOutputType.SVD_REG_FIELD, readable_name='MODEM.SHAPING13.COEFF54'           ))
+        profile.outputs.append(ModelOutput(model.vars.MODEM_SHAPING13_COEFF55, '',         ModelOutputType.SVD_REG_FIELD, readable_name='MODEM.SHAPING13.COEFF55'           ))
+        profile.outputs.append(ModelOutput(model.vars.MODEM_SHAPING14_COEFF56, '',         ModelOutputType.SVD_REG_FIELD, readable_name='MODEM.SHAPING14.COEFF56'           ))
+        profile.outputs.append(ModelOutput(model.vars.MODEM_SHAPING14_COEFF57, '',         ModelOutputType.SVD_REG_FIELD, readable_name='MODEM.SHAPING14.COEFF57'           ))
+        profile.outputs.append(ModelOutput(model.vars.MODEM_SHAPING14_COEFF58, '',         ModelOutputType.SVD_REG_FIELD, readable_name='MODEM.SHAPING14.COEFF58'           ))
+        profile.outputs.append(ModelOutput(model.vars.MODEM_SHAPING14_COEFF59, '',         ModelOutputType.SVD_REG_FIELD, readable_name='MODEM.SHAPING14.COEFF59'           ))
+        profile.outputs.append(ModelOutput(model.vars.MODEM_SHAPING15_COEFF60, '',         ModelOutputType.SVD_REG_FIELD, readable_name='MODEM.SHAPING15.COEFF60'           ))
+        profile.outputs.append(ModelOutput(model.vars.MODEM_SHAPING15_COEFF61, '',         ModelOutputType.SVD_REG_FIELD, readable_name='MODEM.SHAPING15.COEFF61'           ))
+        profile.outputs.append(ModelOutput(model.vars.MODEM_SHAPING15_COEFF62, '',         ModelOutputType.SVD_REG_FIELD, readable_name='MODEM.SHAPING15.COEFF62'           ))
+        profile.outputs.append(ModelOutput(model.vars.MODEM_SHAPING15_COEFF63, '',         ModelOutputType.SVD_REG_FIELD, readable_name='MODEM.SHAPING15.COEFF63'           ))
     profile.outputs.append(ModelOutput(model.vars.MODEM_FRMSCHTIME_FRMSCHTIME, '',         ModelOutputType.SVD_REG_FIELD, readable_name='MODEM.FRMSCHTIME.FRMSCHTIME'           ))
     profile.outputs.append(ModelOutput(model.vars.MODEM_FRMSCHTIME_PMENDSCHEN, '', ModelOutputType.SVD_REG_FIELD, readable_name='MODEM.FRMSCHTIME.PMENDSCHEN'))
     profile.outputs.append(ModelOutput(model.vars.MODEM_FRMSCHTIME_PMRSTSYCNEN, '', ModelOutputType.SVD_REG_FIELD, readable_name='MODEM.FRMSCHTIME.PMRSTSYCNEN'))
@@ -192,7 +194,7 @@ def build_modem_regs_ocelot_shared(model, profile, family):
     profile.outputs.append(ModelOutput(model.vars.AGC_ANTDIV_DEBOUNCECNTTHD, '', ModelOutputType.SVD_REG_FIELD, readable_name='AGC.ANTDIV.DEBOUNCECNTTHD'))
 
     # Not in Sol.
-    if model.part_family.lower() in ["ocelot", "bobcat","viper"]:
+    if model.part_family.lower() in ["ocelot", "bobcat", "margay"]:
         profile.outputs.append(ModelOutput(model.vars.MODEM_CHFCOE00_SET0COEFF0, '',         ModelOutputType.SVD_REG_FIELD, readable_name='MODEM.CHFCOE00.SET0COEFF0'           ))
         profile.outputs.append(ModelOutput(model.vars.MODEM_CHFCOE00_SET0COEFF1, '',         ModelOutputType.SVD_REG_FIELD, readable_name='MODEM.CHFCOE00.SET0COEFF1'           ))
         profile.outputs.append(ModelOutput(model.vars.MODEM_CHFCOE00_SET0COEFF2, '',         ModelOutputType.SVD_REG_FIELD, readable_name='MODEM.CHFCOE00.SET0COEFF2'           ))
@@ -233,7 +235,7 @@ def build_modem_regs_ocelot_shared(model, profile, family):
         profile.outputs.append(ModelOutput(model.vars.MODEM_CTRL5_BBSS, '',         ModelOutputType.SVD_REG_FIELD, readable_name='MODEM.CTRL5.BBSS'           ))
 
     # Not in Bobcat.
-    if model.part_family.lower() in ["ocelot", "sol"]:
+    if model.part_family.lower() in ["ocelot", "sol", "margay"]:
         profile.outputs.append(ModelOutput(model.vars.MODEM_BCRDEMODCTRL_BCRDEMODEN, '', ModelOutputType.SVD_REG_FIELD,readable_name='MODEM.BCRDEMODCTRL.BCRDEMODEN'))
         profile.outputs.append(ModelOutput(model.vars.MODEM_BCRDEMODCTRL_RAWSYN, '', ModelOutputType.SVD_REG_FIELD,readable_name='MODEM.BCRDEMODCTRL.RAWSYN'))
         profile.outputs.append(ModelOutput(model.vars.MODEM_BCRDEMODCTRL_PH0SIZE, '', ModelOutputType.SVD_REG_FIELD,readable_name='MODEM.BCRDEMODCTRL.PH0SIZE'))
@@ -395,7 +397,7 @@ def build_modem_regs_ocelot_shared(model, profile, family):
         profile.outputs.append(ModelOutput(model.vars.RAC_LNAMIXTRIM1_LNAMIXLNA1CAPSEL, '', ModelOutputType.SVD_REG_FIELD, readable_name='RAC.LNAMIXTRIM1.LNAMIXLNA1CAPSEL'           ))
 
      # Not in Bobcat and Sol
-    if model.part_family.lower() in ["ocelot"]:
+    if model.part_family.lower() in ["ocelot", "margay"]:
         profile.outputs.append(ModelOutput(model.vars.RAC_IFADCPLLDCO_IFADCPLLDCOBIASHALF, '',         ModelOutputType.SVD_REG_FIELD, readable_name='RAC.IFADCPLLDCO.IFADCPLLDCOBIASHALF'           ))
         profile.outputs.append(ModelOutput(model.vars.RAC_IFADCPLLDCO_IFADCPLLDCOFILTER, '',         ModelOutputType.SVD_REG_FIELD, readable_name='RAC.IFADCPLLDCO.IFADCPLLDCOFILTER'           ))
         profile.outputs.append(ModelOutput(model.vars.RAC_IFADCPLLDCO_IFADCPLLDCOFULLRATE, '',         ModelOutputType.SVD_REG_FIELD, readable_name='RAC.IFADCPLLDCO.IFADCPLLDCOFULLRATE'           ))
@@ -403,7 +405,6 @@ def build_modem_regs_ocelot_shared(model, profile, family):
         profile.outputs.append(ModelOutput(model.vars.FRC_CTRL_SKIPTXTRAILDATAWHITEN, '', ModelOutputType.SVD_REG_FIELD, readable_name='FRC.CTRL.SKIPTXTRAILDATAWHITEN'))
         profile.outputs.append(ModelOutput(model.vars.FRC_CTRL_SKIPRXSUPSTATEWHITEN, '', ModelOutputType.SVD_REG_FIELD, readable_name='FRC.CTRL.SKIPRXSUPSTATEWHITEN'))
 
-    profile.outputs.append(ModelOutput(model.vars.AGC_CTRL1_CCATHRSH, '', ModelOutputType.SVD_REG_FIELD,readable_name='AGC.CTRL1.CCATHRSH'))
     profile.outputs.append(ModelOutput(model.vars.MODEM_PHDMODANTDIV_ANTWAIT, '', ModelOutputType.SVD_REG_FIELD,readable_name='MODEM.PHDMODANTDIV.ANTWAIT'))
     profile.outputs.append(ModelOutput(model.vars.MODEM_PHDMODANTDIV_SKIP2ANT, '', ModelOutputType.SVD_REG_FIELD,readable_name='MODEM.PHDMODANTDIV.SKIP2ANT'))
     profile.outputs.append(ModelOutput(model.vars.MODEM_PHDMODANTDIV_SKIPCORRTHD, '', ModelOutputType.SVD_REG_FIELD,readable_name='MODEM.PHDMODANTDIV.SKIPCORRTHD'))
@@ -466,11 +467,15 @@ def build_modem_regs_ocelot_shared(model, profile, family):
         profile.outputs.append(ModelOutput(model.vars.RAC_SYTRIM0_SYCHPLEVPSRCTX, '', ModelOutputType.SVD_REG_FIELD,readable_name='RAC.SYTRIM0.SYCHPLEVPSRCTX'))
         profile.outputs.append(ModelOutput(model.vars.RAC_RX_SYPFDFPWENRX, '', ModelOutputType.SVD_REG_FIELD, readable_name='RAC.RX.SYPFDFPWENRX'))
         profile.outputs.append(ModelOutput(model.vars.RAC_TX_SYPFDFPWENTX, '', ModelOutputType.SVD_REG_FIELD, readable_name='RAC.TX.SYPFDFPWENTX'))
-        profile.outputs.append(ModelOutput(model.vars.RAC_RX_SYPFDCHPLPENRX, '', ModelOutputType.SVD_REG_FIELD,readable_name='RAC.RX.SYPFDCHPLPENRX'))
         profile.outputs.append(ModelOutput(model.vars.RAC_TX_SYPFDCHPLPENTX, '', ModelOutputType.SVD_REG_FIELD,readable_name='RAC.TX.SYPFDCHPLPENTX'))
         profile.outputs.append(ModelOutput(model.vars.RAC_RX_LNAMIXENRFPKDLOTHRESH, '', ModelOutputType.SVD_REG_FIELD,readable_name='RAC.RX.LNAMIXENRFPKDLOTHRESH'))
         profile.outputs.append(ModelOutput(model.vars.RAC_SYTRIM0_SYCHPCURRTX, '', ModelOutputType.SVD_REG_FIELD,readable_name='RAC.SYTRIM0.SYCHPCURRTX'))
         profile.outputs.append(ModelOutput(model.vars.RAC_SYMMDCTRL_SYMMDMODETX, '', ModelOutputType.SVD_REG_FIELD,readable_name='RAC.SYMMDCTRL.SYMMDMODETX'))
+
+    # Viper only
+    if model.part_family.lower() not in ["bobcat"]:    
+        profile.outputs.append(ModelOutput(model.vars.RAC_RX_SYPFDCHPLPENRX, '', ModelOutputType.SVD_REG_FIELD,readable_name='RAC.RX.SYPFDCHPLPENRX'))
+
     profile.outputs.append(ModelOutput(model.vars.RAC_SYEN_SYCHPLPENRX, '', ModelOutputType.SVD_REG_FIELD, readable_name='RAC.SYEN.SYCHPLPENRX'))
     profile.outputs.append(ModelOutput(model.vars.RAC_SYTRIM0_SYCHPREPLICACURRADJ, '', ModelOutputType.SVD_REG_FIELD, readable_name='RAC.SYTRIM0.SYCHPREPLICACURRADJ'))
     profile.outputs.append(ModelOutput(model.vars.RAC_SYTRIM0_SYCHPSRCENRX, '', ModelOutputType.SVD_REG_FIELD, readable_name='RAC.SYTRIM0.SYCHPSRCENRX'))

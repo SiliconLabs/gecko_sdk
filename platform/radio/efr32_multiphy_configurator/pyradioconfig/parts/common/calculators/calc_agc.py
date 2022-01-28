@@ -289,8 +289,7 @@ class CALC_AGC(ICalculator):
         # level in dBm (can be negative)
         level = model.vars.agc_power_target.value
 
-        part_family = model.part_family.lower()
-        self._reg_write(model.vars.AGC_CTRL0_PWRTARGET, level, part_family=part_family)
+        self._reg_write(model.vars.AGC_CTRL0_PWRTARGET, level, allow_neg=True)
 
     def calc_rssiperiod_val(self, model):
         """calculate RSSIPERIOD as fixed number 3 for now

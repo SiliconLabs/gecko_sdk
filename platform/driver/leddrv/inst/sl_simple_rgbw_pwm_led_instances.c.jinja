@@ -25,6 +25,7 @@
 sl_led_pwm_t red_{{ inst | lower }} = {
   .port = SL_SIMPLE_RGBW_PWM_LED_{{ inst | upper }}_RED_PORT,
   .pin = SL_SIMPLE_RGBW_PWM_LED_{{ inst | upper }}_RED_PIN,
+  .level = SL_SIMPLE_RGBW_PWM_LED_{{ inst | upper }}_RESOLUTION - 1,
   .polarity = SL_SIMPLE_RGBW_PWM_LED_{{ inst | upper }}_RED_POLARITY,
   .channel = SL_SIMPLE_RGBW_PWM_LED_{{ inst | upper }}_RED_CHANNEL,
 #if defined(SL_SIMPLE_RGBW_PWM_LED_{{ inst | upper }}_RED_LOC)
@@ -38,6 +39,7 @@ sl_led_pwm_t red_{{ inst | lower }} = {
 sl_led_pwm_t green_{{ inst | lower }} = {
   .port = SL_SIMPLE_RGBW_PWM_LED_{{ inst | upper }}_GREEN_PORT,
   .pin = SL_SIMPLE_RGBW_PWM_LED_{{ inst | upper }}_GREEN_PIN,
+  .level = SL_SIMPLE_RGBW_PWM_LED_{{ inst | upper }}_RESOLUTION - 1,
   .polarity = SL_SIMPLE_RGBW_PWM_LED_{{ inst | upper }}_GREEN_POLARITY,
   .channel = SL_SIMPLE_RGBW_PWM_LED_{{ inst | upper }}_GREEN_CHANNEL,
 #if defined(SL_SIMPLE_RGBW_PWM_LED_{{ inst | upper }}_GREEN_LOC)
@@ -51,6 +53,7 @@ sl_led_pwm_t green_{{ inst | lower }} = {
 sl_led_pwm_t blue_{{ inst | lower }} = {
   .port = SL_SIMPLE_RGBW_PWM_LED_{{ inst | upper }}_BLUE_PORT,
   .pin = SL_SIMPLE_RGBW_PWM_LED_{{ inst | upper }}_BLUE_PIN,
+  .level = SL_SIMPLE_RGBW_PWM_LED_{{ inst | upper }}_RESOLUTION - 1,
   .polarity = SL_SIMPLE_RGBW_PWM_LED_{{ inst | upper }}_BLUE_POLARITY,
   .channel = SL_SIMPLE_RGBW_PWM_LED_{{ inst | upper }}_BLUE_CHANNEL,
 #if defined(SL_SIMPLE_RGBW_PWM_LED_{{ inst | upper }}_BLUE_LOC)
@@ -64,6 +67,7 @@ sl_led_pwm_t blue_{{ inst | lower }} = {
 sl_led_pwm_t white_{{ inst | lower }} = {
   .port = SL_SIMPLE_RGBW_PWM_LED_{{ inst | upper }}_WHITE_PORT,
   .pin = SL_SIMPLE_RGBW_PWM_LED_{{ inst | upper }}_WHITE_PIN,
+  .level = SL_SIMPLE_RGBW_PWM_LED_{{ inst | upper }}_RESOLUTION - 1,
   .polarity = SL_SIMPLE_RGBW_PWM_LED_{{ inst | upper }}_WHITE_POLARITY,
   .channel = SL_SIMPLE_RGBW_PWM_LED_{{ inst | upper }}_WHITE_CHANNEL,
 #if defined(SL_SIMPLE_RGBW_PWM_LED_{{ inst | upper }}_WHITE_LOC)

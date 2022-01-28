@@ -198,7 +198,7 @@ class CALC_Demodulator(ICalculator):
         # loop over all possible DEC0, DEC1, and CFOSR values
         for dec0 in [3, 4, 8]:
 
-            for dec1 in xrange(16384, 0, -1):
+            for dec1 in xrange(11500, 0, -1):
 
                 # if we have desired center (IF) frequency choose corresponding setting
                 # if not try all options to find the best

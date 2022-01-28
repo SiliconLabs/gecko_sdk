@@ -1,7 +1,7 @@
 project_name: "ncp-uart-hw-gp-multi-rail"
 label: "ncp-uart-hw-gp-multi-rail"
 package: "Zigbee"
-category: "ZigBee Application"
+category: "Zigbee Application"
 quality: "production"
 
 description: |-

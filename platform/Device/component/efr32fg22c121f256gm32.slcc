@@ -90,6 +90,7 @@
   - name: cortexm33
   - name: armv8m.main
   - name: device_security_rot
+  - name: device_pa_6dbm
   - name: device_has_agc
   - name: device_has_amuxcp
   - name: device_has_amuxcp0

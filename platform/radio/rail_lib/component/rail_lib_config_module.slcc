@@ -335,6 +335,10 @@ library:
     condition:
       - toolchain_iar
       - bgm240pb32vnn
+  - path: platform/radio/rail_lib/autogen/librail_release/librail_config_mgm240l022vnf_iar.a
+    condition:
+      - toolchain_iar
+      - mgm240l022vnf
   - path: platform/radio/rail_lib/autogen/librail_release/librail_config_mgm240pa22vna_iar.a
     condition:
       - toolchain_iar
@@ -676,6 +680,10 @@ library:
     condition:
       - toolchain_gcc
       - bgm240pb32vna
+  - path: platform/radio/rail_lib/autogen/librail_release/librail_config_mgm240l022vnf_gcc.a
+    condition:
+      - toolchain_gcc
+      - mgm240l022vnf
   - path: platform/radio/rail_lib/autogen/librail_release/librail_config_mgm240pa22vna_gcc.a
     condition:
       - toolchain_gcc

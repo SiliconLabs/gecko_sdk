@@ -72,9 +72,9 @@ sl_status_t sl_btmesh_LCD_init(void)
 {
   memset(&LCD_data, 0, sizeof(LCD_data));
 
-  graphInit(BTMESH_WSTK_LCD_GRAPH_INIT_TEXT);
+  graphInit(SL_BTMESH_WSTK_LCD_GRAPH_INIT_TEXT_CFG_VAL);
 
-  return sl_btmesh_LCD_write(BTMESH_WSTK_LCD_INIT_TEXT, BTMESH_WSTK_LCD_ROW_STATUS);
+  return sl_btmesh_LCD_write(SL_BTMESH_WSTK_LCD_INIT_TEXT_CFG_VAL, SL_BTMESH_WSTK_LCD_ROW_STATUS_CFG_VAL);
 }
 
 /*******************************************************************************

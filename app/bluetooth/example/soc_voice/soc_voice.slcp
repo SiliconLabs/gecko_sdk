@@ -57,7 +57,7 @@ include:
     - path: voice.h
 
 readme:
-  - path: ../../documentation/example/soc_voice/readme.html
+  - path: ../../documentation/example/soc_voice/readme.md
 
 config_file:
   - override:
@@ -161,5 +161,5 @@ tag:
 ui_hints:
   highlight:
     - path: config/btconf/gatt_configuration.btconf
-    - path: readme.html
+    - path: readme.md
       focus: true

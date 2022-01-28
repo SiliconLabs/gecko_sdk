@@ -75,7 +75,7 @@ class CALC_Modulator(ICalculator):
         encodingEnum = model.vars.symbol_encoding.var_enum
 
         baud_per_symbol = 1
-        if model.part_family.lower() in ["nerio", "panther", "lynx", "ocelot", "leopard"]:
+        if model.part_family.lower() in ["nerio"]:
             if model.vars.MODEM_LONGRANGE_LRBLE.value == 1:
                 # In case of BLE LR 125 kps, baud_per_symbol is 8
                 if model.vars.FRC_CTRL_RATESELECT.value == 0:

@@ -44,14 +44,14 @@
 #define HIGH_PRIORITY         0              // High Priority
 
 /// current hue level
-static uint16_t current_hue = HSL_SERVER_DEFAULT_HUE;
+static uint16_t current_hue = SL_BTMESH_HSL_SERVER_DEFAULT_HUE_CFG_VAL;
 /// starting level of hue transition
 static uint16_t start_hue;
 /// target level of hue transition
 static uint16_t target_hue;
 
 /// current saturation level
-static uint16_t current_saturation = HSL_SERVER_DEFAULT_SATURATION;
+static uint16_t current_saturation = SL_BTMESH_HSL_SERVER_DEFAULT_SATURATION_CFG_VAL;
 /// starting level of saturation transition
 static uint16_t start_saturation;
 /// target level of saturation transition
@@ -111,7 +111,7 @@ static void hue_transition_timer_cb(sl_simple_timer_t *timer, void *data)
   (void)timer;
   // Initialize the variable to UI update period in order to trigger a UI update
   // at the beginning of the transition.
-  static uint16_t time_elapsed_since_ui_update = HSL_SERVER_HUE_UI_UPDATE_PERIOD;
+  static uint16_t time_elapsed_since_ui_update = SL_BTMESH_HSL_SERVER_HUE_UI_UPDATE_PERIOD_CFG_VAL;
 
   if (!hue_transitioning) {
     sl_status_t sc = sl_simple_timer_stop(&hue_transition_timer);
@@ -127,7 +127,7 @@ static void hue_transition_timer_cb(sl_simple_timer_t *timer, void *data)
 
       // Set the variable to UI update period in order to trigger a UI update
       // at the beginning of the next transition.
-      time_elapsed_since_ui_update = HSL_SERVER_HUE_UI_UPDATE_PERIOD;
+      time_elapsed_since_ui_update = SL_BTMESH_HSL_SERVER_HUE_UI_UPDATE_PERIOD_CFG_VAL;
 
       // Trigger a UI update in order to provide the target values at the end
       // of the current transition
@@ -147,12 +147,12 @@ static void hue_transition_timer_cb(sl_simple_timer_t *timer, void *data)
       }
 
       // When transition is ongoing generate an event to application once every
-      // HSL_SERVER_HUE_UI_UPDATE_PERIOD ms because the event is used to update
+      // SL_BTMESH_HSL_SERVER_HUE_UI_UPDATE_PERIOD_CFG_VAL ms because the event is used to update
       // display status and therefore the rate should not be too high
-      time_elapsed_since_ui_update += HSL_SERVER_HUE_UI_UPDATE_PERIOD;
+      time_elapsed_since_ui_update += SL_BTMESH_HSL_SERVER_HUE_UI_UPDATE_PERIOD_CFG_VAL;
 
-      if (HSL_SERVER_HUE_UI_UPDATE_PERIOD <= time_elapsed_since_ui_update) {
-        time_elapsed_since_ui_update -= HSL_SERVER_HUE_UI_UPDATE_PERIOD;
+      if (SL_BTMESH_HSL_SERVER_HUE_UI_UPDATE_PERIOD_CFG_VAL <= time_elapsed_since_ui_update) {
+        time_elapsed_since_ui_update -= SL_BTMESH_HSL_SERVER_HUE_UI_UPDATE_PERIOD_CFG_VAL;
         sl_btmesh_hsl_hue_on_ui_update(current_hue);
       }
     }
@@ -170,7 +170,7 @@ static void saturation_transition_timer_cb(sl_simple_timer_t *timer, void *data)
   (void)timer;
   // Initialize the variable to UI update period in order to trigger a UI update
   // at the beginning of the transition.
-  static uint16_t time_elapsed_since_ui_update = HSL_SERVER_SATURATION_UI_UPDATE_PERIOD;
+  static uint16_t time_elapsed_since_ui_update = SL_BTMESH_HSL_SERVER_SATURATION_UI_UPDATE_PERIOD_CFG_VAL;
 
   if (!saturation_transitioning) {
     sl_status_t sc = sl_simple_timer_stop(&saturation_transition_timer);
@@ -186,7 +186,7 @@ static void saturation_transition_timer_cb(sl_simple_timer_t *timer, void *data)
 
       // Set the variable to UI update period in order to trigger a UI update
       // at the beginning of the next transition.
-      time_elapsed_since_ui_update = HSL_SERVER_SATURATION_UI_UPDATE_PERIOD;
+      time_elapsed_since_ui_update = SL_BTMESH_HSL_SERVER_SATURATION_UI_UPDATE_PERIOD_CFG_VAL;
 
       // Trigger a UI update in order to provide the target values at the end
       // of the current transition
@@ -206,12 +206,12 @@ static void saturation_transition_timer_cb(sl_simple_timer_t *timer, void *data)
       }
 
       // When transition is ongoing generate an event to application once every
-      // HSL_SERVER_SATURATION_UI_UPDATE_PERIOD ms because the event is used to update
+      // SL_BTMESH_HSL_SERVER_SATURATION_UI_UPDATE_PERIOD_CFG_VAL ms because the event is used to update
       // display status and therefore the rate should not be too high
-      time_elapsed_since_ui_update += HSL_SERVER_SATURATION_UI_UPDATE_PERIOD;
+      time_elapsed_since_ui_update += SL_BTMESH_HSL_SERVER_SATURATION_UI_UPDATE_PERIOD_CFG_VAL;
 
-      if (HSL_SERVER_SATURATION_UI_UPDATE_PERIOD <= time_elapsed_since_ui_update) {
-        time_elapsed_since_ui_update -= HSL_SERVER_SATURATION_UI_UPDATE_PERIOD;
+      if (SL_BTMESH_HSL_SERVER_SATURATION_UI_UPDATE_PERIOD_CFG_VAL <= time_elapsed_since_ui_update) {
+        time_elapsed_since_ui_update -= SL_BTMESH_HSL_SERVER_SATURATION_UI_UPDATE_PERIOD_CFG_VAL;
         sl_btmesh_hsl_saturation_on_ui_update(current_saturation);
       }
     }
@@ -228,15 +228,15 @@ static void saturation_transition_timer_cb(sl_simple_timer_t *timer, void *data)
  ******************************************************************************/
 void sl_btmesh_hsl_set_hue_level(uint16_t hue, uint32_t transition_ms)
 {
-#if HSL_SERVER_MINIMUM_HUE != (0)
-  if (hue < HSL_SERVER_MINIMUM_HUE) {
-    hue = HSL_SERVER_MINIMUM_HUE;
+#if SL_BTMESH_HSL_SERVER_MINIMUM_HUE_CFG_VAL != (0)
+  if (hue < SL_BTMESH_HSL_SERVER_MINIMUM_HUE_CFG_VAL) {
+    hue = SL_BTMESH_HSL_SERVER_MINIMUM_HUE_CFG_VAL;
   }
 #endif
 
-#if HSL_SERVER_MAXIMUM_HUE != (65535)
-  if (hue > HSL_SERVER_MAXIMUM_HUE) {
-    hue = HSL_SERVER_MAXIMUM_HUE;
+#if SL_BTMESH_HSL_SERVER_MAXIMUM_HUE_CFG_VAL != (65535)
+  if (hue > SL_BTMESH_HSL_SERVER_MAXIMUM_HUE_CFG_VAL) {
+    hue = SL_BTMESH_HSL_SERVER_MAXIMUM_HUE_CFG_VAL;
   }
 #endif
 
@@ -266,7 +266,7 @@ void sl_btmesh_hsl_set_hue_level(uint16_t hue, uint32_t transition_ms)
   // enabling timer IRQ -> the temperature is adjusted in timer interrupt
   // gradually until target temperature is reached.
   sl_status_t sc = sl_simple_timer_start(&hue_transition_timer,
-                                         HSL_SERVER_HUE_UPDATE_PERIOD,
+                                         SL_BTMESH_HSL_SERVER_HUE_UPDATE_PERIOD_CFG_VAL,
                                          hue_transition_timer_cb,
                                          NO_CALLBACK_DATA,
                                          true);
@@ -283,15 +283,15 @@ void sl_btmesh_hsl_set_hue_level(uint16_t hue, uint32_t transition_ms)
  ******************************************************************************/
 void sl_btmesh_hsl_set_saturation_level(uint16_t saturation, uint32_t transition_ms)
 {
-#if HSL_SERVER_MINIMUM_SATURATION != (0)
-  if (saturation < HSL_SERVER_MINIMUM_SATURATION) {
-    saturation = HSL_SERVER_MINIMUM_SATURATION;
+#if SL_BTMESH_HSL_SERVER_MINIMUM_SATURATION_CFG_VAL != (0)
+  if (saturation < SL_BTMESH_HSL_SERVER_MINIMUM_SATURATION_CFG_VAL) {
+    saturation = SL_BTMESH_HSL_SERVER_MINIMUM_SATURATION_CFG_VAL;
   }
 #endif
 
-#if HSL_SERVER_MAXIMUM_SATURATION != (65535)
-  if (saturation > HSL_SERVER_MAXIMUM_SATURATION) {
-    saturation = HSL_SERVER_MAXIMUM_SATURATION;
+#if SL_BTMESH_HSL_SERVER_MAXIMUM_SATURATION_CFG_VAL != (65535)
+  if (saturation > SL_BTMESH_HSL_SERVER_MAXIMUM_SATURATION_CFG_VAL) {
+    saturation = SL_BTMESH_HSL_SERVER_MAXIMUM_SATURATION_CFG_VAL;
   }
 #endif
 
@@ -321,7 +321,7 @@ void sl_btmesh_hsl_set_saturation_level(uint16_t saturation, uint32_t transition
   // enabling timer IRQ -> the temperature is adjusted in timer interrupt
   // gradually until target temperature is reached.
   sl_status_t sc = sl_simple_timer_start(&saturation_transition_timer,
-                                         HSL_SERVER_SATURATION_UPDATE_PERIOD,
+                                         SL_BTMESH_HSL_SERVER_SATURATION_UPDATE_PERIOD_CFG_VAL,
                                          saturation_transition_timer_cb,
                                          NO_CALLBACK_DATA,
                                          true);

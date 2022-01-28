@@ -4,6 +4,42 @@ from py_2_and_3_compatibility import *
 
 class CALC_Modulator_Panther(CALC_Modulator):
 
+    def calc_symbol_rates_actual(self, model):
+        encoding = model.vars.symbol_encoding.value
+        encodingEnum = model.vars.symbol_encoding.var_enum
+
+        baud_per_symbol = 1
+
+        if model.vars.MODEM_LONGRANGE_LRBLE.value == 1:
+            # In case of BLE LR 125 kps, baud_per_symbol is 8
+            if model.vars.FRC_CTRL_RATESELECT.value == 0:
+                baud_per_symbol = 8
+            # In case of BLE LR 500 kps, baud_per_symbol is 2
+            elif model.vars.FRC_CTRL_RATESELECT.value == 2:
+                baud_per_symbol = 2
+            else:
+                raise ValueError("Invalid FRC_CTRL_RATESELECT value used in LONGRANGE configuration")
+        if model.vars.FRC_CTRL_RATESELECT.value == 1:
+            encoding = model.vars.MODEM_CTRL6_CODINGB
+        if encoding == encodingEnum.LINECODE:
+            baud_per_symbol *= 4
+        if encoding == encodingEnum.DSSS:
+            baud_per_symbol *= model.vars.dsss_len.value
+        elif encoding == encodingEnum.Manchester:
+            baud_per_symbol *= 2
+        model.vars.baud_per_symbol_actual.value = baud_per_symbol
+
+        if encoding == encodingEnum.DSSS:
+            bits_per_symbol = model.vars.dsss_bits_per_symbol.value
+        else:
+            modFormat = model.vars.modulation_type.value
+            modFormatEnum = model.vars.modulation_type.var_enum
+            if modFormat in [modFormatEnum.FSK4, modFormatEnum.OQPSK]:
+                bits_per_symbol = 2
+            else:
+                bits_per_symbol = 1
+        model.vars.bits_per_symbol_actual.value = bits_per_symbol
+
     def calc_txbr_reg(self, model):
         """
         given desired TX baudrate ratio calculate TXBRNUM and TXBRDEN

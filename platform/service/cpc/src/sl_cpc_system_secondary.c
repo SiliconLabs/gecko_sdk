@@ -584,6 +584,24 @@ static void on_property_get_endpoint_states(sl_cpc_system_cmd_t *tx_command)
 }
 
 /***************************************************************************//**
+ * Command ID:  CMD_PROPERTY_GET
+ * Property ID: PROP_DEBUG_COUNTERS
+ *   The primary queried the debug counters.
+ ******************************************************************************/
+#if (SL_CPC_DEBUG_CORE_EVENT_COUNTERS == 1)
+static void on_property_get_core_debug_counters(sl_cpc_system_cmd_t *tx_command)
+{
+  sl_cpc_system_property_cmd_t *reply_prop_cmd_buff;
+
+  reply_prop_cmd_buff = (sl_cpc_system_property_cmd_t*) tx_command->payload;
+  memcpy(reply_prop_cmd_buff->payload, &sl_cpc_core_debug.core_counters, sizeof(sl_cpc_core_debug_counters_t));
+
+  reply_prop_cmd_buff->property_id = PROP_CORE_DEBUG_COUNTERS;
+  tx_command->header.length = sizeof(sl_cpc_property_id_t) + sizeof(sl_cpc_core_debug_counters_t);
+}
+#endif
+
+/***************************************************************************//**
  * Handler for when the primary asks about a property not found:
  *   As with any property-get/set which is unsuccessful, the rcp replies with
  *   a property id of PROP_LAST_STATUS. Since the property the primary asked about
@@ -798,6 +816,12 @@ static void on_property_get(sl_cpc_system_cmd_t *rx_command,
     case PROP_ENDPOINT_STATES:
       on_property_get_endpoint_states(reply);
       break;
+
+#if (SL_CPC_DEBUG_CORE_EVENT_COUNTERS == 1)
+    case PROP_CORE_DEBUG_COUNTERS:
+      on_property_get_core_debug_counters(reply);
+      break;
+#endif
 
     default:
       // Deal with endpoint state range

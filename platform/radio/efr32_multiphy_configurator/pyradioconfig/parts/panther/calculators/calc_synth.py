@@ -3,6 +3,17 @@ from pyradioconfig.parts.nixi.calculators.calc_synth import CALC_Synth_nixi
 
 class CALC_Synth_panther(CALC_Synth_nixi):
 
+    def __init__(self):
+        super().__init__()
+        self.synth_freq_min_limit = 2000000000
+        self.synth_freq_max_limit = 3250000000
+
+    def _get_synth_min_max(self):
+        # Panther supports a wider frequency range: https://jira.silabs.com/browse/MCUW_RADIO_CFG-710
+        synth_min = (4.0e3 / 2.0) * 1000000
+        synth_max = (6.5e3 / 2.0) * 1000000
+        return synth_min, synth_max
+
     def calc_lo_side_regs(self, model):
         """
         Starting with Panther, make this selectable by optional model.vars.lo_injection_side

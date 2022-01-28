@@ -175,6 +175,14 @@ void sleeptimer_hal_disable_int(uint8_t local_flag)
   BURTC_IntDisable(irqien_hal2burtc(local_flag));
 }
 
+/*******************************************************************************
+ * Hardware Abstraction Layer to set timer interrupts.
+ ******************************************************************************/
+void sleeptimer_hal_set_int(uint8_t local_flag)
+{
+  BURTC_IntSet(irqien_hal2burtc(local_flag));
+}
+
 /******************************************************************************
  * Gets status of specified interrupt.
  *

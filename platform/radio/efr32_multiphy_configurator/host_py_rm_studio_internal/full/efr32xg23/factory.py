@@ -9,7 +9,7 @@ class RM_EFR32XG23_Info(object):
     short_name = 'efr32xg23'
     val_die_name = 'EFR32XG23A000F512GM40'
     arm_core_revs = []
-    rtl_revs = ['A0']
+    rtl_revs = ['A0', 'A1']
     di_revs = []
     pte_revs = []
     pkg_path = _PKG_PATH

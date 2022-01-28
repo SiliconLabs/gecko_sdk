@@ -38,6 +38,8 @@
 #ifndef SL_SIMPLE_TIMER_H
 #define SL_SIMPLE_TIMER_H
 
+#include <stdint.h>
+#include <stdbool.h>
 #include "sl_sleeptimer.h"
 #include "sl_power_manager.h"
 
@@ -61,6 +63,9 @@ struct sl_simple_timer {
   sl_simple_timer_t *next;
   bool triggered;
   bool periodic;
+  uint32_t timeout_ms;
+  uint16_t overflow_counter;
+  uint16_t overflow_max;
 };
 
 /***************************************************************************//**

@@ -45,14 +45,9 @@
 #include "aoa_parse.h"
 #include "aoa_serdes.h"
 #include "aoa_loc.h"
-#include "aoa_corr_angles.h"
+#include "angle_queue.h"
 #include "aoa_angle.h"
 #include "aoa_angle_config.h"
-
-// Check if the configuration is valid
-#if MAX_NUM_SEQUENCE_IDS > MAX_SEQUENCE_DIFF
-#warning MAX_NUM_SEQUENCE_IDS > MAX_SEQUENCE_DIFF, please check the configuration.
-#endif
 
 // -----------------------------------------------------------------------------
 // Private macros
@@ -127,17 +122,18 @@ static const char *antenna_type_string[] = {
 // Private function declarations
 static void parse_config_file(const char *filename);
 static void parse_config(const char *payload);
-
 static void on_message(mqtt_handle_t *handle,
                        const char *topic,
                        const char *payload);
-
 static void subscribe_topic(char *topic_template,
                             size_t topic_size,
                             aoa_locator_t *loc);
 static void subscribe_config(void);
-
 static sl_status_t check_config_topic(const char* topic);
+static void angle_queue_on_angles_ready(aoa_id_t tag_id,
+                                        uint32_t angle_count,
+                                        aoa_angle_t *angle_list,
+                                        aoa_id_t *locator_list);
 
 /**************************************************************************//**
  * Application Init.
@@ -192,15 +188,7 @@ void app_init(int argc, char *argv[])
     app_log(USAGE, argv[0]);
     exit(EXIT_FAILURE);
   }
-
   parse_config_file(config_file);
-
-  // Initialize correlated angle database
-  aoa_corr_angles_config.locator_count = aoa_loc_get_number_of_locators();
-
-  // Initialize locator engine
-  aoa_loc_config.locator_count = aoa_loc_get_number_of_locators();
-  aoa_loc_init_expected_angle_count();
 
   app_log("Press Crtl+C to quit" APP_LOG_NL APP_LOG_NL);
 }
@@ -225,7 +213,7 @@ void app_deinit(void)
   app_assert_status(sc);
 
   aoa_loc_destroy();
-  aoa_corr_angles_destroy();
+  angle_queue_deinit();
 }
 
 /**************************************************************************//**
@@ -250,6 +238,7 @@ static void parse_config(const char *payload)
   aoa_id_t locator_id;
   struct sl_rtl_loc_locator_item item;
   aoa_angle_config_t *angle_config;
+  angle_queue_config_t angle_queue_config = ANGLE_QUEUE_DEFAULT_CONFIG;
   float mask_min = 0;
   float mask_max = 0;
 
@@ -270,8 +259,13 @@ static void parse_config(const char *payload)
   subscribe_config();
 
   aoa_loc_destroy();
-  aoa_corr_angles_destroy();
   aoa_angle_reset_configs();
+  angle_queue_deinit();
+
+  sc = aoa_loc_init();
+  app_assert_status(sc);
+
+  angle_queue_config.on_angles_ready = &angle_queue_on_angles_ready;
 
   app_log_info("Parsing positioning configuration:"  APP_LOG_NL);
   app_log_nl();
@@ -308,23 +302,21 @@ static void parse_config(const char *payload)
                  aoa_loc_config.filtering_amount);
   }
 
-  sc = aoa_parse_uint32_config(&aoa_corr_angles_config.sequence_id_slots,
+  sc = aoa_parse_uint32_config(&angle_queue_config.sequence_ids,
                                "numberOfSequenceIds");
   if (sc == SL_STATUS_OK) {
-    if (aoa_corr_angles_config.sequence_id_slots < 2) {
-      aoa_corr_angles_config.sequence_id_slots = 2;
-      app_log_info("Sequence id slots must be 2 or more!" APP_LOG_NL);
-    }
     app_log_info("Sequence id slots set to: %d" APP_LOG_NL,
-                 aoa_corr_angles_config.sequence_id_slots);
+                 angle_queue_config.sequence_ids);
   }
 
-  sc = aoa_parse_uint32_config(&aoa_corr_angles_config.max_sequence_diff,
+  sc = aoa_parse_uint32_config(&angle_queue_config.max_sequence_diff,
                                "maximumSequenceIdDiffs");
   if (sc == SL_STATUS_OK) {
     app_log_info("Maximum sequence id difference set to: %d" APP_LOG_NL,
-                 aoa_corr_angles_config.max_sequence_diff);
+                 angle_queue_config.max_sequence_diff);
   }
+
+  aoa_loc_config.max_sequence_diff = angle_queue_config.max_sequence_diff;
 
   app_log_nl();
   app_log_info("Parsing locator configurations:" APP_LOG_NL);
@@ -454,29 +446,35 @@ static void parse_config(const char *payload)
     app_assert_status(sc);
   }
   app_log_nl();
-
   aoa_loc_config.locator_count = aoa_loc_get_number_of_locators();
-  aoa_corr_angles_config.locator_count = aoa_loc_config.locator_count;
-  loc_report_mode = (aoa_report_mode_t *)realloc(loc_report_mode,
-                                                 aoa_loc_config.locator_count
-                                                 * sizeof(aoa_report_mode_t));
-  aoa_loc_init_expected_angle_count();
 
-  for (uint8_t i = 0; i < aoa_loc_config.locator_count; i++) {
-    aoa_loc_get_locator_by_index(i, &loc);
-    sc = aoa_parse_report_mode(&loc_report_mode[i], loc->id);
+  // If no locator configured, just wait for MQTT config
+  if (0 != aoa_loc_config.locator_count) {
+    angle_queue_config.locator_count = aoa_loc_config.locator_count;
+    loc_report_mode = (aoa_report_mode_t *)realloc(loc_report_mode,
+                                                   aoa_loc_config.locator_count
+                                                   * sizeof(aoa_report_mode_t));
+    sc = aoa_loc_finalize_config();
+    app_assert_status(sc);
 
-    subscribe_topic(AOA_TOPIC_ANGLE_PRINT,
-                    sizeof(AOA_TOPIC_ANGLE_PRINT),
-                    loc);
+    for (uint32_t i = 0; i < aoa_loc_config.locator_count; i++) {
+      aoa_loc_get_locator_by_index(i, &loc);
+      sc = aoa_parse_report_mode(&loc_report_mode[i], loc->id);
 
-    subscribe_topic(AOA_TOPIC_IQ_REPORT_PRINT,
-                    sizeof(AOA_TOPIC_IQ_REPORT_PRINT),
-                    loc);
+      subscribe_topic(AOA_TOPIC_ANGLE_PRINT,
+                      sizeof(AOA_TOPIC_ANGLE_PRINT),
+                      loc);
+
+      subscribe_topic(AOA_TOPIC_IQ_REPORT_PRINT,
+                      sizeof(AOA_TOPIC_IQ_REPORT_PRINT),
+                      loc);
+    }
+    sc = angle_queue_init(&angle_queue_config);
+    app_assert_status(sc);
   }
 
   app_log_nl();
-  app_log_info("Locator count: %zu" APP_LOG_NL, aoa_loc_config.locator_count);
+  app_log_info("Locator count: %d" APP_LOG_NL, aoa_loc_config.locator_count);
 
   sc = aoa_parse_deinit();
   app_assert_status(sc);
@@ -554,9 +552,6 @@ static void on_message(mqtt_handle_t *handle,
   aoa_locator_t *locator;
   aoa_angle_t angle;
   sl_status_t sc;
-  aoa_corr_angles_t *correlated_angles_array;
-  uint32_t angle_slot = 0;
-  uint32_t last_updated_angle_slot;
   aoa_iq_report_t iq_report;
   int8_t samples[256];
   aoa_report_mode_t report_mode = ANGLE;
@@ -598,21 +593,7 @@ static void on_message(mqtt_handle_t *handle,
                         sc,
                         tag_id);
 
-    // Create correlated angle database for the tag
-    sc = aoa_corr_angles_new(tag_id, &correlated_angles_array);
-    app_assert_status_f(sc,
-                        "[E: 0x%04x] Allocating memory \
-                       for correlated angles failed %s." APP_LOG_NL,
-                        sc,
-                        tag_id);
     app_log_info("New tag added : %s \n", tag_id);
-  } else {
-    sc = aoa_corr_angles_get_by_id(tag_id, &correlated_angles_array);
-    app_assert_status_f(sc,
-                        "[E: 0x%04x] Syncronization lost \
-                        between correlated angles and tags %s." APP_LOG_NL,
-                        sc,
-                        tag_id);
   }
 
   if (IQ_REPORT == loc_report_mode[locator_idx]) {
@@ -639,36 +620,34 @@ static void on_message(mqtt_handle_t *handle,
     app_assert_status(sc);
   }
 
-  // Add new data to the slot
-  sc = aoa_corr_angles_add_data(correlated_angles_array,
-                                locator_idx,
-                                &angle,
-                                &angle_slot);
+  // Add new data to the angle queue
+  sc = angle_queue_push(tag->id,
+                        locator->id,
+                        &angle);
+
   app_assert_status_f(sc,
                       "[E: 0x%04x] Failed to add data \
-                      to the angle database %s." APP_LOG_NL,
+                      to the angle queue %s." APP_LOG_NL,
                       sc,
                       tag_id);
+}
 
-  // Calculate and publish position
-  sc = aoa_loc_calc_position(tag,
-                             angle_slot,
-                             correlated_angles_array,
-                             &last_updated_angle_slot);
-  app_assert_status_f(sc,
-                      "[E: 0x%04x] Failed to \
-                      calculate position %s." APP_LOG_NL,
-                      sc,
-                      tag_id);
+/**************************************************************************//**
+ * Angles ready callback for angle queue.
+ *****************************************************************************/
+static void angle_queue_on_angles_ready(aoa_id_t tag_id,
+                                        uint32_t angle_count,
+                                        aoa_angle_t *angle_list,
+                                        aoa_id_t *locator_list)
+{
+  sl_status_t sc;
 
-  // Cleanup processed data from the angle database
-  sc = aoa_corr_angles_cleanup(correlated_angles_array,
-                               last_updated_angle_slot);
-  app_assert_status_f(sc,
-                      "[E: 0x%04x] Failed to cleanup \
-                      processed angle data %s." APP_LOG_NL,
-                      sc,
-                      tag_id);
+  sc = aoa_loc_calc_position(tag_id,
+                             angle_count,
+                             angle_list,
+                             locator_list);
+
+  app_assert_status(sc);
 }
 
 /**************************************************************************//**

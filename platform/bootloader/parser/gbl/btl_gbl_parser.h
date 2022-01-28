@@ -62,21 +62,21 @@
 /***************************************************************************//**
  * Bootloader/parser configurations
  ******************************************************************************/
-// Parser requires upgrade images to be signed, providing authenticity, if true.
+/// Parser requires upgrade images to be signed, providing authenticity, if true.
 #if defined(BOOTLOADER_ENFORCE_SIGNED_UPGRADE) && (BOOTLOADER_ENFORCE_SIGNED_UPGRADE == 1)
 #define PARSER_REQUIRE_AUTHENTICITY (true)
 #else
 #define PARSER_REQUIRE_AUTHENTICITY (false)
 #endif
 
-// Parser requires upgrade images to be encrypted, providing confidentiality, if true.
+/// Parser requires upgrade images to be encrypted, providing confidentiality, if true.
 #if defined(BOOTLOADER_ENFORCE_ENCRYPTED_UPGRADE) && (BOOTLOADER_ENFORCE_ENCRYPTED_UPGRADE == 1)
 #define PARSER_REQUIRE_CONFIDENTIALITY (true)
 #else
 #define PARSER_REQUIRE_CONFIDENTIALITY (false)
 #endif
 
-// Parser requires upgrade images to be authenticated by the bootloader certificate, if true.
+/// Parser requires upgrade images to be authenticated by the bootloader certificate, if true.
 #ifndef PARSER_REQUIRE_CERTIFICATE_AUTHENTICITY
 #if defined(BOOTLOADER_SUPPORT_CERTIFICATES) && (BOOTLOADER_SUPPORT_CERTIFICATES == 1)
 #define PARSER_REQUIRE_CERTIFICATE_AUTHENTICITY (true)
@@ -85,14 +85,14 @@
 #endif
 #endif
 
-// Parser requires rollback protection of applications, if true.
+/// Parser requires rollback protection of applications, if true.
 #if defined(BOOTLOADER_ROLLBACK_PROTECTION) && (BOOTLOADER_ROLLBACK_PROTECTION == 1)
 #define PARSER_REQUIRE_ANTI_ROLLBACK_PROTECTION (true)
 #else
 #define PARSER_REQUIRE_ANTI_ROLLBACK_PROTECTION (false)
 #endif
 
-// Defines the minimum application version that can be accepted.
+/// Defines the minimum application version that can be accepted.
 #if defined(BOOTLOADER_ROLLBACK_PROTECTION_MINIMUM_VERSION) && (BOOTLOADER_ROLLBACK_PROTECTION_MINIMUM_VERSION != 0)
 #define PARSER_APPLICATION_MINIMUM_VERSION_VALID  BOOTLOADER_ROLLBACK_PROTECTION_MINIMUM_VERSION
 #else

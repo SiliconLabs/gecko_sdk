@@ -120,35 +120,35 @@ void sl_btmesh_lpn_feature_init(void)
 
   // Configure LPN minimum friend queue length
   result = sl_btmesh_lpn_config(sl_btmesh_lpn_queue_length,
-                                LPN_MIN_QUEUE_LENGTH);
+                                SL_BTMESH_LPN_MIN_QUEUE_LENGTH_CFG_VAL);
   if (result) {
     log("LPN queue configuration failed (0x%lx)\r\n", result);
     return;
   }
   // Configure LPN poll timeout
   result = sl_btmesh_lpn_config(sl_btmesh_lpn_poll_timeout,
-                                LPN_POLL_TIMEOUT);
+                                SL_BTMESH_LPN_POLL_TIMEOUT_CFG_VAL);
   if (result) {
     log("LPN poll timeout configuration failed (0x%lx)\r\n", result);
     return;
   }
   // Configure LPN receive delay
   result = sl_btmesh_lpn_config(sl_btmesh_lpn_receive_delay,
-                                LPN_RECEIVE_DELAY);
+                                SL_BTMESH_LPN_RECEIVE_DELAY_CFG_VAL);
   if (result) {
     log("LPN receive delay configuration failed (0x%lx)\r\n", result);
     return;
   }
   // Configure LPN request retries
   result = sl_btmesh_lpn_config(sl_btmesh_lpn_request_retries,
-                                LPN_REQUEST_RETRIES);
+                                SL_BTMESH_LPN_REQUEST_RETRIES_CFG_VAL);
   if (result) {
     log("LPN request retries configuration failed (0x%lx)\r\n", result);
     return;
   }
   // Configure LPN retry interval
   result = sl_btmesh_lpn_config(sl_btmesh_lpn_retry_interval,
-                                LPN_RETRY_INTERVAL);
+                                SL_BTMESH_LPN_RETRY_INTERVAL_CFG_VAL);
   if (result) {
     log("LPN retry interval configuration failed (0x%lx)\r\n", result);
     return;
@@ -236,19 +236,19 @@ void sl_btmesh_lpn_on_event(sl_btmesh_msg_t* evt)
       break;
 
     case sl_btmesh_evt_node_provisioned_id:
-      set_configuration_timer(LPN_TIMEOUT_AFTER_PROVISIONED);
+      set_configuration_timer(SL_BTMESH_LPN_TIMEOUT_AFTER_PROVISIONED_CFG_VAL);
       break;
 
     case sl_btmesh_evt_node_model_config_changed_id:
-      set_configuration_timer(LPN_TIMEOUT_AFTER_CONFIG_MODEL_CHANGED);
+      set_configuration_timer(SL_BTMESH_LPN_TIMEOUT_AFTER_CONFIG_MODEL_CHANGED_CFG_VAL);
       break;
 
     case sl_btmesh_evt_node_config_set_id:
-      set_configuration_timer(LPN_TIMEOUT_AFTER_CONFIG_SET);
+      set_configuration_timer(SL_BTMESH_LPN_TIMEOUT_AFTER_CONFIG_SET_CFG_VAL);
       break;
 
     case sl_btmesh_evt_node_key_added_id:
-      set_configuration_timer(LPN_TIMEOUT_AFTER_KEY);
+      set_configuration_timer(SL_BTMESH_LPN_TIMEOUT_AFTER_KEY_CFG_VAL);
       break;
 
     case sl_btmesh_evt_lpn_friendship_established_id:
@@ -262,7 +262,7 @@ void sl_btmesh_lpn_on_event(sl_btmesh_msg_t* evt)
 
       // try again after timer expires
       sl_status_t sc = sl_simple_timer_start(&lpn_friend_find_timer,
-                                             LPN_FRIEND_FIND_TIMEOUT,
+                                             SL_BTMESH_LPN_FRIEND_FIND_TIMEOUT_CFG_VAL,
                                              lpn_friend_find_timer_cb,
                                              NO_CALLBACK_DATA,
                                              false);
@@ -278,7 +278,7 @@ void sl_btmesh_lpn_on_event(sl_btmesh_msg_t* evt)
       if (num_mesh_proxy_conn == 0) {
         // try again after timer expires
         sl_status_t sc = sl_simple_timer_start(&lpn_friend_find_timer,
-                                               LPN_FRIEND_FIND_TIMEOUT,
+                                               SL_BTMESH_LPN_FRIEND_FIND_TIMEOUT_CFG_VAL,
                                                lpn_friend_find_timer_cb,
                                                NO_CALLBACK_DATA,
                                                false);
@@ -314,11 +314,11 @@ static void lpn_establish_friendship(void)
 {
   sl_status_t result;
 
-  log(LPN_START_FRIEND_SEARCH_LOG_TEXT);
+  log(SL_BTMESH_LPN_START_FRIEND_SEARCH_LOG_TEXT_CFG_VAL);
   result = sl_btmesh_lpn_establish_friendship(lpn_friend_netkey_idx);
 
   if (result != SL_STATUS_OK) {
-    log(LPN_FRIEND_NOT_FOUND_LOG_TEXT, result);
+    log(SL_BTMESH_LPN_FRIEND_NOT_FOUND_LOG_TEXT_CFG_VAL, result);
   }
 }
 
@@ -356,7 +356,7 @@ static void  lpn_node_configured_timer_cb(sl_simple_timer_t *handle, void *data)
   (void)handle;
 
   if (!lpn_active) {
-    log(LPN_START_INIT_LOG_TEXT);
+    log(SL_BTMESH_LPN_START_INIT_LOG_TEXT_CFG_VAL);
     sl_btmesh_lpn_feature_init();
   }
 }

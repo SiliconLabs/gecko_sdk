@@ -73,6 +73,14 @@
 #include "cmsis_os2.h"
 #include "em_assert.h"
 
+#if defined(SL_CATALOG_FREERTOS_KERNEL_PRESENT)
+  #include "FreeRTOSConfig.h"
+  #if (configSUPPORT_STATIC_ALLOCATION == 1)
+    #include "FreeRTOS.h"  // StaticSemaphore_t
+    #include <string.h>
+  #endif
+#endif
+
 #ifdef __cplusplus
 extern "C" {
 #endif
@@ -81,7 +89,10 @@ extern "C" {
 
 /// SE manager mutex definition for CMSIS RTOS2.
 typedef struct mbedtls_threading_mutex {
+#if defined(SL_CATALOG_FREERTOS_KERNEL_PRESENT) && (configSUPPORT_STATIC_ALLOCATION == 1)
   osMutexAttr_t mutex_attr;
+  StaticSemaphore_t static_sem_object;
+#endif
   osMutexId_t   mutex_ID;
 } mbedtls_threading_mutex_t;
 
@@ -96,7 +107,16 @@ static inline void THREADING_InitMutex(mbedtls_threading_mutex_t *mutex)
     return;
   }
 
+#if defined(SL_CATALOG_FREERTOS_KERNEL_PRESENT) && (configSUPPORT_STATIC_ALLOCATION == 1)
+  // Zeroize all members of the mutex attributes object and setup the static control block.
+  memset(&mutex->mutex_attr, 0, sizeof(mutex->mutex_attr));
+  mutex->mutex_attr.cb_mem = &mutex->static_sem_object;
+  mutex->mutex_attr.cb_size = sizeof(mutex->static_sem_object);
   mutex->mutex_ID = osMutexNew(&mutex->mutex_attr);
+#else
+  mutex->mutex_ID = osMutexNew(NULL);
+#endif
+
   EFM_ASSERT(mutex->mutex_ID != NULL);
 }
 

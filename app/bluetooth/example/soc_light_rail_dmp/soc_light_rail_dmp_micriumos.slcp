@@ -77,6 +77,9 @@ config_file:
     path: gatt_configuration.btconf
     directory: btconf
 
+readme:
+  - path: ../../documentation/example/soc_light_rail_dmp/readme.md
+
 other_file:
   - path: ../../script/create_bl_files.bat
   - path: ../../script/create_bl_files.sh
@@ -310,5 +313,5 @@ ui_hints:
   highlight:
     - path: config/btconf/gatt_configuration.btconf
     - path: config/rail/radio_settings.radioconf
-    - path: readme.html
+    - path: readme.md
       focus: true

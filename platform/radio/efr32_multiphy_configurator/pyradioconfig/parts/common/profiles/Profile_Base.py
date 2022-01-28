@@ -58,7 +58,7 @@ class Profile_Base(IProfile):
         IProfile.make_required_input(profile, model.vars.baudrate_tol_ppm,       "modem",    readable_name="Baudrate Tolerance",         value_limit_min=0,         value_limit_max=200000)
         IProfile.make_required_input(profile, model.vars.shaping_filter,         "modem",    readable_name="Shaping Filter"              )
         IProfile.make_required_input(profile, model.vars.fsk_symbol_map,         "modem",    readable_name="FSK symbol map"              )
-        IProfile.make_required_input(profile, model.vars.shaping_filter_param,   "modem",    readable_name="Shaping Filter Parameter (BT or R)",   value_limit_min=0.3, value_limit_max=1.5, fractional_digits=2)
+        IProfile.make_optional_input(profile, model.vars.shaping_filter_param, "modem", readable_name="Shaping Filter Parameter (BT or R)", value_limit_min=0.3, value_limit_max=1.5, fractional_digits=2, default=0.5)
         IProfile.make_optional_input(profile, model.vars.asynchronous_rx_enable, "modem",    readable_name="Enable Asynchronous direct mode",    default=False )
 
         IProfile.make_required_input(profile, model.vars.diff_encoding_mode,     "symbol_coding",  readable_name="Differential Encoding Mode"  )
@@ -97,15 +97,11 @@ class Profile_Base(IProfile):
         # RAIL Outputs
         buildRailOutputs(model, profile)
 
-        # Skip these for Panther as all PHYs are only overrides, no calculations
-        # No, this breaks RAIL
-        if family in ["dumbo", "jumbo", "nerio", "nixi", "panther", "lynx", "ocelot"]:
-
-            # Output fields
-            buildFrameOutputs(model, profile, family=family)
-            buildCrcOutputs(model, profile, family)
-            buildWhiteOutputs(model, profile)
-            buildFecOutputs(model, profile)
+        # Output fields
+        buildFrameOutputs(model, profile, family=family)
+        buildCrcOutputs(model, profile, family)
+        buildWhiteOutputs(model, profile)
+        buildFecOutputs(model, profile)
 
         if family == "dumbo":
             build_modem_regs_dumbo(model, profile, family = family)   # Clean this up as a next step...
@@ -123,9 +119,6 @@ class Profile_Base(IProfile):
             # buildLongRangeOutputs(model, profile)
         elif family == "lynx":
             build_modem_regs_lynx(model, profile, family = family)    # Clean this up as a next step...
-
-        elif family == "ocelot":
-            build_modem_regs_ocelot(model, profile, family = family)    # Clean this up as a next step...
 
         build_ircal_sw_vars(model, profile)
 

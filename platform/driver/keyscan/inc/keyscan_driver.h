@@ -81,7 +81,7 @@ sl_status_t sl_keyscan_driver_init(void);
  *   Registers an event callback to be called on Keyscan event.
  *
  * @param[in]
-*    event_handle  Event handle to register
+ *   event_handle  Event handle to register
  *
  * @note
  *   An EFM_ASSERT is thrown if the handle is NULL.

@@ -33,6 +33,7 @@ requires:
   - name: emlib
   - name: status
   - name: rail_lib
+  - name: rail_util_pa
   - name: simple_led_core
   - name: led
   - name: mbedtls_sha1
@@ -99,7 +100,9 @@ include:
       - path: "radio_board_zgm130s.h"
         condition: "device_sdid_89"
       - path: "radio_board_efr32zg23.h"
-        condition: "device_sdid_210"
+        condition:
+          - "device_sdid_210"
+          - "device_security_vault"
   - path: "protocol/z-wave/ZAF/ApplicationUtilities/EventHandling"
     file_list:
       - path: "zaf_event_helper.h"
@@ -145,19 +148,41 @@ define:
     value: 1
   - name: EFR32ZG23
     value: 1
-    condition: "device_sdid_210"
+    condition:
+      - "device_sdid_210"
+      - "device_security_vault"
   - name: RADIO_BOARD_EFR32ZG23
     value: 1
-    condition: "device_sdid_210"
+    condition:
+      - "device_sdid_210"
+      - "device_security_vault"
   - name: RADIO_BOARD_ZGM130S
     value: 1
     condition: "device_sdid_89"
-  - name: RADIO_BOARD_ZGM230S
+  - name: RADIO_BOARD_ZGM230SA
     value: 1
-    condition: "device_sdid_210"
-  - name: ZGM23
+    condition:
+      - "device_sdid_210"
+      - "zgm230sa27hnn"
+      - "device_security_se"
+  - name: RADIO_BOARD_ZGM230SB
     value: 1
-    condition: "device_sdid_210"
+    condition:
+      - "device_sdid_210"
+      - "zgm230sb27hgn"
+      - "device_security_vault"
+  - name: ZGM23A
+    value: 1
+    condition:
+      - "device_sdid_210"
+      - "zgm230sa27hnn"
+      - "device_security_se"
+  - name: ZGM23B
+    value: 1
+    condition:
+      - "device_sdid_210"
+      - "zgm230sb27hgn"
+      - "device_security_vault"
   - name: EXT_BOARD_8029A
     value: 1
   - name: DISABLE_USART1
@@ -232,5 +257,23 @@ config_file:
     file_id: region_config
   - path: protocol/z-wave/config/zw_build_no.h
     file_id: build_no
-  - path: protocol/z-wave/config/zw_config_rf.h
+  # Default zw_config_rf that sets LR to 140
+  - path: protocol/z-wave/config/zw_rf/zw_config_rf.h
     file_id: config_rf
+    unless:
+    - brd4208a
+    - brd4209a
+    - brd4210a
+  - path: protocol/z-wave/config/zw_rf/20dbm/zw_config_rf.h
+    file_id: config_rf
+    condition:
+    - brd4208a
+  - path: protocol/z-wave/config/zw_rf/20dbm/zw_config_rf.h
+    file_id: config_rf
+    condition:
+    - brd4209a
+  - path: protocol/z-wave/config/zw_rf/20dbm/zw_config_rf.h
+    file_id: config_rf
+    condition:
+    - brd4210a
+  

@@ -83,13 +83,11 @@
 #define KEYSPEC_ATTRIBUTES_ECC_SIGN         (1U << 10)
 #define KEYSPEC_ATTRIBUTES_ECC_SIZE_MASK    0x0000007fU
 
+#define KEYSPEC_TYPE_ECC_EDWARDS    ((uint32_t)(0xaUL << KEYSPEC_TYPE_OFFSET))
+#define KEYSPEC_TYPE_ECC_MONTGOMERY ((uint32_t)(0xbUL << KEYSPEC_TYPE_OFFSET))
+#define KEYSPEC_TYPE_ECC_EDDSA      ((uint32_t)(0xcUL << KEYSPEC_TYPE_OFFSET))
+
 #if (_SILICON_LABS_SECURITY_FEATURE == _SILICON_LABS_SECURITY_FEATURE_VAULT)
-  #define KEYSPEC_TYPE_ECC_EDWARDS \
-  (uint32_t)(0xaUL << KEYSPEC_TYPE_OFFSET)
-  #define KEYSPEC_TYPE_ECC_MONTGOMERY \
-  (uint32_t)(0xbUL << KEYSPEC_TYPE_OFFSET)
-  #define KEYSPEC_TYPE_ECC_EDDSA \
-  (uint32_t)(0xcUL << KEYSPEC_TYPE_OFFSET)
 
   #define KEYSPEC_MODE_WRAPPED \
   (2UL << KEYSPEC_MODE_OFFSET)
@@ -149,16 +147,12 @@ sl_status_t sli_key_get_storage_size(const sl_se_key_descriptor_t* key,
 
   if ((key_type == KEYSPEC_TYPE_ECC_WEIERSTRASS_PRIME)) {
     *storage_size = key_size * (1 * has_private_key + 2 * has_public_key + 6 * has_custom_curve);
-  }
-  #if (_SILICON_LABS_SECURITY_FEATURE == _SILICON_LABS_SECURITY_FEATURE_VAULT)
-  else if (key_type == KEYSPEC_TYPE_ECC_EDWARDS) {
+  } else if (key_type == KEYSPEC_TYPE_ECC_EDWARDS) {
     *storage_size = key_size * (has_private_key + has_public_key + 5 * has_custom_curve);
   } else if ((key_type == KEYSPEC_TYPE_ECC_MONTGOMERY)
              || (key_type == KEYSPEC_TYPE_ECC_EDDSA)) {
     *storage_size = key_size * (has_private_key + has_public_key);
-  }
-  #endif
-  else {
+  } else {
     return SL_STATUS_INVALID_PARAMETER;
   }
 
@@ -212,12 +206,9 @@ sl_status_t sli_key_get_size(const sl_se_key_descriptor_t *key, uint32_t *size)
   if (key_type == KEYSPEC_TYPE_RAW) {
     *size = (key->type & KEYSPEC_ATTRIBUTES_MASK);
   } else if ((key_type == KEYSPEC_TYPE_ECC_WEIERSTRASS_PRIME)
-#if (_SILICON_LABS_SECURITY_FEATURE == _SILICON_LABS_SECURITY_FEATURE_VAULT)
              || (key_type == KEYSPEC_TYPE_ECC_EDWARDS)
              || (key_type == KEYSPEC_TYPE_ECC_MONTGOMERY)
-             || (key_type == KEYSPEC_TYPE_ECC_EDDSA)
-#endif
-             ) {
+             || (key_type == KEYSPEC_TYPE_ECC_EDDSA)) {
 #if (_SILICON_LABS_SECURITY_FEATURE == _SILICON_LABS_SECURITY_FEATURE_VAULT)
     bool has_custom_curve =
       ((key->flags & SL_SE_KEY_FLAG_ASYMMETRIC_USES_CUSTOM_DOMAIN) != 0);
@@ -271,11 +262,8 @@ sl_status_t sli_key_check_equivalent(const sl_se_key_descriptor_t *key_1,
     // not containing the size in the type, but rather in the size field.
     if (((key_1->type & SL_SE_KEY_TYPE_ALGORITHM_MASK)
          == SL_SE_KEY_TYPE_ECC_WEIERSTRASS_PRIME_CUSTOM)
-#if (_SILICON_LABS_SECURITY_FEATURE == _SILICON_LABS_SECURITY_FEATURE_VAULT)
         || ((key_1->type & SL_SE_KEY_TYPE_ALGORITHM_MASK)
-            == SL_SE_KEY_TYPE_ECC_EDDSA)
-#endif
-        ) {
+            == SL_SE_KEY_TYPE_ECC_EDDSA)) {
       if ((key_1->type & SL_SE_KEY_TYPE_ALGORITHM_MASK)
           == (key_2->type & SL_SE_KEY_TYPE_ALGORITHM_MASK)) {
         // Assume that the sizes are equal for now (this will be checked later)
@@ -476,12 +464,8 @@ sl_status_t sli_se_key_to_keyspec(const sl_se_key_descriptor_t *key,
     }
   }
 
-#if (_SILICON_LABS_SECURITY_FEATURE == _SILICON_LABS_SECURITY_FEATURE_VAULT)
   if ((key->type & KEYSPEC_TYPE_MASK) >= KEYSPEC_TYPE_ECC_WEIERSTRASS_PRIME
       && (key->type & KEYSPEC_TYPE_MASK) < KEYSPEC_TYPE_ECC_EDDSA) {
-#else
-  if ((key->type & KEYSPEC_TYPE_MASK) == KEYSPEC_TYPE_ECC_WEIERSTRASS_PRIME) {
-#endif
     if (signing_only) {
       *keyspec |= KEYSPEC_ATTRIBUTES_ECC_SIGN;
     }
@@ -508,12 +492,9 @@ sl_status_t sli_se_key_to_keyspec(const sl_se_key_descriptor_t *key,
     *keyspec = (*keyspec & ~KEYSPEC_ATTRIBUTES_MASK)
                | (size & KEYSPEC_ATTRIBUTES_MASK);
   } else if ((key_type == KEYSPEC_TYPE_ECC_WEIERSTRASS_PRIME)
-#if (_SILICON_LABS_SECURITY_FEATURE == _SILICON_LABS_SECURITY_FEATURE_VAULT)
              || (key_type == KEYSPEC_TYPE_ECC_EDWARDS)
              || (key_type == KEYSPEC_TYPE_ECC_MONTGOMERY)
-             || (key_type == KEYSPEC_TYPE_ECC_EDDSA)
-#endif
-             ) {
+             || (key_type == KEYSPEC_TYPE_ECC_EDDSA)) {
     *keyspec = (*keyspec & ~KEYSPEC_ATTRIBUTES_ECC_SIZE_MASK)
                | ((size - 1) & KEYSPEC_ATTRIBUTES_ECC_SIZE_MASK);
   } else {
@@ -664,12 +645,8 @@ sl_status_t sli_se_keyspec_to_key(const uint32_t keyspec,
     key->type = (key->type & ~SL_SE_KEY_TYPE_ATTRIBUTES_MASK) | ((keyspec & KEYSPEC_ATTRIBUTES_ECC_SIZE_MASK) + 1);
   }
 
-#if (_SILICON_LABS_SECURITY_FEATURE == _SILICON_LABS_SECURITY_FEATURE_VAULT)
   if ((keyspec & KEYSPEC_TYPE_MASK) >= KEYSPEC_TYPE_ECC_WEIERSTRASS_PRIME
       && (keyspec & KEYSPEC_TYPE_MASK) < KEYSPEC_TYPE_ECC_EDDSA) {
-#else
-  if ((keyspec & KEYSPEC_TYPE_MASK) == KEYSPEC_TYPE_ECC_WEIERSTRASS_PRIME) {
-#endif
     if (signing_only) {
       key->flags |= SL_SE_KEY_FLAG_ASYMMETRIC_SIGNING_ONLY;
     }

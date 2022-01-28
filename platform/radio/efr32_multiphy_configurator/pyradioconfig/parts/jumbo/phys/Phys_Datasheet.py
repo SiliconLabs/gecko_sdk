@@ -254,8 +254,6 @@ class PHYS_Datasheet(IPhy):
         phy.profile_inputs.timing_sample_threshold.value = 8
         phy.profile_inputs.bandwidth_hz.value = 10000
         phy.profile_inputs.symbols_in_timing_window.value = 14
-        if model.part_family.lower() in ['ocelot']:
-            phy.profile_inputs.channel_spacing_hz.value = 12500
 
     def PHY_Datasheet_915M_2GFSK_600bps_300(self, model, phy_name=None):
         phy = self._makePhy(model, model.profiles.Base, readable_name='915M 2GFSK 600bps 300', phy_name=phy_name)

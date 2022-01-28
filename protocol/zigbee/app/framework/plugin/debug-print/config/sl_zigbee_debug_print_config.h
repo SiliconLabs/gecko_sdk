@@ -34,7 +34,7 @@
 // <i> If this option is enabled, prints belonging to the "core" group shall be included in the build.
 #define SL_ZIGBEE_DEBUG_CORE_GROUP_ENABLED                                      (1)
 
-// <q SL_ZIGBEE_DEBUG_CORE_GROUP_RUNTIME_DEFAULT> Core group runtime defauly
+// <q SL_ZIGBEE_DEBUG_CORE_GROUP_RUNTIME_DEFAULT> Core group runtime default
 // <i> Default: 1
 // <i> If this option is enabled, prints belonging to the "core" group shall be runtime enabled by default.
 #define SL_ZIGBEE_DEBUG_CORE_GROUP_RUNTIME_DEFAULT                              (1)

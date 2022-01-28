@@ -362,54 +362,72 @@ static sl_status_t conv2d(const sli_mvp_ml_conv2d_s8_params_t *params, bool exec
           //   Array3  scaler
           //   Array4  output
 
-          sli_mvp_prog_set_array_full(p->p,
-                                      SLI_MVP_ARRAY(0),
-                                      (void*)&input[input_index_base],
-                                      use_parallel_mac == true
-                                      ? SLI_MVP_DATATYPE_COMPLEX_INT8
-                                      : SLI_MVP_DATATYPE_INT8,
-                                      input_size_vec,
-                                      input_size_row,
-                                      input_size_col,
-                                      input_stride_vec,
-                                      input_stride_row,
-                                      input_stride_col);
+          if (!execute) {
+            // Do a complete dimension check if in ..._is_supported().
+            if (((unsigned)input_size_vec       > SLI_MVP_MAX_VECTOR_COUNT)
+                || ((unsigned)input_size_row    > SLI_MVP_MAX_ROW_LENGTH)
+                || ((unsigned)input_size_col    > SLI_MVP_MAX_COLUMN_LENGTH)
+                || ((unsigned)filter_size_row   > SLI_MVP_MAX_ROW_LENGTH)
+                || ((unsigned)filter_size_col   > SLI_MVP_MAX_COLUMN_LENGTH)
+                || ((unsigned)output_size_vec   > SLI_MVP_MAX_VECTOR_COUNT)
+                || ((unsigned)output_size_row   > SLI_MVP_MAX_ROW_LENGTH)
+                || ((unsigned)output_depth      > SLI_MVP_MAX_VECTOR_COUNT)
+                || ((unsigned)input_stride_vec  > SLI_MVP_MAX_VECTOR_STRIDE)
+                || ((unsigned)input_stride_row  > SLI_MVP_MAX_ROW_STRIDE)
+                || ((unsigned)filter_stride_vec > SLI_MVP_MAX_VECTOR_STRIDE)
+                || ((unsigned)filter_stride_row > SLI_MVP_MAX_ROW_STRIDE)) {
+              status = SL_STATUS_INVALID_RANGE;
+            }
+          } else {
+            sli_mvp_prog_set_array_full(p->p,
+                                       SLI_MVP_ARRAY(0),
+                                       (void*)&input[input_index_base],
+                                       use_parallel_mac == true
+                                       ? SLI_MVP_DATATYPE_COMPLEX_INT8
+                                       : SLI_MVP_DATATYPE_INT8,
+                                       input_size_vec,
+                                       input_size_row,
+                                       input_size_col,
+                                       input_stride_vec,
+                                       input_stride_row,
+                                       input_stride_col);
 
-          sli_mvp_prog_set_array_full(p->p,
-                                      SLI_MVP_ARRAY(1),
-                                      (void*)&filter[filter_index_base],
-                                      use_parallel_mac == true
-                                      ? SLI_MVP_DATATYPE_COMPLEX_INT8
-                                      : SLI_MVP_DATATYPE_INT8,
-                                      filter_size_vec,
-                                      filter_size_row,
-                                      filter_size_col,
-                                      filter_stride_vec,
-                                      filter_stride_row,
-                                      filter_stride_col);
+           sli_mvp_prog_set_array_full(p->p,
+                                       SLI_MVP_ARRAY(1),
+                                       (void*)&filter[filter_index_base],
+                                       use_parallel_mac == true
+                                       ? SLI_MVP_DATATYPE_COMPLEX_INT8
+                                       : SLI_MVP_DATATYPE_INT8,
+                                       filter_size_vec,
+                                       filter_size_row,
+                                       filter_size_col,
+                                       filter_stride_vec,
+                                       filter_stride_row,
+                                       filter_stride_col);
 
-          sli_mvp_prog_set_vector(p->p,
-                                  SLI_MVP_ARRAY(2),
-                                  bias != NULL ? (void*)bias : (void*)&zero,
-                                  SLI_MVP_DATATYPE_BINARY16,
-                                  bias != NULL ? output_depth : 1);
+           sli_mvp_prog_set_vector(p->p,
+                                   SLI_MVP_ARRAY(2),
+                                   bias != NULL ? (void*)bias : (void*)&zero,
+                                   SLI_MVP_DATATYPE_BINARY16,
+                                   bias != NULL ? output_depth : 1);
 
-          sli_mvp_prog_set_vector(p->p,
-                                  SLI_MVP_ARRAY(3),
-                                  (void*)output_scaler,
-                                  SLI_MVP_DATATYPE_BINARY16,
-                                  output_depth);
+           sli_mvp_prog_set_vector(p->p,
+                                   SLI_MVP_ARRAY(3),
+                                   (void*)output_scaler,
+                                   SLI_MVP_DATATYPE_BINARY16,
+                                   output_depth);
 
-          sli_mvp_prog_set_array_full(p->p,
-                                      SLI_MVP_ARRAY(4),
-                                      &output[output_index_base],
-                                      SLI_MVP_DATATYPE_INT8,
-                                      output_size_vec,
-                                      output_size_row,
-                                      output_size_col,
-                                      output_stride_vec,
-                                      output_stride_row,
-                                      output_stride_col);
+           sli_mvp_prog_set_array_full(p->p,
+                                       SLI_MVP_ARRAY(4),
+                                       &output[output_index_base],
+                                       SLI_MVP_DATATYPE_INT8,
+                                       output_size_vec,
+                                       output_size_row,
+                                       output_size_col,
+                                       output_stride_vec,
+                                       output_stride_row,
+                                       output_stride_col);
+          }
 
           sli_mvp_prog_set_reg_f16(p->p, SLI_MVP_R0, SLI_MVP_ACCUMULATOR_SCALER);
           if (use_parallel_mac) {

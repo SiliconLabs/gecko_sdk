@@ -1,11 +1,8 @@
 from pyradioconfig.parts.common.profiles.bobcat_regs import *
 from pyradioconfig.parts.common.profiles.profile_common import *
-from pyradioconfig.parts.ocelot.profiles.profile_modem import *
-
 from pyradioconfig.calculator_model_framework.interfaces.iprofile import IProfile
 from pyradioconfig.parts.common.utils.units_multiplier import UnitsMultiplier
-
-from pyradioconfig.parts.ocelot.profiles.profile_mbus_modes import *
+from pyradioconfig.parts.bobcat.profiles.sw_profile_outputs_common import sw_profile_outputs_common_bobcat
 
 from pyradioconfig.parts.ocelot.profiles.Profile_Mbus import Profile_Mbus_Ocelot
 from py_2_and_3_compatibility import *
@@ -16,6 +13,7 @@ class Profile_Mbus_Bobcat(Profile_Mbus_Ocelot):
     Init internal variables
     """
     def __init__(self):
+        super().__init__()
         self._family = "bobcat"
         self._profileName = "Mbus"
         self._readable_name = "Mbus Profile"
@@ -23,6 +21,7 @@ class Profile_Mbus_Bobcat(Profile_Mbus_Ocelot):
         self._description = "Profile used for Mbus phys"
         self._default = False
         self._activation_logic = ""
+        self._sw_profile_outputs_common = sw_profile_outputs_common_bobcat()
 
 
     """
@@ -81,10 +80,10 @@ class Profile_Mbus_Bobcat(Profile_Mbus_Ocelot):
 
 
         # Informational output
-        buildModemInfoOutputs(model, profile)
+        self._sw_profile_outputs_common.build_info_outputs(model, profile)
 
         # RAIL Outputs
-        buildRailOutputs(model, profile)
+        self._sw_profile_outputs_common.build_rail_outputs(model, profile)
 
         # Output fields
         buildFrameOutputs(model, profile, family=family)

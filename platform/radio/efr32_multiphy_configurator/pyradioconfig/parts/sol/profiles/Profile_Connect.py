@@ -1,4 +1,6 @@
 from pyradioconfig.parts.sol.profiles.Profile_Base import Profile_Base_Sol
+from pyradioconfig.parts.sol.profiles.frame_profile_inputs_common import frame_profile_inputs_common_sol
+from pyradioconfig.parts.sol.profiles.sw_profile_outputs_common import sw_profile_outputs_common_sol
 
 class Profile_Connect_Sol(Profile_Base_Sol):
 
@@ -10,6 +12,8 @@ class Profile_Connect_Sol(Profile_Base_Sol):
         self._default = False
         self._activation_logic = ""
         self._family = "sol"
+        self._frame_profile_inputs_common = frame_profile_inputs_common_sol()
+        self._sw_profile_outputs_common = sw_profile_outputs_common_sol()
 
     def buildProfileModel(self, model):
 

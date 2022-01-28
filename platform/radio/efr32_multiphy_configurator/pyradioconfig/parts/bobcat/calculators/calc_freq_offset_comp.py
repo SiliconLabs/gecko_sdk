@@ -14,12 +14,12 @@ class Calc_Freq_Offset_Comp_Bobcat(CALC_Freq_Offset_Comp_ocelot):
         demod_sel = model.vars.demod_select.value
 
         # : Variables used in case of antenna diversity enabled
-        adpc_en = model.vars.MODEM_ADPC1_ADPCEN.value
+        enable_parallel_correlation = model.vars.antdiv_enable_parallel_correlation.value
         oversampling_rate_actual = model.vars.oversampling_rate_actual.value
-        adpcwndsizechip = model.vars.antdiv_adpcwndsize.value
 
         # : Calculate based on parallel window size if antenna diversity parallel correlator is enabled
-        if adpc_en:
+        if enable_parallel_correlation:
+            adpcwndsizechip = model.vars.antdiv_adpcwndsize.value
             exp = adpcwndsizechip * oversampling_rate_actual / 128.0
             diff_min = 9999.0
             num = 1

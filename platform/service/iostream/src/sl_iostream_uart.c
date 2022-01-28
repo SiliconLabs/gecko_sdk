@@ -478,12 +478,12 @@ static sl_status_t nolock_uart_write(void *context,
 #if defined(SL_CATALOG_POWER_MANAGER_PRESENT) && !defined(SL_IOSTREAM_UART_FLUSH_TX_BUFFER)
   CORE_ENTER_ATOMIC();
   if (uart_context->tx_idle == true) {
-    uart_context->tx_idle = false;
     CORE_EXIT_ATOMIC();
     sl_power_manager_add_em_requirement(uart_context->tx_em);
-  } else {
-    CORE_EXIT_ATOMIC();
+    CORE_ENTER_ATOMIC();
+    uart_context->tx_idle = false;
   }
+  CORE_EXIT_ATOMIC();
 #endif
 
   if (cr_to_crlf == false) {

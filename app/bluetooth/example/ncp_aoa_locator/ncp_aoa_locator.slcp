@@ -42,7 +42,7 @@ include:
       - path: app.h
 
 readme:
-  - path: ../../documentation/example/ncp_aoa_locator/readme.html
+  - path: ../../documentation/example/ncp_aoa_locator/readme.md
 
 other_file:
   - path: ../../script/create_bl_files.bat
@@ -78,5 +78,5 @@ tag:
 
 ui_hints:
   highlight:
-    - path: readme.html
+    - path: readme.md
       focus: true

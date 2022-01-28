@@ -66,7 +66,7 @@ void sl_btmesh_hsl_saturation_cb(uint16_t saturation);
 /***************************************************************************//**
  * Called when the UI shall be updated with the changed HSL Model state during
  * a transition. The rate of this callback can be controlled by changing the
- * HSL_SERVER_HUE_UI_UPDATE_PERIOD macro.
+ * SL_BTMESH_HSL_SERVER_HUE_UI_UPDATE_PERIOD_CFG_VAL macro.
  *
  * This is a callback which can be implemented in the application.
  * @note If no implementation is provided in the application then a default weak
@@ -79,7 +79,7 @@ void sl_btmesh_hsl_hue_on_ui_update(uint16_t hue);
 /***************************************************************************//**
  * Called when the UI shall be updated with the changed HSL Model state during
  * a transition. The rate of this callback can be controlled by changing the
- * HSL_SERVER_SATURATION_UI_UPDATE_PERIOD macro.
+ * SL_BTMESH_HSL_SERVER_SATURATION_UI_UPDATE_PERIOD_CFG_VAL macro.
  *
  * This is a callback which can be implemented in the application.
  * @note If no implementation is provided in the application then a default weak

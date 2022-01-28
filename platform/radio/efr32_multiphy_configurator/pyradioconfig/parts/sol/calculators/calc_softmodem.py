@@ -27,6 +27,8 @@ class calc_softmodem_sol(ICalculator):
                 ['SPREADING_FACTOR', 1, 'Number of symbols is equal to the frequency domain spreading factor']
             ])
 
+        self._addModelVariable(model, 'ofdm_symbol_rate', float, ModelVariableFormat.DECIMAL, desc='Symbol rate for OFDM')
+
         self._addModelVariable(model, 'fcs_type_802154', Enum, ModelVariableFormat.DECIMAL, desc='FCS type for 802154 PHYs')
         model.vars.fcs_type_802154.var_enum = CreateModelVariableEnum(
             enum_name='FcsTypeEnum',

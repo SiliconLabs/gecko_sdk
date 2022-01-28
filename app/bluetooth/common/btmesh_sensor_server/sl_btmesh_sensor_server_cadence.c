@@ -127,16 +127,16 @@ static bool sensor_thermometer_delta_cadence(temperature_8_t current_temperature
 
 void sl_btmesh_sensor_people_count_cadence_init(count16_t people_count)
 {
-  static uint16_t delta_down =  SENSOR_PEOPLE_COUNT_STATUS_TRIGGER_DELTA_DOWN;
-  static uint16_t delta_up =  SENSOR_PEOPLE_COUNT_STATUS_TRIGGER_DELTA_UP;
+  static uint16_t delta_down =  SL_BTMESH_SENSOR_PEOPLE_COUNT_STATUS_TRIGGER_DELTA_DOWN_CFG_VAL;
+  static uint16_t delta_up =  SL_BTMESH_SENSOR_PEOPLE_COUNT_STATUS_TRIGGER_DELTA_UP_CFG_VAL;
 
-  static uint16_t cadence_low =  SENSOR_PEOPLE_COUNT_FAST_CADENCE_LOW;
-  static uint16_t cadence_high =  SENSOR_PEOPLE_COUNT_FAST_CADENCE_HIGH;
+  static uint16_t cadence_low =  SL_BTMESH_SENSOR_PEOPLE_COUNT_FAST_CADENCE_LOW_CFG_VAL;
+  static uint16_t cadence_high =  SL_BTMESH_SENSOR_PEOPLE_COUNT_FAST_CADENCE_HIGH_CFG_VAL;
 
   cadences[SENSOR_PEOPLE_COUNT_INDEX].property_id = PEOPLE_COUNT;
-  cadences[SENSOR_PEOPLE_COUNT_INDEX].period_divisor =  SENSOR_PEOPLE_COUNT_FAST_CADENCE_PERIOD_DIVISOR;
-  cadences[SENSOR_PEOPLE_COUNT_INDEX].status_trigger_type =  SENSOR_PEOPLE_COUNT_STATUS_TRIGGER_TYPE;
-  cadences[SENSOR_PEOPLE_COUNT_INDEX].min_interval =  SENSOR_PEOPLE_COUNT_STATUS_MIN_INTERVAL;
+  cadences[SENSOR_PEOPLE_COUNT_INDEX].period_divisor =  SL_BTMESH_SENSOR_PEOPLE_COUNT_FAST_CADENCE_PERIOD_DIVISOR_CFG_VAL;
+  cadences[SENSOR_PEOPLE_COUNT_INDEX].status_trigger_type =  SL_BTMESH_SENSOR_PEOPLE_COUNT_STATUS_TRIGGER_TYPE_CFG_VAL;
+  cadences[SENSOR_PEOPLE_COUNT_INDEX].min_interval =  SL_BTMESH_SENSOR_PEOPLE_COUNT_STATUS_MIN_INTERVAL_CFG_VAL;
   cadences[SENSOR_PEOPLE_COUNT_INDEX].fast_cadence_low.size = sizeof(cadence_low);
   cadences[SENSOR_PEOPLE_COUNT_INDEX].fast_cadence_low.value = (uint8_t*)(&cadence_low);
   cadences[SENSOR_PEOPLE_COUNT_INDEX].fast_cadence_high.size = sizeof(cadence_high);
@@ -275,7 +275,7 @@ static bool sensor_people_count_delta_cadence(count16_t people_count)
 
   // Check the unit and format of the Status Trigger Delta Down and
   // the Status Trigger Delta Up fields.
-  if (SENSOR_PEOPLE_COUNT_STATUS_TRIGGER_TYPE_DISCRETE_VALUE == cadences[SENSOR_PEOPLE_COUNT_INDEX].status_trigger_type) {
+  if (SL_BTMESH_SENSOR_PEOPLE_COUNT_STATUS_TRIGGER_TYPE_DISCRETE_VALUE_CFG_VAL == cadences[SENSOR_PEOPLE_COUNT_INDEX].status_trigger_type) {
     // If the temperature change is rising and the measured quantity change
     // exceeds the configured Status Trigger Delta Up value, Sensor Status
     // publishing period modification is required.
@@ -291,7 +291,7 @@ static bool sensor_people_count_delta_cadence(count16_t people_count)
     } else {
     }
     // Same check with measured value represented unitless as percentage
-  } else if ((SENSOR_PEOPLE_COUNT_STATUS_TRIGGER_TYPE_PERCENTAGE == cadences[SENSOR_PEOPLE_COUNT_INDEX].status_trigger_type)
+  } else if ((SL_BTMESH_SENSOR_PEOPLE_COUNT_STATUS_TRIGGER_TYPE_PERCENTAGE_CFG_VAL == cadences[SENSOR_PEOPLE_COUNT_INDEX].status_trigger_type)
              && (prev_people_count_data != people_count)) {
     if (!prev_people_count_data) {
       delta_percent = PERCENTAGE_FULL;

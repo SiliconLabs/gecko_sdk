@@ -33,6 +33,23 @@
 
 #include "sl_rail_util_coex_common_config.h"
 
+// <<< Use Configuration Wizard in Context Menu >>>
+// <h> Coexistence IEEE802.15.4 signal identifier
+// <q SL_RAIL_UTIL_COEX_SIGNAL_IDENTIFIER_ENABLED> True: Signal identifier is enabled; False: Signal identifier is disabled
+// <i> True: Signal identifier is enabled; False: Signal identifier is disabled
+// <i> Default: 0
+#define SL_RAIL_UTIL_COEX_SIGNAL_IDENTIFIER_ENABLED 0
+// <o SL_RAIL_UTIL_COEX_WIFI_TX_ASSERT_LEVEL> Polarity of Wifi Tx signal
+//   <1=> High
+//   <0=> Low
+// <i> Polarity of WiFi Tx signal
+// <i> Default: 1
+#define SL_RAIL_UTIL_COEX_WIFI_TX_ASSERT_LEVEL 1
+// </e>
+// </h>
+// </h>
+// <<< end of configuration section >>>
+
 // <<< sl:start pin_tool >>>
 
 #if SL_RAIL_UTIL_COEX_GNT_ENABLED
@@ -139,6 +156,18 @@
 #error "SL_RAIL_UTIL_COEX_RX_ACTIVE_CHANNEL undefined"
 #endif //SL_RAIL_UTIL_COEX_RX_ACTIVE_CHANNEL
 #endif //SL_RAIL_UTIL_COEX_RX_ACTIVE_ENABLED
+
+#if SL_RAIL_UTIL_COEX_SIGNAL_IDENTIFIER_ENABLED
+// Pin used for WiFi Tx
+// <gpio optional=true> SL_RAIL_UTIL_COEX_WIFI_TX
+// $[GPIO_SL_RAIL_UTIL_COEX_SIGNAL_IDENTIFIER]
+// #define SL_RAIL_UTIL_COEX_WIFI_TX_PORT        gpioPortC
+// #define SL_RAIL_UTIL_COEX_WIFI_TX_PIN         9
+// [GPIO_SL_RAIL_UTIL_COEX_WIFI_TX]$
+#ifndef SL_RAIL_UTIL_COEX_WIFI_TX_PORT
+#error "SL_RAIL_UTIL_COEX_WIFI_TX_PORT undefined"
+#endif // SL_RAIL_UTIL_COEX_WIFI_TX_PORT
+#endif // SL_RAIL_UTIL_COEX_SIGNAL_IDENTIFIER_ENABLED
 
 // <<< sl:end pin_tool >>>
 

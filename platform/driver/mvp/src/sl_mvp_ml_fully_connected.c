@@ -45,6 +45,15 @@ sl_status_t sli_mvp_ml_fully_connected_s8(const sli_mvp_ml_fully_connected_s8_pa
     return SL_STATUS_INVALID_PARAMETER;
   }
 
+  if (params->weight_offset != 0) {
+    // The quantization specification requires the zero point value to be 0.
+    // This means that the weight offset (negative zero point) argument to this
+    // function will also be 0.
+    // https://www.tensorflow.org/lite/performance/quantization_spec
+    EFM_ASSERT(false);
+    return SL_STATUS_INVALID_PARAMETER;
+  }
+
   int accum_depth = params->weight_shape.dim[1];
   int input_threshold = 1024;
   if (accum_depth % 2 == 0) {
@@ -62,11 +71,10 @@ static sl_status_t sli_mvp_ml_fully_connected_s8_small_input(const sli_mvp_ml_fu
 {
   static sli_mvp_program_t prog;
 
-  int32_t input_offset = params->input_offset;
   int32_t output_offset = params->output_offset;
   float16_t output_multiplier = params->output_multiplier;
   float acc_scaler = SLI_MVP_ACCUMULATOR_SCALER;
-  float weight_offset_scaled = params->weight_offset * acc_scaler;
+  float input_offset_scaled = params->input_offset * acc_scaler;
 
   int batches = params->output_shape.dim[0];
   int output_depth = params->output_shape.dim[1];
@@ -112,8 +120,7 @@ static sl_status_t sli_mvp_ml_fully_connected_s8_small_input(const sli_mvp_ml_fu
 
   Register Allocation
     R0 - acc_scaler
-    R1 - input_offset
-    R2 - weight_offset_scaled
+    R1 - input_offset_scaled
     R3 - multiplier
     R4 - output_offset
     R5 - accumulator/output_scaled
@@ -136,14 +143,14 @@ static sl_status_t sli_mvp_ml_fully_connected_s8_small_input(const sli_mvp_ml_fu
       Loop2: cnt=accum_depth {
         I1: R6 = input[A0.Dim1][A0.Dim2++]
             R7 = weight[A1.Dim1][A1.Dim2++]
-            R6 = R6 + R1
-        I2: R7 = R7 * R0 + R2
-        I3: R5 = R6 * R7 + R5
+            R6 = R6 * R0 + R1
+        I2: R5 = R6 * R7 + R5
       } : {A1.Dim1++}
-      I4: R5 = R5 * R3 + R4
+      I3: R5 = R5 * R3 + R4
           output[A3.Dim1][A3.Dim0++] = R5 // Store output
     } : {A0.Dim1++, A3.Dim1++}
   }
+
 */
 
   if (use_parallel_mac) {
@@ -162,8 +169,7 @@ static sl_status_t sli_mvp_ml_fully_connected_s8_small_input(const sli_mvp_ml_fu
   sli_mvp_prog_set_matrix(&prog, SLI_MVP_ARRAY(3), params->output, SLI_MVP_DATATYPE_INT8, batches, output_depth);
 
   sli_mvp_prog_set_reg_f32c(&prog, SLI_MVP_R0, acc_scaler, acc_scaler);
-  sli_mvp_prog_set_reg_s32c(&prog, SLI_MVP_R1, input_offset, input_offset);
-  sli_mvp_prog_set_reg_f32c(&prog, SLI_MVP_R2, weight_offset_scaled, weight_offset_scaled);
+  sli_mvp_prog_set_reg_f32c(&prog, SLI_MVP_R1, input_offset_scaled, input_offset_scaled);
   sli_mvp_prog_set_reg_f16(&prog, SLI_MVP_R3, output_multiplier);
   sli_mvp_prog_set_reg_s32(&prog, SLI_MVP_R4, output_offset);
 
@@ -180,31 +186,21 @@ static sl_status_t sli_mvp_ml_fully_connected_s8_small_input(const sli_mvp_ml_fu
   // Instruction 1:
   //   input  = input[A0.Dim1][A0.Dim2++]
   //   weight = weight[A1.Dim1][A1.Dim2++]
-  //   input  = input + input_offset
+  //   input  = input * acc_scaler + input_offset_scaled
   // LOAD(Array0,R6)
   // LOAD(Array1,R7)
-  // R6 = ADDC(R6,_,R1)
+  // R6 = MACR2A(R6,R0,R1)
   sli_mvp_prog_set_instr(&prog, SLI_MVP_INSTR(inst_cnt++),
-                     SLI_MVP_OP(ADDC),
+                     SLI_MVP_OP(MACR2A),
                      SLI_MVP_ALU_X(SLI_MVP_R6)
+                     | SLI_MVP_ALU_Y(SLI_MVP_R0)
                      | SLI_MVP_ALU_A(SLI_MVP_R1)
                      | SLI_MVP_ALU_Z(SLI_MVP_R6),
                      SLI_MVP_LOAD(0, SLI_MVP_R6, SLI_MVP_ARRAY(0), SLI_MVP_INCRDIM_COL)
                      | SLI_MVP_LOAD(1, SLI_MVP_R7, SLI_MVP_ARRAY(1), SLI_MVP_INCRDIM_COL),
                      0,
                      0);
-  // Instruction 2: weight = weight * ACCUMULATOR_SCALER + weight_offset_scaled
-  // R7 = MULR2A(R7,R0,_)
-  sli_mvp_prog_set_instr(&prog, SLI_MVP_INSTR(inst_cnt++),
-                     SLI_MVP_OP(MACR2A),
-                     SLI_MVP_ALU_X(SLI_MVP_R7)
-                     | SLI_MVP_ALU_Y(SLI_MVP_R0)
-                     | SLI_MVP_ALU_A(SLI_MVP_R2)
-                     | SLI_MVP_ALU_Z(SLI_MVP_R7),
-                     0,
-                     0,
-                     0);
-  // Instruction 3: acc += input * weight
+  // Instruction 2: acc += input * weight
   // R5 = MACR2A(R6,R7,R5)
   sli_mvp_prog_set_instr(&prog, SLI_MVP_INSTR(inst_cnt++),
                      SLI_MVP_OP(MACR2A),
@@ -216,7 +212,7 @@ static sl_status_t sli_mvp_ml_fully_connected_s8_small_input(const sli_mvp_ml_fu
                      0,
                      0);
   if (use_parallel_mac) {
-    // Instruction 4: acc = acc.real + acc.imag
+    // Instruction 3: acc = acc.real + acc.imag
     // R5 = ADDR(R5)
     sli_mvp_prog_set_instr(&prog, SLI_MVP_INSTR(inst_cnt++),
                        SLI_MVP_OP(ADDR),
@@ -226,7 +222,7 @@ static sl_status_t sli_mvp_ml_fully_connected_s8_small_input(const sli_mvp_ml_fu
                        0,
                        0);
   }
-  // Instruction 4/5: output[A3.Dim1][A3.Dim2++] = acc * multiplier + output_offset
+  // Instruction 3/4: output[A3.Dim1][A3.Dim2++] = acc * multiplier + output_offset
   // R5 = MACR2A(R5,R3,R4)
   sli_mvp_prog_set_instr(&prog, SLI_MVP_INSTR(inst_cnt++),
                      SLI_MVP_OP(MACR2A),
@@ -263,7 +259,7 @@ static sl_status_t sli_mvp_ml_fully_connected_s8_small_input(const sli_mvp_ml_fu
   sli_mvp_prog_set_loop(&prog, SLI_MVP_LOOP(2),
                         loop_cnt,
                         SLI_MVP_INSTR(1),
-                        SLI_MVP_INSTR(3),
+                        SLI_MVP_INSTR(2),
                         SLI_MVP_LOOP_INCRDIM(SLI_MVP_ARRAY(1), SLI_MVP_INCRDIM_ROW));
 
   sli_mvp_execute(&prog, true);
@@ -336,11 +332,10 @@ static sl_status_t sli_mvp_ml_fully_connected_s8_large_input(const sli_mvp_ml_fu
 {
   static sli_mvp_program_t prog;
 
-  int32_t input_offset = params->input_offset;
   int32_t output_offset = params->output_offset;
   float16_t output_multiplier = params->output_multiplier;
   float acc_scaler = SLI_MVP_ACCUMULATOR_SCALER;
-  float weight_offset_scaled = params->weight_offset * acc_scaler;
+  float input_offset_scaled = params->input_offset * acc_scaler;
 
   int batches = params->output_shape.dim[0];
   int output_depth = params->output_shape.dim[1];
@@ -357,8 +352,7 @@ static sl_status_t sli_mvp_ml_fully_connected_s8_large_input(const sli_mvp_ml_fu
 
   Register Allocation
     R0 - acc_scaler
-    R1 - input_offset
-    R2 - weight_offset_scaled
+    R1 - input_offset_scaled
     R3 - multiplier
     R4 - output_offset
     R5 - accumulator/output_scaled
@@ -381,17 +375,15 @@ static sl_status_t sli_mvp_ml_fully_connected_s8_large_input(const sli_mvp_ml_fu
     Loop1: cnt=m {
       I1: R6 = input[n][m++]
           R7 = weight_row[n][m++]
-          R6 = R6 + R1
-      I2: R7 = R7 * R0 + R2
-      I3: R5 = R6 * R7 + R5
+          R6 = R6 * R0 + R1
+      I2: R5 = R6 * R7 + R5
   } : {n++}
-  I4: R5 = R5 * R3 + R4
+  I3: R5 = R5 * R3 + R4
     output[0] = R5 // Store output
 */
 
   sli_mvp_prog_set_reg_f32c(&prog, SLI_MVP_R0, acc_scaler, acc_scaler);
-  sli_mvp_prog_set_reg_s32c(&prog, SLI_MVP_R1, input_offset, input_offset);
-  sli_mvp_prog_set_reg_f32c(&prog, SLI_MVP_R2, weight_offset_scaled, weight_offset_scaled);
+  sli_mvp_prog_set_reg_f32c(&prog, SLI_MVP_R1, input_offset_scaled, input_offset_scaled);
   sli_mvp_prog_set_reg_f16(&prog, SLI_MVP_R3, output_multiplier);
   sli_mvp_prog_set_reg_s32(&prog, SLI_MVP_R4, output_offset);
 
@@ -412,31 +404,21 @@ static sl_status_t sli_mvp_ml_fully_connected_s8_large_input(const sli_mvp_ml_fu
   // Instruction 0:
   //   input  = input[A0.Dim1][A0.Dim2++]
   //   weight = weight[A1.Dim1][A1.Dim2++]
-  //   input  = input + input_offset
+  //   input  = input * ACCUMULATOR_SCALER + input_offset_scaled
   // LOAD(Array0,R6)
   // LOAD(Array1,R7)
-  // R6 = ADDC(R6,_,R1)
+  // R6 = MACR2A(R6,R0,R1)
   sli_mvp_prog_set_instr(&prog, SLI_MVP_INSTR(inst_cnt++),
-                     SLI_MVP_OP(ADDC),
+                     SLI_MVP_OP(MACR2A),
                      SLI_MVP_ALU_X(SLI_MVP_R6)
+                     | SLI_MVP_ALU_Y(SLI_MVP_R0)
                      | SLI_MVP_ALU_A(SLI_MVP_R1)
                      | SLI_MVP_ALU_Z(SLI_MVP_R6),
                      SLI_MVP_LOAD(0, SLI_MVP_R6, SLI_MVP_ARRAY(0), SLI_MVP_INCRDIM_COL)
                      | SLI_MVP_LOAD(1, SLI_MVP_R7, SLI_MVP_ARRAY(1), SLI_MVP_INCRDIM_COL),
                      0,
                      0);
-  // Instruction 1: weight = weight * ACCUMULATOR_SCALER + weight_offset_scaled
-  // R7 = MACR2A(R7,R0,R2)
-  sli_mvp_prog_set_instr(&prog, SLI_MVP_INSTR(inst_cnt++),
-                     SLI_MVP_OP(MACR2A),
-                     SLI_MVP_ALU_X(SLI_MVP_R7)
-                     | SLI_MVP_ALU_Y(SLI_MVP_R0)
-                     | SLI_MVP_ALU_A(SLI_MVP_R2)
-                     | SLI_MVP_ALU_Z(SLI_MVP_R7),
-                     0,
-                     0,
-                     0);
-  // Instruction 2: acc += input * weight
+  // Instruction 1: acc += input * weight
   // R5 = MACR2A(R6,R7,R5)
   sli_mvp_prog_set_instr(&prog, SLI_MVP_INSTR(inst_cnt++),
                      SLI_MVP_OP(MACR2A),
@@ -448,7 +430,7 @@ static sl_status_t sli_mvp_ml_fully_connected_s8_large_input(const sli_mvp_ml_fu
                      0,
                      0);
   if (use_parallel_mac) {
-    // Instruction 3: acc = acc.real + acc.imag
+    // Instruction 2: acc = acc.real + acc.imag
     // R5 = ADDR(R5)
     sli_mvp_prog_set_instr(&prog, SLI_MVP_INSTR(inst_cnt++),
                        SLI_MVP_OP(ADDR),
@@ -458,7 +440,7 @@ static sl_status_t sli_mvp_ml_fully_connected_s8_large_input(const sli_mvp_ml_fu
                        0,
                        0);
   }
-  // Instruction 4: output[A3.Dim1][A3.Dim2++] = acc * multiplier + output_offset
+  // Instruction 2/3: output[A3.Dim1][A3.Dim2++] = acc * multiplier + output_offset
   // R5 = MACR2A(R5,R3,R4)
   sli_mvp_prog_set_instr(&prog, SLI_MVP_INSTR(inst_cnt++),
                      SLI_MVP_OP(MACR2A),
@@ -475,12 +457,12 @@ static sl_status_t sli_mvp_ml_fully_connected_s8_large_input(const sli_mvp_ml_fu
   sli_mvp_prog_set_loop(&prog, SLI_MVP_LOOP(0),
                         n,
                         SLI_MVP_INSTR(0),
-                        SLI_MVP_INSTR(2),
+                        SLI_MVP_INSTR(1),
                         0);
   sli_mvp_prog_set_loop(&prog, SLI_MVP_LOOP(1),
                         m,
                         SLI_MVP_INSTR(0),
-                        SLI_MVP_INSTR(2),
+                        SLI_MVP_INSTR(1),
                         SLI_MVP_LOOP_INCRDIM(SLI_MVP_ARRAY(0), SLI_MVP_INCRDIM_ROW)
                         | SLI_MVP_LOOP_INCRDIM(SLI_MVP_ARRAY(1), SLI_MVP_INCRDIM_ROW));
 

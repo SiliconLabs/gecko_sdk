@@ -34,20 +34,22 @@
 #ifndef OTBR_AGENT_BORDER_AGENT_HPP_
 #define OTBR_AGENT_BORDER_AGENT_HPP_
 
+#if !(OTBR_ENABLE_MDNS_AVAHI || OTBR_ENABLE_MDNS_MDNSSD || OTBR_ENABLE_MDNS_MOJO)
+#error "Border Agent feature requires at least one `OTBR_MDNS` implementation"
+#endif
+
 #include <vector>
 
 #include <stdint.h>
 
 #include "agent/instance_params.hpp"
+#include "backbone_router/backbone_agent.hpp"
+#include "common/code_utils.hpp"
 #include "common/mainloop.hpp"
 #include "mdns/mdns.hpp"
 #include "ncp/ncp_openthread.hpp"
 #include "sdp_proxy/advertising_proxy.hpp"
 #include "sdp_proxy/discovery_proxy.hpp"
-
-#if OTBR_ENABLE_BACKBONE_ROUTER
-#include "backbone_router/backbone_agent.hpp"
-#endif
 
 #ifndef OTBR_VENDOR_NAME
 #define OTBR_VENDOR_NAME "OpenThread"
@@ -76,7 +78,7 @@ namespace otbr {
  * This class implements Thread border agent functionality.
  *
  */
-class BorderAgent
+class BorderAgent : private NonCopyable
 {
 public:
     /**
@@ -138,13 +140,13 @@ private:
         uint32_t ToUint32(void) const;
     };
 
-    otbrError   Start(void);
+    void        Start(void);
     void        Stop(void);
     static void HandleMdnsState(void *aContext, Mdns::Publisher::State aState);
     void        HandleMdnsState(Mdns::Publisher::State aState);
     void        PublishMeshCopService(void);
-    void        UnpublishMeshCopService(void);
     void        UpdateMeshCopService(void);
+    void        UnpublishMeshCopService(void);
 #if OTBR_ENABLE_DBUS_SERVER
     void HandleUpdateVendorMeshCoPTxtEntries(std::map<std::string, std::vector<uint8_t>> aUpdate);
 #endif
@@ -167,9 +169,6 @@ private:
 #endif
 #if OTBR_ENABLE_DNSSD_DISCOVERY_PROXY
     Dnssd::DiscoveryProxy mDiscoveryProxy;
-#endif
-#if OTBR_ENABLE_BACKBONE_ROUTER
-    BackboneRouter::BackboneAgent mBackboneAgent;
 #endif
 };
 

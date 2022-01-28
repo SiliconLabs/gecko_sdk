@@ -591,8 +591,12 @@ static bool phyStackEventIsEnabled(void)
 #endif // SL_CATALOG_RAIL_UTIL_ANT_DIV_PRESENT
 
 #ifdef SL_CATALOG_RAIL_UTIL_COEX_PRESENT
-    result |= ((sl_rail_util_coex_is_enabled() || SL_RAIL_UTIL_COEX_RUNTIME_PHY_SELECT)
-               && sRadioCoexEnabled);
+    if (sRadioCoexEnabled) {
+        result |= sl_rail_util_coex_is_enabled();
+#ifdef SL_RAIL_UTIL_COEX_RUNTIME_PHY_SELECT
+        result |= SL_RAIL_UTIL_COEX_RUNTIME_PHY_SELECT;
+#endif
+    }
 #endif // SL_CATALOG_RAIL_UTIL_COEX_PRESENT
 
     return result;
@@ -1536,6 +1540,36 @@ otError otPlatRadioSetTransmitPower(otInstance *aInstance, int8_t aPower)
     return OT_ERROR_NONE;
 }
 
+// Required for RCP error recovery
+// See src/lib/spinel/radio_spinel_impl.hpp::RestoreProperties()
+otError otPlatRadioSetChannelMaxTransmitPower(otInstance *aInstance, uint8_t aChannel, int8_t aMaxPower)
+{
+    uint16_t currentChannel;
+    otError error = OT_ERROR_NONE;
+
+#if RADIO_CONFIG_2P4GHZ_OQPSK_SUPPORT
+    otEXPECT_ACTION(aChannel >= OT_RADIO_2P4GHZ_OQPSK_CHANNEL_MIN && aChannel <= OT_RADIO_2P4GHZ_OQPSK_CHANNEL_MAX,
+                    error = OT_ERROR_INVALID_ARGS);
+#elif RADIO_CONFIG_SUBGHZ_SUPPORT
+    otEXPECT_ACTION(aChannel >= OPENTHREAD_CONFIG_PLATFORM_RADIO_PROPRIETARY_CHANNEL_MIN
+                    && aChannel <= OPENTHREAD_CONFIG_PLATFORM_RADIO_PROPRIETARY_CHANNEL_MAX,
+                    error = OT_ERROR_INVALID_ARGS);
+#elif RADIO_CONFIG_915MHZ_OQPSK_SUPPORT // Not supported
+    otEXPECT_ACTION(aChannel >= OT_RADIO_915MHZ_OQPSK_CHANNEL_MIN && aChannel <= OT_RADIO_915MHZ_OQPSK_CHANNEL_MAX,
+                    error = OT_ERROR_INVALID_ARGS);
+#endif
+
+    RAIL_GetChannel(gRailHandle, &currentChannel);
+
+    if (aChannel == currentChannel)
+    {
+        otPlatRadioSetTransmitPower(aInstance, aMaxPower);
+    }
+
+exit:
+    return error;
+}
+
 otError otPlatRadioGetCcaEnergyDetectThreshold(otInstance *aInstance, int8_t *aThreshold)
 {
     OT_UNUSED_VARIABLE(aInstance);
@@ -2176,6 +2210,12 @@ static void RAILCb_Generic(RAIL_Handle_t aRailHandle, RAIL_Events_t aEvents)
     }
 #endif// SL_CATALOG_RAIL_UTIL_IEEE802154_STACK_EVENT_PRESENT
 
+#ifdef SL_CATALOG_RAIL_UTIL_COEX_PRESENT
+    if (aEvents & RAIL_EVENT_SIGNAL_DETECTED) {
+        (void) handlePhyStackEvent(SL_RAIL_UTIL_IEEE802154_STACK_EVENT_SIGNAL_DETECTED, 0U);
+    }
+#endif // SL_CATALOG_RAIL_UTIL_COEX_PRESENT
+
     if ((aEvents & RAIL_EVENT_IEEE802154_DATA_REQUEST_COMMAND)
 #ifdef SL_CATALOG_RAIL_UTIL_COEX_PRESENT
         && !RAIL_IsRxAutoAckPaused(aRailHandle)
@@ -2578,6 +2618,11 @@ void efr32RadioProcess(otInstance *aInstance)
 //------------------------------------------------------------------------------
 // Antenna Diversity, Wifi coexistence and Runtime PHY select support
 
+RAIL_Status_t efr32RadioSetCcaMode(uint8_t aMode)
+{
+    return RAIL_IEEE802154_ConfigCcaMode(gRailHandle, aMode);
+}
+
 RAIL_IEEE802154_PtiRadioConfig_t efr32GetPtiRadioConfig(void)
 {
     return (RAIL_IEEE802154_GetPtiRadioConfig(gRailHandle));
@@ -2649,7 +2694,8 @@ static void changeDynamicEvents(void)
                                     | RAIL_EVENT_RX_FILTER_PASSED
                                     | RAIL_EVENT_TX_CHANNEL_CLEAR
                                     | RAIL_EVENT_TX_CCA_RETRY
-                                    | RAIL_EVENT_TX_START_CCA;
+                                    | RAIL_EVENT_TX_START_CCA
+                                    | RAIL_EVENT_SIGNAL_DETECTED;
     RAIL_Events_t eventValues = RAIL_EVENTS_NONE;
 
     if (phyStackEventIsEnabled()) {

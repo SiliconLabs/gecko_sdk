@@ -62,22 +62,28 @@ class Target_Sim_Bobcat(ITarget):
             self.MODEM_SHAPING_OVERRIDE(model)
 
         elif model.phy.name == 'PHY_Datasheet_2450M_2GFSK_250Kbps_125K':
-            model.vars.base_frequency_hz.value_forced = 2495775055
+            model.vars.base_frequency_hz.value_forced = 2495700074
+#            model.vars.adc_clock_mode.value_forced = model.vars.adc_clock_mode.var_enum.HFXOMULT
 
         elif model.phy.name == 'PHY_Datasheet_2450M_2GFSK_1Mbps_500K':
             model.vars.base_frequency_hz.value_forced = 2494900046
+#            model.vars.adc_clock_mode.value_forced = model.vars.adc_clock_mode.var_enum.HFXOMULT
 
         elif model.phy.name == 'PHY_Datasheet_2450M_2GFSK_2Mbps_1M':
-            model.vars.base_frequency_hz.value_forced = 2494700020
+            model.vars.base_frequency_hz.value_forced = 2494650033
+#            model.vars.adc_clock_mode.value_forced = model.vars.adc_clock_mode.var_enum.HFXOMULT
 
         elif model.phy.name == 'PHY_ZWave_100kbps_916MHz_viterbi':
             model.vars.base_frequency_hz.value_forced = 935300023
+#            model.vars.adc_clock_mode.value_forced = model.vars.adc_clock_mode.var_enum.HFXOMULT
 
         elif model.phy.name == 'PHY_ZWave_40kbps_9p6kbps_908MHz_viterbi_conc':
             model.vars.base_frequency_hz.value_forced = 934600020
+#            model.vars.adc_clock_mode.value_forced = model.vars.adc_clock_mode.var_enum.HFXOMULT
 
         elif model.phy.name == 'PHY_Connect_2_4GHz_OQPSK_2Mcps_250kbps':
             model.vars.base_frequency_hz.value_forced = 2494650033
+#            model.vars.adc_clock_mode.value_forced = model.vars.adc_clock_mode.var_enum.HFXOMULT
 
         elif model.phy.name == 'PHY_IEEE802154_2p4GHz_cohdsa' or \
                         model.phy.name == 'PHY_IEEE802154_2p4GHz_coh_sensitivity_diversity' or \

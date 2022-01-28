@@ -55,7 +55,7 @@
  * @param errno_val errno number value if there is any error
  * @return return value by status check
  *****************************************************************************/
-static inline int32_t _check_status(sl_status_t status, int32_t retval, errno_t errno_val);
+static inline int32_t _check_status(sl_status_t status, int32_t retval, int32_t errno_val);
 
 /**************************************************************************//**
  * @brief Convert POSIX protocol ID to Wi-SUN eqvivalent
@@ -583,7 +583,7 @@ const char *inet_ntop(sock_domain_t af, const void *src, char *dst, socklen_t si
 //                          Static Function Definitions
 // -----------------------------------------------------------------------------
 
-static inline int32_t _check_status(sl_status_t status, int32_t retval, errno_t errno_val)
+static inline int32_t _check_status(sl_status_t status, int32_t retval, int32_t errno_val)
 {
   if (status == SL_STATUS_OK) {
     return retval;

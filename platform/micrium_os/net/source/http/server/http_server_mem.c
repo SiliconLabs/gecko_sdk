@@ -941,6 +941,8 @@ HTTPs_CONN *HTTPsMem_ConnGet(HTTPs_INSTANCE *p_instance,
 
   goto exit;
 
+#if ((HTTPs_CFG_FORM_EN == DEF_ENABLED) \
+  && (HTTPs_CFG_FORM_MULTIPART_EN == DEF_ENABLED))
 exit_free_host:
 #if (HTTPs_CFG_ABSOLUTE_URI_EN == DEF_ENABLED)
   Mem_DynPoolBlkFree(&p_instance->PoolHost,                   // Release host previously acquired.
@@ -949,13 +951,16 @@ exit_free_host:
   RTOS_ASSERT_CRITICAL((RTOS_ERR_CODE_GET(local_err) == RTOS_ERR_NONE), RTOS_ERR_ASSERT_CRITICAL_FAIL, DEF_NULL);
   p_conn->HostPtr = DEF_NULL;
 #endif
+#endif
 
+#if (HTTPs_CFG_ABSOLUTE_URI_EN == DEF_ENABLED)
 exit_free_path:
   Mem_DynPoolBlkFree(&p_instance->PoolPath,                   // Release path previously acquired.
                      p_conn->PathPtr,
                      &local_err);
   RTOS_ASSERT_CRITICAL((RTOS_ERR_CODE_GET(local_err) == RTOS_ERR_NONE), RTOS_ERR_ASSERT_CRITICAL_FAIL, DEF_NULL);
   p_conn->PathPtr = DEF_NULL;
+#endif
 
 exit_free_buf:
   Mem_DynPoolBlkFree(&p_instance->PoolBuf,                    // Release buf previously acquired.

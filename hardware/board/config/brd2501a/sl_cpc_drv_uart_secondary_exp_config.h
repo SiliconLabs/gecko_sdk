@@ -46,25 +46,41 @@
 // <o SL_CPC_DRV_UART_EXP_BAUDRATE> UART Baudrate
 // <i> Default: 115200
 #define SL_CPC_DRV_UART_EXP_BAUDRATE              115200
+
+// <o SL_CPC_DRV_UART_EXP_FLOW_CONTROL_TYPE> Flow control
+// <usartHwFlowControlNone=> None
+// <usartHwFlowControlCtsAndRts=> CTS/RTS
+// <i> Default: usartHwFlowControlNone
+#define SL_CPC_DRV_UART_EXP_FLOW_CONTROL_TYPE usartHwFlowControlNone
 // </h>
 
 // <<< end of configuration section >>>
 
 // <<< sl:start pin_tool >>>
-// <usart signal=TX,RX> SL_CPC_DRV_UART_EXP
+// <usart signal=TX,RX,(CTS),(RTS)> SL_CPC_DRV_UART_EXP
 // $[USART_SL_CPC_DRV_UART_EXP]
-#define SL_CPC_DRV_UART_EXP_PERIPHERAL           USART0
-#define SL_CPC_DRV_UART_EXP_PERIPHERAL_NO        0
+#define SL_CPC_DRV_UART_EXP_PERIPHERAL           USART2
+#define SL_CPC_DRV_UART_EXP_PERIPHERAL_NO        2
 
-// USART0 TX on PD10
-#define SL_CPC_DRV_UART_EXP_TX_PORT              gpioPortD
-#define SL_CPC_DRV_UART_EXP_TX_PIN               10
-#define SL_CPC_DRV_UART_EXP_TX_LOC               18
+// USART2 TX on PA6
+#define SL_CPC_DRV_UART_EXP_TX_PORT              gpioPortA
+#define SL_CPC_DRV_UART_EXP_TX_PIN               6
+#define SL_CPC_DRV_UART_EXP_TX_LOC               1
 
-// USART0 RX on PD11
-#define SL_CPC_DRV_UART_EXP_RX_PORT              gpioPortD
-#define SL_CPC_DRV_UART_EXP_RX_PIN               11
-#define SL_CPC_DRV_UART_EXP_RX_LOC               18
+// USART2 RX on PA7
+#define SL_CPC_DRV_UART_EXP_RX_PORT              gpioPortA
+#define SL_CPC_DRV_UART_EXP_RX_PIN               7
+#define SL_CPC_DRV_UART_EXP_RX_LOC               1
+
+// USART2 CTS on PA8
+#define SL_CPC_DRV_UART_EXP_CTS_PORT             gpioPortA
+#define SL_CPC_DRV_UART_EXP_CTS_PIN              8
+#define SL_CPC_DRV_UART_EXP_CTS_LOC              31
+
+// USART2 RTS on PA9
+#define SL_CPC_DRV_UART_EXP_RTS_PORT             gpioPortA
+#define SL_CPC_DRV_UART_EXP_RTS_PIN              9
+#define SL_CPC_DRV_UART_EXP_RTS_LOC              31
 
 // [USART_SL_CPC_DRV_UART_EXP]$
 // <<< sl:end pin_tool >>>

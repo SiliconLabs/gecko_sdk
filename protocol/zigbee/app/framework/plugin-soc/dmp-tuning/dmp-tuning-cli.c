@@ -27,9 +27,10 @@
 void emRadioEnableConfigScheduledCallback(bool enable);
 bool emRadioConfigScheduledCallbackEnabled(void);
 void emRadioConfigScheduledCallback(bool scheduled);
+void emberAfPluginDmpStopRadio(void);
 
 // Zigbee related CLI commands
-// Zigbee shceduler priorities
+// Zigbee scheduler priorities
 void emberAfPluginDmpTuningSetZigbeeSchedulerPrioritiesCommand(sl_cli_command_arg_t *arguments)
 {
   EmberMultiprotocolPriorities pri;
@@ -196,6 +197,12 @@ void emberAfPluginDmpTuningGetBleRailMappingCommand(sl_cli_command_arg_t *argume
   emberAfCorePrintln("DmpTuning - GetBleRailMapping: rail_mapping_offset:%d rail_mapping_range:%d",
                      ll_priorities.rail_mapping_offset,
                      ll_priorities.rail_mapping_range);
+}
+
+void emberAfPluginDmpTuningStopRadioCommand(sl_cli_command_arg_t *arguments)
+{
+  emberAfPluginDmpStopRadio();
+  emberAfCorePrintln("Radio has been stopped");
 }
 
 // CLI for protocol switch related RAIL events.

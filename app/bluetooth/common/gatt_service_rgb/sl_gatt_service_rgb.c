@@ -48,6 +48,7 @@ static struct {
 // -----------------------------------------------------------------------------
 // Private function declarations
 
+static void rgb_system_boot_cb(sl_bt_evt_system_boot_t *data);
 static void rgb_connection_opened_cb(sl_bt_evt_connection_opened_t *data);
 static void rgb_connection_closed_cb(sl_bt_evt_connection_closed_t *data);
 static void rgb_read_cb(sl_bt_evt_gatt_server_user_read_request_t *data);
@@ -55,6 +56,20 @@ static void rgb_write_cb(sl_bt_evt_gatt_server_user_write_request_t *data);
 
 // -----------------------------------------------------------------------------
 // Private function definitions
+
+static void rgb_system_boot_cb(sl_bt_evt_system_boot_t *data)
+{
+  (void)data;
+  sl_status_t sc;
+  uint8_t mask;
+
+  mask = sl_gatt_service_rgb_get_led_mask();
+  sc = sl_bt_gatt_server_write_attribute_value(gattdb_ui_rgbled_mask,
+                                               0,
+                                               sizeof(mask),
+                                               &mask);
+  app_log_status_error(sc);
+}
 
 static void rgb_connection_opened_cb(sl_bt_evt_connection_opened_t *data)
 {
@@ -105,6 +120,10 @@ void sl_gatt_service_rgb_on_event(sl_bt_msg_t *evt)
 {
   // Handle stack events
   switch (SL_BT_MSG_ID(evt->header)) {
+    case sl_bt_evt_system_boot_id:
+      rgb_system_boot_cb(&evt->data.evt_system_boot);
+      break;
+
     case sl_bt_evt_connection_opened_id:
       rgb_connection_opened_cb(&evt->data.evt_connection_opened);
       break;
@@ -130,4 +149,9 @@ void sl_gatt_service_rgb_on_event(sl_bt_msg_t *evt)
 SL_WEAK void sl_gatt_service_rgb_set_led(uint8_t m, uint8_t r, uint8_t g, uint8_t b)
 {
   app_log_debug("RGB set: %d %d %d %d\n", m, r, g, b);
+}
+
+SL_WEAK uint8_t sl_gatt_service_rgb_get_led_mask(void)
+{
+  return 0;
 }

@@ -1,5 +1,6 @@
 from pyradioconfig.parts.ocelot.calculators.calc_modulator import CALC_Modulator_Ocelot
 from pycalcmodel.core.variable import ModelVariableFormat, CreateModelVariableEnum
+from pyradioconfig.calculator_model_framework.Utils.LogMgr import LogMgr
 from math import ceil,log2
 from enum import Enum
 
@@ -144,6 +145,23 @@ class Calc_Modulator_Sol(CALC_Modulator_Ocelot):
         #Write the reg
         self._reg_write(model.vars.TXFRONT_SRCCFG_RATIO, int(ratio))
 
+    def calc_tx_baud_rate_actual(self, model):
+
+        #Read in model vars
+        softmodem_modulator_select = model.vars.softmodem_modulator_select.value
+        softmodem_modulation_type = model.vars.softmodem_modulation_type.value
+        softmodem_tx_interpolation1_actual = model.vars.TXFRONT_INT1CFG_RATIO.value + 1
+        softmodem_tx_interpolation2_actual = model.vars.TXFRONT_INT2CFG_RATIO.value + 1
+        txfront_srccfg_ratio_actual = model.vars.TXFRONT_SRCCFG_RATIO.value/(2**18)
+        dac_freq_actual = model.vars.dac_freq_actual.value
+
+        if softmodem_modulator_select == model.vars.softmodem_modulator_select.var_enum.IQ_MOD and\
+                softmodem_modulation_type == model.vars.softmodem_modulation_type.var_enum.SUN_OFDM:
+            tx_baud_rate_actual = dac_freq_actual/softmodem_tx_interpolation1_actual/softmodem_tx_interpolation2_actual*txfront_srccfg_ratio_actual/2.0
+            model.vars.tx_baud_rate_actual.value = tx_baud_rate_actual
+        else:
+            super().calc_tx_baud_rate_actual(model)
+
     def calc_txmix_regs(self, model):
         #This method calculates the RAC_TXMIX fields as well as the RAC_PATRIM6_TXTRIMFILGAIN field
 
@@ -241,3 +259,44 @@ class Calc_Modulator_Sol(CALC_Modulator_Ocelot):
         self._reg_write(model.vars.RAC_TXMIX_TXSELMIXGMSLICEQ, txselmixgmsliceq)
         self._reg_write(model.vars.RAC_TXMIX_TXSELMIXRLOAD, txselmixrload)
         self._reg_write(model.vars.RAC_TXMIX_TXSELMIXBAND, txselmixband)
+
+    def calc_symbol_rates_actual(self, model):
+        softmodem_modulation_type = model.vars.softmodem_modulation_type.value
+        max_bit_rate = model.vars.bitrate.value #We already store the max bitrate here
+
+        if (softmodem_modulation_type == model.vars.softmodem_modulation_type.var_enum.SUN_OFDM):
+            # Symbol rate is constant for OFDM: 1/120us
+            ofdm_tsym = 120e-6
+            ofdm_symbol_rate = 1/ofdm_tsym
+
+            # baud per symbol is not used in OFDM
+            baud_per_symbol = 1
+
+            # bits_per_symbol corresponds to the maximum bit rate (MCS6) for a given option over the symbol rate:
+            bits_per_symbol = int(max_bit_rate / ofdm_symbol_rate)
+
+            # Update model variables
+            model.vars.ofdm_symbol_rate.value = ofdm_symbol_rate
+            model.vars.baud_per_symbol_actual.value = baud_per_symbol
+            model.vars.bits_per_symbol_actual.value = bits_per_symbol
+        else:
+            # Call Ocelot version
+            super().calc_symbol_rates_actual(model)
+
+    def calc_txbases_reg(self, model):
+
+        # Read in model variables
+        preamble_length = model.vars.preamble_length.value  # This is the TX preamble length
+        preamble_pattern_len_actual = model.vars.preamble_pattern_len_actual.value
+        softmodem_active = (model.vars.softmodem_modulation_type.value != model.vars.softmodem_modulation_type.var_enum.NONE)
+
+        if softmodem_active:
+            #If the softmodem is active, the preamble bits will come from the softmodem so set TXBASES=0
+            txbases = 0
+        else:
+            txbases = preamble_length / preamble_pattern_len_actual
+            if (txbases) > 0xffff:
+                LogMgr.Error("Calculated TX preamble sequences (TXBASE) value of %s exceeds limit of 65535! Adjust preamble inputs." % txbases)
+
+        # Write the register
+        self._reg_write(model.vars.MODEM_PRE_TXBASES, int(txbases))

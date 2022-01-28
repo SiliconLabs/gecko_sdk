@@ -1,5 +1,5 @@
 id: "zigbee_stack_unix_library"
-label: "ZigBee Stack Unix Library"
+label: "Zigbee Stack Unix Library"
 package: "Zigbee"
 category: "Zigbee"
 quality: "production"

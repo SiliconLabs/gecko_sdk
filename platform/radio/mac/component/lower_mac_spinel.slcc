@@ -39,6 +39,7 @@ include:
       - path: common/arg_macros.hpp
       - path: common/array.hpp
       - path: common/as_core_type.hpp
+      - path: common/binary_search.hpp
       - path: common/bit_vector.hpp
       - path: common/clearable.hpp
       - path: common/code_utils.hpp
@@ -232,7 +233,6 @@ include:
       - path: utils/heap.hpp
       - path: utils/history_tracker.hpp
       - path: utils/jam_detector.hpp
-      - path: utils/lookup_table.hpp
       - path: utils/otns.hpp
       - path: utils/parse_cmdline.hpp
       - path: utils/ping_sender.hpp
@@ -337,7 +337,7 @@ include:
     
 
 # used by util/third_party/openthread/src/core/common/random_manager
-  - path: "util/third_party/mbedtls/include"
+  - path: "util/third_party/crypto/mbedtls/include"
 
 # ensure this file gets packaged
   - path: "platform/radio/mac"

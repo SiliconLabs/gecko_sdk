@@ -189,9 +189,8 @@ void Manager::HandleMulticastListenerRegistration(const Coap::Message &aMessage,
 
     if (Tlv::Find<ThreadCommissionerSessionIdTlv>(aMessage, commissionerSessionId) == kErrorNone)
     {
-        const MeshCoP::CommissionerSessionIdTlv *commissionerSessionIdTlv =
-            static_cast<const MeshCoP::CommissionerSessionIdTlv *>(
-                Get<NetworkData::Leader>().GetCommissioningDataSubTlv(MeshCoP::Tlv::kCommissionerSessionId));
+        const MeshCoP::CommissionerSessionIdTlv *commissionerSessionIdTlv = As<MeshCoP::CommissionerSessionIdTlv>(
+            Get<NetworkData::Leader>().GetCommissioningDataSubTlv(MeshCoP::Tlv::kCommissionerSessionId));
 
         VerifyOrExit(commissionerSessionIdTlv != nullptr &&
                          commissionerSessionIdTlv->GetCommissionerSessionId() == commissionerSessionId,
@@ -224,7 +223,6 @@ void Manager::HandleMulticastListenerRegistration(const Coap::Message &aMessage,
             uint32_t origTimeout = timeout;
 
             timeout = OT_MIN(timeout, static_cast<uint32_t>(Mle::kMlrTimeoutMax));
-            timeout = OT_MAX(timeout, static_cast<uint32_t>(Mle::kMlrTimeoutMin));
 
             if (timeout != origTimeout)
             {
@@ -242,6 +240,9 @@ void Manager::HandleMulticastListenerRegistration(const Coap::Message &aMessage,
         if (timeout == 0)
         {
             mMulticastListenersTable.Remove(address);
+
+            // Put successfully de-registered addresses at the end of `addresses`.
+            addresses[kIp6AddressesNumMax - (++successAddressNum)] = address;
         }
         else
         {

@@ -4,7 +4,7 @@ description: Server-side implementation of the Zigbee 3.0 Touchlink commissionin
 label: ZLL Commissioning Server
 quality: production
 id: zigbee_zll_commissioning_server
-category: Zigbee|ZigBee Light Link
+category: Zigbee|Zigbee Light Link
 provides:
    - name: "zigbee_zll_commissioning_server"
 requires:

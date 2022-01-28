@@ -62,6 +62,7 @@ typedef struct {
   void (*wait)(void); // Wait for current program to complete
   bool initialized;
   unsigned dma_ch;
+  uint32_t program_count;
 } sli_mvp_t;
 
 static void dma_load(sli_mvp_program_t *program, bool wait);
@@ -124,6 +125,7 @@ sl_status_t sli_mvp_config(sli_mvp_config_t *config)
 sl_status_t sli_mvp_execute(sli_mvp_program_t *program, bool wait)
 {
   program->CMD = MVP_CMD_INIT | MVP_CMD_START;
+  mvp.program_count++;
   sli_mvp_power_program_prepare();
   mvp.load(program, wait);
 
@@ -350,6 +352,16 @@ uint32_t sli_mvp_perfcnt_get(unsigned id)
   return perfcnt[id];
 }
 
+void sli_mvp_progcnt_reset(void)
+{
+  mvp.program_count = 0;
+}
+
+uint32_t sli_mvp_progcnt_get(void)
+{
+  return mvp.program_count;
+}
+
 // Loading program using LDMA
 static void dma_load(sli_mvp_program_t *program, bool wait)
 {
@@ -383,6 +395,13 @@ void sli_mvp_begin_loop(sli_mvp_program_context_t *p,
                         sl_status_t *status)
 {
   if (p->last_loop >= 7) {
+    if (status != NULL) {
+      *status = SL_STATUS_INVALID_PARAMETER;
+    }
+    return;
+  }
+
+  if ((iterations <= 0) || (iterations > MAX_LOOP_COUNT)) {
     if (status != NULL) {
       *status = SL_STATUS_INVALID_PARAMETER;
     }

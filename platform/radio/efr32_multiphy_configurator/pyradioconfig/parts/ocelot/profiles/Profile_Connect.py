@@ -1,5 +1,7 @@
 from pyradioconfig.parts.ocelot.profiles.Profile_Base import Profile_Base_Ocelot
 from pyradioconfig.calculator_model_framework.interfaces.iprofile import IProfile
+from pyradioconfig.parts.ocelot.profiles.frame_profile_inputs_common import frame_profile_inputs_common_ocelot
+from pyradioconfig.parts.ocelot.profiles.sw_profile_outputs_common import sw_profile_outputs_common_ocelot
 
 class Profile_Connect_Ocelot(Profile_Base_Ocelot):
 
@@ -11,6 +13,8 @@ class Profile_Connect_Ocelot(Profile_Base_Ocelot):
         self._default = False
         self._activation_logic = ""
         self._family = "ocelot"
+        self._frame_profile_inputs_common = frame_profile_inputs_common_ocelot()
+        self._sw_profile_outputs_common = sw_profile_outputs_common_ocelot()
 
     """
     Builds inputs, forced, outputs into modem model

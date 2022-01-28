@@ -206,8 +206,12 @@ sl_status_t sl_se_ack_command(sl_se_command_context_t *cmd_ctx);
 /// @details
 /// # Introduction
 ///
-/// The Secure Engine (SE) Manager provides thread-safe APIs for the Secure Engine's mailbox interface.
-/// The SE Manager will use the SE hardware peripherals to accelerate cryptographic operations.
+/// The Secure Engine (SE) Manager provides thread-safe APIs for the Secure Engine's mailbox interface. Note that PSA Crypto is the main device independant crypto API and should be used
+/// whenever possible, see @ref ls_psa_usage. However, the SE manager APIs can be used directly for performance or space constrained applications.
+
+/// Available functionality will vary between devices: device management, such as secure firmware upgrade, secure boot and secure debug implementation, is available on all series 2 devices.
+/// Devices with the SE subsystem includes a low level crypto API where the SE Manager will use the SE hardware peripherals to accelerate cryptographic operations. Finally, Vault High
+/// devices also include secure key storage functionality, anti-tamper protection, advanced crypto API and attestation.
 ///
 /// @note Below are some of the useful application notes linked with Secure Engine Manager:\n
 /// <a href="https://www.silabs.com/documents/public/application-notes/an1190-efr32-secure-debug.pdf">AN1190: Series 2 Secure Debug</a>\n
@@ -220,6 +224,7 @@ sl_status_t sl_se_ack_command(sl_se_command_context_t *cmd_ctx);
 ///
 /// The functionality of the SE Manager includes
 ///
+/// - Core API, inititalizing of SE Manager and SE command context (@ref sl_se_manager_core)
 /// - Secure key storage (@ref sl_se_manager_key_handling)
 ///     - Key wrapping
 ///     - Storing keys in the SE volatile storage
@@ -250,8 +255,7 @@ sl_status_t sl_se_ack_command(sl_se_command_context_t *cmd_ctx);
 ///     - Read SE firmware version
 ///     - Read provisioned certificates
 /// - Multi-thread safe APIs for MicriumOS and FreeRTOS
-///
-/// For a full overview of the available APIs, see @ref sl_se_manager.
+/// - Retrieveing attestation tokens (@ref sl_se_manager_attestation)
 ///
 /// ## Key Storage and Use of SE Wrapped Keys
 ///

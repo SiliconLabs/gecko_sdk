@@ -39,14 +39,16 @@ provides:
   - name: kernel
   - name: micriumos
   - name: micriumos_kernel
+  - name: cmsis_rtos2
   - name: cmsis_rtos2_port
 requires:
   - name: sleeptimer
   - name: rtos_description
   - name: cmsis_core
   - name: cmsis_common
-  - name: cmsis_rtos2
   - name: cmsis_rtos2_headers
+  - name: cmsis_rtos2_init
+    condition: [sl_system]
   - name: device
   - name: cpu
   - name: common_core

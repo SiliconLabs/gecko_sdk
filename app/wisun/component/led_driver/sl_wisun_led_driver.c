@@ -230,7 +230,7 @@ sl_status_t sl_wisun_led_get_signal(const sl_wisun_led_id_t led_id,
 
   led = _get_led_signal_ptr(led_id);
 
-  if (led == NULL) {
+  if (led == NULL || dest == NULL) {
     return SL_STATUS_FAIL;
   }
 
@@ -324,16 +324,16 @@ static void _led_task(void *arg)
   sl_wisun_led_signal_t led_msg  = { 0 }; // incomming led message
   sl_wisun_led_signal_t led0_ref = { 0 }; // LED0 reference storage
   sl_wisun_led_signal_t led1_ref = { 0 }; // LED1 reference storage
-
-  bool led0_state = false;                // led0 state
-  bool led1_state = false;                // led1 state
+  uint8_t msg_prio = 0;
+  bool led0_state  = false;                // led0 state
+  bool led1_state  = false;                // led1 state
   osStatus_t stat;
 
   (void) arg;
 
   SL_WISUN_THREAD_LOOP {
     // check msg queue
-    stat = osMessageQueueGet(_led_msg_queue, &led_msg, NULL, 0U);
+    stat = osMessageQueueGet(_led_msg_queue, &led_msg, &msg_prio, 0U);
 
     _led_mutex_acquire();
 

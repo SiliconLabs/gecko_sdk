@@ -40,7 +40,7 @@
 #endif
 
 #ifndef SL_WISUN_VERSION_PATCH
-#define SL_WISUN_VERSION_PATCH 0
+#define SL_WISUN_VERSION_PATCH 1
 #endif
 
 #endif  // SL_WISUN_VERSION_H

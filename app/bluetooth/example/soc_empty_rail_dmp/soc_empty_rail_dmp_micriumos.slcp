@@ -57,7 +57,7 @@ include:
       - path: app_proprietary.h
 
 readme:
-  - path: ../../documentation/example/soc_empty_rail_dmp/readme.html
+  - path: ../../documentation/example/soc_empty_rail_dmp/readme.md
 
 config_file:
   - override:
@@ -262,5 +262,5 @@ ui_hints:
   highlight:
     - path: config/btconf/gatt_configuration.btconf
     - path: config/rail/radio_settings.radioconf
-    - path: readme.html
+    - path: readme.md
       focus: true

@@ -86,6 +86,133 @@ class Calc_Demodulator_Bobcat(CALC_Demodulator_ocelot):
         #Load local variables back into model variables
         model.vars.oversampling_rate_actual.value = osr_actual
 
+
+    def get_limits(self, demod_select, withremod, relaxsrc2, model):
+
+        #Load model variables into local variables
+        bandwidth = model.vars.bandwidth_hz.value #from calc_target_bandwidth
+
+        baudrate = model.vars.baudrate.value #We don't know the actual bandrate yet
+        modtype = model.vars.modulation_type.value
+        mi = model.vars.modulation_index.value
+        min_chfilt_osr = None
+        max_chfilt_osr = None
+        osr_list = None
+
+        # Define constraints for osr, src2, dec2
+        if demod_select == model.vars.demod_select.var_enum.BCR:
+            # FIXME:  osr_list and resulting target osr are really chfilt_osr, pro2 calculator defines target_osr
+            #       This doesn't cause an error but is confusing.
+            osr_est = int(ceil(2 * float(bandwidth) / baudrate))
+
+            min_osr = 8
+            max_osr = 127
+            min_chfilt_osr = 8
+            if (modtype == model.vars.modulation_type.var_enum.OOK) or \
+                    (modtype == model.vars.modulation_type.var_enum.ASK):
+                max_chfilt_osr = 16256  #127*max_bcr_dec = 127*128
+                osr_list = range(12, max_chfilt_osr)
+            else:
+                max_chfilt_osr = 127
+                osr_list = [osr_est]
+
+            min_src2 = 1.0
+            max_src2 = 1.0
+            min_dec2 = 1
+            max_dec2 = 1
+            min_bwsel = 0.2
+            target_bwsel = 0.4
+            max_bwsel = 0.4
+        elif demod_select == model.vars.demod_select.var_enum.LEGACY:
+            if (modtype == model.vars.modulation_type.var_enum.FSK2 or \
+                  modtype == model.vars.modulation_type.var_enum.FSK4 or \
+                  modtype == model.vars.modulation_type.var_enum.MSK) and (mi<1):
+                # >=7 is better for sensitivity and frequency offset
+                # cost (sens degrade) increases with decreasing osr 6,5,4
+                osr_list = [7, 8, 9, 6, 5, 4]
+                min_osr = 4
+            else:
+                osr_list = [5, 7, 6, 4, 8, 9]
+                min_osr = 4
+            max_osr = 9
+            min_src2 = 0.8
+            max_src2 = 1.2
+            min_dec2 = 1
+            max_dec2 = 64
+            min_bwsel = 0.2
+            target_bwsel = 0.4
+            max_bwsel = 0.4
+        elif demod_select == model.vars.demod_select.var_enum.COHERENT:
+            osr_list = [5]
+            min_osr = 5
+            max_osr = 5
+            min_src2 = 0.8
+            max_src2 = 1.2
+            min_dec2 = 1
+            max_dec2 = 1
+            min_bwsel = 0.2
+            target_bwsel = 0.4
+            max_bwsel = 0.4
+        elif demod_select == model.vars.demod_select.var_enum.TRECS_VITERBI or demod_select == model.vars.demod_select.var_enum.TRECS_SLICER:
+
+            min_bwsel = 0.2
+            target_bwsel = 0.4
+            max_bwsel = 0.4
+
+            if relaxsrc2 == True:
+                min_src2 = 0.55
+                max_src2 = 1.0
+                min_bwsel = 0.15
+            else:
+                min_src2 = 0.8
+                max_src2 = 1.0
+
+            if withremod == True:
+                min_dec2 = 1
+                max_dec2 = 64
+                min_osr = 4
+                max_osr = 32
+                osr_list = [4, 5, 6, 7]
+            elif mi > 2.5: #FIXME: arbitrary threshold here - for zwave 9.6kbps with mi=2.1 we prefer not to use int/diff path but at some point we will have to
+                min_dec2 = 1
+                max_dec2 = 64
+                min_osr = 4
+                max_osr = 7
+                osr_list = [4, 5, 6, 7]
+            else:
+                # Standard TRECs, no DEC2 or remod path
+                min_dec2 = 1
+                max_dec2 = 1
+                min_osr = 4
+                max_osr = 7
+                osr_list = [4, 5, 6, 7]
+        elif demod_select == model.vars.demod_select.var_enum.LONGRANGE:
+            min_dec2 = 1
+            max_dec2 = 1
+            min_osr = 4
+            max_osr = 4
+            osr_list = [4]
+            min_src2 = 0.8
+            max_src2 = 1.2
+            min_bwsel = 0.2
+            target_bwsel = 0.3
+            max_bwsel = 0.3
+        else:
+            raise CalculationException('ERROR: invalid demod_select in return_osr_dec0_dec1()')
+
+        # save to use in other functions
+        model.vars.min_bwsel.value = min_bwsel  # min value for normalized channel filter bandwidth
+        model.vars.max_bwsel.value = max_bwsel  # max value for normalized channel filter bandwidth
+        model.vars.min_src2.value = min_src2  # min value for SRC2
+        model.vars.max_src2.value = max_src2  # max value for SRC2
+        model.vars.max_dec2.value = max_dec2
+        model.vars.min_dec2.value = min_dec2
+
+        return min_bwsel, max_bwsel, min_chfilt_osr, max_chfilt_osr, min_src2, max_src2, min_dec2, max_dec2, min_osr, max_osr, target_bwsel, osr_list
+
+
+
+
     def calc_rxbr(self,model):
         #This function calculates the receive baudrate settings
         # based on actual dec0,dec1,dec2,src2, and desired baudrate
@@ -230,3 +357,5 @@ class Calc_Demodulator_Bobcat(CALC_Demodulator_ocelot):
             lock_bandwidth_hz = 2 * bw_acq
             model.vars.lock_bandwidth_hz.value = int(lock_bandwidth_hz)
 
+    def calc_rssi_rf_adjust_db(self, model):
+        model.vars.rssi_rf_adjust_db.value = -8.0

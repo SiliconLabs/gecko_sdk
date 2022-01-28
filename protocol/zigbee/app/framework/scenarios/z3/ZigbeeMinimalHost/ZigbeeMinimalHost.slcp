@@ -1,7 +1,7 @@
 project_name: "ZigbeeMinimalHost"
 label: "ZigbeeMinimalHost"
 package: "Zigbee"
-category: "ZigBee Application"
+category: "Zigbee Application"
 quality: "production"
 
 component:

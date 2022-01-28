@@ -26,24 +26,23 @@ typedef enum
 
 typedef enum
 {
-  REGION_EU = 0,        /**< Radio is located in Region EU. 2 Channel region. **/
-  REGION_US,            /**< Radio is located in Region US. 2 Channel region. **/
-  REGION_ANZ,           /**< Radio is located in Region Australia/New Zealand. 2 Channel region. **/
-  REGION_HK,            /**< Radio is located in Region Hong Kong. 2 Channel region. **/
-  REGION_IN = 5,        /**< Radio is located in Region India. 2 Channel region. **/
-  REGION_IL,            /**< Radio is located in Region Israel. 2 Channel region. **/
-  REGION_RU,            /**< Radio is located in Region Russia. 2 Channel region. **/
-  REGION_CN,            /**< Radio is located in Region China. 2 Channel region. **/
-  REGION_US_LR,         /**< Radio is located in Region US. 2 Channel LR region. **/
-  REGION_US_LR_BACKUP,  /**< Radio is located in Region US. 2 Channel LR Backup region. **/
-  REGION_2CH_NUM = (REGION_US_LR_BACKUP - REGION_EU) + 1, /**< Number of 2 channel region values. For checking if value is out of range. **/
-  REGION_JP = 32,       /**< Radio is located in Region Japan. 3 Channel region. **/
-  REGION_KR,            /**< Radio is located in Region Korea. 3 Channel region. **/
-  REGION_3CH_NUM = (REGION_KR - REGION_JP) + 1, /**< Number of 3 channel region values. For checking if value is out of range. **/
-  REGION_US_LR_END_DEVICE = 48, /**< Radio is located in Region US Long Range End Device. 2 Long Range Channel Region. **/
-  REGION_LR_END_DEVICE_NUM = 1,
-  REGION_UNDEFINED = 0xFE,
-  REGION_DEFAULT = 0xFF	/**< Radio is located in Library Default Region EU. 2 Channel region. **/
+  REGION_EU               = 0,    /**< Europe **/
+  REGION_US               = 1,    /**< United States **/
+  REGION_ANZ              = 2,    /**< Australia / New Zealand **/
+  REGION_HK               = 3,    /**< Hong Kong **/
+  REGION_IN               = 5,    /**< India **/
+  REGION_IL               = 6,    /**< Israel **/
+  REGION_RU               = 7,    /**< Russia **/
+  REGION_CN               = 8,    /**< China **/
+  REGION_US_LR            = 9,    /**< United Status Long Range **/
+  REGION_US_LR_BACKUP     = 10,   /**< United Status Long Range Backup. Internal use only **/
+  REGION_2CH_NUM          = (REGION_US_LR_BACKUP - REGION_EU) + 1, /**< Number of 2 channel regions. For checking if value is out of range. **/
+  REGION_JP               = 32,   /**< Japan **/
+  REGION_KR               = 33,   /**< Korea **/
+  REGION_3CH_NUM          = (REGION_KR - REGION_JP) + 1, /**< Number of 3 channel regions. For checking if value is out of range. **/
+  REGION_US_LR_END_DEVICE = 48,   /**< United Status Long Range End Device. Internal use only **/
+  REGION_UNDEFINED        = 0xFE,
+  REGION_DEFAULT          = 0xFF  /**< Default region is Europe **/
 } ZW_Region_t;
 
 

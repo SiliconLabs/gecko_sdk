@@ -52,7 +52,7 @@ config_file:
     directory: btconf
 
 readme:
-  - path: ../../documentation/example/soc_iop_test/readme.html
+  - path: ../../documentation/example/soc_iop_test/readme.md
 
 other_file:
   - path: iop_create_bl_files.sh
@@ -108,5 +108,5 @@ tag:
 ui_hints:
   highlight:
     - path: config/btconf/gatt_configuration.btconf
-    - path: readme.html
+    - path: readme.md
       focus: true

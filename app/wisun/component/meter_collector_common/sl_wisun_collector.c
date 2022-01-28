@@ -40,6 +40,7 @@
 #include "sl_cmsis_os2_common.h"
 #include "sl_sleeptimer.h"
 #include "sl_component_catalog.h"
+#include "sl_wisun_trace_util.h"
 
 // -----------------------------------------------------------------------------
 //                              Macros and Typedefs
@@ -356,7 +357,7 @@ static void _collector_recv_thread_fnc(void * args)
              sizeof(struct sockaddr_in6));
   assert(res != RETVAL_ERROR);
 
-  while (1) {
+  SL_WISUN_THREAD_LOOP {
     if (!app_wisun_network_is_connected()) {
       msleep(100);
       continue;

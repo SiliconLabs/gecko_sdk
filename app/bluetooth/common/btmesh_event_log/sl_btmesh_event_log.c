@@ -309,11 +309,11 @@ void sl_btmesh_handle_btmesh_logging_events(sl_btmesh_msg_t *evt)
       break;
 
     case sl_btmesh_evt_lc_server_linear_output_updated_id:
-#if defined(LC_LINEAR_OUTPUT_LOG_ENABLE) && LC_LINEAR_OUTPUT_LOG_ENABLE
+#if defined(SL_BTMESH_LC_LINEAR_OUTPUT_LOG_ENABLE_CFG_VAL) && SL_BTMESH_LC_LINEAR_OUTPUT_LOG_ENABLE_CFG_VAL
       app_log("evt:sl_btmesh_evt_lc_server_linear_output_updated_id, "
               "linear_output=%u\r\n",
               evt->data.evt_lc_server_linear_output_updated.linear_output_value);
-#endif // LC_LINEAR_OUTPUT_LOG_ENABLE
+#endif // SL_BTMESH_LC_LINEAR_OUTPUT_LOG_ENABLE_CFG_VAL
       break;
 
     case sl_btmesh_evt_lc_setup_server_set_property_id:
@@ -323,12 +323,12 @@ void sl_btmesh_handle_btmesh_logging_events(sl_btmesh_msg_t *evt)
       break;
 
     default:
-#if defined(UNKNOWN_EVENTS_LOG_ENABLE) && UNKNOWN_EVENTS_LOG_ENABLE
+#if defined(SL_BTMESH_UNKNOWN_EVENTS_LOG_ENABLE_CFG_VAL) && SL_BTMESH_UNKNOWN_EVENTS_LOG_ENABLE_CFG_VAL
       app_log("unknown evt: %8.8x class %2.2x method %2.2x\r\n",
               evt_id,
               (evt_id >> 16) & 0xFF,
               (evt_id >> 24) & 0xFF);
-#endif // UNKNOWN_EVENTS_LOG_ENABLE
+#endif // SL_BTMESH_UNKNOWN_EVENTS_LOG_ENABLE_CFG_VAL
       break;
   }
 }

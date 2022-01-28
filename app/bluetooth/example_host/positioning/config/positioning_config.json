@@ -42,7 +42,7 @@
             "cteLength":20,
             "slotDuration":1,
             "reportMode":"IQ",
-            "allowlist":[
+            "allowList":[
                "ble-pd-AAAAAAAAAAAA",
                "ble-pd-BBBBBBBBBBBB"
             ],
@@ -118,7 +118,7 @@
             "cteLength":20,
             "slotDuration":2,
             "reportMode":"ANGLE",
-            "allowlist":[
+            "allowList":[
                "ble-pd-AAAAAAAAAAAA",
                "ble-pd-BBBBBBBBBBBB"
             ],

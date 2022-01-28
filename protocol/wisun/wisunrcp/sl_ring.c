@@ -57,20 +57,25 @@ int ring_get(struct ring *ring, unsigned int index)
 
 bool ring_is_empty(struct ring *ring)
 {
+    unsigned int count_rd, count_wr;
     BUG_ON(!ring->buf);
     BUG_ON((ring->size_mask + 1) & ring->size_mask);
-    return ring->count_wr == ring->count_rd;
+    count_rd = ring->count_rd;
+    count_wr = ring->count_wr;
+    return count_wr == count_rd;
 }
 
 unsigned int ring_data_len(struct ring *ring)
 {
-    unsigned int len;
+    unsigned int count_rd, count_wr, len;
 
     BUG_ON(!ring->buf);
     BUG_ON((ring->size_mask + 1) & ring->size_mask);
+    count_rd = ring->count_rd;
+    count_wr = ring->count_wr;
     // Note that when count_wr overlap, count_rd may be greater than count_wr.
     // However, the math are still correct
-    len = ring->count_wr - ring->count_rd;
+    len = count_wr - count_rd;
     BUG_ON(len > ring->size_mask + 1);
     return len;
 }

@@ -130,7 +130,7 @@ EmberStatus zaTrustCenterSecurityInit(bool centralizedNetwork)
     state.bitmask |= EMBER_DISTRIBUTED_TRUST_CENTER_MODE;
   }
 
-#if defined(ZA_CLI_FULL) || defined(UC_BUILD)
+#if defined(ZA_CLI_FULL) || defined(SL_CATALOG_CLI_PRESENT)
   // These functions will only be called if the full CLI is enabled and key
   // values have been previously set on the CLI via the "changekey" command.
   getLinkKeyFromCli(&(state.preconfiguredKey));

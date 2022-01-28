@@ -3,7 +3,7 @@
  * @brief Automation IO GATT service
  *******************************************************************************
  * # License
- * <b>Copyright 2020 Silicon Laboratories Inc. www.silabs.com</b>
+ * <b>Copyright 2022 Silicon Laboratories Inc. www.silabs.com</b>
  *******************************************************************************
  *
  * SPDX-License-Identifier: Zlib
@@ -32,29 +32,8 @@
 #include "sl_status.h"
 #include "gatt_db.h"
 #include "app_assert.h"
-#include "app_log.h"
-#include "sl_simple_button_instances.h"
-#include "sl_simple_led_instances.h"
+#include "sli_gatt_service_aio.h"
 #include "sl_gatt_service_aio.h"
-
-// -----------------------------------------------------------------------------
-// Private macros
-
-// AIO digital states defined by the BLE standard
-#define AIO_DIGITAL_STATE_INACTIVE  0
-#define AIO_DIGITAL_STATE_ACTIVE    1
-#define AIO_DIGITAL_STATE_TRISTATE  2
-#define AIO_DIGITAL_STATE_UNKNOWN   3
-
-#define AIO_DIGITAL_STATE_MASK      3
-#define AIO_DIGITAL_STATE_SIZE      2
-// AIO digital state is represented on 1 byte, thus 4 digitals are supported
-#define AIO_DIGITAL_COUNT_MAX       4
-
-#if (SL_SIMPLE_BUTTON_COUNT > AIO_DIGITAL_COUNT_MAX) \
-  || (SL_SIMPLE_LED_COUNT > AIO_DIGITAL_COUNT_MAX)
-#error Maximal AIO count exceeded.
-#endif
 
 // -----------------------------------------------------------------------------
 // Private variables
@@ -65,10 +44,6 @@ static uint8_t aio_connection = 0;
 
 // -----------------------------------------------------------------------------
 // Private function declarations
-
-static uint8_t aio_digital_in_get_state(void);
-static uint8_t aio_digital_out_get_state(void);
-static void aio_digital_out_set_state(uint8_t state);
 
 static void aio_digital_in_notify(void);
 static void aio_system_boot_cb(void);
@@ -82,54 +57,29 @@ static void aio_digital_out_write_cb(sl_bt_evt_gatt_server_user_write_request_t 
 // -----------------------------------------------------------------------------
 // Private function definitions
 
-static uint8_t aio_digital_in_get_state(void)
+SL_WEAK uint8_t aio_digital_in_get_num(void)
 {
-  uint8_t aio_state = 0;
-  sl_button_state_t btn_state;
-  uint8_t i;
-
-  // read button states
-  for (i = 0; i < SL_SIMPLE_BUTTON_COUNT; i++) {
-    btn_state = sl_button_get_state(SL_SIMPLE_BUTTON_INSTANCE(i));
-    if (btn_state == SL_SIMPLE_BUTTON_PRESSED) {
-      aio_state |= AIO_DIGITAL_STATE_ACTIVE << (i * AIO_DIGITAL_STATE_SIZE);
-    }
-    app_log_info("AIO in: %d=%d", i, btn_state);
-    app_log_nl();
-  }
-
-  return aio_state;
+  return 0;
 }
 
-static uint8_t aio_digital_out_get_state(void)
+SL_WEAK uint8_t aio_digital_in_get_state(void)
 {
-  uint8_t aio_state = 0;
-  sl_led_state_t led_state;
-  uint8_t i;
-
-  // read led states
-  for (i = 0; i < SL_SIMPLE_LED_COUNT; i++) {
-    led_state = sl_led_get_state(SL_SIMPLE_LED_INSTANCE(i));
-    if (led_state == SL_LED_CURRENT_STATE_ON) {
-      aio_state |= AIO_DIGITAL_STATE_ACTIVE << (i * AIO_DIGITAL_STATE_SIZE);
-    }
-  }
-  return aio_state;
+  return 0;
 }
 
-static void aio_digital_out_set_state(uint8_t state)
+SL_WEAK uint8_t aio_digital_out_get_num(void)
 {
-  uint8_t led_state, i;
-  for (i = 0; i < SL_SIMPLE_LED_COUNT; i++) {
-    led_state = (state >> (i * AIO_DIGITAL_STATE_SIZE)) & AIO_DIGITAL_STATE_MASK;
-    if (led_state == AIO_DIGITAL_STATE_ACTIVE) {
-      sl_led_turn_on(SL_SIMPLE_LED_INSTANCE(i));
-    } else {
-      sl_led_turn_off(SL_SIMPLE_LED_INSTANCE(i));
-    }
-    app_log_info("AIO out: %d=%d", i, led_state);
-    app_log_nl();
-  }
+  return 0;
+}
+
+SL_WEAK uint8_t aio_digital_out_get_state(void)
+{
+  return 0;
+}
+
+SL_WEAK void aio_digital_out_set_state(uint8_t state)
+{
+  (void)state;
 }
 
 static void aio_digital_in_notify(void)
@@ -147,11 +97,12 @@ static void aio_digital_in_notify(void)
 static void aio_system_boot_cb(void)
 {
   sl_status_t sc;
-  uint8_t value_in = SL_SIMPLE_BUTTON_COUNT;
-  uint8_t value_out = SL_SIMPLE_LED_COUNT;
-  sc = sl_bt_gatt_server_write_attribute_value(gattdb_aio_num_of_digitals_in, 0, 1, &value_in);
+  uint8_t in_cnt = aio_digital_in_get_num();
+  uint8_t out_cnt = aio_digital_out_get_num();
+
+  sc = sl_bt_gatt_server_write_attribute_value(gattdb_aio_num_of_digitals_in, 0, 1, &in_cnt);
   app_assert_status(sc);
-  sc = sl_bt_gatt_server_write_attribute_value(gattdb_aio_num_of_digitals_out, 0, 1, &value_out);
+  sc = sl_bt_gatt_server_write_attribute_value(gattdb_aio_num_of_digitals_out, 0, 1, &out_cnt);
   app_assert_status(sc);
 }
 

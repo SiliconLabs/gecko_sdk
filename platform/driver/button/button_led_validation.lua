@@ -8,8 +8,18 @@
 if slc.is_selected("simple_led") == true and slc.is_selected("simple_button") == true then
     local leds = slc.component("simple_led")
     local buttons = slc.component("simple_button")
-    local allow_button_conflicts = slc.config("SL_SIMPLE_BUTTON_ALLOW_LED_CONFLICT")
-    if allow_button_conflicts == nil or allow_button_conflicts.value == "0" then
+    local allow_button_conflicts = 0
+
+    -- If there is a SL_SIMPLE_BUTTON_ALLOW_LED_CONFLICT item then parse it
+    if slc.config("SL_SIMPLE_BUTTON_ALLOW_LED_CONFLICT") ~= nil then
+        -- Remove any U/L characters to handle 0U or 0UL type defines
+        value = slc.config("SL_SIMPLE_BUTTON_ALLOW_LED_CONFLICT").value
+        value = string.gsub(value, "U", "")
+        value = string.gsub(value, "L", "")
+        -- Convert to a number so that we can handle hex values
+        allow_button_conflicts = tonumber(value)
+    end
+    if allow_button_conflicts == 0 then
         for led, v in pairs(leds.instances) do
             local led_port = slc.config("SL_SIMPLE_LED_"..string.upper(led).."_PORT").value
             local led_pin = slc.config("SL_SIMPLE_LED_"..string.upper(led).."_PIN").value

@@ -30,23 +30,20 @@
 
 #include "em_device.h"
 
-#ifdef __cplusplus
-extern "C" {
-#endif
-
 #if defined(SEMAILBOX_PRESENT)
+
 #include <string.h>
 
 #include "psa/crypto.h"
-
 #include "sli_se_opaque_types.h"
 #include "sli_se_driver_key_management.h"
 #include "sli_psa_driver_common.h"
+#include "sli_se_version_dependencies.h"
 
-#include "sli_se_manager_internal.h"
 #include "sl_se_manager_key_derivation.h"
 #include "sl_se_manager_internal_keys.h"
 #include "sl_se_manager_util.h"
+#include "sli_se_manager_internal.h"
 
 // -----------------------------------------------------------------------------
 // Static consts
@@ -104,9 +101,9 @@ static const uint8_t ecc_p521_n[] = {
  * @returns
  *   N/A
  */
-static inline void clamp_private_key_if_needed(const psa_key_attributes_t* attributes,
-                                               uint8_t *key_data,
-                                               size_t key_bits)
+static void clamp_private_key_if_needed(const psa_key_attributes_t* attributes,
+                                        uint8_t *key_data,
+                                        size_t key_bits)
 {
 #if defined(SLI_PSA_WANT_ECC_MONTGOMERY)
   psa_key_type_t key_type = psa_get_key_type(attributes);
@@ -114,19 +111,19 @@ static inline void clamp_private_key_if_needed(const psa_key_attributes_t* attri
   if (PSA_KEY_TYPE_IS_ECC_KEY_PAIR(key_type)
       && ((PSA_KEY_TYPE_ECC_GET_FAMILY(key_type) == PSA_ECC_FAMILY_MONTGOMERY))) {
     switch (key_bits) {
-#if defined(PSA_WANT_ECC_MONTGOMERY_255)
+#if defined(SLI_PSA_WANT_ECC_MONTGOMERY_255)
       case 255:
         key_data[0] &= 248U;
         key_data[31] &= 127U;
         key_data[31] |= 64U;
         break;
-#endif // PSA_WANT_ECC_MONTGOMERY_255
-#if defined(PSA_WANT_ECC_MONTGOMERY_448)
+#endif // SLI_PSA_WANT_ECC_MONTGOMERY_255
+#if defined(SLI_PSA_WANT_ECC_MONTGOMERY_448)
       case 448:
         key_data[0] &= 252U;
         key_data[55] |= 128U;
         break;
-#endif // PSA_WANT_ECC_MONTGOMERY_448
+#endif // SLI_PSA_WANT_ECC_MONTGOMERY_448
       default:
         break;
     }
@@ -377,16 +374,16 @@ sli_se_key_desc_from_psa_attributes(const psa_key_attributes_t *attributes,
     if (PSA_KEY_TYPE_ECC_GET_FAMILY(type) == PSA_ECC_FAMILY_MONTGOMERY) {
       // Find key size and set key type
       switch (key_size) {
-        #if defined(PSA_WANT_ECC_MONTGOMERY_255)
+        #if defined(SLI_PSA_WANT_ECC_MONTGOMERY_255)
         case 32:
           key_desc->type = SL_SE_KEY_TYPE_ECC_X25519;
           break;
-        #endif // PSA_WANT_ECC_MONTGOMERY_255
-        #if defined(PSA_WANT_ECC_MONTGOMERY_448)
+        #endif // SLI_PSA_WANT_ECC_MONTGOMERY_255
+        #if defined(SLI_PSA_WANT_ECC_MONTGOMERY_448)
         case 56:
           key_desc->type = SL_SE_KEY_TYPE_ECC_X448;
           break;
-        #endif // PSA_WANT_ECC_MONTGOMERY_448
+        #endif // SLI_PSA_WANT_ECC_MONTGOMERY_448
         default:
           return PSA_ERROR_NOT_SUPPORTED;
       }
@@ -698,36 +695,6 @@ sli_se_set_key_desc_output(const psa_key_attributes_t* attributes,
   }
   return PSA_SUCCESS;
 }
-
-#if defined(SLI_PSA_WANT_ALG_EDDSA)
-/* Check for an erratta causing the SE to emit a faulty EdDSA public key for operations
- * where only a private key is provided. */
-psa_status_t sli_se_check_eddsa_errata(const psa_key_attributes_t* attributes,
-                                       sl_se_command_context_t* cmd_ctx)
-{
-  if (PSA_KEY_TYPE_ECC_GET_FAMILY(psa_get_key_type(attributes)) == PSA_ECC_FAMILY_TWISTED_EDWARDS) {
-#if (_SILICON_LABS_SECURITY_FEATURE == _SILICON_LABS_SECURITY_FEATURE_VAULT)
-    uint32_t version;
-    sl_status_t status = sl_se_get_se_version(cmd_ctx, &version);
-    if (status == SL_STATUS_OK) {
-      version &= 0x00FFFFFFUL;
-      if (version < 0x010202UL || version > 0x010208UL) {
-        return PSA_SUCCESS;
-      } else {
-        return PSA_ERROR_NOT_SUPPORTED;
-      }
-    } else {
-      return PSA_ERROR_HARDWARE_FAILURE;
-    }
-#else
-    (void) cmd_ctx;
-    return PSA_ERROR_NOT_SUPPORTED;
-#endif
-  } else {
-    return PSA_SUCCESS;
-  }
-}
-#endif // SLI_PSA_WANT_ALG_EDDSA
 
 #if (_SILICON_LABS_SECURITY_FEATURE == _SILICON_LABS_SECURITY_FEATURE_VAULT)
 /**
@@ -1181,7 +1148,7 @@ psa_status_t sli_se_opaque_export_key(const psa_key_attributes_t *attributes,
     }
     #endif
 
-    // Apply clamping if this is a Montgomery or Twisted Edwards key.
+    // Apply clamping if this is a Montgomery key.
     clamp_private_key_if_needed(attributes, data, key_bits);
 
     // Successful operation. Set ouput length
@@ -1292,22 +1259,30 @@ psa_status_t sli_se_driver_generate_key(const psa_key_attributes_t *attributes,
   }
   sl_status = sl_se_generate_key(&cmd_ctx, &key_desc);
   if (sl_status != SL_STATUS_OK) {
-    psa_status = PSA_ERROR_HARDWARE_FAILURE;
+    if (sl_status == SL_STATUS_COMMAND_IS_INVALID) {
+      // This error will be returned if the key type isn't supported.
+      psa_status = PSA_ERROR_NOT_SUPPORTED;
+    } else {
+      psa_status = PSA_ERROR_HARDWARE_FAILURE;
+    }
     goto exit;
   } else {
-  #if (_SILICON_LABS_SECURITY_FEATURE == _SILICON_LABS_SECURITY_FEATURE_VAULT)
     if (PSA_KEY_LIFETIME_GET_LOCATION(psa_get_key_lifetime(attributes))
         == PSA_KEY_LOCATION_LOCAL_STORAGE) {
       // Apply clamping if this is a Montgomery key.
       clamp_private_key_if_needed(attributes, key_buffer, key_bits);
-    } else {
-      // Add the key desc to the output array for opaque keys
-      psa_status = store_key_desc_in_context(&key_desc, key_buffer, key_buffer_size);
+    }
+    #if (_SILICON_LABS_SECURITY_FEATURE == _SILICON_LABS_SECURITY_FEATURE_VAULT)
+    else {
+      // Add the key desc to the output array for opaque keys.
+      psa_status = store_key_desc_in_context(&key_desc,
+                                             key_buffer,
+                                             key_buffer_size);
       if (psa_status != PSA_SUCCESS) {
         goto exit;
       }
     }
-  #endif
+    #endif // VAULT
     psa_status = set_key_buffer_length(attributes, key_size, key_buffer_length);
   }
   // Cleanup
@@ -1518,19 +1493,24 @@ sli_se_driver_export_public_key(const psa_key_attributes_t *attributes,
     return PSA_ERROR_HARDWARE_FAILURE;
   }
 
-  #if defined(SLI_PSA_WANT_ALG_EDDSA)
+  #if defined(SLI_SE_VERSION_ED25519_ERRATA_CHECK_REQUIRED)
   psa_status = sli_se_check_eddsa_errata(attributes, &cmd_ctx);
   if (psa_status != PSA_SUCCESS) {
     return psa_status;
   }
-  #endif // SLI_PSA_WANT_ALG_EDDSA
+  #endif // SLI_SE_VERSION_ED25519_ERRATA_CHECK_REQUIRED
 
   sl_status = sl_se_export_public_key(&cmd_ctx, &priv_key_desc, &pub_key_desc);
   if (sl_status == SL_STATUS_FAIL) {
     // This specific code maps to 'does not exist' for builtin keys
     psa_status = PSA_ERROR_DOES_NOT_EXIST;
   } else if (sl_status != SL_STATUS_OK) {
-    psa_status = PSA_ERROR_HARDWARE_FAILURE;
+    if (sl_status == SL_STATUS_COMMAND_IS_INVALID) {
+      // This error will be returned if the key type isn't supported.
+      psa_status = PSA_ERROR_NOT_SUPPORTED;
+    } else {
+      psa_status = PSA_ERROR_HARDWARE_FAILURE;
+    }
   } else {
     psa_status = PSA_SUCCESS;
     #if (_SILICON_LABS_SECURITY_FEATURE == _SILICON_LABS_SECURITY_FEATURE_VAULT) \
@@ -1884,7 +1864,7 @@ psa_status_t sli_se_driver_validate_key(const psa_key_attributes_t *attributes,
         }
       }
       switch (*bits) {
-        #if defined(PSA_WANT_ECC_MONTGOMERY_255) \
+        #if defined(SLI_PSA_WANT_ECC_MONTGOMERY_255) \
         || defined(PSA_WANT_ECC_TWISTED_EDWARDS_255)
         case 255:
           return_status = PSA_SUCCESS;
@@ -1898,12 +1878,12 @@ psa_status_t sli_se_driver_validate_key(const psa_key_attributes_t *attributes,
           *bits = 255;
           return_status = PSA_SUCCESS;
           break;
-        #endif // PSA_WANT_ECC_MONTGOMERY_255 || PSA_WANT_ECC_TWISTED_EDWARDS_255
-        #if defined(PSA_WANT_ECC_MONTGOMERY_448)
+        #endif // SLI_PSA_WANT_ECC_MONTGOMERY_255 || PSA_WANT_ECC_TWISTED_EDWARDS_255
+        #if defined(SLI_PSA_WANT_ECC_MONTGOMERY_448)
         case 448:
           return_status = PSA_SUCCESS;
           break;
-        #endif // PSA_WANT_ECC_MONTGOMERY_448
+        #endif // SLI_PSA_WANT_ECC_MONTGOMERY_448
         default:
           return PSA_ERROR_NOT_SUPPORTED;
           break;
@@ -2021,7 +2001,3 @@ psa_status_t sli_se_driver_validate_pubkey_with_fallback(psa_key_type_t key_type
 #endif /* Software fallback for public key validation on SE < 1.2.2 */
 
 #endif // SEMAILBOX_PRESENT
-
-#ifdef __cplusplus
-}
-#endif

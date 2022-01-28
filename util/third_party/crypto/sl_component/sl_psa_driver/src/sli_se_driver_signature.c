@@ -36,6 +36,7 @@
 #include "sli_se_transparent_types.h"
 #include "sli_se_transparent_functions.h"
 #include "sli_se_driver_key_management.h"
+#include "sli_se_version_dependencies.h"
 
 #if defined(SLI_PSA_WANT_ALG_ECDSA) || defined(SLI_PSA_WANT_ALG_EDDSA)
 #include "sl_se_manager.h"
@@ -68,6 +69,11 @@ check_curve_availability(const psa_key_attributes_t *attributes,
       #if defined(PSA_WANT_ECC_SECP_R1_192)
       case 192: // Intentional
       #endif // PSA_WANT_ECC_SECP_R1_192
+      #if (_SILICON_LABS_32B_SERIES_2_CONFIG >= 3)
+      #if defined(PSA_WANT_ECC_SECP_R1_224)
+      case 224: // Intentional
+      #endif // PSA_WANT_ECC_SECP_R1_224
+      #endif // (_SILICON_LABS_32B_SERIES_2_CONFIG >= 3)
       #if defined(PSA_WANT_ECC_SECP_R1_256)
       case 256: // Intentional
       #endif // PSA_WANT_ECC_SECP_R1_256
@@ -99,8 +105,7 @@ check_curve_availability(const psa_key_attributes_t *attributes,
 #if defined(SLI_PSA_WANT_ALG_EDDSA)
   if (curvetype == PSA_ECC_FAMILY_TWISTED_EDWARDS) {
     switch (psa_get_key_bits(attributes)) {
-      #if (_SILICON_LABS_SECURITY_FEATURE == _SILICON_LABS_SECURITY_FEATURE_VAULT) \
-      && defined(PSA_WANT_ECC_TWISTED_EDWARDS_255)
+      #if defined(PSA_WANT_ECC_TWISTED_EDWARDS_255)
       case 255:
         // Only Ed25519 is supported (and only in context of EdDSA)
         if (alg != PSA_ALG_PURE_EDDSA) {
@@ -124,7 +129,9 @@ static sl_se_hash_type_t get_hash_for_algorithm(psa_algorithm_t alg)
 {
 #if defined(SLI_PSA_WANT_ALG_EDDSA)
   if (alg == PSA_ALG_PURE_EDDSA) {
-    return SL_SE_HASH_SHA512;
+    // The hash alg parameter is ignored for EdDSA, as it is decided uniqely by
+    // the alorithm. Return magic value which isn't SL_SE_HASH_NONE.
+    return (sl_se_hash_type_t)255;
   }
 #endif // SLI_PSA_WANT_ALG_EDDSA
 
@@ -280,7 +287,8 @@ psa_status_t sli_se_sign_message(const psa_key_attributes_t *attributes,
     tmp_signature_p = temp_signature_buffer;
     tmp_signature_size = sizeof(temp_signature_buffer);
   }
-#endif /* Realignment logic for non-word-multiple key sizes */
+  #endif // Realignment logic for non-word-multiple key sizes
+
   if (tmp_signature_size < 2 * (offset + key_size)) {
     return PSA_ERROR_INVALID_ARGUMENT;
   }
@@ -291,12 +299,12 @@ psa_status_t sli_se_sign_message(const psa_key_attributes_t *attributes,
     return PSA_ERROR_HARDWARE_FAILURE;
   }
 
-#if defined(SLI_PSA_WANT_ALG_EDDSA)
+  #if defined(SLI_SE_VERSION_ED25519_ERRATA_CHECK_REQUIRED)
   psa_status = sli_se_check_eddsa_errata(attributes, &cmd_ctx);
   if (psa_status != PSA_SUCCESS) {
     return psa_status;
   }
-#endif // SLI_PSA_WANT_ALG_EDDSA
+  #endif // SLI_SE_VERSION_ED25519_ERRATA_CHECK_REQUIRED
 
   // Run signature generation
   status = sl_se_ecc_sign(&cmd_ctx,
@@ -324,7 +332,11 @@ psa_status_t sli_se_sign_message(const psa_key_attributes_t *attributes,
     psa_status = PSA_SUCCESS;
   } else {
     if (status == SL_STATUS_FAIL) {
+      // Will be returned for missing built-in keys.
       psa_status = PSA_ERROR_DOES_NOT_EXIST;
+    } else if (status == SL_STATUS_COMMAND_IS_INVALID) {
+      // Will be returned if a key type is not supported (for example).
+      psa_status = PSA_ERROR_NOT_SUPPORTED;
     } else {
       psa_status = PSA_ERROR_HARDWARE_FAILURE;
     }
@@ -528,25 +540,36 @@ psa_status_t sli_se_verify_message(const psa_key_attributes_t *attributes,
   // so we must generate a public key if we are passed a private one
   sl_status_t status = SL_STATUS_INVALID_PARAMETER;
   if (PSA_KEY_TYPE_IS_ECC_KEY_PAIR(keytype)) {
+    #if defined(SLI_SE_VERSION_ED25519_ERRATA_CHECK_REQUIRED)
+    psa_status = sli_se_check_eddsa_errata(attributes, &cmd_ctx);
+    if (psa_status != PSA_SUCCESS) {
+      return psa_status;
+    }
+    #endif // SLI_SE_VERSION_ED25519_ERRATA_CHECK_REQUIRED
+
+    // Create similar key descriptor for temporary public key.
     sl_se_key_descriptor_t pubkey_desc = key_desc;
-    // Unset private key flag and set public
     pubkey_desc.flags &= ~SL_SE_KEY_FLAG_ASYMMETRIC_BUFFER_HAS_PRIVATE_KEY;
     pubkey_desc.flags &= ~SL_SE_KEY_FLAG_IS_RESTRICTED;
     pubkey_desc.flags |= SL_SE_KEY_FLAG_ASYMMETRIC_BUFFER_HAS_PUBLIC_KEY;
     sli_se_key_descriptor_set_plaintext(&pubkey_desc, temp_key_buf, sizeof(temp_key_buf));
-    // Same input output region
+
     status = sl_se_init_command_context(&cmd_ctx);
     if (status != SL_STATUS_OK) {
       return PSA_ERROR_HARDWARE_FAILURE;
     }
+
     status = sl_se_export_public_key(&cmd_ctx, &key_desc, &pubkey_desc);
-    if (sl_se_deinit_command_context(&cmd_ctx) != SL_STATUS_OK) {
-      return PSA_ERROR_HARDWARE_FAILURE;
+    if (status != SL_STATUS_OK) {
+      if (status == SL_STATUS_COMMAND_IS_INVALID) {
+        // This error will be returned if the key type isn't supported.
+        return PSA_ERROR_NOT_SUPPORTED;
+      } else {
+        return PSA_ERROR_HARDWARE_FAILURE;
+      }
     }
-    if (status) {
-      return PSA_ERROR_HARDWARE_FAILURE;
-    }
-    // Set the key desc to the public key, and go on
+
+    // Set the key desc to the public key, and move on.
     key_desc = pubkey_desc;
   }
 
@@ -568,9 +591,14 @@ psa_status_t sli_se_verify_message(const psa_key_attributes_t *attributes,
   if (status == SL_STATUS_OK) {
     psa_status = PSA_SUCCESS;
   } else if (status == SL_STATUS_INVALID_SIGNATURE) {
+    // Signature was invalid.
     psa_status = PSA_ERROR_INVALID_SIGNATURE;
   } else if (status == SL_STATUS_FAIL) {
+    // Built-in key does not exist.
     psa_status = PSA_ERROR_DOES_NOT_EXIST;
+  } else if (status == SL_STATUS_COMMAND_IS_INVALID) {
+    // Key type is not supported.
+    psa_status = PSA_ERROR_NOT_SUPPORTED;
   } else {
     psa_status = PSA_ERROR_HARDWARE_FAILURE;
   }

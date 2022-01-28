@@ -4089,29 +4089,29 @@
     {
       "endpointTypeName": "Centralized",
       "endpointTypeIndex": 0,
-      "profileId": "0x0104",
+      "profileId": 260,
       "endpointId": 1,
       "networkId": 0,
       "endpointVersion": 1,
-      "deviceIdentifier": null
+      "deviceIdentifier": 257
     },
     {
       "endpointTypeName": "Touchlink",
       "endpointTypeIndex": 1,
-      "profileId": "0x0104",
+      "profileId": 260,
       "endpointId": 2,
       "networkId": 0,
       "endpointVersion": 1,
-      "deviceIdentifier": null
+      "deviceIdentifier": 269
     },
     {
       "endpointTypeName": "GreenPower",
       "endpointTypeIndex": 2,
-      "profileId": "0xA1E0",
+      "profileId": 41440,
       "endpointId": 242,
       "networkId": 0,
       "endpointVersion": 1,
-      "deviceIdentifier": null
+      "deviceIdentifier": 97
     }
   ],
   "log": []

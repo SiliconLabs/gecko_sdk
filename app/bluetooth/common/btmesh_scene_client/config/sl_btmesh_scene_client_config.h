@@ -34,32 +34,32 @@
 
 // <h> Scene Client configuration
 
-// <o SCENE_CLIENT_RETRANSMISSION_COUNT> Scene model restransmission count
+// <o SL_BTMESH_SCENE_CLIENT_RETRANSMISSION_COUNT_CFG_VAL> Scene model restransmission count
 // <i> Default: 3
 // <i> Scene model restransmission count (How many times Scene model messages are to be sent out for reliability).
-#define SCENE_CLIENT_RETRANSMISSION_COUNT   (3)
+#define SL_BTMESH_SCENE_CLIENT_RETRANSMISSION_COUNT_CFG_VAL   (3)
 
-// <o SCENE_CLIENT_RETRANSMISSION_TIMEOUT> Scene model restransmission timeout
+// <o SL_BTMESH_SCENE_CLIENT_RETRANSMISSION_TIMEOUT_CFG_VAL> Scene model restransmission timeout
 // <i> Default: 50
 // <i> Scene model restransmission timeout.
-#define SCENE_CLIENT_RETRANSMISSION_TIMEOUT   (50)
+#define SL_BTMESH_SCENE_CLIENT_RETRANSMISSION_TIMEOUT_CFG_VAL   (50)
 
-// <e SCENE_CLIENT_LOGGING> Enable Logging
+// <e SL_BTMESH_SCENE_CLIENT_LOGGING_CFG_VAL> Enable Logging
 // <i> Default: 1
 // <i> Enable / disable Logging for Scene Client model specific messages for this component.
-#define SCENE_CLIENT_LOGGING   (1)
+#define SL_BTMESH_SCENE_CLIENT_LOGGING_CFG_VAL   (1)
 
-// <s.128 SCENE_CLIENT_LOGGING_RECALL> Log text when recalling a new scene.
+// <s.128 SL_BTMESH_SCENE_CLIENT_LOGGING_RECALL_CFG_VAL> Log text when recalling a new scene.
 // <i> Set Log text in case the a new scene is recalled
-#define SCENE_CLIENT_LOGGING_RECALL "Recall scene number %u\r\n"
+#define SL_BTMESH_SCENE_CLIENT_LOGGING_RECALL_CFG_VAL "Recall scene number %u\r\n"
 
-// <s.128 SCENE_CLIENT_LOGGING_RECALL_FAIL> Log text when recalling a new scene fails.
+// <s.128 SL_BTMESH_SCENE_CLIENT_LOGGING_RECALL_FAIL_CFG_VAL> Log text when recalling a new scene fails.
 // <i> Set Log text in case the a  scene recall fails
-#define SCENE_CLIENT_LOGGING_RECALL_FAIL "Scene recall failed\r\n"
+#define SL_BTMESH_SCENE_CLIENT_LOGGING_RECALL_FAIL_CFG_VAL "Scene recall failed\r\n"
 
-// <s.128 SCENE_CLIENT_LOGGING_RECALL_SUCCESS> Log text when recalling a scene recall is successful.
+// <s.128 SL_BTMESH_SCENE_CLIENT_LOGGING_RECALL_SUCCESS_CFG_VAL> Log text when recalling a scene recall is successful.
 // <i> Set Log text a scene recall is successful.
-#define SCENE_CLIENT_LOGGING_RECALL_SUCCESS "Scene request sent, trid = %u, delay = %u\r\n"
+#define SL_BTMESH_SCENE_CLIENT_LOGGING_RECALL_SUCCESS_CFG_VAL "Scene request sent, trid = %u, delay = %u\r\n"
 
 // </e>
 

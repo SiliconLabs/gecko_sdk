@@ -2866,7 +2866,8 @@ bool emberAfGreenPowerClusterGpSinkCommissioningModeCallback(EmberAfClusterComma
 #ifdef SL_CATALOG_ZIGBEE_GREEN_POWER_CLIENT_PRESENT
 bool emAfPluginGreenPowerClientGpProxyCommissioningModeCommandHandler(uint8_t options,
                                                                       uint16_t commissioningWindow,
-                                                                      uint8_t channel);
+                                                                      uint8_t channel,
+                                                                      bool localCommandLoopback);
 #endif // SL_CATALOG_ZIGBEE_GREEN_POWER_CLIENT_PRESENT
 
 bool emberAfGreenPowerClusterGpPairingConfigurationCallback(EmberAfClusterCommand *cmd)
@@ -3118,7 +3119,8 @@ bool emberAfGreenPowerClusterGpPairingConfigurationCallback(EmberAfClusterComman
         emAfPluginGreenPowerClientGpProxyCommissioningModeCommandHandler((EMBER_AF_GP_PROXY_COMMISSIONING_MODE_OPTION_ACTION // Enter Commissioning
                                                                           | EMBER_AF_GP_PROXY_COMMISSIONING_MODE_EXIT_MODE_ON_FIRST_PAIRING_SUCCESS), // Exit on First pairing
                                                                          0,   // No Commissioning window
-                                                                         0);  // No channel present
+                                                                         0,   // No channel present
+                                                                         true);
       #endif // SL_CATALOG_ZIGBEE_GREEN_POWER_CLIENT_PRESENT
       }
       commissioningGpd->commissionState = GP_SINK_COMM_STATE_FINALISE_PAIRING;

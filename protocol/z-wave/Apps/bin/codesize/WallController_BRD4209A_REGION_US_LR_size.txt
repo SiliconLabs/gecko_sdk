@@ -1,0 +1,40 @@
+
+==========================================================
+The output of the size tool: (e.g. arm-none-ambi-size.exe)
+==========================================================
+
+WallController.out  :
+section                 size         addr
+.text                0x2e20c          0x0
+_cc_handlers_v3        0x1a4      0x2e20c
+.ARM.exidx               0x8      0x2e3b0
+.stack                0x1000   0x20000000
+.data                  0x53c   0x20001000
+.reset_info              0x4   0x2000153c
+.bss                  0x9f4c   0x20001540
+.heap                 0x4b70   0x2000b490
+.internal_storage    0x3a000      0x2e3b8
+.zwave_nvm            0x3000      0x683b8
+.nvm                  0x9000      0x6b3b8
+.ARM.attributes         0x2e          0x0
+.comment                0x4d          0x0
+.debug_frame          0x6bb0          0x0
+.debug_info         0x88a197          0x0
+.debug_abbrev        0x109d1          0x0
+.debug_loc           0x245b9          0x0
+.debug_aranges        0x28d0          0x0
+.debug_ranges         0x4a98          0x0
+.debug_line          0x2cf0b          0x0
+.debug_str           0x68d74          0x0
+.stabstr               0x14d          0x0
+Total               0x9e7234
+
+The calculated FLASH and SRAM usage summary:
+============================================
+FLASH used as program memory:  (Including only the sections: .text, .ARM.exidx, .data, _cc_handlers_v3, internal_storage)
+   428276
+FLASH used for storage: (Including only the sections: .nvm3App, .simee, .nvm, .zwave_nvm)
+   49152
+SRAM usage:             (Including only the sections: .data, .bss, .heap, .stack_dummy, .reset_info)
+   65532
+

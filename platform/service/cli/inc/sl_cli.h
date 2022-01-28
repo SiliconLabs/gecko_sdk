@@ -73,7 +73,7 @@ extern "C" {
  *   }
  *   ```
  ******************************************************************************/
-#define sl_cli_get_argument_count(a)      ((int)(a->argc - a->arg_ofs))
+#define sl_cli_get_argument_count(a)      ((int)((a)->argc - (a)->arg_ofs))
 
 /***************************************************************************//**
  * @brief
@@ -96,7 +96,7 @@ extern "C" {
  *   the type of the argument.
  *
  ******************************************************************************/
-#define sl_cli_get_argument_type(a, n)      ((sl_cli_arg_t)(a->arg_type_list[n]))
+#define sl_cli_get_argument_type(a, n)      ((sl_cli_arg_t)((a)->arg_type_list[(n)]))
 
 /***************************************************************************//**
  * @brief
@@ -129,7 +129,7 @@ extern "C" {
  *   }
  *   ```
  ******************************************************************************/
-#define sl_cli_get_argument_int8(a, n)    (*(int8_t *)(a->argv[a->arg_ofs + n]))
+#define sl_cli_get_argument_int8(a, n)    (*(int8_t *)((a)->argv[(a)->arg_ofs + (n)]))
 
 /***************************************************************************//**
  * @brief
@@ -162,7 +162,7 @@ extern "C" {
  *   }
  *   ```
  ******************************************************************************/
-#define sl_cli_get_argument_int16(a, n)   (*(int16_t *)(a->argv[a->arg_ofs + n]))
+#define sl_cli_get_argument_int16(a, n)   (*(int16_t *)((a)->argv[(a)->arg_ofs + (n)]))
 
 /***************************************************************************//**
  * @brief
@@ -195,7 +195,7 @@ extern "C" {
  *   }
  *   ```
  ******************************************************************************/
-#define sl_cli_get_argument_int32(a, n)   (*(int32_t *)(a->argv[a->arg_ofs + n]))
+#define sl_cli_get_argument_int32(a, n)   (*(int32_t *)((a)->argv[(a)->arg_ofs + (n)]))
 
 /***************************************************************************//**
  * @brief
@@ -228,7 +228,7 @@ extern "C" {
  *   }
  *   ```
  ******************************************************************************/
-#define sl_cli_get_argument_uint8(a, n)   (*(uint8_t *)(a->argv[a->arg_ofs + n]))
+#define sl_cli_get_argument_uint8(a, n)   (*(uint8_t *)((a)->argv[(a)->arg_ofs + (n)]))
 
 /***************************************************************************//**
  * @brief
@@ -261,7 +261,7 @@ extern "C" {
  *   }
  *   ```
  ******************************************************************************/
-#define sl_cli_get_argument_uint16(a, n)  (*(uint16_t *)(a->argv[a->arg_ofs + n]))
+#define sl_cli_get_argument_uint16(a, n)  (*(uint16_t *)((a)->argv[(a)->arg_ofs + (n)]))
 
 /***************************************************************************//**
  * @brief
@@ -294,7 +294,7 @@ extern "C" {
  *   }
  *   ```
  ******************************************************************************/
-#define sl_cli_get_argument_uint32(a, n)  (*(uint32_t *)(a->argv[a->arg_ofs + n]))
+#define sl_cli_get_argument_uint32(a, n)  (*(uint32_t *)((a)->argv[(a)->arg_ofs + (n)]))
 
 /***************************************************************************//**
  * @brief
@@ -330,7 +330,7 @@ extern "C" {
  *   }
  *   ```
  ******************************************************************************/
-#define sl_cli_get_argument_string(a, n)  ((char *)(a->argv[a->arg_ofs + n]))
+#define sl_cli_get_argument_string(a, n)  ((char *)((a)->argv[(a)->arg_ofs + (n)]))
 
 /***************************************************************************//**
  * @brief
@@ -358,7 +358,7 @@ extern "C" {
  *   }
  *   ```
  ******************************************************************************/
-#define sl_cli_get_command_count(a)       ((int)(a->arg_ofs))
+#define sl_cli_get_command_count(a)       ((int)((a)->arg_ofs))
 
 /***************************************************************************//**
  * @brief
@@ -391,7 +391,7 @@ extern "C" {
  *   }
  *   ```
  ******************************************************************************/
-#define sl_cli_get_command_string(a, n)   ((char *)(a->argv[n]))
+#define sl_cli_get_command_string(a, n)   ((char *)((a)->argv[(n)]))
 
 /***************************************************************************//**
  *  @brief The default CLI handle.

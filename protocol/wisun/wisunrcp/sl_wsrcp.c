@@ -24,11 +24,17 @@
 #include "sl_wsrcp_log.h"
 
 // See warning in sl_wsrcp.h
-struct sl_wsrcp_app g_rcp_ctxt = { };
+struct sl_wsrcp_app g_rcp_ctxt = { 0 };
 
 static int wisun_rcp_uart_tx(void *cb_data, const void *buf, int buf_len)
 {
-    return uart_tx(cb_data, buf, buf_len);
+    struct sl_wsrcp_app *rcp_app = &g_rcp_ctxt;
+    int ret;
+
+    osMutexAcquire(rcp_app->uart_tx_lock, osWaitForever);
+    ret = uart_tx(cb_data, buf, buf_len);
+    osMutexRelease(rcp_app->uart_tx_lock);
+    return ret;
 }
 
 static int wisun_rcp_uart_rx(void *cb_data, void *buf, int buf_len)
@@ -64,8 +70,9 @@ void wisun_rcp_init(void)
     uart_init(rcp_app);
     SEGGER_RTT_SetFlagsUpBuffer(0, SEGGER_RTT_MODE_NO_BLOCK_SKIP);
     export_debugger_data();
-    // Note: this function is launched before the Operating System, you can'
+    // Note: this function is launched before the Operating System, you can't
     // acquire anymutex in.
+    rcp_app->uart_tx_lock = osMutexNew(NULL);
     rcp_app->main_events = osEventFlagsNew(NULL);
     rcp_app->main_task = osThreadNew(wisun_rcp_main, rcp_app, &thread_attr);
 }

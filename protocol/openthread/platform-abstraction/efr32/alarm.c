@@ -51,7 +51,10 @@
 #include "rail.h"
 #include "sl_sleeptimer.h"
 
-#define XTAL_ACCURACY 200
+// According to EFR datasheets, HFXO is ± 40 ppm and LFXO (at least for MG12) is
+// -8 to +40 ppm.  Assuming average as worst case.
+#define HFXO_ACCURACY 40
+#define LFXO_ACCURACY 24
 
 // millisecond timer (sleeptimer)
 static sl_sleeptimer_timer_handle_t sl_handle;
@@ -97,7 +100,16 @@ uint32_t otPlatAlarmMilliGetNow(void)
 
 uint32_t otPlatTimeGetXtalAccuracy(void)
 {
-    return XTAL_ACCURACY;
+#if defined(SL_CATALOG_POWER_MANAGER_PRESENT)
+    // For sleepies, we need to account for the low-frequency crystal
+    // accuracy when they go to sleep.  Accounting for that as well,
+    // for the worst case.
+    if (efr32AllowSleepCallback())
+    {
+        return HFXO_ACCURACY + LFXO_ACCURACY;
+    }
+#endif
+    return HFXO_ACCURACY;
 }
 
 void otPlatAlarmMilliStartAt(otInstance *aInstance, uint32_t aT0, uint32_t aDt)

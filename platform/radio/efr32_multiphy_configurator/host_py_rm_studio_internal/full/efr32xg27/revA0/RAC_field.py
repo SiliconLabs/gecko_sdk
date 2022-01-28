@@ -1024,16 +1024,6 @@ class RM_Field_RAC_SEQIEN_STATESHUTDOWN(Base_RM_Field):
         self.__dict__['zz_frozen'] = True
 
 
-class RM_Field_RAC_STATUS1_TXMASK(Base_RM_Field):
-    def __init__(self, register):
-        self.__dict__['zz_frozen'] = False
-        super(RM_Field_RAC_STATUS1_TXMASK, self).__init__(register,
-            'TXMASK', 'RAC.STATUS1.TXMASK', 'read-only',
-            u"",
-            0, 8)
-        self.__dict__['zz_frozen'] = True
-
-
 class RM_Field_RAC_STIMER_STIMER(Base_RM_Field):
     def __init__(self, register):
         self.__dict__['zz_frozen'] = False
@@ -1120,7 +1110,7 @@ class RM_Field_RAC_SEQCTRL_SWIRQ(Base_RM_Field):
         super(RM_Field_RAC_SEQCTRL_SWIRQ, self).__init__(register,
             'SWIRQ', 'RAC.SEQCTRL.SWIRQ', 'read-write',
             u"",
-            24, 2)
+            24, 5)
         self.__dict__['zz_frozen'] = True
 
 
@@ -1314,16 +1304,6 @@ class RM_Field_RAC_SYNTHENCTRL_SYNTHSTARTREQ(Base_RM_Field):
         self.__dict__['zz_frozen'] = True
 
 
-class RM_Field_RAC_SYNTHENCTRL_MMDPOWERBALANCEDISABLE(Base_RM_Field):
-    def __init__(self, register):
-        self.__dict__['zz_frozen'] = False
-        super(RM_Field_RAC_SYNTHENCTRL_MMDPOWERBALANCEDISABLE, self).__init__(register,
-            'MMDPOWERBALANCEDISABLE', 'RAC.SYNTHENCTRL.MMDPOWERBALANCEDISABLE', 'read-write',
-            u"",
-            10, 1)
-        self.__dict__['zz_frozen'] = True
-
-
 class RM_Field_RAC_SYNTHENCTRL_LPFBWSEL(Base_RM_Field):
     def __init__(self, register):
         self.__dict__['zz_frozen'] = False
@@ -1364,23 +1344,13 @@ class RM_Field_RAC_VCOCTRL_VCOAMPLITUDE(Base_RM_Field):
         self.__dict__['zz_frozen'] = True
 
 
-class RM_Field_RAC_VCOCTRL_VCODETAMPLITUDERX(Base_RM_Field):
+class RM_Field_RAC_VCOCTRL_VCODETAMPLITUDE(Base_RM_Field):
     def __init__(self, register):
         self.__dict__['zz_frozen'] = False
-        super(RM_Field_RAC_VCOCTRL_VCODETAMPLITUDERX, self).__init__(register,
-            'VCODETAMPLITUDERX', 'RAC.VCOCTRL.VCODETAMPLITUDERX', 'read-write',
+        super(RM_Field_RAC_VCOCTRL_VCODETAMPLITUDE, self).__init__(register,
+            'VCODETAMPLITUDE', 'RAC.VCOCTRL.VCODETAMPLITUDE', 'read-write',
             u"",
             4, 4)
-        self.__dict__['zz_frozen'] = True
-
-
-class RM_Field_RAC_VCOCTRL_VCODETAMPLITUDETX(Base_RM_Field):
-    def __init__(self, register):
-        self.__dict__['zz_frozen'] = False
-        super(RM_Field_RAC_VCOCTRL_VCODETAMPLITUDETX, self).__init__(register,
-            'VCODETAMPLITUDETX', 'RAC.VCOCTRL.VCODETAMPLITUDETX', 'read-write',
-            u"",
-            8, 4)
         self.__dict__['zz_frozen'] = True
 
 
@@ -1391,6 +1361,16 @@ class RM_Field_RAC_CHPCTRL_CHPOUTPUTTRISTATEMODE(Base_RM_Field):
             'CHPOUTPUTTRISTATEMODE', 'RAC.CHPCTRL.CHPOUTPUTTRISTATEMODE', 'read-write',
             u"",
             14, 1)
+        self.__dict__['zz_frozen'] = True
+
+
+class RM_Field_RAC_SYNTHCTRL_MMDPOWERBALANCEDISABLE(Base_RM_Field):
+    def __init__(self, register):
+        self.__dict__['zz_frozen'] = False
+        super(RM_Field_RAC_SYNTHCTRL_MMDPOWERBALANCEDISABLE, self).__init__(register,
+            'MMDPOWERBALANCEDISABLE', 'RAC.SYNTHCTRL.MMDPOWERBALANCEDISABLE', 'read-write',
+            u"",
+            10, 1)
         self.__dict__['zz_frozen'] = True
 
 
@@ -1514,23 +1494,13 @@ class RM_Field_RAC_PAENCTRL_INVRAMPCLK(Base_RM_Field):
         self.__dict__['zz_frozen'] = True
 
 
-class RM_Field_RAC_PAENCTRL_DIV2RAMPCLK(Base_RM_Field):
+class RM_Field_RAC_PAENCTRL_PARAMPMODE(Base_RM_Field):
     def __init__(self, register):
         self.__dict__['zz_frozen'] = False
-        super(RM_Field_RAC_PAENCTRL_DIV2RAMPCLK, self).__init__(register,
-            'DIV2RAMPCLK', 'RAC.PAENCTRL.DIV2RAMPCLK', 'read-write',
+        super(RM_Field_RAC_PAENCTRL_PARAMPMODE, self).__init__(register,
+            'PARAMPMODE', 'RAC.PAENCTRL.PARAMPMODE', 'read-write',
             u"",
-            17, 1)
-        self.__dict__['zz_frozen'] = True
-
-
-class RM_Field_RAC_PAENCTRL_RSTDIV2RAMPCLK(Base_RM_Field):
-    def __init__(self, register):
-        self.__dict__['zz_frozen'] = False
-        super(RM_Field_RAC_PAENCTRL_RSTDIV2RAMPCLK, self).__init__(register,
-            'RSTDIV2RAMPCLK', 'RAC.PAENCTRL.RSTDIV2RAMPCLK', 'read-write',
-            u"",
-            18, 1)
+            28, 1)
         self.__dict__['zz_frozen'] = True
 
 
@@ -1551,96 +1521,6 @@ class RM_Field_RAC_APC_AMPCONTROLLIMITSW(Base_RM_Field):
             'AMPCONTROLLIMITSW', 'RAC.APC.AMPCONTROLLIMITSW', 'read-write',
             u"",
             24, 8)
-        self.__dict__['zz_frozen'] = True
-
-
-class RM_Field_RAC_ANTDIV_INTDIVLNAMIXEN0(Base_RM_Field):
-    def __init__(self, register):
-        self.__dict__['zz_frozen'] = False
-        super(RM_Field_RAC_ANTDIV_INTDIVLNAMIXEN0, self).__init__(register,
-            'INTDIVLNAMIXEN0', 'RAC.ANTDIV.INTDIVLNAMIXEN0', 'read-write',
-            u"",
-            0, 1)
-        self.__dict__['zz_frozen'] = True
-
-
-class RM_Field_RAC_ANTDIV_INTDIVLNAMIXRFATTDCEN0(Base_RM_Field):
-    def __init__(self, register):
-        self.__dict__['zz_frozen'] = False
-        super(RM_Field_RAC_ANTDIV_INTDIVLNAMIXRFATTDCEN0, self).__init__(register,
-            'INTDIVLNAMIXRFATTDCEN0', 'RAC.ANTDIV.INTDIVLNAMIXRFATTDCEN0', 'read-write',
-            u"",
-            2, 1)
-        self.__dict__['zz_frozen'] = True
-
-
-class RM_Field_RAC_ANTDIV_INTDIVLNAMIXRFPKDENRF0(Base_RM_Field):
-    def __init__(self, register):
-        self.__dict__['zz_frozen'] = False
-        super(RM_Field_RAC_ANTDIV_INTDIVLNAMIXRFPKDENRF0, self).__init__(register,
-            'INTDIVLNAMIXRFPKDENRF0', 'RAC.ANTDIV.INTDIVLNAMIXRFPKDENRF0', 'read-write',
-            u"",
-            3, 1)
-        self.__dict__['zz_frozen'] = True
-
-
-class RM_Field_RAC_ANTDIV_INTDIVSYLODIVRLO02G4EN(Base_RM_Field):
-    def __init__(self, register):
-        self.__dict__['zz_frozen'] = False
-        super(RM_Field_RAC_ANTDIV_INTDIVSYLODIVRLO02G4EN, self).__init__(register,
-            'INTDIVSYLODIVRLO02G4EN', 'RAC.ANTDIV.INTDIVSYLODIVRLO02G4EN', 'read-write',
-            u"",
-            4, 1)
-        self.__dict__['zz_frozen'] = True
-
-
-class RM_Field_RAC_ANTDIV_INTDIVLNAMIXEN1(Base_RM_Field):
-    def __init__(self, register):
-        self.__dict__['zz_frozen'] = False
-        super(RM_Field_RAC_ANTDIV_INTDIVLNAMIXEN1, self).__init__(register,
-            'INTDIVLNAMIXEN1', 'RAC.ANTDIV.INTDIVLNAMIXEN1', 'read-write',
-            u"",
-            5, 1)
-        self.__dict__['zz_frozen'] = True
-
-
-class RM_Field_RAC_ANTDIV_INTDIVLNAMIXRFATTDCEN1(Base_RM_Field):
-    def __init__(self, register):
-        self.__dict__['zz_frozen'] = False
-        super(RM_Field_RAC_ANTDIV_INTDIVLNAMIXRFATTDCEN1, self).__init__(register,
-            'INTDIVLNAMIXRFATTDCEN1', 'RAC.ANTDIV.INTDIVLNAMIXRFATTDCEN1', 'read-write',
-            u"",
-            7, 1)
-        self.__dict__['zz_frozen'] = True
-
-
-class RM_Field_RAC_ANTDIV_INTDIVLNAMIXRFPKDENRF1(Base_RM_Field):
-    def __init__(self, register):
-        self.__dict__['zz_frozen'] = False
-        super(RM_Field_RAC_ANTDIV_INTDIVLNAMIXRFPKDENRF1, self).__init__(register,
-            'INTDIVLNAMIXRFPKDENRF1', 'RAC.ANTDIV.INTDIVLNAMIXRFPKDENRF1', 'read-write',
-            u"",
-            8, 1)
-        self.__dict__['zz_frozen'] = True
-
-
-class RM_Field_RAC_ANTDIV_INTDIVSYLODIVRLO12G4EN(Base_RM_Field):
-    def __init__(self, register):
-        self.__dict__['zz_frozen'] = False
-        super(RM_Field_RAC_ANTDIV_INTDIVSYLODIVRLO12G4EN, self).__init__(register,
-            'INTDIVSYLODIVRLO12G4EN', 'RAC.ANTDIV.INTDIVSYLODIVRLO12G4EN', 'read-write',
-            u"",
-            9, 1)
-        self.__dict__['zz_frozen'] = True
-
-
-class RM_Field_RAC_ANTDIV_ANTDIVSTATUS(Base_RM_Field):
-    def __init__(self, register):
-        self.__dict__['zz_frozen'] = False
-        super(RM_Field_RAC_ANTDIV_ANTDIVSTATUS, self).__init__(register,
-            'ANTDIVSTATUS', 'RAC.ANTDIV.ANTDIVSTATUS', 'read-only',
-            u"",
-            10, 2)
         self.__dict__['zz_frozen'] = True
 
 
@@ -2454,16 +2334,6 @@ class RM_Field_RAC_IFADCDBG_IFADCSHORTINPUT(Base_RM_Field):
         self.__dict__['zz_frozen'] = True
 
 
-class RM_Field_RAC_IFADCDBG_IFADCDISABLECLK(Base_RM_Field):
-    def __init__(self, register):
-        self.__dict__['zz_frozen'] = False
-        super(RM_Field_RAC_IFADCDBG_IFADCDISABLECLK, self).__init__(register,
-            'IFADCDISABLECLK', 'RAC.IFADCDBG.IFADCDISABLECLK', 'read-write',
-            u"",
-            6, 1)
-        self.__dict__['zz_frozen'] = True
-
-
 class RM_Field_RAC_IFADCTRIM0_IFADCCLKSEL(Base_RM_Field):
     def __init__(self, register):
         self.__dict__['zz_frozen'] = False
@@ -2471,6 +2341,16 @@ class RM_Field_RAC_IFADCTRIM0_IFADCCLKSEL(Base_RM_Field):
             'IFADCCLKSEL', 'RAC.IFADCTRIM0.IFADCCLKSEL', 'read-write',
             u"",
             0, 1)
+        self.__dict__['zz_frozen'] = True
+
+
+class RM_Field_RAC_IFADCTRIM0_IFADCENHALFMODE(Base_RM_Field):
+    def __init__(self, register):
+        self.__dict__['zz_frozen'] = False
+        super(RM_Field_RAC_IFADCTRIM0_IFADCENHALFMODE, self).__init__(register,
+            'IFADCENHALFMODE', 'RAC.IFADCTRIM0.IFADCENHALFMODE', 'read-write',
+            u"",
+            1, 1)
         self.__dict__['zz_frozen'] = True
 
 
@@ -2574,16 +2454,6 @@ class RM_Field_RAC_IFADCTRIM0_IFADCSIDETONEFREQ(Base_RM_Field):
         self.__dict__['zz_frozen'] = True
 
 
-class RM_Field_RAC_IFADCTRIM0_IFADCENHALFMODE(Base_RM_Field):
-    def __init__(self, register):
-        self.__dict__['zz_frozen'] = False
-        super(RM_Field_RAC_IFADCTRIM0_IFADCENHALFMODE, self).__init__(register,
-            'IFADCENHALFMODE', 'RAC.IFADCTRIM0.IFADCENHALFMODE', 'read-write',
-            u"",
-            30, 1)
-        self.__dict__['zz_frozen'] = True
-
-
 class RM_Field_RAC_IFADCTRIM1_IFADCVCMLVL(Base_RM_Field):
     def __init__(self, register):
         self.__dict__['zz_frozen'] = False
@@ -2674,233 +2544,143 @@ class RM_Field_RAC_IFADCSTATUS_IFADCRCCALOUT(Base_RM_Field):
         self.__dict__['zz_frozen'] = True
 
 
-class RM_Field_RAC_LNAMIXDEBUG_LNAMIXDISMXR0(Base_RM_Field):
+class RM_Field_RAC_LNAMIXDEBUG_LNAMIXDISMXR(Base_RM_Field):
     def __init__(self, register):
         self.__dict__['zz_frozen'] = False
-        super(RM_Field_RAC_LNAMIXDEBUG_LNAMIXDISMXR0, self).__init__(register,
-            'LNAMIXDISMXR0', 'RAC.LNAMIXDEBUG.LNAMIXDISMXR0', 'read-write',
+        super(RM_Field_RAC_LNAMIXDEBUG_LNAMIXDISMXR, self).__init__(register,
+            'LNAMIXDISMXR', 'RAC.LNAMIXDEBUG.LNAMIXDISMXR', 'read-write',
             u"",
             0, 1)
         self.__dict__['zz_frozen'] = True
 
 
-class RM_Field_RAC_LNAMIXDEBUG_LNAMIXDISMXR1(Base_RM_Field):
+class RM_Field_RAC_LNAMIXTRIM0_LNAMIXCURCTRL(Base_RM_Field):
     def __init__(self, register):
         self.__dict__['zz_frozen'] = False
-        super(RM_Field_RAC_LNAMIXDEBUG_LNAMIXDISMXR1, self).__init__(register,
-            'LNAMIXDISMXR1', 'RAC.LNAMIXDEBUG.LNAMIXDISMXR1', 'read-write',
-            u"",
-            1, 1)
-        self.__dict__['zz_frozen'] = True
-
-
-class RM_Field_RAC_LNAMIXTRIM0_LNAMIXCAPSEL0(Base_RM_Field):
-    def __init__(self, register):
-        self.__dict__['zz_frozen'] = False
-        super(RM_Field_RAC_LNAMIXTRIM0_LNAMIXCAPSEL0, self).__init__(register,
-            'LNAMIXCAPSEL0', 'RAC.LNAMIXTRIM0.LNAMIXCAPSEL0', 'read-write',
-            u"",
-            0, 3)
-        self.__dict__['zz_frozen'] = True
-
-
-class RM_Field_RAC_LNAMIXTRIM0_LNAMIXMXRBIAS0(Base_RM_Field):
-    def __init__(self, register):
-        self.__dict__['zz_frozen'] = False
-        super(RM_Field_RAC_LNAMIXTRIM0_LNAMIXMXRBIAS0, self).__init__(register,
-            'LNAMIXMXRBIAS0', 'RAC.LNAMIXTRIM0.LNAMIXMXRBIAS0', 'read-write',
-            u"",
-            3, 2)
-        self.__dict__['zz_frozen'] = True
-
-
-class RM_Field_RAC_LNAMIXTRIM0_LNAMIXVOUTADJ0(Base_RM_Field):
-    def __init__(self, register):
-        self.__dict__['zz_frozen'] = False
-        super(RM_Field_RAC_LNAMIXTRIM0_LNAMIXVOUTADJ0, self).__init__(register,
-            'LNAMIXVOUTADJ0', 'RAC.LNAMIXTRIM0.LNAMIXVOUTADJ0', 'read-write',
-            u"",
-            5, 4)
-        self.__dict__['zz_frozen'] = True
-
-
-class RM_Field_RAC_LNAMIXTRIM1_LNAMIXCAPSEL1(Base_RM_Field):
-    def __init__(self, register):
-        self.__dict__['zz_frozen'] = False
-        super(RM_Field_RAC_LNAMIXTRIM1_LNAMIXCAPSEL1, self).__init__(register,
-            'LNAMIXCAPSEL1', 'RAC.LNAMIXTRIM1.LNAMIXCAPSEL1', 'read-write',
-            u"",
-            0, 3)
-        self.__dict__['zz_frozen'] = True
-
-
-class RM_Field_RAC_LNAMIXTRIM1_LNAMIXMXRBIAS1(Base_RM_Field):
-    def __init__(self, register):
-        self.__dict__['zz_frozen'] = False
-        super(RM_Field_RAC_LNAMIXTRIM1_LNAMIXMXRBIAS1, self).__init__(register,
-            'LNAMIXMXRBIAS1', 'RAC.LNAMIXTRIM1.LNAMIXMXRBIAS1', 'read-write',
-            u"",
-            3, 2)
-        self.__dict__['zz_frozen'] = True
-
-
-class RM_Field_RAC_LNAMIXTRIM1_LNAMIXVOUTADJ1(Base_RM_Field):
-    def __init__(self, register):
-        self.__dict__['zz_frozen'] = False
-        super(RM_Field_RAC_LNAMIXTRIM1_LNAMIXVOUTADJ1, self).__init__(register,
-            'LNAMIXVOUTADJ1', 'RAC.LNAMIXTRIM1.LNAMIXVOUTADJ1', 'read-write',
-            u"",
-            5, 4)
-        self.__dict__['zz_frozen'] = True
-
-
-class RM_Field_RAC_LNAMIXTRIM2_LNAMIXCURCTRL(Base_RM_Field):
-    def __init__(self, register):
-        self.__dict__['zz_frozen'] = False
-        super(RM_Field_RAC_LNAMIXTRIM2_LNAMIXCURCTRL, self).__init__(register,
-            'LNAMIXCURCTRL', 'RAC.LNAMIXTRIM2.LNAMIXCURCTRL', 'read-write',
-            u"",
-            4, 6)
-        self.__dict__['zz_frozen'] = True
-
-
-class RM_Field_RAC_LNAMIXTRIM2_LNAMIXHIGHCUR(Base_RM_Field):
-    def __init__(self, register):
-        self.__dict__['zz_frozen'] = False
-        super(RM_Field_RAC_LNAMIXTRIM2_LNAMIXHIGHCUR, self).__init__(register,
-            'LNAMIXHIGHCUR', 'RAC.LNAMIXTRIM2.LNAMIXHIGHCUR', 'read-write',
-            u"",
-            10, 2)
-        self.__dict__['zz_frozen'] = True
-
-
-class RM_Field_RAC_LNAMIXTRIM2_LNAMIXLOWCUR(Base_RM_Field):
-    def __init__(self, register):
-        self.__dict__['zz_frozen'] = False
-        super(RM_Field_RAC_LNAMIXTRIM2_LNAMIXLOWCUR, self).__init__(register,
-            'LNAMIXLOWCUR', 'RAC.LNAMIXTRIM2.LNAMIXLOWCUR', 'read-write',
-            u"",
-            12, 4)
-        self.__dict__['zz_frozen'] = True
-
-
-class RM_Field_RAC_LNAMIXTRIM2_LNAMIXNCASADJ0(Base_RM_Field):
-    def __init__(self, register):
-        self.__dict__['zz_frozen'] = False
-        super(RM_Field_RAC_LNAMIXTRIM2_LNAMIXNCASADJ0, self).__init__(register,
-            'LNAMIXNCASADJ0', 'RAC.LNAMIXTRIM2.LNAMIXNCASADJ0', 'read-write',
-            u"",
-            19, 2)
-        self.__dict__['zz_frozen'] = True
-
-
-class RM_Field_RAC_LNAMIXTRIM2_LNAMIXPCASADJ0(Base_RM_Field):
-    def __init__(self, register):
-        self.__dict__['zz_frozen'] = False
-        super(RM_Field_RAC_LNAMIXTRIM2_LNAMIXPCASADJ0, self).__init__(register,
-            'LNAMIXPCASADJ0', 'RAC.LNAMIXTRIM2.LNAMIXPCASADJ0', 'read-write',
-            u"",
-            21, 2)
-        self.__dict__['zz_frozen'] = True
-
-
-class RM_Field_RAC_LNAMIXTRIM2_LNAMIXTRIMVREG(Base_RM_Field):
-    def __init__(self, register):
-        self.__dict__['zz_frozen'] = False
-        super(RM_Field_RAC_LNAMIXTRIM2_LNAMIXTRIMVREG, self).__init__(register,
-            'LNAMIXTRIMVREG', 'RAC.LNAMIXTRIM2.LNAMIXTRIMVREG', 'read-write',
-            u"",
-            23, 4)
-        self.__dict__['zz_frozen'] = True
-
-
-class RM_Field_RAC_LNAMIXTRIM2_LNAMIXNCASADJ1(Base_RM_Field):
-    def __init__(self, register):
-        self.__dict__['zz_frozen'] = False
-        super(RM_Field_RAC_LNAMIXTRIM2_LNAMIXNCASADJ1, self).__init__(register,
-            'LNAMIXNCASADJ1', 'RAC.LNAMIXTRIM2.LNAMIXNCASADJ1', 'read-write',
-            u"",
-            27, 2)
-        self.__dict__['zz_frozen'] = True
-
-
-class RM_Field_RAC_LNAMIXTRIM2_LNAMIXPCASADJ1(Base_RM_Field):
-    def __init__(self, register):
-        self.__dict__['zz_frozen'] = False
-        super(RM_Field_RAC_LNAMIXTRIM2_LNAMIXPCASADJ1, self).__init__(register,
-            'LNAMIXPCASADJ1', 'RAC.LNAMIXTRIM2.LNAMIXPCASADJ1', 'read-write',
-            u"",
-            29, 2)
-        self.__dict__['zz_frozen'] = True
-
-
-class RM_Field_RAC_LNAMIXTRIM3_LNAMIXIBIASADJ0(Base_RM_Field):
-    def __init__(self, register):
-        self.__dict__['zz_frozen'] = False
-        super(RM_Field_RAC_LNAMIXTRIM3_LNAMIXIBIASADJ0, self).__init__(register,
-            'LNAMIXIBIASADJ0', 'RAC.LNAMIXTRIM3.LNAMIXIBIASADJ0', 'read-write',
+        super(RM_Field_RAC_LNAMIXTRIM0_LNAMIXCURCTRL, self).__init__(register,
+            'LNAMIXCURCTRL', 'RAC.LNAMIXTRIM0.LNAMIXCURCTRL', 'read-write',
             u"",
             0, 6)
         self.__dict__['zz_frozen'] = True
 
 
-class RM_Field_RAC_LNAMIXTRIM3_LNAMIXIBIASADJ1(Base_RM_Field):
+class RM_Field_RAC_LNAMIXTRIM0_LNAMIXHIGHCUR(Base_RM_Field):
     def __init__(self, register):
         self.__dict__['zz_frozen'] = False
-        super(RM_Field_RAC_LNAMIXTRIM3_LNAMIXIBIASADJ1, self).__init__(register,
-            'LNAMIXIBIASADJ1', 'RAC.LNAMIXTRIM3.LNAMIXIBIASADJ1', 'read-write',
+        super(RM_Field_RAC_LNAMIXTRIM0_LNAMIXHIGHCUR, self).__init__(register,
+            'LNAMIXHIGHCUR', 'RAC.LNAMIXTRIM0.LNAMIXHIGHCUR', 'read-write',
             u"",
-            6, 6)
+            6, 2)
         self.__dict__['zz_frozen'] = True
 
 
-class RM_Field_RAC_LNAMIXTRIM4_LNAMIXRFPKDBWSEL(Base_RM_Field):
+class RM_Field_RAC_LNAMIXTRIM0_LNAMIXLOWCUR(Base_RM_Field):
     def __init__(self, register):
         self.__dict__['zz_frozen'] = False
-        super(RM_Field_RAC_LNAMIXTRIM4_LNAMIXRFPKDBWSEL, self).__init__(register,
-            'LNAMIXRFPKDBWSEL', 'RAC.LNAMIXTRIM4.LNAMIXRFPKDBWSEL', 'read-write',
+        super(RM_Field_RAC_LNAMIXTRIM0_LNAMIXLOWCUR, self).__init__(register,
+            'LNAMIXLOWCUR', 'RAC.LNAMIXTRIM0.LNAMIXLOWCUR', 'read-write',
             u"",
-            0, 2)
+            8, 4)
         self.__dict__['zz_frozen'] = True
 
 
-class RM_Field_RAC_LNAMIXTRIM4_LNAMIXRFPKDCALCMLO(Base_RM_Field):
+class RM_Field_RAC_LNAMIXTRIM0_LNAMIXRFPKDBWSEL(Base_RM_Field):
     def __init__(self, register):
         self.__dict__['zz_frozen'] = False
-        super(RM_Field_RAC_LNAMIXTRIM4_LNAMIXRFPKDCALCMLO, self).__init__(register,
-            'LNAMIXRFPKDCALCMLO', 'RAC.LNAMIXTRIM4.LNAMIXRFPKDCALCMLO', 'read-write',
+        super(RM_Field_RAC_LNAMIXTRIM0_LNAMIXRFPKDBWSEL, self).__init__(register,
+            'LNAMIXRFPKDBWSEL', 'RAC.LNAMIXTRIM0.LNAMIXRFPKDBWSEL', 'read-write',
             u"",
-            8, 6)
+            12, 2)
         self.__dict__['zz_frozen'] = True
 
 
-class RM_Field_RAC_LNAMIXTRIM4_LNAMIXRFPKDCALCMHI(Base_RM_Field):
+class RM_Field_RAC_LNAMIXTRIM0_LNAMIXRFPKDCALCM(Base_RM_Field):
     def __init__(self, register):
         self.__dict__['zz_frozen'] = False
-        super(RM_Field_RAC_LNAMIXTRIM4_LNAMIXRFPKDCALCMHI, self).__init__(register,
-            'LNAMIXRFPKDCALCMHI', 'RAC.LNAMIXTRIM4.LNAMIXRFPKDCALCMHI', 'read-write',
+        super(RM_Field_RAC_LNAMIXTRIM0_LNAMIXRFPKDCALCM, self).__init__(register,
+            'LNAMIXRFPKDCALCM', 'RAC.LNAMIXTRIM0.LNAMIXRFPKDCALCM', 'read-write',
             u"",
             14, 6)
         self.__dict__['zz_frozen'] = True
 
 
-class RM_Field_RAC_LNAMIXTRIM4_LNAMIXRFPKDTHRESHSELLO(Base_RM_Field):
+class RM_Field_RAC_LNAMIXTRIM0_LNAMIXRFPKDCALDM(Base_RM_Field):
     def __init__(self, register):
         self.__dict__['zz_frozen'] = False
-        super(RM_Field_RAC_LNAMIXTRIM4_LNAMIXRFPKDTHRESHSELLO, self).__init__(register,
-            'LNAMIXRFPKDTHRESHSELLO', 'RAC.LNAMIXTRIM4.LNAMIXRFPKDTHRESHSELLO', 'read-write',
+        super(RM_Field_RAC_LNAMIXTRIM0_LNAMIXRFPKDCALDM, self).__init__(register,
+            'LNAMIXRFPKDCALDM', 'RAC.LNAMIXTRIM0.LNAMIXRFPKDCALDM', 'read-write',
             u"",
-            24, 4)
+            20, 5)
         self.__dict__['zz_frozen'] = True
 
 
-class RM_Field_RAC_LNAMIXTRIM4_LNAMIXRFPKDTHRESHSELHI(Base_RM_Field):
+class RM_Field_RAC_LNAMIXTRIM0_LNAMIXTRIMVREG(Base_RM_Field):
     def __init__(self, register):
         self.__dict__['zz_frozen'] = False
-        super(RM_Field_RAC_LNAMIXTRIM4_LNAMIXRFPKDTHRESHSELHI, self).__init__(register,
-            'LNAMIXRFPKDTHRESHSELHI', 'RAC.LNAMIXTRIM4.LNAMIXRFPKDTHRESHSELHI', 'read-write',
+        super(RM_Field_RAC_LNAMIXTRIM0_LNAMIXTRIMVREG, self).__init__(register,
+            'LNAMIXTRIMVREG', 'RAC.LNAMIXTRIM0.LNAMIXTRIMVREG', 'read-write',
             u"",
-            28, 4)
+            25, 4)
+        self.__dict__['zz_frozen'] = True
+
+
+class RM_Field_RAC_LNAMIXTRIM1_LNAMIXIBIASADJ(Base_RM_Field):
+    def __init__(self, register):
+        self.__dict__['zz_frozen'] = False
+        super(RM_Field_RAC_LNAMIXTRIM1_LNAMIXIBIASADJ, self).__init__(register,
+            'LNAMIXIBIASADJ', 'RAC.LNAMIXTRIM1.LNAMIXIBIASADJ', 'read-write',
+            u"",
+            0, 6)
+        self.__dict__['zz_frozen'] = True
+
+
+class RM_Field_RAC_LNAMIXTRIM1_LNAMIXLNACAPSEL(Base_RM_Field):
+    def __init__(self, register):
+        self.__dict__['zz_frozen'] = False
+        super(RM_Field_RAC_LNAMIXTRIM1_LNAMIXLNACAPSEL, self).__init__(register,
+            'LNAMIXLNACAPSEL', 'RAC.LNAMIXTRIM1.LNAMIXLNACAPSEL', 'read-write',
+            u"",
+            6, 3)
+        self.__dict__['zz_frozen'] = True
+
+
+class RM_Field_RAC_LNAMIXTRIM1_LNAMIXMXRBIAS(Base_RM_Field):
+    def __init__(self, register):
+        self.__dict__['zz_frozen'] = False
+        super(RM_Field_RAC_LNAMIXTRIM1_LNAMIXMXRBIAS, self).__init__(register,
+            'LNAMIXMXRBIAS', 'RAC.LNAMIXTRIM1.LNAMIXMXRBIAS', 'read-write',
+            u"",
+            9, 2)
+        self.__dict__['zz_frozen'] = True
+
+
+class RM_Field_RAC_LNAMIXTRIM1_LNAMIXNCASADJ(Base_RM_Field):
+    def __init__(self, register):
+        self.__dict__['zz_frozen'] = False
+        super(RM_Field_RAC_LNAMIXTRIM1_LNAMIXNCASADJ, self).__init__(register,
+            'LNAMIXNCASADJ', 'RAC.LNAMIXTRIM1.LNAMIXNCASADJ', 'read-write',
+            u"",
+            11, 2)
+        self.__dict__['zz_frozen'] = True
+
+
+class RM_Field_RAC_LNAMIXTRIM1_LNAMIXPCASADJ(Base_RM_Field):
+    def __init__(self, register):
+        self.__dict__['zz_frozen'] = False
+        super(RM_Field_RAC_LNAMIXTRIM1_LNAMIXPCASADJ, self).__init__(register,
+            'LNAMIXPCASADJ', 'RAC.LNAMIXTRIM1.LNAMIXPCASADJ', 'read-write',
+            u"",
+            13, 2)
+        self.__dict__['zz_frozen'] = True
+
+
+class RM_Field_RAC_LNAMIXTRIM1_LNAMIXVOUTADJ(Base_RM_Field):
+    def __init__(self, register):
+        self.__dict__['zz_frozen'] = False
+        super(RM_Field_RAC_LNAMIXTRIM1_LNAMIXVOUTADJ, self).__init__(register,
+            'LNAMIXVOUTADJ', 'RAC.LNAMIXTRIM1.LNAMIXVOUTADJ', 'read-write',
+            u"",
+            15, 4)
         self.__dict__['zz_frozen'] = True
 
 
@@ -2920,47 +2700,27 @@ class RM_Field_RAC_LNAMIXCAL_LNAMIXCALVMODE(Base_RM_Field):
         super(RM_Field_RAC_LNAMIXCAL_LNAMIXCALVMODE, self).__init__(register,
             'LNAMIXCALVMODE', 'RAC.LNAMIXCAL.LNAMIXCALVMODE', 'read-write',
             u"",
+            1, 1)
+        self.__dict__['zz_frozen'] = True
+
+
+class RM_Field_RAC_LNAMIXCAL_LNAMIXENIRCAL(Base_RM_Field):
+    def __init__(self, register):
+        self.__dict__['zz_frozen'] = False
+        super(RM_Field_RAC_LNAMIXCAL_LNAMIXENIRCAL, self).__init__(register,
+            'LNAMIXENIRCAL', 'RAC.LNAMIXCAL.LNAMIXENIRCAL', 'read-write',
+            u"",
             2, 1)
         self.__dict__['zz_frozen'] = True
 
 
-class RM_Field_RAC_LNAMIXCAL_LNAMIXENIRCAL0(Base_RM_Field):
+class RM_Field_RAC_LNAMIXCAL_LNAMIXIRCALAMP(Base_RM_Field):
     def __init__(self, register):
         self.__dict__['zz_frozen'] = False
-        super(RM_Field_RAC_LNAMIXCAL_LNAMIXENIRCAL0, self).__init__(register,
-            'LNAMIXENIRCAL0', 'RAC.LNAMIXCAL.LNAMIXENIRCAL0', 'read-write',
+        super(RM_Field_RAC_LNAMIXCAL_LNAMIXIRCALAMP, self).__init__(register,
+            'LNAMIXIRCALAMP', 'RAC.LNAMIXCAL.LNAMIXIRCALAMP', 'read-write',
             u"",
-            3, 1)
-        self.__dict__['zz_frozen'] = True
-
-
-class RM_Field_RAC_LNAMIXCAL_LNAMIXENIRCAL1(Base_RM_Field):
-    def __init__(self, register):
-        self.__dict__['zz_frozen'] = False
-        super(RM_Field_RAC_LNAMIXCAL_LNAMIXENIRCAL1, self).__init__(register,
-            'LNAMIXENIRCAL1', 'RAC.LNAMIXCAL.LNAMIXENIRCAL1', 'read-write',
-            u"",
-            4, 1)
-        self.__dict__['zz_frozen'] = True
-
-
-class RM_Field_RAC_LNAMIXCAL_LNAMIXIRCALAMP0(Base_RM_Field):
-    def __init__(self, register):
-        self.__dict__['zz_frozen'] = False
-        super(RM_Field_RAC_LNAMIXCAL_LNAMIXIRCALAMP0, self).__init__(register,
-            'LNAMIXIRCALAMP0', 'RAC.LNAMIXCAL.LNAMIXIRCALAMP0', 'read-write',
-            u"",
-            5, 3)
-        self.__dict__['zz_frozen'] = True
-
-
-class RM_Field_RAC_LNAMIXCAL_LNAMIXIRCALAMP1(Base_RM_Field):
-    def __init__(self, register):
-        self.__dict__['zz_frozen'] = False
-        super(RM_Field_RAC_LNAMIXCAL_LNAMIXIRCALAMP1, self).__init__(register,
-            'LNAMIXIRCALAMP1', 'RAC.LNAMIXCAL.LNAMIXIRCALAMP1', 'read-write',
-            u"",
-            8, 3)
+            4, 3)
         self.__dict__['zz_frozen'] = True
 
 
@@ -2970,7 +2730,7 @@ class RM_Field_RAC_LNAMIXEN_LNAMIXENLDO(Base_RM_Field):
         super(RM_Field_RAC_LNAMIXEN_LNAMIXENLDO, self).__init__(register,
             'LNAMIXENLDO', 'RAC.LNAMIXEN.LNAMIXENLDO', 'read-write',
             u"",
-            3, 1)
+            0, 1)
         self.__dict__['zz_frozen'] = True
 
 
@@ -3024,33 +2784,23 @@ class RM_Field_RAC_PATRIM0_TX0DBMTRIMBIASP(Base_RM_Field):
         self.__dict__['zz_frozen'] = True
 
 
-class RM_Field_RAC_PATRIM0_TXPAAMPCTRL(Base_RM_Field):
+class RM_Field_RAC_PATRIM0_TX0DBMTRIMDUTYCYN(Base_RM_Field):
     def __init__(self, register):
         self.__dict__['zz_frozen'] = False
-        super(RM_Field_RAC_PATRIM0_TXPAAMPCTRL, self).__init__(register,
-            'TXPAAMPCTRL', 'RAC.PATRIM0.TXPAAMPCTRL', 'read-write',
+        super(RM_Field_RAC_PATRIM0_TX0DBMTRIMDUTYCYN, self).__init__(register,
+            'TX0DBMTRIMDUTYCYN', 'RAC.PATRIM0.TX0DBMTRIMDUTYCYN', 'read-write',
             u"",
-            8, 8)
+            8, 3)
         self.__dict__['zz_frozen'] = True
 
 
-class RM_Field_RAC_PATRIM0_TXPABYPASSREG(Base_RM_Field):
+class RM_Field_RAC_PATRIM0_TX0DBMTRIMDUTYCYP(Base_RM_Field):
     def __init__(self, register):
         self.__dict__['zz_frozen'] = False
-        super(RM_Field_RAC_PATRIM0_TXPABYPASSREG, self).__init__(register,
-            'TXPABYPASSREG', 'RAC.PATRIM0.TXPABYPASSREG', 'read-write',
+        super(RM_Field_RAC_PATRIM0_TX0DBMTRIMDUTYCYP, self).__init__(register,
+            'TX0DBMTRIMDUTYCYP', 'RAC.PATRIM0.TX0DBMTRIMDUTYCYP', 'read-write',
             u"",
-            16, 1)
-        self.__dict__['zz_frozen'] = True
-
-
-class RM_Field_RAC_PATRIM0_ENAMPCTRLREG(Base_RM_Field):
-    def __init__(self, register):
-        self.__dict__['zz_frozen'] = False
-        super(RM_Field_RAC_PATRIM0_ENAMPCTRLREG, self).__init__(register,
-            'ENAMPCTRLREG', 'RAC.PATRIM0.ENAMPCTRLREG', 'read-write',
-            u"",
-            24, 1)
+            11, 3)
         self.__dict__['zz_frozen'] = True
 
 
@@ -3064,23 +2814,23 @@ class RM_Field_RAC_PATRIM1_TX0DBMTRIMPREDRVREGIBCORE(Base_RM_Field):
         self.__dict__['zz_frozen'] = True
 
 
-class RM_Field_RAC_PATRIM1_TX0DBMTRIMPREDRVREGPSR(Base_RM_Field):
-    def __init__(self, register):
-        self.__dict__['zz_frozen'] = False
-        super(RM_Field_RAC_PATRIM1_TX0DBMTRIMPREDRVREGPSR, self).__init__(register,
-            'TX0DBMTRIMPREDRVREGPSR', 'RAC.PATRIM1.TX0DBMTRIMPREDRVREGPSR', 'read-write',
-            u"",
-            2, 1)
-        self.__dict__['zz_frozen'] = True
-
-
 class RM_Field_RAC_PATRIM1_TX0DBMTRIMPREDRVREGIBNDIO(Base_RM_Field):
     def __init__(self, register):
         self.__dict__['zz_frozen'] = False
         super(RM_Field_RAC_PATRIM1_TX0DBMTRIMPREDRVREGIBNDIO, self).__init__(register,
             'TX0DBMTRIMPREDRVREGIBNDIO', 'RAC.PATRIM1.TX0DBMTRIMPREDRVREGIBNDIO', 'read-write',
             u"",
-            4, 4)
+            2, 4)
+        self.__dict__['zz_frozen'] = True
+
+
+class RM_Field_RAC_PATRIM1_TX0DBMTRIMPREDRVREGPSR(Base_RM_Field):
+    def __init__(self, register):
+        self.__dict__['zz_frozen'] = False
+        super(RM_Field_RAC_PATRIM1_TX0DBMTRIMPREDRVREGPSR, self).__init__(register,
+            'TX0DBMTRIMPREDRVREGPSR', 'RAC.PATRIM1.TX0DBMTRIMPREDRVREGPSR', 'read-write',
+            u"",
+            6, 1)
         self.__dict__['zz_frozen'] = True
 
 
@@ -3090,7 +2840,7 @@ class RM_Field_RAC_PATRIM1_TX0DBMTRIMPREDRVSLOPE(Base_RM_Field):
         super(RM_Field_RAC_PATRIM1_TX0DBMTRIMPREDRVSLOPE, self).__init__(register,
             'TX0DBMTRIMPREDRVSLOPE', 'RAC.PATRIM1.TX0DBMTRIMPREDRVSLOPE', 'read-write',
             u"",
-            8, 2)
+            7, 2)
         self.__dict__['zz_frozen'] = True
 
 
@@ -3100,7 +2850,7 @@ class RM_Field_RAC_PATRIM1_TX0DBMTRIMREGFB(Base_RM_Field):
         super(RM_Field_RAC_PATRIM1_TX0DBMTRIMREGFB, self).__init__(register,
             'TX0DBMTRIMREGFB', 'RAC.PATRIM1.TX0DBMTRIMREGFB', 'read-write',
             u"",
-            12, 4)
+            9, 4)
         self.__dict__['zz_frozen'] = True
 
 
@@ -3110,357 +2860,287 @@ class RM_Field_RAC_PATRIM1_TX0DBMTRIMREGVREF(Base_RM_Field):
         super(RM_Field_RAC_PATRIM1_TX0DBMTRIMREGVREF, self).__init__(register,
             'TX0DBMTRIMREGVREF', 'RAC.PATRIM1.TX0DBMTRIMREGVREF', 'read-write',
             u"",
+            13, 3)
+        self.__dict__['zz_frozen'] = True
+
+
+class RM_Field_RAC_PATRIM1_TX0DBMTRIMTAPCAP(Base_RM_Field):
+    def __init__(self, register):
+        self.__dict__['zz_frozen'] = False
+        super(RM_Field_RAC_PATRIM1_TX0DBMTRIMTAPCAP, self).__init__(register,
+            'TX0DBMTRIMTAPCAP', 'RAC.PATRIM1.TX0DBMTRIMTAPCAP', 'read-write',
+            u"",
             16, 3)
         self.__dict__['zz_frozen'] = True
 
 
-class RM_Field_RAC_PATRIM1_TX0DBMTRIMTAPCAP100F(Base_RM_Field):
+class RM_Field_RAC_PATRIM2_TX6DBMTRIMBIASN(Base_RM_Field):
     def __init__(self, register):
         self.__dict__['zz_frozen'] = False
-        super(RM_Field_RAC_PATRIM1_TX0DBMTRIMTAPCAP100F, self).__init__(register,
-            'TX0DBMTRIMTAPCAP100F', 'RAC.PATRIM1.TX0DBMTRIMTAPCAP100F', 'read-write',
+        super(RM_Field_RAC_PATRIM2_TX6DBMTRIMBIASN, self).__init__(register,
+            'TX6DBMTRIMBIASN', 'RAC.PATRIM2.TX6DBMTRIMBIASN', 'read-write',
             u"",
-            20, 3)
+            0, 4)
         self.__dict__['zz_frozen'] = True
 
 
-class RM_Field_RAC_PATRIM1_TX0DBMTRIMTAPCAP200F(Base_RM_Field):
+class RM_Field_RAC_PATRIM2_TX6DBMTRIMBIASP(Base_RM_Field):
     def __init__(self, register):
         self.__dict__['zz_frozen'] = False
-        super(RM_Field_RAC_PATRIM1_TX0DBMTRIMTAPCAP200F, self).__init__(register,
-            'TX0DBMTRIMTAPCAP200F', 'RAC.PATRIM1.TX0DBMTRIMTAPCAP200F', 'read-write',
+        super(RM_Field_RAC_PATRIM2_TX6DBMTRIMBIASP, self).__init__(register,
+            'TX6DBMTRIMBIASP', 'RAC.PATRIM2.TX6DBMTRIMBIASP', 'read-write',
             u"",
-            24, 3)
+            4, 4)
         self.__dict__['zz_frozen'] = True
 
 
-class RM_Field_RAC_PATRIM2_TX0DBMTRIMDUTYCYN(Base_RM_Field):
+class RM_Field_RAC_PATRIM2_TX6DBMTRIMDUTYCYN(Base_RM_Field):
     def __init__(self, register):
         self.__dict__['zz_frozen'] = False
-        super(RM_Field_RAC_PATRIM2_TX0DBMTRIMDUTYCYN, self).__init__(register,
-            'TX0DBMTRIMDUTYCYN', 'RAC.PATRIM2.TX0DBMTRIMDUTYCYN', 'read-write',
-            u"",
-            0, 3)
-        self.__dict__['zz_frozen'] = True
-
-
-class RM_Field_RAC_PATRIM2_TX0DBMTRIMDUTYCYP(Base_RM_Field):
-    def __init__(self, register):
-        self.__dict__['zz_frozen'] = False
-        super(RM_Field_RAC_PATRIM2_TX0DBMTRIMDUTYCYP, self).__init__(register,
-            'TX0DBMTRIMDUTYCYP', 'RAC.PATRIM2.TX0DBMTRIMDUTYCYP', 'read-write',
-            u"",
-            4, 3)
-        self.__dict__['zz_frozen'] = True
-
-
-class RM_Field_RAC_PATRIM2_TXPATRIM10DBMDUTYCYN(Base_RM_Field):
-    def __init__(self, register):
-        self.__dict__['zz_frozen'] = False
-        super(RM_Field_RAC_PATRIM2_TXPATRIM10DBMDUTYCYN, self).__init__(register,
-            'TXPATRIM10DBMDUTYCYN', 'RAC.PATRIM2.TXPATRIM10DBMDUTYCYN', 'read-write',
+        super(RM_Field_RAC_PATRIM2_TX6DBMTRIMDUTYCYN, self).__init__(register,
+            'TX6DBMTRIMDUTYCYN', 'RAC.PATRIM2.TX6DBMTRIMDUTYCYN', 'read-write',
             u"",
             8, 3)
         self.__dict__['zz_frozen'] = True
 
 
-class RM_Field_RAC_PATRIM2_TXPATRIM10DBMDUTYCYP(Base_RM_Field):
+class RM_Field_RAC_PATRIM2_TX6DBMTRIMDUTYCYP(Base_RM_Field):
     def __init__(self, register):
         self.__dict__['zz_frozen'] = False
-        super(RM_Field_RAC_PATRIM2_TXPATRIM10DBMDUTYCYP, self).__init__(register,
-            'TXPATRIM10DBMDUTYCYP', 'RAC.PATRIM2.TXPATRIM10DBMDUTYCYP', 'read-write',
+        super(RM_Field_RAC_PATRIM2_TX6DBMTRIMDUTYCYP, self).__init__(register,
+            'TX6DBMTRIMDUTYCYP', 'RAC.PATRIM2.TX6DBMTRIMDUTYCYP', 'read-write',
             u"",
-            12, 3)
+            11, 3)
         self.__dict__['zz_frozen'] = True
 
 
-class RM_Field_RAC_PATRIM3_TXPATRIMBLEEDAUTOREG(Base_RM_Field):
+class RM_Field_RAC_PATRIM3_TX6DBMTRIMIBIASMASTER(Base_RM_Field):
     def __init__(self, register):
         self.__dict__['zz_frozen'] = False
-        super(RM_Field_RAC_PATRIM3_TXPATRIMBLEEDAUTOREG, self).__init__(register,
-            'TXPATRIMBLEEDAUTOREG', 'RAC.PATRIM3.TXPATRIMBLEEDAUTOREG', 'read-write',
+        super(RM_Field_RAC_PATRIM3_TX6DBMTRIMIBIASMASTER, self).__init__(register,
+            'TX6DBMTRIMIBIASMASTER', 'RAC.PATRIM3.TX6DBMTRIMIBIASMASTER', 'read-write',
             u"",
-            1, 1)
+            0, 2)
         self.__dict__['zz_frozen'] = True
 
 
-class RM_Field_RAC_PATRIM3_TXPATRIMIBIASMASTER(Base_RM_Field):
+class RM_Field_RAC_PATRIM3_TX6DBMTRIMPREDRVREGFB(Base_RM_Field):
     def __init__(self, register):
         self.__dict__['zz_frozen'] = False
-        super(RM_Field_RAC_PATRIM3_TXPATRIMIBIASMASTER, self).__init__(register,
-            'TXPATRIMIBIASMASTER', 'RAC.PATRIM3.TXPATRIMIBIASMASTER', 'read-write',
+        super(RM_Field_RAC_PATRIM3_TX6DBMTRIMPREDRVREGFB, self).__init__(register,
+            'TX6DBMTRIMPREDRVREGFB', 'RAC.PATRIM3.TX6DBMTRIMPREDRVREGFB', 'read-write',
             u"",
             2, 2)
         self.__dict__['zz_frozen'] = True
 
 
-class RM_Field_RAC_PATRIM3_TXPATRIMPREDRVREGFB(Base_RM_Field):
+class RM_Field_RAC_PATRIM3_TX6DBMTRIMPREDRVREGFBKATT(Base_RM_Field):
     def __init__(self, register):
         self.__dict__['zz_frozen'] = False
-        super(RM_Field_RAC_PATRIM3_TXPATRIMPREDRVREGFB, self).__init__(register,
-            'TXPATRIMPREDRVREGFB', 'RAC.PATRIM3.TXPATRIMPREDRVREGFB', 'read-write',
+        super(RM_Field_RAC_PATRIM3_TX6DBMTRIMPREDRVREGFBKATT, self).__init__(register,
+            'TX6DBMTRIMPREDRVREGFBKATT', 'RAC.PATRIM3.TX6DBMTRIMPREDRVREGFBKATT', 'read-write',
             u"",
-            4, 2)
+            4, 1)
         self.__dict__['zz_frozen'] = True
 
 
-class RM_Field_RAC_PATRIM3_TXPATRIMPREDRVREGFBKATT(Base_RM_Field):
+class RM_Field_RAC_PATRIM3_TX6DBMTRIMPREDRVREGPSR(Base_RM_Field):
     def __init__(self, register):
         self.__dict__['zz_frozen'] = False
-        super(RM_Field_RAC_PATRIM3_TXPATRIMPREDRVREGFBKATT, self).__init__(register,
-            'TXPATRIMPREDRVREGFBKATT', 'RAC.PATRIM3.TXPATRIMPREDRVREGFBKATT', 'read-write',
+        super(RM_Field_RAC_PATRIM3_TX6DBMTRIMPREDRVREGPSR, self).__init__(register,
+            'TX6DBMTRIMPREDRVREGPSR', 'RAC.PATRIM3.TX6DBMTRIMPREDRVREGPSR', 'read-write',
             u"",
-            6, 1)
+            5, 1)
         self.__dict__['zz_frozen'] = True
 
 
-class RM_Field_RAC_PATRIM3_TXPATRIMPREDRVREGPSR(Base_RM_Field):
+class RM_Field_RAC_PATRIM3_TX6DBMTRIMPREDRVREGSLICE(Base_RM_Field):
     def __init__(self, register):
         self.__dict__['zz_frozen'] = False
-        super(RM_Field_RAC_PATRIM3_TXPATRIMPREDRVREGPSR, self).__init__(register,
-            'TXPATRIMPREDRVREGPSR', 'RAC.PATRIM3.TXPATRIMPREDRVREGPSR', 'read-write',
-            u"",
-            7, 1)
-        self.__dict__['zz_frozen'] = True
-
-
-class RM_Field_RAC_PATRIM3_TXPATRIMPREDRVREGSLICES(Base_RM_Field):
-    def __init__(self, register):
-        self.__dict__['zz_frozen'] = False
-        super(RM_Field_RAC_PATRIM3_TXPATRIMPREDRVREGSLICES, self).__init__(register,
-            'TXPATRIMPREDRVREGSLICES', 'RAC.PATRIM3.TXPATRIMPREDRVREGSLICES', 'read-write',
-            u"",
-            8, 2)
-        self.__dict__['zz_frozen'] = True
-
-
-class RM_Field_RAC_PATRIM3_TXPATRIMPREDRVREGVREF(Base_RM_Field):
-    def __init__(self, register):
-        self.__dict__['zz_frozen'] = False
-        super(RM_Field_RAC_PATRIM3_TXPATRIMPREDRVREGVREF, self).__init__(register,
-            'TXPATRIMPREDRVREGVREF', 'RAC.PATRIM3.TXPATRIMPREDRVREGVREF', 'read-write',
-            u"",
-            12, 3)
-        self.__dict__['zz_frozen'] = True
-
-
-class RM_Field_RAC_PATRIM3_TXPATRIMREGFB(Base_RM_Field):
-    def __init__(self, register):
-        self.__dict__['zz_frozen'] = False
-        super(RM_Field_RAC_PATRIM3_TXPATRIMREGFB, self).__init__(register,
-            'TXPATRIMREGFB', 'RAC.PATRIM3.TXPATRIMREGFB', 'read-write',
-            u"",
-            16, 3)
-        self.__dict__['zz_frozen'] = True
-
-
-class RM_Field_RAC_PATRIM3_TXPATRIMREGPSR(Base_RM_Field):
-    def __init__(self, register):
-        self.__dict__['zz_frozen'] = False
-        super(RM_Field_RAC_PATRIM3_TXPATRIMREGPSR, self).__init__(register,
-            'TXPATRIMREGPSR', 'RAC.PATRIM3.TXPATRIMREGPSR', 'read-write',
-            u"",
-            19, 1)
-        self.__dict__['zz_frozen'] = True
-
-
-class RM_Field_RAC_PATRIM3_TXPATRIMREGVREF(Base_RM_Field):
-    def __init__(self, register):
-        self.__dict__['zz_frozen'] = False
-        super(RM_Field_RAC_PATRIM3_TXPATRIMREGVREF, self).__init__(register,
-            'TXPATRIMREGVREF', 'RAC.PATRIM3.TXPATRIMREGVREF', 'read-write',
-            u"",
-            20, 4)
-        self.__dict__['zz_frozen'] = True
-
-
-class RM_Field_RAC_PATRIM4_TXPATRIM10DBMCTAP(Base_RM_Field):
-    def __init__(self, register):
-        self.__dict__['zz_frozen'] = False
-        super(RM_Field_RAC_PATRIM4_TXPATRIM10DBMCTAP, self).__init__(register,
-            'TXPATRIM10DBMCTAP', 'RAC.PATRIM4.TXPATRIM10DBMCTAP', 'read-write',
-            u"",
-            0, 4)
-        self.__dict__['zz_frozen'] = True
-
-
-class RM_Field_RAC_PATRIM4_TXPATRIM10DBMPREDRVCAP(Base_RM_Field):
-    def __init__(self, register):
-        self.__dict__['zz_frozen'] = False
-        super(RM_Field_RAC_PATRIM4_TXPATRIM10DBMPREDRVCAP, self).__init__(register,
-            'TXPATRIM10DBMPREDRVCAP', 'RAC.PATRIM4.TXPATRIM10DBMPREDRVCAP', 'read-write',
-            u"",
-            4, 2)
-        self.__dict__['zz_frozen'] = True
-
-
-class RM_Field_RAC_PATRIM4_TXPATRIM10DBMPREDRVSLC(Base_RM_Field):
-    def __init__(self, register):
-        self.__dict__['zz_frozen'] = False
-        super(RM_Field_RAC_PATRIM4_TXPATRIM10DBMPREDRVSLC, self).__init__(register,
-            'TXPATRIM10DBMPREDRVSLC', 'RAC.PATRIM4.TXPATRIM10DBMPREDRVSLC', 'read-write',
+        super(RM_Field_RAC_PATRIM3_TX6DBMTRIMPREDRVREGSLICE, self).__init__(register,
+            'TX6DBMTRIMPREDRVREGSLICE', 'RAC.PATRIM3.TX6DBMTRIMPREDRVREGSLICE', 'read-write',
             u"",
             6, 2)
         self.__dict__['zz_frozen'] = True
 
 
-class RM_Field_RAC_PATRIM4_TXPATRIM20DBMCTAP(Base_RM_Field):
+class RM_Field_RAC_PATRIM3_TX6DBMTRIMPREDRVREGVREF(Base_RM_Field):
     def __init__(self, register):
         self.__dict__['zz_frozen'] = False
-        super(RM_Field_RAC_PATRIM4_TXPATRIM20DBMCTAP, self).__init__(register,
-            'TXPATRIM20DBMCTAP', 'RAC.PATRIM4.TXPATRIM20DBMCTAP', 'read-write',
+        super(RM_Field_RAC_PATRIM3_TX6DBMTRIMPREDRVREGVREF, self).__init__(register,
+            'TX6DBMTRIMPREDRVREGVREF', 'RAC.PATRIM3.TX6DBMTRIMPREDRVREGVREF', 'read-write',
             u"",
-            8, 4)
+            8, 3)
         self.__dict__['zz_frozen'] = True
 
 
-class RM_Field_RAC_PATRIM4_TXPATRIM20DBMPREDRV(Base_RM_Field):
+class RM_Field_RAC_PATRIM3_TX6DBMTRIMREGBLEEDAUTO(Base_RM_Field):
     def __init__(self, register):
         self.__dict__['zz_frozen'] = False
-        super(RM_Field_RAC_PATRIM4_TXPATRIM20DBMPREDRV, self).__init__(register,
-            'TXPATRIM20DBMPREDRV', 'RAC.PATRIM4.TXPATRIM20DBMPREDRV', 'read-write',
+        super(RM_Field_RAC_PATRIM3_TX6DBMTRIMREGBLEEDAUTO, self).__init__(register,
+            'TX6DBMTRIMREGBLEEDAUTO', 'RAC.PATRIM3.TX6DBMTRIMREGBLEEDAUTO', 'read-write',
             u"",
-            12, 4)
+            11, 1)
         self.__dict__['zz_frozen'] = True
 
 
-class RM_Field_RAC_PATRIM4_TXPATRIMCAPPAOUTM(Base_RM_Field):
+class RM_Field_RAC_PATRIM3_TX6DBMTRIMREGFB(Base_RM_Field):
     def __init__(self, register):
         self.__dict__['zz_frozen'] = False
-        super(RM_Field_RAC_PATRIM4_TXPATRIMCAPPAOUTM, self).__init__(register,
-            'TXPATRIMCAPPAOUTM', 'RAC.PATRIM4.TXPATRIMCAPPAOUTM', 'read-write',
-            u"",
-            16, 4)
-        self.__dict__['zz_frozen'] = True
-
-
-class RM_Field_RAC_PATRIM4_TXPATRIMCAPPAOUTP(Base_RM_Field):
-    def __init__(self, register):
-        self.__dict__['zz_frozen'] = False
-        super(RM_Field_RAC_PATRIM4_TXPATRIMCAPPAOUTP, self).__init__(register,
-            'TXPATRIMCAPPAOUTP', 'RAC.PATRIM4.TXPATRIMCAPPAOUTP', 'read-write',
-            u"",
-            20, 4)
-        self.__dict__['zz_frozen'] = True
-
-
-class RM_Field_RAC_PATRIM4_TXPATRIMCMGAIN(Base_RM_Field):
-    def __init__(self, register):
-        self.__dict__['zz_frozen'] = False
-        super(RM_Field_RAC_PATRIM4_TXPATRIMCMGAIN, self).__init__(register,
-            'TXPATRIMCMGAIN', 'RAC.PATRIM4.TXPATRIMCMGAIN', 'read-write',
-            u"",
-            24, 2)
-        self.__dict__['zz_frozen'] = True
-
-
-class RM_Field_RAC_PATRIM5_TXPATRIMDACGLITCH(Base_RM_Field):
-    def __init__(self, register):
-        self.__dict__['zz_frozen'] = False
-        super(RM_Field_RAC_PATRIM5_TXPATRIMDACGLITCH, self).__init__(register,
-            'TXPATRIMDACGLITCH', 'RAC.PATRIM5.TXPATRIMDACGLITCH', 'read-write',
-            u"",
-            0, 1)
-        self.__dict__['zz_frozen'] = True
-
-
-class RM_Field_RAC_PATRIM5_TXPATRIMDLY0(Base_RM_Field):
-    def __init__(self, register):
-        self.__dict__['zz_frozen'] = False
-        super(RM_Field_RAC_PATRIM5_TXPATRIMDLY0, self).__init__(register,
-            'TXPATRIMDLY0', 'RAC.PATRIM5.TXPATRIMDLY0', 'read-write',
-            u"",
-            1, 3)
-        self.__dict__['zz_frozen'] = True
-
-
-class RM_Field_RAC_PATRIM5_TXPATRIMDLY1(Base_RM_Field):
-    def __init__(self, register):
-        self.__dict__['zz_frozen'] = False
-        super(RM_Field_RAC_PATRIM5_TXPATRIMDLY1, self).__init__(register,
-            'TXPATRIMDLY1', 'RAC.PATRIM5.TXPATRIMDLY1', 'read-write',
-            u"",
-            4, 3)
-        self.__dict__['zz_frozen'] = True
-
-
-class RM_Field_RAC_PATRIM5_TXPATRIMNBIAS(Base_RM_Field):
-    def __init__(self, register):
-        self.__dict__['zz_frozen'] = False
-        super(RM_Field_RAC_PATRIM5_TXPATRIMNBIAS, self).__init__(register,
-            'TXPATRIMNBIAS', 'RAC.PATRIM5.TXPATRIMNBIAS', 'read-write',
-            u"",
-            8, 4)
-        self.__dict__['zz_frozen'] = True
-
-
-class RM_Field_RAC_PATRIM5_TXPATRIMNCASC(Base_RM_Field):
-    def __init__(self, register):
-        self.__dict__['zz_frozen'] = False
-        super(RM_Field_RAC_PATRIM5_TXPATRIMNCASC, self).__init__(register,
-            'TXPATRIMNCASC', 'RAC.PATRIM5.TXPATRIMNCASC', 'read-write',
+        super(RM_Field_RAC_PATRIM3_TX6DBMTRIMREGFB, self).__init__(register,
+            'TX6DBMTRIMREGFB', 'RAC.PATRIM3.TX6DBMTRIMREGFB', 'read-write',
             u"",
             12, 2)
         self.__dict__['zz_frozen'] = True
 
 
-class RM_Field_RAC_PATRIM5_TXPATRIMPBIAS(Base_RM_Field):
+class RM_Field_RAC_PATRIM3_TX6DBMTRIMREGPSR(Base_RM_Field):
     def __init__(self, register):
         self.__dict__['zz_frozen'] = False
-        super(RM_Field_RAC_PATRIM5_TXPATRIMPBIAS, self).__init__(register,
-            'TXPATRIMPBIAS', 'RAC.PATRIM5.TXPATRIMPBIAS', 'read-write',
+        super(RM_Field_RAC_PATRIM3_TX6DBMTRIMREGPSR, self).__init__(register,
+            'TX6DBMTRIMREGPSR', 'RAC.PATRIM3.TX6DBMTRIMREGPSR', 'read-write',
             u"",
-            16, 4)
+            14, 1)
         self.__dict__['zz_frozen'] = True
 
 
-class RM_Field_RAC_PATRIM5_TXPATRIMPCASC(Base_RM_Field):
+class RM_Field_RAC_PATRIM3_TX6DBMTRIMREGVREF(Base_RM_Field):
     def __init__(self, register):
         self.__dict__['zz_frozen'] = False
-        super(RM_Field_RAC_PATRIM5_TXPATRIMPCASC, self).__init__(register,
-            'TXPATRIMPCASC', 'RAC.PATRIM5.TXPATRIMPCASC', 'read-write',
+        super(RM_Field_RAC_PATRIM3_TX6DBMTRIMREGVREF, self).__init__(register,
+            'TX6DBMTRIMREGVREF', 'RAC.PATRIM3.TX6DBMTRIMREGVREF', 'read-write',
             u"",
-            20, 2)
+            17, 4)
         self.__dict__['zz_frozen'] = True
 
 
-class RM_Field_RAC_PATRIM5_TXPATRIMREGSLICES(Base_RM_Field):
+class RM_Field_RAC_PATRIM3_TX6DBMTRIMRXMODEVREF(Base_RM_Field):
     def __init__(self, register):
         self.__dict__['zz_frozen'] = False
-        super(RM_Field_RAC_PATRIM5_TXPATRIMREGSLICES, self).__init__(register,
-            'TXPATRIMREGSLICES', 'RAC.PATRIM5.TXPATRIMREGSLICES', 'read-write',
+        super(RM_Field_RAC_PATRIM3_TX6DBMTRIMRXMODEVREF, self).__init__(register,
+            'TX6DBMTRIMRXMODEVREF', 'RAC.PATRIM3.TX6DBMTRIMRXMODEVREF', 'read-write',
             u"",
-            24, 2)
+            21, 2)
         self.__dict__['zz_frozen'] = True
 
 
-class RM_Field_RAC_TXPOWER_TX0DBMPOWER(Base_RM_Field):
+class RM_Field_RAC_PACTRL_TX0DBMPOWER(Base_RM_Field):
     def __init__(self, register):
         self.__dict__['zz_frozen'] = False
-        super(RM_Field_RAC_TXPOWER_TX0DBMPOWER, self).__init__(register,
-            'TX0DBMPOWER', 'RAC.TXPOWER.TX0DBMPOWER', 'read-write',
+        super(RM_Field_RAC_PACTRL_TX0DBMPOWER, self).__init__(register,
+            'TX0DBMPOWER', 'RAC.PACTRL.TX0DBMPOWER', 'read-write',
             u"",
             0, 4)
         self.__dict__['zz_frozen'] = True
 
 
-class RM_Field_RAC_TXPOWER_TX0DBMSELSLICE(Base_RM_Field):
+class RM_Field_RAC_PACTRL_TX0DBMSELSLICE(Base_RM_Field):
     def __init__(self, register):
         self.__dict__['zz_frozen'] = False
-        super(RM_Field_RAC_TXPOWER_TX0DBMSELSLICE, self).__init__(register,
-            'TX0DBMSELSLICE', 'RAC.TXPOWER.TX0DBMSELSLICE', 'read-write',
+        super(RM_Field_RAC_PACTRL_TX0DBMSELSLICE, self).__init__(register,
+            'TX0DBMSELSLICE', 'RAC.PACTRL.TX0DBMSELSLICE', 'read-write',
             u"",
             4, 2)
         self.__dict__['zz_frozen'] = True
 
 
-class RM_Field_RAC_TXRAMP_PARAMPMODE(Base_RM_Field):
+class RM_Field_RAC_PACTRL_TX0DBMSLICERESET(Base_RM_Field):
     def __init__(self, register):
         self.__dict__['zz_frozen'] = False
-        super(RM_Field_RAC_TXRAMP_PARAMPMODE, self).__init__(register,
-            'PARAMPMODE', 'RAC.TXRAMP.PARAMPMODE', 'read-write',
+        super(RM_Field_RAC_PACTRL_TX0DBMSLICERESET, self).__init__(register,
+            'TX0DBMSLICERESET', 'RAC.PACTRL.TX0DBMSLICERESET', 'read-write',
             u"",
-            0, 1)
+            8, 1)
+        self.__dict__['zz_frozen'] = True
+
+
+class RM_Field_RAC_PACTRL_TX0DBMLATCHBYPASS(Base_RM_Field):
+    def __init__(self, register):
+        self.__dict__['zz_frozen'] = False
+        super(RM_Field_RAC_PACTRL_TX0DBMLATCHBYPASS, self).__init__(register,
+            'TX0DBMLATCHBYPASS', 'RAC.PACTRL.TX0DBMLATCHBYPASS', 'read-write',
+            u"",
+            9, 1)
+        self.__dict__['zz_frozen'] = True
+
+
+class RM_Field_RAC_PACTRL_TX6DBMPOWER(Base_RM_Field):
+    def __init__(self, register):
+        self.__dict__['zz_frozen'] = False
+        super(RM_Field_RAC_PACTRL_TX6DBMPOWER, self).__init__(register,
+            'TX6DBMPOWER', 'RAC.PACTRL.TX6DBMPOWER', 'read-write',
+            u"",
+            16, 5)
+        self.__dict__['zz_frozen'] = True
+
+
+class RM_Field_RAC_PACTRL_TX6DBMSELSLICE(Base_RM_Field):
+    def __init__(self, register):
+        self.__dict__['zz_frozen'] = False
+        super(RM_Field_RAC_PACTRL_TX6DBMSELSLICE, self).__init__(register,
+            'TX6DBMSELSLICE', 'RAC.PACTRL.TX6DBMSELSLICE', 'read-write',
+            u"",
+            21, 3)
+        self.__dict__['zz_frozen'] = True
+
+
+class RM_Field_RAC_PACTRL_TX6DBMSLICERESET(Base_RM_Field):
+    def __init__(self, register):
+        self.__dict__['zz_frozen'] = False
+        super(RM_Field_RAC_PACTRL_TX6DBMSLICERESET, self).__init__(register,
+            'TX6DBMSLICERESET', 'RAC.PACTRL.TX6DBMSLICERESET', 'read-write',
+            u"",
+            24, 1)
+        self.__dict__['zz_frozen'] = True
+
+
+class RM_Field_RAC_PACTRL_TX6DBMLATCHBYPASS(Base_RM_Field):
+    def __init__(self, register):
+        self.__dict__['zz_frozen'] = False
+        super(RM_Field_RAC_PACTRL_TX6DBMLATCHBYPASS, self).__init__(register,
+            'TX6DBMLATCHBYPASS', 'RAC.PACTRL.TX6DBMLATCHBYPASS', 'read-write',
+            u"",
+            25, 1)
+        self.__dict__['zz_frozen'] = True
+
+
+class RM_Field_RAC_PACTRL_TX6DBMPREDRVREGBYPASS(Base_RM_Field):
+    def __init__(self, register):
+        self.__dict__['zz_frozen'] = False
+        super(RM_Field_RAC_PACTRL_TX6DBMPREDRVREGBYPASS, self).__init__(register,
+            'TX6DBMPREDRVREGBYPASS', 'RAC.PACTRL.TX6DBMPREDRVREGBYPASS', 'read-write',
+            u"",
+            26, 1)
+        self.__dict__['zz_frozen'] = True
+
+
+class RM_Field_RAC_PACTRL_TX6DBMPULLDOWNREG(Base_RM_Field):
+    def __init__(self, register):
+        self.__dict__['zz_frozen'] = False
+        super(RM_Field_RAC_PACTRL_TX6DBMPULLDOWNREG, self).__init__(register,
+            'TX6DBMPULLDOWNREG', 'RAC.PACTRL.TX6DBMPULLDOWNREG', 'read-write',
+            u"",
+            27, 1)
+        self.__dict__['zz_frozen'] = True
+
+
+class RM_Field_RAC_PACTRL_TX6DBMREGBYPASS(Base_RM_Field):
+    def __init__(self, register):
+        self.__dict__['zz_frozen'] = False
+        super(RM_Field_RAC_PACTRL_TX6DBMREGBYPASS, self).__init__(register,
+            'TX6DBMREGBYPASS', 'RAC.PACTRL.TX6DBMREGBYPASS', 'read-write',
+            u"",
+            28, 1)
+        self.__dict__['zz_frozen'] = True
+
+
+class RM_Field_RAC_PGADEBUG_PGACCTRIM(Base_RM_Field):
+    def __init__(self, register):
+        self.__dict__['zz_frozen'] = False
+        super(RM_Field_RAC_PGADEBUG_PGACCTRIM, self).__init__(register,
+            'PGACCTRIM', 'RAC.PGADEBUG.PGACCTRIM', 'read-write',
+            u"",
+            0, 3)
         self.__dict__['zz_frozen'] = True
 
 
@@ -3470,7 +3150,17 @@ class RM_Field_RAC_PGATRIM_PGACTUNE(Base_RM_Field):
         super(RM_Field_RAC_PGATRIM_PGACTUNE, self).__init__(register,
             'PGACTUNE', 'RAC.PGATRIM.PGACTUNE', 'read-write',
             u"",
-            0, 5)
+            0, 4)
+        self.__dict__['zz_frozen'] = True
+
+
+class RM_Field_RAC_PGATRIM_PGADISANTILOCK(Base_RM_Field):
+    def __init__(self, register):
+        self.__dict__['zz_frozen'] = False
+        super(RM_Field_RAC_PGATRIM_PGADISANTILOCK, self).__init__(register,
+            'PGADISANTILOCK', 'RAC.PGATRIM.PGADISANTILOCK', 'read-write',
+            u"",
+            4, 1)
         self.__dict__['zz_frozen'] = True
 
 
@@ -3480,7 +3170,7 @@ class RM_Field_RAC_PGATRIM_PGAVCMOUTTRIM(Base_RM_Field):
         super(RM_Field_RAC_PGATRIM_PGAVCMOUTTRIM, self).__init__(register,
             'PGAVCMOUTTRIM', 'RAC.PGATRIM.PGAVCMOUTTRIM', 'read-write',
             u"",
-            6, 3)
+            5, 3)
         self.__dict__['zz_frozen'] = True
 
 
@@ -3490,27 +3180,47 @@ class RM_Field_RAC_PGATRIM_PGAVLDOTRIM(Base_RM_Field):
         super(RM_Field_RAC_PGATRIM_PGAVLDOTRIM, self).__init__(register,
             'PGAVLDOTRIM', 'RAC.PGATRIM.PGAVLDOTRIM', 'read-write',
             u"",
-            9, 3)
+            8, 3)
         self.__dict__['zz_frozen'] = True
 
 
-class RM_Field_RAC_PGACAL_PGAOFFCALI(Base_RM_Field):
+class RM_Field_RAC_PGACAL_PGAOFFNCALI(Base_RM_Field):
     def __init__(self, register):
         self.__dict__['zz_frozen'] = False
-        super(RM_Field_RAC_PGACAL_PGAOFFCALI, self).__init__(register,
-            'PGAOFFCALI', 'RAC.PGACAL.PGAOFFCALI', 'read-write',
+        super(RM_Field_RAC_PGACAL_PGAOFFNCALI, self).__init__(register,
+            'PGAOFFNCALI', 'RAC.PGACAL.PGAOFFNCALI', 'read-write',
             u"",
             0, 6)
         self.__dict__['zz_frozen'] = True
 
 
-class RM_Field_RAC_PGACAL_PGAOFFCALQ(Base_RM_Field):
+class RM_Field_RAC_PGACAL_PGAOFFNCALQ(Base_RM_Field):
     def __init__(self, register):
         self.__dict__['zz_frozen'] = False
-        super(RM_Field_RAC_PGACAL_PGAOFFCALQ, self).__init__(register,
-            'PGAOFFCALQ', 'RAC.PGACAL.PGAOFFCALQ', 'read-write',
+        super(RM_Field_RAC_PGACAL_PGAOFFNCALQ, self).__init__(register,
+            'PGAOFFNCALQ', 'RAC.PGACAL.PGAOFFNCALQ', 'read-write',
             u"",
             8, 6)
+        self.__dict__['zz_frozen'] = True
+
+
+class RM_Field_RAC_PGACAL_PGAOFFPCALI(Base_RM_Field):
+    def __init__(self, register):
+        self.__dict__['zz_frozen'] = False
+        super(RM_Field_RAC_PGACAL_PGAOFFPCALI, self).__init__(register,
+            'PGAOFFPCALI', 'RAC.PGACAL.PGAOFFPCALI', 'read-write',
+            u"",
+            16, 6)
+        self.__dict__['zz_frozen'] = True
+
+
+class RM_Field_RAC_PGACAL_PGAOFFPCALQ(Base_RM_Field):
+    def __init__(self, register):
+        self.__dict__['zz_frozen'] = False
+        super(RM_Field_RAC_PGACAL_PGAOFFPCALQ, self).__init__(register,
+            'PGAOFFPCALQ', 'RAC.PGACAL.PGAOFFPCALQ', 'read-write',
+            u"",
+            24, 6)
         self.__dict__['zz_frozen'] = True
 
 
@@ -3520,17 +3230,7 @@ class RM_Field_RAC_PGACTRL_PGABWMODE(Base_RM_Field):
         super(RM_Field_RAC_PGACTRL_PGABWMODE, self).__init__(register,
             'PGABWMODE', 'RAC.PGACTRL.PGABWMODE', 'read-write',
             u"",
-            0, 4)
-        self.__dict__['zz_frozen'] = True
-
-
-class RM_Field_RAC_PGACTRL_PGAENGHZ(Base_RM_Field):
-    def __init__(self, register):
-        self.__dict__['zz_frozen'] = False
-        super(RM_Field_RAC_PGACTRL_PGAENGHZ, self).__init__(register,
-            'PGAENGHZ', 'RAC.PGACTRL.PGAENGHZ', 'read-write',
-            u"",
-            4, 1)
+            0, 2)
         self.__dict__['zz_frozen'] = True
 
 
@@ -3540,7 +3240,17 @@ class RM_Field_RAC_PGACTRL_PGAENBIAS(Base_RM_Field):
         super(RM_Field_RAC_PGACTRL_PGAENBIAS, self).__init__(register,
             'PGAENBIAS', 'RAC.PGACTRL.PGAENBIAS', 'read-write',
             u"",
-            5, 1)
+            2, 1)
+        self.__dict__['zz_frozen'] = True
+
+
+class RM_Field_RAC_PGACTRL_PGAENGHZ(Base_RM_Field):
+    def __init__(self, register):
+        self.__dict__['zz_frozen'] = False
+        super(RM_Field_RAC_PGACTRL_PGAENGHZ, self).__init__(register,
+            'PGAENGHZ', 'RAC.PGACTRL.PGAENGHZ', 'read-write',
+            u"",
+            3, 1)
         self.__dict__['zz_frozen'] = True
 
 
@@ -3550,7 +3260,7 @@ class RM_Field_RAC_PGACTRL_PGAENLATCHI(Base_RM_Field):
         super(RM_Field_RAC_PGACTRL_PGAENLATCHI, self).__init__(register,
             'PGAENLATCHI', 'RAC.PGACTRL.PGAENLATCHI', 'read-write',
             u"",
-            6, 1)
+            5, 1)
         self.__dict__['zz_frozen'] = True
 
 
@@ -3560,7 +3270,7 @@ class RM_Field_RAC_PGACTRL_PGAENLATCHQ(Base_RM_Field):
         super(RM_Field_RAC_PGACTRL_PGAENLATCHQ, self).__init__(register,
             'PGAENLATCHQ', 'RAC.PGACTRL.PGAENLATCHQ', 'read-write',
             u"",
-            7, 1)
+            6, 1)
         self.__dict__['zz_frozen'] = True
 
 
@@ -3570,7 +3280,7 @@ class RM_Field_RAC_PGACTRL_PGAENLDOLOAD(Base_RM_Field):
         super(RM_Field_RAC_PGACTRL_PGAENLDOLOAD, self).__init__(register,
             'PGAENLDOLOAD', 'RAC.PGACTRL.PGAENLDOLOAD', 'read-write',
             u"",
-            8, 1)
+            7, 1)
         self.__dict__['zz_frozen'] = True
 
 
@@ -3604,6 +3314,16 @@ class RM_Field_RAC_PGACTRL_PGAENPKD(Base_RM_Field):
         self.__dict__['zz_frozen'] = True
 
 
+class RM_Field_RAC_PGACTRL_PGAENRCMOUT(Base_RM_Field):
+    def __init__(self, register):
+        self.__dict__['zz_frozen'] = False
+        super(RM_Field_RAC_PGACTRL_PGAENRCMOUT, self).__init__(register,
+            'PGAENRCMOUT', 'RAC.PGACTRL.PGAENRCMOUT', 'read-write',
+            u"",
+            12, 1)
+        self.__dict__['zz_frozen'] = True
+
+
 class RM_Field_RAC_PGACTRL_PGAENSUBG(Base_RM_Field):
     def __init__(self, register):
         self.__dict__['zz_frozen'] = False
@@ -3620,7 +3340,7 @@ class RM_Field_RAC_PGACTRL_PGAPOWERMODE(Base_RM_Field):
         super(RM_Field_RAC_PGACTRL_PGAPOWERMODE, self).__init__(register,
             'PGAPOWERMODE', 'RAC.PGACTRL.PGAPOWERMODE', 'read-write',
             u"",
-            14, 3)
+            14, 2)
         self.__dict__['zz_frozen'] = True
 
 
@@ -3630,7 +3350,7 @@ class RM_Field_RAC_PGACTRL_PGATHRPKDLOSEL(Base_RM_Field):
         super(RM_Field_RAC_PGACTRL_PGATHRPKDLOSEL, self).__init__(register,
             'PGATHRPKDLOSEL', 'RAC.PGACTRL.PGATHRPKDLOSEL', 'read-write',
             u"",
-            17, 4)
+            16, 4)
         self.__dict__['zz_frozen'] = True
 
 
@@ -3640,7 +3360,17 @@ class RM_Field_RAC_PGACTRL_PGATHRPKDHISEL(Base_RM_Field):
         super(RM_Field_RAC_PGACTRL_PGATHRPKDHISEL, self).__init__(register,
             'PGATHRPKDHISEL', 'RAC.PGACTRL.PGATHRPKDHISEL', 'read-write',
             u"",
-            21, 4)
+            20, 4)
+        self.__dict__['zz_frozen'] = True
+
+
+class RM_Field_RAC_PGACTRL_LNAMIXRFPKDTHRESHSEL(Base_RM_Field):
+    def __init__(self, register):
+        self.__dict__['zz_frozen'] = False
+        super(RM_Field_RAC_PGACTRL_LNAMIXRFPKDTHRESHSEL, self).__init__(register,
+            'LNAMIXRFPKDTHRESHSEL', 'RAC.PGACTRL.LNAMIXRFPKDTHRESHSEL', 'read-write',
+            u"",
+            24, 3)
         self.__dict__['zz_frozen'] = True
 
 
@@ -3774,103 +3504,43 @@ class RM_Field_RAC_RADIOEN_RFBIASEN(Base_RM_Field):
         self.__dict__['zz_frozen'] = True
 
 
-class RM_Field_RAC_RFPATHEN0_LNAMIXEN0(Base_RM_Field):
+class RM_Field_RAC_RFPATHEN_LNAMIXEN(Base_RM_Field):
     def __init__(self, register):
         self.__dict__['zz_frozen'] = False
-        super(RM_Field_RAC_RFPATHEN0_LNAMIXEN0, self).__init__(register,
-            'LNAMIXEN0', 'RAC.RFPATHEN0.LNAMIXEN0', 'read-write',
-            u"",
-            0, 1)
-        self.__dict__['zz_frozen'] = True
-
-
-class RM_Field_RAC_RFPATHEN0_LNAMIXRFATTDCEN0(Base_RM_Field):
-    def __init__(self, register):
-        self.__dict__['zz_frozen'] = False
-        super(RM_Field_RAC_RFPATHEN0_LNAMIXRFATTDCEN0, self).__init__(register,
-            'LNAMIXRFATTDCEN0', 'RAC.RFPATHEN0.LNAMIXRFATTDCEN0', 'read-write',
+        super(RM_Field_RAC_RFPATHEN_LNAMIXEN, self).__init__(register,
+            'LNAMIXEN', 'RAC.RFPATHEN.LNAMIXEN', 'read-write',
             u"",
             1, 1)
         self.__dict__['zz_frozen'] = True
 
 
-class RM_Field_RAC_RFPATHEN0_LNAMIXRFPKDENRF0(Base_RM_Field):
+class RM_Field_RAC_RFPATHEN_LNAMIXRFATTDCEN(Base_RM_Field):
     def __init__(self, register):
         self.__dict__['zz_frozen'] = False
-        super(RM_Field_RAC_RFPATHEN0_LNAMIXRFPKDENRF0, self).__init__(register,
-            'LNAMIXRFPKDENRF0', 'RAC.RFPATHEN0.LNAMIXRFPKDENRF0', 'read-write',
+        super(RM_Field_RAC_RFPATHEN_LNAMIXRFATTDCEN, self).__init__(register,
+            'LNAMIXRFATTDCEN', 'RAC.RFPATHEN.LNAMIXRFATTDCEN', 'read-write',
             u"",
             2, 1)
         self.__dict__['zz_frozen'] = True
 
 
-class RM_Field_RAC_RFPATHEN0_SYLODIVRLO02G4EN(Base_RM_Field):
+class RM_Field_RAC_RFPATHEN_LNAMIXRFPKDENRF(Base_RM_Field):
     def __init__(self, register):
         self.__dict__['zz_frozen'] = False
-        super(RM_Field_RAC_RFPATHEN0_SYLODIVRLO02G4EN, self).__init__(register,
-            'SYLODIVRLO02G4EN', 'RAC.RFPATHEN0.SYLODIVRLO02G4EN', 'read-write',
+        super(RM_Field_RAC_RFPATHEN_LNAMIXRFPKDENRF, self).__init__(register,
+            'LNAMIXRFPKDENRF', 'RAC.RFPATHEN.LNAMIXRFPKDENRF', 'read-write',
             u"",
             3, 1)
         self.__dict__['zz_frozen'] = True
 
 
-class RM_Field_RAC_RFPATHEN0_LNAMIXTRSW0(Base_RM_Field):
+class RM_Field_RAC_RFPATHEN_LNAMIXTRSW(Base_RM_Field):
     def __init__(self, register):
         self.__dict__['zz_frozen'] = False
-        super(RM_Field_RAC_RFPATHEN0_LNAMIXTRSW0, self).__init__(register,
-            'LNAMIXTRSW0', 'RAC.RFPATHEN0.LNAMIXTRSW0', 'read-write',
+        super(RM_Field_RAC_RFPATHEN_LNAMIXTRSW, self).__init__(register,
+            'LNAMIXTRSW', 'RAC.RFPATHEN.LNAMIXTRSW', 'read-write',
             u"",
-            6, 1)
-        self.__dict__['zz_frozen'] = True
-
-
-class RM_Field_RAC_RFPATHEN1_LNAMIXEN1(Base_RM_Field):
-    def __init__(self, register):
-        self.__dict__['zz_frozen'] = False
-        super(RM_Field_RAC_RFPATHEN1_LNAMIXEN1, self).__init__(register,
-            'LNAMIXEN1', 'RAC.RFPATHEN1.LNAMIXEN1', 'read-write',
-            u"",
-            0, 1)
-        self.__dict__['zz_frozen'] = True
-
-
-class RM_Field_RAC_RFPATHEN1_LNAMIXRFATTDCEN1(Base_RM_Field):
-    def __init__(self, register):
-        self.__dict__['zz_frozen'] = False
-        super(RM_Field_RAC_RFPATHEN1_LNAMIXRFATTDCEN1, self).__init__(register,
-            'LNAMIXRFATTDCEN1', 'RAC.RFPATHEN1.LNAMIXRFATTDCEN1', 'read-write',
-            u"",
-            1, 1)
-        self.__dict__['zz_frozen'] = True
-
-
-class RM_Field_RAC_RFPATHEN1_LNAMIXRFPKDENRF1(Base_RM_Field):
-    def __init__(self, register):
-        self.__dict__['zz_frozen'] = False
-        super(RM_Field_RAC_RFPATHEN1_LNAMIXRFPKDENRF1, self).__init__(register,
-            'LNAMIXRFPKDENRF1', 'RAC.RFPATHEN1.LNAMIXRFPKDENRF1', 'read-write',
-            u"",
-            2, 1)
-        self.__dict__['zz_frozen'] = True
-
-
-class RM_Field_RAC_RFPATHEN1_SYLODIVRLO12G4EN(Base_RM_Field):
-    def __init__(self, register):
-        self.__dict__['zz_frozen'] = False
-        super(RM_Field_RAC_RFPATHEN1_SYLODIVRLO12G4EN, self).__init__(register,
-            'SYLODIVRLO12G4EN', 'RAC.RFPATHEN1.SYLODIVRLO12G4EN', 'read-write',
-            u"",
-            3, 1)
-        self.__dict__['zz_frozen'] = True
-
-
-class RM_Field_RAC_RFPATHEN1_LNAMIXTRSW1(Base_RM_Field):
-    def __init__(self, register):
-        self.__dict__['zz_frozen'] = False
-        super(RM_Field_RAC_RFPATHEN1_LNAMIXTRSW1, self).__init__(register,
-            'LNAMIXTRSW1', 'RAC.RFPATHEN1.LNAMIXTRSW1', 'read-write',
-            u"",
-            6, 1)
+            4, 1)
         self.__dict__['zz_frozen'] = True
 
 
@@ -3914,23 +3584,13 @@ class RM_Field_RAC_RX_LNAMIXENRFPKD(Base_RM_Field):
         self.__dict__['zz_frozen'] = True
 
 
-class RM_Field_RAC_RX_LNAMIXENRFPKDLOTHRESH(Base_RM_Field):
-    def __init__(self, register):
-        self.__dict__['zz_frozen'] = False
-        super(RM_Field_RAC_RX_LNAMIXENRFPKDLOTHRESH, self).__init__(register,
-            'LNAMIXENRFPKDLOTHRESH', 'RAC.RX.LNAMIXENRFPKDLOTHRESH', 'read-write',
-            u"",
-            4, 1)
-        self.__dict__['zz_frozen'] = True
-
-
 class RM_Field_RAC_RX_LNAMIXLDOLOWCUR(Base_RM_Field):
     def __init__(self, register):
         self.__dict__['zz_frozen'] = False
         super(RM_Field_RAC_RX_LNAMIXLDOLOWCUR, self).__init__(register,
             'LNAMIXLDOLOWCUR', 'RAC.RX.LNAMIXLDOLOWCUR', 'read-write',
             u"",
-            5, 1)
+            4, 1)
         self.__dict__['zz_frozen'] = True
 
 
@@ -3940,7 +3600,7 @@ class RM_Field_RAC_RX_LNAMIXREGLOADEN(Base_RM_Field):
         super(RM_Field_RAC_RX_LNAMIXREGLOADEN, self).__init__(register,
             'LNAMIXREGLOADEN', 'RAC.RX.LNAMIXREGLOADEN', 'read-write',
             u"",
-            7, 1)
+            5, 1)
         self.__dict__['zz_frozen'] = True
 
 
@@ -3950,7 +3610,17 @@ class RM_Field_RAC_RX_PGAENLDO(Base_RM_Field):
         super(RM_Field_RAC_RX_PGAENLDO, self).__init__(register,
             'PGAENLDO', 'RAC.RX.PGAENLDO', 'read-write',
             u"",
-            8, 1)
+            6, 1)
+        self.__dict__['zz_frozen'] = True
+
+
+class RM_Field_RAC_RX_SYCHPBIASTRIMBUF(Base_RM_Field):
+    def __init__(self, register):
+        self.__dict__['zz_frozen'] = False
+        super(RM_Field_RAC_RX_SYCHPBIASTRIMBUF, self).__init__(register,
+            'SYCHPBIASTRIMBUF', 'RAC.RX.SYCHPBIASTRIMBUF', 'read-write',
+            u"",
+            7, 1)
         self.__dict__['zz_frozen'] = True
 
 
@@ -3960,57 +3630,47 @@ class RM_Field_RAC_RX_SYCHPQNC3EN(Base_RM_Field):
         super(RM_Field_RAC_RX_SYCHPQNC3EN, self).__init__(register,
             'SYCHPQNC3EN', 'RAC.RX.SYCHPQNC3EN', 'read-write',
             u"",
+            8, 1)
+        self.__dict__['zz_frozen'] = True
+
+
+class RM_Field_RAC_RX_SYPFDCHPLPEN(Base_RM_Field):
+    def __init__(self, register):
+        self.__dict__['zz_frozen'] = False
+        super(RM_Field_RAC_RX_SYPFDCHPLPEN, self).__init__(register,
+            'SYPFDCHPLPEN', 'RAC.RX.SYPFDCHPLPEN', 'read-write',
+            u"",
             9, 1)
         self.__dict__['zz_frozen'] = True
 
 
-class RM_Field_RAC_RX_SYCHPBIASTRIMBUFRX(Base_RM_Field):
+class RM_Field_RAC_RX_SYPFDFPWEN(Base_RM_Field):
     def __init__(self, register):
         self.__dict__['zz_frozen'] = False
-        super(RM_Field_RAC_RX_SYCHPBIASTRIMBUFRX, self).__init__(register,
-            'SYCHPBIASTRIMBUFRX', 'RAC.RX.SYCHPBIASTRIMBUFRX', 'read-write',
+        super(RM_Field_RAC_RX_SYPFDFPWEN, self).__init__(register,
+            'SYPFDFPWEN', 'RAC.RX.SYPFDFPWEN', 'read-write',
             u"",
-            16, 1)
+            10, 1)
         self.__dict__['zz_frozen'] = True
 
 
-class RM_Field_RAC_RX_SYPFDCHPLPENRX(Base_RM_Field):
+class RM_Field_RAC_RX_TX6DBMENRXMODEBIAS(Base_RM_Field):
     def __init__(self, register):
         self.__dict__['zz_frozen'] = False
-        super(RM_Field_RAC_RX_SYPFDCHPLPENRX, self).__init__(register,
-            'SYPFDCHPLPENRX', 'RAC.RX.SYPFDCHPLPENRX', 'read-write',
+        super(RM_Field_RAC_RX_TX6DBMENRXMODEBIAS, self).__init__(register,
+            'TX6DBMENRXMODEBIAS', 'RAC.RX.TX6DBMENRXMODEBIAS', 'read-write',
             u"",
-            17, 1)
+            11, 1)
         self.__dict__['zz_frozen'] = True
 
 
-class RM_Field_RAC_RX_SYPFDFPWENRX(Base_RM_Field):
+class RM_Field_RAC_TX_TX0DBMENBLEEDPREDRVREG(Base_RM_Field):
     def __init__(self, register):
         self.__dict__['zz_frozen'] = False
-        super(RM_Field_RAC_RX_SYPFDFPWENRX, self).__init__(register,
-            'SYPFDFPWENRX', 'RAC.RX.SYPFDFPWENRX', 'read-write',
-            u"",
-            18, 1)
-        self.__dict__['zz_frozen'] = True
-
-
-class RM_Field_RAC_TX_TXPAENREG(Base_RM_Field):
-    def __init__(self, register):
-        self.__dict__['zz_frozen'] = False
-        super(RM_Field_RAC_TX_TXPAENREG, self).__init__(register,
-            'TXPAENREG', 'RAC.TX.TXPAENREG', 'read-write',
+        super(RM_Field_RAC_TX_TX0DBMENBLEEDPREDRVREG, self).__init__(register,
+            'TX0DBMENBLEEDPREDRVREG', 'RAC.TX.TX0DBMENBLEEDPREDRVREG', 'read-write',
             u"",
             0, 1)
-        self.__dict__['zz_frozen'] = True
-
-
-class RM_Field_RAC_TX_TXPAENRAMPCLK(Base_RM_Field):
-    def __init__(self, register):
-        self.__dict__['zz_frozen'] = False
-        super(RM_Field_RAC_TX_TXPAENRAMPCLK, self).__init__(register,
-            'TXPAENRAMPCLK', 'RAC.TX.TXPAENRAMPCLK', 'read-write',
-            u"",
-            1, 1)
         self.__dict__['zz_frozen'] = True
 
 
@@ -4020,17 +3680,37 @@ class RM_Field_RAC_TX_TX0DBMENBLEEDREG(Base_RM_Field):
         super(RM_Field_RAC_TX_TX0DBMENBLEEDREG, self).__init__(register,
             'TX0DBMENBLEEDREG', 'RAC.TX.TX0DBMENBLEEDREG', 'read-write',
             u"",
+            1, 1)
+        self.__dict__['zz_frozen'] = True
+
+
+class RM_Field_RAC_TX_TX0DBMENPREDRV(Base_RM_Field):
+    def __init__(self, register):
+        self.__dict__['zz_frozen'] = False
+        super(RM_Field_RAC_TX_TX0DBMENPREDRV, self).__init__(register,
+            'TX0DBMENPREDRV', 'RAC.TX.TX0DBMENPREDRV', 'read-write',
+            u"",
             2, 1)
         self.__dict__['zz_frozen'] = True
 
 
-class RM_Field_RAC_TX_TX0DBMENREG(Base_RM_Field):
+class RM_Field_RAC_TX_TX0DBMENPREDRVREG(Base_RM_Field):
     def __init__(self, register):
         self.__dict__['zz_frozen'] = False
-        super(RM_Field_RAC_TX_TX0DBMENREG, self).__init__(register,
-            'TX0DBMENREG', 'RAC.TX.TX0DBMENREG', 'read-write',
+        super(RM_Field_RAC_TX_TX0DBMENPREDRVREG, self).__init__(register,
+            'TX0DBMENPREDRVREG', 'RAC.TX.TX0DBMENPREDRVREG', 'read-write',
             u"",
             3, 1)
+        self.__dict__['zz_frozen'] = True
+
+
+class RM_Field_RAC_TX_TX0DBMENPREDRVREGBIAS(Base_RM_Field):
+    def __init__(self, register):
+        self.__dict__['zz_frozen'] = False
+        super(RM_Field_RAC_TX_TX0DBMENPREDRVREGBIAS, self).__init__(register,
+            'TX0DBMENPREDRVREGBIAS', 'RAC.TX.TX0DBMENPREDRVREGBIAS', 'read-write',
+            u"",
+            4, 1)
         self.__dict__['zz_frozen'] = True
 
 
@@ -4044,223 +3724,103 @@ class RM_Field_RAC_TX_TX0DBMENBIAS(Base_RM_Field):
         self.__dict__['zz_frozen'] = True
 
 
-class RM_Field_RAC_TX_TX0DBMENPREDRV(Base_RM_Field):
-    def __init__(self, register):
-        self.__dict__['zz_frozen'] = False
-        super(RM_Field_RAC_TX_TX0DBMENPREDRV, self).__init__(register,
-            'TX0DBMENPREDRV', 'RAC.TX.TX0DBMENPREDRV', 'read-write',
-            u"",
-            6, 1)
-        self.__dict__['zz_frozen'] = True
-
-
-class RM_Field_RAC_TX_TX0DBMENPREDRVREG(Base_RM_Field):
-    def __init__(self, register):
-        self.__dict__['zz_frozen'] = False
-        super(RM_Field_RAC_TX_TX0DBMENPREDRVREG, self).__init__(register,
-            'TX0DBMENPREDRVREG', 'RAC.TX.TX0DBMENPREDRVREG', 'read-write',
-            u"",
-            7, 1)
-        self.__dict__['zz_frozen'] = True
-
-
-class RM_Field_RAC_TX_TX0DBMENPREDRVREGBIAS(Base_RM_Field):
-    def __init__(self, register):
-        self.__dict__['zz_frozen'] = False
-        super(RM_Field_RAC_TX_TX0DBMENPREDRVREGBIAS, self).__init__(register,
-            'TX0DBMENPREDRVREGBIAS', 'RAC.TX.TX0DBMENPREDRVREGBIAS', 'read-write',
-            u"",
-            8, 1)
-        self.__dict__['zz_frozen'] = True
-
-
 class RM_Field_RAC_TX_TX0DBMENRAMPCLK(Base_RM_Field):
     def __init__(self, register):
         self.__dict__['zz_frozen'] = False
         super(RM_Field_RAC_TX_TX0DBMENRAMPCLK, self).__init__(register,
             'TX0DBMENRAMPCLK', 'RAC.TX.TX0DBMENRAMPCLK', 'read-write',
             u"",
-            9, 1)
+            6, 1)
         self.__dict__['zz_frozen'] = True
 
 
-class RM_Field_RAC_TX_TX0DBMENBLEEDPREDRVREG(Base_RM_Field):
+class RM_Field_RAC_TX_TX0DBMENREG(Base_RM_Field):
     def __init__(self, register):
         self.__dict__['zz_frozen'] = False
-        super(RM_Field_RAC_TX_TX0DBMENBLEEDPREDRVREG, self).__init__(register,
-            'TX0DBMENBLEEDPREDRVREG', 'RAC.TX.TX0DBMENBLEEDPREDRVREG', 'read-write',
+        super(RM_Field_RAC_TX_TX0DBMENREG, self).__init__(register,
+            'TX0DBMENREG', 'RAC.TX.TX0DBMENREG', 'read-write',
             u"",
-            10, 1)
+            7, 1)
         self.__dict__['zz_frozen'] = True
 
 
-class RM_Field_RAC_TX_TXPAENBLEEDPREDRVREG(Base_RM_Field):
+class RM_Field_RAC_TX_TX6DBMENBLEEDPREDRVREG(Base_RM_Field):
     def __init__(self, register):
         self.__dict__['zz_frozen'] = False
-        super(RM_Field_RAC_TX_TXPAENBLEEDPREDRVREG, self).__init__(register,
-            'TXPAENBLEEDPREDRVREG', 'RAC.TX.TXPAENBLEEDPREDRVREG', 'read-write',
-            u"",
-            12, 1)
-        self.__dict__['zz_frozen'] = True
-
-
-class RM_Field_RAC_TX_TXPAENBLEEDREG(Base_RM_Field):
-    def __init__(self, register):
-        self.__dict__['zz_frozen'] = False
-        super(RM_Field_RAC_TX_TXPAENBLEEDREG, self).__init__(register,
-            'TXPAENBLEEDREG', 'RAC.TX.TXPAENBLEEDREG', 'read-write',
-            u"",
-            13, 1)
-        self.__dict__['zz_frozen'] = True
-
-
-class RM_Field_RAC_TX_TXPAENPAOUT(Base_RM_Field):
-    def __init__(self, register):
-        self.__dict__['zz_frozen'] = False
-        super(RM_Field_RAC_TX_TXPAENPAOUT, self).__init__(register,
-            'TXPAENPAOUT', 'RAC.TX.TXPAENPAOUT', 'read-write',
-            u"",
-            14, 1)
-        self.__dict__['zz_frozen'] = True
-
-
-class RM_Field_RAC_TX_TXPAENPREDRVREG(Base_RM_Field):
-    def __init__(self, register):
-        self.__dict__['zz_frozen'] = False
-        super(RM_Field_RAC_TX_TXPAENPREDRVREG, self).__init__(register,
-            'TXPAENPREDRVREG', 'RAC.TX.TXPAENPREDRVREG', 'read-write',
-            u"",
-            15, 1)
-        self.__dict__['zz_frozen'] = True
-
-
-class RM_Field_RAC_TX_SYCHPBIASTRIMBUFTX(Base_RM_Field):
-    def __init__(self, register):
-        self.__dict__['zz_frozen'] = False
-        super(RM_Field_RAC_TX_SYCHPBIASTRIMBUFTX, self).__init__(register,
-            'SYCHPBIASTRIMBUFTX', 'RAC.TX.SYCHPBIASTRIMBUFTX', 'read-write',
+        super(RM_Field_RAC_TX_TX6DBMENBLEEDPREDRVREG, self).__init__(register,
+            'TX6DBMENBLEEDPREDRVREG', 'RAC.TX.TX6DBMENBLEEDPREDRVREG', 'read-write',
             u"",
             16, 1)
         self.__dict__['zz_frozen'] = True
 
 
-class RM_Field_RAC_TX_SYPFDCHPLPENTX(Base_RM_Field):
+class RM_Field_RAC_TX_TX6DBMENBLEEDREG(Base_RM_Field):
     def __init__(self, register):
         self.__dict__['zz_frozen'] = False
-        super(RM_Field_RAC_TX_SYPFDCHPLPENTX, self).__init__(register,
-            'SYPFDCHPLPENTX', 'RAC.TX.SYPFDCHPLPENTX', 'read-write',
+        super(RM_Field_RAC_TX_TX6DBMENBLEEDREG, self).__init__(register,
+            'TX6DBMENBLEEDREG', 'RAC.TX.TX6DBMENBLEEDREG', 'read-write',
             u"",
             17, 1)
         self.__dict__['zz_frozen'] = True
 
 
-class RM_Field_RAC_TX_SYPFDFPWENTX(Base_RM_Field):
+class RM_Field_RAC_TX_TX6DBMENPREDRVREG(Base_RM_Field):
     def __init__(self, register):
         self.__dict__['zz_frozen'] = False
-        super(RM_Field_RAC_TX_SYPFDFPWENTX, self).__init__(register,
-            'SYPFDFPWENTX', 'RAC.TX.SYPFDFPWENTX', 'read-write',
-            u"",
-            18, 1)
-        self.__dict__['zz_frozen'] = True
-
-
-class RM_Field_RAC_TX_TXPAEN10DBM(Base_RM_Field):
-    def __init__(self, register):
-        self.__dict__['zz_frozen'] = False
-        super(RM_Field_RAC_TX_TXPAEN10DBM, self).__init__(register,
-            'TXPAEN10DBM', 'RAC.TX.TXPAEN10DBM', 'read-write',
+        super(RM_Field_RAC_TX_TX6DBMENPREDRVREG, self).__init__(register,
+            'TX6DBMENPREDRVREG', 'RAC.TX.TX6DBMENPREDRVREG', 'read-write',
             u"",
             19, 1)
         self.__dict__['zz_frozen'] = True
 
 
-class RM_Field_RAC_TX_TXPAEN10DBMMAINCTAP(Base_RM_Field):
+class RM_Field_RAC_TX_TX6DBMENRAMPCLK(Base_RM_Field):
     def __init__(self, register):
         self.__dict__['zz_frozen'] = False
-        super(RM_Field_RAC_TX_TXPAEN10DBMMAINCTAP, self).__init__(register,
-            'TXPAEN10DBMMAINCTAP', 'RAC.TX.TXPAEN10DBMMAINCTAP', 'read-write',
-            u"",
-            20, 1)
-        self.__dict__['zz_frozen'] = True
-
-
-class RM_Field_RAC_TX_TXPAEN10DBMPREDRV(Base_RM_Field):
-    def __init__(self, register):
-        self.__dict__['zz_frozen'] = False
-        super(RM_Field_RAC_TX_TXPAEN10DBMPREDRV, self).__init__(register,
-            'TXPAEN10DBMPREDRV', 'RAC.TX.TXPAEN10DBMPREDRV', 'read-write',
-            u"",
-            21, 1)
-        self.__dict__['zz_frozen'] = True
-
-
-class RM_Field_RAC_TX_TXPAEN10DBMVMID(Base_RM_Field):
-    def __init__(self, register):
-        self.__dict__['zz_frozen'] = False
-        super(RM_Field_RAC_TX_TXPAEN10DBMVMID, self).__init__(register,
-            'TXPAEN10DBMVMID', 'RAC.TX.TXPAEN10DBMVMID', 'read-write',
+        super(RM_Field_RAC_TX_TX6DBMENRAMPCLK, self).__init__(register,
+            'TX6DBMENRAMPCLK', 'RAC.TX.TX6DBMENRAMPCLK', 'read-write',
             u"",
             22, 1)
         self.__dict__['zz_frozen'] = True
 
 
-class RM_Field_RAC_TX_TXPAEN20DBM(Base_RM_Field):
+class RM_Field_RAC_TX_TX6DBMENREG(Base_RM_Field):
     def __init__(self, register):
         self.__dict__['zz_frozen'] = False
-        super(RM_Field_RAC_TX_TXPAEN20DBM, self).__init__(register,
-            'TXPAEN20DBM', 'RAC.TX.TXPAEN20DBM', 'read-write',
+        super(RM_Field_RAC_TX_TX6DBMENREG, self).__init__(register,
+            'TX6DBMENREG', 'RAC.TX.TX6DBMENREG', 'read-write',
             u"",
             23, 1)
         self.__dict__['zz_frozen'] = True
 
 
-class RM_Field_RAC_TX_TXPAEN20DBMMAINCTAP(Base_RM_Field):
+class RM_Field_RAC_TX_TX6DBMENPACORE(Base_RM_Field):
     def __init__(self, register):
         self.__dict__['zz_frozen'] = False
-        super(RM_Field_RAC_TX_TXPAEN20DBMMAINCTAP, self).__init__(register,
-            'TXPAEN20DBMMAINCTAP', 'RAC.TX.TXPAEN20DBMMAINCTAP', 'read-write',
+        super(RM_Field_RAC_TX_TX6DBMENPACORE, self).__init__(register,
+            'TX6DBMENPACORE', 'RAC.TX.TX6DBMENPACORE', 'read-write',
             u"",
             24, 1)
         self.__dict__['zz_frozen'] = True
 
 
-class RM_Field_RAC_TX_TXPAEN20DBMPREDRV(Base_RM_Field):
+class RM_Field_RAC_TX_TX6DBMENPAOUT(Base_RM_Field):
     def __init__(self, register):
         self.__dict__['zz_frozen'] = False
-        super(RM_Field_RAC_TX_TXPAEN20DBMPREDRV, self).__init__(register,
-            'TXPAEN20DBMPREDRV', 'RAC.TX.TXPAEN20DBMPREDRV', 'read-write',
+        super(RM_Field_RAC_TX_TX6DBMENPAOUT, self).__init__(register,
+            'TX6DBMENPAOUT', 'RAC.TX.TX6DBMENPAOUT', 'read-write',
             u"",
             25, 1)
         self.__dict__['zz_frozen'] = True
 
 
-class RM_Field_RAC_TX_TXPAEN20DBMVMID(Base_RM_Field):
+class RM_Field_RAC_TX_ENXOSQBUFFILT(Base_RM_Field):
     def __init__(self, register):
         self.__dict__['zz_frozen'] = False
-        super(RM_Field_RAC_TX_TXPAEN20DBMVMID, self).__init__(register,
-            'TXPAEN20DBMVMID', 'RAC.TX.TXPAEN20DBMVMID', 'read-write',
+        super(RM_Field_RAC_TX_ENXOSQBUFFILT, self).__init__(register,
+            'ENXOSQBUFFILT', 'RAC.TX.ENXOSQBUFFILT', 'read-write',
             u"",
-            26, 1)
-        self.__dict__['zz_frozen'] = True
-
-
-class RM_Field_RAC_TX_TXPAEN20DBMVBIASHF(Base_RM_Field):
-    def __init__(self, register):
-        self.__dict__['zz_frozen'] = False
-        super(RM_Field_RAC_TX_TXPAEN20DBMVBIASHF, self).__init__(register,
-            'TXPAEN20DBMVBIASHF', 'RAC.TX.TXPAEN20DBMVBIASHF', 'read-write',
-            u"",
-            27, 1)
-        self.__dict__['zz_frozen'] = True
-
-
-class RM_Field_RAC_TX_TXPATRIM20DBMVBIASHF(Base_RM_Field):
-    def __init__(self, register):
-        self.__dict__['zz_frozen'] = False
-        super(RM_Field_RAC_TX_TXPATRIM20DBMVBIASHF, self).__init__(register,
-            'TXPATRIM20DBMVBIASHF', 'RAC.TX.TXPATRIM20DBMVBIASHF', 'read-write',
-            u"",
-            28, 2)
+            29, 1)
         self.__dict__['zz_frozen'] = True
 
 
@@ -4364,23 +3924,13 @@ class RM_Field_RAC_SYTRIM0_SYCHPBIAS(Base_RM_Field):
         self.__dict__['zz_frozen'] = True
 
 
-class RM_Field_RAC_SYTRIM0_SYCHPCURRRX(Base_RM_Field):
+class RM_Field_RAC_SYTRIM0_SYCHPCURR(Base_RM_Field):
     def __init__(self, register):
         self.__dict__['zz_frozen'] = False
-        super(RM_Field_RAC_SYTRIM0_SYCHPCURRRX, self).__init__(register,
-            'SYCHPCURRRX', 'RAC.SYTRIM0.SYCHPCURRRX', 'read-write',
+        super(RM_Field_RAC_SYTRIM0_SYCHPCURR, self).__init__(register,
+            'SYCHPCURR', 'RAC.SYTRIM0.SYCHPCURR', 'read-write',
             u"",
             3, 3)
-        self.__dict__['zz_frozen'] = True
-
-
-class RM_Field_RAC_SYTRIM0_SYCHPCURRTX(Base_RM_Field):
-    def __init__(self, register):
-        self.__dict__['zz_frozen'] = False
-        super(RM_Field_RAC_SYTRIM0_SYCHPCURRTX, self).__init__(register,
-            'SYCHPCURRTX', 'RAC.SYTRIM0.SYCHPCURRTX', 'read-write',
-            u"",
-            6, 3)
         self.__dict__['zz_frozen'] = True
 
 
@@ -4390,47 +3940,27 @@ class RM_Field_RAC_SYTRIM0_SYCHPLEVNSRC(Base_RM_Field):
         super(RM_Field_RAC_SYTRIM0_SYCHPLEVNSRC, self).__init__(register,
             'SYCHPLEVNSRC', 'RAC.SYTRIM0.SYCHPLEVNSRC', 'read-write',
             u"",
+            6, 3)
+        self.__dict__['zz_frozen'] = True
+
+
+class RM_Field_RAC_SYTRIM0_SYCHPLEVPSRC(Base_RM_Field):
+    def __init__(self, register):
+        self.__dict__['zz_frozen'] = False
+        super(RM_Field_RAC_SYTRIM0_SYCHPLEVPSRC, self).__init__(register,
+            'SYCHPLEVPSRC', 'RAC.SYTRIM0.SYCHPLEVPSRC', 'read-write',
+            u"",
             9, 3)
         self.__dict__['zz_frozen'] = True
 
 
-class RM_Field_RAC_SYTRIM0_SYCHPLEVPSRCRX(Base_RM_Field):
+class RM_Field_RAC_SYTRIM0_SYCHPSRCEN(Base_RM_Field):
     def __init__(self, register):
         self.__dict__['zz_frozen'] = False
-        super(RM_Field_RAC_SYTRIM0_SYCHPLEVPSRCRX, self).__init__(register,
-            'SYCHPLEVPSRCRX', 'RAC.SYTRIM0.SYCHPLEVPSRCRX', 'read-write',
+        super(RM_Field_RAC_SYTRIM0_SYCHPSRCEN, self).__init__(register,
+            'SYCHPSRCEN', 'RAC.SYTRIM0.SYCHPSRCEN', 'read-write',
             u"",
-            12, 3)
-        self.__dict__['zz_frozen'] = True
-
-
-class RM_Field_RAC_SYTRIM0_SYCHPLEVPSRCTX(Base_RM_Field):
-    def __init__(self, register):
-        self.__dict__['zz_frozen'] = False
-        super(RM_Field_RAC_SYTRIM0_SYCHPLEVPSRCTX, self).__init__(register,
-            'SYCHPLEVPSRCTX', 'RAC.SYTRIM0.SYCHPLEVPSRCTX', 'read-write',
-            u"",
-            15, 3)
-        self.__dict__['zz_frozen'] = True
-
-
-class RM_Field_RAC_SYTRIM0_SYCHPSRCENRX(Base_RM_Field):
-    def __init__(self, register):
-        self.__dict__['zz_frozen'] = False
-        super(RM_Field_RAC_SYTRIM0_SYCHPSRCENRX, self).__init__(register,
-            'SYCHPSRCENRX', 'RAC.SYTRIM0.SYCHPSRCENRX', 'read-write',
-            u"",
-            18, 1)
-        self.__dict__['zz_frozen'] = True
-
-
-class RM_Field_RAC_SYTRIM0_SYCHPSRCENTX(Base_RM_Field):
-    def __init__(self, register):
-        self.__dict__['zz_frozen'] = False
-        super(RM_Field_RAC_SYTRIM0_SYCHPSRCENTX, self).__init__(register,
-            'SYCHPSRCENTX', 'RAC.SYTRIM0.SYCHPSRCENTX', 'read-write',
-            u"",
-            19, 1)
+            13, 1)
         self.__dict__['zz_frozen'] = True
 
 
@@ -4440,7 +3970,7 @@ class RM_Field_RAC_SYTRIM0_SYCHPREPLICACURRADJ(Base_RM_Field):
         super(RM_Field_RAC_SYTRIM0_SYCHPREPLICACURRADJ, self).__init__(register,
             'SYCHPREPLICACURRADJ', 'RAC.SYTRIM0.SYCHPREPLICACURRADJ', 'read-write',
             u"",
-            20, 3)
+            14, 3)
         self.__dict__['zz_frozen'] = True
 
 
@@ -4450,7 +3980,7 @@ class RM_Field_RAC_SYTRIM0_SYTRIMCHPREGAMPBIAS(Base_RM_Field):
         super(RM_Field_RAC_SYTRIM0_SYTRIMCHPREGAMPBIAS, self).__init__(register,
             'SYTRIMCHPREGAMPBIAS', 'RAC.SYTRIM0.SYTRIMCHPREGAMPBIAS', 'read-write',
             u"",
-            23, 3)
+            17, 3)
         self.__dict__['zz_frozen'] = True
 
 
@@ -4460,57 +3990,27 @@ class RM_Field_RAC_SYTRIM0_SYTRIMCHPREGAMPBW(Base_RM_Field):
         super(RM_Field_RAC_SYTRIM0_SYTRIMCHPREGAMPBW, self).__init__(register,
             'SYTRIMCHPREGAMPBW', 'RAC.SYTRIM0.SYTRIMCHPREGAMPBW', 'read-write',
             u"",
-            26, 2)
+            20, 2)
         self.__dict__['zz_frozen'] = True
 
 
-class RM_Field_RAC_SYTRIM1_SYLODIVLDOTRIMCORERX(Base_RM_Field):
+class RM_Field_RAC_SYTRIM1_SYLODIVLDOTRIMCORE(Base_RM_Field):
     def __init__(self, register):
         self.__dict__['zz_frozen'] = False
-        super(RM_Field_RAC_SYTRIM1_SYLODIVLDOTRIMCORERX, self).__init__(register,
-            'SYLODIVLDOTRIMCORERX', 'RAC.SYTRIM1.SYLODIVLDOTRIMCORERX', 'read-write',
+        super(RM_Field_RAC_SYTRIM1_SYLODIVLDOTRIMCORE, self).__init__(register,
+            'SYLODIVLDOTRIMCORE', 'RAC.SYTRIM1.SYLODIVLDOTRIMCORE', 'read-write',
             u"",
             0, 2)
         self.__dict__['zz_frozen'] = True
 
 
-class RM_Field_RAC_SYTRIM1_SYLODIVLDOTRIMCORETX(Base_RM_Field):
+class RM_Field_RAC_SYTRIM1_SYLODIVLDOTRIMNDIO(Base_RM_Field):
     def __init__(self, register):
         self.__dict__['zz_frozen'] = False
-        super(RM_Field_RAC_SYTRIM1_SYLODIVLDOTRIMCORETX, self).__init__(register,
-            'SYLODIVLDOTRIMCORETX', 'RAC.SYTRIM1.SYLODIVLDOTRIMCORETX', 'read-write',
+        super(RM_Field_RAC_SYTRIM1_SYLODIVLDOTRIMNDIO, self).__init__(register,
+            'SYLODIVLDOTRIMNDIO', 'RAC.SYTRIM1.SYLODIVLDOTRIMNDIO', 'read-write',
             u"",
-            2, 2)
-        self.__dict__['zz_frozen'] = True
-
-
-class RM_Field_RAC_SYTRIM1_SYLODIVLDOTRIMNDIORX(Base_RM_Field):
-    def __init__(self, register):
-        self.__dict__['zz_frozen'] = False
-        super(RM_Field_RAC_SYTRIM1_SYLODIVLDOTRIMNDIORX, self).__init__(register,
-            'SYLODIVLDOTRIMNDIORX', 'RAC.SYTRIM1.SYLODIVLDOTRIMNDIORX', 'read-write',
-            u"",
-            4, 4)
-        self.__dict__['zz_frozen'] = True
-
-
-class RM_Field_RAC_SYTRIM1_SYLODIVLDOTRIMNDIOTX(Base_RM_Field):
-    def __init__(self, register):
-        self.__dict__['zz_frozen'] = False
-        super(RM_Field_RAC_SYTRIM1_SYLODIVLDOTRIMNDIOTX, self).__init__(register,
-            'SYLODIVLDOTRIMNDIOTX', 'RAC.SYTRIM1.SYLODIVLDOTRIMNDIOTX', 'read-write',
-            u"",
-            8, 4)
-        self.__dict__['zz_frozen'] = True
-
-
-class RM_Field_RAC_SYTRIM1_SYLODIVTLO20DBM2G4DELAY(Base_RM_Field):
-    def __init__(self, register):
-        self.__dict__['zz_frozen'] = False
-        super(RM_Field_RAC_SYTRIM1_SYLODIVTLO20DBM2G4DELAY, self).__init__(register,
-            'SYLODIVTLO20DBM2G4DELAY', 'RAC.SYTRIM1.SYLODIVTLO20DBM2G4DELAY', 'read-write',
-            u"",
-            18, 3)
+            2, 4)
         self.__dict__['zz_frozen'] = True
 
 
@@ -4520,7 +4020,7 @@ class RM_Field_RAC_SYTRIM1_SYMMDREPLICA1CURRADJ(Base_RM_Field):
         super(RM_Field_RAC_SYTRIM1_SYMMDREPLICA1CURRADJ, self).__init__(register,
             'SYMMDREPLICA1CURRADJ', 'RAC.SYTRIM1.SYMMDREPLICA1CURRADJ', 'read-write',
             u"",
-            21, 3)
+            6, 3)
         self.__dict__['zz_frozen'] = True
 
 
@@ -4530,7 +4030,7 @@ class RM_Field_RAC_SYTRIM1_SYMMDREPLICA2CURRADJ(Base_RM_Field):
         super(RM_Field_RAC_SYTRIM1_SYMMDREPLICA2CURRADJ, self).__init__(register,
             'SYMMDREPLICA2CURRADJ', 'RAC.SYTRIM1.SYMMDREPLICA2CURRADJ', 'read-write',
             u"",
-            24, 3)
+            9, 3)
         self.__dict__['zz_frozen'] = True
 
 
@@ -4540,7 +4040,7 @@ class RM_Field_RAC_SYTRIM1_SYTRIMMMDREGAMPBIAS(Base_RM_Field):
         super(RM_Field_RAC_SYTRIM1_SYTRIMMMDREGAMPBIAS, self).__init__(register,
             'SYTRIMMMDREGAMPBIAS', 'RAC.SYTRIM1.SYTRIMMMDREGAMPBIAS', 'read-write',
             u"",
-            27, 3)
+            12, 3)
         self.__dict__['zz_frozen'] = True
 
 
@@ -4550,7 +4050,27 @@ class RM_Field_RAC_SYTRIM1_SYTRIMMMDREGAMPBW(Base_RM_Field):
         super(RM_Field_RAC_SYTRIM1_SYTRIMMMDREGAMPBW, self).__init__(register,
             'SYTRIMMMDREGAMPBW', 'RAC.SYTRIM1.SYTRIMMMDREGAMPBW', 'read-write',
             u"",
-            30, 2)
+            15, 2)
+        self.__dict__['zz_frozen'] = True
+
+
+class RM_Field_RAC_SYTRIM1_SYLODIVRLOADCCLKSEL(Base_RM_Field):
+    def __init__(self, register):
+        self.__dict__['zz_frozen'] = False
+        super(RM_Field_RAC_SYTRIM1_SYLODIVRLOADCCLKSEL, self).__init__(register,
+            'SYLODIVRLOADCCLKSEL', 'RAC.SYTRIM1.SYLODIVRLOADCCLKSEL', 'read-write',
+            u"",
+            17, 1)
+        self.__dict__['zz_frozen'] = True
+
+
+class RM_Field_RAC_SYTRIM1_SYLODIVSGTESTDIV(Base_RM_Field):
+    def __init__(self, register):
+        self.__dict__['zz_frozen'] = False
+        super(RM_Field_RAC_SYTRIM1_SYLODIVSGTESTDIV, self).__init__(register,
+            'SYLODIVSGTESTDIV', 'RAC.SYTRIM1.SYLODIVSGTESTDIV', 'read-write',
+            u"",
+            29, 3)
         self.__dict__['zz_frozen'] = True
 
 
@@ -4614,23 +4134,13 @@ class RM_Field_RAC_SYEN_SYCHPEN(Base_RM_Field):
         self.__dict__['zz_frozen'] = True
 
 
-class RM_Field_RAC_SYEN_SYCHPLPENRX(Base_RM_Field):
+class RM_Field_RAC_SYEN_SYCHPLPEN(Base_RM_Field):
     def __init__(self, register):
         self.__dict__['zz_frozen'] = False
-        super(RM_Field_RAC_SYEN_SYCHPLPENRX, self).__init__(register,
-            'SYCHPLPENRX', 'RAC.SYEN.SYCHPLPENRX', 'read-write',
+        super(RM_Field_RAC_SYEN_SYCHPLPEN, self).__init__(register,
+            'SYCHPLPEN', 'RAC.SYEN.SYCHPLPEN', 'read-write',
             u"",
             1, 1)
-        self.__dict__['zz_frozen'] = True
-
-
-class RM_Field_RAC_SYEN_SYCHPLPENTX(Base_RM_Field):
-    def __init__(self, register):
-        self.__dict__['zz_frozen'] = False
-        super(RM_Field_RAC_SYEN_SYCHPLPENTX, self).__init__(register,
-            'SYCHPLPENTX', 'RAC.SYEN.SYCHPLPENTX', 'read-write',
-            u"",
-            2, 1)
         self.__dict__['zz_frozen'] = True
 
 
@@ -4640,7 +4150,7 @@ class RM_Field_RAC_SYEN_SYENCHPREG(Base_RM_Field):
         super(RM_Field_RAC_SYEN_SYENCHPREG, self).__init__(register,
             'SYENCHPREG', 'RAC.SYEN.SYENCHPREG', 'read-write',
             u"",
-            3, 1)
+            2, 1)
         self.__dict__['zz_frozen'] = True
 
 
@@ -4650,7 +4160,7 @@ class RM_Field_RAC_SYEN_SYENCHPREPLICA(Base_RM_Field):
         super(RM_Field_RAC_SYEN_SYENCHPREPLICA, self).__init__(register,
             'SYENCHPREPLICA', 'RAC.SYEN.SYENCHPREPLICA', 'read-write',
             u"",
-            4, 1)
+            3, 1)
         self.__dict__['zz_frozen'] = True
 
 
@@ -4660,7 +4170,7 @@ class RM_Field_RAC_SYEN_SYENMMDREG(Base_RM_Field):
         super(RM_Field_RAC_SYEN_SYENMMDREG, self).__init__(register,
             'SYENMMDREG', 'RAC.SYEN.SYENMMDREG', 'read-write',
             u"",
-            5, 1)
+            4, 1)
         self.__dict__['zz_frozen'] = True
 
 
@@ -4670,7 +4180,7 @@ class RM_Field_RAC_SYEN_SYENMMDREPLICA1(Base_RM_Field):
         super(RM_Field_RAC_SYEN_SYENMMDREPLICA1, self).__init__(register,
             'SYENMMDREPLICA1', 'RAC.SYEN.SYENMMDREPLICA1', 'read-write',
             u"",
-            6, 1)
+            5, 1)
         self.__dict__['zz_frozen'] = True
 
 
@@ -4680,7 +4190,7 @@ class RM_Field_RAC_SYEN_SYENMMDREPLICA2(Base_RM_Field):
         super(RM_Field_RAC_SYEN_SYENMMDREPLICA2, self).__init__(register,
             'SYENMMDREPLICA2', 'RAC.SYEN.SYENMMDREPLICA2', 'read-write',
             u"",
-            7, 1)
+            6, 1)
         self.__dict__['zz_frozen'] = True
 
 
@@ -4690,7 +4200,7 @@ class RM_Field_RAC_SYEN_SYENVCOBIAS(Base_RM_Field):
         super(RM_Field_RAC_SYEN_SYENVCOBIAS, self).__init__(register,
             'SYENVCOBIAS', 'RAC.SYEN.SYENVCOBIAS', 'read-write',
             u"",
-            8, 1)
+            7, 1)
         self.__dict__['zz_frozen'] = True
 
 
@@ -4700,7 +4210,7 @@ class RM_Field_RAC_SYEN_SYENVCOPFET(Base_RM_Field):
         super(RM_Field_RAC_SYEN_SYENVCOPFET, self).__init__(register,
             'SYENVCOPFET', 'RAC.SYEN.SYENVCOPFET', 'read-write',
             u"",
-            9, 1)
+            8, 1)
         self.__dict__['zz_frozen'] = True
 
 
@@ -4710,7 +4220,37 @@ class RM_Field_RAC_SYEN_SYENVCOREG(Base_RM_Field):
         super(RM_Field_RAC_SYEN_SYENVCOREG, self).__init__(register,
             'SYENVCOREG', 'RAC.SYEN.SYENVCOREG', 'read-write',
             u"",
+            9, 1)
+        self.__dict__['zz_frozen'] = True
+
+
+class RM_Field_RAC_SYEN_SYLODIVEN(Base_RM_Field):
+    def __init__(self, register):
+        self.__dict__['zz_frozen'] = False
+        super(RM_Field_RAC_SYEN_SYLODIVEN, self).__init__(register,
+            'SYLODIVEN', 'RAC.SYEN.SYLODIVEN', 'read-write',
+            u"",
             10, 1)
+        self.__dict__['zz_frozen'] = True
+
+
+class RM_Field_RAC_SYEN_SYLODIVLDOBIASEN(Base_RM_Field):
+    def __init__(self, register):
+        self.__dict__['zz_frozen'] = False
+        super(RM_Field_RAC_SYEN_SYLODIVLDOBIASEN, self).__init__(register,
+            'SYLODIVLDOBIASEN', 'RAC.SYEN.SYLODIVLDOBIASEN', 'read-write',
+            u"",
+            11, 1)
+        self.__dict__['zz_frozen'] = True
+
+
+class RM_Field_RAC_SYEN_SYLODIVLDOEN(Base_RM_Field):
+    def __init__(self, register):
+        self.__dict__['zz_frozen'] = False
+        super(RM_Field_RAC_SYEN_SYLODIVLDOEN, self).__init__(register,
+            'SYLODIVLDOEN', 'RAC.SYEN.SYLODIVLDOEN', 'read-write',
+            u"",
+            12, 1)
         self.__dict__['zz_frozen'] = True
 
 
@@ -4734,43 +4274,23 @@ class RM_Field_RAC_SYEN_SYSTARTMMDREG(Base_RM_Field):
         self.__dict__['zz_frozen'] = True
 
 
-class RM_Field_RAC_SYLOEN_SYLODIVEN(Base_RM_Field):
-    def __init__(self, register):
-        self.__dict__['zz_frozen'] = False
-        super(RM_Field_RAC_SYLOEN_SYLODIVEN, self).__init__(register,
-            'SYLODIVEN', 'RAC.SYLOEN.SYLODIVEN', 'read-write',
-            u"",
-            1, 1)
-        self.__dict__['zz_frozen'] = True
-
-
-class RM_Field_RAC_SYLOEN_SYLODIVLDOBIASEN(Base_RM_Field):
-    def __init__(self, register):
-        self.__dict__['zz_frozen'] = False
-        super(RM_Field_RAC_SYLOEN_SYLODIVLDOBIASEN, self).__init__(register,
-            'SYLODIVLDOBIASEN', 'RAC.SYLOEN.SYLODIVLDOBIASEN', 'read-write',
-            u"",
-            2, 1)
-        self.__dict__['zz_frozen'] = True
-
-
-class RM_Field_RAC_SYLOEN_SYLODIVLDOEN(Base_RM_Field):
-    def __init__(self, register):
-        self.__dict__['zz_frozen'] = False
-        super(RM_Field_RAC_SYLOEN_SYLODIVLDOEN, self).__init__(register,
-            'SYLODIVLDOEN', 'RAC.SYLOEN.SYLODIVLDOEN', 'read-write',
-            u"",
-            3, 1)
-        self.__dict__['zz_frozen'] = True
-
-
 class RM_Field_RAC_SYLOEN_SYLODIVRLOADCCLK2G4EN(Base_RM_Field):
     def __init__(self, register):
         self.__dict__['zz_frozen'] = False
         super(RM_Field_RAC_SYLOEN_SYLODIVRLOADCCLK2G4EN, self).__init__(register,
             'SYLODIVRLOADCCLK2G4EN', 'RAC.SYLOEN.SYLODIVRLOADCCLK2G4EN', 'read-write',
             u"",
-            4, 1)
+            0, 1)
+        self.__dict__['zz_frozen'] = True
+
+
+class RM_Field_RAC_SYLOEN_SYLODIVRLO2G4EN(Base_RM_Field):
+    def __init__(self, register):
+        self.__dict__['zz_frozen'] = False
+        super(RM_Field_RAC_SYLOEN_SYLODIVRLO2G4EN, self).__init__(register,
+            'SYLODIVRLO2G4EN', 'RAC.SYLOEN.SYLODIVRLO2G4EN', 'read-write',
+            u"",
+            1, 1)
         self.__dict__['zz_frozen'] = True
 
 
@@ -4780,7 +4300,7 @@ class RM_Field_RAC_SYLOEN_SYLODIVTLO0DBM2G4AUXEN(Base_RM_Field):
         super(RM_Field_RAC_SYLOEN_SYLODIVTLO0DBM2G4AUXEN, self).__init__(register,
             'SYLODIVTLO0DBM2G4AUXEN', 'RAC.SYLOEN.SYLODIVTLO0DBM2G4AUXEN', 'read-write',
             u"",
-            8, 1)
+            5, 1)
         self.__dict__['zz_frozen'] = True
 
 
@@ -4790,67 +4310,37 @@ class RM_Field_RAC_SYLOEN_SYLODIVTLO0DBM2G4EN(Base_RM_Field):
         super(RM_Field_RAC_SYLOEN_SYLODIVTLO0DBM2G4EN, self).__init__(register,
             'SYLODIVTLO0DBM2G4EN', 'RAC.SYLOEN.SYLODIVTLO0DBM2G4EN', 'read-write',
             u"",
+            6, 1)
+        self.__dict__['zz_frozen'] = True
+
+
+class RM_Field_RAC_SYLOEN_SYLODIVTLO6DBM2G4AUXEN(Base_RM_Field):
+    def __init__(self, register):
+        self.__dict__['zz_frozen'] = False
+        super(RM_Field_RAC_SYLOEN_SYLODIVTLO6DBM2G4AUXEN, self).__init__(register,
+            'SYLODIVTLO6DBM2G4AUXEN', 'RAC.SYLOEN.SYLODIVTLO6DBM2G4AUXEN', 'read-write',
+            u"",
             9, 1)
         self.__dict__['zz_frozen'] = True
 
 
-class RM_Field_RAC_SYLOEN_SYLODIVTLO20DBM2G4AUXEN(Base_RM_Field):
+class RM_Field_RAC_SYLOEN_SYLODIVTLO6DBM2G4EN(Base_RM_Field):
     def __init__(self, register):
         self.__dict__['zz_frozen'] = False
-        super(RM_Field_RAC_SYLOEN_SYLODIVTLO20DBM2G4AUXEN, self).__init__(register,
-            'SYLODIVTLO20DBM2G4AUXEN', 'RAC.SYLOEN.SYLODIVTLO20DBM2G4AUXEN', 'read-write',
+        super(RM_Field_RAC_SYLOEN_SYLODIVTLO6DBM2G4EN, self).__init__(register,
+            'SYLODIVTLO6DBM2G4EN', 'RAC.SYLOEN.SYLODIVTLO6DBM2G4EN', 'read-write',
             u"",
             10, 1)
         self.__dict__['zz_frozen'] = True
 
 
-class RM_Field_RAC_SYLOEN_SYLODIVTLO20DBM2G4EN(Base_RM_Field):
+class RM_Field_RAC_SYLOEN_SYLODIVSGTESTDIVEN(Base_RM_Field):
     def __init__(self, register):
         self.__dict__['zz_frozen'] = False
-        super(RM_Field_RAC_SYLOEN_SYLODIVTLO20DBM2G4EN, self).__init__(register,
-            'SYLODIVTLO20DBM2G4EN', 'RAC.SYLOEN.SYLODIVTLO20DBM2G4EN', 'read-write',
+        super(RM_Field_RAC_SYLOEN_SYLODIVSGTESTDIVEN, self).__init__(register,
+            'SYLODIVSGTESTDIVEN', 'RAC.SYLOEN.SYLODIVSGTESTDIVEN', 'read-write',
             u"",
-            11, 1)
-        self.__dict__['zz_frozen'] = True
-
-
-class RM_Field_RAC_SYLOEN_SYLODIVRLOADCCLKSEL(Base_RM_Field):
-    def __init__(self, register):
-        self.__dict__['zz_frozen'] = False
-        super(RM_Field_RAC_SYLOEN_SYLODIVRLOADCCLKSEL, self).__init__(register,
-            'SYLODIVRLOADCCLKSEL', 'RAC.SYLOEN.SYLODIVRLOADCCLKSEL', 'read-write',
-            u"",
-            12, 1)
-        self.__dict__['zz_frozen'] = True
-
-
-class RM_Field_RAC_SYMMDCTRL_SYMMDDIVRSDIG(Base_RM_Field):
-    def __init__(self, register):
-        self.__dict__['zz_frozen'] = False
-        super(RM_Field_RAC_SYMMDCTRL_SYMMDDIVRSDIG, self).__init__(register,
-            'SYMMDDIVRSDIG', 'RAC.SYMMDCTRL.SYMMDDIVRSDIG', 'read-write',
-            u"",
-            0, 2)
-        self.__dict__['zz_frozen'] = True
-
-
-class RM_Field_RAC_SYMMDCTRL_SYMMDMODERX(Base_RM_Field):
-    def __init__(self, register):
-        self.__dict__['zz_frozen'] = False
-        super(RM_Field_RAC_SYMMDCTRL_SYMMDMODERX, self).__init__(register,
-            'SYMMDMODERX', 'RAC.SYMMDCTRL.SYMMDMODERX', 'read-write',
-            u"",
-            2, 3)
-        self.__dict__['zz_frozen'] = True
-
-
-class RM_Field_RAC_SYMMDCTRL_SYMMDMODETX(Base_RM_Field):
-    def __init__(self, register):
-        self.__dict__['zz_frozen'] = False
-        super(RM_Field_RAC_SYMMDCTRL_SYMMDMODETX, self).__init__(register,
-            'SYMMDMODETX', 'RAC.SYMMDCTRL.SYMMDMODETX', 'read-write',
-            u"",
-            5, 3)
+            31, 1)
         self.__dict__['zz_frozen'] = True
 
 
@@ -4860,7 +4350,27 @@ class RM_Field_RAC_SYMMDCTRL_SYMMDENRSDIG(Base_RM_Field):
         super(RM_Field_RAC_SYMMDCTRL_SYMMDENRSDIG, self).__init__(register,
             'SYMMDENRSDIG', 'RAC.SYMMDCTRL.SYMMDENRSDIG', 'read-write',
             u"",
-            8, 1)
+            0, 1)
+        self.__dict__['zz_frozen'] = True
+
+
+class RM_Field_RAC_SYMMDCTRL_SYMMDDIVRSDIG(Base_RM_Field):
+    def __init__(self, register):
+        self.__dict__['zz_frozen'] = False
+        super(RM_Field_RAC_SYMMDCTRL_SYMMDDIVRSDIG, self).__init__(register,
+            'SYMMDDIVRSDIG', 'RAC.SYMMDCTRL.SYMMDDIVRSDIG', 'read-write',
+            u"",
+            1, 2)
+        self.__dict__['zz_frozen'] = True
+
+
+class RM_Field_RAC_SYMMDCTRL_SYMMDMODE(Base_RM_Field):
+    def __init__(self, register):
+        self.__dict__['zz_frozen'] = False
+        super(RM_Field_RAC_SYMMDCTRL_SYMMDMODE, self).__init__(register,
+            'SYMMDMODE', 'RAC.SYMMDCTRL.SYMMDMODE', 'read-write',
+            u"",
+            9, 3)
         self.__dict__['zz_frozen'] = True
 
 
@@ -5004,173 +4514,13 @@ class RM_Field_RAC_XORETIMESTATUS_XORETIMERESETNLO(Base_RM_Field):
         self.__dict__['zz_frozen'] = True
 
 
-class RM_Field_RAC_AGCOVERWRITE0_ENMANLNAMIXRFATT(Base_RM_Field):
+class RM_Field_RAC_XOSQBUFFILT_XOSQBUFFILT(Base_RM_Field):
     def __init__(self, register):
         self.__dict__['zz_frozen'] = False
-        super(RM_Field_RAC_AGCOVERWRITE0_ENMANLNAMIXRFATT, self).__init__(register,
-            'ENMANLNAMIXRFATT', 'RAC.AGCOVERWRITE0.ENMANLNAMIXRFATT', 'read-write',
+        super(RM_Field_RAC_XOSQBUFFILT_XOSQBUFFILT, self).__init__(register,
+            'XOSQBUFFILT', 'RAC.XOSQBUFFILT.XOSQBUFFILT', 'read-write',
             u"",
-            0, 1)
-        self.__dict__['zz_frozen'] = True
-
-
-class RM_Field_RAC_AGCOVERWRITE0_ENMANLNAMIXSLICE(Base_RM_Field):
-    def __init__(self, register):
-        self.__dict__['zz_frozen'] = False
-        super(RM_Field_RAC_AGCOVERWRITE0_ENMANLNAMIXSLICE, self).__init__(register,
-            'ENMANLNAMIXSLICE', 'RAC.AGCOVERWRITE0.ENMANLNAMIXSLICE', 'read-write',
-            u"",
-            1, 1)
-        self.__dict__['zz_frozen'] = True
-
-
-class RM_Field_RAC_AGCOVERWRITE0_ENMANPGAGAIN(Base_RM_Field):
-    def __init__(self, register):
-        self.__dict__['zz_frozen'] = False
-        super(RM_Field_RAC_AGCOVERWRITE0_ENMANPGAGAIN, self).__init__(register,
-            'ENMANPGAGAIN', 'RAC.AGCOVERWRITE0.ENMANPGAGAIN', 'read-write',
-            u"",
-            2, 1)
-        self.__dict__['zz_frozen'] = True
-
-
-class RM_Field_RAC_AGCOVERWRITE0_ENMANIFADCSCALE(Base_RM_Field):
-    def __init__(self, register):
-        self.__dict__['zz_frozen'] = False
-        super(RM_Field_RAC_AGCOVERWRITE0_ENMANIFADCSCALE, self).__init__(register,
-            'ENMANIFADCSCALE', 'RAC.AGCOVERWRITE0.ENMANIFADCSCALE', 'read-write',
-            u"",
-            3, 1)
-        self.__dict__['zz_frozen'] = True
-
-
-class RM_Field_RAC_AGCOVERWRITE0_MANLNAMIXSLICE0(Base_RM_Field):
-    def __init__(self, register):
-        self.__dict__['zz_frozen'] = False
-        super(RM_Field_RAC_AGCOVERWRITE0_MANLNAMIXSLICE0, self).__init__(register,
-            'MANLNAMIXSLICE0', 'RAC.AGCOVERWRITE0.MANLNAMIXSLICE0', 'read-write',
-            u"",
-            4, 6)
-        self.__dict__['zz_frozen'] = True
-
-
-class RM_Field_RAC_AGCOVERWRITE0_MANLNAMIXSLICE1(Base_RM_Field):
-    def __init__(self, register):
-        self.__dict__['zz_frozen'] = False
-        super(RM_Field_RAC_AGCOVERWRITE0_MANLNAMIXSLICE1, self).__init__(register,
-            'MANLNAMIXSLICE1', 'RAC.AGCOVERWRITE0.MANLNAMIXSLICE1', 'read-write',
-            u"",
-            10, 6)
-        self.__dict__['zz_frozen'] = True
-
-
-class RM_Field_RAC_AGCOVERWRITE0_MANPGAGAIN(Base_RM_Field):
-    def __init__(self, register):
-        self.__dict__['zz_frozen'] = False
-        super(RM_Field_RAC_AGCOVERWRITE0_MANPGAGAIN, self).__init__(register,
-            'MANPGAGAIN', 'RAC.AGCOVERWRITE0.MANPGAGAIN', 'read-write',
-            u"",
-            20, 4)
-        self.__dict__['zz_frozen'] = True
-
-
-class RM_Field_RAC_AGCOVERWRITE0_MANIFADCSCALE(Base_RM_Field):
-    def __init__(self, register):
-        self.__dict__['zz_frozen'] = False
-        super(RM_Field_RAC_AGCOVERWRITE0_MANIFADCSCALE, self).__init__(register,
-            'MANIFADCSCALE', 'RAC.AGCOVERWRITE0.MANIFADCSCALE', 'read-write',
-            u"",
-            24, 2)
-        self.__dict__['zz_frozen'] = True
-
-
-class RM_Field_RAC_AGCOVERWRITE1_MANLNAMIXRFATT0(Base_RM_Field):
-    def __init__(self, register):
-        self.__dict__['zz_frozen'] = False
-        super(RM_Field_RAC_AGCOVERWRITE1_MANLNAMIXRFATT0, self).__init__(register,
-            'MANLNAMIXRFATT0', 'RAC.AGCOVERWRITE1.MANLNAMIXRFATT0', 'read-write',
-            u"",
-            0, 14)
-        self.__dict__['zz_frozen'] = True
-
-
-class RM_Field_RAC_AGCOVERWRITE1_MANLNAMIXRFATT1(Base_RM_Field):
-    def __init__(self, register):
-        self.__dict__['zz_frozen'] = False
-        super(RM_Field_RAC_AGCOVERWRITE1_MANLNAMIXRFATT1, self).__init__(register,
-            'MANLNAMIXRFATT1', 'RAC.AGCOVERWRITE1.MANLNAMIXRFATT1', 'read-write',
-            u"",
-            16, 14)
-        self.__dict__['zz_frozen'] = True
-
-
-class RM_Field_RAC_AGCOVERWRITE2_ENMANFENOTCH(Base_RM_Field):
-    def __init__(self, register):
-        self.__dict__['zz_frozen'] = False
-        super(RM_Field_RAC_AGCOVERWRITE2_ENMANFENOTCH, self).__init__(register,
-            'ENMANFENOTCH', 'RAC.AGCOVERWRITE2.ENMANFENOTCH', 'read-write',
-            u"",
-            0, 1)
-        self.__dict__['zz_frozen'] = True
-
-
-class RM_Field_RAC_AGCOVERWRITE2_MANFENOTCHEN(Base_RM_Field):
-    def __init__(self, register):
-        self.__dict__['zz_frozen'] = False
-        super(RM_Field_RAC_AGCOVERWRITE2_MANFENOTCHEN, self).__init__(register,
-            'MANFENOTCHEN', 'RAC.AGCOVERWRITE2.MANFENOTCHEN', 'read-write',
-            u"",
-            1, 1)
-        self.__dict__['zz_frozen'] = True
-
-
-class RM_Field_RAC_AGCOVERWRITE2_MANFENOTCHATTNSEL(Base_RM_Field):
-    def __init__(self, register):
-        self.__dict__['zz_frozen'] = False
-        super(RM_Field_RAC_AGCOVERWRITE2_MANFENOTCHATTNSEL, self).__init__(register,
-            'MANFENOTCHATTNSEL', 'RAC.AGCOVERWRITE2.MANFENOTCHATTNSEL', 'read-write',
-            u"",
-            2, 4)
-        self.__dict__['zz_frozen'] = True
-
-
-class RM_Field_RAC_AGCOVERWRITE2_MANFENOTCHRATTNENRF0(Base_RM_Field):
-    def __init__(self, register):
-        self.__dict__['zz_frozen'] = False
-        super(RM_Field_RAC_AGCOVERWRITE2_MANFENOTCHRATTNENRF0, self).__init__(register,
-            'MANFENOTCHRATTNENRF0', 'RAC.AGCOVERWRITE2.MANFENOTCHRATTNENRF0', 'read-write',
-            u"",
-            6, 1)
-        self.__dict__['zz_frozen'] = True
-
-
-class RM_Field_RAC_AGCOVERWRITE2_MANFENOTCHRATTNENRF1(Base_RM_Field):
-    def __init__(self, register):
-        self.__dict__['zz_frozen'] = False
-        super(RM_Field_RAC_AGCOVERWRITE2_MANFENOTCHRATTNENRF1, self).__init__(register,
-            'MANFENOTCHRATTNENRF1', 'RAC.AGCOVERWRITE2.MANFENOTCHRATTNENRF1', 'read-write',
-            u"",
-            7, 1)
-        self.__dict__['zz_frozen'] = True
-
-
-class RM_Field_RAC_AGCOVERWRITE2_MANFENOTCHCAPCRSE(Base_RM_Field):
-    def __init__(self, register):
-        self.__dict__['zz_frozen'] = False
-        super(RM_Field_RAC_AGCOVERWRITE2_MANFENOTCHCAPCRSE, self).__init__(register,
-            'MANFENOTCHCAPCRSE', 'RAC.AGCOVERWRITE2.MANFENOTCHCAPCRSE', 'read-write',
-            u"",
-            8, 4)
-        self.__dict__['zz_frozen'] = True
-
-
-class RM_Field_RAC_AGCOVERWRITE2_MANFENOTCHCAPFINE(Base_RM_Field):
-    def __init__(self, register):
-        self.__dict__['zz_frozen'] = False
-        super(RM_Field_RAC_AGCOVERWRITE2_MANFENOTCHCAPFINE, self).__init__(register,
-            'MANFENOTCHCAPFINE', 'RAC.AGCOVERWRITE2.MANFENOTCHCAPFINE', 'read-write',
-            u"",
-            12, 4)
+            0, 2)
         self.__dict__['zz_frozen'] = True
 
 
@@ -5200,7 +4550,17 @@ class RM_Field_RAC_SPARE_TX0DBMSPARE(Base_RM_Field):
         super(RM_Field_RAC_SPARE_TX0DBMSPARE, self).__init__(register,
             'TX0DBMSPARE', 'RAC.SPARE.TX0DBMSPARE', 'read-write',
             u"",
-            5, 1)
+            5, 3)
+        self.__dict__['zz_frozen'] = True
+
+
+class RM_Field_RAC_SPARE_TX6DBMSPARE(Base_RM_Field):
+    def __init__(self, register):
+        self.__dict__['zz_frozen'] = False
+        super(RM_Field_RAC_SPARE_TX6DBMSPARE, self).__init__(register,
+            'TX6DBMSPARE', 'RAC.SPARE.TX6DBMSPARE', 'read-write',
+            u"",
+            8, 2)
         self.__dict__['zz_frozen'] = True
 
 
@@ -5210,27 +4570,7 @@ class RM_Field_RAC_SPARE_SYSPARE(Base_RM_Field):
         super(RM_Field_RAC_SPARE_SYSPARE, self).__init__(register,
             'SYSPARE', 'RAC.SPARE.SYSPARE', 'read-write',
             u"",
-            9, 8)
-        self.__dict__['zz_frozen'] = True
-
-
-class RM_Field_RAC_SPARE_FENOTCHSPARE(Base_RM_Field):
-    def __init__(self, register):
-        self.__dict__['zz_frozen'] = False
-        super(RM_Field_RAC_SPARE_FENOTCHSPARE, self).__init__(register,
-            'FENOTCHSPARE', 'RAC.SPARE.FENOTCHSPARE', 'read-write',
-            u"",
-            17, 5)
-        self.__dict__['zz_frozen'] = True
-
-
-class RM_Field_RAC_SPARE_LNAMIXSPARE(Base_RM_Field):
-    def __init__(self, register):
-        self.__dict__['zz_frozen'] = False
-        super(RM_Field_RAC_SPARE_LNAMIXSPARE, self).__init__(register,
-            'LNAMIXSPARE', 'RAC.SPARE.LNAMIXSPARE', 'read-write',
-            u"",
-            22, 4)
+            11, 8)
         self.__dict__['zz_frozen'] = True
 
 
@@ -5254,173 +4594,83 @@ class RM_Field_RAC_SPARE_IFADCCTRLRESERVEDLV(Base_RM_Field):
         self.__dict__['zz_frozen'] = True
 
 
-class RM_Field_RAC_PACTRL_TX0DBMLATCHBYPASS(Base_RM_Field):
+class RM_Field_RAC_AGCOVERWRITE_ENMANLNAMIXRFATT(Base_RM_Field):
     def __init__(self, register):
         self.__dict__['zz_frozen'] = False
-        super(RM_Field_RAC_PACTRL_TX0DBMLATCHBYPASS, self).__init__(register,
-            'TX0DBMLATCHBYPASS', 'RAC.PACTRL.TX0DBMLATCHBYPASS', 'read-write',
+        super(RM_Field_RAC_AGCOVERWRITE_ENMANLNAMIXRFATT, self).__init__(register,
+            'ENMANLNAMIXRFATT', 'RAC.AGCOVERWRITE.ENMANLNAMIXRFATT', 'read-write',
             u"",
             0, 1)
         self.__dict__['zz_frozen'] = True
 
 
-class RM_Field_RAC_PACTRL_TX0DBMSLICERESET(Base_RM_Field):
+class RM_Field_RAC_AGCOVERWRITE_ENMANLNAMIXSLICE(Base_RM_Field):
     def __init__(self, register):
         self.__dict__['zz_frozen'] = False
-        super(RM_Field_RAC_PACTRL_TX0DBMSLICERESET, self).__init__(register,
-            'TX0DBMSLICERESET', 'RAC.PACTRL.TX0DBMSLICERESET', 'read-write',
+        super(RM_Field_RAC_AGCOVERWRITE_ENMANLNAMIXSLICE, self).__init__(register,
+            'ENMANLNAMIXSLICE', 'RAC.AGCOVERWRITE.ENMANLNAMIXSLICE', 'read-write',
             u"",
             1, 1)
         self.__dict__['zz_frozen'] = True
 
 
-class RM_Field_RAC_PACTRL_TXPABYPASSPREDRVREG(Base_RM_Field):
+class RM_Field_RAC_AGCOVERWRITE_ENMANPGAGAIN(Base_RM_Field):
     def __init__(self, register):
         self.__dict__['zz_frozen'] = False
-        super(RM_Field_RAC_PACTRL_TXPABYPASSPREDRVREG, self).__init__(register,
-            'TXPABYPASSPREDRVREG', 'RAC.PACTRL.TXPABYPASSPREDRVREG', 'read-write',
+        super(RM_Field_RAC_AGCOVERWRITE_ENMANPGAGAIN, self).__init__(register,
+            'ENMANPGAGAIN', 'RAC.AGCOVERWRITE.ENMANPGAGAIN', 'read-write',
             u"",
             2, 1)
         self.__dict__['zz_frozen'] = True
 
 
-class RM_Field_RAC_PACTRL_TXPAPULLDOWNVDDPA(Base_RM_Field):
+class RM_Field_RAC_AGCOVERWRITE_ENMANIFADCSCALE(Base_RM_Field):
     def __init__(self, register):
         self.__dict__['zz_frozen'] = False
-        super(RM_Field_RAC_PACTRL_TXPAPULLDOWNVDDPA, self).__init__(register,
-            'TXPAPULLDOWNVDDPA', 'RAC.PACTRL.TXPAPULLDOWNVDDPA', 'read-write',
+        super(RM_Field_RAC_AGCOVERWRITE_ENMANIFADCSCALE, self).__init__(register,
+            'ENMANIFADCSCALE', 'RAC.AGCOVERWRITE.ENMANIFADCSCALE', 'read-write',
             u"",
             3, 1)
         self.__dict__['zz_frozen'] = True
 
 
-class RM_Field_RAC_PACTRL_TXPAPOWER(Base_RM_Field):
+class RM_Field_RAC_AGCOVERWRITE_MANLNAMIXRFATT(Base_RM_Field):
     def __init__(self, register):
         self.__dict__['zz_frozen'] = False
-        super(RM_Field_RAC_PACTRL_TXPAPOWER, self).__init__(register,
-            'TXPAPOWER', 'RAC.PACTRL.TXPAPOWER', 'read-write',
+        super(RM_Field_RAC_AGCOVERWRITE_MANLNAMIXRFATT, self).__init__(register,
+            'MANLNAMIXRFATT', 'RAC.AGCOVERWRITE.MANLNAMIXRFATT', 'read-write',
             u"",
-            4, 4)
+            4, 6)
         self.__dict__['zz_frozen'] = True
 
 
-class RM_Field_RAC_PACTRL_TXPALATCHBYPASS10DBM(Base_RM_Field):
+class RM_Field_RAC_AGCOVERWRITE_MANLNAMIXSLICE(Base_RM_Field):
     def __init__(self, register):
         self.__dict__['zz_frozen'] = False
-        super(RM_Field_RAC_PACTRL_TXPALATCHBYPASS10DBM, self).__init__(register,
-            'TXPALATCHBYPASS10DBM', 'RAC.PACTRL.TXPALATCHBYPASS10DBM', 'read-write',
+        super(RM_Field_RAC_AGCOVERWRITE_MANLNAMIXSLICE, self).__init__(register,
+            'MANLNAMIXSLICE', 'RAC.AGCOVERWRITE.MANLNAMIXSLICE', 'read-write',
             u"",
-            8, 1)
+            10, 6)
         self.__dict__['zz_frozen'] = True
 
 
-class RM_Field_RAC_PACTRL_TXPALATCHBYPASS20DBM(Base_RM_Field):
+class RM_Field_RAC_AGCOVERWRITE_MANPGAGAIN(Base_RM_Field):
     def __init__(self, register):
         self.__dict__['zz_frozen'] = False
-        super(RM_Field_RAC_PACTRL_TXPALATCHBYPASS20DBM, self).__init__(register,
-            'TXPALATCHBYPASS20DBM', 'RAC.PACTRL.TXPALATCHBYPASS20DBM', 'read-write',
+        super(RM_Field_RAC_AGCOVERWRITE_MANPGAGAIN, self).__init__(register,
+            'MANPGAGAIN', 'RAC.AGCOVERWRITE.MANPGAGAIN', 'read-write',
             u"",
-            9, 1)
+            20, 4)
         self.__dict__['zz_frozen'] = True
 
 
-class RM_Field_RAC_PACTRL_TXPASELPREDRVREGVDDPA(Base_RM_Field):
+class RM_Field_RAC_AGCOVERWRITE_MANIFADCSCALE(Base_RM_Field):
     def __init__(self, register):
         self.__dict__['zz_frozen'] = False
-        super(RM_Field_RAC_PACTRL_TXPASELPREDRVREGVDDPA, self).__init__(register,
-            'TXPASELPREDRVREGVDDPA', 'RAC.PACTRL.TXPASELPREDRVREGVDDPA', 'read-write',
+        super(RM_Field_RAC_AGCOVERWRITE_MANIFADCSCALE, self).__init__(register,
+            'MANIFADCSCALE', 'RAC.AGCOVERWRITE.MANIFADCSCALE', 'read-write',
             u"",
-            10, 1)
-        self.__dict__['zz_frozen'] = True
-
-
-class RM_Field_RAC_PACTRL_TXPASELPREDRVREGVDDRF(Base_RM_Field):
-    def __init__(self, register):
-        self.__dict__['zz_frozen'] = False
-        super(RM_Field_RAC_PACTRL_TXPASELPREDRVREGVDDRF, self).__init__(register,
-            'TXPASELPREDRVREGVDDRF', 'RAC.PACTRL.TXPASELPREDRVREGVDDRF', 'read-write',
-            u"",
-            11, 1)
-        self.__dict__['zz_frozen'] = True
-
-
-class RM_Field_RAC_PACTRL_TXPASELSLICE(Base_RM_Field):
-    def __init__(self, register):
-        self.__dict__['zz_frozen'] = False
-        super(RM_Field_RAC_PACTRL_TXPASELSLICE, self).__init__(register,
-            'TXPASELSLICE', 'RAC.PACTRL.TXPASELSLICE', 'read-write',
-            u"",
-            12, 4)
-        self.__dict__['zz_frozen'] = True
-
-
-class RM_Field_RAC_PACTRL_TXPASLICERST(Base_RM_Field):
-    def __init__(self, register):
-        self.__dict__['zz_frozen'] = False
-        super(RM_Field_RAC_PACTRL_TXPASLICERST, self).__init__(register,
-            'TXPASLICERST', 'RAC.PACTRL.TXPASLICERST', 'read-write',
-            u"",
-            16, 1)
-        self.__dict__['zz_frozen'] = True
-
-
-class RM_Field_RAC_FENOTCH0_FENOTCHVBIAS(Base_RM_Field):
-    def __init__(self, register):
-        self.__dict__['zz_frozen'] = False
-        super(RM_Field_RAC_FENOTCH0_FENOTCHVBIAS, self).__init__(register,
-            'FENOTCHVBIAS', 'RAC.FENOTCH0.FENOTCHVBIAS', 'read-write',
-            u"",
-            12, 3)
-        self.__dict__['zz_frozen'] = True
-
-
-class RM_Field_RAC_FENOTCH1_FENOTCHENVDDSW(Base_RM_Field):
-    def __init__(self, register):
-        self.__dict__['zz_frozen'] = False
-        super(RM_Field_RAC_FENOTCH1_FENOTCHENVDDSW, self).__init__(register,
-            'FENOTCHENVDDSW', 'RAC.FENOTCH1.FENOTCHENVDDSW', 'read-write',
-            u"",
-            0, 1)
-        self.__dict__['zz_frozen'] = True
-
-
-class RM_Field_RAC_FENOTCH1_FENOTCHRCCALEN(Base_RM_Field):
-    def __init__(self, register):
-        self.__dict__['zz_frozen'] = False
-        super(RM_Field_RAC_FENOTCH1_FENOTCHRCCALEN, self).__init__(register,
-            'FENOTCHRCCALEN', 'RAC.FENOTCH1.FENOTCHRCCALEN', 'read-write',
-            u"",
-            2, 1)
-        self.__dict__['zz_frozen'] = True
-
-
-class RM_Field_RAC_FENOTCH1_FENOTCHRCCALCOUNTER(Base_RM_Field):
-    def __init__(self, register):
-        self.__dict__['zz_frozen'] = False
-        super(RM_Field_RAC_FENOTCH1_FENOTCHRCCALCOUNTER, self).__init__(register,
-            'FENOTCHRCCALCOUNTER', 'RAC.FENOTCH1.FENOTCHRCCALCOUNTER', 'read-write',
-            u"",
-            8, 8)
-        self.__dict__['zz_frozen'] = True
-
-
-class RM_Field_RAC_FENOTCH1_FENOTCHRCCALOSC(Base_RM_Field):
-    def __init__(self, register):
-        self.__dict__['zz_frozen'] = False
-        super(RM_Field_RAC_FENOTCH1_FENOTCHRCCALOSC, self).__init__(register,
-            'FENOTCHRCCALOSC', 'RAC.FENOTCH1.FENOTCHRCCALOSC', 'read-write',
-            u"",
-            16, 4)
-        self.__dict__['zz_frozen'] = True
-
-
-class RM_Field_RAC_FENOTCH1_FENOTCHRCCALOUT(Base_RM_Field):
-    def __init__(self, register):
-        self.__dict__['zz_frozen'] = False
-        super(RM_Field_RAC_FENOTCH1_FENOTCHRCCALOUT, self).__init__(register,
-            'FENOTCHRCCALOUT', 'RAC.FENOTCH1.FENOTCHRCCALOUT', 'read-only',
-            u"",
-            20, 1)
+            24, 2)
         self.__dict__['zz_frozen'] = True
 
 
@@ -5570,7 +4820,7 @@ class RM_Field_RAC_RFLOCK0_SYNTHLODIVFREQCTRL(Base_RM_Field):
         super(RM_Field_RAC_RFLOCK0_SYNTHLODIVFREQCTRL, self).__init__(register,
             'SYNTHLODIVFREQCTRL', 'RAC.RFLOCK0.SYNTHLODIVFREQCTRL', 'read-write',
             u"",
-            0, 10)
+            0, 9)
         self.__dict__['zz_frozen'] = True
 
 
@@ -5584,43 +4834,13 @@ class RM_Field_RAC_RFLOCK0_RACIFPGAEN(Base_RM_Field):
         self.__dict__['zz_frozen'] = True
 
 
-class RM_Field_RAC_RFLOCK0_RACTX0DBM(Base_RM_Field):
+class RM_Field_RAC_RFLOCK0_RACPAEN6DBM(Base_RM_Field):
     def __init__(self, register):
         self.__dict__['zz_frozen'] = False
-        super(RM_Field_RAC_RFLOCK0_RACTX0DBM, self).__init__(register,
-            'RACTX0DBM', 'RAC.RFLOCK0.RACTX0DBM', 'read-write',
+        super(RM_Field_RAC_RFLOCK0_RACPAEN6DBM, self).__init__(register,
+            'RACPAEN6DBM', 'RAC.RFLOCK0.RACPAEN6DBM', 'read-write',
             u"",
             17, 1)
-        self.__dict__['zz_frozen'] = True
-
-
-class RM_Field_RAC_RFLOCK0_RACTX10DBM(Base_RM_Field):
-    def __init__(self, register):
-        self.__dict__['zz_frozen'] = False
-        super(RM_Field_RAC_RFLOCK0_RACTX10DBM, self).__init__(register,
-            'RACTX10DBM', 'RAC.RFLOCK0.RACTX10DBM', 'read-write',
-            u"",
-            18, 1)
-        self.__dict__['zz_frozen'] = True
-
-
-class RM_Field_RAC_RFLOCK0_RACTX20DBM(Base_RM_Field):
-    def __init__(self, register):
-        self.__dict__['zz_frozen'] = False
-        super(RM_Field_RAC_RFLOCK0_RACTX20DBM, self).__init__(register,
-            'RACTX20DBM', 'RAC.RFLOCK0.RACTX20DBM', 'read-write',
-            u"",
-            19, 1)
-        self.__dict__['zz_frozen'] = True
-
-
-class RM_Field_RAC_RFLOCK0_MODEMHADM(Base_RM_Field):
-    def __init__(self, register):
-        self.__dict__['zz_frozen'] = False
-        super(RM_Field_RAC_RFLOCK0_MODEMHADM, self).__init__(register,
-            'MODEMHADM', 'RAC.RFLOCK0.MODEMHADM', 'read-write',
-            u"",
-            21, 1)
         self.__dict__['zz_frozen'] = True
 
 
@@ -5724,23 +4944,43 @@ class RM_Field_RAC_RFLOCK0_UNLOCKED(Base_RM_Field):
         self.__dict__['zz_frozen'] = True
 
 
-class RM_Field_RAC_RFLOCK1_RACPASTRIPE(Base_RM_Field):
+class RM_Field_RAC_RFLOCK1_RACPASTRIPE0DBM(Base_RM_Field):
     def __init__(self, register):
         self.__dict__['zz_frozen'] = False
-        super(RM_Field_RAC_RFLOCK1_RACPASTRIPE, self).__init__(register,
-            'RACPASTRIPE', 'RAC.RFLOCK1.RACPASTRIPE', 'read-write',
+        super(RM_Field_RAC_RFLOCK1_RACPASTRIPE0DBM, self).__init__(register,
+            'RACPASTRIPE0DBM', 'RAC.RFLOCK1.RACPASTRIPE0DBM', 'read-write',
             u"",
             0, 4)
         self.__dict__['zz_frozen'] = True
 
 
-class RM_Field_RAC_RFLOCK1_RACPASLICE(Base_RM_Field):
+class RM_Field_RAC_RFLOCK1_RACPASLICE0DBM(Base_RM_Field):
     def __init__(self, register):
         self.__dict__['zz_frozen'] = False
-        super(RM_Field_RAC_RFLOCK1_RACPASLICE, self).__init__(register,
-            'RACPASLICE', 'RAC.RFLOCK1.RACPASLICE', 'read-write',
+        super(RM_Field_RAC_RFLOCK1_RACPASLICE0DBM, self).__init__(register,
+            'RACPASLICE0DBM', 'RAC.RFLOCK1.RACPASLICE0DBM', 'read-write',
             u"",
-            4, 4)
+            4, 2)
+        self.__dict__['zz_frozen'] = True
+
+
+class RM_Field_RAC_RFLOCK1_RACPASTRIPE6DBM(Base_RM_Field):
+    def __init__(self, register):
+        self.__dict__['zz_frozen'] = False
+        super(RM_Field_RAC_RFLOCK1_RACPASTRIPE6DBM, self).__init__(register,
+            'RACPASTRIPE6DBM', 'RAC.RFLOCK1.RACPASTRIPE6DBM', 'read-write',
+            u"",
+            8, 5)
+        self.__dict__['zz_frozen'] = True
+
+
+class RM_Field_RAC_RFLOCK1_RACPASLICE6DBM(Base_RM_Field):
+    def __init__(self, register):
+        self.__dict__['zz_frozen'] = False
+        super(RM_Field_RAC_RFLOCK1_RACPASLICE6DBM, self).__init__(register,
+            'RACPASLICE6DBM', 'RAC.RFLOCK1.RACPASLICE6DBM', 'read-write',
+            u"",
+            13, 3)
         self.__dict__['zz_frozen'] = True
 
 

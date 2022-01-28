@@ -5,36 +5,6 @@ component_table = {
     SL_IOSTREAM_TYPE_VUART = 'iostream_vuart',
 }
 
--- automatic conversion of input parameters
-function autonumber(input)
-    local base = 10
-    local orig_input = input
-    if (type(input) == "string") then
-        input = input:gsub("[\(\)\"uUlL]", "")
-        if string.find(input,"[bxhBXH]") ~= nil then
-            if string.find(string.lower(input), "0b") == 1 then
-                input = input:gsub("[bB]","")
-                base = 2
-            elseif string.find(string.lower(input), "0x") == 1 then
-                input = input:gsub("[xXhH]","")
-                base = 16
-            end
-        elseif string.find(input, "0") == 1 then
-            base = 8
-        end
-    elseif (type(input) == "number") then
-        return input
-    else
-        logit("autonumber() expects either a string or a number!")
-        return nil
-    end
-    local result = tonumber(input, base)
-    if result == nil then
-        logit("Configured value is not valid: \"" .. tostring(orig_input) .. "\" - modify it to a numeric value!")
-    end
-    return result
-  end
-
 -- check if the choosen key is part of a set or not (no "in" operator in lua)
 function table_contains(set, key)
     if (type(set) == "table") then 
@@ -129,7 +99,7 @@ function check_name(project, stream_type, stream_name)
 end
 
 -- app_log validation script for checking IO stream validity.
-local override_enabled = autonumber(slc.config('APP_LOG_OVERRIDE_DEFAULT_STREAM').value)
+local override_enabled = autonumber_common.autonumber(slc.config('APP_LOG_OVERRIDE_DEFAULT_STREAM').value)
 if override_enabled ~= nil and override_enabled == 1 then
     local stream_type = slc.config('APP_LOG_STREAM_TYPE')
     if stream_type ~= nil then

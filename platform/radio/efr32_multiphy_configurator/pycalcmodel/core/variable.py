@@ -9,8 +9,6 @@ from pycalcmodel import model_type
 from pycalcmodel import model_instance as model_inst
 from collections import OrderedDict
 from enum import Enum, unique, EnumMeta, IntEnum
-from host_py_rm_studio_internal.factory import RM_Factory
-from host_py_rm_studio_internal.full.efr32xg1.revA2.static.common import errors
 from pycalcmodel.py2_and_3_compatibility import *
 from pycalcmodel.core.variable_access_name import *
 import sys
@@ -114,6 +112,8 @@ class ModelVariable(object):
         self._forceable = forceable
         #: The peripheral.register.field notation string
         self._svd_mapping = None
+        #: The reg model field object
+        self._rm = None
         #: The units string for the variable
         self._units = None
         #: A forced value to use in place of the calculated value
@@ -180,6 +180,14 @@ class ModelVariable(object):
         assert len(value.split('.')) == 3, \
             "FATAL ERROR: {} must be PERIPHERAL.REGISTER.FIELD format".format(value)
         self._svd_mapping = value
+
+    @property
+    def rm(self):
+        return self._rm
+
+    @rm.setter
+    def rm(self, value):
+        self._rm = value
 
     @property
     def units(self):
@@ -439,26 +447,16 @@ class ModelVariable(object):
     def value_do_not_care(self, value):
         assert isinstance(value, bool)
         assert (value is False) or (self.svd_mapping is not None), "attempted to set non-register calculator variable to do not care"
-        self._value_do_not_care = value
+        if self._value_forced is not None:
+            #If the reg value is forced, then we always do care
+            self._value_do_not_care = False
+        else:
+            self._value_do_not_care = value
 
-    def _get_regmodel_field(self, part_family, part_rev = None):
-        #This is a helper function to get the associated regmodel field object from a model variable
+    def get_bit_width(self):
+        # This is a helper function to get bit width. It does not automatically run. Does not impact var object contents.
 
-        #If part_rev is None then this will return the object for the latest rev of the part
-        factory_func = RM_Factory(part_family.upper(), part_rev)
-        reg_model = factory_func()
-        try:
-            reg = reg_model.getObjectByName(self.svd_mapping)
-        except errors.RegMapNameError:
-            reg = None
-
-        return reg
-
-
-    def get_bit_width(self, part_family, part_rev = None):
-        #This is a helper function to get bit width. It does not automatically run. Does not impact var object contents.
-
-        reg = self._get_regmodel_field(part_family = part_family, part_rev = part_rev)
+        reg = self.rm
         if reg is not None:
             bit_width = reg.bitWidth
         else:
@@ -466,10 +464,10 @@ class ModelVariable(object):
 
         return bit_width
 
-    def get_reset_val(self, part_family, part_rev = None):
+    def get_reset_val(self):
         # This is a helper function to get reset val. It does not automatically run. Does not impact var object contents.
 
-        reg = self._get_regmodel_field(part_family=part_family, part_rev=part_rev)
+        reg = self.rm
         if reg is not None:
 
             bit_offset = reg.bitOffset
@@ -485,10 +483,10 @@ class ModelVariable(object):
 
         return reset_val
 
-    def set_to_reset_val(self, part_family, part_rev = None):
+    def set_to_reset_val(self):
         #This function resets a variable to its power-on-reset state (as defined in the reg model)
 
-        reset_val = self.get_reset_val(part_family, part_rev)
+        reset_val = self.get_reset_val()
         if reset_val is not None:
             self.value = reset_val
 

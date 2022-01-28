@@ -78,7 +78,7 @@ config_file:
     directory: btmeshconf
 
 readme:
-  - path: ../../documentation/example/soc_btmesh_light/readme.html
+  - path: ../../documentation/example/soc_btmesh_light/readme.md
 
 other_file:
   - path: ../../script/create_bl_files.bat
@@ -105,23 +105,23 @@ other_file:
 configuration:
   - name: APP_LOG_LEVEL
     value: "APP_LOG_LEVEL_INFO"
-  - name: LC_SERVER_PROPERTY_STATE_DEFAULT_ENABLE
+  - name: SL_BTMESH_LC_SERVER_PROPERTY_STATE_DEFAULT_ENABLE_CFG_VAL
     value: "1"
-  - name: LC_SERVER_TIME_RUN_ON_DEFAULT
+  - name: SL_BTMESH_LC_SERVER_TIME_RUN_ON_DEFAULT_CFG_VAL
     value: "2000"
-  - name: LC_SERVER_TIME_PROLONG_DEFAULT
+  - name: SL_BTMESH_LC_SERVER_TIME_PROLONG_DEFAULT_CFG_VAL
     value: "500"
-  - name: LC_SERVER_LIGHTNESS_ON_DEFAULT
+  - name: SL_BTMESH_LC_SERVER_LIGHTNESS_ON_DEFAULT_CFG_VAL
     value: "65535"
-  - name: LC_SERVER_LIGHTNESS_PROLONG_DEFAULT
+  - name: SL_BTMESH_LC_SERVER_LIGHTNESS_PROLONG_DEFAULT_CFG_VAL
     value: "32767"
-  - name: LC_SERVER_LIGHTNESS_STANDBY_DEFAULT
+  - name: SL_BTMESH_LC_SERVER_LIGHTNESS_STANDBY_DEFAULT_CFG_VAL
     value: "2000"
-  - name: LC_SERVER_AMBIENT_LUX_LEVEL_ON_DEFAULT
+  - name: SL_BTMESH_LC_SERVER_AMBIENT_LUX_LEVEL_ON_DEFAULT_CFG_VAL
     value: "1000"
-  - name: LC_SERVER_AMBIENT_LUX_LEVEL_PROLONG_DEFAULT
+  - name: SL_BTMESH_LC_SERVER_AMBIENT_LUX_LEVEL_PROLONG_DEFAULT_CFG_VAL
     value: "500"
-  - name: LC_SERVER_AMBIENT_LUX_LEVEL_STANDBY_DEFAULT
+  - name: SL_BTMESH_LC_SERVER_AMBIENT_LUX_LEVEL_STANDBY_DEFAULT_CFG_VAL
     value: "20"
   - name: SL_BOARD_ENABLE_DISPLAY
     value: "1"
@@ -163,5 +163,5 @@ ui_hints:
       focus: false
     - path: config/btmeshconf/dcd_config.btmeshconf
       focus: false
-    - path: readme.html
+    - path: readme.md
       focus: true

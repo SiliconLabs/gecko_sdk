@@ -4,9 +4,9 @@
     <model:property key="demos.blurb" value="Bluetooth Mesh - IOP Test - Friend node"/>
     <model:property key="core.partCompatibility" value=".*efr32bg13p632f512gm48.*"/>
     <model:property key="core.boardCompatibility" value="brd4104a"/>
-    <model:property key="demos.imageFile" value="asset://com.silabs.sdk.stack.super_4.0.0/app/bluetooth/demos/soc_btmesh_iop_friend/soc_btmesh_iop_friend-brd4104a.s37"/>
+    <model:property key="demos.imageFile" value="asset://com.silabs.sdk.stack.super_4.0.1/app/bluetooth/demos/soc_btmesh_iop_friend/soc_btmesh_iop_friend-brd4104a.s37"/>
     <model:property key="core.quality" value="INTERNAL"/>
-    <model:property key="demos.bootloaderFile" value="asset://com.silabs.sdk.stack.super_4.0.0/platform/bootloader/demos/bootloader-storage-internal-single-352k/bootloader-storage-internal-single-352k-brd4104a-combined.s37"/>
+    <model:property key="demos.bootloaderFile" value="asset://com.silabs.sdk.stack.super_4.0.1/platform/bootloader/demos/bootloader-storage-internal-single-352k/bootloader-storage-internal-single-352k-brd4104a-combined.s37"/>
     <model:description>Friend example for IOP test. This node acts as a friend for the low power node and caches messages sent to it when the low power node is sleeping.
 </model:description>
   </demo>
@@ -14,9 +14,9 @@
     <model:property key="demos.blurb" value="Bluetooth Mesh - IOP Test - Friend node"/>
     <model:property key="core.partCompatibility" value=".*efr32mg21a010f1024im32.*"/>
     <model:property key="core.boardCompatibility" value="brd4181a"/>
-    <model:property key="demos.imageFile" value="asset://com.silabs.sdk.stack.super_4.0.0/app/bluetooth/demos/soc_btmesh_iop_friend/soc_btmesh_iop_friend-brd4181a.s37"/>
+    <model:property key="demos.imageFile" value="asset://com.silabs.sdk.stack.super_4.0.1/app/bluetooth/demos/soc_btmesh_iop_friend/soc_btmesh_iop_friend-brd4181a.s37"/>
     <model:property key="core.quality" value="INTERNAL"/>
-    <model:property key="demos.bootloaderFile" value="asset://com.silabs.sdk.stack.super_4.0.0/platform/bootloader/demos/bootloader-storage-internal-single/bootloader-storage-internal-single-brd4181a.s37"/>
+    <model:property key="demos.bootloaderFile" value="asset://com.silabs.sdk.stack.super_4.0.1/platform/bootloader/demos/bootloader-storage-internal-single/bootloader-storage-internal-single-brd4181a.s37"/>
     <model:description>Friend example for IOP test. This node acts as a friend for the low power node and caches messages sent to it when the low power node is sleeping.
 </model:description>
   </demo>
@@ -24,9 +24,9 @@
     <model:property key="demos.blurb" value="Bluetooth Mesh - IOP Test - Friend node"/>
     <model:property key="core.partCompatibility" value=".*efr32mg21a010f1024im32.*"/>
     <model:property key="core.boardCompatibility" value="brd4181b"/>
-    <model:property key="demos.imageFile" value="asset://com.silabs.sdk.stack.super_4.0.0/app/bluetooth/demos/soc_btmesh_iop_friend/soc_btmesh_iop_friend-brd4181b.s37"/>
+    <model:property key="demos.imageFile" value="asset://com.silabs.sdk.stack.super_4.0.1/app/bluetooth/demos/soc_btmesh_iop_friend/soc_btmesh_iop_friend-brd4181b.s37"/>
     <model:property key="core.quality" value="INTERNAL"/>
-    <model:property key="demos.bootloaderFile" value="asset://com.silabs.sdk.stack.super_4.0.0/platform/bootloader/demos/bootloader-storage-internal-single/bootloader-storage-internal-single-brd4181b.s37"/>
+    <model:property key="demos.bootloaderFile" value="asset://com.silabs.sdk.stack.super_4.0.1/platform/bootloader/demos/bootloader-storage-internal-single/bootloader-storage-internal-single-brd4181b.s37"/>
     <model:description>Friend example for IOP test. This node acts as a friend for the low power node and caches messages sent to it when the low power node is sleeping.
 </model:description>
   </demo>
@@ -34,9 +34,9 @@
     <model:property key="demos.blurb" value="Bluetooth Mesh - IOP Test - LPN node"/>
     <model:property key="core.partCompatibility" value=".*efr32bg13p632f512gm48.*"/>
     <model:property key="core.boardCompatibility" value="brd4104a"/>
-    <model:property key="demos.imageFile" value="asset://com.silabs.sdk.stack.super_4.0.0/app/bluetooth/demos/soc_btmesh_iop_lpn/soc_btmesh_iop_lpn-brd4104a.s37"/>
+    <model:property key="demos.imageFile" value="asset://com.silabs.sdk.stack.super_4.0.1/app/bluetooth/demos/soc_btmesh_iop_lpn/soc_btmesh_iop_lpn-brd4104a.s37"/>
     <model:property key="core.quality" value="INTERNAL"/>
-    <model:property key="demos.bootloaderFile" value="asset://com.silabs.sdk.stack.super_4.0.0/platform/bootloader/demos/bootloader-storage-internal-single-352k/bootloader-storage-internal-single-352k-brd4104a-combined.s37"/>
+    <model:property key="demos.bootloaderFile" value="asset://com.silabs.sdk.stack.super_4.0.1/platform/bootloader/demos/bootloader-storage-internal-single-352k/bootloader-storage-internal-single-352k-brd4104a-combined.s37"/>
     <model:description>Low power node example for IOP test. This node acts as a typical low power device and sleeps most of the time. It needs a friend node to cache messages and forward them when polled.
 </model:description>
   </demo>
@@ -44,9 +44,9 @@
     <model:property key="demos.blurb" value="Bluetooth Mesh - IOP Test - LPN node"/>
     <model:property key="core.partCompatibility" value=".*efr32mg21a010f1024im32.*"/>
     <model:property key="core.boardCompatibility" value="brd4181a"/>
-    <model:property key="demos.imageFile" value="asset://com.silabs.sdk.stack.super_4.0.0/app/bluetooth/demos/soc_btmesh_iop_lpn/soc_btmesh_iop_lpn-brd4181a.s37"/>
+    <model:property key="demos.imageFile" value="asset://com.silabs.sdk.stack.super_4.0.1/app/bluetooth/demos/soc_btmesh_iop_lpn/soc_btmesh_iop_lpn-brd4181a.s37"/>
     <model:property key="core.quality" value="INTERNAL"/>
-    <model:property key="demos.bootloaderFile" value="asset://com.silabs.sdk.stack.super_4.0.0/platform/bootloader/demos/bootloader-storage-internal-single/bootloader-storage-internal-single-brd4181a.s37"/>
+    <model:property key="demos.bootloaderFile" value="asset://com.silabs.sdk.stack.super_4.0.1/platform/bootloader/demos/bootloader-storage-internal-single/bootloader-storage-internal-single-brd4181a.s37"/>
     <model:description>Low power node example for IOP test. This node acts as a typical low power device and sleeps most of the time. It needs a friend node to cache messages and forward them when polled.
 </model:description>
   </demo>
@@ -54,9 +54,9 @@
     <model:property key="demos.blurb" value="Bluetooth Mesh - IOP Test - LPN node"/>
     <model:property key="core.partCompatibility" value=".*efr32mg21a010f1024im32.*"/>
     <model:property key="core.boardCompatibility" value="brd4181b"/>
-    <model:property key="demos.imageFile" value="asset://com.silabs.sdk.stack.super_4.0.0/app/bluetooth/demos/soc_btmesh_iop_lpn/soc_btmesh_iop_lpn-brd4181b.s37"/>
+    <model:property key="demos.imageFile" value="asset://com.silabs.sdk.stack.super_4.0.1/app/bluetooth/demos/soc_btmesh_iop_lpn/soc_btmesh_iop_lpn-brd4181b.s37"/>
     <model:property key="core.quality" value="INTERNAL"/>
-    <model:property key="demos.bootloaderFile" value="asset://com.silabs.sdk.stack.super_4.0.0/platform/bootloader/demos/bootloader-storage-internal-single/bootloader-storage-internal-single-brd4181b.s37"/>
+    <model:property key="demos.bootloaderFile" value="asset://com.silabs.sdk.stack.super_4.0.1/platform/bootloader/demos/bootloader-storage-internal-single/bootloader-storage-internal-single-brd4181b.s37"/>
     <model:description>Low power node example for IOP test. This node acts as a typical low power device and sleeps most of the time. It needs a friend node to cache messages and forward them when polled.
 </model:description>
   </demo>
@@ -64,9 +64,9 @@
     <model:property key="demos.blurb" value="Bluetooth Mesh - IOP Test - LPN node"/>
     <model:property key="core.partCompatibility" value=".*efr32mg22c224f512im40.*"/>
     <model:property key="core.boardCompatibility" value="brd4182a"/>
-    <model:property key="demos.imageFile" value="asset://com.silabs.sdk.stack.super_4.0.0/app/bluetooth/demos/soc_btmesh_iop_lpn/soc_btmesh_iop_lpn-brd4182a.s37"/>
+    <model:property key="demos.imageFile" value="asset://com.silabs.sdk.stack.super_4.0.1/app/bluetooth/demos/soc_btmesh_iop_lpn/soc_btmesh_iop_lpn-brd4182a.s37"/>
     <model:property key="core.quality" value="INTERNAL"/>
-    <model:property key="demos.bootloaderFile" value="asset://com.silabs.sdk.stack.super_4.0.0/platform/bootloader/demos/bootloader-storage-internal-single-352k/bootloader-storage-internal-single-352k-brd4182a.s37"/>
+    <model:property key="demos.bootloaderFile" value="asset://com.silabs.sdk.stack.super_4.0.1/platform/bootloader/demos/bootloader-storage-internal-single-352k/bootloader-storage-internal-single-352k-brd4182a.s37"/>
     <model:description>Low power node example for IOP test. This node acts as a typical low power device and sleeps most of the time. It needs a friend node to cache messages and forward them when polled.
 </model:description>
   </demo>
@@ -74,9 +74,9 @@
     <model:property key="demos.blurb" value="Bluetooth Mesh - IOP Test - Proxy node"/>
     <model:property key="core.partCompatibility" value=".*efr32bg13p632f512gm48.*"/>
     <model:property key="core.boardCompatibility" value="brd4104a"/>
-    <model:property key="demos.imageFile" value="asset://com.silabs.sdk.stack.super_4.0.0/app/bluetooth/demos/soc_btmesh_iop_proxy/soc_btmesh_iop_proxy-brd4104a.s37"/>
+    <model:property key="demos.imageFile" value="asset://com.silabs.sdk.stack.super_4.0.1/app/bluetooth/demos/soc_btmesh_iop_proxy/soc_btmesh_iop_proxy-brd4104a.s37"/>
     <model:property key="core.quality" value="INTERNAL"/>
-    <model:property key="demos.bootloaderFile" value="asset://com.silabs.sdk.stack.super_4.0.0/platform/bootloader/demos/bootloader-storage-internal-single-352k/bootloader-storage-internal-single-352k-brd4104a-combined.s37"/>
+    <model:property key="demos.bootloaderFile" value="asset://com.silabs.sdk.stack.super_4.0.1/platform/bootloader/demos/bootloader-storage-internal-single-352k/bootloader-storage-internal-single-352k-brd4104a-combined.s37"/>
     <model:description>Proxy example for IOP test. This node forwards/relays messages between GATT and advertising bearers in the network.
 </model:description>
   </demo>
@@ -84,9 +84,9 @@
     <model:property key="demos.blurb" value="Bluetooth Mesh - IOP Test - Proxy node"/>
     <model:property key="core.partCompatibility" value=".*efr32mg21a010f1024im32.*"/>
     <model:property key="core.boardCompatibility" value="brd4181a"/>
-    <model:property key="demos.imageFile" value="asset://com.silabs.sdk.stack.super_4.0.0/app/bluetooth/demos/soc_btmesh_iop_proxy/soc_btmesh_iop_proxy-brd4181a.s37"/>
+    <model:property key="demos.imageFile" value="asset://com.silabs.sdk.stack.super_4.0.1/app/bluetooth/demos/soc_btmesh_iop_proxy/soc_btmesh_iop_proxy-brd4181a.s37"/>
     <model:property key="core.quality" value="INTERNAL"/>
-    <model:property key="demos.bootloaderFile" value="asset://com.silabs.sdk.stack.super_4.0.0/platform/bootloader/demos/bootloader-storage-internal-single/bootloader-storage-internal-single-brd4181a.s37"/>
+    <model:property key="demos.bootloaderFile" value="asset://com.silabs.sdk.stack.super_4.0.1/platform/bootloader/demos/bootloader-storage-internal-single/bootloader-storage-internal-single-brd4181a.s37"/>
     <model:description>Proxy example for IOP test. This node forwards/relays messages between GATT and advertising bearers in the network.
 </model:description>
   </demo>
@@ -94,9 +94,9 @@
     <model:property key="demos.blurb" value="Bluetooth Mesh - IOP Test - Proxy node"/>
     <model:property key="core.partCompatibility" value=".*efr32mg21a010f1024im32.*"/>
     <model:property key="core.boardCompatibility" value="brd4181b"/>
-    <model:property key="demos.imageFile" value="asset://com.silabs.sdk.stack.super_4.0.0/app/bluetooth/demos/soc_btmesh_iop_proxy/soc_btmesh_iop_proxy-brd4181b.s37"/>
+    <model:property key="demos.imageFile" value="asset://com.silabs.sdk.stack.super_4.0.1/app/bluetooth/demos/soc_btmesh_iop_proxy/soc_btmesh_iop_proxy-brd4181b.s37"/>
     <model:property key="core.quality" value="INTERNAL"/>
-    <model:property key="demos.bootloaderFile" value="asset://com.silabs.sdk.stack.super_4.0.0/platform/bootloader/demos/bootloader-storage-internal-single/bootloader-storage-internal-single-brd4181b.s37"/>
+    <model:property key="demos.bootloaderFile" value="asset://com.silabs.sdk.stack.super_4.0.1/platform/bootloader/demos/bootloader-storage-internal-single/bootloader-storage-internal-single-brd4181b.s37"/>
     <model:description>Proxy example for IOP test. This node forwards/relays messages between GATT and advertising bearers in the network.
 </model:description>
   </demo>
@@ -104,9 +104,9 @@
     <model:property key="demos.blurb" value="Bluetooth Mesh - IOP Test - Relay node"/>
     <model:property key="core.partCompatibility" value=".*efr32bg13p632f512gm48.*"/>
     <model:property key="core.boardCompatibility" value="brd4104a"/>
-    <model:property key="demos.imageFile" value="asset://com.silabs.sdk.stack.super_4.0.0/app/bluetooth/demos/soc_btmesh_iop_relay/soc_btmesh_iop_relay-brd4104a.s37"/>
+    <model:property key="demos.imageFile" value="asset://com.silabs.sdk.stack.super_4.0.1/app/bluetooth/demos/soc_btmesh_iop_relay/soc_btmesh_iop_relay-brd4104a.s37"/>
     <model:property key="core.quality" value="INTERNAL"/>
-    <model:property key="demos.bootloaderFile" value="asset://com.silabs.sdk.stack.super_4.0.0/platform/bootloader/demos/bootloader-storage-internal-single-352k/bootloader-storage-internal-single-352k-brd4104a-combined.s37"/>
+    <model:property key="demos.bootloaderFile" value="asset://com.silabs.sdk.stack.super_4.0.1/platform/bootloader/demos/bootloader-storage-internal-single-352k/bootloader-storage-internal-single-352k-brd4104a-combined.s37"/>
     <model:description>Relay example for IOP test. This node acts as a relay, i.e. if a node is out of range for another node, it relays messages between the two, provided the relay node is in range for both.
 </model:description>
   </demo>
@@ -114,9 +114,9 @@
     <model:property key="demos.blurb" value="Bluetooth Mesh - IOP Test - Relay node"/>
     <model:property key="core.partCompatibility" value=".*efr32mg21a010f1024im32.*"/>
     <model:property key="core.boardCompatibility" value="brd4181a"/>
-    <model:property key="demos.imageFile" value="asset://com.silabs.sdk.stack.super_4.0.0/app/bluetooth/demos/soc_btmesh_iop_relay/soc_btmesh_iop_relay-brd4181a.s37"/>
+    <model:property key="demos.imageFile" value="asset://com.silabs.sdk.stack.super_4.0.1/app/bluetooth/demos/soc_btmesh_iop_relay/soc_btmesh_iop_relay-brd4181a.s37"/>
     <model:property key="core.quality" value="INTERNAL"/>
-    <model:property key="demos.bootloaderFile" value="asset://com.silabs.sdk.stack.super_4.0.0/platform/bootloader/demos/bootloader-storage-internal-single/bootloader-storage-internal-single-brd4181a.s37"/>
+    <model:property key="demos.bootloaderFile" value="asset://com.silabs.sdk.stack.super_4.0.1/platform/bootloader/demos/bootloader-storage-internal-single/bootloader-storage-internal-single-brd4181a.s37"/>
     <model:description>Relay example for IOP test. This node acts as a relay, i.e. if a node is out of range for another node, it relays messages between the two, provided the relay node is in range for both.
 </model:description>
   </demo>
@@ -124,9 +124,9 @@
     <model:property key="demos.blurb" value="Bluetooth Mesh - IOP Test - Relay node"/>
     <model:property key="core.partCompatibility" value=".*efr32mg21a010f1024im32.*"/>
     <model:property key="core.boardCompatibility" value="brd4181b"/>
-    <model:property key="demos.imageFile" value="asset://com.silabs.sdk.stack.super_4.0.0/app/bluetooth/demos/soc_btmesh_iop_relay/soc_btmesh_iop_relay-brd4181b.s37"/>
+    <model:property key="demos.imageFile" value="asset://com.silabs.sdk.stack.super_4.0.1/app/bluetooth/demos/soc_btmesh_iop_relay/soc_btmesh_iop_relay-brd4181b.s37"/>
     <model:property key="core.quality" value="INTERNAL"/>
-    <model:property key="demos.bootloaderFile" value="asset://com.silabs.sdk.stack.super_4.0.0/platform/bootloader/demos/bootloader-storage-internal-single/bootloader-storage-internal-single-brd4181b.s37"/>
+    <model:property key="demos.bootloaderFile" value="asset://com.silabs.sdk.stack.super_4.0.1/platform/bootloader/demos/bootloader-storage-internal-single/bootloader-storage-internal-single-brd4181b.s37"/>
     <model:description>Relay example for IOP test. This node acts as a relay, i.e. if a node is out of range for another node, it relays messages between the two, provided the relay node is in range for both.
 </model:description>
   </demo>

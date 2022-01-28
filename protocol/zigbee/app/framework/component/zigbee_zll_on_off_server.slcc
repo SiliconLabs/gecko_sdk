@@ -9,7 +9,7 @@ description: Silicon Labs implementation of the original Zigbee Light Link profi
 label: ZLL On/Off Server Cluster Enhancements
 quality: extend
 id: zigbee_zll_on_off_server
-category: Zigbee|ZigBee Light Link
+category: Zigbee|Zigbee Light Link
 provides:
    - name: "zigbee_zll_on_off_server"
 requires:

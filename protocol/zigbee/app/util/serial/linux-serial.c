@@ -43,6 +43,7 @@ EmberStatus emberSerialWriteData(uint8_t port, uint8_t *data, uint8_t length);
 #include "cli.h"
 
 #include <sys/types.h>         // for fstat()
+#include <sys/select.h>        // for fd_set
 #include <sys/stat.h>          // ""
 #include <fcntl.h>             // for fcntl()
 #include <stdlib.h>

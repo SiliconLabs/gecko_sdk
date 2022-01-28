@@ -366,3 +366,29 @@ class Calc_Pro2_Demod_Sol(CALC_Pro2_Demod_Ocelot):
             crslow = 0
 
         self._reg_write(model.vars.MODEM_BCRCTRL0_CRSLOW, crslow)
+
+    def calc_bcr_cfe_costthd(self, model):
+        #This function calculates the value of MODEM_BCRDEMODPMEXP_BCRCFECOSTTHD for Sol and newer EFR ICs
+        #The main change in this function, compared to the old one, is  an extra condition to set BCRCFECOSTTHD TO 150
+        # for cases when the FSK2/4 modulation index is 0.5
+
+        # Reading variables from model variables
+        antdivmode = model.vars.antdivmode.value
+        mod_format = model.vars.modulation_type.value
+        modulation_index = model.vars.modulation_index.value
+
+        if model.vars.bcr_demod_en.value == 1:
+            # Need to read in these variables inside of the if statement as some are don't care if BCR disabled
+            calculated_bcrpmacqwin = model.vars.MODEM_BCRDEMODPMEXP_BCRPMACQWIN.value
+
+            if antdivmode == model.vars.antdivmode.var_enum.PHDEMODANTDIV or antdivmode == model.vars.antdivmode.var_enum.ANTENNA1:
+                bcr_cfe_costthd = 150  # If antdiv enabled, bcrpmacqwin is always 2 so the cost thd is constant.
+            elif ((mod_format == model.vars.modulation_type.var_enum.FSK2 or mod_format == model.vars.modulation_type.var_enum.FSK4) and \
+                    modulation_index == 0.5):
+                bcr_cfe_costthd = 150  # In Sol, this condition only applies to PHY_Landis_Gyr_915M_19p2kbps_mi0p5
+            else:
+                bcr_cfe_costthd = int(round(215 - (3 - calculated_bcrpmacqwin) * 60))
+        else:
+            bcr_cfe_costthd = 255
+
+        self._reg_sat_write(model.vars.MODEM_BCRDEMODPMEXP_BCRCFECOSTTHD, bcr_cfe_costthd)  # We always care about this

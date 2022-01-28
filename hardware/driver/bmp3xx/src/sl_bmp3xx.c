@@ -157,6 +157,7 @@ sl_status_t sl_bmp3xx_set_config(sl_i2cspm_t *i2cspm, sl_bmp3xx_config_t *cfg)
   settings = cfg->settings;
 
   result = bmp3_set_sensor_settings(desired_settings, &settings, &bmp3xx);
+  result |= bmp3_set_op_mode(&settings, &bmp3xx);
   bmp3xx_power_mode = settings.op_mode;
 
   if (result != SL_STATUS_OK) {

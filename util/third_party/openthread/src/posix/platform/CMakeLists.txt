@@ -37,6 +37,17 @@ if(OT_DAEMON)
     )
 endif()
 
+option(OT_POSIX_INSTALL_EXTERNAL_ROUTES "Install External Routes as IPv6 routes" ON)
+if(OT_POSIX_INSTALL_EXTERNAL_ROUTES)
+    target_compile_definitions(ot-posix-config
+        INTERFACE "OPENTHREAD_POSIX_CONFIG_INSTALL_EXTERNAL_ROUTES_ENABLE=1"
+    )
+else()
+    target_compile_definitions(ot-posix-config
+        INTERFACE "OPENTHREAD_POSIX_CONFIG_INSTALL_EXTERNAL_ROUTES_ENABLE=0"
+    )
+endif()
+
 option(OT_POSIX_VIRTUAL_TIME "enable virtual time" OFF)
 if(OT_POSIX_VIRTUAL_TIME)
     target_compile_definitions(ot-posix-config
@@ -67,6 +78,7 @@ add_library(openthread-posix
     backbone.cpp
     daemon.cpp
     entropy.cpp
+    firewall.cpp
     hdlc_interface.cpp
     infra_if.cpp
     logging.cpp
@@ -82,6 +94,7 @@ add_library(openthread-posix
     system.cpp
     trel_udp6.cpp
     udp.cpp
+    utils.cpp
     virtual_time.cpp
 )
 

@@ -6,7 +6,7 @@
 #
 # Prerequisites
 # - Windows PowerShell.
-# - PATH_SCMD and PATH_GCCARM environment variables to be set. See readme.html
+# - PATH_SCMD and PATH_GCCARM environment variables to be set. See readme.md
 # for more information.
 # - The Bluetooth - SoC Interoperability Test example generated either with
 # the "Link SDK and copy project sources" or the "Copy contents" option.
@@ -19,7 +19,7 @@
 # - Start the test. When prompted to choose a gbl file for OTA-DFU, select the
 # ota-dfu_ack.gbl file. When prompted again, select ota-dfu_non_ack.gbl.
 #
-# For a more detailed guide see the readme.html file of the example.
+# For a more detailed guide see the readme.md file of the example.
 ################################################################################
 
 $App1 = "ota-dfu_non_ack"

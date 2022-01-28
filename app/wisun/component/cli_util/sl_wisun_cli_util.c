@@ -109,7 +109,7 @@ sl_status_t app_util_get_string(char *const value_str,
   if (is_value_hex) {
     // Hex value
     strcat(value_format_str, "lx");
-    sprintf(value_temp, value_format_str, (uint32_t)value);
+    sprintf(value_temp, value_format_str, value);
   } else if (is_value_signed) {
     // Signed integer value
     strcat(value_format_str, "ld");
@@ -117,7 +117,7 @@ sl_status_t app_util_get_string(char *const value_str,
   } else {
     // Unsigned integer value
     strcat(value_format_str, "lu");
-    sprintf(value_temp, value_format_str, (uint32_t)value);
+    sprintf(value_temp, value_format_str, value);
   }
 
   // String starts with an enumeration
@@ -321,10 +321,6 @@ char *app_util_printable_data_next(app_printable_data_ctx_t *const ctx)
                                   ctx->data,
                                   ctx->data_left,
                                   ctx->line_length);
-  }
-  if (!ret) {
-    // All done
-    return NULL;
   }
 
   // Prepare for the next line

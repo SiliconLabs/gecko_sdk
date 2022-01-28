@@ -1,6 +1,6 @@
-Wi-SUN SDK 1.2.0.0
-* FAN 1.0 Certified Wi-SUN Border Router reference design
-* Wi-SUN Network Peformance Application
+Wi-SUN SDK 1.2.1.0
+- Stack: Reduced the stack log verbosity
+- Other quality improvements and bug fixes
 
 
 

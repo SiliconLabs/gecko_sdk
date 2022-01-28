@@ -1,7 +1,7 @@
 project_name: "mp-ncp-uart-hw"
 label: "mp-ncp-uart-hw"
 package: "Zigbee"
-category: "ZigBee Application"
+category: "Zigbee Application"
 quality: "production"
 
 component:

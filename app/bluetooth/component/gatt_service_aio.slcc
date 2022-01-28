@@ -12,18 +12,23 @@ config_file:
     directory: btconf
 source:
   - path: sl_gatt_service_aio.c
+  - path: sl_gatt_service_aio_digital_in.c
+    condition:
+      - simple_button
+  - path: sl_gatt_service_aio_digital_out.c
+    condition:
+      - simple_led
 include:
   - path: .
     file_list:
       - path: sl_gatt_service_aio.h
+      - path: sli_gatt_service_aio.h
 provides:
   - name: gatt_service_aio
 requires:
   - name: bluetooth_stack
   - name: gatt_configuration
   - name: bluetooth_feature_gatt_server
-  - name: simple_button
-  - name: simple_led
   - name: app_assert
   - name: app_log
 template_contribution:

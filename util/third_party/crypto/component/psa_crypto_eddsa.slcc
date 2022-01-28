@@ -3,16 +3,14 @@ package: platform
 label: PSA Crypto support for EdDSA
 description: >-
   This component provides support for signature generation and verification
-  with EDDSA in PSA Crypto. EdDSA is only supported on Vault High devices.
+  with EDDSA in PSA Crypto. EdDSA is only supported on HSE devices.
 category: Platform|Security
 quality: production
 provides:
   - name: psa_crypto_eddsa
 requires:
-  - name: device_security_vault
+  - name: device_has_semailbox
   - name: psa_crypto_ecc_edwards_curve
-  - name: psa_crypto_sha512
-    condition: [psa_crypto_ecc_edwards25519]
 template_contribution:
   - name: psa_crypto_config
     value: PSA_WANT_ALG_EDDSA

@@ -9,6 +9,8 @@ provides:
    - name: "zigbee_stack_diagnostics"
 config_file:
   - path: protocol/zigbee/app/framework/plugin/stack-diagnostics/config/stack-diagnostics-config.h
+validation_helper:
+  - path: protocol/zigbee/app/framework/component/scripts/zigbee_stack_diagnostics_validation.lua
 source:
   - path: protocol/zigbee/app/framework/plugin/stack-diagnostics/stack-diagnostics.c
     condition:

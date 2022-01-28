@@ -169,7 +169,7 @@ static void hsl_state_store_timer_cb(sl_simple_timer_t *handle,
 /***************************************************************************//**
  * This function loads the saved light state from Persistent Storage and
  * copies the data in the global variable lightbulb_state.
- * If PS key with ID HSL_SERVER_PS_KEY does not exist or loading failed,
+ * If PS key with ID SL_BTMESH_HSL_SERVER_PS_KEY_CFG_VAL does not exist or loading failed,
  * lightbulb_state is set to zero and some default values are written to it.
  *
  * @return Returns SL_STATUS_OK (0) if succeed, non-zero otherwise.
@@ -2769,7 +2769,7 @@ static void init_hsl_models(void)
 /***************************************************************************//**
  * This function loads the saved light state from Persistent Storage and
  * copies the data in the global variable lightbulb_state.
- * If PS key with ID HSL_SERVER_PS_KEY does not exist or loading failed,
+ * If PS key with ID SL_BTMESH_HSL_SERVER_PS_KEY_CFG_VAL does not exist or loading failed,
  * lightbulb_state is set to zero and some default values are written to it.
  *
  * @return Returns SL_STATUS_OK (0) if succeed, non-zero otherwise.
@@ -2780,7 +2780,7 @@ static sl_status_t lightbulb_state_load(void)
   size_t ps_len = 0;
   struct lightbulb_state ps_data;
 
-  sc = sl_bt_nvm_load(HSL_SERVER_PS_KEY,
+  sc = sl_bt_nvm_load(SL_BTMESH_HSL_SERVER_PS_KEY_CFG_VAL,
                       sizeof(ps_data),
                       &ps_len,
                       (uint8_t *)&ps_data);
@@ -2788,12 +2788,12 @@ static sl_status_t lightbulb_state_load(void)
   // Set default values if ps_load fail or size of lightbulb_state has changed
   if ((sc != SL_STATUS_OK) || (ps_len != sizeof(struct lightbulb_state))) {
     memset(&lightbulb_state, 0, sizeof(struct lightbulb_state));
-    lightbulb_state.hue_default = HSL_SERVER_DEFAULT_HUE;
-    lightbulb_state.hue_min = HSL_SERVER_MINIMUM_HUE;
-    lightbulb_state.hue_max = HSL_SERVER_MAXIMUM_HUE;
-    lightbulb_state.saturation_default = HSL_SERVER_DEFAULT_SATURATION;
-    lightbulb_state.saturation_min = HSL_SERVER_MINIMUM_SATURATION;
-    lightbulb_state.saturation_max = HSL_SERVER_MAXIMUM_SATURATION;
+    lightbulb_state.hue_default = SL_BTMESH_HSL_SERVER_DEFAULT_HUE_CFG_VAL;
+    lightbulb_state.hue_min = SL_BTMESH_HSL_SERVER_MINIMUM_HUE_CFG_VAL;
+    lightbulb_state.hue_max = SL_BTMESH_HSL_SERVER_MAXIMUM_HUE_CFG_VAL;
+    lightbulb_state.saturation_default = SL_BTMESH_HSL_SERVER_DEFAULT_SATURATION_CFG_VAL;
+    lightbulb_state.saturation_min = SL_BTMESH_HSL_SERVER_MINIMUM_SATURATION_CFG_VAL;
+    lightbulb_state.saturation_max = SL_BTMESH_HSL_SERVER_MAXIMUM_SATURATION_CFG_VAL;
 
     // Check if default values are valid and correct them if needed
     lightbulb_state_validate_and_correct();
@@ -2822,7 +2822,7 @@ static sl_status_t lightbulb_state_load(void)
  * This function saves the current light state in Persistent Storage so that
  * the data is preserved over reboots and power cycles.
  * The light state is hold in a global variable lightbulb_state.
- * A PS key with ID HSL_SERVER_PS_KEY is used to store the whole struct.
+ * A PS key with ID SL_BTMESH_HSL_SERVER_PS_KEY_CFG_VAL is used to store the whole struct.
  *
  * @return Returns SL_STATUS_OK (0) if succeed, non-zero otherwise.
  ******************************************************************************/
@@ -2830,7 +2830,7 @@ static sl_status_t lightbulb_state_store(void)
 {
   sl_status_t sc;
 
-  sc = sl_bt_nvm_save(HSL_SERVER_PS_KEY,
+  sc = sl_bt_nvm_save(SL_BTMESH_HSL_SERVER_PS_KEY_CFG_VAL,
                       sizeof(struct lightbulb_state),
                       (const uint8_t *)&lightbulb_state);
 
@@ -2849,7 +2849,7 @@ static sl_status_t lightbulb_state_store(void)
 static void lightbulb_state_changed(void)
 {
   sl_status_t sc = sl_simple_timer_start(&hsl_state_store_timer,
-                                         HSL_SERVER_NVM_SAVE_TIME,
+                                         SL_BTMESH_HSL_SERVER_NVM_SAVE_TIME_CFG_VAL,
                                          hsl_state_store_timer_cb,
                                          NO_CALLBACK_DATA,
                                          false);

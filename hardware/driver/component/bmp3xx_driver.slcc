@@ -23,6 +23,9 @@ include:
 source:
   - path: src/sl_bmp3xx.c
   - path: bosch/BMP3_driver/bmp3.c
+template_contribution:
+  - name: component_catalog
+    value: bmp3xx_driver
 documentation:
     docset: gecko-platform
     document: hardware-driver/api/group-bmp3xx

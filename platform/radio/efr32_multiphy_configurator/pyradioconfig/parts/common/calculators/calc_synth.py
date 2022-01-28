@@ -59,9 +59,6 @@ class CALC_Synth(ICalculator):
         # A proper flag to determine sub-GHz
         self._addModelVariable(model, 'subgig_band', bool, ModelVariableFormat.DECIMAL, desc="Flag for sub-GHz")
 
-        # if model.part_family.lower() in ["panther", "lynx", "ocelot"]:
-            # 40nm Series 2 enable optional input for injection side
-
         var = self._addModelVariable(model, 'lo_injection_side', Enum, ModelVariableFormat.DECIMAL, 'Possible LO injection sides')
         member_data = [
             ['HIGH_SIDE' , 0, 'The local oscillator (LO) is higher in frequency than the receive RF channel'],
@@ -271,18 +268,7 @@ class CALC_Synth(ICalculator):
         # The synth tuning range was found in:  https: // jira.silabs.com / browse / EFRPHY - 12
         # According to that it is 4670 to 5740 MHz.  It's easier to think of half those number as
         # being between 2335MHz and and 2870MHz
-        if model.part_family.lower() in ["dumbo", "jumbo", "nerio", "nixi"]:
-            synth_min = 2335 * 1000000
-            synth_max = 2870 * 1000000
-
-        # Panther supports a wider frequency range: https://jira.silabs.com/browse/MCUW_RADIO_CFG-710
-        if model.part_family.lower() in ["panther", "lynx", "ocelot", "leopard"]:
-            synth_min = (4.0e3 / 2.0) * 1000000
-            synth_max = (6.5e3 / 2.0) * 1000000
-
-            # Can I do this here?
-            self.synth_freq_min_limit = long(2000000000)
-            self.synth_freq_max_limit = long(3250000000)
+        synth_min, synth_max = self._get_synth_min_max()
 
         # Now go through the valid lodiv options calculated above, and find the one that uses
         # the lowest synth frequency that is still above the minimum value allowed
@@ -326,6 +312,11 @@ class CALC_Synth(ICalculator):
         reg = (lodiv_a << 6) + (lodiv_b << 3) + lodiv_c
 
         self._reg_write(model.vars.SYNTH_DIVCTRL_LODIVFREQCTRL, reg)
+
+    def _get_synth_min_max(self):
+        synth_min = 2335 * 1000000
+        synth_max = 2870 * 1000000
+        return synth_min, synth_max
 
     def calc_lodiv_actual(self, model):
         """

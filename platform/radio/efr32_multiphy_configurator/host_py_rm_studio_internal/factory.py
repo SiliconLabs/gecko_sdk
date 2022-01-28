@@ -1,6 +1,6 @@
 
 import os
-import imp
+import importlib
 
 
 _PKG_PATH = os.path.dirname(os.path.realpath(__file__))
@@ -19,8 +19,8 @@ _RM_PART_FAMILY_MAP = {
     'OCELOT':  'efr32xg23',
     'BOBCAT':  'efr32xg24',
     'SOL':     'efr32xg25',
-    'LEOPARD': 'efr32xg26',
-    'VIPER':   'efr32xg27',
+    'LEOPARD': 'efr32xg27',
+    'VIPER':   'efr32xg31',
 }
 
 RM_S1_PART_FAMILY_NAMES = [
@@ -87,10 +87,11 @@ def rm_dynamic_import(part_family_name, rev_name=None):
         raise ValueError("Invalid register revision '{}'. "
                          "Available revisions: {}".format(rev_name,
                                                           ','.join(rm_info.all_revs)))
-    mod_name = os.path.basename(rm_info.pkg_path) + '.rev' + rev_name
-    rev_path = os.path.join(rm_info.pkg_path, 'rev' + rev_name)
-    rev_pkg = imp.load_module(mod_name, None, rev_path, ('', '', 5))
-
+    rev_path = os.path.join(rm_info.pkg_path, 'rev' + rev_name, 'device.py')
+    abs_mod_name = os.path.basename(_PKG_PATH) + '.full.' + rm_info.short_name + '.rev' + rev_name + '.device'
+    spec = importlib.util.spec_from_file_location(abs_mod_name, rev_path)
+    rev_pkg = importlib.util.module_from_spec(spec)
+    spec.loader.exec_module(rev_pkg)
     return getattr(rev_pkg, 'RM_Device_' + rm_info.val_die_name + '_Rev' + rev_name)
 
 
@@ -100,7 +101,10 @@ def RM_Factory(part_family_name, rev_name=None):
 
 def RM_GetInfo(part_family_name):
     mod_name = get_mod_name(part_family_name)
-    die_path = os.path.join(_PKG_PATH, 'full', mod_name)
-    die_pkg = imp.load_module(mod_name, None, die_path, ('', '', 5))
-    factory_func = getattr(die_pkg.factory, 'RM_GetInfo')
+    die_path = os.path.join(_PKG_PATH, 'full', mod_name, 'factory.py')
+    abs_mod_name = os.path.basename(_PKG_PATH) + '.full.' + mod_name + '.factory'
+    spec = importlib.util.spec_from_file_location(abs_mod_name, die_path)
+    die_pkg = importlib.util.module_from_spec(spec)
+    spec.loader.exec_module(die_pkg)
+    factory_func = getattr(die_pkg, 'RM_GetInfo')
     return factory_func()

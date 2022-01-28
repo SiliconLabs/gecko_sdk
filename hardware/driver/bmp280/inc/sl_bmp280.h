@@ -74,8 +74,8 @@ extern "C" {
  ******************************************************************************/
 typedef struct sl_bmp280_config {
   uint8_t oversampling;       /**< Oversampling value                         */
-  uint8_t powerMode;          /**< SLEEP, FORCED or NORMAL power mode setting */
-  uint8_t standbyTime;        /**< Standby time setting                       */
+  uint8_t power_mode;         /**< SLEEP, FORCED or NORMAL power mode setting */
+  uint8_t standby_time;       /**< Standby time setting                       */
 } sl_bmp280_config_t;
 
 /***************************************************************************//**
@@ -108,6 +108,10 @@ void sl_bmp280_deinit(sl_i2cspm_t *i2cspm);
  *
  * @param[in] cfg
  *    Structure, which holds the configuration parameters
+ *
+ * @note
+ *   Make sure to pass by Sleep Mode before switching between Forced mode
+ *   and normal mode. Refer to datasheet for more details.
  *
  * @retval SL_STATUS_OK Success
  * @retval SL_STATUS_FAIL Sensor configuration failed

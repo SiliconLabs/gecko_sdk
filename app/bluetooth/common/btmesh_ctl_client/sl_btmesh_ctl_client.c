@@ -148,9 +148,9 @@ static void send_ctl_request(uint8_t retrans)
                                        );
 
   if (sc == SL_STATUS_OK) {
-    log_info(CTL_CLIENT_LOGGING_RECALL_SUCCESS, ctl_trid, delay);
+    log_info(SL_BTMESH_CTL_CLIENT_LOGGING_RECALL_SUCCESS_CFG_VAL, ctl_trid, delay);
   } else {
-    log_btmesh_status_f(sc, CTL_CLIENT_LOGGING_CLIENT_PUBLISH_FAIL);
+    log_btmesh_status_f(sc, SL_BTMESH_CTL_CLIENT_LOGGING_CLIENT_PUBLISH_FAIL_CFG_VAL);
   }
 
   // Keep track of how many requests has been sent
@@ -172,7 +172,7 @@ void sl_btmesh_change_temperature(int8_t change_percentage)
   if (change_percentage > 0) {
     temperature_percent += change_percentage;
     if (temperature_percent > TEMPERATURE_PCT_MAX) {
-#if (CTL_CLIENT_TEMPERATURE_WRAP_ENABLED != 0)
+#if (SL_BTMESH_CTL_CLIENT_TEMPERATURE_WRAP_ENABLED_CFG_VAL != 0)
       temperature_percent = 0;
 #else
       temperature_percent = TEMPERATURE_PCT_MAX;
@@ -180,7 +180,7 @@ void sl_btmesh_change_temperature(int8_t change_percentage)
     }
   } else {
     if (temperature_percent < (-change_percentage)) {
-#if (CTL_CLIENT_TEMPERATURE_WRAP_ENABLED != 0)
+#if (SL_BTMESH_CTL_CLIENT_TEMPERATURE_WRAP_ENABLED_CFG_VAL != 0)
       temperature_percent = TEMPERATURE_PCT_MAX;
 #else
       temperature_percent = 0;
@@ -217,12 +217,12 @@ void sl_btmesh_set_temperature(uint8_t new_color_temperature_percentage)
                          / TEMPERATURE_PCT_MAX)                    \
                       * (TEMPERATURE_MAX - TEMPERATURE_MIN)        \
                       / TEMPERATURE_SCALE_FACTOR;
-  log(CTL_CLIENT_LOGGING_NEW_TEMP_SET,
+  log(SL_BTMESH_CTL_CLIENT_LOGGING_NEW_TEMP_SET_CFG_VAL,
       temperature_percent * temperature_percent / TEMPERATURE_PCT_MAX,
       temperature_level);
 
   // Request is sent multiple times to improve reliability
-  ctl_request_count = CTL_CLIENT_RETRANSMISSION_COUNT;
+  ctl_request_count = SL_BTMESH_CTL_CLIENT_RETRANSMISSION_COUNT_CFG_VAL;
 
   send_ctl_request(0);  //Send the first request
 
@@ -230,7 +230,7 @@ void sl_btmesh_set_temperature(uint8_t new_color_temperature_percentage)
   // to trigger retransmission of the request after 50 ms delay
   if (ctl_request_count > 0) {
     sl_status_t sc = sl_simple_timer_start(&ctl_retransmission_timer,
-                                           CTL_CLIENT_RETRANSMISSION_TIMEOUT,
+                                           SL_BTMESH_CTL_CLIENT_RETRANSMISSION_TIMEOUT_CFG_VAL,
                                            ctl_retransmission_timer_cb,
                                            NO_CALLBACK_DATA,
                                            true);

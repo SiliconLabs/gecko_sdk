@@ -77,6 +77,10 @@ void SubMac::Init(void)
     mEnergyScanMaxRssi = kInvalidRssiValue;
     mEnergyScanEndTime = Time{0};
 
+#if OPENTHREAD_CONFIG_MAC_FILTER_ENABLE
+    mRadioFilterEnabled = false;
+#endif
+
     mPrevKey.Clear();
     mCurrKey.Clear();
     mNextKey.Clear();
@@ -219,7 +223,18 @@ exit:
 
 Error SubMac::Receive(uint8_t aChannel)
 {
-    Error error = Get<Radio>().Receive(aChannel);
+    Error error;
+
+#if OPENTHREAD_CONFIG_MAC_FILTER_ENABLE
+    if (mRadioFilterEnabled)
+    {
+        error = Get<Radio>().Sleep();
+    }
+    else
+#endif
+    {
+        error = Get<Radio>().Receive(aChannel);
+    }
 
     if (error != kErrorNone)
     {
@@ -242,6 +257,10 @@ Error SubMac::CslSample(uint8_t aPanChannel)
     {
         mCslChannel = aPanChannel;
     }
+
+#if OPENTHREAD_CONFIG_MAC_FILTER_ENABLE
+    VerifyOrExit(!mRadioFilterEnabled, error = Get<Radio>().Sleep());
+#endif
 
     switch (mCslState)
     {
@@ -268,7 +287,7 @@ exit:
     }
     return error;
 }
-#endif
+#endif // OPENTHREAD_CONFIG_MAC_CSL_RECEIVER_ENABLE
 
 void SubMac::HandleReceiveDone(RxFrame *aFrame, Error aError)
 {
@@ -301,7 +320,12 @@ void SubMac::HandleReceiveDone(RxFrame *aFrame, Error aError)
     }
 #endif
 
-    mCallbacks.ReceiveDone(aFrame, aError);
+#if OPENTHREAD_CONFIG_MAC_FILTER_ENABLE
+    if (!mRadioFilterEnabled)
+#endif
+    {
+        mCallbacks.ReceiveDone(aFrame, aError);
+    }
 }
 
 Error SubMac::Send(void)
@@ -327,6 +351,14 @@ Error SubMac::Send(void)
 #endif
         break;
     }
+
+#if OPENTHREAD_CONFIG_MAC_FILTER_ENABLE
+    if (mRadioFilterEnabled)
+    {
+        mCallbacks.TransmitDone(mTransmitFrame, nullptr, mTransmitFrame.GetAckRequest() ? kErrorNoAck : kErrorNone);
+        ExitNow();
+    }
+#endif
 
     ProcessTransmitSecurity();
     mCsmaBackoffs    = 0;
@@ -606,7 +638,20 @@ exit:
 
 int8_t SubMac::GetRssi(void) const
 {
-    return Get<Radio>().GetRssi();
+    int8_t rssi;
+
+#if OPENTHREAD_CONFIG_MAC_FILTER_ENABLE
+    if (mRadioFilterEnabled)
+    {
+        rssi = kInvalidRssiValue;
+    }
+    else
+#endif
+    {
+        rssi = Get<Radio>().GetRssi();
+    }
+
+    return rssi;
 }
 
 int8_t SubMac::GetNoiseFloor(void)
@@ -636,6 +681,10 @@ Error SubMac::EnergyScan(uint8_t aScanChannel, uint16_t aScanDuration)
 #endif
         break;
     }
+
+#if OPENTHREAD_CONFIG_MAC_FILTER_ENABLE
+    VerifyOrExit(!mRadioFilterEnabled, HandleEnergyScanDone(kInvalidRssiValue));
+#endif
 
     if (RadioSupportsEnergyScan())
     {
@@ -1041,10 +1090,9 @@ void SubMac::HandleCslTimer(void)
         break;
 
     case kCslSleep:
-        mCslSampleTime += periodUs;
-
         if (RadioSupportsReceiveTiming())
         {
+            mCslSampleTime += periodUs;
             mCslTimer.FireAt(mCslSampleTime - timeAhead);
             timeAhead -= kCslReceiveTimeAhead;
         }
@@ -1052,6 +1100,7 @@ void SubMac::HandleCslTimer(void)
         {
             mCslTimer.FireAt(mCslSampleTime + timeAfter);
             mCslState = kCslSample;
+            mCslSampleTime += periodUs;
         }
 
         Get<Radio>().UpdateCslSampleTime(mCslSampleTime.GetValue());
@@ -1082,20 +1131,13 @@ void SubMac::HandleCslTimer(void)
 void SubMac::GetCslWindowEdges(uint32_t &ahead, uint32_t &after)
 {
     uint32_t semiPeriod = mCslPeriod * kUsPerTenSymbols / 2;
-    uint64_t curTime    = otPlatRadioGetNow(&GetInstance());
-    uint64_t elapsed;
+    uint32_t curTime    = static_cast<uint32_t>(otPlatRadioGetNow(&GetInstance()));
+    uint32_t elapsed;
     uint32_t semiWindow;
 
-    if (mCslLastSync.GetValue() > curTime)
-    {
-        elapsed = UINT64_MAX - mCslLastSync.GetValue() + curTime;
-    }
-    else
-    {
-        elapsed = curTime - mCslLastSync.GetValue();
-    }
+    elapsed = curTime - mCslLastSync.GetValue();
 
-    semiWindow = static_cast<uint32_t>(elapsed * (Get<Radio>().GetCslAccuracy() + mCslParentAccuracy) / 1000000);
+    semiWindow = elapsed * (Get<Radio>().GetCslAccuracy() + mCslParentAccuracy) / 1000000;
     semiWindow += mCslParentUncert * kUsPerUncertUnit;
 
     ahead = (semiWindow + kCslReceiveTimeAhead > semiPeriod) ? semiPeriod : semiWindow + kCslReceiveTimeAhead;

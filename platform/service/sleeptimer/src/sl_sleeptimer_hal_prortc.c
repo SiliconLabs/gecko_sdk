@@ -297,6 +297,20 @@ void sleeptimer_hal_disable_int(uint8_t local_flag)
   BUS_RegMaskedClear(&PRORTC->IEN, prortc_int_dis);
 }
 
+/*******************************************************************************
+ * Hardware Abstraction Layer to set timer interrupts.
+ ******************************************************************************/
+void sleeptimer_hal_set_int(uint8_t local_flag)
+{
+  if (local_flag & SLEEPTIMER_EVENT_COMP) {
+#if defined (RTCC_HAS_SET_CLEAR)
+    PRORTC->IF_SET = PRORTC_IF_COMP_BIT;
+#else
+    PRORTC->IS = PRORTC_IF_COMP_BIT;
+#endif
+  }
+}
+
 /******************************************************************************
  * Gets status of specified interrupt.
  *

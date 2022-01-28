@@ -152,9 +152,9 @@ static void send_onoff_request(uint8_t retrans)
                                        );
 
   if (sc == SL_STATUS_OK) {
-    log_info(LIGHTING_ONOFF_LOGGING_CLIENT_PUBLISH_SUCCESS, onoff_trid, delay);
+    log_info(SL_BTMESH_LIGHTING_ONOFF_LOGGING_CLIENT_PUBLISH_SUCCESS_CFG_VAL, onoff_trid, delay);
   } else {
-    log_btmesh_status_f(sc, LIGHTING_ONOFF_LOGGING_CLIENT_PUBLISH_FAIL);
+    log_btmesh_status_f(sc, SL_BTMESH_LIGHTING_ONOFF_LOGGING_CLIENT_PUBLISH_FAIL_CFG_VAL);
   }
 
   // Keep track of how many requests has been sent
@@ -204,11 +204,11 @@ static void send_lightness_request(uint8_t retrans)
                                        );
 
   if (sc == SL_STATUS_OK) {
-    log_info(LIGHTING_LOGGING_CLIENT_PUBLISH_SUCCESS,
+    log_info(SL_BTMESH_LIGHTING_LOGGING_CLIENT_PUBLISH_SUCCESS_CFG_VAL,
              lightness_trid,
              delay);
   } else {
-    log_btmesh_status_f(sc, LIGHTING_LOGGING_CLIENT_PUBLISH_FAIL);
+    log_btmesh_status_f(sc, SL_BTMESH_LIGHTING_LOGGING_CLIENT_PUBLISH_FAIL_CFG_VAL);
   }
 
   // Keep track of how many requests has been sent
@@ -230,7 +230,7 @@ void sl_btmesh_change_lightness(int8_t change_percentage)
   if (change_percentage > 0) {
     lightness_percent += change_percentage;
     if (lightness_percent > LIGHTNESS_PCT_MAX) {
-#if (LIGHT_LIGHTNESS_WRAP_ENABLED != 0)
+#if (SL_BTMESH_LIGHT_LIGHTNESS_WRAP_ENABLED_CFG_VAL != 0)
       lightness_percent = 0;
 #else
       lightness_percent = LIGHTNESS_PCT_MAX;
@@ -238,7 +238,7 @@ void sl_btmesh_change_lightness(int8_t change_percentage)
     }
   } else {
     if (lightness_percent < (-change_percentage)) {
-#if (LIGHT_LIGHTNESS_WRAP_ENABLED != 0)
+#if (SL_BTMESH_LIGHT_LIGHTNESS_WRAP_ENABLED_CFG_VAL != 0)
       lightness_percent = LIGHTNESS_PCT_MAX;
 #else
       lightness_percent = 0;
@@ -269,9 +269,9 @@ void sl_btmesh_set_lightness(uint8_t new_lightness_percentage)
   }
 
   lightness_level = lightness_percent * 0xFFFF / LIGHTNESS_PCT_MAX;
-  log(LIGHTING_LOGGING_NEW_LIGHTNESS_SET, lightness_percent, lightness_level);
+  log(SL_BTMESH_LIGHTING_LOGGING_NEW_LIGHTNESS_SET_CFG_VAL, lightness_percent, lightness_level);
   // Request is sent multiple times to improve reliability
-  lightness_request_count = LIGHT_RETRANSMISSION_COUNT;
+  lightness_request_count = SL_BTMESH_LIGHT_RETRANSMISSION_COUNT_CFG_VAL;
 
   send_lightness_request(0);  // Send the first request
 
@@ -279,7 +279,7 @@ void sl_btmesh_set_lightness(uint8_t new_lightness_percentage)
   // to trigger retransmission of the request after 50 ms delay
   if (lightness_request_count > 0) {
     sl_status_t sc = sl_simple_timer_start(&light_retransmission_timer,
-                                           LIGHT_RETRANSMISSION_TIMEOUT,
+                                           SL_BTMESH_LIGHT_RETRANSMISSION_TIMEOUT_CFG_VAL,
                                            light_retransmission_timer_cb,
                                            NO_CALLBACK_DATA,
                                            true);
@@ -306,14 +306,14 @@ void sl_btmesh_change_switch_position(uint8_t position)
 
   // Turns light ON or OFF, using Generic OnOff model
   if (switch_pos) {
-    log(ONOFF_LIGHTING_LOGGING_ON);
+    log(SL_BTMESH_ONOFF_LIGHTING_LOGGING_ON_CFG_VAL);
     lightness_percent = LIGHTNESS_PCT_MAX;
   } else {
-    log(ONOFF_LIGHTING_LOGGING_OFF);
+    log(SL_BTMESH_ONOFF_LIGHTING_LOGGING_OFF_CFG_VAL);
     lightness_percent = 0;
   }
   // Request is sent 3 times to improve reliability
-  onoff_request_count = ONOFF_RETRANSMISSION_COUNT;
+  onoff_request_count = SL_BTMESH_ONOFF_RETRANSMISSION_COUNT_CFG_VAL;
 
   send_onoff_request(0);  // Send the first request
 
@@ -321,7 +321,7 @@ void sl_btmesh_change_switch_position(uint8_t position)
   // to trigger retransmission of the request after 50 ms delay
   if (onoff_request_count > 0) {
     sl_status_t sc = sl_simple_timer_start(&onoff_retransmission_timer,
-                                           ONOFF_RETRANSMISSION_TIMEOUT,
+                                           SL_BTMESH_ONOFF_RETRANSMISSION_TIMEOUT_CFG_VAL,
                                            onoff_retransmission_timer_cb,
                                            NO_CALLBACK_DATA,
                                            true);

@@ -48,9 +48,15 @@
 #include "common/dns_utils.hpp"
 #include "common/logging.hpp"
 #include "utils/dns_utils.hpp"
+#include "utils/string_utils.hpp"
 
 namespace otbr {
 namespace Dnssd {
+
+static inline bool DnsLabelsEqual(const std::string &aLabel1, const std::string &aLabel2)
+{
+    return StringUtils::EqualCaseInsensitive(aLabel1, aLabel2);
+}
 
 DiscoveryProxy::DiscoveryProxy(Ncp::ControllerOpenThread &aNcp, Mdns::Publisher &aPublisher)
     : mNcp(aNcp)
@@ -60,12 +66,17 @@ DiscoveryProxy::DiscoveryProxy(Ncp::ControllerOpenThread &aNcp, Mdns::Publisher 
 
 void DiscoveryProxy::Start(void)
 {
+    assert(mSubscriberId == 0);
+
     otDnssdQuerySetCallbacks(mNcp.GetInstance(), &DiscoveryProxy::OnDiscoveryProxySubscribe,
                              &DiscoveryProxy::OnDiscoveryProxyUnsubscribe, this);
 
-    mMdnsPublisher.SetSubscriptionCallbacks(
+    mSubscriberId = mMdnsPublisher.AddSubscriptionCallbacks(
         [this](const std::string &aType, const Mdns::Publisher::DiscoveredInstanceInfo &aInstanceInfo) {
-            OnServiceDiscovered(aType, aInstanceInfo);
+            if (!aInstanceInfo.mRemoved)
+            {
+                OnServiceDiscovered(aType, aInstanceInfo);
+            }
         },
 
         [this](const std::string &aHostName, const Mdns::Publisher::DiscoveredHostInfo &aHostInfo) {
@@ -78,7 +89,12 @@ void DiscoveryProxy::Start(void)
 void DiscoveryProxy::Stop(void)
 {
     otDnssdQuerySetCallbacks(mNcp.GetInstance(), nullptr, nullptr, nullptr);
-    mMdnsPublisher.SetSubscriptionCallbacks(nullptr, nullptr);
+
+    if (mSubscriberId > 0)
+    {
+        mMdnsPublisher.RemoveSubscriptionCallbacks(mSubscriberId);
+        mSubscriberId = 0;
+    }
 
     otbrLogInfo("stopped");
 }
@@ -91,7 +107,6 @@ void DiscoveryProxy::OnDiscoveryProxySubscribe(void *aContext, const char *aFull
 void DiscoveryProxy::OnDiscoveryProxySubscribe(const char *aFullName)
 {
     std::string fullName(aFullName);
-    otbrError   error    = OTBR_ERROR_NONE;
     DnsNameInfo nameInfo = SplitFullDnsName(fullName);
 
     otbrLogInfo("subscribe: %s", fullName.c_str());
@@ -107,11 +122,6 @@ void DiscoveryProxy::OnDiscoveryProxySubscribe(const char *aFullName)
             mMdnsPublisher.SubscribeHost(nameInfo.mHostName);
         }
     }
-
-    if (error != OTBR_ERROR_NONE)
-    {
-        otbrLogWarning("failed to subscribe %s: %s", fullName.c_str(), otbrErrorString(error));
-    }
 }
 
 void DiscoveryProxy::OnDiscoveryProxyUnsubscribe(void *aContext, const char *aFullName)
@@ -122,7 +132,6 @@ void DiscoveryProxy::OnDiscoveryProxyUnsubscribe(void *aContext, const char *aFu
 void DiscoveryProxy::OnDiscoveryProxyUnsubscribe(const char *aFullName)
 {
     std::string fullName(aFullName);
-    otbrError   error    = OTBR_ERROR_NONE;
     DnsNameInfo nameInfo = SplitFullDnsName(fullName);
 
     otbrLogInfo("unsubscribe: %s", fullName.c_str());
@@ -138,10 +147,6 @@ void DiscoveryProxy::OnDiscoveryProxyUnsubscribe(const char *aFullName)
             mMdnsPublisher.UnsubscribeHost(nameInfo.mHostName);
         }
     }
-    if (error != OTBR_ERROR_NONE)
-    {
-        otbrLogWarning("failed to unsubscribe %s: %s", fullName.c_str(), otbrErrorString(error));
-    }
 }
 
 void DiscoveryProxy::OnServiceDiscovered(const std::string &                            aType,
@@ -155,9 +160,6 @@ void DiscoveryProxy::OnServiceDiscovered(const std::string &                    
                 "weight %d",
                 aType.c_str(), aInstanceInfo.mName.c_str(), aInstanceInfo.mHostName.c_str(),
                 aInstanceInfo.mAddresses.size(), aInstanceInfo.mPort, aInstanceInfo.mPriority, aInstanceInfo.mWeight);
-
-    CheckServiceNameSanity(aType);
-    CheckHostnameSanity(aInstanceInfo.mHostName);
 
     instanceInfo.mAddressNum = aInstanceInfo.mAddresses.size();
 
@@ -206,14 +208,15 @@ void DiscoveryProxy::OnServiceDiscovered(const std::string &                    
             continue;
         }
 
-        if (serviceName == aType && (instanceName.empty() || instanceName == unescapedInstanceName))
+        if (DnsLabelsEqual(serviceName, aType) &&
+            (instanceName.empty() || DnsLabelsEqual(instanceName, unescapedInstanceName)))
         {
-            std::string serviceFullName  = aType + "." + domain;
-            std::string hostName         = TranslateDomain(aInstanceInfo.mHostName, domain);
-            std::string instanceFullName = unescapedInstanceName + "." + serviceFullName;
+            std::string serviceFullName    = aType + "." + domain;
+            std::string translatedHostName = TranslateDomain(aInstanceInfo.mHostName, domain);
+            std::string instanceFullName   = unescapedInstanceName + "." + serviceFullName;
 
             instanceInfo.mFullName = instanceFullName.c_str();
-            instanceInfo.mHostName = hostName.c_str();
+            instanceInfo.mHostName = translatedHostName.c_str();
 
             otDnssdQueryHandleDiscoveredServiceInstance(mNcp.GetInstance(), serviceFullName.c_str(), &instanceInfo);
         }
@@ -234,8 +237,6 @@ void DiscoveryProxy::OnHostDiscovered(const std::string &                       
     {
         resolvedHostName = aHostName + ".local.";
     }
-
-    CheckHostnameSanity(resolvedHostName);
 
     hostInfo.mAddressNum = aHostInfo.mAddresses.size();
     if (!aHostInfo.mAddresses.empty())
@@ -263,7 +264,7 @@ void DiscoveryProxy::OnHostDiscovered(const std::string &                       
         splitError = SplitFullHostName(queryName, hostName, domain);
         assert(splitError == OTBR_ERROR_NONE);
 
-        if (hostName == aHostName)
+        if (DnsLabelsEqual(hostName, aHostName))
         {
             std::string hostFullName = TranslateDomain(resolvedHostName, domain);
 
@@ -279,7 +280,7 @@ std::string DiscoveryProxy::TranslateDomain(const std::string &aName, const std:
     std::string domain;
 
     VerifyOrExit(OTBR_ERROR_NONE == SplitFullHostName(aName, hostName, domain), targetName = aName);
-    VerifyOrExit(domain == "local.", targetName = aName);
+    VerifyOrExit(DnsLabelsEqual(domain, "local."), targetName = aName);
 
     targetName = hostName + "." + aTargetDomain;
 
@@ -301,33 +302,12 @@ int DiscoveryProxy::GetServiceSubscriptionCount(const DnsNameInfo &aNameInfo) co
         otDnssdGetQueryTypeAndName(query, &queryName);
         queryInfo = SplitFullDnsName(queryName);
 
-        count += (aNameInfo.mInstanceName == queryInfo.mInstanceName &&
-                  aNameInfo.mServiceName == queryInfo.mServiceName && aNameInfo.mHostName == queryInfo.mHostName);
+        count += (DnsLabelsEqual(aNameInfo.mInstanceName, queryInfo.mInstanceName) &&
+                  DnsLabelsEqual(aNameInfo.mServiceName, queryInfo.mServiceName) &&
+                  DnsLabelsEqual(aNameInfo.mHostName, queryInfo.mHostName));
     }
 
     return count;
-}
-
-void DiscoveryProxy::CheckServiceNameSanity(const std::string &aType)
-{
-    size_t dotpos;
-
-    OTBR_UNUSED_VARIABLE(aType);
-    OTBR_UNUSED_VARIABLE(dotpos);
-
-    assert(aType.length() > 0);
-    assert(aType[aType.length() - 1] != '.');
-    dotpos = aType.find_first_of('.');
-    assert(dotpos != std::string::npos);
-    assert(dotpos == aType.find_last_of('.'));
-}
-
-void DiscoveryProxy::CheckHostnameSanity(const std::string &aHostName)
-{
-    OTBR_UNUSED_VARIABLE(aHostName);
-
-    assert(aHostName.length() > 0);
-    assert(aHostName[aHostName.length() - 1] == '.');
 }
 
 uint32_t DiscoveryProxy::CapTtl(uint32_t aTtl)

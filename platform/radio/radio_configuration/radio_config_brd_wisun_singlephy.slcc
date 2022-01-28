@@ -23,6 +23,10 @@ config_file:
   directory: rail
   condition:
   - brd4254a
+- path: platform/radio/radio_configuration/WiSUN/brd_wisun_singlephy/device_sdid_220/EU_1_1a/radio_settings.radioconf
+  directory: rail
+  condition:
+  - brd4271a
 
 #NA_1_1b/radio_settings based on boards
 - path: platform/radio/radio_configuration/WiSUN/brd_wisun_singlephy/device_sdid_84/NA_1_1b/radio_settings.radioconf
@@ -44,17 +48,17 @@ config_file:
 - path: platform/radio/radio_configuration/WiSUN/brd_wisun_singlephy/device_sdid_220/NA_1_1b/radio_settings.radioconf
   directory: rail
   condition:
-  - brd4271a
-- path: platform/radio/radio_configuration/WiSUN/brd_wisun_singlephy/device_sdid_220/NA_1_1b/radio_settings.radioconf
-  directory: rail
-  condition:
-  - brd4272a
+  - brd4270b
 
 #CN_1_1b/radio_settings based on boards
 - path: platform/radio/radio_configuration/WiSUN/brd_wisun_singlephy/device_sdid_84/CN_1_1b/radio_settings.radioconf
   directory: rail
   condition:
   - brd4172a
+- path: platform/radio/radio_configuration/WiSUN/brd_wisun_singlephy/device_sdid_220/CN_1_1b/radio_settings.radioconf
+  directory: rail
+  condition:
+  - brd4272a
 
 # radio settings based on IC chips
 - path: platform/radio/radio_configuration/WiSUN/brd_wisun_singlephy/device_sdid_84/NA_1_1b/radio_settings.radioconf

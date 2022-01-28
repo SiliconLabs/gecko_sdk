@@ -3,7 +3,7 @@
  * @brief Board HW abstraction header for BRD4184A
  *******************************************************************************
  * # License
- * <b>Copyright 2020 Silicon Laboratories Inc. www.silabs.com</b>
+ * <b>Copyright 2022 Silicon Laboratories Inc. www.silabs.com</b>
  *******************************************************************************
  *
  * SPDX-License-Identifier: Zlib
@@ -31,6 +31,17 @@
 #ifndef BOARD_H
 #define BOARD_H
 
-#define BOARD_BUTTON0_EM4WUEN_MASK 0x08           /**< Mask to enable EM4 wake-up BTN0 */
+//--------------------------------
+#include "sl_simple_led_instances.h"
+
+#define ADV_LED                    SL_SIMPLE_LED_INSTANCE(0)
+#define adv_led_turn_on()          sl_led_turn_on(ADV_LED)
+#define adv_led_turn_off()         sl_led_turn_off(ADV_LED)
+#define adv_led_toggle()           sl_led_toggle(ADV_LED)
+
+//--------------------------------
+#define BOARD_EM4WUEN_BTN  sl_button_btn0 // The button to use for EM4 wake-up
+#define BOARD_EM4WUEN_NUM  3 // The EM4WU interrupt number of the chosen button. (See the Reference Manual.)
+#define BOARD_EM4WUEN_MASK (1 << BOARD_EM4WUEN_NUM) // GPIO pinmask for EM4 wake-up
 
 #endif // BOARD_H

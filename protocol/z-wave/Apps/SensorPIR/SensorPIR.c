@@ -15,13 +15,7 @@
 #include "Assert.h"
 #include "DebugPrintConfig.h"
 
-//To enable DEBUGPRINT you must first undefine DISABLE_USART0
-//In Simplicity Studio open Project->Properties->C/C++ General->Paths and Symbols
-//Remove DISABLE_USART0 from list found under # Symbols->GNU C
-#if !defined(DISABLE_USART1) || !defined(DISABLE_USART0)
 //#define DEBUGPRINT
-#endif
-
 #include "DebugPrint.h"
 #include "config_app.h"
 #include "ZAF_app_version.h"
@@ -707,10 +701,10 @@ ApplicationInit(EResetReason_t eResetReason)
   BRD420xBoardInit(RadioConfig.eRegion);
 
 #ifdef DEBUGPRINT
+  static uint8_t m_aDebugPrintBuffer[96];
 #if BUILDING_WITH_UC
   DebugPrintConfig(m_aDebugPrintBuffer, sizeof(m_aDebugPrintBuffer), DebugPrinter);
 #else
-  static uint8_t m_aDebugPrintBuffer[96];
   ZAF_UART0_enable(115200, true, false);
   DebugPrintConfig(m_aDebugPrintBuffer, sizeof(m_aDebugPrintBuffer), ZAF_UART0_tx_send);
 #endif // BUILDING_WITH_UC

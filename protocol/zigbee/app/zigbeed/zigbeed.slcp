@@ -1,7 +1,7 @@
 project_name: "zigbeed"
 label: "zigbeed"
 package: "Zigbee"
-category: "ZigBee Host Application"
+category: "Zigbee Host Application"
 quality: "production"
 
 description: |-
@@ -36,15 +36,27 @@ configuration:
   - name: SL_CLI_MAX_INPUT_ARGUMENTS
     value: 16
   - name: EMBER_BINDING_TABLE_SIZE
-    value: 32
+    value: 128
   - name: EMBER_MAX_END_DEVICE_CHILDREN
-    value: 32
+    value: 64
+  - name: EMBER_SOURCE_ROUTE_TABLE_SIZE
+    value: 254  
+  - name: EMBER_ROUTE_TABLE_SIZE
+    value: 254
+  - name: EMBER_DISCOVERY_TABLE_SIZE
+    value: 64
+  - name: EMBER_ADDRESS_TABLE_SIZE
+    value: 128 
+  - name: EMBER_NEIGHBOR_TABLE_SIZE
+    value: 26              
   - name: EMBER_PACKET_BUFFER_COUNT
     value: 255
+  - name: EMBER_CUSTOM_MAC_FILTER_TABLE_SIZE
+    value: 64  
   - name: EMBER_AF_PLUGIN_ZIGBEE_PRO_STACK_CHILD_TABLE_SIZE
-    value: 32
+    value: 64
   - name:  EMBER_KEY_TABLE_SIZE
-    value: 12
+    value: 128
 
 include:
   - path: "./"

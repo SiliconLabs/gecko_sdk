@@ -71,7 +71,7 @@ config_file:
     directory: btmeshconf
 
 readme:
-  - path: ../../documentation/example/soc_btmesh_switch/readme.html
+  - path: ../../documentation/example/soc_btmesh_switch/readme.md
 
 other_file:
   - path: ../../script/create_bl_files.bat
@@ -98,11 +98,11 @@ other_file:
 configuration:
   - name: APP_LOG_LEVEL
     value: "APP_LOG_LEVEL_INFO"
-  - name: CTL_CLIENT_TEMPERATURE_WRAP_ENABLED
+  - name: SL_BTMESH_CTL_CLIENT_TEMPERATURE_WRAP_ENABLED_CFG_VAL
     value: "1"
   - name: NVM3_DEFAULT_CACHE_SIZE
     value: 100
-  - name: LIGHT_LIGHTNESS_WRAP_ENABLED
+  - name: SL_BTMESH_LIGHT_LIGHTNESS_WRAP_ENABLED_CFG_VAL
     value: "1"
   - name: SL_BOARD_ENABLE_VCOM
     value: "1"
@@ -153,5 +153,5 @@ ui_hints:
       focus: false
     - path: config/btmeshconf/dcd_config.btmeshconf
       focus: false
-    - path: readme.html
+    - path: readme.md
       focus: true

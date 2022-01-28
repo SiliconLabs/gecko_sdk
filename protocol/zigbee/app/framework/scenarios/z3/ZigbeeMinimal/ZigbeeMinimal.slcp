@@ -1,7 +1,7 @@
 project_name: "ZigbeeMinimal"
 label: "ZigbeeMinimal"
 package: "Zigbee"
-category: "ZigBee Application"
+category: "Zigbee Application"
 quality: "production"
 
 component:
@@ -15,7 +15,6 @@ component:
   - id: simple_led
     instance:
       - led0
-      - led1
   - id: "zigbee_pro_stack"
   - id: "zigbee_source_route"
   - id: "zigbee_zcl_framework_core"

@@ -32,21 +32,21 @@
 
 #if defined(SEMAILBOX_PRESENT)
 
-#include "psa/crypto.h"
-#include "sli_se_opaque_functions.h"
-
-#include "sli_se_driver_key_management.h"
-#include "sli_se_driver_key_derivation.h"
-#include "sl_se_manager_key_derivation.h"
-
-#include "sl_se_manager.h"
-#include "sli_se_manager_internal.h"
-#include "sl_se_manager_util.h"
 #include <string.h>
 
-#ifdef __cplusplus
-extern "C" {
-#endif
+#include "psa/crypto.h"
+#include "sli_se_opaque_functions.h"
+#include "sli_se_driver_key_management.h"
+#include "sli_se_driver_key_derivation.h"
+#include "sli_se_version_dependencies.h"
+
+#include "sl_se_manager.h"
+#include "sl_se_manager_key_derivation.h"
+#include "sl_se_manager_util.h"
+#include "sli_se_manager_internal.h"
+
+// -----------------------------------------------------------------------------
+// Function Definitions
 
 #if defined(PSA_WANT_ALG_HKDF) \
   && (_SILICON_LABS_SECURITY_FEATURE == _SILICON_LABS_SECURITY_FEATURE_VAULT)
@@ -219,24 +219,23 @@ psa_status_t sli_se_driver_key_agreement(psa_algorithm_t alg,
     return PSA_ERROR_BUFFER_TOO_SMALL;
   }
 
-#if !defined(SL_SE_ASSUME_FW_AT_LEAST_1_2_2) \
-  && defined(_SILICON_LABS_32B_SERIES_2_CONFIG_1)
-
-  // External public key validation is required for older versions of SE firmware.
-  // SE version 1.2.2 is first version with public key validation inside of SE for ECDH.
+  #if defined(SLI_SE_VERSION_ECDH_PUBKEY_VALIDATION_UNCERTAIN)
   sl_status = sl_se_init_command_context(&cmd_ctx);
   if (sl_status != SL_STATUS_OK) {
     return PSA_ERROR_HARDWARE_FAILURE;
   }
-
   uint32_t se_version = 0;
   sl_status = sl_se_get_se_version(&cmd_ctx, &se_version);
   if (sl_status != SL_STATUS_OK) {
     return PSA_ERROR_HARDWARE_FAILURE;
   }
+  se_version = SLI_VERSION_REMOVE_DIE_ID(se_version);
 
-  if ((se_version & 0x00FFFFFFU) < SLI_SE_OLDEST_VERSION_WITH_PUBLIC_KEY_VALIDATION) {
-#if defined(MBEDTLS_ECP_C) && defined(MBEDTLS_PSA_CRYPTO_C) && defined(SL_SE_SUPPORT_FW_PRIOR_TO_1_2_2)
+  // External public key validation is required for older versions of SE FW.
+  if (SLI_SE_VERSION_PUBKEY_VALIDATION_REQUIRED(se_version)) {
+      #if defined(MBEDTLS_ECP_C)     \
+    && defined(MBEDTLS_PSA_CRYPTO_C) \
+    && defined(SL_SE_SUPPORT_FW_PRIOR_TO_1_2_2)
     psa_status = sli_se_driver_validate_pubkey_with_fallback(key_type,
                                                              key_bits,
                                                              peer_key,
@@ -244,12 +243,12 @@ psa_status_t sli_se_driver_key_agreement(psa_algorithm_t alg,
     if (psa_status != PSA_SUCCESS) {
       return psa_status;
     }
-#else
-    // No fallback code is compiled in, cannot do public key validation
+      #else
+    // No fallback code is compiled in, cannot do public key validation.
     return PSA_ERROR_NOT_SUPPORTED;
-#endif
+      #endif
   }
-#endif
+  #endif // SLI_SE_VERSION_ECDH_PUBKEY_VALIDATION_UNCERTAIN
 
   switch (key_type) {
     #if defined(SLI_PSA_WANT_ECC_SECP)
@@ -322,12 +321,16 @@ psa_status_t sli_se_driver_key_agreement(psa_algorithm_t alg,
       }
 
       switch (key_bits) {
+        #if defined(SLI_PSA_WANT_ECC_MONTGOMERY_255)
         case 255:
           pub_desc.type = SL_SE_KEY_TYPE_ECC_X25519;
           break;
+        #endif // SLI_PSA_WANT_ECC_MONTGOMERY_255
+        #if defined(SLI_PSA_WANT_ECC_MONTGOMERY_448)
         case 448:
           pub_desc.type = SL_SE_KEY_TYPE_ECC_X448;
           break;
+        #endif // SLI_PSA_WANT_ECC_MONTGOMERY_448
         default:
           return PSA_ERROR_NOT_SUPPORTED;
       }
@@ -409,10 +412,15 @@ psa_status_t sli_se_driver_key_agreement(psa_algorithm_t alg,
                                                &pub_desc,
                                                &shared_desc);
   if (sl_status != SL_STATUS_OK) {
-    // If the ECDH operation failed, this is most likely due to the peer key
-    // being an invalid elliptic curve point. Other sources for failure should
-    // hopefully have been caught during parameter validation.
-    return PSA_ERROR_INVALID_ARGUMENT;
+    if (sl_status == SL_STATUS_COMMAND_IS_INVALID) {
+      // This error will be returned if the key type isn't supported.
+      return PSA_ERROR_NOT_SUPPORTED;
+    } else {
+      // If the ECDH operation failed, this is most likely due to the peer key
+      // being an invalid elliptic curve point. Other sources for failure should
+      // hopefully have been caught during parameter validation.
+      return PSA_ERROR_INVALID_ARGUMENT;
+    }
   }
 
   #if (_SILICON_LABS_SECURITY_FEATURE == _SILICON_LABS_SECURITY_FEATURE_VAULT) \
@@ -453,7 +461,4 @@ psa_status_t sli_se_driver_key_agreement(psa_algorithm_t alg,
 #endif // SLI_PSA_WANT_ALG_ECDH
 }
 
-#ifdef __cplusplus
-}
-#endif
 #endif // SEMAILBOX_PRESENT

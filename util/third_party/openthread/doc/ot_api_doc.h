@@ -121,13 +121,13 @@
  *
  * @defgroup api-cli                  Command Line Interface
  * @defgroup api-coprocessor-rpc      Co-processor Remote Procedure Call
- * @defgroup api-crypto               Crypto
+ * @defgroup api-crypto               Crypto - Thread Stack
  * @defgroup api-entropy              Entropy Source
- * @defgroup api-factory-diagnostics  Factory Diagnostics
+ * @defgroup api-factory-diagnostics  Factory Diagnostics - Thread Stack
  * @defgroup api-heap                 Heap
  * @defgroup api-history-tracker      History Tracker
  * @defgroup api-jam-detection        Jam Detection
- * @defgroup api-logging              Logging
+ * @defgroup api-logging              Logging - Thread Stack
  * @defgroup api-ncp                  Network Co-Processor
  * @defgroup api-network-time         Network Time Synchronization
  * @defgroup api-random-group         Random Number Generator
@@ -155,10 +155,10 @@
  * @{
  *
  * @defgroup plat-alarm               Alarm
- * @defgroup plat-coprocessor-rpc     Co-processor Remore Procedure Call
+ * @defgroup plat-crypto              Crypto - Platform
  * @defgroup plat-entropy             Entropy
- * @defgroup plat-factory-diagnostics Factory Diagnostics
- * @defgroup plat-logging             Logging
+ * @defgroup plat-factory-diagnostics Factory Diagnostics - Platform
+ * @defgroup plat-logging             Logging - Platform
  * @defgroup plat-memory              Memory
  * @defgroup plat-messagepool         Message Pool
  * @defgroup plat-misc                Miscellaneous

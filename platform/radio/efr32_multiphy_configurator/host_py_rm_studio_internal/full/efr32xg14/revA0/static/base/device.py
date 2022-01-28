@@ -3,6 +3,7 @@ __all__ = [ 'Base_RM_Device' ]
 
 from collections import OrderedDict
 import io
+import warnings
 try:
     unicode = unicode
 except NameError:
@@ -48,6 +49,7 @@ class Base_RM_Device(IRegMapDevice):
             self.zz_rmio = rmio
         self.zz_pdict = OrderedDict()
         self.zz_reg_addr_to_name = {}
+        self.zz_reg_addr_to_names = {}
         self.zz_dump_cb_functions = []
 
     def __setattr__(self, name, value):
@@ -70,6 +72,8 @@ class Base_RM_Device(IRegMapDevice):
         return self.zz_svd_info
 
     def addressToName(self, address):
+        warnings.warn("addressToName() is deprecated; use addressToNames() for aliased register support",
+                      DeprecationWarning, stacklevel=2)
         if not isinstance(address, (int, long)):
             raise RegMapAddressError("Invalid address '{}'".format(address))
         try:
@@ -77,16 +81,44 @@ class Base_RM_Device(IRegMapDevice):
         except KeyError:
             raise RegMapAddressError("No register found for address {:#010x}".format(address))
 
+    def addressToNames(self, address):
+        if not isinstance(address, (int, long)):
+            raise RegMapAddressError("Invalid address '{}'".format(address))
+        try:
+            return self.zz_reg_addr_to_names[address]
+        except KeyError:
+            raise RegMapAddressError("No registers found for address {:#010x}".format(address))
+
     def updateAddressToNameCache(self, peripheral):
+        """TODO: Remove the update of legacy dict once the addressToName() is removed."""
         if not isinstance(peripheral, Base_RM_Peripheral):
             raise RegMapNameError("Invalid peripheral attribute {}".format(peripheral))
-        for key in list(self.zz_reg_addr_to_name.keys()):
-            val = self.zz_reg_addr_to_name[key]
-            if val.split('.')[0] == peripheral.name:
-                del self.zz_reg_addr_to_name[key]
-        for key in peripheral.zz_rdict:
-            reg = peripheral.zz_rdict[key]
+        # prune legacy mapping, which uses single reg fullname string value
+        for addr in list(self.zz_reg_addr_to_name.keys()):
+            fullname = self.zz_reg_addr_to_name[addr]
+            if fullname.split('.')[0] == peripheral.name:
+                # remove this peripheral's register fullname from dict
+                del self.zz_reg_addr_to_name[addr]
+        # assign legacy mapping with peripheral register names
+        for reg_name in peripheral.zz_rdict:
+            reg = peripheral.zz_rdict[reg_name]
             self.zz_reg_addr_to_name[reg.baseAddress + reg.addressOffset] = reg.fullname
+        # prune new mapping, which uses list of reg fullname strings value
+        for addr in list(self.zz_reg_addr_to_names.keys()):
+            for fullname in self.zz_reg_addr_to_names[addr]:
+                if fullname.split('.')[0] == peripheral.name:
+                    # remove this peripheral's register name from value list
+                    self.zz_reg_addr_to_names[addr].remove(fullname)
+                    # assign legacy mapping with peripheral
+        # update new mapping with peripheral register names
+        for reg_name in peripheral.zz_rdict:
+            reg = peripheral.zz_rdict[reg_name]
+            try:
+                if reg.fullname not in self.zz_reg_addr_to_names[reg.baseAddress + reg.addressOffset]:
+                    self.zz_reg_addr_to_names[reg.baseAddress + reg.addressOffset].append(reg.fullname)
+            except KeyError:
+                # need assert on invalid reads in addressToNames(), so can't use defaultdict
+                self.zz_reg_addr_to_names[reg.baseAddress + reg.addressOffset] = [reg.fullname]
 
     def nameToAddress(self, name):
         reg_or_field = self.getObjectByName(name)

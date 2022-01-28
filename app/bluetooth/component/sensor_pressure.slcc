@@ -7,6 +7,7 @@ quality: production
 root_path: app/bluetooth/common/sensor_pressure
 source:
   - path: sl_sensor_pressure.c
+
 include:
   - path: .
     file_list:
@@ -15,8 +16,9 @@ provides:
   - name: sensor_pressure
 requires:
   - name: sensor_select
-  - name: bmp280_driver
+  - name: pressure_driver
   - name: i2cspm
+  - name: app_assert
 template_contribution:
   - name: component_catalog
     value: sensor_pressure

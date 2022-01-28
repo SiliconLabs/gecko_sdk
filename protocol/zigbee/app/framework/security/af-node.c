@@ -40,7 +40,7 @@ EmberStatus zaNodeSecurityInit(bool centralizedNetwork)
           emberKeyContents(&data->preconfiguredKey),
           EMBER_ENCRYPTION_KEY_SIZE);
 
-#if defined(ZA_CLI_FULL) || defined(UC_BUILD)
+#if defined(ZA_CLI_FULL) || defined(SL_CATALOG_CLI_PRESENT)
   // This function will only be used if the full CLI is enabled,
   // and a value has been previously set via the "changekey" command.
   getLinkKeyFromCli(&(state.preconfiguredKey));

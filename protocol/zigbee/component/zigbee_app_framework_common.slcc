@@ -4,7 +4,7 @@ package: Zigbee
 category: Zigbee|Utility
 quality: production
 
-description: This component declares all the required application framework globals, initializes the ZigBee stack and dispatches stack callbacks calls as needed to the application components.
+description: This component declares all the required application framework globals, initializes the Zigbee stack and dispatches stack callbacks calls as needed to the application components.
 
 provides:
   - name: zigbee_app_framework_common

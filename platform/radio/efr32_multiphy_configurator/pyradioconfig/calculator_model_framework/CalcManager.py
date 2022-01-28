@@ -26,11 +26,13 @@ from pycalcmodel.core.model import ModelRoot
 from pycalcmodel.core.variable import ModelVariableEmptyValue
 from pycalcmodel.core.variable import ModelVariableWriteAccess
 from pycalcmodel.core.variable_access_name import VariableAccess
+from pycalcmodel.core.input import ModelInputType
 from pyradioconfig.calculator_model_framework.model_serializers.human_readable import Human_Readable
 from pyradioconfig.calculator_model_framework.model_serializers.static_timestamp_xml import Static_TimeStamp_XML
 from pyradioconfig.calculator_model_framework.model_serializers.import_isc_files import ImportISCFiles
 from pyradioconfig import parts
 from pycalcmodel.core.model import ModelRootInstanceXml
+from pycalcmodel.core.output import ModelOutputType
 
 from py_2_and_3_compatibility import *
 
@@ -659,12 +661,21 @@ class CalcManager(object):
         Returns:
            list (list) : List of Phy reference object functions
         """
-        phys = self.__getPhyList()
-        list = []
-        for phy in phys:
-            list.extend(phy.getPhyList())
+        phy_class_list = self.__getPhyList()
+        phy_function_list = []
+        phy_name_list = []
+        for phy_class in phy_class_list:
+            phy_functions = phy_class.getPhyList()
+            for phy_function in phy_functions:
+                phy_function_name = phy_function.__name__
+                if (phy_function_name in phy_name_list) and (phy_function_name != '_phypass'):
+                    #Found a duplicate PHY definition, raise exception
+                    raise Exception("Error! Found duplicate definition for %s" % phy_function_name)
+                else:
+                    phy_function_list.append(phy_function)
+                    phy_name_list.append(phy_function_name)
 
-        return list
+        return phy_function_list
 
     def __getPhyList(self):
         """Returns a list of all phys for part family and part revision
@@ -754,7 +765,17 @@ class CalcManager(object):
         for output in profile.outputs:
             if output.override is not None:
                 variable = getattr(modem_model.vars, output.var_name)
-                variable.value_forced = output.override
+                if (output.output_type is ModelOutputType.SVD_REG_FIELD) or (output.output_type is ModelOutputType.SEQ_REG_FIELD):
+                    if output.override < 0:
+                        #Convert to 2s compliment and warn
+                        field_width = variable.get_bit_width()
+                        variable.value_forced = (1 << field_width) + output.override
+                        LogMgr.Warning("Negative value for override of %s, assuming 2s compliment" % output.var_name)
+                    else:
+                        # Use positive value
+                        variable.value_forced = output.override
+                else:
+                    variable.value_forced = output.override
 
         # Call any target specific calculate functions last (these overwrite all other settings)
         self._call_target_calculate(modem_model)
@@ -836,7 +857,7 @@ class CalcManager(object):
         self.__verifyPartFamilyPartRevisionIsSet()
 
         # Create empty modem model
-        modem_type_model = ModelRoot(self.__part_family, self.__MODEL_VER)
+        modem_type_model = ModelRoot(self.__part_family, self.__MODEL_VER, target=self.__target)
 
         # Build features
         Features.build(modem_type_model)
@@ -980,6 +1001,25 @@ class CalcManager(object):
            result_code (int): Calculation return status codes
            error_message (str) : Calculation error message, if any (default = '')
         """
+
+        sim_test_phy_groups = self.get_sim_tests_phy_groups()
+
+        model_has_phy = hasattr(model_instance, 'phy')
+        if model_has_phy:
+            phy_group_name = getattr(model_instance.phy, 'group_name', 'No_Group')
+            phy_name = getattr(model_instance.phy, 'name', 'No_PHY_Name')
+        else:
+            phy_group_name = 'No_Group'
+            phy_name = 'No_PHY_Name'
+
+        #First check to make sure all required Profile Inputs are present
+        #We do not check for unit_test_part because it intentionally does not follow this rule
+        #Also skip the old sim PHYs as they are not well formed (just pokes)
+        if (model_instance.part_family.lower() != "unit_test_part") and (phy_group_name not in sim_test_phy_groups):
+            for profile_input in model_instance.profile.inputs:
+                if profile_input.input_type == ModelInputType.REQUIRED and profile_input.default is None:
+                    assert profile_input.var_value is not None, "Required Profile Input %s is not populated for %s" % (profile_input.var_name, phy_name)
+
         result_code, error_message = self.execute_calc_fuctions(model_instance)
         return result_code, error_message
 
@@ -1440,7 +1480,7 @@ class CalcManager(object):
             # compatiblity functions to be added in case inputs become deprecated.
             raise Exception('Profile {} does not have a profile_calculate() function.'.format(profile_name))
 
-    def phy_has_tag(self, phy_name, tag, model=None):
+    def check_phy_has_tag(self, phy_name, tag, model=None):
         tag_found_in_tags = False
 
         if model is None:
@@ -1582,7 +1622,7 @@ class CalcManager(object):
             target_tag = self.getTargetTag()
 
         blacklist_tag = "-"+target_tag
-        target_blacklisted = self.phy_has_tag(phy_name,blacklist_tag,model)
+        target_blacklisted = self.check_phy_has_tag(phy_name,blacklist_tag,model)
         if target_blacklisted:
             return False
         else:

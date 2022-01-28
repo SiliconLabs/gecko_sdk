@@ -18,6 +18,9 @@
 #include "app/framework/include/af.h"
 #include "dmp-tuning-profiles.h"
 #include "sl_bluetooth.h"
+#include "rail.h"
+
+void* BTLE_LL_GetRadioHandle(void);
 
 uint32_t railScheduledEventCntr = 0;
 uint32_t railUnscheduledEventCntr = 0;
@@ -123,4 +126,10 @@ void emRadioConfigScheduledCallback(bool scheduled)
   } else {
     railUnscheduledEventCntr++;
   }
+}
+
+void emberAfPluginDmpStopRadio(void)
+{
+  RAIL_Idle(emberGetRailHandle(), RAIL_IDLE_FORCE_SHUTDOWN_CLEAR_FLAGS, true);
+  RAIL_Idle(BTLE_LL_GetRadioHandle(), RAIL_IDLE_FORCE_SHUTDOWN_CLEAR_FLAGS, true);
 }

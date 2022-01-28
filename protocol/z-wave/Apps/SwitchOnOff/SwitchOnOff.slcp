@@ -28,7 +28,8 @@ component:
   - id: zw_cc_zwaveplusinfo
   - id: sl_system
   - id: device_init
-  - id: iostream_recommended_stream
+  - id: iostream_usart
+    instance: [vcom]
   - id: mpu # disable execution from RAM
 source:
   - path: SwitchOnOff.c
@@ -97,9 +98,12 @@ configuration:
     value: 2
     condition: ["device_series_2"]
 
+define:
+  - name: APP_PROPERTIES_CONFIG_FILE
+    value: <config_app.h>
+
 other_file:
   - path: ../../DevTools/postbuild.sh
-    condition: [device_series_2]
 
 tag:
   - prebuilt_demo

@@ -1403,6 +1403,16 @@ PACKSTRUCT( struct sl_bt_cmd_sm_set_remote_oob_s
 typedef struct sl_bt_cmd_sm_set_remote_oob_s sl_bt_cmd_sm_set_remote_oob_t;
 
 
+PACKSTRUCT( struct sl_bt_cmd_sm_set_bonding_data_s
+{
+    uint8_t             connection;
+    uint8_t             type;
+    uint8array          data;
+});
+
+typedef struct sl_bt_cmd_sm_set_bonding_data_s sl_bt_cmd_sm_set_bonding_data_t;
+
+
 
 PACKSTRUCT( struct sl_bt_cmd_ota_set_device_name_s
 {
@@ -3053,6 +3063,14 @@ PACKSTRUCT( struct sl_bt_rsp_sm_set_remote_oob_s
 typedef struct sl_bt_rsp_sm_set_remote_oob_s sl_bt_rsp_sm_set_remote_oob_t;
 
 
+PACKSTRUCT( struct sl_bt_rsp_sm_set_bonding_data_s
+{
+    uint16_t            result;
+});
+
+typedef struct sl_bt_rsp_sm_set_bonding_data_s sl_bt_rsp_sm_set_bonding_data_t;
+
+
 PACKSTRUCT( struct sl_bt_rsp_ota_set_device_name_s
 {
     uint16_t            result;
@@ -3471,6 +3489,7 @@ PACKSTRUCT( struct sl_bt_packet {
     sl_bt_cmd_sm_set_legacy_oob_t                                cmd_sm_set_legacy_oob;
     sl_bt_cmd_sm_set_oob_t                                       cmd_sm_set_oob;
     sl_bt_cmd_sm_set_remote_oob_t                                cmd_sm_set_remote_oob;
+    sl_bt_cmd_sm_set_bonding_data_t                              cmd_sm_set_bonding_data;
     sl_bt_cmd_ota_set_device_name_t                              cmd_ota_set_device_name;
     sl_bt_cmd_ota_set_advertising_data_t                         cmd_ota_set_advertising_data;
     sl_bt_cmd_ota_set_configuration_t                            cmd_ota_set_configuration;
@@ -3663,6 +3682,7 @@ PACKSTRUCT( struct sl_bt_packet {
     sl_bt_rsp_sm_set_legacy_oob_t                                rsp_sm_set_legacy_oob;
     sl_bt_rsp_sm_set_oob_t                                       rsp_sm_set_oob;
     sl_bt_rsp_sm_set_remote_oob_t                                rsp_sm_set_remote_oob;
+    sl_bt_rsp_sm_set_bonding_data_t                              rsp_sm_set_bonding_data;
     sl_bt_rsp_ota_set_device_name_t                              rsp_ota_set_device_name;
     sl_bt_rsp_ota_set_advertising_data_t                         rsp_ota_set_advertising_data;
     sl_bt_rsp_ota_set_configuration_t                            rsp_ota_set_configuration;

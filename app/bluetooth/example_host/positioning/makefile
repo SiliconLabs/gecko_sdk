@@ -27,7 +27,7 @@ include $(SDK_DIR)/app/bluetooth/component_host/aoa_angle.mk
 
 override INCLUDEPATHS += . \
 $(SDK_DIR)/app/bluetooth/common_host/aoa_util \
-$(SDK_DIR)/app/bluetooth/common_host/aoa_corr_angles \
+$(SDK_DIR)/app/bluetooth/common_host/angle_queue \
 $(SDK_DIR)/app/bluetooth/common_host/aoa_loc \
 $(SDK_DIR)/platform/common/inc
 
@@ -40,7 +40,7 @@ override C_SRC += \
 $(SDK_DIR)/app/bluetooth/common_host/aoa_util/aoa_parse.c \
 $(SDK_DIR)/app/bluetooth/common_host/aoa_util/aoa_serdes.c \
 $(SDK_DIR)/app/bluetooth/common_host/aoa_util/aoa_util.c \
-$(SDK_DIR)/app/bluetooth/common_host/aoa_corr_angles/aoa_corr_angles.c \
+$(SDK_DIR)/app/bluetooth/common_host/angle_queue/angle_queue.c \
 $(SDK_DIR)/app/bluetooth/common_host/aoa_loc/aoa_loc.c \
 app.c \
 main.c

@@ -42,13 +42,13 @@ template_contribution:
       function:
         name: sl_iostream_init_instances
         return: void
-    priority: -5000
+    priority: 4
   - name: event_handler
     value:
       event: service_init
       include: sl_iostream_init_instances.h
       handler: sl_iostream_init_instances
-    priority: -5000
+    priority: 4
 #validation_helper:
 #  - path: iostream_handle_validation.py
 documentation:

@@ -27,6 +27,7 @@ const EmberAfSecurityProfileData emAfSecurityProfileData[] = {
   #include "security-profile-data.h"
 };
 
+#if (!defined(UC_BUILD) || defined(SL_CATALOG_CLI_PRESENT))
 static const EmberKeyData unSetKey = DUMMY_KEY;
 
 // This routine sets the keys from values previously set on the CLI.
@@ -53,6 +54,8 @@ void getNetworkKeyFromCli(EmberKeyData* returnData)
 {
   getKeyFromCli(returnData, false);
 }
+
+#endif
 
 void emAfClearLinkKeyTable(void)
 {

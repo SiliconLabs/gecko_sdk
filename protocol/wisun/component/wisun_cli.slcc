@@ -19,6 +19,7 @@ requires:
   - name: "sl_wisun_cli_util"
   - name: "wisun_test_certificates"
   - name: "wisun_radioconf"
+  - name: "wisun_rb_detection"
 provides:
   - name: "wisun_cli"
 source:
@@ -38,6 +39,7 @@ include:
   - path: "."
     file_list:
     - path: "app_cli.h"
+    - path: "app_default_phy.h"
     - path: "app_settings.h"
 template_contribution:
   - name: "event_handler"

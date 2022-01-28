@@ -46,12 +46,18 @@
 // <o SL_CPC_DRV_UART_INSTANCE_BAUDRATE> UART Baudrate
 // <i> Default: 115200
 #define SL_CPC_DRV_UART_INSTANCE_BAUDRATE              115200
+
+// <o SL_CPC_DRV_UART_INSTANCE_FLOW_CONTROL_TYPE> Flow control
+// <usartHwFlowControlNone=> None
+// <usartHwFlowControlCtsAndRts=> CTS/RTS
+// <i> Default: usartHwFlowControlNone
+#define SL_CPC_DRV_UART_INSTANCE_FLOW_CONTROL_TYPE usartHwFlowControlNone
 // </h>
 
 // <<< end of configuration section >>>
 
 // <<< sl:start pin_tool >>>
-// <usart signal=TX,RX> SL_CPC_DRV_UART_INSTANCE
+// <usart signal=TX,RX,(CTS),(RTS)> SL_CPC_DRV_UART_INSTANCE
 // $[USART_SL_CPC_DRV_UART_INSTANCE]
 #define SL_CPC_DRV_UART_INSTANCE_PERIPHERAL                 USART0
 #define SL_CPC_DRV_UART_INSTANCE_PERIPHERAL_NO              0
@@ -65,6 +71,16 @@
 #define SL_CPC_DRV_UART_INSTANCE_RX_PORT                    gpioPortD
 #define SL_CPC_DRV_UART_INSTANCE_RX_PIN                     14
 #define SL_CPC_DRV_UART_INSTANCE_RX_LOC                     20
+
+// USART CTS
+#define SL_CPC_DRV_UART_INSTANCE_CTS_PORT                    gpioPortD
+#define SL_CPC_DRV_UART_INSTANCE_CTS_PIN                     13
+#define SL_CPC_DRV_UART_INSTANCE_CTS_LOC                     22
+
+// USART RTS
+#define SL_CPC_DRV_UART_INSTANCE_RTS_PORT                    gpioPortD
+#define SL_CPC_DRV_UART_INSTANCE_RTS_PIN                     14
+#define SL_CPC_DRV_UART_INSTANCE_RTS_LOC                     20
 
 // [USART_SL_CPC_DRV_UART_INSTANCE]$
 // <<< sl:end pin_tool >>>

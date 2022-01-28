@@ -7,12 +7,36 @@ category: Services|Device Initialization
 quality: production
 root_path: platform/service/device_init/
 config_file:
-  - path: config/s1/sl_device_init_dcdc_config.h
+  - path: config/s2/sdid210/14dbm/sl_device_init_dcdc_config.h
     file_id: device_init_dcdc_config
-    condition: [device_series_1]
+    condition: [device_sdid_210, device_pa_14dbm]
+  - path: config/s2/sdid210/20dbm/sl_device_init_dcdc_config.h
+    file_id: device_init_dcdc_config
+    condition: [device_sdid_210, device_pa_20dbm]
   - path: config/s2/sl_device_init_dcdc_config.h
     file_id: device_init_dcdc_config
-    condition: [device_series_2]
+    condition: [device_sdid_210]
+    unless: [device_pa_14dbm, device_pa_20dbm]
+  - path: config/s2/sdid215/10dbm/sl_device_init_dcdc_config.h
+    file_id: device_init_dcdc_config
+    condition: [device_sdid_215, device_pa_10dbm]
+  - path: config/s2/sdid215/20dbm/sl_device_init_dcdc_config.h
+    file_id: device_init_dcdc_config
+    condition: [device_sdid_215, device_pa_20dbm]
+  - path: config/s2/sl_device_init_dcdc_config.h
+    file_id: device_init_dcdc_config
+    condition: [device_sdid_215]
+    unless: [device_pa_10dbm, device_pa_20dbm]
+  - path: config/s2/sdid220/14dbm/sl_device_init_dcdc_config.h
+    file_id: device_init_dcdc_config
+    condition: [device_sdid_220, device_pa_14dbm]
+  - path: config/s2/sl_device_init_dcdc_config.h
+    file_id: device_init_dcdc_config
+    condition: [device_sdid_220]
+    unless: [device_pa_14dbm]
+  - path: config/s2/sl_device_init_dcdc_config.h
+    file_id: device_init_dcdc_config
+    unless: [device_sdid_210, device_sdid_215, device_sdid_220]
 include:
   - path: inc
     file_list:

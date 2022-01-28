@@ -81,22 +81,22 @@
 
 // This macro calculates the number of precompile logging enable request in the
 // specific c file where the this header file is included from
-#define APP_BTMESH_UTIL_COMPONENT_LOGGING \
-  (CTL_CLIENT_LOGGING                     \
-   + CTL_SERVER_LOGGING                   \
-   + FRIEND_LOGGING                       \
-   + GENERIC_ONOFF_SERVER_LOGGING         \
-   + LC_SERVER_LOGGING                    \
-   + LIGHTING_CLIENT_LOGGING              \
-   + LIGHTING_SERVER_LOGGING              \
-   + LPN_LOGGING                          \
-   + PROVISIONING_DECORATOR_LOGGING       \
-   + SCENE_CLIENT_LOGGING                 \
-   + SCHEDULER_SERVER_LOGGING             \
-   + SENSOR_CLIENT_LOGGING                \
-   + SENSOR_SERVER_LOGGING                \
-   + TIME_SERVER_LOGGING                  \
-   + VENDOR_LOOPBACK_LOGGING)
+#define APP_BTMESH_UTIL_COMPONENT_LOGGING             \
+  (SL_BTMESH_CTL_CLIENT_LOGGING_CFG_VAL               \
+   + SL_BTMESH_CTL_SERVER_LOGGING_CFG_VAL             \
+   + SL_BTMESH_FRIEND_LOGGING_CFG_VAL                 \
+   + SL_BTMESH_GENERIC_ONOFF_SERVER_LOGGING_CFG_VAL   \
+   + SL_BTMESH_LC_SERVER_LOGGING_CFG_VAL              \
+   + SL_BTMESH_LIGHTING_CLIENT_LOGGING_CFG_VAL        \
+   + SL_BTMESH_LIGHTING_SERVER_LOGGING_CFG_VAL        \
+   + SL_BTMESH_LPN_LOGGING_CFG_VAL                    \
+   + SL_BTMESH_PROVISIONING_DECORATOR_LOGGING_CFG_VAL \
+   + SL_BTMESH_SCENE_CLIENT_LOGGING_CFG_VAL           \
+   + SL_BTMESH_SCHEDULER_SERVER_LOGGING_CFG_VAL       \
+   + SL_BTMESH_SENSOR_CLIENT_LOGGING_CFG_VAL          \
+   + SL_BTMESH_SENSOR_SERVER_LOGGING_CFG_VAL          \
+   + SL_BTMESH_TIME_SERVER_LOGGING_CFG_VAL            \
+   + SL_BTMESH_VENDOR_LOOPBACK_LOGGING_CFG_VAL)
 // Component A shall not include the config file of another component B because
 // <COMPONENT_B>_LOGGING macro of component B could turn on the logging in the
 // component A unnecessarily. This is important in case of components with log.

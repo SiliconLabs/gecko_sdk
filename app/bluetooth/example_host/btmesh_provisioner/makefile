@@ -5,6 +5,8 @@
 PROJECTNAME = btmesh_provisioner
 SDK_DIR = ../../../..
 
+# Disable threading as handling more than a few mesh devices can cause data loss
+HOST_THREADING = 0
 
 ################################################################################
 # Components                                                                   #

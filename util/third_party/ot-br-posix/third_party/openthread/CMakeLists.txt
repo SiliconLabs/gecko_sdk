@@ -35,7 +35,9 @@ set(OT_COMMISSIONER ON CACHE BOOL "enable commissioner" FORCE)
 set(OT_DAEMON ON CACHE BOOL "enable daemon mode" FORCE)
 set(OT_JOINER ON CACHE BOOL "enable joiner" FORCE)
 set(OT_LEGACY ON CACHE STRING "enable legacy network support" FORCE)
-set(OT_LINK_METRICS_SUBJECT ON CACHE BOOL "enable link metrics subject" FORCE)
+if (NOT OT_THREAD_VERSION EQUAL "1.1")
+    set(OT_LINK_METRICS_SUBJECT ON CACHE BOOL "enable link metrics subject" FORCE)
+endif()
 set(OT_SLAAC ON CACHE BOOL "enable SLAAC" FORCE)
 set(OT_TREL ON CACHE BOOL "enable TREL")
 
@@ -82,10 +84,14 @@ if (OT_THREAD_VERSION STREQUAL "1.2")
     set(OT_DUA ON CACHE BOOL "Enable Thread 1.2 DUA by default")
 endif()
 
+# Diagnostics / Logging
 set(OT_DIAGNOSTIC ON CACHE BOOL "Enable diagnostics module" FORCE)
 set(OT_FULL_LOGS ON CACHE BOOL "Enable debug level logging" FORCE)
 set(OT_LOG_LEVEL "NONE" CACHE STRING "Set OpenThread log level to NONE by default" FORCE)
 set(OT_COPROCESSOR_RPC ON CACHE BOOL "Enable co-processor RPC support" FORCE)
+
+# RCP recovery
+set(OT_RCP_RESTORATION_MAX_COUNT "100" CACHE STRING "set max RCP restoration count" FORCE)
 
 if (OTBR_DNSSD_DISCOVERY_PROXY)
     set(OT_DNSSD_SERVER ON CACHE BOOL "enable DNS-SD server support" FORCE)

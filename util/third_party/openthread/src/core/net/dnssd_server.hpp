@@ -137,9 +137,9 @@ public:
     /**
      * This method acquires the next query in the server.
      *
-     * @param[in] aQuery            The query pointer. Pass nullptr to get the first query.
+     * @param[in] aQuery            The query pointer. Pass `nullptr` to get the first query.
      *
-     * @returns  A pointer to the query or nullptr if no more queries.
+     * @returns  A pointer to the query or `nullptr` if no more queries.
      *
      */
     const otDnssdQuery *GetNextQuery(const otDnssdQuery *aQuery) const;
@@ -392,8 +392,8 @@ private:
     void        HandleTimer(void);
     void        ResetTimer(void);
 
-    static const char kDnssdProtocolUdp[4];
-    static const char kDnssdProtocolTcp[4];
+    static const char kDnssdProtocolUdp[];
+    static const char kDnssdProtocolTcp[];
     static const char kDnssdSubTypeLabel[];
     static const char kDefaultDomainName[];
     Ip6::Udp::Socket  mSocket;

@@ -254,8 +254,8 @@ static void sendReadAttribute(void);
 static void bigReadCommand(void);
 
 //------------------------------------------------------------------------------
-// Functions
-
+// F(unctions
+#if (!defined(UC_BUILD) || defined(SL_CATALOG_CLI_PRESENT))
 void setOptionsCommand(SL_CLI_COMMAND_ARG)
 {
   uint8_t temp = (uint8_t)emberUnsignedCommandArgument(0);
@@ -317,6 +317,8 @@ void startTestCommand(SL_CLI_COMMAND_ARG)
     emberAfCorePrintln("Error: Invalid test type %d", testType);
   }
 }
+
+#endif //!defined(UC_BUILD)...
 
 static const char* gettAttributeTypeString(uint8_t attributeType)
 {

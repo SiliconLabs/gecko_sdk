@@ -39,6 +39,7 @@
 #include <string>
 #include <sys/select.h>
 
+#include "common/code_utils.hpp"
 #include "common/mainloop.hpp"
 #include "dbus/common/dbus_message_helper.hpp"
 #include "dbus/common/dbus_resources.hpp"
@@ -50,7 +51,7 @@
 namespace otbr {
 namespace DBus {
 
-class DBusAgent : public MainloopProcessor
+class DBusAgent : public MainloopProcessor, private NonCopyable
 {
 public:
     /**
@@ -64,10 +65,8 @@ public:
     /**
      * This method initializes the dbus agent.
      *
-     * @returns The intialization error.
-     *
      */
-    otbrError Init(void);
+    void Init(void);
 
     void Update(MainloopContext &aMainloop) override;
     void Process(const MainloopContext &aMainloop) override;

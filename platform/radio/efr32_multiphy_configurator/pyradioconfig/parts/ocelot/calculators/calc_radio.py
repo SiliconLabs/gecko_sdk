@@ -41,16 +41,9 @@ class CALC_Radio_ocelot(CALC_Radio_lynx):
 
     def calc_lnamix_reg(self, model):
 
-        part_family = model.part_family
-
-        reg = model.vars.RAC_RX_LNAMIXLDOLOWCUR.get_reset_val(part_family)
-        self._reg_write(model.vars.RAC_RX_LNAMIXLDOLOWCUR, reg)
-
-        reg = model.vars.RAC_LNAMIXTRIM0_LNAMIXLNA0CAPSEL.get_reset_val(part_family)
-        self._reg_write(model.vars.RAC_LNAMIXTRIM0_LNAMIXLNA0CAPSEL, reg)
-
-        reg = model.vars.RAC_LNAMIXTRIM1_LNAMIXLNA1CAPSEL.get_reset_val(part_family)
-        self._reg_write(model.vars.RAC_LNAMIXTRIM1_LNAMIXLNA1CAPSEL, reg)
+        self._reg_write_default(model.vars.RAC_RX_LNAMIXLDOLOWCUR)
+        self._reg_write_default(model.vars.RAC_LNAMIXTRIM0_LNAMIXLNA0CAPSEL)
+        self._reg_write_default(model.vars.RAC_LNAMIXTRIM1_LNAMIXLNA1CAPSEL)
 
         self._reg_write(model.vars.RAC_LNAMIXTRIM4_LNAMIXRFPKDTHRESHSELLO, 2)
         self._reg_write(model.vars.RAC_LNAMIXTRIM4_LNAMIXRFPKDTHRESHSELHI, 4)

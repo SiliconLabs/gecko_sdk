@@ -116,9 +116,16 @@ void cli_bootloader_validate_image(sl_cli_command_arg_t *arguments)
  *****************************************************************************/
 void cli_bootloader_flash_erase_slot(sl_cli_command_arg_t *arguments)
 {
+  if ((arguments == NULL)
+      || (arguments->argv == NULL)
+      || (arguments->argv[arguments->arg_ofs + 0] == NULL)) {
+    app_log_error("argument error\n");
+    return;
+  }
+
   uint32_t slot = sl_cli_get_argument_uint32(arguments, 0);
 
-  app_log_info("flash erasing slot %lu started\n", slot);
+  app_log_info("flash erasing slot %lu started\n", (long unsigned int) slot);
 
   if ( emberAfPluginBootloaderInterfaceChipEraseSlot(slot) ) {
     app_log_info("flash erase successful!\n");
@@ -141,6 +148,14 @@ void cli_bootloader_flash_image(sl_cli_command_arg_t *arguments)
  *****************************************************************************/
 void cli_bootloader_flash_read(sl_cli_command_arg_t *arguments)
 {
+  if ((arguments == NULL)
+      || (arguments->argv == NULL)
+      || (arguments->argv[arguments->arg_ofs + 0] == NULL)
+      || (arguments->argv[arguments->arg_ofs + 1] == NULL)) {
+    app_log_error("argument error\n");
+    return;
+  }
+
   uint32_t address = sl_cli_get_argument_uint32(arguments, 0);
   uint8_t length = sl_cli_get_argument_uint8(arguments, 1);
   uint8_t buff[255];
@@ -148,7 +163,7 @@ void cli_bootloader_flash_read(sl_cli_command_arg_t *arguments)
 
   if (emberAfPluginBootloaderInterfaceRead(address, length, buff)) {
     app_log_info("flash read succeeded!\n");
-    app_log_info("address: %lu, length: %d, data:\n", address, length);
+    app_log_info("address: %lu, length: %d, data:\n", (long unsigned int) address, length);
     for (i = 0; i < length; i++) {
       app_log_info("0x%x ", buff[i]);
     }
@@ -163,6 +178,14 @@ void cli_bootloader_flash_read(sl_cli_command_arg_t *arguments)
  *****************************************************************************/
 void cli_bootloader_flash_write(sl_cli_command_arg_t *arguments)
 {
+  if ((arguments == NULL)
+      || (arguments->argv == NULL)
+      || (arguments->argv[arguments->arg_ofs + 0] == NULL)
+      || (arguments->argv[arguments->arg_ofs + 1] == NULL)) {
+    app_log_error("argument error\n");
+    return;
+  }
+
   uint32_t address = sl_cli_get_argument_uint32(arguments, 0);
   size_t length;
 
@@ -180,6 +203,13 @@ void cli_bootloader_flash_write(sl_cli_command_arg_t *arguments)
  *****************************************************************************/
 void cli_bootloader_set_tag(sl_cli_command_arg_t *arguments)
 {
+  if ((arguments == NULL)
+      || (arguments->argv == NULL)
+      || (arguments->argv[arguments->arg_ofs + 0] == NULL)) {
+    app_log_error("argument error\n");
+    return;
+  }
+
   uint8_t new_image_tag = 0;
   new_image_tag = sl_cli_get_argument_uint8(arguments, 0);
   if (new_image_tag != ota_bootloader_test_image_tag) {

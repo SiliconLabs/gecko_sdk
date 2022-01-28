@@ -1,7 +1,7 @@
 project_name: "Z3SwitchWithVoice"
 label: "Z3SwitchWithVoice"
 package: "Zigbee"
-category: "ZigBee Application"
+category: "Zigbee Application"
 quality: "production"
 component:
   - id: "cli"

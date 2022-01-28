@@ -25,8 +25,14 @@ requires:
     condition: [device_security_se, psa_crypto_ecc_secp384r1]
   - name: mbedtls_ecdh
     condition: [device_security_se, psa_crypto_ecc_secp521r1]
+  # X25519 has not always been supported on xG21A/xG23A devices. For the
+  # time being, we will choose an approach where we always include SW fallback.
+  # This will change in the future as more users can be assumed to have upgraded
+  # their SE FWs.
   - name: mbedtls_ecdh
-    condition: [device_security_se, psa_crypto_ecc_curve25519]
+    condition: [device_security_se, psa_crypto_ecc_curve25519, device_sdid_200]
+  - name: mbedtls_ecdh
+    condition: [device_security_se, psa_crypto_ecc_curve25519, device_sdid_210]
   - name: mbedtls_ecdh
     condition: [device_security_rot, psa_crypto_ecc_secp384r1]
   - name: mbedtls_ecdh

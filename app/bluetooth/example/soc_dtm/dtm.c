@@ -32,6 +32,13 @@
 #include "rail_features.h"
 #include "sl_bt_api.h"
 #include "app_assert.h"
+#include "dtm_config.h"
+
+#if DTM_CONFIG_SPECIFY_TX_POWER == 1
+#define DTM_DEFAULT_TX_POWER  DTM_CONFIG_DEFAULT_MAX_TX_POWER
+#else
+#define DTM_DEFAULT_TX_POWER  MAX_POW_LEVEL_REQ
+#endif
 
 #define MAX_PDU_OCTETS 255
 
@@ -104,7 +111,7 @@ typedef struct {
   uint8_t switch_pat;
   uint8_t *ant_array;
   uint8_t slot_duration;
-  int16_t transmitter_power_level;
+  int16_t transmitter_power_level_dbm;
 } setup_t;
 
 typedef enum {
@@ -198,7 +205,7 @@ static const setup_t default_setup = {
   .switch_pat = 0,
   .ant_array = 0,
   .slot_duration = 1,
-  .transmitter_power_level = 0,
+  .transmitter_power_level_dbm = 0,
 };
 
 static cmd_buffer_t cmd_buffer;
@@ -227,6 +234,10 @@ static void process_transceiver_command(cmd_type_t cmd_type,
                                         transceiver_cmd_packet_t *cmd);
 static void process_command(void);
 static void handle_dtm_completed(sl_bt_msg_t *evt);
+static void tx_power_set(int8_t tx_power_dbm,
+                         int16_t *tx_power_out_dbm,
+                         uint16_t *response,
+                         uint8_t *status);
 
 /**************************************************************************//**
  * Initialize testmode library.
@@ -271,6 +282,13 @@ void testmode_process_command_byte(uint8_t byte)
 void testmode_handle_gecko_event(sl_bt_msg_t *evt)
 {
   switch (SL_BT_MSG_ID(evt->header)) {
+    case sl_bt_evt_system_boot_id:
+      // Set TX power to default, ignore output
+      tx_power_set(DTM_DEFAULT_TX_POWER,
+                   &setup.transmitter_power_level_dbm,
+                   NULL,
+                   NULL);
+      break;
     case sl_bt_evt_system_external_signal_id:
       if (evt->data.evt_system_external_signal.extsignals & cfg.command_ready_signal) {
         process_command();
@@ -288,7 +306,9 @@ void testmode_handle_gecko_event(sl_bt_msg_t *evt)
 
 static void reset_setup(void)
 {
+  int16_t tx_power_dbm_save = setup.transmitter_power_level_dbm;
   setup = default_setup;
+  setup.transmitter_power_level_dbm = tx_power_dbm_save;
 }
 
 static void reset_cmd_buffer(void)
@@ -357,6 +377,76 @@ static void parse_cmd_buffer(cmd_packet_t *result)
   }
 }
 
+/**************************************************************************//**
+ * Set TX power in dBm
+ *****************************************************************************/
+static void tx_power_set(int8_t tx_power_dbm,
+                         int16_t *tx_power_out_dbm,
+                         uint16_t *response,
+                         uint8_t *status)
+{
+  int16_t support_min;
+  int16_t support_max;
+  int16_t support_min_dbm;
+  int16_t support_max_dbm;
+  int16_t set_min;
+  int16_t set_max;
+  int16_t rf_path_gain;
+  sl_status_t sc;
+  int16_t tx_power_to_set_dbm = 0;
+
+  *response = 0;
+
+  sc = sl_bt_system_get_tx_power_setting(&support_min,
+                                         &support_max,
+                                         &set_min,
+                                         &set_max,
+                                         &rf_path_gain);
+
+  app_assert_status(sc);
+
+  support_min_dbm = (support_min) > 0 ? ((support_min) + 5) / 10 : ((support_min) - 5) / 10;
+  support_max_dbm = (support_max) > 0 ? ((support_max) + 5) / 10 : ((support_max) - 5) / 10;
+
+  if (tx_power_dbm == MIN_POW_LEVEL_REQ) {
+    tx_power_to_set_dbm = support_min_dbm;
+    if (response != NULL) {
+      *response |= MIN_POW_INDICATE_BIT;
+    }
+  } else if (tx_power_dbm == MAX_POW_LEVEL_REQ) {
+    tx_power_to_set_dbm = support_max_dbm;
+    if (response != NULL) {
+      *response |= MAX_POW_INDICATE_BIT;
+    }
+  } else if (tx_power_dbm > support_max_dbm) {
+    if (status != NULL) {
+      *status = TEST_STATUS_ERROR;
+    }
+    return;
+  } else if (tx_power_dbm < support_min_dbm) {
+    if (status != NULL) {
+      *status = TEST_STATUS_ERROR;
+    }
+    return;
+  } else {
+    tx_power_to_set_dbm = (int16_t)tx_power_dbm;
+  }
+
+  sc = sl_bt_system_set_tx_power(support_min,
+                                 tx_power_to_set_dbm * 10,
+                                 &set_min,
+                                 &set_max);
+  app_assert_status(sc);
+
+  // Set outputs
+  if (response != NULL) {
+    *response |= (uint8_t)(tx_power_to_set_dbm);
+  }
+  if (tx_power_out_dbm != NULL) {
+    *tx_power_out_dbm = tx_power_to_set_dbm;
+  }
+}
+
 static void process_setup_command(setup_cmd_packet_t *cmd)
 {
   uint8_t n = 0;
@@ -365,11 +455,6 @@ static void process_setup_command(setup_cmd_packet_t *cmd)
   sl_status_t sc;
   int8_t tx_power = 0;
   uint8_t cte_time = 0;
-  int16_t support_min;
-  int16_t support_max;
-  int16_t set_min;
-  int16_t set_max;
-  int16_t rf_path_gain;
 
   if (cmd->control == SETUP_CMD_RESET) {
     cmd->parameter = cmd->parameter >> 2;
@@ -487,7 +572,8 @@ static void process_setup_command(setup_cmd_packet_t *cmd)
       } else {
         if (setup.switch_pat) {
           setup.ant_array_length = (setup.num_ant * 2) - 1;
-          setup.ant_array = (uint8_t *)calloc(setup.ant_array_length, sizeof(uint8_t));
+          setup.ant_array = (uint8_t *)calloc(setup.ant_array_length,
+                                              sizeof(uint8_t));
 
           for (i = 0; i < setup.num_ant; i++) {
             setup.ant_array[i] = i;
@@ -497,7 +583,8 @@ static void process_setup_command(setup_cmd_packet_t *cmd)
           }
         } else {
           setup.ant_array_length = setup.num_ant;
-          setup.ant_array = (uint8_t *)calloc(setup.ant_array_length, sizeof(uint8_t));
+          setup.ant_array = (uint8_t *)calloc(setup.ant_array_length,
+                                              sizeof(uint8_t));
 
           for (i = 0; i < n; i++) {
             setup.ant_array[i] = i;
@@ -509,61 +596,10 @@ static void process_setup_command(setup_cmd_packet_t *cmd)
     case SETUP_CMD_TRANSMITTER_POWER_LEVEL:
 
       tx_power = cmd->parameter;
-
-      sc = sl_bt_system_get_tx_power_setting(&support_min,
-                                             &support_max,
-                                             &set_min,
-                                             &set_max,
-                                             &rf_path_gain);
-
-      app_assert_status(sc);
-
-      support_min = (support_min) > 0 ? ((support_min) + 5) / 10 : ((support_min) - 5) / 10;
-      support_max = (support_max) > 0 ? ((support_max) + 5) / 10 : ((support_max) - 5) / 10;
-
-      if (tx_power == MIN_POW_LEVEL_REQ) {
-        setup.transmitter_power_level = support_min;
-        response |= MIN_POW_INDICATE_BIT;
-      } else if (tx_power == MAX_POW_LEVEL_REQ) {
-        setup.transmitter_power_level = support_max;
-        response |= MAX_POW_INDICATE_BIT;
-      } else if (tx_power > MAX_POW_LEVEL) {
-        status = TEST_STATUS_ERROR;
-        break;
-      } else if (tx_power < MIN_POW_LEVEL) {
-        status = TEST_STATUS_ERROR;
-        break;
-      } else {
-        // Requested is real TX power in (-127, 20) range
-        setup.transmitter_power_level = (int16_t)tx_power;
-      }
-
-      if ((setup.transmitter_power_level * 10) < set_min) {
-        set_min = setup.transmitter_power_level * 10;
-        sc = sl_bt_system_set_tx_power(set_min,
-                                       set_max,
-                                       &set_min,
-                                       &set_max);
-
-        app_assert_status(sc);
-
-        set_min = (set_min) > 0 ? ((set_min) + 5) / 10 : ((set_min) - 5) / 10;
-        setup.transmitter_power_level = set_min;
-      } else if ((setup.transmitter_power_level * 10) > set_max) {
-        set_max = setup.transmitter_power_level * 10;
-        sc = sl_bt_system_set_tx_power(set_min,
-                                       set_max,
-                                       &set_min,
-                                       &set_max);
-
-        app_assert_status(sc);
-
-        set_max = (set_max) > 0 ? ((set_max) + 5) / 10 : ((set_max) - 5) / 10;
-        setup.transmitter_power_level = set_max;
-      }
-
-      response |= (uint8_t)setup.transmitter_power_level;
-
+      tx_power_set(tx_power,
+                   &setup.transmitter_power_level_dbm,
+                   &response,
+                   &status);
       break;
 
     default:
@@ -587,9 +623,11 @@ static void process_transceiver_command(cmd_type_t cmd_type,
 
       if (setup.cte_present) {
         if (setup.ant_array != 0) {
-          sc = sl_bt_cte_receiver_set_dtm_parameters(setup.cte_time, setup.cte_type,
+          sc = sl_bt_cte_receiver_set_dtm_parameters(setup.cte_time,
+                                                     setup.cte_type,
                                                      setup.slot_duration,
-                                                     setup.ant_array_length, setup.ant_array);
+                                                     setup.ant_array_length,
+                                                     setup.ant_array);
           app_assert_status(sc);
         }
       } else {
@@ -599,10 +637,18 @@ static void process_transceiver_command(cmd_type_t cmd_type,
       break;
 
     case CMD_TYPE_TXTEST:
+
+      tx_power_set(setup.transmitter_power_level_dbm,
+                   NULL,
+                   NULL,
+                   NULL);
+
       if (setup.cte_present) {
         if (setup.ant_array != 0) {
-          sc = sl_bt_cte_transmitter_set_dtm_parameters(setup.cte_time, setup.cte_type,
-                                                        setup.ant_array_length, setup.ant_array);
+          sc = sl_bt_cte_transmitter_set_dtm_parameters(setup.cte_time,
+                                                        setup.cte_type,
+                                                        setup.ant_array_length,
+                                                        setup.ant_array);
           app_assert_status(sc);
         }
       } else {
@@ -611,7 +657,11 @@ static void process_transceiver_command(cmd_type_t cmd_type,
 
       // Do the test only if UART Test Interface command packet type is valid
       if (PACKET_TYPE_MAX > cmd->pkt) {
-        sc = sl_bt_test_dtm_tx_v4(std_to_bgapi_pkt_types[cmd->pkt], length, cmd->frequency, setup.phy, setup.transmitter_power_level * 10);
+        sc = sl_bt_test_dtm_tx_v4(std_to_bgapi_pkt_types[cmd->pkt],
+                                  length,
+                                  cmd->frequency,
+                                  setup.phy,
+                                  setup.transmitter_power_level_dbm);
         app_assert_status(sc);
       }
       break;
@@ -633,7 +683,8 @@ static void process_command(void)
 
     case CMD_TYPE_RXTEST:
     case CMD_TYPE_TXTEST:
-      process_transceiver_command(cmd_packet.cmd_type, &cmd_packet.cmd.transceiver);
+      process_transceiver_command(cmd_packet.cmd_type,
+                                  &cmd_packet.cmd.transceiver);
       set_transceiver_test_state(cmd_packet.cmd_type);
       break;
 

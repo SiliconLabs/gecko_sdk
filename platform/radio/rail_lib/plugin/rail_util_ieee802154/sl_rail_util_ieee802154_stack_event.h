@@ -64,6 +64,7 @@ extern "C" {
 #define SL_RAIL_UTIL_IEEE802154_STACK_EVENT_TX_ACK_TIMEDOUT 0x2Au // uint8_t macRetries     SUCCESS
 #define SL_RAIL_UTIL_IEEE802154_STACK_EVENT_TX_ENDED        0x2Bu // MBZ                    SUCCESS
 #define SL_RAIL_UTIL_IEEE802154_STACK_EVENT_TX_IDLED        0x2Cu // MBZ                    SUCCESS
+#define SL_RAIL_UTIL_IEEE802154_STACK_EVENT_SIGNAL_DETECTED 0x2Du // MBZ                    SUCCESS
 
 typedef uint8_t sl_rail_util_ieee802154_stack_event_t;
 

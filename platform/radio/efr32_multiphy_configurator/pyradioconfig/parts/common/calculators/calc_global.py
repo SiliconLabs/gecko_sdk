@@ -126,6 +126,13 @@ class CALC_Global(ICalculator):
 
 
         # Output fields
+
+        # Add register groups
+        self._add_TXBR_regs(model)
+
+        # Add granular vars
+        self._add_baudrate_variable(model)
+
         self._addModelRegister(model, 'MODEM.CF.CFOSR'                 , int, ModelVariableFormat.HEX )
         self._addModelRegister(model, 'MODEM.CF.DEC0'                  , int, ModelVariableFormat.HEX )
         self._addModelRegister(model, 'MODEM.CF.DEC1'                  , int, ModelVariableFormat.HEX )
@@ -188,8 +195,6 @@ class CALC_Global(ICalculator):
         self._addModelRegister(model, 'MODEM.TIMING.OFFSUBNUM'         , int, ModelVariableFormat.HEX )
         self._addModelRegister(model, 'MODEM.TIMING.TIMINGBASES'       , int, ModelVariableFormat.HEX )
         self._addModelRegister(model, 'MODEM.TIMING.TIMTHRESH'         , int, ModelVariableFormat.HEX )
-        self._addModelRegister(model, 'MODEM.TXBR.TXBRDEN'             , int, ModelVariableFormat.HEX )
-        self._addModelRegister(model, 'MODEM.TXBR.TXBRNUM'             , int, ModelVariableFormat.HEX )
         self._addModelRegister(model, 'MODEM.DSSS0.DSSS0'              , long, ModelVariableFormat.HEX )
         self._addModelRegister(model, 'MODEM.AFCADJLIM.AFCADJLIM'      , int, ModelVariableFormat.HEX )
         self._addModelRegister(model, 'MODEM.AFC.AFCAVGPER'            , int, ModelVariableFormat.HEX )
@@ -229,7 +234,6 @@ class CALC_Global(ICalculator):
         self._addModelVariable(model,    'fdm0_thresh'           ,   int,   ModelVariableFormat.DECIMAL)
         self._addModelVariable(model,    'brcalavg'              ,   int,   ModelVariableFormat.DECIMAL)
         self._addModelVariable(model,    'brcalen'               ,   int,   ModelVariableFormat.DECIMAL)
-        self._addModelVariable(model,    'baudrate'              ,   int,   ModelVariableFormat.DECIMAL)
         self._addModelVariable(model,    'sensitivity',            float,   ModelVariableFormat.DECIMAL)
         self._addModelVariable(model,    'dsss_bits_per_symbol'  ,   int,   ModelVariableFormat.DECIMAL)
         self._addModelVariable(model,    'dsss_shifts'           ,   int,   ModelVariableFormat.DECIMAL)
@@ -326,3 +330,10 @@ class CALC_Global(ICalculator):
         #On parts prior to Ocelot the bitrate variable in the calculator represents chiprate
         self._addModelVariable(model, 'bitrate', int, ModelVariableFormat.DECIMAL, units='bps',
                                desc='Chip rate after channel coding and before symbol coding.')
+
+    def _add_baudrate_variable(self, model):
+        self._addModelVariable(model, 'baudrate', int, ModelVariableFormat.DECIMAL)
+
+    def _add_TXBR_regs(self, model):
+        self._addModelRegister(model, 'MODEM.TXBR.TXBRNUM', int, ModelVariableFormat.HEX)
+        self._addModelRegister(model, 'MODEM.TXBR.TXBRDEN', int, ModelVariableFormat.HEX)

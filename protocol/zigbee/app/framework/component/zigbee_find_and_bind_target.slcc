@@ -5,7 +5,7 @@ description: This component provides the functionality for a target device to st
 label: Find and Bind Target
 quality: production
 id: zigbee_find_and_bind_target
-category: Zigbee|ZigBee 3.0
+category: Zigbee|Zigbee 3.0
 provides:
    - name: "zigbee_find_and_bind_target"
 config_file:

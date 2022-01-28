@@ -119,8 +119,14 @@ sl_status_t sl_se_ecdh_compute_shared_secret(sl_se_command_context_t *cmd_ctx,
     }
   }
   #else
-  if ((key_pubkey_size * 2) > key_out->storage.location.buffer.size) {
-    return SL_STATUS_INVALID_PARAMETER;
+  if (key_in_priv->type == SL_SE_KEY_TYPE_ECC_X25519) {
+    if (key_pubkey_size > key_out->storage.location.buffer.size) {
+      return SL_STATUS_INVALID_PARAMETER;
+    }
+  } else {
+    if ((key_pubkey_size * 2) > key_out->storage.location.buffer.size) {
+      return SL_STATUS_INVALID_PARAMETER;
+    }
   }
   #endif
 

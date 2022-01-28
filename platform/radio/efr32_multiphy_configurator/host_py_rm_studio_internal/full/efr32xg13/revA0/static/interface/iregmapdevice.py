@@ -29,6 +29,7 @@ class IRegMapDevice(object):
     # SVD Info Property
 
     @property
+    @abstractmethod
     def svdInfo(self):
         """
         :rtype: :class:`pyrmsvd.static.common.svdinfo.RM_SVD_Info`
@@ -44,10 +45,25 @@ class IRegMapDevice(object):
         """
         Returns the register string for the given address.
 
+        DEPRECATED by addressToNames()
+
         :type  address: ``int`` or ``long``
         :param address: The register address
         :rtype: ``str``
         :return: The register name in 'PERIPHERAL.REGISTER' format
+        :raises: RegMapAddressError
+        """
+        pass
+
+    @abstractmethod
+    def addressToNames(self, address):
+        """
+        Returns the list of register strings for the given address.
+
+        :type  address: ``int`` or ``long``
+        :param address: The register address
+        :rtype: ``list``
+        :return: The register names list in 'PERIPHERAL.REGISTER' format
         :raises: RegMapAddressError
         """
         pass

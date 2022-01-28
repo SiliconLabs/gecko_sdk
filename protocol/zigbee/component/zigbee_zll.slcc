@@ -4,7 +4,7 @@ package: Zigbee
 category: Zigbee|Stack
 quality: production
 
-description: Provides the functionality to support ZigBee Light Link (ZLL) functionality on a device.
+description: Provides the functionality to support Zigbee Light Link (ZLL) functionality on a device.
 
 provides:
   - name: zigbee_zll

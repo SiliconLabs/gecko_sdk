@@ -64,14 +64,9 @@ template_contribution:
       name: print
       handler: emberAfPluginCountersPrintCommand
       help: Prints all counter values and clears them.
-  - name: cli_group
-    value:
-      group: plugin
-      name: counter
-      help: counter related commands.
   - name: cli_command
     value:
-      group: counter
+      group: counters
       name: print-counter-type
       handler: emberAfPluginCounterPrintCounterTypeCommand
       help: Prints the value of this particular counter.

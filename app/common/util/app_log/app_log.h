@@ -38,6 +38,10 @@
 #include "app_log_config.h"
 #include "sl_status.h"
 
+#ifdef __cplusplus
+extern "C" {
+#endif
+
 #define APP_LOG_LEVEL_CRITICAL             0
 #define APP_LOG_LEVEL_ERROR                1
 #define APP_LOG_LEVEL_WARNING              2
@@ -493,5 +497,9 @@ uint8_t app_log_filter_mask_get(void);
 
 #define app_log_hexdump_critical_s(separator, p_data, len) \
   app_log_hexdump_level_s(APP_LOG_LEVEL_CRITICAL, separator, p_data, len)
+
+#ifdef __cplusplus
+}
+#endif
 
 #endif // APP_LOG_H

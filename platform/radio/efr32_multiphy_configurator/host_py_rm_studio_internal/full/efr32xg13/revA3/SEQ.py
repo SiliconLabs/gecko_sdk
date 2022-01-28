@@ -11,7 +11,8 @@ class RM_Peripheral_SEQ(Base_RM_Peripheral):
         self.__dict__['zz_frozen'] = False
         super(RM_Peripheral_SEQ, self).__init__(rmio, label,
             0x21001FDC, 'SEQ',
-            u"")
+            u"",
+            [])
         self.BBSS_GROUP_1 = RM_Register_SEQ_BBSS_GROUP_1(self.zz_rmio, self.zz_label)
         self.zz_rdict['BBSS_GROUP_1'] = self.BBSS_GROUP_1
         self.BBSS_GROUP_2 = RM_Register_SEQ_BBSS_GROUP_2(self.zz_rmio, self.zz_label)

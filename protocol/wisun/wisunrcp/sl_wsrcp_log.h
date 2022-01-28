@@ -156,7 +156,8 @@ char *bytes_str(const void *in_start, size_t in_len, const void **in_done, char 
             __PRINT_WITH_LINE(91, "bug: " MSG, ##__VA_ARGS__);       \
         else                                                         \
             __PRINT_WITH_LINE(91, "bug");                            \
-        raise(SIGTRAP);                                              \
+        __BKPT(0);                                                   \
+        for (;;);                                                    \
     } while (0)
 
 #define __BUG_ON(COND, MSG, ...) \
@@ -166,16 +167,17 @@ char *bytes_str(const void *in_start, size_t in_len, const void **in_done, char 
                 __PRINT_WITH_LINE(91, "bug: " MSG, ##__VA_ARGS__);   \
             else                                                     \
                 __PRINT_WITH_LINE(91, "bug: \"%s\"", #COND);         \
-            raise(SIGTRAP);                                          \
+            __BKPT(0);                                               \
+            for (;;);                                                \
         }                                                            \
     } while (0)
 
 #define __PRINT(COLOR, MSG, ...) \
     do {                                                             \
         if (COLOR != 0 && g_enable_color_traces)                     \
-            fprintf(stderr, "\x1B[" #COLOR "m" MSG "\x1B[0m\n", ##__VA_ARGS__); \
+            printf("\x1B[" #COLOR "m" MSG "\x1B[0m\n", ##__VA_ARGS__); \
         else                                                         \
-            fprintf(stderr, MSG "\n", ##__VA_ARGS__);                \
+            printf(MSG "\n", ##__VA_ARGS__);                \
     } while(0)
 
 #define __PRINT_WITH_TIME(COLOR, MSG, ...) \

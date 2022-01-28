@@ -1,5 +1,7 @@
+import re
 from functools import wraps
-
+from pyradioconfig.calculator_model_framework.CalcManager import CalcManager
+from pycalcmodel.core.output import ModelOutputType
 
 def phy_guid(guid):
     def inner_decorator(f):
@@ -42,3 +44,28 @@ def do_not_inherit_phys(cls):
 
 def _phypass(self, model, phy_name=None):
     pass
+
+def concurrent_phy(phy_name,reg_field_list): #decorator maker
+    def inner_decorator(f):
+        @wraps(f)
+        def wrapped(*args, **kwargs):
+
+            #First call the decorated PHY method
+            class_ref = args[0]
+            model = args[1]
+            phy = f(*args, **kwargs)
+
+            #Now generate a calculator model for the second (concurrent) PHY
+            concurrent_model = CalcManager(part_family=model.part_family, part_rev='model.part_rev', target=model.target).calculate_phy(phy_name=phy_name)
+
+            #Finally loop go through the Profile Outputs for the concurrent PHY and copy them over
+            for reg_field in reg_field_list:
+                for profile_output in concurrent_model.profile.outputs:
+                    if (profile_output.output_type == ModelOutputType.SVD_REG_FIELD) and (re.search("^"+reg_field.lower(),profile_output.var_name.lower())):
+                        original_phy_profile_output = getattr(phy.profile_outputs, profile_output.var_name)
+                        original_phy_profile_output.override = profile_output.var_value
+
+            return phy
+        return wrapped
+    return inner_decorator
+

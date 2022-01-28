@@ -710,7 +710,7 @@ class CALC_Pro2_Demod_Ocelot(ICalculator):
         else:
             bcr_cfe_costthd = 255
 
-        self._reg_sat_write(model.vars.MODEM_BCRDEMODPMEXP_BCRCFECOSTTHD, bcr_cfe_costthd, model.part_family) #We always care about this
+        self._reg_sat_write(model.vars.MODEM_BCRDEMODPMEXP_BCRCFECOSTTHD, bcr_cfe_costthd) #We always care about this
 
     def calc_bcr_symbwmax(self, model):
         pro2_dsa_en = model.vars.pro2_dsa_mode.value

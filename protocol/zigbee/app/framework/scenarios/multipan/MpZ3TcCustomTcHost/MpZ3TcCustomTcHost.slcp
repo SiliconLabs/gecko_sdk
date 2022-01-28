@@ -1,7 +1,7 @@
 project_name: "MpZ3TcCustomTcHost"
 label: "MpZ3TcCustomTcHost"
 package: "Zigbee"
-category: "ZigBee Host Application"
+category: "Zigbee Host Application"
 quality: "production"
 
 component:

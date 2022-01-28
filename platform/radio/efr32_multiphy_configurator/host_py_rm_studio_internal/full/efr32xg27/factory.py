@@ -17,7 +17,7 @@ class RM_EFR32XG27_Info(object):
 
 
 def RM_Factory(rev_name):
-    return rm_dynamic_import('VIPER', rev_name)
+    return rm_dynamic_import('LEOPARD', rev_name)
 
 
 def RM_GetInfo():

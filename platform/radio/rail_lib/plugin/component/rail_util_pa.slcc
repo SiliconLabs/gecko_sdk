@@ -51,6 +51,15 @@ config_file:
       - device_sdid_215
     unless:
       - fpga
+      - device_is_module
+    file_id: rail_util_pa_config
+  - path: platform/radio/rail_lib/plugin/pa-conversions/efr32xg24/config/module/sl_rail_util_pa_config.h
+    condition:
+      - device_series_2
+      - device_sdid_215
+      - device_is_module
+    unless:
+      - fpga
     file_id: rail_util_pa_config
   - path: platform/radio/rail_lib/plugin/pa-conversions/efr32xg25/config/sl_rail_util_pa_config.h
     condition:

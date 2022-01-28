@@ -12,5 +12,3 @@ requires:
   - name: linux_arch
 recommends:
   - id: linux_arch_64
-tag:
-  - device:opn:linux

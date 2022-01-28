@@ -15,6 +15,7 @@ source:
   - path: util/third_party/freertos/kernel/portable/MemMang/heap_3.c
 provides:
   - name: freertos_heap
+  - name: freertos_heap_3
 requires:
   - name: cmsis_core
   - name: freertos

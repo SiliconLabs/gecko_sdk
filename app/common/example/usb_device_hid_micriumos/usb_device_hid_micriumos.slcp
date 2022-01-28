@@ -25,6 +25,9 @@ component:
     instance: [mouse0]
 define:
   - name: DEBUG_EFM
+configuration:
+  - name: SL_HEAP_SIZE
+    value: 4096
 readme:
   - path: "readme.html"
 tag:

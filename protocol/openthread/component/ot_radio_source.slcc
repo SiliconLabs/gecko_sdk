@@ -106,9 +106,11 @@ include:
       - path: coap/coap.hpp
       - path: coap/coap_message.hpp
       - path: coap/coap_secure.hpp
+      - path: common/appender.hpp
       - path: common/arg_macros.hpp
       - path: common/array.hpp
       - path: common/as_core_type.hpp
+      - path: common/binary_search.hpp
       - path: common/bit_vector.hpp
       - path: common/clearable.hpp
       - path: common/code_utils.hpp
@@ -121,6 +123,7 @@ include:
       - path: common/error.hpp
       - path: common/extension.hpp
       - path: common/heap.hpp
+      - path: common/heap_allocatable.hpp
       - path: common/heap_data.hpp
       - path: common/heap_string.hpp
       - path: common/instance.hpp
@@ -134,9 +137,13 @@ include:
       - path: common/non_copyable.hpp
       - path: common/notifier.hpp
       - path: common/numeric_limits.hpp
+      - path: common/owned_ptr.hpp
+      - path: common/owning_list.hpp
       - path: common/pool.hpp
+      - path: common/ptr_wrapper.hpp
       - path: common/random.hpp
       - path: common/random_manager.hpp
+      - path: common/retain_ptr.hpp
       - path: common/settings.hpp
       - path: common/settings_driver.hpp
       - path: common/string.hpp
@@ -302,7 +309,6 @@ include:
       - path: utils/heap.hpp
       - path: utils/history_tracker.hpp
       - path: utils/jam_detector.hpp
-      - path: utils/lookup_table.hpp
       - path: utils/otns.hpp
       - path: utils/parse_cmdline.hpp
       - path: utils/ping_sender.hpp
@@ -318,6 +324,9 @@ source:
       - path: api/multi_radio_api.cpp
       - path: api/random_noncrypto_api.cpp
       - path: api/tasklet_api.cpp
+      - path: common/appender.cpp
+      - path: common/binary_search.cpp
+      - path: common/data.cpp
       - path: common/error.cpp
       - path: common/instance.cpp
       - path: common/logging.cpp
@@ -345,7 +354,6 @@ source:
       - path: radio/trel_packet.cpp
       - path: thread/link_quality.cpp
       - path: thread/radio_selector.cpp
-      - path: utils/lookup_table.cpp
       - path: utils/parse_cmdline.cpp
 template_contribution:
   - name: application_type

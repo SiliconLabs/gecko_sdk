@@ -301,7 +301,8 @@ uint16_t emberAfGreenPowerClientStoreProxyTableEntry(EmberGpProxyTableEntry *ent
 
 bool emAfPluginGreenPowerClientGpProxyCommissioningModeCommandHandler(uint8_t options,
                                                                       uint16_t commissioningWindow,
-                                                                      uint8_t channel)
+                                                                      uint8_t channel,
+                                                                      bool localCommandLoopback)
 {
   bool enterCommissioningMode = (options
                                  & EMBER_AF_GP_PROXY_COMMISSIONING_MODE_OPTION_ACTION);
@@ -317,14 +318,15 @@ bool emAfPluginGreenPowerClientGpProxyCommissioningModeCommandHandler(uint8_t op
   bool unicastCommunication = (options
                                & EMBER_AF_GP_PROXY_COMMISSIONING_MODE_OPTION_UNICAST_COMMUNICATION);
 
-  if (emberAfCurrentEndpoint() != GP_ENDPOINT) {
-  } else if (commissioningState.inCommissioningMode
+  if (!localCommandLoopback && emberAfCurrentEndpoint() != GP_ENDPOINT) {
+  } else if (!localCommandLoopback
+             && commissioningState.inCommissioningMode
              && (emberGetSender() != commissioningState.commissioningSink)) {
     // check if current message sender is same as sender that put us in
     // commissioning mode.
     // if not, drop message silently.
   } else if (enterCommissioningMode) {
-    commissioningState.commissioningSink = emberGetSender();
+    commissioningState.commissioningSink = (localCommandLoopback ? emberGetNodeId() : emberGetSender());
     commissioningState.inCommissioningMode = true;
     commissioningState.gppCommissioningWindow = EMBER_AF_PLUGIN_GREEN_POWER_CLIENT_GPP_COMMISSIONING_WINDOW;
     commissioningState.exitMode = (EmberAfGreenPowerClientCommissioningExitMode) exitMode;
@@ -368,7 +370,8 @@ bool emberAfGreenPowerClusterGpProxyCommissioningModeCallback(EmberAfClusterComm
 
   return emAfPluginGreenPowerClientGpProxyCommissioningModeCommandHandler(cmd_data.options,
                                                                           cmd_data.commissioningWindow,
-                                                                          cmd_data.channel);
+                                                                          cmd_data.channel,
+                                                                          false);
 }
 
 /*
@@ -816,7 +819,8 @@ bool emberAfGreenPowerClusterGpProxyCommissioningModeCallback(uint8_t options,
 {
   return emAfPluginGreenPowerClientGpProxyCommissioningModeCommandHandler(options,
                                                                           commissioningWindow,
-                                                                          channel);
+                                                                          channel,
+                                                                          false);
 }
 
 bool emberAfGreenPowerClusterGpNotificationResponseCallback(uint8_t options,

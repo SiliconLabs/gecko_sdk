@@ -11,7 +11,8 @@ class RM_Peripheral_RAC(Base_RM_Peripheral):
         self.__dict__['zz_frozen'] = False
         super(RM_Peripheral_RAC, self).__init__(rmio, label,
             0xA8020000, 'RAC',
-            u"")
+            u"",
+            [])
         self.IPVERSION = RM_Register_RAC_IPVERSION(self.zz_rmio, self.zz_label)
         self.zz_rdict['IPVERSION'] = self.IPVERSION
         self.EN = RM_Register_RAC_EN(self.zz_rmio, self.zz_label)
@@ -36,8 +37,6 @@ class RM_Peripheral_RAC(Base_RM_Peripheral):
         self.zz_rdict['SEQIF'] = self.SEQIF
         self.SEQIEN = RM_Register_RAC_SEQIEN(self.zz_rmio, self.zz_label)
         self.zz_rdict['SEQIEN'] = self.SEQIEN
-        self.STATUS1 = RM_Register_RAC_STATUS1(self.zz_rmio, self.zz_label)
-        self.zz_rdict['STATUS1'] = self.STATUS1
         self.STIMER = RM_Register_RAC_STIMER(self.zz_rmio, self.zz_label)
         self.zz_rdict['STIMER'] = self.STIMER
         self.STIMERCOMP = RM_Register_RAC_STIMERCOMP(self.zz_rmio, self.zz_label)
@@ -70,6 +69,8 @@ class RM_Peripheral_RAC(Base_RM_Peripheral):
         self.zz_rdict['VCOCTRL'] = self.VCOCTRL
         self.CHPCTRL = RM_Register_RAC_CHPCTRL(self.zz_rmio, self.zz_label)
         self.zz_rdict['CHPCTRL'] = self.CHPCTRL
+        self.SYNTHCTRL = RM_Register_RAC_SYNTHCTRL(self.zz_rmio, self.zz_label)
+        self.zz_rdict['SYNTHCTRL'] = self.SYNTHCTRL
         self.RFSTATUS = RM_Register_RAC_RFSTATUS(self.zz_rmio, self.zz_label)
         self.zz_rdict['RFSTATUS'] = self.RFSTATUS
         self.STATUS2 = RM_Register_RAC_STATUS2(self.zz_rmio, self.zz_label)
@@ -80,8 +81,6 @@ class RM_Peripheral_RAC(Base_RM_Peripheral):
         self.zz_rdict['PAENCTRL'] = self.PAENCTRL
         self.APC = RM_Register_RAC_APC(self.zz_rmio, self.zz_label)
         self.zz_rdict['APC'] = self.APC
-        self.ANTDIV = RM_Register_RAC_ANTDIV(self.zz_rmio, self.zz_label)
-        self.zz_rdict['ANTDIV'] = self.ANTDIV
         self.AUXADCTRIM = RM_Register_RAC_AUXADCTRIM(self.zz_rmio, self.zz_label)
         self.zz_rdict['AUXADCTRIM'] = self.AUXADCTRIM
         self.AUXADCEN = RM_Register_RAC_AUXADCEN(self.zz_rmio, self.zz_label)
@@ -116,12 +115,6 @@ class RM_Peripheral_RAC(Base_RM_Peripheral):
         self.zz_rdict['LNAMIXTRIM0'] = self.LNAMIXTRIM0
         self.LNAMIXTRIM1 = RM_Register_RAC_LNAMIXTRIM1(self.zz_rmio, self.zz_label)
         self.zz_rdict['LNAMIXTRIM1'] = self.LNAMIXTRIM1
-        self.LNAMIXTRIM2 = RM_Register_RAC_LNAMIXTRIM2(self.zz_rmio, self.zz_label)
-        self.zz_rdict['LNAMIXTRIM2'] = self.LNAMIXTRIM2
-        self.LNAMIXTRIM3 = RM_Register_RAC_LNAMIXTRIM3(self.zz_rmio, self.zz_label)
-        self.zz_rdict['LNAMIXTRIM3'] = self.LNAMIXTRIM3
-        self.LNAMIXTRIM4 = RM_Register_RAC_LNAMIXTRIM4(self.zz_rmio, self.zz_label)
-        self.zz_rdict['LNAMIXTRIM4'] = self.LNAMIXTRIM4
         self.LNAMIXCAL = RM_Register_RAC_LNAMIXCAL(self.zz_rmio, self.zz_label)
         self.zz_rdict['LNAMIXCAL'] = self.LNAMIXCAL
         self.LNAMIXEN = RM_Register_RAC_LNAMIXEN(self.zz_rmio, self.zz_label)
@@ -136,14 +129,10 @@ class RM_Peripheral_RAC(Base_RM_Peripheral):
         self.zz_rdict['PATRIM2'] = self.PATRIM2
         self.PATRIM3 = RM_Register_RAC_PATRIM3(self.zz_rmio, self.zz_label)
         self.zz_rdict['PATRIM3'] = self.PATRIM3
-        self.PATRIM4 = RM_Register_RAC_PATRIM4(self.zz_rmio, self.zz_label)
-        self.zz_rdict['PATRIM4'] = self.PATRIM4
-        self.PATRIM5 = RM_Register_RAC_PATRIM5(self.zz_rmio, self.zz_label)
-        self.zz_rdict['PATRIM5'] = self.PATRIM5
-        self.TXPOWER = RM_Register_RAC_TXPOWER(self.zz_rmio, self.zz_label)
-        self.zz_rdict['TXPOWER'] = self.TXPOWER
-        self.TXRAMP = RM_Register_RAC_TXRAMP(self.zz_rmio, self.zz_label)
-        self.zz_rdict['TXRAMP'] = self.TXRAMP
+        self.PACTRL = RM_Register_RAC_PACTRL(self.zz_rmio, self.zz_label)
+        self.zz_rdict['PACTRL'] = self.PACTRL
+        self.PGADEBUG = RM_Register_RAC_PGADEBUG(self.zz_rmio, self.zz_label)
+        self.zz_rdict['PGADEBUG'] = self.PGADEBUG
         self.PGATRIM = RM_Register_RAC_PGATRIM(self.zz_rmio, self.zz_label)
         self.zz_rdict['PGATRIM'] = self.PGATRIM
         self.PGACAL = RM_Register_RAC_PGACAL(self.zz_rmio, self.zz_label)
@@ -156,10 +145,8 @@ class RM_Peripheral_RAC(Base_RM_Peripheral):
         self.zz_rdict['RFBIASCTRL'] = self.RFBIASCTRL
         self.RADIOEN = RM_Register_RAC_RADIOEN(self.zz_rmio, self.zz_label)
         self.zz_rdict['RADIOEN'] = self.RADIOEN
-        self.RFPATHEN0 = RM_Register_RAC_RFPATHEN0(self.zz_rmio, self.zz_label)
-        self.zz_rdict['RFPATHEN0'] = self.RFPATHEN0
-        self.RFPATHEN1 = RM_Register_RAC_RFPATHEN1(self.zz_rmio, self.zz_label)
-        self.zz_rdict['RFPATHEN1'] = self.RFPATHEN1
+        self.RFPATHEN = RM_Register_RAC_RFPATHEN(self.zz_rmio, self.zz_label)
+        self.zz_rdict['RFPATHEN'] = self.RFPATHEN
         self.RX = RM_Register_RAC_RX(self.zz_rmio, self.zz_label)
         self.zz_rdict['RX'] = self.RX
         self.TX = RM_Register_RAC_TX(self.zz_rmio, self.zz_label)
@@ -186,20 +173,12 @@ class RM_Peripheral_RAC(Base_RM_Peripheral):
         self.zz_rdict['XORETIMECTRL'] = self.XORETIMECTRL
         self.XORETIMESTATUS = RM_Register_RAC_XORETIMESTATUS(self.zz_rmio, self.zz_label)
         self.zz_rdict['XORETIMESTATUS'] = self.XORETIMESTATUS
-        self.AGCOVERWRITE0 = RM_Register_RAC_AGCOVERWRITE0(self.zz_rmio, self.zz_label)
-        self.zz_rdict['AGCOVERWRITE0'] = self.AGCOVERWRITE0
-        self.AGCOVERWRITE1 = RM_Register_RAC_AGCOVERWRITE1(self.zz_rmio, self.zz_label)
-        self.zz_rdict['AGCOVERWRITE1'] = self.AGCOVERWRITE1
-        self.AGCOVERWRITE2 = RM_Register_RAC_AGCOVERWRITE2(self.zz_rmio, self.zz_label)
-        self.zz_rdict['AGCOVERWRITE2'] = self.AGCOVERWRITE2
+        self.XOSQBUFFILT = RM_Register_RAC_XOSQBUFFILT(self.zz_rmio, self.zz_label)
+        self.zz_rdict['XOSQBUFFILT'] = self.XOSQBUFFILT
         self.SPARE = RM_Register_RAC_SPARE(self.zz_rmio, self.zz_label)
         self.zz_rdict['SPARE'] = self.SPARE
-        self.PACTRL = RM_Register_RAC_PACTRL(self.zz_rmio, self.zz_label)
-        self.zz_rdict['PACTRL'] = self.PACTRL
-        self.FENOTCH0 = RM_Register_RAC_FENOTCH0(self.zz_rmio, self.zz_label)
-        self.zz_rdict['FENOTCH0'] = self.FENOTCH0
-        self.FENOTCH1 = RM_Register_RAC_FENOTCH1(self.zz_rmio, self.zz_label)
-        self.zz_rdict['FENOTCH1'] = self.FENOTCH1
+        self.AGCOVERWRITE = RM_Register_RAC_AGCOVERWRITE(self.zz_rmio, self.zz_label)
+        self.zz_rdict['AGCOVERWRITE'] = self.AGCOVERWRITE
         self.SCRATCH0 = RM_Register_RAC_SCRATCH0(self.zz_rmio, self.zz_label)
         self.zz_rdict['SCRATCH0'] = self.SCRATCH0
         self.SCRATCH1 = RM_Register_RAC_SCRATCH1(self.zz_rmio, self.zz_label)

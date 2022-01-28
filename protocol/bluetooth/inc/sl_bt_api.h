@@ -656,7 +656,7 @@ PACKSTRUCT( struct sl_bt_evt_system_boot_s
   uint16_t minor;      /**< Minor release version */
   uint16_t patch;      /**< Patch release number */
   uint16_t build;      /**< Build number */
-  uint32_t bootloader; /**< Bootloader version */
+  uint32_t bootloader; /**< Unused. Ignore this field. */
   uint16_t hw;         /**< Hardware type */
   uint32_t hash;       /**< Version hash */
 });
@@ -850,7 +850,7 @@ sl_status_t sl_bt_system_stop_bluetooth();
  * @param[out] minor Minor release version
  * @param[out] patch Patch release number
  * @param[out] build Build number
- * @param[out] bootloader Bootloader version
+ * @param[out] bootloader Unused. Ignore this field.
  * @param[out] hash Version hash
  *
  * @return SL_STATUS_OK if successful. Error code otherwise.
@@ -1659,15 +1659,15 @@ sl_status_t sl_bt_advertiser_configure(uint8_t advertising_set, uint32_t flags);
  * @param[in] advertising_set Advertising set handle
  * @param[in] interval_min @parblock
  *   Minimum advertising interval. Value in units of 0.625 ms
- *     - Range: 0x20 to 0xFFFF
- *     - Time range: 20 ms to 40.96 s
+ *     - Range: 0x20 to 0xFFFFFF
+ *     - Time range: 20 ms to 10485.759375 s
  *
  *   Default value: 100 ms
  *   @endparblock
  * @param[in] interval_max @parblock
  *   Maximum advertising interval. Value in units of 0.625 ms
- *     - Range: 0x20 to 0xFFFF
- *     - Time range: 20 ms to 40.96 s
+ *     - Range: 0x20 to 0xFFFFFF
+ *     - Time range: 20 ms to 10485.759375 s
  *     - Note: interval_max should be bigger than interval_min
  *
  *   Default value: 200 ms
@@ -1876,9 +1876,10 @@ sl_status_t sl_bt_advertiser_delete_set(uint8_t advertising_set);
  * command.
  *
  * Set extended advertising PHYs on an advertising set. This setting will take
- * effect next time the extended advertising is enabled. The invalid parameter
- * error is returned if a PHY value is invalid or the device does not support a
- * given PHY.
+ * effect next time the extended advertising is enabled. When advertising on the
+ * LE Coded PHY, coding scheme S=8 is used. The invalid parameter error is
+ * returned if a PHY value is invalid or the device does not support a given
+ * PHY.
  *
  * @param[in] advertising_set Advertising set handle
  * @param[in] primary_phy @parblock
@@ -1886,7 +1887,7 @@ sl_status_t sl_bt_advertiser_delete_set(uint8_t advertising_set);
  *   transmitted on the primary advertising channel. If legacy advertising PDUs
  *   are used, 1M PHY must be used. Values:
  *     - <b>sl_bt_gap_phy_1m (0x1):</b> 1M PHY
- *     - <b>sl_bt_gap_phy_coded (0x4):</b> Coded PHY, 125k (S=8) or 500k (S=2)
+ *     - <b>sl_bt_gap_phy_coded (0x4):</b> Coded PHY, 125k (S=8)
  *
  *   Default value: @ref sl_bt_gap_phy_1m
  *   @endparblock
@@ -1895,7 +1896,7 @@ sl_status_t sl_bt_advertiser_delete_set(uint8_t advertising_set);
  *   transmitted on the secondary advertising channel. Values:
  *     - <b>sl_bt_gap_phy_1m (0x1):</b> 1M PHY
  *     - <b>sl_bt_gap_phy_2m (0x2):</b> 2M PHY
- *     - <b>sl_bt_gap_phy_coded (0x4):</b> Coded PHY, 125k (S=8) or 500k (S=2)
+ *     - <b>sl_bt_gap_phy_coded (0x4):</b> Coded PHY, 125k (S=8)
  *
  *   Default value: @ref sl_bt_gap_phy_1m
  *   @endparblock
@@ -2550,7 +2551,8 @@ typedef enum
 /***************************************************************************//**
  *
  * Set advertising PHYs of the extended advertising on an advertising set. This
- * setting will take effect next time the advertising is enabled. The invalid
+ * setting will take effect next time the advertising is enabled. When
+ * advertising on the LE Coded PHY, coding scheme S=8 is used. The invalid
  * parameter error is returned if a PHY value is invalid or the device does not
  * support a given PHY.
  *
@@ -2559,7 +2561,7 @@ typedef enum
  *   Enum @ref sl_bt_gap_phy_t. The PHY on which the advertising packets are
  *   transmitted on the primary advertising channel. Values:
  *     - <b>sl_bt_gap_phy_1m (0x1):</b> 1M PHY
- *     - <b>sl_bt_gap_phy_coded (0x4):</b> Coded PHY, 125k (S=8) or 500k (S=2)
+ *     - <b>sl_bt_gap_phy_coded (0x4):</b> Coded PHY, 125k (S=8)
  *
  *   Default value: @ref sl_bt_gap_phy_1m
  *   @endparblock
@@ -2568,7 +2570,7 @@ typedef enum
  *   transmitted on the secondary advertising channel. Values:
  *     - <b>sl_bt_gap_phy_1m (0x1):</b> 1M PHY
  *     - <b>sl_bt_gap_phy_2m (0x2):</b> 2M PHY
- *     - <b>sl_bt_gap_phy_coded (0x4):</b> Coded PHY, 125k (S=8) or 500k (S=2)
+ *     - <b>sl_bt_gap_phy_coded (0x4):</b> Coded PHY, 125k (S=8)
  *
  *   Default value: @ref sl_bt_gap_phy_1m
  *   @endparblock
@@ -3907,9 +3909,18 @@ typedef struct sl_bt_evt_connection_remote_used_features_s sl_bt_evt_connection_
 /***************************************************************************//**
  *
  * Set default Bluetooth connection parameters. The values are valid for all
- * subsequent connections initiated by this device. To change parameters of an
- * already established connection, use the command @ref
- * sl_bt_connection_set_parameters.
+ * subsequent connections initiated by this device.
+ *
+ * @p min_ce_length and @p max_ce_length specify the preference of the
+ * connection event length so that the Link Layer can prioritize tasks
+ * accordingly in simultaneous connections, or scanning and so on. A connection
+ * event starts at an anchor point of a connection interval and lasts until the
+ * lesser of @p max_ce_length and the actual connection interval. Packets that
+ * do not fit into the connection event will be sent in the next connection
+ * interval.
+ *
+ * To change parameters of an already established connection, use the command
+ * @ref sl_bt_connection_set_parameters.
  *
  * @param[in] min_interval @parblock
  *   Minimum value for the connection event interval. This must be set less than
@@ -3952,18 +3963,40 @@ typedef struct sl_bt_evt_connection_remote_used_features_s sl_bt_evt_connection_
  *   Default value: 1000 ms
  *   @endparblock
  * @param[in] min_ce_length @parblock
- *   Minimum value for the connection event length. This must be set be less
- *   than or equal to @p max_ce_length.
+ *   Minimum length of the connection event. It must be less than or equal to @p
+ *   max_ce_length.
+ *
+ *   This value defines the minimum time that should be given to the connection
+ *   event in a situation where other tasks need to run immediately after the
+ *   connection event. When the value is very small, the connection event still
+ *   has at least one TX/RX operation. If this value is increased, more time is
+ *   reserved for the connection event so it can transmit and receive more
+ *   packets in a connection interval.
+ *
+ *   Use the default value if the application doesn't care about the connection
+ *   event length or doesn't want to do fine tuning.
+ *
  *     - Time = Value x 0.625 ms
  *     - Range: 0x0000 to 0xffff
  *
  *   Default value: 0x0000
- *
- *   Value is not currently used and is reserved for future. Set to 0.
  *   @endparblock
  * @param[in] max_ce_length @parblock
- *   Maximum value for the connection event length. This must be set greater
- *   than or equal to @p min_ce_length.
+ *   Maximum length of the connection event. It must be greater than or equal to
+ *   @p min_ce_length.
+ *
+ *   This value is used for limiting the connection event length so that a
+ *   connection that has large amounts of data to transmit or receive doesn't
+ *   block other tasks. Limiting the connection event is a hard stop. If there
+ *   is no enough time to send or receive a packet, the connection event will be
+ *   closed.
+ *
+ *   If the value is set to 0, the connection event still has at least one TX/RX
+ *   operation. This is useful to limit power consumption or leave more time to
+ *   other tasks.
+ *
+ *   Use the default value if the application doesn't care about the connection
+ *   event length or doesn't want to do fine tuning.
  *     - Time = Value x 0.625 ms
  *     - Range: 0x0000 to 0xffff
  *
@@ -4090,6 +4123,14 @@ sl_status_t sl_bt_connection_open(bd_addr address,
  *
  * Request a change in the connection parameters of a Bluetooth connection.
  *
+ * @p min_ce_length and @p max_ce_length specify the preference of the
+ * connection event length so that the Link Layer can prioritize tasks
+ * accordingly in simultaneous connections, or scanning and so on. A connection
+ * event starts at an anchor point of a connection interval and lasts until the
+ * lesser of @p max_ce_length and the actual connection interval. Packets that
+ * do not fit into the connection event will be sent in the next connection
+ * interval.
+ *
  * @param[in] connection Connection Handle
  * @param[in] min_interval Minimum value for the connection event interval. This
  *   must be set less than or equal to @p max_interval.
@@ -4118,20 +4159,44 @@ sl_status_t sl_bt_connection_open(bd_addr address,
  *   over at least a few connection intervals.
  *   @endparblock
  * @param[in] min_ce_length @parblock
- *   Minimum value for the connection event length. This must be set less than
- *   or equal to @p max_ce_length.
+ *   Minimum length of the connection event. It must be less than or equal to @p
+ *   max_ce_length.
+ *
+ *   This value defines the minimum time that should be given to the connection
+ *   event in a situation where other tasks need to run immediately after the
+ *   connection event. When the value is very small, the connection event still
+ *   has at least one TX/RX operation. If this value is increased, more time is
+ *   reserved for the connection event so it can transmit and receive more
+ *   packets in a connection interval.
+ *
+ *   Use the default value if the application doesn't care about the connection
+ *   event length or doesn't want to do fine tuning.
+ *
  *     - Time = Value x 0.625 ms
  *     - Range: 0x0000 to 0xffff
  *
- *   Value is not currently used and is reserved for future. Set to 0.
+ *   Default value: 0x0000
  *   @endparblock
  * @param[in] max_ce_length @parblock
- *   Maximum value for the connection event length. This must be set greater
- *   than or equal to @p min_ce_length.
+ *   Maximum length of the connection event. It must be greater than or equal to
+ *   @p min_ce_length.
+ *
+ *   This value is used for limiting the connection event length so that a
+ *   connection that has large amounts of data to transmit or receive doesn't
+ *   block other tasks. Limiting the connection event is a hard stop. If there
+ *   is no enough time to send or receive a packet, the connection event will be
+ *   closed.
+ *
+ *   If the value is set to 0, the connection event still has at least one TX/RX
+ *   operation. This is useful to limit power consumption or leave more time to
+ *   other tasks.
+ *
+ *   Use the default value if the application doesn't care about the connection
+ *   event length or doesn't want to do fine tuning.
  *     - Time = Value x 0.625 ms
  *     - Range: 0x0000 to 0xffff
  *
- *   Use 0xffff for no limitation.
+ *   Default value: 0xffff
  *   @endparblock
  *
  * @return SL_STATUS_OK if successful. Error code otherwise.
@@ -7091,6 +7156,7 @@ sl_status_t sl_bt_test_dtm_end();
 #define sl_bt_cmd_sm_set_legacy_oob_id                               0x190f0020
 #define sl_bt_cmd_sm_set_oob_id                                      0x1a0f0020
 #define sl_bt_cmd_sm_set_remote_oob_id                               0x1b0f0020
+#define sl_bt_cmd_sm_set_bonding_data_id                             0x1c0f0020
 #define sl_bt_rsp_sm_configure_id                                    0x010f0020
 #define sl_bt_rsp_sm_set_minimum_key_size_id                         0x140f0020
 #define sl_bt_rsp_sm_set_debug_mode_id                               0x0f0f0020
@@ -7115,6 +7181,7 @@ sl_status_t sl_bt_test_dtm_end();
 #define sl_bt_rsp_sm_set_legacy_oob_id                               0x190f0020
 #define sl_bt_rsp_sm_set_oob_id                                      0x1a0f0020
 #define sl_bt_rsp_sm_set_remote_oob_id                               0x1b0f0020
+#define sl_bt_rsp_sm_set_bonding_data_id                             0x1c0f0020
 
 /**
  * @cond RESTRICTED
@@ -7136,6 +7203,38 @@ typedef enum
   sl_bt_sm_bonding_key_irk        = 0x3  /**< (0x3) Identity resolving key for
                                               resolvable private addresses */
 } sl_bt_sm_bonding_key_t;
+/** @endcond */ // end restricted enum type
+
+/**
+ * @cond RESTRICTED
+ *
+ * Restricted/experimental API. Contact Silicon Labs sales for more information.
+ * @brief These values define the bonding data types, which are stored in the
+ * persistent store.
+ */
+typedef enum
+{
+  sl_bt_sm_bonding_data_remote_address       = 0x0, /**< (0x0) Identity address
+                                                         of the remote device */
+  sl_bt_sm_bonding_data_remote_ltk           = 0x1, /**< (0x1) LTK used as
+                                                         central device */
+  sl_bt_sm_bonding_data_local_ltk            = 0x2, /**< (0x2) LTK used as
+                                                         peripheral device */
+  sl_bt_sm_bonding_data_remote_master_inf    = 0x3, /**< (0x3) Idenfication info
+                                                         used as central device */
+  sl_bt_sm_bonding_data_local_master_inf     = 0x4, /**< (0x4) Idenfication info
+                                                         used as central device */
+  sl_bt_sm_bonding_data_irk                  = 0x5, /**< (0x5) IRK of the remote
+                                                         device */
+  sl_bt_sm_bonding_data_meta                 = 0x6, /**< (0x6) Metadata about
+                                                         the bonding */
+  sl_bt_sm_bonding_data_gatt_client_config   = 0x7, /**< (0x7) GATT database
+                                                         client configuration */
+  sl_bt_sm_bonding_data_gatt_client_features = 0x8, /**< (0x8) GATT client
+                                                         supported features */
+  sl_bt_sm_bonding_data_gatt_db_hash         = 0x9  /**< (0x9) GATT database
+                                                         hash */
+} sl_bt_sm_bonding_data_t;
 /** @endcond */ // end restricted enum type
 
 /**
@@ -7903,6 +8002,44 @@ sl_status_t sl_bt_sm_set_oob(uint8_t enable,
 sl_status_t sl_bt_sm_set_remote_oob(uint8_t enable,
                                     aes_key_128 random,
                                     aes_key_128 confirm);
+
+/***************************************************************************//**
+ * @cond RESTRICTED
+ *
+ * Restricted/experimental API. Contact Silicon Labs sales for more information.
+ *
+ * Set bonding data for connection from external bonding database.
+ *
+ * @param[in] connection Connection handle
+ * @param[in] type Enum @ref sl_bt_sm_bonding_data_t. Bonding data type. Values:
+ *     - <b>sl_bt_sm_bonding_data_remote_address (0x0):</b> Identity address of
+ *       the remote device
+ *     - <b>sl_bt_sm_bonding_data_remote_ltk (0x1):</b> LTK used as central
+ *       device
+ *     - <b>sl_bt_sm_bonding_data_local_ltk (0x2):</b> LTK used as peripheral
+ *       device
+ *     - <b>sl_bt_sm_bonding_data_remote_master_inf (0x3):</b> Idenfication info
+ *       used as central device
+ *     - <b>sl_bt_sm_bonding_data_local_master_inf (0x4):</b> Idenfication info
+ *       used as central device
+ *     - <b>sl_bt_sm_bonding_data_irk (0x5):</b> IRK of the remote device
+ *     - <b>sl_bt_sm_bonding_data_meta (0x6):</b> Metadata about the bonding
+ *     - <b>sl_bt_sm_bonding_data_gatt_client_config (0x7):</b> GATT database
+ *       client configuration
+ *     - <b>sl_bt_sm_bonding_data_gatt_client_features (0x8):</b> GATT client
+ *       supported features
+ *     - <b>sl_bt_sm_bonding_data_gatt_db_hash (0x9):</b> GATT database hash
+ * @param[in] data_len Length of data in @p data
+ * @param[in] data Bonding data.
+ *
+ * @return SL_STATUS_OK if successful. Error code otherwise.
+ *
+ * @endcond
+ ******************************************************************************/
+sl_status_t sl_bt_sm_set_bonding_data(uint8_t connection,
+                                      uint8_t type,
+                                      size_t data_len,
+                                      const uint8_t* data);
 
 /** @} */ // end addtogroup sl_bt_sm
 
@@ -9476,9 +9613,12 @@ void sl_bt_priority_handle(void);
  *
  * @param signals is a bitmask defining active signals that are reported back to
  *   the application by system_external_signal-event.
- *
+ * @return SL_STATUS_OK if the operation is successful,
+ *   SL_STATUS_NO_MORE_RESOURCE indicating the request could not be processed
+ *   due to resource limitation at the moment, or SL_STATUS_INVALID_STATE when
+ *   the on-demand start feature is used and the stack is currently stopped.
  */
-void sl_bt_external_signal(uint32_t signals);
+sl_status_t sl_bt_external_signal(uint32_t signals);
 
 /**
  * Signals stack to send system_awake event when application received wakeup

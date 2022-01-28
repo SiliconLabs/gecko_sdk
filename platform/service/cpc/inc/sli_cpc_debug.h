@@ -55,8 +55,14 @@
 #define SLI_CPC_DEBUG_TRACE_CORE_RXD_FRAME()                            { SLI_CPC_DEBUG_CORE_COUNTER_INC(rxd_frame); \
                                                                           SLI_CPC_SYSVIEW_MARK_EVENT_ON_CORE(RX_FRAME); }
 
-#define SLI_CPC_DEBUG_TRACE_CORE_RXD_VALID_FRAME()                      { SLI_CPC_DEBUG_CORE_COUNTER_INC(rxd_valid_frame); \
-                                                                          SLI_CPC_SYSVIEW_MARK_EVENT_ON_CORE(RXD_VALID_FRAME); }
+#define SLI_CPC_DEBUG_TRACE_CORE_RXD_VALID_IFRAME()                      { SLI_CPC_DEBUG_CORE_COUNTER_INC(rxd_valid_iframe); \
+                                                                           SLI_CPC_SYSVIEW_MARK_EVENT_ON_CORE(RXD_VALID_IFRAME); }
+
+#define SLI_CPC_DEBUG_TRACE_CORE_RXD_VALID_UFRAME()                      { SLI_CPC_DEBUG_CORE_COUNTER_INC(rxd_valid_uframe); \
+                                                                           SLI_CPC_SYSVIEW_MARK_EVENT_ON_CORE(RXD_VALID_UFRAME); }
+
+#define SLI_CPC_DEBUG_TRACE_CORE_RXD_VALID_SFRAME()                      { SLI_CPC_DEBUG_CORE_COUNTER_INC(rxd_valid_sframe); \
+                                                                           SLI_CPC_SYSVIEW_MARK_EVENT_ON_CORE(RXD_VALID_SFRAME); }
 
 #define SLI_CPC_DEBUG_TRACE_CORE_RXD_DATA_FRAME_DROPPED()               { SLI_CPC_DEBUG_CORE_COUNTER_INC(rxd_data_frame_dropped); \
                                                                           SLI_CPC_SYSVIEW_MARK_EVENT_ON_CORE(RXD_DATA_FRAME_DROPPED); }
@@ -76,8 +82,14 @@
 #define SLI_CPC_DEBUG_TRACE_CORE_INVALID_HEADER_CHECKSUM()              { SLI_CPC_DEBUG_CORE_COUNTER_INC(invalid_header_checksum); \
                                                                           SLI_CPC_SYSVIEW_MARK_EVENT_ON_CORE(INVALID_HEADER_CHECKSUM); }
 
+#define SLI_CPC_DEBUG_TRACE_CORE_INVALID_PAYLOAD_CHECKSUM()              { SLI_CPC_DEBUG_CORE_COUNTER_INC(invalid_payload_checksum); \
+                                                                           SLI_CPC_SYSVIEW_MARK_EVENT_ON_CORE(INVALID_PAYLOAD_CHECKSUM); }
+
 #define SLI_CPC_DEBUG_TRACE_CORE_TXD_TRANSMIT_COMPLETED()               { SLI_CPC_DEBUG_CORE_COUNTER_INC(txd_completed); \
                                                                           SLI_CPC_SYSVIEW_MARK_EVENT_ON_CORE(TXD_TRANSMIT_COMPLETED); }
+
+#define SLI_CPC_DEBUG_TRACE_CORE_RE_TRANSMIT_FRAME()                     { SLI_CPC_DEBUG_CORE_COUNTER_INC(retxd_data_frame); \
+                                                                           SLI_CPC_SYSVIEW_MARK_EVENT_ON_CORE(RE_TRANSMIT_FRAME); }
 
 #define SLI_CPC_DEBUG_TRACE_ENDPOINT_RXD_FRAME(endpoint)                { SLI_CPC_DEBUG_ENDPOINT_COUNTER_INC(endpoint, rxd_packet); \
                                                                           SLI_CPC_SYSVIEW_MARK_EVENT_ON_ENDPOINT(RXD_FRAME, endpoint->id); }

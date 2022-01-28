@@ -38,6 +38,7 @@ class Base_RM_Register(IRegMapRegister):
         self.resetMask = resetMask
         self.zz_accessed_flag = False
         self.dumpActive = True
+        self._addressToNamesCb = None
 
     def __repr__(self):
         out = "    {}\n".format(self.getDesc())
@@ -107,6 +108,8 @@ class Base_RM_Register(IRegMapRegister):
                                                 simulated=True)
         reg_copy.io = latest_value
         reg_copy.zz_rmio.writeRegister(reg_copy, latest_value)
+        # remove binding to main device instance
+        reg_copy.registerAddressToNamesCb(None)
         reg_copy.__dict__['zz_frozen'] = True
         self.zz_rmio = live_rmio
         self.__dict__['zz_frozen'] = True
@@ -140,6 +143,22 @@ class Base_RM_Register(IRegMapRegister):
         pass
 
     io = property(_getio, _setio)
+
+    def registerAddressToNamesCb(self, addressToNamesCb):
+        self.__dict__['zz_frozen'] = False
+        self._addressToNamesCb = addressToNamesCb
+        self.__dict__['zz_frozen'] = True
+
+    def getAliasedNames(self):
+        if self._addressToNamesCb:
+            aliases = self._addressToNamesCb(self.address)  # type: list
+            self_idx = aliases.index(self.fullname)
+            return aliases[:self_idx] + aliases[self_idx+1:]
+        else:
+            return []
+
+    def isAliased(self):
+        return self.getAliasedNames() != []
 
     def getFieldNames(self):
         nameList = []

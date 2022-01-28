@@ -194,11 +194,11 @@ void printMonitorData(sl_cli_command_arg_t *args)
   responsePrintStart(sl_cli_get_command_string(args, 0));
   printf("{Rising:0x%.8lx", rising[0]);
   uint32_t samples = 1U;
-  do {
+  while ((samples < MONITOR_NUM_SAMPLES)
+         && (rising[samples] != 0xFFFFFFFFUL)) {
     printf(" 0x%.8lx", rising[samples]);
     samples++;
-  } while ((samples < MONITOR_NUM_SAMPLES)
-           && (rising[samples] != 0xFFFFFFFFUL));
+  }
 
   // The GPIO may toggle while we're outputting falling samples. In order to
   // keep the data consistent, we need to limit the number of falling samples
@@ -218,10 +218,10 @@ void printMonitorData(sl_cli_command_arg_t *args)
 
   printf("}{Falling:0x%.8lx", falling[0]);
   i = 1U;
-  do {
+  while ((i < samples) && falling[i] != 0xFFFFFFFFUL) {
     printf(" 0x%.8lx", falling[i]);
     i++;
-  } while ((i < samples) && falling[i] != 0xFFFFFFFFUL);
+  }
   printf("}}\n");
 }
 

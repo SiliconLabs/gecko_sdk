@@ -190,14 +190,18 @@ typedef struct {
   uint32_t endpoint_opened;
   uint32_t endpoint_closed;
   uint32_t rxd_frame;
-  uint32_t rxd_valid_frame;
+  uint32_t rxd_valid_iframe;
+  uint32_t rxd_valid_uframe;
+  uint32_t rxd_valid_sframe;
   uint32_t rxd_data_frame_dropped;
   uint32_t txd_reject_destination_unreachable;
   uint32_t txd_reject_error_fault;
   uint32_t txd_completed;
+  uint32_t retxd_data_frame;
   uint32_t driver_error;
   uint32_t driver_packet_dropped;
   uint32_t invalid_header_checksum;
+  uint32_t invalid_payload_checksum;
 } sl_cpc_core_debug_counters_t;
 
 /// @brief Struct representing a memory pool handle.

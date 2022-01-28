@@ -100,7 +100,8 @@ sl_status_t sl_debug_swo_disable_itm(uint32_t channel);
  *
  * @note
  * This function ensures that the ITM channel is enabled, and enables it if
- * it wasn't already.
+ * it wasn't already. Note that even if the debug port is locked, the byte
+ * will still be written on the SWO.
  *
  * @param[in] channel ITM channel number
  * @param[in] byte Byte to send

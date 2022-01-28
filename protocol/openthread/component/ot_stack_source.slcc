@@ -174,7 +174,6 @@ source:
       - path: utils/heap.cpp
       - path: utils/history_tracker.cpp
       - path: utils/jam_detector.cpp
-      - path: utils/lookup_table.cpp
       - path: utils/otns.cpp
       - path: utils/ping_sender.cpp
       - path: utils/slaac_address.cpp

@@ -203,7 +203,7 @@ Error MeshForwarder::ForwardDuaToBackboneLink(Message &aMessage, const Ip6::Addr
     ttl++;
     aMessage.Write(Ip6::Header::kHopLimitFieldOffset, ttl);
 
-    IgnoreError(Get<Ip6::Ip6>().HandleDatagram(aMessage, nullptr, nullptr, false));
+    IgnoreError(Get<Ip6::Ip6>().HandleDatagram(aMessage, nullptr, nullptr, /* aFromNcpHost */ false));
 
 exit:
     return error;
@@ -805,7 +805,8 @@ void MeshForwarder::HandleMesh(uint8_t *             aFrame,
         meshHeader.DecrementHopsLeft();
 
         GetForwardFramePriority(aFrame, aFrameLength, meshSource, meshDest, priority);
-        message = Get<MessagePool>().New(Message::kType6lowpan, priority);
+        message =
+            Get<MessagePool>().Allocate(Message::kType6lowpan, /* aReserveHeader */ 0, Message::Settings(priority));
         VerifyOrExit(message != nullptr, error = kErrorNoBufs);
 
         SuccessOrExit(error = message->SetLength(meshHeader.GetHeaderLength() + aFrameLength));
@@ -837,7 +838,7 @@ exit:
     if (error != kErrorNone)
     {
         otLogInfoMac("Dropping rx mesh frame, error:%s, len:%d, src:%s, sec:%s", ErrorToString(error), aFrameLength,
-                     aMacSource.ToString().AsCString(), aLinkInfo.IsLinkSecurityEnabled() ? "yes" : "no");
+                     aMacSource.ToString().AsCString(), ToYesNo(aLinkInfo.IsLinkSecurityEnabled()));
         FreeMessage(message);
     }
 }
@@ -1069,7 +1070,7 @@ Error MeshForwarder::LogMeshFragmentHeader(MessageAction       aAction,
              (aMacAddress == nullptr) ? "" : ((aAction == kMessageReceive) ? ", from:" : ", to:"),
              (aMacAddress == nullptr) ? "" : aMacAddress->ToString().AsCString(), aMeshSource.ToString().AsCString(),
              aMeshDest.ToString().AsCString(), meshHeader.GetHopsLeft() + ((aAction == kMessageReceive) ? 1 : 0),
-             hasFragmentHeader ? "yes" : "no", aMessage.IsLinkSecurityEnabled() ? "yes" : "no",
+             ToYesNo(hasFragmentHeader), ToYesNo(aMessage.IsLinkSecurityEnabled()),
              (aError == kErrorNone) ? "" : ", error:", (aError == kErrorNone) ? "" : ErrorToString(aError),
              shouldLogRss ? ", rss:" : "", shouldLogRss ? aMessage.GetRssAverager().ToString().AsCString() : "",
              shouldLogRadio ? ", radio:" : "", radioString);

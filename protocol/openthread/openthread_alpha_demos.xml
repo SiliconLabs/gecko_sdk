@@ -4,7 +4,7 @@
     <model:property key="demos.blurb" value="rcp-spi-802154-blehci"/>
     <model:property key="core.partCompatibility" value=".*efr32mg12p432f1024gl125.*"/>
     <model:property key="core.boardCompatibility" value="brd4161a"/>
-    <model:property key="demos.imageFile" value="asset://com.silabs.sdk.stack.super_4.0.0/protocol/openthread/demos/rcp-spi-802154-blehci/rcp-spi-802154-blehci-brd4161a.s37"/>
+    <model:property key="demos.imageFile" value="asset://com.silabs.sdk.stack.super_4.0.1/protocol/openthread/demos/rcp-spi-802154-blehci/rcp-spi-802154-blehci-brd4161a.s37"/>
     <model:property key="core.quality" value="ALPHA"/>
     <model:description>Multiprotocol and multipan RCP (Radio Co-Processor) application. Runs multipan 802.15.4 and the Bluetooth Link Layer using DMP (Dynamic MultiProtocol). Access to 802.15.4 is provided using the SPINEL protocol, and access to Bluetooth is provided using the standard Bluetooth HCI (Host Controller Interface) protocol. Both are carried over the CPC (Co-Processor Communication) protocol using a SPI connection.
 </model:description>
@@ -13,7 +13,7 @@
     <model:property key="demos.blurb" value="rcp-spi-802154-blehci"/>
     <model:property key="core.partCompatibility" value=".*efr32mg12p332f1024gl125.*"/>
     <model:property key="core.boardCompatibility" value="brd4166a"/>
-    <model:property key="demos.imageFile" value="asset://com.silabs.sdk.stack.super_4.0.0/protocol/openthread/demos/rcp-spi-802154-blehci/rcp-spi-802154-blehci-brd4166a.s37"/>
+    <model:property key="demos.imageFile" value="asset://com.silabs.sdk.stack.super_4.0.1/protocol/openthread/demos/rcp-spi-802154-blehci/rcp-spi-802154-blehci-brd4166a.s37"/>
     <model:property key="core.quality" value="ALPHA"/>
     <model:description>Multiprotocol and multipan RCP (Radio Co-Processor) application. Runs multipan 802.15.4 and the Bluetooth Link Layer using DMP (Dynamic MultiProtocol). Access to 802.15.4 is provided using the SPINEL protocol, and access to Bluetooth is provided using the standard Bluetooth HCI (Host Controller Interface) protocol. Both are carried over the CPC (Co-Processor Communication) protocol using a SPI connection.
 </model:description>
@@ -22,7 +22,7 @@
     <model:property key="demos.blurb" value="rcp-spi-802154-blehci"/>
     <model:property key="core.partCompatibility" value=".*efr32mg13p732f512gm48.*"/>
     <model:property key="core.boardCompatibility" value="brd4168a"/>
-    <model:property key="demos.imageFile" value="asset://com.silabs.sdk.stack.super_4.0.0/protocol/openthread/demos/rcp-spi-802154-blehci/rcp-spi-802154-blehci-brd4168a.s37"/>
+    <model:property key="demos.imageFile" value="asset://com.silabs.sdk.stack.super_4.0.1/protocol/openthread/demos/rcp-spi-802154-blehci/rcp-spi-802154-blehci-brd4168a.s37"/>
     <model:property key="core.quality" value="ALPHA"/>
     <model:description>Multiprotocol and multipan RCP (Radio Co-Processor) application. Runs multipan 802.15.4 and the Bluetooth Link Layer using DMP (Dynamic MultiProtocol). Access to 802.15.4 is provided using the SPINEL protocol, and access to Bluetooth is provided using the standard Bluetooth HCI (Host Controller Interface) protocol. Both are carried over the CPC (Co-Processor Communication) protocol using a SPI connection.
 </model:description>
@@ -31,7 +31,7 @@
     <model:property key="demos.blurb" value="rcp-spi-802154-blehci"/>
     <model:property key="core.partCompatibility" value=".*efr32mg21a020f1024im32.*"/>
     <model:property key="core.boardCompatibility" value="brd4180a"/>
-    <model:property key="demos.imageFile" value="asset://com.silabs.sdk.stack.super_4.0.0/protocol/openthread/demos/rcp-spi-802154-blehci/rcp-spi-802154-blehci-brd4180a.s37"/>
+    <model:property key="demos.imageFile" value="asset://com.silabs.sdk.stack.super_4.0.1/protocol/openthread/demos/rcp-spi-802154-blehci/rcp-spi-802154-blehci-brd4180a.s37"/>
     <model:property key="core.quality" value="ALPHA"/>
     <model:description>Multiprotocol and multipan RCP (Radio Co-Processor) application. Runs multipan 802.15.4 and the Bluetooth Link Layer using DMP (Dynamic MultiProtocol). Access to 802.15.4 is provided using the SPINEL protocol, and access to Bluetooth is provided using the standard Bluetooth HCI (Host Controller Interface) protocol. Both are carried over the CPC (Co-Processor Communication) protocol using a SPI connection.
 </model:description>
@@ -40,7 +40,7 @@
     <model:property key="demos.blurb" value="rcp-spi-802154-blehci"/>
     <model:property key="core.partCompatibility" value=".*mgm12p32f1024ga.*"/>
     <model:property key="core.boardCompatibility" value="brd4304a"/>
-    <model:property key="demos.imageFile" value="asset://com.silabs.sdk.stack.super_4.0.0/protocol/openthread/demos/rcp-spi-802154-blehci/rcp-spi-802154-blehci-brd4304a.s37"/>
+    <model:property key="demos.imageFile" value="asset://com.silabs.sdk.stack.super_4.0.1/protocol/openthread/demos/rcp-spi-802154-blehci/rcp-spi-802154-blehci-brd4304a.s37"/>
     <model:property key="core.quality" value="ALPHA"/>
     <model:description>Multiprotocol and multipan RCP (Radio Co-Processor) application. Runs multipan 802.15.4 and the Bluetooth Link Layer using DMP (Dynamic MultiProtocol). Access to 802.15.4 is provided using the SPINEL protocol, and access to Bluetooth is provided using the standard Bluetooth HCI (Host Controller Interface) protocol. Both are carried over the CPC (Co-Processor Communication) protocol using a SPI connection.
 </model:description>
@@ -49,7 +49,7 @@
     <model:property key="demos.blurb" value="rcp-uart-802154-blehci"/>
     <model:property key="core.partCompatibility" value=".*efr32mg12p432f1024gl125.*"/>
     <model:property key="core.boardCompatibility" value="brd4161a"/>
-    <model:property key="demos.imageFile" value="asset://com.silabs.sdk.stack.super_4.0.0/protocol/openthread/demos/rcp-uart-802154-blehci/rcp-uart-802154-blehci-brd4161a.s37"/>
+    <model:property key="demos.imageFile" value="asset://com.silabs.sdk.stack.super_4.0.1/protocol/openthread/demos/rcp-uart-802154-blehci/rcp-uart-802154-blehci-brd4161a.s37"/>
     <model:property key="core.quality" value="ALPHA"/>
     <model:description>Multiprotocol and multipan RCP (Radio Co-Processor) application. Runs multipan 802.15.4 and the Bluetooth Link Layer using DMP (Dynamic MultiProtocol). Access to 802.15.4 is provided using the SPINEL protocol, and access to Bluetooth is provided using the standard Bluetooth HCI (Host Controller Interface) protocol. Both are carried over the CPC (Co-Processor Communication) protocol using a UART connection.
 </model:description>
@@ -58,7 +58,7 @@
     <model:property key="demos.blurb" value="rcp-uart-802154-blehci"/>
     <model:property key="core.partCompatibility" value=".*efr32mg12p332f1024gl125.*"/>
     <model:property key="core.boardCompatibility" value="brd4166a"/>
-    <model:property key="demos.imageFile" value="asset://com.silabs.sdk.stack.super_4.0.0/protocol/openthread/demos/rcp-uart-802154-blehci/rcp-uart-802154-blehci-brd4166a.s37"/>
+    <model:property key="demos.imageFile" value="asset://com.silabs.sdk.stack.super_4.0.1/protocol/openthread/demos/rcp-uart-802154-blehci/rcp-uart-802154-blehci-brd4166a.s37"/>
     <model:property key="core.quality" value="ALPHA"/>
     <model:description>Multiprotocol and multipan RCP (Radio Co-Processor) application. Runs multipan 802.15.4 and the Bluetooth Link Layer using DMP (Dynamic MultiProtocol). Access to 802.15.4 is provided using the SPINEL protocol, and access to Bluetooth is provided using the standard Bluetooth HCI (Host Controller Interface) protocol. Both are carried over the CPC (Co-Processor Communication) protocol using a UART connection.
 </model:description>
@@ -67,7 +67,7 @@
     <model:property key="demos.blurb" value="rcp-uart-802154-blehci"/>
     <model:property key="core.partCompatibility" value=".*efr32mg13p732f512gm48.*"/>
     <model:property key="core.boardCompatibility" value="brd4168a"/>
-    <model:property key="demos.imageFile" value="asset://com.silabs.sdk.stack.super_4.0.0/protocol/openthread/demos/rcp-uart-802154-blehci/rcp-uart-802154-blehci-brd4168a.s37"/>
+    <model:property key="demos.imageFile" value="asset://com.silabs.sdk.stack.super_4.0.1/protocol/openthread/demos/rcp-uart-802154-blehci/rcp-uart-802154-blehci-brd4168a.s37"/>
     <model:property key="core.quality" value="ALPHA"/>
     <model:description>Multiprotocol and multipan RCP (Radio Co-Processor) application. Runs multipan 802.15.4 and the Bluetooth Link Layer using DMP (Dynamic MultiProtocol). Access to 802.15.4 is provided using the SPINEL protocol, and access to Bluetooth is provided using the standard Bluetooth HCI (Host Controller Interface) protocol. Both are carried over the CPC (Co-Processor Communication) protocol using a UART connection.
 </model:description>
@@ -76,7 +76,7 @@
     <model:property key="demos.blurb" value="rcp-uart-802154-blehci"/>
     <model:property key="core.partCompatibility" value=".*efr32mg21a020f1024im32.*"/>
     <model:property key="core.boardCompatibility" value="brd4180a"/>
-    <model:property key="demos.imageFile" value="asset://com.silabs.sdk.stack.super_4.0.0/protocol/openthread/demos/rcp-uart-802154-blehci/rcp-uart-802154-blehci-brd4180a.s37"/>
+    <model:property key="demos.imageFile" value="asset://com.silabs.sdk.stack.super_4.0.1/protocol/openthread/demos/rcp-uart-802154-blehci/rcp-uart-802154-blehci-brd4180a.s37"/>
     <model:property key="core.quality" value="ALPHA"/>
     <model:description>Multiprotocol and multipan RCP (Radio Co-Processor) application. Runs multipan 802.15.4 and the Bluetooth Link Layer using DMP (Dynamic MultiProtocol). Access to 802.15.4 is provided using the SPINEL protocol, and access to Bluetooth is provided using the standard Bluetooth HCI (Host Controller Interface) protocol. Both are carried over the CPC (Co-Processor Communication) protocol using a UART connection.
 </model:description>
@@ -85,7 +85,7 @@
     <model:property key="demos.blurb" value="rcp-uart-802154-blehci"/>
     <model:property key="core.partCompatibility" value=".*mgm12p32f1024ga.*"/>
     <model:property key="core.boardCompatibility" value="brd4304a"/>
-    <model:property key="demos.imageFile" value="asset://com.silabs.sdk.stack.super_4.0.0/protocol/openthread/demos/rcp-uart-802154-blehci/rcp-uart-802154-blehci-brd4304a.s37"/>
+    <model:property key="demos.imageFile" value="asset://com.silabs.sdk.stack.super_4.0.1/protocol/openthread/demos/rcp-uart-802154-blehci/rcp-uart-802154-blehci-brd4304a.s37"/>
     <model:property key="core.quality" value="ALPHA"/>
     <model:description>Multiprotocol and multipan RCP (Radio Co-Processor) application. Runs multipan 802.15.4 and the Bluetooth Link Layer using DMP (Dynamic MultiProtocol). Access to 802.15.4 is provided using the SPINEL protocol, and access to Bluetooth is provided using the standard Bluetooth HCI (Host Controller Interface) protocol. Both are carried over the CPC (Co-Processor Communication) protocol using a UART connection.
 </model:description>

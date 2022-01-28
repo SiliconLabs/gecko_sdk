@@ -7,7 +7,7 @@ description: This component provides the functionality to update the trust cente
 label: Update TC Link Key
 quality: production
 id: zigbee_update_tc_link_key
-category: Zigbee|ZigBee 3.0
+category: Zigbee|Zigbee 3.0
 provides:
    - name: "zigbee_update_tc_link_key"
 requires:

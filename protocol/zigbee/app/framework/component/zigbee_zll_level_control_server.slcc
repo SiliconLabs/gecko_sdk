@@ -9,7 +9,7 @@ description: Silicon Labs implementation of the original Zigbee Light Link profi
 label: ZLL Level Control Server Cluster Enhancements
 quality: production
 id: zigbee_zll_level_control_server
-category: Zigbee|ZigBee Light Link
+category: Zigbee|Zigbee Light Link
 provides:
    - name: "zigbee_zll_level_control_server"
 requires:

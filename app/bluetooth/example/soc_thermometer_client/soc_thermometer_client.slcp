@@ -44,7 +44,7 @@ include:
     - path: app.h
 
 readme:
-  - path: ../../documentation/example/soc_thermometer_client/readme.html
+  - path: ../../documentation/example/soc_thermometer_client/readme.md
 
 config_file:
   - override:
@@ -100,5 +100,5 @@ tag:
 
 ui_hints:
   highlight:
-    - path: readme.html
+    - path: readme.md
       focus: true

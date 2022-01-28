@@ -10,7 +10,7 @@ description: This component utilizes behavior defined in the specification, but 
 label: HA Device Trust Center Link Key Update
 quality: production
 id: zigbee_update_ha_tc_link_key
-category: Zigbee|ZigBee 3.0
+category: Zigbee|Zigbee 3.0
 provides:
    - name: "zigbee_update_ha_tc_link_key"
 requires:

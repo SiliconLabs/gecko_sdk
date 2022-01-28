@@ -182,7 +182,7 @@ sl_status_t btmesh_conf_init(void)
   }
 
   if (SL_STATUS_OK == sc) {
-    btmesh_conf_dist = btmesh_conf_distributor_create(BTMESH_CONF_EXECUTOR_COUNT);
+    btmesh_conf_dist = btmesh_conf_distributor_create(SL_BTMESH_CONF_EXECUTOR_COUNT_CFG_VAL);
     if (NULL == btmesh_conf_dist) {
       sc = SL_STATUS_ALLOCATION_FAILED;
     } else {
@@ -209,7 +209,7 @@ sl_status_t btmesh_conf_submit_job(btmesh_conf_job_t *job)
 {
   bool auto_destroy_on_submit_failure = false;
 
-#if 0 != BTMESH_CONF_JOB_AUTO_DESTROY_ON_SUBMIT_FAILURE
+#if 0 != SL_BTMESH_CONF_JOB_AUTO_DESTROY_ON_SUBMIT_FAILURE_CFG_VAL
   if (false != job->auto_destroy) {
     auto_destroy_on_submit_failure = true;
   }
@@ -292,8 +292,8 @@ void btmesh_conf_on_event(const sl_btmesh_msg_t *evt)
       sc = btmesh_conf_init();
       app_assert_status_f(sc, "Failed to init configurator component." NL);
 
-      sc = sl_btmesh_config_client_set_default_timeout(BTMESH_CONF_REQUEST_TIMEOUT_MS,
-                                                       BTMESH_CONF_LPN_REQUEST_TIMEOUT_MS);
+      sc = sl_btmesh_config_client_set_default_timeout(SL_BTMESH_CONF_REQUEST_TIMEOUT_MS_CFG_VAL,
+                                                       SL_BTMESH_CONF_LPN_REQUEST_TIMEOUT_MS_CFG_VAL);
       app_assert_status_f(sc, "Failed to set config client default timeout.");
       break;
     }

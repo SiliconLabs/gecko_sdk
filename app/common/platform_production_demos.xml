@@ -4,7 +4,7 @@
     <model:property key="demos.blurb" value="Platform - MEMLCD Bare-metal"/>
     <model:property key="core.partCompatibility" value=".*efm32zg222f32.*"/>
     <model:property key="core.boardCompatibility" value="brd2010a"/>
-    <model:property key="demos.imageFile" value="asset://com.silabs.sdk.stack.super_4.0.0/app/common/demos/memlcd_baremetal/memlcd_baremetal-brd2010a.s37"/>
+    <model:property key="demos.imageFile" value="asset://com.silabs.sdk.stack.super_4.0.1/app/common/demos/memlcd_baremetal/memlcd_baremetal-brd2010a.s37"/>
     <model:property key="core.quality" value="PRODUCTION"/>
     <model:description>This example project demonstrates use of the Memory Liquid Crystal Display (LCD)  module in a baremetal application, using Silicon Labs Graphics Library (glib).
 </model:description>
@@ -13,7 +13,7 @@
     <model:property key="demos.blurb" value="Platform - MEMLCD Bare-metal"/>
     <model:property key="core.partCompatibility" value=".*efm32hg322f64.*"/>
     <model:property key="core.boardCompatibility" value="brd2012a"/>
-    <model:property key="demos.imageFile" value="asset://com.silabs.sdk.stack.super_4.0.0/app/common/demos/memlcd_baremetal/memlcd_baremetal-brd2012a.s37"/>
+    <model:property key="demos.imageFile" value="asset://com.silabs.sdk.stack.super_4.0.1/app/common/demos/memlcd_baremetal/memlcd_baremetal-brd2012a.s37"/>
     <model:property key="core.quality" value="PRODUCTION"/>
     <model:description>This example project demonstrates use of the Memory Liquid Crystal Display (LCD)  module in a baremetal application, using Silicon Labs Graphics Library (glib).
 </model:description>
@@ -22,7 +22,7 @@
     <model:property key="demos.blurb" value="Platform - MEMLCD Bare-metal"/>
     <model:property key="core.partCompatibility" value=".*efm32gg11b820f2048gl192.*"/>
     <model:property key="core.boardCompatibility" value="brd2204a"/>
-    <model:property key="demos.imageFile" value="asset://com.silabs.sdk.stack.super_4.0.0/app/common/demos/memlcd_baremetal/memlcd_baremetal-brd2204a.s37"/>
+    <model:property key="demos.imageFile" value="asset://com.silabs.sdk.stack.super_4.0.1/app/common/demos/memlcd_baremetal/memlcd_baremetal-brd2204a.s37"/>
     <model:property key="core.quality" value="PRODUCTION"/>
     <model:description>This example project demonstrates use of the Memory Liquid Crystal Display (LCD)  module in a baremetal application, using Silicon Labs Graphics Library (glib).
 </model:description>
@@ -31,7 +31,7 @@
     <model:property key="demos.blurb" value="Platform - MEMLCD Bare-metal"/>
     <model:property key="core.partCompatibility" value=".*efm32gg11b820f2048gl192.*"/>
     <model:property key="core.boardCompatibility" value="brd2204b"/>
-    <model:property key="demos.imageFile" value="asset://com.silabs.sdk.stack.super_4.0.0/app/common/demos/memlcd_baremetal/memlcd_baremetal-brd2204b.s37"/>
+    <model:property key="demos.imageFile" value="asset://com.silabs.sdk.stack.super_4.0.1/app/common/demos/memlcd_baremetal/memlcd_baremetal-brd2204b.s37"/>
     <model:property key="core.quality" value="PRODUCTION"/>
     <model:description>This example project demonstrates use of the Memory Liquid Crystal Display (LCD)  module in a baremetal application, using Silicon Labs Graphics Library (glib).
 </model:description>
@@ -40,7 +40,7 @@
     <model:property key="demos.blurb" value="Platform - MEMLCD Bare-metal"/>
     <model:property key="core.partCompatibility" value=".*efm32pg1b200f256gm48.*"/>
     <model:property key="core.boardCompatibility" value="brd2500a"/>
-    <model:property key="demos.imageFile" value="asset://com.silabs.sdk.stack.super_4.0.0/app/common/demos/memlcd_baremetal/memlcd_baremetal-brd2500a.s37"/>
+    <model:property key="demos.imageFile" value="asset://com.silabs.sdk.stack.super_4.0.1/app/common/demos/memlcd_baremetal/memlcd_baremetal-brd2500a.s37"/>
     <model:property key="core.quality" value="PRODUCTION"/>
     <model:description>This example project demonstrates use of the Memory Liquid Crystal Display (LCD)  module in a baremetal application, using Silicon Labs Graphics Library (glib).
 </model:description>
@@ -49,7 +49,7 @@
     <model:property key="demos.blurb" value="Platform - MEMLCD Bare-metal"/>
     <model:property key="core.partCompatibility" value=".*efm32pg12b500f1024gl125.*"/>
     <model:property key="core.boardCompatibility" value="brd2501a"/>
-    <model:property key="demos.imageFile" value="asset://com.silabs.sdk.stack.super_4.0.0/app/common/demos/memlcd_baremetal/memlcd_baremetal-brd2501a.s37"/>
+    <model:property key="demos.imageFile" value="asset://com.silabs.sdk.stack.super_4.0.1/app/common/demos/memlcd_baremetal/memlcd_baremetal-brd2501a.s37"/>
     <model:property key="core.quality" value="PRODUCTION"/>
     <model:description>This example project demonstrates use of the Memory Liquid Crystal Display (LCD)  module in a baremetal application, using Silicon Labs Graphics Library (glib).
 </model:description>
@@ -58,7 +58,7 @@
     <model:property key="demos.blurb" value="Platform - MEMLCD Bare-metal"/>
     <model:property key="core.partCompatibility" value=".*efr32bg1p232f256gm48.*"/>
     <model:property key="core.boardCompatibility" value="brd4100a"/>
-    <model:property key="demos.imageFile" value="asset://com.silabs.sdk.stack.super_4.0.0/app/common/demos/memlcd_baremetal/memlcd_baremetal-brd4100a.s37"/>
+    <model:property key="demos.imageFile" value="asset://com.silabs.sdk.stack.super_4.0.1/app/common/demos/memlcd_baremetal/memlcd_baremetal-brd4100a.s37"/>
     <model:property key="core.quality" value="PRODUCTION"/>
     <model:description>This example project demonstrates use of the Memory Liquid Crystal Display (LCD)  module in a baremetal application, using Silicon Labs Graphics Library (glib).
 </model:description>
@@ -67,7 +67,7 @@
     <model:property key="demos.blurb" value="Platform - MEMLCD Bare-metal"/>
     <model:property key="core.partCompatibility" value=".*efr32bg1p332f256gj43.*"/>
     <model:property key="core.boardCompatibility" value="brd4101a"/>
-    <model:property key="demos.imageFile" value="asset://com.silabs.sdk.stack.super_4.0.0/app/common/demos/memlcd_baremetal/memlcd_baremetal-brd4101a.s37"/>
+    <model:property key="demos.imageFile" value="asset://com.silabs.sdk.stack.super_4.0.1/app/common/demos/memlcd_baremetal/memlcd_baremetal-brd4101a.s37"/>
     <model:property key="core.quality" value="PRODUCTION"/>
     <model:description>This example project demonstrates use of the Memory Liquid Crystal Display (LCD)  module in a baremetal application, using Silicon Labs Graphics Library (glib).
 </model:description>
@@ -76,7 +76,7 @@
     <model:property key="demos.blurb" value="Platform - MEMLCD Bare-metal"/>
     <model:property key="core.partCompatibility" value=".*efr32bg1b232f256gj43.*"/>
     <model:property key="core.boardCompatibility" value="brd4101b"/>
-    <model:property key="demos.imageFile" value="asset://com.silabs.sdk.stack.super_4.0.0/app/common/demos/memlcd_baremetal/memlcd_baremetal-brd4101b.s37"/>
+    <model:property key="demos.imageFile" value="asset://com.silabs.sdk.stack.super_4.0.1/app/common/demos/memlcd_baremetal/memlcd_baremetal-brd4101b.s37"/>
     <model:property key="core.quality" value="PRODUCTION"/>
     <model:description>This example project demonstrates use of the Memory Liquid Crystal Display (LCD)  module in a baremetal application, using Silicon Labs Graphics Library (glib).
 </model:description>
@@ -85,7 +85,7 @@
     <model:property key="demos.blurb" value="Platform - MEMLCD Bare-metal"/>
     <model:property key="core.partCompatibility" value=".*efr32bg12p332f1024gl125.*"/>
     <model:property key="core.boardCompatibility" value="brd4103a"/>
-    <model:property key="demos.imageFile" value="asset://com.silabs.sdk.stack.super_4.0.0/app/common/demos/memlcd_baremetal/memlcd_baremetal-brd4103a.s37"/>
+    <model:property key="demos.imageFile" value="asset://com.silabs.sdk.stack.super_4.0.1/app/common/demos/memlcd_baremetal/memlcd_baremetal-brd4103a.s37"/>
     <model:property key="core.quality" value="PRODUCTION"/>
     <model:description>This example project demonstrates use of the Memory Liquid Crystal Display (LCD)  module in a baremetal application, using Silicon Labs Graphics Library (glib).
 </model:description>
@@ -94,7 +94,7 @@
     <model:property key="demos.blurb" value="Platform - MEMLCD Bare-metal"/>
     <model:property key="core.partCompatibility" value=".*efr32bg13p632f512gm48.*"/>
     <model:property key="core.boardCompatibility" value="brd4104a"/>
-    <model:property key="demos.imageFile" value="asset://com.silabs.sdk.stack.super_4.0.0/app/common/demos/memlcd_baremetal/memlcd_baremetal-brd4104a.s37"/>
+    <model:property key="demos.imageFile" value="asset://com.silabs.sdk.stack.super_4.0.1/app/common/demos/memlcd_baremetal/memlcd_baremetal-brd4104a.s37"/>
     <model:property key="core.quality" value="PRODUCTION"/>
     <model:description>This example project demonstrates use of the Memory Liquid Crystal Display (LCD)  module in a baremetal application, using Silicon Labs Graphics Library (glib).
 </model:description>
@@ -103,7 +103,7 @@
     <model:property key="demos.blurb" value="Platform - MEMLCD Bare-metal"/>
     <model:property key="core.partCompatibility" value=".*efr32mg1p233f256gm48.*"/>
     <model:property key="core.boardCompatibility" value="brd4150a"/>
-    <model:property key="demos.imageFile" value="asset://com.silabs.sdk.stack.super_4.0.0/app/common/demos/memlcd_baremetal/memlcd_baremetal-brd4150a.s37"/>
+    <model:property key="demos.imageFile" value="asset://com.silabs.sdk.stack.super_4.0.1/app/common/demos/memlcd_baremetal/memlcd_baremetal-brd4150a.s37"/>
     <model:property key="core.quality" value="PRODUCTION"/>
     <model:description>This example project demonstrates use of the Memory Liquid Crystal Display (LCD)  module in a baremetal application, using Silicon Labs Graphics Library (glib).
 </model:description>
@@ -112,7 +112,7 @@
     <model:property key="demos.blurb" value="Platform - MEMLCD Bare-metal"/>
     <model:property key="core.partCompatibility" value=".*efr32mg1p233f256gm48.*"/>
     <model:property key="core.boardCompatibility" value="brd4150b"/>
-    <model:property key="demos.imageFile" value="asset://com.silabs.sdk.stack.super_4.0.0/app/common/demos/memlcd_baremetal/memlcd_baremetal-brd4150b.s37"/>
+    <model:property key="demos.imageFile" value="asset://com.silabs.sdk.stack.super_4.0.1/app/common/demos/memlcd_baremetal/memlcd_baremetal-brd4150b.s37"/>
     <model:property key="core.quality" value="PRODUCTION"/>
     <model:description>This example project demonstrates use of the Memory Liquid Crystal Display (LCD)  module in a baremetal application, using Silicon Labs Graphics Library (glib).
 </model:description>
@@ -121,7 +121,7 @@
     <model:property key="demos.blurb" value="Platform - MEMLCD Bare-metal"/>
     <model:property key="core.partCompatibility" value=".*efr32mg1p133f256gm48.*"/>
     <model:property key="core.boardCompatibility" value="brd4150c"/>
-    <model:property key="demos.imageFile" value="asset://com.silabs.sdk.stack.super_4.0.0/app/common/demos/memlcd_baremetal/memlcd_baremetal-brd4150c.s37"/>
+    <model:property key="demos.imageFile" value="asset://com.silabs.sdk.stack.super_4.0.1/app/common/demos/memlcd_baremetal/memlcd_baremetal-brd4150c.s37"/>
     <model:property key="core.quality" value="PRODUCTION"/>
     <model:description>This example project demonstrates use of the Memory Liquid Crystal Display (LCD)  module in a baremetal application, using Silicon Labs Graphics Library (glib).
 </model:description>
@@ -130,7 +130,7 @@
     <model:property key="demos.blurb" value="Platform - MEMLCD Bare-metal"/>
     <model:property key="core.partCompatibility" value=".*efr32mg1p232f256gm48.*"/>
     <model:property key="core.boardCompatibility" value="brd4151a"/>
-    <model:property key="demos.imageFile" value="asset://com.silabs.sdk.stack.super_4.0.0/app/common/demos/memlcd_baremetal/memlcd_baremetal-brd4151a.s37"/>
+    <model:property key="demos.imageFile" value="asset://com.silabs.sdk.stack.super_4.0.1/app/common/demos/memlcd_baremetal/memlcd_baremetal-brd4151a.s37"/>
     <model:property key="core.quality" value="PRODUCTION"/>
     <model:description>This example project demonstrates use of the Memory Liquid Crystal Display (LCD)  module in a baremetal application, using Silicon Labs Graphics Library (glib).
 </model:description>
@@ -139,7 +139,7 @@
     <model:property key="demos.blurb" value="Platform - MEMLCD Bare-metal"/>
     <model:property key="core.partCompatibility" value=".*efr32mg1p233f256gm48.*"/>
     <model:property key="core.boardCompatibility" value="brd4152a"/>
-    <model:property key="demos.imageFile" value="asset://com.silabs.sdk.stack.super_4.0.0/app/common/demos/memlcd_baremetal/memlcd_baremetal-brd4152a.s37"/>
+    <model:property key="demos.imageFile" value="asset://com.silabs.sdk.stack.super_4.0.1/app/common/demos/memlcd_baremetal/memlcd_baremetal-brd4152a.s37"/>
     <model:property key="core.quality" value="PRODUCTION"/>
     <model:description>This example project demonstrates use of the Memory Liquid Crystal Display (LCD)  module in a baremetal application, using Silicon Labs Graphics Library (glib).
 </model:description>
@@ -148,7 +148,7 @@
     <model:property key="demos.blurb" value="Platform - MEMLCD Bare-metal"/>
     <model:property key="core.partCompatibility" value=".*efr32mg1p132f256gm48.*"/>
     <model:property key="core.boardCompatibility" value="brd4153a"/>
-    <model:property key="demos.imageFile" value="asset://com.silabs.sdk.stack.super_4.0.0/app/common/demos/memlcd_baremetal/memlcd_baremetal-brd4153a.s37"/>
+    <model:property key="demos.imageFile" value="asset://com.silabs.sdk.stack.super_4.0.1/app/common/demos/memlcd_baremetal/memlcd_baremetal-brd4153a.s37"/>
     <model:property key="core.quality" value="PRODUCTION"/>
     <model:description>This example project demonstrates use of the Memory Liquid Crystal Display (LCD)  module in a baremetal application, using Silicon Labs Graphics Library (glib).
 </model:description>
@@ -157,7 +157,7 @@
     <model:property key="demos.blurb" value="Platform - MEMLCD Bare-metal"/>
     <model:property key="core.partCompatibility" value=".*efr32mg1p732f256gm32.*"/>
     <model:property key="core.boardCompatibility" value="brd4154a"/>
-    <model:property key="demos.imageFile" value="asset://com.silabs.sdk.stack.super_4.0.0/app/common/demos/memlcd_baremetal/memlcd_baremetal-brd4154a.s37"/>
+    <model:property key="demos.imageFile" value="asset://com.silabs.sdk.stack.super_4.0.1/app/common/demos/memlcd_baremetal/memlcd_baremetal-brd4154a.s37"/>
     <model:property key="core.quality" value="PRODUCTION"/>
     <model:description>This example project demonstrates use of the Memory Liquid Crystal Display (LCD)  module in a baremetal application, using Silicon Labs Graphics Library (glib).
 </model:description>
@@ -166,7 +166,7 @@
     <model:property key="demos.blurb" value="Platform - MEMLCD Bare-metal"/>
     <model:property key="core.partCompatibility" value=".*efr32mg1p132f256gm48.*"/>
     <model:property key="core.boardCompatibility" value="brd4155a"/>
-    <model:property key="demos.imageFile" value="asset://com.silabs.sdk.stack.super_4.0.0/app/common/demos/memlcd_baremetal/memlcd_baremetal-brd4155a.s37"/>
+    <model:property key="demos.imageFile" value="asset://com.silabs.sdk.stack.super_4.0.1/app/common/demos/memlcd_baremetal/memlcd_baremetal-brd4155a.s37"/>
     <model:property key="core.quality" value="PRODUCTION"/>
     <model:description>This example project demonstrates use of the Memory Liquid Crystal Display (LCD)  module in a baremetal application, using Silicon Labs Graphics Library (glib).
 </model:description>
@@ -175,7 +175,7 @@
     <model:property key="demos.blurb" value="Platform - MEMLCD Bare-metal"/>
     <model:property key="core.partCompatibility" value=".*efr32mg13p733f512gm48.*"/>
     <model:property key="core.boardCompatibility" value="brd4158a"/>
-    <model:property key="demos.imageFile" value="asset://com.silabs.sdk.stack.super_4.0.0/app/common/demos/memlcd_baremetal/memlcd_baremetal-brd4158a.s37"/>
+    <model:property key="demos.imageFile" value="asset://com.silabs.sdk.stack.super_4.0.1/app/common/demos/memlcd_baremetal/memlcd_baremetal-brd4158a.s37"/>
     <model:property key="core.quality" value="PRODUCTION"/>
     <model:description>This example project demonstrates use of the Memory Liquid Crystal Display (LCD)  module in a baremetal application, using Silicon Labs Graphics Library (glib).
 </model:description>
@@ -184,7 +184,7 @@
     <model:property key="demos.blurb" value="Platform - MEMLCD Bare-metal"/>
     <model:property key="core.partCompatibility" value=".*efr32mg13p632f512gm48.*"/>
     <model:property key="core.boardCompatibility" value="brd4159a"/>
-    <model:property key="demos.imageFile" value="asset://com.silabs.sdk.stack.super_4.0.0/app/common/demos/memlcd_baremetal/memlcd_baremetal-brd4159a.s37"/>
+    <model:property key="demos.imageFile" value="asset://com.silabs.sdk.stack.super_4.0.1/app/common/demos/memlcd_baremetal/memlcd_baremetal-brd4159a.s37"/>
     <model:property key="core.quality" value="PRODUCTION"/>
     <model:description>This example project demonstrates use of the Memory Liquid Crystal Display (LCD)  module in a baremetal application, using Silicon Labs Graphics Library (glib).
 </model:description>
@@ -193,7 +193,7 @@
     <model:property key="demos.blurb" value="Platform - MEMLCD Bare-metal"/>
     <model:property key="core.partCompatibility" value=".*efr32mg12p432f1024gl125.*"/>
     <model:property key="core.boardCompatibility" value="brd4161a"/>
-    <model:property key="demos.imageFile" value="asset://com.silabs.sdk.stack.super_4.0.0/app/common/demos/memlcd_baremetal/memlcd_baremetal-brd4161a.s37"/>
+    <model:property key="demos.imageFile" value="asset://com.silabs.sdk.stack.super_4.0.1/app/common/demos/memlcd_baremetal/memlcd_baremetal-brd4161a.s37"/>
     <model:property key="core.quality" value="PRODUCTION"/>
     <model:description>This example project demonstrates use of the Memory Liquid Crystal Display (LCD)  module in a baremetal application, using Silicon Labs Graphics Library (glib).
 </model:description>
@@ -202,7 +202,7 @@
     <model:property key="demos.blurb" value="Platform - MEMLCD Bare-metal"/>
     <model:property key="core.partCompatibility" value=".*efr32mg12p332f1024gl125.*"/>
     <model:property key="core.boardCompatibility" value="brd4162a"/>
-    <model:property key="demos.imageFile" value="asset://com.silabs.sdk.stack.super_4.0.0/app/common/demos/memlcd_baremetal/memlcd_baremetal-brd4162a.s37"/>
+    <model:property key="demos.imageFile" value="asset://com.silabs.sdk.stack.super_4.0.1/app/common/demos/memlcd_baremetal/memlcd_baremetal-brd4162a.s37"/>
     <model:property key="core.quality" value="PRODUCTION"/>
     <model:description>This example project demonstrates use of the Memory Liquid Crystal Display (LCD)  module in a baremetal application, using Silicon Labs Graphics Library (glib).
 </model:description>
@@ -211,7 +211,7 @@
     <model:property key="demos.blurb" value="Platform - MEMLCD Bare-metal"/>
     <model:property key="core.partCompatibility" value=".*efr32mg12p433f1024gl125.*"/>
     <model:property key="core.boardCompatibility" value="brd4163a"/>
-    <model:property key="demos.imageFile" value="asset://com.silabs.sdk.stack.super_4.0.0/app/common/demos/memlcd_baremetal/memlcd_baremetal-brd4163a.s37"/>
+    <model:property key="demos.imageFile" value="asset://com.silabs.sdk.stack.super_4.0.1/app/common/demos/memlcd_baremetal/memlcd_baremetal-brd4163a.s37"/>
     <model:property key="core.quality" value="PRODUCTION"/>
     <model:description>This example project demonstrates use of the Memory Liquid Crystal Display (LCD)  module in a baremetal application, using Silicon Labs Graphics Library (glib).
 </model:description>
@@ -220,7 +220,7 @@
     <model:property key="demos.blurb" value="Platform - MEMLCD Bare-metal"/>
     <model:property key="core.partCompatibility" value=".*efr32mg12p433f1024gl125.*"/>
     <model:property key="core.boardCompatibility" value="brd4164a"/>
-    <model:property key="demos.imageFile" value="asset://com.silabs.sdk.stack.super_4.0.0/app/common/demos/memlcd_baremetal/memlcd_baremetal-brd4164a.s37"/>
+    <model:property key="demos.imageFile" value="asset://com.silabs.sdk.stack.super_4.0.1/app/common/demos/memlcd_baremetal/memlcd_baremetal-brd4164a.s37"/>
     <model:property key="core.quality" value="PRODUCTION"/>
     <model:description>This example project demonstrates use of the Memory Liquid Crystal Display (LCD)  module in a baremetal application, using Silicon Labs Graphics Library (glib).
 </model:description>
@@ -229,7 +229,7 @@
     <model:property key="demos.blurb" value="Platform - MEMLCD Bare-metal"/>
     <model:property key="core.partCompatibility" value=".*efr32mg13p832f512im48.*"/>
     <model:property key="core.boardCompatibility" value="brd4165b"/>
-    <model:property key="demos.imageFile" value="asset://com.silabs.sdk.stack.super_4.0.0/app/common/demos/memlcd_baremetal/memlcd_baremetal-brd4165b.s37"/>
+    <model:property key="demos.imageFile" value="asset://com.silabs.sdk.stack.super_4.0.1/app/common/demos/memlcd_baremetal/memlcd_baremetal-brd4165b.s37"/>
     <model:property key="core.quality" value="PRODUCTION"/>
     <model:description>This example project demonstrates use of the Memory Liquid Crystal Display (LCD)  module in a baremetal application, using Silicon Labs Graphics Library (glib).
 </model:description>
@@ -238,7 +238,7 @@
     <model:property key="demos.blurb" value="Platform - MEMLCD Bare-metal"/>
     <model:property key="core.partCompatibility" value=".*efr32mg13p733f512gm48.*"/>
     <model:property key="core.boardCompatibility" value="brd4167a"/>
-    <model:property key="demos.imageFile" value="asset://com.silabs.sdk.stack.super_4.0.0/app/common/demos/memlcd_baremetal/memlcd_baremetal-brd4167a.s37"/>
+    <model:property key="demos.imageFile" value="asset://com.silabs.sdk.stack.super_4.0.1/app/common/demos/memlcd_baremetal/memlcd_baremetal-brd4167a.s37"/>
     <model:property key="core.quality" value="PRODUCTION"/>
     <model:description>This example project demonstrates use of the Memory Liquid Crystal Display (LCD)  module in a baremetal application, using Silicon Labs Graphics Library (glib).
 </model:description>
@@ -247,7 +247,7 @@
     <model:property key="demos.blurb" value="Platform - MEMLCD Bare-metal"/>
     <model:property key="core.partCompatibility" value=".*efr32mg13p732f512gm48.*"/>
     <model:property key="core.boardCompatibility" value="brd4168a"/>
-    <model:property key="demos.imageFile" value="asset://com.silabs.sdk.stack.super_4.0.0/app/common/demos/memlcd_baremetal/memlcd_baremetal-brd4168a.s37"/>
+    <model:property key="demos.imageFile" value="asset://com.silabs.sdk.stack.super_4.0.1/app/common/demos/memlcd_baremetal/memlcd_baremetal-brd4168a.s37"/>
     <model:property key="core.quality" value="PRODUCTION"/>
     <model:description>This example project demonstrates use of the Memory Liquid Crystal Display (LCD)  module in a baremetal application, using Silicon Labs Graphics Library (glib).
 </model:description>
@@ -256,7 +256,7 @@
     <model:property key="demos.blurb" value="Platform - MEMLCD Bare-metal"/>
     <model:property key="core.partCompatibility" value=".*efr32mg14p733f256gm48.*"/>
     <model:property key="core.boardCompatibility" value="brd4169a"/>
-    <model:property key="demos.imageFile" value="asset://com.silabs.sdk.stack.super_4.0.0/app/common/demos/memlcd_baremetal/memlcd_baremetal-brd4169a.s37"/>
+    <model:property key="demos.imageFile" value="asset://com.silabs.sdk.stack.super_4.0.1/app/common/demos/memlcd_baremetal/memlcd_baremetal-brd4169a.s37"/>
     <model:property key="core.quality" value="PRODUCTION"/>
     <model:description>This example project demonstrates use of the Memory Liquid Crystal Display (LCD)  module in a baremetal application, using Silicon Labs Graphics Library (glib).
 </model:description>
@@ -265,7 +265,7 @@
     <model:property key="demos.blurb" value="Platform - MEMLCD Bare-metal"/>
     <model:property key="core.partCompatibility" value=".*efr32mg14p733f256gm48.*"/>
     <model:property key="core.boardCompatibility" value="brd4169b"/>
-    <model:property key="demos.imageFile" value="asset://com.silabs.sdk.stack.super_4.0.0/app/common/demos/memlcd_baremetal/memlcd_baremetal-brd4169b.s37"/>
+    <model:property key="demos.imageFile" value="asset://com.silabs.sdk.stack.super_4.0.1/app/common/demos/memlcd_baremetal/memlcd_baremetal-brd4169b.s37"/>
     <model:property key="core.quality" value="PRODUCTION"/>
     <model:description>This example project demonstrates use of the Memory Liquid Crystal Display (LCD)  module in a baremetal application, using Silicon Labs Graphics Library (glib).
 </model:description>
@@ -274,7 +274,7 @@
     <model:property key="demos.blurb" value="Platform - MEMLCD Bare-metal"/>
     <model:property key="core.partCompatibility" value=".*efr32mg12p433f1024gm68.*"/>
     <model:property key="core.boardCompatibility" value="brd4170a"/>
-    <model:property key="demos.imageFile" value="asset://com.silabs.sdk.stack.super_4.0.0/app/common/demos/memlcd_baremetal/memlcd_baremetal-brd4170a.s37"/>
+    <model:property key="demos.imageFile" value="asset://com.silabs.sdk.stack.super_4.0.1/app/common/demos/memlcd_baremetal/memlcd_baremetal-brd4170a.s37"/>
     <model:property key="core.quality" value="PRODUCTION"/>
     <model:description>This example project demonstrates use of the Memory Liquid Crystal Display (LCD)  module in a baremetal application, using Silicon Labs Graphics Library (glib).
 </model:description>
@@ -283,7 +283,7 @@
     <model:property key="demos.blurb" value="Platform - MEMLCD Bare-metal"/>
     <model:property key="core.partCompatibility" value=".*rm21z000f1024im32.*"/>
     <model:property key="core.boardCompatibility" value="brd4171a"/>
-    <model:property key="demos.imageFile" value="asset://com.silabs.sdk.stack.super_4.0.0/app/common/demos/memlcd_baremetal/memlcd_baremetal-brd4171a.s37"/>
+    <model:property key="demos.imageFile" value="asset://com.silabs.sdk.stack.super_4.0.1/app/common/demos/memlcd_baremetal/memlcd_baremetal-brd4171a.s37"/>
     <model:property key="core.quality" value="PRODUCTION"/>
     <model:description>This example project demonstrates use of the Memory Liquid Crystal Display (LCD)  module in a baremetal application, using Silicon Labs Graphics Library (glib).
 </model:description>
@@ -292,7 +292,7 @@
     <model:property key="demos.blurb" value="Platform - MEMLCD Bare-metal"/>
     <model:property key="core.partCompatibility" value=".*efr32mg12p433f1024gm48.*"/>
     <model:property key="core.boardCompatibility" value="brd4172a"/>
-    <model:property key="demos.imageFile" value="asset://com.silabs.sdk.stack.super_4.0.0/app/common/demos/memlcd_baremetal/memlcd_baremetal-brd4172a.s37"/>
+    <model:property key="demos.imageFile" value="asset://com.silabs.sdk.stack.super_4.0.1/app/common/demos/memlcd_baremetal/memlcd_baremetal-brd4172a.s37"/>
     <model:property key="core.quality" value="PRODUCTION"/>
     <model:description>This example project demonstrates use of the Memory Liquid Crystal Display (LCD)  module in a baremetal application, using Silicon Labs Graphics Library (glib).
 </model:description>
@@ -301,7 +301,7 @@
     <model:property key="demos.blurb" value="Platform - MEMLCD Bare-metal"/>
     <model:property key="core.partCompatibility" value=".*efr32mg12p433f1024gm48.*"/>
     <model:property key="core.boardCompatibility" value="brd4172b"/>
-    <model:property key="demos.imageFile" value="asset://com.silabs.sdk.stack.super_4.0.0/app/common/demos/memlcd_baremetal/memlcd_baremetal-brd4172b.s37"/>
+    <model:property key="demos.imageFile" value="asset://com.silabs.sdk.stack.super_4.0.1/app/common/demos/memlcd_baremetal/memlcd_baremetal-brd4172b.s37"/>
     <model:property key="core.quality" value="PRODUCTION"/>
     <model:description>This example project demonstrates use of the Memory Liquid Crystal Display (LCD)  module in a baremetal application, using Silicon Labs Graphics Library (glib).
 </model:description>
@@ -310,7 +310,7 @@
     <model:property key="demos.blurb" value="Platform - MEMLCD Bare-metal"/>
     <model:property key="core.partCompatibility" value=".*efr32mg12p433f1024gm48.*"/>
     <model:property key="core.boardCompatibility" value="brd4173a"/>
-    <model:property key="demos.imageFile" value="asset://com.silabs.sdk.stack.super_4.0.0/app/common/demos/memlcd_baremetal/memlcd_baremetal-brd4173a.s37"/>
+    <model:property key="demos.imageFile" value="asset://com.silabs.sdk.stack.super_4.0.1/app/common/demos/memlcd_baremetal/memlcd_baremetal-brd4173a.s37"/>
     <model:property key="core.quality" value="PRODUCTION"/>
     <model:description>This example project demonstrates use of the Memory Liquid Crystal Display (LCD)  module in a baremetal application, using Silicon Labs Graphics Library (glib).
 </model:description>
@@ -319,7 +319,7 @@
     <model:property key="demos.blurb" value="Platform - MEMLCD Bare-metal"/>
     <model:property key="core.partCompatibility" value=".*efr32mg13p733f512gm48.*"/>
     <model:property key="core.boardCompatibility" value="brd4174a"/>
-    <model:property key="demos.imageFile" value="asset://com.silabs.sdk.stack.super_4.0.0/app/common/demos/memlcd_baremetal/memlcd_baremetal-brd4174a.s37"/>
+    <model:property key="demos.imageFile" value="asset://com.silabs.sdk.stack.super_4.0.1/app/common/demos/memlcd_baremetal/memlcd_baremetal-brd4174a.s37"/>
     <model:property key="core.quality" value="PRODUCTION"/>
     <model:description>This example project demonstrates use of the Memory Liquid Crystal Display (LCD)  module in a baremetal application, using Silicon Labs Graphics Library (glib).
 </model:description>
@@ -328,7 +328,7 @@
     <model:property key="demos.blurb" value="Platform - MEMLCD Bare-metal"/>
     <model:property key="core.partCompatibility" value=".*efr32mg13p733f512gm48.*"/>
     <model:property key="core.boardCompatibility" value="brd4174b"/>
-    <model:property key="demos.imageFile" value="asset://com.silabs.sdk.stack.super_4.0.0/app/common/demos/memlcd_baremetal/memlcd_baremetal-brd4174b.s37"/>
+    <model:property key="demos.imageFile" value="asset://com.silabs.sdk.stack.super_4.0.1/app/common/demos/memlcd_baremetal/memlcd_baremetal-brd4174b.s37"/>
     <model:property key="core.quality" value="PRODUCTION"/>
     <model:description>This example project demonstrates use of the Memory Liquid Crystal Display (LCD)  module in a baremetal application, using Silicon Labs Graphics Library (glib).
 </model:description>
@@ -337,7 +337,7 @@
     <model:property key="demos.blurb" value="Platform - MEMLCD Bare-metal"/>
     <model:property key="core.partCompatibility" value=".*efr32mg13p733f512gm48.*"/>
     <model:property key="core.boardCompatibility" value="brd4175a"/>
-    <model:property key="demos.imageFile" value="asset://com.silabs.sdk.stack.super_4.0.0/app/common/demos/memlcd_baremetal/memlcd_baremetal-brd4175a.s37"/>
+    <model:property key="demos.imageFile" value="asset://com.silabs.sdk.stack.super_4.0.1/app/common/demos/memlcd_baremetal/memlcd_baremetal-brd4175a.s37"/>
     <model:property key="core.quality" value="PRODUCTION"/>
     <model:description>This example project demonstrates use of the Memory Liquid Crystal Display (LCD)  module in a baremetal application, using Silicon Labs Graphics Library (glib).
 </model:description>
@@ -346,7 +346,7 @@
     <model:property key="demos.blurb" value="Platform - MEMLCD Bare-metal"/>
     <model:property key="core.partCompatibility" value=".*efr32mg21a010f1024im32.*"/>
     <model:property key="core.boardCompatibility" value="brd4176a"/>
-    <model:property key="demos.imageFile" value="asset://com.silabs.sdk.stack.super_4.0.0/app/common/demos/memlcd_baremetal/memlcd_baremetal-brd4176a.s37"/>
+    <model:property key="demos.imageFile" value="asset://com.silabs.sdk.stack.super_4.0.1/app/common/demos/memlcd_baremetal/memlcd_baremetal-brd4176a.s37"/>
     <model:property key="core.quality" value="PRODUCTION"/>
     <model:description>This example project demonstrates use of the Memory Liquid Crystal Display (LCD)  module in a baremetal application, using Silicon Labs Graphics Library (glib).
 </model:description>
@@ -355,7 +355,7 @@
     <model:property key="demos.blurb" value="Platform - MEMLCD Bare-metal"/>
     <model:property key="core.partCompatibility" value=".*efr32mg13p732f512gm48.*"/>
     <model:property key="core.boardCompatibility" value="brd4177a"/>
-    <model:property key="demos.imageFile" value="asset://com.silabs.sdk.stack.super_4.0.0/app/common/demos/memlcd_baremetal/memlcd_baremetal-brd4177a.s37"/>
+    <model:property key="demos.imageFile" value="asset://com.silabs.sdk.stack.super_4.0.1/app/common/demos/memlcd_baremetal/memlcd_baremetal-brd4177a.s37"/>
     <model:property key="core.quality" value="PRODUCTION"/>
     <model:description>This example project demonstrates use of the Memory Liquid Crystal Display (LCD)  module in a baremetal application, using Silicon Labs Graphics Library (glib).
 </model:description>
@@ -364,7 +364,7 @@
     <model:property key="demos.blurb" value="Platform - MEMLCD Bare-metal"/>
     <model:property key="core.partCompatibility" value=".*efr32mg21a020f1024im32.*"/>
     <model:property key="core.boardCompatibility" value="brd4180a"/>
-    <model:property key="demos.imageFile" value="asset://com.silabs.sdk.stack.super_4.0.0/app/common/demos/memlcd_baremetal/memlcd_baremetal-brd4180a.s37"/>
+    <model:property key="demos.imageFile" value="asset://com.silabs.sdk.stack.super_4.0.1/app/common/demos/memlcd_baremetal/memlcd_baremetal-brd4180a.s37"/>
     <model:property key="core.quality" value="PRODUCTION"/>
     <model:description>This example project demonstrates use of the Memory Liquid Crystal Display (LCD)  module in a baremetal application, using Silicon Labs Graphics Library (glib).
 </model:description>
@@ -373,7 +373,7 @@
     <model:property key="demos.blurb" value="Platform - MEMLCD Bare-metal"/>
     <model:property key="core.partCompatibility" value=".*efr32mg21a020f1024im32.*"/>
     <model:property key="core.boardCompatibility" value="brd4180b"/>
-    <model:property key="demos.imageFile" value="asset://com.silabs.sdk.stack.super_4.0.0/app/common/demos/memlcd_baremetal/memlcd_baremetal-brd4180b.s37"/>
+    <model:property key="demos.imageFile" value="asset://com.silabs.sdk.stack.super_4.0.1/app/common/demos/memlcd_baremetal/memlcd_baremetal-brd4180b.s37"/>
     <model:property key="core.quality" value="PRODUCTION"/>
     <model:description>This example project demonstrates use of the Memory Liquid Crystal Display (LCD)  module in a baremetal application, using Silicon Labs Graphics Library (glib).
 </model:description>
@@ -382,7 +382,7 @@
     <model:property key="demos.blurb" value="Platform - MEMLCD Bare-metal"/>
     <model:property key="core.partCompatibility" value=".*efr32mg21a010f1024im32.*"/>
     <model:property key="core.boardCompatibility" value="brd4181a"/>
-    <model:property key="demos.imageFile" value="asset://com.silabs.sdk.stack.super_4.0.0/app/common/demos/memlcd_baremetal/memlcd_baremetal-brd4181a.s37"/>
+    <model:property key="demos.imageFile" value="asset://com.silabs.sdk.stack.super_4.0.1/app/common/demos/memlcd_baremetal/memlcd_baremetal-brd4181a.s37"/>
     <model:property key="core.quality" value="PRODUCTION"/>
     <model:description>This example project demonstrates use of the Memory Liquid Crystal Display (LCD)  module in a baremetal application, using Silicon Labs Graphics Library (glib).
 </model:description>
@@ -391,7 +391,7 @@
     <model:property key="demos.blurb" value="Platform - MEMLCD Bare-metal"/>
     <model:property key="core.partCompatibility" value=".*efr32mg21a010f1024im32.*"/>
     <model:property key="core.boardCompatibility" value="brd4181b"/>
-    <model:property key="demos.imageFile" value="asset://com.silabs.sdk.stack.super_4.0.0/app/common/demos/memlcd_baremetal/memlcd_baremetal-brd4181b.s37"/>
+    <model:property key="demos.imageFile" value="asset://com.silabs.sdk.stack.super_4.0.1/app/common/demos/memlcd_baremetal/memlcd_baremetal-brd4181b.s37"/>
     <model:property key="core.quality" value="PRODUCTION"/>
     <model:description>This example project demonstrates use of the Memory Liquid Crystal Display (LCD)  module in a baremetal application, using Silicon Labs Graphics Library (glib).
 </model:description>
@@ -400,7 +400,7 @@
     <model:property key="demos.blurb" value="Platform - MEMLCD Bare-metal"/>
     <model:property key="core.partCompatibility" value=".*efr32mg21b010f1024im32.*"/>
     <model:property key="core.boardCompatibility" value="brd4181c"/>
-    <model:property key="demos.imageFile" value="asset://com.silabs.sdk.stack.super_4.0.0/app/common/demos/memlcd_baremetal/memlcd_baremetal-brd4181c.s37"/>
+    <model:property key="demos.imageFile" value="asset://com.silabs.sdk.stack.super_4.0.1/app/common/demos/memlcd_baremetal/memlcd_baremetal-brd4181c.s37"/>
     <model:property key="core.quality" value="PRODUCTION"/>
     <model:description>This example project demonstrates use of the Memory Liquid Crystal Display (LCD)  module in a baremetal application, using Silicon Labs Graphics Library (glib).
 </model:description>
@@ -409,7 +409,7 @@
     <model:property key="demos.blurb" value="Platform - MEMLCD Bare-metal"/>
     <model:property key="core.partCompatibility" value=".*efr32mg22c224f512im40.*"/>
     <model:property key="core.boardCompatibility" value="brd4182a"/>
-    <model:property key="demos.imageFile" value="asset://com.silabs.sdk.stack.super_4.0.0/app/common/demos/memlcd_baremetal/memlcd_baremetal-brd4182a.s37"/>
+    <model:property key="demos.imageFile" value="asset://com.silabs.sdk.stack.super_4.0.1/app/common/demos/memlcd_baremetal/memlcd_baremetal-brd4182a.s37"/>
     <model:property key="core.quality" value="PRODUCTION"/>
     <model:description>This example project demonstrates use of the Memory Liquid Crystal Display (LCD)  module in a baremetal application, using Silicon Labs Graphics Library (glib).
 </model:description>
@@ -418,7 +418,7 @@
     <model:property key="demos.blurb" value="Platform - MEMLCD Bare-metal"/>
     <model:property key="core.partCompatibility" value=".*efr32bg22c224f512im40.*"/>
     <model:property key="core.boardCompatibility" value="brd4185a"/>
-    <model:property key="demos.imageFile" value="asset://com.silabs.sdk.stack.super_4.0.0/app/common/demos/memlcd_baremetal/memlcd_baremetal-brd4185a.s37"/>
+    <model:property key="demos.imageFile" value="asset://com.silabs.sdk.stack.super_4.0.1/app/common/demos/memlcd_baremetal/memlcd_baremetal-brd4185a.s37"/>
     <model:property key="core.quality" value="PRODUCTION"/>
     <model:description>This example project demonstrates use of the Memory Liquid Crystal Display (LCD)  module in a baremetal application, using Silicon Labs Graphics Library (glib).
 </model:description>
@@ -427,7 +427,7 @@
     <model:property key="demos.blurb" value="Platform - MEMLCD Bare-metal"/>
     <model:property key="core.partCompatibility" value=".*efr32mg24a010f1536gm48.*"/>
     <model:property key="core.boardCompatibility" value="brd4186a"/>
-    <model:property key="demos.imageFile" value="asset://com.silabs.sdk.stack.super_4.0.0/app/common/demos/memlcd_baremetal/memlcd_baremetal-brd4186a.s37"/>
+    <model:property key="demos.imageFile" value="asset://com.silabs.sdk.stack.super_4.0.1/app/common/demos/memlcd_baremetal/memlcd_baremetal-brd4186a.s37"/>
     <model:property key="core.quality" value="PRODUCTION"/>
     <model:description>This example project demonstrates use of the Memory Liquid Crystal Display (LCD)  module in a baremetal application, using Silicon Labs Graphics Library (glib).
 </model:description>
@@ -436,7 +436,16 @@
     <model:property key="demos.blurb" value="Platform - MEMLCD Bare-metal"/>
     <model:property key="core.partCompatibility" value=".*efr32mg24b010f1536im48.*"/>
     <model:property key="core.boardCompatibility" value="brd4186b"/>
-    <model:property key="demos.imageFile" value="asset://com.silabs.sdk.stack.super_4.0.0/app/common/demos/memlcd_baremetal/memlcd_baremetal-brd4186b.s37"/>
+    <model:property key="demos.imageFile" value="asset://com.silabs.sdk.stack.super_4.0.1/app/common/demos/memlcd_baremetal/memlcd_baremetal-brd4186b.s37"/>
+    <model:property key="core.quality" value="PRODUCTION"/>
+    <model:description>This example project demonstrates use of the Memory Liquid Crystal Display (LCD)  module in a baremetal application, using Silicon Labs Graphics Library (glib).
+</model:description>
+  </demo>
+  <demo name="brd4186c.demo.memlcd_baremetal" label="Platform - MEMLCD Bare-metal">
+    <model:property key="demos.blurb" value="Platform - MEMLCD Bare-metal"/>
+    <model:property key="core.partCompatibility" value=".*efr32mg24b210f1536im48.*"/>
+    <model:property key="core.boardCompatibility" value="brd4186c"/>
+    <model:property key="demos.imageFile" value="asset://com.silabs.sdk.stack.super_4.0.1/app/common/demos/memlcd_baremetal/memlcd_baremetal-brd4186c.s37"/>
     <model:property key="core.quality" value="PRODUCTION"/>
     <model:description>This example project demonstrates use of the Memory Liquid Crystal Display (LCD)  module in a baremetal application, using Silicon Labs Graphics Library (glib).
 </model:description>
@@ -445,7 +454,7 @@
     <model:property key="demos.blurb" value="Platform - MEMLCD Bare-metal"/>
     <model:property key="core.partCompatibility" value=".*efr32mg24a020f1536gm48.*"/>
     <model:property key="core.boardCompatibility" value="brd4187a"/>
-    <model:property key="demos.imageFile" value="asset://com.silabs.sdk.stack.super_4.0.0/app/common/demos/memlcd_baremetal/memlcd_baremetal-brd4187a.s37"/>
+    <model:property key="demos.imageFile" value="asset://com.silabs.sdk.stack.super_4.0.1/app/common/demos/memlcd_baremetal/memlcd_baremetal-brd4187a.s37"/>
     <model:property key="core.quality" value="PRODUCTION"/>
     <model:description>This example project demonstrates use of the Memory Liquid Crystal Display (LCD)  module in a baremetal application, using Silicon Labs Graphics Library (glib).
 </model:description>
@@ -454,7 +463,16 @@
     <model:property key="demos.blurb" value="Platform - MEMLCD Bare-metal"/>
     <model:property key="core.partCompatibility" value=".*efr32mg24b020f1536im48.*"/>
     <model:property key="core.boardCompatibility" value="brd4187b"/>
-    <model:property key="demos.imageFile" value="asset://com.silabs.sdk.stack.super_4.0.0/app/common/demos/memlcd_baremetal/memlcd_baremetal-brd4187b.s37"/>
+    <model:property key="demos.imageFile" value="asset://com.silabs.sdk.stack.super_4.0.1/app/common/demos/memlcd_baremetal/memlcd_baremetal-brd4187b.s37"/>
+    <model:property key="core.quality" value="PRODUCTION"/>
+    <model:description>This example project demonstrates use of the Memory Liquid Crystal Display (LCD)  module in a baremetal application, using Silicon Labs Graphics Library (glib).
+</model:description>
+  </demo>
+  <demo name="brd4187c.demo.memlcd_baremetal" label="Platform - MEMLCD Bare-metal">
+    <model:property key="demos.blurb" value="Platform - MEMLCD Bare-metal"/>
+    <model:property key="core.partCompatibility" value=".*efr32mg24b220f1536im48.*"/>
+    <model:property key="core.boardCompatibility" value="brd4187c"/>
+    <model:property key="demos.imageFile" value="asset://com.silabs.sdk.stack.super_4.0.1/app/common/demos/memlcd_baremetal/memlcd_baremetal-brd4187c.s37"/>
     <model:property key="core.quality" value="PRODUCTION"/>
     <model:description>This example project demonstrates use of the Memory Liquid Crystal Display (LCD)  module in a baremetal application, using Silicon Labs Graphics Library (glib).
 </model:description>
@@ -463,7 +481,16 @@
     <model:property key="demos.blurb" value="Platform - MEMLCD Bare-metal"/>
     <model:property key="core.partCompatibility" value=".*efr32mg24b020f1536im48.*"/>
     <model:property key="core.boardCompatibility" value="brd4188a"/>
-    <model:property key="demos.imageFile" value="asset://com.silabs.sdk.stack.super_4.0.0/app/common/demos/memlcd_baremetal/memlcd_baremetal-brd4188a.s37"/>
+    <model:property key="demos.imageFile" value="asset://com.silabs.sdk.stack.super_4.0.1/app/common/demos/memlcd_baremetal/memlcd_baremetal-brd4188a.s37"/>
+    <model:property key="core.quality" value="PRODUCTION"/>
+    <model:description>This example project demonstrates use of the Memory Liquid Crystal Display (LCD)  module in a baremetal application, using Silicon Labs Graphics Library (glib).
+</model:description>
+  </demo>
+  <demo name="brd4188b.demo.memlcd_baremetal" label="Platform - MEMLCD Bare-metal">
+    <model:property key="demos.blurb" value="Platform - MEMLCD Bare-metal"/>
+    <model:property key="core.partCompatibility" value=".*efr32mg24b220f1536im48.*"/>
+    <model:property key="core.boardCompatibility" value="brd4188b"/>
+    <model:property key="demos.imageFile" value="asset://com.silabs.sdk.stack.super_4.0.1/app/common/demos/memlcd_baremetal/memlcd_baremetal-brd4188b.s37"/>
     <model:property key="core.quality" value="PRODUCTION"/>
     <model:description>This example project demonstrates use of the Memory Liquid Crystal Display (LCD)  module in a baremetal application, using Silicon Labs Graphics Library (glib).
 </model:description>
@@ -472,7 +499,7 @@
     <model:property key="demos.blurb" value="Platform - MEMLCD Bare-metal"/>
     <model:property key="core.partCompatibility" value=".*efr32mg12p232f1024gm48.*"/>
     <model:property key="core.boardCompatibility" value="brd4190a"/>
-    <model:property key="demos.imageFile" value="asset://com.silabs.sdk.stack.super_4.0.0/app/common/demos/memlcd_baremetal/memlcd_baremetal-brd4190a.s37"/>
+    <model:property key="demos.imageFile" value="asset://com.silabs.sdk.stack.super_4.0.1/app/common/demos/memlcd_baremetal/memlcd_baremetal-brd4190a.s37"/>
     <model:property key="core.quality" value="PRODUCTION"/>
     <model:description>This example project demonstrates use of the Memory Liquid Crystal Display (LCD)  module in a baremetal application, using Silicon Labs Graphics Library (glib).
 </model:description>
@@ -481,7 +508,7 @@
     <model:property key="demos.blurb" value="Platform - MEMLCD Bare-metal"/>
     <model:property key="core.partCompatibility" value=".*zgm130s037hgn.*"/>
     <model:property key="core.boardCompatibility" value="brd4200a"/>
-    <model:property key="demos.imageFile" value="asset://com.silabs.sdk.stack.super_4.0.0/app/common/demos/memlcd_baremetal/memlcd_baremetal-brd4200a.s37"/>
+    <model:property key="demos.imageFile" value="asset://com.silabs.sdk.stack.super_4.0.1/app/common/demos/memlcd_baremetal/memlcd_baremetal-brd4200a.s37"/>
     <model:property key="core.quality" value="PRODUCTION"/>
     <model:description>This example project demonstrates use of the Memory Liquid Crystal Display (LCD)  module in a baremetal application, using Silicon Labs Graphics Library (glib).
 </model:description>
@@ -490,7 +517,7 @@
     <model:property key="demos.blurb" value="Platform - MEMLCD Bare-metal"/>
     <model:property key="core.partCompatibility" value=".*zgm130s037hgn.*"/>
     <model:property key="core.boardCompatibility" value="brd4202a"/>
-    <model:property key="demos.imageFile" value="asset://com.silabs.sdk.stack.super_4.0.0/app/common/demos/memlcd_baremetal/memlcd_baremetal-brd4202a.s37"/>
+    <model:property key="demos.imageFile" value="asset://com.silabs.sdk.stack.super_4.0.1/app/common/demos/memlcd_baremetal/memlcd_baremetal-brd4202a.s37"/>
     <model:property key="core.quality" value="PRODUCTION"/>
     <model:description>This example project demonstrates use of the Memory Liquid Crystal Display (LCD)  module in a baremetal application, using Silicon Labs Graphics Library (glib).
 </model:description>
@@ -499,7 +526,7 @@
     <model:property key="demos.blurb" value="Platform - MEMLCD Bare-metal"/>
     <model:property key="core.partCompatibility" value=".*efr32zg13p531f512gm48.*"/>
     <model:property key="core.boardCompatibility" value="brd4203a"/>
-    <model:property key="demos.imageFile" value="asset://com.silabs.sdk.stack.super_4.0.0/app/common/demos/memlcd_baremetal/memlcd_baremetal-brd4203a.s37"/>
+    <model:property key="demos.imageFile" value="asset://com.silabs.sdk.stack.super_4.0.1/app/common/demos/memlcd_baremetal/memlcd_baremetal-brd4203a.s37"/>
     <model:property key="core.quality" value="PRODUCTION"/>
     <model:description>This example project demonstrates use of the Memory Liquid Crystal Display (LCD)  module in a baremetal application, using Silicon Labs Graphics Library (glib).
 </model:description>
@@ -508,7 +535,7 @@
     <model:property key="demos.blurb" value="Platform - MEMLCD Bare-metal"/>
     <model:property key="core.partCompatibility" value=".*efr32zg23a010f512gm48.*"/>
     <model:property key="core.boardCompatibility" value="brd4204a"/>
-    <model:property key="demos.imageFile" value="asset://com.silabs.sdk.stack.super_4.0.0/app/common/demos/memlcd_baremetal/memlcd_baremetal-brd4204a.s37"/>
+    <model:property key="demos.imageFile" value="asset://com.silabs.sdk.stack.super_4.0.1/app/common/demos/memlcd_baremetal/memlcd_baremetal-brd4204a.s37"/>
     <model:property key="core.quality" value="PRODUCTION"/>
     <model:description>This example project demonstrates use of the Memory Liquid Crystal Display (LCD)  module in a baremetal application, using Silicon Labs Graphics Library (glib).
 </model:description>
@@ -517,7 +544,7 @@
     <model:property key="demos.blurb" value="Platform - MEMLCD Bare-metal"/>
     <model:property key="core.partCompatibility" value=".*efr32zg23a010f512gm48.*"/>
     <model:property key="core.boardCompatibility" value="brd4204b"/>
-    <model:property key="demos.imageFile" value="asset://com.silabs.sdk.stack.super_4.0.0/app/common/demos/memlcd_baremetal/memlcd_baremetal-brd4204b.s37"/>
+    <model:property key="demos.imageFile" value="asset://com.silabs.sdk.stack.super_4.0.1/app/common/demos/memlcd_baremetal/memlcd_baremetal-brd4204b.s37"/>
     <model:property key="core.quality" value="PRODUCTION"/>
     <model:description>This example project demonstrates use of the Memory Liquid Crystal Display (LCD)  module in a baremetal application, using Silicon Labs Graphics Library (glib).
 </model:description>
@@ -526,7 +553,7 @@
     <model:property key="demos.blurb" value="Platform - MEMLCD Bare-metal"/>
     <model:property key="core.partCompatibility" value=".*efr32zg23b010f512im48.*"/>
     <model:property key="core.boardCompatibility" value="brd4204c"/>
-    <model:property key="demos.imageFile" value="asset://com.silabs.sdk.stack.super_4.0.0/app/common/demos/memlcd_baremetal/memlcd_baremetal-brd4204c.s37"/>
+    <model:property key="demos.imageFile" value="asset://com.silabs.sdk.stack.super_4.0.1/app/common/demos/memlcd_baremetal/memlcd_baremetal-brd4204c.s37"/>
     <model:property key="core.quality" value="PRODUCTION"/>
     <model:description>This example project demonstrates use of the Memory Liquid Crystal Display (LCD)  module in a baremetal application, using Silicon Labs Graphics Library (glib).
 </model:description>
@@ -535,7 +562,7 @@
     <model:property key="demos.blurb" value="Platform - MEMLCD Bare-metal"/>
     <model:property key="core.partCompatibility" value=".*efr32zg23b010f512im48.*"/>
     <model:property key="core.boardCompatibility" value="brd4204d"/>
-    <model:property key="demos.imageFile" value="asset://com.silabs.sdk.stack.super_4.0.0/app/common/demos/memlcd_baremetal/memlcd_baremetal-brd4204d.s37"/>
+    <model:property key="demos.imageFile" value="asset://com.silabs.sdk.stack.super_4.0.1/app/common/demos/memlcd_baremetal/memlcd_baremetal-brd4204d.s37"/>
     <model:property key="core.quality" value="PRODUCTION"/>
     <model:description>This example project demonstrates use of the Memory Liquid Crystal Display (LCD)  module in a baremetal application, using Silicon Labs Graphics Library (glib).
 </model:description>
@@ -544,7 +571,7 @@
     <model:property key="demos.blurb" value="Platform - MEMLCD Bare-metal"/>
     <model:property key="core.partCompatibility" value=".*zgm230sa27hnn.*"/>
     <model:property key="core.boardCompatibility" value="brd4205a"/>
-    <model:property key="demos.imageFile" value="asset://com.silabs.sdk.stack.super_4.0.0/app/common/demos/memlcd_baremetal/memlcd_baremetal-brd4205a.s37"/>
+    <model:property key="demos.imageFile" value="asset://com.silabs.sdk.stack.super_4.0.1/app/common/demos/memlcd_baremetal/memlcd_baremetal-brd4205a.s37"/>
     <model:property key="core.quality" value="PRODUCTION"/>
     <model:description>This example project demonstrates use of the Memory Liquid Crystal Display (LCD)  module in a baremetal application, using Silicon Labs Graphics Library (glib).
 </model:description>
@@ -553,7 +580,7 @@
     <model:property key="demos.blurb" value="Platform - MEMLCD Bare-metal"/>
     <model:property key="core.partCompatibility" value=".*zgm230sb27hgn.*"/>
     <model:property key="core.boardCompatibility" value="brd4205b"/>
-    <model:property key="demos.imageFile" value="asset://com.silabs.sdk.stack.super_4.0.0/app/common/demos/memlcd_baremetal/memlcd_baremetal-brd4205b.s37"/>
+    <model:property key="demos.imageFile" value="asset://com.silabs.sdk.stack.super_4.0.1/app/common/demos/memlcd_baremetal/memlcd_baremetal-brd4205b.s37"/>
     <model:property key="core.quality" value="PRODUCTION"/>
     <model:description>This example project demonstrates use of the Memory Liquid Crystal Display (LCD)  module in a baremetal application, using Silicon Labs Graphics Library (glib).
 </model:description>
@@ -562,7 +589,7 @@
     <model:property key="demos.blurb" value="Platform - MEMLCD Bare-metal"/>
     <model:property key="core.partCompatibility" value=".*zgm130s037hgn.*"/>
     <model:property key="core.boardCompatibility" value="brd4207a"/>
-    <model:property key="demos.imageFile" value="asset://com.silabs.sdk.stack.super_4.0.0/app/common/demos/memlcd_baremetal/memlcd_baremetal-brd4207a.s37"/>
+    <model:property key="demos.imageFile" value="asset://com.silabs.sdk.stack.super_4.0.1/app/common/demos/memlcd_baremetal/memlcd_baremetal-brd4207a.s37"/>
     <model:property key="core.quality" value="PRODUCTION"/>
     <model:description>This example project demonstrates use of the Memory Liquid Crystal Display (LCD)  module in a baremetal application, using Silicon Labs Graphics Library (glib).
 </model:description>
@@ -571,7 +598,7 @@
     <model:property key="demos.blurb" value="Platform - MEMLCD Bare-metal"/>
     <model:property key="core.partCompatibility" value=".*efr32zg13p531f512gm48.*"/>
     <model:property key="core.boardCompatibility" value="brd4209a"/>
-    <model:property key="demos.imageFile" value="asset://com.silabs.sdk.stack.super_4.0.0/app/common/demos/memlcd_baremetal/memlcd_baremetal-brd4209a.s37"/>
+    <model:property key="demos.imageFile" value="asset://com.silabs.sdk.stack.super_4.0.1/app/common/demos/memlcd_baremetal/memlcd_baremetal-brd4209a.s37"/>
     <model:property key="core.quality" value="PRODUCTION"/>
     <model:description>This example project demonstrates use of the Memory Liquid Crystal Display (LCD)  module in a baremetal application, using Silicon Labs Graphics Library (glib).
 </model:description>
@@ -580,7 +607,7 @@
     <model:property key="demos.blurb" value="Platform - MEMLCD Bare-metal"/>
     <model:property key="core.partCompatibility" value=".*efr32zg23b020f512im48.*"/>
     <model:property key="core.boardCompatibility" value="brd4210a"/>
-    <model:property key="demos.imageFile" value="asset://com.silabs.sdk.stack.super_4.0.0/app/common/demos/memlcd_baremetal/memlcd_baremetal-brd4210a.s37"/>
+    <model:property key="demos.imageFile" value="asset://com.silabs.sdk.stack.super_4.0.1/app/common/demos/memlcd_baremetal/memlcd_baremetal-brd4210a.s37"/>
     <model:property key="core.quality" value="PRODUCTION"/>
     <model:description>This example project demonstrates use of the Memory Liquid Crystal Display (LCD)  module in a baremetal application, using Silicon Labs Graphics Library (glib).
 </model:description>
@@ -589,7 +616,7 @@
     <model:property key="demos.blurb" value="Platform - MEMLCD Bare-metal"/>
     <model:property key="core.partCompatibility" value=".*efr32fg1p133f256gm48.*"/>
     <model:property key="core.boardCompatibility" value="brd4250a"/>
-    <model:property key="demos.imageFile" value="asset://com.silabs.sdk.stack.super_4.0.0/app/common/demos/memlcd_baremetal/memlcd_baremetal-brd4250a.s37"/>
+    <model:property key="demos.imageFile" value="asset://com.silabs.sdk.stack.super_4.0.1/app/common/demos/memlcd_baremetal/memlcd_baremetal-brd4250a.s37"/>
     <model:property key="core.quality" value="PRODUCTION"/>
     <model:description>This example project demonstrates use of the Memory Liquid Crystal Display (LCD)  module in a baremetal application, using Silicon Labs Graphics Library (glib).
 </model:description>
@@ -598,7 +625,7 @@
     <model:property key="demos.blurb" value="Platform - MEMLCD Bare-metal"/>
     <model:property key="core.partCompatibility" value=".*efr32fg1p133f256gm48.*"/>
     <model:property key="core.boardCompatibility" value="brd4250b"/>
-    <model:property key="demos.imageFile" value="asset://com.silabs.sdk.stack.super_4.0.0/app/common/demos/memlcd_baremetal/memlcd_baremetal-brd4250b.s37"/>
+    <model:property key="demos.imageFile" value="asset://com.silabs.sdk.stack.super_4.0.1/app/common/demos/memlcd_baremetal/memlcd_baremetal-brd4250b.s37"/>
     <model:property key="core.quality" value="PRODUCTION"/>
     <model:description>This example project demonstrates use of the Memory Liquid Crystal Display (LCD)  module in a baremetal application, using Silicon Labs Graphics Library (glib).
 </model:description>
@@ -607,7 +634,7 @@
     <model:property key="demos.blurb" value="Platform - MEMLCD Bare-metal"/>
     <model:property key="core.partCompatibility" value=".*efr32fg1p133f256gm48.*"/>
     <model:property key="core.boardCompatibility" value="brd4251a"/>
-    <model:property key="demos.imageFile" value="asset://com.silabs.sdk.stack.super_4.0.0/app/common/demos/memlcd_baremetal/memlcd_baremetal-brd4251a.s37"/>
+    <model:property key="demos.imageFile" value="asset://com.silabs.sdk.stack.super_4.0.1/app/common/demos/memlcd_baremetal/memlcd_baremetal-brd4251a.s37"/>
     <model:property key="core.quality" value="PRODUCTION"/>
     <model:description>This example project demonstrates use of the Memory Liquid Crystal Display (LCD)  module in a baremetal application, using Silicon Labs Graphics Library (glib).
 </model:description>
@@ -616,7 +643,7 @@
     <model:property key="demos.blurb" value="Platform - MEMLCD Bare-metal"/>
     <model:property key="core.partCompatibility" value=".*efr32fg1p133f256gm48.*"/>
     <model:property key="core.boardCompatibility" value="brd4251b"/>
-    <model:property key="demos.imageFile" value="asset://com.silabs.sdk.stack.super_4.0.0/app/common/demos/memlcd_baremetal/memlcd_baremetal-brd4251b.s37"/>
+    <model:property key="demos.imageFile" value="asset://com.silabs.sdk.stack.super_4.0.1/app/common/demos/memlcd_baremetal/memlcd_baremetal-brd4251b.s37"/>
     <model:property key="core.quality" value="PRODUCTION"/>
     <model:description>This example project demonstrates use of the Memory Liquid Crystal Display (LCD)  module in a baremetal application, using Silicon Labs Graphics Library (glib).
 </model:description>
@@ -625,7 +652,7 @@
     <model:property key="demos.blurb" value="Platform - MEMLCD Bare-metal"/>
     <model:property key="core.partCompatibility" value=".*efr32fg1p133f256gm48.*"/>
     <model:property key="core.boardCompatibility" value="brd4251d"/>
-    <model:property key="demos.imageFile" value="asset://com.silabs.sdk.stack.super_4.0.0/app/common/demos/memlcd_baremetal/memlcd_baremetal-brd4251d.s37"/>
+    <model:property key="demos.imageFile" value="asset://com.silabs.sdk.stack.super_4.0.1/app/common/demos/memlcd_baremetal/memlcd_baremetal-brd4251d.s37"/>
     <model:property key="core.quality" value="PRODUCTION"/>
     <model:description>This example project demonstrates use of the Memory Liquid Crystal Display (LCD)  module in a baremetal application, using Silicon Labs Graphics Library (glib).
 </model:description>
@@ -634,7 +661,7 @@
     <model:property key="demos.blurb" value="Platform - MEMLCD Bare-metal"/>
     <model:property key="core.partCompatibility" value=".*efr32fg1p132f256gm48.*"/>
     <model:property key="core.boardCompatibility" value="brd4252a"/>
-    <model:property key="demos.imageFile" value="asset://com.silabs.sdk.stack.super_4.0.0/app/common/demos/memlcd_baremetal/memlcd_baremetal-brd4252a.s37"/>
+    <model:property key="demos.imageFile" value="asset://com.silabs.sdk.stack.super_4.0.1/app/common/demos/memlcd_baremetal/memlcd_baremetal-brd4252a.s37"/>
     <model:property key="core.quality" value="PRODUCTION"/>
     <model:description>This example project demonstrates use of the Memory Liquid Crystal Display (LCD)  module in a baremetal application, using Silicon Labs Graphics Library (glib).
 </model:description>
@@ -643,7 +670,7 @@
     <model:property key="demos.blurb" value="Platform - MEMLCD Bare-metal"/>
     <model:property key="core.partCompatibility" value=".*efr32fg12p433f1024gl125.*"/>
     <model:property key="core.boardCompatibility" value="brd4253a"/>
-    <model:property key="demos.imageFile" value="asset://com.silabs.sdk.stack.super_4.0.0/app/common/demos/memlcd_baremetal/memlcd_baremetal-brd4253a.s37"/>
+    <model:property key="demos.imageFile" value="asset://com.silabs.sdk.stack.super_4.0.1/app/common/demos/memlcd_baremetal/memlcd_baremetal-brd4253a.s37"/>
     <model:property key="core.quality" value="PRODUCTION"/>
     <model:description>This example project demonstrates use of the Memory Liquid Crystal Display (LCD)  module in a baremetal application, using Silicon Labs Graphics Library (glib).
 </model:description>
@@ -652,7 +679,7 @@
     <model:property key="demos.blurb" value="Platform - MEMLCD Bare-metal"/>
     <model:property key="core.partCompatibility" value=".*efr32fg12p433f1024gl125.*"/>
     <model:property key="core.boardCompatibility" value="brd4254a"/>
-    <model:property key="demos.imageFile" value="asset://com.silabs.sdk.stack.super_4.0.0/app/common/demos/memlcd_baremetal/memlcd_baremetal-brd4254a.s37"/>
+    <model:property key="demos.imageFile" value="asset://com.silabs.sdk.stack.super_4.0.1/app/common/demos/memlcd_baremetal/memlcd_baremetal-brd4254a.s37"/>
     <model:property key="core.quality" value="PRODUCTION"/>
     <model:description>This example project demonstrates use of the Memory Liquid Crystal Display (LCD)  module in a baremetal application, using Silicon Labs Graphics Library (glib).
 </model:description>
@@ -661,7 +688,7 @@
     <model:property key="demos.blurb" value="Platform - MEMLCD Bare-metal"/>
     <model:property key="core.partCompatibility" value=".*efr32fg13p233f512gm48.*"/>
     <model:property key="core.boardCompatibility" value="brd4255a"/>
-    <model:property key="demos.imageFile" value="asset://com.silabs.sdk.stack.super_4.0.0/app/common/demos/memlcd_baremetal/memlcd_baremetal-brd4255a.s37"/>
+    <model:property key="demos.imageFile" value="asset://com.silabs.sdk.stack.super_4.0.1/app/common/demos/memlcd_baremetal/memlcd_baremetal-brd4255a.s37"/>
     <model:property key="core.quality" value="PRODUCTION"/>
     <model:description>This example project demonstrates use of the Memory Liquid Crystal Display (LCD)  module in a baremetal application, using Silicon Labs Graphics Library (glib).
 </model:description>
@@ -670,7 +697,7 @@
     <model:property key="demos.blurb" value="Platform - MEMLCD Bare-metal"/>
     <model:property key="core.partCompatibility" value=".*efr32fg13p233f512gm48.*"/>
     <model:property key="core.boardCompatibility" value="brd4256a"/>
-    <model:property key="demos.imageFile" value="asset://com.silabs.sdk.stack.super_4.0.0/app/common/demos/memlcd_baremetal/memlcd_baremetal-brd4256a.s37"/>
+    <model:property key="demos.imageFile" value="asset://com.silabs.sdk.stack.super_4.0.1/app/common/demos/memlcd_baremetal/memlcd_baremetal-brd4256a.s37"/>
     <model:property key="core.quality" value="PRODUCTION"/>
     <model:description>This example project demonstrates use of the Memory Liquid Crystal Display (LCD)  module in a baremetal application, using Silicon Labs Graphics Library (glib).
 </model:description>
@@ -679,7 +706,7 @@
     <model:property key="demos.blurb" value="Platform - MEMLCD Bare-metal"/>
     <model:property key="core.partCompatibility" value=".*efr32fg14p233f256gm48.*"/>
     <model:property key="core.boardCompatibility" value="brd4257a"/>
-    <model:property key="demos.imageFile" value="asset://com.silabs.sdk.stack.super_4.0.0/app/common/demos/memlcd_baremetal/memlcd_baremetal-brd4257a.s37"/>
+    <model:property key="demos.imageFile" value="asset://com.silabs.sdk.stack.super_4.0.1/app/common/demos/memlcd_baremetal/memlcd_baremetal-brd4257a.s37"/>
     <model:property key="core.quality" value="PRODUCTION"/>
     <model:description>This example project demonstrates use of the Memory Liquid Crystal Display (LCD)  module in a baremetal application, using Silicon Labs Graphics Library (glib).
 </model:description>
@@ -688,7 +715,7 @@
     <model:property key="demos.blurb" value="Platform - MEMLCD Bare-metal"/>
     <model:property key="core.partCompatibility" value=".*efr32fg14p233f256gm48.*"/>
     <model:property key="core.boardCompatibility" value="brd4257b"/>
-    <model:property key="demos.imageFile" value="asset://com.silabs.sdk.stack.super_4.0.0/app/common/demos/memlcd_baremetal/memlcd_baremetal-brd4257b.s37"/>
+    <model:property key="demos.imageFile" value="asset://com.silabs.sdk.stack.super_4.0.1/app/common/demos/memlcd_baremetal/memlcd_baremetal-brd4257b.s37"/>
     <model:property key="core.quality" value="PRODUCTION"/>
     <model:description>This example project demonstrates use of the Memory Liquid Crystal Display (LCD)  module in a baremetal application, using Silicon Labs Graphics Library (glib).
 </model:description>
@@ -697,7 +724,7 @@
     <model:property key="demos.blurb" value="Platform - MEMLCD Bare-metal"/>
     <model:property key="core.partCompatibility" value=".*efr32fg14p233f256gm48.*"/>
     <model:property key="core.boardCompatibility" value="brd4258a"/>
-    <model:property key="demos.imageFile" value="asset://com.silabs.sdk.stack.super_4.0.0/app/common/demos/memlcd_baremetal/memlcd_baremetal-brd4258a.s37"/>
+    <model:property key="demos.imageFile" value="asset://com.silabs.sdk.stack.super_4.0.1/app/common/demos/memlcd_baremetal/memlcd_baremetal-brd4258a.s37"/>
     <model:property key="core.quality" value="PRODUCTION"/>
     <model:description>This example project demonstrates use of the Memory Liquid Crystal Display (LCD)  module in a baremetal application, using Silicon Labs Graphics Library (glib).
 </model:description>
@@ -706,7 +733,7 @@
     <model:property key="demos.blurb" value="Platform - MEMLCD Bare-metal"/>
     <model:property key="core.partCompatibility" value=".*efr32fg14p233f256gm48.*"/>
     <model:property key="core.boardCompatibility" value="brd4258b"/>
-    <model:property key="demos.imageFile" value="asset://com.silabs.sdk.stack.super_4.0.0/app/common/demos/memlcd_baremetal/memlcd_baremetal-brd4258b.s37"/>
+    <model:property key="demos.imageFile" value="asset://com.silabs.sdk.stack.super_4.0.1/app/common/demos/memlcd_baremetal/memlcd_baremetal-brd4258b.s37"/>
     <model:property key="core.quality" value="PRODUCTION"/>
     <model:description>This example project demonstrates use of the Memory Liquid Crystal Display (LCD)  module in a baremetal application, using Silicon Labs Graphics Library (glib).
 </model:description>
@@ -715,7 +742,7 @@
     <model:property key="demos.blurb" value="Platform - MEMLCD Bare-metal"/>
     <model:property key="core.partCompatibility" value=".*efr32fg14p233f256gm48.*"/>
     <model:property key="core.boardCompatibility" value="brd4259a"/>
-    <model:property key="demos.imageFile" value="asset://com.silabs.sdk.stack.super_4.0.0/app/common/demos/memlcd_baremetal/memlcd_baremetal-brd4259a.s37"/>
+    <model:property key="demos.imageFile" value="asset://com.silabs.sdk.stack.super_4.0.1/app/common/demos/memlcd_baremetal/memlcd_baremetal-brd4259a.s37"/>
     <model:property key="core.quality" value="PRODUCTION"/>
     <model:description>This example project demonstrates use of the Memory Liquid Crystal Display (LCD)  module in a baremetal application, using Silicon Labs Graphics Library (glib).
 </model:description>
@@ -724,7 +751,7 @@
     <model:property key="demos.blurb" value="Platform - MEMLCD Bare-metal"/>
     <model:property key="core.partCompatibility" value=".*efr32fg14p233f256gm48.*"/>
     <model:property key="core.boardCompatibility" value="brd4261a"/>
-    <model:property key="demos.imageFile" value="asset://com.silabs.sdk.stack.super_4.0.0/app/common/demos/memlcd_baremetal/memlcd_baremetal-brd4261a.s37"/>
+    <model:property key="demos.imageFile" value="asset://com.silabs.sdk.stack.super_4.0.1/app/common/demos/memlcd_baremetal/memlcd_baremetal-brd4261a.s37"/>
     <model:property key="core.quality" value="PRODUCTION"/>
     <model:description>This example project demonstrates use of the Memory Liquid Crystal Display (LCD)  module in a baremetal application, using Silicon Labs Graphics Library (glib).
 </model:description>
@@ -733,7 +760,7 @@
     <model:property key="demos.blurb" value="Platform - MEMLCD Bare-metal"/>
     <model:property key="core.partCompatibility" value=".*efr32fg14p233f256gm48.*"/>
     <model:property key="core.boardCompatibility" value="brd4262a"/>
-    <model:property key="demos.imageFile" value="asset://com.silabs.sdk.stack.super_4.0.0/app/common/demos/memlcd_baremetal/memlcd_baremetal-brd4262a.s37"/>
+    <model:property key="demos.imageFile" value="asset://com.silabs.sdk.stack.super_4.0.1/app/common/demos/memlcd_baremetal/memlcd_baremetal-brd4262a.s37"/>
     <model:property key="core.quality" value="PRODUCTION"/>
     <model:description>This example project demonstrates use of the Memory Liquid Crystal Display (LCD)  module in a baremetal application, using Silicon Labs Graphics Library (glib).
 </model:description>
@@ -742,7 +769,7 @@
     <model:property key="demos.blurb" value="Platform - MEMLCD Bare-metal"/>
     <model:property key="core.partCompatibility" value=".*efr32fg14p233f256gm48.*"/>
     <model:property key="core.boardCompatibility" value="brd4262b"/>
-    <model:property key="demos.imageFile" value="asset://com.silabs.sdk.stack.super_4.0.0/app/common/demos/memlcd_baremetal/memlcd_baremetal-brd4262b.s37"/>
+    <model:property key="demos.imageFile" value="asset://com.silabs.sdk.stack.super_4.0.1/app/common/demos/memlcd_baremetal/memlcd_baremetal-brd4262b.s37"/>
     <model:property key="core.quality" value="PRODUCTION"/>
     <model:description>This example project demonstrates use of the Memory Liquid Crystal Display (LCD)  module in a baremetal application, using Silicon Labs Graphics Library (glib).
 </model:description>
@@ -751,7 +778,7 @@
     <model:property key="demos.blurb" value="Platform - MEMLCD Bare-metal"/>
     <model:property key="core.partCompatibility" value=".*efr32fg23a010f512gm48.*"/>
     <model:property key="core.boardCompatibility" value="brd4263a"/>
-    <model:property key="demos.imageFile" value="asset://com.silabs.sdk.stack.super_4.0.0/app/common/demos/memlcd_baremetal/memlcd_baremetal-brd4263a.s37"/>
+    <model:property key="demos.imageFile" value="asset://com.silabs.sdk.stack.super_4.0.1/app/common/demos/memlcd_baremetal/memlcd_baremetal-brd4263a.s37"/>
     <model:property key="core.quality" value="PRODUCTION"/>
     <model:description>This example project demonstrates use of the Memory Liquid Crystal Display (LCD)  module in a baremetal application, using Silicon Labs Graphics Library (glib).
 </model:description>
@@ -760,7 +787,7 @@
     <model:property key="demos.blurb" value="Platform - MEMLCD Bare-metal"/>
     <model:property key="core.partCompatibility" value=".*efr32fg23a010f512gm48.*"/>
     <model:property key="core.boardCompatibility" value="brd4263b"/>
-    <model:property key="demos.imageFile" value="asset://com.silabs.sdk.stack.super_4.0.0/app/common/demos/memlcd_baremetal/memlcd_baremetal-brd4263b.s37"/>
+    <model:property key="demos.imageFile" value="asset://com.silabs.sdk.stack.super_4.0.1/app/common/demos/memlcd_baremetal/memlcd_baremetal-brd4263b.s37"/>
     <model:property key="core.quality" value="PRODUCTION"/>
     <model:description>This example project demonstrates use of the Memory Liquid Crystal Display (LCD)  module in a baremetal application, using Silicon Labs Graphics Library (glib).
 </model:description>
@@ -769,7 +796,7 @@
     <model:property key="demos.blurb" value="Platform - MEMLCD Bare-metal"/>
     <model:property key="core.partCompatibility" value=".*efr32fg23b010f512im48.*"/>
     <model:property key="core.boardCompatibility" value="brd4263c"/>
-    <model:property key="demos.imageFile" value="asset://com.silabs.sdk.stack.super_4.0.0/app/common/demos/memlcd_baremetal/memlcd_baremetal-brd4263c.s37"/>
+    <model:property key="demos.imageFile" value="asset://com.silabs.sdk.stack.super_4.0.1/app/common/demos/memlcd_baremetal/memlcd_baremetal-brd4263c.s37"/>
     <model:property key="core.quality" value="PRODUCTION"/>
     <model:description>This example project demonstrates use of the Memory Liquid Crystal Display (LCD)  module in a baremetal application, using Silicon Labs Graphics Library (glib).
 </model:description>
@@ -778,7 +805,7 @@
     <model:property key="demos.blurb" value="Platform - MEMLCD Bare-metal"/>
     <model:property key="core.partCompatibility" value=".*efr32fg23a020f512gm48.*"/>
     <model:property key="core.boardCompatibility" value="brd4264a"/>
-    <model:property key="demos.imageFile" value="asset://com.silabs.sdk.stack.super_4.0.0/app/common/demos/memlcd_baremetal/memlcd_baremetal-brd4264a.s37"/>
+    <model:property key="demos.imageFile" value="asset://com.silabs.sdk.stack.super_4.0.1/app/common/demos/memlcd_baremetal/memlcd_baremetal-brd4264a.s37"/>
     <model:property key="core.quality" value="PRODUCTION"/>
     <model:description>This example project demonstrates use of the Memory Liquid Crystal Display (LCD)  module in a baremetal application, using Silicon Labs Graphics Library (glib).
 </model:description>
@@ -787,7 +814,7 @@
     <model:property key="demos.blurb" value="Platform - MEMLCD Bare-metal"/>
     <model:property key="core.partCompatibility" value=".*efr32fg23a020f512gm48.*"/>
     <model:property key="core.boardCompatibility" value="brd4264b"/>
-    <model:property key="demos.imageFile" value="asset://com.silabs.sdk.stack.super_4.0.0/app/common/demos/memlcd_baremetal/memlcd_baremetal-brd4264b.s37"/>
+    <model:property key="demos.imageFile" value="asset://com.silabs.sdk.stack.super_4.0.1/app/common/demos/memlcd_baremetal/memlcd_baremetal-brd4264b.s37"/>
     <model:property key="core.quality" value="PRODUCTION"/>
     <model:description>This example project demonstrates use of the Memory Liquid Crystal Display (LCD)  module in a baremetal application, using Silicon Labs Graphics Library (glib).
 </model:description>
@@ -796,7 +823,7 @@
     <model:property key="demos.blurb" value="Platform - MEMLCD Bare-metal"/>
     <model:property key="core.partCompatibility" value=".*efr32fg23b020f512im48.*"/>
     <model:property key="core.boardCompatibility" value="brd4264c"/>
-    <model:property key="demos.imageFile" value="asset://com.silabs.sdk.stack.super_4.0.0/app/common/demos/memlcd_baremetal/memlcd_baremetal-brd4264c.s37"/>
+    <model:property key="demos.imageFile" value="asset://com.silabs.sdk.stack.super_4.0.1/app/common/demos/memlcd_baremetal/memlcd_baremetal-brd4264c.s37"/>
     <model:property key="core.quality" value="PRODUCTION"/>
     <model:description>This example project demonstrates use of the Memory Liquid Crystal Display (LCD)  module in a baremetal application, using Silicon Labs Graphics Library (glib).
 </model:description>
@@ -805,7 +832,7 @@
     <model:property key="demos.blurb" value="Platform - MEMLCD Bare-metal"/>
     <model:property key="core.partCompatibility" value=".*efr32fg23a010f512gm48.*"/>
     <model:property key="core.boardCompatibility" value="brd4265a"/>
-    <model:property key="demos.imageFile" value="asset://com.silabs.sdk.stack.super_4.0.0/app/common/demos/memlcd_baremetal/memlcd_baremetal-brd4265a.s37"/>
+    <model:property key="demos.imageFile" value="asset://com.silabs.sdk.stack.super_4.0.1/app/common/demos/memlcd_baremetal/memlcd_baremetal-brd4265a.s37"/>
     <model:property key="core.quality" value="PRODUCTION"/>
     <model:description>This example project demonstrates use of the Memory Liquid Crystal Display (LCD)  module in a baremetal application, using Silicon Labs Graphics Library (glib).
 </model:description>
@@ -814,7 +841,7 @@
     <model:property key="demos.blurb" value="Platform - MEMLCD Bare-metal"/>
     <model:property key="core.partCompatibility" value=".*efr32fg23b010f512im48.*"/>
     <model:property key="core.boardCompatibility" value="brd4265b"/>
-    <model:property key="demos.imageFile" value="asset://com.silabs.sdk.stack.super_4.0.0/app/common/demos/memlcd_baremetal/memlcd_baremetal-brd4265b.s37"/>
+    <model:property key="demos.imageFile" value="asset://com.silabs.sdk.stack.super_4.0.1/app/common/demos/memlcd_baremetal/memlcd_baremetal-brd4265b.s37"/>
     <model:property key="core.quality" value="PRODUCTION"/>
     <model:description>This example project demonstrates use of the Memory Liquid Crystal Display (LCD)  module in a baremetal application, using Silicon Labs Graphics Library (glib).
 </model:description>
@@ -823,7 +850,7 @@
     <model:property key="demos.blurb" value="Platform - MEMLCD Bare-metal"/>
     <model:property key="core.partCompatibility" value=".*efr32fg23b010f512im48.*"/>
     <model:property key="core.boardCompatibility" value="brd4266b"/>
-    <model:property key="demos.imageFile" value="asset://com.silabs.sdk.stack.super_4.0.0/app/common/demos/memlcd_baremetal/memlcd_baremetal-brd4266b.s37"/>
+    <model:property key="demos.imageFile" value="asset://com.silabs.sdk.stack.super_4.0.1/app/common/demos/memlcd_baremetal/memlcd_baremetal-brd4266b.s37"/>
     <model:property key="core.quality" value="PRODUCTION"/>
     <model:description>This example project demonstrates use of the Memory Liquid Crystal Display (LCD)  module in a baremetal application, using Silicon Labs Graphics Library (glib).
 </model:description>
@@ -832,7 +859,7 @@
     <model:property key="demos.blurb" value="Platform - MEMLCD Bare-metal"/>
     <model:property key="core.partCompatibility" value=".*efr32fg23b020f512im48.*"/>
     <model:property key="core.boardCompatibility" value="brd4267b"/>
-    <model:property key="demos.imageFile" value="asset://com.silabs.sdk.stack.super_4.0.0/app/common/demos/memlcd_baremetal/memlcd_baremetal-brd4267b.s37"/>
+    <model:property key="demos.imageFile" value="asset://com.silabs.sdk.stack.super_4.0.1/app/common/demos/memlcd_baremetal/memlcd_baremetal-brd4267b.s37"/>
     <model:property key="core.quality" value="PRODUCTION"/>
     <model:description>This example project demonstrates use of the Memory Liquid Crystal Display (LCD)  module in a baremetal application, using Silicon Labs Graphics Library (glib).
 </model:description>
@@ -841,7 +868,7 @@
     <model:property key="demos.blurb" value="Platform - MEMLCD Bare-metal"/>
     <model:property key="core.partCompatibility" value=".*efr32fg23b020f512im48.*"/>
     <model:property key="core.boardCompatibility" value="brd4269b"/>
-    <model:property key="demos.imageFile" value="asset://com.silabs.sdk.stack.super_4.0.0/app/common/demos/memlcd_baremetal/memlcd_baremetal-brd4269b.s37"/>
+    <model:property key="demos.imageFile" value="asset://com.silabs.sdk.stack.super_4.0.1/app/common/demos/memlcd_baremetal/memlcd_baremetal-brd4269b.s37"/>
     <model:property key="core.quality" value="PRODUCTION"/>
     <model:description>This example project demonstrates use of the Memory Liquid Crystal Display (LCD)  module in a baremetal application, using Silicon Labs Graphics Library (glib).
 </model:description>
@@ -850,7 +877,16 @@
     <model:property key="demos.blurb" value="Platform - MEMLCD Bare-metal"/>
     <model:property key="core.partCompatibility" value=".*efr32fg25b222f1920im56.*"/>
     <model:property key="core.boardCompatibility" value="brd4270a"/>
-    <model:property key="demos.imageFile" value="asset://com.silabs.sdk.stack.super_4.0.0/app/common/demos/memlcd_baremetal/memlcd_baremetal-brd4270a.s37"/>
+    <model:property key="demos.imageFile" value="asset://com.silabs.sdk.stack.super_4.0.1/app/common/demos/memlcd_baremetal/memlcd_baremetal-brd4270a.s37"/>
+    <model:property key="core.quality" value="PRODUCTION"/>
+    <model:description>This example project demonstrates use of the Memory Liquid Crystal Display (LCD)  module in a baremetal application, using Silicon Labs Graphics Library (glib).
+</model:description>
+  </demo>
+  <demo name="brd4270b.demo.memlcd_baremetal" label="Platform - MEMLCD Bare-metal">
+    <model:property key="demos.blurb" value="Platform - MEMLCD Bare-metal"/>
+    <model:property key="core.partCompatibility" value=".*efr32fg25b222f1920im56.*"/>
+    <model:property key="core.boardCompatibility" value="brd4270b"/>
+    <model:property key="demos.imageFile" value="asset://com.silabs.sdk.stack.super_4.0.1/app/common/demos/memlcd_baremetal/memlcd_baremetal-brd4270b.s37"/>
     <model:property key="core.quality" value="PRODUCTION"/>
     <model:description>This example project demonstrates use of the Memory Liquid Crystal Display (LCD)  module in a baremetal application, using Silicon Labs Graphics Library (glib).
 </model:description>
@@ -859,7 +895,7 @@
     <model:property key="demos.blurb" value="Platform - MEMLCD Bare-metal"/>
     <model:property key="core.partCompatibility" value=".*efr32fg25b222f1920im56.*"/>
     <model:property key="core.boardCompatibility" value="brd4271a"/>
-    <model:property key="demos.imageFile" value="asset://com.silabs.sdk.stack.super_4.0.0/app/common/demos/memlcd_baremetal/memlcd_baremetal-brd4271a.s37"/>
+    <model:property key="demos.imageFile" value="asset://com.silabs.sdk.stack.super_4.0.1/app/common/demos/memlcd_baremetal/memlcd_baremetal-brd4271a.s37"/>
     <model:property key="core.quality" value="PRODUCTION"/>
     <model:description>This example project demonstrates use of the Memory Liquid Crystal Display (LCD)  module in a baremetal application, using Silicon Labs Graphics Library (glib).
 </model:description>
@@ -868,7 +904,7 @@
     <model:property key="demos.blurb" value="Platform - MEMLCD Bare-metal"/>
     <model:property key="core.partCompatibility" value=".*efr32fg25b222f1920im56.*"/>
     <model:property key="core.boardCompatibility" value="brd4272a"/>
-    <model:property key="demos.imageFile" value="asset://com.silabs.sdk.stack.super_4.0.0/app/common/demos/memlcd_baremetal/memlcd_baremetal-brd4272a.s37"/>
+    <model:property key="demos.imageFile" value="asset://com.silabs.sdk.stack.super_4.0.1/app/common/demos/memlcd_baremetal/memlcd_baremetal-brd4272a.s37"/>
     <model:property key="core.quality" value="PRODUCTION"/>
     <model:description>This example project demonstrates use of the Memory Liquid Crystal Display (LCD)  module in a baremetal application, using Silicon Labs Graphics Library (glib).
 </model:description>
@@ -877,7 +913,7 @@
     <model:property key="demos.blurb" value="Platform - MEMLCD Bare-metal"/>
     <model:property key="core.partCompatibility" value=".*bgm111a256v2.*"/>
     <model:property key="core.boardCompatibility" value="brd4300a"/>
-    <model:property key="demos.imageFile" value="asset://com.silabs.sdk.stack.super_4.0.0/app/common/demos/memlcd_baremetal/memlcd_baremetal-brd4300a.s37"/>
+    <model:property key="demos.imageFile" value="asset://com.silabs.sdk.stack.super_4.0.1/app/common/demos/memlcd_baremetal/memlcd_baremetal-brd4300a.s37"/>
     <model:property key="core.quality" value="PRODUCTION"/>
     <model:description>This example project demonstrates use of the Memory Liquid Crystal Display (LCD)  module in a baremetal application, using Silicon Labs Graphics Library (glib).
 </model:description>
@@ -886,7 +922,7 @@
     <model:property key="demos.blurb" value="Platform - MEMLCD Bare-metal"/>
     <model:property key="core.partCompatibility" value=".*mgm111a256v2.*"/>
     <model:property key="core.boardCompatibility" value="brd4300b"/>
-    <model:property key="demos.imageFile" value="asset://com.silabs.sdk.stack.super_4.0.0/app/common/demos/memlcd_baremetal/memlcd_baremetal-brd4300b.s37"/>
+    <model:property key="demos.imageFile" value="asset://com.silabs.sdk.stack.super_4.0.1/app/common/demos/memlcd_baremetal/memlcd_baremetal-brd4300b.s37"/>
     <model:property key="core.quality" value="PRODUCTION"/>
     <model:description>This example project demonstrates use of the Memory Liquid Crystal Display (LCD)  module in a baremetal application, using Silicon Labs Graphics Library (glib).
 </model:description>
@@ -895,7 +931,7 @@
     <model:property key="demos.blurb" value="Platform - MEMLCD Bare-metal"/>
     <model:property key="core.partCompatibility" value=".*bgm121a256v2.*"/>
     <model:property key="core.boardCompatibility" value="brd4302a"/>
-    <model:property key="demos.imageFile" value="asset://com.silabs.sdk.stack.super_4.0.0/app/common/demos/memlcd_baremetal/memlcd_baremetal-brd4302a.s37"/>
+    <model:property key="demos.imageFile" value="asset://com.silabs.sdk.stack.super_4.0.1/app/common/demos/memlcd_baremetal/memlcd_baremetal-brd4302a.s37"/>
     <model:property key="core.quality" value="PRODUCTION"/>
     <model:description>This example project demonstrates use of the Memory Liquid Crystal Display (LCD)  module in a baremetal application, using Silicon Labs Graphics Library (glib).
 </model:description>
@@ -904,7 +940,7 @@
     <model:property key="demos.blurb" value="Platform - MEMLCD Bare-metal"/>
     <model:property key="core.partCompatibility" value=".*bgm11s22f256ga.*"/>
     <model:property key="core.boardCompatibility" value="brd4303a"/>
-    <model:property key="demos.imageFile" value="asset://com.silabs.sdk.stack.super_4.0.0/app/common/demos/memlcd_baremetal/memlcd_baremetal-brd4303a.s37"/>
+    <model:property key="demos.imageFile" value="asset://com.silabs.sdk.stack.super_4.0.1/app/common/demos/memlcd_baremetal/memlcd_baremetal-brd4303a.s37"/>
     <model:property key="core.quality" value="PRODUCTION"/>
     <model:description>This example project demonstrates use of the Memory Liquid Crystal Display (LCD)  module in a baremetal application, using Silicon Labs Graphics Library (glib).
 </model:description>
@@ -913,7 +949,7 @@
     <model:property key="demos.blurb" value="Platform - MEMLCD Bare-metal"/>
     <model:property key="core.partCompatibility" value=".*mgm12p32f1024ga.*"/>
     <model:property key="core.boardCompatibility" value="brd4304a"/>
-    <model:property key="demos.imageFile" value="asset://com.silabs.sdk.stack.super_4.0.0/app/common/demos/memlcd_baremetal/memlcd_baremetal-brd4304a.s37"/>
+    <model:property key="demos.imageFile" value="asset://com.silabs.sdk.stack.super_4.0.1/app/common/demos/memlcd_baremetal/memlcd_baremetal-brd4304a.s37"/>
     <model:property key="core.quality" value="PRODUCTION"/>
     <model:description>This example project demonstrates use of the Memory Liquid Crystal Display (LCD)  module in a baremetal application, using Silicon Labs Graphics Library (glib).
 </model:description>
@@ -922,7 +958,7 @@
     <model:property key="demos.blurb" value="Platform - MEMLCD Bare-metal"/>
     <model:property key="core.partCompatibility" value=".*bgm13s32f512ga.*"/>
     <model:property key="core.boardCompatibility" value="brd4305a"/>
-    <model:property key="demos.imageFile" value="asset://com.silabs.sdk.stack.super_4.0.0/app/common/demos/memlcd_baremetal/memlcd_baremetal-brd4305a.s37"/>
+    <model:property key="demos.imageFile" value="asset://com.silabs.sdk.stack.super_4.0.1/app/common/demos/memlcd_baremetal/memlcd_baremetal-brd4305a.s37"/>
     <model:property key="core.quality" value="PRODUCTION"/>
     <model:description>This example project demonstrates use of the Memory Liquid Crystal Display (LCD)  module in a baremetal application, using Silicon Labs Graphics Library (glib).
 </model:description>
@@ -931,7 +967,7 @@
     <model:property key="demos.blurb" value="Platform - MEMLCD Bare-metal"/>
     <model:property key="core.partCompatibility" value=".*bgm13s22f512ga.*"/>
     <model:property key="core.boardCompatibility" value="brd4305c"/>
-    <model:property key="demos.imageFile" value="asset://com.silabs.sdk.stack.super_4.0.0/app/common/demos/memlcd_baremetal/memlcd_baremetal-brd4305c.s37"/>
+    <model:property key="demos.imageFile" value="asset://com.silabs.sdk.stack.super_4.0.1/app/common/demos/memlcd_baremetal/memlcd_baremetal-brd4305c.s37"/>
     <model:property key="core.quality" value="PRODUCTION"/>
     <model:description>This example project demonstrates use of the Memory Liquid Crystal Display (LCD)  module in a baremetal application, using Silicon Labs Graphics Library (glib).
 </model:description>
@@ -940,7 +976,7 @@
     <model:property key="demos.blurb" value="Platform - MEMLCD Bare-metal"/>
     <model:property key="core.partCompatibility" value=".*mgm13s02f512ga.*"/>
     <model:property key="core.boardCompatibility" value="brd4305d"/>
-    <model:property key="demos.imageFile" value="asset://com.silabs.sdk.stack.super_4.0.0/app/common/demos/memlcd_baremetal/memlcd_baremetal-brd4305d.s37"/>
+    <model:property key="demos.imageFile" value="asset://com.silabs.sdk.stack.super_4.0.1/app/common/demos/memlcd_baremetal/memlcd_baremetal-brd4305d.s37"/>
     <model:property key="core.quality" value="PRODUCTION"/>
     <model:description>This example project demonstrates use of the Memory Liquid Crystal Display (LCD)  module in a baremetal application, using Silicon Labs Graphics Library (glib).
 </model:description>
@@ -949,7 +985,7 @@
     <model:property key="demos.blurb" value="Platform - MEMLCD Bare-metal"/>
     <model:property key="core.partCompatibility" value=".*mgm13s12f512ga.*"/>
     <model:property key="core.boardCompatibility" value="brd4305e"/>
-    <model:property key="demos.imageFile" value="asset://com.silabs.sdk.stack.super_4.0.0/app/common/demos/memlcd_baremetal/memlcd_baremetal-brd4305e.s37"/>
+    <model:property key="demos.imageFile" value="asset://com.silabs.sdk.stack.super_4.0.1/app/common/demos/memlcd_baremetal/memlcd_baremetal-brd4305e.s37"/>
     <model:property key="core.quality" value="PRODUCTION"/>
     <model:description>This example project demonstrates use of the Memory Liquid Crystal Display (LCD)  module in a baremetal application, using Silicon Labs Graphics Library (glib).
 </model:description>
@@ -958,7 +994,7 @@
     <model:property key="demos.blurb" value="Platform - MEMLCD Bare-metal"/>
     <model:property key="core.partCompatibility" value=".*bgm13p22f512ga.*"/>
     <model:property key="core.boardCompatibility" value="brd4306a"/>
-    <model:property key="demos.imageFile" value="asset://com.silabs.sdk.stack.super_4.0.0/app/common/demos/memlcd_baremetal/memlcd_baremetal-brd4306a.s37"/>
+    <model:property key="demos.imageFile" value="asset://com.silabs.sdk.stack.super_4.0.1/app/common/demos/memlcd_baremetal/memlcd_baremetal-brd4306a.s37"/>
     <model:property key="core.quality" value="PRODUCTION"/>
     <model:description>This example project demonstrates use of the Memory Liquid Crystal Display (LCD)  module in a baremetal application, using Silicon Labs Graphics Library (glib).
 </model:description>
@@ -967,7 +1003,7 @@
     <model:property key="demos.blurb" value="Platform - MEMLCD Bare-metal"/>
     <model:property key="core.partCompatibility" value=".*bgm13p32f512ga.*"/>
     <model:property key="core.boardCompatibility" value="brd4306b"/>
-    <model:property key="demos.imageFile" value="asset://com.silabs.sdk.stack.super_4.0.0/app/common/demos/memlcd_baremetal/memlcd_baremetal-brd4306b.s37"/>
+    <model:property key="demos.imageFile" value="asset://com.silabs.sdk.stack.super_4.0.1/app/common/demos/memlcd_baremetal/memlcd_baremetal-brd4306b.s37"/>
     <model:property key="core.quality" value="PRODUCTION"/>
     <model:description>This example project demonstrates use of the Memory Liquid Crystal Display (LCD)  module in a baremetal application, using Silicon Labs Graphics Library (glib).
 </model:description>
@@ -976,7 +1012,7 @@
     <model:property key="demos.blurb" value="Platform - MEMLCD Bare-metal"/>
     <model:property key="core.partCompatibility" value=".*mgm13p02f512ga.*"/>
     <model:property key="core.boardCompatibility" value="brd4306c"/>
-    <model:property key="demos.imageFile" value="asset://com.silabs.sdk.stack.super_4.0.0/app/common/demos/memlcd_baremetal/memlcd_baremetal-brd4306c.s37"/>
+    <model:property key="demos.imageFile" value="asset://com.silabs.sdk.stack.super_4.0.1/app/common/demos/memlcd_baremetal/memlcd_baremetal-brd4306c.s37"/>
     <model:property key="core.quality" value="PRODUCTION"/>
     <model:description>This example project demonstrates use of the Memory Liquid Crystal Display (LCD)  module in a baremetal application, using Silicon Labs Graphics Library (glib).
 </model:description>
@@ -985,7 +1021,7 @@
     <model:property key="demos.blurb" value="Platform - MEMLCD Bare-metal"/>
     <model:property key="core.partCompatibility" value=".*mgm13p12f512ga.*"/>
     <model:property key="core.boardCompatibility" value="brd4306d"/>
-    <model:property key="demos.imageFile" value="asset://com.silabs.sdk.stack.super_4.0.0/app/common/demos/memlcd_baremetal/memlcd_baremetal-brd4306d.s37"/>
+    <model:property key="demos.imageFile" value="asset://com.silabs.sdk.stack.super_4.0.1/app/common/demos/memlcd_baremetal/memlcd_baremetal-brd4306d.s37"/>
     <model:property key="core.quality" value="PRODUCTION"/>
     <model:description>This example project demonstrates use of the Memory Liquid Crystal Display (LCD)  module in a baremetal application, using Silicon Labs Graphics Library (glib).
 </model:description>
@@ -994,7 +1030,7 @@
     <model:property key="demos.blurb" value="Platform - MEMLCD Bare-metal"/>
     <model:property key="core.partCompatibility" value=".*mgm210pa32jia.*"/>
     <model:property key="core.boardCompatibility" value="brd4308a"/>
-    <model:property key="demos.imageFile" value="asset://com.silabs.sdk.stack.super_4.0.0/app/common/demos/memlcd_baremetal/memlcd_baremetal-brd4308a.s37"/>
+    <model:property key="demos.imageFile" value="asset://com.silabs.sdk.stack.super_4.0.1/app/common/demos/memlcd_baremetal/memlcd_baremetal-brd4308a.s37"/>
     <model:property key="core.quality" value="PRODUCTION"/>
     <model:description>This example project demonstrates use of the Memory Liquid Crystal Display (LCD)  module in a baremetal application, using Silicon Labs Graphics Library (glib).
 </model:description>
@@ -1003,7 +1039,7 @@
     <model:property key="demos.blurb" value="Platform - MEMLCD Bare-metal"/>
     <model:property key="core.partCompatibility" value=".*mgm210pa22jia.*"/>
     <model:property key="core.boardCompatibility" value="brd4308b"/>
-    <model:property key="demos.imageFile" value="asset://com.silabs.sdk.stack.super_4.0.0/app/common/demos/memlcd_baremetal/memlcd_baremetal-brd4308b.s37"/>
+    <model:property key="demos.imageFile" value="asset://com.silabs.sdk.stack.super_4.0.1/app/common/demos/memlcd_baremetal/memlcd_baremetal-brd4308b.s37"/>
     <model:property key="core.quality" value="PRODUCTION"/>
     <model:description>This example project demonstrates use of the Memory Liquid Crystal Display (LCD)  module in a baremetal application, using Silicon Labs Graphics Library (glib).
 </model:description>
@@ -1012,7 +1048,7 @@
     <model:property key="demos.blurb" value="Platform - MEMLCD Bare-metal"/>
     <model:property key="core.partCompatibility" value=".*mgm210pb32jia.*"/>
     <model:property key="core.boardCompatibility" value="brd4308c"/>
-    <model:property key="demos.imageFile" value="asset://com.silabs.sdk.stack.super_4.0.0/app/common/demos/memlcd_baremetal/memlcd_baremetal-brd4308c.s37"/>
+    <model:property key="demos.imageFile" value="asset://com.silabs.sdk.stack.super_4.0.1/app/common/demos/memlcd_baremetal/memlcd_baremetal-brd4308c.s37"/>
     <model:property key="core.quality" value="PRODUCTION"/>
     <model:description>This example project demonstrates use of the Memory Liquid Crystal Display (LCD)  module in a baremetal application, using Silicon Labs Graphics Library (glib).
 </model:description>
@@ -1021,7 +1057,7 @@
     <model:property key="demos.blurb" value="Platform - MEMLCD Bare-metal"/>
     <model:property key="core.partCompatibility" value=".*mgm210pb22jia.*"/>
     <model:property key="core.boardCompatibility" value="brd4308d"/>
-    <model:property key="demos.imageFile" value="asset://com.silabs.sdk.stack.super_4.0.0/app/common/demos/memlcd_baremetal/memlcd_baremetal-brd4308d.s37"/>
+    <model:property key="demos.imageFile" value="asset://com.silabs.sdk.stack.super_4.0.1/app/common/demos/memlcd_baremetal/memlcd_baremetal-brd4308d.s37"/>
     <model:property key="core.quality" value="PRODUCTION"/>
     <model:description>This example project demonstrates use of the Memory Liquid Crystal Display (LCD)  module in a baremetal application, using Silicon Labs Graphics Library (glib).
 </model:description>
@@ -1030,7 +1066,7 @@
     <model:property key="demos.blurb" value="Platform - MEMLCD Bare-metal"/>
     <model:property key="core.partCompatibility" value=".*bgm220sc12wga.*"/>
     <model:property key="core.boardCompatibility" value="brd4310a"/>
-    <model:property key="demos.imageFile" value="asset://com.silabs.sdk.stack.super_4.0.0/app/common/demos/memlcd_baremetal/memlcd_baremetal-brd4310a.s37"/>
+    <model:property key="demos.imageFile" value="asset://com.silabs.sdk.stack.super_4.0.1/app/common/demos/memlcd_baremetal/memlcd_baremetal-brd4310a.s37"/>
     <model:property key="core.quality" value="PRODUCTION"/>
     <model:description>This example project demonstrates use of the Memory Liquid Crystal Display (LCD)  module in a baremetal application, using Silicon Labs Graphics Library (glib).
 </model:description>
@@ -1039,7 +1075,7 @@
     <model:property key="demos.blurb" value="Platform - MEMLCD Bare-metal"/>
     <model:property key="core.partCompatibility" value=".*bgm220pc22hna.*"/>
     <model:property key="core.boardCompatibility" value="brd4311a"/>
-    <model:property key="demos.imageFile" value="asset://com.silabs.sdk.stack.super_4.0.0/app/common/demos/memlcd_baremetal/memlcd_baremetal-brd4311a.s37"/>
+    <model:property key="demos.imageFile" value="asset://com.silabs.sdk.stack.super_4.0.1/app/common/demos/memlcd_baremetal/memlcd_baremetal-brd4311a.s37"/>
     <model:property key="core.quality" value="PRODUCTION"/>
     <model:description>This example project demonstrates use of the Memory Liquid Crystal Display (LCD)  module in a baremetal application, using Silicon Labs Graphics Library (glib).
 </model:description>
@@ -1048,7 +1084,7 @@
     <model:property key="demos.blurb" value="Platform - MEMLCD Bare-metal"/>
     <model:property key="core.partCompatibility" value=".*mgm220pc22hna.*"/>
     <model:property key="core.boardCompatibility" value="brd4311b"/>
-    <model:property key="demos.imageFile" value="asset://com.silabs.sdk.stack.super_4.0.0/app/common/demos/memlcd_baremetal/memlcd_baremetal-brd4311b.s37"/>
+    <model:property key="demos.imageFile" value="asset://com.silabs.sdk.stack.super_4.0.1/app/common/demos/memlcd_baremetal/memlcd_baremetal-brd4311b.s37"/>
     <model:property key="core.quality" value="PRODUCTION"/>
     <model:description>This example project demonstrates use of the Memory Liquid Crystal Display (LCD)  module in a baremetal application, using Silicon Labs Graphics Library (glib).
 </model:description>
@@ -1057,7 +1093,7 @@
     <model:property key="demos.blurb" value="Platform - MEMLCD Bare-metal"/>
     <model:property key="core.partCompatibility" value=".*bgm220sc22hna.*"/>
     <model:property key="core.boardCompatibility" value="brd4312a"/>
-    <model:property key="demos.imageFile" value="asset://com.silabs.sdk.stack.super_4.0.0/app/common/demos/memlcd_baremetal/memlcd_baremetal-brd4312a.s37"/>
+    <model:property key="demos.imageFile" value="asset://com.silabs.sdk.stack.super_4.0.1/app/common/demos/memlcd_baremetal/memlcd_baremetal-brd4312a.s37"/>
     <model:property key="core.quality" value="PRODUCTION"/>
     <model:description>This example project demonstrates use of the Memory Liquid Crystal Display (LCD)  module in a baremetal application, using Silicon Labs Graphics Library (glib).
 </model:description>
@@ -1066,7 +1102,7 @@
     <model:property key="demos.blurb" value="Platform - MEMLCD Bare-metal"/>
     <model:property key="core.partCompatibility" value=".*mgm240pb22vna.*"/>
     <model:property key="core.boardCompatibility" value="brd4316a"/>
-    <model:property key="demos.imageFile" value="asset://com.silabs.sdk.stack.super_4.0.0/app/common/demos/memlcd_baremetal/memlcd_baremetal-brd4316a.s37"/>
+    <model:property key="demos.imageFile" value="asset://com.silabs.sdk.stack.super_4.0.1/app/common/demos/memlcd_baremetal/memlcd_baremetal-brd4316a.s37"/>
     <model:property key="core.quality" value="PRODUCTION"/>
     <model:description>This example project demonstrates use of the Memory Liquid Crystal Display (LCD)  module in a baremetal application, using Silicon Labs Graphics Library (glib).
 </model:description>
@@ -1075,7 +1111,7 @@
     <model:property key="demos.blurb" value="Platform - MEMLCD Bare-metal"/>
     <model:property key="core.partCompatibility" value=".*mgm240pb32vna.*"/>
     <model:property key="core.boardCompatibility" value="brd4317a"/>
-    <model:property key="demos.imageFile" value="asset://com.silabs.sdk.stack.super_4.0.0/app/common/demos/memlcd_baremetal/memlcd_baremetal-brd4317a.s37"/>
+    <model:property key="demos.imageFile" value="asset://com.silabs.sdk.stack.super_4.0.1/app/common/demos/memlcd_baremetal/memlcd_baremetal-brd4317a.s37"/>
     <model:property key="core.quality" value="PRODUCTION"/>
     <model:description>This example project demonstrates use of the Memory Liquid Crystal Display (LCD)  module in a baremetal application, using Silicon Labs Graphics Library (glib).
 </model:description>
@@ -1084,7 +1120,7 @@
     <model:property key="demos.blurb" value="Platform - MEMLCD Bare-metal"/>
     <model:property key="core.partCompatibility" value=".*wgm160px22kga2.*"/>
     <model:property key="core.boardCompatibility" value="brd4321a"/>
-    <model:property key="demos.imageFile" value="asset://com.silabs.sdk.stack.super_4.0.0/app/common/demos/memlcd_baremetal/memlcd_baremetal-brd4321a.s37"/>
+    <model:property key="demos.imageFile" value="asset://com.silabs.sdk.stack.super_4.0.1/app/common/demos/memlcd_baremetal/memlcd_baremetal-brd4321a.s37"/>
     <model:property key="core.quality" value="PRODUCTION"/>
     <model:description>This example project demonstrates use of the Memory Liquid Crystal Display (LCD)  module in a baremetal application, using Silicon Labs Graphics Library (glib).
 </model:description>

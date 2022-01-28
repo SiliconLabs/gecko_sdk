@@ -276,8 +276,6 @@ void socket_handler_init(void)
   // get kernel status to avoid mutex assert failure
   kernel_state = osKernelGetState();
 
-  __init_errno();
-
   // Create socket handler mutex
   _socket_hnd_mtx = osMutexNew(&_socket_hnd_mtx_attr);
 

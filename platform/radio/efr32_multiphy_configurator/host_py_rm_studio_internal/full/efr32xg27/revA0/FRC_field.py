@@ -194,26 +194,6 @@ class RM_Field_FRC_STATUS_FSMSTATE(Base_RM_Field):
         self.__dict__['zz_frozen'] = True
 
 
-class RM_Field_FRC_STATUS_RXWCNTMATCHPAUSED(Base_RM_Field):
-    def __init__(self, register):
-        self.__dict__['zz_frozen'] = False
-        super(RM_Field_FRC_STATUS_RXWCNTMATCHPAUSED, self).__init__(register,
-            'RXWCNTMATCHPAUSED', 'FRC.STATUS.RXWCNTMATCHPAUSED', 'read-only',
-            u"",
-            25, 1)
-        self.__dict__['zz_frozen'] = True
-
-
-class RM_Field_FRC_STATUS_CRCERRORTOLERATED(Base_RM_Field):
-    def __init__(self, register):
-        self.__dict__['zz_frozen'] = False
-        super(RM_Field_FRC_STATUS_CRCERRORTOLERATED, self).__init__(register,
-            'CRCERRORTOLERATED', 'FRC.STATUS.CRCERRORTOLERATED', 'read-only',
-            u"",
-            26, 1)
-        self.__dict__['zz_frozen'] = True
-
-
 class RM_Field_FRC_DFLCTRL_DFLMODE(Base_RM_Field):
     def __init__(self, register):
         self.__dict__['zz_frozen'] = False
@@ -534,11 +514,11 @@ class RM_Field_FRC_CMD_RXRAWUNBLOCK(Base_RM_Field):
         self.__dict__['zz_frozen'] = True
 
 
-class RM_Field_FRC_CMD_RXPAUSERESUME(Base_RM_Field):
+class RM_Field_FRC_CMD_PKTBUFSTOP(Base_RM_Field):
     def __init__(self, register):
         self.__dict__['zz_frozen'] = False
-        super(RM_Field_FRC_CMD_RXPAUSERESUME, self).__init__(register,
-            'RXPAUSERESUME', 'FRC.CMD.RXPAUSERESUME', 'write-only',
+        super(RM_Field_FRC_CMD_PKTBUFSTOP, self).__init__(register,
+            'PKTBUFSTOP', 'FRC.CMD.PKTBUFSTOP', 'write-only',
             u"",
             13, 1)
         self.__dict__['zz_frozen'] = True
@@ -834,16 +814,6 @@ class RM_Field_FRC_CTRL_TXPREFETCH(Base_RM_Field):
         self.__dict__['zz_frozen'] = True
 
 
-class RM_Field_FRC_CTRL_TXFETCHBLOCKING(Base_RM_Field):
-    def __init__(self, register):
-        self.__dict__['zz_frozen'] = False
-        super(RM_Field_FRC_CTRL_TXFETCHBLOCKING, self).__init__(register,
-            'TXFETCHBLOCKING', 'FRC.CTRL.TXFETCHBLOCKING', 'read-write',
-            u"",
-            14, 1)
-        self.__dict__['zz_frozen'] = True
-
-
 class RM_Field_FRC_CTRL_SEQHANDSHAKE(Base_RM_Field):
     def __init__(self, register):
         self.__dict__['zz_frozen'] = False
@@ -1004,16 +974,6 @@ class RM_Field_FRC_RXCTRL_RXFRAMEENDAHEADBYTES(Base_RM_Field):
         self.__dict__['zz_frozen'] = True
 
 
-class RM_Field_FRC_RXCTRL_ACCEPTUARTERRORS(Base_RM_Field):
-    def __init__(self, register):
-        self.__dict__['zz_frozen'] = False
-        super(RM_Field_FRC_RXCTRL_ACCEPTUARTERRORS, self).__init__(register,
-            'ACCEPTUARTERRORS', 'FRC.RXCTRL.ACCEPTUARTERRORS', 'read-write',
-            u"",
-            11, 1)
-        self.__dict__['zz_frozen'] = True
-
-
 class RM_Field_FRC_TRAILTXDATACTRL_TRAILTXDATA(Base_RM_Field):
     def __init__(self, register):
         self.__dict__['zz_frozen'] = False
@@ -1061,16 +1021,6 @@ class RM_Field_FRC_TRAILTXDATACTRL_TXSUPPLENOVERIDE(Base_RM_Field):
             'TXSUPPLENOVERIDE', 'FRC.TRAILTXDATACTRL.TXSUPPLENOVERIDE', 'read-write',
             u"",
             22, 1)
-        self.__dict__['zz_frozen'] = True
-
-
-class RM_Field_FRC_TRAILTXDATACTRL_POSTAMBLEEN(Base_RM_Field):
-    def __init__(self, register):
-        self.__dict__['zz_frozen'] = False
-        super(RM_Field_FRC_TRAILTXDATACTRL_POSTAMBLEEN, self).__init__(register,
-            'POSTAMBLEEN', 'FRC.TRAILTXDATACTRL.POSTAMBLEEN', 'read-write',
-            u"",
-            23, 1)
         self.__dict__['zz_frozen'] = True
 
 
@@ -1254,23 +1204,13 @@ class RM_Field_FRC_PAUSECTRL_TXSUBFRAMEPAUSEEN(Base_RM_Field):
         self.__dict__['zz_frozen'] = True
 
 
-class RM_Field_FRC_PAUSECTRL_RXWCNTMATCHPAUSEEN(Base_RM_Field):
-    def __init__(self, register):
-        self.__dict__['zz_frozen'] = False
-        super(RM_Field_FRC_PAUSECTRL_RXWCNTMATCHPAUSEEN, self).__init__(register,
-            'RXWCNTMATCHPAUSEEN', 'FRC.PAUSECTRL.RXWCNTMATCHPAUSEEN', 'read-write',
-            u"",
-            5, 1)
-        self.__dict__['zz_frozen'] = True
-
-
 class RM_Field_FRC_PAUSECTRL_CONVPAUSECNT(Base_RM_Field):
     def __init__(self, register):
         self.__dict__['zz_frozen'] = False
         super(RM_Field_FRC_PAUSECTRL_CONVPAUSECNT, self).__init__(register,
             'CONVPAUSECNT', 'FRC.PAUSECTRL.CONVPAUSECNT', 'read-write',
             u"",
-            11, 6)
+            5, 6)
         self.__dict__['zz_frozen'] = True
 
 
@@ -1280,7 +1220,7 @@ class RM_Field_FRC_PAUSECTRL_INTERLEAVEWRITEPAUSECNT(Base_RM_Field):
         super(RM_Field_FRC_PAUSECTRL_INTERLEAVEWRITEPAUSECNT, self).__init__(register,
             'INTERLEAVEWRITEPAUSECNT', 'FRC.PAUSECTRL.INTERLEAVEWRITEPAUSECNT', 'read-write',
             u"",
-            17, 5)
+            11, 5)
         self.__dict__['zz_frozen'] = True
 
 
@@ -1290,7 +1230,7 @@ class RM_Field_FRC_PAUSECTRL_INTERLEAVEREADPAUSECNT(Base_RM_Field):
         super(RM_Field_FRC_PAUSECTRL_INTERLEAVEREADPAUSECNT, self).__init__(register,
             'INTERLEAVEREADPAUSECNT', 'FRC.PAUSECTRL.INTERLEAVEREADPAUSECNT', 'read-write',
             u"",
-            22, 5)
+            16, 5)
         self.__dict__['zz_frozen'] = True
 
 
@@ -1524,16 +1464,6 @@ class RM_Field_FRC_IF_RXRAWOF(Base_RM_Field):
         self.__dict__['zz_frozen'] = True
 
 
-class RM_Field_FRC_IF_WCNTCMP5(Base_RM_Field):
-    def __init__(self, register):
-        self.__dict__['zz_frozen'] = False
-        super(RM_Field_FRC_IF_WCNTCMP5, self).__init__(register,
-            'WCNTCMP5', 'FRC.IF.WCNTCMP5', 'read-write',
-            u"",
-            23, 1)
-        self.__dict__['zz_frozen'] = True
-
-
 class RM_Field_FRC_IF_FRAMEDETPAUSED(Base_RM_Field):
     def __init__(self, register):
         self.__dict__['zz_frozen'] = False
@@ -1601,16 +1531,6 @@ class RM_Field_FRC_IF_TXWORD(Base_RM_Field):
             'TXWORD', 'FRC.IF.TXWORD', 'read-write',
             u"",
             30, 1)
-        self.__dict__['zz_frozen'] = True
-
-
-class RM_Field_FRC_IF_UARTERROR(Base_RM_Field):
-    def __init__(self, register):
-        self.__dict__['zz_frozen'] = False
-        super(RM_Field_FRC_IF_UARTERROR, self).__init__(register,
-            'UARTERROR', 'FRC.IF.UARTERROR', 'read-write',
-            u"",
-            31, 1)
         self.__dict__['zz_frozen'] = True
 
 
@@ -1844,16 +1764,6 @@ class RM_Field_FRC_IEN_RXRAWOF(Base_RM_Field):
         self.__dict__['zz_frozen'] = True
 
 
-class RM_Field_FRC_IEN_WCNTCMP5(Base_RM_Field):
-    def __init__(self, register):
-        self.__dict__['zz_frozen'] = False
-        super(RM_Field_FRC_IEN_WCNTCMP5, self).__init__(register,
-            'WCNTCMP5', 'FRC.IEN.WCNTCMP5', 'read-write',
-            u"",
-            23, 1)
-        self.__dict__['zz_frozen'] = True
-
-
 class RM_Field_FRC_IEN_FRAMEDETPAUSED(Base_RM_Field):
     def __init__(self, register):
         self.__dict__['zz_frozen'] = False
@@ -1921,16 +1831,6 @@ class RM_Field_FRC_IEN_TXWORD(Base_RM_Field):
             'TXWORD', 'FRC.IEN.TXWORD', 'read-write',
             u"",
             30, 1)
-        self.__dict__['zz_frozen'] = True
-
-
-class RM_Field_FRC_IEN_UARTERROR(Base_RM_Field):
-    def __init__(self, register):
-        self.__dict__['zz_frozen'] = False
-        super(RM_Field_FRC_IEN_UARTERROR, self).__init__(register,
-            'UARTERROR', 'FRC.IEN.UARTERROR', 'read-write',
-            u"",
-            31, 1)
         self.__dict__['zz_frozen'] = True
 
 
@@ -2454,16 +2354,6 @@ class RM_Field_FRC_SEQIF_RXRAWOF(Base_RM_Field):
         self.__dict__['zz_frozen'] = True
 
 
-class RM_Field_FRC_SEQIF_WCNTCMP5(Base_RM_Field):
-    def __init__(self, register):
-        self.__dict__['zz_frozen'] = False
-        super(RM_Field_FRC_SEQIF_WCNTCMP5, self).__init__(register,
-            'WCNTCMP5', 'FRC.SEQIF.WCNTCMP5', 'read-write',
-            u"",
-            23, 1)
-        self.__dict__['zz_frozen'] = True
-
-
 class RM_Field_FRC_SEQIF_FRAMEDETPAUSED(Base_RM_Field):
     def __init__(self, register):
         self.__dict__['zz_frozen'] = False
@@ -2531,16 +2421,6 @@ class RM_Field_FRC_SEQIF_TXWORD(Base_RM_Field):
             'TXWORD', 'FRC.SEQIF.TXWORD', 'read-write',
             u"",
             30, 1)
-        self.__dict__['zz_frozen'] = True
-
-
-class RM_Field_FRC_SEQIF_UARTERROR(Base_RM_Field):
-    def __init__(self, register):
-        self.__dict__['zz_frozen'] = False
-        super(RM_Field_FRC_SEQIF_UARTERROR, self).__init__(register,
-            'UARTERROR', 'FRC.SEQIF.UARTERROR', 'read-write',
-            u"",
-            31, 1)
         self.__dict__['zz_frozen'] = True
 
 
@@ -2774,16 +2654,6 @@ class RM_Field_FRC_SEQIEN_RXRAWOF(Base_RM_Field):
         self.__dict__['zz_frozen'] = True
 
 
-class RM_Field_FRC_SEQIEN_WCNTCMP5(Base_RM_Field):
-    def __init__(self, register):
-        self.__dict__['zz_frozen'] = False
-        super(RM_Field_FRC_SEQIEN_WCNTCMP5, self).__init__(register,
-            'WCNTCMP5', 'FRC.SEQIEN.WCNTCMP5', 'read-write',
-            u"",
-            23, 1)
-        self.__dict__['zz_frozen'] = True
-
-
 class RM_Field_FRC_SEQIEN_FRAMEDETPAUSED(Base_RM_Field):
     def __init__(self, register):
         self.__dict__['zz_frozen'] = False
@@ -2851,16 +2721,6 @@ class RM_Field_FRC_SEQIEN_TXWORD(Base_RM_Field):
             'TXWORD', 'FRC.SEQIEN.TXWORD', 'read-write',
             u"",
             30, 1)
-        self.__dict__['zz_frozen'] = True
-
-
-class RM_Field_FRC_SEQIEN_UARTERROR(Base_RM_Field):
-    def __init__(self, register):
-        self.__dict__['zz_frozen'] = False
-        super(RM_Field_FRC_SEQIEN_UARTERROR, self).__init__(register,
-            'UARTERROR', 'FRC.SEQIEN.UARTERROR', 'read-write',
-            u"",
-            31, 1)
         self.__dict__['zz_frozen'] = True
 
 
@@ -3014,16 +2874,6 @@ class RM_Field_FRC_WCNTCMP4_SUPPLENGTH(Base_RM_Field):
         self.__dict__['zz_frozen'] = True
 
 
-class RM_Field_FRC_WCNTCMP5_RXPAUSELOC(Base_RM_Field):
-    def __init__(self, register):
-        self.__dict__['zz_frozen'] = False
-        super(RM_Field_FRC_WCNTCMP5_RXPAUSELOC, self).__init__(register,
-            'RXPAUSELOC', 'FRC.WCNTCMP5.RXPAUSELOC', 'read-write',
-            u"",
-            0, 12)
-        self.__dict__['zz_frozen'] = True
-
-
 class RM_Field_FRC_PKTBUFCTRL_PKTBUFSTARTLOC(Base_RM_Field):
     def __init__(self, register):
         self.__dict__['zz_frozen'] = False
@@ -3051,16 +2901,6 @@ class RM_Field_FRC_PKTBUFCTRL_PKTBUFTHRESHOLDEN(Base_RM_Field):
             'PKTBUFTHRESHOLDEN', 'FRC.PKTBUFCTRL.PKTBUFTHRESHOLDEN', 'read-write',
             u"",
             24, 1)
-        self.__dict__['zz_frozen'] = True
-
-
-class RM_Field_FRC_PKTBUFCTRL_PKTBUFSTOP(Base_RM_Field):
-    def __init__(self, register):
-        self.__dict__['zz_frozen'] = False
-        super(RM_Field_FRC_PKTBUFCTRL_PKTBUFSTOP, self).__init__(register,
-            'PKTBUFSTOP', 'FRC.PKTBUFCTRL.PKTBUFSTOP', 'write-only',
-            u"",
-            25, 1)
         self.__dict__['zz_frozen'] = True
 
 
@@ -4031,16 +3871,6 @@ class RM_Field_FRC_INTELEMENT15_INTELEMENT(Base_RM_Field):
             'INTELEMENT', 'FRC.INTELEMENT15.INTELEMENT', 'read-only',
             u"",
             0, 8)
-        self.__dict__['zz_frozen'] = True
-
-
-class RM_Field_FRC_AHBCONFIG_AHBHPROTBUFFERABLE(Base_RM_Field):
-    def __init__(self, register):
-        self.__dict__['zz_frozen'] = False
-        super(RM_Field_FRC_AHBCONFIG_AHBHPROTBUFFERABLE, self).__init__(register,
-            'AHBHPROTBUFFERABLE', 'FRC.AHBCONFIG.AHBHPROTBUFFERABLE', 'read-write',
-            u"",
-            0, 1)
         self.__dict__['zz_frozen'] = True
 
 

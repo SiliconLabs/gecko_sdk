@@ -15,6 +15,7 @@ provides:
   - name: sensor_imu
 requires:
   - name: imu_driver
+  - name: app_assert
 template_contribution:
   - name: component_catalog
     value: sensor_imu

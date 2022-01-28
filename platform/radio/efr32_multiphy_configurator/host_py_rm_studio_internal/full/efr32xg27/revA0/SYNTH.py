@@ -11,7 +11,8 @@ class RM_Peripheral_SYNTH(Base_RM_Peripheral):
         self.__dict__['zz_frozen'] = False
         super(RM_Peripheral_SYNTH, self).__init__(rmio, label,
             0xA8018000, 'SYNTH',
-            u"")
+            u"",
+            [])
         self.IPVERSION = RM_Register_SYNTH_IPVERSION(self.zz_rmio, self.zz_label)
         self.zz_rdict['IPVERSION'] = self.IPVERSION
         self.EN = RM_Register_SYNTH_EN(self.zz_rmio, self.zz_label)

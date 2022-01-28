@@ -34,7 +34,6 @@
 #include "sl_status.h"
 #include "aoa_types.h"
 #include "sl_rtl_clib_api.h"
-#include "aoa_corr_angles.h"
 
 #ifdef __cplusplus
 extern "C" {
@@ -57,14 +56,14 @@ enum axis_list{
 /// Locator struct
 typedef struct {
   aoa_id_t id;
+  uint32_t loc_id;                          // assigned by RTL lib
   struct sl_rtl_loc_locator_item item;
 } aoa_locator_t;
 
 /// Asset tag struct
 typedef struct {
   aoa_id_t id;
-  uint32_t *loc_id;                         // assigned by RTL lib
-  sl_rtl_loc_libitem loc;
+  int32_t tag_id;                          // assigned by RTL lib
   sl_rtl_util_libitem filter[AXIS_COUNT];
   aoa_position_t position;
   void *aoa_state;                         //Only if Angle calculation is needed from IQ report
@@ -72,7 +71,8 @@ typedef struct {
 
 /// Init struct
 typedef struct {
-  size_t locator_count;
+  uint32_t locator_count;
+  uint32_t max_sequence_diff;
   enum sl_rtl_loc_estimation_mode estimation_mode;
   enum sl_rtl_loc_measurement_validation_method validation_method;
   float estimation_interval_sec;
@@ -91,9 +91,21 @@ extern aoa_loc_config_t aoa_loc_config;
 // Public functions.
 
 /**************************************************************************//**
- * Initializes the expected angle count.
+ * Initializes the locator engine.
+ *
+ * @retval SL_STATUS_FAIL - RTL lib initialization error.
+ * @retval SL_STATUS_OK - Initialization ok.
  *****************************************************************************/
-void aoa_loc_init_expected_angle_count(void);
+sl_status_t aoa_loc_init(void);
+
+/**************************************************************************//**
+ * Finalizes the configuration.
+ *
+ * @retval SL_STATUS_ALLOCATION_FAILED - Memory allocation error.
+ * @retval SL_STATUS_FAIL - RTL lib error.
+ * @retval SL_STATUS_OK - Initialization ok.
+ *****************************************************************************/
+sl_status_t aoa_loc_finalize_config(void);
 
 /**************************************************************************//**
  * Adds a new locator to the database.
@@ -140,7 +152,7 @@ sl_status_t aoa_loc_get_locator_by_index(uint32_t locator_idx,
  *
  * @retval Number of locators
  *****************************************************************************/
-size_t aoa_loc_get_number_of_locators(void);
+uint32_t aoa_loc_get_number_of_locators(void);
 
 /**************************************************************************//**
  * Adds a new asset tag to the database.
@@ -182,18 +194,18 @@ sl_status_t aoa_loc_get_tag_by_index(uint32_t index,
 /**************************************************************************//**
  * Calculates the asset tag position and notify the app.
  *
- * @param[in] tag Pointer to the entry.
- * @param[in] start_slot The correlated angle slot to start the calc from.
- * @param[in] corr_angles_array Pointer to the correlated angles array.
- * @param[in] last_updated_slot The slot that was last updated.
+ * @param[in] tag_id Tag for calculate the location.
+ * @param[in] angle_count Number of angles.
+ * @param[in] angle_list Angle list.
+ * @param[in] locator_list Locator list.
  *
  * @retval SL_STATUS_FAIL - Position calculation failed in the RTL lib.
  * @retval SL_STATUS_OK - Calculation was succesful.
  *****************************************************************************/
-sl_status_t aoa_loc_calc_position(aoa_asset_tag_t *tag,
-                                  int32_t start_slot,
-                                  aoa_corr_angles_t *corr_angles_array,
-                                  uint32_t *last_updated_slot);
+sl_status_t aoa_loc_calc_position(aoa_id_t tag_id,
+                                  uint32_t angle_count,
+                                  aoa_angle_t *angle_list,
+                                  aoa_id_t *locator_list);
 
 /**************************************************************************//**
  * Destroys the module database.

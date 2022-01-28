@@ -128,16 +128,17 @@ otError History::ProcessIpAddr(Arg aArgs[])
         {
             sprintf(&addressString[strlen(addressString)], "/%d", info->mPrefixLength);
 
-            OutputLine("| %20s | %-7s | %-43s | %-6s | %3d | %c | %c | %c |", ageString, kEventStrings[info->mEvent],
-                       addressString, AddressOriginToString(info->mAddressOrigin), info->mScope,
+            OutputLine("| %20s | %-7s | %-43s | %-6s | %3d | %c | %c | %c |", ageString,
+                       Stringify(info->mEvent, kEventStrings), addressString,
+                       Interpreter::AddressOriginToString(info->mAddressOrigin), info->mScope,
                        info->mPreferred ? 'Y' : 'N', info->mValid ? 'Y' : 'N', info->mRloc ? 'Y' : 'N');
         }
         else
         {
             OutputLine("%s -> event:%s address:%s prefixlen:%d origin:%s scope:%d preferred:%s valid:%s rloc:%s",
-                       ageString, kEventStrings[info->mEvent], addressString, info->mPrefixLength,
-                       AddressOriginToString(info->mAddressOrigin), info->mScope, info->mPreferred ? "yes" : "no",
-                       info->mValid ? "yes" : "no", info->mRloc ? "yes" : "no");
+                       ageString, Stringify(info->mEvent, kEventStrings), addressString, info->mPrefixLength,
+                       Interpreter::AddressOriginToString(info->mAddressOrigin), info->mScope,
+                       info->mPreferred ? "yes" : "no", info->mValid ? "yes" : "no", info->mRloc ? "yes" : "no");
         }
     }
 
@@ -194,7 +195,8 @@ otError History::ProcessIpMulticastAddr(Arg aArgs[])
         otIp6AddressToString(&info->mAddress, addressString, sizeof(addressString));
 
         OutputLine(isList ? "%s -> event:%s address:%s origin:%s" : "| %20s | %-12s | %-39s | %-6s |", ageString,
-                   kEventStrings[info->mEvent], addressString, AddressOriginToString(info->mAddressOrigin));
+                   Stringify(info->mEvent, kEventStrings), addressString,
+                   Interpreter::AddressOriginToString(info->mAddressOrigin));
     }
 
 exit:
@@ -324,62 +326,21 @@ otError History::ProcessTx(Arg aArgs[])
     return ProcessRxTxHistory(kTx, aArgs);
 }
 
-const char *History::AddressOriginToString(uint8_t aOrigin)
-{
-    const char *str = "Unknown";
-
-    switch (aOrigin)
-    {
-    case OT_ADDRESS_ORIGIN_THREAD:
-        str = "Thread";
-        break;
-
-    case OT_ADDRESS_ORIGIN_SLAAC:
-        str = "SLAAC";
-        break;
-
-    case OT_ADDRESS_ORIGIN_DHCPV6:
-        str = "DHCPv6";
-        break;
-
-    case OT_ADDRESS_ORIGIN_MANUAL:
-        str = "Manual";
-        break;
-
-    default:
-        break;
-    }
-
-    return str;
-}
-
 const char *History::MessagePriorityToString(uint8_t aPriority)
 {
-    const char *str = "unkn";
+    static const char *const kPriorityStrings[] = {
+        "low",  // (0) OT_HISTORY_TRACKER_MSG_PRIORITY_LOW
+        "norm", // (1) OT_HISTORY_TRACKER_MSG_PRIORITY_NORMAL
+        "high", // (2) OT_HISTORY_TRACKER_MSG_PRIORITY_HIGH
+        "net",  // (3) OT_HISTORY_TRACKER_MSG_PRIORITY_NET
+    };
 
-    switch (aPriority)
-    {
-    case OT_HISTORY_TRACKER_MSG_PRIORITY_LOW:
-        str = "low";
-        break;
+    static_assert(0 == OT_HISTORY_TRACKER_MSG_PRIORITY_LOW, "MSG_PRIORITY_LOW value is incorrect");
+    static_assert(1 == OT_HISTORY_TRACKER_MSG_PRIORITY_NORMAL, "MSG_PRIORITY_NORMAL value is incorrect");
+    static_assert(2 == OT_HISTORY_TRACKER_MSG_PRIORITY_HIGH, "MSG_PRIORITY_HIGH value is incorrect");
+    static_assert(3 == OT_HISTORY_TRACKER_MSG_PRIORITY_NET, "MSG_PRIORITY_NET value is incorrect");
 
-    case OT_HISTORY_TRACKER_MSG_PRIORITY_NORMAL:
-        str = "norm";
-        break;
-
-    case OT_HISTORY_TRACKER_MSG_PRIORITY_HIGH:
-        str = "high";
-        break;
-
-    case OT_HISTORY_TRACKER_MSG_PRIORITY_NET:
-        str = "net";
-        break;
-
-    default:
-        break;
-    }
-
-    return str;
+    return Stringify(aPriority, kPriorityStrings, "unkn");
 }
 
 const char *History::RadioTypeToString(const otHistoryTrackerMessageInfo &aInfo)
@@ -621,7 +582,7 @@ otError History::Process(Arg aArgs[])
         ExitNow();
     }
 
-    command = Utils::LookupTable::Find(aArgs[0].GetCString(), sCommands);
+    command = BinarySearch::Find(aArgs[0].GetCString(), sCommands);
     VerifyOrExit(command != nullptr);
 
     error = (this->*command->mHandler)(aArgs + 1);

@@ -380,8 +380,6 @@ class CALC_Viterbi_ocelot(CALC_Viterbi_lynx):
 
     def calc_viterbi_misc_reg(self, model):
 
-        part_family = model.part_family.lower()
-
         vtdemoden = model.vars.MODEM_VITERBIDEMOD_VTDEMODEN.value
         ber_force_freq_comp_off = model.vars.ber_force_freq_comp_off.value
 
@@ -406,7 +404,7 @@ class CALC_Viterbi_ocelot(CALC_Viterbi_lynx):
             self._reg_write(model.vars.MODEM_VTTRACK_FREQTRACKMODE, 1)
             self._reg_write(model.vars.MODEM_VTTRACK_HIPWRTHD, 1)
             self._reg_write(model.vars.MODEM_VTTRACK_TIMTRACKTHD, 2)
-            self._reg_write_default(model.vars.MODEM_VTTRACK_TIMEACQUTHD, part_family)
+            self._reg_write_default(model.vars.MODEM_VTTRACK_TIMEACQUTHD)
         else:
             self._reg_write(model.vars.MODEM_VITERBIDEMOD_CORRSTPSIZE, 0)
             self._reg_write(model.vars.MODEM_VTBLETIMING_DISDEMODOF, 0)

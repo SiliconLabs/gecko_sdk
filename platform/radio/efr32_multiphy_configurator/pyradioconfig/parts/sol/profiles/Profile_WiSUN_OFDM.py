@@ -1,8 +1,7 @@
 from pyradioconfig.calculator_model_framework.interfaces.iprofile import IProfile
 from pyradioconfig.parts.common.profiles.ocelot_regs import build_modem_regs_ocelot
 from pyradioconfig.parts.common.profiles.profile_common import buildCrcOutputs, buildFecOutputs, buildFrameOutputs, \
-    buildWhiteOutputs, build_ircal_sw_vars
-from pyradioconfig.parts.ocelot.profiles.profile_modem import buildModemInfoOutputs
+    buildWhiteOutputs
 from pyradioconfig.parts.common.utils.units_multiplier import UnitsMultiplier
 from pyradioconfig.parts.sol.profiles.sw_profile_outputs_common import sw_profile_outputs_common_sol
 from pyradioconfig.parts.sol.profiles.wisun_profile_outputs_common import wisun_profile_outputs_common_sol
@@ -74,6 +73,13 @@ class Profile_WiSUN_OFDM_Sol(IProfile):
         self.make_hidden_input(profile, model.vars.if_frequency_hz, 'Advanced', readable_name='IF Frequency',
                                value_limit_min=70000, value_limit_max=1900000, units_multiplier=UnitsMultiplier.KILO)
 
+        #Hidden input to allow experimenting with synth TX mode
+        self.make_hidden_input(profile, model.vars.synth_tx_mode, 'Advanced', readable_name='Synthesizer TX Mode')
+
+        # Hidden input for dual front-end filter support
+        self.make_hidden_input(profile, model.vars.dual_fefilt, "Advanced",
+                               readable_name="Dual front-end filter enable")
+
     def build_deprecated_profile_inputs(self, model, profile):
         pass
 
@@ -92,7 +98,7 @@ class Profile_WiSUN_OFDM_Sol(IProfile):
         self._wisun_profile_outputs_common.build_wisun_mode_switch_outputs(model, profile)
 
     def build_info_profile_outputs(self, model, profile):
-        buildModemInfoOutputs(model, profile)
+        self._sw_profile_outputs_common.build_info_outputs(model, profile)
 
     def profile_calculate(self, model):
         self._fixed_wisun_ofdm_vars(model)

@@ -27,7 +27,7 @@
  * 3. This notice may not be removed or altered from any source distribution.
  *
  ******************************************************************************/
-#if APP_PROPERTIES_CONFIG_FILE
+#ifdef APP_PROPERTIES_CONFIG_FILE
 #include APP_PROPERTIES_CONFIG_FILE
 #else
 #include "app_properties_config.h"

@@ -77,17 +77,22 @@ extern "C" {
   || defined(PSA_WANT_ECC_SECP_R1_521)))
   #define SLI_PSA_WANT_ECC_SECP
 #endif
-#if (defined(PSA_WANT_KEY_TYPE_ECC_KEY_PAIR)                                   \
-  || defined(PSA_WANT_KEY_TYPE_ECC_PUBLIC_KEY))                                \
-  && ((_SILICON_LABS_SECURITY_FEATURE == _SILICON_LABS_SECURITY_FEATURE_VAULT) \
-  &&  (defined(PSA_WANT_ECC_MONTGOMERY_255)                                    \
-  || defined(PSA_WANT_ECC_MONTGOMERY_448)))
+#if (defined(PSA_WANT_KEY_TYPE_ECC_KEY_PAIR)    \
+  || defined(PSA_WANT_KEY_TYPE_ECC_PUBLIC_KEY)) \
+  && defined(PSA_WANT_ECC_MONTGOMERY_255)
   #define SLI_PSA_WANT_ECC_MONTGOMERY
+  #define SLI_PSA_WANT_ECC_MONTGOMERY_255
 #endif
-#if (defined(PSA_WANT_KEY_TYPE_ECC_KEY_PAIR)                                   \
-  || defined(PSA_WANT_KEY_TYPE_ECC_PUBLIC_KEY))                                \
-  && ((_SILICON_LABS_SECURITY_FEATURE == _SILICON_LABS_SECURITY_FEATURE_VAULT) \
-  && defined(PSA_WANT_ECC_TWISTED_EDWARDS_255))
+#if (defined(PSA_WANT_KEY_TYPE_ECC_KEY_PAIR)    \
+  || defined(PSA_WANT_KEY_TYPE_ECC_PUBLIC_KEY)) \
+  &&  defined(PSA_WANT_ECC_MONTGOMERY_448)      \
+  && (_SILICON_LABS_SECURITY_FEATURE == _SILICON_LABS_SECURITY_FEATURE_VAULT)
+  #define SLI_PSA_WANT_ECC_MONTGOMERY
+  #define SLI_PSA_WANT_ECC_MONTGOMERY_448
+#endif
+#if (defined(PSA_WANT_KEY_TYPE_ECC_KEY_PAIR)    \
+  || defined(PSA_WANT_KEY_TYPE_ECC_PUBLIC_KEY)) \
+  && defined(PSA_WANT_ECC_TWISTED_EDWARDS_255)
   #define SLI_PSA_WANT_ECC_TWISTED_EDWARDS
 #endif
 
@@ -139,14 +144,6 @@ extern "C" {
  * @returns the number of padding bytes required
  */
 #define sli_se_word_align(size)   ((size + 3) & ~3)
-
-/**
- * The oldest firmware revision with support for checking the validity
- * of public ECC keys. Also see \ref SL_SE_SUPPORT_FW_PRIOR_TO_1_2_2 and
- * \ref SL_SE_ASSUME_FW_AT_LEAST_1_2_2 */
-#if !defined(SLI_SE_OLDEST_VERSION_WITH_PUBLIC_KEY_VALIDATION)
-#define SLI_SE_OLDEST_VERSION_WITH_PUBLIC_KEY_VALIDATION (0x00010202U)
-#endif
 
 /*******************************************************************************
  * Static inlines *
@@ -412,12 +409,6 @@ psa_status_t sli_se_driver_validate_pubkey_with_fallback(psa_key_type_t key_type
                                                          const uint8_t *data,
                                                          size_t data_length);
 #endif // Software fallback for SE < 1.2.2
-
-#if defined(PSA_WANT_ALG_EDDSA)
-// Some SE versions have issues with EdDSA public key reconstruction
-psa_status_t sli_se_check_eddsa_errata(const psa_key_attributes_t* attributes,
-                                       sl_se_command_context_t* cmd_ctx);
-#endif // PSA_WANT_ALG_EDDSA
 
 #endif // SEMAILBOX_PRESENT
 

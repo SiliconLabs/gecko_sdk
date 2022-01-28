@@ -27,7 +27,6 @@ def build_modem_regs_panther(model,profile, family):
     # AGC.CTRL0.DISCFLOOPADJ
     # AGC.CTRL0.AGCCLKUNDIVREQ
     # AGC.CTRL0.DISRESETCHPWR
-    # AGC.CTRL1.CCATHRSH
     # AGC.CTRL1.RSSIPERIOD
     # AGC.CTRL1.SUBPERIOD
     # AGC.CTRL1.SUBNUM
