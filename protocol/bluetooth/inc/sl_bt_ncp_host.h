@@ -114,10 +114,11 @@ sl_status_t sli_bgapi_get_event(int block, sl_bt_msg_t *event, bgapi_device_type
 /**
  * Function that sends a message to the serial port.
  *
- * @param msg_len Length of the message
- * @param msg_data The message data
+ * @param msg_len[in] Length of the message.
+ * @param msg_data[in] The message data.
+ * @return The amount of bytes sent or -1 on failure.
  */
-typedef void(*tx_func)(uint32_t msg_len, uint8_t* msg_data);
+typedef int32_t(*tx_func)(uint32_t msg_len, uint8_t* msg_data);
 
 /**
  *  @brief Function that reads data from serial port.
@@ -156,8 +157,8 @@ sl_status_t sl_bt_api_initialize_nonblock(tx_func ofunc, rx_func ifunc, rx_peek_
 extern tx_func sl_bt_api_output;
 extern rx_func sl_bt_api_input;
 extern rx_peek_func sl_bt_api_peek;
-void sl_bt_host_handle_command();
-void sl_bt_host_handle_command_noresponse();
+sl_status_t sl_bt_host_handle_command(void);
+sl_status_t sl_bt_host_handle_command_noresponse(void);
 sl_status_t sl_bt_wait_event(sl_bt_msg_t *p);
 
 sl_bt_msg_t* sli_wait_for_bgapi_message(sl_bt_msg_t *response_buf);

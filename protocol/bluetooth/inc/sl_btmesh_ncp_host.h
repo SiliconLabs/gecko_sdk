@@ -97,8 +97,8 @@ extern bgapi_device_type_queue_t sl_btmesh_api_queue;
 #define SL_BTMESH_API_REGISTER() \
   do { sli_bgapi_register_device(&sl_btmesh_api_queue); } while (0);
 
-void sl_btmesh_host_handle_command();
-void sl_btmesh_host_handle_command_noresponse();
+sl_status_t sl_btmesh_host_handle_command(void);
+sl_status_t sl_btmesh_host_handle_command_noresponse(void);
 sl_status_t sl_btmesh_wait_event(sl_btmesh_msg_t *p);
 
 #endif

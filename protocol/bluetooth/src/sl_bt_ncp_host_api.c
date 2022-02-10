@@ -17,8 +17,10 @@
 #include "sl_bt_api.h"
 #include "sli_bt_api.h"
 
-void sl_bt_host_handle_command();
-void sl_bt_host_handle_command_noresponse();
+#define return_if_fail(rc)  if ((rc) != SL_STATUS_OK) return (rc)
+
+sl_status_t sl_bt_host_handle_command(void);
+sl_status_t sl_bt_host_handle_command_noresponse(void);
 extern sl_bt_msg_t *sl_bt_cmd_msg;
 extern sl_bt_msg_t *sl_bt_rsp_msg;
 
@@ -43,7 +45,7 @@ sl_status_t sl_bt_dfu_flash_set_address(uint32_t address) {
     cmd->header=sl_bt_cmd_dfu_flash_set_address_id+(((4)&0xff)<<8)+(((4)&0x700)>>8);
 
 
-    sl_bt_host_handle_command();
+    return_if_fail(sl_bt_host_handle_command());
     return rsp->data.rsp_dfu_flash_set_address.result;
 
 }
@@ -59,7 +61,7 @@ sl_status_t sl_bt_dfu_flash_upload(size_t data_len, const uint8_t* data) {
     cmd->header=sl_bt_cmd_dfu_flash_upload_id+(((1+data_len)&0xff)<<8)+(((1+data_len)&0x700)>>8);
 
 
-    sl_bt_host_handle_command();
+    return_if_fail(sl_bt_host_handle_command());
     return rsp->data.rsp_dfu_flash_upload.result;
 
 }
@@ -73,7 +75,7 @@ sl_status_t sl_bt_dfu_flash_upload_finish() {
     cmd->header=sl_bt_cmd_dfu_flash_upload_finish_id+(((0)&0xff)<<8)+(((0)&0x700)>>8);
 
 
-    sl_bt_host_handle_command();
+    return_if_fail(sl_bt_host_handle_command());
     return rsp->data.rsp_dfu_flash_upload_finish.result;
 
 }
@@ -87,7 +89,7 @@ sl_status_t sl_bt_system_hello() {
     cmd->header=sl_bt_cmd_system_hello_id+(((0)&0xff)<<8)+(((0)&0x700)>>8);
 
 
-    sl_bt_host_handle_command();
+    return_if_fail(sl_bt_host_handle_command());
     return rsp->data.rsp_system_hello.result;
 
 }
@@ -101,7 +103,7 @@ sl_status_t sl_bt_system_start_bluetooth() {
     cmd->header=sl_bt_cmd_system_start_bluetooth_id+(((0)&0xff)<<8)+(((0)&0x700)>>8);
 
 
-    sl_bt_host_handle_command();
+    return_if_fail(sl_bt_host_handle_command());
     return rsp->data.rsp_system_start_bluetooth.result;
 
 }
@@ -115,7 +117,7 @@ sl_status_t sl_bt_system_stop_bluetooth() {
     cmd->header=sl_bt_cmd_system_stop_bluetooth_id+(((0)&0xff)<<8)+(((0)&0x700)>>8);
 
 
-    sl_bt_host_handle_command();
+    return_if_fail(sl_bt_host_handle_command());
     return rsp->data.rsp_system_stop_bluetooth.result;
 
 }
@@ -134,7 +136,7 @@ sl_status_t sl_bt_system_get_version(uint16_t *major,
     cmd->header=sl_bt_cmd_system_get_version_id+(((0)&0xff)<<8)+(((0)&0x700)>>8);
 
 
-    sl_bt_host_handle_command();
+    return_if_fail(sl_bt_host_handle_command());
     *major = rsp->data.rsp_system_get_version.major;
     *minor = rsp->data.rsp_system_get_version.minor;
     *patch = rsp->data.rsp_system_get_version.patch;
@@ -166,7 +168,7 @@ sl_status_t sl_bt_system_halt(uint8_t halt) {
     cmd->header=sl_bt_cmd_system_halt_id+(((1)&0xff)<<8)+(((1)&0x700)>>8);
 
 
-    sl_bt_host_handle_command();
+    return_if_fail(sl_bt_host_handle_command());
     return rsp->data.rsp_system_halt.result;
 
 }
@@ -185,7 +187,7 @@ sl_status_t sl_bt_system_linklayer_configure(uint8_t key,
     cmd->header=sl_bt_cmd_system_linklayer_configure_id+(((2+data_len)&0xff)<<8)+(((2+data_len)&0x700)>>8);
 
 
-    sl_bt_host_handle_command();
+    return_if_fail(sl_bt_host_handle_command());
     return rsp->data.rsp_system_linklayer_configure.result;
 
 }
@@ -204,7 +206,7 @@ sl_status_t sl_bt_system_set_tx_power(int16_t min_power,
     cmd->header=sl_bt_cmd_system_set_tx_power_id+(((4)&0xff)<<8)+(((4)&0x700)>>8);
 
 
-    sl_bt_host_handle_command();
+    return_if_fail(sl_bt_host_handle_command());
     *set_min = rsp->data.rsp_system_set_tx_power.set_min;
     *set_max = rsp->data.rsp_system_set_tx_power.set_max;
     return rsp->data.rsp_system_set_tx_power.result;
@@ -224,7 +226,7 @@ sl_status_t sl_bt_system_get_tx_power_setting(int16_t *support_min,
     cmd->header=sl_bt_cmd_system_get_tx_power_setting_id+(((0)&0xff)<<8)+(((0)&0x700)>>8);
 
 
-    sl_bt_host_handle_command();
+    return_if_fail(sl_bt_host_handle_command());
     *support_min = rsp->data.rsp_system_get_tx_power_setting.support_min;
     *support_max = rsp->data.rsp_system_get_tx_power_setting.support_max;
     *set_min = rsp->data.rsp_system_get_tx_power_setting.set_min;
@@ -245,7 +247,7 @@ sl_status_t sl_bt_system_set_identity_address(bd_addr address, uint8_t type) {
     cmd->header=sl_bt_cmd_system_set_identity_address_id+(((7)&0xff)<<8)+(((7)&0x700)>>8);
 
 
-    sl_bt_host_handle_command();
+    return_if_fail(sl_bt_host_handle_command());
     return rsp->data.rsp_system_set_identity_address.result;
 
 }
@@ -259,7 +261,7 @@ sl_status_t sl_bt_system_get_identity_address(bd_addr *address, uint8_t *type) {
     cmd->header=sl_bt_cmd_system_get_identity_address_id+(((0)&0xff)<<8)+(((0)&0x700)>>8);
 
 
-    sl_bt_host_handle_command();
+    return_if_fail(sl_bt_host_handle_command());
     memcpy(address,&rsp->data.rsp_system_get_identity_address.address,sizeof(bd_addr));
     *type = rsp->data.rsp_system_get_identity_address.type;
     return rsp->data.rsp_system_get_identity_address.result;
@@ -279,7 +281,7 @@ sl_status_t sl_bt_system_get_random_data(uint8_t length,
     cmd->header=sl_bt_cmd_system_get_random_data_id+(((1)&0xff)<<8)+(((1)&0x700)>>8);
 
 
-    sl_bt_host_handle_command();
+    return_if_fail(sl_bt_host_handle_command());
     *data_len = rsp->data.rsp_system_get_random_data.data.len;
     if (rsp->data.rsp_system_get_random_data.data.len <= max_data_size) {
         memcpy(data,rsp->data.rsp_system_get_random_data.data.data,rsp->data.rsp_system_get_random_data.data.len);
@@ -300,7 +302,7 @@ sl_status_t sl_bt_system_data_buffer_write(size_t data_len,
     cmd->header=sl_bt_cmd_system_data_buffer_write_id+(((1+data_len)&0xff)<<8)+(((1+data_len)&0x700)>>8);
 
 
-    sl_bt_host_handle_command();
+    return_if_fail(sl_bt_host_handle_command());
     return rsp->data.rsp_system_data_buffer_write.result;
 
 }
@@ -314,7 +316,7 @@ sl_status_t sl_bt_system_data_buffer_clear() {
     cmd->header=sl_bt_cmd_system_data_buffer_clear_id+(((0)&0xff)<<8)+(((0)&0x700)>>8);
 
 
-    sl_bt_host_handle_command();
+    return_if_fail(sl_bt_host_handle_command());
     return rsp->data.rsp_system_data_buffer_clear.result;
 
 }
@@ -333,7 +335,7 @@ sl_status_t sl_bt_system_get_counters(uint8_t reset,
     cmd->header=sl_bt_cmd_system_get_counters_id+(((1)&0xff)<<8)+(((1)&0x700)>>8);
 
 
-    sl_bt_host_handle_command();
+    return_if_fail(sl_bt_host_handle_command());
     *tx_packets = rsp->data.rsp_system_get_counters.tx_packets;
     *rx_packets = rsp->data.rsp_system_get_counters.rx_packets;
     *crc_errors = rsp->data.rsp_system_get_counters.crc_errors;
@@ -356,7 +358,7 @@ SL_BGAPI_DEPRECATED sl_status_t sl_bt_system_set_soft_timer(uint32_t time,
     cmd->header=sl_bt_cmd_system_set_soft_timer_id+(((6)&0xff)<<8)+(((6)&0x700)>>8);
 
 
-    sl_bt_host_handle_command();
+    return_if_fail(sl_bt_host_handle_command());
     return rsp->data.rsp_system_set_soft_timer.result;
 
 }
@@ -377,7 +379,7 @@ sl_status_t sl_bt_system_set_lazy_soft_timer(uint32_t time,
     cmd->header=sl_bt_cmd_system_set_lazy_soft_timer_id+(((10)&0xff)<<8)+(((10)&0x700)>>8);
 
 
-    sl_bt_host_handle_command();
+    return_if_fail(sl_bt_host_handle_command());
     return rsp->data.rsp_system_set_lazy_soft_timer.result;
 
 }
@@ -393,7 +395,7 @@ sl_status_t sl_bt_gap_set_privacy_mode(uint8_t privacy, uint8_t interval) {
     cmd->header=sl_bt_cmd_gap_set_privacy_mode_id+(((2)&0xff)<<8)+(((2)&0x700)>>8);
 
 
-    sl_bt_host_handle_command();
+    return_if_fail(sl_bt_host_handle_command());
     return rsp->data.rsp_gap_set_privacy_mode.result;
 
 }
@@ -410,7 +412,7 @@ sl_status_t sl_bt_gap_set_data_channel_classification(size_t channel_map_len,
     cmd->header=sl_bt_cmd_gap_set_data_channel_classification_id+(((1+channel_map_len)&0xff)<<8)+(((1+channel_map_len)&0x700)>>8);
 
 
-    sl_bt_host_handle_command();
+    return_if_fail(sl_bt_host_handle_command());
     return rsp->data.rsp_gap_set_data_channel_classification.result;
 
 }
@@ -425,7 +427,7 @@ sl_status_t sl_bt_gap_enable_whitelisting(uint8_t enable) {
     cmd->header=sl_bt_cmd_gap_enable_whitelisting_id+(((1)&0xff)<<8)+(((1)&0x700)>>8);
 
 
-    sl_bt_host_handle_command();
+    return_if_fail(sl_bt_host_handle_command());
     return rsp->data.rsp_gap_enable_whitelisting.result;
 
 }
@@ -439,7 +441,7 @@ sl_status_t sl_bt_advertiser_create_set(uint8_t *handle) {
     cmd->header=sl_bt_cmd_advertiser_create_set_id+(((0)&0xff)<<8)+(((0)&0x700)>>8);
 
 
-    sl_bt_host_handle_command();
+    return_if_fail(sl_bt_host_handle_command());
     *handle = rsp->data.rsp_advertiser_create_set.handle;
     return rsp->data.rsp_advertiser_create_set.result;
 
@@ -456,7 +458,7 @@ sl_status_t sl_bt_advertiser_configure(uint8_t advertising_set, uint32_t flags) 
     cmd->header=sl_bt_cmd_advertiser_configure_id+(((5)&0xff)<<8)+(((5)&0x700)>>8);
 
 
-    sl_bt_host_handle_command();
+    return_if_fail(sl_bt_host_handle_command());
     return rsp->data.rsp_advertiser_configure.result;
 
 }
@@ -479,7 +481,7 @@ sl_status_t sl_bt_advertiser_set_timing(uint8_t advertising_set,
     cmd->header=sl_bt_cmd_advertiser_set_timing_id+(((12)&0xff)<<8)+(((12)&0x700)>>8);
 
 
-    sl_bt_host_handle_command();
+    return_if_fail(sl_bt_host_handle_command());
     return rsp->data.rsp_advertiser_set_timing.result;
 
 }
@@ -496,7 +498,7 @@ sl_status_t sl_bt_advertiser_set_channel_map(uint8_t advertising_set,
     cmd->header=sl_bt_cmd_advertiser_set_channel_map_id+(((2)&0xff)<<8)+(((2)&0x700)>>8);
 
 
-    sl_bt_host_handle_command();
+    return_if_fail(sl_bt_host_handle_command());
     return rsp->data.rsp_advertiser_set_channel_map.result;
 
 }
@@ -514,7 +516,7 @@ sl_status_t sl_bt_advertiser_set_tx_power(uint8_t advertising_set,
     cmd->header=sl_bt_cmd_advertiser_set_tx_power_id+(((3)&0xff)<<8)+(((3)&0x700)>>8);
 
 
-    sl_bt_host_handle_command();
+    return_if_fail(sl_bt_host_handle_command());
     *set_power = rsp->data.rsp_advertiser_set_tx_power.set_power;
     return rsp->data.rsp_advertiser_set_tx_power.result;
 
@@ -532,7 +534,7 @@ sl_status_t sl_bt_advertiser_set_report_scan_request(uint8_t advertising_set,
     cmd->header=sl_bt_cmd_advertiser_set_report_scan_request_id+(((2)&0xff)<<8)+(((2)&0x700)>>8);
 
 
-    sl_bt_host_handle_command();
+    return_if_fail(sl_bt_host_handle_command());
     return rsp->data.rsp_advertiser_set_report_scan_request.result;
 
 }
@@ -552,7 +554,7 @@ sl_status_t sl_bt_advertiser_set_random_address(uint8_t advertising_set,
     cmd->header=sl_bt_cmd_advertiser_set_random_address_id+(((8)&0xff)<<8)+(((8)&0x700)>>8);
 
 
-    sl_bt_host_handle_command();
+    return_if_fail(sl_bt_host_handle_command());
     memcpy(address_out,&rsp->data.rsp_advertiser_set_random_address.address_out,sizeof(bd_addr));
     return rsp->data.rsp_advertiser_set_random_address.result;
 
@@ -568,7 +570,7 @@ sl_status_t sl_bt_advertiser_clear_random_address(uint8_t advertising_set) {
     cmd->header=sl_bt_cmd_advertiser_clear_random_address_id+(((1)&0xff)<<8)+(((1)&0x700)>>8);
 
 
-    sl_bt_host_handle_command();
+    return_if_fail(sl_bt_host_handle_command());
     return rsp->data.rsp_advertiser_clear_random_address.result;
 
 }
@@ -583,7 +585,7 @@ sl_status_t sl_bt_advertiser_stop(uint8_t advertising_set) {
     cmd->header=sl_bt_cmd_advertiser_stop_id+(((1)&0xff)<<8)+(((1)&0x700)>>8);
 
 
-    sl_bt_host_handle_command();
+    return_if_fail(sl_bt_host_handle_command());
     return rsp->data.rsp_advertiser_stop.result;
 
 }
@@ -598,7 +600,7 @@ sl_status_t sl_bt_advertiser_delete_set(uint8_t advertising_set) {
     cmd->header=sl_bt_cmd_advertiser_delete_set_id+(((1)&0xff)<<8)+(((1)&0x700)>>8);
 
 
-    sl_bt_host_handle_command();
+    return_if_fail(sl_bt_host_handle_command());
     return rsp->data.rsp_advertiser_delete_set.result;
 
 }
@@ -617,7 +619,7 @@ sl_status_t sl_bt_advertiser_set_phy(uint8_t advertising_set,
     cmd->header=sl_bt_cmd_advertiser_set_phy_id+(((3)&0xff)<<8)+(((3)&0x700)>>8);
 
 
-    sl_bt_host_handle_command();
+    return_if_fail(sl_bt_host_handle_command());
     return rsp->data.rsp_advertiser_set_phy.result;
 
 }
@@ -634,7 +636,7 @@ sl_status_t sl_bt_advertiser_set_configuration(uint8_t advertising_set,
     cmd->header=sl_bt_cmd_advertiser_set_configuration_id+(((5)&0xff)<<8)+(((5)&0x700)>>8);
 
 
-    sl_bt_host_handle_command();
+    return_if_fail(sl_bt_host_handle_command());
     return rsp->data.rsp_advertiser_set_configuration.result;
 
 }
@@ -651,7 +653,7 @@ sl_status_t sl_bt_advertiser_clear_configuration(uint8_t advertising_set,
     cmd->header=sl_bt_cmd_advertiser_clear_configuration_id+(((5)&0xff)<<8)+(((5)&0x700)>>8);
 
 
-    sl_bt_host_handle_command();
+    return_if_fail(sl_bt_host_handle_command());
     return rsp->data.rsp_advertiser_clear_configuration.result;
 
 }
@@ -672,7 +674,7 @@ sl_status_t sl_bt_advertiser_set_data(uint8_t advertising_set,
     cmd->header=sl_bt_cmd_advertiser_set_data_id+(((3+adv_data_len)&0xff)<<8)+(((3+adv_data_len)&0x700)>>8);
 
 
-    sl_bt_host_handle_command();
+    return_if_fail(sl_bt_host_handle_command());
     return rsp->data.rsp_advertiser_set_data.result;
 
 }
@@ -689,7 +691,7 @@ sl_status_t sl_bt_advertiser_set_long_data(uint8_t advertising_set,
     cmd->header=sl_bt_cmd_advertiser_set_long_data_id+(((2)&0xff)<<8)+(((2)&0x700)>>8);
 
 
-    sl_bt_host_handle_command();
+    return_if_fail(sl_bt_host_handle_command());
     return rsp->data.rsp_advertiser_set_long_data.result;
 
 }
@@ -708,7 +710,7 @@ sl_status_t sl_bt_advertiser_start(uint8_t advertising_set,
     cmd->header=sl_bt_cmd_advertiser_start_id+(((3)&0xff)<<8)+(((3)&0x700)>>8);
 
 
-    sl_bt_host_handle_command();
+    return_if_fail(sl_bt_host_handle_command());
     return rsp->data.rsp_advertiser_start.result;
 
 }
@@ -729,7 +731,7 @@ sl_status_t sl_bt_advertiser_start_periodic_advertising(uint8_t advertising_set,
     cmd->header=sl_bt_cmd_advertiser_start_periodic_advertising_id+(((9)&0xff)<<8)+(((9)&0x700)>>8);
 
 
-    sl_bt_host_handle_command();
+    return_if_fail(sl_bt_host_handle_command());
     return rsp->data.rsp_advertiser_start_periodic_advertising.result;
 
 }
@@ -744,7 +746,7 @@ sl_status_t sl_bt_advertiser_stop_periodic_advertising(uint8_t advertising_set) 
     cmd->header=sl_bt_cmd_advertiser_stop_periodic_advertising_id+(((1)&0xff)<<8)+(((1)&0x700)>>8);
 
 
-    sl_bt_host_handle_command();
+    return_if_fail(sl_bt_host_handle_command());
     return rsp->data.rsp_advertiser_stop_periodic_advertising.result;
 
 }
@@ -765,7 +767,7 @@ sl_status_t sl_bt_legacy_advertiser_set_data(uint8_t advertising_set,
     cmd->header=sl_bt_cmd_legacy_advertiser_set_data_id+(((3+data_len)&0xff)<<8)+(((3+data_len)&0x700)>>8);
 
 
-    sl_bt_host_handle_command();
+    return_if_fail(sl_bt_host_handle_command());
     return rsp->data.rsp_legacy_advertiser_set_data.result;
 
 }
@@ -782,7 +784,7 @@ sl_status_t sl_bt_legacy_advertiser_generate_data(uint8_t advertising_set,
     cmd->header=sl_bt_cmd_legacy_advertiser_generate_data_id+(((2)&0xff)<<8)+(((2)&0x700)>>8);
 
 
-    sl_bt_host_handle_command();
+    return_if_fail(sl_bt_host_handle_command());
     return rsp->data.rsp_legacy_advertiser_generate_data.result;
 
 }
@@ -799,7 +801,7 @@ sl_status_t sl_bt_legacy_advertiser_start(uint8_t advertising_set,
     cmd->header=sl_bt_cmd_legacy_advertiser_start_id+(((2)&0xff)<<8)+(((2)&0x700)>>8);
 
 
-    sl_bt_host_handle_command();
+    return_if_fail(sl_bt_host_handle_command());
     return rsp->data.rsp_legacy_advertiser_start.result;
 
 }
@@ -820,7 +822,7 @@ sl_status_t sl_bt_legacy_advertiser_start_directed(uint8_t advertising_set,
     cmd->header=sl_bt_cmd_legacy_advertiser_start_directed_id+(((9)&0xff)<<8)+(((9)&0x700)>>8);
 
 
-    sl_bt_host_handle_command();
+    return_if_fail(sl_bt_host_handle_command());
     return rsp->data.rsp_legacy_advertiser_start_directed.result;
 
 }
@@ -839,7 +841,7 @@ sl_status_t sl_bt_extended_advertiser_set_phy(uint8_t advertising_set,
     cmd->header=sl_bt_cmd_extended_advertiser_set_phy_id+(((3)&0xff)<<8)+(((3)&0x700)>>8);
 
 
-    sl_bt_host_handle_command();
+    return_if_fail(sl_bt_host_handle_command());
     return rsp->data.rsp_extended_advertiser_set_phy.result;
 
 }
@@ -858,7 +860,7 @@ sl_status_t sl_bt_extended_advertiser_set_data(uint8_t advertising_set,
     cmd->header=sl_bt_cmd_extended_advertiser_set_data_id+(((2+data_len)&0xff)<<8)+(((2+data_len)&0x700)>>8);
 
 
-    sl_bt_host_handle_command();
+    return_if_fail(sl_bt_host_handle_command());
     return rsp->data.rsp_extended_advertiser_set_data.result;
 
 }
@@ -873,7 +875,7 @@ sl_status_t sl_bt_extended_advertiser_set_long_data(uint8_t advertising_set) {
     cmd->header=sl_bt_cmd_extended_advertiser_set_long_data_id+(((1)&0xff)<<8)+(((1)&0x700)>>8);
 
 
-    sl_bt_host_handle_command();
+    return_if_fail(sl_bt_host_handle_command());
     return rsp->data.rsp_extended_advertiser_set_long_data.result;
 
 }
@@ -890,7 +892,7 @@ sl_status_t sl_bt_extended_advertiser_generate_data(uint8_t advertising_set,
     cmd->header=sl_bt_cmd_extended_advertiser_generate_data_id+(((2)&0xff)<<8)+(((2)&0x700)>>8);
 
 
-    sl_bt_host_handle_command();
+    return_if_fail(sl_bt_host_handle_command());
     return rsp->data.rsp_extended_advertiser_generate_data.result;
 
 }
@@ -909,7 +911,7 @@ sl_status_t sl_bt_extended_advertiser_start(uint8_t advertising_set,
     cmd->header=sl_bt_cmd_extended_advertiser_start_id+(((6)&0xff)<<8)+(((6)&0x700)>>8);
 
 
-    sl_bt_host_handle_command();
+    return_if_fail(sl_bt_host_handle_command());
     return rsp->data.rsp_extended_advertiser_start.result;
 
 }
@@ -928,7 +930,7 @@ sl_status_t sl_bt_periodic_advertiser_set_data(uint8_t advertising_set,
     cmd->header=sl_bt_cmd_periodic_advertiser_set_data_id+(((2+data_len)&0xff)<<8)+(((2+data_len)&0x700)>>8);
 
 
-    sl_bt_host_handle_command();
+    return_if_fail(sl_bt_host_handle_command());
     return rsp->data.rsp_periodic_advertiser_set_data.result;
 
 }
@@ -943,7 +945,7 @@ sl_status_t sl_bt_periodic_advertiser_set_long_data(uint8_t advertising_set) {
     cmd->header=sl_bt_cmd_periodic_advertiser_set_long_data_id+(((1)&0xff)<<8)+(((1)&0x700)>>8);
 
 
-    sl_bt_host_handle_command();
+    return_if_fail(sl_bt_host_handle_command());
     return rsp->data.rsp_periodic_advertiser_set_long_data.result;
 
 }
@@ -964,7 +966,7 @@ sl_status_t sl_bt_periodic_advertiser_start(uint8_t advertising_set,
     cmd->header=sl_bt_cmd_periodic_advertiser_start_id+(((9)&0xff)<<8)+(((9)&0x700)>>8);
 
 
-    sl_bt_host_handle_command();
+    return_if_fail(sl_bt_host_handle_command());
     return rsp->data.rsp_periodic_advertiser_start.result;
 
 }
@@ -979,7 +981,7 @@ sl_status_t sl_bt_periodic_advertiser_stop(uint8_t advertising_set) {
     cmd->header=sl_bt_cmd_periodic_advertiser_stop_id+(((1)&0xff)<<8)+(((1)&0x700)>>8);
 
 
-    sl_bt_host_handle_command();
+    return_if_fail(sl_bt_host_handle_command());
     return rsp->data.rsp_periodic_advertiser_stop.result;
 
 }
@@ -998,7 +1000,7 @@ sl_status_t sl_bt_scanner_set_timing(uint8_t phys,
     cmd->header=sl_bt_cmd_scanner_set_timing_id+(((5)&0xff)<<8)+(((5)&0x700)>>8);
 
 
-    sl_bt_host_handle_command();
+    return_if_fail(sl_bt_host_handle_command());
     return rsp->data.rsp_scanner_set_timing.result;
 
 }
@@ -1014,7 +1016,7 @@ sl_status_t sl_bt_scanner_set_mode(uint8_t phys, uint8_t scan_mode) {
     cmd->header=sl_bt_cmd_scanner_set_mode_id+(((2)&0xff)<<8)+(((2)&0x700)>>8);
 
 
-    sl_bt_host_handle_command();
+    return_if_fail(sl_bt_host_handle_command());
     return rsp->data.rsp_scanner_set_mode.result;
 
 }
@@ -1030,7 +1032,7 @@ sl_status_t sl_bt_scanner_start(uint8_t scanning_phy, uint8_t discover_mode) {
     cmd->header=sl_bt_cmd_scanner_start_id+(((2)&0xff)<<8)+(((2)&0x700)>>8);
 
 
-    sl_bt_host_handle_command();
+    return_if_fail(sl_bt_host_handle_command());
     return rsp->data.rsp_scanner_start.result;
 
 }
@@ -1044,7 +1046,7 @@ sl_status_t sl_bt_scanner_stop() {
     cmd->header=sl_bt_cmd_scanner_stop_id+(((0)&0xff)<<8)+(((0)&0x700)>>8);
 
 
-    sl_bt_host_handle_command();
+    return_if_fail(sl_bt_host_handle_command());
     return rsp->data.rsp_scanner_stop.result;
 
 }
@@ -1063,7 +1065,7 @@ sl_status_t sl_bt_sync_set_parameters(uint16_t skip,
     cmd->header=sl_bt_cmd_sync_set_parameters_id+(((8)&0xff)<<8)+(((8)&0x700)>>8);
 
 
-    sl_bt_host_handle_command();
+    return_if_fail(sl_bt_host_handle_command());
     return rsp->data.rsp_sync_set_parameters.result;
 
 }
@@ -1083,7 +1085,7 @@ sl_status_t sl_bt_sync_open(bd_addr address,
     cmd->header=sl_bt_cmd_sync_open_id+(((8)&0xff)<<8)+(((8)&0x700)>>8);
 
 
-    sl_bt_host_handle_command();
+    return_if_fail(sl_bt_host_handle_command());
     *sync = rsp->data.rsp_sync_open.sync;
     return rsp->data.rsp_sync_open.result;
 
@@ -1101,7 +1103,7 @@ sl_status_t sl_bt_sync_set_reporting_mode(uint16_t sync,
     cmd->header=sl_bt_cmd_sync_set_reporting_mode_id+(((3)&0xff)<<8)+(((3)&0x700)>>8);
 
 
-    sl_bt_host_handle_command();
+    return_if_fail(sl_bt_host_handle_command());
     return rsp->data.rsp_sync_set_reporting_mode.result;
 
 }
@@ -1116,7 +1118,7 @@ sl_status_t sl_bt_sync_close(uint16_t sync) {
     cmd->header=sl_bt_cmd_sync_close_id+(((2)&0xff)<<8)+(((2)&0x700)>>8);
 
 
-    sl_bt_host_handle_command();
+    return_if_fail(sl_bt_host_handle_command());
     return rsp->data.rsp_sync_close.result;
 
 }
@@ -1141,7 +1143,7 @@ sl_status_t sl_bt_connection_set_default_parameters(uint16_t min_interval,
     cmd->header=sl_bt_cmd_connection_set_default_parameters_id+(((12)&0xff)<<8)+(((12)&0x700)>>8);
 
 
-    sl_bt_host_handle_command();
+    return_if_fail(sl_bt_host_handle_command());
     return rsp->data.rsp_connection_set_default_parameters.result;
 
 }
@@ -1158,7 +1160,7 @@ sl_status_t sl_bt_connection_set_default_preferred_phy(uint8_t preferred_phy,
     cmd->header=sl_bt_cmd_connection_set_default_preferred_phy_id+(((2)&0xff)<<8)+(((2)&0x700)>>8);
 
 
-    sl_bt_host_handle_command();
+    return_if_fail(sl_bt_host_handle_command());
     return rsp->data.rsp_connection_set_default_preferred_phy.result;
 
 }
@@ -1178,7 +1180,7 @@ sl_status_t sl_bt_connection_open(bd_addr address,
     cmd->header=sl_bt_cmd_connection_open_id+(((8)&0xff)<<8)+(((8)&0x700)>>8);
 
 
-    sl_bt_host_handle_command();
+    return_if_fail(sl_bt_host_handle_command());
     *connection = rsp->data.rsp_connection_open.connection;
     return rsp->data.rsp_connection_open.result;
 
@@ -1206,7 +1208,7 @@ sl_status_t sl_bt_connection_set_parameters(uint8_t connection,
     cmd->header=sl_bt_cmd_connection_set_parameters_id+(((13)&0xff)<<8)+(((13)&0x700)>>8);
 
 
-    sl_bt_host_handle_command();
+    return_if_fail(sl_bt_host_handle_command());
     return rsp->data.rsp_connection_set_parameters.result;
 
 }
@@ -1225,7 +1227,7 @@ sl_status_t sl_bt_connection_set_preferred_phy(uint8_t connection,
     cmd->header=sl_bt_cmd_connection_set_preferred_phy_id+(((3)&0xff)<<8)+(((3)&0x700)>>8);
 
 
-    sl_bt_host_handle_command();
+    return_if_fail(sl_bt_host_handle_command());
     return rsp->data.rsp_connection_set_preferred_phy.result;
 
 }
@@ -1242,7 +1244,7 @@ sl_status_t sl_bt_connection_disable_slave_latency(uint8_t connection,
     cmd->header=sl_bt_cmd_connection_disable_slave_latency_id+(((2)&0xff)<<8)+(((2)&0x700)>>8);
 
 
-    sl_bt_host_handle_command();
+    return_if_fail(sl_bt_host_handle_command());
     return rsp->data.rsp_connection_disable_slave_latency.result;
 
 }
@@ -1257,7 +1259,7 @@ sl_status_t sl_bt_connection_get_rssi(uint8_t connection) {
     cmd->header=sl_bt_cmd_connection_get_rssi_id+(((1)&0xff)<<8)+(((1)&0x700)>>8);
 
 
-    sl_bt_host_handle_command();
+    return_if_fail(sl_bt_host_handle_command());
     return rsp->data.rsp_connection_get_rssi.result;
 
 }
@@ -1275,7 +1277,7 @@ sl_status_t sl_bt_connection_read_channel_map(uint8_t connection,
     cmd->header=sl_bt_cmd_connection_read_channel_map_id+(((1)&0xff)<<8)+(((1)&0x700)>>8);
 
 
-    sl_bt_host_handle_command();
+    return_if_fail(sl_bt_host_handle_command());
     *channel_map_len = rsp->data.rsp_connection_read_channel_map.channel_map.len;
     if (rsp->data.rsp_connection_read_channel_map.channel_map.len <= max_channel_map_size) {
         memcpy(channel_map,rsp->data.rsp_connection_read_channel_map.channel_map.data,rsp->data.rsp_connection_read_channel_map.channel_map.len);
@@ -1296,7 +1298,7 @@ sl_status_t sl_bt_connection_set_power_reporting(uint8_t connection,
     cmd->header=sl_bt_cmd_connection_set_power_reporting_id+(((2)&0xff)<<8)+(((2)&0x700)>>8);
 
 
-    sl_bt_host_handle_command();
+    return_if_fail(sl_bt_host_handle_command());
     return rsp->data.rsp_connection_set_power_reporting.result;
 
 }
@@ -1313,7 +1315,7 @@ sl_status_t sl_bt_connection_set_remote_power_reporting(uint8_t connection,
     cmd->header=sl_bt_cmd_connection_set_remote_power_reporting_id+(((2)&0xff)<<8)+(((2)&0x700)>>8);
 
 
-    sl_bt_host_handle_command();
+    return_if_fail(sl_bt_host_handle_command());
     return rsp->data.rsp_connection_set_remote_power_reporting.result;
 
 }
@@ -1332,7 +1334,7 @@ sl_status_t sl_bt_connection_get_tx_power(uint8_t connection,
     cmd->header=sl_bt_cmd_connection_get_tx_power_id+(((2)&0xff)<<8)+(((2)&0x700)>>8);
 
 
-    sl_bt_host_handle_command();
+    return_if_fail(sl_bt_host_handle_command());
     *current_level = rsp->data.rsp_connection_get_tx_power.current_level;
     *max_level = rsp->data.rsp_connection_get_tx_power.max_level;
     return rsp->data.rsp_connection_get_tx_power.result;
@@ -1351,7 +1353,7 @@ sl_status_t sl_bt_connection_get_remote_tx_power(uint8_t connection,
     cmd->header=sl_bt_cmd_connection_get_remote_tx_power_id+(((2)&0xff)<<8)+(((2)&0x700)>>8);
 
 
-    sl_bt_host_handle_command();
+    return_if_fail(sl_bt_host_handle_command());
     return rsp->data.rsp_connection_get_remote_tx_power.result;
 
 }
@@ -1366,7 +1368,7 @@ sl_status_t sl_bt_connection_close(uint8_t connection) {
     cmd->header=sl_bt_cmd_connection_close_id+(((1)&0xff)<<8)+(((1)&0x700)>>8);
 
 
-    sl_bt_host_handle_command();
+    return_if_fail(sl_bt_host_handle_command());
     return rsp->data.rsp_connection_close.result;
 
 }
@@ -1381,7 +1383,7 @@ sl_status_t sl_bt_connection_read_remote_used_features(uint8_t connection) {
     cmd->header=sl_bt_cmd_connection_read_remote_used_features_id+(((1)&0xff)<<8)+(((1)&0x700)>>8);
 
 
-    sl_bt_host_handle_command();
+    return_if_fail(sl_bt_host_handle_command());
     return rsp->data.rsp_connection_read_remote_used_features.result;
 
 }
@@ -1396,7 +1398,7 @@ sl_status_t sl_bt_gatt_set_max_mtu(uint16_t max_mtu, uint16_t *max_mtu_out) {
     cmd->header=sl_bt_cmd_gatt_set_max_mtu_id+(((2)&0xff)<<8)+(((2)&0x700)>>8);
 
 
-    sl_bt_host_handle_command();
+    return_if_fail(sl_bt_host_handle_command());
     *max_mtu_out = rsp->data.rsp_gatt_set_max_mtu.max_mtu_out;
     return rsp->data.rsp_gatt_set_max_mtu.result;
 
@@ -1412,7 +1414,7 @@ sl_status_t sl_bt_gatt_discover_primary_services(uint8_t connection) {
     cmd->header=sl_bt_cmd_gatt_discover_primary_services_id+(((1)&0xff)<<8)+(((1)&0x700)>>8);
 
 
-    sl_bt_host_handle_command();
+    return_if_fail(sl_bt_host_handle_command());
     return rsp->data.rsp_gatt_discover_primary_services.result;
 
 }
@@ -1431,7 +1433,7 @@ sl_status_t sl_bt_gatt_discover_primary_services_by_uuid(uint8_t connection,
     cmd->header=sl_bt_cmd_gatt_discover_primary_services_by_uuid_id+(((2+uuid_len)&0xff)<<8)+(((2+uuid_len)&0x700)>>8);
 
 
-    sl_bt_host_handle_command();
+    return_if_fail(sl_bt_host_handle_command());
     return rsp->data.rsp_gatt_discover_primary_services_by_uuid.result;
 
 }
@@ -1448,7 +1450,7 @@ sl_status_t sl_bt_gatt_find_included_services(uint8_t connection,
     cmd->header=sl_bt_cmd_gatt_find_included_services_id+(((5)&0xff)<<8)+(((5)&0x700)>>8);
 
 
-    sl_bt_host_handle_command();
+    return_if_fail(sl_bt_host_handle_command());
     return rsp->data.rsp_gatt_find_included_services.result;
 
 }
@@ -1465,7 +1467,7 @@ sl_status_t sl_bt_gatt_discover_characteristics(uint8_t connection,
     cmd->header=sl_bt_cmd_gatt_discover_characteristics_id+(((5)&0xff)<<8)+(((5)&0x700)>>8);
 
 
-    sl_bt_host_handle_command();
+    return_if_fail(sl_bt_host_handle_command());
     return rsp->data.rsp_gatt_discover_characteristics.result;
 
 }
@@ -1486,7 +1488,7 @@ sl_status_t sl_bt_gatt_discover_characteristics_by_uuid(uint8_t connection,
     cmd->header=sl_bt_cmd_gatt_discover_characteristics_by_uuid_id+(((6+uuid_len)&0xff)<<8)+(((6+uuid_len)&0x700)>>8);
 
 
-    sl_bt_host_handle_command();
+    return_if_fail(sl_bt_host_handle_command());
     return rsp->data.rsp_gatt_discover_characteristics_by_uuid.result;
 
 }
@@ -1503,7 +1505,7 @@ sl_status_t sl_bt_gatt_discover_descriptors(uint8_t connection,
     cmd->header=sl_bt_cmd_gatt_discover_descriptors_id+(((3)&0xff)<<8)+(((3)&0x700)>>8);
 
 
-    sl_bt_host_handle_command();
+    return_if_fail(sl_bt_host_handle_command());
     return rsp->data.rsp_gatt_discover_descriptors.result;
 
 }
@@ -1522,7 +1524,7 @@ sl_status_t sl_bt_gatt_set_characteristic_notification(uint8_t connection,
     cmd->header=sl_bt_cmd_gatt_set_characteristic_notification_id+(((4)&0xff)<<8)+(((4)&0x700)>>8);
 
 
-    sl_bt_host_handle_command();
+    return_if_fail(sl_bt_host_handle_command());
     return rsp->data.rsp_gatt_set_characteristic_notification.result;
 
 }
@@ -1537,7 +1539,7 @@ sl_status_t sl_bt_gatt_send_characteristic_confirmation(uint8_t connection) {
     cmd->header=sl_bt_cmd_gatt_send_characteristic_confirmation_id+(((1)&0xff)<<8)+(((1)&0x700)>>8);
 
 
-    sl_bt_host_handle_command();
+    return_if_fail(sl_bt_host_handle_command());
     return rsp->data.rsp_gatt_send_characteristic_confirmation.result;
 
 }
@@ -1554,7 +1556,7 @@ sl_status_t sl_bt_gatt_read_characteristic_value(uint8_t connection,
     cmd->header=sl_bt_cmd_gatt_read_characteristic_value_id+(((3)&0xff)<<8)+(((3)&0x700)>>8);
 
 
-    sl_bt_host_handle_command();
+    return_if_fail(sl_bt_host_handle_command());
     return rsp->data.rsp_gatt_read_characteristic_value.result;
 
 }
@@ -1575,7 +1577,7 @@ sl_status_t sl_bt_gatt_read_characteristic_value_from_offset(uint8_t connection,
     cmd->header=sl_bt_cmd_gatt_read_characteristic_value_from_offset_id+(((7)&0xff)<<8)+(((7)&0x700)>>8);
 
 
-    sl_bt_host_handle_command();
+    return_if_fail(sl_bt_host_handle_command());
     return rsp->data.rsp_gatt_read_characteristic_value_from_offset.result;
 
 }
@@ -1594,7 +1596,7 @@ sl_status_t sl_bt_gatt_read_multiple_characteristic_values(uint8_t connection,
     cmd->header=sl_bt_cmd_gatt_read_multiple_characteristic_values_id+(((2+characteristic_list_len)&0xff)<<8)+(((2+characteristic_list_len)&0x700)>>8);
 
 
-    sl_bt_host_handle_command();
+    return_if_fail(sl_bt_host_handle_command());
     return rsp->data.rsp_gatt_read_multiple_characteristic_values.result;
 
 }
@@ -1615,7 +1617,7 @@ sl_status_t sl_bt_gatt_read_characteristic_value_by_uuid(uint8_t connection,
     cmd->header=sl_bt_cmd_gatt_read_characteristic_value_by_uuid_id+(((6+uuid_len)&0xff)<<8)+(((6+uuid_len)&0x700)>>8);
 
 
-    sl_bt_host_handle_command();
+    return_if_fail(sl_bt_host_handle_command());
     return rsp->data.rsp_gatt_read_characteristic_value_by_uuid.result;
 
 }
@@ -1636,7 +1638,7 @@ sl_status_t sl_bt_gatt_write_characteristic_value(uint8_t connection,
     cmd->header=sl_bt_cmd_gatt_write_characteristic_value_id+(((4+value_len)&0xff)<<8)+(((4+value_len)&0x700)>>8);
 
 
-    sl_bt_host_handle_command();
+    return_if_fail(sl_bt_host_handle_command());
     return rsp->data.rsp_gatt_write_characteristic_value.result;
 
 }
@@ -1658,7 +1660,7 @@ sl_status_t sl_bt_gatt_write_characteristic_value_without_response(uint8_t conne
     cmd->header=sl_bt_cmd_gatt_write_characteristic_value_without_response_id+(((4+value_len)&0xff)<<8)+(((4+value_len)&0x700)>>8);
 
 
-    sl_bt_host_handle_command();
+    return_if_fail(sl_bt_host_handle_command());
     *sent_len = rsp->data.rsp_gatt_write_characteristic_value_without_response.sent_len;
     return rsp->data.rsp_gatt_write_characteristic_value_without_response.result;
 
@@ -1683,7 +1685,7 @@ sl_status_t sl_bt_gatt_prepare_characteristic_value_write(uint8_t connection,
     cmd->header=sl_bt_cmd_gatt_prepare_characteristic_value_write_id+(((6+value_len)&0xff)<<8)+(((6+value_len)&0x700)>>8);
 
 
-    sl_bt_host_handle_command();
+    return_if_fail(sl_bt_host_handle_command());
     *sent_len = rsp->data.rsp_gatt_prepare_characteristic_value_write.sent_len;
     return rsp->data.rsp_gatt_prepare_characteristic_value_write.result;
 
@@ -1708,7 +1710,7 @@ sl_status_t sl_bt_gatt_prepare_characteristic_value_reliable_write(uint8_t conne
     cmd->header=sl_bt_cmd_gatt_prepare_characteristic_value_reliable_write_id+(((6+value_len)&0xff)<<8)+(((6+value_len)&0x700)>>8);
 
 
-    sl_bt_host_handle_command();
+    return_if_fail(sl_bt_host_handle_command());
     *sent_len = rsp->data.rsp_gatt_prepare_characteristic_value_reliable_write.sent_len;
     return rsp->data.rsp_gatt_prepare_characteristic_value_reliable_write.result;
 
@@ -1726,7 +1728,7 @@ sl_status_t sl_bt_gatt_execute_characteristic_value_write(uint8_t connection,
     cmd->header=sl_bt_cmd_gatt_execute_characteristic_value_write_id+(((2)&0xff)<<8)+(((2)&0x700)>>8);
 
 
-    sl_bt_host_handle_command();
+    return_if_fail(sl_bt_host_handle_command());
     return rsp->data.rsp_gatt_execute_characteristic_value_write.result;
 
 }
@@ -1743,7 +1745,7 @@ sl_status_t sl_bt_gatt_read_descriptor_value(uint8_t connection,
     cmd->header=sl_bt_cmd_gatt_read_descriptor_value_id+(((3)&0xff)<<8)+(((3)&0x700)>>8);
 
 
-    sl_bt_host_handle_command();
+    return_if_fail(sl_bt_host_handle_command());
     return rsp->data.rsp_gatt_read_descriptor_value.result;
 
 }
@@ -1764,7 +1766,7 @@ sl_status_t sl_bt_gatt_write_descriptor_value(uint8_t connection,
     cmd->header=sl_bt_cmd_gatt_write_descriptor_value_id+(((4+value_len)&0xff)<<8)+(((4+value_len)&0x700)>>8);
 
 
-    sl_bt_host_handle_command();
+    return_if_fail(sl_bt_host_handle_command());
     return rsp->data.rsp_gatt_write_descriptor_value.result;
 
 }
@@ -1778,7 +1780,7 @@ sl_status_t sl_bt_gattdb_new_session(uint16_t *session) {
     cmd->header=sl_bt_cmd_gattdb_new_session_id+(((0)&0xff)<<8)+(((0)&0x700)>>8);
 
 
-    sl_bt_host_handle_command();
+    return_if_fail(sl_bt_host_handle_command());
     *session = rsp->data.rsp_gattdb_new_session.session;
     return rsp->data.rsp_gattdb_new_session.result;
 
@@ -1803,7 +1805,7 @@ sl_status_t sl_bt_gattdb_add_service(uint16_t session,
     cmd->header=sl_bt_cmd_gattdb_add_service_id+(((5+uuid_len)&0xff)<<8)+(((5+uuid_len)&0x700)>>8);
 
 
-    sl_bt_host_handle_command();
+    return_if_fail(sl_bt_host_handle_command());
     *service = rsp->data.rsp_gattdb_add_service.service;
     return rsp->data.rsp_gattdb_add_service.result;
 
@@ -1820,7 +1822,7 @@ sl_status_t sl_bt_gattdb_remove_service(uint16_t session, uint16_t service) {
     cmd->header=sl_bt_cmd_gattdb_remove_service_id+(((4)&0xff)<<8)+(((4)&0x700)>>8);
 
 
-    sl_bt_host_handle_command();
+    return_if_fail(sl_bt_host_handle_command());
     return rsp->data.rsp_gattdb_remove_service.result;
 
 }
@@ -1840,7 +1842,7 @@ sl_status_t sl_bt_gattdb_add_included_service(uint16_t session,
     cmd->header=sl_bt_cmd_gattdb_add_included_service_id+(((6)&0xff)<<8)+(((6)&0x700)>>8);
 
 
-    sl_bt_host_handle_command();
+    return_if_fail(sl_bt_host_handle_command());
     *attribute = rsp->data.rsp_gattdb_add_included_service.attribute;
     return rsp->data.rsp_gattdb_add_included_service.result;
 
@@ -1858,7 +1860,7 @@ sl_status_t sl_bt_gattdb_remove_included_service(uint16_t session,
     cmd->header=sl_bt_cmd_gattdb_remove_included_service_id+(((4)&0xff)<<8)+(((4)&0x700)>>8);
 
 
-    sl_bt_host_handle_command();
+    return_if_fail(sl_bt_host_handle_command());
     return rsp->data.rsp_gattdb_remove_included_service.result;
 
 }
@@ -1892,7 +1894,7 @@ sl_status_t sl_bt_gattdb_add_uuid16_characteristic(uint16_t session,
     cmd->header=sl_bt_cmd_gattdb_add_uuid16_characteristic_id+(((16+value_len)&0xff)<<8)+(((16+value_len)&0x700)>>8);
 
 
-    sl_bt_host_handle_command();
+    return_if_fail(sl_bt_host_handle_command());
     *characteristic = rsp->data.rsp_gattdb_add_uuid16_characteristic.characteristic;
     return rsp->data.rsp_gattdb_add_uuid16_characteristic.result;
 
@@ -1927,7 +1929,7 @@ sl_status_t sl_bt_gattdb_add_uuid128_characteristic(uint16_t session,
     cmd->header=sl_bt_cmd_gattdb_add_uuid128_characteristic_id+(((30+value_len)&0xff)<<8)+(((30+value_len)&0x700)>>8);
 
 
-    sl_bt_host_handle_command();
+    return_if_fail(sl_bt_host_handle_command());
     *characteristic = rsp->data.rsp_gattdb_add_uuid128_characteristic.characteristic;
     return rsp->data.rsp_gattdb_add_uuid128_characteristic.result;
 
@@ -1945,7 +1947,7 @@ sl_status_t sl_bt_gattdb_remove_characteristic(uint16_t session,
     cmd->header=sl_bt_cmd_gattdb_remove_characteristic_id+(((4)&0xff)<<8)+(((4)&0x700)>>8);
 
 
-    sl_bt_host_handle_command();
+    return_if_fail(sl_bt_host_handle_command());
     return rsp->data.rsp_gattdb_remove_characteristic.result;
 
 }
@@ -1977,7 +1979,7 @@ sl_status_t sl_bt_gattdb_add_uuid16_descriptor(uint16_t session,
     cmd->header=sl_bt_cmd_gattdb_add_uuid16_descriptor_id+(((15+value_len)&0xff)<<8)+(((15+value_len)&0x700)>>8);
 
 
-    sl_bt_host_handle_command();
+    return_if_fail(sl_bt_host_handle_command());
     *descriptor = rsp->data.rsp_gattdb_add_uuid16_descriptor.descriptor;
     return rsp->data.rsp_gattdb_add_uuid16_descriptor.result;
 
@@ -2010,7 +2012,7 @@ sl_status_t sl_bt_gattdb_add_uuid128_descriptor(uint16_t session,
     cmd->header=sl_bt_cmd_gattdb_add_uuid128_descriptor_id+(((29+value_len)&0xff)<<8)+(((29+value_len)&0x700)>>8);
 
 
-    sl_bt_host_handle_command();
+    return_if_fail(sl_bt_host_handle_command());
     *descriptor = rsp->data.rsp_gattdb_add_uuid128_descriptor.descriptor;
     return rsp->data.rsp_gattdb_add_uuid128_descriptor.result;
 
@@ -2028,7 +2030,7 @@ sl_status_t sl_bt_gattdb_remove_descriptor(uint16_t session,
     cmd->header=sl_bt_cmd_gattdb_remove_descriptor_id+(((4)&0xff)<<8)+(((4)&0x700)>>8);
 
 
-    sl_bt_host_handle_command();
+    return_if_fail(sl_bt_host_handle_command());
     return rsp->data.rsp_gattdb_remove_descriptor.result;
 
 }
@@ -2044,7 +2046,7 @@ sl_status_t sl_bt_gattdb_start_service(uint16_t session, uint16_t service) {
     cmd->header=sl_bt_cmd_gattdb_start_service_id+(((4)&0xff)<<8)+(((4)&0x700)>>8);
 
 
-    sl_bt_host_handle_command();
+    return_if_fail(sl_bt_host_handle_command());
     return rsp->data.rsp_gattdb_start_service.result;
 
 }
@@ -2060,7 +2062,7 @@ sl_status_t sl_bt_gattdb_stop_service(uint16_t session, uint16_t service) {
     cmd->header=sl_bt_cmd_gattdb_stop_service_id+(((4)&0xff)<<8)+(((4)&0x700)>>8);
 
 
-    sl_bt_host_handle_command();
+    return_if_fail(sl_bt_host_handle_command());
     return rsp->data.rsp_gattdb_stop_service.result;
 
 }
@@ -2077,7 +2079,7 @@ sl_status_t sl_bt_gattdb_start_characteristic(uint16_t session,
     cmd->header=sl_bt_cmd_gattdb_start_characteristic_id+(((4)&0xff)<<8)+(((4)&0x700)>>8);
 
 
-    sl_bt_host_handle_command();
+    return_if_fail(sl_bt_host_handle_command());
     return rsp->data.rsp_gattdb_start_characteristic.result;
 
 }
@@ -2094,7 +2096,7 @@ sl_status_t sl_bt_gattdb_stop_characteristic(uint16_t session,
     cmd->header=sl_bt_cmd_gattdb_stop_characteristic_id+(((4)&0xff)<<8)+(((4)&0x700)>>8);
 
 
-    sl_bt_host_handle_command();
+    return_if_fail(sl_bt_host_handle_command());
     return rsp->data.rsp_gattdb_stop_characteristic.result;
 
 }
@@ -2109,7 +2111,7 @@ sl_status_t sl_bt_gattdb_commit(uint16_t session) {
     cmd->header=sl_bt_cmd_gattdb_commit_id+(((2)&0xff)<<8)+(((2)&0x700)>>8);
 
 
-    sl_bt_host_handle_command();
+    return_if_fail(sl_bt_host_handle_command());
     return rsp->data.rsp_gattdb_commit.result;
 
 }
@@ -2124,7 +2126,7 @@ sl_status_t sl_bt_gattdb_abort(uint16_t session) {
     cmd->header=sl_bt_cmd_gattdb_abort_id+(((2)&0xff)<<8)+(((2)&0x700)>>8);
 
 
-    sl_bt_host_handle_command();
+    return_if_fail(sl_bt_host_handle_command());
     return rsp->data.rsp_gattdb_abort.result;
 
 }
@@ -2140,7 +2142,7 @@ sl_status_t sl_bt_gatt_server_set_max_mtu(uint16_t max_mtu,
     cmd->header=sl_bt_cmd_gatt_server_set_max_mtu_id+(((2)&0xff)<<8)+(((2)&0x700)>>8);
 
 
-    sl_bt_host_handle_command();
+    return_if_fail(sl_bt_host_handle_command());
     *max_mtu_out = rsp->data.rsp_gatt_server_set_max_mtu.max_mtu_out;
     return rsp->data.rsp_gatt_server_set_max_mtu.result;
 
@@ -2156,7 +2158,7 @@ sl_status_t sl_bt_gatt_server_get_mtu(uint8_t connection, uint16_t *mtu) {
     cmd->header=sl_bt_cmd_gatt_server_get_mtu_id+(((1)&0xff)<<8)+(((1)&0x700)>>8);
 
 
-    sl_bt_host_handle_command();
+    return_if_fail(sl_bt_host_handle_command());
     *mtu = rsp->data.rsp_gatt_server_get_mtu.mtu;
     return rsp->data.rsp_gatt_server_get_mtu.result;
 
@@ -2177,7 +2179,7 @@ sl_status_t sl_bt_gatt_server_find_attribute(uint16_t start,
     cmd->header=sl_bt_cmd_gatt_server_find_attribute_id+(((3+type_len)&0xff)<<8)+(((3+type_len)&0x700)>>8);
 
 
-    sl_bt_host_handle_command();
+    return_if_fail(sl_bt_host_handle_command());
     *attribute = rsp->data.rsp_gatt_server_find_attribute.attribute;
     return rsp->data.rsp_gatt_server_find_attribute.result;
 
@@ -2198,7 +2200,7 @@ sl_status_t sl_bt_gatt_server_read_attribute_value(uint16_t attribute,
     cmd->header=sl_bt_cmd_gatt_server_read_attribute_value_id+(((4)&0xff)<<8)+(((4)&0x700)>>8);
 
 
-    sl_bt_host_handle_command();
+    return_if_fail(sl_bt_host_handle_command());
     *value_len = rsp->data.rsp_gatt_server_read_attribute_value.value.len;
     if (rsp->data.rsp_gatt_server_read_attribute_value.value.len <= max_value_size) {
         memcpy(value,rsp->data.rsp_gatt_server_read_attribute_value.value.data,rsp->data.rsp_gatt_server_read_attribute_value.value.len);
@@ -2220,7 +2222,7 @@ sl_status_t sl_bt_gatt_server_read_attribute_type(uint16_t attribute,
     cmd->header=sl_bt_cmd_gatt_server_read_attribute_type_id+(((2)&0xff)<<8)+(((2)&0x700)>>8);
 
 
-    sl_bt_host_handle_command();
+    return_if_fail(sl_bt_host_handle_command());
     *type_len = rsp->data.rsp_gatt_server_read_attribute_type.type.len;
     if (rsp->data.rsp_gatt_server_read_attribute_type.type.len <= max_type_size) {
         memcpy(type,rsp->data.rsp_gatt_server_read_attribute_type.type.data,rsp->data.rsp_gatt_server_read_attribute_type.type.len);
@@ -2245,7 +2247,7 @@ sl_status_t sl_bt_gatt_server_write_attribute_value(uint16_t attribute,
     cmd->header=sl_bt_cmd_gatt_server_write_attribute_value_id+(((5+value_len)&0xff)<<8)+(((5+value_len)&0x700)>>8);
 
 
-    sl_bt_host_handle_command();
+    return_if_fail(sl_bt_host_handle_command());
     return rsp->data.rsp_gatt_server_write_attribute_value.result;
 
 }
@@ -2269,7 +2271,7 @@ sl_status_t sl_bt_gatt_server_send_user_read_response(uint8_t connection,
     cmd->header=sl_bt_cmd_gatt_server_send_user_read_response_id+(((5+value_len)&0xff)<<8)+(((5+value_len)&0x700)>>8);
 
 
-    sl_bt_host_handle_command();
+    return_if_fail(sl_bt_host_handle_command());
     *sent_len = rsp->data.rsp_gatt_server_send_user_read_response.sent_len;
     return rsp->data.rsp_gatt_server_send_user_read_response.result;
 
@@ -2289,7 +2291,7 @@ sl_status_t sl_bt_gatt_server_send_user_write_response(uint8_t connection,
     cmd->header=sl_bt_cmd_gatt_server_send_user_write_response_id+(((4)&0xff)<<8)+(((4)&0x700)>>8);
 
 
-    sl_bt_host_handle_command();
+    return_if_fail(sl_bt_host_handle_command());
     return rsp->data.rsp_gatt_server_send_user_write_response.result;
 
 }
@@ -2310,7 +2312,7 @@ sl_status_t sl_bt_gatt_server_send_notification(uint8_t connection,
     cmd->header=sl_bt_cmd_gatt_server_send_notification_id+(((4+value_len)&0xff)<<8)+(((4+value_len)&0x700)>>8);
 
 
-    sl_bt_host_handle_command();
+    return_if_fail(sl_bt_host_handle_command());
     return rsp->data.rsp_gatt_server_send_notification.result;
 
 }
@@ -2331,7 +2333,7 @@ sl_status_t sl_bt_gatt_server_send_indication(uint8_t connection,
     cmd->header=sl_bt_cmd_gatt_server_send_indication_id+(((4+value_len)&0xff)<<8)+(((4+value_len)&0x700)>>8);
 
 
-    sl_bt_host_handle_command();
+    return_if_fail(sl_bt_host_handle_command());
     return rsp->data.rsp_gatt_server_send_indication.result;
 
 }
@@ -2350,7 +2352,7 @@ sl_status_t sl_bt_gatt_server_notify_all(uint16_t characteristic,
     cmd->header=sl_bt_cmd_gatt_server_notify_all_id+(((3+value_len)&0xff)<<8)+(((3+value_len)&0x700)>>8);
 
 
-    sl_bt_host_handle_command();
+    return_if_fail(sl_bt_host_handle_command());
     return rsp->data.rsp_gatt_server_notify_all.result;
 
 }
@@ -2368,7 +2370,7 @@ sl_status_t sl_bt_gatt_server_read_client_configuration(uint8_t connection,
     cmd->header=sl_bt_cmd_gatt_server_read_client_configuration_id+(((3)&0xff)<<8)+(((3)&0x700)>>8);
 
 
-    sl_bt_host_handle_command();
+    return_if_fail(sl_bt_host_handle_command());
     *client_config_flags = rsp->data.rsp_gatt_server_read_client_configuration.client_config_flags;
     return rsp->data.rsp_gatt_server_read_client_configuration.result;
 
@@ -2394,7 +2396,7 @@ sl_status_t sl_bt_gatt_server_send_user_prepare_write_response(uint8_t connectio
     cmd->header=sl_bt_cmd_gatt_server_send_user_prepare_write_response_id+(((7+value_len)&0xff)<<8)+(((7+value_len)&0x700)>>8);
 
 
-    sl_bt_host_handle_command();
+    return_if_fail(sl_bt_host_handle_command());
     return rsp->data.rsp_gatt_server_send_user_prepare_write_response.result;
 
 }
@@ -2411,7 +2413,7 @@ sl_status_t sl_bt_gatt_server_set_capabilities(uint32_t caps,
     cmd->header=sl_bt_cmd_gatt_server_set_capabilities_id+(((8)&0xff)<<8)+(((8)&0x700)>>8);
 
 
-    sl_bt_host_handle_command();
+    return_if_fail(sl_bt_host_handle_command());
     return rsp->data.rsp_gatt_server_set_capabilities.result;
 
 }
@@ -2426,7 +2428,7 @@ sl_status_t sl_bt_gatt_server_enable_capabilities(uint32_t caps) {
     cmd->header=sl_bt_cmd_gatt_server_enable_capabilities_id+(((4)&0xff)<<8)+(((4)&0x700)>>8);
 
 
-    sl_bt_host_handle_command();
+    return_if_fail(sl_bt_host_handle_command());
     return rsp->data.rsp_gatt_server_enable_capabilities.result;
 
 }
@@ -2441,7 +2443,7 @@ sl_status_t sl_bt_gatt_server_disable_capabilities(uint32_t caps) {
     cmd->header=sl_bt_cmd_gatt_server_disable_capabilities_id+(((4)&0xff)<<8)+(((4)&0x700)>>8);
 
 
-    sl_bt_host_handle_command();
+    return_if_fail(sl_bt_host_handle_command());
     return rsp->data.rsp_gatt_server_disable_capabilities.result;
 
 }
@@ -2455,7 +2457,7 @@ sl_status_t sl_bt_gatt_server_get_enabled_capabilities(uint32_t *caps) {
     cmd->header=sl_bt_cmd_gatt_server_get_enabled_capabilities_id+(((0)&0xff)<<8)+(((0)&0x700)>>8);
 
 
-    sl_bt_host_handle_command();
+    return_if_fail(sl_bt_host_handle_command());
     *caps = rsp->data.rsp_gatt_server_get_enabled_capabilities.caps;
     return rsp->data.rsp_gatt_server_get_enabled_capabilities.result;
 
@@ -2472,7 +2474,7 @@ sl_status_t sl_bt_gatt_server_read_client_supported_features(uint8_t connection,
     cmd->header=sl_bt_cmd_gatt_server_read_client_supported_features_id+(((1)&0xff)<<8)+(((1)&0x700)>>8);
 
 
-    sl_bt_host_handle_command();
+    return_if_fail(sl_bt_host_handle_command());
     *client_features = rsp->data.rsp_gatt_server_read_client_supported_features.client_features;
     return rsp->data.rsp_gatt_server_read_client_supported_features.result;
 
@@ -2492,7 +2494,7 @@ sl_status_t sl_bt_nvm_save(uint16_t key,
     cmd->header=sl_bt_cmd_nvm_save_id+(((3+value_len)&0xff)<<8)+(((3+value_len)&0x700)>>8);
 
 
-    sl_bt_host_handle_command();
+    return_if_fail(sl_bt_host_handle_command());
     return rsp->data.rsp_nvm_save.result;
 
 }
@@ -2510,7 +2512,7 @@ sl_status_t sl_bt_nvm_load(uint16_t key,
     cmd->header=sl_bt_cmd_nvm_load_id+(((2)&0xff)<<8)+(((2)&0x700)>>8);
 
 
-    sl_bt_host_handle_command();
+    return_if_fail(sl_bt_host_handle_command());
     *value_len = rsp->data.rsp_nvm_load.value.len;
     if (rsp->data.rsp_nvm_load.value.len <= max_value_size) {
         memcpy(value,rsp->data.rsp_nvm_load.value.data,rsp->data.rsp_nvm_load.value.len);
@@ -2529,7 +2531,7 @@ sl_status_t sl_bt_nvm_erase(uint16_t key) {
     cmd->header=sl_bt_cmd_nvm_erase_id+(((2)&0xff)<<8)+(((2)&0x700)>>8);
 
 
-    sl_bt_host_handle_command();
+    return_if_fail(sl_bt_host_handle_command());
     return rsp->data.rsp_nvm_erase.result;
 
 }
@@ -2543,7 +2545,7 @@ sl_status_t sl_bt_nvm_erase_all() {
     cmd->header=sl_bt_cmd_nvm_erase_all_id+(((0)&0xff)<<8)+(((0)&0x700)>>8);
 
 
-    sl_bt_host_handle_command();
+    return_if_fail(sl_bt_host_handle_command());
     return rsp->data.rsp_nvm_erase_all.result;
 
 }
@@ -2566,7 +2568,7 @@ sl_status_t sl_bt_test_dtm_tx_v4(uint8_t packet_type,
     cmd->header=sl_bt_cmd_test_dtm_tx_v4_id+(((5)&0xff)<<8)+(((5)&0x700)>>8);
 
 
-    sl_bt_host_handle_command();
+    return_if_fail(sl_bt_host_handle_command());
     return rsp->data.rsp_test_dtm_tx_v4.result;
 
 }
@@ -2587,7 +2589,7 @@ sl_status_t sl_bt_test_dtm_tx_cw(uint8_t packet_type,
     cmd->header=sl_bt_cmd_test_dtm_tx_cw_id+(((5)&0xff)<<8)+(((5)&0x700)>>8);
 
 
-    sl_bt_host_handle_command();
+    return_if_fail(sl_bt_host_handle_command());
     return rsp->data.rsp_test_dtm_tx_cw.result;
 
 }
@@ -2603,7 +2605,7 @@ sl_status_t sl_bt_test_dtm_rx(uint8_t channel, uint8_t phy) {
     cmd->header=sl_bt_cmd_test_dtm_rx_id+(((2)&0xff)<<8)+(((2)&0x700)>>8);
 
 
-    sl_bt_host_handle_command();
+    return_if_fail(sl_bt_host_handle_command());
     return rsp->data.rsp_test_dtm_rx.result;
 
 }
@@ -2617,7 +2619,7 @@ sl_status_t sl_bt_test_dtm_end() {
     cmd->header=sl_bt_cmd_test_dtm_end_id+(((0)&0xff)<<8)+(((0)&0x700)>>8);
 
 
-    sl_bt_host_handle_command();
+    return_if_fail(sl_bt_host_handle_command());
     return rsp->data.rsp_test_dtm_end.result;
 
 }
@@ -2633,7 +2635,7 @@ sl_status_t sl_bt_sm_configure(uint8_t flags, uint8_t io_capabilities) {
     cmd->header=sl_bt_cmd_sm_configure_id+(((2)&0xff)<<8)+(((2)&0x700)>>8);
 
 
-    sl_bt_host_handle_command();
+    return_if_fail(sl_bt_host_handle_command());
     return rsp->data.rsp_sm_configure.result;
 
 }
@@ -2648,7 +2650,7 @@ sl_status_t sl_bt_sm_set_minimum_key_size(uint8_t minimum_key_size) {
     cmd->header=sl_bt_cmd_sm_set_minimum_key_size_id+(((1)&0xff)<<8)+(((1)&0x700)>>8);
 
 
-    sl_bt_host_handle_command();
+    return_if_fail(sl_bt_host_handle_command());
     return rsp->data.rsp_sm_set_minimum_key_size.result;
 
 }
@@ -2662,7 +2664,7 @@ sl_status_t sl_bt_sm_set_debug_mode() {
     cmd->header=sl_bt_cmd_sm_set_debug_mode_id+(((0)&0xff)<<8)+(((0)&0x700)>>8);
 
 
-    sl_bt_host_handle_command();
+    return_if_fail(sl_bt_host_handle_command());
     return rsp->data.rsp_sm_set_debug_mode.result;
 
 }
@@ -2678,7 +2680,7 @@ sl_status_t sl_bt_sm_add_to_whitelist(bd_addr address, uint8_t address_type) {
     cmd->header=sl_bt_cmd_sm_add_to_whitelist_id+(((7)&0xff)<<8)+(((7)&0x700)>>8);
 
 
-    sl_bt_host_handle_command();
+    return_if_fail(sl_bt_host_handle_command());
     return rsp->data.rsp_sm_add_to_whitelist.result;
 
 }
@@ -2695,7 +2697,7 @@ sl_status_t sl_bt_sm_store_bonding_configuration(uint8_t max_bonding_count,
     cmd->header=sl_bt_cmd_sm_store_bonding_configuration_id+(((2)&0xff)<<8)+(((2)&0x700)>>8);
 
 
-    sl_bt_host_handle_command();
+    return_if_fail(sl_bt_host_handle_command());
     return rsp->data.rsp_sm_store_bonding_configuration.result;
 
 }
@@ -2710,7 +2712,7 @@ sl_status_t sl_bt_sm_set_bondable_mode(uint8_t bondable) {
     cmd->header=sl_bt_cmd_sm_set_bondable_mode_id+(((1)&0xff)<<8)+(((1)&0x700)>>8);
 
 
-    sl_bt_host_handle_command();
+    return_if_fail(sl_bt_host_handle_command());
     return rsp->data.rsp_sm_set_bondable_mode.result;
 
 }
@@ -2725,7 +2727,7 @@ sl_status_t sl_bt_sm_set_passkey(int32_t passkey) {
     cmd->header=sl_bt_cmd_sm_set_passkey_id+(((4)&0xff)<<8)+(((4)&0x700)>>8);
 
 
-    sl_bt_host_handle_command();
+    return_if_fail(sl_bt_host_handle_command());
     return rsp->data.rsp_sm_set_passkey.result;
 
 }
@@ -2741,7 +2743,7 @@ SL_BGAPI_DEPRECATED sl_status_t sl_bt_sm_set_oob_data(size_t oob_data_len, const
     cmd->header=sl_bt_cmd_sm_set_oob_data_id+(((1+oob_data_len)&0xff)<<8)+(((1+oob_data_len)&0x700)>>8);
 
 
-    sl_bt_host_handle_command();
+    return_if_fail(sl_bt_host_handle_command());
     return rsp->data.rsp_sm_set_oob_data.result;
 
 }
@@ -2759,7 +2761,7 @@ SL_BGAPI_DEPRECATED sl_status_t sl_bt_sm_use_sc_oob(uint8_t enable,
     cmd->header=sl_bt_cmd_sm_use_sc_oob_id+(((1)&0xff)<<8)+(((1)&0x700)>>8);
 
 
-    sl_bt_host_handle_command();
+    return_if_fail(sl_bt_host_handle_command());
     *oob_data_len = rsp->data.rsp_sm_use_sc_oob.oob_data.len;
     if (rsp->data.rsp_sm_use_sc_oob.oob_data.len <= max_oob_data_size) {
         memcpy(oob_data,rsp->data.rsp_sm_use_sc_oob.oob_data.data,rsp->data.rsp_sm_use_sc_oob.oob_data.len);
@@ -2780,7 +2782,7 @@ SL_BGAPI_DEPRECATED sl_status_t sl_bt_sm_set_sc_remote_oob_data(size_t oob_data_
     cmd->header=sl_bt_cmd_sm_set_sc_remote_oob_data_id+(((1+oob_data_len)&0xff)<<8)+(((1+oob_data_len)&0x700)>>8);
 
 
-    sl_bt_host_handle_command();
+    return_if_fail(sl_bt_host_handle_command());
     return rsp->data.rsp_sm_set_sc_remote_oob_data.result;
 
 }
@@ -2795,7 +2797,7 @@ sl_status_t sl_bt_sm_increase_security(uint8_t connection) {
     cmd->header=sl_bt_cmd_sm_increase_security_id+(((1)&0xff)<<8)+(((1)&0x700)>>8);
 
 
-    sl_bt_host_handle_command();
+    return_if_fail(sl_bt_host_handle_command());
     return rsp->data.rsp_sm_increase_security.result;
 
 }
@@ -2811,7 +2813,7 @@ sl_status_t sl_bt_sm_enter_passkey(uint8_t connection, int32_t passkey) {
     cmd->header=sl_bt_cmd_sm_enter_passkey_id+(((5)&0xff)<<8)+(((5)&0x700)>>8);
 
 
-    sl_bt_host_handle_command();
+    return_if_fail(sl_bt_host_handle_command());
     return rsp->data.rsp_sm_enter_passkey.result;
 
 }
@@ -2827,7 +2829,7 @@ sl_status_t sl_bt_sm_passkey_confirm(uint8_t connection, uint8_t confirm) {
     cmd->header=sl_bt_cmd_sm_passkey_confirm_id+(((2)&0xff)<<8)+(((2)&0x700)>>8);
 
 
-    sl_bt_host_handle_command();
+    return_if_fail(sl_bt_host_handle_command());
     return rsp->data.rsp_sm_passkey_confirm.result;
 
 }
@@ -2843,7 +2845,7 @@ sl_status_t sl_bt_sm_bonding_confirm(uint8_t connection, uint8_t confirm) {
     cmd->header=sl_bt_cmd_sm_bonding_confirm_id+(((2)&0xff)<<8)+(((2)&0x700)>>8);
 
 
-    sl_bt_host_handle_command();
+    return_if_fail(sl_bt_host_handle_command());
     return rsp->data.rsp_sm_bonding_confirm.result;
 
 }
@@ -2857,7 +2859,7 @@ SL_BGAPI_DEPRECATED sl_status_t sl_bt_sm_list_all_bondings() {
     cmd->header=sl_bt_cmd_sm_list_all_bondings_id+(((0)&0xff)<<8)+(((0)&0x700)>>8);
 
 
-    sl_bt_host_handle_command();
+    return_if_fail(sl_bt_host_handle_command());
     return rsp->data.rsp_sm_list_all_bondings.result;
 
 }
@@ -2872,7 +2874,7 @@ sl_status_t sl_bt_sm_delete_bonding(uint8_t bonding) {
     cmd->header=sl_bt_cmd_sm_delete_bonding_id+(((1)&0xff)<<8)+(((1)&0x700)>>8);
 
 
-    sl_bt_host_handle_command();
+    return_if_fail(sl_bt_host_handle_command());
     return rsp->data.rsp_sm_delete_bonding.result;
 
 }
@@ -2886,7 +2888,7 @@ sl_status_t sl_bt_sm_delete_bondings() {
     cmd->header=sl_bt_cmd_sm_delete_bondings_id+(((0)&0xff)<<8)+(((0)&0x700)>>8);
 
 
-    sl_bt_host_handle_command();
+    return_if_fail(sl_bt_host_handle_command());
     return rsp->data.rsp_sm_delete_bondings.result;
 
 }
@@ -2905,7 +2907,7 @@ sl_status_t sl_bt_sm_get_bonding_handles(uint32_t reserved,
     cmd->header=sl_bt_cmd_sm_get_bonding_handles_id+(((4)&0xff)<<8)+(((4)&0x700)>>8);
 
 
-    sl_bt_host_handle_command();
+    return_if_fail(sl_bt_host_handle_command());
     *num_bondings = rsp->data.rsp_sm_get_bonding_handles.num_bondings;
     *bondings_len = rsp->data.rsp_sm_get_bonding_handles.bondings.len;
     if (rsp->data.rsp_sm_get_bonding_handles.bondings.len <= max_bondings_size) {
@@ -2929,7 +2931,7 @@ sl_status_t sl_bt_sm_get_bonding_details(uint32_t bonding,
     cmd->header=sl_bt_cmd_sm_get_bonding_details_id+(((4)&0xff)<<8)+(((4)&0x700)>>8);
 
 
-    sl_bt_host_handle_command();
+    return_if_fail(sl_bt_host_handle_command());
     memcpy(address,&rsp->data.rsp_sm_get_bonding_details.address,sizeof(bd_addr));
     *address_type = rsp->data.rsp_sm_get_bonding_details.address_type;
     *security_mode = rsp->data.rsp_sm_get_bonding_details.security_mode;
@@ -2951,7 +2953,7 @@ sl_status_t sl_bt_sm_find_bonding_by_address(bd_addr address,
     cmd->header=sl_bt_cmd_sm_find_bonding_by_address_id+(((6)&0xff)<<8)+(((6)&0x700)>>8);
 
 
-    sl_bt_host_handle_command();
+    return_if_fail(sl_bt_host_handle_command());
     *bonding = rsp->data.rsp_sm_find_bonding_by_address.bonding;
     *security_mode = rsp->data.rsp_sm_find_bonding_by_address.security_mode;
     *key_size = rsp->data.rsp_sm_find_bonding_by_address.key_size;
@@ -2973,7 +2975,7 @@ sl_status_t sl_bt_sm_set_bonding_key(uint32_t bonding,
     cmd->header=sl_bt_cmd_sm_set_bonding_key_id+(((21)&0xff)<<8)+(((21)&0x700)>>8);
 
 
-    sl_bt_host_handle_command();
+    return_if_fail(sl_bt_host_handle_command());
     return rsp->data.rsp_sm_set_bonding_key.result;
 
 }
@@ -2989,7 +2991,7 @@ sl_status_t sl_bt_sm_set_legacy_oob(uint8_t enable, aes_key_128 oob_data) {
     cmd->header=sl_bt_cmd_sm_set_legacy_oob_id+(((17)&0xff)<<8)+(((17)&0x700)>>8);
 
 
-    sl_bt_host_handle_command();
+    return_if_fail(sl_bt_host_handle_command());
     return rsp->data.rsp_sm_set_legacy_oob.result;
 
 }
@@ -3006,7 +3008,7 @@ sl_status_t sl_bt_sm_set_oob(uint8_t enable,
     cmd->header=sl_bt_cmd_sm_set_oob_id+(((1)&0xff)<<8)+(((1)&0x700)>>8);
 
 
-    sl_bt_host_handle_command();
+    return_if_fail(sl_bt_host_handle_command());
     memcpy(random,&rsp->data.rsp_sm_set_oob.random,sizeof(aes_key_128));
     memcpy(confirm,&rsp->data.rsp_sm_set_oob.confirm,sizeof(aes_key_128));
     return rsp->data.rsp_sm_set_oob.result;
@@ -3027,7 +3029,7 @@ sl_status_t sl_bt_sm_set_remote_oob(uint8_t enable,
     cmd->header=sl_bt_cmd_sm_set_remote_oob_id+(((33)&0xff)<<8)+(((33)&0x700)>>8);
 
 
-    sl_bt_host_handle_command();
+    return_if_fail(sl_bt_host_handle_command());
     return rsp->data.rsp_sm_set_remote_oob.result;
 
 }
@@ -3048,7 +3050,7 @@ sl_status_t sl_bt_sm_set_bonding_data(uint8_t connection,
     cmd->header=sl_bt_cmd_sm_set_bonding_data_id+(((3+data_len)&0xff)<<8)+(((3+data_len)&0x700)>>8);
 
 
-    sl_bt_host_handle_command();
+    return_if_fail(sl_bt_host_handle_command());
     return rsp->data.rsp_sm_set_bonding_data.result;
 
 }
@@ -3064,7 +3066,7 @@ sl_status_t sl_bt_ota_set_device_name(size_t name_len, const uint8_t* name) {
     cmd->header=sl_bt_cmd_ota_set_device_name_id+(((1+name_len)&0xff)<<8)+(((1+name_len)&0x700)>>8);
 
 
-    sl_bt_host_handle_command();
+    return_if_fail(sl_bt_host_handle_command());
     return rsp->data.rsp_ota_set_device_name.result;
 
 }
@@ -3083,7 +3085,7 @@ sl_status_t sl_bt_ota_set_advertising_data(uint8_t packet_type,
     cmd->header=sl_bt_cmd_ota_set_advertising_data_id+(((2+adv_data_len)&0xff)<<8)+(((2+adv_data_len)&0x700)>>8);
 
 
-    sl_bt_host_handle_command();
+    return_if_fail(sl_bt_host_handle_command());
     return rsp->data.rsp_ota_set_advertising_data.result;
 
 }
@@ -3098,7 +3100,7 @@ sl_status_t sl_bt_ota_set_configuration(uint32_t flags) {
     cmd->header=sl_bt_cmd_ota_set_configuration_id+(((4)&0xff)<<8)+(((4)&0x700)>>8);
 
 
-    sl_bt_host_handle_command();
+    return_if_fail(sl_bt_host_handle_command());
     return rsp->data.rsp_ota_set_configuration.result;
 
 }
@@ -3114,7 +3116,7 @@ sl_status_t sl_bt_ota_set_rf_path(uint8_t enable, uint8_t antenna) {
     cmd->header=sl_bt_cmd_ota_set_rf_path_id+(((2)&0xff)<<8)+(((2)&0x700)>>8);
 
 
-    sl_bt_host_handle_command();
+    return_if_fail(sl_bt_host_handle_command());
     return rsp->data.rsp_ota_set_rf_path.result;
 
 }
@@ -3130,7 +3132,7 @@ sl_status_t sl_bt_coex_set_options(uint32_t mask, uint32_t options) {
     cmd->header=sl_bt_cmd_coex_set_options_id+(((8)&0xff)<<8)+(((8)&0x700)>>8);
 
 
-    sl_bt_host_handle_command();
+    return_if_fail(sl_bt_host_handle_command());
     return rsp->data.rsp_coex_set_options.result;
 
 }
@@ -3151,7 +3153,7 @@ sl_status_t sl_bt_coex_set_parameters(uint8_t priority,
     cmd->header=sl_bt_cmd_coex_set_parameters_id+(((4)&0xff)<<8)+(((4)&0x700)>>8);
 
 
-    sl_bt_host_handle_command();
+    return_if_fail(sl_bt_host_handle_command());
     return rsp->data.rsp_coex_set_parameters.result;
 
 }
@@ -3166,7 +3168,7 @@ sl_status_t sl_bt_coex_set_directional_priority_pulse(uint8_t pulse) {
     cmd->header=sl_bt_cmd_coex_set_directional_priority_pulse_id+(((1)&0xff)<<8)+(((1)&0x700)>>8);
 
 
-    sl_bt_host_handle_command();
+    return_if_fail(sl_bt_host_handle_command());
     return rsp->data.rsp_coex_set_directional_priority_pulse.result;
 
 }
@@ -3184,7 +3186,7 @@ sl_status_t sl_bt_coex_get_counters(uint8_t reset,
     cmd->header=sl_bt_cmd_coex_get_counters_id+(((1)&0xff)<<8)+(((1)&0x700)>>8);
 
 
-    sl_bt_host_handle_command();
+    return_if_fail(sl_bt_host_handle_command());
     *counters_len = rsp->data.rsp_coex_get_counters.counters.len;
     if (rsp->data.rsp_coex_get_counters.counters.len <= max_counters_size) {
         memcpy(counters,rsp->data.rsp_coex_get_counters.counters.data,rsp->data.rsp_coex_get_counters.counters.len);
@@ -3211,7 +3213,7 @@ sl_status_t sl_bt_l2cap_coc_send_connection_request(uint8_t connection,
     cmd->header=sl_bt_cmd_l2cap_coc_send_connection_request_id+(((9)&0xff)<<8)+(((9)&0x700)>>8);
 
 
-    sl_bt_host_handle_command();
+    return_if_fail(sl_bt_host_handle_command());
     return rsp->data.rsp_l2cap_coc_send_connection_request.result;
 
 }
@@ -3236,7 +3238,7 @@ sl_status_t sl_bt_l2cap_coc_send_connection_response(uint8_t connection,
     cmd->header=sl_bt_cmd_l2cap_coc_send_connection_response_id+(((11)&0xff)<<8)+(((11)&0x700)>>8);
 
 
-    sl_bt_host_handle_command();
+    return_if_fail(sl_bt_host_handle_command());
     return rsp->data.rsp_l2cap_coc_send_connection_response.result;
 
 }
@@ -3255,7 +3257,7 @@ sl_status_t sl_bt_l2cap_coc_send_le_flow_control_credit(uint8_t connection,
     cmd->header=sl_bt_cmd_l2cap_coc_send_le_flow_control_credit_id+(((5)&0xff)<<8)+(((5)&0x700)>>8);
 
 
-    sl_bt_host_handle_command();
+    return_if_fail(sl_bt_host_handle_command());
     return rsp->data.rsp_l2cap_coc_send_le_flow_control_credit.result;
 
 }
@@ -3272,7 +3274,7 @@ sl_status_t sl_bt_l2cap_coc_send_disconnection_request(uint8_t connection,
     cmd->header=sl_bt_cmd_l2cap_coc_send_disconnection_request_id+(((3)&0xff)<<8)+(((3)&0x700)>>8);
 
 
-    sl_bt_host_handle_command();
+    return_if_fail(sl_bt_host_handle_command());
     return rsp->data.rsp_l2cap_coc_send_disconnection_request.result;
 
 }
@@ -3293,7 +3295,7 @@ sl_status_t sl_bt_l2cap_coc_send_data(uint8_t connection,
     cmd->header=sl_bt_cmd_l2cap_coc_send_data_id+(((4+data_len)&0xff)<<8)+(((4+data_len)&0x700)>>8);
 
 
-    sl_bt_host_handle_command();
+    return_if_fail(sl_bt_host_handle_command());
     return rsp->data.rsp_l2cap_coc_send_data.result;
 
 }
@@ -3314,7 +3316,7 @@ sl_status_t sl_bt_cte_transmitter_set_dtm_parameters(uint8_t cte_length,
     cmd->header=sl_bt_cmd_cte_transmitter_set_dtm_parameters_id+(((3+switching_pattern_len)&0xff)<<8)+(((3+switching_pattern_len)&0x700)>>8);
 
 
-    sl_bt_host_handle_command();
+    return_if_fail(sl_bt_host_handle_command());
     return rsp->data.rsp_cte_transmitter_set_dtm_parameters.result;
 
 }
@@ -3328,7 +3330,7 @@ sl_status_t sl_bt_cte_transmitter_clear_dtm_parameters() {
     cmd->header=sl_bt_cmd_cte_transmitter_clear_dtm_parameters_id+(((0)&0xff)<<8)+(((0)&0x700)>>8);
 
 
-    sl_bt_host_handle_command();
+    return_if_fail(sl_bt_host_handle_command());
     return rsp->data.rsp_cte_transmitter_clear_dtm_parameters.result;
 
 }
@@ -3349,7 +3351,7 @@ sl_status_t sl_bt_cte_transmitter_enable_connection_cte(uint8_t connection,
     cmd->header=sl_bt_cmd_cte_transmitter_enable_connection_cte_id+(((3+switching_pattern_len)&0xff)<<8)+(((3+switching_pattern_len)&0x700)>>8);
 
 
-    sl_bt_host_handle_command();
+    return_if_fail(sl_bt_host_handle_command());
     return rsp->data.rsp_cte_transmitter_enable_connection_cte.result;
 
 }
@@ -3364,7 +3366,7 @@ sl_status_t sl_bt_cte_transmitter_disable_connection_cte(uint8_t connection) {
     cmd->header=sl_bt_cmd_cte_transmitter_disable_connection_cte_id+(((1)&0xff)<<8)+(((1)&0x700)>>8);
 
 
-    sl_bt_host_handle_command();
+    return_if_fail(sl_bt_host_handle_command());
     return rsp->data.rsp_cte_transmitter_disable_connection_cte.result;
 
 }
@@ -3389,7 +3391,7 @@ sl_status_t sl_bt_cte_transmitter_enable_connectionless_cte(uint8_t handle,
     cmd->header=sl_bt_cmd_cte_transmitter_enable_connectionless_cte_id+(((5+switching_pattern_len)&0xff)<<8)+(((5+switching_pattern_len)&0x700)>>8);
 
 
-    sl_bt_host_handle_command();
+    return_if_fail(sl_bt_host_handle_command());
     return rsp->data.rsp_cte_transmitter_enable_connectionless_cte.result;
 
 }
@@ -3404,7 +3406,7 @@ sl_status_t sl_bt_cte_transmitter_disable_connectionless_cte(uint8_t handle) {
     cmd->header=sl_bt_cmd_cte_transmitter_disable_connectionless_cte_id+(((1)&0xff)<<8)+(((1)&0x700)>>8);
 
 
-    sl_bt_host_handle_command();
+    return_if_fail(sl_bt_host_handle_command());
     return rsp->data.rsp_cte_transmitter_disable_connectionless_cte.result;
 
 }
@@ -3429,7 +3431,7 @@ sl_status_t sl_bt_cte_transmitter_enable_silabs_cte(uint8_t handle,
     cmd->header=sl_bt_cmd_cte_transmitter_enable_silabs_cte_id+(((5+switching_pattern_len)&0xff)<<8)+(((5+switching_pattern_len)&0x700)>>8);
 
 
-    sl_bt_host_handle_command();
+    return_if_fail(sl_bt_host_handle_command());
     return rsp->data.rsp_cte_transmitter_enable_silabs_cte.result;
 
 }
@@ -3444,7 +3446,7 @@ sl_status_t sl_bt_cte_transmitter_disable_silabs_cte(uint8_t handle) {
     cmd->header=sl_bt_cmd_cte_transmitter_disable_silabs_cte_id+(((1)&0xff)<<8)+(((1)&0x700)>>8);
 
 
-    sl_bt_host_handle_command();
+    return_if_fail(sl_bt_host_handle_command());
     return rsp->data.rsp_cte_transmitter_disable_silabs_cte.result;
 
 }
@@ -3467,7 +3469,7 @@ sl_status_t sl_bt_cte_receiver_set_dtm_parameters(uint8_t cte_length,
     cmd->header=sl_bt_cmd_cte_receiver_set_dtm_parameters_id+(((4+switching_pattern_len)&0xff)<<8)+(((4+switching_pattern_len)&0x700)>>8);
 
 
-    sl_bt_host_handle_command();
+    return_if_fail(sl_bt_host_handle_command());
     return rsp->data.rsp_cte_receiver_set_dtm_parameters.result;
 
 }
@@ -3481,7 +3483,7 @@ sl_status_t sl_bt_cte_receiver_clear_dtm_parameters() {
     cmd->header=sl_bt_cmd_cte_receiver_clear_dtm_parameters_id+(((0)&0xff)<<8)+(((0)&0x700)>>8);
 
 
-    sl_bt_host_handle_command();
+    return_if_fail(sl_bt_host_handle_command());
     return rsp->data.rsp_cte_receiver_clear_dtm_parameters.result;
 
 }
@@ -3496,7 +3498,7 @@ sl_status_t sl_bt_cte_receiver_set_sync_cte_type(uint8_t sync_cte_type) {
     cmd->header=sl_bt_cmd_cte_receiver_set_sync_cte_type_id+(((1)&0xff)<<8)+(((1)&0x700)>>8);
 
 
-    sl_bt_host_handle_command();
+    return_if_fail(sl_bt_host_handle_command());
     return rsp->data.rsp_cte_receiver_set_sync_cte_type.result;
 
 }
@@ -3511,7 +3513,7 @@ sl_status_t sl_bt_cte_receiver_configure(uint8_t flags) {
     cmd->header=sl_bt_cmd_cte_receiver_configure_id+(((1)&0xff)<<8)+(((1)&0x700)>>8);
 
 
-    sl_bt_host_handle_command();
+    return_if_fail(sl_bt_host_handle_command());
     return rsp->data.rsp_cte_receiver_configure.result;
 
 }
@@ -3538,7 +3540,7 @@ sl_status_t sl_bt_cte_receiver_enable_connection_cte(uint8_t connection,
     cmd->header=sl_bt_cmd_cte_receiver_enable_connection_cte_id+(((7+switching_pattern_len)&0xff)<<8)+(((7+switching_pattern_len)&0x700)>>8);
 
 
-    sl_bt_host_handle_command();
+    return_if_fail(sl_bt_host_handle_command());
     return rsp->data.rsp_cte_receiver_enable_connection_cte.result;
 
 }
@@ -3553,7 +3555,7 @@ sl_status_t sl_bt_cte_receiver_disable_connection_cte(uint8_t connection) {
     cmd->header=sl_bt_cmd_cte_receiver_disable_connection_cte_id+(((1)&0xff)<<8)+(((1)&0x700)>>8);
 
 
-    sl_bt_host_handle_command();
+    return_if_fail(sl_bt_host_handle_command());
     return rsp->data.rsp_cte_receiver_disable_connection_cte.result;
 
 }
@@ -3576,7 +3578,7 @@ sl_status_t sl_bt_cte_receiver_enable_connectionless_cte(uint16_t sync,
     cmd->header=sl_bt_cmd_cte_receiver_enable_connectionless_cte_id+(((5+switching_pattern_len)&0xff)<<8)+(((5+switching_pattern_len)&0x700)>>8);
 
 
-    sl_bt_host_handle_command();
+    return_if_fail(sl_bt_host_handle_command());
     return rsp->data.rsp_cte_receiver_enable_connectionless_cte.result;
 
 }
@@ -3591,7 +3593,7 @@ sl_status_t sl_bt_cte_receiver_disable_connectionless_cte(uint16_t sync) {
     cmd->header=sl_bt_cmd_cte_receiver_disable_connectionless_cte_id+(((2)&0xff)<<8)+(((2)&0x700)>>8);
 
 
-    sl_bt_host_handle_command();
+    return_if_fail(sl_bt_host_handle_command());
     return rsp->data.rsp_cte_receiver_disable_connectionless_cte.result;
 
 }
@@ -3612,7 +3614,7 @@ sl_status_t sl_bt_cte_receiver_enable_silabs_cte(uint8_t slot_durations,
     cmd->header=sl_bt_cmd_cte_receiver_enable_silabs_cte_id+(((3+switching_pattern_len)&0xff)<<8)+(((3+switching_pattern_len)&0x700)>>8);
 
 
-    sl_bt_host_handle_command();
+    return_if_fail(sl_bt_host_handle_command());
     return rsp->data.rsp_cte_receiver_enable_silabs_cte.result;
 
 }
@@ -3626,7 +3628,7 @@ sl_status_t sl_bt_cte_receiver_disable_silabs_cte() {
     cmd->header=sl_bt_cmd_cte_receiver_disable_silabs_cte_id+(((0)&0xff)<<8)+(((0)&0x700)>>8);
 
 
-    sl_bt_host_handle_command();
+    return_if_fail(sl_bt_host_handle_command());
     return rsp->data.rsp_cte_receiver_disable_silabs_cte.result;
 
 }
@@ -3646,7 +3648,7 @@ sl_status_t sl_bt_user_message_to_target(size_t data_len,
     cmd->header=sl_bt_cmd_user_message_to_target_id+(((1+data_len)&0xff)<<8)+(((1+data_len)&0x700)>>8);
 
 
-    sl_bt_host_handle_command();
+    return_if_fail(sl_bt_host_handle_command());
     *response_len = rsp->data.rsp_user_message_to_target.response.len;
     if (rsp->data.rsp_user_message_to_target.response.len <= max_response_size) {
         memcpy(response,rsp->data.rsp_user_message_to_target.response.data,rsp->data.rsp_user_message_to_target.response.len);
@@ -3667,7 +3669,7 @@ sl_status_t sl_bt_user_manage_event_filter(size_t data_len,
     cmd->header=sl_bt_cmd_user_manage_event_filter_id+(((1+data_len)&0xff)<<8)+(((1+data_len)&0x700)>>8);
 
 
-    sl_bt_host_handle_command();
+    return_if_fail(sl_bt_host_handle_command());
     return rsp->data.rsp_user_manage_event_filter.result;
 
 }

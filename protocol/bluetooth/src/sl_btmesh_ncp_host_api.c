@@ -17,8 +17,11 @@
 #include "sl_btmesh_api.h"
 #include "sli_btmesh_api.h"
 
-void sl_btmesh_host_handle_command();
-void sl_btmesh_host_handle_command_noresponse();
+
+#define return_if_fail(rc)  if ((rc) != SL_STATUS_OK) return (rc)
+
+sl_status_t sl_btmesh_host_handle_command(void);
+sl_status_t sl_btmesh_host_handle_command_noresponse(void);
 extern sl_btmesh_msg_t *sl_btmesh_cmd_msg;
 extern sl_btmesh_msg_t *sl_btmesh_rsp_msg;
 
@@ -31,7 +34,7 @@ sl_status_t sl_btmesh_node_init() {
     cmd->header=sl_btmesh_cmd_node_init_id+(((0)&0xff)<<8)+(((0)&0x700)>>8);
 
 
-    sl_btmesh_host_handle_command();
+    return_if_fail(sl_btmesh_host_handle_command());
     return rsp->data.rsp_node_init.result;
 
 }
@@ -45,7 +48,7 @@ sl_status_t sl_btmesh_node_set_exportable_keys() {
     cmd->header=sl_btmesh_cmd_node_set_exportable_keys_id+(((0)&0xff)<<8)+(((0)&0x700)>>8);
 
 
-    sl_btmesh_host_handle_command();
+    return_if_fail(sl_btmesh_host_handle_command());
     return rsp->data.rsp_node_set_exportable_keys.result;
 
 }
@@ -60,7 +63,7 @@ sl_status_t sl_btmesh_node_start_unprov_beaconing(uint8_t bearer) {
     cmd->header=sl_btmesh_cmd_node_start_unprov_beaconing_id+(((1)&0xff)<<8)+(((1)&0x700)>>8);
 
 
-    sl_btmesh_host_handle_command();
+    return_if_fail(sl_btmesh_host_handle_command());
     return rsp->data.rsp_node_start_unprov_beaconing.result;
 
 }
@@ -74,7 +77,7 @@ sl_status_t sl_btmesh_node_stop_unprov_beaconing() {
     cmd->header=sl_btmesh_cmd_node_stop_unprov_beaconing_id+(((0)&0xff)<<8)+(((0)&0x700)>>8);
 
 
-    sl_btmesh_host_handle_command();
+    return_if_fail(sl_btmesh_host_handle_command());
     return rsp->data.rsp_node_stop_unprov_beaconing.result;
 
 }
@@ -88,7 +91,7 @@ sl_status_t sl_btmesh_node_get_rssi(int8_t *rssi) {
     cmd->header=sl_btmesh_cmd_node_get_rssi_id+(((0)&0xff)<<8)+(((0)&0x700)>>8);
 
 
-    sl_btmesh_host_handle_command();
+    return_if_fail(sl_btmesh_host_handle_command());
     *rssi = rsp->data.rsp_node_get_rssi.rssi;
     return rsp->data.rsp_node_get_rssi.result;
 
@@ -106,7 +109,7 @@ sl_status_t sl_btmesh_node_send_input_oob_request_response(size_t data_len,
     cmd->header=sl_btmesh_cmd_node_send_input_oob_request_response_id+(((1+data_len)&0xff)<<8)+(((1+data_len)&0x700)>>8);
 
 
-    sl_btmesh_host_handle_command();
+    return_if_fail(sl_btmesh_host_handle_command());
     return rsp->data.rsp_node_send_input_oob_request_response.result;
 
 }
@@ -120,7 +123,7 @@ sl_status_t sl_btmesh_node_get_uuid(uuid_128 *uuid) {
     cmd->header=sl_btmesh_cmd_node_get_uuid_id+(((0)&0xff)<<8)+(((0)&0x700)>>8);
 
 
-    sl_btmesh_host_handle_command();
+    return_if_fail(sl_btmesh_host_handle_command());
     *uuid = rsp->data.rsp_node_get_uuid.uuid;
     return rsp->data.rsp_node_get_uuid.result;
 
@@ -146,7 +149,7 @@ sl_status_t sl_btmesh_node_set_provisioning_data(aes_key_128 device_key,
     cmd->header=sl_btmesh_cmd_node_set_provisioning_data_id+(((41)&0xff)<<8)+(((41)&0x700)>>8);
 
 
-    sl_btmesh_host_handle_command();
+    return_if_fail(sl_btmesh_host_handle_command());
     return rsp->data.rsp_node_set_provisioning_data.result;
 
 }
@@ -173,7 +176,7 @@ sl_status_t sl_btmesh_node_init_oob(uint8_t public_key,
     cmd->header=sl_btmesh_cmd_node_init_oob_id+(((10)&0xff)<<8)+(((10)&0x700)>>8);
 
 
-    sl_btmesh_host_handle_command();
+    return_if_fail(sl_btmesh_host_handle_command());
     return rsp->data.rsp_node_init_oob.result;
 
 }
@@ -188,7 +191,7 @@ sl_status_t sl_btmesh_node_set_ivrecovery_mode(uint8_t mode) {
     cmd->header=sl_btmesh_cmd_node_set_ivrecovery_mode_id+(((1)&0xff)<<8)+(((1)&0x700)>>8);
 
 
-    sl_btmesh_host_handle_command();
+    return_if_fail(sl_btmesh_host_handle_command());
     return rsp->data.rsp_node_set_ivrecovery_mode.result;
 
 }
@@ -202,7 +205,7 @@ sl_status_t sl_btmesh_node_get_ivrecovery_mode(uint8_t *mode) {
     cmd->header=sl_btmesh_cmd_node_get_ivrecovery_mode_id+(((0)&0xff)<<8)+(((0)&0x700)>>8);
 
 
-    sl_btmesh_host_handle_command();
+    return_if_fail(sl_btmesh_host_handle_command());
     *mode = rsp->data.rsp_node_get_ivrecovery_mode.mode;
     return rsp->data.rsp_node_get_ivrecovery_mode.result;
 
@@ -219,7 +222,7 @@ sl_status_t sl_btmesh_node_get_statistics(size_t max_statistics_size,
     cmd->header=sl_btmesh_cmd_node_get_statistics_id+(((0)&0xff)<<8)+(((0)&0x700)>>8);
 
 
-    sl_btmesh_host_handle_command();
+    return_if_fail(sl_btmesh_host_handle_command());
     *statistics_len = rsp->data.rsp_node_get_statistics.statistics.len;
     if (rsp->data.rsp_node_get_statistics.statistics.len <= max_statistics_size) {
         memcpy(statistics,rsp->data.rsp_node_get_statistics.statistics.data,rsp->data.rsp_node_get_statistics.statistics.len);
@@ -237,7 +240,7 @@ sl_status_t sl_btmesh_node_clear_statistics() {
     cmd->header=sl_btmesh_cmd_node_clear_statistics_id+(((0)&0xff)<<8)+(((0)&0x700)>>8);
 
 
-    sl_btmesh_host_handle_command();
+    return_if_fail(sl_btmesh_host_handle_command());
     return rsp->data.rsp_node_clear_statistics.result;
 
 }
@@ -253,7 +256,7 @@ sl_status_t sl_btmesh_node_set_net_relay_delay(uint8_t min_ms, uint8_t max_ms) {
     cmd->header=sl_btmesh_cmd_node_set_net_relay_delay_id+(((2)&0xff)<<8)+(((2)&0x700)>>8);
 
 
-    sl_btmesh_host_handle_command();
+    return_if_fail(sl_btmesh_host_handle_command());
     return rsp->data.rsp_node_set_net_relay_delay.result;
 
 }
@@ -268,7 +271,7 @@ sl_status_t sl_btmesh_node_get_net_relay_delay(uint8_t *min_ms,
     cmd->header=sl_btmesh_cmd_node_get_net_relay_delay_id+(((0)&0xff)<<8)+(((0)&0x700)>>8);
 
 
-    sl_btmesh_host_handle_command();
+    return_if_fail(sl_btmesh_host_handle_command());
     *min_ms = rsp->data.rsp_node_get_net_relay_delay.min_ms;
     *max_ms = rsp->data.rsp_node_get_net_relay_delay.max_ms;
     return rsp->data.rsp_node_get_net_relay_delay.result;
@@ -285,7 +288,7 @@ sl_status_t sl_btmesh_node_get_ivupdate_state(uint32_t *iv_index,
     cmd->header=sl_btmesh_cmd_node_get_ivupdate_state_id+(((0)&0xff)<<8)+(((0)&0x700)>>8);
 
 
-    sl_btmesh_host_handle_command();
+    return_if_fail(sl_btmesh_host_handle_command());
     *iv_index = rsp->data.rsp_node_get_ivupdate_state.iv_index;
     *state = rsp->data.rsp_node_get_ivupdate_state.state;
     return rsp->data.rsp_node_get_ivupdate_state.result;
@@ -301,7 +304,7 @@ sl_status_t sl_btmesh_node_request_ivupdate() {
     cmd->header=sl_btmesh_cmd_node_request_ivupdate_id+(((0)&0xff)<<8)+(((0)&0x700)>>8);
 
 
-    sl_btmesh_host_handle_command();
+    return_if_fail(sl_btmesh_host_handle_command());
     return rsp->data.rsp_node_request_ivupdate.result;
 
 }
@@ -317,7 +320,7 @@ sl_status_t sl_btmesh_node_get_seq_remaining(uint16_t elem_index,
     cmd->header=sl_btmesh_cmd_node_get_seq_remaining_id+(((2)&0xff)<<8)+(((2)&0x700)>>8);
 
 
-    sl_btmesh_host_handle_command();
+    return_if_fail(sl_btmesh_host_handle_command());
     *count = rsp->data.rsp_node_get_seq_remaining.count;
     return rsp->data.rsp_node_get_seq_remaining.result;
 
@@ -332,7 +335,7 @@ sl_status_t sl_btmesh_node_save_replay_protection_list() {
     cmd->header=sl_btmesh_cmd_node_save_replay_protection_list_id+(((0)&0xff)<<8)+(((0)&0x700)>>8);
 
 
-    sl_btmesh_host_handle_command();
+    return_if_fail(sl_btmesh_host_handle_command());
     return rsp->data.rsp_node_save_replay_protection_list.result;
 
 }
@@ -347,7 +350,7 @@ sl_status_t sl_btmesh_node_set_uuid(uuid_128 uuid) {
     cmd->header=sl_btmesh_cmd_node_set_uuid_id+(((16)&0xff)<<8)+(((16)&0x700)>>8);
 
 
-    sl_btmesh_host_handle_command();
+    return_if_fail(sl_btmesh_host_handle_command());
     return rsp->data.rsp_node_set_uuid.result;
 
 }
@@ -362,7 +365,7 @@ sl_status_t sl_btmesh_node_get_replay_protection_list_status(uint16_t *total_ent
     cmd->header=sl_btmesh_cmd_node_get_replay_protection_list_status_id+(((0)&0xff)<<8)+(((0)&0x700)>>8);
 
 
-    sl_btmesh_host_handle_command();
+    return_if_fail(sl_btmesh_host_handle_command());
     *total_entries = rsp->data.rsp_node_get_replay_protection_list_status.total_entries;
     *unsaved_entries = rsp->data.rsp_node_get_replay_protection_list_status.unsaved_entries;
     return rsp->data.rsp_node_get_replay_protection_list_status.result;
@@ -380,7 +383,7 @@ sl_status_t sl_btmesh_node_get_element_address(uint16_t elem_index,
     cmd->header=sl_btmesh_cmd_node_get_element_address_id+(((2)&0xff)<<8)+(((2)&0x700)>>8);
 
 
-    sl_btmesh_host_handle_command();
+    return_if_fail(sl_btmesh_host_handle_command());
     *address = rsp->data.rsp_node_get_element_address.address;
     return rsp->data.rsp_node_get_element_address.result;
 
@@ -398,7 +401,7 @@ sl_status_t sl_btmesh_node_send_static_oob_request_response(size_t data_len,
     cmd->header=sl_btmesh_cmd_node_send_static_oob_request_response_id+(((1+data_len)&0xff)<<8)+(((1+data_len)&0x700)>>8);
 
 
-    sl_btmesh_host_handle_command();
+    return_if_fail(sl_btmesh_host_handle_command());
     return rsp->data.rsp_node_send_static_oob_request_response.result;
 
 }
@@ -412,7 +415,7 @@ sl_status_t sl_btmesh_node_reset() {
     cmd->header=sl_btmesh_cmd_node_reset_id+(((0)&0xff)<<8)+(((0)&0x700)>>8);
 
 
-    sl_btmesh_host_handle_command();
+    return_if_fail(sl_btmesh_host_handle_command());
     return rsp->data.rsp_node_reset.result;
 
 }
@@ -427,7 +430,7 @@ sl_status_t sl_btmesh_node_set_beacon_reporting(uint8_t report) {
     cmd->header=sl_btmesh_cmd_node_set_beacon_reporting_id+(((1)&0xff)<<8)+(((1)&0x700)>>8);
 
 
-    sl_btmesh_host_handle_command();
+    return_if_fail(sl_btmesh_host_handle_command());
     return rsp->data.rsp_node_set_beacon_reporting.result;
 
 }
@@ -442,7 +445,7 @@ sl_status_t sl_btmesh_node_set_iv_update_age(uint32_t age_sec) {
     cmd->header=sl_btmesh_cmd_node_set_iv_update_age_id+(((4)&0xff)<<8)+(((4)&0x700)>>8);
 
 
-    sl_btmesh_host_handle_command();
+    return_if_fail(sl_btmesh_host_handle_command());
     return rsp->data.rsp_node_set_iv_update_age.result;
 
 }
@@ -457,7 +460,7 @@ sl_status_t sl_btmesh_node_get_key_count(uint8_t type, uint32_t *count) {
     cmd->header=sl_btmesh_cmd_node_get_key_count_id+(((1)&0xff)<<8)+(((1)&0x700)>>8);
 
 
-    sl_btmesh_host_handle_command();
+    return_if_fail(sl_btmesh_host_handle_command());
     *count = rsp->data.rsp_node_get_key_count.count;
     return rsp->data.rsp_node_get_key_count.result;
 
@@ -480,7 +483,7 @@ sl_status_t sl_btmesh_node_get_key(uint8_t type,
     cmd->header=sl_btmesh_cmd_node_get_key_id+(((6)&0xff)<<8)+(((6)&0x700)>>8);
 
 
-    sl_btmesh_host_handle_command();
+    return_if_fail(sl_btmesh_host_handle_command());
     *id = rsp->data.rsp_node_get_key.id;
     *netkey_index = rsp->data.rsp_node_get_key.netkey_index;
     memcpy(key,&rsp->data.rsp_node_get_key.key,sizeof(aes_key_128));
@@ -499,7 +502,7 @@ sl_status_t sl_btmesh_node_get_networks(size_t max_networks_size,
     cmd->header=sl_btmesh_cmd_node_get_networks_id+(((0)&0xff)<<8)+(((0)&0x700)>>8);
 
 
-    sl_btmesh_host_handle_command();
+    return_if_fail(sl_btmesh_host_handle_command());
     *networks_len = rsp->data.rsp_node_get_networks.networks.len;
     if (rsp->data.rsp_node_get_networks.networks.len <= max_networks_size) {
         memcpy(networks,rsp->data.rsp_node_get_networks.networks.data,rsp->data.rsp_node_get_networks.networks.len);
@@ -519,7 +522,7 @@ sl_status_t sl_btmesh_node_get_element_seqnum(uint16_t elem_index,
     cmd->header=sl_btmesh_cmd_node_get_element_seqnum_id+(((2)&0xff)<<8)+(((2)&0x700)>>8);
 
 
-    sl_btmesh_host_handle_command();
+    return_if_fail(sl_btmesh_host_handle_command());
     *seqnum = rsp->data.rsp_node_get_element_seqnum.seqnum;
     return rsp->data.rsp_node_get_element_seqnum.result;
 
@@ -543,7 +546,7 @@ sl_status_t sl_btmesh_node_set_model_option(uint16_t elem_index,
     cmd->header=sl_btmesh_cmd_node_set_model_option_id+(((11)&0xff)<<8)+(((11)&0x700)>>8);
 
 
-    sl_btmesh_host_handle_command();
+    return_if_fail(sl_btmesh_host_handle_command());
     return rsp->data.rsp_node_set_model_option.result;
 
 }
@@ -558,7 +561,7 @@ sl_status_t sl_btmesh_node_get_local_dcd(uint8_t page) {
     cmd->header=sl_btmesh_cmd_node_get_local_dcd_id+(((1)&0xff)<<8)+(((1)&0x700)>>8);
 
 
-    sl_btmesh_host_handle_command();
+    return_if_fail(sl_btmesh_host_handle_command());
     return rsp->data.rsp_node_get_local_dcd.result;
 
 }
@@ -572,7 +575,7 @@ SL_BGAPI_DEPRECATED sl_status_t sl_btmesh_node_erase_mesh_nvm() {
     cmd->header=sl_btmesh_cmd_node_erase_mesh_nvm_id+(((0)&0xff)<<8)+(((0)&0x700)>>8);
 
 
-    sl_btmesh_host_handle_command();
+    return_if_fail(sl_btmesh_host_handle_command());
     return rsp->data.rsp_node_erase_mesh_nvm.result;
 
 }
@@ -586,7 +589,7 @@ sl_status_t sl_btmesh_node_power_off() {
     cmd->header=sl_btmesh_cmd_node_power_off_id+(((0)&0xff)<<8)+(((0)&0x700)>>8);
 
 
-    sl_btmesh_host_handle_command();
+    return_if_fail(sl_btmesh_host_handle_command());
     return rsp->data.rsp_node_power_off.result;
 
 }
@@ -601,7 +604,7 @@ sl_status_t sl_btmesh_node_set_adv_phy(uint8_t phy) {
     cmd->header=sl_btmesh_cmd_node_set_adv_phy_id+(((1)&0xff)<<8)+(((1)&0x700)>>8);
 
 
-    sl_btmesh_host_handle_command();
+    return_if_fail(sl_btmesh_host_handle_command());
     return rsp->data.rsp_node_set_adv_phy.result;
 
 }
@@ -615,7 +618,7 @@ sl_status_t sl_btmesh_node_get_adv_phy(uint8_t *phy) {
     cmd->header=sl_btmesh_cmd_node_get_adv_phy_id+(((0)&0xff)<<8)+(((0)&0x700)>>8);
 
 
-    sl_btmesh_host_handle_command();
+    return_if_fail(sl_btmesh_host_handle_command());
     *phy = rsp->data.rsp_node_get_adv_phy.phy;
     return rsp->data.rsp_node_get_adv_phy.result;
 
@@ -630,7 +633,7 @@ sl_status_t sl_btmesh_prov_init() {
     cmd->header=sl_btmesh_cmd_prov_init_id+(((0)&0xff)<<8)+(((0)&0x700)>>8);
 
 
-    sl_btmesh_host_handle_command();
+    return_if_fail(sl_btmesh_host_handle_command());
     return rsp->data.rsp_prov_init.result;
 
 }
@@ -644,7 +647,7 @@ sl_status_t sl_btmesh_prov_scan_unprov_beacons() {
     cmd->header=sl_btmesh_cmd_prov_scan_unprov_beacons_id+(((0)&0xff)<<8)+(((0)&0x700)>>8);
 
 
-    sl_btmesh_host_handle_command();
+    return_if_fail(sl_btmesh_host_handle_command());
     return rsp->data.rsp_prov_scan_unprov_beacons.result;
 
 }
@@ -663,7 +666,7 @@ sl_status_t sl_btmesh_prov_create_provisioning_session(uint16_t netkey_index,
     cmd->header=sl_btmesh_cmd_prov_create_provisioning_session_id+(((19)&0xff)<<8)+(((19)&0x700)>>8);
 
 
-    sl_btmesh_host_handle_command();
+    return_if_fail(sl_btmesh_host_handle_command());
     return rsp->data.rsp_prov_create_provisioning_session.result;
 
 }
@@ -678,7 +681,7 @@ sl_status_t sl_btmesh_prov_set_provisioning_suspend_event(uint8_t status) {
     cmd->header=sl_btmesh_cmd_prov_set_provisioning_suspend_event_id+(((1)&0xff)<<8)+(((1)&0x700)>>8);
 
 
-    sl_btmesh_host_handle_command();
+    return_if_fail(sl_btmesh_host_handle_command());
     return rsp->data.rsp_prov_set_provisioning_suspend_event.result;
 
 }
@@ -693,7 +696,7 @@ sl_status_t sl_btmesh_prov_provision_adv_device(uuid_128 uuid) {
     cmd->header=sl_btmesh_cmd_prov_provision_adv_device_id+(((16)&0xff)<<8)+(((16)&0x700)>>8);
 
 
-    sl_btmesh_host_handle_command();
+    return_if_fail(sl_btmesh_host_handle_command());
     return rsp->data.rsp_prov_provision_adv_device.result;
 
 }
@@ -710,7 +713,7 @@ sl_status_t sl_btmesh_prov_provision_gatt_device(uuid_128 uuid,
     cmd->header=sl_btmesh_cmd_prov_provision_gatt_device_id+(((17)&0xff)<<8)+(((17)&0x700)>>8);
 
 
-    sl_btmesh_host_handle_command();
+    return_if_fail(sl_btmesh_host_handle_command());
     return rsp->data.rsp_prov_provision_gatt_device.result;
 
 }
@@ -725,7 +728,7 @@ sl_status_t sl_btmesh_prov_continue_provisioning(uuid_128 uuid) {
     cmd->header=sl_btmesh_cmd_prov_continue_provisioning_id+(((16)&0xff)<<8)+(((16)&0x700)>>8);
 
 
-    sl_btmesh_host_handle_command();
+    return_if_fail(sl_btmesh_host_handle_command());
     return rsp->data.rsp_prov_continue_provisioning.result;
 
 }
@@ -741,7 +744,7 @@ sl_status_t sl_btmesh_prov_abort_provisioning(uuid_128 uuid, uint8_t reason) {
     cmd->header=sl_btmesh_cmd_prov_abort_provisioning_id+(((17)&0xff)<<8)+(((17)&0x700)>>8);
 
 
-    sl_btmesh_host_handle_command();
+    return_if_fail(sl_btmesh_host_handle_command());
     return rsp->data.rsp_prov_abort_provisioning.result;
 
 }
@@ -757,7 +760,7 @@ sl_status_t sl_btmesh_prov_set_device_address(uuid_128 uuid, uint16_t address) {
     cmd->header=sl_btmesh_cmd_prov_set_device_address_id+(((18)&0xff)<<8)+(((18)&0x700)>>8);
 
 
-    sl_btmesh_host_handle_command();
+    return_if_fail(sl_btmesh_host_handle_command());
     return rsp->data.rsp_prov_set_device_address.result;
 
 }
@@ -776,7 +779,7 @@ sl_status_t sl_btmesh_prov_create_network(uint16_t netkey_index,
     cmd->header=sl_btmesh_cmd_prov_create_network_id+(((3+key_len)&0xff)<<8)+(((3+key_len)&0x700)>>8);
 
 
-    sl_btmesh_host_handle_command();
+    return_if_fail(sl_btmesh_host_handle_command());
     return rsp->data.rsp_prov_create_network.result;
 
 }
@@ -800,7 +803,7 @@ sl_status_t sl_btmesh_prov_create_appkey(uint16_t netkey_index,
     cmd->header=sl_btmesh_cmd_prov_create_appkey_id+(((5+key_len)&0xff)<<8)+(((5+key_len)&0x700)>>8);
 
 
-    sl_btmesh_host_handle_command();
+    return_if_fail(sl_btmesh_host_handle_command());
     *application_key_len = rsp->data.rsp_prov_create_appkey.application_key.len;
     if (rsp->data.rsp_prov_create_appkey.application_key.len <= max_application_key_size) {
         memcpy(application_key,rsp->data.rsp_prov_create_appkey.application_key.data,rsp->data.rsp_prov_create_appkey.application_key.len);
@@ -823,7 +826,7 @@ sl_status_t sl_btmesh_prov_send_oob_pkey_response(uuid_128 uuid,
     cmd->header=sl_btmesh_cmd_prov_send_oob_pkey_response_id+(((17+pkey_len)&0xff)<<8)+(((17+pkey_len)&0x700)>>8);
 
 
-    sl_btmesh_host_handle_command();
+    return_if_fail(sl_btmesh_host_handle_command());
     return rsp->data.rsp_prov_send_oob_pkey_response.result;
 
 }
@@ -842,7 +845,7 @@ sl_status_t sl_btmesh_prov_send_oob_auth_response(uuid_128 uuid,
     cmd->header=sl_btmesh_cmd_prov_send_oob_auth_response_id+(((17+data_len)&0xff)<<8)+(((17+data_len)&0x700)>>8);
 
 
-    sl_btmesh_host_handle_command();
+    return_if_fail(sl_btmesh_host_handle_command());
     return rsp->data.rsp_prov_send_oob_auth_response.result;
 
 }
@@ -869,7 +872,7 @@ sl_status_t sl_btmesh_prov_set_oob_requirements(uuid_128 uuid,
     cmd->header=sl_btmesh_cmd_prov_set_oob_requirements_id+(((24)&0xff)<<8)+(((24)&0x700)>>8);
 
 
-    sl_btmesh_host_handle_command();
+    return_if_fail(sl_btmesh_host_handle_command());
     return rsp->data.rsp_prov_set_oob_requirements.result;
 
 }
@@ -890,7 +893,7 @@ sl_status_t sl_btmesh_prov_start_key_refresh(uint16_t netkey_index,
     cmd->header=sl_btmesh_cmd_prov_start_key_refresh_id+(((4+appkey_indices_len)&0xff)<<8)+(((4+appkey_indices_len)&0x700)>>8);
 
 
-    sl_btmesh_host_handle_command();
+    return_if_fail(sl_btmesh_host_handle_command());
     return rsp->data.rsp_prov_start_key_refresh.result;
 
 }
@@ -908,7 +911,7 @@ sl_status_t sl_btmesh_prov_get_key_refresh_exclusion(uint16_t key,
     cmd->header=sl_btmesh_cmd_prov_get_key_refresh_exclusion_id+(((18)&0xff)<<8)+(((18)&0x700)>>8);
 
 
-    sl_btmesh_host_handle_command();
+    return_if_fail(sl_btmesh_host_handle_command());
     *status = rsp->data.rsp_prov_get_key_refresh_exclusion.status;
     return rsp->data.rsp_prov_get_key_refresh_exclusion.result;
 
@@ -928,7 +931,7 @@ sl_status_t sl_btmesh_prov_set_key_refresh_exclusion(uint16_t key,
     cmd->header=sl_btmesh_cmd_prov_set_key_refresh_exclusion_id+(((19)&0xff)<<8)+(((19)&0x700)>>8);
 
 
-    sl_btmesh_host_handle_command();
+    return_if_fail(sl_btmesh_host_handle_command());
     return rsp->data.rsp_prov_set_key_refresh_exclusion.result;
 
 }
@@ -947,7 +950,7 @@ sl_status_t sl_btmesh_prov_get_ddb_entry(uuid_128 uuid,
     cmd->header=sl_btmesh_cmd_prov_get_ddb_entry_id+(((16)&0xff)<<8)+(((16)&0x700)>>8);
 
 
-    sl_btmesh_host_handle_command();
+    return_if_fail(sl_btmesh_host_handle_command());
     memcpy(device_key,&rsp->data.rsp_prov_get_ddb_entry.device_key,sizeof(aes_key_128));
     *netkey_index = rsp->data.rsp_prov_get_ddb_entry.netkey_index;
     *address = rsp->data.rsp_prov_get_ddb_entry.address;
@@ -966,7 +969,7 @@ sl_status_t sl_btmesh_prov_delete_ddb_entry(uuid_128 uuid) {
     cmd->header=sl_btmesh_cmd_prov_delete_ddb_entry_id+(((16)&0xff)<<8)+(((16)&0x700)>>8);
 
 
-    sl_btmesh_host_handle_command();
+    return_if_fail(sl_btmesh_host_handle_command());
     return rsp->data.rsp_prov_delete_ddb_entry.result;
 
 }
@@ -989,7 +992,7 @@ sl_status_t sl_btmesh_prov_add_ddb_entry(uuid_128 uuid,
     cmd->header=sl_btmesh_cmd_prov_add_ddb_entry_id+(((37)&0xff)<<8)+(((37)&0x700)>>8);
 
 
-    sl_btmesh_host_handle_command();
+    return_if_fail(sl_btmesh_host_handle_command());
     return rsp->data.rsp_prov_add_ddb_entry.result;
 
 }
@@ -1003,7 +1006,7 @@ sl_status_t sl_btmesh_prov_list_ddb_entries(uint16_t *count) {
     cmd->header=sl_btmesh_cmd_prov_list_ddb_entries_id+(((0)&0xff)<<8)+(((0)&0x700)>>8);
 
 
-    sl_btmesh_host_handle_command();
+    return_if_fail(sl_btmesh_host_handle_command());
     *count = rsp->data.rsp_prov_list_ddb_entries.count;
     return rsp->data.rsp_prov_list_ddb_entries.result;
 
@@ -1020,7 +1023,7 @@ sl_status_t sl_btmesh_prov_initialize_network(uint16_t address, uint32_t ivi) {
     cmd->header=sl_btmesh_cmd_prov_initialize_network_id+(((6)&0xff)<<8)+(((6)&0x700)>>8);
 
 
-    sl_btmesh_host_handle_command();
+    return_if_fail(sl_btmesh_host_handle_command());
     return rsp->data.rsp_prov_initialize_network.result;
 
 }
@@ -1040,7 +1043,7 @@ sl_status_t sl_btmesh_prov_get_key_refresh_appkey_exclusion(uint16_t netkey_inde
     cmd->header=sl_btmesh_cmd_prov_get_key_refresh_appkey_exclusion_id+(((20)&0xff)<<8)+(((20)&0x700)>>8);
 
 
-    sl_btmesh_host_handle_command();
+    return_if_fail(sl_btmesh_host_handle_command());
     *status = rsp->data.rsp_prov_get_key_refresh_appkey_exclusion.status;
     return rsp->data.rsp_prov_get_key_refresh_appkey_exclusion.result;
 
@@ -1062,7 +1065,7 @@ sl_status_t sl_btmesh_prov_set_key_refresh_appkey_exclusion(uint16_t netkey_inde
     cmd->header=sl_btmesh_cmd_prov_set_key_refresh_appkey_exclusion_id+(((21)&0xff)<<8)+(((21)&0x700)>>8);
 
 
-    sl_btmesh_host_handle_command();
+    return_if_fail(sl_btmesh_host_handle_command());
     return rsp->data.rsp_prov_set_key_refresh_appkey_exclusion.result;
 
 }
@@ -1076,7 +1079,7 @@ sl_status_t sl_btmesh_prov_stop_scan_unprov_beacons() {
     cmd->header=sl_btmesh_cmd_prov_stop_scan_unprov_beacons_id+(((0)&0xff)<<8)+(((0)&0x700)>>8);
 
 
-    sl_btmesh_host_handle_command();
+    return_if_fail(sl_btmesh_host_handle_command());
     return rsp->data.rsp_prov_stop_scan_unprov_beacons.result;
 
 }
@@ -1093,7 +1096,7 @@ sl_status_t sl_btmesh_prov_update_device_netkey_index(uuid_128 uuid,
     cmd->header=sl_btmesh_cmd_prov_update_device_netkey_index_id+(((18)&0xff)<<8)+(((18)&0x700)>>8);
 
 
-    sl_btmesh_host_handle_command();
+    return_if_fail(sl_btmesh_host_handle_command());
     return rsp->data.rsp_prov_update_device_netkey_index.result;
 
 }
@@ -1108,7 +1111,7 @@ sl_status_t sl_btmesh_prov_suspend_key_refresh(uint16_t netkey_index) {
     cmd->header=sl_btmesh_cmd_prov_suspend_key_refresh_id+(((2)&0xff)<<8)+(((2)&0x700)>>8);
 
 
-    sl_btmesh_host_handle_command();
+    return_if_fail(sl_btmesh_host_handle_command());
     return rsp->data.rsp_prov_suspend_key_refresh.result;
 
 }
@@ -1123,7 +1126,7 @@ sl_status_t sl_btmesh_prov_resume_key_refresh(uint16_t netkey_index) {
     cmd->header=sl_btmesh_cmd_prov_resume_key_refresh_id+(((2)&0xff)<<8)+(((2)&0x700)>>8);
 
 
-    sl_btmesh_host_handle_command();
+    return_if_fail(sl_btmesh_host_handle_command());
     return rsp->data.rsp_prov_resume_key_refresh.result;
 
 }
@@ -1139,7 +1142,7 @@ sl_status_t sl_btmesh_prov_get_key_refresh_phase(uint16_t netkey_index,
     cmd->header=sl_btmesh_cmd_prov_get_key_refresh_phase_id+(((2)&0xff)<<8)+(((2)&0x700)>>8);
 
 
-    sl_btmesh_host_handle_command();
+    return_if_fail(sl_btmesh_host_handle_command());
     *phase = rsp->data.rsp_prov_get_key_refresh_phase.phase;
     return rsp->data.rsp_prov_get_key_refresh_phase.result;
 
@@ -1163,7 +1166,7 @@ sl_status_t sl_btmesh_prov_start_key_refresh_from_phase(uint8_t phase,
     cmd->header=sl_btmesh_cmd_prov_start_key_refresh_from_phase_id+(((5+appkey_indices_len)&0xff)<<8)+(((5+appkey_indices_len)&0x700)>>8);
 
 
-    sl_btmesh_host_handle_command();
+    return_if_fail(sl_btmesh_host_handle_command());
     return rsp->data.rsp_prov_start_key_refresh_from_phase.result;
 
 }
@@ -1178,7 +1181,7 @@ sl_status_t sl_btmesh_prov_flush_key_refresh_state(uint16_t netkey_index) {
     cmd->header=sl_btmesh_cmd_prov_flush_key_refresh_state_id+(((2)&0xff)<<8)+(((2)&0x700)>>8);
 
 
-    sl_btmesh_host_handle_command();
+    return_if_fail(sl_btmesh_host_handle_command());
     return rsp->data.rsp_prov_flush_key_refresh_state.result;
 
 }
@@ -1200,7 +1203,7 @@ sl_status_t sl_btmesh_prov_test_identity(uint16_t address,
     cmd->header=sl_btmesh_cmd_prov_test_identity_id+(((5+data_len)&0xff)<<8)+(((5+data_len)&0x700)>>8);
 
 
-    sl_btmesh_host_handle_command();
+    return_if_fail(sl_btmesh_host_handle_command());
     *match = rsp->data.rsp_prov_test_identity.match;
     return rsp->data.rsp_prov_test_identity.result;
 
@@ -1216,7 +1219,7 @@ sl_status_t sl_btmesh_proxy_connect(uint8_t connection, uint32_t *handle) {
     cmd->header=sl_btmesh_cmd_proxy_connect_id+(((1)&0xff)<<8)+(((1)&0x700)>>8);
 
 
-    sl_btmesh_host_handle_command();
+    return_if_fail(sl_btmesh_host_handle_command());
     *handle = rsp->data.rsp_proxy_connect.handle;
     return rsp->data.rsp_proxy_connect.result;
 
@@ -1232,7 +1235,7 @@ sl_status_t sl_btmesh_proxy_disconnect(uint32_t handle) {
     cmd->header=sl_btmesh_cmd_proxy_disconnect_id+(((4)&0xff)<<8)+(((4)&0x700)>>8);
 
 
-    sl_btmesh_host_handle_command();
+    return_if_fail(sl_btmesh_host_handle_command());
     return rsp->data.rsp_proxy_disconnect.result;
 
 }
@@ -1251,7 +1254,7 @@ sl_status_t sl_btmesh_proxy_set_filter_type(uint32_t handle,
     cmd->header=sl_btmesh_cmd_proxy_set_filter_type_id+(((7)&0xff)<<8)+(((7)&0x700)>>8);
 
 
-    sl_btmesh_host_handle_command();
+    return_if_fail(sl_btmesh_host_handle_command());
     return rsp->data.rsp_proxy_set_filter_type.result;
 
 }
@@ -1270,7 +1273,7 @@ sl_status_t sl_btmesh_proxy_allow(uint32_t handle,
     cmd->header=sl_btmesh_cmd_proxy_allow_id+(((8)&0xff)<<8)+(((8)&0x700)>>8);
 
 
-    sl_btmesh_host_handle_command();
+    return_if_fail(sl_btmesh_host_handle_command());
     return rsp->data.rsp_proxy_allow.result;
 
 }
@@ -1289,7 +1292,7 @@ sl_status_t sl_btmesh_proxy_deny(uint32_t handle,
     cmd->header=sl_btmesh_cmd_proxy_deny_id+(((8)&0xff)<<8)+(((8)&0x700)>>8);
 
 
-    sl_btmesh_host_handle_command();
+    return_if_fail(sl_btmesh_host_handle_command());
     return rsp->data.rsp_proxy_deny.result;
 
 }
@@ -1304,7 +1307,7 @@ sl_status_t sl_btmesh_proxy_optimisation_toggle(uint8_t enable) {
     cmd->header=sl_btmesh_cmd_proxy_optimisation_toggle_id+(((1)&0xff)<<8)+(((1)&0x700)>>8);
 
 
-    sl_btmesh_host_handle_command();
+    return_if_fail(sl_btmesh_host_handle_command());
     return rsp->data.rsp_proxy_optimisation_toggle.result;
 
 }
@@ -1339,7 +1342,7 @@ sl_status_t sl_btmesh_vendor_model_send(uint16_t destination_address,
     cmd->header=sl_btmesh_cmd_vendor_model_send_id+(((15+payload_len)&0xff)<<8)+(((15+payload_len)&0x700)>>8);
 
 
-    sl_btmesh_host_handle_command();
+    return_if_fail(sl_btmesh_host_handle_command());
     return rsp->data.rsp_vendor_model_send.result;
 
 }
@@ -1366,7 +1369,7 @@ sl_status_t sl_btmesh_vendor_model_set_publication(uint16_t elem_index,
     cmd->header=sl_btmesh_cmd_vendor_model_set_publication_id+(((9+payload_len)&0xff)<<8)+(((9+payload_len)&0x700)>>8);
 
 
-    sl_btmesh_host_handle_command();
+    return_if_fail(sl_btmesh_host_handle_command());
     return rsp->data.rsp_vendor_model_set_publication.result;
 
 }
@@ -1385,7 +1388,7 @@ sl_status_t sl_btmesh_vendor_model_clear_publication(uint16_t elem_index,
     cmd->header=sl_btmesh_cmd_vendor_model_clear_publication_id+(((6)&0xff)<<8)+(((6)&0x700)>>8);
 
 
-    sl_btmesh_host_handle_command();
+    return_if_fail(sl_btmesh_host_handle_command());
     return rsp->data.rsp_vendor_model_clear_publication.result;
 
 }
@@ -1404,7 +1407,7 @@ sl_status_t sl_btmesh_vendor_model_publish(uint16_t elem_index,
     cmd->header=sl_btmesh_cmd_vendor_model_publish_id+(((6)&0xff)<<8)+(((6)&0x700)>>8);
 
 
-    sl_btmesh_host_handle_command();
+    return_if_fail(sl_btmesh_host_handle_command());
     return rsp->data.rsp_vendor_model_publish.result;
 
 }
@@ -1429,7 +1432,7 @@ sl_status_t sl_btmesh_vendor_model_init(uint16_t elem_index,
     cmd->header=sl_btmesh_cmd_vendor_model_init_id+(((8+opcodes_len)&0xff)<<8)+(((8+opcodes_len)&0x700)>>8);
 
 
-    sl_btmesh_host_handle_command();
+    return_if_fail(sl_btmesh_host_handle_command());
     return rsp->data.rsp_vendor_model_init.result;
 
 }
@@ -1448,7 +1451,7 @@ sl_status_t sl_btmesh_vendor_model_deinit(uint16_t elem_index,
     cmd->header=sl_btmesh_cmd_vendor_model_deinit_id+(((6)&0xff)<<8)+(((6)&0x700)>>8);
 
 
-    sl_btmesh_host_handle_command();
+    return_if_fail(sl_btmesh_host_handle_command());
     return rsp->data.rsp_vendor_model_deinit.result;
 
 }
@@ -1486,7 +1489,7 @@ sl_status_t sl_btmesh_vendor_model_send_tracked(uint16_t destination_address,
     cmd->header=sl_btmesh_cmd_vendor_model_send_tracked_id+(((16+payload_len)&0xff)<<8)+(((16+payload_len)&0x700)>>8);
 
 
-    sl_btmesh_host_handle_command();
+    return_if_fail(sl_btmesh_host_handle_command());
     *handle = rsp->data.rsp_vendor_model_send_tracked.handle;
     return rsp->data.rsp_vendor_model_send_tracked.result;
 
@@ -1517,7 +1520,7 @@ sl_status_t sl_btmesh_vendor_model_set_publication_tracked(uint16_t elem_index,
     cmd->header=sl_btmesh_cmd_vendor_model_set_publication_tracked_id+(((10+payload_len)&0xff)<<8)+(((10+payload_len)&0x700)>>8);
 
 
-    sl_btmesh_host_handle_command();
+    return_if_fail(sl_btmesh_host_handle_command());
     *handle = rsp->data.rsp_vendor_model_set_publication_tracked.handle;
     return rsp->data.rsp_vendor_model_set_publication_tracked.result;
 
@@ -1539,7 +1542,7 @@ sl_status_t sl_btmesh_health_client_get(uint16_t server_address,
     cmd->header=sl_btmesh_cmd_health_client_get_id+(((8)&0xff)<<8)+(((8)&0x700)>>8);
 
 
-    sl_btmesh_host_handle_command();
+    return_if_fail(sl_btmesh_host_handle_command());
     return rsp->data.rsp_health_client_get.result;
 
 }
@@ -1562,7 +1565,7 @@ sl_status_t sl_btmesh_health_client_clear(uint16_t server_address,
     cmd->header=sl_btmesh_cmd_health_client_clear_id+(((9)&0xff)<<8)+(((9)&0x700)>>8);
 
 
-    sl_btmesh_host_handle_command();
+    return_if_fail(sl_btmesh_host_handle_command());
     return rsp->data.rsp_health_client_clear.result;
 
 }
@@ -1587,7 +1590,7 @@ sl_status_t sl_btmesh_health_client_test(uint16_t server_address,
     cmd->header=sl_btmesh_cmd_health_client_test_id+(((10)&0xff)<<8)+(((10)&0x700)>>8);
 
 
-    sl_btmesh_host_handle_command();
+    return_if_fail(sl_btmesh_host_handle_command());
     return rsp->data.rsp_health_client_test.result;
 
 }
@@ -1606,7 +1609,7 @@ sl_status_t sl_btmesh_health_client_get_period(uint16_t server_address,
     cmd->header=sl_btmesh_cmd_health_client_get_period_id+(((6)&0xff)<<8)+(((6)&0x700)>>8);
 
 
-    sl_btmesh_host_handle_command();
+    return_if_fail(sl_btmesh_host_handle_command());
     return rsp->data.rsp_health_client_get_period.result;
 
 }
@@ -1629,7 +1632,7 @@ sl_status_t sl_btmesh_health_client_set_period(uint16_t server_address,
     cmd->header=sl_btmesh_cmd_health_client_set_period_id+(((8)&0xff)<<8)+(((8)&0x700)>>8);
 
 
-    sl_btmesh_host_handle_command();
+    return_if_fail(sl_btmesh_host_handle_command());
     return rsp->data.rsp_health_client_set_period.result;
 
 }
@@ -1648,7 +1651,7 @@ sl_status_t sl_btmesh_health_client_get_attention(uint16_t server_address,
     cmd->header=sl_btmesh_cmd_health_client_get_attention_id+(((6)&0xff)<<8)+(((6)&0x700)>>8);
 
 
-    sl_btmesh_host_handle_command();
+    return_if_fail(sl_btmesh_host_handle_command());
     return rsp->data.rsp_health_client_get_attention.result;
 
 }
@@ -1671,7 +1674,7 @@ sl_status_t sl_btmesh_health_client_set_attention(uint16_t server_address,
     cmd->header=sl_btmesh_cmd_health_client_set_attention_id+(((8)&0xff)<<8)+(((8)&0x700)>>8);
 
 
-    sl_btmesh_host_handle_command();
+    return_if_fail(sl_btmesh_host_handle_command());
     return rsp->data.rsp_health_client_set_attention.result;
 
 }
@@ -1687,7 +1690,7 @@ sl_status_t sl_btmesh_health_server_set_fault(uint16_t elem_index, uint8_t id) {
     cmd->header=sl_btmesh_cmd_health_server_set_fault_id+(((3)&0xff)<<8)+(((3)&0x700)>>8);
 
 
-    sl_btmesh_host_handle_command();
+    return_if_fail(sl_btmesh_host_handle_command());
     return rsp->data.rsp_health_server_set_fault.result;
 
 }
@@ -1704,7 +1707,7 @@ sl_status_t sl_btmesh_health_server_clear_fault(uint16_t elem_index,
     cmd->header=sl_btmesh_cmd_health_server_clear_fault_id+(((3)&0xff)<<8)+(((3)&0x700)>>8);
 
 
-    sl_btmesh_host_handle_command();
+    return_if_fail(sl_btmesh_host_handle_command());
     return rsp->data.rsp_health_server_clear_fault.result;
 
 }
@@ -1725,7 +1728,7 @@ sl_status_t sl_btmesh_health_server_send_test_response(uint16_t client_address,
     cmd->header=sl_btmesh_cmd_health_server_send_test_response_id+(((8)&0xff)<<8)+(((8)&0x700)>>8);
 
 
-    sl_btmesh_host_handle_command();
+    return_if_fail(sl_btmesh_host_handle_command());
     return rsp->data.rsp_health_server_send_test_response.result;
 
 }
@@ -1748,7 +1751,7 @@ sl_status_t sl_btmesh_generic_client_get(uint16_t server_address,
     cmd->header=sl_btmesh_cmd_generic_client_get_id+(((9)&0xff)<<8)+(((9)&0x700)>>8);
 
 
-    sl_btmesh_host_handle_command();
+    return_if_fail(sl_btmesh_host_handle_command());
     return rsp->data.rsp_generic_client_get.result;
 
 }
@@ -1783,7 +1786,7 @@ sl_status_t sl_btmesh_generic_client_set(uint16_t server_address,
     cmd->header=sl_btmesh_cmd_generic_client_set_id+(((19+parameters_len)&0xff)<<8)+(((19+parameters_len)&0x700)>>8);
 
 
-    sl_btmesh_host_handle_command();
+    return_if_fail(sl_btmesh_host_handle_command());
     return rsp->data.rsp_generic_client_set.result;
 
 }
@@ -1814,7 +1817,7 @@ sl_status_t sl_btmesh_generic_client_publish(uint16_t elem_index,
     cmd->header=sl_btmesh_cmd_generic_client_publish_id+(((15+parameters_len)&0xff)<<8)+(((15+parameters_len)&0x700)>>8);
 
 
-    sl_btmesh_host_handle_command();
+    return_if_fail(sl_btmesh_host_handle_command());
     return rsp->data.rsp_generic_client_publish.result;
 
 }
@@ -1841,7 +1844,7 @@ sl_status_t sl_btmesh_generic_client_get_params(uint16_t server_address,
     cmd->header=sl_btmesh_cmd_generic_client_get_params_id+(((10+parameters_len)&0xff)<<8)+(((10+parameters_len)&0x700)>>8);
 
 
-    sl_btmesh_host_handle_command();
+    return_if_fail(sl_btmesh_host_handle_command());
     return rsp->data.rsp_generic_client_get_params.result;
 
 }
@@ -1855,7 +1858,7 @@ sl_status_t sl_btmesh_generic_client_init() {
     cmd->header=sl_btmesh_cmd_generic_client_init_id+(((0)&0xff)<<8)+(((0)&0x700)>>8);
 
 
-    sl_btmesh_host_handle_command();
+    return_if_fail(sl_btmesh_host_handle_command());
     return rsp->data.rsp_generic_client_init.result;
 
 }
@@ -1869,7 +1872,7 @@ sl_status_t sl_btmesh_generic_client_init_common() {
     cmd->header=sl_btmesh_cmd_generic_client_init_common_id+(((0)&0xff)<<8)+(((0)&0x700)>>8);
 
 
-    sl_btmesh_host_handle_command();
+    return_if_fail(sl_btmesh_host_handle_command());
     return rsp->data.rsp_generic_client_init_common.result;
 
 }
@@ -1883,7 +1886,7 @@ sl_status_t sl_btmesh_generic_client_init_on_off() {
     cmd->header=sl_btmesh_cmd_generic_client_init_on_off_id+(((0)&0xff)<<8)+(((0)&0x700)>>8);
 
 
-    sl_btmesh_host_handle_command();
+    return_if_fail(sl_btmesh_host_handle_command());
     return rsp->data.rsp_generic_client_init_on_off.result;
 
 }
@@ -1897,7 +1900,7 @@ sl_status_t sl_btmesh_generic_client_init_level() {
     cmd->header=sl_btmesh_cmd_generic_client_init_level_id+(((0)&0xff)<<8)+(((0)&0x700)>>8);
 
 
-    sl_btmesh_host_handle_command();
+    return_if_fail(sl_btmesh_host_handle_command());
     return rsp->data.rsp_generic_client_init_level.result;
 
 }
@@ -1911,7 +1914,7 @@ sl_status_t sl_btmesh_generic_client_init_default_transition_time() {
     cmd->header=sl_btmesh_cmd_generic_client_init_default_transition_time_id+(((0)&0xff)<<8)+(((0)&0x700)>>8);
 
 
-    sl_btmesh_host_handle_command();
+    return_if_fail(sl_btmesh_host_handle_command());
     return rsp->data.rsp_generic_client_init_default_transition_time.result;
 
 }
@@ -1925,7 +1928,7 @@ sl_status_t sl_btmesh_generic_client_init_power_on_off() {
     cmd->header=sl_btmesh_cmd_generic_client_init_power_on_off_id+(((0)&0xff)<<8)+(((0)&0x700)>>8);
 
 
-    sl_btmesh_host_handle_command();
+    return_if_fail(sl_btmesh_host_handle_command());
     return rsp->data.rsp_generic_client_init_power_on_off.result;
 
 }
@@ -1939,7 +1942,7 @@ sl_status_t sl_btmesh_generic_client_init_power_level() {
     cmd->header=sl_btmesh_cmd_generic_client_init_power_level_id+(((0)&0xff)<<8)+(((0)&0x700)>>8);
 
 
-    sl_btmesh_host_handle_command();
+    return_if_fail(sl_btmesh_host_handle_command());
     return rsp->data.rsp_generic_client_init_power_level.result;
 
 }
@@ -1953,7 +1956,7 @@ sl_status_t sl_btmesh_generic_client_init_battery() {
     cmd->header=sl_btmesh_cmd_generic_client_init_battery_id+(((0)&0xff)<<8)+(((0)&0x700)>>8);
 
 
-    sl_btmesh_host_handle_command();
+    return_if_fail(sl_btmesh_host_handle_command());
     return rsp->data.rsp_generic_client_init_battery.result;
 
 }
@@ -1967,7 +1970,7 @@ sl_status_t sl_btmesh_generic_client_init_location() {
     cmd->header=sl_btmesh_cmd_generic_client_init_location_id+(((0)&0xff)<<8)+(((0)&0x700)>>8);
 
 
-    sl_btmesh_host_handle_command();
+    return_if_fail(sl_btmesh_host_handle_command());
     return rsp->data.rsp_generic_client_init_location.result;
 
 }
@@ -1981,7 +1984,7 @@ sl_status_t sl_btmesh_generic_client_init_property() {
     cmd->header=sl_btmesh_cmd_generic_client_init_property_id+(((0)&0xff)<<8)+(((0)&0x700)>>8);
 
 
-    sl_btmesh_host_handle_command();
+    return_if_fail(sl_btmesh_host_handle_command());
     return rsp->data.rsp_generic_client_init_property.result;
 
 }
@@ -1995,7 +1998,7 @@ sl_status_t sl_btmesh_generic_client_init_lightness() {
     cmd->header=sl_btmesh_cmd_generic_client_init_lightness_id+(((0)&0xff)<<8)+(((0)&0x700)>>8);
 
 
-    sl_btmesh_host_handle_command();
+    return_if_fail(sl_btmesh_host_handle_command());
     return rsp->data.rsp_generic_client_init_lightness.result;
 
 }
@@ -2009,7 +2012,7 @@ sl_status_t sl_btmesh_generic_client_init_ctl() {
     cmd->header=sl_btmesh_cmd_generic_client_init_ctl_id+(((0)&0xff)<<8)+(((0)&0x700)>>8);
 
 
-    sl_btmesh_host_handle_command();
+    return_if_fail(sl_btmesh_host_handle_command());
     return rsp->data.rsp_generic_client_init_ctl.result;
 
 }
@@ -2023,7 +2026,7 @@ sl_status_t sl_btmesh_generic_client_init_hsl() {
     cmd->header=sl_btmesh_cmd_generic_client_init_hsl_id+(((0)&0xff)<<8)+(((0)&0x700)>>8);
 
 
-    sl_btmesh_host_handle_command();
+    return_if_fail(sl_btmesh_host_handle_command());
     return rsp->data.rsp_generic_client_init_hsl.result;
 
 }
@@ -2054,7 +2057,7 @@ sl_status_t sl_btmesh_generic_server_respond(uint16_t client_address,
     cmd->header=sl_btmesh_cmd_generic_server_respond_id+(((16+parameters_len)&0xff)<<8)+(((16+parameters_len)&0x700)>>8);
 
 
-    sl_btmesh_host_handle_command();
+    return_if_fail(sl_btmesh_host_handle_command());
     return rsp->data.rsp_generic_server_respond.result;
 
 }
@@ -2079,7 +2082,7 @@ sl_status_t sl_btmesh_generic_server_update(uint16_t elem_index,
     cmd->header=sl_btmesh_cmd_generic_server_update_id+(((10+parameters_len)&0xff)<<8)+(((10+parameters_len)&0x700)>>8);
 
 
-    sl_btmesh_host_handle_command();
+    return_if_fail(sl_btmesh_host_handle_command());
     return rsp->data.rsp_generic_server_update.result;
 
 }
@@ -2098,7 +2101,7 @@ sl_status_t sl_btmesh_generic_server_publish(uint16_t elem_index,
     cmd->header=sl_btmesh_cmd_generic_server_publish_id+(((5)&0xff)<<8)+(((5)&0x700)>>8);
 
 
-    sl_btmesh_host_handle_command();
+    return_if_fail(sl_btmesh_host_handle_command());
     return rsp->data.rsp_generic_server_publish.result;
 
 }
@@ -2112,7 +2115,7 @@ sl_status_t sl_btmesh_generic_server_init() {
     cmd->header=sl_btmesh_cmd_generic_server_init_id+(((0)&0xff)<<8)+(((0)&0x700)>>8);
 
 
-    sl_btmesh_host_handle_command();
+    return_if_fail(sl_btmesh_host_handle_command());
     return rsp->data.rsp_generic_server_init.result;
 
 }
@@ -2126,7 +2129,7 @@ sl_status_t sl_btmesh_generic_server_init_common() {
     cmd->header=sl_btmesh_cmd_generic_server_init_common_id+(((0)&0xff)<<8)+(((0)&0x700)>>8);
 
 
-    sl_btmesh_host_handle_command();
+    return_if_fail(sl_btmesh_host_handle_command());
     return rsp->data.rsp_generic_server_init_common.result;
 
 }
@@ -2140,7 +2143,7 @@ sl_status_t sl_btmesh_generic_server_init_on_off() {
     cmd->header=sl_btmesh_cmd_generic_server_init_on_off_id+(((0)&0xff)<<8)+(((0)&0x700)>>8);
 
 
-    sl_btmesh_host_handle_command();
+    return_if_fail(sl_btmesh_host_handle_command());
     return rsp->data.rsp_generic_server_init_on_off.result;
 
 }
@@ -2154,7 +2157,7 @@ sl_status_t sl_btmesh_generic_server_init_level() {
     cmd->header=sl_btmesh_cmd_generic_server_init_level_id+(((0)&0xff)<<8)+(((0)&0x700)>>8);
 
 
-    sl_btmesh_host_handle_command();
+    return_if_fail(sl_btmesh_host_handle_command());
     return rsp->data.rsp_generic_server_init_level.result;
 
 }
@@ -2168,7 +2171,7 @@ sl_status_t sl_btmesh_generic_server_init_default_transition_time() {
     cmd->header=sl_btmesh_cmd_generic_server_init_default_transition_time_id+(((0)&0xff)<<8)+(((0)&0x700)>>8);
 
 
-    sl_btmesh_host_handle_command();
+    return_if_fail(sl_btmesh_host_handle_command());
     return rsp->data.rsp_generic_server_init_default_transition_time.result;
 
 }
@@ -2182,7 +2185,7 @@ sl_status_t sl_btmesh_generic_server_init_power_on_off() {
     cmd->header=sl_btmesh_cmd_generic_server_init_power_on_off_id+(((0)&0xff)<<8)+(((0)&0x700)>>8);
 
 
-    sl_btmesh_host_handle_command();
+    return_if_fail(sl_btmesh_host_handle_command());
     return rsp->data.rsp_generic_server_init_power_on_off.result;
 
 }
@@ -2196,7 +2199,7 @@ sl_status_t sl_btmesh_generic_server_init_power_level() {
     cmd->header=sl_btmesh_cmd_generic_server_init_power_level_id+(((0)&0xff)<<8)+(((0)&0x700)>>8);
 
 
-    sl_btmesh_host_handle_command();
+    return_if_fail(sl_btmesh_host_handle_command());
     return rsp->data.rsp_generic_server_init_power_level.result;
 
 }
@@ -2210,7 +2213,7 @@ sl_status_t sl_btmesh_generic_server_init_battery() {
     cmd->header=sl_btmesh_cmd_generic_server_init_battery_id+(((0)&0xff)<<8)+(((0)&0x700)>>8);
 
 
-    sl_btmesh_host_handle_command();
+    return_if_fail(sl_btmesh_host_handle_command());
     return rsp->data.rsp_generic_server_init_battery.result;
 
 }
@@ -2224,7 +2227,7 @@ sl_status_t sl_btmesh_generic_server_init_location() {
     cmd->header=sl_btmesh_cmd_generic_server_init_location_id+(((0)&0xff)<<8)+(((0)&0x700)>>8);
 
 
-    sl_btmesh_host_handle_command();
+    return_if_fail(sl_btmesh_host_handle_command());
     return rsp->data.rsp_generic_server_init_location.result;
 
 }
@@ -2238,7 +2241,7 @@ sl_status_t sl_btmesh_generic_server_init_property() {
     cmd->header=sl_btmesh_cmd_generic_server_init_property_id+(((0)&0xff)<<8)+(((0)&0x700)>>8);
 
 
-    sl_btmesh_host_handle_command();
+    return_if_fail(sl_btmesh_host_handle_command());
     return rsp->data.rsp_generic_server_init_property.result;
 
 }
@@ -2252,7 +2255,7 @@ sl_status_t sl_btmesh_generic_server_init_lightness() {
     cmd->header=sl_btmesh_cmd_generic_server_init_lightness_id+(((0)&0xff)<<8)+(((0)&0x700)>>8);
 
 
-    sl_btmesh_host_handle_command();
+    return_if_fail(sl_btmesh_host_handle_command());
     return rsp->data.rsp_generic_server_init_lightness.result;
 
 }
@@ -2266,7 +2269,7 @@ sl_status_t sl_btmesh_generic_server_init_ctl() {
     cmd->header=sl_btmesh_cmd_generic_server_init_ctl_id+(((0)&0xff)<<8)+(((0)&0x700)>>8);
 
 
-    sl_btmesh_host_handle_command();
+    return_if_fail(sl_btmesh_host_handle_command());
     return rsp->data.rsp_generic_server_init_ctl.result;
 
 }
@@ -2280,7 +2283,7 @@ sl_status_t sl_btmesh_generic_server_init_hsl() {
     cmd->header=sl_btmesh_cmd_generic_server_init_hsl_id+(((0)&0xff)<<8)+(((0)&0x700)>>8);
 
 
-    sl_btmesh_host_handle_command();
+    return_if_fail(sl_btmesh_host_handle_command());
     return rsp->data.rsp_generic_server_init_hsl.result;
 
 }
@@ -2303,7 +2306,7 @@ sl_status_t sl_btmesh_generic_server_get_cached_state(uint16_t elem_index,
     cmd->header=sl_btmesh_cmd_generic_server_get_cached_state_id+(((5)&0xff)<<8)+(((5)&0x700)>>8);
 
 
-    sl_btmesh_host_handle_command();
+    return_if_fail(sl_btmesh_host_handle_command());
     *remaining_ms = rsp->data.rsp_generic_server_get_cached_state.remaining_ms;
     *parameters_len = rsp->data.rsp_generic_server_get_cached_state.parameters.len;
     if (rsp->data.rsp_generic_server_get_cached_state.parameters.len <= max_parameters_size) {
@@ -2322,7 +2325,7 @@ sl_status_t sl_btmesh_test_get_nettx(uint8_t *count, uint8_t *interval) {
     cmd->header=sl_btmesh_cmd_test_get_nettx_id+(((0)&0xff)<<8)+(((0)&0x700)>>8);
 
 
-    sl_btmesh_host_handle_command();
+    return_if_fail(sl_btmesh_host_handle_command());
     *count = rsp->data.rsp_test_get_nettx.count;
     *interval = rsp->data.rsp_test_get_nettx.interval;
     return rsp->data.rsp_test_get_nettx.result;
@@ -2340,7 +2343,7 @@ sl_status_t sl_btmesh_test_set_nettx(uint8_t count, uint8_t interval) {
     cmd->header=sl_btmesh_cmd_test_set_nettx_id+(((2)&0xff)<<8)+(((2)&0x700)>>8);
 
 
-    sl_btmesh_host_handle_command();
+    return_if_fail(sl_btmesh_host_handle_command());
     return rsp->data.rsp_test_set_nettx.result;
 
 }
@@ -2356,7 +2359,7 @@ sl_status_t sl_btmesh_test_get_relay(uint8_t *enabled,
     cmd->header=sl_btmesh_cmd_test_get_relay_id+(((0)&0xff)<<8)+(((0)&0x700)>>8);
 
 
-    sl_btmesh_host_handle_command();
+    return_if_fail(sl_btmesh_host_handle_command());
     *enabled = rsp->data.rsp_test_get_relay.enabled;
     *count = rsp->data.rsp_test_get_relay.count;
     *interval = rsp->data.rsp_test_get_relay.interval;
@@ -2378,7 +2381,7 @@ sl_status_t sl_btmesh_test_set_relay(uint8_t enabled,
     cmd->header=sl_btmesh_cmd_test_set_relay_id+(((3)&0xff)<<8)+(((3)&0x700)>>8);
 
 
-    sl_btmesh_host_handle_command();
+    return_if_fail(sl_btmesh_host_handle_command());
     return rsp->data.rsp_test_set_relay.result;
 
 }
@@ -2405,7 +2408,7 @@ sl_status_t sl_btmesh_test_set_adv_scan_params(uint16_t adv_interval_min,
     cmd->header=sl_btmesh_cmd_test_set_adv_scan_params_id+(((11)&0xff)<<8)+(((11)&0x700)>>8);
 
 
-    sl_btmesh_host_handle_command();
+    return_if_fail(sl_btmesh_host_handle_command());
     return rsp->data.rsp_test_set_adv_scan_params.result;
 
 }
@@ -2420,7 +2423,7 @@ sl_status_t sl_btmesh_test_set_ivupdate_test_mode(uint8_t mode) {
     cmd->header=sl_btmesh_cmd_test_set_ivupdate_test_mode_id+(((1)&0xff)<<8)+(((1)&0x700)>>8);
 
 
-    sl_btmesh_host_handle_command();
+    return_if_fail(sl_btmesh_host_handle_command());
     return rsp->data.rsp_test_set_ivupdate_test_mode.result;
 
 }
@@ -2434,7 +2437,7 @@ sl_status_t sl_btmesh_test_get_ivupdate_test_mode(uint8_t *mode) {
     cmd->header=sl_btmesh_cmd_test_get_ivupdate_test_mode_id+(((0)&0xff)<<8)+(((0)&0x700)>>8);
 
 
-    sl_btmesh_host_handle_command();
+    return_if_fail(sl_btmesh_host_handle_command());
     *mode = rsp->data.rsp_test_get_ivupdate_test_mode.mode;
     return rsp->data.rsp_test_get_ivupdate_test_mode.result;
 
@@ -2450,7 +2453,7 @@ sl_status_t sl_btmesh_test_set_segment_send_delay(uint8_t delay) {
     cmd->header=sl_btmesh_cmd_test_set_segment_send_delay_id+(((1)&0xff)<<8)+(((1)&0x700)>>8);
 
 
-    sl_btmesh_host_handle_command();
+    return_if_fail(sl_btmesh_host_handle_command());
     return rsp->data.rsp_test_set_segment_send_delay.result;
 
 }
@@ -2465,7 +2468,7 @@ sl_status_t sl_btmesh_test_set_ivupdate_state(uint8_t state) {
     cmd->header=sl_btmesh_cmd_test_set_ivupdate_state_id+(((1)&0xff)<<8)+(((1)&0x700)>>8);
 
 
-    sl_btmesh_host_handle_command();
+    return_if_fail(sl_btmesh_host_handle_command());
     return rsp->data.rsp_test_set_ivupdate_state.result;
 
 }
@@ -2479,7 +2482,7 @@ sl_status_t sl_btmesh_test_send_beacons() {
     cmd->header=sl_btmesh_cmd_test_send_beacons_id+(((0)&0xff)<<8)+(((0)&0x700)>>8);
 
 
-    sl_btmesh_host_handle_command();
+    return_if_fail(sl_btmesh_host_handle_command());
     return rsp->data.rsp_test_send_beacons.result;
 
 }
@@ -2500,7 +2503,7 @@ sl_status_t sl_btmesh_test_bind_local_model_app(uint16_t elem_index,
     cmd->header=sl_btmesh_cmd_test_bind_local_model_app_id+(((8)&0xff)<<8)+(((8)&0x700)>>8);
 
 
-    sl_btmesh_host_handle_command();
+    return_if_fail(sl_btmesh_host_handle_command());
     return rsp->data.rsp_test_bind_local_model_app.result;
 
 }
@@ -2521,7 +2524,7 @@ sl_status_t sl_btmesh_test_unbind_local_model_app(uint16_t elem_index,
     cmd->header=sl_btmesh_cmd_test_unbind_local_model_app_id+(((8)&0xff)<<8)+(((8)&0x700)>>8);
 
 
-    sl_btmesh_host_handle_command();
+    return_if_fail(sl_btmesh_host_handle_command());
     return rsp->data.rsp_test_unbind_local_model_app.result;
 
 }
@@ -2542,7 +2545,7 @@ sl_status_t sl_btmesh_test_add_local_model_sub(uint16_t elem_index,
     cmd->header=sl_btmesh_cmd_test_add_local_model_sub_id+(((8)&0xff)<<8)+(((8)&0x700)>>8);
 
 
-    sl_btmesh_host_handle_command();
+    return_if_fail(sl_btmesh_host_handle_command());
     return rsp->data.rsp_test_add_local_model_sub.result;
 
 }
@@ -2563,7 +2566,7 @@ sl_status_t sl_btmesh_test_remove_local_model_sub(uint16_t elem_index,
     cmd->header=sl_btmesh_cmd_test_remove_local_model_sub_id+(((8)&0xff)<<8)+(((8)&0x700)>>8);
 
 
-    sl_btmesh_host_handle_command();
+    return_if_fail(sl_btmesh_host_handle_command());
     return rsp->data.rsp_test_remove_local_model_sub.result;
 
 }
@@ -2586,7 +2589,7 @@ sl_status_t sl_btmesh_test_add_local_model_sub_va(uint16_t elem_index,
     cmd->header=sl_btmesh_cmd_test_add_local_model_sub_va_id+(((7+sub_address_len)&0xff)<<8)+(((7+sub_address_len)&0x700)>>8);
 
 
-    sl_btmesh_host_handle_command();
+    return_if_fail(sl_btmesh_host_handle_command());
     return rsp->data.rsp_test_add_local_model_sub_va.result;
 
 }
@@ -2609,7 +2612,7 @@ sl_status_t sl_btmesh_test_remove_local_model_sub_va(uint16_t elem_index,
     cmd->header=sl_btmesh_cmd_test_remove_local_model_sub_va_id+(((7+sub_address_len)&0xff)<<8)+(((7+sub_address_len)&0x700)>>8);
 
 
-    sl_btmesh_host_handle_command();
+    return_if_fail(sl_btmesh_host_handle_command());
     return rsp->data.rsp_test_remove_local_model_sub_va.result;
 
 }
@@ -2631,7 +2634,7 @@ sl_status_t sl_btmesh_test_get_local_model_sub(uint16_t elem_index,
     cmd->header=sl_btmesh_cmd_test_get_local_model_sub_id+(((6)&0xff)<<8)+(((6)&0x700)>>8);
 
 
-    sl_btmesh_host_handle_command();
+    return_if_fail(sl_btmesh_host_handle_command());
     *addresses_len = rsp->data.rsp_test_get_local_model_sub.addresses.len;
     if (rsp->data.rsp_test_get_local_model_sub.addresses.len <= max_addresses_size) {
         memcpy(addresses,rsp->data.rsp_test_get_local_model_sub.addresses.data,rsp->data.rsp_test_get_local_model_sub.addresses.len);
@@ -2666,7 +2669,7 @@ sl_status_t sl_btmesh_test_set_local_model_pub(uint16_t elem_index,
     cmd->header=sl_btmesh_cmd_test_set_local_model_pub_id+(((14)&0xff)<<8)+(((14)&0x700)>>8);
 
 
-    sl_btmesh_host_handle_command();
+    return_if_fail(sl_btmesh_host_handle_command());
     return rsp->data.rsp_test_set_local_model_pub.result;
 
 }
@@ -2699,7 +2702,7 @@ sl_status_t sl_btmesh_test_set_local_model_pub_va(uint16_t elem_index,
     cmd->header=sl_btmesh_cmd_test_set_local_model_pub_va_id+(((13+pub_address_len)&0xff)<<8)+(((13+pub_address_len)&0x700)>>8);
 
 
-    sl_btmesh_host_handle_command();
+    return_if_fail(sl_btmesh_host_handle_command());
     return rsp->data.rsp_test_set_local_model_pub_va.result;
 
 }
@@ -2724,7 +2727,7 @@ sl_status_t sl_btmesh_test_get_local_model_pub(uint16_t elem_index,
     cmd->header=sl_btmesh_cmd_test_get_local_model_pub_id+(((6)&0xff)<<8)+(((6)&0x700)>>8);
 
 
-    sl_btmesh_host_handle_command();
+    return_if_fail(sl_btmesh_host_handle_command());
     *appkey_index = rsp->data.rsp_test_get_local_model_pub.appkey_index;
     *pub_address = rsp->data.rsp_test_get_local_model_pub.pub_address;
     *ttl = rsp->data.rsp_test_get_local_model_pub.ttl;
@@ -2749,7 +2752,7 @@ sl_status_t sl_btmesh_test_set_local_heartbeat_subscription(uint16_t subscriptio
     cmd->header=sl_btmesh_cmd_test_set_local_heartbeat_subscription_id+(((5)&0xff)<<8)+(((5)&0x700)>>8);
 
 
-    sl_btmesh_host_handle_command();
+    return_if_fail(sl_btmesh_host_handle_command());
     return rsp->data.rsp_test_set_local_heartbeat_subscription.result;
 
 }
@@ -2765,7 +2768,7 @@ sl_status_t sl_btmesh_test_get_local_heartbeat_subscription(uint16_t *count,
     cmd->header=sl_btmesh_cmd_test_get_local_heartbeat_subscription_id+(((0)&0xff)<<8)+(((0)&0x700)>>8);
 
 
-    sl_btmesh_host_handle_command();
+    return_if_fail(sl_btmesh_host_handle_command());
     *count = rsp->data.rsp_test_get_local_heartbeat_subscription.count;
     *hop_min = rsp->data.rsp_test_get_local_heartbeat_subscription.hop_min;
     *hop_max = rsp->data.rsp_test_get_local_heartbeat_subscription.hop_max;
@@ -2787,7 +2790,7 @@ sl_status_t sl_btmesh_test_get_local_heartbeat_publication(uint16_t *publication
     cmd->header=sl_btmesh_cmd_test_get_local_heartbeat_publication_id+(((0)&0xff)<<8)+(((0)&0x700)>>8);
 
 
-    sl_btmesh_host_handle_command();
+    return_if_fail(sl_btmesh_host_handle_command());
     *publication_address = rsp->data.rsp_test_get_local_heartbeat_publication.publication_address;
     *count = rsp->data.rsp_test_get_local_heartbeat_publication.count;
     *period_log = rsp->data.rsp_test_get_local_heartbeat_publication.period_log;
@@ -2818,7 +2821,7 @@ sl_status_t sl_btmesh_test_set_local_heartbeat_publication(uint16_t publication_
     cmd->header=sl_btmesh_cmd_test_set_local_heartbeat_publication_id+(((9)&0xff)<<8)+(((9)&0x700)>>8);
 
 
-    sl_btmesh_host_handle_command();
+    return_if_fail(sl_btmesh_host_handle_command());
     return rsp->data.rsp_test_set_local_heartbeat_publication.result;
 
 }
@@ -2839,7 +2842,7 @@ SL_BGAPI_DEPRECATED sl_status_t sl_btmesh_test_set_local_config(uint16_t id,
     cmd->header=sl_btmesh_cmd_test_set_local_config_id+(((5+value_len)&0xff)<<8)+(((5+value_len)&0x700)>>8);
 
 
-    sl_btmesh_host_handle_command();
+    return_if_fail(sl_btmesh_host_handle_command());
     return rsp->data.rsp_test_set_local_config.result;
 
 }
@@ -2859,7 +2862,7 @@ SL_BGAPI_DEPRECATED sl_status_t sl_btmesh_test_get_local_config(uint16_t id,
     cmd->header=sl_btmesh_cmd_test_get_local_config_id+(((4)&0xff)<<8)+(((4)&0x700)>>8);
 
 
-    sl_btmesh_host_handle_command();
+    return_if_fail(sl_btmesh_host_handle_command());
     *data_len = rsp->data.rsp_test_get_local_config.data.len;
     if (rsp->data.rsp_test_get_local_config.data.len <= max_data_size) {
         memcpy(data,rsp->data.rsp_test_get_local_config.data.data,rsp->data.rsp_test_get_local_config.data.len);
@@ -2884,7 +2887,7 @@ sl_status_t sl_btmesh_test_add_local_key(uint8_t key_type,
     cmd->header=sl_btmesh_cmd_test_add_local_key_id+(((21)&0xff)<<8)+(((21)&0x700)>>8);
 
 
-    sl_btmesh_host_handle_command();
+    return_if_fail(sl_btmesh_host_handle_command());
     return rsp->data.rsp_test_add_local_key.result;
 
 }
@@ -2901,7 +2904,7 @@ sl_status_t sl_btmesh_test_remove_local_key(uint8_t key_type,
     cmd->header=sl_btmesh_cmd_test_remove_local_key_id+(((3)&0xff)<<8)+(((3)&0x700)>>8);
 
 
-    sl_btmesh_host_handle_command();
+    return_if_fail(sl_btmesh_host_handle_command());
     return rsp->data.rsp_test_remove_local_key.result;
 
 }
@@ -2920,7 +2923,7 @@ sl_status_t sl_btmesh_test_update_local_key(uint8_t key_type,
     cmd->header=sl_btmesh_cmd_test_update_local_key_id+(((19)&0xff)<<8)+(((19)&0x700)>>8);
 
 
-    sl_btmesh_host_handle_command();
+    return_if_fail(sl_btmesh_host_handle_command());
     return rsp->data.rsp_test_update_local_key.result;
 
 }
@@ -2945,7 +2948,7 @@ sl_status_t sl_btmesh_test_set_sar_config(uint32_t incomplete_timer_ms,
     cmd->header=sl_btmesh_cmd_test_set_sar_config_id+(((21)&0xff)<<8)+(((21)&0x700)>>8);
 
 
-    sl_btmesh_host_handle_command();
+    return_if_fail(sl_btmesh_host_handle_command());
     return rsp->data.rsp_test_set_sar_config.result;
 
 }
@@ -2960,7 +2963,7 @@ sl_status_t sl_btmesh_test_set_adv_bearer_state(uint8_t state) {
     cmd->header=sl_btmesh_cmd_test_set_adv_bearer_state_id+(((1)&0xff)<<8)+(((1)&0x700)>>8);
 
 
-    sl_btmesh_host_handle_command();
+    return_if_fail(sl_btmesh_host_handle_command());
     return rsp->data.rsp_test_set_adv_bearer_state.result;
 
 }
@@ -2976,7 +2979,7 @@ sl_status_t sl_btmesh_test_prov_get_device_key(uint16_t address,
     cmd->header=sl_btmesh_cmd_test_prov_get_device_key_id+(((2)&0xff)<<8)+(((2)&0x700)>>8);
 
 
-    sl_btmesh_host_handle_command();
+    return_if_fail(sl_btmesh_host_handle_command());
     memcpy(device_key,&rsp->data.rsp_test_prov_get_device_key.device_key,sizeof(aes_key_128));
     return rsp->data.rsp_test_prov_get_device_key.result;
 
@@ -2996,7 +2999,7 @@ sl_status_t sl_btmesh_test_prov_prepare_key_refresh(aes_key_128 net_key,
     cmd->header=sl_btmesh_cmd_test_prov_prepare_key_refresh_id+(((17+app_keys_len)&0xff)<<8)+(((17+app_keys_len)&0x700)>>8);
 
 
-    sl_btmesh_host_handle_command();
+    return_if_fail(sl_btmesh_host_handle_command());
     return rsp->data.rsp_test_prov_prepare_key_refresh.result;
 
 }
@@ -3013,7 +3016,7 @@ sl_status_t sl_btmesh_test_cancel_segmented_tx(uint16_t src_addr,
     cmd->header=sl_btmesh_cmd_test_cancel_segmented_tx_id+(((4)&0xff)<<8)+(((4)&0x700)>>8);
 
 
-    sl_btmesh_host_handle_command();
+    return_if_fail(sl_btmesh_host_handle_command());
     return rsp->data.rsp_test_cancel_segmented_tx.result;
 
 }
@@ -3028,7 +3031,7 @@ sl_status_t sl_btmesh_test_set_iv_index(uint32_t iv_index) {
     cmd->header=sl_btmesh_cmd_test_set_iv_index_id+(((4)&0xff)<<8)+(((4)&0x700)>>8);
 
 
-    sl_btmesh_host_handle_command();
+    return_if_fail(sl_btmesh_host_handle_command());
     return rsp->data.rsp_test_set_iv_index.result;
 
 }
@@ -3045,7 +3048,7 @@ sl_status_t sl_btmesh_test_set_element_seqnum(uint16_t elem_index,
     cmd->header=sl_btmesh_cmd_test_set_element_seqnum_id+(((6)&0xff)<<8)+(((6)&0x700)>>8);
 
 
-    sl_btmesh_host_handle_command();
+    return_if_fail(sl_btmesh_host_handle_command());
     return rsp->data.rsp_test_set_element_seqnum.result;
 
 }
@@ -3068,7 +3071,7 @@ sl_status_t sl_btmesh_test_set_model_option(uint16_t elem_index,
     cmd->header=sl_btmesh_cmd_test_set_model_option_id+(((11)&0xff)<<8)+(((11)&0x700)>>8);
 
 
-    sl_btmesh_host_handle_command();
+    return_if_fail(sl_btmesh_host_handle_command());
     return rsp->data.rsp_test_set_model_option.result;
 
 }
@@ -3090,7 +3093,7 @@ sl_status_t sl_btmesh_test_get_local_model_app_bindings(uint16_t elem_index,
     cmd->header=sl_btmesh_cmd_test_get_local_model_app_bindings_id+(((6)&0xff)<<8)+(((6)&0x700)>>8);
 
 
-    sl_btmesh_host_handle_command();
+    return_if_fail(sl_btmesh_host_handle_command());
     *appkeys_len = rsp->data.rsp_test_get_local_model_app_bindings.appkeys.len;
     if (rsp->data.rsp_test_get_local_model_app_bindings.appkeys.len <= max_appkeys_size) {
         memcpy(appkeys,rsp->data.rsp_test_get_local_model_app_bindings.appkeys.data,rsp->data.rsp_test_get_local_model_app_bindings.appkeys.len);
@@ -3111,7 +3114,7 @@ sl_status_t sl_btmesh_test_get_replay_protection_list_entry(uint16_t address,
     cmd->header=sl_btmesh_cmd_test_get_replay_protection_list_entry_id+(((2)&0xff)<<8)+(((2)&0x700)>>8);
 
 
-    sl_btmesh_host_handle_command();
+    return_if_fail(sl_btmesh_host_handle_command());
     *seq = rsp->data.rsp_test_get_replay_protection_list_entry.seq;
     *seq_ivindex = rsp->data.rsp_test_get_replay_protection_list_entry.seq_ivindex;
     return rsp->data.rsp_test_get_replay_protection_list_entry.result;
@@ -3128,7 +3131,7 @@ sl_status_t sl_btmesh_test_clear_replay_protection_list_entry(uint16_t address) 
     cmd->header=sl_btmesh_cmd_test_clear_replay_protection_list_entry_id+(((2)&0xff)<<8)+(((2)&0x700)>>8);
 
 
-    sl_btmesh_host_handle_command();
+    return_if_fail(sl_btmesh_host_handle_command());
     return rsp->data.rsp_test_clear_replay_protection_list_entry.result;
 
 }
@@ -3143,7 +3146,7 @@ sl_status_t sl_btmesh_test_set_replay_protection_list_diagnostics(uint8_t enable
     cmd->header=sl_btmesh_cmd_test_set_replay_protection_list_diagnostics_id+(((1)&0xff)<<8)+(((1)&0x700)>>8);
 
 
-    sl_btmesh_host_handle_command();
+    return_if_fail(sl_btmesh_host_handle_command());
     return rsp->data.rsp_test_set_replay_protection_list_diagnostics.result;
 
 }
@@ -3165,7 +3168,7 @@ sl_status_t sl_btmesh_test_get_model_option(uint16_t elem_index,
     cmd->header=sl_btmesh_cmd_test_get_model_option_id+(((7)&0xff)<<8)+(((7)&0x700)>>8);
 
 
-    sl_btmesh_host_handle_command();
+    return_if_fail(sl_btmesh_host_handle_command());
     *value = rsp->data.rsp_test_get_model_option.value;
     return rsp->data.rsp_test_get_model_option.result;
 
@@ -3180,7 +3183,7 @@ sl_status_t sl_btmesh_test_get_default_ttl(uint8_t *value) {
     cmd->header=sl_btmesh_cmd_test_get_default_ttl_id+(((0)&0xff)<<8)+(((0)&0x700)>>8);
 
 
-    sl_btmesh_host_handle_command();
+    return_if_fail(sl_btmesh_host_handle_command());
     *value = rsp->data.rsp_test_get_default_ttl.value;
     return rsp->data.rsp_test_get_default_ttl.result;
 
@@ -3196,7 +3199,7 @@ sl_status_t sl_btmesh_test_set_default_ttl(uint8_t set_value, uint8_t *value) {
     cmd->header=sl_btmesh_cmd_test_set_default_ttl_id+(((1)&0xff)<<8)+(((1)&0x700)>>8);
 
 
-    sl_btmesh_host_handle_command();
+    return_if_fail(sl_btmesh_host_handle_command());
     *value = rsp->data.rsp_test_set_default_ttl.value;
     return rsp->data.rsp_test_set_default_ttl.result;
 
@@ -3211,7 +3214,7 @@ sl_status_t sl_btmesh_test_get_gatt_proxy(uint8_t *value) {
     cmd->header=sl_btmesh_cmd_test_get_gatt_proxy_id+(((0)&0xff)<<8)+(((0)&0x700)>>8);
 
 
-    sl_btmesh_host_handle_command();
+    return_if_fail(sl_btmesh_host_handle_command());
     *value = rsp->data.rsp_test_get_gatt_proxy.value;
     return rsp->data.rsp_test_get_gatt_proxy.result;
 
@@ -3227,7 +3230,7 @@ sl_status_t sl_btmesh_test_set_gatt_proxy(uint8_t set_value, uint8_t *value) {
     cmd->header=sl_btmesh_cmd_test_set_gatt_proxy_id+(((1)&0xff)<<8)+(((1)&0x700)>>8);
 
 
-    sl_btmesh_host_handle_command();
+    return_if_fail(sl_btmesh_host_handle_command());
     *value = rsp->data.rsp_test_set_gatt_proxy.value;
     return rsp->data.rsp_test_set_gatt_proxy.result;
 
@@ -3245,7 +3248,7 @@ sl_status_t sl_btmesh_test_get_identity(uint16_t get_netkey_index,
     cmd->header=sl_btmesh_cmd_test_get_identity_id+(((2)&0xff)<<8)+(((2)&0x700)>>8);
 
 
-    sl_btmesh_host_handle_command();
+    return_if_fail(sl_btmesh_host_handle_command());
     *netkey_index = rsp->data.rsp_test_get_identity.netkey_index;
     *value = rsp->data.rsp_test_get_identity.value;
     return rsp->data.rsp_test_get_identity.result;
@@ -3266,7 +3269,7 @@ sl_status_t sl_btmesh_test_set_identity(uint16_t set_netkey_index,
     cmd->header=sl_btmesh_cmd_test_set_identity_id+(((3)&0xff)<<8)+(((3)&0x700)>>8);
 
 
-    sl_btmesh_host_handle_command();
+    return_if_fail(sl_btmesh_host_handle_command());
     *netkey_index = rsp->data.rsp_test_set_identity.netkey_index;
     *value = rsp->data.rsp_test_set_identity.value;
     return rsp->data.rsp_test_set_identity.result;
@@ -3282,7 +3285,7 @@ sl_status_t sl_btmesh_test_get_friend(uint8_t *value) {
     cmd->header=sl_btmesh_cmd_test_get_friend_id+(((0)&0xff)<<8)+(((0)&0x700)>>8);
 
 
-    sl_btmesh_host_handle_command();
+    return_if_fail(sl_btmesh_host_handle_command());
     *value = rsp->data.rsp_test_get_friend.value;
     return rsp->data.rsp_test_get_friend.result;
 
@@ -3298,7 +3301,7 @@ sl_status_t sl_btmesh_test_set_friend(uint8_t set_value, uint8_t *value) {
     cmd->header=sl_btmesh_cmd_test_set_friend_id+(((1)&0xff)<<8)+(((1)&0x700)>>8);
 
 
-    sl_btmesh_host_handle_command();
+    return_if_fail(sl_btmesh_host_handle_command());
     *value = rsp->data.rsp_test_set_friend.value;
     return rsp->data.rsp_test_set_friend.result;
 
@@ -3313,7 +3316,7 @@ sl_status_t sl_btmesh_test_get_beacon(uint8_t *value) {
     cmd->header=sl_btmesh_cmd_test_get_beacon_id+(((0)&0xff)<<8)+(((0)&0x700)>>8);
 
 
-    sl_btmesh_host_handle_command();
+    return_if_fail(sl_btmesh_host_handle_command());
     *value = rsp->data.rsp_test_get_beacon.value;
     return rsp->data.rsp_test_get_beacon.result;
 
@@ -3329,7 +3332,7 @@ sl_status_t sl_btmesh_test_set_beacon(uint8_t set_value, uint8_t *value) {
     cmd->header=sl_btmesh_cmd_test_set_beacon_id+(((1)&0xff)<<8)+(((1)&0x700)>>8);
 
 
-    sl_btmesh_host_handle_command();
+    return_if_fail(sl_btmesh_host_handle_command());
     *value = rsp->data.rsp_test_set_beacon.value;
     return rsp->data.rsp_test_set_beacon.result;
 
@@ -3344,7 +3347,7 @@ sl_status_t sl_btmesh_lpn_init() {
     cmd->header=sl_btmesh_cmd_lpn_init_id+(((0)&0xff)<<8)+(((0)&0x700)>>8);
 
 
-    sl_btmesh_host_handle_command();
+    return_if_fail(sl_btmesh_host_handle_command());
     return rsp->data.rsp_lpn_init.result;
 
 }
@@ -3358,7 +3361,7 @@ sl_status_t sl_btmesh_lpn_deinit() {
     cmd->header=sl_btmesh_cmd_lpn_deinit_id+(((0)&0xff)<<8)+(((0)&0x700)>>8);
 
 
-    sl_btmesh_host_handle_command();
+    return_if_fail(sl_btmesh_host_handle_command());
     return rsp->data.rsp_lpn_deinit.result;
 
 }
@@ -3373,7 +3376,7 @@ sl_status_t sl_btmesh_lpn_establish_friendship(uint16_t netkey_index) {
     cmd->header=sl_btmesh_cmd_lpn_establish_friendship_id+(((2)&0xff)<<8)+(((2)&0x700)>>8);
 
 
-    sl_btmesh_host_handle_command();
+    return_if_fail(sl_btmesh_host_handle_command());
     return rsp->data.rsp_lpn_establish_friendship.result;
 
 }
@@ -3388,7 +3391,7 @@ sl_status_t sl_btmesh_lpn_poll(uint16_t netkey_index) {
     cmd->header=sl_btmesh_cmd_lpn_poll_id+(((2)&0xff)<<8)+(((2)&0x700)>>8);
 
 
-    sl_btmesh_host_handle_command();
+    return_if_fail(sl_btmesh_host_handle_command());
     return rsp->data.rsp_lpn_poll.result;
 
 }
@@ -3403,7 +3406,7 @@ sl_status_t sl_btmesh_lpn_terminate_friendship(uint16_t netkey_index) {
     cmd->header=sl_btmesh_cmd_lpn_terminate_friendship_id+(((2)&0xff)<<8)+(((2)&0x700)>>8);
 
 
-    sl_btmesh_host_handle_command();
+    return_if_fail(sl_btmesh_host_handle_command());
     return rsp->data.rsp_lpn_terminate_friendship.result;
 
 }
@@ -3419,7 +3422,7 @@ sl_status_t sl_btmesh_lpn_config(uint8_t setting_id, uint32_t value) {
     cmd->header=sl_btmesh_cmd_lpn_config_id+(((5)&0xff)<<8)+(((5)&0x700)>>8);
 
 
-    sl_btmesh_host_handle_command();
+    return_if_fail(sl_btmesh_host_handle_command());
     return rsp->data.rsp_lpn_config.result;
 
 }
@@ -3433,7 +3436,7 @@ sl_status_t sl_btmesh_friend_init() {
     cmd->header=sl_btmesh_cmd_friend_init_id+(((0)&0xff)<<8)+(((0)&0x700)>>8);
 
 
-    sl_btmesh_host_handle_command();
+    return_if_fail(sl_btmesh_host_handle_command());
     return rsp->data.rsp_friend_init.result;
 
 }
@@ -3447,7 +3450,7 @@ sl_status_t sl_btmesh_friend_deinit() {
     cmd->header=sl_btmesh_cmd_friend_deinit_id+(((0)&0xff)<<8)+(((0)&0x700)>>8);
 
 
-    sl_btmesh_host_handle_command();
+    return_if_fail(sl_btmesh_host_handle_command());
     return rsp->data.rsp_friend_deinit.result;
 
 }
@@ -3462,7 +3465,7 @@ sl_status_t sl_btmesh_config_client_cancel_request(uint32_t handle) {
     cmd->header=sl_btmesh_cmd_config_client_cancel_request_id+(((4)&0xff)<<8)+(((4)&0x700)>>8);
 
 
-    sl_btmesh_host_handle_command();
+    return_if_fail(sl_btmesh_host_handle_command());
     return rsp->data.rsp_config_client_cancel_request.result;
 
 }
@@ -3482,7 +3485,7 @@ sl_status_t sl_btmesh_config_client_get_request_status(uint32_t handle,
     cmd->header=sl_btmesh_cmd_config_client_get_request_status_id+(((4)&0xff)<<8)+(((4)&0x700)>>8);
 
 
-    sl_btmesh_host_handle_command();
+    return_if_fail(sl_btmesh_host_handle_command());
     *server_address = rsp->data.rsp_config_client_get_request_status.server_address;
     *opcode = rsp->data.rsp_config_client_get_request_status.opcode;
     *age_ms = rsp->data.rsp_config_client_get_request_status.age_ms;
@@ -3502,7 +3505,7 @@ sl_status_t sl_btmesh_config_client_get_default_timeout(uint32_t *timeout_ms,
     cmd->header=sl_btmesh_cmd_config_client_get_default_timeout_id+(((0)&0xff)<<8)+(((0)&0x700)>>8);
 
 
-    sl_btmesh_host_handle_command();
+    return_if_fail(sl_btmesh_host_handle_command());
     *timeout_ms = rsp->data.rsp_config_client_get_default_timeout.timeout_ms;
     *lpn_timeout_ms = rsp->data.rsp_config_client_get_default_timeout.lpn_timeout_ms;
     return rsp->data.rsp_config_client_get_default_timeout.result;
@@ -3521,7 +3524,7 @@ sl_status_t sl_btmesh_config_client_set_default_timeout(uint32_t timeout_ms,
     cmd->header=sl_btmesh_cmd_config_client_set_default_timeout_id+(((8)&0xff)<<8)+(((8)&0x700)>>8);
 
 
-    sl_btmesh_host_handle_command();
+    return_if_fail(sl_btmesh_host_handle_command());
     return rsp->data.rsp_config_client_set_default_timeout.result;
 
 }
@@ -3541,7 +3544,7 @@ sl_status_t sl_btmesh_config_client_add_netkey(uint16_t enc_netkey_index,
     cmd->header=sl_btmesh_cmd_config_client_add_netkey_id+(((6)&0xff)<<8)+(((6)&0x700)>>8);
 
 
-    sl_btmesh_host_handle_command();
+    return_if_fail(sl_btmesh_host_handle_command());
     *handle = rsp->data.rsp_config_client_add_netkey.handle;
     return rsp->data.rsp_config_client_add_netkey.result;
 
@@ -3562,7 +3565,7 @@ sl_status_t sl_btmesh_config_client_remove_netkey(uint16_t enc_netkey_index,
     cmd->header=sl_btmesh_cmd_config_client_remove_netkey_id+(((6)&0xff)<<8)+(((6)&0x700)>>8);
 
 
-    sl_btmesh_host_handle_command();
+    return_if_fail(sl_btmesh_host_handle_command());
     *handle = rsp->data.rsp_config_client_remove_netkey.handle;
     return rsp->data.rsp_config_client_remove_netkey.result;
 
@@ -3581,7 +3584,7 @@ sl_status_t sl_btmesh_config_client_list_netkeys(uint16_t enc_netkey_index,
     cmd->header=sl_btmesh_cmd_config_client_list_netkeys_id+(((4)&0xff)<<8)+(((4)&0x700)>>8);
 
 
-    sl_btmesh_host_handle_command();
+    return_if_fail(sl_btmesh_host_handle_command());
     *handle = rsp->data.rsp_config_client_list_netkeys.handle;
     return rsp->data.rsp_config_client_list_netkeys.result;
 
@@ -3604,7 +3607,7 @@ sl_status_t sl_btmesh_config_client_add_appkey(uint16_t enc_netkey_index,
     cmd->header=sl_btmesh_cmd_config_client_add_appkey_id+(((8)&0xff)<<8)+(((8)&0x700)>>8);
 
 
-    sl_btmesh_host_handle_command();
+    return_if_fail(sl_btmesh_host_handle_command());
     *handle = rsp->data.rsp_config_client_add_appkey.handle;
     return rsp->data.rsp_config_client_add_appkey.result;
 
@@ -3627,7 +3630,7 @@ sl_status_t sl_btmesh_config_client_remove_appkey(uint16_t enc_netkey_index,
     cmd->header=sl_btmesh_cmd_config_client_remove_appkey_id+(((8)&0xff)<<8)+(((8)&0x700)>>8);
 
 
-    sl_btmesh_host_handle_command();
+    return_if_fail(sl_btmesh_host_handle_command());
     *handle = rsp->data.rsp_config_client_remove_appkey.handle;
     return rsp->data.rsp_config_client_remove_appkey.result;
 
@@ -3648,7 +3651,7 @@ sl_status_t sl_btmesh_config_client_list_appkeys(uint16_t enc_netkey_index,
     cmd->header=sl_btmesh_cmd_config_client_list_appkeys_id+(((6)&0xff)<<8)+(((6)&0x700)>>8);
 
 
-    sl_btmesh_host_handle_command();
+    return_if_fail(sl_btmesh_host_handle_command());
     *handle = rsp->data.rsp_config_client_list_appkeys.handle;
     return rsp->data.rsp_config_client_list_appkeys.result;
 
@@ -3675,7 +3678,7 @@ sl_status_t sl_btmesh_config_client_bind_model(uint16_t enc_netkey_index,
     cmd->header=sl_btmesh_cmd_config_client_bind_model_id+(((11)&0xff)<<8)+(((11)&0x700)>>8);
 
 
-    sl_btmesh_host_handle_command();
+    return_if_fail(sl_btmesh_host_handle_command());
     *handle = rsp->data.rsp_config_client_bind_model.handle;
     return rsp->data.rsp_config_client_bind_model.result;
 
@@ -3702,7 +3705,7 @@ sl_status_t sl_btmesh_config_client_unbind_model(uint16_t enc_netkey_index,
     cmd->header=sl_btmesh_cmd_config_client_unbind_model_id+(((11)&0xff)<<8)+(((11)&0x700)>>8);
 
 
-    sl_btmesh_host_handle_command();
+    return_if_fail(sl_btmesh_host_handle_command());
     *handle = rsp->data.rsp_config_client_unbind_model.handle;
     return rsp->data.rsp_config_client_unbind_model.result;
 
@@ -3727,7 +3730,7 @@ sl_status_t sl_btmesh_config_client_list_bindings(uint16_t enc_netkey_index,
     cmd->header=sl_btmesh_cmd_config_client_list_bindings_id+(((9)&0xff)<<8)+(((9)&0x700)>>8);
 
 
-    sl_btmesh_host_handle_command();
+    return_if_fail(sl_btmesh_host_handle_command());
     *handle = rsp->data.rsp_config_client_list_bindings.handle;
     return rsp->data.rsp_config_client_list_bindings.result;
 
@@ -3752,7 +3755,7 @@ sl_status_t sl_btmesh_config_client_get_model_pub(uint16_t enc_netkey_index,
     cmd->header=sl_btmesh_cmd_config_client_get_model_pub_id+(((9)&0xff)<<8)+(((9)&0x700)>>8);
 
 
-    sl_btmesh_host_handle_command();
+    return_if_fail(sl_btmesh_host_handle_command());
     *handle = rsp->data.rsp_config_client_get_model_pub.handle;
     return rsp->data.rsp_config_client_get_model_pub.result;
 
@@ -3791,7 +3794,7 @@ sl_status_t sl_btmesh_config_client_set_model_pub(uint16_t enc_netkey_index,
     cmd->header=sl_btmesh_cmd_config_client_set_model_pub_id+(((22)&0xff)<<8)+(((22)&0x700)>>8);
 
 
-    sl_btmesh_host_handle_command();
+    return_if_fail(sl_btmesh_host_handle_command());
     *handle = rsp->data.rsp_config_client_set_model_pub.handle;
     return rsp->data.rsp_config_client_set_model_pub.result;
 
@@ -3830,7 +3833,7 @@ sl_status_t sl_btmesh_config_client_set_model_pub_va(uint16_t enc_netkey_index,
     cmd->header=sl_btmesh_cmd_config_client_set_model_pub_va_id+(((36)&0xff)<<8)+(((36)&0x700)>>8);
 
 
-    sl_btmesh_host_handle_command();
+    return_if_fail(sl_btmesh_host_handle_command());
     *handle = rsp->data.rsp_config_client_set_model_pub_va.handle;
     return rsp->data.rsp_config_client_set_model_pub_va.result;
 
@@ -3857,7 +3860,7 @@ sl_status_t sl_btmesh_config_client_add_model_sub(uint16_t enc_netkey_index,
     cmd->header=sl_btmesh_cmd_config_client_add_model_sub_id+(((11)&0xff)<<8)+(((11)&0x700)>>8);
 
 
-    sl_btmesh_host_handle_command();
+    return_if_fail(sl_btmesh_host_handle_command());
     *handle = rsp->data.rsp_config_client_add_model_sub.handle;
     return rsp->data.rsp_config_client_add_model_sub.result;
 
@@ -3884,7 +3887,7 @@ sl_status_t sl_btmesh_config_client_add_model_sub_va(uint16_t enc_netkey_index,
     cmd->header=sl_btmesh_cmd_config_client_add_model_sub_va_id+(((25)&0xff)<<8)+(((25)&0x700)>>8);
 
 
-    sl_btmesh_host_handle_command();
+    return_if_fail(sl_btmesh_host_handle_command());
     *handle = rsp->data.rsp_config_client_add_model_sub_va.handle;
     return rsp->data.rsp_config_client_add_model_sub_va.result;
 
@@ -3911,7 +3914,7 @@ sl_status_t sl_btmesh_config_client_remove_model_sub(uint16_t enc_netkey_index,
     cmd->header=sl_btmesh_cmd_config_client_remove_model_sub_id+(((11)&0xff)<<8)+(((11)&0x700)>>8);
 
 
-    sl_btmesh_host_handle_command();
+    return_if_fail(sl_btmesh_host_handle_command());
     *handle = rsp->data.rsp_config_client_remove_model_sub.handle;
     return rsp->data.rsp_config_client_remove_model_sub.result;
 
@@ -3938,7 +3941,7 @@ sl_status_t sl_btmesh_config_client_remove_model_sub_va(uint16_t enc_netkey_inde
     cmd->header=sl_btmesh_cmd_config_client_remove_model_sub_va_id+(((25)&0xff)<<8)+(((25)&0x700)>>8);
 
 
-    sl_btmesh_host_handle_command();
+    return_if_fail(sl_btmesh_host_handle_command());
     *handle = rsp->data.rsp_config_client_remove_model_sub_va.handle;
     return rsp->data.rsp_config_client_remove_model_sub_va.result;
 
@@ -3965,7 +3968,7 @@ sl_status_t sl_btmesh_config_client_set_model_sub(uint16_t enc_netkey_index,
     cmd->header=sl_btmesh_cmd_config_client_set_model_sub_id+(((11)&0xff)<<8)+(((11)&0x700)>>8);
 
 
-    sl_btmesh_host_handle_command();
+    return_if_fail(sl_btmesh_host_handle_command());
     *handle = rsp->data.rsp_config_client_set_model_sub.handle;
     return rsp->data.rsp_config_client_set_model_sub.result;
 
@@ -3992,7 +3995,7 @@ sl_status_t sl_btmesh_config_client_set_model_sub_va(uint16_t enc_netkey_index,
     cmd->header=sl_btmesh_cmd_config_client_set_model_sub_va_id+(((25)&0xff)<<8)+(((25)&0x700)>>8);
 
 
-    sl_btmesh_host_handle_command();
+    return_if_fail(sl_btmesh_host_handle_command());
     *handle = rsp->data.rsp_config_client_set_model_sub_va.handle;
     return rsp->data.rsp_config_client_set_model_sub_va.result;
 
@@ -4017,7 +4020,7 @@ sl_status_t sl_btmesh_config_client_clear_model_sub(uint16_t enc_netkey_index,
     cmd->header=sl_btmesh_cmd_config_client_clear_model_sub_id+(((9)&0xff)<<8)+(((9)&0x700)>>8);
 
 
-    sl_btmesh_host_handle_command();
+    return_if_fail(sl_btmesh_host_handle_command());
     *handle = rsp->data.rsp_config_client_clear_model_sub.handle;
     return rsp->data.rsp_config_client_clear_model_sub.result;
 
@@ -4042,7 +4045,7 @@ sl_status_t sl_btmesh_config_client_list_subs(uint16_t enc_netkey_index,
     cmd->header=sl_btmesh_cmd_config_client_list_subs_id+(((9)&0xff)<<8)+(((9)&0x700)>>8);
 
 
-    sl_btmesh_host_handle_command();
+    return_if_fail(sl_btmesh_host_handle_command());
     *handle = rsp->data.rsp_config_client_list_subs.handle;
     return rsp->data.rsp_config_client_list_subs.result;
 
@@ -4061,7 +4064,7 @@ sl_status_t sl_btmesh_config_client_get_heartbeat_pub(uint16_t enc_netkey_index,
     cmd->header=sl_btmesh_cmd_config_client_get_heartbeat_pub_id+(((4)&0xff)<<8)+(((4)&0x700)>>8);
 
 
-    sl_btmesh_host_handle_command();
+    return_if_fail(sl_btmesh_host_handle_command());
     *handle = rsp->data.rsp_config_client_get_heartbeat_pub.handle;
     return rsp->data.rsp_config_client_get_heartbeat_pub.result;
 
@@ -4092,7 +4095,7 @@ sl_status_t sl_btmesh_config_client_set_heartbeat_pub(uint16_t enc_netkey_index,
     cmd->header=sl_btmesh_cmd_config_client_set_heartbeat_pub_id+(((13)&0xff)<<8)+(((13)&0x700)>>8);
 
 
-    sl_btmesh_host_handle_command();
+    return_if_fail(sl_btmesh_host_handle_command());
     *handle = rsp->data.rsp_config_client_set_heartbeat_pub.handle;
     return rsp->data.rsp_config_client_set_heartbeat_pub.result;
 
@@ -4111,7 +4114,7 @@ sl_status_t sl_btmesh_config_client_get_heartbeat_sub(uint16_t enc_netkey_index,
     cmd->header=sl_btmesh_cmd_config_client_get_heartbeat_sub_id+(((4)&0xff)<<8)+(((4)&0x700)>>8);
 
 
-    sl_btmesh_host_handle_command();
+    return_if_fail(sl_btmesh_host_handle_command());
     *handle = rsp->data.rsp_config_client_get_heartbeat_sub.handle;
     return rsp->data.rsp_config_client_get_heartbeat_sub.result;
 
@@ -4136,7 +4139,7 @@ sl_status_t sl_btmesh_config_client_set_heartbeat_sub(uint16_t enc_netkey_index,
     cmd->header=sl_btmesh_cmd_config_client_set_heartbeat_sub_id+(((9)&0xff)<<8)+(((9)&0x700)>>8);
 
 
-    sl_btmesh_host_handle_command();
+    return_if_fail(sl_btmesh_host_handle_command());
     *handle = rsp->data.rsp_config_client_set_heartbeat_sub.handle;
     return rsp->data.rsp_config_client_set_heartbeat_sub.result;
 
@@ -4155,7 +4158,7 @@ sl_status_t sl_btmesh_config_client_get_beacon(uint16_t enc_netkey_index,
     cmd->header=sl_btmesh_cmd_config_client_get_beacon_id+(((4)&0xff)<<8)+(((4)&0x700)>>8);
 
 
-    sl_btmesh_host_handle_command();
+    return_if_fail(sl_btmesh_host_handle_command());
     *handle = rsp->data.rsp_config_client_get_beacon.handle;
     return rsp->data.rsp_config_client_get_beacon.result;
 
@@ -4176,7 +4179,7 @@ sl_status_t sl_btmesh_config_client_set_beacon(uint16_t enc_netkey_index,
     cmd->header=sl_btmesh_cmd_config_client_set_beacon_id+(((5)&0xff)<<8)+(((5)&0x700)>>8);
 
 
-    sl_btmesh_host_handle_command();
+    return_if_fail(sl_btmesh_host_handle_command());
     *handle = rsp->data.rsp_config_client_set_beacon.handle;
     return rsp->data.rsp_config_client_set_beacon.result;
 
@@ -4195,7 +4198,7 @@ sl_status_t sl_btmesh_config_client_get_default_ttl(uint16_t enc_netkey_index,
     cmd->header=sl_btmesh_cmd_config_client_get_default_ttl_id+(((4)&0xff)<<8)+(((4)&0x700)>>8);
 
 
-    sl_btmesh_host_handle_command();
+    return_if_fail(sl_btmesh_host_handle_command());
     *handle = rsp->data.rsp_config_client_get_default_ttl.handle;
     return rsp->data.rsp_config_client_get_default_ttl.result;
 
@@ -4216,7 +4219,7 @@ sl_status_t sl_btmesh_config_client_set_default_ttl(uint16_t enc_netkey_index,
     cmd->header=sl_btmesh_cmd_config_client_set_default_ttl_id+(((5)&0xff)<<8)+(((5)&0x700)>>8);
 
 
-    sl_btmesh_host_handle_command();
+    return_if_fail(sl_btmesh_host_handle_command());
     *handle = rsp->data.rsp_config_client_set_default_ttl.handle;
     return rsp->data.rsp_config_client_set_default_ttl.result;
 
@@ -4235,7 +4238,7 @@ sl_status_t sl_btmesh_config_client_get_gatt_proxy(uint16_t enc_netkey_index,
     cmd->header=sl_btmesh_cmd_config_client_get_gatt_proxy_id+(((4)&0xff)<<8)+(((4)&0x700)>>8);
 
 
-    sl_btmesh_host_handle_command();
+    return_if_fail(sl_btmesh_host_handle_command());
     *handle = rsp->data.rsp_config_client_get_gatt_proxy.handle;
     return rsp->data.rsp_config_client_get_gatt_proxy.result;
 
@@ -4256,7 +4259,7 @@ sl_status_t sl_btmesh_config_client_set_gatt_proxy(uint16_t enc_netkey_index,
     cmd->header=sl_btmesh_cmd_config_client_set_gatt_proxy_id+(((5)&0xff)<<8)+(((5)&0x700)>>8);
 
 
-    sl_btmesh_host_handle_command();
+    return_if_fail(sl_btmesh_host_handle_command());
     *handle = rsp->data.rsp_config_client_set_gatt_proxy.handle;
     return rsp->data.rsp_config_client_set_gatt_proxy.result;
 
@@ -4275,7 +4278,7 @@ sl_status_t sl_btmesh_config_client_get_relay(uint16_t enc_netkey_index,
     cmd->header=sl_btmesh_cmd_config_client_get_relay_id+(((4)&0xff)<<8)+(((4)&0x700)>>8);
 
 
-    sl_btmesh_host_handle_command();
+    return_if_fail(sl_btmesh_host_handle_command());
     *handle = rsp->data.rsp_config_client_get_relay.handle;
     return rsp->data.rsp_config_client_get_relay.result;
 
@@ -4300,7 +4303,7 @@ sl_status_t sl_btmesh_config_client_set_relay(uint16_t enc_netkey_index,
     cmd->header=sl_btmesh_cmd_config_client_set_relay_id+(((8)&0xff)<<8)+(((8)&0x700)>>8);
 
 
-    sl_btmesh_host_handle_command();
+    return_if_fail(sl_btmesh_host_handle_command());
     *handle = rsp->data.rsp_config_client_set_relay.handle;
     return rsp->data.rsp_config_client_set_relay.result;
 
@@ -4319,7 +4322,7 @@ sl_status_t sl_btmesh_config_client_get_network_transmit(uint16_t enc_netkey_ind
     cmd->header=sl_btmesh_cmd_config_client_get_network_transmit_id+(((4)&0xff)<<8)+(((4)&0x700)>>8);
 
 
-    sl_btmesh_host_handle_command();
+    return_if_fail(sl_btmesh_host_handle_command());
     *handle = rsp->data.rsp_config_client_get_network_transmit.handle;
     return rsp->data.rsp_config_client_get_network_transmit.result;
 
@@ -4342,7 +4345,7 @@ sl_status_t sl_btmesh_config_client_set_network_transmit(uint16_t enc_netkey_ind
     cmd->header=sl_btmesh_cmd_config_client_set_network_transmit_id+(((7)&0xff)<<8)+(((7)&0x700)>>8);
 
 
-    sl_btmesh_host_handle_command();
+    return_if_fail(sl_btmesh_host_handle_command());
     *handle = rsp->data.rsp_config_client_set_network_transmit.handle;
     return rsp->data.rsp_config_client_set_network_transmit.result;
 
@@ -4363,7 +4366,7 @@ sl_status_t sl_btmesh_config_client_get_identity(uint16_t enc_netkey_index,
     cmd->header=sl_btmesh_cmd_config_client_get_identity_id+(((6)&0xff)<<8)+(((6)&0x700)>>8);
 
 
-    sl_btmesh_host_handle_command();
+    return_if_fail(sl_btmesh_host_handle_command());
     *handle = rsp->data.rsp_config_client_get_identity.handle;
     return rsp->data.rsp_config_client_get_identity.result;
 
@@ -4386,7 +4389,7 @@ sl_status_t sl_btmesh_config_client_set_identity(uint16_t enc_netkey_index,
     cmd->header=sl_btmesh_cmd_config_client_set_identity_id+(((7)&0xff)<<8)+(((7)&0x700)>>8);
 
 
-    sl_btmesh_host_handle_command();
+    return_if_fail(sl_btmesh_host_handle_command());
     *handle = rsp->data.rsp_config_client_set_identity.handle;
     return rsp->data.rsp_config_client_set_identity.result;
 
@@ -4405,7 +4408,7 @@ sl_status_t sl_btmesh_config_client_get_friend(uint16_t enc_netkey_index,
     cmd->header=sl_btmesh_cmd_config_client_get_friend_id+(((4)&0xff)<<8)+(((4)&0x700)>>8);
 
 
-    sl_btmesh_host_handle_command();
+    return_if_fail(sl_btmesh_host_handle_command());
     *handle = rsp->data.rsp_config_client_get_friend.handle;
     return rsp->data.rsp_config_client_get_friend.result;
 
@@ -4426,7 +4429,7 @@ sl_status_t sl_btmesh_config_client_set_friend(uint16_t enc_netkey_index,
     cmd->header=sl_btmesh_cmd_config_client_set_friend_id+(((5)&0xff)<<8)+(((5)&0x700)>>8);
 
 
-    sl_btmesh_host_handle_command();
+    return_if_fail(sl_btmesh_host_handle_command());
     *handle = rsp->data.rsp_config_client_set_friend.handle;
     return rsp->data.rsp_config_client_set_friend.result;
 
@@ -4447,7 +4450,7 @@ sl_status_t sl_btmesh_config_client_get_key_refresh_phase(uint16_t enc_netkey_in
     cmd->header=sl_btmesh_cmd_config_client_get_key_refresh_phase_id+(((6)&0xff)<<8)+(((6)&0x700)>>8);
 
 
-    sl_btmesh_host_handle_command();
+    return_if_fail(sl_btmesh_host_handle_command());
     *handle = rsp->data.rsp_config_client_get_key_refresh_phase.handle;
     return rsp->data.rsp_config_client_get_key_refresh_phase.result;
 
@@ -4468,7 +4471,7 @@ sl_status_t sl_btmesh_config_client_get_lpn_polltimeout(uint16_t enc_netkey_inde
     cmd->header=sl_btmesh_cmd_config_client_get_lpn_polltimeout_id+(((6)&0xff)<<8)+(((6)&0x700)>>8);
 
 
-    sl_btmesh_host_handle_command();
+    return_if_fail(sl_btmesh_host_handle_command());
     *handle = rsp->data.rsp_config_client_get_lpn_polltimeout.handle;
     return rsp->data.rsp_config_client_get_lpn_polltimeout.result;
 
@@ -4489,7 +4492,7 @@ sl_status_t sl_btmesh_config_client_get_dcd(uint16_t enc_netkey_index,
     cmd->header=sl_btmesh_cmd_config_client_get_dcd_id+(((5)&0xff)<<8)+(((5)&0x700)>>8);
 
 
-    sl_btmesh_host_handle_command();
+    return_if_fail(sl_btmesh_host_handle_command());
     *handle = rsp->data.rsp_config_client_get_dcd.handle;
     return rsp->data.rsp_config_client_get_dcd.result;
 
@@ -4508,7 +4511,7 @@ sl_status_t sl_btmesh_config_client_reset_node(uint16_t enc_netkey_index,
     cmd->header=sl_btmesh_cmd_config_client_reset_node_id+(((4)&0xff)<<8)+(((4)&0x700)>>8);
 
 
-    sl_btmesh_host_handle_command();
+    return_if_fail(sl_btmesh_host_handle_command());
     *handle = rsp->data.rsp_config_client_reset_node.handle;
     return rsp->data.rsp_config_client_reset_node.result;
 
@@ -4528,7 +4531,7 @@ sl_status_t sl_btmesh_sensor_server_init(uint16_t elem_index,
     cmd->header=sl_btmesh_cmd_sensor_server_init_id+(((3+descriptors_len)&0xff)<<8)+(((3+descriptors_len)&0x700)>>8);
 
 
-    sl_btmesh_host_handle_command();
+    return_if_fail(sl_btmesh_host_handle_command());
     return rsp->data.rsp_sensor_server_init.result;
 
 }
@@ -4543,7 +4546,7 @@ sl_status_t sl_btmesh_sensor_server_deinit(uint16_t elem_index) {
     cmd->header=sl_btmesh_cmd_sensor_server_deinit_id+(((2)&0xff)<<8)+(((2)&0x700)>>8);
 
 
-    sl_btmesh_host_handle_command();
+    return_if_fail(sl_btmesh_host_handle_command());
     return rsp->data.rsp_sensor_server_deinit.result;
 
 }
@@ -4568,7 +4571,7 @@ sl_status_t sl_btmesh_sensor_server_send_descriptor_status(uint16_t client_addre
     cmd->header=sl_btmesh_cmd_sensor_server_send_descriptor_status_id+(((8+descriptors_len)&0xff)<<8)+(((8+descriptors_len)&0x700)>>8);
 
 
-    sl_btmesh_host_handle_command();
+    return_if_fail(sl_btmesh_host_handle_command());
     return rsp->data.rsp_sensor_server_send_descriptor_status.result;
 
 }
@@ -4593,7 +4596,7 @@ sl_status_t sl_btmesh_sensor_server_send_status(uint16_t client_address,
     cmd->header=sl_btmesh_cmd_sensor_server_send_status_id+(((8+sensor_data_len)&0xff)<<8)+(((8+sensor_data_len)&0x700)>>8);
 
 
-    sl_btmesh_host_handle_command();
+    return_if_fail(sl_btmesh_host_handle_command());
     return rsp->data.rsp_sensor_server_send_status.result;
 
 }
@@ -4620,7 +4623,7 @@ sl_status_t sl_btmesh_sensor_server_send_column_status(uint16_t client_address,
     cmd->header=sl_btmesh_cmd_sensor_server_send_column_status_id+(((10+sensor_data_len)&0xff)<<8)+(((10+sensor_data_len)&0x700)>>8);
 
 
-    sl_btmesh_host_handle_command();
+    return_if_fail(sl_btmesh_host_handle_command());
     return rsp->data.rsp_sensor_server_send_column_status.result;
 
 }
@@ -4647,7 +4650,7 @@ sl_status_t sl_btmesh_sensor_server_send_series_status(uint16_t client_address,
     cmd->header=sl_btmesh_cmd_sensor_server_send_series_status_id+(((10+sensor_data_len)&0xff)<<8)+(((10+sensor_data_len)&0x700)>>8);
 
 
-    sl_btmesh_host_handle_command();
+    return_if_fail(sl_btmesh_host_handle_command());
     return rsp->data.rsp_sensor_server_send_series_status.result;
 
 }
@@ -4674,7 +4677,7 @@ sl_status_t sl_btmesh_sensor_setup_server_send_cadence_status(uint16_t client_ad
     cmd->header=sl_btmesh_cmd_sensor_setup_server_send_cadence_status_id+(((10+params_len)&0xff)<<8)+(((10+params_len)&0x700)>>8);
 
 
-    sl_btmesh_host_handle_command();
+    return_if_fail(sl_btmesh_host_handle_command());
     return rsp->data.rsp_sensor_setup_server_send_cadence_status.result;
 
 }
@@ -4701,7 +4704,7 @@ sl_status_t sl_btmesh_sensor_setup_server_send_settings_status(uint16_t client_a
     cmd->header=sl_btmesh_cmd_sensor_setup_server_send_settings_status_id+(((10+setting_ids_len)&0xff)<<8)+(((10+setting_ids_len)&0x700)>>8);
 
 
-    sl_btmesh_host_handle_command();
+    return_if_fail(sl_btmesh_host_handle_command());
     return rsp->data.rsp_sensor_setup_server_send_settings_status.result;
 
 }
@@ -4730,7 +4733,7 @@ sl_status_t sl_btmesh_sensor_setup_server_send_setting_status(uint16_t client_ad
     cmd->header=sl_btmesh_cmd_sensor_setup_server_send_setting_status_id+(((12+raw_value_len)&0xff)<<8)+(((12+raw_value_len)&0x700)>>8);
 
 
-    sl_btmesh_host_handle_command();
+    return_if_fail(sl_btmesh_host_handle_command());
     return rsp->data.rsp_sensor_setup_server_send_setting_status.result;
 
 }
@@ -4744,7 +4747,7 @@ sl_status_t sl_btmesh_sensor_client_init() {
     cmd->header=sl_btmesh_cmd_sensor_client_init_id+(((0)&0xff)<<8)+(((0)&0x700)>>8);
 
 
-    sl_btmesh_host_handle_command();
+    return_if_fail(sl_btmesh_host_handle_command());
     return rsp->data.rsp_sensor_client_init.result;
 
 }
@@ -4758,7 +4761,7 @@ sl_status_t sl_btmesh_sensor_client_deinit() {
     cmd->header=sl_btmesh_cmd_sensor_client_deinit_id+(((0)&0xff)<<8)+(((0)&0x700)>>8);
 
 
-    sl_btmesh_host_handle_command();
+    return_if_fail(sl_btmesh_host_handle_command());
     return rsp->data.rsp_sensor_client_deinit.result;
 
 }
@@ -4781,7 +4784,7 @@ sl_status_t sl_btmesh_sensor_client_get_descriptor(uint16_t server_address,
     cmd->header=sl_btmesh_cmd_sensor_client_get_descriptor_id+(((9)&0xff)<<8)+(((9)&0x700)>>8);
 
 
-    sl_btmesh_host_handle_command();
+    return_if_fail(sl_btmesh_host_handle_command());
     return rsp->data.rsp_sensor_client_get_descriptor.result;
 
 }
@@ -4804,7 +4807,7 @@ sl_status_t sl_btmesh_sensor_client_get(uint16_t server_address,
     cmd->header=sl_btmesh_cmd_sensor_client_get_id+(((9)&0xff)<<8)+(((9)&0x700)>>8);
 
 
-    sl_btmesh_host_handle_command();
+    return_if_fail(sl_btmesh_host_handle_command());
     return rsp->data.rsp_sensor_client_get.result;
 
 }
@@ -4831,7 +4834,7 @@ sl_status_t sl_btmesh_sensor_client_get_column(uint16_t server_address,
     cmd->header=sl_btmesh_cmd_sensor_client_get_column_id+(((10+column_id_len)&0xff)<<8)+(((10+column_id_len)&0x700)>>8);
 
 
-    sl_btmesh_host_handle_command();
+    return_if_fail(sl_btmesh_host_handle_command());
     return rsp->data.rsp_sensor_client_get_column.result;
 
 }
@@ -4858,7 +4861,7 @@ sl_status_t sl_btmesh_sensor_client_get_series(uint16_t server_address,
     cmd->header=sl_btmesh_cmd_sensor_client_get_series_id+(((10+column_ids_len)&0xff)<<8)+(((10+column_ids_len)&0x700)>>8);
 
 
-    sl_btmesh_host_handle_command();
+    return_if_fail(sl_btmesh_host_handle_command());
     return rsp->data.rsp_sensor_client_get_series.result;
 
 }
@@ -4881,7 +4884,7 @@ sl_status_t sl_btmesh_sensor_client_get_cadence(uint16_t server_address,
     cmd->header=sl_btmesh_cmd_sensor_client_get_cadence_id+(((9)&0xff)<<8)+(((9)&0x700)>>8);
 
 
-    sl_btmesh_host_handle_command();
+    return_if_fail(sl_btmesh_host_handle_command());
     return rsp->data.rsp_sensor_client_get_cadence.result;
 
 }
@@ -4908,7 +4911,7 @@ sl_status_t sl_btmesh_sensor_client_set_cadence(uint16_t server_address,
     cmd->header=sl_btmesh_cmd_sensor_client_set_cadence_id+(((10+params_len)&0xff)<<8)+(((10+params_len)&0x700)>>8);
 
 
-    sl_btmesh_host_handle_command();
+    return_if_fail(sl_btmesh_host_handle_command());
     return rsp->data.rsp_sensor_client_set_cadence.result;
 
 }
@@ -4931,7 +4934,7 @@ sl_status_t sl_btmesh_sensor_client_get_settings(uint16_t server_address,
     cmd->header=sl_btmesh_cmd_sensor_client_get_settings_id+(((9)&0xff)<<8)+(((9)&0x700)>>8);
 
 
-    sl_btmesh_host_handle_command();
+    return_if_fail(sl_btmesh_host_handle_command());
     return rsp->data.rsp_sensor_client_get_settings.result;
 
 }
@@ -4956,7 +4959,7 @@ sl_status_t sl_btmesh_sensor_client_get_setting(uint16_t server_address,
     cmd->header=sl_btmesh_cmd_sensor_client_get_setting_id+(((11)&0xff)<<8)+(((11)&0x700)>>8);
 
 
-    sl_btmesh_host_handle_command();
+    return_if_fail(sl_btmesh_host_handle_command());
     return rsp->data.rsp_sensor_client_get_setting.result;
 
 }
@@ -4985,7 +4988,7 @@ sl_status_t sl_btmesh_sensor_client_set_setting(uint16_t server_address,
     cmd->header=sl_btmesh_cmd_sensor_client_set_setting_id+(((12+raw_value_len)&0xff)<<8)+(((12+raw_value_len)&0x700)>>8);
 
 
-    sl_btmesh_host_handle_command();
+    return_if_fail(sl_btmesh_host_handle_command());
     return rsp->data.rsp_sensor_client_set_setting.result;
 
 }
@@ -5000,7 +5003,7 @@ sl_status_t sl_btmesh_lc_client_init(uint16_t elem_index) {
     cmd->header=sl_btmesh_cmd_lc_client_init_id+(((2)&0xff)<<8)+(((2)&0x700)>>8);
 
 
-    sl_btmesh_host_handle_command();
+    return_if_fail(sl_btmesh_host_handle_command());
     return rsp->data.rsp_lc_client_init.result;
 
 }
@@ -5019,7 +5022,7 @@ sl_status_t sl_btmesh_lc_client_get_mode(uint16_t server_address,
     cmd->header=sl_btmesh_cmd_lc_client_get_mode_id+(((6)&0xff)<<8)+(((6)&0x700)>>8);
 
 
-    sl_btmesh_host_handle_command();
+    return_if_fail(sl_btmesh_host_handle_command());
     return rsp->data.rsp_lc_client_get_mode.result;
 
 }
@@ -5042,7 +5045,7 @@ sl_status_t sl_btmesh_lc_client_set_mode(uint16_t server_address,
     cmd->header=sl_btmesh_cmd_lc_client_set_mode_id+(((8)&0xff)<<8)+(((8)&0x700)>>8);
 
 
-    sl_btmesh_host_handle_command();
+    return_if_fail(sl_btmesh_host_handle_command());
     return rsp->data.rsp_lc_client_set_mode.result;
 
 }
@@ -5061,7 +5064,7 @@ sl_status_t sl_btmesh_lc_client_get_om(uint16_t server_address,
     cmd->header=sl_btmesh_cmd_lc_client_get_om_id+(((6)&0xff)<<8)+(((6)&0x700)>>8);
 
 
-    sl_btmesh_host_handle_command();
+    return_if_fail(sl_btmesh_host_handle_command());
     return rsp->data.rsp_lc_client_get_om.result;
 
 }
@@ -5084,7 +5087,7 @@ sl_status_t sl_btmesh_lc_client_set_om(uint16_t server_address,
     cmd->header=sl_btmesh_cmd_lc_client_set_om_id+(((8)&0xff)<<8)+(((8)&0x700)>>8);
 
 
-    sl_btmesh_host_handle_command();
+    return_if_fail(sl_btmesh_host_handle_command());
     return rsp->data.rsp_lc_client_set_om.result;
 
 }
@@ -5103,7 +5106,7 @@ sl_status_t sl_btmesh_lc_client_get_light_onoff(uint16_t server_address,
     cmd->header=sl_btmesh_cmd_lc_client_get_light_onoff_id+(((6)&0xff)<<8)+(((6)&0x700)>>8);
 
 
-    sl_btmesh_host_handle_command();
+    return_if_fail(sl_btmesh_host_handle_command());
     return rsp->data.rsp_lc_client_get_light_onoff.result;
 
 }
@@ -5132,7 +5135,7 @@ sl_status_t sl_btmesh_lc_client_set_light_onoff(uint16_t server_address,
     cmd->header=sl_btmesh_cmd_lc_client_set_light_onoff_id+(((15)&0xff)<<8)+(((15)&0x700)>>8);
 
 
-    sl_btmesh_host_handle_command();
+    return_if_fail(sl_btmesh_host_handle_command());
     return rsp->data.rsp_lc_client_set_light_onoff.result;
 
 }
@@ -5153,7 +5156,7 @@ sl_status_t sl_btmesh_lc_client_get_property(uint16_t server_address,
     cmd->header=sl_btmesh_cmd_lc_client_get_property_id+(((8)&0xff)<<8)+(((8)&0x700)>>8);
 
 
-    sl_btmesh_host_handle_command();
+    return_if_fail(sl_btmesh_host_handle_command());
     return rsp->data.rsp_lc_client_get_property.result;
 
 }
@@ -5180,7 +5183,7 @@ sl_status_t sl_btmesh_lc_client_set_property(uint16_t server_address,
     cmd->header=sl_btmesh_cmd_lc_client_set_property_id+(((10+params_len)&0xff)<<8)+(((10+params_len)&0x700)>>8);
 
 
-    sl_btmesh_host_handle_command();
+    return_if_fail(sl_btmesh_host_handle_command());
     return rsp->data.rsp_lc_client_set_property.result;
 
 }
@@ -5195,7 +5198,7 @@ sl_status_t sl_btmesh_lc_server_init(uint16_t elem_index) {
     cmd->header=sl_btmesh_cmd_lc_server_init_id+(((2)&0xff)<<8)+(((2)&0x700)>>8);
 
 
-    sl_btmesh_host_handle_command();
+    return_if_fail(sl_btmesh_host_handle_command());
     return rsp->data.rsp_lc_server_init.result;
 
 }
@@ -5210,7 +5213,7 @@ sl_status_t sl_btmesh_lc_server_deinit(uint16_t elem_index) {
     cmd->header=sl_btmesh_cmd_lc_server_deinit_id+(((2)&0xff)<<8)+(((2)&0x700)>>8);
 
 
-    sl_btmesh_host_handle_command();
+    return_if_fail(sl_btmesh_host_handle_command());
     return rsp->data.rsp_lc_server_deinit.result;
 
 }
@@ -5226,7 +5229,7 @@ sl_status_t sl_btmesh_lc_server_update_mode(uint16_t elem_index, uint8_t mode) {
     cmd->header=sl_btmesh_cmd_lc_server_update_mode_id+(((3)&0xff)<<8)+(((3)&0x700)>>8);
 
 
-    sl_btmesh_host_handle_command();
+    return_if_fail(sl_btmesh_host_handle_command());
     return rsp->data.rsp_lc_server_update_mode.result;
 
 }
@@ -5242,7 +5245,7 @@ sl_status_t sl_btmesh_lc_server_update_om(uint16_t elem_index, uint8_t om) {
     cmd->header=sl_btmesh_cmd_lc_server_update_om_id+(((3)&0xff)<<8)+(((3)&0x700)>>8);
 
 
-    sl_btmesh_host_handle_command();
+    return_if_fail(sl_btmesh_host_handle_command());
     return rsp->data.rsp_lc_server_update_om.result;
 
 }
@@ -5261,7 +5264,7 @@ sl_status_t sl_btmesh_lc_server_update_light_onoff(uint16_t elem_index,
     cmd->header=sl_btmesh_cmd_lc_server_update_light_onoff_id+(((7)&0xff)<<8)+(((7)&0x700)>>8);
 
 
-    sl_btmesh_host_handle_command();
+    return_if_fail(sl_btmesh_host_handle_command());
     return rsp->data.rsp_lc_server_update_light_onoff.result;
 
 }
@@ -5276,7 +5279,7 @@ sl_status_t sl_btmesh_lc_server_init_all_properties(uint16_t elem_index) {
     cmd->header=sl_btmesh_cmd_lc_server_init_all_properties_id+(((2)&0xff)<<8)+(((2)&0x700)>>8);
 
 
-    sl_btmesh_host_handle_command();
+    return_if_fail(sl_btmesh_host_handle_command());
     return rsp->data.rsp_lc_server_init_all_properties.result;
 
 }
@@ -5295,7 +5298,7 @@ sl_status_t sl_btmesh_lc_server_set_publish_mask(uint16_t elem_index,
     cmd->header=sl_btmesh_cmd_lc_server_set_publish_mask_id+(((5)&0xff)<<8)+(((5)&0x700)>>8);
 
 
-    sl_btmesh_host_handle_command();
+    return_if_fail(sl_btmesh_host_handle_command());
     return rsp->data.rsp_lc_server_set_publish_mask.result;
 
 }
@@ -5312,7 +5315,7 @@ sl_status_t sl_btmesh_lc_server_set_regulator_interval(uint16_t elem_index,
     cmd->header=sl_btmesh_cmd_lc_server_set_regulator_interval_id+(((3)&0xff)<<8)+(((3)&0x700)>>8);
 
 
-    sl_btmesh_host_handle_command();
+    return_if_fail(sl_btmesh_host_handle_command());
     return rsp->data.rsp_lc_server_set_regulator_interval.result;
 
 }
@@ -5331,7 +5334,7 @@ sl_status_t sl_btmesh_lc_server_set_event_mask(uint16_t elem_index,
     cmd->header=sl_btmesh_cmd_lc_server_set_event_mask_id+(((5)&0xff)<<8)+(((5)&0x700)>>8);
 
 
-    sl_btmesh_host_handle_command();
+    return_if_fail(sl_btmesh_host_handle_command());
     return rsp->data.rsp_lc_server_set_event_mask.result;
 
 }
@@ -5348,7 +5351,7 @@ sl_status_t sl_btmesh_lc_server_get_lc_state(uint16_t elem_index,
     cmd->header=sl_btmesh_cmd_lc_server_get_lc_state_id+(((2)&0xff)<<8)+(((2)&0x700)>>8);
 
 
-    sl_btmesh_host_handle_command();
+    return_if_fail(sl_btmesh_host_handle_command());
     *state = rsp->data.rsp_lc_server_get_lc_state.state;
     *transition_time = rsp->data.rsp_lc_server_get_lc_state.transition_time;
     return rsp->data.rsp_lc_server_get_lc_state.result;
@@ -5371,7 +5374,7 @@ sl_status_t sl_btmesh_lc_setup_server_update_property(uint16_t elem_index,
     cmd->header=sl_btmesh_cmd_lc_setup_server_update_property_id+(((5+params_len)&0xff)<<8)+(((5+params_len)&0x700)>>8);
 
 
-    sl_btmesh_host_handle_command();
+    return_if_fail(sl_btmesh_host_handle_command());
     return rsp->data.rsp_lc_setup_server_update_property.result;
 
 }
@@ -5386,7 +5389,7 @@ sl_status_t sl_btmesh_scene_client_init(uint16_t elem_index) {
     cmd->header=sl_btmesh_cmd_scene_client_init_id+(((2)&0xff)<<8)+(((2)&0x700)>>8);
 
 
-    sl_btmesh_host_handle_command();
+    return_if_fail(sl_btmesh_host_handle_command());
     return rsp->data.rsp_scene_client_init.result;
 
 }
@@ -5405,7 +5408,7 @@ sl_status_t sl_btmesh_scene_client_get(uint16_t server_address,
     cmd->header=sl_btmesh_cmd_scene_client_get_id+(((6)&0xff)<<8)+(((6)&0x700)>>8);
 
 
-    sl_btmesh_host_handle_command();
+    return_if_fail(sl_btmesh_host_handle_command());
     return rsp->data.rsp_scene_client_get.result;
 
 }
@@ -5424,7 +5427,7 @@ sl_status_t sl_btmesh_scene_client_get_register(uint16_t server_address,
     cmd->header=sl_btmesh_cmd_scene_client_get_register_id+(((6)&0xff)<<8)+(((6)&0x700)>>8);
 
 
-    sl_btmesh_host_handle_command();
+    return_if_fail(sl_btmesh_host_handle_command());
     return rsp->data.rsp_scene_client_get_register.result;
 
 }
@@ -5453,7 +5456,7 @@ sl_status_t sl_btmesh_scene_client_recall(uint16_t server_address,
     cmd->header=sl_btmesh_cmd_scene_client_recall_id+(((16)&0xff)<<8)+(((16)&0x700)>>8);
 
 
-    sl_btmesh_host_handle_command();
+    return_if_fail(sl_btmesh_host_handle_command());
     return rsp->data.rsp_scene_client_recall.result;
 
 }
@@ -5476,7 +5479,7 @@ sl_status_t sl_btmesh_scene_client_store(uint16_t server_address,
     cmd->header=sl_btmesh_cmd_scene_client_store_id+(((9)&0xff)<<8)+(((9)&0x700)>>8);
 
 
-    sl_btmesh_host_handle_command();
+    return_if_fail(sl_btmesh_host_handle_command());
     return rsp->data.rsp_scene_client_store.result;
 
 }
@@ -5499,7 +5502,7 @@ sl_status_t sl_btmesh_scene_client_delete(uint16_t server_address,
     cmd->header=sl_btmesh_cmd_scene_client_delete_id+(((9)&0xff)<<8)+(((9)&0x700)>>8);
 
 
-    sl_btmesh_host_handle_command();
+    return_if_fail(sl_btmesh_host_handle_command());
     return rsp->data.rsp_scene_client_delete.result;
 
 }
@@ -5514,7 +5517,7 @@ sl_status_t sl_btmesh_scene_server_init(uint16_t elem_index) {
     cmd->header=sl_btmesh_cmd_scene_server_init_id+(((2)&0xff)<<8)+(((2)&0x700)>>8);
 
 
-    sl_btmesh_host_handle_command();
+    return_if_fail(sl_btmesh_host_handle_command());
     return rsp->data.rsp_scene_server_init.result;
 
 }
@@ -5529,7 +5532,7 @@ sl_status_t sl_btmesh_scene_server_deinit(uint16_t elem_index) {
     cmd->header=sl_btmesh_cmd_scene_server_deinit_id+(((2)&0xff)<<8)+(((2)&0x700)>>8);
 
 
-    sl_btmesh_host_handle_command();
+    return_if_fail(sl_btmesh_host_handle_command());
     return rsp->data.rsp_scene_server_deinit.result;
 
 }
@@ -5544,7 +5547,7 @@ sl_status_t sl_btmesh_scene_server_reset_register(uint16_t elem_index) {
     cmd->header=sl_btmesh_cmd_scene_server_reset_register_id+(((2)&0xff)<<8)+(((2)&0x700)>>8);
 
 
-    sl_btmesh_host_handle_command();
+    return_if_fail(sl_btmesh_host_handle_command());
     return rsp->data.rsp_scene_server_reset_register.result;
 
 }
@@ -5558,7 +5561,7 @@ sl_status_t sl_btmesh_scene_server_enable_compact_recall_events() {
     cmd->header=sl_btmesh_cmd_scene_server_enable_compact_recall_events_id+(((0)&0xff)<<8)+(((0)&0x700)>>8);
 
 
-    sl_btmesh_host_handle_command();
+    return_if_fail(sl_btmesh_host_handle_command());
     return rsp->data.rsp_scene_server_enable_compact_recall_events.result;
 
 }
@@ -5573,7 +5576,7 @@ sl_status_t sl_btmesh_scene_setup_server_init(uint16_t elem_index) {
     cmd->header=sl_btmesh_cmd_scene_setup_server_init_id+(((2)&0xff)<<8)+(((2)&0x700)>>8);
 
 
-    sl_btmesh_host_handle_command();
+    return_if_fail(sl_btmesh_host_handle_command());
     return rsp->data.rsp_scene_setup_server_init.result;
 
 }
@@ -5588,7 +5591,7 @@ sl_status_t sl_btmesh_scheduler_client_init(uint16_t elem_index) {
     cmd->header=sl_btmesh_cmd_scheduler_client_init_id+(((2)&0xff)<<8)+(((2)&0x700)>>8);
 
 
-    sl_btmesh_host_handle_command();
+    return_if_fail(sl_btmesh_host_handle_command());
     return rsp->data.rsp_scheduler_client_init.result;
 
 }
@@ -5603,7 +5606,7 @@ sl_status_t sl_btmesh_scheduler_client_deinit(uint16_t elem_index) {
     cmd->header=sl_btmesh_cmd_scheduler_client_deinit_id+(((2)&0xff)<<8)+(((2)&0x700)>>8);
 
 
-    sl_btmesh_host_handle_command();
+    return_if_fail(sl_btmesh_host_handle_command());
     return rsp->data.rsp_scheduler_client_deinit.result;
 
 }
@@ -5622,7 +5625,7 @@ sl_status_t sl_btmesh_scheduler_client_get(uint16_t server_address,
     cmd->header=sl_btmesh_cmd_scheduler_client_get_id+(((6)&0xff)<<8)+(((6)&0x700)>>8);
 
 
-    sl_btmesh_host_handle_command();
+    return_if_fail(sl_btmesh_host_handle_command());
     return rsp->data.rsp_scheduler_client_get.result;
 
 }
@@ -5643,7 +5646,7 @@ sl_status_t sl_btmesh_scheduler_client_get_action(uint16_t server_address,
     cmd->header=sl_btmesh_cmd_scheduler_client_get_action_id+(((7)&0xff)<<8)+(((7)&0x700)>>8);
 
 
-    sl_btmesh_host_handle_command();
+    return_if_fail(sl_btmesh_host_handle_command());
     return rsp->data.rsp_scheduler_client_get_action.result;
 
 }
@@ -5686,7 +5689,7 @@ sl_status_t sl_btmesh_scheduler_client_set_action(uint16_t server_address,
     cmd->header=sl_btmesh_cmd_scheduler_client_set_action_id+(((23)&0xff)<<8)+(((23)&0x700)>>8);
 
 
-    sl_btmesh_host_handle_command();
+    return_if_fail(sl_btmesh_host_handle_command());
     return rsp->data.rsp_scheduler_client_set_action.result;
 
 }
@@ -5701,7 +5704,7 @@ sl_status_t sl_btmesh_scheduler_server_init(uint16_t elem_index) {
     cmd->header=sl_btmesh_cmd_scheduler_server_init_id+(((2)&0xff)<<8)+(((2)&0x700)>>8);
 
 
-    sl_btmesh_host_handle_command();
+    return_if_fail(sl_btmesh_host_handle_command());
     return rsp->data.rsp_scheduler_server_init.result;
 
 }
@@ -5716,7 +5719,7 @@ sl_status_t sl_btmesh_scheduler_server_deinit(uint16_t elem_index) {
     cmd->header=sl_btmesh_cmd_scheduler_server_deinit_id+(((2)&0xff)<<8)+(((2)&0x700)>>8);
 
 
-    sl_btmesh_host_handle_command();
+    return_if_fail(sl_btmesh_host_handle_command());
     return rsp->data.rsp_scheduler_server_deinit.result;
 
 }
@@ -5732,7 +5735,7 @@ sl_status_t sl_btmesh_scheduler_server_get(uint16_t elem_index,
     cmd->header=sl_btmesh_cmd_scheduler_server_get_id+(((2)&0xff)<<8)+(((2)&0x700)>>8);
 
 
-    sl_btmesh_host_handle_command();
+    return_if_fail(sl_btmesh_host_handle_command());
     *status = rsp->data.rsp_scheduler_server_get.status;
     return rsp->data.rsp_scheduler_server_get.result;
 
@@ -5761,7 +5764,7 @@ sl_status_t sl_btmesh_scheduler_server_get_action(uint16_t elem_index,
     cmd->header=sl_btmesh_cmd_scheduler_server_get_action_id+(((3)&0xff)<<8)+(((3)&0x700)>>8);
 
 
-    sl_btmesh_host_handle_command();
+    return_if_fail(sl_btmesh_host_handle_command());
     *index_ = rsp->data.rsp_scheduler_server_get_action.index_;
     *year = rsp->data.rsp_scheduler_server_get_action.year;
     *month = rsp->data.rsp_scheduler_server_get_action.month;
@@ -5809,7 +5812,7 @@ sl_status_t sl_btmesh_scheduler_server_set_action(uint16_t elem_index,
     cmd->header=sl_btmesh_cmd_scheduler_server_set_action_id+(((18)&0xff)<<8)+(((18)&0x700)>>8);
 
 
-    sl_btmesh_host_handle_command();
+    return_if_fail(sl_btmesh_host_handle_command());
     return rsp->data.rsp_scheduler_server_set_action.result;
 
 }
@@ -5824,7 +5827,7 @@ sl_status_t sl_btmesh_time_server_init(uint16_t elem_index) {
     cmd->header=sl_btmesh_cmd_time_server_init_id+(((2)&0xff)<<8)+(((2)&0x700)>>8);
 
 
-    sl_btmesh_host_handle_command();
+    return_if_fail(sl_btmesh_host_handle_command());
     return rsp->data.rsp_time_server_init.result;
 
 }
@@ -5839,7 +5842,7 @@ sl_status_t sl_btmesh_time_server_deinit(uint16_t elem_index) {
     cmd->header=sl_btmesh_cmd_time_server_deinit_id+(((2)&0xff)<<8)+(((2)&0x700)>>8);
 
 
-    sl_btmesh_host_handle_command();
+    return_if_fail(sl_btmesh_host_handle_command());
     return rsp->data.rsp_time_server_deinit.result;
 
 }
@@ -5860,7 +5863,7 @@ sl_status_t sl_btmesh_time_server_get_time(uint16_t elem_index,
     cmd->header=sl_btmesh_cmd_time_server_get_time_id+(((2)&0xff)<<8)+(((2)&0x700)>>8);
 
 
-    sl_btmesh_host_handle_command();
+    return_if_fail(sl_btmesh_host_handle_command());
     *tai_seconds = rsp->data.rsp_time_server_get_time.tai_seconds;
     *subsecond = rsp->data.rsp_time_server_get_time.subsecond;
     *uncertainty = rsp->data.rsp_time_server_get_time.uncertainty;
@@ -5893,7 +5896,7 @@ sl_status_t sl_btmesh_time_server_set_time(uint16_t elem_index,
     cmd->header=sl_btmesh_cmd_time_server_set_time_id+(((19)&0xff)<<8)+(((19)&0x700)>>8);
 
 
-    sl_btmesh_host_handle_command();
+    return_if_fail(sl_btmesh_host_handle_command());
     return rsp->data.rsp_time_server_set_time.result;
 
 }
@@ -5910,7 +5913,7 @@ sl_status_t sl_btmesh_time_server_get_time_zone_offset_new(uint16_t elem_index,
     cmd->header=sl_btmesh_cmd_time_server_get_time_zone_offset_new_id+(((2)&0xff)<<8)+(((2)&0x700)>>8);
 
 
-    sl_btmesh_host_handle_command();
+    return_if_fail(sl_btmesh_host_handle_command());
     *new_offset = rsp->data.rsp_time_server_get_time_zone_offset_new.new_offset;
     *tai_of_zone_change = rsp->data.rsp_time_server_get_time_zone_offset_new.tai_of_zone_change;
     return rsp->data.rsp_time_server_get_time_zone_offset_new.result;
@@ -5931,7 +5934,7 @@ sl_status_t sl_btmesh_time_server_set_time_zone_offset_new(uint16_t elem_index,
     cmd->header=sl_btmesh_cmd_time_server_set_time_zone_offset_new_id+(((12)&0xff)<<8)+(((12)&0x700)>>8);
 
 
-    sl_btmesh_host_handle_command();
+    return_if_fail(sl_btmesh_host_handle_command());
     return rsp->data.rsp_time_server_set_time_zone_offset_new.result;
 
 }
@@ -5948,7 +5951,7 @@ sl_status_t sl_btmesh_time_server_get_tai_utc_delta_new(uint16_t elem_index,
     cmd->header=sl_btmesh_cmd_time_server_get_tai_utc_delta_new_id+(((2)&0xff)<<8)+(((2)&0x700)>>8);
 
 
-    sl_btmesh_host_handle_command();
+    return_if_fail(sl_btmesh_host_handle_command());
     *new_delta = rsp->data.rsp_time_server_get_tai_utc_delta_new.new_delta;
     *tai_of_delta_change = rsp->data.rsp_time_server_get_tai_utc_delta_new.tai_of_delta_change;
     return rsp->data.rsp_time_server_get_tai_utc_delta_new.result;
@@ -5969,7 +5972,7 @@ sl_status_t sl_btmesh_time_server_set_tai_utc_delta_new(uint16_t elem_index,
     cmd->header=sl_btmesh_cmd_time_server_set_tai_utc_delta_new_id+(((14)&0xff)<<8)+(((14)&0x700)>>8);
 
 
-    sl_btmesh_host_handle_command();
+    return_if_fail(sl_btmesh_host_handle_command());
     return rsp->data.rsp_time_server_set_tai_utc_delta_new.result;
 
 }
@@ -5985,7 +5988,7 @@ sl_status_t sl_btmesh_time_server_get_time_role(uint16_t elem_index,
     cmd->header=sl_btmesh_cmd_time_server_get_time_role_id+(((2)&0xff)<<8)+(((2)&0x700)>>8);
 
 
-    sl_btmesh_host_handle_command();
+    return_if_fail(sl_btmesh_host_handle_command());
     *time_role = rsp->data.rsp_time_server_get_time_role.time_role;
     return rsp->data.rsp_time_server_get_time_role.result;
 
@@ -6003,7 +6006,7 @@ sl_status_t sl_btmesh_time_server_set_time_role(uint16_t elem_index,
     cmd->header=sl_btmesh_cmd_time_server_set_time_role_id+(((3)&0xff)<<8)+(((3)&0x700)>>8);
 
 
-    sl_btmesh_host_handle_command();
+    return_if_fail(sl_btmesh_host_handle_command());
     return rsp->data.rsp_time_server_set_time_role.result;
 
 }
@@ -6027,7 +6030,7 @@ sl_status_t sl_btmesh_time_server_get_datetime(uint16_t elem_index,
     cmd->header=sl_btmesh_cmd_time_server_get_datetime_id+(((2)&0xff)<<8)+(((2)&0x700)>>8);
 
 
-    sl_btmesh_host_handle_command();
+    return_if_fail(sl_btmesh_host_handle_command());
     *year = rsp->data.rsp_time_server_get_datetime.year;
     *month = rsp->data.rsp_time_server_get_datetime.month;
     *day = rsp->data.rsp_time_server_get_datetime.day;
@@ -6051,7 +6054,7 @@ sl_status_t sl_btmesh_time_server_publish(uint16_t elem_index) {
     cmd->header=sl_btmesh_cmd_time_server_publish_id+(((2)&0xff)<<8)+(((2)&0x700)>>8);
 
 
-    sl_btmesh_host_handle_command();
+    return_if_fail(sl_btmesh_host_handle_command());
     return rsp->data.rsp_time_server_publish.result;
 
 }
@@ -6070,7 +6073,7 @@ sl_status_t sl_btmesh_time_server_status(uint16_t destination_address,
     cmd->header=sl_btmesh_cmd_time_server_status_id+(((6)&0xff)<<8)+(((6)&0x700)>>8);
 
 
-    sl_btmesh_host_handle_command();
+    return_if_fail(sl_btmesh_host_handle_command());
     return rsp->data.rsp_time_server_status.result;
 
 }
@@ -6085,7 +6088,7 @@ sl_status_t sl_btmesh_time_client_init(uint16_t elem_index) {
     cmd->header=sl_btmesh_cmd_time_client_init_id+(((2)&0xff)<<8)+(((2)&0x700)>>8);
 
 
-    sl_btmesh_host_handle_command();
+    return_if_fail(sl_btmesh_host_handle_command());
     return rsp->data.rsp_time_client_init.result;
 
 }
@@ -6100,7 +6103,7 @@ sl_status_t sl_btmesh_time_client_deinit(uint16_t elem_index) {
     cmd->header=sl_btmesh_cmd_time_client_deinit_id+(((2)&0xff)<<8)+(((2)&0x700)>>8);
 
 
-    sl_btmesh_host_handle_command();
+    return_if_fail(sl_btmesh_host_handle_command());
     return rsp->data.rsp_time_client_deinit.result;
 
 }
@@ -6119,7 +6122,7 @@ sl_status_t sl_btmesh_time_client_get_time(uint16_t server_address,
     cmd->header=sl_btmesh_cmd_time_client_get_time_id+(((6)&0xff)<<8)+(((6)&0x700)>>8);
 
 
-    sl_btmesh_host_handle_command();
+    return_if_fail(sl_btmesh_host_handle_command());
     return rsp->data.rsp_time_client_get_time.result;
 
 }
@@ -6150,7 +6153,7 @@ sl_status_t sl_btmesh_time_client_set_time(uint16_t server_address,
     cmd->header=sl_btmesh_cmd_time_client_set_time_id+(((23)&0xff)<<8)+(((23)&0x700)>>8);
 
 
-    sl_btmesh_host_handle_command();
+    return_if_fail(sl_btmesh_host_handle_command());
     return rsp->data.rsp_time_client_set_time.result;
 
 }
@@ -6169,7 +6172,7 @@ sl_status_t sl_btmesh_time_client_get_time_zone(uint16_t server_address,
     cmd->header=sl_btmesh_cmd_time_client_get_time_zone_id+(((6)&0xff)<<8)+(((6)&0x700)>>8);
 
 
-    sl_btmesh_host_handle_command();
+    return_if_fail(sl_btmesh_host_handle_command());
     return rsp->data.rsp_time_client_get_time_zone.result;
 
 }
@@ -6192,7 +6195,7 @@ sl_status_t sl_btmesh_time_client_set_time_zone(uint16_t server_address,
     cmd->header=sl_btmesh_cmd_time_client_set_time_zone_id+(((16)&0xff)<<8)+(((16)&0x700)>>8);
 
 
-    sl_btmesh_host_handle_command();
+    return_if_fail(sl_btmesh_host_handle_command());
     return rsp->data.rsp_time_client_set_time_zone.result;
 
 }
@@ -6211,7 +6214,7 @@ sl_status_t sl_btmesh_time_client_get_tai_utc_delta(uint16_t server_address,
     cmd->header=sl_btmesh_cmd_time_client_get_tai_utc_delta_id+(((6)&0xff)<<8)+(((6)&0x700)>>8);
 
 
-    sl_btmesh_host_handle_command();
+    return_if_fail(sl_btmesh_host_handle_command());
     return rsp->data.rsp_time_client_get_tai_utc_delta.result;
 
 }
@@ -6234,7 +6237,7 @@ sl_status_t sl_btmesh_time_client_set_tai_utc_delta(uint16_t server_address,
     cmd->header=sl_btmesh_cmd_time_client_set_tai_utc_delta_id+(((18)&0xff)<<8)+(((18)&0x700)>>8);
 
 
-    sl_btmesh_host_handle_command();
+    return_if_fail(sl_btmesh_host_handle_command());
     return rsp->data.rsp_time_client_set_tai_utc_delta.result;
 
 }
@@ -6253,7 +6256,7 @@ sl_status_t sl_btmesh_time_client_get_time_role(uint16_t server_address,
     cmd->header=sl_btmesh_cmd_time_client_get_time_role_id+(((6)&0xff)<<8)+(((6)&0x700)>>8);
 
 
-    sl_btmesh_host_handle_command();
+    return_if_fail(sl_btmesh_host_handle_command());
     return rsp->data.rsp_time_client_get_time_role.result;
 
 }
@@ -6274,7 +6277,7 @@ sl_status_t sl_btmesh_time_client_set_time_role(uint16_t server_address,
     cmd->header=sl_btmesh_cmd_time_client_set_time_role_id+(((7)&0xff)<<8)+(((7)&0x700)>>8);
 
 
-    sl_btmesh_host_handle_command();
+    return_if_fail(sl_btmesh_host_handle_command());
     return rsp->data.rsp_time_client_set_time_role.result;
 
 }
@@ -6288,7 +6291,7 @@ sl_status_t sl_btmesh_migration_migrate_keys() {
     cmd->header=sl_btmesh_cmd_migration_migrate_keys_id+(((0)&0xff)<<8)+(((0)&0x700)>>8);
 
 
-    sl_btmesh_host_handle_command();
+    return_if_fail(sl_btmesh_host_handle_command());
     return rsp->data.rsp_migration_migrate_keys.result;
 
 }
@@ -6302,7 +6305,7 @@ sl_status_t sl_btmesh_migration_migrate_ddb() {
     cmd->header=sl_btmesh_cmd_migration_migrate_ddb_id+(((0)&0xff)<<8)+(((0)&0x700)>>8);
 
 
-    sl_btmesh_host_handle_command();
+    return_if_fail(sl_btmesh_host_handle_command());
     return rsp->data.rsp_migration_migrate_ddb.result;
 
 }

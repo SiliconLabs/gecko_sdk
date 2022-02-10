@@ -275,15 +275,21 @@ sl_bt_msg_t* sl_bt_wait_response(void)
   }
 }
 
-void sl_bt_host_handle_command()
+sl_status_t sl_bt_host_handle_command(void)
 {
   //packet in sl_bt_cmd_msg is waiting for output
-  sl_bt_api_output(SL_BGAPI_MSG_HEADER_LEN + SL_BT_MSG_LEN(sl_bt_cmd_msg->header), (uint8_t*)sl_bt_cmd_msg);
+  if (sl_bt_api_output(SL_BGAPI_MSG_HEADER_LEN + SL_BT_MSG_LEN(sl_bt_cmd_msg->header), (uint8_t*)sl_bt_cmd_msg) < 0) {
+    return SL_STATUS_TRANSMIT;
+  }
   sl_bt_wait_response();
+  return SL_STATUS_OK;
 }
 
-void sl_bt_host_handle_command_noresponse()
+sl_status_t sl_bt_host_handle_command_noresponse(void)
 {
   //packet in sl_bt_cmd_msg is waiting for output
-  sl_bt_api_output(SL_BGAPI_MSG_HEADER_LEN + SL_BT_MSG_LEN(sl_bt_cmd_msg->header), (uint8_t*)sl_bt_cmd_msg);
+  if (sl_bt_api_output(SL_BGAPI_MSG_HEADER_LEN + SL_BT_MSG_LEN(sl_bt_cmd_msg->header), (uint8_t*)sl_bt_cmd_msg) < 0) {
+    return SL_STATUS_TRANSMIT;
+  }
+  return SL_STATUS_OK;
 }
