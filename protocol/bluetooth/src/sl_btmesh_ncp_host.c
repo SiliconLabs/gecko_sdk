@@ -60,15 +60,16 @@ sl_status_t sl_btmesh_pop_event(sl_btmesh_msg_t* event)
  * Any events that arrive before the response will be put into their corresponding
  * event queues.
  */
-sl_btmesh_msg_t* sl_btmesh_wait_response(void)
+sl_status_t sl_btmesh_wait_response(void)
 {
-  sl_btmesh_msg_t* p;
+  sl_status_t rc;
   while (1) {
-    p = (sl_btmesh_msg_t*)sli_wait_for_bgapi_message((sl_bt_msg_t*)sl_btmesh_rsp_msg);
-    if (p) {
-      return p;
+    rc = sli_wait_for_bgapi_message((sl_bt_msg_t*)sl_btmesh_rsp_msg);
+    if ((rc == SL_STATUS_OK) || (rc == SL_STATUS_RECEIVE)) {
+      break;
     }
   }
+  return rc;
 }
 
 sl_status_t sl_btmesh_host_handle_command(void)
@@ -77,8 +78,7 @@ sl_status_t sl_btmesh_host_handle_command(void)
   if (sl_bt_api_output(SL_BGAPI_MSG_HEADER_LEN + SL_BGAPI_MSG_LEN(sl_btmesh_cmd_msg->header), (uint8_t*)sl_btmesh_cmd_msg) < 0) {
     return SL_STATUS_TRANSMIT;
   }
-  sl_btmesh_wait_response();
-  return SL_STATUS_OK;
+  return sl_btmesh_wait_response();
 }
 
 sl_status_t sl_btmesh_host_handle_command_noresponse(void)

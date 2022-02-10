@@ -107,28 +107,33 @@ bool sli_bgapi_other_events_in_queue(enum sl_bgapi_dev_types my_device_type)
 /**
  * This function attempts to read a BGAPI event or response from the input data pipe.
  *
- * If there is no data, or a proper header cannot be recognized, returns NULL and
- * discards any read data.
+ * In case of data input callback function error, returns SL_STATUS_RECEIVE. This error
+ * shall be handler by the caller.
+ *
+ * If there is no data, or a proper header cannot be recognized, returns SL_STATUS_FAIL
+ * and discards any read data.
  *
  * If an event is found, it is put into the corresponding event queue, as indicated
- * by the registered event queue struct device type. Then NULL is returned.
+ * by the registered event queue struct device type. Then SL_STATUS_FULL is returned
+ * if queue is full and packet was in fact discarded, otherwise SL_STATUS_BUSY.
  *
- * If a response is found, it is copied into the response_buffer parameter.
- * Then a pointer to response_buffer is returned.
+ * If a response is found, it is copied into the response_buffer parameter and
+ * SL_STATUS_OK is returned.
  */
-sl_bt_msg_t* sli_wait_for_bgapi_message(sl_bt_msg_t *response_buffer)
+sl_status_t sli_wait_for_bgapi_message(sl_bt_msg_t *response_buffer)
 {
   uint32_t msg_length;
   uint32_t header;
   uint8_t  *payload;
-  sl_bt_msg_t *packet_ptr, *retVal = NULL;
+  sl_bt_msg_t *packet_ptr;
+  sl_status_t ret_val = SL_STATUS_BUSY;
   int      ret;
   size_t i;
   bgapi_device_type_queue_t *queue = NULL;
   //sync to header byte
   ret = sl_bt_api_input(1, (uint8_t*)&header);
   if (ret < 0) {
-    return 0; // Failed to read header byte
+    return SL_STATUS_BUSY; // Failed to read header byte
   }
   for (i = 0; i < SL_BGAPI_DEVICE_TYPES; i++) {
     if ((device_event_queues[i] != NULL)
@@ -138,17 +143,17 @@ sl_bt_msg_t* sli_wait_for_bgapi_message(sl_bt_msg_t *response_buffer)
     }
   }
   if (queue == NULL) {
-    return 0; // Unrecognized device
+    return SL_STATUS_FAIL; // Unrecognized device
   }
   ret = sl_bt_api_input(SL_BGAPI_MSG_HEADER_LEN - 1, &((uint8_t*)&header)[1]);
   if (ret < 0) {
-    return 0;
+    return SL_STATUS_RECEIVE;
   }
 
   msg_length = SL_BT_MSG_LEN(header);
 
   if (msg_length > SL_BGAPI_MAX_PAYLOAD_SIZE) {
-    return 0;
+    return SL_STATUS_FAIL;
   }
 
   if ((header & 0xf8) == ( (uint32_t)(queue->device_type) | (uint32_t)sl_bgapi_msg_type_evt)) {
@@ -158,9 +163,12 @@ sl_bt_msg_t* sli_wait_for_bgapi_message(sl_bt_msg_t *response_buffer)
       if (msg_length) {
         // Discard payload if it exists
         uint8_t discard_buf[SL_BGAPI_MAX_PAYLOAD_SIZE];
-        sl_bt_api_input(msg_length, discard_buf);
+        ret = sl_bt_api_input(msg_length, discard_buf);
+        if (ret < 0) {
+          return SL_STATUS_RECEIVE;
+        }
       }
-      return 0;
+      return SL_STATUS_FULL;
     }
     packet_ptr = &queue->buffer[queue->write_offset];
     // Move write offset to next slot or wrap around to beginning.
@@ -169,10 +177,11 @@ sl_bt_msg_t* sli_wait_for_bgapi_message(sl_bt_msg_t *response_buffer)
     // Note that in the case of a response we don't need to split it into two buffer types,
     // because we can't have multiple pending commands and responses in parallel.
     // Whoever sent the last command will wait for the response.
-    retVal = packet_ptr = response_buffer;
+    packet_ptr = response_buffer;
+    ret_val = SL_STATUS_OK;
   } else {
     //fail
-    return 0;
+    return SL_STATUS_FAIL;
   }
   packet_ptr->header = header;
   payload = (uint8_t*)&packet_ptr->data.payload;
@@ -186,10 +195,10 @@ sl_bt_msg_t* sli_wait_for_bgapi_message(sl_bt_msg_t *response_buffer)
     }
   }
 
-  // Using retVal avoid double handling of event msg types in outer function.
-  // If retVal is non-null we got a response packet. If null, an event was placed
-  // in one of the event queues.
-  return retVal;
+  // Using ret_val avoids double handling of event msg types in outer function.
+  // If ret_val is SL_STATUS_OK we got a response packet. Otherwise, an event
+  // was placed in one of the event queues.
+  return ret_val;
 }
 
 bool sl_bt_event_pending(void)
@@ -198,8 +207,8 @@ bool sl_bt_event_pending(void)
     return true;
   }
 
-  //something in uart waiting to be read
-  if (sl_bt_api_peek && sl_bt_api_peek()) {
+  //something in uart waiting to be read (or error occurred)
+  if (sl_bt_api_peek && (sl_bt_api_peek() != 0)) {
     return true;
   }
 
@@ -219,7 +228,7 @@ bool sl_bt_event_pending(void)
  **/
 sl_status_t sli_bgapi_get_event(int block, sl_bt_msg_t *event, bgapi_device_type_queue_t *device_queue)
 {
-  sl_bt_msg_t *rsp;
+  sl_status_t rc;
   while (1) {
     // First check if we already have events waiting for us.
     if (sli_bgapi_device_queue_has_events(device_queue)) {
@@ -235,16 +244,26 @@ sl_status_t sli_bgapi_get_event(int block, sl_bt_msg_t *event, bgapi_device_type
     }
 
     //if not blocking and nothing in uart -> out
-    if (!block && sl_bt_api_peek && sl_bt_api_peek() == 0) {
-      return SL_STATUS_WOULD_BLOCK;
+    if (!block && sl_bt_api_peek) {
+      int ret = sl_bt_api_peek();
+      if (ret < 0) {
+        return SL_STATUS_RECEIVE;
+      }
+      else if (ret == 0) {
+        return SL_STATUS_WOULD_BLOCK;
+      }
     }
 
     //read more messages from device
-    if ( (rsp = sli_wait_for_bgapi_message(sl_bt_rsp_msg)) ) {
+    rc = sli_wait_for_bgapi_message(sl_bt_rsp_msg);
+    if (rc == SL_STATUS_OK) {
       // Note that we copy the event to the event pointer here only if it is a response.
       // Regular events are handled in the above blocks.
-      memcpy(event, rsp, sizeof(sl_bt_msg_t));
+      memcpy(event, sl_bt_rsp_msg, sizeof(sl_bt_msg_t));
       return SL_STATUS_OK;
+    }
+    else if (rc == SL_STATUS_RECEIVE) {
+      return SL_STATUS_RECEIVE;
     }
   }
 }
@@ -264,15 +283,16 @@ sl_status_t sl_bt_pop_event(sl_bt_msg_t* event)
  * Any events that arrive before the response will be put into their corresponding
  * event queues.
  */
-sl_bt_msg_t* sl_bt_wait_response(void)
+sl_status_t sl_bt_wait_response(void)
 {
-  sl_bt_msg_t* rsp;
+  sl_status_t rc;
   while (1) {
-    rsp = sli_wait_for_bgapi_message(sl_bt_rsp_msg); // Will return a valid pointer only if we got a response.
-    if (rsp) {
-      return rsp;
+    rc = sli_wait_for_bgapi_message(sl_bt_rsp_msg);
+    if ((rc == SL_STATUS_OK) || (rc == SL_STATUS_RECEIVE)) {
+      break;
     }
   }
+  return rc;
 }
 
 sl_status_t sl_bt_host_handle_command(void)
@@ -281,8 +301,7 @@ sl_status_t sl_bt_host_handle_command(void)
   if (sl_bt_api_output(SL_BGAPI_MSG_HEADER_LEN + SL_BT_MSG_LEN(sl_bt_cmd_msg->header), (uint8_t*)sl_bt_cmd_msg) < 0) {
     return SL_STATUS_TRANSMIT;
   }
-  sl_bt_wait_response();
-  return SL_STATUS_OK;
+  return sl_bt_wait_response();
 }
 
 sl_status_t sl_bt_host_handle_command_noresponse(void)

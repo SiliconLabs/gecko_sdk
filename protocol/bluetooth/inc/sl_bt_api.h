@@ -9538,7 +9538,7 @@ sl_status_t sl_bt_pop_event(sl_bt_msg_t* event);
  * Check whether events are in queue pending for processing.
  * Call @ref sl_bt_pop_event to process pending events.
  *
- * @return true if event is pending; false otherwise
+ * @return true if event is pending or error occurred; false otherwise
  */
 bool sl_bt_event_pending(void);
 

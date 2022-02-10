@@ -161,6 +161,6 @@ sl_status_t sl_bt_host_handle_command(void);
 sl_status_t sl_bt_host_handle_command_noresponse(void);
 sl_status_t sl_bt_wait_event(sl_bt_msg_t *p);
 
-sl_bt_msg_t* sli_wait_for_bgapi_message(sl_bt_msg_t *response_buf);
+sl_status_t sli_wait_for_bgapi_message(sl_bt_msg_t *response_buf);
 
 #endif
