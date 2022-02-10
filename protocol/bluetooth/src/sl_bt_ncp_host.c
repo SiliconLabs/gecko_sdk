@@ -30,6 +30,8 @@ sl_bt_msg_t *sl_bt_rsp_msg = &_sl_bt_rsp_msg;
 tx_func sl_bt_api_output;
 rx_func sl_bt_api_input;
 rx_peek_func sl_bt_api_peek;
+time_ms_func sl_bt_api_time;
+uint32_t sl_bt_rx_timeout = 0;
 uint8_t _sl_bt_queue_buffer[SL_BT_API_QUEUE_LEN * (SL_BGAPI_MSG_HEADER_LEN + SL_BGAPI_MAX_PAYLOAD_SIZE)];
 
 bgapi_device_type_queue_t sl_bt_api_queue = {
@@ -61,10 +63,12 @@ sl_status_t sl_bt_api_initialize(tx_func ofunc, rx_func ifunc)
   sl_bt_api_output = ofunc;
   sl_bt_api_input = ifunc;
   sl_bt_api_peek = NULL;
+  sl_bt_api_time = NULL;
   return sli_bgapi_register_device(&sl_bt_api_queue);
 }
 
-sl_status_t sl_bt_api_initialize_nonblock(tx_func ofunc, rx_func ifunc, rx_peek_func pfunc)
+sl_status_t sl_bt_api_initialize_nonblock(tx_func ofunc, rx_func ifunc, rx_peek_func pfunc,
+                                          time_ms_func tfunc, uint32_t rx_timeout_ms)
 {
   if (!ofunc || !ifunc || !pfunc) {
     return SL_STATUS_INVALID_PARAMETER;
@@ -72,6 +76,8 @@ sl_status_t sl_bt_api_initialize_nonblock(tx_func ofunc, rx_func ifunc, rx_peek_
   sl_bt_api_output = ofunc;
   sl_bt_api_input = ifunc;
   sl_bt_api_peek = pfunc;
+  sl_bt_api_time == tfunc;
+  sl_bt_rx_timeout = rx_timeout_ms;
   return sli_bgapi_register_device(&sl_bt_api_queue);
 }
 
@@ -286,13 +292,16 @@ sl_status_t sl_bt_pop_event(sl_bt_msg_t* event)
 sl_status_t sl_bt_wait_response(void)
 {
   sl_status_t rc;
+  const int64_t t_start = (sl_bt_api_time ? sl_bt_api_time() : 0);
   while (1) {
     rc = sli_wait_for_bgapi_message(sl_bt_rsp_msg);
     if ((rc == SL_STATUS_OK) || (rc == SL_STATUS_RECEIVE)) {
-      break;
+      return rc;
+    }
+    if (sl_bt_api_time && ((sl_bt_api_time() - t_start) >= sl_bt_rx_timeout)) {
+      return SL_STATUS_IO_TIMEOUT;
     }
   }
-  return rc;
 }
 
 sl_status_t sl_bt_host_handle_command(void)

@@ -136,6 +136,12 @@ typedef int32_t(*rx_func)(uint32_t dataLength, uint8_t* data);
 typedef int32_t(*rx_peek_func)(void);
 
 /**
+ * @brief  Function for retrieving current time, used for timeouts.
+ * @return Returns the number of milliseconds, monotonically increasing since an undefined point in time.
+ */
+typedef int64_t(*time_ms_func)(void);
+
+/**
  * Initialize NCP host Bluetooth API.
  *
  * @param ofunc The function for sending api messages
@@ -150,9 +156,12 @@ sl_status_t sl_bt_api_initialize(tx_func ofunc, rx_func ifunc);
  * @param ofunc The function for sending api messages
  * @param ifunc The function for receiving api messages
  * @param pfunc The function for getting the number of bytes in the input buffer
+ * @param tfunc Optional function for getting current monotonic time in ms, used for timeouts
+ * @param rx_timeout_ms Timeout for receiving command responses, only used if tfunc is provided
  * @return Status code
  */
-sl_status_t sl_bt_api_initialize_nonblock(tx_func ofunc, rx_func ifunc, rx_peek_func pfunc);
+sl_status_t sl_bt_api_initialize_nonblock(tx_func ofunc, rx_func ifunc, rx_peek_func pfunc,
+                                          time_ms_func tfunc, uint32_t rx_timeout_ms);
 
 extern tx_func sl_bt_api_output;
 extern rx_func sl_bt_api_input;
