@@ -153,9 +153,9 @@ sl_status_t sl_bt_api_initialize(tx_func ofunc, rx_func ifunc);
  */
 sl_status_t sl_bt_api_initialize_nonblock(tx_func ofunc, rx_func ifunc, rx_peek_func pfunc);
 
-extern void(*sl_bt_api_output)(uint32_t len1, uint8_t* data1);
-extern int32_t (*sl_bt_api_input)(uint32_t len1, uint8_t* data1);
-extern int32_t(*sl_bt_api_peek)(void);
+extern tx_func sl_bt_api_output;
+extern rx_func sl_bt_api_input;
+extern rx_peek_func sl_bt_api_peek;
 void sl_bt_host_handle_command();
 void sl_bt_host_handle_command_noresponse();
 sl_status_t sl_bt_wait_event(sl_bt_msg_t *p);

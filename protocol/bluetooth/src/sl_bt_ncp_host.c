@@ -27,9 +27,9 @@ sl_bt_msg_t _sl_bt_cmd_msg;
 sl_bt_msg_t _sl_bt_rsp_msg;
 sl_bt_msg_t *sl_bt_cmd_msg = &_sl_bt_cmd_msg;
 sl_bt_msg_t *sl_bt_rsp_msg = &_sl_bt_rsp_msg;
-void (*sl_bt_api_output)(uint32_t len1, uint8_t* data1);
-int32_t (*sl_bt_api_input)(uint32_t len1, uint8_t* data1);
-int32_t (*sl_bt_api_peek)(void);
+tx_func sl_bt_api_output;
+rx_func sl_bt_api_input;
+rx_peek_func sl_bt_api_peek;
 uint8_t _sl_bt_queue_buffer[SL_BT_API_QUEUE_LEN * (SL_BGAPI_MSG_HEADER_LEN + SL_BGAPI_MAX_PAYLOAD_SIZE)];
 
 bgapi_device_type_queue_t sl_bt_api_queue = {
