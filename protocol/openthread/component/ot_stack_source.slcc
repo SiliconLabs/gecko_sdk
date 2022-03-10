@@ -29,7 +29,6 @@ source:
       - path: api/diags_api.cpp
       - path: api/dns_api.cpp
       - path: api/dns_server_api.cpp
-      - path: api/entropy_api.cpp
       - path: api/heap_api.cpp
       - path: api/history_tracker_api.cpp
       - path: api/icmp6_api.cpp
@@ -53,6 +52,7 @@ source:
       - path: api/thread_api.cpp
       - path: api/thread_ftd_api.cpp
       - path: api/tcp_api.cpp
+      - path: api/trel_api.cpp
       - path: api/udp_api.cpp
       - path: backbone_router/backbone_tmf.cpp
       - path: backbone_router/bbr_leader.cpp
@@ -111,6 +111,7 @@ source:
       - path: net/dhcp6_client.cpp
       - path: net/dhcp6_server.cpp
       - path: net/dns_client.cpp
+      - path: net/dns_dso.cpp
       - path: net/dns_types.cpp
       - path: net/dnssd_server.cpp
       - path: net/icmp6.cpp
@@ -178,6 +179,18 @@ source:
       - path: utils/ping_sender.cpp
       - path: utils/slaac_address.cpp
       - path: utils/srp_client_buffers.cpp
+      - path: ../../third_party/tcplp/bsdtcp/cc/cc_newreno.c
+      - path: ../../third_party/tcplp/bsdtcp/tcp_input.c
+      - path: ../../third_party/tcplp/bsdtcp/tcp_output.c
+      - path: ../../third_party/tcplp/bsdtcp/tcp_reass.c
+      - path: ../../third_party/tcplp/bsdtcp/tcp_sack.c
+      - path: ../../third_party/tcplp/bsdtcp/tcp_subr.c
+      - path: ../../third_party/tcplp/bsdtcp/tcp_timer.c
+      - path: ../../third_party/tcplp/bsdtcp/tcp_timewait.c
+      - path: ../../third_party/tcplp/bsdtcp/tcp_usrreq.c
+      - path: ../../third_party/tcplp/lib/bitmap.c
+      - path: ../../third_party/tcplp/lib/cbuf.c
+      - path: ../../third_party/tcplp/lib/lbuf.c
 template_contribution:
   - name: component_catalog
     value: openthread_stack

@@ -20,7 +20,7 @@
 
 // <h>Zigbee Network Find (Sub-GHz) configuration
 
-// <o EMBER_AF_PLUGIN_NETWORK_FIND_SUB_GHZ_CUT_OFF_VALUE> Cut-off value (dBm) <-128-127>
+// <o EMBER_AF_PLUGIN_NETWORK_FIND_SUB_GHZ_CUT_OFF_VALUE> Cut-off value (dBm) <-128..127>
 // <i> Default: -48
 // <i> The maximum noise allowed on a channel to consider for forming a network. For more details, see the "Cut-off value" and "Enable scanning all channels" options in the Network Find plugin.
 #define EMBER_AF_PLUGIN_NETWORK_FIND_SUB_GHZ_CUT_OFF_VALUE   -48

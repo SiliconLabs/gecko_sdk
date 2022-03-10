@@ -98,7 +98,7 @@ void sl_wisun_socket_data_event_hnd(sl_wisun_evt_t *evt)
 }
 
 /* Socket data available event handler */
-void sl_wisun_socket_data_avialable_event_hnd(sl_wisun_evt_t *evt)
+void sl_wisun_socket_data_available_event_hnd(sl_wisun_evt_t *evt)
 {
   __CHECK_FOR_STATUS(evt->evt.error.status);
 }

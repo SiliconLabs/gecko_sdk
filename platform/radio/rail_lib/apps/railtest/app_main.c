@@ -72,6 +72,14 @@
 
 #include "sl_rail_test_config.h"
 
+#ifdef SL_CATALOG_RAIL_UTIL_COEX_PRESENT
+#include "coexistence-802154.h"
+#endif
+
+#ifdef SL_CATALOG_TIMING_TEST_PRESENT
+#include "sl_rail_util_timing_test.h"
+#endif
+
 #ifndef STATIC_ASSERT
 #ifdef __ICCARM__
   #define STATIC_ASSERT(__condition, __errorstr) \
@@ -201,6 +209,10 @@ const uint8_t numRailEvents = COUNTOF(eventNames);
 #if RAIL_FEAT_CHANNEL_HOPPING
 uint32_t channelHoppingBufferSpace[CHANNEL_HOPPING_BUFFER_SIZE];
 uint32_t *channelHoppingBuffer = channelHoppingBufferSpace;
+#endif
+
+#ifdef SL_CATALOG_TIMING_TEST_PRESENT
+extern volatile bool enableRxPacketEventTimeCapture;
 #endif
 
 // Channel Variable
@@ -475,6 +487,9 @@ void sl_rail_test_internal_app_init(void)
   // RX isn't validated yet so lets not go into receive just yet
   RAIL_StartRx(railHandle, channel, NULL); // Start in receive mode
   receiveModeEnabled = true;
+#ifdef SL_CATALOG_RAIL_UTIL_COEX_PRESENT
+  sl_rail_util_coex_init();
+#endif
 }
 
 volatile uint16_t rxDataSourceEventState = RX_DATA_SOURCE_EVENT_STATE_CHECKED;
@@ -636,6 +651,13 @@ void sl_rail_util_on_assert_failed(RAIL_Handle_t railHandle, uint32_t errorCode)
 // Override weak function called by callback sli_rail_util_on_event.
 void sl_rail_util_on_event(RAIL_Handle_t railHandle, RAIL_Events_t events)
 {
+#ifdef SL_CATALOG_TIMING_TEST_PRESENT
+  if (enableRxPacketEventTimeCapture
+      && (events & RAIL_EVENT_RX_PACKET_RECEIVED)) {
+    sl_rac_info_start.radioStateTimerTick = *RAIL_TimerTick;
+    enableRxPacketEventTimeCapture = false;
+  }
+#endif //SL_CATALOG_TIMING_TEST_PRESENT
   enqueueEvents(events);
   if (events & RAIL_EVENT_CAL_NEEDED) {
     calibrateRadio = true;

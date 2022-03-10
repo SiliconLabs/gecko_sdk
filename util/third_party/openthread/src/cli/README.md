@@ -108,7 +108,7 @@ Done
 - [state](#state)
 - [srp](README_SRP.md)
 - [thread](#thread-start)
-- [trel](#trel-enable)
+- [trel](#trel)
 - [tvcheck](#tvcheck-enable)
 - [txpower](#txpower)
 - [udp](README_UDP.md)
@@ -324,6 +324,17 @@ Set jitter (in seconds) for Backbone Router registration for Thread 1.2 FTD.
 Done
 ```
 
+### bbr skipseqnuminc
+
+Skip increase of Sequence Number when updating the local BBR Dataset from the Network Data.
+
+Only for testing/reference device.
+
+```bash
+> bbr skipseqnuminc
+Done
+```
+
 ### ba
 
 Show current Border Agent information.
@@ -379,6 +390,18 @@ Get the randomly generated on-link prefix of the Border Router.
 ```bash
 > br onlinkprefix
 fd41:2650:a6f5:0::/64
+Done
+```
+
+### br nat64prefix
+
+Get the local NAT64 prefix of the Border Router.
+
+`OPENTHREAD_CONFIG_BORDER_ROUTING_NAT64_ENABLE` is required.
+
+```bash
+> br nat64prefix
+fd14:1078:b3d5:b0b0:0:0::/96
 Done
 ```
 
@@ -2620,13 +2643,21 @@ Get the Thread Version number.
 Done
 ```
 
+### trel
+
+Indicate whether TREL radio operation is enabled or not.
+
+`OPENTHREAD_CONFIG_RADIO_LINK_TREL_ENABLE` is required for all `trel` sub-commands.
+
+```bash
+> trel
+Enabled
+Done
+```
+
 ### trel enable
 
-Enable TREL radio link.
-
-`OPENTHREAD_CONFIG_RADIO_LINK_TREL_ENABLE` is required.
-
-Note: TREL radio link can be enabled only when a valid TREL URL was specified.
+Enable TREL operation.
 
 ```bash
 > trel enable
@@ -2635,12 +2666,59 @@ Done
 
 ### trel disable
 
-Disable TREL radio link.
-
-`OPENTHREAD_CONFIG_RADIO_LINK_TREL_ENABLE` is required.
+Disable TREL operation.
 
 ```bash
 > trel disable
+Done
+```
+
+### trel filter
+
+Indicate whether TREL filter mode is enabled or not
+
+When filter mode is enabled, any rx and tx traffic through TREL interface is silently dropped. This is mainly intended for use during testing.
+
+```bash
+> trel filter
+Disabled
+Done
+```
+
+### trel filter enable
+
+Enable TREL filter mode.
+
+```bash
+> trel filter enable
+Done
+```
+
+### trel filter disable
+
+Disable TREL filter mode.
+
+```bash
+> trel filter disable
+Done
+```
+
+### trel peers [list]
+
+Get the TREL peer table in table format or as a list.
+
+```bash
+> trel peers
+| No  | Ext MAC Address  | Ext PAN Id       | IPv6 Socket Address                              |
++-----+------------------+------------------+--------------------------------------------------+
+|   1 | 5e5785ba3a63adb9 | f0d9c001f00d2e43 | [fe80:0:0:0:cc79:2a29:d311:1aea]:9202            |
+|   2 | ce792a29d3111aea | dead00beef00cafe | [fe80:0:0:0:5c57:85ba:3a63:adb9]:9203            |
+Done
+
+> trel peers list
+001 ExtAddr:5e5785ba3a63adb9 ExtPanId:f0d9c001f00d2e43 SockAddr:[fe80:0:0:0:cc79:2a29:d311:1aea]:9202
+002 ExtAddr:ce792a29d3111aea ExtPanId:dead00beef00cafe SockAddr:[fe80:0:0:0:5c57:85ba:3a63:adb9]:9203
+>>>>>>> [trel] implement new TREL model using DNS-SD
 Done
 ```
 

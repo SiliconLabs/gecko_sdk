@@ -431,6 +431,7 @@ static void edgeGpioDevice(const char *gpioNumber, const char *edge)
   while (fd == -1 && loopCount < GPIO_SETUP_MAX_LOOP_COUNT) {
     fd = open(filename, O_WRONLY);
     sleepDelayMicroseconds(GPIO_SETUP_SLEEP_US);
+    loopCount++;
   }
 
   // If setting up the GPIO fails, there is no way to recover.  Alert the

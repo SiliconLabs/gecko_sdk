@@ -69,8 +69,6 @@ include:
     - path: netif/ppp/magic.h
     - path: netif/ppp/mppe.h
     - path: netif/ppp/ppp.h
-    - path: netif/ppp/ppp_impl.h
-    - path: netif/ppp/ppp_opts.h
     - path: netif/ppp/pppapi.h
     - path: netif/ppp/pppcrypt.h
     - path: netif/ppp/pppdebug.h

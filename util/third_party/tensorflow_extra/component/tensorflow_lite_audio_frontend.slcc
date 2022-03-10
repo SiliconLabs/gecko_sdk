@@ -1,6 +1,6 @@
 id: tensorflow_lite_audio_frontend
 package: platform
-label: TensorFlow Lite Micro Audio Frontend
+label: Microfrontend
 description: >
   This component provides an audio frontend library for generating filter bank
   feature vectors from raw audio data. The library expects 16-bit audio data, and
@@ -9,7 +9,7 @@ description: >
   For more information on this library, visit:
   https://github.com/tensorflow/tflite-micro/tree/main/tensorflow/lite/experimental/microfrontend/lib
 
-category: Platform|Machine Learning|TensorFlow
+category: Machine Learning|TensorFlow|Utilities
 quality: production
 provides:
   - name: tensorflow_lite_audio_frontend

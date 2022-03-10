@@ -51,11 +51,11 @@
   - name: SL_BOARD_NAME
     value: '"BRD4187C"'
   - name: SL_BOARD_REV
-    value: '"A00"'
+    value: '"A01"'
 - tag:
   - board:pn:BRD4187
   - board:variant:C
-  - board:revision:A00
+  - board:revision:A01
   - board:device:efr32mg24b220f1536im48
   - hardware:has:vcom
   - hardware:has:pti

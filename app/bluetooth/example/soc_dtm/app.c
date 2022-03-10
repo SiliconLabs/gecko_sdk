@@ -35,14 +35,18 @@
 #include "app.h"
 #include "dtm.h"
 #include "sl_iostream_init_usart_instances.h"
+#include "sl_board_control.h"
 
 enum signal{
   signal_testmode_command_ready = 1,
 };
 
+// IOStream instance used for communication with the DTM tester equipment
+sl_iostream_t *dtm_iostream_handle;
+
 void app_write_response(uint8_t data)
 {
-  sl_iostream_putchar(sl_iostream_exp_handle, data);
+  sl_iostream_putchar(dtm_iostream_handle, data);
 }
 
 static const testmode_config_t testmode_config = {
@@ -58,10 +62,18 @@ static const testmode_config_t testmode_config = {
 SL_WEAK void app_init(void)
 {
   app_log_info("soc_dtm initialised\n");
+
   /////////////////////////////////////////////////////////////////////////////
   // Put your additional application init code here!                         //
   // This is called once during start-up.                                    //
   /////////////////////////////////////////////////////////////////////////////
+
+  // Default IOStream instance is used for communication with the DTM tester
+  // equipment.
+  dtm_iostream_handle = sl_iostream_get_default();
+
+  // Enable VCOM
+  sl_board_enable_vcom();
 
   testmode_init(&testmode_config);
 }
@@ -79,7 +91,7 @@ SL_WEAK void app_process_action(void)
 
   uint8_t data = 0;
 
-  if (SL_STATUS_OK == sl_iostream_read(sl_iostream_exp_handle, &data, 1, NULL)) {
+  if (SL_STATUS_OK == sl_iostream_read(dtm_iostream_handle, &data, 1, NULL)) {
     testmode_process_command_byte(data);
   }
 }

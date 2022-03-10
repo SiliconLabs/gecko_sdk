@@ -39,7 +39,6 @@ include:
       - path: dns.h
       - path: dns_client.h
       - path: dnssd_server.h
-      - path: entropy.h
       - path: error.h
       - path: heap.h
       - path: history_tracker.h
@@ -71,11 +70,13 @@ include:
       - path: tcp.h
       - path: thread.h
       - path: thread_ftd.h
+      - path: trel.h
       - path: udp.h
       - path: platform/alarm-micro.h
       - path: platform/alarm-milli.h
       - path: platform/crypto.h
       - path: platform/diag.h
+      - path: platform/dso_transport.h
       - path: platform/entropy.h
       - path: platform/flash.h
       - path: platform/infra_if.h
@@ -85,12 +86,12 @@ include:
       - path: platform/otns.h
       - path: platform/radio.h
       - path: platform/time.h
-      - path: platform/trel-udp6.h
       - path: platform/udp.h
       - path: platform/spi-slave.h
       - path: platform/settings.h
       - path: platform/messagepool.h
       - path: platform/toolchain.h
+      - path: platform/trel.h
       - path: platform/debug_uart.h
   - path: ./
     file_list:
@@ -144,6 +145,7 @@ include:
       - path: common/random.hpp
       - path: common/random_manager.hpp
       - path: common/retain_ptr.hpp
+      - path: common/serial_number.hpp
       - path: common/settings.hpp
       - path: common/settings_driver.hpp
       - path: common/string.hpp
@@ -170,6 +172,7 @@ include:
       - path: config/dhcp6_server.h
       - path: config/diag.h
       - path: config/dns_client.h
+      - path: config/dns_dso.h
       - path: config/dnssd_server.h
       - path: config/dtls.h
       - path: config/history_tracker.h
@@ -235,6 +238,7 @@ include:
       - path: net/dhcp6_client.hpp
       - path: net/dhcp6_server.hpp
       - path: net/dns_client.hpp
+      - path: net/dns_dso.hpp
       - path: net/dns_types.hpp
       - path: net/dnssd_server.hpp
       - path: net/icmp6.hpp
@@ -314,6 +318,25 @@ include:
       - path: utils/ping_sender.hpp
       - path: utils/slaac_address.hpp
       - path: utils/srp_client_buffers.hpp
+  - path: ../../third_party/tcplp
+    file_list:
+      - path: bsdtcp/cc.h
+      - path: bsdtcp/cc/cc_module.h
+      - path: bsdtcp/icmp_var.h
+      - path: bsdtcp/ip.h
+      - path: bsdtcp/ip6.h
+      - path: bsdtcp/sys/queue.h
+      - path: bsdtcp/tcp.h
+      - path: bsdtcp/tcp_const.h
+      - path: bsdtcp/tcp_fsm.h
+      - path: bsdtcp/tcp_seq.h
+      - path: bsdtcp/tcp_timer.h
+      - path: bsdtcp/tcp_var.h
+      - path: bsdtcp/types.h
+      - path: lib/bitmap.h
+      - path: lib/cbuf.h
+      - path: lib/lbuf.h
+      - path: tcplp.h
 source:
       - path: api/coprocessor_rpc_api.cpp
       - path: api/diags_api.cpp

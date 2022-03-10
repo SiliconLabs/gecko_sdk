@@ -31,6 +31,5 @@ template_contribution:
       event: platform_init
       include: SEGGER_SYSVIEW.h
       handler: SEGGER_SYSVIEW_Conf
-    unless: [freertos]
   - name: component_catalog
     value: systemview_trace

@@ -1,7 +1,16 @@
 project_name: simple_trx_std
 label: "Flex (RAIL) - Simple TRX Standards"
 package: Flex
-description: This application demonstrates the simplest exchange of transmit and receive operation between two nodes using IEEE Std. 802.15.4 and IEEE Std. 802.15.4g and BLE. Both nodes can send and receive IEEE Std. 802.15.4 and IEEE Std. 802.15.4g or BLE advertising frames. With IEEE Std. 802.15.4 the frame can be sent and received with CSMA/CA, auto-ACK, address filtering and setable Frame Control Frame (available settings broadcast or unicast). With IEEE Std. 802.15.4g the frame can be sent and received with auto-ACK, address filtering and setable Frame Control Frame (available settings broadcast or unicast). On the WSTK, any button press (PB0/PB1) will send a message. LED0 will toggle on message send and LED1 will toggle on message receive. CLI can also be used for sending and showing received messages. To send enter 'send'. By default the received packets will be printed out in terminal. To change standard to BLE, the Flex - RAIL BLE support software component shall be installed under Flex/RAIL/Utilility. With one click this baremetal sample app can be run on an OS, currently MicriumOS and FreeRTOS is supported.
+description: "This application demonstrates the simplest exchange of transmit and receive operation between two nodes using IEEE Std. 802.15.4 and IEEE Std. 802.15.4g and BLE.
+Both nodes can send and receive IEEE Std. 802.15.4 and IEEE Std. 802.15.4g or BLE advertising frames.
+With IEEE Std. 802.15.4 the frame can be sent and received with CSMA/CA, auto-ACK, address filtering and setable Frame Control Frame (available settings broadcast or unicast).
+With IEEE Std. 802.15.4g the frame can be sent and received with auto-ACK, address filtering and setable Frame Control Frame (available settings broadcast or unicast).
+On the WSTK, any button press (PB0/PB1) will send a message.
+LED0 will toggle on message send and LED1 will toggle on message receive.
+CLI can also be used for sending and showing received messages.
+To send enter 'send'. By default the received packets will be printed out in terminal.
+To change standard to BLE, the Flex - RAIL BLE support software component shall be installed under Flex/RAIL/Utilility.
+With one click this baremetal sample app can be run on an OS, currently MicriumOS and FreeRTOS is supported.
 NOTE: Due to the higher current consumption of the continuous radio usage (especially in Rx Mode), it is not recommended to power the boards from a coin cell. Instead, an USB power bank can be used if portability is needed."
 category: RAIL Examples
 quality: production
@@ -85,6 +94,9 @@ source:
 
 readme:
   - path: ../../../documentation/example/rail/simple_trx_std/readme.md
+
+other_file:
+  - path: "hw_filter_tags.yaml"
 
 #------------ Configuration overrides ----------------
 configuration:
@@ -395,19 +407,3 @@ ui_hints:
     - path: "readme.md"
       focus: true
 
-tag:
-  - hardware:
-      device:
-        memory:
-          flash: 101
-          ram: 8
-      board:
-        rf_bands:
-          - 868|915|2400
-        communication:
-          - vcom
-          - pti
-        io:
-          led: 2
-          button: 2
-  

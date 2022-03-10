@@ -33,14 +33,14 @@
 </ul>
 <h5 class="code-line" data-line-start=50 data-line-end=51><a id="PSA_ECC_FAMILY_TWISTED_EDWARDS_EdDSA__50"></a><code>PSA_ECC_FAMILY_TWISTED_EDWARDS</code> (EdDSA) :</h5>
 <ul>
-<li class="has-line-data" data-line-start="52" data-line-end="54">Ed25519 - 255-bit (Secure Vault High only)</li>
+<li class="has-line-data" data-line-start="52" data-line-end="54">Ed25519 - 255-bit (HSE only)</li>
 </ul>
 <h2 class="code-line" data-line-start=54 data-line-end=55><a id="Asymmetric_Signature_Algorithm_54"></a>Asymmetric Signature Algorithm</h2>
 <p class="has-line-data" data-line-start="56" data-line-end="57">The following asymmetric signature algorithms are supported in this example:</p>
 <ul>
 <li class="has-line-data" data-line-start="58" data-line-end="59"><code>PSA_ALG_ECDSA(hash_alg)</code></li>
 <li class="has-line-data" data-line-start="59" data-line-end="60"><code>PSA_ALG_ECDSA_ANY</code></li>
-<li class="has-line-data" data-line-start="60" data-line-end="62"><code>PSA_ALG_PURE_EDDSA</code> (Secure Vault High only)</li>
+<li class="has-line-data" data-line-start="60" data-line-end="62"><code>PSA_ALG_PURE_EDDSA</code> (HSE only)</li>
 </ul>
 <h2 class="code-line" data-line-start=62 data-line-end=63><a id="Hash_Algorithm_62"></a>Hash Algorithm</h2>
 <p class="has-line-data" data-line-start="64" data-line-end="65">The following hash algorithms are supported in this example:</p>
@@ -104,11 +104,12 @@
 <li class="has-line-data" data-line-start="127" data-line-end="128">The example uses the CTR-DRBG, a pseudo-random number generator (PRNG) included in <a href="https://docs.silabs.com/mbed-tls/latest/">Mbed TLS</a> to generate the random number. If the example is running on a device including a TRNG (True Random Number Generator) hardware module, the TRNG will be used as an entropy source to seed the CTR-DRBG. If the device does not incorporate a TRNG, the example will use <a href="https://docs.silabs.com/rail/latest/">RAIL</a> or NV (non-volatile) seed (requires NVM3) as the entropy source.</li>
 <li class="has-line-data" data-line-start="128" data-line-end="129">If an algorithm is not supported in the hardware accelerator of the selected device, the PSA Crypto will use the software fallback feature in Mbed TLS.</li>
 <li class="has-line-data" data-line-start="129" data-line-end="130">The PSA Crypto does not yet support software fallback on the <code>Ed25519</code> curve.</li>
-<li class="has-line-data" data-line-start="130" data-line-end="131">Change the <code>PERSISTENT_KEY_ID</code> value in <code>app_process.h</code> if this key ID had already existed in NVM3.</li>
-<li class="has-line-data" data-line-start="131" data-line-end="133">The default optimization level is <code>Optimize for debugging (-Og)</code> on Simplicity IDE and <code>None</code> on IAR Embedded Workbench.</li>
+<li class="has-line-data" data-line-start="130" data-line-end="131">The HSE Secure Vault Mid devices require SE firmware v1.2.11 or higher (EFR32xG21) and v2.1.7 or higher (other HSE devices) to support hardware acceleration on <code>Ed25519</code>.</li>
+<li class="has-line-data" data-line-start="131" data-line-end="132">Change the <code>PERSISTENT_KEY_ID</code> value in <code>app_process.h</code> if this key ID had already existed in NVM3.</li>
+<li class="has-line-data" data-line-start="132" data-line-end="134">The default optimization level is <code>Optimize for debugging (-Og)</code> on Simplicity IDE and <code>None</code> on IAR Embedded Workbench.</li>
 </ol>
-<h2 class="code-line" data-line-start=133 data-line-end=134><a id="Resources_133"></a>Resources</h2>
-<p class="has-line-data" data-line-start="135" data-line-end="136"><a href="https://www.silabs.com/documents/public/application-notes/an1222-efr32xg2x-production-programming.pdf">AN1222: Production Programming of Series 2 Devices</a></p>
-<p class="has-line-data" data-line-start="137" data-line-end="138"><a href="https://www.silabs.com/documents/public/application-notes/an1268-efr32-secure-identity.pdf">AN1268: Authenticating Silicon Labs Devices Using Device Certificates</a></p>
-<p class="has-line-data" data-line-start="139" data-line-end="140"><a href="https://www.silabs.com/documents/public/application-notes/an1311-mbedtls-psa-crypto-porting-guide.pdf">AN1311: Integrating Crypto Functionality Using PSA Crypto Compared to Mbed TLS</a></p>
+<h2 class="code-line" data-line-start=134 data-line-end=135><a id="Resources_134"></a>Resources</h2>
+<p class="has-line-data" data-line-start="136" data-line-end="137"><a href="https://www.silabs.com/documents/public/application-notes/an1222-efr32xg2x-production-programming.pdf">AN1222: Production Programming of Series 2 Devices</a></p>
+<p class="has-line-data" data-line-start="138" data-line-end="139"><a href="https://www.silabs.com/documents/public/application-notes/an1268-efr32-secure-identity.pdf">AN1268: Authenticating Silicon Labs Devices Using Device Certificates</a></p>
+<p class="has-line-data" data-line-start="140" data-line-end="141"><a href="https://www.silabs.com/documents/public/application-notes/an1311-mbedtls-psa-crypto-porting-guide.pdf">AN1311: Integrating Crypto Functionality Using PSA Crypto Compared to Mbed TLS</a></p>
 </body></html>

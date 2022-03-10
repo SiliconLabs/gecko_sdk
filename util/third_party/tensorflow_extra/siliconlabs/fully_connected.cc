@@ -13,7 +13,8 @@
 #include "sl_mvp_ml_fully_connected.h"
 
 namespace tflite {
-namespace {
+namespace sl {
+namespace fully_connected {
 
 struct OpData {
   int32_t output_multiplier;
@@ -327,30 +328,29 @@ TfLiteStatus EvalInt8(TfLiteContext* context, TfLiteNode* node) {
   return EvalQuantizedInt8(context, node, data, input, filter, bias, output);
 }
 
-}  // namespace
+}  // namespace fully_connected
+}  // namespace sl
 
 TfLiteRegistration Register_FULLY_CONNECTED() {
-  fully_connected_registration.init = Init;
-  fully_connected_registration.free = nullptr;
-  fully_connected_registration.prepare = Prepare;
-  fully_connected_registration.invoke = Eval;
-  fully_connected_registration.profiling_string = nullptr;
-  fully_connected_registration.builtin_code = 0;
-  fully_connected_registration.custom_name = nullptr;
-  fully_connected_registration.version = 0;
-  return fully_connected_registration;
+  return {/*init*/sl::fully_connected::Init,
+          /*free*/nullptr,
+          /*prepare*/sl::fully_connected::Prepare,
+          /*invoke*/sl::fully_connected::Eval,
+          /*profiling_string*/nullptr,
+          /*builtin_code*/0,
+          /*custom_name*/nullptr,
+          /*version*/0};
 }
 
 TfLiteRegistration Register_FULLY_CONNECTED_INT8() {
-  fully_connected_registration.init = Init;
-  fully_connected_registration.free = nullptr;
-  fully_connected_registration.prepare = Prepare;
-  fully_connected_registration.invoke = EvalInt8;
-  fully_connected_registration.profiling_string = nullptr;
-  fully_connected_registration.builtin_code = 0;
-  fully_connected_registration.custom_name = nullptr;
-  fully_connected_registration.version = 0;
-  return fully_connected_registration;
+  return {/*init*/sl::fully_connected::Init,
+          /*free*/nullptr,
+          /*prepare*/sl::fully_connected::Prepare,
+          /*invoke*/sl::fully_connected::EvalInt8,
+          /*profiling_string*/nullptr,
+          /*builtin_code*/0,
+          /*custom_name*/nullptr,
+          /*version*/0};
 }
 
 }  // namespace tflite

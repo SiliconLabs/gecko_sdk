@@ -14,9 +14,9 @@
   - name: SL_KIT_NAME
     value: '"SLWRB4183A"'
   - name: SL_KIT_REV
-    value: '"A01"'
+    value: '"A02"'
 - tag:
   - kit:opn:SLWRB4183A
   - kit:pn:WRB4183
   - kit:variant:A
-  - kit:revision:A01
+  - kit:revision:A02

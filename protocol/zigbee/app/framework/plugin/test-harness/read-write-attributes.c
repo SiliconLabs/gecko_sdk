@@ -254,7 +254,7 @@ static void sendReadAttribute(void);
 static void bigReadCommand(void);
 
 //------------------------------------------------------------------------------
-// F(unctions
+// Functions
 #if (!defined(UC_BUILD) || defined(SL_CATALOG_CLI_PRESENT))
 void setOptionsCommand(SL_CLI_COMMAND_ARG)
 {

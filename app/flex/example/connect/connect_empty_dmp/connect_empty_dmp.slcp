@@ -10,6 +10,9 @@ component:
   - id: radio_config_simple_connect_singlephy
   - id: sl_system
   - id: device_init
+  - id: cli
+    instance:
+      - "example"
   - id: connect_app_framework_common
   - id: connect_ble_cli
   - id: token_manager
@@ -55,6 +58,7 @@ source:
 other_file:
   - path: "../../../script/connect_create_gbl_image.bat"
   - path: "../../../script/connect_create_gbl_image.sh"
+  - path: "hw_filter_tags.yaml"
 
 readme:
   - path: ../../../documentation/example/connect/connect_empty_dmp/readme.md
@@ -84,16 +88,3 @@ ui_hints:
     - path: "config/btconf/gatt_configuration.btconf"
     - path: "readme.md"
       focus: true
-
-tag:
-  - hardware:
-      device:
-        memory:
-          flash: 329
-          ram: 53
-      board:
-        rf_bands:
-          - 2400
-        communication:
-          - vcom
-          - pti

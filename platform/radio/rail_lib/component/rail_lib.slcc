@@ -73,3 +73,6 @@ include:
       - path: rail_chip_specific.h
     condition:
       - device_series_2
+template_contribution:
+  - name: component_catalog
+    value: rail_lib

@@ -42,7 +42,7 @@
 ; The vector table is normally located at address 0.
 ;
 ; When debugging in RAM, it can be located in RAM with at least a 128 byte
-; alignment, 256 byte alignment is requied if all interrupt vectors are in use.
+; alignment, 512 byte alignment is requied if all interrupt vectors are in use.
 ;
 ; The name "__vector_table" has special meaning for C-SPY:
 ; it is where the SP start value is found, and the NVIC vector
@@ -55,7 +55,7 @@
         ;; Forward declaration of sections.
         SECTION CSTACK:DATA:NOROOT(3)
 
-        SECTION .intvec:CODE:NOROOT(8)
+        SECTION .intvec:CODE:NOROOT(9)
 
         EXTERN  __iar_program_start
         EXTERN  SystemInit

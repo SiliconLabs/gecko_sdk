@@ -130,7 +130,9 @@ void app_task_init(void)
  ******************************************************************************/
 void app_task_notify(void)
 {
-  vTaskNotifyGiveFromISR(proprietary_task_notify, false);
+  if (proprietary_task_notify != NULL) {
+    vTaskNotifyGiveFromISR(proprietary_task_notify, false);
+  }
 }
 
 /*******************************************************************************

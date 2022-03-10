@@ -228,14 +228,14 @@ private:
         }
 
         if (cnt > 0) {
-          sli_mvp_begin_loop(p, cnt, &status);
-            sli_mvp_compute(p,
-                            SLI_MVP_OP(NOOP),
-                            SLI_MVP_NONE,
-                            SLI_MVP_LOAD(0, reg_no, array_no, 1 << dim_id),
-                            SLI_MVP_NONE,
-                            &status);
-          sli_mvp_end_loop(p);
+          sli_mvp_pb_begin_loop(p, cnt, &status);
+            sli_mvp_pb_compute(p,
+                               SLI_MVP_OP(NOOP),
+                               SLI_MVP_NONE,
+                               SLI_MVP_LOAD(0, reg_no, array_no, 1 << dim_id),
+                               SLI_MVP_NONE,
+                               &status);
+          sli_mvp_pb_end_loop(p);
         }
       }
     }
@@ -334,7 +334,7 @@ sl_status_t sli_mvp_ml_depthwise_conv2d_s8_gen(const sli_mvp_ml_depthwise_conv2d
     }
   }
 
-  sli_mvp_init_program(p);
+  sli_mvp_pb_init_program(p);
 
   // Gather original dim info.
   int original_input_strides[4];
@@ -402,7 +402,8 @@ sl_status_t sli_mvp_ml_depthwise_conv2d_s8_gen(const sli_mvp_ml_depthwise_conv2d
   // Check strides and sizes upfront.
   for(int dim = 0; dim < kDimCount; ++dim) {
     if (input_dims.isActive(dim)) {
-      if ((unsigned)input_dims.sizes[dim] > SLI_MVP_MAX_VECTOR_COUNT) {
+      if (((unsigned)input_dims.sizes[dim] > SLI_MVP_MAX_VECTOR_COUNT)
+          ||((unsigned)input_dims.strides[dim] > SLI_MVP_MAX_VECTOR_STRIDE)) {
         status = SL_STATUS_INVALID_PARAMETER;
       }
     }
@@ -415,9 +416,6 @@ sl_status_t sli_mvp_ml_depthwise_conv2d_s8_gen(const sli_mvp_ml_depthwise_conv2d
   }
 
   if (status != SL_STATUS_OK) {
-    if (execute) {
-      EFM_ASSERT(false);
-    }
     return status;
   }
 
@@ -605,7 +603,7 @@ sl_status_t sli_mvp_ml_depthwise_conv2d_s8_gen(const sli_mvp_ml_depthwise_conv2d
           out_dims.offsets[kDimInChannel] = in_channel_group; /* * num_in_channels_per_program; */
           SLI_MVP_CHECK((in_channel_group == 0) || (num_in_channels_per_program == 1));  // check assumption above
 
-          sli_mvp_begin_program(p);
+          sli_mvp_pb_begin_program(p);
 
           void *v_ptr;
           const int in_channel_start = in_channel_group * num_in_channels_per_program;
@@ -645,32 +643,34 @@ sl_status_t sli_mvp_ml_depthwise_conv2d_s8_gen(const sli_mvp_ml_depthwise_conv2d
 
           // Set up input array
           v_ptr = (void*)&input[in_dims.flat_offset()];
-          sli_mvp_prog_set_array_full(p->p,
-                                      SLI_MVP_ARRAY(0),
-                                      v_ptr,                                          // addr
-                                      SLI_MVP_DATATYPE_INT8,                          // datatype
-                                      in_dims.sizes[in_dims.reverse_mvp_dims[0]],     // page
-                                      in_dims.sizes[in_dims.reverse_mvp_dims[1]],     // rows
-                                      in_dims.sizes[in_dims.reverse_mvp_dims[2]],     // cols
-                                      in_dims.strides[in_dims.reverse_mvp_dims[0]],   // pagestride
-                                      in_dims.strides[in_dims.reverse_mvp_dims[1]],   // rowstride
-                                      in_dims.strides[in_dims.reverse_mvp_dims[2]]);  // colstride
+          sli_mvp_pb_config_array_full(p->p,
+                                       SLI_MVP_ARRAY(0),
+                                       v_ptr,                                          // addr
+                                       SLI_MVP_DATATYPE_INT8,                          // datatype
+                                       in_dims.sizes[in_dims.reverse_mvp_dims[0]],     // page
+                                       in_dims.sizes[in_dims.reverse_mvp_dims[1]],     // rows
+                                       in_dims.sizes[in_dims.reverse_mvp_dims[2]],     // cols
+                                       in_dims.strides[in_dims.reverse_mvp_dims[0]],   // pagestride
+                                       in_dims.strides[in_dims.reverse_mvp_dims[1]],   // rowstride
+                                       in_dims.strides[in_dims.reverse_mvp_dims[2]],   // colstride
+                                       &status);
 
           // Set up output array
           const int nonparallel_output_offset = out_dims.flat_offset() * parallelization;
           v_ptr = &output[nonparallel_output_offset];
-          sli_mvp_prog_set_array_full(p->p,
-                                      SLI_MVP_ARRAY(1),
-                                      v_ptr,                                            // addr
-                                      parallelize_channels == true
-                                      ? SLI_MVP_DATATYPE_COMPLEX_INT8                   // datatype
-                                      : SLI_MVP_DATATYPE_INT8,
-                                      out_dims.sizes[out_dims.reverse_mvp_dims[0]],     // page
-                                      out_dims.sizes[out_dims.reverse_mvp_dims[1]],     // rows
-                                      out_dims.sizes[out_dims.reverse_mvp_dims[2]],     // cols
-                                      out_dims.strides[out_dims.reverse_mvp_dims[0]],   // pagestride
-                                      out_dims.strides[out_dims.reverse_mvp_dims[1]],   // rowstride
-                                      out_dims.strides[out_dims.reverse_mvp_dims[2]]);  // colstride
+          sli_mvp_pb_config_array_full(p->p,
+                                       SLI_MVP_ARRAY(1),
+                                       v_ptr,                                            // addr
+                                       parallelize_channels == true
+                                       ? SLI_MVP_DATATYPE_COMPLEX_INT8                   // datatype
+                                       : SLI_MVP_DATATYPE_INT8,
+                                       out_dims.sizes[out_dims.reverse_mvp_dims[0]],     // page
+                                       out_dims.sizes[out_dims.reverse_mvp_dims[1]],     // rows
+                                       out_dims.sizes[out_dims.reverse_mvp_dims[2]],     // cols
+                                       out_dims.strides[out_dims.reverse_mvp_dims[0]],   // pagestride
+                                       out_dims.strides[out_dims.reverse_mvp_dims[1]],   // rowstride
+                                       out_dims.strides[out_dims.reverse_mvp_dims[2]],   // colstride
+                                       &status);
 
           // Set up filter array
           const int nonparallel_filter_offset = sli_mvp_util_offset_nhwc(filter_height,
@@ -681,18 +681,19 @@ sl_status_t sli_mvp_ml_depthwise_conv2d_s8_gen(const sli_mvp_ml_depthwise_conv2d
                                                                          filter_x_start,
                                                                          out_channel_start);
           v_ptr = const_cast<int8_t*>(&filter[nonparallel_filter_offset]);
-          sli_mvp_prog_set_array_full(p->p,
-                                      SLI_MVP_ARRAY(2),
-                                      v_ptr,                                        // addr
-                                      parallelize_channels == true
-                                      ? SLI_MVP_DATATYPE_COMPLEX_INT8               // datatype
-                                      : SLI_MVP_DATATYPE_INT8,
-                                      filter_depth/parallelization,                 // page
-                                      filter_width_truncated,                       // rows
-                                      filter_height_truncated,                      // cols
-                                      original_filter_strides[0],                   // pagestride
-                                      original_filter_strides[1]/parallelization,   // rowstride
-                                      original_filter_strides[2]/parallelization);  // colstride
+          sli_mvp_pb_config_array_full(p->p,
+                                       SLI_MVP_ARRAY(2),
+                                       v_ptr,                                        // addr
+                                       parallelize_channels == true
+                                       ? SLI_MVP_DATATYPE_COMPLEX_INT8               // datatype
+                                       : SLI_MVP_DATATYPE_INT8,
+                                       filter_depth/parallelization,                 // page
+                                       filter_width_truncated,                       // rows
+                                       filter_height_truncated,                      // cols
+                                       original_filter_strides[0],                   // pagestride
+                                       original_filter_strides[1]/parallelization,   // rowstride
+                                       original_filter_strides[2]/parallelization,   // colstride
+                                       &status);
 
           // Set up bias array
           const int nonparallel_bias_offset = out_channel_start;
@@ -702,34 +703,36 @@ sl_status_t sli_mvp_ml_depthwise_conv2d_s8_gen(const sli_mvp_ml_depthwise_conv2d
           } else {
             bias_data_ptr = const_cast<float16_t*>(parallel_zero_data);
           }
-          sli_mvp_prog_set_vector(p->p,
-                                  SLI_MVP_ARRAY(3),
-                                  bias_data_ptr,                        // addr
-                                  parallelize_channels == true
-                                  ? SLI_MVP_DATATYPE_COMPLEX_BINARY16   // datatype
-                                  : SLI_MVP_DATATYPE_BINARY16,
-                                  bias != nullptr ? output_depth/parallelization : 1);
+          sli_mvp_pb_config_vector(p->p,
+                                   SLI_MVP_ARRAY(3),
+                                   bias_data_ptr,                        // addr
+                                   parallelize_channels == true
+                                   ? SLI_MVP_DATATYPE_COMPLEX_BINARY16   // datatype
+                                   : SLI_MVP_DATATYPE_BINARY16,
+                                   bias != nullptr ? output_depth/parallelization : 1,
+                                   &status);
 
           // Set up output_scaler array
           const int nonparallel_output_scaler_offset = out_channel_start;
           void * output_scaler_data_ptr;
           output_scaler_data_ptr = const_cast<float16_t*>(&output_scaler[nonparallel_output_scaler_offset]);
-          sli_mvp_prog_set_vector(p->p,
-                                  SLI_MVP_ARRAY(4),
-                                  output_scaler_data_ptr,               // addr
-                                  parallelize_channels == true
-                                  ? SLI_MVP_DATATYPE_COMPLEX_BINARY16   // datatype
-                                  : SLI_MVP_DATATYPE_BINARY16,
-                                  output_depth/parallelization);
+          sli_mvp_pb_config_vector(p->p,
+                                   SLI_MVP_ARRAY(4),
+                                   output_scaler_data_ptr,               // addr
+                                   parallelize_channels == true
+                                   ? SLI_MVP_DATATYPE_COMPLEX_BINARY16   // datatype
+                                   : SLI_MVP_DATATYPE_BINARY16,
+                                   output_depth/parallelization,
+                                   &status);
 
           // Instructions and loops.
 
           if (num_in_channels_per_program > 1) {
-            sli_mvp_begin_loop(p, num_in_channels_per_program, &status);
+            sli_mvp_pb_begin_loop(p, num_in_channels_per_program, &status);
           }
 
           if (effective_depth_multiplier > 1) {
-            sli_mvp_begin_loop(p, effective_depth_multiplier, &status);
+            sli_mvp_pb_begin_loop(p, effective_depth_multiplier, &status);
           }
 
           // LOAD(ARRAY3, R4)    bias
@@ -737,129 +740,126 @@ sl_status_t sli_mvp_ml_depthwise_conv2d_s8_gen(const sli_mvp_ml_depthwise_conv2d
           // INCR(ARRAY3, DIM2)
           // INCR(ARRAY4, DIM2)
           // R5 = COPY(R4)       Compute(r_acc, COPY, r_bias_i)
-          sli_mvp_compute(p,
-                          SLI_MVP_OP(COPY),
-                          SLI_MVP_ALU_Z(SLI_MVP_R5)
-                          | SLI_MVP_ALU_A(SLI_MVP_R4),
-                          SLI_MVP_LOAD(0, SLI_MVP_R4, SLI_MVP_ARRAY(3), SLI_MVP_INCRDIM_COL)
-                          | SLI_MVP_LOAD(1, SLI_MVP_R3, SLI_MVP_ARRAY(4), SLI_MVP_INCRDIM_COL),
-                          SLI_MVP_NONE,
-                          &status);
+          sli_mvp_pb_compute(p,
+                             SLI_MVP_OP(COPY),
+                             SLI_MVP_ALU_Z(SLI_MVP_R5)
+                             | SLI_MVP_ALU_A(SLI_MVP_R4),
+                             SLI_MVP_LOAD(0, SLI_MVP_R4, SLI_MVP_ARRAY(3), SLI_MVP_INCRDIM_COL)
+                             | SLI_MVP_LOAD(1, SLI_MVP_R3, SLI_MVP_ARRAY(4), SLI_MVP_INCRDIM_COL),
+                             SLI_MVP_NONE,
+                             &status);
 
-          sli_mvp_begin_loop(p, out_y_offsets, &status);
-            sli_mvp_begin_loop(p, output_width_truncated, &status);
-              sli_mvp_begin_loop(p, out_y_groups, &status);
-                sli_mvp_begin_loop(p, filter_height_truncated, &status);
-                  sli_mvp_begin_loop(p, filter_width_truncated, &status);
+          sli_mvp_pb_begin_loop(p, out_y_offsets, &status);
+            sli_mvp_pb_begin_loop(p, output_width_truncated, &status);
+              sli_mvp_pb_begin_loop(p, out_y_groups, &status);
+                sli_mvp_pb_begin_loop(p, filter_height_truncated, &status);
+                  sli_mvp_pb_begin_loop(p, filter_width_truncated, &status);
 
                     // LOAD(ARRAY0, R6)    input
                     // LOAD(ARRAY2, R7)    filter
                     // INCR(ARRAY2, DIM1)
                     // R6 = MAC(R6, R0, R1) Compute(r_input_i, MACC, r_input_i, c_accumulator_scaler, c_input_offset_scaled);
-                    sli_mvp_compute(p,
-                                    SLI_MVP_OP(MACC),
-                                    SLI_MVP_ALU_Z(SLI_MVP_R6)
-                                    | SLI_MVP_ALU_X(SLI_MVP_R6)
-                                    | SLI_MVP_ALU_Y(SLI_MVP_R0)
-                                    | SLI_MVP_ALU_A(SLI_MVP_R1),
-                                    SLI_MVP_LOAD(0, SLI_MVP_R6, SLI_MVP_ARRAY(0), SLI_MVP_NOINCR)
-                                    | SLI_MVP_LOAD(1, SLI_MVP_R7, SLI_MVP_ARRAY(2), SLI_MVP_INCRDIM_ROW),
-                                    SLI_MVP_NONE,
-                                    &status);
+                    sli_mvp_pb_compute(p,
+                                       SLI_MVP_OP(MACC),
+                                       SLI_MVP_ALU_Z(SLI_MVP_R6)
+                                       | SLI_MVP_ALU_X(SLI_MVP_R6)
+                                       | SLI_MVP_ALU_Y(SLI_MVP_R0)
+                                       | SLI_MVP_ALU_A(SLI_MVP_R1),
+                                       SLI_MVP_LOAD(0, SLI_MVP_R6, SLI_MVP_ARRAY(0), SLI_MVP_NOINCR)
+                                       | SLI_MVP_LOAD(1, SLI_MVP_R7, SLI_MVP_ARRAY(2), SLI_MVP_INCRDIM_ROW),
+                                       SLI_MVP_NONE,
+                                       &status);
                     in_dims.mvp_incr_index_stream(p, kDimFilterX, kIStream0, SLI_MVP_R6);
 
                     // R5 = MAC(R6, R7, R5) Compute(r_acc, MACR2A, r_input_i, r_filter_i, r_acc);
-                    sli_mvp_compute(p,
-                                    SLI_MVP_OP(MACR2A),
-                                    SLI_MVP_ALU_Z(SLI_MVP_R5)
-                                    | SLI_MVP_ALU_X(SLI_MVP_R6)
-                                    | SLI_MVP_ALU_Y(SLI_MVP_R7)
-                                    | SLI_MVP_ALU_A(SLI_MVP_R5),
-                                    SLI_MVP_NONE,
-                                    SLI_MVP_NONE,
-                                    &status);
+                    sli_mvp_pb_compute(p,
+                                       SLI_MVP_OP(MACR2A),
+                                       SLI_MVP_ALU_Z(SLI_MVP_R5)
+                                       | SLI_MVP_ALU_X(SLI_MVP_R6)
+                                       | SLI_MVP_ALU_Y(SLI_MVP_R7)
+                                       | SLI_MVP_ALU_A(SLI_MVP_R5),
+                                       SLI_MVP_NONE,
+                                       SLI_MVP_NONE,
+                                       &status);
 
-                  sli_mvp_end_loop(p); // filter_width_truncated
-                  sli_mvp_postloop_incr_dim(p, SLI_MVP_ARRAY(2), SLI_MVP_INCRDIM_COL);
+                  sli_mvp_pb_end_loop(p); // filter_width_truncated
+                  sli_mvp_pb_postloop_incr_dim(p, SLI_MVP_ARRAY(2), SLI_MVP_INCRDIM_COL);
 
                   in_dims.mvp_incr_index_loop(p, kDimFilterY, SLI_MVP_R6);
 
-                sli_mvp_end_loop(p);  // filter_height_truncated
+                sli_mvp_pb_end_loop(p);  // filter_height_truncated
 
                 in_dims.mvp_incr_index_loop(p, kDimOutYGroup, SLI_MVP_R6);
 
                 // R7 = MAC2RA(R5, R3, R2) Compute(r_output_i, MACR2A, r_acc, r_output_scaler_i, c_output_offset)
                 // STORE(ARRAY1, R7)
-                sli_mvp_compute(p,
-                                SLI_MVP_OP(MACR2A),
-                                SLI_MVP_ALU_Z(SLI_MVP_R7)
-                                | SLI_MVP_ALU_X(SLI_MVP_R5)
-                                | SLI_MVP_ALU_Y(SLI_MVP_R3)
-                                | SLI_MVP_ALU_A(SLI_MVP_R2),
-                                SLI_MVP_NONE,
-                                SLI_MVP_STORE(SLI_MVP_R7,SLI_MVP_ARRAY(1),SLI_MVP_NOINCR),
-                                &status);
+                sli_mvp_pb_compute(p,
+                                   SLI_MVP_OP(MACR2A),
+                                   SLI_MVP_ALU_Z(SLI_MVP_R7)
+                                   | SLI_MVP_ALU_X(SLI_MVP_R5)
+                                   | SLI_MVP_ALU_Y(SLI_MVP_R3)
+                                   | SLI_MVP_ALU_A(SLI_MVP_R2),
+                                   SLI_MVP_NONE,
+                                   SLI_MVP_STORE(SLI_MVP_R7,SLI_MVP_ARRAY(1),SLI_MVP_NOINCR),
+                                   &status);
 
                 out_dims.mvp_incr_index_stream(p, kDimOutYGroup, kOStream, SLI_MVP_R6);
 
                 if (out_dim_out_y_group_extra_incr == 0) {
                   // R5 = COPY(R4)       Compute(r_acc, COPY, r_bias_i)
-                  sli_mvp_compute(p,
-                                  SLI_MVP_OP(COPY),
-                                  SLI_MVP_ALU_Z(SLI_MVP_R5)
-                                  | SLI_MVP_ALU_A(SLI_MVP_R4),
-                                  SLI_MVP_NONE,
-                                  SLI_MVP_NONE,
-                                  &status);
+                  sli_mvp_pb_compute(p,
+                                     SLI_MVP_OP(COPY),
+                                     SLI_MVP_ALU_Z(SLI_MVP_R5)
+                                     | SLI_MVP_ALU_A(SLI_MVP_R4),
+                                     SLI_MVP_NONE,
+                                     SLI_MVP_NONE,
+                                     &status);
                 } else {
-                  sli_mvp_begin_loop(p, out_dim_out_y_group_extra_incr, &status);
+                  sli_mvp_pb_begin_loop(p, out_dim_out_y_group_extra_incr, &status);
                     // R5 = COPY(R4)       Compute(r_acc, COPY, r_bias_i)
-                    sli_mvp_compute(p,
-                                    SLI_MVP_OP(COPY),
-                                    SLI_MVP_ALU_Z(SLI_MVP_R5)
-                                    | SLI_MVP_ALU_A(SLI_MVP_R4),
-                                    SLI_MVP_LOAD(0, SLI_MVP_R7, SLI_MVP_ARRAY(1), 1 << out_dims.mvp_dims[kDimOutYGroup]),
-                                    SLI_MVP_NONE,
-                                    &status);
-                  sli_mvp_end_loop(p);
+                    sli_mvp_pb_compute(p,
+                                       SLI_MVP_OP(COPY),
+                                       SLI_MVP_ALU_Z(SLI_MVP_R5)
+                                       | SLI_MVP_ALU_A(SLI_MVP_R4),
+                                       SLI_MVP_LOAD(0, SLI_MVP_R7, SLI_MVP_ARRAY(1), 1 << out_dims.mvp_dims[kDimOutYGroup]),
+                                       SLI_MVP_NONE,
+                                       &status);
+                  sli_mvp_pb_end_loop(p);
                 }
 
-              sli_mvp_end_loop(p);  // out_y_groups
+              sli_mvp_pb_end_loop(p);  // out_y_groups
 
               in_dims.mvp_incr_index_loop(p, kDimOutX, SLI_MVP_R7);
               out_dims.mvp_incr_index_loop(p, kDimOutX, SLI_MVP_R6);
 
-            sli_mvp_end_loop(p);  // output_width_truncated
+            sli_mvp_pb_end_loop(p);  // output_width_truncated
 
             out_dims.mvp_incr_index_loop(p, kDimOutYOffset, SLI_MVP_R7);
             in_dims.mvp_incr_index_loop(p, kDimOutYOffset, SLI_MVP_R6);
 
-          sli_mvp_end_loop(p);  // out_y_offsets
-          sli_mvp_postloop_incr_dim(p, SLI_MVP_ARRAY(2), SLI_MVP_INCRDIM_VEC);
+          sli_mvp_pb_end_loop(p);  // out_y_offsets
+          sli_mvp_pb_postloop_incr_dim(p, SLI_MVP_ARRAY(2), SLI_MVP_INCRDIM_VEC);
 
           out_dims.mvp_incr_index_loop(p, kDimM, SLI_MVP_R7);
 
           if (effective_depth_multiplier > 1) {
-            sli_mvp_end_loop(p);
+            sli_mvp_pb_end_loop(p);
           }
 
           in_dims.mvp_incr_index_loop(p, kDimInChannel, SLI_MVP_R6);
 
           if (num_in_channels_per_program > 1) {
-            sli_mvp_end_loop(p);
+            sli_mvp_pb_end_loop(p);
           }
 
           // Check if any errors found during program generation.
           if (status != SL_STATUS_OK) {
-            if (execute) {
-              EFM_ASSERT(false);
-            }
             return status;
           }
 
           // Execute the program
           if (execute) {
-            sli_mvp_execute_program(p);
+            sli_mvp_pb_execute_program(p);
           } else {
             mvp_prog_cnt++;
           }

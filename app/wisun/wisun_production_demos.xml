@@ -4,7 +4,7 @@
     <model:property key="demos.blurb" value="Wi-SUN - SoC CLI"/>
     <model:property key="core.partCompatibility" value=".*efr32mg12p433f1024gl125.*"/>
     <model:property key="core.boardCompatibility" value="brd4163a"/>
-    <model:property key="demos.imageFile" value="asset://com.silabs.sdk.stack.super_4.0.1/app/wisun/demos/wisun_cli/wisun_cli-brd4163a.s37"/>
+    <model:property key="demos.imageFile" value="asset://com.silabs.sdk.stack.super_4.0.2/app/wisun/demos/wisun_cli/wisun_cli-brd4163a.s37"/>
     <model:property key="core.quality" value="PRODUCTION"/>
     <model:description>The Wi-SUN CLI (Command-Line Interface) sample application allows developers to easily evaluate the Wi-SUN stack APIs. The Wi-SUN command line interface provides a serial interface to a number of the Wi-SUN stack functions. For example, it can be used to connect the Wi-SUN device to a Wi-SUN border router and exchange IP packets.</model:description>
   </demo>
@@ -12,7 +12,7 @@
     <model:property key="demos.blurb" value="Wi-SUN - SoC CLI"/>
     <model:property key="core.partCompatibility" value=".*efr32mg12p433f1024gl125.*"/>
     <model:property key="core.boardCompatibility" value="brd4164a"/>
-    <model:property key="demos.imageFile" value="asset://com.silabs.sdk.stack.super_4.0.1/app/wisun/demos/wisun_cli/wisun_cli-brd4164a.s37"/>
+    <model:property key="demos.imageFile" value="asset://com.silabs.sdk.stack.super_4.0.2/app/wisun/demos/wisun_cli/wisun_cli-brd4164a.s37"/>
     <model:property key="core.quality" value="PRODUCTION"/>
     <model:description>The Wi-SUN CLI (Command-Line Interface) sample application allows developers to easily evaluate the Wi-SUN stack APIs. The Wi-SUN command line interface provides a serial interface to a number of the Wi-SUN stack functions. For example, it can be used to connect the Wi-SUN device to a Wi-SUN border router and exchange IP packets.</model:description>
   </demo>
@@ -20,7 +20,7 @@
     <model:property key="demos.blurb" value="Wi-SUN - SoC CLI"/>
     <model:property key="core.partCompatibility" value=".*efr32mg12p433f1024gm68.*"/>
     <model:property key="core.boardCompatibility" value="brd4170a"/>
-    <model:property key="demos.imageFile" value="asset://com.silabs.sdk.stack.super_4.0.1/app/wisun/demos/wisun_cli/wisun_cli-brd4170a.s37"/>
+    <model:property key="demos.imageFile" value="asset://com.silabs.sdk.stack.super_4.0.2/app/wisun/demos/wisun_cli/wisun_cli-brd4170a.s37"/>
     <model:property key="core.quality" value="PRODUCTION"/>
     <model:description>The Wi-SUN CLI (Command-Line Interface) sample application allows developers to easily evaluate the Wi-SUN stack APIs. The Wi-SUN command line interface provides a serial interface to a number of the Wi-SUN stack functions. For example, it can be used to connect the Wi-SUN device to a Wi-SUN border router and exchange IP packets.</model:description>
   </demo>
@@ -28,7 +28,7 @@
     <model:property key="demos.blurb" value="Wi-SUN - SoC CLI"/>
     <model:property key="core.partCompatibility" value=".*efr32mg12p433f1024gm48.*"/>
     <model:property key="core.boardCompatibility" value="brd4172a"/>
-    <model:property key="demos.imageFile" value="asset://com.silabs.sdk.stack.super_4.0.1/app/wisun/demos/wisun_cli/wisun_cli-brd4172a.s37"/>
+    <model:property key="demos.imageFile" value="asset://com.silabs.sdk.stack.super_4.0.2/app/wisun/demos/wisun_cli/wisun_cli-brd4172a.s37"/>
     <model:property key="core.quality" value="PRODUCTION"/>
     <model:description>The Wi-SUN CLI (Command-Line Interface) sample application allows developers to easily evaluate the Wi-SUN stack APIs. The Wi-SUN command line interface provides a serial interface to a number of the Wi-SUN stack functions. For example, it can be used to connect the Wi-SUN device to a Wi-SUN border router and exchange IP packets.</model:description>
   </demo>
@@ -36,7 +36,7 @@
     <model:property key="demos.blurb" value="Wi-SUN - SoC CLI"/>
     <model:property key="core.partCompatibility" value=".*efr32mg12p433f1024gm48.*"/>
     <model:property key="core.boardCompatibility" value="brd4173a"/>
-    <model:property key="demos.imageFile" value="asset://com.silabs.sdk.stack.super_4.0.1/app/wisun/demos/wisun_cli/wisun_cli-brd4173a.s37"/>
+    <model:property key="demos.imageFile" value="asset://com.silabs.sdk.stack.super_4.0.2/app/wisun/demos/wisun_cli/wisun_cli-brd4173a.s37"/>
     <model:property key="core.quality" value="PRODUCTION"/>
     <model:description>The Wi-SUN CLI (Command-Line Interface) sample application allows developers to easily evaluate the Wi-SUN stack APIs. The Wi-SUN command line interface provides a serial interface to a number of the Wi-SUN stack functions. For example, it can be used to connect the Wi-SUN device to a Wi-SUN border router and exchange IP packets.</model:description>
   </demo>
@@ -44,7 +44,7 @@
     <model:property key="demos.blurb" value="Wi-SUN - SoC CLI"/>
     <model:property key="core.partCompatibility" value=".*efr32fg12p433f1024gl125.*"/>
     <model:property key="core.boardCompatibility" value="brd4253a"/>
-    <model:property key="demos.imageFile" value="asset://com.silabs.sdk.stack.super_4.0.1/app/wisun/demos/wisun_cli/wisun_cli-brd4253a.s37"/>
+    <model:property key="demos.imageFile" value="asset://com.silabs.sdk.stack.super_4.0.2/app/wisun/demos/wisun_cli/wisun_cli-brd4253a.s37"/>
     <model:property key="core.quality" value="PRODUCTION"/>
     <model:description>The Wi-SUN CLI (Command-Line Interface) sample application allows developers to easily evaluate the Wi-SUN stack APIs. The Wi-SUN command line interface provides a serial interface to a number of the Wi-SUN stack functions. For example, it can be used to connect the Wi-SUN device to a Wi-SUN border router and exchange IP packets.</model:description>
   </demo>
@@ -52,7 +52,7 @@
     <model:property key="demos.blurb" value="Wi-SUN - SoC CLI"/>
     <model:property key="core.partCompatibility" value=".*efr32fg12p433f1024gl125.*"/>
     <model:property key="core.boardCompatibility" value="brd4254a"/>
-    <model:property key="demos.imageFile" value="asset://com.silabs.sdk.stack.super_4.0.1/app/wisun/demos/wisun_cli/wisun_cli-brd4254a.s37"/>
+    <model:property key="demos.imageFile" value="asset://com.silabs.sdk.stack.super_4.0.2/app/wisun/demos/wisun_cli/wisun_cli-brd4254a.s37"/>
     <model:property key="core.quality" value="PRODUCTION"/>
     <model:description>The Wi-SUN CLI (Command-Line Interface) sample application allows developers to easily evaluate the Wi-SUN stack APIs. The Wi-SUN command line interface provides a serial interface to a number of the Wi-SUN stack functions. For example, it can be used to connect the Wi-SUN device to a Wi-SUN border router and exchange IP packets.</model:description>
   </demo>
@@ -60,7 +60,7 @@
     <model:property key="demos.blurb" value="Wi-SUN - SoC CLI"/>
     <model:property key="core.partCompatibility" value=".*efr32fg25b222f1920im56.*"/>
     <model:property key="core.boardCompatibility" value="brd4270a"/>
-    <model:property key="demos.imageFile" value="asset://com.silabs.sdk.stack.super_4.0.1/app/wisun/demos/wisun_cli/wisun_cli-brd4270a.s37"/>
+    <model:property key="demos.imageFile" value="asset://com.silabs.sdk.stack.super_4.0.2/app/wisun/demos/wisun_cli/wisun_cli-brd4270a.s37"/>
     <model:property key="core.quality" value="PRODUCTION"/>
     <model:description>The Wi-SUN CLI (Command-Line Interface) sample application allows developers to easily evaluate the Wi-SUN stack APIs. The Wi-SUN command line interface provides a serial interface to a number of the Wi-SUN stack functions. For example, it can be used to connect the Wi-SUN device to a Wi-SUN border router and exchange IP packets.</model:description>
   </demo>
@@ -68,7 +68,7 @@
     <model:property key="demos.blurb" value="Wi-SUN - SoC CLI"/>
     <model:property key="core.partCompatibility" value=".*efr32fg25b222f1920im56.*"/>
     <model:property key="core.boardCompatibility" value="brd4270b"/>
-    <model:property key="demos.imageFile" value="asset://com.silabs.sdk.stack.super_4.0.1/app/wisun/demos/wisun_cli/wisun_cli-brd4270b.s37"/>
+    <model:property key="demos.imageFile" value="asset://com.silabs.sdk.stack.super_4.0.2/app/wisun/demos/wisun_cli/wisun_cli-brd4270b.s37"/>
     <model:property key="core.quality" value="PRODUCTION"/>
     <model:description>The Wi-SUN CLI (Command-Line Interface) sample application allows developers to easily evaluate the Wi-SUN stack APIs. The Wi-SUN command line interface provides a serial interface to a number of the Wi-SUN stack functions. For example, it can be used to connect the Wi-SUN device to a Wi-SUN border router and exchange IP packets.</model:description>
   </demo>
@@ -76,7 +76,7 @@
     <model:property key="demos.blurb" value="Wi-SUN - SoC CLI"/>
     <model:property key="core.partCompatibility" value=".*efr32fg25b222f1920im56.*"/>
     <model:property key="core.boardCompatibility" value="brd4271a"/>
-    <model:property key="demos.imageFile" value="asset://com.silabs.sdk.stack.super_4.0.1/app/wisun/demos/wisun_cli/wisun_cli-brd4271a.s37"/>
+    <model:property key="demos.imageFile" value="asset://com.silabs.sdk.stack.super_4.0.2/app/wisun/demos/wisun_cli/wisun_cli-brd4271a.s37"/>
     <model:property key="core.quality" value="PRODUCTION"/>
     <model:description>The Wi-SUN CLI (Command-Line Interface) sample application allows developers to easily evaluate the Wi-SUN stack APIs. The Wi-SUN command line interface provides a serial interface to a number of the Wi-SUN stack functions. For example, it can be used to connect the Wi-SUN device to a Wi-SUN border router and exchange IP packets.</model:description>
   </demo>
@@ -84,7 +84,7 @@
     <model:property key="demos.blurb" value="Wi-SUN - SoC CLI"/>
     <model:property key="core.partCompatibility" value=".*efr32fg25b222f1920im56.*"/>
     <model:property key="core.boardCompatibility" value="brd4272a"/>
-    <model:property key="demos.imageFile" value="asset://com.silabs.sdk.stack.super_4.0.1/app/wisun/demos/wisun_cli/wisun_cli-brd4272a.s37"/>
+    <model:property key="demos.imageFile" value="asset://com.silabs.sdk.stack.super_4.0.2/app/wisun/demos/wisun_cli/wisun_cli-brd4272a.s37"/>
     <model:property key="core.quality" value="PRODUCTION"/>
     <model:description>The Wi-SUN CLI (Command-Line Interface) sample application allows developers to easily evaluate the Wi-SUN stack APIs. The Wi-SUN command line interface provides a serial interface to a number of the Wi-SUN stack functions. For example, it can be used to connect the Wi-SUN device to a Wi-SUN border router and exchange IP packets.</model:description>
   </demo>

@@ -16,6 +16,8 @@ component:
   - id: mpu
 #------------CLI--------------------------------------
   - id: cli
+    instance:
+    - example
 #-----------Need while connect uses printf -----------
   - id: printf
   - id: iostream_recommended_stream
@@ -50,6 +52,7 @@ source:
 other_file:
   - path: "../../../script/connect_create_gbl_image.bat"
   - path: "../../../script/connect_create_gbl_image.sh"
+  - path: "hw_filter_tags.yaml"
 
 readme:
   - path: ../../../documentation/example/connect/ecdh_key_exchange/readme.md
@@ -150,19 +153,6 @@ template_contribution:
       name: leave
       handler: cmd_leave
       help: "Leaves network if joined before"
-
-tag:
-  - hardware:
-      device:
-        memory:
-          flash: 200
-          ram: 25
-      board:
-        rf_bands:
-          - any
-        communication:
-          - vcom
-          - pti
 
 ui_hints:
   highlight:

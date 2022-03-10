@@ -65,8 +65,6 @@ void sl_zigbee_common_rtos_wakeup_stack_task(void)
 
 void sli_zigbee_common_rtos_init_callback(void)
 {
-  App_OS_SetAllHooks();
-
   // Create ZigBee task.
   zigbee_task_attr.name = "Zigbee task";
   zigbee_task_attr.stack_mem = &zigbee_task_stack[0];

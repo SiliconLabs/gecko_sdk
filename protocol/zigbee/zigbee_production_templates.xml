@@ -143,12 +143,12 @@
     <properties key="quality" value="PRODUCTION"/>
     <properties key="stockConfigCompatibility" value="com.silabs.ss.framework.project.toolchain.core.default"/>
   </descriptors>
-  <descriptors name="Z3SwitchWithVoice" label="Z3SwitchWithVoice" description="Zigbee 3.0 Switch with Voice">
+  <descriptors name="Z3SwitchWithVoice" label="Machine Learning - Z3SwitchWithVoice" description="Zigbee 3.0 Switch with Voice">
     <properties key="namespace" value="template.uc"/>
     <properties key="keywords" value="universal\ configurator"/>
     <properties key="projectFilePaths" value="app/framework/scenarios/z3/Z3SwitchWithVoice/Z3SwitchWithVoice.slcp"/>
     <properties key="readmeFiles" value="app/framework/scenarios/z3/Z3SwitchWithVoice/readme.html"/>
-    <properties key="boardCompatibility" value="brd2601a brd2601b com.silabs.board.none"/>
+    <properties key="boardCompatibility" value="brd2601b com.silabs.board.none"/>
     <properties key="partCompatibility" value=".*efr32mg24.*"/>
     <properties key="ideCompatibility" value="makefile-ide segger-embedded-studio simplicity-ide"/>
     <properties key="toolchainCompatibility" value="gcc"/>

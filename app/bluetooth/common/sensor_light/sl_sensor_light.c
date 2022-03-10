@@ -3,7 +3,7 @@
  * @brief Ambient light and UV index sensor
  *******************************************************************************
  * # License
- * <b>Copyright 2020 Silicon Laboratories Inc. www.silabs.com</b>
+ * <b>Copyright 2022 Silicon Laboratories Inc. www.silabs.com</b>
  *******************************************************************************
  *
  * SPDX-License-Identifier: Zlib
@@ -36,9 +36,14 @@
 #include "sl_sensor_light.h"
 
 // -----------------------------------------------------------------------------
+// Private variables
+
+static bool initialized = false;
+
+// -----------------------------------------------------------------------------
 // Public function definitions
 
-void sl_sensor_light_init(void)
+sl_status_t sl_sensor_light_init(void)
 {
   sl_status_t sc;
   sl_i2cspm_t *light_sensor = sl_sensor_select(SL_BOARD_SENSOR_LIGHT);
@@ -47,18 +52,30 @@ void sl_sensor_light_init(void)
              "[E: %#04x] Si1133 sensor not available\n",
              sc);
   sc = sl_si1133_init(light_sensor);
-  app_assert_status(sc);
+  if (sc == SL_STATUS_OK) {
+    initialized = true;
+  } else {
+    initialized = false;
+  }
+  return sc;
 }
 
 void sl_sensor_light_deinit(void)
 {
   (void)sl_board_disable_sensor(SL_BOARD_SENSOR_LIGHT);
+  initialized = false;
 }
 
 sl_status_t sl_sensor_light_get(float *lux, float *uvi)
 {
   sl_status_t sc;
-  sl_i2cspm_t *light_sensor = sl_sensor_select(SL_BOARD_SENSOR_LIGHT);
-  sc = sl_si1133_measure_lux_uvi(light_sensor, lux, uvi);
+
+  if (initialized) {
+    sl_i2cspm_t *light_sensor = sl_sensor_select(SL_BOARD_SENSOR_LIGHT);
+    sc = sl_si1133_measure_lux_uvi(light_sensor, lux, uvi);
+  } else {
+    sc = SL_STATUS_NOT_INITIALIZED;
+  }
+
   return sc;
 }

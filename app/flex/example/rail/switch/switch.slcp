@@ -66,6 +66,9 @@ source:
     condition:
       - cli
 
+other_file:
+  - path: "hw_filter_tags.yaml"
+
 #------------ Configuration overrides ----------------
 configuration:
 #------------- RAIL init, Project --------------------
@@ -78,6 +81,13 @@ configuration:
     value: "1"
   - name: SL_RAIL_UTIL_INIT_PROTOCOL_INST0_DEFAULT
     value: "SL_RAIL_UTIL_PROTOCOL_PROPRIETARY"
+#------------- RAIL init, Calibrations ---------------
+  - name: SL_RAIL_UTIL_INIT_CALIBRATIONS_INST0_ENABLE
+    value: "1"
+  - name: SL_RAIL_UTIL_INIT_CALIBRATION_TEMPERATURE_NOTIFY_INST0_ENABLE
+    value: "1"
+  - name: SL_RAIL_UTIL_INIT_CALIBRATION_ONETIME_NOTIFY_INST0_ENABLE
+    value: "1"
 #------------- RAIL init, Auto Transitions -----------
   - name: SL_RAIL_UTIL_INIT_TRANSITIONS_INST0_ENABLE
     value: "1"
@@ -179,19 +189,3 @@ ui_hints:
 
 tag:
   - prebuilt_demo
-  - hardware:
-      device:
-        memory:
-          flash: 185
-          ram: 25
-      board:
-        rf_bands:
-          - any
-        communication:
-          - vcom
-          - pti
-        io:
-          led: 2
-          button: 2
-          display: true
-  

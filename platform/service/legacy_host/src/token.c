@@ -134,9 +134,15 @@ void halInternalSetTokenData(uint16_t token, uint8_t index, void *data, uint8_t 
   }
 }
 
+void halInternalGetMfgTokenData(void *data, uint16_t token, uint8_t index, uint8_t len)
+{
+  // No manufacturing tokens on host.
+  assert(false);
+}
+
 void halInternalSetMfgTokenData(uint16_t token, void *data, uint8_t len)
 {
-  // TODO: Handle manufacturing tokens.
+  // No manufacturing tokens on host.
   assert(false);
 }
 

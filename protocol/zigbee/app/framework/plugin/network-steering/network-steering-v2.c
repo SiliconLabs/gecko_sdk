@@ -308,6 +308,16 @@ static uint32_t jitterTimeDelayMs()
   return jitterDelayMs;
 }
 
+bool joinedToDistributedNetwork(void)
+{
+  EmberCurrentSecurityState securityState;
+  EmberStatus status = emberGetCurrentSecurityState(&securityState);
+  if (status == EMBER_SUCCESS) {
+    return (securityState.bitmask & EMBER_DISTRIBUTED_TRUST_CENTER_MODE);
+  }
+  return false;
+}
+
 #ifdef UC_BUILD
 void emAfPluginNetworkSteeringStackStatusCallback(EmberStatus status)
 #else
@@ -329,7 +339,8 @@ void emberAfPluginNetworkSteeringStackStatusCallback(EmberStatus status)
     emberAfCorePrintln("%p network joined.", PLUGIN_NAME);
     if (!emAfPluginNetworkSteeringStateUsesDistributedKey()
         && !(emAfPluginNetworkSteeringOptionsMask
-             & EMBER_AF_PLUGIN_NETWORK_STEERING_OPTIONS_NO_TCLK_UPDATE)) {
+             & EMBER_AF_PLUGIN_NETWORK_STEERING_OPTIONS_NO_TCLK_UPDATE)
+        && !joinedToDistributedNetwork()) {
       emAfPluginNetworkSteeringStateSetUpdateTclk();
     }
     slxu_zigbee_event_set_delay_ms(finishSteeringEvent, randomJitterMS());

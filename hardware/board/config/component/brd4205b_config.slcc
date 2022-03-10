@@ -118,6 +118,12 @@
   - condition:
     - brd4001a
     override:
+      component: device_init_dcdc
+      file_id: device_init_dcdc_config
+    path: brd4205b_brd4001a/sl_device_init_dcdc_config.h
+  - condition:
+    - brd4001a
+    override:
       component: i2cspm
       file_id: i2cspm_config
       instance: sensor
@@ -500,6 +506,12 @@
       file_id: cpc_drv_uart_secondary_config
       instance: exp
     path: brd4205b_brd4002a/sl_cpc_drv_uart_secondary_exp_config.h
+  - condition:
+    - brd4002a
+    override:
+      component: device_init_dcdc
+      file_id: device_init_dcdc_config
+    path: brd4205b_brd4002a/sl_device_init_dcdc_config.h
   - condition:
     - brd4002a
     override:

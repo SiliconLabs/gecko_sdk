@@ -52,6 +52,7 @@ typedef struct {
 typedef struct {
   uint8_t printable_data_as_hex;
   uint8_t printable_data_length;
+  uint8_t autoconnect;
 } app_settings_app_t;
 
 extern app_settings_wisun_t app_settings_wisun;

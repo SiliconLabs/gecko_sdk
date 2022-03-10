@@ -93,6 +93,47 @@ template_contribution:
       argument:
       - type: uint8
         help: Message timeout in seconds
+  - name: cli_command
+    value:
+      group: interpan
+      name: group
+      handler: emAfInterpanGroupShortCommand
+      help: Send an interpan message to a group id.
+      argument:
+      - type: uint16
+        help: Group ID
+      - type: uint16
+        help: Destination PAN ID
+      - type: uint16
+        help: Destination Profile ID
+  - name: cli_command
+    value:
+      group: interpan
+      name: short
+      handler: emAfInterpanGroupShortCommand
+      help: Send an interpan message to a short id.
+      argument:
+      - type: uint16
+        help: Short ID
+      - type: uint16
+        help: Destination PAN ID
+      - type: uint16
+        help: Destination Profile ID
+  - name: cli_command
+    value:
+      group: interpan
+      name: long
+      handler: emAfInterpanLongCommand
+      help: Send an interpan message to an 8-byte EUI64.
+      argument:
+      - type: hex
+        help: Long ID
+      - type: uint16
+        help: Destination PAN ID
+      - type: uint16
+        help: Destination Profile ID
+      - type: uint16
+        help: Encrypt Options
 
 documentation:
   docset: zigbee

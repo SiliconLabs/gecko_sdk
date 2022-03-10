@@ -1,7 +1,7 @@
 id: cpc_secondary_driver_uart
 package: platform
 description: UART driver for Co-Processor Communication Secondary Device
-label: CPC Secondary - UART driver
+label: CPC Secondary - USART
 category: Services|Co-Processor Communication|Secondary Device
 quality: alpha
 instantiable:
@@ -26,6 +26,7 @@ provides:
   - name: cpc_secondary_driver_uart
     allow_multiple: false
 requires:
+  - name: cpc_secondary
   - name: status
   - name: dmadrv
   - name: emlib_gpio

@@ -1,6 +1,6 @@
 /***************************************************************************//**
  * @file
- * @brief Air pressure sensor header
+ * @brief Air Pressure Sensor header
  *******************************************************************************
  * # License
  * <b>Copyright 2022 Silicon Laboratories Inc. www.silabs.com</b>
@@ -39,8 +39,9 @@
  * \note With certain boards (e.g. 4166A), using this initialization function
  * enables other sensors, because they're on the same enable pin. Please take
  * that into account when using this function.
+ * @return Status of the operation.
  *****************************************************************************/
-void sl_sensor_pressure_init(void);
+sl_status_t sl_sensor_pressure_init(void);
 
 /**************************************************************************//**
  * Deinitialize pressure sensor.

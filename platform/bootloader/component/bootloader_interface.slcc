@@ -6,6 +6,9 @@ description: >
   When this component is part of a project a part of flash memory will be reserved
   for Bootloader usage in the application linker file. This component also provides
   a bootloader interface for interacting with the Gecko Bootloader.
+
+  Note: This component is not required for Gecko Bootloader projects. This component
+  is only required for application projects that need Gecko Bootloader support
 category: Platform|Bootloader
 quality: production
 source:

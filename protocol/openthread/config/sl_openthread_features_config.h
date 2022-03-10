@@ -47,23 +47,27 @@
 #ifndef OPENTHREAD_CONFIG_MLR_ENABLE
 #define OPENTHREAD_CONFIG_MLR_ENABLE                1
 #endif
-// <q>  DNS Client (Thread 1.3 alpha)
+// <q>  DNS Client (Thread 1.3)
 #ifndef OPENTHREAD_CONFIG_DNS_CLIENT_ENABLE
 #define OPENTHREAD_CONFIG_DNS_CLIENT_ENABLE         1
 #endif
-// <q>  DNS-SD Server (Thread 1.3 alpha)
+// <q>  DNS-SD Server (Thread 1.3)
 #ifndef OPENTHREAD_CONFIG_DNSSD_SERVER_ENABLE
 #define OPENTHREAD_CONFIG_DNSSD_SERVER_ENABLE       0
 #endif
-// <q>  Service Registration Protocol (SRP) Client (Thread 1.3 alpha)
+// <q>  Service Registration Protocol (SRP) Client (Thread 1.3)
 #ifndef OPENTHREAD_CONFIG_SRP_CLIENT_ENABLE
 #define OPENTHREAD_CONFIG_SRP_CLIENT_ENABLE         1
 #endif
-// <q>  Service Registration Protocol (SRP) Server (Thread 1.3 alpha)
+// <q>  Service Registration Protocol (SRP) Server (Thread 1.3)
 #ifndef OPENTHREAD_CONFIG_SRP_SERVER_ENABLE
 #define OPENTHREAD_CONFIG_SRP_SERVER_ENABLE         0
 #endif
-// <q> Thread over Infrastructure (Thread 1.3 alpha: NCP only)
+// <q>  TCPlp (Low power TCP over OpenThread) (Thread 1.3)
+#ifndef OPENTHREAD_CONFIG_TCP_ENABLE
+#define OPENTHREAD_CONFIG_TCP_ENABLE                0
+#endif
+// <q> Thread over Infrastructure (Thread 1.3: NCP only)
 #ifndef OPENTHREAD_CONFIG_RADIO_LINK_TREL_ENABLE
 #define OPENTHREAD_CONFIG_RADIO_LINK_TREL_ENABLE 0
 #endif

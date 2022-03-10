@@ -4,7 +4,7 @@
     <model:property key="demos.blurb" value="ot-ble-dmp"/>
     <model:property key="core.partCompatibility" value=".*efr32mg12p432f1024gl125.*"/>
     <model:property key="core.boardCompatibility" value="brd4161a"/>
-    <model:property key="demos.imageFile" value="asset://com.silabs.sdk.stack.super_4.0.1/protocol/openthread/demos/ot-ble-dmp/ot-ble-dmp-brd4161a.s37"/>
+    <model:property key="demos.imageFile" value="asset://com.silabs.sdk.stack.super_4.0.2/protocol/openthread/demos/ot-ble-dmp/ot-ble-dmp-brd4161a.s37"/>
     <model:property key="core.quality" value="PRODUCTION"/>
     <model:description>This is a simple application to test DMP with OpenThread and Bluetooth running on FreeRTOS.</model:description>
   </demo>
@@ -12,7 +12,7 @@
     <model:property key="demos.blurb" value="ot-ble-dmp"/>
     <model:property key="core.partCompatibility" value=".*efr32mg12p332f1024gl125.*"/>
     <model:property key="core.boardCompatibility" value="brd4166a"/>
-    <model:property key="demos.imageFile" value="asset://com.silabs.sdk.stack.super_4.0.1/protocol/openthread/demos/ot-ble-dmp/ot-ble-dmp-brd4166a.s37"/>
+    <model:property key="demos.imageFile" value="asset://com.silabs.sdk.stack.super_4.0.2/protocol/openthread/demos/ot-ble-dmp/ot-ble-dmp-brd4166a.s37"/>
     <model:property key="core.quality" value="PRODUCTION"/>
     <model:description>This is a simple application to test DMP with OpenThread and Bluetooth running on FreeRTOS.</model:description>
   </demo>
@@ -20,7 +20,7 @@
     <model:property key="demos.blurb" value="ot-ble-dmp"/>
     <model:property key="core.partCompatibility" value=".*efr32mg13p732f512gm48.*"/>
     <model:property key="core.boardCompatibility" value="brd4168a"/>
-    <model:property key="demos.imageFile" value="asset://com.silabs.sdk.stack.super_4.0.1/protocol/openthread/demos/ot-ble-dmp/ot-ble-dmp-brd4168a.s37"/>
+    <model:property key="demos.imageFile" value="asset://com.silabs.sdk.stack.super_4.0.2/protocol/openthread/demos/ot-ble-dmp/ot-ble-dmp-brd4168a.s37"/>
     <model:property key="core.quality" value="PRODUCTION"/>
     <model:description>This is a simple application to test DMP with OpenThread and Bluetooth running on FreeRTOS.</model:description>
   </demo>
@@ -28,7 +28,7 @@
     <model:property key="demos.blurb" value="ot-ble-dmp"/>
     <model:property key="core.partCompatibility" value=".*efr32mg21a020f1024im32.*"/>
     <model:property key="core.boardCompatibility" value="brd4180a"/>
-    <model:property key="demos.imageFile" value="asset://com.silabs.sdk.stack.super_4.0.1/protocol/openthread/demos/ot-ble-dmp/ot-ble-dmp-brd4180a.s37"/>
+    <model:property key="demos.imageFile" value="asset://com.silabs.sdk.stack.super_4.0.2/protocol/openthread/demos/ot-ble-dmp/ot-ble-dmp-brd4180a.s37"/>
     <model:property key="core.quality" value="PRODUCTION"/>
     <model:description>This is a simple application to test DMP with OpenThread and Bluetooth running on FreeRTOS.</model:description>
   </demo>
@@ -36,7 +36,7 @@
     <model:property key="demos.blurb" value="ot-ble-dmp"/>
     <model:property key="core.partCompatibility" value=".*mgm12p32f1024ga.*"/>
     <model:property key="core.boardCompatibility" value="brd4304a"/>
-    <model:property key="demos.imageFile" value="asset://com.silabs.sdk.stack.super_4.0.1/protocol/openthread/demos/ot-ble-dmp/ot-ble-dmp-brd4304a.s37"/>
+    <model:property key="demos.imageFile" value="asset://com.silabs.sdk.stack.super_4.0.2/protocol/openthread/demos/ot-ble-dmp/ot-ble-dmp-brd4304a.s37"/>
     <model:property key="core.quality" value="PRODUCTION"/>
     <model:description>This is a simple application to test DMP with OpenThread and Bluetooth running on FreeRTOS.</model:description>
   </demo>
@@ -44,7 +44,7 @@
     <model:property key="demos.blurb" value="ot-cli-ftd"/>
     <model:property key="core.partCompatibility" value=".*efr32mg12p432f1024gl125.*"/>
     <model:property key="core.boardCompatibility" value="brd4161a"/>
-    <model:property key="demos.imageFile" value="asset://com.silabs.sdk.stack.super_4.0.1/protocol/openthread/demos/ot-cli-ftd/ot-cli-ftd-brd4161a.s37"/>
+    <model:property key="demos.imageFile" value="asset://com.silabs.sdk.stack.super_4.0.2/protocol/openthread/demos/ot-cli-ftd/ot-cli-ftd-brd4161a.s37"/>
     <model:property key="core.quality" value="PRODUCTION"/>
     <model:description>This is a very simple CLI application to test the Openthread stack on a Full Thread Device.</model:description>
   </demo>
@@ -52,7 +52,7 @@
     <model:property key="demos.blurb" value="ot-cli-ftd"/>
     <model:property key="core.partCompatibility" value=".*efr32mg12p332f1024gl125.*"/>
     <model:property key="core.boardCompatibility" value="brd4166a"/>
-    <model:property key="demos.imageFile" value="asset://com.silabs.sdk.stack.super_4.0.1/protocol/openthread/demos/ot-cli-ftd/ot-cli-ftd-brd4166a.s37"/>
+    <model:property key="demos.imageFile" value="asset://com.silabs.sdk.stack.super_4.0.2/protocol/openthread/demos/ot-cli-ftd/ot-cli-ftd-brd4166a.s37"/>
     <model:property key="core.quality" value="PRODUCTION"/>
     <model:description>This is a very simple CLI application to test the Openthread stack on a Full Thread Device.</model:description>
   </demo>
@@ -60,7 +60,7 @@
     <model:property key="demos.blurb" value="ot-cli-ftd"/>
     <model:property key="core.partCompatibility" value=".*efr32mg13p732f512gm48.*"/>
     <model:property key="core.boardCompatibility" value="brd4168a"/>
-    <model:property key="demos.imageFile" value="asset://com.silabs.sdk.stack.super_4.0.1/protocol/openthread/demos/ot-cli-ftd/ot-cli-ftd-brd4168a.s37"/>
+    <model:property key="demos.imageFile" value="asset://com.silabs.sdk.stack.super_4.0.2/protocol/openthread/demos/ot-cli-ftd/ot-cli-ftd-brd4168a.s37"/>
     <model:property key="core.quality" value="PRODUCTION"/>
     <model:description>This is a very simple CLI application to test the Openthread stack on a Full Thread Device.</model:description>
   </demo>
@@ -68,7 +68,7 @@
     <model:property key="demos.blurb" value="ot-cli-ftd"/>
     <model:property key="core.partCompatibility" value=".*efr32mg21a020f1024im32.*"/>
     <model:property key="core.boardCompatibility" value="brd4180a"/>
-    <model:property key="demos.imageFile" value="asset://com.silabs.sdk.stack.super_4.0.1/protocol/openthread/demos/ot-cli-ftd/ot-cli-ftd-brd4180a.s37"/>
+    <model:property key="demos.imageFile" value="asset://com.silabs.sdk.stack.super_4.0.2/protocol/openthread/demos/ot-cli-ftd/ot-cli-ftd-brd4180a.s37"/>
     <model:property key="core.quality" value="PRODUCTION"/>
     <model:description>This is a very simple CLI application to test the Openthread stack on a Full Thread Device.</model:description>
   </demo>
@@ -76,7 +76,7 @@
     <model:property key="demos.blurb" value="ot-cli-ftd"/>
     <model:property key="core.partCompatibility" value=".*mgm12p32f1024ga.*"/>
     <model:property key="core.boardCompatibility" value="brd4304a"/>
-    <model:property key="demos.imageFile" value="asset://com.silabs.sdk.stack.super_4.0.1/protocol/openthread/demos/ot-cli-ftd/ot-cli-ftd-brd4304a.s37"/>
+    <model:property key="demos.imageFile" value="asset://com.silabs.sdk.stack.super_4.0.2/protocol/openthread/demos/ot-cli-ftd/ot-cli-ftd-brd4304a.s37"/>
     <model:property key="core.quality" value="PRODUCTION"/>
     <model:description>This is a very simple CLI application to test the Openthread stack on a Full Thread Device.</model:description>
   </demo>
@@ -84,7 +84,7 @@
     <model:property key="demos.blurb" value="ot-cli-mtd"/>
     <model:property key="core.partCompatibility" value=".*efr32mg12p432f1024gl125.*"/>
     <model:property key="core.boardCompatibility" value="brd4161a"/>
-    <model:property key="demos.imageFile" value="asset://com.silabs.sdk.stack.super_4.0.1/protocol/openthread/demos/ot-cli-mtd/ot-cli-mtd-brd4161a.s37"/>
+    <model:property key="demos.imageFile" value="asset://com.silabs.sdk.stack.super_4.0.2/protocol/openthread/demos/ot-cli-mtd/ot-cli-mtd-brd4161a.s37"/>
     <model:property key="core.quality" value="PRODUCTION"/>
     <model:description>This is a very simple CLI application to test the Openthread stack on a Minimal Thread Device.</model:description>
   </demo>
@@ -92,7 +92,7 @@
     <model:property key="demos.blurb" value="ot-cli-mtd"/>
     <model:property key="core.partCompatibility" value=".*efr32mg12p332f1024gl125.*"/>
     <model:property key="core.boardCompatibility" value="brd4166a"/>
-    <model:property key="demos.imageFile" value="asset://com.silabs.sdk.stack.super_4.0.1/protocol/openthread/demos/ot-cli-mtd/ot-cli-mtd-brd4166a.s37"/>
+    <model:property key="demos.imageFile" value="asset://com.silabs.sdk.stack.super_4.0.2/protocol/openthread/demos/ot-cli-mtd/ot-cli-mtd-brd4166a.s37"/>
     <model:property key="core.quality" value="PRODUCTION"/>
     <model:description>This is a very simple CLI application to test the Openthread stack on a Minimal Thread Device.</model:description>
   </demo>
@@ -100,7 +100,7 @@
     <model:property key="demos.blurb" value="ot-cli-mtd"/>
     <model:property key="core.partCompatibility" value=".*efr32mg13p732f512gm48.*"/>
     <model:property key="core.boardCompatibility" value="brd4168a"/>
-    <model:property key="demos.imageFile" value="asset://com.silabs.sdk.stack.super_4.0.1/protocol/openthread/demos/ot-cli-mtd/ot-cli-mtd-brd4168a.s37"/>
+    <model:property key="demos.imageFile" value="asset://com.silabs.sdk.stack.super_4.0.2/protocol/openthread/demos/ot-cli-mtd/ot-cli-mtd-brd4168a.s37"/>
     <model:property key="core.quality" value="PRODUCTION"/>
     <model:description>This is a very simple CLI application to test the Openthread stack on a Minimal Thread Device.</model:description>
   </demo>
@@ -108,7 +108,7 @@
     <model:property key="demos.blurb" value="ot-cli-mtd"/>
     <model:property key="core.partCompatibility" value=".*efr32mg21a020f1024im32.*"/>
     <model:property key="core.boardCompatibility" value="brd4180a"/>
-    <model:property key="demos.imageFile" value="asset://com.silabs.sdk.stack.super_4.0.1/protocol/openthread/demos/ot-cli-mtd/ot-cli-mtd-brd4180a.s37"/>
+    <model:property key="demos.imageFile" value="asset://com.silabs.sdk.stack.super_4.0.2/protocol/openthread/demos/ot-cli-mtd/ot-cli-mtd-brd4180a.s37"/>
     <model:property key="core.quality" value="PRODUCTION"/>
     <model:description>This is a very simple CLI application to test the Openthread stack on a Minimal Thread Device.</model:description>
   </demo>
@@ -116,7 +116,7 @@
     <model:property key="demos.blurb" value="ot-cli-mtd"/>
     <model:property key="core.partCompatibility" value=".*mgm12p32f1024ga.*"/>
     <model:property key="core.boardCompatibility" value="brd4304a"/>
-    <model:property key="demos.imageFile" value="asset://com.silabs.sdk.stack.super_4.0.1/protocol/openthread/demos/ot-cli-mtd/ot-cli-mtd-brd4304a.s37"/>
+    <model:property key="demos.imageFile" value="asset://com.silabs.sdk.stack.super_4.0.2/protocol/openthread/demos/ot-cli-mtd/ot-cli-mtd-brd4304a.s37"/>
     <model:property key="core.quality" value="PRODUCTION"/>
     <model:description>This is a very simple CLI application to test the Openthread stack on a Minimal Thread Device.</model:description>
   </demo>
@@ -124,7 +124,7 @@
     <model:property key="demos.blurb" value="ot-ncp-ftd"/>
     <model:property key="core.partCompatibility" value=".*efr32mg12p432f1024gl125.*"/>
     <model:property key="core.boardCompatibility" value="brd4161a"/>
-    <model:property key="demos.imageFile" value="asset://com.silabs.sdk.stack.super_4.0.1/protocol/openthread/demos/ot-ncp-ftd/ot-ncp-ftd-brd4161a.s37"/>
+    <model:property key="demos.imageFile" value="asset://com.silabs.sdk.stack.super_4.0.2/protocol/openthread/demos/ot-ncp-ftd/ot-ncp-ftd-brd4161a.s37"/>
     <model:property key="core.quality" value="PRODUCTION"/>
     <model:description>This is a simple OpenThread Full Thread Device NCP application.</model:description>
   </demo>
@@ -132,7 +132,7 @@
     <model:property key="demos.blurb" value="ot-ncp-ftd"/>
     <model:property key="core.partCompatibility" value=".*efr32mg12p332f1024gl125.*"/>
     <model:property key="core.boardCompatibility" value="brd4166a"/>
-    <model:property key="demos.imageFile" value="asset://com.silabs.sdk.stack.super_4.0.1/protocol/openthread/demos/ot-ncp-ftd/ot-ncp-ftd-brd4166a.s37"/>
+    <model:property key="demos.imageFile" value="asset://com.silabs.sdk.stack.super_4.0.2/protocol/openthread/demos/ot-ncp-ftd/ot-ncp-ftd-brd4166a.s37"/>
     <model:property key="core.quality" value="PRODUCTION"/>
     <model:description>This is a simple OpenThread Full Thread Device NCP application.</model:description>
   </demo>
@@ -140,7 +140,7 @@
     <model:property key="demos.blurb" value="ot-ncp-ftd"/>
     <model:property key="core.partCompatibility" value=".*efr32mg13p732f512gm48.*"/>
     <model:property key="core.boardCompatibility" value="brd4168a"/>
-    <model:property key="demos.imageFile" value="asset://com.silabs.sdk.stack.super_4.0.1/protocol/openthread/demos/ot-ncp-ftd/ot-ncp-ftd-brd4168a.s37"/>
+    <model:property key="demos.imageFile" value="asset://com.silabs.sdk.stack.super_4.0.2/protocol/openthread/demos/ot-ncp-ftd/ot-ncp-ftd-brd4168a.s37"/>
     <model:property key="core.quality" value="PRODUCTION"/>
     <model:description>This is a simple OpenThread Full Thread Device NCP application.</model:description>
   </demo>
@@ -148,7 +148,7 @@
     <model:property key="demos.blurb" value="ot-ncp-ftd"/>
     <model:property key="core.partCompatibility" value=".*efr32mg21a020f1024im32.*"/>
     <model:property key="core.boardCompatibility" value="brd4180a"/>
-    <model:property key="demos.imageFile" value="asset://com.silabs.sdk.stack.super_4.0.1/protocol/openthread/demos/ot-ncp-ftd/ot-ncp-ftd-brd4180a.s37"/>
+    <model:property key="demos.imageFile" value="asset://com.silabs.sdk.stack.super_4.0.2/protocol/openthread/demos/ot-ncp-ftd/ot-ncp-ftd-brd4180a.s37"/>
     <model:property key="core.quality" value="PRODUCTION"/>
     <model:description>This is a simple OpenThread Full Thread Device NCP application.</model:description>
   </demo>
@@ -156,7 +156,7 @@
     <model:property key="demos.blurb" value="ot-ncp-ftd"/>
     <model:property key="core.partCompatibility" value=".*mgm12p32f1024ga.*"/>
     <model:property key="core.boardCompatibility" value="brd4304a"/>
-    <model:property key="demos.imageFile" value="asset://com.silabs.sdk.stack.super_4.0.1/protocol/openthread/demos/ot-ncp-ftd/ot-ncp-ftd-brd4304a.s37"/>
+    <model:property key="demos.imageFile" value="asset://com.silabs.sdk.stack.super_4.0.2/protocol/openthread/demos/ot-ncp-ftd/ot-ncp-ftd-brd4304a.s37"/>
     <model:property key="core.quality" value="PRODUCTION"/>
     <model:description>This is a simple OpenThread Full Thread Device NCP application.</model:description>
   </demo>
@@ -164,7 +164,7 @@
     <model:property key="demos.blurb" value="ot-ncp-mtd"/>
     <model:property key="core.partCompatibility" value=".*efr32mg12p432f1024gl125.*"/>
     <model:property key="core.boardCompatibility" value="brd4161a"/>
-    <model:property key="demos.imageFile" value="asset://com.silabs.sdk.stack.super_4.0.1/protocol/openthread/demos/ot-ncp-mtd/ot-ncp-mtd-brd4161a.s37"/>
+    <model:property key="demos.imageFile" value="asset://com.silabs.sdk.stack.super_4.0.2/protocol/openthread/demos/ot-ncp-mtd/ot-ncp-mtd-brd4161a.s37"/>
     <model:property key="core.quality" value="PRODUCTION"/>
     <model:description>This is a simple OpenThread Minimal Thread Device NCP application.</model:description>
   </demo>
@@ -172,7 +172,7 @@
     <model:property key="demos.blurb" value="ot-ncp-mtd"/>
     <model:property key="core.partCompatibility" value=".*efr32mg12p332f1024gl125.*"/>
     <model:property key="core.boardCompatibility" value="brd4166a"/>
-    <model:property key="demos.imageFile" value="asset://com.silabs.sdk.stack.super_4.0.1/protocol/openthread/demos/ot-ncp-mtd/ot-ncp-mtd-brd4166a.s37"/>
+    <model:property key="demos.imageFile" value="asset://com.silabs.sdk.stack.super_4.0.2/protocol/openthread/demos/ot-ncp-mtd/ot-ncp-mtd-brd4166a.s37"/>
     <model:property key="core.quality" value="PRODUCTION"/>
     <model:description>This is a simple OpenThread Minimal Thread Device NCP application.</model:description>
   </demo>
@@ -180,7 +180,7 @@
     <model:property key="demos.blurb" value="ot-ncp-mtd"/>
     <model:property key="core.partCompatibility" value=".*efr32mg13p732f512gm48.*"/>
     <model:property key="core.boardCompatibility" value="brd4168a"/>
-    <model:property key="demos.imageFile" value="asset://com.silabs.sdk.stack.super_4.0.1/protocol/openthread/demos/ot-ncp-mtd/ot-ncp-mtd-brd4168a.s37"/>
+    <model:property key="demos.imageFile" value="asset://com.silabs.sdk.stack.super_4.0.2/protocol/openthread/demos/ot-ncp-mtd/ot-ncp-mtd-brd4168a.s37"/>
     <model:property key="core.quality" value="PRODUCTION"/>
     <model:description>This is a simple OpenThread Minimal Thread Device NCP application.</model:description>
   </demo>
@@ -188,7 +188,7 @@
     <model:property key="demos.blurb" value="ot-ncp-mtd"/>
     <model:property key="core.partCompatibility" value=".*efr32mg21a020f1024im32.*"/>
     <model:property key="core.boardCompatibility" value="brd4180a"/>
-    <model:property key="demos.imageFile" value="asset://com.silabs.sdk.stack.super_4.0.1/protocol/openthread/demos/ot-ncp-mtd/ot-ncp-mtd-brd4180a.s37"/>
+    <model:property key="demos.imageFile" value="asset://com.silabs.sdk.stack.super_4.0.2/protocol/openthread/demos/ot-ncp-mtd/ot-ncp-mtd-brd4180a.s37"/>
     <model:property key="core.quality" value="PRODUCTION"/>
     <model:description>This is a simple OpenThread Minimal Thread Device NCP application.</model:description>
   </demo>
@@ -196,7 +196,7 @@
     <model:property key="demos.blurb" value="ot-ncp-mtd"/>
     <model:property key="core.partCompatibility" value=".*mgm12p32f1024ga.*"/>
     <model:property key="core.boardCompatibility" value="brd4304a"/>
-    <model:property key="demos.imageFile" value="asset://com.silabs.sdk.stack.super_4.0.1/protocol/openthread/demos/ot-ncp-mtd/ot-ncp-mtd-brd4304a.s37"/>
+    <model:property key="demos.imageFile" value="asset://com.silabs.sdk.stack.super_4.0.2/protocol/openthread/demos/ot-ncp-mtd/ot-ncp-mtd-brd4304a.s37"/>
     <model:property key="core.quality" value="PRODUCTION"/>
     <model:description>This is a simple OpenThread Minimal Thread Device NCP application.</model:description>
   </demo>
@@ -204,7 +204,7 @@
     <model:property key="demos.blurb" value="ot-rcp"/>
     <model:property key="core.partCompatibility" value=".*efr32mg12p432f1024gl125.*"/>
     <model:property key="core.boardCompatibility" value="brd4161a"/>
-    <model:property key="demos.imageFile" value="asset://com.silabs.sdk.stack.super_4.0.1/protocol/openthread/demos/ot-rcp/ot-rcp-brd4161a.s37"/>
+    <model:property key="demos.imageFile" value="asset://com.silabs.sdk.stack.super_4.0.2/protocol/openthread/demos/ot-rcp/ot-rcp-brd4161a.s37"/>
     <model:property key="core.quality" value="PRODUCTION"/>
     <model:description>This is a simple OpenThread RCP application.</model:description>
   </demo>
@@ -212,7 +212,7 @@
     <model:property key="demos.blurb" value="ot-rcp"/>
     <model:property key="core.partCompatibility" value=".*efr32mg12p332f1024gl125.*"/>
     <model:property key="core.boardCompatibility" value="brd4166a"/>
-    <model:property key="demos.imageFile" value="asset://com.silabs.sdk.stack.super_4.0.1/protocol/openthread/demos/ot-rcp/ot-rcp-brd4166a.s37"/>
+    <model:property key="demos.imageFile" value="asset://com.silabs.sdk.stack.super_4.0.2/protocol/openthread/demos/ot-rcp/ot-rcp-brd4166a.s37"/>
     <model:property key="core.quality" value="PRODUCTION"/>
     <model:description>This is a simple OpenThread RCP application.</model:description>
   </demo>
@@ -220,7 +220,7 @@
     <model:property key="demos.blurb" value="ot-rcp"/>
     <model:property key="core.partCompatibility" value=".*efr32mg13p732f512gm48.*"/>
     <model:property key="core.boardCompatibility" value="brd4168a"/>
-    <model:property key="demos.imageFile" value="asset://com.silabs.sdk.stack.super_4.0.1/protocol/openthread/demos/ot-rcp/ot-rcp-brd4168a.s37"/>
+    <model:property key="demos.imageFile" value="asset://com.silabs.sdk.stack.super_4.0.2/protocol/openthread/demos/ot-rcp/ot-rcp-brd4168a.s37"/>
     <model:property key="core.quality" value="PRODUCTION"/>
     <model:description>This is a simple OpenThread RCP application.</model:description>
   </demo>
@@ -228,7 +228,7 @@
     <model:property key="demos.blurb" value="ot-rcp"/>
     <model:property key="core.partCompatibility" value=".*efr32mg21a020f1024im32.*"/>
     <model:property key="core.boardCompatibility" value="brd4180a"/>
-    <model:property key="demos.imageFile" value="asset://com.silabs.sdk.stack.super_4.0.1/protocol/openthread/demos/ot-rcp/ot-rcp-brd4180a.s37"/>
+    <model:property key="demos.imageFile" value="asset://com.silabs.sdk.stack.super_4.0.2/protocol/openthread/demos/ot-rcp/ot-rcp-brd4180a.s37"/>
     <model:property key="core.quality" value="PRODUCTION"/>
     <model:description>This is a simple OpenThread RCP application.</model:description>
   </demo>
@@ -236,7 +236,7 @@
     <model:property key="demos.blurb" value="ot-rcp"/>
     <model:property key="core.partCompatibility" value=".*mgm12p32f1024ga.*"/>
     <model:property key="core.boardCompatibility" value="brd4304a"/>
-    <model:property key="demos.imageFile" value="asset://com.silabs.sdk.stack.super_4.0.1/protocol/openthread/demos/ot-rcp/ot-rcp-brd4304a.s37"/>
+    <model:property key="demos.imageFile" value="asset://com.silabs.sdk.stack.super_4.0.2/protocol/openthread/demos/ot-rcp/ot-rcp-brd4304a.s37"/>
     <model:property key="core.quality" value="PRODUCTION"/>
     <model:description>This is a simple OpenThread RCP application.</model:description>
   </demo>
@@ -244,7 +244,7 @@
     <model:property key="demos.blurb" value="rcp-spi-802154"/>
     <model:property key="core.partCompatibility" value=".*efr32mg1p232f256gm48.*"/>
     <model:property key="core.boardCompatibility" value="brd4151a"/>
-    <model:property key="demos.imageFile" value="asset://com.silabs.sdk.stack.super_4.0.1/protocol/openthread/demos/rcp-spi-802154/rcp-spi-802154-brd4151a.s37"/>
+    <model:property key="demos.imageFile" value="asset://com.silabs.sdk.stack.super_4.0.2/protocol/openthread/demos/rcp-spi-802154/rcp-spi-802154-brd4151a.s37"/>
     <model:property key="core.quality" value="PRODUCTION"/>
     <model:description>Multipan 802.15.4 RCP (Radio Co-Processor) application. Access to 802.15.4 is provided using SPINEL carried over the CPC (Co-Processor Communication) protocol using a SPI connection.
 </model:description>
@@ -253,7 +253,7 @@
     <model:property key="demos.blurb" value="rcp-spi-802154"/>
     <model:property key="core.partCompatibility" value=".*efr32mg12p432f1024gl125.*"/>
     <model:property key="core.boardCompatibility" value="brd4161a"/>
-    <model:property key="demos.imageFile" value="asset://com.silabs.sdk.stack.super_4.0.1/protocol/openthread/demos/rcp-spi-802154/rcp-spi-802154-brd4161a.s37"/>
+    <model:property key="demos.imageFile" value="asset://com.silabs.sdk.stack.super_4.0.2/protocol/openthread/demos/rcp-spi-802154/rcp-spi-802154-brd4161a.s37"/>
     <model:property key="core.quality" value="PRODUCTION"/>
     <model:description>Multipan 802.15.4 RCP (Radio Co-Processor) application. Access to 802.15.4 is provided using SPINEL carried over the CPC (Co-Processor Communication) protocol using a SPI connection.
 </model:description>
@@ -262,7 +262,7 @@
     <model:property key="demos.blurb" value="rcp-spi-802154"/>
     <model:property key="core.partCompatibility" value=".*efr32mg12p332f1024gl125.*"/>
     <model:property key="core.boardCompatibility" value="brd4166a"/>
-    <model:property key="demos.imageFile" value="asset://com.silabs.sdk.stack.super_4.0.1/protocol/openthread/demos/rcp-spi-802154/rcp-spi-802154-brd4166a.s37"/>
+    <model:property key="demos.imageFile" value="asset://com.silabs.sdk.stack.super_4.0.2/protocol/openthread/demos/rcp-spi-802154/rcp-spi-802154-brd4166a.s37"/>
     <model:property key="core.quality" value="PRODUCTION"/>
     <model:description>Multipan 802.15.4 RCP (Radio Co-Processor) application. Access to 802.15.4 is provided using SPINEL carried over the CPC (Co-Processor Communication) protocol using a SPI connection.
 </model:description>
@@ -271,7 +271,7 @@
     <model:property key="demos.blurb" value="rcp-spi-802154"/>
     <model:property key="core.partCompatibility" value=".*efr32mg13p732f512gm48.*"/>
     <model:property key="core.boardCompatibility" value="brd4168a"/>
-    <model:property key="demos.imageFile" value="asset://com.silabs.sdk.stack.super_4.0.1/protocol/openthread/demos/rcp-spi-802154/rcp-spi-802154-brd4168a.s37"/>
+    <model:property key="demos.imageFile" value="asset://com.silabs.sdk.stack.super_4.0.2/protocol/openthread/demos/rcp-spi-802154/rcp-spi-802154-brd4168a.s37"/>
     <model:property key="core.quality" value="PRODUCTION"/>
     <model:description>Multipan 802.15.4 RCP (Radio Co-Processor) application. Access to 802.15.4 is provided using SPINEL carried over the CPC (Co-Processor Communication) protocol using a SPI connection.
 </model:description>
@@ -280,7 +280,7 @@
     <model:property key="demos.blurb" value="rcp-spi-802154"/>
     <model:property key="core.partCompatibility" value=".*efr32mg21a020f1024im32.*"/>
     <model:property key="core.boardCompatibility" value="brd4180a"/>
-    <model:property key="demos.imageFile" value="asset://com.silabs.sdk.stack.super_4.0.1/protocol/openthread/demos/rcp-spi-802154/rcp-spi-802154-brd4180a.s37"/>
+    <model:property key="demos.imageFile" value="asset://com.silabs.sdk.stack.super_4.0.2/protocol/openthread/demos/rcp-spi-802154/rcp-spi-802154-brd4180a.s37"/>
     <model:property key="core.quality" value="PRODUCTION"/>
     <model:description>Multipan 802.15.4 RCP (Radio Co-Processor) application. Access to 802.15.4 is provided using SPINEL carried over the CPC (Co-Processor Communication) protocol using a SPI connection.
 </model:description>
@@ -289,7 +289,7 @@
     <model:property key="demos.blurb" value="rcp-spi-802154"/>
     <model:property key="core.partCompatibility" value=".*mgm12p32f1024ga.*"/>
     <model:property key="core.boardCompatibility" value="brd4304a"/>
-    <model:property key="demos.imageFile" value="asset://com.silabs.sdk.stack.super_4.0.1/protocol/openthread/demos/rcp-spi-802154/rcp-spi-802154-brd4304a.s37"/>
+    <model:property key="demos.imageFile" value="asset://com.silabs.sdk.stack.super_4.0.2/protocol/openthread/demos/rcp-spi-802154/rcp-spi-802154-brd4304a.s37"/>
     <model:property key="core.quality" value="PRODUCTION"/>
     <model:description>Multipan 802.15.4 RCP (Radio Co-Processor) application. Access to 802.15.4 is provided using SPINEL carried over the CPC (Co-Processor Communication) protocol using a SPI connection.
 </model:description>
@@ -298,7 +298,7 @@
     <model:property key="demos.blurb" value="rcp-uart-802154"/>
     <model:property key="core.partCompatibility" value=".*efr32mg1p232f256gm48.*"/>
     <model:property key="core.boardCompatibility" value="brd4151a"/>
-    <model:property key="demos.imageFile" value="asset://com.silabs.sdk.stack.super_4.0.1/protocol/openthread/demos/rcp-uart-802154/rcp-uart-802154-brd4151a.s37"/>
+    <model:property key="demos.imageFile" value="asset://com.silabs.sdk.stack.super_4.0.2/protocol/openthread/demos/rcp-uart-802154/rcp-uart-802154-brd4151a.s37"/>
     <model:property key="core.quality" value="PRODUCTION"/>
     <model:description>Multipan 802.15.4 RCP (Radio Co-Processor) application. Access to 802.15.4 is provided using SPINEL carried over the CPC (Co-Processor Communication) protocol using a UART connection.
 </model:description>
@@ -307,7 +307,7 @@
     <model:property key="demos.blurb" value="rcp-uart-802154"/>
     <model:property key="core.partCompatibility" value=".*efr32mg12p432f1024gl125.*"/>
     <model:property key="core.boardCompatibility" value="brd4161a"/>
-    <model:property key="demos.imageFile" value="asset://com.silabs.sdk.stack.super_4.0.1/protocol/openthread/demos/rcp-uart-802154/rcp-uart-802154-brd4161a.s37"/>
+    <model:property key="demos.imageFile" value="asset://com.silabs.sdk.stack.super_4.0.2/protocol/openthread/demos/rcp-uart-802154/rcp-uart-802154-brd4161a.s37"/>
     <model:property key="core.quality" value="PRODUCTION"/>
     <model:description>Multipan 802.15.4 RCP (Radio Co-Processor) application. Access to 802.15.4 is provided using SPINEL carried over the CPC (Co-Processor Communication) protocol using a UART connection.
 </model:description>
@@ -316,7 +316,7 @@
     <model:property key="demos.blurb" value="rcp-uart-802154"/>
     <model:property key="core.partCompatibility" value=".*efr32mg12p332f1024gl125.*"/>
     <model:property key="core.boardCompatibility" value="brd4166a"/>
-    <model:property key="demos.imageFile" value="asset://com.silabs.sdk.stack.super_4.0.1/protocol/openthread/demos/rcp-uart-802154/rcp-uart-802154-brd4166a.s37"/>
+    <model:property key="demos.imageFile" value="asset://com.silabs.sdk.stack.super_4.0.2/protocol/openthread/demos/rcp-uart-802154/rcp-uart-802154-brd4166a.s37"/>
     <model:property key="core.quality" value="PRODUCTION"/>
     <model:description>Multipan 802.15.4 RCP (Radio Co-Processor) application. Access to 802.15.4 is provided using SPINEL carried over the CPC (Co-Processor Communication) protocol using a UART connection.
 </model:description>
@@ -325,7 +325,7 @@
     <model:property key="demos.blurb" value="rcp-uart-802154"/>
     <model:property key="core.partCompatibility" value=".*efr32mg13p732f512gm48.*"/>
     <model:property key="core.boardCompatibility" value="brd4168a"/>
-    <model:property key="demos.imageFile" value="asset://com.silabs.sdk.stack.super_4.0.1/protocol/openthread/demos/rcp-uart-802154/rcp-uart-802154-brd4168a.s37"/>
+    <model:property key="demos.imageFile" value="asset://com.silabs.sdk.stack.super_4.0.2/protocol/openthread/demos/rcp-uart-802154/rcp-uart-802154-brd4168a.s37"/>
     <model:property key="core.quality" value="PRODUCTION"/>
     <model:description>Multipan 802.15.4 RCP (Radio Co-Processor) application. Access to 802.15.4 is provided using SPINEL carried over the CPC (Co-Processor Communication) protocol using a UART connection.
 </model:description>
@@ -334,7 +334,7 @@
     <model:property key="demos.blurb" value="rcp-uart-802154"/>
     <model:property key="core.partCompatibility" value=".*efr32mg21a020f1024im32.*"/>
     <model:property key="core.boardCompatibility" value="brd4180a"/>
-    <model:property key="demos.imageFile" value="asset://com.silabs.sdk.stack.super_4.0.1/protocol/openthread/demos/rcp-uart-802154/rcp-uart-802154-brd4180a.s37"/>
+    <model:property key="demos.imageFile" value="asset://com.silabs.sdk.stack.super_4.0.2/protocol/openthread/demos/rcp-uart-802154/rcp-uart-802154-brd4180a.s37"/>
     <model:property key="core.quality" value="PRODUCTION"/>
     <model:description>Multipan 802.15.4 RCP (Radio Co-Processor) application. Access to 802.15.4 is provided using SPINEL carried over the CPC (Co-Processor Communication) protocol using a UART connection.
 </model:description>
@@ -343,7 +343,7 @@
     <model:property key="demos.blurb" value="rcp-uart-802154"/>
     <model:property key="core.partCompatibility" value=".*mgm12p32f1024ga.*"/>
     <model:property key="core.boardCompatibility" value="brd4304a"/>
-    <model:property key="demos.imageFile" value="asset://com.silabs.sdk.stack.super_4.0.1/protocol/openthread/demos/rcp-uart-802154/rcp-uart-802154-brd4304a.s37"/>
+    <model:property key="demos.imageFile" value="asset://com.silabs.sdk.stack.super_4.0.2/protocol/openthread/demos/rcp-uart-802154/rcp-uart-802154-brd4304a.s37"/>
     <model:property key="core.quality" value="PRODUCTION"/>
     <model:description>Multipan 802.15.4 RCP (Radio Co-Processor) application. Access to 802.15.4 is provided using SPINEL carried over the CPC (Co-Processor Communication) protocol using a UART connection.
 </model:description>
@@ -352,7 +352,7 @@
     <model:property key="demos.blurb" value="sleepy-demo-ftd"/>
     <model:property key="core.partCompatibility" value=".*efr32mg12p432f1024gl125.*"/>
     <model:property key="core.boardCompatibility" value="brd4161a"/>
-    <model:property key="demos.imageFile" value="asset://com.silabs.sdk.stack.super_4.0.1/protocol/openthread/demos/sleepy-demo-ftd/sleepy-demo-ftd-brd4161a.s37"/>
+    <model:property key="demos.imageFile" value="asset://com.silabs.sdk.stack.super_4.0.2/protocol/openthread/demos/sleepy-demo-ftd/sleepy-demo-ftd-brd4161a.s37"/>
     <model:property key="core.quality" value="PRODUCTION"/>
     <model:description>This is a sample application to start and form a Thread network on an FTD for the sleepy-demo.</model:description>
   </demo>
@@ -360,7 +360,7 @@
     <model:property key="demos.blurb" value="sleepy-demo-ftd"/>
     <model:property key="core.partCompatibility" value=".*efr32mg12p332f1024gl125.*"/>
     <model:property key="core.boardCompatibility" value="brd4166a"/>
-    <model:property key="demos.imageFile" value="asset://com.silabs.sdk.stack.super_4.0.1/protocol/openthread/demos/sleepy-demo-ftd/sleepy-demo-ftd-brd4166a.s37"/>
+    <model:property key="demos.imageFile" value="asset://com.silabs.sdk.stack.super_4.0.2/protocol/openthread/demos/sleepy-demo-ftd/sleepy-demo-ftd-brd4166a.s37"/>
     <model:property key="core.quality" value="PRODUCTION"/>
     <model:description>This is a sample application to start and form a Thread network on an FTD for the sleepy-demo.</model:description>
   </demo>
@@ -368,7 +368,7 @@
     <model:property key="demos.blurb" value="sleepy-demo-ftd"/>
     <model:property key="core.partCompatibility" value=".*efr32mg13p732f512gm48.*"/>
     <model:property key="core.boardCompatibility" value="brd4168a"/>
-    <model:property key="demos.imageFile" value="asset://com.silabs.sdk.stack.super_4.0.1/protocol/openthread/demos/sleepy-demo-ftd/sleepy-demo-ftd-brd4168a.s37"/>
+    <model:property key="demos.imageFile" value="asset://com.silabs.sdk.stack.super_4.0.2/protocol/openthread/demos/sleepy-demo-ftd/sleepy-demo-ftd-brd4168a.s37"/>
     <model:property key="core.quality" value="PRODUCTION"/>
     <model:description>This is a sample application to start and form a Thread network on an FTD for the sleepy-demo.</model:description>
   </demo>
@@ -376,7 +376,7 @@
     <model:property key="demos.blurb" value="sleepy-demo-ftd"/>
     <model:property key="core.partCompatibility" value=".*efr32mg21a020f1024im32.*"/>
     <model:property key="core.boardCompatibility" value="brd4180a"/>
-    <model:property key="demos.imageFile" value="asset://com.silabs.sdk.stack.super_4.0.1/protocol/openthread/demos/sleepy-demo-ftd/sleepy-demo-ftd-brd4180a.s37"/>
+    <model:property key="demos.imageFile" value="asset://com.silabs.sdk.stack.super_4.0.2/protocol/openthread/demos/sleepy-demo-ftd/sleepy-demo-ftd-brd4180a.s37"/>
     <model:property key="core.quality" value="PRODUCTION"/>
     <model:description>This is a sample application to start and form a Thread network on an FTD for the sleepy-demo.</model:description>
   </demo>
@@ -384,7 +384,7 @@
     <model:property key="demos.blurb" value="sleepy-demo-ftd"/>
     <model:property key="core.partCompatibility" value=".*mgm12p32f1024ga.*"/>
     <model:property key="core.boardCompatibility" value="brd4304a"/>
-    <model:property key="demos.imageFile" value="asset://com.silabs.sdk.stack.super_4.0.1/protocol/openthread/demos/sleepy-demo-ftd/sleepy-demo-ftd-brd4304a.s37"/>
+    <model:property key="demos.imageFile" value="asset://com.silabs.sdk.stack.super_4.0.2/protocol/openthread/demos/sleepy-demo-ftd/sleepy-demo-ftd-brd4304a.s37"/>
     <model:property key="core.quality" value="PRODUCTION"/>
     <model:description>This is a sample application to start and form a Thread network on an FTD for the sleepy-demo.</model:description>
   </demo>
@@ -392,7 +392,7 @@
     <model:property key="demos.blurb" value="sleepy-demo-mtd"/>
     <model:property key="core.partCompatibility" value=".*efr32mg12p432f1024gl125.*"/>
     <model:property key="core.boardCompatibility" value="brd4161a"/>
-    <model:property key="demos.imageFile" value="asset://com.silabs.sdk.stack.super_4.0.1/protocol/openthread/demos/sleepy-demo-mtd/sleepy-demo-mtd-brd4161a.s37"/>
+    <model:property key="demos.imageFile" value="asset://com.silabs.sdk.stack.super_4.0.2/protocol/openthread/demos/sleepy-demo-mtd/sleepy-demo-mtd-brd4161a.s37"/>
     <model:property key="core.quality" value="PRODUCTION"/>
     <model:description>This is a sample application to demonstrate Sleepy End Device behaviour on an MTD using the EFR32's low power EM2 mode.</model:description>
   </demo>
@@ -400,7 +400,7 @@
     <model:property key="demos.blurb" value="sleepy-demo-mtd"/>
     <model:property key="core.partCompatibility" value=".*efr32mg12p332f1024gl125.*"/>
     <model:property key="core.boardCompatibility" value="brd4166a"/>
-    <model:property key="demos.imageFile" value="asset://com.silabs.sdk.stack.super_4.0.1/protocol/openthread/demos/sleepy-demo-mtd/sleepy-demo-mtd-brd4166a.s37"/>
+    <model:property key="demos.imageFile" value="asset://com.silabs.sdk.stack.super_4.0.2/protocol/openthread/demos/sleepy-demo-mtd/sleepy-demo-mtd-brd4166a.s37"/>
     <model:property key="core.quality" value="PRODUCTION"/>
     <model:description>This is a sample application to demonstrate Sleepy End Device behaviour on an MTD using the EFR32's low power EM2 mode.</model:description>
   </demo>
@@ -408,7 +408,7 @@
     <model:property key="demos.blurb" value="sleepy-demo-mtd"/>
     <model:property key="core.partCompatibility" value=".*efr32mg13p732f512gm48.*"/>
     <model:property key="core.boardCompatibility" value="brd4168a"/>
-    <model:property key="demos.imageFile" value="asset://com.silabs.sdk.stack.super_4.0.1/protocol/openthread/demos/sleepy-demo-mtd/sleepy-demo-mtd-brd4168a.s37"/>
+    <model:property key="demos.imageFile" value="asset://com.silabs.sdk.stack.super_4.0.2/protocol/openthread/demos/sleepy-demo-mtd/sleepy-demo-mtd-brd4168a.s37"/>
     <model:property key="core.quality" value="PRODUCTION"/>
     <model:description>This is a sample application to demonstrate Sleepy End Device behaviour on an MTD using the EFR32's low power EM2 mode.</model:description>
   </demo>
@@ -416,7 +416,7 @@
     <model:property key="demos.blurb" value="sleepy-demo-mtd"/>
     <model:property key="core.partCompatibility" value=".*efr32mg21a020f1024im32.*"/>
     <model:property key="core.boardCompatibility" value="brd4180a"/>
-    <model:property key="demos.imageFile" value="asset://com.silabs.sdk.stack.super_4.0.1/protocol/openthread/demos/sleepy-demo-mtd/sleepy-demo-mtd-brd4180a.s37"/>
+    <model:property key="demos.imageFile" value="asset://com.silabs.sdk.stack.super_4.0.2/protocol/openthread/demos/sleepy-demo-mtd/sleepy-demo-mtd-brd4180a.s37"/>
     <model:property key="core.quality" value="PRODUCTION"/>
     <model:description>This is a sample application to demonstrate Sleepy End Device behaviour on an MTD using the EFR32's low power EM2 mode.</model:description>
   </demo>
@@ -424,7 +424,7 @@
     <model:property key="demos.blurb" value="sleepy-demo-mtd"/>
     <model:property key="core.partCompatibility" value=".*mgm12p32f1024ga.*"/>
     <model:property key="core.boardCompatibility" value="brd4304a"/>
-    <model:property key="demos.imageFile" value="asset://com.silabs.sdk.stack.super_4.0.1/protocol/openthread/demos/sleepy-demo-mtd/sleepy-demo-mtd-brd4304a.s37"/>
+    <model:property key="demos.imageFile" value="asset://com.silabs.sdk.stack.super_4.0.2/protocol/openthread/demos/sleepy-demo-mtd/sleepy-demo-mtd-brd4304a.s37"/>
     <model:property key="core.quality" value="PRODUCTION"/>
     <model:description>This is a sample application to demonstrate Sleepy End Device behaviour on an MTD using the EFR32's low power EM2 mode.</model:description>
   </demo>

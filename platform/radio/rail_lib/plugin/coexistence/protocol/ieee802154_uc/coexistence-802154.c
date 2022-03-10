@@ -270,13 +270,15 @@ static void coexEventsCb(COEX_Events_t events);
 static void phySelectIsr(void);
 #endif//SL_RAIL_UTIL_COEX_RUNTIME_PHY_SELECT
 
-#if SL_RAIL_UTIL_COEX_SIGNAL_IDENTIFIER_ENABLED
+#if SL_RAIL_UTIL_COEX_IEEE802154_SIGNAL_IDENTIFIER_ENABLED
 static void wifiTxIsr(void)
 {
-  if (COEX_HAL_GetWifiTx()) {
-    RAIL_IEEE802154_EnableSignalIdentifier(emPhyRailHandle, false);
-  } else {
-    RAIL_IEEE802154_EnableSignalIdentifier(emPhyRailHandle, true);
+  if (emPhyRailHandle != NULL) {
+    if (COEX_HAL_GetWifiTx()) {
+      RAIL_IEEE802154_EnableSignalIdentifier(emPhyRailHandle, false);
+    } else {
+      RAIL_IEEE802154_EnableSignalIdentifier(emPhyRailHandle, true);
+    }
   }
 }
 #endif
@@ -291,7 +293,7 @@ void sli_rail_util_ieee802154_coex_on_event(COEX_Events_t events)
     phySelectIsr();
   }
  #endif//SL_RAIL_UTIL_COEX_RUNTIME_PHY_SELECT
- #if SL_RAIL_UTIL_COEX_SIGNAL_IDENTIFIER_ENABLED
+ #if SL_RAIL_UTIL_COEX_IEEE802154_SIGNAL_IDENTIFIER_ENABLED
   if ((events & COEX_EVENT_WIFI_TX_CHANGED) != 0U) {
     wifiTxIsr();
   }
@@ -559,22 +561,25 @@ static void ptaRxTimerCb(RAIL_MultiTimer_t * tmr,
 // Both timers do the same thing, and cancel each other
 #define ptaRxRetryTimerCb ptaRxTimerCb
 
-#if SL_RAIL_UTIL_COEX_PWM_REQ_ENABLED && SL_RAIL_UTIL_COEX_PWM_DEFAULT_ENABLED
-static bool pwmRequestInitialized = false;
-static void initPwmRequest(void)
+static bool stackEventTickInitialized = false;
+
+static void stackEventTickInit(void)
 {
-  if (!pwmRequestInitialized && emPhyRailHandle != NULL) {
+  if (!stackEventTickInitialized && emPhyRailHandle != NULL) {
+#if SL_RAIL_UTIL_COEX_PWM_REQ_ENABLED && SL_RAIL_UTIL_COEX_PWM_DEFAULT_ENABLED
     sl_rail_util_coex_set_request_pwm(COEX_REQ_PWM
                                       | (SL_RAIL_UTIL_COEX_PWM_PRIORITY << COEX_REQ_HIPRI_SHIFT),
                                       NULL,
                                       SL_RAIL_UTIL_COEX_PWM_REQ_DUTYCYCLE,
                                       SL_RAIL_UTIL_COEX_PWM_REQ_PERIOD);
-    pwmRequestInitialized = true;
+#endif
+#if SL_RAIL_UTIL_COEX_IEEE802154_SIGNAL_IDENTIFIER_ENABLED
+    COEX_EnableWifiTxIsr(true);
+    RAIL_IEEE802154_ConfigSignalIdentifier(emPhyRailHandle);
+#endif
+    stackEventTickInitialized = true;
   }
 }
-#else //!(SL_RAIL_UTIL_COEX_PWM_REQ_ENABLED && SL_RAIL_UTIL_COEX_PWM_DEFAULT_ENABLED)
-#define initPwmRequest() //no-op
-#endif // SL_RAIL_UTIL_COEX_PWM_REQ_ENABLED && SL_RAIL_UTIL_COEX_PWM_DEFAULT_ENABLED
 
 sl_rail_util_ieee802154_stack_status_t sl_rail_util_coex_on_event(
   sl_rail_util_ieee802154_stack_event_t stack_event,
@@ -586,7 +591,7 @@ sl_rail_util_ieee802154_stack_status_t sl_rail_util_coex_on_event(
   switch (stack_event) {
     case SL_RAIL_UTIL_IEEE802154_STACK_EVENT_TICK:
       if (sl_rail_util_coex_is_enabled()) {
-        initPwmRequest();
+        stackEventTickInit();
       }
 #if SL_RAIL_UTIL_COEX_RUNTIME_PHY_SELECT
       if (phySelectInitialized) {
@@ -609,10 +614,12 @@ sl_rail_util_ieee802154_stack_status_t sl_rail_util_coex_on_event(
           (void) sl_rail_util_coex_set_rx_request(sl_rail_util_coex_frame_detect_req(), NULL);
           cancelTimer(&ptaRxRetryTimer);
           setTimer(&ptaRxTimer, SL_RAIL_UTIL_COEX_RX_TIMEOUT_US, &ptaRxTimerCb);
-        #if SL_RAIL_UTIL_COEX_SIGNAL_IDENTIFIER_ENABLED
+        #if SL_RAIL_UTIL_COEX_IEEE802154_SIGNAL_IDENTIFIER_ENABLED
           // Disable signal identifier if RX started before signal detected event happened
-          RAIL_IEEE802154_EnableSignalIdentifier(emPhyRailHandle, false);
-          COEX_EnableWifiTxIsr(false);
+          if (emPhyRailHandle != NULL) {
+            RAIL_IEEE802154_EnableSignalIdentifier(emPhyRailHandle, false);
+            COEX_EnableWifiTxIsr(false);
+          }
         #endif
         }
       }
@@ -1057,8 +1064,13 @@ void sl_rail_util_coex_init(void)
 #if defined(SL_RAIL_UTIL_COEX_REQ_PORT) || defined(SL_RAIL_UTIL_COEX_GNT_PORT)
   sl_rail_util_coex_set_enable(true);
 #endif //defined(SL_RAIL_UTIL_COEX_REQ_PORT) || defined(SL_RAIL_UTIL_COEX_GNT_PORT)
-#if SL_RAIL_UTIL_COEX_SIGNAL_IDENTIFIER_ENABLED
-  COEX_EnableWifiTxIsr(true);
-  RAIL_IEEE802154_ConfigSignalIdentifier(emPhyRailHandle);
+}
+
+bool sl_rail_util_is_coex_signal_identifier_enabled(void)
+{
+#if SL_RAIL_UTIL_COEX_IEEE802154_SIGNAL_IDENTIFIER_ENABLED
+  return true;
+#else
+  return false;
 #endif
 }

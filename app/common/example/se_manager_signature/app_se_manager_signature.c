@@ -137,6 +137,9 @@ size_t get_signature_len(sl_se_key_type_t key_type)
     case SL_SE_KEY_TYPE_ECC_P256:
       return (ECC_P256_PRIVKEY_SIZE * 2);
 
+    case SL_SE_KEY_TYPE_ECC_ED25519:
+      return (ECC_ED25519_PRIVKEY_SIZE * 2);
+
 #if (_SILICON_LABS_SECURITY_FEATURE == _SILICON_LABS_SECURITY_FEATURE_VAULT)
     case SL_SE_KEY_TYPE_ECC_P384:
       return (ECC_P384_PRIVKEY_SIZE * 2);
@@ -146,9 +149,6 @@ size_t get_signature_len(sl_se_key_type_t key_type)
 
     case SL_SE_KEY_TYPE_ECC_WEIERSTRASS_PRIME_CUSTOM:
       return (DOMAIN_SIZE * 2);
-
-    case SL_SE_KEY_TYPE_ECC_ED25519:
-      return (ECC_ED25519_PRIVKEY_SIZE * 2);
 #endif
 
     default:

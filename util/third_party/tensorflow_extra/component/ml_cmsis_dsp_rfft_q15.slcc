@@ -6,8 +6,8 @@ description: >
   Q15 types.
 
   This library has been patched
-category: Platform|Machine Learning
-quality: beta
+category: Machine Learning|Utilities
+quality: production
 provides:
   - name: ml_cmsis_dsp_rfft_q15
   - name: frontend_fft_implementation

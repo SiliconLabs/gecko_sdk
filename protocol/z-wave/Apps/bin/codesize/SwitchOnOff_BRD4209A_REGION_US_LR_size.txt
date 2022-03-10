@@ -10,31 +10,30 @@ _cc_handlers_v3        0x188      0x2dcac
 .ARM.exidx               0x8      0x2de34
 .stack                0x1000   0x20000000
 .data                  0x40c   0x20001000
-.reset_info              0x4   0x2000140c
-.bss                  0x9e54   0x20001410
+.bss                  0x9e5c   0x2000140c
 .heap                 0x4d98   0x2000b268
 .internal_storage    0x3a000      0x2de3c
 .zwave_nvm            0x3000      0x67e3c
 .nvm                  0x9000      0x6ae3c
 .ARM.attributes         0x2e          0x0
 .comment                0x4d          0x0
-.debug_frame          0x6bd4          0x0
-.debug_info         0x82b28a          0x0
-.debug_abbrev        0x10962          0x0
-.debug_loc           0x242d3          0x0
+.debug_frame          0x6bd0          0x0
+.debug_info         0x82b24b          0x0
+.debug_abbrev        0x10978          0x0
+.debug_loc           0x24360          0x0
 .debug_aranges        0x28d8          0x0
-.debug_ranges         0x4a30          0x0
-.debug_line          0x2c85a          0x0
-.debug_str           0x688ef          0x0
+.debug_ranges         0x4a20          0x0
+.debug_line          0x2c7e7          0x0
+.debug_str           0x6890e          0x0
 .stabstr               0x14d          0x0
 Total               0x986ee4
 
 The calculated FLASH and SRAM usage summary:
 ============================================
-FLASH used as program memory:  (Including only the sections: .text, .ARM.exidx, .data, _cc_handlers_v3, internal_storage)
-   426568
+FLASH used as program memory:  (Including only the sections: .text, .ARM.exidx, .data, _cc_handlers_v3)
+   189000
 FLASH used for storage: (Including only the sections: .nvm3App, .simee, .nvm, .zwave_nvm)
    49152
 SRAM usage:             (Including only the sections: .data, .bss, .heap, .stack_dummy, .reset_info)
-   65532
+   65536
 

@@ -39,8 +39,9 @@
 extern "C" {
 #endif
 
+/// @cond DO_NOT_INCLUDE_WITH_DOXYGEN
 /***************************************************************************//**
- * @addtogroup mvp_depthwise_conv2d MVP Depthwise Conv2d API
+ * @addtogroup mvp MVP API
  * @{
  ******************************************************************************/
 
@@ -107,7 +108,8 @@ sl_status_t sli_mvp_ml_depthwise_conv2d_s8(const sli_mvp_ml_depthwise_conv2d_s8_
  ******************************************************************************/
 bool sli_mvp_ml_depthwise_conv2d_s8_is_supported(const sli_mvp_ml_depthwise_conv2d_s8_params_t *params);
 
-/** @} (end addtogroup mvp_depthwise_conv2d) */
+/** @} (end addtogroup mvp) */
+/// @endcond
 
 #ifdef __cplusplus
 }

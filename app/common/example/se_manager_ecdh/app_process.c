@@ -38,12 +38,10 @@ static void app_iostream_usart_process_action(void);
  ******************************************************************************/
 static void print_startup(void);
 
-#if (_SILICON_LABS_SECURITY_FEATURE == _SILICON_LABS_SECURITY_FEATURE_VAULT)
 /***************************************************************************//**
  * Print asymmetric key algorithm option.
  ******************************************************************************/
 static void print_key_algo_option(void);
-#endif
 
 /***************************************************************************//**
  * Print selected asymmetric key algorithm for ECDH client.
@@ -95,13 +93,14 @@ static const char *asymmetric_key_type_string[] = {
   "wrapped",
   "volatile"
 };
+#endif
 
 /// Asymmetric key algorithm selection
 static uint8_t asymmetric_key_algo_select;
 
 static const char *asymmetric_key_algo_string[] = {
   "ECC Weierstrass Prime",
-  "ECC Montgomery",
+  "ECC Montgomery"
 };
 
 /// ECC Montgomery key selection for ECDH
@@ -114,9 +113,10 @@ static const char *ecc_montgomery_key_string[] = {
 
 static const sl_se_key_type_t ecc_montgomery_key[] = {
   SL_SE_KEY_TYPE_ECC_X25519,
+#if (_SILICON_LABS_SECURITY_FEATURE == _SILICON_LABS_SECURITY_FEATURE_VAULT)
   SL_SE_KEY_TYPE_ECC_X448
-};
 #endif
+};
 
 /// ECC Weierstrass Prime key selection
 static uint8_t ecc_weierstrass_prime_key_select;
@@ -190,6 +190,7 @@ void app_process_action(void)
         app_state = SELECT_KEY_ALGO;
       }
       break;
+#endif
 
     case SELECT_KEY_ALGO:
       if (space_press) {
@@ -198,8 +199,18 @@ void app_process_action(void)
         if (asymmetric_key_algo_select == 2) {
           asymmetric_key_algo_select = 0;
         }
+#if (_SILICON_LABS_SECURITY_FEATURE == _SILICON_LABS_SECURITY_FEATURE_VAULT)
         printf("  + Current asymmetric key algorithm is %s.\n",
                asymmetric_key_algo_string[asymmetric_key_algo_select]);
+#else
+        if (asymmetric_key_algo_select == 0) {
+          printf("  + Current asymmetric key algorithm is %s.\n",
+                 asymmetric_key_algo_string[asymmetric_key_algo_select]);
+        } else {
+          printf("  + Current asymmetric key algorithm is %s.\n",
+                 ecc_montgomery_key_string[0]);
+        }
+#endif
       }
       if (enter_press) {
         enter_press = false;
@@ -207,6 +218,7 @@ void app_process_action(void)
       }
       break;
 
+#if (_SILICON_LABS_SECURITY_FEATURE == _SILICON_LABS_SECURITY_FEATURE_VAULT)
     case SELECT_MONTGOMERY_KEY:
       if (space_press) {
         space_press = false;
@@ -441,17 +453,17 @@ static void print_startup(void)
          asymmetric_key_type_string[2]);
   app_state = SELECT_KEY_TYPE;
 #else
-  printf("\n  . Current ECC Weierstrass Prime key is %s.\n",
-         ecc_weierstrass_prime_key_string[ecc_weierstrass_prime_key_select]);
-  printf("  + Press SPACE to select ECC Weierstrass Prime key (%s/%s), press ENTER "
-         "to run.\n",
-         ecc_weierstrass_prime_key_string[0],
-         ecc_weierstrass_prime_key_string[1]);
-  app_state = SELECT_WEIERSTRASS_KEY;
+  printf("\n  . Current asymmetric key algorithm is %s.\n",
+         asymmetric_key_algo_string[asymmetric_key_algo_select]);
+  printf("  + Press SPACE to select asymmetric key algorithm (%s/%s), press"
+         " ENTER to next option or run if %s is selected.\n",
+         asymmetric_key_algo_string[0],
+         ecc_montgomery_key_string[0],
+         ecc_montgomery_key_string[0]);
+  app_state = SELECT_KEY_ALGO;
 #endif
 }
 
-#if (_SILICON_LABS_SECURITY_FEATURE == _SILICON_LABS_SECURITY_FEATURE_VAULT)
 /***************************************************************************//**
  * Print asymmetric key algorithm option.
  ******************************************************************************/
@@ -460,6 +472,7 @@ static void print_key_algo_option(void)
   if (asymmetric_key_algo_select == 0) {
     printf("\n  . Current ECC Weierstrass Prime key is %s.\n",
            ecc_weierstrass_prime_key_string[ecc_weierstrass_prime_key_select]);
+#if (_SILICON_LABS_SECURITY_FEATURE == _SILICON_LABS_SECURITY_FEATURE_VAULT)
     printf("  + Press SPACE to select ECC Weierstrass Prime key (%s/%s/%s/%s/%s),"
            " press ENTER to run.\n",
            ecc_weierstrass_prime_key_string[0],
@@ -467,8 +480,15 @@ static void print_key_algo_option(void)
            ecc_weierstrass_prime_key_string[2],
            ecc_weierstrass_prime_key_string[3],
            ecc_weierstrass_prime_key_string[4]);
+#else
+    printf("  + Press SPACE to select ECC Weierstrass Prime key (%s/%s),"
+           " press ENTER to run.\n",
+           ecc_weierstrass_prime_key_string[0],
+           ecc_weierstrass_prime_key_string[1]);
+#endif
     app_state = SELECT_WEIERSTRASS_KEY;
   } else {
+#if (_SILICON_LABS_SECURITY_FEATURE == _SILICON_LABS_SECURITY_FEATURE_VAULT)
     printf("\n  . Current ECC Montgomery key is %s.\n",
            ecc_montgomery_key_string[ecc_montgomery_key_select]);
     printf("  + Press SPACE to select ECC Montgomery key (%s/%s), press ENTER to "
@@ -476,16 +496,18 @@ static void print_key_algo_option(void)
            ecc_montgomery_key_string[0],
            ecc_montgomery_key_string[1]);
     app_state = SELECT_MONTGOMERY_KEY;
+#else
+    selected_key = ecc_montgomery_key[0];
+    print_key_algo_client();
+#endif
   }
 }
-#endif
 
 /***************************************************************************//**
  * Print selected asymmetric key algorithm for ECDH client.
  ******************************************************************************/
 static void print_key_algo_client(void)
 {
-#if (_SILICON_LABS_SECURITY_FEATURE == _SILICON_LABS_SECURITY_FEATURE_VAULT)
   printf("\n  . ECDH Client");
   printf("\n  + %s",
          asymmetric_key_algo_string[asymmetric_key_algo_select]);
@@ -495,7 +517,7 @@ static void print_key_algo_client(void)
   } else {
     printf(" - %s \n", ecc_montgomery_key_string[ecc_montgomery_key_select]);
   }
-
+#if (_SILICON_LABS_SECURITY_FEATURE == _SILICON_LABS_SECURITY_FEATURE_VAULT)
   if (asymmetric_key_type_select == 0) {
     app_state = CREATE_CLIENT_PLAIN_KEY;
   } else if (asymmetric_key_type_select == 1) {
@@ -504,9 +526,6 @@ static void print_key_algo_client(void)
     app_state = CREATE_CLIENT_VOLATILE_KEY;
   }
 #else
-  printf("\n  . ECDH Client");
-  printf("\n  + ECC Weierstrass Prime - %s\n",
-         ecc_weierstrass_prime_key_string[ecc_weierstrass_prime_key_select]);
   app_state = CREATE_CLIENT_PLAIN_KEY;
 #endif
 }
@@ -516,7 +535,6 @@ static void print_key_algo_client(void)
  ******************************************************************************/
 static void print_key_algo_server(void)
 {
-#if (_SILICON_LABS_SECURITY_FEATURE == _SILICON_LABS_SECURITY_FEATURE_VAULT)
   printf("\n  . ECDH Server");
   printf("\n  + %s",
          asymmetric_key_algo_string[asymmetric_key_algo_select]);
@@ -526,7 +544,7 @@ static void print_key_algo_server(void)
   } else {
     printf(" - %s \n", ecc_montgomery_key_string[ecc_montgomery_key_select]);
   }
-
+#if (_SILICON_LABS_SECURITY_FEATURE == _SILICON_LABS_SECURITY_FEATURE_VAULT)
   if (asymmetric_key_type_select == 0) {
     app_state = CREATE_SERVER_PLAIN_KEY;
   } else if (asymmetric_key_type_select == 1) {
@@ -535,9 +553,6 @@ static void print_key_algo_server(void)
     app_state = CREATE_SERVER_VOLATILE_KEY;
   }
 #else
-  printf("\n  . ECDH Server");
-  printf("\n  + ECC Weierstrass Prime - %s\n",
-         ecc_weierstrass_prime_key_string[ecc_weierstrass_prime_key_select]);
   app_state = CREATE_SERVER_PLAIN_KEY;
 #endif
 }
@@ -589,8 +604,14 @@ static void print_shared_secret(bool client)
 #else
   if (client) {
     printf("\n  . Compute ECDH shared secret");
-    printf("\n  + ECC Weierstrass Prime - %s\n",
-           ecc_weierstrass_prime_key_string[ecc_weierstrass_prime_key_select]);
+    printf("\n  + %s",
+           asymmetric_key_algo_string[asymmetric_key_algo_select]);
+    if (asymmetric_key_algo_select == 0) {
+      printf(" - %s \n",
+             ecc_weierstrass_prime_key_string[ecc_weierstrass_prime_key_select]);
+    } else {
+      printf(" - %s \n", ecc_montgomery_key_string[ecc_montgomery_key_select]);
+    }
     printf("  + Compute client shared secret with plaintext key... ");
     if (compute_plain_shared_secret(selected_key, client) == SL_STATUS_OK) {
       app_state = COMPUTE_SERVER_SHARED_SECRET;

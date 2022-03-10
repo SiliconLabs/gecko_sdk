@@ -33,7 +33,7 @@
 #include "aoa_cte.h"
 #include "system.h"
 #include "aoa_cte_config.h"
-#include "aoa_board.h"
+#include "app_log.h"
 
 // -----------------------------------------------------------------------------
 // Module variables.
@@ -41,26 +41,20 @@
 // Current CTE mode.
 static aoa_cte_type_t cte_mode = AOA_CTE_DEFAULT_MODE;
 
+// Common switch pattern for all CTE modes.
+uint8_t cte_switch_pattern[ANTENNA_ARRAY_MAX_PIN_PATTERN_SIZE];
+uint8_t cte_switch_pattern_size;
+
 aoa_cte_config_t aoa_cte_config = {
   AOA_CTE_SAMPLING_INTERVAL,
   AOA_CTE_MIN_LENGTH,
   AOA_CTE_COUNT,
-  AOA_CTE_SLOT_DURATION
+  AOA_CTE_SLOT_DURATION,
+  NULL
 };
 
 // -----------------------------------------------------------------------------
 // Public function definitions.
-
-/**************************************************************************//**
- * Initializes the module.
- *****************************************************************************/
-void aoa_cte_init(void)
-{
-  uint8_t antenna_array[AOA_NUM_ARRAY_ELEMENTS] = SWITCHING_PATTERN;
-  aoa_cte_config.switching_pattern = malloc(AOA_NUM_ARRAY_ELEMENTS * sizeof(uint8_t));
-  memcpy(aoa_cte_config.switching_pattern, antenna_array, sizeof(antenna_array));
-  aoa_cte_config.switching_pattern_length = AOA_NUM_ARRAY_ELEMENTS;
-}
 
 /**************************************************************************//**
  * Handles the bluetooth event.
@@ -68,6 +62,26 @@ void aoa_cte_init(void)
 sl_status_t aoa_cte_bt_on_event(sl_bt_msg_t *evt)
 {
   sl_status_t sc = SL_STATUS_OK;
+
+  if (SL_BT_MSG_ID(evt->header) == sl_bt_evt_system_boot_id) {
+    // Get actual switch pattern at boot.
+    cte_switch_pattern_size = sizeof(cte_switch_pattern);
+    sc = antenna_array_get_pin_pattern(aoa_cte_config.antenna_array,
+                                       cte_switch_pattern,
+                                       &cte_switch_pattern_size);
+    if (sc != SL_STATUS_OK) {
+      return sc;
+    } else {
+      app_log_debug("CTE switch pattern:");
+      if (_app_log_check_level(APP_LOG_LEVEL_DEBUG)) {
+        for (uint8_t i = 0; i < cte_switch_pattern_size; i++) {
+          app_log(" %d", cte_switch_pattern[i]);
+        }
+        app_log_nl();
+      }
+    }
+  }
+
   switch (cte_mode) {
     case AOA_CTE_TYPE_SILABS:
       sc = cte_bt_on_event_silabs(evt);

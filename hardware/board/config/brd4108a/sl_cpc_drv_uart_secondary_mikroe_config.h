@@ -50,8 +50,8 @@
 // <o SL_CPC_DRV_UART_MIKROE_FLOW_CONTROL_TYPE> Flow control
 // <usartHwFlowControlNone=> None
 // <usartHwFlowControlCtsAndRts=> CTS/RTS
-// <i> Default: usartHwFlowControlNone
-#define SL_CPC_DRV_UART_MIKROE_FLOW_CONTROL_TYPE usartHwFlowControlNone
+// <i> Default: usartHwFlowControlCtsAndRts
+#define SL_CPC_DRV_UART_MIKROE_FLOW_CONTROL_TYPE usartHwFlowControlCtsAndRts
 // </h>
 
 // <<< end of configuration section >>>

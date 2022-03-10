@@ -163,9 +163,7 @@ void emberAfPluginNetworkSteeringCompleteCallback(EmberStatus status,
 void emberAfPluginNetworkCreatorCompleteCallback(const EmberNetworkParameters *network,
                                                  bool usedSecondaryChannels)
 {
-  sl_zigbee_app_debug_print("%s network %s: 0x%02X\n",
-                            "Form distributed",
-                            "complete",
+  sl_zigbee_app_debug_print("Form Network Complete: 0x%02X\n",
                             EMBER_SUCCESS);
 }
 

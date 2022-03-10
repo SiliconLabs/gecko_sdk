@@ -7,11 +7,9 @@ description: >
 category: LwIP|OS
 quality: production
 provides:
-  - name: lwip_port
   - name: lwip_port_micriumos
 requires:
   - name: lwip_core
-  - name: micriumos
 source:
   - path: util/third_party/lwip/lwip-contrib/ports/micriumos/sys_arch.c
 include:

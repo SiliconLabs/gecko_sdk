@@ -3,7 +3,7 @@
  * @brief CMSIS system header file for MGM24
  ******************************************************************************
  * # License
- * <b>Copyright 2021 Silicon Laboratories, Inc. www.silabs.com</b>
+ * <b>Copyright 2022 Silicon Laboratories, Inc. www.silabs.com</b>
  ******************************************************************************
  *
  * SPDX-License-Identifier: Zlib
@@ -103,7 +103,6 @@ void EUSART0_RX_IRQHandler(void);        /**< EUSART0_RX IRQ Handler */
 void EUSART0_TX_IRQHandler(void);        /**< EUSART0_TX IRQ Handler */
 void EUSART1_RX_IRQHandler(void);        /**< EUSART1_RX IRQ Handler */
 void EUSART1_TX_IRQHandler(void);        /**< EUSART1_TX IRQ Handler */
-void MVP_IRQHandler(void);               /**< MVP IRQ Handler */
 void ICACHE0_IRQHandler(void);           /**< ICACHE0 IRQ Handler */
 void BURTC_IRQHandler(void);             /**< BURTC IRQ Handler */
 void LETIMER0_IRQHandler(void);          /**< LETIMER0 IRQ Handler */

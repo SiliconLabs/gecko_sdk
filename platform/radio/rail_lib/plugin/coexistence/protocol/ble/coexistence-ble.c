@@ -27,6 +27,8 @@
 #include "coexistence-ble.h"
 #include "coexistence-hal.h"
 
+#include "rail_ble.h"
+
 struct {
   uint16_t requestWindow;
   uint8_t scheduledPriority;
@@ -312,7 +314,11 @@ void sl_bt_enable_coex_pull_resistor(bool enable)
 
 static void scanPwmRequest(bool request)
 {
+#if SL_RAIL_UTIL_COEX_BLE_SIGNAL_IDENTIFIER_ENABLED
+  RAIL_BLE_EnableSignalIdentifier(ll_coex.handle, request);
+#else
   COEX_SetRequest(&ll_coex.scanPwmState, (request ? COEX_REQ_PWM : COEX_REQ_OFF) | (ll_coex.pwmPriority ? COEX_REQ_HIPRI : COEX_REQ_OFF), NULL);
+#endif
 }
 
 /**
@@ -377,6 +383,10 @@ void sl_bt_init_coex(const sl_bt_coex_init_t *coexInit)
 #if SL_RAIL_UTIL_COEX_RHO_ENABLED
   setCoexPowerState(true);
 #endif //SL_RAIL_UTIL_COEX_RHO_ENABLED
+#if SL_RAIL_UTIL_COEX_BLE_SIGNAL_IDENTIFIER_ENABLED
+  RAIL_BLE_ConfigSignalIdentifier(ll_coex.handle,
+                                  (RAIL_BLE_SignalIdentifierMode_t)SL_RAIL_UTIL_COEX_BLE_SIGNAL_IDENTIFIER_MODE);
+#endif
 }
 
 RAIL_Events_t ll_radioFilterEvents(RAIL_Handle_t ll_radioHandle, RAIL_Events_t events)
@@ -443,6 +453,62 @@ bool sl_bt_set_coex_options(uint32_t mask, uint32_t options)
   }
 
   return true;
+}
+
+RAIL_Events_t sl_bt_ll_coex_get_events(void)
+{
+#if SL_RAIL_UTIL_COEX_BLE_SIGNAL_IDENTIFIER_ENABLED
+  RAIL_Events_t events = (RAIL_EVENT_RX_SYNC1_DETECT
+                          | RAIL_EVENT_RX_SYNC2_DETECT
+                          | RAIL_EVENT_SIGNAL_DETECTED);
+  return events;
+#else
+  return RAIL_EVENTS_NONE;
+#endif
+}
+
+static RAIL_MultiTimer_t channelSwitchTimer;
+#define RAIL_UTIL_COEX_BLE_CHANNEL_SWITCH_TIME 30U
+#if SL_RAIL_UTIL_COEX_BLE_SIGNAL_IDENTIFIER_ENABLED
+extern void ll_scanHopToNextChannel(uint32_t minTimeToHop);
+#endif
+
+static void channelSwitchTimerCb(RAIL_MultiTimer_t *tmr,
+                                 RAIL_Time_t expectedTimeOfEvent,
+                                 void *cbArg)
+{
+  (void)tmr;
+  (void)expectedTimeOfEvent;
+  (void)cbArg;
+  COEX_SetRequest(&ll_coex.reqState, COEX_REQ_ON, NULL);
+#if SL_RAIL_UTIL_COEX_BLE_SIGNAL_IDENTIFIER_ENABLED
+  ll_scanHopToNextChannel(SL_RAIL_UTIL_COEX_BLE_MIN_TIME_FOR_HOPPING);
+#endif
+}
+
+void sl_bt_ll_coex_handle_events(RAIL_Events_t events)
+{
+  switch (events) {
+    case RAIL_EVENT_RX_PACKET_RECEIVED:
+      sl_bt_ll_coex_update_grant(false);
+      COEX_SetRequest(&ll_coex.reqState, COEX_REQ_OFF, NULL);
+      break;
+    case RAIL_EVENT_RX_SYNC1_DETECT:
+    case RAIL_EVENT_RX_SYNC2_DETECT:
+      RAIL_CancelMultiTimer(&channelSwitchTimer);
+      COEX_SetRequest(&ll_coex.reqState, COEX_REQ_OFF, NULL);
+      break;
+    case RAIL_EVENT_SIGNAL_DETECTED:
+      RAIL_SetMultiTimer(&channelSwitchTimer, RAIL_UTIL_COEX_BLE_CHANNEL_SWITCH_TIME, RAIL_TIME_DELAY, &channelSwitchTimerCb, NULL);
+      break;
+    case RAIL_EVENT_RX_TIMEOUT:
+    case RAIL_EVENT_RX_SCHEDULED_RX_END:
+    case RAIL_EVENT_RX_PACKET_ABORTED:
+      COEX_SetRequest(&ll_coex.reqState, COEX_REQ_OFF, NULL);
+      break;
+    default:
+      break;
+  }
 }
 
 SL_WEAK void sli_bt_coex_counter_increment_denied(void)

@@ -54,6 +54,8 @@ configuration:
     value: 1
   - name: SL_BT_CONFIG_USER_ADVERTISERS
     value: 2
+  - name: SL_CPC_RX_BUFFER_MAX_COUNT
+    value: 9
   - name: SL_UARTDRV_USART_VCOM_FLOW_CONTROL_TYPE
     value: uartdrvFlowControlNone
   - name: SL_DEVICE_INIT_LFXO_TIMEOUT

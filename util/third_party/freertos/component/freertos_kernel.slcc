@@ -180,8 +180,8 @@ requires:
   - name: cmsis_core
   - name: cmsis_common
   - name: cmsis_rtos2_headers
+  - name: cmsis_rtos2_tick
   - name: cmsis_rtos2_init
-    condition: [sl_system]
   - name: freertos_heap
   - name: sleeptimer
     condition: [power_manager]

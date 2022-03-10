@@ -261,8 +261,8 @@ uint16_t sl_wisun_mc_get_token_size(void);
  * @param[in] src measurement packet which is packed
  * @return const sl_wisun_meter_packet_t* static unpacked measurement packet
  *****************************************************************************/
-void sl_wisun_mc_pack_measurement_packet(sl_wisun_meter_packet_packed_t * const dest,
-                                         const sl_wisun_meter_packet_t * const src);
+void sl_wisun_mc_unpack_measurement_packet(sl_wisun_meter_packet_t * const dest,
+                                           const sl_wisun_meter_packet_packed_t * const src);
 
 /**************************************************************************//**
  * @brief Pack measurement packet content and convert to byte stream.

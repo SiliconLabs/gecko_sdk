@@ -3,7 +3,7 @@
  * @brief Relative Humidity and Temperature sensor (Mock)
  *******************************************************************************
  * # License
- * <b>Copyright 2020 Silicon Laboratories Inc. www.silabs.com</b>
+ * <b>Copyright 2022 Silicon Laboratories Inc. www.silabs.com</b>
  *******************************************************************************
  *
  * SPDX-License-Identifier: Zlib
@@ -47,27 +47,27 @@ static bool has_tempdrv = false; // has temperature driver and it is inited
 static int32_t temperature_millicelsius = T_MIN; // Temperature value
 static uint32_t humidity_millipercent = RH_MIN; // Relative Humidity value
 
-void sl_sensor_rht_init(void)
+sl_status_t sl_sensor_rht_init(void)
 {
   Ecode_t er;
   // Init TEMPDRV
   er = TEMPDRV_Init();
   if (er != ECODE_EMDRV_TEMPDRV_OK) {
     has_tempdrv = false;
-    return;
+    return SL_STATUS_INITIALIZATION;
   }
   // Enable TEMPDRV
   er = TEMPDRV_Enable(true);
   if (er != ECODE_EMDRV_TEMPDRV_OK) {
     TEMPDRV_DeInit();
     has_tempdrv = false;
-    return;
+    return SL_STATUS_INITIALIZATION;
   }
   // Reset to base values
   temperature_millicelsius = T_MIN;
   humidity_millipercent = RH_MIN;
   has_tempdrv = true;
-  return;
+  return SL_STATUS_OK;
 }
 
 void sl_sensor_rht_deinit(void)

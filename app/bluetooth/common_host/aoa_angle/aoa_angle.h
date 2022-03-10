@@ -40,6 +40,7 @@ extern "C" {
 #include "sl_rtl_clib_api.h"
 #include "sl_status.h"
 #include "aoa_util.h"
+#include "antenna_array.h"
 
 // Forward declaration
 typedef struct aoa_mask_node_s aoa_mask_node_t;
@@ -61,19 +62,16 @@ struct aoa_mask_node_s {
 /// Locator specific configuration settings for AoA angle estimation.
 typedef struct aoa_angle_config_s {
   enum sl_rtl_aox_mode aox_mode;
-  enum sl_rtl_aox_array_type array_type;
-  uint16_t period_samples;
   bool angle_filtering;
   float angle_filtering_weight;
   uint16_t angle_correction_timeout;
   uint16_t angle_correction_delay;
-  uint8_t *switching_pattern;
-  uint8_t switching_pattern_length;
   uint8_t num_snapshots;
   uint16_t cte_min_length;
   uint16_t cte_slot_duration;
   aoa_mask_node_t *azimuth_mask_head;
   aoa_mask_node_t *elevation_mask_head;
+  antenna_array_t antenna_array;
 } aoa_angle_config_t;
 
 /**************************************************************************//**

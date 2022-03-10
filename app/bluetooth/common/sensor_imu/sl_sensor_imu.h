@@ -3,7 +3,7 @@
  * @brief Inertial Measurement Unit sensor header
  *******************************************************************************
  * # License
- * <b>Copyright 2020 Silicon Laboratories Inc. www.silabs.com</b>
+ * <b>Copyright 2022 Silicon Laboratories Inc. www.silabs.com</b>
  *******************************************************************************
  *
  * SPDX-License-Identifier: Zlib
@@ -47,8 +47,9 @@ void sl_sensor_imu_deinit(void);
 /**************************************************************************//**
  * Enable/disable IMU sensor.
  * @param[in] Enable (true) or disable (false).
+ * @return Status of the operation.
  *****************************************************************************/
-void sl_sensor_imu_enable(bool enable);
+sl_status_t sl_sensor_imu_enable(bool enable);
 
 /**************************************************************************//**
  * Getter for orientation and acceleration sensor measurement data.

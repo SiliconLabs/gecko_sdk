@@ -1,10 +1,11 @@
-Gecko Platform 4.0.1.0
-- CMSIS: Added module- and part-specific DCDC initialization headers to have more control on DCDC configuration.
-- Security: X25519 and Ed25519 algorithms, along with related key management functionality, are now accelerated on Series-2 Secure Vault Mid devices.
-- Operating System: Added new errno module. 
-- Boards and External Devices: Created pressure driver that abstracts bmp280 and bmp3xx.
-- RAIL Library:
-  - Restricted the SL_RAIL_UTIL_PA_RAMP_TIME_US to 10 us on some EFR32 modules to match the certification conditions.
-  - Updated the Z-Wave PHYs for the EFR32xG23 to prevent a sensitivity degradation on the R2 (9.6 kbps) PHY.
-- Selected quality improvements and bug fixes throughout.
+Gecko Platform 4.0.2.0
+- Peripherals: Added support for the IADC input (as positive or negative inputs) for DAC 0/1 and PADANA 0/1/2/3
+- Gecko Bootloader: Added support for MX25R3235F SPI flash part
+- Boards and External Devices: Added support for new OPNs BRD4330A and BRD4331A
+- RAIL library:
+  - Added support for EFR32xG24
+  - Added a new component to enable the built-in PHYs to operate with either 38.4 MHz or 39 MHz crystals on EFR32xG24 devices
+  - Added support for additional IEEE 802.15.4 CCA modes on platforms that support signal detection (EFR32xG24)
+  - Added support for IEEE 802.15.4 and Bluetooth LE Signal Identifier hardware on the EFR32xG24 (tested to alpha quality)
+- Other quality improvements and bug fixes throughout.
 

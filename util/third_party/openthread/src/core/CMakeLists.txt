@@ -49,7 +49,6 @@ set(COMMON_SOURCES
     api/diags_api.cpp
     api/dns_api.cpp
     api/dns_server_api.cpp
-    api/entropy_api.cpp
     api/error_api.cpp
     api/heap_api.cpp
     api/history_tracker_api.cpp
@@ -80,6 +79,7 @@ set(COMMON_SOURCES
     api/tcp_api.cpp
     api/thread_api.cpp
     api/thread_ftd_api.cpp
+    api/trel_api.cpp
     api/udp_api.cpp
     backbone_router/backbone_tmf.cpp
     backbone_router/bbr_leader.cpp
@@ -158,6 +158,7 @@ set(COMMON_SOURCES
     net/dhcp6_client.cpp
     net/dhcp6_server.cpp
     net/dns_client.cpp
+    net/dns_dso.cpp
     net/dns_types.cpp
     net/dnssd_server.cpp
     net/icmp6.cpp

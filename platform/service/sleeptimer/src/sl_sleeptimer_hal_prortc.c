@@ -306,7 +306,7 @@ void sleeptimer_hal_set_int(uint8_t local_flag)
 #if defined (RTCC_HAS_SET_CLEAR)
     PRORTC->IF_SET = PRORTC_IF_COMP_BIT;
 #else
-    PRORTC->IS = PRORTC_IF_COMP_BIT;
+    PRORTC->IFS = PRORTC_IF_COMP_BIT;
 #endif
   }
 }

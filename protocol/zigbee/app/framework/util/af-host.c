@@ -467,6 +467,22 @@ uint8_t emberAfGetNcpConfigItem(EzspConfigId id)
   return (uint8_t)(*configItemPtr);
 }
 
+EmberStatus emberGetSenderEui64(EmberEUI64 senderEui64)
+{
+  // if the current sender EUI is valid then copy it in and send it back
+  if (currentSenderEui64IsValid) {
+    MEMMOVE(senderEui64, currentSenderEui64, EUI64_SIZE);
+    return EMBER_SUCCESS;
+  }
+  // in the not valid case just return error
+  return EMBER_ERR_FATAL;
+}
+
+bool emberAfNcpNeedsReset(void)
+{
+  return ncpNeedsResetAndInit;
+}
+
 //------------------------------------------------------------------------------
 // Internal APIs
 
@@ -786,6 +802,18 @@ EmberStatus emAfSend(EmberOutgoingMessageType type,
   }
 
   return status;
+}
+
+void emAfPrintEzspEndpointFlags(uint8_t endpoint)
+{
+  EzspEndpointFlags flags;
+  EzspStatus status = ezspGetEndpointFlags(endpoint,
+                                           &flags);
+  if (status != EZSP_SUCCESS) {
+    emberAfCorePrint("Error retrieving EZSP endpoint flags.");
+  } else {
+    emberAfCorePrint("- EZSP Endpoint flags: 0x%04X", flags);
+  }
 }
 
 // WARNING:  This function executes in ISR context

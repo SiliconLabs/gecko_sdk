@@ -36,6 +36,7 @@
 #include "sl_enum.h"
 #include "psa/crypto.h"
 #include "psa_crypto_storage.h"
+#include "sl_cpc_security_config.h"
 
 /// The security state enabled bit mask
 #define SL_CPC_SECURITY_STATE_ENABLE_MASK (1 << 0)

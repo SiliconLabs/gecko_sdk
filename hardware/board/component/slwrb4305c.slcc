@@ -14,9 +14,9 @@
   - name: SL_KIT_NAME
     value: '"SLWRB4305C"'
   - name: SL_KIT_REV
-    value: '"A02"'
+    value: '"A03"'
 - tag:
   - kit:opn:SLWRB4305C
   - kit:pn:WRB4305
   - kit:variant:C
-  - kit:revision:A02
+  - kit:revision:A03

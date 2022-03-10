@@ -353,6 +353,22 @@ sl_status_t sli_cpc_get_raw_rx_buffer(void **raw_rx_buffer)
 }
 
 /***************************************************************************//**
+ * Get a CPC RAW buffer for reception.
+ ******************************************************************************/
+sl_status_t sli_cpc_free_raw_rx_buffer(void *raw_rx_buffer)
+{
+  EFM_ASSERT(sli_cpc_driver_capabilities.use_raw_rx_buffer);
+
+  if (raw_rx_buffer != NULL) {
+    free_object(&cpc_mempool_rx_buffer, raw_rx_buffer);
+  } else {
+    return SL_STATUS_NULL_POINTER;
+  }
+
+  return SL_STATUS_OK;
+}
+
+/***************************************************************************//**
  * Free rx handle and all associate buffers
  ******************************************************************************/
 sl_status_t sli_cpc_drop_buffer_handle(sl_cpc_buffer_handle_t *handle)

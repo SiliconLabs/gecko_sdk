@@ -5,6 +5,12 @@
 extern "C" {
 #endif
 
+/// @cond DO_NOT_INCLUDE_WITH_DOXYGEN
+/***************************************************************************//**
+ * @addtogroup mvp MVP API
+ * @{
+ ******************************************************************************/
+
 /**
  * @brief
  *   Initialize mvp power handling.
@@ -81,6 +87,9 @@ void sli_mvp_power_program_wait(void);
  *   function behaves.
  */
 void sli_mvp_power_program_complete(void);
+
+/** @} (end addtogroup mvp) */
+/// @endcond
 
 #ifdef __cplusplus
 }

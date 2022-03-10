@@ -215,9 +215,20 @@ bool emAfProcessEzspCommandNetworking(uint16_t commandId)
       uint8_t index;
       EmberChildData childData;
       index = fetchInt8u();
-      status = emberAfEzspGetChildDataCommandCallback(index, &childData);
+      status = emberGetChildData(index, &childData);
       appendInt8u(status);
       appendEmberChildData(&childData);
+      break;
+    }
+
+    case EZSP_SET_CHILD_DATA: {
+      EmberStatus status;
+      uint8_t index;
+      EmberChildData childData;
+      index = fetchInt8u();
+      fetchEmberChildData(&childData);
+      status = emberSetChildData(index, &childData);
+      appendInt8u(status);
       break;
     }
 
@@ -267,6 +278,17 @@ bool emAfProcessEzspCommandNetworking(uint16_t commandId)
       status = emberGetNeighborFrameCounter(eui64, &returnFrameCounter);
       appendInt8u(status);
       appendInt32u(returnFrameCounter);
+      break;
+    }
+
+    case EZSP_SET_NEIGHBOR_FRAME_COUNTER: {
+      EmberStatus status;
+      uint8_t eui64[8];
+      uint32_t frameCounter;
+      fetchInt8uArray(8, eui64);
+      frameCounter = fetchInt32u();
+      status = emberSetNeighborFrameCounter(eui64, frameCounter);
+      appendInt8u(status);
       break;
     }
 
@@ -326,6 +348,15 @@ bool emAfProcessEzspCommandNetworking(uint16_t commandId)
       uint8_t channel;
       channel = emberGetRadioChannel();
       appendInt8u(channel);
+      break;
+    }
+
+    case EZSP_SET_RADIO_IEEE802154_CCA_MODE: {
+      EmberStatus status;
+      uint8_t ccaMode;
+      ccaMode = fetchInt8u();
+      status = emberSetRadioIeee802154CcaMode(ccaMode);
+      appendInt8u(status);
       break;
     }
 

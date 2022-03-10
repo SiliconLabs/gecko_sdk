@@ -40,8 +40,8 @@
 " itemURI="file:ug162-simplicity-commander-reference-guide.pdf" label="UG162: Simplicity Commander Reference Guide" priority="12">
 		<property key="sdkAndProtocolTags" value="Bluetooth Bluetooth\ Mesh Zigbee Proprietary Thread HomeKit Wi-SUN"/>
 	</contentItemData>
-	<contentItemData category="Release Notes" description="Gecko Bootloader v2.x, introduced in GSDK 4.0, contains a number of changes compared to Gecko Bootloader v1.x. This document describes the differences between the versions, including how to configure the new Gecko Bootloader in Simplicity Studio 5.     
-" itemURI="file:an1326-gecko-bootloader-transitioning-guide.pdf" label="Transitioning to the Updated Gecko Bootloader in GSDK 4.0 and Higher" priority="3">
+	<contentItemData category="Application Notes" description="Gecko Bootloader v2.x, introduced in GSDK 4.0, contains a number of changes compared to Gecko Bootloader v1.x. This document describes the differences between the versions, including how to configure the new Gecko Bootloader in Simplicity Studio 5.     
+" itemURI="file:an1326-gecko-bootloader-transitioning-guide.pdf" label="AN1326: Transitioning to the Updated Gecko Bootloader in GSDK 4.0 and Higher" priority="3">
 		<property key="sdkAndProtocolTags" value="Bluetooth Bluetooth\ Mesh Zigbee Proprietary Thread 32-bit\ MCU HomeKit Wi-SUN"/>
 	</contentItemData>
 	<contentItemData category="Application Notes" description="How to program, provision, and configure the anti-tamper module on EFR32 Series 2 devices with  Secure Vault.

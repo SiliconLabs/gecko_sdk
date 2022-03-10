@@ -8,7 +8,6 @@ source:
   - path: "../../../../util/third_party/aws_iot_libs/vendors/siliconlabs/boards/all/aws_tests/application_code/main.c"
 component:
   - id: freertos
-  - id: cmsis_rtos2
   - id: aws_tests_core
   - id: iostream_usart
     instance: [vcom]

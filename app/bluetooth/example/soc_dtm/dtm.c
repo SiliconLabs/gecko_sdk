@@ -395,8 +395,9 @@ static void tx_power_set(int8_t tx_power_dbm,
   sl_status_t sc;
   int16_t tx_power_to_set_dbm = 0;
 
-  *response = 0;
-
+  if (response != NULL) {
+    *response = 0;
+  }
   sc = sl_bt_system_get_tx_power_setting(&support_min,
                                          &support_max,
                                          &set_min,
@@ -621,6 +622,7 @@ static void process_transceiver_command(cmd_type_t cmd_type,
   switch (cmd_type) {
     case CMD_TYPE_RXTEST:
 
+      #ifdef SL_CATALOG_BLUETOOTH_FEATURE_AOA_RECEIVER_PRESENT
       if (setup.cte_present) {
         if (setup.ant_array != 0) {
           sc = sl_bt_cte_receiver_set_dtm_parameters(setup.cte_time,
@@ -633,6 +635,8 @@ static void process_transceiver_command(cmd_type_t cmd_type,
       } else {
         (void)sl_bt_cte_receiver_clear_dtm_parameters();
       }
+      #endif // SL_CATALOG_BLUETOOTH_FEATURE_AOA_RECEIVER_PRESENT
+
       (void)sl_bt_test_dtm_rx(cmd->frequency, setup.phy);
       break;
 
@@ -643,6 +647,7 @@ static void process_transceiver_command(cmd_type_t cmd_type,
                    NULL,
                    NULL);
 
+      #ifdef SL_CATALOG_BLUETOOTH_FEATURE_AOA_TRANSMITTER_PRESENT
       if (setup.cte_present) {
         if (setup.ant_array != 0) {
           sc = sl_bt_cte_transmitter_set_dtm_parameters(setup.cte_time,
@@ -654,6 +659,7 @@ static void process_transceiver_command(cmd_type_t cmd_type,
       } else {
         (void)sl_bt_cte_transmitter_clear_dtm_parameters();
       }
+      #endif // SL_CATALOG_BLUETOOTH_FEATURE_AOA_TRANSMITTER_PRESENT
 
       // Do the test only if UART Test Interface command packet type is valid
       if (PACKET_TYPE_MAX > cmd->pkt) {

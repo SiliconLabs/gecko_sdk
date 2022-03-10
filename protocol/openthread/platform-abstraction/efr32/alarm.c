@@ -228,13 +228,12 @@ uint32_t otPlatAlarmMicroGetNow(void)
 
 // Note: This function should be called at least once per wrap
 // period for the wrap-around logic to work below
-uint64_t otPlatRadioGetNow(otInstance *aInstance)
+uint64_t otPlatTimeGet(void)
 {
   static uint32_t timerWraps = 0U;
   static uint32_t prev32TimeUs = 0U;
   uint32_t now32TimeUs;
   uint64_t now64TimeUs;
-  OT_UNUSED_VARIABLE(aInstance);
   CORE_DECLARE_IRQ_STATE;
   CORE_ENTER_CRITICAL();
   now32TimeUs = RAIL_GetTime();

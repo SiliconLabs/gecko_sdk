@@ -58,6 +58,9 @@ source:
 readme:
   - path: ../../../documentation/example/rail/wmbus/readme.md
 
+other_file:
+  - path: "hw_filter_tags.yaml"
+
 #------------ Configuration overrides ----------------
 configuration:
   - name: SL_STACK_SIZE
@@ -109,6 +112,13 @@ configuration:
     value: "1"
   - name: SL_RAIL_UTIL_INIT_PROTOCOL_INST0_DEFAULT
     value: "SL_RAIL_UTIL_PROTOCOL_PROPRIETARY"
+#------------- RAIL init, Calibrations ---------------
+  - name: SL_RAIL_UTIL_INIT_CALIBRATIONS_INST0_ENABLE
+    value: "1"
+  - name: SL_RAIL_UTIL_INIT_CALIBRATION_TEMPERATURE_NOTIFY_INST0_ENABLE
+    value: "1"
+  - name: SL_RAIL_UTIL_INIT_CALIBRATION_ONETIME_NOTIFY_INST0_ENABLE
+    value: "1"
 #------------- RAIL init, Auto Transitions -----------
   - name: SL_RAIL_UTIL_INIT_TRANSITIONS_INST0_ENABLE
     value: "1"
@@ -173,19 +183,3 @@ ui_hints:
     - path: "config/rail/radio_settings.radioconf"
     - path: "readme.md"
       focus: true
-
-tag:
-  - hardware:
-      device:
-        memory:
-          flash: 89
-          ram: 10
-      board:
-        rf_bands:
-          - 169|434|868
-        communication:
-          - vcom
-          - pti
-        io:
-          led: 2
-  

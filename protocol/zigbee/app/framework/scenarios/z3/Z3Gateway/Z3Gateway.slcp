@@ -63,6 +63,8 @@ configuration:
     value:  "\"Z3Gateway>\""
   - name: EMBER_KEY_TABLE_SIZE
     value: 4
+  - name: SL_ZIGBEE_EVENT_DEBUG_ENABLED
+    value: 1
 
 include:
   - path: "./"

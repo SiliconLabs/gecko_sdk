@@ -1,15 +1,15 @@
 id: tensorflow_lite_micro_optimized_kernels
 package: platform
-label: TensorFlow Lite Micro Optimized Kernels
+label: CMSIS-NN Optimized Kernels
 description: >
   This component includes kernel implementations that are optimized for certain CPU
-  architectures. By including this component, the optimized kernel implementations
+  architectures using CMSIS-NN. By including this component, the optimized kernel implementations
   will be used instead of the reference kernels.
 
   The kernels which have optimized implementations are: add, conv, depthwise_conv,
-  fully_connected, mul, pooling and softmax. Remaining kernels fallback to use the
+  fully_connected, mul, pooling and softmax. Remaining kernels fall back to using the
   reference kernel implementations.
-category: Platform|Machine Learning|TensorFlow
+category: Machine Learning|TensorFlow|Kernels
 quality: production
 provides:
   - name: tensorflow_lite_micro_optimized_kernels

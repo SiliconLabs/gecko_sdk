@@ -41,7 +41,7 @@ bool ZAF_EventHelperEventEnqueueFromISR(const uint8_t event)
 {
   EQueueNotifyingStatus Status;
 
-  Status = QueueNotifyingSendToBackFromISR(m_pQueueNotifyingHandle, &event, NULL);
+  Status = QueueNotifyingSendToBackFromISR(m_pQueueNotifyingHandle, &event);
   if (Status != EQUEUENOTIFYING_STATUS_SUCCESS)
   {
     DPRINT("Failed to queue event\r\n");

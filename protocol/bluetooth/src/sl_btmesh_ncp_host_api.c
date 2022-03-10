@@ -621,6 +621,57 @@ sl_status_t sl_btmesh_node_get_adv_phy(uint8_t *phy) {
 
 }
 
+sl_status_t sl_btmesh_node_set_unprov_beaconing_adv_interval(uint16_t adv_interval_min,
+                                                             uint16_t adv_interval_max) {
+    struct sl_btmesh_packet *cmd = (struct sl_btmesh_packet *)sl_btmesh_cmd_msg;
+
+    struct sl_btmesh_packet *rsp = (struct sl_btmesh_packet *)sl_btmesh_rsp_msg;
+
+    cmd->data.cmd_node_set_unprov_beaconing_adv_interval.adv_interval_min=adv_interval_min;
+    cmd->data.cmd_node_set_unprov_beaconing_adv_interval.adv_interval_max=adv_interval_max;
+
+    cmd->header=sl_btmesh_cmd_node_set_unprov_beaconing_adv_interval_id+(((4)&0xff)<<8)+(((4)&0x700)>>8);
+
+
+    sl_btmesh_host_handle_command();
+    return rsp->data.rsp_node_set_unprov_beaconing_adv_interval.result;
+
+}
+
+sl_status_t sl_btmesh_node_set_proxy_service_adv_interval(uint16_t adv_interval_min,
+                                                          uint16_t adv_interval_max) {
+    struct sl_btmesh_packet *cmd = (struct sl_btmesh_packet *)sl_btmesh_cmd_msg;
+
+    struct sl_btmesh_packet *rsp = (struct sl_btmesh_packet *)sl_btmesh_rsp_msg;
+
+    cmd->data.cmd_node_set_proxy_service_adv_interval.adv_interval_min=adv_interval_min;
+    cmd->data.cmd_node_set_proxy_service_adv_interval.adv_interval_max=adv_interval_max;
+
+    cmd->header=sl_btmesh_cmd_node_set_proxy_service_adv_interval_id+(((4)&0xff)<<8)+(((4)&0x700)>>8);
+
+
+    sl_btmesh_host_handle_command();
+    return rsp->data.rsp_node_set_proxy_service_adv_interval.result;
+
+}
+
+sl_status_t sl_btmesh_node_set_provisioning_service_adv_interval(uint16_t adv_interval_min,
+                                                                 uint16_t adv_interval_max) {
+    struct sl_btmesh_packet *cmd = (struct sl_btmesh_packet *)sl_btmesh_cmd_msg;
+
+    struct sl_btmesh_packet *rsp = (struct sl_btmesh_packet *)sl_btmesh_rsp_msg;
+
+    cmd->data.cmd_node_set_provisioning_service_adv_interval.adv_interval_min=adv_interval_min;
+    cmd->data.cmd_node_set_provisioning_service_adv_interval.adv_interval_max=adv_interval_max;
+
+    cmd->header=sl_btmesh_cmd_node_set_provisioning_service_adv_interval_id+(((4)&0xff)<<8)+(((4)&0x700)>>8);
+
+
+    sl_btmesh_host_handle_command();
+    return rsp->data.rsp_node_set_provisioning_service_adv_interval.result;
+
+}
+
 sl_status_t sl_btmesh_prov_init() {
     struct sl_btmesh_packet *cmd = (struct sl_btmesh_packet *)sl_btmesh_cmd_msg;
 

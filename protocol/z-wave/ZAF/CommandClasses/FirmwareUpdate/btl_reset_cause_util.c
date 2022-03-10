@@ -13,11 +13,12 @@
 #include <stddef.h>
 #include <ZW_system_startup_api.h>
 
-static BootloaderResetCause_t * pBootInfo = (BootloaderResetCause_t *)SRAM_BASE;
+extern BootloaderResetCause_t m_resetinfo;
+static BootloaderResetCause_t * pBootInfo = &m_resetinfo;
 
 bool CC_FirmwareUpdate_IsFirstBoot(uint16_t * pBootReason)
 {
-  static bool isFirstBoot = false;
+  bool isFirstBoot = false;
   DPRINTF("\nBTL rst reason: %x", pBootInfo->reason);
 
   //First boot is always triggered by Software Reset.

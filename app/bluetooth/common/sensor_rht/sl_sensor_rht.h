@@ -3,7 +3,7 @@
  * @brief Relative Humidity and Temperature sensor header
  *******************************************************************************
  * # License
- * <b>Copyright 2020 Silicon Laboratories Inc. www.silabs.com</b>
+ * <b>Copyright 2022 Silicon Laboratories Inc. www.silabs.com</b>
  *******************************************************************************
  *
  * SPDX-License-Identifier: Zlib
@@ -40,8 +40,9 @@
  * \note With certain boards (e.g. 4166A, 4184A, 4184B), using this
  * initialization function enables other sensors, because they're on the same
  * enable pin. Please take that into account when using this function.
+ * @return Status of the operation.
  *****************************************************************************/
-void sl_sensor_rht_init(void);
+sl_status_t sl_sensor_rht_init(void);
 
 /**************************************************************************//**
  * Deinitialize Relative Humidity and Temperature sensor.

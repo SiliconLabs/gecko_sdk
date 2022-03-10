@@ -23,6 +23,7 @@
 
 #include "app/util/ezsp/ezsp-enum.h"
 #include "app/util/ezsp/ezsp-frame-utilities.h"
+#include "stack/config/ember-configuration-defaults.h"
 
 #define DEFAULT_TC_POLICY (EZSP_DECISION_ALLOW_JOINS | EZSP_DECISION_ALLOW_UNSECURED_REJOINS)
 extern uint8_t emNumMultiPanForks;
@@ -40,6 +41,14 @@ void emXncpInit(void)
     trustCenterPolicies[i] = DEFAULT_TC_POLICY;
   }
 #endif  // EMBER_MULTI_NETWORK_STRIPPED
+
+  EmberStatus status = emberSetRadioIeee802154CcaMode(EMBER_RADIO_802154_CCA_MODE);
+  emberDebugPrintf("Init: default CCA mode set to %d: 0x%X",
+                   EMBER_RADIO_802154_CCA_MODE,
+                   status);
+#ifndef DEBUG_ROUTINES_PRESENT
+  (void)status;
+#endif // DEBUG_ROUTINES_PRESENT
 }
 
 // *****************************************

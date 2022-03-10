@@ -82,6 +82,12 @@ public:
     void Init(void);
 
     /**
+     * This method deinitialize the NCP controller.
+     *
+     */
+    void Deinit(void);
+
+    /**
      * This method get mInstance pointer.
      *
      * @retval The pointer of mInstance.
@@ -176,6 +182,10 @@ private:
                                                  const otIp6Address *         aAddress);
     void        HandleBackboneRouterNdProxyEvent(otBackboneRouterNdProxyEvent aEvent, const otIp6Address *aAddress);
 #endif
+
+    static bool IsAutoAttachEnabled(void);
+
+    static void DisableAutoAttach(void);
 
     otInstance *mInstance;
 

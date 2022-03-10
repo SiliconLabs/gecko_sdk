@@ -27,6 +27,7 @@
 #include <ZW_classcmd.h>
 #include <CC_Supervision.h>
 #include <ZAF_tx_mutex.h>
+#include <Assert.h>
 
 #include "CC_MultilevelSensor_Support.h"
 #include "CC_MultilevelSensor_SensorHandler.h"
@@ -103,6 +104,14 @@ void sl_cc_multilevel_sensor_init(void)
   AppTimerEm4PersistentStart(&cc_multilevel_sensor_autoreport_timer, SL_MULTILEVEL_SENSOR_DEFAULT_AUTOREPORT_PEDIOD_MS);
 }
 
+typedef struct tse_data_t {
+  RECEIVE_OPTIONS_TYPE_EX zaf_tse_local_actuation;
+  sl_sensor_interface_iterator_t* sensor_interface;  
+} tse_data_t;
+ 
+  
+static tse_data_t tse_data[SL_MULTILEVEL_SENSOR_REGISTERED_SENSOR_NUMBER_LIMIT] = {0};
+
 /**
  * This is a callback for the autoreport timer to trigger periodically the lifeline
  * report of the sensors' measured values.
@@ -116,20 +125,17 @@ static void sl_cc_multilevel_sensor_autoreport_callback(SSwTimer *pTimer)
   * All applications can use this variable when triggering the TSE after
   * a local / non Z-Wave initiated change
   */
-  static RECEIVE_OPTIONS_TYPE_EX zaf_tse_local_actuation = {
-    .rxStatus = 0,    /* rxStatus, verified by the TSE for Multicast */
-    .securityKey = 0,   /* securityKey, ignored by the TSE */
-    .sourceNode = {0,0},  /* sourceNode (nodeId, endpoint), verified against lifeline destinations by the TSE */
-    .destNode = {0,0}   /* destNode (nodeId, endpoint), verified by the TSE for local endpoint */
-  };
-
-  uint8_t registered_sensors = sl_cc_multilevel_sensor_get_number_of_registered_sensors();
-
-  if(registered_sensors > 0)
+  sl_sensor_interface_iterator_t* sensor_interface_iterator;
+  sl_cc_multilevel_sensor_init_iterator(&sensor_interface_iterator);
+  uint8_t i = 0;
+  while(sensor_interface_iterator)
   {
-    ZAF_TSE_Trigger(sl_cc_multilevel_sensor_operation_report_stx, (void*)&zaf_tse_local_actuation, true);
-  }
 
+    tse_data[i].sensor_interface = sensor_interface_iterator;
+    ZAF_TSE_Trigger(sl_cc_multilevel_sensor_operation_report_stx, (void*)&tse_data[i], false);
+    sl_cc_multilevel_sensor_next_iterator(&sensor_interface_iterator);
+    i++;
+  }
   AppTimerEm4PersistentStart(&cc_multilevel_sensor_autoreport_timer, SL_MULTILEVEL_SENSOR_DEFAULT_AUTOREPORT_PEDIOD_MS);
 }
 
@@ -138,51 +144,54 @@ static void sl_cc_multilevel_sensor_autoreport_callback(SSwTimer *pTimer)
  * @param[in] txOptions TxOptions, filled in by TSE
  * @param[in] pData this parameter is not used in this case
  */
-static void sl_cc_multilevel_sensor_operation_report_stx(TRANSMIT_OPTIONS_TYPE_SINGLE_EX txOptions, void* pData)
+static void sl_cc_multilevel_sensor_operation_report_stx(TRANSMIT_OPTIONS_TYPE_SINGLE_EX txOptions, void *pData)
 {
-  UNUSED(pData);
-
-  ZAF_TRANSPORT_TX_BUFFER  TxBuf;
-  ZW_APPLICATION_TX_BUFFER *pTxBuf = &(TxBuf.appTxBuf);
-  uint8_t* pTxBufRaw = (uint8_t *)pTxBuf;
-
-  sl_sensor_interface_iterator_t* sensor_interface_iterator;
-  sl_cc_multilevel_sensor_init_iterator(&sensor_interface_iterator);
-
-  while(sensor_interface_iterator)
+  if (NULL == pData)
   {
-    sl_sensor_read_result_t read_result;
-    size_t  raw_buffer_offset = 0;
-    uint8_t sensor_type_value = 0;
-    uint8_t scale       = 0;
-    memset((uint8_t*)pTxBuf, 0, sizeof(ZW_APPLICATION_TX_BUFFER) );
+    ASSERT(0);  // this only for debugging purpose.
+    return;
+  }
 
-    pTxBuf->ZW_SensorMultilevelGetV11Frame.cmdClass = COMMAND_CLASS_SENSOR_MULTILEVEL_V11;
-    raw_buffer_offset++;
-    pTxBuf->ZW_SensorMultilevelGetV11Frame.cmd    = SENSOR_MULTILEVEL_REPORT_V11;
-    raw_buffer_offset++;
+  sl_sensor_interface_iterator_t *sensor_interface_iterator = ((tse_data_t *)pData)->sensor_interface;
+  if (NULL == sensor_interface_iterator) {
+    ASSERT(0);  // this only for debugging purpose.
+    return;
+  }
 
-    sensor_type_value = sensor_interface_iterator->sensor_type->value;
-    pTxBufRaw[raw_buffer_offset++] = sensor_type_value;
+  ZAF_TRANSPORT_TX_BUFFER TxBuf;
+  ZW_APPLICATION_TX_BUFFER *pTxBuf = &(TxBuf.appTxBuf);
+  uint8_t *pTxBufRaw = (uint8_t *)pTxBuf;
 
-    if(sensor_interface_iterator->read_value != NULL)
+  sl_sensor_read_result_t read_result;
+  size_t raw_buffer_offset = 0;
+  uint8_t sensor_type_value = 0;
+  uint8_t scale = 0;
+  memset((uint8_t *)pTxBuf, 0, sizeof(ZW_APPLICATION_TX_BUFFER));
+
+  pTxBuf->ZW_SensorMultilevelGetV11Frame.cmdClass = COMMAND_CLASS_SENSOR_MULTILEVEL_V11;
+  raw_buffer_offset++;
+  pTxBuf->ZW_SensorMultilevelGetV11Frame.cmd = SENSOR_MULTILEVEL_REPORT_V11;
+  raw_buffer_offset++;
+
+  sensor_type_value = sensor_interface_iterator->sensor_type->value;
+  pTxBufRaw[raw_buffer_offset++] = sensor_type_value;
+
+  if (sensor_interface_iterator->read_value != NULL)
+  {
+    scale = sl_cc_multilevel_sensor_check_scale(sensor_interface_iterator, 0);
+    if (true == sensor_interface_iterator->read_value(&read_result, scale))
     {
-      scale = sl_cc_multilevel_sensor_check_scale(sensor_interface_iterator, 0);
-      if(true == sensor_interface_iterator->read_value(&read_result, scale))
-      {
-        pTxBufRaw[raw_buffer_offset++] =  (uint8_t)(read_result.precision << 5) |
-                                                          (uint8_t)(scale << 3) |
-                                          (uint8_t)read_result.size_bytes;
-        memcpy(&pTxBufRaw[raw_buffer_offset], read_result.raw_result, read_result.size_bytes);
-        raw_buffer_offset += read_result.size_bytes;
+      pTxBufRaw[raw_buffer_offset++] = (uint8_t)(read_result.precision << 5) |
+                                       (uint8_t)(scale << 3) |
+                                       (uint8_t)read_result.size_bytes;
+      memcpy(&pTxBufRaw[raw_buffer_offset], read_result.raw_result, read_result.size_bytes);
+      raw_buffer_offset += read_result.size_bytes;
 
-        Transport_SendRequestEP( pTxBufRaw,
-                                 raw_buffer_offset,
-                                 &txOptions,
-                                 ZAF_TSE_TXCallback);
-      }
+      Transport_SendRequestEP(pTxBufRaw,
+                              raw_buffer_offset,
+                              &txOptions,
+                              ZAF_TSE_TXCallback);
     }
-  	sl_cc_multilevel_sensor_next_iterator(&sensor_interface_iterator);
   }
 }
 

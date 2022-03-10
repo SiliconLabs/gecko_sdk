@@ -56,6 +56,11 @@ enum
 
   // These states are specific to RAIL
   EMBER_MAC_STATE_RADIO_INIT,
+
+#ifdef CSL_SUPPORT
+  // These states are specific to the CSL feature within the lower mac
+  EMBER_MAC_STATE_WUF_RX, // a wake up frame has been received and we have scheduled an RX
+#endif // CSL_SUPPORT
 };
 
 extern LowerMacState emLowerMacState;
@@ -75,6 +80,9 @@ enum
 
 bool sl_mac_lower_mac_is_idle(uint8_t mac_index);
 void sl_mac_lower_mac_set_idle(uint8_t mac_index);
+#ifdef CSL_SUPPORT
+bool sl_mac_lower_mac_rx_wakeup_frame(uint8_t mac_index);
+#endif // CSL_SUPPORT
 
 void sl_mac_lower_mac_send(uint8_t mac_index, uint8_t *packet, sl_mac_tx_options_bitmask_t tx_options);
 void sl_mac_packet_send_complete_callback(uint8_t mac_index, sl_status_t status);
@@ -254,6 +262,12 @@ void sl_mac_lower_mac_radio_sleep(void);
 void sl_mac_lower_mac_radio_wakeup(void);
 uint32_t sl_mac_get_mac_timer(void);
 bool sl_mac_lower_mac_channel_is_valid(uint8_t mac_index, uint8_t mac_page_chan);
+
+//------------------------------------------------------------------------------
+// New APIs created after the zigbee/flex merge
+
+sl_status_t sl_mac_set_cca_mode(uint8_t ccaMode);
+
 sl_status_t sl_mac_enable_duty_cycling(void);
 
 // CSL related structs and APIs
@@ -288,7 +302,7 @@ sl_status_t sl_mac_set_mac_csl_period(uint8_t mac_index, uint16_t mac_csl_period
 uint16_t sl_mac_get_mac_csl_period(uint8_t mac_index);
 sl_status_t sl_mac_set_mac_csl_channel_sample(uint8_t mac_index, uint16_t mac_csl_channel_sample_ms);
 uint16_t sl_mac_get_mac_csl_channel_sample(uint8_t mac_index);
-
+void sli_mac_get_eui64(EmberEUI64 eui64);
 // 802.15.4 software filtering APIs (see lower-mac-802.15.4-filtering.c)
 
 // Return true if the packet is accepted, false if the packet is filtered.

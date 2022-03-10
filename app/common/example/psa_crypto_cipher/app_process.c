@@ -47,10 +47,8 @@ static void encrypt_cipher_single(psa_algorithm_t algo);
 
 /***************************************************************************//**
  * Single part cipher decryption.
- *
- * @param algo The cipher algorithm.
  ******************************************************************************/
-static void decrypt_cipher_single(psa_algorithm_t algo);
+static void decrypt_cipher_single(void);
 
 // -----------------------------------------------------------------------------
 //                                Global Variables
@@ -357,7 +355,7 @@ void app_process_action(void)
         break;
       }
       printf("\n  . AES ECB decryption -");
-      decrypt_cipher_single(PSA_ALG_ECB_NO_PADDING);
+      decrypt_cipher_single();
       if (app_state == PSA_CRYPTO_EXIT) {
         break;
       }
@@ -371,7 +369,7 @@ void app_process_action(void)
         break;
       }
       printf("\n  . AES CBC decryption -");
-      decrypt_cipher_single(PSA_ALG_CBC_NO_PADDING);
+      decrypt_cipher_single();
       if (app_state == PSA_CRYPTO_EXIT) {
         break;
       }
@@ -385,7 +383,7 @@ void app_process_action(void)
         break;
       }
       printf("\n  . AES CFB decryption -");
-      decrypt_cipher_single(PSA_ALG_CFB);
+      decrypt_cipher_single();
       if (app_state == PSA_CRYPTO_EXIT) {
         break;
       }
@@ -399,7 +397,7 @@ void app_process_action(void)
         break;
       }
       printf("\n  . AES CTR decryption -");
-      decrypt_cipher_single(PSA_ALG_CTR);
+      decrypt_cipher_single();
       if (app_state == PSA_CRYPTO_EXIT) {
         break;
       }
@@ -416,7 +414,7 @@ void app_process_action(void)
           break;
         }
         printf("\n  . CHACHA20 decryption -");
-        decrypt_cipher_single(PSA_ALG_STREAM_CIPHER);
+        decrypt_cipher_single();
         if (app_state == PSA_CRYPTO_EXIT) {
           break;
         }
@@ -1049,22 +1047,8 @@ static void encrypt_cipher_single(psa_algorithm_t algo)
   // Free resources
   reset_key_attr();
 
-  printf("  + Starting an encryption... ");
-  if (start_cipher_encryption() != PSA_SUCCESS) {
-    return;
-  }
-  if (algo != PSA_ALG_ECB_NO_PADDING) {
-    printf("  + Generating an IV... ");
-    if (generate_cipher_iv() != PSA_SUCCESS) {
-      return;
-    }
-  }
-  printf("  + Updating an encryption... ");
-  if (update_cipher_encryption(0) != PSA_SUCCESS) {
-    return;
-  }
-  printf("  + Finishing an encryption... ");
-  if (finish_cipher_encryption() != PSA_SUCCESS) {
+  printf("  + Encrypting message... ");
+  if (encrypt_cipher() != PSA_SUCCESS) {
     return;
   }
   app_state = PSA_CRYPTO_INIT;
@@ -1073,7 +1057,7 @@ static void encrypt_cipher_single(psa_algorithm_t algo)
 /***************************************************************************//**
  * Single part cipher decryption.
  ******************************************************************************/
-static void decrypt_cipher_single(psa_algorithm_t algo)
+static void decrypt_cipher_single(void)
 {
   app_state = PSA_CRYPTO_EXIT;
   memset(get_plain_msg_buf_ptr(), 0, plain_msg_size[plain_msg_size_select]);
@@ -1082,22 +1066,8 @@ static void decrypt_cipher_single(psa_algorithm_t algo)
          symmetric_key_size[symmetric_key_size_select]);
 
   // Use the key in encryption for decryption
-  printf("  + Starting a decryption... ");
-  if (start_cipher_decryption() != PSA_SUCCESS) {
-    return;
-  }
-  if (algo != PSA_ALG_ECB_NO_PADDING) {
-    printf("  + Setting the IV... ");
-    if (set_cipher_iv() != PSA_SUCCESS) {
-      return;
-    }
-  }
-  printf("  + Updating a decryption... ");
-  if (update_cipher_decryption(0) != PSA_SUCCESS) {
-    return;
-  }
-  printf("  + Finishing a decryption... ");
-  if (finish_cipher_decryption() != PSA_SUCCESS) {
+  printf("  + Decrypting message... ");
+  if (decrypt_cipher() != PSA_SUCCESS) {
     return;
   }
   printf("  + Comparing the hash of decrypted message and plain message... ");

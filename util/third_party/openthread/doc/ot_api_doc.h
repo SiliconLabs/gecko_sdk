@@ -84,6 +84,7 @@
  * @defgroup api-message              Message
  *
  * @defgroup api-multi-radio          Multi Radio Link
+ * @defgroup api-trel                 TREL - Thread Stack
  *
  * @defgroup api-thread               Thread
  *
@@ -122,7 +123,6 @@
  * @defgroup api-cli                  Command Line Interface
  * @defgroup api-coprocessor-rpc      Co-processor Remote Procedure Call
  * @defgroup api-crypto               Crypto - Thread Stack
- * @defgroup api-entropy              Entropy Source
  * @defgroup api-factory-diagnostics  Factory Diagnostics - Thread Stack
  * @defgroup api-heap                 Heap
  * @defgroup api-history-tracker      History Tracker
@@ -168,7 +168,7 @@
  * @defgroup plat-spi-slave           SPI Slave
  * @defgroup plat-time                Time Service
  * @defgroup plat-toolchain           Toolchain
- * @defgroup plat-trel                TREL
+ * @defgroup plat-trel                TREL - Platform
  *
  * @}
  *

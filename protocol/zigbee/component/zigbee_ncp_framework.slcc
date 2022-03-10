@@ -86,13 +86,15 @@ template_contribution:
       handler: sli_zigbee_ncp_tick_callback
     unless:
       - cmsis_rtos2
+  # We have ash-ncp.c in legacy_ncp_ash.slcc and
+  # serial-interface-spi.c in zigbee_ncp_spi_source.slcc
+  # subscribing this is_ok_to_sleep handler. They are mutual exclusive
+  # based on what serial communication we choose for NCP.
   - name: power_manager_handler
     value:
       event: is_ok_to_sleep
       include: "serial-interface.h"
       handler: serialOkToSleep
-    condition:
-      - zigbee_ncp_spi
   - name: zigbee_stack_callback
     value:
       callback_type: counter

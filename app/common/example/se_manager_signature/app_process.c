@@ -38,12 +38,10 @@ static void app_iostream_usart_process_action(void);
  ******************************************************************************/
 static void print_startup(void);
 
-#if (_SILICON_LABS_SECURITY_FEATURE == _SILICON_LABS_SECURITY_FEATURE_VAULT)
 /***************************************************************************//**
  * Print asymmetric key algorithm option.
  ******************************************************************************/
 static void print_key_algo_option(void);
-#endif
 
 /***************************************************************************//**
  * Print selected asymmetric key algorithm for digital signature.
@@ -66,12 +64,8 @@ static bool enter_press;
 /// State machine state variable
 static state_t app_state = SE_MANAGER_INIT;
 
-#if (_SILICON_LABS_SECURITY_FEATURE == _SILICON_LABS_SECURITY_FEATURE_VAULT)
 /// String for example
 static uint8_t example_string[] = "SE Manager Digital Signature (ECDSA and EdDSA) Example";
-#else
-static uint8_t example_string[] = "SE Manager Digital Signature (ECDSA) Example";
-#endif
 
 #if (_SILICON_LABS_SECURITY_FEATURE == _SILICON_LABS_SECURITY_FEATURE_VAULT)
 /// Asymmetric key type (plain or wrap or volatile)
@@ -82,6 +76,7 @@ static const char *asymmetric_key_type_string[] = {
   "wrapped",
   "volatile"
 };
+#endif
 
 /// Asymmetric key algorithm selection
 static uint8_t asymmetric_key_algo_select;
@@ -90,7 +85,6 @@ static const char *asymmetric_key_algo_string[] = {
   "ECC Weierstrass Prime",
   "ECC EdDSA (Ed25519)"
 };
-#endif
 
 /// ECC Weierstrass Prime key selection
 static uint8_t ecc_weierstrass_prime_key_select;
@@ -203,6 +197,7 @@ void app_process_action(void)
         app_state = SELECT_KEY_ALGO;
       }
       break;
+#endif
 
     case SELECT_KEY_ALGO:
       if (space_press) {
@@ -219,7 +214,6 @@ void app_process_action(void)
         print_key_algo_option();
       }
       break;
-#endif
 
     case SELECT_WEIERSTRASS_KEY:
       if (space_press) {
@@ -346,9 +340,14 @@ void app_process_action(void)
                asymmetric_key_type_string[asymmetric_key_type_select]);
       }
 #else
-      printf("  + Sign %lu bytes message with %s and plaintext private key... ",
-             plain_msg_size[plain_msg_size_select],
-             hash_algo_string[hash_algo_select]);
+      if (asymmetric_key_algo_select == 0) {
+        printf("  + Sign %lu bytes message with %s and plaintext private "
+               "key... ", plain_msg_size[plain_msg_size_select],
+               hash_algo_string[hash_algo_select]);
+      } else {
+        printf("  + Sign %lu bytes message with plaintext private key... ",
+               plain_msg_size[plain_msg_size_select]);
+      }
 #endif
       if (sign_message(hash_algo[hash_algo_select]) == SL_STATUS_OK) {
         app_state = VERIFY_SIGNATURE;
@@ -375,8 +374,12 @@ void app_process_action(void)
                asymmetric_key_type_string[asymmetric_key_type_select]);
       }
 #else
-      printf("  + Verify signature with %s and plaintext public key... ",
-             hash_algo_string[hash_algo_select]);
+      if (asymmetric_key_algo_select == 0) {
+        printf("  + Verify signature with %s and plaintext public key... ",
+               hash_algo_string[hash_algo_select]);
+      } else {
+        printf("  + Verify signature with plaintext public key... ");
+      }
 #endif
       if (verify_signature(hash_algo[hash_algo_select]) == SL_STATUS_OK) {
 #if (_SILICON_LABS_SECURITY_FEATURE == _SILICON_LABS_SECURITY_FEATURE_VAULT)
@@ -442,17 +445,16 @@ static void print_startup(void)
          asymmetric_key_type_string[2]);
   app_state = SELECT_KEY_TYPE;
 #else
-  printf("\n  . Current ECC Weierstrass Prime key is %s.\n",
-         ecc_weierstrass_prime_key_string[ecc_weierstrass_prime_key_select]);
-  printf("  + Press SPACE to select ECC Weierstrass Prime key (%s/%s), press ENTER "
-         "to next option.\n",
-         ecc_weierstrass_prime_key_string[0],
-         ecc_weierstrass_prime_key_string[1]);
-  app_state = SELECT_WEIERSTRASS_KEY;
+  printf("\n  . Current asymmetric key algorithm is %s.\n",
+         asymmetric_key_algo_string[asymmetric_key_algo_select]);
+  printf("  + Press SPACE to select asymmetric key algorithm (%s/%s), press"
+         " ENTER to next option.\n",
+         asymmetric_key_algo_string[0],
+         asymmetric_key_algo_string[1]);
+  app_state = SELECT_KEY_ALGO;
 #endif
 }
 
-#if (_SILICON_LABS_SECURITY_FEATURE == _SILICON_LABS_SECURITY_FEATURE_VAULT)
 /***************************************************************************//**
  * Print asymmetric key algorithm option.
  ******************************************************************************/
@@ -461,6 +463,7 @@ static void print_key_algo_option(void)
   if (asymmetric_key_algo_select == 0) {
     printf("\n  . Current ECC Weierstrass Prime key is %s.\n",
            ecc_weierstrass_prime_key_string[ecc_weierstrass_prime_key_select]);
+#if (_SILICON_LABS_SECURITY_FEATURE == _SILICON_LABS_SECURITY_FEATURE_VAULT)
     printf("  + Press SPACE to select ECC Weierstrass Prime key (%s/%s/%s/%s/%s),"
            " press ENTER to next option.\n",
            ecc_weierstrass_prime_key_string[0],
@@ -468,6 +471,11 @@ static void print_key_algo_option(void)
            ecc_weierstrass_prime_key_string[2],
            ecc_weierstrass_prime_key_string[3],
            ecc_weierstrass_prime_key_string[4]);
+#else
+    printf("  + Press SPACE to select ECC Weierstrass Prime key (%s/%s), press "
+           "ENTER to next option.\n", ecc_weierstrass_prime_key_string[0],
+           ecc_weierstrass_prime_key_string[1]);
+#endif
     app_state = SELECT_WEIERSTRASS_KEY;
   } else {
     // ECC EdDSA key for digital signature
@@ -480,14 +488,12 @@ static void print_key_algo_option(void)
     app_state = SELECT_DATA_SIZE;
   }
 }
-#endif
 
 /***************************************************************************//**
  * Print selected asymmetric key algorithm for digital signature.
  ******************************************************************************/
 static void print_key_algo(void)
 {
-#if (_SILICON_LABS_SECURITY_FEATURE == _SILICON_LABS_SECURITY_FEATURE_VAULT)
   printf("\n  . Digital signature");
   printf("\n  + %s",
          asymmetric_key_algo_string[asymmetric_key_algo_select]);
@@ -498,6 +504,7 @@ static void print_key_algo(void)
     printf("\n");
   }
 
+#if (_SILICON_LABS_SECURITY_FEATURE == _SILICON_LABS_SECURITY_FEATURE_VAULT)
   if (asymmetric_key_type_select == 0) {
     app_state = CREATE_PLAIN_KEY;
   } else if (asymmetric_key_type_select == 1) {
@@ -506,9 +513,6 @@ static void print_key_algo(void)
     app_state = CREATE_VOLATILE_KEY;
   }
 #else
-  printf("\n  . Digital signature");
-  printf("\n  + ECC Weierstrass Prime - %s\n",
-         ecc_weierstrass_prime_key_string[ecc_weierstrass_prime_key_select]);
   app_state = CREATE_PLAIN_KEY;
 #endif
 }

@@ -33,11 +33,11 @@ import logging
 import os
 import re
 import socket
-import string
 import subprocess
 import sys
 import time
 import traceback
+import typing
 import unittest
 from ipaddress import IPv6Address, IPv6Network
 from typing import Union, Dict, Optional, List, Any
@@ -89,6 +89,14 @@ class OtbrDocker:
                                              stdout=subprocess.DEVNULL,
                                              stderr=subprocess.DEVNULL)
 
+        try:
+            self._ot_rcp_proc.wait(1)
+        except subprocess.TimeoutExpired:
+            # We expect ot-rcp not to quit in 1 second.
+            pass
+        else:
+            raise Exception(f"ot-rcp {nodeid} exited unexpectedly!")
+
     def _get_ot_rcp_path(self) -> str:
         srcdir = os.environ['top_builddir']
         path = '%s/examples/apps/ncp/ot-rcp' % srcdir
@@ -117,6 +125,8 @@ class OtbrDocker:
             config.OTBR_DOCKER_IMAGE,
             '-B',
             config.BACKBONE_IFNAME,
+            '--trel-url',
+            f'trel://{config.BACKBONE_IFNAME}',
         ],
                                              stdin=subprocess.DEVNULL,
                                              stdout=sys.stdout,
@@ -179,14 +189,19 @@ class OtbrDocker:
         self._shutdown_socat()
 
     def _shutdown_docker(self):
-        if self._docker_proc is not None:
+        if self._docker_proc is None:
+            return
+
+        try:
             COVERAGE = int(os.getenv('COVERAGE', '0'))
             OTBR_COVERAGE = int(os.getenv('OTBR_COVERAGE', '0'))
+            test_name = os.getenv('TEST_NAME')
+            unique_node_id = f'{test_name}-{PORT_OFFSET}-{self.nodeid}'
+
             if COVERAGE or OTBR_COVERAGE:
                 self.bash('service otbr-agent stop')
 
-                test_name = os.getenv('TEST_NAME')
-                cov_file_path = f'/tmp/coverage/coverage-{test_name}-{PORT_OFFSET}-{self.nodeid}.info'
+                cov_file_path = f'/tmp/coverage/coverage-{unique_node_id}.info'
                 # Upload OTBR code coverage if OTBR_COVERAGE=1, otherwise OpenThread code coverage.
                 if OTBR_COVERAGE:
                     codecov_cmd = f'lcov --directory . --capture --output-file {cov_file_path}'
@@ -196,6 +211,12 @@ class OtbrDocker:
 
                 self.bash(codecov_cmd)
 
+            copyCore = subprocess.run(f'docker cp {self._docker_name}:/core ./coredump_{unique_node_id}', shell=True)
+            if copyCore.returncode == 0:
+                subprocess.check_call(
+                    f'docker cp {self._docker_name}:/usr/sbin/otbr-agent ./otbr-agent_{unique_node_id}', shell=True)
+
+        finally:
             subprocess.check_call(f"docker rm -f {self._docker_name}", shell=True)
             self._docker_proc.wait()
             del self._docker_proc
@@ -635,7 +656,7 @@ class NodeImpl:
         if isinstance(pattern, str):
             pattern = re.compile(pattern)
 
-        if isinstance(pattern, re.Pattern):
+        if isinstance(pattern, typing.Pattern):
             return pattern.match(line)
         else:
             return any(NodeImpl._match_pattern(line, p) for p in pattern)
@@ -862,6 +883,11 @@ class NodeImpl:
         cmd = 'bbr jitter %d' % jitter
         self.send_command(cmd)
         self._expect_done()
+
+    def get_rcp_version(self) -> str:
+        self.send_command('rcp version')
+        rcp_version = self._expect_command_output()[0].strip()
+        return rcp_version
 
     def srp_server_get_state(self):
         states = ['disabled', 'running', 'stopped']
@@ -1110,6 +1136,31 @@ class NodeImpl:
         self.send_command(cmd)
         service_lines = self._expect_command_output()
         return [self._parse_srp_client_service(line) for line in service_lines]
+
+    def srp_client_set_lease_interval(self, leaseinterval: int):
+        cmd = f'srp client leaseinterval {leaseinterval}'
+        self.send_command(cmd)
+        self._expect_done()
+
+    def srp_client_get_lease_interval(self) -> int:
+        cmd = 'srp client leaseinterval'
+        self.send_command(cmd)
+        return int(self._expect_result('\d+'))
+
+    #
+    # TREL utilities
+    #
+
+    def get_trel_state(self) -> Union[None, bool]:
+        states = [r'Disabled', r'Enabled']
+        self.send_command('trel')
+        try:
+            return self._expect_result(states) == 'Enabled'
+        except Exception as ex:
+            if 'InvalidCommand' in str(ex):
+                return None
+
+            raise
 
     def _encode_txt_entry(self, entry):
         """Encodes the TXT entry to the DNS-SD TXT record format as a HEX string.

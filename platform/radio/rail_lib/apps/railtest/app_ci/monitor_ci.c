@@ -83,17 +83,6 @@ static unsigned int dmaCh1;
 
 static bool init = false;
 
-// This logic should be handled by em_device.h. TODO: Use internal headers here?
-#ifdef PROTIMER
-#define PROTIMER_WRAPCNT &PROTIMER->WRAPCNT
-#elif defined(_SILICON_LABS_32B_SERIES_1)
-#define PROTIMER_WRAPCNT (0x40085018UL)
-#elif defined(_SILICON_LABS_32B_SERIES_2)
-#define PROTIMER_WRAPCNT (0xA801C020UL)
-#else
-#error "Need a handle to the PROTIMER WRAPCNT"
-#endif
-
 // Set up the monitor. The monitor takes a single GPIO pin and connects it to
 // 2 PRS channels. One of the channels is inverted. Those two PRS channels then
 // each go to an LDMA via the LDMAXBAR (LDMA crossbar), which causes one
@@ -177,7 +166,7 @@ bool initMonitor(uint8_t port, uint8_t pin)
   LDMA_Init(&ldmaInit);
   // There's no SINGLE_P2M_WORD define, so modify a SINGLE_P2M_BYTE descriptor
   LDMA_Descriptor_t descriptor = LDMA_DESCRIPTOR_SINGLE_P2M_BYTE(
-    PROTIMER_WRAPCNT, &rising[0], MONITOR_NUM_SAMPLES);
+    RAIL_TimerTick, &rising[0], MONITOR_NUM_SAMPLES);
   descriptor.xfer.size = ldmaCtrlSizeWord;
   LDMA_TransferCfg_t transfer = LDMA_TRANSFER_CFG_PERIPHERAL(ldmaPrsConn0);
   LDMA_StartTransfer(dmaCh0, &transfer, &descriptor);

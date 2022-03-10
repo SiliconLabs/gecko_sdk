@@ -162,6 +162,7 @@
   - name: device_has_emu_temp_sensor
   - name: device_has_fpu
   - name: device_has_mpu
+  - name: device_compute_basic
 - requires:
   - name: cmsis_core
 - template_contribution:

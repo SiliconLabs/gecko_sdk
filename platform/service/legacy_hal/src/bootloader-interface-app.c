@@ -172,7 +172,7 @@ static uint8_t buff[EEPROM_PAGE_SIZE];
 EblConfigType eblConfig;
 #endif
 
-uint8_t bootloaderValidationContext[BOOTLOADER_STORAGE_VERIFICATION_CONTEXT_SIZE];
+__ALIGNED(4) uint8_t bootloaderValidationContext[BOOTLOADER_STORAGE_VERIFICATION_CONTEXT_SIZE];
 
 void halAppBootloaderImageIsValidReset(void)
 {

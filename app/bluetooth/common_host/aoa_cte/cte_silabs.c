@@ -32,6 +32,10 @@
 #include "aoa_cte.h"
 #include "aoa_cte_config.h"
 
+// Module shared variables.
+extern uint8_t cte_switch_pattern[ANTENNA_ARRAY_MAX_PIN_PATTERN_SIZE];
+extern uint8_t cte_switch_pattern_size;
+
 /**************************************************************************//**
  * CTE specific Bluetooth event handler.
  *****************************************************************************/
@@ -81,8 +85,8 @@ sl_status_t cte_bt_on_event_silabs(sl_bt_msg_t *evt)
       // Start Silabs CTE
       sc = sl_bt_cte_receiver_enable_silabs_cte(aoa_cte_config.cte_slot_duration,
                                                 aoa_cte_config.cte_count,
-                                                aoa_cte_config.switching_pattern_length,
-                                                aoa_cte_config.switching_pattern);
+                                                cte_switch_pattern_size,
+                                                cte_switch_pattern);
       break;
     case sl_bt_evt_cte_receiver_silabs_iq_report_id:
     {

@@ -32,6 +32,7 @@
 
 #include "aoa_db.h"
 #include "aoa_types.h"
+#include "antenna_array.h"
 #include "sl_status.h"
 
 #ifdef __cplusplus
@@ -47,8 +48,7 @@ typedef struct {
   uint16_t cte_min_length;
   uint16_t cte_count;
   uint16_t cte_slot_duration;
-  uint8_t *switching_pattern;
-  uint8_t switching_pattern_length;
+  antenna_array_t *antenna_array;
 } aoa_cte_config_t;
 
 /// Enum for CTE type selection.
@@ -67,11 +67,6 @@ extern aoa_cte_config_t aoa_cte_config;
 
 // -----------------------------------------------------------------------------
 // Public function declarations
-
-/**************************************************************************//**
- * Initializes the module.
- *****************************************************************************/
-void aoa_cte_init(void);
 
 /**************************************************************************//**
  * Handles the bluetooth event.

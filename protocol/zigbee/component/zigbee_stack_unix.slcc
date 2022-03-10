@@ -272,6 +272,13 @@ toolchain_settings:
     value: "-Wno-missing-field-initializers"
   - option: gcc_compiler_option
     value: "-Wno-missing-braces"
+  # On Mac, clang 12 forces 64 bit compilation to error on violations of
+  # implicit-function-declaration. We are not there yet in fixing all violations
+  # (there is a PIT effort to catalog warnings and fix them), so for now, we
+  # turn it off. This has not been an issue until now because 32 bit compilation
+  # does not turn error on implicit references
+  - option: gcc_compiler_option
+    value: "-Wno-error=implicit-function-declaration"
 
 
 documentation:

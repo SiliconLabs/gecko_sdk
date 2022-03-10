@@ -306,6 +306,98 @@ typedef struct RAIL_IEEE802154_Config {
   bool defaultFramePendingInOutgoingAcks;
 } RAIL_IEEE802154_Config_t;
 
+/// @addtogroup IEEE802154_PHY IEEE 802.15.4 Radio Configurations
+/// Radio configurations for the RAIL 802.15.4 Accelerator
+///
+/// These radio configurations are used to configure 802.15.4 when a function
+/// such as \ref RAIL_IEEE802154_Config2p4GHzRadio() is called. Each radio
+/// configuration listed below is compiled into the RAIL library as a weak
+/// symbol that will take into account per-die defaults. If the board
+/// configuration in use has different settings than the default, such as a
+/// different radio subsystem clock frequency, these radio configurations can
+/// be overriden to account for those settings.
+/// @{
+
+/**
+ * Default PHY to use for 2.4 GHz 802.15.4. Will be NULL if
+ * \ref RAIL_SUPPORTS_PROTOCOL_IEEE802154 or \ref RAIL_SUPPORTS_2P4GHZ_BAND
+ * is 0.
+ */
+extern const RAIL_ChannelConfig_t *const RAIL_IEEE802154_Phy2p4GHz;
+
+/**
+ * Default PHY to use for 2.4 GHz 802.15.4 with antenna diversity. Will be NULL
+ * if \ref RAIL_SUPPORTS_PROTOCOL_IEEE802154, \ref RAIL_SUPPORTS_2P4GHZ_BAND, or
+ * \ref RAIL_SUPPORTS_ANTENNA_DIVERSITY is 0.
+ */
+extern const RAIL_ChannelConfig_t *const RAIL_IEEE802154_Phy2p4GHzAntDiv;
+
+/**
+ * Default PHY to use for 2.4 GHz 802.15.4 optimized for coexistence. Will be
+ * NULL if \ref RAIL_IEEE802154_SUPPORTS_COEX_PHY is 0.
+ */
+extern const RAIL_ChannelConfig_t *const RAIL_IEEE802154_Phy2p4GHzCoex;
+
+/**
+ * Default PHY to use for 2.4 GHz 802.15.4 optimized for coexistence, while
+ * supporting antenna diversity. Will be NULL if
+ * \ref RAIL_SUPPORTS_ANTENNA_DIVERSITY or
+ * \ref RAIL_IEEE802154_SUPPORTS_COEX_PHY is 0.
+ */
+extern const RAIL_ChannelConfig_t *const RAIL_IEEE802154_Phy2p4GHzAntDivCoex;
+
+/**
+ * Default PHY to use for 2.4 GHz 802.15.4 with a configuration that supports a
+ * front-end module. Will be NULL if
+ * \ref RAIL_IEEE802154_SUPPORTS_FEM_PHY is 0.
+ */
+extern const RAIL_ChannelConfig_t *const RAIL_IEEE802154_Phy2p4GHzFem;
+
+/**
+ * Default PHY to use for 2.4 GHz 802.15.4 with a configuration that supports a
+ * front-end module and antenna diversity. Will be NULL if
+ * \ref RAIL_IEEE802154_SUPPORTS_FEM_PHY or \ref RAIL_SUPPORTS_ANTENNA_DIVERSITY
+ * is 0.
+ */
+extern const RAIL_ChannelConfig_t *const RAIL_IEEE802154_Phy2p4GHzAntDivFem;
+
+/**
+ * Default PHY to use for 2.4 GHz 802.15.4 with a configuration that supports a
+ * front-end module and is optimized for radio coexistence. Will be NULL if
+ * \ref RAIL_IEEE802154_SUPPORTS_FEM_PHY or
+ * \ref RAIL_IEEE802154_SUPPORTS_COEX_PHY is 0.
+ */
+extern const RAIL_ChannelConfig_t *const RAIL_IEEE802154_Phy2p4GHzCoexFem;
+
+/**
+ * Default PHY to use for 2.4 GHz 802.15.4 with a configuration that supports a
+ * front-end module and antenna diversity, and is optimized for radio
+ * coexistence. Will be NULL if \ref RAIL_IEEE802154_SUPPORTS_FEM_PHY,
+ * \ref RAIL_IEEE802154_SUPPORTS_COEX_PHY, or
+ * \ref RAIL_SUPPORTS_ANTENNA_DIVERSITY is 0.
+ */
+extern const RAIL_ChannelConfig_t *const RAIL_IEEE802154_Phy2p4GHzAntDivCoexFem;
+
+/**
+ * Default PHY to use for 2.4 GHz 802.15.4 with custom settings. Will be NULL
+ * if \ref RAIL_IEEE802154_SUPPORTS_CUSTOM1_PHY is 0.
+ */
+extern const RAIL_ChannelConfig_t *const RAIL_IEEE802154_Phy2p4GHzCustom1;
+
+/**
+ * Default PHY to use for 863MHz GB868 802.15.4. Will be NULL if
+ * \ref RAIL_IEEE802154_SUPPORTS_G_SUBSET_GB868 is 0.
+ */
+extern const RAIL_ChannelConfig_t *const RAIL_IEEE802154_PhyGB863MHz;
+
+/**
+ * Default PHY to use for 915MHz GB868 802.15.4. Will be NULL if
+ * \ref RAIL_IEEE802154_SUPPORTS_G_SUBSET_GB868 is 0.
+ */
+extern const RAIL_ChannelConfig_t *const RAIL_IEEE802154_PhyGB915MHz;
+
+/// @} // End of group IEEE802154_PHY
+
 /**
  * Initialize RAIL for IEEE802.15.4 features.
  *
@@ -1348,7 +1440,11 @@ RAIL_ENUM(RAIL_IEEE802154_CcaMode_t) {
   /**
    * ALOHA. Always transmit CCA=1. CCA shall always report an idle medium.
    */
-  RAIL_IEEE802154_CCA_MODE_ALWAYS_TRANSMIT
+  RAIL_IEEE802154_CCA_MODE_ALWAYS_TRANSMIT,
+  /**
+   * Number of CCA modes.
+   */
+  RAIL_IEEE802154_CCA_MODE_COUNT
 };
 
 #ifndef DOXYGEN_SHOULD_SKIP_THIS
@@ -1358,6 +1454,7 @@ RAIL_ENUM(RAIL_IEEE802154_CcaMode_t) {
 #define RAIL_IEEE802154_CCA_MODE_SIGNAL_OR_RSSI    ((RAIL_IEEE802154_CcaMode_t)RAIL_IEEE802154_CCA_MODE_SIGNAL_OR_RSSI)
 #define RAIL_IEEE802154_CCA_MODE_SIGNAL_AND_RSSI   ((RAIL_IEEE802154_CcaMode_t)RAIL_IEEE802154_CCA_MODE_SIGNAL_AND_RSSI)
 #define RAIL_IEEE802154_CCA_MODE_ALWAYS_TRANSMIT   ((RAIL_IEEE802154_CcaMode_t)RAIL_IEEE802154_CCA_MODE_ALWAYS_TRANSMIT)
+#define RAIL_IEEE802154_CCA_MODE_COUNT             ((RAIL_IEEE802154_CcaMode_t)RAIL_IEEE802154_CCA_MODE_COUNT)
 #endif
 
 /**
@@ -1407,13 +1504,14 @@ RAIL_Status_t RAIL_IEEE802154_EnableSignalIdentifier(RAIL_Handle_t railHandle,
  * If not called RAIL_IEEE802154_CCA_MODE_RSSI (RSSI based CCA) is used for CCA.
  *
  * In RAIL_IEEE802154_CCA_MODE_SIGNAL, RAIL_IEEE802154_CCA_MODE_SIGNAL_OR_RSSI and
- * RAIL_IEEE802154_CCA_MODE_SIGNAL_AND_RSSI signal identifer is enabled and remains
- * enabled to detect the signal.
+ * RAIL_IEEE802154_CCA_MODE_SIGNAL_AND_RSSI signal identifer is enabled
+ * for the duration of LBT.  If previously enabled by
+ * \ref RAIL_IEEE802154_EnableSignalIdentifier, the signal identifier will remain active
+ * until triggered.
  *
- * On platforms that don't support different CCA modes, a call to this function
- * will do nothing.
  *
  * @return Status code indicating success of the function call.
+ *   An error should be returned if ccaMode is unsuppported on a given device.
  */
 RAIL_Status_t RAIL_IEEE802154_ConfigCcaMode(RAIL_Handle_t railHandle,
                                             const RAIL_IEEE802154_CcaMode_t ccaMode);

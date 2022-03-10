@@ -144,6 +144,7 @@ typedef struct {
   //uint8_t parentEui64[8];
   uint8_t nodeType;
   uint8_t zigbeeState;
+  uint8_t dynamicCapabilities;
   //uint8_t radioChannel;
   //int8_t radioPower;
   //uint16_t localNodeId;

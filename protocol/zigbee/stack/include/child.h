@@ -75,6 +75,27 @@ uint8_t emberChildIndex(EmberNodeId childId);
 EmberStatus emberGetChildData(uint8_t index,
                               EmberChildData *childData);
 
+/** @brief Sets the EUI64, node ID, and node type of the child at the provided index in
+ * nonvolatile memory. No other data from the childData argument is used or copied.
+ * The user is responsible for rebooting the device after calling this API in order to
+ * initialize RAM-based child data.
+ * Possible child indexes run from zero to ::emberMaxChildCount() - 1.
+ *
+ * @param index            The index of the child.
+ *
+ * @param childData        The child's data.
+ *
+ * @return Returns ::EMBER_SUCCESS if successfully setting child at that index,
+ *         ::EMBER_INDEX_OUT_OF_RANGE if provided index is out of range.
+ *
+ * @note This API only sets the child data to nonvolatile memory. A reboot is
+ * required after calling this API to read the nonvolatile child data and set it to
+ * RAM structures. This API does not set other child RAM data, such as power and
+ * timeout values.
+ */
+EmberStatus emberSetChildData(uint8_t index,
+                              EmberChildData *childData);
+
 /** @brief Called by the stack when a child joins or leaves.
  * 'Joining' is true if the child is joining and false if leaving.
  *

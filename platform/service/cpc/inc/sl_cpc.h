@@ -39,9 +39,13 @@
 #include "sl_status.h"
 #include "sl_slist.h"
 #include "sl_cpc_config.h"
-#include "sl_cpc_security.h"
+
 #include <stddef.h>
 #include <stdarg.h>
+
+#if (defined(SL_CATALOG_CPC_SECURITY_PRESENT))
+#include "sl_cpc_security.h"
+#endif
 
 #if defined(SL_CATALOG_KERNEL_PRESENT)
 #include "cmsis_os2.h"

@@ -3,7 +3,7 @@
  * @brief MGM24 CMU register and bit field definitions
  ******************************************************************************
  * # License
- * <b>Copyright 2021 Silicon Laboratories, Inc. www.silabs.com</b>
+ * <b>Copyright 2022 Silicon Laboratories, Inc. www.silabs.com</b>
  ******************************************************************************
  *
  * SPDX-License-Identifier: Zlib
@@ -905,36 +905,44 @@ typedef struct {
 #define CMU_DPLLREFCLKCTRL_CLKSEL_CLKIN0           (_CMU_DPLLREFCLKCTRL_CLKSEL_CLKIN0 << 0)   /**< Shifted mode CLKIN0 for CMU_DPLLREFCLKCTRL  */
 
 /* Bit fields for CMU EM01GRPACLKCTRL */
-#define _CMU_EM01GRPACLKCTRL_RESETVALUE            0x00000001UL                                 /**< Default value for CMU_EM01GRPACLKCTRL       */
-#define _CMU_EM01GRPACLKCTRL_MASK                  0x00000007UL                                 /**< Mask for CMU_EM01GRPACLKCTRL                */
-#define _CMU_EM01GRPACLKCTRL_CLKSEL_SHIFT          0                                            /**< Shift value for CMU_CLKSEL                  */
-#define _CMU_EM01GRPACLKCTRL_CLKSEL_MASK           0x7UL                                        /**< Bit mask for CMU_CLKSEL                     */
-#define _CMU_EM01GRPACLKCTRL_CLKSEL_DEFAULT        0x00000001UL                                 /**< Mode DEFAULT for CMU_EM01GRPACLKCTRL        */
-#define _CMU_EM01GRPACLKCTRL_CLKSEL_HFRCODPLL      0x00000001UL                                 /**< Mode HFRCODPLL for CMU_EM01GRPACLKCTRL      */
-#define _CMU_EM01GRPACLKCTRL_CLKSEL_HFXO           0x00000002UL                                 /**< Mode HFXO for CMU_EM01GRPACLKCTRL           */
-#define _CMU_EM01GRPACLKCTRL_CLKSEL_FSRCO          0x00000003UL                                 /**< Mode FSRCO for CMU_EM01GRPACLKCTRL          */
-#define _CMU_EM01GRPACLKCTRL_CLKSEL_HFRCOEM23      0x00000004UL                                 /**< Mode HFRCOEM23 for CMU_EM01GRPACLKCTRL      */
-#define CMU_EM01GRPACLKCTRL_CLKSEL_DEFAULT         (_CMU_EM01GRPACLKCTRL_CLKSEL_DEFAULT << 0)   /**< Shifted mode DEFAULT for CMU_EM01GRPACLKCTRL*/
-#define CMU_EM01GRPACLKCTRL_CLKSEL_HFRCODPLL       (_CMU_EM01GRPACLKCTRL_CLKSEL_HFRCODPLL << 0) /**< Shifted mode HFRCODPLL for CMU_EM01GRPACLKCTRL*/
-#define CMU_EM01GRPACLKCTRL_CLKSEL_HFXO            (_CMU_EM01GRPACLKCTRL_CLKSEL_HFXO << 0)      /**< Shifted mode HFXO for CMU_EM01GRPACLKCTRL   */
-#define CMU_EM01GRPACLKCTRL_CLKSEL_FSRCO           (_CMU_EM01GRPACLKCTRL_CLKSEL_FSRCO << 0)     /**< Shifted mode FSRCO for CMU_EM01GRPACLKCTRL  */
-#define CMU_EM01GRPACLKCTRL_CLKSEL_HFRCOEM23       (_CMU_EM01GRPACLKCTRL_CLKSEL_HFRCOEM23 << 0) /**< Shifted mode HFRCOEM23 for CMU_EM01GRPACLKCTRL*/
+#define _CMU_EM01GRPACLKCTRL_RESETVALUE            0x00000001UL                                   /**< Default value for CMU_EM01GRPACLKCTRL       */
+#define _CMU_EM01GRPACLKCTRL_MASK                  0x00000007UL                                   /**< Mask for CMU_EM01GRPACLKCTRL                */
+#define _CMU_EM01GRPACLKCTRL_CLKSEL_SHIFT          0                                              /**< Shift value for CMU_CLKSEL                  */
+#define _CMU_EM01GRPACLKCTRL_CLKSEL_MASK           0x7UL                                          /**< Bit mask for CMU_CLKSEL                     */
+#define _CMU_EM01GRPACLKCTRL_CLKSEL_DEFAULT        0x00000001UL                                   /**< Mode DEFAULT for CMU_EM01GRPACLKCTRL        */
+#define _CMU_EM01GRPACLKCTRL_CLKSEL_HFRCODPLL      0x00000001UL                                   /**< Mode HFRCODPLL for CMU_EM01GRPACLKCTRL      */
+#define _CMU_EM01GRPACLKCTRL_CLKSEL_HFXO           0x00000002UL                                   /**< Mode HFXO for CMU_EM01GRPACLKCTRL           */
+#define _CMU_EM01GRPACLKCTRL_CLKSEL_FSRCO          0x00000003UL                                   /**< Mode FSRCO for CMU_EM01GRPACLKCTRL          */
+#define _CMU_EM01GRPACLKCTRL_CLKSEL_HFRCOEM23      0x00000004UL                                   /**< Mode HFRCOEM23 for CMU_EM01GRPACLKCTRL      */
+#define _CMU_EM01GRPACLKCTRL_CLKSEL_HFRCODPLLRT    0x00000005UL                                   /**< Mode HFRCODPLLRT for CMU_EM01GRPACLKCTRL    */
+#define _CMU_EM01GRPACLKCTRL_CLKSEL_HFXORT         0x00000006UL                                   /**< Mode HFXORT for CMU_EM01GRPACLKCTRL         */
+#define CMU_EM01GRPACLKCTRL_CLKSEL_DEFAULT         (_CMU_EM01GRPACLKCTRL_CLKSEL_DEFAULT << 0)     /**< Shifted mode DEFAULT for CMU_EM01GRPACLKCTRL*/
+#define CMU_EM01GRPACLKCTRL_CLKSEL_HFRCODPLL       (_CMU_EM01GRPACLKCTRL_CLKSEL_HFRCODPLL << 0)   /**< Shifted mode HFRCODPLL for CMU_EM01GRPACLKCTRL*/
+#define CMU_EM01GRPACLKCTRL_CLKSEL_HFXO            (_CMU_EM01GRPACLKCTRL_CLKSEL_HFXO << 0)        /**< Shifted mode HFXO for CMU_EM01GRPACLKCTRL   */
+#define CMU_EM01GRPACLKCTRL_CLKSEL_FSRCO           (_CMU_EM01GRPACLKCTRL_CLKSEL_FSRCO << 0)       /**< Shifted mode FSRCO for CMU_EM01GRPACLKCTRL  */
+#define CMU_EM01GRPACLKCTRL_CLKSEL_HFRCOEM23       (_CMU_EM01GRPACLKCTRL_CLKSEL_HFRCOEM23 << 0)   /**< Shifted mode HFRCOEM23 for CMU_EM01GRPACLKCTRL*/
+#define CMU_EM01GRPACLKCTRL_CLKSEL_HFRCODPLLRT     (_CMU_EM01GRPACLKCTRL_CLKSEL_HFRCODPLLRT << 0) /**< Shifted mode HFRCODPLLRT for CMU_EM01GRPACLKCTRL*/
+#define CMU_EM01GRPACLKCTRL_CLKSEL_HFXORT          (_CMU_EM01GRPACLKCTRL_CLKSEL_HFXORT << 0)      /**< Shifted mode HFXORT for CMU_EM01GRPACLKCTRL */
 
 /* Bit fields for CMU EM01GRPCCLKCTRL */
-#define _CMU_EM01GRPCCLKCTRL_RESETVALUE            0x00000001UL                                 /**< Default value for CMU_EM01GRPCCLKCTRL       */
-#define _CMU_EM01GRPCCLKCTRL_MASK                  0x00000007UL                                 /**< Mask for CMU_EM01GRPCCLKCTRL                */
-#define _CMU_EM01GRPCCLKCTRL_CLKSEL_SHIFT          0                                            /**< Shift value for CMU_CLKSEL                  */
-#define _CMU_EM01GRPCCLKCTRL_CLKSEL_MASK           0x7UL                                        /**< Bit mask for CMU_CLKSEL                     */
-#define _CMU_EM01GRPCCLKCTRL_CLKSEL_DEFAULT        0x00000001UL                                 /**< Mode DEFAULT for CMU_EM01GRPCCLKCTRL        */
-#define _CMU_EM01GRPCCLKCTRL_CLKSEL_HFRCODPLL      0x00000001UL                                 /**< Mode HFRCODPLL for CMU_EM01GRPCCLKCTRL      */
-#define _CMU_EM01GRPCCLKCTRL_CLKSEL_HFXO           0x00000002UL                                 /**< Mode HFXO for CMU_EM01GRPCCLKCTRL           */
-#define _CMU_EM01GRPCCLKCTRL_CLKSEL_FSRCO          0x00000003UL                                 /**< Mode FSRCO for CMU_EM01GRPCCLKCTRL          */
-#define _CMU_EM01GRPCCLKCTRL_CLKSEL_HFRCOEM23      0x00000004UL                                 /**< Mode HFRCOEM23 for CMU_EM01GRPCCLKCTRL      */
-#define CMU_EM01GRPCCLKCTRL_CLKSEL_DEFAULT         (_CMU_EM01GRPCCLKCTRL_CLKSEL_DEFAULT << 0)   /**< Shifted mode DEFAULT for CMU_EM01GRPCCLKCTRL*/
-#define CMU_EM01GRPCCLKCTRL_CLKSEL_HFRCODPLL       (_CMU_EM01GRPCCLKCTRL_CLKSEL_HFRCODPLL << 0) /**< Shifted mode HFRCODPLL for CMU_EM01GRPCCLKCTRL*/
-#define CMU_EM01GRPCCLKCTRL_CLKSEL_HFXO            (_CMU_EM01GRPCCLKCTRL_CLKSEL_HFXO << 0)      /**< Shifted mode HFXO for CMU_EM01GRPCCLKCTRL   */
-#define CMU_EM01GRPCCLKCTRL_CLKSEL_FSRCO           (_CMU_EM01GRPCCLKCTRL_CLKSEL_FSRCO << 0)     /**< Shifted mode FSRCO for CMU_EM01GRPCCLKCTRL  */
-#define CMU_EM01GRPCCLKCTRL_CLKSEL_HFRCOEM23       (_CMU_EM01GRPCCLKCTRL_CLKSEL_HFRCOEM23 << 0) /**< Shifted mode HFRCOEM23 for CMU_EM01GRPCCLKCTRL*/
+#define _CMU_EM01GRPCCLKCTRL_RESETVALUE            0x00000001UL                                   /**< Default value for CMU_EM01GRPCCLKCTRL       */
+#define _CMU_EM01GRPCCLKCTRL_MASK                  0x00000007UL                                   /**< Mask for CMU_EM01GRPCCLKCTRL                */
+#define _CMU_EM01GRPCCLKCTRL_CLKSEL_SHIFT          0                                              /**< Shift value for CMU_CLKSEL                  */
+#define _CMU_EM01GRPCCLKCTRL_CLKSEL_MASK           0x7UL                                          /**< Bit mask for CMU_CLKSEL                     */
+#define _CMU_EM01GRPCCLKCTRL_CLKSEL_DEFAULT        0x00000001UL                                   /**< Mode DEFAULT for CMU_EM01GRPCCLKCTRL        */
+#define _CMU_EM01GRPCCLKCTRL_CLKSEL_HFRCODPLL      0x00000001UL                                   /**< Mode HFRCODPLL for CMU_EM01GRPCCLKCTRL      */
+#define _CMU_EM01GRPCCLKCTRL_CLKSEL_HFXO           0x00000002UL                                   /**< Mode HFXO for CMU_EM01GRPCCLKCTRL           */
+#define _CMU_EM01GRPCCLKCTRL_CLKSEL_FSRCO          0x00000003UL                                   /**< Mode FSRCO for CMU_EM01GRPCCLKCTRL          */
+#define _CMU_EM01GRPCCLKCTRL_CLKSEL_HFRCOEM23      0x00000004UL                                   /**< Mode HFRCOEM23 for CMU_EM01GRPCCLKCTRL      */
+#define _CMU_EM01GRPCCLKCTRL_CLKSEL_HFRCODPLLRT    0x00000005UL                                   /**< Mode HFRCODPLLRT for CMU_EM01GRPCCLKCTRL    */
+#define _CMU_EM01GRPCCLKCTRL_CLKSEL_HFXORT         0x00000006UL                                   /**< Mode HFXORT for CMU_EM01GRPCCLKCTRL         */
+#define CMU_EM01GRPCCLKCTRL_CLKSEL_DEFAULT         (_CMU_EM01GRPCCLKCTRL_CLKSEL_DEFAULT << 0)     /**< Shifted mode DEFAULT for CMU_EM01GRPCCLKCTRL*/
+#define CMU_EM01GRPCCLKCTRL_CLKSEL_HFRCODPLL       (_CMU_EM01GRPCCLKCTRL_CLKSEL_HFRCODPLL << 0)   /**< Shifted mode HFRCODPLL for CMU_EM01GRPCCLKCTRL*/
+#define CMU_EM01GRPCCLKCTRL_CLKSEL_HFXO            (_CMU_EM01GRPCCLKCTRL_CLKSEL_HFXO << 0)        /**< Shifted mode HFXO for CMU_EM01GRPCCLKCTRL   */
+#define CMU_EM01GRPCCLKCTRL_CLKSEL_FSRCO           (_CMU_EM01GRPCCLKCTRL_CLKSEL_FSRCO << 0)       /**< Shifted mode FSRCO for CMU_EM01GRPCCLKCTRL  */
+#define CMU_EM01GRPCCLKCTRL_CLKSEL_HFRCOEM23       (_CMU_EM01GRPCCLKCTRL_CLKSEL_HFRCOEM23 << 0)   /**< Shifted mode HFRCOEM23 for CMU_EM01GRPCCLKCTRL*/
+#define CMU_EM01GRPCCLKCTRL_CLKSEL_HFRCODPLLRT     (_CMU_EM01GRPCCLKCTRL_CLKSEL_HFRCODPLLRT << 0) /**< Shifted mode HFRCODPLLRT for CMU_EM01GRPCCLKCTRL*/
+#define CMU_EM01GRPCCLKCTRL_CLKSEL_HFXORT          (_CMU_EM01GRPCCLKCTRL_CLKSEL_HFXORT << 0)      /**< Shifted mode HFXORT for CMU_EM01GRPCCLKCTRL */
 
 /* Bit fields for CMU EM23GRPACLKCTRL */
 #define _CMU_EM23GRPACLKCTRL_RESETVALUE            0x00000001UL                               /**< Default value for CMU_EM23GRPACLKCTRL       */

@@ -62,6 +62,7 @@ source:
 other_file:
   - path: "../../../script/connect_create_gbl_image.bat"
   - path: "../../../script/connect_create_gbl_image.sh"
+  - path: "hw_filter_tags.yaml"
 
 readme:
   - path: ../../../documentation/example/connect/direct_mode_device/readme.md
@@ -206,20 +207,8 @@ toolchain_settings:
   - option: optimize
     value: debug
 
-tag:
-  - hardware:
-      device:
-        memory:
-          flash: 191
-          ram: 24
-      board:
-        rf_bands:
-          - any
-        communication:
-          - vcom
-          - pti
-
 ui_hints:
   highlight:
     - path: readme.md
       focus: true
+

@@ -34,19 +34,33 @@
 #include "sl_rail_util_coex_common_config.h"
 
 // <<< Use Configuration Wizard in Context Menu >>>
-// <h> Coexistence IEEE802.15.4 signal identifier
-// <q SL_RAIL_UTIL_COEX_SIGNAL_IDENTIFIER_ENABLED> True: Signal identifier is enabled; False: Signal identifier is disabled
-// <i> True: Signal identifier is enabled; False: Signal identifier is disabled
+// <h> Coexistence signal identifier configuration
+// <h> IEEE802.15.4 only configuration
+// <q SL_RAIL_UTIL_COEX_IEEE802154_SIGNAL_IDENTIFIER_ENABLED> Enable coexistence IEEE802.15.4 signal identifier
 // <i> Default: 0
-#define SL_RAIL_UTIL_COEX_SIGNAL_IDENTIFIER_ENABLED 0
+#define SL_RAIL_UTIL_COEX_IEEE802154_SIGNAL_IDENTIFIER_ENABLED 0
+// </h>
+// <h> BLE only Configuration
+// <q SL_RAIL_UTIL_COEX_BLE_SIGNAL_IDENTIFIER_ENABLED> Enable coexistence BLE signal identifier
+// <i> Default: 0
+#define SL_RAIL_UTIL_COEX_BLE_SIGNAL_IDENTIFIER_ENABLED 0
+// <o SL_RAIL_UTIL_COEX_BLE_SIGNAL_IDENTIFIER_MODE> BLE signal identifier mode
+//    <1=> BLE 1Mbps
+//    <2=> BLE 2Mbps
+// <i> 1: Signal identifier detects BLE 1Mbps signals 2: Signal identifier detects BLE 2Mbps signals
+// <i> Default: 1
+#define SL_RAIL_UTIL_COEX_BLE_SIGNAL_IDENTIFIER_MODE 1
+// <o SL_RAIL_UTIL_COEX_BLE_MIN_TIME_FOR_HOPPING> Minimum number of microseconds that should be available in the scanning window for hopping to next channel when signal identifier is enabled
+// <300-2000:1>
+// <i> Default: 300
+#define SL_RAIL_UTIL_COEX_BLE_MIN_TIME_FOR_HOPPING 300
+// </h>
 // <o SL_RAIL_UTIL_COEX_WIFI_TX_ASSERT_LEVEL> Polarity of Wifi Tx signal
 //   <1=> High
 //   <0=> Low
 // <i> Polarity of WiFi Tx signal
 // <i> Default: 1
 #define SL_RAIL_UTIL_COEX_WIFI_TX_ASSERT_LEVEL 1
-// </e>
-// </h>
 // </h>
 // <<< end of configuration section >>>
 
@@ -157,17 +171,17 @@
 #endif //SL_RAIL_UTIL_COEX_RX_ACTIVE_CHANNEL
 #endif //SL_RAIL_UTIL_COEX_RX_ACTIVE_ENABLED
 
-#if SL_RAIL_UTIL_COEX_SIGNAL_IDENTIFIER_ENABLED
+#if (SL_RAIL_UTIL_COEX_IEEE802154_SIGNAL_IDENTIFIER_ENABLED || SL_RAIL_UTIL_COEX_BLE_SIGNAL_IDENTIFIER_ENABLED)
 // Pin used for WiFi Tx
 // <gpio optional=true> SL_RAIL_UTIL_COEX_WIFI_TX
-// $[GPIO_SL_RAIL_UTIL_COEX_SIGNAL_IDENTIFIER]
+// $[GPIO_SL_RAIL_UTIL_COEX_WIFI_TX]
 // #define SL_RAIL_UTIL_COEX_WIFI_TX_PORT        gpioPortC
 // #define SL_RAIL_UTIL_COEX_WIFI_TX_PIN         9
 // [GPIO_SL_RAIL_UTIL_COEX_WIFI_TX]$
 #ifndef SL_RAIL_UTIL_COEX_WIFI_TX_PORT
 #error "SL_RAIL_UTIL_COEX_WIFI_TX_PORT undefined"
 #endif // SL_RAIL_UTIL_COEX_WIFI_TX_PORT
-#endif // SL_RAIL_UTIL_COEX_SIGNAL_IDENTIFIER_ENABLED
+#endif // SL_RAIL_UTIL_COEX_IEEE802154_SIGNAL_IDENTIFIER_ENABLED || SL_RAIL_UTIL_COEX_BLE_SIGNAL_IDENTIFIER_ENABLED
 
 // <<< sl:end pin_tool >>>
 

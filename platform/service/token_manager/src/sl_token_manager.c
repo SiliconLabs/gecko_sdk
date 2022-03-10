@@ -545,8 +545,7 @@ Ecode_t sl_token_get_data(uint32_t token,
     #ifdef EMBER_TEST
     assert(false);
     #else //EMBER_TEST
-// handled in MFGtoken JIRA    halInternalGetMfgTokenData(data, token, index, length);
-    assert(false);
+    halInternalGetMfgTokenData(data, token, index, length);
     #endif //EMBER_TEST
   } else {
     assert(false);

@@ -53,6 +53,17 @@ if [[ "$SERIES" == "2" ]]; then
     if [ $RET -ne 0 ]; then
         exit $RET
     fi
+
+    # Also merge the _v255 binary if it exists
+    if [[ -e "${APPLICATION}_v255.hex" ]]; then
+
+        echo "Combining bootloader and application v255 into one file"
+        commander convert $BOOTLOADER ${APPLICATION}_v255.hex --outfile ${APPLICATION}_v255.hex
+        RET=$?
+        if [ $RET -ne 0 ]; then
+            exit $RET
+        fi
+    fi
 fi
 
 # Generate size report

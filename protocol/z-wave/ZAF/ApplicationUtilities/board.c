@@ -1324,7 +1324,7 @@ uint32_t Board_Init(void)
   }
 
 #if !defined(BUILDING_WITH_UC)
-// UART init is handled by iostream_usart automatically
+// UART init is handled by iostream_recommended_stream automatically
 #if defined(HAL_VCOM_ENABLE) && defined(BSP_VCOM_ENABLE_PORT)
   GPIO_PinModeSet(BSP_VCOM_ENABLE_PORT, //VCOM_ENABLE_PORT,
                   BSP_VCOM_ENABLE_PIN, //VCOM_ENABLE_PIN,

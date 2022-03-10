@@ -13,14 +13,6 @@ toolchain_settings:
     value: "-mmacosx-version-min=10.14"
   - option: gcc_linker_option
     value: "-mmacosx-version-min=10.14"
-  - option: gcc_compiler_option
-    value: "-arch i386"
-    condition:
-      - build_32bit
-  - option: gcc_linker_option
-    value: "-arch i386"
-    condition:
-      - build_32bit
 library:
   - system: System
 tag:

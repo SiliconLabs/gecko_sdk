@@ -71,7 +71,7 @@ requires:
   - name: psa_crypto_ecc_curve448
     condition: [device_security_vault]
   - name: psa_crypto_ecc_edwards25519
-    condition: [device_security_vault]
+    condition: [device_has_semailbox]
 configuration:
   - name: SL_DEVICE_INIT_HFRCO_BAND
     value: cmuHFRCOFreq_38M0Hz

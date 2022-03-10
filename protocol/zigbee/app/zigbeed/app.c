@@ -280,7 +280,8 @@ void app_process_args(int argc, char *argv[])
 
   openlog("zigbeed", LOG_PID | (config.mIsVerbose ? LOG_PERROR : 0), LOG_DAEMON);
   setlogmask(setlogmask(0) & LOG_UPTO(LOG_DEBUG));
-
+  // Sleep added for successful restart of zigbeed when Host application resets
+  sleep(1);
   otInstance *instance = otSysInit(&config.mPlatformConfig);
   IgnoreError(otLoggingSetLevel(config.mLogLevel));
   syslog(LOG_INFO, "Zigbeed started");

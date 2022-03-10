@@ -1,12 +1,12 @@
 project_name: voice_control_light
 package: platform
 quality: production
-label: Voice Control Light
+label: Machine Learning - Voice Control Light
 description: >
   This application uses TensorFlow Lite for Microcontrollers to detect the spoken 
   words "on" and "off" from audio data recorded on the microphone in a Micrium OS 
   kernel task. The detected keywords are used to control an LED on the board. 
-category: Example|Platform
+category: Example|Machine Learning
 include:
   - path: .
     file_list:
@@ -34,7 +34,7 @@ component:
   - id: sleeptimer
 config_file: 
   - path: config/recognize_commands_config.h
-  - path: "config/tflite/voice_controlled_light.tflite"
+  - path: "config/tflite/keyword_spotting_on_off.tflite"
     file_id: flatbuffer_file_id
     directory: "tflite"
 define:
@@ -53,15 +53,19 @@ configuration:
     condition: [iostream_uart]
   - name: SL_ML_AUDIO_FEATURE_GENERATION_AUDIO_BUFFER_SIZE
     value: "4096"
+  - name: SL_ML_AUDIO_FEATURE_GENERATION_AUDIO_GAIN
+    value: "2"
   - name: SL_HEAP_SIZE
     value: "0x2000"
 toolchain_settings:
   - option: gcc_compiler_option
     value: "-Wno-unused-parameter"
+other_file:
+  - path: keyword_detection_model.png
 readme:
-  - path: readme.html
+  - path: readme.md
 ui_hints:
-  highlight: readme.html
+  highlight: readme.md
 tag:
   - hardware:component:led:1+
   - hardware:component:microphone

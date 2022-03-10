@@ -184,6 +184,33 @@ PACKSTRUCT( struct sl_btmesh_cmd_node_set_adv_phy_s
 typedef struct sl_btmesh_cmd_node_set_adv_phy_s sl_btmesh_cmd_node_set_adv_phy_t;
 
 
+PACKSTRUCT( struct sl_btmesh_cmd_node_set_unprov_beaconing_adv_interval_s
+{
+    uint16_t            adv_interval_min;
+    uint16_t            adv_interval_max;
+});
+
+typedef struct sl_btmesh_cmd_node_set_unprov_beaconing_adv_interval_s sl_btmesh_cmd_node_set_unprov_beaconing_adv_interval_t;
+
+
+PACKSTRUCT( struct sl_btmesh_cmd_node_set_proxy_service_adv_interval_s
+{
+    uint16_t            adv_interval_min;
+    uint16_t            adv_interval_max;
+});
+
+typedef struct sl_btmesh_cmd_node_set_proxy_service_adv_interval_s sl_btmesh_cmd_node_set_proxy_service_adv_interval_t;
+
+
+PACKSTRUCT( struct sl_btmesh_cmd_node_set_provisioning_service_adv_interval_s
+{
+    uint16_t            adv_interval_min;
+    uint16_t            adv_interval_max;
+});
+
+typedef struct sl_btmesh_cmd_node_set_provisioning_service_adv_interval_s sl_btmesh_cmd_node_set_provisioning_service_adv_interval_t;
+
+
 
 PACKSTRUCT( struct sl_btmesh_cmd_prov_create_provisioning_session_s
 {
@@ -2955,6 +2982,30 @@ PACKSTRUCT( struct sl_btmesh_rsp_node_get_adv_phy_s
 typedef struct sl_btmesh_rsp_node_get_adv_phy_s sl_btmesh_rsp_node_get_adv_phy_t;
 
 
+PACKSTRUCT( struct sl_btmesh_rsp_node_set_unprov_beaconing_adv_interval_s
+{
+    uint16_t            result;
+});
+
+typedef struct sl_btmesh_rsp_node_set_unprov_beaconing_adv_interval_s sl_btmesh_rsp_node_set_unprov_beaconing_adv_interval_t;
+
+
+PACKSTRUCT( struct sl_btmesh_rsp_node_set_proxy_service_adv_interval_s
+{
+    uint16_t            result;
+});
+
+typedef struct sl_btmesh_rsp_node_set_proxy_service_adv_interval_s sl_btmesh_rsp_node_set_proxy_service_adv_interval_t;
+
+
+PACKSTRUCT( struct sl_btmesh_rsp_node_set_provisioning_service_adv_interval_s
+{
+    uint16_t            result;
+});
+
+typedef struct sl_btmesh_rsp_node_set_provisioning_service_adv_interval_s sl_btmesh_rsp_node_set_provisioning_service_adv_interval_t;
+
+
 PACKSTRUCT( struct sl_btmesh_rsp_prov_init_s
 {
     uint16_t            result;
@@ -5372,6 +5423,9 @@ PACKSTRUCT( struct sl_btmesh_packet {
     sl_btmesh_cmd_node_set_model_option_t                        cmd_node_set_model_option;
     sl_btmesh_cmd_node_get_local_dcd_t                           cmd_node_get_local_dcd;
     sl_btmesh_cmd_node_set_adv_phy_t                             cmd_node_set_adv_phy;
+    sl_btmesh_cmd_node_set_unprov_beaconing_adv_interval_t       cmd_node_set_unprov_beaconing_adv_interval;
+    sl_btmesh_cmd_node_set_proxy_service_adv_interval_t          cmd_node_set_proxy_service_adv_interval;
+    sl_btmesh_cmd_node_set_provisioning_service_adv_interval_t   cmd_node_set_provisioning_service_adv_interval;
     sl_btmesh_cmd_prov_create_provisioning_session_t             cmd_prov_create_provisioning_session;
     sl_btmesh_cmd_prov_set_provisioning_suspend_event_t          cmd_prov_set_provisioning_suspend_event;
     sl_btmesh_cmd_prov_provision_adv_device_t                    cmd_prov_provision_adv_device;
@@ -5640,6 +5694,9 @@ PACKSTRUCT( struct sl_btmesh_packet {
     sl_btmesh_rsp_node_power_off_t                               rsp_node_power_off;
     sl_btmesh_rsp_node_set_adv_phy_t                             rsp_node_set_adv_phy;
     sl_btmesh_rsp_node_get_adv_phy_t                             rsp_node_get_adv_phy;
+    sl_btmesh_rsp_node_set_unprov_beaconing_adv_interval_t       rsp_node_set_unprov_beaconing_adv_interval;
+    sl_btmesh_rsp_node_set_proxy_service_adv_interval_t          rsp_node_set_proxy_service_adv_interval;
+    sl_btmesh_rsp_node_set_provisioning_service_adv_interval_t   rsp_node_set_provisioning_service_adv_interval;
     sl_btmesh_rsp_prov_init_t                                    rsp_prov_init;
     sl_btmesh_rsp_prov_scan_unprov_beacons_t                     rsp_prov_scan_unprov_beacons;
     sl_btmesh_rsp_prov_create_provisioning_session_t             rsp_prov_create_provisioning_session;
@@ -6057,6 +6114,7 @@ PACKSTRUCT( struct sl_btmesh_packet {
     sl_btmesh_evt_scheduler_client_action_status_t               evt_scheduler_client_action_status;
     sl_btmesh_evt_scheduler_server_action_changed_t              evt_scheduler_server_action_changed;
     sl_btmesh_evt_scheduler_server_scene_changed_t               evt_scheduler_server_scene_changed;
+    sl_btmesh_evt_scheduler_server_action_triggered_t            evt_scheduler_server_action_triggered;
     sl_btmesh_evt_time_server_time_updated_t                     evt_time_server_time_updated;
     sl_btmesh_evt_time_server_time_zone_offset_updated_t         evt_time_server_time_zone_offset_updated;
     sl_btmesh_evt_time_server_tai_utc_delta_updated_t            evt_time_server_tai_utc_delta_updated;

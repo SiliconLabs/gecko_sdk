@@ -201,6 +201,7 @@
   - name: device_supports_connect
   - name: device_supports_zwave
   - name: device_supports_zwave_end_device
+  - name: device_compute_basic
 - requires:
   - name: cmsis_core
   - name: ZGM230SA27HNN_config

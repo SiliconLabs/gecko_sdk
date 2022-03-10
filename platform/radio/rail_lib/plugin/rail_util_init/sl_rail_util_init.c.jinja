@@ -33,6 +33,14 @@
 #include "sl_rail_util_init.h"
 #include "sl_rail_util_protocol.h"
 #include "sl_component_catalog.h"
+
+#if defined(SL_CATALOG_TIMING_TEST_PRESENT) && !SL_RAIL_LIB_MULTIPROTOCOL_SUPPORT
+// Needed for measuring RAIL_Init() time as a part of 
+// detailed timing characterization.
+#include "em_timer.h"
+#include "em_cmu.h"
+#endif
+
 #ifdef SL_CATALOG_APP_ASSERT_PRESENT
 #include "app_assert.h"
 #define APP_ASSERT(expr, ...) app_assert(expr,__VA_ARGS__)
@@ -58,6 +66,23 @@
 // Instance: {{ inst | lower }}
 static RAIL_Handle_t sl_rail_handle_{{ inst | lower }} = RAIL_EFR32_HANDLE;
 
+#if defined(SL_CATALOG_TIMING_TEST_PRESENT) && !SL_RAIL_LIB_MULTIPROTOCOL_SUPPORT
+uint32_t sli_timing_start_tick = 0U;
+uint32_t sli_timing_end_tick = 0U;
+static TIMER_TypeDef *timer = TIMER0;
+static void setupTimingTestTimer(void)
+{
+  // Clock TIMER0 using the HF clock
+  CMU_ClockSelectSet(cmuClock_TIMER0, cmuSelect_HFXO);
+  CMU_ClockEnable(cmuClock_TIMER0, true);
+  // Use default configuration, prescaled by 8.
+  TIMER_Init_TypeDef timerCfg = TIMER_INIT_DEFAULT;
+  timerCfg.prescale = timerPrescale8;
+  // Enable TIMER0 to upcount
+  TIMER_Init(timer, &timerCfg);
+}
+#endif
+
 static void sl_rail_util_init_{{ inst | lower }}(void)
 {
 #if SL_RAIL_UTIL_INIT_{{ inst | upper }}_ENABLE
@@ -66,6 +91,10 @@ static void sl_rail_util_init_{{ inst | lower }}(void)
     .eventsCallback = &sli_rail_util_on_event,
     // Other fields are ignored nowadays
   };
+#ifdef SL_CATALOG_TIMING_TEST_PRESENT
+  setupTimingTestTimer();
+  sli_timing_start_tick = timer->CNT;
+#endif // SL_CATALOG_TIMING_TEST_PRESENT
   sl_rail_handle_{{ inst | lower }} = RAIL_Init(&sl_rail_config,
 #if SL_RAIL_UTIL_INIT_INIT_COMPLETE_CALLBACK_{{ inst | upper }}_ENABLE
                              &sli_rail_util_on_rf_ready
@@ -73,6 +102,9 @@ static void sl_rail_util_init_{{ inst | lower }}(void)
                              NULL
 #endif // SL_RAIL_UTIL_INIT_INIT_COMPLETE_CALLBACK_{{ inst | upper }}_ENABLE
                              );
+#ifdef SL_CATALOG_TIMING_TEST_PRESENT
+  sli_timing_end_tick = timer->CNT;
+#endif // SL_CATALOG_TIMING_TEST_PRESENT
   APP_ASSERT((NULL != sl_rail_handle_{{ inst | lower }}),
              "RAIL_Init failed, return value: NULL");
 

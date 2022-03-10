@@ -102,7 +102,7 @@ static void packetMode_RxPacketAborted(RAIL_Handle_t railHandle)
     rxPacket->rxPacket.packetStatus = packetInfo.packetStatus;
     rxPacket->rxPacket.dataLength = 0U;
     rxPacket->rxPacket.freqOffset = getRxFreqOffset();
-    rxPacket->rxPacket.filterMask = 0U;
+    rxPacket->rxPacket.filterMask = packetInfo.filterMask;
     // Read what packet details are available into our packet structure
     if (RAIL_GetRxPacketDetailsAlt(railHandle, packetHandle,
                                    &rxPacket->rxPacket.appendedInfo)

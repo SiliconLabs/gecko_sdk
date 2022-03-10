@@ -1,0 +1,12 @@
+tag:
+  - hardware:
+      device:
+        memory:
+          flash: 68
+          ram: 7
+      board:
+        rf_bands:
+          - any
+        communication:
+          - pti
+  

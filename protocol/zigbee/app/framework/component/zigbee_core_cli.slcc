@@ -9,6 +9,8 @@ provides:
   - name: "zigbee_core_cli"
 requires:
   - name: "zigbee_cli"
+config_file:
+  - path: protocol/zigbee/app/framework/common/config/zigbee_core_cli_config.h
 source:
   - path: "protocol/zigbee/app/framework/cli/core-cli.c"
     condition:
@@ -141,6 +143,68 @@ template_contribution:
       - rail_util_ieee802154_phy_select
   - name: cli_command
     value:
+      name: config-cca-mode
+      handler: sli_zigbee_cli_config_cca_mode_command
+      help: "Set the configured 802.15.4 CCA mode in the radio. See documentation regarding RAIL_IEEE802154_CcaMode_t."
+      argument:
+      - type: uint8
+        help: "A RAIL_IEEE802154_CcaMode_t value"
+  - name: cli_command
+    value:
       name: version
       handler: sli_zigbee_cli_version_command
       help: "Shows the version of the software."
+  - name: cli_group
+    value:
+      name: endpoints
+      help: "endpoint related commands."
+  - name: cli_command
+    value:
+      group: endpoints
+      name: print
+      handler: endpointPrint
+      help: "Print status of endpoints."
+  - name: cli_command
+    value:
+      group: endpoints
+      name: enable
+      handler: enableDisableEndpoint
+      help: "Enables the endpoint for ZCL messages."
+      argument:
+      - type: uint8
+        help: "Endpoint index"
+  - name: cli_command
+    value:
+      group: endpoints
+      name: disable
+      handler: enableDisableEndpoint
+      help: "Disable the endpoint for ZCL messages."
+      argument:
+      - type: uint8
+        help: "Endpoint index"
+  - name: cli_command
+    value:
+      name: events
+      handler: printEvents
+      help: "Print active events."
+  - name: cli_group
+    value:
+      name: security
+      help: "security related commands"
+  - name: cli_group
+    value:
+      group: security
+      name: mfg-token
+      help: "Get/set MFG token."
+  - name: cli_command
+    value:
+      group: mfg-token
+      name: get
+      handler: getSetMfgToken
+      help: "Print MFG token."
+  - name: cli_command
+    value:
+      group: mfg-token
+      name: set
+      handler: getSetMfgToken
+      help: "Set MFG token, CANNOT BE UNSET BY CLI."

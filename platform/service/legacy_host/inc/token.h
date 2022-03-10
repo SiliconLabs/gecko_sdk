@@ -178,7 +178,7 @@ void halInternalSetTokenData(uint16_t token, uint8_t index, void *data, uint8_t 
   halInternalGetTokenData(data, token, 0x7F, token##_SIZE)
 
 #define halCommonGetMfgToken(data, token) \
-  halInternalGetTokenData(data, token, 0x7F, token##_SIZE)
+  halInternalGetMfgTokenData(data, token, 0x7F, token##_SIZE)
 
 void halInternalSetMfgTokenData(uint16_t token, void *data, uint8_t len);
 

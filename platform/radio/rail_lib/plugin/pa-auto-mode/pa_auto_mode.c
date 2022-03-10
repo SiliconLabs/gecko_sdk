@@ -30,11 +30,8 @@
  ******************************************************************************/
 #include "pa_auto_mode.h"
 
-#ifdef RAIL_PA_AUTO_MODE_WEAK
-__WEAK
-#endif
 #if _SILICON_LABS_32B_SERIES_1_CONFIG != 0
-RAIL_PaAutoModeConfigEntry_t RAIL_PaAutoModeConfig[] = {
+static RAIL_PaAutoModeConfigEntry_t RAIL_PaAutoModeConfigDefault[] = {
   // LP PA's range is from -12.5 to 0 dBm
   // Because the default algorithm stops at the
   // first matching entry, specify LP for its range
@@ -59,7 +56,7 @@ RAIL_PaAutoModeConfigEntry_t RAIL_PaAutoModeConfig[] = {
   }
 };
 #elif _SILICON_LABS_32B_SERIES_2_CONFIG == 1
-RAIL_PaAutoModeConfigEntry_t RAIL_PaAutoModeConfig[] = {
+static RAIL_PaAutoModeConfigEntry_t RAIL_PaAutoModeConfigDefault[] = {
   // While EFR32XG21 does have a low power PA, matching networks can only
   // perform well for the HP and MP PA's, or the LP PA alone.
   {
@@ -76,7 +73,7 @@ RAIL_PaAutoModeConfigEntry_t RAIL_PaAutoModeConfig[] = {
   }
 };
 #elif _SILICON_LABS_32B_SERIES_2_CONFIG == 2
-RAIL_PaAutoModeConfigEntry_t RAIL_PaAutoModeConfig[] = {
+static RAIL_PaAutoModeConfigEntry_t RAIL_PaAutoModeConfigDefault[] = {
   {
     .min = -287,
     .max = 0,
@@ -91,7 +88,7 @@ RAIL_PaAutoModeConfigEntry_t RAIL_PaAutoModeConfig[] = {
   }
 };
 #elif _SILICON_LABS_32B_SERIES_2_CONFIG == 3
-RAIL_PaAutoModeConfigEntry_t RAIL_PaAutoModeConfig[] = {
+static RAIL_PaAutoModeConfigEntry_t RAIL_PaAutoModeConfigDefault[] = {
   {
     .min = INT16_MIN,
     .max = INT16_MAX,
@@ -100,15 +97,21 @@ RAIL_PaAutoModeConfigEntry_t RAIL_PaAutoModeConfig[] = {
   }
 };
 #elif _SILICON_LABS_32B_SERIES_2_CONFIG == 4
-RAIL_PaAutoModeConfigEntry_t RAIL_PaAutoModeConfig[] = {
-#if (_SILICON_LABS_EFR32_2G4HZ_HP_PA_MAX_OUTPUT_DBM <= 10)
+static RAIL_PaAutoModeConfigEntry_t RAIL_PaAutoModeConfigDefault10dBm[] = {
   {
     .min = -250,
     .max = 0,
     .mode = RAIL_TX_POWER_MODE_2P4_LP,
     .band = RAIL_PA_BAND_2P4GIG
   },
-#endif
+  {
+    .min = INT16_MIN,
+    .max = INT16_MAX,
+    .mode = RAIL_TX_POWER_MODE_2P4_HP,
+    .band = RAIL_PA_BAND_2P4GIG
+  }
+};
+static RAIL_PaAutoModeConfigEntry_t RAIL_PaAutoModeConfigDefault[] = {
   {
     .min = INT16_MIN,
     .max = INT16_MAX,
@@ -117,7 +120,7 @@ RAIL_PaAutoModeConfigEntry_t RAIL_PaAutoModeConfig[] = {
   }
 };
 #elif _SILICON_LABS_32B_SERIES_2_CONFIG == 5
-RAIL_PaAutoModeConfigEntry_t RAIL_PaAutoModeConfig[] = {
+static RAIL_PaAutoModeConfigEntry_t RAIL_PaAutoModeConfigDefault[] = {
 // todo_sol: PA auto mode
   {
     .min = INT16_MIN,
@@ -127,7 +130,7 @@ RAIL_PaAutoModeConfigEntry_t RAIL_PaAutoModeConfig[] = {
   }
 };
 #else
-RAIL_PaAutoModeConfigEntry_t RAIL_PaAutoModeConfig[] = {
+static RAIL_PaAutoModeConfigEntry_t RAIL_PaAutoModeConfigDefault[] = {
   {
     .min = INT16_MIN,
     .max = INT16_MAX,
@@ -135,6 +138,15 @@ RAIL_PaAutoModeConfigEntry_t RAIL_PaAutoModeConfig[] = {
     .band = RAIL_PA_BAND_2P4GIG
   }
 };
+#endif
+
+#ifdef RAIL_PA_AUTO_MODE_WEAK
+__WEAK
+#endif
+#if (defined(RAIL_PA_AUTO_MODE_WEAK)) || (_SILICON_LABS_32B_SERIES_2_CONFIG == 4)
+RAIL_PaAutoModeConfigEntry_t * RAIL_PaAutoModeConfig = RAIL_PaAutoModeConfigDefault;
+#else
+RAIL_PaAutoModeConfigEntry_t * const RAIL_PaAutoModeConfig = RAIL_PaAutoModeConfigDefault;
 #endif
 
 #ifdef RAIL_PA_AUTO_MODE_WEAK
@@ -158,6 +170,14 @@ RAIL_Status_t RAILCb_PaAutoModeDecision(RAIL_Handle_t railHandle,
   }
 #else
   (void)chCfgEntry;
+#endif
+
+#if _SILICON_LABS_32B_SERIES_2_CONFIG == 4
+  if (RAIL_SupportsTxPowerMode(railHandle,
+                               RAIL_TX_POWER_MODE_2P4GIG_LP,
+                               NULL)) {
+    RAIL_PaAutoModeConfig = RAIL_PaAutoModeConfigDefault10dBm;
+  }
 #endif
 
   // Find the index of the configuration entry that contains

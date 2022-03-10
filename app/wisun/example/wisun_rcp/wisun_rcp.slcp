@@ -7,7 +7,6 @@ quality: "production"
 
 component:
   - id: "device_init"
-  - id: "cmsis_rtos2"
   - id: "micriumos_kernel"
   - id: "sleeptimer"
   - id: "nvm3_default"
@@ -17,6 +16,10 @@ component:
   - id: "wisun_full_radioconf"
   - id: "wisun_rcp"
 
+requires:
+  - name: "cmsis_rtos2"
+  - name: freertos_heap_3
+    condition: [freertos]
 configuration:
   - name: "SL_BOARD_ENABLE_VCOM"
     value: "1"
@@ -24,13 +27,7 @@ configuration:
     value: "1"
     condition: [micriumos_kernel]
   - name: "SL_HEAP_SIZE"
-    value: "0x10000"
-  - name: "configTOTAL_HEAP_SIZE"
-    value: "16384"
-    condition: [freertos]
-  - name: "LIB_MEM_CFG_HEAP_SIZE"
-    value: "16384"
-    condition: [micriumos_kernel]
+    value: "0xD000"
   - name: CPU_CFG_TS_32_EN
     value: "1"
   - name: OS_CFG_DBG_EN
@@ -50,6 +47,7 @@ readme:
 other_file:
   - path: ../../documentation/example/wisun_rcp/readme_img0.png
   - path: ../../documentation/example/wisun_rcp/readme_img1.png
+  - path: hw_filter_tags.yaml
 
 ui_hints:
   highlight:
@@ -58,15 +56,4 @@ ui_hints:
 
 tag:
   - prebuilt_demo
-  - hardware:
-      device:
-        memory:
-          flash: 200
-          ram: 80
-      board:
-        rf_bands:
-          - 434|490|868|915
-        communication:
-          - vcom
-          - pti
-  
+

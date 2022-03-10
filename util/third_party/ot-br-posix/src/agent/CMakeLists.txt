@@ -95,8 +95,16 @@ elseif(NOT OTBR_OPENWRT)
         RENAME otbr-agent)
 endif()
 
+set(OTBR_NO_AUTO_ATTACH "0" CACHE STRING "Set to 1 to disable auto Thread attach")
+
 configure_file(otbr-agent.default.in otbr-agent.default)
 install(FILES ${CMAKE_CURRENT_BINARY_DIR}/otbr-agent.default
     DESTINATION ${CMAKE_INSTALL_FULL_SYSCONFDIR}/default
     RENAME otbr-agent
 )
+
+pkg_check_modules(LIBSYSTEMD libsystemd)
+if(LIBSYSTEMD_FOUND)
+    target_compile_definitions(otbr-config INTERFACE "HAVE_LIBSYSTEMD=1")
+    target_link_libraries(otbr-agent PUBLIC ${LIBSYSTEMD_LIBRARIES})
+endif()

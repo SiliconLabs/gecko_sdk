@@ -14,6 +14,7 @@ requires:
   - name: rail_util_init
   - name: rail_util_protocol # included as dependency of rail_util_init too
   - name: rail_util_callbacks # included as dependency of rail_util_init too
+  - name: rail_util_built_in_phys
   - name: rail_util_pa
   - name: rail_util_pti
   - name: rail_util_rssi

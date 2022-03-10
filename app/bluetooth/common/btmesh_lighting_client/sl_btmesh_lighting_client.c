@@ -101,6 +101,8 @@ static uint8_t onoff_request_count;
 static uint8_t onoff_trid = 0;
 /// lightness level percentage
 static uint8_t lightness_percent = 0;
+/// lightness level percentage when switching ON
+static uint8_t lightness_percent_switch_on = LIGHTNESS_PCT_MAX;
 /// lightness level converted from percentage to actual value, range 0..65535
 static uint16_t lightness_level = 0;
 /// number of lightness requests to be sent
@@ -248,6 +250,9 @@ void sl_btmesh_change_lightness(int8_t change_percentage)
     }
   }
 
+  if (lightness_percent != 0) {
+    lightness_percent_switch_on = lightness_percent;
+  }
   sl_btmesh_set_lightness(lightness_percent);
 }
 
@@ -307,7 +312,7 @@ void sl_btmesh_change_switch_position(uint8_t position)
   // Turns light ON or OFF, using Generic OnOff model
   if (switch_pos) {
     log(SL_BTMESH_ONOFF_LIGHTING_LOGGING_ON_CFG_VAL);
-    lightness_percent = LIGHTNESS_PCT_MAX;
+    lightness_percent = lightness_percent_switch_on;
   } else {
     log(SL_BTMESH_ONOFF_LIGHTING_LOGGING_OFF_CFG_VAL);
     lightness_percent = 0;

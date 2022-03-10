@@ -43,6 +43,7 @@ source:
 other_file:
   - path: "../../../script/connect_create_gbl_image.bat"
   - path: "../../../script/connect_create_gbl_image.sh"
+  - path: "hw_filter_tags.yaml"
 
 readme:
   - path: ../../../documentation/example/connect/connect_empty/readme.md
@@ -64,20 +65,8 @@ toolchain_settings:
   - option: optimize
     value: debug
 
-tag:
-  - hardware:
-      device:
-        memory:
-          flash: 163
-          ram: 23
-      board:
-        rf_bands:
-          - any
-        communication:
-          - vcom
-          - pti
-
 ui_hints:
   highlight:
     - path: readme.md
       focus: true
+  

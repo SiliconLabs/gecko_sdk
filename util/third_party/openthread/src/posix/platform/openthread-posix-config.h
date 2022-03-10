@@ -48,35 +48,6 @@
 #endif
 
 /**
- * @def OPENTHREAD_CONFIG_POSIX_APP_TREL_INTERFACE_NAME
- *
- * Defines the default interface name used for TREL UDP6 platform. Empty string disables TREL platform.
- *
- */
-#ifndef OPENTHREAD_CONFIG_POSIX_APP_TREL_INTERFACE_NAME
-#define OPENTHREAD_CONFIG_POSIX_APP_TREL_INTERFACE_NAME ""
-#endif
-
-/**
- * @def OPENTHREAD_CONFIG_POSIX_TREL_USE_NETLINK_SOCKET
- *
- * Defines whether the TREL UDP6 platform uses netlink socket to add/remove addresses on the TREL netif or `ioctl()`
- * command.
- *
- * When netlink is used Duplicate Address Detection (DAD) is disabled when a new address is added on the netif.
- *
- * Use of netlink is enabled by default on linux-based platforms.
- *
- */
-#ifndef OPENTHREAD_CONFIG_POSIX_TREL_USE_NETLINK_SOCKET
-#ifdef __linux__
-#define OPENTHREAD_CONFIG_POSIX_TREL_USE_NETLINK_SOCKET 1
-#else
-#define OPENTHREAD_CONFIG_POSIX_TREL_USE_NETLINK_SOCKET 0
-#endif
-#endif
-
-/**
  * @def OPENTHREAD_POSIX_CONFIG_DAEMON_SOCKET_BASENAME
  *
  * Define socket basename used by POSIX app daemon.
@@ -210,14 +181,6 @@
  * ip6tables -A $OTBR_FORWARD_INGRESS_CHAIN -p ip -j ACCEPT
  *
  */
-#ifdef __linux__
-#if OPENTHREAD_CONFIG_BORDER_ROUTER_ENABLE & OPENTHREAD_CONFIG_PLATFORM_NETIF_ENABLE
-#ifndef OPENTHREAD_POSIX_CONFIG_FIREWALL_ENABLE
-#define OPENTHREAD_POSIX_CONFIG_FIREWALL_ENABLE 1
-#endif
-#endif
-#endif
-
 #ifndef OPENTHREAD_POSIX_CONFIG_FIREWALL_ENABLE
 #define OPENTHREAD_POSIX_CONFIG_FIREWALL_ENABLE 0
 #endif
@@ -251,5 +214,16 @@
 #endif
 
 #endif // __APPLE__
+
+//---------------------------------------------------------------------------------------------------------------------
+// Removed or renamed POSIX specific configs.
+
+#ifdef OPENTHREAD_CONFIG_POSIX_APP_TREL_INTERFACE_NAME
+#error "OPENTHREAD_CONFIG_POSIX_APP_TREL_INTERFACE_NAME was removed (no longer applicable with TREL over DNS-SD)."
+#endif
+
+#ifdef OPENTHREAD_CONFIG_POSIX_TREL_USE_NETLINK_SOCKET
+#error "OPENTHREAD_CONFIG_POSIX_TREL_USE_NETLINK_SOCKET was removed (no longer applicable with TREL over DNS-SD)."
+#endif
 
 #endif // OPENTHREAD_PLATFORM_CONFIG_H_

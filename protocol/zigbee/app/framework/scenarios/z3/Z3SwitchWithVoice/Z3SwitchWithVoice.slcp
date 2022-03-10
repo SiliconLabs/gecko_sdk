@@ -1,5 +1,5 @@
 project_name: "Z3SwitchWithVoice"
-label: "Z3SwitchWithVoice"
+label: "Machine Learning - Z3SwitchWithVoice"
 package: "Zigbee"
 category: "Zigbee Application"
 quality: "production"
@@ -77,6 +77,8 @@ configuration:
     value: 0
   - name: SL_ML_AUDIO_FEATURE_GENERATION_AUDIO_BUFFER_SIZE
     value: 4096
+  - name: SL_ML_AUDIO_FEATURE_GENERATION_AUDIO_GAIN
+    value: 2
   - name: SL_CLI_PROMPT_STRING
     value:  "\"Z3SwitchWithVoice>\""
   - name: NVM3_DEFAULT_NVM_SIZE
@@ -98,7 +100,7 @@ config_file:
     file_id: zap_configuration_file_id
     directory: "zcl"
   - path: config/recognize_commands_config.h
-  - path: "config/tflite/voice_controlled_light.tflite"
+  - path: "config/tflite/keyword_spotting_on_off.tflite"
     file_id: flatbuffer_file_id
     directory: "tflite"
 include:

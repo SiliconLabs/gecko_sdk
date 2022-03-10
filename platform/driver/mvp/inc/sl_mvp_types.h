@@ -38,12 +38,21 @@
 extern "C" {
 #endif
 
+/// @cond DO_NOT_INCLUDE_WITH_DOXYGEN
+/***************************************************************************//**
+ * @addtogroup mvp MVP API
+ * @{
+ ******************************************************************************/
+
 // Half precision floating point types. 16 bits encoded in binary16 format.
 typedef __fp16 float16_t;
 
 typedef struct {
   int dim[4];
 } sli_shape_t;
+
+/** @} (end addtogroup mvp) */
+/// @endcond
 
 #ifdef __cplusplus
 }

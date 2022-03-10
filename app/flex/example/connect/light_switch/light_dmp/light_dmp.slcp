@@ -19,6 +19,9 @@ component:
   - id: app_assert
   - id: legacy_hal
   - id: token_manager
+  - id: cli
+    instance:
+      - "example"
   # Connect components
   - id: connect_debug_print
   - id: connect_app_framework_common
@@ -81,6 +84,7 @@ config_file:
 other_file:
   - path: "../../../../script/connect_create_gbl_image.bat"
   - path: "../../../../script/connect_create_gbl_image.sh"
+  - path: "hw_filter_tags.yaml"
 
 #------------ Configuration overrides ----------------
 configuration:
@@ -158,16 +162,3 @@ ui_hints:
     - path: "config/btconf/gatt_configuration.btconf"
       focus: true
 
-tag:
-  - hardware:
-      device:
-        memory:
-          flash: 353
-          ram: 52
-      board:
-        rf_bands:
-          - 2400
-        communication:
-          - vcom
-          - pti
-  

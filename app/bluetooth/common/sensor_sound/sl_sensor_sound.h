@@ -3,7 +3,7 @@
  * @brief Sound level sensor header
  *******************************************************************************
  * # License
- * <b>Copyright 2020 Silicon Laboratories Inc. www.silabs.com</b>
+ * <b>Copyright 2022 Silicon Laboratories Inc. www.silabs.com</b>
  *******************************************************************************
  *
  * SPDX-License-Identifier: Zlib
@@ -35,8 +35,9 @@
 
 /**************************************************************************//**
  * Initialize sound level sensor.
+ * @return Status of the operation.
  *****************************************************************************/
-void sl_sensor_sound_init(void);
+sl_status_t sl_sensor_sound_init(void);
 
 /**************************************************************************//**
  * Deinitialize sound level sensor.

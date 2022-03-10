@@ -637,6 +637,16 @@ EmberStatus ezspGetChildData(
   // Return: The data of the child.
   EmberChildData *childData);
 
+// Sets child data to the child table token.
+// Return: EMBER_SUCCESS if the child data is set successfully at index.
+// EMBER_INDEX_OUT_OF_RANGE if provided index is out of range.
+EmberStatus ezspSetChildData(
+  // The index of the child of interest in the child table. Possible indexes
+  // range from zero to (EMBER_CHILD_TABLE_SIZE - 1).
+  uint8_t index,
+  // The data of the child.
+  EmberChildData *childData);
+
 // Returns the source route table total size.
 // Return: Total size of source route table.
 uint8_t ezspGetSourceRouteTableTotalSize(void);
@@ -684,6 +694,15 @@ EmberStatus ezspGetNeighborFrameCounter(
   // Return: Return the frame counter of the node from the neighbor or child
   // table
   uint32_t *returnFrameCounter);
+
+// Sets the frame counter for the neighbour or child.
+// Return: Return EMBER_NOT_FOUND if the node is not found in the neighbor or
+// child table. Returns EMBER_SUCCESS otherwise
+EmberStatus ezspSetNeighborFrameCounter(
+  // eui64 of the node
+  EmberEUI64 eui64,
+  // Return the frame counter of the node from the neighbor or child table
+  uint32_t frameCounter);
 
 // Sets the routing shortcut threshold to directly use a neighbor instead of
 // performing routing.
@@ -737,6 +756,13 @@ EmberStatus ezspSetRadioChannel(
 // Gets the channel in use for sending and receiving messages.
 // Return: Current radio channel.
 uint8_t ezspGetRadioChannel(void);
+
+// Set the configured 802.15.4 CCA mode in the radio.
+// Return: An EmberStatus value indicating the success or failure of the
+// command.
+EmberStatus ezspSetRadioIeee802154CcaMode(
+  // A RAIL_IEEE802154_CcaMode_t value.
+  uint8_t ccaMode);
 
 // Enable/disable concentrator support.
 // Return: An EmberStatus value indicating success or the reason for failure.

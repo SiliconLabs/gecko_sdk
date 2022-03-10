@@ -1068,16 +1068,16 @@ void RAILCb_IEEE802154_DataRequestCommand(RAIL_Handle_t railHandle)
 
 void set802154CcaMode(sl_cli_command_arg_t *args)
 {
-#if RAIL_IEEE802154_SUPPORTS_SIGNAL_IDENTIFIER
   RAIL_IEEE802154_CcaMode_t ccaMode = sl_cli_get_argument_uint8(args, 0);
-  RAIL_IEEE802154_ConfigCcaMode(railHandle, ccaMode);
-  responsePrint(sl_cli_get_command_string(args, 0),
-                "ccaMode:%u",
-                ccaMode);
-#else
-  responsePrint(sl_cli_get_command_string(args, 0),
-                "CCA modes unsupported");
-#endif
+  if (RAIL_IEEE802154_ConfigCcaMode(railHandle, ccaMode)
+      == RAIL_STATUS_NO_ERROR) {
+    responsePrint(sl_cli_get_command_string(args, 0),
+                  "ccaMode:%u",
+                  ccaMode);
+  } else {
+    responsePrint(sl_cli_get_command_string(args, 0),
+                  "CCA mode unsupported");
+  }
 }
 
 void enable802154SignalIdentifier(sl_cli_command_arg_t *args)

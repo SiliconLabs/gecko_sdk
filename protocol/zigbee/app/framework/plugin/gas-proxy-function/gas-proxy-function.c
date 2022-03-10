@@ -719,7 +719,6 @@ bool emberAfCalendarClusterPublishDayProfileCallback(EmberAfClusterCommand *cmd)
 
 
   sl_zcl_calendar_cluster_publish_day_profile_command_t cmd_data;
-  bool status;
   uint16_t dayScheduleEntriesLength;
 
   if (zcl_decode_calendar_cluster_publish_day_profile_command(cmd, &cmd_data)
@@ -739,10 +738,10 @@ bool emberAfCalendarClusterPublishDayProfileCallback(EmberAfClusterCommand *cmd)
                                        cmd_data.totalNumberOfCommands,
                                        cmd_data.calendarType);
 
-  status = emberAfCalendarCommonAddDayProfInfo(cmd_data.issuerCalendarId,
-                                               cmd_data.dayId,
-                                               cmd_data.dayScheduleEntries,
-                                               dayScheduleEntriesLength);
+  emberAfCalendarCommonAddDayProfInfo(cmd_data.issuerCalendarId,
+                                      cmd_data.dayId,
+                                      cmd_data.dayScheduleEntries,
+                                      dayScheduleEntriesLength);
   return true;
 }
 
@@ -836,7 +835,6 @@ bool emberAfCalendarClusterPublishSpecialDaysCallback(EmberAfClusterCommand *cmd
 bool emberAfCalendarClusterPublishWeekProfileCallback(EmberAfClusterCommand *cmd)
 {
   sl_zcl_calendar_cluster_publish_week_profile_command_t cmd_data;
-  bool status;
 
   if (zcl_decode_calendar_cluster_publish_week_profile_command(cmd, &cmd_data)
       != EMBER_ZCL_STATUS_SUCCESS) {
@@ -856,15 +854,15 @@ bool emberAfCalendarClusterPublishWeekProfileCallback(EmberAfClusterCommand *cmd
                                        cmd_data.dayIdRefSaturday,
                                        cmd_data.dayIdRefSunday);
 
-  status = emberAfCalendarServerAddWeekProfInfo(cmd_data.issuerCalendarId,
-                                                cmd_data.weekId,
-                                                cmd_data.dayIdRefMonday,
-                                                cmd_data.dayIdRefTuesday,
-                                                cmd_data.dayIdRefWednesday,
-                                                cmd_data.dayIdRefThursday,
-                                                cmd_data.dayIdRefFriday,
-                                                cmd_data.dayIdRefSaturday,
-                                                cmd_data.dayIdRefSunday);
+  emberAfCalendarServerAddWeekProfInfo(cmd_data.issuerCalendarId,
+                                       cmd_data.weekId,
+                                       cmd_data.dayIdRefMonday,
+                                       cmd_data.dayIdRefTuesday,
+                                       cmd_data.dayIdRefWednesday,
+                                       cmd_data.dayIdRefThursday,
+                                       cmd_data.dayIdRefFriday,
+                                       cmd_data.dayIdRefSaturday,
+                                       cmd_data.dayIdRefSunday);
   return true;
 }
 
@@ -954,6 +952,339 @@ bool emberAfDeviceManagementClusterPublishChangeOfTenancyCallback(EmberAfCluster
   }
 
   emberAfSendImmediateDefaultResponse(status);
+  return true;
+}
+
+bool emberAfPriceClusterPublishCalorificValueCallback(EmberAfClusterCommand *cmd)
+{
+  sl_zcl_price_cluster_publish_calorific_value_command_t cmd_data;
+  EmberAfStatus status;
+
+  if (zcl_decode_price_cluster_publish_calorific_value_command(cmd, &cmd_data)
+      != EMBER_ZCL_STATUS_SUCCESS) {
+    return false;
+  }
+
+  emberAfPluginGasProxyFunctionPrintln("GPF: RX: PublishCalorificValue 0x%4X, 0x%4X, 0x%4X, 0x%X, 0x%X",
+                                       cmd_data.issuerEventId,
+                                       cmd_data.startTime,
+                                       cmd_data.calorificValue,
+                                       cmd_data.calorificValueUnit,
+                                       cmd_data.calorificValueTrailingDigit);
+
+  if (emberAfPluginGasProxyFunctionIgnoreFutureCommand(cmd_data.startTime)) {
+    emberAfPluginGasProxyFunctionPrintln("GPF: Ignoring future dated command.");
+    return true;
+  }
+
+  status = emberAfPluginPriceServerCalorificValueAdd(EMBER_AF_PLUGIN_GAS_PROXY_FUNCTION_ESI_ENDPOINT,
+                                                     cmd_data.issuerEventId,
+                                                     cmd_data.startTime,
+                                                     cmd_data.calorificValue,
+                                                     cmd_data.calorificValueUnit,
+                                                     cmd_data.calorificValueTrailingDigit);
+  if (status != EMBER_ZCL_STATUS_SUCCESS) {
+    emberAfPluginGasProxyFunctionPrintln("GPF: ERR: Unable to update calorific value (status:0x%X).", status);
+  }
+  return true;
+}
+
+bool emberAfPriceClusterPublishConversionFactorCallback(EmberAfClusterCommand *cmd)
+{
+  sl_zcl_price_cluster_publish_conversion_factor_command_t cmd_data;
+  EmberStatus status;
+
+  if (zcl_decode_price_cluster_publish_conversion_factor_command(cmd, &cmd_data)
+      != EMBER_ZCL_STATUS_SUCCESS) {
+    return false;
+  }
+
+  emberAfPluginGasProxyFunctionPrintln("GPF: RX: PublishConversionFactor 0x%4X, 0x%4X, 0x%4X, 0x%X",
+                                       cmd_data.issuerEventId,
+                                       cmd_data.startTime,
+                                       cmd_data.conversionFactor,
+                                       cmd_data.conversionFactorTrailingDigit);
+
+  if (emberAfPluginGasProxyFunctionIgnoreFutureCommand(cmd_data.startTime)) {
+    emberAfPluginGasProxyFunctionPrintln("GPF: Ignoring future dated command.");
+    return true;
+  }
+
+  status = emberAfPluginPriceServerConversionFactorAdd(EMBER_AF_PLUGIN_GAS_PROXY_FUNCTION_ESI_ENDPOINT,
+                                                       cmd_data.issuerEventId,
+                                                       cmd_data.startTime,
+                                                       cmd_data.conversionFactor,
+                                                       cmd_data.conversionFactorTrailingDigit);
+  if (status != EMBER_ZCL_STATUS_SUCCESS) {
+    emberAfPluginGasProxyFunctionPrintln("GPF: ERR: Unable to update conversion factor (status:0x%X).", status);
+  }
+  return true;
+}
+
+bool emberAfPriceClusterPublishBlockThresholdsCallback(EmberAfClusterCommand *cmd)
+{
+  sl_zcl_price_cluster_publish_block_thresholds_command_t cmd_data;
+
+  if (zcl_decode_price_cluster_publish_block_thresholds_command(cmd, &cmd_data)
+      != EMBER_ZCL_STATUS_SUCCESS) {
+    return false;
+  }
+
+  emberAfPluginGasProxyFunctionPrintln("GPF: RX: PublishBlockThresholds 0x%4X, 0x%4X, 0x%4X, 0x%4X, 0x%X, 0x%X, 0x%X",
+                                       cmd_data.providerId,
+                                       cmd_data.issuerEventId,
+                                       cmd_data.startTime,
+                                       cmd_data.issuerTariffId,
+                                       cmd_data.commandIndex,
+                                       cmd_data.numberOfCommands,
+                                       cmd_data.subPayloadControl);
+
+  if (emberAfPluginGasProxyFunctionIgnoreFutureCommand(cmd_data.startTime)) {
+    emberAfPluginGasProxyFunctionPrintln("GPF: Ignoring future dated command.");
+    return true;
+  }
+
+  emberAfPriceAddBlockThresholdsTableEntry(EMBER_AF_PLUGIN_GAS_PROXY_FUNCTION_ESI_ENDPOINT,
+                                           cmd_data.providerId,
+                                           cmd_data.issuerEventId,
+                                           cmd_data.startTime,
+                                           cmd_data.issuerTariffId,
+                                           cmd_data.commandIndex,
+                                           cmd_data.numberOfCommands,
+                                           cmd_data.subPayloadControl,
+                                           cmd_data.payload);
+
+  return true;
+}
+
+bool emberAfPriceClusterPublishTariffInformationCallback(EmberAfClusterCommand *cmd)
+{
+  sl_zcl_price_cluster_publish_tariff_information_command_t cmd_data;
+  EmberAfPriceCommonInfo info;
+  EmberAfScheduledTariff tariff;
+
+  if (zcl_decode_price_cluster_publish_tariff_information_command(cmd, &cmd_data)
+      != EMBER_ZCL_STATUS_SUCCESS) {
+    return false;
+  }
+
+  emberAfPluginGasProxyFunctionPrintln("GPF: RX: PublishTariffInformationReceived");
+  emberAfPriceClusterPrint("RX: PublishTariffInformation 0x%4x, 0x%4x, 0x%4x, 0x%4x, 0x%x, \"",
+                           cmd_data.providerId,
+                           cmd_data.issuerEventId,
+                           cmd_data.issuerTariffId,
+                           cmd_data.startTime,
+                           cmd_data.tariffTypeChargingScheme);
+
+  emberAfPriceClusterPrintString(cmd_data.tariffLabel);
+  emberAfPriceClusterPrint("\"");
+  emberAfPriceClusterPrint(", 0x%x, 0x%x, 0x%x, 0x%2x, 0x%x",
+                           cmd_data.numberOfPriceTiersInUse,
+                           cmd_data.numberOfBlockThresholdsInUse,
+                           cmd_data.unitOfMeasure,
+                           cmd_data.currency,
+                           cmd_data.priceTrailingDigit);
+  emberAfPriceClusterPrintln(", 0x%4x, 0x%x, 0x%4x, 0x%4x",
+                             cmd_data.standingCharge,
+                             cmd_data.tierBlockMode,
+                             cmd_data.blockThresholdMultiplier,
+                             cmd_data.blockThresholdDivisor);
+  emberAfPriceClusterFlush();
+
+  if (emberAfPluginGasProxyFunctionIgnoreFutureCommand(cmd_data.startTime)) {
+    emberAfPluginGasProxyFunctionPrintln("GPF: Ignoring future dated command.");
+    return true;
+  }
+
+  info.startTime = cmd_data.startTime;
+  info.issuerEventId = cmd_data.issuerEventId;
+  tariff.providerId = cmd_data.providerId;
+  tariff.issuerTariffId = cmd_data.issuerTariffId;
+  tariff.tariffTypeChargingScheme = cmd_data.tariffTypeChargingScheme;
+  emberAfCopyString(tariff.tariffLabel, cmd_data.tariffLabel, ZCL_PRICE_CLUSTER_MAXIMUM_RATE_LABEL_LENGTH);
+  tariff.numberOfPriceTiersInUse = cmd_data.numberOfPriceTiersInUse;
+  tariff.numberOfBlockThresholdsInUse = cmd_data.numberOfBlockThresholdsInUse;
+  tariff.unitOfMeasure = cmd_data.unitOfMeasure;
+  tariff.currency = cmd_data.currency;
+  tariff.priceTrailingDigit = cmd_data.priceTrailingDigit;
+  tariff.standingCharge = cmd_data.standingCharge;
+  tariff.tierBlockMode = cmd_data.tierBlockMode;
+  tariff.blockThresholdMultiplier = cmd_data.blockThresholdMultiplier;
+  tariff.blockThresholdDivisor = cmd_data.blockThresholdDivisor;
+  tariff.status |= FUTURE;
+
+  emberAfPriceAddTariffTableEntry(EMBER_AF_PLUGIN_GAS_PROXY_FUNCTION_ESI_ENDPOINT,
+                                  &info,
+                                  &tariff);
+  return true;
+}
+
+bool emberAfPriceClusterPublishPriceMatrixCallback(EmberAfClusterCommand *cmd)
+{
+  sl_zcl_price_cluster_publish_price_matrix_command_t cmd_data;
+
+  if (zcl_decode_price_cluster_publish_price_matrix_command(cmd, &cmd_data)
+      != EMBER_ZCL_STATUS_SUCCESS) {
+    return false;
+  }
+
+  emberAfPluginGasProxyFunctionPrintln("GPF: RX: PublishPriceMatrix 0x%4X, 0x%4X, 0x%4X, 0x%4X, 0x%X, 0x%X, 0x%X",
+                                       cmd_data.providerId,
+                                       cmd_data.issuerEventId,
+                                       cmd_data.startTime,
+                                       cmd_data.issuerTariffId,
+                                       cmd_data.commandIndex,
+                                       cmd_data.numberOfCommands,
+                                       cmd_data.subPayloadControl);
+
+  if (emberAfPluginGasProxyFunctionIgnoreFutureCommand(cmd_data.startTime)) {
+    emberAfPluginGasProxyFunctionPrintln("GPF: Ignoring future dated command.");
+    return true;
+  }
+
+  emberAfPriceAddPriceMatrixRaw(EMBER_AF_PLUGIN_GAS_PROXY_FUNCTION_ESI_ENDPOINT,
+                                cmd_data.providerId,
+                                cmd_data.issuerEventId,
+                                cmd_data.startTime,
+                                cmd_data.issuerTariffId,
+                                cmd_data.commandIndex,
+                                cmd_data.numberOfCommands,
+                                cmd_data.subPayloadControl,
+                                cmd_data.payload);
+
+  return true;
+}
+
+bool emberAfMessagingClusterDisplayMessageCallback(EmberAfClusterCommand *cmd)
+{
+  sl_zcl_messaging_cluster_display_message_command_t cmd_data;
+  EmberAfPluginMessagingServerMessage message;
+  uint8_t msgLength;
+
+  if (zcl_decode_messaging_cluster_display_message_command(cmd, &cmd_data)
+      != EMBER_ZCL_STATUS_SUCCESS) {
+    return false;
+  }
+
+  msgLength = emberAfStringLength(cmd_data.message) + 1;
+
+  if (msgLength > EMBER_AF_PLUGIN_MESSAGING_SERVER_MESSAGE_SIZE) {
+    emberAfPluginGasProxyFunctionPrint("GPF: ERR: Message too long for messaging server message buffer.");
+    return true;
+  }
+
+  if (emberAfPluginGasProxyFunctionIgnoreFutureCommand(cmd_data.startTime)) {
+    emberAfPluginGasProxyFunctionPrintln("GPF: Ignoring future dated command.");
+    return true;
+  }
+
+  message.messageId = cmd_data.messageId;
+  message.messageControl = cmd_data.messageControl;
+  message.startTime = cmd_data.startTime;
+  message.durationInMinutes = cmd_data.durationInMinutes;
+  MEMCOPY(message.message, cmd_data.message, msgLength);
+  message.extendedMessageControl = cmd_data.optionalExtendedMessageControl;
+
+  emberAfPluginGasProxyFunctionPrint("GPF: RX: DisplayMessage"
+                                     " 0x%4x, 0x%x, 0x%4x, 0x%2x, \"",
+                                     cmd_data.messageId,
+                                     cmd_data.messageControl,
+                                     cmd_data.startTime,
+                                     cmd_data.durationInMinutes);
+  emberAfPluginGasProxyFunctionPrintString(cmd_data.message);
+  emberAfPluginGasProxyFunctionPrint(", 0x%X", cmd_data.optionalExtendedMessageControl);
+  emberAfPluginGasProxyFunctionPrintln("\"");
+
+  emberAfPluginMessagingServerSetMessage(EMBER_AF_PLUGIN_GAS_PROXY_FUNCTION_ESI_ENDPOINT,
+                                         &message);
+  return true;
+}
+
+bool emberAfPriceClusterPublishBlockPeriodCallback(EmberAfClusterCommand *cmd)
+{
+  sl_zcl_price_cluster_publish_block_period_command_t cmd_data;
+  uint32_t thresholdMultiplier;
+  uint32_t thresholdDivisor;
+
+  if (zcl_decode_price_cluster_publish_block_period_command(cmd, &cmd_data)
+      != EMBER_ZCL_STATUS_SUCCESS) {
+    return false;
+  }
+
+  emberAfPluginGasProxyFunctionPrintln("GPF: RX: PublishBlockPeriod 0x%4X, 0x%4X, 0x%4X, 0x%4X, 0x%X, 0x%X, 0x%X, 0x%X",
+                                       cmd_data.providerId,
+                                       cmd_data.issuerEventId,
+                                       cmd_data.blockPeriodStartTime,
+                                       cmd_data.blockPeriodDuration,
+                                       cmd_data.blockPeriodControl,
+                                       cmd_data.blockPeriodDurationType,
+                                       cmd_data.tariffType,
+                                       cmd_data.tariffResolutionPeriod);
+
+  if (emberAfPluginGasProxyFunctionIgnoreFutureCommand(cmd_data.blockPeriodStartTime)) {
+    emberAfPluginGasProxyFunctionPrintln("GPF: Ignoring future dated command.");
+    return true;
+  }
+
+  emberAfReadAttribute(EMBER_AF_PLUGIN_GAS_PROXY_FUNCTION_ESI_ENDPOINT,
+                       ZCL_PRICE_CLUSTER_ID,
+                       ZCL_THRESHOLD_MULTIPLIER_ATTRIBUTE_ID,
+                       CLUSTER_MASK_SERVER,
+                       (uint8_t *)&(thresholdMultiplier),
+                       emberAfGetDataSize(ZCL_INT24U_ATTRIBUTE_TYPE),
+                       NULL);
+
+  emberAfReadAttribute(EMBER_AF_PLUGIN_GAS_PROXY_FUNCTION_ESI_ENDPOINT,
+                       ZCL_PRICE_CLUSTER_ID,
+                       ZCL_THRESHOLD_DIVISOR_ATTRIBUTE_ID,
+                       CLUSTER_MASK_SERVER,
+                       (uint8_t *)&(thresholdDivisor),
+                       emberAfGetDataSize(ZCL_INT24U_ATTRIBUTE_TYPE),
+                       NULL);
+
+  emberAfPluginPriceServerBlockPeriodAdd(EMBER_AF_PLUGIN_GAS_PROXY_FUNCTION_ESI_ENDPOINT,
+                                         cmd_data.providerId,
+                                         cmd_data.issuerEventId,
+                                         cmd_data.blockPeriodStartTime,
+                                         cmd_data.blockPeriodDuration,
+                                         cmd_data.blockPeriodControl,
+                                         cmd_data.blockPeriodDurationType,
+                                         thresholdMultiplier,
+                                         thresholdDivisor,
+                                         cmd_data.tariffType,
+                                         cmd_data.tariffResolutionPeriod);
+  return true;
+}
+
+bool emberAfPriceClusterPublishBillingPeriodCallback(EmberAfClusterCommand *cmd)
+{
+  sl_zcl_price_cluster_publish_billing_period_command_t cmd_data;
+
+  if (zcl_decode_price_cluster_publish_billing_period_command(cmd, &cmd_data)
+      != EMBER_ZCL_STATUS_SUCCESS) {
+    return false;
+  }
+
+  emberAfPluginGasProxyFunctionPrintln("GPF: RX: PublishBillingPeriod 0x%4X, 0x%4X, 0x%4X, 0x%4X, 0x%X, 0x%X",
+                                       cmd_data.providerId,
+                                       cmd_data.issuerEventId,
+                                       cmd_data.billingPeriodStartTime,
+                                       cmd_data.billingPeriodDuration,
+                                       cmd_data.billingPeriodDurationType,
+                                       cmd_data.tariffType);
+
+  if (emberAfPluginGasProxyFunctionIgnoreFutureCommand(cmd_data.billingPeriodStartTime)) {
+    emberAfPluginGasProxyFunctionPrintln("GPF: Ignoring future dated command.");
+    return true;
+  }
+
+  emberAfPluginPriceServerBillingPeriodAdd(EMBER_AF_PLUGIN_GAS_PROXY_FUNCTION_ESI_ENDPOINT,
+                                           cmd_data.billingPeriodStartTime,
+                                           cmd_data.issuerEventId,
+                                           cmd_data.providerId,
+                                           cmd_data.billingPeriodDuration,
+                                           cmd_data.billingPeriodDurationType,
+                                           cmd_data.tariffType);
   return true;
 }
 
@@ -1259,8 +1590,6 @@ bool emberAfDeviceManagementClusterPublishChangeOfTenancyCallback(uint32_t provi
   return true;
 }
 
-#endif // UC_BUILD
-
 bool emberAfPriceClusterPublishCalorificValueCallback(uint32_t issuerEventId,
                                                       uint32_t startTime,
                                                       uint32_t calorificValue,
@@ -1506,51 +1835,6 @@ bool emberAfMessagingClusterDisplayMessageCallback(uint32_t messageId,
   return true;
 }
 
-/** @brief Simple Metering Cluster Request Mirror
- *
- */
-bool emberAfSimpleMeteringClusterRequestMirrorCallback(void)
-{
-  EmberEUI64 otaEui;
-  uint16_t endpointId;
-
-  emberAfPluginGasProxyFunctionPrintln("GPF: RX: RequestMirror");
-
-  if (emberLookupEui64ByNodeId(emberAfResponseDestination, otaEui) == EMBER_SUCCESS) {
-    endpointId = emberAfPluginMeterMirrorRequestMirror(otaEui);
-    if (endpointId != 0xFFFF) {
-      emberAfFillCommandSimpleMeteringClusterRequestMirrorResponse(endpointId);
-      emberAfSendResponse();
-    } else {
-      emberAfPluginGasProxyFunctionPrintln("GPF: Invalid endpoint. Sending Default Response");
-      emberAfSendImmediateDefaultResponse(EMBER_ZCL_STATUS_NOT_AUTHORIZED);
-    }
-  } else {
-    emberAfSendImmediateDefaultResponse(EMBER_ZCL_STATUS_FAILURE);
-  }
-  return true;
-}
-
-/** @brief Simple Metering Cluster Remove Mirror
- *
- */
-bool emberAfSimpleMeteringClusterRemoveMirrorCallback(void)
-{
-  EmberEUI64 otaEui;
-  uint16_t endpointId;
-
-  emberAfPluginGasProxyFunctionPrintln("GPF: RX: RemoveMirror");
-
-  if (emberLookupEui64ByNodeId(emberAfResponseDestination, otaEui) == EMBER_SUCCESS) {
-    endpointId = emberAfPluginMeterMirrorRemoveMirror(otaEui);
-    emberAfFillCommandSimpleMeteringClusterMirrorRemoved(endpointId);
-    emberAfSendResponse();
-  } else {
-    emberAfSendImmediateDefaultResponse(EMBER_ZCL_STATUS_FAILURE);
-  }
-  return true;
-}
-
 bool emberAfPriceClusterPublishBlockPeriodCallback(uint32_t providerId,
                                                    uint32_t issuerEventId,
                                                    uint32_t blockPeriodStartTime,
@@ -1637,6 +1921,47 @@ bool emberAfPriceClusterPublishBillingPeriodCallback(uint32_t providerId,
   return true;
 }
 
+#endif // UC_BUILD
+
+bool emberAfSimpleMeteringClusterRequestMirrorCallback(void)
+{
+  EmberEUI64 otaEui;
+  uint16_t endpointId;
+
+  emberAfPluginGasProxyFunctionPrintln("GPF: RX: RequestMirror");
+
+  if (emberLookupEui64ByNodeId(emberAfResponseDestination, otaEui) == EMBER_SUCCESS) {
+    endpointId = emberAfPluginMeterMirrorRequestMirror(otaEui);
+    if (endpointId != 0xFFFF) {
+      emberAfFillCommandSimpleMeteringClusterRequestMirrorResponse(endpointId);
+      emberAfSendResponse();
+    } else {
+      emberAfPluginGasProxyFunctionPrintln("GPF: Invalid endpoint. Sending Default Response");
+      emberAfSendImmediateDefaultResponse(EMBER_ZCL_STATUS_NOT_AUTHORIZED);
+    }
+  } else {
+    emberAfSendImmediateDefaultResponse(EMBER_ZCL_STATUS_FAILURE);
+  }
+  return true;
+}
+
+bool emberAfSimpleMeteringClusterRemoveMirrorCallback(void)
+{
+  EmberEUI64 otaEui;
+  uint16_t endpointId;
+
+  emberAfPluginGasProxyFunctionPrintln("GPF: RX: RemoveMirror");
+
+  if (emberLookupEui64ByNodeId(emberAfResponseDestination, otaEui) == EMBER_SUCCESS) {
+    endpointId = emberAfPluginMeterMirrorRemoveMirror(otaEui);
+    emberAfFillCommandSimpleMeteringClusterMirrorRemoved(endpointId);
+    emberAfSendResponse();
+  } else {
+    emberAfSendImmediateDefaultResponse(EMBER_ZCL_STATUS_FAILURE);
+  }
+  return true;
+}
+
 /** @brief Publish Info
  *
  * This function is called by the calendar-server plugin after receiving any of
@@ -1692,8 +2017,8 @@ bool emberAfPluginGasProxyFunctionIgnoreFutureCommand(uint32_t startTime)
 
 #ifdef UC_BUILD
 
-uint32_t emberAfCalendarClusterClientCommandParse(sl_service_opcode_t opcode,
-                                                  sl_service_function_context_t *context)
+uint32_t emAfGasProxyFunctionCalendarClusterClientCommandParse(sl_service_opcode_t opcode,
+                                                               sl_service_function_context_t *context)
 {
   EmberAfClusterCommand *cmd = (EmberAfClusterCommand *)context->data;
   bool wasHandled = false;
@@ -1733,8 +2058,8 @@ uint32_t emberAfCalendarClusterClientCommandParse(sl_service_opcode_t opcode,
           : EMBER_ZCL_STATUS_UNSUP_COMMAND);
 }
 
-uint32_t emberAfDeviceManagementClusterClientCommandParse(sl_service_opcode_t opcode,
-                                                          sl_service_function_context_t *context)
+uint32_t emAfGasProxyFunctionDeviceManagementClusterClientCommandParse(sl_service_opcode_t opcode,
+                                                                       sl_service_function_context_t *context)
 {
   (void)opcode;
 
@@ -1745,14 +2070,116 @@ uint32_t emberAfDeviceManagementClusterClientCommandParse(sl_service_opcode_t op
     switch (cmd->commandId) {
       case ZCL_PUBLISH_CHANGE_OF_TENANCY_COMMAND_ID:
       {
-        //
         wasHandled = emberAfDeviceManagementClusterPublishChangeOfTenancyCallback(cmd);
         break;
       }
       case ZCL_PUBLISH_CHANGE_OF_SUPPLIER_COMMAND_ID:
       {
-        //
         wasHandled = emberAfDeviceManagementClusterPublishChangeOfSupplierCallback(cmd);
+        break;
+      }
+    }
+  }
+
+  return ((wasHandled)
+          ? EMBER_ZCL_STATUS_SUCCESS
+          : EMBER_ZCL_STATUS_UNSUP_COMMAND);
+}
+
+uint32_t emAfGasProxyFunctionPriceClusterClientCommandParse(sl_service_opcode_t opcode,
+                                                            sl_service_function_context_t *context)
+{
+  (void)opcode;
+
+  EmberAfClusterCommand *cmd = (EmberAfClusterCommand *)context->data;
+  bool wasHandled = false;
+
+  if (!cmd->mfgSpecific) {
+    switch (cmd->commandId) {
+      case ZCL_PUBLISH_BLOCK_PERIOD_COMMAND_ID:
+      {
+        wasHandled = emberAfPriceClusterPublishBlockPeriodCallback(cmd);
+        break;
+      }
+      case ZCL_PUBLISH_CONVERSION_FACTOR_COMMAND_ID:
+      {
+        wasHandled = emberAfPriceClusterPublishConversionFactorCallback(cmd);
+        break;
+      }
+      case ZCL_PUBLISH_CALORIFIC_VALUE_COMMAND_ID:
+      {
+        wasHandled = emberAfPriceClusterPublishCalorificValueCallback(cmd);
+        break;
+      }
+      case ZCL_PUBLISH_TARIFF_INFORMATION_COMMAND_ID:
+      {
+        wasHandled = emberAfPriceClusterPublishTariffInformationCallback(cmd);
+        break;
+      }
+      case ZCL_PUBLISH_BLOCK_THRESHOLDS_COMMAND_ID:
+      {
+        wasHandled = emberAfPriceClusterPublishBlockThresholdsCallback(cmd);
+        break;
+      }
+      case ZCL_PUBLISH_BILLING_PERIOD_COMMAND_ID:
+      {
+        wasHandled = emberAfPriceClusterPublishBillingPeriodCallback(cmd);
+        break;
+      }
+      case ZCL_PUBLISH_PRICE_MATRIX_COMMAND_ID:
+      {
+        wasHandled = emberAfPriceClusterPublishPriceMatrixCallback(cmd);
+        break;
+      }
+    }
+  }
+
+  return ((wasHandled)
+          ? EMBER_ZCL_STATUS_SUCCESS
+          : EMBER_ZCL_STATUS_UNSUP_COMMAND);
+}
+
+uint32_t emAfGasProxyFunctionMessagingClusterClientCommandParse(sl_service_opcode_t opcode,
+                                                                sl_service_function_context_t *context)
+{
+  (void)opcode;
+
+  EmberAfClusterCommand *cmd = (EmberAfClusterCommand *)context->data;
+  bool wasHandled = false;
+
+  if (!cmd->mfgSpecific) {
+    switch (cmd->commandId) {
+      case ZCL_DISPLAY_MESSAGE_COMMAND_ID:
+      {
+        wasHandled = emberAfMessagingClusterDisplayMessageCallback(cmd);
+        break;
+      }
+    }
+  }
+
+  return ((wasHandled)
+          ? EMBER_ZCL_STATUS_SUCCESS
+          : EMBER_ZCL_STATUS_UNSUP_COMMAND);
+}
+
+uint32_t emAfGasProxyFunctionSimpleMeteringClusterClientCommandParse(sl_service_opcode_t opcode,
+                                                                     sl_service_function_context_t *context)
+{
+  (void)opcode;
+
+  EmberAfClusterCommand *cmd = (EmberAfClusterCommand *)context->data;
+  bool wasHandled = false;
+
+  if (!cmd->mfgSpecific) {
+    switch (cmd->commandId) {
+      case ZCL_REQUEST_MIRROR_COMMAND_ID:
+      {
+        wasHandled = emberAfSimpleMeteringClusterRequestMirrorCallback();
+        break;
+      }
+      case ZCL_REMOVE_MIRROR_COMMAND_ID:
+      {
+        wasHandled = emberAfSimpleMeteringClusterRemoveMirrorCallback();
         break;
       }
     }

@@ -59,7 +59,8 @@ extern "C" {
 #error "No valid PA available for selected chip."
 #endif
 #elif defined (_SILICON_LABS_32B_SERIES_2_CONFIG_4)
-  #if (_SILICON_LABS_EFR32_2G4HZ_HP_PA_MAX_OUTPUT_DBM > 10)
+  #if defined(_SILICON_LABS_EFR32_2G4HZ_HP_PA_PRESENT) \
+  && (_SILICON_LABS_EFR32_2G4HZ_HP_PA_MAX_OUTPUT_DBM > 10)
   #include "efr32xg24/sl_rail_util_pa_curves_20dbm.h"
   #else
   #include "efr32xg24/sl_rail_util_pa_curves_10dbm.h"

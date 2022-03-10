@@ -15,7 +15,6 @@ component:
   - id: "zigbee_pro_leaf_stack"
   - id: "zigbee_source_route"
   - id: "zigbee_binding_table"
-  - id: "zigbee_stack_diagnostics"
   - id: "bluetooth_stack"
   - id: "gatt_configuration"
   - id: "bluetooth_feature_system"

@@ -31,12 +31,7 @@ typedef uint16_t EmberNodeId;
 
 //-- Build parameter links
 #define DEFINETOKENS
-#ifdef ZIGBEE_STACK_ON_HOST
-// zigbeed needs MFG_EUI_64 token
-#define TOKEN_MFG TOKEN_DEF
-#else
 #define TOKEN_MFG(name, creator, iscnt, isidx, type, arraysize, ...)
-#endif
 
 #define TOKEN_DEF(name, creator, iscnt, isidx, type, arraysize, ...) \
   NVM3KEY_##name,

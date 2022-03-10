@@ -3,7 +3,7 @@
  * @brief Hall Effect GATT Service
  *******************************************************************************
  * # License
- * <b>Copyright 2020 Silicon Laboratories Inc. www.silabs.com</b>
+ * <b>Copyright 2022 Silicon Laboratories Inc. www.silabs.com</b>
  *******************************************************************************
  *
  * SPDX-License-Identifier: Zlib
@@ -36,6 +36,7 @@
 #include "gatt_db.h"
 #include "app_assert.h"
 #include "sl_gatt_service_hall.h"
+#include "sl_gatt_service_hall_config.h"
 
 // -----------------------------------------------------------------------------
 // Configuration
@@ -84,18 +85,24 @@ static void hall_char_write_cb(sl_bt_evt_gatt_server_user_write_request_t *data)
 
 static void hall_update(void)
 {
+  sl_status_t sc;
   float field_strength = 0;
   bool alert = false;
   bool tamper = false;
 
   // get measurement values
-  if (SL_STATUS_OK != sl_gatt_service_hall_get(&field_strength, &alert, &tamper)) {
-    // measurement failed, keep the previous results
+  sc = sl_gatt_service_hall_get(&field_strength, &alert, &tamper);
+
+  if (SL_STATUS_OK == sc) {
+    // convert mT to uT, round to closest integer
+    hall_field_strength_value = lroundf(field_strength * 1000);
+  } else if (SL_STATUS_NOT_INITIALIZED == sc) {
+    hall_field_strength_value = SL_GATT_SERVICE_HALL_FIELD_STRENGTH_INVALID;
+    alert = SL_GATT_SERVICE_HALL_ALERT_INVALID;
+    tamper = SL_GATT_SERVICE_HALL_TAMPER_INVALID;
+  } else {
     return;
   }
-
-  // convert mT to uT, round to closest integer
-  hall_field_strength_value = lroundf(field_strength * 1000);
 
   // derive State characteristic value from measurement
   if (tamper) {

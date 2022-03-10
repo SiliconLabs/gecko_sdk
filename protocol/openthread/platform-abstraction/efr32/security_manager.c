@@ -73,7 +73,11 @@ sl_sec_man_status_t sl_sec_man_init(void)
     {
         psa_status_t status             = psa_crypto_init();
         retStatus                       = SEC_MAN_GET_STATUS(status);
-        is_security_manager_initialised = true;
+
+        if(retStatus == SL_SECURITY_MAN_SUCCESS)
+        {
+            is_security_manager_initialised = true;
+        }
     }
 
     return retStatus;
@@ -493,6 +497,23 @@ sl_sec_man_status_t sl_sec_man_hash_finish(psa_hash_operation_t *sl_psa_hash_ctx
     }
 
     status = SEC_MAN_GET_STATUS(psa_hash_finish(sl_psa_hash_ctx, sl_psa_hash, sl_psa_hash_size, sl_psa_hash_len));
+
+exit:
+    return status;
+}
+
+sl_sec_man_status_t sl_sec_man_get_random( uint8_t               *sl_psa_output_buffer, 
+                                           uint16_t              sl_psa_output_size)
+{
+    sl_sec_man_status_t status = SL_SECURITY_MAN_SUCCESS;
+
+    if (sl_psa_output_buffer == NULL)
+    {
+        status = SL_SECURITY_MAN_INVALID_PARAMS;
+        goto exit;
+    }
+
+    status = SEC_MAN_GET_STATUS(psa_generate_random(sl_psa_output_buffer, sl_psa_output_size));
 
 exit:
     return status;

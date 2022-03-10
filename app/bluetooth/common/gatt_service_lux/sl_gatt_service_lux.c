@@ -3,7 +3,7 @@
  * @brief Ambient Light GATT Service
  *******************************************************************************
  * # License
- * <b>Copyright 2020 Silicon Laboratories Inc. www.silabs.com</b>
+ * <b>Copyright 2022 Silicon Laboratories Inc. www.silabs.com</b>
  *******************************************************************************
  *
  * SPDX-License-Identifier: Zlib
@@ -33,6 +33,7 @@
 #include "gatt_db.h"
 #include "app_assert.h"
 #include "sl_gatt_service_lux.h"
+#include "sl_gatt_service_lux_config.h"
 
 // -----------------------------------------------------------------------------
 // Private variables
@@ -53,9 +54,14 @@ static void lux_ambient_light_read_cb(sl_bt_evt_gatt_server_user_read_request_t 
   sl_status_t sc;
   float lux;
 
+  sc = sl_gatt_service_lux_get(&lux);
   // update measurement data, keep previous data if measurement fails
-  if (SL_STATUS_OK == sl_gatt_service_lux_get(&lux)) {
+  if (SL_STATUS_OK == sc) {
     lux_char_value = (uint32_t)(lux * 100);
+  } else if (SL_STATUS_NOT_INITIALIZED == sc) {
+    lux_char_value = SL_GATT_SERVICE_LUX_LUX_INVALID;
+  } else {
+    return;
   }
 
   sc = sl_bt_gatt_server_send_user_read_response(

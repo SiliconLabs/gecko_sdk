@@ -40,6 +40,10 @@
 #define APP_SETTINGS_WISUN_CHANNEL_MASK_ALL  0xFFFFFFFF
 #define APP_SETTINGS_WISUN_CHANNEL_MASK_NONE  0
 
+#ifndef APP_SETTINGS_APP_DEFAULT_AUTOCONNECT
+# define APP_SETTINGS_APP_DEFAULT_AUTOCONNECT  0
+#endif
+
 typedef enum
 {
   app_settings_domain_wisun       = 0x00,
@@ -107,7 +111,8 @@ static const app_settings_ping_t app_settings_ping_default = {
 
 static const app_settings_app_t app_settings_app_default = {
   .printable_data_as_hex = false,
-  .printable_data_length = APP_UTIL_PRINTABLE_DATA_MAX_LENGTH
+  .printable_data_length = APP_UTIL_PRINTABLE_DATA_MAX_LENGTH,
+  .autoconnect = APP_SETTINGS_APP_DEFAULT_AUTOCONNECT
 };
 
 app_settings_wisun_t app_settings_wisun;
@@ -521,6 +526,19 @@ const app_settings_entry_t app_settings_entries[] =
     .set_handler = app_settings_set_integer,
     .get_handler = app_settings_get_integer,
     .description = "Socket data line length [uint8]"
+  },
+  {
+    .key = "autoconnect",
+    .domain = app_settings_domain_app,
+    .value_size = APP_SETTINGS_VALUE_SIZE_UINT8,
+    .input = APP_SETTINGS_INPUT_FLAG_DEFAULT,
+    .output = APP_SETTINGS_OUTPUT_FLAG_DEFAULT,
+    .value = &app_settings_app.autoconnect,
+    .input_enum_list = NULL,
+    .output_enum_list = NULL,
+    .set_handler = app_settings_set_integer,
+    .get_handler = app_settings_get_integer,
+    .description = "Enable or disable autoconnect [bool] (0|1)"
   },
   {
     .key = "join_state",

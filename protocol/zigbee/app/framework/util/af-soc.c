@@ -23,6 +23,7 @@
 #include "app/util/security/security.h"
 #include "app/util/zigbee-framework/zigbee-device-library.h"
 #include "stack/include/source-route.h"
+#include "stack/config/ember-configuration-defaults.h"
 
 #ifdef SL_CATALOG_ZIGBEE_FRAGMENTATION_PRESENT
 #include "fragmentation.h"
@@ -91,6 +92,8 @@ void emAfInitCallback(SLXU_INIT_ARG)
   emberSetMaximumIncomingTransferSize(EMBER_AF_INCOMING_BUFFER_LENGTH);
   emberSetMaximumOutgoingTransferSize(EMBER_AF_MAXIMUM_SEND_PAYLOAD_LENGTH);
   emberSetTxPowerMode(EMBER_AF_TX_POWER_MODE);
+
+  (void)emberSetRadioIeee802154CcaMode(EMBER_RADIO_802154_CCA_MODE);
 }
 
 EmberZdoStatus emAfRemoteSetBindingCallback(EmberBindingTableEntry *entry)

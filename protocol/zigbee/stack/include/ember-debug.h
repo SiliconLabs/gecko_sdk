@@ -42,6 +42,9 @@
 #define emberDebugInit(port) do {} while (false)
 
 #if (DEBUG_LEVEL >= BASIC_DEBUG) || defined(DOXYGEN_SHOULD_SKIP_THIS) || defined(UC_BUILD)
+
+#define DEBUG_ROUTINES_PRESENT
+
 /** @brief Print the filename and line number to the debug serial port.
  *
  * @param filename    The name of the file where the assert occurred.

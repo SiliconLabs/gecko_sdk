@@ -33,13 +33,14 @@ set(OT_BUILD_EXECUTABLES OFF CACHE BOOL "disable building executables" FORCE)
 set(OT_BUILTIN_MBEDTLS_MANAGEMENT OFF CACHE BOOL "diable mbedTLS management" FORCE)
 set(OT_COMMISSIONER ON CACHE BOOL "enable commissioner" FORCE)
 set(OT_DAEMON ON CACHE BOOL "enable daemon mode" FORCE)
+set(OT_FIREWALL ON CACHE BOOL "enable firewall feature")
 set(OT_JOINER ON CACHE BOOL "enable joiner" FORCE)
 set(OT_LEGACY ON CACHE STRING "enable legacy network support" FORCE)
 if (NOT OT_THREAD_VERSION EQUAL "1.1")
     set(OT_LINK_METRICS_SUBJECT ON CACHE BOOL "enable link metrics subject" FORCE)
 endif()
 set(OT_SLAAC ON CACHE BOOL "enable SLAAC" FORCE)
-set(OT_TREL ON CACHE BOOL "enable TREL")
+set(OT_TREL ${OTBR_TREL} CACHE BOOL "enable TREL" FORCE)
 
 if (NOT OT_LOG_LEVEL)
     if (CMAKE_BUILD_TYPE STREQUAL "Debug")
@@ -87,7 +88,7 @@ endif()
 # Diagnostics / Logging
 set(OT_DIAGNOSTIC ON CACHE BOOL "Enable diagnostics module" FORCE)
 set(OT_FULL_LOGS ON CACHE BOOL "Enable debug level logging" FORCE)
-set(OT_LOG_LEVEL "NONE" CACHE STRING "Set OpenThread log level to NONE by default" FORCE)
+set(OT_LOG_LEVEL "DEBG" CACHE STRING "Set max OpenThread log level to DEBG (dynamic logging turned on)" FORCE)
 set(OT_COPROCESSOR_RPC ON CACHE BOOL "Enable co-processor RPC support" FORCE)
 
 # RCP recovery
@@ -119,7 +120,6 @@ if (OT_COPROCESSOR_RPC)
 endif()
 
 target_compile_definitions(ot-config INTERFACE
-    "-DOPENTHREAD_CONFIG_LOG_CLI=1"
     "-DOPENTHREAD_CONFIG_MAX_STATECHANGE_HANDLERS=3"
     "-DOPENTHREAD_CONFIG_MLE_STEERING_DATA_SET_OOB_ENABLE=1"
     "-DOPENTHREAD_CONFIG_TMF_PROXY_DUA_ENABLE=$<BOOL:${OTBR_DUA_ROUTING}>"

@@ -3,7 +3,7 @@
  * @brief Ambient light sensor
  *******************************************************************************
  * # License
- * <b>Copyright 2020 Silicon Laboratories Inc. www.silabs.com</b>
+ * <b>Copyright 2022 Silicon Laboratories Inc. www.silabs.com</b>
  *******************************************************************************
  *
  * SPDX-License-Identifier: Zlib
@@ -36,9 +36,14 @@
 #include "sl_sensor_lux.h"
 
 // -----------------------------------------------------------------------------
+// Private variables
+
+static bool initialized = false;
+
+// -----------------------------------------------------------------------------
 // Public function definitions
 
-void sl_sensor_lux_init(void)
+sl_status_t sl_sensor_lux_init(void)
 {
   sl_status_t sc;
   sl_i2cspm_t *light_sensor = sl_sensor_select(SL_BOARD_SENSOR_LIGHT);
@@ -47,18 +52,31 @@ void sl_sensor_lux_init(void)
              "[E: %#04x] VEML6035 sensor not available\n",
              sc);
   sc = sl_veml6035_init(light_sensor, false);
-  app_assert_status(sc);
+  if (SL_STATUS_OK == sc) {
+    initialized = true;
+  } else {
+    initialized = false;
+  }
+
+  return sc;
 }
 
 void sl_sensor_lux_deinit(void)
 {
   (void)sl_board_disable_sensor(SL_BOARD_SENSOR_LIGHT);
+  initialized = false;
 }
 
 sl_status_t sl_sensor_lux_get(float *lux)
 {
   sl_status_t sc;
-  sl_i2cspm_t *light_sensor = sl_sensor_select(SL_BOARD_SENSOR_LIGHT);
-  sc = sl_veml6035_get_als_lux(light_sensor, lux);
+
+  if (initialized) {
+    sl_i2cspm_t *light_sensor = sl_sensor_select(SL_BOARD_SENSOR_LIGHT);
+    sc = sl_veml6035_get_als_lux(light_sensor, lux);
+  } else {
+    sc = SL_STATUS_NOT_INITIALIZED;
+  }
+
   return sc;
 }

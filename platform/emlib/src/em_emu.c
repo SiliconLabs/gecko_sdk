@@ -2737,8 +2737,9 @@ void EMU_DCDCModeSet(EMU_DcdcMode_TypeDef dcdcMode)
       && (dcdcMode == emuDcdcMode_LowNoise)) {
     errataFixDcdcHsState = errataFixDcdcHsBypassLn;
   }
+#endif // (_SILICON_LABS_GECKO_INTERNAL_SDID_80)
 
-#else
+#if defined(_SILICON_LABS_GECKO_INTERNAL_SDID_84)
 
   /* Fix for errata DCDC_E204. */
   if (((currentDcdcMode == EMU_DCDCCTRL_DCDCMODE_OFF) || (currentDcdcMode == EMU_DCDCCTRL_DCDCMODE_BYPASS))
@@ -2751,7 +2752,7 @@ void EMU_DCDCModeSet(EMU_DcdcMode_TypeDef dcdcMode)
     while ((EMU_IntGet() & EMU_IF_DCDCLNRUNNING) == 0U) {
     }
   }
-#endif
+#endif // (_SILICON_LABS_GECKO_INTERNAL_SDID_84)
 
   /* Set user-requested mode. */
   while ((EMU->DCDCSYNC & EMU_DCDCSYNC_DCDCCTRLBUSY) != 0UL) {

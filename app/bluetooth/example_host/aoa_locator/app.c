@@ -31,6 +31,7 @@
 #include <stdlib.h>
 #include <stdio.h>
 #include <string.h>
+#include <time.h>
 #include <unistd.h>
 #include "sl_bt_api.h"
 #include "ncp_host.h"
@@ -48,6 +49,7 @@
 #include "aoa_cte.h"
 #include "aoa_angle.h"
 #include "aoa_angle_config.h"
+#include "antenna_array.h"
 
 // Optstring argument for getopt.
 #define OPTSTRING      NCP_HOST_OPTSTRING APP_LOG_OPTSTRING "m:c:h"
@@ -66,6 +68,8 @@
   "    -c  Locator configuration file.\n"                                      \
   "        <config>         Path to the configuration file\n"                  \
   "    -h  Print this help message.\n"
+
+#define DEFAULT_REPORT_MODE           ANGLE
 
 static void parse_config_file(const char *file_name);
 static void parse_config(const char *config);
@@ -137,7 +141,7 @@ void app_init(int argc, char *argv[])
   int opt;
   char *port_str;
 
-  report_mode = ANGLE;
+  report_mode = DEFAULT_REPORT_MODE;
 
   // Process command line options.
   while ((opt = getopt(argc, argv, OPTSTRING)) != -1) {
@@ -182,7 +186,9 @@ void app_init(int argc, char *argv[])
     }
   }
 
-  aoa_cte_init();
+  // Initialize random generator to generate random antenna pattern.
+  unsigned int seed = time(NULL) + getpid();
+  srand(seed);
 
   // Initialize NCP connection.
   sc = ncp_host_init();
@@ -267,6 +273,7 @@ void sl_bt_on_event(sl_bt_msg_t *evt)
             address.addr[0]);
 
     if (first_bt_system_reset == true) {
+      aoa_angle_config_t *angle_config;
       // Execute this part only after first reset
       first_bt_system_reset = false;
 
@@ -279,7 +286,18 @@ void sl_bt_on_event(sl_bt_msg_t *evt)
 
       mqtt_handle.on_message = on_message;
 
-      aoa_angle_add_config(locator_id, NULL);
+      // Initialize AoA angle component.
+      sc = aoa_angle_add_config(locator_id, &angle_config);
+      app_assert_status(sc);
+
+      if (report_mode == ANGLE) {
+        // Use random antenna switch pattern in angle reporting mode.
+        sc = antenna_array_shuffle_pattern(&angle_config->antenna_array, rand);
+        app_assert_status(sc);
+      }
+
+      // Share antenna array configuration with the CTE component.
+      aoa_cte_config.antenna_array = &angle_config->antenna_array;
 
       // Parse config file if given
       if (config_file != NULL) {
@@ -507,11 +525,19 @@ static void parse_config(const char *config)
   float mask_min = 0;
   float mask_max = 0;
   aoa_cte_type_t cte_mode;
+  uint8_t *antenna_switch_pattern = NULL;
+  uint8_t antenna_switch_pattern_size = 0;
+  enum sl_rtl_aox_array_type antenna_array_type;
+  aoa_report_mode_t report_mode_old;
+  // Flag to store if antenna switch pattern has been configured.
+  static bool antenna_switch_pattern_set = false;
+  // Flag to indicate that antenna array needs to be reinitialized.
+  bool antenna_array_reinit = false;
 
-  sc = aoa_angle_get_config(locator_id,
-                            &angle_config);
+  sc = aoa_angle_get_config(locator_id, &angle_config);
 
   if (SL_STATUS_OK != sc) {
+    app_log_status_error_f(sc, "aoa_angle_get_config failed." APP_LOG_NL);
     return;
   }
 
@@ -521,38 +547,91 @@ static void parse_config(const char *config)
   aoa_db_remove_all();
 
   sc = aoa_parse_init(config);
-  app_assert_status(sc);
+  if (sc != SL_STATUS_OK) {
+    app_log_status_error_f(sc,
+                           "aoa_parse_init failed. Please check if JSON syntax is correct." APP_LOG_NL);
+    return;
+  }
 
   app_log(APP_LOG_NEW_LINE);
   app_log_info("Start parsing configuration..." APP_LOG_NL);
+
+  // Store the previously set report mode before parsing.
+  report_mode_old = report_mode;
+  sc = aoa_parse_report_mode(&report_mode, locator_id);
+  if (sc == SL_STATUS_OK) {
+    app_log_info("Report mode set to: %s" APP_LOG_NL,
+                 report_mode == ANGLE ? "ANGLE" : "IQ_REPORT");
+  }
+
+  if (!antenna_switch_pattern_set && (report_mode_old != report_mode)) {
+    antenna_array_reinit = true;
+  }
+
+  // Store the previously set antenna array type before parsing.
+  antenna_array_type = angle_config->antenna_array.array_type;
+  sc = aoa_parse_antenna_mode(&antenna_array_type, locator_id);
+  if (sc == SL_STATUS_OK) {
+    app_log_info("Antenna mode set to: %s" APP_LOG_NL,
+                 antenna_type_string[antenna_array_type]);
+  }
+
+  // Check if antenna array type has changed.
+  if (antenna_array_type != angle_config->antenna_array.array_type) {
+    // Previously configured antenna switch pattern is not valid anymore.
+    antenna_switch_pattern_set = false;
+    antenna_array_reinit = true;
+  }
+
+  if (antenna_array_reinit) {
+    sc = antenna_array_init(&angle_config->antenna_array, antenna_array_type);
+    if (sc != SL_STATUS_OK) {
+      app_log_status_error_f(sc,
+                             "antenna_array_init failed for %s" APP_LOG_NL,
+                             antenna_type_string[antenna_array_type]);
+    } else {
+      app_log_debug("antenna_array_init successful." APP_LOG_NL);
+      // Use random antenna switch pattern in angle reporting mode.
+      if (report_mode == ANGLE) {
+        sc = antenna_array_shuffle_pattern(&angle_config->antenna_array, rand);
+        if (sc != SL_STATUS_OK) {
+          app_log_status_error_f(sc,
+                                 "antenna_array_shuffle_pattern failed" APP_LOG_NL);
+        } else {
+          app_log_debug("antenna_array_shuffle_pattern successful." APP_LOG_NL);
+        }
+      }
+    }
+  }
+
+  sc = aoa_parse_antenna_array(&antenna_switch_pattern,
+                               &antenna_switch_pattern_size,
+                               locator_id);
+  if (sc == SL_STATUS_OK) {
+    sc = antenna_array_set_pattern(&angle_config->antenna_array,
+                                   antenna_switch_pattern,
+                                   antenna_switch_pattern_size);
+    if (sc == SL_STATUS_OK) {
+      antenna_switch_pattern_set = true;
+      app_log_info("Antenna array set to:");
+      if (_app_log_check_level(APP_LOG_LEVEL_INFO)) {
+        for (uint8_t i = 0; i < antenna_switch_pattern_size; i++) {
+          app_log(" %d", antenna_switch_pattern[i]);
+        }
+        app_log_nl();
+      }
+    } else {
+      app_log_status_error_f(sc,
+                             "antenna_array_set_pattern failed with size %d" APP_LOG_NL,
+                             antenna_switch_pattern_size);
+    }
+    free(antenna_switch_pattern);
+  }
 
   sc = aoa_parse_aox_mode(&angle_config->aox_mode, locator_id);
   if (sc == SL_STATUS_OK) {
     app_log_info("AoX mode set to: %s" APP_LOG_NL,
                  aox_mode_string[angle_config->aox_mode]);
-  }
-
-  sc = aoa_parse_antenna_mode(&angle_config->array_type, locator_id);
-  if (sc == SL_STATUS_OK) {
-    app_log_info("Antenna mode set to: %s" APP_LOG_NL,
-                 antenna_type_string[angle_config->array_type]);
-  }
-
-  sc = aoa_parse_antenna_array(&aoa_cte_config.switching_pattern,
-                               &aoa_cte_config.switching_pattern_length,
-                               locator_id);
-
-  if (sc == SL_STATUS_OK) {
-    sc = aoa_parse_antenna_array(&angle_config->switching_pattern,
-                                 &angle_config->switching_pattern_length,
-                                 locator_id);
-    if (sc == SL_STATUS_OK) {
-      app_log_info("Antenna array set to:{");
-      for (uint8_t i = 0; i < aoa_cte_config.switching_pattern_length; i++) {
-        app_log("%d,", aoa_cte_config.switching_pattern[i]);
-      }
-      app_log("}" APP_LOG_NL);
-    }
   }
 
   sc = aoa_parse_angle_filtering(&angle_config->angle_filtering, locator_id);
@@ -566,14 +645,6 @@ static void parse_config(const char *config)
   if (sc == SL_STATUS_OK) {
     app_log_info("Angle filtering weight set to: %f" APP_LOG_NL,
                  angle_config->angle_filtering_weight);
-  }
-
-  sc = aoa_parse_simple_config(&angle_config->period_samples,
-                               "periodSamples",
-                               locator_id);
-  if (sc == SL_STATUS_OK) {
-    app_log_info("Sample period set to: %d" APP_LOG_NL,
-                 angle_config->period_samples);
   }
 
   sc = aoa_parse_simple_config(&angle_config->angle_correction_timeout,
@@ -625,12 +696,6 @@ static void parse_config(const char *config)
     angle_config->cte_slot_duration = aoa_cte_config.cte_slot_duration;
     app_log_info("CTE slot duration set to: %d" APP_LOG_NL,
                  aoa_cte_config.cte_slot_duration);
-  }
-
-  sc = aoa_parse_report_mode(&report_mode, locator_id);
-  if (sc == SL_STATUS_OK) {
-    app_log_info("Report mode set to: %s" APP_LOG_NL,
-                 report_mode == ANGLE ? "ANGLE" : "IQ_REPORT");
   }
 
   if (SL_STATUS_OK == aoa_parse_check_config_exist("allowlist", locator_id)) {

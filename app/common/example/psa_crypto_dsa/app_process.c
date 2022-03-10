@@ -262,7 +262,7 @@ void app_process_action(void)
         }
 #endif
 
-#if defined(SEMAILBOX_PRESENT) && (_SILICON_LABS_SECURITY_FEATURE == _SILICON_LABS_SECURITY_FEATURE_VAULT)
+#if defined(SEMAILBOX_PRESENT)
         printf("\n  . Current ECC curve is %s.\n",
                asymmetric_key_curve_string[asymmetric_key_curve_select]);
         printf("  + Press SPACE to select ECC curve (%s or %s), press ENTER to "

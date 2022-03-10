@@ -104,29 +104,20 @@ static sl_status_t transpose_conv(const sli_mvp_ml_transpose_conv2d_s8_params_t 
     }
   }
 
-  if ((filter_height                    > (int)SLI_MVP_MAX_ROW_LENGTH)
-      || ((filter_width * input_depth)  > (int)SLI_MVP_MAX_ROW_LENGTH)
-      || (input_height                  > (int)SLI_MVP_MAX_ROW_LENGTH)
-      || ((input_width * input_depth)   > (int)SLI_MVP_MAX_ROW_LENGTH)
-      || (output_height                 > (int)SLI_MVP_MAX_ROW_LENGTH)
-      || ((output_width * output_depth) > (int)SLI_MVP_MAX_ROW_LENGTH)) {
-    status = SL_STATUS_INVALID_RANGE;
-  }
-
   // Early exit on errors.
-  if (!execute) {
-    return status;
-  } else if (status != SL_STATUS_OK) {
+  if (status != SL_STATUS_OK) {
     if (execute) {
       EFM_ASSERT(false);
     }
     return status;
   }
 
-  sli_mvp_init_program(p);
+  sli_mvp_pb_init_program(p);
 
-  // Zero entire temporary buffer using MVP.
-  sli_mvp_util_memclr_f16(p, tmp_buf, batches, output_depth, output_height, output_width);
+  if (execute) {
+    // Zero entire temporary buffer using MVP.
+    status = sli_mvp_util_memclr_f16(p, tmp_buf, batches, output_depth, output_height, output_width);
+  }
 
   //----------------------------------------------------------------------------
   // Accumulate results in temporary buffer.
@@ -188,82 +179,96 @@ static sl_status_t transpose_conv(const sli_mvp_ml_transpose_conv2d_s8_params_t 
 
         // Loop through output channels.
         for (int out_channel = 0; out_channel < output_depth; ++out_channel) {
-          sli_mvp_begin_program(p);
+          sli_mvp_pb_begin_program(p);
 
-          sli_mvp_util_prog_set_array_nhwc(p->p,
-                                           input_array,
-                                           (void*)&input[input_base],
-                                           SLI_MVP_DATATYPE_INT8,
-                                           input_height,
-                                           input_width,
-                                           input_depth);
+          sli_mvp_pb_config_array_nhwc(p->p,
+                                       input_array,
+                                       (void*)&input[input_base],
+                                       SLI_MVP_DATATYPE_INT8,
+                                       input_height,
+                                       input_width,
+                                       input_depth,
+                                       &status);
 
-          sli_mvp_util_prog_set_array_nhwc(p->p,
-                                           filter_array,
-                                           (void*)&filter[filter_base],
-                                           SLI_MVP_DATATYPE_INT8,
-                                           filter_height,
-                                           filter_width,
-                                           input_depth);
+          sli_mvp_pb_config_array_nhwc(p->p,
+                                       filter_array,
+                                       (void*)&filter[filter_base],
+                                       SLI_MVP_DATATYPE_INT8,
+                                       filter_height,
+                                       filter_width,
+                                       input_depth,
+                                       &status);
 
-          sli_mvp_util_prog_set_array_nhwc(p->p,
-                                           tmp_buf_array,
-                                           (void*)&tmp_buf[tmpbuf_base],
-                                           SLI_MVP_DATATYPE_BINARY16,
-                                           output_height,
-                                           output_width,
-                                           output_depth);
+          sli_mvp_pb_config_array_nhwc(p->p,
+                                       tmp_buf_array,
+                                       (void*)&tmp_buf[tmpbuf_base],
+                                       SLI_MVP_DATATYPE_BINARY16,
+                                       output_height,
+                                       output_width,
+                                       output_depth,
+                                       &status);
 
           sli_mvp_prog_set_reg_f16(p->p, SLI_MVP_R0, SLI_MVP_ACCUMULATOR_SCALER);
           sli_mvp_prog_set_reg_f16(p->p, SLI_MVP_R1, input_offset * SLI_MVP_ACCUMULATOR_SCALER);
 
-          sli_mvp_begin_loop(p, input_depth, NULL);          // Loop over input channels.
+          sli_mvp_pb_begin_loop(p, input_depth, &status);          // Loop over input channels.
 
             // Calculate: tmp_buf += (input + input_offset) * ACCUMULATOR_SCALER * filter
             //      =>    tmp_buf += ((input * ACCUMULATOR_SCALER) + input_offset_scaled) * filter
 
             // R2 = Input
             // R5 = (R2 * R0) + R1   scratch = (input * ACCUMULATOR_SCALER) + input_offset_scaled
-            sli_mvp_compute(p,
-                            SLI_MVP_OP(MACR2A),
-                            SLI_MVP_ALU_Z(SLI_MVP_R5)
-                            | SLI_MVP_ALU_X(SLI_MVP_R2)
-                            | SLI_MVP_ALU_Y(SLI_MVP_R0)
-                            | SLI_MVP_ALU_A(SLI_MVP_R1),
-                            SLI_MVP_LOAD(0, SLI_MVP_R2, input_array, SLI_MVP_NOINCR),
-                            SLI_MVP_NONE,
-                            NULL);
+            sli_mvp_pb_compute(p,
+                               SLI_MVP_OP(MACR2A),
+                               SLI_MVP_ALU_Z(SLI_MVP_R5)
+                               | SLI_MVP_ALU_X(SLI_MVP_R2)
+                               | SLI_MVP_ALU_Y(SLI_MVP_R0)
+                               | SLI_MVP_ALU_A(SLI_MVP_R1),
+                               SLI_MVP_LOAD(0, SLI_MVP_R2, input_array, SLI_MVP_NOINCR),
+                               SLI_MVP_NONE,
+                               &status);
 
-            sli_mvp_begin_loop(p, filter_y_count, NULL);     // Loop over filter height.
-              sli_mvp_begin_loop(p, filter_x_count, NULL);   // Loop over filter width.
+            sli_mvp_pb_begin_loop(p, filter_y_count, &status);     // Loop over filter height.
+              sli_mvp_pb_begin_loop(p, filter_x_count, &status);   // Loop over filter width.
 
                 // R4 = tmp_buf
                 // R3 = Filter
                 // R7 = (R5 * R3) + R4   acc += ((input * ACCUMULATOR_SCALER) + input_offset_scaled) * filter
                 // output = R7
-                sli_mvp_compute(p,
-                                SLI_MVP_OP(MACR2A),
-                                SLI_MVP_ALU_Z(SLI_MVP_R7)
-                                | SLI_MVP_ALU_X(SLI_MVP_R5)
-                                | SLI_MVP_ALU_Y(SLI_MVP_R3)
-                                | SLI_MVP_ALU_A(SLI_MVP_R4),
-                                SLI_MVP_LOAD(0, SLI_MVP_R4, tmp_buf_array, SLI_MVP_NOINCR)
-                                | SLI_MVP_LOAD(1, SLI_MVP_R3, filter_array, SLI_MVP_INCRDIM_WIDTH),
-                                SLI_MVP_STORE(SLI_MVP_R7, tmp_buf_array, SLI_MVP_INCRDIM_WIDTH),
-                                NULL);
+                sli_mvp_pb_compute(p,
+                                   SLI_MVP_OP(MACR2A),
+                                   SLI_MVP_ALU_Z(SLI_MVP_R7)
+                                   | SLI_MVP_ALU_X(SLI_MVP_R5)
+                                   | SLI_MVP_ALU_Y(SLI_MVP_R3)
+                                   | SLI_MVP_ALU_A(SLI_MVP_R4),
+                                   SLI_MVP_LOAD(0, SLI_MVP_R4, tmp_buf_array, SLI_MVP_NOINCR)
+                                   | SLI_MVP_LOAD(1, SLI_MVP_R3, filter_array, SLI_MVP_INCRDIM_WIDTH),
+                                   SLI_MVP_STORE(SLI_MVP_R7, tmp_buf_array, SLI_MVP_INCRDIM_WIDTH),
+                                   &status);
 
-              sli_mvp_end_loop(p);  // Filter width.
-              sli_mvp_postloop_reset_dim(p, tmp_buf_array, SLI_MVP_RESETDIM_WIDTH);
-              sli_mvp_postloop_reset_dim(p, filter_array,  SLI_MVP_RESETDIM_WIDTH);
-              sli_mvp_postloop_incr_dim(p,  tmp_buf_array, SLI_MVP_INCRDIM_HEIGHT);
-              sli_mvp_postloop_incr_dim(p,  filter_array,  SLI_MVP_INCRDIM_HEIGHT);
-            sli_mvp_end_loop(p);  // Filter height.
-            sli_mvp_postloop_reset_dim(p, tmp_buf_array, SLI_MVP_RESETDIM_HEIGHT);
-            sli_mvp_postloop_reset_dim(p, filter_array,  SLI_MVP_RESETDIM_HEIGHT);
-            sli_mvp_postloop_incr_dim(p,  input_array,   SLI_MVP_INCRDIM_DEPTH);
-            sli_mvp_postloop_incr_dim(p,  filter_array,  SLI_MVP_INCRDIM_DEPTH);
-          sli_mvp_end_loop(p);  // Input channels.
-          sli_mvp_execute_program(p);
+              sli_mvp_pb_end_loop(p);  // Filter width.
+              sli_mvp_pb_postloop_reset_dim(p, tmp_buf_array, SLI_MVP_RESETDIM_WIDTH);
+              sli_mvp_pb_postloop_reset_dim(p, filter_array,  SLI_MVP_RESETDIM_WIDTH);
+              sli_mvp_pb_postloop_incr_dim(p,  tmp_buf_array, SLI_MVP_INCRDIM_HEIGHT);
+              sli_mvp_pb_postloop_incr_dim(p,  filter_array,  SLI_MVP_INCRDIM_HEIGHT);
+            sli_mvp_pb_end_loop(p);  // Filter height.
+            sli_mvp_pb_postloop_reset_dim(p, tmp_buf_array, SLI_MVP_RESETDIM_HEIGHT);
+            sli_mvp_pb_postloop_reset_dim(p, filter_array,  SLI_MVP_RESETDIM_HEIGHT);
+            sli_mvp_pb_postloop_incr_dim(p,  input_array,   SLI_MVP_INCRDIM_DEPTH);
+            sli_mvp_pb_postloop_incr_dim(p,  filter_array,  SLI_MVP_INCRDIM_DEPTH);
+          sli_mvp_pb_end_loop(p);  // Input channels.
+
+          // Check if any errors found during program generation.
+          if (status != SL_STATUS_OK) {
+            if (execute) {
+              EFM_ASSERT(false);
+            }
+            return status;
+          }
+
+          if (execute) {
+            sli_mvp_pb_execute_program(p);
+          }
 
           // Next filter "pack".
           filter_base += filter_pack_stride;
@@ -308,45 +313,49 @@ static sl_status_t transpose_conv(const sli_mvp_ml_transpose_conv2d_s8_params_t 
     //   Array2  tmp_buf
     //   Array3  output_scaler
 
-    sli_mvp_begin_program(p);
+    sli_mvp_pb_begin_program(p);
 
     const int output_base = sli_mvp_util_offset_nhwc(output_height, output_width, output_depth,
                                                      batch, 0, 0, 0);
-    sli_mvp_util_prog_set_array_nhwc(p->p,
-                                     tmp_buf_array,
-                                     (void*)&tmp_buf[output_base],
-                                     parallel
-                                     ? SLI_MVP_DATATYPE_COMPLEX_BINARY16
-                                     : SLI_MVP_DATATYPE_BINARY16,
-                                     output_height,
-                                     output_width,
-                                     output_depth);
+    sli_mvp_pb_config_array_nhwc(p->p,
+                                 tmp_buf_array,
+                                 (void*)&tmp_buf[output_base],
+                                 parallel
+                                 ? SLI_MVP_DATATYPE_COMPLEX_BINARY16
+                                 : SLI_MVP_DATATYPE_BINARY16,
+                                 output_height,
+                                 output_width,
+                                 output_depth,
+                                 &status);
 
-    sli_mvp_util_prog_set_array_nhwc(p->p,
-                                     output_array,
-                                     (void*)&output[output_base],
-                                     parallel
-                                     ? SLI_MVP_DATATYPE_COMPLEX_INT8
-                                     : SLI_MVP_DATATYPE_INT8,
-                                     output_height,
-                                     output_width,
-                                     output_depth);
+    sli_mvp_pb_config_array_nhwc(p->p,
+                                 output_array,
+                                 (void*)&output[output_base],
+                                 parallel
+                                 ? SLI_MVP_DATATYPE_COMPLEX_INT8
+                                 : SLI_MVP_DATATYPE_INT8,
+                                 output_height,
+                                 output_width,
+                                 output_depth,
+                                 &status);
 
-    sli_mvp_prog_set_vector(p->p,
-                            bias_array,
-                            bias != NULL ? (void*)bias : (void*)zero,
-                            parallel
-                            ? SLI_MVP_DATATYPE_COMPLEX_BINARY16
-                            : SLI_MVP_DATATYPE_BINARY16,
-                            bias != NULL ? output_depth : 1);
+    sli_mvp_pb_config_vector(p->p,
+                             bias_array,
+                             bias != NULL ? (void*)bias : (void*)zero,
+                             parallel
+                             ? SLI_MVP_DATATYPE_COMPLEX_BINARY16
+                             : SLI_MVP_DATATYPE_BINARY16,
+                             bias != NULL ? output_depth : 1,
+                             &status);
 
-    sli_mvp_prog_set_vector(p->p,
-                            output_scaler_array,
-                            (void*)output_scaler,
-                            parallel
-                            ? SLI_MVP_DATATYPE_COMPLEX_BINARY16
-                            : SLI_MVP_DATATYPE_BINARY16,
-                            output_depth);
+    sli_mvp_pb_config_vector(p->p,
+                             output_scaler_array,
+                             (void*)output_scaler,
+                             parallel
+                             ? SLI_MVP_DATATYPE_COMPLEX_BINARY16
+                             : SLI_MVP_DATATYPE_BINARY16,
+                             output_depth,
+                             &status);
 
     sli_mvp_prog_set_reg_f16c(p->p, SLI_MVP_R0, output_offset, output_offset);
     bool do_activation = (activation_min != -128) || (activation_max != 127);
@@ -356,25 +365,25 @@ static sl_status_t transpose_conv(const sli_mvp_ml_transpose_conv2d_s8_params_t 
     }
 
     // R4 = bias
-    sli_mvp_compute(p,
-                    SLI_MVP_OP(NOOP),
-                    SLI_MVP_NONE,
-                    SLI_MVP_LOAD(0, SLI_MVP_R4, bias_array, SLI_MVP_INCRDIM_WIDTH),
-                    SLI_MVP_NONE,
-                    NULL);
-
-    sli_mvp_begin_loop(p, output_height, NULL);
-      sli_mvp_begin_loop(p, output_width, NULL);
-
-        // R3 = tmp_buf
-        sli_mvp_compute(p,
+    sli_mvp_pb_compute(p,
                        SLI_MVP_OP(NOOP),
                        SLI_MVP_NONE,
-                       SLI_MVP_LOAD(0, SLI_MVP_R3, tmp_buf_array, SLI_MVP_NOINCR),
+                       SLI_MVP_LOAD(0, SLI_MVP_R4, bias_array, SLI_MVP_INCRDIM_WIDTH),
                        SLI_MVP_NONE,
-                       NULL);
+                       &status);
 
-        sli_mvp_begin_loop(p, output_depth, NULL);
+    sli_mvp_pb_begin_loop(p, output_height, &status);
+      sli_mvp_pb_begin_loop(p, output_width, &status);
+
+        // R3 = tmp_buf
+        sli_mvp_pb_compute(p,
+                          SLI_MVP_OP(NOOP),
+                          SLI_MVP_NONE,
+                          SLI_MVP_LOAD(0, SLI_MVP_R3, tmp_buf_array, SLI_MVP_NOINCR),
+                          SLI_MVP_NONE,
+                          &status);
+
+        sli_mvp_pb_begin_loop(p, output_depth, &status);
 
           // Calculate: output = ((tmp_buf + bias) * scaler) + output_offset
           //            output = MAX(output, activation_min)
@@ -382,53 +391,64 @@ static sl_status_t transpose_conv(const sli_mvp_ml_transpose_conv2d_s8_params_t 
 
           // R5 = scaler
           // R7 = R3 + R4    acc = tmp_buf + bias
-          sli_mvp_compute(p,
-                          SLI_MVP_OP(ADDC),
-                          SLI_MVP_ALU_Z(SLI_MVP_R7)
-                          | SLI_MVP_ALU_X(SLI_MVP_R3)
-                          | SLI_MVP_ALU_A(SLI_MVP_R4),
-                          SLI_MVP_LOAD(0, SLI_MVP_R5, output_scaler_array, SLI_MVP_INCRDIM_WIDTH),
-                          SLI_MVP_NONE,
-                          NULL);
+          sli_mvp_pb_compute(p,
+                             SLI_MVP_OP(ADDC),
+                             SLI_MVP_ALU_Z(SLI_MVP_R7)
+                             | SLI_MVP_ALU_X(SLI_MVP_R3)
+                             | SLI_MVP_ALU_A(SLI_MVP_R4),
+                             SLI_MVP_LOAD(0, SLI_MVP_R5, output_scaler_array, SLI_MVP_INCRDIM_WIDTH),
+                             SLI_MVP_NONE,
+                             &status);
 
           // R3 = tmp_buf          (load for use in next loop iteration)
           // R4 = bias             (load for use in next loop iteration)
           // R7 = (R7 * R5) + R0   acc = ((tmp_buf + bias) * scaler) + output_offset
           // output = R7
-          sli_mvp_compute(p,
-                          SLI_MVP_OP(MACR2A),
-                          SLI_MVP_ALU_Z(SLI_MVP_R7)
-                          | SLI_MVP_ALU_X(SLI_MVP_R7)
-                          | SLI_MVP_ALU_Y(SLI_MVP_R5)
-                          | SLI_MVP_ALU_A(SLI_MVP_R0),
-                          SLI_MVP_LOAD(0, SLI_MVP_R3, tmp_buf_array, SLI_MVP_INCRDIM_DEPTH)
-                          | SLI_MVP_LOAD(1, SLI_MVP_R4, bias_array, SLI_MVP_INCRDIM_WIDTH),
-                          do_activation
-                          ? SLI_MVP_NONE
-                          : SLI_MVP_STORE(SLI_MVP_R7, output_array, SLI_MVP_INCRDIM_DEPTH),
-                          NULL);
+          sli_mvp_pb_compute(p,
+                             SLI_MVP_OP(MACR2A),
+                             SLI_MVP_ALU_Z(SLI_MVP_R7)
+                             | SLI_MVP_ALU_X(SLI_MVP_R7)
+                             | SLI_MVP_ALU_Y(SLI_MVP_R5)
+                             | SLI_MVP_ALU_A(SLI_MVP_R0),
+                             SLI_MVP_LOAD(0, SLI_MVP_R3, tmp_buf_array, SLI_MVP_INCRDIM_DEPTH)
+                             | SLI_MVP_LOAD(1, SLI_MVP_R4, bias_array, SLI_MVP_INCRDIM_WIDTH),
+                             do_activation
+                             ? SLI_MVP_NONE
+                             : SLI_MVP_STORE(SLI_MVP_R7, output_array, SLI_MVP_INCRDIM_DEPTH),
+                             &status);
 
           if (do_activation) {
             // R7 = CLIP2A(R1, R2, R7)
             // output = R7
-            sli_mvp_compute(p,
-                            SLI_MVP_OP(CLIP2A),
-                            SLI_MVP_ALU_Z(SLI_MVP_R7)
-                            | SLI_MVP_ALU_X(SLI_MVP_R1)
-                            | SLI_MVP_ALU_Y(SLI_MVP_R2)
-                            | SLI_MVP_ALU_A(SLI_MVP_R7),
-                            SLI_MVP_NONE,
-                            SLI_MVP_STORE(SLI_MVP_R7, output_array, SLI_MVP_INCRDIM_DEPTH),
-                            NULL);
+            sli_mvp_pb_compute(p,
+                               SLI_MVP_OP(CLIP2A),
+                               SLI_MVP_ALU_Z(SLI_MVP_R7)
+                               | SLI_MVP_ALU_X(SLI_MVP_R1)
+                               | SLI_MVP_ALU_Y(SLI_MVP_R2)
+                               | SLI_MVP_ALU_A(SLI_MVP_R7),
+                               SLI_MVP_NONE,
+                               SLI_MVP_STORE(SLI_MVP_R7, output_array, SLI_MVP_INCRDIM_DEPTH),
+                               &status);
           }
-        sli_mvp_end_loop(p);  // Output depth.
-        sli_mvp_postloop_incr_dim(p, output_array,  SLI_MVP_INCRDIM_WIDTH);
-        sli_mvp_postloop_incr_dim(p, tmp_buf_array, SLI_MVP_INCRDIM_WIDTH);
-      sli_mvp_end_loop(p);  // Output width.
-      sli_mvp_postloop_incr_dim(p, output_array,  SLI_MVP_INCRDIM_HEIGHT);
-      sli_mvp_postloop_incr_dim(p, tmp_buf_array, SLI_MVP_INCRDIM_HEIGHT);
-    sli_mvp_end_loop(p);  // Output height.
-    sli_mvp_execute_program(p);
+        sli_mvp_pb_end_loop(p);  // Output depth.
+        sli_mvp_pb_postloop_incr_dim(p, output_array,  SLI_MVP_INCRDIM_WIDTH);
+        sli_mvp_pb_postloop_incr_dim(p, tmp_buf_array, SLI_MVP_INCRDIM_WIDTH);
+      sli_mvp_pb_end_loop(p);  // Output width.
+      sli_mvp_pb_postloop_incr_dim(p, output_array,  SLI_MVP_INCRDIM_HEIGHT);
+      sli_mvp_pb_postloop_incr_dim(p, tmp_buf_array, SLI_MVP_INCRDIM_HEIGHT);
+    sli_mvp_pb_end_loop(p);  // Output height.
+
+    // Check if any errors found during program generation.
+    if (status != SL_STATUS_OK) {
+      if (execute) {
+        EFM_ASSERT(false);
+      }
+      return status;
+    }
+
+    if (execute) {
+      sli_mvp_pb_execute_program(p);
+    }
   } // Batches.
   sli_mvp_wait_for_completion();
 

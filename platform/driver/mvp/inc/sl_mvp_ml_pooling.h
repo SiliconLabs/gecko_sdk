@@ -38,8 +38,9 @@
 extern "C" {
 #endif
 
+/// @cond DO_NOT_INCLUDE_WITH_DOXYGEN
 /***************************************************************************//**
- * @addtogroup mvp_pooling MVP pooling API
+ * @addtogroup mvp MVP API
  * @{
  ******************************************************************************/
 
@@ -149,7 +150,8 @@ bool sli_mvp_ml_average_pooling_s8_is_supported(const sli_mvp_ml_pooling_s8_para
  ******************************************************************************/
 bool sli_mvp_ml_max_pooling_s8_is_supported(const sli_mvp_ml_pooling_s8_params_t *params);
 
-/** @} (end addtogroup mvp_pooling) */
+/** @} (end addtogroup mvp) */
+/// @endcond
 
 #ifdef __cplusplus
 }

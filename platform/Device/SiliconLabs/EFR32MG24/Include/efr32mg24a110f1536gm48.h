@@ -4,7 +4,7 @@
  *        for EFR32MG24A110F1536GM48
  ******************************************************************************
  * # License
- * <b>Copyright 2021 Silicon Laboratories, Inc. www.silabs.com</b>
+ * <b>Copyright 2022 Silicon Laboratories, Inc. www.silabs.com</b>
  ******************************************************************************
  *
  * SPDX-License-Identifier: Zlib
@@ -75,7 +75,6 @@ typedef enum IRQn{
   EUSART0_TX_IRQn        = 12, /*!< 12 EFR32 EUSART0_TX Interrupt */
   EUSART1_RX_IRQn        = 13, /*!< 13 EFR32 EUSART1_RX Interrupt */
   EUSART1_TX_IRQn        = 14, /*!< 14 EFR32 EUSART1_TX Interrupt */
-  MVP_IRQn               = 15, /*!< 15 EFR32 MVP Interrupt */
   ICACHE0_IRQn           = 16, /*!< 16 EFR32 ICACHE0 Interrupt */
   BURTC_IRQn             = 17, /*!< 17 EFR32 BURTC Interrupt */
   LETIMER0_IRQn          = 18, /*!< 18 EFR32 LETIMER0 Interrupt */
@@ -440,8 +439,6 @@ typedef enum IRQn{
 #define MODEM_COUNT                                       1 /** 1 MODEMs available  */
 #define MSC_PRESENT                                         /** MSC is available in this part */
 #define MSC_COUNT                                         1 /** 1 MSCs available  */
-#define MVP_PRESENT                                         /** MVP is available in this part */
-#define MVP_COUNT                                         1 /** 1 MVPs available  */
 #define PCNT_PRESENT                                        /** PCNT is available in this part */
 #define PCNT_COUNT                                        1 /** 1 PCNTs available  */
 #define PROTIMER_PRESENT                                    /** PROTIMER is available in this part */
@@ -535,7 +532,6 @@ typedef enum IRQn{
 #include "efr32mg24_hfxo.h"
 #include "efr32mg24_wdog.h"
 #include "efr32mg24_semailbox.h"
-#include "efr32mg24_mvp.h"
 #include "efr32mg24_frc.h"
 #include "efr32mg24_agc.h"
 #include "efr32mg24_rfcrc.h"
@@ -611,7 +607,6 @@ typedef enum IRQn{
 #define WDOG1_BASE                (0x4B008000UL) /* WDOG1 base address */
 #define EUSART0_BASE              (0x4B010000UL) /* EUSART0 base address */
 #define SEMAILBOX_HOST_BASE       (0x4C000000UL) /* SEMAILBOX_HOST base address */
-#define MVP_BASE                  (0x4D000000UL) /* MVP base address */
 #define SCRATCHPAD_NS_BASE        (0x50000000UL) /* SCRATCHPAD_NS base address */
 #define EMU_NS_BASE               (0x50004000UL) /* EMU_NS base address */
 #define CMU_NS_BASE               (0x50008000UL) /* CMU_NS base address */
@@ -663,7 +658,6 @@ typedef enum IRQn{
 #define WDOG1_NS_BASE             (0x5B008000UL) /* WDOG1_NS base address */
 #define EUSART0_NS_BASE           (0x5B010000UL) /* EUSART0_NS base address */
 #define SEMAILBOX_NS_HOST_BASE    (0x5C000000UL) /* SEMAILBOX_NS_HOST base address */
-#define MVP_NS_BASE               (0x5D000000UL) /* MVP_NS base address */
 #define FRC_BASE                  (0xA8004000UL) /* FRC base address */
 #define AGC_BASE                  (0xA800C000UL) /* AGC base address */
 #define RFCRC_BASE                (0xA8010000UL) /* RFCRC base address */
@@ -800,8 +794,6 @@ typedef enum IRQn{
 #define EUSART0              ((EUSART_TypeDef *) EUSART0_BASE)                   /**< EUSART0_S base pointer */
 #define SEMAILBOX_S_HOST     ((SEMAILBOX_HOST_TypeDef *) SEMAILBOX_HOST_BASE)    /**< SEMAILBOX_S_HOST base pointer */
 #define SEMAILBOX_HOST       ((SEMAILBOX_HOST_TypeDef *) SEMAILBOX_HOST_BASE)    /**< SEMAILBOX_S_HOST base pointer */
-#define MVP_S                ((MVP_TypeDef *) MVP_BASE)                          /**< MVP_S base pointer */
-#define MVP                  ((MVP_TypeDef *) MVP_BASE)                          /**< MVP_S base pointer */
 #define SCRATCHPAD_NS        ((SCRATCHPAD_TypeDef *) SCRATCHPAD_NS_BASE)         /**< SCRATCHPAD_NS base pointer */
 #define EMU_NS               ((EMU_TypeDef *) EMU_NS_BASE)                       /**< EMU_NS base pointer */
 #define CMU_NS               ((CMU_TypeDef *) CMU_NS_BASE)                       /**< CMU_NS base pointer */
@@ -853,7 +845,6 @@ typedef enum IRQn{
 #define WDOG1_NS             ((WDOG_TypeDef *) WDOG1_NS_BASE)                    /**< WDOG1_NS base pointer */
 #define EUSART0_NS           ((EUSART_TypeDef *) EUSART0_NS_BASE)                /**< EUSART0_NS base pointer */
 #define SEMAILBOX_NS_HOST    ((SEMAILBOX_HOST_TypeDef *) SEMAILBOX_NS_HOST_BASE) /**< SEMAILBOX_NS_HOST base pointer */
-#define MVP_NS               ((MVP_TypeDef *) MVP_NS_BASE)                       /**< MVP_NS base pointer */
 #define FRC_S                ((FRC_TypeDef *) FRC_BASE)                          /**< FRC_S base pointer */
 #define FRC                  ((FRC_TypeDef *) FRC_BASE)                          /**< FRC_S base pointer */
 #define AGC_S                ((AGC_TypeDef *) AGC_BASE)                          /**< AGC_S base pointer */

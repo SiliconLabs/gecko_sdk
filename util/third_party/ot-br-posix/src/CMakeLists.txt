@@ -33,6 +33,7 @@ endif()
 add_subdirectory(common)
 add_subdirectory(ncp)
 add_subdirectory(sdp_proxy)
+add_subdirectory(trel_dnssd)
 
 if(OTBR_DBUS)
     add_subdirectory(dbus)

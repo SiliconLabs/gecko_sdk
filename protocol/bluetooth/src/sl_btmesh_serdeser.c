@@ -730,6 +730,12 @@ sl_status_t mesh_lib_serialize_state(const struct mesh_generic_state *current,
       *msg_used = msg_off;
       break;
 
+    case mesh_lighting_state_lightness_range_with_status:
+      if (msg_len < 5) {
+        return SL_STATUS_INVALID_PARAMETER;
+      }
+      msg_buf[msg_off++] = current->lightness_range.status;
+    //Intentional fallthrough
     case mesh_lighting_state_lightness_range:
       if (msg_len < 4) {
         return SL_STATUS_INVALID_PARAMETER;
@@ -809,6 +815,12 @@ sl_status_t mesh_lib_serialize_state(const struct mesh_generic_state *current,
       *msg_used = msg_off;
       break;
 
+    case mesh_lighting_state_ctl_temperature_range_with_status:
+      if (msg_len < 5) {
+        return SL_STATUS_INVALID_PARAMETER;
+      }
+      msg_buf[msg_off++] = current->ctl_temperature_range.status;
+    //Intentional fallthrough
     case mesh_lighting_state_ctl_temperature_range:
       if (msg_len < 4) {
         return SL_STATUS_INVALID_PARAMETER;
@@ -881,6 +893,12 @@ sl_status_t mesh_lib_serialize_state(const struct mesh_generic_state *current,
       *msg_used = msg_off;
       break;
 
+    case mesh_lighting_state_hsl_range_with_status:
+      if (msg_len < 9) {
+        return -1;
+      }
+      msg_buf[msg_off++] = current->hsl_range.status;
+    //Intentional fallthrough
     case mesh_lighting_state_hsl_range:
       if (msg_len < 8) {
         return -1;
@@ -1128,6 +1146,13 @@ sl_status_t mesh_lib_deserialize_state(struct mesh_generic_state *current,
       }
       break;
 
+    case mesh_lighting_state_lightness_range_with_status:
+      if (msg_len - msg_off == 5) {
+        current->lightness_range.status = msg_buf[msg_off++];
+      } else {
+        return SL_STATUS_INVALID_PARAMETER;
+      }
+    //Intentional fallthrough
     case mesh_lighting_state_lightness_range:
       if (msg_len - msg_off == 4) {
         current->kind = kind;
@@ -1237,6 +1262,13 @@ sl_status_t mesh_lib_deserialize_state(struct mesh_generic_state *current,
       }
       break;
 
+    case mesh_lighting_state_ctl_temperature_range_with_status:
+      if (msg_len - msg_off == 5) {
+        current->ctl_temperature_range.status = msg_buf[msg_off++];
+      } else {
+        return SL_STATUS_INVALID_PARAMETER;
+      }
+    // Intentional fallthrough
     case mesh_lighting_state_ctl_temperature_range:
       if (msg_len - msg_off == 4) {
         current->kind = kind;
@@ -1332,6 +1364,13 @@ sl_status_t mesh_lib_deserialize_state(struct mesh_generic_state *current,
       }
       break;
 
+    case mesh_lighting_state_hsl_range_with_status:
+      if (msg_len - msg_off == 9) {
+        current->hsl_range.status = msg_buf[msg_off++];
+      } else {
+        return -1;
+      }
+    // Intentional fallthrough
     case mesh_lighting_state_hsl_range:
       if (msg_len - msg_off == 8) {
         current->kind = kind;

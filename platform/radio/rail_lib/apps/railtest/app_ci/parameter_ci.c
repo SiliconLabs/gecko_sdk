@@ -615,6 +615,7 @@ void delayUs(sl_cli_command_arg_t *args)
 
 #ifdef RAIL_PA_AUTO_MODE
 #include "pa_auto_mode.h"
+static bool paAutoModeEnable = false;
 void configPaAutoMode(sl_cli_command_arg_t *args)
 {
   uint8_t index = sl_cli_get_argument_uint8(args, 0);
@@ -628,7 +629,10 @@ void configPaAutoMode(sl_cli_command_arg_t *args)
     responsePrintError(sl_cli_get_command_string(args, 0), 0x01, "Invalid mode (%d) specified", mode);
     return;
   }
-
+  if (!paAutoModeEnable) {
+    responsePrintError(sl_cli_get_command_string(args, 0), 0x01, "PA auto mode should be enabled to set configs.");
+    return;
+  }
   RAIL_PaAutoModeConfig[index].min = min;
   RAIL_PaAutoModeConfig[index].max = max;
   RAIL_PaAutoModeConfig[index].mode = mode;
@@ -641,10 +645,10 @@ void configPaAutoMode(sl_cli_command_arg_t *args)
 void enablePaAutoMode(sl_cli_command_arg_t *args)
 {
   CHECK_RAIL_HANDLE(sl_cli_get_command_string(args, 0));
-  bool enable = !!sl_cli_get_argument_uint8(args, 0);
-  RAIL_EnablePaAutoMode(railHandle, enable);
+  paAutoModeEnable = !!sl_cli_get_argument_uint8(args, 0);
+  RAIL_EnablePaAutoMode(railHandle, paAutoModeEnable);
 
-  responsePrint(sl_cli_get_command_string(args, 0), "enable:%s", enable ? "True" : "False");
+  responsePrint(sl_cli_get_command_string(args, 0), "enable:%s", paAutoModeEnable ? "True" : "False");
 }
 #else
 void configPaAutoMode(sl_cli_command_arg_t *args)

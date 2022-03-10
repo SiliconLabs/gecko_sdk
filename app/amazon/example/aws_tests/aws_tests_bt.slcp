@@ -11,7 +11,6 @@ component:
   - id: bootloader_interface
   - id: toolchain_gcc
   - id: freertos
-  - id: cmsis_rtos2
   - id: aws_tests_core
   - id: iostream_usart
     instance: [vcom]

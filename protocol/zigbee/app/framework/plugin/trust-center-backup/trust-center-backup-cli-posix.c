@@ -25,6 +25,13 @@
 
 #include <errno.h>
 
+#ifdef UC_BUILD
+#include "trust-center-backup-config.h"
+#if (EMBER_AF_PLUGIN_TRUST_CENTER_BACKUP_POSIX_FILE_BACKUP_SUPPORT == 1)
+  #define POSIX_FILE_BACKUP_SUPPORT
+#endif // EMBER_AF_PLUGIN_TRUST_CENTER_BACKUP_POSIX_FILE_BACKUP_SUPPORT
+#endif // UC_BUILD
+
 #if defined(EMBER_TEST)
   #define POSIX_FILE_BACKUP_SUPPORT
 #endif

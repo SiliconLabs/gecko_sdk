@@ -152,6 +152,10 @@
           <value>int:0</value>
         </input>
         <input>
+          <key>DUAL_FEFILT</key>
+          <value>null</value>
+        </input>
+        <input>
           <key>ERRORS_IN_TIMING_WINDOW</key>
           <value>null</value>
         </input>

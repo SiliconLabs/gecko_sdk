@@ -29,6 +29,7 @@
  ******************************************************************************/
 
 #include <stdbool.h>
+#include <string.h>
 
 #include "sl_gsdk_version.h"
 #include "sl_cpc_system_common.h"
@@ -40,11 +41,11 @@
 #include "sli_mem_pool.h"
 #include "em_rmu.h"
 
-#if (!defined(SLI_CPC_DEVICE_UNDER_TEST))
+#if (defined(SL_CATALOG_CPC_BOOTLOADER_INTERFACE_PRESENT))
 #include "btl_interface.h"
 #endif
 
-#ifdef SL_CPC_ENDPOINT_SECURITY_ENABLED
+#if (defined(SL_CATALOG_CPC_SECURITY_PRESENT))
 #include "sl_cpc_security.h"
 #endif
 
@@ -58,6 +59,8 @@
 /*******************************************************************************
  ***************************  LOCAL VARIABLES   ********************************
  ******************************************************************************/
+
+static bool sli_cpc_system_restart_flag = false;
 
 /***************************************************************************//**
  * System endpoint handle
@@ -82,9 +85,10 @@ static void on_write_completed(sl_cpc_user_endpoint_id_t endpoint_id,
                                void *arg,
                                sl_status_t status);
 
-#if (!defined(SLI_CPC_DEVICE_UNDER_TEST))
+static sl_status_t sli_cpc_system_open_endpoint(void);
+static void on_system_ep_error(sl_cpc_user_endpoint_id_t endpoint_id);
+
 static void send_reset_reason(void);
-#endif
 
 static void on_poll(uint8_t endpoint_id,
                     void *arg,
@@ -99,7 +103,7 @@ __WEAK void system_on_information_received(uint8_t endpoint_id, void *arg);
 /***************************************************************************//**
  * Initialize CPC System
  ******************************************************************************/
-sl_status_t sli_cpc_system_init(void)
+static sl_status_t sli_cpc_system_open_endpoint(void)
 {
   sl_status_t status;
 
@@ -136,11 +140,55 @@ sl_status_t sli_cpc_system_init(void)
     return status;
   }
 
-#if (!defined(SLI_CPC_DEVICE_UNDER_TEST))
+  status = sl_cpc_set_endpoint_option(&system_ep, SL_CPC_ENDPOINT_ON_ERROR, (void *)on_system_ep_error);
+  if (status != SL_STATUS_OK) {
+    sl_cpc_close_endpoint(&system_ep);
+    return status;
+  }
+
+  return SL_STATUS_OK;
+}
+
+/***************************************************************************//**
+ * Process the system endpoint
+ ******************************************************************************/
+void sli_cpc_system_process(void)
+{
+  sl_cpc_endpoint_state_t state;
+
+  if (sli_cpc_system_restart_flag) {
+    state = sl_cpc_get_endpoint_state(&system_ep);
+
+    if (state == SL_CPC_STATE_FREED) {
+      EFM_ASSERT(sli_cpc_system_open_endpoint() == SL_STATUS_OK);
+      sli_cpc_system_restart_flag = false;
+    } else {
+      if (state != SL_CPC_STATE_CLOSED) {
+        sl_cpc_close_endpoint(&system_ep);
+      }
+    }
+  }
+}
+
+/***************************************************************************//**
+ * Initialize CPC System
+ ******************************************************************************/
+sl_status_t sli_cpc_system_init(void)
+{
+  sl_status_t status = sli_cpc_system_open_endpoint();
+
   send_reset_reason();
-#endif
 
   return status;
+}
+
+/***************************************************************************//**
+ * System endpoint on error callback
+ ******************************************************************************/
+static void on_system_ep_error(sl_cpc_user_endpoint_id_t endpoint_id)
+{
+  EFM_ASSERT(endpoint_id == SL_CPC_ENDPOINT_SYSTEM);
+  sli_cpc_system_restart_flag = true;
 }
 
 /***************************************************************************//**
@@ -154,10 +202,13 @@ static void on_write_completed(sl_cpc_user_endpoint_id_t endpoint_id,
   (void) endpoint_id;
   (void) status;
 
-  sli_cpc_free_command_buffer(buffer);
+  // Unnumbered ACK has no payload
+  if (buffer != NULL) {
+    sli_cpc_free_command_buffer(buffer);
+  }
 
-#if (!defined(SLI_CPC_DEVICE_UNDER_TEST))
   if ((uint32_t) arg == 0xDEADBEEF) {
+#if (defined(SL_CATALOG_CPC_BOOTLOADER_INTERFACE_PRESENT))
     // The reset command asked to perform a reset.
 
     BootloaderResetCause_t* resetCause = (BootloaderResetCause_t*) (RAM_MEM_BASE);
@@ -175,7 +226,7 @@ static void on_write_completed(sl_cpc_user_endpoint_id_t endpoint_id,
     }
 
     resetCause->signature = BOOTLOADER_RESET_SIGNATURE_VALID;
-
+#endif
 #if defined(RMU_PRESENT)
     // Clear resetcause
     RMU->CMD = RMU_CMD_RCCLR;
@@ -184,9 +235,6 @@ static void on_write_completed(sl_cpc_user_endpoint_id_t endpoint_id,
 #endif
     NVIC_SystemReset();
   }
-#else
-  (void)arg;
-#endif
 }
 
 /***************************************************************************//**
@@ -233,7 +281,6 @@ sl_status_t sli_cpc_send_disconnection_notification(uint8_t endpoint_id)
 /***************************************************************************//**
  * Send reset reason
  ******************************************************************************/
-#if (!defined(SLI_CPC_DEVICE_UNDER_TEST))
 static void send_reset_reason(void)
 {
   sl_status_t status;
@@ -340,7 +387,6 @@ static void send_reset_reason(void)
 
   EFM_ASSERT(status == SL_STATUS_OK);
 }
-#endif
 
 void send_status_ok(void)
 {
@@ -461,7 +507,7 @@ static void on_property_get_rx_capabilities(sl_cpc_system_cmd_t *tx_command)
  * Property ID: PROP_BOOTLOADER_INFO
  *   Reply to the PRIMARY the bootloader infos.
  ******************************************************************************/
-#if (!defined(SLI_CPC_DEVICE_UNDER_TEST))
+#if (defined(SL_CATALOG_CPC_BOOTLOADER_INTERFACE_PRESENT))
 static void on_property_get_bootloader_info(sl_cpc_system_cmd_t *tx_command)
 {
   sl_cpc_system_property_cmd_t *tx_property;
@@ -716,13 +762,11 @@ static void on_noop(sl_cpc_system_cmd_t *noop,
  *   wheter or not it can reset in the desired mode dictated by 'prop_bootloader
  *   _reboot_mode'
  ******************************************************************************/
-#if (!defined(SLI_CPC_DEVICE_UNDER_TEST))
 static void on_reset(sl_cpc_system_cmd_t *reset,
                      uint32_t *reply_data_lenght,
                      void **on_write_complete_arg)
 {
   sl_cpc_system_status_t *reset_status;
-  BootloaderInformation_t btl_info;
 
   reset_status = (sl_cpc_system_status_t*)(reset->payload);
   reset->header.command_id = CMD_SYSTEM_RESET;
@@ -733,7 +777,10 @@ static void on_reset(sl_cpc_system_cmd_t *reset,
       *reset_status = STATUS_OK;
       break;
 
+#if (defined(SL_CATALOG_CPC_BOOTLOADER_INTERFACE_PRESENT))
     case REBOOT_BOOTLOADER:
+    {
+      BootloaderInformation_t btl_info;
       bootloader_getInfo(&btl_info);
 
       // In case of bootloader reboot, check that a bootloader is present
@@ -743,6 +790,9 @@ static void on_reset(sl_cpc_system_cmd_t *reset,
         *reset_status = STATUS_OK;
       }
       break;
+    }
+#endif
+
     default:
       EFM_ASSERT(0);
       break;
@@ -764,12 +814,11 @@ static void on_reset(sl_cpc_system_cmd_t *reset,
     *on_write_complete_arg = 0;
   }
 }
-#endif
 
 /***************************************************************************//**
  * Handle property-get from PRIMARY:
  *   This functions is called when a property-get command is received from the
- *   PRIMARY. Causes the SECONDARY to emit a "CMD_PROP_VALUE_IS" command for the
+ *   PRIMARY. Causes the SECONDARY to emit a "CMD_PROP_VALUE_IS " command for the
  *   given property identifier.
  ******************************************************************************/
 static void on_property_get(sl_cpc_system_cmd_t *rx_command,
@@ -799,7 +848,7 @@ static void on_property_get(sl_cpc_system_cmd_t *rx_command,
       on_property_get_rx_capabilities(reply);
       break;
 
-#if (!defined(SLI_CPC_DEVICE_UNDER_TEST))
+#if (defined(SL_CATALOG_CPC_BOOTLOADER_INTERFACE_PRESENT))
     case PROP_BOOTLOADER_INFO:
       on_property_get_bootloader_info(reply);
       break;
@@ -842,7 +891,7 @@ static void on_property_get(sl_cpc_system_cmd_t *rx_command,
 /***************************************************************************//**
  * Handle property-set from PRIMARY:
  *   This functions is called when a property-set command is received from the
- *   PRIMARY. Causes the RCP to emit a "CMD_PROP_VALUE_IS" command for the given
+ *   PRIMARY. Causes the RCP to emit a "CMD_PROP_VALUE_IS " command for the given
  *   property identifier.
  ******************************************************************************/
 static void on_property_set(sl_cpc_system_cmd_t* rx_command,
@@ -930,11 +979,9 @@ static void on_poll(uint8_t endpoint_id,
       on_noop((sl_cpc_system_cmd_t *)*reply_data, reply_data_lenght);
       break;
 
-#if (!defined(SLI_CPC_DEVICE_UNDER_TEST))
     case CMD_SYSTEM_RESET:
       on_reset((sl_cpc_system_cmd_t *)*reply_data, reply_data_lenght, on_write_complete_arg);
       break;
-#endif
 
     case CMD_SYSTEM_PROP_VALUE_GET:
       on_property_get(rx_command, (sl_cpc_system_cmd_t *)*reply_data, reply_data_lenght);

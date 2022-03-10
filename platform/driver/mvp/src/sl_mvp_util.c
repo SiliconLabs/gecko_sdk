@@ -33,14 +33,6 @@
 extern __INLINE int sli_mvp_util_offset_nhwc(int height, int width, int depth,
                                              int n, int h, int w, int c);
 
-extern __INLINE void sli_mvp_util_prog_set_array_nhwc(sli_mvp_program_t *prog,
-                                                      uint8_t index,
-                                                      void *addr,
-                                                      sli_mvp_datatype_t type,
-                                                      unsigned short h,
-                                                      unsigned short w,
-                                                      unsigned short c);
-
 /***************************************************************************//**
  *
  * sli_mvp_memclr_f16() clears 2 * batches * vecs * rows * cols bytes in memory.
@@ -60,6 +52,8 @@ sl_status_t sli_mvp_util_memclr_f16(sli_mvp_program_context_t *p,
   int height = rows;
   int width = cols;
   bool parallel = false;
+  sl_status_t status = SL_STATUS_OK;
+  unsigned batch_size = 2 * vecs * rows * cols;
 
   if (depth % 2 == 0) {
     depth /= 2;
@@ -74,32 +68,39 @@ sl_status_t sli_mvp_util_memclr_f16(sli_mvp_program_context_t *p,
 
   // Loop through batches which is usually only one.
   for (int batch = 0; batch < batches; ++batch) {
-    sli_mvp_begin_program(p);
+    sli_mvp_pb_begin_program(p);
     sli_mvp_prog_set_reg_f16c(p->p, SLI_MVP_R0, 0, 0);
-    sli_mvp_prog_set_array(p->p,
-                           SLI_MVP_ARRAY(0),
-                           dst,
-                           parallel == true
-                           ? SLI_MVP_DATATYPE_COMPLEX_BINARY16
-                           : SLI_MVP_DATATYPE_BINARY16,
-                           depth,
-                           height,
-                           width);
-    sli_mvp_begin_loop(p, depth, NULL);
-      sli_mvp_begin_loop(p, width, NULL);
-        sli_mvp_begin_loop(p, height, NULL);
-          sli_mvp_compute(p,
-                          SLI_MVP_OP(NOOP),
-                          SLI_MVP_NONE,
-                          SLI_MVP_NONE,
-                          SLI_MVP_STORE(SLI_MVP_R0, SLI_MVP_ARRAY(0), SLI_MVP_INCRDIM_ROW),
-                          NULL);
-        sli_mvp_end_loop(p);
-        sli_mvp_postloop_incr_dim(p, SLI_MVP_ARRAY(0), SLI_MVP_INCRDIM_COL);
-      sli_mvp_end_loop(p);
-      sli_mvp_postloop_incr_dim(p, SLI_MVP_ARRAY(0), SLI_MVP_INCRDIM_VEC);
-    sli_mvp_end_loop(p);
-    sli_mvp_execute_program(p);
+    sli_mvp_pb_config_array_nhwc(p->p,
+                                 SLI_MVP_ARRAY(0),
+                                 dst,
+                                 parallel == true
+                                 ? SLI_MVP_DATATYPE_COMPLEX_BINARY16
+                                 : SLI_MVP_DATATYPE_BINARY16,
+                                 height,
+                                 width,
+                                 depth,
+                                 &status);
+    sli_mvp_pb_begin_loop(p, depth, NULL);
+      sli_mvp_pb_begin_loop(p, width, NULL);
+        sli_mvp_pb_begin_loop(p, height, NULL);
+          sli_mvp_pb_compute(p,
+                             SLI_MVP_OP(NOOP),
+                             SLI_MVP_NONE,
+                             SLI_MVP_NONE,
+                             SLI_MVP_STORE(SLI_MVP_R0, SLI_MVP_ARRAY(0), SLI_MVP_INCRDIM_HEIGHT),
+                             NULL);
+        sli_mvp_pb_end_loop(p);
+        sli_mvp_pb_postloop_incr_dim(p, SLI_MVP_ARRAY(0), SLI_MVP_INCRDIM_WIDTH);
+      sli_mvp_pb_end_loop(p);
+      sli_mvp_pb_postloop_incr_dim(p, SLI_MVP_ARRAY(0), SLI_MVP_INCRDIM_DEPTH);
+    sli_mvp_pb_end_loop(p);
+
+    if (status == SL_STATUS_OK) {
+      sli_mvp_pb_execute_program(p);
+    } else {
+      return status;
+    }
+    dst += batch_size;
   }
-  return SL_STATUS_OK;
+  return status;
 }

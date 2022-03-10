@@ -3,7 +3,7 @@
  * @brief Air quality sensor
  *******************************************************************************
  * # License
- * <b>Copyright 2020 Silicon Laboratories Inc. www.silabs.com</b>
+ * <b>Copyright 2022 Silicon Laboratories Inc. www.silabs.com</b>
  *******************************************************************************
  *
  * SPDX-License-Identifier: Zlib
@@ -29,6 +29,7 @@
  ******************************************************************************/
 
 #include <stddef.h>
+#include <stdbool.h>
 #include "sl_board_control.h"
 #include "sl_ccs811.h"
 #include "sl_sensor_select.h"
@@ -41,9 +42,14 @@
 #define GAS_MEASURE_MODE  CCS811_MEASURE_MODE_DRIVE_MODE_1SEC
 
 // -----------------------------------------------------------------------------
+// Private variables
+
+static bool initialized = false;
+
+// -----------------------------------------------------------------------------
 // Public function definitions
 
-void sl_sensor_gas_init(void)
+sl_status_t sl_sensor_gas_init(void)
 {
   sl_status_t sc;
   sl_i2cspm_t *gas_sensor = sl_sensor_select(SL_BOARD_SENSOR_GAS);
@@ -52,23 +58,35 @@ void sl_sensor_gas_init(void)
              "[E: %#04x] Gas sensor not available\n",
              sc);
   sc = sl_ccs811_init(gas_sensor);
-  if ( sc == SL_STATUS_OK ) {
+  if (sc == SL_STATUS_OK) {
     sc = sl_ccs811_set_measure_mode(gas_sensor, GAS_MEASURE_MODE);
+    app_assert_status(sc);
+    initialized = true;
+  } else {
+    initialized = false;
   }
-  app_assert_status(sc);
+
+  return sc;
 }
 
 void sl_sensor_gas_deinit(void)
 {
   (void)sl_board_disable_sensor(SL_BOARD_SENSOR_GAS);
+  initialized = false;
 }
 
 sl_status_t sl_sensor_gas_get(uint16_t *eco2, uint16_t *tvoc)
 {
   sl_status_t sc = SL_STATUS_NOT_READY;
-  sl_i2cspm_t *gas_sensor = sl_sensor_select(SL_BOARD_SENSOR_GAS);
-  if ( sl_ccs811_is_data_available(gas_sensor) ) {
-    sc = sl_ccs811_get_measurement(gas_sensor, eco2, tvoc);
+
+  if (initialized) {
+    sl_i2cspm_t *gas_sensor = sl_sensor_select(SL_BOARD_SENSOR_GAS);
+    if (sl_ccs811_is_data_available(gas_sensor)) {
+      sc = sl_ccs811_get_measurement(gas_sensor, eco2, tvoc);
+    }
+  } else {
+    sc = SL_STATUS_NOT_INITIALIZED;
   }
+
   return sc;
 }

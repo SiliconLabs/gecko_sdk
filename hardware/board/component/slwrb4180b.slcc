@@ -14,9 +14,9 @@
   - name: SL_KIT_NAME
     value: '"SLWRB4180B"'
   - name: SL_KIT_REV
-    value: '"A03"'
+    value: '"A04"'
 - tag:
   - kit:opn:SLWRB4180B
   - kit:pn:WRB4180
   - kit:variant:B
-  - kit:revision:A03
+  - kit:revision:A04

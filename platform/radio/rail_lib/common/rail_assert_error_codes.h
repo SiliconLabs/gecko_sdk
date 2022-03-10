@@ -120,6 +120,7 @@ RAIL_ENUM_GENERIC(RAIL_AssertErrorCodes_t, uint32_t)
   RAIL_ASSERT_FAILED_EM1P_EXIT = 68,
   RAIL_ASSERT_FAILED_RTCC_SYNC_STOP = 69,
   RAIL_ASSERT_FAILED_MULTITIMER_CORRUPT = 70,
+  RAIL_ASSERT_FAILED_TEMPCAL_ERROR = 71,
 };
 
 #ifndef DOXYGEN_SHOULD_SKIP_THIS
@@ -195,6 +196,7 @@ RAIL_ENUM_GENERIC(RAIL_AssertErrorCodes_t, uint32_t)
 #define RAIL_ASSERT_FAILED_EM1P_EXIT                           ((RAIL_AssertErrorCodes_t) RAIL_ASSERT_FAILED_EM1P_EXIT)
 #define RAIL_ASSERT_FAILED_RTCC_SYNC_STOP                      ((RAIL_AssertErrorCodes_t) RAIL_ASSERT_FAILED_RTCC_SYNC_STOP)
 #define RAIL_ASSERT_FAILED_MULTITIMER_CORRUPT                  ((RAIL_AssertErrorCodes_t) RAIL_ASSERT_FAILED_MULTITIMER_CORRUPT)
+#define RAIL_ASSERT_FAILED_TEMPCAL_ERROR                       ((RAIL_AssertErrorCodes_t) RAIL_ASSERT_FAILED_TEMPCAL_ERROR)
 #endif//DOXYGEN_SHOULD_SKIP_THIS
 
 /// Use this define to create an array of error messages that map to the codes
@@ -293,6 +295,7 @@ RAIL_ENUM_GENERIC(RAIL_AssertErrorCodes_t, uint32_t)
     /*68*/ "Failed to disable EM1P energy mode",                                       \
     /*69*/ "Failed to disable RTCC synchronization",                                   \
     /*70*/ "Multitimer linked list corrupted",                                         \
+    /*71*/ "Unable to configure radio for temperature calibration",                    \
 }
 
 /**

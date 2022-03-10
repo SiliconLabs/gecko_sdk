@@ -8,6 +8,7 @@ category: Bluetooth|GATT
 quality: production
 root_path: app/bluetooth/common/gatt_service_light
 config_file:
+  - path: config/sl_gatt_service_light_config.h
   - path: gatt_service_light.xml
     directory: btconf
 source:

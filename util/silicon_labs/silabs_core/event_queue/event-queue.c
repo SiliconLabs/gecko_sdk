@@ -35,7 +35,7 @@
 // We use this instead of NULL at the end of a list so that unscheduled
 // events can be marked by having a 'next' field of NULL.  This makes them
 // easier to initialize.
-#define LIST_END ((EmberEvent *) 1)
+#define LIST_END EVENT_QUEUE_LIST_END
 
 // Marker function for ISR event types.  This should never be called.
 void emIsrEventMarker(struct Event_s *event)

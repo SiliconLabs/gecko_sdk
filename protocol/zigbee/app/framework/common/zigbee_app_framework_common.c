@@ -160,8 +160,8 @@ void sli_zigbee_event_init(sl_zigbee_event_t *event,
   }
 }
 
-void sl_zigbee_network_event_init(sl_zigbee_event_t *event,
-                                  void (*handler)(sl_zigbee_event_t *))
+void sli_zigbee_network_event_init(sl_zigbee_event_t *event,
+                                   void (*handler)(sl_zigbee_event_t *))
 {
   uint8_t i;
   for (i = 0; i < EMBER_SUPPORTED_NETWORKS; i++) {

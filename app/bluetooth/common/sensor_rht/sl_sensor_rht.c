@@ -3,7 +3,7 @@
  * @brief Relative Humidity and Temperature sensor
  *******************************************************************************
  * # License
- * <b>Copyright 2020 Silicon Laboratories Inc. www.silabs.com</b>
+ * <b>Copyright 2022 Silicon Laboratories Inc. www.silabs.com</b>
  *******************************************************************************
  *
  * SPDX-License-Identifier: Zlib
@@ -41,9 +41,14 @@
 #define RHT_ADDRESS  SI7021_ADDR
 
 // -----------------------------------------------------------------------------
+// Private variables
+
+static bool initialized = false;
+
+// -----------------------------------------------------------------------------
 // Public function definitions
 
-void sl_sensor_rht_init(void)
+sl_status_t sl_sensor_rht_init(void)
 {
   sl_status_t sc;
   sl_i2cspm_t *rht_sensor = sl_sensor_select(SL_BOARD_SENSOR_RHT);
@@ -51,18 +56,30 @@ void sl_sensor_rht_init(void)
   app_assert(NULL != rht_sensor,
              "Si70xx sensor not available\n");
   sc = sl_si70xx_init(rht_sensor, RHT_ADDRESS);
-  app_assert_status(sc);
+  if (SL_STATUS_OK == sc) {
+    initialized = true;
+  } else {
+    initialized = false;
+  }
+  return sc;
 }
 
 void sl_sensor_rht_deinit(void)
 {
   (void)sl_board_disable_sensor(SL_BOARD_SENSOR_RHT);
+  initialized = false;
 }
 
 sl_status_t sl_sensor_rht_get(uint32_t *rh, int32_t *t)
 {
   sl_status_t sc;
-  sl_i2cspm_t *rht_sensor = sl_sensor_select(SL_BOARD_SENSOR_RHT);
-  sc = sl_si70xx_measure_rh_and_temp(rht_sensor, RHT_ADDRESS, rh, t);
+
+  if (initialized) {
+    sl_i2cspm_t *rht_sensor = sl_sensor_select(SL_BOARD_SENSOR_RHT);
+    sc = sl_si70xx_measure_rh_and_temp(rht_sensor, RHT_ADDRESS, rh, t);
+  } else {
+    sc = SL_STATUS_NOT_INITIALIZED;
+  }
+
   return sc;
 }

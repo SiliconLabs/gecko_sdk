@@ -994,7 +994,7 @@ ApplicationTask(SApplicationHandles* pAppHandles)
 
   // Wait for and process events
   DPRINT("PowerStrip Event processor Started\r\n");
-  uint32_t iMaxTaskSleep = 5;
+  uint32_t iMaxTaskSleep = 0xFFFFFFFF;
   for (;;)
   {
     if (0xFFFFFFFF == EventDistributorDistribute(&g_EventDistributor, iMaxTaskSleep, 0))

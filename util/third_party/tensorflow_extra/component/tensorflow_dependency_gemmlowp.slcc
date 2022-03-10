@@ -3,7 +3,7 @@ package: platform
 label: Low Precision General Matrix Multiplication (GEMMLOWP)
 description: >
   Low precision general matrix multiplication (GEMMLOWP) library
-category: Platform|Machine Learning|TensorFlow|Dependency
+category: Machine Learning|TensorFlow|Dependency
 quality: production
 root_path: util/third_party/tensorflow_extra/gemmlowp
 provides:

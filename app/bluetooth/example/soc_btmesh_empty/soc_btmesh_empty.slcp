@@ -15,16 +15,12 @@ category: Bluetooth Mesh Examples
 quality: production
 component:
   - id: app_assert
-  - id: app_log
   - id: bootloader_interface
   - id: btmesh_feature_gatt_prov_bearer
   - id: btmesh_feature_node
   - id: btmesh_feature_relay
   - id: btmesh_proxy
   - id: btmesh_stack
-  - id: iostream_usart
-    instance:
-      - vcom
   - id: mpu
   - id: ota_dfu
   - id: rail_util_pti
@@ -65,16 +61,8 @@ other_file:
     folder: images
 
 configuration:
-  - name: APP_LOG_LEVEL
-    value: "APP_LOG_LEVEL_INFO"
-  - name: SL_BOARD_ENABLE_VCOM
-    value: "1"
-    condition:
-      - iostream_usart
   - name: SL_HEAP_SIZE
     value: "0x4000"
-  - name: SL_IOSTREAM_USART_VCOM_RESTRICT_ENERGY_MODE_TO_ALLOW_RECEPTION
-    value: "0"
   - name: SL_PSA_KEY_USER_SLOT_COUNT
     value: "0"
     condition:
@@ -83,7 +71,6 @@ configuration:
     value: "0x1000"
 
 tag:
-  - hardware:device:sdid:!215
   - hardware:device:flash:512
   - hardware:device:ram:32
   - hardware:rf:band:2400

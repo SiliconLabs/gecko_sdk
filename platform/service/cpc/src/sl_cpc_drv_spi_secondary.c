@@ -190,7 +190,7 @@ sl_status_t sli_cpc_drv_init(void)
   };
 
   // Configure GPIO mode for CS since it is controlled by the application (this driver)
-  GPIO_PinModeSet(SL_CPC_DRV_SPI_CS_PORT, SL_CPC_DRV_SPI_CS_PIN, gpioModePushPull, 1);
+  GPIO_PinModeSet(SL_CPC_DRV_SPI_CS_PORT, SL_CPC_DRV_SPI_CS_PIN, gpioModeInputPullFilter, 1);
 
   // RCP RX IRQ line
   GPIO_PinModeSet(SL_CPC_DRV_SPI_RX_IRQ_PORT, SL_CPC_DRV_SPI_RX_IRQ_PIN, gpioModePushPull, 1);
@@ -366,6 +366,10 @@ static void sli_cpc_spi_read_data_idle(void)
 static void sli_cpc_hw_cs_interrupt(uint8_t intNo)
 {
   CORE_DECLARE_IRQ_STATE;
+
+  if (GPIO_PinOutGet(SL_CPC_DRV_SPI_RX_IRQ_PORT, SL_CPC_DRV_SPI_RX_IRQ_PIN) == 0) {
+    return;
+  }
 
   if (intNo == SL_CPC_DRV_SPI_CS_RISING_EDGE_INT_NO) {
     // End of transfer
