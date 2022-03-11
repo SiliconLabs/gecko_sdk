@@ -114,10 +114,11 @@ sl_status_t sli_bgapi_get_event(int block, sl_bt_msg_t *event, bgapi_device_type
 /**
  * Function that sends a message to the serial port.
  *
- * @param msg_len Length of the message
- * @param msg_data The message data
+ * @param msg_len[in] Length of the message.
+ * @param msg_data[in] The message data.
+ * @return The amount of bytes sent or -1 on failure.
  */
-typedef void(*tx_func)(uint32_t msg_len, uint8_t* msg_data);
+typedef int32_t(*tx_func)(uint32_t msg_len, uint8_t* msg_data);
 
 /**
  *  @brief Function that reads data from serial port.
@@ -135,6 +136,12 @@ typedef int32_t(*rx_func)(uint32_t dataLength, uint8_t* data);
 typedef int32_t(*rx_peek_func)(void);
 
 /**
+ * @brief  Function for retrieving current time, used for timeouts.
+ * @return Returns the number of milliseconds, monotonically increasing since an undefined point in time.
+ */
+typedef int64_t(*time_ms_func)(void);
+
+/**
  * Initialize NCP host Bluetooth API.
  *
  * @param ofunc The function for sending api messages
@@ -149,17 +156,20 @@ sl_status_t sl_bt_api_initialize(tx_func ofunc, rx_func ifunc);
  * @param ofunc The function for sending api messages
  * @param ifunc The function for receiving api messages
  * @param pfunc The function for getting the number of bytes in the input buffer
+ * @param tfunc Optional function for getting current monotonic time in ms, used for timeouts
+ * @param rx_timeout_ms Timeout for receiving command responses, only used if tfunc is provided
  * @return Status code
  */
-sl_status_t sl_bt_api_initialize_nonblock(tx_func ofunc, rx_func ifunc, rx_peek_func pfunc);
+sl_status_t sl_bt_api_initialize_nonblock(tx_func ofunc, rx_func ifunc, rx_peek_func pfunc,
+                                          time_ms_func tfunc, uint32_t rx_timeout_ms);
 
-extern void(*sl_bt_api_output)(uint32_t len1, uint8_t* data1);
-extern int32_t (*sl_bt_api_input)(uint32_t len1, uint8_t* data1);
-extern int32_t(*sl_bt_api_peek)(void);
-void sl_bt_host_handle_command();
-void sl_bt_host_handle_command_noresponse();
+extern tx_func sl_bt_api_output;
+extern rx_func sl_bt_api_input;
+extern rx_peek_func sl_bt_api_peek;
+sl_status_t sl_bt_host_handle_command(void);
+sl_status_t sl_bt_host_handle_command_noresponse(void);
 sl_status_t sl_bt_wait_event(sl_bt_msg_t *p);
 
-sl_bt_msg_t* sli_wait_for_bgapi_message(sl_bt_msg_t *response_buf);
+sl_status_t sli_wait_for_bgapi_message(sl_bt_msg_t *response_buf);
 
 #endif
