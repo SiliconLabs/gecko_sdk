@@ -31,6 +31,10 @@
 #ifndef EM_ASSERT_H
 #define EM_ASSERT_H
 
+#if defined(EM_ASSERT_CONFIG_FILE)
+#include EM_ASSERT_CONFIG_FILE
+#endif
+
 #ifdef __cplusplus
 extern "C" {
 #endif
@@ -74,7 +78,16 @@ extern "C" {
 /* not the assert expression (nor function name (C99)) */
 void assertEFM(const char *file, int line);
 /** Default assertion is not operational */
+
+#if !defined(EFM_ASSERT_USER)
+
 #define EFM_ASSERT(expr)    ((expr) ? ((void)0) : assertEFM(__FILE__, __LINE__))
+
+#else
+
+#define EFM_ASSERT(expr)    EFM_ASSERT_USER(expr)
+
+#endif /* !defined(EFM_ASSERT_USER) */
 
 #else
 
