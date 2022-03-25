@@ -749,7 +749,7 @@ I2C_TransferReturn_TypeDef I2C_Transfer(I2C_TypeDef *i2c)
           // Errata I2C_E303. I2C Fails to Indicate New Incoming Data.
           uint32_t status = i2c->STATUS;
           // look for invalid RXDATAV = 0 and RXFULL = 1 condition
-          if (((status & I2C_IF_RXDATAV) == 0) & ((status & I2C_IF_RXFULL) != 0)) {
+          if (((status & I2C_STATUS_RXDATAV) == 0) & ((status & I2C_STATUS_RXFULL) != 0)) {
             // Performing a dummy read of the RXFIFO (I2C_RXDATA).
             // This restores the expected RXDATAV = 1 and RXFULL = 0 condition.
             (void)i2c->RXDATA;
