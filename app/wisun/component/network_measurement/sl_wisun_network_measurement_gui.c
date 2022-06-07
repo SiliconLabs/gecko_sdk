@@ -36,6 +36,7 @@
 #include <string.h>
 #include <inttypes.h>
 #include <assert.h>
+#include "sl_component_catalog.h"
 #include "sl_wisun_util.h"
 #include "sl_wisun_app_core.h"
 #include "sl_wisun_app_setting.h"
@@ -83,6 +84,8 @@ Avg. Time[ms]: %lu\n\
 lifetime:      %lu\n\
 mac_tx_count:  %lu\n\
 mac_tx_fail:   %lu\n\
+mac_tx_ms_cnt: %lu\n\
+mac_tx_ms_fail:%lu\n\
 rpl_rank:      %u\n\
 etx:           %u\n\
 rsl_out:       %u\n\
@@ -94,6 +97,8 @@ rsl_in:        %u\n"
 lifetime:      %lu\n\
 mac_tx_count:  %lu\n\
 mac_tx_fail:   %lu\n\
+mac_tx_ms_cnt: %lu\n\
+mac_tx_ms_fail:%lu\n\
 rpl_rank:      %u\n\
 etx:           %u\n\
 rsl_out:       %u\n\
@@ -111,7 +116,7 @@ Max. Time[ms]: %lu\n\
 Avg. Time[ms]: %lu\n"
 
 /// Print Node Info format string
-#define PRINT_NODE_INFO_FROMAT_STR \
+#define PRINT_NODE_INFO_FORMAT_STR \
   "Network Name:\n%s\n\
 Nw. size: %s(%d)\n\
 TX Power: %d\n\
@@ -121,7 +126,8 @@ Op. mode: 0x%x\n\
 Global:\n[%s]\n\
 Border Router:\n[%s]\n\
 Primary Parent:\n[%s]\n\
-Secondary Parent:\n[%s]"
+Secondary Parent:\n[%s]\n\
+TX budget: %lums\n%s\n"
 
 /// Network Measurement settings structure
 typedef struct sl_wisun_nwm_setting {
@@ -139,12 +145,6 @@ typedef struct node_info {
   current_addr_t addresses;
   /// Settings
   app_setting_wisun_t settings;
-  /// Regulatory domaint
-  uint8_t reg_domain;
-  /// Operating mode
-  uint16_t op_mode;
-  /// Operating class
-  uint8_t op_class;
 } node_info_t;
 
 // -----------------------------------------------------------------------------
@@ -467,6 +467,11 @@ static void _node_info_form(void *args)
   node_info_t node_info = { 0 };
   (void) args;
 
+  // Hold the remaning TX budget if applicable (regulation is active or value is valid)
+  uint32_t tx_remaining_budget = 0UL;
+  // Indicates if the remaining budget returned is a usable value.
+  bool valid = false;
+
   sl_gui_title_set_label("Node Info");
 
   sl_gui_title_update();
@@ -484,22 +489,26 @@ static void _node_info_form(void *args)
   // getting settings
   app_wisun_setting_get(&node_info.settings);
 
-  (void) sl_wisun_util_get_rf_settings(&node_info.reg_domain, &node_info.op_class,
-                                       &node_info.op_mode);
+  // get remanining transmission budget if applicable
+  if ( app_wisun_get_regulation_active() == true ) {
+    valid = app_wisun_get_remaining_tx_budget(&tx_remaining_budget);
+  }
 
   snprintf(_str_buff, STR_BUFF_SIZE,
-           PRINT_NODE_INFO_FROMAT_STR,
+           PRINT_NODE_INFO_FORMAT_STR,
            node_info.settings.network_name,
            app_wisun_trace_util_nw_size_to_str(node_info.settings.network_size),
            node_info.settings.network_size,
            node_info.settings.tx_power,
-           app_wisun_trace_util_reg_domain_to_str(node_info.reg_domain), node_info.reg_domain,
-           node_info.op_class,
-           node_info.op_mode,
+           app_wisun_trace_util_reg_domain_to_str(node_info.settings.phy.regulatory_domain), node_info.settings.phy.regulatory_domain,
+           node_info.settings.phy.operating_class,
+           node_info.settings.phy.operating_mode,
            app_wisun_trace_util_get_ip_address_str(&node_info.addresses.global),
            app_wisun_trace_util_get_ip_address_str(&node_info.addresses.border_router),
            app_wisun_trace_util_get_ip_address_str(&node_info.addresses.primary_parent),
-           app_wisun_trace_util_get_ip_address_str(&node_info.addresses.secondary_parent));
+           app_wisun_trace_util_get_ip_address_str(&node_info.addresses.secondary_parent),
+           (valid ? tx_remaining_budget : 0UL),
+           (valid ? ((tx_remaining_budget == 0UL) ? "[Exceeded]" : "[Remaining]") : "[Not available]"));
   sl_gui_textbox_set(_str_buff);
   sl_gui_textbox_update();
   sl_display_update();
@@ -700,6 +709,8 @@ static void _set_test_result_txtbox(void *args)
              stat->stat.lifetime,
              stat->stat.mac_tx_count,
              stat->stat.mac_tx_failed_count,
+             stat->stat.mac_tx_ms_count,
+             stat->stat.mac_tx_ms_failed_count,
              stat->stat.rpl_rank,
              stat->stat.etx,
              stat->stat.rsl_out,
@@ -733,6 +744,8 @@ static void _set_nbinfo_txtbox(void *args)
            stat->stat.lifetime,
            stat->stat.mac_tx_count,
            stat->stat.mac_tx_failed_count,
+           stat->stat.mac_tx_ms_count,
+           stat->stat.mac_tx_ms_failed_count,
            stat->stat.rpl_rank,
            stat->stat.etx,
            stat->stat.rsl_out,

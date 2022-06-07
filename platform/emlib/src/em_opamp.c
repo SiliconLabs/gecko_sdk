@@ -33,7 +33,7 @@
   || (defined(_SILICON_LABS_32B_SERIES_1) && defined(VDAC_PRESENT)  && (VDAC_COUNT > 0)))
 
 #include "em_system.h"
-#include "em_assert.h"
+#include "sl_assert.h"
 
 /* *INDENT-OFF* */
 /***************************************************************************//**

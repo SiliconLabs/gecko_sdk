@@ -222,3 +222,25 @@ library:
       - toolchain_gcc
       - device_sdid_220
       - device_is_module
+  - path: platform/radio/rail_lib/autogen/librail_release/librail_efr32xg27_iar_release.a
+    condition:
+      - toolchain_iar
+      - device_sdid_230
+    unless:
+      - device_is_module
+  - path: platform/radio/rail_lib/autogen/librail_release/librail_efr32xg27_gcc_release.a
+    condition:
+      - toolchain_gcc
+      - device_sdid_230
+    unless:
+      - device_is_module
+  - path: platform/radio/rail_lib/autogen/librail_release/librail_module_efr32xg27_iar_release.a
+    condition:
+      - toolchain_iar
+      - device_sdid_230
+      - device_is_module
+  - path: platform/radio/rail_lib/autogen/librail_release/librail_module_efr32xg27_gcc_release.a
+    condition:
+      - toolchain_gcc
+      - device_sdid_230
+      - device_is_module

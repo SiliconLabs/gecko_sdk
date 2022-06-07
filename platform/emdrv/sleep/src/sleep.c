@@ -30,7 +30,7 @@
 
 /* Chip specific header file(s). */
 #include "em_device.h"
-#include "em_assert.h"
+#include "sl_assert.h"
 #include "em_core.h"
 #include "em_rmu.h"
 #include "em_emu.h"

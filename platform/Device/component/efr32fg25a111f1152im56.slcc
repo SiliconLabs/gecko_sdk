@@ -12,14 +12,7 @@
   - path: platform/Device/SiliconLabs/EFR32FG25/Source/system_efr32fg25.c
     unless:
     - device_content_override
-  - condition:
-    - toolchain_iar
-    path: platform/Device/SiliconLabs/EFR32FG25/Source/IAR/startup_efr32fg25.c
-    unless:
-    - device_content_override
-  - condition:
-    - toolchain_gcc
-    path: platform/Device/SiliconLabs/EFR32FG25/Source/GCC/startup_efr32fg25.c
+  - path: platform/Device/SiliconLabs/EFR32FG25/Source/startup_efr32fg25.c
     unless:
     - device_content_override
 - include:
@@ -27,36 +20,19 @@
     - path: efr32fg25a111f1152im56.h
     - path: efr32fg25_acmp.h
     - path: efr32fg25_aes.h
-    - path: efr32fg25_agc.h
     - path: efr32fg25_amuxcp.h
     - path: efr32fg25_bufc.h
     - path: efr32fg25_buram.h
     - path: efr32fg25_burtc.h
     - path: efr32fg25_cmu.h
-    - path: efr32fg25_conv.h
-    - path: efr32fg25_cordic.h
-    - path: efr32fg25_correl.h
-    - path: efr32fg25_cpdma.h
-    - path: efr32fg25_cpfifo.h
-    - path: efr32fg25_crc.h
     - path: efr32fg25_dcdc.h
-    - path: efr32fg25_demap.h
     - path: efr32fg25_devinfo.h
     - path: efr32fg25_dma_descriptor.h
     - path: efr32fg25_dpll.h
-    - path: efr32fg25_eca.h
-    - path: efr32fg25_ecaif.h
-    - path: efr32fg25_ecaifadc.h
     - path: efr32fg25_emu.h
     - path: efr32fg25_etampdet.h
     - path: efr32fg25_eusart.h
-    - path: efr32fg25_fefilt.h
-    - path: efr32fg25_fft.h
-    - path: efr32fg25_filt.h
-    - path: efr32fg25_frc.h
-    - path: efr32fg25_frcif.h
     - path: efr32fg25_fsrco.h
-    - path: efr32fg25_gen.h
     - path: efr32fg25_gpcrc.h
     - path: efr32fg25_gpio.h
     - path: efr32fg25_gpio_port.h
@@ -73,43 +49,24 @@
     - path: efr32fg25_lfrco.h
     - path: efr32fg25_lfxo.h
     - path: efr32fg25_mailbox.h
-    - path: efr32fg25_map.h
-    - path: efr32fg25_modem.h
     - path: efr32fg25_mpahbram.h
-    - path: efr32fg25_mpcp.h
     - path: efr32fg25_msc.h
-    - path: efr32fg25_obiram.h
     - path: efr32fg25_pcnt.h
     - path: efr32fg25_pfmxpprf.h
     - path: efr32fg25_pll.h
-    - path: efr32fg25_prbs.h
-    - path: efr32fg25_protimer.h
     - path: efr32fg25_prs.h
     - path: efr32fg25_prs_signals.h
-    - path: efr32fg25_rac.h
-    - path: efr32fg25_rfcrc.h
     - path: efr32fg25_rffpll.h
-    - path: efr32fg25_rvcfg.h
-    - path: efr32fg25_rvint.h
-    - path: efr32fg25_rxf.h
     - path: efr32fg25_scratchpad.h
     - path: efr32fg25_semailbox.h
-    - path: efr32fg25_smctrl.h
     - path: efr32fg25_smu.h
-    - path: efr32fg25_synth.h
     - path: efr32fg25_syscfg.h
     - path: efr32fg25_sysrtc.h
-    - path: efr32fg25_testctrl.h
     - path: efr32fg25_timer.h
-    - path: efr32fg25_txf.h
-    - path: efr32fg25_txfront.h
     - path: efr32fg25_ulfrco.h
     - path: efr32fg25_usb.h
     - path: efr32fg25_usbahb.h
-    - path: efr32fg25_utimer.h
     - path: efr32fg25_vdac.h
-    - path: efr32fg25_veq.h
-    - path: efr32fg25_vit.h
     - path: efr32fg25_wdog.h
     - path: em_device.h
     - path: system_efr32fg25.h
@@ -128,34 +85,22 @@
   - name: cortexm33
   - name: armv8m.main
   - name: device_security_se
+  - name: device_dcdc_buck
   - name: device_pa_14dbm
   - name: device_has_acmp
   - name: device_has_acmp0
   - name: device_has_acmp1
-  - name: device_has_agc
   - name: device_has_amuxcp
   - name: device_has_amuxcp0
   - name: device_has_bufc
   - name: device_has_buram
   - name: device_has_burtc
-  - name: device_has_chiptestctrl
   - name: device_has_cmu
-  - name: device_has_conv
-  - name: device_has_cordic
-  - name: device_has_cordic1
-  - name: device_has_cordic2
-  - name: device_has_correl
-  - name: device_has_cpdma
-  - name: device_has_cpfifo
-  - name: device_has_crc
   - name: device_has_dcdc
-  - name: device_has_demap
   - name: device_has_devinfo
   - name: device_has_dmem
   - name: device_has_dpll
   - name: device_has_dpll0
-  - name: device_has_ecaif
-  - name: device_has_ecaifadc
   - name: device_has_emu
   - name: device_has_etampdet
   - name: device_has_euart
@@ -165,17 +110,7 @@
   - name: device_has_eusart2
   - name: device_has_eusart3
   - name: device_has_eusart4
-  - name: device_has_fefilt
-  - name: device_has_fefilt0
-  - name: device_has_fefilt1
-  - name: device_has_fft
-  - name: device_has_filt
-  - name: device_has_filt1
-  - name: device_has_filt2
-  - name: device_has_frc
-  - name: device_has_frcif
   - name: device_has_fsrco
-  - name: device_has_gen
   - name: device_has_gpcrc
   - name: device_has_gpio
   - name: device_has_hfrco
@@ -199,47 +134,18 @@
   - name: device_has_letimer0
   - name: device_has_lfrco
   - name: device_has_lfxo
-  - name: device_has_map
-  - name: device_has_modem
   - name: device_has_mpahbram
-  - name: device_has_mpcp
-  - name: device_has_mpcp1
-  - name: device_has_mpcp2
   - name: device_has_msc
-  - name: device_has_obiramdtcm
-  - name: device_has_obiramitcm
   - name: device_has_pcnt
   - name: device_has_pcnt0
   - name: device_has_pfmxpprf
-  - name: device_has_prbs
-  - name: device_has_prbs1
-  - name: device_has_prbs2
-  - name: device_has_protimer
   - name: device_has_prs
-  - name: device_has_rac
   - name: device_has_radioaes
-  - name: device_has_rfcrc
-  - name: device_has_rfeca
-  - name: device_has_rfeca0
-  - name: device_has_rfeca1
   - name: device_has_rffpll
   - name: device_has_rffpll0
-  - name: device_has_rfldma
-  - name: device_has_rfmailbox
-  - name: device_has_rfscratchpad
-  - name: device_has_rftimer
-  - name: device_has_rvcfg
-  - name: device_has_rvint
-  - name: device_has_rxf
-  - name: device_has_rxf1
-  - name: device_has_rxf2
   - name: device_has_scratchpad
   - name: device_has_semailbox
-  - name: device_has_smctrl
   - name: device_has_smu
-  - name: device_has_softmmailb
-  - name: device_has_softmspad
-  - name: device_has_synth
   - name: device_has_syscfg
   - name: device_has_sysrtc
   - name: device_has_sysrtc0
@@ -252,8 +158,6 @@
   - name: device_has_timer5
   - name: device_has_timer6
   - name: device_has_timer7
-  - name: device_has_txf
-  - name: device_has_txfront
   - name: device_has_ulfrco
   - name: device_has_usb
   - name: device_has_usbahb
@@ -261,8 +165,6 @@
   - name: device_has_usbpll0
   - name: device_has_vdac
   - name: device_has_vdac0
-  - name: device_has_veq
-  - name: device_has_vit
   - name: device_has_wdog
   - name: device_has_wdog0
   - name: device_has_wdog1
@@ -277,6 +179,8 @@
   - name: device_supports_connect
   - name: device_supports_wisun
   - name: device_compute_basic
+- recommends:
+  - id: trustzone_unaware
 - requires:
   - name: cmsis_core
 - template_contribution:
@@ -319,8 +223,25 @@
     value: cortex-m33
   - option: fpu
     value: fpv5-sp
+  - option: cmse
+    unless:
+    - trustzone_nonsecure
+    value: enabled
 - config_file:
   - condition:
     - custom_radio_config
     directory: rail
     path: platform/Device/config/220/device.yaml
+- metadata:
+    device:
+      memory:
+      - name: Main Flash
+        page_size: 8192
+        size: 1179648
+        start: 134217728
+        type: non-volatile
+      - name: RAM
+        size: 262144
+        start: 536870912
+        type: volatile
+      opn: efr32fg25a111f1152im56

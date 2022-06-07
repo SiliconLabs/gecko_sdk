@@ -12,6 +12,8 @@ requires:
   - name: emlib_prs
 provides:
   - name: fem_util
+conflicts:
+  - name: rail_util_eff
 documentation:
   docset: rail
   document: fem-util

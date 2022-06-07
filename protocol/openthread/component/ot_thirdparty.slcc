@@ -7,6 +7,5 @@ description: This component references to all the third party support needed by 
 provides:
   - name: ot_thirdparty
 requires:
-  - name: ot_psa_crypto
   - name: ot_mbedtls
   - name: segger_rtt

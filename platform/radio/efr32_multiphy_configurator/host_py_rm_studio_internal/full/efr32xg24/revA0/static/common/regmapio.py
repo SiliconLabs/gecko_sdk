@@ -135,7 +135,7 @@ class RegisterMapInterface(IRegMapIO):
     It implements the :class:`pyrmsvd.static.interface.iregmapio.IRegMapIO` interface.
     """
 
-    def __init__(self, Reader, Writer, simulated=False, range_overrides=None):
+    def __init__(self, Reader, Writer, simulated=False, range_overrides=None, Dumper=None):
         """
         Register the reader and writer functions that the top-level
         device class will use for the peripheral register and register
@@ -150,6 +150,8 @@ class RegisterMapInterface(IRegMapIO):
                           register map
         :type range_overrides: list of RegisterRangeOverrides
         :param range_overrides: The optional list of override ranges.
+        :type Dumper: T(<address>)
+        :param Dumper: The read address function pointer for dumping.  To log failed reads.
         """
         # register the reader and writer functions
         self._ReadAddress = Reader
@@ -169,6 +171,10 @@ class RegisterMapInterface(IRegMapIO):
         if range_overrides:
             for override in range_overrides:
                 self.addRegisterRangeOverride(override)
+        if Dumper is None:
+            self._DumpAddress = Reader
+        else:
+            self._DumpAddress = Dumper
 
     def _read(self, address, reg=None):
         # print("Reading address {0:#010x}".format(address))
@@ -213,6 +219,9 @@ class RegisterMapInterface(IRegMapIO):
         if not self.simulated:
             raise RegMapAccessError("Unable to force value in live connection")
         return self._write(reg.baseAddress + reg.addressOffset, value, reg)
+
+    def dumpRegister(self, reg):
+        return self._DumpAddress(reg.baseAddress + reg.addressOffset)
 
     def readRegister(self, reg):
         # Per LABATEPDB-642, allow reads of all access types

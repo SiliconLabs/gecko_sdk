@@ -1,7 +1,8 @@
 id: zw_cc_usercode
 label: User Code Command Class
 category: Z-Wave|Command Classes
-description: User Code Command Class!
+description: >
+  User Code Command Class is used to manage User Codes in access control systems.
 package: Z-Wave
 quality: production
 source:
@@ -14,3 +15,5 @@ provides:
   - name: zw_cc_usercode
 requires:
   - name: zw_core
+documentation:
+  url: "https://sdomembers.z-wavealliance.org/document/dl/638"

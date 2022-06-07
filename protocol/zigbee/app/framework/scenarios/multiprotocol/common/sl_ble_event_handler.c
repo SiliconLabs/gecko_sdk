@@ -792,16 +792,6 @@ void sl_bt_on_event(sl_bt_msg_t* evt)
       emberAfCorePrintln("");
     }
     break;
-    case sl_bt_evt_sm_list_bonding_entry_id: {
-      sl_bt_evt_sm_list_bonding_entry_t * bonding_entry_evt =
-        (sl_bt_evt_sm_list_bonding_entry_t*) &(evt->data);
-      emberAfCorePrint("Bonding handle=0x%x, address type=0x%x, address: ",
-                       bonding_entry_evt->bonding,
-                       bonding_entry_evt->address_type);
-      zb_ble_dmp_print_ble_address(bonding_entry_evt->address.addr);
-      emberAfCorePrintln("");
-    }
-    break;
     case sl_bt_evt_connection_parameters_id: {
       sl_bt_evt_connection_parameters_t* param_evt =
         (sl_bt_evt_connection_parameters_t*) &(evt->data);

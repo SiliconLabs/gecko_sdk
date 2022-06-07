@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2010-2021 Arm Limited or its affiliates. All rights reserved.
+ * Copyright (C) 2010-2021 Arm Limited or its affiliates.
  *
  * SPDX-License-Identifier: Apache-2.0
  *
@@ -28,8 +28,8 @@
  *
  * -------------------------------------------------------------------- */
 
-#include "cmsis/CMSIS/NN/Include/arm_nnfunctions.h"
-#include "cmsis/CMSIS/NN/Include/arm_nnsupportfunctions.h"
+#include "arm_nnfunctions.h"
+#include "arm_nnsupportfunctions.h"
 
 /**
  * @ingroup groupNN
@@ -87,12 +87,21 @@ arm_status arm_svdf_s8(const cmsis_nn_context *input_ctx,
     const int32_t time_batches = weights_time_dims->h;
     const int32_t unit_count = feature_batches / rank;
 
+    if (input_ctx->buf == NULL)
+    {
+        return ARM_MATH_ARGUMENT_ERROR;
+    }
     q31_t *buffer_a = (q31_t *)input_ctx->buf;
+
+    if (output_ctx->buf == NULL)
+    {
+        return ARM_MATH_ARGUMENT_ERROR;
+    }
     q31_t *buffer_b = (q31_t *)output_ctx->buf;
 
     memmove((q15_t *)state_data,
             (q15_t *)state_data + 1,
-            (size_t)(input_batches * feature_batches * time_batches * (int32_t)sizeof(int16_t)));
+            (size_t)((input_batches * feature_batches * time_batches - 1) * (int32_t)sizeof(int16_t)));
 
     for (int i_batch = 0; i_batch < input_batches; i_batch++)
     {

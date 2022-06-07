@@ -1,9 +1,9 @@
 id: mbedtls_rsa_4096
 package: platform
-label: Mbed TLS Support for RSA-4096
+label: RSA-4096
 description: >-
   This component adds support for 4096-bit RSA operations.
-category: Platform|Security
+category: Platform|Security|Mbed TLS|RSA
 quality: alpha
 provides:
   - name: mbedtls_rsa_4096

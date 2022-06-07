@@ -29,9 +29,11 @@
  ******************************************************************************/
 
 #include "em_system.h"
-#include "em_assert.h"
+#include "sl_assert.h"
 #include <stddef.h>
-
+#if defined(SYSCFG_PRESENT)
+#include "em_syscfg.h"
+#endif
 /***************************************************************************//**
  * @addtogroup system
  * @{
@@ -47,6 +49,9 @@
  * bitfield. */
 #define SYSCFG_CHIPREV_PARTNUMBER1  0xFE0
 #define SYSCFG_CHIPREV_PARTNUMBER0  0xF
+
+/* Bit mask to convert NON-SECURE to SECURE */
+#define CONVERT_NS_TO_S (~(1 << 28U))
 
 /** @endcond */
 
@@ -68,7 +73,7 @@ void SYSTEM_ChipRevisionGet(SYSTEM_ChipRevision_TypeDef *rev)
 #if defined(CMU_CLKEN0_SYSCFG)
   CMU->CLKEN0_SET = CMU_CLKEN0_SYSCFG;
 #endif
-  uint32_t chiprev = SYSCFG->CHIPREV;
+  uint32_t chiprev = SYSCFG_readChipRev();
 #if defined(_SYSCFG_CHIPREV_PARTNUMBER_MASK)
   rev->partNumber = ((chiprev & SYSCFG_CHIPREV_PARTNUMBER1) >> 5) | (chiprev & SYSCFG_CHIPREV_PARTNUMBER0);
 #else
@@ -118,6 +123,10 @@ void SYSTEM_ChipRevisionGet(SYSTEM_ChipRevision_TypeDef *rev)
 bool SYSTEM_GetCalibrationValue(volatile uint32_t *regAddress)
 {
   SYSTEM_CalAddrVal_TypeDef * p, * end;
+
+  uint32_t s_regAddress = (uint32_t)regAddress;
+  s_regAddress = s_regAddress & CONVERT_NS_TO_S;
+
 #if defined(MSC_FLASH_CHIPCONFIG_MEM_BASE)
   p   = (SYSTEM_CalAddrVal_TypeDef *)MSC_FLASH_CHIPCONFIG_MEM_BASE;
   end = (SYSTEM_CalAddrVal_TypeDef *)MSC_FLASH_CHIPCONFIG_MEM_END;
@@ -131,7 +140,7 @@ bool SYSTEM_GetCalibrationValue(volatile uint32_t *regAddress)
       /* p->address == 0 marks the end of the table */
       return false;
     }
-    if (p->address == (uint32_t)regAddress) {
+    if (p->address == s_regAddress) {
       *regAddress = p->calValue;
       return true;
     }

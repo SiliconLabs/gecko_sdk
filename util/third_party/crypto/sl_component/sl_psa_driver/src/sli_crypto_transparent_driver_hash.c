@@ -42,7 +42,7 @@
 #include "crypto_management.h"
 #include "em_crypto.h"
 #include "em_core.h"
-#include "em_assert.h"
+#include "sl_assert.h"
 #include <string.h>
 
 // SHA-1, SHA-224 and SHA-256 share the same counter and block sizes, which

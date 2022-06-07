@@ -424,7 +424,6 @@ bool emberAfCalendarServerAddWeekProfInfo(uint32_t issuerCalendarId,
   uint8_t dayIdRefs[7];
   uint8_t dayCount = 7;
   uint8_t * normalDayIndexes;
-  EmberAfCalendarWeekStruct * weeks;
   EmberAfCalendarDayStruct * normalDays;
   uint8_t dayIdRefsIndex;
 
@@ -442,7 +441,6 @@ bool emberAfCalendarServerAddWeekProfInfo(uint32_t issuerCalendarId,
   dayIdRefs[6] = dayIdRefSun;
   normalDays = (EmberAfCalendarDayStruct *)&cal->normalDays;
   normalDayIndexes = (uint8_t *)&cal->weeks[cal->numberOfReceivedWeekProfiles].normalDayIndexes;
-  weeks = &cal->weeks[cal->numberOfReceivedWeekProfiles];
 
   cal->weeks[cal->numberOfReceivedWeekProfiles].id = weekId;
   emberAfCalendarClusterPrintln("Updated: WeekProfile[%d]",

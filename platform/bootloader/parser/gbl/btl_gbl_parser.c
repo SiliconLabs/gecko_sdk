@@ -32,9 +32,8 @@
 #include "security/btl_security_types.h"
 
 #include "core/btl_util.h"
-#if (PARSER_REQUIRE_ANTI_ROLLBACK_PROTECTION == true)
 #include "core/btl_bootload.h"
-#endif
+
 MISRAC_DISABLE
 #include "em_device.h"
 MISRAC_ENABLE
@@ -89,6 +88,12 @@ static int32_t parser_determineGblVersion(ParserContext_t  *parserContext,
 // Parse GBL version 3 header
 static int32_t parser_parseGblHeader(ParserContext_t  *parserContext,
                                      GblInputBuffer_t *input);
+
+#if defined(BTL_PARSER_SUPPORT_VERSION_DEPENDENCY_TAG)
+// Parse GBL version dependency tag
+static int32_t parser_parseVersionDependency(ParserContext_t  *parserContext,
+                                             GblInputBuffer_t *input);
+#endif
 
 // Parse new tag header and update parserContext->internalState accordingly
 static int32_t parser_parseNewTagHeader(ParserContext_t  *parserContext,
@@ -270,6 +275,10 @@ static void gbl_advanceParser(ParserContext_t *context, size_t consumedBytes)
       context->inEncryptedContainer = false;
     }
   }
+#endif
+#if defined(BOOTLOADER_SE_UPGRADE_NO_STAGING) \
+  && (BOOTLOADER_SE_UPGRADE_NO_STAGING == 1)
+  context->offsetInGbl += consumedBytes;
 #endif
   context->offsetInTag += consumedBytes;
 }
@@ -498,6 +507,12 @@ int32_t parser_init(void *context, void *decryptContext, void *authContext, uint
 #if defined(_SILICON_LABS_32B_SERIES_2)
   (void) memset(&(parserContext->certificate), 0, 136U);
   parserContext->gotCertificate = false;
+  parserContext->offsetInGbl = 0UL;
+  parserContext->offsetOfSeUpgradeTag = 0xFFFFFFFFUL; // Representing invalid offset
+
+  parserContext->versionDependencyResultApp        = 1U;
+  parserContext->versionDependencyResultBootloader = 1U;
+  parserContext->versionDependencyResultSe         = 1U;
 #endif
 
   if ((PARSER_REQUIRE_CONFIDENTIALITY) && (decryptContext == NULL)) {
@@ -591,6 +606,14 @@ int32_t parser_parse(void                              *context,
 #endif
         break;
 
+#if defined(BTL_PARSER_SUPPORT_VERSION_DEPENDENCY_TAG)
+      case GblParserStateVersionDependency:
+        retval = parser_parseVersionDependency(parserContext, &input);
+        if (retval != BOOTLOADER_ERROR_PARSER_PARSED) {
+          return retval;
+        }
+        break;
+#endif
       case GblParserStateApplication:
         retval = parser_parseApplicationInfo(parserContext,
                                              &input,
@@ -607,6 +630,11 @@ int32_t parser_parse(void                              *context,
 
 #if defined(SEMAILBOX_PRESENT) || defined(CRYPTOACC_PRESENT)
       case GblParserStateSe:
+#if defined(BOOTLOADER_SE_UPGRADE_NO_STAGING) \
+        && (BOOTLOADER_SE_UPGRADE_NO_STAGING == 1)
+        parserContext->offsetOfSeUpgradeTag = parserContext->offsetInGbl
+                                              - sizeof(GblTagHeader_t);
+#endif
         retval = parser_parseSe(parserContext,
                                 &input,
                                 imageProperties,
@@ -931,6 +959,177 @@ static int32_t parser_parseGblHeader(ParserContext_t  *parserContext,
   return BOOTLOADER_ERROR_PARSER_PARSED;
 }
 
+#if defined(BTL_PARSER_SUPPORT_VERSION_DEPENDENCY_TAG)
+/***************************************************************************//**
+ * Parse and evaluate version dependency statements.
+ * Terminate GBL parsing if any of the encountered version dependency statements
+ * evaluates to false.
+ *
+ * @param[in, out] parserContext Context variable
+ * @param[in] input Input buffer
+ * @returns BOOTLOADER_ERROR_PARSER_PARSED when successfully parsed.
+ *
+ * Updates parserContext->internalState.
+ * Success:   GblParserStateIdle
+ * Otherwise: GblParserStateError
+ ******************************************************************************/
+static int32_t parser_parseVersionDependency(ParserContext_t  *parserContext,
+                                             GblInputBuffer_t *input)
+{
+  volatile int32_t retval;
+  uint8_t tagBuffer[GBL_PARSER_BUFFER_SIZE];
+  const uint32_t numberOfStatements = parserContext->lengthOfTag / sizeof(VersionDependency_t);
+  uint32_t currentStatementNumber = 0UL;
+  uint32_t currentVersion = 0xFFFFFFFFUL;
+
+  uint8_t resultApp        = 1U;
+  uint8_t resultBootloader = 1U;
+  uint8_t resultSe         = 1U;
+  uint8_t *resultPtr       = NULL;
+  uint8_t tmpResult;
+  uint8_t operator, operatorType, operatorNegatorBit;
+  uint8_t connective, connectiveType, connectiveNegatorBit;
+  VersionDependency_t *versionDependency = NULL;
+
+  while (parserContext->offsetInTag < parserContext->lengthOfTag) {
+    // Parse the version dependency structs one-by-one
+    retval = gbl_getData(parserContext,
+                         input,
+                         tagBuffer,
+                         sizeof(VersionDependency_t),
+                         true,
+                         false);
+    if (retval != BOOTLOADER_ERROR_PARSER_PARSED) {
+      return retval;
+    }
+
+    // One VersionDependency_t struct contained in tagBuffer at this point
+    versionDependency = (VersionDependency_t *) tagBuffer;
+
+    switch (versionDependency->imageType) {
+      case GBL_VERSION_DEPENDENCY_TYPE_APPLICATION:
+        if (!bootload_getApplicationVersion(&currentVersion)) {
+          // Set result to false when the application version cannot be read.
+          // This can happen if there is no app present or version information
+          // got corrupted after applying a (bootloader|SE) upgrade also
+          // present in the GBL. These are expected legitimate scenarios and
+          // should just falsify resultApp instead of setting an error state.
+          resultApp = 0U;
+        }
+        resultPtr = &resultApp;
+        break;
+      case GBL_VERSION_DEPENDENCY_TYPE_BOOTLOADER:
+        currentVersion = bootload_getBootloaderVersion();
+        resultPtr = &resultBootloader;
+        break;
+#if defined(SEMAILBOX_PRESENT) || defined(CRYPTOACC_PRESENT)
+      case GBL_VERSION_DEPENDENCY_TYPE_SE:
+        if (!bootload_getSeVersion(&currentVersion)) {
+          parserContext->internalState = GblParserStateError;
+          return BOOTLOADER_ERROR_PARSER_UNEXPECTED;
+        }
+        // Discard compatibility byte before version comparison
+        currentVersion &= GBL_VERSION_DEPENDENCY_SE_VERSION_MASK;
+        resultPtr = &resultSe;
+        break;
+#endif
+      default:
+        parserContext->internalState = GblParserStateError;
+        return BOOTLOADER_ERROR_PARSER_UNEXPECTED; // invalid imageType
+    }
+
+    tmpResult = 0U;
+
+    operator = (versionDependency->statement & GBL_VERSION_DEPENDENCY_OPERATOR_MASK)
+               >> GBL_VERSION_DEPENDENCY_OPERATOR_SHIFT;
+    operatorType       = (operator & GBL_VERSION_DEPENDENCY_OPERATOR_TYPE_MASK);
+    operatorNegatorBit = (operator & GBL_VERSION_DEPENDENCY_OPERATOR_NEGATOR_BIT_MASK);
+
+    connective = (versionDependency->statement & GBL_VERSION_DEPENDENCY_CONNECTIVE_MASK)
+                 >> GBL_VERSION_DEPENDENCY_CONNECTIVE_SHIFT;
+    connectiveType       = (connective & GBL_VERSION_DEPENDENCY_CONNECTIVE_TYPE_MASK);
+    connectiveNegatorBit = (connective & GBL_VERSION_DEPENDENCY_CONNECTIVE_NEGATOR_BIT_MASK);
+
+    switch (operatorType) {
+      case GBL_VERSION_DEPENDENCY_OPERATOR_LT:
+        if (currentVersion < versionDependency->version) {
+          tmpResult = 1U;
+        }
+        break;
+      case GBL_VERSION_DEPENDENCY_OPERATOR_LEQ:
+        if (currentVersion <= versionDependency->version) {
+          tmpResult = 1U;
+        }
+        break;
+      case GBL_VERSION_DEPENDENCY_OPERATOR_EQ:
+        if (currentVersion == versionDependency->version) {
+          tmpResult = 1U;
+        }
+        break;
+      case GBL_VERSION_DEPENDENCY_OPERATOR_GEQ:
+        if (currentVersion >= versionDependency->version) {
+          tmpResult = 1U;
+        }
+        break;
+      case GBL_VERSION_DEPENDENCY_OPERATOR_GT:
+        if (currentVersion > versionDependency->version) {
+          tmpResult = 1U;
+        }
+        break;
+      default:
+        parserContext->internalState = GblParserStateError;
+        return BOOTLOADER_ERROR_PARSER_UNEXPECTED; // invalid operator
+    }
+
+    tmpResult ^= operatorNegatorBit;
+
+    switch (connectiveType) {
+      case GBL_VERSION_DEPENDENCY_CONNECTIVE_AND:
+        *resultPtr &= tmpResult;
+        break;
+      case GBL_VERSION_DEPENDENCY_CONNECTIVE_OR:
+        *resultPtr |= tmpResult;
+        break;
+      default:
+        parserContext->internalState = GblParserStateError;
+        return BOOTLOADER_ERROR_PARSER_UNEXPECTED; // invalid connective
+    }
+
+    *resultPtr ^= connectiveNegatorBit;
+
+    currentStatementNumber++;
+  }
+
+  // Check that all the version dependency statements were indeed parsed.
+  if (currentStatementNumber != numberOfStatements) {
+    parserContext->internalState = GblParserStateError;
+    return BOOTLOADER_ERROR_PARSER_UNEXPECTED;
+  }
+
+  // Fail as early as possible. For storage bootloaders,
+  // things get more complicated as we have to account for GBL files possibly
+  // containing multiple upgrade images, each changing its corresponding
+  // version number after the (app|bootloader|se) upgrade.
+  // In that case, the final evaluation will take place during parser_finalize.
+#if defined(BOOTLOADER_SUPPORT_COMMUNICATION)
+  // Check that all the version dependency statements evaluated to true,
+  // and reject the GBL image otherwise.
+  if ((!resultApp) || (!resultBootloader) || (!resultSe)) {
+    parserContext->internalState = GblParserStateError;
+    return BOOTLOADER_ERROR_PARSER_VERSION;
+  }
+#endif
+
+  parserContext->versionDependencyResultApp        = resultApp;
+  parserContext->versionDependencyResultBootloader = resultBootloader;
+  parserContext->versionDependencyResultSe         = resultSe;
+
+  // Continue with GBL parsing.
+  parserContext->internalState = GblParserStateIdle;
+  return BOOTLOADER_ERROR_PARSER_PARSED;
+}
+#endif // defined(BTL_PARSER_SUPPORT_VERSION_DEPENDENCY_TAG)
+
 /***************************************************************************//**
  * Parse tag header of the next tag to be parsed, coming from an idle state.
  * Update parserContext-internalState with the state corresponding to the tagId.
@@ -1000,9 +1199,17 @@ static int32_t parser_parseNewTagHeader(ParserContext_t  *parserContext,
         }
         parserContext->internalState = GblParserStateFinalize;
         break;
+
+#if defined(SEMAILBOX_PRESENT) || defined(CRYPTOACC_PRESENT)
+      case GBL_TAG_ID_SE_UPGRADE:
+#if defined(BOOTLOADER_SE_UPGRADE_NO_STAGING) \
+        && (BOOTLOADER_SE_UPGRADE_NO_STAGING == 1)
+        parserContext->internalState = GblParserStateSe;
+        break;
+#endif // BOOTLOADER_SE_UPGRADE_NO_STAGING
+#endif // SEMAILBOX_PRESENT
       case GBL_TAG_ID_BOOTLOADER:
       case GBL_TAG_ID_APPLICATION:
-      case GBL_TAG_ID_SE_UPGRADE:
       case GBL_TAG_ID_METADATA:
       case GBL_TAG_ID_PROG:
       case GBL_TAG_ID_ERASEPROG:
@@ -1024,11 +1231,25 @@ static int32_t parser_parseNewTagHeader(ParserContext_t  *parserContext,
 #endif // BTL_PARSER_NO_SUPPORT_ENCRYPTION
 
   switch (gblTagHeader.tagId) {
+#if defined(BTL_PARSER_SUPPORT_VERSION_DEPENDENCY_TAG)
+    case GBL_TAG_ID_VERSION_DEPENDENCY:
+      parserContext->internalState = GblParserStateVersionDependency;
+      break;
+#endif // defined(BTL_PARSER_SUPPORT_VERSION_DEPENDENCY_TAG)
 #if defined(SEMAILBOX_PRESENT) || defined(CRYPTOACC_PRESENT)
     case GBL_TAG_ID_SE_UPGRADE:
+#if !defined(BTL_PARSER_NO_SUPPORT_ENCRYPTION)     \
+      && defined(BOOTLOADER_SE_UPGRADE_NO_STAGING) \
+      && (BOOTLOADER_SE_UPGRADE_NO_STAGING == 1)
+      if ((parserContext->flags & PARSER_FLAG_ENCRYPTED)
+          && parserContext->inEncryptedContainer) {
+        parserContext->internalState = GblParserStateError;
+        return BOOTLOADER_ERROR_PARSER_UNEXPECTED;
+      }
+#endif // BTL_PARSER_NO_SUPPORT_ENCRYPTION, BOOTLOADER_SE_UPGRADE_NO_STAGING
       parserContext->internalState = GblParserStateSe;
       break;
-#endif
+#endif // SEMAILBOX_PRESENT
     case GBL_TAG_ID_BOOTLOADER:
       parserContext->internalState = GblParserStateBootloader;
       break;
@@ -1273,6 +1494,8 @@ static int32_t parser_parseSe(ParserContext_t                   *parserContext,
       // Pass 4 first words to SE upgrade
       if ((callbacks->bootloaderCallback != NULL)) {
         // SE data
+#if !defined(BOOTLOADER_SE_UPGRADE_NO_STAGING) \
+        || (BOOTLOADER_SE_UPGRADE_NO_STAGING == 0)
         callbacks->bootloaderCallback(parserContext->tagAddress,
                                       tagBuffer,
                                       4U,
@@ -1281,6 +1504,7 @@ static int32_t parser_parseSe(ParserContext_t                   *parserContext,
                                       &tagBuffer[8],
                                       8U,
                                       callbacks->context);
+#endif
         parserContext->tagAddress += 16U;
       }
     }
@@ -1527,12 +1751,15 @@ static int32_t parser_parseData(ParserContext_t                   *parserContext
                  && (callbacks->bootloaderCallback != NULL)) {
         // SE data
         // Re-use the bootloader callback
+#if !defined(BOOTLOADER_SE_UPGRADE_NO_STAGING) \
+        || (BOOTLOADER_SE_UPGRADE_NO_STAGING == 0)
         callbacks->bootloaderCallback(parserContext->tagAddress,
                                       tagBuffer,
                                       tmpSize,
                                       callbacks->context);
         parserContext->tagAddress += tmpSize;
-#endif
+#endif // BOOTLOADER_SE_UPGRADE_NO_STAGING
+#endif // SEMAILBOX_PRESENT
       } else {
         // Not a valid tag
       }
@@ -1819,19 +2046,66 @@ static int32_t parser_finalize(ParserContext_t                   *parserContext,
     imageProperties->imageVerified = true;
   }
 
+#if defined(BTL_PARSER_SUPPORT_VERSION_DEPENDENCY_TAG) && defined(BOOTLOADER_SUPPORT_STORAGE)
+  // Version dependency check
+  uint8_t resultApp        = parserContext->versionDependencyResultApp;
+  uint8_t resultBootloader = parserContext->versionDependencyResultBootloader;
+  uint8_t resultSe         = parserContext->versionDependencyResultSe;
+
+  // If the GBL contains an SE or bootloader upgrade image and the running
+  // (SE|bootloader) version matches the one stored in the image, this
+  // indicates that an upgrade has taken place and the version dependency tag
+  // has already been evaluated once.
+  bool skipVersionDependencyCheck = false;
+
+#if defined(SEMAILBOX_PRESENT) || defined(CRYPTOACC_PRESENT)
+  if (parserContext->receivedFlags & BTL_PARSER_RECEIVED_SE) {
+    uint32_t runningSeVersion;
+    if (!bootload_getSeVersion(&runningSeVersion)) {
+      parserContext->internalState = GblParserStateError;
+      return BOOTLOADER_ERROR_PARSER_UNEXPECTED;
+    }
+    if (runningSeVersion == imageProperties->seUpgradeVersion) {
+      skipVersionDependencyCheck = true;
+    }
+  }
+#endif
+  if (parserContext->receivedFlags & BTL_PARSER_RECEIVED_BOOTLOADER) {
+    if (bootload_getBootloaderVersion() == imageProperties->bootloaderVersion) {
+      skipVersionDependencyCheck = true;
+    }
+  }
+
+  if ((skipVersionDependencyCheck == false)
+      && ((!resultApp) || (!resultBootloader) || (!resultSe))) {
+    parserContext->internalState = GblParserStateError;
+    return BOOTLOADER_ERROR_PARSER_VERSION;
+  }
+#endif // defined(BTL_PARSER_SUPPORT_VERSION_DEPENDENCY_TAG) && defined(BOOTLOADER_SUPPORT_STORAGE)
+
   // Flash withheld information now if authenticity was not required
   // or we have verified the signature. CRC is OK, otherwise we'd have
   // errored.
   if (imageProperties->imageVerified) {
-    // We have a bootloader PC/SE length to write
-    if ((parserContext->receivedFlags
-         & (BTL_PARSER_RECEIVED_BOOTLOADER | BTL_PARSER_RECEIVED_SE))
+    // We have a bootloader PC to write
+    if ((parserContext->receivedFlags & BTL_PARSER_RECEIVED_BOOTLOADER)
         && (callbacks->bootloaderCallback != NULL)) {
       callbacks->bootloaderCallback(4UL,
                                     parserContext->withheldBootloaderVectors,
                                     4U,
                                     callbacks->context);
     }
+#if !defined(BOOTLOADER_SE_UPGRADE_NO_STAGING) \
+    || (BOOTLOADER_SE_UPGRADE_NO_STAGING == 0)
+    // We have an SE length to write
+    if ((parserContext->receivedFlags & BTL_PARSER_RECEIVED_SE)
+        && (callbacks->bootloaderCallback != NULL)) {
+      callbacks->bootloaderCallback(4UL,
+                                    parserContext->withheldBootloaderVectors,
+                                    4U,
+                                    callbacks->context);
+    }
+#endif
     // If programmingAddress != 0, we have an application PC to write
     if ((parserContext->programmingAddress != 0UL)
         && (callbacks->applicationCallback != NULL)) {

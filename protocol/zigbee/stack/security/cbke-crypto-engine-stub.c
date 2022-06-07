@@ -23,7 +23,7 @@
 
 CryptoOperation emNextCryptoOperation = NULL_OPERATION;
 uint8_t* partnerEuiBigEndian = NULL;
-// Normally these booleans never change in the stub library. However for testing
+// Normally these bools never change in the stub library. However for testing
 // it is easier to use the stub version of the library, and allow them to be
 // changed.
 EMBER_TEST_EXTERNAL_CONST bool emKeysAuthorizedByDefault  = true;

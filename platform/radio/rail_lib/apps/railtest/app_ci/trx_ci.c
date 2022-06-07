@@ -464,6 +464,17 @@ void setTxStream(sl_cli_command_arg_t *args)
   }
   streamMode = stream;
   enableAppMode(TX_STREAM, enable, sl_cli_get_command_string(args, 0));
+
+#ifdef SL_RAIL_UTIL_EFF_DEVICE
+  // Check if EFF supports Tx
+  if (SL_RAIL_UTIL_EFF_DEVICE == RAIL_EFF_DEVICE_EFF01A12) {
+    /* If configured power is higher than RAIL_UTIL_EFF_MAX_TX_CONTINUOUS_POWER_DBM
+       then it is limited to that latter */
+    responsePrint(sl_cli_get_command_string(args, 0),
+                  "Warning:FEM used so power is limited to %d dBm",
+                  femConfig.PMaxContinuousTx);
+  }
+#endif
 }
 
 void configDirectMode(sl_cli_command_arg_t *args)
@@ -713,9 +724,10 @@ void sleep(sl_cli_command_arg_t *args)
 
     // Configure the USART Rx pin as a GPIO interrupt for sleep-wake purposes,
     // falling-edge only
-    GPIO_IntConfig(VCOM_RX_PORT,
-                   VCOM_RX_PIN,
-                   false, true, true);
+    GPIO_ExtIntConfig(VCOM_RX_PORT,
+                      VCOM_RX_PIN,
+                      VCOM_RX_PIN,
+                      false, true, true);
 
     serEvent = false;
     rxPacketEvent = false;

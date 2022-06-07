@@ -26,7 +26,9 @@ bool emberGpdAfPluginIncomingCommandCallback(uint8_t gpdCommand,
                                              uint8_t length,
                                              uint8_t * commandPayload);
 void emberGpdAfPluginSleepCallback(void);
+#if defined(EMBER_AF_PLUGIN_APPS_MAC_SEQ) && (EMBER_AF_PLUGIN_APPS_MAC_SEQ == EMBER_GPD_MAC_SEQ_RANDOM)
 uint32_t emberGpdAfPluginGetRandomCallback(void);
+#endif
 void emberGpdAfPluginGetGpdIeeeCallback(uint8_t *eui,
                                         uint8_t *gpdEndpoint);
 void emberGpdAfPluginNvInitCallback(void);

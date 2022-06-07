@@ -84,6 +84,15 @@ void spi_setCsActive(void);
 void spi_setCsInactive(void);
 
 /**
+ * Get PPUSATD word of the (E)USART in use.
+ *
+ * @param[out] ppusatdNr PPUSATD register number
+ *
+ * @return The PPUSATD word of the (E)USART in use
+ */
+uint32_t spi_getUsartPPUSATD(uint32_t *ppusatdNr);
+
+/**
  * @} // addtogroup Spi
  * @} // addtogroup Driver
  */

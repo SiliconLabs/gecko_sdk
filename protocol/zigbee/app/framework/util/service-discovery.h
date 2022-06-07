@@ -20,7 +20,7 @@
 #define SILABS_SERVICE_DISCOVERY_H
 
 #include "../include/af.h"
-#define EMBER_SUPPORTED_SERVICE_DISCOVERY_STATES_PER_NETWORK 4
+#define EMBER_SUPPORTED_SERVICE_DISCOVERY_STATES_PER_NETWORK 4u
 // Internal Functions
 void emAfServiceDiscoveryMatched(EmberNodeId nodeId,
                                  uint8_t endpointListLength,
@@ -40,7 +40,7 @@ bool emAfServiceDiscoveryIncoming(EmberNodeId sender,
 void emAfServiceDiscoveryComplete(uint8_t networkIndex, uint8_t sequenceNumber);
 
 #ifndef EMBER_AF_DISCOVERY_TIMEOUT_QS
-  #define EMBER_AF_DISCOVERY_TIMEOUT_QS (2 * 4)
+  #define EMBER_AF_DISCOVERY_TIMEOUT_QS (2u * 4u)
 #endif
 
 #ifdef UC_BUILD

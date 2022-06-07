@@ -25,7 +25,7 @@
 // <i> The maximum noise allowed on a channel to consider for forming a network. For more details, see the "Cut-off value" and "Enable scanning all channels" options in the Network Find plugin.
 #define EMBER_AF_PLUGIN_NETWORK_FIND_SUB_GHZ_CUT_OFF_VALUE   -48
 
-// <o EMBER_AF_PLUGIN_NETWORK_FIND_SUB_GHZ_RADIO_TX_POWER> Sub-GHz radio output power <-30-20>
+// <o EMBER_AF_PLUGIN_NETWORK_FIND_SUB_GHZ_RADIO_TX_POWER> Sub-GHz radio output power <-30..20>
 // <i> Default: 3
 // <i> The radio output power (in dBm) at which the node will operate. Enabling getting the power from a callback in the Network Find plugin overrides this option.
 #define EMBER_AF_PLUGIN_NETWORK_FIND_SUB_GHZ_RADIO_TX_POWER   3

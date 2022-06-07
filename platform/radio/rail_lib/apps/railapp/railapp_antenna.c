@@ -88,8 +88,12 @@ void RAILAPP_SetRfPath(RAIL_AntennaSel_t rfPath)
 #ifdef CLI_INTERFACE
 void CI_SetRfPath(sl_cli_command_arg_t *args)
 {
-  uint32_t rfPath = sl_cli_get_argument_uint32(args, 0);
-  RAILAPP_SetRfPath(rfPath);
-  responsePrint(sl_cli_get_command_string(args, 0), "RfPath:%d", rfPath);
+  if (inRadioState(RAIL_RF_STATE_IDLE, sl_cli_get_command_string(args, 0))) {
+    uint32_t rfPath = sl_cli_get_argument_uint32(args, 0);
+    RAILAPP_SetRfPath(rfPath);
+    responsePrint(sl_cli_get_command_string(args, 0), "RfPath:%d", rfPath);
+  } else {
+    // do nothing
+  }
 }
 #endif

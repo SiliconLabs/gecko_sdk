@@ -149,7 +149,7 @@ template_contribution:
       group: policy
       name: image-req-min-period
       handler: setPolicy
-      help: 
+      help: Sets the Minimum Block Period.
       argument:
       - type: uint16
         help: The minimum block period in milliseconds

@@ -1,6 +1,5 @@
 id: lwip_addons_netconn
 label: "netconn"
-pretty_name : "netconn"
 package: platform
 description: >
   netconn addon.

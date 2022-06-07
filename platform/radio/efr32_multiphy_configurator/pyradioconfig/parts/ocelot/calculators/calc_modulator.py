@@ -77,7 +77,7 @@ class CALC_Modulator_Ocelot(CALC_Modulator):
     def calc_modindex_value(self, model):
         #Overriding this function due to variable name change
 
-        hardmodem_freq_actual = model.vars.hardmodem_freq_actual.value * 1.0
+        modem_frequency_hz = model.vars.modem_frequency_hz.value * 1.0
         modformat = model.vars.modulation_type.value
         freq_dev_hz = model.vars.deviation.value * 1.0
         synth_res = model.vars.synth_res_actual.value
@@ -90,7 +90,7 @@ class CALC_Modulator_Ocelot(CALC_Modulator):
             modindex = freq_dev_hz * 16.0 / (synth_res * shaping_filter_gain * interpolation_gain)
 
         elif modformat == model.vars.modulation_type.var_enum.OQPSK:
-            modindex = hardmodem_freq_actual / (synth_res * 2 * shaping_filter_gain * interpolation_gain)
+            modindex = modem_frequency_hz / (synth_res * 2 * shaping_filter_gain * interpolation_gain)
 
         elif modformat == model.vars.modulation_type.var_enum.OOK or \
                 modformat == model.vars.modulation_type.var_enum.ASK or \

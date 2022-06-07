@@ -28,45 +28,45 @@
   #error "Service discovery is limited to four networks."
 #endif
 
-#define MAX_SIMPLE_DESCRIPTOR_RESPONSE_PAYLOAD                          \
-  (128   /* 802.15.4 MTU */                                             \
-   - 1   /* PHY length byte */                                          \
-   - 11  /* MAC header 9 + 2 byte CRC */                                \
-   - 8   /* NWK header */                                               \
-   - 18  /* NWK security header + 4-byte MIC */                         \
-   - 8   /* APS header */                                               \
-   - EMBER_AF_ZDO_RESPONSE_OVERHEAD                                     \
-   - 3   /* Active Endpoint Response overhead: Address(2), length(1) */ \
+#define MAX_SIMPLE_DESCRIPTOR_RESPONSE_PAYLOAD                           \
+  (128u   /* 802.15.4 MTU */                                             \
+   - 1u   /* PHY length byte */                                          \
+   - 11u  /* MAC header 9 + 2 byte CRC */                                \
+   - 8u   /* NWK header */                                               \
+   - 18u  /* NWK security header + 4-byte MIC */                         \
+   - 8u   /* APS header */                                               \
+   - EMBER_AF_ZDO_RESPONSE_OVERHEAD                                      \
+   - 3u   /* Active Endpoint Response overhead: Address(2), length(1) */ \
   )
 
 #define SIMPLE_DESCRIPTOR_RESPONSE_ENDPOINT_OFFSET \
   (EMBER_AF_ZDO_RESPONSE_OVERHEAD                  \
-   + 2 /* address of interest */                   \
-   + 1 /* length value */                          \
+   + 2u /* address of interest */                  \
+   + 1u /* length value */                         \
   )
 
 #define SIMPLE_DESCRIPTOR_RESPONSE_PROFILE_ID_OFFSET \
   (SIMPLE_DESCRIPTOR_RESPONSE_ENDPOINT_OFFSET        \
-   + 1 /* endpoint */                                \
+   + 1u /* endpoint */                               \
   )
 
 #define SIMPLE_DESCRIPTOR_RESPONSE_DEVICE_ID_OFFSET \
-  (SIMPLE_DESCRIPTOR_RESPONSE_PROFILE_ID_OFFSET + 2)
+  (SIMPLE_DESCRIPTOR_RESPONSE_PROFILE_ID_OFFSET + 2u)
 
 #define SIMPLE_DESCRIPTOR_RESPONSE_INPUT_CLUSTER_LIST_COUNT_INDEX \
   (SIMPLE_DESCRIPTOR_RESPONSE_DEVICE_ID_OFFSET                    \
-   + 2  /* device ID length */                                    \
-   + 1  /* version (4-bits), reserved (4-bits) */                 \
+   + 2u  /* device ID length */                                   \
+   + 1u  /* version (4-bits), reserved (4-bits) */                \
   )
 
 #define SIMPLE_DESCRIPTOR_RESPONSE_INPUT_CLUSTER_LIST_INDEX \
-  (SIMPLE_DESCRIPTOR_RESPONSE_INPUT_CLUSTER_LIST_COUNT_INDEX + 1)
+  (SIMPLE_DESCRIPTOR_RESPONSE_INPUT_CLUSTER_LIST_COUNT_INDEX + 1u)
 
 #define MAX_CLUSTERS_IN_ACTIVE_ENDPOINT_RESPONSE (MAX_SIMPLE_DESCRIPTOR_RESPONSE_PAYLOAD >> 1)
 
 #define ACTIVE_ENDPOINT_RESPONSE_COUNT_OFFSET \
   (EMBER_AF_ZDO_RESPONSE_OVERHEAD             \
-   + 2) // Address of Interest
+   + 2u) // Address of Interest
 
 //==============================================================================
 // Service discovery state machine
@@ -104,26 +104,26 @@ typedef struct {
 static ServiceDiscoveryState states[EMBER_SUPPORTED_SERVICE_DISCOVERY_STATES_PER_NETWORK][EMBER_SUPPORTED_NETWORKS];
 static uint8_t stateLimit = EMBER_SUPPORTED_SERVICE_DISCOVERY_STATES_PER_NETWORK;
 static bool statesInitialized = false;
-#define UNICAST_QUERY_BIT (0x8000)
+#define UNICAST_QUERY_BIT (0x8000u)
 #define isUnicastQuery(state) (UNICAST_QUERY_BIT == ((state)->requestData & UNICAST_QUERY_BIT))
 #define setUnicastQuery(state) ((state)->requestData |= UNICAST_QUERY_BIT)
 #define getRequestCluster(state) ((state)->requestData & ~UNICAST_QUERY_BIT)
 #define serviceDiscoveryInProgress(state) ((state)->active)
 
 // seq. number (1), status (1), address (2), length (1)
-#define MATCH_DESCRIPTOR_OVERHEAD               5
+#define MATCH_DESCRIPTOR_OVERHEAD               5u
 #define MINIMUM_MATCH_DESCRIPTOR_SUCCESS_LENGTH MATCH_DESCRIPTOR_OVERHEAD
 
 // seq. number (1), status (1)
-#define EMBER_AF_ZDO_RESPONSE_OVERHEAD 2
+#define EMBER_AF_ZDO_RESPONSE_OVERHEAD 2u
 // EUI64 (8), node ID (2),
-#define MINIMUM_ADDRESS_REQEUST_SUCCESS (EMBER_AF_ZDO_RESPONSE_OVERHEAD + 10)
+#define MINIMUM_ADDRESS_REQEUST_SUCCESS (EMBER_AF_ZDO_RESPONSE_OVERHEAD + 10u)
 #define ADDRESS_RESPONSE_NODE_ID_OFFSET (EMBER_AF_ZDO_RESPONSE_OVERHEAD + EUI64_SIZE)
 
 // Address (2), EP Count (1)
-#define MINIMUM_ACTIVE_ENDPOINT_RESPONSE (EMBER_AF_ZDO_RESPONSE_OVERHEAD + 3)
+#define MINIMUM_ACTIVE_ENDPOINT_RESPONSE (EMBER_AF_ZDO_RESPONSE_OVERHEAD + 3u)
 #define ACTIVE_ENDPOINT_RESPONSE_NODE_ID_OFFSET (EMBER_AF_ZDO_RESPONSE_OVERHEAD)
-#define ACTIVE_ENDPOINT_RESPONSE_LIST_OFFSET (ACTIVE_ENDPOINT_RESPONSE_NODE_ID_OFFSET + 3)
+#define ACTIVE_ENDPOINT_RESPONSE_LIST_OFFSET (ACTIVE_ENDPOINT_RESPONSE_NODE_ID_OFFSET + 3u)
 
 #define PREFIX "Svc Disc: "
 
@@ -157,7 +157,7 @@ void emAfServiceDiscoveryInitEventsCallback(SLXU_INIT_ARG)
   SLXU_INIT_UNUSED_ARG;
 
   uint8_t i;
-  for (i = 0; i < EMBER_SUPPORTED_SERVICE_DISCOVERY_STATES_PER_NETWORK; i++) {
+  for (i = 0u; i < EMBER_SUPPORTED_SERVICE_DISCOVERY_STATES_PER_NETWORK; i++) {
     sl_zigbee_network_event_init(emAfServiceDiscoveryEvents[i],
                                  emAfServiceDiscoveryTimeoutHandler);
   }
@@ -282,7 +282,7 @@ EmberStatus emberAfFindIeeeAddress(EmberNodeId shortAddress,
 
   status = emberIeeeAddressRequest(shortAddress,
                                    false,         // report kids?
-                                   0,             // child start index
+                                   0u,            // child start index
                                    EMBER_APS_OPTION_RETRY);
   // Get the sequence number sent in the request.
   // For SoC, most requests use the application layer's half
@@ -323,7 +323,7 @@ EmberStatus emberAfFindNodeId(EmberEUI64 longAddress,
 
   status = emberNetworkAddressRequest(longAddress,
                                       false,         // report kids?
-                                      0);            // child start index
+                                      0u);           // child start index
   // Get the sequence number sent in the request.
   // For SoC, most requests use the application layer's half
   // of the sequence numbering space (0x00-0x7f), but this request
@@ -484,7 +484,7 @@ static bool processMatchDescriptorResponse(ServiceDiscoveryState *state,
 
   emberAfServiceDiscoveryPrintln("%pMatch%p found from 0x%2x.",
                                  PREFIX,
-                                 (listLength > 0
+                                 (listLength > 0u
                                   ? ""
                                   : " NOT"),
                                  matchId);
@@ -518,9 +518,9 @@ static bool processSimpleDescriptorResponse(ServiceDiscoveryState *state,
   EmberAfClusterList clusterList;
 
   clusterList.profileId = message[SIMPLE_DESCRIPTOR_RESPONSE_PROFILE_ID_OFFSET]
-                          + (message[SIMPLE_DESCRIPTOR_RESPONSE_PROFILE_ID_OFFSET + 1] << 8);
+                          + (message[SIMPLE_DESCRIPTOR_RESPONSE_PROFILE_ID_OFFSET + 1u] << 8);
   clusterList.deviceId = message[SIMPLE_DESCRIPTOR_RESPONSE_DEVICE_ID_OFFSET]
-                         + (message[SIMPLE_DESCRIPTOR_RESPONSE_DEVICE_ID_OFFSET + 1] << 8);
+                         + (message[SIMPLE_DESCRIPTOR_RESPONSE_DEVICE_ID_OFFSET + 1u] << 8);
   clusterList.endpoint = message[SIMPLE_DESCRIPTOR_RESPONSE_ENDPOINT_OFFSET];
 
   // Copying the cluster list to a separate array
@@ -534,31 +534,31 @@ static bool processSimpleDescriptorResponse(ServiceDiscoveryState *state,
   clusterList.inClusterCount = message[SIMPLE_DESCRIPTOR_RESPONSE_INPUT_CLUSTER_LIST_COUNT_INDEX];
   // The +1 is for the input cluster count length.
   clusterList.outClusterCount = message[SIMPLE_DESCRIPTOR_RESPONSE_INPUT_CLUSTER_LIST_COUNT_INDEX
-                                        + 1 + (clusterList.inClusterCount * 2)];
+                                        + 1u + (clusterList.inClusterCount * 2u)];
 
-  if ((length - index - 1) % 2 != 0) {  // subtract 1 for the output cluster count.
+  if ((length - index - 1u) % 2u != 0u) {  // subtract 1 for the output cluster count.
     emberAfServiceDiscoveryPrintln("Error: %p bad simple descriptor length.", PREFIX);
     // Return true because we still tried to process the message.
     return true;
   }
   uint8_t loop;
   uint8_t clusterIndex = 0;
-  for (loop = 0; loop < 2; loop++) {
+  for (loop = 0u; loop < 2u; loop++) {
     uint8_t count;
     uint8_t i;
-    if (loop == 0) {
+    if (loop == 0u) {
       clusterList.inClusterList = &(clusters[clusterIndex]);
       count = clusterList.inClusterCount;
     } else {
       clusterList.outClusterList = &(clusters[clusterIndex]);
       count = clusterList.outClusterCount;
     }
-    for (i = 0; i < count; i++) {
-      clusters[clusterIndex] = message[index] + (message[index + 1] << 8);
+    for (i = 0u; i < count; i++) {
+      clusters[clusterIndex] = message[index] + (message[index + 1u] << 8);
       clusterIndex++;
-      index += 2;
+      index += 2u;
     }
-    if (loop == 0) {
+    if (loop == 0u) {
       // This is the output cluster count
       index++;
     }
@@ -594,7 +594,7 @@ static bool processAddressResponse(ServiceDiscoveryState *state,
                    ? EMBER_AF_UNICAST_SERVICE_DISCOVERY_COMPLETE_WITH_RESPONSE
                    : EMBER_AF_BROADCAST_SERVICE_DISCOVERY_COMPLETE_WITH_RESPONSE);
   result.matchAddress = (message[ADDRESS_RESPONSE_NODE_ID_OFFSET]
-                         + (message[ADDRESS_RESPONSE_NODE_ID_OFFSET + 1] << 8));
+                         + (message[ADDRESS_RESPONSE_NODE_ID_OFFSET + 1u] << 8));
   result.zdoRequestClusterId = getRequestCluster(state);
   result.responseData = eui64LittleEndian;
 
@@ -613,11 +613,11 @@ static bool processActiveEndpointResponse(ServiceDiscoveryState* state,
     return true;
   }
   result.matchAddress = (message[ACTIVE_ENDPOINT_RESPONSE_NODE_ID_OFFSET]
-                         + (message[ACTIVE_ENDPOINT_RESPONSE_NODE_ID_OFFSET + 1] << 8));
+                         + (message[ACTIVE_ENDPOINT_RESPONSE_NODE_ID_OFFSET + 1u] << 8));
   uint8_t count = message[ACTIVE_ENDPOINT_RESPONSE_COUNT_OFFSET];
 
   // +1 for count value iteslf, +2 for node ID
-  uint8_t expectedLength = EMBER_AF_ZDO_RESPONSE_OVERHEAD + 1 + 2 + count;
+  uint8_t expectedLength = EMBER_AF_ZDO_RESPONSE_OVERHEAD + 1u + 2u + count;
 
   if (expectedLength != length) {
     emberAfServiceDiscoveryPrintln("Error: %p invalid length (%d != %d) for Active Endpoint response",
@@ -689,8 +689,8 @@ bool emAfServiceDiscoveryIncoming(EmberNodeId sender,
 static void firstTimeInitStates(void)
 {
   if (!statesInitialized) {
-    for (uint8_t si = 0; si < stateLimit; ++si) {
-      for (uint8_t ni = 0; ni < EMBER_SUPPORTED_NETWORKS; ++ni) {
+    for (uint8_t si = 0u; si < stateLimit; ++si) {
+      for (uint8_t ni = 0u; ni < EMBER_SUPPORTED_NETWORKS; ++ni) {
         ServiceDiscoveryState *state = &states[si][ni];
         // Coordinates of this state entry, for convenient reference.
         state->stateIndex = si;
@@ -698,8 +698,8 @@ static void firstTimeInitStates(void)
         // Operational state.
         state->active = false;
         state->callback = NULL;
-        state->requestData = 0;
-        state->requestSequence = 0;
+        state->requestData = 0u;
+        state->requestSequence = 0u;
       }
     }
     // Do this only once.
@@ -716,7 +716,7 @@ static void firstTimeInitStates(void)
 static ServiceDiscoveryState *findUnusedState(void)
 {
   firstTimeInitStates();
-  for (int si = 0; si < stateLimit; si++) {
+  for (int si = 0u; si < stateLimit; si++) {
     if (!states[si][emberGetCurrentNetwork()].active) {
       return &states[si][emberGetCurrentNetwork()];
     }
@@ -732,7 +732,7 @@ static ServiceDiscoveryState *findUnusedState(void)
 static ServiceDiscoveryState *findStateForResponse(uint8_t sequenceNumber, uint8_t networkIndex)
 {
   firstTimeInitStates();
-  for (int si = 0; si < stateLimit; si++) {
+  for (int si = 0u; si < stateLimit; si++) {
     if (states[si][networkIndex].requestSequence == sequenceNumber
         && states[si][networkIndex].active) {
       return &states[si][networkIndex];
@@ -750,8 +750,8 @@ static ServiceDiscoveryState *findStateForResponse(uint8_t sequenceNumber, uint8
 static ServiceDiscoveryState *find_state_for_event_control(sl_zigbee_event_t *event)
 {
   firstTimeInitStates();
-  for (uint8_t si = 0; si < stateLimit; si++) {
-    for (uint8_t ni = 0; ni < EMBER_SUPPORTED_NETWORKS; ni++) {
+  for (uint8_t si = 0u; si < stateLimit; si++) {
+    for (uint8_t ni = 0u; ni < EMBER_SUPPORTED_NETWORKS; ni++) {
       if (event == &emAfServiceDiscoveryEvents[si][ni]) {
         return &states[si][ni];
       }
@@ -763,8 +763,8 @@ static ServiceDiscoveryState *find_state_for_event_control(sl_zigbee_event_t *ev
 static ServiceDiscoveryState *findStateForEventControl(EmberEventControl *control)
 {
   firstTimeInitStates();
-  for (uint8_t si = 0; si < stateLimit; si++) {
-    for (uint8_t ni = 0; ni < EMBER_SUPPORTED_NETWORKS; ni++) {
+  for (uint8_t si = 0u; si < stateLimit; si++) {
+    for (uint8_t ni = 0u; ni < EMBER_SUPPORTED_NETWORKS; ni++) {
       if (control == &emAfServiceDiscoveryEventControls[si][ni]) {
         return &states[si][ni];
       }
@@ -780,7 +780,7 @@ static ServiceDiscoveryState *findStateForEventControl(EmberEventControl *contro
 static bool isStateActiveInCurrentNetwork(void)
 {
   uint8_t currentNetwork = emberGetCurrentNetwork();
-  for (uint8_t si = 0; si < stateLimit; si++) {
+  for (uint8_t si = 0u; si < stateLimit; si++) {
     if (states[si][currentNetwork].active) {
       return true;
     }

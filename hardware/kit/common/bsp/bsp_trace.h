@@ -66,7 +66,7 @@ void BSP_TraceEtmSetup(void);
 #if defined(GPIO_ROUTE_SWOPEN) || defined(_GPIO_ROUTEPEN_SWVPEN_MASK) \
   || defined(GPIO_TRACEROUTEPEN_SWVPEN)
 bool BSP_TraceProfilerSetup(void);
-void BSP_TraceSwoSetup(void);
+void BSP_TraceSwoSetup(void) SL_DEPRECATED_API_SDK_4_1;
 #endif
 
 #ifdef __cplusplus

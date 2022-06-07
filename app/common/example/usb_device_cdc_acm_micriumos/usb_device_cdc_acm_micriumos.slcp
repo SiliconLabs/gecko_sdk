@@ -6,6 +6,13 @@ description: >
   This example uses the USB stack with the Micrium OS kernel to create a COM port on your PC. 
   Once connected on the port using a terminal tool, a menu is displayed and lets you echo any character you typed in.
 category: Example|Platform
+filter:
+  - name: "Device Type"
+    value: ["SoC"]
+  - name: "MCU"
+    value: ["32-bit MCU"]
+  - name: "Project Difficulty"
+    value: ["Advanced"]
 source:
   - path: app.c
   - path: main.c
@@ -26,6 +33,8 @@ component:
 define:
   - name: DEBUG_EFM
 readme:
-  - path: "readme.html"
+  - path: readme.md
 tag:
   - hardware:component:usb
+ui_hints:
+  highlight: readme.md

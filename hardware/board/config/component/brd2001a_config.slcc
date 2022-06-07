@@ -34,35 +34,35 @@
       file_id: btl_uart_driver_cfg
     path: brd2001a/btl_uart_driver_cfg.h
   - override:
-      component: cpc_primary_driver_spi
+      component: cpc_primary_driver_spi_usart
       file_id: cpc_drv_spi_primary_config
       instance: exp
-    path: brd2001a/sl_cpc_drv_spi_primary_exp_config.h
+    path: brd2001a/sl_cpc_drv_primary_spi_usart_exp_config.h
   - override:
-      component: cpc_primary_driver_uart
+      component: cpc_primary_driver_uart_usart
       file_id: cpc_drv_uart_primary_config
       instance: vcom
-    path: brd2001a/sl_cpc_drv_uart_primary_vcom_config.h
+    path: brd2001a/sl_cpc_drv_primary_uart_usart_vcom_config.h
   - override:
-      component: cpc_primary_driver_uart
+      component: cpc_primary_driver_uart_usart
       file_id: cpc_drv_uart_primary_config
       instance: exp
-    path: brd2001a/sl_cpc_drv_uart_primary_exp_config.h
+    path: brd2001a/sl_cpc_drv_primary_uart_usart_exp_config.h
   - override:
-      component: cpc_secondary_driver_spi
-      file_id: cpc_drv_spi_secondary_config
+      component: cpc_secondary_driver_spi_usart
+      file_id: cpc_drv_secondary_spi_usart_config
       instance: exp
-    path: brd2001a/sl_cpc_drv_spi_secondary_exp_config.h
+    path: brd2001a/sl_cpc_drv_secondary_spi_usart_exp_config.h
   - override:
-      component: cpc_secondary_driver_uart
-      file_id: cpc_drv_uart_secondary_config
+      component: cpc_secondary_driver_uart_usart
+      file_id: cpc_drv_secondary_uart_usart_config
       instance: vcom
-    path: brd2001a/sl_cpc_drv_uart_secondary_vcom_config.h
+    path: brd2001a/sl_cpc_drv_secondary_uart_usart_vcom_config.h
   - override:
-      component: cpc_secondary_driver_uart
-      file_id: cpc_drv_uart_secondary_config
+      component: cpc_secondary_driver_uart_usart
+      file_id: cpc_drv_secondary_uart_usart_config
       instance: exp
-    path: brd2001a/sl_cpc_drv_uart_secondary_exp_config.h
+    path: brd2001a/sl_cpc_drv_secondary_uart_usart_exp_config.h
   - override:
       component: device_init_lfxo
       file_id: device_init_lfxo_config

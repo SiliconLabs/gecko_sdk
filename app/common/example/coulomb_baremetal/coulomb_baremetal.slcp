@@ -5,6 +5,13 @@ label: Platform - Coulomb Counter Bare-metal
 description: >
   This example project shows how to use coulomb counter in a bare-metal configuration.
 category: Example|Platform
+filter:
+  - name: "Device Type"
+    value: ["SoC"]
+  - name: "MCU"
+    value: ["32-bit MCU"]
+  - name: "Project Difficulty"
+    value: ["Beginner"]
 source:
   - path: app.c
   - path: main.c
@@ -69,4 +76,6 @@ template_contribution:
       handler: coulomb_app_reset_total
       help: "Reset total counter to zero."
 readme:
-  - path: readme.html
+  - path: readme.md
+ui_hints:
+  highlight: readme.md

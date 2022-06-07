@@ -1,11 +1,23 @@
-Gecko Platform 4.0.2.0
-- Peripherals: Added support for the IADC input (as positive or negative inputs) for DAC 0/1 and PADANA 0/1/2/3
-- Gecko Bootloader: Added support for MX25R3235F SPI flash part
-- Boards and External Devices: Added support for new OPNs BRD4330A and BRD4331A
-- RAIL library:
-  - Added support for EFR32xG24
-  - Added a new component to enable the built-in PHYs to operate with either 38.4 MHz or 39 MHz crystals on EFR32xG24 devices
-  - Added support for additional IEEE 802.15.4 CCA modes on platforms that support signal detection (EFR32xG24)
-  - Added support for IEEE 802.15.4 and Bluetooth LE Signal Identifier hardware on the EFR32xG24 (tested to alpha quality)
-- Other quality improvements and bug fixes throughout.
+Gecko Platform 4.1.0.0
+
+- Initial release of CPC
+- Added support for EFR32xG24; MGM240, EFR32MR21 and FGM230
+- Several code size improvements related to Power Manager, HFXO Manager and em_crypto
+
+- Tools and Dependencies
+  - Updated compiler support to GCC 10.3-2021.10 and IAR 9.20.4
+  - Updated CMSIS to version 5.8.0
+  
+- Drivers
+  - Added a new component to synchronize UART/PTI settings between WSTK mainboard and the radio board
+  - Added support for Analog Joystick driver to use the joystick functionality on mainboard v2
+
+- Security
+  - Mbed TLS is updated to version 3.1.0
+  - Added software support for TrustZone, BETA quality
+
+- Bootloader
+  - Jedec driver support for external SPI flash 
+  - Added a new bootloader sample application for devices with external SPI flash
+
 

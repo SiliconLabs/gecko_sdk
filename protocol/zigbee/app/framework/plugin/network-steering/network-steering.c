@@ -338,8 +338,6 @@ void tryToJoinNetwork(void)
 //Description: Generates a random number between 10000-40000.
 static uint32_t jitterTimeDelayMs()
 {
-  uint16_t seed;
-  halStackSeedRandom((uint32_t)&seed);
   uint32_t jitterDelayMs = (emberGetPseudoRandomNumber() % (UPDATE_TC_LINK_KEY_JITTER_MAX_MS - UPDATE_TC_LINK_KEY_JITTER_MIN_MS + 1)) + UPDATE_TC_LINK_KEY_JITTER_MIN_MS;
   return jitterDelayMs;
 }
@@ -387,16 +385,16 @@ bool emIsWellKnownKey(EmberKeyData key)
   return true;
 }
 
-static void scanCompleteCallback(uint8_t channel, EmberStatus status)
+static void scanCompleteCallback(uint8_t channel, sl_status_t status)
 {
-  if (status != EMBER_SUCCESS) {
-    emberAfCorePrintln("Error: Scan complete handler returned 0x%X", status);
-  }
-
-  // EMAPPFWKV2-1462 - make sure we didn't cleanupAndStop() above.
-  if (emAfPluginNetworkSteeringState
-      != EMBER_AF_PLUGIN_NETWORK_STEERING_STATE_NONE) {
-    tryToJoinNetwork();
+  if (status != SL_STATUS_OK) {
+    emberAfCorePrintln("Error: Scan complete handler returned 0x%X on %d", status, channel);
+  } else {   // when scan is over, we always return with success
+    // EMAPPFWKV2-1462 - make sure we didn't cleanupAndStop() above.
+    if (emAfPluginNetworkSteeringState
+        != EMBER_AF_PLUGIN_NETWORK_STEERING_STATE_NONE) {
+      tryToJoinNetwork();
+    }
   }
 }
 
@@ -444,7 +442,7 @@ HIDDEN void scanResultsHandler(EmberAfPluginScanDispatchScanResults *results)
   if (emberAfPluginScanDispatchScanResultsAreComplete(results)
       || emberAfPluginScanDispatchScanResultsAreFailure(results)) {
     scanCompleteCallback(results->channel, results->status);
-  } else {
+  } else if (results->network && results->network->panId != EMBER_AF_INVALID_PAN_ID) {
     networkFoundCallback(results->network,
                          results->lqi,
                          results->rssi);
@@ -587,7 +585,7 @@ static EmberStatus setupSecurity(void)
 EmberStatus emberAfPluginNetworkSteeringStart(void)
 {
   EmberStatus status = EMBER_INVALID_CALL;
-  emberAfAddToCurrentAppTasksCallback(EMBER_AF_WAITING_FOR_TC_KEY_UPDATE); // to force sleepy device do short poll
+  emberAfAddToCurrentAppTasksCallback(EMBER_AF_WAITING_FOR_TC_KEY_UPDATE);     // to force sleepy device do short poll
   if (emAfProIsCurrentNetwork()
       && (emAfPluginNetworkSteeringState
           == EMBER_AF_PLUGIN_NETWORK_STEERING_STATE_NONE)) {
@@ -602,7 +600,7 @@ EmberStatus emberAfPluginNetworkSteeringStart(void)
       status = stateMachineRun();
     } else {
       status = emberAfPermitJoin(EMBER_AF_PLUGIN_NETWORK_STEERING_COMMISSIONING_TIME_S,
-                                 true); // Broadcast permit join?
+                                 true);     // Broadcast permit join?
     }
   }
 
@@ -657,7 +655,7 @@ void emberAfPluginNetworkSteeringFinishSteeringEventHandler(SLXU_UC_EVENT)
     // Broadcast permit join to extend the network.
     // We are done!
     status = emberAfPermitJoin(EMBER_AF_PLUGIN_NETWORK_STEERING_COMMISSIONING_TIME_S,
-                               true); // Broadcast permit join?
+                               true);     // Broadcast permit join?
     emberAfCorePrintln("%p: %p: 0x%X",
                        PLUGIN_NAME,
                        "Broadcasting permit join",

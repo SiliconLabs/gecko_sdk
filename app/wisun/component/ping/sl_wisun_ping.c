@@ -139,7 +139,7 @@ static  const osThreadAttr_t _ping_task_attr = {
   .cb_size     = sizeof(_ping_task_cb),
   .stack_mem   = _ping_stack,
   .stack_size  = PING_STACK_SIZE_BYTES,
-  .priority    = osPriorityNormal,
+  .priority    = osPriorityNormal2,
   .tz_module   = 0
 };
 
@@ -452,10 +452,10 @@ static void _ping_task_fnc(void *args)
     } else {
       resp.lost = true;
     }
-    
+
     resp.stop_time_stamp = sl_sleeptimer_get_tick_count();
     resp.response_time_ms = sl_sleeptimer_tick_to_ms(resp.stop_time_stamp - resp.start_time_stamp);
-    
+
     close(_sockid);
     _ping_mutex_release(); // unlock()
 

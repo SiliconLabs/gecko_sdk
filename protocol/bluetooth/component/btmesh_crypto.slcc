@@ -98,5 +98,14 @@ requires:
   - name: "mbedtls_sha1"
     condition:
       - "device_series_1"
+  - name: "btmesh_feature_crypto_key_cache"
+    condition:
+      - "device_series_2"
+    unless:
+      - "trustzone_nonsecure"
+  - name: "btmesh_feature_crypto_key_cache_dummy"
+    condition:
+      - "device_series_2"
+      - "trustzone_nonsecure"
 provides:
   - name: "btmesh_crypto"

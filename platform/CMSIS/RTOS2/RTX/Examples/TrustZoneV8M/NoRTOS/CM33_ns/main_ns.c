@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2013-2016 ARM Limited. All rights reserved.
+ * Copyright (c) 2013-209 ARM Limited. All rights reserved.
  *
  * SPDX-License-Identifier: Apache-2.0
  *
@@ -23,7 +23,7 @@
  *    Initial Release
  *---------------------------------------------------------------------------*/
 
-#include "..\CM33_s\interface.h"        // Interface API
+#include "interface.h"        // Interface API
 
 extern volatile int val1, val2;
 volatile int val1, val2;

@@ -5,6 +5,13 @@ label: Platform - I2C Simple Polled Master on FreeRTOS Kernel
 description: > 
   This example project demonstrates how to use the I2C Simple Polled Master driver using the Si7021 Relative Humidity and Temperature Sensor in a FreeRTOS kernel task.
 category: Example|Platform
+filter:
+  - name: "Device Type"
+    value: ["SoC"]
+  - name: "MCU"
+    value: ["32-bit MCU"]
+  - name: "Project Difficulty"
+    value: ["Beginner"]
 source:
   - path: app.c
   - path: main.c
@@ -30,10 +37,12 @@ component:
 define:
   - name: DEBUG_EFM
 readme:
-  - path: "readme.html"
+  - path: readme.md
+ui_hints:
+  highlight: readme.md
 tag:
   - hardware:component:led:2+
-  - hardware:component:sensor:si7021 
+  - hardware:component:sensor:si7021
 configuration:
   - name: SL_BOARD_ENABLE_VCOM
     value: 1

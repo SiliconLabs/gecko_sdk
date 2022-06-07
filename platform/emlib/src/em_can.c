@@ -29,8 +29,8 @@
  ******************************************************************************/
 
 #include "em_can.h"
-#include "em_common.h"
-#include "em_assert.h"
+#include "sl_common.h"
+#include "sl_assert.h"
 #include "em_cmu.h"
 #include <stddef.h>
 

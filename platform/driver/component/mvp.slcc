@@ -19,6 +19,7 @@ source:
   - path: src/sl_mvp_power.c
   - path: src/sl_mvp_math.c
   - path: src/sl_mvp_util.c
+  - path: src/sl_mvp_program_area.c
   - path: src/sl_mvp_ml_add.c
   - path: src/sl_mvp_ml_fully_connected.c
   - path: src/sl_mvp_ml_pooling.c
@@ -35,6 +36,7 @@ include:
       - path: sl_mvp_types.h
       - path: sl_mvp_math.h
       - path: sl_mvp_util.h
+      - path: sl_mvp_program_area.h
       - path: sl_mvp_ml_add.h
       - path: sl_mvp_ml_fully_connected.h
       - path: sl_mvp_ml_pooling.h
@@ -52,6 +54,8 @@ requires:
 toolchain_settings:
   - option: fp16
     value: enabled
+  - option: gcc_compiler_option
+    value: -mfp16-format=ieee
 template_contribution:
   - name: component_catalog
     value: mvp

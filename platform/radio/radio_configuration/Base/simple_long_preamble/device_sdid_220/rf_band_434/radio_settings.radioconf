@@ -184,6 +184,10 @@
           <value>int:1</value>
         </input>
         <input>
+          <key>FPLL_BAND</key>
+          <value>null</value>
+        </input>
+        <input>
           <key>FRAME_BITENDIAN</key>
           <value>serializableObject:EnumDataItem:0</value>
         </input>
@@ -445,7 +449,7 @@
         </input>
         <input>
           <key>SYNCWORD_1</key>
-          <value>long:28494</value>
+          <value>long:36942</value>
         </input>
         <input>
           <key>SYNCWORD_LENGTH</key>

@@ -59,7 +59,24 @@
 #elif defined(BGM240PB32VNN)
 #include "bgm240pb32vnn.h"
 
+#elif defined(BGM240SA22VNA)
+#include "bgm240sa22vna.h"
+
+#elif defined(BGM240SB22VNA)
+#include "bgm240sb22vna.h"
+
+#elif defined(BGM241SB22VNA)
+#include "bgm241sb22vna.h"
+
 #else
 #error "em_device.h: PART NUMBER undefined"
+#endif
+
+#if defined(SL_CATALOG_TRUSTZONE_SECURE_CONFIG_PRESENT) && defined(SL_TRUSTZONE_NONSECURE)
+#error "Can't define SL_CATALOG_TRUSTZONE_SECURE_CONFIG_PRESENT and SL_TRUSTZONE_NONSECURE MACRO at the same time."
+#endif
+
+#if defined(SL_TRUSTZONE_SECURE) && defined(SL_TRUSTZONE_NONSECURE)
+#error "Can't define SL_TRUSTZONE_SECURE and SL_TRUSTZONE_NONSECURE MACRO at the same time."
 #endif
 #endif /* EM_DEVICE_H */

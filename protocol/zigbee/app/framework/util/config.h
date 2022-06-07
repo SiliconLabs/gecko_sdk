@@ -52,6 +52,10 @@
 #include "sl_component_catalog.h"
 #include "zigbee_device_config.h"
 
+#ifdef  SL_CATALOG_ZIGBEE_FRAGMENTATION_PRESENT
+#include "fragmentation-config.h"
+#endif
+
 #if (SLI_ZIGBEE_DEFAULT_NETWORK == SLI_ZIGBEE_DEFAULT_NETWORK_PRIMARY)
 #define EMBER_AF_DEFAULT_NETWORK_INDEX 0
 #else
@@ -130,8 +134,8 @@
 #define ZA_ROUTER 2
 #define ZA_END_DEVICE 3
 #define ZA_SLEEPY_END_DEVICE 4
-#define ZA_WIREFREE_INITIATOR_DEVICE 5
-#define ZA_WIREFREE_TARGET_DEVICE 6
+#define ZA_S2S_INITIATOR_DEVICE 5
+#define ZA_S2S_TARGET_DEVICE 6
 #endif // UC_BUILD
 
 #define CBA_PROFILE_ID (0x0105)
@@ -213,7 +217,7 @@
 // as responses.
 // Maximum payload length.
 // If fragmenation is enabled, and fragmentation length is bigger than default, then use that
-#if defined(EMBER_AF_PLUGIN_FRAGMENTATION) \
+#if (defined(EMBER_AF_PLUGIN_FRAGMENTATION) || defined(SL_CATALOG_ZIGBEE_FRAGMENTATION_PRESENT)) \
   && (EMBER_AF_PLUGIN_FRAGMENTATION_BUFFER_SIZE > EMBER_AF_MAXIMUM_APS_PAYLOAD_LENGTH)
   #define EMBER_AF_MAXIMUM_SEND_PAYLOAD_LENGTH EMBER_AF_PLUGIN_FRAGMENTATION_BUFFER_SIZE
   #define EMBER_AF_INCOMING_BUFFER_LENGTH      EMBER_AF_PLUGIN_FRAGMENTATION_BUFFER_SIZE

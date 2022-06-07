@@ -87,3 +87,11 @@ bool emAfProcessEzspCommandTrustCenter(uint16_t commandId)
   return false;
 }
 #endif  // SL_CATALOG_ZIGBEE_STACK_COMMON_PRESENT
+
+// The weak stub for the command-handler when the token interface
+// component is not present.
+WEAK(bool emAfProcessEzspTokenInterfaceCommands(uint16_t commandId))
+{
+  (void)commandId;
+  return false;
+}

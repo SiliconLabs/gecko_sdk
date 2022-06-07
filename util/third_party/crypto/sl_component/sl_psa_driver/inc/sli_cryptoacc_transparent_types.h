@@ -48,6 +48,7 @@
 
 #include "sx_hash.h"
 #include "sx_aes.h"
+#include "sl_enum.h"
 // Replace inclusion of crypto_driver_common.h with the new psa driver interface
 // header file when it becomes available.
 #include "psa/crypto_driver_common.h"
@@ -55,6 +56,11 @@
 #ifdef __cplusplus
 extern "C" {
 #endif
+
+SL_ENUM(sli_aes_mode_t) {
+  SLI_AES_ENC = 1,
+  SLI_AES_DEC = 2,
+};
 
 typedef struct {
   sx_hash_fct_t hash_type;            ///< Hash type
@@ -64,7 +70,7 @@ typedef struct {
 } sli_cryptoacc_transparent_hash_operation_t;
 
 typedef struct {
-  sx_aes_mode_t direction;            ///< Cipher direction (encrypt/decrypt)
+  sli_aes_mode_t direction;           ///< Cipher direction (encrypt/decrypt)
   psa_algorithm_t alg;                ///< Algorithm (cipher and mode of operation)
   uint8_t key[32];                    ///< Key buffer
   size_t key_len;                     ///< Length of key in bytes
@@ -92,22 +98,27 @@ typedef union {
   #endif
 } sli_cryptoacc_transparent_mac_operation_t;
 
-typedef struct { // Will possibly require an update once multi-part is implemented.
-  sx_aes_mode_t direction;
-  size_t ad_length;
-  size_t pt_length;
-  uint8_t nonce[16];
-  size_t nonce_length;
+typedef struct {
+  uint8_t nonce_length;                     ///< Nonce length
+  uint8_t nonce[16];                        ///< Nonce buffer
 } sli_cryptoacc_transparent_aead_preinit_t;
 
-typedef struct { // Will possibly require an update once multi-part is implemented.
-  psa_algorithm_t alg;
-  uint8_t key[32];
-  size_t key_len;
-  size_t ad_len;
-  size_t pt_len;
+typedef struct {
+  sli_aes_mode_t direction;                 ///< xCM mode
+  psa_algorithm_t alg;                      ///< Algorithm
+  uint8_t key[32];                          ///< Key buffer
+  size_t key_len;                           ///< Key length
+  size_t ad_len;                            ///< Length of additional data
+  size_t processed_len;                     ///< Current encrypted/decrypted message length
+  #if defined(PSA_WANT_ALG_CCM)
+  size_t total_length;                      ///< Total message length (only used for ccm)
+  #endif
+  uint8_t final_data[16];                   ///< Input data saved for finish operation
+  uint8_t final_data_length;                ///< Length of data saved
   union {
-    sli_cryptoacc_transparent_aead_preinit_t preinit;
+    sli_cryptoacc_transparent_aead_preinit_t preinit; ///< Values needed for initiating a multipart process
+    uint8_t xcm_ctx[BLK_CIPHER_CTX_xCM_SIZE]; ///< xCM state context
+    uint8_t tag_buf[16];                      ///< Tag (only need for CCM when total message length is zero)
   } ctx;
 } sli_cryptoacc_transparent_aead_operation_t;
 

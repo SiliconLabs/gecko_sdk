@@ -19,17 +19,17 @@
 #define BTL_DEBUG_H
 
 #include "config/btl_config.h"
-#include "stdint.h"
-#include "core/btl_util.h"
-
 #ifndef BTL_CONFIG_FILE
-#include "btl_debug_cfg.h"
+  #include "btl_debug_cfg.h"
 #endif
 
+#include "core/btl_util.h"
 MISRAC_DISABLE
 #include "em_common.h"
 MISRAC_ENABLE
 
+#include "stdint.h"
+#include "em_common.h"
 
 /***************************************************************************//**
  * @addtogroup Components

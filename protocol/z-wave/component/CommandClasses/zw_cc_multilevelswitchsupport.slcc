@@ -1,7 +1,12 @@
 id: zw_cc_multilevelswitchsupport
-label: Multilevel Switch Command Class
+label: Multilevel Switch Command Class Support
 category: Z-Wave|Command Classes
-description: Multilevel switch support Command Class!
+description: >
+  Multilevel Switch Command Class is used to control devices with multilevel capability.
+  
+  This component provides support for Multilevel Switch Command Class commands,
+  controlled by another device.
+
 package: Z-Wave
 quality: production
 source:
@@ -12,3 +17,5 @@ include:
      - path: CC_MultilevelSwitch_Support.h
 provides:
   - name: zw_cc_multilevelswitchsupport
+documentation:
+  url: "https://sdomembers.z-wavealliance.org/document/dl/638"

@@ -40,21 +40,7 @@
 namespace ot {
 namespace Cli {
 
-constexpr Commissioner::Command Commissioner::sCommands[];
-
-otError Commissioner::ProcessHelp(Arg aArgs[])
-{
-    OT_UNUSED_VARIABLE(aArgs);
-
-    for (const Command &command : sCommands)
-    {
-        OutputLine(command.mName);
-    }
-
-    return OT_ERROR_NONE;
-}
-
-otError Commissioner::ProcessAnnounce(Arg aArgs[])
+template <> otError Commissioner::Process<Cmd("announce")>(Arg aArgs[])
 {
     otError      error;
     uint32_t     mask;
@@ -73,7 +59,7 @@ exit:
     return error;
 }
 
-otError Commissioner::ProcessEnergy(Arg aArgs[])
+template <> otError Commissioner::Process<Cmd("energy")>(Arg aArgs[])
 {
     otError      error;
     uint32_t     mask;
@@ -95,12 +81,53 @@ exit:
     return error;
 }
 
-otError Commissioner::ProcessJoiner(Arg aArgs[])
+template <> otError Commissioner::Process<Cmd("joiner")>(Arg aArgs[])
 {
     otError             error = OT_ERROR_NONE;
     otExtAddress        addr;
     const otExtAddress *addrPtr = nullptr;
     otJoinerDiscerner   discerner;
+
+    if (aArgs[0] == "table")
+    {
+        uint16_t     iter = 0;
+        otJoinerInfo joinerInfo;
+
+        static const char *const kJoinerTableTitles[] = {"ID", "PSKd", "Expiration"};
+
+        static const uint8_t kJoinerTableColumnWidths[] = {
+            23,
+            34,
+            12,
+        };
+
+        OutputTableHeader(kJoinerTableTitles, kJoinerTableColumnWidths);
+
+        while (otCommissionerGetNextJoinerInfo(GetInstancePtr(), &iter, &joinerInfo) == OT_ERROR_NONE)
+        {
+            switch (joinerInfo.mType)
+            {
+            case OT_JOINER_INFO_TYPE_ANY:
+                OutputFormat("| %21s", "*");
+                break;
+
+            case OT_JOINER_INFO_TYPE_EUI64:
+                OutputFormat("|      ");
+                OutputExtAddress(joinerInfo.mSharedId.mEui64);
+                break;
+
+            case OT_JOINER_INFO_TYPE_DISCERNER:
+                OutputFormat("| 0x%016llx/%2u", static_cast<unsigned long long>(joinerInfo.mSharedId.mDiscerner.mValue),
+                             joinerInfo.mSharedId.mDiscerner.mLength);
+                break;
+            }
+
+            OutputFormat(" | %32s | %10d |", joinerInfo.mPskd.m8, joinerInfo.mExpirationTime);
+            OutputLine("");
+        }
+
+        ExitNow(error = OT_ERROR_NONE);
+    }
 
     VerifyOrExit(!aArgs[1].IsEmpty(), error = OT_ERROR_INVALID_ARGS);
 
@@ -163,7 +190,7 @@ exit:
     return error;
 }
 
-otError Commissioner::ProcessMgmtGet(Arg aArgs[])
+template <> otError Commissioner::Process<Cmd("mgmtget")>(Arg aArgs[])
 {
     otError error = OT_ERROR_NONE;
     uint8_t tlvs[32];
@@ -210,7 +237,7 @@ exit:
     return error;
 }
 
-otError Commissioner::ProcessMgmtSet(Arg aArgs[])
+template <> otError Commissioner::Process<Cmd("mgmtset")>(Arg aArgs[])
 {
     otError                error;
     otCommissioningDataset dataset;
@@ -272,7 +299,7 @@ exit:
     return error;
 }
 
-otError Commissioner::ProcessPanId(Arg aArgs[])
+template <> otError Commissioner::Process<Cmd("panid")>(Arg aArgs[])
 {
     otError      error;
     uint16_t     panId;
@@ -289,14 +316,14 @@ exit:
     return error;
 }
 
-otError Commissioner::ProcessProvisioningUrl(Arg aArgs[])
+template <> otError Commissioner::Process<Cmd("provisioningurl")>(Arg aArgs[])
 {
     // If aArgs[0] is empty, `GetCString() will return `nullptr`
     /// which will correctly clear the provisioning URL.
     return otCommissionerSetProvisioningUrl(GetInstancePtr(), aArgs[0].GetCString());
 }
 
-otError Commissioner::ProcessSessionId(Arg aArgs[])
+template <> otError Commissioner::Process<Cmd("sessionid")>(Arg aArgs[])
 {
     OT_UNUSED_VARIABLE(aArgs);
 
@@ -305,7 +332,24 @@ otError Commissioner::ProcessSessionId(Arg aArgs[])
     return OT_ERROR_NONE;
 }
 
-otError Commissioner::ProcessStart(Arg aArgs[])
+template <> otError Commissioner::Process<Cmd("id")>(Arg aArgs[])
+{
+    otError error;
+
+    if (aArgs[0].IsEmpty())
+    {
+        OutputLine("%s", otCommissionerGetId(GetInstancePtr()));
+        error = OT_ERROR_NONE;
+    }
+    else
+    {
+        error = otCommissionerSetId(GetInstancePtr(), aArgs[0].GetCString());
+    }
+
+    return error;
+}
+
+template <> otError Commissioner::Process<Cmd("start")>(Arg aArgs[])
 {
     OT_UNUSED_VARIABLE(aArgs);
 
@@ -376,14 +420,14 @@ void Commissioner::HandleJoinerEvent(otCommissionerJoinerEvent aEvent,
     OutputLine("");
 }
 
-otError Commissioner::ProcessStop(Arg aArgs[])
+template <> otError Commissioner::Process<Cmd("stop")>(Arg aArgs[])
 {
     OT_UNUSED_VARIABLE(aArgs);
 
     return otCommissionerStop(GetInstancePtr());
 }
 
-otError Commissioner::ProcessState(Arg aArgs[])
+template <> otError Commissioner::Process<Cmd("state")>(Arg aArgs[])
 {
     OT_UNUSED_VARIABLE(aArgs);
 
@@ -394,16 +438,31 @@ otError Commissioner::ProcessState(Arg aArgs[])
 
 otError Commissioner::Process(Arg aArgs[])
 {
+#define CmdEntry(aCommandString)                                    \
+    {                                                               \
+        aCommandString, &Commissioner::Process<Cmd(aCommandString)> \
+    }
+
+    static constexpr Command kCommands[] = {
+        CmdEntry("announce"),  CmdEntry("energy"),  CmdEntry("id"),    CmdEntry("joiner"),
+        CmdEntry("mgmtget"),   CmdEntry("mgmtset"), CmdEntry("panid"), CmdEntry("provisioningurl"),
+        CmdEntry("sessionid"), CmdEntry("start"),   CmdEntry("state"), CmdEntry("stop"),
+    };
+
+#undef CmdEntry
+
+    static_assert(BinarySearch::IsSorted(kCommands), "kCommands is not sorted");
+
     otError        error = OT_ERROR_INVALID_COMMAND;
     const Command *command;
 
-    if (aArgs[0].IsEmpty())
+    if (aArgs[0].IsEmpty() || (aArgs[0] == "help"))
     {
-        IgnoreError(ProcessHelp(aArgs));
-        ExitNow();
+        OutputCommandTable(kCommands);
+        ExitNow(error = aArgs[0].IsEmpty() ? error : OT_ERROR_NONE);
     }
 
-    command = BinarySearch::Find(aArgs[0].GetCString(), sCommands);
+    command = BinarySearch::Find(aArgs[0].GetCString(), kCommands);
     VerifyOrExit(command != nullptr);
 
     error = (this->*command->mHandler)(aArgs + 1);

@@ -1,8 +1,8 @@
 /**
  * @file
  * @brief Defines the procedures to make operations with block ciphers engines:
- *        BA411E-AES, BA419-SM4 and BA424-ARIA
- * @copyright Copyright (c) 2019 Silex Insight. All Rights reserved
+ *        BA411E-AES
+ * @copyright Copyright (c) 2019-2020 Silex Insight. All Rights reserved
  */
 
 #include <stddef.h>
@@ -21,16 +21,15 @@
 
 extern uint32_t sx_aes_set_hw_config_for_key(block_t *key, uint32_t *config);
 
-const uint32_t engine_select[] = {
+const uint32_t engine_select[SX_NUM_BLK_CIPHER_ENGINES] = {
       DMA_SG_ENGINESELECT_BA411E,
-      DMA_SG_ENGINESELECT_BA419,
-      DMA_SG_ENGINESELECT_BA424};
+};
 
-const uint32_t operation_select[] = {
+const uint32_t operation_select[SX_NUM_BLK_CIPHER_OPERATIONS] = {
       SX_BLK_CIPHER_MODEID_ENCRYPT,
       SX_BLK_CIPHER_MODEID_DECRYPT};
 
-const uint32_t mode_select[] = {
+const uint32_t mode_select[SX_NUM_BLK_CIPHER_MODES] = {
       SX_BLK_CIPHER_MODEID_ECB,
       SX_BLK_CIPHER_MODEID_CBC,
       SX_BLK_CIPHER_MODEID_CTR,
@@ -71,7 +70,7 @@ static uint32_t sx_blk_cipher_build_descr(
 bool is_len_valid_for_cbc_xts(enum sx_blk_cipher_engine_select engine, uint32_t len)
 {
    if(SX_BLK_CIPHER_AES == engine)
-      if ((BA411E_HW_CFG_1 & AES_HW_CFG_CS_EN_MASK) == AES_HW_CFG_CS_EN_MASK)
+      if (AES_HW_CFG_CS_EN)
          return len >= BLK_CIPHER_BLOCK_SIZE;
    return !(len % BLK_CIPHER_BLOCK_SIZE) && (len > 0);
 }
@@ -88,6 +87,7 @@ uint32_t sx_blk_cipher_ecb(
    if ((datain->len % 16) || !datain->len || (dataout->len != datain->len))
       return CRYPTOLIB_INVALID_PARAM;
 
+   CRYPTOLIB_ASSERT_NM(operation < SX_NUM_BLK_CIPHER_OPERATIONS);
    uint32_t config = operation_select[operation] | SX_BLK_CIPHER_MODEID_ECB;
    block_t dummy = NULL_blk;
    return sx_blk_cipher_build_descr(
@@ -112,6 +112,8 @@ uint32_t sx_blk_cipher_cbc_ctr_ofb_cfb_init(
       const block_t *iv,
       block_t *ctx_out)
 {
+   CRYPTOLIB_ASSERT_NM(operation < SX_NUM_BLK_CIPHER_OPERATIONS);
+   CRYPTOLIB_ASSERT_NM(mode < SX_NUM_BLK_CIPHER_MODES);
    uint32_t config = operation_select[operation] | mode_select[mode]
          | SX_BLK_CIPHER_MODEID_CX_SAVE;
 
@@ -142,6 +144,8 @@ uint32_t sx_blk_cipher_cbc_ctr_ofb_cfb_update(
       const block_t *ctx_in,
       block_t *ctx_out)
 {
+   CRYPTOLIB_ASSERT_NM(operation < SX_NUM_BLK_CIPHER_OPERATIONS);
+   CRYPTOLIB_ASSERT_NM(mode < SX_NUM_BLK_CIPHER_MODES);
    uint32_t config = operation_select[operation] | mode_select[mode]
          | SX_BLK_CIPHER_MODEID_CX_SAVE | SX_BLK_CIPHER_MODEID_CX_LOAD;
 
@@ -176,6 +180,7 @@ uint32_t sx_blk_cipher_cbc(
          (dataout->len != datain->len) || (iv->len != BLK_CIPHER_IV_SIZE))
       return CRYPTOLIB_INVALID_PARAM;
 
+   CRYPTOLIB_ASSERT_NM(operation < SX_NUM_BLK_CIPHER_OPERATIONS);
    uint32_t config = operation_select[operation] | SX_BLK_CIPHER_MODEID_CBC;
    block_t dummy = NULL_blk;
    return sx_blk_cipher_build_descr(
@@ -197,6 +202,7 @@ uint32_t sx_blk_cipher_cbc_final(
       block_t *dataout,
       const block_t *ctx_in)
 {
+   CRYPTOLIB_ASSERT_NM(operation < SX_NUM_BLK_CIPHER_OPERATIONS);
    uint32_t config = operation_select[operation] | SX_BLK_CIPHER_MODEID_CBC |
          SX_BLK_CIPHER_MODEID_CX_LOAD;
    if (!is_len_valid_for_cbc_xts(engine, datain->len) || (dataout->len != datain->len) ||
@@ -225,6 +231,7 @@ uint32_t sx_blk_cipher_ctr(
       block_t *dataout,
       const block_t *iv)
 {
+   CRYPTOLIB_ASSERT_NM(operation < SX_NUM_BLK_CIPHER_OPERATIONS);
    uint32_t config = operation_select[operation] | SX_BLK_CIPHER_MODEID_CTR;
 
    if (!datain->len || dataout->len != datain->len || iv->len != BLK_CIPHER_IV_SIZE)
@@ -251,6 +258,7 @@ uint32_t sx_blk_cipher_ctr_final(
       block_t *dataout,
       const block_t *ctx_in)
 {
+   CRYPTOLIB_ASSERT_NM(operation < SX_NUM_BLK_CIPHER_OPERATIONS);
    uint32_t config = operation_select[operation] | SX_BLK_CIPHER_MODEID_CTR |
          SX_BLK_CIPHER_MODEID_CX_LOAD;
 
@@ -285,6 +293,8 @@ uint32_t sx_blk_cipher_cfb_ofb(
          (iv->len != BLK_CIPHER_IV_SIZE))
       return CRYPTOLIB_INVALID_PARAM;
 
+   CRYPTOLIB_ASSERT_NM(operation < SX_NUM_BLK_CIPHER_OPERATIONS);
+   CRYPTOLIB_ASSERT_NM(mode < SX_NUM_BLK_CIPHER_MODES);
    uint32_t config = operation_select[operation] | mode_select[mode];
    block_t dummy = NULL_blk;
    return sx_blk_cipher_build_descr(
@@ -307,6 +317,8 @@ uint32_t sx_blk_cipher_cfb_ofb_final(
       block_t *dataout,
       const block_t *ctx_in)
 {
+   CRYPTOLIB_ASSERT_NM(operation < SX_NUM_BLK_CIPHER_OPERATIONS);
+   CRYPTOLIB_ASSERT_NM(mode < SX_NUM_BLK_CIPHER_MODES);
    uint32_t config = operation_select[operation] | mode_select[mode]
          | SX_BLK_CIPHER_MODEID_CX_LOAD;
 
@@ -337,6 +349,7 @@ uint32_t sx_blk_cipher_xts(
       const block_t *iv,
       const block_t *key_xts)
 {
+   CRYPTOLIB_ASSERT_NM(operation < SX_NUM_BLK_CIPHER_OPERATIONS);
    uint32_t config = operation_select[operation] | SX_BLK_CIPHER_MODEID_XTS;
 
    if (!is_len_valid_for_cbc_xts(engine, datain->len) ||
@@ -366,6 +379,7 @@ uint32_t sx_blk_cipher_xts_init(
       block_t *ctx_out,
       const block_t *key_xts)
 {
+   CRYPTOLIB_ASSERT_NM(operation < SX_NUM_BLK_CIPHER_OPERATIONS);
    uint32_t config = operation_select[operation] | SX_BLK_CIPHER_MODEID_XTS |
          SX_BLK_CIPHER_MODEID_CX_SAVE;
 
@@ -397,6 +411,7 @@ uint32_t sx_blk_cipher_xts_update(
       block_t *ctx_out,
       const block_t *key_xts)
 {
+   CRYPTOLIB_ASSERT_NM(operation < SX_NUM_BLK_CIPHER_OPERATIONS);
    uint32_t config = operation_select[operation] | SX_BLK_CIPHER_MODEID_XTS |
          SX_BLK_CIPHER_MODEID_CX_SAVE | SX_BLK_CIPHER_MODEID_CX_LOAD;
 
@@ -427,7 +442,8 @@ uint32_t sx_blk_cipher_xts_final(
       const block_t *ctx_in,
       const block_t *key_xts)
 {
-    uint32_t config = operation_select[operation] | SX_BLK_CIPHER_MODEID_XTS |
+   CRYPTOLIB_ASSERT_NM(operation < SX_NUM_BLK_CIPHER_OPERATIONS);
+   uint32_t config = operation_select[operation] | SX_BLK_CIPHER_MODEID_XTS |
           SX_BLK_CIPHER_MODEID_CX_LOAD;
 
    if (!is_len_valid_for_cbc_xts(engine, datain->len) || (dataout->len != datain->len) ||
@@ -462,6 +478,7 @@ uint32_t sx_blk_cipher_gcm(
          (mac->len != BLK_CIPHER_MAC_SIZE))
       return CRYPTOLIB_INVALID_PARAM;
 
+   CRYPTOLIB_ASSERT_NM(operation < SX_NUM_BLK_CIPHER_OPERATIONS);
    uint32_t config = operation_select[operation] | SX_BLK_CIPHER_MODEID_GCM;
 
    // Compute len(AAD) + len(data)
@@ -496,7 +513,7 @@ uint32_t sx_blk_cipher_gcm_decrypt_verify(
       const block_t *mac,
       const block_t *aad)
 {
-   if (mac->len != BLK_CIPHER_MAC_SIZE)
+   if ((mac->len < 4) || (mac->len > BLK_CIPHER_MAC_SIZE))
       return CRYPTOLIB_INVALID_PARAM;
 
    uint8_t mac_recomputed_buf[BLK_CIPHER_MAC_SIZE] = {0};
@@ -522,7 +539,8 @@ uint32_t sx_blk_cipher_gcm_init(
       block_t *ctx_out,
       const block_t *aad)
 {
-    uint32_t config = operation_select[operation] | SX_BLK_CIPHER_MODEID_GCM |
+   CRYPTOLIB_ASSERT_NM(operation < SX_NUM_BLK_CIPHER_OPERATIONS);
+   uint32_t config = operation_select[operation] | SX_BLK_CIPHER_MODEID_GCM |
           SX_BLK_CIPHER_MODEID_CX_SAVE;
 
    if ((dataout->len != datain->len) || (iv->len != BLK_CIPHER_IV_GCM_SIZE) ||
@@ -553,7 +571,8 @@ uint32_t sx_blk_cipher_gcm_update(
       const block_t *ctx_in,
       block_t *ctx_out)
 {
-    uint32_t config = operation_select[operation] | SX_BLK_CIPHER_MODEID_GCM |
+   CRYPTOLIB_ASSERT_NM(operation < SX_NUM_BLK_CIPHER_OPERATIONS);
+   uint32_t config = operation_select[operation] | SX_BLK_CIPHER_MODEID_GCM |
           SX_BLK_CIPHER_MODEID_CX_SAVE | SX_BLK_CIPHER_MODEID_CX_LOAD;
 
    if ((dataout->len != datain->len) || (ctx_in->len != BLK_CIPHER_CTX_xCM_SIZE) ||
@@ -583,7 +602,8 @@ uint32_t sx_blk_cipher_gcm_final(
       block_t *mac,
       const block_t *len_a_c)
 {
-    uint32_t config = operation_select[operation] | SX_BLK_CIPHER_MODEID_GCM |
+   CRYPTOLIB_ASSERT_NM(operation < SX_NUM_BLK_CIPHER_OPERATIONS);
+   uint32_t config = operation_select[operation] | SX_BLK_CIPHER_MODEID_GCM |
           SX_BLK_CIPHER_MODEID_CX_LOAD;
 
    if ((dataout->len != datain->len) || (ctx_in->len != BLK_CIPHER_CTX_xCM_SIZE) ||
@@ -608,7 +628,6 @@ uint32_t sx_blk_cipher_gcm_final(
 uint32_t sx_blk_cipher_gcm_decrypt_verify_final(
       enum sx_blk_cipher_engine_select engine,
       enum sx_blk_cipher_operation operation,
-
       const block_t *key,
       const block_t *ciphertext,
       block_t *plaintext,
@@ -616,7 +635,7 @@ uint32_t sx_blk_cipher_gcm_decrypt_verify_final(
       const block_t *mac,
       const block_t *len_a_c)
 {
-   if (mac->len != BLK_CIPHER_MAC_SIZE)
+   if ((mac->len < 4) || (mac->len > BLK_CIPHER_MAC_SIZE))
       return CRYPTOLIB_INVALID_PARAM;
 
    uint8_t mac_recomputed_buf[BLK_CIPHER_MAC_SIZE] = {0};
@@ -661,6 +680,7 @@ uint32_t sx_blk_cipher_ccm_encrypt(
    if (status)
       return status;
 
+   CRYPTOLIB_ASSERT_NM(operation < SX_NUM_BLK_CIPHER_OPERATIONS);
    uint32_t config = operation_select[operation] | SX_BLK_CIPHER_MODEID_CCM;
    block_t dummy = NULL_blk;
    return sx_blk_cipher_build_descr(
@@ -697,11 +717,12 @@ uint32_t sx_blk_cipher_ccm_decrypt(
    if (status)
       return status;
 
+   CRYPTOLIB_ASSERT_NM(operation < SX_NUM_BLK_CIPHER_OPERATIONS);
    uint32_t config = operation_select[operation] | SX_BLK_CIPHER_MODEID_CCM;
    block_t dummy = NULL_blk;
 
-   /* CCM is implemented in a different way that GCM; it is not possible to
-    * directly read back the recomputed MAC from the BA411E.
+   /* In BA411E, CCM is implemented in a different way than GCM; it is not
+    * possible to directly read back the recomputed MAC from the BA411E.
     * The reference MAC is xor-ed internally with the recomputed one.
     * Sending 0,...,0 in place of the reference will return the recomputed MAC
     * as A xor 0 = A.
@@ -725,7 +746,6 @@ uint32_t sx_blk_cipher_ccm_decrypt(
 uint32_t sx_blk_cipher_ccm_decrypt_verify(
       enum sx_blk_cipher_engine_select engine,
       enum sx_blk_cipher_operation operation,
-
       const block_t *key,
       const block_t *ciphertext,
       block_t *plaintext,
@@ -761,9 +781,11 @@ uint32_t sx_blk_cipher_ccm_init(
       const block_t *nonce,
       block_t *ctx_out,
       const block_t *aad,
-      uint32_t mac_len)
+      uint32_t mac_len,
+      uint32_t total_length)
 {
-    uint32_t config = operation_select[operation] | SX_BLK_CIPHER_MODEID_CCM |
+   CRYPTOLIB_ASSERT_NM(operation < SX_NUM_BLK_CIPHER_OPERATIONS);
+   uint32_t config = operation_select[operation] | SX_BLK_CIPHER_MODEID_CCM |
           SX_BLK_CIPHER_MODEID_CX_SAVE;
 
    if ((datain->len != dataout->len) || (ctx_out->len != BLK_CIPHER_CTX_xCM_SIZE))
@@ -771,7 +793,7 @@ uint32_t sx_blk_cipher_ccm_init(
 
    uint8_t header_generated[22]; // Maximum header size (excluding aad which will be transferred directly)
    block_t header = BLK_LITARRAY(header_generated);
-   uint32_t status = generate_ccm_header(*nonce, aad->len, datain->len, mac_len, &header);
+   uint32_t status = generate_ccm_header(*nonce, aad->len, total_length, mac_len, &header);
    if (status)
       return status;
 
@@ -798,7 +820,8 @@ uint32_t sx_blk_cipher_ccm_update(
       const block_t *ctx_in,
       block_t *ctx_out)
 {
-    uint32_t config = operation_select[operation] | SX_BLK_CIPHER_MODEID_CCM |
+   CRYPTOLIB_ASSERT_NM(operation < SX_NUM_BLK_CIPHER_OPERATIONS);
+   uint32_t config = operation_select[operation] | SX_BLK_CIPHER_MODEID_CCM |
           SX_BLK_CIPHER_MODEID_CX_SAVE | SX_BLK_CIPHER_MODEID_CX_LOAD;
 
    if ((datain->len != dataout->len) || (ctx_in->len != BLK_CIPHER_CTX_xCM_SIZE) ||
@@ -827,7 +850,8 @@ uint32_t sx_blk_cipher_ccm_encrypt_final(
       const block_t *ctx_in,
       block_t *mac)
 {
-    uint32_t config = operation_select[operation] | SX_BLK_CIPHER_MODEID_CCM |
+   CRYPTOLIB_ASSERT_NM(operation < SX_NUM_BLK_CIPHER_OPERATIONS);
+   uint32_t config = operation_select[operation] | SX_BLK_CIPHER_MODEID_CCM |
           SX_BLK_CIPHER_MODEID_CX_LOAD;
 
    if ((plaintext->len != ciphertext->len) ||
@@ -867,7 +891,8 @@ uint32_t sx_blk_cipher_ccm_decrypt_final(
       const block_t *ctx_in,
       block_t *mac)
 {
-    uint32_t config = operation_select[operation] | SX_BLK_CIPHER_MODEID_CCM |
+   CRYPTOLIB_ASSERT_NM(operation < SX_NUM_BLK_CIPHER_OPERATIONS);
+   uint32_t config = operation_select[operation] | SX_BLK_CIPHER_MODEID_CCM |
           SX_BLK_CIPHER_MODEID_CX_LOAD;
 
    if ((plaintext->len != ciphertext->len) ||
@@ -892,8 +917,11 @@ uint32_t sx_blk_cipher_ccm_decrypt_final(
     */
    uint8_t zeroes_buf[BLK_CIPHER_MAC_SIZE] = {0};
    block_t zeroes = block_t_convert(zeroes_buf, mac->len);
-
    block_t dummy = NULL_blk;
+   block_t extrain = dummy;
+   if (engine == SX_BLK_CIPHER_AES)
+      extrain = zeroes;
+
    return sx_blk_cipher_build_descr(
          engine,
          config,
@@ -903,7 +931,7 @@ uint32_t sx_blk_cipher_ccm_decrypt_final(
          ciphertext,
          plaintext,
          &dummy, &dummy,
-         &zeroes,
+         &extrain,
          mac,
          &dummy);
 }
@@ -966,7 +994,7 @@ uint32_t sx_blk_cipher_cmac_verify(
       const block_t *message,
       const block_t *mac)
 {
-   if (mac->len != BLK_CIPHER_MAC_SIZE)
+   if (mac->len > BLK_CIPHER_MAC_SIZE)
       return CRYPTOLIB_INVALID_PARAM;
 
    uint8_t recomputed_buf[BLK_CIPHER_MAC_SIZE];
@@ -1229,17 +1257,10 @@ static uint32_t sx_blk_cipher_build_descr(
       block_t *tag_out,
       block_t *ctx_ptr)
 {
-   uint32_t status;
    block_t config = block_t_convert(&hw_config, sizeof(hw_config));
    block_t keyb = *key;
-
-   switch (engine) {
-   case SX_BLK_CIPHER_AES:
-      status = sx_aes_set_hw_config_for_key(&keyb, &hw_config);
-      break;
-   default:
-      return CRYPTOLIB_INVALID_PARAM;
-   }
+   CRYPTOLIB_ASSERT(engine < SX_NUM_BLK_CIPHER_ENGINES, "Invalid engine");
+   uint32_t status = sx_aes_set_hw_config_for_key(&keyb, &hw_config);
    if (status)
       return status;
 

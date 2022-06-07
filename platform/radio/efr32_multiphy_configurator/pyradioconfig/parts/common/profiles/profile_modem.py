@@ -91,5 +91,9 @@ def buildRailOutputs(model, profile):
     profile.outputs.append(ModelOutput(model.vars.rx_ch_hopping_delay_usec, '', ModelOutputType.RAIL_CONFIG,readable_name='For receive scanning PHYs: delay in microseconds to look for RX on a particular PHY'))
     profile.outputs.append(ModelOutput(model.vars.div_antdivmode, '', ModelOutputType.RAIL_CONFIG, readable_name='Antenna diversity mode'))
     profile.outputs.append(ModelOutput(model.vars.div_antdivrepeatdis, '', ModelOutputType.RAIL_CONFIG, readable_name='Disable repeated measurement of first antenna when Select-Best algorithm is used'))
+    profile.outputs.append(ModelOutput(model.vars.stack_info, '', ModelOutputType.RAIL_CONFIG, readable_name='Stack information containing protocol and PHY IDs'))
+    profile.outputs.append(ModelOutput(model.vars.rx_sync_delay_ns, '', ModelOutputType.RAIL_CONFIG, readable_name='Time needed from start of preamble on-air to sync detect'))
+    profile.outputs.append(ModelOutput(model.vars.rx_eof_delay_ns, '', ModelOutputType.RAIL_CONFIG, readable_name='Time from end of frame on-air to RX EOF timestamp'))
+    profile.outputs.append(ModelOutput(model.vars.tx_eof_delay_ns, '', ModelOutputType.RAIL_CONFIG, readable_name='Time from end of frame on-air to TX EOF timestamp'))
     if model.part_family.lower() not in ["dumbo", "jumbo", "nerio", "nixi", "unit_test_part"]:
         profile.outputs.append(ModelOutput(model.vars.rssi_adjust_db, '', ModelOutputType.RAIL_CONFIG, readable_name='RSSI compensation value calculated from decimation and digital gains'))

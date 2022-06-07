@@ -93,11 +93,12 @@ bool flash_writeBuffer_dma(uint32_t       address,
   if ((ch < 0) || (ch >= (int)DMA_CHAN_COUNT)) {
     return false;
   }
-
+  MISRAC_DISABLE
   CMU_ClockEnable(cmuClock_LDMA, true);
 #if defined(CMU_CLKEN0_LDMAXBAR)
   CMU_ClockEnable(cmuClock_LDMAXBAR, true);
 #endif
+  MISRAC_ENABLE
 
   if (length == 0UL) {
     // Attempt to write zero-length array, return immediately

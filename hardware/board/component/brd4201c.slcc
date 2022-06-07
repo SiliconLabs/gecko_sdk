@@ -15,6 +15,7 @@
   - name: hardware_board_rb
   - name: hardware_board_from_stk
   - name: hardware_board_from_slwrb4201c
+  - name: hardware_board_has_vcom
   - name: hardware_board_has_rfswitch
   - name: hardware_board_has_hfxo
   - name: hardware_board_supports_rf_band_868
@@ -29,9 +30,6 @@
     instance:
     - vcom
   - id: bootloader_uart_driver
-  - id: i2cspm
-    instance:
-    - sensor
   - id: simple_led
     instance:
     - led0
@@ -56,6 +54,5 @@
   - board:device:efr32zg13l231f512gm32
   - hardware:has:vcom
   - hardware:has:pti
-  - hardware:has:sensor:si7021
   - hardware:has:led:2
   - hardware:has:button:2

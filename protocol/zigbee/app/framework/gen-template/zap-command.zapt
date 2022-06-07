@@ -53,7 +53,7 @@
   {{/if~}}
 {{/zcl_command_arguments}}) \
 emberAfFillExternalBuffer((ZCL_GLOBAL_COMMAND \
-                           | ZCL_FRAME_CONTROL_SERVER_TO_CLIENT), \
+                           | ZCL_FRAME_CONTROL_SERVER_TO_CLIENT {{#is_command_default_response_disabled .}} | ZCL_DISABLE_DEFAULT_RESPONSE_MASK{{/is_command_default_response_disabled}}), \
                            clusterId, \
                            ZCL_{{as_delimited_macro label}}_COMMAND_ID, \
                            "{{#zcl_command_arguments}}{{as_underlying_zcl_type type array="b" one_byte="u" two_byte="v" three_byte="x" four_byte="w" short_string="s" long_string="l" ten_byte="A" eleven_byte="B" twelve_byte="C" thirten_byte="D" fourteen_byte="E" fifteen_byte="F" sixteen_byte="G" struct="b" defaul="b" zclCharFormatter="true"}}{{/zcl_command_arguments}}"{{#if_command_args_exist this.id}},{{/if_command_args_exist}} \
@@ -82,7 +82,7 @@ emberAfFillExternalBuffer((ZCL_GLOBAL_COMMAND \
   {{/if~}}
 {{/zcl_command_arguments}}) \
 emberAfFillExternalBuffer((ZCL_GLOBAL_COMMAND \
-                           | ZCL_FRAME_CONTROL_CLIENT_TO_SERVER), \
+                           | ZCL_FRAME_CONTROL_CLIENT_TO_SERVER{{#is_command_default_response_disabled .}} | ZCL_DISABLE_DEFAULT_RESPONSE_MASK{{/is_command_default_response_disabled}}), \
                            clusterId, \
                            ZCL_{{as_delimited_macro label}}_COMMAND_ID, \
                            "{{#zcl_command_arguments}}{{as_underlying_zcl_type type array="b" one_byte="u" two_byte="v" three_byte="x" four_byte="w" short_string="s" long_string="l" ten_byte="A" eleven_byte="B" twelve_byte="C" thirten_byte="D" fourteen_byte="E" fifteen_byte="F" sixteen_byte="G" struct="b" defaul="b" zclCharFormatter="true"}}{{/zcl_command_arguments}}"{{#if_command_args_exist this.id}},{{/if_command_args_exist}} \
@@ -113,7 +113,7 @@ emberAfFillExternalBuffer((ZCL_GLOBAL_COMMAND \
   {{/if~}}
 {{/zcl_command_arguments}}) \
 emberAfFillExternalBuffer((ZCL_GLOBAL_COMMAND \
-                           | ZCL_FRAME_CONTROL_CLIENT_TO_SERVER), \
+                           | ZCL_FRAME_CONTROL_CLIENT_TO_SERVER{{#is_command_default_response_disabled .}} | ZCL_DISABLE_DEFAULT_RESPONSE_MASK{{/is_command_default_response_disabled}}), \
                            clusterId, \
                            ZCL_{{as_delimited_macro label}}_COMMAND_ID, \
                            "{{#zcl_command_arguments}}{{as_underlying_zcl_type type array="b" one_byte="u" two_byte="v" three_byte="x" four_byte="w" short_string="s" long_string="l" ten_byte="A" eleven_byte="B" twelve_byte="C" thirten_byte="D" fourteen_byte="E" fifteen_byte="F" sixteen_byte="G" struct="b" defaul="b" zclCharFormatter="true"}}{{/zcl_command_arguments}}"{{#if_command_args_exist this.id}},{{/if_command_args_exist}} \
@@ -135,7 +135,7 @@ emberAfFillExternalBuffer((ZCL_GLOBAL_COMMAND \
   {{/if~}}
 {{/zcl_command_arguments}}) \
 emberAfFillExternalBuffer((ZCL_GLOBAL_COMMAND \
-                           | ZCL_FRAME_CONTROL_SERVER_TO_CLIENT), \
+                           | ZCL_FRAME_CONTROL_SERVER_TO_CLIENT{{#is_command_default_response_disabled .}} | ZCL_DISABLE_DEFAULT_RESPONSE_MASK{{/is_command_default_response_disabled}}), \
                            clusterId, \
                            ZCL_{{as_delimited_macro label}}_COMMAND_ID, \
                            "{{#zcl_command_arguments}}{{as_underlying_zcl_type type array="b" one_byte="u" two_byte="v" three_byte="x" four_byte="w" short_string="s" long_string="l" ten_byte="A" eleven_byte="B" twelve_byte="C" thirten_byte="D" fourteen_byte="E" fifteen_byte="F" sixteen_byte="G" struct="b" defaul="b" zclCharFormatter="true"}}{{/zcl_command_arguments}}"{{#if_command_args_exist this.id}},{{/if_command_args_exist}} \
@@ -175,7 +175,7 @@ emberAfFillExternalBuffer((ZCL_GLOBAL_COMMAND \
   {{/if~}}
 {{/zcl_command_arguments}}) \
 emberAfFillExternal{{#if_mfg_specific_cluster ../id}}ManufacturerSpecific{{/if_mfg_specific_cluster}}Buffer((ZCL_CLUSTER_SPECIFIC_COMMAND{{#if_mfg_specific_cluster ../id}} | ZCL_MANUFACTURER_SPECIFIC_MASK{{/if_mfg_specific_cluster}} \
-                           | ZCL_FRAME_CONTROL_SERVER_TO_CLIENT), \
+                           | ZCL_FRAME_CONTROL_SERVER_TO_CLIENT{{#is_command_default_response_disabled .}} | ZCL_DISABLE_DEFAULT_RESPONSE_MASK{{/is_command_default_response_disabled}}), \
                            ZCL_{{as_delimited_macro ../define}}_ID, {{backslash}}{{new_line 1}}
                            {{~#if_mfg_specific_cluster ../id~}}
                            {{../manufacturerCode}}, \
@@ -206,7 +206,7 @@ emberAfFillExternal{{#if_mfg_specific_cluster ../id}}ManufacturerSpecific{{/if_m
   {{/if~}}
 {{/zcl_command_arguments}}) \
 emberAfFillExternal{{#if_mfg_specific_cluster ../id}}ManufacturerSpecific{{/if_mfg_specific_cluster}}Buffer((ZCL_CLUSTER_SPECIFIC_COMMAND{{#if_mfg_specific_cluster ../id}} | ZCL_MANUFACTURER_SPECIFIC_MASK{{/if_mfg_specific_cluster}} \
-                           | ZCL_FRAME_CONTROL_CLIENT_TO_SERVER), \
+                           | ZCL_FRAME_CONTROL_CLIENT_TO_SERVER{{#is_command_default_response_disabled .}} | ZCL_DISABLE_DEFAULT_RESPONSE_MASK{{/is_command_default_response_disabled}}), \
                            ZCL_{{as_delimited_macro ../define}}_ID, {{backslash}}{{new_line 1}}
                            {{~#if_mfg_specific_cluster ../id~}}
                            {{../manufacturerCode}}, \
@@ -239,7 +239,7 @@ emberAfFillExternal{{#if_mfg_specific_cluster ../id}}ManufacturerSpecific{{/if_m
   {{/if~}}
 {{/zcl_command_arguments}}) \
 emberAfFillExternal{{#if_mfg_specific_cluster ../id}}ManufacturerSpecific{{/if_mfg_specific_cluster}}Buffer((ZCL_CLUSTER_SPECIFIC_COMMAND{{#if_mfg_specific_cluster ../id}} | ZCL_MANUFACTURER_SPECIFIC_MASK{{/if_mfg_specific_cluster}} \
-                           | ZCL_FRAME_CONTROL_CLIENT_TO_SERVER), \
+                           | ZCL_FRAME_CONTROL_CLIENT_TO_SERVER{{#is_command_default_response_disabled .}} | ZCL_DISABLE_DEFAULT_RESPONSE_MASK{{/is_command_default_response_disabled}}), \
                            ZCL_{{as_delimited_macro ../define}}_ID, {{backslash}}{{new_line 1}}
                            {{~#if_mfg_specific_cluster ../id~}}
                            {{../manufacturerCode}}, \
@@ -264,7 +264,7 @@ emberAfFillExternal{{#if_mfg_specific_cluster ../id}}ManufacturerSpecific{{/if_m
   {{/if~}}
 {{/zcl_command_arguments}}) \
 emberAfFillExternal{{#if_mfg_specific_cluster ../id}}ManufacturerSpecific{{/if_mfg_specific_cluster}}Buffer((ZCL_CLUSTER_SPECIFIC_COMMAND{{#if_mfg_specific_cluster ../id}} | ZCL_MANUFACTURER_SPECIFIC_MASK{{/if_mfg_specific_cluster}} \
-                           | ZCL_FRAME_CONTROL_SERVER_TO_CLIENT), \
+                           | ZCL_FRAME_CONTROL_SERVER_TO_CLIENT{{#is_command_default_response_disabled .}} | ZCL_DISABLE_DEFAULT_RESPONSE_MASK{{/is_command_default_response_disabled}}), \
                            ZCL_{{as_delimited_macro ../define}}_ID, {{backslash}}{{new_line 1}}
                            {{~#if_mfg_specific_cluster ../id~}}
                            {{../manufacturerCode}}, \

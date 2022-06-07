@@ -31,7 +31,7 @@
 #include "crypto_management.h"
 #include "em_core.h"
 #include "em_bus.h"
-#include "em_assert.h"
+#include "sl_assert.h"
 
 #if defined(CRYPTO_PRESENT)
 

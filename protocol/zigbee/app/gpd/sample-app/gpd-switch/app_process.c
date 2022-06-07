@@ -292,15 +292,6 @@ bool emberGpdAfPluginNvSaveAndLoadCallback(EmberGpd_t * gpd,
   return false;
 }
 
-/** @brief
- *
- * Application framework equivalent of ::emberRadioNeedsCalibratingHandler
- */
-void emberAfRadioNeedsCalibratingCallback(void)
-{
-  sl_mac_calibrate_current_channel();
-}
-
 // -----------------------------------------------------------------------------
 //                          Static Function Definitions
 // -----------------------------------------------------------------------------

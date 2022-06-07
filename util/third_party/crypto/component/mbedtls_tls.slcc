@@ -1,9 +1,9 @@
 id: mbedtls_tls
 package: platform
-label: Mbed TLS Support for TLS Client
+label: TLS Client
 description: >-
   This component provides support for using TLS (as a client) in Mbed TLS.
-category: Platform|Security
+category: Platform|Security|Mbed TLS|Upper Layer
 quality: production
 source:
   - path: util/third_party/crypto/mbedtls/library/ssl_cache.c
@@ -26,10 +26,13 @@ include:
       - path: mbedtls/net_sockets.h
   - path: util/third_party/crypto/mbedtls/library
     file_list:
-      - path: ssl_invasive.h
+      - path: ssl_debug_helpers_generated.h
       - path: ssl_misc.h
 provides:
   - name: mbedtls_tls
+  # Will not become compatible until upper layer TLS code only uses PSA APIs.
+  - name: tz_ns_incompatible
+    condition: [tz_secure_key_library_ns]
 requires:
   - name: mbedtls_hash
   - name: mbedtls_cipher

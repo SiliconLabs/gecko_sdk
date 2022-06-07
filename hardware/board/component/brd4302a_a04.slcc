@@ -14,6 +14,9 @@
   - name: brd4302a_a04
   - name: hardware_board
   - name: hardware_board_rb
+  - name: hardware_board_has_si70xx
+  - name: hardware_board_has_tempsensor
+  - name: hardware_board_has_vcom
   - name: hardware_board_has_spiflash
   - name: hardware_board_supports_rf_band_2400
   - name: hardware_board_supports_1_rf_band
@@ -34,6 +37,7 @@
     instance:
     - led0
     - led1
+  - id: skrhaae010
   - id: simple_button
     instance:
     - btn0
@@ -59,5 +63,6 @@
   - hardware:has:sensor:si7021
   - hardware:has:display:ls013b7dh03
   - hardware:has:led:2
+  - hardware:has:joystick:skrhaae010
   - hardware:has:button:2
   - hardware:has:memory:spi:mx25r8035f

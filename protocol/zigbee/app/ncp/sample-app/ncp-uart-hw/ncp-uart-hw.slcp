@@ -1,10 +1,10 @@
 project_name: "ncp-uart-hw"
-label: "ncp-uart-hw"
+label: "Zigbee - NCP ncp-uart-hw"
 package: "Zigbee"
 category: "Zigbee Application"
 quality: "production"
 
-description: |-
+description: >
   This network coprocessor (NCP) application supports communication with a host
   application over a UART interface with hardware flow control. This NCP
   application can be built as configured, or optionally can be augmented with
@@ -12,10 +12,11 @@ description: |-
   definition/handling, and messaging with the host.
 
   Steps to create a ECC enabled application for Smart Energy Profile application:
-  1) Download the side package 'EmberZnet-ECC.zip'
+  1) Download the side package 'EmberZnet-Smart-Energy.zip'
   2) Extract the side package over installed SDK.
   3) Enable 'CBKE 163k1' and/or 'CBKE 283k1' components depending on the use case.
   4) Build the application.
+author: "Silicon Laboratories, Inc."
 
 component:
   - id: "iostream_usart"
@@ -28,7 +29,6 @@ component:
   - id: "zigbee_source_route"
   - id: "zigbee_binding_table"
   - id: "zigbee_end_device_bind"
-  - id: "zigbee_multi_network_stub"
   - id: "zigbee_packet_validate"
   - id: "zigbee_gp"
   - id: "zigbee_r22_support"
@@ -86,3 +86,11 @@ ui_hints:
   highlight:
     - path: readme.html
       focus: false
+
+filter:
+  - name: "Wireless Technology"
+    value: ["Zigbee"]
+  - name: "Device Type"
+    value: ["NCP"]
+  - name: "Project Difficulty"
+    value: ["Advanced"]

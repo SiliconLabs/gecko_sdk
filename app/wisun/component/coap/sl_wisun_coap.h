@@ -3,7 +3,7 @@
  * @brief Wi-SUN CoAP handler
  *******************************************************************************
  * # License
- * <b>Copyright 2019 Silicon Laboratories Inc. www.silabs.com</b>
+ * <b>Copyright 2022 Silicon Laboratories Inc. www.silabs.com</b>
  *******************************************************************************
  *
  * SPDX-License-Identifier: Zlib
@@ -42,7 +42,7 @@ extern "C" {
 #include "sn_config.h"
 #include "sn_coap_protocol.h"
 #include "sn_coap_header.h"
-#include "sl_wisun_coap_mem.h"
+#include "sli_wisun_coap_mem.h"
 
 /**************************************************************************//**
  * @addtogroup SL_WISUN_COAP_API CoAP
@@ -59,6 +59,9 @@ extern "C" {
  * @ingroup SL_WISUN_COAP
  * @{
  *****************************************************************************/
+/// Maximum size of the URI path string
+#define SL_WISUN_COAP_URI_PATH_MAX_SIZE   (128U)
+
 /// Wi-SUN CoAP handler for Wi-SUN component
 typedef struct coap_s sl_wisun_coap_handle_t;
 
@@ -120,7 +123,7 @@ typedef struct sl_wisun_coap {
 
 /**************************************************************************//**
  * @brief Initialize Wi-SUN CoAP.
- * @details Set the Wi-SUN CoAP internal descriptor
+ * @details Set the Wi-SUN CoAP internal descriptor.
  * @param[in] tx_callback TX callback, if it's NULL, the default callback is applied
  * @param[in] rx_callback RX callback, if it's NULL, the default callback is applied
  * @param[in] version CoAP version
@@ -133,7 +136,7 @@ bool sl_wisun_coap_init(const sl_wisun_coap_tx_callback tx_callback,
 
 /**************************************************************************//**
  * @brief Initialize Wi-SUN CoAP default.
- * @details initialize the internal descriptor with default values
+ * @details Initializes the internal descriptor with default values.
  * @return true Proper initialization
  * @return false Error
  *****************************************************************************/
@@ -144,7 +147,7 @@ static inline bool sl_wisun_coap_init_default(void)
 
 /**************************************************************************//**
  * @brief Get lib state.
- * @details Get initialized state of the CoAP library to decide init is need or not
+ * @details Gets the initialized state of the CoAP library to decide whether the init is needed.
  * @return true Initialized
  * @return false Not initialized
  *****************************************************************************/
@@ -152,7 +155,7 @@ bool sl_wisun_coap_is_initialized(void);
 
 /**************************************************************************//**
  * @brief Implement malloc.
- * @details OS dependent thread-safe implementation
+ * @details OS-dependent thread-safe implementation.
  * @param size size for malloc
  * @return void* the memory pointer
  *****************************************************************************/
@@ -160,7 +163,7 @@ void *sl_wisun_coap_malloc(uint16_t size);
 
 /**************************************************************************//**
  * @brief Free Wi-SUN CoAP.
- * @details OS dependent thread-safe implementation
+ * @details OS-dependent thread-safe implementation.
  * @param addr address ptr
  *****************************************************************************/
 void sl_wisun_coap_free(void *addr);
@@ -176,7 +179,7 @@ sl_wisun_coap_packet_t* sl_wisun_coap_parser(uint16_t packet_data_len,
 
 /**************************************************************************//**
  * @brief CoAP packet calc size wrapper.
- * @details Used sn_coap_builder_calc_needed_packet_data_size
+ * @details Used sn_coap_builder_calc_needed_packet_data_size.
  * @param[in] message message ptr
  * @return uint16_t size
  *****************************************************************************/
@@ -184,11 +187,11 @@ uint16_t sl_wisun_coap_builder_calc_size(const sl_wisun_coap_packet_t *message);
 
 /**************************************************************************//**
  * @brief CoAP message builder Wi-SUN.
- * @details Used sl_wisun_coap_builder
+ * @details Used sl_wisun_coap_builder.
  * @param[out] dest_buff destination buffer for raw message
  * @param[in] message message structure
  * @return int16_t On success bytes of built message,
- *                 on failure -1 if coap header structure is wrong
+ *                 on failure -1 if CoAP header structure is wrong
  *                            -2 if NULL ptr set as argument
  *****************************************************************************/
 int16_t sl_wisun_coap_builder(uint8_t *dest_buff,
@@ -196,7 +199,7 @@ int16_t sl_wisun_coap_builder(uint8_t *dest_buff,
 
 /**************************************************************************//**
  * @brief Build generic response for request wrapper function.
- * @details Used sn_coap_build_response
+ * @details Used sn_coap_build_response.
  * @param[in] req request
  * @param[in] msg_code message code to build
  * @return sl_wisun_coap_header_t* built packet ptr on the heap
@@ -225,7 +228,7 @@ const char *sl_wisun_coap_get_parsed_uri_path(char *dest_buff,
 
 /**************************************************************************//**
  * @brief Get payload.
- * @details Thread safe deep copy
+ * @details Thread-safe deep copy
  * @param[in] source_packet source packet
  * @param[out] dest_buff destination buffer
  * @param[in] buff_length length of destination buffer
@@ -237,7 +240,7 @@ bool sl_wisun_coap_get_payload(const sl_wisun_coap_packet_t *source_packet,
                                const uint16_t buff_length);
 /**************************************************************************//**
  * @brief Set payload.
- * @details Set the corresponding packet member ptr and length
+ * @details Set the corresponding packet member ptr and length.
  * @param[out] dest_packet destination packet
  * @param[in] source_buff source buffer
  * @param[in] buff_length source buffer length
@@ -247,7 +250,7 @@ void sl_wisun_coap_set_payload(sl_wisun_coap_packet_t *dest_packet,
                                const uint16_t buff_length);
 /**************************************************************************//**
  * @brief Get token.
- * @details Thread safe deep copy
+ * @details Thread-safe deep copy
  * @param[in] source_packet source packet
  * @param[out] dest_buff destination buffer
  * @param[in] buff_length length of destination buffer
@@ -260,7 +263,7 @@ bool sl_wisun_coap_get_token(const sl_wisun_coap_packet_t *source_packet,
 
 /**************************************************************************//**
  * @brief Set token.
- * @details Set the corresponding packet member ptr and length
+ * @details Set the corresponding packet member ptr and length.
  * @param dest_packet destination packet
  * @param source_buff source buffer
  * @param buff_length source buffer length
@@ -271,7 +274,7 @@ void sl_wisun_coap_set_token(sl_wisun_coap_packet_t *dest_packet,
 
 /**************************************************************************//**
  * @brief Get options list.
- * @details Thread safe deep copy
+ * @details Thread-safe deep copy
  * @param source_packet source packet
  * @param dest destination option list structure
  * @return true Success
@@ -306,7 +309,7 @@ void sl_wisun_coap_destroy_packet(sl_wisun_coap_packet_t *packet);
 
 /**************************************************************************//**
  * @brief Compare URI path with the stored from the previous parsed packet.
- * @details Thread safe way to compare URI pathes.
+ * @details Thread-safe way to compare URI paths.
  *          The buffer length must be set, eg strlen(uri_path) + 1
  * @param uri_path URI path
  * @param buff_max_len buffer size of the URI path
@@ -315,6 +318,20 @@ void sl_wisun_coap_destroy_packet(sl_wisun_coap_packet_t *packet);
  *****************************************************************************/
 bool sl_wisun_coap_compare_uri_path(const char *uri_path,
                                     const uint16_t buff_max_len);
+
+/**************************************************************************//**
+ * @brief Helper function to compare two strings with known lengths.
+ * @param str1 pointer to the first string
+ * @param len1 length of the first string
+ * @param str2 pointer to the other string
+ * @param len2 length of the other string
+ * @return true Matched
+ * @return false Not matched
+ *****************************************************************************/
+bool sl_wisun_coap_compare(const char* str1,
+                           const uint16_t len1,
+                           const char* str2,
+                           const uint16_t len2);
 
 /** @}*/
 

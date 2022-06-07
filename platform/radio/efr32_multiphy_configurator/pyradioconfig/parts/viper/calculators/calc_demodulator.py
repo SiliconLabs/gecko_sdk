@@ -14,22 +14,8 @@ from scipy import signal as sp
 
 class Calc_Demodulator_Viper(Calc_Demodulator_Bobcat):
 
-#    def calc_dec0_reg(self,model):
-#        #This function writes the register for dec0
-#
-#        #Load model variables into local variables
-#        dec0_value = model.vars.dec0.value
-#        fefilt_selected = model.vars.fefilt_selected.value
-#
-#        #Define a constant list for the (register data, value pairs)
-#        dec0_list = [(0, 3), (2, 4), (4, 8)]
-#        # Search for the value in the list
-#        for dec0_pair in dec0_list:
-#            if (dec0_pair[1]==dec0_value):
-#                dec0_reg = dec0_pair[0]
-#
-#        #Write the registers
-#        self._reg_write_by_name_concat(model, fefilt_selected, 'CF_DEC0', dec0_reg)
+    # override inhereited variable defining threshold for _channel_filter_clocks_valid
+    chf_required_clks_per_sample = 3  # fixed in PGVIPER-248
 
     def calc_dec1_reg(self, model):
         #This function writes the register for dec1

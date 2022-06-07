@@ -31,9 +31,8 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include "aoa_cte.h"
-#include "system.h"
+#include "sl_common.h"
 #include "aoa_cte_config.h"
-#include "app_log.h"
 
 // -----------------------------------------------------------------------------
 // Module variables.
@@ -71,14 +70,6 @@ sl_status_t aoa_cte_bt_on_event(sl_bt_msg_t *evt)
                                        &cte_switch_pattern_size);
     if (sc != SL_STATUS_OK) {
       return sc;
-    } else {
-      app_log_debug("CTE switch pattern:");
-      if (_app_log_check_level(APP_LOG_LEVEL_DEBUG)) {
-        for (uint8_t i = 0; i < cte_switch_pattern_size; i++) {
-          app_log(" %d", cte_switch_pattern[i]);
-        }
-        app_log_nl();
-      }
     }
   }
 

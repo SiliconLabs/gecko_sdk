@@ -313,8 +313,8 @@ void sl_bt_on_event(sl_bt_msg_t* evt)
           }
         }
       } else if (gattdb_radioMode == evt->data.evt_gatt_server_user_write_request.characteristic) {
-        uint8_t tmp_value = range_test_settings.radio_mode,
-                update_needed = check_and_write_uint8_value(&(tmp_value), gattdb_radioMode_valid_range, 2, evt);
+        uint8_t tmp_value = range_test_settings.radio_mode;
+        uint8_t update_needed = check_and_write_uint8_value(&(tmp_value), gattdb_radioMode_valid_range, 2, evt);
         range_test_settings.radio_mode = tmp_value;
         if (update_needed) {
           // backwards compatibiliy
@@ -393,7 +393,7 @@ void sl_bt_on_event(sl_bt_msg_t* evt)
         answer_read_request((uint8_t*)&phy_list, phy_list_length, evt);
       } else if (gattdb_radioMode == evt->data.evt_gatt_server_user_read_request.characteristic) {
         uint8_t radio_mode = range_test_settings.radio_mode + 1;
-        answer_read_request((uint8_t*)&radio_mode, 1, evt);
+        answer_read_request(&radio_mode, 1, evt);
       } else if (gattdb_frequency == evt->data.evt_gatt_server_user_read_request.characteristic) {
         uint32_t base_frequency = 0;
         uint32_t channel_spacing = 0;
@@ -519,8 +519,8 @@ void advertise_received_data(int8_t rssi, uint16_t packet_count, uint16_t receiv
   buf[i++] = (uint8_t)(received_packets & 0x00FF);          // Number of received packets
   buf[i++] = (uint8_t)((received_packets >> 8) & 0x00FF);   // Number of received packets
 
-  bt_status = sl_bt_advertiser_set_data(advertising_set_handle, 0, i, buf);
-  app_assert_status_f(bt_status, "sl_bt_advertiser_set_data failed with %#X\n", bt_status);
+  bt_status = sl_bt_legacy_advertiser_set_data(advertising_set_handle, sl_bt_advertiser_advertising_data_packet, i, buf);
+  app_assert_status_f(bt_status, "sl_bt_legacy_advertiser_set_data failed with %#X\n", bt_status);
 
   // Configure advertising to send out only 1 packet.
   bt_status = sl_bt_advertiser_set_timing(
@@ -532,11 +532,10 @@ void advertise_received_data(int8_t rssi, uint16_t packet_count, uint16_t receiv
   app_assert_status_f(bt_status, "sl_bt_advertiser_set_timing failed with %#X\n", bt_status);
 
   // Start advertising.
-  bt_status = sl_bt_advertiser_start(
+  bt_status = sl_bt_legacy_advertiser_start(
     advertising_set_handle,                    // advertising set handle
-    advertiser_user_data,                  // discoverable mode
-    advertiser_non_connectable);     // connectable mode
-  app_assert_status_f(bt_status, "sl_bt_advertiser_start failed with %#X\n", bt_status);
+    sl_bt_legacy_advertiser_non_connectable);     // connectable mode
+  app_assert_status_f(bt_status, "sl_bt_legacy_advertiser_start failed with %#X\n", bt_status);
 //  APP_LOG("[info] [B] Advertise RSSI\n");
 }
 
@@ -778,8 +777,8 @@ static void start_advertising(void)
   buf[i++] = 0x06;              // Incomplete List of 128-bit Service Class UUID
   memcpy(&buf[i], uuid, sizeof(uuid)); i += sizeof(uuid);
 
-  bt_status = sl_bt_advertiser_set_data(advertising_set_handle, 0, i, buf);
-  app_assert_status_f(bt_status, "sl_bt_advertiser_set_data failed with %#X\n", bt_status);
+  bt_status = sl_bt_legacy_advertiser_set_data(advertising_set_handle, sl_bt_advertiser_advertising_data_packet, i, buf);
+  app_assert_status_f(bt_status, "sl_bt_legacy_advertiser_set_data failed with %#X\n", bt_status);
 
   // Set advertising interval to 100ms.
   bt_status = sl_bt_advertiser_set_timing(
@@ -791,11 +790,10 @@ static void start_advertising(void)
   app_assert_status_f(bt_status, "sl_bt_advertiser_set_timing failed with %#X\n", bt_status);
 
   // Start advertising and enable connections.
-  bt_status = sl_bt_advertiser_start(
+  bt_status = sl_bt_legacy_advertiser_start(
     advertising_set_handle,                    // advertising set handle
-    advertiser_user_data,                  // discoverable mode
-    advertiser_connectable_scannable);         // connectable mode
-  app_assert_status_f(bt_status, "sl_bt_advertiser_start failed with %#X\n", bt_status);
+    sl_bt_legacy_advertiser_connectable);         // connectable mode
+  app_assert_status_f(bt_status, "sl_bt_legacy_advertiser_start failed with %#X\n", bt_status);
 
   app_log_info("[info] [B] Start advertising\n");
 }
@@ -855,7 +853,8 @@ static bool check_and_write_uint8_value(uint8_t *update_value_byte, uint16_t ran
   uint8_t range_buff[4];
   sl_status_t bt_status = SL_STATUS_OK;
   uint8_t value;
-  uint8_t max_range, min_range;
+  uint8_t max_range;
+  uint8_t min_range;
   bool success = false;
 
   bt_status = sl_bt_gatt_server_read_attribute_value(range_attribute, 0, range_max_size, &read_length, range_buff);
@@ -902,7 +901,8 @@ static bool check_and_write_uint16_value(uint16_t *update_value_byte, uint16_t r
   uint8_t range_buff[4];
   sl_status_t bt_status = SL_STATUS_OK;
   uint16_t value;
-  uint16_t max_range, min_range;
+  uint16_t max_range;
+  uint16_t min_range;
   bool success = false;
 
   bt_status = sl_bt_gatt_server_read_attribute_value(range_attribute, 0, range_max_size, &read_length, range_buff);
@@ -950,7 +950,8 @@ static bool check_and_write_int16_value(int16_t *update_value_byte, uint16_t ran
   uint8_t range_buff[4];
   sl_status_t bt_status = SL_STATUS_OK;
   int16_t value;
-  int16_t max_range, min_range;
+  int16_t max_range;
+  int16_t min_range;
   bool success = false;
 
   bt_status = sl_bt_gatt_server_read_attribute_value(range_attribute, 0, range_max_size, &read_length, range_buff);

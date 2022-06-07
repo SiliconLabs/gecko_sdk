@@ -7,6 +7,15 @@ description: >
   The model is continuously fed with values ranging from 0 to 2pi, and the 
   output of the model is used to control the intensity of an LED. 
 category: Example|Machine Learning
+filter:
+  - name: "Device Type"
+    value: ["SoC"]
+  - name: "MCU"
+    value: ["32-bit MCU"]
+  - name: "Project Difficulty"
+    value: ["Advanced"]
+  - name: "Capability"
+    value: ["Machine Learning"]
 include:
   - path: .
     file_list:
@@ -53,6 +62,8 @@ configuration:
 toolchain_settings:
   - option: gcc_compiler_option
     value: "-Wno-unused-parameter"
+  - option: gcc_compiler_option
+    value: "-Wno-missing-field-initializers"
   - option: gcc_linker_option
     value: "-u _printf_float"
 readme:

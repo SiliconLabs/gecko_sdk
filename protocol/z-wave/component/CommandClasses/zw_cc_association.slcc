@@ -1,7 +1,18 @@
 id: zw_cc_association
 label: Association Command Class
 category: Z-Wave|Command Classes
-description: Association Command Class!
+description: >
+  This component includes several Command classes.
+
+  Association Command Class is used to manage associations to NodeID destinations.
+  A NodeID destination may be a simple device or the Root Device of a Multi Channel device.
+  
+  Multi Channel Association Command Class is used to manage associations
+  to Multi Channel End Point destinations as well as to NodeID destinations
+  
+  Association Group Information (AGI) Command Class allows a node to advertise
+  the capabilities of each association group supported by a given application resource.
+  
 package: Z-Wave
 quality: production
 source:
@@ -22,4 +33,7 @@ provides:
   - name: zw_cc_association
 requires:
   - name: zw_core
+
+documentation:
+  url: "https://sdomembers.z-wavealliance.org/document/dl/643" 
   

@@ -35,6 +35,7 @@
 #if defined(WDOG_COUNT) && (WDOG_COUNT > 0)
 
 #include <stdbool.h>
+#include "sl_common.h"
 
 #ifdef __cplusplus
 extern "C" {
@@ -129,6 +130,20 @@ typedef struct {
   /** Counter keeps running during debug halt. */
   bool                   debugRun;
 
+#if defined(_WDOG_CTRL_CLRSRC_MASK) \
+  || defined(_WDOG_CFG_CLRSRC_MASK)
+  /** Select WDOG clear source:
+   *  False: Write to the clear bit will clear the WDOG counter
+   *  True: Rising edge on the PRS Source 0 will clear the WDOG counter
+   *  */
+  bool                   clrSrc;
+#endif
+
+#if defined(_WDOG_CFG_EM1RUN_MASK)
+  /** Counter keeps running when in EM1. Available for series2. */
+  bool                   em1Run;
+#endif
+
   /** Counter keeps running when in EM2. */
   bool                   em2Run;
 
@@ -137,6 +152,14 @@ typedef struct {
 
   /** Block EMU from entering EM4. */
   bool                   em4Block;
+
+#if defined(_WDOG_CFG_MASK)
+  /** When set, a PRS Source 0 missing event will trigger a WDOG reset. */
+  bool                   prs0MissRstEn;
+
+  /** When set, a PRS Source 1 missing event will trigger a WDOG reset. */
+  bool                   prs1MissRstEn;
+#endif
 
   /** Block SW from disabling LFRCO/LFXO oscillators. */
 #if defined(_WDOG_CTRL_SWOSCBLOCK_MASK)
@@ -174,19 +197,40 @@ typedef struct {
 } WDOG_Init_TypeDef;
 
 /** Suggested default configuration for WDOG initialization structure. */
-#if defined(_WDOG_CFG_MASK)
-#define WDOG_INIT_DEFAULT                                                       \
-  {                                                                             \
-    true,                     /* Start Watchdog when initialization is done. */ \
-    false,                    /* WDOG is not counting during debug halt. */     \
-    false,                    /* WDOG is not counting when in EM2. */           \
-    false,                    /* WDOG is not counting when in EM3. */           \
-    false,                    /* EM4 can be entered. */                         \
-    false,                    /* Do not lock WDOG configuration. */             \
-    wdogPeriod_256k,          /* Set longest possible timeout period. */        \
-    wdogWarnDisable,          /* Disable warning interrupt. */                  \
-    wdogIllegalWindowDisable, /* Disable illegal window interrupt. */           \
-    false                     /* Do not disable reset. */                       \
+#if defined(_WDOG_CFG_MASK) && defined(_WDOG_CFG_EM1RUN_MASK)
+#define WDOG_INIT_DEFAULT                                                                     \
+  {                                                                                           \
+    true,                     /* Start Watchdog when initialization is done. */               \
+    false,                    /* WDOG is not counting during debug halt. */                   \
+    false,                    /* The clear bit will clear the WDOG counter. */                \
+    false,                    /* WDOG is not counting when in EM1. */                         \
+    false,                    /* WDOG is not counting when in EM2. */                         \
+    false,                    /* WDOG is not counting when in EM3. */                         \
+    false,                    /* EM4 can be entered. */                                       \
+    false,                    /* PRS Source 0 missing event will not trigger a WDOG reset. */ \
+    false,                    /* PRS Source 1 missing event will not trigger a WDOG reset. */ \
+    false,                    /* Do not lock WDOG configuration. */                           \
+    wdogPeriod_256k,          /* Set longest possible timeout period. */                      \
+    wdogWarnDisable,          /* Disable warning interrupt. */                                \
+    wdogIllegalWindowDisable, /* Disable illegal window interrupt. */                         \
+    false                     /* Do not disable reset. */                                     \
+  }
+#elif defined(_WDOG_CFG_MASK)
+#define WDOG_INIT_DEFAULT                                                                     \
+  {                                                                                           \
+    true,                     /* Start Watchdog when initialization is done. */               \
+    false,                    /* WDOG is not counting during debug halt. */                   \
+    false,                    /* The clear bit will clear the WDOG counter. */                \
+    false,                    /* WDOG is not counting when in EM2. */                         \
+    false,                    /* WDOG is not counting when in EM3. */                         \
+    false,                    /* EM4 can be entered. */                                       \
+    false,                    /* PRS Source 0 missing event will not trigger a WDOG reset. */ \
+    false,                    /* PRS Source 1 missing event will not trigger a WDOG reset. */ \
+    false,                    /* Do not lock WDOG configuration. */                           \
+    wdogPeriod_256k,          /* Set longest possible timeout period. */                      \
+    wdogWarnDisable,          /* Disable warning interrupt. */                                \
+    wdogIllegalWindowDisable, /* Disable illegal window interrupt. */                         \
+    false                     /* Do not disable reset. */                                     \
   }
 #elif defined(_WDOG_CTRL_WARNSEL_MASK)   \
   && defined(_WDOG_CTRL_WDOGRSTDIS_MASK) \
@@ -195,6 +239,7 @@ typedef struct {
   {                                                                             \
     true,                     /* Start Watchdog when initialization is done. */ \
     false,                    /* WDOG is not counting during debug halt. */     \
+    false,                    /* The clear bit will clear the WDOG counter. */  \
     false,                    /* WDOG is not counting when in EM2. */           \
     false,                    /* WDOG is not counting when in EM3. */           \
     false,                    /* EM4 can be entered. */                         \
@@ -412,7 +457,7 @@ __STATIC_INLINE bool WDOGn_IsLocked(WDOG_TypeDef *wdog)
  *   Set to true to enable Watchdog, false to disable. Watchdog cannot be
  *   disabled if Watchdog has been locked.
  ******************************************************************************/
-__STATIC_INLINE void WDOG_Enable(bool enable)
+__STATIC_INLINE SL_DEPRECATED_API_SDK_4_1 void WDOG_Enable(bool enable)
 {
   WDOGn_Enable(DEFAULT_WDOG, enable);
 }
@@ -425,7 +470,7 @@ __STATIC_INLINE void WDOG_Enable(bool enable)
  *   Deprecated function. New code should use @ref WDOGn_Feed().
  *   This function uses @ref DEFAULT_WDOG.
  ******************************************************************************/
-__STATIC_INLINE void WDOG_Feed(void)
+__STATIC_INLINE SL_DEPRECATED_API_SDK_4_1 void WDOG_Feed(void)
 {
   WDOGn_Feed(DEFAULT_WDOG);
 }
@@ -443,7 +488,7 @@ __STATIC_INLINE void WDOG_Feed(void)
  *   Structure holding Watchdog configuration. A default setting
  *   #WDOG_INIT_DEFAULT is available for initialization.
  ******************************************************************************/
-__STATIC_INLINE void WDOG_Init(const WDOG_Init_TypeDef *init)
+__STATIC_INLINE SL_DEPRECATED_API_SDK_4_1 void WDOG_Init(const WDOG_Init_TypeDef *init)
 {
   WDOGn_Init(DEFAULT_WDOG, init);
 }
@@ -456,7 +501,7 @@ __STATIC_INLINE void WDOG_Init(const WDOG_Init_TypeDef *init)
  *   Deprecated function. New code should use @ref WDOGn_Lock().
  *   This function uses @ref DEFAULT_WDOG.
  ******************************************************************************/
-__STATIC_INLINE void WDOG_Lock(void)
+__STATIC_INLINE SL_DEPRECATED_API_SDK_4_1 void WDOG_Lock(void)
 {
   WDOGn_Lock(DEFAULT_WDOG);
 }
@@ -472,7 +517,7 @@ __STATIC_INLINE void WDOG_Lock(void)
  * @return
  *   True if Watchdog is enabled.
  ******************************************************************************/
-__STATIC_INLINE bool WDOG_IsEnabled(void)
+__STATIC_INLINE SL_DEPRECATED_API_SDK_4_1 bool WDOG_IsEnabled(void)
 {
   return WDOGn_IsEnabled(DEFAULT_WDOG);
 }
@@ -488,7 +533,7 @@ __STATIC_INLINE bool WDOG_IsEnabled(void)
  * @return
  *   True if Watchdog is locked.
  ******************************************************************************/
-__STATIC_INLINE bool WDOG_IsLocked(void)
+__STATIC_INLINE SL_DEPRECATED_API_SDK_4_1 bool WDOG_IsLocked(void)
 {
   return WDOGn_IsLocked(DEFAULT_WDOG);
 }

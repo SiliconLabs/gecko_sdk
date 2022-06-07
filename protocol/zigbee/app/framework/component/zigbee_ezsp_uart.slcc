@@ -12,7 +12,9 @@ provides:
 requires:
    - name: "zigbee_ezsp"
    - name: "device_host"
-   - name: "cli_ash_host"
+   - name: "legacy_host_ash"
+   # cli_threaded_host component is required to correctly read I/O in a nonblocking fashion
+   - name: "cli_threaded_host"
      condition:
       - cli
 define:
@@ -22,7 +24,6 @@ source:
   - path: "protocol/zigbee/app/util/ezsp/serial-interface-uart.c"
   - path: "protocol/zigbee/app/ezsp-host/ash/ash-host-ui.c"
   - path: "protocol/zigbee/app/ezsp-host/ash/ash-host.c"
-  - path: "platform/service/legacy_ncp_ash/src/ash-common.c"
   - path: "protocol/zigbee/app/util/gateway/backchannel-stub.c"
     condition:
       - zigbee_host_simulation
@@ -36,9 +37,6 @@ source:
     condition:
       - zigbee_host_simulation
 include:
-  - path: "platform/service/"
-    file_list:
-      - path: legacy_ncp_ash/inc/ash-protocol.h
   - path: protocol/zigbee/app/ezsp-host/ash
     file_list:
       - path: ash-host.h

@@ -1,5 +1,6 @@
 /**
  * @file
+ * @copyright 2021 Silicon Laboratories Inc.
  */
 
 #ifndef _ZW_BUILD_NO_H_

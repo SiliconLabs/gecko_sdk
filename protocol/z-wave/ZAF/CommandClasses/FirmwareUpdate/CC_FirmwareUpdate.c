@@ -11,15 +11,10 @@
 #include <ZW_TransportLayer.h>
 #include <ota_util.h>
 #include <CRC.h>
-#include <CC_Version.h>
 #include <string.h>
 #include <CC_ManufacturerSpecific.h>
 #include "ZAF_tx_mutex.h"
-#ifdef EFR32ZG
-#ifndef ZWAVE_SERIES_800
-#include<btl_interface.h>
-#endif
-#endif
+#include <zaf_config_api.h>
 
 //#define DEBUGPRINT
 #include "DebugPrint.h"
@@ -67,30 +62,35 @@ CC_FirmwareUpdate_handler(
 
       uint16_t manufacturerID = 0;
       uint16_t productID      = 0;
+      uint8_t numberOfFirmwareTargets;
       CC_ManufacturerSpecific_ManufacturerSpecificGet_handler(&manufacturerID, &productID);
 
       pTxBuf->ZW_FirmwareMdReport1byteV5Frame.cmdClass = COMMAND_CLASS_FIRMWARE_UPDATE_MD_V5;
       pTxBuf->ZW_FirmwareMdReport1byteV5Frame.cmd = FIRMWARE_MD_REPORT_V5;
       pTxBuf->ZW_FirmwareMdReport1byteV5Frame.manufacturerId1 = (uint8_t)(manufacturerID >> 8);
       pTxBuf->ZW_FirmwareMdReport1byteV5Frame.manufacturerId2 = (uint8_t)(manufacturerID & 0xFF);
-      pTxBuf->ZW_FirmwareMdReport1byteV5Frame.firmware0Id1 = (uint8_t)(handleFirmWareIdGet(0) >> 8);
-      pTxBuf->ZW_FirmwareMdReport1byteV5Frame.firmware0Id2 = (uint8_t)(handleFirmWareIdGet(0) & 0xff);
+      pTxBuf->ZW_FirmwareMdReport1byteV5Frame.firmware0Id1 = (uint8_t)(handleFirmWareIdGetExtended(0) >> 8);
+      pTxBuf->ZW_FirmwareMdReport1byteV5Frame.firmware0Id2 = (uint8_t)(handleFirmWareIdGetExtended(0) & 0xff);
       pTxBuf->ZW_FirmwareMdReport1byteV5Frame.firmware0Checksum1 = 0x00; // Checksum N/A for SDK7
       pTxBuf->ZW_FirmwareMdReport1byteV5Frame.firmware0Checksum2 = 0x00; // Checksum N/A for SDK7
       pTxBuf->ZW_FirmwareMdReport1byteV5Frame.firmwareUpgradable = 0xFF; // Hardcode to upgradable.
-      pTxBuf->ZW_FirmwareMdReport1byteV5Frame.numberOfFirmwareTargets = CC_Version_getNumberOfFirmwareTargets_handler() - 1;
+      numberOfFirmwareTargets = zaf_config_get_firmware_target_count();
+      if(zaf_config_get_bootloader_upgradable()) {
+        numberOfFirmwareTargets++;
+      }
+      pTxBuf->ZW_FirmwareMdReport1byteV5Frame.numberOfFirmwareTargets = numberOfFirmwareTargets - 1; /* -1 : Firmware version 0 */
       uint16_t maxFragmentSize = handleCommandClassFirmwareUpdateMaxFragmentSize();
       pTxBuf->ZW_FirmwareMdReport1byteV5Frame.maxFragmentSize1 = (uint8_t)(maxFragmentSize >> 8);
       pTxBuf->ZW_FirmwareMdReport1byteV5Frame.maxFragmentSize2 = (uint8_t)maxFragmentSize;
       pData = (uint8_t *)pTxBuf;
       uint8_t  i;
-      for (i = 1; i < handleNbrFirmwareVersions(); i++)
+      for (i = 1; i < numberOfFirmwareTargets; i++)
       {
-        *(pData + 10 + (2 * i)) = (uint8_t)(handleFirmWareIdGet(i) >> 8);
-        *(pData + 10 + (2 * i) + 1) = (uint8_t)(handleFirmWareIdGet(i) & 0xff);
+        *(pData + 10 + (2 * i)) = (uint8_t)(handleFirmWareIdGetExtended(i) >> 8);
+        *(pData + 10 + (2 * i) + 1) = (uint8_t)(handleFirmWareIdGetExtended(i) & 0xff);
       }
       // Fill out the hardwareVersion field, located right after the 0-n extra firmwareId fields
-      *(pData + 10 + (2 * i)) = CC_Version_GetHardwareVersion_handler();
+      *(pData + 10 + (2 * i)) = zaf_config_get_hardware_version();
 
       if ( ZAF_ENQUEUE_STATUS_SUCCESS != Transport_SendResponseEP(
              (uint8_t *)pTxBuf,
@@ -324,7 +324,7 @@ JOB_STATUS CC_FirmwareUpdate_ActivationStatusReport_tx(
   // Activation supports the Z-Wave firmware only.
   const uint8_t FIRMWARE_TARGET = 0;
 
-  uint16_t firmwareID = handleFirmWareIdGet(FIRMWARE_TARGET);
+  uint16_t firmwareID = handleFirmWareIdGetExtended(FIRMWARE_TARGET);
 
   pTxBuf->ZW_FirmwareUpdateActivationStatusReportV5Frame.cmdClass = COMMAND_CLASS_FIRMWARE_UPDATE_MD_V5;
   pTxBuf->ZW_FirmwareUpdateActivationStatusReportV5Frame.cmd = FIRMWARE_UPDATE_ACTIVATION_STATUS_REPORT_V5;
@@ -336,7 +336,7 @@ JOB_STATUS CC_FirmwareUpdate_ActivationStatusReport_tx(
   pTxBuf->ZW_FirmwareUpdateActivationStatusReportV5Frame.checksum2 = (uint8_t)(checksum);
   pTxBuf->ZW_FirmwareUpdateActivationStatusReportV5Frame.firmwareTarget = FIRMWARE_TARGET;
   pTxBuf->ZW_FirmwareUpdateActivationStatusReportV5Frame.firmwareUpdateStatus = status;
-  pTxBuf->ZW_FirmwareUpdateActivationStatusReportV5Frame.hardwareVersion = CC_Version_GetHardwareVersion_handler();
+  pTxBuf->ZW_FirmwareUpdateActivationStatusReportV5Frame.hardwareVersion = zaf_config_get_hardware_version();
 
   if(ZAF_ENQUEUE_STATUS_SUCCESS != Transport_SendRequestEP(
       (uint8_t *)pTxBuf,

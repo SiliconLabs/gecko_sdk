@@ -1,13 +1,14 @@
 id: psa_builtin_key_support_se
 package: platform
-label: Support for using externally provisioned keys through PSA
+label: Built-In Keys
 description: >-
   This component provides support for using OTP-provisioned keys through
-  the PSA Crypto API (using the builtin key functionality). For more details
+  the PSA Crypto API (using the built-in key functionality). For more details
   on OTP-provisioned keys, please refer to AN1271.
-category: Platform|Security
+category: Platform|Security|PSA Crypto
 quality: production
 requires:
+  - name: psa_crypto
   - name: psa_driver
   - name: device_has_semailbox
 provides:
@@ -16,4 +17,3 @@ provides:
 template_contribution:
   - name: mbedtls_config
     value: MBEDTLS_PSA_CRYPTO_BUILTIN_KEYS
-    condition: [device_has_semailbox]

@@ -49,6 +49,7 @@ class CALC_FEC_Ocelot(CALC_FEC_Lynx):
                 self._reg_write(model.vars.FRC_CONVGENERATOR_GENERATOR0, 0x6D)
                 self._reg_write(model.vars.FRC_CONVGENERATOR_GENERATOR1, 0x4F)
 
+    def calc_fec_enabled(self, model):
         model.vars.fec_enabled.value = int(model.vars.FRC_FECCTRL_CONVMODE.value != 0)
 
     def calc_postamble_regs(self, model):

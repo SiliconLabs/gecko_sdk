@@ -1,11 +1,12 @@
 project_name: "xncp-led-ncp"
-label: "xncp-led-ncp"
+label: "Zigbee - NCP xncp-led-ncp"
 package: "Zigbee"
 category: "Zigbee Application"
 quality: "production"
 
-description: |-
+description: >
   An extensible network co-processor (xNCP) application with an LED controlled by a HOST.
+author: "Silicon Laboratories, Inc."
 
 component:
   - id: "iostream_usart"
@@ -18,7 +19,6 @@ component:
   - id: "zigbee_source_route"
   - id: "zigbee_binding_table"
   - id: "zigbee_end_device_bind"
-  - id: "zigbee_multi_network_stub"
   - id: "zigbee_packet_validate"
   - id: "zigbee_gp"
   - id: "zigbee_r22_support"
@@ -77,3 +77,12 @@ ui_hints:
   highlight:
     - path: readme.html
       focus: false
+
+filter:
+  - name: "Wireless Technology"
+    value: ["Zigbee"]
+  - name: "Device Type"
+    value: ["NCP"]
+  - name: "Project Difficulty"
+    value: ["Advanced"]
+

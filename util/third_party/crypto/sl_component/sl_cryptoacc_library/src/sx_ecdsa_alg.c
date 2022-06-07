@@ -16,14 +16,17 @@
 
 uint32_t ecdsa_validate_domain(const sx_ecc_curve_t *curve)
 {
+   uint32_t status;
+
    const uint32_t size = sx_ecc_curve_bytesize(curve);
    if (size > ECC_MAX_KEY_SIZE)
       return CRYPTOLIB_UNSUPPORTED_ERR;
    if (curve->params.len != 5 * size && curve->params.len != 6 * size)
       return CRYPTOLIB_INVALID_PARAM;
 
-   uint32_t status;
-   ba414ep_set_command(BA414EP_OPTYPE_ECDSA_PARAM_EVAL, size, BA414EP_BIGEND, curve->pk_flags);
+   status = ba414ep_set_command(BA414EP_OPTYPE_ECDSA_PARAM_EVAL, size, BA414EP_BIGEND, curve->pk_flags);
+   if (status)
+      return status;
    ba414ep_load_curve(curve->params, size, BA414EP_BIGEND, 1);
    status = ba414ep_start_wait_status();
    if (status)
@@ -36,6 +39,7 @@ uint32_t sx_ecdsa_configure_signature(const sx_ecc_curve_t *curve,
                                       block_t formatted_digest,
                                       block_t key)
 {
+   uint32_t status;
    const uint32_t size = sx_ecc_curve_bytesize(curve);
    if (size > ECC_MAX_KEY_SIZE)
       return CRYPTOLIB_UNSUPPORTED_ERR;
@@ -44,7 +48,9 @@ uint32_t sx_ecdsa_configure_signature(const sx_ecc_curve_t *curve,
       return CRYPTOLIB_INVALID_PARAM;
 
    // Set command to enable byte-swap
-   ba414ep_set_command(BA414EP_OPTYPE_ECDSA_SIGN_GEN, size, BA414EP_BIGEND, curve->pk_flags);
+   status = ba414ep_set_command(BA414EP_OPTYPE_ECDSA_SIGN_GEN, size, BA414EP_BIGEND, curve->pk_flags);
+   if (status)
+      return status;
 
    // Load parameters
    ba414ep_load_curve(curve->params, size, BA414EP_BIGEND, 1);
@@ -68,7 +74,7 @@ uint32_t sx_ecdsa_attempt_signature(
          signature.len != 2 * size)
       return CRYPTOLIB_INVALID_PARAM;
 
-   uint8_t  rnd_buff[ECC_MAX_KEY_SIZE];
+   uint8_t  rnd_buff[ECC_MAX_KEY_SIZE] = {0};
    block_t rnd = block_t_convert(rnd_buff, size);
    block_t curve_order = block_t_convert(curve->params.addr + size, size);
    uint32_t status = sx_rng_get_rand_lt_n_blk(rnd, curve_order, rng);
@@ -77,11 +83,13 @@ uint32_t sx_ecdsa_attempt_signature(
    mem2CryptoRAM_rev(rnd, rnd.len, BA414EP_MEMLOC_7);
 
    /* ECDSA signature generation */
-   ba414ep_set_command(
+   status = ba414ep_set_command(
          BA414EP_OPTYPE_ECDSA_SIGN_GEN,
          size,
          BA414EP_BIGEND,
          curve->pk_flags);
+   if (status)
+      return status;
    status = ba414ep_start_wait_status();
 
    if (status & BA414EP_STS_BADSIGNATURE_MASK)
@@ -122,6 +130,7 @@ uint32_t ecdsa_verify_signature_digest(const sx_ecc_curve_t *curve,
                                        block_t key,
                                        block_t signature)
 {
+   uint32_t status;
    const uint32_t size = sx_ecc_curve_bytesize(curve);
    if (size > ECC_MAX_KEY_SIZE)
       return CRYPTOLIB_UNSUPPORTED_ERR;
@@ -130,7 +139,9 @@ uint32_t ecdsa_verify_signature_digest(const sx_ecc_curve_t *curve,
          signature.len != 2 * size)
       return CRYPTOLIB_INVALID_PARAM;
 
-   ba414ep_set_command(BA414EP_OPTYPE_ECDSA_SIGN_VERIF, size, BA414EP_BIGEND, curve->pk_flags);
+   status = ba414ep_set_command(BA414EP_OPTYPE_ECDSA_SIGN_VERIF, size, BA414EP_BIGEND, curve->pk_flags);
+   if (status)
+      return status;
    ba414ep_load_curve(curve->params, size, 1, 1); //TODO FIX ENDIAN
 
    /* Load ECDSA parameters */

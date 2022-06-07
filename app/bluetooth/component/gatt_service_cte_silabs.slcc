@@ -12,8 +12,6 @@ description: >
   and take the largest/smallest value. Insted of this the latest valid value will take effect.
 
   - The Advertising Constant Tone Extension Transmit Duration characteristic is not implemented.
-
-  - The Advertising Constant Tone Extension Interval characteristic has no effect in this component.
 category: Bluetooth|GATT
 quality: production
 root_path: app/bluetooth/common/gatt_service_cte_adv
@@ -27,9 +25,8 @@ provides:
 requires:
   - name: bluetooth_stack
   - name: gatt_configuration
-  - name: bluetooth_feature_advertiser
+  - name: bluetooth_feature_extended_advertiser
   - name: bluetooth_feature_aoa_transmitter
-  - name: bluetooth_feature_periodic_adv
   - name: app_assert
   - name: gatt_service_cte_adv
 template_contribution:

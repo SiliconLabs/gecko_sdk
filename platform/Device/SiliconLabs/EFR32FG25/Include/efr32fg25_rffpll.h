@@ -129,12 +129,12 @@ typedef struct {
 /* Bit fields for RFFPLL STATUS */
 #define _RFFPLL_STATUS_RESETVALUE                0x00000000UL                                 /**< Default value for RFFPLL_STATUS             */
 #define _RFFPLL_STATUS_MASK                      0x800F0113UL                                 /**< Mask for RFFPLL_STATUS                      */
-#define RFFPLL_STATUS_RFFPLLRADIORDY             (0x1UL << 0)                                 /**< PLL Radio Output Ready                      */
+#define RFFPLL_STATUS_RFFPLLRADIORDY             (0x1UL << 0)                                 /**< Radio Clock Output Ready                    */
 #define _RFFPLL_STATUS_RFFPLLRADIORDY_SHIFT      0                                            /**< Shift value for RFFPLL_RFFPLLRADIORDY       */
 #define _RFFPLL_STATUS_RFFPLLRADIORDY_MASK       0x1UL                                        /**< Bit mask for RFFPLL_RFFPLLRADIORDY          */
 #define _RFFPLL_STATUS_RFFPLLRADIORDY_DEFAULT    0x00000000UL                                 /**< Mode DEFAULT for RFFPLL_STATUS              */
 #define RFFPLL_STATUS_RFFPLLRADIORDY_DEFAULT     (_RFFPLL_STATUS_RFFPLLRADIORDY_DEFAULT << 0) /**< Shifted mode DEFAULT for RFFPLL_STATUS      */
-#define RFFPLL_STATUS_RFFPLLSYSRDY               (0x1UL << 1)                                 /**< PLL System Output Ready                     */
+#define RFFPLL_STATUS_RFFPLLSYSRDY               (0x1UL << 1)                                 /**< Digital System Clock Output Ready           */
 #define _RFFPLL_STATUS_RFFPLLSYSRDY_SHIFT        1                                            /**< Shift value for RFFPLL_RFFPLLSYSRDY         */
 #define _RFFPLL_STATUS_RFFPLLSYSRDY_MASK         0x2UL                                        /**< Bit mask for RFFPLL_RFFPLLSYSRDY            */
 #define _RFFPLL_STATUS_RFFPLLSYSRDY_DEFAULT      0x00000000UL                                 /**< Mode DEFAULT for RFFPLL_STATUS              */
@@ -149,7 +149,7 @@ typedef struct {
 #define _RFFPLL_STATUS_HWREQRADIO_MASK           0x10000UL                                    /**< Bit mask for RFFPLL_HWREQRADIO              */
 #define _RFFPLL_STATUS_HWREQRADIO_DEFAULT        0x00000000UL                                 /**< Mode DEFAULT for RFFPLL_STATUS              */
 #define RFFPLL_STATUS_HWREQRADIO_DEFAULT         (_RFFPLL_STATUS_HWREQRADIO_DEFAULT << 16)    /**< Shifted mode DEFAULT for RFFPLL_STATUS      */
-#define RFFPLL_STATUS_HWREQSYS                   (0x1UL << 17)                                /**< PLL System Output Requested                 */
+#define RFFPLL_STATUS_HWREQSYS                   (0x1UL << 17)                                /**< PLL Digital System Output Requested         */
 #define _RFFPLL_STATUS_HWREQSYS_SHIFT            17                                           /**< Shift value for RFFPLL_HWREQSYS             */
 #define _RFFPLL_STATUS_HWREQSYS_MASK             0x20000UL                                    /**< Bit mask for RFFPLL_HWREQSYS                */
 #define _RFFPLL_STATUS_HWREQSYS_DEFAULT          0x00000000UL                                 /**< Mode DEFAULT for RFFPLL_STATUS              */
@@ -183,12 +183,12 @@ typedef struct {
 /* Bit fields for RFFPLL IF */
 #define _RFFPLL_IF_RESETVALUE                    0x00000000UL                             /**< Default value for RFFPLL_IF                 */
 #define _RFFPLL_IF_MASK                          0x00000003UL                             /**< Mask for RFFPLL_IF                          */
-#define RFFPLL_IF_RFFPLLRADIORDY                 (0x1UL << 0)                             /**< PLL Radio Output Ready Interrupt            */
+#define RFFPLL_IF_RFFPLLRADIORDY                 (0x1UL << 0)                             /**< Radio Output Ready Interrupt                */
 #define _RFFPLL_IF_RFFPLLRADIORDY_SHIFT          0                                        /**< Shift value for RFFPLL_RFFPLLRADIORDY       */
 #define _RFFPLL_IF_RFFPLLRADIORDY_MASK           0x1UL                                    /**< Bit mask for RFFPLL_RFFPLLRADIORDY          */
 #define _RFFPLL_IF_RFFPLLRADIORDY_DEFAULT        0x00000000UL                             /**< Mode DEFAULT for RFFPLL_IF                  */
 #define RFFPLL_IF_RFFPLLRADIORDY_DEFAULT         (_RFFPLL_IF_RFFPLLRADIORDY_DEFAULT << 0) /**< Shifted mode DEFAULT for RFFPLL_IF          */
-#define RFFPLL_IF_RFFPLLSYSRDY                   (0x1UL << 1)                             /**< PLL System Output Ready Interrupt           */
+#define RFFPLL_IF_RFFPLLSYSRDY                   (0x1UL << 1)                             /**< Digital System Output Ready Interrupt       */
 #define _RFFPLL_IF_RFFPLLSYSRDY_SHIFT            1                                        /**< Shift value for RFFPLL_RFFPLLSYSRDY         */
 #define _RFFPLL_IF_RFFPLLSYSRDY_MASK             0x2UL                                    /**< Bit mask for RFFPLL_RFFPLLSYSRDY            */
 #define _RFFPLL_IF_RFFPLLSYSRDY_DEFAULT          0x00000000UL                             /**< Mode DEFAULT for RFFPLL_IF                  */
@@ -197,12 +197,12 @@ typedef struct {
 /* Bit fields for RFFPLL IEN */
 #define _RFFPLL_IEN_RESETVALUE                   0x00000000UL                              /**< Default value for RFFPLL_IEN                */
 #define _RFFPLL_IEN_MASK                         0x00000003UL                              /**< Mask for RFFPLL_IEN                         */
-#define RFFPLL_IEN_RFFPLLRADIORDY                (0x1UL << 0)                              /**< PLL Radio Output Ready Interrupt            */
+#define RFFPLL_IEN_RFFPLLRADIORDY                (0x1UL << 0)                              /**< Radio Output Ready Interrupt                */
 #define _RFFPLL_IEN_RFFPLLRADIORDY_SHIFT         0                                         /**< Shift value for RFFPLL_RFFPLLRADIORDY       */
 #define _RFFPLL_IEN_RFFPLLRADIORDY_MASK          0x1UL                                     /**< Bit mask for RFFPLL_RFFPLLRADIORDY          */
 #define _RFFPLL_IEN_RFFPLLRADIORDY_DEFAULT       0x00000000UL                              /**< Mode DEFAULT for RFFPLL_IEN                 */
 #define RFFPLL_IEN_RFFPLLRADIORDY_DEFAULT        (_RFFPLL_IEN_RFFPLLRADIORDY_DEFAULT << 0) /**< Shifted mode DEFAULT for RFFPLL_IEN         */
-#define RFFPLL_IEN_RFFPLLSYSRDY                  (0x1UL << 1)                              /**< PLL System Output Ready Interrupt           */
+#define RFFPLL_IEN_RFFPLLSYSRDY                  (0x1UL << 1)                              /**< Digital System Output Ready Interrupt       */
 #define _RFFPLL_IEN_RFFPLLSYSRDY_SHIFT           1                                         /**< Shift value for RFFPLL_RFFPLLSYSRDY         */
 #define _RFFPLL_IEN_RFFPLLSYSRDY_MASK            0x2UL                                     /**< Bit mask for RFFPLL_RFFPLLSYSRDY            */
 #define _RFFPLL_IEN_RFFPLLSYSRDY_DEFAULT         0x00000000UL                              /**< Mode DEFAULT for RFFPLL_IEN                 */

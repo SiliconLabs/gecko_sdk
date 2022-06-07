@@ -3,7 +3,7 @@
  * @brief BT Mesh Sensor Server Instances
  *******************************************************************************
  * # License
- * <b>Copyright 2020 Silicon Laboratories Inc. www.silabs.com</b>
+ * <b>Copyright 2022 Silicon Laboratories Inc. www.silabs.com</b>
  *******************************************************************************
  *
  * SPDX-License-Identifier: Zlib
@@ -117,6 +117,7 @@
 
 #ifdef SL_CATALOG_SENSOR_RHT_PRESENT
 temperature_8_t get_temperature(void);
+bool            rht_initialized;
 #endif // SL_CATALOG_SENSOR_RHT_PRESENT
 
 #if defined(SL_CATALOG_SENSOR_LIGHT_PRESENT) \
@@ -206,40 +207,78 @@ void sl_btmesh_sensor_server_node_init(void)
 #endif // SL_CATALOG_BTMESH_SENSOR_PEOPLE_COUNT_PRESENT
 #if defined(SL_BOARD_ENABLE_SENSOR_LIGHT) && SL_BOARD_ENABLE_SENSOR_LIGHT
 #ifdef SL_CATALOG_SENSOR_LIGHT_PRESENT
-  (void)sl_sensor_light_init();
+  {
+    sl_status_t sc;
+    sc = sl_sensor_light_init();
+    if (sc != SL_STATUS_OK) {
+      app_log_warning("Ambient light and UV index sensor initialization failed.");
+      app_log_nl();
+    }
+  }
 #endif // SL_CATALOG_SENSOR_LIGHT_PRESENT
 #ifdef SL_CATALOG_SENSOR_LUX_PRESENT
-  (void)sl_sensor_lux_init();
+  {
+    sl_status_t sc;
+    sc = sl_sensor_lux_init();
+    if (sc != SL_STATUS_OK) {
+      app_log_warning("Ambient light sensor initialization failed.");
+      app_log_nl();
+    }
+  }
 #endif // SL_CATALOG_SENSOR_LUX_PRESENT
 #endif // SL_BOARD_ENABLE_SENSOR_LIGHT
 #if defined(SL_CATALOG_SENSOR_RHT_PRESENT) \
   && defined(SL_BOARD_ENABLE_SENSOR_RHT)   \
   && SL_BOARD_ENABLE_SENSOR_RHT
-  (void)sl_sensor_rht_init();
+  {
+    sl_status_t sc;
+    sc = sl_sensor_rht_init();
+    if (sc != SL_STATUS_OK) {
+      app_log_warning("Relative Humidity and Temperature sensor initialization failed.");
+      app_log_nl();
+#if SENSOR_THERMOMETER_CADENCE
+      rht_initialized = false;
+    } else {
+      rht_initialized = true;
+    }
+#else
+    }
+#endif // SENSOR_THERMOMETER_CADENCE
+  }
 #endif // SL_CATALOG_SENSOR_RHT_PRESENT
 
 #if SENSOR_PEOPLE_COUNT_CADENCE && SENSOR_THERMOMETER_CADENCE
   uint32_t update_interval;
   sl_btmesh_sensor_people_count_cadence_init(0);
-  sl_btmesh_sensor_thermometer_cadence_init(get_temperature());
-  update_interval = MIN(SENSOR_THERMOMETER_UPDATE_INTERVAL, SL_BTMESH_SENSOR_PEOPLE_COUNT_UPDATE_INTERVAL_CFG_VAL);
+  if (rht_initialized == true) {
+    sl_btmesh_sensor_thermometer_cadence_init(get_temperature());
+    update_interval = MIN(SENSOR_THERMOMETER_UPDATE_INTERVAL, SL_BTMESH_SENSOR_PEOPLE_COUNT_UPDATE_INTERVAL_CFG_VAL);
+  } else {
+    update_interval = SL_BTMESH_SENSOR_PEOPLE_COUNT_UPDATE_INTERVAL_CFG_VAL;
+  }
 #elif SENSOR_PEOPLE_COUNT_CADENCE
   uint32_t update_interval;
   sl_btmesh_sensor_people_count_cadence_init(0);
   update_interval = SL_BTMESH_SENSOR_PEOPLE_COUNT_UPDATE_INTERVAL_CFG_VAL;
 #elif SENSOR_THERMOMETER_CADENCE
   uint32_t update_interval;
-  sl_btmesh_sensor_thermometer_cadence_init(get_temperature());
-  update_interval = SENSOR_THERMOMETER_UPDATE_INTERVAL;
+  if (rht_initialized == true) {
+    sl_btmesh_sensor_thermometer_cadence_init(get_temperature());
+    update_interval = SENSOR_THERMOMETER_UPDATE_INTERVAL;
+  } else {
+    update_interval = 0;
+  }
 #endif
 
 #if SENSOR_PEOPLE_COUNT_CADENCE || SENSOR_THERMOMETER_CADENCE
-  sl_status_t sc = sl_simple_timer_start(&sensor_server_data_timer,
-                                         ((uint32_t)(pow((double)1.1, update_interval - 64) * 1000)),
-                                         sensor_server_data_timer_cb,
-                                         NO_CALLBACK_DATA,
-                                         true);
-  app_assert_status_f(sc, "Failed to start periodic sensor_server_data_timer\r\n");
+  if (update_interval != 0) {
+    sl_status_t sc = sl_simple_timer_start(&sensor_server_data_timer,
+                                           ((uint32_t)(pow((double)1.1, ((double)update_interval - 64)) * 1000)),
+                                           sensor_server_data_timer_cb,
+                                           NO_CALLBACK_DATA,
+                                           true);
+    app_assert_status_f(sc, "Failed to start periodic sensor_server_data_timer\r\n");
+  }
 #endif
 }
 
@@ -451,14 +490,14 @@ static void handle_sensor_setup_server_get_cadence_request(
 #endif
 
 #if SENSOR_THERMOMETER_CADENCE
-  if (PRESENT_AMBIENT_TEMPERATURE == evt->property_id) {
+  if (evt->property_id == PRESENT_AMBIENT_TEMPERATURE) {
     buff_len = sl_btmesh_sensor_thermometer_get_cadence(SENSOR_CADENCE_BUF_LEN, cadence_status_buf);
     buff_addr = cadence_status_buf;
   }
 #endif // SENSOR_THERMOMETER_CADENCE
 
 #if SENSOR_PEOPLE_COUNT_CADENCE
-  if (PEOPLE_COUNT == evt->property_id) {
+  if (evt->property_id == PEOPLE_COUNT) {
     buff_len = sl_btmesh_sensor_people_count_get_cadence(SENSOR_CADENCE_BUF_LEN, cadence_status_buf);
     buff_addr = cadence_status_buf;
   }
@@ -493,11 +532,11 @@ static void handle_sensor_setup_server_set_cadence_request(
 #endif
 
 #if SENSOR_THERMOMETER_CADENCE
-  if (PRESENT_AMBIENT_TEMPERATURE == evt->property_id) {
+  if (evt->property_id == PRESENT_AMBIENT_TEMPERATURE) {
     // store incoming cadence parameters
     param_validity = sl_btmesh_sensor_thermometer_set_cadence(evt);
-    if ((SET_CADENCE_ACK_FLAG == (evt->flags & SET_CADENCE_ACK_FLAG))
-        && (true == param_validity)) {
+    if (((evt->flags & SET_CADENCE_ACK_FLAG) == SET_CADENCE_ACK_FLAG)
+        && (param_validity == true)) {
       // prepare buffer for cadence status response
       buff_len = sl_btmesh_sensor_thermometer_get_cadence(SENSOR_CADENCE_BUF_LEN, cadence_status_buf);
       buff_addr = cadence_status_buf;
@@ -506,19 +545,19 @@ static void handle_sensor_setup_server_set_cadence_request(
 #endif // SENSOR_THERMOMETER_CADENCE
 
 #if SENSOR_PEOPLE_COUNT_CADENCE
-  if (PEOPLE_COUNT == evt->property_id) {
+  if (evt->property_id == PEOPLE_COUNT) {
     // store incoming cadence parameters
     param_validity = sl_btmesh_sensor_people_count_set_cadence(evt);
-    if ((SET_CADENCE_ACK_FLAG == (evt->flags & SET_CADENCE_ACK_FLAG))
-        && (true == param_validity)) {
+    if (((evt->flags & SET_CADENCE_ACK_FLAG) == SET_CADENCE_ACK_FLAG)
+        && (param_validity == true)) {
       // prepare buffer for cadence status response
       buff_len = sl_btmesh_sensor_people_count_get_cadence(SENSOR_CADENCE_BUF_LEN, cadence_status_buf);
       buff_addr = cadence_status_buf;
     }
   }
 #endif // SENSOR_PEOPLE_COUNT_CADENCE
-  if ((SET_CADENCE_ACK_FLAG == (evt->flags & SET_CADENCE_ACK_FLAG))
-      && (true == param_validity)) {
+  if (((evt->flags & SET_CADENCE_ACK_FLAG) == SET_CADENCE_ACK_FLAG)
+      && (param_validity == true)) {
     sl_status_t sc = sl_btmesh_sensor_setup_server_send_cadence_status(evt->client_address,
                                                                        BTMESH_SENSOR_SERVER_MAIN,
                                                                        evt->appkey_index,
@@ -692,19 +731,18 @@ temperature_8_t get_temperature(void)
 {
   int32_t temp_data = 0;
   uint32_t temp_rh = 0;
-  temperature_8_t temperature;
+  temperature_8_t temperature = SL_BTMESH_SENSOR_TEMPERATURE_VALUE_UNKNOWN;
   sl_status_t sc = sl_sensor_rht_get(&temp_rh, &temp_data);
-  if (sc != SL_STATUS_OK) {
-    log("Warning! Invalid temperature reading: %lu %ld\n",
-        temp_rh,
-        temp_data);
-    temperature = SL_BTMESH_SENSOR_TEMPERATURE_VALUE_IS_NOT_KNOWN;
-  } else {
+  if (sc == SL_STATUS_OK) {
     temp_data = (((temp_data
                    * TEMPERATURE_PRE_SCALE)
                   + TEMPERATURE_OFFSET)
                  / TEMPERATURE_SCALE_VAL);
     temperature = (temperature_8_t)temp_data;
+  } else if (sc != SL_STATUS_NOT_INITIALIZED) {
+    log("Warning! Invalid temperature reading: %u %d\n",
+        temp_rh,
+        temp_data);
   }
   sl_btmesh_sensor_server_on_temperature_measurement(temperature);
   return temperature;
@@ -721,7 +759,7 @@ temperature_8_t get_temperature(void)
 illuminance_t get_light(void)
 {
   float lux;
-  illuminance_t light;
+  illuminance_t light = SL_BTMESH_SENSOR_LIGHT_VALUE_UNKNOWN;
   sl_status_t sc;
 #ifdef SL_CATALOG_SENSOR_LIGHT_PRESENT
   float uvi;
@@ -730,11 +768,10 @@ illuminance_t get_light(void)
 #elif defined(SL_CATALOG_SENSOR_LUX_PRESENT)
   sc = sl_sensor_lux_get(&lux);
 #endif // SL_CATALOG_SENSOR_LIGHT_PRESENT
-  if (sc != SL_STATUS_OK) {
-    log("Warning! Invalid light reading: %6lulx\n", (illuminance_t)lux);
-    light = SL_BTMESH_SENSOR_LIGHT_VALUE_IS_NOT_KNOWN;
-  } else {
+  if (sc == SL_STATUS_OK) {
     light = (illuminance_t)lux;
+  } else if (sc != SL_STATUS_NOT_INITIALIZED) {
+    log("Warning! Invalid light reading: %6ulx\n", (illuminance_t)lux);
   }
   sl_btmesh_sensor_server_on_light_measurement(light);
   return light;
@@ -763,7 +800,9 @@ static void sensor_server_data_timer_cb(sl_simple_timer_t *handle, void *data)
   sl_status_t sc;
 
 #if SENSOR_THERMOMETER_CADENCE
-  publ_timer_thermometer = sl_btmesh_sensor_thermometer_handle_cadence(get_temperature(), publish_period);
+  if (rht_initialized == true) {
+    publ_timer_thermometer = sl_btmesh_sensor_thermometer_handle_cadence(get_temperature(), publish_period);
+  }
 #endif // SENSOR_THERMOMETER_CADENCE
 
 #if SENSOR_PEOPLE_COUNT_CADENCE
@@ -791,7 +830,6 @@ static void sensor_server_data_timer_cb(sl_simple_timer_t *handle, void *data)
                                true);
     app_assert_status_f(sc, "Failed to start periodic sensor_server_publish_timer\r\n");
   }
-
   prev_publish_timeout = publ_timeout;
 }
 

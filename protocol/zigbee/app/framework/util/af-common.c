@@ -423,6 +423,7 @@ EmberStatus emberAfSendMulticastToBindings(EmberApsFrame *apsFrame,
                                            uint8_t* message)
 {
   EmberStatus status = EMBER_INVALID_BINDING_INDEX;
+#if (EMBER_BINDING_TABLE_SIZE > 0)
   uint8_t i;
   EmberBindingTableEntry binding;
   uint16_t groupDest;
@@ -455,6 +456,7 @@ EmberStatus emberAfSendMulticastToBindings(EmberApsFrame *apsFrame,
       }
     }
   }
+#endif // (EMBER_BINDING_TABLE_SIZE > 0)
 
   return status;
 }
@@ -558,6 +560,7 @@ EmberStatus emberAfSendUnicastToBindingsWithCallback(EmberApsFrame *apsFrame,
                                                      EmberAfMessageSentFunction callback)
 {
   EmberStatus status = EMBER_INVALID_BINDING_INDEX;
+#if (EMBER_BINDING_TABLE_SIZE > 0)
   uint8_t i;
 
   for (i = 0; i < EMBER_BINDING_TABLE_SIZE; i++) {
@@ -567,10 +570,13 @@ EmberStatus emberAfSendUnicastToBindingsWithCallback(EmberApsFrame *apsFrame,
       return status;
     }
     if (binding.type == EMBER_UNICAST_BINDING
+#ifndef EMBER_MULTI_NETWORK_STRIPPED
         && binding.networkIndex == emberGetCurrentNetwork()
+#endif // EMBER_MULTI_NETWORK_STRIPPED
         && binding.local == apsFrame->sourceEndpoint
         && binding.clusterId == apsFrame->clusterId) {
       apsFrame->destinationEndpoint = binding.remote;
+
       status = send(EMBER_OUTGOING_VIA_BINDING,
                     i,
                     apsFrame,
@@ -585,6 +591,7 @@ EmberStatus emberAfSendUnicastToBindingsWithCallback(EmberApsFrame *apsFrame,
       }
     }
   }
+#endif // (EMBER_BINDING_TABLE_SIZE > 0)
 
   return status;
 }
@@ -806,6 +813,7 @@ void emAfNetworkSecurityInit(void)
 // If possible, initialize each network.  For ZigBee PRO networks, the node
 // type of the device must match the one used previously, but note that
 // coordinator-capable devices are allowed to initialize as routers.
+#ifndef EMBER_AF_TC_SWAP_OUT_TEST
 void emAfNetworkInit(SLXU_INIT_ARG)
 {
   SLXU_INIT_UNUSED_ARG;
@@ -822,8 +830,8 @@ void emAfNetworkInit(SLXU_INIT_ARG)
       }
       if (emberAfGetNodeType(&nodeType) == EMBER_SUCCESS
           && (nodeType != emAfCurrentZigbeeProNetwork->nodeType
-              && (nodeType != EMBER_WIREFREE_INITIATOR_DEVICE)
-              && (nodeType != EMBER_WIREFREE_TARGET_DEVICE)
+              && (nodeType != EMBER_S2S_INITIATOR_DEVICE)
+              && (nodeType != EMBER_S2S_TARGET_DEVICE)
               && (emAfCurrentZigbeeProNetwork->nodeType != EMBER_COORDINATOR
                   || nodeType != EMBER_ROUTER))) {
         initialize = false;
@@ -836,7 +844,12 @@ void emAfNetworkInit(SLXU_INIT_ARG)
     (void) emberAfPopNetworkIndex();
   }
 }
-
+//EMBER_AF_TC_SWAP_OUT_TEST Prevent calling emAfNetworkInit during stack initialization
+#else // EMBER_AF_TC_SWAP_OUT_TEST
+void emAfNetworkInit(SLXU_INIT_ARG)
+{
+}
+#endif //EMBER_AF_TC_SWAP_OUT_TEST
 // Called from emAfInitCallback() in af-soc.c or af-host.c
 void emAfInitializeMessageSentCallbackArray(void)
 {
@@ -1219,7 +1232,8 @@ static void printMessage(EmberIncomingMessageType type,
                     (messageContents[0] & ZCL_CLUSTER_SPECIFIC_COMMAND
                      ? "Cluster"
                      : "Global"),
-                    messageContents[2]);
+                    messageContents[0] & ZCL_MANUFACTURER_SPECIFIC_MASK
+                    ? messageContents[4] : messageContents[2]);
   }
   emberAfAppPrintln("");
 }

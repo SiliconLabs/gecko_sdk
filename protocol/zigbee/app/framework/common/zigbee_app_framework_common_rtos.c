@@ -22,6 +22,10 @@
 #include "cmsis_os2.h"
 #include "sl_cmsis_os2_common.h"
 
+#if defined(EMBER_AF_NCP) && defined(SL_CATALOG_IOSTREAM_UART_COMMON_PRESENT)
+#include "sl_iostream.h"
+#endif
+
 #include "zigbee_app_framework_common.h"
 #include "zigbee_rtos_task_config.h"
 
@@ -91,6 +95,12 @@ void sli_zigbee_common_rtos_wakeup_isr_callback(void)
 
 //------------------------------------------------------------------------------
 // Static functions.
+#if defined(EMBER_AF_NCP) && defined(SL_CATALOG_IOSTREAM_UART_COMMON_PRESENT)
+void sli_iostream_on_uart_rx(sl_iostream_t *handle)
+{
+  sli_zigbee_common_rtos_wakeup_isr_callback();
+}
+#endif
 
 static void zigbee_task(void *p_arg)
 {
@@ -98,10 +108,16 @@ static void zigbee_task(void *p_arg)
 
   sli_zigbee_stack_init_callback();
   sli_zigbee_app_framework_init_callback();
+#ifdef EMBER_AF_NCP
+  sli_zigbee_ncp_init_callback();
+#endif
 
   while (true) {
     sli_zigbee_stack_tick_callback();
     sli_zigbee_app_framework_tick_callback();
+#ifdef EMBER_AF_NCP
+    sli_zigbee_ncp_tick_callback();
+#endif
 
     // Yield the ZigBee stack task if possible.
     zigbee_stack_task_yield();
@@ -119,7 +135,11 @@ static void zigbee_stack_task_yield(void)
   yield_time_ms = sli_zigbee_app_framework_set_pm_requirements_and_get_ms_to_next_wakeup();
 
   // Convert time in ms to ticks
-  yield_time_ticks = (osKernelGetTickFreq() * yield_time_ms) / 1000;
+  if (yield_time_ms != osWaitForever) {
+    yield_time_ticks = (osKernelGetTickFreq() * yield_time_ms) / 1000;
+  } else {
+    yield_time_ticks = osWaitForever;
+  }
 
   if (yield_time_ticks > 0) {
     uint32_t flags = osEventFlagsWait(zigbee_task_event_flags_id,

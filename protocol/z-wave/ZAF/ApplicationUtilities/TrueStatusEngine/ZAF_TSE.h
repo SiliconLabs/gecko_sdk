@@ -16,28 +16,7 @@
 #include <CC_Common.h>
 #include "ZW_TransportEndpoint.h"
 
-/**
- * The ZAF_TSE_GROUP_ID setting represents the Association Group Identifier
- * This represent the Root Device Group identifier. It is not possible to configure a
- * Multi Channel endpoint Association Group on this module,
- * for which the True Status Engine will report its status.
- */
-#define ZAF_TSE_GROUP_ID                        1
 
-/**
- * The ZAF_TSE_MAXIMUM_SIMULTANEOUS_TRIGGERS setting represents the maximum number
- * of queued status report waiting to be reported via the Association Group.
- * Note: This number should not be higher than the maximum number of frames that can be
- * queued for transmission, which is set to 5
- */
-#define ZAF_TSE_MAXIMUM_SIMULTANEOUS_TRIGGERS   3
-
-/**
- * The ZAF_TSE_DELAY_TRIGGER setting represents the delay (expressed in ms) between the status change and
- * queuing the report command to the transmit queue.
- * This setting should be as small as possible but not too small so that it would trigger network collisions.
- */
-#define ZAF_TSE_DELAY_TRIGGER                   250
 
 
 /* This struct is made as a template to parse incoming structs to the TSE_Trigger function */

@@ -140,9 +140,15 @@ typedef enum {
     MBEDTLS_CIPHER_AES_128_CCM,          /**< AES cipher with 128-bit CCM mode. */
     MBEDTLS_CIPHER_AES_192_CCM,          /**< AES cipher with 192-bit CCM mode. */
     MBEDTLS_CIPHER_AES_256_CCM,          /**< AES cipher with 256-bit CCM mode. */
+    MBEDTLS_CIPHER_AES_128_CCM_STAR_NO_TAG, /**< AES cipher with 128-bit CCM_STAR_NO_TAG mode. */
+    MBEDTLS_CIPHER_AES_192_CCM_STAR_NO_TAG, /**< AES cipher with 192-bit CCM_STAR_NO_TAG mode. */
+    MBEDTLS_CIPHER_AES_256_CCM_STAR_NO_TAG, /**< AES cipher with 256-bit CCM_STAR_NO_TAG mode. */
     MBEDTLS_CIPHER_CAMELLIA_128_CCM,     /**< Camellia cipher with 128-bit CCM mode. */
     MBEDTLS_CIPHER_CAMELLIA_192_CCM,     /**< Camellia cipher with 192-bit CCM mode. */
     MBEDTLS_CIPHER_CAMELLIA_256_CCM,     /**< Camellia cipher with 256-bit CCM mode. */
+    MBEDTLS_CIPHER_CAMELLIA_128_CCM_STAR_NO_TAG, /**< Camellia cipher with 128-bit CCM_STAR_NO_TAG mode. */
+    MBEDTLS_CIPHER_CAMELLIA_192_CCM_STAR_NO_TAG, /**< Camellia cipher with 192-bit CCM_STAR_NO_TAG mode. */
+    MBEDTLS_CIPHER_CAMELLIA_256_CCM_STAR_NO_TAG, /**< Camellia cipher with 256-bit CCM_STAR_NO_TAG mode. */
     MBEDTLS_CIPHER_ARIA_128_ECB,         /**< Aria cipher with 128-bit key and ECB mode. */
     MBEDTLS_CIPHER_ARIA_192_ECB,         /**< Aria cipher with 192-bit key and ECB mode. */
     MBEDTLS_CIPHER_ARIA_256_ECB,         /**< Aria cipher with 256-bit key and ECB mode. */
@@ -161,6 +167,9 @@ typedef enum {
     MBEDTLS_CIPHER_ARIA_128_CCM,         /**< Aria cipher with 128-bit key and CCM mode. */
     MBEDTLS_CIPHER_ARIA_192_CCM,         /**< Aria cipher with 192-bit key and CCM mode. */
     MBEDTLS_CIPHER_ARIA_256_CCM,         /**< Aria cipher with 256-bit key and CCM mode. */
+    MBEDTLS_CIPHER_ARIA_128_CCM_STAR_NO_TAG, /**< Aria cipher with 128-bit key and CCM_STAR_NO_TAG mode. */
+    MBEDTLS_CIPHER_ARIA_192_CCM_STAR_NO_TAG, /**< Aria cipher with 192-bit key and CCM_STAR_NO_TAG mode. */
+    MBEDTLS_CIPHER_ARIA_256_CCM_STAR_NO_TAG, /**< Aria cipher with 256-bit key and CCM_STAR_NO_TAG mode. */
     MBEDTLS_CIPHER_AES_128_OFB,          /**< AES 128-bit cipher in OFB mode. */
     MBEDTLS_CIPHER_AES_192_OFB,          /**< AES 192-bit cipher in OFB mode. */
     MBEDTLS_CIPHER_AES_256_OFB,          /**< AES 256-bit cipher in OFB mode. */
@@ -187,6 +196,7 @@ typedef enum {
     MBEDTLS_MODE_GCM,                    /**< The GCM cipher mode.         */
     MBEDTLS_MODE_STREAM,                 /**< The stream cipher mode.      */
     MBEDTLS_MODE_CCM,                    /**< The CCM cipher mode.         */
+    MBEDTLS_MODE_CCM_STAR_NO_TAG,        /**< The CCM*-no-tag cipher mode. */
     MBEDTLS_MODE_XTS,                    /**< The XTS cipher mode.         */
     MBEDTLS_MODE_CHACHAPOLY,             /**< The ChaCha-Poly cipher mode. */
     MBEDTLS_MODE_KW,                     /**< The SP800-38F KW mode */
@@ -258,6 +268,13 @@ typedef struct mbedtls_cmac_context_t mbedtls_cmac_context_t;
 /**
  * Cipher information. Allows calling cipher functions
  * in a generic way.
+ *
+ * \note        The library does not support custom cipher info structures,
+ *              only built-in structures returned by the functions
+ *              mbedtls_cipher_info_from_string(),
+ *              mbedtls_cipher_info_from_type(),
+ *              mbedtls_cipher_info_from_values(),
+ *              mbedtls_cipher_info_from_psa().
  */
 typedef struct mbedtls_cipher_info_t
 {
@@ -415,6 +432,156 @@ const mbedtls_cipher_info_t *mbedtls_cipher_info_from_values( const mbedtls_ciph
                                               const mbedtls_cipher_mode_t mode );
 
 /**
+ * \brief               Retrieve the identifier for a cipher info structure.
+ *
+ * \param[in] info      The cipher info structure to query.
+ *                      This may be \c NULL.
+ *
+ * \return              The full cipher identifier (\c MBEDTLS_CIPHER_xxx).
+ * \return              #MBEDTLS_CIPHER_NONE if \p info is \c NULL.
+ */
+static inline mbedtls_cipher_type_t mbedtls_cipher_info_get_type(
+    const mbedtls_cipher_info_t *info )
+{
+    if( info == NULL )
+        return( MBEDTLS_CIPHER_NONE );
+    else
+        return( info->MBEDTLS_PRIVATE(type) );
+}
+
+/**
+ * \brief               Retrieve the operation mode for a cipher info structure.
+ *
+ * \param[in] info      The cipher info structure to query.
+ *                      This may be \c NULL.
+ *
+ * \return              The cipher mode (\c MBEDTLS_MODE_xxx).
+ * \return              #MBEDTLS_MODE_NONE if \p info is \c NULL.
+ */
+static inline mbedtls_cipher_mode_t mbedtls_cipher_info_get_mode(
+    const mbedtls_cipher_info_t *info )
+{
+    if( info == NULL )
+        return( MBEDTLS_MODE_NONE );
+    else
+        return( info->MBEDTLS_PRIVATE(mode) );
+}
+
+/**
+ * \brief               Retrieve the key size for a cipher info structure.
+ *
+ * \param[in] info      The cipher info structure to query.
+ *                      This may be \c NULL.
+ *
+ * \return              The key length in bits.
+ *                      For variable-sized ciphers, this is the default length.
+ *                      For DES, this includes the parity bits.
+ * \return              \c 0 if \p info is \c NULL.
+ */
+static inline size_t mbedtls_cipher_info_get_key_bitlen(
+    const mbedtls_cipher_info_t *info )
+{
+    if( info == NULL )
+        return( 0 );
+    else
+        return( info->MBEDTLS_PRIVATE(key_bitlen) );
+}
+
+/**
+ * \brief               Retrieve the human-readable name for a
+ *                      cipher info structure.
+ *
+ * \param[in] info      The cipher info structure to query.
+ *                      This may be \c NULL.
+ *
+ * \return              The cipher name, which is a human readable string,
+ *                      with static storage duration.
+ * \return              \c NULL if \c info is \p NULL.
+ */
+static inline const char *mbedtls_cipher_info_get_name(
+    const mbedtls_cipher_info_t *info )
+{
+    if( info == NULL )
+        return( NULL );
+    else
+        return( info->MBEDTLS_PRIVATE(name) );
+}
+
+/**
+ * \brief       This function returns the size of the IV or nonce
+ *              for the cipher info structure, in bytes.
+ *
+ * \param info  The cipher info structure. This may be \c NULL.
+ *
+ * \return      The recommended IV size.
+ * \return      \c 0 for ciphers not using an IV or a nonce.
+ * \return      \c 0 if \p info is \c NULL.
+ */
+static inline size_t mbedtls_cipher_info_get_iv_size(
+    const mbedtls_cipher_info_t *info )
+{
+    if( info == NULL )
+        return( 0 );
+
+    return( (size_t) info->MBEDTLS_PRIVATE(iv_size) );
+}
+
+/**
+ * \brief        This function returns the block size of the given
+ *               cipher info structure in bytes.
+ *
+ * \param info   The cipher info structure. This may be \c NULL.
+ *
+ * \return       The block size of the cipher.
+ * \return       \c 1 if the cipher is a stream cipher.
+ * \return       \c 0 if \p info is \c NULL.
+ */
+static inline size_t mbedtls_cipher_info_get_block_size(
+    const mbedtls_cipher_info_t *info )
+{
+    if( info == NULL )
+        return( 0 );
+
+    return( (size_t) info->MBEDTLS_PRIVATE(block_size) );
+}
+
+/**
+ * \brief        This function returns a non-zero value if the key length for
+ *               the given cipher is variable.
+ *
+ * \param info   The cipher info structure. This may be \c NULL.
+ *
+ * \return       Non-zero if the key length is variable, \c 0 otherwise.
+ * \return       \c 0 if the given pointer is \c NULL.
+ */
+static inline int mbedtls_cipher_info_has_variable_key_bitlen(
+    const mbedtls_cipher_info_t *info )
+{
+    if( info == NULL )
+        return( 0 );
+
+    return( info->MBEDTLS_PRIVATE(flags) & MBEDTLS_CIPHER_VARIABLE_KEY_LEN );
+}
+
+/**
+ * \brief        This function returns a non-zero value if the IV size for
+ *               the given cipher is variable.
+ *
+ * \param info   The cipher info structure. This may be \c NULL.
+ *
+ * \return       Non-zero if the IV size is variable, \c 0 otherwise.
+ * \return       \c 0 if the given pointer is \c NULL.
+ */
+static inline int mbedtls_cipher_info_has_variable_iv_size(
+    const mbedtls_cipher_info_t *info )
+{
+    if( info == NULL )
+        return( 0 );
+
+    return( info->MBEDTLS_PRIVATE(flags) & MBEDTLS_CIPHER_VARIABLE_IV_LEN );
+}
+
+/**
  * \brief               This function initializes a \p cipher_context as NONE.
  *
  * \param ctx           The context to be initialized. This must not be \c NULL.
@@ -490,11 +657,13 @@ int mbedtls_cipher_setup_psa( mbedtls_cipher_context_t *ctx,
 #endif /* MBEDTLS_USE_PSA_CRYPTO */
 
 /**
- * \brief        This function returns the block size of the given cipher.
+ * \brief        This function returns the block size of the given cipher
+ *               in bytes.
  *
- * \param ctx    The context of the cipher. This must be initialized.
+ * \param ctx    The context of the cipher.
  *
  * \return       The block size of the underlying cipher.
+ * \return       \c 1 if the cipher is a stream cipher.
  * \return       \c 0 if \p ctx has not been initialized.
  */
 static inline unsigned int mbedtls_cipher_get_block_size(

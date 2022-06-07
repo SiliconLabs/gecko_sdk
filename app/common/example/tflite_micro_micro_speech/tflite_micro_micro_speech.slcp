@@ -7,6 +7,15 @@ description: >
   "no" from speech data recorded from the microphone. The detected keywords are
   transmitted over VCOM.
 category: Example|Machine Learning
+filter:
+  - name: "Device Type"
+    value: ["SoC"]
+  - name: "MCU"
+    value: ["32-bit MCU"]
+  - name: "Project Difficulty"
+    value: ["Advanced"]
+  - name: "Capability"
+    value: ["Machine Learning"]
 include:
   - path: .
     file_list:
@@ -41,7 +50,7 @@ component:
   - id: sl_system
   - id: device_init
   - id: tensorflow_lite_micro
-  - id: tensorflow_lite_audio_frontend
+  - id: ml_audio_feature_generation
   - id: mic_driver
   - id: iostream_recommended_stream
   - id: simple_led
@@ -60,9 +69,15 @@ configuration:
     condition: [iostream_uart]
   - name: SL_HEAP_SIZE
     value: "0x3000"
+  - name: SL_ML_AUDIO_FEATURE_GENERATION_MANUAL_CONFIG_ENABLE
+    value: 1
+  - name: SL_ML_FRONTEND_FFT_LENGTH
+    value: 512
 toolchain_settings:
   - option: gcc_compiler_option
     value: "-Wno-unused-parameter"
+  - option: gcc_compiler_option
+    value: "-Wno-missing-field-initializers"
 readme:
   - path: readme.md
 ui_hints:

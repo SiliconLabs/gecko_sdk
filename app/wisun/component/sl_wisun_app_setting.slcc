@@ -14,13 +14,14 @@ source:
 include:
   - path: "."
     file_list:
-    - "path": "sl_wisun_app_setting.h"
+    - path: "sl_wisun_app_setting.h"
 
 requires:
+  - name: "wisun_default_phy"
+    condition:
+      - "wisun_full_radioconf"
   - name: "sl_wisun_cli_util"
-
-config_file:
-  - path: "config/sl_wisun_app_setting_config.h"
+  - name: "wisun_config"
 
 #-------------- Template Contribution ----------------
 template_contribution:

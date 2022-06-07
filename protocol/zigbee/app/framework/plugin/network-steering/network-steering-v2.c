@@ -302,8 +302,6 @@ void tryToJoinNetwork()
 //Description: Generates a random number between 10000-40000.
 static uint32_t jitterTimeDelayMs()
 {
-  uint16_t seed;
-  halStackSeedRandom((uint32_t)&seed);
   uint32_t jitterDelayMs = (emberGetPseudoRandomNumber() % (UPDATE_TC_LINK_KEY_JITTER_MAX_MS - UPDATE_TC_LINK_KEY_JITTER_MIN_MS + 1)) + UPDATE_TC_LINK_KEY_JITTER_MIN_MS;
   return jitterDelayMs;
 }
@@ -432,12 +430,9 @@ HIDDEN void scanResultsHandler(EmberAfPluginScanDispatchScanResults *results)
 
   if (emberAfPluginScanDispatchScanResultsAreComplete(results)
       || emberAfPluginScanDispatchScanResultsAreFailure(results)) {
-    if (results->status != EMBER_SUCCESS) {
+    if (results->status != SL_STATUS_OK) {
       emberAfCorePrintln("Error: Scan complete handler returned 0x%X",
                          results->status);
-      // To match the change in network-steering, and scan-dispatch code
-      CLEARBIT(scheduleScanChannelMask, results->channel);
-      scheduleScan(scheduleScanChannelMask);
       return;
     }
     emAfPluginNetworkSteeringTotalBeacons = emberGetNumStoredBeacons();

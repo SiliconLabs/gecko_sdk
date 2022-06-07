@@ -495,5 +495,3 @@ class Calc_Global_Bobcat(CALC_Global_ocelot):
     def _add_CHFCTRL_regs(self, model):
         self._addModelRegister(model, 'MODEM.CHFCTRL.CHFSWSEL', int, ModelVariableFormat.HEX)
 
-    def calc_family_name(self, model):
-        model.vars.family.value = "bobcat"

@@ -50,7 +50,9 @@
  * @{
  ******************************************************************************/
 
+#if !defined(SL_TRUSTZONE_NONSECURE)
 #include "sl_se_manager_key_handling.h"
+#endif
 #include "sl_se_manager_types.h"
 #include "em_se.h"
 #include "sl_status.h"

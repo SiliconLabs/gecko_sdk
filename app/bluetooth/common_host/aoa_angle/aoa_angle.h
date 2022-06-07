@@ -195,7 +195,7 @@ enum sl_rtl_error_code aoa_calculate(aoa_state_t *aoa_state,
  * @return Status returned by the RTL library
  ******************************************************************************/
 enum sl_rtl_error_code aoa_set_correction(aoa_state_t *aoa_state,
-                                          aoa_correction_t *correction,
+                                          aoa_angle_t *correction,
                                           aoa_id_t config_id);
 
 /***************************************************************************//**

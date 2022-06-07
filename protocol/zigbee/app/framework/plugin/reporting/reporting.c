@@ -155,8 +155,12 @@ void emberAfPluginReportingInitCallback(uint8_t init_level)
       break;
     }
 
-    case SL_ZIGBEE_INIT_LEVEL_LOCAL_DATA:
+    case SL_ZIGBEE_INIT_LEVEL_DONE:
     {
+      // Deferring this to the DONE phase as it relies on endpoint
+      // enable/disable state having first been initialized. That
+      // state is referenced directly here, and in tick scheduler.
+      //
       // On device initialization, any attributes that have been set up to report
       // should generate an attribute report.
       uint16_t i;
@@ -169,7 +173,9 @@ void emberAfPluginReportingInitCallback(uint8_t init_level)
           // a single range.  When we encounter an unused entry, assume
           // we've reached the end of active entries and break the loop
           break;
-        } else if (entry.direction == EMBER_ZCL_REPORTING_DIRECTION_REPORTED) {
+        }
+        if (emberAfEndpointIsEnabled(entry.endpoint)
+            && entry.direction == EMBER_ZCL_REPORTING_DIRECTION_REPORTED) {
           emAfPluginReportVolatileData[i].reportableChange = true;
         }
       }
@@ -177,6 +183,10 @@ void emberAfPluginReportingInitCallback(uint8_t init_level)
       scheduleTick();
       break;
     }
+
+    default:
+      // MISRA requires default case.
+      break;
   }
 }
 
@@ -197,7 +207,9 @@ void emberAfPluginReportingInitCallback(void)
       // a single range.  When we encounter an unused entry, assume
       // we've reached the end of active entries and break the loop
       break;
-    } else if (entry.direction == EMBER_ZCL_REPORTING_DIRECTION_REPORTED) {
+    }
+    if (emberAfEndpointIsEnabled(entry.endpoint)
+        && entry.direction == EMBER_ZCL_REPORTING_DIRECTION_REPORTED) {
       emAfPluginReportVolatileData[i].reportableChange = true;
     }
   }
@@ -235,9 +247,8 @@ void emberAfPluginReportingTickEventHandler(SLXU_UC_EVENT)
     // if the maximum interval is set and has elapsed.
     elapsedMs = elapsedTimeInt32u(emAfPluginReportVolatileData[i].lastReportTimeMs,
                                   halCommonGetInt32uMillisecondTick());
-    if (entry.direction != EMBER_ZCL_REPORTING_DIRECTION_REPORTED
-        || entry.endpoint == EMBER_AF_PLUGIN_REPORTING_UNUSED_ENDPOINT_ID
-        || !emberAfEndpointIsEnabled(entry.endpoint)
+    if (!emberAfEndpointIsEnabled(entry.endpoint)
+        || entry.direction != EMBER_ZCL_REPORTING_DIRECTION_REPORTED
         || (elapsedMs
             < entry.data.reported.minInterval * MILLISECOND_TICKS_PER_SECOND)
         || (!emAfPluginReportVolatileData[i].reportableChange
@@ -261,22 +272,24 @@ void emberAfPluginReportingTickEventHandler(SLXU_UC_EVENT)
                               entry.clusterId,
                               entry.attributeId,
                               status);
-      continue;
+      goto skipAttribute;
     }
+
     if (emberAfIsLongStringAttributeType(dataType)) {
       // LONG string types are rarely used and even more rarely (never?)
       // reported; ignore and leave ensuing handling of other types unchanged.
       emberAfReportingPrintln("ERR: reporting of LONG string attribute type not supported: cluster 0x%2x attribute 0x%2x",
                               entry.clusterId,
                               entry.attributeId);
-      continue;
+      goto skipAttribute;
     }
 
     // find size of current report
     dataSize = emberAfAttributeValueSize(dataType, readData, sizeof(readData));
     if (dataSize == 0) {
-      continue; // defensive; read attribute above would have failed
+      goto skipAttribute; // defensive; read attribute above should have failed
     }
+
     reportSize = sizeof(entry.attributeId) + sizeof(dataType) + dataSize;
 
     // If we have already started a report for a different attribute or
@@ -351,11 +364,10 @@ void emberAfPluginReportingTickEventHandler(SLXU_UC_EVENT)
     emberAfPutBlockInResp(readData, dataSize);
 #endif
 
-    // Store the last reported time and value so that we can track intervals
-    // and changes.  We only track changes for data types that are small enough
-    // for us to compare. For CHAR and OCTET strings, we substitute a 32-bit hash.
-    emAfPluginReportVolatileData[i].reportableChange = false;
-    emAfPluginReportVolatileData[i].lastReportTimeMs = halCommonGetInt32uMillisecondTick();
+    // Store the current attribute value for comparison with future values
+    // to detect reportable changes. Use the actual attribute value for
+    // data types that are small enough to efficiently store; for string
+    // types, substitute a 32-bit hash of the string value.
     uint32_t stringHash = 0;
     uint8_t *copyData = readData;
     uint8_t copySize = dataSize;
@@ -378,6 +390,26 @@ void emberAfPluginReportingTickEventHandler(SLXU_UC_EVENT)
       MEMMOVE(&emAfPluginReportVolatileData[i].lastReportValue, copyData, copySize);
 #endif
     }
+
+    // Normally will arrive here at the conclusion of attribute processing.
+    // Update the state used to decide if an attribute value is ready to
+    // be reported. The shortest and longest intervals between reports for
+    // this attribute will be governed by the minInterval and maxInterval
+    // settings in the attribute's report configuration.
+    //
+    // Alternatively...
+    //
+    skipAttribute:
+    //
+    // ...may arrive here via goto label if attribute processing detected
+    // a condition that prevents the attribute value from being reported.
+    // In that case, this state still must be updated; otherwise the tick
+    // scheduler, executed at the end of this handler, will see the attribute
+    // as still being ready to be reported, and will schedule the handler
+    // to execute again IMMEDIATELY. If the problematic attribute condition
+    // persists, the handler will effectively try to execute continuously.
+    emAfPluginReportVolatileData[i].reportableChange = false;
+    emAfPluginReportVolatileData[i].lastReportTimeMs = halCommonGetInt32uMillisecondTick();
   }
 
   if (apsFrame != NULL) {
@@ -391,12 +423,12 @@ static void conditionallySendReport(uint8_t endpoint, EmberAfClusterId clusterId
   EmberStatus status;
   if ((emberAfIsDeviceEnabled(endpoint)
        || clusterId == ZCL_IDENTIFY_CLUSTER_ID)
-      // No transmissions from the wirefree shades device is desired. The WF
+      // No transmissions from the s2s shades device is desired. The S2S
       // Shades sets up bindings at startup. The device then tries to send
       // messages over those bindings - something we don't want. The below code
-      // stops all reports if the device is a wirefree device
-      && ((emberAfNetworkState() != EMBER_JOINED_NETWORK_WF_INITIATOR)
-          && (emberAfNetworkState() != EMBER_JOINED_NETWORK_WF_TARGET))) {
+      // stops all reports if the device is a s2s device
+      && ((emberAfNetworkState() != EMBER_JOINED_NETWORK_S2S_INITIATOR)
+          && (emberAfNetworkState() != EMBER_JOINED_NETWORK_S2S_TARGET))) {
     status = emberAfSendCommandUnicastToBindingsWithCallback((EmberAfMessageSentFunction)(&retrySendReport));
 
     // If the callback table is full, attempt to send the message with no
@@ -851,7 +883,8 @@ static void scheduleTick(void)
   for (i = 0; i < reportTableActiveLength; i++) {
     EmberAfPluginReportingEntry entry;
     emAfPluginReportingGetEntry(i, &entry);
-    if (entry.direction == EMBER_ZCL_REPORTING_DIRECTION_REPORTED) {
+    if (emberAfEndpointIsEnabled(entry.endpoint)
+        && entry.direction == EMBER_ZCL_REPORTING_DIRECTION_REPORTED) {
       uint32_t minIntervalMs = (entry.data.reported.minInterval
                                 * MILLISECOND_TICKS_PER_SECOND);
       uint32_t maxIntervalMs = (entry.data.reported.maxInterval

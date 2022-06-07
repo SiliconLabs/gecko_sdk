@@ -1300,6 +1300,4 @@ class CALC_Global_panther(CALC_Global_nixi):
         self._addModelRegister(model, 'RAC.SYTRIM1.SYTRIMMMDREGAMPBIAS', int, ModelVariableFormat.HEX)
         self._addModelRegister(model, 'RAC.SYTRIM1.SYTRIMMMDREGAMPBW', int, ModelVariableFormat.HEX)
 
-    def calc_family_name(self, model):
-        model.vars.family.value = "panther"
 

@@ -35,7 +35,7 @@
 #if defined(CMU_PRESENT) && defined(FPGA)
 
 #include "em_cmu.h"
-#include "em_assert.h"
+#include "sl_assert.h"
 
 /***************************************************************************//**
  * @addtogroup emlib
@@ -242,9 +242,11 @@ uint32_t CMU_ClockFreqGet(CMU_Clock_TypeDef clock)
           freq = Get_Fpga_Core_freq();
           break;
         case cmuSelect_EM23GRPACLK:       // This is for Lynx
+#if defined(LFRCO_PRESENT)
         case cmuSelect_LFRCO:             // This is for Ocelot/Bobcat
           freq = LFRCO_CLK_FREQ;
           break;
+#endif
         case cmuSelect_ULFRCO:
           freq = ULFRCO_CLK_FREQ;
           break;

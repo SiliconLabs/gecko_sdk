@@ -33,17 +33,12 @@
 
 #include "sl_status.h"
 
-// BGAPI option flags.
-#define ADV_CONFIG_USE_LEGACY_PDUS_BIT_MASK  1
-#define PERIODIC_ADV_CONFIG_INCLUDE_TX_POWER 1
-
 // -----------------------------------------------------------------------------
 // Advertising Constant Tone Extension Minimum Length characteristic.
 typedef uint8_t adv_cte_min_len_t;
 extern adv_cte_min_len_t adv_cte_min_len;
 #define ADV_CTE_MIN_LEN_MIN           2      // 16 us
 #define ADV_CTE_MIN_LEN_MAX           20     // 160 us
-#define ADV_CTE_MIN_LEN_DEFAULT       ADV_CTE_MIN_LEN_MAX
 
 // -----------------------------------------------------------------------------
 // Advertising Constant Tone Extension Minimum Transmit Count characteristic.
@@ -51,15 +46,15 @@ typedef uint8_t adv_cte_min_tx_count_t;
 extern adv_cte_min_tx_count_t adv_cte_min_tx_count;
 #define ADV_CTE_MIN_TX_COUNT_MIN      1      // 1 per interval
 #define ADV_CTE_MIN_TX_COUNT_MAX      15     // 15 per interval
-#define ADV_CTE_MIN_TX_COUNT_DEFAULT  ADV_CTE_MIN_TX_COUNT_MIN
 
 // -----------------------------------------------------------------------------
 // Advertising Constant Tone Extension Interval characteristic.
 typedef uint16_t adv_cte_interval_t;
 extern adv_cte_interval_t adv_cte_interval;
-#define ADV_CTE_INTERVAL_MIN          6      // 7.5 ms
-#define ADV_CTE_INTERVAL_MAX          0xFFFF // 81.91875 s
-#define ADV_CTE_INTERVAL_DEFAULT      16     // 20 ms
+// Minimum value is CTE type dependent.
+// Maximum value is 0xFFFF for all CTE types, which equals to UINT16_MAX.
+// Therefore, there is no need to check the upper limit.
+extern const adv_cte_interval_t ADV_CTE_INTERVAL_MIN;
 
 // -----------------------------------------------------------------------------
 // Advertising Constant Tone Extension PHY characteristic.
@@ -67,7 +62,6 @@ typedef uint8_t adv_cte_phy_t;
 extern adv_cte_phy_t adv_cte_phy;
 #define ADV_CTE_PHY_1M                0
 #define ADV_CTE_PHY_2M                1
-#define ADV_CTE_PHY_DEFAULT           ADV_CTE_PHY_1M
 #define ADV_CTE_PHY_CONVERT(p)        (((p) == ADV_CTE_PHY_2M) ? sl_bt_gap_2m_phy : sl_bt_gap_1m_phy)
 
 /**************************************************************************//**

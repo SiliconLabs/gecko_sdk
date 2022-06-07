@@ -34,6 +34,8 @@
 #include "sl_wisun_coap_collector.h"
 #include <string.h>
 #include "sl_string.h"
+#include "sl_wisun_meter_collector_config.h"
+#include "sl_wisun_collector.h"
 
 // -----------------------------------------------------------------------------
 //                              Macros and Typedefs
@@ -58,7 +60,8 @@
  * @return true On success
  * @return false On failure
  *****************************************************************************/
-static bool _coap_collector_send_request(sl_wisun_meter_entry_t * meter,
+static bool _coap_collector_send_request(const int32_t sockid,
+                                         sl_wisun_meter_entry_t * meter,
                                          sl_wisun_meter_request_t * req);
 
 /**************************************************************************//**
@@ -230,7 +233,9 @@ bool sl_wisun_coap_collector_send_led_toggle_request(const wisun_addr_t * const 
   if (!retval) {
     return false;
   }
-  retval = _coap_collector_send_request(&meter, &_led_req);
+  retval = _coap_collector_send_request(sl_wisun_collector_get_shared_socket(),
+                                        &meter,
+                                        &_led_req);
   return retval;
 }
 
@@ -238,28 +243,27 @@ bool sl_wisun_coap_collector_send_led_toggle_request(const wisun_addr_t * const 
 //                          Static Function Definitions
 // -----------------------------------------------------------------------------
 
-static bool _coap_collector_send_request(sl_wisun_meter_entry_t * meter,
+static bool _coap_collector_send_request(const int32_t sockid,
+                                         sl_wisun_meter_entry_t * meter,
                                          sl_wisun_meter_request_t * req)
 {
-  int32_t sockid = SOCKET_INVALID_ID;
-  int32_t res    = SOCKET_INVALID_ID;
-  socklen_t len  = 0;
+  int32_t res         = SOCKET_INVALID_ID;
+  socklen_t len       = 0;
+  bool retval         = true;
 
-  // create socket
-  sockid = socket(AF_WISUN, SOCK_DGRAM, IPPROTO_UDP);
   if (sockid == SOCKET_INVALID_ID) {
     return false;
   }
+
   len = sizeof(meter->addr);
 
   res = sendto(sockid, req->buff, req->length, 0,
-               (const struct sockaddr *)&meter->addr, len);;
+               (const struct sockaddr *)&meter->addr, len);
   if (res == RETVAL_ERROR) {
-    close(sockid);
-    return false;
+    retval = false;
   }
-  close(sockid);
-  return true;
+
+  return retval;
 }
 
 static sl_wisun_meter_entry_t * _coap_collector_recv_response(int32_t sockid)

@@ -30,7 +30,7 @@
 
 #include <stdbool.h>
 #include "em_device.h"
-#include "em_common.h"
+#include "sl_common.h"
 #include "em_cmu.h"
 #include "em_emu.h"
 #include "em_core.h"

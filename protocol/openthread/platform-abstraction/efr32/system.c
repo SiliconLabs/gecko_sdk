@@ -109,6 +109,8 @@ void otSysProcessDrivers(otInstance *aInstance)
     efr32UartProcess();
 #elif OPENTHREAD_CONFIG_NCP_CPC_ENABLE
     efr32CpcProcess();
+#elif OPENTHREAD_CONFIG_NCP_SPI_ENABLE
+    efr32SpiProcess();
 #endif
     efr32RadioProcess(aInstance);
 

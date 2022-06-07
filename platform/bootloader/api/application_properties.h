@@ -29,7 +29,7 @@
  *   the application version and capabilities, and so on. The metadata contained
  *   in this struct will be extracted from the application by the Simplicity
  *   Commander tool and placed in the GBL upgrade file. If this struct is not
- *   present in the application image, it will be added to the GBL file by the
+ *   in the application image, it will be added to the GBL file by the
  *   Simplicity Commander.
  *
  *   The struct is also used to declare whether the application image is signed
@@ -63,7 +63,7 @@
 /// Major version number of the AppliationProperties_t struct
 #define APPLICATION_PROPERTIES_VERSION_MAJOR (1UL)
 /// Minor version number of the AppliationProperties_t struct
-#define APPLICATION_PROPERTIES_VERSION_MINOR (1UL)
+#define APPLICATION_PROPERTIES_VERSION_MINOR (2UL)
 /// Version number of the ApplicationCertificate_t struct
 #define APPLICATION_CERTIFICATE_VERSION  (1UL)
 /// The application is not signed
@@ -135,6 +135,8 @@ typedef struct {
   ApplicationCertificate_t *cert;
   /// Pointer to Long Token Data Section
   uint8_t *longTokenSectionAddress;
+  /// Parser Decryption Key
+  const uint8_t decryptKey[16];
 } ApplicationProperties_t;
 
 /** @} (end addtogroup ApplicationProperties) */

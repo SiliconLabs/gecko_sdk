@@ -8,7 +8,7 @@
 /*                              INCLUDE FILES                               */
 /****************************************************************************/
 #include "CC_Indicator.h"
-#include <board.h>
+#include "CC_IndicatorPrivate.h"
 //#define DEBUGPRINT
 #include "DebugPrint.h"
 #include <ZAF_TSE.h>
@@ -41,6 +41,7 @@ static uint8_t g_on_off_num_cycles    = 0;  /**< Number of cycles */
 static uint8_t g_on_time              = 0;  /**< On time in 1/10 second */
 
 s_CC_indicator_data_t indicatorData;
+cc_indicator_callback_t callback;
 
 
 static void
@@ -55,11 +56,11 @@ prepare_report_v3(uint8_t indicatorId, ZW_APPLICATION_TX_BUFFER *pTxBuffer, size
 /****************************************************************************/
 
 /**
- * Calls @ref Board_IndicatorControl after calculating the parameters to pass.
+ * Calls @ref cc_indicator_callback_t after calculating the parameters to pass.
  *
  * Uses the global variables @ref g_on_off_period_length, @ref g_on_off_num_cycles
  * and @ref g_on_time (set by Indicator Command Class commands) to calculate
- * the values to pass to @ref Board_IndicatorControl.
+ * the values to pass to @ref cc_indicator_callback_t.
  *
  * Should be called whenever a SET command is received.
  */
@@ -88,7 +89,7 @@ UpdateIndicator(void)
 
     /* The value 0xFF is special and means "run until stopped".
      * If num_cycles is 0xFF we simply leave blinker_cycles at 0
-     * as Board_IndicatorControl() handles 0 cycles as "run until
+     * as cc_indicator_callback_t cycles as "run until
      * stopped"
      */
     if (g_on_off_num_cycles != 0xFF)
@@ -98,7 +99,10 @@ UpdateIndicator(void)
   }
 
   /* Tell the indicator to start (or stop) */
-  Board_IndicatorControl(on_time_ms, off_time_ms, blinker_cycles, true);
+  if (callback)
+  {
+    callback(on_time_ms, off_time_ms, blinker_cycles);
+  }
 }
 
 
@@ -115,12 +119,9 @@ UpdateIndicator(void)
 void
 CC_Indicator_RefreshIndicatorProperties(void)
 {
-  if (!Board_IsIndicatorActive())
-  {
-    g_on_off_period_length = 0;
-    g_on_off_num_cycles    = 0;
-    g_on_time              = 0;
-  }
+  g_on_off_period_length = 0;
+  g_on_off_num_cycles    = 0;
+  g_on_time              = 0;
 }
 
 
@@ -569,6 +570,11 @@ IndicatorHandler_SupportedGet_V3(RECEIVE_OPTIONS_TYPE_EX  *rx_opt,
 /*                             PUBLIC FUNCTIONS                             */
 /****************************************************************************/
 
+void CC_Indicator_Init(cc_indicator_callback_t callback_)
+{
+  callback = callback_;
+}
+
 /*
  * Entry point for the Indicator Command Class handler.
  * Dispatches incoming commands to the appropriate handler function.
@@ -606,8 +612,6 @@ CC_Indicator_handler(RECEIVE_OPTIONS_TYPE_EX  *rx_opt,
     case INDICATOR_GET_V3:
       if (false == Check_not_legal_response_job(rx_opt))
       {
-        CC_Indicator_RefreshIndicatorProperties();
-
         if (cmd_length == sizeof(ZW_INDICATOR_GET_FRAME))
         {
           rc = IndicatorHandler_Get_V1(rx_opt, cmd, cmd_length);

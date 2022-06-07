@@ -18,8 +18,7 @@
 #ifndef SL_BUTTON_H
 #define SL_BUTTON_H
 
-#include "em_common.h"
-#include "em_gpio.h"
+#include "sl_common.h"
 #include "sl_status.h"
 
 #ifdef __cplusplus

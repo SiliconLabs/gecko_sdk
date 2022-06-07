@@ -33,7 +33,7 @@
 #include "sli_hfxo_manager.h"
 #include "sli_hfxo_manager_internal.h"
 #include "sl_sleeptimer.h"
-#include "em_assert.h"
+#include "sl_assert.h"
 #include "sl_status.h"
 #include <stdbool.h>
 

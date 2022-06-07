@@ -42,6 +42,8 @@ template_contribution:
       event: sleep_on_isr_exit
       include: "uartdrv.h"
       handler: "sl_uartdrv_sleep_on_isr_exit"
+  - name: component_catalog
+    value: uartdrv_eusart
 documentation:
     docset: gecko-platform
     document: driver/api/group-uartdrv

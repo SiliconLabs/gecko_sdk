@@ -3,7 +3,7 @@
  * @brief Bluetooth event handler for Silabs CTE mode.
  *******************************************************************************
  * # License
- * <b>Copyright 2021 Silicon Laboratories Inc. www.silabs.com</b>
+ * <b>Copyright 2022 Silicon Laboratories Inc. www.silabs.com</b>
  *******************************************************************************
  *
  * SPDX-License-Identifier: Zlib
@@ -64,7 +64,7 @@ sl_status_t cte_bt_on_event_silabs(sl_bt_msg_t *evt)
         break;
       }
 
-      // Set passive scanning on 1Mb PHY
+      // Set passive scanning on 1M PHY
       sc = sl_bt_scanner_set_mode(sl_bt_gap_1m_phy, AOA_CTE_SCAN_MODE);
       if (SL_STATUS_OK != sc) {
         break;
@@ -77,7 +77,7 @@ sl_status_t cte_bt_on_event_silabs(sl_bt_msg_t *evt)
       }
 
       // Start scanning - looking for tags
-      sc = sl_bt_scanner_start(sl_bt_gap_1m_phy, sl_bt_scanner_discover_observation);
+      sc = sl_bt_scanner_start(sl_bt_gap_1m_phy, sl_bt_scanner_discover_generic);
       if (SL_STATUS_OK != sc) {
         break;
       }
@@ -88,6 +88,8 @@ sl_status_t cte_bt_on_event_silabs(sl_bt_msg_t *evt)
                                                 cte_switch_pattern_size,
                                                 cte_switch_pattern);
       break;
+
+    // -------------------------------
     case sl_bt_evt_cte_receiver_silabs_iq_report_id:
     {
       if (evt->data.evt_cte_receiver_silabs_iq_report.samples.len == 0) {

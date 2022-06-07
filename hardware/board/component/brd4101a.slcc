@@ -15,6 +15,7 @@
   - name: hardware_board_rb
   - name: hardware_board_from_stk
   - name: hardware_board_from_slwrb4101a
+  - name: hardware_board_has_vcom
   - name: hardware_board_has_spiflash
   - name: hardware_board_has_hfxo
   - name: hardware_board_has_lfxo
@@ -28,9 +29,6 @@
     instance:
     - vcom
   - id: bootloader_uart_driver
-  - id: i2cspm
-    instance:
-    - sensor
   - id: ls013b7dh03
   - id: memlcd_usart
   - id: simple_button
@@ -55,7 +53,6 @@
   - board:device:efr32bg1p332f256gj43
   - hardware:has:vcom
   - hardware:has:pti
-  - hardware:has:sensor:si7021
   - hardware:has:display:ls013b7dh03
   - hardware:has:led:0
   - hardware:has:button:2

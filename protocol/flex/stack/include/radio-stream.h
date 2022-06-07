@@ -39,7 +39,7 @@
  */
 
 /**
- * @brief Start a continuous Tx stream to test RF.
+ * @brief Start a continuous TX stream to test RF.
  *
  * @param[in] parameters Stream mode. See ::EmberTxStreamParameters.
  * @param[in] channel RF channel.
@@ -50,7 +50,7 @@
 EmberStatus emberStartTxStream(EmberTxStreamParameters parameters, uint16_t channel);
 
 /**
- * @brief Stop a RF stream in progress
+ * @brief Stop an RF stream in progress.
  *
  * @return EMBER_INVALID_CALL if no stream is in progress\n
  *         EMBER_SUCCESS otherwise

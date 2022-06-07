@@ -1,9 +1,9 @@
 id: psa_crypto_cipher_ofb
 package: platform
-label: PSA Crypto support for the OFB stream cipher mode.
+label: OFB Mode
 description: >-
   This component provides support for the OFB stream cipher mode in PSA Crypto.
-category: Platform|Security
+category: Platform|Security|PSA Crypto|Encryption
 quality: production
 provides:
   - name: psa_crypto_cipher_ofb

@@ -79,7 +79,7 @@ int32_t spi_peripheral_sendByte(uint8_t byte);
  *
  * @return Number of bytes in the transmit buffer still needing to go out
  ******************************************************************************/
-size_t  spi_peripheral_getTxBytesLeft(void);
+size_t spi_peripheral_getTxBytesLeft(void);
 
 /***************************************************************************//**
  * Enable/disable MISO output.
@@ -103,7 +103,7 @@ void spi_peripheral_enableReceiver(bool enable);
  * @return Number of bytes in the receive buffer available for reading with
  *         @ref spi_peripheral_receiveBuffer
  ******************************************************************************/
-size_t  spi_peripheral_getRxAvailableBytes(void);
+size_t spi_peripheral_getRxAvailableBytes(void);
 
 /***************************************************************************//**
  * Read from the RX buffer into a local buffer.
@@ -118,11 +118,11 @@ size_t  spi_peripheral_getRxAvailableBytes(void);
  *
  * @return BOOTLOADER_OK if successful, error code otherwise
  ******************************************************************************/
-int32_t spi_peripheral_receiveBuffer(uint8_t  * buffer,
-                               size_t   requestedLength,
-                               size_t   * receivedLength,
-                               bool     blocking,
-                               uint32_t timeout);
+int32_t spi_peripheral_receiveBuffer(uint8_t  *buffer,
+                                     size_t   requestedLength,
+                                     size_t   *receivedLength,
+                                     bool     blocking,
+                                     uint32_t timeout);
 
 /***************************************************************************//**
  * Get one byte from the SPI peripheral in a blocking fashion.

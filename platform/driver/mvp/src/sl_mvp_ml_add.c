@@ -31,7 +31,8 @@
 #include "sl_mvp_ml_add.h"
 #include "sl_mvp.h"
 #include "sl_mvp_math.h"
-#include "em_common.h"
+#include "sl_mvp_program_area.h"
+#include "sl_common.h"
 #include <stdbool.h>
 #include <math.h>
 
@@ -41,132 +42,132 @@ sl_status_t sli_mvp_ml_add_s8(const sli_mvp_ml_add_s8_params_t *params)
     return SL_STATUS_INVALID_PARAMETER;
   }
 
-  static sli_mvp_program_t prog;
+  sli_mvp_program_t *prog = sli_mvp_get_program_area_single();
 
   int remaining = params->length;
   const int8_t *input1_data = params->input1;
   const int8_t *input2_data = params->input2;
   int8_t *output_data = params->output;
+  float input1_offset_scaled = params->input1_offset * params->input1_multiplier;
+  float input2_offset_scaled = params->input2_offset * params->input2_multiplier;
 
+  // *INDENT-OFF*
   /*
-  Software Reference:
+     Software Reference:
 
-  This is the reference algorithm for the add operation. Note that in the 8 bit
-  version of add there are 3 different quantization parameters. This is why the
-  add operation is more complex than a simple addition. We first have to convert
-  each of the input by de-quantization before we can perform the add operation.
-  After the add operation we have to quantize the output using the output specific
-  quantization parameters.
+     This is the reference algorithm for the add operation. Note that in the 8 bit
+     version of add there are 3 different quantization parameters. This is why the
+     add operation is more complex than a simple addition. We first have to convert
+     each of the input by de-quantization before we can perform the add operation.
+     After the add operation we have to quantize the output using the output specific
+     quantization parameters.
 
-  for (size_t i = 0; i < params->length; ++i) {
-    float input1_val = (input1[i] - input1_zero_point) * input1_scale;
-    float input2_val = (input2[i] - input2_zero_point) * input2_scale;
-    float output_val = (input1_val + input2_val) / output_scale + output_zero_point;
-    output_val = round(output_val);
-    output[i] = clamp(output_val, activation_min, activation_max);
-  }
+     for (size_t i = 0; i < params->length; ++i) {
+       float input1_val = (input1[i] + input1_offset) * input1_scale;
+       float input2_val = (input2[i] + input2_offset) * input2_scale;
+       float output_val = (input1_val + input2_val) / output_scale + output_zero_point;
+       output_val = round(output_val);
+       output[i] = clamp(output_val, activation_min, activation_max);
+     }
 
-  Here is a representation of the MVP program. We divide the
-  input into batches that can fit within one MVP program.
+     We can get the core loop without the clamp operation down to 4 instructions on
+     the MVP hardware by implementing the following algorithm.
 
-  Arrays: {
-    A0 = input1[batch_size]
-    A1 = input2[batch_size]
-    A2 = output[batch_size]
-  }
-  Regs: {
-    R0 = input1_offset
-    R1 = input1_scale
-    R2 = input2_offset
-    R3 = input2_scale
-    R4 = output_offset
-    R5 = output_multiplier (1/output_scale)
-  }
-  Loop0: cnt=batch_size {
-    R6 = input1[A0.Dim0++]
-    R6 = R6 + R0
-    R6 = R6 * R1
-    R7 = input2[A1.Dim0++]
-    R7 = R7 + R2
-    R7 = R7 * R3
-    R6 = R6 + R7
-    R7 = R6 * R5 + R3
-    output[A2.Dim0++] = R7 // Store output
-  }
+     float16_t input1_offset_scaled = input1_offset * input1_scale;
+     float16_t input2_offset_scaled = input2_offset * input2_scale;
+     float16_t output_multiplier = 1 / output_scale;
 
-  */
+     for (size_t i = 0; i < params->length; ++i) {
+       float16_t input1_val = input1[i] * input1_scale + input1_offset_scaled;
+       float16_t input2_val = input2[i] * input2_scale + input2_offset_scaled;
+       float16_t output_val = input1_val + input2_val;
+       output[i] = output_val * output_multiplier + output_offset;
+     }
 
-  sli_mvp_prog_set_reg_s32c(&prog, SLI_MVP_R0, params->input1_offset, params->input1_offset);
-  sli_mvp_prog_set_reg_f32c(&prog, SLI_MVP_R1, params->input1_multiplier, params->input1_multiplier);
-  sli_mvp_prog_set_reg_s32c(&prog, SLI_MVP_R2, params->input2_offset, params->input2_offset);
-  sli_mvp_prog_set_reg_f32c(&prog, SLI_MVP_R3, params->input2_multiplier, params->input2_multiplier);
-  sli_mvp_prog_set_reg_s32c(&prog, SLI_MVP_R4, params->output_offset, params->output_offset);
-  sli_mvp_prog_set_reg_f32c(&prog, SLI_MVP_R5, params->output_multiplier, params->output_multiplier);
+     Here is a representation of the MVP program. We divide the
+     input into batches that can fit within one MVP program.
 
-  // Instruction 0: Add input1_offset to input1_data (Array0)
-  // LOAD(Array0,R6)
-  // INC(Array0,Dim0)
-  // R6 = ADDC(R6,R0)
-  sli_mvp_prog_set_instr(&prog, SLI_MVP_INSTR(0),
-      SLI_MVP_OP(ADDC),
-      SLI_MVP_ALU_X(SLI_MVP_R6)    // X (R6) - Array0 value (input1_data[i])
-      | SLI_MVP_ALU_A(SLI_MVP_R0)  // A (R0) - input1_offset
-      | SLI_MVP_ALU_Z(SLI_MVP_R6), // Z (R6) - result (R6 + R0)
-      SLI_MVP_LOAD(0, SLI_MVP_R6, SLI_MVP_ARRAY(0), SLI_MVP_INCRDIM_COL),
-      0, 0);
+     Arrays: {
+       A0 = input1[batch_size]
+       A1 = input2[batch_size]
+       A2 = output[batch_size]
+     }
+     Regs: {
+       R0 = input1_offset_scaled
+       R1 = input1_scale
+       R2 = input2_offset_scaled
+       R3 = input2_scale
+       R4 = output_offset
+       R5 = output_multiplier
+     }
+     Loop0: cnt=batch_size {
+       R6 = input1[A0.Dim0++]
+       R6 = R6 * R1 + R0
+       R7 = input2[A1.Dim0++]
+       R7 = R7 * R3 + R2
+       R6 = R6 + R7
+       R7 = R6 * R5 + R3
+       output[A2.Dim0++] = R7 // Store output
+     }
 
-  // Instruction 1: Multiply input1 with input1_scale value (R1)
-  // R6 = MULR2A(R6,R1)
-  sli_mvp_prog_set_instr(&prog, SLI_MVP_INSTR(1),
-      SLI_MVP_OP(MULR2A),
-      SLI_MVP_ALU_X(SLI_MVP_R6)    // X (R6) - previous result
-      | SLI_MVP_ALU_Y(SLI_MVP_R1)  // Y (R1) - input1_scale
-      | SLI_MVP_ALU_Z(SLI_MVP_R6), // Z (R6) - result (R6 * R1)
-      0, 0, 0);
+   */
+  // *INDENT-ON*
 
-  // Configure instruction 2: Add input2_offset to input2_data
+  sli_mvp_prog_set_reg_f32c(prog, SLI_MVP_R0, input1_offset_scaled, input1_offset_scaled);
+  sli_mvp_prog_set_reg_f32c(prog, SLI_MVP_R1, params->input1_multiplier, params->input1_multiplier);
+  sli_mvp_prog_set_reg_f32c(prog, SLI_MVP_R2, input2_offset_scaled, input2_offset_scaled);
+  sli_mvp_prog_set_reg_f32c(prog, SLI_MVP_R3, params->input2_multiplier, params->input2_multiplier);
+  sli_mvp_prog_set_reg_s32c(prog, SLI_MVP_R4, params->output_offset, params->output_offset);
+  sli_mvp_prog_set_reg_f32c(prog, SLI_MVP_R5, params->output_multiplier, params->output_multiplier);
+
+  // Instruction 0: Load and adjust input1 value
+  // Load(Array0, R6)
+  // INC(Array0, Dim0)
+  // R6 = MACR2A(R6,R1,R0)
+  sli_mvp_prog_set_instr(prog, SLI_MVP_INSTR(0),
+                         SLI_MVP_OP(MACR2A),
+                         SLI_MVP_ALU_X(SLI_MVP_R6)
+                         | SLI_MVP_ALU_Y(SLI_MVP_R1)
+                         | SLI_MVP_ALU_A(SLI_MVP_R0)
+                         | SLI_MVP_ALU_Z(SLI_MVP_R6),
+                         SLI_MVP_LOAD(0, SLI_MVP_R6, SLI_MVP_ARRAY(0), SLI_MVP_INCRDIM_COL),
+                         0, 0);
+
+  // Instruction 1: Load and adjust input2 value
   // LOAD(Array1,R7)
   // INC(Array0,Dim0)
-  // R7 = ADDC(R7,R2)
-  sli_mvp_prog_set_instr(&prog, SLI_MVP_INSTR(2),
-      SLI_MVP_OP(ADDC),
-      SLI_MVP_ALU_X(SLI_MVP_R7)    // X (R7) - Array1 value (input2_data[i])
-      | SLI_MVP_ALU_A(SLI_MVP_R2)  // A (R2) - input2_offset
-      | SLI_MVP_ALU_Z(SLI_MVP_R7), // Z (R7) - result (R7 + R2)
-      SLI_MVP_LOAD(0, SLI_MVP_R7, SLI_MVP_ARRAY(1), SLI_MVP_INCRDIM_COL),
-      0, 0);
+  // R7 = MACR2A(R7,R3,R2)
+  sli_mvp_prog_set_instr(prog, SLI_MVP_INSTR(1),
+                         SLI_MVP_OP(MACR2A),
+                         SLI_MVP_ALU_X(SLI_MVP_R7)
+                         | SLI_MVP_ALU_Y(SLI_MVP_R3)
+                         | SLI_MVP_ALU_A(SLI_MVP_R2)
+                         | SLI_MVP_ALU_Z(SLI_MVP_R7),
+                         SLI_MVP_LOAD(0, SLI_MVP_R7, SLI_MVP_ARRAY(1), SLI_MVP_INCRDIM_COL),
+                         0, 0);
 
-  // Instruction 3: Multiply input2_data with input2_scale value
-  // R7 = MULR2A(R7,R3)
-  sli_mvp_prog_set_instr(&prog, SLI_MVP_INSTR(3),
-      SLI_MVP_OP(MULR2A),
-      SLI_MVP_ALU_X(SLI_MVP_R7)    // X (R7) - previous result
-      | SLI_MVP_ALU_Y(SLI_MVP_R3)  // Y (R3) - input2_scale
-      | SLI_MVP_ALU_Z(SLI_MVP_R7), // Z (R7) - result (R7 * R3)
-      0, 0, 0);
-
-  // Instruction 4: Add input1 and input2
+  // Instruction 2: Add input1 and input2
   // R6 = ADDC(R6,R7)
-  sli_mvp_prog_set_instr(&prog, SLI_MVP_INSTR(4),
-      SLI_MVP_OP(ADDC),
-      SLI_MVP_ALU_X(SLI_MVP_R6)    // X (R6) - input1 (de-quantized)
-      | SLI_MVP_ALU_A(SLI_MVP_R7)  // A (R7) - input2 (de-quantized)
-      | SLI_MVP_ALU_Z(SLI_MVP_R6), // Z (R6) - result (R6 + R7)
-      0, 0, 0);
+  sli_mvp_prog_set_instr(prog, SLI_MVP_INSTR(2),
+                         SLI_MVP_OP(ADDC),
+                         SLI_MVP_ALU_X(SLI_MVP_R6) // X (R6) - input1 (de-quantized)
+                         | SLI_MVP_ALU_A(SLI_MVP_R7) // A (R7) - input2 (de-quantized)
+                         | SLI_MVP_ALU_Z(SLI_MVP_R6), // Z (R6) - result (R6 + R7)
+                         0, 0, 0);
 
-  // Instruction 5: Multiply and Accumulate output value
-  // R7 = MACR2A(R6,R5,R3)
+  // Instruction 3: Adjust and store output value
+  // R7 = MACR2A(R6,R5,R4)
   // STORE(Array2, R7)
   // INC(Array2, Dim0)
-  sli_mvp_prog_set_instr(&prog, SLI_MVP_INSTR(5),
-      SLI_MVP_OP(MACR2A),
-      SLI_MVP_ALU_X(SLI_MVP_R6)    // X (R6) - result of previous ADDC operation
-      | SLI_MVP_ALU_Y(SLI_MVP_R5)  // Y (R5) - output_scale
-      | SLI_MVP_ALU_A(SLI_MVP_R4)  // A (R3) - output_offset
-      | SLI_MVP_ALU_Z(SLI_MVP_R7), // Z (R7) - output (R6 * R5 + R3)
-      0,
-      SLI_MVP_STORE(SLI_MVP_R7, SLI_MVP_ARRAY(2), SLI_MVP_INCRDIM_COL),
-      SLI_MVP_ENDPROG);
+  sli_mvp_prog_set_instr(prog, SLI_MVP_INSTR(3),
+                         SLI_MVP_OP(MACR2A),
+                         SLI_MVP_ALU_X(SLI_MVP_R6) // X (R6) - result of previous ADDC operation
+                         | SLI_MVP_ALU_Y(SLI_MVP_R5) // Y (R5) - output_scale
+                         | SLI_MVP_ALU_A(SLI_MVP_R4) // A (R4) - output_offset
+                         | SLI_MVP_ALU_Z(SLI_MVP_R7), // Z (R7) - output (R6 * R5 + R3)
+                         0,
+                         SLI_MVP_STORE(SLI_MVP_R7, SLI_MVP_ARRAY(2), SLI_MVP_INCRDIM_COL),
+                         SLI_MVP_ENDPROG);
 
   while (remaining >= 2) {
     // Process batch sizes of max 1024, this means 2048 actual values
@@ -174,21 +175,21 @@ sl_status_t sli_mvp_ml_add_s8(const sli_mvp_ml_add_s8_params_t *params)
     int num_elements = SL_MIN(2048, remaining);
     int batch_size = num_elements / 2;
     num_elements = batch_size * 2;
-  
+
     // Configure the input and output arrays
-    sli_mvp_prog_set_vector(&prog, SLI_MVP_ARRAY(0), (int8_t *)input1_data, SLI_MVP_DATATYPE_COMPLEX_INT8, batch_size);
-    sli_mvp_prog_set_vector(&prog, SLI_MVP_ARRAY(1), (int8_t *)input2_data, SLI_MVP_DATATYPE_COMPLEX_INT8, batch_size);
-    sli_mvp_prog_set_vector(&prog, SLI_MVP_ARRAY(2), output_data, SLI_MVP_DATATYPE_COMPLEX_INT8, batch_size);
-  
+    sli_mvp_prog_set_vector(prog, SLI_MVP_ARRAY(0), (int8_t *)input1_data, SLI_MVP_DATATYPE_COMPLEX_INT8, batch_size);
+    sli_mvp_prog_set_vector(prog, SLI_MVP_ARRAY(1), (int8_t *)input2_data, SLI_MVP_DATATYPE_COMPLEX_INT8, batch_size);
+    sli_mvp_prog_set_vector(prog, SLI_MVP_ARRAY(2), output_data, SLI_MVP_DATATYPE_COMPLEX_INT8, batch_size);
+
     // Loop 0 is iterating over elements
-    sli_mvp_prog_set_loop(&prog, SLI_MVP_LOOP(0),
-        batch_size,
-        SLI_MVP_INSTR(0),
-        SLI_MVP_INSTR(5),
-        0);
-  
-    sli_mvp_execute(&prog, true);
-  
+    sli_mvp_prog_set_loop(prog, SLI_MVP_LOOP(0),
+                          batch_size,
+                          SLI_MVP_INSTR(0),
+                          SLI_MVP_INSTR(3),
+                          0);
+
+    sli_mvp_execute(prog, true);
+
     input1_data += num_elements;
     input2_data += num_elements;
     output_data += num_elements;

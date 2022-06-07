@@ -24,14 +24,15 @@
  *
  * MUST NOT be changed.
  */
-#define ZAF_FILE_ID_APP_VERSION           (ZAF_FILE_ID_BASE + 0)
-#define ZAF_FILE_ID_ASSOCIATIONINFO       (ZAF_FILE_ID_BASE + 1)
-#define ZAF_FILE_ID_USERCODE              (ZAF_FILE_ID_BASE + 2)
-#define ZAF_FILE_ID_BATTERYDATA           (ZAF_FILE_ID_BASE + 3)
-#define ZAF_FILE_ID_NOTIFICATIONDATA      (ZAF_FILE_ID_BASE + 4)
-#define ZAF_FILE_ID_WAKEUPCCDATA          (ZAF_FILE_ID_BASE + 5)
-#define ZAF_FILE_ID_CC_FIRMWARE_UPDATE    (ZAF_FILE_ID_BASE + 6)
-#define ZAF_FILE_ID_CC_CONFIGURATION      (ZAF_FILE_ID_BASE + 7)  //Obsolete ID nr. (Do not remove since legacy files may exist.)
+#define ZAF_FILE_ID_APP_VERSION                 (ZAF_FILE_ID_BASE + 0)
+#define ZAF_FILE_ID_ASSOCIATIONINFO             (ZAF_FILE_ID_BASE + 1)
+#define ZAF_FILE_ID_USERCODE                    (ZAF_FILE_ID_BASE + 2)
+#define ZAF_FILE_ID_BATTERYDATA                 (ZAF_FILE_ID_BASE + 3)
+#define ZAF_FILE_ID_NOTIFICATIONDATA            (ZAF_FILE_ID_BASE + 4)
+#define ZAF_FILE_ID_WAKEUPCCDATA                (ZAF_FILE_ID_BASE + 5)
+#define ZAF_FILE_ID_CC_FIRMWARE_UPDATE          (ZAF_FILE_ID_BASE + 6)
+#define ZAF_FILE_ID_CC_CONFIGURATION            (ZAF_FILE_ID_BASE + 7)  //Obsolete ID nr. (Do not remove since legacy files may exist.)
+#define ZAF_FILE_ID_KEY_FOB_NODES               (ZAF_FILE_ID_BASE + 8)
 //Add file IDs for single files here.
 
 

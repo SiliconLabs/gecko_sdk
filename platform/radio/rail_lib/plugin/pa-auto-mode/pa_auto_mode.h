@@ -81,11 +81,17 @@ typedef struct RAIL_PaAutoModeConfigEntry {
  * The actual PA auto mode configuration structure used by the auto mode plugin
  * to control output power.
  */
-#if (defined(RAIL_PA_AUTO_MODE_WEAK)) || (_SILICON_LABS_32B_SERIES_2_CONFIG == 4)
-extern RAIL_PaAutoModeConfigEntry_t *RAIL_PaAutoModeConfig;
-#else
-extern RAIL_PaAutoModeConfigEntry_t * const RAIL_PaAutoModeConfig;
-#endif
+extern const RAIL_PaAutoModeConfigEntry_t *RAIL_PaAutoModeConfig;
+
+/**
+ * Configure the PA auto mode entries.
+ *
+ * @param[in] railHandle A RAIL instance handle.
+ * @param[in] paAutoModeEntry Entries used to configure PA auto mode decision points.
+ * @return Status parameter indicating success of function call.
+ */
+RAIL_Status_t RAIL_ConfigPaAutoEntry(RAIL_Handle_t railHandle,
+                                     const RAIL_PaAutoModeConfigEntry_t *paAutoModeEntry);
 /** @} */ // PA Power Amplifier (PA)
 
 /**

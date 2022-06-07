@@ -44,7 +44,7 @@
  * The mailbox server will notify clients who submit messages when a message
  * was delivered or when it couldn't be delivered due to an error.
  *
- * Mailbox uses a plugin configurable protocol endpoint, which is 15 by default.
+ * Mailbox uses a plugin-configurable protocol endpoint, which is 15 by default.
  *
  * The server can also configure the size of the mailbox (in number of packets,
  * 25 by default) and the packet timeout, after which the server drops the

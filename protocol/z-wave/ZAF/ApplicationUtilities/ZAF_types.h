@@ -164,7 +164,7 @@ typedef struct
  */
 typedef transmission_result_t TRANSMISSION_RESULT;
 
-typedef void * cc_handler_t; // Generic handler
+typedef void (*cc_handler_t)(void); // Generic handler
 typedef received_frame_status_t(*cc_handler_v1_t)(RECEIVE_OPTIONS_TYPE_EX *, ZW_APPLICATION_TX_BUFFER *, uint8_t);
 typedef received_frame_status_t(*cc_handler_v2_t)(
     RECEIVE_OPTIONS_TYPE_EX *,
@@ -175,6 +175,9 @@ typedef received_frame_status_t(*cc_handler_v2_t)(
 
 typedef void(* basic_set_mapper_t)(ZW_APPLICATION_TX_BUFFER * p_frame);
 typedef void(* basic_get_mapper_t)(uint8_t * p_current_value, uint8_t * p_target_value, uint8_t * p_duration);
+
+typedef void (*cc_init_function_t)(void); // Generic init function
+typedef void (*cc_reset_function_t)(void); // Generic reset function
 
 /**
  * A lifeline report function must take an array of CC pairs as input and return the number of
@@ -206,7 +209,7 @@ typedef struct
 CC_handler_map_v2_t;
 
 /**
- * Third generation of the CC handler item (for example).
+ * Third generation of the CC handler item.
  */
 typedef struct
 {
@@ -220,6 +223,31 @@ typedef struct
   uint32_t flags;
 }
 CC_handler_map_v3_t;
+
+/**
+ * Fourth generation of the CC handler item.
+ */
+typedef struct
+{
+  uint8_t handler_api_version;
+  uint16_t CC;
+  uint8_t version;
+  cc_handler_t handler;
+  basic_set_mapper_t basic_set_mapper;
+  basic_get_mapper_t basic_get_mapper;
+  lifeline_report_get_t lifeline_report_get;
+  uint32_t flags;
+  cc_init_function_t init;
+  cc_reset_function_t reset;
+}
+CC_handler_map_v4_t;
+
+/**
+ * Defines a type for the latest available CC handle type.
+ *
+ * Users of the CC handle must use this type to avoid changes caused by a future handle version.
+ */
+typedef CC_handler_map_v4_t CC_handler_map_latest_t;
 
 typedef void(*ZAF_TX_Callback_t)(transmission_result_t * pTxResult);
 
@@ -250,14 +278,14 @@ extern CC_handler_map_v3_t __stop__cc_handlers_v3 __asm("section$end$__TEXT$__cc
 /**
  * This is the first of the registered app handlers
  */
-extern const CC_handler_map_v3_t __start__cc_handlers_v3;
+extern const CC_handler_map_latest_t __start__cc_handlers_v3;
 #define cc_handlers_start __start__cc_handlers_v3
 /**
  * This marks the end of the handlers. The element
  * after the last element. This means that this element
  * is not valid.
  */
-extern const CC_handler_map_v3_t __stop__cc_handlers_v3;
+extern const CC_handler_map_latest_t __stop__cc_handlers_v3;
 #define cc_handlers_stop __stop__cc_handlers_v3
 #endif
 
@@ -290,12 +318,45 @@ extern const CC_handler_map_v3_t __stop__cc_handlers_v3;
  *                                under "Lifeline Reports" in
  *                                https://sdomembers.z-wavealliance.org/wg/AWG/document/120.
  * @param[in] flags               Reserved for future use.
+ * @param[in] init_cb             The CC init function to be invoked by ZAF_Init().
+ * @param[in] reset_cb            The CC reset function to be invoked on factory reset.
+ */
+#define REGISTER_CC_V4(cc,version,handler,basic_set_mapper,basic_get_mapper, lifeline_report_cb, flags, init_cb, reset_cb) \
+  static const CC_handler_map_latest_t thisHandler##cc __attribute__((aligned(4), __used__, __section__( HANDLER_SECTION ))) = {2,cc,version,(cc_handler_t)handler,basic_set_mapper,basic_get_mapper,lifeline_report_cb,flags,init_cb,reset_cb}; \
+  void * dummy##cc
+
+/**
+ * Registers a given command class with version, handler, etc.
+ *
+ * Every CC must register itself using the latest REGISTER_CC macro. Doing so will enable ZAF
+ * to process certain parts without the need for additional handling in the application.
+ * One example being the dispatching of command class frames to the correct command class.
+ *
+ * Using this macro will make the linker place a variable in a specific linker section which
+ * effectively will create an array of registered command classes. ZAF uses this array to look
+ * up different information about the supported command classes.
+ *
+ * Please see existing command classes for examples of usage.
+ *
+ * @remark Requires a CC handler matching @ref cc_handler_v2_t.
+ *
+ * @param[in] cc                  The command class number, e.g. COMMAND_CLASS_VERSION.
+ * @param[in] version             The version of the command class the the implementation covers.
+ * @param[in] handler             Address of the handler function.
+ * @param[in] basic_set_mapper    Address of the Basic Set mapper function.
+ * @param[in] basic_get_mapper    Address of the Basic Get mapper function.
+ * @param[in] lifeline_report_cb  Pointer to a function that will set one or more command class /
+ *                                command pairs.
+ *                                Some command classes are required to report via Lifeline and each
+ *                                Lifeline report callback will populate the list of command class /
+ *                                command pairs for the Association Group Command List Report.
+ *                                The list of mandatory command class / command pairs can be found
+ *                                under "Lifeline Reports" in
+ *                                https://sdomembers.z-wavealliance.org/wg/AWG/document/120.
+ * @param[in] flags               Reserved for future use.
  */
 #define REGISTER_CC_V3(cc,version,handler,basic_set_mapper,basic_get_mapper, lifeline_report_cb, flags) \
-  _Pragma("GCC diagnostic push")                                                                                                                                                                  \
-  _Pragma("GCC diagnostic ignored \"-Wpedantic\"")                                                                                                                                                \
-  static const CC_handler_map_v3_t thisHandler##cc __attribute__((__used__, __section__( HANDLER_SECTION ))) = {2,cc,version,handler,basic_set_mapper,basic_get_mapper,lifeline_report_cb,flags}; \
-  _Pragma("GCC diagnostic pop")                                                                                                                                                                   \
+  static const CC_handler_map_latest_t thisHandler##cc __attribute__((aligned(4), __used__, __section__( HANDLER_SECTION ))) = {2,cc,version,(cc_handler_t)handler,basic_set_mapper,basic_get_mapper,lifeline_report_cb,flags,NULL,NULL}; \
   void * dummy##cc
 
 /**
@@ -304,20 +365,16 @@ extern const CC_handler_map_v3_t __stop__cc_handlers_v3;
  * Requires a CC handler matching @ref cc_handler_v2_t.
  */
 #define REGISTER_CC_V2(cc,version,handler)                                                                                                              \
-  _Pragma("GCC diagnostic push")                                                                                                                        \
-  _Pragma("GCC diagnostic ignored \"-Wpedantic\"")                                                                                                      \
-  static const CC_handler_map_v3_t thisHandler##cc __attribute__((__used__, __section__( HANDLER_SECTION ))) = {2,cc,version,handler,NULL,NULL,NULL,0}; \
-  _Pragma("GCC diagnostic pop")                                                                                                                         \
+  static const CC_handler_map_latest_t thisHandler##cc __attribute__((aligned(4), __used__, __section__( HANDLER_SECTION ))) = {2,cc,version,(cc_handler_t)handler,NULL,NULL,NULL,0,NULL,NULL}; \
   void * dummy##cc
 
 /**
  * Registers a given command class with version, handler, etc.
+ *
+ * Requires a CC handler matching @ref cc_handler_t.
  */
 #define REGISTER_CC(cc,version,handler)                                                                                                                 \
-  _Pragma("GCC diagnostic push")                                                                                                                        \
-  _Pragma("GCC diagnostic ignored \"-Wpedantic\"")                                                                                                      \
-  static const CC_handler_map_v3_t thisHandler##cc __attribute__((__used__, __section__( HANDLER_SECTION ))) = {1,cc,version,handler,NULL,NULL,NULL,0}; \
-  _Pragma("GCC diagnostic pop")                                                                                                                         \
+  static const CC_handler_map_latest_t thisHandler##cc __attribute__((aligned(4), __used__, __section__( HANDLER_SECTION ))) = {1,cc,version,(cc_handler_t)handler,NULL,NULL,NULL,0,NULL,NULL}; \
   void * dummy##cc
 
 #endif /* ZAF_APPLICATIONUTILITIES_ZAF_TYPES_H_ */

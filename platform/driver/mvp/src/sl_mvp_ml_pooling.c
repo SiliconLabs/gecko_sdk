@@ -31,7 +31,8 @@
 #include "sl_mvp_ml_pooling.h"
 #include "sl_mvp.h"
 #include "sl_mvp_util.h"
-#include "em_common.h"
+#include "sl_mvp_program_area.h"
+#include "sl_common.h"
 
 /// @cond DO_NOT_INCLUDE_WITH_DOXYGEN
 
@@ -41,9 +42,6 @@
       status = SL_STATUS_INVALID_RANGE; \
     }                                   \
   } while (0)
-
-static sli_mvp_program_context_t program;
-static sli_mvp_program_context_t *p = &program;
 
 static sl_status_t avg_pool(const sli_mvp_ml_pooling_s8_params_t *params, bool execute);
 static sl_status_t avg_pool_opt(const sli_mvp_ml_pooling_s8_params_t *params, bool execute);
@@ -72,7 +70,7 @@ sl_status_t sli_mvp_ml_average_pooling_s8(const sli_mvp_ml_pooling_s8_params_t *
   bool opt_supported = avg_pool_opt(params, false) == SL_STATUS_OK;
 
   if (((params->output_width * params->output_height)
-       > (((9 * params->filter_width * params->filter_height * params->channels) + 5)/ 10))
+       > (((9 * params->filter_width * params->filter_height * params->channels) + 5) / 10))
       || !opt_supported) {
     // We prefer the generic algorithm for efficiency, OR we must use it because
     // the optimized algorithm does not support this configuration.
@@ -159,7 +157,8 @@ static sl_status_t avg_pool_opt(const sli_mvp_ml_pooling_s8_params_t *params, bo
   const int8_t *input          = params->input;
   int8_t *output               = params->output;
 
-  sl_status_t status = SL_STATUS_OK;
+  sl_status_t status           = SL_STATUS_OK;
+  sli_mvp_program_context_t *p = sli_mvp_get_program_area_context();
 
   const int parallel = (depth % 2) == 0 ? 2 : 1;
   const int x_stride = depth / parallel;
@@ -191,7 +190,6 @@ static sl_status_t avg_pool_opt(const sli_mvp_ml_pooling_s8_params_t *params, bo
   for (int batch = 0; batch < batches; ++batch) {
     for (int out_y = 0; out_y < output_height; ++out_y) {
       for (int out_x = 0; out_x < output_width; ++out_x) {
-
         const int in_x_origin = (out_x * stride_width) - pad_width;
         const int in_y_origin = (out_y * stride_height) - pad_height;
 
@@ -216,7 +214,7 @@ static sl_status_t avg_pool_opt(const sli_mvp_ml_pooling_s8_params_t *params, bo
         const int filter_x_count = filter_x_end - filter_x_start;
         const int filter_y_count = filter_y_end - filter_y_start;
         const float16_t final_scale_factor = SLI_MVP_ACCUMULATOR_MULTIPLIER
-                                            / (filter_x_count * filter_y_count);
+                                             / (filter_x_count * filter_y_count);
 
         // Register allocation:
         //   Constants:
@@ -274,7 +272,7 @@ static sl_status_t avg_pool_opt(const sli_mvp_ml_pooling_s8_params_t *params, bo
           sli_mvp_prog_set_reg_f16c(p->p, SLI_MVP_R5, (float16_t)activation_max, (float16_t)activation_max);
         }
 
-        sli_mvp_pb_begin_loop(p, depth / parallel, &status); // Loop over channels.
+        sli_mvp_pb_begin_loop(p, depth / parallel, &status); {  // Loop over channels.
 
           // R2 = CLEAR() r_acc = 0
           sli_mvp_pb_compute(p,
@@ -284,8 +282,8 @@ static sl_status_t avg_pool_opt(const sli_mvp_ml_pooling_s8_params_t *params, bo
                              SLI_MVP_NONE,
                              &status);
 
-          sli_mvp_pb_begin_loop(p, filter_y_count, &status);     // Loop over filter height
-            sli_mvp_pb_begin_loop(p, filter_x_count, &status);   // Loop over filter width
+          sli_mvp_pb_begin_loop(p, filter_y_count, &status); {    // Loop over filter height
+            sli_mvp_pb_begin_loop(p, filter_x_count, &status); {  // Loop over filter width
 
               // Accumulate input tensor values covered by filter.
               // LOAD(ARRAY0, R3)
@@ -299,11 +297,12 @@ static sl_status_t avg_pool_opt(const sli_mvp_ml_pooling_s8_params_t *params, bo
                                  SLI_MVP_LOAD(0, SLI_MVP_R3, SLI_MVP_ARRAY(0), SLI_MVP_INCRDIM_COL),
                                  SLI_MVP_NONE,
                                  &status);
-
-            sli_mvp_pb_end_loop(p);  // Filter width
+            }
+            sli_mvp_pb_end_loop(p);      // Filter width
             sli_mvp_pb_postloop_incr_dim(p, SLI_MVP_ARRAY(0), SLI_MVP_INCRDIM_ROW);
             sli_mvp_pb_postloop_reset_dim(p, SLI_MVP_ARRAY(0), SLI_MVP_RESETDIM_COL);
-          sli_mvp_pb_end_loop(p);    // Filter height
+          }
+          sli_mvp_pb_end_loop(p);        // Filter height
           sli_mvp_pb_postloop_incr_dim(p, SLI_MVP_ARRAY(0), SLI_MVP_INCRDIM_VEC);
           sli_mvp_pb_postloop_reset_dim(p, SLI_MVP_ARRAY(0), SLI_MVP_RESETDIM_ROW);
 
@@ -333,7 +332,7 @@ static sl_status_t avg_pool_opt(const sli_mvp_ml_pooling_s8_params_t *params, bo
                                SLI_MVP_STORE(SLI_MVP_R6, SLI_MVP_ARRAY(1), SLI_MVP_INCRDIM_VEC),
                                &status);
           }
-
+        }
         sli_mvp_pb_end_loop(p);  // Channels
 
         // Check if any errors found during program generation.
@@ -374,8 +373,9 @@ static sl_status_t avg_pool(const sli_mvp_ml_pooling_s8_params_t *params, bool e
   const int8_t *input          = params->input;
   int8_t *output               = params->output;
 
-  sl_status_t status = SL_STATUS_OK;
-  bool parallelize_channels = (depth % 2) == 0;
+  sl_status_t status           = SL_STATUS_OK;
+  sli_mvp_program_context_t *p = sli_mvp_get_program_area_context();
+  bool parallelize_channels    = (depth % 2) == 0;
 
   if (needs_padding == false) {
     if ((pad_width != 0) || (pad_height != 0)) {
@@ -418,7 +418,7 @@ static sl_status_t avg_pool(const sli_mvp_ml_pooling_s8_params_t *params, bool e
       out_x_max = out_x_min;   // (and 1 or more filter_x_end)
     } else {                   // Case 2.  true for the rest of the out_x
       if (input_width - in_x_origin_min >= filter_width) {
-                               // Case 2a. true for multiple out_x
+        // Case 2a. true for multiple out_x
         out_x_max = out_x_center_max;
       } else {                 // Case 2b. each out_x leads to 1 filter_x_end
         out_x_max = out_x_min;
@@ -460,7 +460,7 @@ static sl_status_t avg_pool(const sli_mvp_ml_pooling_s8_params_t *params, bool e
         out_y_max = out_y_min;   // (and 1 or more filter_y_end)
       } else {                   // Case 2.  true for the rest of the out_y
         if (input_height - in_y_origin_min >= filter_height) {
-                                 // Case 2a. true for multiple out_y
+          // Case 2a. true for multiple out_y
           out_y_max = out_y_center_max;
         } else {                 // Case 2b. each out_y leads to 1 filter_y_end
           out_y_max = out_y_min;
@@ -507,7 +507,7 @@ static sl_status_t avg_pool(const sli_mvp_ml_pooling_s8_params_t *params, bool e
       // offsets that have no valid out_y in inner loop.
       int out_y_num_offsets = SL_MIN(out_y_incr, output_height_truncated);
 
-      for(int out_y_offset = 0; out_y_offset < out_y_num_offsets; ++out_y_offset) {
+      for (int out_y_offset = 0; out_y_offset < out_y_num_offsets; ++out_y_offset) {
         // Could compute out_y_size for offset 0 and use for all but it is possible
         // that some more programs may be possible with a tighter bound on array size.
         SLI_MVP_CHECK(output_height_truncated >= out_y_offset);
@@ -664,8 +664,8 @@ static sl_status_t avg_pool(const sli_mvp_ml_pooling_s8_params_t *params, bool e
               sli_mvp_prog_set_reg_f16c(p->p, SLI_MVP_R5, (float16_t)activation_max, (float16_t)activation_max);
             }
 
-            sli_mvp_pb_begin_loop(p, output_width_truncated, &status);
-              sli_mvp_pb_begin_loop(p, out_y_size, &status);
+            sli_mvp_pb_begin_loop(p, output_width_truncated, &status); {
+              sli_mvp_pb_begin_loop(p, out_y_size, &status); {
                 // R2 = CLEAR()
                 sli_mvp_pb_compute(p,
                                    SLI_MVP_OP(CLEAR),
@@ -673,8 +673,8 @@ static sl_status_t avg_pool(const sli_mvp_ml_pooling_s8_params_t *params, bool e
                                    SLI_MVP_NONE,
                                    SLI_MVP_NONE,
                                    &status);
-                sli_mvp_pb_begin_loop(p, filter_height_truncated, &status);
-                  sli_mvp_pb_begin_loop(p, input_size_col, &status);
+                sli_mvp_pb_begin_loop(p, filter_height_truncated, &status); {
+                  sli_mvp_pb_begin_loop(p, input_size_col, &status); {
                     // R2 = MAC2RA(R3, R1, R2)
                     // LOAD(ARRAY0, R3)
                     sli_mvp_pb_compute(p,
@@ -686,9 +686,11 @@ static sl_status_t avg_pool(const sli_mvp_ml_pooling_s8_params_t *params, bool e
                                        SLI_MVP_LOAD(0, SLI_MVP_R3, SLI_MVP_ARRAY(0), SLI_MVP_INCRDIM_COL),
                                        SLI_MVP_NONE,
                                        &status);
-                  sli_mvp_pb_end_loop(p);              // input_size_col
+                  }
+                  sli_mvp_pb_end_loop(p);                    // input_size_col
                   sli_mvp_pb_postloop_incr_dim(p, SLI_MVP_ARRAY(0), SLI_MVP_INCRDIM_ROW);
-                sli_mvp_pb_end_loop(p);                // filter_height_truncated
+                }
+                sli_mvp_pb_end_loop(p);                    // filter_height_truncated
 
                 if (single_out_x) {
                   sli_mvp_pb_postloop_incr_dim(p, SLI_MVP_ARRAY(0), SLI_MVP_INCRDIM_VEC);
@@ -699,7 +701,7 @@ static sl_status_t avg_pool(const sli_mvp_ml_pooling_s8_params_t *params, bool e
                   sli_mvp_pb_postloop_incr_dim(p, SLI_MVP_ARRAY(0), SLI_MVP_INCRDIM_ROW);
                 }
 
-                if (input_row_incr_left-- > 0) { // use one of the available load streams of next op
+                if (input_row_incr_left-- > 0) {     // use one of the available load streams of next op
                   // LOAD(ARRAY0, R3)
                   // R2 = MULR2A(R2, R0)
                   // STORE(ARRAY1, R2)
@@ -745,51 +747,58 @@ static sl_status_t avg_pool(const sli_mvp_ml_pooling_s8_params_t *params, bool e
                 // Handle special case where need to increment out_y
                 // one piece at a time due to stride limits.
                 if (out_y_extra_incr > 0) {
-                  sli_mvp_pb_begin_loop(p, out_y_extra_incr, &status);
-                    sli_mvp_pb_begin_loop(p, 1, &status);
+                  sli_mvp_pb_begin_loop(p, out_y_extra_incr, &status); {
+                    sli_mvp_pb_begin_loop(p, 1, &status); {
                       sli_mvp_pb_compute(p,
                                          SLI_MVP_OP(NOOP),
                                          SLI_MVP_NONE,
                                          SLI_MVP_NONE,
                                          SLI_MVP_NONE,
                                          &status);
+                    }
                     sli_mvp_pb_end_loop(p);
                     sli_mvp_pb_postloop_incr_dim(p, SLI_MVP_ARRAY(1), SLI_MVP_INCRDIM_VEC);
+                  }
                   sli_mvp_pb_end_loop(p);
                 }
 
                 // Handle any remaining input rows still needing to increment
                 if (input_row_incr_left <= 0) {
                 } else if (input_row_incr_left == 1) {
-                  sli_mvp_pb_begin_loop(p, 1, &status);
+                  sli_mvp_pb_begin_loop(p, 1, &status); {
                     sli_mvp_pb_compute(p,
                                        SLI_MVP_OP(NOOP),
                                        SLI_MVP_NONE,
                                        SLI_MVP_NONE,
                                        SLI_MVP_NONE,
                                        &status);
+                  }
                   sli_mvp_pb_end_loop(p);
                   sli_mvp_pb_postloop_incr_dim(p, SLI_MVP_ARRAY(0), SLI_MVP_INCRDIM_ROW);
                 } else {
-                  sli_mvp_pb_begin_loop(p, input_row_incr_left - 1, &status);
-                    sli_mvp_pb_begin_loop(p, 1, &status);
+                  sli_mvp_pb_begin_loop(p, input_row_incr_left - 1, &status); {
+                    sli_mvp_pb_begin_loop(p, 1, &status); {
                       sli_mvp_pb_compute(p,
                                          SLI_MVP_OP(NOOP),
                                          SLI_MVP_NONE,
                                          SLI_MVP_NONE,
                                          SLI_MVP_NONE,
                                          &status);
+                    }
                     sli_mvp_pb_end_loop(p);
                     sli_mvp_pb_postloop_incr_dim(p, SLI_MVP_ARRAY(0), SLI_MVP_INCRDIM_ROW);
+                  }
                   sli_mvp_pb_end_loop(p);
                   sli_mvp_pb_postloop_incr_dim(p, SLI_MVP_ARRAY(0), SLI_MVP_INCRDIM_ROW);
                 }
-              sli_mvp_pb_end_loop(p);                  // out_y_size
+              }
+              sli_mvp_pb_end_loop(p);                    // out_y_size
               sli_mvp_pb_postloop_incr_dim(p, SLI_MVP_ARRAY(1), SLI_MVP_INCRDIM_ROW);
 
               if (!single_out_x) {
                 sli_mvp_pb_postloop_incr_dim(p, SLI_MVP_ARRAY(0), SLI_MVP_INCRDIM_VEC);
               }
+            }
             sli_mvp_pb_end_loop(p);                    // output_width_truncated
 
             // Check if any errors found during program generation.
@@ -835,7 +844,8 @@ static sl_status_t max_pool(const sli_mvp_ml_pooling_s8_params_t *params, bool e
   const int8_t *input          = params->input;
   int8_t *output               = params->output;
 
-  sl_status_t status = SL_STATUS_OK;
+  sl_status_t status           = SL_STATUS_OK;
+  sli_mvp_program_context_t *p = sli_mvp_get_program_area_context();
 
   if (needs_padding == false) {
     if ((pad_width != 0) || (pad_height != 0)) {
@@ -902,7 +912,7 @@ static sl_status_t max_pool(const sli_mvp_ml_pooling_s8_params_t *params, bool e
         out_y_max = out_y_min;   // (and 1 or more filter_y_end)
       } else {                   // Case 2.  true for the rest of the out_y
         if (input_height - in_y_origin_min >= filter_height) {
-                                 // Case 2a. true for multiple out_y
+          // Case 2a. true for multiple out_y
           out_y_max = out_y_center_max;
         } else {                 // Case 2b. each out_y leads to 1 filter_y_end
           out_y_max = out_y_min;
@@ -947,7 +957,7 @@ static sl_status_t max_pool(const sli_mvp_ml_pooling_s8_params_t *params, bool e
       // offsets that have no valid out_y in inner loop.
       int out_y_num_offsets = SL_MIN(out_y_incr, output_height_truncated);
 
-      for(int out_y_offset = 0; out_y_offset < out_y_num_offsets; ++out_y_offset) {
+      for (int out_y_offset = 0; out_y_offset < out_y_num_offsets; ++out_y_offset) {
         // Could compute out_y_size for offset 0 and use for all but it is possible
         // that some more programs may be possible with a tighter bound on array size.
         SLI_MVP_CHECK(output_height_truncated >= out_y_offset);
@@ -1097,8 +1107,8 @@ static sl_status_t max_pool(const sli_mvp_ml_pooling_s8_params_t *params, bool e
             sli_mvp_prog_set_reg_f16c(p->p, SLI_MVP_R3, (float16_t)activation_min, (float16_t)activation_min);
             sli_mvp_prog_set_reg_f16c(p->p, SLI_MVP_R4, (float16_t)activation_max, (float16_t)activation_max);
 
-            sli_mvp_pb_begin_loop(p, output_width_truncated, &status);
-              sli_mvp_pb_begin_loop(p, out_y_size, &status);
+            sli_mvp_pb_begin_loop(p, output_width_truncated, &status); {
+              sli_mvp_pb_begin_loop(p, out_y_size, &status); {
                 // R1 = COPY(R0)
                 sli_mvp_pb_compute(p,
                                    SLI_MVP_OP(COPY),
@@ -1107,8 +1117,8 @@ static sl_status_t max_pool(const sli_mvp_ml_pooling_s8_params_t *params, bool e
                                    SLI_MVP_NONE,
                                    SLI_MVP_NONE,
                                    &status);
-                sli_mvp_pb_begin_loop(p, filter_height_truncated, &status);
-                  sli_mvp_pb_begin_loop(p, input_size_col, &status);
+                sli_mvp_pb_begin_loop(p, filter_height_truncated, &status); {
+                  sli_mvp_pb_begin_loop(p, input_size_col, &status); {
                     // LOAD(ARRAY0, R2)
                     // R1 = MAX2A(R2, R1)
                     sli_mvp_pb_compute(p,
@@ -1119,9 +1129,11 @@ static sl_status_t max_pool(const sli_mvp_ml_pooling_s8_params_t *params, bool e
                                        SLI_MVP_LOAD(0, SLI_MVP_R2, SLI_MVP_ARRAY(0), SLI_MVP_INCRDIM_COL),
                                        SLI_MVP_NONE,
                                        &status);
-                  sli_mvp_pb_end_loop(p);              // input_size_col
+                  }
+                  sli_mvp_pb_end_loop(p);                    // input_size_col
                   sli_mvp_pb_postloop_incr_dim(p, SLI_MVP_ARRAY(0), SLI_MVP_INCRDIM_ROW);
-                sli_mvp_pb_end_loop(p);                // filter_height_truncated
+                }
+                sli_mvp_pb_end_loop(p);                    // filter_height_truncated
 
                 if (single_out_x) {
                   sli_mvp_pb_postloop_incr_dim(p, SLI_MVP_ARRAY(0), SLI_MVP_INCRDIM_VEC);
@@ -1132,7 +1144,7 @@ static sl_status_t max_pool(const sli_mvp_ml_pooling_s8_params_t *params, bool e
                   sli_mvp_pb_postloop_incr_dim(p, SLI_MVP_ARRAY(0), SLI_MVP_INCRDIM_ROW);
                 }
 
-                if (input_row_incr_left-- > 0) { // use one of the available load streams of next op
+                if (input_row_incr_left-- > 0) {     // use one of the available load streams of next op
                   // LOAD(ARRAY0, R2)
                   // R5 = CLIP2A(R3, R4, R1)
                   // STORE(ARRAY1, R5)
@@ -1162,51 +1174,58 @@ static sl_status_t max_pool(const sli_mvp_ml_pooling_s8_params_t *params, bool e
                 // Handle special case where need to increment out_y
                 // one piece at a time due to stride limits.
                 if (out_y_extra_incr > 0) {
-                  sli_mvp_pb_begin_loop(p, out_y_extra_incr, &status);
-                    sli_mvp_pb_begin_loop(p, 1, &status);
+                  sli_mvp_pb_begin_loop(p, out_y_extra_incr, &status); {
+                    sli_mvp_pb_begin_loop(p, 1, &status); {
                       sli_mvp_pb_compute(p,
                                          SLI_MVP_OP(NOOP),
                                          SLI_MVP_NONE,
                                          SLI_MVP_NONE,
                                          SLI_MVP_NONE,
                                          &status);
+                    }
                     sli_mvp_pb_end_loop(p);
                     sli_mvp_pb_postloop_incr_dim(p, SLI_MVP_ARRAY(1), SLI_MVP_INCRDIM_VEC);
+                  }
                   sli_mvp_pb_end_loop(p);
                 }
 
                 // Handle any remaining input rows still needing to increment
                 if (input_row_incr_left <= 0) {
                 } else if (input_row_incr_left == 1) {
-                  sli_mvp_pb_begin_loop(p, 1, &status);
+                  sli_mvp_pb_begin_loop(p, 1, &status); {
                     sli_mvp_pb_compute(p,
                                        SLI_MVP_OP(NOOP),
                                        SLI_MVP_NONE,
                                        SLI_MVP_NONE,
                                        SLI_MVP_NONE,
                                        &status);
+                  }
                   sli_mvp_pb_end_loop(p);
                   sli_mvp_pb_postloop_incr_dim(p, SLI_MVP_ARRAY(0), SLI_MVP_INCRDIM_ROW);
                 } else {
-                  sli_mvp_pb_begin_loop(p, input_row_incr_left - 1, &status);
-                    sli_mvp_pb_begin_loop(p, 1, &status);
+                  sli_mvp_pb_begin_loop(p, input_row_incr_left - 1, &status); {
+                    sli_mvp_pb_begin_loop(p, 1, &status); {
                       sli_mvp_pb_compute(p,
                                          SLI_MVP_OP(NOOP),
                                          SLI_MVP_NONE,
                                          SLI_MVP_NONE,
                                          SLI_MVP_NONE,
                                          &status);
+                    }
                     sli_mvp_pb_end_loop(p);
                     sli_mvp_pb_postloop_incr_dim(p, SLI_MVP_ARRAY(0), SLI_MVP_INCRDIM_ROW);
+                  }
                   sli_mvp_pb_end_loop(p);
                   sli_mvp_pb_postloop_incr_dim(p, SLI_MVP_ARRAY(0), SLI_MVP_INCRDIM_ROW);
                 }
-              sli_mvp_pb_end_loop(p);                  // out_y_size
+              }
+              sli_mvp_pb_end_loop(p);                    // out_y_size
               sli_mvp_pb_postloop_incr_dim(p, SLI_MVP_ARRAY(1), SLI_MVP_INCRDIM_ROW);
 
               if (!single_out_x) {
                 sli_mvp_pb_postloop_incr_dim(p, SLI_MVP_ARRAY(0), SLI_MVP_INCRDIM_VEC);
               }
+            }
             sli_mvp_pb_end_loop(p);                    // output_width_truncated
 
             // Check if any errors found during program generation.

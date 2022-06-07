@@ -61,16 +61,21 @@
 #include <string.h>
 
 #if defined(PSA_WANT_ALG_CCM)
-/*
- * ccm_auth_crypt has been taken from mbed TLS and adapted to use the
- * CRYPTO accelerator, hence the above copyright notice.
- */
-static psa_status_t ccm_auth_crypt(const unsigned char *key_buffer, size_t key_buffer_size,
-                                   psa_encrypt_or_decrypt_t mode, size_t length,
-                                   const unsigned char *iv, size_t iv_len,
-                                   const unsigned char *add, size_t add_len,
-                                   const unsigned char *input, unsigned char *output,
-                                   unsigned char *tag, size_t tag_len);
+
+//sli_ccm_crypt_and_tag has been taken from mbed TLS and adapted to use the
+//CRYPTO accelerator, hence the above copyright notice.
+
+static psa_status_t sli_ccm_crypt_and_tag(sli_crypto_transparent_aead_operation_t *operation,
+                                          psa_encrypt_or_decrypt_t mode,
+                                          size_t length,
+                                          const unsigned char *iv,
+                                          size_t iv_len,
+                                          const unsigned char *add,
+                                          size_t add_len,
+                                          const unsigned char *input,
+                                          unsigned char *output,
+                                          unsigned char *tag,
+                                          size_t tag_len);
 #endif // PSA_WANT_ALG_CCM
 
 #if defined(PSA_WANT_ALG_GCM)
@@ -107,8 +112,7 @@ static psa_status_t check_aead_parameters(const psa_key_attributes_t *attributes
       if (psa_get_key_type(attributes) != PSA_KEY_TYPE_AES) {
         return PSA_ERROR_NOT_SUPPORTED;
       }
-      if (tag_length == 0
-          || tag_length == 2
+      if (tag_length < 4
           || tag_length > 16
           || tag_length % 2 != 0
           || nonce_length < 7
@@ -343,6 +347,10 @@ psa_status_t sli_crypto_transparent_aead_encrypt_tag(const psa_key_attributes_t 
     plaintext = ciphertext;
   }
 
+  sli_crypto_transparent_aead_operation_t operation = { 0 };
+  operation.key_len = key_length;
+  memcpy(operation.key, key_buffer, key_length);
+
   switch (PSA_ALG_AEAD_WITH_SHORTENED_TAG(alg, 0)) {
 #if defined(PSA_WANT_ALG_CCM)
     case PSA_ALG_AEAD_WITH_SHORTENED_TAG(PSA_ALG_CCM, 0):
@@ -351,18 +359,17 @@ psa_status_t sli_crypto_transparent_aead_encrypt_tag(const psa_key_attributes_t 
         return PSA_ERROR_NOT_SUPPORTED;
       }
 
-      psa_status = ccm_auth_crypt(key_buffer,
-                                  key_buffer_size,
-                                  PSA_CRYPTO_DRIVER_ENCRYPT,
-                                  plaintext_length,
-                                  nonce,
-                                  nonce_length,
-                                  additional_data,
-                                  additional_data_length,
-                                  plaintext,
-                                  ciphertext,
-                                  tag,
-                                  *tag_length);
+      psa_status = sli_ccm_crypt_and_tag(&operation,
+                                         PSA_CRYPTO_DRIVER_ENCRYPT,
+                                         plaintext_length,
+                                         nonce,
+                                         nonce_length,
+                                         additional_data,
+                                         additional_data_length,
+                                         plaintext,
+                                         ciphertext,
+                                         tag,
+                                         *tag_length);
       break;
 #endif // PSA_WANT_ALG_CCM
 #if defined(PSA_WANT_ALG_GCM)
@@ -371,12 +378,6 @@ psa_status_t sli_crypto_transparent_aead_encrypt_tag(const psa_key_attributes_t 
       if (psa_get_key_type(attributes) != PSA_KEY_TYPE_AES) {
         return PSA_ERROR_NOT_SUPPORTED;
       }
-
-      // Populate the operation struct directly until we have implemented
-      // the multi-part functions
-      sli_crypto_transparent_aead_operation_t operation = { 0 };
-      operation.key_len = key_length;
-      memcpy(operation.key, key_buffer, key_length);
 
       sli_gcm_crypt_and_tag(&operation,
                             PSA_CRYPTO_DRIVER_ENCRYPT,
@@ -443,7 +444,7 @@ psa_status_t sli_crypto_transparent_aead_decrypt_tag(const psa_key_attributes_t 
                                                      size_t additional_data_length,
                                                      const uint8_t *ciphertext,
                                                      size_t ciphertext_length,
-                                                     const uint8_t* tag,
+                                                     const uint8_t *tag,
                                                      size_t tag_length,
                                                      uint8_t *plaintext,
                                                      size_t plaintext_size,
@@ -490,6 +491,10 @@ psa_status_t sli_crypto_transparent_aead_decrypt_tag(const psa_key_attributes_t 
     ciphertext = plaintext;
   }
 
+  sli_crypto_transparent_aead_operation_t operation = { 0 };
+  operation.key_len = key_length;
+  memcpy(operation.key, key_buffer, key_length);
+
   uint8_t calc_tag[16] = { 0 };
   uint32_t diff = 0;
 
@@ -501,18 +506,17 @@ psa_status_t sli_crypto_transparent_aead_decrypt_tag(const psa_key_attributes_t 
         return PSA_ERROR_NOT_SUPPORTED;
       }
 
-      psa_status = ccm_auth_crypt(key_buffer,
-                                  key_buffer_size,
-                                  PSA_CRYPTO_DRIVER_DECRYPT,
-                                  ciphertext_length,
-                                  nonce,
-                                  nonce_length,
-                                  additional_data,
-                                  additional_data_length,
-                                  ciphertext,
-                                  plaintext,
-                                  calc_tag,
-                                  tag_length);
+      psa_status = sli_ccm_crypt_and_tag(&operation,
+                                         PSA_CRYPTO_DRIVER_DECRYPT,
+                                         ciphertext_length,
+                                         nonce,
+                                         nonce_length,
+                                         additional_data,
+                                         additional_data_length,
+                                         ciphertext,
+                                         plaintext,
+                                         calc_tag,
+                                         tag_length);
 
       if (psa_status != PSA_SUCCESS) {
         return psa_status;
@@ -541,12 +545,6 @@ psa_status_t sli_crypto_transparent_aead_decrypt_tag(const psa_key_attributes_t 
       if (psa_get_key_type(attributes) != PSA_KEY_TYPE_AES) {
         return PSA_ERROR_NOT_SUPPORTED;
       }
-
-      // Populate the operation struct directly until we have implemented
-      // the multi-part functions
-      sli_crypto_transparent_aead_operation_t operation = { 0 };
-      operation.key_len = key_length;
-      memcpy(operation.key, key_buffer, key_length);
 
       sli_gcm_crypt_and_tag(&operation,
                             PSA_CRYPTO_DRIVER_DECRYPT,
@@ -609,130 +607,6 @@ psa_status_t sli_crypto_transparent_aead_decrypt_tag(const psa_key_attributes_t 
 #endif // PSA_WANT_ALG_CCM || PSA_WANT_ALG_GCM
 }
 
-#if defined(PSA_CRYPTO_AEAD_MULTIPART_SUPPORTED)
-
-psa_status_t sli_crypto_transparent_aead_encrypt_setup(sli_crypto_transparent_aead_operation_t *operation,
-                                                       const psa_key_attributes_t *attributes,
-                                                       const uint8_t *key_buffer,
-                                                       size_t key_buffer_size,
-                                                       psa_algorithm_t alg)
-{
-  (void)operation;
-  (void)attributes;
-  (void)key_buffer;
-  (void)key_buffer_size;
-  (void)alg;
-  return PSA_ERROR_NOT_SUPPORTED;
-}
-
-psa_status_t sli_crypto_transparent_aead_decrypt_setup(sli_crypto_transparent_aead_operation_t *operation,
-                                                       const psa_key_attributes_t *attributes,
-                                                       const uint8_t *key_buffer,
-                                                       size_t key_buffer_size,
-                                                       psa_algorithm_t alg)
-{
-  (void)operation;
-  (void)attributes;
-  (void)key_buffer;
-  (void)key_buffer_size;
-  (void)alg;
-  return PSA_ERROR_NOT_SUPPORTED;
-}
-
-psa_status_t sli_crypto_transparent_aead_generate_nonce(sli_crypto_transparent_aead_operation_t *operation,
-                                                        uint8_t *nonce,
-                                                        size_t nonce_size,
-                                                        size_t *nonce_length)
-{
-  (void)operation;
-  (void)nonce;
-  (void)nonce_size;
-  (void)nonce_length;
-  return PSA_ERROR_NOT_SUPPORTED;
-}
-
-psa_status_t sli_crypto_transparent_aead_set_nonce(sli_crypto_transparent_aead_operation_t *operation,
-                                                   const uint8_t *nonce,
-                                                   size_t nonce_size)
-{
-  (void)operation;
-  (void)nonce;
-  (void)nonce_size;
-  return PSA_ERROR_NOT_SUPPORTED;
-}
-
-psa_status_t sli_crypto_transparent_aead_set_lengths(sli_crypto_transparent_aead_operation_t *operation,
-                                                     size_t ad_length,
-                                                     size_t plaintext_length)
-{
-  (void)operation;
-  (void)ad_length;
-  (void)plaintext_length;
-  return PSA_ERROR_NOT_SUPPORTED;
-}
-
-psa_status_t sli_crypto_transparent_aead_update_ad(sli_crypto_transparent_aead_operation_t *operation,
-                                                   const uint8_t *input,
-                                                   size_t input_length)
-{
-  (void)operation;
-  (void)input;
-  (void)input_length;
-  return PSA_ERROR_NOT_SUPPORTED;
-}
-
-psa_status_t sli_crypto_transparent_aead_update(sli_crypto_transparent_aead_operation_t *operation,
-                                                const uint8_t *input,
-                                                size_t input_length,
-                                                uint8_t *output,
-                                                size_t output_size,
-                                                size_t *output_length)
-{
-  (void)operation;
-  (void)input;
-  (void)input_length;
-  (void)output;
-  (void)output_size;
-  (void)output_length;
-  return PSA_ERROR_NOT_SUPPORTED;
-}
-
-psa_status_t sli_crypto_transparent_aead_finish(sli_crypto_transparent_aead_operation_t *operation,
-                                                uint8_t *ciphertext,
-                                                size_t ciphertext_size,
-                                                size_t *ciphertext_length,
-                                                uint8_t *tag,
-                                                size_t tag_size,
-                                                size_t *tag_length)
-{
-  (void)operation;
-  (void)ciphertext;
-  (void)ciphertext_size;
-  (void)ciphertext_length;
-  (void)tag;
-  (void)tag_size;
-  (void)tag_length;
-  return PSA_ERROR_NOT_SUPPORTED;
-}
-
-psa_status_t sli_crypto_transparent_aead_verify(sli_crypto_transparent_aead_operation_t *operation,
-                                                uint8_t *plaintext,
-                                                size_t plaintext_size,
-                                                size_t *plaintext_length,
-                                                const uint8_t *tag,
-                                                size_t tag_length)
-{
-  (void)operation;
-  (void)plaintext;
-  (void)plaintext_size;
-  (void)plaintext_length;
-  (void)tag;
-  (void)tag_length;
-  return PSA_ERROR_NOT_SUPPORTED;
-}
-
-#endif // defined(PSA_CRYPTO_AEAD_MULTIPART_SUPPORTED)
-
 /*******************************************************************************
  **************************    LOCAL FUNCTIONS   *******************************
  ******************************************************************************/
@@ -755,218 +629,7 @@ void update_cbc_mac(CRYPTO_TypeDef *crypto, unsigned char *b)
                    CRYPTO_CMD_INSTR_DATA0TODATA2);
 }
 
-/*
- * Definition of CCM:
- * http://csrc.nist.gov/publications/nistpubs/800-38C/SP800-38C_updated-July20_2007.pdf
- * RFC 3610 "Counter with CBC-MAC (CCM)"
- *
- * Related:
- * RFC 5116 "An Interface and Algorithms for Authenticated Encryption"
- */
-static psa_status_t ccm_auth_crypt(const unsigned char *key_buffer, size_t key_buffer_size,
-                                   psa_encrypt_or_decrypt_t mode, size_t length,
-                                   const unsigned char *iv, size_t iv_len,
-                                   const unsigned char *add, size_t add_len,
-                                   const unsigned char *input, unsigned char *output,
-                                   unsigned char *tag, size_t tag_len)
-{
-  CORE_DECLARE_IRQ_STATE;
-
-  unsigned char i;
-  unsigned char q;
-  size_t len_left;
-  unsigned char b[16];
-  unsigned char ctr[16];
-  const unsigned char *src;
-  unsigned char *dst;
-
-  /*
-   * Check remaining length requirements: SP800-38C A.1
-   * Additional requirement: a < 2^16 - 2^8 to simplify the code.
-   * 'length' checked later (when writing it to the first block)
-   *
-   * Also, loosen the requirements to enable support for CCM* (IEEE 802.15.4).
-   */
-  if (add_len >= 0xFF00) {
-    return PSA_ERROR_INVALID_ARGUMENT;
-  }
-
-  q = 16 - 1 - (unsigned char) iv_len;
-
-  /*
-   * First block B_0:
-   * 0        .. 0        flags
-   * 1        .. iv_len   nonce (aka iv)
-   * iv_len+1 .. 15       length
-   *
-   * With flags as (bits):
-   * 7        0
-   * 6        add present?
-   * 5 .. 3   (t - 2) / 2
-   * 2 .. 0   q - 1
-   */
-  b[0] = 0;
-  b[0] |= (add_len > 0) << 6;
-  b[0] |= ((tag_len - 2) / 2) << 3;
-  b[0] |= q - 1;
-
-  memcpy(b + 1, iv, iv_len);
-
-  for (i = 0, len_left = length; i < q; i++, len_left >>= 8) {
-    b[15 - i] = (unsigned char)(len_left & 0xFF);
-  }
-
-  if (len_left > 0) {
-    return PSA_ERROR_INVALID_ARGUMENT;
-  }
-
-  CRYPTO_TypeDef *crypto = crypto_management_acquire();
-  crypto->WAC = 0;
-  crypto->CTRL = 0;
-
-  // Set the encryption key
-  CORE_ENTER_CRITICAL();
-  CRYPTO_KeyBufWriteUnaligned(crypto,
-                              key_buffer,
-                              (key_buffer_size == 16U) ? cryptoKey128Bits
-                              : cryptoKey256Bits);
-
-  // Clear tag register (DATA2)
-  for (uint32_t i = 0; i < 4; ++i) {
-    crypto->DATA2 = 0;
-  }
-
-  /* Start CBC-MAC with first block */
-  update_cbc_mac(crypto, b);
-  CORE_EXIT_CRITICAL();
-
-  /*
-   * If there is additional data, update CBC-MAC with
-   * add_len, add, 0 (padding to a block boundary)
-   */
-  if (add_len > 0) {
-    size_t use_len;
-    len_left = add_len;
-    src = add;
-
-    memset(b, 0, 16);
-    b[0] = (unsigned char)((add_len >> 8) & 0xFF);
-    b[1] = (unsigned char)((add_len) & 0xFF);
-
-    use_len = len_left < 16 - 2 ? len_left : 16 - 2;
-    memcpy(b + 2, src, use_len);
-    len_left -= use_len;
-    src += use_len;
-
-    CORE_ENTER_CRITICAL();
-    update_cbc_mac(crypto, b);
-
-    while (len_left > 0) {
-      use_len = len_left > 16 ? 16 : len_left;
-
-      memset(b, 0, 16);
-      memcpy(b, src, use_len);
-      update_cbc_mac(crypto, b);
-
-      len_left -= use_len;
-      src += use_len;
-    }
-    CORE_EXIT_CRITICAL();
-  }
-
-  /*
-   * Prepare counter block for encryption:
-   * 0        .. 0        flags
-   * 1        .. iv_len   nonce (aka iv)
-   * iv_len+1 .. 15       counter (initially 1)
-   *
-   * With flags as (bits):
-   * 7 .. 3   0
-   * 2 .. 0   q - 1
-   */
-  ctr[0] = q - 1;
-  memcpy(ctr + 1, iv, iv_len);
-  memset(ctr + 1 + iv_len, 0, q);
-  ctr[15] = 1;
-
-  // Write the counter to CRYPTO
-  CORE_ENTER_CRITICAL();
-  CRYPTO_DataWriteUnaligned(&crypto->DATA1, (uint8_t *)ctr);
-
-  /*
-   * Authenticate and {en,de}crypt the message.
-   *
-   * The only difference between encryption and decryption is
-   * the respective order of authentication and {en,de}cryption.
-   */
-  len_left = length;
-  src = input;
-  dst = output;
-
-  uint8_t out_buf[16];
-
-  while (len_left > 0) {
-    size_t use_len = len_left > 16 ? 16 : len_left;
-
-    if (mode == PSA_CRYPTO_DRIVER_ENCRYPT) {
-      memset(b, 0, 16);
-      memcpy(b, src, use_len);
-      update_cbc_mac(crypto, b);
-    }
-
-    // Encrypt a message block with CTR
-    CRYPTO_DataWriteUnaligned(&crypto->DATA3, (uint8_t *)src);
-    CRYPTO_EXECUTE_4(crypto,
-                     // Generate key stream block
-                     CRYPTO_CMD_INSTR_DATA1TODATA0,
-                     CRYPTO_CMD_INSTR_AESENC,
-                     // Apply the key stream block to input
-                     CRYPTO_CMD_INSTR_DATA3TODATA0XOR,
-                     // Increment counter
-                     CRYPTO_CMD_INSTR_DATA1INC);
-    while ((crypto->STATUS & CRYPTO_STATUS_SEQRUNNING) != 0) ;
-    CRYPTO_DataReadUnaligned(&crypto->DATA0, (uint8_t *)out_buf);
-
-    memcpy(dst, out_buf, use_len);
-
-    if (mode == PSA_CRYPTO_DRIVER_DECRYPT) {
-      memset(b, 0, 16);
-      memcpy(b, dst, use_len);
-      update_cbc_mac(crypto, b);
-    }
-
-    dst += use_len;
-    src += use_len;
-    len_left -= use_len;
-  }
-
-  /*
-   * Authentication: reset counter and crypt/mask internal tag
-   */
-  for (i = 0; i < q; i++) {
-    ctr[15 - i] = 0;
-  }
-
-  // Encrypt the tag with CTR
-  CRYPTO_DataWriteUnaligned(&crypto->DATA0, (uint8_t *)ctr);
-  CRYPTO_EXECUTE_2(crypto,
-                   // Generate key stream block
-                   CRYPTO_CMD_INSTR_AESENC,
-                   // Apply the key stream block to the tag
-                   CRYPTO_CMD_INSTR_DATA2TODATA0XOR);
-  while ((crypto->STATUS & CRYPTO_STATUS_SEQRUNNING) != 0) ;
-  CRYPTO_DataReadUnaligned(&crypto->DATA0, (uint8_t *)out_buf);
-  CORE_EXIT_CRITICAL();
-
-  memcpy(tag, out_buf, tag_len);
-
-  crypto_management_release(crypto);
-
-  return PSA_SUCCESS;
-}
-
 #endif // PSA_WANT_ALG_CCM
-
 /*
  * The GCM algorithm is based on two main functions, GHASH and GCTR, defined
  * in http://csrc.nist.gov/publications/nistpubs/800-38D/SP-800-38D.pdf
@@ -1028,8 +691,6 @@ static psa_status_t ccm_auth_crypt(const unsigned char *key_buffer, size_t key_b
 
 #if defined(PSA_WANT_ALG_GCM)
 
-#if defined(PSA_CRYPTO_AEAD_MULTIPART_SUPPORTED)
-
 __STATIC_INLINE void gcm_restore_crypto_state(sli_crypto_transparent_aead_operation_t *operation,
                                               CRYPTO_TypeDef *crypto)
 {
@@ -1053,34 +714,25 @@ __STATIC_INLINE void gcm_restore_crypto_state(sli_crypto_transparent_aead_operat
                               : cryptoKey256Bits);
 
   crypto->WAC = CRYPTO_WAC_MODULUS_GCMBIN128 | CRYPTO_WAC_RESULTWIDTH_128BIT;
-  CRYPTO_DataWrite(&crypto->DATA2, operation->gcm_ctx.ghash_key);
-  CRYPTO_DataWrite(&crypto->DATA1, operation->gcm_ctx.gctr_state);
+  CRYPTO_DataWrite(&crypto->DATA2, operation->ctx.gcm_ctx.ghash_key);
+  CRYPTO_DataWrite(&crypto->DATA1, operation->ctx.gcm_ctx.gctr_state);
   // Write GHASH state (128 bits) temporarily to DATA0 (in DDATA2) then
   // move it to DDATA0 (256 bits) where CRYPTO expects it.
-  CRYPTO_DataWrite(&crypto->DATA0, operation->gcm_ctx.ghash_state);
+  CRYPTO_DataWrite(&crypto->DATA0, operation->ctx.gcm_ctx.ghash_state);
   crypto->CMD = CRYPTO_CMD_INSTR_DDATA2TODDATA0;
 
   CORE_EXIT_CRITICAL();
 }
-
-#endif // defined(PSA_CRYPTO_AEAD_MULTIPART_SUPPORTED)
 
 // Start GCM streaming operation
 static void sli_gcm_starts(sli_crypto_transparent_aead_operation_t *operation,
                            CRYPTO_TypeDef *device,
                            psa_encrypt_or_decrypt_t mode,
                            const unsigned char *iv,
-                           size_t iv_len,
-                           const unsigned char *add,
-                           size_t add_len)
+                           size_t iv_len)
 {
-#if defined(PSA_CRYPTO_AEAD_MULTIPART_SUPPORTED)
   bool            store_state_and_release;
-#endif
   CRYPTO_TypeDef *crypto;
-  uint32_t        temp[4];
-  unsigned int    complete_blocks_in_bytes;
-  bool            last_block_is_incomplete;
   CORE_DECLARE_IRQ_STATE;
 
   (void) iv_len; // checked in check_aead_parameters()
@@ -1094,7 +746,6 @@ static void sli_gcm_starts(sli_crypto_transparent_aead_operation_t *operation,
   }
 #endif
 
-#if defined(PSA_CRYPTO_AEAD_MULTIPART_SUPPORTED)
   // Check if this context has already acquired a crypto device, which means
   // the caller should be mbedtls_gcm_crypt_and_tag() which will perform GCM
   // on a full block and call starts, update, finish in a sequence meaning we
@@ -1106,9 +757,6 @@ static void sli_gcm_starts(sli_crypto_transparent_aead_operation_t *operation,
     store_state_and_release = false;
     crypto = device;
   }
-#else
-  crypto = device;
-#endif
 
   // Setup CRTL and KEY
   //   - AES-128 or AES-256 mode
@@ -1140,9 +788,9 @@ static void sli_gcm_starts(sli_crypto_transparent_aead_operation_t *operation,
   //   Y0 = IV | 1
   //   That is, the 12 byte Initial Vector concatenated with the initial
   //   counter value 1 in the least significant 32bit word.
-  memcpy(operation->gcm_ctx.gctr_state, iv, 12);
-  operation->gcm_ctx.gctr_state[3] = 0x01000000;
-  CRYPTO_DataWrite(&crypto->DATA1, operation->gcm_ctx.gctr_state);
+  memcpy(operation->ctx.gcm_ctx.gctr_state, iv, 12);
+  operation->ctx.gcm_ctx.gctr_state[3] = 0x01000000;
+  CRYPTO_DataWrite(&crypto->DATA1, operation->ctx.gcm_ctx.gctr_state);
 
   CORE_ENTER_CRITICAL();
 
@@ -1163,6 +811,7 @@ static void sli_gcm_starts(sli_crypto_transparent_aead_operation_t *operation,
 
 #if defined(SLI_PSA_SUPPORT_GCM_IV_CALCULATION)
   // When len(IV) != 12, then IV = GHASH(zero-extended-IV)
+  uint32_t temp[4];
   if (iv_len != 12) {
     // Start GHASH from a zero state
     // DATA2 has the hash key
@@ -1196,7 +845,7 @@ static void sli_gcm_starts(sli_crypto_transparent_aead_operation_t *operation,
     }
     if (iv_bytes_left > 0) {
       // For last incomplete block, use temporary buffer for zero padding.
-      memset(temp, 0, 16);
+      memset(temp, 0, sizeof(temp));
       memcpy(temp, iv, iv_bytes_left);
       while (!(crypto->STATUS & CRYPTO_STATUS_DMAACTIVE)) ;
       CRYPTO_DataWrite(&crypto->DATA0, temp);
@@ -1217,24 +866,65 @@ static void sli_gcm_starts(sli_crypto_transparent_aead_operation_t *operation,
     // Copy out calculated IV to context and DATA1
     crypto->CMD = CRYPTO_CMD_INSTR_DDATA0TODDATA2;
     crypto->CMD = CRYPTO_CMD_INSTR_DATA0TODATA1;
-    CRYPTO_DataRead(&crypto->DATA0, operation->gcm_ctx.gctr_state);
+    CRYPTO_DataRead(&crypto->DATA0, operation->ctx.gcm_ctx.gctr_state);
 
     // Reset GHASH state
     crypto->CMD = CRYPTO_CMD_INSTR_CLR;
   }
-#endif /* SLI_PSA_SUPPORT_GCM_IV_CALCULATION */
+#endif // SLI_PSA_SUPPORT_GCM_IV_CALCULATION
 
   // Remember IV since we need it for the finish operation
-  CRYPTO_DataRead(&crypto->DATA1, operation->gcm_ctx.iv);
+  CRYPTO_DataRead(&crypto->DATA1, operation->ctx.gcm_ctx.iv);
 
   // Remember mode and additional authentication length
   operation->direction = mode;
-  operation->add_len = add_len;
-  /* Reset data length to zero. */
+  // Reset data length to zero.
   operation->processed_len = 0;
+
+  if (store_state_and_release) {
+    CORE_ENTER_CRITICAL();
+    // Move GHASH state in DDATA0 temporarily to DATA0 (in DDATA2) in order to
+    // read only the 128 bits value (since DDATA0 is 256 bits wide).
+    crypto->CMD = CRYPTO_CMD_INSTR_DDATA0TODDATA2;
+    CRYPTO_DataRead(&crypto->DATA0, operation->ctx.gcm_ctx.ghash_state);
+    CRYPTO_DataRead(&crypto->DATA2, operation->ctx.gcm_ctx.ghash_key);
+    CORE_EXIT_CRITICAL();
+
+    crypto_management_release(crypto);
+  }
+  return;
+}
+
+// Add authentication data.
+static void crypto_gcm_update_partial_ad(sli_crypto_transparent_aead_operation_t *operation,
+                                         CRYPTO_TypeDef *device,
+                                         const unsigned char *add,
+                                         size_t add_len)
+{
+  bool            store_state_and_release;
+  CRYPTO_TypeDef *crypto;
+  uint32_t        temp[4];
+  unsigned int    complete_blocks_in_bytes;
+  bool            last_block_is_incomplete;
+  CORE_DECLARE_IRQ_STATE;
+
+  // Check if this context has already acquired a crypto device, which means
+  // the caller should be mbedtls_gcm_crypt_and_tag() which will perform GCM
+  // on a full block and call starts, update, finish in a sequence meaning we
+  // will not need to store the state in between.
+  if (device == NULL) {
+    crypto = crypto_management_acquire();
+    store_state_and_release = true;
+    gcm_restore_crypto_state(operation, crypto);
+  } else {
+    store_state_and_release = false;
+    crypto = device;
+  }
 
   // Process additional authentication data if present.
   crypto->SEQCTRLB = 0; // Sequence B is not used for auth data
+
+  operation->add_len += add_len;
   while (add_len) {
     if (add_len > (_CRYPTO_SEQCTRL_LENGTHA_MASK & 0xFFFFFFF0u)) {
       complete_blocks_in_bytes = _CRYPTO_SEQCTRL_LENGTHA_MASK & 0xFFFFFFF0u;
@@ -1277,7 +967,7 @@ static void sli_gcm_starts(sli_crypto_transparent_aead_operation_t *operation,
     }
     if (last_block_is_incomplete) {
       // For last incomplete block, use temporary buffer for zero padding.
-      memset(temp, 0, 16);
+      memset(temp, 0, sizeof(temp));
       memcpy(temp, add, add_len);
       while (!(crypto->STATUS & CRYPTO_STATUS_DMAACTIVE)) ;
       CRYPTO_DataWrite(&crypto->DATA0, temp);
@@ -1290,21 +980,17 @@ static void sli_gcm_starts(sli_crypto_transparent_aead_operation_t *operation,
 
     CORE_EXIT_CRITICAL();
   }
-
-#if defined(PSA_CRYPTO_AEAD_MULTIPART_SUPPORTED)
   if (store_state_and_release) {
     CORE_ENTER_CRITICAL();
     // Move GHASH state in DDATA0 temporarily to DATA0 (in DDATA2) in order to
     // read only the 128 bits value (since DDATA0 is 256 bits wide).
     crypto->CMD = CRYPTO_CMD_INSTR_DDATA0TODDATA2;
-    CRYPTO_DataRead(&crypto->DATA0, operation->gcm_ctx.ghash_state);
-    CRYPTO_DataRead(&crypto->DATA2, operation->gcm_ctx.ghash_key);
+    CRYPTO_DataRead(&crypto->DATA0, operation->ctx.gcm_ctx.ghash_state);
+    CRYPTO_DataRead(&crypto->DATA2, operation->ctx.gcm_ctx.ghash_key);
     CORE_EXIT_CRITICAL();
 
     crypto_management_release(crypto);
   }
-#endif
-
   return;
 }
 
@@ -1316,9 +1002,7 @@ static void sli_gcm_update(sli_crypto_transparent_aead_operation_t *operation,
                            const unsigned char *input,
                            unsigned char *output)
 {
-#if defined(PSA_CRYPTO_AEAD_MULTIPART_SUPPORTED)
   bool            restore_state_and_release;
-#endif
   CRYPTO_TypeDef *crypto;
   uint32_t        temp[4];
   unsigned int    complete_blocks_in_bytes;
@@ -1340,7 +1024,6 @@ static void sli_gcm_update(sli_crypto_transparent_aead_operation_t *operation,
   }
 #endif
 
-#if defined(PSA_CRYPTO_AEAD_MULTIPART_SUPPORTED)
   // Check if this context has already acquired a crypto device, which means
   // the caller should be mbedtls_gcm_crypt_and_tag() which will perform GCM
   // on a full block and call starts, update, finish in a sequence meaning we
@@ -1353,9 +1036,6 @@ static void sli_gcm_update(sli_crypto_transparent_aead_operation_t *operation,
     restore_state_and_release = false;
     crypto = device;
   }
-#else
-  crypto = device;
-#endif
 
   operation->processed_len += length;
 
@@ -1451,7 +1131,7 @@ static void sli_gcm_update(sli_crypto_transparent_aead_operation_t *operation,
     if (last_block_is_incomplete) {
       // The last block is incomplete, so we need to zero pad bits outside len(PT)
       // Use temporary buffer for zero padding
-      memset(temp, 0, 16);
+      memset(temp, 0, sizeof(temp));
       memcpy(temp, input, length);
 
       while (!(crypto->STATUS & CRYPTO_STATUS_DMAACTIVE)) ;
@@ -1481,19 +1161,17 @@ static void sli_gcm_update(sli_crypto_transparent_aead_operation_t *operation,
     CORE_EXIT_CRITICAL();
   }
 
-#if defined(PSA_CRYPTO_AEAD_MULTIPART_SUPPORTED)
   if (restore_state_and_release) {
     CORE_ENTER_CRITICAL();
-    CRYPTO_DataRead(&crypto->DATA1, operation->gcm_ctx.gctr_state);
+    CRYPTO_DataRead(&crypto->DATA1, operation->ctx.gcm_ctx.gctr_state);
     // Move GHASH state in DDATA0 temporarily to DATA2 (in DDATA3) in order to
     // read only the 128 bits value (since DDATA0 is 256 bits wide).
     crypto->CMD = CRYPTO_CMD_INSTR_DDATA0TODDATA3;
-    CRYPTO_DataRead(&crypto->DATA2, operation->gcm_ctx.ghash_state);
+    CRYPTO_DataRead(&crypto->DATA2, operation->ctx.gcm_ctx.ghash_state);
     CORE_EXIT_CRITICAL();
 
     crypto_management_release(crypto);
   }
-#endif
 
   return;
 }
@@ -1509,7 +1187,6 @@ static void sli_gcm_finish(sli_crypto_transparent_aead_operation_t *operation,
   CRYPTO_TypeDef *crypto;
   CORE_DECLARE_IRQ_STATE;
 
-#if defined(PSA_CRYPTO_AEAD_MULTIPART_SUPPORTED)
   bool            restore_state_and_release;
   // Check if this context has already acquired a crypto device, which means
   // the caller should be mbedtls_gcm_crypt_and_tag() which will perform GCM
@@ -1523,9 +1200,6 @@ static void sli_gcm_finish(sli_crypto_transparent_aead_operation_t *operation,
     restore_state_and_release = false;
     crypto = device;
   }
-#else
-  crypto = device;
-#endif
 
   // Compute last part of the GHASH and authentication tag:
   //
@@ -1566,7 +1240,7 @@ static void sli_gcm_finish(sli_crypto_transparent_aead_operation_t *operation,
 
   // With the GHASH result in DDATA0, we can reinstate the initial IV
   // and calculate tag = GHASH ^ AESENC(IV)
-  CRYPTO_DataWrite(&crypto->DATA0, operation->gcm_ctx.iv);
+  CRYPTO_DataWrite(&crypto->DATA0, operation->ctx.gcm_ctx.iv);
   CRYPTO_EXECUTE_3(crypto,
                    CRYPTO_CMD_INSTR_DDATA0TODDATA3,   // GHASH result to DATA2
                    // Calculate AuthTag
@@ -1583,16 +1257,13 @@ static void sli_gcm_finish(sli_crypto_transparent_aead_operation_t *operation,
 
   CORE_EXIT_CRITICAL();
 
-#if defined(PSA_CRYPTO_AEAD_MULTIPART_SUPPORTED)
   if (restore_state_and_release) {
     crypto_management_release(crypto);
   }
-#endif
-
   return;
 }
 
-// Perform full GCM block encryption or decryption operation with tag
+// Perform full GCM block encryption or decryption operation with tag.
 static void sli_gcm_crypt_and_tag(sli_crypto_transparent_aead_operation_t *operation,
                                   psa_encrypt_or_decrypt_t mode,
                                   size_t length,
@@ -1607,7 +1278,8 @@ static void sli_gcm_crypt_and_tag(sli_crypto_transparent_aead_operation_t *opera
 {
   CRYPTO_TypeDef *device = crypto_management_acquire();
 
-  sli_gcm_starts(operation, device, mode, iv, iv_len, add, add_len);
+  sli_gcm_starts(operation, device, mode, iv, iv_len);
+  crypto_gcm_update_partial_ad(operation, device, add, add_len);
   sli_gcm_update(operation, device, length, input, output);
   sli_gcm_finish(operation, device, tag, tag_len);
 
@@ -1618,4 +1290,1148 @@ static void sli_gcm_crypt_and_tag(sli_crypto_transparent_aead_operation_t *opera
 
 #endif // PSA_WANT_ALG_GCM
 
-#endif // defined(CRYPTO_PRESENT)
+#if defined(PSA_WANT_ALG_CCM)
+
+__STATIC_INLINE void ccm_restore_crypto_state(sli_crypto_transparent_aead_operation_t *operation,
+                                              CRYPTO_TypeDef *crypto)
+{
+  CORE_DECLARE_IRQ_STATE;
+  CORE_ENTER_CRITICAL();
+
+  CRYPTO_KeyBufWriteUnaligned(crypto,
+                              operation->key,
+                              (operation->key_len == 16U) ? cryptoKey128Bits
+                              : cryptoKey256Bits);
+
+  CRYPTO_DataWriteUnaligned(&crypto->DATA1, (uint8_t *)operation->ctx.ccm_ctx.cctr_state);
+
+  CORE_EXIT_CRITICAL();
+}
+
+static void crypto_ccm_update_partial_ad(sli_crypto_transparent_aead_operation_t *operation,
+                                         CRYPTO_TypeDef *device,
+                                         const unsigned char *add,
+                                         size_t add_len)
+{
+  size_t len_left;
+  unsigned char b[16];
+  const unsigned char *src;
+
+  CRYPTO_TypeDef *crypto;
+  CORE_DECLARE_IRQ_STATE;
+
+  // Check if this context has already acquired a crypto device, which means
+  // the caller should be sli_ccm_crypt_and_tag() which will perform CCM
+  // on a full block and call starts, update, finish in a sequence meaning we
+  // will not need to store the state in between.
+  if (device == NULL) {
+    crypto = crypto_management_acquire();
+    ccm_restore_crypto_state(operation, crypto);
+  } else {
+    crypto = device;
+  }
+
+  // If there is additional data, update CBC-MAC with
+  // add_len, add, 0 (padding to a block boundary).
+  if (add_len > 0) {
+    size_t use_len;
+    len_left = add_len;
+    src = add;
+    CORE_ENTER_CRITICAL();
+    if (operation->first_update_ad_op) {
+      memset(b, 0, sizeof(b));
+      b[0] = (unsigned char)((operation->add_len >> 8) & 0xFF);
+      b[1] = (unsigned char)((operation->add_len) & 0xFF);
+
+      use_len = len_left < 16 - 2 ? len_left : 16 - 2;
+      memcpy(b + 2, src, use_len);
+      len_left -= use_len;
+      src += use_len;
+
+      update_cbc_mac(crypto, b);
+      operation->first_update_ad_op = false;
+    }
+
+    while (len_left > 0) {
+      use_len = len_left > 16 ? 16 : len_left;
+
+      memset(b, 0, sizeof(b));
+      memcpy(b, src, use_len);
+      update_cbc_mac(crypto, b);
+
+      len_left -= use_len;
+      src += use_len;
+    }
+
+    CORE_EXIT_CRITICAL();
+  }
+}
+
+// Start CCM streaming operation.
+static psa_status_t sli_ccm_starts(sli_crypto_transparent_aead_operation_t *operation,
+                                   CRYPTO_TypeDef *device,
+                                   psa_encrypt_or_decrypt_t mode,
+                                   const unsigned char *iv,
+                                   size_t iv_len,
+                                   size_t tag_len,
+                                   size_t message_len)
+{
+  unsigned char i;
+  unsigned char q;
+  size_t len_left;
+  unsigned char b[16];
+  unsigned char ctr[16];
+
+  CRYPTO_TypeDef *crypto;
+  CORE_DECLARE_IRQ_STATE;
+
+  // Check remaining length requirements: SP800-38C A.1
+  // Additional requirement: a < 2^16 - 2^8 to simplify the code.
+  // 'length' checked later (when writing it to the first block)
+
+  // Also, loosen the requirements to enable support for CCM* (IEEE 802.15.4).
+
+  bool            store_state_and_release;
+  // Check if this context has already acquired a crypto device, which means
+  // the caller should be sli_ccm_crypt_and_tag() which will perform CCM
+  // on a full block and call starts, update, finish in a sequence meaning we
+  // will not need to store the state in between.
+  if (device == NULL) {
+    crypto = crypto_management_acquire();
+    store_state_and_release = true;
+  } else {
+    store_state_and_release = false;
+    operation->first_update_ad_op = true;
+    crypto = device;
+  }
+
+  // Remember mode and initialize additional authentication length.
+  operation->add_len = operation->ctx.preinit.add_len;
+  operation->direction = mode;
+  // Reset data length to zero.
+  operation->processed_len = 0;
+  // Save IV and IV length for finish step.
+  operation->ctx.ccm_ctx.iv_len = iv_len;
+  memcpy(operation->ctx.ccm_ctx.iv, iv, iv_len);
+
+  q = 16 - 1 - (unsigned char) iv_len;
+
+  // First block B_0:
+  // 0        .. 0        flags
+  // 1        .. iv_len   nonce (aka iv)
+  // iv_len+1 .. 15       length
+  //
+  // With flags as (bits):
+  // 7        0
+  // 6        add present?
+  // 5 .. 3   (t - 2) / 2
+  // 2 .. 0   q - 1
+
+  b[0] = 0;
+  b[0] |= (operation->add_len > 0) << 6;
+  b[0] |= ((tag_len - 2) / 2) << 3;
+  b[0] |= q - 1;
+
+  memcpy(b + 1, iv, iv_len);
+
+  for (i = 0, len_left = message_len; i < q; i++, len_left >>= 8) {
+    b[15 - i] = (unsigned char)(len_left & 0xFF);
+  }
+
+  if (len_left > 0) {
+    return PSA_ERROR_INVALID_ARGUMENT;
+  }
+
+  crypto->WAC = 0;
+  crypto->CTRL = 0;
+
+  // Set the encryption key.
+  CORE_ENTER_CRITICAL();
+  CRYPTO_KeyBufWriteUnaligned(crypto,
+                              operation->key,
+                              (operation->key_len == 16U) ? cryptoKey128Bits
+                              : cryptoKey256Bits);
+
+  // Clear tag register (DATA2)
+  for (uint32_t i = 0; i < 4; ++i) {
+    crypto->DATA2 = 0;
+  }
+
+  // Start CBC-MAC with first block.
+  update_cbc_mac(crypto, b);
+  CORE_EXIT_CRITICAL();
+
+  // Prepare counter block for encryption:
+  // 0        .. 0        flags
+  // 1        .. iv_len   nonce (aka iv)
+  // iv_len+1 .. 15       counter (initially 1)
+
+  // With flags as (bits):
+  // 7 .. 3   0
+  // 2 .. 0   q - 1
+
+  ctr[0] = q - 1;
+  memcpy(ctr + 1, iv, iv_len);
+  memset(ctr + 1 + iv_len, 0, q);
+  ctr[15] = 1;
+
+  // Write the counter to CRYPTO.
+  CORE_ENTER_CRITICAL();
+  CRYPTO_DataWriteUnaligned(&crypto->DATA1, (uint8_t *)ctr);
+  CORE_EXIT_CRITICAL();
+
+  if (store_state_and_release) {
+    CORE_ENTER_CRITICAL();
+    CRYPTO_DataReadUnaligned(&crypto->DATA1, (uint8_t *)operation->ctx.ccm_ctx.cctr_state);
+    CORE_EXIT_CRITICAL();
+    crypto_management_release(crypto);
+  }
+  return PSA_SUCCESS;
+}
+
+// Update a CCM streaming operation with more input data to be
+// encrypted or decrypted.
+static psa_status_t sli_ccm_update(sli_crypto_transparent_aead_operation_t *operation,
+                                   CRYPTO_TypeDef *device,
+                                   size_t length,
+                                   const unsigned char *input,
+                                   unsigned char *output)
+{
+  size_t len_left;
+  unsigned char b[16];
+  const unsigned char *src;
+  unsigned char *dst;
+
+  CRYPTO_TypeDef *crypto;
+  CORE_DECLARE_IRQ_STATE;
+
+  if (length == 0) {
+    return PSA_SUCCESS;
+  }
+
+  bool restore_state_and_release;
+  // Check if this context has already acquired a crypto device, which means
+  // the caller should be sli_ccm_crypt_and_tag() which will perform CCM
+  // on a full block and call starts, update, finish in a sequence meaning we
+  // will not need to store the state in between.
+  if (device == NULL) {
+    crypto = crypto_management_acquire();
+    restore_state_and_release = true;
+    ccm_restore_crypto_state(operation, crypto);
+  } else {
+    restore_state_and_release = false;
+    crypto = device;
+  }
+
+  operation->processed_len += length;
+
+  // Authenticate and {en,de}crypt the message.
+
+  // The only difference between encryption and decryption is
+  // the respective order of authentication and {en,de}cryption.
+  len_left = length;
+  src = input;
+  dst = output;
+
+  uint8_t out_buf[16];
+
+  CORE_ENTER_CRITICAL();
+
+  while (len_left > 0) {
+    size_t use_len = len_left > 16 ? 16 : len_left;
+
+    if (operation->direction == PSA_CRYPTO_DRIVER_ENCRYPT) {
+      memset(b, 0, sizeof(b));
+      memcpy(b, src, use_len);
+      update_cbc_mac(crypto, b);
+    }
+
+    // Encrypt a message block with CTR.
+    CRYPTO_DataWriteUnaligned(&crypto->DATA3, (uint8_t *)src);
+    CRYPTO_EXECUTE_4(crypto,
+                     // Generate key stream block.
+                     CRYPTO_CMD_INSTR_DATA1TODATA0,
+                     CRYPTO_CMD_INSTR_AESENC,
+                     // Apply the key stream block to input.
+                     CRYPTO_CMD_INSTR_DATA3TODATA0XOR,
+                     // Increment counter.
+                     CRYPTO_CMD_INSTR_DATA1INC);
+    while ((crypto->STATUS & CRYPTO_STATUS_SEQRUNNING) != 0) ;
+    CRYPTO_DataReadUnaligned(&crypto->DATA0, (uint8_t *)out_buf);
+
+    memcpy(dst, out_buf, use_len);
+
+    if (operation->direction == PSA_CRYPTO_DRIVER_DECRYPT) {
+      memset(b, 0, sizeof(b));
+      memcpy(b, dst, use_len);
+      update_cbc_mac(crypto, b);
+    }
+
+    dst += use_len;
+    src += use_len;
+    len_left -= use_len;
+  }
+
+  CORE_EXIT_CRITICAL();
+  // Save state and release.
+  if (restore_state_and_release) {
+    CORE_ENTER_CRITICAL();
+    CRYPTO_DataReadUnaligned(&crypto->DATA1, (uint8_t *)operation->ctx.ccm_ctx.cctr_state);
+    CORE_EXIT_CRITICAL();
+    crypto_management_release(crypto);
+  }
+  return PSA_SUCCESS;
+}
+
+// Finish CCM streaming operation
+static psa_status_t sli_ccm_finish(sli_crypto_transparent_aead_operation_t *operation,
+                                   CRYPTO_TypeDef *device,
+                                   unsigned char *tag,
+                                   size_t tag_len)
+{
+  unsigned char i;
+  unsigned char q;
+  unsigned char ctr[16];
+  uint8_t out_buf[16];
+  CRYPTO_TypeDef *crypto;
+
+  CORE_DECLARE_IRQ_STATE;
+
+  bool restore_state_and_release;
+  // Check if this context has already acquired a crypto device, which means
+  // the caller should be sli_ccm_crypt_and_tag() which will perform CCM
+  // on a full block and call starts, update, finish in a sequence meaning we
+  // will not need to store the state in between.
+  if (device == NULL) {
+    crypto = crypto_management_acquire();
+    restore_state_and_release = true;
+    ccm_restore_crypto_state(operation, crypto);
+  } else {
+    restore_state_and_release = false;
+    crypto = device;
+  }
+
+  q = 16 - 1 - (unsigned char) operation->ctx.ccm_ctx.iv_len;
+
+  ctr[0] = q - 1;
+  memcpy(ctr + 1, operation->ctx.ccm_ctx.iv, operation->ctx.ccm_ctx.iv_len);
+  memset(ctr + 1 + operation->ctx.ccm_ctx.iv_len, 0, q);
+  ctr[15] = 1;
+
+  // Authentication: reset counter and crypt/mask internal tag.
+  for (i = 0; i < q; i++) {
+    ctr[15 - i] = 0;
+  }
+
+  CORE_ENTER_CRITICAL();
+
+  // Encrypt the tag with CTR.
+  CRYPTO_DataWriteUnaligned(&crypto->DATA0, (uint8_t *)ctr);
+
+  CRYPTO_EXECUTE_2(crypto,
+                   // Generate key stream block.
+                   CRYPTO_CMD_INSTR_AESENC,
+                   // Apply the key stream block to the tag.
+                   CRYPTO_CMD_INSTR_DATA2TODATA0XOR);
+
+  while ((crypto->STATUS & CRYPTO_STATUS_SEQRUNNING) != 0) ;
+
+  CRYPTO_DataReadUnaligned(&crypto->DATA0, (uint8_t *)out_buf);
+  CORE_EXIT_CRITICAL();
+
+  memcpy(tag, out_buf, tag_len);
+
+  if (restore_state_and_release) {
+    crypto_management_release(crypto);
+  }
+
+  return PSA_SUCCESS;
+}
+/*
+ * Definition of CCM:
+ * http://csrc.nist.gov/publications/nistpubs/800-38C/SP800-38C_updated-July20_2007.pdf
+ * RFC 3610 "Counter with CBC-MAC (CCM)"
+ *
+ * Related:
+ * RFC 5116 "An Interface and Algorithms for Authenticated Encryption"
+ */
+
+// Perform full CCM block encryption or decryption operation with tag
+static psa_status_t sli_ccm_crypt_and_tag(sli_crypto_transparent_aead_operation_t *operation,
+                                          psa_encrypt_or_decrypt_t mode,
+                                          size_t length,
+                                          const unsigned char *iv,
+                                          size_t iv_len,
+                                          const unsigned char *add,
+                                          size_t add_len,
+                                          const unsigned char *input,
+                                          unsigned char *output,
+                                          unsigned char *tag,
+                                          size_t tag_len)
+{
+  psa_status_t status;
+  CRYPTO_TypeDef *device = crypto_management_acquire();
+
+  operation->ctx.preinit.add_len = add_len;
+
+  status = sli_ccm_starts(operation, device, mode, iv, iv_len, tag_len, length);
+  if (status != PSA_SUCCESS) {
+    return status;
+  }
+
+  crypto_ccm_update_partial_ad(operation, device, add, add_len);
+
+  status = sli_ccm_update(operation, device, length, input, output);
+
+  if (status != PSA_SUCCESS) {
+    return status;
+  }
+  status = sli_ccm_finish(operation, device, tag, tag_len);
+
+  if (status != PSA_SUCCESS) {
+    return status;
+  }
+
+  crypto_management_release(device);
+
+  return PSA_SUCCESS;
+}
+
+#endif // PSA_WANT_ALG_CCM
+
+#if defined(PSA_WANT_ALG_GCM) || defined(PSA_WANT_ALG_CCM)
+static psa_status_t transparent_aead_encrypt_decrypt_setup(sli_crypto_transparent_aead_operation_t *operation,
+                                                           const psa_key_attributes_t *attributes,
+                                                           const uint8_t *key_buffer,
+                                                           size_t key_buffer_size,
+                                                           psa_algorithm_t alg,
+                                                           psa_encrypt_or_decrypt_t operation_direction)
+{
+  if (operation == NULL
+      || attributes == NULL
+      || key_buffer == NULL) {
+    return PSA_ERROR_INVALID_ARGUMENT;
+  }
+
+  memset(operation, 0, sizeof(*operation));
+
+  size_t key_bits = psa_get_key_bits(attributes);
+  size_t key_size = PSA_BITS_TO_BYTES(key_bits);
+
+  if (key_buffer_size < key_size) {
+    return PSA_ERROR_INVALID_ARGUMENT;
+  }
+
+  if (sizeof(operation->key) < key_size) {
+    return PSA_ERROR_INVALID_ARGUMENT;
+  }
+
+  switch (psa_get_key_bits(attributes)) {
+    case 128:
+      break;
+    case 192:
+      return PSA_ERROR_NOT_SUPPORTED;
+    case 256:
+      break;
+    default:
+      return PSA_ERROR_INVALID_ARGUMENT;
+  }
+
+  // Validate key type.
+  if (psa_get_key_type(attributes) != PSA_KEY_TYPE_AES) {
+    return PSA_ERROR_NOT_SUPPORTED;
+  }
+
+  // Validate tag length.
+  if ( PSA_AEAD_TAG_LENGTH(psa_get_key_type(attributes), key_bits, alg) > 16 ) {
+    return PSA_ERROR_INVALID_ARGUMENT;
+  }
+
+  // Validate operation.
+  switch (PSA_ALG_AEAD_WITH_SHORTENED_TAG(alg, 0)) {
+#if defined (PSA_WANT_ALG_GCM)
+    case PSA_ALG_AEAD_WITH_SHORTENED_TAG(PSA_ALG_GCM, 0):
+      operation->alg = alg;
+      break;
+#endif
+#if defined (PSA_WANT_ALG_CCM)
+    case PSA_ALG_AEAD_WITH_SHORTENED_TAG(PSA_ALG_CCM, 0):
+      operation->alg = alg;
+      operation->first_update_ad_op = true;
+      break;
+#endif
+    default:
+      return PSA_ERROR_NOT_SUPPORTED;
+  }
+
+  operation->key_len = key_size;
+  memcpy(operation->key, key_buffer, key_size);
+
+  operation->direction = operation_direction;
+
+  return PSA_SUCCESS;
+}
+#endif //PSA_WANT_ALG_GCM || PSA_WANT_ALG_CCM
+
+psa_status_t sli_crypto_transparent_aead_encrypt_setup(sli_crypto_transparent_aead_operation_t *operation,
+                                                       const psa_key_attributes_t *attributes,
+                                                       const uint8_t *key_buffer,
+                                                       size_t key_buffer_size,
+                                                       psa_algorithm_t alg)
+{
+#if defined(PSA_WANT_ALG_GCM) || defined(PSA_WANT_ALG_CCM)
+
+  return transparent_aead_encrypt_decrypt_setup(operation, attributes, key_buffer, key_buffer_size,
+                                                alg, PSA_CRYPTO_DRIVER_ENCRYPT);
+
+#else //PSA_WANT_ALG_GCM || PSA_WANT_ALG_CCM
+  (void)operation;
+  (void)attributes;
+  (void)key_buffer;
+  (void)key_buffer_size;
+  (void)alg;
+  return PSA_ERROR_NOT_SUPPORTED;
+#endif //PSA_WANT_ALG_GCM || PSA_WANT_ALG_CCM
+}
+
+psa_status_t sli_crypto_transparent_aead_decrypt_setup(sli_crypto_transparent_aead_operation_t *operation,
+                                                       const psa_key_attributes_t *attributes,
+                                                       const uint8_t *key_buffer,
+                                                       size_t key_buffer_size,
+                                                       psa_algorithm_t alg)
+{
+#if defined(PSA_WANT_ALG_GCM) || defined(PSA_WANT_ALG_CCM)
+
+  return transparent_aead_encrypt_decrypt_setup(operation, attributes, key_buffer, key_buffer_size,
+                                                alg, PSA_CRYPTO_DRIVER_DECRYPT);
+
+#else //PSA_WANT_ALG_GCM || PSA_WANT_ALG_CCM
+  (void)operation;
+  (void)attributes;
+  (void)key_buffer;
+  (void)key_buffer_size;
+  (void)alg;
+  return PSA_ERROR_NOT_SUPPORTED;
+#endif //PSA_WANT_ALG_GCM || PSA_WANT_ALG_CCM
+}
+
+psa_status_t sli_crypto_transparent_aead_set_nonce(sli_crypto_transparent_aead_operation_t *operation,
+                                                   const uint8_t *nonce,
+                                                   size_t nonce_size)
+{
+#if defined(PSA_WANT_ALG_GCM) || defined(PSA_WANT_ALG_CCM)
+  if (operation == NULL || nonce == NULL) {
+    return PSA_ERROR_INVALID_ARGUMENT;
+  }
+
+  // Not able to set nonce twice.
+  if (operation->ctx.preinit.nonce_length != 0) {
+    return PSA_ERROR_BAD_STATE;
+  }
+
+  if (nonce_size > sizeof(operation->ctx.preinit.nonce)) {
+    return PSA_ERROR_INVALID_ARGUMENT;
+  }
+
+  // Validate nonce length.
+  switch (PSA_ALG_AEAD_WITH_SHORTENED_TAG(operation->alg, 0)) {
+#if defined(PSA_WANT_ALG_GCM)
+    case PSA_ALG_AEAD_WITH_SHORTENED_TAG(PSA_ALG_GCM, 0):
+    {
+      if (nonce_size != 12) {
+        return PSA_ERROR_NOT_SUPPORTED;
+      }
+      break;
+    }
+#endif // PSA_WANT_ALG_GCM
+#if defined(PSA_WANT_ALG_CCM)
+    case PSA_ALG_AEAD_WITH_SHORTENED_TAG(PSA_ALG_CCM, 0):
+    {
+      if (nonce_size < 7 || nonce_size > 13) {
+        return PSA_ERROR_INVALID_ARGUMENT;
+      }
+      break;
+    }
+#endif // PSA_WANT_ALG_CCM
+    default:
+      return PSA_ERROR_NOT_SUPPORTED;
+  }
+
+  memcpy(operation->ctx.preinit.nonce, nonce, nonce_size);
+  operation->ctx.preinit.nonce_length = nonce_size;
+
+  return PSA_SUCCESS;
+
+#else // PSA_WANT_ALG_GCM || PSA_WANT_ALG_CCM
+  (void)operation;
+  (void)nonce;
+  (void)nonce_size;
+  return PSA_ERROR_NOT_SUPPORTED;
+#endif // PSA_WANT_ALG_GCM || PSA_WANT_ALG_CCM
+}
+
+psa_status_t sli_crypto_transparent_aead_set_lengths(sli_crypto_transparent_aead_operation_t *operation,
+                                                     size_t ad_length,
+                                                     size_t plaintext_length)
+{
+#if defined(PSA_WANT_ALG_GCM) || defined(PSA_WANT_ALG_CCM)
+  if (operation == NULL) {
+    return PSA_ERROR_INVALID_ARGUMENT;
+  }
+
+  // To pass current PSA Crypto test suite, tag length encoded in the
+  // algorithm needs to be checked at this point.
+  switch (PSA_ALG_AEAD_WITH_SHORTENED_TAG(operation->alg, 0)) {
+#if defined(PSA_WANT_ALG_GCM)
+    case PSA_ALG_AEAD_WITH_SHORTENED_TAG(PSA_ALG_GCM, 0):
+      (void)ad_length;
+      (void)plaintext_length;
+      if (PSA_ALG_AEAD_GET_TAG_LENGTH(operation->alg) < 4
+          || PSA_ALG_AEAD_GET_TAG_LENGTH(operation->alg) > 16) {
+        return PSA_ERROR_INVALID_ARGUMENT;
+      }
+      break;
+#endif
+#if defined(PSA_WANT_ALG_CCM)
+    case PSA_ALG_AEAD_WITH_SHORTENED_TAG(PSA_ALG_CCM, 0):
+      if (PSA_ALG_AEAD_GET_TAG_LENGTH(operation->alg) < 4
+          || PSA_ALG_AEAD_GET_TAG_LENGTH(operation->alg) > 16
+          || PSA_ALG_AEAD_GET_TAG_LENGTH(operation->alg) % 2 != 0) {
+        return PSA_ERROR_INVALID_ARGUMENT;
+      }
+      if (ad_length >= 0xFF00) {
+        return PSA_ERROR_INVALID_ARGUMENT;
+      }
+      operation->ctx.preinit.add_len = ad_length;
+      operation->total_length = plaintext_length;
+      break;
+#endif
+    default:
+      return PSA_ERROR_BAD_STATE;
+  }
+
+  return PSA_SUCCESS;
+#else // PSA_WANT_ALG_GCM || PSA_WANT_ALG_CCM
+  (void)operation;
+  (void)ad_length;
+  (void)plaintext_length;
+  return PSA_ERROR_NOT_SUPPORTED;
+#endif // PSA_WANT_ALG_GCM || PSA_WANT_ALG_CCM
+}
+
+#if defined(PSA_WANT_ALG_GCM) || defined(PSA_WANT_ALG_CCM)
+static psa_status_t crypto_aead_start(sli_crypto_transparent_aead_operation_t *operation)
+{
+  switch (PSA_ALG_AEAD_WITH_SHORTENED_TAG(operation->alg, 0)) {
+    case PSA_ALG_AEAD_WITH_SHORTENED_TAG(PSA_ALG_GCM, 0):
+#if defined PSA_WANT_ALG_GCM
+      {
+        sli_gcm_starts(operation,
+                       NULL,
+                       operation->direction,
+                       operation->ctx.preinit.nonce,
+                       operation->ctx.preinit.nonce_length);
+        break;
+      }
+#endif //  PSA_WANT_ALG_GCM
+#if defined(PSA_WANT_ALG_CCM)
+    case PSA_ALG_AEAD_WITH_SHORTENED_TAG(PSA_ALG_CCM, 0):
+    {
+      size_t tag_length = PSA_ALG_AEAD_GET_TAG_LENGTH(operation->alg);
+      sli_ccm_starts(operation,
+                     NULL,
+                     operation->direction,
+                     operation->ctx.preinit.nonce,
+                     operation->ctx.preinit.nonce_length,
+                     tag_length,
+                     operation->total_length);
+      break;
+    }
+#endif // PSA_WANT_ALG_CCM
+    default:
+      return PSA_ERROR_NOT_SUPPORTED;
+  }
+  return PSA_SUCCESS;
+}
+#endif // PSA_WANT_ALG_GCM || PSA_WANT_ALG_CCM
+
+#if defined(PSA_WANT_ALG_GCM) || defined(PSA_WANT_ALG_CCM)
+static psa_status_t crypto_aead_update_partial_ad(sli_crypto_transparent_aead_operation_t *operation,
+                                                  CRYPTO_TypeDef *device,
+                                                  const uint8_t *input,
+                                                  size_t input_length)
+{
+  // First update_ad call.
+  if (operation->add_len == 0) {
+    crypto_aead_start(operation);
+  }
+
+  switch (PSA_ALG_AEAD_WITH_SHORTENED_TAG(operation->alg, 0)) {
+#if defined(PSA_WANT_ALG_GCM)
+    case PSA_ALG_AEAD_WITH_SHORTENED_TAG(PSA_ALG_GCM, 0):
+    {
+      crypto_gcm_update_partial_ad(operation,
+                                   device,
+                                   input,
+                                   input_length);
+      break;
+    }
+#endif // PSA_WANT_ALG_GCM
+#if defined(PSA_WANT_ALG_CCM)
+    case PSA_ALG_AEAD_WITH_SHORTENED_TAG(PSA_ALG_CCM, 0):
+    {
+      crypto_ccm_update_partial_ad(operation,
+                                   device,
+                                   input,
+                                   input_length);
+      break;
+    }
+#endif // PSA_WANT_ALG_CCM
+    default:
+      return PSA_ERROR_NOT_SUPPORTED;
+  }
+  return PSA_SUCCESS;
+}
+#endif // PSA_WANT_ALG_GCM || PSA_WANT_ALG_CCM
+
+psa_status_t sli_crypto_transparent_aead_update_ad(sli_crypto_transparent_aead_operation_t *operation,
+                                                   const uint8_t *input,
+                                                   size_t input_length)
+{
+#if defined(PSA_WANT_ALG_GCM) || defined(PSA_WANT_ALG_CCM)
+  if (operation == NULL
+      || (input == NULL && input_length > 0)) {
+    return PSA_ERROR_INVALID_ARGUMENT;
+  }
+
+  if (operation->alg == 0) {
+    return PSA_ERROR_BAD_STATE;
+  }
+
+  if (operation->processed_len > 0) {
+    return PSA_ERROR_BAD_STATE;
+  }
+
+  // AD are limited to 2^64 bits, so 2^61 bytes.
+  // We need not check if SIZE_MAX (max of size_t) is less than 2^61 (0x2000000000000000).
+#if SIZE_MAX > 0x2000000000000000ull
+  if (input_length >> 61 != 0) {
+    return PSA_ERROR_INVALID_ARGUMENT;
+  }
+#endif
+
+  // To make sure crypto_aead_start is not called twice.
+  if (input_length == 0) {
+    return PSA_SUCCESS;
+  }
+
+  // The following logic enables processing of partial non-blocksize authentication data.
+
+  uint8_t block_size = 16;
+
+#if defined(PSA_WANT_ALG_CCM)
+  if (PSA_ALG_AEAD_WITH_SHORTENED_TAG(operation->alg, 0) == PSA_ALG_AEAD_WITH_SHORTENED_TAG(PSA_ALG_CCM, 0)) {
+    if (operation->first_update_ad_op) {
+      // CCM only processes 14 bytes on its first update CBC-MAC operation.
+      block_size = 14;
+    }
+  }
+#endif
+
+  if (operation->unprocessed_aad_length > 16) {
+    // Context is not valid.
+    return PSA_ERROR_INVALID_ARGUMENT;
+  }
+
+  // Store up to 16 bytes in context in case there is more data coming. If there is no more
+  // authentication data: stored data will be processed in the first update operation or in
+  // the finish/verify operation.
+  if ((operation->unprocessed_aad_length + input_length) < block_size && input_length < block_size) {
+    memcpy(operation->unprocessed_block + operation->unprocessed_aad_length, input, input_length);
+    operation->unprocessed_aad_length += input_length;
+    return PSA_SUCCESS;
+  }
+
+  if (operation->unprocessed_aad_length > 0) {
+    // If present, process any stored authenication data first.
+    memcpy(operation->unprocessed_block + operation->unprocessed_aad_length, input, block_size
+           - operation->unprocessed_aad_length);
+    input += (block_size - operation->unprocessed_aad_length);
+    input_length -= (block_size - operation->unprocessed_aad_length);
+    operation->unprocessed_aad_length = 0;
+
+    crypto_aead_update_partial_ad(operation,
+                                  NULL,
+                                  operation->unprocessed_block,
+                                  block_size);
+
+    if (input_length < block_size) {
+      memcpy(operation->unprocessed_block, input, input_length);
+      operation->unprocessed_aad_length = input_length;
+      return PSA_SUCCESS;
+    }
+  }
+
+  uint8_t incomplete_block = (input_length - block_size) % 16;
+
+  if (incomplete_block > 0) {
+    memcpy(operation->unprocessed_block, input + (input_length - incomplete_block), incomplete_block);
+    operation->unprocessed_aad_length = incomplete_block;
+    input_length -= incomplete_block;
+  }
+
+  crypto_aead_update_partial_ad(operation,
+                                NULL,
+                                input,
+                                input_length);
+
+  return PSA_SUCCESS;
+
+#else // PSA_WANT_ALG_GCM || PSA_WANT_ALG_CCM
+  (void)operation;
+  (void)input;
+  (void)input_length;
+  return PSA_ERROR_NOT_SUPPORTED;
+#endif // PSA_WANT_ALG_GCM || PSA_WANT_ALG_CCM
+}
+
+psa_status_t sli_crypto_transparent_aead_update(sli_crypto_transparent_aead_operation_t *operation,
+                                                const uint8_t *input,
+                                                size_t input_length,
+                                                uint8_t *output,
+                                                size_t output_size,
+                                                size_t *output_length)
+{
+#if defined(PSA_WANT_ALG_GCM) || defined(PSA_WANT_ALG_CCM)
+
+  if (output_size < input_length) {
+    return PSA_ERROR_BUFFER_TOO_SMALL;
+  }
+
+  if (operation == NULL
+      || ((input == NULL || output == NULL) && input_length > 0)
+      || output_length == NULL) {
+    return PSA_ERROR_INVALID_ARGUMENT;
+  }
+
+  if (operation->alg == 0) {
+    return PSA_ERROR_BAD_STATE;
+  }
+
+  // If present, process authentication data.
+  if (operation->unprocessed_aad_length > 0) {
+    if (operation->unprocessed_aad_length > 16) {
+      return PSA_ERROR_INVALID_ARGUMENT;
+    }
+    crypto_aead_update_partial_ad(operation,
+                                  NULL,
+                                  operation->unprocessed_block,
+                                  operation->unprocessed_aad_length);
+    operation->unprocessed_aad_length = 0;
+    memset(operation->unprocessed_block, 0, sizeof(operation->unprocessed_block));
+  }
+
+  if (input_length == 0) {
+    return PSA_SUCCESS;
+  }
+
+#if defined(PSA_WANT_ALG_GCM)
+  if (PSA_ALG_AEAD_WITH_SHORTENED_TAG(operation->alg, 0) == PSA_ALG_AEAD_WITH_SHORTENED_TAG(PSA_ALG_GCM, 0)) {
+    // Deal with input that are not a multiple of 16.
+    if ((operation->unprocessed_length + input_length) < 16 && input_length < 16) {
+      if (operation->unprocessed_length > 16) {
+        // Context is not valid.
+        return PSA_ERROR_INVALID_ARGUMENT;
+      }
+
+      // Fill context buffer and end operation.
+      memcpy(operation->unprocessed_block + operation->unprocessed_length, input, input_length);
+      operation->unprocessed_length += input_length;
+      *output_length = 0;
+
+      return PSA_SUCCESS;
+    }
+  }
+#endif
+
+  if (operation->processed_len == 0 && operation->add_len == 0) {
+    // Multipart operation not initialized.
+    crypto_aead_start(operation);
+  }
+
+#if defined(PSA_WANT_ALG_GCM)
+  uint8_t input_offset = 0;
+  uint8_t output_offset = 0;
+
+  if (PSA_ALG_AEAD_WITH_SHORTENED_TAG(operation->alg, 0) == PSA_ALG_AEAD_WITH_SHORTENED_TAG(PSA_ALG_GCM, 0)) {
+    if (operation->unprocessed_length != 0) {
+      if (operation->unprocessed_length > 16) {
+        // Context is not valid.
+        return PSA_ERROR_INVALID_ARGUMENT;
+      }
+
+      // If there is data stored in the context it must be processed first.
+      input_offset = 16 - operation->unprocessed_length;
+
+      memcpy(operation->unprocessed_block + operation->unprocessed_length, input, input_offset);
+
+      sli_gcm_update(operation,
+                     NULL,
+                     sizeof(operation->unprocessed_block),
+                     operation->unprocessed_block,
+                     output);
+
+      input_length -= input_offset;
+      output_offset += 16;
+      input += input_offset;
+      output += output_offset;
+
+      sli_psa_zeroize(operation->unprocessed_block, sizeof(operation->unprocessed_block));
+      operation->unprocessed_length = 0;
+
+      if (input_length < 16) {
+        // Fill context buffer and end operation.
+        memcpy(operation->unprocessed_block, input, input_length);
+        operation->unprocessed_length = input_length;
+        *output_length = output_offset;
+
+        return PSA_SUCCESS;
+      }
+    }
+    // Store data that is not a multiple of 16 in context.
+    uint8_t res_data_length = input_length % 16;
+    memcpy(operation->unprocessed_block, input + (input_length - res_data_length),
+           res_data_length);
+    operation->unprocessed_length = res_data_length;
+    input_length -= res_data_length;
+  }
+#endif // PSA_WANT_ALG_GCM
+
+  // Our drivers only support full or no overlap between input and output
+  // buffers. So in the case of partial overlap, copy the input buffer into
+  // the output buffer and process it in place as if the buffers fully
+  // overlapped.
+  if ((output > input) && (output < (input + input_length))) {
+    memmove(output, input, input_length);
+    input = output;
+  }
+
+  switch (PSA_ALG_AEAD_WITH_SHORTENED_TAG(operation->alg, 0)) {
+#if defined(PSA_WANT_ALG_GCM)
+    case PSA_ALG_AEAD_WITH_SHORTENED_TAG(PSA_ALG_GCM, 0):
+    {
+      sli_gcm_update(operation,
+                     NULL,
+                     input_length,
+                     input,
+                     output);
+
+      *output_length = input_length + output_offset;
+      break;
+    }
+#endif // PSA_WANT_ALG_GCM
+#if defined(PSA_WANT_ALG_CCM)
+    case PSA_ALG_AEAD_WITH_SHORTENED_TAG(PSA_ALG_CCM, 0):
+    {
+      sli_ccm_update(operation,
+                     NULL,
+                     input_length,
+                     input,
+                     output);
+
+      *output_length = input_length;
+      break;
+    }
+#endif
+    default:
+      return PSA_ERROR_NOT_SUPPORTED;
+  }
+
+  return PSA_SUCCESS;
+#else // PSA_WANT_ALG_GCM || PSA_WANT_ALG_CCM
+  (void)operation;
+  (void)input;
+  (void)input_length;
+  (void)output;
+  (void)output_size;
+  (void)output_length;
+  return PSA_ERROR_NOT_SUPPORTED;
+#endif // PSA_WANT_ALG_GCM || PSA_WANT_ALG_CCM
+}
+
+psa_status_t sli_crypto_transparent_aead_finish(sli_crypto_transparent_aead_operation_t *operation,
+                                                uint8_t *ciphertext,
+                                                size_t ciphertext_size,
+                                                size_t *ciphertext_length,
+                                                uint8_t *tag,
+                                                size_t tag_size,
+                                                size_t *tag_length)
+{
+#if defined(PSA_WANT_ALG_GCM) || defined(PSA_WANT_ALG_CCM)
+
+  (void)ciphertext;
+  (void)ciphertext_size;
+
+  if (operation == NULL) {
+    return PSA_ERROR_INVALID_ARGUMENT;
+  }
+
+  uint32_t tag_len = PSA_ALG_AEAD_GET_TAG_LENGTH(operation->alg);
+
+  if (tag_size < tag_len) {
+    return PSA_ERROR_BUFFER_TOO_SMALL;
+  }
+
+  *ciphertext_length = 0;
+
+  // If present, process authentication data.
+  if (operation->unprocessed_aad_length > 0) {
+    if (operation->unprocessed_aad_length > 16) {
+      return PSA_ERROR_INVALID_ARGUMENT;
+    }
+    crypto_aead_update_partial_ad(operation,
+                                  NULL,
+                                  operation->unprocessed_block,
+                                  operation->unprocessed_aad_length);
+    operation->unprocessed_aad_length = 0;
+    memset(operation->unprocessed_block, 0, 16);
+  }
+
+  if ((operation->processed_len == 0) && (operation->add_len == 0)) {
+    // Multipart operation not initialized.
+    crypto_aead_start(operation);
+  }
+
+#if defined(PSA_WANT_ALG_GCM)
+  if (PSA_ALG_AEAD_WITH_SHORTENED_TAG(operation->alg, 0) == PSA_ALG_AEAD_WITH_SHORTENED_TAG(PSA_ALG_GCM, 0)) {
+    if (operation->unprocessed_length) {
+      // Any unprocessed data in context must be processed first.
+      if (ciphertext_size < operation->unprocessed_length) {
+        return PSA_ERROR_INVALID_ARGUMENT;
+      }
+
+      sli_gcm_update(operation,
+                     NULL,
+                     operation->unprocessed_length,
+                     operation->unprocessed_block,
+                     ciphertext);
+
+      *ciphertext_length = operation->unprocessed_length;
+    }
+  }
+#endif
+
+  switch (PSA_ALG_AEAD_WITH_SHORTENED_TAG(operation->alg, 0)) {
+#if defined(PSA_WANT_ALG_GCM)
+    case PSA_ALG_AEAD_WITH_SHORTENED_TAG(PSA_ALG_GCM, 0):
+    {
+      sli_gcm_finish(operation,
+                     NULL,
+                     tag,
+                     tag_size);
+
+      break;
+    }
+#endif //PSA_WANT_ALG_GCM
+#if defined(PSA_WANT_ALG_CCM)
+    case PSA_ALG_AEAD_WITH_SHORTENED_TAG(PSA_ALG_CCM, 0):
+    {
+      sli_ccm_finish(operation,
+                     NULL,
+                     tag,
+                     tag_size);
+      break;
+    }
+#endif
+    default:
+      return PSA_ERROR_NOT_SUPPORTED;
+  }
+
+  sli_psa_zeroize(operation, sizeof(*operation));
+
+  *tag_length = tag_size;
+
+  return PSA_SUCCESS;
+#else// PSA_WANT_ALG_GCM || PSA_WANT_ALG_CCM
+  (void)operation;
+  (void)ciphertext;
+  (void)ciphertext_size;
+  (void)ciphertext_length;
+  (void)tag;
+  (void)tag_size;
+  (void)tag_length;
+  return PSA_ERROR_NOT_SUPPORTED;
+#endif// PSA_WANT_ALG_GCM || PSA_WANT_ALG_CCM
+}
+
+psa_status_t sli_crypto_transparent_aead_verify(sli_crypto_transparent_aead_operation_t *operation,
+                                                uint8_t *plaintext,
+                                                size_t plaintext_size,
+                                                size_t *plaintext_length,
+                                                const uint8_t *tag,
+                                                size_t tag_length)
+{
+#if defined(PSA_WANT_ALG_GCM) || defined(PSA_WANT_ALG_CCM)
+
+  psa_status_t status = PSA_ERROR_CORRUPTION_DETECTED;
+
+  size_t tag_length_out = 0;
+
+  uint8_t calc_tag[PSA_AEAD_TAG_MAX_SIZE] = { 0 };
+
+  if (tag == NULL || tag_length == 0 ) {
+    return PSA_ERROR_INVALID_SIGNATURE;
+  }
+
+  if (tag_length != PSA_ALG_AEAD_GET_TAG_LENGTH(operation->alg)) {
+    return PSA_ERROR_INVALID_SIGNATURE;
+  }
+
+  status = sli_crypto_transparent_aead_finish(operation,
+                                              plaintext,
+                                              plaintext_size,
+                                              plaintext_length,
+                                              calc_tag,
+                                              tag_length,
+                                              &tag_length_out);
+
+  if (status != PSA_SUCCESS) {
+    return status;
+  }
+
+  if (tag_length != tag_length_out) {
+    return PSA_ERROR_BAD_STATE;
+  }
+
+  // Check that the provided tag equals the calculated tag
+  // (in constant time).
+  uint8_t diff = sli_psa_safer_memcmp(calc_tag, tag, tag_length);
+  sli_psa_zeroize(calc_tag, tag_length);
+
+  if (diff != 0) {
+    return PSA_ERROR_INVALID_SIGNATURE;
+  }
+
+  return PSA_SUCCESS;
+#else // PSA_WANT_ALG_GCM || PSA_WANT_ALG_CCM
+  (void)operation;
+  (void)plaintext;
+  (void)plaintext_size;
+  (void)plaintext_length;
+  (void)tag;
+  (void)tag_length;
+  return PSA_ERROR_NOT_SUPPORTED;
+#endif // PSA_WANT_ALG_GCM || PSA_WANT_ALG_CCM
+}
+
+psa_status_t sli_crypto_transparent_aead_abort(sli_crypto_transparent_aead_operation_t *operation)
+{
+  if (operation == NULL) {
+    return PSA_ERROR_INVALID_ARGUMENT;
+  }
+
+  memset(operation, 0, sizeof(*operation));
+  return PSA_SUCCESS;
+}
+
+#endif // CRYPTO_PRESENT

@@ -13,7 +13,6 @@ requires:
    - name: "zigbee_packet_handoff"
    - name: "zigbee_zll_commissioning_common"
    - name: "zigbee_ota_server"
-   - name: "zigbee_storage_common"
    - name: "zigbee_interpan"
 source:
   - path: protocol/zigbee/app/framework/plugin/test-harness-z3/test-harness-z3-core.c

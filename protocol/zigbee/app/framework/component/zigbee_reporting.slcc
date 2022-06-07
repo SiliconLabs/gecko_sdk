@@ -42,7 +42,7 @@ template_contribution:
       function_name: emberAfPluginReportingInitCallback
   - name: zigbee_af_callback
     value:
-      callback_type: local_data_init
+      callback_type: init_done
       function_name: emberAfPluginReportingInitCallback
   - name: zigbee_stack_callback
     value:

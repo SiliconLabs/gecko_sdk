@@ -64,6 +64,9 @@
 /*******************************************************************************
  *********************   LOCAL FUNCTION PROTOTYPES   ***************************
  ******************************************************************************/
+
+__WEAK void sli_iostream_on_uart_rx(sl_iostream_t *handle);
+
 static sl_status_t uart_deinit(void *stream);
 
 static sl_status_t uart_write(void *context,
@@ -339,6 +342,8 @@ void sli_uart_push_rxd_data(void *context,
 {
   sl_iostream_uart_context_t *uart_context = (sl_iostream_uart_context_t *)context;
   CORE_DECLARE_IRQ_STATE;
+
+  sli_iostream_on_uart_rx((sl_iostream_t *)uart_context);
 
   CORE_ENTER_ATOMIC();
   if (uart_context->sw_flow_control) {

@@ -88,9 +88,9 @@
 #define APPLICATION_VERIFICATION_SKIP_EM4_RST                    0
 
 // <o BOOTLOADER_VERSION_MAIN_CUSTOMER> Bootloader Version Main Customer
-// <i> Default: 2
+// <i> Default: 0
 // <i> Bootloader Version Main Customer
-#define BOOTLOADER_VERSION_MAIN_CUSTOMER                    2
+#define BOOTLOADER_VERSION_MAIN_CUSTOMER                    0
 
 // <e USE_CUSTOM_APP_SIZE> Use custom Bootloader Application Size
 // <i> Default: 0

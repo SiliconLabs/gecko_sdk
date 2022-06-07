@@ -20,7 +20,7 @@ appPlugin: gecko-usb=true
 appPlugin: core=true
 appPlugin: bootloader-interface=true
 appPlugin: fatfs=true
-
+appPlugin: sl_assert=true
 
 # Setup configurations
 

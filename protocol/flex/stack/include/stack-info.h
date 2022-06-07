@@ -27,6 +27,10 @@
  *
  ******************************************************************************/
 
+#ifdef SL_CATALOG_CONNECT_AES_SECURITY_PRESENT
+#include <psa/crypto.h>
+#endif
+
 /**
  * @addtogroup stack_info
  * @brief Connect API for accessing and modifying stack states and behaviors.
@@ -139,9 +143,11 @@ EmberNetworkStatus emberNetworkState(void);
  */
 bool emberStackIsUp(void);
 
-/** @brief Set the security key.
+/** @brief Write a key at the address of the formerly used security key. The
+ *  key set by this function will not be used by the stack. The API is meant to
+ *  be used to erase a key as it is now managed by PSA Crypto API.
  *
- * @param[out] key   An ::EmberKeyData value containing the security key to be
+ * @param[in] key   An ::EmberKeyData value containing the security key to be
  * set.
  *
  * @return An EmberStatus value of ::EMBER_SUCCESS if the key was successfully
@@ -149,9 +155,46 @@ bool emberStackIsUp(void);
  */
 EmberStatus emberSetSecurityKey(EmberKeyData *key);
 
-/** @brief Set the channel to use for sending and receiving messages on the
- * current network. The available channels depend on the radio config you use,
- * and channels can differ more than the frequency if it's a multi-PHY config.
+/** @brief Get the legacy security key. This function does not return the value
+ *  set with the PSA Crypto API.
+ *
+ * @param[in] key   An ::EmberKeyData where the legcay security key will be stored
+ *
+ * @return An EmberStatus value of ::EMBER_SUCCESS if the key was successfully
+ *   read.
+ */
+EmberStatus emberGetSecurityKey(EmberKeyData *key);
+
+#ifdef SL_CATALOG_CONNECT_AES_SECURITY_PRESENT
+/**
+ * @brief Register a PSA Cyrpto key. It must comply to Connect stack key format:
+ *  128 bits AES key with encrypt and decrypt permissions.
+ *
+ * @param key_id A PSA Crypto key identifier.
+ * @return An EmberStatus value of ::EMBER_SUCCESS if the key was successfully
+ *  imported. If the function failed, it returns:
+ *  - EMBER_BAD_ARGUMENT if the key was not imported calling psa_import_key or any
+ *  equivalent.
+ *  - EMBER_SECURITY_DATA_INVALID if the key does not match the Connect stack
+ *  key format.
+ *
+ */
+EmberStatus emberSetPsaSecurityKey(mbedtls_svc_key_id_t key_id);
+
+/**
+ * @brief Unregister the PSA Crypto key id previously set with ::emberSetPsaSecurityKey.
+ * This function does not destroy the PSA Crypto key. It is the application
+ * responsibility to call psa_destroy_key.
+ *
+ * @return An EmberStatus value of ::EMBER_SUCCESS if the key was successfully
+ *  removed.
+ */
+EmberStatus emberRemovePsaSecurityKey(void);
+#endif
+
+/** @brief Set the channel for sending and receiving messages on the current
+ * network. The available channels depend on the radio config you use. Channels
+ * can differ more than the frequency if it's a multi-PHY config.
  *
  * @note Care should be taken when using this API.
  *       All devices on a network must use the same channel.
@@ -172,9 +215,9 @@ EmberStatus emberSetSecurityKey(EmberKeyData *key);
 EmberStatus emberSetRadioChannelExtended(uint16_t channel, bool persistent);
 
 #if defined(DOXYGEN_SHOULD_SKIP_THIS) || defined(UNIX_HOST)
-/** @brief Set the channel to use for sending and receiving messages on the
- * current network. The available channels depend on the radio config you use,
- * and channels can differ more than the frequency if it's a multi-PHY config.
+/** @brief Set the channel for sending and receiving messages on the current
+ * network. The available channels depend on the radio config you use. Channels
+ * can differ more than the frequency if it's a multi-PHY config.
  *
  * @note Care should be taken when using this API.
  *       All devices on a network must use the same channel.
@@ -197,8 +240,8 @@ EmberStatus emberSetRadioChannel(uint16_t channel);
 #endif // DOXYGEN_SHOULD_SKIP_THIS
 
 /** @brief Get the radio channel, to which a node is set, on the current
- * network. The available channels depend on the radio config you use,
- * and channels can differ more than the frequency if it's a multi-PHY config
+ * network. The available channels depend on the radio config you use.
+ * Channels can differ more than the frequency if it's a multi-PHY config.
  *
  * @return The current radio channel.
  */
@@ -213,7 +256,7 @@ uint16_t emberGetDefaultChannel(void);
 
 /** @brief Indicate if the PHY configuration of the stack. Currently only
  * supporting ::EMBER_RADIO_CONFIGURATOR and ::EMBER_STANDARD_PHY_2_4GHZ.
- * It must be called before initialising the stack.
+ * It must be called before initializing the stack.
  *
  * @return ::EMBER_BAD_ARGUMENT if phyType is incorrect
  *         ::EMBER_INVALID_CALL if API is called after stack initialization
@@ -222,7 +265,7 @@ uint16_t emberGetDefaultChannel(void);
 EmberStatus emberPhyConfigInit(EmberPhyType phyType);
 
 /** @brief Perform image rejection calibration on the current channel. The
- * stack will notify the application of the need for channel calibration via the
+ * stack will notify the application that it needs channel calibration via the
  * ::emberRadioNeedsCalibratingHandler() callback function during
  * ::emberTick().  This function should only be called from within the context
  * of the ::emberRadioNeedsCalibratingHandler() callback function. Note if this
@@ -243,7 +286,7 @@ EmberStatus emberCalibrateCurrentChannelExtended(uint32_t calValueIn,
 
 #if defined(DOXYGEN_SHOULD_SKIP_THIS) || defined(UNIX_HOST)
 /** @brief Perform image rejection calibration on the current channel. The
- * stack will notify the application of the need for channel calibration via the
+ * stack will notify the application that it needs channel calibration via the
  * ::emberRadioNeedsCalibratingHandler() callback function during
  * ::emberTick().  This function should only be called from within the context
  * of the ::emberRadioNeedsCalibratingHandler() callback function. Note if this
@@ -257,7 +300,7 @@ void emberCalibrateCurrentChannel(void);
 #endif
 
 /** @brief Apply Image Rejection calibration on the current channel. The
- * stack will notify the application of the need for channel calibration via the
+ * stack will notify the application that it needs channel calibration via the
  * ::emberRadioNeedsCalibratingHandler() callback function during
  * ::emberTick().  This function should only be called from within the context
  * of the ::emberRadioNeedsCalibratingHandler() callback function. Note if this
@@ -273,7 +316,7 @@ void emberCalibrateCurrentChannel(void);
 EmberStatus emberApplyIrCalibration(uint32_t calValue);
 
 /** @brief Perform Temperature VCO calibration calibration on the current channel. The
- * stack will notify the application of the need for channel calibration via the
+ * stack will notify the application that it needs channel calibration via the
  * ::emberRadioNeedsCalibratingHandler() callback function during
  * ::emberTick().  This function should only be called from within the context
  * of the ::emberRadioNeedsCalibratingHandler() callback function. Note if this
@@ -334,7 +377,7 @@ int16_t emberGetRadioPower(void);
  */
 EmberStatus emberSetRadioPowerMode(bool radioOn);
 
-/** @brief Sets the MAC layer transmission parameters.
+/** @brief Set the MAC layer transmission parameters.
  *
  * @param[in] ccaThreshold   The CCA RSSI threshold, in dBm, above which the
  *                         channel is considered 'busy'. This parameter is by
@@ -378,9 +421,9 @@ EmberStatus emberSetRadioPowerMode(bool radioOn);
  *                        the CSMA operations. This value is set by default to
  *                        \b 0 which means that no timeout is imposed.
  *
- * @param[in] ackTimeout     The ack timeout in microsends after which the
- *                        transmitting shall give up waiting for an
- *                        acknowledment. This parameter is set by default to
+ * @param[in] ackTimeout     The ack timeout in microseconds after which the
+ *                        transmitting gives up waiting for an acknowledgment.
+ *                        This parameter is set by default to
  *                        \b (::EMBER_MAC_ACK_TIMEOUT_MS * 1000).
  *
  * @note The CSMA/CA (CCA) values are directly used in RAIL's
@@ -399,8 +442,8 @@ EmberStatus emberSetMacParams(int8_t ccaThreshold,
                               uint32_t csmaTimeout,
                               uint16_t ackTimeout);
 
-/** @brief An API to retrieve the parent address. This API can be invoked only
- * for nodes of ::EMBER_MAC_MODE_DEVICE or ::EMBER_MAC_MODE_SLEEPY_DEVICE type.
+/** @brief Retrieve the parent address. This API can be invoked only for nodes
+ * of ::EMBER_MAC_MODE_DEVICE or ::EMBER_MAC_MODE_SLEEPY_DEVICE type.
  *
  * @return An ::EmberStatus value of ::EMBER_SUCCESS if the parent address was
  * successfully retrieved, otherwise an ::EmberStatus value indicating the
@@ -475,8 +518,8 @@ uint8_t* emberGetEui64(void);
 EmberEUI64 emberGetEui64(void);
 #endif
 
-/** @brief Determines whether \c eui64 is the local node's EUI64 ID. EUI64 is
- * accessible easily in SoC mode, but in Host-NCP, the address is stored on the
+/** @brief Determine whether \c eui64 is the local node's EUI64 ID. EUI64 is
+ * easily accessible in SoC mode, but in Host-NCP, the address is stored on the
  * NCP. This API can be used on the Host to compare a value with the locally
  * stored one.
  *
@@ -566,8 +609,8 @@ EmberStatus emberGetCounter(EmberCounterType counterType, uint32_t *count);
  * @{
  */
 
-/** @brief This handler is invoked at coordinator, range extender, or mac mode
- * nodes when a new child has joined the device.
+/** @brief Invoked at coordinator, range extender, or mac mode nodes when a new
+ * child has joined the device.
  *
  * @param[in] nodeType  The role of the joining device (::EMBER_STAR_RANGE_EXTENDER,
  * ::EMBER_STAR_END_DEVICE, ::EMBER_STAR_SLEEPY_END_DEVICE,

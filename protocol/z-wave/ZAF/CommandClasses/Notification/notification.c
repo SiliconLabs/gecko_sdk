@@ -54,7 +54,7 @@ MY_NOTIFICATION myNotification;
 bool notificationBurglerUnknownEvent = false;
 uint8_t notificationBurglerSequenceNbr = 0;
 
-static nvm3_Handle_t* pFileSystem;
+static zpal_nvm_handle_t pFileSystem;
 
 /****************************************************************************/
 /*                              EXPORTED DATA                               */
@@ -72,29 +72,29 @@ static void SaveNotificationStatus(
     NOTIFICATION_STATUS notificationStatus,
     uint8_t endpoint)
 {
-  Ecode_t errCode;
+  zpal_status_t status;
 
   ASSERT(pFileSystem != 0);
 
   SNotificationData tSource;
-  errCode = nvm3_readData(pFileSystem, ZAF_FILE_ID_NOTIFICATIONDATA, &tSource, sizeof(SNotificationData));
-  ASSERT(ECODE_NVM3_OK == errCode);
+  status = zpal_nvm_read(pFileSystem, ZAF_FILE_ID_NOTIFICATIONDATA, &tSource, sizeof(SNotificationData));
+  ASSERT(ZPAL_STATUS_OK == status);
 
   uint8_t tGroupNumber = GetGroupNotificationType(&notificationType, endpoint);
 
   if(0xFF != tGroupNumber)
   {
-    //Only write to nvm3 if file will change
+    //Only write to nvm if file will change
     if(tSource.AlarmStatus[tGroupNumber] != (uint8_t)notificationStatus)
     {
       tSource.AlarmStatus[tGroupNumber] = (uint8_t)notificationStatus;
-      errCode = nvm3_writeData(pFileSystem, ZAF_FILE_ID_NOTIFICATIONDATA, &tSource, sizeof(SNotificationData));
-      ASSERT(ECODE_NVM3_OK == errCode);
+      status = zpal_nvm_write(pFileSystem, ZAF_FILE_ID_NOTIFICATIONDATA, &tSource, sizeof(SNotificationData));
+      ASSERT(ZPAL_STATUS_OK == status);
     }
   }
 }
 
-void InitNotification(nvm3_Handle_t* pFS)
+void InitNotification(zpal_nvm_handle_t pFS)
 {
   ASSERT(pFS != NULL);
 
@@ -119,12 +119,10 @@ void InitNotification(nvm3_Handle_t* pFS)
 
   pFileSystem = pFS;
 
-  Ecode_t errCode;
-  uint32_t objectType;
   size_t   dataLen;
-  errCode = nvm3_getObjectInfo(pFileSystem, ZAF_FILE_ID_NOTIFICATIONDATA, &objectType, &dataLen);
+  const zpal_status_t status = zpal_nvm_get_object_size(pFileSystem, ZAF_FILE_ID_NOTIFICATIONDATA, &dataLen);
 
-  if ((ECODE_NVM3_OK != errCode) || (ZAF_FILE_SIZE_NOTIFICATIONDATA != dataLen))
+  if ((ZPAL_STATUS_OK != status) || (ZAF_FILE_SIZE_NOTIFICATIONDATA != dataLen))
   {
     //By default set: NOTIFICATION_STATUS_UNSOLICIT_ACTIVATED
     DefaultNotificationStatus(NOTIFICATION_STATUS_UNSOLICIT_ACTIVATED);
@@ -133,7 +131,6 @@ void InitNotification(nvm3_Handle_t* pFS)
 
 void DefaultNotificationStatus(NOTIFICATION_STATUS status)
 {
-  Ecode_t errCode;
   ASSERT(pFileSystem != 0);
 
   SNotificationData tDefaultAlarmStatus;
@@ -146,8 +143,8 @@ void DefaultNotificationStatus(NOTIFICATION_STATUS status)
     memset(&tDefaultAlarmStatus, 0x00, sizeof(tDefaultAlarmStatus));
   }
 
-  errCode = nvm3_writeData(pFileSystem, ZAF_FILE_ID_NOTIFICATIONDATA, &tDefaultAlarmStatus, sizeof(SNotificationData));
-  ASSERT(ECODE_NVM3_OK == errCode);
+  const zpal_status_t write_status = zpal_nvm_write(pFileSystem, ZAF_FILE_ID_NOTIFICATIONDATA, &tDefaultAlarmStatus, sizeof(SNotificationData));
+  ASSERT(ZPAL_STATUS_OK == write_status);
 }
 
 
@@ -379,13 +376,12 @@ NOTIFICATION_STATUS CmdClassNotificationGetNotificationStatus(
 
   if(0xff != grp)
   {
-    Ecode_t errCode;
     ASSERT(pFileSystem != 0);
 
     SNotificationData tNotificationData;
 
-    errCode = nvm3_readData(pFileSystem, ZAF_FILE_ID_NOTIFICATIONDATA, &tNotificationData, sizeof(SNotificationData));
-    ASSERT(ECODE_NVM3_OK == errCode);
+    const zpal_status_t read_status = zpal_nvm_read(pFileSystem, ZAF_FILE_ID_NOTIFICATIONDATA, &tNotificationData, sizeof(SNotificationData));
+    ASSERT(ZPAL_STATUS_OK == read_status);
 
     uint8_t AlarmStatus = tNotificationData.AlarmStatus[grp];
 

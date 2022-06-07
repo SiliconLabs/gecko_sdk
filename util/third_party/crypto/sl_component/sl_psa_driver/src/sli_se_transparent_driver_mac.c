@@ -39,17 +39,33 @@
 
 #include <string.h>
 
+//------------------------------------------------------------------------------
+// Static asserts
+
+// Make sure that the two locations of 'alg' are in the same place, since we
+// access them interchangeably.
+#if defined(PSA_WANT_ALG_HMAC)
+_Static_assert(offsetof(sli_se_transparent_mac_operation_t, hmac.alg)
+               == offsetof(sli_se_transparent_mac_operation_t,
+                           cipher_mac.operation.alg),
+               "hmac.alg and cipher_mac.oepration.alg are not aliases");
+#endif
+
+//------------------------------------------------------------------------------
+// Static functions
+
+#if defined(PSA_WANT_ALG_CMAC) || defined(PSA_WANT_ALG_CBC_MAC)
 static psa_status_t sli_se_transparent_driver_symmetric_key_from_context(
   sl_se_key_descriptor_t* key_desc,
-  sli_se_transparent_mac_operation_t* transparent_operation)
+  sli_se_transparent_mac_operation_t* operation)
 {
   // Point to transparent key buffer as storage location
   key_desc->storage.method = SL_SE_KEY_STORAGE_EXTERNAL_PLAINTEXT;
-  key_desc->storage.location.buffer.pointer = transparent_operation->cipher_mac.key;
-  key_desc->storage.location.buffer.size = sizeof(transparent_operation->cipher_mac.key);
-  key_desc->size = transparent_operation->cipher_mac.key_len;
+  key_desc->storage.location.buffer.pointer = operation->cipher_mac.key;
+  key_desc->storage.location.buffer.size = sizeof(operation->cipher_mac.key);
+  key_desc->size = operation->cipher_mac.key_len;
 
-  switch (PSA_ALG_FULL_LENGTH_MAC(transparent_operation->cipher_mac.operation.alg)) {
+  switch (PSA_ALG_FULL_LENGTH_MAC(operation->cipher_mac.operation.alg)) {
     case PSA_ALG_CBC_MAC:
     case PSA_ALG_CMAC:
       if (key_desc->size == 16) {
@@ -68,11 +84,16 @@ static psa_status_t sli_se_transparent_driver_symmetric_key_from_context(
 
   return PSA_SUCCESS;
 }
+#endif // PSA_WANT_ALG_CMAC || PSA_WANT_ALG_CBC_MAC
 
-static psa_status_t sli_se_transparent_driver_symmetric_key_from_psa(sl_se_key_descriptor_t* key_desc,
-                                                                     const psa_key_attributes_t *attributes,
-                                                                     const uint8_t *key_buffer,
-                                                                     size_t key_buffer_size)
+#if defined(PSA_WANT_ALG_CMAC)     \
+  || defined(PSA_WANT_ALG_CBC_MAC) \
+  || defined(PSA_WANT_ALG_HMAC)
+static psa_status_t sli_se_transparent_driver_symmetric_key_from_psa(
+  sl_se_key_descriptor_t* key_desc,
+  const psa_key_attributes_t *attributes,
+  const uint8_t *key_buffer,
+  size_t key_buffer_size)
 {
   // Point to transparent key buffer as storage location
   key_desc->storage.method = SL_SE_KEY_STORAGE_EXTERNAL_PLAINTEXT;
@@ -82,31 +103,38 @@ static psa_status_t sli_se_transparent_driver_symmetric_key_from_psa(sl_se_key_d
   // Verify and set key attributes
   psa_key_type_t keytype = psa_get_key_type(attributes);
 
-  if (keytype == PSA_KEY_TYPE_AES) {
-    switch (psa_get_key_bits(attributes)) {
-      case 128:
-        key_desc->size = 16;
-        key_desc->type = SL_SE_KEY_TYPE_AES_128;
-        break;
-      case 192:
-        key_desc->size = 24;
-        key_desc->type = SL_SE_KEY_TYPE_AES_192;
-        break;
-      case 256:
-        key_desc->size = 32;
-        key_desc->type = SL_SE_KEY_TYPE_AES_256;
-        break;
-      default:
-        return PSA_ERROR_NOT_SUPPORTED;
+  switch (keytype) {
+    #if defined(PSA_WANT_ALG_CMAC) || defined(PSA_WANT_ALG_CBC_MAC)
+    case PSA_KEY_TYPE_AES: {
+      switch (psa_get_key_bits(attributes)) {
+        case 128:
+          key_desc->size = 16;
+          key_desc->type = SL_SE_KEY_TYPE_AES_128;
+          break;
+        case 192:
+          key_desc->size = 24;
+          key_desc->type = SL_SE_KEY_TYPE_AES_192;
+          break;
+        case 256:
+          key_desc->size = 32;
+          key_desc->type = SL_SE_KEY_TYPE_AES_256;
+          break;
+        default:
+          return PSA_ERROR_NOT_SUPPORTED;
+      }
+      break;
     }
-#if defined(PSA_WANT_ALG_HMAC)
-  } else if (keytype == PSA_KEY_TYPE_HMAC) {
-    key_desc->size = psa_get_key_bits(attributes) / 8;
-    key_desc->type = SL_SE_KEY_TYPE_SYMMETRIC;
-#endif
-  } else {
-    // Unknown key type to us
-    return PSA_ERROR_INVALID_ARGUMENT;
+    #endif // PSA_WANT_ALG_CMAC || PSA_WANT_ALG_CBC_MAC
+    #if defined(PSA_WANT_ALG_HMAC)
+    case PSA_KEY_TYPE_HMAC: {
+      key_desc->size = psa_get_key_bits(attributes) / 8;
+      key_desc->type = SL_SE_KEY_TYPE_SYMMETRIC;
+      break;
+    }
+    #endif // PSA_WANT_ALG_HMAC
+    default:
+      return PSA_ERROR_INVALID_ARGUMENT;
+      break;
   }
 
   if (key_buffer_size < key_desc->size) {
@@ -115,17 +143,26 @@ static psa_status_t sli_se_transparent_driver_symmetric_key_from_psa(sl_se_key_d
 
   return PSA_SUCCESS;
 }
+#endif // PSA_WANT_ALG_CMAC || PSA_WANT_ALG_CBC_MAC || PSA_WANT_ALG_HMAC
 
-psa_status_t sli_se_transparent_mac_compute(const psa_key_attributes_t *attributes,
-                                            const uint8_t *key_buffer,
-                                            size_t key_buffer_size,
-                                            psa_algorithm_t alg,
-                                            const uint8_t *input,
-                                            size_t input_length,
-                                            uint8_t *mac,
-                                            size_t mac_size,
-                                            size_t *mac_length)
+//------------------------------------------------------------------------------
+// Driver entry points
+
+psa_status_t sli_se_transparent_mac_compute(
+  const psa_key_attributes_t *attributes,
+  const uint8_t *key_buffer,
+  size_t key_buffer_size,
+  psa_algorithm_t alg,
+  const uint8_t *input,
+  size_t input_length,
+  uint8_t *mac,
+  size_t mac_size,
+  size_t *mac_length)
 {
+#if defined(PSA_WANT_ALG_CMAC)     \
+  || defined(PSA_WANT_ALG_CBC_MAC) \
+  || defined(PSA_WANT_ALG_HMAC)
+
   if (key_buffer == NULL
       || attributes == NULL) {
     return PSA_ERROR_INVALID_ARGUMENT;
@@ -133,10 +170,11 @@ psa_status_t sli_se_transparent_mac_compute(const psa_key_attributes_t *attribut
 
   // Ephemeral contexts
   sl_se_key_descriptor_t key_desc = { 0 };
-  psa_status_t psa_status = sli_se_transparent_driver_symmetric_key_from_psa(&key_desc,
-                                                                             attributes,
-                                                                             key_buffer,
-                                                                             key_buffer_size);
+  psa_status_t psa_status
+    = sli_se_transparent_driver_symmetric_key_from_psa(&key_desc,
+                                                       attributes,
+                                                       key_buffer,
+                                                       key_buffer_size);
   if (psa_status != PSA_SUCCESS) {
     return psa_status;
   }
@@ -148,20 +186,9 @@ psa_status_t sli_se_transparent_mac_compute(const psa_key_attributes_t *attribut
                                    mac,
                                    mac_size,
                                    mac_length);
-}
 
-psa_status_t sli_se_transparent_mac_verify(const psa_key_attributes_t *attributes,
-                                           const uint8_t *key_buffer,
-                                           size_t key_buffer_size,
-                                           psa_algorithm_t alg,
-                                           const uint8_t *input,
-                                           size_t input_length,
-                                           const uint8_t *mac,
-                                           size_t mac_length)
-{
-  // There's no point in providing this functionality, since we'd do the same as the PSA core
-  // either way: compute through mac_compute, and constant-time compare on the provided vs
-  // calculated mac.
+#else // PSA_WANT_ALG_CMAC || PSA_WANT_ALG_CBC_MAC || PSA_WANT_ALG_HMAC
+
   (void)attributes;
   (void)key_buffer;
   (void)key_buffer_size;
@@ -169,24 +196,24 @@ psa_status_t sli_se_transparent_mac_verify(const psa_key_attributes_t *attribute
   (void)input;
   (void)input_length;
   (void)mac;
+  (void)mac_size;
   (void)mac_length;
+
   return PSA_ERROR_NOT_SUPPORTED;
+#endif
 }
 
-// Make sure that the two locations of 'alg' are in the same place, since we access them
-// interchangeably.
-#if defined(PSA_WANT_ALG_HMAC)
-_Static_assert(offsetof(sli_se_transparent_mac_operation_t, hmac.alg)
-               == offsetof(sli_se_transparent_mac_operation_t, cipher_mac.operation.alg),
-               "hmac.alg and cipher_mac.oepration.alg are not aliases");
-#endif
-
-psa_status_t sli_se_transparent_mac_sign_setup(sli_se_transparent_mac_operation_t *operation,
-                                               const psa_key_attributes_t *attributes,
-                                               const uint8_t *key_buffer,
-                                               size_t key_buffer_size,
-                                               psa_algorithm_t alg)
+psa_status_t sli_se_transparent_mac_sign_setup(
+  sli_se_transparent_mac_operation_t *operation,
+  const psa_key_attributes_t *attributes,
+  const uint8_t *key_buffer,
+  size_t key_buffer_size,
+  psa_algorithm_t alg)
 {
+#if defined(PSA_WANT_ALG_CMAC)     \
+  || defined(PSA_WANT_ALG_CBC_MAC) \
+  || defined(PSA_WANT_ALG_HMAC)
+
   if (operation == NULL
       || attributes == NULL
       || (key_buffer == NULL && key_buffer_size > 0)) {
@@ -198,9 +225,9 @@ psa_status_t sli_se_transparent_mac_sign_setup(sli_se_transparent_mac_operation_
   // start by resetting context
   memset(operation, 0, sizeof(*operation));
 
-#if defined(PSA_WANT_ALG_HMAC)
+  #if defined(PSA_WANT_ALG_HMAC)
   if (PSA_ALG_IS_HMAC(alg)) {
-    // SEMAILBOX does not support multipart HMAC. Construct it from hashing instead.
+    // SE does not support multipart HMAC. Construct it from hashing instead.
     // Check key type and output size
     if (psa_get_key_type(attributes) != PSA_KEY_TYPE_HMAC) {
       // For HMAC, key type is strictly enforced
@@ -214,17 +241,17 @@ psa_status_t sli_se_transparent_mac_sign_setup(sli_se_transparent_mac_operation_
       return PSA_ERROR_INVALID_ARGUMENT;
     }
 
-    // Setup the hash accumulator first, such that we can return early for non-supported
-    // hash functions and avoid potentially overflowing buffer lengths.
-    status = sli_se_transparent_hash_setup(
-      &operation->hmac.hash_ctx,
-      hash_alg);
+    // Setup the hash accumulator first, such that we can return early for non-
+    // supported hash functions and avoid potentially overflowing buffer lengths.
+    status = sli_se_transparent_hash_setup(&operation->hmac.hash_ctx,
+                                           hash_alg);
     if (status != PSA_SUCCESS) {
       return status;
     }
 
     size_t keylen = psa_get_key_bits(attributes) / 8;
-    size_t blocklen = (hash_alg == PSA_ALG_SHA_384 || hash_alg == PSA_ALG_SHA_512 ? 128 : 64);
+    size_t blocklen
+      = (hash_alg == PSA_ALG_SHA_384 || hash_alg == PSA_ALG_SHA_512) ? 128 : 64;
 
     if (key_buffer_size < keylen) {
       return PSA_ERROR_INVALID_ARGUMENT;
@@ -267,8 +294,9 @@ psa_status_t sli_se_transparent_mac_sign_setup(sli_se_transparent_mac_operation_
     operation->hmac.alg = alg;
     return PSA_SUCCESS;
   }
-#endif
+  #endif // PSA_WANT_ALG_HMAC
 
+  #if defined(PSA_WANT_ALG_CMAC) || defined(PSA_WANT_ALG_CBC_MAC)
   status = sli_se_driver_mac_sign_setup(&(operation->cipher_mac.operation),
                                         attributes,
                                         alg);
@@ -301,17 +329,32 @@ psa_status_t sli_se_transparent_mac_sign_setup(sli_se_transparent_mac_operation_
   }
 
   return PSA_SUCCESS;
+  #else // PSA_WANT_ALG_CMAC || PSA_WANT_ALG_CBC_MAC
+  return PSA_ERROR_NOT_SUPPORTED;
+  #endif // PSA_WANT_ALG_CMAC || PSA_WANT_ALG_CBC_MAC
+
+#else // PSA_WANT_ALG_CMAC || PSA_WANT_ALG_CBC_MAC || PSA_WANT_ALG_HMAC
+
+  (void)operation;
+  (void)attributes;
+  (void)key_buffer;
+  (void)key_buffer_size;
+  (void)alg;
+
+  return PSA_ERROR_NOT_SUPPORTED;
+#endif
 }
 
-psa_status_t sli_se_transparent_mac_verify_setup(sli_se_transparent_mac_operation_t *operation,
-                                                 const psa_key_attributes_t *attributes,
-                                                 const uint8_t *key_buffer,
-                                                 size_t key_buffer_size,
-                                                 psa_algorithm_t alg)
+psa_status_t sli_se_transparent_mac_verify_setup(
+  sli_se_transparent_mac_operation_t *operation,
+  const psa_key_attributes_t *attributes,
+  const uint8_t *key_buffer,
+  size_t key_buffer_size,
+  psa_algorithm_t alg)
 {
-  // Since the PSA Crypto core exposes the verify functionality of the drivers without
-  // actually implementing the fallback to 'sign' when the driver doesn't support verify,
-  // we need to do this ourselves for the time being.
+  // Since the PSA Crypto core exposes the verify functionality of the drivers
+  // without actually implementing the fallback to 'sign' when the driver
+  // doesn't support verify, we need to do this ourselves for the time being.
   return sli_se_transparent_mac_sign_setup(operation,
                                            attributes,
                                            key_buffer,
@@ -319,29 +362,36 @@ psa_status_t sli_se_transparent_mac_verify_setup(sli_se_transparent_mac_operatio
                                            alg);
 }
 
-psa_status_t sli_se_transparent_mac_update(sli_se_transparent_mac_operation_t *operation,
-                                           const uint8_t *input,
-                                           size_t input_length)
+psa_status_t sli_se_transparent_mac_update(
+  sli_se_transparent_mac_operation_t *operation,
+  const uint8_t *input,
+  size_t input_length)
 {
+#if defined(PSA_WANT_ALG_CMAC)     \
+  || defined(PSA_WANT_ALG_CBC_MAC) \
+  || defined(PSA_WANT_ALG_HMAC)
+
   if (operation == NULL
       || (input == NULL && input_length > 0)) {
     return PSA_ERROR_INVALID_ARGUMENT;
   }
 
-#if defined(PSA_WANT_ALG_HMAC)
+  #if defined(PSA_WANT_ALG_HMAC)
   if (PSA_ALG_IS_HMAC(operation->hmac.alg)) {
     return sli_se_transparent_hash_update(
       &operation->hmac.hash_ctx,
       input,
       input_length);
   }
-#endif
+  #endif
 
+  #if defined(PSA_WANT_ALG_CMAC) || defined(PSA_WANT_ALG_CBC_MAC)
   // Ephemeral contexts
   sl_se_key_descriptor_t key_desc = { 0 };
 
-  psa_status_t psa_status = sli_se_transparent_driver_symmetric_key_from_context(&key_desc,
-                                                                                 operation);
+  psa_status_t psa_status
+    = sli_se_transparent_driver_symmetric_key_from_context(&key_desc,
+                                                           operation);
   if (psa_status != PSA_SUCCESS) {
     return psa_status;
   }
@@ -350,13 +400,30 @@ psa_status_t sli_se_transparent_mac_update(sli_se_transparent_mac_operation_t *o
                                   &key_desc,
                                   input,
                                   input_length);
+  #else // PSA_WANT_ALG_CMAC || PSA_WANT_ALG_CBC_MAC
+  return PSA_ERROR_NOT_SUPPORTED;
+  #endif // PSA_WANT_ALG_CMAC || PSA_WANT_ALG_CBC_MAC
+
+#else // PSA_WANT_ALG_CMAC || PSA_WANT_ALG_CBC_MAC || PSA_WANT_ALG_HMAC
+
+  (void)operation;
+  (void)input;
+  (void)input_length;
+
+  return PSA_ERROR_NOT_SUPPORTED;
+#endif
 }
 
-psa_status_t sli_se_transparent_mac_sign_finish(sli_se_transparent_mac_operation_t *operation,
-                                                uint8_t *mac,
-                                                size_t mac_size,
-                                                size_t *mac_length)
+psa_status_t sli_se_transparent_mac_sign_finish(
+  sli_se_transparent_mac_operation_t *operation,
+  uint8_t *mac,
+  size_t mac_size,
+  size_t *mac_length)
 {
+#if defined(PSA_WANT_ALG_CMAC)     \
+  || defined(PSA_WANT_ALG_CBC_MAC) \
+  || defined(PSA_WANT_ALG_HMAC)
+
   if (operation == NULL
       || mac == NULL
       || mac_size == 0
@@ -364,25 +431,24 @@ psa_status_t sli_se_transparent_mac_sign_finish(sli_se_transparent_mac_operation
     return PSA_ERROR_INVALID_ARGUMENT;
   }
 
-  psa_status_t status;
-
-#if defined(PSA_WANT_ALG_HMAC)
+  #if defined(PSA_WANT_ALG_HMAC)
   if (PSA_ALG_IS_HMAC(operation->hmac.alg)) {
-    uint8_t buffer[sizeof(operation->hmac.opad) + (sizeof(operation->hmac.opad) / 2)];
+    uint8_t buffer[sizeof(operation->hmac.opad)
+                   + (sizeof(operation->hmac.opad) / 2)];
     size_t olen = 0;
     psa_algorithm_t hash_alg = PSA_ALG_HMAC_GET_HASH(operation->hmac.alg);
-    size_t blocklen = (hash_alg == PSA_ALG_SHA_384 || hash_alg == PSA_ALG_SHA_512 ? 128 : 64);
+    size_t blocklen
+      = (hash_alg == PSA_ALG_SHA_384 || hash_alg == PSA_ALG_SHA_512) ? 128 : 64;
 
     // Construct outer hash input from opad and hash result
     memcpy(buffer, operation->hmac.opad, blocklen);
     memset(operation->hmac.opad, 0, sizeof(operation->hmac.opad));
 
-    status = sli_se_transparent_hash_finish(
+    psa_status_t status = sli_se_transparent_hash_finish(
       &operation->hmac.hash_ctx,
       &buffer[blocklen],
       sizeof(buffer) - blocklen,
       &olen);
-
     if (status != PSA_SUCCESS) {
       return status;
     }
@@ -414,33 +480,52 @@ psa_status_t sli_se_transparent_mac_sign_finish(sli_se_transparent_mac_operation
     *mac_length = requested_length;
     memset(buffer, 0, sizeof(buffer));
     return PSA_SUCCESS;
-  } else
-#endif
-  {
-    // Ephemeral contexts
-    sl_se_key_descriptor_t key_desc = { 0 };
-
-    status = sli_se_transparent_driver_symmetric_key_from_context(&key_desc,
-                                                                  operation);
-    if (status != PSA_SUCCESS) {
-      return status;
-    }
-
-    return sli_se_driver_mac_sign_finish(&(operation->cipher_mac.operation),
-                                         &key_desc,
-                                         mac,
-                                         mac_size,
-                                         mac_length);
   }
+  #endif // PSA_WANT_ALG_HMAC
+
+  #if defined(PSA_WANT_ALG_CMAC) || defined(PSA_WANT_ALG_CBC_MAC)
+  // Ephemeral contexts
+  sl_se_key_descriptor_t key_desc = { 0 };
+
+  psa_status_t status = sli_se_transparent_driver_symmetric_key_from_context(
+    &key_desc,
+    operation);
+  if (status != PSA_SUCCESS) {
+    return status;
+  }
+
+  return sli_se_driver_mac_sign_finish(&(operation->cipher_mac.operation),
+                                       &key_desc,
+                                       mac,
+                                       mac_size,
+                                       mac_length);
+  #else // PSA_WANT_ALG_CMAC || PSA_WANT_ALG_CBC_MAC
+  return PSA_ERROR_NOT_SUPPORTED;
+  #endif // PSA_WANT_ALG_CMAC || PSA_WANT_ALG_CBC_MAC
+
+#else // PSA_WANT_ALG_CMAC || PSA_WANT_ALG_CBC_MAC || PSA_WANT_ALG_HMAC
+
+  (void)operation;
+  (void)mac;
+  (void)mac_size;
+  (void)mac_length;
+
+  return PSA_ERROR_NOT_SUPPORTED;
+#endif
 }
 
-psa_status_t sli_se_transparent_mac_verify_finish(sli_se_transparent_mac_operation_t *operation,
-                                                  const uint8_t *mac,
-                                                  size_t mac_length)
+psa_status_t sli_se_transparent_mac_verify_finish(
+  sli_se_transparent_mac_operation_t *operation,
+  const uint8_t *mac,
+  size_t mac_length)
 {
-  // Since the PSA Crypto core exposes the verify functionality of the drivers without
-  // actually implementing the fallback to 'sign' when the driver doesn't support verify,
-  // we need to do this ourselves for the time being.
+#if defined(PSA_WANT_ALG_CMAC)     \
+  || defined(PSA_WANT_ALG_CBC_MAC) \
+  || defined(PSA_WANT_ALG_HMAC)
+
+  // Since the PSA Crypto core exposes the verify functionality of the drivers
+  // without actually implementing the fallback to 'sign' when the driver
+  // doesn't support verify, we need to do this ourselves for the time being.
   uint8_t calculated_mac[PSA_MAC_MAX_SIZE] = { 0 };
   size_t calculated_length = PSA_MAC_MAX_SIZE;
 
@@ -463,17 +548,40 @@ psa_status_t sli_se_transparent_mac_verify_finish(sli_se_transparent_mac_operati
 
   memset(calculated_mac, 0, sizeof(calculated_mac));
   return status;
+
+#else // PSA_WANT_ALG_CMAC || PSA_WANT_ALG_CBC_MAC || PSA_WANT_ALG_HMAC
+
+  (void)operation;
+  (void)mac;
+  (void)mac_length;
+
+  return PSA_ERROR_NOT_SUPPORTED;
+#endif
 }
 
-psa_status_t sli_se_transparent_mac_abort(sli_se_transparent_mac_operation_t *operation)
+psa_status_t sli_se_transparent_mac_abort(
+  sli_se_transparent_mac_operation_t *operation)
 {
-  // There's no state in hardware that we need to preserve, so zeroing out the context suffices.
+#if defined(PSA_WANT_ALG_CMAC)     \
+  || defined(PSA_WANT_ALG_CBC_MAC) \
+  || defined(PSA_WANT_ALG_HMAC)
+
+  // There's no state in hardware that we need to preserve, so zeroing out the
+  // context suffices.
   if (operation == NULL) {
     return PSA_ERROR_INVALID_ARGUMENT;
   }
 
   memset(operation, 0, sizeof(*operation));
+
   return PSA_SUCCESS;
+
+#else // PSA_WANT_ALG_CMAC || PSA_WANT_ALG_CBC_MAC || PSA_WANT_ALG_HMAC
+
+  (void)operation;
+
+  return PSA_ERROR_NOT_SUPPORTED;
+#endif
 }
 
 #endif // defined(SEMAILBOX_PRESENT)

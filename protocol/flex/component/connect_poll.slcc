@@ -7,7 +7,7 @@ description: "Implements polling for end devices."
 provides:
   - name: "connect_poll"
 requires:
-  - name: "connect_stack_common"  
+  - name: "connect_stack_common"
 source:
       - path: "protocol/flex/poll/poll.c"
 include:
@@ -18,7 +18,7 @@ config_file:
   - path: "protocol/flex/poll/config/poll-config.h"
 template_contribution:
   - name: stack_callback
-    value: 
+    value:
       callback_type: "stack_status"
       function_name: "emberAfPluginPollStackStatusCallback"
   - name: event_system

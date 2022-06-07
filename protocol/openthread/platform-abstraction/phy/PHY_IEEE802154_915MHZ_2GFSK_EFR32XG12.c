@@ -187,11 +187,13 @@ const RAIL_ChannelConfigEntry_t generated_channels[] = {
 };
 
 const RAIL_ChannelConfig_t generated_channelConfig = {
-  generated,
-  NULL,
-  generated_channels,
-  1
+  .phyConfigBase = generated,
+  .phyConfigDeltaSubtract = NULL,
+  .configs = generated_channels,
+  .length = 1,
+  .signature = 0U,
 };
+
 const RAIL_ChannelConfig_t *channelConfigs[] = {
   &generated_channelConfig,
 };

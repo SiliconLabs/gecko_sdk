@@ -15,8 +15,6 @@ requires:
   # To make this component only applicable to dumbo parts.
   # Device id for dumbo is 80.
   - name: device_sdid_80
-  - name: zigbee_multi_network_stub
-  - name: zigbee_multi_pan_stub
 
 define:
   - name: SMART_ENERGY_STACK_TOKENS

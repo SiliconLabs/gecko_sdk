@@ -46,6 +46,8 @@
 #define REFERENCE_PERIOD_US      8
 #define REFERENCE_PERIOD_SAMPLES 8
 
+#define QUALITY_BUFFER_SIZE      100
+
 // -----------------------------------------------------------------------------
 // Type definitions
 
@@ -287,14 +289,6 @@ enum sl_rtl_error_code aoa_init_rtl(aoa_state_t *aoa_state, aoa_id_t config_id)
                                             &antenna_switch_pattern_size);
   if (SL_STATUS_OK != sc) {
     return SL_RTL_ERROR_ARGUMENT;
-  } else {
-    app_log_debug("RTL switch pattern:");
-    if (_app_log_check_level(APP_LOG_LEVEL_DEBUG)) {
-      for (uint32_t i = 0; i < antenna_switch_pattern_size; i++) {
-        app_log(" %d", antenna_switch_pattern[i]);
-      }
-      app_log_nl();
-    }
   }
 
   current_azimuth = aoa_angle_config->azimuth_mask_head;
@@ -347,6 +341,11 @@ enum sl_rtl_error_code aoa_init_rtl(aoa_state_t *aoa_state, aoa_id_t config_id)
   // Set the switching pattern mode
   ec = sl_rtl_aox_set_switch_pattern_mode(&aoa_state->libitem, SL_RTL_AOX_SWITCH_PATTERN_MODE_EXTERNAL);
   CHECK_ERROR(ec);
+  if (antenna_array_type_is_dp(aoa_angle_config->antenna_array.array_type)) {
+    // Skip samples from the reference antenna.
+    ec = sl_rtl_aox_set_switch_pattern_mode(&aoa_state->libitem, SL_RTL_AOX_SWITCH_PATTERN_MODE_EXTRA_REFERENCE);
+    CHECK_ERROR(ec);
+  }
   // Set the switching pattern
   ec = sl_rtl_aox_update_switch_pattern(&aoa_state->libitem, antenna_switch_pattern, NULL);
   CHECK_ERROR(ec);
@@ -378,6 +377,9 @@ enum sl_rtl_error_code aoa_calculate(aoa_state_t *aoa_state,
   sl_status_t sc;
   aoa_angle_config_node_t *node;
   aoa_angle_config_t *aoa_angle_config;
+  uint32_t quality;
+  char quality_buffer[QUALITY_BUFFER_SIZE];
+  char* quality_string;
 
   sc = aoa_angle_find(config_id, &node);
   if (SL_STATUS_OK != sc) {
@@ -414,11 +416,20 @@ enum sl_rtl_error_code aoa_calculate(aoa_state_t *aoa_state,
                           &angle->elevation);
   CHECK_ERROR(ec);
 
+  ec = sl_rtl_aox_get_latest_aoa_standard_deviation(&aoa_state->libitem,
+                                                    &angle->azimuth_stdev,
+                                                    &angle->elevation_stdev);
+  CHECK_ERROR(ec);
+
   // Calculate distance from RSSI.
   ec = sl_rtl_util_rssi2distance(AOA_ANGLE_TAG_TX_POWER,
                                  (float)iq_report->rssi,
                                  &angle->distance);
   CHECK_ERROR(ec);
+
+  // Distance standard deviation is not supported, use 0.
+  angle->distance_stdev = 0;
+
   if (aoa_angle_config->angle_filtering == true) {
     ec = sl_rtl_util_filter(&aoa_state->util_libitem,
                             angle->distance,
@@ -430,7 +441,16 @@ enum sl_rtl_error_code aoa_calculate(aoa_state_t *aoa_state,
   angle->sequence = iq_report->event_counter;
 
   // Fetch the quality result.
-  angle->quality = sl_rtl_aox_iq_sample_qa_get_results(&aoa_state->libitem);
+  quality = sl_rtl_aox_iq_sample_qa_get_results(&aoa_state->libitem);
+  if (quality != 0) {
+    quality_string = sl_rtl_util_iq_sample_qa_code2string(quality_buffer,
+                                                          sizeof(quality_buffer),
+                                                          quality);
+    app_log_debug("%s [%d] quality: %s" APP_LOG_NL,
+                  config_id,
+                  angle->sequence,
+                  quality_string);
+  }
 
   if (aoa_state->correction_timeout > 0) {
     // Decrement timeout counter.
@@ -447,7 +467,7 @@ enum sl_rtl_error_code aoa_calculate(aoa_state_t *aoa_state,
  * Set correction data for the estimator
  ******************************************************************************/
 enum sl_rtl_error_code aoa_set_correction(aoa_state_t *aoa_state,
-                                          aoa_correction_t *correction,
+                                          aoa_angle_t *correction,
                                           aoa_id_t config_id)
 {
   enum sl_rtl_error_code ec;
@@ -460,12 +480,12 @@ enum sl_rtl_error_code aoa_set_correction(aoa_state_t *aoa_state,
   }
 
   ec = sl_rtl_aox_set_expected_direction(&aoa_state->libitem,
-                                         correction->direction.azimuth,
-                                         correction->direction.elevation);
+                                         correction->azimuth,
+                                         correction->elevation);
   CHECK_ERROR(ec);
   ec = sl_rtl_aox_set_expected_deviation(&aoa_state->libitem,
-                                         correction->deviation.azimuth,
-                                         correction->deviation.elevation);
+                                         correction->azimuth_stdev,
+                                         correction->elevation_stdev);
   CHECK_ERROR(ec);
 
   aoa_state->correction_timeout = aoa_angle_config->angle_correction_timeout;
@@ -592,11 +612,20 @@ static sl_status_t aoa_angle_set_default_config(aoa_angle_config_t *aoa_angle_co
 static sl_status_t aoa_angle_finalize_node(aoa_angle_config_node_t *node)
 {
   aoa_angle_config_t *cfg = &node->aoa_angle_config;
+  uint8_t antenna_switch_pattern_size;
+  sl_status_t sc;
+
+  sc = antenna_array_get_pin_pattern(&cfg->antenna_array,
+                                     NULL,
+                                     &antenna_switch_pattern_size);
+  if (sc != SL_STATUS_OK) {
+    return sc;
+  }
 
   cfg->num_snapshots = (uint8_t)(((cfg->cte_min_length * 8)
                                   - GUARD_PERIOD_US - REFERENCE_PERIOD_US)
                                  / (cfg->cte_slot_duration * 2)
-                                 / cfg->antenna_array.size);
+                                 / antenna_switch_pattern_size);
 
   return allocate_sample_buffers(node);
 }
@@ -605,23 +634,35 @@ static sl_status_t allocate_sample_buffers(aoa_angle_config_node_t *node)
 {
   sl_status_t sc;
   aoa_angle_config_t *cfg = &node->aoa_angle_config;
+  uint8_t antenna_switch_pattern_size;
+
+  sc = antenna_array_get_pin_pattern(&cfg->antenna_array,
+                                     NULL,
+                                     &antenna_switch_pattern_size);
+  if (sc != SL_STATUS_OK) {
+    return sc;
+  }
 
   // Reallocate sample buffers
   if ((node->sample_rows != cfg->num_snapshots)
-      || (node->sample_cols != cfg->antenna_array.size)) {
+      || (node->sample_cols != antenna_switch_pattern_size)) {
     free_2D_float_buffer(node->i_samples, node->sample_rows);
     free_2D_float_buffer(node->q_samples, node->sample_rows);
-    sc = allocate_2D_float_buffer(&node->i_samples, cfg->num_snapshots, cfg->antenna_array.size);
+    sc = allocate_2D_float_buffer(&node->i_samples,
+                                  cfg->num_snapshots,
+                                  antenna_switch_pattern_size);
     if (SL_STATUS_OK != sc) {
       return sc;
     }
-    sc = allocate_2D_float_buffer(&node->q_samples, cfg->num_snapshots, cfg->antenna_array.size);
+    sc = allocate_2D_float_buffer(&node->q_samples,
+                                  cfg->num_snapshots,
+                                  antenna_switch_pattern_size);
     if (SL_STATUS_OK != sc) {
       return sc;
     }
     // Store new sample buffer dimensions
     node->sample_rows = cfg->num_snapshots;
-    node->sample_cols = cfg->antenna_array.size;
+    node->sample_cols = antenna_switch_pattern_size;
   }
 
   return SL_STATUS_OK;

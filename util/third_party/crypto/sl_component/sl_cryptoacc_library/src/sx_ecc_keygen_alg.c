@@ -22,7 +22,9 @@ uint32_t ecc_validate_public_key(block_t domain, block_t pub, uint32_t size, uin
    if (pub.len != 2 * size || (domain.len != 6 * size && domain.len != 5 * size))
       return CRYPTOLIB_INVALID_PARAM;
 
-   ba414ep_set_command(BA414EP_OPTYPE_ECC_CHECK_POINTONCURVE, size, BA414EP_BIGEND, curve_flags);
+   status = ba414ep_set_command(BA414EP_OPTYPE_ECC_CHECK_POINTONCURVE, size, BA414EP_BIGEND, curve_flags);
+   if (status)
+      return status;
    ba414ep_load_curve(domain, size, BA414EP_BIGEND, 1);
    point2CryptoRAM_rev(pub, size , BA414EP_MEMLOC_6);
 
@@ -66,7 +68,10 @@ uint32_t ecc_generate_public_key(block_t curve, block_t pub, block_t priv, uint3
       return CRYPTOLIB_INVALID_PARAM;
 
    // Set command to enable byte-swap
-   ba414ep_set_command(BA414EP_OPTYPE_ECC_POINT_MULT, size, BA414EP_BIGEND, curve_flags);
+   status = ba414ep_set_command(BA414EP_OPTYPE_ECC_POINT_MULT, size, BA414EP_BIGEND, curve_flags);
+   if (status)
+      return status;
+
    // Load parameters
    ba414ep_load_curve(curve, size, BA414EP_BIGEND, 1);
 

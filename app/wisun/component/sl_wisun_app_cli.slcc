@@ -55,4 +55,12 @@ template_contribution:
       shortcuts:
         - name: "d"
 
+  - name: "cli_command"
+    value:
+      name: "about"
+      handler: "app_about"
+      help: "Get info about the running app"
+      shortcuts:
+        - name: "a"
+
 

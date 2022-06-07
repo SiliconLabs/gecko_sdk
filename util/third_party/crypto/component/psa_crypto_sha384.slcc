@@ -1,9 +1,9 @@
 id: psa_crypto_sha384
 package: platform
-label: PSA Crypto support for SHA-384
+label: SHA-384
 description: >-
   This component provides support for the SHA-384 hash algorithm in PSA Crypto.
-category: Platform|Security
+category: Platform|Security|PSA Crypto|Hashing
 quality: production
 provides:
   - name: psa_crypto_sha384

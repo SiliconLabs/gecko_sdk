@@ -11,7 +11,7 @@ sl_status_t sl_debug_swo_init(void)
 {
   uint32_t freq;
   unsigned int location = 0U;
-
+  uint16_t cyctap, postpreset;
   CMU_ClockEnable(cmuClock_GPIO, true);
 
 #if defined(_GPIO_ROUTE_SWOPEN_MASK)
@@ -49,6 +49,9 @@ sl_status_t sl_debug_swo_init(void)
 #endif
   // Select HFRCOEM23 as source for TRACECLK
   CMU_ClockSelectSet(cmuClock_TRACECLK, cmuSelect_HFRCOEM23);
+#elif defined(_CMU_TRACECLKCTRL_CLKSEL_SYSCLK)
+  // Select SYSCLK as source for TRACECLK
+  CMU_ClockSelectSet(cmuClock_TRACECLK, cmuSelect_SYSCLK);
 #endif
 #endif
 
@@ -58,16 +61,27 @@ sl_status_t sl_debug_swo_init(void)
   // Enable trace in core debug
   CoreDebug->DHCSR |= CoreDebug_DHCSR_C_DEBUGEN_Msk;
   CoreDebug->DEMCR |= CoreDebug_DEMCR_TRCENA_Msk;
-
+  //Tap the cyctap and postpreset based on the selected interval
+#ifdef SL_DEBUG_SWO_SAMPLE_INTERVAL
+  if (SL_DEBUG_SWO_SAMPLE_INTERVAL <= 960) {
+    cyctap = 0;
+    postpreset = (SL_DEBUG_SWO_SAMPLE_INTERVAL / 64);
+  } else {
+    cyctap = 1;
+    postpreset = (SL_DEBUG_SWO_SAMPLE_INTERVAL / 1024);
+  }
+#else
+  cyctap = 1;
+  postpreset = 0xF;
+#endif
   // Enable PC and IRQ sampling output
   DWT->CTRL = ((4UL << DWT_CTRL_NUMCOMP_Pos)        // Number of comparators. Hardwired to 4.
                | (SL_DEBUG_SWO_SAMPLE_IRQ << DWT_CTRL_EXCTRCENA_Pos)  // Interrupt events
                | (SL_DEBUG_SWO_SAMPLE_PC << DWT_CTRL_PCSAMPLENA_Pos)  // PC sample events
-               | (1UL << DWT_CTRL_CYCTAP_Pos)       // Tap cycle counter at bit 10 (vs bit 6 if 0)
+               | (cyctap << DWT_CTRL_CYCTAP_Pos)       // Tap cycle counter at bit 10 (vs bit 6 if 0)
                | (0xFUL << DWT_CTRL_POSTINIT_Pos)   // Post-tap counter
-               | (0xFUL << DWT_CTRL_POSTPRESET_Pos) // Post-tap counter reload value
+               | (postpreset << DWT_CTRL_POSTPRESET_Pos) // Post-tap counter reload value
                | (1UL << DWT_CTRL_CYCCNTENA_Pos));  // Enable cycle counter
-
   // Set TPIU prescaler for the current debug clock frequency. ACPR value is div - 1.
   TPI->ACPR = ((freq + (SL_DEBUG_SWO_FREQ / 2)) / SL_DEBUG_SWO_FREQ) - 1UL;
 

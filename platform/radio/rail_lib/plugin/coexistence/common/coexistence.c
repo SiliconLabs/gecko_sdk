@@ -75,9 +75,6 @@ static void COEX_REQ_ISR(void);
 static void COEX_GNT_ISR(void);
 static void COEX_RHO_ISR(void);
 static void COEX_PHY_SEL_ISR(void);
-#ifdef SL_RAIL_UTIL_COEX_WIFI_TX_PORT
-static void COEX_WIFI_TX_ISR(void);
-#endif
 
 static COEX_Cfg_t coexCfg;
 
@@ -539,7 +536,6 @@ bool COEX_ConfigWifiTx(COEX_GpioHandle_t gpioHandle)
 #endif //SL_RAIL_UTIL_COEX_OVERRIDE_GPIO_INPUT
   // Register chip specific Wifi Tx interrupt
   configGpio(gpioHandle, &wifiTxHandle, &wifiTxCfg);
-  COEX_WIFI_TX_ISR();
   return true;
 }
 #endif
@@ -652,33 +648,6 @@ void COEX_EnablePhySelectIsr(bool enable)
     disableGpioInt(phySelectHandle);
   }
 }
-
-#ifdef SL_RAIL_UTIL_COEX_WIFI_TX_PORT
-static void COEX_WIFI_TX_ISR(void)
-{
-  disableGpioInt(wifiTxHandle);
-  coexEventCallback(COEX_EVENT_WIFI_TX_CHANGED);
-}
-
-static void enableWifiTxIsr(void *args)
-{
-  (void)args;
-  enableGpioInt(wifiTxHandle, NULL);
-  if (isGpioInSet(wifiTxHandle, false)) {
-    COEX_WIFI_TX_ISR();
-  }
-}
-
-void COEX_EnableWifiTxIsr(bool enable)
-{
-  if (enable) {
-    clearGpioFlag(wifiTxHandle);
-    COEX_HAL_CallAtomic(enableWifiTxIsr, NULL);
-  } else {
-    disableGpioInt(wifiTxHandle);
-  }
-}
-#endif
 
 #if COEX_HAL_FAST_REQUEST
 #if SL_RAIL_UTIL_COEX_OVERRIDE_GPIO_INPUT
@@ -874,9 +843,6 @@ void COEX_InitHalConfigOptions(void)
   #if SL_RAIL_UTIL_COEX_PRI_SHARED && !SL_RAIL_UTIL_COEX_DP_ENABLED
   options |= COEX_OPTION_PRI_SHARED;
   #endif //SL_RAIL_UTIL_COEX_PRI_SHARED && !SL_RAIL_UTIL_COEX_DP_ENABLED
-  #if SL_RAIL_UTIL_COEX_TX_ABORT
-  options |= COEX_OPTION_TX_ABORT;
-  #endif //SL_RAIL_UTIL_COEX_TX_ABORT
   #if SL_RAIL_UTIL_COEX_DP_ENABLED
   COEX_HAL_ConfigDp(SL_RAIL_UTIL_COEX_DP_PULSE_WIDTH_US);
   #endif

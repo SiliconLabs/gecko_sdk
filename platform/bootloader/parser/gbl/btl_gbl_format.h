@@ -61,6 +61,8 @@
 #define GBL_TAG_ID_END                      0xFC0404FCUL
 /// Tag ID for the SE upgrade tag
 #define GBL_TAG_ID_SE_UPGRADE               0x5EA617EBUL
+/// Tag ID for the version dependency tag
+#define GBL_TAG_ID_VERSION_DEPENDENCY       0x76A617EBUL
 
 // Encryption-related tags
 /// Tag ID for the GBL encryption header tag
@@ -87,6 +89,53 @@
 #define GBL_TYPE_SIGNATURE_ECDSA            0x00000100UL
 
 // -------------------------------
+// Version dependency tag defines
+
+/// Image Type : Application Image
+#define GBL_VERSION_DEPENDENCY_TYPE_APPLICATION   0x01U
+/// Image Type : Bootloader Image
+#define GBL_VERSION_DEPENDENCY_TYPE_BOOTLOADER    0x02U
+/// Image Type : Secure Engine Image
+#define GBL_VERSION_DEPENDENCY_TYPE_SE            0x03U
+
+/// Operator encoding : Operator Mask
+#define GBL_VERSION_DEPENDENCY_OPERATOR_MASK               0x0FU
+/// Operator encoding : Operator Shift
+#define GBL_VERSION_DEPENDENCY_OPERATOR_SHIFT              0x00U
+/// Operator encoding : Operator Type Mask
+#define GBL_VERSION_DEPENDENCY_OPERATOR_TYPE_MASK          0x0EU
+/// Operator encoding : Negator Bit mask
+#define GBL_VERSION_DEPENDENCY_OPERATOR_NEGATOR_BIT_MASK   0x01U
+
+/// GBL Version Dependency Operator LT
+#define GBL_VERSION_DEPENDENCY_OPERATOR_LT    0x00U
+/// GBL Version Dependency Operator LEQ
+#define GBL_VERSION_DEPENDENCY_OPERATOR_LEQ   0x02U
+/// GBL Version Dependency Operator EQ
+#define GBL_VERSION_DEPENDENCY_OPERATOR_EQ    0x04U
+/// GBL Version Dependency Operator GEQ
+#define GBL_VERSION_DEPENDENCY_OPERATOR_GEQ   0x06U
+/// GBL Version Dependency Operator GT
+#define GBL_VERSION_DEPENDENCY_OPERATOR_GT    0x08U
+
+/// Connective encoding : Connective Encoding Mask
+#define GBL_VERSION_DEPENDENCY_CONNECTIVE_MASK               0xF0U
+/// Connective encoding : Encoding Shift
+#define GBL_VERSION_DEPENDENCY_CONNECTIVE_SHIFT              0x04U
+/// Connective encoding : Encoding Type Mask
+#define GBL_VERSION_DEPENDENCY_CONNECTIVE_TYPE_MASK          0x0EU
+/// Connective encoding : Negator Bit Mask
+#define GBL_VERSION_DEPENDENCY_CONNECTIVE_NEGATOR_BIT_MASK   0x01U
+
+/// Connective AND Mask
+#define GBL_VERSION_DEPENDENCY_CONNECTIVE_AND   0x00U
+/// Connective OR Mask
+#define GBL_VERSION_DEPENDENCY_CONNECTIVE_OR    0x02U
+
+/// SE version mask for ignoring the compatibility byte when comparing versions
+#define GBL_VERSION_DEPENDENCY_SE_VERSION_MASK   0x00FFFFFFUL
+
+// -------------------------------
 // Structs
 
 /// GBL tag header. Must be the first element in all GBL tags.
@@ -101,6 +150,14 @@ typedef struct {
   uint32_t       version;     ///< Version of the GBL spec used in this file
   uint32_t       type;        ///< Type of GBL
 } GblHeader_t;
+
+/// GBL version dependency tag type.
+typedef struct {
+  uint8_t  imageType; ///< Type of image (application, bootloader, SE)
+  uint8_t  statement; ///< Encoded dependency statement (ex. appVersion > (0).1.2.3)
+  uint16_t reserved;  ///< Reserved
+  uint32_t version;   ///< The version number used in the statement (ex. (0).1.2.3)
+} VersionDependency_t;
 
 /// GBL application tag type.
 typedef struct {

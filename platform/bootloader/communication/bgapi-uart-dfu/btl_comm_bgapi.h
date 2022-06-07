@@ -20,6 +20,13 @@
 
 #include "core/btl_util.h"
 #include "sl_status.h"
+#include "api/btl_interface.h"
+
+#if defined(BOOTLOADER_NONSECURE)
+  #include "parser/gbl/btl_gbl_parser_ns.h"
+#else
+  #include "parser/gbl/btl_gbl_parser.h"
+#endif
 
 MISRAC_DISABLE
 #include "em_common.h"
@@ -145,6 +152,32 @@ typedef enum {
   }
 
 /** @endcond */
+
+/***************************************************************************//**
+ * Initialize hardware for the BGAPI UART DFU Bootloader communication.
+ ******************************************************************************/
+void bootloader_bgapi_communication_init(void);
+
+/***************************************************************************//**
+ * Initialize communication between the BGAPI UART DFU bootloader
+ * and external host.
+ *
+ * @return Error code indicating success or failure.
+ ******************************************************************************/
+int32_t bootloader_bgapi_communication_start(void);
+
+/***************************************************************************//**
+ * Communication main for the BGAPI UART DFU bootloader.
+ *
+ * @param imageProps    The image file processed
+ * @param parserContext Image parser context
+ * @param parseCb       Bootloader parser callbacks
+ *
+ * @return Error code indicating success or failure.
+ ******************************************************************************/
+int32_t bootloader_bgapi_communication_main(ImageProperties_t *imageProps,
+                                            ParserContext_t *parserContext,
+                                            const BootloaderParserCallbacks_t* parseCb);
 
 /** @} addtogroup Communication */
 /** @} addtogroup Components */

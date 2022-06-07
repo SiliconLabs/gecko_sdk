@@ -10,7 +10,7 @@
 #include <CC_Common.h>
 #include "ZAF_TSE.h"
 #include <ZAF_CmdPublisher.h>
-#include <ZAF_PM_Wrapper.h>
+#include "ZAF_CC_Invoker.h"
 
 //#define DEBUGPRINT
 #include "DebugPrint.h"
@@ -21,7 +21,15 @@
  */
 #define CP_MAX_SUBSCRIBERS  3
 
-static SPowerLock_t powerLock;
+static bool invoke_init(CC_handler_map_latest_t const * const p_cc_entry, zaf_cc_context_t context)
+{
+  UNUSED(context);
+  if (NULL != p_cc_entry->init)
+  {
+    p_cc_entry->init();
+  }
+  return false;
+}
 
 void ZAF_Init(TaskHandle_t pAppTaskHandle,
               SApplicationHandles* pAppHandle,
@@ -36,8 +44,8 @@ void ZAF_Init(TaskHandle_t pAppTaskHandle,
   if (isFLiRS(ZAF_getAppNodeInfo()))
   {
     DPRINT("Initialize power lock for FLiRS \r\n");
-    ZAF_setPowerLock(&powerLock);
-    ZAF_PM_Register(ZAF_getPowerLock(), PM_TYPE_RADIO);
+    zpal_pm_handle_t power_lock = zpal_pm_register(ZPAL_PM_TYPE_USE_RADIO);
+    ZAF_setPowerLock(power_lock);
   }
 
   ZW_TransportMulticast_Init(NULL);
@@ -55,12 +63,31 @@ void ZAF_Init(TaskHandle_t pAppTaskHandle,
     ASSERT(false);
   }
 
+  // Initialize command classes that have registered an init function.
+  // Don't pass a context because invoke_init() doesn't require it.
+  ZAF_CC_foreach(invoke_init, NULL);
+
   // more common function calls can be added here
 }
 
+static bool invoke_reset(CC_handler_map_latest_t const * const p_cc_entry, zaf_cc_context_t context)
+{
+  UNUSED(context);
+  if (NULL != p_cc_entry->reset)
+  {
+    p_cc_entry->reset();
+  }
+  return false;
+}
+
+void ZAF_Reset(void)
+{
+  // Don't pass a context because invoke_reset() doesn't require it.
+  ZAF_CC_foreach(invoke_reset, NULL);
+}
 
 void ZAF_FLiRS_StayAwake()
 {
   DPRINT("\r\nZAF_FLiRS_StayAwake\r\n");
-  ZAF_PM_StayAwake(ZAF_getPowerLock(), 2000);
+  zpal_pm_stay_awake(ZAF_getPowerLock(), 2000);
 }

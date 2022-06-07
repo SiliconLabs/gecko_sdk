@@ -70,6 +70,10 @@ typedef struct sl_wisun_neighbor_stat {
   uint32_t mac_tx_count;
   /// MAC TX failed count
   uint32_t mac_tx_failed_count;
+  /// MAC TX Mode switch count
+  uint32_t mac_tx_ms_count;
+  /// MAC TX Mode switch failed count
+  uint32_t mac_tx_ms_failed_count;
   /// RPL Rank value for parents (0xffff if unknown or child)
   uint16_t rpl_rank;
   /// Measured ETX value if known (0xffff if unknown)

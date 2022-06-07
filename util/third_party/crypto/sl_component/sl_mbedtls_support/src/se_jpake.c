@@ -592,8 +592,8 @@ int mbedtls_ecjpake_write_round_two(mbedtls_ecjpake_context *ctx,
       *(buf++) = MBEDTLS_ECP_TLS_NAMED_CURVE;
 
       // Next two bytes are the namedcurve value
-      *(buf++) = curve_info->MBEDTLS_PRIVATE(tls_id) >> 8;
-      *(buf++) = curve_info->MBEDTLS_PRIVATE(tls_id) & 0xFF;
+      *(buf++) = curve_info->tls_id >> 8;
+      *(buf++) = curve_info->tls_id & 0xFF;
 
       *olen += 3;
       len -= 3;
@@ -658,7 +658,7 @@ int mbedtls_ecjpake_read_round_two(mbedtls_ecjpake_context *ctx,
       return(MBEDTLS_ERR_PLATFORM_FEATURE_UNSUPPORTED);
     }
 
-    if (curve_info->MBEDTLS_PRIVATE(grp_id) != MBEDTLS_ECP_DP_SECP256R1) {
+    if (curve_info->grp_id != MBEDTLS_ECP_DP_SECP256R1) {
       return MBEDTLS_ERR_PLATFORM_FEATURE_UNSUPPORTED;
     }
 

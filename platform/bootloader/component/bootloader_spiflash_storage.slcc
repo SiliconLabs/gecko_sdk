@@ -16,8 +16,12 @@ include:
 define:
   - name: BOOTLOADER_SUPPORT_STORAGE
     value: 1
+  - name: BOOTLOADER_SUPPORT_EXTERNAL_STORAGE
+    value : 1
 provides:
   - name: bootloader_spiflash_storage
+  - name: bootloader_nonsecure_incompatible
+    condition: [bootloader_core_nonsecure]
 requires:
   - name: bootloader_crc
   - name: bootloader_spi_controller_driver
@@ -25,3 +29,5 @@ requires:
 config_file:
   - path: platform/bootloader/config/btl_spiflash_storage_cfg.h
     file_id: btl_spiflash_storage_cfg
+validation_helper:
+  - path: platform/bootloader/component/scripts/bootloader_spiflash_validation.lua

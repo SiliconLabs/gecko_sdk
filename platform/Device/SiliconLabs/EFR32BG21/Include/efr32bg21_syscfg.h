@@ -209,22 +209,22 @@ typedef struct {
 /* Bit fields for SYSCFG IEN */
 #define _SYSCFG_IEN_RESETVALUE                             0x00000000UL                               /**< Default value for SYSCFG_IEN                */
 #define _SYSCFG_IEN_MASK                                   0x3303000FUL                               /**< Mask for SYSCFG_IEN                         */
-#define SYSCFG_IEN_SW0                                     (0x1UL << 0)                               /**< Software interrupt 0                        */
+#define SYSCFG_IEN_SW0                                     (0x1UL << 0)                               /**< Software Interrupt 0                        */
 #define _SYSCFG_IEN_SW0_SHIFT                              0                                          /**< Shift value for SYSCFG_SW0                  */
 #define _SYSCFG_IEN_SW0_MASK                               0x1UL                                      /**< Bit mask for SYSCFG_SW0                     */
 #define _SYSCFG_IEN_SW0_DEFAULT                            0x00000000UL                               /**< Mode DEFAULT for SYSCFG_IEN                 */
 #define SYSCFG_IEN_SW0_DEFAULT                             (_SYSCFG_IEN_SW0_DEFAULT << 0)             /**< Shifted mode DEFAULT for SYSCFG_IEN         */
-#define SYSCFG_IEN_SW1                                     (0x1UL << 1)                               /**< Software interrupt 1                        */
+#define SYSCFG_IEN_SW1                                     (0x1UL << 1)                               /**< Software Interrupt 1                        */
 #define _SYSCFG_IEN_SW1_SHIFT                              1                                          /**< Shift value for SYSCFG_SW1                  */
 #define _SYSCFG_IEN_SW1_MASK                               0x2UL                                      /**< Bit mask for SYSCFG_SW1                     */
 #define _SYSCFG_IEN_SW1_DEFAULT                            0x00000000UL                               /**< Mode DEFAULT for SYSCFG_IEN                 */
 #define SYSCFG_IEN_SW1_DEFAULT                             (_SYSCFG_IEN_SW1_DEFAULT << 1)             /**< Shifted mode DEFAULT for SYSCFG_IEN         */
-#define SYSCFG_IEN_SW2                                     (0x1UL << 2)                               /**< Software interrupt 2                        */
+#define SYSCFG_IEN_SW2                                     (0x1UL << 2)                               /**< Software Interrupt 2                        */
 #define _SYSCFG_IEN_SW2_SHIFT                              2                                          /**< Shift value for SYSCFG_SW2                  */
 #define _SYSCFG_IEN_SW2_MASK                               0x4UL                                      /**< Bit mask for SYSCFG_SW2                     */
 #define _SYSCFG_IEN_SW2_DEFAULT                            0x00000000UL                               /**< Mode DEFAULT for SYSCFG_IEN                 */
 #define SYSCFG_IEN_SW2_DEFAULT                             (_SYSCFG_IEN_SW2_DEFAULT << 2)             /**< Shifted mode DEFAULT for SYSCFG_IEN         */
-#define SYSCFG_IEN_SW3                                     (0x1UL << 3)                               /**< Software interrupt 3                        */
+#define SYSCFG_IEN_SW3                                     (0x1UL << 3)                               /**< Software Interrupt 3                        */
 #define _SYSCFG_IEN_SW3_SHIFT                              3                                          /**< Shift value for SYSCFG_SW3                  */
 #define _SYSCFG_IEN_SW3_MASK                               0x8UL                                      /**< Bit mask for SYSCFG_SW3                     */
 #define _SYSCFG_IEN_SW3_DEFAULT                            0x00000000UL                               /**< Mode DEFAULT for SYSCFG_IEN                 */
@@ -261,11 +261,11 @@ typedef struct {
 #define SYSCFG_IEN_FRCRAMERR2BIEN_DEFAULT                  (_SYSCFG_IEN_FRCRAMERR2BIEN_DEFAULT << 29) /**< Shifted mode DEFAULT for SYSCFG_IEN         */
 
 /* Bit fields for SYSCFG CHIPREVHW */
-#define _SYSCFG_CHIPREVHW_RESETVALUE                       0x00000000UL                            /**< Default value for SYSCFG_CHIPREVHW          */
+#define _SYSCFG_CHIPREVHW_RESETVALUE                       0x00000001UL                            /**< Default value for SYSCFG_CHIPREVHW          */
 #define _SYSCFG_CHIPREVHW_MASK                             0xFF0FFFFFUL                            /**< Mask for SYSCFG_CHIPREVHW                   */
 #define _SYSCFG_CHIPREVHW_MAJOR_SHIFT                      0                                       /**< Shift value for SYSCFG_MAJOR                */
 #define _SYSCFG_CHIPREVHW_MAJOR_MASK                       0x3FUL                                  /**< Bit mask for SYSCFG_MAJOR                   */
-#define _SYSCFG_CHIPREVHW_MAJOR_DEFAULT                    0x00000000UL                            /**< Mode DEFAULT for SYSCFG_CHIPREVHW           */
+#define _SYSCFG_CHIPREVHW_MAJOR_DEFAULT                    0x00000001UL                            /**< Mode DEFAULT for SYSCFG_CHIPREVHW           */
 #define SYSCFG_CHIPREVHW_MAJOR_DEFAULT                     (_SYSCFG_CHIPREVHW_MAJOR_DEFAULT << 0)  /**< Shifted mode DEFAULT for SYSCFG_CHIPREVHW   */
 #define _SYSCFG_CHIPREVHW_FAMILY_SHIFT                     6                                       /**< Shift value for SYSCFG_FAMILY               */
 #define _SYSCFG_CHIPREVHW_FAMILY_MASK                      0xFC0UL                                 /**< Bit mask for SYSCFG_FAMILY                  */

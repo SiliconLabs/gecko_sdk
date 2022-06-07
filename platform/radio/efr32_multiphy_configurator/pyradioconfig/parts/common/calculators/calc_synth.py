@@ -222,6 +222,7 @@ class CALC_Synth(ICalculator):
     def calc_lodiv_value(self, model):
 
         f0 = model.vars.base_frequency.value
+        part_family = model.part_family.lower()
 
         # cannot calculate lodiv if RF frequency is not given
         if f0 == 0:
@@ -237,7 +238,7 @@ class CALC_Synth(ICalculator):
         lodiv_section_c = [1, 2, 3, 4, 5]       # last in lodiv_chain_option tuple, low order bits in register
 
         # For parts after Dumbo, A divide by 7 option was added to one stage
-        if model.vars.family.value != "dumbo":
+        if part_family != "dumbo":
             # Now add a bit of a hack...
             # We've already characterized Jumbo and Dumbo in the 169MHz range quite a bit using the divide by 15 lodiv.
             # For now at least, if we're able to use a divide by 15 in that area, then we'll use it.  We'll not enable the

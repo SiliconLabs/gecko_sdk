@@ -1,11 +1,10 @@
 id: mbedtls_ecdsa
 package: platform
-label: Mbed TLS Support for ECDSA
+label: ECDSA
 description: >-
   This component provides support for signature generation and verification with
-  ECDSA using Mbed TLS. The primary purpose of this component is to enable the
-  software fallback implementation of ECDSA in PSA Crypto.
-category: Platform|Security
+  ECDSA using Mbed TLS.
+category: Platform|Security|Mbed TLS|Signatures
 quality: production
 provides:
   - name: mbedtls_ecdsa

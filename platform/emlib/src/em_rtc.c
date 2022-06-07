@@ -31,7 +31,7 @@
 #include "em_rtc.h"
 #if defined(RTC_COUNT) && (RTC_COUNT > 0)
 
-#include "em_assert.h"
+#include "sl_assert.h"
 #include "em_bus.h"
 
 /***************************************************************************//**

@@ -34,85 +34,26 @@
 #define SL_CPC_CONFIG_H
 
 // <h>CPC Configuration
-// <o SL_CPC_TASK_PRIORITY> CPC task priority
-// <osPriorityLow1=> low + 1
-// <osPriorityLow2=> low + 2
-// <osPriorityLow3=> low + 3
-// <osPriorityLow4=> low + 4
-// <osPriorityLow5=> low + 5
-// <osPriorityLow6=> low + 6
-// <osPriorityLow7=> low + 7
-// <osPriorityBelowNormal=> below normal
-// <osPriorityBelowNormal1=> below normal + 1
-// <osPriorityBelowNormal2=> below normal + 2
-// <osPriorityBelowNormal3=> below normal + 3
-// <osPriorityBelowNormal4=> below normal + 4
-// <osPriorityBelowNormal5=> below normal + 5
-// <osPriorityBelowNormal6=> below normal + 6
-// <osPriorityBelowNormal7=> below normal + 7
-// <osPriorityNormal=> normal
-// <osPriorityNormal1=> normal + 1
-// <osPriorityNormal2=> normal + 2
-// <osPriorityNormal3=> normal + 3
-// <osPriorityNormal4=> normal + 4
-// <osPriorityNormal5=> normal + 5
-// <osPriorityNormal6=> normal + 6
-// <osPriorityNormal7=> normal + 7
-// <osPriorityAboveNormal => above normal
-// <osPriorityAboveNormal1=> above normal + 1
-// <osPriorityAboveNormal2=> above normal + 2
-// <osPriorityAboveNormal3=> above normal + 3
-// <osPriorityAboveNormal4=> above normal + 4
-// <osPriorityAboveNormal5=> above normal + 5
-// <osPriorityAboveNormal6=> above normal + 6
-// <osPriorityAboveNormal7=> above normal + 7
-// <osPriorityHigh=> high
-// <osPriorityHigh1=> high + 1
-// <osPriorityHigh2=> high + 2
-// <osPriorityHigh3=> high + 3
-// <osPriorityHigh4=> high + 4
-// <osPriorityHigh5=> high + 5
-// <osPriorityHigh6=> high + 6
-// <osPriorityHigh7=> high + 7
-// <osPriorityRealtime=> realtime
-// <osPriorityRealtime1=> realtime + 1
-// <osPriorityRealtime2=> realtime + 2
-// <osPriorityRealtime3=> realtime + 3
-// <osPriorityRealtime4=> realtime + 4
-// <osPriorityRealtime5=> realtime + 5
-// <osPriorityRealtime6=> realtime + 6
-// <osPriorityRealtime7=> realtime + 7
-// <i> Default: osPriorityAboveNormal3
-// <i> Priority of the CPC task using the CMSIS order and using the enum name
-// <i> This configuration is only used when the project contains an RTOS.
-#define SL_CPC_TASK_PRIORITY      osPriorityAboveNormal3
 
-// <o SL_CPC_TASK_STACK_SIZE> CPC task stack size
-// <i> Default: 1024
-// <i> Stack size for the CPC task in words.
-// <i> This configuration is only used when the project contains an RTOS.
-#define SL_CPC_TASK_STACK_SIZE            (1024)
-
-// <o SL_CPC_RX_PAYLOAD_MAX_LENGTH><1-4087>
+// <o SL_CPC_RX_PAYLOAD_MAX_LENGTH>Max Rx Payload Length<1-4087>
 // <i> Default: 256
 // <i> Maximum size of the payload in bytes of each RX buffer
 #define SL_CPC_RX_PAYLOAD_MAX_LENGTH      (256)
 
-// <o SL_CPC_TX_QUEUE_ITEM_MAX_COUNT>
-// <i> Default 20
-// <i> The maximum number of outgoing messages capable of being queued for transmission,
-// <i> including outgoing messages on the TX side and ACKs or NACKs on the RX side.
+// <o SL_CPC_TX_QUEUE_ITEM_MAX_COUNT> Tx Queue Size
+// <i> Default: 20
+// <i> The maximum number of outgoing messages capable of being queued for transmission.
 #define SL_CPC_TX_QUEUE_ITEM_MAX_COUNT    (20)
 
-// <o SL_CPC_RX_BUFFER_MAX_COUNT>
-// <i> Default 20
-// <i> Maximum count of CPC RX buffers assigned across all endpoints
+// <o SL_CPC_RX_BUFFER_MAX_COUNT> Total Number of Rx Buffers
+// <i> Default: 20
+// <i> Total number of CPC RX buffers available across all endpoints
 // <i> Multiple RX buffers can be associated with a single endpoint
 #define SL_CPC_RX_BUFFER_MAX_COUNT        (20)
 
-// <o SL_CPC_USER_ENDPOINT_MAX_COUNT > <0-10>
-// <i> Default 10
-// <i> Maximum count of CPC user endpoints that can be opened at once.
+// <o SL_CPC_USER_ENDPOINT_MAX_COUNT>Max Number of User Endpoints<0-10>
+// <i> Default: 10
+// <i> Maximum number of CPC user endpoints that can be opened at once.
 #define SL_CPC_USER_ENDPOINT_MAX_COUNT    (10)
 
 // <q SL_CPC_DEBUG_SYSTEM_VIEW_LOG_CORE_EVENT> Enable debug core tracing with system view
@@ -123,11 +64,11 @@
 // <i> Default: 0
 #define SL_CPC_DEBUG_SYSTEM_VIEW_LOG_ENDPOINT_EVENT    0
 
-// <q SL_CPC_DEBUG_CORE_EVENT_COUNTERS> Enable debug counters for event that happen at the core level
+// <q SL_CPC_DEBUG_CORE_EVENT_COUNTERS> Enable debug counters for core events
 // <i> Default: 0
 #define SL_CPC_DEBUG_CORE_EVENT_COUNTERS     0
 
-// <q SL_CPC_DEBUG_ENDPOINT_EVENT_COUNTERS> Enable debug counters for event that happen on an endpoint
+// <q SL_CPC_DEBUG_ENDPOINT_EVENT_COUNTERS> Enable debug counters for endpoint events
 // <i> Default: 0
 #define SL_CPC_DEBUG_ENDPOINT_EVENT_COUNTERS     0
 

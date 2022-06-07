@@ -42,6 +42,13 @@ requires:
   - name: device_init_hfxo
     condition:
       - device_init # RAIL requires HFXO, but only require this specific implementation if device_init is in play.
+  - name: emlib_acmp
+    condition:
+      - device_sdid_220 # Needed for EFF01
+  - name: emlib_vdac
+    condition:
+      - device_sdid_220 # Needed for EFF01
+
 recommends:
   - id: rail_lib_singleprotocol # default component to satisfy generic rail_lib_Xprotocol requirement
 provides:

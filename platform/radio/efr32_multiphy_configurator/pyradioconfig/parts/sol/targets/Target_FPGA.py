@@ -25,9 +25,9 @@ class Target_FPGA_Sol(ITarget):
         model.vars.xtal_frequency_hz.value_forced = int(38.4e6)
 
         #Use a FPLL at same rate as HFXO
-        model.vars.RFFPLL0_RFFPLLCTRL1_DIVX.value_forced = 5
-        model.vars.RFFPLL0_RFFPLLCTRL1_DIVN.value_forced = 80
-        model.vars.RFFPLL0_RFFPLLCTRL1_DIVXMODEMSEL.value_forced = 1
+        model.vars.fpll_divx.value_forced = 5
+        model.vars.fpll_divy.value_forced = 16
+        model.vars.fpll_divn.value_forced = 80
 
         #Disable AFC (right now the OTA FPGA incorrectly adjusts the synth even when we are using DIGMIXFB)
         model.vars.frequency_comp_mode.value_forced = model.vars.frequency_comp_mode.var_enum.INTERNAL_ALWAYS_ON

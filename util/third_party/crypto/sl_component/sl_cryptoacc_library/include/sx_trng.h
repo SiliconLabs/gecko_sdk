@@ -86,12 +86,16 @@ bool sx_trng_startup_failed(void);
 void sx_trng_set_startup_chk_flag(void);
 
 /**
- * @brief Indicates whether a NIST-800-90B repetition count test fails,
- *  a adaptative proportion test fails or (if enabled) a AIS31 noise alarm
- *  is triggered.
- * @return true if one error described above is raised
+ * @brief Returns a 32-bit word containing the TRNG status register where all
+ * the bits have been zeroed out except the ones representing the repetition
+ * count test interrupt status, the adaptive proportion test interrupt status
+ * and (if enabled) the AIS31  noise alarm status.
+ *
+ * Bit 4 is the repetition count test interrupt status, bit 5 is the adaptive
+ * proportion test interrupt status and bit 9 is the AIS31 noise alarm status.
+ * If any of these bits is set, the corresponding test has failed.
  */
-bool sx_trng_critical_raised(void);
+uint32_t sx_trng_critical_raised(void);
 
 /**
 * @brief Applies a soft reset on the random generator and sets a flag that tells
@@ -179,5 +183,11 @@ void sx_trng_save_state(struct sx_trng_internal_state *copy);
  * @param source is a structure containing the config to restore to the TRNG
  */
 void sx_trng_restore_state(struct sx_trng_internal_state *source);
+
+/**
+* @brief TRNG initialization in order to provide RAW data
+* @return CRYPTOLIB_SUCCESS or CRYPTOLIB_CRYPTO_ERR
+*/
+uint32_t sx_trng_raw_init(void);
 
 #endif /* SX_TRNG_H */

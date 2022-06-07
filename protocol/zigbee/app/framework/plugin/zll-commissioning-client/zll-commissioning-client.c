@@ -19,6 +19,7 @@
 #include "app/framework/include/af.h"
 #include "app/framework/util/af-main.h"
 #include "app/framework/util/common.h"
+#include  "mac-phy.h"
 
 #ifdef UC_BUILD
 #include "sl_signature_decode.h"

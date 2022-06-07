@@ -42,7 +42,14 @@
 
 // <q SL_WISUN_COAP_MEM_USE_STATIC_MEMORY_POOL> Enable Static Memory Pool usage
 // <i> Enables the static memory pool usage in CoAP component, if it's available (Micrium doesn't support this feature).
-#define SL_WISUN_COAP_MEM_USE_STATIC_MEMORY_POOL   1
+#define SL_WISUN_COAP_MEM_USE_STATIC_MEMORY_POOL    1
+
+// </h>
+
+// <h>Wi-SUN CoAP Resource Configuration
+// <o SL_WISUN_COAP_RESOURCE_HANDLER_MAX_RESOURCES> Maximum capacity of the CoAP Resource Table
+// <i> Default: 10
+#define SL_WISUN_COAP_RESOURCE_HANDLER_MAX_RESOURCES                  10U
 
 // </h>
 

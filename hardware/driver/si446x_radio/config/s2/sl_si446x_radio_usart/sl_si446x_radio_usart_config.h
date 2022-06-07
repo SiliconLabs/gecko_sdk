@@ -3,7 +3,7 @@
  * @brief SL_SI446X_RADIO_USART Config
  *******************************************************************************
  * # License
- * <b>Copyright 2021 Silicon Laboratories Inc. www.silabs.com</b>
+ * <b>Copyright 2022 Silicon Laboratories Inc. www.silabs.com</b>
  *******************************************************************************
  *
  * The licensor of this software is Silicon Laboratories Inc. Your use of this
@@ -59,4 +59,3 @@
 // <<< sl:end pin_tool >>>
 
 #endif // SL_SI446X_RADIO_CONFIG_H
-

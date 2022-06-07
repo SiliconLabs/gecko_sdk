@@ -32,10 +32,13 @@
 #if defined(SEMAILBOX_PRESENT) || defined(CRYPTOACC_PRESENT)
 
 #include "sl_se_manager.h"
+
+#if !defined(SL_CATALOG_TZ_SECURE_KEY_LIBRARY_NS_PRESENT)
+
 #include "sli_se_manager_internal.h"
 #include "sli_se_manager_osal.h"
 #include "em_se.h"
-#include "em_assert.h"
+#include "sl_assert.h"
 #if defined(_CMU_CLKEN1_SEMAILBOXHOST_MASK)
 #include "em_bus.h"
 #endif
@@ -297,6 +300,29 @@ void SEMBRX_IRQHandler(void)
 #endif // #if defined(SL_SE_MANAGER_YIELD_WHILE_WAITING_FOR_COMMAND_COMPLETION)
 
 /***************************************************************************//**
+ * Set the yield attribute of the SE command context object.
+ ******************************************************************************/
+sl_status_t sl_se_set_yield(sl_se_command_context_t *cmd_ctx,
+                            bool yield)
+{
+  if (cmd_ctx == NULL) {
+    return SL_STATUS_INVALID_PARAMETER;
+  }
+
+  #if defined(SL_SE_MANAGER_YIELD_WHILE_WAITING_FOR_COMMAND_COMPLETION)
+  cmd_ctx->yield = yield;
+  return SL_STATUS_OK;
+  #else
+  if (yield) {
+    return SL_STATUS_NOT_AVAILABLE;
+  } else {
+    (void) cmd_ctx;
+    return SL_STATUS_OK;
+  }
+  #endif
+}
+
+/***************************************************************************//**
  * @brief
  *   Execute and wait for SE mailbox command to complete.
  *
@@ -366,7 +392,7 @@ sl_status_t sli_se_execute_and_wait(sl_se_command_context_t *cmd_ctx)
   }
 }
 
-#elif defined(CRYPTOACC_PRESENT)
+#elif defined(CRYPTOACC_PRESENT) // SEMAILBOX_PRESENT
 
 sl_status_t sli_se_execute_and_wait(sl_se_command_context_t *cmd_ctx)
 {
@@ -453,7 +479,9 @@ sl_status_t sl_se_ack_command(sl_se_command_context_t *cmd_ctx)
   }
 }
 
-#endif
+#endif // CRYPTOACC_PRESENT
+
+#endif // !SL_CATALOG_TZ_SECURE_KEY_LIBRARY_NS_PRESENT
 
 /***************************************************************************//**
  * Initialize an SE command context object
@@ -480,29 +508,6 @@ sl_status_t sl_se_deinit_command_context(sl_se_command_context_t *cmd_ctx)
   }
 
   return sl_se_init_command_context(cmd_ctx);
-}
-
-/***************************************************************************//**
- * Set the yield attribute of the SE command context object.
- ******************************************************************************/
-sl_status_t sl_se_set_yield(sl_se_command_context_t *cmd_ctx,
-                            bool yield)
-{
-  if (cmd_ctx == NULL) {
-    return SL_STATUS_INVALID_PARAMETER;
-  }
-
-  #if defined(SL_SE_MANAGER_YIELD_WHILE_WAITING_FOR_COMMAND_COMPLETION)
-  cmd_ctx->yield = yield;
-  return SL_STATUS_OK;
-  #else
-  if (yield) {
-    return SL_STATUS_NOT_AVAILABLE;
-  } else {
-    (void) cmd_ctx;
-    return SL_STATUS_OK;
-  }
-  #endif
 }
 
 /** @} (end addtogroup sl_se) */

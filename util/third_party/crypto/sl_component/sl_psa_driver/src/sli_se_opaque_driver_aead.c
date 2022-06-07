@@ -150,25 +150,6 @@ psa_status_t sli_se_opaque_aead_decrypt_setup(sli_se_opaque_aead_operation_t *op
                                                   SLI_SE_WRAPPED_KEY_OVERHEAD);
 }
 
-#if defined(PSA_CRYPTO_AEAD_MULTIPART_SUPPORTED)
-
-psa_status_t sli_se_opaque_aead_generate_nonce(sli_se_opaque_aead_operation_t *operation,
-                                               uint8_t *nonce,
-                                               size_t nonce_size,
-                                               size_t *nonce_length)
-{
-  if (operation == NULL) {
-    return PSA_ERROR_INVALID_ARGUMENT;
-  }
-
-  return sli_se_driver_aead_generate_nonce(&(operation->operation),
-                                           nonce,
-                                           nonce_size,
-                                           nonce_length);
-}
-
-#endif // defined(PSA_CRYPTO_AEAD_MULTIPART_SUPPORTED)
-
 psa_status_t sli_se_opaque_aead_set_nonce(sli_se_opaque_aead_operation_t *operation,
                                           const uint8_t *nonce,
                                           size_t nonce_size)
@@ -265,7 +246,6 @@ psa_status_t sli_se_opaque_aead_verify(sli_se_opaque_aead_operation_t *operation
                                    tag,
                                    tag_length);
 }
-#if defined(PSA_CRYPTO_AEAD_MULTIPART_SUPPORTED)
 
 psa_status_t sli_se_opaque_aead_abort(sli_se_opaque_aead_operation_t *operation)
 {
@@ -275,10 +255,8 @@ psa_status_t sli_se_opaque_aead_abort(sli_se_opaque_aead_operation_t *operation)
   }
 
   memset(operation, 0, sizeof(*operation));
-  return PSA_ERROR_NOT_SUPPORTED;
+  return PSA_SUCCESS;
 }
-
-#endif // defined(PSA_CRYPTO_AEAD_MULTIPART_SUPPORTED)
 
 #endif // _SILICON_LABS_SECURITY_FEATURE_VAULT || MBEDTLS_PSA_CRYPTO_BUILTIN_KEYS
 

@@ -252,7 +252,7 @@ static FilterResult filterPacket(MacAddressMode mode,
     //   Broadcast PAN ID would be accepted
     //   Messages without PAN ID would also be accepted.
 
-    boolean found = false;
+    bool found = false;
     result = ((macAddressFilterData.options & MAC_FILTER_OPTIONS_DEST_PAN_ID_WHITELIST)
               ? ALLOW_PACKET
               : DROP_PACKET);
@@ -590,7 +590,7 @@ void emberAfPluginMacAddressFilteringInitCallback(SLXU_INIT_ARG)
 
 // <generate-cli-xml> Command: plugin mac-address-filtering set-config no-address-filter <enable>
 // <generate-cli-xml> Description: Enable/disable filtering of no-address messages.
-// <generate-cli-xml> Arg: enable | boolean | True means drop no-address messages, false means allow.
+// <generate-cli-xml> Arg: enable | bool | True means drop no-address messages, false means allow.
 
 void emberAfPluginMacAddressFilteringFilterNoAddressCommand(SL_CLI_COMMAND_ARG)
 {
@@ -953,7 +953,7 @@ EmberStatus emberAfPluginMacAddressFilteringGetStatsForShortAddress(uint8_t inde
   return EMBER_SUCCESS;
 }
 
-void emberAfPluginMacAddressFilteringGetStats(boolean shortMode,
+void emberAfPluginMacAddressFilteringGetStats(bool shortMode,
                                               uint32_t* allowedPacketCountPtr,
                                               uint32_t* droppedPacketCountPtr,
                                               uint32_t* totalPacketCountPtr)

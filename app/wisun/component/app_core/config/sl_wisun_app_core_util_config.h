@@ -42,7 +42,7 @@
 
 // <q HEARTBEAT_ENABLED> Enable
 // <i> Enables The heartbeat character and section breaks on the console output.
-#define HEARTBEAT_ENABLED      0
+#define HEARTBEAT_ENABLED                           0
 
 // </h> End Heartbeat Enable
 
@@ -51,10 +51,42 @@
 // <o HEARBEAT_SECTION_LENGTH> Length of one section is seconds where the heartbeat breaks line.
 // <i> Default: 60
 // <i> Define the number seconds which is printed on one line
-#define HEARBEAT_SECTION_LENGTH      (60)
+#define HEARBEAT_SECTION_LENGTH                     (60)
 
 // </h> End Heartbeat section length
 
+// <h> Regional Regulation
+
+// corresponds to SL_WISUN_REGULATION_NONE
+#define REGULATION_NONE                              (0)
+// corresponds to SL_WISUN_REGULATION_ARIB
+#define REGULATION_ARIB                              (1)
+
+// <h> Regulation
+// <o WISUN_APP_REGULATION> Name of the Wi-SUN regional regulation or None
+// <REGULATION_NONE=> None
+// <REGULATION_ARIB=> ARIB
+// <i> Default: SL_WISUN_REGULATION_NONE
+#define WISUN_APP_REGULATION                        REGULATION_NONE
+// </h> Regulation
+
+// <h> Wi-SUN regulation transmission budget
+// <o WISUN_APP_TX_BUDGET> Number of milliseconds per hour allowed to transmit in case of regional regulation.
+// <i> Default: 720000 ms(corresponding to ARIB regulation)
+#define WISUN_APP_TX_BUDGET                         (720000)
+// </h> Wi-SUN regulation transmission budget in milliseconds.
+
+// <h> Wi-SUN regulation warning and alert thresholds
+// <o WISUN_DEFAULT_REGULATION_WARNING_THRESHOLD> Transmission duration level warning threshold in percent or -1 to disable
+// <i> Default: 85 %
+#define WISUN_DEFAULT_REGULATION_WARNING_THRESHOLD  85
+
+// <o WISUN_DEFAULT_REGULATION_ALERT_THRESHOLD> Transmission duration level alert threshold in percent or -1 to disable
+// <i> Default: 95 %
+#define WISUN_DEFAULT_REGULATION_ALERT_THRESHOLD    95
+// </h> Wi-SUN regulation warning and alert thresholds
+
+// </h> Regional Regulation set upon connection
 // <<< end of configuration section >>>
 
 /** @}*/

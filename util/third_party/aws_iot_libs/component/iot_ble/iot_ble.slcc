@@ -22,6 +22,32 @@ source:
     condition: ["aws_tests_defs"]
   - path: util/third_party/aws_iot_libs/libraries/abstractions/ble_hal/test/src/iot_test_ble_hal_stress_test.c
     condition: ["aws_tests_defs"]
+  # Test scripts
+  - path: util/third_party/aws_iot_libs/libraries/abstractions/ble_hal/test/ble_test_scipts/attributesCommon.py
+    condition: ["aws_tests_defs"]
+  - path: util/third_party/aws_iot_libs/libraries/abstractions/ble_hal/test/ble_test_scipts/bleAdapter.py
+    condition: ["aws_tests_defs"]
+  - path: util/third_party/aws_iot_libs/libraries/abstractions/ble_hal/test/ble_test_scipts/gattClient.py
+    condition: ["aws_tests_defs"]
+  - path: util/third_party/aws_iot_libs/libraries/abstractions/ble_hal/test/ble_test_scipts/runPI.sh
+    condition: ["aws_tests_defs"]
+  - path: util/third_party/aws_iot_libs/libraries/abstractions/ble_hal/test/ble_test_scipts/securityAgent.py
+    condition: ["aws_tests_defs"]
+  - path: util/third_party/aws_iot_libs/libraries/abstractions/ble_hal/test/ble_test_scipts/startTests_afqp.py
+    condition: ["aws_tests_defs"]
+  - path: util/third_party/aws_iot_libs/libraries/abstractions/ble_hal/test/ble_test_scipts/startTests_integration.py
+    condition: ["aws_tests_defs"]
+  - path: util/third_party/aws_iot_libs/libraries/abstractions/ble_hal/test/ble_test_scipts/startTests_kpi.py
+    condition: ["aws_tests_defs"]
+  - path: util/third_party/aws_iot_libs/libraries/abstractions/ble_hal/test/ble_test_scipts/startTests_stress.py
+    condition: ["aws_tests_defs"]
+  - path: util/third_party/aws_iot_libs/libraries/abstractions/ble_hal/test/ble_test_scipts/test1.py
+    condition: ["aws_tests_defs"]
+  - path: util/third_party/aws_iot_libs/libraries/abstractions/ble_hal/test/ble_test_scipts/testClass.py
+    condition: ["aws_tests_defs"]
+  - path: util/third_party/aws_iot_libs/libraries/abstractions/ble_hal/test/ble_test_scipts/testutils.py
+    condition: ["aws_tests_defs"]
+
 
   # Demo related sources
   - path: util/third_party/aws_iot_libs/libraries/c_sdk/standard/ble/src/iot_ble_gap.c

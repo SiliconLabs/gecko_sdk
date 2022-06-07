@@ -441,26 +441,6 @@ int mbedtls_aes_setkey_dec(mbedtls_aes_context *ctx,
 /*
  * AES-ECB block encryption
  */
-void mbedtls_aes_encrypt(mbedtls_aes_context *ctx,
-                         const unsigned char input[16],
-                         unsigned char output[16])
-{
-  (void) mbedtls_aes_crypt_ecb(ctx, MBEDTLS_AES_ENCRYPT, input, output);
-}
-
-/*
- * AES-ECB block decryption
- */
-void mbedtls_aes_decrypt(mbedtls_aes_context *ctx,
-                         const unsigned char input[16],
-                         unsigned char output[16])
-{
-  (void) mbedtls_aes_crypt_ecb(ctx, MBEDTLS_AES_DECRYPT, input, output);
-}
-
-/*
- * AES-ECB block encryption
- */
 int mbedtls_internal_aes_encrypt(mbedtls_aes_context *ctx,
                                  const unsigned char input[16],
                                  unsigned char output[16])
@@ -818,7 +798,6 @@ int mbedtls_aes_crypt_ctr(mbedtls_aes_context *ctx,
       output[processed] = (unsigned char)(input[processed] ^ stream_block[n]);
       n = (n + 1) & 0x0F;
       processed++;
-      continue;
     } else {
       /* process one ore more blocks of data */
       CRYPTO_TypeDef *device = crypto_management_acquire();

@@ -46,9 +46,9 @@
 // This controls the type of response. Normally The library sends an automatic
 // response (if appropriate) on the same PAN. The reply can be disabled by
 // calling emberAfSetNoReplyForNextMessage.
-#define ZCL_UTIL_RESP_NORMAL   0
-#define ZCL_UTIL_RESP_NONE     1
-#define ZCL_UTIL_RESP_INTERPAN 2
+#define ZCL_UTIL_RESP_NORMAL   0u
+#define ZCL_UTIL_RESP_NONE     1u
+#define ZCL_UTIL_RESP_INTERPAN 2u
 
 // Cluster name structure
 typedef struct {
@@ -59,7 +59,7 @@ typedef struct {
 
 extern const EmberAfClusterName zclClusterNames[];
 
-#define ZCL_NULL_CLUSTER_ID 0xFFFF
+#define ZCL_NULL_CLUSTER_ID 0xFFFFu
 
 #include "../include/af.h"
 

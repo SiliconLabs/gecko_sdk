@@ -146,9 +146,9 @@ void printTimeCommand(sl_cli_command_arg_t *arguments)
 
 void emAfCliBsendCommand(sl_cli_command_arg_t *arguments)
 {
-  uint8_t srcEndpointToUse, i;
+#if (EMBER_BINDING_TABLE_SIZE > 0)
+  uint8_t srcEndpointToUse;
   EmberStatus status;
-  EmberBindingTableEntry candidate;
 
   // check that cmd is built
   if (zclCmdIsBuilt == false) {
@@ -162,63 +162,37 @@ void emAfCliBsendCommand(sl_cli_command_arg_t *arguments)
                      srcEndpointToUse,
                      globalApsFrame.clusterId);
 
+  globalApsFrame.sourceEndpoint = srcEndpointToUse;
   if (useMulticastBinding) {
     emberAfCorePrintln("sending to multicast bind");
-
-    globalApsFrame.sourceEndpoint = srcEndpointToUse;
-
     status = emberAfSendMulticastToBindings(&globalApsFrame,
                                             appZclBufferLen,
                                             appZclBuffer);
-
-    emberAfDebugPrintln("T%4x:TX (%p) %ccast 0x%x%p",
-                        emberAfGetCurrentTime(),
-                        "CLI",
-                        'U',
-                        status,
-                        ((globalApsFrame.options & EMBER_APS_OPTION_ENCRYPTION)
-                         ? " w/ link key" : ""));
-    emberAfDebugPrint("TX buffer: [");
-    emberAfDebugFlush();
-    emberAfDebugPrintBuffer(appZclBuffer, appZclBufferLen, true);
-    emberAfDebugPrintln("]");
-    emberAfDebugFlush();
   } else {
     // find a binding to send on
-    for (i = 0; i < EMBER_BINDING_TABLE_SIZE; i++) {
-      status = emberGetBinding(i, &candidate);
-
-      // if we can read the binding, it is unicast, the endpoint is the
-      // one we want (or we have no preference) and the cluster matches
-      // then use that binding to send the message
-      if (status == EMBER_SUCCESS
-          && candidate.type == EMBER_UNICAST_BINDING
-          && (srcEndpointToUse == 0
-              || candidate.local == srcEndpointToUse)
-          && candidate.clusterId == globalApsFrame.clusterId) {
-        emberAfCorePrintln("sending to bind %x", i);
-
-        status = emberAfSendUnicast(EMBER_OUTGOING_VIA_BINDING,
-                                    i,
-                                    &globalApsFrame,
-                                    appZclBufferLen,
-                                    appZclBuffer);
-
-        emberAfDebugPrintln("T%4x:TX (%p) %ccast 0x%x%p",
-                            emberAfGetCurrentTime(),
-                            "CLI",
-                            'U',
-                            status,
-                            ((globalApsFrame.options & EMBER_APS_OPTION_ENCRYPTION)
-                             ? " w/ link key" : ""));
-        emberAfDebugPrint("TX buffer: [");
-        emberAfDebugFlush();
-        emberAfDebugPrintBuffer(appZclBuffer, appZclBufferLen, true);
-        emberAfDebugPrintln("]");
-        emberAfDebugFlush();
-      }
-    }
+    status = emberAfSendUnicastToBindings(&globalApsFrame,
+                                          appZclBufferLen,
+                                          appZclBuffer);
   }
+#if (defined(SL_CATALOG_ZIGBEE_DEBUG_PRINT_PRESENT) && (SL_ZIGBEE_DEBUG_ZCL_GROUP_ENABLED == 1) && (SL_ZIGBEE_DEBUG_PRINTS_ZCL_LEGACY_AF_DEBUG_ENABLED == 1))
+  emberAfDebugPrintln("T%4x:TX (%p) %ccast 0x%x%p",
+                      emberAfGetCurrentTime(),
+                      "CLI",
+                      'U',
+                      status,
+                      ((globalApsFrame.options & EMBER_APS_OPTION_ENCRYPTION)
+                       ? " w/ link key" : ""));
+  emberAfDebugPrint("TX buffer: [");
+  emberAfDebugFlush();
+  emberAfDebugPrintBuffer(appZclBuffer, appZclBufferLen, true);
+  emberAfDebugPrintln("]");
+  emberAfDebugFlush();
+#else
+  UNUSED_VAR(status);
+#endif // (defined(SL_CATALOG_ZIGBEE_DEBUG_PRINT_PRESENT) && (SL_ZIGBEE_DEBUG_ZCL_GROUP_ENABLED == 1) && (SL_ZIGBEE_DEBUG_PRINTS_ZCL_LEGACY_AF_DEBUG_ENABLED == 1))
+#else
+  emberAfCorePrintln("Error: binding table size is 0");
+#endif // (EMBER_BINDING_TABLE_SIZE > 0)
 }
 
 // ******************************************************

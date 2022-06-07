@@ -14,9 +14,9 @@
   - name: SL_KIT_NAME
     value: '"SLSTK3701A"'
   - name: SL_KIT_REV
-    value: '"A05"'
+    value: '"B00"'
 - tag:
   - kit:opn:SLSTK3701A
   - kit:pn:STK3701
   - kit:variant:A
-  - kit:revision:A05
+  - kit:revision:B00

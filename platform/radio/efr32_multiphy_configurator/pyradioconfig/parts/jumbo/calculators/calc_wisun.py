@@ -1,6 +1,7 @@
 from pyradioconfig.calculator_model_framework.interfaces.icalculator import ICalculator
 from pycalcmodel.core.variable import ModelVariableFormat, CreateModelVariableEnum
 from enum import Enum
+from pyradioconfig.calculator_model_framework.Utils.LogMgr import LogMgr
 
 class CALC_WiSUN_Jumbo(ICalculator):
 
@@ -21,9 +22,271 @@ class CALC_WiSUN_Jumbo(ICalculator):
             'List of supported WiSUN Modes',
             member_data)
 
+        var = self._addModelVariable(model, 'wisun_han_mode', Enum, ModelVariableFormat.DECIMAL,
+                                     'Wi-SUN Operating Mode (PhyMode)')
+        member_data = [
+            ['Mode1b', 1, '2FSK 50kbps mi=1.0'],
+            ['Mode2b', 3, '2FSK 100kbps mi=1.0'],
+        ] #Leaving numbering the same as wisun_mode to allow for easy expansion
+        var.var_enum = CreateModelVariableEnum(
+            'WiSUNHanModeEnum',
+            'List of supported WiSUN Modes',
+            member_data)
+
+        var = self._addModelVariable(model, 'wisun_reg_domain', Enum, ModelVariableFormat.HEX,
+                                     'Wi-SUN Regulatory Domain')
+        member_data = [
+            ['WW', 0x00, 'Worldwide'],
+            ['NA', 0x01, 'North America'],
+            ['JP', 0x02, 'Japan'],
+            ['EU', 0x03, 'Europe'],
+            ['CN', 0x04, 'China'],
+            ['IN', 0x05, 'India'],
+            ['MX', 0x06, 'Mexico'],
+            ['BZ', 0x07, 'Brazil'],
+            ['AZ_NZ', 0x08, 'Australia and New Zealand'],
+            ['KR', 0x09, 'Korea'],
+            ['PH', 0x0A, 'Philippines'],
+            ['MY', 0x0B, 'Malaysia'],
+            ['HK', 0x0C, 'Hong Kong'],
+            ['SG', 0x0D, 'Singapore'],
+            ['TH', 0x0E, 'Thailand'],
+            ['VN', 0x0F, 'Vietnam'],
+        ]
+        var.var_enum = CreateModelVariableEnum(
+            'WiSUNRegDomainEnum',
+            'List of supported WiSUN Regulatory Domains',
+            member_data)
+
+        self._addModelVariable(model, 'wisun_operating_class', int, ModelVariableFormat.DECIMAL, desc='WiSUN Operating Class')
         self._addModelVariable(model, 'wisun_phy_mode_id', int, ModelVariableFormat.DECIMAL, desc='WiSUN PhyModeID', is_array=True)
         self._addModelVariable(model, 'wisun_mode_switch_phr', int, ModelVariableFormat.DECIMAL, desc='WiSUN Mode Switch PHR', is_array=True)
 
+
+    def calc_wisun_freq_spacing(self, model):
+
+        #This calculation only applies to Wi-SUN FSK (FAN/HAN)
+        if model.profile.name.lower() in ['wisun_fan_1_0', 'wisun_han']:
+
+            # Read the reg domain and operating class
+            wisun_reg_domain = model.vars.wisun_reg_domain.value
+            wisun_operating_class = model.vars.wisun_operating_class.value
+            reg_domain_enum = model.vars.wisun_reg_domain.var_enum
+
+            error = False
+            if wisun_reg_domain == reg_domain_enum.CN:
+                if wisun_operating_class == 1:
+                    base_frequency_hz = 470.2e6
+                    channel_spacing_hz = 200e3
+                elif wisun_operating_class == 2:
+                    base_frequency_hz = 779.2e6
+                    channel_spacing_hz = 200e3
+                elif wisun_operating_class == 3:
+                    base_frequency_hz = 779.4e6
+                    channel_spacing_hz = 400e3
+                elif wisun_operating_class == 4:
+                    base_frequency_hz = 920.625e6
+                    channel_spacing_hz = 250e3
+                else:
+                    error = True
+                    base_frequency_hz = 470.2e6
+                    channel_spacing_hz = 200e3
+            elif wisun_reg_domain == reg_domain_enum.EU:
+                if wisun_operating_class == 1:
+                    base_frequency_hz = 863.1e6
+                    channel_spacing_hz = 100e3
+                elif wisun_operating_class == 2:
+                    base_frequency_hz = 863.1e6
+                    channel_spacing_hz = 200e3
+                elif wisun_operating_class == 3:
+                    base_frequency_hz = 870.1e6
+                    channel_spacing_hz = 100e3
+                elif wisun_operating_class == 4:
+                    base_frequency_hz = 870.2e6
+                    channel_spacing_hz = 200e3
+                else:
+                    error = True
+                    base_frequency_hz = 863.1e6
+                    channel_spacing_hz = 100e3
+            elif wisun_reg_domain == reg_domain_enum.IN:
+                if wisun_operating_class == 1:
+                    base_frequency_hz = 865.1e6
+                    channel_spacing_hz = 100e3
+                elif wisun_operating_class == 2:
+                    base_frequency_hz = 865.1e6
+                    channel_spacing_hz = 200e3
+                else:
+                    error = True
+                    base_frequency_hz = 865.1e6
+                    channel_spacing_hz = 100e3
+            elif wisun_reg_domain == reg_domain_enum.SG:
+                if wisun_operating_class == 1:
+                    base_frequency_hz = 866.1e6
+                    channel_spacing_hz = 100e3
+                elif wisun_operating_class == 2:
+                    base_frequency_hz = 866.1e6
+                    channel_spacing_hz = 200e3
+                elif wisun_operating_class == 3:
+                    base_frequency_hz = 866.3e6
+                    channel_spacing_hz = 400e3
+                elif wisun_operating_class == 4:
+                    base_frequency_hz = 920.2e6
+                    channel_spacing_hz = 200e3
+                elif wisun_operating_class== 5:
+                    base_frequency_hz = 920.4e6
+                    channel_spacing_hz = 400e3
+                else:
+                    error = True
+                    base_frequency_hz = 866.1e6
+                    channel_spacing_hz = 100e3
+            elif wisun_reg_domain == reg_domain_enum.MX:
+                if wisun_operating_class == 1:
+                    base_frequency_hz = 902.2e6
+                    channel_spacing_hz = 200e3
+                elif wisun_operating_class == 2:
+                    base_frequency_hz = 902.4e6
+                    channel_spacing_hz = 400e3
+                else:
+                    error = True
+                    base_frequency_hz = 902.2e6
+                    channel_spacing_hz = 200e3
+            elif wisun_reg_domain == reg_domain_enum.NA:
+                if wisun_operating_class == 1:
+                    base_frequency_hz = 902.2e6
+                    channel_spacing_hz = 200e3
+                elif wisun_operating_class == 2:
+                    base_frequency_hz = 902.4e6
+                    channel_spacing_hz = 400e3
+                elif wisun_operating_class == 3:
+                    base_frequency_hz = 902.6e6
+                    channel_spacing_hz = 600e3
+                else:
+                    error = True
+                    base_frequency_hz = 902.2e6
+                    channel_spacing_hz = 200e3
+            elif wisun_reg_domain == reg_domain_enum.BZ:
+                if wisun_operating_class == 1:
+                    base_frequency_hz = 902.2e6
+                    channel_spacing_hz = 200e3
+                elif wisun_operating_class == 2:
+                    base_frequency_hz = 902.4e6
+                    channel_spacing_hz = 400e3
+                elif wisun_operating_class == 3:
+                    base_frequency_hz = 902.6e6
+                    channel_spacing_hz = 600e3
+                else:
+                    error = True
+                    base_frequency_hz = 902.2e6
+                    channel_spacing_hz = 200e3
+            elif wisun_reg_domain == reg_domain_enum.AZ_NZ:
+                if wisun_operating_class == 1:
+                    base_frequency_hz = 915.2e6
+                    channel_spacing_hz = 200e3
+                elif wisun_operating_class == 2:
+                    base_frequency_hz = 915.4e6
+                    channel_spacing_hz = 400e3
+                else:
+                    error = True
+                    base_frequency_hz = 915.2e6
+                    channel_spacing_hz = 200e3
+            elif wisun_reg_domain == reg_domain_enum.KR:
+                if wisun_operating_class == 1:
+                    base_frequency_hz = 917.1e6
+                    channel_spacing_hz = 200e3
+                elif wisun_operating_class == 2:
+                    base_frequency_hz = 917.3e6
+                    channel_spacing_hz = 400e3
+                else:
+                    error = True
+                    base_frequency_hz = 917.1e6
+                    channel_spacing_hz = 200e3
+            elif wisun_reg_domain == reg_domain_enum.PH:
+                if wisun_operating_class == 1:
+                    base_frequency_hz = 915.2e6
+                    channel_spacing_hz = 200e3
+                elif wisun_operating_class == 2:
+                    base_frequency_hz = 915.4e6
+                    channel_spacing_hz = 400e3
+                else:
+                    error = True
+                    base_frequency_hz = 915.2e6
+                    channel_spacing_hz = 200e3
+            elif wisun_reg_domain == reg_domain_enum.MY:
+                if wisun_operating_class == 1:
+                    base_frequency_hz = 919.2e6
+                    channel_spacing_hz = 200e3
+                elif wisun_operating_class == 2:
+                    base_frequency_hz = 919.4e6
+                    channel_spacing_hz = 400e3
+                else:
+                    error = True
+                    base_frequency_hz = 919.2e6
+                    channel_spacing_hz = 200e3
+            elif wisun_reg_domain == reg_domain_enum.HK:
+                if wisun_operating_class == 1:
+                    base_frequency_hz = 920.2e6
+                    channel_spacing_hz = 200e3
+                elif wisun_operating_class == 2:
+                    base_frequency_hz = 920.4e6
+                    channel_spacing_hz = 400e3
+                else:
+                    error = True
+                    base_frequency_hz = 920.2e6
+                    channel_spacing_hz = 200e3
+            elif wisun_reg_domain == reg_domain_enum.TH:
+                if wisun_operating_class == 1:
+                    base_frequency_hz = 920.2e6
+                    channel_spacing_hz = 200e3
+                elif wisun_operating_class == 2:
+                    base_frequency_hz = 920.4e6
+                    channel_spacing_hz = 400e3
+                else:
+                    error = True
+                    base_frequency_hz = 920.2e6
+                    channel_spacing_hz = 200e3
+            elif wisun_reg_domain == reg_domain_enum.VN:
+                if wisun_operating_class == 1:
+                    base_frequency_hz = 920.2e6
+                    channel_spacing_hz = 200e3
+                elif wisun_operating_class == 2:
+                    base_frequency_hz = 920.4e6
+                    channel_spacing_hz = 400e3
+                else:
+                    error = True
+                    base_frequency_hz = 920.2e6
+                    channel_spacing_hz = 200e3
+            elif wisun_reg_domain == reg_domain_enum.JP:
+                if wisun_operating_class == 1:
+                    base_frequency_hz = 920.6e6
+                    channel_spacing_hz = 200e3
+                elif wisun_operating_class == 2:
+                    base_frequency_hz = 920.9e6
+                    channel_spacing_hz = 400e3
+                elif wisun_operating_class == 3:
+                    base_frequency_hz = 920.8e6
+                    channel_spacing_hz = 600e3
+                else:
+                    error = True
+                    base_frequency_hz = 920.6e6
+                    channel_spacing_hz = 200e3
+            else: #WW
+                if wisun_operating_class == 1:
+                    base_frequency_hz = 2400.2e6
+                    channel_spacing_hz = 200e3
+                elif wisun_operating_class == 2:
+                    base_frequency_hz = 2400.4e6
+                    channel_spacing_hz = 400e3
+                else:
+                    error = True
+                    base_frequency_hz = 2400.2e6
+                    channel_spacing_hz = 200e3
+
+            if error:
+                LogMgr.Error("Error: Unsupported Wi-SUN Operating Class for selected Regulatory Domain")
+
+            #Write the model vars
+            model.vars.base_frequency_hz.value = int(base_frequency_hz)
+            model.vars.channel_spacing_hz.value = int(channel_spacing_hz)
 
     def calc_wisun_phy_mode_id(self, model):
         # This function calculates the PhyModeID for Wi-SUN OFDM and Wi-SUN FSK PHYs
@@ -32,7 +295,7 @@ class CALC_WiSUN_Jumbo(ICalculator):
 
         profile_name = model.profile.name.lower()
 
-        if profile_name == "wisun":
+        if "wisun" in profile_name:
             wisun_mode = model.vars.wisun_mode.value
             wisun_phy_mode_id = [0] * 2
             phy_mode =  int(wisun_mode) + 1

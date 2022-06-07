@@ -59,6 +59,19 @@ extern "C"
 uint16_t sli_cpc_get_crc_sw(const void* buffer, uint16_t buffer_length);
 
 /***************************************************************************//**
+ * Computes CRC-16 CCITT on given buffer. Software implementation.
+ *
+ * @param buffer         Pointer to the buffer on which the CRC must be computed.
+ * @param buffer_length  Length of the buffer, in bytes.
+ * @param security_tag   Pointer to the buffer containing the security tag.
+ * @param security_tag_length  Length of the security tag buffer, in bytes.
+ *
+ * @return CRC value.
+ ******************************************************************************/
+uint16_t sli_cpc_get_crc_sw_with_security(const void *buffer, uint16_t buffer_length,
+                                          const void *security_tag, uint16_t security_tag_length);
+
+/***************************************************************************//**
  * Validates CRC-16 CCITT on given buffer. Software implementation.
  *
  * @param buffer Pointer to the buffer on which the CRC must be computed.

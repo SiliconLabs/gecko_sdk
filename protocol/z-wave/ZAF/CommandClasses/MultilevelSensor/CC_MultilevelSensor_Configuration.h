@@ -24,9 +24,9 @@
 // -----------------------------------------------------------------------------
 //                Macros and Typedefs
 // -----------------------------------------------------------------------------
-#define SL_MULTILEVEL_SENSOR_DEFAULT_AUTOREPORT_PEDIOD_MIN (30)
+#define MULTILEVEL_SENSOR_DEFAULT_AUTOREPORT_PEDIOD_MIN (30)
 
-#define SL_MULTILEVEL_SENSOR_REGISTERED_SENSOR_NUMBER_LIMIT 2
+#define MULTILEVEL_SENSOR_REGISTERED_SENSOR_NUMBER_LIMIT 2
 // -----------------------------------------------------------------------------
 //                Global Variables
 // -----------------------------------------------------------------------------

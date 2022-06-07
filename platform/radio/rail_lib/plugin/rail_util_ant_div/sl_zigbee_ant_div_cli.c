@@ -38,6 +38,8 @@
 // Console Response: "TX antenna mode:<antennaMode>"
 void emberAfPluginAntennaGetAntennaTxMode(sl_cli_command_arg_t *arguments)
 {
+  (void)arguments;
+
   sl_rail_util_antenna_mode_t antennaMode = sl_rail_util_ant_div_get_tx_antenna_mode();
   sl_zigbee_app_debug_print("TX antenna mode:%d", antennaMode);
 }
@@ -59,6 +61,8 @@ void emberAfPluginAntennaSetAntennaTxMode(sl_cli_command_arg_t *arguments)
 // Console Response: "RX Antenna Mode: 0x<antennaMode>"
 void emberAfPluginAntennaGetAntennaRxMode(sl_cli_command_arg_t *arguments)
 {
+  (void)arguments;
+
   sl_rail_util_antenna_mode_t antennaMode = sl_rail_util_ant_div_get_rx_antenna_mode();
   sl_zigbee_app_debug_print("RX antenna mode:%d", antennaMode);
 }

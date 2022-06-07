@@ -223,7 +223,7 @@ typedef struct {
 #define _MSC_WRITECTRL_IRQERASEABORT_MASK         0x2UL                                       /**< Bit mask for MSC_IRQERASEABORT              */
 #define _MSC_WRITECTRL_IRQERASEABORT_DEFAULT      0x00000000UL                                /**< Mode DEFAULT for MSC_WRITECTRL              */
 #define MSC_WRITECTRL_IRQERASEABORT_DEFAULT       (_MSC_WRITECTRL_IRQERASEABORT_DEFAULT << 1) /**< Shifted mode DEFAULT for MSC_WRITECTRL      */
-#define MSC_WRITECTRL_LPWRITE                     (0x1UL << 3)                                /**< Low-Power Erase                             */
+#define MSC_WRITECTRL_LPWRITE                     (0x1UL << 3)                                /**< Low-Power Write                             */
 #define _MSC_WRITECTRL_LPWRITE_SHIFT              3                                           /**< Shift value for MSC_LPWRITE                 */
 #define _MSC_WRITECTRL_LPWRITE_MASK               0x8UL                                       /**< Bit mask for MSC_LPWRITE                    */
 #define _MSC_WRITECTRL_LPWRITE_DEFAULT            0x00000000UL                                /**< Mode DEFAULT for MSC_WRITECTRL              */

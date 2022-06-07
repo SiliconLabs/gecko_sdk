@@ -183,6 +183,8 @@ class TestCase(NcpSupportMixin, unittest.TestCase):
             self.nodes[i].set_panid(params['panid'])
             self.nodes[i].set_mode(params['mode'])
 
+            if 'extended_panid' in params:
+                self.nodes[i].set_extpanid(params['extended_panid'])
             if 'partition_id' in params:
                 self.nodes[i].set_preferred_partition_id(params['partition_id'])
             if 'channel' in params:
@@ -327,6 +329,7 @@ class TestCase(NcpSupportMixin, unittest.TestCase):
     def _verify_packets(self, test_info_path: str):
         pv = PacketVerifier(test_info_path, self.CASE_WIRESHARK_PREFS)
         pv.add_common_vars()
+        pv.pkts.filter_thread_unallowed_icmpv6().must_not_next()
         self.verify(pv)
         print("Packet verification passed: %s" % test_info_path, file=sys.stderr)
 

@@ -58,6 +58,13 @@
  *  limitations under the License.
  */
 
+#if defined(SL_TRUSTZONE_NONSECURE)
+
+/* The NonSecure app must use the crypto_struct.h from the trusted-firmware-m repo. */
+#include "../../trusted-firmware-m/interface/include/psa/crypto_struct.h"
+
+#else /* SL_TRUSTZONE_NONSECURE */
+
 #ifndef PSA_CRYPTO_STRUCT_H
 #define PSA_CRYPTO_STRUCT_H
 #include "mbedtls/private_access.h"
@@ -72,6 +79,8 @@ extern "C" {
 
 #include "mbedtls/cmac.h"
 #include "mbedtls/gcm.h"
+#include "mbedtls/ccm.h"
+#include "mbedtls/chachapoly.h"
 
 /* Include the context definition for the compiled-in drivers for the primitive
  * algorithms. */
@@ -148,19 +157,31 @@ static inline struct psa_mac_operation_s psa_mac_operation_init( void )
 
 struct psa_aead_operation_s
 {
+
+    /** Unique ID indicating which driver got assigned to do the
+     * operation. Since driver contexts are driver-specific, swapping
+     * drivers halfway through the operation is not supported.
+     * ID values are auto-generated in psa_crypto_driver_wrappers.h
+     * ID value zero means the context is not valid or not assigned to
+     * any driver (i.e. none of the driver contexts are active). */
+    unsigned int MBEDTLS_PRIVATE(id);
+
     psa_algorithm_t MBEDTLS_PRIVATE(alg);
-    unsigned int MBEDTLS_PRIVATE(key_set) : 1;
-    unsigned int MBEDTLS_PRIVATE(iv_set) : 1;
-    uint8_t MBEDTLS_PRIVATE(iv_size);
-    uint8_t MBEDTLS_PRIVATE(block_size);
-    union
-    {
-        unsigned MBEDTLS_PRIVATE(dummy); /* Enable easier initializing of the union. */
-        mbedtls_cipher_context_t MBEDTLS_PRIVATE(cipher);
-    } MBEDTLS_PRIVATE(ctx);
+    psa_key_type_t MBEDTLS_PRIVATE(key_type);
+
+    size_t MBEDTLS_PRIVATE(ad_remaining);
+    size_t MBEDTLS_PRIVATE(body_remaining);
+
+    unsigned int MBEDTLS_PRIVATE(nonce_set) : 1;
+    unsigned int MBEDTLS_PRIVATE(lengths_set) : 1;
+    unsigned int MBEDTLS_PRIVATE(ad_started) : 1;
+    unsigned int MBEDTLS_PRIVATE(body_started) : 1;
+    unsigned int MBEDTLS_PRIVATE(is_encrypt) : 1;
+
+    psa_driver_aead_context_t MBEDTLS_PRIVATE(ctx);
 };
 
-#define PSA_AEAD_OPERATION_INIT { 0, 0, 0, 0, 0, { 0 } }
+#define PSA_AEAD_OPERATION_INIT {0, 0, 0, 0, 0, 0, 0, 0, 0, 0, {0}}
 static inline struct psa_aead_operation_s psa_aead_operation_init( void )
 {
     const struct psa_aead_operation_s v = PSA_AEAD_OPERATION_INIT;
@@ -172,9 +193,6 @@ typedef struct
 {
     uint8_t *MBEDTLS_PRIVATE(info);
     size_t MBEDTLS_PRIVATE(info_length);
-    psa_mac_operation_t MBEDTLS_PRIVATE(hmac);
-    uint8_t MBEDTLS_PRIVATE(prk)[PSA_HASH_MAX_SIZE];
-    uint8_t MBEDTLS_PRIVATE(output_block)[PSA_HASH_MAX_SIZE];
 #if PSA_HASH_MAX_SIZE > 0xff
 #error "PSA_HASH_MAX_SIZE does not fit in uint8_t"
 #endif
@@ -182,6 +200,9 @@ typedef struct
     uint8_t MBEDTLS_PRIVATE(block_number);
     unsigned int MBEDTLS_PRIVATE(state) : 2;
     unsigned int MBEDTLS_PRIVATE(info_set) : 1;
+    uint8_t MBEDTLS_PRIVATE(output_block)[PSA_HASH_MAX_SIZE];
+    uint8_t MBEDTLS_PRIVATE(prk)[PSA_HASH_MAX_SIZE];
+    struct psa_mac_operation_s MBEDTLS_PRIVATE(hmac);
 } psa_hkdf_key_derivation_t;
 #endif /* MBEDTLS_PSA_BUILTIN_ALG_HKDF */
 
@@ -479,3 +500,5 @@ static inline size_t psa_get_key_bits(
 #endif
 
 #endif /* PSA_CRYPTO_STRUCT_H */
+
+#endif /* SL_TRUSTZONE_NONSECURE */

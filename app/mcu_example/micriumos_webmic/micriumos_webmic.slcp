@@ -14,21 +14,14 @@ description: >
   Configuration can be found in common_declarations.h and config.h.
   For info on encoding, see IETFs and xiphs rfc6716, rfc7845 and rfc3533.
 
-  The encoded data is then streamed through a simple no-file-system HTTP server.
-  Transmission of data packets is handled by an HTTP server task by means
-  of unicast and chunked transfer encoding.
-
-  To listen to the audio: connect the board via ethernet, wait for the IP to be
-  shown on the display and type that IP into any browser capable of
-  streaming opus. Because of real-time constraints, there's an upper limit of 5 clients.
-
-  Micrium OS Support SEGGER SystemView to view the runtime behavior or a system.
-  SystemView Trace is enabled by default when the segger_systemview component
-  is included in the project. SystemView can be usedto inspect the runtime 
-  behaviour of this example, it will give a nice overview
-  of the tasks and interrupts in the application. SystemView can be downloaded 
-  from https://www.segger.com/systemview.html
 category: Example|MCU Example
+filter:
+  - name: "Device Type"
+    value: ["SoC"]
+  - name: "MCU"
+    value: ["32-bit MCU"]
+  - name: "Project Difficulty"
+    value: ["Advanced"]
 component:
   - id: micriumos_bsp
   - id: micriumos_bsp_net_ether  
@@ -131,6 +124,10 @@ configuration:
     value: 1    
 define:
   - name: "DEBUG_EFM"
+readme:
+  - path: readme.md
+ui_hints:
+  highlight: readme.md
 tag:
   - hardware:component:eth
   - prebuilt_demo

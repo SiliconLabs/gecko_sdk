@@ -28,12 +28,13 @@
  *
  ******************************************************************************/
 #include "sl_mbedtls.h"
+#include "sl_assert.h"
 #include "mbedtls/threading.h"
 #if defined(SEMAILBOX_PRESENT) || defined(CRYPTOACC_PRESENT)
 #include "sl_se_manager.h"
 #endif
-#if defined(SLI_RADIOAES_REQUIRES_MASKING)
-#include "sli_radioaes_management.h"
+#if defined(CRYPTOACC_PRESENT) && (_SILICON_LABS_32B_SERIES_2_CONFIG > 2)
+  #include "cryptoacc_management.h"
 #endif
 
 void sl_mbedtls_init(void)
@@ -46,18 +47,15 @@ void sl_mbedtls_init(void)
   EFM_ASSERT(ret == SL_STATUS_OK);
 #endif
 
+#if defined(CRYPTOACC_PRESENT) && (_SILICON_LABS_32B_SERIES_2_CONFIG > 2)
+  // Set up SCA countermeasures in hardware
+  cryptoacc_initialize_countermeasures();
+#endif // SILICON_LABS_32B_SERIES_2_CONFIG > 2
+
 #if defined(MBEDTLS_THREADING_C)
   mbedtls_threading_set_alt(&THREADING_InitMutex,
                             &THREADING_FreeMutex,
                             &THREADING_TakeMutexBlocking,
                             &THREADING_GiveMutex);
-#endif
-
-#if defined(SLI_RADIOAES_REQUIRES_MASKING)
-  /* Initialize the RADIOAES mask value early to avoid taking the hit of
-   * requesting RNG output in IRQ context. Just acquiring and releasing the
-   * peripheral should ensure the mask is properly set. */
-  (void) sli_radioaes_acquire();
-  (void) sli_radioaes_release();
 #endif
 }

@@ -544,30 +544,6 @@ uint16_t emberAfFillCommandGreenPowerClusterGpSinkTableRequestSmart(uint8_t opti
   return charCount;
 }
 
-uint16_t emberAfFillCommandGreenPowerClusterGpProxyTableResponseSmart(uint8_t status,
-                                                                      uint8_t totalNumberOfNonEmptyProxyTableEntries,
-                                                                      uint8_t startIndex,
-                                                                      uint8_t entriesCount,
-                                                                      uint8_t* proxyTableEntries)
-{
-  uint16_t charCount = 0;
-  charCount += emberAfFillExternalBuffer((ZCL_CLUSTER_SPECIFIC_COMMAND        \
-                                          | ZCL_DISABLE_DEFAULT_RESPONSE_MASK \
-                                          | ZCL_FRAME_CONTROL_CLIENT_TO_SERVER),
-                                         ZCL_GREEN_POWER_CLUSTER_ID,
-                                         ZCL_GP_PROXY_TABLE_RESPONSE_COMMAND_ID,
-                                         "uuuu",
-                                         status,
-                                         totalNumberOfNonEmptyProxyTableEntries,
-                                         startIndex,
-                                         entriesCount);
-
-  // FIXME: need to add proper fields to EmberGpProxyTableEntry / append.
-  emberAfPutBlockInResp(proxyTableEntries, entriesCount);
-
-  return charCount;
-}
-
 uint32_t emberAfFillCommandGreenPowerClusterGpNotificationResponseSmart(uint8_t options,
                                                                         uint32_t gpdSrcId,
                                                                         uint8_t* gpdIeee,
@@ -755,30 +731,6 @@ uint16_t emberAfFillCommandGreenPowerClusterGpResponseSmart(uint8_t  options,
   return charCount;
 }
 
-uint16_t emberAfFillCommandGreenPowerClusterGpSinkTableResponseSmart(uint8_t status,
-                                                                     uint8_t totalNumberofNonEmptySinkTableEntries,
-                                                                     uint8_t startIndex,
-                                                                     uint8_t sinkTableEntriesCount,
-                                                                     uint8_t *sinkTableEntries)
-{
-  uint16_t charCount = 0;
-
-  charCount += emberAfFillExternalBuffer((ZCL_CLUSTER_SPECIFIC_COMMAND           \
-                                          | ZCL_DISABLE_DEFAULT_RESPONSE_MASK    \
-                                          | ZCL_FRAME_CONTROL_SERVER_TO_CLIENT), \
-                                         ZCL_GREEN_POWER_CLUSTER_ID,             \
-                                         ZCL_GP_SINK_TABLE_RESPONSE_COMMAND_ID,  \
-                                         "uuuu",                                 \
-                                         status,                                 \
-                                         totalNumberofNonEmptySinkTableEntries,  \
-                                         startIndex,                             \
-                                         sinkTableEntriesCount);
-
-  // FIXME: we need to define a type for tokTypeStackGpSinkTableEntry
-  // emberAfPutBlockInResp(sinkTableEntry, entriesCount);
-  return charCount;
-}
-
 uint16_t emberAfFillCommandGreenPowerClusterGpProxyTableRequestSmart(uint8_t options,
                                                                      uint32_t gpdSrcId,
                                                                      uint8_t* gpdIeee,
@@ -816,17 +768,6 @@ uint16_t emberAfFillCommandGreenPowerClusterGpProxyTableRequestSmart(uint8_t opt
   }
 
   return charCount;
-}
-
-uint16_t emberAfFillCommandGreenPowerClusterGpSinkCommissioningModeSmart(uint8_t options,
-                                                                         uint16_t gpmAddrForSecurity,
-                                                                         uint16_t gpmAddrForPairing,
-                                                                         uint8_t sinkEndpoint)
-{
-  return emberAfFillCommandGreenPowerClusterGpSinkCommissioningMode(options,
-                                                                    gpmAddrForSecurity,
-                                                                    gpmAddrForPairing,
-                                                                    sinkEndpoint);
 }
 
 /*

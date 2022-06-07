@@ -35,7 +35,7 @@
 
 #if defined(VDAC_COUNT) && (VDAC_COUNT > 0)
 
-#include "em_assert.h"
+#include "sl_assert.h"
 #include <stdbool.h>
 
 #ifdef __cplusplus
@@ -469,14 +469,17 @@ __STATIC_INLINE void VDAC_SineModeStart(VDAC_TypeDef *vdac, bool start)
 {
   EFM_ASSERT(VDAC_REF_VALID(vdac));
 
-  while (vdac->STATUS & VDAC_STATUS_SYNCBUSY) ;
+  while (vdac->STATUS & VDAC_STATUS_SYNCBUSY) {
+  }
 
   if (start) {
     vdac->CMD = VDAC_CMD_SINEMODESTART;
-    while ((vdac->STATUS & VDAC_STATUS_SINEACTIVE) == 0) ;
+    while ((vdac->STATUS & VDAC_STATUS_SINEACTIVE) == 0) {
+    }
   } else {
     vdac->CMD = VDAC_CMD_SINEMODESTOP;
-    while ((vdac->STATUS & VDAC_STATUS_SINEACTIVE) != 0) ;
+    while ((vdac->STATUS & VDAC_STATUS_SINEACTIVE) != 0) {
+    }
   }
 }
 #endif

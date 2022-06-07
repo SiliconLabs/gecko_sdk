@@ -58,37 +58,48 @@
 // final output is two arrays of timestamps, one for rising edges, and one for
 // falling edges.
 
-// The timestamping source is based on PROTIMER WRAPCNT ticks. This in a clock
-// source that we do not expose to the user, but it is the only fast 32-bit
-// timestamp I [MW] could find on-chip. If we could find a different fast 32-bit
-// timer to use, then we could make this a public plugin in the UC future.
-
-// This logic monitor consumer a number of resources: Two PRS signals, two
-// LDMA channels, two LMDAXBAR request signals, and a GPIO interrupt. The LDMA
+// The timestamping source is based on the RAIL_TimerTick hardware timer. This
+// logic monitor consumes a number of resources: Three PRS signals, two LDMA
+// channels, two LMDAXBAR request signals, and a GPIO interrupt. The LDMA
 // channels will be allocated based on the DMADRV if RAIL_DMA_CHANNEL is
 // DMA_CHANNEL_DMADRV, and are otherwise set by the macro logic in the monitor
 // init code. The two PRS channels will always be set by the macros below. The
 // first two LDMAXBAR signals are always used. The GPIO interrupt will be
 // chosen as the pin number that is being monitored.
 
+#define MONITOR_NUM_SAMPLES  (50U)
+
 #define MONITOR_PRS_CH_0     (0U)
 #define MONITOR_PRS_CH_1     (1U)
+#define MONITOR_PRS_CH_2     (2U)
+#define TOGGLES (&monitor_samples[0]) // Pin monitor on Series-1
+#define RISING (&monitor_samples[0]) // Pin monitor on Series-2
+#define FALLING (&monitor_samples[MONITOR_NUM_SAMPLES]) // Pin monitor on Series-2
+#define TIMESTAMPS (&monitor_samples[0]) // Port monitor
+#define GPIO_VALUES (&monitor_samples[MONITOR_NUM_SAMPLES]) // Port monitor
 
-#define MONITOR_NUM_SAMPLES  (50U)
-static uint32_t rising[MONITOR_NUM_SAMPLES];
-static uint32_t falling[MONITOR_NUM_SAMPLES];
+static uint32_t monitor_samples[MONITOR_NUM_SAMPLES * 2];
+#if defined(_SILICON_LABS_32B_SERIES_1)
+uint32_t initialState = false;
+#endif
 
-static unsigned int dmaCh0;
-static unsigned int dmaCh1;
+static unsigned int dma_ch0;
+static unsigned int dma_ch1;
 
-static bool init = false;
+typedef enum {
+  SL_UNINITIALIZED,
+  SL_PIN_MONITOR,
+  SL_PORT_MONITOR,
+} sl_monitor_state_t;
 
-// Set up the monitor. The monitor takes a single GPIO pin and connects it to
-// 2 PRS channels. One of the channels is inverted. Those two PRS channels then
-// each go to an LDMA via the LDMAXBAR (LDMA crossbar), which causes one
-// WRAPCNT sample to be written to the appropriate array per GPIO rising or
-// falling edge.
-bool initMonitor(uint8_t port, uint8_t pin)
+static sl_monitor_state_t sl_monitor_state = SL_UNINITIALIZED;
+
+// Set up the monitor for an entire port. The monitor takes a single GPIO pin
+// and connects it to 2 PRS channels. Those two PRS channels then each go to an
+// LDMA via the LDMAXBAR (LDMA crossbar), which causes a RAIL_TimerTick sample
+// to be written to the timestamps array and the port's GPIO DOUT to be written
+// to the GPIO values array.
+static sl_monitor_state_t sl_init_port_monitor(uint8_t port, uint8_t pin)
 {
   // Enable clocks
   CMU_ClockEnable(cmuClock_GPIO, true);
@@ -98,50 +109,160 @@ bool initMonitor(uint8_t port, uint8_t pin)
   CMU_ClockEnable(cmuClock_LDMAXBAR, true);
 #endif
 
-  // Reset the buffers from any previous operation. 0xFFFFFFFF is not a valid
-  // PROTIMER tick value
-  memset(rising, 0xFFU, sizeof(rising));
-  memset(falling, 0xFFU, sizeof(falling));
+  // Reset the buffers from any previous operation.
+  memset(monitor_samples, 0xFFU, sizeof(monitor_samples));
 
   // Allocate DMA channels based on RAIL_DMA_CHANNEL
 #if RAIL_DMA_CHANNEL == DMA_CHANNEL_DMADRV
-  Ecode_t dmaError = DMADRV_AllocateChannel(&dmaCh0, NULL);
-  // Spin loop forever if we fail
-  if (dmaError != ECODE_EMDRV_DMADRV_OK) {
-    return false;
+  Ecode_t dma_error = DMADRV_AllocateChannel(&dma_ch0, NULL);
+  if (dma_error != ECODE_EMDRV_DMADRV_OK) {
+    return SL_UNINITIALIZED;
   }
-  dmaError = DMADRV_AllocateChannel(&dmaCh1, NULL);
-  if (dmaError != ECODE_EMDRV_DMADRV_OK) {
-    return false;
+  dma_error = DMADRV_AllocateChannel(&dma_ch1, NULL);
+  if (dma_error != ECODE_EMDRV_DMADRV_OK) {
+    return SL_UNINITIALIZED;
   }
 #elif RAIL_DMA_CHANNEL == DMA_CHANNEL_INVALID
   // If RAIL doesn't use a DMA channel, take the first two
-  dmaCh0 = 0U;
-  dmaCh1 = 1U;
+  dma_ch0 = 0U;
+  dma_ch1 = 1U;
 #else
   // If RAIL does have a channel, take the next two (mod DMA_CHAN_COUNT)
-  dmaCh0 = ((RAIL_DMA_CHANNEL + 1U) % DMA_CHAN_COUNT);
-  dmaCh1 = ((RAIL_DMA_CHANNEL + 2U) % DMA_CHAN_COUNT);
+  dma_ch0 = ((RAIL_DMA_CHANNEL + 1U) % DMA_CHAN_COUNT);
+  dma_ch1 = ((RAIL_DMA_CHANNEL + 2U) % DMA_CHAN_COUNT);
 #endif
 
-  uint32_t ldmaPrsConn0;
-  uint32_t ldmaPrsConn1;
+  uint32_t ldma_prs_conn0;
+  uint32_t ldma_prs_conn1;
 
 #if defined(_SILICON_LABS_32B_SERIES_1)
   // Configure the PRS logic we need on Series 1
   uint32_t source = (pin < 8U)
                     ? PRS_CH_CTRL_SOURCESEL_GPIOL
                     : PRS_CH_CTRL_SOURCESEL_GPIOH;
-  // On series-1 devices we could use prsEdgeBoth detection, but keep them on
-  // two separate channels to maintain compatibility with series-2
-  PRS_SourceSignalSet(MONITOR_PRS_CH_0, source, pin, prsEdgePos);
-  PRS_SourceSignalSet(MONITOR_PRS_CH_1, source, pin, prsEdgeNeg);
+  // On series-1 devices we use prsEdgeBoth detection to only require
+  // two channels instead of the three that series-2 devices require
+  PRS_SourceSignalSet(MONITOR_PRS_CH_0, source, pin, prsEdgeBoth);
+  PRS_SourceSignalSet(MONITOR_PRS_CH_1, source, pin, prsEdgeBoth);
 
   PRS->DMAREQ0 = MONITOR_PRS_CH_0;
   PRS->DMAREQ1 = MONITOR_PRS_CH_1;
 
-  ldmaPrsConn0 = ldmaPeripheralSignal_PRS_REQ0;
-  ldmaPrsConn1 = ldmaPeripheralSignal_PRS_REQ1;
+  ldma_prs_conn0 = ldmaPeripheralSignal_PRS_REQ0;
+  ldma_prs_conn1 = ldmaPeripheralSignal_PRS_REQ1;
+#elif defined(_SILICON_LABS_32B_SERIES_2)
+  // Configure the PRS logic we need on Series 2. One would expect a signal
+  // being passed to both inputs of an XNOR to always be 1, but passing it
+  // between PRS channels like this causes enough of a glitch low to trigger
+  // the next capture. This is the only case that needs three PRS signals,
+  // and MONITOR_PRS_CH_2 is otherwise unused
+  PRS_SourceAsyncSignalSet(MONITOR_PRS_CH_2,
+                           PRS_ASYNC_CH_CTRL_SOURCESEL_GPIO,
+                           pin);
+  PRS_ConnectConsumer(MONITOR_PRS_CH_2, prsTypeAsync, prsConsumerLDMA_REQUEST0);
+
+  PRS_SourceAsyncSignalSet(MONITOR_PRS_CH_0,
+                           PRS_ASYNC_CH_CTRL_SOURCESEL_GPIO,
+                           pin);
+  PRS_ConnectConsumer(MONITOR_PRS_CH_0, prsTypeAsync, prsConsumerLDMA_REQUEST0);
+  PRS_SourceAsyncSignalSet(MONITOR_PRS_CH_1,
+                           PRS_ASYNC_CH_CTRL_SOURCESEL_GPIO,
+                           pin);
+  PRS_ConnectConsumer(MONITOR_PRS_CH_1, prsTypeAsync, prsConsumerLDMA_REQUEST1);
+  PRS_Combine(MONITOR_PRS_CH_1, MONITOR_PRS_CH_2, prsLogic_A_XNOR_B);
+  PRS_Combine(MONITOR_PRS_CH_0, MONITOR_PRS_CH_2, prsLogic_A_XNOR_B);
+
+  ldma_prs_conn0 = ldmaPeripheralSignal_LDMAXBAR_PRSREQ0;
+  ldma_prs_conn1 = ldmaPeripheralSignal_LDMAXBAR_PRSREQ1;
+#else
+#error "Invalid Platform for GPIO Monitor"
+#endif
+  // The PRS handles GPIO interrupts, so we need to configure one for
+  // channel we're using.
+  GPIO_ExtIntConfig((GPIO_Port_TypeDef)port, pin, pin, false, false, false);
+
+  // Connect the DMA channels
+  LDMA_Init_t ldma_init = LDMA_INIT_DEFAULT;
+  LDMA_Init(&ldma_init);
+  // There's no SINGLE_P2M_WORD define, so modify a SINGLE_P2M_BYTE descriptor
+  LDMA_Descriptor_t descriptor = LDMA_DESCRIPTOR_SINGLE_P2M_BYTE(
+    RAIL_TimerTick, TIMESTAMPS, MONITOR_NUM_SAMPLES);
+  descriptor.xfer.size = ldmaCtrlSizeWord;
+  LDMA_TransferCfg_t transfer = LDMA_TRANSFER_CFG_PERIPHERAL(ldma_prs_conn0);
+  LDMA_StartTransfer(dma_ch0, &transfer, &descriptor);
+
+  descriptor.xfer.srcAddr = (uint32_t) &(GPIO->P[port].DIN);
+  descriptor.xfer.dstAddr = (uint32_t) GPIO_VALUES;
+  transfer.ldmaReqSel = ldma_prs_conn1;
+  LDMA_StartTransfer(dma_ch1, &transfer, &descriptor);
+
+  return SL_PORT_MONITOR;
+}
+
+// Set up the monitor for a single pin. The monitor takes a single GPIO pin and
+// connects it to 2 PRS channels. One of the channels is inverted. Those two PRS
+// channels then each go to an LDMA via the LDMAXBAR (LDMA crossbar), which
+// causes one RAIL_TimerTick sample to be written to the appropriate array per
+// GPIO rising or falling edge.
+static sl_monitor_state_t sl_init_pin_monitor(uint8_t port, uint8_t pin)
+{
+  // Enable clocks
+  CMU_ClockEnable(cmuClock_GPIO, true);
+  CMU_ClockEnable(cmuClock_PRS, true);
+  CMU_ClockEnable(cmuClock_LDMA, true);
+#ifdef _CMU_CLKEN0_LDMAXBAR_SHIFT
+  CMU_ClockEnable(cmuClock_LDMAXBAR, true);
+#endif
+
+  // Reset the buffers from any previous operation.
+  memset(monitor_samples, 0xFFU, sizeof(monitor_samples));
+
+  // Allocate DMA channels based on RAIL_DMA_CHANNEL
+#if RAIL_DMA_CHANNEL == DMA_CHANNEL_DMADRV
+  Ecode_t dma_error = DMADRV_AllocateChannel(&dma_ch0, NULL);
+  if (dma_error != ECODE_EMDRV_DMADRV_OK) {
+    return SL_UNINITIALIZED;
+  }
+  dma_error = DMADRV_AllocateChannel(&dma_ch1, NULL);
+  if (dma_error != ECODE_EMDRV_DMADRV_OK) {
+    return SL_UNINITIALIZED;
+  }
+#elif RAIL_DMA_CHANNEL == DMA_CHANNEL_INVALID
+  // If RAIL doesn't use a DMA channel, take the first two
+  dma_ch0 = 0U;
+  dma_ch1 = 1U;
+#else
+  // If RAIL does have a channel, take the next two (mod DMA_CHAN_COUNT)
+  dma_ch0 = ((RAIL_DMA_CHANNEL + 1U) % DMA_CHAN_COUNT);
+  dma_ch1 = ((RAIL_DMA_CHANNEL + 2U) % DMA_CHAN_COUNT);
+#endif
+
+#if defined(_SILICON_LABS_32B_SERIES_1)
+  // Configure the PRS logic we need on Series 1
+  uint32_t source = (pin < 8U)
+                    ? PRS_CH_CTRL_SOURCESEL_GPIOL
+                    : PRS_CH_CTRL_SOURCESEL_GPIOH;
+  // Use prsEdgeBoth to only require one channel
+  PRS_SourceSignalSet(MONITOR_PRS_CH_0, source, pin, prsEdgeBoth);
+  PRS->DMAREQ0 = MONITOR_PRS_CH_0;
+  uint32_t ldma_prs_conn0 = ldmaPeripheralSignal_PRS_REQ0;
+
+  // The PRS handles GPIO interrupts, so we need to configure one for
+  // channel we're using.
+  GPIO_ExtIntConfig((GPIO_Port_TypeDef)port, pin, pin, false, false, false);
+
+  // Connect the DMA channels
+  LDMA_Init_t ldma_init = LDMA_INIT_DEFAULT;
+  LDMA_Init(&ldma_init);
+
+  LDMA_Descriptor_t descriptor = LDMA_DESCRIPTOR_SINGLE_P2M_BYTE(
+    RAIL_TimerTick, TOGGLES, MONITOR_NUM_SAMPLES * 2);
+  descriptor.xfer.size = ldmaCtrlSizeWord;
+  LDMA_TransferCfg_t transfer = LDMA_TRANSFER_CFG_PERIPHERAL(ldma_prs_conn0);
+  LDMA_StartTransfer(dma_ch0, &transfer, &descriptor);
+
+  initialState = GPIO_PinOutGet(port, pin);
+
 #elif defined(_SILICON_LABS_32B_SERIES_2)
 
   // Configure the PRS logic we need on Series 2
@@ -152,88 +273,158 @@ bool initMonitor(uint8_t port, uint8_t pin)
   PRS_ConnectConsumer(MONITOR_PRS_CH_1, prsTypeAsync, prsConsumerLDMA_REQUEST1);
   PRS_Combine(MONITOR_PRS_CH_1, MONITOR_PRS_CH_0, prsLogic_NOT_B);
 
-  ldmaPrsConn0 = ldmaPeripheralSignal_LDMAXBAR_PRSREQ0;
-  ldmaPrsConn1 = ldmaPeripheralSignal_LDMAXBAR_PRSREQ1;
-#else
-#error "Invalid Platform for GPIO Monitor"
-#endif
+  uint32_t ldma_prs_conn0 = ldmaPeripheralSignal_LDMAXBAR_PRSREQ0;
+  uint32_t ldma_prs_conn1 = ldmaPeripheralSignal_LDMAXBAR_PRSREQ1;
+
   // The PRS handles GPIO interrupts, so we need to configure one for
   // channel we're using.
   GPIO_ExtIntConfig((GPIO_Port_TypeDef)port, pin, pin, false, false, false);
 
   // Connect the DMA channels
-  LDMA_Init_t ldmaInit = LDMA_INIT_DEFAULT;
-  LDMA_Init(&ldmaInit);
+  LDMA_Init_t ldma_init = LDMA_INIT_DEFAULT;
+  LDMA_Init(&ldma_init);
   // There's no SINGLE_P2M_WORD define, so modify a SINGLE_P2M_BYTE descriptor
   LDMA_Descriptor_t descriptor = LDMA_DESCRIPTOR_SINGLE_P2M_BYTE(
-    RAIL_TimerTick, &rising[0], MONITOR_NUM_SAMPLES);
+    RAIL_TimerTick, RISING, MONITOR_NUM_SAMPLES);
   descriptor.xfer.size = ldmaCtrlSizeWord;
-  LDMA_TransferCfg_t transfer = LDMA_TRANSFER_CFG_PERIPHERAL(ldmaPrsConn0);
-  LDMA_StartTransfer(dmaCh0, &transfer, &descriptor);
+  LDMA_TransferCfg_t transfer = LDMA_TRANSFER_CFG_PERIPHERAL(ldma_prs_conn0);
+  LDMA_StartTransfer(dma_ch0, &transfer, &descriptor);
 
-  descriptor.xfer.dstAddr = (uint32_t) &falling[0];
-  transfer.ldmaReqSel = ldmaPrsConn1;
-  LDMA_StartTransfer(dmaCh1, &transfer, &descriptor);
+  descriptor.xfer.dstAddr = (uint32_t) FALLING;
+  transfer.ldmaReqSel = ldma_prs_conn1;
+  LDMA_StartTransfer(dma_ch1, &transfer, &descriptor);
 
-  return true;
+#else
+#error "Invalid Platform for GPIO Monitor"
+#endif
+  return SL_PIN_MONITOR;
 }
 
-void printMonitorData(sl_cli_command_arg_t *args)
+static void sl_print_port_monitor_data(sl_cli_command_arg_t *args)
 {
   responsePrintStart(sl_cli_get_command_string(args, 0));
-  printf("{Rising:0x%.8lx", rising[0]);
+  // rising and timestamps refer to the same data
+  printf("{Timestamps:%lu", TIMESTAMPS[0]);
+
   uint32_t samples = 1U;
   while ((samples < MONITOR_NUM_SAMPLES)
-         && (rising[samples] != 0xFFFFFFFFUL)) {
-    printf(" 0x%.8lx", rising[samples]);
+         && (RISING[samples] != 0xFFFFFFFFUL)) {
+    printf(" %lu", RISING[samples]);
     samples++;
   }
+
+  // Port monitor uses GPIO values and timestamps
+  printf("}{Values:0x%.8lx", GPIO_VALUES[0]);
+
+  uint32_t i = 1U;
+  while ((i < samples) && (FALLING[i] != 0xFFFFFFFFUL)) {
+    printf(" %.8lx", FALLING[i]);
+    i++;
+  }
+  printf("}}\n");
+}
+
+static void sl_print_pin_monitor_data(sl_cli_command_arg_t *args)
+{
+  responsePrintStart(sl_cli_get_command_string(args, 0));
+
+#if defined(_SILICON_LABS_32B_SERIES_1)
+  uint32_t samples = (initialState == 0U) ? 0U : 1U;
+  printf("{Rising:%lu", TOGGLES[samples]);
+  samples += 2U;
+
+  while ((samples < MONITOR_NUM_SAMPLES)
+         && (TOGGLES[samples] != 0xFFFFFFFFUL)) {
+    printf(" %lu", TOGGLES[samples]);
+    samples += 2U;
+  }
+
+  uint32_t i = (initialState == 0U) ? 1U : 0U;
+  printf("}{Falling:%lu", TOGGLES[i]);
+  i += 2U;
 
   // The GPIO may toggle while we're outputting falling samples. In order to
   // keep the data consistent, we need to limit the number of falling samples
   // to the number of rising samples, +1 if a falling sample happened first.
   // Loop over all of the equal samples, in case multiple toggles happened on
   // the same tick
+  while ((i < (samples + 2U)) && (TOGGLES[i] != 0xFFFFFFFFUL)) {
+    printf(" %lu", TOGGLES[i]);
+    i += 2U;
+  }
+#else
+  printf("{Rising:%lu", RISING[0]);
+
+  uint32_t samples = 1U;
+  while ((samples < MONITOR_NUM_SAMPLES)
+         && (RISING[samples] != 0xFFFFFFFFUL)) {
+    printf(" %lu", RISING[samples]);
+    samples++;
+  }
+
   uint32_t i = 0U;
+  // The GPIO may toggle while we're outputting falling samples. In order to
+  // keep the data consistent, we need to limit the number of falling samples
+  // to the number of rising samples, +1 if a falling sample happened first.
+  // Loop over all of the equal samples, in case multiple toggles happened on
+  // the same tick
   if (samples < MONITOR_NUM_SAMPLES) {
     do {
-      if (falling[i] < rising[i]) {
+      if (FALLING[i] < RISING[i]) {
         samples++;
         break;
       }
       i++;
-    } while (falling[i - 1] == rising[i - 1] && (i < samples));
+    } while ((FALLING[i - 1] == RISING[i - 1]) && (i < samples));
   }
 
-  printf("}{Falling:0x%.8lx", falling[0]);
+  // Pin monitor uses rising and falling edges
+  printf("}{Falling:%lu", FALLING[0]);
+
   i = 1U;
-  while ((i < samples) && falling[i] != 0xFFFFFFFFUL) {
-    printf(" 0x%.8lx", falling[i]);
+  while ((i < samples) && (FALLING[i] != 0xFFFFFFFFUL)) {
+    printf(" %lu", FALLING[i]);
     i++;
   }
+#endif
   printf("}}\n");
 }
 
-void printMonitorHelp(sl_cli_command_arg_t *args)
+static void sl_print_monitor_data(sl_cli_command_arg_t *args)
+{
+  if (sl_monitor_state == SL_PIN_MONITOR) {
+    sl_print_pin_monitor_data(args);
+  } else if (sl_monitor_state == SL_PORT_MONITOR) {
+    sl_print_port_monitor_data(args);
+  } else { // SL_UNINITIALIZED
+    responsePrintError(sl_cli_get_command_string(args, 0), 0x53,
+                       "The monitor is not initialized. Call 'init' before '%s'",
+                       sl_cli_get_argument_string(args, 0));
+  }
+}
+
+static void sl_print_monitor_help(sl_cli_command_arg_t *args)
 {
   RAILTEST_PRINTF("\nUse the following commands:\n \
-  '%s init' [port pin]- To setup monitor on a GPIO\n \
-  '%s get'            - To get GPIO rising and falling edges\n \
-  '%s stop'           - To disable\n",                \
+  '%s init' [port pin]    - To setup monitor on a single GPIO\n \
+  '%s portInit' [port pin]- To setup monitor on a whole GPIO port\n \
+  '%s get'                - To get GPIO rising and falling edges\n \
+  '%s stop'               - To disable\n",            \
+                  sl_cli_get_command_string(args, 0), \
                   sl_cli_get_command_string(args, 0), \
                   sl_cli_get_command_string(args, 0), \
                   sl_cli_get_command_string(args, 0));
 }
 
-void stopMonitor(void)
+static void sl_stop_monitor(void)
 {
   // Stop all LDMA transfers and deallocate the channels, but everything else
   // can be left as is. Leave clocks running, in case they are needed elsewhere
-  LDMA_StopTransfer(dmaCh0);
-  LDMA_StopTransfer(dmaCh1);
+  LDMA_StopTransfer(dma_ch0);
+  LDMA_StopTransfer(dma_ch1);
 #if RAIL_DMA_CHANNEL == DMA_CHANNEL_DMADRV
-  DMADRV_FreeChannel(dmaCh0);
-  DMADRV_FreeChannel(dmaCh1);
+  DMADRV_FreeChannel(dma_ch0);
+  DMADRV_FreeChannel(dma_ch1);
 #endif
 }
 
@@ -241,7 +432,7 @@ void monitorGpio(sl_cli_command_arg_t *args)
 {
   if ((sl_cli_get_argument_count(args) < 1)
       || (strcasecmp(sl_cli_get_argument_string(args, 0), "help") == 0)) {
-    printMonitorHelp(args);
+    sl_print_monitor_help(args);
     return;
   }
 
@@ -251,39 +442,49 @@ void monitorGpio(sl_cli_command_arg_t *args)
                          "Invalid parameters for 'init' - Need GPIO port and pin");
       return;
     }
+    sl_monitor_state = sl_init_pin_monitor(
+      strtoul(sl_cli_get_argument_string(args, 1), NULL, 0),
+      strtoul(sl_cli_get_argument_string(args, 2), NULL, 0));
 
-    init = initMonitor(strtoul(sl_cli_get_argument_string(args, 1), NULL, 0),
-                       strtoul(sl_cli_get_argument_string(args, 2), NULL, 0));
+    if (sl_monitor_state == SL_PIN_MONITOR) {
+      responsePrint(sl_cli_get_command_string(args, 0), "Status:Initialized");
+    } else {
+      responsePrintError(sl_cli_get_command_string(args, 0), 0x54,
+                         "Error during monitor initialization.");
+    }
+  } else if (strcasecmp(sl_cli_get_argument_string(args, 0), "portInit") == 0) {
+    if (sl_cli_get_argument_count(args) < 3) {
+      responsePrintError(sl_cli_get_command_string(args, 0), 0x53,
+                         "Invalid parameters for 'init' - Need GPIO port and pin");
+      return;
+    }
+    sl_monitor_state = sl_init_port_monitor(
+      strtoul(sl_cli_get_argument_string(args, 1), NULL, 0),
+      strtoul(sl_cli_get_argument_string(args, 2), NULL, 0));
 
-    if (init) {
+    if (sl_monitor_state == SL_PORT_MONITOR) {
       responsePrint(sl_cli_get_command_string(args, 0), "Status:Initialized");
     } else {
       responsePrintError(sl_cli_get_command_string(args, 0), 0x54,
                          "Error during monitor initialization.");
     }
   } else if (strcasecmp(sl_cli_get_argument_string(args, 0), "get") == 0) {
-    if (!init) {
-      responsePrintError(sl_cli_get_command_string(args, 0), 0x53,
-                         "The monitor is not initialized. Call 'init' before '%s'",
-                         sl_cli_get_argument_string(args, 0));
-      return;
-    }
-    printMonitorData(args);
+    sl_print_monitor_data(args);
   } else if (strcasecmp(sl_cli_get_argument_string(args, 0), "stop") == 0) {
-    if (!init) {
+    if (sl_monitor_state == SL_UNINITIALIZED) {
       responsePrintError(sl_cli_get_command_string(args, 0), 0x53,
                          "The monitor is not initialized. Call 'init' before '%s'",
                          sl_cli_get_argument_string(args, 0));
       return;
     }
-    stopMonitor();
+    sl_stop_monitor();
 
-    init = false;
+    sl_monitor_state = SL_UNINITIALIZED;
     responsePrint(sl_cli_get_command_string(args, 0), "Status:Stopped");
   } else {
     responsePrintError(sl_cli_get_command_string(args, 0), 0x53,
                        "%s is invalid option.",
                        sl_cli_get_argument_string(args, 0));
-    printMonitorHelp(args);
+    sl_print_monitor_help(args);
   }
 }

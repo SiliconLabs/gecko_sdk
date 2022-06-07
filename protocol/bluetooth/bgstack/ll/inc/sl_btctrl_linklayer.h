@@ -55,6 +55,19 @@ void sl_btctrl_init_periodic_adv();
 void sl_btctrl_init_periodic_scan();
 
 /**
+ * @brief Enable and initialize support for the PAWR advertiser.
+ * @param[in] num_adv Number of advertising sets supporting PAWR.
+ *       If set to zero, previously allocated PAWR sets are only freed.
+ * @return SL_STATUS_OK, or an appropriate error code.
+ */
+sl_status_t sl_btctrl_pawr_advertiser_configure(uint8_t max_pawr_sets);
+
+/**
+ * @brief Enable and initialize support for PAWR sync/receiver.
+ * @return SL_STATUS_OK, or an appropriate error code. */
+sl_status_t sl_btctrl_pawr_synchronizer_configure(void);
+
+/**
  * @brief Allocate memory for synchronized scanners
  *
  * @param num_scan Number of Periodic Scanners Allowed
@@ -118,6 +131,8 @@ void sl_btctrl_init_adv(void);
 
 void sl_btctrl_init_conn(void);
 
+void sl_btctrl_init_phy(void);
+
 void sl_btctrl_init_adv_ext(void);
 
 /**
@@ -127,5 +142,11 @@ void sl_btctrl_init_adv_ext(void);
 void sl_btctrl_init_scan_ext(void);
 
 void sl_btctrl_init_scan(void);
+
+/**
+ * @brief return true if controller is initialized
+ *
+ */
+bool sl_btctrl_is_initialized();
 
 #endif

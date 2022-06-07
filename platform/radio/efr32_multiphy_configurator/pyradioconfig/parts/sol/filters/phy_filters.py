@@ -26,7 +26,8 @@ class PhyFilters_Sol(IPhyFilter):
                                     'Phys_Studio_Base_Standard_SUNFSK',
                                     'Phys_Studio_Connect',
                                     'Phys_Studio_SUN_OQPSK',
-                                    'Phys_Studio_WiSUN_FSK',
+                                    'phys_studio_wisun_fan_1_0',
+                                    'phys_studio_wisun_han',
                                     'Phys_Studio_WiSUN_OFDM',
                                     ]
 

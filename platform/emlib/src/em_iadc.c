@@ -31,9 +31,9 @@
 #include "em_iadc.h"
 #if defined(IADC_COUNT) && (IADC_COUNT > 0)
 
-#include "em_assert.h"
+#include "sl_assert.h"
 #include "em_cmu.h"
-#include "em_common.h"
+#include "sl_common.h"
 #include <stddef.h>
 
 /***************************************************************************//**
@@ -381,7 +381,12 @@ void IADC_init(IADC_TypeDef *iadc,
         }
 
         // Compensate offset according to selected reference voltage.
-        offset *= 1.25f / (allConfigs->configs[config].vRef / 1000.0f);
+        if (allConfigs->configs[config].reference == iadcCfgReferenceInt1V2) {
+          // Internal reference voltage (VBGR) depends on the chip revision.
+          offset *= 1.25f / (IADC_getReferenceVoltage(allConfigs->configs[config].reference) / 1000.0f);
+        } else {
+          offset *= 1.25f / (allConfigs->configs[config].vRef / 1000.0f);
+        }
 
         // Compensate offset for systematic offset.
         offset = (offset * 4.0f) + (640.0f * (256.0f / iOsr));
@@ -406,38 +411,8 @@ void IADC_init(IADC_TypeDef *iadc,
 
 #if defined(_IADC_CFG_ADCMODE_HIGHACCURACY)
       case iadcCfgModeHighAccuracy:
-        switch (allConfigs->configs[config].reference) {
-          case iadcCfgReferenceInt1V2:
-            refVoltage = 1.21;
-            break;
-          case iadcCfgReferenceExt1V25:
-            refVoltage = 1.25;
-            break;
-#if defined(_IADC_CFG_REFSEL_VREF2P5)
-          case iadcCfgReferenceExt2V5:
-            refVoltage = 2.5;
-            break;
-#endif
-          case iadcCfgReferenceVddx:
-            refVoltage = 3.0;
-            break;
-          case iadcCfgReferenceVddX0P8Buf:
-            refVoltage = 2.4;
-            break;
-#if defined(_IADC_CFG_REFSEL_VREFBUF)
-          case iadcCfgReferenceBuf:
-            refVoltage = 1.25;
-            break;
-#endif
-#if defined(_IADC_CFG_REFSEL_VREF0P8BUF)
-          case iadcCfgReference0P8Buf:
-            refVoltage = 1.0;
-            break;
-#endif
-          default:
-            EFM_ASSERT(false);
-            break;
-        }
+        // Get reference voltage in volts
+        refVoltage = IADC_getReferenceVoltage(allConfigs->configs[config].reference) / 1000.0f;
 
         // Get OSR from config register
         osrValue = (iadc->CFG[config].CFG & _IADC_CFG_OSRHA_MASK) >> _IADC_CFG_OSRHA_SHIFT;
@@ -731,7 +706,7 @@ void IADC_setScanMask(IADC_TypeDef *iadc, uint32_t mask)
  *   Pointer to IADC peripheral register block.
  *
  * @param[in] id
- *   Id of scan table entry to add.
+ *   ID of scan table entry to add.
  *
  * @param[in] entry
  *   Pointer to scan table entry structure.
@@ -1096,6 +1071,70 @@ IADC_Result_t IADC_readScanResult(IADC_TypeDef *iadc)
                        >> _IADC_SCANFIFOCFG_ALIGNMENT_SHIFT;
   return IADC_ConvertRawDataToResult(iadc->SCANDATA,
                                      (IADC_Alignment_t) alignment);
+}
+
+/***************************************************************************//**
+ * @brief
+ *   Get reference voltage selection.
+ *
+ * @param[in] reference
+ *   IADC Reference selection.
+ *
+ * @return
+ *   IADC reference voltage in millivolts.
+ ******************************************************************************/
+uint32_t IADC_getReferenceVoltage(IADC_CfgReference_t reference)
+{
+  uint32_t refVoltage = 0;
+  // Get chip revision
+  SYSTEM_ChipRevision_TypeDef chipRev;
+  SYSTEM_ChipRevisionGet(&chipRev);
+  switch (reference) {
+    case iadcCfgReferenceInt1V2:
+#if defined(_SILICON_LABS_32B_SERIES_2_CONFIG_1)
+      if (chipRev.major == 2UL) {
+        if (chipRev.minor == 0UL) {
+          refVoltage = 1232;
+        } else {
+          refVoltage = 1180;
+        }
+      } else {
+        refVoltage = 1210;
+      }
+#else
+      refVoltage = 1210;
+#endif
+      break;
+    case iadcCfgReferenceExt1V25:
+      refVoltage = 1250;
+      break;
+#if defined(_IADC_CFG_REFSEL_VREF2P5)
+    case iadcCfgReferenceExt2V5:
+      refVoltage = 2500;
+      break;
+#endif
+    case iadcCfgReferenceVddx:
+      refVoltage = 3000;
+      break;
+    case iadcCfgReferenceVddX0P8Buf:
+      refVoltage = 2400;
+      break;
+#if defined(_IADC_CFG_REFSEL_VREFBUF)
+    case iadcCfgReferenceBuf:
+      refVoltage = 12500;
+      break;
+#endif
+#if defined(_IADC_CFG_REFSEL_VREF0P8BUF)
+    case iadcCfgReference0P8Buf:
+      refVoltage = 1000;
+      break;
+#endif
+    default:
+      EFM_ASSERT(false);
+      break;
+  }
+
+  return refVoltage;
 }
 
 /** @} (end addtogroup iadc) */

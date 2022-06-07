@@ -31,6 +31,8 @@ extern "C" {
 
 
 
+
+
 /**
  * @addtogroup sl_btmesh_node Mesh Node
  * @{
@@ -140,7 +142,6 @@ extern "C" {
 #define sl_btmesh_cmd_node_get_element_seqnum_id                         0x1d140028
 #define sl_btmesh_cmd_node_set_model_option_id                           0x1e140028
 #define sl_btmesh_cmd_node_get_local_dcd_id                              0x1f140028
-#define sl_btmesh_cmd_node_erase_mesh_nvm_id                             0x20140028
 #define sl_btmesh_cmd_node_power_off_id                                  0x21140028
 #define sl_btmesh_cmd_node_set_adv_phy_id                                0x22140028
 #define sl_btmesh_cmd_node_get_adv_phy_id                                0x23140028
@@ -179,7 +180,6 @@ extern "C" {
 #define sl_btmesh_rsp_node_get_element_seqnum_id                         0x1d140028
 #define sl_btmesh_rsp_node_set_model_option_id                           0x1e140028
 #define sl_btmesh_rsp_node_get_local_dcd_id                              0x1f140028
-#define sl_btmesh_rsp_node_erase_mesh_nvm_id                             0x20140028
 #define sl_btmesh_rsp_node_power_off_id                                  0x21140028
 #define sl_btmesh_rsp_node_set_adv_phy_id                                0x22140028
 #define sl_btmesh_rsp_node_get_adv_phy_id                                0x23140028
@@ -479,9 +479,7 @@ typedef struct sl_btmesh_evt_node_input_oob_request_s sl_btmesh_evt_node_input_o
  ******************************************************************************/
 PACKSTRUCT( struct sl_btmesh_evt_node_provisioning_started_s
 {
-  uint16_t result; /**< Result code
-                          - <b>0:</b> success
-                          - <b>Non-zero:</b> an error has occurred */
+  uint16_t result; /**< SL_STATUS_OK if successful. Error code otherwise. */
 });
 
 typedef struct sl_btmesh_evt_node_provisioning_started_s sl_btmesh_evt_node_provisioning_started_t;
@@ -502,9 +500,7 @@ typedef struct sl_btmesh_evt_node_provisioning_started_s sl_btmesh_evt_node_prov
  ******************************************************************************/
 PACKSTRUCT( struct sl_btmesh_evt_node_provisioning_failed_s
 {
-  uint16_t result; /**< Result code
-                          - <b>0:</b> success
-                          - <b>Non-zero:</b> an error has occurred */
+  uint16_t result; /**< SL_STATUS_OK if successful. Error code otherwise. */
 });
 
 typedef struct sl_btmesh_evt_node_provisioning_failed_s sl_btmesh_evt_node_provisioning_failed_t;
@@ -841,9 +837,7 @@ typedef struct sl_btmesh_evt_node_local_dcd_data_s sl_btmesh_evt_node_local_dcd_
  ******************************************************************************/
 PACKSTRUCT( struct sl_btmesh_evt_node_local_dcd_data_end_s
 {
-  uint16_t result; /**< Result code
-                          - <b>0:</b> success
-                          - <b>Non-zero:</b> an error has occurred */
+  uint16_t result; /**< SL_STATUS_OK if successful. Error code otherwise. */
 });
 
 typedef struct sl_btmesh_evt_node_local_dcd_data_end_s sl_btmesh_evt_node_local_dcd_data_end_t;
@@ -911,6 +905,9 @@ sl_status_t sl_btmesh_node_init();
  *
  *
  * @return SL_STATUS_OK if successful. Error code otherwise.
+ *
+ * @b Events
+ * 
  *
  ******************************************************************************/
 sl_status_t sl_btmesh_node_set_exportable_keys();
@@ -1494,19 +1491,6 @@ sl_status_t sl_btmesh_node_set_model_option(uint16_t elem_index,
  *
  ******************************************************************************/
 sl_status_t sl_btmesh_node_get_local_dcd(uint8_t page);
-
-/***************************************************************************//**
- *
- * <b>Deprecated</b> . Use @ref sl_btmesh_node_reset instead.
- *
- * Delete all NVM keys and their corresponding values from the Bluetooth Mesh
- * specific NVM region.
- *
- *
- * @return SL_STATUS_OK if successful. Error code otherwise.
- *
- ******************************************************************************/
-SL_BGAPI_DEPRECATED sl_status_t sl_btmesh_node_erase_mesh_nvm();
 
 /***************************************************************************//**
  *
@@ -2182,9 +2166,7 @@ typedef struct sl_btmesh_evt_prov_key_refresh_node_update_s sl_btmesh_evt_prov_k
 PACKSTRUCT( struct sl_btmesh_evt_prov_key_refresh_complete_s
 {
   uint16_t key;    /**< Network key index */
-  uint16_t result; /**< Result code
-                          - <b>0:</b> success
-                          - <b>Non-zero:</b> an error has occurred */
+  uint16_t result; /**< SL_STATUS_OK if successful. Error code otherwise. */
 });
 
 typedef struct sl_btmesh_evt_prov_key_refresh_complete_s sl_btmesh_evt_prov_key_refresh_complete_t;
@@ -2207,9 +2189,7 @@ typedef struct sl_btmesh_evt_prov_key_refresh_complete_s sl_btmesh_evt_prov_key_
  ******************************************************************************/
 PACKSTRUCT( struct sl_btmesh_evt_prov_add_ddb_entry_complete_s
 {
-  uint16_t result; /**< Result code
-                          - <b>0:</b> success
-                          - <b>Non-zero:</b> an error has occurred */
+  uint16_t result; /**< SL_STATUS_OK if successful. Error code otherwise. */
   uuid_128 uuid;   /**< UUID of the Device */
 });
 
@@ -2233,9 +2213,7 @@ typedef struct sl_btmesh_evt_prov_add_ddb_entry_complete_s sl_btmesh_evt_prov_ad
  ******************************************************************************/
 PACKSTRUCT( struct sl_btmesh_evt_prov_delete_ddb_entry_complete_s
 {
-  uint16_t result; /**< Result code
-                          - <b>0:</b> success
-                          - <b>Non-zero:</b> an error has occurred */
+  uint16_t result; /**< SL_STATUS_OK if successful. Error code otherwise. */
   uuid_128 uuid;   /**< UUID of the Device */
 });
 
@@ -2261,9 +2239,7 @@ typedef struct sl_btmesh_evt_prov_delete_ddb_entry_complete_s sl_btmesh_evt_prov
  ******************************************************************************/
 PACKSTRUCT( struct sl_btmesh_evt_prov_initialization_failed_s
 {
-  uint16_t result; /**< Result code
-                          - <b>0:</b> success
-                          - <b>Non-zero:</b> an error has occurred */
+  uint16_t result; /**< SL_STATUS_OK if successful. Error code otherwise. */
 });
 
 typedef struct sl_btmesh_evt_prov_initialization_failed_s sl_btmesh_evt_prov_initialization_failed_t;
@@ -2363,6 +2339,9 @@ sl_status_t sl_btmesh_prov_scan_unprov_beacons();
  *
  * @return SL_STATUS_OK if successful. Error code otherwise.
  *
+ * @b Events
+ * 
+ *
  ******************************************************************************/
 sl_status_t sl_btmesh_prov_create_provisioning_session(uint16_t netkey_index,
                                                        uuid_128 uuid,
@@ -2438,6 +2417,9 @@ sl_status_t sl_btmesh_prov_provision_gatt_device(uuid_128 uuid,
  *
  * @return SL_STATUS_OK if successful. Error code otherwise.
  *
+ * @b Events
+ * 
+ *
  ******************************************************************************/
 sl_status_t sl_btmesh_prov_continue_provisioning(uuid_128 uuid);
 
@@ -2459,6 +2441,9 @@ sl_status_t sl_btmesh_prov_continue_provisioning(uuid_128 uuid);
  *
  * @return SL_STATUS_OK if successful. Error code otherwise.
  *
+ * @b Events
+ * 
+ *
  ******************************************************************************/
 sl_status_t sl_btmesh_prov_abort_provisioning(uuid_128 uuid, uint8_t reason);
 
@@ -2472,6 +2457,9 @@ sl_status_t sl_btmesh_prov_abort_provisioning(uuid_128 uuid, uint8_t reason);
  *   the node.
  *
  * @return SL_STATUS_OK if successful. Error code otherwise.
+ *
+ * @b Events
+ * 
  *
  ******************************************************************************/
 sl_status_t sl_btmesh_prov_set_device_address(uuid_128 uuid, uint16_t address);
@@ -3263,9 +3251,7 @@ typedef struct sl_btmesh_evt_vendor_model_receive_s sl_btmesh_evt_vendor_model_r
  ******************************************************************************/
 PACKSTRUCT( struct sl_btmesh_evt_vendor_model_send_complete_s
 {
-  uint16_t result; /**< Result code
-                          - <b>0:</b> success
-                          - <b>Non-zero:</b> an error has occurred */
+  uint16_t result; /**< SL_STATUS_OK if successful. Error code otherwise. */
   uint16_t handle; /**< Tracking handle for the message sending attempt as
                         reported by @ref sl_btmesh_vendor_model_send_tracked or
                         @ref sl_btmesh_vendor_model_set_publication_tracked
@@ -3578,11 +3564,11 @@ sl_status_t sl_btmesh_vendor_model_set_publication_tracked(uint16_t elem_index,
  * @brief Receiving a Health Server fault status message generates this event
  *
  * The Client model may receive a status message because:
- *   - \* it made a @ref sl_btmesh_health_client_get to which a Server model
+ *   - * it made a @ref sl_btmesh_health_client_get to which a Server model
  *     responded, or
- *   - \* it made a @ref sl_btmesh_health_client_clear to which a Server model
+ *   - * it made a @ref sl_btmesh_health_client_clear to which a Server model
  *     responded, or
- *   - \* it made a @ref sl_btmesh_health_client_test to which a Server model
+ *   - * it made a @ref sl_btmesh_health_client_test to which a Server model
  *     responded.
  */
 
@@ -3694,7 +3680,8 @@ typedef struct sl_btmesh_evt_health_client_server_status_attention_s sl_btmesh_e
  *   request
  * @param[in] vendor_id Bluetooth vendor ID used in the request
  *
- * @return SL_STATUS_OK if successful. Error code otherwise.
+ * @return If an error occurs locally, (for instance, because of invalid
+ *   parameters) an errorcode parameter is returned immediately.
  *
  ******************************************************************************/
 sl_status_t sl_btmesh_health_client_get(uint16_t server_address,
@@ -3719,7 +3706,8 @@ sl_status_t sl_btmesh_health_client_get(uint16_t server_address,
  * @param[in] vendor_id Bluetooth vendor ID used in the request
  * @param[in] reliable If non-zero, a reliable model message is used.
  *
- * @return SL_STATUS_OK if successful. Error code otherwise.
+ * @return If an error occurs locally (for instance, because of invalid
+ *   parameters), an errorcode parameter is returned immediately.
  *
  ******************************************************************************/
 sl_status_t sl_btmesh_health_client_clear(uint16_t server_address,
@@ -3742,7 +3730,8 @@ sl_status_t sl_btmesh_health_client_clear(uint16_t server_address,
  * @param[in] vendor_id Bluetooth vendor ID used in the request
  * @param[in] reliable If non-zero, a reliable model message is used.
  *
- * @return SL_STATUS_OK if successful. Error code otherwise.
+ * @return If an error occurs locally (for instance, because of invalid
+ *   parameters) an errorcode parameter is returned immediately.
  *
  ******************************************************************************/
 sl_status_t sl_btmesh_health_client_test(uint16_t server_address,
@@ -3767,7 +3756,8 @@ sl_status_t sl_btmesh_health_client_test(uint16_t server_address,
  * @param[in] appkey_index The application key index to use in encrypting the
  *   request
  *
- * @return SL_STATUS_OK if successful. Error code otherwise.
+ * @return If an error occurs locally, (for instance, because of invalid
+ *   parameters) an errorcode parameter is returned immediately.
  *
  ******************************************************************************/
 sl_status_t sl_btmesh_health_client_get_period(uint16_t server_address,
@@ -3792,7 +3782,8 @@ sl_status_t sl_btmesh_health_client_get_period(uint16_t server_address,
  * @param[in] period Health period divisor value
  * @param[in] reliable If non-zero, a reliable model message is used.
  *
- * @return SL_STATUS_OK if successful. Error code otherwise.
+ * @return If an error occurs locally (for instance, because of invalid
+ *   parameters), an errorcode parameter is returned immediately.
  *
  ******************************************************************************/
 sl_status_t sl_btmesh_health_client_set_period(uint16_t server_address,
@@ -3817,7 +3808,8 @@ sl_status_t sl_btmesh_health_client_set_period(uint16_t server_address,
  * @param[in] appkey_index The application key index to use in encrypting the
  *   request
  *
- * @return SL_STATUS_OK if successful. Error code otherwise.
+ * @return If an error occurs locally (for instance, because of invalid
+ *   parameters), an errorcode parameter is returned immediately.
  *
  ******************************************************************************/
 sl_status_t sl_btmesh_health_client_get_attention(uint16_t server_address,
@@ -3842,7 +3834,8 @@ sl_status_t sl_btmesh_health_client_get_attention(uint16_t server_address,
  * @param[in] attention_sec Attention timer period in seconds
  * @param[in] reliable If non-zero, a reliable model message is used.
  *
- * @return SL_STATUS_OK if successful. Error code otherwise.
+ * @return If an error occurs locally (for instance, because of invalid
+ *   parameters), an errorcode parameter is returned immediately.
  *
  ******************************************************************************/
 sl_status_t sl_btmesh_health_client_set_attention(uint16_t server_address,
@@ -3981,7 +3974,8 @@ sl_status_t sl_btmesh_health_server_clear_fault(uint16_t elem_index,
  *   request.
  * @param[in] vendor_id Bluetooth vendor ID used in the request
  *
- * @return SL_STATUS_OK if successful. Error code otherwise.
+ * @return If an error occurs locally (for instance, because of invalid
+ *   parameters), an errorcode parameter is returned immediately.
  *
  ******************************************************************************/
 sl_status_t sl_btmesh_health_server_send_test_response(uint16_t client_address,
@@ -5339,9 +5333,7 @@ typedef struct sl_btmesh_evt_test_replay_protection_list_entry_cleared_s sl_btme
  ******************************************************************************/
 PACKSTRUCT( struct sl_btmesh_evt_test_replay_protection_list_saved_s
 {
-  uint16_t result;      /**< Result code
-                               - <b>0:</b> success
-                               - <b>Non-zero:</b> an error has occurred */
+  uint16_t result;      /**< SL_STATUS_OK if successful. Error code otherwise. */
   uint16_t saved_count; /**< Number of entries saved successfully */
   uint16_t total_count; /**< Number of entries in the list in total */
 });
@@ -7009,9 +7001,7 @@ typedef struct sl_btmesh_evt_config_client_request_modified_s sl_btmesh_evt_conf
  ******************************************************************************/
 PACKSTRUCT( struct sl_btmesh_evt_config_client_netkey_status_s
 {
-  uint16_t result; /**< Result code
-                          - <b>0:</b> success
-                          - <b>Non-zero:</b> an error has occurred */
+  uint16_t result; /**< SL_STATUS_OK if successful. Error code otherwise. */
   uint32_t handle; /**< Request handle */
 });
 
@@ -7061,9 +7051,7 @@ typedef struct sl_btmesh_evt_config_client_netkey_list_s sl_btmesh_evt_config_cl
  ******************************************************************************/
 PACKSTRUCT( struct sl_btmesh_evt_config_client_netkey_list_end_s
 {
-  uint16_t result; /**< Result code
-                          - <b>0:</b> success
-                          - <b>Non-zero:</b> an error has occurred */
+  uint16_t result; /**< SL_STATUS_OK if successful. Error code otherwise. */
   uint32_t handle; /**< Request handle */
 });
 
@@ -7088,9 +7076,7 @@ typedef struct sl_btmesh_evt_config_client_netkey_list_end_s sl_btmesh_evt_confi
  ******************************************************************************/
 PACKSTRUCT( struct sl_btmesh_evt_config_client_appkey_status_s
 {
-  uint16_t result; /**< Result code
-                          - <b>0:</b> success
-                          - <b>Non-zero:</b> an error has occurred */
+  uint16_t result; /**< SL_STATUS_OK if successful. Error code otherwise. */
   uint32_t handle; /**< Request handle */
 });
 
@@ -7141,9 +7127,7 @@ typedef struct sl_btmesh_evt_config_client_appkey_list_s sl_btmesh_evt_config_cl
  ******************************************************************************/
 PACKSTRUCT( struct sl_btmesh_evt_config_client_appkey_list_end_s
 {
-  uint16_t result; /**< Result code
-                          - <b>0:</b> success
-                          - <b>Non-zero:</b> an error has occurred */
+  uint16_t result; /**< SL_STATUS_OK if successful. Error code otherwise. */
   uint32_t handle; /**< Request handle */
 });
 
@@ -7166,9 +7150,7 @@ typedef struct sl_btmesh_evt_config_client_appkey_list_end_s sl_btmesh_evt_confi
  ******************************************************************************/
 PACKSTRUCT( struct sl_btmesh_evt_config_client_binding_status_s
 {
-  uint16_t result; /**< Result code
-                          - <b>0:</b> success
-                          - <b>Non-zero:</b> an error has occurred */
+  uint16_t result; /**< SL_STATUS_OK if successful. Error code otherwise. */
   uint32_t handle; /**< Request handle */
 });
 
@@ -7218,9 +7200,7 @@ typedef struct sl_btmesh_evt_config_client_bindings_list_s sl_btmesh_evt_config_
  ******************************************************************************/
 PACKSTRUCT( struct sl_btmesh_evt_config_client_bindings_list_end_s
 {
-  uint16_t result; /**< Result code
-                          - <b>0:</b> success
-                          - <b>Non-zero:</b> an error has occurred */
+  uint16_t result; /**< SL_STATUS_OK if successful. Error code otherwise. */
   uint32_t handle; /**< Request handle */
 });
 
@@ -7244,10 +7224,8 @@ typedef struct sl_btmesh_evt_config_client_bindings_list_end_s sl_btmesh_evt_con
  ******************************************************************************/
 PACKSTRUCT( struct sl_btmesh_evt_config_client_model_pub_status_s
 {
-  uint16_t result;                 /**< Result code
-                                          - <b>0:</b> success
-                                          - <b>Non-zero:</b> an error has
-                                            occurred */
+  uint16_t result;                 /**< SL_STATUS_OK if successful. Error code
+                                        otherwise. */
   uint32_t handle;                 /**< Request handle */
   uint16_t address;                /**< The address to publish to. If this
                                         address is the unassigned address, the
@@ -7292,9 +7270,7 @@ typedef struct sl_btmesh_evt_config_client_model_pub_status_s sl_btmesh_evt_conf
  ******************************************************************************/
 PACKSTRUCT( struct sl_btmesh_evt_config_client_model_sub_status_s
 {
-  uint16_t result; /**< Result code
-                          - <b>0:</b> success
-                          - <b>Non-zero:</b> an error has occurred */
+  uint16_t result; /**< SL_STATUS_OK if successful. Error code otherwise. */
   uint32_t handle; /**< Request handle */
 });
 
@@ -7345,9 +7321,7 @@ typedef struct sl_btmesh_evt_config_client_subs_list_s sl_btmesh_evt_config_clie
  ******************************************************************************/
 PACKSTRUCT( struct sl_btmesh_evt_config_client_subs_list_end_s
 {
-  uint16_t result; /**< Result code
-                          - <b>0:</b> success
-                          - <b>Non-zero:</b> an error has occurred */
+  uint16_t result; /**< SL_STATUS_OK if successful. Error code otherwise. */
   uint32_t handle; /**< Request handle */
 });
 
@@ -7370,9 +7344,8 @@ typedef struct sl_btmesh_evt_config_client_subs_list_end_s sl_btmesh_evt_config_
  ******************************************************************************/
 PACKSTRUCT( struct sl_btmesh_evt_config_client_heartbeat_pub_status_s
 {
-  uint16_t result;              /**< Result code
-                                       - <b>0:</b> success
-                                       - <b>Non-zero:</b> an error has occurred */
+  uint16_t result;              /**< SL_STATUS_OK if successful. Error code
+                                     otherwise. */
   uint32_t handle;              /**< Request handle */
   uint16_t destination_address; /**< Heartbeat publication destination address. */
   uint16_t netkey_index;        /**< Index of the network key used to encrypt
@@ -7404,9 +7377,8 @@ typedef struct sl_btmesh_evt_config_client_heartbeat_pub_status_s sl_btmesh_evt_
  ******************************************************************************/
 PACKSTRUCT( struct sl_btmesh_evt_config_client_heartbeat_sub_status_s
 {
-  uint16_t result;              /**< Result code
-                                       - <b>0:</b> success
-                                       - <b>Non-zero:</b> an error has occurred */
+  uint16_t result;              /**< SL_STATUS_OK if successful. Error code
+                                     otherwise. */
   uint32_t handle;              /**< Request handle */
   uint16_t source_address;      /**< Source address for heartbeat messages */
   uint16_t destination_address; /**< Destination address for heartbeat messages */
@@ -7439,9 +7411,7 @@ typedef struct sl_btmesh_evt_config_client_heartbeat_sub_status_s sl_btmesh_evt_
  ******************************************************************************/
 PACKSTRUCT( struct sl_btmesh_evt_config_client_beacon_status_s
 {
-  uint16_t result; /**< Result code
-                          - <b>0:</b> success
-                          - <b>Non-zero:</b> an error has occurred */
+  uint16_t result; /**< SL_STATUS_OK if successful. Error code otherwise. */
   uint32_t handle; /**< Request handle */
   uint8_t  value;  /**< Secure network beacon state of the node. Valid values
                         are:
@@ -7468,9 +7438,7 @@ typedef struct sl_btmesh_evt_config_client_beacon_status_s sl_btmesh_evt_config_
  ******************************************************************************/
 PACKSTRUCT( struct sl_btmesh_evt_config_client_default_ttl_status_s
 {
-  uint16_t result; /**< Result code
-                          - <b>0:</b> success
-                          - <b>Non-zero:</b> an error has occurred */
+  uint16_t result; /**< SL_STATUS_OK if successful. Error code otherwise. */
   uint32_t handle; /**< Request handle */
   uint8_t  value;  /**< Default TTL value. Valid value range is from 2 to 127
                         for relayed PDUs, and 0 to indicate non-relayed PDUs. */
@@ -7495,9 +7463,7 @@ typedef struct sl_btmesh_evt_config_client_default_ttl_status_s sl_btmesh_evt_co
  ******************************************************************************/
 PACKSTRUCT( struct sl_btmesh_evt_config_client_gatt_proxy_status_s
 {
-  uint16_t result; /**< Result code
-                          - <b>0:</b> success
-                          - <b>Non-zero:</b> an error has occurred */
+  uint16_t result; /**< SL_STATUS_OK if successful. Error code otherwise. */
   uint32_t handle; /**< Request handle */
   uint8_t  value;  /**< GATT proxy value of the node. Valid values are:
                           - 0: GATT proxy feature is disabled
@@ -7524,10 +7490,8 @@ typedef struct sl_btmesh_evt_config_client_gatt_proxy_status_s sl_btmesh_evt_con
  ******************************************************************************/
 PACKSTRUCT( struct sl_btmesh_evt_config_client_relay_status_s
 {
-  uint16_t result;                 /**< Result code
-                                          - <b>0:</b> success
-                                          - <b>Non-zero:</b> an error has
-                                            occurred */
+  uint16_t result;                 /**< SL_STATUS_OK if successful. Error code
+                                        otherwise. */
   uint32_t handle;                 /**< Request handle */
   uint8_t  relay;                  /**< Relay state of the node. Valid values
                                         are as follows:
@@ -7563,9 +7527,8 @@ typedef struct sl_btmesh_evt_config_client_relay_status_s sl_btmesh_evt_config_c
  ******************************************************************************/
 PACKSTRUCT( struct sl_btmesh_evt_config_client_network_transmit_status_s
 {
-  uint16_t result;               /**< Result code
-                                        - <b>0:</b> success
-                                        - <b>Non-zero:</b> an error has occurred */
+  uint16_t result;               /**< SL_STATUS_OK if successful. Error code
+                                      otherwise. */
   uint32_t handle;               /**< Request handle */
   uint8_t  transmit_count;       /**< Network transmit count. Valid values range
                                       from 1 to 8; default value is 1 (single
@@ -7596,9 +7559,7 @@ typedef struct sl_btmesh_evt_config_client_network_transmit_status_s sl_btmesh_e
  ******************************************************************************/
 PACKSTRUCT( struct sl_btmesh_evt_config_client_identity_status_s
 {
-  uint16_t result; /**< Result code
-                          - <b>0:</b> success
-                          - <b>Non-zero:</b> an error has occurred */
+  uint16_t result; /**< SL_STATUS_OK if successful. Error code otherwise. */
   uint32_t handle; /**< Request handle */
   uint8_t  value;  /**< Identity state of the node for the used network index.
                         Valid values are as follows:
@@ -7626,9 +7587,7 @@ typedef struct sl_btmesh_evt_config_client_identity_status_s sl_btmesh_evt_confi
  ******************************************************************************/
 PACKSTRUCT( struct sl_btmesh_evt_config_client_friend_status_s
 {
-  uint16_t result; /**< Result code
-                          - <b>0:</b> success
-                          - <b>Non-zero:</b> an error has occurred */
+  uint16_t result; /**< SL_STATUS_OK if successful. Error code otherwise. */
   uint32_t handle; /**< Request handle */
   uint8_t  value;  /**< Friend value to set. Valid values are:
                           - 0: Friend feature is not enabled
@@ -7655,9 +7614,7 @@ typedef struct sl_btmesh_evt_config_client_friend_status_s sl_btmesh_evt_config_
  ******************************************************************************/
 PACKSTRUCT( struct sl_btmesh_evt_config_client_key_refresh_phase_status_s
 {
-  uint16_t result;       /**< Result code
-                                - <b>0:</b> success
-                                - <b>Non-zero:</b> an error has occurred */
+  uint16_t result;       /**< SL_STATUS_OK if successful. Error code otherwise. */
   uint32_t handle;       /**< Request handle */
   uint16_t netkey_index; /**< Network key index for which the state applies */
   uint8_t  value;        /**< Key refresh phase state of the node for the given
@@ -7686,9 +7643,8 @@ typedef struct sl_btmesh_evt_config_client_key_refresh_phase_status_s sl_btmesh_
  ******************************************************************************/
 PACKSTRUCT( struct sl_btmesh_evt_config_client_lpn_polltimeout_status_s
 {
-  uint16_t result;          /**< Result code
-                                   - <b>0:</b> success
-                                   - <b>Non-zero:</b> an error has occurred */
+  uint16_t result;          /**< SL_STATUS_OK if successful. Error code
+                                 otherwise. */
   uint32_t handle;          /**< Request handle */
   uint32_t poll_timeout_ms; /**< Poll timeout value, in milliseconds, for the
                                  specified LPN. The value reported is zero if
@@ -7743,9 +7699,7 @@ typedef struct sl_btmesh_evt_config_client_dcd_data_s sl_btmesh_evt_config_clien
  ******************************************************************************/
 PACKSTRUCT( struct sl_btmesh_evt_config_client_dcd_data_end_s
 {
-  uint16_t result; /**< Result code
-                          - <b>0:</b> success
-                          - <b>Non-zero:</b> an error has occurred */
+  uint16_t result; /**< SL_STATUS_OK if successful. Error code otherwise. */
   uint32_t handle; /**< Request handle */
 });
 
@@ -7768,9 +7722,7 @@ typedef struct sl_btmesh_evt_config_client_dcd_data_end_s sl_btmesh_evt_config_c
  ******************************************************************************/
 PACKSTRUCT( struct sl_btmesh_evt_config_client_reset_status_s
 {
-  uint16_t result; /**< Result code
-                          - <b>0:</b> success
-                          - <b>Non-zero:</b> an error has occurred */
+  uint16_t result; /**< SL_STATUS_OK if successful. Error code otherwise. */
   uint32_t handle; /**< Request handle */
 });
 

@@ -65,6 +65,9 @@ extern const app_enum_t app_wisun_phy_reg_domain_enum[];
 /// Network size enum
 extern const app_enum_t app_wisun_nw_size_enum[];
 
+/// Regulation enum
+extern const app_enum_t app_regulation_enum[];
+
 // -----------------------------------------------------------------------------
 //                          Public Function Declarations
 // -----------------------------------------------------------------------------
@@ -110,9 +113,10 @@ const char * app_wisun_trace_util_nw_size_to_str(const uint32_t val);
  * @brief Swapping short unsigned integer endianess
  * @details It swaps the value pointed.
  * @param[in] num The swappng number
- * @return uint16_t integer 
+ * @return uint16_t integer
  *****************************************************************************/
-static inline uint16_t app_wisun_trace_swap_u16(uint16_t num) {
+static inline uint16_t app_wisun_trace_swap_u16(uint16_t num)
+{
   return (((num & 0xFF) << 8) | ((num & 0xFF00) >> 8));
 }
 

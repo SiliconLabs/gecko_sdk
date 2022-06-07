@@ -215,32 +215,68 @@ class Base_RM_Register(IRegMapRegister):
             outFH.write(u"    '{}',\n".format(self.fullname))
             outFH.write(u"      # {}\n".format(self.getDesc()))
 
-    def dump(self, outFH=None, valueDict=None):
+    def dump(self, outFH=None, valueDict=None, ignoreFailures=False):
         if self.isReadable():
             if outFH is None:
                 outFH = sys.stdout
             if valueDict is None:
                 valueDict = {}
-            regValue = self.io
-            outFH.write(u"    ('{}', {:#010x}),\n".format(self.fullname, regValue))
-            outFH.write(u"      # {}\n".format(self.getDesc()))
-            valueDict[self.fullname] = regValue
-            fieldCommentList = []
-            for key in sorted(self.zz_fdict):
-                self.zz_fdict[key].dump(regValue, fieldCommentList)
-            for msb, fullname, line in sorted(fieldCommentList, reverse=True):
-                outFH.write(line)
+            # The initialization could fall back to simple read function,
+            # so inspect the return type.  The old method will raise an
+            # exception here.
+            if ignoreFailures:
+                self._c_log_read()
+                self._py_log_read()
+                result = self.zz_rmio.dumpRegister(self)
+            else:
+                result = self.io
 
-    def dump_field(self, outFH, valueDict, field_name):
+            if isinstance(result, list):
+                [errMsg, regValue] = result
+            else:
+                errMsg = ""
+                regValue = result
+
+            if errMsg == "":
+                # read was successful, so log register and field details
+                outFH.write(u"    ('{}', {:#010x}),\n".format(self.fullname, regValue))
+                outFH.write(u"      # {}\n".format(self.getDesc()))
+                valueDict[self.fullname] = regValue
+                fieldCommentList = []
+                for key in sorted(self.zz_fdict):
+                    self.zz_fdict[key].dump(regValue, fieldCommentList)
+                for msb, fullname, line in sorted(fieldCommentList, reverse=True):
+                    outFH.write(line)
+            else:
+                # read failed
+                outFH.write(u"    # skipping '{}' due to access error\n".format(self.fullname))
+
+    def dump_field(self, outFH, valueDict, field_name, ignoreFailures=False):
         if self.isReadable():
-            regValue = self.io
-            fieldObj = self.zz_fdict[field_name]
-            fieldValue = GetFieldValue(regValue, fieldObj.bitOffset, fieldObj.bitWidth)
-            outFH.write(u"    ('{}.{}', {:#x}),\n".format(self.fullname,
-                                                          field_name,
-                                                          fieldValue))
-            outFH.write(u"      # {}\n".format(self.getDesc()))
-            valueDict[self.fullname + '.' + field_name] = fieldValue
-            fieldCommentList = []
-            fieldObj.dump(regValue, fieldCommentList)
-            outFH.write(fieldCommentList[0][2])
+            if ignoreFailures:
+                self._c_log_read()
+                self._py_log_read()
+                result = self.zz_rmio.dumpRegister(self)
+            else:
+                result = self.io
+            if isinstance(result, list):
+                [errMsg, regValue] = result
+            else:
+                errMsg = ""
+                regValue = result
+
+            if errMsg == "":
+                # read was successful, so log field value and details
+                fieldObj = self.zz_fdict[field_name]
+                fieldValue = GetFieldValue(regValue, fieldObj.bitOffset, fieldObj.bitWidth)
+                outFH.write(u"    ('{}.{}', {:#x}),\n".format(self.fullname,
+                                                              field_name,
+                                                              fieldValue))
+                outFH.write(u"      # {}\n".format(self.getDesc()))
+                valueDict[self.fullname + '.' + field_name] = fieldValue
+                fieldCommentList = []
+                fieldObj.dump(regValue, fieldCommentList)
+                outFH.write(fieldCommentList[0][2])
+            else:
+                # read failed
+                outFH.write(u"    # skipping '{}.{}' due to access error\n".format(self.fullname, field_name))

@@ -32,12 +32,6 @@ enum {
   EMBER_MAC_INFO_TYPE_MAC_COMMAND = (BIT(2) | BIT(3))
 };
 
-#define EMBER_MAC_INFO_PHY_INDEX                 ((uint16_t)(BIT(0)))     // 0x0001
-// Outgoing packet header could explicitly set EMBER_MAC_INFO_PHY_INDEX flag to indicate
-// what interface to send to, EMBER_MAC_INFO_PHY_INDEX_VALID bit is used to indicate
-// EMBER_MAC_INFO_PHY_INDEX is valid or not. This bit is checked in sl_mac_submit().
-#define EMBER_MAC_INFO_PHY_INDEX_VALID           ((uint16_t)(BIT(1)))     // 0x0002
-
 // Bitmasks for flags in the mac info field
 #define EMBER_MAC_INFO_FRAME_TYPE_MASK           ((uint16_t)(BIT(2) | BIT(3)))  // 0x000C
 
@@ -78,6 +72,7 @@ void sl_mac_header_set_mac_info(PacketHeader header, uint16_t info);
 void sl_mac_header_set_mac_info_bit(PacketHeader header, uint16_t bit, bool set);
 
 uint16_t sl_mac_header_mac_info(PacketHeader header);
+uint8_t  sli_mac_header_mac_index(PacketHeader header);
 uint8_t sl_mac_header_mac_info_frame_type(PacketHeader header);
 
 //------------------------------------------------------------------------------
@@ -101,6 +96,7 @@ typedef struct {
 typedef struct {
   uint16_t mac_info_flags;
   uint8_t nwk_index;
+  uint8_t mac_index;
   union {
     sl_mac_in_memory_tx_data_info_t tx_data;
     sl_mac_in_memory_rx_data_info_t rx_data;

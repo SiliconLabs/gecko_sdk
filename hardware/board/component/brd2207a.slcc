@@ -14,6 +14,7 @@
   - name: hardware_board_stk
   - name: hardware_board_from_stk
   - name: hardware_board_from_sltb009a
+  - name: hardware_board_has_vcom
   - name: hardware_board_has_hfxo
   - name: hardware_board_has_lfxo
 - recommends:
@@ -41,11 +42,11 @@
   - name: SL_BOARD_NAME
     value: '"BRD2207A"'
   - name: SL_BOARD_REV
-    value: '"A02"'
+    value: '"A03"'
 - tag:
   - board:pn:BRD2207
   - board:variant:A
-  - board:revision:A02
+  - board:revision:A03
   - board:device:efm32gg12b810f1024gm64
   - hardware:has:vcom
   - hardware:has:sensor:spk0641ht4h

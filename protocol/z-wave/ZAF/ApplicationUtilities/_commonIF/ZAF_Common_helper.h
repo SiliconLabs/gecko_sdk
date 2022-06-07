@@ -31,6 +31,11 @@ void ZAF_Init(TaskHandle_t pAppTaskHandle,
               );
 
 /**
+ * Reset ZAF and command classes that have registered a reset function.
+ */
+void ZAF_Reset(void);
+
+/**
  * Callback function for FLiRS nodes.
  * Used to handle power management
  *

@@ -1,5 +1,7 @@
-Flex SDK 3.3.2.0
-- EFR32xG24 support
-- Targeted quality improvements and bug fixes 
+Flex SDK 3.4.0.0
+- EFR32xG24 GA with Antenna Diversity support
+- FGM230S proprietary module GA
+- Secure Vault integration to Connect stack
+- BGM220 Range Test + DMP  pre-compiled demo with EFR Connect Mobile Application
 
 

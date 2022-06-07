@@ -1,9 +1,9 @@
 id: mbedtls_cipher_cbc
 package: platform
-label: Mbed TLS Support for CBC Cipher modes
+label: CBC Mode
 description: >-
-  This component provides support for CBC cipher in mbed TLS.
-category: Platform|Security
+  This component provides support for CBC cipher modes in mbed TLS.
+category: Platform|Security|Mbed TLS|Encryption
 quality: production
 provides:
   - name: mbedtls_cipher_cbc

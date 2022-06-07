@@ -13,23 +13,17 @@
 #include <stdint.h>
 #include "SizeOf.h"
 #include "Assert.h"
-#include <SWO_Debug.h>
 #include "DebugPrintConfig.h"
 //#define DEBUGPRINT
 #include "DebugPrint.h"
 #include "config_app.h"
-#include "ZAF_app_version.h"
 #include <ZAF_file_ids.h>
-#include "nvm3.h"
-#include "ZAF_nvm3_app.h"
-#include <em_system.h>
+#include "ZAF_nvm_app.h"
 #include <ZW_slave_api.h>
 #include <ZW_classcmd.h>
 #include <ZW_TransportLayer.h>
-#include <ZAF_uart_utils.h>
 #include <string.h>
 #include <ev_man.h>
-#include <board.h>
 #include <AppTimer.h>
 #include <SwTimer.h>
 #include <EventDistributor.h>
@@ -45,12 +39,10 @@
 #include <CC_DeviceResetLocally.h>
 #include <CC_Indicator.h>
 #include <CC_MultiChanAssociation.h>
-#include <CC_PowerLevel.h>
 #include <CC_Supervision.h>
-#include <CC_Version.h>
-#include <CC_ZWavePlusInfo.h>
 #include <CC_FirmwareUpdate.h>
 #include <CC_ManufacturerSpecific.h>
+#include <zaf_config_api.h>
 #include <zaf_event_helper.h>
 #include <zaf_job_helper.h>
 #include <ZAF_Common_helper.h>
@@ -58,12 +50,14 @@
 #include <ota_util.h>
 #include <ZAF_TSE.h>
 #include <ZAF_CmdPublisher.h>
-#include <em_wdog.h>
 #include <ZAF_network_management.h>
 #include "events.h"
+#include <zpal_watchdog.h>
+#include <zpal_misc.h>
+#include <LEDBulb_hw.h>
+#include <board_indicator.h>
+#include <board_init.h>
 #include "zw_region_config.h"
-
-#include <sl_simple_rgb_pwm_led.h>
 
 #include "zw_build_no.h"
 
@@ -77,74 +71,6 @@
  * the latest Multilevel Switch command class.
  */
 #define CC_MULTILEVEL_SWITCH_DEFAULT_DIMMING_DURATION 1 // 1 second
-
-#if defined(BUILDING_WITH_UC)
-#include "sl_simple_rgb_pwm_led_instances.h"
-#else
-
-#include "sl_simple_rgb_pwm_led_led_config.h"
-
-sl_led_pwm_t red_led = {
-  .port = SL_SIMPLE_RGB_PWM_LED_LED_RED_PORT,
-  .pin = SL_SIMPLE_RGB_PWM_LED_LED_RED_PIN,
-  .polarity = SL_SIMPLE_RGB_PWM_LED_LED_RED_POLARITY,
-  .channel = SL_SIMPLE_RGB_PWM_LED_LED_RED_CHANNEL,
-#if defined(SL_SIMPLE_RGB_PWM_LED_LED_RED_LOC)
-  .location = SL_SIMPLE_RGB_PWM_LED_LED_RED_LOC,
-#endif
-  .timer = SL_SIMPLE_RGB_PWM_LED_LED_PERIPHERAL,
-  .frequency = SL_SIMPLE_RGB_PWM_LED_LED_FREQUENCY,
-  .resolution = SL_SIMPLE_RGB_PWM_LED_LED_RESOLUTION,
-};
-
-sl_led_pwm_t green_led = {
-  .port = SL_SIMPLE_RGB_PWM_LED_LED_GREEN_PORT,
-  .pin = SL_SIMPLE_RGB_PWM_LED_LED_GREEN_PIN,
-  .polarity = SL_SIMPLE_RGB_PWM_LED_LED_GREEN_POLARITY,
-  .channel = SL_SIMPLE_RGB_PWM_LED_LED_GREEN_CHANNEL,
-#if defined(SL_SIMPLE_RGB_PWM_LED_LED_GREEN_LOC)
-  .location = SL_SIMPLE_RGB_PWM_LED_LED_GREEN_LOC,
-#endif
-  .timer = SL_SIMPLE_RGB_PWM_LED_LED_PERIPHERAL,
-  .frequency = SL_SIMPLE_RGB_PWM_LED_LED_FREQUENCY,
-  .resolution = SL_SIMPLE_RGB_PWM_LED_LED_RESOLUTION,
-};
-
-sl_led_pwm_t blue_led = {
-  .port = SL_SIMPLE_RGB_PWM_LED_LED_BLUE_PORT,
-  .pin = SL_SIMPLE_RGB_PWM_LED_LED_BLUE_PIN,
-  .polarity = SL_SIMPLE_RGB_PWM_LED_LED_BLUE_POLARITY,
-  .channel = SL_SIMPLE_RGB_PWM_LED_LED_BLUE_CHANNEL,
-#if defined(SL_SIMPLE_RGB_PWM_LED_LED_BLUE_LOC)
-  .location = SL_SIMPLE_RGB_PWM_LED_LED_BLUE_LOC,
-#endif
-  .timer = SL_SIMPLE_RGB_PWM_LED_LED_PERIPHERAL,
-  .frequency = SL_SIMPLE_RGB_PWM_LED_LED_FREQUENCY,
-  .resolution = SL_SIMPLE_RGB_PWM_LED_LED_RESOLUTION,
-};
-
-sl_simple_rgb_pwm_led_context_t simple_rgb_pwm_led_context = {
-  .red = &red_led,
-  .green = &green_led,
-  .blue = &blue_led,
-
-  .timer = SL_SIMPLE_RGB_PWM_LED_LED_PERIPHERAL,
-  .frequency = SL_SIMPLE_RGB_PWM_LED_LED_FREQUENCY,
-  .resolution = SL_SIMPLE_RGB_PWM_LED_LED_RESOLUTION,
-};
-
-const sl_led_rgb_pwm_t sl_led = {
-  .led_common.context = &simple_rgb_pwm_led_context,
-  .led_common.init = sl_simple_rgb_pwm_led_init,
-  .led_common.turn_on = sl_simple_rgb_pwm_led_turn_on,
-  .led_common.turn_off = sl_simple_rgb_pwm_led_turn_off,
-  .led_common.toggle = sl_simple_rgb_pwm_led_toggle,
-  .led_common.get_state = sl_simple_rgb_pwm_led_get_state,
-  .set_rgb_color = sl_simple_rgb_pwm_led_set_color,
-  .get_rgb_color = sl_simple_rgb_pwm_led_get_color,
-};
-
-#endif // BUILDING_WITH_UC
 
 /****************************************************************************/
 /*                      PRIVATE TYPES and DEFINITIONS                       */
@@ -237,11 +163,6 @@ app_node_information_t m_AppNIF =
 */
 static const uint8_t SecureKeysRequested = REQUESTED_SECURITY_KEYS;
 
-/**
- * Set up PowerDownDebug
- */
-static const EPowerDownDebug PowerDownDebug = APP_POWERDOWNDEBUG;
-
 static const SAppNodeInfo_t AppNodeInfo =
 {
   .DeviceOptionsMask = DEVICE_OPTIONS_MASK,
@@ -262,27 +183,14 @@ static const SRadioConfig_t RadioConfig =
   .iTxPowerLevelAdjust = APP_MEASURED_0DBM_TX_POWER,
   .iTxPowerLevelMaxLR = APP_MAX_TX_POWER_LR,
   .eRegion = ZW_REGION,
-  .enablePTI = ENABLE_PTI
+  .radio_debug_enable = ENABLE_RADIO_DEBUG
 };
 
 static const SProtocolConfig_t ProtocolConfig = {
   .pVirtualSlaveNodeInfoTable = NULL,
   .pSecureKeysRequested = &SecureKeysRequested,
-  .pPowerDownDebug = &PowerDownDebug,
   .pNodeInfo = &AppNodeInfo,
   .pRadioConfig = &RadioConfig
-};
-
-/**************************************************************************************************
- * Configuration for Z-Wave Plus Info CC
- **************************************************************************************************
- */
-static const SCCZWavePlusInfo CCZWavePlusInfo = {
-                               .pEndpointIconList = NULL,
-                               .roleType = APP_ROLE_TYPE,
-                               .nodeType = APP_NODE_TYPE,
-                               .installerIconType = APP_ICON_TYPE,
-                               .userIconType = APP_USER_ICON_TYPE
 };
 
 /**
@@ -346,33 +254,29 @@ static s_CC_indicator_data_t ZAF_TSE_localActuationIdentifyData = {
   .indicatorId = 0x50      /* Identify Indicator*/
 };
 
-static nvm3_Handle_t* pFileSystemApplication;
+static zpal_nvm_handle_t pFileSystemApplication;
 
 /**
  * Color Switch CC data. Supported colors in the app.
  * This app supports RED, GREEN, BLUE
  */
-// callbacks called after the change takes place (for example LED changed intensity from 5% to 15%)
-void callback_RED(s_colorComponent * colorComponent);
-void callback_GREEN(s_colorComponent * colorComponent);
-void callback_BLUE(s_colorComponent * colorComponent);
 
 // Array of all colors supported by the app
 static s_colorComponent s_colorComponents[] = {
   {
     .ep = 0,
     .colorId = ECOLORCOMPONENT_RED,
-    .cb = callback_RED,
+    .cb = LEDBulb_hw_callback_RED,
   },
   {
     .ep = 0,
     .colorId = ECOLORCOMPONENT_GREEN,
-    .cb = callback_GREEN,
+    .cb = LEDBulb_hw_callback_GREEN,
   },
   {
     .ep = 0,
     .colorId = ECOLORCOMPONENT_BLUE,
-    .cb = callback_BLUE,
+    .cb = LEDBulb_hw_callback_BLUE,
   }
 };
 
@@ -382,11 +286,6 @@ cc_multilevel_switch_t multilevel_switch = {
                                             .endpoint = 0 // Root device
 };
 
-static uint8_t multilevel_switch_max;
-static uint8_t color_switch_max;
-
-void multilevel_switch_handler(cc_multilevel_switch_t * p_switch);
-
 /****************************************************************************/
 /*                              EXPORTED DATA                               */
 /****************************************************************************/
@@ -394,8 +293,6 @@ void multilevel_switch_handler(cc_multilevel_switch_t * p_switch);
 /****************************************************************************/
 /*                            PRIVATE FUNCTIONS                             */
 /****************************************************************************/
-void DeviceResetLocallyDone(TRANSMISSION_RESULT * pTransmissionResult);
-void DeviceResetLocally(void);
 STATE_APP GetAppState(void);
 void AppStateManager(EVENT_APP event);
 static void ChangeState(STATE_APP newState);
@@ -404,13 +301,7 @@ bool LoadConfiguration(void);
 void SetDefaultConfiguration(void);
 void AppResetNvm(void);
 
-#if defined(DEBUGPRINT) && defined(BUILDING_WITH_UC)
-#include "sl_iostream.h"
-static void DebugPrinter(const uint8_t * buffer, uint32_t len)
-{
-  sl_iostream_write(SL_IOSTREAM_STDOUT, buffer, len);
-}
-#endif
+static void indicator_set_handler(uint32_t on_time_ms, uint32_t off_time_ms, uint32_t num_cycles);
 
 /**
 * @brief Called when protocol puts a frame on the ZwRxQueue.
@@ -523,10 +414,6 @@ static void EventHandlerZwCommandStatus(void)
         else if(ELEARNSTATUS_SMART_START_IN_PROGRESS == Status.Content.LearnModeStatus.Status)
         {
           ZAF_EventHelperEventEnqueue(EVENT_APP_SMARTSTART_IN_PROGRESS);
-        }
-        else if(ELEARNSTATUS_LEARN_IN_PROGRESS == Status.Content.LearnModeStatus.Status)
-        {
-          ZAF_EventHelperEventEnqueue(EVENT_APP_LEARN_IN_PROGRESS);
         }
         else if(ELEARNSTATUS_LEARN_MODE_COMPLETED_TIMEOUT == Status.Content.LearnModeStatus.Status)
         {
@@ -656,56 +543,39 @@ ApplicationInit(EResetReason_t eResetReason)
 
   /* hardware initialization */
   Board_Init();
-  BRD420xBoardInit(RadioConfig.eRegion);
-
-  //SWO_DebugPrintInit();
 
 #ifdef DEBUGPRINT
-#if BUILDING_WITH_UC
-  DebugPrintConfig(m_aDebugPrintBuffer, sizeof(m_aDebugPrintBuffer), DebugPrinter);
-#else
-  ZAF_UART0_enable(115200, true, false);
-  DebugPrintConfig(m_aDebugPrintBuffer, sizeof(m_aDebugPrintBuffer), ZAF_UART0_tx_send);
-#endif // BUILDING_WITH_UC
-#endif // DEBUGPRINT
+  zpal_debug_init();
+  DebugPrintConfig(m_aDebugPrintBuffer, sizeof(m_aDebugPrintBuffer), zpal_debug_output);
+#endif
 
   /* Init state machine*/
   currentState = STATE_APP_STARTUP;
 
-  uint8_t versionMajor      = ZAF_GetAppVersionMajor();
-  uint8_t versionMinor      = ZAF_GetAppVersionMinor();
-  uint8_t versionPatchLevel = ZAF_GetAppVersionPatchLevel();
 
   DPRINT("\n\n--------------------------------\n");
   DPRINT("Z-Wave Sample App: LED Bulb\n");
-  DPRINTF("SDK: %d.%d.%d ZAF: %d.%d.%d.%d [Freq: %d]\n",
+  DPRINTF("SDK: %d.%d.%d ZAF: %d.%d.%d.%d\n",
           SDK_VERSION_MAJOR,
           SDK_VERSION_MINOR,
           SDK_VERSION_PATCH,
-          versionMajor,
-          versionMinor,
-          versionPatchLevel,
-          ZAF_BUILD_NO,
-          RadioConfig.eRegion);
-  DPRINT("--------------------------------\n");
-  DPRINTF("%s: Toggle learn mode\n", Board_GetButtonLabel(APP_BUTTON_LEARN_RESET));
-  DPRINT("      Hold 5 sec: Reset\n");
-  DPRINTF("%s: Learn mode + identify\n", Board_GetLedLabel(APP_LED_INDICATOR));
-  DPRINT("--------------------------------\n\n");
+          zpal_get_app_version_major(),
+          zpal_get_app_version_minor(),
+          zpal_get_app_version_patch(),
+          ZAF_BUILD_NO);
 
   DPRINTF("ApplicationInit eResetReason = %d\n", eResetReason);
 
-  CC_ZWavePlusInfo_Init(&CCZWavePlusInfo);
-
   CC_ColorSwitch_Init(s_colorComponents, sizeof_array(s_colorComponents), COLOR_SWITCH_DEFAULT_DURATION_SEC, NULL);
+  CC_Indicator_Init(indicator_set_handler);
   cc_multilevel_switch_init(&multilevel_switch,
                             1,
                             CC_MULTILEVEL_SWITCH_DEFAULT_DIMMING_DURATION,
-                            multilevel_switch_handler);
-  color_switch_max = ZAF_Actuator_GetMax(&s_colorComponents[0].obj);
-  multilevel_switch_max = ZAF_Actuator_GetMax(&multilevel_switch.actuator);
+                            LEDBulb_hw_multilevel_switch_handler);
 
-  CC_Version_SetApplicationVersionInfo(versionMajor, versionMinor, versionPatchLevel, ZAF_BUILD_NO);
+
+  // Init file system
+  ApplicationFileSystemInit(&pFileSystemApplication);
 
   /*************************************************************************************
    * CREATE USER TASKS  -  ZW_ApplicationRegisterTask() and ZW_UserTask_CreateTask()
@@ -741,7 +611,7 @@ ApplicationTask(SApplicationHandles* pAppHandles)
 {
   // Init
   DPRINT("Enabling watchdog\n");
-  WDOGn_Enable(DEFAULT_WDOG, true);
+  zpal_enable_watchdog(true);
 
   g_AppTaskHandle = xTaskGetCurrentTaskHandle();
   g_pAppHandles = pAppHandles;
@@ -761,13 +631,12 @@ ApplicationTask(SApplicationHandles* pAppHandles)
 
   ZAF_EventHelperEventEnqueue(EVENT_APP_INIT);
 
-#if !defined(BUILDING_WITH_UC)
-  sl_led_init((sl_led_t *)&sl_led);
-#endif /* !defined(BUILDING_WITH_UC) */
+  LEDBulb_hw_init(
+    ZAF_Actuator_GetMax(&multilevel_switch.actuator),
+    ZAF_Actuator_GetMax(&s_colorComponents[0].obj)
+  );
 
-  Board_EnableButton(APP_BUTTON_LEARN_RESET);
-
-  Board_IndicatorInit(APP_LED_INDICATOR);
+  Board_IndicatorInit();
   Board_IndicateStatus(BOARD_STATUS_IDLE);
 
   CommandClassSupervisionInit(
@@ -806,10 +675,7 @@ GetAppState(void)
 
 static void doRemainingInitialization()
 {
-  // Init file system
-  ApplicationFileSystemInit(&pFileSystemApplication);
-
-  /* Load the application settings from NVM3 file system */
+  /* Load the application settings from NVM file system */
   LoadConfiguration();
   /*it is not the time to wake completely*/
 
@@ -838,13 +704,13 @@ AppStateManager(EVENT_APP event)
 {
   DPRINTF("AppStateManager St: %d, Ev: %d\r\n", currentState, event);
 
-  if ((BTN_EVENT_LONG_PRESS(APP_BUTTON_LEARN_RESET) == (BUTTON_EVENT)event) ||
+  if ((EVENT_APP_BUTTON_LEARN_RESET_LONG_PRESS == event) ||
       (EVENT_SYSTEM_RESET == (EVENT_SYSTEM)event))
   {
     /*Force state change to activate system-reset without taking care of current state.*/
     ChangeState(STATE_APP_RESET);
     /* Send reset notification*/
-    DeviceResetLocally();
+    CC_DeviceResetLocally_notification_tx();
   }
 
   switch(currentState)
@@ -881,7 +747,7 @@ AppStateManager(EVENT_APP event)
         LoadConfiguration();
       }
 
-      if (BTN_EVENT_SHORT_PRESS(APP_BUTTON_LEARN_RESET) == (BUTTON_EVENT)event ||
+      if (EVENT_APP_BUTTON_LEARN_RESET_SHORT_PRESS == event ||
           (EVENT_SYSTEM_LEARNMODE_START == (EVENT_SYSTEM)event))
       {
         if (EINCLUSIONSTATE_EXCLUDED != g_pAppHandles->pNetworkInfo->eInclusionState)
@@ -910,7 +776,7 @@ AppStateManager(EVENT_APP event)
         LoadConfiguration();
       }
 
-      if (BTN_EVENT_SHORT_PRESS(APP_BUTTON_LEARN_RESET) == (BUTTON_EVENT)event ||
+      if (EVENT_APP_BUTTON_LEARN_RESET_SHORT_PRESS == event ||
           (EVENT_SYSTEM_LEARNMODE_STOP == (EVENT_SYSTEM)event))
       {
         ZAF_setNetworkLearnMode(E_NETWORK_LEARN_MODE_DISABLE);
@@ -923,7 +789,10 @@ AppStateManager(EVENT_APP event)
         ChangeState(STATE_APP_IDLE);
 
         /* If we are in a network and the Identify LED state was changed to idle due to learn mode, report it to lifeline */
-        CC_Indicator_RefreshIndicatorProperties();
+        if (!Board_IsIndicatorActive())
+        {
+          CC_Indicator_RefreshIndicatorProperties();
+        }
         ZAF_TSE_Trigger(CC_Indicator_report_stx,
                         (void *)&ZAF_TSE_localActuationIdentifyData,
                         true);
@@ -938,7 +807,10 @@ AppStateManager(EVENT_APP event)
         ChangeState(STATE_APP_IDLE);
 
         /* If we are in a network and the Identify LED state was changed to idle due to learn mode, report it to lifeline */
-        CC_Indicator_RefreshIndicatorProperties();
+        if (!Board_IsIndicatorActive())
+        {
+          CC_Indicator_RefreshIndicatorProperties();
+        }
         ZAF_TSE_Trigger(CC_Indicator_report_stx,
                         (void *)&ZAF_TSE_localActuationIdentifyData,
                         true);
@@ -952,7 +824,7 @@ AppStateManager(EVENT_APP event)
       {
         AppResetNvm();
         /* Soft reset */
-        Board_ResetHandler();
+        zpal_reboot();
       }
       break;
 
@@ -982,7 +854,7 @@ ChangeState(STATE_APP newState)
  * @param pTransmissionResult Result of each transmission.
  */
 void
-DeviceResetLocallyDone(TRANSMISSION_RESULT * pTransmissionResult)
+CC_DeviceResetLocally_done(TRANSMISSION_RESULT * pTransmissionResult)
 {
   if (TRANSMISSION_RESULT_FINISHED == pTransmissionResult->isFinished)
   {
@@ -992,7 +864,7 @@ DeviceResetLocallyDone(TRANSMISSION_RESULT * pTransmissionResult)
     CommandPackage.eCommandType = EZWAVECOMMANDTYPE_SET_DEFAULT;
 
     DPRINT("\nDisabling watchdog during reset\n");
-    WDOGn_Enable(DEFAULT_WDOG, false);
+    zpal_enable_watchdog(false);
 
     EQueueNotifyingStatus Status = QueueNotifyingSendToBack(g_pAppHandles->pZwCommandQueue,
                                                             (uint8_t*)&CommandPackage,
@@ -1000,53 +872,6 @@ DeviceResetLocallyDone(TRANSMISSION_RESULT * pTransmissionResult)
     ASSERT(EQUEUENOTIFYING_STATUS_SUCCESS == Status);
   }
 }
-
-/**
- * @brief Send reset notification.
- */
-void
-DeviceResetLocally(void)
-{
-  AGI_PROFILE lifelineProfile = {
-      ASSOCIATION_GROUP_INFO_REPORT_PROFILE_GENERAL,
-      ASSOCIATION_GROUP_INFO_REPORT_PROFILE_GENERAL_LIFELINE
-  };
-  DPRINT("Call locally reset\r\n");
-
-  CC_DeviceResetLocally_notification_tx(&lifelineProfile, DeviceResetLocallyDone);
-}
-
-/**
- * @brief See description for function prototype in CC_Version.h.
- */
-uint8_t
-CC_Version_getNumberOfFirmwareTargets_handler(void)
-{
-  return 1; /*CHANGE THIS - firmware 0 version*/
-}
-
-/**
- * @brief See description for function prototype in CC_Version.h.
- */
-void
-handleGetFirmwareVersion(
-  uint8_t bFirmwareNumber,
-  VG_VERSION_REPORT_V2_VG *pVariantgroup)
-{
-  /*firmware 0 version and sub version*/
-  if(bFirmwareNumber == 0)
-  {
-    pVariantgroup->firmwareVersion = ZAF_GetAppVersionMajor();
-    pVariantgroup->firmwareSubVersion = ZAF_GetAppVersionMinor();
-  }
-  else
-  {
-    /*Just set it to 0 if firmware n is not present*/
-    pVariantgroup->firmwareVersion = 0;
-    pVariantgroup->firmwareSubVersion = 0;
-  }
-}
-
 
 /**
  * @brief Function resets configuration to default values.
@@ -1062,18 +887,18 @@ SetDefaultConfiguration(void)
 {
   AssociationInit(true, pFileSystemApplication);
 
-  loadInitStatusPowerLevel();
+  ZAF_Reset();
 
   CC_ColorSwitch_Init(s_colorComponents, sizeof_array(s_colorComponents), COLOR_SWITCH_DEFAULT_DURATION_SEC, NULL);
 
   cc_multilevel_switch_init(&multilevel_switch,
                             1,
                             CC_MULTILEVEL_SWITCH_DEFAULT_DIMMING_DURATION,
-                            multilevel_switch_handler);
+                            LEDBulb_hw_multilevel_switch_handler);
 
-  uint32_t appVersion = ZAF_GetAppVersion();
-  Ecode_t result = nvm3_writeData(pFileSystemApplication, ZAF_FILE_ID_APP_VERSION, &appVersion, ZAF_FILE_SIZE_APP_VERSION);
-  ASSERT(ECODE_NVM3_OK == result);
+  uint32_t appVersion = zpal_get_app_version();
+  const zpal_status_t status = zpal_nvm_write(pFileSystemApplication, ZAF_FILE_ID_APP_VERSION, &appVersion, ZAF_FILE_SIZE_APP_VERSION);
+  ASSERT(ZPAL_STATUS_OK == status);
 }
 
 /**
@@ -1084,11 +909,11 @@ bool
 LoadConfiguration(void)
 {
   uint32_t appVersion;
-  Ecode_t versionFileStatus = nvm3_readData(pFileSystemApplication, ZAF_FILE_ID_APP_VERSION, &appVersion, ZAF_FILE_SIZE_APP_VERSION);
+  const zpal_status_t status = zpal_nvm_read(pFileSystemApplication, ZAF_FILE_ID_APP_VERSION, &appVersion, ZAF_FILE_SIZE_APP_VERSION);
 
-  if (ECODE_NVM3_OK == versionFileStatus)
+  if (ZPAL_STATUS_OK == status)
   {
-    if (ZAF_GetAppVersion() != appVersion)
+    if (zpal_get_app_version() != appVersion)
     {
       // Add code for migration of file system to higher version here.
     }
@@ -1101,7 +926,6 @@ LoadConfiguration(void)
   else
   {
     DPRINT("Application FileSystem Verify failed\r\n");
-    loadInitStatusPowerLevel();
 
     // Reset the file system if ZAF_FILE_ID_APP_VERSION is missing since this indicates
     // corrupt or missing file system.
@@ -1117,8 +941,8 @@ void AppResetNvm(void)
 
   ASSERT(0 != pFileSystemApplication); //Assert has been kept for debugging , can be removed from production code. This error can only be caused by some internal flash HW failure
 
-  Ecode_t errCode = nvm3_eraseAll(pFileSystemApplication);
-  ASSERT(ECODE_NVM3_OK == errCode); //Assert has been kept for debugging , can be removed from production code. This error can only be caused by some internal flash HW failure
+  const zpal_status_t status = zpal_nvm_erase_all(pFileSystemApplication);
+  ASSERT(ZPAL_STATUS_OK == status); //Assert has been kept for debugging , can be removed from production code. This error can only be caused by some internal flash HW failure
 
   /* Apparently there is no valid configuration in file system, so load */
   /* default values and save them to file system. */
@@ -1205,12 +1029,6 @@ void CC_Basic_report_notifyWorking(RECEIVE_OPTIONS_TYPE_EX* pRxOpt)
   UNUSED(pRxOpt);
 }
 
-
-uint8_t CC_Version_GetHardwareVersion_handler(void)
-{
-  return 1;
-}
-
 void CC_ManufacturerSpecific_ManufacturerSpecificGet_handler(uint16_t * pManufacturerID,
                                                              uint16_t * pProductID)
 {
@@ -1229,72 +1047,54 @@ void CC_ManufacturerSpecific_DeviceSpecificGet_handler(device_id_type_t * pDevic
                                                        uint8_t * pDeviceIDDataLength,
                                                        uint8_t * pDeviceIDData)
 {
+  const size_t serial_length = zpal_get_serial_number_length();
+
+  ASSERT(serial_length <= 0x1F); // Device ID Data Length field size is 5 bits
+
   *pDeviceIDType = DEVICE_ID_TYPE_SERIAL_NUMBER;
   *pDeviceIDDataFormat = DEVICE_ID_FORMAT_BINARY;
-  *pDeviceIDDataLength = 8;
-  uint64_t uuID = SYSTEM_GetUnique();
-  DPRINTF("\r\nuuID: %x", (uint32_t)uuID);
-  *(pDeviceIDData + 0) = (uint8_t)(uuID >> 56);
-  *(pDeviceIDData + 1) = (uint8_t)(uuID >> 48);
-  *(pDeviceIDData + 2) = (uint8_t)(uuID >> 40);
-  *(pDeviceIDData + 3) = (uint8_t)(uuID >> 32);
-  *(pDeviceIDData + 4) = (uint8_t)(uuID >> 24);
-  *(pDeviceIDData + 5) = (uint8_t)(uuID >> 16);
-  *(pDeviceIDData + 6) = (uint8_t)(uuID >>  8);
-  *(pDeviceIDData + 7) = (uint8_t)(uuID >>  0);
+  *pDeviceIDDataLength = (uint8_t)serial_length;
+  zpal_get_serial_number(pDeviceIDData);
+
+  DPRINT("\r\nserial number: ");
+  for (size_t i = 0; i < serial_length; ++i)
+  {
+    DPRINTF("%02x", pDeviceIDData[i]);
+  }
+  DPRINT("\r\n");
 }
 
-static uint8_t multilevel_switch_value;
-static uint8_t color_switch_red_value;
-static uint8_t color_switch_green_value;
-static uint8_t color_switch_blue_value;
-
-void callback_RED(s_colorComponent * colorComponent)
+/*
+ * The below functions should be implemented as hardware specific functions in a separate source
+ * file, e.g. LEDBulb_hw.c.
+ */
+ZW_WEAK void LEDBulb_hw_init(uint8_t multilevel_switch_max, uint8_t color_switch_max)
 {
-  color_switch_red_value = ZAF_Actuator_GetCurrentValue(&colorComponent->obj);
-  DPRINTF("%s Setting RGB=(%u,%u,%u)\n", __func__,
-          (color_switch_red_value * multilevel_switch_value) / multilevel_switch_max,
-          (color_switch_green_value * multilevel_switch_value) / multilevel_switch_max,
-          (color_switch_blue_value * multilevel_switch_value) / multilevel_switch_max);
-  sl_led_set_rgb_color(&sl_led,
-                        (uint16_t)((color_switch_red_value * multilevel_switch_value) / multilevel_switch_max),
-                        (uint16_t)((color_switch_green_value * multilevel_switch_value) / multilevel_switch_max),
-                        (uint16_t)((color_switch_blue_value * multilevel_switch_value) / multilevel_switch_max));
-}
-void callback_GREEN(s_colorComponent * colorComponent)
-{
-  color_switch_green_value = ZAF_Actuator_GetCurrentValue(&colorComponent->obj);
-  DPRINTF("%s Setting RGB=(%u,%u,%u)\n", __func__,
-          (color_switch_red_value * multilevel_switch_value) / multilevel_switch_max,
-          (color_switch_green_value * multilevel_switch_value) / multilevel_switch_max,
-          (color_switch_blue_value * multilevel_switch_value) / multilevel_switch_max);
-  sl_led_set_rgb_color(&sl_led,
-                        (uint16_t)((color_switch_red_value * multilevel_switch_value) / multilevel_switch_max),
-                        (uint16_t)((color_switch_green_value * multilevel_switch_value) / multilevel_switch_max),
-                        (uint16_t)((color_switch_blue_value * multilevel_switch_value) / multilevel_switch_max));
-}
-void callback_BLUE(s_colorComponent * colorComponent)
-{
-  color_switch_blue_value = ZAF_Actuator_GetCurrentValue(&colorComponent->obj);
-  DPRINTF("%s Setting RGB=(%u,%u,%u)\n", __func__,
-          (color_switch_red_value * multilevel_switch_value) / multilevel_switch_max,
-          (color_switch_green_value * multilevel_switch_value) / multilevel_switch_max,
-          (color_switch_blue_value * multilevel_switch_value) / multilevel_switch_max);
-  sl_led_set_rgb_color(&sl_led,
-                        (uint16_t)((color_switch_red_value * multilevel_switch_value) / multilevel_switch_max),
-                        (uint16_t)((color_switch_green_value * multilevel_switch_value) / multilevel_switch_max),
-                        (uint16_t)((color_switch_blue_value * multilevel_switch_value) / multilevel_switch_max));
+  UNUSED(multilevel_switch_max);
+  UNUSED(color_switch_max);
 }
 
-void multilevel_switch_handler(cc_multilevel_switch_t * p_switch)
+ZW_WEAK void LEDBulb_hw_callback_RED(s_colorComponent * colorComponent)
 {
-  multilevel_switch_value = cc_multilevel_switch_get_current_value(p_switch);
-  DPRINTF("%s Setting RGB=(%u,%u,%u)\n", __func__,
-          (color_switch_red_value * multilevel_switch_value) / multilevel_switch_max,
-          (color_switch_green_value * multilevel_switch_value) / multilevel_switch_max,
-          (color_switch_blue_value * multilevel_switch_value) / multilevel_switch_max);
-  sl_led_set_rgb_color(&sl_led,
-                        (uint16_t)((color_switch_red_value * multilevel_switch_value) / multilevel_switch_max),
-                        (uint16_t)((color_switch_green_value * multilevel_switch_value) / multilevel_switch_max),
-                        (uint16_t)((color_switch_blue_value * multilevel_switch_value) / multilevel_switch_max));
+  UNUSED(colorComponent);
+}
+
+ZW_WEAK void LEDBulb_hw_callback_GREEN(s_colorComponent * colorComponent)
+{
+  UNUSED(colorComponent);
+}
+
+ZW_WEAK void LEDBulb_hw_callback_BLUE(s_colorComponent * colorComponent)
+{
+  UNUSED(colorComponent);
+}
+
+ZW_WEAK void LEDBulb_hw_multilevel_switch_handler(cc_multilevel_switch_t * p_switch)
+{
+  UNUSED(p_switch);
+}
+
+static void indicator_set_handler(uint32_t on_time_ms, uint32_t off_time_ms, uint32_t num_cycles)
+{
+  Board_IndicatorControl(on_time_ms, off_time_ms, num_cycles, true);
 }

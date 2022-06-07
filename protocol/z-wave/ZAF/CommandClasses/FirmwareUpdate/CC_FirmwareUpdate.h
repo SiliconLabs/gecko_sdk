@@ -69,7 +69,6 @@ typedef struct
 }
 SFirmwareUpdateFile;
 
-#ifdef ZWAVE_SERIES_700
 //Original version of SFirmwareUpdateFile.
 //Used only for automatic migration of the file to newer version.
 //The compiler automatically sets 2 padding bytes in the struct that ends up 12 bytes long.
@@ -85,7 +84,6 @@ typedef struct
   uint32_t securityKey;
 }
 SFirmwareUpdateFile_DEPRECATED_V0;
-#endif // ZWAVE_SERIES_700
 
 #define ZAF_FILE_SIZE_CC_FIRMWARE_UPDATE (sizeof(SFirmwareUpdateFile))
 

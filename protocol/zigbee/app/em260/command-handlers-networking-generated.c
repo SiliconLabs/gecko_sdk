@@ -70,7 +70,7 @@ bool emAfProcessEzspCommandNetworking(uint16_t commandId)
     }
 
     case EZSP_START_SCAN: {
-      EmberStatus status;
+      sl_status_t status;
       EzspNetworkScanType scanType;
       uint32_t channelMask;
       uint8_t duration;
@@ -78,7 +78,7 @@ bool emAfProcessEzspCommandNetworking(uint16_t commandId)
       channelMask = fetchInt32u();
       duration = fetchInt8u();
       status = emberStartScan(scanType, channelMask, duration);
-      appendInt8u(status);
+      appendInt32u(status);
       break;
     }
 

@@ -11,7 +11,6 @@ provides:
   - name: core_pkcs11
 
 requires:
-  - name: mbedtls
   - name: mbedtls_sha
   - name: mbedtls_sha256
   - name: mbedtls_ecdsa

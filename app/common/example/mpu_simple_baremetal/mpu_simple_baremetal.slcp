@@ -8,6 +8,13 @@ description: >
   some fake malicious executable code is copied to RAM and executed with the MPU disabled and 
   re-enabled to demonstrate its effectiveness. 
 category: Example|Platform
+filter:
+  - name: "Device Type"
+    value: ["SoC"]
+  - name: "MCU"
+    value: ["32-bit MCU"]
+  - name: "Project Difficulty"
+    value: ["Beginner"]
 source:
   - path: app.c
   - path: main.c
@@ -29,3 +36,7 @@ configuration:
     value: 1
 define:
   - name: DEBUG_EFM
+readme:
+  - path: readme.md
+ui_hints:
+  highlight: readme.md

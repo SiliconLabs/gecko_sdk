@@ -49,7 +49,7 @@
 #include "sl_iostream.h"
 #include "sl_iostream_swo.h"
 #include "sl_status.h"
-#include "em_assert.h"
+#include "sl_assert.h"
 #include "em_gpio.h"
 #include "em_cmu.h"
 

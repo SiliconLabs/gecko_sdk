@@ -22,25 +22,28 @@ config_file:
 source:
   - path: throughput_peripheral.c
 requires:
-  - name: "app_log"
-  - name: "app_assert"
-  - name: "gatt_configuration"
-  - name: "bluetooth_stack"
-  - name: "bluetooth_feature_afh"
-  - name: "bluetooth_feature_power_control"
-  - name: "bluetooth_feature_connection"
-  - name: "bluetooth_feature_advertiser"
-  - name: "bluetooth_feature_gatt_server"
-  - name: "bluetooth_feature_gatt"
-  - name: "power_manager"
-  - name: "throughput"
-  - name: "simple_timer"
-  - name: "sleeptimer"
-  - name: "throughput_ui"
+  - name: app_log
+  - name: app_assert
+  - name: gatt_configuration
+  - name: bluetooth_stack
+  - name: bluetooth_feature_afh
+  - name: bluetooth_feature_power_control
+  - name: bluetooth_feature_connection
+  - name: bluetooth_feature_legacy_advertiser
+  - name: bluetooth_feature_extended_advertiser
+    condition: 
+      - device_supports_bluetooth_advertising_extensions
+  - name: bluetooth_feature_gatt_server
+  - name: bluetooth_feature_gatt
+  - name: power_manager
+  - name: throughput
+  - name: simple_timer
+  - name: sleeptimer
+  - name: throughput_ui
 
 recommends:
-  - id: "simple_timer"
-  - id: "throughput_ui_log"
+  - id: simple_timer
+  - id: throughput_ui_log
 provides:
   - name: throughput_peripheral
 template_contribution:

@@ -52,12 +52,10 @@ typedef struct RMR_State{
   RAIL_ChannelConfigEntry_t generatedChannels[1];
   __ALIGNED(4) uint8_t convDecodeBuffer[RMR_CONV_DECODE_BUFFER_LEN];
   RAIL_ChannelConfig_t channelConfig;
-#if (_SILICON_LABS_32B_SERIES_2_CONFIG >= 3)
   uint8_t dcdcRetimingConfig[RMR_DCDC_RETIMING_LEN];
-#endif
-#if (_SILICON_LABS_32B_SERIES_2_CONFIG >= 2)
   uint8_t hfxoRetimingConfig[RMR_HFXO_RETIMING_LEN];
-#endif
+  uint32_t rffpllConfig[RMR_RFFPLL_CONFIG_LEN];
+  uint8_t txIrCalConfig[RMR_TXIRCAL_CONFIG_LEN];
 } RMR_State_t;
 
 static RMR_State_t *rmrState = NULL;
@@ -103,18 +101,22 @@ RAIL_Status_t Rmr_updateConfigurationPointer(uint8_t structToModify, uint16_t of
       structPointer = 0u; // NULL
       break;
     }
-#if (_SILICON_LABS_32B_SERIES_2_CONFIG >= 3)
     case (RMR_STRUCT_DCDC_RETIMING_CONFIG): {
       structPointer = (uint32_t)&(rmrState->dcdcRetimingConfig);
       break;
     }
-#endif
-#if (_SILICON_LABS_32B_SERIES_2_CONFIG >= 2)
     case (RMR_STRUCT_HFXO_RETIMING_CONFIG): {
       structPointer = (uint32_t)&(rmrState->hfxoRetimingConfig);
       break;
     }
-#endif
+    case (RMR_STRUCT_RFFPLL_CONFIG): {
+      structPointer = (uint32_t)&(rmrState->rffpllConfig);
+      break;
+    }
+    case (RMR_STRUCT_TXIRCAL_CONFIG): {
+      structPointer = (uint32_t)&(rmrState->txIrCalConfig);
+      break;
+    }
     default: {
       // Error, unrecognized structure
       return RAIL_STATUS_INVALID_PARAMETER;
@@ -219,20 +221,26 @@ RAIL_Status_t Rmr_writeRmrStructure(RAIL_RMR_StructureIndex_t structure, uint16_
       targetStruct = (uint8_t *) &(rmrState->generatedChannels);
       break;
     }
-#if (_SILICON_LABS_32B_SERIES_2_CONFIG >= 3)
     case (RMR_STRUCT_DCDC_RETIMING_CONFIG): {
       size = sizeof(rmrState->dcdcRetimingConfig);
       targetStruct = (uint8_t *) &(rmrState->dcdcRetimingConfig);
       break;
     }
-#endif
-#if (_SILICON_LABS_32B_SERIES_2_CONFIG >= 2)
     case (RMR_STRUCT_HFXO_RETIMING_CONFIG): {
       size = sizeof(rmrState->hfxoRetimingConfig);
       targetStruct = (uint8_t *) &(rmrState->hfxoRetimingConfig);
       break;
     }
-#endif
+    case (RMR_STRUCT_RFFPLL_CONFIG): {
+      size = sizeof(rmrState->rffpllConfig);
+      targetStruct = (uint8_t *) &(rmrState->rffpllConfig);
+      break;
+    }
+    case (RMR_STRUCT_TXIRCAL_CONFIG): {
+      size = sizeof(rmrState->txIrCalConfig);
+      targetStruct = (uint8_t *) &(rmrState->txIrCalConfig);
+      break;
+    }
     default: {
       return RAIL_STATUS_INVALID_PARAMETER;
       break;
@@ -309,18 +317,22 @@ void CI_printRmrStructureLocations(sl_cli_command_arg_t *args)
                      RMR_STRUCT_CHANNEL_CONFIG_ENTRY,
                      (uint8_t *) &(rmrState->generatedChannels),
                      sizeof(rmrState->generatedChannels));
-#if (_SILICON_LABS_32B_SERIES_2_CONFIG >= 3)
   responsePrintMulti("Id:%u,Address:0x%x,Size:%u",
                      RMR_STRUCT_DCDC_RETIMING_CONFIG,
                      (uint8_t *) &(rmrState->dcdcRetimingConfig),
                      sizeof(rmrState->dcdcRetimingConfig));
-#endif
-#if (_SILICON_LABS_32B_SERIES_2_CONFIG >= 2)
   responsePrintMulti("Id:%u,Address:0x%x,Size:%u",
                      RMR_STRUCT_HFXO_RETIMING_CONFIG,
                      (uint8_t *) &(rmrState->hfxoRetimingConfig),
                      sizeof(rmrState->hfxoRetimingConfig));
-#endif
+  responsePrintMulti("Id:%u,Address:0x%x,Size:%u",
+                     RMR_STRUCT_RFFPLL_CONFIG,
+                     (uint8_t *) &(rmrState->rffpllConfig),
+                     sizeof(rmrState->rffpllConfig));
+  responsePrintMulti("Id:%u,Address:0x%x,Size:%u",
+                     RMR_STRUCT_TXIRCAL_CONFIG,
+                     (uint8_t *) &(rmrState->txIrCalConfig),
+                     sizeof(rmrState->txIrCalConfig));
 }
 
 void CI_writeRmrStructure(sl_cli_command_arg_t *args)

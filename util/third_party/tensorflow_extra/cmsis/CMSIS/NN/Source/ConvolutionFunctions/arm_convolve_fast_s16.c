@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2010-2021 Arm Limited or its affiliates. All rights reserved.
+ * Copyright (C) 2010-2021 Arm Limited or its affiliates.
  *
  * SPDX-License-Identifier: Apache-2.0
  *
@@ -28,8 +28,8 @@
  *
  * -------------------------------------------------------------------- */
 
-#include "cmsis/CMSIS/NN/Include/arm_nnfunctions.h"
-#include "cmsis/CMSIS/NN/Include/arm_nnsupportfunctions.h"
+#include "arm_nnfunctions.h"
+#include "arm_nnsupportfunctions.h"
 
 /**
  *  @ingroup groupNN
@@ -64,6 +64,11 @@ arm_status arm_convolve_fast_s16(const cmsis_nn_context *ctx,
     if (filter_dims->w * filter_dims->h * input_dims->c >= 512)
     {
         return ARM_MATH_SIZE_MISMATCH;
+    }
+
+    if (ctx->buf == NULL && arm_convolve_s8_get_buffer_size(input_dims, filter_dims) > 0)
+    {
+        return ARM_MATH_ARGUMENT_ERROR;
     }
     q15_t *buffer_a = (q15_t *)ctx->buf;
 
@@ -194,6 +199,8 @@ arm_status arm_convolve_fast_s16(const cmsis_nn_context *ctx,
             }
         }
 #else
+        (void)input_data;
+        (void)output_data;
         (void)bias_data;
         (void)filter_data;
         (void)buffer_a;

@@ -852,5 +852,13 @@ int sli_process_ble_rpa(const unsigned char keytable[],
   return -1;
 }
 
+void sli_aes_seed_mask(void)
+{
+  // Acquiring and releasing the peripheral should ensure the mask is properly
+  // set.
+  (void) sli_radioaes_acquire();
+  (void) sli_radioaes_release();
+}
+
 /// @endcond
 #endif // defined(RADIOAES_PRESENT)

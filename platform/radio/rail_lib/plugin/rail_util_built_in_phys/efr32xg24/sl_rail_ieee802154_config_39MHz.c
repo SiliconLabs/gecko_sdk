@@ -2,8 +2,8 @@
  * @brief RAIL Configuration
  * @details
  *   WARNING: Auto-Generated Radio Config  -  DO NOT EDIT
- *   Radio Configurator Version: 2022.1.1
- *   RAIL Adapter Version: 2.4.18
+ *   Radio Configurator Version: 2022.5.2
+ *   RAIL Adapter Version: 2.4.19
  *   RAIL Compatibility: 2.x
  *******************************************************************************
  * # License
@@ -70,7 +70,7 @@ static RAIL_ChannelConfigEntryAttr_t channelConfigEntryAttr = {
 };
 
 static const uint32_t phyInfo_0[] = {
-  11UL,
+  13UL,
   0x00666666UL, // 102.39999999999999
   (uint32_t) NULL,
   (uint32_t) irCalConfig,
@@ -86,11 +86,13 @@ static const uint32_t phyInfo_0[] = {
   (uint32_t) NULL,
   0UL,
   0UL,
-  1999969UL,
+  1999970UL,
+  (uint32_t) NULL,
+  (uint32_t) NULL,
 };
 
 static const uint32_t phyInfo_1[] = {
-  11UL,
+  13UL,
   0x00666666UL, // 102.39999999999999
   (uint32_t) NULL,
   (uint32_t) irCalConfig,
@@ -106,7 +108,9 @@ static const uint32_t phyInfo_1[] = {
   (uint32_t) NULL,
   0UL,
   0UL,
-  1999969UL,
+  1999970UL,
+  (uint32_t) NULL,
+  (uint32_t) NULL,
 };
 
 const uint32_t sl_rail_ieee802154_phy_2G4Hz_39MHz_modemConfigBase[] = {
@@ -195,13 +199,13 @@ const uint32_t sl_rail_ieee802154_phy_2G4Hz_39MHz_modemConfigBase[] = {
   0x010140E0UL, 0x00000200UL,
   0x01024110UL, 0x00051E33UL,
   /*    4114 */ 0x00000000UL,
-  0x0101411CUL, 0x8BC29000UL,
+  0x0101411CUL, 0x8BD49000UL,
   0x01054124UL, 0x078304FFUL,
   /*    4128 */ 0x3AC81388UL,
   /*    412C */ 0x0C6606FFUL,
   /*    4130 */ 0x078304FFUL,
   /*    4134 */ 0x03FF1388UL,
-  0x0106413CUL, 0x005254F8UL,
+  0x0106413CUL, 0x00524A02UL,
   /*    4140 */ 0x00000000UL,
   /*    4144 */ 0x123556B7UL,
   /*    4148 */ 0x50000000UL,
@@ -220,20 +224,20 @@ const uint32_t sl_rail_ieee802154_phy_2G4Hz_39MHz_modemConfigBase[] = {
   /*    41D4 */ 0x000000D0UL,
   /*    41D8 */ 0x00020000UL,
   0x011641E0UL, 0x00000000UL,
-  /*    41E4 */ 0x365E63DEUL,
-  /*    41E8 */ 0x00076FBFUL,
-  /*    41EC */ 0x0016EA6FUL,
-  /*    41F0 */ 0x00CE30E5UL,
-  /*    41F4 */ 0x0ED9B9B2UL,
-  /*    41F8 */ 0x0494844BUL,
-  /*    41FC */ 0x24A91F5AUL,
-  /*    4200 */ 0x365E63DEUL,
-  /*    4204 */ 0x00076FBFUL,
-  /*    4208 */ 0x0016EA6FUL,
-  /*    420C */ 0x00CE30E5UL,
-  /*    4210 */ 0x0ED9B9B2UL,
-  /*    4214 */ 0x0494844BUL,
-  /*    4218 */ 0x24A91F5AUL,
+  /*    41E4 */ 0x3BBEE3E3UL,
+  /*    41E8 */ 0x000BA049UL,
+  /*    41EC */ 0x00131A92UL,
+  /*    41F0 */ 0x00C38003UL,
+  /*    41F4 */ 0x0F11B9CFUL,
+  /*    41F8 */ 0x049C8539UL,
+  /*    41FC */ 0x23321E63UL,
+  /*    4200 */ 0x3BBEE3E3UL,
+  /*    4204 */ 0x000BA049UL,
+  /*    4208 */ 0x00131A92UL,
+  /*    420C */ 0x00C38003UL,
+  /*    4210 */ 0x0F11B9CFUL,
+  /*    4214 */ 0x049C8539UL,
+  /*    4218 */ 0x23321E63UL,
   /*    421C */ 0x00000000UL,
   /*    4220 */ 0x00000000UL,
   /*    4224 */ 0x0000002CUL,
@@ -266,8 +270,9 @@ const uint32_t sl_rail_ieee802154_phy_2G4Hz_39MHz_modemConfigBase[] = {
   0x010280B0UL, 0x02000300UL,
   /*    80B4 */ 0x01000037UL,
   0x0201009CUL, 0x04000C00UL,
-  0x020200D8UL, 0xAA400005UL,
+  0x020300D8UL, 0xAA400005UL,
   /*    00DC */ 0x00000188UL,
+  /*    00E0 */ 0x000000C0UL,
   0x120100ECUL, 0x00000FE0UL,
   0x320100ECUL, 0x1151200CUL,
   0x020100F0UL, 0x0000012BUL,
@@ -294,7 +299,7 @@ const uint32_t sl_rail_ieee802154_phy_2G4Hz_39MHz_modemConfig[] = {
   0x0001C024UL, 0x00004300UL,
   0x0001C044UL, 0x0000022EUL,
   0x0002C068UL, 0x0002B6D1UL,
-  /*    C06C */ 0x000006C0UL,
+  /*    C06C */ 0x000006A0UL,
   0x0001C0D0UL, 0x00000000UL,
   0x0103404CUL, 0x0413F920UL,
   /*    4050 */ 0x00620007UL,
@@ -438,7 +443,7 @@ const uint32_t sl_rail_ieee802154_phy_2G4Hz_fem_39MHz_modemConfig[] = {
   0x0001C024UL, 0x00004300UL,
   0x0001C044UL, 0x0000022EUL,
   0x0002C068UL, 0x0002B6D1UL,
-  /*    C06C */ 0x000006C0UL,
+  /*    C06C */ 0x000006A0UL,
   0x0001C0D0UL, 0x00000000UL,
   0x0103404CUL, 0x0413F920UL,
   /*    4050 */ 0x00620007UL,
@@ -488,7 +493,10 @@ const RAIL_ChannelConfigEntry_t sl_rail_ieee802154_phy_2G4Hz_39MHz_channels[] = 
     .maxPower = RAIL_TX_POWER_MAX,
     .attr = &channelConfigEntryAttr,
 #ifdef RADIO_CONFIG_ENABLE_CONC_PHY
-    .entryType = 0
+    .entryType = 0,
+#endif
+#ifdef RADIO_CONFIG_ENABLE_STACK_INFO
+    .stackInfo = NULL,
 #endif
   },
 };
@@ -504,7 +512,10 @@ const RAIL_ChannelConfigEntry_t sl_rail_ieee802154_phy_2G4Hz_antdiv_39MHz_channe
     .maxPower = RAIL_TX_POWER_MAX,
     .attr = &channelConfigEntryAttr,
 #ifdef RADIO_CONFIG_ENABLE_CONC_PHY
-    .entryType = 0
+    .entryType = 0,
+#endif
+#ifdef RADIO_CONFIG_ENABLE_STACK_INFO
+    .stackInfo = NULL,
 #endif
   },
 };
@@ -520,7 +531,10 @@ const RAIL_ChannelConfigEntry_t sl_rail_ieee802154_phy_2G4Hz_antdiv_fem_39MHz_ch
     .maxPower = RAIL_TX_POWER_MAX,
     .attr = &channelConfigEntryAttr,
 #ifdef RADIO_CONFIG_ENABLE_CONC_PHY
-    .entryType = 0
+    .entryType = 0,
+#endif
+#ifdef RADIO_CONFIG_ENABLE_STACK_INFO
+    .stackInfo = NULL,
 #endif
   },
 };
@@ -536,7 +550,10 @@ const RAIL_ChannelConfigEntry_t sl_rail_ieee802154_phy_2G4Hz_fem_39MHz_channels[
     .maxPower = RAIL_TX_POWER_MAX,
     .attr = &channelConfigEntryAttr,
 #ifdef RADIO_CONFIG_ENABLE_CONC_PHY
-    .entryType = 0
+    .entryType = 0,
+#endif
+#ifdef RADIO_CONFIG_ENABLE_STACK_INFO
+    .stackInfo = NULL,
 #endif
   },
 };

@@ -715,21 +715,17 @@ bool emberAfGreenPowerClusterGpProxyTableRequestCallback(EmberAfClusterCommand *
     }
     entryIndex = emberGpProxyTableLookup(&addr);
     if (entryIndex == 0xFF) {
-      emberAfFillCommandGreenPowerClusterGpProxyTableResponse(EMBER_ZCL_GP_PROXY_TABLE_RESPONSE_STATUS_NOT_FOUND,
-                                                              validEntriesCount,
-                                                              cmd_data.index,
-                                                              0x00,
-                                                              NULL,
-                                                              0);
+      emberAfFillCommandGreenPowerClusterGpProxyTableResponseSmart(EMBER_ZCL_GP_PROXY_TABLE_RESPONSE_STATUS_NOT_FOUND,
+                                                                   validEntriesCount,
+                                                                   cmd_data.index,
+                                                                   0);
       emberAfSendResponse();
       goto kickout;
     } else {
-      emberAfFillCommandGreenPowerClusterGpProxyTableResponse(EMBER_ZCL_GP_PROXY_TABLE_RESPONSE_STATUS_SUCCESS,
-                                                              validEntriesCount,
-                                                              0xff,
-                                                              1,
-                                                              NULL,
-                                                              0);
+      emberAfFillCommandGreenPowerClusterGpProxyTableResponseSmart(EMBER_ZCL_GP_PROXY_TABLE_RESPONSE_STATUS_SUCCESS,
+                                                                   validEntriesCount,
+                                                                   0xff,
+                                                                   1);
       if (emberGpProxyTableGetEntry(entryIndex, &entry) != EMBER_SUCCESS) {
         return false;
       }
@@ -743,21 +739,17 @@ bool emberAfGreenPowerClusterGpProxyTableRequestCallback(EmberAfClusterCommand *
   } else if (requestType == EMBER_ZCL_GP_PROXY_TABLE_REQUEST_OPTIONS_REQUEST_TYPE_BY_INDEX) {
     if (cmd_data.index >= validEntriesCount) {
       //Nothing to send
-      emberAfFillCommandGreenPowerClusterGpProxyTableResponse(EMBER_ZCL_GP_PROXY_TABLE_RESPONSE_STATUS_NOT_FOUND,
-                                                              validEntriesCount,
-                                                              cmd_data.index,
-                                                              0x00,
-                                                              NULL,
-                                                              0);
+      emberAfFillCommandGreenPowerClusterGpProxyTableResponseSmart(EMBER_ZCL_GP_PROXY_TABLE_RESPONSE_STATUS_NOT_FOUND,
+                                                                   validEntriesCount,
+                                                                   cmd_data.index,
+                                                                   0);
       emberAfSendResponse();
       goto kickout;
     } else {
-      emberAfFillCommandGreenPowerClusterGpProxyTableResponse(EMBER_ZCL_GP_PROXY_TABLE_RESPONSE_STATUS_SUCCESS,
-                                                              validEntriesCount,
-                                                              cmd_data.index,
-                                                              0xff,
-                                                              NULL,
-                                                              0);
+      emberAfFillCommandGreenPowerClusterGpProxyTableResponseSmart(EMBER_ZCL_GP_PROXY_TABLE_RESPONSE_STATUS_SUCCESS,
+                                                                   validEntriesCount,
+                                                                   cmd_data.index,
+                                                                   0);
 
       validEntriesCount = 0;
       uint16_t entriesCount = 0;
@@ -793,12 +785,10 @@ bool emberAfGreenPowerClusterGpProxyTableRequestCallback(EmberAfClusterCommand *
       EmberStatus status = emberAfSendResponse();
 
       if (status == EMBER_MESSAGE_TOO_LONG) {
-        emberAfFillCommandGreenPowerClusterGpProxyTableResponse(EMBER_ZCL_GP_PROXY_TABLE_RESPONSE_STATUS_SUCCESS,
-                                                                validEntriesCount,
-                                                                cmd_data.index,
-                                                                0x00,
-                                                                NULL,
-                                                                0);
+        emberAfFillCommandGreenPowerClusterGpProxyTableResponseSmart(EMBER_ZCL_GP_PROXY_TABLE_RESPONSE_STATUS_SUCCESS,
+                                                                     validEntriesCount,
+                                                                     cmd_data.index,
+                                                                     0);
         emberAfSendResponse();
       }
       goto kickout;
@@ -1179,21 +1169,17 @@ bool emberAfGreenPowerClusterGpProxyTableRequestCallback(uint8_t options,
     }
     entryIndex = emberGpProxyTableLookup(&addr);
     if (entryIndex == 0xFF) {
-      emberAfFillCommandGreenPowerClusterGpProxyTableResponse(EMBER_ZCL_GP_PROXY_TABLE_RESPONSE_STATUS_NOT_FOUND,
-                                                              validEntriesCount,
-                                                              index,
-                                                              0x00,
-                                                              NULL,
-                                                              0);
+      emberAfFillCommandGreenPowerClusterGpProxyTableResponseSmart(EMBER_ZCL_GP_PROXY_TABLE_RESPONSE_STATUS_NOT_FOUND,
+                                                                   validEntriesCount,
+                                                                   index,
+                                                                   0);
       emberAfSendResponse();
       goto kickout;
     } else {
-      emberAfFillCommandGreenPowerClusterGpProxyTableResponse(EMBER_ZCL_GP_PROXY_TABLE_RESPONSE_STATUS_SUCCESS,
-                                                              validEntriesCount,
-                                                              0xff,
-                                                              1,
-                                                              NULL,
-                                                              0);
+      emberAfFillCommandGreenPowerClusterGpProxyTableResponseSmart(EMBER_ZCL_GP_PROXY_TABLE_RESPONSE_STATUS_SUCCESS,
+                                                                   validEntriesCount,
+                                                                   0xff,
+                                                                   1);
       if (emberGpProxyTableGetEntry(entryIndex, &entry) != EMBER_SUCCESS) {
         return false;
       }
@@ -1207,21 +1193,17 @@ bool emberAfGreenPowerClusterGpProxyTableRequestCallback(uint8_t options,
   } else if (requestType == EMBER_ZCL_GP_PROXY_TABLE_REQUEST_OPTIONS_REQUEST_TYPE_BY_INDEX) {
     if (index >= validEntriesCount) {
       //Nothing to send
-      emberAfFillCommandGreenPowerClusterGpProxyTableResponse(EMBER_ZCL_GP_PROXY_TABLE_RESPONSE_STATUS_NOT_FOUND,
-                                                              validEntriesCount,
-                                                              index,
-                                                              0x00,
-                                                              NULL,
-                                                              0);
+      emberAfFillCommandGreenPowerClusterGpProxyTableResponseSmart(EMBER_ZCL_GP_PROXY_TABLE_RESPONSE_STATUS_NOT_FOUND,
+                                                                   validEntriesCount,
+                                                                   index,
+                                                                   0);
       emberAfSendResponse();
       goto kickout;
     } else {
-      emberAfFillCommandGreenPowerClusterGpProxyTableResponse(EMBER_ZCL_GP_PROXY_TABLE_RESPONSE_STATUS_SUCCESS,
-                                                              validEntriesCount,
-                                                              index,
-                                                              0xff,
-                                                              NULL,
-                                                              0);
+      emberAfFillCommandGreenPowerClusterGpProxyTableResponseSmart(EMBER_ZCL_GP_PROXY_TABLE_RESPONSE_STATUS_SUCCESS,
+                                                                   validEntriesCount,
+                                                                   index,
+                                                                   0xff);
 
       validEntriesCount = 0;
       uint16_t entriesCount = 0;
@@ -1257,12 +1239,10 @@ bool emberAfGreenPowerClusterGpProxyTableRequestCallback(uint8_t options,
       EmberStatus status = emberAfSendResponse();
 
       if (status == EMBER_MESSAGE_TOO_LONG) {
-        emberAfFillCommandGreenPowerClusterGpProxyTableResponse(EMBER_ZCL_GP_PROXY_TABLE_RESPONSE_STATUS_SUCCESS,
-                                                                validEntriesCount,
-                                                                index,
-                                                                0x00,
-                                                                NULL,
-                                                                0);
+        emberAfFillCommandGreenPowerClusterGpProxyTableResponseSmart(EMBER_ZCL_GP_PROXY_TABLE_RESPONSE_STATUS_SUCCESS,
+                                                                     validEntriesCount,
+                                                                     index,
+                                                                     0);
         emberAfSendResponse();
       }
       goto kickout;

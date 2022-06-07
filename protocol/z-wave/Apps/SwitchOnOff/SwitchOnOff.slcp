@@ -1,5 +1,5 @@
-project_name: SwitchOnOff
-label: SwitchOnOff
+project_name: zwave_soc_switch_on_off
+label: Z-Wave - SoC Switch On/Off
 category: Z-Wave|Apps
 description: The Z-Wave certified Switch On/Off application shows a switch implementation that turns on any device that is connected to power. Examples include lights, appliances, etc.
 package: Z-Wave
@@ -11,7 +11,10 @@ component:
   - id: emlib_msc
   - id: gpiointerrupt
   - id: zw_core
-  - id: zw_apputilities
+  - id: zw_role_type_always_on
+  - id: zw_appshw_switchonoff
+  - id: zw_zaf
+  - id: zw_true_status
   - id: zw_ota
   - id: zw_cc_manufacturerspecific
   - id: zw_cc_common
@@ -28,7 +31,6 @@ component:
   - id: zw_cc_zwaveplusinfo
   - id: sl_system
   - id: device_init
-  - id: iostream_recommended_stream
   - id: mpu # disable execution from RAM
 source:
   - path: SwitchOnOff.c
@@ -40,7 +42,6 @@ include:
       - path: config_app.h
       - path: events.h
       - path: app.h
-
 configuration:
   - name: NVM3_DEFAULT_MAX_OBJECT_SIZE
     value: 1900
@@ -96,10 +97,18 @@ configuration:
 
 define:
   - name: APP_PROPERTIES_CONFIG_FILE
-    value: <config_app.h>
+    value: <application_properties_config.h>
 
 other_file:
   - path: ../../DevTools/postbuild.sh
 
 tag:
   - prebuilt_demo
+
+filter:
+  - name: "Wireless Technology"
+    value: ["Z-Wave"]
+  - name: "Device Type"
+    value: ["SoC"]
+  - name: "Project Difficulty"
+    value: ["Beginner"]

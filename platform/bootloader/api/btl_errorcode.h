@@ -287,6 +287,9 @@
 /// Upgrade file was rejected
 #define BOOTLOADER_ERROR_PARSER_REJECTED \
   (BOOTLOADER_ERROR_PARSER_BASE | 0x0CL)
+/// Upgrade file overlaps with the upgrade location
+#define BOOTLOADER_ERROR_PARSER_OVERLAP \
+  (BOOTLOADER_ERROR_PARSER_BASE | 0x0DL)
 
 /** @} addtogroup ParserError */
 

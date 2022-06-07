@@ -15,6 +15,10 @@
  *
  ******************************************************************************/
 
+#ifndef _GNU_SOURCE
+#define _GNU_SOURCE     // strnlen
+#endif
+
 // this file contains all the common includes for clusters in the util
 #include "app/framework/include/af.h"
 #include "app/framework/util/common.h"
@@ -23,6 +27,7 @@
 #include "app/framework/plugin/ota-storage-common/ota-storage.h"
 
 #include "ota-storage-linux.h"
+#include "ota-storage-linux-config.h"
 
 #if defined (IMAGE_BUILDER)
 // For our PC tool, we use a simpler #define to turn on this code.
@@ -33,7 +38,6 @@
 // These includes are wrapped inside the #ifdef because they are platform
 // specific.
 
-#define _GNU_SOURCE     // strnlen
 #include <string.h>     // ""
 
 #include <stdio.h>      // fopen, fread, fwrite, fclose, fseek, fprintf
@@ -103,7 +107,7 @@ typedef struct {
 // to the 'EmberAfOtaHeader' data structure. Must use
 // emGetOtaHeaderFieldDefinition() to get the field definitions. Do not use this
 // array directly.
-const static EmberAfOtaHeaderFieldDefinition otaHeaderFieldDefinitions[] = {
+static const EmberAfOtaHeaderFieldDefinition otaHeaderFieldDefinitions[] = {
   { "Magic Number", INTEGER_FIELD, 4, ALWAYS_PRESENT_MASK },
   { "Header Version", INTEGER_FIELD, 2, ALWAYS_PRESENT_MASK },
   // The fields returned above SHALL not depend on otaHeaderVersion, because
@@ -220,8 +224,8 @@ static void myFree(void* ptr);
 static void error(const char* formatString, ...);
 static void note(const char* formatString, ...);
 static void debug(bool debugOn, const char* formatString, ...);
-
-static const char defaultStorageDirectory[] = "ota-files";
+// OTA file storage directory can also set in runtime using '-d' option.
+char defaultStorageDirectory[OTA_FILE_STORAGE_DIR_LENGTH] = "ota-files";
 static bool initDone = false;
 static bool createStorageDirectory = true;
 
@@ -502,9 +506,8 @@ EmberAfOtaStorageStatus emAfOtaStorageCreateImage(EmberAfOtaHeader* header,
   while (fieldIndex < FIELD_INDEX_MAX) {
     const EmberAfOtaHeaderFieldDefinition *definition = emGetOtaHeaderFieldDefinition(header->headerVersion, fieldIndex);
     debug(config.memoryDebug,
-          "Writing Header Field: %s, bufferPtr: 0x%08X\n",
-          definition->name,
-          (unsigned int)bufferPtr);
+          "Writing Header Field: %s, bufferPtr: %p\n",
+          definition->name, bufferPtr);
 
     bufferPtr = writeHeaderDataToBuffer(fieldIndex,
                                         header->headerVersion,
@@ -850,19 +853,6 @@ static void removeImage(OtaImage* image)
   imageCount--;
 }
 
-static void printEui64(uint8_t* eui64)
-{
-  note("%02X%02X%02X%02X%02X%02X%02X%02X",
-       eui64[0],
-       eui64[1],
-       eui64[2],
-       eui64[3],
-       eui64[4],
-       eui64[5],
-       eui64[6],
-       eui64[7]);
-}
-
 static void printHeaderInfo(const EmberAfOtaHeader* header)
 {
   if (!config.printFileDiscoveryOrRemoval) {
@@ -1149,7 +1139,6 @@ static void freeOtaImage(OtaImage* image)
 
 const EmberAfOtaHeaderFieldDefinition *emGetOtaHeaderFieldDefinition(uint16_t headerVersion, EmberAfOtaBootloadFileHeaderFieldIndex_t headerIndex)
 {
-  const EmberAfOtaHeaderFieldDefinition invalidField = { NULL, INVALID_FIELD, 0, 0 };
   if ((!isValidHeaderVersion(headerVersion)) && (headerIndex != MAGIC_NUMBER_INDEX) && (headerIndex != HEADER_VERSION_INDEX)) {
     return &otaHeaderFieldDefinitions[INVALID_FIELD_INDEX];
   }

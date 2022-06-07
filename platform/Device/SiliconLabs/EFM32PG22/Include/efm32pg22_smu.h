@@ -936,30 +936,30 @@ typedef struct {
 /* Bit fields for SMU NSIF */
 #define _SMU_NSIF_RESETVALUE                    0x00000000UL                            /**< Default value for SMU_NSIF                  */
 #define _SMU_NSIF_MASK                          0x00000005UL                            /**< Mask for SMU_NSIF                           */
-#define SMU_NSIF_PPUNSPRIVIF                    (0x1UL << 0)                            /**< PPUNS Privilege Interrupt Flag              */
-#define _SMU_NSIF_PPUNSPRIVIF_SHIFT             0                                       /**< Shift value for SMU_PPUNSPRIVIF             */
-#define _SMU_NSIF_PPUNSPRIVIF_MASK              0x1UL                                   /**< Bit mask for SMU_PPUNSPRIVIF                */
-#define _SMU_NSIF_PPUNSPRIVIF_DEFAULT           0x00000000UL                            /**< Mode DEFAULT for SMU_NSIF                   */
-#define SMU_NSIF_PPUNSPRIVIF_DEFAULT            (_SMU_NSIF_PPUNSPRIVIF_DEFAULT << 0)    /**< Shifted mode DEFAULT for SMU_NSIF           */
-#define SMU_NSIF_PPUNSINSTIF                    (0x1UL << 2)                            /**< PPUNS Instruction Interrupt Flag            */
-#define _SMU_NSIF_PPUNSINSTIF_SHIFT             2                                       /**< Shift value for SMU_PPUNSINSTIF             */
-#define _SMU_NSIF_PPUNSINSTIF_MASK              0x4UL                                   /**< Bit mask for SMU_PPUNSINSTIF                */
-#define _SMU_NSIF_PPUNSINSTIF_DEFAULT           0x00000000UL                            /**< Mode DEFAULT for SMU_NSIF                   */
-#define SMU_NSIF_PPUNSINSTIF_DEFAULT            (_SMU_NSIF_PPUNSINSTIF_DEFAULT << 2)    /**< Shifted mode DEFAULT for SMU_NSIF           */
+#define SMU_NSIF_PPUNSPRIV                      (0x1UL << 0)                            /**< PPUNS Privilege Interrupt Flag              */
+#define _SMU_NSIF_PPUNSPRIV_SHIFT               0                                       /**< Shift value for SMU_PPUNSPRIV               */
+#define _SMU_NSIF_PPUNSPRIV_MASK                0x1UL                                   /**< Bit mask for SMU_PPUNSPRIV                  */
+#define _SMU_NSIF_PPUNSPRIV_DEFAULT             0x00000000UL                            /**< Mode DEFAULT for SMU_NSIF                   */
+#define SMU_NSIF_PPUNSPRIV_DEFAULT              (_SMU_NSIF_PPUNSPRIV_DEFAULT << 0)      /**< Shifted mode DEFAULT for SMU_NSIF           */
+#define SMU_NSIF_PPUNSINST                      (0x1UL << 2)                            /**< PPUNS Instruction Interrupt Flag            */
+#define _SMU_NSIF_PPUNSINST_SHIFT               2                                       /**< Shift value for SMU_PPUNSINST               */
+#define _SMU_NSIF_PPUNSINST_MASK                0x4UL                                   /**< Bit mask for SMU_PPUNSINST                  */
+#define _SMU_NSIF_PPUNSINST_DEFAULT             0x00000000UL                            /**< Mode DEFAULT for SMU_NSIF                   */
+#define SMU_NSIF_PPUNSINST_DEFAULT              (_SMU_NSIF_PPUNSINST_DEFAULT << 2)      /**< Shifted mode DEFAULT for SMU_NSIF           */
 
 /* Bit fields for SMU NSIEN */
 #define _SMU_NSIEN_RESETVALUE                   0x00000000UL                            /**< Default value for SMU_NSIEN                 */
 #define _SMU_NSIEN_MASK                         0x00000005UL                            /**< Mask for SMU_NSIEN                          */
-#define SMU_NSIEN_PPUNSPRIVIEN                  (0x1UL << 0)                            /**< PPUNS Privilege Interrupt Enable            */
-#define _SMU_NSIEN_PPUNSPRIVIEN_SHIFT           0                                       /**< Shift value for SMU_PPUNSPRIVIEN            */
-#define _SMU_NSIEN_PPUNSPRIVIEN_MASK            0x1UL                                   /**< Bit mask for SMU_PPUNSPRIVIEN               */
-#define _SMU_NSIEN_PPUNSPRIVIEN_DEFAULT         0x00000000UL                            /**< Mode DEFAULT for SMU_NSIEN                  */
-#define SMU_NSIEN_PPUNSPRIVIEN_DEFAULT          (_SMU_NSIEN_PPUNSPRIVIEN_DEFAULT << 0)  /**< Shifted mode DEFAULT for SMU_NSIEN          */
-#define SMU_NSIEN_PPUNSINSTIEN                  (0x1UL << 2)                            /**< PPUNS Instruction Interrupt Enable          */
-#define _SMU_NSIEN_PPUNSINSTIEN_SHIFT           2                                       /**< Shift value for SMU_PPUNSINSTIEN            */
-#define _SMU_NSIEN_PPUNSINSTIEN_MASK            0x4UL                                   /**< Bit mask for SMU_PPUNSINSTIEN               */
-#define _SMU_NSIEN_PPUNSINSTIEN_DEFAULT         0x00000000UL                            /**< Mode DEFAULT for SMU_NSIEN                  */
-#define SMU_NSIEN_PPUNSINSTIEN_DEFAULT          (_SMU_NSIEN_PPUNSINSTIEN_DEFAULT << 2)  /**< Shifted mode DEFAULT for SMU_NSIEN          */
+#define SMU_NSIEN_PPUNSPRIV                     (0x1UL << 0)                            /**< PPUNS Privilege Interrupt Enable            */
+#define _SMU_NSIEN_PPUNSPRIV_SHIFT              0                                       /**< Shift value for SMU_PPUNSPRIV               */
+#define _SMU_NSIEN_PPUNSPRIV_MASK               0x1UL                                   /**< Bit mask for SMU_PPUNSPRIV                  */
+#define _SMU_NSIEN_PPUNSPRIV_DEFAULT            0x00000000UL                            /**< Mode DEFAULT for SMU_NSIEN                  */
+#define SMU_NSIEN_PPUNSPRIV_DEFAULT             (_SMU_NSIEN_PPUNSPRIV_DEFAULT << 0)     /**< Shifted mode DEFAULT for SMU_NSIEN          */
+#define SMU_NSIEN_PPUNSINST                     (0x1UL << 2)                            /**< PPUNS Instruction Interrupt Enable          */
+#define _SMU_NSIEN_PPUNSINST_SHIFT              2                                       /**< Shift value for SMU_PPUNSINST               */
+#define _SMU_NSIEN_PPUNSINST_MASK               0x4UL                                   /**< Bit mask for SMU_PPUNSINST                  */
+#define _SMU_NSIEN_PPUNSINST_DEFAULT            0x00000000UL                            /**< Mode DEFAULT for SMU_NSIEN                  */
+#define SMU_NSIEN_PPUNSINST_DEFAULT             (_SMU_NSIEN_PPUNSINST_DEFAULT << 2)     /**< Shifted mode DEFAULT for SMU_NSIEN          */
 
 /* Bit fields for SMU PPUNSPATD0 */
 #define _SMU_PPUNSPATD0_RESETVALUE              0x00000000UL                                 /**< Default value for SMU_PPUNSPATD0            */

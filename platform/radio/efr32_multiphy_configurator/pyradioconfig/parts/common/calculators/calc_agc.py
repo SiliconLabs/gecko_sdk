@@ -311,8 +311,10 @@ class CALC_AGC(ICalculator):
         if period > 15:
             period = 15
 
-        if period < 0:
-            period = 0
+        # Minimum RSSIPERIOD field value is 1 corresponding to a period of 2
+        # See https://jira.silabs.com/browse/MCUW_RADIO_CFG-851
+        if period < 1:
+            period = 1
 
         self._reg_write(model.vars.AGC_CTRL1_RSSIPERIOD, period)
 

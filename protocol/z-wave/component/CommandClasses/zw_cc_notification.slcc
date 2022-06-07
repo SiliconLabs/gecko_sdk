@@ -1,7 +1,9 @@
 id: zw_cc_notification
 label: Notification Command Class
 category: Z-Wave|Command Classes
-description: Notification Command Class!
+description: >
+  Notification Command Class  is used to advertise events or states,
+  such as movement detection, door open/close or system failure.
 package: Z-Wave
 quality: production
 source:
@@ -14,3 +16,5 @@ include:
     - path: notification.h
 provides:
   - name: zw_cc_notification
+documentation:
+  url: "https://sdomembers.z-wavealliance.org/document/dl/638"

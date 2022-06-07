@@ -40,7 +40,7 @@ extern "C" {
 #endif
 
 /**************************************************************************//**
- * @addtogroup SL_WISUN_TRACE_API Wi-SUN Stack traces and debug API
+ * @addtogroup SL_WISUN_TRACE_API Wi-SUN Stack Traces and Debug API
  * @{
  *****************************************************************************/
 
@@ -57,7 +57,7 @@ extern "C" {
 sl_status_t sl_wisun_set_trace_level(uint8_t group_count, sl_wisun_trace_group_config_t *trace_config);
 
 /**************************************************************************//**
- * @brief Set the trace filter. Indicate which trace group shall be displayed.
+ * @brief Set the trace filter. Indicate which trace group will be displayed.
  * @param[in] filter Bitfield. Each 1 indicates the trace group ID corresponding
  *                   is selected for tracing. 0 means the trace group ID corresponding
  *                   should be filtered out. It follows enum sl_wisun_trace_group_t

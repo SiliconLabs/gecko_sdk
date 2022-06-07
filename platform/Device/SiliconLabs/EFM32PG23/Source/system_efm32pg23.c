@@ -120,6 +120,11 @@ uint32_t SystemCoreClock = HFRCODPLL_STARTUP_FREQ;
 
 #endif
 
+/*---------------------------------------------------------------------------
+ * Exception / Interrupt Vector table
+ *---------------------------------------------------------------------------*/
+extern const tVectorEntry __VECTOR_TABLE[16 + EXT_IRQ_COUNT];
+
 /*******************************************************************************
  **************************   GLOBAL FUNCTIONS   *******************************
  ******************************************************************************/
@@ -138,8 +143,8 @@ uint32_t SystemCoreClock = HFRCODPLL_STARTUP_FREQ;
  *****************************************************************************/
 void SystemInit(void)
 {
-#if defined(__VTOR_PRESENT) && (__VTOR_PRESENT == 1U)
-  SCB->VTOR = (uint32_t) &__Vectors;
+#if defined (__VTOR_PRESENT) && (__VTOR_PRESENT == 1U)
+  SCB->VTOR = (uint32_t) (&__VECTOR_TABLE[0]);
 #endif
 
 #if defined(UNALIGNED_SUPPORT_DISABLE)
@@ -150,6 +155,43 @@ void SystemInit(void)
   SCB->CPACR |= ((3U << 10U * 2U)           /* set CP10 Full Access */
                  | (3U << 11U * 2U));       /* set CP11 Full Access */
 #endif
+
+/* Secure app takes care of moving between the security states.
+ * SL_TRUSTZONE_SECURE MACRO is for secure access.
+ * SL_TRUSTZONE_NONSECURE MACRO is for non-secure access.
+ * When both the MACROS are not defined, during start-up below code makes sure
+ * that all the peripherals are accessed from non-secure address except SMU,
+ * as SMU is used to configure the trustzone state of the system. */
+#if !defined(SL_TRUSTZONE_SECURE) && !defined(SL_TRUSTZONE_NONSECURE) \
+  && defined(__TZ_PRESENT)
+
+#if (_SILICON_LABS_32B_SERIES_2_CONFIG >= 2)
+  CMU->CLKEN1_SET = CMU_CLKEN1_SMU;
+#endif
+
+  /* config SMU to Secure and other peripherals to Non-Secure. */
+  SMU->PPUSATD0_CLR = _SMU_PPUSATD0_MASK;
+#if defined (SEMAILBOX_PRESENT)
+  SMU->PPUSATD1_CLR = (_SMU_PPUSATD1_MASK & (~SMU_PPUSATD1_SMU & ~SMU_PPUSATD1_SEMAILBOX));
+#else
+  SMU->PPUSATD1_CLR = (_SMU_PPUSATD1_MASK & ~SMU_PPUSATD1_SMU);
+#endif
+
+  /* SAU treats all accesses as non-secure */
+#if defined(__ARM_FEATURE_CMSE) && (__ARM_FEATURE_CMSE == 3U)
+  SAU->CTRL = SAU_CTRL_ALLNS_Msk;
+  __DSB();
+  __ISB();
+#else
+  #error "The startup code requires access to the CMSE toolchain extension to set proper SAU settings."
+#endif /* __ARM_FEATURE_CMSE */
+
+/* Clear and Enable the SMU PPUSEC and BMPUSEC interrupt. */
+  NVIC_ClearPendingIRQ(SMU_SECURE_IRQn);
+  SMU->IF_CLR = SMU_IF_PPUSEC | SMU_IF_BMPUSEC;
+  NVIC_EnableIRQ(SMU_SECURE_IRQn);
+  SMU->IEN = SMU_IEN_PPUSEC | SMU_IEN_BMPUSEC;
+#endif /*SL_TRUSTZONE_SECURE */
 }
 
 /**************************************************************************//**

@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2013-2018 Arm Limited. All rights reserved.
+ * Copyright (c) 2013-2021 Arm Limited. All rights reserved.
  *
  * SPDX-License-Identifier: Apache-2.0
  *
@@ -75,9 +75,7 @@ static uint32_t isr_queue_put (os_object_t *object) {
 /// Get Object from ISR Queue.
 /// \return object or NULL.
 static os_object_t *isr_queue_get (void) {
-#if (EXCLUSIVE_ACCESS == 0)
-  uint32_t     primask = __get_PRIMASK();
-#else
+#if (EXCLUSIVE_ACCESS != 0)
   uint32_t     n;
 #endif
   uint16_t     max;
@@ -97,10 +95,8 @@ static os_object_t *isr_queue_get (void) {
   } else {
     ret = NULL;
   }
-  
-  if (primask == 0U) {
-    __enable_irq();
-  }
+
+  __enable_irq();
 #else
   if (atomic_dec16_nz(&osRtxInfo.isr_queue.cnt) != 0U) {
     n = atomic_inc16_lim(&osRtxInfo.isr_queue.out, max);
@@ -126,38 +122,40 @@ void osRtxTick_Handler (void) {
   OS_Tick_AcknowledgeIRQ();
   osRtxInfo.kernel.tick++;
 
-  // Process Timers
-  if (osRtxInfo.timer.tick != NULL) {
-    osRtxInfo.timer.tick();
-  }
-
   // Process Thread Delays
   osRtxThreadDelayTick();
 
   osRtxThreadDispatch(NULL);
 
+  // Process Timers
+  if (osRtxInfo.timer.tick != NULL) {
+    osRtxInfo.timer.tick();
+  }
+
   // Check Round Robin timeout
   if (osRtxInfo.thread.robin.timeout != 0U) {
-    if (osRtxInfo.thread.robin.thread != osRtxInfo.thread.run.next) {
-      // Reset Round Robin
-      osRtxInfo.thread.robin.thread = osRtxInfo.thread.run.next;
-      osRtxInfo.thread.robin.tick   = osRtxInfo.thread.robin.timeout;
-    } else {
-      if (osRtxInfo.thread.robin.tick != 0U) {
-        osRtxInfo.thread.robin.tick--;
+    thread = osRtxInfo.thread.run.next;
+    if (thread != osRtxInfo.thread.robin.thread) {
+      osRtxInfo.thread.robin.thread = thread;
+      if (thread->delay == 0U) {
+        // Reset Round Robin
+        thread->delay = osRtxInfo.thread.robin.timeout;
       }
-      if (osRtxInfo.thread.robin.tick == 0U) {
-        // Round Robin Timeout
-        if (osRtxKernelGetState() == osRtxKernelRunning) {
-          thread = osRtxInfo.thread.ready.thread_list;
-          if ((thread != NULL) && (thread->priority == osRtxInfo.thread.robin.thread->priority)) {
-            osRtxThreadListRemove(thread);
-            osRtxThreadReadyPut(osRtxInfo.thread.robin.thread);
-            EvrRtxThreadPreempted(osRtxInfo.thread.robin.thread);
-            osRtxThreadSwitch(thread);
-            osRtxInfo.thread.robin.thread = thread;
-            osRtxInfo.thread.robin.tick   = osRtxInfo.thread.robin.timeout;
-          }
+    }
+    if (thread->delay != 0U) {
+      thread->delay--;
+    }
+    if (thread->delay == 0U) {
+      // Round Robin Timeout
+      if (osRtxKernelGetState() == osRtxKernelRunning) {
+        thread = osRtxInfo.thread.ready.thread_list;
+        if ((thread != NULL) && (thread->priority == osRtxInfo.thread.robin.thread->priority)) {
+          osRtxThreadListRemove(thread);
+          osRtxThreadReadyPut(osRtxInfo.thread.robin.thread);
+          EvrRtxThreadPreempted(osRtxInfo.thread.robin.thread);
+          osRtxThreadSwitch(thread);
+          osRtxInfo.thread.robin.thread = thread;
+          thread->delay = osRtxInfo.thread.robin.timeout;
         }
       }
     }
@@ -212,6 +210,6 @@ void osRtxPostProcess (os_object_t *object) {
       osRtxInfo.kernel.pendSV = 1U;
     }
   } else {
-    (void)osRtxErrorNotify(osRtxErrorISRQueueOverflow, object);
+    (void)osRtxKernelErrorNotify(osRtxErrorISRQueueOverflow, object);
   }
 }

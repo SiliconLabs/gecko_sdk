@@ -76,7 +76,7 @@ void sl_simple_rail_heartbeat_init(void)
   sl_status_t status = sl_sleeptimer_start_periodic_timer_ms(&hb_radio_timer_handle,
                                                              SIMPLE_RAIL_HEARTBEAT_TIME_PERIOD_MS,
                                                              simple_rail_heartbeat_callback,
-                                                             (void *)NULL,
+                                                             NULL,
                                                              SIMPLE_RAIL_HEARTBEAT_TIMER_PRIORITY,
                                                              0);
   app_assert_status_f(status,

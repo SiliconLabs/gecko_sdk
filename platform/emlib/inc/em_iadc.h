@@ -33,6 +33,7 @@
 
 #include "em_device.h"
 #include "em_gpio.h"
+#include "em_system.h"
 #if defined(IADC_COUNT) && (IADC_COUNT > 0)
 
 #include <stdbool.h>
@@ -310,14 +311,23 @@ typedef enum {
   /** Ground  */
   iadcPosInputGnd       = (_IADC_SCAN_PORTPOS_GND << (_IADC_SCAN_PORTPOS_SHIFT - _IADC_SCAN_PINPOS_SHIFT)),
 
-  /** Avdd  */
+  /** Avdd / 4  */
   iadcPosInputAvdd      = (_IADC_SCAN_PORTPOS_SUPPLY << (_IADC_SCAN_PORTPOS_SHIFT - _IADC_SCAN_PINPOS_SHIFT))
                           | 0,
 
-  /** Vddio  */
+  /** Vddio / 4  */
   iadcPosInputVddio     = (_IADC_SCAN_PORTPOS_SUPPLY << (_IADC_SCAN_PORTPOS_SHIFT - _IADC_SCAN_PINPOS_SHIFT))
                           | 1,
 
+#if defined(_SILICON_LABS_32B_SERIES_2_CONFIG_5)
+  /** Vddio1 / 4 */
+  iadcPosInputVddio1    = (_IADC_SCAN_PORTPOS_SUPPLY << (_IADC_SCAN_PORTPOS_SHIFT - _IADC_SCAN_PINPOS_SHIFT))
+                          | 2,
+
+  /** Vddio2 / 4 */
+  iadcPosInputVddio2    = (_IADC_SCAN_PORTPOS_SUPPLY << (_IADC_SCAN_PORTPOS_SHIFT - _IADC_SCAN_PINPOS_SHIFT))
+                          | 3,
+#else
   /** Vss  */
   iadcPosInputVss       = (_IADC_SCAN_PORTPOS_SUPPLY << (_IADC_SCAN_PORTPOS_SHIFT - _IADC_SCAN_PINPOS_SHIFT))
                           | 2,
@@ -325,8 +335,9 @@ typedef enum {
   /** Vss  */
   iadcPosInputVssaux    = (_IADC_SCAN_PORTPOS_SUPPLY << (_IADC_SCAN_PORTPOS_SHIFT - _IADC_SCAN_PINPOS_SHIFT))
                           | 3,
+#endif
 
-  /** Dvdd  */
+  /** Dvdd / 4  */
   iadcPosInputDvdd      = (_IADC_SCAN_PORTPOS_SUPPLY << (_IADC_SCAN_PORTPOS_SHIFT - _IADC_SCAN_PINPOS_SHIFT))
                           | 4,
 
@@ -733,6 +744,7 @@ typedef enum {
   /** Data valid level is 4 before requesting DMA transfer */
   iadcFifoCfgDvl4  = _IADC_SCANFIFOCFG_DVL_VALID4,
 
+#if !defined(_SILICON_LABS_32B_SERIES_2_CONFIG_7)
 #if _SILICON_LABS_32B_SERIES_2_CONFIG > 2
   /** Data valid level is 5 before requesting DMA transfer */
   iadcFifoCfgDvl5  = _IADC_SCANFIFOCFG_DVL_VALID5,
@@ -747,6 +759,7 @@ typedef enum {
 #if _SILICON_LABS_32B_SERIES_2_CONFIG > 3
   /** Data valid level is 8 before requesting DMA transfer */
   iadcFifoCfgDvl8  = _IADC_SCANFIFOCFG_DVL_VALID8
+#endif
 #endif
 } IADC_FifoCfgDvl_t;
 
@@ -776,8 +789,8 @@ typedef enum {
 
 /** IADC init structure, common for single conversion and scan sequence. */
 typedef struct {
-  bool                          iadcClkSuspend0;       /**< Suspend IADC_CLK until PRS0 trigger. */
-  bool                          iadcClkSuspend1;       /**< Suspend IADC_CLK until PRS1 trigger. */
+  bool                          iadcClkSuspend0;       /**< Suspend IADC_CLK when in scan mode until PRS trigger. */
+  bool                          iadcClkSuspend1;       /**< Suspend IADC_CLK when in single mode until PRS trigger. */
   bool                          debugHalt;             /**< Halt IADC during debug mode. */
   IADC_Warmup_t                 warmup;                /**< IADC warmup mode. */
   uint8_t                       timebase;              /**< IADC clock cycles (timebase+1) corresponding to 1us.
@@ -1013,7 +1026,7 @@ typedef struct {
 /** Structure holding IADC result, including data and ID */
 typedef struct {
   uint32_t data;  /**< ADC sample data. */
-  uint8_t  id;    /**< Id of FIFO entry; Scan table entry id or single indicator (0x20). */
+  uint8_t  id;    /**< ID of FIFO entry; Scan table entry id or single indicator (0x20). */
 } IADC_Result_t;
 
 /*******************************************************************************
@@ -1048,6 +1061,7 @@ IADC_Result_t IADC_readSingleResult(IADC_TypeDef *iadc);
 IADC_Result_t IADC_pullSingleFifoResult(IADC_TypeDef *iadc);
 IADC_Result_t IADC_readScanResult(IADC_TypeDef *iadc);
 IADC_Result_t IADC_pullScanFifoResult(IADC_TypeDef *iadc);
+uint32_t IADC_getReferenceVoltage(IADC_CfgReference_t reference);
 
 /***************************************************************************//**
  * @brief

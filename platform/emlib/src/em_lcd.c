@@ -30,7 +30,7 @@
 
 #include "em_lcd.h"
 #if defined(LCD_COUNT) && (LCD_COUNT > 0)
-#include "em_assert.h"
+#include "sl_assert.h"
 #include "em_bus.h"
 #include "em_gpio.h"
 

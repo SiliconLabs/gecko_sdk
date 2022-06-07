@@ -35,4 +35,25 @@
 
 #define CMSIS_RTOS_ERROR_MASK       0x80000000
 
+#define SLI_WISUN_ERROR_CHECK(__result)\
+do {\
+  if (!(__result)){\
+    goto error_handler;\
+  }\
+} while(0)
+
+#define SLI_WISUN_ERROR_CHECK_SET_STATUS(__result, __value)\
+do {\
+  if (!(__result)){\
+    status = __value;\
+    goto error_handler;\
+  }\
+} while(0)
+
+#define SLI_WISUN_ERROR_SET_STATUS(__value)\
+do {\
+  status = __value;\
+  goto error_handler;\
+} while(0)
+
 #endif

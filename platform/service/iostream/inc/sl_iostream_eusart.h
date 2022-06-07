@@ -95,7 +95,7 @@ typedef struct {
   EUSART_HwFlowControl_TypeDef flow_control;    ///< Flow control
   bool enable_high_frequency;                   ///< enable_high_frequency
   CMU_Clock_TypeDef clock;                      ///< Peripheral Clock
-#if defined(EUSART_COUNT) && (EUSART_COUNT > 1)
+#if defined(EUSART_COUNT)
   unsigned int port_index;                      ///< Port index for GPIO routing
 #endif
   GPIO_Port_TypeDef tx_port;                    ///< Transmit port

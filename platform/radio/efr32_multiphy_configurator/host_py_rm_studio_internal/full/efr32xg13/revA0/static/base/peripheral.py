@@ -123,7 +123,7 @@ class Base_RM_Peripheral(IRegMapPeripheral):
         for regaddr, reg in sorted(reg_list):
             reg.buildRegFilterList(outFH, filterList)
 
-    def dump(self, outFH=None, valueDict=None):
+    def dump(self, outFH=None, valueDict=None, ignoreFailures=False):
         """
         This dump is only called for the use case with no filtered register
         list. Use the dumpActive flag to determine if this register should
@@ -140,4 +140,4 @@ class Base_RM_Peripheral(IRegMapPeripheral):
             if reg.dumpActive:
                 reg_list.append([reg.baseAddress + reg.addressOffset, reg])
         for regaddr, reg in sorted(reg_list):
-            reg.dump(outFH, valueDict)
+            reg.dump(outFH, valueDict, ignoreFailures=ignoreFailures)

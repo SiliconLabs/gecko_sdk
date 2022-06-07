@@ -171,10 +171,21 @@ static RAIL_Events_t getRxAntOptions(sl_rail_util_antenna_mode_t mode)
   }
 }
 
+#ifdef SL_CATALOG_RAIL_UTIL_INIT_PRESENT
+#include "sl_rail_util_init.h"
+#else
 extern RAIL_Handle_t emPhyRailHandle;
+#endif
 
 static sl_status_t radioConfigRxAntenna(sl_rail_util_antenna_mode_t mode)
 {
+#ifdef SL_CATALOG_RAIL_UTIL_INIT_PRESENT
+#if SL_RAIL_UTIL_INIT_INST0_ENABLE
+  RAIL_Handle_t emPhyRailHandle = sl_rail_util_get_handle(SL_RAIL_UTIL_HANDLE_INST0);
+#else
+#error "RAIL instance not initialized"
+#endif
+#endif
   if (emPhyRailHandle == NULL) {
     // This call is premature, before radio is initialized.
     // Defer to when we're re-called as part of halPluginConfig2p4GHzRadio().

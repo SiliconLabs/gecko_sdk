@@ -1,31 +1,31 @@
 <?xml version="1.0" ?>
-<api device_id="5" device_name="btmesh" version="3.3.2">
+<api device_id="5" device_name="btmesh" version="4.0.0">
     <datatypes>
-        <datatype base="uint16" name="errorcode"/>
-        <datatype base="int16" name="int16"/>
-        <datatype base="bd_addr" name="bd_addr"/>
-        <datatype base="uint16" name="uint16"/>
-        <datatype base="int32" name="int32"/>
-        <datatype base="uint32" name="uint32"/>
-        <datatype base="uint16" name="link_id_t"/>
-        <datatype base="int8" name="int8"/>
-        <datatype base="uint8" name="uint8"/>
-        <datatype base="uint8array" name="uint8array"/>
-        <datatype base="uint16array" name="uint16array"/>
-        <datatype base="ser_name" name="ser_name"/>
-        <datatype base="int8" name="dbm"/>
-        <datatype base="uint8" name="connection"/>
-        <datatype base="uint32" name="service"/>
-        <datatype base="uint16" name="characteristic"/>
-        <datatype base="uint16" name="descriptor"/>
-        <datatype base="uint8array" name="uuid"/>
-        <datatype base="uint8" name="att_errorcode"/>
-        <datatype base="uint8" name="att_opcode"/>
-        <datatype base="uuid_128" name="uuid_128"/>
-        <datatype base="aes_key_128" name="aes_key_128"/>
-        <datatype base="sl_bt_uuid_64_t" name="uuid_64"/>
-        <datatype base="int64" name="int64"/>
-        <datatype base="uint64" name="uint64"/>
+        <datatype base="uint16" name="errorcode" length="2"/>
+        <datatype base="int16" name="int16" length="2"/>
+        <datatype base="bd_addr" name="bd_addr" length="6"/>
+        <datatype base="uint16" name="uint16" length="2"/>
+        <datatype base="int32" name="int32" length="4"/>
+        <datatype base="uint32" name="uint32" length="4"/>
+        <datatype base="uint16" name="link_id_t" length="2"/>
+        <datatype base="int8" name="int8" length="1"/>
+        <datatype base="uint8" name="uint8" length="1"/>
+        <datatype base="uint8array" name="uint8array" length="1"/>
+        <datatype base="uint16array" name="uint16array" length="2"/>
+        <datatype base="ser_name" name="ser_name" length="16"/>
+        <datatype base="int8" name="dbm" length="1"/>
+        <datatype base="uint8" name="connection" length="1"/>
+        <datatype base="uint32" name="service" length="4"/>
+        <datatype base="uint16" name="characteristic" length="2"/>
+        <datatype base="uint16" name="descriptor" length="2"/>
+        <datatype base="uint8array" name="uuid" length="1"/>
+        <datatype base="uint8" name="att_errorcode" length="1"/>
+        <datatype base="uint8" name="att_opcode" length="1"/>
+        <datatype base="uuid_128" name="uuid_128" length="16"/>
+        <datatype base="aes_key_128" name="aes_key_128" length="16"/>
+        <datatype base="sl_bt_uuid_64_t" name="uuid_64" length="8"/>
+        <datatype base="int64" name="int64" length="8"/>
+        <datatype base="uint64" name="uint64" length="8"/>
     </datatypes>
     <class index="20" name="node">
         <command index="0" name="init" >
@@ -286,12 +286,6 @@
             <params>
                 <param datatype="uint8" name="page" type="uint8"/>
             </params>
-            <returns>
-                <param datatype="errorcode" name="result" type="uint16"/>
-            </returns>
-        </command>
-        <command index="32" name="erase_mesh_nvm" >
-            <params/>
             <returns>
                 <param datatype="errorcode" name="result" type="uint16"/>
             </returns>

@@ -39,7 +39,7 @@
  * bootloader can be started to replace the application in the flash to the one
  * just downloaded.
  *
- * All Connect bootloader related code relies on the Gecko Bootloader for
+ * All Connect bootloader-related code relies on the Gecko Bootloader for
  * bootloading and it must be installed on the device for these plugins to work.
  * For details on the Gecko Bootloader, see UG266.
  *

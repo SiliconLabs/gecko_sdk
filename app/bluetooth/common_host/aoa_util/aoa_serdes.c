@@ -100,9 +100,11 @@ sl_status_t aoa_serialize_angle(aoa_angle_t *angle, char** str)
   }
   cJSON *root = cJSON_CreateObject();
   cJSON_AddDoubleToObject(root, "azimuth", (double)angle->azimuth);
+  cJSON_AddDoubleToObject(root, "azimuth_stdev", (double)angle->azimuth_stdev);
   cJSON_AddDoubleToObject(root, "elevation", (double)angle->elevation);
+  cJSON_AddDoubleToObject(root, "elevation_stdev", (double)angle->elevation_stdev);
   cJSON_AddDoubleToObject(root, "distance", (double)angle->distance);
-  cJSON_AddIntegerToObject(root, "quality", (int)angle->quality);
+  cJSON_AddDoubleToObject(root, "distance_stdev", (double)angle->distance_stdev);
   cJSON_AddIntegerToObject(root, "sequence", (int)angle->sequence);
   *str = cJSON_Print(root);
   cJSON_Delete(root);
@@ -122,17 +124,21 @@ sl_status_t aoa_deserialize_angle(char* str, aoa_angle_t *angle)
   cJSON *param = cJSON_GetObjectItem(root, "azimuth");
   CHECK_TYPE(param, cJSON_Number);
   angle->azimuth = (float)param->valuedouble;
+  param = cJSON_GetObjectItem(root, "azimuth_stdev");
+  CHECK_TYPE(param, cJSON_Number);
+  angle->azimuth_stdev = (float)param->valuedouble;
   param = cJSON_GetObjectItem(root, "elevation");
   CHECK_TYPE(param, cJSON_Number);
   angle->elevation = (float)param->valuedouble;
+  param = cJSON_GetObjectItem(root, "elevation_stdev");
+  CHECK_TYPE(param, cJSON_Number);
+  angle->elevation_stdev = (float)param->valuedouble;
   param = cJSON_GetObjectItem(root, "distance");
   CHECK_TYPE(param, cJSON_Number);
   angle->distance = (float)param->valuedouble;
-  param = cJSON_GetObjectItem(root, "quality");
-  // Quality serves diagnostic purposes only and is therefore optional.
-  if ((param != NULL) && (param->type == cJSON_Number)) {
-    angle->quality = (uint32_t)param->valueint;
-  }
+  param = cJSON_GetObjectItem(root, "distance_stdev");
+  CHECK_TYPE(param, cJSON_Number);
+  angle->distance_stdev = (float)param->valuedouble;
   param = cJSON_GetObjectItem(root, "sequence");
   CHECK_TYPE(param, cJSON_Number);
   angle->sequence = (int32_t)param->valueint;
@@ -150,8 +156,11 @@ sl_status_t aoa_serialize_position(aoa_position_t *position, char** str)
   }
   cJSON *root = cJSON_CreateObject();
   cJSON_AddDoubleToObject(root, "x", position->x);
+  cJSON_AddDoubleToObject(root, "x_stdev", position->x_stdev);
   cJSON_AddDoubleToObject(root, "y", position->y);
+  cJSON_AddDoubleToObject(root, "y_stdev", position->y_stdev);
   cJSON_AddDoubleToObject(root, "z", position->z);
+  cJSON_AddDoubleToObject(root, "z_stdev", position->z_stdev);
   cJSON_AddIntegerToObject(root, "sequence", (int)position->sequence);
   *str = cJSON_Print(root);
   cJSON_Delete(root);
@@ -171,79 +180,24 @@ sl_status_t aoa_deserialize_position(char* str, aoa_position_t *position)
   cJSON *param = cJSON_GetObjectItem(root, "x");
   CHECK_TYPE(param, cJSON_Number);
   position->x = (float)param->valuedouble;
+  param = cJSON_GetObjectItem(root, "x_stdev");
+  CHECK_TYPE(param, cJSON_Number);
+  position->x_stdev = (float)param->valuedouble;
   param = cJSON_GetObjectItem(root, "y");
   CHECK_TYPE(param, cJSON_Number);
   position->y = (float)param->valuedouble;
+  param = cJSON_GetObjectItem(root, "y_stdev");
+  CHECK_TYPE(param, cJSON_Number);
+  position->y_stdev = (float)param->valuedouble;
   param = cJSON_GetObjectItem(root, "z");
   CHECK_TYPE(param, cJSON_Number);
   position->z = (float)param->valuedouble;
+  param = cJSON_GetObjectItem(root, "z_stdev");
+  CHECK_TYPE(param, cJSON_Number);
+  position->z_stdev = (float)param->valuedouble;
   param = cJSON_GetObjectItem(root, "sequence");
   CHECK_TYPE(param, cJSON_Number);
   position->sequence = (int32_t)param->valueint;
-  cJSON_Delete(root);
-  return SL_STATUS_OK;
-}
-
-/***************************************************************************//**
- * Serialize correction data structure into string.
- ******************************************************************************/
-sl_status_t aoa_serialize_correction(aoa_correction_t *correction, char** str)
-{
-  if ((correction == NULL) || (str == NULL)) {
-    return SL_STATUS_NULL_POINTER;
-  }
-  cJSON *root = cJSON_CreateObject();
-  cJSON *direction = cJSON_CreateObject();
-  cJSON *deviation = cJSON_CreateObject();
-  cJSON_AddDoubleToObject(direction, "azimuth", (double)correction->direction.azimuth);
-  cJSON_AddDoubleToObject(direction, "elevation", (double)correction->direction.elevation);
-  cJSON_AddDoubleToObject(direction, "distance", (double)correction->direction.distance);
-  cJSON_AddItemToObject(root, "direction", direction);
-  cJSON_AddDoubleToObject(deviation, "azimuth", (double)correction->deviation.azimuth);
-  cJSON_AddDoubleToObject(deviation, "elevation", (double)correction->deviation.elevation);
-  cJSON_AddDoubleToObject(deviation, "distance", (double)correction->deviation.distance);
-  cJSON_AddItemToObject(root, "deviation", deviation);
-  cJSON_AddIntegerToObject(root, "sequence", (int)correction->sequence);
-  *str = cJSON_Print(root);
-  cJSON_Delete(root);
-  return SL_STATUS_OK;
-}
-
-/***************************************************************************//**
- * Deserialize correction data structure from string.
- ******************************************************************************/
-sl_status_t aoa_deserialize_correction(char* str, aoa_correction_t *correction)
-{
-  if ((correction == NULL) || (str == NULL)) {
-    return SL_STATUS_NULL_POINTER;
-  }
-  cJSON *root = cJSON_Parse(str);
-  CHECK_TYPE(root, cJSON_Object);
-  cJSON *direction = cJSON_GetObjectItem(root, "direction");
-  CHECK_TYPE(direction, cJSON_Object);
-  cJSON *deviation = cJSON_GetObjectItem(root, "deviation");
-  CHECK_TYPE(deviation, cJSON_Object);
-  cJSON *param = cJSON_GetObjectItem(direction, "azimuth");
-  CHECK_TYPE(param, cJSON_Number);
-  correction->direction.azimuth = (float)param->valuedouble;
-  param = cJSON_GetObjectItem(direction, "elevation");
-  CHECK_TYPE(param, cJSON_Number);
-  correction->direction.elevation = (float)param->valuedouble;
-  param = cJSON_GetObjectItem(direction, "distance");
-  CHECK_TYPE(param, cJSON_Number);
-  correction->direction.distance = (float)param->valuedouble;
-  param = cJSON_GetObjectItem(deviation, "azimuth");
-  CHECK_TYPE(param, cJSON_Number);
-  correction->deviation.azimuth = (float)param->valuedouble;
-  param = cJSON_GetObjectItem(deviation, "elevation");
-  CHECK_TYPE(param, cJSON_Number);
-  correction->deviation.elevation = (float)param->valuedouble;
-  param = cJSON_GetObjectItem(deviation, "distance");
-  CHECK_TYPE(param, cJSON_Number);
-  correction->deviation.distance = (float)param->valuedouble;
-  param = cJSON_GetObjectItem(root, "sequence");
-  CHECK_TYPE(param, cJSON_Number);
-  correction->sequence = (int32_t)param->valueint;
   cJSON_Delete(root);
   return SL_STATUS_OK;
 }

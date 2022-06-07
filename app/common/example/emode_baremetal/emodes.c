@@ -770,11 +770,21 @@ static void disable_HF_clocks(void)
   TIMER1->EN_CLR = 0x1;
   TIMER2->EN_CLR = 0x1;
   TIMER3->EN_CLR = 0x1;
+#if defined(ACMP0)
   ACMP0->EN_CLR = 0x1;
+#endif // (ACMP0)
+#if defined(ACMP1)
   ACMP1->EN_CLR = 0x1;
+#endif // (ACMP1)
+#if defined(IADC0)
   IADC0->EN_CLR = 0x1;
+#endif // (IADC0)
+#if defined(I2C0)
   I2C0->EN_CLR = 0x1;
+#endif // (I2C0)
+#if defined(I2C1)
   I2C1->EN_CLR = 0x1;
+#endif // (I2C1)
   GPCRC->EN_CLR = 0x1;
 #else
   CMU->CLKEN0_SET = CMU_CLKEN0_HFRCO0;

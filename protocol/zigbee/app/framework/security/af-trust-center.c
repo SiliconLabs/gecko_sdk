@@ -363,6 +363,13 @@ EmberJoinDecision emberTrustCenterJoinHandler(EmberNodeId newNodeId,
                  ? EMBER_USE_PRECONFIGURED_KEY
                  : EMBER_NO_ACTION;
 #endif
+
+  // EMZIGBEE-9283 Allow unsecured rejoin if default decision is EMBER_ALLOW_REJOINS_ONLY
+  if (status == EMBER_STANDARD_SECURITY_UNSECURED_REJOIN
+      && joinDecision == EMBER_ALLOW_REJOINS_ONLY ) {
+    joinDecision = EMBER_USE_PRECONFIGURED_KEY;
+  }
+
   //this would be the callback
   securityJoinNotify(newNodeId,
                      newNodeEui64,

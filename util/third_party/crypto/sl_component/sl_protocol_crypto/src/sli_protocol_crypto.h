@@ -1,6 +1,7 @@
 /***************************************************************************//**
  * @file
- * @brief Accelerated cryptographic primitives using the RADIOAES peripheral.
+ * @brief Accelerated cryptographic primitives using the CRYPTO and RADIOAES
+ *        peripherals, for series-1 and series-2 respectively.
  *******************************************************************************
  * # License
  * <b>Copyright 2020 Silicon Laboratories Inc. www.silabs.com</b>
@@ -34,7 +35,8 @@
 
 /***************************************************************************//**
  * @addtogroup sli_protocol_crypto
- * @brief Accelerated cryptographic primitives using the RADIOAES peripheral.
+ * @brief Accelerated cryptographic primitives using the CRYPTO and RADIOAES
+ *        peripherals, for series-1 and series-2 respectively.
  * @{
  ******************************************************************************/
 
@@ -101,6 +103,13 @@ sl_status_t sli_aes_cmac_radio(const unsigned char    *key,
                                const unsigned char    *input,
                                unsigned int           length,
                                volatile unsigned char output[16]);
+
+/***************************************************************************//**
+ * @brief         Seeds the AES mask. It is recommended to call this function
+                  during initialization in order to avoid taking the potential
+                  hit of requesting RNG output in an IRQ context.
+ ******************************************************************************/
+void sli_aes_seed_mask(void);
 #endif
 
 /***************************************************************************//**

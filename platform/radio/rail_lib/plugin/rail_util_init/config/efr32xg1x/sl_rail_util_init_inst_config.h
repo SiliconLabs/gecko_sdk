@@ -317,6 +317,11 @@
 // <i> Default: 0
 #define SL_RAIL_UTIL_INIT_EVENT_CAL_NEEDED_INSTANCE_ENABLE 0
 // </h>
+// <h> RSSI Radio Events
+// <q SL_RAIL_UTIL_INIT_EVENT_DETECT_RSSI_THRESHOLD_INSTANCE_ENABLE> RSSI detect threshold
+// <i> Default: 0
+#define SL_RAIL_UTIL_INIT_EVENT_DETECT_RSSI_THRESHOLD_INSTANCE_ENABLE 0
+// </h>
 // </e>
 
 // </e>

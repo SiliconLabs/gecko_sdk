@@ -31,7 +31,7 @@
 #include "em_rmu.h"
 #if (defined(RMU_COUNT) && (RMU_COUNT > 0)) || (_EMU_RSTCTRL_MASK)
 
-#include "em_common.h"
+#include "sl_common.h"
 #include "em_emu.h"
 #include "em_bus.h"
 

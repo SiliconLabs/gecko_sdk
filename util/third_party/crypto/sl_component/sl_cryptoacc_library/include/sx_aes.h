@@ -25,6 +25,12 @@
 /** @brief Size for Context in all modes except GCM and CCM */
 #define AES_CTX_SIZE (BLK_CIPHER_CTX_SIZE)
 
+/** @brief Size in bytes for AES-128 key */
+#define AES_KEYSIZE_128 16
+/** @brief Size in bytes for AES-192 key */
+#define AES_KEYSIZE_192 24
+/** @brief Size in bytes for AES-256 key */
+#define AES_KEYSIZE_256 32
 /**
  * @brief Dummy variables to use hardware keys Key1 and Key2
  *
@@ -49,15 +55,6 @@ extern uint8_t aes_hw_key1;
 #define AES_KEY2_128 block_t_convert(&aes_hw_key2, 128/8)
 /** @brief Second Hardware Key of 256b (for description, see ::AES_KEY1_128) */
 #define AES_KEY2_256 block_t_convert(&aes_hw_key2, 256/8)
-
-/**
-* @brief Enumeration of possible mode for AES algorithm.
-*/
-typedef enum sx_aes_mode_e
-{
-    ENC = 1,            /**< Encrypt */
-    DEC = 2,            /**< Decrypt */
-} sx_aes_mode_t;
 
 /** Encryption operation using AES-ECB
  *
@@ -151,6 +148,7 @@ uint32_t sx_aes_cbc_decrypt_init(
       const block_t *iv,
       block_t *ctx_out);
 
+
 /** Continue (update) encryption operation using AES-CBC in Init-Update-Final model
  *
  * @param key is the key involved to encrypt the plaintext
@@ -159,7 +157,7 @@ uint32_t sx_aes_cbc_decrypt_init(
  * @param ctx_in is the input intermediate context outputted from
  *               ::sx_aes_cbc_encrypt_init or from ::sx_aes_cbc_encrypt_update
  * @param ctx_out is the output intermediate context to forward to
- *                ::sx_aes_ctr_encrypt_update or to ::sx_aes_ctr_encrypt_final
+ *                ::sx_aes_cbc_encrypt_update or to ::sx_aes_cbc_encrypt_final
  * @return ::CRYPTOLIB_SUCCESS if encryption succeeded
  *         ::CRYPTOLIB_UNSUPPORTED_ERR if the key length is not supported
  */
@@ -1087,6 +1085,7 @@ uint32_t sx_aes_ccm_decrypt_verify(
  * @param mac_len is the length of the mac to output. In IUF, it is mandatory
  *        to provide it during init step as this length is required to compute
  *        CCM headers.
+ * @param total_length total length of data going to be input in IUF
  * @return ::CRYPTOLIB_SUCCESS if encryption succeeded
  *         ::CRYPTOLIB_UNSUPPORTED_ERR if the key length is not supported
  */
@@ -1097,7 +1096,8 @@ uint32_t sx_aes_ccm_encrypt_init(
       const block_t *nonce,
       block_t *ctx_out,
       const block_t *aad,
-      uint32_t mac_len);
+      uint32_t mac_len,
+      uint32_t total_length);
 
 /** Start (init) decryption and authentication operation using AES-CCM in
  *  Init-Update-Final model
@@ -1112,6 +1112,7 @@ uint32_t sx_aes_ccm_encrypt_init(
  * @param mac_len is the length of the mac to output. In IUF, it is mandatory
  *        to provide it during init step as this length is required to compute
  *        CCM headers.
+ * @param total_length total length of data going to be input in IUF
  * @return ::CRYPTOLIB_SUCCESS if decryption succeeded
  *         ::CRYPTOLIB_UNSUPPORTED_ERR if the key length is not supported
  */
@@ -1122,7 +1123,8 @@ uint32_t sx_aes_ccm_decrypt_init(
       const block_t *nonce,
       block_t *ctx_out,
       const block_t *aad,
-      uint32_t mac_len);
+      uint32_t mac_len,
+      uint32_t total_length);
 
 /** Continue (update) encryption and authentication operation using AES-CCM in
  *  Init-Update-Final model

@@ -36,7 +36,7 @@
 
 #include "sl_wisun_app_core.h"
 #include "sl_wisun_coap.h"
-#include "sl_wisun_meter_collector.h"
+#include "sli_wisun_meter_collector.h"
 #include "sl_wisun_meter.h"
 #include "sl_wisun_coap_meter_collector_config.h"
 #include "sl_wisun_led_driver.h"

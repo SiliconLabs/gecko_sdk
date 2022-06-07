@@ -33,7 +33,7 @@
 #if defined(LDMA_PRESENT) && (LDMA_COUNT == 1)
 
 #include <stddef.h>
-#include "em_assert.h"
+#include "sl_assert.h"
 #include "em_bus.h"
 #include "em_cmu.h"
 #include "em_core.h"

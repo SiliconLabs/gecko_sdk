@@ -1,7 +1,11 @@
 id: zw_cc_multichannelcontrol
-label: Multichannel Command Class
+label: Multi Channel Command Class Control
 category: Z-Wave|Command Classes
-description: Multichannel Control Command Class!
+description: >
+  Multi Channel command class is used to address one or more End Points in a Multi Channel device.
+  
+  This component provides functionality for controlling other devices.
+  
 package: Z-Wave
 quality: production
 source:
@@ -12,3 +16,5 @@ include:
     - path: multichannel.h
 provides:
   - name: zw_cc_multichannelcontrol
+documentation:
+  url: "https://sdomembers.z-wavealliance.org/document/dl/652"

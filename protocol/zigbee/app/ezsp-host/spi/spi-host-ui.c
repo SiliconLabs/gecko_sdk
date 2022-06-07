@@ -39,6 +39,12 @@
 #include "app/ezsp-host/ezsp-host-ui.h"
 #include "app/util/gateway/backchannel.h"
 #include "app/ezsp-host/spi/spi-host-ui.h"
+#ifdef SL_COMPONENT_CATALOG_PRESENT
+#include "sl_component_catalog.h"
+#endif  // SL_COMPONENT_CATALOG_PRESENT
+#ifdef SL_CATALOG_ZIGBEE_OTA_STORAGE_POSIX_FILESYSTEM_PRESENT
+#include "ota-storage-linux-config.h"
+#endif  // SL_CATALOG_ZIGBEE_OTA_STORAGE_POSIX_FILESYSTEM_PRESENT
 
 //------------------------------------------------------------------------------
 // Preprocessor definitions
@@ -48,10 +54,14 @@
 #define txControl (txBuffer[0])     // more descriptive aliases
 #define rxControl (rxBuffer[0])
 
-static const char options[] = "h::t:v::";
+static const char options[] = "h::t:v::d:";
 
 extern int optind, opterr, optopt;
 extern char *optarg;
+#ifdef SL_CATALOG_ZIGBEE_OTA_STORAGE_POSIX_FILESYSTEM_PRESENT
+// To set the OTA file storage directory in runtime.
+extern char defaultStorageDirectory[OTA_FILE_STORAGE_DIR_LENGTH];
+#endif  // SL_CATALOG_ZIGBEE_OTA_STORAGE_POSIX_FILESYSTEM_PRESENT
 
 bool ezspInternalProcessCommandOptions(int argc, char *argv[], char *errStr)
 {
@@ -99,6 +109,22 @@ bool ezspInternalProcessCommandOptions(int argc, char *argv[], char *errStr)
           backchannelSerialPortOffset = port;
         }
         break;
+      case 'd': {
+  #ifdef SL_CATALOG_ZIGBEE_OTA_STORAGE_POSIX_FILESYSTEM_PRESENT
+        char otaStorageDir[128];
+        if (!optarg || (sscanf(optarg, "%127s", otaStorageDir) <= 0)) {
+          snprintf(errStr, ERR_LEN, "Invalid OTA files storage directory name %s.\n",
+                   optarg ? optarg : "NULL");
+        } else if (strlen(otaStorageDir) >= OTA_FILE_STORAGE_DIR_LENGTH) {
+          snprintf(errStr, ERR_LEN, "OTA files storage directory %s too long.\n",
+                   otaStorageDir);
+        } else {
+          otaStorageDir[OTA_FILE_STORAGE_DIR_LENGTH - 1] = '\0';
+          strncpy(defaultStorageDirectory, otaStorageDir, OTA_FILE_STORAGE_DIR_LENGTH);
+        }
+  #endif  // SL_CATALOG_ZIGBEE_OTA_STORAGE_POSIX_FILESYSTEM_PRESENT
+      }
+      break;
       default:
         assert(1);
         break;

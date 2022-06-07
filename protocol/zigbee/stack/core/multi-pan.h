@@ -18,7 +18,8 @@
 #ifndef SILABS_MULTI_PAN_H
 #define SILABS_MULTI_PAN_H
 
-#include "core/ember-stack.h"
+#include "stack/include/library.h"
+#include "event_queue/event-queue.h"
 #include "stack/include/ember-types.h"
 
 extern uint8_t emNumMultiPanForks;

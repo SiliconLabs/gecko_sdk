@@ -52,7 +52,6 @@
 #include "em_core.h"
 #include "em_rmu.h"
 #include "em_emu.h"
-#include "em_system.h"
 
 #include "gpiointerrupt.h"
 #include "response_print.h"
@@ -80,19 +79,8 @@
 #include "sl_rail_util_timing_test.h"
 #endif
 
-#ifndef STATIC_ASSERT
-#ifdef __ICCARM__
-  #define STATIC_ASSERT(__condition, __errorstr) \
-  static_assert(__condition, __errorstr)
-#elif defined(__GNUC__)
-  #define STATIC_ASSERT(__condition, __errorstr) \
-  _Static_assert(__condition, __errorstr)
-#else
-  #define STATIC_ASSERT(__condition, __errorstr)
-#endif
-#endif//STATIC_ASSERT
-STATIC_ASSERT(sizeof(RailAppEvent_t) <= 36,
-              "Adjust BUFFER_POOL_ALLOCATOR_BUFFER_SIZE_MAX per sizeof(RailAppEvent_t) growth");
+_Static_assert(sizeof(RailAppEvent_t) <= 40,
+               "Adjust BUFFER_POOL_ALLOCATOR_BUFFER_SIZE_MAX per sizeof(RailAppEvent_t) growth");
 
 // Includes for Silicon Labs-only, internal testing
 #ifdef RPC_TESTING
@@ -119,6 +107,9 @@ STATIC_ASSERT(sizeof(RailAppEvent_t) <= 36,
 #ifdef SL_CATALOG_RAIL_UTIL_IEEE802154_STACK_EVENT_PRESENT
 extern void sl_rail_util_ieee801254_on_rail_event(RAIL_Handle_t railHandle, RAIL_Events_t events);
 #endif // SL_CATALOG_RAIL_UTIL_IEEE802154_STACK_EVENT_PRESENT
+#ifdef SL_CATALOG_RAIL_UTIL_COEX_PRESENT
+extern void sl_bt_ll_coex_handle_events(RAIL_Events_t events);
+#endif //SL_CATALOG_RAIL_UTIL_COEX_PRESENT
 
 // External control and status variables
 Counters_t counters = { 0 };
@@ -347,72 +338,10 @@ void sl_rail_test_internal_app_init(void)
 
   // Make sure the response printer mirrors the default printingEnabled state
   responsePrintEnable(printingEnabled);
-
-#define EVALIT(a, b)  a # b
-#define PASTEIT(a, b) EVALIT(a, b)
-#if defined(_SILICON_LABS_32B_SERIES_1)
- #if   (_SILICON_LABS_32B_SERIES_1_CONFIG == 1)
-  #define FAMILY_NAME "EFR32XG1"
- #else
-  #define FAMILY_NAME PASTEIT("EFR32XG1", _SILICON_LABS_32B_SERIES_1_CONFIG)
- #endif
-#elif defined(_SILICON_LABS_32B_SERIES_2)
-  #define FAMILY_NAME PASTEIT("EFR32XG2", _SILICON_LABS_32B_SERIES_2_CONFIG)
-#else
-  #define FAMILY_NAME "??"
-#endif
-#ifndef _SILICON_LABS_GECKO_INTERNAL_SDID
-  #define _SILICON_LABS_GECKO_INTERNAL_SDID 0U
-#endif
-
   // Print app initialization information.
   RAILTEST_PRINTF("\n");
   responsePrint("reset", "App:%s,Built:%s", SL_RAIL_TEST_APP_NAME, buildDateTime);
-#if defined(_SILICON_LABS_32B_SERIES_2)
-  uint32_t moduleName32[8] = {
-    DEVINFO->MODULENAME0, DEVINFO->MODULENAME1, DEVINFO->MODULENAME2,
-    DEVINFO->MODULENAME3, DEVINFO->MODULENAME4, DEVINFO->MODULENAME5,
-    DEVINFO->MODULENAME6, 0UL
-  };
-  char *moduleName = (char *) moduleName32;
-  for (uint8_t i = 0U; i < sizeof(moduleName32); i++) {
-    if ((moduleName[i] == '\0') || (moduleName[i] == '\xFF')) {
-      moduleName[i] = '\0';
-      break;
-    }
-  }
-  responsePrint("radio", "FreqHz:%u,ModuleInfo:0x%08x,ModuleName:%s",
-                RAIL_GetRadioClockFreqHz(railHandle),
-                DEVINFO->MODULEINFO,
-                ((moduleName[0] == '\0') ? "N/A" : moduleName));
-#else
-  responsePrint("radio", "FreqHz:%u,ModuleInfo:0x%08x",
-                RAIL_GetRadioClockFreqHz(railHandle),
-                DEVINFO->MODULEINFO);
-#endif
-  SYSTEM_ChipRevision_TypeDef chipRev = { 0, };
-  SYSTEM_ChipRevisionGet(&chipRev);
-
-  // SYSTEM_ChipRevision_TypeDef defines either a partNumber field or a family field.
-  // If _SYSCFG_CHIPREV_PARTNUMBER_MASK is defined, there is a partNumber field.
-  // Otherwise, there is a family field.
-  responsePrint("system", "Family:%s,"
-#if defined(_SYSCFG_CHIPREV_PARTNUMBER_MASK)
-                "Part#:%u,"
-#else
-                "Fam#:%u,"
-#endif
-                "ChipRev:%u.%u,sdid:%u,Part:0x%08x",
-                FAMILY_NAME,
-#if defined(_SYSCFG_CHIPREV_PARTNUMBER_MASK)
-                chipRev.partNumber,
-#else
-                chipRev.family,
-#endif
-                chipRev.major,
-                chipRev.minor,
-                _SILICON_LABS_GECKO_INTERNAL_SDID,
-                DEVINFO->PART);
+  printChipInfo();
   getPti(NULL);
 
   // Set TX FIFO, and verify that the size is correct
@@ -442,7 +371,7 @@ void sl_rail_test_internal_app_init(void)
     // Always turn off RfSense when waking back up from EM4
     (void) RAIL_StartRfSense(railHandle, RAIL_RFSENSE_OFF, 0, NULL);
   }
-#elif (_SILICON_LABS_32B_SERIES_2_CONFIG == 2)
+#elif ((_SILICON_LABS_32B_SERIES_2_CONFIG == 2) || (_SILICON_LABS_32B_SERIES_2_CONFIG == 7))
   if (resetCause & EMU_RSTCAUSE_EM4) {
     responsePrint("sleepWoke", "EM:4s,SerialWakeup:No,RfSensed:%s",
                   RAIL_IsRfSensed(railHandle) ? "Yes" : "No");
@@ -487,9 +416,6 @@ void sl_rail_test_internal_app_init(void)
   // RX isn't validated yet so lets not go into receive just yet
   RAIL_StartRx(railHandle, channel, NULL); // Start in receive mode
   receiveModeEnabled = true;
-#ifdef SL_CATALOG_RAIL_UTIL_COEX_PRESENT
-  sl_rail_util_coex_init();
-#endif
 }
 
 volatile uint16_t rxDataSourceEventState = RX_DATA_SOURCE_EVENT_STATE_CHECKED;
@@ -566,6 +492,57 @@ void RAILCb_SwTimerExpired(RAIL_Handle_t railHandle)
   railTimerConfigExpireTime = RAIL_GetTimer(railHandle);
   railTimerExpired = true;
 }
+
+#if RAIL_IEEE802154_SUPPORTS_G_MODESWITCH && defined(WISUN_MODESWITCHPHRS_ARRAY_SIZE)
+void RAILCb_ModeSwitchMultiTimerExpired(RAIL_MultiTimer_t *tmr,
+                                        RAIL_Time_t expectedTimeOfEvent,
+                                        void *cbArg)
+{
+  (void)tmr;
+  (void)expectedTimeOfEvent;
+  (void)cbArg;
+
+  if (modeSwitchState == TX_ON_NEW_PHY) {
+    restartModeSwitchSequence();
+  }
+  if (modeSwitchState == RX_ON_NEW_PHY) {
+    if (RAIL_IsValidChannel(railHandle, modeSwitchBaseChannel)
+        == RAIL_STATUS_NO_ERROR) {
+      changeChannel(modeSwitchBaseChannel);
+      modeSwitchBaseChannel = 0xFFFFU;
+      modeSwitchNewChannel = 0xFFFFU;
+    }
+  }
+}
+
+void restartModeSwitchSequence(void)
+{
+  // Re-start sequence: switch back on base channel
+  if (RAIL_IsValidChannel(railHandle, modeSwitchBaseChannel)
+      == RAIL_STATUS_NO_ERROR) {
+    changeChannel(modeSwitchBaseChannel);
+    // Write MS PHR in txData
+    txData[0] = MSphr[0];
+    txData[1] = MSphr[1];
+    modeSwitchState = TX_MS_PACKET;
+    // Send MS packet
+    txCount = 1;
+    pendPacketTx();
+    sendPacketIfPending(); // txCount is decremented in this function
+  }
+}
+
+void endModeSwitchSequence(void)
+{
+  if (modeSwitchLifeReturn) {
+    changeChannel(modeSwitchBaseChannel);
+  }
+  modeSwitchDelayUs = 0;
+  modeSwitchBaseChannel = 0xFFFFU;
+  modeSwitchNewChannel = 0xFFFFU;
+  setNextAppMode(NONE, NULL);
+}
+#endif
 
 void RAILCb_TimerExpired(RAIL_Handle_t railHandle)
 {
@@ -731,6 +708,15 @@ void sl_rail_util_on_event(RAIL_Handle_t railHandle, RAIL_Events_t events)
     receivingPacket = false;
     if (events & RAIL_EVENT_RX_PACKET_RECEIVED) {
       RAILCb_RxPacketReceived(railHandle);
+#if RAIL_IEEE802154_SUPPORTS_G_MODESWITCH && defined(WISUN_MODESWITCHPHRS_ARRAY_SIZE)
+      if (modeSwitchState == RX_ON_NEW_PHY && modeSwitchLifeReturn) {
+        RAIL_SetMultiTimer(&modeSwitchMultiTimer,
+                           RX_MODE_SWITCH_DELAY_US,
+                           RAIL_TIME_DELAY,
+                           &RAILCb_ModeSwitchMultiTimerExpired,
+                           NULL);
+      }
+ #endif
     }
     if (rxFifoManual && (railDataConfig.rxMethod != PACKET_MODE)) {
       (void)RAIL_HoldRxPacket(railHandle);
@@ -863,6 +849,19 @@ void sl_rail_util_on_event(RAIL_Handle_t railHandle, RAIL_Events_t events)
     if (events & RAIL_EVENT_TX_UNDERFLOW) {
       counters.userTxUnderflow++;
     }
+#if RAIL_IEEE802154_SUPPORTS_G_MODESWITCH && defined(WISUN_MODESWITCHPHRS_ARRAY_SIZE)
+    if (modeSwitchState == TX_MS_PACKET) {
+      // Restore first 2 bytes overwritten by Mode Switch PHR
+      txData[0] = txData_2B[0];
+      txData[1] = txData_2B[1];
+
+      modeSwitchState = IDLE;
+      modeSwitchDelayUs = 0;
+      modeSwitchBaseChannel = 0xFFFFU;
+      modeSwitchNewChannel = 0xFFFFU;
+      setNextAppMode(NONE, NULL);
+    }
+ #endif
   }
   // Put this here too so that we do these things twice
   // in the case that an ack and a non ack have completed
@@ -894,9 +893,30 @@ void sl_rail_util_on_event(RAIL_Handle_t railHandle, RAIL_Events_t events)
   if (events & RAIL_EVENT_PA_PROTECTION) {
     counters.paProtect++;
   }
+#if RAIL_IEEE802154_SUPPORTS_G_MODESWITCH && defined(WISUN_MODESWITCHPHRS_ARRAY_SIZE)
+  if (events & RAIL_EVENT_IEEE802154_MODESWITCH_START) {
+    modeSwitchState = RX_ON_NEW_PHY;
+    modeSwitchBaseChannel = channel;
+    channel = getLikelyChannel();
+    modeSwitchNewChannel = channel;
+  }
+  if (events & RAIL_EVENT_IEEE802154_MODESWITCH_END) {
+    modeSwitchState = IDLE;
+    channel = getLikelyChannel();
+    modeSwitchBaseChannel = 0xFFFFU;
+    modeSwitchNewChannel = 0xFFFFU;
+  }
+#endif
 #ifdef SL_CATALOG_RAIL_UTIL_IEEE802154_STACK_EVENT_PRESENT
-  sl_rail_util_ieee801254_on_rail_event(railHandle, events);
+  if (RAIL_IEEE802154_IsEnabled(railHandle)) {
+    sl_rail_util_ieee801254_on_rail_event(railHandle, events);
+  }
 #endif //SL_CATALOG_RAIL_UTIL_IEEE802154_STACK_EVENT_PRESENT
+#ifdef SL_CATALOG_RAIL_UTIL_COEX_PRESENT
+  if (RAIL_BLE_IsEnabled(railHandle)) {
+    sl_bt_ll_coex_handle_events(events);
+  }
+#endif //SL_CATALOG_RAIL_UTIL_COEX_PRESENT
 }
 
 volatile bool allowPowerManagerSleep = false;
@@ -1052,6 +1072,22 @@ void changeChannel(uint32_t i)
       while (1) ;
     }
   }
+#if RAIL_IEEE802154_SUPPORTS_G_MODESWITCH && defined(WISUN_MODESWITCHPHRS_ARRAY_SIZE)
+  if (modeSwitchState != IDLE) {
+    void *modeSwitchChangeChannelHandle = memoryAllocate(sizeof(RailAppEvent_t));
+    RailAppEvent_t *modeSwitchChangeChannel = (RailAppEvent_t *)memoryPtrFromHandle(modeSwitchChangeChannelHandle);
+    if (modeSwitchChangeChannel == NULL) {
+      eventsMissed++;
+      return;
+    }
+    modeSwitchChangeChannel->type = MODE_SWITCH_CHANGE_CHANNEL;
+    modeSwitchChangeChannel->modeSwitchChangeChannel.channel = channel;
+    queueAdd(&railAppEventQueue, modeSwitchChangeChannelHandle);
+  }
+  if (i != modeSwitchNewChannel) {
+    modeSwitchState = IDLE;
+  }
+#endif
 }
 
 void pendPacketTx(void)
@@ -1223,8 +1259,7 @@ void printPacket(char *cmdName,
   responsePrintStart(cmdName);
   if (packetData != NULL) {
     responsePrintContinue(
-      "len:%d,timeUs:%u,timePos:%u,crc:%s,filterMask:0x%x,rssi:%d,lqi:%d,phy:%d,"
-      "isAck:%s,syncWordId:%d,antenna:%d,channelHopIdx:%d",
+      "len:%d,timeUs:%u,timePos:%u,crc:%s,filterMask:0x%x,rssi:%d,lqi:%d,phy:%d",
       packetData->dataLength,
       packetData->appendedInfo.timeReceived.packetTime,
       packetData->appendedInfo.timeReceived.timePosition,
@@ -1232,11 +1267,14 @@ void printPacket(char *cmdName,
       packetData->filterMask,
       packetData->appendedInfo.rssi,
       packetData->appendedInfo.lqi,
-      packetData->appendedInfo.subPhyId,
+      packetData->appendedInfo.subPhyId);
+    responsePrintContinue(
+      "isAck:%s,syncWordId:%d,antenna:%d,channelHopIdx:%d,channel:%u",
       packetData->appendedInfo.isAck ? "True" : "False",
       packetData->appendedInfo.syncWordId,
       packetData->appendedInfo.antennaId,
-      packetData->appendedInfo.channelHoppingChannelIndex);
+      packetData->appendedInfo.channelHoppingChannelIndex,
+      packetData->appendedInfo.channel);
     if (RAIL_IEEE802154_IsEnabled(railHandle)) {
       responsePrintContinue(
         "ed154:%u,lqi154:%u",

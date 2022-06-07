@@ -1,14 +1,14 @@
 project_name: "ncp-uart-hw-gp-multi-rail"
-label: "ncp-uart-hw-gp-multi-rail"
+label: "Zigbee - NCP ncp-uart-hw-gp-multi-rail"
 package: "Zigbee"
 category: "Zigbee Application"
 quality: "production"
 
-description: |-
-  This network cooprocessor application (NCP) uses the multirail-demo plugin to 
-  transmit a pre-configured outgoing green power device frame (gpdf) in response 
-  to a bidirrectional incoming gpdf (that has a rx-after-tx bit set) using an 
-  additional rail handle.
+description: >
+  This network co-processor (NCP) application uses the multiple RAIL demo component (multirail-demo),
+  which uses the second RAIL handle to schedule a pre-configured outgoing Green Power device frame (GPDF)
+  in response to an incoming bidirectional GPDF with its rx-after-tx bit set.
+author: "Silicon Laboratories, Inc."
 
 component:
   - id: "iostream_usart"
@@ -21,7 +21,6 @@ component:
   - id: "zigbee_source_route"
   - id: "zigbee_binding_table"
   - id: "zigbee_end_device_bind"
-  - id: "zigbee_multi_network_stub"
   - id: "zigbee_packet_validate"
   - id: "zigbee_gp"
   - id: "zigbee_r22_support"
@@ -91,3 +90,11 @@ ui_hints:
   highlight:
     - path: readme.html
       focus: false
+
+filter:
+  - name: "Wireless Technology"
+    value: ["Zigbee"]
+  - name: "Device Type"
+    value: ["NCP"]
+  - name: "Project Difficulty"
+    value: ["Advanced"]

@@ -89,7 +89,7 @@ EmberStatus emberNetworkInit(EmberNetworkInitStruct* networkInitStruct);
  */
 EmberStatus emberFormNetwork(EmberNetworkParameters *parameters);
 
-/** @brief Form a new Wirefree network.
+/** @brief Form a new Sleepy-to-Sleepy network.
  *
  * @note If using security, the application must call
  *   ::emberSetInitialSecurityState() prior to joining the network.  This also
@@ -101,7 +101,7 @@ EmberStatus emberFormNetwork(EmberNetworkParameters *parameters);
  * @return An ::EmberStatus value that indicates either the successful formation
  * of the new network, or the reason that the network formation failed.
  */
-EmberStatus emberWireFreeNetworkStart(EmberNetworkParameters *parameters, bool initiator);
+EmberStatus emberSleepyToSleepyNetworkStart(EmberNetworkParameters *parameters, bool initiator);
 
 /** @brief Tell the stack to allow other nodes to join the network
  * with this node as their parent. Joining is initially disabled by default.
@@ -290,7 +290,7 @@ EmberStatus emberRejoinNetwork(bool haveCurrentNetworkKey);
 #define emberRejoinNetwork(haveKey) emberFindAndRejoinNetwork((haveKey), 0)
 #endif
 
-/** @brief Start a scan. ::EMBER_SUCCESS signals that
+/** @brief Start a scan. ::SL_STATUS_OK signals that
  * the scan successfully started. Note that although a scan can be initiated
  * while the node is currently joined to a network, the node will generally
  * be unable to communicate with its PAN during the scan period.
@@ -298,12 +298,12 @@ EmberStatus emberRejoinNetwork(bool haveCurrentNetworkKey);
  * presently joined to an existing PAN.
  *
  * Possible error responses and their meanings:
- * - ::EMBER_MAC_SCANNING, already scanning.
- * - ::EMBER_MAC_BAD_SCAN_DURATION, a duration value that is
+ * - ::SL_STATUS_MAC_SCANNING, already scanning.
+ * - ::SL_STATUS_BAD_SCAN_DURATION, a duration value that is
  *   not 0..14 inclusive is set.
- * - ::EMBER_MAC_INCORRECT_SCAN_TYPE, an undefined
+ * - ::SL_STATUS_MAC_INCORRECT_SCAN_TYPE, an undefined
  *   scanning type is requested;
- * - ::EMBER_MAC_INVALID_CHANNEL_MASK, the channel mask did not specify any
+ * - ::SL_STATUS_INVALID_CHANNEL_MASK, the channel mask did not specify any
  *   valid channels on the current platform.
  *
  * @param scanType     Indicates the type of scan to be performed.
@@ -324,7 +324,7 @@ EmberStatus emberRejoinNetwork(bool haveCurrentNetworkKey);
  * few values is as follows: 0 = 31 msec, 1 = 46 msec, 2 = 77 msec,
  * 3 = 138 msec, 4 = 261 msec, 5 = 507 msec, 6 = 998 msec.
  */
-EmberStatus emberStartScan(EmberNetworkScanType scanType, uint32_t channelMask, uint8_t duration);
+sl_status_t emberStartScan(EmberNetworkScanType scanType, uint32_t channelMask, uint8_t duration);
 
 /** @brief Handle the reception of a beacon.
  *
@@ -379,12 +379,6 @@ EmberStatus emberFindUnusedPanId(uint32_t channelMask, uint8_t duration);
  * @return Returns ::EMBER_SUCCESS if successful.
  */
 EmberStatus emberStopScan(void);
-
-/** @brief Check if radio_off scan mode is activated and radio has shut down as a result.
- * @return Returns ::true if radio has shut down successfully.
- * There is no EZSP/NCP implementation for this.
- */
-bool emberIsRadioOffScanActivated(void);
 
 /** @brief Indicate the status of the current scan. When the scan has
  * completed, the stack will call this function with status set to

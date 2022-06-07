@@ -36,7 +36,7 @@
 #include <sys/stat.h>
 #include <stddef.h>
 #include "em_device.h"
-#include "em_assert.h"
+#include "sl_assert.h"
 
 int _close(int file);
 void _exit(int status);
@@ -222,7 +222,7 @@ int _write(int file, const char *ptr, int len)
 
 #include <yfuns.h>
 #include <stdint.h>
-#include "em_common.h"
+#include "sl_common.h"
 
 _STD_BEGIN
 

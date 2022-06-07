@@ -48,7 +48,6 @@ extern "C" {
  * interrupt events, and data over any ITM channel.
  * @{
  */
-
 /**
  * Initialize SWO Debug
  *

@@ -17,7 +17,8 @@ class CALC_WiSUN_Ocelot(CALC_WiSUN_Jumbo):
         profile_name = model.profile.name.lower()
 
         # See https://jira.silabs.com/browse/MCUW_RADIO_CFG-1859
-        if profile_name == "wisun" or profile_name == "wisun_fsk":
+        # This calculation only applies to Wi-SUN FSK (FAN/HAN)
+        if model.profile.name.lower() in ['wisun_fan_1_0', 'wisun_han']:
             bch_lut_data = [
                 0b000000000000000,
                 0b000000000000001,

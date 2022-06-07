@@ -1,8 +1,10 @@
-Zigbee EmberZNet SDK 7.0.2.0
-- EFR32MG24 support
-- New APIs including setting the power descriptor dynamic value.
-- Other targeted quality improvements and bug fixes
-
+Zigbee EmberZNet SDK 7.1.0.0
+- 2.4GHz Zigbee Smart Energy support for xG24
+- 802.15.4 Signal Identifier and MAC CCA Mode 2 and 3 support for xG24
+- Zigbee Green Power Gateway Backup
+- Updated GCC and IAR Compiler Version
+- Alpha Concurrent Multiprotocol Zigbee in NCP mode and Open-Thread in RCP mode 
+- Alpha Dynamic Multiprotocol Blue-tooth and multi-PAN 802.15.4 in RCP mode
 
 
 

@@ -40,11 +40,11 @@
 //                              Macros and Typedefs
 // -----------------------------------------------------------------------------
 /// Size of RAIL TX FIFO
-#define RAIL_TX_FIFO_SIZE (256u)
+#define RAIL_TX_FIFO_SIZE (256U)
 /// RAIL transmit data length
-#define TX_PAYLOAD_LENGTH (16u)
+#define TX_PAYLOAD_LENGTH (16U)
 /// RAIL transmit channel
-#define TX_CHANNEL (0u)
+#define TX_CHANNEL (0U)
 /// 802.15.4 / BLE / Z-Wave valid PDU (16bytes)
 //  0x0F, - 1st Byte: IEEE 802.15.4 PHY Header, (PSDU Length:8 bits)
 //  0x0E, - 2nd Byte: BLE PDU Header, (Length:8 bits)

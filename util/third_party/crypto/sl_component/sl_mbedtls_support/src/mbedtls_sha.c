@@ -224,7 +224,7 @@ int mbedtls_internal_sha256_process(mbedtls_sha256_context *ctx, const unsigned 
   return psa_status_to_mbedtls(HASH_UPDATE_FCT((void *)ctx, data, 64), PSA_ALG_SHA_256);
 }
 
-int mbedtls_sha256_finish(mbedtls_sha256_context *ctx, unsigned char output[32])
+int mbedtls_sha256_finish(mbedtls_sha256_context *ctx, unsigned char *output)
 {
   SHA256_VALIDATE_RET(ctx != NULL);
   SHA256_VALIDATE_RET((unsigned char *)output != NULL);

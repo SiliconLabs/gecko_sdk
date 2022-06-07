@@ -15,12 +15,13 @@ provides:
   - name: app_scheduler
 
 requires:
-  - name: sleeptimer
+  - name: simple_timer
   - name: app_scheduler_memory
   - name: slist
 
 recommends:
   - id: app_scheduler_memory_static
+  - id: simple_timer
 
 root_path: app/common/util/app_scheduler
 

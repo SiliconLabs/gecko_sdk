@@ -16,13 +16,6 @@
 /*                     EXPORTED TYPES and DEFINITIONS                       */
 /****************************************************************************/
 
-#ifndef EVENT_QUEUE_BUFFER_SIZE
-/**
- * Size of event queue buffer
- */
-#define EVENT_QUEUE_BUFFER_SIZE 5
-#endif /* EVENT_QUEUE_BUFFER_SIZE*/
-
 /**
  * Event groups for application state event machine
  */
@@ -61,7 +54,7 @@ typedef enum _EVENT_SYSTEM_
  */
 typedef enum _BUTTON_EVENT_
 {
-  EVENT_PB1_DOWN = DEFINE_EVENT_KEY_NBR,
+  EVENT_PB1_DOWN = DEFINE_EVENT_KEY_NBR, // 64
   EVENT_PB1_UP,
   EVENT_PB1_SHORT_PRESS,
   EVENT_PB1_HOLD,

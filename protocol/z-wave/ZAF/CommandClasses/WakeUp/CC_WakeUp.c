@@ -18,7 +18,6 @@
 #include <ZW_TransportSecProtocol.h>
 #include <ZW_transport_api.h>
 #include <AppTimer.h>
-#include "ZAF_PM_Wrapper.h"
 #include <ZAF_Common_interface.h>
 #include <ZAF_file_ids.h>
 #include "ZAF_tx_mutex.h"
@@ -42,8 +41,8 @@
 
 static uint32_t wakeUpSettings[WAKEUP_PAR_COUNT];
 
-static nvm3_Handle_t* pFileSystem;
-static SPowerLock_t wakeUpCCPowerLock;
+static zpal_nvm_handle_t pFileSystem;
+static zpal_pm_handle_t wake_up_cc_power_lock;
 static bool wakeUpIsActive              = false;
 static bool autoStayAwakeAfterInclusion = false;
 
@@ -78,9 +77,9 @@ static void TimerCallback(SSwTimer *pTimer)
 #if !defined(DEBUGPRINT)
   UNUSED(pTimer);
 #endif
-  /* It is assumed that an EM4 persistent timer is used with this call back
-   * (see AppTimerEm4PersistentRegister()). Otherwise this function will not
-   * be called if the timer expires while the device is sleeping in EM4
+  /* It is assumed that an Deep Sleep persistent timer is used with this call back
+   * (see AppTimerDeepSleepPersistentRegister()). Otherwise this function will not
+   * be called if the timer expires while the device is sleeping in deep sleep
    * hibernate.
    */
 
@@ -91,29 +90,26 @@ static void TimerCallback(SSwTimer *pTimer)
 
 static void LoadData(void)
 {
-  Ecode_t errCode;
-  errCode = nvm3_readData(pFileSystem, ZAF_FILE_ID_WAKEUPCCDATA, &gWakeupCcData, sizeof(SWakeupCcData));
-  DPRINTF("\r\nE#%x", errCode);
-  ASSERT(ECODE_NVM3_OK == errCode);
+  const zpal_status_t status = zpal_nvm_read(pFileSystem, ZAF_FILE_ID_WAKEUPCCDATA, &gWakeupCcData, sizeof(SWakeupCcData));
+  DPRINTF("\r\nE#%x", status);
+  ASSERT(ZPAL_STATUS_OK == status);
 }
 
 void CC_WakeUp_init(EResetReason_t resetReason,
-                    nvm3_Handle_t* pFS)
+                    zpal_nvm_handle_t pFS)
 {
   pFileSystem = pFS;
   m_pAppHandle = ZAF_getAppHandle();
   wakeUpIsActive = false;
 
-  AppTimerEm4PersistentRegister(&WakeUpTimer, false, TimerCallback);
-  ZAF_PM_Register(&wakeUpCCPowerLock, PM_TYPE_RADIO);
+  AppTimerDeepSleepPersistentRegister(&WakeUpTimer, false, TimerCallback);
+  wake_up_cc_power_lock = zpal_pm_register(ZPAL_PM_TYPE_USE_RADIO);
 
   //Verify that a WAKEUPCCDATA file exists
-  Ecode_t errCode;
-  uint32_t objectType;
   size_t   dataLen;
-  errCode = nvm3_getObjectInfo(pFileSystem, ZAF_FILE_ID_WAKEUPCCDATA, &objectType, &dataLen);
+  const zpal_status_t status = zpal_nvm_get_object_size(pFileSystem, ZAF_FILE_ID_WAKEUPCCDATA, &dataLen);
   //If there is no file or there is size mismatch write a default file
-  if ((ECODE_NVM3_OK != errCode) || (ZAF_FILE_SIZE_WAKEUPCCDATA != dataLen))
+  if ((ZPAL_STATUS_OK != status) || (ZAF_FILE_SIZE_WAKEUPCCDATA != dataLen))
   {
     CC_WakeUp_notificationMemorySetDefault(pFileSystem);
   }
@@ -260,7 +256,6 @@ CC_WakeUp_handler(
   ZAF_TRANSPORT_TX_BUFFER  TxBuf;
   ZW_APPLICATION_TX_BUFFER *pTxBuf = &(TxBuf.appTxBuf);
   TRANSMIT_OPTIONS_TYPE_SINGLE_EX * pTxOptionsEx;
-  Ecode_t errCode;
 
   UNUSED(cmdLength);
 
@@ -329,8 +324,8 @@ CC_WakeUp_handler(
         gWakeupCcData.MasterNodeId = pCmd->ZW_WakeUpIntervalSetV2Frame.nodeid;
         gWakeupCcData.SleepPeriod = setSleepPeriod;
 
-        errCode = nvm3_writeData(pFileSystem, ZAF_FILE_ID_WAKEUPCCDATA, &gWakeupCcData, sizeof(SWakeupCcData));
-        ASSERT(ECODE_NVM3_OK == errCode);
+        const zpal_status_t status = zpal_nvm_write(pFileSystem, ZAF_FILE_ID_WAKEUPCCDATA, &gWakeupCcData, sizeof(SWakeupCcData));
+        ASSERT(ZPAL_STATUS_OK == status);
 
         CC_WakeUp_startWakeUpNotificationTimer();
 
@@ -380,7 +375,7 @@ CC_WakeUp_handler(
        * From the WakeUp CC perspective we're ready sleep immediately.
        * We signal that to the PM module by releasing our PM lock.
        */
-      ZAF_PM_Cancel(&wakeUpCCPowerLock);
+      zpal_pm_cancel(wake_up_cc_power_lock);
       wakeUpIsActive = false;
 
       autoStayAwakeAfterInclusion = false;
@@ -436,12 +431,11 @@ CC_WakeUp_handler(
 }
 
 
-void CC_WakeUp_notificationMemorySetDefault(nvm3_Handle_t* pFS)
+void CC_WakeUp_notificationMemorySetDefault(zpal_nvm_handle_t pFS)
 {
   DPRINT("\r\nCCWdef");
   pFileSystem = pFS;
 
-  Ecode_t errCode;
   ASSERT(pFileSystem != 0);
 
   wakeUpIsActive = false;
@@ -449,13 +443,13 @@ void CC_WakeUp_notificationMemorySetDefault(nvm3_Handle_t* pFS)
   if (WakeUpTimer.pLiaison) // Has the timer been initialized?
   {
     // Ensure the wakeup timer is not running (OK to stop even if not running)
-    AppTimerEm4PersistentStop(&WakeUpTimer);
+    AppTimerDeepSleepPersistentStop(&WakeUpTimer);
   }
 
   memset(&gWakeupCcData, 0, sizeof(SWakeupCcData));
   gWakeupCcData.SleepPeriod = wakeUpSettings[WAKEUP_PAR_DEFAULT_SLEEP_TIME];
-  errCode = nvm3_writeData(pFileSystem, ZAF_FILE_ID_WAKEUPCCDATA, &gWakeupCcData, sizeof(SWakeupCcData));
-  ASSERT(ECODE_NVM3_OK == errCode);
+  const zpal_status_t status = zpal_nvm_write(pFileSystem, ZAF_FILE_ID_WAKEUPCCDATA, &gWakeupCcData, sizeof(SWakeupCcData));
+  ASSERT(ZPAL_STATUS_OK == status);
 
 }
 
@@ -476,7 +470,7 @@ void
 CC_WakeUp_stayAwake10s(void)
 {
   /* Don't sleep the next 10 seconds */
-  ZAF_PM_StayAwake(&wakeUpCCPowerLock, POST_INCLUSION_STAY_AWAKE_TIME);
+  zpal_pm_stay_awake(wake_up_cc_power_lock, POST_INCLUSION_STAY_AWAKE_TIME);
 }
 
 void
@@ -484,11 +478,11 @@ CC_WakeUp_startWakeUpNotificationTimer(void)
 {
   if (gWakeupCcData.SleepPeriod > 0)
   {
-    AppTimerEm4PersistentStart(&WakeUpTimer, gWakeupCcData.SleepPeriod * 1000);
+    AppTimerDeepSleepPersistentStart(&WakeUpTimer, gWakeupCcData.SleepPeriod * 1000);
   }
   else
   {
-    AppTimerEm4PersistentStop(&WakeUpTimer);
+    AppTimerDeepSleepPersistentStop(&WakeUpTimer);
   }
 }
 

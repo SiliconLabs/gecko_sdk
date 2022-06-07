@@ -22,6 +22,7 @@ requires:
       - kernel
   - name: emlib_common
   - name: emlib_core
+  - name: sl_assert
   - name: enum
   - name: iostream_transport_core
   - name: status

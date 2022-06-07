@@ -20,17 +20,11 @@
 //#define DEBUGPRINT
 #include "DebugPrint.h"
 #include "config_app.h"
-#include "ZAF_app_version.h"
 #include <ZAF_file_ids.h>
-#include "nvm3.h"
-#include "ZAF_nvm3_app.h"
-#include <em_system.h>
-#include <ZW_radio_api.h>
+#include "ZAF_nvm_app.h"
 #include <ZW_slave_api.h>
 #include <ZW_classcmd.h>
 #include <ZW_TransportLayer.h>
-#include <ZAF_uart_utils.h>
-#include <board.h>
 #include <ev_man.h>
 #include <AppTimer.h>
 #include <SwTimer.h>
@@ -48,12 +42,9 @@
 #include <CC_ManufacturerSpecific.h>
 #include <CC_MultiChanAssociation.h>
 #include <CC_MultilevelSwitch_Control.h>
-#include <CC_PowerLevel.h>
-#include <CC_Security.h>
 #include <CC_Supervision.h>
-#include <CC_Version.h>
-#include <CC_ZWavePlusInfo.h>
 #include <CC_FirmwareUpdate.h>
+#include <zaf_config_api.h>
 #include <ZW_TransportMulticast.h>
 #include "zaf_event_helper.h"
 #include "zaf_job_helper.h"
@@ -62,26 +53,14 @@
 #include <ZAF_TSE.h>
 #include <ota_util.h>
 #include <ZAF_CmdPublisher.h>
-#include <em_wdog.h>
 #include "events.h"
+#include <zpal_watchdog.h>
+#include <zpal_misc.h>
+#include <WallController_hw.h>
+#include <board_indicator.h>
+#include <board_init.h>
 #include "zw_region_config.h"
 #include "zw_build_no.h"
-
-/****************************************************************************/
-/* Application specific button and LED definitions                          */
-/****************************************************************************/
-
-#define KEY01_BTN   APP_BUTTON_A
-#define KEY02_BTN   APP_BUTTON_B
-#define KEY03_BTN   APP_BUTTON_C
-
-STATIC_ASSERT((APP_BUTTON_LEARN_RESET != KEY01_BTN) &&
-              (APP_BUTTON_LEARN_RESET != KEY02_BTN) &&
-              (APP_BUTTON_LEARN_RESET != KEY03_BTN) &&
-              (KEY01_BTN != KEY02_BTN) &&
-              (KEY01_BTN != KEY03_BTN) &&
-              (KEY02_BTN != KEY03_BTN),
-              STATIC_ASSERT_FAILED_button_overlap);
 
 /****************************************************************************/
 /*                      PRIVATE TYPES and DEFINITIONS                       */
@@ -196,11 +175,6 @@ app_node_information_t m_AppNIF =
 */
 static const uint8_t SecureKeysRequested = REQUESTED_SECURITY_KEYS;
 
-/**
- * Set up PowerDownDebug
- */
-static const EPowerDownDebug PowerDownDebug = APP_POWERDOWNDEBUG;
-
 static const SAppNodeInfo_t AppNodeInfo =
 {
   .DeviceOptionsMask = DEVICE_OPTIONS_MASK,
@@ -221,13 +195,12 @@ static const SRadioConfig_t RadioConfig =
   .iTxPowerLevelAdjust = APP_MEASURED_0DBM_TX_POWER,
   .iTxPowerLevelMaxLR = APP_MAX_TX_POWER_LR,
   .eRegion = ZW_REGION,
-  .enablePTI = ENABLE_PTI
+  .radio_debug_enable = ENABLE_RADIO_DEBUG
 };
 
 static const SProtocolConfig_t ProtocolConfig = {
   .pVirtualSlaveNodeInfoTable = NULL,
   .pSecureKeysRequested = &SecureKeysRequested,
-  .pPowerDownDebug = &PowerDownDebug,
   .pNodeInfo = &AppNodeInfo,
   .pRadioConfig = &RadioConfig
 };
@@ -246,18 +219,6 @@ AGI_GROUP agiTableRootDeviceGroups[] = {AGITABLE_ROOTDEVICE_GROUPS};
  * config_app.h) plus one (for Lifeline)
  */
 STATIC_ASSERT((sizeof_array(agiTableRootDeviceGroups) + 1) == MAX_ASSOCIATION_GROUPS, MAX_ASSOCIATION_GROUPS_value_is_invalid);
-
-/**************************************************************************************************
- * Configuration for Z-Wave Plus Info CC
- **************************************************************************************************
- */
-static const SCCZWavePlusInfo CCZWavePlusInfo = {
-                               .pEndpointIconList = NULL,
-                               .roleType = APP_ROLE_TYPE,
-                               .nodeType = APP_NODE_TYPE,
-                               .installerIconType = APP_ICON_TYPE,
-                               .userIconType = APP_USER_ICON_TYPE
-};
 
 /**
  * Application state-machine state.
@@ -354,7 +315,7 @@ static s_CC_indicator_data_t ZAF_TSE_localActuationIdentifyData = {
   .indicatorId = 0x50      /* Identify Indicator*/
 };
 
-static nvm3_Handle_t* pFileSystemApplication;
+static zpal_nvm_handle_t pFileSystemApplication;
 
 static EVENT_APP pendingKeyPressEvent = EVENT_APP_CC_NO_JOB;
 
@@ -367,9 +328,6 @@ static EVENT_APP pendingKeyPressEvent = EVENT_APP_CC_NO_JOB;
 /****************************************************************************/
 /* PRIVATE FUNCTION PROTOTYPES                                              */
 /****************************************************************************/
-
-void DeviceResetLocallyDone(TRANSMISSION_RESULT * pTransmissionResult);
-void DeviceResetLocally(void);
 STATE_APP GetAppState(void);
 void AppStateManager(EVENT_APP event);
 static void ChangeState(STATE_APP newState);
@@ -388,13 +346,7 @@ void writeAppData(const SApplicationData* pAppData);
 
 void AppResetNvm(void);
 
-#if defined(DEBUGPRINT) && defined(BUILDING_WITH_UC)
-#include "sl_iostream.h"
-static void DebugPrinter(const uint8_t * buffer, uint32_t len)
-{
-  sl_iostream_write(SL_IOSTREAM_STDOUT, buffer, len);
-}
-#endif
+static void indicator_set_handler(uint32_t on_time_ms, uint32_t off_time_ms, uint32_t num_cycles);
 
 /**
 * @brief Called when protocol puts a frame on the ZwRxQueue.
@@ -507,10 +459,6 @@ static void EventHandlerZwCommandStatus(void)
         else if(ELEARNSTATUS_SMART_START_IN_PROGRESS == Status.Content.LearnModeStatus.Status)
         {
           ZAF_EventHelperEventEnqueue(EVENT_APP_SMARTSTART_IN_PROGRESS);
-        }
-        else if(ELEARNSTATUS_LEARN_IN_PROGRESS == Status.Content.LearnModeStatus.Status)
-        {
-          ZAF_EventHelperEventEnqueue(EVENT_APP_LEARN_IN_PROGRESS);
         }
         else if(ELEARNSTATUS_LEARN_MODE_COMPLETED_TIMEOUT == Status.Content.LearnModeStatus.Status)
         {
@@ -637,50 +585,34 @@ ApplicationInit(EResetReason_t eResetReason)
 
   /* hardware initialization */
   Board_Init();
-  BRD420xBoardInit(RadioConfig.eRegion);
 
 #ifdef DEBUGPRINT
-#if BUILDING_WITH_UC
-  DebugPrintConfig(m_aDebugPrintBuffer, sizeof(m_aDebugPrintBuffer), DebugPrinter);
-#else
-  ZAF_UART0_enable(115200, true, false);
-  DebugPrintConfig(m_aDebugPrintBuffer, sizeof(m_aDebugPrintBuffer), ZAF_UART0_tx_send);
-#endif // BUILDING_WITH_UC
-#endif // DEBUGPRINT
+  zpal_debug_init();
+  DebugPrintConfig(m_aDebugPrintBuffer, sizeof(m_aDebugPrintBuffer), zpal_debug_output);
+#endif
 
   /* Init state machine*/
   currentState = STATE_APP_STARTUP;
 
-  uint8_t versionMajor      = ZAF_GetAppVersionMajor();
-  uint8_t versionMinor      = ZAF_GetAppVersionMinor();
-  uint8_t versionPatchLevel = ZAF_GetAppVersionPatchLevel();
 
   DPRINT("\n\n----------------------------------\n");
   DPRINT("Z-Wave Sample App: Wall Controller\n");
-  DPRINTF("SDK: %d.%d.%d ZAF: %d.%d.%d.%d [Freq: %d]\n",
+  DPRINTF("SDK: %d.%d.%d ZAF: %d.%d.%d.%d\n",
           SDK_VERSION_MAJOR,
           SDK_VERSION_MINOR,
           SDK_VERSION_PATCH,
-          versionMajor,
-          versionMinor,
-          versionPatchLevel,
-          ZAF_BUILD_NO,
-          RadioConfig.eRegion);
-  DPRINT("----------------------------------\n");
-
-  DPRINTF("%s: BTN0 press/hold/release\n", Board_GetButtonLabel(KEY01_BTN));
-  DPRINTF("%s: BTN2 press/hold/release\n", Board_GetButtonLabel(KEY02_BTN));
-  DPRINTF("%s: BTN3 press/hold/release\n", Board_GetButtonLabel(KEY03_BTN));
-  DPRINTF("%s: Toggle learn mode\n", Board_GetButtonLabel(APP_BUTTON_LEARN_RESET));
-  DPRINT("      Hold 5 sec: Reset\n");
-  DPRINTF("%s: LED1 Learn mode + identify\n", Board_GetLedLabel(APP_LED_INDICATOR));
-  DPRINT("----------------------------------\n\n");
+          zpal_get_app_version_major(),
+          zpal_get_app_version_minor(),
+          zpal_get_app_version_patch(),
+          ZAF_BUILD_NO);
 
   DPRINTF("ApplicationInit eResetReason = %d\n", eResetReason);
 
-  CC_ZWavePlusInfo_Init(&CCZWavePlusInfo);
+  CC_Indicator_Init(indicator_set_handler);
 
-  CC_Version_SetApplicationVersionInfo(versionMajor, versionMinor, versionPatchLevel, ZAF_BUILD_NO);
+
+  // Init file system
+  ApplicationFileSystemInit(&pFileSystemApplication);
 
   /*************************************************************************************
    * CREATE USER TASKS  -  ZW_ApplicationRegisterTask() and ZW_UserTask_CreateTask()
@@ -716,7 +648,7 @@ ApplicationTask(SApplicationHandles* pAppHandles)
 {
   // Init
   DPRINT("Enabling watchdog\n");
-  WDOGn_Enable(DEFAULT_WDOG, true);
+  zpal_enable_watchdog(true);
 
   g_AppTaskHandle = xTaskGetCurrentTaskHandle();
   g_pAppHandles = pAppHandles;
@@ -737,12 +669,9 @@ ApplicationTask(SApplicationHandles* pAppHandles)
 
   ZAF_EventHelperEventEnqueue(EVENT_APP_INIT);
 
-  Board_EnableButton(APP_BUTTON_LEARN_RESET);
-  Board_EnableButton(KEY01_BTN);
-  Board_EnableButton(KEY02_BTN);
-  Board_EnableButton(KEY03_BTN);
+  WallController_hw_init();
 
-  Board_IndicatorInit(APP_LED_INDICATOR);
+  Board_IndicatorInit();
   Board_IndicateStatus(BOARD_STATUS_IDLE);
 
   CommandClassSupervisionInit(
@@ -781,10 +710,7 @@ GetAppState(void)
 
 static void doRemainingInitialization()
 {
-  // Init file system
-  ApplicationFileSystemInit(&pFileSystemApplication);
-
-  /* Load the application settings from NVM3 file system */
+  /* Load the application settings from NVM file system */
   LoadConfiguration();
 
   /*
@@ -817,13 +743,13 @@ AppStateManager(EVENT_APP event)
 {
   DPRINTF("AppStateManager St: %d, Ev: %d\r\n", currentState, event);
 
-  if ((BTN_EVENT_LONG_PRESS(APP_BUTTON_LEARN_RESET) == (BUTTON_EVENT)event) ||
+  if ((EVENT_APP_BUTTON_LEARN_RESET_LONG_PRESS == event) ||
       (EVENT_SYSTEM_RESET == (EVENT_SYSTEM)event))
   {
     /*Force state change to activate system-reset without taking care of current state.*/
     ChangeState(STATE_APP_RESET);
     /* Send reset notification*/
-    DeviceResetLocally();
+    CC_DeviceResetLocally_notification_tx();
   }
 
   switch(currentState)
@@ -870,7 +796,7 @@ AppStateManager(EVENT_APP event)
        * Learn/Reset button
        **************************************************************************************
        */
-      if ((BTN_EVENT_SHORT_PRESS(APP_BUTTON_LEARN_RESET) == (BUTTON_EVENT)event) ||
+      if ((EVENT_APP_BUTTON_LEARN_RESET_SHORT_PRESS == event) ||
           (EVENT_SYSTEM_LEARNMODE_START == (EVENT_SYSTEM)event))
       {
         if (EINCLUSIONSTATE_EXCLUDED != g_pAppHandles->pNetworkInfo->eInclusionState)
@@ -890,7 +816,7 @@ AppStateManager(EVENT_APP event)
        * KEY 1
        *************************************************************************************/
 
-      if (BTN_EVENT_SHORT_PRESS(KEY01_BTN) == (BUTTON_EVENT)event)
+      if (EVENT_APP_BUTTON_KEY01_SHORT_PRESS == event)
       {
         DPRINT("\r\nK1SHORT_PRESS\r\n");
         keyEventGlobal = KEY_EVENT_SHORT_PRESS;
@@ -905,7 +831,7 @@ AppStateManager(EVENT_APP event)
         ChangeState(STATE_APP_TRANSMIT_DATA);
       }
 
-      if (BTN_EVENT_HOLD(KEY01_BTN) == (BUTTON_EVENT)event)
+      if (EVENT_APP_BUTTON_KEY01_HOLD == event)
       {
         DPRINT("\r\nK1HOLD\r\n");
         keyEventGlobal = KEY_EVENT_HOLD;
@@ -919,8 +845,8 @@ AppStateManager(EVENT_APP event)
         ChangeState(STATE_APP_TRANSMIT_DATA);
       }
 
-      if ( ((BTN_EVENT_UP(KEY01_BTN) == (BUTTON_EVENT)event) || (BTN_EVENT_LONG_PRESS(KEY01_BTN) == (BUTTON_EVENT)event)) &&
-           (keyEventGlobal == KEY_EVENT_HOLD) )
+      if ((EVENT_APP_BUTTON_KEY01_RELEASE == event) &&
+          (keyEventGlobal == KEY_EVENT_HOLD))
       {
         DPRINT("\r\nK1UP\r\n");
         keyEventGlobal = KEY_EVENT_UP;
@@ -938,7 +864,7 @@ AppStateManager(EVENT_APP event)
        * KEY 2
        *************************************************************************************/
 
-      if (BTN_EVENT_SHORT_PRESS(KEY02_BTN) == (BUTTON_EVENT)event)
+      if (EVENT_APP_BUTTON_KEY02_SHORT_PRESS == event)
       {
         DPRINT("\r\nK2SHORT_PRESS\r\n");
         keyEventGlobal = KEY_EVENT_SHORT_PRESS;
@@ -952,7 +878,7 @@ AppStateManager(EVENT_APP event)
         ChangeState(STATE_APP_TRANSMIT_DATA);
       }
 
-      if (BTN_EVENT_HOLD(KEY02_BTN) == (BUTTON_EVENT)event)
+      if (EVENT_APP_BUTTON_KEY02_HOLD == event)
       {
         DPRINT("\r\nK2HOLD\r\n");
         keyEventGlobal = KEY_EVENT_HOLD;
@@ -966,8 +892,8 @@ AppStateManager(EVENT_APP event)
         ChangeState(STATE_APP_TRANSMIT_DATA);
       }
 
-      if ( ((BTN_EVENT_UP(KEY02_BTN) == (BUTTON_EVENT)event) || (BTN_EVENT_LONG_PRESS(KEY02_BTN) == (BUTTON_EVENT)event)) &&
-           (keyEventGlobal == KEY_EVENT_HOLD) )
+      if ((EVENT_APP_BUTTON_KEY02_RELEASE == event) &&
+          (keyEventGlobal == KEY_EVENT_HOLD))
       {
         DPRINT("\r\nK2UP\r\n");
         keyEventGlobal = KEY_EVENT_UP;
@@ -985,7 +911,7 @@ AppStateManager(EVENT_APP event)
        * KEY 3
        *************************************************************************************/
 
-      if (BTN_EVENT_SHORT_PRESS(KEY03_BTN) == (BUTTON_EVENT)event)
+      if (EVENT_APP_BUTTON_KEY03_SHORT_PRESS == event)
       {
         DPRINT("\r\nK3SHORT_PRESS\r\n");
         keyEventGlobal = KEY_EVENT_SHORT_PRESS;
@@ -999,7 +925,7 @@ AppStateManager(EVENT_APP event)
         ChangeState(STATE_APP_TRANSMIT_DATA);
       }
 
-      if (BTN_EVENT_HOLD(KEY03_BTN) == (BUTTON_EVENT)event)
+      if (EVENT_APP_BUTTON_KEY03_HOLD == event)
       {
         DPRINT("\r\nK3HOLD\r\n");
         keyEventGlobal = KEY_EVENT_HOLD;
@@ -1013,8 +939,8 @@ AppStateManager(EVENT_APP event)
         ChangeState(STATE_APP_TRANSMIT_DATA);
       }
 
-      if ( ((BTN_EVENT_UP(KEY03_BTN) == (BUTTON_EVENT)event) || (BTN_EVENT_LONG_PRESS(KEY03_BTN) == (BUTTON_EVENT)event)) &&
-           (keyEventGlobal == KEY_EVENT_HOLD) )
+      if ((EVENT_APP_BUTTON_KEY03_RELEASE == event) &&
+          (keyEventGlobal == KEY_EVENT_HOLD))
       {
         DPRINT("\r\nK3UP\r\n");
         keyEventGlobal = KEY_EVENT_UP;
@@ -1042,7 +968,7 @@ AppStateManager(EVENT_APP event)
         LoadConfiguration();
       }
 
-      if ((BTN_EVENT_SHORT_PRESS(APP_BUTTON_LEARN_RESET) == (BUTTON_EVENT)event) ||
+      if ((EVENT_APP_BUTTON_LEARN_RESET_SHORT_PRESS == event) ||
           (EVENT_SYSTEM_LEARNMODE_STOP == (EVENT_SYSTEM)event))
       {
         DPRINT("\r\nLEARN MODE DISABLE\r\n");
@@ -1056,7 +982,10 @@ AppStateManager(EVENT_APP event)
         ChangeState(STATE_APP_IDLE);
 
         /* If we are in a network and the Identify LED state was changed to idle due to learn mode, report it to lifeline */
-        CC_Indicator_RefreshIndicatorProperties();
+        if (!Board_IsIndicatorActive())
+        {
+          CC_Indicator_RefreshIndicatorProperties();
+        }
         ZAF_TSE_Trigger(CC_Indicator_report_stx,
                         (void *)&ZAF_TSE_localActuationIdentifyData,
                         true);
@@ -1072,7 +1001,10 @@ AppStateManager(EVENT_APP event)
         ChangeState(STATE_APP_IDLE);
 
         /* If we are in a network and the Identify LED state was changed to idle due to learn mode, report it to lifeline */
-        CC_Indicator_RefreshIndicatorProperties();
+        if (!Board_IsIndicatorActive())
+        {
+          CC_Indicator_RefreshIndicatorProperties();
+        }
         ZAF_TSE_Trigger(CC_Indicator_report_stx,
                         (void *)&ZAF_TSE_localActuationIdentifyData,
                         true);
@@ -1086,7 +1018,7 @@ AppStateManager(EVENT_APP event)
       {
         AppResetNvm();
         /* Soft reset */
-        Board_ResetHandler();
+        zpal_reboot();
       }
 
       break;
@@ -1170,9 +1102,9 @@ AppStateManager(EVENT_APP event)
        * Important events are "Key Up" and "Key Long Press", which both are button release events
        * and signify the end to an action that was initiated earlier and therefore must be matched.
        */
-      if ( ((BTN_EVENT_UP(KEY01_BTN) == (BUTTON_EVENT)event) || (BTN_EVENT_LONG_PRESS(KEY01_BTN) == (BUTTON_EVENT)event)) ||
-           ((BTN_EVENT_UP(KEY02_BTN) == (BUTTON_EVENT)event) || (BTN_EVENT_LONG_PRESS(KEY02_BTN) == (BUTTON_EVENT)event)) ||
-           ((BTN_EVENT_UP(KEY03_BTN) == (BUTTON_EVENT)event) || (BTN_EVENT_LONG_PRESS(KEY03_BTN) == (BUTTON_EVENT)event)) )
+      if ( (EVENT_APP_BUTTON_KEY01_RELEASE == event) ||
+           (EVENT_APP_BUTTON_KEY02_RELEASE == event) ||
+           (EVENT_APP_BUTTON_KEY03_RELEASE == event) )
       {
         DPRINTF("\r\nReceived key press event (%d) in state STATE_APP_TRANSMIT_DATA", event);
         pendingKeyPressEvent = event;
@@ -1218,7 +1150,7 @@ ChangeState(STATE_APP newState)
  * @param pTransmissionResult Result of each transmission.
  */
 void
-DeviceResetLocallyDone(TRANSMISSION_RESULT * pTransmissionResult)
+CC_DeviceResetLocally_done(TRANSMISSION_RESULT * pTransmissionResult)
 {
   if (TRANSMISSION_RESULT_FINISHED == pTransmissionResult->isFinished)
   {
@@ -1228,60 +1160,12 @@ DeviceResetLocallyDone(TRANSMISSION_RESULT * pTransmissionResult)
     CommandPackage.eCommandType = EZWAVECOMMANDTYPE_SET_DEFAULT;
 
     DPRINT("\nDisabling watchdog during reset\n");
-    WDOGn_Enable(DEFAULT_WDOG, false);
+    zpal_enable_watchdog(false);
 
     EQueueNotifyingStatus Status = QueueNotifyingSendToBack(g_pAppHandles->pZwCommandQueue, (uint8_t*)&CommandPackage, 500);
     ASSERT(EQUEUENOTIFYING_STATUS_SUCCESS == Status);
   }
 }
-
-/**
- * @brief Send reset notification.
- */
-void
-DeviceResetLocally(void)
-{
-  agi_profile_t lifelineProfile = {
-      ASSOCIATION_GROUP_INFO_REPORT_PROFILE_GENERAL,
-      ASSOCIATION_GROUP_INFO_REPORT_PROFILE_GENERAL_LIFELINE
-  };
-  DPRINT("\r\nCall locally reset");
-
-  CC_DeviceResetLocally_notification_tx(&lifelineProfile, DeviceResetLocallyDone);
-}
-
-/**
- * @brief See description for function prototype in CC_Version.h.
- */
-uint8_t
-CC_Version_getNumberOfFirmwareTargets_handler(void)
-{
-  return 1; /*CHANGE THIS - firmware 0 version*/
-}
-
-
-/**
- * @brief See description for function prototype in CC_Version.h.
- */
-void
-handleGetFirmwareVersion(
-  uint8_t bFirmwareNumber,
-  VG_VERSION_REPORT_V2_VG *pVariantgroup)
-{
-  /*firmware 0 version and sub version*/
-  if(bFirmwareNumber == 0)
-  {
-    pVariantgroup->firmwareVersion = ZAF_GetAppVersionMajor();
-    pVariantgroup->firmwareSubVersion = ZAF_GetAppVersionMinor();
-  }
-  else
-  {
-    /*Just set it to 0 if firmware n is not present*/
-    pVariantgroup->firmwareVersion = 0;
-    pVariantgroup->firmwareSubVersion = 0;
-  }
-}
-
 
 /**
  * @brief Function resets configuration to default values.
@@ -1301,10 +1185,10 @@ SetDefaultConfiguration(void)
 
   writeAppData(&ApplicationData);
 
-  loadInitStatusPowerLevel();
+  ZAF_Reset();
 
-  uint32_t appVersion = ZAF_GetAppVersion();
-  nvm3_writeData(pFileSystemApplication, ZAF_FILE_ID_APP_VERSION, &appVersion, ZAF_FILE_SIZE_APP_VERSION);
+  uint32_t appVersion = zpal_get_app_version();
+  zpal_nvm_write(pFileSystemApplication, ZAF_FILE_ID_APP_VERSION, &appVersion, ZAF_FILE_SIZE_APP_VERSION);
 }
 
 /**
@@ -1315,11 +1199,11 @@ bool
 LoadConfiguration(void)
 {
   uint32_t appVersion;
-  Ecode_t versionFileStatus = nvm3_readData(pFileSystemApplication, ZAF_FILE_ID_APP_VERSION, &appVersion, ZAF_FILE_SIZE_APP_VERSION);
+  const zpal_status_t status = zpal_nvm_read(pFileSystemApplication, ZAF_FILE_ID_APP_VERSION, &appVersion, ZAF_FILE_SIZE_APP_VERSION);
 
-  if (ECODE_NVM3_OK == versionFileStatus)
+  if (ZPAL_STATUS_OK == status)
   {
-    if (ZAF_GetAppVersion() != appVersion)
+    if (zpal_get_app_version() != appVersion)
     {
       // Add code for migration of file system to higher version here.
     }
@@ -1334,7 +1218,6 @@ LoadConfiguration(void)
   else
   {
     DPRINT("Application FileSystem Verify failed\r\n");
-    loadInitStatusPowerLevel();
 
     // Reset the file system if ZAF_FILE_ID_APP_VERSION is missing since this indicates
     // corrupt or missing file system.
@@ -1351,8 +1234,8 @@ void AppResetNvm(void)
 
   ASSERT(0 != pFileSystemApplication); //Assert has been kept for debugging , can be removed from production code. This error can only be caused by some internal flash HW failure
 
-  Ecode_t errCode = nvm3_eraseAll(pFileSystemApplication);
-  ASSERT(ECODE_NVM3_OK == errCode);  //Assert has been kept for debugging , can be removed from production code. This error can only be caused by some internal flash HW failure
+  const zpal_status_t status = zpal_nvm_erase_all(pFileSystemApplication);
+  ASSERT(ZPAL_STATUS_OK == status);  //Assert has been kept for debugging , can be removed from production code. This error can only be caused by some internal flash HW failure
 
   /* Apparently there is no valid configuration in file system, so load */
   /* default values and save them to file system. */
@@ -1555,8 +1438,8 @@ readAppData(void)
 {
   SApplicationData AppData;
 
-  Ecode_t errCode = nvm3_readData(pFileSystemApplication, FILE_ID_APPLICATIONDATA, &AppData, sizeof(SApplicationData));
-  ASSERT(ECODE_NVM3_OK == errCode);//Assert has been kept for debugging , can be removed from production code. This error hard to occur when a corresponing write is successfull
+  const zpal_status_t status = zpal_nvm_read(pFileSystemApplication, FILE_ID_APPLICATIONDATA, &AppData, sizeof(SApplicationData));
+  ASSERT(ZPAL_STATUS_OK == status);//Assert has been kept for debugging , can be removed from production code. This error hard to occur when a corresponing write is successfull
                                     //Can only happended in case of some hardware failure
 
   return AppData;
@@ -1567,8 +1450,8 @@ readAppData(void)
  */
 void writeAppData(const SApplicationData* pAppData)
 {
-  Ecode_t errCode = nvm3_writeData(pFileSystemApplication, FILE_ID_APPLICATIONDATA, pAppData, sizeof(SApplicationData));
-  ASSERT(ECODE_NVM3_OK == errCode); //Assert has been kept for debugging , can be removed from production code. This error can only be caused by some internal flash HW failure
+  const zpal_status_t status = zpal_nvm_write(pFileSystemApplication, FILE_ID_APPLICATIONDATA, pAppData, sizeof(SApplicationData));
+  ASSERT(ZPAL_STATUS_OK == status); //Assert has been kept for debugging , can be removed from production code. This error can only be caused by some internal flash HW failure
 }
 
 uint16_t handleFirmWareIdGet(uint8_t n)
@@ -1580,11 +1463,6 @@ uint16_t handleFirmWareIdGet(uint8_t n)
   }
   // Invalid Firmware number
   return 0;
-}
-
-uint8_t CC_Version_GetHardwareVersion_handler(void)
-{
-  return 1;
 }
 
 void CC_ManufacturerSpecific_ManufacturerSpecificGet_handler(uint16_t * pManufacturerID,
@@ -1605,17 +1483,33 @@ void CC_ManufacturerSpecific_DeviceSpecificGet_handler(device_id_type_t * pDevic
                                                        uint8_t * pDeviceIDDataLength,
                                                        uint8_t * pDeviceIDData)
 {
+  const size_t serial_length = zpal_get_serial_number_length();
+
+  ASSERT(serial_length <= 0x1F); // Device ID Data Length field size is 5 bits
+
   *pDeviceIDType = DEVICE_ID_TYPE_SERIAL_NUMBER;
   *pDeviceIDDataFormat = DEVICE_ID_FORMAT_BINARY;
-  *pDeviceIDDataLength = 8;
-  uint64_t uuID = SYSTEM_GetUnique();
-  DPRINTF("\r\nuuID: %x", (uint32_t)uuID);
-  *(pDeviceIDData + 0) = (uint8_t)(uuID >> 56);
-  *(pDeviceIDData + 1) = (uint8_t)(uuID >> 48);
-  *(pDeviceIDData + 2) = (uint8_t)(uuID >> 40);
-  *(pDeviceIDData + 3) = (uint8_t)(uuID >> 32);
-  *(pDeviceIDData + 4) = (uint8_t)(uuID >> 24);
-  *(pDeviceIDData + 5) = (uint8_t)(uuID >> 16);
-  *(pDeviceIDData + 6) = (uint8_t)(uuID >>  8);
-  *(pDeviceIDData + 7) = (uint8_t)(uuID >>  0);
+  *pDeviceIDDataLength = (uint8_t)serial_length;
+  zpal_get_serial_number(pDeviceIDData);
+
+  DPRINT("\r\nserial number: ");
+  for (size_t i = 0; i < serial_length; ++i)
+  {
+    DPRINTF("%02x", pDeviceIDData[i]);
+  }
+  DPRINT("\r\n");
+}
+
+static void indicator_set_handler(uint32_t on_time_ms, uint32_t off_time_ms, uint32_t num_cycles)
+{
+  Board_IndicatorControl(on_time_ms, off_time_ms, num_cycles, true);
+}
+
+/*
+ * The below functions should be implemented as hardware specific functions in a separate source
+ * file, e.g. WallController_hw.c.
+ */
+ZW_WEAK void WallController_hw_init(void)
+{
+
 }

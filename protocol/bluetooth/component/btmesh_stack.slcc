@@ -238,6 +238,33 @@ library:
     condition:
       - "toolchain_iar"
       - "device_family_mgm24"
+#BGM24
+  - path: "lib/EFR32BG24/GCC/libbluetooth_mesh.a"
+    condition:
+      - "toolchain_gcc"
+      - "device_family_bgm24"
+  - path: "lib/EFR32BG24/IAR/libbluetooth_mesh.a"
+    condition:
+      - "toolchain_iar"
+      - "device_family_bgm24"
+#EFR32MG27
+  - path: "lib/EFR32MG27/GCC/libbluetooth_mesh.a"
+    condition:
+      - "toolchain_gcc"
+      - "device_family_efr32mg27"
+  - path: "lib/EFR32MG27/IAR/libbluetooth_mesh.a"
+    condition:
+      - "toolchain_iar"
+      - "device_family_efr32mg27"
+#EFR32BG27
+  - path: "lib/EFR32BG27/GCC/libbluetooth_mesh.a"
+    condition:
+      - "toolchain_gcc"
+      - "device_family_efr32bg27"
+  - path: "lib/EFR32BG27/IAR/libbluetooth_mesh.a"
+    condition:
+      - "toolchain_iar"
+      - "device_family_efr32bg27"
 template_contribution:
   - name: component_catalog
     value: btmesh
@@ -261,7 +288,7 @@ template_contribution:
   - name: btmesh_advertisers
     value:
       name: mesh_data
-      count: 1
+      count: 2
 requires:
   - name: "sl_system"
   - name: "device_init"

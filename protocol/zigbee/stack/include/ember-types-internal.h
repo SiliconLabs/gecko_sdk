@@ -22,9 +22,7 @@
 
 #include PLATFORM_HEADER
 #include "ember.h"
-#ifndef ZIGBEE_STACK_ON_HOST
-#include "upper-mac.h"
-#endif
+
 #include "multi-mac.h"
 #if defined(SL_COMPONENT_CATALOG_PRESENT)
 #include "sl_component_catalog.h"
@@ -35,21 +33,26 @@
  #define EMBER_TEST_EXTERNAL_CONST
 #else // EMBER_TEST
  #define EMBER_TEST_EXTERNAL static
- #define EMBER_TEST_EXTERNAL_CONST const static
+ #define EMBER_TEST_EXTERNAL_CONST static const
 #endif // EMBER_TEST
 
 // Use user provided power value while forming/joining a network to be a max
 // power value in link power delta calculation.
 #if defined(MAC_DUAL_PRESENT) || defined(SL_CATALOG_ZIGBEE_PHY_2_4_SUBGHZ_SWITCH_COORDINATOR_PRESENT)
+// Internal tests use the simulated PHY_EM250 phy.h
+// Everything else for hardware can use upper-mac.h, which will
+// pull in the right phy.h
+#if !defined(ZIGBEE_STACK_ON_HOST) && !defined(PHY_EM250)
+#include "upper-mac.h"
+#endif // !defined(ZIGBEE_STACK_ON_HOST) && !defined(PHY_EM250)
 #define emSubGhzRadioChannel sl_mac_upper_mac_state[1].nwk_radio_parameters[0].channel
 #define emSubGhzRadioPower sl_mac_upper_mac_state[1].nwk_radio_parameters[0].tx_power
 #define MAX_RADIO_POWER_USER_PROVIDED  emSubGhzRadioPower
 #elif defined(EMBER_MULTI_NETWORK_STRIPPED)
-#define emEnableApplicationCurrentNetwork()
-#define emRestoreCurrentNetwork()
-#ifndef ZIGBEE_STACK_ON_HOST
+#if !defined(ZIGBEE_STACK_ON_HOST) && !defined(PHY_EM250)
+#include "upper-mac.h"
 #define MAX_RADIO_POWER_USER_PROVIDED  (sl_mac_upper_mac_state[0].nwk_radio_parameters[0].tx_power)
-#else
+#else // MAC_DUAL_PRESENT || SL_CATALOG_ZIGBEE_PHY_2_4_SUBGHZ_SWITCH_COORDINATOR_PRESENT, !EMBER_MULTI_NETWORK_STRIPPED
 // there is no radio on Linux, so this value is picked at random
 #define MAX_RADIO_POWER_USER_PROVIDED  10
 #endif//#ifndef ZIGBEE_STACK_ON_HOST
@@ -58,7 +61,8 @@ extern uint8_t emCurrentNetworkIndex;
 extern void emEnableApplicationCurrentNetwork(void);
 extern void emRestoreCurrentNetworkInternal(void);
 #define emRestoreCurrentNetwork() (emRestoreCurrentNetworkInternal())
-#ifndef ZIGBEE_STACK_ON_HOST
+#if !defined(ZIGBEE_STACK_ON_HOST) && !defined(PHY_EM250)
+#include "upper-mac.h"
 #define MAX_RADIO_POWER_USER_PROVIDED   (sl_mac_upper_mac_state[0].nwk_radio_parameters[emCurrentNetworkIndex].tx_power)
 #else
 // there is no radio on Linux, so this value is picked at random
@@ -119,5 +123,51 @@ enum {
   PACKET_VALIDATE_APS_COMMAND          = 5,
 };
 typedef uint8_t PacketValidateType;
+
+// management code
+//----------------------------------------------------------------
+// PAN ID state
+//
+// PAN ID conflict states.  These need to be invalid PAN IDs because we encode
+// the state in 'newPanId'.  We use these to:
+//  - Put in a delay between PAN ID reports, to keep from flooding the network.
+//  - Implement the required delay between receiving a PAN ID update and
+//    actually changing the PAN ID.
+// New states will be needed If we implement the suggested-but-not-actually-
+// required active scan before sending a report or picking a new PAN ID.
+
+#define PAN_ID_OKAY            0xFFFF
+#define PAN_ID_REPORT_SENT     0xFFFE
+//      PAN_ID_UPDATE_RECEIVED <any valid PAN ID>
+
+// association code
+// To make it easy to translate from the internal enumeration to
+// the external one we embed the external enumeration in the low
+// four bits of the internal.  Doing it this way also makes sure
+// that every internal value has a corresponding external value.
+
+enum {
+  NETWORK_INITIAL                     = EMBER_NO_NETWORK,
+
+  NETWORK_JOINING                     = EMBER_JOINING_NETWORK,
+  NETWORK_JOINED_UNAUTHENTICATED      = EMBER_JOINING_NETWORK + 0x10,
+  NETWORK_JOIN_FAILED                 = EMBER_JOINING_NETWORK + 0x20,
+  NETWORK_JOINING_USING_REJOIN        = EMBER_JOINING_NETWORK + 0x30,
+  NETWORK_JOINED_WAITING_FOR_LINK_KEY = EMBER_JOINING_NETWORK + 0x40,
+
+  NETWORK_JOINED                      = EMBER_JOINED_NETWORK,
+
+  NETWORK_JOINED_NO_PARENT            = EMBER_JOINED_NETWORK_NO_PARENT,
+  NETWORK_ORPHAN_SCAN                 = EMBER_JOINED_NETWORK_NO_PARENT + 0x10,
+  NETWORK_ORPHAN_SCAN_COMPLETE        = EMBER_JOINED_NETWORK_NO_PARENT + 0x20,
+  NETWORK_REJOINING                   = EMBER_JOINED_NETWORK_NO_PARENT + 0x30,
+  NETWORK_REJOINED_UNAUTHENTICATED    = EMBER_JOINED_NETWORK_NO_PARENT + 0x40,
+  NETWORK_LEAVING_AND_REJOINING       = EMBER_JOINED_NETWORK_NO_PARENT + 0x50,
+
+  NETWORK_JOINED_S2S_INITIATOR        = EMBER_JOINED_NETWORK_S2S_INITIATOR,
+  NETWORK_JOINED_S2S_TARGET           = EMBER_JOINED_NETWORK_S2S_TARGET,
+
+  NETWORK_LEAVING                     = EMBER_LEAVING_NETWORK,
+};
 
 #endif // SILABS_EMBER_TYPES_INTERNAL_H

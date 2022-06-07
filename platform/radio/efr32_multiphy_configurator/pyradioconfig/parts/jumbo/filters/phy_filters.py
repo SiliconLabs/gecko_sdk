@@ -31,6 +31,6 @@ class PhyFilters(IPhyFilter):
 
     sim_tests_phy_groups = ['Phys_sim_tests']
 
-    simplicity_studio_phy_groups = ['Phys_Datasheet', 'Phys_Studio', 'Phys_connect', 'Phys_MBus_Studio', 'Phys_Studio_LongRange', 'Phys_Studio_WiSUN']
+    simplicity_studio_phy_groups = ['Phys_Datasheet', 'Phys_Studio', 'Phys_connect', 'Phys_MBus_Studio', 'Phys_Studio_LongRange', 'phys_studio_wisun_fan_1_0', 'phys_studio_wisun_han']
 
     non_functional_phy_groups = ['Phys_ASK']

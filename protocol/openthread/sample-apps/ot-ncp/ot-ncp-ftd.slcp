@@ -1,7 +1,8 @@
 project_name: ot-ncp-ftd
-label: ot-ncp-ftd
+label: OpenThread - NCP (FTD)
 package: OpenThread
-description: This is a simple OpenThread Full Thread Device NCP application.
+description:  >
+  This is a simple OpenThread Full Thread Device NCP application. This is equivalent to the ot-ncp-ftd application in the OpenThread GitHub repo.
 category: OpenThread Examples
 quality: production
 
@@ -63,3 +64,20 @@ configuration:
 
 tag:
   - prebuilt_demo
+
+readme:
+  - path: ./README-OT-NCP.md
+
+filter:
+  - name: "Wireless Technology"
+    value: ["Thread"]
+  - name: "Device Type"
+    value: ["NCP"]
+  - name: "Project Difficulty"
+    value: ["Advanced"]
+
+ui_hints:
+  highlight:
+    - path: ./README-OT-NCP.md
+      focus: true
+

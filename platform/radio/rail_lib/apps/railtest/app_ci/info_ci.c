@@ -37,6 +37,17 @@
 #include "rail_ieee802154.h"
 #include "app_common.h"
 
+uint16_t getLikelyChannel(void)
+{
+  uint16_t chan = channel; // Default to last 'offline' setChannel setting
+  if ((RAIL_GetRadioState(railHandle)
+       & (RAIL_RF_STATE_RX | RAIL_RF_STATE_TX)) != 0U) {
+    (void) RAIL_GetChannel(railHandle, &chan); // capture online channel
+    // Note: this may not reflect a channel-hopping channel
+  }
+  return chan;
+}
+
 static void printBitField(uint32_t bitField,
                           char** fieldNames,
                           uint8_t numFields)
@@ -131,7 +142,7 @@ void getStatus(sl_cli_command_arg_t *args)
                         "Aborted:%u,"
                         "RxBeams:%u,"
                         "DataRequests:%u",
-                        channel,
+                        getLikelyChannel(),
                         appModeNames(currentAppMode()),
                         counters.timingLost,
                         counters.timingDetect,
@@ -368,6 +379,27 @@ void getRssiOffset(sl_cli_command_arg_t *args)
                   (protocolRssiOffset + radioRssiOffset));
   }
 }
+void getRssiDetectThreshold(sl_cli_command_arg_t *args)
+{
+  int8_t rssiDetectThresholdDbm = RAIL_GetRssiDetectThreshold(railHandle);
+  responsePrint(sl_cli_get_command_string(args, 0), "rssiDetectThresholdDbm:%d,status:%s",
+                rssiDetectThresholdDbm,
+                rssiDetectThresholdDbm == RAIL_RSSI_INVALID_DBM ? "Disabled" : "Enabled");
+}
+void setRssiDetectThreshold(sl_cli_command_arg_t *args)
+{
+  int8_t rssiDetectThresholdDbm = sl_cli_get_argument_int8(args, 0);
+  CHECK_RAIL_HANDLE(sl_cli_get_command_string(args, 0));
+  if (!RAIL_SupportsRssiDetectThreshold(railHandle)) {
+    responsePrintError(sl_cli_get_command_string(args, 0), 0x0A, "RSSI threshold detection is not supported on this chip.");
+  } else {
+    if (RAIL_STATUS_NO_ERROR != RAIL_SetRssiDetectThreshold(railHandle, rssiDetectThresholdDbm)) {
+      responsePrintError(sl_cli_get_command_string(args, 0), 0x0B, "Error setting the rssiDetectThreshold.");
+    } else {
+      getRssiDetectThreshold(args);
+    }
+  }
+}
 void sweepPower(sl_cli_command_arg_t *args)
 {
   CHECK_RAIL_HANDLE(sl_cli_get_command_string(args, 0));
@@ -464,6 +496,10 @@ void printChipFeatures(sl_cli_command_arg_t *args)
                      "RAIL_SUPPORTS_EXTERNAL_THERMISTOR",
                      RAIL_SUPPORTS_EXTERNAL_THERMISTOR ? "Yes" : "No",
                      RAIL_SupportsExternalThermistor(railHandle) ? "Yes" : "No");
+  responsePrintMulti("Feature:%s,CompileTime:%s,RunTime:%s",
+                     "RAIL_SUPPORTS_AUXADC",
+                     RAIL_SUPPORTS_AUXADC ? "Yes" : "No",
+                     RAIL_SupportsAuxAdc(railHandle) ? "Yes" : "No");
   responsePrintMulti("Feature:%s,CompileTime:%s,RunTime:%s",
                      "RAIL_SUPPORTS_PRECISION_LFRCO",
                      RAIL_SUPPORTS_PRECISION_LFRCO ? "Yes" : "No",
@@ -624,6 +660,70 @@ void printChipFeatures(sl_cli_command_arg_t *args)
   responsePrintMulti("Feature:%s,CompileTime:%s,RunTime:%s",
                      "RAIL_TX_POWER_MODE_SUBGIG_LLP", "N/A", "N/A");
  #endif//RAIL_TX_POWER_MODE_SUBGIG_LLP
+ #ifdef RAIL_TX_POWER_MODE_SUBGIG
+  if (RAIL_SupportsTxPowerMode(railHandle,
+                               RAIL_TX_POWER_MODE_SUBGIG,
+                               &maxPowerLevel)
+      && (maxPowerLevel != RAIL_TX_POWER_LEVEL_INVALID)) {
+    responsePrintMulti("Feature:%s,CompileTime:%s,RunTime:%u",
+                       "RAIL_TX_POWER_MODE_SUBGIG", "Yes",
+                       maxPowerLevel);
+  } else {
+    responsePrintMulti("Feature:%s,CompileTime:%s,RunTime:%s",
+                       "RAIL_TX_POWER_MODE_SUBGIG", "Yes", "No");
+  }
+ #else
+  responsePrintMulti("Feature:%s,CompileTime:%s,RunTime:%s",
+                     "RAIL_TX_POWER_MODE_SUBGIG", "N/A", "N/A");
+ #endif//RAIL_TX_POWER_MODE_SUBGIG
+ #ifdef RAIL_TX_POWER_MODE_SUBGIG_EFF_30DBM
+  if (RAIL_SupportsTxPowerMode(railHandle,
+                               RAIL_TX_POWER_MODE_SUBGIG_EFF_30DBM,
+                               &maxPowerLevel)
+      && (maxPowerLevel != RAIL_TX_POWER_LEVEL_INVALID)) {
+    responsePrintMulti("Feature:%s,CompileTime:%s,RunTime:%u",
+                       "RAIL_TX_POWER_MODE_SUBGIG_EFF_30DBM", "Yes",
+                       maxPowerLevel);
+  } else {
+    responsePrintMulti("Feature:%s,CompileTime:%s,RunTime:%s",
+                       "RAIL_TX_POWER_MODE_SUBGIG_EFF_30DBM", "Yes", "No");
+  }
+ #else
+  responsePrintMulti("Feature:%s,CompileTime:%s,RunTime:%s",
+                     "RAIL_TX_POWER_MODE_SUBGIG_EFF_30DBM", "N/A", "N/A");
+ #endif//RAIL_TX_POWER_MODE_SUBGIG_EFF_30DBM
+ #ifdef RAIL_TX_POWER_MODE_SUBGIG_EFF_25DBM
+  if (RAIL_SupportsTxPowerMode(railHandle,
+                               RAIL_TX_POWER_MODE_SUBGIG_EFF_25DBM,
+                               &maxPowerLevel)
+      && (maxPowerLevel != RAIL_TX_POWER_LEVEL_INVALID)) {
+    responsePrintMulti("Feature:%s,CompileTime:%s,RunTime:%u",
+                       "RAIL_TX_POWER_MODE_SUBGIG_EFF_25DBM", "Yes",
+                       maxPowerLevel);
+  } else {
+    responsePrintMulti("Feature:%s,CompileTime:%s,RunTime:%s",
+                       "RAIL_TX_POWER_MODE_SUBGIG_EFF_25DBM", "Yes", "No");
+  }
+ #else
+  responsePrintMulti("Feature:%s,CompileTime:%s,RunTime:%s",
+                     "RAIL_TX_POWER_MODE_SUBGIG_EFF_25DBM", "N/A", "N/A");
+ #endif//RAIL_TX_POWER_MODE_SUBGIG_EFF_25DBM
+ #ifdef RAIL_TX_POWER_MODE_SUBGIG_EFF_20DBM
+  if (RAIL_SupportsTxPowerMode(railHandle,
+                               RAIL_TX_POWER_MODE_SUBGIG_EFF_20DBM,
+                               &maxPowerLevel)
+      && (maxPowerLevel != RAIL_TX_POWER_LEVEL_INVALID)) {
+    responsePrintMulti("Feature:%s,CompileTime:%s,RunTime:%u",
+                       "RAIL_TX_POWER_MODE_SUBGIG_EFF_20DBM", "Yes",
+                       maxPowerLevel);
+  } else {
+    responsePrintMulti("Feature:%s,CompileTime:%s,RunTime:%s",
+                       "RAIL_TX_POWER_MODE_SUBGIG_EFF_20DBM", "Yes", "No");
+  }
+ #else
+  responsePrintMulti("Feature:%s,CompileTime:%s,RunTime:%s",
+                     "RAIL_TX_POWER_MODE_SUBGIG_EFF_20DBM", "N/A", "N/A");
+ #endif//RAIL_TX_POWER_MODE_SUBGIG_EFF_20DBM
  #ifdef RAIL_TX_POWER_MODE_OFDM_PA
   if (RAIL_SupportsTxPowerMode(railHandle,
                                RAIL_TX_POWER_MODE_OFDM_PA,
@@ -640,6 +740,70 @@ void printChipFeatures(sl_cli_command_arg_t *args)
   responsePrintMulti("Feature:%s,CompileTime:%s,RunTime:%s",
                      "RAIL_TX_POWER_MODE_OFDM_PA", "N/A", "N/A");
  #endif//RAIL_TX_POWER_MODE_OFDM_PA
+ #ifdef RAIL_TX_POWER_MODE_OFDM_PA_EFF_30DBM
+  if (RAIL_SupportsTxPowerMode(railHandle,
+                               RAIL_TX_POWER_MODE_OFDM_PA_EFF_30DBM,
+                               &maxPowerLevel)
+      && (maxPowerLevel != RAIL_TX_POWER_LEVEL_INVALID)) {
+    responsePrintMulti("Feature:%s,CompileTime:%s,RunTime:%u",
+                       "RAIL_TX_POWER_MODE_OFDM_PA_EFF_30DBM", "Yes",
+                       maxPowerLevel);
+  } else {
+    responsePrintMulti("Feature:%s,CompileTime:%s,RunTime:%s",
+                       "RAIL_TX_POWER_MODE_OFDM_PA_EFF_30DBM", "Yes", "No");
+  }
+ #else
+  responsePrintMulti("Feature:%s,CompileTime:%s,RunTime:%s",
+                     "RAIL_TX_POWER_MODE_OFDM_PA_EFF_30DBM", "N/A", "N/A");
+ #endif//RAIL_TX_POWER_MODE_OFDM_PA_EFF_30DBM
+ #ifdef RAIL_TX_POWER_MODE_OFDM_PA_EFF_25DBM
+  if (RAIL_SupportsTxPowerMode(railHandle,
+                               RAIL_TX_POWER_MODE_OFDM_PA_EFF_25DBM,
+                               &maxPowerLevel)
+      && (maxPowerLevel != RAIL_TX_POWER_LEVEL_INVALID)) {
+    responsePrintMulti("Feature:%s,CompileTime:%s,RunTime:%u",
+                       "RAIL_TX_POWER_MODE_OFDM_PA_EFF_25DBM", "Yes",
+                       maxPowerLevel);
+  } else {
+    responsePrintMulti("Feature:%s,CompileTime:%s,RunTime:%s",
+                       "RAIL_TX_POWER_MODE_OFDM_PA_EFF_25DBM", "Yes", "No");
+  }
+ #else
+  responsePrintMulti("Feature:%s,CompileTime:%s,RunTime:%s",
+                     "RAIL_TX_POWER_MODE_OFDM_PA_EFF_25DBM", "N/A", "N/A");
+ #endif//RAIL_TX_POWER_MODE_OFDM_PA_EFF_25DBM
+ #ifdef RAIL_TX_POWER_MODE_OFDM_PA_EFF_20DBM
+  if (RAIL_SupportsTxPowerMode(railHandle,
+                               RAIL_TX_POWER_MODE_OFDM_PA_EFF_20DBM,
+                               &maxPowerLevel)
+      && (maxPowerLevel != RAIL_TX_POWER_LEVEL_INVALID)) {
+    responsePrintMulti("Feature:%s,CompileTime:%s,RunTime:%u",
+                       "RAIL_TX_POWER_MODE_OFDM_PA_EFF_20DBM", "Yes",
+                       maxPowerLevel);
+  } else {
+    responsePrintMulti("Feature:%s,CompileTime:%s,RunTime:%s",
+                       "RAIL_TX_POWER_MODE_OFDM_PA_EFF_20DBM", "Yes", "No");
+  }
+ #else
+  responsePrintMulti("Feature:%s,CompileTime:%s,RunTime:%s",
+                     "RAIL_TX_POWER_MODE_OFDM_PA_EFF_20DBM", "N/A", "N/A");
+ #endif//RAIL_TX_POWER_MODE_OFDM_PA_EFF_20DBM
+ #ifdef RAIL_TX_POWER_MODE_OFDM_PA_EFF_MAXDBM
+  if (RAIL_SupportsTxPowerMode(railHandle,
+                               RAIL_TX_POWER_MODE_OFDM_PA_EFF_MAXDBM,
+                               &maxPowerLevel)
+      && (maxPowerLevel != RAIL_TX_POWER_LEVEL_INVALID)) {
+    responsePrintMulti("Feature:%s,CompileTime:%s,RunTime:%u",
+                       "RAIL_TX_POWER_MODE_OFDM_PA_EFF_MAXDBM", "Yes",
+                       maxPowerLevel);
+  } else {
+    responsePrintMulti("Feature:%s,CompileTime:%s,RunTime:%s",
+                       "RAIL_TX_POWER_MODE_OFDM_PA_EFF_MAXDBM", "Yes", "No");
+  }
+ #else
+  responsePrintMulti("Feature:%s,CompileTime:%s,RunTime:%s",
+                     "RAIL_TX_POWER_MODE_OFDM_PA_EFF_MAXDBM", "N/A", "N/A");
+ #endif//RAIL_TX_POWER_MODE_OFDM_PA_EFF_MAXDBM
   responsePrintMulti("Feature:%s,CompileTime:%s,RunTime:%s",
                      "RAIL_SUPPORTS_PROTOCOL_BLE",
                      RAIL_SUPPORTS_PROTOCOL_BLE ? "Yes" : "No",
@@ -784,6 +948,10 @@ void printChipFeatures(sl_cli_command_arg_t *args)
                      "RAIL_SUPPORTS_MFM",
                      RAIL_SUPPORTS_MFM ? "Yes" : "No",
                      RAIL_SupportsMfm(railHandle) ? "Yes" : "No");
+  responsePrintMulti("Feature:%s,CompileTime:%s,RunTime:%s",
+                     "RAIL_SUPPORTS_EFF",
+                     RAIL_SUPPORTS_EFF ? "Yes" : "No",
+                     RAIL_SupportsEff(railHandle) ? "Yes" : "No");
 }
 
 void cliSeparatorHack(sl_cli_command_arg_t *args)

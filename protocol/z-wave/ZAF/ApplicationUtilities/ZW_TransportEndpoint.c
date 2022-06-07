@@ -53,7 +53,9 @@ RequestCallbackFunctionQueue_t  m_RequestCallbackQueue;
 ResponseCallbackFunctionQueue_t m_ResponseCallbackQueue;
 
 static void ZCB_RequestCompleted(uint8_t txStatus, TX_STATUS_TYPE* extendedTxStatus);
+#ifndef HOST_SECURITY_INCLUDED
 static void ZCB_ResponseCompleted(uint8_t txStatus, TX_STATUS_TYPE* extendedTxStatus);
+#endif
 
 typedef struct {
   uint8_t flag_supervision_encap;
@@ -366,6 +368,22 @@ Transport_SendResponseEP(
   VOID_CALLBACKFUNC(pCallback)(uint8_t bStatus))
 {
   EZAF_EnqueueStatus_t result;
+
+#ifdef HOST_SECURITY_INCLUDED
+  UNUSED(pCallback);
+  SZwaveTransmitPackage TransmitPackage;
+  memset(&TransmitPackage, 0, sizeof(TransmitPackage));
+  TransmitPackage.eTransmitType = EZWAVETRANSMITTYPE_SECURE;
+  SSecureSendData *params = &TransmitPackage.uTransmitParams.SendDataParams;
+  params->connection.remote.is_multicast = false;
+  params->data_length = dataLength;
+  memcpy(params->data, pData, params->data_length);
+  params->tx_options.number_of_responses = 0;
+  params->ptxCompleteCallback = NULL;
+  params->connection.remote.address.node_id = pTxOptionsEx->pDestNode->node.nodeId;
+  // Put the package on queue (and dont wait for it)
+  result = (EZAF_EnqueueStatus_t)QueueNotifyingSendToBack(m_pTxQueueNotifying, (uint8_t *)&TransmitPackage, 0);
+#else
   /*
    * Save the callback function pointer to a variable in order to call it in
    * ZCB_ResponseCompleted.
@@ -407,7 +425,6 @@ Transport_SendResponseEP(
   FramePackage.uTransmitParams.SendDataEx.eKeyType = pTxOptionsEx->pDestNode->nodeInfo.security;
 
   FramePackage.eTransmitType = EZWAVETRANSMITTYPE_EX;
-
   // Put the package on queue (and dont wait for it)
   result = (EZAF_EnqueueStatus_t)QueueNotifyingSendToBack(m_pTxQueueNotifying, (uint8_t*)&FramePackage, 0);
   if (ZAF_ENQUEUE_STATUS_SUCCESS == result)
@@ -416,6 +433,7 @@ Transport_SendResponseEP(
     m_ResponseCallbackQueue.head++;
     m_ResponseCallbackQueue.numInQueue++;
   }
+#endif
   return result;
 
 }
@@ -556,6 +574,7 @@ ZCB_RequestCompleted(uint8_t txStatus, TX_STATUS_TYPE* extendedTxStatus)
   }
 }
 
+#ifndef HOST_SECURITY_INCLUDED
 static void
 ZCB_ResponseCompleted(uint8_t txStatus, TX_STATUS_TYPE* extendedTxStatus)
 {
@@ -584,7 +603,7 @@ ZCB_ResponseCompleted(uint8_t txStatus, TX_STATUS_TYPE* extendedTxStatus)
     m_cbUpdateStayAwakePeriod();
   }
 }
-
+#endif
 
 void
 SetFlagSupervisionEncap(bool flag)

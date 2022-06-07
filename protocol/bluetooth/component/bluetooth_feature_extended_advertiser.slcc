@@ -13,10 +13,9 @@ root_path: "protocol/bluetooth"
 requires:
   - name: "bluetooth_controller"
   - name: "bluetooth_feature_advertiser"
+  - name: "device_supports_bluetooth_advertising_extensions"
 provides:
   - name: "bluetooth_feature_extended_advertiser"
-conflicts:
-  - name: "device_sdid_80"
 template_contribution:
   - name: component_catalog
     value: bluetooth_feature_extended_advertiser
@@ -24,7 +23,3 @@ template_contribution:
     value:
       function: sl_btctrl_init_adv_ext()
     priority: 7
-  - name: bluetooth_bgapi_class
-    value:
-      class: "extended_advertiser"
-    priority: 3

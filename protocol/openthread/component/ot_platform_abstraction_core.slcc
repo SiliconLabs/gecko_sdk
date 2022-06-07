@@ -1,0 +1,134 @@
+id: ot_platform_abstraction_core
+label: Platform Abstraction (Core)
+package: OpenThread
+category: OpenThread
+quality: production
+description: This component provides the abstraction layer between the OpenThread stack and Silicon Labs platform
+provides:
+  - name: ot_platform_abstraction_core
+  # NOTE: The 'wireless_stack' provide was moved here from 'ot_stack_source' to support building modules using the ot-efr32 GitHub repo
+  - name: wireless_stack
+    allow_multiple: true
+requires:
+  - name: cpp_support
+  - name: sl_system_init
+  - name: sl_system_process_action
+  - name: sli_protocol_crypto
+  - name: device_init
+  - name: device_init_core
+  - name: component_catalog
+  - name: rail_lib
+  - name: rail_util_pa
+  - name: rail_util_rssi
+  - name: emlib_msc
+  - name: emlib_rmu
+  - name: sleeptimer
+  - name: mpu
+  - name: nvm3_default
+  - name: silabs_core_sl_malloc
+  - name: toolchain_gcc
+ui_hints:
+  visibility: never
+include:
+  - path: util/third_party/openthread/examples/platforms
+    file_list:
+      - path: openthread-system.h
+  - path: util/third_party/openthread/examples/platforms/utils
+    file_list:
+      - path: code_utils.h
+      - path: link_metrics.h
+      - path: logging_rtt.h
+      - path: mac_frame.h
+      - path: soft_source_match_table.h
+      - path: settings.h
+      - path: uart.h
+  - path: protocol/openthread/platform-abstraction/efr32
+    file_list:
+      - path: board_config.h
+      - path: ieee802154mac.h
+      - path: openthread-core-efr32-config.h
+      - path: openthread-core-efr32-config-check.h
+      - path: ieee802154-packet-utils.hpp
+      - path: platform-efr32.h
+      - path: platform-band.h
+      - path: rail_config.h
+      - path: security_manager.h
+      - path: sl_packet_utils.h
+      - path: sl_openthread.h
+      - path: sleep.h
+        condition:
+          - power_manager
+source:
+      - path: util/third_party/openthread/examples/platforms/utils/debug_uart.c
+      - path: util/third_party/openthread/examples/platforms/utils/link_metrics.cpp
+      - path: util/third_party/openthread/examples/platforms/utils/logging_rtt.c
+      - path: util/third_party/openthread/examples/platforms/utils/mac_frame.cpp
+      - path: util/third_party/openthread/examples/platforms/utils/settings_ram.c
+      - path: util/third_party/openthread/examples/platforms/utils/soft_source_match_table.c
+      - path: protocol/openthread/platform-abstraction/efr32/alarm.c
+      - path: protocol/openthread/platform-abstraction/efr32/diag.c
+      - path: protocol/openthread/platform-abstraction/efr32/entropy.c
+      - path: protocol/openthread/platform-abstraction/efr32/flash.c
+      - path: protocol/openthread/platform-abstraction/efr32/logging.c
+      - path: protocol/openthread/platform-abstraction/efr32/memory.c
+      - path: protocol/openthread/platform-abstraction/efr32/misc.c
+      - path: protocol/openthread/platform-abstraction/efr32/crypto.c
+      - path: protocol/openthread/platform-abstraction/efr32/ieee802154-packet-utils.cpp
+      - path: protocol/openthread/platform-abstraction/efr32/radio.c
+      - path: protocol/openthread/platform-abstraction/efr32/security_manager.c
+      - path: protocol/openthread/platform-abstraction/efr32/startup-gcc.c
+      - path: protocol/openthread/platform-abstraction/efr32/system.c
+      - path: protocol/openthread/platform-abstraction/efr32/uartdrv_uart.c
+        condition:
+          - uartdrv_usart
+      - path: protocol/openthread/platform-abstraction/efr32/iostream_uart.c
+        condition:
+          - iostream_usart
+      - path: protocol/openthread/platform-abstraction/efr32/sleep.c
+        condition:
+          - power_manager
+library:
+  - path: "protocol/openthread/libs/libsl_openthread_efr32mg1x_gcc.a"
+    condition:
+      - toolchain_gcc
+      - device_series_1
+  - path: "protocol/openthread/libs/libsl_openthread_efr32mg2x_gcc.a"
+    condition:
+      - toolchain_gcc
+      - device_series_2
+define:
+  - name: OPENTHREAD_PROJECT_CORE_CONFIG_FILE
+    value: "\"openthread-core-efr32-config.h\""
+  - name: OPENTHREAD_CORE_CONFIG_PLATFORM_CHECK_FILE
+    value: "\"openthread-core-efr32-config-check.h\""
+template_file:
+  - path: protocol/openthread/src/template/sl_ot_init.c.jinja
+  - path: protocol/openthread/include/template/sl_ot_init.h.jinja
+template_contribution:
+  - name: power_manager_handler
+    value:
+      event: is_ok_to_sleep
+      include: sleep.h
+      handler: sl_ot_is_ok_to_sleep
+    condition:
+      - power_manager
+    unless:
+      - kernel
+  - name: event_handler
+    value:
+      event: stack_init
+      include: platform-efr32.h
+      handler: sl_ot_sys_init
+    priority: -10
+  - name: event_handler
+    value:
+      event: internal_app_init
+      include: sl_ot_init.h
+      handler: sl_ot_init
+    unless:
+      - kernel
+  - name: ot_init
+    value: sl_ot_sleep_init
+    priority: 10
+    condition:
+      - power_manager

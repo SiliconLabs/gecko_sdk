@@ -121,6 +121,9 @@ bool sli_pending_btctrl_events(void)
 
 void BTLE_LL_EventRaise(uint32_t events)
 {
+  if ((sli_btctrl_events & events) == events) {//Events already pending
+    return;
+  }
   CORE_DECLARE_IRQ_STATE;
   CORE_ENTER_ATOMIC();
   sli_btctrl_events |= events;

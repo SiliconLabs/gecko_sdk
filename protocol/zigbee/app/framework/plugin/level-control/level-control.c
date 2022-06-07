@@ -17,6 +17,7 @@
  ******************************************************************************/
 
 // this file contains all the common includes for clusters in the util
+#include "sl_common.h"
 #include "app/framework/include/af.h"
 
 // clusters specific header
@@ -710,6 +711,7 @@ static void moveToLevelHandler(uint8_t commandId,
 
   // Move To Level commands cause the device to move from its current level to
   // the specified level at the specified rate.
+  SL_IGNORE_TYPE_LIMIT_BEGIN;
   if (MAX_LEVEL < level) {
     state->moveToLevel = MAX_LEVEL;
   } else if (level < MIN_LEVEL) {
@@ -717,6 +719,7 @@ static void moveToLevelHandler(uint8_t commandId,
   } else {
     state->moveToLevel = level;
   }
+  SL_IGNORE_TYPE_LIMIT_END;
 
   // If the level is decreasing, the On/Off attribute is left unchanged.  This
   // logic is to prevent a light from transitioning from off to bright to dim.
@@ -1171,6 +1174,7 @@ void emberAfLevelControlClusterServerInitCallback(uint8_t endpoint)
             // Otherwise set to specified value 0x01-0xFE.
             // But, need to enforce currentLevel's min/max, right?
             // Spec doesn't mention this.
+            SL_IGNORE_TYPE_LIMIT_BEGIN;
             if (startUpCurrentLevel < MIN_LEVEL) {
               currentLevel = MIN_LEVEL;
             } else if (startUpCurrentLevel > MAX_LEVEL) {
@@ -1178,6 +1182,7 @@ void emberAfLevelControlClusterServerInitCallback(uint8_t endpoint)
             } else {
               currentLevel = startUpCurrentLevel;
             }
+            SL_IGNORE_TYPE_LIMIT_END;
             break;
         }
         status = emberAfWriteAttribute(endpoint,

@@ -750,7 +750,10 @@ static void processSerialInput(uint8_t port)
     if (port == SERIAL_PORT_CLI && useControlChannel) {
       // Wait for the parent to give the "go ahead"
       debugPrint("Child process waiting for parent's 'go-ahead'.\n");
-      read(CONTROL_READER(port), &goAhead, 1);
+      if (read(CONTROL_READER(port), &goAhead, 1) < 0) {
+        fprintf(stderr, "Attempt to read from port failed");
+        assert(false);
+      }
     }
 
     if (port == SERIAL_PORT_CLI) {
@@ -932,7 +935,10 @@ void emberSerialFlushRx(uint8_t port)
 {
   char buf;
   while (0 < emberSerialReadAvailable(port)) {
-    read(DATA_READER(port), &buf, 1);
+    if (read(DATA_READER(port), &buf, 1) < 0 ) {
+      fprintf(stderr, "Attempt to read from port failed");
+      assert(false);
+    }
   }
 }
 

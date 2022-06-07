@@ -299,6 +299,16 @@ int32_t storage_eraseRaw(uint32_t address, size_t length);
  ******************************************************************************/
 bool storage_isBusy(void);
 
+/***************************************************************************//**
+ * Get PPUSATD word of the (E)USART in use
+ *
+ * @param ppusatdNr PPUSATD register number
+ *
+ * @return Word representing the PPUSATD bit field of the (E)USART in use.
+ *         0 if not found.
+ ******************************************************************************/
+uint32_t storage_getSpiUsartPPUSATD(uint32_t *ppusatdNr);
+
 /** @} // addtogroup Storage */
 /** @} addtogroup Components */
 #endif // BTL_STORAGE_H

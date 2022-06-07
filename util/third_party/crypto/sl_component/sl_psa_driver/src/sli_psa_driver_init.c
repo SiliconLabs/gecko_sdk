@@ -47,6 +47,7 @@
 
 #if defined(CRYPTOACC_PRESENT)
   #include "sli_cryptoacc_transparent_functions.h"
+  #include "cryptoacc_management.h"
 #endif // CRYPTOACC_PRESENT
 
 #if defined(CRYPTO_PRESENT)
@@ -106,9 +107,14 @@ psa_status_t sli_se_opaque_driver_deinit(void)
 #if defined(CRYPTOACC_PRESENT)
 psa_status_t sli_cryptoacc_transparent_driver_init(void)
 {
-  // Leave this function empty for now. Consider moving the clock init and etc. here,
-  // which is performed by the management functions.
+  // Consider moving the clock init and etc. here, which is performed by the
+  // management functions.
+
+#if _SILICON_LABS_32B_SERIES_2_CONFIG > 2
+  return cryptoacc_initialize_countermeasures();
+#else // SILICON_LABS_32B_SERIES_2_CONFIG > 2
   return PSA_SUCCESS;
+#endif // SILICON_LABS_32B_SERIES_2_CONFIG > 2
 }
 
 psa_status_t sli_cryptoacc_transparent_driver_deinit(void)

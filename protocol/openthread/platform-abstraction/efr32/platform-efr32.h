@@ -45,9 +45,16 @@
 // Global OpenThread instance structure
 extern otInstance *sInstance;
 
+#ifdef SL_COMPONENT_CATALOG_PRESENT
+#include "sl_component_catalog.h"
+#endif // SL_COMPONENT_CATALOG_PRESENT
+
 // Global reference to rail handle
-extern RAIL_Handle_t emPhyRailHandle; // coex needs the emPhyRailHandle symbol.
+#ifndef SL_CATALOG_RAIL_MULTIPLEXER_PRESENT
 #define gRailHandle emPhyRailHandle   // use gRailHandle in the OpenThread PAL.
+#endif
+
+extern RAIL_Handle_t gRailHandle; // coex needs the emPhyRailHandle symbol.
 
 /**
  * This function performs all platform-specific initialization of
@@ -117,6 +124,12 @@ void efr32UartProcess(void);
 void efr32CpcProcess(void);
 
 /**
+ * This function performs SPI driver processing.
+ *
+ */
+void efr32SpiProcess(void);
+
+/**
  * Initialization of Misc module.
  *
  */
@@ -145,8 +158,9 @@ void efr32LogDeinit(void);
  *
  * A call to this function should be made after RAIL has been
  * initialized and a valid handle is available. On platforms that
- * don't support different CCA modes, a call to this function will
- * do nothing.
+ * don't support different CCA modes, a call to this function with
+ * non-Default CCA mode (i.e. with any value except
+ * RAIL_IEEE802154_CCA_MODE_RSSI) will return a failure.
  *
  * @param[in] aMode Mode of CCA operation.
  * @return RAIL Status code indicating success of the function call.

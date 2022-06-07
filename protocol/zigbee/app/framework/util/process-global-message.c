@@ -15,6 +15,8 @@
  *
  ******************************************************************************/
 
+#include "sl_common.h"
+
 #ifdef UC_BUILD
 #include "af.h"
 #include "sl_component_catalog.h"
@@ -108,13 +110,13 @@ bool emAfSyncingTime = false;
 #define DISC_ATTR_RSP_MAX_ATTRIBUTES                                         \
   (((EMBER_AF_MAXIMUM_APS_PAYLOAD_LENGTH                                     \
      - EMBER_AF_ZCL_MANUFACTURER_SPECIFIC_OVERHEAD /* max ZCL header size */ \
-     - 1)       /* discovery is complete boolean */                          \
+     - 1)       /* discovery is complete bool */                             \
     / 3)        /* size of one discover attributes response entry */         \
    % UINT8_MAX) /* make count fit in an 8 bit integer */
 #define DISC_ATTR_EXT_RSP_MAX_ATTRIBUTES                                      \
   (((EMBER_AF_MAXIMUM_APS_PAYLOAD_LENGTH                                      \
      - EMBER_AF_ZCL_MANUFACTURER_SPECIFIC_OVERHEAD /* max ZCL header size */  \
-     - 1)       /* discovery is complete boolean */                           \
+     - 1)       /* discovery is complete bool */                              \
     / 4)        /* size of one discover attributes extended response entry */ \
    % UINT8_MAX) /* make count fit in an 8 bit integer */
 
@@ -352,6 +354,7 @@ bool emAfProcessGlobalCommand(EmberAfClusterCommand *cmd)
       // Reset message back to start
       msgIndex = cmd->payloadStartIndex;
       appResponseLength = (cmd->mfgSpecific ? 4u : 2u);
+      SL_FALLTHROUGH
     // DO NOT BREAK from this case
 
     // the format of the write attributes cmd is:

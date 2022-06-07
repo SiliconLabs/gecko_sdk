@@ -317,10 +317,7 @@ class CALC_Frame_panther(CALC_Frame_common):
 
         # Moved in Panther to FRC_FCDn_* to FRC_FCDn_FCD_*
 
-        #if model.vars.family.value == "nerio":
         self._reg_write(eval("model.vars.FRC_FCD{}_EXCLUDESUBFRAMEWCNT".format(fcdindex)), excludesubframewcnt)
-
-        #if model.vars.family.value != "dumbo":
         self._reg_write(eval("model.vars.FRC_FCD{}_ADDTRAILTXDATA".format(fcdindex)), addtrailtxdata)
 
         if model.vars.ber_force_whitening.value == True:

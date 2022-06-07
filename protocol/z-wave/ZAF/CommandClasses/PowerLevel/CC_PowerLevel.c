@@ -10,11 +10,9 @@
 /*                              INCLUDE FILES                               */
 /****************************************************************************/
 
-#include <CC_PowerLevel.h>
 #include <ZW_basis_api.h>
 #include <ZW_TransportSecProtocol.h>
 #include <ZW_TransportEndpoint.h>
-#include <ZW_radio_api.h>
 #include <AppTimer.h>
 #include <SwTimer.h>
 #include <QueueNotifying.h>
@@ -25,6 +23,7 @@
 #include "ZAF_tx_mutex.h"
 //#define DEBUGPRINT
 #include "DebugPrint.h"
+#include <zpal_radio.h>
 
 /****************************************************************************/
 /*                      PRIVATE TYPES and DEFINITIONS                       */
@@ -44,7 +43,7 @@ static SSwTimer   timerPowerLevel;
 static uint8_t    timerPowerLevelSec = 0;
 static SSwTimer   delayTestFrameTimer;
 static uint16_t   testFrameCount;
-static uint8_t    currentPower = NORMAL_POWER;
+static uint8_t    currentPower = ZPAL_RADIO_TX_POWER_DEFAULT;
 
 /****************************************************************************/
 /*                              EXPORTED DATA                               */
@@ -147,7 +146,7 @@ ZCB_SendTestDone (
 
 /**
  * Timer callback which makes sure that the RF transmit powerlevel is set back to
- * NORMAL_POWER after the designated time period.
+ * ZPAL_RADIO_TX_POWER_DEFAULT after the designated time period.
  */
 static void
 ZCB_PowerLevelTimeout (SSwTimer* pTimer)
@@ -155,7 +154,7 @@ ZCB_PowerLevelTimeout (SSwTimer* pTimer)
   timerPowerLevelSec -= 1;
   if (0 == timerPowerLevelSec)
   {
-    currentPower = NORMAL_POWER; /* Reset powerlevel to NORMAL_POWER */
+    currentPower = ZPAL_RADIO_TX_POWER_DEFAULT; /* Reset powerlevel to ZPAL_RADIO_TX_POWER_DEFAULT */
     SetRadioAttenuation(currentPower);
     TimerStop(pTimer);
   }
@@ -195,12 +194,12 @@ ZCB_DelayTestFrame (SSwTimer* pTimer)
   }
 }
 
-void loadStatusPowerLevel(void)
+static void loadStatusPowerLevel(void)
 {
   timerPowerLevelSec = 0;
 }
 
-void loadInitStatusPowerLevel(void)
+static void loadInitStatusPowerLevel(void)
 {
   testNodeID = 0;
   testPowerLevel = 0;
@@ -208,7 +207,7 @@ void loadInitStatusPowerLevel(void)
   testSourceNodeID = 0;
   testState = POWERLEVEL_TEST_NODE_REPORT_ZW_TEST_FAILED;
 
-  currentPower = NORMAL_POWER;
+  currentPower = ZPAL_RADIO_TX_POWER_DEFAULT;
   SetRadioAttenuation(currentPower);
 
   timerPowerLevelSec = 0;
@@ -223,14 +222,18 @@ static received_frame_status_t
 CC_Powerlevel_handler(
   RECEIVE_OPTIONS_TYPE_EX *rxOpt,
   ZW_APPLICATION_TX_BUFFER *pCmd,
-  uint8_t cmdLength)
+  uint8_t cmdLength,
+  ZW_APPLICATION_TX_BUFFER * pFrameOut,
+  uint8_t * pLengthOut)
 {
   UNUSED(cmdLength);
+  UNUSED(pFrameOut);
+  UNUSED(pLengthOut);
 
   switch (pCmd->ZW_Common.cmd)
   {
     case POWERLEVEL_SET:
-      if (pCmd->ZW_PowerlevelSetFrame.powerLevel > MINIMUM_POWER)
+      if (pCmd->ZW_PowerlevelSetFrame.powerLevel > ZPAL_RADIO_TX_POWER_MINUS9_DBM)
       {
         return RECEIVED_FRAME_STATUS_FAIL;
       }
@@ -244,7 +247,7 @@ CC_Powerlevel_handler(
       AppTimerRegister(&timerPowerLevel, true, ZCB_PowerLevelTimeout);
       TimerStop(&timerPowerLevel); /* Stop any ongoing POWERLEVEL_SET operation */
 
-      if (NORMAL_POWER == pCmd->ZW_PowerlevelSetFrame.powerLevel)
+      if (ZPAL_RADIO_TX_POWER_DEFAULT == pCmd->ZW_PowerlevelSetFrame.powerLevel)
       {
         // If the power level is set to normal, we ignore the timeout.
         timerPowerLevelSec = 0;
@@ -280,7 +283,7 @@ CC_Powerlevel_handler(
       RxToTxOptions(rxOpt, &pTxOptionsEx);
       pTxBuf->ZW_PowerlevelReportFrame.cmdClass = COMMAND_CLASS_POWERLEVEL;
       pTxBuf->ZW_PowerlevelReportFrame.cmd = POWERLEVEL_REPORT;
-      pTxBuf->ZW_PowerlevelReportFrame.powerLevel = (uint8_t)currentPower;
+      pTxBuf->ZW_PowerlevelReportFrame.powerLevel = currentPower;
       pTxBuf->ZW_PowerlevelReportFrame.timeout = timerPowerLevelSec;
       if (ZAF_ENQUEUE_STATUS_SUCCESS != Transport_SendResponseEP(
                                                         (uint8_t *)pTxBuf,
@@ -359,15 +362,6 @@ CC_Powerlevel_handler(
   return RECEIVED_FRAME_STATUS_NO_SUPPORT;
 }
 
-bool CC_Powerlevel_isInProgress(void)
-{
-  if(POWERLEVEL_TEST_NODE_REPORT_ZW_TEST_INPROGRESS == testState)
-  {
-    DPRINT("\r\nPowl ");
-  }
-  return ((POWERLEVEL_TEST_NODE_REPORT_ZW_TEST_INPROGRESS == testState) ? true : false);
-}
-
 static void SetRadioAttenuation(uint8_t adjustTxPower)
 {
   const SApplicationHandles * pAppHandle = ZAF_getAppHandle();
@@ -378,4 +372,14 @@ static void SetRadioAttenuation(uint8_t adjustTxPower)
   ASSERT(EQUEUENOTIFYING_STATUS_SUCCESS == QueueStatus);
 }
 
-REGISTER_CC(COMMAND_CLASS_POWERLEVEL, POWERLEVEL_VERSION, CC_Powerlevel_handler);
+static void init(void)
+{
+  loadStatusPowerLevel();
+}
+
+static void reset(void)
+{
+  loadInitStatusPowerLevel();
+}
+
+REGISTER_CC_V4(COMMAND_CLASS_POWERLEVEL, POWERLEVEL_VERSION, CC_Powerlevel_handler, NULL, NULL, NULL, 0, init, reset);

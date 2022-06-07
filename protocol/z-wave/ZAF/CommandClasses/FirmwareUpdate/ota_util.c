@@ -23,23 +23,16 @@
 #include <ZAF_Common_interface.h>
 #include <ZAF_transport.h>
 
-#include <btl_interface.h>
-#include <btl_interface_storage.h>
-
-#include <em_wdog.h>
-
+#include <zpal_watchdog.h>
+#include <zpal_misc.h>
+#include <zpal_bootloader.h>
+#include <zpal_power_manager.h>
 
 #include "stdlib.h"
-#include "em_msc.h"
-#include <CC_Version.h>
-#include <btl_reset_cause_util.h>
-#include <nvm3.h>
 #include <ZAF_file_ids.h>
-#include <ZAF_nvm3_app.h>
+#include <ZAF_nvm_app.h>
+#include <zaf_config_api.h>
 #include <SizeOf.h>
-#include <board.h>
-#include <ZAF_PM_Wrapper.h>
-#include "ZAF_watchdog.h"
 
 //#define DEBUGPRINT
 #include "DebugPrint.h"
@@ -93,17 +86,13 @@ typedef struct _OTA_transition_{
 //This version number must be increased if we make changes in the struct SFirmwareUpdateFile
 #define FIRMWARE_UPDATE_FILE_VERSION  0x01
 
-#ifdef ZWAVE_SERIES_700
 //Sizes of SFirmwareUpdateFile and SFirmwareUpdateFile_DEPRECATED_V0 must not be equal for current automatic file migration to work
 STATIC_ASSERT(sizeof(SFirmwareUpdateFile) > sizeof(SFirmwareUpdateFile_DEPRECATED_V0), STATIC_ASSERT_FAILED_file_migration_failure);
-#endif // ZWAVE_SERIES_700
 
 #define FIRMWARE_UPDATE_REQUEST_TIMEOUTS         10000   /* unit: 1 ms ticks */
 #define FIRMWARE_UPDATE_MAX_RETRY                   10
 /* Used for extending FIRMWARE_UPDATE_REQUEST_TIMEOUTS on MdGet retries - in 1ms ticks */
 #define FIRMWARE_UPDATE_REQUEST_TIMEOUT_RETRY_INC 1500
-
-#define APPLICATION_IMAGE_STORAGE_SLOT 0x0
 
 #define ACTIVATION_SUPPORT_MASK_APP        0x80U
 #define ACTIVATION_SUPPORT_MASK_INITIATOR  0x01U
@@ -122,14 +111,14 @@ STATIC_ASSERT(sizeof(SFirmwareUpdateFile) > sizeof(SFirmwareUpdateFile_DEPRECATE
 /****************************************************************************/
 
 // Used for keeping device awake during OTA.
-static SPowerLock_t m_radioPowerLock;
+static zpal_pm_handle_t m_radioPowerLock;
 
 /**
  * Internal storage for incoming FW Update MD Reports.
  * Should be big enough to store at least two incoming frames.
  * If not, then frames are written directly to flash and the storage is not used
  */
-static uint8_t mdReportsStorage[OTA_CACHE_SIZE];
+static uint8_t mdReportsStorage[OTA_CACHE_SIZE] __attribute__((aligned(4)));
 
 /**
  * Number of Reports to request in single FW Update MD Get. Minimum is 1.
@@ -141,10 +130,6 @@ static uint8_t mdGetNumberOfReports;
 /// Actual fragment size calculated upon receiving REQUEST GET.
 static uint8_t firmware_update_packetsize;
 
-static BootloaderStorageSlot_t bootloader_storage_slot = {
-  .address = 0,
-  .length  = 0  
-};
 typedef struct _OTA_UTIL_
 {
   CC_FirmwareUpdate_start_callback_t pOtaStart;
@@ -181,10 +166,6 @@ static OTA_UTIL myOta = {
     .reportsReceived = 0 // reportsReceived
 };
 
-static uint32_t pageCnt  = 0;
-static uint32_t pageno   = 1;
-static uint32_t prevpage = 0;
-
 /****************************************************************************/
 /*                              EXPORTED DATA                               */
 /****************************************************************************/
@@ -200,10 +181,8 @@ static void ZCB_TimerOutFwUpdateFrameGet(SSwTimer* pTimer);
 static void ZCB_FinishFwUpdate(TRANSMISSION_RESULT * pTransmissionResult);
 static void ZCB_VerifyImage(SSwTimer* pTimer);
 
-static void OTA_WriteData(uint32_t offset, uint8_t* pData, uint16_t legth);
 static void UpdateStatusSuccess();
 static void SendFirmwareUpdateStatusReport();
-static bool OtaVerifyImage();
 
 static void handleEvent(uint8_t event);
 static void fw_action_send_get(void);
@@ -242,41 +221,22 @@ static inline bool ActivationIsEnabled(void)
   return (ACTIVATION_SUPPORT_ENABLED_MASK == myOta.activation_enabled);
 }
 
-/**
- * Do cleanup after end flash storage write/erase operation.
- *
- * All the MSC_Init() function does is to unlock the flash controller
- * to allow for other entities (such as the NVM3 module) to access the
- * internal flash device after we are done using it.
- *
- * This is required because the bootloader leaves the flash controller
- * LOCKED upon return from all OTA write/erase operations.
- */
-static void OtaFlashWriteEraseDone(void)
-{
-  MSC_Init();
-}
-
 bool CC_FirmwareUpdate_Init(
     CC_FirmwareUpdate_start_callback_t pOtaStart,
     CC_FirmwareUpdate_finish_callback_t pOtaFinish,
     bool support_activation)
 {
-  int32_t retvalue;
+  zpal_status_t retvalue;
 
-  BootloaderInformation_t bloaderInfo;
+  zpal_bootloader_info_t bloaderInfo;
 
   myOta.pOtaStart = pOtaStart;
   myOta.pOtaFinish = pOtaFinish;
   myOta.NVM_valid = true;
 
-  pageCnt = 0;
-  pageno = 1;
-  prevpage = 0;
-
   mdGetNumberOfReports = 1;
 
-  ZAF_PM_Register(&m_radioPowerLock, PM_TYPE_RADIO);
+  m_radioPowerLock = zpal_pm_register(ZPAL_PM_TYPE_USE_RADIO);
 
   if (true == support_activation) {
     myOta.activation_enabled |= ACTIVATION_SUPPORT_MASK_APP;
@@ -285,73 +245,61 @@ bool CC_FirmwareUpdate_Init(
   }
 
 
-  retvalue = bootloader_init();
-  if(retvalue != BOOTLOADER_OK)
+  retvalue = zpal_bootloader_init();
+  if(retvalue != ZPAL_STATUS_OK)
   {
     DPRINTF("\r\nBootloader NOT OK! %x", retvalue);
     myOta.NVM_valid = false;
   }
   /* Checking the bootloader validity before proceed, if it is non silabs bootloader then make it non upgradable */
-  bootloader_getInfo(&bloaderInfo);
-  if(bloaderInfo.type != SL_BOOTLOADER)
+  zpal_bootloader_get_info(&bloaderInfo);
+  if(bloaderInfo.type != ZPAL_BOOTLOADER_PRESENT)
   {
      DPRINTF("\r\nNo bootloader is present or non silabs bootloader hence it's not upgradable type =%x",bloaderInfo.type);
      myOta.NVM_valid = false;
   }
   /*Checking this bootloader has storage capablity or not, just in case a wrong bootloader been loaded into the device*/
-  if(!(bloaderInfo.capabilities & BOOTLOADER_CAPABILITY_STORAGE))
+  if(!(bloaderInfo.capabilities & ZPAL_BOOTLOADER_CAPABILITY_STORAGE))
   {
      DPRINT("\r\nThis bootloader do not have storage capablity hence it can't be used for OTA");
      myOta.NVM_valid = false;
   }
 
-  retvalue = bootloader_getStorageSlotInfo(APPLICATION_IMAGE_STORAGE_SLOT, &bootloader_storage_slot);
-  if(retvalue != BOOTLOADER_OK)
-  {
-    DPRINTF("Could not get storage slot info! %x\n", retvalue);
-    myOta.NVM_valid = false;
-  }
-
-  DPRINTF("\r\nslot address %d, length %d\n", bootloader_storage_slot.address, bootloader_storage_slot.length);
-
-  Ecode_t errCode = 0;
-  uint32_t objectType;
+  zpal_status_t status = ZPAL_STATUS_FAIL;
   size_t dataLen = 0;
-  nvm3_Handle_t * pFileSystem = ZAF_GetFileSystemHandle();
-  errCode = nvm3_getObjectInfo(pFileSystem,
-                               ZAF_FILE_ID_CC_FIRMWARE_UPDATE,
-                               &objectType,
-                               &dataLen);
+  zpal_nvm_handle_t pFileSystem = ZAF_GetFileSystemHandle();
+  status = zpal_nvm_get_object_size(pFileSystem,
+                                    ZAF_FILE_ID_CC_FIRMWARE_UPDATE,
+                                    &dataLen);
 
-  if (ECODE_NVM3_OK != errCode)
+  if (ZPAL_STATUS_OK != status)
   {
     DPRINT("\nFile default!");
     SFirmwareUpdateFile file;
     memset(&file, 0, sizeof(file));
     file.fileVersion = FIRMWARE_UPDATE_FILE_VERSION;
     dataLen = ZAF_FILE_SIZE_CC_FIRMWARE_UPDATE;
-    errCode = nvm3_writeData(pFileSystem,
+    status = zpal_nvm_write(pFileSystem,
                              ZAF_FILE_ID_CC_FIRMWARE_UPDATE,
                              &file,
                              dataLen);
-    ASSERT(ECODE_NVM3_OK == errCode);
+    ASSERT(ZPAL_STATUS_OK == status);
   }
 
-  uint16_t bootloader_reset_reason;
-  if (CC_FirmwareUpdate_IsFirstBoot(&bootloader_reset_reason))
+  bool updated_successfully = false;
+  if (zpal_bootloader_is_first_boot(&updated_successfully))
   {
     DPRINT("\nFIRMWARE UPDATE DONE NOW!");
 
     SFirmwareUpdateFile file;
-    errCode = nvm3_readData(pFileSystem,
+    status = zpal_nvm_read(pFileSystem,
                             ZAF_FILE_ID_CC_FIRMWARE_UPDATE,
                             &file,
                             dataLen);
-    ASSERT(ECODE_NVM3_OK == errCode);
+    ASSERT(ZPAL_STATUS_OK == status);
 
     DPRINTF("\nF INIT: %x", file.activation_was_applied);
 
-#ifdef ZWAVE_SERIES_700
     if (sizeof(SFirmwareUpdateFile_DEPRECATED_V0) == dataLen)
     {
       //Do automatic file migration.
@@ -364,8 +312,10 @@ bool CC_FirmwareUpdate_Init(
       file.srcEndpoint = oldFile.srcEndpoint;
       file.rxStatus    = oldFile.rxStatus;
       file.securityKey = oldFile.securityKey;
+
+      status = zpal_nvm_write(pFileSystem, ZAF_FILE_ID_CC_FIRMWARE_UPDATE, &file, ZAF_FILE_SIZE_CC_FIRMWARE_UPDATE);
+      ASSERT(ZPAL_STATUS_OK == status);
     }
-#endif // ZWAVE_SERIES_700
 
     RECEIVE_OPTIONS_TYPE_EX rxOpt;
     rxOpt.sourceNode.nodeId   = file.srcNodeID;
@@ -387,7 +337,7 @@ bool CC_FirmwareUpdate_Init(
       DPRINT("\nTX Activation Status Report!");
 
       uint8_t status;
-      if (BOOTLOADER_RESET_REASON_GO == bootloader_reset_reason)
+      if (updated_successfully)
       {
         status = FIRMWARE_UPDATE_ACTIVATION_STATUS_REPORT_FIRMWARE_UPDATE_COMPLETED_SUCCESSFULLY_V5;
       }
@@ -400,7 +350,7 @@ bool CC_FirmwareUpdate_Init(
     else
     {
       uint8_t status;
-      if (BOOTLOADER_RESET_REASON_GO == bootloader_reset_reason)
+      if (updated_successfully)
       {
         status = FIRMWARE_UPDATE_MD_STATUS_REPORT_SUCCESSFULLY_V5;
       }
@@ -434,52 +384,6 @@ bool CC_FirmwareUpdate_Init(
   }
   DPRINTF("\r\nInit including bootloader init finished--bootloader init status 0x%x\n", retvalue);
   return myOta.NVM_valid;
-}
-
-/// Write data to the OTA NVM
-/// @param offset Starting address in NVM
-/// @param pData pointer to data to be written
-/// @param length length of data to be written
-static void OTA_WriteData(uint32_t offset, uint8_t *pData, uint16_t length)
-{
-  int32_t retvalue = BOOTLOADER_OK;
-
-  if (pageCnt < (bootloader_storage_slot.length / FLASH_PAGE_SIZE))
-  {
-    pageno = ((offset + length) / FLASH_PAGE_SIZE) + 1;
-    if (pageno != prevpage) //address on the same page so no write
-    {
-      retvalue = bootloader_eraseRawStorage(
-          bootloader_storage_slot.address + (pageCnt * FLASH_PAGE_SIZE), FLASH_PAGE_SIZE);
-      prevpage = pageno;
-      if (retvalue != BOOTLOADER_OK)
-      {
-        DPRINTF("OTA_ERROR_ERASING_FLASH ERROR =0x%x\n", retvalue);
-      }
-      else
-      {
-        DPRINTF("OTA_SUCESS_ERASING_FLASH page=%d\n", pageCnt);
-        pageCnt++;
-      }
-    }
-    /*writing gbl image to the flash*/
-    if (0 == (length % 4))
-    {
-      retvalue = bootloader_writeRawStorage(bootloader_storage_slot.address + offset, pData, length); //for EFR32ZG Chip
-    }
-    else
-    {
-      //last packet make the writing as 4 bytes alligned
-      DPRINTF("Writing the last packet length is %d...\n", length);
-      retvalue = bootloader_writeRawStorage(bootloader_storage_slot.address + offset, pData,
-                                            (size_t)(length + (4 - (length % 4))));
-    }
-    if (retvalue != BOOTLOADER_OK)
-    {
-      DPRINTF("OTA_ERROR_WRITING_FLASH ERROR =0x%x,length=%d,offset=%d", retvalue, length, offset);
-    }
-    OtaFlashWriteEraseDone(); // Required after end flash write/erase operation    
-  }
 }
 
 /*======================== UpdateStatusSuccess ==========================
@@ -543,10 +447,11 @@ handleCmdClassFirmwareUpdateMdReport( uint16_t crc16Result,
                                       uint8_t* pData,
                                       uint8_t  fw_actualFrameSize)
 {
+  zpal_status_t zpal_status;
   DPRINT("handleCmdClassFirmwareUpdateMdReport()\n");
 
   /* Frame burst during OTA can cause watch dog to reset */
-  WDOGn_Feed(DEFAULT_WDOG);
+  zpal_feed_watchdog();
 
   // Ignore FW Update MD Report if OTA is not in progress
   // handleEvent() would handle any unexpected events anyway.
@@ -627,8 +532,11 @@ handleCmdClassFirmwareUpdateMdReport( uint16_t crc16Result,
   else
   {
     // Otherwise, write data directly to flash
+    // Using mdReportsStorage to ensure 32-bit alignment
     startAddress = ((uint32_t)(firmwareUpdateReportNumber - 1) * firmware_update_packetsize);
-    OTA_WriteData(startAddress, pData, fw_actualFrameSize);
+    memcpy(mdReportsStorage, pData, fw_actualFrameSize);
+    zpal_status = zpal_bootloader_write_data(startAddress, mdReportsStorage, fw_actualFrameSize);
+    ASSERT(zpal_status == ZPAL_STATUS_OK);
   }
 
   /**
@@ -675,7 +583,8 @@ handleCmdClassFirmwareUpdateMdReport( uint16_t crc16Result,
 
       // Find the starting address for writing to flash
       startAddress = ((uint32_t)(firmwareUpdateReportNumber - myOta.reportsReceived) * firmware_update_packetsize);
-      OTA_WriteData(startAddress, mdReportsStorage, len);
+      zpal_status = zpal_bootloader_write_data(startAddress, mdReportsStorage, len);
+      ASSERT(zpal_status == ZPAL_STATUS_OK);
     }
     // Delay verification of the firmware image
     // so we can transmit the ack or routed ack first
@@ -703,7 +612,8 @@ handleCmdClassFirmwareUpdateMdReport( uint16_t crc16Result,
 
         // Find the starting address for writing to flash
         startAddress = ((uint32_t)(firmwareUpdateReportNumber - myOta.reportsReceived) * firmware_update_packetsize);
-        OTA_WriteData(startAddress, mdReportsStorage, len);
+        zpal_status = zpal_bootloader_write_data(startAddress, mdReportsStorage, len);
+        ASSERT(zpal_status == ZPAL_STATUS_OK);
       }
       else
       {
@@ -713,6 +623,24 @@ handleCmdClassFirmwareUpdateMdReport( uint16_t crc16Result,
       handleEvent(FW_EVENT_REPORT_RECEIVED_BATCH);
     }
   }
+}
+
+static uint16_t 
+handleBootloaderFirmWareIdGet()
+{
+  zpal_bootloader_info_t bootloader_info;
+  zpal_bootloader_get_info(&bootloader_info);
+  return ((bootloader_info.version & ZPAL_BOOTLOADER_VERSION_BUGFIX_MASK) >> ZPAL_BOOTLOADER_VERSION_BUGFIX_SHIFT);
+}
+
+uint16_t 
+handleFirmWareIdGetExtended(uint8_t n)
+{
+  if(zaf_config_get_bootloader_upgradable() && zaf_config_get_bootloader_target_id() == n) {
+    return handleBootloaderFirmWareIdGet();    
+  } else {
+    return handleFirmWareIdGet(n);
+  }  
 }
 
 void handleCmdClassFirmwareUpdateMdReqGet(
@@ -752,7 +680,7 @@ void handleCmdClassFirmwareUpdateMdReqGet(
   }
 
   /* Validate the hardwareVersion field (V5 and onwards) */
-  uint8_t hardwareVersion = CC_Version_GetHardwareVersion_handler();
+  uint8_t hardwareVersion = zaf_config_get_hardware_version();
   if ((sizeof(ZW_FIRMWARE_UPDATE_MD_REQUEST_GET_V5_FRAME) <= cmdLength) &&
       (hardwareVersion != pFrame->hardwareVersion))
   {
@@ -763,7 +691,7 @@ void handleCmdClassFirmwareUpdateMdReqGet(
     return;
   }
 
-  if (pFrame->firmwareTarget >= CC_Version_getNumberOfFirmwareTargets_handler())
+  if (pFrame->firmwareTarget >= zaf_config_get_firmware_target_count())
   {
     /*wrong target!!*/
     *pStatus = FIRMWARE_UPDATE_MD_REQUEST_REPORT_NOT_UPGRADABLE_V5;
@@ -799,7 +727,7 @@ void handleCmdClassFirmwareUpdateMdReqGet(
                                     | (uint16_t)pFrame->manufacturerId2);
   uint16_t firmwareIdIncoming = (uint16_t)((((uint16_t)pFrame->firmwareId1) << 8)
                                 | (uint16_t)pFrame->firmwareId2);
-  uint16_t firmwareId = handleFirmWareIdGet(fwTarget);
+  uint16_t firmwareId = handleFirmWareIdGetExtended(fwTarget);
   if ((manufacturerIdIncoming != manufacturerID) ||
       (firmwareIdIncoming != firmwareId))
   {
@@ -822,7 +750,7 @@ void handleCmdClassFirmwareUpdateMdReqGet(
 
   /*Firmware valid.. ask OtaStart to start update*/
   if (NON_NULL(myOta.pOtaStart) &&
-      (false == myOta.pOtaStart(handleFirmWareIdGet(fwTarget), checksumIncoming)))
+      (false == myOta.pOtaStart(handleFirmWareIdGetExtended(fwTarget), checksumIncoming)))
   {
     DPRINT("&");
     *pStatus = FIRMWARE_UPDATE_MD_REQUEST_REPORT_REQUIRES_AUTHENTICATION_V5;
@@ -832,13 +760,12 @@ void handleCmdClassFirmwareUpdateMdReqGet(
   }
 
   // Keep awake for a long time, but not forever.
-  ZAF_PM_StayAwake(&m_radioPowerLock, OTA_AWAKE_PERIOD_LONG_TERM);
+  zpal_pm_stay_awake(m_radioPowerLock, OTA_AWAKE_PERIOD_LONG_TERM);
 
   initOTAState();
   memcpy( (uint8_t*) &myOta.rxOpt, (uint8_t*)rxOpt, sizeof(RECEIVE_OPTIONS_TYPE_EX));
 
   // Save activation status, checksum and RX options
-  Ecode_t errCode = 0;
   SFirmwareUpdateFile file = {
                               .activation_was_applied = myOta.activation_enabled,
                               .fileVersion = FIRMWARE_UPDATE_FILE_VERSION,
@@ -848,9 +775,9 @@ void handleCmdClassFirmwareUpdateMdReqGet(
                               .rxStatus = rxOpt->rxStatus,
                               .securityKey = (uint32_t)rxOpt->securityKey
   };
-  nvm3_Handle_t * pFileSystem = ZAF_GetFileSystemHandle();
-  errCode = nvm3_writeData(pFileSystem, ZAF_FILE_ID_CC_FIRMWARE_UPDATE, &file, ZAF_FILE_SIZE_CC_FIRMWARE_UPDATE);
-  ASSERT(ECODE_NVM3_OK == errCode);
+  zpal_nvm_handle_t pFileSystem = ZAF_GetFileSystemHandle();
+  const zpal_status_t status = zpal_nvm_write(pFileSystem, ZAF_FILE_ID_CC_FIRMWARE_UPDATE, &file, ZAF_FILE_SIZE_CC_FIRMWARE_UPDATE);
+  ASSERT(ZPAL_STATUS_OK == status);
 
   DPRINTF("\nF: %x", file.activation_was_applied);
 
@@ -898,8 +825,7 @@ void ZCB_CmdClassFwUpdateMdReqReport(uint8_t txStatus)
 static void
 ZCB_CmdClassFwUpdateMdGet(TRANSMISSION_RESULT * pTransmissionResult)
 {
-
-  WDOGn_Feed(DEFAULT_WDOG);
+  zpal_feed_watchdog();
 
   DPRINT("Md Get CMD queued and now transmitted! Resetting Md Get CMD timer...\n");
   UNUSED(pTransmissionResult);
@@ -941,7 +867,7 @@ SendFirmwareUpdateStatusReport()
       break;
     case FIRMWARE_UPDATE_MD_STATUS_REPORT_SUCCESSFULLY_V5:
       // Reboot right away and report afterwards.
-      bootloader_rebootAndInstall();
+      zpal_bootloader_reboot_and_install();
       return;
       break;
     case FIRMWARE_UPDATE_MD_STATUS_REPORT_SUCCESSFULLY_WAITING_FOR_ACTIVATION_V5:
@@ -981,66 +907,22 @@ static void ZCB_FinishFwUpdate(TRANSMISSION_RESULT * pTransmissionResult)
   {
     DPRINT("Reboot from ZCB_FinishFwUpdate\n");
     DPRINT("Now telling the bootloader new image to boot install\n");
-    bootloader_rebootAndInstall();
+    zpal_bootloader_reboot_and_install();
   }
 
   if (FIRMWARE_UPDATE_MD_STATUS_REPORT_UNABLE_TO_RECEIVE_V5 == myOta.statusReport)
   {
     // Device unable to receive new frames.
     // Reboot to avoid situation where device gets stuck for any unpredicted reason.
-    Board_ResetHandler();
+    zpal_reboot();
   }
 
   /*
    * Remove lock on power manager to allow going back to sleep with a delay
    * in case of buffered packets or ACK/NACK/RES that needs to be send.
    */
-  ZAF_PM_StayAwake(&m_radioPowerLock, OTA_AWAKE_PERIOD_GRACEFUL_OFF);
+  zpal_pm_stay_awake(m_radioPowerLock, OTA_AWAKE_PERIOD_GRACEFUL_OFF);
   DPRINT(" --> OTA_UTIL.C TURNED OFF DEVICE! ---\n");
-}
-
-/**
- * Uses bootloder functionality to verify downloaded image.
- * @attention Returns false in case of app version downgrade
- * @return true if there exists a valid image that can be installed by the bootloader.
- */
-static bool OtaVerifyImage()
-{
-  int32_t verifystat;
-
-  static bool watchdogPrev_state = false;
-
-  if (ZAF_is_watchdog_enabled())
-  {
-    watchdogPrev_state = true;
-    ZAF_enable_watchdog(false);
-  }
-
-  verifystat = bootloader_verifyImage(APPLICATION_IMAGE_STORAGE_SLOT, NULL);
-
-  if (BOOTLOADER_OK == verifystat)
-  {
-    DPRINT("bootloader_verifyImage went OK\n");
-    ZAF_enable_watchdog(watchdogPrev_state);
-    return true;
-  }
-  else
-  {
-    DPRINTF("booloader_verifyImage went WRONG!!   ERR: %4x\n", verifystat);
-    // Prepare for the next OTA update attempt
-    // Rewind the page counters and erase the storage
-    pageno=1;
-    prevpage=0;
-    pageCnt = 0;
-    int32_t retvalue = bootloader_eraseStorageSlot(APPLICATION_IMAGE_STORAGE_SLOT);
-    if (BOOTLOADER_OK != retvalue)
-    {
-      DPRINTF("bootloader_eraseStorageSlot FAILED!!   ERR: %4x\n", retvalue);
-    }
-    OtaFlashWriteEraseDone(); // Required after end flash write/erase operation
-    ZAF_enable_watchdog(watchdogPrev_state);
-    return false;
-  }
 }
 
 /// Cancel timer for retries on Get next firmware update frame.
@@ -1066,7 +948,7 @@ static void ZCB_TimerOutFwUpdateFrameGet(SSwTimer* pTimer)
   {
     DPRINTF("Send MD GET (same or next report number), reportNo = %d\n", myOta.firmwareUpdateReportNumberPrevious + 1);
 
-    WDOGn_Feed(DEFAULT_WDOG);
+    zpal_feed_watchdog();
     if (JOB_STATUS_SUCCESS == CmdClassFirmwareUpdateMdGet( &myOta.rxOpt,
                                                            myOta.firmwareUpdateReportNumberPrevious + 1,
                                                            ZCB_CmdClassFwUpdateMdGet))
@@ -1128,11 +1010,11 @@ bool CC_FirmwareUpdate_ActivationSet_handler(
     ZW_FIRMWARE_UPDATE_ACTIVATION_SET_V5_FRAME * pFrame,
     uint8_t * pStatus)
 {
-  uint16_t firmwareId = handleFirmWareIdGet(pFrame->firmwareTarget);
+  uint16_t firmwareId = handleFirmWareIdGetExtended(pFrame->firmwareTarget);
   uint16_t manufacturerID = 0;
   uint16_t productID      = 0;
   CC_ManufacturerSpecific_ManufacturerSpecificGet_handler(&manufacturerID, &productID);
-  uint8_t hardwareVersion = CC_Version_GetHardwareVersion_handler();
+  uint8_t hardwareVersion = zaf_config_get_hardware_version();
 
   uint16_t manufacturerIdIncoming = (uint16_t)((((uint16_t)pFrame->manufacturerId1) << 8)
                                     | (uint16_t)pFrame->manufacturerId2);
@@ -1141,17 +1023,17 @@ bool CC_FirmwareUpdate_ActivationSet_handler(
   uint16_t checksumIncoming = (uint16_t)((((uint16_t)pFrame->checksum1) << 8)
                               | (uint16_t)pFrame->checksum2);
 
-  /* Either no checksum value has yet been calculated, or we are an EM4 sleeping device and
+  /* Either no checksum value has yet been calculated, or we are an Deep Sleeping device and
    * therefore need to restore the calculated value from file storage */
   if (0 == myOta.firmwareCrc)
   {
     SFirmwareUpdateFile file;
-    nvm3_Handle_t * pFileSystem = ZAF_GetFileSystemHandle();
-    Ecode_t errCode = nvm3_readData(pFileSystem,
-                                    ZAF_FILE_ID_CC_FIRMWARE_UPDATE,
-                                    &file,
-                                    ZAF_FILE_SIZE_CC_FIRMWARE_UPDATE);
-    ASSERT(ECODE_NVM3_OK == errCode);
+    zpal_nvm_handle_t pFileSystem = ZAF_GetFileSystemHandle();
+    const zpal_status_t status = zpal_nvm_read(pFileSystem,
+                                               ZAF_FILE_ID_CC_FIRMWARE_UPDATE,
+                                               &file,
+                                               ZAF_FILE_SIZE_CC_FIRMWARE_UPDATE);
+    ASSERT(ZPAL_STATUS_OK == status);
     myOta.firmwareCrc = file.checksum;
   }
 
@@ -1167,7 +1049,7 @@ bool CC_FirmwareUpdate_ActivationSet_handler(
   DPRINTF("\n manufacturerID: %4x", manufacturerID);
   DPRINTF("\n firmwareIdIncoming: %4x", firmwareIdIncoming);
   DPRINTF("\n firmwareId: %4x", firmwareId);
-  // Delay the call of bootloader_rebootAndInstall()
+  // Delay the call of zpal_bootloader_reboot_and_install()
   // so we can transmit the ack or routed ack first
   if(ESWTIMER_STATUS_FAILED == TimerStart(&myOta.timerOtaSuccess, 100)) {
     DPRINT("Failed to delay OTA!");
@@ -1227,7 +1109,7 @@ void handleEvent(uint8_t event)
            getStateAsString(myOta.currentState));
   // Ignore invalid frame and continue.
   // For more strict control, comment out next line.
-  // Board_ResetHandler();
+  // zpal_reboot();
 }
 
 
@@ -1239,7 +1121,7 @@ static void fw_action_send_get(void)
   resetReceivedReportsData();
   myOta.fw_numOfRetries = 0;
   
-  WDOGn_Feed(DEFAULT_WDOG);
+  zpal_feed_watchdog();
   if (JOB_STATUS_SUCCESS != CmdClassFirmwareUpdateMdGet(&myOta.rxOpt,
                                                         myOta.firmwareUpdateReportNumberPrevious + 1,  // The next report number.
                                                         ZCB_CmdClassFwUpdateMdGet))
@@ -1254,7 +1136,6 @@ static void fw_action_send_req_report(void)
 
   if (FIRMWARE_UPDATE_MD_REQUEST_REPORT_VALID_COMBINATION_V5 == myOta.requestReport)
   {
-    CC_FirmwareUpdate_InvalidateImage();
     myOta.fw_crcrunning = CRC_INITAL_VALUE;
     myOta.firmwareUpdateReportNumberPrevious = 0;
     TimerCancelFwUpdateFrameGet();
@@ -1276,7 +1157,7 @@ static void fw_action_verify_image(void)
 {
   DPRINTF(">> %s() \n", __func__);
   resetReceivedReportsData();
-  if(OtaVerifyImage())
+  if(ZPAL_STATUS_OK == zpal_bootloader_verify_image())
   {
     UpdateStatusSuccess();
   }
@@ -1292,7 +1173,7 @@ static void fw_action_verify_image(void)
 static void fw_action_reboot_and_Install(void)
 {
   DPRINTF(">> %s() \n", __func__);
-  bootloader_rebootAndInstall();
+  zpal_bootloader_reboot_and_install();
 }
 /// No action needed.
 static void fw_action_none(void)
@@ -1385,7 +1266,7 @@ static void resetReceivedReportsData()
 /// must be enabled, and number of reports should be greater than 1
 static bool useMultiFrames()
 {
-  return OTA_MULTI_FRAME_ENABLED && mdGetNumberOfReports;
+  return OTA_MULTI_FRAME_ENABLED && ( mdGetNumberOfReports > 1 );
 }
 
 void otaModuleReset(void)

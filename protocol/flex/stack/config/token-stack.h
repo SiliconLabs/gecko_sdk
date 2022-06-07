@@ -188,7 +188,7 @@
 // Since the manufacturing data is platform specific, we pull in the proper
 // file here.
 #if defined(CORTEXM3)
-// cortexm3 handles mfg tokens seperately via mfg-token.h
+// cortexm3 handles mfg tokens separately via mfg-token.h
 #elif defined(EMBER_TEST)
   #include "hal/micro/cortexm3/efm32/token-manufacturing.h"
 #else

@@ -33,6 +33,7 @@
 // -----------------------------------------------------------------------------
 #include <stdint.h>
 #include <stddef.h>
+#include <stdio.h>
 #include "sl_component_catalog.h"
 #include "app_menu.h"
 #include "app_measurement.h"
@@ -294,7 +295,7 @@ void init_ranget_test_standard_phys(uint8_t* number_of_phys)
 #ifdef SL_CATALOG_RAIL_UTIL_ANT_DIV_PRESENT
       emPhyRailHandle = rail_handles[i];
       sl_rail_util_ant_div_init();
-	  sl_rail_util_ant_div_set_rx_antenna_mode(SL_RAIL_UTIL_ANTENNA_MODE_DISABLED);
+      sl_rail_util_ant_div_set_rx_antenna_mode(SL_RAIL_UTIL_ANTENNA_MODE_DISABLED);
       sl_rail_util_ant_div_update_antenna_config();
 #endif
       if (status != RAIL_STATUS_NO_ERROR) {
@@ -525,32 +526,33 @@ void handle_payload_length_for_standard(void)
  ******************************************************************************/
 void print_standard_name(char *print_buffer)
 {
+  // Length for print_buffer comes from app_menu.c
   if (current_phy_standard_value() == IEEE802154_250KBPS) {
 #if RAIL_SUPPORTS_PROTOCOL_IEEE802154
-    sprintf(print_buffer, "IEEE 802.15.4");
+    snprintf(print_buffer, 15, "IEEE 802.15.4");
     range_test_settings.channel = IEEE802154_CHANNEL;
 #endif
-  } else if(current_phy_standard_value() == IEEE802154_250KBPS_ANTDIV){
-      sprintf(print_buffer, "IEEE 802.ANTDIV");
-      range_test_settings.channel = IEEE802154_CHANNEL;
-  }else {
+  } else if (current_phy_standard_value() == IEEE802154_250KBPS_ANTDIV) {
+    snprintf(print_buffer, 15, "IEEE 802.ANTDIV");
+    range_test_settings.channel = IEEE802154_CHANNEL;
+  } else {
     switch (current_phy_standard_value()) {
 #if RAIL_BLE_SUPPORTS_CODED_PHY
       case BLE_125KBPS:
-        sprintf(print_buffer, "BLE 125kbps");
+        snprintf(print_buffer, 15, "BLE 125kbps");
         break;
       case BLE_500KBPS:
-        sprintf(print_buffer, "BLE 500kbps");
+        snprintf(print_buffer, 15, "BLE 500kbps");
         break;
 #endif
 #if RAIL_BLE_SUPPORTS_1MBPS
       case BLE_1MBPS:
-        sprintf(print_buffer, "BLE 1Mbps");
+        snprintf(print_buffer, 15, "BLE 1Mbps");
         break;
 #endif
 #if RAIL_BLE_SUPPORTS_2MBPS
       case BLE_2MBPS:
-        sprintf(print_buffer, "BLE 2Mbps");
+        snprintf(print_buffer, 15, "BLE 2Mbps");
         break;
 #endif
     }
@@ -723,20 +725,20 @@ void menu_set_std_phy(bool init)
   if (is_current_phy_standard()) {
     if (current_phy_standard_value() == IEEE802154_250KBPS ) {
 #ifdef SL_CATALOG_RAIL_UTIL_ANT_DIV_PRESENT
-        sl_rail_util_ant_div_set_rx_antenna_mode(SL_RAIL_UTIL_ANTENNA_MODE_DISABLED);
-        sl_rail_util_ant_div_update_antenna_config();
+      sl_rail_util_ant_div_set_rx_antenna_mode(SL_RAIL_UTIL_ANTENNA_MODE_DISABLED);
+      sl_rail_util_ant_div_update_antenna_config();
 #endif
-        RAIL_IEEE802154_Config2p4GHzRadio(rail_handles[PROT_IEEE802154]);
-    }else if(current_phy_standard_value() == IEEE802154_250KBPS_ANTDIV){
+      RAIL_IEEE802154_Config2p4GHzRadio(rail_handles[PROT_IEEE802154]);
+    } else if (current_phy_standard_value() == IEEE802154_250KBPS_ANTDIV) {
 #ifdef SL_CATALOG_RAIL_UTIL_ANT_DIV_PRESENT
-        sl_rail_util_ant_div_set_rx_antenna_mode(SL_RAIL_UTIL_ANTENNA_MODE_DIVERSITY);
-        sl_rail_util_ant_div_update_antenna_config();
-        RAIL_IEEE802154_Config2p4GHzRadioAntDiv(rail_handles[PROT_IEEE802154]);
+      sl_rail_util_ant_div_set_rx_antenna_mode(SL_RAIL_UTIL_ANTENNA_MODE_DIVERSITY);
+      sl_rail_util_ant_div_update_antenna_config();
+      RAIL_IEEE802154_Config2p4GHzRadioAntDiv(rail_handles[PROT_IEEE802154]);
 #else
-        range_test_settings.current_phy++;
-        menu_set_std_phy(false);
+      range_test_settings.current_phy++;
+      menu_set_std_phy(false);
 #endif
-    }else{
+    } else {
       while (true) {
         if (!ble_protocol_change()) {
           range_test_settings.current_phy++;
@@ -849,33 +851,34 @@ void get_rail_standard_channel_range(uint16_t *min, uint16_t *max)
  ******************************************************************************/
 void std_phy_list_generation(uint8_t phy_index, uint8_t *buffer, uint8_t *length)
 {
+  // *buffer length (255) comes from app_bluetooth.c
   uint8_t std_phy_index = phy_index - get_number_of_custom_phys();
   if (range_test_std_phys[std_phy_index].is_supported) {
     switch (std_phy_index) {
 #if RAIL_SUPPORTS_PROTOCOL_IEEE802154
       case IEEE802154_250KBPS:
-        sprintf((char*)(&buffer[*length]), "%u:IEEE 802.15.4,", phy_index);
+        snprintf((char*)(&buffer[*length]), 255, "%u:IEEE 802.15.4,", phy_index);
         break;
       case IEEE802154_250KBPS_ANTDIV:
-              sprintf((char*)(&buffer[*length]), "%u:IEEE 802.15.4 ANTDIV,", phy_index);
-              break;
+        snprintf((char*)(&buffer[*length]), 255, "%u:IEEE 802.15.4 ANTDIV,", phy_index);
+        break;
 #endif
 #if RAIL_BLE_SUPPORTS_CODED_PHY
       case BLE_125KBPS:
-        sprintf((char*)(&buffer[*length]), "%u:BLE 125kbps,", phy_index);
+        snprintf((char*)(&buffer[*length]), 255, "%u:BLE 125kbps,", phy_index);
         break;
       case BLE_500KBPS:
-        sprintf((char*)(&buffer[*length]), "%u:BLE 500kbps,", phy_index);
+        snprintf((char*)(&buffer[*length]), 255, "%u:BLE 500kbps,", phy_index);
         break;
 #endif
 #if RAIL_BLE_SUPPORTS_1MBPS
       case BLE_1MBPS:
-        sprintf((char*)(&buffer[*length]), "%u:BLE 1Mbps,", phy_index);
+        snprintf((char*)(&buffer[*length]), 255, "%u:BLE 1Mbps,", phy_index);
         break;
 #endif
 #if RAIL_BLE_SUPPORTS_2MBPS
       case BLE_2MBPS:
-        sprintf((char*)(&buffer[*length]), "%u:BLE 2Mbps,", phy_index);
+        snprintf((char*)(&buffer[*length]), 255, "%u:BLE 2Mbps,", phy_index);
         break;
 #endif
     }
@@ -916,6 +919,6 @@ static void range_test_generate_remainder(uint8_t *remainder)
 {
   uint8_t remainder_length = range_test_settings.payload_length - PAYLOAD_LEN_MIN;
   for (int i = 0; i < remainder_length; i++) {
-    remainder[i] = (i % 2u) ? (0x55u) : (0xAAu);
+    remainder[i] = (i % 2U) ? (0x55U) : (0xAAU);
   }
 }

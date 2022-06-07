@@ -18,8 +18,8 @@
 #include PLATFORM_HEADER
 #include "stack/include/ember-types.h"
 #include "hal/hal.h"
-#include "legacy_ncp_ash/inc/ash-protocol.h"
-#include "legacy_ncp_ash/inc/ash-common.h"
+#include "ash-protocol.h"
+#include "ash-common.h"
 #include "app/ezsp-host/ash/ash-host.h"
 #include "app/ezsp-host/ezsp-host-io.h"
 #include "app/ezsp-host/ezsp-host-priv.h"

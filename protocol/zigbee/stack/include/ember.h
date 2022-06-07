@@ -47,6 +47,9 @@
 // that is used to conditionally compile out multi-network
 // related source code. The following flash-space constrained chips
 // have EMBER_MULTI_NETWORK_STRIPPED by default.
+// It is possible for one to reenable the multi-network code by defining
+// EMBER_MULTI_NETWORK_REENABLE when building libraries. There are no known
+// consumers of these type of libraries right now
 #ifndef EMBER_MULTI_NETWORK_STRIPPED
 #if defined(CORTEXM3_EM351) || defined(CORTEXM3_EM357) || defined(_SILICON_LABS_32B_SERIES_1_CONFIG_1) || defined(_SILICON_LABS_32B_SERIES_1_CONFIG_4)
 #ifndef EMBER_MULTI_NETWORK_REENABLE

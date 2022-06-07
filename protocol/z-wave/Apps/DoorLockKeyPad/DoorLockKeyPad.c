@@ -18,20 +18,12 @@
 #include "DebugPrint.h"
 #include "DebugPrintConfig.h"
 #include "config_app.h"
-#include "ZAF_app_version.h"
 #include <ZAF_file_ids.h>
-#include "nvm3.h"
-#include "ZAF_nvm3_app.h"
-#include <em_system.h>
+#include "ZAF_nvm_app.h"
 #include <ZW_slave_api.h>
 #include <ZW_typedefs.h>
 #include <ZW_classcmd.h>
 #include <ZW_TransportLayer.h>
-
-#include <ZAF_uart_utils.h>
-
-/*IO control*/
-#include <board.h>
 
 #include <ev_man.h>
 #include <AppTimer.h>
@@ -47,9 +39,6 @@
 #include <CC_Basic.h>
 #include <CC_Association.h>
 #include <CC_AssociationGroupInfo.h>
-#include <CC_Version.h>
-#include <CC_ZWavePlusInfo.h>
-#include <CC_PowerLevel.h>
 #include <CC_DeviceResetLocally.h>
 #include <CC_DoorLock.h>
 #include <CC_Indicator.h>
@@ -59,46 +48,25 @@
 #include <CC_Supervision.h>
 #include <CC_FirmwareUpdate.h>
 #include <CC_ManufacturerSpecific.h>
-
+#include <zaf_config_api.h>
 #include <string.h>
 
 #include "zaf_event_helper.h"
 #include "zaf_job_helper.h"
 
 #include <ZAF_Common_helper.h>
-#include <ZAF_PM_Wrapper.h>
 #include <ZAF_network_learn.h>
 #include <ota_util.h>
 #include "ZAF_TSE.h"
-#include "ZAF_adc.h"
 #include <ZAF_CmdPublisher.h>
-#include <em_wdog.h>
 #include "events.h"
+#include <zpal_watchdog.h>
+#include <zpal_misc.h>
+#include <board_indicator.h>
+#include <board_init.h>
+#include <DoorLockKeyPad_hw.h>
 #include "zw_region_config.h"
 #include "zw_build_no.h"
-
-/****************************************************************************/
-/* Application specific button and LED definitions                          */
-/****************************************************************************/
-
-#define DOORHANDLE_BTN       APP_BUTTON_A
-#define BATTERY_REPORT_BTN   APP_BUTTON_B
-#define ENTER_USER_CODE      APP_BUTTON_C
-#define LATCH_STATUS_LED     APP_LED_A
-#define BOLT_STATUS_LED      APP_LED_B
-
-/* Ensure we did not allocate the same physical button or led to more than one function */
-STATIC_ASSERT((APP_BUTTON_LEARN_RESET != DOORHANDLE_BTN) &&
-              (APP_BUTTON_LEARN_RESET != BATTERY_REPORT_BTN) &&
-              (APP_BUTTON_LEARN_RESET != ENTER_USER_CODE) &&
-              (DOORHANDLE_BTN != BATTERY_REPORT_BTN) &&
-              (DOORHANDLE_BTN != ENTER_USER_CODE) &&
-              (BATTERY_REPORT_BTN != ENTER_USER_CODE),
-              STATIC_ASSERT_FAILED_button_overlap);
-STATIC_ASSERT((APP_LED_INDICATOR != LATCH_STATUS_LED) &&
-              (APP_LED_INDICATOR != BOLT_STATUS_LED) &&
-              (LATCH_STATUS_LED != BOLT_STATUS_LED),
-              STATIC_ASSERT_FAILED_led_overlap);
 
 /****************************************************************************/
 /*                      PRIVATE TYPES and DEFINITIONS                       */
@@ -196,11 +164,6 @@ app_node_information_t m_AppNIF =
 */
 static const uint8_t SecureKeysRequested = REQUESTED_SECURITY_KEYS;
 
-/**
- * Set up PowerDownDebug
- */
-static const EPowerDownDebug PowerDownDebug = APP_POWERDOWNDEBUG;
-
 static const SAppNodeInfo_t AppNodeInfo =
 {
   .DeviceOptionsMask = DEVICE_OPTIONS_MASK,
@@ -221,13 +184,12 @@ static const SRadioConfig_t RadioConfig =
   .iTxPowerLevelAdjust = APP_MEASURED_0DBM_TX_POWER,
   .iTxPowerLevelMaxLR = APP_MAX_TX_POWER_LR,
   .eRegion = ZW_REGION,
-  .enablePTI = ENABLE_PTI
+  .radio_debug_enable = ENABLE_RADIO_DEBUG
 };
 
 static const SProtocolConfig_t ProtocolConfig = {
   .pVirtualSlaveNodeInfoTable = NULL,
   .pSecureKeysRequested = &SecureKeysRequested,
-  .pPowerDownDebug = &PowerDownDebug,
   .pNodeInfo = &AppNodeInfo,
   .pRadioConfig = &RadioConfig
 };
@@ -237,18 +199,6 @@ static const SProtocolConfig_t ProtocolConfig = {
  */
 AGI_PROFILE lifelineProfile = {ASSOCIATION_GROUP_INFO_REPORT_PROFILE_GENERAL,
                                ASSOCIATION_GROUP_INFO_REPORT_PROFILE_GENERAL_LIFELINE};
-
-/**************************************************************************************************
- * Configuration for Z-Wave Plus Info CC
- **************************************************************************************************
- */
-static const SCCZWavePlusInfo CCZWavePlusInfo = {
-                               .pEndpointIconList = NULL,
-                               .roleType = APP_ROLE_TYPE,
-                               .nodeType = APP_NODE_TYPE,
-                               .installerIconType = APP_ICON_TYPE,
-                               .userIconType = APP_USER_ICON_TYPE
-};
 
 /**
  * Application state-machine state.
@@ -361,7 +311,7 @@ static RECEIVE_OPTIONS_TYPE_EX zaf_tse_local_actuation = {
 
 static SSwTimer BatteryCheckTimer;
 
-static nvm3_Handle_t* pFileSystemApplication;
+static zpal_nvm_handle_t pFileSystemApplication;
 
 /****************************************************************************/
 /*                              EXPORTED DATA                               */
@@ -373,8 +323,6 @@ static nvm3_Handle_t* pFileSystemApplication;
 
 void AppResetNvm(void);
 void ZCB_BattReportSentDone(TRANSMISSION_RESULT * pTransmissionResult);
-void DeviceResetLocallyDone(TRANSMISSION_RESULT * pTransmissionResult);
-void DeviceResetLocally(void);
 STATE_APP GetAppState();
 void AppStateManager( EVENT_APP event);
 static void ChangeState( STATE_APP newState);
@@ -397,15 +345,9 @@ void DefaultApplicationsSettings(void);
 static inline door_lock_mode_t getCurrentMode();
 static bool ValidateUserCode( uint8_t identifier, uint8_t const * const pCode, uint8_t len);
 
-bool CheckAndReportBatteryLevel(void);
+bool CheckBatteryLevelChanged(void);
 
-#if defined(DEBUGPRINT) && defined(BUILDING_WITH_UC)
-#include "sl_iostream.h"
-static void DebugPrinter(const uint8_t * buffer, uint32_t len)
-{
-  sl_iostream_write(SL_IOSTREAM_STDOUT, buffer, len);
-}
-#endif
+static void indicator_set_handler(uint32_t on_time_ms, uint32_t off_time_ms, uint32_t num_cycles);
 
 /**
 * @brief Called when protocol puts a frame on the ZwRxQueue.
@@ -533,10 +475,6 @@ static void EventHandlerZwCommandStatus(void)
         {
           ZAF_EventHelperEventEnqueue(EVENT_APP_SMARTSTART_IN_PROGRESS);
         }
-        else if(ELEARNSTATUS_LEARN_IN_PROGRESS == Status.Content.LearnModeStatus.Status)
-        {
-          ZAF_EventHelperEventEnqueue(EVENT_APP_LEARN_IN_PROGRESS);
-        }
         else if(ELEARNSTATUS_LEARN_MODE_COMPLETED_FAILED == Status.Content.LearnModeStatus.Status)
         {
           //Reformats protocol and application NVM. Then soft reset.
@@ -657,52 +595,34 @@ ZW_APPLICATION_STATUS ApplicationInit(EResetReason_t eResetReason)
 
   /* hardware initialization */
   Board_Init();
-  BRD420xBoardInit(RadioConfig.eRegion);
+
 #ifdef DEBUGPRINT
-#if BUILDING_WITH_UC
-  DebugPrintConfig(m_aDebugPrintBuffer, sizeof(m_aDebugPrintBuffer), DebugPrinter);
-#else
-  ZAF_UART0_enable(115200, true, false);
-  DebugPrintConfig(m_aDebugPrintBuffer, sizeof(m_aDebugPrintBuffer), ZAF_UART0_tx_send);
-#endif // BUILDING_WITH_UC
-#endif // DEBUGPRINT
+  zpal_debug_init();
+  DebugPrintConfig(m_aDebugPrintBuffer, sizeof(m_aDebugPrintBuffer), zpal_debug_output);
+#endif
   /* Init state machine*/
   currentState = STATE_APP_IDLE;
 
-  uint8_t versionMajor      = ZAF_GetAppVersionMajor();
-  uint8_t versionMinor      = ZAF_GetAppVersionMinor();
-  uint8_t versionPatchLevel = ZAF_GetAppVersionPatchLevel();
-
   DPRINT("\n\n-----------------------------------\n");
   DPRINT("Z-Wave Sample App: Door Lock Keypad\n");
-  DPRINTF("SDK: %d.%d.%d ZAF: %d.%d.%d.%d [Freq: %d]\n",
+  DPRINTF("SDK: %d.%d.%d ZAF: %d.%d.%d.%d\n",
           SDK_VERSION_MAJOR,
           SDK_VERSION_MINOR,
           SDK_VERSION_PATCH,
-          versionMajor,
-          versionMinor,
-          versionPatchLevel,
-          ZAF_BUILD_NO,
-          RadioConfig.eRegion);
-  DPRINT("-----------------------------------\n");
-  DPRINTF("%s: Hold/release: Activate/deactivate outside door handle #1\n", Board_GetButtonLabel(DOORHANDLE_BTN));
-  DPRINTF("%s: Send battery report\n", Board_GetButtonLabel(BATTERY_REPORT_BTN));
-  DPRINTF("%s: Toggle learn mode\n", Board_GetButtonLabel(APP_BUTTON_LEARN_RESET));
-  DPRINT("      Hold 5 sec: Reset\n");
-  DPRINTF("%s: Enter user code\n", Board_GetButtonLabel(ENTER_USER_CODE));
-  DPRINTF("%s: Learn mode + identify\n", Board_GetLedLabel(APP_LED_INDICATOR));
-  DPRINTF("%s: Latch closed(off)/open(on)\n", Board_GetLedLabel(LATCH_STATUS_LED));
-  DPRINTF("%s: Bolt locked(on)/unlocked(off)\n", Board_GetLedLabel(BOLT_STATUS_LED));
-  DPRINT("-----------------------------------\n\n");
+          zpal_get_app_version_major(),
+          zpal_get_app_version_minor(),
+          zpal_get_app_version_patch(),
+          ZAF_BUILD_NO);
 
   DPRINTF("ApplicationInit eResetReason = %d\n", eResetReason);
 
-  CC_ZWavePlusInfo_Init(&CCZWavePlusInfo);
+  CC_Indicator_Init(indicator_set_handler);
 
   memset((uint8_t *)&myDoorLock, 0x00, sizeof(myDoorLock));
   myDoorLock.type = DOOR_OPERATION_CONST;
 
-  CC_Version_SetApplicationVersionInfo(versionMajor, versionMinor, versionPatchLevel, ZAF_BUILD_NO);
+  // Init file system
+  ApplicationFileSystemInit(&pFileSystemApplication);
 
   /*************************************************************************************
    * CREATE USER TASKS  -  ZW_ApplicationRegisterTask() and ZW_UserTask_CreateTask()
@@ -738,7 +658,7 @@ ApplicationTask(SApplicationHandles* pAppHandles)
 {
   // Init
   DPRINT("Enabling watchdog\n");
-  WDOGn_Enable(DEFAULT_WDOG, true);
+  zpal_enable_watchdog(true);
 
   g_AppTaskHandle = xTaskGetCurrentTaskHandle();
   g_pAppHandles = pAppHandles;
@@ -763,16 +683,12 @@ ApplicationTask(SApplicationHandles* pAppHandles)
    */
   EventQueueInit();
 
-  // Enables button events on test board
-  Board_EnableButton(APP_BUTTON_LEARN_RESET);
-  Board_EnableButton(DOORHANDLE_BTN);
-  Board_EnableButton(BATTERY_REPORT_BTN);
-  Board_EnableButton(ENTER_USER_CODE);
+  DoorLockKeyPad_hw_init();
 
-  Board_IndicatorInit(APP_LED_INDICATOR);
+  Board_IndicatorInit();
   Board_IndicateStatus(BOARD_STATUS_IDLE);
 
-  /* Load the application settings from NVM3 file system */
+  /* Load the application settings from NVM file system */
   LoadConfiguration();
 
   /*
@@ -832,14 +748,14 @@ AppStateManager(EVENT_APP event)
 {
   DPRINTF("AppStateManager St: %d, Ev: %d\r\n", currentState, event);
 
-  if ((BTN_EVENT_LONG_PRESS(APP_BUTTON_LEARN_RESET) == (BUTTON_EVENT)event) ||
+  if ((EVENT_APP_BUTTON_LEARN_RESET_LONG_PRESS == event) ||
       (EVENT_SYSTEM_RESET == (EVENT_SYSTEM)event))
   {
     /*Force state change to activate system-reset without taking care of current
       state.*/
     ChangeState(STATE_APP_RESET);
     /* Send reset notification*/
-    DeviceResetLocally();
+    CC_DeviceResetLocally_notification_tx();
   }
 
   switch(currentState)
@@ -863,7 +779,7 @@ AppStateManager(EVENT_APP event)
         ChangeState(STATE_APP_LEARN_MODE);
       }
 
-      if ((BTN_EVENT_SHORT_PRESS(APP_BUTTON_LEARN_RESET) == (BUTTON_EVENT)event) ||
+      if ((EVENT_APP_BUTTON_LEARN_RESET_SHORT_PRESS == event) ||
           (EVENT_SYSTEM_LEARNMODE_START == (EVENT_SYSTEM)event))
       {
         if (EINCLUSIONSTATE_EXCLUDED != g_pAppHandles->pNetworkInfo->eInclusionState)
@@ -879,7 +795,7 @@ AppStateManager(EVENT_APP event)
         ChangeState(STATE_APP_LEARN_MODE);
       }
 
-      if (BTN_EVENT_SHORT_PRESS(BATTERY_REPORT_BTN) == (BUTTON_EVENT)event)
+      if (EVENT_APP_BUTTON_BATTERY_REPORT == event)
       {
         DPRINT("\r\nBattery Level report transmit (keypress trig)\r\n");
         ChangeState(STATE_APP_TRANSMIT_DATA);
@@ -896,15 +812,13 @@ AppStateManager(EVENT_APP event)
       if (EVENT_APP_PERIODIC_BATTERY_CHECK_TRIGGER == event)
       {
         /* Check the battery level and send a report to lifeline if required */
-        if (true == CheckAndReportBatteryLevel())
+        if (true == CheckBatteryLevelChanged())
         {
           /* Battery level report TX initiated */
           ChangeState(STATE_APP_TRANSMIT_DATA);
-          /*
-           * Add an empty event to remain in STATE_APP_TRANSMIT_DATA until
-           * the TX complete callback event occurs
-           */
-          ZAF_JobHelperJobEnqueue(EVENT_EMPTY);
+
+          /*Add event's on job-queue*/
+          ZAF_JobHelperJobEnqueue(EVENT_APP_SEND_BATTERY_LEVEL_REPORT);
         }
 
         if (false == ZAF_EventHelperEventEnqueue(EVENT_APP_NEXT_EVENT_JOB))
@@ -924,7 +838,7 @@ AppStateManager(EVENT_APP event)
        * default user code the lock can no longer be secured/unsecured by
        * pressing the button.
        */
-      if (BTN_EVENT_SHORT_PRESS(ENTER_USER_CODE) == (BUTTON_EVENT)event)
+      if (EVENT_APP_BUTTON_ENTER_USER_CODE == event)
       {
         DPRINT("\r\nUser code entered!\r\n");
 
@@ -943,7 +857,7 @@ AppStateManager(EVENT_APP event)
       }
 
       /* Outside door handle #1 activated? */
-      if (BTN_EVENT_HOLD(DOORHANDLE_BTN) == (BUTTON_EVENT)event)
+      if (EVENT_APP_DOORHANDLE_ACTIVATED == event)
       {
         myDoorLock.outsideDoorHandleState |= 0x01;
         UpdateDoorLockCondition_RefreshMMI();
@@ -954,12 +868,8 @@ AppStateManager(EVENT_APP event)
         ZAF_TSE_Trigger(CC_DoorLock_operation_report_stx, pData, true);
       }
 
-      /* Outside door handle #1 deactivated?
-       * NB: If DOORHANDLE_BTN is held for more than 5 seconds then BTN_EVENT_LONG_PRESS
-       *     will be received on DOORHANDLE_BTN release instead of BTN_EVENT_UP
-       */
-      if ((BTN_EVENT_UP(DOORHANDLE_BTN) == (BUTTON_EVENT)event) ||
-          (BTN_EVENT_LONG_PRESS(DOORHANDLE_BTN) == (BUTTON_EVENT)event))
+      /* Outside door handle #1 deactivated? */
+      if (EVENT_APP_DOORHANDLE_DEACTIVATED == event)
       {
 
         /*
@@ -992,7 +902,7 @@ AppStateManager(EVENT_APP event)
         LoadConfiguration();
       }
 
-      if ((BTN_EVENT_SHORT_PRESS(APP_BUTTON_LEARN_RESET) == (BUTTON_EVENT)event) ||
+      if ((EVENT_APP_BUTTON_LEARN_RESET_SHORT_PRESS == event) ||
           (EVENT_SYSTEM_LEARNMODE_STOP == (EVENT_SYSTEM)event))
       {
         DPRINT("\r\n STATE_APP_LEARN_MODE disable\r\n");
@@ -1006,7 +916,10 @@ AppStateManager(EVENT_APP event)
         ChangeState(STATE_APP_IDLE);
 
         /* If we are in a network and the Identify LED state was changed to idle due to learn mode, report it to lifeline */
-        CC_Indicator_RefreshIndicatorProperties();
+        if (!Board_IsIndicatorActive())
+        {
+          CC_Indicator_RefreshIndicatorProperties();
+        }
         ZAF_TSE_Trigger(CC_Indicator_report_stx,
                         (void *)&ZAF_TSE_localActuationIdentifyData,
                         true);
@@ -1021,7 +934,10 @@ AppStateManager(EVENT_APP event)
         ChangeState(STATE_APP_IDLE);
 
         /* If we are in a network and the Identify LED state was changed to idle due to learn mode, report it to lifeline */
-        CC_Indicator_RefreshIndicatorProperties();
+        if (!Board_IsIndicatorActive())
+        {
+          CC_Indicator_RefreshIndicatorProperties();
+        }
         ZAF_TSE_Trigger(CC_Indicator_report_stx,
                         (void *)&ZAF_TSE_localActuationIdentifyData,
                         true);
@@ -1033,7 +949,7 @@ AppStateManager(EVENT_APP event)
       {
         AppResetNvm();
         /* Soft reset */
-        Board_ResetHandler();
+        zpal_reboot();
       }
       break;
 
@@ -1080,6 +996,12 @@ AppStateManager(EVENT_APP event)
           DPRINT("\r\n** CC_Battery TX FAILED ** \r\n");
           ZAF_EventHelperEventEnqueue(EVENT_APP_NEXT_EVENT_JOB);
         }
+        else
+        {
+          // Report sucessfully sent. Update the last reported value and store in flash
+          BatteryData.lastReportedBatteryLevel = battLevel;
+          writeBatteryData(&BatteryData);
+        }
       }
 
       if(EVENT_APP_FINISH_EVENT_JOB == event)
@@ -1110,7 +1032,7 @@ ChangeState(STATE_APP newState)
  * @param pTransmissionResult Result of each transmission.
  */
 void
-DeviceResetLocallyDone(TRANSMISSION_RESULT * pTransmissionResult)
+CC_DeviceResetLocally_done(TRANSMISSION_RESULT * pTransmissionResult)
 {
   if (TRANSMISSION_RESULT_FINISHED == pTransmissionResult->isFinished)
   {
@@ -1120,64 +1042,13 @@ DeviceResetLocallyDone(TRANSMISSION_RESULT * pTransmissionResult)
     CommandPackage.eCommandType = EZWAVECOMMANDTYPE_SET_DEFAULT;
 
     DPRINT("\nDisabling watchdog during reset\n");
-    WDOGn_Enable(DEFAULT_WDOG, false);
+    zpal_enable_watchdog(false);
 
     EQueueNotifyingStatus Status = QueueNotifyingSendToBack(g_pAppHandles->pZwCommandQueue, (uint8_t*)&CommandPackage, 500);
     ASSERT(EQUEUENOTIFYING_STATUS_SUCCESS == Status);
   }
 }
 
-/**
- * @brief Reset delay callback.
- */
-void
-DeviceResetLocally(void)
-{
-  AGI_PROFILE lifelineProfile = {
-      ASSOCIATION_GROUP_INFO_REPORT_PROFILE_GENERAL,
-      ASSOCIATION_GROUP_INFO_REPORT_PROFILE_GENERAL_LIFELINE
-  };
-
-  DPRINT("\r\nCall locally reset\r\n");
-
-  CC_DeviceResetLocally_notification_tx(&lifelineProfile, DeviceResetLocallyDone);
-}
-
-/**
- * @brief See description for function prototype in CC_Version.h.
- */
-uint8_t
-CC_Version_getNumberOfFirmwareTargets_handler(void)
-{
-  return 1; /*CHANGE THIS - firmware 0 version*/
-}
-
-
-/**
- * @brief See description for function prototype in CC_Version.h.
- */
-void
-handleGetFirmwareVersion(
-  uint8_t bFirmwareNumber,
-  VG_VERSION_REPORT_V2_VG *pVariantgroup)
-{
-  /*firmware 0 version and sub version*/
-  if(bFirmwareNumber == 0)
-  {
-    pVariantgroup->firmwareVersion = ZAF_GetAppVersionMajor();
-    pVariantgroup->firmwareSubVersion = ZAF_GetAppVersionMinor();
-  }
-  else
-  {
-    /*Just set it to 0 if firmware n is not present*/
-    pVariantgroup->firmwareVersion = 0;
-    pVariantgroup->firmwareSubVersion = 0;
-  }
-}
-
-#define MY_BATTERY_SPEC_LEVEL_FULL         3000  // My battery's 100% level (millivolts)
-#define MY_BATTERY_SPEC_LEVEL_EMPTY        2400  // My battery's 0% level (millivolts)
-#define BATTERY_LEVEL_REPORTING_DECREMENTS   10  // Round off and report the level in 10% decrements (100%, 90%, 80%, etc)
 /**
  * Report current battery level to battery command class handler
  *
@@ -1186,53 +1057,17 @@ handleGetFirmwareVersion(
 uint8_t
 CC_Battery_BatteryGet_handler(uint8_t endpoint)
 {
-  uint32_t VBattery;
-  uint8_t  accurateLevel;
-  uint8_t  roundedLevel;
-
   UNUSED(endpoint);
 
-  /*
-   * Simple example how to use the ADC to measure the battery voltage
-   * and convert to a percentage battery level on a linear scale.
-   */
-  ZAF_ADC_Enable();
-  VBattery = ZAF_ADC_Measure_VSupply();
-  DPRINTF("\r\nBattery voltage: %dmV", VBattery);
-  ZAF_ADC_Disable();
-
-  if (MY_BATTERY_SPEC_LEVEL_FULL <= VBattery)
-  {
-    // Level is full
-    return (uint8_t)CMD_CLASS_BATTERY_LEVEL_FULL;
-  }
-  else if (MY_BATTERY_SPEC_LEVEL_EMPTY > VBattery)
-  {
-    // Level is empty (<0%)
-    return (uint8_t)CMD_CLASS_BATTERY_LEVEL_WARNING;
-  }
-  else
-  {
-    // Calculate the percentage level from 0 to 100
-    accurateLevel = (uint8_t)((100 * (VBattery - MY_BATTERY_SPEC_LEVEL_EMPTY)) / (MY_BATTERY_SPEC_LEVEL_FULL - MY_BATTERY_SPEC_LEVEL_EMPTY));
-
-    // And round off to the nearest "BATTERY_LEVEL_REPORTING_DECREMENTS" level
-    roundedLevel =  (accurateLevel / BATTERY_LEVEL_REPORTING_DECREMENTS) * BATTERY_LEVEL_REPORTING_DECREMENTS; // Rounded down
-    if ((accurateLevel % BATTERY_LEVEL_REPORTING_DECREMENTS) >= (BATTERY_LEVEL_REPORTING_DECREMENTS / 2))
-    {
-      roundedLevel += BATTERY_LEVEL_REPORTING_DECREMENTS; // Round up
-    }
-  }
-  return roundedLevel;
+  return DoorLockKeyPad_hw_get_battery_level();
 }
 
 /**
- * Function for periodically checking the battery level and sending a report to the lifeline if
- * the level differs from what was last reported.
+ * Function for periodically checking if the battery level differs from what was last reported.
  *
- * @return true if a report was sent / false if the battery level hasn't changed since last reported
+ * @return true if the battery level has changed since last reported / false if the battery level hasn't changed
  */
-bool CheckAndReportBatteryLevel(void)
+bool CheckBatteryLevelChanged(void)
 {
   uint8_t currentBatteryLevel;
 
@@ -1253,17 +1088,6 @@ bool CheckAndReportBatteryLevel(void)
     return false;
   }
 
-  // Battery level has changed. Send a new update to the lifeline
-  if (JOB_STATUS_SUCCESS != CC_Battery_LevelReport_tx(&lifelineProfile, ENDPOINT_ROOT, currentBatteryLevel, ZCB_BattReportSentDone))
-  {
-    DPRINTF("\r\n%s: TX FAILED ** \r\n", __func__);
-    return false;
-  }
-
-  // Report sucessfully sent. Update the last reported value and store in flash
-  BatteryData.lastReportedBatteryLevel = currentBatteryLevel;
-  writeBatteryData(&BatteryData);
-
   return true;
 }
 
@@ -1283,18 +1107,18 @@ SetDefaultConfiguration(void)
 
   DefaultApplicationsSettings();
 
-  Ecode_t errCode = nvm3_writeData(pFileSystemApplication, FILE_ID_APPLICATIONDATA, &myDoorLock, FILE_SIZE_APPLICATIONDATA);
-  ASSERT(ECODE_NVM3_OK == errCode); //Assert has been kept for debugging , can be removed from production code if this error can only be caused by some internal flash HW failure
+  zpal_status_t status = zpal_nvm_write(pFileSystemApplication, FILE_ID_APPLICATIONDATA, &myDoorLock, FILE_SIZE_APPLICATIONDATA);
+  ASSERT(ZPAL_STATUS_OK == status); //Assert has been kept for debugging , can be removed from production code if this error can only be caused by some internal flash HW failure
 
   BatteryData.lastReportedBatteryLevel = BATTERY_DATA_UNASSIGNED_VALUE;
   writeBatteryData(&BatteryData);
 
-  loadInitStatusPowerLevel();
+  ZAF_Reset();
 
-  uint32_t appVersion = ZAF_GetAppVersion();
-  errCode =  nvm3_writeData(pFileSystemApplication, ZAF_FILE_ID_APP_VERSION, &appVersion, ZAF_FILE_SIZE_APP_VERSION);
+  uint32_t appVersion = zpal_get_app_version();
+  status =  zpal_nvm_write(pFileSystemApplication, ZAF_FILE_ID_APP_VERSION, &appVersion, ZAF_FILE_SIZE_APP_VERSION);
 
-  ASSERT(ECODE_NVM3_OK == errCode); //Assert has been kept for debugging , can be removed from production code if this error can only be caused by some internal flash HW failure
+  ASSERT(ZPAL_STATUS_OK == status); //Assert has been kept for debugging , can be removed from production code if this error can only be caused by some internal flash HW failure
 }
 
 /**
@@ -1304,27 +1128,24 @@ SetDefaultConfiguration(void)
 bool
 LoadConfiguration(void)
 {
-  // Init file system
-  ApplicationFileSystemInit(&pFileSystemApplication);
-
   myDoorLock.condition = 0; /* read HW-condition for the door: [door] Open/close,[bolt] Locked/unlocked,[Latch] Open/Closed */
   myDoorLock.insideDoorHandleMode |= APP_SUPPORTED_INSIDE_HANDLES;    /* enable all supported inside handles */
   myDoorLock.outsideDoorHandleMode |= APP_SUPPORTED_OUTSIDE_HANDLES;  /* enable all supported outside handles */
 
   uint32_t appVersion;
-  Ecode_t versionFileStatus = nvm3_readData(pFileSystemApplication, ZAF_FILE_ID_APP_VERSION, &appVersion, ZAF_FILE_SIZE_APP_VERSION);
+  const zpal_status_t version_status = zpal_nvm_read(pFileSystemApplication, ZAF_FILE_ID_APP_VERSION, &appVersion, ZAF_FILE_SIZE_APP_VERSION);
 
-  if (ECODE_NVM3_OK == versionFileStatus)
+  if (ZPAL_STATUS_OK == version_status)
   {
-    if (ZAF_GetAppVersion() != appVersion)
+    if (zpal_get_app_version() != appVersion)
     {
       // Add code for migration of file system to higher version here.
     }
 
     /* get stored values */
     CMD_CLASS_DOOR_LOCK_DATA savedDoorLock;
-    Ecode_t errCode = nvm3_readData(pFileSystemApplication, FILE_ID_APPLICATIONDATA, &savedDoorLock, FILE_SIZE_APPLICATIONDATA);
-    ASSERT(ECODE_NVM3_OK == errCode);    //Assert has been kept for debugging , can be removed from production code if this error can only be caused by some internal flash failure
+    const zpal_status_t status = zpal_nvm_read(pFileSystemApplication, FILE_ID_APPLICATIONDATA, &savedDoorLock, FILE_SIZE_APPLICATIONDATA);
+    ASSERT(ZPAL_STATUS_OK == status);    //Assert has been kept for debugging , can be removed from production code if this error can only be caused by some internal flash failure
 
     myDoorLock.condition = savedDoorLock.condition;
     myDoorLock.type = savedDoorLock.type;
@@ -1342,8 +1163,6 @@ LoadConfiguration(void)
     /* Initialize association module */
     AssociationInit(false, pFileSystemApplication);
 
-    loadStatusPowerLevel();
-
 //    /* There is a configuration stored, so load it */
 //    LoadBatteryConfiguration();
 
@@ -1352,7 +1171,6 @@ LoadConfiguration(void)
   else
   {
     DPRINT("Application FileSystem Verify failed\r\n");
-    loadInitStatusPowerLevel();
 
     // Reset the file system if ZAF_FILE_ID_APP_VERSION is missing since this indicates
     // corrupt or missing file system.
@@ -1367,10 +1185,10 @@ void AppResetNvm(void)
 
   ASSERT(0 != pFileSystemApplication);     //we are not able to successfully opened the file system ,Assert has been kept for debugging,this can be removed from the production code as it is hard to fail , it is flash driver/ hardware failure
 
-  Ecode_t errCode = nvm3_eraseAll(pFileSystemApplication);
-  ASSERT(ECODE_NVM3_OK == errCode);          //Assert has been kept for debugging, we are not able to successfully erase the file system , removing this from production code as it can only cause by some flash hardware failure
+  const zpal_status_t status = zpal_nvm_erase_all(pFileSystemApplication);
+  ASSERT(ZPAL_STATUS_OK == status);          //Assert has been kept for debugging, we are not able to successfully erase the file system , removing this from production code as it can only cause by some flash hardware failure
 
-  /* Apparently there is no valid configuration in NVM3, so load */
+  /* Apparently there is no valid configuration in NVM, so load */
   /* default values and save them. */
   SetDefaultConfiguration();
 }
@@ -1416,8 +1234,8 @@ static bool ValidateUserCode( uint8_t identifier, uint8_t const * const pCode, u
 {
   SUserCode userCodeData[USER_ID_MAX];
 
-  Ecode_t errCode = nvm3_readData(pFileSystemApplication, ZAF_FILE_ID_USERCODE, userCodeData, ZAF_FILE_SIZE_USERCODE);
-  ASSERT(ECODE_NVM3_OK == errCode); //Assert has been kept for debugging,this can be removed from the production code as it is hard to fail in read when a corressponding write is successfull
+  const zpal_status_t status = zpal_nvm_read(pFileSystemApplication, ZAF_FILE_ID_USERCODE, userCodeData, ZAF_FILE_SIZE_USERCODE);
+  ASSERT(ZPAL_STATUS_OK == status); //Assert has been kept for debugging,this can be removed from the production code as it is hard to fail in read when a corressponding write is successfull
 
   if( (len == userCodeData[identifier - 1].userCodeLen) && ((USER_ID_OCCUPIED == userCodeData[identifier - 1].user_id_status) || (USER_ID_RESERVED == userCodeData[identifier - 1].user_id_status)))
   {
@@ -1444,8 +1262,8 @@ CC_UserCode_Set_handler(
   UNUSED(endpoint);
   SUserCode userCodeData[USER_ID_MAX];
 
-  Ecode_t errCode = nvm3_readData(pFileSystemApplication, ZAF_FILE_ID_USERCODE, userCodeData, ZAF_FILE_SIZE_USERCODE);
-  ASSERT(ECODE_NVM3_OK == errCode); //Assert has been kept for debugging,this can be removed from the production code as it is hard to fail in read when a corressponding write is successfull
+  zpal_status_t status = zpal_nvm_read(pFileSystemApplication, ZAF_FILE_ID_USERCODE, userCodeData, ZAF_FILE_SIZE_USERCODE);
+  ASSERT(ZPAL_STATUS_OK == status); //Assert has been kept for debugging,this can be removed from the production code as it is hard to fail in read when a corressponding write is successfull
 
   if(0 == identifier)
   {
@@ -1466,8 +1284,8 @@ CC_UserCode_Set_handler(
     userCodeData[identifier - 1].userCodeLen = len;
   }
 
-  errCode = nvm3_writeData(pFileSystemApplication, ZAF_FILE_ID_USERCODE, userCodeData, ZAF_FILE_SIZE_USERCODE);
-  ASSERT(ECODE_NVM3_OK == errCode); //Assert has been kept for debugging if we are able to write then certainly some failure in flash hardware/driver, can be removed from production build
+  status = zpal_nvm_write(pFileSystemApplication, ZAF_FILE_ID_USERCODE, userCodeData, ZAF_FILE_SIZE_USERCODE);
+  ASSERT(ZPAL_STATUS_OK == status); //Assert has been kept for debugging if we are able to write then certainly some failure in flash hardware/driver, can be removed from production build
 
   for(i = 0; i < len; i++)
   {
@@ -1494,8 +1312,8 @@ CC_UserCode_getId_handler(
   }
   SUserCode userCodeData[USER_ID_MAX];
 
-  Ecode_t errCode = nvm3_readData(pFileSystemApplication, ZAF_FILE_ID_USERCODE, userCodeData, ZAF_FILE_SIZE_USERCODE);
-  ASSERT(ECODE_NVM3_OK == errCode); //Assert has been kept for debugging , can be removed from production code if this error can only be caused by some internal flash failure
+  const zpal_status_t status = zpal_nvm_read(pFileSystemApplication, ZAF_FILE_ID_USERCODE, userCodeData, ZAF_FILE_SIZE_USERCODE);
+  ASSERT(ZPAL_STATUS_OK == status); //Assert has been kept for debugging , can be removed from production code if this error can only be caused by some internal flash failure
 
   *pId = userCodeData[identifier - 1].user_id_status;
   return true;
@@ -1514,8 +1332,8 @@ CC_UserCode_Report_handler(
   SUserCode userCodeData[USER_ID_MAX];
   UNUSED(endpoint);
 
-  Ecode_t errCode = nvm3_readData(pFileSystemApplication, ZAF_FILE_ID_USERCODE, userCodeData, ZAF_FILE_SIZE_USERCODE);
-  ASSERT(ECODE_NVM3_OK == errCode); //Assert has been kept for debugging , Read is difficult to fail when a write has a failure can be removed from production code if this error can only be caused by some internal flash failure
+  const zpal_status_t status = zpal_nvm_read(pFileSystemApplication, ZAF_FILE_ID_USERCODE, userCodeData, ZAF_FILE_SIZE_USERCODE);
+  ASSERT(ZPAL_STATUS_OK == status); //Assert has been kept for debugging , Read is difficult to fail when a write has a failure can be removed from production code if this error can only be caused by some internal flash failure
 
   *pLen = userCodeData[identifier - 1].userCodeLen;
   if(USERCODE_MAX_LEN >= *pLen)
@@ -1738,23 +1556,23 @@ UpdateDoorLockCondition_RefreshMMI( void )
 
   if(0x04 & myDoorLock.condition)
   {
-    Board_SetLed(LATCH_STATUS_LED, LED_OFF);
+    DoorLockKeyPad_hw_latch_status_handler(false);
     DPRINT("Latch closed\r\n");
   }
   else
   {
-    Board_SetLed(LATCH_STATUS_LED, LED_ON);
+    DoorLockKeyPad_hw_latch_status_handler(true);
     DPRINT("Latch open\r\n");
   }
 
   if(0x02 & myDoorLock.condition)
   {
-    Board_SetLed(BOLT_STATUS_LED, LED_OFF);
+    DoorLockKeyPad_hw_bolt_status_handler(false);
     DPRINT("Bolt unlocked\r\n");
   }
   else
   {
-    Board_SetLed(BOLT_STATUS_LED, LED_ON);
+    DoorLockKeyPad_hw_bolt_status_handler(true);
     DPRINT("Bolt locked\r\n");
   }
 }
@@ -1777,13 +1595,13 @@ ZCB_BattReportSentDone(TRANSMISSION_RESULT * pTransmissionResult)
 
 /**
  * @brief Stores the current status of the lock on/off
- * in the application NVM3 file system.
+ * in the application NVM file system.
  */
 static void
 SaveStatus(void)
 {
-  Ecode_t errCode = nvm3_writeData(pFileSystemApplication, FILE_ID_APPLICATIONDATA, &myDoorLock, FILE_SIZE_APPLICATIONDATA);
-  ASSERT(ECODE_NVM3_OK == errCode); //Assert has been kept for debugging , can be removed from production code if this error can only be caused by some internal flash hw failure
+  const zpal_status_t status = zpal_nvm_write(pFileSystemApplication, FILE_ID_APPLICATIONDATA, &myDoorLock, FILE_SIZE_APPLICATIONDATA);
+  ASSERT(ZPAL_STATUS_OK == status); //Assert has been kept for debugging , can be removed from production code if this error can only be caused by some internal flash hw failure
 }
 
 /**
@@ -1899,8 +1717,8 @@ void DefaultApplicationsSettings(void)
     }
   }
 
-  Ecode_t errCode = nvm3_writeData(pFileSystemApplication, ZAF_FILE_ID_USERCODE, userCodeDefaultData, ZAF_FILE_SIZE_USERCODE);
-  ASSERT(ECODE_NVM3_OK == errCode); //Assert has been kept for debugging , can be removed from production code if this error can only be caused by some internal flash failure
+  const zpal_status_t status = zpal_nvm_write(pFileSystemApplication, ZAF_FILE_ID_USERCODE, userCodeDefaultData, ZAF_FILE_SIZE_USERCODE);
+  ASSERT(ZPAL_STATUS_OK == status); //Assert has been kept for debugging , can be removed from production code if this error can only be caused by some internal flash failure
 
 }
 
@@ -2026,8 +1844,8 @@ readBatteryData(void)
 {
   SBatteryData StoredBatteryData;
 
-  Ecode_t errCode = nvm3_readData(pFileSystemApplication, ZAF_FILE_ID_BATTERYDATA, &StoredBatteryData, ZAF_FILE_SIZE_BATTERYDATA);
-  if(ECODE_NVM3_OK != errCode)
+  const zpal_status_t status = zpal_nvm_read(pFileSystemApplication, ZAF_FILE_ID_BATTERYDATA, &StoredBatteryData, ZAF_FILE_SIZE_BATTERYDATA);
+  if(ZPAL_STATUS_OK != status)
   {
     StoredBatteryData.lastReportedBatteryLevel = BATTERY_DATA_UNASSIGNED_VALUE;
     writeBatteryData(&BatteryData);
@@ -2041,8 +1859,8 @@ readBatteryData(void)
  */
 void writeBatteryData(const SBatteryData* pBatteryData)
 {
-  Ecode_t errCode = nvm3_writeData(pFileSystemApplication, ZAF_FILE_ID_BATTERYDATA, pBatteryData, ZAF_FILE_SIZE_BATTERYDATA);
-  ASSERT(ECODE_NVM3_OK == errCode); //Assert has been kept for debugging , can be removed from production code. This error can only be caused by some internal flash HW failure
+  const zpal_status_t status = zpal_nvm_write(pFileSystemApplication, ZAF_FILE_ID_BATTERYDATA, pBatteryData, ZAF_FILE_SIZE_BATTERYDATA);
+  ASSERT(ZPAL_STATUS_OK == status); //Assert has been kept for debugging , can be removed from production code. This error can only be caused by some internal flash HW failure
 }
 
 uint16_t handleFirmWareIdGet(uint8_t n)
@@ -2054,11 +1872,6 @@ uint16_t handleFirmWareIdGet(uint8_t n)
   }
   // Invalid Firmware number
   return 0;
-}
-
-uint8_t CC_Version_GetHardwareVersion_handler(void)
-{
-  return 1;
 }
 
 void CC_ManufacturerSpecific_ManufacturerSpecificGet_handler(uint16_t * pManufacturerID,
@@ -2079,17 +1892,49 @@ void CC_ManufacturerSpecific_DeviceSpecificGet_handler(device_id_type_t * pDevic
                                                        uint8_t * pDeviceIDDataLength,
                                                        uint8_t * pDeviceIDData)
 {
+  const size_t serial_length = zpal_get_serial_number_length();
+
+  ASSERT(serial_length <= 0x1F); // Device ID Data Length field size is 5 bits
+
   *pDeviceIDType = DEVICE_ID_TYPE_SERIAL_NUMBER;
   *pDeviceIDDataFormat = DEVICE_ID_FORMAT_BINARY;
-  *pDeviceIDDataLength = 8;
-  uint64_t uuID = SYSTEM_GetUnique();
-  DPRINTF("\r\nuuID: %x", (uint32_t)uuID);
-  *(pDeviceIDData + 0) = (uint8_t)(uuID >> 56);
-  *(pDeviceIDData + 1) = (uint8_t)(uuID >> 48);
-  *(pDeviceIDData + 2) = (uint8_t)(uuID >> 40);
-  *(pDeviceIDData + 3) = (uint8_t)(uuID >> 32);
-  *(pDeviceIDData + 4) = (uint8_t)(uuID >> 24);
-  *(pDeviceIDData + 5) = (uint8_t)(uuID >> 16);
-  *(pDeviceIDData + 6) = (uint8_t)(uuID >>  8);
-  *(pDeviceIDData + 7) = (uint8_t)(uuID >>  0);
+  *pDeviceIDDataLength = (uint8_t)serial_length;
+  zpal_get_serial_number(pDeviceIDData);
+
+  DPRINT("\r\nserial number: ");
+  for (size_t i = 0; i < serial_length; ++i)
+  {
+    DPRINTF("%02x", pDeviceIDData[i]);
+  }
+  DPRINT("\r\n");
+}
+
+static void indicator_set_handler(uint32_t on_time_ms, uint32_t off_time_ms, uint32_t num_cycles)
+{
+  Board_IndicatorControl(on_time_ms, off_time_ms, num_cycles, true);
+}
+
+
+/*
+ * The below functions should be implemented as hardware specific functions in a separate source
+ * file, e.g. DoorLockKeyPad_hw.c.
+ */
+ZW_WEAK void DoorLockKeyPad_hw_init(void)
+{
+
+}
+
+ZW_WEAK void DoorLockKeyPad_hw_latch_status_handler(bool opened)
+{
+  UNUSED(opened);
+}
+
+ZW_WEAK void DoorLockKeyPad_hw_bolt_status_handler(bool locked)
+{
+  UNUSED(locked);
+}
+
+ZW_WEAK uint8_t DoorLockKeyPad_hw_get_battery_level(void)
+{
+  return (uint8_t)CMD_CLASS_BATTERY_LEVEL_FULL;
 }

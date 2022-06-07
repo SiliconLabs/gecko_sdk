@@ -7,7 +7,7 @@ description: "Implements the client side of the Connect mailbox protocol. It pro
 provides:
   - name: "connect_mailbox_client"
 requires:
-  - name: "connect_stack_common"  
+  - name: "connect_stack_common"
 source:
       - path: "protocol/flex/mailbox/mailbox-client/mailbox-client.c"
       - path: "protocol/flex/mailbox/mailbox-client/mailbox-client-cb.c"
@@ -23,15 +23,15 @@ config_file:
   - path: "protocol/flex/mailbox/mailbox-client/config/mailbox-client-config.h"
 template_contribution:
   - name: stack_callback
-    value: 
+    value:
       callback_type: "init"
       function_name: "emAfPluginMailboxClientInitCallback"
-  - name: stack_callback      
-    value: 
+  - name: stack_callback
+    value:
       callback_type: "incoming_message"
       function_name: "emAfPluginMailboxClientIncomingMessageCallback"
-  - name: stack_callback      
-    value: 
+  - name: stack_callback
+    value:
       callback_type: "message_sent"
       function_name: "emAfPluginMailboxClientMessageSentCallback"
   - name: event_system

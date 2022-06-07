@@ -42,36 +42,44 @@
 
 #include <string.h>
 
+//------------------------------------------------------------------------------
+// Static functions
+
 #if defined(PSA_WANT_ALG_HMAC)
-sl_se_hash_type_t sli_se_hash_type_from_psa_hmac_alg(psa_algorithm_t alg, size_t *length)
+sl_se_hash_type_t sli_se_hash_type_from_psa_hmac_alg(psa_algorithm_t alg,
+                                                     size_t *length)
 {
-  if (PSA_ALG_IS_HMAC(alg)) {
-    psa_algorithm_t hash_alg = PSA_ALG_HMAC_GET_HASH(alg);
-    switch (hash_alg) {
-      case PSA_ALG_SHA_1:
-        *length = 20;
-        return SL_SE_HASH_SHA1;
-      case PSA_ALG_SHA_224:
-        *length = 28;
-        return SL_SE_HASH_SHA224;
-      case PSA_ALG_SHA_256:
-        *length = 32;
-        return SL_SE_HASH_SHA256;
-#if (_SILICON_LABS_SECURITY_FEATURE == _SILICON_LABS_SECURITY_FEATURE_VAULT)
-      case PSA_ALG_SHA_384:
-        *length = 48;
-        return SL_SE_HASH_SHA384;
-      case PSA_ALG_SHA_512:
-        *length = 64;
-        return SL_SE_HASH_SHA512;
-#endif
-      default:
-        return SL_SE_HASH_NONE;
-    }
+  if (!PSA_ALG_IS_HMAC(alg)) {
+    return SL_SE_HASH_NONE;
   }
-  return SL_SE_HASH_NONE;
+
+  psa_algorithm_t hash_alg = PSA_ALG_HMAC_GET_HASH(alg);
+  switch (hash_alg) {
+    case PSA_ALG_SHA_1:
+      *length = 20;
+      return SL_SE_HASH_SHA1;
+    case PSA_ALG_SHA_224:
+      *length = 28;
+      return SL_SE_HASH_SHA224;
+    case PSA_ALG_SHA_256:
+      *length = 32;
+      return SL_SE_HASH_SHA256;
+    #if (_SILICON_LABS_SECURITY_FEATURE == _SILICON_LABS_SECURITY_FEATURE_VAULT)
+    case PSA_ALG_SHA_384:
+      *length = 48;
+      return SL_SE_HASH_SHA384;
+    case PSA_ALG_SHA_512:
+      *length = 64;
+      return SL_SE_HASH_SHA512;
+    #endif
+    default:
+      return SL_SE_HASH_NONE;
+  }
 }
 #endif // PSA_WANT_ALG_HMAC
+
+//------------------------------------------------------------------------------
+// Second stage driver entry points
 
 psa_status_t sli_se_driver_mac_compute(sl_se_key_descriptor_t *key_desc,
                                        psa_algorithm_t alg,
@@ -81,6 +89,10 @@ psa_status_t sli_se_driver_mac_compute(sl_se_key_descriptor_t *key_desc,
                                        size_t mac_size,
                                        size_t *mac_length)
 {
+#if defined(PSA_WANT_ALG_HMAC)  \
+  || defined(PSA_WANT_ALG_CMAC) \
+  || defined(PSA_WANT_ALG_CBC_MAC)
+
   if (mac == NULL
       || mac_length == NULL
       || key_desc == NULL) {
@@ -96,17 +108,17 @@ psa_status_t sli_se_driver_mac_compute(sl_se_key_descriptor_t *key_desc,
     return PSA_ERROR_HARDWARE_FAILURE;
   }
 
-#if defined(PSA_WANT_ALG_HMAC)
+  #if defined(PSA_WANT_ALG_HMAC)
   if (PSA_ALG_IS_HMAC(alg)) {
     #if (_SILICON_LABS_SECURITY_FEATURE == _SILICON_LABS_SECURITY_FEATURE_VAULT)
     uint8_t tmp_hmac[64];
-    #else
+    #else // VAULT
     uint8_t tmp_hmac[32];
-    #endif
+    #endif // VAULT
 
     size_t requested_length = 0;
-    sl_se_hash_type_t hash_type = sli_se_hash_type_from_psa_hmac_alg(alg, &requested_length);
-
+    sl_se_hash_type_t hash_type =
+      sli_se_hash_type_from_psa_hmac_alg(alg, &requested_length);
     if (hash_type == SL_SE_HASH_NONE) {
       return PSA_ERROR_NOT_SUPPORTED;
     }
@@ -131,7 +143,8 @@ psa_status_t sli_se_driver_mac_compute(sl_se_key_descriptor_t *key_desc,
     if (padding > 0u) {
       // We can only manipulate the transparent keys.
       if (key_desc->storage.method == SL_SE_KEY_STORAGE_EXTERNAL_PLAINTEXT) {
-        size_t word_aligned_buffer_size = sli_se_word_align(key_desc->storage.location.buffer.size);
+        size_t word_aligned_buffer_size
+          = sli_se_word_align(key_desc->storage.location.buffer.size);
         temp_key_buf = mbedtls_calloc(1, word_aligned_buffer_size);
         if (temp_key_buf == NULL) {
           return PSA_ERROR_INSUFFICIENT_MEMORY;
@@ -146,7 +159,7 @@ psa_status_t sli_se_driver_mac_compute(sl_se_key_descriptor_t *key_desc,
         key_desc->storage.location.buffer.size = word_aligned_buffer_size;
       }
     }
-    #endif
+    #endif // SLI_SE_KEY_PADDING_REQUIRED
 
     status = sl_se_hmac(&cmd_ctx,
                         key_desc,
@@ -160,7 +173,7 @@ psa_status_t sli_se_driver_mac_compute(sl_se_key_descriptor_t *key_desc,
     if (padding > 0u) {
       mbedtls_free(temp_key_buf);
     }
-    #endif
+    #endif // SLI_SE_KEY_PADDING_REQUIRED
 
     if (status == PSA_SUCCESS) {
       memcpy(mac, tmp_hmac, requested_length);
@@ -170,10 +183,18 @@ psa_status_t sli_se_driver_mac_compute(sl_se_key_descriptor_t *key_desc,
     }
 
     memset(tmp_hmac, 0, sizeof(tmp_hmac));
-  } else
-#endif // PSA_WANT_ALG_HMAC
+
+    goto exit;
+  }
+  #endif // PSA_WANT_ALG_HMAC
+
+  #if defined(PSA_WANT_ALG_HMAC) \
+  && (defined(PSA_WANT_ALG_CMAC) || defined(PSA_WANT_ALG_CBC_MAC))
+  else
+  #endif // PSA_WANT_ALG_HMAC && (PSA_WANT_ALG_CMAC || PSA_WANT_ALG_CBC_MAC)
+
+  #if defined(PSA_WANT_ALG_CMAC) || defined(PSA_WANT_ALG_CBC_MAC)
   {
-    uint8_t tmp_mac[16] = { 0 };
     size_t output_length = PSA_MAC_TRUNCATED_LENGTH(alg);
     if (output_length == 0) {
       output_length = 16;
@@ -185,14 +206,16 @@ psa_status_t sli_se_driver_mac_compute(sl_se_key_descriptor_t *key_desc,
     }
 
     switch (PSA_ALG_FULL_LENGTH_MAC(alg)) {
-      case PSA_ALG_CBC_MAC:
-        // CBC-MAC: Do an AES-CBC encrypt with zero IV, keeping only the last block
-        if (input_length % 16 != 0 || input_length < 16) {
-          psa_status = PSA_ERROR_INVALID_ARGUMENT;
-          goto exit;
-        }
-        uint8_t tmp_buf[16];
+      #if defined(PSA_WANT_ALG_CBC_MAC)
+      case PSA_ALG_CBC_MAC: {
+        uint8_t tmp_buf[16] = { 0 };
+        uint8_t tmp_mac[16] = { 0 };
 
+        if (input_length % 16 != 0 || input_length < 16) {
+          return PSA_ERROR_INVALID_ARGUMENT;
+        }
+
+        // Do an AES-CBC encrypt with zero IV, keeping only the last block.
         while (input_length > 0) {
           status = sl_se_aes_crypt_cbc(&cmd_ctx,
                                        key_desc,
@@ -212,27 +235,40 @@ psa_status_t sli_se_driver_mac_compute(sl_se_key_descriptor_t *key_desc,
           sli_psa_zeroize(tmp_mac, sizeof(tmp_mac));
           *mac_length = output_length;
         }
+
+        goto exit;
         break;
-#if defined(PSA_WANT_ALG_CMAC)
-      case PSA_ALG_CMAC:
+      }
+      #endif // PSA_WANT_ALG_CBC_MAC
+      #if defined(PSA_WANT_ALG_CMAC)
+      case PSA_ALG_CMAC: {
+        uint8_t tmp_mac[16] = { 0 };
+
         status = sl_se_cmac(&cmd_ctx,
                             key_desc,
                             input,
                             input_length,
                             tmp_mac);
+
         // Copy the requested number of bytes (max 16) to the user buffer.
         if (status == SL_STATUS_OK) {
           memcpy(mac, tmp_mac, output_length);
           sli_psa_zeroize(tmp_mac, sizeof(tmp_mac));
           *mac_length = output_length;
         }
-        break;
-#endif // PSA_WANT_ALG_CMAC
-      default:
-        psa_status = PSA_ERROR_NOT_SUPPORTED;
+
         goto exit;
+        break;
+      }
+      #endif // PSA_WANT_ALG_CMAC
+      default:
+        return PSA_ERROR_NOT_SUPPORTED;
+        break;
     }
   }
+  #endif // PSA_WANT_ALG_CMAC || PSA_WANT_ALG_CBC_MAC
+
+  exit:
 
   if (status == SL_STATUS_INVALID_PARAMETER) {
     psa_status = PSA_ERROR_INVALID_ARGUMENT;
@@ -244,7 +280,6 @@ psa_status_t sli_se_driver_mac_compute(sl_se_key_descriptor_t *key_desc,
     psa_status = PSA_SUCCESS;
   }
 
-  exit:
   // Cleanup
   status = sl_se_deinit_command_context(&cmd_ctx);
   if (status != SL_STATUS_OK) {
@@ -252,11 +287,27 @@ psa_status_t sli_se_driver_mac_compute(sl_se_key_descriptor_t *key_desc,
   }
 
   return psa_status;
+
+#else // PSA_WANT_ALG_HMAC || PSA_WANT_ALG_CMAC || PSA_WANT_ALG_CBC_MAC
+
+  (void)key_desc;
+  (void)alg;
+  (void)input;
+  (void)input_length;
+  (void)mac;
+  (void)mac_size;
+  (void)mac_length;
+
+  return PSA_ERROR_NOT_SUPPORTED;
+#endif // PSA_WANT_ALG_HMAC || PSA_WANT_ALG_CMAC || PSA_WANT_ALG_CBC_MAC
 }
 
-psa_status_t sli_se_driver_mac_sign_setup(sli_se_driver_mac_operation_t *operation,
-                                          const psa_key_attributes_t *attributes,
-                                          psa_algorithm_t alg)
+#if defined(PSA_WANT_ALG_CMAC) || defined(PSA_WANT_ALG_CBC_MAC)
+
+psa_status_t sli_se_driver_mac_sign_setup(
+  sli_se_driver_mac_operation_t *operation,
+  const psa_key_attributes_t *attributes,
+  psa_algorithm_t alg)
 {
   if (operation == NULL
       || attributes == NULL) {
@@ -267,6 +318,7 @@ psa_status_t sli_se_driver_mac_sign_setup(sli_se_driver_mac_operation_t *operati
   memset(operation, 0, sizeof(*operation));
 
   switch (PSA_ALG_FULL_LENGTH_MAC(alg)) {
+    #if defined(PSA_WANT_ALG_CBC_MAC)
     case PSA_ALG_CBC_MAC:
       if (psa_get_key_type(attributes) != PSA_KEY_TYPE_AES) {
         return PSA_ERROR_NOT_SUPPORTED;
@@ -275,7 +327,8 @@ psa_status_t sli_se_driver_mac_sign_setup(sli_se_driver_mac_operation_t *operati
         return PSA_ERROR_INVALID_ARGUMENT;
       }
       break;
-#if defined(PSA_WANT_ALG_CMAC)
+    #endif // PSA_WANT_ALG_CBC_MAC
+    #if defined(PSA_WANT_ALG_CMAC)
     case PSA_ALG_CMAC:
       if (psa_get_key_type(attributes) != PSA_KEY_TYPE_AES) {
         return PSA_ERROR_NOT_SUPPORTED;
@@ -284,7 +337,7 @@ psa_status_t sli_se_driver_mac_sign_setup(sli_se_driver_mac_operation_t *operati
         return PSA_ERROR_INVALID_ARGUMENT;
       }
       break;
-#endif // PSA_WANT_ALG_CMAC
+    #endif // PSA_WANT_ALG_CMAC
     default:
       return PSA_ERROR_NOT_SUPPORTED;
   }
@@ -313,14 +366,17 @@ psa_status_t sli_se_driver_mac_update(sli_se_driver_mac_operation_t *operation,
 
   psa_status_t psa_status = PSA_ERROR_NOT_SUPPORTED;
   switch (PSA_ALG_FULL_LENGTH_MAC(operation->alg)) {
+    #if defined(PSA_WANT_ALG_CBC_MAC)
     case PSA_ALG_CBC_MAC:
       if (input_length == 0) {
         psa_status = PSA_SUCCESS;
         goto exit;
       }
+
       // Add bytes to the streaming buffer up to the next block boundary
       if (operation->ctx.cbcmac.processed_length % 16 != 0) {
-        size_t bytes_to_boundary = 16 - operation->ctx.cbcmac.processed_length % 16;
+        size_t bytes_to_boundary
+          = 16 - operation->ctx.cbcmac.processed_length % 16;
         if (input_length < bytes_to_boundary) {
           memcpy(&operation->ctx.cbcmac.streaming_block[16 - bytes_to_boundary],
                  input,
@@ -380,9 +436,11 @@ psa_status_t sli_se_driver_mac_update(sli_se_driver_mac_operation_t *operation,
                input_length);
         operation->ctx.cbcmac.processed_length += input_length;
       }
+
       psa_status = PSA_SUCCESS;
       goto exit;
-#if defined(PSA_WANT_ALG_CMAC)
+    #endif // PSA_WANT_ALG_CBC_MAC
+    #if defined(PSA_WANT_ALG_CMAC)
     case PSA_ALG_CMAC:
       if (input_length == 0) {
         psa_status = PSA_SUCCESS;
@@ -403,7 +461,7 @@ psa_status_t sli_se_driver_mac_update(sli_se_driver_mac_operation_t *operation,
       }
       psa_status = PSA_SUCCESS;
       goto exit;
-#endif // PSA_WANT_ALG_CMAC
+    #endif // PSA_WANT_ALG_CMAC
     default:
       psa_status = PSA_ERROR_BAD_STATE;
       goto exit;
@@ -419,11 +477,12 @@ psa_status_t sli_se_driver_mac_update(sli_se_driver_mac_operation_t *operation,
   return psa_status;
 }
 
-psa_status_t sli_se_driver_mac_sign_finish(sli_se_driver_mac_operation_t *operation,
-                                           sl_se_key_descriptor_t *key_desc,
-                                           uint8_t *mac,
-                                           size_t mac_size,
-                                           size_t *mac_length)
+psa_status_t sli_se_driver_mac_sign_finish(
+  sli_se_driver_mac_operation_t *operation,
+  sl_se_key_descriptor_t *key_desc,
+  uint8_t *mac,
+  size_t mac_size,
+  size_t *mac_length)
 {
   if (operation == NULL
       || mac == NULL
@@ -443,47 +502,62 @@ psa_status_t sli_se_driver_mac_sign_finish(sli_se_driver_mac_operation_t *operat
     mac_size = truncated_length;
   }
 
-  if (PSA_ALG_FULL_LENGTH_MAC(operation->alg) == PSA_ALG_CBC_MAC) {
-    if (operation->ctx.cbcmac.processed_length % 16 != 0) {
+  switch (PSA_ALG_FULL_LENGTH_MAC(operation->alg)) {
+    #if defined(PSA_WANT_ALG_CBC_MAC)
+    case PSA_ALG_CBC_MAC: {
+      (void)key_desc;
+
+      if (operation->ctx.cbcmac.processed_length % 16 != 0) {
+        return PSA_ERROR_BAD_STATE;
+      }
+
+      // Copy the requested number of bytes (max 16) to the user buffer.
+      memcpy(mac, operation->ctx.cbcmac.iv, mac_size);
+      *mac_length = mac_size;
+
+      return PSA_SUCCESS;
+      break;
+    }
+    #endif // PSA_WANT_ALG_CBC_MAC
+    #if defined(PSA_WANT_ALG_CMAC)
+    case PSA_ALG_CMAC: {
+      // Ephemeral contexts
+      sl_se_command_context_t cmd_ctx = { 0 };
+      uint8_t tmp_mac[16] = { 0 };
+      sl_status_t status = sl_se_init_command_context(&cmd_ctx);
+      if (status != SL_STATUS_OK) {
+        return PSA_ERROR_HARDWARE_FAILURE;
+      }
+
+      status = sl_se_cmac_multipart_finish(&operation->ctx.cmac,
+                                           &cmd_ctx,
+                                           key_desc,
+                                           tmp_mac);
+      if (status != SL_STATUS_OK) {
+        *mac_length = 0;
+        return PSA_ERROR_HARDWARE_FAILURE;
+      }
+
+      // Cleanup
+      status = sl_se_deinit_command_context(&cmd_ctx);
+      if (status != SL_STATUS_OK) {
+        *mac_length = 0;
+        return PSA_ERROR_HARDWARE_FAILURE;
+      }
+
+      // Copy the requested number of bytes (max 16) to the user buffer.
+      memcpy(mac, tmp_mac, mac_size);
+      *mac_length = mac_size;
+
+      return PSA_SUCCESS;
+      break;
+    }
+    #endif // PSA_WANT_ALG_CMAC
+    default:
       return PSA_ERROR_BAD_STATE;
-    }
-    // Copy the requested number of bytes (max 16) to the user buffer.
-    memcpy(mac, operation->ctx.cbcmac.iv, mac_size);
-    *mac_length = mac_size;
-    return PSA_SUCCESS;
   }
-#if defined(PSA_WANT_ALG_CMAC)
-  else if (PSA_ALG_FULL_LENGTH_MAC(operation->alg) == PSA_ALG_CMAC) {
-    // Ephemeral contexts
-    sl_se_command_context_t cmd_ctx = { 0 };
-    uint8_t tmp_mac[16];
-    sl_status_t status = sl_se_init_command_context(&cmd_ctx);
-    if (status != SL_STATUS_OK) {
-      return PSA_ERROR_HARDWARE_FAILURE;
-    }
-
-    status = sl_se_cmac_multipart_finish(&operation->ctx.cmac, &cmd_ctx, key_desc, tmp_mac);
-    if (status != SL_STATUS_OK) {
-      *mac_length = 0;
-      return PSA_ERROR_HARDWARE_FAILURE;
-    }
-
-    // Cleanup
-    status = sl_se_deinit_command_context(&cmd_ctx);
-    if (status != SL_STATUS_OK) {
-      *mac_length = 0;
-      return PSA_ERROR_HARDWARE_FAILURE;
-    }
-    // Copy the requested number of bytes (max 16) to the user buffer.
-    memcpy(mac, tmp_mac, mac_size);
-    *mac_length = mac_size;
-    return PSA_SUCCESS;
-  }
-#else // PSA_WANT_ALG_CMAC
-  (void)key_desc;
-#endif // PSA_WANT_ALG_CMAC
-
-  return PSA_ERROR_NOT_SUPPORTED;
 }
+
+#endif // PSA_WANT_ALG_CMAC || PSA_WANT_ALG_CBC_MAC
 
 #endif // defined(SEMAILBOX_PRESENT)

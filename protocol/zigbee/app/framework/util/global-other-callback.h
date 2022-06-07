@@ -28,8 +28,8 @@ void emberAfGroupsClusterClearGroupTableCallback(int8u endpoint);
  * @param endpoint The endpoint.  Ver.: always
  * @param groupId The group identifier.  Ver.: always
  */
-boolean emberAfGroupsClusterEndpointInGroupCallback(int8u endpoint,
-                                                    int16u groupId);
+bool emberAfGroupsClusterEndpointInGroupCallback(int8u endpoint,
+                                                 int16u groupId);
 /** @brief Scenes Cluster ClearSceneTable
  *
  * This function is called by the framework when the application should clear
@@ -92,7 +92,7 @@ EmberAfStatus emberAfScenesClusterStoreCurrentSceneCallback(int8u endpoint,
  * @param newValue   Ver.: always
  */
 void emberAfOnOffClusterLevelControlEffectCallback(int8u endpoint,
-                                                   boolean newValue);
+                                                   bool newValue);
 /** @brief On/off Cluster Set Value
  *
  * This function is called when the on/off value needs to be set, either through
@@ -104,7 +104,7 @@ void emberAfOnOffClusterLevelControlEffectCallback(int8u endpoint,
  */
 EmberAfStatus emberAfOnOffClusterSetValueCallback(int8u endpoint,
                                                   int8u command,
-                                                  boolean initiatedByLevelChange);
+                                                  bool initiatedByLevelChange);
 /** @brief Key Establishment Cluster Client Command Received
  *
  * This function is called by the application framework when a server-to-client
@@ -115,7 +115,7 @@ EmberAfStatus emberAfOnOffClusterSetValueCallback(int8u endpoint,
  *
  * @param cmd   Ver.: always
  */
-boolean emberAfKeyEstablishmentClusterClientCommandReceivedCallback(EmberAfClusterCommand *cmd);
+bool emberAfKeyEstablishmentClusterClientCommandReceivedCallback(EmberAfClusterCommand *cmd);
 /** @brief Key Establishment Cluster Server Command Received
  *
  * This function is called by the application framework when a client-to-server
@@ -126,4 +126,4 @@ boolean emberAfKeyEstablishmentClusterClientCommandReceivedCallback(EmberAfClust
  *
  * @param cmd   Ver.: always
  */
-boolean emberAfKeyEstablishmentClusterServerCommandReceivedCallback(EmberAfClusterCommand *cmd);
+bool emberAfKeyEstablishmentClusterServerCommandReceivedCallback(EmberAfClusterCommand *cmd);

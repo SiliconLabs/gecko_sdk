@@ -31,7 +31,7 @@
 #ifndef __SILICON_LABS_RTCDRV_H__
 #define __SILICON_LABS_RTCDRV_H__
 
-#ifndef SL_SUPRESS_DEPRECATION_WARNINGS_SDK_3_2
+#ifndef SL_SUPPRESS_DEPRECATION_WARNINGS_SDK_3_2
 #warning "The RTC driver is deprecated and marked for removal in a later release. Please use the sleeptimer service instead."
 #endif
 

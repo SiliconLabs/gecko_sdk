@@ -68,7 +68,7 @@ typedef struct range_test_settings_t{
 typedef struct range_test_measurement_t{
   float    PER;                  ///> Current Packet Error Rate.
   float    moving_average;       ///> Current Moving Average.
-  uint32_t moving_average_history[4u];   ///> Array that stores history to calculate MA.
+  uint32_t moving_average_history[4U];   ///> Array that stores history to calculate MA.
   uint16_t packets_sent;         ///> Number of sent packets.
   uint16_t packets_received_counter;         ///> Counter in received packet.
   uint16_t packets_received_correctly;       ///> Number of CRC OK packets.
@@ -268,7 +268,7 @@ void update_tx_power(void);
  * Get the minimum Power Amplifier setting in deci-dBm units
  *
  * @param None
- * @returns minimum PA valui in deci-dBm
+ * @returns minimum PA value in deci-dBm
  ******************************************************************************/
 int16_t get_min_tx_power_deci_dbm(void);
 
@@ -276,7 +276,7 @@ int16_t get_min_tx_power_deci_dbm(void);
  * Get the maximum Power Amplifier setting in deci-dBm units
  *
  * @param None
- * @returns maximum PA valui in deci-dBm
+ * @returns maximum PA value in deci-dBm
  ******************************************************************************/
 int16_t get_max_tx_power_deci_dbm(void);
 

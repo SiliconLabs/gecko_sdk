@@ -14,6 +14,12 @@
  * sections of the MSLA applicable to Source Code.
  *
  ******************************************************************************/
+
+/***************************************************************************//**
+ * @addtogroup legacyhal
+ * @{
+ ******************************************************************************/
+
 /** @addtogroup button
  * @brief Sample API functions for using push-buttons.
  *
@@ -87,3 +93,4 @@ void halButtonIsr(uint8_t button, uint8_t state);
 
 /** @} END addtogroup
  */
+/** @} (end addtogroup legacyhal) */

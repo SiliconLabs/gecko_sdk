@@ -164,6 +164,10 @@
           <value>null</value>
         </input>
         <input>
+          <key>FPLL_BAND</key>
+          <value>null</value>
+        </input>
+        <input>
           <key>FRAME_LENGTH_TYPE</key>
           <value>null</value>
         </input>

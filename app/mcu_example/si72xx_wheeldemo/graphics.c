@@ -32,6 +32,7 @@
 #include <math.h>
 #include <stdio.h>
 #include <time.h>
+#include <string.h>
 
 #define BACKGROUND_WIDTH          (gc.pDisplayGeometry->xSize)
 #define BACKGROUND_HEIGHT         (gc.pDisplayGeometry->ySize)

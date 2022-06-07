@@ -411,7 +411,7 @@ typedef struct {
 #define _TIMER_STATUS_ICFEMPTY2_MASK               0x40000UL                                     /**< Bit mask for TIMER_ICFEMPTY2                */
 #define _TIMER_STATUS_ICFEMPTY2_DEFAULT            0x00000000UL                                  /**< Mode DEFAULT for TIMER_STATUS               */
 #define TIMER_STATUS_ICFEMPTY2_DEFAULT             (_TIMER_STATUS_ICFEMPTY2_DEFAULT << 18)       /**< Shifted mode DEFAULT for TIMER_STATUS       */
-#define TIMER_STATUS_CCPOL0                        (0x1UL << 24)                                 /**< CCn Polarity                                */
+#define TIMER_STATUS_CCPOL0                        (0x1UL << 24)                                 /**< Compare/Capture Polarity                    */
 #define _TIMER_STATUS_CCPOL0_SHIFT                 24                                            /**< Shift value for TIMER_CCPOL0                */
 #define _TIMER_STATUS_CCPOL0_MASK                  0x1000000UL                                   /**< Bit mask for TIMER_CCPOL0                   */
 #define _TIMER_STATUS_CCPOL0_DEFAULT               0x00000000UL                                  /**< Mode DEFAULT for TIMER_STATUS               */
@@ -420,7 +420,7 @@ typedef struct {
 #define TIMER_STATUS_CCPOL0_DEFAULT                (_TIMER_STATUS_CCPOL0_DEFAULT << 24)          /**< Shifted mode DEFAULT for TIMER_STATUS       */
 #define TIMER_STATUS_CCPOL0_LOWRISE                (_TIMER_STATUS_CCPOL0_LOWRISE << 24)          /**< Shifted mode LOWRISE for TIMER_STATUS       */
 #define TIMER_STATUS_CCPOL0_HIGHFALL               (_TIMER_STATUS_CCPOL0_HIGHFALL << 24)         /**< Shifted mode HIGHFALL for TIMER_STATUS      */
-#define TIMER_STATUS_CCPOL1                        (0x1UL << 25)                                 /**< CCn Polarity                                */
+#define TIMER_STATUS_CCPOL1                        (0x1UL << 25)                                 /**< Compare/Capture Polarity                    */
 #define _TIMER_STATUS_CCPOL1_SHIFT                 25                                            /**< Shift value for TIMER_CCPOL1                */
 #define _TIMER_STATUS_CCPOL1_MASK                  0x2000000UL                                   /**< Bit mask for TIMER_CCPOL1                   */
 #define _TIMER_STATUS_CCPOL1_DEFAULT               0x00000000UL                                  /**< Mode DEFAULT for TIMER_STATUS               */
@@ -429,7 +429,7 @@ typedef struct {
 #define TIMER_STATUS_CCPOL1_DEFAULT                (_TIMER_STATUS_CCPOL1_DEFAULT << 25)          /**< Shifted mode DEFAULT for TIMER_STATUS       */
 #define TIMER_STATUS_CCPOL1_LOWRISE                (_TIMER_STATUS_CCPOL1_LOWRISE << 25)          /**< Shifted mode LOWRISE for TIMER_STATUS       */
 #define TIMER_STATUS_CCPOL1_HIGHFALL               (_TIMER_STATUS_CCPOL1_HIGHFALL << 25)         /**< Shifted mode HIGHFALL for TIMER_STATUS      */
-#define TIMER_STATUS_CCPOL2                        (0x1UL << 26)                                 /**< CCn Polarity                                */
+#define TIMER_STATUS_CCPOL2                        (0x1UL << 26)                                 /**< Compare/Capture Polarity                    */
 #define _TIMER_STATUS_CCPOL2_SHIFT                 26                                            /**< Shift value for TIMER_CCPOL2                */
 #define _TIMER_STATUS_CCPOL2_MASK                  0x4000000UL                                   /**< Bit mask for TIMER_CCPOL2                   */
 #define _TIMER_STATUS_CCPOL2_DEFAULT               0x00000000UL                                  /**< Mode DEFAULT for TIMER_STATUS               */

@@ -54,7 +54,8 @@ Once the button is released the average throughput will be calculated and shown 
 
 ### EFR32 (SoC) <-> EFR32 (NCP) + Host (typically PC)
 
-The final use case consists of one kit flashed with **Bluetooth - SoC Throughput** example and a second kit flashed with **Bluetooth - NCP**. The NCP device will be controlled by a dedicated host application which is located in *<SDK-installation-location>\app\bluetooth\example_host\throughput*. 
+The final use case consists of one kit flashed with **Bluetooth - SoC Throughput** example and a second kit flashed with an extended version of the **Bluetooth - NCP** example. To achieve that, create a **Bluetooth - NCP** example from the Laucher and under the Software Components tab, install the **LE Power Control** component. Finally build and flash the image to the target board.
+The NCP device will be controlled by a dedicated host application which is located under *<SDK-installation-location>/app/bluetooth/example_host/bt_host_throughput*. 
 
 To learn more about NCP firmware and how to build the host applications, see [AN1259: Using the v3.x Silicon Labs Bluetooth Stack in Network Co-Processor Mode](https://www.silabs.com/documents/public/application-notes/an1259-bt-ncp-mode-sdk-v3x.pdf).
 

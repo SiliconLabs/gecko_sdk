@@ -15,11 +15,9 @@ requires:
 provides:
   - name: "bluetooth_feature_aoa_receiver"
 template_contribution:
-  - name: bluetooth_bgapi_class
-    value:
-      class: "cte_receiver"
-    priority: 10
-  - name: bluetooth_controller_feature_init
+  - name: component_catalog
+    value: bluetooth_feature_aoa_receiver
+  - name: bluetooth_controller_init
     value:
       function: "sl_btctrl_init_cte()"
     priority: 10

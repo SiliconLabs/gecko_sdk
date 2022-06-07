@@ -561,9 +561,9 @@ enum
    */
   EMBER_SLEEPY_END_DEVICE = 4,
   /** Sleepy end device which transmits with wake up frames (CSL). */
-  EMBER_WIREFREE_INITIATOR_DEVICE = 5,
+  EMBER_S2S_INITIATOR_DEVICE = 5,
   /** Sleepy end device which duty cycles the radio Rx (CSL). */
-  EMBER_WIREFREE_TARGET_DEVICE = 6,
+  EMBER_S2S_TARGET_DEVICE = 6,
 };
 
 /**
@@ -917,10 +917,10 @@ enum
   /** The node is an end device joined to a network but its parent
       is not responding. */
   EMBER_JOINED_NETWORK_NO_PARENT,
-  /** The node is an Wire free initiator */
-  EMBER_JOINED_NETWORK_WF_INITIATOR,
-  /** The node is an Wire free target */
-  EMBER_JOINED_NETWORK_WF_TARGET,
+  /** The node is a Sleepy-to-Sleepy initiator */
+  EMBER_JOINED_NETWORK_S2S_INITIATOR,
+  /** The node is a Sleepy-to-Sleepy target */
+  EMBER_JOINED_NETWORK_S2S_TARGET,
   /** The node is in the process of leaving its current network. */
   EMBER_LEAVING_NETWORK
 };
@@ -928,14 +928,12 @@ enum
 /**
  * @brief Type for a network scan.
  */
+
 // The RADIO_OFF scan is not really a scan at all.  It is used to
 // temporarily turn off the radio to use the TX and RX
 // buffers for other purposes.
 // Start the scan with:
 //   emberStartScan(EMBER_START_RADIO_OFF_SCAN, 0, 0);
-// Then check emberIsRadioOffScanActivated() and wait for it to return true.  There may be a brief
-// delay while the radio finishes transmitting.
-//
 // Call emberStopScan() to restart the radio and the MAC.
 
 #ifdef DOXYGEN_SHOULD_SKIP_THIS
@@ -1058,7 +1056,8 @@ enum
   "use preconfigured key",          \
   "send key in the clear",          \
   "deny join",                      \
-  "no action",
+  "no action",                      \
+  "allow rejoins only",
 
 /** @brief The Status of the Update Device message sent to the Trust Center.
  *  The device may have joined or rejoined insecurely, rejoined securely, or
@@ -3200,6 +3199,32 @@ enum
   /** Do not encrypt broadcasts and unicasts */
   TC_APS_ENCRYPT_DISABLE = 0x02,
 };
+
+/**
+ * @brief A structure containing the information of a token.
+ */
+typedef struct {
+  /** NVM3 token key. */
+  uint32_t nvm3Key;
+  /** The token is a counter token type. */
+  bool isCnt;
+  /** The token is an indexed token type. */
+  bool isIdx;
+  /** Size of the object of the token. */
+  uint8_t size;
+  /** The array size for the token when it is an indexed token. */
+  uint8_t arraySize;
+} EmberTokenInfo;
+
+/**
+ * @brief A structure containing the information of a token data.
+ */
+typedef struct {
+  /** The size of the token data in number of bytes. */
+  uint32_t size;
+  /** A data pointer pointing to the storage for the token data of above size. */
+  void * data;
+} EmberTokenData;
 
 /** @} END addtogroup
  */

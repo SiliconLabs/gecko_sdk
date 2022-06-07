@@ -1,8 +1,12 @@
 project_name: gpd-switch
-label: "GPD Switch"
+label: "Zigbee - SoC GPD Switch"
 package: "Zigbee"
 category: "Zigbee Application"
 quality: production
+
+description: >
+  This is a Green Power On/Off Switch Device that pairs with a GP Combo or Sink Light and controls its operation.
+author: "Silicon Laboratories, Inc."
 
 # Silicon Labs Project Configuration Tools: slcp, v0, Component selection file.
 include:
@@ -20,6 +24,7 @@ component:
 - id: rail_util_init
   instance:
   - gpdrail
+- id: psa_crypto
 #---------------- User Buttons -----------------------
 - id: simple_button
   instance:
@@ -114,9 +119,6 @@ source:
 define:
   - name: "UC_BUILD"
 
-description: |-
-  This is a Green Power On/Off Switch Device that pairs with a GP Combo or Sink Light and controls its operation.
-
 #-------------- Template Contribution ----------------
 template_contribution:
 #------------------ CLI commands ---------------------
@@ -144,3 +146,11 @@ ui_hints:
   highlight:
     - path: readme.html
       focus: false
+
+filter:
+  - name: "Wireless Technology"
+    value: ["Zigbee"]
+  - name: "Device Type"
+    value: ["SoC"]
+  - name: "Project Difficulty"
+    value: ["Advanced"]

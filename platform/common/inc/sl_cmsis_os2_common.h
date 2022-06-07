@@ -99,6 +99,7 @@ typedef struct {
 typedef struct {
   OS_FLAG_GRP flag_grp;
   uint8_t     dyn_alloc;
+  uint32_t    flags;
 } osEventFlags_t;
 #endif
 

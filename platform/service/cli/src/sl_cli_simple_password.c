@@ -316,10 +316,12 @@ static sl_status_t read_until_line_feed(sl_cli_handle_t handle,
       CORE_EXIT_ATOMIC();
 
       if ((c == '\n') || (c == '\r')) {  // line feed
-        read = false;
-        session->buffer[session->buffer_ix] = '\0';
-        sl_iostream_putchar(handle->iostream_handle, c);
-        return SL_STATUS_OK;
+        if (session->buffer_ix > 0) {
+          read = false;
+          session->buffer[session->buffer_ix] = '\0';
+          sl_iostream_putchar(handle->iostream_handle, c);
+          return SL_STATUS_OK;
+        }
       } else if (c == '\b') { // backspace
         if (session->buffer_ix > 0) { // underflow check
           session->buffer_ix--;

@@ -31,7 +31,7 @@
 #include "em_idac.h"
 #if defined(IDAC_COUNT) && (IDAC_COUNT > 0)
 #include "em_cmu.h"
-#include "em_assert.h"
+#include "sl_assert.h"
 #include "em_bus.h"
 
 /***************************************************************************//**

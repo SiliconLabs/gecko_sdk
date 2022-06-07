@@ -8,7 +8,7 @@
  * design.
  *
  * Initialization:
- * 1. Call constructor InitNotification(nvm3_Handle_t* pFS)
+ * 1. Call constructor InitNotification(zpal_nvm_handle_t pFS)
  * 2. Add application Notification types and events to the module by calling
  *    AddNotification(...)
  *
@@ -33,8 +33,8 @@
 #include <ZW_typedefs.h>
 #include <CC_Notification.h>
 #include <agi.h>
-#include "nvm3.h"
 #include <config_app.h>
+#include <zpal_nvm.h>
 /****************************************************************************/
 /*                     EXPORTED TYPES and DEFINITIONS                       */
 /****************************************************************************/
@@ -61,7 +61,7 @@ typedef struct SNotificationData
 /**
  * @brief Init notification module
  */
-void InitNotification(nvm3_Handle_t* pFS);
+void InitNotification(zpal_nvm_handle_t pFS);
 
 
 /**

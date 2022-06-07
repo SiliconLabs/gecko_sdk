@@ -1,7 +1,9 @@
 id: zw_cc_manufacturerspecific
 label: Manufacturer Specific Command Class
 category: Z-Wave|Command Classes
-description: Manufacturer Specific Command Class!
+description: > 
+  Manufacturer Specific Command Class is used to advertise
+  manufacturer specific and device specific information.
 package: Z-Wave
 quality: production
 source:
@@ -16,4 +18,5 @@ include:
     - path: CC_ManufacturerSpecific_config.h
 provides:
   - name: zw_cc_manufacturerspecific
-
+documentation:
+  url: "https://sdomembers.z-wavealliance.org/document/dl/643"

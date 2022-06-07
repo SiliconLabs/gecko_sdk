@@ -1,9 +1,9 @@
 id: mbedtls_ecc_curve25519
 package: platform
-label: Mbed TLS Support for Curve25519
+label: Curve25519
 description: >-
   This component enables support for usage of the Curve25519 elliptic curve with Mbed TLS.
-category: Platform|Security
+category: Platform|Security|Mbed TLS|Elliptic Curves
 quality: production
 provides:
   - name: mbedtls_ecc_curve25519

@@ -41,7 +41,11 @@ extern "C" {
 #define ANTENNA_ARRAY_TYPE_4x4_URA    0 ///< Silicon Labs Ref. 4x4 Uniform Rectangular Array
 #define ANTENNA_ARRAY_TYPE_3x3_URA    1 ///< Silicon Labs Ref. 3x3 Uniform Rectangular Array
 #define ANTENNA_ARRAY_TYPE_1x4_ULA    2 ///< Silicon Labs Ref. 1x4 Uniform Linear Array
-#define ANTENNA_ARRAY_TYPE_LAST       3 ///< Placeholder
+#define ANTENNA_ARRAY_TYPE_4x4_DP_URA 3 ///< Silicon Labs Ref. 4x4 Uniform Dual Polarized Rectangular Array
+#define ANTENNA_ARRAY_TYPE_LAST       4 ///< Placeholder
+
+/// Check if antenna is of dual polarized type.
+#define antenna_array_type_is_dp(x)   ((x) == ANTENNA_ARRAY_TYPE_4x4_DP_URA)
 
 /// Antenna array returned by antenna_array_get_continuous_pattern is guaranteed
 /// to fit into this buffer size.
@@ -49,7 +53,7 @@ extern "C" {
 
 /// Antenna array returned by antenna_array_get_pin_pattern is guaranteed
 /// to fit into this buffer size.
-#define ANTENNA_ARRAY_MAX_PIN_PATTERN_SIZE    16
+#define ANTENNA_ARRAY_MAX_PIN_PATTERN_SIZE    33
 
 /// Antenna array storage type.
 typedef struct antenna_array_s {
@@ -86,7 +90,8 @@ sl_status_t antenna_array_set_pattern(antenna_array_t *antenna_array,
  * @param[in] antenna_array Antenna array instance to operate on.
  * @param[out] pattern Pin sequence that implements the antenna switch pattern.
  *                     The first element in the sequence represents the
- *                     reference antenna.
+ *                     reference antenna. Optional argument, can be omitted
+ *                     by passing NULL.
  * @param[in,out] size Buffer length as input, actual pattern length as output.
  ******************************************************************************/
 sl_status_t antenna_array_get_pin_pattern(antenna_array_t *antenna_array,
@@ -95,6 +100,10 @@ sl_status_t antenna_array_get_pin_pattern(antenna_array_t *antenna_array,
 
 /***************************************************************************//**
  * Convert antenna switch pattern to [0..n-1] interval without gaps.
+ *
+ * This function is relevant for reduced antenna boards like 3x3 URA or 1x4 ULA.
+ * If all antennas on the boards are in use, then the pattern returned by this
+ * function and the stored pattern are identical.
  *
  * @param[in] antenna_array Antenna array instance to operate on.
  * @param[out] pattern Buffer for the converted switch pattern.

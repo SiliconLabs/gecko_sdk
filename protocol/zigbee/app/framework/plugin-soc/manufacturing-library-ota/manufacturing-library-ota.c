@@ -134,9 +134,9 @@ bool emberAfMfglibClusterStreamCallback(uint8_t channel,
   return TRUE;
 }
 
-boolean emberAfMfglibClusterRxModeCallback(uint8_t channel,
-                                           int8_t power,
-                                           uint16_t time)
+bool emberAfMfglibClusterRxModeCallback(uint8_t channel,
+                                        int8_t power,
+                                        uint16_t time)
 {
   currentActiveCommand = ACTIVE_COMMAND_RX_MODE;
 

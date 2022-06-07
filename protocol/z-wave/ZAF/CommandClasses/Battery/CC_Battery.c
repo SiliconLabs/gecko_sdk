@@ -10,7 +10,6 @@
 /****************************************************************************/
 #include <ZW_TransportLayer.h>
 
-#include "config_app.h"
 #include <CC_Battery.h>
 #include <ZW_TransportMulticast.h>
 #include <string.h>

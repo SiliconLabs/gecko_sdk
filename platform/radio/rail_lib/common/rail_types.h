@@ -555,20 +555,20 @@ RAIL_ENUM(RAIL_SchedulerStatus_t) {
   RAIL_SCHEDULER_SCHEDULED_RX_INTERRUPTED = (RAIL_SCHEDULER_TASK_SCHEDULED_RX
                                              | RAIL_SCHEDULER_STATUS_EVENT_INTERRUPTED),
 
-  /** Multiprotocol scheduled Tx internal error. */
+  /** Multiprotocol scheduled TX internal error. */
   RAIL_SCHEDULER_SCHEDULED_TX_INTERNAL_ERROR = (RAIL_SCHEDULER_TASK_SCHEDULED_TX
                                                 | RAIL_SCHEDULER_STATUS_INTERNAL_ERROR),
-  /** Multiprotocol scheduled Tx scheduling error. */
+  /** Multiprotocol scheduled TX scheduling error. */
   RAIL_SCHEDULER_SCHEDULED_TX_SCHEDULING_ERROR = (RAIL_SCHEDULER_TASK_SCHEDULED_TX
                                                   | RAIL_SCHEDULER_STATUS_SCHEDULE_FAIL),
   /** \ref RAIL_StartScheduledTx() operation interrupted */
   RAIL_SCHEDULER_SCHEDULED_TX_INTERRUPTED = (RAIL_SCHEDULER_TASK_SCHEDULED_TX
                                              | RAIL_SCHEDULER_STATUS_EVENT_INTERRUPTED),
 
-  /** Multiprotocol instantaneous Tx internal error. */
+  /** Multiprotocol instantaneous TX internal error. */
   RAIL_SCHEDULER_SINGLE_TX_INTERNAL_ERROR = (RAIL_SCHEDULER_TASK_SINGLE_TX
                                              | RAIL_SCHEDULER_STATUS_INTERNAL_ERROR),
-  /** Multiprotocol instantaneous Tx scheduling error. */
+  /** Multiprotocol instantaneous TX scheduling error. */
   RAIL_SCHEDULER_SINGLE_TX_SCHEDULING_ERROR = (RAIL_SCHEDULER_TASK_SINGLE_TX
                                                | RAIL_SCHEDULER_STATUS_SCHEDULE_FAIL),
   /** \ref RAIL_StartTx() operation interrupted */
@@ -848,6 +848,8 @@ RAIL_ENUM_GENERIC(RAIL_Events_t, uint64_t) {
   /** Shift position of \ref RAIL_EVENT_IEEE802154_MODESWITCH_END bit */
   RAIL_EVENT_IEEE802154_MODESWITCH_END_SHIFT,
 #endif//DOXYGEN_SHOULD_SKIP_THIS
+  /** Shift position of \ref RAIL_EVENT_DETECT_RSSI_THRESHOLD bit */
+  RAIL_EVENT_DETECT_RSSI_THRESHOLD_SHIFT,
 };
 
 // RAIL_Event_t bitmasks
@@ -1163,7 +1165,7 @@ RAIL_ENUM_GENERIC(RAIL_Events_t, uint64_t) {
  * This event only occurs if the RAIL Z-Wave functionality is enabled.
  *
  * Following this event, the application must call \ref RAIL_ZWAVE_SetLrAckData()
- * to populate noise floor, TX power and receive rssi fields of the Z-Wave
+ * to populate noise floor, TX power and receive RSSI fields of the Z-Wave
  * Long Range ACK packet.
  */
 #define RAIL_EVENT_ZWAVE_LR_ACK_REQUEST_COMMAND (1ULL << RAIL_EVENT_ZWAVE_LR_ACK_REQUEST_COMMAND_SHIFT)
@@ -1323,9 +1325,12 @@ RAIL_ENUM_GENERIC(RAIL_Events_t, uint64_t) {
 #define RAIL_EVENT_TX_CCA_RETRY (1ULL << RAIL_EVENT_TX_CCA_RETRY_SHIFT)
 
 /**
- * Occurs when a Clear Channel Assessment (CCA) check begins.
+ * Occurs when the receiver is activated to perform a Clear Channel Assessment
+ * (CCA) check.
  *
- * This event can
+ * This event generally precedes the actual start of a CCA check by roughly
+ * the \ref RAIL_StateTiming_t::idleToRx time (subject to
+ * \ref RAIL_MINIMUM_TRANSITION_US).  It can
  * occur multiple times based on the configuration of the ongoing CSMA or LBT
  * transmission. It can only happen after calling RAIL_StartCcaCsmaTx()
  * or RAIL_StartCcaLbtTx().
@@ -1471,11 +1476,11 @@ RAIL_ENUM_GENERIC(RAIL_Events_t, uint64_t) {
 #define RAIL_EVENT_PA_PROTECTION (1ULL << RAIL_EVENT_PA_PROTECTION_SHIFT)
 
 /**
- * Occurs after enabling the signal identifier using \ref RAIL_BLE_EnableSignalIdentifier
- * or \ref RAIL_IEEE802154_EnableSignalIdentifier when a signal is detected.
- * This is only used on platforms that support signal identifer, where
- * RAIL_BLE_SUPPORTS_SIGNAL_IDENTIFIER or RAIL_IEEE802154_SUPPORTS_SIGNAL_IDENTIFIER
- * is true.
+ * Occurs after enabling the signal detection using \ref RAIL_BLE_EnableSignalDetection
+ * or \ref RAIL_IEEE802154_EnableSignalDetection when a signal is detected.
+ * This is only used on platforms that support signal identifier, where
+ * \ref RAIL_BLE_SUPPORTS_SIGNAL_IDENTIFIER or
+ * \ref RAIL_IEEE802154_SUPPORTS_SIGNAL_IDENTIFIER is true.
  */
 #define RAIL_EVENT_SIGNAL_DETECTED (1ULL << RAIL_EVENT_SIGNAL_DETECTED_SHIFT)
 
@@ -1492,6 +1497,12 @@ RAIL_ENUM_GENERIC(RAIL_Events_t, uint64_t) {
  */
 #define RAIL_EVENT_IEEE802154_MODESWITCH_END (1ULL << RAIL_EVENT_IEEE802154_MODESWITCH_END_SHIFT)
 #endif//DOXYGEN_SHOULD_SKIP_THIS
+
+/**
+ * Occurs when the sampled RSSI is above the threshold set by
+ * \ref RAIL_SetRssiDetectThreshold().
+ */
+#define RAIL_EVENT_DETECT_RSSI_THRESHOLD (1ULL << RAIL_EVENT_DETECT_RSSI_THRESHOLD_SHIFT)
 
 /** A value representing all possible events */
 #define RAIL_EVENTS_ALL 0xFFFFFFFFFFFFFFFFULL
@@ -1621,6 +1632,13 @@ RAIL_ENUM(RAIL_ChannelConfigEntryType_t) {
 #define RADIO_CONFIG_ENABLE_CONC_PHY 1
 
 /**
+ * @def RADIO_CONFIG_ENABLE_STACK_INFO
+ * @brief Indicates this version of RAIL supports stack info feature in
+ * radio configurator output. Needed for backwards compatibility.
+ */
+#define RADIO_CONFIG_ENABLE_STACK_INFO
+
+/**
  * @struct RAIL_ChannelConfigEntry_t
  * @brief A channel configuration entry structure, which defines a channel range
  *   and parameters across which a corresponding radio configuration is valid.
@@ -1649,6 +1667,11 @@ typedef struct RAIL_ChannelConfigEntry {
                                             channel set. */
   RAIL_ChannelConfigEntryType_t entryType; /**< Indicates channel config type. */
   uint8_t reserved[3]; /**< to align to 32-bit boundary. */
+  const uint8_t *stackInfo; /**< Array containing information according to the protocolId value,
+                                 first byte of this array.
+                                 The first 2 fields are common to all protocols and accessible by RAIL,
+                                 others are ignored by RAIL and only used by the application.
+                                 Common fields are listed in RAIL_StackInfoCommon_t. */
 } RAIL_ChannelConfigEntry_t;
 
 /// @struct RAIL_ChannelConfig_t
@@ -1876,8 +1899,18 @@ typedef struct RAIL_ChannelConfig {
  */
 typedef struct RAIL_ChannelMetadata {
   uint16_t channel; /**< Channel number */
+  uint16_t reserved; /**< Word alignment */
   uint32_t frequency; /**< Channel frequency, in Hz */
 } RAIL_ChannelMetadata_t;
+
+/**
+ * @struct RAIL_StackInfoCommon_t
+ * @brief StackInfo fields common to all protocols.
+ */
+typedef struct RAIL_StackInfoCommon {
+  uint8_t protocolId; /**< Same as RAIL_PtiProtocol_t */
+  uint8_t phyId;  /**< PHY Id depending on the protocol_id value */
+} RAIL_StackInfoCommon_t;
 
 /**
  * @typedef RAIL_RadioConfigChangedCallback_t
@@ -2580,7 +2613,7 @@ typedef struct RAIL_ScheduleTxConfig {
 ///     // is above the threshold.
 ///     signalEvent(RAIL_EVENT_TX_START_CCA);
 ///     if (performCca(csmaConfig->ccaDuration, csmaConfig->ccaThreshold)) {
-///       // CCA (and CSMA) success: Transmit after Rx-to-Tx turnaround
+///       // CCA (and CSMA) success: Transmit after RX-to-TX turnaround
 ///       StopAbortTimer();
 ///       signalEvent(RAIL_EVENT_TX_CHANNEL_CLEAR);
 ///       return true;
@@ -3040,8 +3073,6 @@ RAIL_ENUM_GENERIC(RAIL_RxOptions_t, uint32_t) {
 #define RAIL_RSSI_INVALID         ((int16_t)(RAIL_RSSI_INVALID_DBM * 4))
 /** The lowest RSSI value returned by RAIL: in quarter dBm. */
 #define RAIL_RSSI_LOWEST          ((int16_t)(RAIL_RSSI_INVALID + 1))
-/** The highest RSSI value returned by RAIL: in quarter dBm. */
-#define RAIL_RSSI_HIGHEST         ((int16_t)((-RAIL_RSSI_INVALID_DBM - 1) * 4))
 
 /** Maximum absolute value for RSSI offset */
 #define RAIL_RSSI_OFFSET_MAX      35
@@ -3393,6 +3424,19 @@ typedef struct RAIL_RxPacketDetails {
    * It is always available.
    */
   uint8_t channelHoppingChannelIndex;
+  /**
+   * The channel on which the packet was received.
+   *
+   * It is always available.
+   *
+   * @note It is best to fully process (empty or clear) the receive FIFO
+   *   before changing channel configurations (\ref RAIL_ConfigChannels()
+   *   or a built-in configuration) as unprocessed packets' channel
+   *   could reflect the wrong configuration. On EFR32xG1 only this
+   *   advice also applies when changing channels for receive or transmit
+   *   where unprocessed packets' channel could reflect the new channel.
+   */
+  uint16_t channel;
 } RAIL_RxPacketDetails_t;
 
 /** @} */ // end of group Receive
@@ -3465,6 +3509,22 @@ typedef struct RAIL_AutoAckConfig {
 
 /// A sentinel value to indicate an invalid thermistor measurement value.
 #define RAIL_INVALID_THERMISTOR_VALUE (0xFFFFFFFF)
+
+/**
+ * @struct RAIL_HFXOThermistorConfig_t
+ * @brief Configure the port and pin of the thermistor.
+ * @note This configuration is OPN dependent.
+ */
+typedef struct RAIL_HFXOThermistorConfig {
+  /**
+   * The GPIO port to access.
+   */
+  uint8_t port;
+  /**
+   * The GPIO pin to set.
+   */
+  uint8_t pin;
+} RAIL_HFXOThermistorConfig_t;
 /** @} */ // end of group External_Thermistor
 
 /******************************************************************************
@@ -3981,11 +4041,11 @@ typedef struct RAIL_RxChannelHoppingConfigMultiMode {
 typedef struct RAIL_RxChannelHoppingConfigEntry {
   /**
    * The channel number to be used for this entry in the channel hopping
-   * sequence. If this is an invalid channel for the current phy, the
+   * sequence. If this is an invalid channel for the current PHY, the
    * call to \ref RAIL_ConfigRxChannelHopping() will fail.
    */
   uint16_t channel;
-  /** Deprecated field. Set to RAIL_RX_CHANNEL_HOPPING_DELAY_MODE_STATIC. */
+  /** The mode by which RAIL determines when to hop to the next channel. */
   RAIL_RxChannelHoppingMode_t mode;
   // Unnamed 'uint8_t reserved1[1]' pad byte field here.
   /**
@@ -3999,9 +4059,7 @@ typedef struct RAIL_RxChannelHoppingConfigEntry {
    * channel indicated by this entry.
    */
   uint32_t delay;
-  /**
-   * Indicate how the timing specified in 'delay' should be applied.
-   */
+  /** Deprecated field. Set to RAIL_RX_CHANNEL_HOPPING_DELAY_MODE_STATIC. */
   RAIL_RxChannelHoppingDelayMode_t delayMode;
   /**
    * Bitmask of various options that can be applied to the current
@@ -4199,6 +4257,135 @@ typedef struct RAIL_VerifyConfig {
 } RAIL_VerifyConfig_t;
 
 /** @} */ // end of group Diagnostic
+
+/******************************************************************************
+ * Energy Friendly Front End Module (EFF)
+ *****************************************************************************/
+/**
+ * @addtogroup EFF
+ * @{
+ */
+
+/**
+ * @enum RAIL_EffDevice_t
+ * @brief EFF part numbers.
+ *
+ * The part number of the attached EFF device is passed to
+ * \ref RAIL_ConfigEff() as \ref RAIL_EffConfig_t.device.
+ * The \ref rail_util_eff configures and controls
+ * the EFF based on the capabilities of the attached EFF.
+ */
+RAIL_ENUM(RAIL_EffDevice_t) {
+  RAIL_EFF_DEVICE_NONE = 0, /**< No EFF device attached. */
+  RAIL_EFF_DEVICE_EFF01Z11, /**< EFF01Z11. LNA only, TX is bypass mode. */
+  RAIL_EFF_DEVICE_EFF01A12, /**< EFF01A12. */
+  RAIL_EFF_DEVICE_COUNT,    /**< A count of the choices in this enumeration. */
+};
+/**
+ * @def RAIL_EFF_SUPPORTS_TRANSMIT(x)
+ * @brief A macro that checks for EFFxx devices that support high power transmit
+ */
+#define RAIL_EFF_SUPPORTS_TRANSMIT(x) ( ((x) == RAIL_EFF_DEVICE_EFF01A12) \
+                                        )
+/**
+ * @def RAIL_EFF_SUPPORTS_RECEIVE(x)
+ * @brief A macro that checks for EFFxx devices that support receive
+ */
+#define RAIL_EFF_SUPPORTS_RECEIVE(x) ( ((x) == RAIL_EFF_DEVICE_EFF01A12)    \
+                                       || ((x) == RAIL_EFF_DEVICE_EFF01Z11) \
+                                       )
+
+/**
+ * @enum RAIL_EffLnaMode_t
+ * @brief EFF LNA Modes.
+ *
+ * The enabled EFF LNA modes are passed to\ref RAIL_ConfigEff() as the
+ * \ref RAIL_EffConfig_t.enabledLnaModes.
+ * The \ref rail_util_eff dynamically transitions between enabled LNA modes to
+ * maximize receive performance.
+ */
+RAIL_ENUM(RAIL_EffLnaMode_t) {
+  RAIL_EFF_LNA_MODE_RURAL   = (0x01U << 0), /**< Rural LNA Mode. */
+  RAIL_EFF_LNA_MODE_URBAN   = (0x01U << 1), /**< Urban LNA Mode. */
+  RAIL_EFF_LNA_MODE_BYPASS  = (0x01U << 2), /**< Bypass LNA Mode. */
+  RAIL_EFF_LNA_MODE_COUNT   = (0x01U << 3), /**< A count of the choices in this enumeration. */
+};
+
+/**
+ * @enum RAIL_ClpcEnable_t
+ * @brief EFF Closed Loop Power Control (CLPC) Enable states.
+ *
+ * The EFF CLPC Enable state is passed to \ref RAIL_ConfigEff() as the
+ * \ref RAIL_EffConfig_t.clpcEnable.
+ * The \ref rail_util_eff uses advanced power controls to tune EFF output to match
+ * Surface Acoustic Wave (SAW) filter losses and antenna performance.
+ */
+RAIL_ENUM(RAIL_ClpcEnable_t) {
+  RAIL_EFF_CLPC_DISABLED                  = 0,  /**<CLPC actions are completely disabled. EFF will output but CLPC will not change modes, take power measurements or tune power output. Temperature measurements are taken.*/
+  RAIL_EFF_CLPC_MODE_CHANGE               = 1,  /**<CLPC actions are completely disabled. EFF will output, change modes, and take measurements, but not tune power output. */
+  RAIL_EFF_CLPC_POWER_SLOW                = 2,  /**<CLPC actions allows Slow Loop. EFF will output, change modes, and take measurements, and tune power output based on slow loop. */
+  RAIL_EFF_CLPC_POWER_FAST                = 3,  /**<CLPC actions allows Fast Loop. EFF will output, change modes, and take measurements, and tune power output based on fast loop. */
+  RAIL_EFF_CLPC_POWER_BOTH                = 4,  /**<CLPC actions are completely enabled. EFF will output, change modes, take measurements, and tune power output based on slow and fast loops. Default state. */
+  RAIL_EFF_CLPC_POWER_SLOW_BELOW_MAX      = 5,  /**<CLPC actions allows Slow Loop. EFF will output, change modes, and take measurements, but not tune power output because requested output power is less than max. Internal only state. */
+  RAIL_EFF_CLPC_POWER_FAST_BELOW_MAX      = 6,  /**<CLPC actions allows Fast Loop. EFF will output, change modes, and take measurements,  but not tune power output because requested output power is less than max. Internal only state. */
+  RAIL_EFF_CLPC_POWER_BOTH_BELOW_MAX      = 7,  /**<CLPC actions are completely enabled. EFF will output, change modes, and take measurements, but not tune power output because requested output power is less than max. Internal only state. */
+  RAIL_EFF_CLPC_COUNT                     = 8   /**< A count of the choices in this enumeration. Must be last */
+};
+
+/**
+ * @struct RAIL_FemProtectionConfig_t
+ *
+ * @brief Temperature protection configuration for the attached FEM.
+ */
+typedef struct RAIL_FemProtectionConfig {
+  RAIL_TxPower_t PMaxContinuousTx;  /**< Power limit at FEM output, in deci-dBm */
+  uint8_t txDutyCycle;              /**< TX duty cycle limit, in percentage */
+  uint32_t reserved[2];             /**< Reserved. Values ignored. */
+} RAIL_FemProtectionConfig_t;
+
+/**
+ * @struct RAIL_EffConfig_t
+ *
+ * @brief Configuration data for the attached EFF device.
+ *
+ * A structure of type \ref RAIL_EffConfig_t is passed to \ref RAIL_ConfigEff().
+ */
+typedef struct RAIL_EffConfig {
+  RAIL_EffDevice_t device;            /**< EFF Device Type */
+  uint8_t ctrl0Port;                  /**< CTRL0 output GPIO port */
+  uint8_t ctrl0Pin;                   /**< CTRL0 output GPIO pin */
+  uint8_t ctrl1Port;                  /**< CTRL1 output GPIO port */
+  uint8_t ctrl1Pin;                   /**< CTRL1 output GPIO pin */
+  uint8_t ctrl2Port;                  /**< CTRL2 output GPIO port */
+  uint8_t ctrl2Pin;                   /**< CTRL2 output GPIO pin */
+  uint8_t ctrl3Port;                  /**< CTRL3 output GPIO port */
+  uint8_t ctrl3Pin;                   /**< CTRL3 output GPIO pin */
+  uint8_t testPort;                   /**< TEST output GPIO port */
+  uint8_t testPin;                    /**< TEST output GPIO pin */
+  uint8_t sensePort;                  /**< SENSE input GPIO port */
+  uint8_t sensePin;                   /**< SENSE input GPIO pin */
+  RAIL_EffLnaMode_t enabledLnaModes;  /**< LNA modes enable bitmask **/
+  uint16_t ruralUrbanMv;              /**< Trip point from rural to urban mode, in millivolts */
+  uint16_t urbanBypassMv;             /**< Trip point from urban to bypass mode, in millivolts */
+  uint16_t lnaReserved;               /**< Reserved for future use */
+  uint32_t urbanDwellTimeMs;          /**< Time to stay in urban mode before transitioning to rural mode, in milliseconds */
+  uint32_t bypassDwellTimeMs;         /**< Time to stay in bypass mode before transitioning to urban or rural mode, in milliseconds */
+  uint16_t clpcSlowLoopTarget;        /**< Target for Closed Loop Power Control (CLPC) slow loop, in milliwatts. */
+  uint16_t clpcSlowLoopSlope;         /**< Slope for CLPC slow loop, in delta-GAINDIG/delta-milliwatts. */
+  uint16_t clpcFastLoopTarget;        /**< Target for CLPC fast loop, in millivolts. */
+  uint16_t clpcFastLoopSlope;         /**< Slope for CLPC fast loop, in delta-GAINDIG/delta-millivolts. */
+  uint8_t  clpcReserved;              /**< Reserved for future use */
+  RAIL_ClpcEnable_t clpcEnable;       /**< Select CLPC mode */
+  uint8_t maxTxContinuousPowerDbm;    /**< Maximum continuous power (in dBm) */
+  uint8_t maxTxDutyCycle;             /**< Maximum transmit duty cycle (as a
+                                           percentage) */
+  uint16_t effTempThreshold;          /**< Temperature of EFF above which transmit
+                                           is not allowed, in degrees Kelvin */
+  uint16_t internalTempThreshold;     /**< Chip's internal temperature above which transmit
+                                           is not allowed, in degrees Kelvin */
+} RAIL_EffConfig_t;
+
+/** @} */ // end of group EFF
 
 #ifndef DOXYGEN_SHOULD_SKIP_THIS
 

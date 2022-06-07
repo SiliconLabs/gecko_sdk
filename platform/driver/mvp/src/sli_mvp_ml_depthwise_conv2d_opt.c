@@ -17,9 +17,8 @@
 
 #include "sl_mvp_ml_depthwise_conv2d.h"
 #include "sl_mvp_math.h"
-#include "em_common.h"
-
-static sli_mvp_program_t mvp_prog[2];
+#include "sl_mvp_program_area.h"
+#include "sl_common.h"
 
 sl_status_t sli_mvp_ml_depthwise_conv2d_s8_gen_opt(const sli_mvp_ml_depthwise_conv2d_s8_params_t *params,
                                                    bool execute)
@@ -48,11 +47,13 @@ sl_status_t sli_mvp_ml_depthwise_conv2d_s8_gen_opt(const sli_mvp_ml_depthwise_co
   const float16_t *output_scaler       = params->output_scaler;
   int8_t *output                       = params->output;
   int prog_index                       = 0;
-  __ALIGNED(4) const float16_t zero[2] = {.0f, .0f};
+  __ALIGNED(4) const float16_t zero[2] = { .0f, .0f };
 
-  if ((((uint32_t)bias & 0x1U) != 0U)
-       || (((uint32_t)output_scaler & 0x1U) != 0U)) {
-    return SL_STATUS_INVALID_PARAMETER;
+  if (execute) {
+    if ((((uint32_t)bias & 0x1U) != 0U)
+        || (((uint32_t)output_scaler & 0x1U) != 0U)) {
+      return SL_STATUS_INVALID_PARAMETER;
+    }
   }
 
   bool use_parallel = false;
@@ -62,7 +63,7 @@ sl_status_t sli_mvp_ml_depthwise_conv2d_s8_gen_opt(const sli_mvp_ml_depthwise_co
       && (((uint32_t)filter & 0x1U) == 0U)
       && (((uint32_t)bias & 0x3U) == 0U)
       && (((uint32_t)output_scaler & 0x3U) == 0U)) {
-        use_parallel = true;
+    use_parallel = true;
   }
   int effective_depth = use_parallel ? output_depth / 2 : output_depth;
 
@@ -90,6 +91,8 @@ sl_status_t sli_mvp_ml_depthwise_conv2d_s8_gen_opt(const sli_mvp_ml_depthwise_co
     // Range validation complete; early exit
     return SL_STATUS_OK;
   }
+
+  sli_mvp_program_t *mvp_prog = sli_mvp_get_program_area_double();
 
   for (int batch = 0; batch < batches; ++batch) {
     for (int out_y = 0; out_y < output_height; ++out_y) {
@@ -138,7 +141,7 @@ sl_status_t sli_mvp_ml_depthwise_conv2d_s8_gen_opt(const sli_mvp_ml_depthwise_co
           1,
           input_width * effective_depth,
           effective_depth
-        );
+          );
 
         // ARRAY1 = filter
         sli_mvp_prog_set_array_full(
@@ -152,7 +155,7 @@ sl_status_t sli_mvp_ml_depthwise_conv2d_s8_gen_opt(const sli_mvp_ml_depthwise_co
           1,
           filter_width * effective_depth,
           effective_depth
-        );
+          );
 
         // ARRAY2 = bias
         sli_mvp_prog_set_vector(
@@ -182,7 +185,7 @@ sl_status_t sli_mvp_ml_depthwise_conv2d_s8_gen_opt(const sli_mvp_ml_depthwise_co
           1,
           effective_depth,
           effective_depth
-        );
+          );
 
         // R5 = LOAD(A2) bias_i = load bias_array
         sli_mvp_prog_set_instr(
@@ -193,7 +196,7 @@ sl_status_t sli_mvp_ml_depthwise_conv2d_s8_gen_opt(const sli_mvp_ml_depthwise_co
           SLI_MVP_LOAD(0, SLI_MVP_R5, SLI_MVP_ARRAY(2), SLI_MVP_INCRDIM2),
           SLI_MVP_NONE,
           false
-        );
+          );
 
         // R6 = LOAD(A0) input_i = load input_array
         // R7 = LOAD(A1) filter_i = load filter_array
@@ -210,7 +213,7 @@ sl_status_t sli_mvp_ml_depthwise_conv2d_s8_gen_opt(const sli_mvp_ml_depthwise_co
           | SLI_MVP_LOAD(1, SLI_MVP_R7, SLI_MVP_ARRAY(1), SLI_MVP_INCRDIM2),
           SLI_MVP_NONE,
           false
-        );
+          );
 
         // R5 = MAC(R6, R7, R5) acc += input_i * filter_i
         sli_mvp_prog_set_instr(
@@ -224,7 +227,7 @@ sl_status_t sli_mvp_ml_depthwise_conv2d_s8_gen_opt(const sli_mvp_ml_depthwise_co
           SLI_MVP_NONE,
           SLI_MVP_NONE,
           false
-        );
+          );
 
         // R6 = LOAD(A3) output_scaler_i = load output_scaler_array
         // R7 = MAC(R5, R6, R2) output_i = acc * output_scaler_i + output_offset
@@ -244,7 +247,7 @@ sl_status_t sli_mvp_ml_depthwise_conv2d_s8_gen_opt(const sli_mvp_ml_depthwise_co
           do_activation
           ? false
           : true
-        );
+          );
 
         if (do_activation) {
           // R7 = CLIP2A(R3, R4, R7)
@@ -261,7 +264,7 @@ sl_status_t sli_mvp_ml_depthwise_conv2d_s8_gen_opt(const sli_mvp_ml_depthwise_co
             SLI_MVP_NONE,
             SLI_MVP_STORE(SLI_MVP_R7, SLI_MVP_ARRAY(4), SLI_MVP_INCRDIM0),
             true
-          );
+            );
         }
 
         // Loop over all depth
@@ -274,7 +277,7 @@ sl_status_t sli_mvp_ml_depthwise_conv2d_s8_gen_opt(const sli_mvp_ml_depthwise_co
           ? SLI_MVP_INSTR(4)
           : SLI_MVP_INSTR(3),
           SLI_MVP_NOINCR
-        );
+          );
 
         // LOOP(y): increment depth afterwards
         sli_mvp_prog_set_loop(
@@ -285,7 +288,7 @@ sl_status_t sli_mvp_ml_depthwise_conv2d_s8_gen_opt(const sli_mvp_ml_depthwise_co
           SLI_MVP_INSTR(2),
           SLI_MVP_LOOP_INCRDIM(SLI_MVP_ARRAY(0), SLI_MVP_INCRDIM0) // incr d/2 end of every loop
           | SLI_MVP_LOOP_INCRDIM(SLI_MVP_ARRAY(1), SLI_MVP_INCRDIM0)
-        );
+          );
 
         // LOOP(x): increment y afterwards
         sli_mvp_prog_set_loop(
@@ -296,7 +299,7 @@ sl_status_t sli_mvp_ml_depthwise_conv2d_s8_gen_opt(const sli_mvp_ml_depthwise_co
           SLI_MVP_INSTR(2),
           SLI_MVP_LOOP_INCRDIM(SLI_MVP_ARRAY(0), SLI_MVP_INCRDIM1) // incr y/1 end of every loop
           | SLI_MVP_LOOP_INCRDIM(SLI_MVP_ARRAY(1), SLI_MVP_INCRDIM1)
-        );
+          );
 
         sli_mvp_execute(p, false);
         prog_index ^= 1;

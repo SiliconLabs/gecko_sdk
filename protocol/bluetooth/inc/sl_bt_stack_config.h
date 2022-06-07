@@ -21,39 +21,10 @@
 #include "sl_bt_ll_config.h"
 
 typedef struct {
-  uint8_t max_connections;    //!< Maximum number of connections to support, if 0 defaults to 4
-  uint8_t max_advertisers;    //!< Maximum number of advertisers to support, if 0 defaults to 1
-  uint8_t max_periodic_sync;  //!< Maximum number of periodic synchronizations to support, if 0 defaults to 0
-  uint8_t max_l2cap_coc;      //!< Maximum number of L2cap Connection-oriented channels to support, if 0 defaults to 0
   uint32_t max_buffer_memory; //!< Maximum number of bytes to use for data buffers
   uint32_t linklayer_config;
   sl_bt_bluetooth_ll_priorities * linklayer_priorities; //Priority configuration, if NULL uses default values
 }sl_bt_stack_config_t;
-
-/** Value indicating the PA configuration is disabled  */
-#define SL_BT_RADIO_PA_CONFIG_DISABLED 0
-
-/** Value indicating the PA configuration is enabled  */
-#define SL_BT_RADIO_PA_CONFIG_ENABLED  1
-
-/** PA configuration - PAVDD input from battery supply. Voltage: ~ 3300 mV */
-#define SL_BT_RADIO_PA_INPUT_VBAT      0
-
-/** PA configuration - PAVDD input from DCDC supply. Voltage: ~ 1800 mV */
-#define SL_BT_RADIO_PA_INPUT_DCDC      1
-
-typedef struct {
-  uint8_t config_enable; // Non-zero value indicates this is a valid PA config
-
-  uint8_t input;         // PAVDD input, either SL_BT_RADIO_PA_INPUT_VBAT or SL_BT_RADIO_PA_INPUT_DCDC
-                         // default: SL_BT_RADIO_PA_INPUT_DCDC
-
-  uint8_t pa_mode;       // Selected PA power mode.
-                         // See power mode definitions in RAIL rail_chip_specific.h. If the given mode is not
-                         // supported by the device the stack will try with a lower mode. If power mode eventually
-                         // failed to configure, an error will be returned from sl_bt_stack_init or sl_bt_init.
-                         // Default value: RAIL_TX_POWER_MODE_2P4_HP
-}sl_bt_radio_pa_config_t;
 
 /** Flag indicating Bluetooth runs in RTOS */
 #define SL_BT_CONFIG_FLAG_RTOS                         256
@@ -90,8 +61,6 @@ typedef struct {
   //Callback for requesting Bluetooth stack scheduling, used for RTOS support
   //This is called from Interrupt context
   sl_bt_stack_schedule_callback stack_schedule_callback;
-
-  sl_bt_radio_pa_config_t pa;
 
   uint8_t max_timers;  // Max number of soft timers, up to 16, the application will use through SL_BT_API. Default: 4
   sl_bt_rf_config_t rf;

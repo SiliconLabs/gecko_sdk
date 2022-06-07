@@ -182,4 +182,11 @@ void sl_wisun_error_event_hnd(sl_wisun_evt_t *evt);
  *****************************************************************************/
 void sl_wisun_join_state_event_hnd(sl_wisun_evt_t *evt);
 
+/**************************************************************************//**
+ * @brief Wi-SUN regulation TX level indication
+ * @details
+ * @param[in] evt event ptr
+ *****************************************************************************/
+void sl_wisun_regulation_tx_level_hnd(sl_wisun_evt_t *evt);
+
 #endif /* __SL_WISUN_EVENT_MGR_H__ */

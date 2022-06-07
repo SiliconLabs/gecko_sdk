@@ -16,6 +16,11 @@ include:
       - path: sl_cli_tokenize.h
       - path: sl_cli_types.h
       - path: sl_cli_arguments.h
+  - path: src
+    file_list:
+      - path: sli_cli_arguments.h
+      - path: sli_cli_input.h
+      - path: sli_cli_io.h
 source:
   - path: src/sl_cli_input.c
   - path: src/sl_cli_tokenize.c
@@ -23,9 +28,6 @@ source:
   - path: src/sl_cli.c
   - path: src/sl_cli_io.c
   - path: src/sl_cli_arguments.c
-  - path: src/sli_cli_io.h
-  - path: src/sli_cli_input.h
-  - path: src/sli_cli_arguments.h
 provides:
   - name: cli_core
 requires:
@@ -35,6 +37,7 @@ requires:
   - name: iostream
   - name: slist
   - name: printf_integration
+  - name: sl_assert
 recommends:
   - id: printf
 library:

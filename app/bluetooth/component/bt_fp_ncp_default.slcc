@@ -8,14 +8,15 @@ quality: deprecated
 root_path: app/bluetooth
 requires:
   - name: bluetooth_stack
-  - name: bluetooth_feature_advertiser
+  - name: bluetooth_feature_legacy_advertiser
+  - name: bluetooth_feature_extended_advertiser
+  - name: bluetooth_feature_periodic_advertiser
   - name: bluetooth_feature_connection
   - name: bluetooth_feature_dfu
   - name: bluetooth_feature_gap
   - name: bluetooth_feature_gatt
   - name: bluetooth_feature_gatt_server
   - name: bluetooth_feature_nvm
-  - name: bluetooth_feature_periodic_adv
   - name: bluetooth_feature_scanner
   - name: bluetooth_feature_sm
   - name: bluetooth_feature_sync

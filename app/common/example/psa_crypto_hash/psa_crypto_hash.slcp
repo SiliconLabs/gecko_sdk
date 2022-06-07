@@ -5,6 +5,13 @@ label: Platform - PSA Crypto Hash
 description: >
   This example project demonstrates the hash API.
 category: Example|Platform
+filter:
+  - name: "Device Type"
+    value: ["SoC"]
+  - name: "MCU"
+    value: ["32-bit MCU"]
+  - name: "Project Difficulty"
+    value: ["Advanced"]
 source:
   - path: main.c
   - path: app_init.c
@@ -20,10 +27,10 @@ include:
     - path: app_psa_crypto_key.h
     - path: app_psa_crypto_macro.h
 readme:
-  - path: readme.html
+  - path: readme.md
 ui_hints:
   highlight:
-    - path: readme.html
+    - path: readme.md
       focus: true
 component:
   - id: psa_crypto_sha1

@@ -254,12 +254,12 @@ void sl_fem_util_init(void)
 #endif
 
 // if fem has a tx power pin (FEM pin CHL)
-#ifdef SL_FEM_UTIL_TXPOWER_PORT
+#ifdef SL_FEM_UTIL_TX_HIGH_POWER_PORT
   // set up tx power pin
   #if SL_FEM_UTIL_TX_HIGH_POWER_ENABLE
-  GPIO_PinModeSet(SL_FEM_UTIL_TXPOWER_PORT, SL_FEM_UTIL_TXPOWER_PIN, gpioModePushPull, 1);
+  GPIO_PinModeSet(SL_FEM_UTIL_TX_HIGH_POWER_PORT, SL_FEM_UTIL_TX_HIGH_POWER_PIN, gpioModePushPull, 1);
   #else
-  GPIO_PinModeSet(SL_FEM_UTIL_TXPOWER_PORT, SL_FEM_UTIL_TXPOWER_PIN, gpioModePushPull, 0);
+  GPIO_PinModeSet(SL_FEM_UTIL_TX_HIGH_POWER_PORT, SL_FEM_UTIL_TX_HIGH_POWER_PIN, gpioModePushPull, 0);
   #endif
 #endif
 #endif // SL_FEM_UTIL_GLOBAL_ENABLE

@@ -114,7 +114,7 @@ void emAfPluginScanDispatchInitCallback(uint8_t init_level)
 
 void emberAfPluginScanDispatchScanNetworkEventHandler(SLXU_UC_EVENT)
 {
-  EmberStatus status;
+  sl_status_t status;
 
 #ifdef UC_BUILD
   sl_zigbee_event_set_inactive(emberAfPluginScanDispatchScanNetworkEvents);
@@ -129,14 +129,15 @@ void emberAfPluginScanDispatchScanNetworkEventHandler(SLXU_UC_EVENT)
     status = emberStartScan(handlerQueue[head].scanType,
                             handlerQueue[head].channelMask,
                             handlerQueue[head].duration);
-    if (status != EMBER_MAC_SCANNING) {
-      if (status != EMBER_SUCCESS) {
+
+    if (status != SL_STATUS_MAC_SCANNING) {
+      if (status != SL_STATUS_OK) {
         maybeCallNextHandler(status,
-                             0, // channel or LQI - meh
+                             0,     // channel. 0 indicating that the actual scan was not started
                              handlerQueue[head].scanType,
-                             true,  // complete?
-                             true,  // failure?
-                             NULL); // network
+                             true,     // complete?
+                             true,     // failure?
+                             NULL);     // network
         head = handlerQueueNextIndex(head);
         count--;
 #ifdef UC_BUILD
@@ -158,9 +159,9 @@ void emberAfEnergyScanResultCallback(uint8_t channel, int8_t rssi)
   maybeCallNextHandler((uint8_t)rssi,
                        channel,
                        EMBER_ENERGY_SCAN,
-                       false,  // complete?
-                       false,  // failure?
-                       NULL);  // network
+                       false,     // complete?
+                       false,     // failure?
+                       NULL);     // network
 }
 
 #ifdef UC_BUILD
@@ -176,8 +177,8 @@ void emberAfNetworkFoundCallback(EmberZigbeeNetwork *networkFound,
   maybeCallNextHandler((uint8_t)rssi,
                        lqi,
                        EMBER_ACTIVE_SCAN,
-                       false, // complete?
-                       false, // failure?
+                       false,     // complete?
+                       false,     // failure?
                        networkFound);
 }
 
@@ -190,17 +191,16 @@ void emberAfScanCompleteCallback(uint8_t channel, EmberStatus status)
   maybeCallNextHandler(status,
                        channel,
                        handlerQueue[head].scanType,
-                       true,  // complete?
-                       false, // failure?
-                       NULL); // network
+                       true,     // complete?
+                       false,     // failure?
+                       NULL);     // network
 
   // The scan is done when the status is set to EMBER_SUCCESS.
   // See documentation for the emberScanCompleteHandler callback.
   // For Active scan we call the EMBER_ACTIVE_SCAN_XX anyways,
   // beacuse of the change in network-steering code which
   // continues to schedule a scan on the next channel after a failure
-  if ((status == EMBER_SUCCESS ||  handlerQueue[head].scanType == EMBER_ACTIVE_SCAN || handlerQueue[head].scanType == EMBER_ACTIVE_SCAN_ROUTER
-       ) && !handlerQueueIsEmpty()) {
+  if ((status == EMBER_SUCCESS) && !handlerQueueIsEmpty()) {
     head = handlerQueueNextIndex(head);
     count--;
 #ifdef UC_BUILD

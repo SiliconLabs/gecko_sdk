@@ -47,31 +47,22 @@ typedef struct aoa_iq_report_s {
 
 typedef struct aoa_angle_s {
   float azimuth;
+  float azimuth_stdev;
   float elevation;
+  float elevation_stdev;
   float distance;
-  uint32_t quality;
+  float distance_stdev;
   int32_t sequence;
 } aoa_angle_t;
 
 typedef struct aoa_position_s {
   float x;
+  float x_stdev;
   float y;
+  float y_stdev;
   float z;
+  float z_stdev;
   int32_t sequence;
 } aoa_position_t;
-
-typedef struct aoa_correction_s {
-  struct {
-    float azimuth;
-    float elevation;
-    float distance;
-  } direction;
-  struct {
-    float azimuth;
-    float elevation;
-    float distance;
-  } deviation;
-  int32_t sequence;
-} aoa_correction_t;
 
 #endif // AOA_TYPES_H

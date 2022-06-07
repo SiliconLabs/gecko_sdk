@@ -1,7 +1,8 @@
 project_name: ot-cli-mtd
-label: ot-cli-mtd
+label: OpenThread - SoC CLI (MTD)
 package: OpenThread
-description: This is a very simple CLI application to test the Openthread stack on a Minimal Thread Device.
+description: >
+  This is a very simple CLI application to test the OpenThread stack on a Minimal Thread Device. This is equivalent to the ot-cli-mtd application in the OpenThread GitHub repo.
 category: OpenThread Examples
 quality: production
 
@@ -70,3 +71,19 @@ configuration:
 
 tag:
   - prebuilt_demo
+
+readme:
+  - path: ./README.md
+
+filter:
+  - name: "Wireless Technology"
+    value: ["Thread"]
+  - name: "Device Type"
+    value: ["SoC"]
+  - name: "Project Difficulty"
+    value: ["Beginner"]
+
+ui_hints:
+  highlight:
+    - path: ./README.md
+      focus: true

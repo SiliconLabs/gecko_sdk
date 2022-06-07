@@ -31,7 +31,7 @@
 #define EM_CORE_H
 
 #include "em_device.h"
-#include "em_common.h"
+#include "sl_common.h"
 
 #include <stdbool.h>
 

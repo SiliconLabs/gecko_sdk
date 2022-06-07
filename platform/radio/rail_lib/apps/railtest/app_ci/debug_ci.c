@@ -56,6 +56,7 @@
 #endif // SL_RAIL_UTIL_INIT_RADIO_CONFIG_SUPPORT_INST0_ENABLE
 
 uint32_t rxOverflowDelay = 10 * 1000000; // 10 seconds
+uint32_t thermistorResistance = 0;
 
 #define MAX_DEBUG_BYTES (128)
 static char debugPrintBuffer[MAX_DEBUG_BYTES];
@@ -209,6 +210,27 @@ void txCancel(sl_cli_command_arg_t *args)
   enableAppMode(TX_CANCEL, delay >= 0, sl_cli_get_command_string(args, 0)); // Pends transmit to cancel
 }
 
+void configHFXOThermistor(sl_cli_command_arg_t *args)
+{
+#if RAIL_FEAT_EXTERNAL_THERMISTOR
+  CHECK_RAIL_HANDLE(sl_cli_get_command_string(args, 0));
+  const RAIL_HFXOThermistorConfig_t hfxoThermistorConfig = {
+    .port = GPIO_THMSW_EN_PORT,
+    .pin = GPIO_THMSW_EN_PIN
+  };
+
+  RAIL_Status_t status = RAIL_ConfigHFXOThermistor(railHandle, &hfxoThermistorConfig);
+  if (status == RAIL_STATUS_NO_ERROR) {
+    responsePrint(sl_cli_get_command_string(args, 0), "Configuration:Success");
+  } else {
+    responsePrintError(sl_cli_get_command_string(args, 0), 0xFF, "Error during configuration");
+  }
+#else
+  responsePrintError(sl_cli_get_command_string(args, 0), 0xFF, "Feature not supported in this target.");
+#endif
+  return;
+}
+
 void startThermistorMeasurement(sl_cli_command_arg_t *args)
 {
 #if RAIL_FEAT_EXTERNAL_THERMISTOR
@@ -229,18 +251,520 @@ void getThermistorImpedance(sl_cli_command_arg_t *args)
 {
 #if RAIL_FEAT_EXTERNAL_THERMISTOR
   RAIL_Status_t status;
-  uint32_t thermistorResistance;
   CHECK_RAIL_HANDLE(sl_cli_get_command_string(args, 0));
   status = RAIL_GetThermistorImpedance(railHandle, &thermistorResistance);
+
   if (status == RAIL_STATUS_NO_ERROR) {
-    responsePrint(sl_cli_get_command_string(args, 0), "Thermistor Measurement: %u Ohms", thermistorResistance);
+    if (thermistorResistance != 0U) {
+      int16_t thermistorTemperatureC;
+      status = RAIL_ConvertThermistorImpedance(railHandle, thermistorResistance, &thermistorTemperatureC);
+
+      if (status == RAIL_STATUS_NO_ERROR) {
+        // Convert temperature (originally in eighth of Celsius degrees) in Celsius
+        responsePrint(sl_cli_get_command_string(args, 0),
+                      "Ohms:%u,DegreesC:%d",
+                      thermistorResistance, thermistorTemperatureC / 8);
+      } else {
+        responsePrintError(sl_cli_get_command_string(args, 0), 0xFF, "Ohms:%u,DegreesC:255", thermistorResistance);
+      }
+    } else {
+      responsePrintError(sl_cli_get_command_string(args, 0), 0xFF, "Ohms:%u", thermistorResistance);
+    }
   } else {
-    responsePrintError(sl_cli_get_command_string(args, 0), 0xFF, "Thermistor mesurement not done yet.");
+    responsePrintError(sl_cli_get_command_string(args, 0), 0xFF, "Thermistor measurement not done yet.");
   }
 #else
   responsePrintError(sl_cli_get_command_string(args, 0), 0xFF, "Feature not supported in this target.");
 #endif
   return;
+}
+
+void getHFXOPPMError(sl_cli_command_arg_t *args)
+{
+#if RAIL_FEAT_EXTERNAL_THERMISTOR
+  RAIL_Status_t status;
+  CHECK_RAIL_HANDLE(sl_cli_get_command_string(args, 0));
+
+  if (thermistorResistance != 0U) {
+    int16_t thermistorTemperatureC;
+    status = RAIL_ConvertThermistorImpedance(railHandle, thermistorResistance, &thermistorTemperatureC);
+
+    if (status == RAIL_STATUS_NO_ERROR) {
+      int8_t crystalPPMError;
+      // Temperature is in eighth of celsius degrees
+      RAIL_ComputeHFXOPPMError(railHandle, thermistorTemperatureC / 8, &crystalPPMError);
+      responsePrint(sl_cli_get_command_string(args, 0),
+                    "ErrorPpm:%d", crystalPPMError);
+    } else {
+      responsePrintError(sl_cli_get_command_string(args, 0), 0xFF, "Ohms:%u,DegreesC:255", thermistorResistance);
+    }
+  } else {
+    responsePrintError(sl_cli_get_command_string(args, 0), 0xFF, "Ohms:%u", thermistorResistance);
+  }
+#else
+  responsePrintError(sl_cli_get_command_string(args, 0), 0xFF, "Feature not supported in this target.");
+#endif
+  return;
+}
+
+void getTemperature(sl_cli_command_arg_t *args)
+{
+#ifdef SL_RAIL_UTIL_EFF_DEVICE
+  if (SL_RAIL_UTIL_EFF_DEVICE != RAIL_EFF_DEVICE_NONE) {
+    bool reset = false;
+    int16_t tempBuffer[RAIL_TEMP_MEASURE_COUNT];
+
+    if (sl_cli_get_argument_count(args) > 0) {
+      reset = (bool) sl_cli_get_argument_uint8(args, 0);
+    }
+
+    CHECK_RAIL_HANDLE(sl_cli_get_command_string(args, 0));
+    RAIL_Status_t status = RAIL_GetTemperature(railHandle, tempBuffer, reset);
+
+    if (status == RAIL_STATUS_NO_ERROR) {
+      for (uint8_t i = 0; i < RAIL_TEMP_MEASURE_COUNT; i++) {
+        tempBuffer[i] = ((tempBuffer[i] != 0) && (tempBuffer[i] != 0x7FFF)) ? (tempBuffer[i] - 273) : 0xFF;
+      }
+
+      responsePrintStart(sl_cli_get_command_string(args, 0));
+      responsePrintContinue("chipTempTxStreamC:%d,"
+                            "chipTempPreTxC:%d,"
+                            "chipTempPostTxC:%d",
+                            tempBuffer[0],
+                            tempBuffer[1],
+                            tempBuffer[2]);
+      responsePrintContinue("effTempPreTxC:%d,"
+                            "effTempPostTxC:%d,"
+                            "effTempPreTxMinC:%d,"
+                            "effTempPostTxMinC:%d,"
+                            "effTempPreTxMaxC:%d,"
+                            "effTempPostTxMaxC:%d,"
+                            "effTempPreTxAvgC:%d,"
+                            "effTempPostTxAvgC:%d",
+                            tempBuffer[3],
+                            tempBuffer[4],
+                            tempBuffer[5],
+                            tempBuffer[6],
+                            tempBuffer[7],
+                            tempBuffer[8],
+                            tempBuffer[9],
+                            tempBuffer[10]);
+      responsePrintEnd("xtalTempPreTxK:%d,"
+                       "xtalTempPostTxK:%d",
+                       tempBuffer[11],
+                       tempBuffer[12]);
+    } else {
+      responsePrintError(sl_cli_get_command_string(args, 0), 0xFF, "Could not get temperature metrics.");
+    }
+  }
+#else
+  responsePrintError(sl_cli_get_command_string(args, 0), 0xFF, "Feature not supported in this target.");
+#endif // SL_RAIL_UTIL_EFF_DEVICE
+}
+
+void getSetFemProtectionConfig(sl_cli_command_arg_t *args)
+{
+#ifdef SL_RAIL_UTIL_EFF_DEVICE
+  if (SL_RAIL_UTIL_EFF_DEVICE != RAIL_EFF_DEVICE_NONE) {
+    RAIL_Status_t status = RAIL_STATUS_NO_ERROR;
+
+    // Only update protection configuration if an argument is given,
+    // otherwise print the current configuration
+    if (sl_cli_get_argument_count(args) > 0) {
+      femConfig.txDutyCycle = sl_cli_get_argument_uint32(args, 0);
+
+      if (sl_cli_get_argument_count(args) == 2) {
+        femConfig.PMaxContinuousTx = sl_cli_get_argument_uint32(args, 1);
+      }
+      // Check and possibly apply the configuration
+      (void) RAIL_SetFemProtectionConfig(railHandle, &femConfig);
+    }
+
+    // Get FEM parameters after update
+    status = RAIL_GetFemProtectionConfig(railHandle, &femConfig);
+
+    if (status == RAIL_STATUS_NO_ERROR) {
+      responsePrint(sl_cli_get_command_string(args, 0),
+                    "TxDutyCycle:%u,PMaxContinuousTx:%d",
+                    femConfig.txDutyCycle, femConfig.PMaxContinuousTx);
+    } else {
+      responsePrintError(sl_cli_get_command_string(args, 0), 31,
+                         "Incorrect configuration");
+    }
+  }
+#else
+  responsePrintError(sl_cli_get_command_string(args, 0), 0xFF, "Feature not supported in this target.");
+#endif // SL_RAIL_UTIL_EFF_DEVICE
+}
+
+void getSetEffControl(sl_cli_command_arg_t *args)
+{
+#ifdef SL_RAIL_UTIL_EFF_DEVICE
+  if (SL_RAIL_UTIL_EFF_DEVICE != RAIL_EFF_DEVICE_NONE) {
+    bool reset = false;
+    uint16_t tempBuffer[RAIL_EFF_CONTROL_SIZE / sizeof(uint16_t)];
+
+    _Static_assert(COUNTOF(tempBuffer) == 26,
+                   "CLPC Control size changed, must update getSetEffControl");
+
+    if (sl_cli_get_argument_count(args) > 0) {
+      reset = (bool) sl_cli_get_argument_uint8(args, 0);
+    }
+
+    CHECK_RAIL_HANDLE(sl_cli_get_command_string(args, 0));
+    RAIL_Status_t status = RAIL_GetSetEffControl(railHandle, tempBuffer, reset);
+
+    if (status == RAIL_STATUS_NO_ERROR) {
+      responsePrintStart(sl_cli_get_command_string(args, 0));
+      responsePrintContinue("EFF_CLPC_STATUS:%d,"
+                            "RX_BYPASS_SENSE_VDDB:%d,"
+                            "RX_BYPASS_SENSE_TEMPB:%d,"
+                            "PA_SAWA:%d,"
+                            "PA_SAWB:%d,"
+                            "PA_SAWC:%d,"
+                            "PA_SAWD:%d,"
+                            "PA_SAWE:%d,"
+                            "PA_SAWF:%d,"
+                            "PA_SAWG:%d,"
+                            "PA_SAWH:%d",
+                            ((uint32_t)tempBuffer[1] << 16) | tempBuffer[0],
+                            tempBuffer[2],
+                            tempBuffer[3],
+                            tempBuffer[4],
+                            tempBuffer[5],
+                            tempBuffer[6],
+                            tempBuffer[7],
+                            tempBuffer[8],
+                            tempBuffer[9],
+                            tempBuffer[10],
+                            tempBuffer[11]
+                            );
+      responsePrintEnd("PA_SENSE_ANT_VOLTAGEA:%d,"
+                       "PA_SENSE_ANT_CURRENTA:%d,"
+                       "PA_SENSE_ANT_VOLTAGEB:%d,"
+                       "PA_SENSE_ANT_CURRENTB:%d,"
+                       "PA_SENSE_VDD_SENSE:%d,"
+                       "RX_BYPASS_SENSE_TEMPA:%d,"
+                       "TIMESTAMP0:%d,"
+                       "TIMESTAMP1:%d,"
+                       "TIMESTAMP2:%d,"
+                       "TIMESTAMP3:%d",
+                       tempBuffer[12],
+                       tempBuffer[13],
+                       tempBuffer[14],
+                       tempBuffer[15],
+                       tempBuffer[16],
+                       tempBuffer[17],
+                       ((uint32_t)tempBuffer[19] << 16) | tempBuffer[18],
+                       ((uint32_t)tempBuffer[21] << 16) | tempBuffer[20],
+                       ((uint32_t)tempBuffer[23] << 16) | tempBuffer[22],
+                       ((uint32_t)tempBuffer[25] << 16) | tempBuffer[24]
+                       );
+    } else {
+      responsePrintError(sl_cli_get_command_string(args, 0), 0xFF, "Could not get EFF Control values.");
+    }
+  }
+#else
+  responsePrintError(sl_cli_get_command_string(args, 0), 0xFF, "Feature not supported in this target.");
+#endif // SL_RAIL_UTIL_EFF_DEVICE
+}
+
+void getSetEffMode(sl_cli_command_arg_t *args)
+{
+#ifdef SL_RAIL_UTIL_EFF_DEVICE
+  if (SL_RAIL_UTIL_EFF_DEVICE != RAIL_EFF_DEVICE_NONE) {
+    bool changeMode = false;
+    uint8_t newMode;
+
+    if (sl_cli_get_argument_count(args) > 0) {
+      changeMode = true;
+      newMode = sl_cli_get_argument_uint8(args, 0);
+    }
+
+    CHECK_RAIL_HANDLE(sl_cli_get_command_string(args, 0));
+    RAIL_Status_t status = RAIL_GetSetEffMode(railHandle, &newMode, changeMode);
+
+    if (status == RAIL_STATUS_NO_ERROR) {
+      responsePrintStart(sl_cli_get_command_string(args, 0));
+      responsePrintEnd("EFF Mode:%d",
+                       newMode
+                       );
+    } else {
+      responsePrintError(sl_cli_get_command_string(args, 0), 0xFF, "Could not get EFF mode.");
+    }
+  }
+#else
+  responsePrintError(sl_cli_get_command_string(args, 0), 0xFF, "Feature not supported in this target.");
+#endif // SL_RAIL_UTIL_EFF_DEVICE
+}
+
+void getSetEffRuralUrban(sl_cli_command_arg_t *args)
+{
+#ifdef SL_RAIL_UTIL_EFF_DEVICE
+  if (SL_RAIL_UTIL_EFF_DEVICE != RAIL_EFF_DEVICE_NONE) {
+    bool changeTrip = false;
+    uint16_t newTrip;
+
+    if (sl_cli_get_argument_count(args) > 0) {
+      changeTrip = true;
+      newTrip = sl_cli_get_argument_uint16(args, 0);
+    }
+
+    CHECK_RAIL_HANDLE(sl_cli_get_command_string(args, 0));
+    RAIL_Status_t status = RAIL_GetSetEffRuralUrbanMv(railHandle, &newTrip, changeTrip);
+
+    if (status == RAIL_STATUS_NO_ERROR) {
+      responsePrintStart(sl_cli_get_command_string(args, 0));
+      responsePrintEnd("EFF rural to urban trip (mV):%d",
+                       newTrip
+                       );
+    } else {
+      responsePrintError(sl_cli_get_command_string(args, 0), 0xFF, "Could not get Rural to Urban trip.");
+    }
+  }
+#else
+  responsePrintError(sl_cli_get_command_string(args, 0), 0xFF, "Feature not supported in this target.");
+#endif // SL_RAIL_UTIL_EFF_DEVICE
+}
+
+void getSetEffUrbanBypass(sl_cli_command_arg_t *args)
+{
+#ifdef SL_RAIL_UTIL_EFF_DEVICE
+  if (SL_RAIL_UTIL_EFF_DEVICE != RAIL_EFF_DEVICE_NONE) {
+    bool changeTrip = false;
+    uint16_t newTrip;
+
+    if (sl_cli_get_argument_count(args) > 0) {
+      changeTrip = true;
+      newTrip = sl_cli_get_argument_uint16(args, 0);
+    }
+
+    CHECK_RAIL_HANDLE(sl_cli_get_command_string(args, 0));
+    RAIL_Status_t status = RAIL_GetSetEffUrbanBypassMv(railHandle, &newTrip, changeTrip);
+
+    if (status == RAIL_STATUS_NO_ERROR) {
+      responsePrintStart(sl_cli_get_command_string(args, 0));
+      responsePrintEnd("EFF urban to bypass trip (mV):%d",
+                       newTrip
+                       );
+    } else {
+      responsePrintError(sl_cli_get_command_string(args, 0), 0xFF, "Could not get Urban to Bypass trip.");
+    }
+  }
+#else
+  responsePrintError(sl_cli_get_command_string(args, 0), 0xFF, "Feature not supported in this target.");
+#endif // SL_RAIL_UTIL_EFF_DEVICE
+}
+
+void getSetEffUrbanDwellTime(sl_cli_command_arg_t *args)
+{
+#ifdef SL_RAIL_UTIL_EFF_DEVICE
+  if (SL_RAIL_UTIL_EFF_DEVICE != RAIL_EFF_DEVICE_NONE) {
+    bool changeDwellTime = false;
+    uint32_t newDwellTime;
+
+    if (sl_cli_get_argument_count(args) > 0) {
+      changeDwellTime = true;
+      newDwellTime = sl_cli_get_argument_uint32(args, 0);
+    }
+
+    CHECK_RAIL_HANDLE(sl_cli_get_command_string(args, 0));
+    RAIL_Status_t status = RAIL_GetSetEffUrbanDwellTimeMs(railHandle, &newDwellTime, changeDwellTime);
+
+    if (status == RAIL_STATUS_NO_ERROR) {
+      responsePrintStart(sl_cli_get_command_string(args, 0));
+      responsePrintEnd("EFF urban dwell time (ms):%d",
+                       newDwellTime
+                       );
+    } else {
+      responsePrintError(sl_cli_get_command_string(args, 0), 0xFF, "Could not get Urban dwell time.");
+    }
+  }
+#else
+  responsePrintError(sl_cli_get_command_string(args, 0), 0xFF, "Feature not supported in this target.");
+#endif // SL_RAIL_UTIL_EFF_DEVICE
+}
+
+void getSetEffBypassDwellTime(sl_cli_command_arg_t *args)
+{
+#ifdef SL_RAIL_UTIL_EFF_DEVICE
+  if (SL_RAIL_UTIL_EFF_DEVICE != RAIL_EFF_DEVICE_NONE) {
+    bool changeDwellTime = false;
+    uint32_t newDwellTime;
+
+    if (sl_cli_get_argument_count(args) > 0) {
+      changeDwellTime = true;
+      newDwellTime = sl_cli_get_argument_uint32(args, 0);
+    }
+
+    CHECK_RAIL_HANDLE(sl_cli_get_command_string(args, 0));
+    RAIL_Status_t status = RAIL_GetSetEffBypassDwellTimeMs(railHandle, &newDwellTime, changeDwellTime);
+
+    if (status == RAIL_STATUS_NO_ERROR) {
+      responsePrintStart(sl_cli_get_command_string(args, 0));
+      responsePrintEnd("EFF bypass dwell time (ms):%d",
+                       newDwellTime
+                       );
+    } else {
+      responsePrintError(sl_cli_get_command_string(args, 0), 0xFF, "Could not get Bypass dwell time.");
+    }
+  }
+#else
+  responsePrintError(sl_cli_get_command_string(args, 0), 0xFF, "Feature not supported in this target.");
+#endif // SL_RAIL_UTIL_EFF_DEVICE
+}
+
+void getSetClpcSlowLoop(sl_cli_command_arg_t *args)
+{
+#ifdef SL_RAIL_UTIL_EFF_DEVICE
+  if (SL_RAIL_UTIL_EFF_DEVICE != RAIL_EFF_DEVICE_NONE) {
+    bool changeValues = false;
+    uint16_t newTarget;
+    uint16_t newSlope;
+
+    if (sl_cli_get_argument_count(args) > 1) {
+      changeValues = true;
+      newTarget = sl_cli_get_argument_uint16(args, 0);
+      newSlope = sl_cli_get_argument_uint16(args, 1);
+    }
+
+    CHECK_RAIL_HANDLE(sl_cli_get_command_string(args, 0));
+    RAIL_Status_t status = RAIL_GetSetClpcSlowLoop(railHandle, &newTarget, &newSlope, changeValues);
+
+    if (status == RAIL_STATUS_NO_ERROR) {
+      responsePrintStart(sl_cli_get_command_string(args, 0));
+      responsePrintEnd("EFF CLPC slow loop target (mW):%d,"
+                       "EFF CLPC slow loop slope (GAINDIG/mW):%d",
+                       newTarget,
+                       newSlope
+                       );
+    } else {
+      responsePrintError(sl_cli_get_command_string(args, 0), 0xFF, "Could not get CLPC slow loop values.");
+    }
+  }
+#else
+  responsePrintError(sl_cli_get_command_string(args, 0), 0xFF, "Feature not supported in this target.");
+#endif // SL_RAIL_UTIL_EFF_DEVICE
+}
+
+void getSetClpcFastLoop(sl_cli_command_arg_t *args)
+{
+#ifdef SL_RAIL_UTIL_EFF_DEVICE
+  if (SL_RAIL_UTIL_EFF_DEVICE != RAIL_EFF_DEVICE_NONE) {
+    bool changeValues = false;
+    uint16_t newTarget;
+    uint16_t newSlope;
+
+    if (sl_cli_get_argument_count(args) > 1) {
+      changeValues = true;
+      newTarget = sl_cli_get_argument_uint16(args, 0);
+      newSlope = sl_cli_get_argument_uint16(args, 1);
+    }
+
+    CHECK_RAIL_HANDLE(sl_cli_get_command_string(args, 0));
+    RAIL_Status_t status = RAIL_GetSetClpcFastLoop(railHandle, &newTarget, &newSlope, changeValues);
+
+    if (status == RAIL_STATUS_NO_ERROR) {
+      responsePrintStart(sl_cli_get_command_string(args, 0));
+      responsePrintEnd("EFF CLPC fast loop target (mV):%d,"
+                       "EFF CLPC fast loop slope (GAINDIG/mV):%d",
+                       newTarget,
+                       newSlope
+                       );
+    } else {
+      responsePrintError(sl_cli_get_command_string(args, 0), 0xFF, "Could not get CLPC fast loop values.");
+    }
+  }
+#else
+  responsePrintError(sl_cli_get_command_string(args, 0), 0xFF, "Feature not supported in this target.");
+#endif // SL_RAIL_UTIL_EFF_DEVICE
+}
+
+void getSetClpcEnable(sl_cli_command_arg_t *args)
+{
+#ifdef SL_RAIL_UTIL_EFF_DEVICE
+  if (SL_RAIL_UTIL_EFF_DEVICE != RAIL_EFF_DEVICE_NONE) {
+    bool changeClpcEnable = false;
+    uint8_t newClpcEnable;
+
+    if (sl_cli_get_argument_count(args) > 0) {
+      changeClpcEnable = true;
+      newClpcEnable = sl_cli_get_argument_uint8(args, 0);
+    }
+
+    CHECK_RAIL_HANDLE(sl_cli_get_command_string(args, 0));
+    RAIL_Status_t status = RAIL_GetSetClpcEnable(railHandle, &newClpcEnable, changeClpcEnable);
+
+    if (status == RAIL_STATUS_NO_ERROR) {
+      responsePrintStart(sl_cli_get_command_string(args, 0));
+      responsePrintEnd("EFF CLPC Enable:%d",
+                       newClpcEnable
+                       );
+    } else {
+      responsePrintError(sl_cli_get_command_string(args, 0), 0xFF, "Could not get CLPC Enable.");
+    }
+  }
+#else
+  responsePrintError(sl_cli_get_command_string(args, 0), 0xFF, "Feature not supported in this target.");
+#endif // SL_RAIL_UTIL_EFF_DEVICE
+}
+
+void getSetEffTempThreshold(sl_cli_command_arg_t *args)
+{
+#ifdef SL_RAIL_UTIL_EFF_DEVICE
+  if (SL_RAIL_UTIL_EFF_DEVICE != RAIL_EFF_DEVICE_NONE) {
+    bool changeThreshold = false;
+    uint16_t newThreshold;
+
+    if (sl_cli_get_argument_count(args) > 0) {
+      changeThreshold = true;
+      newThreshold = sl_cli_get_argument_uint16(args, 0);
+    }
+
+    CHECK_RAIL_HANDLE(sl_cli_get_command_string(args, 0));
+    RAIL_Status_t status = RAIL_GetSetEffTempThreshold(railHandle, &newThreshold, changeThreshold);
+
+    if (status == RAIL_STATUS_NO_ERROR) {
+      responsePrintStart(sl_cli_get_command_string(args, 0));
+      responsePrintEnd("EFF temperature threshold (K):%d",
+                       newThreshold
+                       );
+    } else {
+      responsePrintError(sl_cli_get_command_string(args, 0), 0xFF, "Could not get EFF temperature threshold.");
+    }
+  }
+#else
+  responsePrintError(sl_cli_get_command_string(args, 0), 0xFF, "Feature not supported in this target.");
+#endif // SL_RAIL_UTIL_EFF_DEVICE
+}
+
+void getSetInternalTempThreshold(sl_cli_command_arg_t *args)
+{
+#ifdef SL_RAIL_UTIL_EFF_DEVICE
+  if (SL_RAIL_UTIL_EFF_DEVICE != RAIL_EFF_DEVICE_NONE) {
+    bool changeThreshold = false;
+    uint16_t newThreshold;
+
+    if (sl_cli_get_argument_count(args) > 0) {
+      changeThreshold = true;
+      newThreshold = sl_cli_get_argument_uint16(args, 0);
+    }
+
+    CHECK_RAIL_HANDLE(sl_cli_get_command_string(args, 0));
+    RAIL_Status_t status = RAIL_GetSetInternalTempThreshold(railHandle, &newThreshold, changeThreshold);
+
+    if (status == RAIL_STATUS_NO_ERROR) {
+      responsePrintStart(sl_cli_get_command_string(args, 0));
+      responsePrintEnd("Internal temperature threshold (K):%d",
+                       newThreshold
+                       );
+    } else {
+      responsePrintError(sl_cli_get_command_string(args, 0), 0xFF, "Could not get internal temperature threshold.");
+    }
+  }
+#else
+  responsePrintError(sl_cli_get_command_string(args, 0), 0xFF, "Feature not supported in this target.");
+#endif // SL_RAIL_UTIL_EFF_DEVICE
 }
 
 void getLogLevels(sl_cli_command_arg_t *args)

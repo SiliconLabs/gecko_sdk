@@ -50,9 +50,9 @@
 /**************************************************************************//**
  * @brief Check status value, set errno and return with error or retval
  * @details Parsing sl_status, set errno and return
- * @param status Status value
- * @param retval Return value to retrun if the status is SL_STATUS_OK
- * @param errno_val errno number value if there is any error
+ * @param[in] status Status value
+ * @param[in] retval Return value to retrun if the status is SL_STATUS_OK
+ * @param[in] errno_val errno number value if there is any error
  * @return return value by status check
  *****************************************************************************/
 static inline int32_t _check_status(sl_status_t status, int32_t retval, int32_t errno_val);
@@ -60,7 +60,7 @@ static inline int32_t _check_status(sl_status_t status, int32_t retval, int32_t 
 /**************************************************************************//**
  * @brief Convert POSIX protocol ID to Wi-SUN eqvivalent
  * @details Default is UDP, if the protocol is correct
- * @param protocol protocol ID, it can be:
+ * @param[in] protocol protocol ID, it can be:
  *                 IPPROTO_ICMP
  *                 IPPROTO_TCP
  *                 IPPROTO_UDP
@@ -74,11 +74,39 @@ static inline sl_wisun_socket_protocol_t _proto2wisun(proto_type_t protocol);
  *             SOCK_STREAM -> TCP
  *             SOCK_DGRAM  -> UDP
  *             SOCK_RAW    -> by the protocol converter _proto2wisun
- * @param type Socket type ID
- * @param protocol Protocol ID
+ * @param[in] type Socket type ID
+ * @param[in] protocol Protocol ID
  * @return Converted protocol. Default is SL_WISUN_SOCKET_PROTOCOL_UDP
  *****************************************************************************/
 static inline sl_wisun_socket_protocol_t _socktype2wisun(sock_type_t type, proto_type_t protocol);
+
+/**************************************************************************//**
+ * @brief Set special Wi-SUN socket options for socket handler
+ * @details helper function
+ * @param[in,out] hnd Handler
+ * @param[in] optname Option name ID
+ * @param[in] optval Option value ptr
+ * @param[in] optlen Option length
+ * @return int32_t Return with -1 on error, 0 on success.
+ *****************************************************************************/
+static int32_t _set_socket_handler_opt(_socket_handler_t *hnd,
+                                       const int32_t optname,
+                                       const void * const optval,
+                                       const socklen_t optlen);
+
+/**************************************************************************//**
+ * @brief Get special Wi-SUN socket options for socket handler
+ * @details helper function
+ * @param[in] hnd Handler
+ * @param[in] optname Option name ID
+ * @param[out] optval Destination option value ptr
+ * @param[in] optlen Option length
+ * @return int32_t Return with -1 on error, 0 on success.
+ *****************************************************************************/
+static int32_t _get_socket_handler_opt(const _socket_handler_t * const hnd,
+                                       const int32_t optname,
+                                       void * const optval,
+                                       socklen_t * const optlen);
 
 // -----------------------------------------------------------------------------
 //                                Global Variables
@@ -480,7 +508,7 @@ int32_t recvfrom(int32_t sockid, void *buf, uint32_t len, int32_t flags,
 int32_t setsockopt(int32_t sockid, int32_t level, int32_t optname,
                    const void *optval, socklen_t optlen)
 {
-  const _socket_handler_t *sockhnd = NULL;
+  _socket_handler_t *sockhnd = NULL;
   sl_status_t stat = SL_STATUS_FAIL;
 
   sockhnd = socket_handler_get(sockid);
@@ -490,17 +518,22 @@ int32_t setsockopt(int32_t sockid, int32_t level, int32_t optname,
 
   switch (sockhnd->_domain) {
     case AF_WISUN:
-      (void) level;  // level not used in Wi-SUN domain
-      // if the opt lent is not set to the sizeof sl_wisun_socket_option_data_t
-      // return with erro in Wi-SUN mode
-      if (optlen != sizeof(sl_wisun_socket_option_data_t)) {
+      if (level == SOL_SOCKET_HANDLER) {
+        return _set_socket_handler_opt(sockhnd, optname, optval, optlen);
+      } else if (level == SOL_SOCKET) {
+        // if the opt lent is not set to the sizeof sl_wisun_socket_option_data_t
+        // return with erro in Wi-SUN mode
+        if (optlen != sizeof(sl_wisun_socket_option_data_t)) {
+          _set_errno_ret_error(EINVAL);
+        }
+        stat = sl_wisun_set_socket_option((sl_wisun_socket_id_t) sockhnd->_socket_id,
+                                          (sl_wisun_socket_option_t) optname,
+                                          (const sl_wisun_socket_option_data_t *)optval);
+        __CHECK_FOR_STATUS(stat);
+        return _check_status(stat, RETVAL_OK, EINVAL);
+      } else {
         _set_errno_ret_error(EINVAL);
       }
-      stat = sl_wisun_set_socket_option((sl_wisun_socket_id_t) sockhnd->_socket_id,
-                                        (sl_wisun_socket_option_t) optname,
-                                        (const sl_wisun_socket_option_data_t *)optval);
-      __CHECK_FOR_STATUS(stat);
-      return _check_status(stat, RETVAL_OK, EINVAL);
     case AF_INET:
     case AF_INET6: return _external_setsockopt(sockid, level, optname, optval, optlen);
     default:
@@ -522,17 +555,22 @@ int32_t getsockopt(int32_t sockid, int32_t level, int32_t optname,
 
   switch (sockhnd->_domain) {
     case AF_WISUN:
-      (void) level; // not used
-      // if the opt lent is not set to the sizeof sl_wisun_socket_option_data_t
-      // return with erro in Wi-SUN mode
-      if (*optlen != sizeof(sl_wisun_socket_option_data_t)) {
+      if (level == SOL_SOCKET_HANDLER) {
+        return _get_socket_handler_opt(sockhnd, optname, optval, optlen);
+      } else if (level == SOL_SOCKET) {
+        // if the opt lent is not set to the sizeof sl_wisun_socket_option_data_t
+        // return with erro in Wi-SUN mode
+        if (*optlen != sizeof(sl_wisun_socket_option_data_t)) {
+          _set_errno_ret_error(EINVAL);
+        }
+        stat = sl_wisun_get_socket_option((sl_wisun_socket_id_t) sockhnd->_socket_id,
+                                          (sl_wisun_socket_option_t) optname,
+                                          (sl_wisun_socket_option_data_t *) optval);
+        __CHECK_FOR_STATUS(stat);
+        return _check_status(stat, RETVAL_OK, EINVAL);
+      } else {
         _set_errno_ret_error(EINVAL);
       }
-      stat = sl_wisun_get_socket_option((sl_wisun_socket_id_t) sockhnd->_socket_id,
-                                        (sl_wisun_socket_option_t) optname,
-                                        (sl_wisun_socket_option_data_t *) optval);
-      __CHECK_FOR_STATUS(stat);
-      return _check_status(stat, RETVAL_OK, EINVAL);
     case AF_INET:
     case AF_INET6: return _external_getsockopt(sockid, level, optname, optval, optlen);
     default:
@@ -553,7 +591,7 @@ int32_t inet_pton(sock_domain_t af, const char *src, void *dst)
         ;
       }
       ipv6_res = sl_wisun_stoip6(src, len, dst); // convert address text to binary for wisun and ipv6
-      return ipv6_res ? 1 : -1;         // 1: success, -1: error
+      return ipv6_res ? 1 : -1;                  // 1: success, -1: error
     case AF_INET:
       (void) 0;
     default:
@@ -570,7 +608,7 @@ const char *inet_ntop(sock_domain_t af, const void *src, char *dst, socklen_t si
     case AF_INET6:
       (void) size;
       ipv6_res = sl_wisun_ip6tos(src, dst);  // convert address binary to text for wisun and ipv6
-      return ipv6_res ? dst : NULL; // dst: success, NULL: error
+      return ipv6_res ? dst : NULL;          // dst: success, NULL: error
     case AF_INET:
       (void) 0;
     default:
@@ -582,6 +620,38 @@ const char *inet_ntop(sock_domain_t af, const void *src, char *dst, socklen_t si
 // -----------------------------------------------------------------------------
 //                          Static Function Definitions
 // -----------------------------------------------------------------------------
+
+static int32_t _set_socket_handler_opt(_socket_handler_t *hnd,
+                                       const int32_t optname,
+                                       const void * const optval,
+                                       socklen_t optlen)
+{
+  switch (optname) {
+    case SO_HANDLER_OVERWRITE_PREV_RCV_BUFF:
+      if (optlen < sizeof(bool)) {
+        return RETVAL_ERROR;
+      }
+      return socket_handler_fifo_set_overwrite(hnd, (bool *)optval);
+    default: return RETVAL_ERROR;
+  }
+}
+
+static int32_t _get_socket_handler_opt(const _socket_handler_t * const hnd,
+                                       const int32_t optname,
+                                       void * const optval,
+                                       socklen_t * const optlen)
+{
+  switch (optname) {
+    case SO_HANDLER_OVERWRITE_PREV_RCV_BUFF:
+      if (*optlen < sizeof(bool)) {
+        return RETVAL_ERROR;
+      }
+      *optlen = sizeof(bool);
+      return socket_handler_fifo_get_overwrite(hnd, (bool *)optval);
+
+    default: return RETVAL_ERROR;
+  }
+}
 
 static inline int32_t _check_status(sl_status_t status, int32_t retval, int32_t errno_val)
 {

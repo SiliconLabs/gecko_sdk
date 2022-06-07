@@ -258,16 +258,19 @@ extern const RAIL_ChannelConfig_t *const RAIL_BLE_PhyQuuppa;
  * @brief Available Signal Identifier modes.
  */
 RAIL_ENUM(RAIL_BLE_SignalIdentifierMode_t) {
+  /* Disable signal detection mode. */
+  RAIL_BLE_SIGNAL_IDENTIFIER_MODE_DISABLE = 0,
   /* BLE 1Mbps (GFSK) detection mode. */
-  RAIL_BLE_SIGNAL_IDENTIFIER_MODE_1MBPS = 1,
+  RAIL_BLE_SIGNAL_IDENTIFIER_MODE_1MBPS,
   /* BLE 2Mbps (GFSK) detection mode. */
   RAIL_BLE_SIGNAL_IDENTIFIER_MODE_2MBPS
 };
 
 #ifndef DOXYGEN_SHOULD_SKIP_THIS
 // Self-referencing defines minimize compiler complaints when using RAIL_ENUM
-#define RAIL_BLE_SIGNAL_IDENTIFIER_MODE_2MBPS ((RAIL_BLE_SignalIdentifierMode_t)RAIL_BLE_SIGNAL_IDENTIFIER_MODE_2MBPS)
-#define RAIL_BLE_SIGNAL_IDENTIFIER_MODE_1MBPS ((RAIL_BLE_SignalIdentifierMode_t)RAIL_BLE_SIGNAL_IDENTIFIER_MODE_1MBPS)
+#define RAIL_BLE_SIGNAL_IDENTIFIER_MODE_DISABLE ((RAIL_BLE_SignalIdentifierMode_t)RAIL_BLE_SIGNAL_IDENTIFIER_MODE_DISABLE)
+#define RAIL_BLE_SIGNAL_IDENTIFIER_MODE_1MBPS   ((RAIL_BLE_SignalIdentifierMode_t)RAIL_BLE_SIGNAL_IDENTIFIER_MODE_1MBPS)
+#define RAIL_BLE_SIGNAL_IDENTIFIER_MODE_2MBPS   ((RAIL_BLE_SignalIdentifierMode_t)RAIL_BLE_SIGNAL_IDENTIFIER_MODE_2MBPS)
 #endif
 
 /**
@@ -491,43 +494,54 @@ RAIL_Status_t RAIL_BLE_PhySwitchToRx(RAIL_Handle_t railHandle,
                                      bool disableWhitening);
 
 /**
- * Configure signal identifier for BLE signal detection.
+ * Configure and enable signal identifier for BLE signal detection.
  *
  * @param[in] railHandle A RAIL instance handle.
  * @param[in] signalIdentifierMode Mode of signal identifier operation.
  *
  * This features allows detection of BLE signal on air based on the mode.
- * This function must be called once before \ref RAIL_BLE_EnableSignalIdentifier
- * to configure signal identifier.
- * Subsequent calls to this to function to reconfigure the signal identifier
- * require a new call to \ref RAIL_BLE_EnableSignalIdentifier() to re-enable the
- * signal identifier.
+ * This function must be called once before \ref RAIL_BLE_EnableSignalDetection
+ * to configure and enable signal identifier.
  *
  * To enable event for signal detection \ref RAIL_ConfigEvents() must be called
  * for enabling \ref RAIL_EVENT_SIGNAL_DETECTED.
  *
+ * This function is only supported by chips where
+ * \ref RAIL_BLE_SUPPORTS_SIGNAL_IDENTIFIER and
+ * \ref RAIL_BLE_SupportsSignalIdentifier() are true.
+ *
  * @return Status code indicating success of the function call.
  */
 RAIL_Status_t RAIL_BLE_ConfigSignalIdentifier(RAIL_Handle_t railHandle,
-                                              const RAIL_BLE_SignalIdentifierMode_t signalIdentifierMode);
+                                              RAIL_BLE_SignalIdentifierMode_t signalIdentifierMode);
 
 /**
- * Enable or Disable signal identifier for BLE signal detection.
+ * Enable or Disable signal identifier interrupt for BLE signal detection.
  *
  * @param[in] railHandle A RAIL instance handle.
- * @param[in] enable Signal Identifer is enabled if true, disabled if false.
+ * @param[in] enable Signal detection is enabled if true, disabled if false.
  *
  * \ref RAIL_BLE_ConfigSignalIdentifier must be called once before calling this
- * function to configure signal identifier.
- * Once a signal is detected signal identifier will be turned off and this
- * function should be called to re-enable signal identifier without needing to
- * call \ref RAIL_BLE_ConfigSignalIdentifier if the signal identifier is already
- * configured.
+ * function to configure and enable signal identifier.
+ * Once a signal is detected signal detection will be turned off and this
+ * function should be called to re-enable the signal detection without needing
+ * to call \ref RAIL_BLE_ConfigSignalIdentifier if the signal identifier
+ * is already configured and enabled.
+ *
+ * This function is only supported by chips where
+ * \ref RAIL_BLE_SUPPORTS_SIGNAL_IDENTIFIER and
+ * \ref RAIL_BLE_SupportsSignalIdentifier() are true.
  *
  * @return Status code indicating success of the function call.
  */
-RAIL_Status_t RAIL_BLE_EnableSignalIdentifier(RAIL_Handle_t railHandle,
-                                              bool enable);
+RAIL_Status_t RAIL_BLE_EnableSignalDetection(RAIL_Handle_t railHandle,
+                                             bool enable);
+
+/**
+ * @brief Backward compatible name for the \ref
+ * RAIL_BLE_EnableSignalDetection API.
+ */
+#define RAIL_BLE_EnableSignalIdentifier RAIL_BLE_EnableSignalDetection
 
 /******************************************************************************
  * Angle of Arrival/Departure (AoX)
@@ -949,12 +963,12 @@ typedef struct RAIL_BLE_TxRepeatConfig {
  * called. Future repeated transmits must be requested by calling this function
  * again.
  *
- * Each repeated transmit that occurs will have full \ref PTI information, and
+ * Each repeated transmit that occurs will have full \ref PTI information and
  * will receive events such as \ref RAIL_EVENT_TX_PACKET_SENT as normal.
  *
  * If a TX error occurs during the repetition, the process will abort and the
  * TX error transition from \ref RAIL_SetTxTransitions will be used. If the
- * repetition completes successfully, then the TX success transition from
+ * repetition completes successfully, the TX success transition from
  * \ref RAIL_SetTxTransitions will be used.
  *
  * Any call to \ref RAIL_Idle or \ref RAIL_StopTx will clear the pending
@@ -968,8 +982,8 @@ typedef struct RAIL_BLE_TxRepeatConfig {
  * The application is responsible for populating the transmit data to be used
  * by the repeated transmits via \ref RAIL_SetTxFifo or \ref RAIL_WriteTxFifo.
  * Data will be transmitted from the TX FIFO. If the TX FIFO does not have
- * sufficient data to transmit, a TX error will be caused and a \ref
- * RAIL_EVENT_TX_UNDERFLOW will occur. In order to avoid an underflow, the
+ * sufficient data to transmit, a TX error and a \ref
+ * RAIL_EVENT_TX_UNDERFLOW will occur. To avoid an underflow, the
  * application should queue data to be transmitted as early as possible.
  *
  * This function will fail to configure the repetition if a transmit of any

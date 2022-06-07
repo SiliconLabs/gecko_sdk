@@ -49,6 +49,20 @@
 #include "board_config.h"
 #include "em_msc.h"
 
+/**
+ * @def OPENTHREAD_CONFIG_CLI_MAX_LINE_LENGTH
+ *
+ * The maximum size of the CLI line in bytes including the null terminator.
+ *
+ */
+#ifndef OPENTHREAD_CONFIG_CLI_MAX_LINE_LENGTH
+#if OPENTHREAD_CONFIG_REFERENCE_DEVICE_ENABLE
+#define OPENTHREAD_CONFIG_CLI_MAX_LINE_LENGTH 640 // Default for Test Harness certification
+#else
+#define OPENTHREAD_CONFIG_CLI_MAX_LINE_LENGTH 384 // Stack default
+#endif
+#endif
+
 /*
  * @def OPENTHREAD_CONFIG_RADIO_915MHZ_OQPSK_SUPPORT
  *
@@ -151,6 +165,20 @@
 #endif
 
 /**
+ * @def OPENTHREAD_CONFIG_MAC_CSL_AUTO_SYNC_ENABLE
+ *
+ * This setting configures CSL auto synchronization based on data poll mechanism in Thread 1.2.
+ *
+ */
+#ifndef OPENTHREAD_CONFIG_MAC_CSL_AUTO_SYNC_ENABLE
+#if OPENTHREAD_CONFIG_REFERENCE_DEVICE_ENABLE
+#define OPENTHREAD_CONFIG_MAC_CSL_AUTO_SYNC_ENABLE 0
+#else
+#define OPENTHREAD_CONFIG_MAC_CSL_AUTO_SYNC_ENABLE 1
+#endif
+#endif
+
+/**
  * @def OPENTHREAD_CONFIG_MAC_CSL_REQUEST_AHEAD_US
  *
  * Define how many microseconds ahead should MAC deliver CSL frame to SubMac.
@@ -177,10 +205,10 @@
  * - Maximum frame size with preamble: 6*2+127*2 symbols
  * - AIFS: 12 symbols
  * - Maximum ACK size with preamble: 6*2+33*2 symbols
- *
+ * - Additional frame window: 6*2+127*2 symbols
  */
 #ifndef OPENTHREAD_CONFIG_CSL_MIN_RECEIVE_ON
-#define OPENTHREAD_CONFIG_CSL_MIN_RECEIVE_ON 356 * 16
+#define OPENTHREAD_CONFIG_CSL_MIN_RECEIVE_ON 622 * 16
 #endif
 
 /*
@@ -298,6 +326,16 @@
  */
 #ifndef OPENTHREAD_CONFIG_NCP_CPC_ENABLE
 #define OPENTHREAD_CONFIG_NCP_CPC_ENABLE 0
+#endif
+
+/**
+ * @def OPENTHREAD_CONFIG_NCP_SPI_ENABLE
+ *
+ * Define to 1 to enable NCP SPI support.
+ *
+ */
+#ifndef OPENTHREAD_CONFIG_NCP_SPI_ENABLE
+#define OPENTHREAD_CONFIG_NCP_SPI_ENABLE 0
 #endif
 
 /**

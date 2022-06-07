@@ -116,6 +116,7 @@ void printBackup(const EmberAfTrustCenterBackupData* backup)
 
 void printExportDataCommand(sl_cli_command_arg_t *arguments)
 {
+  (void) arguments;
   EmberAfLinkKeyBackupData exportKeyList[MAX_CLI_SIZE];
   EmberAfTrustCenterBackupData export;
   EmberStatus status;
@@ -134,11 +135,13 @@ void printExportDataCommand(sl_cli_command_arg_t *arguments)
 
 void printImportDataCommand(sl_cli_command_arg_t *arguments)
 {
+  (void) arguments;
   printBackup(&importData);
 }
 
 void importClearCommand(sl_cli_command_arg_t *arguments)
 {
+  (void) arguments;
   MEMSET(&importData, 0, sizeof(EmberAfTrustCenterBackupData));
   MEMSET(importKeyList,
          0,
@@ -185,6 +188,7 @@ void setExtendedPanIdCommand(sl_cli_command_arg_t *arguments)
 
 void restoreFromBackupCommand(sl_cli_command_arg_t *arguments)
 {
+  (void) arguments;
   EmberStatus status;
 
   if (0 == MEMCOMPARE(importData.extendedPanId,

@@ -35,6 +35,7 @@
 //                                   Includes
 // -----------------------------------------------------------------------------
 #include "rail.h"
+#include "rail_features.h"
 #include "sl_component_catalog.h"
 #include "rail_ieee802154.h"
 #include "sl_flex_util_802154_protocol.h"
@@ -187,7 +188,7 @@ void sl_flex_ieee802154_print_frame(sl_flex_ieee802154_std_t std,
  * @param[in] buffer    buffer contains raw ACK frame
  *****************************************************************************/
 void sl_flex_ieee802154_print_ack(sl_flex_ieee802154_std_t std,
-                                  uint8_t *buffer);
+                                  const uint8_t *buffer);
 
 /**************************************************************************//**
  * The function initializes the settings when a new request is coming and
@@ -222,7 +223,7 @@ void sl_flex_ieee802154_prepare_sending(sl_flex_ieee802154_frame_t *frame,
  * @param[in] tx_frame      Frame of TX
  *****************************************************************************/
 void sl_flex_ieee802154_update_status(sl_flex_ieee802154_status_t *comm_status,
-                                      sl_flex_ieee802154_frame_t *tx_frame);
+                                      const sl_flex_ieee802154_frame_t *tx_frame);
 
 /**************************************************************************//**
  * The function processes the requests.
@@ -241,7 +242,7 @@ bool sl_flex_ieee802154_is_change_requested(
  * @param[in] packet_size     size of the packet
  *****************************************************************************/
 RAIL_Status_t sl_flex_ieee802154_transmission(RAIL_Handle_t rail_handle,
-                                              uint8_t *packet,
+                                              const uint8_t *packet,
                                               uint16_t packet_size);
 
 /**************************************************************************//**

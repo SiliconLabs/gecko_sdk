@@ -43,6 +43,10 @@
   #define DEFAULT_SL_RAIL_UTIL_COEX_OPT_ACK_HOLDOFF SL_RAIL_UTIL_COEX_OPT_DISABLED
 #endif //SL_RAIL_UTIL_COEX_ACKHOLDOFF || defined(RHO_GPIO)
 
+#if !defined(SL_RAIL_UTIL_COEX_IEEE802154_TX_ABORT) && defined(SL_RAIL_UTIL_COEX_TX_ABORT)
+  #define SL_RAIL_UTIL_COEX_IEEE802154_TX_ABORT SL_RAIL_UTIL_COEX_TX_ABORT
+#endif
+
 #if SL_RAIL_UTIL_COEX_IEEE802154_TX_ABORT
   #define DEFAULT_SL_RAIL_UTIL_COEX_OPT_ABORT_TX SL_RAIL_UTIL_COEX_OPT_ABORT_TX
 #else //!SL_RAIL_UTIL_COEX_IEEE802154_TX_ABORT
@@ -97,14 +101,14 @@
   #define DEFAULT_SL_RAIL_UTIL_COEX_OPT_RX_RETRY_REQ SL_RAIL_UTIL_COEX_OPT_DISABLED
 #endif //SL_RAIL_UTIL_COEX_RETRYRX_TIMEOUT
 
-#if SL_RAIL_UTIL_COEX_CCA_THRESHOLD
+#if SL_RAIL_UTIL_COEX_PRIORITY_ESCALATION_ENABLE && SL_RAIL_UTIL_COEX_CCA_THRESHOLD
   #define DEFAULT_SL_RAIL_UTIL_COEX_OPT_CCA_THRESHOLD \
   ((SL_RAIL_UTIL_COEX_CCA_THRESHOLD << 20) & SL_RAIL_UTIL_COEX_OPT_CCA_THRESHOLD)
 #else //!SL_RAIL_UTIL_COEX_CCA_THRESHOLD
   #define DEFAULT_SL_RAIL_UTIL_COEX_OPT_CCA_THRESHOLD SL_RAIL_UTIL_COEX_OPT_DISABLED
 #endif  //SL_RAIL_UTIL_COEX_CCA_THRESHOLD
 
-#if SL_RAIL_UTIL_COEX_MAC_FAIL_THRESHOLD
+#if SL_RAIL_UTIL_COEX_PRIORITY_ESCALATION_ENABLE && SL_RAIL_UTIL_COEX_MAC_FAIL_THRESHOLD
   #define DEFAULT_SL_RAIL_UTIL_COEX_OPT_MAC_FAIL_THRESHOLD \
   ((SL_RAIL_UTIL_COEX_MAC_FAIL_THRESHOLD << 25) & SL_RAIL_UTIL_COEX_OPT_MAC_FAIL_THRESHOLD)
 #else //!SL_RAIL_UTIL_COEX_MAC_FAIL_THRESHOLD
@@ -270,19 +274,6 @@ static void coexEventsCb(COEX_Events_t events);
 static void phySelectIsr(void);
 #endif//SL_RAIL_UTIL_COEX_RUNTIME_PHY_SELECT
 
-#if SL_RAIL_UTIL_COEX_IEEE802154_SIGNAL_IDENTIFIER_ENABLED
-static void wifiTxIsr(void)
-{
-  if (emPhyRailHandle != NULL) {
-    if (COEX_HAL_GetWifiTx()) {
-      RAIL_IEEE802154_EnableSignalIdentifier(emPhyRailHandle, false);
-    } else {
-      RAIL_IEEE802154_EnableSignalIdentifier(emPhyRailHandle, true);
-    }
-  }
-}
-#endif
-
 void sli_rail_util_ieee802154_coex_on_event(COEX_Events_t events)
 {
   if ((events & COEX_EVENT_HOLDOFF_CHANGED) != 0U) {
@@ -293,11 +284,6 @@ void sli_rail_util_ieee802154_coex_on_event(COEX_Events_t events)
     phySelectIsr();
   }
  #endif//SL_RAIL_UTIL_COEX_RUNTIME_PHY_SELECT
- #if SL_RAIL_UTIL_COEX_IEEE802154_SIGNAL_IDENTIFIER_ENABLED
-  if ((events & COEX_EVENT_WIFI_TX_CHANGED) != 0U) {
-    wifiTxIsr();
-  }
- #endif
   coexEventsCb(events);
 }
 
@@ -347,7 +333,6 @@ sl_status_t sl_rail_util_coex_set_options(sl_rail_util_coex_options_t options)
     (void) sl_rail_util_coex_set_tx_request(SL_RAIL_UTIL_COEX_REQ_OFF, NULL);
     (void) sl_rail_util_coex_set_rx_request(SL_RAIL_UTIL_COEX_REQ_OFF, NULL);
   }
-  MAP_COEX_OPTION(COEX_OPTION_TX_ABORT, SL_RAIL_UTIL_COEX_OPT_ABORT_TX);
   MAP_COEX_OPTION(COEX_OPTION_RHO_ENABLED, SL_RAIL_UTIL_COEX_OPT_RHO_ENABLED);
 
   if (COEX_SetOptions(coexOptions)) {
@@ -417,7 +402,7 @@ static void coexEventsCb(COEX_Events_t events)
     emRadioEnablePta((COEX_GetOptions() & COEX_OPTION_COEX_ENABLED) != 0U);
   }
   if ((events & COEX_EVENT_GRANT_RELEASED) != 0U
-      && (COEX_GetOptions() & COEX_OPTION_TX_ABORT) != 0U
+      && (sl_rail_util_coex_get_options() & SL_RAIL_UTIL_COEX_OPT_ABORT_TX) != 0U
       && (txReq.coexReq & COEX_REQ_ON) != 0U) {
     if (cancelTransmit()) {
       events |= COEX_EVENT_TX_ABORTED;
@@ -574,8 +559,7 @@ static void stackEventTickInit(void)
                                       SL_RAIL_UTIL_COEX_PWM_REQ_PERIOD);
 #endif
 #if SL_RAIL_UTIL_COEX_IEEE802154_SIGNAL_IDENTIFIER_ENABLED
-    COEX_EnableWifiTxIsr(true);
-    RAIL_IEEE802154_ConfigSignalIdentifier(emPhyRailHandle);
+    RAIL_IEEE802154_ConfigSignalIdentifier(emPhyRailHandle, RAIL_IEEE802154_SIGNAL_IDENTIFIER_MODE_154);
 #endif
     stackEventTickInitialized = true;
   }
@@ -614,13 +598,6 @@ sl_rail_util_ieee802154_stack_status_t sl_rail_util_coex_on_event(
           (void) sl_rail_util_coex_set_rx_request(sl_rail_util_coex_frame_detect_req(), NULL);
           cancelTimer(&ptaRxRetryTimer);
           setTimer(&ptaRxTimer, SL_RAIL_UTIL_COEX_RX_TIMEOUT_US, &ptaRxTimerCb);
-        #if SL_RAIL_UTIL_COEX_IEEE802154_SIGNAL_IDENTIFIER_ENABLED
-          // Disable signal identifier if RX started before signal detected event happened
-          if (emPhyRailHandle != NULL) {
-            RAIL_IEEE802154_EnableSignalIdentifier(emPhyRailHandle, false);
-            COEX_EnableWifiTxIsr(false);
-          }
-        #endif
         }
       }
       break;
@@ -664,9 +641,6 @@ sl_rail_util_ieee802154_stack_status_t sl_rail_util_coex_on_event(
         cancelTimer(&ptaRxRetryTimer);
         if (!isReceivingFrame) {
           (void) sl_rail_util_coex_set_rx_request(SL_RAIL_UTIL_COEX_REQ_OFF, NULL);
-        #if RAIL_UTIL_COEX_SIGNAL_IDENTIFIER_ENABLED
-          COEX_EnableWifiTxIsr(true);
-        #endif
         }
       }
       break;
@@ -829,6 +803,13 @@ sl_status_t sl_rail_util_coex_set_tx_request(COEX_Req_t coexReq, COEX_ReqCb_t co
 
 sl_status_t sl_rail_util_coex_set_rx_request(COEX_Req_t coexReq, COEX_ReqCb_t coexCb)
 {
+#if SL_RAIL_UTIL_COEX_IEEE802154_SIGNAL_IDENTIFIER_ENABLED
+  if (emPhyRailHandle != NULL) {
+    // Restart signal detection when request deasserts and vice-versa.
+    bool enable = ((coexReq & SL_RAIL_UTIL_COEX_REQ_ON) == SL_RAIL_UTIL_COEX_REQ_ON) ? false : true;
+    (void) RAIL_IEEE802154_EnableSignalDetection(emPhyRailHandle, enable);
+  }
+#endif
   return internalPtaSetRequest(&rxReq, coexReq, coexCb);
 }
 

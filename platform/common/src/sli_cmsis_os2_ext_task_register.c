@@ -28,7 +28,7 @@
  *
  ******************************************************************************/
 
-#include "em_assert.h"
+#include "sl_assert.h"
 #include "sli_cmsis_os2_ext_task_register.h"
 #include "sl_cmsis_os2_common.h"
 
@@ -90,7 +90,7 @@ sl_status_t sli_osTaskRegisterGetValue(const osThreadId_t thread_id,
     return SL_STATUS_FAIL;
   }
 
-  if(thread_id != NULL) {
+  if (thread_id != NULL) {
     thread = (osThread_t *)thread_id;
     *value = OSTaskRegGet(&thread->tcb, reg_id, &err);
   } else {
@@ -122,7 +122,7 @@ sl_status_t sli_osTaskRegisterSetValue(const osThreadId_t thread_id,
   RTOS_ERR err;
   osThread_t *thread;
 
-  if(thread_id != NULL) {
+  if (thread_id != NULL) {
     thread = (osThread_t *)thread_id;
     OSTaskRegSet(&thread->tcb, reg_id, (OS_REG)value, &err);
   } else {

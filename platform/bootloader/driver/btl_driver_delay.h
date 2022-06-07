@@ -62,7 +62,7 @@ void delay_milliseconds(uint32_t msecs, bool blocking);
 /**
  * Check whether the current delay has expired.
  *
- * @return True if the delay has expired
+ * @return True if the delay has expired.
  */
 bool delay_expired(void);
 

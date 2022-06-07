@@ -32,6 +32,7 @@
 #include <stdio.h>
 #include <stdbool.h>
 #include <windows.h>
+#include <winbase.h>
 #include <errno.h>
 #include <unistd.h>
 
@@ -101,12 +102,7 @@ int32_t uartOpen(void *handle, int8_t *port, uint32_t baudRate,
 
 void uartFlush(void *handle)
 {
-  uint8_t buf[4];
-
-  // Flush all accumulated data in target
-  usleep(50000);
-  while (uartRxNonBlocking(handle, 4, buf) == 4) {
-  }
+  PurgeComm(*(HANDLE *)handle, PURGE_TXCLEAR | PURGE_RXCLEAR);
 }
 
 int32_t uartClose(void *handle)

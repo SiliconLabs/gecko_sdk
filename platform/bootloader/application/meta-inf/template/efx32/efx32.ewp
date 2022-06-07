@@ -306,7 +306,8 @@
           <state>$FILE_DIR$</state>
           <state>$PROJ_DIR$</state>
           <state>$PROJ_DIR$\$--frameworkDirFromProjBs--$\..\$--deviceDir--$\SiliconLabs\$--chipFamily;U--$\Include</state>
-          <state>$PROJ_DIR$\$--frameworkDirFromProjBs--$\..\$--cmsisDir--$\Include</state>
+          <state>$PROJ_DIR$\$--frameworkDirFromProjBs--$\..\$--cmsisDir--$\Core\Include</state>
+          <state>$PROJ_DIR$\$--frameworkDirFromProjBs--$\..\$--cmsisDir--$\DSP\Include</state>
           <state>$PROJ_DIR$\$--frameworkDirFromProjBs--$\..\$--halconfigDir--$\inc\hal-config</state>
           <state>$PROJ_DIR$\$--frameworkDirFromProjBs--$\..\..\hardware\module\config</state>
       $--includePathsEwp--$
@@ -562,7 +563,8 @@
           <state>$FILE_DIR$</state>
           <state>$PROJ_DIR$</state>
           <state>$PROJ_DIR$\$--frameworkDirFromProjBs--$\..\$--deviceDir--$\SiliconLabs\$--chipFamily;U--$\Include</state>
-          <state>$PROJ_DIR$\$--frameworkDirFromProjBs--$\..\$--cmsisDir--$\Include</state>
+          <state>$PROJ_DIR$\$--frameworkDirFromProjBs--$\..\$--cmsisDir--$\Core\Include</state>
+          <state>$PROJ_DIR$\$--frameworkDirFromProjBs--$\..\$--cmsisDir--$\DSP\Include</state>
           <state>$PROJ_DIR$\$--frameworkDirFromProjBs--$\..\$--halconfigDir--$\inc\hal-config</state>
       $--includePathsEwp--$
         </option>
@@ -1243,7 +1245,8 @@
           <state>$FILE_DIR$</state>
           <state>$PROJ_DIR$</state>
           <state>$PROJ_DIR$\$--frameworkDirFromProjBs--$\..\$--deviceDir--$\SiliconLabs\$--chipFamily;U--$\Include</state>
-          <state>$PROJ_DIR$\$--frameworkDirFromProjBs--$\..\$--cmsisDir--$\Include</state>
+          <state>$PROJ_DIR$\$--frameworkDirFromProjBs--$\..\$--cmsisDir--$\Core\Include</state>
+          <state>$PROJ_DIR$\$--frameworkDirFromProjBs--$\..\$--cmsisDir--$\DSP\Include</state>
           <state>$PROJ_DIR$\$--frameworkDirFromProjBs--$\..\$--halconfigDir--$\inc\hal-config</state>
           <state>$PROJ_DIR$\$--frameworkDirFromProjBs--$\..\..\hardware\module\config</state>
       $--includePathsEwp--$
@@ -1502,7 +1505,8 @@
           <state>$FILE_DIR$</state>
           <state>$PROJ_DIR$</state>
           <state>$PROJ_DIR$\$--frameworkDirFromProjBs--$\..\$--deviceDir--$\SiliconLabs\$--chipFamily;U--$\Include</state>
-          <state>$PROJ_DIR$\$--frameworkDirFromProjBs--$\..\$--cmsisDir--$\Include</state>
+          <state>$PROJ_DIR$\$--frameworkDirFromProjBs--$\..\$--cmsisDir--$\Core\Include</state>
+          <state>$PROJ_DIR$\$--frameworkDirFromProjBs--$\..\$--cmsisDir--$\DSP\Include</state>
       $--includePathsEwp--$
         </option>
         <option>

@@ -30,7 +30,7 @@
 #include "sl_mvp.h"
 #include "sl_mvp_power.h"
 #include "em_device.h"
-#include "em_assert.h"
+#include "sl_assert.h"
 #include "em_ldma.h"
 #include "sl_mvp_config.h"
 #include <stddef.h>
@@ -52,7 +52,7 @@ static LDMA_Descriptor_t ldma_descriptor = LDMA_DESCRIPTOR_SINGLE_M2M_WORD(
   sizeof(sli_mvp_program_t) / sizeof(uint32_t)
   );
 static LDMA_TransferCfg_t ldma_config = LDMA_TRANSFER_CFG_MEMORY();
-static volatile uint32_t perfcnt[NUM_PERF_CNT] = {0};
+static volatile uint32_t perfcnt[NUM_PERF_CNT] = { 0 };
 
 /* Abstraction of interaction with the MVP hardware. This represents the functionality needed
  * for loading and executing an MVP program and makes it possible to use this
@@ -533,16 +533,16 @@ void sli_mvp_pb_init_program(sli_mvp_program_context_t *p)
 }
 
 void sli_mvp_pb_postloop_incr_dim(sli_mvp_program_context_t *p,
-                               uint8_t array_index,
-                               uint8_t dimension)
+                                  uint8_t array_index,
+                                  uint8_t dimension)
 {
   p->p->LOOP[p->loop_stack[p->loop_level + 1]].CFG
     |= dimension << ((array_index * 4) + _MVP_LOOPCFG_ARRAY0INCRDIM0_SHIFT);
 }
 
 void sli_mvp_pb_postloop_reset_dim(sli_mvp_program_context_t *p,
-                                uint8_t array_index,
-                                uint8_t dimension)
+                                   uint8_t array_index,
+                                   uint8_t dimension)
 {
   p->p->LOOP[p->loop_stack[p->loop_level + 1]].RST
     |= dimension << ((array_index * 4) + _MVP_LOOPRST_ARRAY0RESETDIM0_SHIFT);

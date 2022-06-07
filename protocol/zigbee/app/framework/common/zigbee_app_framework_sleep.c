@@ -50,6 +50,10 @@ bool emAfCheckStayAwakeWhenNotJoined(void);
 
 //------------------------------------------------------------------------------
 // Static and externs
+
+// Get length of data in a callback queue.
+extern uint16_t emberGetCallbackQueueLength(void);
+
 static bool em1_requirement_set = false;
 static sl_power_manager_em_transition_event_handle_t pm_handle;
 static void energy_mode_transition_callback(sl_power_manager_em_t from, sl_power_manager_em_t to);
@@ -65,6 +69,10 @@ uint32_t lastWakeupMs = 0;
 static void wakeup_timer_callback(sl_sleeptimer_timer_handle_t* timer_id, void *user);
 static sl_sleeptimer_timer_handle_t wakeup_timer_id;
 #endif //!defined(SL_CATALOG_KERNEL_PRESENT)
+
+#ifdef SL_CATALOG_ZIGBEE_FORCE_SLEEP_AND_WAKEUP_PRESENT
+#include "force-sleep-wakeup.h"
+#endif // SL_CATALOG_ZIGBEE_FORCE_SLEEP_AND_WAKEUP_PRESENT
 
 void sli_zigbee_app_framework_sleep_init(void)
 {
@@ -88,6 +96,17 @@ void sli_zigbee_app_framework_sleep_init(void)
 bool sli_zigbee_app_framework_is_ok_to_sleep(void)
 {
   uint32_t duration_ms = 0;
+
+  #ifdef SL_CATALOG_ZIGBEE_FORCE_SLEEP_AND_WAKEUP_PRESENT
+  if (sli_zigbee_app_framework_get_force_sleep_flag()) {
+    // We NEED to go to EM2. Remove EM1 requirement if set and allow power manager to sleep
+    if (em1_requirement_set) {
+      sl_power_manager_remove_em_requirement(SL_POWER_MANAGER_EM1);
+      em1_requirement_set = false;
+    }
+    return true;
+  }
+  #endif //#ifdef SL_CATALOG_ZIGBEE_FORCE_SLEEP_AND_WAKEUP_PRESENT
 
   duration_ms = sli_zigbee_app_framework_set_pm_requirements_and_get_ms_to_next_wakeup();
   // Limit the value of sleep duration to what the sleep timer allows
@@ -232,6 +251,13 @@ void sl_button_on_change(const sl_button_t *handle)
 }
 #endif //defined(SL_CATALOG_SIMPLE_BUTTON_PRESENT) && (SL_ZIGBEE_APP_FRAMEWORK_USE_BUTTON_TO_STAY_AWAKE == 1)
 
+#ifdef EMBER_AF_NCP
+extern uint16_t emberGetCallbackQueueLength(void);
+#ifdef EZSP_CPC
+extern bool zigbee_cpc_is_tx_queue_empty(void);
+#endif
+#endif
+
 bool emAfOkToIdleOrSleep(void)
 {
   if (emAfForceEndDeviceToStayAwake) {
@@ -246,6 +272,11 @@ bool emAfOkToIdleOrSleep(void)
   if (emberGetCallbackQueueLength()) {
     return false;
   }
+ #ifdef EZSP_CPC
+  if (!zigbee_cpc_is_tx_queue_empty()) {
+    return false;
+  }
+ #endif
  #endif  // EMBER_AF_NCP
 
  #ifndef EMBER_AF_NCP
@@ -263,8 +294,8 @@ bool emAfCheckStayAwakeWhenNotJoined(void)
     for (uint8_t i = 0; !awake && i < EMBER_SUPPORTED_NETWORKS; i++) {
       if (emberAfPushNetworkIndex(i) == EMBER_SUCCESS) {
         awake = ((emberAfNetworkState() != EMBER_JOINED_NETWORK)
-                 && (emberAfNetworkState() != EMBER_JOINED_NETWORK_WF_INITIATOR)
-                 && (emberAfNetworkState() != EMBER_JOINED_NETWORK_WF_TARGET));
+                 && (emberAfNetworkState() != EMBER_JOINED_NETWORK_S2S_INITIATOR)
+                 && (emberAfNetworkState() != EMBER_JOINED_NETWORK_S2S_TARGET));
         (void) emberAfPopNetworkIndex();
       }
     }

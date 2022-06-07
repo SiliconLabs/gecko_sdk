@@ -12,6 +12,7 @@ requires:
   - name: mbedtls_dtls
   - name: mbedtls_ecdsa_deterministic
   - name: mbedtls_jpake
+  - name: mbedtls_ecc_secp256r1
   - name: mbedtls_cmac
   - name: mbedtls_tls_server
 template_contribution:

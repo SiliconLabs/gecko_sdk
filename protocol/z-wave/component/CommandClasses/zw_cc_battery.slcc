@@ -1,7 +1,9 @@
 id: zw_cc_battery
 label: Battery Command Class
 category: Z-Wave|Command Classes
-description: Battery Command Class!
+description: >
+  Battery Command Class is used to request and report the battery types,
+  status and levels of a given device.
 package: Z-Wave
 quality: production
 source:
@@ -14,3 +16,5 @@ provides:
   - name: zw_cc_battery
 requires:
   - name: zw_core
+documentation:
+  url: "https://sdomembers.z-wavealliance.org/document/dl/643" 

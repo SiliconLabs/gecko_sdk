@@ -12,7 +12,6 @@ provides:
   - name: "zigbee_ezsp_protocol"
   - name: "zigbee_ezsp"
   - name: "zigbee_host_application"
-  - name: "build_32bit"
 requires:
   - name: "zigbee_ezsp_serial_interface"
   - name: "zigbee_gateway"
@@ -141,7 +140,7 @@ include:
       - path: bootloader-interface-standalone.h
       - path: bootloader-interface-app.h
       - path: bootloader-eeprom.h
-  - path: platform/service/legacy_ncp_ash/inc/
+  - path: platform/service/legacy_common_ash/inc/
     file_list:
       - path: ash-common.h
   - path: platform/service/token_manager/inc/

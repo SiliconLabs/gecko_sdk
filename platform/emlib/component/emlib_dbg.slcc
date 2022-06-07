@@ -20,6 +20,10 @@ requires:
   - name: emlib_cmu
   - name: emlib_gpio
   - name: cmsis_core
+  - name: emlib_msc
+  - name: emlib_se
+    condition:
+    - device_series_2
 documentation:
   docset: gecko-platform
   document:

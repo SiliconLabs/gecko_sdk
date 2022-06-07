@@ -31,7 +31,7 @@
 #include "sl_mvp_ml_depthwise_conv2d.h"
 #include "sl_mvp.h"
 #include "sl_mvp_math.h"
-#include "em_common.h"
+#include "sl_common.h"
 #include <stdbool.h>
 
 /// @cond DO_NOT_INCLUDE_WITH_DOXYGEN
@@ -63,12 +63,12 @@ sl_status_t sli_mvp_ml_depthwise_conv2d_s8(const sli_mvp_ml_depthwise_conv2d_s8_
 
   // Run optimized algorithm for small inputs with high depth.
   if (((params->input_width * params->input_height)
-        <= (4 * params->filter_width * params->filter_height * params->out_channels))
+       <= (4 * params->filter_width * params->filter_height * params->out_channels))
       && opt_supported) {
     status = sli_mvp_ml_depthwise_conv2d_s8_gen_opt(params, true);
   }
 
-  if (status != SL_STATUS_OK){
+  if (status != SL_STATUS_OK) {
     // Fall back to generic algorithm.
     status =  sli_mvp_ml_depthwise_conv2d_s8_gen(params, true);
     if ((status != SL_STATUS_OK) && opt_supported) {

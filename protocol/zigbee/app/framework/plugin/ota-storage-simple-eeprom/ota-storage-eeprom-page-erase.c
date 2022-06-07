@@ -20,7 +20,7 @@
 
 #include "app/framework/plugin/ota-common/ota.h"
 #include "app/framework/plugin/ota-storage-common/ota-storage.h"
-#include "app/framework/plugin/ota-client/ota-client.h"
+
 #ifdef UC_BUILD
 #include "eeprom.h"
 #else // !UC_BUILD
@@ -215,6 +215,9 @@ static int32_t getByteMaskIndexFromEeprom(void)
                                              BYTE_MASK_READ_SIZE);
     debugPrint("Bytemask read status: 0x%X", status);
     EMBER_TEST_ASSERT(status == 0);
+#if !defined(DEBUG_PRINT) && !defined(EMBER_TEST)
+    UNUSED_VAR(status);
+#endif
 
     if (byteMaskIndex == 0 && byteMask[0] == 0xFF) {
       debugFlush();
@@ -329,6 +332,9 @@ void emAfStorageEepromUpdateDownloadOffset(uint32_t otaOffsetNew, bool finalOffs
           * emberAfPluginEepromGetWordSize())),
       byteArray,
       emberAfPluginEepromGetWordSize());
+#if !defined(DEBUG_PRINT) && !defined(EMBER_TEST)
+    UNUSED_VAR(status);
+#endif
     debugPrint("EEPROM Write status: 0x%X", status);
     EMBER_TEST_ASSERT(status == 0);
 

@@ -60,13 +60,18 @@ class Calc_Viterbi_Sol(Calc_Viterbi_Bobcat):
 
         osr = model.vars.MODEM_TRECSCFG_TRECSOSR.value
         rtschmode = model.vars.MODEM_REALTIMCFE_RTSCHMODE.value
-        baudrate =  model.vars.baudrate.value
         pmdetthd = model.vars.MODEM_PHDMODCTRL_PMDETTHD.value
+        freq_offset_hz = model.vars.freq_offset_hz.value
+        deviation = model.vars.deviation.value
 
         if rtschmode == 1:
             #Special case for dual syncword detection case where hard slicing on syncword is required
             #because frequency tolerance is more difficult when RTSCHMODE is 1
-            pmoffset = osr * 2 + 2
+            if deviation !=0 and freq_offset_hz/deviation > 2:
+                #For very high offset cases we need to use a minimal PMOFFSET value to ensure no noisy samples in offset est
+                pmoffset = 2
+            else:
+                pmoffset = osr * 2 + 2
         else:
             # + 2 for processing delay. See expsynclen register description. These are used in the same way.
             pmoffset = osr * pmdetthd + 2
@@ -79,18 +84,21 @@ class Calc_Viterbi_Sol(Calc_Viterbi_Bobcat):
         #Read in model variables
         vtdemoden = model.vars.MODEM_VITERBIDEMOD_VTDEMODEN.value
         freq_offset_hz = model.vars.freq_offset_hz.value
-        baudrate = model.vars.baudrate.value
-        modulation_index = model.vars.modulation_index.value
+        deviation = model.vars.deviation.value
+        baudrate_tol_ppm = model.vars.baudrate_tol_ppm.value
 
         if vtdemoden:
-            #Reduce tracking window size if high relative frequency offset is configured
-            if (freq_offset_hz / baudrate) > 0.57  and modulation_index <= 0.5:
-                trackingwin = 2
+            #Reduce tracking window size if high relative frequency offset or baudrate offset is configured
+            #In extreme freq offset cases the freq mapping will saturate, and then tracking is critical
+            #to quickly bring the signal to center
+            if (deviation != 0 and freq_offset_hz/deviation > 2) or baudrate_tol_ppm >= 10000:
+                trackingwin = 3 #Do not set below 3 as this causes floor in Apps + Design setups
+            elif (deviation != 0 and freq_offset_hz/deviation > 1) or baudrate_tol_ppm >= 5000:
+                trackingwin = 5
             else:
                 trackingwin = 7
         else:
             trackingwin = 0
-
         #Write the reg
         self._reg_write(model.vars.MODEM_REALTIMCFE_TRACKINGWIN, trackingwin)
 
@@ -119,3 +127,24 @@ class Calc_Viterbi_Sol(Calc_Viterbi_Bobcat):
 
         # Write the register
         self._reg_write(model.vars.MODEM_FRMSCHTIME_PMENDSCHEN, pmendschen)
+
+    def calc_frc_spare_bugfix(self, model):
+        #This method calculates the FRC_SPARE register. Bit 0 of this register is used to activate a workaround on
+        #rev A1 which controls frc_rxframe_end_ahead_disable. This improves baudrate tol for TRECS PHYs that use DFL
+        #with a 2B frame length field
+
+        #Read in model vars
+        demod_select = model.vars.demod_select.value
+        var_length_shift = model.vars.var_length_shift.value #Bit position of dynamic length field
+        var_length_numbits = model.vars.var_length_numbits.value #Number of bits in dynamic length field
+
+        #Disable rxframe_end_ahead if TRECS and we are crossing a byte boundary w DFL field
+        if (demod_select == model.vars.demod_select.var_enum.TRECS_VITERBI or
+            demod_select == model.vars.demod_select.var_enum.TRECS_SLICER) and \
+                ((var_length_numbits + var_length_shift) > 8): #Check for crossing of byte boundary
+            frc_rxframe_end_ahead_disable = 1
+        else:
+            frc_rxframe_end_ahead_disable = 0
+
+        #Write the reg
+        self._reg_write(model.vars.FRC_SPARE_SPARE, frc_rxframe_end_ahead_disable) #No other useful bits in this field

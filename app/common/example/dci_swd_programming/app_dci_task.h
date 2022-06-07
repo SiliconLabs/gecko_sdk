@@ -44,8 +44,8 @@
 #define UPGRADE_SE_FIRMWARE_LENGTH      (0x0000000CUL)
 #define INIT_AES_KEY_LENGTH             (0x0000001CUL)
 #define INIT_PUB_KEY_LENGTH             (0x0000004CUL)
-#define INIT_VSE_OTP_LENGTH             (0x00000014UL)
-#define INIT_HSE_OTP_LENGTH             (0x00000028UL)
+#define INIT_VSE_OTP_LENGTH             (0x00000008UL)
+#define INIT_HSE_OTP_LENGTH             (0x0000001CUL)
 
 /// DCI commands
 #define COMMAND_READ_SERIAL             (0xFE000000UL)

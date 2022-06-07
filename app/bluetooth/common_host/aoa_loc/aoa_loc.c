@@ -3,7 +3,7 @@
  * @brief Location calculation engine.
  *******************************************************************************
  * # License
- * <b>Copyright 2021 Silicon Laboratories Inc. www.silabs.com</b>
+ * <b>Copyright 2022 Silicon Laboratories Inc. www.silabs.com</b>
  *******************************************************************************
  *
  * SPDX-License-Identifier: Zlib
@@ -31,15 +31,12 @@
 #include <stdint.h>
 #include <stdlib.h>
 #include <string.h>
+#include "sl_common.h"
 #include "aoa_loc.h"
 #include "aoa_util.h"
 
 // -----------------------------------------------------------------------------
 // Defines
-
-#ifndef SL_WEAK
-#define SL_WEAK __attribute__ ((weak))
-#endif
 
 #define CHECK_ERROR(x)             \
   if ((x) != SL_RTL_ERROR_SUCCESS) \
@@ -79,7 +76,6 @@ static sl_status_t aoa_loc_run_estimation(aoa_asset_tag_t *tag,
                                           uint32_t angle_count,
                                           aoa_angle_t *angle_list,
                                           aoa_id_t *locator_list);
-static void aoa_loc_destroy_tags(void);
 static void aoa_loc_destroy_locators(void);
 
 // -----------------------------------------------------------------------------
@@ -120,7 +116,7 @@ static sl_rtl_loc_libitem loc_libitem;
 // Public function definitions.
 
 /**************************************************************************//**
- * Initializes the locator engine.
+ * Initialize the locator engine.
  *****************************************************************************/
 sl_status_t aoa_loc_init(void)
 {
@@ -133,11 +129,25 @@ sl_status_t aoa_loc_init(void)
 }
 
 /**************************************************************************//**
- * Finalizes the configuration.
+ * Finalize the configuration.
  *****************************************************************************/
 sl_status_t aoa_loc_finalize_config(void)
 {
   enum sl_rtl_error_code ec;
+  aoa_locator_node_t *current = head_locator;
+  aoa_loc_config.locator_count = 0;
+
+  // Add functional locators to the estimator.
+  while (current != NULL) {
+    if (current->locator.functional) {
+      ec = sl_rtl_loc_add_locator(&loc_libitem,
+                                  &current->locator.item,
+                                  &current->locator.loc_id);
+      CHECK_ERROR(ec);
+      aoa_loc_config.locator_count++;
+    }
+    current = current->next;
+  }
 
   // Select estimation mode.
   ec = sl_rtl_loc_set_mode(&loc_libitem, aoa_loc_config.estimation_mode);
@@ -164,10 +174,8 @@ sl_status_t aoa_loc_add_locator(aoa_id_t locator_id,
                                 struct sl_rtl_loc_locator_item item,
                                 aoa_locator_t **locator)
 {
-  enum sl_rtl_error_code ec;
-
   aoa_locator_node_t *new = (aoa_locator_node_t *)malloc(sizeof(aoa_locator_node_t));
-  if (NULL == new) {
+  if (new == NULL) {
     return SL_STATUS_ALLOCATION_FAILED;
   }
   new->next = head_locator;
@@ -182,16 +190,42 @@ sl_status_t aoa_loc_add_locator(aoa_id_t locator_id,
   new->locator.item.orientation_y_axis_degrees = item.orientation_y_axis_degrees;
   new->locator.item.orientation_z_axis_degrees = item.orientation_z_axis_degrees;
 
-  ec = sl_rtl_loc_add_locator(&loc_libitem, &new->locator.item, &new->locator.loc_id);
-  CHECK_ERROR(ec);
-
   *locator = &(new->locator);
 
   return SL_STATUS_OK;
 }
 
 /**************************************************************************//**
- * Returns a locator from the locator list by its id.
+ * Remove a locator from the list.
+ *****************************************************************************/
+sl_status_t aoa_loc_remove_locator(aoa_id_t locator_id)
+{
+  aoa_locator_node_t *current = head_locator;
+  aoa_locator_node_t *previous = NULL;
+
+  if (head_locator == NULL) {
+    return SL_STATUS_EMPTY;
+  }
+
+  while (current != NULL) {
+    if (aoa_id_compare(current->locator.id, locator_id) == 0) {
+      if (previous != NULL) {
+        previous->next = current->next;
+      } else {
+        head_locator = current->next;
+      }
+      free(current);
+      return SL_STATUS_OK;
+    }
+    previous = current;
+    current = current->next;
+  }
+
+  return SL_STATUS_NOT_FOUND;
+}
+
+/**************************************************************************//**
+ * Return a locator from the locator list by its id.
  *****************************************************************************/
 sl_status_t aoa_loc_get_locator_by_id(aoa_id_t locator_id,
                                       uint32_t *locator_idx,
@@ -200,14 +234,14 @@ sl_status_t aoa_loc_get_locator_by_id(aoa_id_t locator_id,
   aoa_locator_node_t *current = head_locator;
   uint32_t i = 0;
 
-  if (NULL == head_locator) {
+  if (head_locator == NULL) {
     return SL_STATUS_NOT_FOUND;
   }
 
-  while (NULL != current) {
-    if (0 == aoa_id_compare(current->locator.id, locator_id)) {
+  while (current != NULL) {
+    if (aoa_id_compare(current->locator.id, locator_id) == 0) {
       *locator = &(current->locator);
-      if (NULL != locator_idx) {
+      if (locator_idx != NULL) {
         *locator_idx = i;
       }
       return SL_STATUS_OK;
@@ -220,7 +254,7 @@ sl_status_t aoa_loc_get_locator_by_id(aoa_id_t locator_id,
 }
 
 /**************************************************************************//**
- * Returns a locator from the locator list by its index.
+ * Return a locator from the locator list by its index.
  *****************************************************************************/
 sl_status_t aoa_loc_get_locator_by_index(uint32_t locator_idx,
                                          aoa_locator_t **locator)
@@ -228,11 +262,11 @@ sl_status_t aoa_loc_get_locator_by_index(uint32_t locator_idx,
   uint32_t i = 0;
   aoa_locator_node_t *current = head_locator;
 
-  if (NULL == head_locator) {
+  if (head_locator == NULL) {
     return SL_STATUS_NOT_FOUND;
   }
 
-  while (NULL != current) {
+  while (current != NULL) {
     if (i == locator_idx) {
       *locator = &(current->locator);
       return SL_STATUS_OK;
@@ -245,14 +279,14 @@ sl_status_t aoa_loc_get_locator_by_index(uint32_t locator_idx,
 }
 
 /**************************************************************************//**
- * Returns the number of locators on the list.
+ * Return the number of locators on the list.
  *****************************************************************************/
 uint32_t aoa_loc_get_number_of_locators(void)
 {
   uint32_t i = 0;
   aoa_locator_node_t *current = head_locator;
 
-  while (NULL != current) {
+  while (current != NULL) {
     i++;
     current = current->next;
   }
@@ -267,7 +301,7 @@ sl_status_t aoa_loc_add_asset_tag(aoa_id_t tag_id,
                                   aoa_asset_tag_t **tag)
 {
   aoa_asset_tag_node_t *new = (aoa_asset_tag_node_t *)malloc(sizeof(aoa_asset_tag_node_t));
-  if (NULL == new) {
+  if (new == NULL) {
     return SL_STATUS_ALLOCATION_FAILED;
   }
   aoa_id_copy(new->tag.id, tag_id);
@@ -283,19 +317,19 @@ sl_status_t aoa_loc_add_asset_tag(aoa_id_t tag_id,
 }
 
 /**************************************************************************//**
- * Returns a tag from the tag list by its id.
+ * Return a tag from the tag list by its id.
  *****************************************************************************/
 sl_status_t aoa_loc_get_tag_by_id(aoa_id_t id,
                                   aoa_asset_tag_t **tag)
 {
   aoa_asset_tag_node_t *current = head_tag;
 
-  if (NULL == head_tag) {
+  if (head_tag == NULL) {
     return SL_STATUS_NOT_FOUND;
   }
 
-  while (NULL != current) {
-    if (0 == aoa_id_compare(current->tag.id, id)) {
+  while (current != NULL) {
+    if (aoa_id_compare(current->tag.id, id) == 0) {
       *tag = &(current->tag);
       return SL_STATUS_OK;
     }
@@ -306,7 +340,7 @@ sl_status_t aoa_loc_get_tag_by_id(aoa_id_t id,
 }
 
 /**************************************************************************//**
- * Returns a tag from the tag list by its index.
+ * Return a tag from the tag list by its index.
  *****************************************************************************/
 sl_status_t aoa_loc_get_tag_by_index(uint32_t index,
                                      aoa_asset_tag_t **tag)
@@ -314,11 +348,11 @@ sl_status_t aoa_loc_get_tag_by_index(uint32_t index,
   aoa_asset_tag_node_t *current = head_tag;
   uint32_t i = 0;
 
-  if (NULL == head_tag) {
+  if (head_tag == NULL) {
     return SL_STATUS_NOT_FOUND;
   }
 
-  while (NULL != current) {
+  while (current != NULL) {
     if (i == index) {
       *tag = &(current->tag);
       return SL_STATUS_OK;
@@ -331,7 +365,7 @@ sl_status_t aoa_loc_get_tag_by_index(uint32_t index,
 }
 
 /**************************************************************************//**
- * Calculates the asset tag position and notify the app.
+ * Calculate the asset tag position and notify the app.
  *****************************************************************************/
 sl_status_t aoa_loc_calc_position(aoa_id_t tag_id,
                                   uint32_t angle_count,
@@ -341,7 +375,7 @@ sl_status_t aoa_loc_calc_position(aoa_id_t tag_id,
   sl_status_t sc;
   aoa_asset_tag_t *tag;
   aoa_locator_t *locator;
-  aoa_correction_t correction;
+  aoa_angle_t correction;
   uint32_t locator_index = 0;
 
   sc = aoa_loc_get_tag_by_id(tag_id, &tag);
@@ -363,16 +397,16 @@ sl_status_t aoa_loc_calc_position(aoa_id_t tag_id,
       aoa_loc_get_locator_by_id(locator_list[i], &locator_index, &locator);
       sc = sl_rtl_loc_get_expected_direction_tag(&loc_libitem,
                                                  locator->loc_id,
-                                                 &correction.direction.azimuth,
-                                                 &correction.direction.elevation,
-                                                 &correction.direction.distance,
+                                                 &correction.azimuth,
+                                                 &correction.elevation,
+                                                 &correction.distance,
                                                  tag->tag_id);
       if (sc == SL_RTL_ERROR_INCORRECT_MEASUREMENT) {
         sl_rtl_loc_get_expected_deviation_tag(&loc_libitem,
                                               locator->loc_id,
-                                              &correction.deviation.azimuth,
-                                              &correction.deviation.elevation,
-                                              &correction.deviation.distance,
+                                              &correction.azimuth_stdev,
+                                              &correction.elevation_stdev,
+                                              &correction.distance_stdev,
                                               tag->tag_id);
         correction.sequence = tag->position.sequence;
         // The first angle in the angle list is the most recent.
@@ -385,13 +419,44 @@ sl_status_t aoa_loc_calc_position(aoa_id_t tag_id,
 }
 
 /**************************************************************************//**
- * Destroys the module database
+ * Destroy the module database
  *****************************************************************************/
 void aoa_loc_destroy(void)
 {
   aoa_loc_destroy_tags();
   aoa_loc_destroy_locators();
   sl_rtl_loc_deinit(&loc_libitem);
+}
+
+/**************************************************************************//**
+ * Reinitialize the estimator.
+ *****************************************************************************/
+sl_status_t aoa_loc_reinit(void)
+{
+  sl_rtl_loc_deinit(&loc_libitem);
+  enum sl_rtl_error_code ec;
+
+  ec = sl_rtl_loc_init(&loc_libitem);
+  CHECK_ERROR(ec);
+
+  return SL_STATUS_OK;
+}
+
+/**************************************************************************//**
+ * Destroy the tags database
+ *****************************************************************************/
+void aoa_loc_destroy_tags(void)
+{
+  aoa_asset_tag_node_t *current;
+  aoa_asset_tag_node_t *next;
+
+  for (current = head_tag; current != NULL; current = next) {
+    next = current->next;
+    aoa_loc_deinit_asset_tag(&current->tag);
+    free(current);
+  }
+
+  head_tag = NULL;
 }
 
 /**************************************************************************//**
@@ -409,7 +474,7 @@ SL_WEAK void aoa_loc_on_correction_ready(aoa_asset_tag_t *tag,
                                          int32_t sequence,
                                          aoa_id_t locator_id,
                                          uint32_t loc_idx,
-                                         aoa_correction_t *correction)
+                                         aoa_angle_t *correction)
 {
   // Implement in the application.
 }
@@ -437,7 +502,7 @@ SL_WEAK void aoa_loc_angle_deinit(aoa_asset_tag_t *tag,
 // Private function definitions.
 
 /**************************************************************************//**
- * Initializes an asset tag.
+ * Initialize an asset tag.
  *****************************************************************************/
 static sl_status_t aoa_loc_init_asset_tag(aoa_asset_tag_t *tag)
 {
@@ -471,7 +536,7 @@ static sl_status_t aoa_loc_init_asset_tag(aoa_asset_tag_t *tag)
 }
 
 /**************************************************************************//**
- * Deinitializes an asset tag.
+ * Deinitialize an asset tag.
  *****************************************************************************/
 static sl_status_t aoa_loc_deinit_asset_tag(aoa_asset_tag_t *tag)
 {
@@ -518,8 +583,23 @@ static sl_status_t aoa_loc_run_estimation(aoa_asset_tag_t *tag,
 
     ec = sl_rtl_loc_set_locator_measurement_tag(&loc_libitem,
                                                 locator->loc_id,
+                                                SL_RTL_LOC_LOCATOR_MEASUREMENT_AZIMUTH_DEVIATION,
+                                                angle_list[i].azimuth_stdev,
+                                                tag->tag_id);
+
+    CHECK_ERROR(ec);
+
+    ec = sl_rtl_loc_set_locator_measurement_tag(&loc_libitem,
+                                                locator->loc_id,
                                                 SL_RTL_LOC_LOCATOR_MEASUREMENT_ELEVATION,
                                                 angle_list[i].elevation,
+                                                tag->tag_id);
+    CHECK_ERROR(ec);
+
+    ec = sl_rtl_loc_set_locator_measurement_tag(&loc_libitem,
+                                                locator->loc_id,
+                                                SL_RTL_LOC_LOCATOR_MEASUREMENT_ELEVATION_DEVIATION,
+                                                angle_list[i].elevation_stdev,
                                                 tag->tag_id);
     CHECK_ERROR(ec);
 
@@ -565,13 +645,28 @@ static sl_status_t aoa_loc_run_estimation(aoa_asset_tag_t *tag,
                                  tag->tag_id);
   CHECK_ERROR(sc);
   sc = sl_rtl_loc_get_result_tag(&loc_libitem,
+                                 SL_RTL_LOC_RESULT_POSITION_STDEV_X,
+                                 &tag->position.x_stdev,
+                                 tag->tag_id);
+  CHECK_ERROR(sc);
+  sc = sl_rtl_loc_get_result_tag(&loc_libitem,
                                  SL_RTL_LOC_RESULT_POSITION_Y,
                                  &tag->position.y,
                                  tag->tag_id);
   CHECK_ERROR(sc);
   sc = sl_rtl_loc_get_result_tag(&loc_libitem,
+                                 SL_RTL_LOC_RESULT_POSITION_STDEV_Y,
+                                 &tag->position.y_stdev,
+                                 tag->tag_id);
+  CHECK_ERROR(sc);
+  sc = sl_rtl_loc_get_result_tag(&loc_libitem,
                                  SL_RTL_LOC_RESULT_POSITION_Z,
                                  &tag->position.z,
+                                 tag->tag_id);
+  CHECK_ERROR(sc);
+  sc = sl_rtl_loc_get_result_tag(&loc_libitem,
+                                 SL_RTL_LOC_RESULT_POSITION_STDEV_Z,
+                                 &tag->position.z_stdev,
                                  tag->tag_id);
   CHECK_ERROR(sc);
 
@@ -599,24 +694,7 @@ static sl_status_t aoa_loc_run_estimation(aoa_asset_tag_t *tag,
 }
 
 /**************************************************************************//**
- * Destroys the tags database
- *****************************************************************************/
-static void aoa_loc_destroy_tags(void)
-{
-  aoa_asset_tag_node_t *current;
-  aoa_asset_tag_node_t *next;
-
-  for (current = head_tag; current != NULL; current = next) {
-    next = current->next;
-    aoa_loc_deinit_asset_tag(&current->tag);
-    free(current);
-  }
-
-  head_tag = NULL;
-}
-
-/**************************************************************************//**
- * Destroys the locator database
+ * Destroy the locator database
  *****************************************************************************/
 static void aoa_loc_destroy_locators(void)
 {

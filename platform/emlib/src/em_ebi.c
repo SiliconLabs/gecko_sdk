@@ -30,7 +30,7 @@
 
 #include "em_ebi.h"
 #if defined(EBI_COUNT) && (EBI_COUNT > 0)
-#include "em_assert.h"
+#include "sl_assert.h"
 #include "em_bus.h"
 
 /***************************************************************************//**

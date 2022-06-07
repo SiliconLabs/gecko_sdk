@@ -28,6 +28,14 @@
  *
  ******************************************************************************/
 
+#if defined(SL_COMPONENT_CATALOG_PRESENT)
+  #include "sl_component_catalog.h"
+#endif
+
+#ifdef SL_CATALOG_RAIL_MULTIPLEXER_PRESENT
+#include "sl_rail_mux_rename.h"
+#endif
+
 #include "rail.h"
 #include "rail_ieee802154.h"
 #include "sl_rail_util_ieee802154_phy_select.h"

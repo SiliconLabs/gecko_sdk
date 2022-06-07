@@ -41,6 +41,13 @@ config_file:
     condition:
       - device_series_2
       - device_sdid_220
+  - path: "platform/radio/rail_lib/plugin/rail_util_init/config/efr32xg27/sl_rail_util_init_{{instance}}_config.h"
+    condition:
+      - device_series_2
+      - device_sdid_230
+
 template_contribution:
   - name: rail_util_init_instance
     value: "{{instance}}"
+  - name: component_catalog
+    value: rail_util_init

@@ -203,6 +203,4 @@ class CALC_Global_lynx(CALC_Global_panther):
         self._addModelRegister(model, 'MODEM.SHAPING11.COEFF46', int, ModelVariableFormat.HEX)
         self._addModelRegister(model, 'MODEM.SHAPING11.COEFF47', int, ModelVariableFormat.HEX)
 
-    def calc_family_name(self, model):
-        model.vars.family.value = "lynx"
 

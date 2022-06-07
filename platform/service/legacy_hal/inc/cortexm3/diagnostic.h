@@ -348,7 +348,7 @@ typedef union {
     uint32_t TRNG_IRQn              : 1;  // B1
     uint32_t PKE_IRQn               : 1;  // B2
     uint32_t SMU_SECURE_IRQn        : 1;  // B3
-    uint32_t SMU_PRIVILEGED_IRQn    : 1;  // B4
+    uint32_t SMU_S_PRIVILEGED_IRQn  : 1;  // B4
     uint32_t SMU_NS_PRIVILEGED_IRQn : 1;  // B5
     uint32_t EMU_IRQn               : 1;  // B6
     uint32_t TIMER0_IRQn            : 1;  // B7
@@ -412,7 +412,7 @@ typedef union {
   uint32_t word[2];
 #elif defined(_SILICON_LABS_32B_SERIES_2_CONFIG_3)
     uint32_t SMU_SECURE_IRQn        : 1; // B0
-    uint32_t SMU_PRIVILEGED_IRQn    : 1; // B1
+    uint32_t SMU_S_PRIVILEGED_IRQn  : 1; // B1
     uint32_t SMU_NS_PRIVILEGED_IRQn : 1; // B2
     uint32_t EMU_IRQn               : 1; // B3
     uint32_t TIMER0_IRQn            : 1; // B4
@@ -490,7 +490,7 @@ typedef union {
   uint32_t word[2];
 #elif defined (_SILICON_LABS_32B_SERIES_2_CONFIG_4)
     uint32_t SMU_SECURE_IRQn        : 1;  // B0
-    uint32_t SMU_PRIVILEGED_IRQn    : 1;  // B1
+    uint32_t SMU_S_PRIVILEGED_IRQn  : 1;  // B1
     uint32_t SMU_NS_PRIVILEGED_IRQn : 1;  // B2
     uint32_t EMU_IRQn               : 1;  // B3
     uint32_t TIMER0_IRQn            : 1;  // B4
@@ -564,6 +564,76 @@ typedef union {
     uint32_t RFECA1_IRQn            : 1;  // B72
     uint32_t VDAC0_IRQn             : 1;  // B73
     uint32_t VDAC1_IRQn             : 1;  // B74
+  } bits;
+  uint32_t word[2];
+#elif defined (_SILICON_LABS_32B_SERIES_2_CONFIG_7)
+    uint32_t CRYPTOACC_IRQn         : 1;  // B0
+    uint32_t TRNG_IRQn              : 1;  // B1
+    uint32_t PKE_IRQn               : 1;  // B2
+    uint32_t SMU_SECURE_IRQn        : 1;  // B3
+    uint32_t SMU_S_PRIVILEGED_IRQn  : 1;  // B4
+    uint32_t SMU_NS_PRIVILEGED_IRQn : 1;  // B5
+    uint32_t EMU_IRQn               : 1;  // B6
+    uint32_t EMUEFP_IRQn            : 1;  // B7
+    uint32_t DCDC_IRQn              : 1;  // B8
+    uint32_t ETAMPDET_IRQn          : 1;  // B9
+    uint32_t TIMER0_IRQn            : 1;  // B10
+    uint32_t TIMER1_IRQn            : 1;  // B11
+    uint32_t TIMER2_IRQn            : 1;  // B12
+    uint32_t TIMER3_IRQn            : 1;  // B13
+    uint32_t TIMER4_IRQn            : 1;  // B14
+    uint32_t RTCC_IRQn              : 1;  // B15
+    uint32_t USART0_RX_IRQn         : 1;  // B16
+    uint32_t USART0_TX_IRQn         : 1;  // B17
+    uint32_t USART1_RX_IRQn         : 1;  // B18
+    uint32_t USART1_TX_IRQn         : 1;  // B19
+    uint32_t EUSART0_RX_IRQn        : 1;  // B20
+    uint32_t EUSART0_TX_IRQn        : 1;  // B21
+    uint32_t ICACHE0_IRQn           : 1;  // B22
+    uint32_t BURTC_IRQn             : 1;  // B23
+    uint32_t LETIMER0_IRQn          : 1;  // B24
+    uint32_t SYSCFG_IRQn            : 1;  // B25
+    uint32_t LDMA_IRQn              : 1;  // B26
+    uint32_t LFXO_IRQn              : 1;  // B27
+    uint32_t LFRCO_IRQn             : 1;  // B28
+    uint32_t ULFRCO_IRQn            : 1;  // B29
+    uint32_t GPIO_ODD_IRQn          : 1;  // B30
+    uint32_t GPIO_EVEN_IRQn         : 1;  // B31
+    uint32_t I2C0_IRQn              : 1;  // B32
+    uint32_t I2C1_IRQn              : 1;  // B33
+    uint32_t EMUDG_IRQn             : 1;  // B34
+    uint32_t EMUSE_IRQn             : 1;  // B35
+    uint32_t AGC_IRQn               : 1;  // B36
+    uint32_t BUFC_IRQn              : 1;  // B37
+    uint32_t FRC_PRI_IRQn           : 1;  // B38
+    uint32_t FRC_IRQn               : 1;  // B39
+    uint32_t MODEM_IRQn             : 1;  // B40
+    uint32_t PROTIMER_IRQn          : 1;  // B41
+    uint32_t RAC_RSM_IRQn           : 1;  // B42
+    uint32_t RAC_SEQ_IRQn           : 1;  // B43
+    uint32_t RDMAILBOX_IRQn         : 1;  // B44
+    uint32_t RFSENSE_IRQn           : 1;  // B45
+    uint32_t SYNTH_IRQn             : 1;  // B46
+    uint32_t PRORTC_IRQn            : 1;  // B47
+    uint32_t ACMP0_IRQn             : 1;  // B48
+    uint32_t WDOG0_IRQn             : 1;  // B49
+    uint32_t HFXO0_IRQn             : 1;  // B50
+    uint32_t HFRCO0_IRQn            : 1;  // B51
+    uint32_t CMU_IRQn               : 1;  // B52
+    uint32_t AES_IRQn               : 1;  // B53
+    uint32_t IADC_IRQn              : 1;  // B54
+    uint32_t MSC_IRQn               : 1;  // B55
+    uint32_t DPLL0_IRQn             : 1;  // B56
+    uint32_t PDM_IRQn               : 1;  // B57
+    uint32_t SW0_IRQn               : 1;  // B58
+    uint32_t SW1_IRQn               : 1;  // B59
+    uint32_t SW2_IRQn               : 1;  // B60
+    uint32_t SW3_IRQn               : 1;  // B61
+    uint32_t KERNEL0_IRQn           : 1;  // B62
+    uint32_t KERNEL1_IRQn           : 1;  // B63
+    uint32_t M33CTI0_IRQn           : 1;  // B64
+    uint32_t M33CTI1_IRQn           : 1;  // B65
+    uint32_t FPUEXH_IRQn            : 1;  // B66
   } bits;
   uint32_t word[2];
 #elif CORTEXM3_EMBER_MICRO

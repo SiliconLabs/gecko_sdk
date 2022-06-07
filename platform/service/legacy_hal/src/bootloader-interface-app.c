@@ -29,6 +29,7 @@
 #include "bootloader-interface-app.h"
 
 #include "api/btl_interface.h"
+#include "api/btl_interface_storage.h"
 
 // Default to using storage slot 0
 static int32_t storageSlot = 0;
@@ -102,7 +103,7 @@ const HalEepromInformationType *halAppBootloaderInfo(void)
       return NULL;
     }
     BootloaderStorageInformation_t info;
-    mainBootloaderTable->storage->getInfo(&info);
+    bootloader_getStorageInfo(&info);
 
     if (info.info == NULL) {
       return NULL;
@@ -182,12 +183,9 @@ void halAppBootloaderImageIsValidReset(void)
     // The bootloader needs to have storage in order to perform validation
     assert(mainBootloaderTable->capabilities & BOOTLOADER_CAPABILITY_STORAGE);
 
-    ret = mainBootloaderTable->storage->initParseImage(
-      storageSlot,
-      (BootloaderParserContext_t *)bootloaderValidationContext,
-      BOOTLOADER_STORAGE_VERIFICATION_CONTEXT_SIZE
-      );
-
+    ret = bootloader_initVerifyImage(storageSlot,
+                                     bootloaderValidationContext,
+                                     BOOTLOADER_STORAGE_VERIFICATION_CONTEXT_SIZE);
     assert(ret == BOOTLOADER_OK);
   } else {
 #ifdef _SILICON_LABS_32B_SERIES_1_CONFIG_1
@@ -213,10 +211,7 @@ uint16_t halAppBootloaderImageIsValid(void)
       return 0;
     }
 
-    ret = mainBootloaderTable->storage->verifyImage(
-      (BootloaderParserContext_t *)bootloaderValidationContext,
-      NULL
-      );
+    ret = bootloader_continueVerifyImage(bootloaderValidationContext, NULL);
 
     if (ret == BOOTLOADER_ERROR_PARSE_CONTINUE) {
       return BL_IMAGE_IS_VALID_CONTINUE;
@@ -256,7 +251,7 @@ EmberStatus halAppBootloaderInstallNewImage(void)
       return EMBER_ERR_FATAL;
     }
 
-    if (mainBootloaderTable->storage->setImagesToBootload(&storageSlot, 1) == BOOTLOADER_OK) {
+    if (bootloader_setImagesToBootload(&storageSlot, 1) == BOOTLOADER_OK) {
       // should not return
       bootloader_rebootAndInstall();
     }
@@ -277,7 +272,7 @@ uint8_t halAppBootloaderWriteRawStorage(uint32_t address,
 {
   if (bootloaderIsCommonBootloader()) {
     if (mainBootloaderTable->capabilities & BOOTLOADER_CAPABILITY_STORAGE) {
-      if (mainBootloaderTable->storage->writeRaw(address, (uint8_t *)data, len) == BOOTLOADER_OK) {
+      if (bootloader_writeRawStorage(address, (uint8_t *)data, len) == BOOTLOADER_OK) {
         return EEPROM_SUCCESS;
       }
     }
@@ -295,7 +290,7 @@ uint8_t halAppBootloaderReadRawStorage(uint32_t address, uint8_t *data, uint16_t
 {
   if (bootloaderIsCommonBootloader()) {
     if (mainBootloaderTable->capabilities & BOOTLOADER_CAPABILITY_STORAGE) {
-      if (mainBootloaderTable->storage->readRaw(address, data, len) == BOOTLOADER_OK) {
+      if (bootloader_readRawStorage(address, data, len) == BOOTLOADER_OK) {
         return EEPROM_SUCCESS;
       }
     }
@@ -313,7 +308,7 @@ uint8_t halAppBootloaderEraseRawStorage(uint32_t address, uint32_t len)
 {
   if (bootloaderIsCommonBootloader()) {
     if (mainBootloaderTable->capabilities & BOOTLOADER_CAPABILITY_STORAGE) {
-      if (mainBootloaderTable->storage->eraseRaw(address, len) == BOOTLOADER_OK) {
+      if (bootloader_eraseRawStorage(address, len) == BOOTLOADER_OK) {
         return EEPROM_SUCCESS;
       }
     }
@@ -331,7 +326,7 @@ bool halAppBootloaderStorageBusy(void)
 {
   if (bootloaderIsCommonBootloader()) {
     if (mainBootloaderTable->capabilities & BOOTLOADER_CAPABILITY_STORAGE) {
-      return mainBootloaderTable->storage->isBusy();
+      return bootloader_storageIsBusy();
     } else {
       return true;
     }

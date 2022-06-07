@@ -12,14 +12,7 @@
   - path: platform/Device/SiliconLabs/MGM22/Source/system_mgm22.c
     unless:
     - device_content_override
-  - condition:
-    - toolchain_iar
-    path: platform/Device/SiliconLabs/MGM22/Source/IAR/startup_mgm22.c
-    unless:
-    - device_content_override
-  - condition:
-    - toolchain_gcc
-    path: platform/Device/SiliconLabs/MGM22/Source/GCC/startup_mgm22.c
+  - path: platform/Device/SiliconLabs/MGM22/Source/startup_mgm22.c
     unless:
     - device_content_override
 - include:
@@ -27,9 +20,7 @@
     - path: mgm220pc22hna.h
     - path: em_device.h
     - path: mgm22_aes.h
-    - path: mgm22_agc.h
     - path: mgm22_amuxcp.h
-    - path: mgm22_bufc.h
     - path: mgm22_buram.h
     - path: mgm22_burtc.h
     - path: mgm22_cmu.h
@@ -40,7 +31,6 @@
     - path: mgm22_dpll.h
     - path: mgm22_emu.h
     - path: mgm22_eusart.h
-    - path: mgm22_frc.h
     - path: mgm22_fsrco.h
     - path: mgm22_gpcrc.h
     - path: mgm22_gpio.h
@@ -56,19 +46,12 @@
     - path: mgm22_letimer.h
     - path: mgm22_lfrco.h
     - path: mgm22_lfxo.h
-    - path: mgm22_mailbox.h
-    - path: mgm22_modem.h
     - path: mgm22_msc.h
     - path: mgm22_pdm.h
-    - path: mgm22_protimer.h
     - path: mgm22_prs.h
     - path: mgm22_prs_signals.h
-    - path: mgm22_rac.h
-    - path: mgm22_rfcrc.h
-    - path: mgm22_rfsense.h
     - path: mgm22_rtcc.h
     - path: mgm22_smu.h
-    - path: mgm22_synth.h
     - path: mgm22_syscfg.h
     - path: mgm22_timer.h
     - path: mgm22_ulfrco.h
@@ -92,11 +75,10 @@
   - name: hardware_board_has_hfxo
   - name: hardware_board_has_lfxo
   - name: device_security_rot
+  - name: device_dcdc_buck
   - name: device_pa_8dbm
-  - name: device_has_agc
   - name: device_has_amuxcp
   - name: device_has_amuxcp0
-  - name: device_has_bufc
   - name: device_has_buram
   - name: device_has_burtc
   - name: device_has_cmu
@@ -108,7 +90,6 @@
   - name: device_has_emu
   - name: device_has_euart
   - name: device_has_euart0
-  - name: device_has_frc
   - name: device_has_fsrco
   - name: device_has_gpcrc
   - name: device_has_gpio
@@ -129,22 +110,13 @@
   - name: device_has_letimer0
   - name: device_has_lfrco
   - name: device_has_lfxo
-  - name: device_has_modem
   - name: device_has_msc
   - name: device_has_pdm
   - name: device_has_prortc
-  - name: device_has_protimer
   - name: device_has_prs
-  - name: device_has_rac
   - name: device_has_radioaes
-  - name: device_has_rdmailbox
-  - name: device_has_rdmailbox0
-  - name: device_has_rdmailbox1
-  - name: device_has_rfcrc
-  - name: device_has_rfsense
   - name: device_has_rtcc
   - name: device_has_smu
-  - name: device_has_synth
   - name: device_has_syscfg
   - name: device_has_timer
   - name: device_has_timer0
@@ -175,6 +147,8 @@
   - name: device_supports_bluetooth_cte
   - name: device_supports_connect
   - name: device_compute_basic
+- recommends:
+  - id: trustzone_unaware
 - requires:
   - name: cmsis_core
   - name: MGM220PC22HNA_config
@@ -218,8 +192,25 @@
     value: cortex-m33
   - option: fpu
     value: fpv5-sp
+  - option: cmse
+    unless:
+    - trustzone_nonsecure
+    value: enabled
 - config_file:
   - condition:
     - custom_radio_config
     directory: rail
     path: platform/Device/config/205/device.yaml
+- metadata:
+    device:
+      memory:
+      - name: Main Flash
+        page_size: 8192
+        size: 524288
+        start: 0
+        type: non-volatile
+      - name: RAM
+        size: 32768
+        start: 536870912
+        type: volatile
+      opn: mgm220pc22hna

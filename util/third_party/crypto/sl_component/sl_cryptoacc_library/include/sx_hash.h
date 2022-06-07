@@ -21,32 +21,32 @@
 #define MD5_DIGESTSIZE     16
 /** @brief Size of SHA1 data block in bytes */
 #define SHA1_BLOCKSIZE     64
-/** @brief Size of SHA1 initialization value in bytes */
-#define SHA1_INITSIZE      20
+/** @brief Size of SHA1 state in bytes */
+#define SHA1_STATESIZE      20
 /** @brief Size of SHA1 digest in bytes */
 #define SHA1_DIGESTSIZE    20
 /** @brief Size of SHA224 data block in bytes */
 #define SHA224_BLOCKSIZE   64
-/** @brief Size of SHA224 initialization value in bytes */
-#define SHA224_INITSIZE    32
+/** @brief Size of SHA224 state in bytes */
+#define SHA224_STATESIZE    32
 /** @brief Size of SHA224 digest in bytes */
 #define SHA224_DIGESTSIZE  28
 /** @brief Size of SHA256 data block in bytes */
 #define SHA256_BLOCKSIZE   64
-/** @brief Size of SHA256 initialization value in bytes */
-#define SHA256_INITSIZE    32
+/** @brief Size of SHA256 state in bytes */
+#define SHA256_STATESIZE    32
 /** @brief Size of SHA256 digest in bytes */
 #define SHA256_DIGESTSIZE  32
 /** @brief Size of SHA384 data block in bytes */
 #define SHA384_BLOCKSIZE   128
-/** @brief Size of SHA384 initialization value in bytes */
-#define SHA384_INITSIZE    64
+/** @brief Size of SHA384 state in bytes */
+#define SHA384_STATESIZE    64
 /** @brief Size of SHA384 digest in bytes */
 #define SHA384_DIGESTSIZE  48
 /** @brief Size of SHA512 data block in bytes */
 #define SHA512_BLOCKSIZE   128
-/** @brief Size of SHA512 initialization value in bytes */
-#define SHA512_INITSIZE    64
+/** @brief Size of SHA512 state in bytes */
+#define SHA512_STATESIZE    64
 /** @brief Size of SHA512 digest in bytes */
 #define SHA512_DIGESTSIZE  64
 /** @brief Size of SM3 digest in bytes */
@@ -81,6 +81,36 @@ typedef enum sx_hash_fct_e
  * https://tools.ietf.org/id/draft-oscca-cfrg-sm3-01.html#rfc.section.4.1
  */
 extern const uint8_t sx_sm3_iv[SM3_DIGESTSIZE];
+
+/**
+ * @brief: Initial value for SHA-1
+ * http://dx.doi.org/10.6028/NIST.FIPS.180-4
+ */
+extern const uint8_t sx_sha1_initial_value[SHA1_STATESIZE];
+
+/**
+ * @brief: Initial value for SHA-224
+ * http://dx.doi.org/10.6028/NIST.FIPS.180-4
+ */
+extern const uint8_t sx_sha224_initial_value[SHA224_STATESIZE];
+
+/**
+ * @brief: Initial value for SHA-256
+ * http://dx.doi.org/10.6028/NIST.FIPS.180-4
+ */
+extern const uint8_t sx_sha256_initial_value[SHA256_STATESIZE];
+
+/**
+ * @brief: Initial value for SHA-384
+ * http://dx.doi.org/10.6028/NIST.FIPS.180-4
+ */
+extern const uint8_t sx_sha384_initial_value[SHA384_STATESIZE];
+
+/**
+ * @brief: Initial value for SHA-512
+ * http://dx.doi.org/10.6028/NIST.FIPS.180-4
+ */
+extern const uint8_t sx_sha512_initial_value[SHA512_STATESIZE];
 
 /**
  * @brief Get digest size in bytes for the given \p hash_fct

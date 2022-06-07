@@ -38,26 +38,26 @@
 //                Static Variables
 // -----------------------------------------------------------------------------
 /**< Configuration table of the possible sensor types. This table is filled based on SDS13812 table */
-static const sl_sensor_type_t sensor_types[] = {
-  [SL_SENSOR_NAME_AIR_TEMPERATURE] = {.value = 0x01, .byte_offset = 1, .bit_mask = 0, .max_scale_value = 0x01},
-  [SL_SENSOR_NAME_GENERAL_PURPOSE] = {.value = 0x02, .byte_offset = 1, .bit_mask = 1, .max_scale_value = 0x01},
-  [SL_SENSOR_NAME_ILLUMINANCE]     = {.value = 0x03, .byte_offset = 1, .bit_mask = 2, .max_scale_value = 0x01},
-  [SL_SENSOR_NAME_POWER]           = {.value = 0x04, .byte_offset = 1, .bit_mask = 3, .max_scale_value = 0x01},
-  [SL_SENSOR_NAME_HUMIDITY]        = {.value = 0x05, .byte_offset = 1, .bit_mask = 4, .max_scale_value = 0x01},
+static const sensor_type_t sensor_types[] = {
+  [SENSOR_NAME_AIR_TEMPERATURE] = {.value = 0x01, .byte_offset = 1, .bit_mask = 0, .max_scale_value = 0x01},
+  [SENSOR_NAME_GENERAL_PURPOSE] = {.value = 0x02, .byte_offset = 1, .bit_mask = 1, .max_scale_value = 0x01},
+  [SENSOR_NAME_ILLUMINANCE]     = {.value = 0x03, .byte_offset = 1, .bit_mask = 2, .max_scale_value = 0x01},
+  [SENSOR_NAME_POWER]           = {.value = 0x04, .byte_offset = 1, .bit_mask = 3, .max_scale_value = 0x01},
+  [SENSOR_NAME_HUMIDITY]        = {.value = 0x05, .byte_offset = 1, .bit_mask = 4, .max_scale_value = 0x01},
 };
 // -----------------------------------------------------------------------------
 //              Public Function Definitions
 // -----------------------------------------------------------------------------
-const sl_sensor_type_t* sl_cc_multilevel_sensor_get_sensor_type(sl_sensor_name_t i_sensor_name)
+const sensor_type_t* cc_multilevel_sensor_get_sensor_type(sensor_name_t i_sensor_name)
 {
 #ifdef UNIT_TEST
-  if((i_sensor_name < SL_SENSOR_NAME_MAX_COUNT) && (i_sensor_name >= SL_SENSOR_NAME_AIR_TEMPERATURE))
+  if((i_sensor_name < SENSOR_NAME_MAX_COUNT) && (i_sensor_name >= SENSOR_NAME_AIR_TEMPERATURE))
 #else
-/*warnings is ignored since (i_sensor_name >= SL_SENSOR_NAME_AIR_TEMPERATURE) always returns true due limited range of data type*/
+/*warnings is ignored since (i_sensor_name >= SENSOR_NAME_AIR_TEMPERATURE) always returns true due limited range of data type*/
 /*Only disable warning when building targtes. Unit test will fai if warning disabled*/
 #pragma GCC diagnostic push
 #pragma GCC diagnostic ignored "-Wtype-limits"
-  if((i_sensor_name < SL_SENSOR_NAME_MAX_COUNT) && (i_sensor_name >= SL_SENSOR_NAME_AIR_TEMPERATURE))
+  if((i_sensor_name < SENSOR_NAME_MAX_COUNT) && (i_sensor_name >= SENSOR_NAME_AIR_TEMPERATURE))
 #pragma GCC diagnostic pop
 #endif
   {
@@ -66,24 +66,24 @@ const sl_sensor_type_t* sl_cc_multilevel_sensor_get_sensor_type(sl_sensor_name_t
   return NULL;
 }
 
-sl_sensor_interface_return_value_t 
-sl_cc_multilevel_sensor_init_interface(sl_sensor_interface_t* i_instance, sl_sensor_name_t i_name)
+sensor_interface_return_value_t 
+cc_multilevel_sensor_init_interface(sensor_interface_t* i_instance, sensor_name_t i_name)
 {
-  sl_sensor_interface_return_value_t retval = SL_SENSOR_INTERFACE_RETURN_VALUE_ERROR;
-  if((i_instance != NULL) && (i_name < SL_SENSOR_NAME_MAX_COUNT))
+  sensor_interface_return_value_t retval = SENSOR_INTERFACE_RETURN_VALUE_ERROR;
+  if((i_instance != NULL) && (i_name < SENSOR_NAME_MAX_COUNT))
   {
-    memset(i_instance, 0, sizeof(sl_sensor_interface_t));
-    i_instance->sensor_type = sl_cc_multilevel_sensor_get_sensor_type(i_name);
-    retval = SL_SENSOR_INTERFACE_RETURN_VALUE_OK;
+    memset(i_instance, 0, sizeof(sensor_interface_t));
+    i_instance->sensor_type = cc_multilevel_sensor_get_sensor_type(i_name);
+    retval = SENSOR_INTERFACE_RETURN_VALUE_OK;
   }
 
   return retval;
 }
 
-sl_sensor_interface_return_value_t
-sl_cc_multilevel_sensor_add_supported_scale_interface(sl_sensor_interface_t* i_instance, uint8_t i_scale)
+sensor_interface_return_value_t
+cc_multilevel_sensor_add_supported_scale_interface(sensor_interface_t* i_instance, uint8_t i_scale)
 {
-  sl_sensor_interface_return_value_t retval = SL_SENSOR_INTERFACE_RETURN_VALUE_OK;
+  sensor_interface_return_value_t retval = SENSOR_INTERFACE_RETURN_VALUE_OK;
   if(i_instance != NULL)
   {
     if(i_scale <= i_instance->sensor_type->max_scale_value)
@@ -92,7 +92,7 @@ sl_cc_multilevel_sensor_add_supported_scale_interface(sl_sensor_interface_t* i_i
       
       if((i_instance->supported_scale & pattern) > 0 )
       {
-        retval = SL_SENSOR_INTERFACE_RETURN_VALUE_ALREADY_SET;
+        retval = SENSOR_INTERFACE_RETURN_VALUE_ALREADY_SET;
       }
       else
       {
@@ -101,13 +101,13 @@ sl_cc_multilevel_sensor_add_supported_scale_interface(sl_sensor_interface_t* i_i
     }
     else
     {
-      retval = SL_SENSOR_INTERFACE_RETURN_VALUE_INVALID_SCALE_VALUE;
+      retval = SENSOR_INTERFACE_RETURN_VALUE_INVALID_SCALE_VALUE;
     }
     
   }
   else
   {
-    retval = SL_SENSOR_INTERFACE_RETURN_VALUE_ERROR;
+    retval = SENSOR_INTERFACE_RETURN_VALUE_ERROR;
   }
   
   return retval;

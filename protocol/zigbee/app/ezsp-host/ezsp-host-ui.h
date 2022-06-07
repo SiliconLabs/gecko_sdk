@@ -79,7 +79,14 @@ const uint8_t* ezspErrorString(uint8_t error);
   #define readConfig(x) spiReadConfig(x)
   #define BUMP_HOST_COUNTER(mbr)
   #define ADD_HOST_COUNTER(op, mbr)
-#endif
+#elif defined(EZSP_CPC)
+  #include "app/ezsp-host/cpc/cpc-host.h"
+  #include "app/ezsp-host/cpc/cpc-host-ui.h"
+  #define readConfig(x) 0
+  #define BUMP_HOST_COUNTER(mbr)
+  #define ADD_HOST_COUNTER(op, mbr)
+#endif // EZSP_ASH || EZSP_USB || EZSP_SPI || EZSP_CPC
+
 #endif //__EZSP_HOST_UI_H___
 
 /** @} END addtogroup

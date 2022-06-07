@@ -19,7 +19,7 @@ requires:
   - name: device_init_hfxo
     condition: [hardware_board_has_hfxo]
   - name: device_init_usbpll
-    condition: [device_has_usbpll]  
+    condition: [device_has_usbpll]
   - name: device_init_lfxo
     condition: [hardware_board_has_lfxo]
   - name: device_init_clocks

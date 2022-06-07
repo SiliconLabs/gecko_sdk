@@ -34,15 +34,17 @@
 #include <stdio.h>
 #include <string.h>
 #include <assert.h>
+#include "sl_component_catalog.h"
 #include "sl_cli.h"
 #include "sl_wisun_api.h"
 #include "sl_wisun_util.h"
 #include "sl_wisun_trace_util.h"
-#include "sl_wisun_app_setting_config.h"
 #include "sl_wisun_cli_settings.h"
 #include "sl_wisun_app_setting.h"
 #include "sl_wisun_cli_util.h"
 #include "sl_wisun_cli_core.h"
+#include "sl_wisun_app_core.h"
+#include "sl_wisun_app_core_util_config.h"
 
 // -----------------------------------------------------------------------------
 //                              Macros and Typedefs
@@ -67,15 +69,6 @@
 #define APP_CLI_VALUE_SIZE_UINT32         APP_SETTINGS_VALUE_SIZE_UINT32
 
 typedef app_settings_entry_t app_cli_entry_t;
-
-/**************************************************************************//**
- * @brief Wisun phy parameters structure
- *****************************************************************************/
-typedef struct {
-  uint8_t reg_domain;
-  uint16_t op_mode;
-  uint8_t op_class;
-} wisun_app_cli_phy_t;
 
 // -----------------------------------------------------------------------------
 //                          Static Function Declarations
@@ -177,9 +170,114 @@ static sl_status_t _app_cli_get_phy(char *value_str,
                                     const char *key_str,
                                     const app_cli_entry_t *entry);
 
+#if defined(SL_CATALOG_WISUN_MODE_SWITCH_PRESENT)
+/**************************************************************************//**
+ * @brief Helper to get wisun mode switch counters for getter
+ * @param[out] *value_str is the desired value string
+ * @param[in] *key_str is the key string of the set command
+ * @param[in] *entry is the settings entry
+ * @return SL_STATUS_OK if the setting is success.
+ * @return SL_STATUS_FAIL if setting failed.
+ *****************************************************************************/
+static sl_status_t _app_ms_get_counters(char *value_str,
+                                        const char *key_str,
+                                        const app_cli_entry_t *entry);
+#endif
+
+#if defined(SL_CATALOG_WISUN_FULL_RADIOCONF_PRESENT)
+/**************************************************************************//**
+ * @brief Helper to set TX power for getter
+ * @param[out] *value_str is the desired value string
+ * @param[in] *key_str is the key string of the set command
+ * @param[in] *entry is the settings entry
+ * @return SL_STATUS_OK if the setting is success.
+ * @return SL_STATUS_FAIL if setting failed.
+ *****************************************************************************/
+static sl_status_t _app_cli_set_phy(const char *value_str,
+                                    const char *key_str,
+                                    const app_settings_entry_t *entry);
+#endif
+
+/**************************************************************************//**
+ * @brief Helper to set regulation for setter
+ * @param[out] *value_str is the desired value string
+ * @param[in] *key_str is the key string of the set command
+ * @param[in] *entry is the settings entry
+ * @return SL_STATUS_OK if the setting is success.
+ * @return SL_STATUS_FAIL if setting failed.
+ *****************************************************************************/
+static sl_status_t _app_set_regulation(const char *value_str,
+                                       const char *key_str,
+                                       const app_settings_entry_t *entry);
+
+/**************************************************************************//**
+ * @brief Helper to set regulation warning threshold for setter
+ * @param[out] *value_str is the desired value string
+ * @param[in] *key_str is the key string of the set command
+ * @param[in] *entry is the settings entry
+ * @return SL_STATUS_OK if the setting is success.
+ * @return SL_STATUS_FAIL if setting failed.
+ *****************************************************************************/
+static sl_status_t _app_set_regulation_warning_threshold(const char *value_str,
+                                                         const char *key_str,
+                                                         const app_settings_entry_t *entry);
+
+/**************************************************************************//**
+ * @brief Helper to set regulation alert threshold for setter
+ * @param[out] *value_str is the desired value string
+ * @param[in] *key_str is the key string of the set command
+ * @param[in] *entry is the settings entry
+ * @return SL_STATUS_OK if the setting is success.
+ * @return SL_STATUS_FAIL if setting failed.
+ *****************************************************************************/
+static sl_status_t _app_set_regulation_alert_threshold(const char *value_str,
+                                                       const char *key_str,
+                                                       const app_settings_entry_t *entry);
+
+/**************************************************************************//**
+ * @brief Helper to get regulation for getter
+ * @param[out] *value_str is the desired value string
+ * @param[in] *key_str is the key string of the set command
+ * @param[in] *entry is the settings entry
+ * @return SL_STATUS_OK if the setting is success.
+ * @return SL_STATUS_FAIL if setting failed.
+ *****************************************************************************/
+static sl_status_t _app_get_regulation(char *value_str,
+                                       const char *key_str,
+                                       const app_cli_entry_t *entry);
+
+/**************************************************************************//**
+ * @brief Helper to get regulation warning threshold for setter
+ * @param[out] *value_str is the desired value string
+ * @param[in] *key_str is the key string of the set command
+ * @param[in] *entry is the settings entry
+ * @return SL_STATUS_OK if the setting is success.
+ * @return SL_STATUS_FAIL if setting failed.
+ *****************************************************************************/
+static sl_status_t _app_get_regulation_warning_threshold(char *value_str,
+                                                         const char *key_str,
+                                                         const app_cli_entry_t *entry);
+
+/**************************************************************************//**
+ * @brief Helper to get regulation alert threshold for setter
+ * @param[out] *value_str is the desired value string
+ * @param[in] *key_str is the key string of the set command
+ * @param[in] *entry is the settings entry
+ * @return SL_STATUS_OK if the setting is success.
+ * @return SL_STATUS_FAIL if setting failed.
+ *****************************************************************************/
+static sl_status_t _app_get_regulation_alert_threshold(char *value_str,
+                                                       const char *key_str,
+                                                       const app_cli_entry_t *entry);
+
 // -----------------------------------------------------------------------------
 //                                Static Variables
 // -----------------------------------------------------------------------------
+
+/**************************************************************************//**
+ * @brief Wi-SUN application regulation
+ *****************************************************************************/
+static sl_wisun_regulation_t app_regulation = (sl_wisun_regulation_t)WISUN_APP_REGULATION;
 
 // -----------------------------------------------------------------------------
 //                                Global Variables
@@ -246,7 +344,11 @@ const app_cli_entry_t app_settings_entries[] =
     .value = NULL,
     .input_enum_list = app_wisun_phy_reg_domain_enum,
     .output_enum_list = app_wisun_phy_reg_domain_enum,
+#if defined(SL_CATALOG_WISUN_FULL_RADIOCONF_PRESENT)
+    .set_handler = _app_cli_set_phy,
+#else
     .set_handler = NULL,
+#endif
     .get_handler = _app_cli_get_phy
   },
   {
@@ -258,7 +360,11 @@ const app_cli_entry_t app_settings_entries[] =
     .value = NULL,
     .input_enum_list = NULL,
     .output_enum_list = NULL,
+#if defined(SL_CATALOG_WISUN_FULL_RADIOCONF_PRESENT)
+    .set_handler = _app_cli_set_phy,
+#else
     .set_handler = NULL,
+#endif
     .get_handler = _app_cli_get_phy
   },
   {
@@ -270,7 +376,11 @@ const app_cli_entry_t app_settings_entries[] =
     .value = NULL,
     .input_enum_list = NULL,
     .output_enum_list = NULL,
+#if defined(SL_CATALOG_WISUN_FULL_RADIOCONF_PRESENT)
+    .set_handler = _app_cli_set_phy,
+#else
     .set_handler = NULL,
+#endif
     .get_handler = _app_cli_get_phy
   },
   {
@@ -325,6 +435,99 @@ const app_cli_entry_t app_settings_entries[] =
     .get_handler = app_settings_get_ip_address,
     .description = NULL
   },
+#if defined(SL_CATALOG_WISUN_MODE_SWITCH_PRESENT)
+  {
+    .key = "mode_switch_tx_counter",
+    .domain = WISUN_CLI_DOMAIN_ID,
+    .value_size = APP_CLI_VALUE_SIZE_UINT32,
+    .input = APP_CLI_INPUT_FLAG_DEFAULT,
+    .output = APP_CLI_OUTPUT_FLAG_DEFAULT,
+    .value = NULL,
+    .input_enum_list = NULL,
+    .output_enum_list = NULL,
+    .set_handler = NULL,
+    .get_handler = _app_ms_get_counters,
+    .description = NULL
+  },
+  {
+    .key = "mode_switch_tx_failed_counter",
+    .domain = WISUN_CLI_DOMAIN_ID,
+    .value_size = APP_CLI_VALUE_SIZE_UINT32,
+    .input = APP_CLI_INPUT_FLAG_DEFAULT,
+    .output = APP_CLI_OUTPUT_FLAG_DEFAULT,
+    .value = NULL,
+    .input_enum_list = NULL,
+    .output_enum_list = NULL,
+    .set_handler = NULL,
+    .get_handler = _app_ms_get_counters,
+    .description = NULL
+  },
+  {
+    .key = "mode_switch_rx_counter",
+    .domain = WISUN_CLI_DOMAIN_ID,
+    .value_size = APP_CLI_VALUE_SIZE_UINT32,
+    .input = APP_CLI_INPUT_FLAG_DEFAULT,
+    .output = APP_CLI_OUTPUT_FLAG_DEFAULT,
+    .value = NULL,
+    .input_enum_list = NULL,
+    .output_enum_list = NULL,
+    .set_handler = NULL,
+    .get_handler = _app_ms_get_counters,
+    .description = NULL
+  },
+  {
+    .key = "mode_switch_rx_failed_counter",
+    .domain = WISUN_CLI_DOMAIN_ID,
+    .value_size = APP_CLI_VALUE_SIZE_UINT32,
+    .input = APP_CLI_INPUT_FLAG_DEFAULT,
+    .output = APP_CLI_OUTPUT_FLAG_DEFAULT,
+    .value = NULL,
+    .input_enum_list = NULL,
+    .output_enum_list = NULL,
+    .set_handler = NULL,
+    .get_handler = _app_ms_get_counters,
+    .description = NULL
+  },
+#endif
+  {
+    .key = "regulation",
+    .domain = WISUN_CLI_DOMAIN_ID,
+    .value_size = APP_CLI_VALUE_SIZE_UINT8,
+    .input = APP_CLI_INPUT_FLAG_DEFAULT,
+    .output = APP_CLI_OUTPUT_FLAG_DEFAULT,
+    .value = NULL,
+    .input_enum_list = app_regulation_enum,
+    .output_enum_list = app_regulation_enum,
+    .set_handler = _app_set_regulation,
+    .get_handler = _app_get_regulation,
+    .description = "Regional regulation [uint8]"
+  },
+  {
+    .key = "regulation_warning_threshold",
+    .domain = WISUN_CLI_DOMAIN_ID,
+    .value_size = APP_CLI_VALUE_SIZE_UINT8,
+    .input = APP_CLI_INPUT_FLAG_SIGNED,
+    .output = APP_CLI_OUTPUT_FLAG_SIGNED,
+    .value = NULL,
+    .input_enum_list = NULL,
+    .output_enum_list = NULL,
+    .set_handler = _app_set_regulation_warning_threshold,
+    .get_handler = _app_get_regulation_warning_threshold,
+    .description = "Transmission warning threshold in percent (-1 to disable) [int8]"
+  },
+  {
+    .key = "regulation_alert_threshold",
+    .domain = WISUN_CLI_DOMAIN_ID,
+    .value_size = APP_CLI_VALUE_SIZE_UINT8,
+    .input = APP_CLI_INPUT_FLAG_SIGNED,
+    .output = APP_CLI_OUTPUT_FLAG_SIGNED,
+    .value = NULL,
+    .input_enum_list = NULL,
+    .output_enum_list = NULL,
+    .set_handler = _app_set_regulation_alert_threshold,
+    .get_handler = _app_get_regulation_alert_threshold,
+    .description = "Transmission alert threshold in percent (-1 to disable) [int8]"
+  },
   {
     .key = NULL,
     .domain = 0,
@@ -343,6 +546,11 @@ const app_cli_entry_t app_settings_entries[] =
 // -----------------------------------------------------------------------------
 //                          Public Function Definitions
 // -----------------------------------------------------------------------------
+
+void app_about(void)
+{
+  app_wisun_project_info_print(false);
+}
 
 /* Weak function for app_wisun_network_connect() if the app_core is not added. */
 SL_WEAK void app_wisun_network_connect(void)
@@ -573,17 +781,21 @@ static sl_status_t _app_cli_get_phy(char *value_str,
                                     const app_cli_entry_t *entry)
 {
   sl_status_t res = SL_STATUS_FAIL;
-  wisun_app_cli_phy_t parameters;
   const app_enum_t* value_enum;
   (void)key_str;
+  app_setting_phy phy;
 
   if ((value_str == NULL) || (entry == NULL) || (entry->key == NULL)) {
     return res;
   }
 
   // gets the wisun phy parameters
-  res = sl_wisun_util_get_rf_settings(&parameters.reg_domain, &parameters.op_class,
-                                      &parameters.op_mode);
+#if defined(SL_CATALOG_WISUN_FULL_RADIOCONF_PRESENT)
+  res = app_wisun_setting_get_phy(&phy);
+#else
+  res = sl_wisun_util_get_rf_settings(&phy.regulatory_domain, &phy.operating_class,
+                                      &phy.operating_mode);
+#endif
   if (res != SL_STATUS_OK) {
     return res;
   }
@@ -595,7 +807,7 @@ static sl_status_t _app_cli_get_phy(char *value_str,
 
     if (value_enum->value_str != NULL) {
       while (value_enum) {
-        if (value_enum->value == parameters.reg_domain) {
+        if (value_enum->value == phy.regulatory_domain) {
           // Matching enumeration found
           break;
         }
@@ -607,11 +819,329 @@ static sl_status_t _app_cli_get_phy(char *value_str,
     sprintf(value_str, "%s (%d)", value_enum->value_str, (uint8_t)value_enum->value);
     // operating class
   } else if (strstr(entry->key, "operating_class")) {
-    sprintf(value_str, "%d", parameters.op_class);
+    sprintf(value_str, "%d", phy.operating_class);
     // operating mode
   } else if (strstr(entry->key, "operating_mode")) {
-    sprintf(value_str, "0x%02x", parameters.op_mode);
+    sprintf(value_str, "0x%02x", phy.operating_mode);
+  }
+
+  return SL_STATUS_OK;
+}
+
+#if defined(SL_CATALOG_WISUN_FULL_RADIOCONF_PRESENT)
+/* App CLI getting PHY parameters */
+sl_status_t _app_cli_set_phy(const char *value_str,
+                             const char *key_str,
+                             const app_settings_entry_t *entry)
+{
+  (void)key_str;
+  sl_status_t res = SL_STATUS_FAIL;
+  int32_t value = 0U;
+  const app_enum_t* value_enum;
+  app_setting_phy phy;
+
+  if ((value_str == NULL) || (entry == NULL) || (entry->key == NULL)) {
+    return res;
+  }
+
+  app_wisun_setting_get_phy(&phy);
+
+  res = app_util_get_integer((uint32_t *)&value,
+                             value_str,
+                             entry->input_enum_list,
+                             entry->input & APP_SETTINGS_INPUT_FLAG_SIGNED);
+  if (res != SL_STATUS_OK) {
+    return res;
+  }
+
+  if (strstr(entry->key, "regulatory_domain")) {
+    value_enum = entry->output_enum_list;
+    value_enum += value;
+    phy.regulatory_domain = value;
+    app_wisun_setting_set_phy(&phy);
+  } else if (strstr(entry->key, "operating_class")) {
+    phy.operating_class = value;
+    app_wisun_setting_set_phy(&phy);
+  } else if (strstr(entry->key, "operating_mode")) {
+    phy.operating_mode = value;
+    app_wisun_setting_set_phy(&phy);
   } else {
+  }
+  return res;
+}
+#endif
+
+#if defined(SL_CATALOG_WISUN_MODE_SWITCH_PRESENT)
+/* App CLI getting mode switch counters */
+static sl_status_t _app_ms_get_counters(char *value_str,
+                                        const char *key_str,
+                                        const app_cli_entry_t *entry)
+{
+  sl_status_t res = SL_STATUS_FAIL;
+  (void)key_str;
+  sl_wisun_statistics_t stat;
+
+  if ((value_str == NULL) || (entry == NULL) || (entry->key == NULL)) {
+    return res;
+  }
+
+  // gets the statsitic that contains the mode switch information
+  res = sl_wisun_get_statistics(SL_WISUN_STATISTICS_TYPE_MAC, &stat);
+
+  if (res != SL_STATUS_OK) {
+    return res;
+  }
+
+  // mode switch TX-RX counters (inc. failed)
+  if (strstr(entry->key, "mode_switch_tx_counter")) {
+    sprintf(value_str, "%lu", stat.mac.tx_ms_count);
+  } else if (strstr(entry->key, "mode_switch_tx_failed_counter")) {
+    sprintf(value_str, "%lu", stat.mac.tx_ms_failed_count);
+  } else if (strstr(entry->key, "mode_switch_rx_counter")) {
+    sprintf(value_str, "%lu", stat.mac.rx_ms_count);
+  } else if (strstr(entry->key, "mode_switch_rx_failed_counter")) {
+    sprintf(value_str, "%lu", stat.mac.rx_ms_failed_count);
+  } else {
+  }
+
+  return SL_STATUS_OK;
+}
+#endif
+
+static sl_status_t _app_set_regulation(const char *value_str,
+                                       const char *key_str,
+                                       const app_settings_entry_t *entry)
+{
+  (void)key_str;
+  (void)entry;
+  sl_status_t res = SL_STATUS_FAIL;
+  uint32_t value = 0U;
+  regulation_thresholds_t thresholds;
+  sl_wisun_join_state_t join_state = SL_WISUN_JOIN_STATE_DISCONNECTED;
+
+  if ((value_str == NULL) || (entry == NULL) || (entry->key == NULL)) {
+    return SL_STATUS_FAIL;
+  }
+
+  // checking if the device connected or not
+  res = sl_wisun_get_join_state(&join_state);
+  if (res != SL_STATUS_OK) {
+    return res;
+  } else {
+    if (join_state != SL_WISUN_JOIN_STATE_DISCONNECTED) {
+      printf("[Regulation related settings unavailable, disconnection is needed]\r\n");
+      return SL_STATUS_FAIL;
+    }
+  }
+
+  res = app_util_get_integer(&value,
+                             value_str,
+                             entry->input_enum_list,
+                             entry->input & APP_CLI_INPUT_FLAG_SIGNED);
+
+  if (res != SL_STATUS_OK) {
+    printf("[Failed: Get value error: %lu]\r\n", res);
+    return res;
+  }
+
+  if (strstr(entry->key, "regulation")) {
+    // sets the thresholds
+    (void)app_wisun_get_regulation_thresholds(&thresholds);
+    res = sl_wisun_set_regulation_tx_thresholds(thresholds.warning_threshold,
+                                                thresholds.alert_threshold);
+    if (res != SL_STATUS_OK) {
+      printf("[Failed: unable to set regulation TX thresholds: %lu]\r\n", res);
+      return res;
+    }
+
+    // sets regulation
+    res = sl_wisun_set_regulation((sl_wisun_regulation_t)value);
+    if (res != SL_STATUS_OK) {
+      printf("[Regulation not valid]\n");
+      return res;
+    } else {
+      app_regulation = (sl_wisun_regulation_t)value;
+    }
+
+    // sets status of regulation
+    if ((sl_wisun_regulation_t)value == SL_WISUN_REGULATION_NONE) {
+      app_wisun_set_regulation_active(false);
+    } else {
+      app_wisun_set_regulation_active(true);
+    }
+  }
+
+  return SL_STATUS_OK;
+}
+
+static sl_status_t _app_set_regulation_warning_threshold(const char *value_str,
+                                                         const char *key_str,
+                                                         const app_settings_entry_t *entry)
+{
+  (void)key_str;
+  (void)entry;
+  sl_status_t res = SL_STATUS_FAIL;
+  uint32_t value = 0U;
+  regulation_thresholds_t thresholds;
+  sl_wisun_join_state_t join_state = SL_WISUN_JOIN_STATE_DISCONNECTED;
+
+  if ((value_str == NULL) || (entry == NULL) || (entry->key == NULL)) {
+    return SL_STATUS_FAIL;
+  }
+
+  // checking if the device connected or not
+  res = sl_wisun_get_join_state(&join_state);
+  if (res != SL_STATUS_OK) {
+    return res;
+  } else {
+    if (join_state != SL_WISUN_JOIN_STATE_DISCONNECTED) {
+      printf("[Regulation related settings unavailable, disconnection is needed]\r\n");
+      return SL_STATUS_FAIL;
+    }
+  }
+
+  res = app_util_get_integer(&value,
+                             value_str,
+                             entry->input_enum_list,
+                             entry->input & APP_CLI_INPUT_FLAG_SIGNED);
+
+  if (res != SL_STATUS_OK) {
+    printf("[Failed: Get value error: %lu]\r\n", res);
+    return res;
+  }
+
+  if (strstr(entry->key, "regulation_warning_threshold")) {
+    (void)app_wisun_get_regulation_thresholds(&thresholds);
+    res = sl_wisun_set_regulation_tx_thresholds((int8_t)value, thresholds.alert_threshold);
+    if (res != SL_STATUS_OK) {
+      printf("[Failed: unable to set regulation TX warning threshold: %lu]\r\n", res);
+      return res;
+    } else {
+      app_wisun_set_regulation_thresholds((int8_t)value, thresholds.alert_threshold);
+    }
+  }
+
+  return SL_STATUS_OK;
+}
+
+static sl_status_t _app_set_regulation_alert_threshold(const char *value_str,
+                                                       const char *key_str,
+                                                       const app_settings_entry_t *entry)
+{
+  (void)key_str;
+  (void)entry;
+  sl_status_t res = SL_STATUS_FAIL;
+  uint32_t value = 0U;
+  regulation_thresholds_t thresholds;
+  sl_wisun_join_state_t join_state = SL_WISUN_JOIN_STATE_DISCONNECTED;
+
+  if ((value_str == NULL) || (entry == NULL) || (entry->key == NULL)) {
+    return SL_STATUS_FAIL;
+  }
+
+  // checking if the device connected or not
+  res = sl_wisun_get_join_state(&join_state);
+  if (res != SL_STATUS_OK) {
+    return res;
+  } else {
+    if (join_state != SL_WISUN_JOIN_STATE_DISCONNECTED) {
+      printf("[Regulation related settings unavailable, disconnection is needed]\r\n");
+      return SL_STATUS_FAIL;
+    }
+  }
+
+  res = app_util_get_integer(&value,
+                             value_str,
+                             entry->input_enum_list,
+                             entry->input & APP_CLI_INPUT_FLAG_SIGNED);
+
+  if (res != SL_STATUS_OK) {
+    printf("[Failed: Get value error: %lu]\r\n", res);
+    return res;
+  }
+
+  if (strstr(entry->key, "regulation_alert_threshold")) {
+    (void)app_wisun_get_regulation_thresholds(&thresholds);
+    res = sl_wisun_set_regulation_tx_thresholds(thresholds.warning_threshold, (int8_t)value);
+    if (res != SL_STATUS_OK) {
+      printf("[Failed: unable to set regulation TX alert threshold: %lu]\r\n", res);
+      return res;
+    } else {
+      app_wisun_set_regulation_thresholds(thresholds.warning_threshold, (int8_t)value);
+    }
+  }
+
+  return SL_STATUS_OK;
+}
+
+static sl_status_t _app_get_regulation(char *value_str,
+                                       const char *key_str,
+                                       const app_cli_entry_t *entry)
+{
+  sl_status_t res = SL_STATUS_FAIL;
+  const app_enum_t* value_enum;
+  (void)key_str;
+
+  if ((value_str == NULL) || (entry == NULL) || (entry->key == NULL)) {
+    return res;
+  }
+
+  if (strstr(entry->key, "regulation")) {
+    // finds the proper string for the value for regulation
+    value_enum = entry->output_enum_list;
+
+    if (value_enum->value_str != NULL) {
+      while (value_enum) {
+        if (value_enum->value == app_regulation) {
+          // Matching enumeration found
+          break;
+        }
+        value_enum++;
+      }
+    } else {
+      return SL_STATUS_FAIL;
+    }
+    sprintf(value_str, "%s (%d)", value_enum->value_str, (uint8_t)value_enum->value);
+  }
+
+  return SL_STATUS_OK;
+}
+
+static sl_status_t _app_get_regulation_warning_threshold(char *value_str,
+                                                         const char *key_str,
+                                                         const app_cli_entry_t *entry)
+{
+  sl_status_t res = SL_STATUS_FAIL;
+  (void)key_str;
+  regulation_thresholds_t thresholds;
+
+  if ((value_str == NULL) || (entry == NULL) || (entry->key == NULL)) {
+    return res;
+  }
+
+  if (strstr(entry->key, "regulation_warning_threshold")) {
+    (void)app_wisun_get_regulation_thresholds(&thresholds);
+    sprintf(value_str, "%d", thresholds.warning_threshold);
+  }
+
+  return SL_STATUS_OK;
+}
+
+static sl_status_t _app_get_regulation_alert_threshold(char *value_str,
+                                                       const char *key_str,
+                                                       const app_cli_entry_t *entry)
+{
+  sl_status_t res = SL_STATUS_FAIL;
+  (void)key_str;
+  regulation_thresholds_t thresholds;
+
+  if ((value_str == NULL) || (entry == NULL) || (entry->key == NULL)) {
+    return res;
+  }
+
+  if (strstr(entry->key, "regulation_alert_threshold")) {
+    (void)app_wisun_get_regulation_thresholds(&thresholds);
+    sprintf(value_str, "%d", thresholds.alert_threshold);
   }
 
   return SL_STATUS_OK;

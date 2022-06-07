@@ -945,7 +945,7 @@ typedef struct {
 #define _SMU_BMPUPATD0_RADIOAES_MASK             0x1UL                                        /**< Bit mask for SMU_RADIOAES                   */
 #define _SMU_BMPUPATD0_RADIOAES_DEFAULT          0x00000001UL                                 /**< Mode DEFAULT for SMU_BMPUPATD0              */
 #define SMU_BMPUPATD0_RADIOAES_DEFAULT           (_SMU_BMPUPATD0_RADIOAES_DEFAULT << 0)       /**< Shifted mode DEFAULT for SMU_BMPUPATD0      */
-#define SMU_BMPUPATD0_RADIOSUBSYSTEM             (0x1UL << 1)                                 /**< RADIO subsystem masters privileged mode     */
+#define SMU_BMPUPATD0_RADIOSUBSYSTEM             (0x1UL << 1)                                 /**< RADIO subsystem manager privileged mode     */
 #define _SMU_BMPUPATD0_RADIOSUBSYSTEM_SHIFT      1                                            /**< Shift value for SMU_RADIOSUBSYSTEM          */
 #define _SMU_BMPUPATD0_RADIOSUBSYSTEM_MASK       0x2UL                                        /**< Bit mask for SMU_RADIOSUBSYSTEM             */
 #define _SMU_BMPUPATD0_RADIOSUBSYSTEM_DEFAULT    0x00000001UL                                 /**< Mode DEFAULT for SMU_BMPUPATD0              */
@@ -999,7 +999,7 @@ typedef struct {
 #define _SMU_BMPUSATD0_RADIOAES_MASK             0x1UL                                        /**< Bit mask for SMU_RADIOAES                   */
 #define _SMU_BMPUSATD0_RADIOAES_DEFAULT          0x00000001UL                                 /**< Mode DEFAULT for SMU_BMPUSATD0              */
 #define SMU_BMPUSATD0_RADIOAES_DEFAULT           (_SMU_BMPUSATD0_RADIOAES_DEFAULT << 0)       /**< Shifted mode DEFAULT for SMU_BMPUSATD0      */
-#define SMU_BMPUSATD0_RADIOSUBSYSTEM             (0x1UL << 1)                                 /**< RADIO subsystem masters secure mode         */
+#define SMU_BMPUSATD0_RADIOSUBSYSTEM             (0x1UL << 1)                                 /**< RADIO subsystem manager secure mode         */
 #define _SMU_BMPUSATD0_RADIOSUBSYSTEM_SHIFT      1                                            /**< Shift value for SMU_RADIOSUBSYSTEM          */
 #define _SMU_BMPUSATD0_RADIOSUBSYSTEM_MASK       0x2UL                                        /**< Bit mask for SMU_RADIOSUBSYSTEM             */
 #define _SMU_BMPUSATD0_RADIOSUBSYSTEM_DEFAULT    0x00000001UL                                 /**< Mode DEFAULT for SMU_BMPUSATD0              */
@@ -1575,7 +1575,7 @@ typedef struct {
 #define _SMU_BMPUNSPATD0_RADIOAES_MASK             0x1UL                                          /**< Bit mask for SMU_RADIOAES                   */
 #define _SMU_BMPUNSPATD0_RADIOAES_DEFAULT          0x00000001UL                                   /**< Mode DEFAULT for SMU_BMPUNSPATD0            */
 #define SMU_BMPUNSPATD0_RADIOAES_DEFAULT           (_SMU_BMPUNSPATD0_RADIOAES_DEFAULT << 0)       /**< Shifted mode DEFAULT for SMU_BMPUNSPATD0    */
-#define SMU_BMPUNSPATD0_RADIOSUBSYSTEM             (0x1UL << 1)                                   /**< RADIO subsystem masters privileged mode     */
+#define SMU_BMPUNSPATD0_RADIOSUBSYSTEM             (0x1UL << 1)                                   /**< RADIO subsystem manager privileged mode     */
 #define _SMU_BMPUNSPATD0_RADIOSUBSYSTEM_SHIFT      1                                              /**< Shift value for SMU_RADIOSUBSYSTEM          */
 #define _SMU_BMPUNSPATD0_RADIOSUBSYSTEM_MASK       0x2UL                                          /**< Bit mask for SMU_RADIOSUBSYSTEM             */
 #define _SMU_BMPUNSPATD0_RADIOSUBSYSTEM_DEFAULT    0x00000001UL                                   /**< Mode DEFAULT for SMU_BMPUNSPATD0            */

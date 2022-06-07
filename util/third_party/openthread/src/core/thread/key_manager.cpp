@@ -37,7 +37,7 @@
 #include "common/encoding.hpp"
 #include "common/instance.hpp"
 #include "common/locator_getters.hpp"
-#include "common/logging.hpp"
+#include "common/log.hpp"
 #include "common/timer.hpp"
 #include "crypto/hkdf_sha256.hpp"
 #include "crypto/storage.hpp"
@@ -45,6 +45,8 @@
 #include "thread/thread_netif.hpp"
 
 namespace ot {
+
+RegisterLogModule("KeyManager");
 
 const uint8_t KeyManager::kThreadString[] = {
     'T', 'h', 'r', 'e', 'a', 'd',
@@ -70,7 +72,6 @@ void SecurityPolicy::SetToDefaultFlags(void)
     mNativeCommissioningEnabled     = true;
     mRoutersEnabled                 = true;
     mExternalCommissioningEnabled   = true;
-    mBeaconsEnabled                 = true;
     mCommercialCommissioningEnabled = false;
     mAutonomousEnrollmentEnabled    = false;
     mNetworkKeyProvisioningEnabled  = false;
@@ -89,7 +90,6 @@ void SecurityPolicy::SetFlags(const uint8_t *aFlags, uint8_t aFlagsLength)
     mNativeCommissioningEnabled     = aFlags[0] & kNativeCommissioningMask;
     mRoutersEnabled                 = aFlags[0] & kRoutersMask;
     mExternalCommissioningEnabled   = aFlags[0] & kExternalCommissioningMask;
-    mBeaconsEnabled                 = aFlags[0] & kBeaconsMask;
     mCommercialCommissioningEnabled = (aFlags[0] & kCommercialCommissioningMask) == 0;
     mAutonomousEnrollmentEnabled    = (aFlags[0] & kAutonomousEnrollmentMask) == 0;
     mNetworkKeyProvisioningEnabled  = (aFlags[0] & kNetworkKeyProvisioningMask) == 0;
@@ -127,11 +127,6 @@ void SecurityPolicy::GetFlags(uint8_t *aFlags, uint8_t aFlagsLength) const
     if (mExternalCommissioningEnabled)
     {
         aFlags[0] |= kExternalCommissioningMask;
-    }
-
-    if (mBeaconsEnabled)
-    {
-        aFlags[0] |= kBeaconsMask;
     }
 
     if (!mCommercialCommissioningEnabled)
@@ -348,13 +343,13 @@ void KeyManager::UpdateKeyMaterial(void)
         Mac::KeyMaterial prevKey;
         Mac::KeyMaterial nextKey;
 
-        curKey.SetFrom(hashKeys.GetMacKey());
+        curKey.SetFrom(hashKeys.GetMacKey(), kExportableMacKeys);
 
         ComputeKeys(mKeySequence - 1, hashKeys);
-        prevKey.SetFrom(hashKeys.GetMacKey());
+        prevKey.SetFrom(hashKeys.GetMacKey(), kExportableMacKeys);
 
         ComputeKeys(mKeySequence + 1, hashKeys);
-        nextKey.SetFrom(hashKeys.GetMacKey());
+        nextKey.SetFrom(hashKeys.GetMacKey(), kExportableMacKeys);
 
         Get<Mac::SubMac>().SetMacKey(Mac::Frame::kKeyIdMode1, (mKeySequence & 0x7f) + 1, prevKey, curKey, nextKey);
     }
@@ -486,7 +481,7 @@ void KeyManager::SetSecurityPolicy(const SecurityPolicy &aSecurityPolicy)
 {
     if (aSecurityPolicy.mRotationTime < SecurityPolicy::kMinKeyRotationTime)
     {
-        otLogNoteMeshCoP("Key Rotation Time too small: %d", aSecurityPolicy.mRotationTime);
+        LogNote("Key Rotation Time too small: %d", aSecurityPolicy.mRotationTime);
         ExitNow();
     }
 

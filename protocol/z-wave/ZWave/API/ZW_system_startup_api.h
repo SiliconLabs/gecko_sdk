@@ -20,7 +20,7 @@ bool IsWakeupCausedByRtccTimeout(void);
 
 /**
  * Get number of milliseconds the device has spent sleeping
- * in EM4 before it was woken up.
+ * in deep sleep before it was woken up.
  *
  * This function can safely be called from multiple threads.
 
@@ -29,24 +29,24 @@ bool IsWakeupCausedByRtccTimeout(void);
 uint32_t GetCompletedSleepDurationMs(void);
 
 /**
- * Get the sl_sleeptimer tick value of the device when it woke
- * up from EM4
+ * Get the sleeptimer tick value of the device when it woke
+ * up from deep sleep
  *
  * This function can safely be called from multiple threads.
 
  * @return RTCC ticks.
  */
-uint32_t GetEM4WakeupTick(void);
+uint32_t GetDeepSleepWakeupTick(void);
 
 /**
- * Get the sl_sleeptimer tick value of the device when it last
- * went to EM4 sleep. (It is stored in retention RAM)
+ * Get the sleeptimer tick value of the device when it last
+ * went to Deep Sleep. (It is stored in retention RAM)
  *
  * This function can safely be called from multiple threads.
 
  * @return RTCC ticks.
  */
-uint32_t GetLastTickBeforeEM4(void);
+uint32_t GetLastTickBeforeDeepSleep(void);
 
 
 /**

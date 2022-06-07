@@ -11,7 +11,7 @@ requires:
   - name: device_series_1
 root_path: ./
 include:
-  - path: platform/service/sim_eeprom_headers/inc
+  - path: platform/service/sim_eeprom/sim_eeprom_headers/inc
     file_list:
       - path: sl_sim_eeprom_cortexm3.h
       - path: sl_sim_eeprom_size.h

@@ -19,7 +19,7 @@
 #ifndef SILABS_APP_EM260_SERIAL_INTERFACE_H
 #define SILABS_APP_EM260_SERIAL_INTERFACE_H
 
-void serialInit(void);
+void serialInit(EmberEvent* event);
 bool serialReleaseBuffers(void);
 void serialAllocateBuffers(void);
 bool serialOkToSleep(void);

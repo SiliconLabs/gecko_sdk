@@ -18,7 +18,7 @@
 #include <stddef.h>
 #include "stack/include/ember.h"
 #include "stack/include/error.h"
-#include "zigbee_debug_channel.h"
+#include "stack/framework/zigbee_debug_channel.h"
 #include "em2xx-reset-defs.h"
 #include "hal/hal.h"
 #include "app/util/ezsp/ezsp-protocol.h"
@@ -27,10 +27,10 @@
 #include "ash-protocol.h"
 #include "ash-ncp.h"
 #include "ash-common.h"
-#include "legacy_ncp_ash_config.h"
-#if !defined(ZIGBEE_STACK_ON_HOST)
+#include "legacy_common_ash_config.h"
+#if !defined(ZIGBEE_STACK_ON_HOST) && !defined(EMBER_TEST)
 #include "sl_token_manufacturing_api.h"
-#endif
+#endif // !defined(ZIGBEE_STACK_ON_HOST) && !defined(EMBER_TEST)
 //------------------------------------------------------------------------------
 // Preprocessor definitions
 
@@ -205,6 +205,8 @@ static void ashTraceFrameError(EzspStatus status);
 static void ashTraceEventDebugOnly(EzspStatus status);
 
 static void ashTraceAckEvent(EzspStatus status, uint8_t ackNum);
+
+extern uint8_t halGetEm2xxResetInfo(void);
 
 //------------------------------------------------------------------------------
 // Functions implementing the interface upward to EZSP

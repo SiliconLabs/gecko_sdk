@@ -14,7 +14,7 @@
  * sections of the MSLA applicable to Source Code.
  *
  ******************************************************************************/
-#include PLATFORM_HEADER
+#include <stdint.h>
 #include "crc.h"
 
 /*

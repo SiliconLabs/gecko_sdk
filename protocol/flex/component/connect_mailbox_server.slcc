@@ -23,23 +23,23 @@ config_file:
   - path: "protocol/flex/mailbox/mailbox-server/config/mailbox-server-config.h"
 template_contribution:
   - name: stack_callback
-    value: 
+    value:
       callback_type: "init"
       function_name: "emAfPluginMailboxServerInitCallback"
   - name: stack_callback
-    value: 
+    value:
       callback_type: "stack_status"
       function_name: "emAfPluginMailboxServerStackStatusCallback"
   - name: stack_callback
-    value: 
+    value:
       callback_type: "incoming_message"
       function_name: "emAfPluginMailboxServerIncomingMessageCallback"
   - name: stack_callback
-    value: 
+    value:
       callback_type: "message_sent"
       function_name: "emAfPluginMailboxServerMessageSentCallback"
   - name: stack_callback
-    value: 
+    value:
       callback_type: "mark_application_buffers"
       function_name: "emAfPluginMailboxServerMarkBuffersCallback"
   - name: event_system

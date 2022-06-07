@@ -1,7 +1,14 @@
 id: zw_cc_basic
-label: Basic Command Class
+label: Basic Command Class Support
 category: Z-Wave|Command Classes
-description: Basic Command Class!
+description: >
+  Basic Command Class allows a controlling device to operate
+  the primary functionality of another device without any further knowledge.
+  Basic Command Class ensures a basic interoperability if no other Command Class
+  is shared by two devices.
+
+  This component provides support for Basic Command Class controlled by another device.
+
 package: Z-Wave
 quality: production
 source:
@@ -14,3 +21,5 @@ provides:
   - name: zw_cc_basic
 requires:
   - name: zw_core
+documentation:
+  url: "https://sdomembers.z-wavealliance.org/document/dl/638"

@@ -136,7 +136,7 @@ class Calc_Demodulator_Bobcat(CALC_Demodulator_ocelot):
                 min_osr = 4
             max_osr = 9
             min_src2 = 0.8
-            max_src2 = 1.2
+            max_src2 = 1.65 if relaxsrc2 else 1.2
             min_dec2 = 1
             max_dec2 = 64
             min_bwsel = 0.2
@@ -147,12 +147,12 @@ class Calc_Demodulator_Bobcat(CALC_Demodulator_ocelot):
             min_osr = 5
             max_osr = 5
             min_src2 = 0.8
-            max_src2 = 1.2
             min_dec2 = 1
             max_dec2 = 1
             min_bwsel = 0.2
             target_bwsel = 0.4
             max_bwsel = 0.4
+            max_src2 = 1.65 if relaxsrc2 else 1.2
         elif demod_select == model.vars.demod_select.var_enum.TRECS_VITERBI or demod_select == model.vars.demod_select.var_enum.TRECS_SLICER:
 
             min_bwsel = 0.2
@@ -161,7 +161,7 @@ class Calc_Demodulator_Bobcat(CALC_Demodulator_ocelot):
 
             if relaxsrc2 == True:
                 min_src2 = 0.55
-                max_src2 = 1.0
+                max_src2 = 1.3
                 min_bwsel = 0.15
             else:
                 min_src2 = 0.8

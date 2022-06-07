@@ -7,6 +7,13 @@ description: >
   to demonstrate the use of LEUART communication over the virtual COM port (VCOM). The 
   application will echo back any characters it receives over the serial connection.
 category: Example|Platform
+filter:
+  - name: "Device Type"
+    value: ["SoC"]
+  - name: "MCU"
+    value: ["32-bit MCU"]
+  - name: "Project Difficulty"
+    value: ["Advanced"]
 source:
   - path: app.c
   - path: main.c
@@ -34,6 +41,8 @@ configuration:
   - name: UARTDRV_RESTRICT_ENERGY_MODE_TO_ALLOW_RECEPTION
     value: 0
 readme:
-  - path: "readme.html"
+  - path: readme.md
 tag:
   - hardware:component:vcom
+ui_hints:
+  highlight: readme.md

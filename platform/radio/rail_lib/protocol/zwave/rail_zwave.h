@@ -296,8 +296,8 @@ RAIL_ENUM(RAIL_ZWAVE_RegionId_t) {
   RAIL_ZWAVE_REGIONID_IL,      /**< Israel*/
   RAIL_ZWAVE_REGIONID_KR,      /**< Korea*/
   RAIL_ZWAVE_REGIONID_CN,      /**< China*/
-  RAIL_ZWAVE_REGIONID_US_LR1,  /**< United States, with first long range phy*/
-  RAIL_ZWAVE_REGIONID_US_LR2,  /**< United States, with second long range phy*/
+  RAIL_ZWAVE_REGIONID_US_LR1,  /**< United States, with first long range PHY*/
+  RAIL_ZWAVE_REGIONID_US_LR2,  /**< United States, with second long range PHY*/
   RAIL_ZWAVE_REGIONID_US_LR_END_DEVICE, /**< United States long range end device PHY for both LR frequencies*/
   RAIL_ZWAVE_REGIONID_COUNT    /**< Count of known regions, must be last*/
 };
@@ -418,7 +418,7 @@ RAIL_Status_t RAIL_ZWAVE_ConfigRegion(RAIL_Handle_t railHandle,
  * @return A status code indicating success of the function call.
  *
  * This function is the entry point for working with Z-Wave within
- * RAIL. It will set up relevant hardware acceleration for Z-Wave-specific
+ * RAIL. It sets up relevant hardware acceleration for Z-Wave-specific
  * features, such as HomeId filtering and beam packets (as
  * specified in the configuration) and allows users to select the
  * relevant Z-Wave region-specific PHY via \ref RAIL_ZWAVE_ConfigRegion.
@@ -460,10 +460,10 @@ RAIL_Status_t RAIL_ZWAVE_ConfigOptions(RAIL_Handle_t railHandle,
                                        RAIL_ZWAVE_Options_t options);
 
 /**
- * Inform RAIL of the Z-Wave node's NodeId for receive filtering purposes.
+ * Inform RAIL of the Z-Wave node's NodeId for receive filtering.
  *
  * @param[in] railHandle A handle of RAIL instance.
- * @param[in] nodeId A Z-Wave Node Id.
+ * @param[in] nodeId A Z-Wave Node ID.
  * @return Status code indicating success of the function call.
  *
  * @note Until this API is called, RAIL will assume the NodeId is
@@ -474,10 +474,9 @@ RAIL_Status_t RAIL_ZWAVE_SetNodeId(RAIL_Handle_t railHandle,
 
 /**
  * Inform RAIL of the Z-Wave node's HomeId and its hash for receive filtering
- * purposes.
  *
  * @param[in] railHandle A handle of RAIL instance.
- * @param[in] homeId A Z-Wave Home Id.
+ * @param[in] homeId A Z-Wave Home ID.
  * @param[in] homeIdHash The hash of the Home Id expected in Beam frames.
  *   If this is \ref RAIL_ZWAVE_HOME_ID_HASH_DONT_CARE, Beam frame detection
  *   will not check the HomeIdHash in a received Beam frame at all, and
@@ -509,14 +508,14 @@ RAIL_Status_t RAIL_ZWAVE_GetBeamNodeId(RAIL_Handle_t railHandle,
                                        RAIL_ZWAVE_NodeId_t *pNodeId);
 
 /**
- * Get the channel hopping index of the most recently seen Beam frame that
+ * Get the channel hopping index of the most recently seen beam frame that
  * targeted this node.
  *
  * @param[in] railHandle A handle of RAIL instance.
  * @param[out] pChannelIndex A pointer to a uint8_t to populate with
  *   the channel hopping index. If channel-hopping was off at the time
  *   the beam packet was received, \ref RAIL_CHANNEL_HOPPING_INVALID_INDEX
- *   is emplaced.
+ *   is provided.
  * @return Status code indicating success of the function call.
  *
  * @note This is best called while handling the \ref RAIL_EVENT_ZWAVE_BEAM
@@ -650,14 +649,14 @@ RAIL_TxPower_t RAIL_ZWAVE_GetTxLowPowerDbm(RAIL_Handle_t railHandle);
  * It will take care of all configuration and radio setup to
  * detect and receive beams in the current Z-Wave region.
  * If a beam is detected, RAIL will provide
- * the usual \ref RAIL_EVENT_ZWAVE_BEAM event, during which time users can
- * process the beam as normal. However, normal packets may also be
- * received during this time (thus triggering \ref RAIL_EVENTS_RX_COMPLETION
+ * the usual \ref RAIL_EVENT_ZWAVE_BEAM event during which time users can
+ * process the beam as expected. However, normal packets may also be
+ * received during this time (also triggering \ref RAIL_EVENTS_RX_COMPLETION
  * events), in which case, this API may need to be re-called to receive
  * a beam. Users should also listen for
- * \ref RAIL_EVENT_RX_CHANNEL_HOPPING_COMPLETE which will indicate
- * that no beam is heard at which point the radio will be automatically idled.
- * Until one of these events are received, users should not try to attempt to
+ * \ref RAIL_EVENT_RX_CHANNEL_HOPPING_COMPLETE, which will indicate
+ * that no beam is heard. At that point, the radio will be automatically idled.
+ * Until one of these events is received, users should not try to
  * reconfigure radio settings or start another radio operation. If an application
  * needs to do some other operation or configuration, it must first call
  * \ref RAIL_Idle and wait for the radio to idle.
@@ -703,7 +702,7 @@ RAIL_Status_t RAIL_ZWAVE_ReceiveBeam(RAIL_Handle_t railHandle,
 RAIL_Status_t RAIL_ZWAVE_ConfigBeamRx(RAIL_Handle_t railHandle, RAIL_ZWAVE_BeamRxConfig_t *config);
 
 /**
- * Set the default Rx beam configuration.
+ * Set the default RX beam configuration.
  *
  * @param[in] railHandle A RAIL instance handle.
  * @return Status code indicating success of the function call.
@@ -715,7 +714,7 @@ RAIL_Status_t RAIL_ZWAVE_ConfigBeamRx(RAIL_Handle_t railHandle, RAIL_ZWAVE_BeamR
 RAIL_Status_t RAIL_ZWAVE_SetDefaultRxBeamConfig(RAIL_Handle_t railHandle);
 
 /**
- * Get the current Rx beam configuration.
+ * Get the current RX beam configuration.
  *
  * @param[out] pConfig A pointer to \ref RAIL_ZWAVE_BeamRxConfig_t to be
  *   populated with the current beam configuration.
@@ -724,11 +723,11 @@ RAIL_Status_t RAIL_ZWAVE_SetDefaultRxBeamConfig(RAIL_Handle_t railHandle);
 RAIL_Status_t RAIL_ZWAVE_GetRxBeamConfig(RAIL_ZWAVE_BeamRxConfig_t *pConfig);
 
 /**
- * Configure the channel hop timings for use in Z-Wave Rx channel hop configuration.
+ * Configure the channel hop timings for use in Z-Wave RX channel hop configuration.
  * This function should not be used without direct instruction by Silicon Labs.
  *
  * @param[in] railHandle A RAIL instance handle.
- * @param[in, out] config Configuration for Z-Wave Rx channel hopping.
+ * @param[in, out] config Configuration for Z-Wave RX channel hopping.
  * This structure must be allocated in application global read-write memory.
  * RAIL will populate fields within or referenced by this structure during its
  * operation. Be sure to allocate \ref RAIL_RxChannelHoppingConfigEntry_t

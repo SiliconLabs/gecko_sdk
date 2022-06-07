@@ -215,9 +215,7 @@ sl_sec_man_status_t sl_sec_man_aes_encrypt(psa_key_id_t    sl_psa_key_id,
                                            const uint8_t * sl_psa_aes_input,
                                            uint8_t *       sl_psa_aes_output)
 {
-    psa_cipher_operation_t sl_psa_aes_opr     = PSA_CIPHER_OPERATION_INIT;
     size_t                 sl_psa_aes_enc_len = 0;
-    psa_status_t           sl_psa_status;
     sl_sec_man_status_t    status = SL_SECURITY_MAN_SUCCESS;
 
     if ((sl_psa_aes_input == NULL) || (sl_psa_aes_output == NULL))
@@ -226,39 +224,10 @@ sl_sec_man_status_t sl_sec_man_aes_encrypt(psa_key_id_t    sl_psa_key_id,
         goto exit;
     }
 
-    sl_psa_status = psa_cipher_encrypt_setup(&sl_psa_aes_opr, sl_psa_key_id, sl_psa_aes_alg);
-
-    if (sl_psa_status != PSA_SUCCESS)
-    {
-        status = SEC_MAN_GET_STATUS(sl_psa_status);
-        goto exit;
-    }
-
-    sl_psa_status = psa_cipher_update(&sl_psa_aes_opr, sl_psa_aes_input, SL_MAN_AES_BLOCK_SIZE, sl_psa_aes_output,
-                                      SL_MAN_AES_BLOCK_SIZE, &sl_psa_aes_enc_len);
-
-    if (sl_psa_status != PSA_SUCCESS)
-    {
-        status = SEC_MAN_GET_STATUS(sl_psa_status);
-        goto exit;
-    }
-
-    sl_psa_status = psa_cipher_finish(&sl_psa_aes_opr, (uint8_t *)sl_psa_aes_input + sl_psa_aes_enc_len,
-                                      SL_MAN_AES_BLOCK_SIZE - sl_psa_aes_enc_len, &sl_psa_aes_enc_len);
-
-    if (sl_psa_status != PSA_SUCCESS)
-    {
-        status = SEC_MAN_GET_STATUS(sl_psa_status);
-        goto exit;
-    }
+    status = SEC_MAN_GET_STATUS(psa_cipher_encrypt(sl_psa_key_id, sl_psa_aes_alg, sl_psa_aes_input, SL_MAN_AES_BLOCK_SIZE, sl_psa_aes_output,
+                                                    SL_MAN_AES_BLOCK_SIZE, &sl_psa_aes_enc_len));
 
 exit:
-
-    if (status != SL_SECURITY_MAN_SUCCESS)
-    {
-        psa_cipher_abort(&sl_psa_aes_opr);
-    }
-
     return status;
 }
 

@@ -20,6 +20,7 @@
 #include "app/framework/util/af-main.h"
 #include "app/framework/util/common.h"
 #include "app/framework/plugin/zll-commissioning-common/zll-commissioning.h"
+#include  "mac-phy.h"
 
 #ifdef UC_BUILD
 #include "sl_component_catalog.h"

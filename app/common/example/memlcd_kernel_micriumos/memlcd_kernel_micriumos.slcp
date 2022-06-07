@@ -6,6 +6,13 @@ description: >
   This example project demonstrates use of the Memory Liquid Crystal Display (LCD) 
   module in a Micrium OS kernel task, using Silicon Labs Graphics Library (glib).
 category: Example|Platform
+filter:
+  - name: "Device Type"
+    value: ["SoC"]
+  - name: "MCU"
+    value: ["32-bit MCU"]
+  - name: "Project Difficulty"
+    value: ["Beginner"]
 source:
   - path: app.c
   - path: main.c
@@ -29,7 +36,9 @@ component:
 define:
   - name: DEBUG_EFM
 readme:
-  - path: "readme.html"
+  - path: readme.md
+ui_hints:
+  highlight: readme.md
 tag:
   - hardware:component:display
   - hardware:device:ram:16

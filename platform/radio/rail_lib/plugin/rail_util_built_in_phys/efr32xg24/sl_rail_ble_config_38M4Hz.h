@@ -2,8 +2,8 @@
  * @brief RAIL Configuration
  * @details
  *   WARNING: Auto-Generated Radio Config Header  -  DO NOT EDIT
- *   Radio Configurator Version: 2022.1.1
- *   RAIL Adapter Version: 2.4.18
+ *   Radio Configurator Version: 2022.5.2
+ *   RAIL Adapter Version: 2.4.19
  *   RAIL Compatibility: 2.x
  *******************************************************************************
  * # License

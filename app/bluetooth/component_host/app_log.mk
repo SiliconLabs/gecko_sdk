@@ -7,7 +7,9 @@ ifeq ($(OS),win)
 override CFLAGS += -DAPP_LOG_NEW_LINE=APP_LOG_NEW_LINE_RN
 endif
 
-override CFLAGS += -DSL_CATALOG_APP_LOG_PRESENT
+override CFLAGS += \
+-DSL_CATALOG_APP_LOG_PRESENT \
+-Wno-format-zero-length 
 
 override INCLUDEPATHS += \
 $(SDK_DIR)/app/common/util/app_log \

@@ -13,6 +13,8 @@ See the License for the specific language governing permissions and
 limitations under the License.
 ==============================================================================*/
 
+#include <limits>
+
 #include "tensorflow/lite/c/common.h"
 #include "tensorflow/lite/kernels/internal/quantization_util.h"
 #include "tensorflow/lite/kernels/internal/reference/quantize.h"
@@ -21,6 +23,7 @@ limitations under the License.
 #include "tensorflow/lite/kernels/kernel_util.h"
 #include "tensorflow/lite/micro/kernels/kernel_util.h"
 #include "tensorflow/lite/micro/kernels/quantize.h"
+#include "tensorflow/lite/micro/micro_error_reporter.h"
 #include "tensorflow/lite/micro/micro_utils.h"
 
 namespace tflite {
@@ -33,9 +36,11 @@ TfLiteStatus PrepareQuantizeReference(TfLiteContext* context,
   TF_LITE_ENSURE_EQ(context, NumInputs(node), 1);
   TF_LITE_ENSURE_EQ(context, NumOutputs(node), 1);
 
-  const TfLiteTensor* input = GetInput(context, node, 0);
+  MicroContext* micro_context = GetMicroContext(context);
+
+  TfLiteTensor* input = micro_context->AllocateTempInputTensor(node, 0);
   TF_LITE_ENSURE(context, input != nullptr);
-  TfLiteTensor* output = GetOutput(context, node, 0);
+  TfLiteTensor* output = micro_context->AllocateTempOutputTensor(node, 0);
   TF_LITE_ENSURE(context, output != nullptr);
 
   // TODO(b/128934713): Add support for fixed-point per-channel quantization.
@@ -48,9 +53,9 @@ TfLiteStatus PrepareQuantizeReference(TfLiteContext* context,
   TF_LITE_ENSURE(context, affine_quantization->scale);
   TF_LITE_ENSURE(context, affine_quantization->scale->size == 1);
 
-  TF_LITE_ENSURE(context, input->type == kTfLiteFloat32 ||
-                              input->type == kTfLiteInt16 ||
-                              input->type == kTfLiteInt8);
+  TF_LITE_ENSURE(context,
+                 input->type == kTfLiteFloat32 || input->type == kTfLiteInt32 ||
+                     input->type == kTfLiteInt16 || input->type == kTfLiteInt8);
   TF_LITE_ENSURE(context, output->type == kTfLiteInt8 ||
                               output->type == kTfLiteInt16 ||
                               output->type == kTfLiteInt32);
@@ -60,7 +65,9 @@ TfLiteStatus PrepareQuantizeReference(TfLiteContext* context,
       (input->type == kTfLiteInt8 && output->type == kTfLiteInt16) ||
       (input->type == kTfLiteInt8 && output->type == kTfLiteInt32) ||
       (input->type == kTfLiteInt16 && output->type == kTfLiteInt16) ||
-      (input->type == kTfLiteInt16 && output->type == kTfLiteInt32)) {
+      (input->type == kTfLiteInt16 && output->type == kTfLiteInt32) ||
+      (input->type == kTfLiteInt32 && output->type == kTfLiteInt8) ||
+      (input->type == kTfLiteInt32 && output->type == kTfLiteInt16)) {
     double effective_scale = static_cast<double>(input->params.scale) /
                              static_cast<double>(output->params.scale);
 
@@ -72,6 +79,9 @@ TfLiteStatus PrepareQuantizeReference(TfLiteContext* context,
   data->quantization_params.scale = static_cast<double>(output->params.scale);
 
   data->input_zero_point = input->params.zero_point;
+
+  micro_context->DeallocateTempTfLiteTensor(input);
+  micro_context->DeallocateTempTfLiteTensor(output);
   return kTfLiteOk;
 }
 
@@ -98,6 +108,29 @@ TfLiteStatus EvalQuantizeReference(TfLiteContext* context, TfLiteNode* node) {
             tflite::micro::GetTensorShape(output),
             tflite::micro::GetTensorData<int16_t>(output));
         return kTfLiteOk;
+      default:
+        TF_LITE_KERNEL_LOG(context, "Input %s, output %s not supported.",
+                           TfLiteTypeGetName(input->type),
+                           TfLiteTypeGetName(output->type));
+        return kTfLiteError;
+    }
+  } else if (input->type == kTfLiteInt32) {
+    size_t size = ElementCount(*input->dims);
+    switch (output->type) {
+      case kTfLiteInt8:
+        reference_ops::Requantize(
+            tflite::micro::GetTensorData<int32_t>(input), size,
+            data->requantize_output_multiplier, data->requantize_output_shift,
+            data->input_zero_point, data->quantization_params.zero_point,
+            tflite::micro::GetTensorData<int8_t>(output));
+        break;
+      case kTfLiteInt16:
+        reference_ops::Requantize(
+            tflite::micro::GetTensorData<int32_t>(input), size,
+            data->requantize_output_multiplier, data->requantize_output_shift,
+            data->input_zero_point, data->quantization_params.zero_point,
+            tflite::micro::GetTensorData<int16_t>(output));
+        break;
       default:
         TF_LITE_KERNEL_LOG(context, "Input %s, output %s not supported.",
                            TfLiteTypeGetName(input->type),

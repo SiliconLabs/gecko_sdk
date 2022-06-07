@@ -19,12 +19,12 @@
 #ifndef ZAF_COMMANDCLASSES_CONFIGURATION_CC_CONFIGURATION_H_
 #define ZAF_COMMANDCLASSES_CONFIGURATION_CC_CONFIGURATION_H_
 
-#include "nvm3.h"
 #include <stddef.h>
 #include <stdint.h>
 #include <stdbool.h>
 #include <ZAF_types.h>
 #include <ZW_classcmd.h>
+#include <zpal_nvm.h>
 #include "CC_Configuration_Configuration.h"
 
 /**
@@ -89,7 +89,7 @@ typedef struct cc_config_parameter_buffer_t cc_config_parameter_buffer_t;
 typedef struct {
   const uint16_t number;                       ///< Unique id number of the parameter
   uint16_t next_number;                        ///< Next parameter number
-  const nvm3_ObjectKey_t file_id;              ///< ID of the configuration file
+  const zpal_nvm_object_key_t file_id;              ///< ID of the configuration file
   cc_config_parameter_attributes_t attributes; ///< Attributes of the parameters
   bool (*migration_handler)(cc_config_parameter_buffer_t* parameter_buffer); ///< Function pointer to handle the migration between versions
 } cc_config_parameter_metadata_t;
@@ -124,9 +124,9 @@ typedef struct
  * Holds a write and a read interface defined by the user. 
  */ 
 typedef struct {
-  bool (*write_handler)(nvm3_ObjectKey_t file_id, uint8_t const* data, size_t size); ///< Write function which writes data with a specified size to non volatile memory
-  bool (*read_handler)(nvm3_ObjectKey_t file_id, uint8_t *data, size_t size);        ///< Read function which reads data with specified size from non volatile memory
-} sl_cc_configuration_io_interface_t;
+  bool (*write_handler)(zpal_nvm_object_key_t file_id, uint8_t const* data, size_t size); ///< Write function which writes data with a specified size to non volatile memory
+  bool (*read_handler)(zpal_nvm_object_key_t file_id, uint8_t *data, size_t size);        ///< Read function which reads data with specified size from non volatile memory
+} cc_configuration_io_interface_t;
 
 /**
  * Defines a handle type for the Configuration CC.
@@ -154,7 +154,7 @@ bool CC_Configuration_SetValue(cc_configuration_handle_t handle,
  * @return Returns true if successfuly inited the command class, false otherwise.
  */
 bool
-sl_cc_configuration_init(cc_configuration_t const* default_configuration, sl_cc_configuration_io_interface_t const* interface );
+cc_configuration_init(cc_configuration_t const* default_configuration, cc_configuration_io_interface_t const* interface );
 
 /**
  * Initialize the configuration Command Class
@@ -164,7 +164,7 @@ sl_cc_configuration_init(cc_configuration_t const* default_configuration, sl_cc_
  * @return Returns true if successfuly found and filled parameter buffer, false otherwise
  */
 bool
-sl_cc_configuration_get(uint16_t parameter_number, cc_config_parameter_buffer_t* parameter_buffer);
+cc_configuration_get(uint16_t parameter_number, cc_config_parameter_buffer_t* parameter_buffer);
 
 /**
  * Sets new interface set to manipulate non volatile memory to store and read configuration values
@@ -172,7 +172,7 @@ sl_cc_configuration_get(uint16_t parameter_number, cc_config_parameter_buffer_t*
  * @param[in]  interface pointer to the new interface set
  */
 void
-sl_cc_configuration_set_interface(sl_cc_configuration_io_interface_t const* interface);
+cc_configuration_set_interface(cc_configuration_io_interface_t const* interface);
 
 /**
  * Sets default configuration in the Command Class
@@ -180,7 +180,7 @@ sl_cc_configuration_set_interface(sl_cc_configuration_io_interface_t const* inte
  * @param[in]  configuration pointer to a configuration set
  */
 void
-sl_cc_configuration_set_default_configuration(cc_configuration_t const* configuration);
+cc_configuration_set_default_configuration(cc_configuration_t const* configuration);
 
 /**
  * Limit a value by the parameter's limits
@@ -190,7 +190,7 @@ sl_cc_configuration_set_default_configuration(cc_configuration_t const* configur
  * @return Returns true if successfuly limiterd, false otherwise
  */
 bool
-sl_cc_configuration_limit_value(cc_config_parameter_buffer_t const* parameter_buffer,
+cc_configuration_limit_value(cc_config_parameter_buffer_t const* parameter_buffer,
                                 cc_config_parameter_value_t * pNewValue);
 
 #endif /* ZAF_COMMANDCLASSES_CONFIGURATION_CC_CONFIGURATION_H_ */

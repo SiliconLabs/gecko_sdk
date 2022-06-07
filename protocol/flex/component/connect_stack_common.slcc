@@ -6,7 +6,7 @@ quality: "production"
 description: "Provides Connect Stack common functionalities such
 as 15.4-like MAC layer, events system, dynamic memory allocation, and other
 required infrastracture functions. It also provides the stack configuration
-file, which allocates all the sizable RAM data structures."              
+file, which allocates all the sizable RAM data structures."
 provides:
   - name: "connect_stack_common"
   - name: "wireless_stack"

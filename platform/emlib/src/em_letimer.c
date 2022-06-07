@@ -31,7 +31,7 @@
 #include "em_letimer.h"
 #if defined(LETIMER_COUNT) && (LETIMER_COUNT > 0)
 #include "em_cmu.h"
-#include "em_assert.h"
+#include "sl_assert.h"
 
 /***************************************************************************//**
  * @addtogroup letimer LETIMER - Low Energy Timer
@@ -544,16 +544,15 @@ void LETIMER_RepeatSet(LETIMER_TypeDef *letimer,
  ******************************************************************************/
 void LETIMER_Reset(LETIMER_TypeDef *letimer)
 {
-#if defined (LETIMER_EN_EN)
+#if defined(LETIMER_EN_EN)
   letimer->EN_SET = LETIMER_EN_EN;
 #endif
   LETIMER_SyncWait(letimer);
 
-#ifdef LETIMER_SWRST_SWRST
-
+#if defined(LETIMER_SWRST_SWRST)
   letimer->SWRST_SET = LETIMER_SWRST_SWRST;
-  while (letimer->SWRST & _LETIMER_SWRST_RESETTING_MASK) ;
-
+  while (letimer->SWRST & _LETIMER_SWRST_RESETTING_MASK) {
+  }
 #else
 
 #if defined(_LETIMER_FREEZE_MASK)

@@ -34,7 +34,7 @@
 #include "sl_se_manager.h"
 #include "sli_se_manager_internal.h"
 #include "em_se.h"
-#include "em_assert.h"
+#include "sl_assert.h"
 #include <string.h>
 
 /***************************************************************************//**
@@ -592,11 +592,15 @@ sl_status_t sl_se_hash_multipart_update(void *hash_type_ctx,
   // ripple counter
   if ( counter[0] < input_len ) {
     counter[1] += 1;
+#if (_SILICON_LABS_SECURITY_FEATURE == _SILICON_LABS_SECURITY_FEATURE_VAULT)
     for (size_t i = 1; i < (countersize - 1); i++) {
       if ( counter[i] == 0 ) {
         counter[i + 1]++;
       }
     }
+#else
+    (void)countersize;
+#endif
   }
 
   if ( (left > 0) && (input_len >= fill) ) {

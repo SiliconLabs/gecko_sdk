@@ -20,8 +20,7 @@
 #include "DebugPrint.h"
 #include "ZAF_Common_interface.h"
 #include <ZAF_file_ids.h>
-#include <nvm3.h>
-#include <ZAF_nvm3_app.h>
+#include <ZAF_nvm_app.h>
 
 /****************************************************************************/
 /*                             PARAMETER CHECK                              */
@@ -93,7 +92,7 @@ static ASSOCIATION_GROUP groups[NUMBER_OF_ENDPOINTS + 1][MAX_ASSOCIATION_GROUPS]
 
 uint8_t numberOfGroupMappingEntries = 0;
 
-static nvm3_Handle_t* pFileSystem;
+static zpal_nvm_handle_t pFileSystem;
 
 /****************************************************************************/
 /*                              EXPORTED DATA                               */
@@ -345,7 +344,7 @@ AssociationAddNode(
 {
   ASSERT(pNodeToAdd->nodeId <= ZW_MAX_NODES); // This makes this function LR aware!
   /*
-   * Due to NVM3 not supporting 16 bit NodeIDs, can this function not process
+   * Due to NVM not supporting 16 bit NodeIDs, can this function not process
    * node additions for NodeIDs higher than 232 (ZW_MAX_NODES).
    */
   if (pNodeToAdd->nodeId > ZW_MAX_NODES)
@@ -671,11 +670,10 @@ RemoveAssociationsFromGroup(
  * This function takes care of stepping through the entire association table that is in memory.
  * The input is used to identify the need for table initialization or checking for valid NodeID and correction.
  *
- * This function further writes the table to NVM3.
+ * This function further writes the table to NVM.
  */
 static void generateAssociationAndWrite(NVM_ACTION action, SAssociationInfo *pAssociationInfo)
 {
-  Ecode_t  errCode = 0;
   bool writeFile = false;
 
   /*
@@ -701,8 +699,8 @@ static void generateAssociationAndWrite(NVM_ACTION action, SAssociationInfo *pAs
 
   if(writeFile)
   {
-    errCode = nvm3_writeData(pFileSystem, ZAF_FILE_ID_ASSOCIATIONINFO, pAssociationInfo, sizeof(SAssociationInfo));
-    ASSERT(ECODE_NVM3_OK == errCode);
+    const zpal_status_t status = zpal_nvm_write(pFileSystem, ZAF_FILE_ID_ASSOCIATIONINFO, pAssociationInfo, sizeof(SAssociationInfo));
+    ASSERT(ZPAL_STATUS_OK == status);
   }
 }
 
@@ -716,8 +714,7 @@ NVM_Action(NVM_ACTION action)
 {
   uint8_t i,j,k;
 
-  Ecode_t  errCode = 0;
-  uint32_t objectType;
+  zpal_status_t status = ZPAL_STATUS_FAIL;
   size_t   dataLen = 0;
   bool     forceClearMem = false;
   SAssociationInfo associationInfo;  // This can become a large allocation on the stack
@@ -736,14 +733,14 @@ NVM_Action(NVM_ACTION action)
       // Fetch the stored data, since we are not clearing it.
       if (!forceClearMem)
       {
-        errCode = nvm3_getObjectInfo(pFileSystem, ZAF_FILE_ID_ASSOCIATIONINFO, &objectType, &dataLen);
+        status = zpal_nvm_get_object_size(pFileSystem, ZAF_FILE_ID_ASSOCIATIONINFO, &dataLen);
       }
 
       /*
        * If the stored NMV3 file structure for the Association Info is different than expected here,
        * erase it and create a new file.
        */
-      if ((ECODE_NVM3_OK != errCode) || (ZAF_FILE_SIZE_ASSOCIATIONINFO != dataLen) || (true == forceClearMem))
+      if ((ZPAL_STATUS_OK != status) || (ZAF_FILE_SIZE_ASSOCIATIONINFO != dataLen) || (true == forceClearMem))
       {
         //Write default Association Info file
         memset(&associationInfo, 0 , sizeof(SAssociationInfo));
@@ -753,15 +750,15 @@ NVM_Action(NVM_ACTION action)
       else
       {
         // Make sure that free nodeIds are not set to legacy zero value
-        nvm3_readData(pFileSystem, ZAF_FILE_ID_ASSOCIATIONINFO, &associationInfo, sizeof(SAssociationInfo));
+        zpal_nvm_read(pFileSystem, ZAF_FILE_ID_ASSOCIATIONINFO, &associationInfo, sizeof(SAssociationInfo));
 
         generateAssociationAndWrite(action, &associationInfo);
       }
       // Fall through
     case NVM_ACTION_READ_DATA:
 
-      errCode = nvm3_readData(pFileSystem, ZAF_FILE_ID_ASSOCIATIONINFO, &associationInfo, sizeof(SAssociationInfo));
-      ASSERT(ECODE_NVM3_OK == errCode);
+      status = zpal_nvm_read(pFileSystem, ZAF_FILE_ID_ASSOCIATIONINFO, &associationInfo, sizeof(SAssociationInfo));
+      ASSERT(ZPAL_STATUS_OK == status);
 
       for(i = 0; i < MAX_ASSOCIATION_GROUPS; i++)
       {
@@ -814,8 +811,8 @@ NVM_Action(NVM_ACTION action)
         }
       }
 
-      errCode = nvm3_writeData(pFileSystem, ZAF_FILE_ID_ASSOCIATIONINFO, &associationInfo, sizeof(SAssociationInfo));
-      ASSERT(ECODE_NVM3_OK == errCode);
+      status = zpal_nvm_write(pFileSystem, ZAF_FILE_ID_ASSOCIATIONINFO, &associationInfo, sizeof(SAssociationInfo));
+      ASSERT(ZPAL_STATUS_OK == status);
       break;
 
     default:

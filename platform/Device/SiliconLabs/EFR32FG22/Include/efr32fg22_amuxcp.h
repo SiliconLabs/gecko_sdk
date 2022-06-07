@@ -48,28 +48,28 @@ typedef struct {
   __IOM uint32_t CTRL;                          /**< Control                                            */
   __IM uint32_t  STATUS;                        /**< Status                                             */
   __IOM uint32_t TEST;                          /**< Test                                               */
-  __IOM uint32_t TRIM;                          /**< New Register                                       */
+  __IOM uint32_t TRIM;                          /**< Trim                                               */
   uint32_t       RESERVED1[1018U];              /**< Reserved for future use                            */
   __IM uint32_t  IPVERSION_SET;                 /**< IPVERSION                                          */
   uint32_t       RESERVED2[1U];                 /**< Reserved for future use                            */
   __IOM uint32_t CTRL_SET;                      /**< Control                                            */
   __IM uint32_t  STATUS_SET;                    /**< Status                                             */
   __IOM uint32_t TEST_SET;                      /**< Test                                               */
-  __IOM uint32_t TRIM_SET;                      /**< New Register                                       */
+  __IOM uint32_t TRIM_SET;                      /**< Trim                                               */
   uint32_t       RESERVED3[1018U];              /**< Reserved for future use                            */
   __IM uint32_t  IPVERSION_CLR;                 /**< IPVERSION                                          */
   uint32_t       RESERVED4[1U];                 /**< Reserved for future use                            */
   __IOM uint32_t CTRL_CLR;                      /**< Control                                            */
   __IM uint32_t  STATUS_CLR;                    /**< Status                                             */
   __IOM uint32_t TEST_CLR;                      /**< Test                                               */
-  __IOM uint32_t TRIM_CLR;                      /**< New Register                                       */
+  __IOM uint32_t TRIM_CLR;                      /**< Trim                                               */
   uint32_t       RESERVED5[1018U];              /**< Reserved for future use                            */
   __IM uint32_t  IPVERSION_TGL;                 /**< IPVERSION                                          */
   uint32_t       RESERVED6[1U];                 /**< Reserved for future use                            */
   __IOM uint32_t CTRL_TGL;                      /**< Control                                            */
   __IM uint32_t  STATUS_TGL;                    /**< Status                                             */
   __IOM uint32_t TEST_TGL;                      /**< Test                                               */
-  __IOM uint32_t TRIM_TGL;                      /**< New Register                                       */
+  __IOM uint32_t TRIM_TGL;                      /**< Trim                                               */
 } AMUXCP_TypeDef;
 /** @} End of group EFR32FG22_AMUXCP */
 

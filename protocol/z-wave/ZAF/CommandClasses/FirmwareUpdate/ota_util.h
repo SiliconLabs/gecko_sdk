@@ -111,5 +111,13 @@ void otaModuleReset(void);
  */
 uint8_t getFWUpdateMDGetNumberOfReports();
 
+/**
+ * @brief This function adds the bootloader handling to \ref handleFirmWareIdGet
+ *
+ * @param[in] n the target index (0,1..N-1)
+ * @return target n firmware ID
+ */
+uint16_t handleFirmWareIdGetExtended(uint8_t n);
+
 #endif /* _OTA_UTIL_H_ */
 

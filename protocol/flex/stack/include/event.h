@@ -34,8 +34,8 @@
 /*
  *
  * This was originally part of the group documentation, but it was removed,
- * since it's not important for connect platforms. It is kept as it might become
- * important later when we add support of new platforms.
+ * since it's not important for Connect platforms. It is kept as it might become
+ * important later when support for new platforms is added.
  *
  * The base time units for events are ticks.  Each tick is approximately equal
  * to a millisecond, but the true duration depends on the platform.  The
@@ -89,7 +89,7 @@
  * ::emberEventControlSetActive(someEvent) or
  * ::emberEventControlSetDelayMS(someEvent, 0).
  *
- * The base time units for events are ticks. A tick equals 1us on every platform
+ * The base time units for events are ticks. A tick equals 1 us on every platform
  * supported by Connect. Note, however, that the accuracy of the base tick
  * depends on the timer source, which by default is the LF RC oscillator on
  * EFR32 platforms.
@@ -105,7 +105,7 @@
  * a minute on platforms supported by Connect.
  *
  * However, in the future, Connect support might become available on platforms
- * where one tick is not exactly 1us. For example,. on the EM357 SoC, 1ms is 1024 ticks,
+ * where one tick is not exactly 1 us. For example,. on the EM357 SoC, 1 ms is 1024 ticks,
  * so each tick is 1000 / 1024 = ~0.98 milliseconds. If you need platform
  * independent accurate delays, use the macros
  * ::MILLISECOND_TICKS_PER_SECOND and ::MILLISECOND_TICKS_PER_MINUTE. For
@@ -186,7 +186,7 @@
 #define EMBER_TASK_COUNT (3)
 
 /**
- * @brief Set this ::EmberEventControl as inactive (no pending event).
+ * @brief Set ::EmberEventControl as inactive (no pending event).
  *
  * @param[in] control Control of the event to set inactive.
  */
@@ -194,7 +194,7 @@
   do { (control).status = EMBER_EVENT_INACTIVE; } while (0)
 
 /**
- * @brief Check whether this ::EmberEventControl is currently active. An event
+ * @brief Check whether ::EmberEventControl is currently active. An event
  * is considered active if it is set to run some time in the future (activated
  * by @ref emberEventControlSetActive(), @ref emberEventControlSetDelayMS()
  * or any other emberEventControlSetDelay* functions)
@@ -208,7 +208,7 @@
   ((control).status != EMBER_EVENT_INACTIVE)
 
 /**
- * @brief Set this ::EmberEventControl to run at the next available
+ * @brief Set ::EmberEventControl to run at the next available
  * opportunity.
  *
  * @param[in] control Control of the event to set active.
@@ -230,7 +230,7 @@ void emEventControlSetActive(EmberEventControl *event);
 #define EMBER_MAX_EVENT_CONTROL_DELAY_MS (HALF_MAX_INT32U_VALUE - 1)
 
 /**
- * @brief Set this ::EmberEventControl to run some milliseconds in the future.
+ * @brief Set ::EmberEventControl to run some milliseconds in the future.
  * @param[in] control Control of the event to run.
  * @param[in] delay
  *   The delay in milliseconds. Must be less than
@@ -255,7 +255,7 @@ void emEventControlSetDelayMS(EmberEventControl*event, uint32_t delay);
 #define EMBER_MAX_EVENT_CONTROL_DELAY_QS (EMBER_MAX_EVENT_CONTROL_DELAY_MS >> 8)
 
 /**
- * @brief Set this ::EmberEventControl to run some quarter seconds in the
+ * @brief Set ::EmberEventControl to run some quarter seconds in the
  * future.
  * @param[in] control Control of the event to run.
  * @param[in] delay
@@ -272,7 +272,7 @@ void emEventControlSetDelayMS(EmberEventControl*event, uint32_t delay);
 #define EMBER_MAX_EVENT_CONTROL_DELAY_MINUTES (EMBER_MAX_EVENT_CONTROL_DELAY_MS >> 16)
 
 /**
- * @brief Set this ::EmberEventControl to run some minutes in the future.
+ * @brief Set ::EmberEventControl to run some minutes in the future.
  * @param[in] control Control of the event to run.
  * @param[in] delay
  *   The delay in minute. One minute is actually 65536 ms. Must be
@@ -305,8 +305,8 @@ uint32_t emEventControlGetRemainingMS(EmberEventControl *event);
 // Running events
 
 /**
- * @brief Start an event handler if there is anything scheduled at the moment
- * this function is called.
+ * @brief Start an event handler if anything is scheduled when this function is
+ * called.
  *
  * An application typically creates an array of events along with their
  * handlers. This function should be called in the main loop to run those events.

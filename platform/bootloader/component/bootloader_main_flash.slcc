@@ -10,3 +10,5 @@ define:
     value: 1
 provides:
   - name: bootloader_in_main_flash
+  - name: bootloader_nonsecure_incompatible
+    condition: [bootloader_core_nonsecure]

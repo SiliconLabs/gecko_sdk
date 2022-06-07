@@ -46,7 +46,7 @@
 #include "sl_iostream.h"
 #include "sl_enum.h"
 #include "sl_status.h"
-#include "em_assert.h"
+#include "sl_assert.h"
 #include "sl_debug_swo.h"
 
 #include "sl_atomic.h"

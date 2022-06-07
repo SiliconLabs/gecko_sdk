@@ -8,12 +8,11 @@ quality: "production"
 root_path: "protocol/bluetooth"
 requires:
   - name: "bluetooth_stack"
+  - name: "bluetooth_feature_bonding_database"
+recommends:
+  - id: "bluetooth_feature_builtin_bonding_database"
 provides:
   - name: "bluetooth_feature_sm"
 template_contribution:
   - name: component_catalog
     value: bluetooth_feature_sm
-  - name: bluetooth_bgapi_class
-    value:
-      class: "sm"
-    priority: 10

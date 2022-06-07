@@ -58,7 +58,15 @@ void emAfTcExportCommand(sl_cli_command_arg_t *arguments)
   uint8_t file[MAX_FILEPATH_LENGTH];
   getFilePathFromCommandLine(arguments, file);
 
-  emberAfTrustCenterExportBackupToFile(file);
+  emberAfTrustCenterExportBackupToFile((const char*)file);
+}
+
+void emAfTrustCenterBackupSaveTokensToFileCli(sl_cli_command_arg_t *arguments)
+{
+  uint8_t file[MAX_FILEPATH_LENGTH];
+  getFilePathFromCommandLine(arguments, file);
+  EmberStatus status = emberAfTrustCenterBackupSaveTokensToFile((const char*)file);
+  printf("%s Status = %d\n", (status == EMBER_SUCCESS) ? "SUCCESS" : "ERROR", status);
 }
 
 void emAfTcImportCommand(sl_cli_command_arg_t *arguments)
@@ -66,7 +74,15 @@ void emAfTcImportCommand(sl_cli_command_arg_t *arguments)
   uint8_t file[MAX_FILEPATH_LENGTH];
   getFilePathFromCommandLine(arguments, file);
 
-  emberAfTrustCenterImportBackupFromFile(file);
+  emberAfTrustCenterImportBackupFromFile((const char*)file);
+}
+
+void emAfTrustCenterBackupRestoreTokensFromFileCli(sl_cli_command_arg_t *arguments)
+{
+  uint8_t file[MAX_FILEPATH_LENGTH];
+  getFilePathFromCommandLine(arguments, file);
+  EmberStatus status = emberAfTrustCenterBackupRestoreTokensFromFile((const char*)file);
+  printf("%s Status = %d\n", (status == EMBER_SUCCESS) ? "SUCCESS" : "ERROR", status);
 }
 
 static void getFilePathFromCommandLine(sl_cli_command_arg_t *arguments, uint8_t* result)
@@ -77,6 +93,21 @@ static void getFilePathFromCommandLine(sl_cli_command_arg_t *arguments, uint8_t*
                                              false); // leftpad?
   result[length] = '\0';
 }
+
+void emAfTrustCenterBackupRestoreResetNodeCli(sl_cli_command_arg_t *arguments)
+{
+  (void)arguments;
+  ezspResetNode();
+}
+
+void emAfTrustCenterBackupWriteNcpTokenToZigbeedTokensCli(sl_cli_command_arg_t *arguments)
+{
+  uint8_t file[MAX_FILEPATH_LENGTH];
+  getFilePathFromCommandLine(arguments, file);
+  EmberStatus status = emberAfTrustCenterBackupWriteNcpTokenToZigbeedTokens((const char*)file);
+  printf("%s Status = %d\n", (status == EMBER_SUCCESS) ? "SUCCESS" : "ERROR", status);
+}
+
 #else
 // *****************************************************************************
 // Forward Declarations

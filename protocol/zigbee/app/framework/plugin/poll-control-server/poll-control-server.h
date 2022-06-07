@@ -46,7 +46,7 @@
  * Sets the behavior of the Poll Control server when determining whether or not
  * to use non Trust Center Poll Control clients.
  *
- * @param IgnoreNonTc a boolean determining whether the server should ignore any
+ * @param IgnoreNonTc a bool determining whether the server should ignore any
  *        non Trust Center Poll Control clients
  */
 void emberAfPluginPollControlServerSetIgnoreNonTrustCenter(bool ignoreNonTc);

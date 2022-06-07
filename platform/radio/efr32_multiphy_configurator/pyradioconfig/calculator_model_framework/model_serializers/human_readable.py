@@ -37,6 +37,12 @@ class Human_Readable(object):
             line = 'info.phy_guid = ' + str(phy_guid)
             output_lines.append(line)
 
+        #Show the part family and revision
+        line = 'info.part_family = ' + str(modem_model.part_family)
+        output_lines.append(line)
+        line = 'info.part_revision = ' + str(modem_model.part_revision)
+        output_lines.append(line)
+
         #Show the execution target
         line = 'info.target = ' + str(modem_model.target)
         output_lines.append(line)
@@ -101,8 +107,10 @@ class Human_Readable(object):
             if var.svd_mapping is None:
                 try:
                     if var._value_calc is not None:
-                        if not (var._value_forced or \
-                           hasattr(profile.forces, var.name) or \
+
+                        #Only output actual or calculated information if the variable is not forced
+                        if not ((var._value_forced is not None) or
+                           hasattr(profile.forces, var.name) or
                            hasattr(profile.outputs, var.name)):
 
                             #Print all _actual variables as "actual"

@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2013-2018 Arm Limited. All rights reserved.
+ * Copyright (c) 2013-2021 Arm Limited. All rights reserved.
  *
  * SPDX-License-Identifier: Apache-2.0
  *
@@ -27,15 +27,18 @@
 #define RTX_CORE_C_H_
 
 //lint -emacro((923,9078),SCB) "cast from unsigned long to pointer" [MISRA Note 9]
+#ifndef RTE_COMPONENTS_H
 #include "RTE_Components.h"
+#endif
 #include CMSIS_device_header
 
-#if ((!defined(__ARM_ARCH_6M__))      && \
-     (!defined(__ARM_ARCH_7A__))      && \
-     (!defined(__ARM_ARCH_7M__))      && \
-     (!defined(__ARM_ARCH_7EM__))     && \
-     (!defined(__ARM_ARCH_8M_BASE__)) && \
-     (!defined(__ARM_ARCH_8M_MAIN__)))
+#if ((!defined(__ARM_ARCH_6M__))        && \
+     (!defined(__ARM_ARCH_7A__))        && \
+     (!defined(__ARM_ARCH_7M__))        && \
+     (!defined(__ARM_ARCH_7EM__))       && \
+     (!defined(__ARM_ARCH_8M_BASE__))   && \
+     (!defined(__ARM_ARCH_8M_MAIN__))   && \
+     (!defined(__ARM_ARCH_8_1M_MAIN__)))
 #error "Unknown Arm Architecture!"
 #endif
 

@@ -1,6 +1,6 @@
-# SoC - Thermometer Micrium RTOS
+# SoC - Thermometer RTOS
 
-This example application demonstrates the integration of Micrium RTOS into Bluetooth applications. RTOS is added to the **Bluetooth - SoC Thermometer** example.
+This example application demonstrates the integration of a Real Time Operating System (RTOS) into Bluetooth applications. RTOS is added to the **Bluetooth - SoC Thermometer** example.
 
 ## Getting Started
 
@@ -8,13 +8,15 @@ To get started with Silicon Labs Bluetooth and Simplicity Studio, see [QSG169: B
 
 To learn more about how the thermometer example application works, create a **SoC - Thermometer** example project (without RTOS).
 
-The following image shows the system architecture of a Micrium RTOS application. The Bluetooth stack is run in multiple tasks:
+## Bluetooth over RTOS
+
+The following image shows the system architecture of an RTOS based Bluetooth application. The Bluetooth stack is run in multiple tasks:
 - Link Layer Task signals Bluetooth Host Task when the Bluetooth stack needs an update.
 - Bluetooth Host Task updates the Bluetooth stack, issues stack events to Event Handler Task and handles commands from application tasks.
 - Event Handler Task handles and dispatches stack events to `sl_bt_on_event()` that needs to be integrated in the application.
-![Micrium RTOS system architecture](readme_img1.png)
+![RTOS system architecture](readme_img1.png)
 
-To learn more about Micrium RTOS integration into Bluetooth projects, see [AN1260: Integrating v3.x Silicon Labs Bluetooth Applications with Real-Time Operating Systems](https://www.silabs.com/documents/public/application-notes/an1260-integrating-v3x-bluetooth-applications-with-rtos.pdf).
+To learn more about RTOS integration into Bluetooth projects, see [AN1260: Integrating v3.x Silicon Labs Bluetooth Applications with Real-Time Operating Systems](https://www.silabs.com/documents/public/application-notes/an1260-integrating-v3x-bluetooth-applications-with-rtos.pdf).
 
 ## Troubleshooting
 

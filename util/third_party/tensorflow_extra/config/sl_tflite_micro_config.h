@@ -58,7 +58,7 @@
 // <i> configuration to a non-zero value will overwrite any pre-configured value
 // <i> in the model's metadata.
 // <i> Default: 0
-#define SL_TFLITE_MICRO_ARENA_SIZE     			   (0)
+#define SL_TFLITE_MICRO_ARENA_SIZE                 (0)
 // </e>
 
 #endif // SL_TFLITE_MICRO_CONFIG_H

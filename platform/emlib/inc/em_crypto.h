@@ -47,6 +47,7 @@
 #if defined(CRYPTO_COUNT) && (CRYPTO_COUNT > 0)
 
 #include "em_bus.h"
+#include "sl_common.h"
 #include "em_crypto_compat.h"
 #include <stdbool.h>
 #include <string.h>
@@ -690,20 +691,8 @@ __STATIC_INLINE void CRYPTO_IncWidthSet(CRYPTO_TypeDef *crypto,
  *   This is a pointer to 4 32 bit integers that contains the 128 bit value
  *   which will be written to the crypto register.
  ******************************************************************************/
-__STATIC_INLINE void CRYPTO_BurstToCrypto(volatile uint32_t * reg,
-                                          const uint32_t * val)
-{
-  /* Load data from memory into local registers. */
-  register uint32_t v0 = val[0];
-  register uint32_t v1 = val[1];
-  register uint32_t v2 = val[2];
-  register uint32_t v3 = val[3];
-  /* Store data to CRYPTO */
-  *reg = v0;
-  *reg = v1;
-  *reg = v2;
-  *reg = v3;
-}
+void CRYPTO_BurstToCrypto(volatile uint32_t * reg,
+                          const uint32_t * val);
 
 /***************************************************************************//**
  * @brief
@@ -722,19 +711,7 @@ __STATIC_INLINE void CRYPTO_BurstToCrypto(volatile uint32_t * reg,
  *   This is a pointer to an array that is capable of holding 4 32 bit integers
  *   that will be filled with the 128 bit value from the crypto register.
  ******************************************************************************/
-__STATIC_INLINE void CRYPTO_BurstFromCrypto(volatile uint32_t * reg, uint32_t * val)
-{
-  /* Load data from CRYPTO into local registers. */
-  register uint32_t v0 = *reg;
-  register uint32_t v1 = *reg;
-  register uint32_t v2 = *reg;
-  register uint32_t v3 = *reg;
-  /* Store data to memory */
-  val[0] = v0;
-  val[1] = v1;
-  val[2] = v2;
-  val[3] = v3;
-}
+void CRYPTO_BurstFromCrypto(volatile uint32_t * reg, uint32_t * val);
 
 /***************************************************************************//**
  * @brief
@@ -749,11 +726,8 @@ __STATIC_INLINE void CRYPTO_BurstFromCrypto(volatile uint32_t * reg, uint32_t * 
  * @param[in]  val        Value of the data to write to the DATA register.
  *                        Has to be word-aligned.
  ******************************************************************************/
-__STATIC_INLINE void CRYPTO_DataWrite(CRYPTO_DataReg_TypeDef dataReg,
-                                      const CRYPTO_Data_TypeDef val)
-{
-  CRYPTO_BurstToCrypto(dataReg, val);
-}
+void CRYPTO_DataWrite(CRYPTO_DataReg_TypeDef dataReg,
+                      const CRYPTO_Data_TypeDef val);
 
 /***************************************************************************//**
  * @brief
@@ -769,23 +743,8 @@ __STATIC_INLINE void CRYPTO_DataWrite(CRYPTO_DataReg_TypeDef dataReg,
  *                    Can be unaligned.
  ******************************************************************************/
 CRYPTO_WARNINGS_NO_CAST_ALIGN
-__STATIC_INLINE void CRYPTO_DataWriteUnaligned(volatile uint32_t * reg,
-                                               const uint8_t * val)
-{
-  /* Check data is 32-bit aligned, if not move to temporary buffer before
-     writing.*/
-  if ((uintptr_t)val & 0x3) {
-    uint32_t temp[4];
-    memcpy(temp, val, sizeof(temp));
-    CRYPTO_DataWrite(reg, temp);
-  } else {
-    // Avoid casting val directly to uint32_t pointer as this can lead to the
-    // compiler making incorrect assumptions in the case where val is un-
-    // aligned.
-    const uint8_t * volatile tmp_val_ptr = val;
-    CRYPTO_DataWrite(reg, (const uint32_t*)tmp_val_ptr);
-  }
-}
+void CRYPTO_DataWriteUnaligned(volatile uint32_t * reg,
+                               const uint8_t * val);
 CRYPTO_WARNINGS_RESET
 
 /***************************************************************************//**
@@ -801,11 +760,8 @@ CRYPTO_WARNINGS_RESET
  * @param[out] val       Location where to store the value in memory.
  *                       Has to be word-aligned.
  ******************************************************************************/
-__STATIC_INLINE void CRYPTO_DataRead(CRYPTO_DataReg_TypeDef  dataReg,
-                                     CRYPTO_Data_TypeDef     val)
-{
-  CRYPTO_BurstFromCrypto(dataReg, val);
-}
+void CRYPTO_DataRead(CRYPTO_DataReg_TypeDef  dataReg,
+                     CRYPTO_Data_TypeDef     val);
 
 /***************************************************************************//**
  * @brief
@@ -822,23 +778,8 @@ __STATIC_INLINE void CRYPTO_DataRead(CRYPTO_DataReg_TypeDef  dataReg,
  *                    Can be unaligned.
  ******************************************************************************/
 CRYPTO_WARNINGS_NO_CAST_ALIGN
-__STATIC_INLINE void CRYPTO_DataReadUnaligned(volatile uint32_t * reg,
-                                              uint8_t * val)
-{
-  /* Check data is 32bit aligned, if not, read into temporary buffer and
-     then move to user buffer. */
-  if ((uintptr_t)val & 0x3) {
-    uint32_t temp[4];
-    CRYPTO_DataRead(reg, temp);
-    memcpy(val, temp, sizeof(temp));
-  } else {
-    // Avoid casting val directly to uint32_t pointer as this can lead to the
-    // compiler making incorrect assumptions in the case where val is un-
-    // aligned.
-    uint8_t * volatile tmp_val_ptr = val;
-    CRYPTO_DataRead(reg, (uint32_t*)tmp_val_ptr);
-  }
-}
+void CRYPTO_DataReadUnaligned(volatile uint32_t * reg,
+                              uint8_t * val);
 CRYPTO_WARNINGS_RESET
 
 /***************************************************************************//**
@@ -853,12 +794,8 @@ CRYPTO_WARNINGS_RESET
  * @param[in]  ddataReg   The 256 bit DDATA register.
  * @param[in]  val        Value of the data to write to the DDATA register.
  ******************************************************************************/
-__STATIC_INLINE void CRYPTO_DDataWrite(CRYPTO_DDataReg_TypeDef ddataReg,
-                                       const CRYPTO_DData_TypeDef val)
-{
-  CRYPTO_BurstToCrypto(ddataReg, &val[0]);
-  CRYPTO_BurstToCrypto(ddataReg, &val[4]);
-}
+void CRYPTO_DDataWrite(CRYPTO_DDataReg_TypeDef ddataReg,
+                       const CRYPTO_DData_TypeDef val);
 
 /***************************************************************************//**
  * @brief
@@ -872,12 +809,8 @@ __STATIC_INLINE void CRYPTO_DDataWrite(CRYPTO_DDataReg_TypeDef ddataReg,
  * @param[in]  ddataReg   The 256 bit DDATA register.
  * @param[out] val        Location where to store the value in memory.
  ******************************************************************************/
-__STATIC_INLINE void CRYPTO_DDataRead(CRYPTO_DDataReg_TypeDef  ddataReg,
-                                      CRYPTO_DData_TypeDef     val)
-{
-  CRYPTO_BurstFromCrypto(ddataReg, &val[0]);
-  CRYPTO_BurstFromCrypto(ddataReg, &val[4]);
-}
+void CRYPTO_DDataRead(CRYPTO_DDataReg_TypeDef  ddataReg,
+                      CRYPTO_DData_TypeDef     val);
 
 /***************************************************************************//**
  * @brief
@@ -891,35 +824,23 @@ __STATIC_INLINE void CRYPTO_DDataRead(CRYPTO_DDataReg_TypeDef  ddataReg,
  * @param[in]  qdataReg   The 512 bits QDATA register.
  * @param[in]  val        Value of the data to write to the QDATA register.
  ******************************************************************************/
-__STATIC_INLINE void CRYPTO_QDataWrite(CRYPTO_QDataReg_TypeDef qdataReg,
-                                       const CRYPTO_QData_TypeDef val)
-{
-  CRYPTO_BurstToCrypto(qdataReg, &val[0]);
-  CRYPTO_BurstToCrypto(qdataReg, &val[4]);
-  CRYPTO_BurstToCrypto(qdataReg, &val[8]);
-  CRYPTO_BurstToCrypto(qdataReg, &val[12]);
-}
+void CRYPTO_QDataWrite(CRYPTO_QDataReg_TypeDef qdataReg,
+                       const CRYPTO_QData_TypeDef val);
 
 /***************************************************************************//**
  * @brief
  *   Read 512 bits of data from a QDATAX register in the CRYPTO module.
  *
  * @details
- * Read 512 bits of data from a QDATAX register in the crypto module. The data
- * value is typically input to a big integer operation (see crypto
- * instructions).
+ *   Read 512 bits of data from a QDATAX register in the crypto module. The data
+ *   value is typically input to a big integer operation (see crypto
+ *   instructions).
  *
  * @param[in]  qdataReg   The 512 bits QDATA register.
  * @param[in]  val        Value of the data to write to the QDATA register.
  ******************************************************************************/
-__STATIC_INLINE void CRYPTO_QDataRead(CRYPTO_QDataReg_TypeDef qdataReg,
-                                      CRYPTO_QData_TypeDef    val)
-{
-  CRYPTO_BurstFromCrypto(qdataReg, &val[0]);
-  CRYPTO_BurstFromCrypto(qdataReg, &val[4]);
-  CRYPTO_BurstFromCrypto(qdataReg, &val[8]);
-  CRYPTO_BurstFromCrypto(qdataReg, &val[12]);
-}
+void CRYPTO_QDataRead(CRYPTO_QDataReg_TypeDef qdataReg,
+                      CRYPTO_QData_TypeDef    val);
 
 /***************************************************************************//**
  * @brief
@@ -937,21 +858,9 @@ __STATIC_INLINE void CRYPTO_QDataRead(CRYPTO_QDataReg_TypeDef qdataReg,
  * @param[in]  keyWidth
  *   Key width - 128 or 256 bits.
  ******************************************************************************/
-__STATIC_INLINE void CRYPTO_KeyBufWrite(CRYPTO_TypeDef          *crypto,
-                                        CRYPTO_KeyBuf_TypeDef    val,
-                                        CRYPTO_KeyWidth_TypeDef  keyWidth)
-{
-  if (keyWidth == cryptoKey256Bits) {
-    /* Set AES-256 mode */
-    BUS_RegBitWrite(&crypto->CTRL, _CRYPTO_CTRL_AES_SHIFT, _CRYPTO_CTRL_AES_AES256);
-    /* Load key in KEYBUF register (= DDATA4) */
-    CRYPTO_DDataWrite(&crypto->DDATA4, val);
-  } else {
-    /* Set AES-128 mode */
-    BUS_RegBitWrite(&crypto->CTRL, _CRYPTO_CTRL_AES_SHIFT, _CRYPTO_CTRL_AES_AES128);
-    CRYPTO_BurstToCrypto(&crypto->KEYBUF, &val[0]);
-  }
-}
+void CRYPTO_KeyBufWrite(CRYPTO_TypeDef          *crypto,
+                        CRYPTO_KeyBuf_TypeDef    val,
+                        CRYPTO_KeyWidth_TypeDef  keyWidth);
 
 /***************************************************************************//**
  * @brief
@@ -972,29 +881,9 @@ __STATIC_INLINE void CRYPTO_KeyBufWrite(CRYPTO_TypeDef          *crypto,
  *   Key width - 128 or 256 bits.
  ******************************************************************************/
 CRYPTO_WARNINGS_NO_CAST_ALIGN
-__STATIC_INLINE
 void CRYPTO_KeyBufWriteUnaligned(CRYPTO_TypeDef          *crypto,
                                  const uint8_t *          val,
-                                 CRYPTO_KeyWidth_TypeDef  keyWidth)
-{
-  /* Check if key val buffer is 32bit aligned, if not move to temporary
-     aligned buffer before writing.*/
-  if ((uintptr_t)val & 0x3) {
-    CRYPTO_KeyBuf_TypeDef temp;
-    if (keyWidth == cryptoKey128Bits) {
-      memcpy(temp, val, 16);
-    } else {
-      memcpy(temp, val, 32);
-    }
-    CRYPTO_KeyBufWrite(crypto, temp, keyWidth);
-  } else {
-    // Avoid casting val directly to uint32_t pointer as this can lead to the
-    // compiler making incorrect assumptions in the case where val is un-
-    // aligned.
-    const uint8_t * volatile tmp_val_ptr = val;
-    CRYPTO_KeyBufWrite(crypto, (uint32_t*)tmp_val_ptr, keyWidth);
-  }
-}
+                                 CRYPTO_KeyWidth_TypeDef  keyWidth);
 CRYPTO_WARNINGS_RESET
 
 void CRYPTO_KeyRead(CRYPTO_TypeDef *crypto,
@@ -1018,11 +907,8 @@ void CRYPTO_KeyReadUnaligned(CRYPTO_TypeDef *         crypto,
  * @param[in]  val
  *   Value of the data to write to the KEYBUF register.
  ******************************************************************************/
-__STATIC_INLINE void CRYPTO_KeyBuf128Write(CRYPTO_TypeDef *crypto,
-                                           const uint32_t * val)
-{
-  CRYPTO_BurstToCrypto(&crypto->KEYBUF, val);
-}
+void CRYPTO_KeyBuf128Write(CRYPTO_TypeDef *crypto,
+                           const uint32_t * val);
 
 /***************************************************************************//**
  * @brief
@@ -1479,12 +1365,12 @@ __STATIC_INLINE void CRYPTO_IntSet(CRYPTO_TypeDef *crypto, uint32_t flags)
  *   This function preserves backwards compatibility. Use
  *   @ref CRYPTO_AES_CBC128 instead.
  ******************************************************************************/
-__STATIC_INLINE void AES_CBC128(uint8_t * out,
-                                const uint8_t * in,
-                                unsigned int len,
-                                const uint8_t * key,
-                                const uint8_t * iv,
-                                bool encrypt)
+__STATIC_INLINE SL_DEPRECATED_API_SDK_4_1 void AES_CBC128(uint8_t * out,
+                                                          const uint8_t * in,
+                                                          unsigned int len,
+                                                          const uint8_t * key,
+                                                          const uint8_t * iv,
+                                                          bool encrypt)
 {
   CRYPTO_AES_CBC128(DEFAULT_CRYPTO, out, in, len, key, iv, encrypt);
 }
@@ -1498,12 +1384,12 @@ __STATIC_INLINE void AES_CBC128(uint8_t * out,
  *   This function preserves backwards compatibility. Use
  *   @ref CRYPTO_AES_CBC256 instead.
  ******************************************************************************/
-__STATIC_INLINE void AES_CBC256(uint8_t * out,
-                                const uint8_t * in,
-                                unsigned int len,
-                                const uint8_t * key,
-                                const uint8_t * iv,
-                                bool encrypt)
+__STATIC_INLINE SL_DEPRECATED_API_SDK_4_1 void AES_CBC256(uint8_t * out,
+                                                          const uint8_t * in,
+                                                          unsigned int len,
+                                                          const uint8_t * key,
+                                                          const uint8_t * iv,
+                                                          bool encrypt)
 {
   CRYPTO_AES_CBC256(DEFAULT_CRYPTO, out, in, len, key, iv, encrypt);
 }
@@ -1516,12 +1402,12 @@ __STATIC_INLINE void AES_CBC256(uint8_t * out,
  *   This function preserves backwards compatibility. Use
  *   @ref CRYPTO_AES_CFB128 instead.
  ******************************************************************************/
-__STATIC_INLINE void AES_CFB128(uint8_t * out,
-                                const uint8_t * in,
-                                unsigned int len,
-                                const uint8_t * key,
-                                const uint8_t * iv,
-                                bool encrypt)
+__STATIC_INLINE SL_DEPRECATED_API_SDK_4_1 void AES_CFB128(uint8_t * out,
+                                                          const uint8_t * in,
+                                                          unsigned int len,
+                                                          const uint8_t * key,
+                                                          const uint8_t * iv,
+                                                          bool encrypt)
 {
   CRYPTO_AES_CFB128(DEFAULT_CRYPTO, out, in, len, key, iv, encrypt);
 }
@@ -1534,12 +1420,12 @@ __STATIC_INLINE void AES_CFB128(uint8_t * out,
  *   This function preserves backwards compatibility. Use
  *   @ref CRYPTO_AES_CFB256 instead.
  ******************************************************************************/
-__STATIC_INLINE void AES_CFB256(uint8_t * out,
-                                const uint8_t * in,
-                                unsigned int len,
-                                const uint8_t * key,
-                                const uint8_t * iv,
-                                bool encrypt)
+__STATIC_INLINE SL_DEPRECATED_API_SDK_4_1 void AES_CFB256(uint8_t * out,
+                                                          const uint8_t * in,
+                                                          unsigned int len,
+                                                          const uint8_t * key,
+                                                          const uint8_t * iv,
+                                                          bool encrypt)
 {
   CRYPTO_AES_CFB256(DEFAULT_CRYPTO, out, in, len, key, iv, encrypt);
 }
@@ -1552,12 +1438,12 @@ __STATIC_INLINE void AES_CFB256(uint8_t * out,
  *   This function preserves backwards compatibility. Use
  *   @ref CRYPTO_AES_CTR128 instead.
  ******************************************************************************/
-__STATIC_INLINE void AES_CTR128(uint8_t * out,
-                                const uint8_t * in,
-                                unsigned int len,
-                                const uint8_t * key,
-                                uint8_t * ctr,
-                                CRYPTO_AES_CtrFuncPtr_TypeDef ctrFunc)
+__STATIC_INLINE SL_DEPRECATED_API_SDK_4_1 void AES_CTR128(uint8_t * out,
+                                                          const uint8_t * in,
+                                                          unsigned int len,
+                                                          const uint8_t * key,
+                                                          uint8_t * ctr,
+                                                          CRYPTO_AES_CtrFuncPtr_TypeDef ctrFunc)
 {
   CRYPTO_AES_CTR128(DEFAULT_CRYPTO, out, in, len, key, ctr, ctrFunc);
 }
@@ -1570,12 +1456,12 @@ __STATIC_INLINE void AES_CTR128(uint8_t * out,
  *   This function preserves backwards compatibility. Use
  *   @ref CRYPTO_AES_CTR256 instead.
  ******************************************************************************/
-__STATIC_INLINE void AES_CTR256(uint8_t * out,
-                                const uint8_t * in,
-                                unsigned int len,
-                                const uint8_t * key,
-                                uint8_t * ctr,
-                                CRYPTO_AES_CtrFuncPtr_TypeDef ctrFunc)
+__STATIC_INLINE SL_DEPRECATED_API_SDK_4_1 void AES_CTR256(uint8_t * out,
+                                                          const uint8_t * in,
+                                                          unsigned int len,
+                                                          const uint8_t * key,
+                                                          uint8_t * ctr,
+                                                          CRYPTO_AES_CtrFuncPtr_TypeDef ctrFunc)
 {
   CRYPTO_AES_CTR256(DEFAULT_CRYPTO, out, in, len, key, ctr, ctrFunc);
 }
@@ -1588,7 +1474,7 @@ __STATIC_INLINE void AES_CTR256(uint8_t * out,
  *   This function preserves backwards compatibility. Use
  *   @ref CRYPTO_AES_CTRUpdate32Bit instead.
  ******************************************************************************/
-__STATIC_INLINE void AES_CTRUpdate32Bit(uint8_t * ctr)
+__STATIC_INLINE SL_DEPRECATED_API_SDK_4_1 void AES_CTRUpdate32Bit(uint8_t * ctr)
 {
   CRYPTO_AES_CTRUpdate32Bit(ctr);
 }
@@ -1602,7 +1488,8 @@ __STATIC_INLINE void AES_CTRUpdate32Bit(uint8_t * ctr)
  *   This function preserves backwards compatibility. Use
  *   @ref CRYPTO_AES_DecryptKey128 instead.
  ******************************************************************************/
-__STATIC_INLINE void AES_DecryptKey128(uint8_t * out, const uint8_t * in)
+__STATIC_INLINE SL_DEPRECATED_API_SDK_4_1 void AES_DecryptKey128(uint8_t * out,
+                                                                 const uint8_t * in)
 {
   CRYPTO_AES_DecryptKey128(DEFAULT_CRYPTO, out, in);
 }
@@ -1616,7 +1503,8 @@ __STATIC_INLINE void AES_DecryptKey128(uint8_t * out, const uint8_t * in)
  *   This function preserves backwards compatibility. Use
  *   @ref CRYPTO_AES_DecryptKey256 instead.
  ******************************************************************************/
-__STATIC_INLINE void AES_DecryptKey256(uint8_t * out, const uint8_t * in)
+__STATIC_INLINE SL_DEPRECATED_API_SDK_4_1 void AES_DecryptKey256(uint8_t * out,
+                                                                 const uint8_t * in)
 {
   CRYPTO_AES_DecryptKey256(DEFAULT_CRYPTO, out, in);
 }
@@ -1630,11 +1518,11 @@ __STATIC_INLINE void AES_DecryptKey256(uint8_t * out, const uint8_t * in)
  *   This function preserves backwards compatibility. Use
  *   @ref CRYPTO_AES_ECB128 instead.
  ******************************************************************************/
-__STATIC_INLINE void AES_ECB128(uint8_t * out,
-                                const uint8_t * in,
-                                unsigned int len,
-                                const uint8_t * key,
-                                bool encrypt)
+__STATIC_INLINE SL_DEPRECATED_API_SDK_4_1 void AES_ECB128(uint8_t * out,
+                                                          const uint8_t * in,
+                                                          unsigned int len,
+                                                          const uint8_t * key,
+                                                          bool encrypt)
 {
   CRYPTO_AES_ECB128(DEFAULT_CRYPTO, out, in, len, key, encrypt);
 }
@@ -1648,11 +1536,11 @@ __STATIC_INLINE void AES_ECB128(uint8_t * out,
  *   This function preserves backwards compatibility. Use
  *   @ref CRYPTO_AES_ECB256 instead.
  ******************************************************************************/
-__STATIC_INLINE void AES_ECB256(uint8_t * out,
-                                const uint8_t * in,
-                                unsigned int len,
-                                const uint8_t * key,
-                                bool encrypt)
+__STATIC_INLINE SL_DEPRECATED_API_SDK_4_1 void AES_ECB256(uint8_t * out,
+                                                          const uint8_t * in,
+                                                          unsigned int len,
+                                                          const uint8_t * key,
+                                                          bool encrypt)
 {
   CRYPTO_AES_ECB256(DEFAULT_CRYPTO, out, in, len, key, encrypt);
 }
@@ -1665,11 +1553,11 @@ __STATIC_INLINE void AES_ECB256(uint8_t * out,
  *   This function preserves backwards compatibility. Use
  *   @ref CRYPTO_AES_OFB128 instead.
  ******************************************************************************/
-__STATIC_INLINE void AES_OFB128(uint8_t * out,
-                                const uint8_t * in,
-                                unsigned int len,
-                                const uint8_t * key,
-                                const uint8_t * iv)
+__STATIC_INLINE SL_DEPRECATED_API_SDK_4_1 void AES_OFB128(uint8_t * out,
+                                                          const uint8_t * in,
+                                                          unsigned int len,
+                                                          const uint8_t * key,
+                                                          const uint8_t * iv)
 {
   CRYPTO_AES_OFB128(DEFAULT_CRYPTO, out, in, len, key, iv);
 }
@@ -1682,11 +1570,11 @@ __STATIC_INLINE void AES_OFB128(uint8_t * out,
  *   This function preserves backwards compatibility. Use
  *   @ref CRYPTO_AES_OFB256 instead.
  ******************************************************************************/
-__STATIC_INLINE void AES_OFB256(uint8_t * out,
-                                const uint8_t * in,
-                                unsigned int len,
-                                const uint8_t * key,
-                                const uint8_t * iv)
+__STATIC_INLINE SL_DEPRECATED_API_SDK_4_1 void AES_OFB256(uint8_t * out,
+                                                          const uint8_t * in,
+                                                          unsigned int len,
+                                                          const uint8_t * key,
+                                                          const uint8_t * iv)
 {
   CRYPTO_AES_OFB256(DEFAULT_CRYPTO, out, in, len, key, iv);
 }

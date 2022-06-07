@@ -7,6 +7,13 @@ description: >
   The blink task can be created using either dynamic or static memory allocation
   for the task stack and tcb.
 category: Example|Platform
+filter:
+  - name: "Device Type"
+    value: ["SoC"]
+  - name: "MCU"
+    value: ["32-bit MCU"]
+  - name: "Project Difficulty"
+    value: ["Beginner"]
 source:
   - path: app.c
   - path: main.c
@@ -25,6 +32,10 @@ component:
     instance: [led0]
 define:
   - name: DEBUG_EFM
+readme:
+  - path: readme.md
+ui_hints:
+  highlight: readme.md
 tag:
   - hardware:component:led:1+
   - hardware:device:ram:8

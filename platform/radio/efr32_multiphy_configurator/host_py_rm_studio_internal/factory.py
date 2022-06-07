@@ -20,6 +20,7 @@ _RM_PART_FAMILY_MAP = {
     'BOBCAT':  'efr32xg24',
     'SOL':     'efr32xg25',
     'LEOPARD': 'efr32xg27',
+    'MARGAY':  'efr32xg28',
     'VIPER':   'efr32xg31',
 }
 
@@ -37,6 +38,7 @@ RM_S2_PART_FAMILY_NAMES = [
     'BOBCAT',
     'SOL',
     'LEOPARD',
+    'MARGAY',
     'VIPER',
 ]
 

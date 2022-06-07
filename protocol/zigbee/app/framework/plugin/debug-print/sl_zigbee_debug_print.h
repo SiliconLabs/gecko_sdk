@@ -88,33 +88,33 @@ void sli_zigbee_debug_print_buffer(uint32_t group_type,
 
 /** @} */ // end of name APIs
 #if (SL_ZIGBEE_DEBUG_STACK_GROUP_ENABLED == 1)
-#define sl_zigbee_stack_debug_print(...) sli_zigbee_debug_print(SL_ZIGBEE_DEBUG_PRINT_TYPE_STACK, __VA_ARGS__)
+#define sl_zigbee_stack_debug_print(...) sli_zigbee_debug_print(((uint32_t)SL_ZIGBEE_DEBUG_PRINT_TYPE_STACK), __VA_ARGS__)
 #else
 #define sl_zigbee_stack_debug_print(...)
 #endif
 
 #if (SL_ZIGBEE_DEBUG_CORE_GROUP_ENABLED == 1)
-#define sl_zigbee_core_debug_print(...) sli_zigbee_debug_print(SL_ZIGBEE_DEBUG_PRINT_TYPE_CORE, __VA_ARGS__)
+#define sl_zigbee_core_debug_print(...) sli_zigbee_debug_print(((uint32_t)SL_ZIGBEE_DEBUG_PRINT_TYPE_CORE), __VA_ARGS__)
 #else
 #define sl_zigbee_core_debug_print(...)
 #endif
 
 #if (SL_ZIGBEE_DEBUG_APP_GROUP_ENABLED == 1)
-#define sl_zigbee_app_debug_print(...) sli_zigbee_debug_print(SL_ZIGBEE_DEBUG_PRINT_TYPE_APP, __VA_ARGS__)
-#define sl_zigbee_app_debug_print_buffer(buffer, length, with_space) sli_zigbee_debug_print_buffer(SL_ZIGBEE_DEBUG_PRINT_TYPE_APP, (buffer), (length), (with_space))
+#define sl_zigbee_app_debug_print(...) sli_zigbee_debug_print(((uint32_t)SL_ZIGBEE_DEBUG_PRINT_TYPE_APP), __VA_ARGS__)
+#define sl_zigbee_app_debug_print_buffer(buffer, length, with_space) sli_zigbee_debug_print_buffer(((uint32_t)SL_ZIGBEE_DEBUG_PRINT_TYPE_APP), (buffer), (length), (with_space))
 #else
 #define sl_zigbee_app_debug_print(...)
 #define sl_zigbee_app_debug_print_buffer(buffer, length, with_space)
 #endif
 
 #if (SL_ZIGBEE_DEBUG_ZCL_GROUP_ENABLED == 1)
-#define sl_zigbee_zcl_debug_print(...) sli_zigbee_debug_print(SL_ZIGBEE_DEBUG_PRINT_TYPE_ZCL, __VA_ARGS__)
+#define sl_zigbee_zcl_debug_print(...) sli_zigbee_debug_print(((uint32_t)SL_ZIGBEE_DEBUG_PRINT_TYPE_ZCL), __VA_ARGS__)
 #else
 #define sl_zigbee_zcl_debug_print(...)
 #endif
 
 #if (SL_ZIGBEE_DEBUG_PRINTS_LEGACY_AF_DEBUG_ENABLED == 1)
-#define sl_zigbee_legacy_af_debug_print(...) sli_zigbee_debug_print(SL_ZIGBEE_DEBUG_PRINT_TYPE_LEGACY_AF_DEBUG, __VA_ARGS__)
+#define sl_zigbee_legacy_af_debug_print(...) sli_zigbee_debug_print(((uint32_t)SL_ZIGBEE_DEBUG_PRINT_TYPE_LEGACY_AF_DEBUG), __VA_ARGS__)
 #else
 #define sl_zigbee_debug_print(...)
 #endif

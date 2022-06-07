@@ -19,6 +19,7 @@ requires:
   - name: device_has_gpio
   - name: emlib_common
   - name: cmsis_core
+  - name: enum
 documentation:
   docset: gecko-platform
   document:

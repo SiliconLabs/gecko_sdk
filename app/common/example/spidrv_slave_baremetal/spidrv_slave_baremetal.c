@@ -28,7 +28,7 @@
 #define SPI_HANDLE sl_spidrv_exp_handle
 
 // size of transmission and reception buffers
-#define APP_BUFFER_SIZE             10
+#define APP_BUFFER_SIZE             16
 
 /*******************************************************************************
  ***************************  LOCAL VARIABLES   ********************************

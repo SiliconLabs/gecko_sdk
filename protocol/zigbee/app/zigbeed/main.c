@@ -81,10 +81,12 @@ int main(void)
 #endif
 {
 #ifdef UNIX_HOST
+#if defined(SL_CATALOG_ZIGBEE_MSLA_CHECK_PRESENT)
   if ( access("/accept_silabs_msla", F_OK) != 0 ) {
     fprintf(stderr, "In order to run this software, you must accept the Silicon Labs MSLA found at https://www.silabs.com/about-us/legal/master-software-license-agreement by creating a file called /accept_silabs_msla.\n");
     return -1;
   }
+#endif
   fprintf(stdout, "By using this software, you are agreeing to the Silicon Labs MSLA found at https://www.silabs.com/about-us/legal/master-software-license-agreement.\n");
 
   app_process_args(argc, argv);

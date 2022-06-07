@@ -584,18 +584,16 @@ static void decommissionGpd(uint8_t secLvl,
                                               0xFF);
     emberAfGreenPowerClusterPrintln("Gp Pairing for Decommissing send returned %d", retval);
 
-    // move send gp pairing config from elsewhere to here in case of Cgroup=communication mode
-    // this is before removingthe sink entry in order to have a valid DeviceID to indicate into
-    // the gp pairing config frame
-    uint8_t deviceId = entry.deviceId;
-    if (sinkFunctionalitySupported(EMBER_AF_GP_GPS_FUNCTIONALITY_SINK_TABLE_BASED_GROUPCAST_FORWARDING)
-        || sinkFunctionalitySupported(EMBER_AF_GP_GPS_FUNCTIONALITY_PRE_COMMISSIONED_GROUPCAST_COMMUNICATION)) {
+    // In case of Sink was supporting groupcast for the GPD, then send a Gp Pairing config.
+    if (gpsCommunicationMode == EMBER_GP_SINK_TYPE_GROUPCAST
+        && (sinkFunctionalitySupported(EMBER_AF_GP_GPS_FUNCTIONALITY_SINK_TABLE_BASED_GROUPCAST_FORWARDING)
+            || sinkFunctionalitySupported(EMBER_AF_GP_GPS_FUNCTIONALITY_PRE_COMMISSIONED_GROUPCAST_COMMUNICATION))) {
       emberAfFillCommandGreenPowerClusterGpPairingConfigurationSmart(EMBER_ZCL_GP_PAIRING_CONFIGURATION_ACTION_REMOVE_GPD,
                                                                      0,
                                                                      gpdAddr->id.sourceId,
                                                                      gpdAddr->id.gpdIeeeAddress,
                                                                      gpdAddr->endpoint,
-                                                                     deviceId,
+                                                                     entry.deviceId,
                                                                      0,
                                                                      NULL,
                                                                      0,
@@ -2396,6 +2394,12 @@ void emberAfPluginGreenPowerServerCommissioningWindowTimeoutEventHandler(SLXU_UC
 //////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
 #ifdef UC_BUILD
+void emberAfGreenPowerServerSinkTableInit(void)
+{
+  emberAfGreenPowerClusterPrintln("SinkTable Init..");
+  emberGpSinkTableInit();
+  greenPowerServerInitialised = true;
+}
 
 void emberAfPluginGreenPowerServerInitCallback(uint8_t init_level)
 {
@@ -2413,10 +2417,11 @@ void emberAfPluginGreenPowerServerInitCallback(uint8_t init_level)
 
     case SL_ZIGBEE_INIT_LEVEL_LOCAL_DATA:
     {
-      // Bring up the Sink table
-      emberAfGreenPowerClusterPrintln("SinkTable Init..");
-      emberGpSinkTableInit();
-      greenPowerServerInitialised = true;
+      #ifndef EZSP_HOST
+      // Bring up the Sink table here in case of SoC, for NCP-Host
+      // the same must be called after the NCP is initialised and the configured.
+      emberAfGreenPowerServerSinkTableInit();
+      #endif
       // A test to see the security upon reset
       // uncomment the assert to just run the security test
       //emGpTestSecurity();
@@ -3217,12 +3222,10 @@ bool emberAfGreenPowerClusterGpSinkTableRequestCallback(EmberAfClusterCommand *c
   if (validEntriesCount == 0) {
     // "index" is already 0xFF if search by ID
     // or already set to the value from "SinkTableRequest" triggered frame in case it is search by INDEX
-    emberAfFillCommandGreenPowerClusterGpSinkTableResponse(EMBER_ZCL_GP_SINK_TABLE_RESPONSE_STATUS_NOT_FOUND,
-                                                           0x00,
-                                                           cmd_data.index,
-                                                           0x00,
-                                                           NULL,
-                                                           0);
+    emberAfFillCommandGreenPowerClusterGpSinkTableResponseSmart(EMBER_ZCL_GP_SINK_TABLE_RESPONSE_STATUS_NOT_FOUND,
+                                                                0,
+                                                                cmd_data.index,
+                                                                0);
     emberAfSendResponse();
     return true;
   } else {
@@ -3233,12 +3236,10 @@ bool emberAfGreenPowerClusterGpSinkTableRequestCallback(EmberAfClusterCommand *c
       entryIndex = emberGpSinkTableLookup(&gpdAddr);
       if (entryIndex == 0xFF) {
         // Valid entries present but none for this gpdAddr - Send NOT FOUND sesponse.
-        emberAfFillCommandGreenPowerClusterGpSinkTableResponse(EMBER_ZCL_GP_SINK_TABLE_RESPONSE_STATUS_NOT_FOUND,
-                                                               validEntriesCount,
-                                                               entryIndex,
-                                                               0x00,
-                                                               NULL,
-                                                               0);
+        emberAfFillCommandGreenPowerClusterGpSinkTableResponseSmart(EMBER_ZCL_GP_SINK_TABLE_RESPONSE_STATUS_NOT_FOUND,
+                                                                    validEntriesCount,
+                                                                    entryIndex,
+                                                                    0);
         emberAfSendResponse();
         goto kickout;
       } else {
@@ -3250,12 +3251,10 @@ bool emberAfGreenPowerClusterGpSinkTableRequestCallback(EmberAfClusterCommand *c
           // entries carrying the total number of non-empty Sink Table entries on this device, Start index set to
           // 0xff, Entries count field set to 0x01, and one Sink Table entry field for the requested GPD ID (and
           // Endpoint, if ApplicationID = 0b010), formatted as specified in sec. A.3.3.2.2.1, present.
-          emberAfFillCommandGreenPowerClusterGpSinkTableResponse(EMBER_ZCL_GP_SINK_TABLE_RESPONSE_STATUS_SUCCESS,
-                                                                 validEntriesCount,
-                                                                 0xff,
-                                                                 1,
-                                                                 NULL,
-                                                                 0);
+          emberAfFillCommandGreenPowerClusterGpSinkTableResponseSmart(EMBER_ZCL_GP_SINK_TABLE_RESPONSE_STATUS_SUCCESS,
+                                                                      validEntriesCount,
+                                                                      0xff,
+                                                                      1);
           appResponseLength += storeSinkTableEntryInBuffer(&entry, (appResponseData + appResponseLength));
           emberAfSendResponse();
         } else {
@@ -3265,24 +3264,20 @@ bool emberAfGreenPowerClusterGpSinkTableRequestCallback(EmberAfClusterCommand *c
       }
     } else if (requestType == EMBER_ZCL_GP_SINK_TABLE_REQUEST_OPTIONS_REQUEST_TABLE_ENTRIES_BY_INDEX) {
       if (cmd_data.index >= validEntriesCount) {
-        emberAfFillCommandGreenPowerClusterGpSinkTableResponse(EMBER_ZCL_GP_SINK_TABLE_RESPONSE_STATUS_NOT_FOUND,
-                                                               validEntriesCount,
-                                                               cmd_data.index,
-                                                               0x00,
-                                                               NULL,
-                                                               0);
+        emberAfFillCommandGreenPowerClusterGpSinkTableResponseSmart(EMBER_ZCL_GP_SINK_TABLE_RESPONSE_STATUS_NOT_FOUND,
+                                                                    validEntriesCount,
+                                                                    cmd_data.index,
+                                                                    0);
         emberAfSendResponse();
         return true;
       } else {
         // return the sink table entry content into the reponse payload from indicated
         // index and nexts until these are consistant (adress type, etc) and
         // as long as it feet into one message
-        emberAfFillCommandGreenPowerClusterGpSinkTableResponse(EMBER_ZCL_GP_SINK_TABLE_RESPONSE_STATUS_SUCCESS,
-                                                               validEntriesCount,
-                                                               cmd_data.index,
-                                                               0xff, //validEntriesCount - index??,
-                                                               NULL, // ?? is there a way to indicate the pointer and the lenght of the entry
-                                                               0);
+        emberAfFillCommandGreenPowerClusterGpSinkTableResponseSmart(EMBER_ZCL_GP_SINK_TABLE_RESPONSE_STATUS_SUCCESS,
+                                                                    validEntriesCount,
+                                                                    cmd_data.index,
+                                                                    0xff);
         validEntriesCount = 0;
         uint16_t entriesCount = 0;
         for (entryIndex = 0; entryIndex < EMBER_GP_SINK_TABLE_SIZE; entryIndex++) {
@@ -3314,12 +3309,10 @@ bool emberAfGreenPowerClusterGpSinkTableRequestCallback(EmberAfClusterCommand *c
         appResponseData[GP_SINK_TABLE_RESPONSE_ENTRIES_OFFSET + GP_NON_MANUFACTURER_ZCL_HEADER_LENGTH] = entriesCount;
         EmberStatus status = emberAfSendResponse();
         if (status == EMBER_MESSAGE_TOO_LONG) {
-          emberAfFillCommandGreenPowerClusterGpSinkTableResponse(EMBER_ZCL_GP_SINK_TABLE_RESPONSE_STATUS_SUCCESS,
-                                                                 validEntriesCount,
-                                                                 cmd_data.index,
-                                                                 0x00,
-                                                                 NULL,
-                                                                 0);
+          emberAfFillCommandGreenPowerClusterGpSinkTableResponseSmart(EMBER_ZCL_GP_SINK_TABLE_RESPONSE_STATUS_SUCCESS,
+                                                                      validEntriesCount,
+                                                                      cmd_data.index,
+                                                                      0);
           emberAfSendResponse();
         }
         goto kickout;
@@ -3950,12 +3943,10 @@ bool emberAfGreenPowerClusterGpSinkTableRequestCallback(uint8_t options,
   if (validEntriesCount == 0) {
     // "index" is already 0xFF if search by ID
     // or already set to the value from "SinkTableRequest" triggered frame in case it is search by INDEX
-    emberAfFillCommandGreenPowerClusterGpSinkTableResponse(EMBER_ZCL_GP_SINK_TABLE_RESPONSE_STATUS_NOT_FOUND,
-                                                           0x00,
-                                                           index,
-                                                           0x00,
-                                                           NULL,
-                                                           0);
+    emberAfFillCommandGreenPowerClusterGpSinkTableResponseSmart(EMBER_ZCL_GP_SINK_TABLE_RESPONSE_STATUS_NOT_FOUND,
+                                                                0,
+                                                                index,
+                                                                0);
     emberAfSendResponse();
     return true;
   } else {
@@ -3966,12 +3957,10 @@ bool emberAfGreenPowerClusterGpSinkTableRequestCallback(uint8_t options,
       entryIndex = emberGpSinkTableLookup(&gpdAddr);
       if (entryIndex == 0xFF) {
         // Valid entries present but none for this gpdAddr - Send NOT FOUND sesponse.
-        emberAfFillCommandGreenPowerClusterGpSinkTableResponse(EMBER_ZCL_GP_SINK_TABLE_RESPONSE_STATUS_NOT_FOUND,
-                                                               validEntriesCount,
-                                                               entryIndex,
-                                                               0x00,
-                                                               NULL,
-                                                               0);
+        emberAfFillCommandGreenPowerClusterGpSinkTableResponseSmart(EMBER_ZCL_GP_SINK_TABLE_RESPONSE_STATUS_NOT_FOUND,
+                                                                    validEntriesCount,
+                                                                    entryIndex,
+                                                                    0);
         emberAfSendResponse();
         goto kickout;
       } else {
@@ -3983,12 +3972,10 @@ bool emberAfGreenPowerClusterGpSinkTableRequestCallback(uint8_t options,
           // entries carrying the total number of non-empty Sink Table entries on this device, Start index set to
           // 0xff, Entries count field set to 0x01, and one Sink Table entry field for the requested GPD ID (and
           // Endpoint, if ApplicationID = 0b010), formatted as specified in sec. A.3.3.2.2.1, present.
-          emberAfFillCommandGreenPowerClusterGpSinkTableResponse(EMBER_ZCL_GP_SINK_TABLE_RESPONSE_STATUS_SUCCESS,
-                                                                 validEntriesCount,
-                                                                 0xff,
-                                                                 1,
-                                                                 NULL,
-                                                                 0);
+          emberAfFillCommandGreenPowerClusterGpSinkTableResponseSmart(EMBER_ZCL_GP_SINK_TABLE_RESPONSE_STATUS_SUCCESS,
+                                                                      validEntriesCount,
+                                                                      0xff,
+                                                                      1);
           appResponseLength += storeSinkTableEntryInBuffer(&entry, (appResponseData + appResponseLength));
           emberAfSendResponse();
         } else {
@@ -3998,24 +3985,20 @@ bool emberAfGreenPowerClusterGpSinkTableRequestCallback(uint8_t options,
       }
     } else if (requestType == EMBER_ZCL_GP_SINK_TABLE_REQUEST_OPTIONS_REQUEST_TABLE_ENTRIES_BY_INDEX) {
       if (index >= validEntriesCount) {
-        emberAfFillCommandGreenPowerClusterGpSinkTableResponse(EMBER_ZCL_GP_SINK_TABLE_RESPONSE_STATUS_NOT_FOUND,
-                                                               validEntriesCount,
-                                                               index,
-                                                               0x00,
-                                                               NULL,
-                                                               0);
+        emberAfFillCommandGreenPowerClusterGpSinkTableResponseSmart(EMBER_ZCL_GP_SINK_TABLE_RESPONSE_STATUS_NOT_FOUND,
+                                                                    validEntriesCount,
+                                                                    index,
+                                                                    0);
         emberAfSendResponse();
         return true;
       } else {
         // return the sink table entry content into the reponse payload from indicated
         // index and nexts until these are consistant (adress type, etc) and
         // as long as it feet into one message
-        emberAfFillCommandGreenPowerClusterGpSinkTableResponse(EMBER_ZCL_GP_SINK_TABLE_RESPONSE_STATUS_SUCCESS,
-                                                               validEntriesCount,
-                                                               index,
-                                                               0xff, //validEntriesCount - index??,
-                                                               NULL, // ?? is there a way to indicate the pointer and the lenght of the entry
-                                                               0);
+        emberAfFillCommandGreenPowerClusterGpSinkTableResponseSmart(EMBER_ZCL_GP_SINK_TABLE_RESPONSE_STATUS_SUCCESS,
+                                                                    validEntriesCount,
+                                                                    index,
+                                                                    0xff);
         validEntriesCount = 0;
         uint16_t entriesCount = 0;
         for (entryIndex = 0; entryIndex < EMBER_GP_SINK_TABLE_SIZE; entryIndex++) {
@@ -4047,12 +4030,10 @@ bool emberAfGreenPowerClusterGpSinkTableRequestCallback(uint8_t options,
         appResponseData[GP_SINK_TABLE_RESPONSE_ENTRIES_OFFSET + GP_NON_MANUFACTURER_ZCL_HEADER_LENGTH] = entriesCount;
         EmberStatus status = emberAfSendResponse();
         if (status == EMBER_MESSAGE_TOO_LONG) {
-          emberAfFillCommandGreenPowerClusterGpSinkTableResponse(EMBER_ZCL_GP_SINK_TABLE_RESPONSE_STATUS_SUCCESS,
-                                                                 validEntriesCount,
-                                                                 index,
-                                                                 0x00,
-                                                                 NULL,
-                                                                 0);
+          emberAfFillCommandGreenPowerClusterGpSinkTableResponseSmart(EMBER_ZCL_GP_SINK_TABLE_RESPONSE_STATUS_SUCCESS,
+                                                                      validEntriesCount,
+                                                                      index,
+                                                                      0);
           emberAfSendResponse();
         }
         goto kickout;

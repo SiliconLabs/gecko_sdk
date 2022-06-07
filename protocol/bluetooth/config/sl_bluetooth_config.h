@@ -30,18 +30,6 @@
 // <i> Define the number of software timers the application needs.  Each timer needs resources from the stack to be implemented. Increasing amount of soft timers may cause degraded performance in some use cases.
 #define SL_BT_CONFIG_MAX_SOFTWARE_TIMERS     (4)
 
-#ifdef SL_CATALOG_BLUETOOTH_FEATURE_SYNC_PRESENT
-#include "sl_bluetooth_periodic_sync_config.h"
-#else
-#define SL_BT_CONFIG_MAX_PERIODIC_ADVERTISING_SYNC (0)
-#endif
-
-#ifdef SL_CATALOG_BLUETOOTH_FEATURE_L2CAP_PRESENT
-#include "sl_bluetooth_l2cap_config.h"
-#else
-#define SL_BT_CONFIG_USER_L2CAP_COC_CHANNELS (0)
-#endif
-
 // <o SL_BT_CONFIG_BUFFER_SIZE> Buffer memory size for Bluetooth stack
 // <i> Default: 3150
 // <i> Define buffer memory size for running Bluetooth stack and buffering data over Bluetooth connections,
@@ -126,41 +114,18 @@ void sli_bt_rtos_stack_callback();
 
 #include "sl_bt_stack_config.h"
 
-// Set PA configuration default values if RAIL PA Config component presents:
-#ifdef SL_RAIL_UTIL_PA_CONFIG_HEADER
-#include SL_RAIL_UTIL_PA_CONFIG_HEADER
-#define BT_PA_CONFIG_STATE             SL_BT_RADIO_PA_CONFIG_ENABLED
-#define BT_PA_SELECTION                SL_RAIL_UTIL_PA_SELECTION_2P4GHZ
-#if SL_RAIL_UTIL_PA_VOLTAGE_MV == 3300
-#define BT_PA_POWER_SUPPLY             SL_BT_RADIO_PA_INPUT_VBAT
-#else
-#define BT_PA_POWER_SUPPLY             SL_BT_RADIO_PA_INPUT_DCDC
-#endif
-#else
-#define BT_PA_CONFIG_STATE             SL_BT_RADIO_PA_CONFIG_DISABLED
-#define BT_PA_SELECTION                0
-#define BT_PA_POWER_SUPPLY             0
-#endif // SL_RAIL_UTIL_PA_CONFIG_HEADER
-
-#define SL_BT_CONFIG_DEFAULT                                                   \
-  {                                                                            \
-    .config_flags = SL_BT_CONFIG_FLAGS,                                        \
-    .bluetooth.max_connections = SL_BT_CONFIG_MAX_CONNECTIONS_SUM,             \
-    .bluetooth.max_advertisers = SL_BT_CONFIG_MAX_ADVERTISERS,                 \
-    .bluetooth.max_periodic_sync = SL_BT_CONFIG_MAX_PERIODIC_ADVERTISING_SYNC, \
-    .bluetooth.max_l2cap_coc     = SL_BT_CONFIG_USER_L2CAP_COC_CHANNELS,       \
-    .bluetooth.max_buffer_memory = SL_BT_CONFIG_BUFFER_SIZE,                   \
-    .scheduler_callback = SL_BT_CONFIG_LL_CALLBACK,                            \
-    .stack_schedule_callback = SL_BT_CONFIG_STACK_CALLBACK,                    \
-    .gattdb = &gattdb,                                                         \
-    .max_timers = SL_BT_CONFIG_MAX_SOFTWARE_TIMERS,                            \
-    .rf.tx_gain = SL_BT_CONFIG_RF_PATH_GAIN_TX,                                \
-    .rf.rx_gain = SL_BT_CONFIG_RF_PATH_GAIN_RX,                                \
-    .rf.tx_min_power = SL_BT_CONFIG_MIN_TX_POWER,                              \
-    .rf.tx_max_power = SL_BT_CONFIG_MAX_TX_POWER,                              \
-    .pa.config_enable = BT_PA_CONFIG_STATE,                                    \
-    .pa.input = BT_PA_POWER_SUPPLY,                                            \
-    .pa.pa_mode = BT_PA_SELECTION,                                             \
+#define SL_BT_CONFIG_DEFAULT                                 \
+  {                                                          \
+    .config_flags = SL_BT_CONFIG_FLAGS,                      \
+    .bluetooth.max_buffer_memory = SL_BT_CONFIG_BUFFER_SIZE, \
+    .scheduler_callback = SL_BT_CONFIG_LL_CALLBACK,          \
+    .stack_schedule_callback = SL_BT_CONFIG_STACK_CALLBACK,  \
+    .gattdb = &gattdb,                                       \
+    .max_timers = SL_BT_CONFIG_MAX_SOFTWARE_TIMERS,          \
+    .rf.tx_gain = SL_BT_CONFIG_RF_PATH_GAIN_TX,              \
+    .rf.rx_gain = SL_BT_CONFIG_RF_PATH_GAIN_RX,              \
+    .rf.tx_min_power = SL_BT_CONFIG_MIN_TX_POWER,            \
+    .rf.tx_max_power = SL_BT_CONFIG_MAX_TX_POWER,            \
   }
 
 #endif // SL_BLUETOOTH_CONFIG_H

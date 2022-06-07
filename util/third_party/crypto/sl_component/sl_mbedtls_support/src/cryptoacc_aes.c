@@ -56,7 +56,6 @@
 #include "cryptoacc_management.h"
 #include "sx_aes.h"
 #include "sx_errors.h"
-#include "cryptolib_def.h"
 #include "mbedtls/aes.h"
 #include "mbedtls/platform.h"
 #include "mbedtls/platform_util.h"
@@ -407,7 +406,6 @@ int mbedtls_aes_crypt_ecb(mbedtls_aes_context *ctx,
 {
   int status;
   uint32_t sx_ret;
-  sx_aes_mode_t dir = mode == MBEDTLS_AES_ENCRYPT ? ENC : DEC;
   block_t key;
   block_t data_in;
   block_t data_out;
@@ -432,7 +430,7 @@ int mbedtls_aes_crypt_ecb(mbedtls_aes_context *ctx,
   if (status != 0) {
     return status;
   }
-  if (dir == ENC) {
+  if (mode == MBEDTLS_AES_ENCRYPT) {
     sx_ret = sx_aes_ecb_encrypt((const block_t*)&key, (const block_t*)&data_in, &data_out);
   } else {
     sx_ret = sx_aes_ecb_decrypt((const block_t*)&key, (const block_t*)&data_in, &data_out);
@@ -463,7 +461,6 @@ int mbedtls_aes_crypt_cbc(mbedtls_aes_context *ctx,
 {
   int status;
   uint32_t sx_ret;
-  sx_aes_mode_t dir = mode == MBEDTLS_AES_ENCRYPT ? ENC : DEC;
   block_t key;
   block_t iv_block;
   block_t data_in;
@@ -497,7 +494,7 @@ int mbedtls_aes_crypt_cbc(mbedtls_aes_context *ctx,
   if (status != 0) {
     return status;
   }
-  if (dir == ENC) {
+  if (mode == MBEDTLS_AES_ENCRYPT) {
     sx_ret = sx_aes_cbc_encrypt_update((const block_t *)&key, (const block_t *)&data_in, &data_out, (const block_t *)&iv_block, &iv_block);
   } else {
     sx_ret = sx_aes_cbc_decrypt_update((const block_t *)&key, (const block_t *)&data_in, &data_out, (const block_t *)&iv_block, &iv_block);
@@ -531,7 +528,6 @@ int mbedtls_aes_crypt_cfb128(mbedtls_aes_context *ctx,
   size_t n = iv_off ? *iv_off : 0;
   size_t processed = 0;
   uint32_t sx_ret;
-  sx_aes_mode_t dir = mode == MBEDTLS_AES_ENCRYPT ? ENC : DEC;
   block_t key;
   block_t iv_block;
   block_t data_in;
@@ -582,7 +578,7 @@ int mbedtls_aes_crypt_cfb128(mbedtls_aes_context *ctx,
         if (status != 0) {
           return status;
         }
-        if (dir == ENC) {
+        if (mode == MBEDTLS_AES_ENCRYPT) {
           sx_ret = sx_aes_cfb_encrypt_update((const block_t *)&key, (const block_t *)&data_in, &data_out, (const block_t *)&iv_block, &iv_block);
         } else {
           sx_ret = sx_aes_cfb_decrypt_update((const block_t *)&key, (const block_t *)&data_in, &data_out, (const block_t *)&iv_block, &iv_block);
@@ -722,7 +718,6 @@ int mbedtls_aes_crypt_ctr(mbedtls_aes_context *ctx,
       output[processed] = (unsigned char)(input[processed] ^ stream_block[n]);
       n = (n + 1) & 0x0F;
       processed++;
-      continue;
     } else {
       /* process one or more blocks of data */
       size_t iterations = (length - processed) / 16;

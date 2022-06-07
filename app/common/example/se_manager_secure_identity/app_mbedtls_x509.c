@@ -113,7 +113,7 @@ int32_t get_pub_device_key(void)
 
   // Copy public key in device certificate to an ECP key-pair structure
   mbedtls_ecp_keypair_init(&ecp_key);
-  ret = mbedtls_ecp_copy(&ecp_key.MBEDTLS_PRIVATE(Q), &mbedtls_pk_ec(cert_chain.MBEDTLS_PRIVATE(pk))->MBEDTLS_PRIVATE(Q));
+  ret = mbedtls_ecp_copy(&ecp_key.MBEDTLS_PRIVATE(Q), &mbedtls_pk_ec(cert_chain.pk)->MBEDTLS_PRIVATE(Q));
   if (ret != 0) {
     return ret;
   }

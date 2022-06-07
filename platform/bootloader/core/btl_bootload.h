@@ -33,6 +33,40 @@
  ******************************************************************************/
 
 /***************************************************************************//**
+ * Get base address of the bootloader upgrade image.
+ *
+ * @return Returns the base address of bootloader upgrade image.
+ ******************************************************************************/
+uint32_t bootload_getUpgradeLocation(void);
+
+/***************************************************************************//**
+ * Get the version of the bootloader.
+ *
+ * @return Returns the version of the bootloader.
+ ******************************************************************************/
+uint32_t bootload_getBootloaderVersion(void);
+
+/***************************************************************************//**
+ * Get the version of the application.
+ *
+ * @param[out] version The retrieved application version
+ *
+ * @return Returns true if the version was retrieved successfully
+ ******************************************************************************/
+bool bootload_getApplicationVersion(uint32_t *version);
+
+#if defined(SEMAILBOX_PRESENT) || defined(CRYPTOACC_PRESENT)
+/***************************************************************************//**
+ * Get the version of the SE.
+ *
+ * @param[out] version The retrieved SE version
+ *
+ * @return Returns true if the version was retrieved successfully.
+ ******************************************************************************/
+bool bootload_getSeVersion(uint32_t *version);
+#endif // defined(SEMAILBOX_PRESENT) || defined(CRYPTOACC_PRESENT)
+
+/***************************************************************************//**
  * Check application properties magic.
  *
  * @param appProperties   Pointer to ::ApplicationProperties_t

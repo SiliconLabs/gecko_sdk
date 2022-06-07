@@ -8,6 +8,7 @@ quality: production
 provides:
 - name: radio_config_simple_rail_multiphy
 - name: a_radio_config
+  allow_multiple: true
 ui_hints:
   visibility: never
 template_contribution:

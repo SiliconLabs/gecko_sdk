@@ -86,10 +86,10 @@ void finding_and_binding_event_handler(sl_zigbee_event_t *event)
   }
 }
 
-extern bool emberAfGreenPowerClusterGpSinkCommissioningModeCallback(uint8_t options,
-                                                                    uint16_t gpmAddrForSecurity,
-                                                                    uint16_t gpmAddrForPairing,
-                                                                    uint8_t sinkEndpoint);
+extern bool emAfPluginGreenPowerServerGpSinkCommissioningModeCommandHandler(uint8_t options,
+                                                                            uint16_t gpmAddrForSecurity,
+                                                                            uint16_t gpmAddrForPairing,
+                                                                            uint8_t sinkEndpoint);
 
 // Enter or exit sink commissioning mode
 void sink_commissioning_mode_event_handler(sl_zigbee_event_t *event)
@@ -97,10 +97,10 @@ void sink_commissioning_mode_event_handler(sl_zigbee_event_t *event)
   uint8_t options = EMBER_AF_GP_SINK_COMMISSIONING_MODE_OPTIONS_INVOLVE_PROXIES \
                     | ((enterComm) ? EMBER_AF_GP_SINK_COMMISSIONING_MODE_OPTIONS_ACTION : 0);
 
-  emberAfGreenPowerClusterGpSinkCommissioningModeCallback(options,    //options - (Involve Proxy | Enter)
-                                                          0xFFFF,     //addr
-                                                          0xFFFF,     //addr
-                                                          LIGHT_ENDPOINT); //light Endpoint
+  emAfPluginGreenPowerServerGpSinkCommissioningModeCommandHandler(options,    //options - (Involve Proxy | Enter)
+                                                                  0xFFFF, //addr
+                                                                  0xFFFF, //addr
+                                                                  LIGHT_ENDPOINT); //light Endpoint
   if (enterComm) {
     led_turn_on(COMMISSIONING_STATUS_LED);
     enterComm = false;

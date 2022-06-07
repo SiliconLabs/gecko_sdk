@@ -71,7 +71,19 @@
 #include "app_task_init.h"
 #endif
 
-#if defined(RAIL0_CHANNEL_GROUP_1_PROFILE_WISUN)  || defined(RAIL0_CHANNELS_FOR_915_PROFILE_WISUN) || defined(RAIL0_CHANNEL_GROUP_1_PROFILE_WISUN_OFDM) || defined(RAIL0_CHANNEL_GROUP_1_PROFILE_WISUN_FSK)
+#if defined(RAIL0_CHANNEL_GROUP_1_PHY_IEEE802154_SUN_FSK_169MHZ_4FSK_9P6KBPS)  \
+  || defined(RAIL0_CHANNEL_GROUP_1_PHY_IEEE802154_SUN_FSK_169MHZ_2FSK_4P8KBPS) \
+  || defined(RAIL0_CHANNEL_GROUP_1_PHY_IEEE802154_SUN_FSK_169MHZ_2FSK_2P4KBPS) \
+  || defined(RAIL0_CHANNEL_GROUP_1_PHY_IEEE802154_SUN_FSK_450MHZ_2FSK_4P8KBPS) \
+  || defined(RAIL0_CHANNEL_GROUP_1_PHY_IEEE802154_SUN_FSK_450MHZ_4FSK_9P6KBPS) \
+  || defined(RAIL0_CHANNEL_GROUP_1_PHY_IEEE802154_SUN_FSK_896MHZ_2FSK_40KBPS)  \
+  || defined(RAIL0_CHANNEL_GROUP_1_PHY_IEEE802154_SUN_FSK_915MHZ_2FSK_10KBPS)  \
+  || defined(RAIL0_CHANNEL_GROUP_1_PHY_IEEE802154_SUN_FSK_920MHZ_4FSK_400KBPS)
+#undef RAIL0_CHANNEL_GROUP_1_PROFILE_BASE
+#define RAIL0_CHANNEL_GROUP_1_PROFILE_WISUN_FSK
+#endif
+
+#if defined(RAIL0_CHANNEL_GROUP_1_PROFILE_WISUN) || defined(RAIL0_CHANNELS_FOR_915_PROFILE_WISUN) || defined(RAIL0_CHANNEL_GROUP_1_PROFILE_WISUN_OFDM) || defined(RAIL0_CHANNEL_GROUP_1_PROFILE_WISUN_FSK) || defined(RAIL0_CHANNEL_GROUP_1_PROFILE_WISUN_FAN_1_0) || defined(RAIL0_CHANNEL_GROUP_1_PROFILE_WISUN_HAN) || defined(RAIL0_CHANNEL_GROUP_1_PROFILE_SUN_OQPSK)
 #include "sl_flex_packet_asm.h"
 #endif
 
@@ -88,8 +100,8 @@
 #define RANGE_TEST_SEND_TIME ((uint32_t) 100000)
 
 /// RAIL buffer sizes
-#define RAIL_TX_BUFFER_SIZE         (128u)
-#define RAIL_RX_BUFFER_SIZE         (256u)
+#define RAIL_TX_BUFFER_SIZE         (128U)
+#define RAIL_RX_BUFFER_SIZE         (256U)
 
 /// structre to keep the error flags in a small variable
 typedef struct error_flags_t {
@@ -204,7 +216,12 @@ volatile range_test_measurement_t range_test_measurement;
 /// Scheduling setting for TX part of the range test
 static RAIL_ScheduleTxConfig_t schedule = {
   .mode = RAIL_TIME_DELAY,
+#if defined(HARDWARE_BOARD_HAS_EFF)
+  // double the time for EFF to not to cause overheating
+  .when = RANGE_TEST_SEND_TIME*2,
+#else
   .when = RANGE_TEST_SEND_TIME,
+#endif
 };
 
 /// Memory allocation for RAIL TX FIFO
@@ -540,11 +557,11 @@ void set_power_level_to_max(bool init)
                         channelConfigs[range_test_settings.current_phy], NULL);
     uint16_t channel = range_test_settings.channel;
     if ((channel
-         > channelConfigs[range_test_settings.current_phy]->configs[0u].channelNumberEnd)
+         > channelConfigs[range_test_settings.current_phy]->configs[0U].channelNumberEnd)
         || (init)) {
       // Initialize the channel to the first one in channel config
       range_test_settings.channel =
-        channelConfigs[range_test_settings.current_phy]->configs[0u].channelNumberStart;
+        channelConfigs[range_test_settings.current_phy]->configs[0U].channelNumberStart;
     }
 
     if (channelConfigs[range_test_settings.current_phy]->configs[0].baseFrequency
@@ -591,7 +608,7 @@ void get_rail_config_data(uint32_t *base_frequency, uint32_t *channel_spacing, i
   } else {
 #if defined(SL_CATALOG_RADIO_CONFIG_SIMPLE_RAIL_SINGLEPHY_PRESENT)
     *base_frequency = channelConfigs[range_test_settings.current_phy]->configs[0].baseFrequency;
-    *channel_spacing = channelConfigs[range_test_settings.current_phy]->configs[0u].channelSpacing;
+    *channel_spacing = channelConfigs[range_test_settings.current_phy]->configs[0U].channelSpacing;
 #endif
   }
 }
@@ -609,8 +626,8 @@ void get_rail_channel_range(uint16_t *start, uint16_t *end)
     get_rail_standard_channel_range(start, end);
   } else {
 #if defined(SL_CATALOG_RADIO_CONFIG_SIMPLE_RAIL_SINGLEPHY_PRESENT)
-    *start = channelConfigs[range_test_settings.current_phy]->configs[0u].channelNumberStart;
-    *end = channelConfigs[range_test_settings.current_phy]->configs[0u].channelNumberEnd;
+    *start = channelConfigs[range_test_settings.current_phy]->configs[0U].channelNumberStart;
+    *end = channelConfigs[range_test_settings.current_phy]->configs[0U].channelNumberEnd;
 #endif
   }
 }
@@ -645,7 +662,8 @@ void phy_list_generation(uint8_t *buffer, uint8_t *length)
     if (number_of_custom_phys == 0 || number_of_custom_phys <= phy_index) {
       std_phy_list_generation(phy_index, buffer, length);
     } else {
-      sprintf((char*)(&buffer[*length]), "%u:custom_%u,", phy_index, phy_index);
+      // *buffer length comes from app_bluetooth.c
+      snprintf((char*)(&buffer[*length]), 255, "%u:custom_%u,", phy_index, phy_index);
       *length = strlen((char*)(buffer));
     }
   }
@@ -695,11 +713,11 @@ void range_test_init()
  ******************************************************************************/
 void range_test_reset_values(void)
 {
-  range_test_measurement.packets_received_counter = 0u;
-  range_test_measurement.first_recevied_packet_offset = 0u;
+  range_test_measurement.packets_received_counter = 0U;
+  range_test_measurement.first_recevied_packet_offset = 0U;
   range_test_measurement.packets_received_correctly = RANGETEST_PACKET_COUNT_INVALID;
-  range_test_measurement.packets_sent = 0u;
-  range_test_measurement.packets_with_crc_error = 0u;
+  range_test_measurement.packets_sent = 0U;
+  range_test_measurement.packets_with_crc_error = 0U;
   schedule_is_ready = true;
 }
 
@@ -813,7 +831,7 @@ bool receive_measurment(void)
   RAIL_Status_t rail_status = RAIL_STATUS_NO_ERROR;
   bool refresh_screen_is_needed = false;
   RAIL_Handle_t rail_handle = get_current_rail_handler();
-  static uint32_t last_received_packet_count = 0u;
+  static uint32_t last_received_packet_count = 0U;
   int8_t rssi_value = 0;
 
   if (rx_crc_error_happpend) {
@@ -858,7 +876,7 @@ bool receive_measurment(void)
       rx_packet = get_start_of_payload_for_standard(rx_fifo);
     } else {
       uint8_t *start_of_packet = 0;
-      uint16_t packet_size = unpack_packet(rx_fifo, &packet_info, &start_of_packet);
+      (void)unpack_packet(rx_fifo, &packet_info, &start_of_packet);
       rail_status = RAIL_ReleaseRxPacket(rail_handle, rx_packet_handle);
       rx_packet = (range_test_packet_t*) start_of_packet;
     }
@@ -890,9 +908,9 @@ bool receive_measurment(void)
 #endif
 
       // Reset received counter
-      range_test_measurement.packets_received_correctly = 0u;
+      range_test_measurement.packets_received_correctly = 0U;
       // Set counter offset
-      range_test_measurement.first_recevied_packet_offset = rx_packet->packet_counter - 1u;
+      range_test_measurement.first_recevied_packet_offset = rx_packet->packet_counter - 1U;
 
 #if defined(SL_CATALOG_GLIB_PRESENT)
       // Clear RSSI Chart
@@ -903,7 +921,7 @@ bool receive_measurment(void)
       range_test_MA_clear_all();
 
       // Restart Moving-Average calculation
-      last_received_packet_count = 0u;
+      last_received_packet_count = 0U;
     }
 
     if (range_test_measurement.packets_received_correctly < 0xFFFF) {
@@ -925,25 +943,25 @@ bool receive_measurment(void)
 #endif
 
     // Calculate recently lost packets number based on newest counter
-    if ((range_test_measurement.packets_received_counter - last_received_packet_count) > 1u) {
+    if ((range_test_measurement.packets_received_counter - last_received_packet_count) > 1U) {
       // At least one packet lost
-      range_test_MA_set(range_test_measurement.packets_received_counter - last_received_packet_count - 1u);
+      range_test_MA_set(range_test_measurement.packets_received_counter - last_received_packet_count - 1U);
     }
     // Current packet is received
     range_test_MA_clear();
     last_received_packet_count = range_test_measurement.packets_received_counter;
 
     // Calculate Moving-Average Error Rate
-    range_test_measurement.moving_average = (range_test_MA_get() * 100.0f)
+    range_test_measurement.moving_average = (range_test_MA_get() * 100.0F)
                                             / range_test_settings.moving_average_window_size;
 
     uint16_t packets_received_counter = range_test_measurement.packets_received_counter;
     // Calculate Packet Error Rate
     range_test_measurement.PER = (packets_received_counter)   // Avoid zero division
                                  ? (((float) (packets_received_counter - range_test_measurement.packets_received_correctly)
-                                     * 100.0f) / packets_received_counter)   // Calculate PER
+                                     * 100.0F) / packets_received_counter)   // Calculate PER
                                  :
-                                 0.0f;   // By default PER is 0.0%
+                                 0.0F;   // By default PER is 0.0%
 
     refresh_screen_is_needed = true;
   }
@@ -1125,10 +1143,8 @@ static void prepare_radio_config_packet(uint16_t packet_number, uint8_t *tx_buff
  ******************************************************************************/
 static void range_test_generate_payload(uint8_t *data, uint16_t data_length)
 {
-  uint8_t i = sizeof(range_test_packet_t);
-
-  for (; i < data_length; i++) {
-    data[i] = (i % 2u) ? (0x55u) : (0xAAu);
+  for (uint8_t i = sizeof(range_test_packet_t); i < data_length; i++) {
+    data[i] = (i % 2U) ? (0x55U) : (0xAAU);
   }
 }
 
@@ -1212,11 +1228,11 @@ static void range_test_MA_clear(void)
   // Buffering volatile value
   uint8_t  ma_finger = range_test_measurement.moving_average_current_point_value;
 
-  range_test_measurement.moving_average_history[ma_finger >> 5u] &= ~(1u << (ma_finger % 32u));
+  range_test_measurement.moving_average_history[ma_finger >> 5U] &= ~(1U << (ma_finger % 32U));
 
   ma_finger++;
   if (ma_finger >= range_test_settings.moving_average_window_size) {
-    ma_finger = 0u;
+    ma_finger = 0U;
   }
   // Updating new value back to volatile
   range_test_measurement.moving_average_current_point_value = ma_finger;
@@ -1240,18 +1256,18 @@ static void range_test_MA_set(uint32_t nr)
     // Set all bits to 1's
     i = range_test_settings.moving_average_window_size;
 
-    while (i >> 5u) {
-      range_test_measurement.moving_average_history[(i >> 5u) - 1u] = 0xFFFFFFFFul;
-      i -= 32u;
+    while (i >> 5U) {
+      range_test_measurement.moving_average_history[(i >> 5U) - 1U] = 0xFFFFFFFFUL;
+      i -= 32U;
     }
     return;
   }
 
   while (nr) {
-    range_test_measurement.moving_average_history[ma_finger >> 5u] |= (1u << ma_finger % 32u);
+    range_test_measurement.moving_average_history[ma_finger >> 5U] |= (1U << ma_finger % 32U);
     ma_finger++;
     if (ma_finger >= range_test_settings.moving_average_window_size) {
-      ma_finger = 0u;
+      ma_finger = 0U;
     }
     nr--;
   }
@@ -1267,10 +1283,9 @@ static void range_test_MA_set(uint32_t nr)
  ******************************************************************************/
 static uint8_t range_test_MA_get(void)
 {
-  uint8_t i;
-  uint8_t return_value = 0u;
+  uint8_t return_value = 0U;
 
-  for (i = 0u; i < (range_test_settings.moving_average_window_size >> 5u); i++) {
+  for (uint8_t i = 0U; i < (range_test_settings.moving_average_window_size >> 5U); i++) {
     return_value += range_test_count_bits(range_test_measurement.moving_average_history[i]);
   }
   return return_value;
@@ -1283,10 +1298,10 @@ static uint8_t range_test_MA_get(void)
  ******************************************************************************/
 static void range_test_MA_clear_all(void)
 {
-  range_test_measurement.moving_average_history[0u] = range_test_measurement.moving_average_history[1u]
-                                                        = range_test_measurement.moving_average_history[2u]
-                                                            = range_test_measurement.moving_average_history[3u]
-                                                                = 0u;
+  range_test_measurement.moving_average_history[0U] = range_test_measurement.moving_average_history[1U]
+                                                        = range_test_measurement.moving_average_history[2U]
+                                                            = range_test_measurement.moving_average_history[3U]
+                                                                = 0U;
 }
 
 /*******************************************************************************
@@ -1299,10 +1314,10 @@ static void range_test_MA_clear_all(void)
 static uint32_t range_test_count_bits(uint32_t u)
 {
   uint32_t count = u
-                   - ((u >> 1u) & 033333333333)
-                   - ((u >> 2u) & 011111111111);
+                   - ((u >> 1U) & 033333333333)
+                   - ((u >> 2U) & 011111111111);
 
-  return  (((count + (count >> 3u)) & 030707070707) % 63u);
+  return  (((count + (count >> 3U)) & 030707070707) % 63U);
 }
 
 /*******************************************************************************
@@ -1364,7 +1379,7 @@ static inline void print_rx_logs(void)
   }
 }
 
-#if defined(RAIL0_CHANNEL_GROUP_1_PROFILE_WISUN) || defined(RAIL0_CHANNEL_GROUP_1_PROFILE_WISUN_FSK) || defined(RAIL0_CHANNELS_FOR_915_PROFILE_WISUN)
+#if defined(RAIL0_CHANNEL_GROUP_1_PROFILE_WISUN) || defined(RAIL0_CHANNEL_GROUP_1_PROFILE_WISUN_FSK) || defined(RAIL0_CHANNEL_GROUP_1_PROFILE_WISUN_FAN_1_0) || defined(RAIL0_CHANNEL_GROUP_1_PROFILE_WISUN_HAN) || defined(RAIL0_CHANNELS_FOR_915_PROFILE_WISUN)
 /******************************************************************************
  * The API helps to unpack the received packet, point to the payload and returns the length.
  *****************************************************************************/
@@ -1372,7 +1387,7 @@ static uint16_t unpack_packet(uint8_t *rx_destination, const RAIL_RxPacketInfo_t
 {
   sl_flex_802154_packet_mhr_frame_t rx_mhr = { 0 };
   uint16_t payload_size = 0;
-  uint8_t rx_phr_config = 0u;
+  uint8_t rx_phr_config = 0U;
   RAIL_CopyRxPacket(rx_destination, packet_information);
 
   *start_of_payload = sl_flex_802154_packet_unpack_g_opt_data_frame(&rx_phr_config,
@@ -1389,7 +1404,7 @@ static void prepare_package(RAIL_Handle_t rail_handle, uint8_t *out_data, uint16
 {
   // Check if write fifo has written all bytes
   uint16_t bytes_writen_in_fifo = 0;
-  uint16_t packet_size = 0u;
+  uint16_t packet_size = 0U;
   uint8_t tx_phr_config = SL_FLEX_IEEE802154G_PHR_MODE_SWITCH_OFF
                           | SL_FLEX_IEEE802154G_PHR_CRC_4_BYTE
                           | SL_FLEX_IEEE802154G_PHR_DATA_WHITENING_ON;
@@ -1399,7 +1414,7 @@ static void prepare_package(RAIL_Handle_t rail_handle, uint8_t *out_data, uint16
                               | MAC_FRAME_DESTINATION_MODE_SHORT \
                               | MAC_FRAME_VERSION_2006           \
                               | MAC_FRAME_SOURCE_MODE_SHORT,
-    .sequence_number        = 0u,
+    .sequence_number        = 0U,
     .destination_pan_id     = (0xFFFF),
     .destination_address    = (0xFFFF),
     .source_address         = (0x0000)
@@ -1423,11 +1438,17 @@ static void prepare_package(RAIL_Handle_t rail_handle, uint8_t *out_data, uint16
  *****************************************************************************/
 static uint16_t unpack_packet(uint8_t *rx_destination, const RAIL_RxPacketInfo_t *packet_information, uint8_t **start_of_payload)
 {
-  uint8_t phr_size = 4;
-  uint8_t soft_modem_trailing_bytes = 6;
+  uint16_t payload_size = 0U;
+  uint8_t rate = 0U;
+  uint8_t scrambler = 0U;
+
   RAIL_CopyRxPacket(rx_destination, packet_information);
-  *start_of_payload = &rx_destination[phr_size];
-  return (packet_information->packetBytes - phr_size - soft_modem_trailing_bytes);
+  *start_of_payload = sl_flex_802154_packet_unpack_ofdm_data_frame(packet_information,
+                                                                   &rate,
+                                                                   &scrambler,
+                                                                   &payload_size,
+                                                                   rx_destination);
+  return payload_size;
 }
 
 /******************************************************************************
@@ -1437,13 +1458,8 @@ static void prepare_package(RAIL_Handle_t rail_handle, uint8_t *out_data, uint16
 {
   // Check if write fifo has written all bytes
   uint16_t bytes_writen_in_fifo = 0;
-  uint16_t packet_size = 0u;
+  uint16_t packet_size = 0U;
   uint8_t tx_frame_buffer[256];
-  uint32_t phr = 0;
-  uint16_t frameLength = 0;
-
-  uint8_t phr_size = 4;
-  uint8_t fcs_size = 4;
   uint8_t rate = 0x06;     // rate: 5 bits wide, The Rate field (RA4-RA0) specifies the data rate of the payload and is equal to the numerical value of the MCS
                            // 0x0 BPSK, coding rate 1/2, 4 x frequency repetition
                            // 0x1 BPSK, coding rate 1/2, 2 x frequency repetition
@@ -1454,22 +1470,12 @@ static void prepare_package(RAIL_Handle_t rail_handle, uint8_t *out_data, uint16
                            // 0x6 16-QAM, coding rate 3/4
   uint8_t scrambler = 0; // scrambler: 2 bits wide, The Scrambler field (S1-S0) specifies the scrambling seed
 
-  // The Frame Length field (L10-L0) specifies the total number of octets contained in the PSDU (prior to FEC encoding). The PSDU field carries the data of the PHY packet.
-  frameLength = ((length + phr_size) - phr_size) + fcs_size;
-  phr = (rate << 19) | (frameLength << 7) | (scrambler << 3);
-  // Flip the 32 bits for all SUN modulations
-  phr = __RBIT(phr);
-
-  // Write the phr in the payload
-  for (uint8_t index = 0; index < phr_size; index++) {
-    tx_frame_buffer[index] = ((phr & (0xFF << index * 8)) >> index * 8);
-  }
-  // Add payload bytes
-  packet_size = length + phr_size;
-  for (uint8_t index = phr_size; index < packet_size; index++) {
-    tx_frame_buffer[index] = out_data[index - phr_size];
-  }
-
+  sl_flex_802154_packet_pack_ofdm_data_frame(rate,
+                                             scrambler,
+                                             length,
+                                             out_data,
+                                             &packet_size,
+                                             tx_frame_buffer);
   bytes_writen_in_fifo = RAIL_WriteTxFifo(rail_handle, tx_frame_buffer, packet_size, true);
   app_assert(bytes_writen_in_fifo == packet_size,
              "RAIL_WriteTxFifo() failed to write in fifo (%d bytes instead of %d bytes)\n",
@@ -1482,11 +1488,17 @@ static void prepare_package(RAIL_Handle_t rail_handle, uint8_t *out_data, uint16
  *****************************************************************************/
 static uint16_t unpack_packet(uint8_t *rx_destination, const RAIL_RxPacketInfo_t *packet_information, uint8_t **start_of_payload)
 {
-  uint8_t phr_size = 4;
-  uint8_t soft_modem_trailing_bytes = 6;
+  uint16_t payload_size = 0U;
+  bool spreadingMode = false;
+  uint8_t rateMode = 0U;
+
   RAIL_CopyRxPacket(rx_destination, packet_information);
-  *start_of_payload = &rx_destination[phr_size];
-  return (packet_information->packetBytes - phr_size - soft_modem_trailing_bytes);
+  *start_of_payload = sl_flex_802154_packet_unpack_oqpsk_data_frame(packet_information,
+                                                                    &spreadingMode,
+                                                                    &rateMode,
+                                                                    &payload_size,
+                                                                    rx_destination);
+  return payload_size;
 }
 
 /******************************************************************************
@@ -1496,31 +1508,17 @@ static void prepare_package(RAIL_Handle_t rail_handle, uint8_t *out_data, uint16
 {
   // Check if write fifo has written all bytes
   uint16_t bytes_writen_in_fifo = 0;
-  uint16_t packet_size = 0u;
+  uint16_t packet_size = 0U;
   uint8_t tx_frame_buffer[256];
-  uint32_t phr = 0;
-  uint16_t frameLength = 0;
-
-  uint8_t phr_size = 4;
-  uint8_t fcs_size = 4;
   bool spreadingMode = false;
   uint8_t rateMode = 0; // rateMode: 2 bits wide
 
-  // The Frame Length field (L10-L0) specifies the total number of octets contained in the PSDU (prior to FEC encoding). The PSDU field carries the data of the PHY packet.
-  frameLength = ((length + phr_size) - phr_size) + fcs_size;
-  phr = (spreadingMode << 15) | (rateMode << 13) | frameLength;
-  // Flip the 32 bits for all SUN modulations
-  phr = __RBIT(phr);
-
-  // Write the phr in the payload
-  for (uint8_t index = 0; index < phr_size; index++) {
-    tx_frame_buffer[index] = ((phr & (0xFF << index * 8)) >> index * 8);
-  }
-  // Add payload bytes
-  packet_size = length + phr_size;
-  for (uint8_t index = phr_size; index < packet_size; index++) {
-    tx_frame_buffer[index] = out_data[index - phr_size];
-  }
+  sl_flex_802154_packet_pack_oqpsk_data_frame(spreadingMode,
+                                              rateMode,
+                                              length,
+                                              out_data,
+                                              &packet_size,
+                                              tx_frame_buffer);
 
   bytes_writen_in_fifo = RAIL_WriteTxFifo(rail_handle, tx_frame_buffer, packet_size, true);
   app_assert(bytes_writen_in_fifo == packet_size,

@@ -353,3 +353,112 @@ class Calc_Synth_Bobcat(CALC_Synth_ocelot):
         self._reg_write(model.vars.RAC_PGACTRL_PGABWMODE, pgabwmode)
         self._reg_write(model.vars.AGC_LNABOOST_LNABWADJ, lnabwadj)
         self._reg_write(model.vars.AGC_LNABOOST_LNABWADJBOOST, lnabwadjboost)
+
+    def calc_clkmult_div_reg(self, model):
+        adc_clock_mode_actual = model.vars.adc_clock_mode_actual.value
+        ifadc_halfrate = model.vars.RAC_IFADCTRIM0_IFADCENHALFMODE.value
+
+        if adc_clock_mode_actual == model.vars.adc_clock_mode.var_enum.HFXOMULT:
+            if ifadc_halfrate == 0:
+                # adc_full_speed from dpll_utils.py (xo * 8); 8 = 48 / (3 * 2)
+                self._reg_write(model.vars.RAC_CLKMULTCTRL_CLKMULTDIVR, 1)
+                self._reg_write(model.vars.RAC_CLKMULTCTRL_CLKMULTDIVN, 48)
+                self._reg_write(model.vars.RAC_CLKMULTCTRL_CLKMULTDIVX, 3)
+                self._reg_write(model.vars.RAC_CLKMULTEN0_CLKMULTFREQCAL, 1)
+                self._reg_write(model.vars.RAC_CLKMULTEN0_CLKMULTBWCAL, 1)
+            else:
+                # adc_half_speed from dpll_utils.py (xo * 4); 4 = 40 / (5 * 2)
+                self._reg_write(model.vars.RAC_CLKMULTCTRL_CLKMULTDIVR, 1)
+                self._reg_write(model.vars.RAC_CLKMULTCTRL_CLKMULTDIVN, 40)
+                self._reg_write(model.vars.RAC_CLKMULTCTRL_CLKMULTDIVX, 5)
+                self._reg_write(model.vars.RAC_CLKMULTEN0_CLKMULTFREQCAL, 0)
+                self._reg_write(model.vars.RAC_CLKMULTEN0_CLKMULTBWCAL, 0)
+        else:
+            # reset values
+            self._reg_write_default(model.vars.RAC_CLKMULTCTRL_CLKMULTDIVR)
+            self._reg_write_default(model.vars.RAC_CLKMULTCTRL_CLKMULTDIVN)
+            self._reg_write_default(model.vars.RAC_CLKMULTCTRL_CLKMULTDIVX)
+            self._reg_write_default(model.vars.RAC_CLKMULTEN0_CLKMULTFREQCAL)
+            self._reg_write_default(model.vars.RAC_CLKMULTEN0_CLKMULTBWCAL)
+
+    def calc_clkmulten_reg(self, model):
+        adc_clock_mode_actual = model.vars.adc_clock_mode_actual.value
+
+        # To enable clkmult the following additional registers must also be set, but are handled in RAIL
+        # SYXO0.INTERNALCTRL.ENCLKMULTANA = 1 # enable XO output to CLKMULT
+        # RAC.SYLOEN.SYLODIVRLO2P4GENEN = 0 # disable LODIV output buffer from SYLODIV (power saving)
+
+        if adc_clock_mode_actual == model.vars.adc_clock_mode.var_enum.HFXOMULT:
+            # unless otherwise specified, the values are taken from dualbclk_mult_validation_20190516_lynx_revA0.pptx > dpll_utils.py > dualbclk_mult spec sheet
+            # based on the common settings for adc_full_speed, adc_full_speed_lp, adc_half_speed, adc_half_speed_lp
+            # in dpll_utils.py
+            self._reg_write(model.vars.RAC_CLKMULTEN0_CLKMULTDISICO, 0) # 0 = ENABLE ICO, 1 = DISABLE ICO
+            self._reg_write(model.vars.RAC_CLKMULTEN0_CLKMULTENBBDET, 1)
+            self._reg_write(model.vars.RAC_CLKMULTEN0_CLKMULTENBBXLDET, 1)
+            self._reg_write(model.vars.RAC_CLKMULTEN0_CLKMULTENBBXMDET, 1)
+            self._reg_write(model.vars.RAC_CLKMULTEN0_CLKMULTENCFDET, 1)
+            self._reg_write(model.vars.RAC_CLKMULTEN0_CLKMULTENDITHER, 0)
+            self._reg_write(model.vars.RAC_CLKMULTEN0_CLKMULTENDRVADC, 1)
+            self._reg_write(model.vars.RAC_CLKMULTEN0_CLKMULTENDRVN, 0)
+            self._reg_write(model.vars.RAC_CLKMULTEN0_CLKMULTENDRVP, 1)
+            self._reg_write(model.vars.RAC_CLKMULTEN0_CLKMULTENDRVRX2P4G, 0)
+            self._reg_write(model.vars.RAC_CLKMULTEN0_CLKMULTENDRVRXSUBG, 0)
+            self._reg_write(model.vars.RAC_CLKMULTEN0_CLKMULTENDRVTXDUALB, 0)
+            self._reg_write(model.vars.RAC_CLKMULTEN0_CLKMULTENFBDIV, 1)
+            self._reg_write(model.vars.RAC_CLKMULTEN0_CLKMULTENREFDIV, 1)
+            self._reg_write(model.vars.RAC_CLKMULTEN0_CLKMULTENREG1, 1)
+            self._reg_write(model.vars.RAC_CLKMULTEN0_CLKMULTENREG2, 1)
+            self._reg_write(model.vars.RAC_CLKMULTEN0_CLKMULTENREG3, 1)
+            self._reg_write(model.vars.RAC_CLKMULTEN0_CLKMULTENROTDET, 1)
+            self._reg_write(model.vars.RAC_CLKMULTEN0_CLKMULTENBYPASS40MHZ, 0)
+
+            self._reg_write(model.vars.RAC_CLKMULTEN0_CLKMULTREG1ADJV, 2)
+            self._reg_write(model.vars.RAC_CLKMULTEN0_CLKMULTREG2ADJV, 3) # from dpll_utils.py
+            self._reg_write(model.vars.RAC_CLKMULTEN0_CLKMULTREG2ADJI, 1) # from dpll_utils.py
+
+            self._reg_write(model.vars.RAC_CLKMULTEN0_CLKMULTREG3ADJV, 2)
+
+            self._reg_write(model.vars.RAC_CLKMULTEN1_CLKMULTINNIBBLE, 8)
+            self._reg_write(model.vars.RAC_CLKMULTEN1_CLKMULTLDFNIB, 0)
+            self._reg_write(model.vars.RAC_CLKMULTEN1_CLKMULTLDMNIB, 0)
+            self._reg_write(model.vars.RAC_CLKMULTEN1_CLKMULTRDNIBBLE, 3)
+            self._reg_write(model.vars.RAC_CLKMULTEN1_CLKMULTLDCNIB, 0)
+            self._reg_write(model.vars.RAC_CLKMULTEN1_CLKMULTDRVAMPSEL, 7) # based on dpll_utils.py
+
+            self._reg_write(model.vars.RAC_CLKMULTCTRL_CLKMULTENRESYNC, 0)
+            self._reg_write(model.vars.RAC_CLKMULTCTRL_CLKMULTVALID, 0)
+        else:
+            # when using lodiv, turn off dualbclk_mult to reset values
+            self._reg_write_default(model.vars.RAC_CLKMULTEN0_CLKMULTDISICO)
+            self._reg_write_default(model.vars.RAC_CLKMULTEN0_CLKMULTENBBDET)
+            self._reg_write_default(model.vars.RAC_CLKMULTEN0_CLKMULTENBBXLDET)
+            self._reg_write_default(model.vars.RAC_CLKMULTEN0_CLKMULTENBBXMDET)
+            self._reg_write_default(model.vars.RAC_CLKMULTEN0_CLKMULTENCFDET)
+            self._reg_write_default(model.vars.RAC_CLKMULTEN0_CLKMULTENDITHER)
+            self._reg_write_default(model.vars.RAC_CLKMULTEN0_CLKMULTENDRVADC)
+            self._reg_write_default(model.vars.RAC_CLKMULTEN0_CLKMULTENDRVN)
+            self._reg_write_default(model.vars.RAC_CLKMULTEN0_CLKMULTENDRVP)
+            self._reg_write_default(model.vars.RAC_CLKMULTEN0_CLKMULTENDRVRX2P4G)
+            self._reg_write_default(model.vars.RAC_CLKMULTEN0_CLKMULTENDRVRXSUBG)
+            self._reg_write_default(model.vars.RAC_CLKMULTEN0_CLKMULTENDRVTXDUALB)
+            self._reg_write_default(model.vars.RAC_CLKMULTEN0_CLKMULTENFBDIV)
+            self._reg_write_default(model.vars.RAC_CLKMULTEN0_CLKMULTENREFDIV)
+            self._reg_write_default(model.vars.RAC_CLKMULTEN0_CLKMULTENREG1)
+            self._reg_write_default(model.vars.RAC_CLKMULTEN0_CLKMULTENREG2)
+            self._reg_write_default(model.vars.RAC_CLKMULTEN0_CLKMULTENREG3)
+            self._reg_write_default(model.vars.RAC_CLKMULTEN0_CLKMULTENROTDET)
+            self._reg_write_default(model.vars.RAC_CLKMULTEN0_CLKMULTENBYPASS40MHZ)
+            self._reg_write_default(model.vars.RAC_CLKMULTEN0_CLKMULTREG1ADJV)
+            self._reg_write_default(model.vars.RAC_CLKMULTEN0_CLKMULTREG2ADJV)
+            self._reg_write_default(model.vars.RAC_CLKMULTEN0_CLKMULTREG2ADJI)
+            self._reg_write_default(model.vars.RAC_CLKMULTEN0_CLKMULTREG3ADJV)
+
+            self._reg_write_default(model.vars.RAC_CLKMULTEN1_CLKMULTINNIBBLE)
+            self._reg_write_default(model.vars.RAC_CLKMULTEN1_CLKMULTLDFNIB)
+            self._reg_write_default(model.vars.RAC_CLKMULTEN1_CLKMULTLDMNIB)
+            self._reg_write_default(model.vars.RAC_CLKMULTEN1_CLKMULTRDNIBBLE)
+            self._reg_write_default(model.vars.RAC_CLKMULTEN1_CLKMULTLDCNIB)
+            self._reg_write_default(model.vars.RAC_CLKMULTEN1_CLKMULTDRVAMPSEL)
+
+            self._reg_write_default(model.vars.RAC_CLKMULTCTRL_CLKMULTENRESYNC)
+            self._reg_write_default(model.vars.RAC_CLKMULTCTRL_CLKMULTVALID)

@@ -35,8 +35,8 @@
 #include <string.h>
 #include "em_device.h"
 #include "sl_wisun_coap_meter.h"
-#include "sl_wisun_rht_measurement.h"
-#if !defined(_SILICON_LABS_GECKO_INTERNAL_SDID_220)
+#include "sl_component_catalog.h"
+#if defined(SL_CATALOG_TEMP_SENSOR_PRESENT)
   #include "sl_wisun_rht_measurement.h"
 #endif
 
@@ -76,7 +76,7 @@ static sl_wisun_meter_hnd_t _coap_meter_hnd = { 0 };
 void sl_wisun_coap_meter_init(void)
 {
   // Init meter-collector common component
-#if defined(_SILICON_LABS_GECKO_INTERNAL_SDID_220)
+#if !defined(SL_CATALOG_TEMP_SENSOR_PRESENT)
   sl_wisun_meter_set_initializer(&_coap_meter_hnd, NULL);
 #else
   sl_wisun_meter_set_initializer(&_coap_meter_hnd, sl_wisun_rht_init);
@@ -113,12 +113,12 @@ int32_t sl_wisun_coap_meter_meas_params_and_send(const int32_t sockd_meter, cons
   memset(&response, 0, sizeof(response));
   response.uri_path_ptr     = (uint8_t *) SL_WISUN_COAP_METER_COLLECTOR_MEASUREMENT_URI_PATH; // CoAP URI path
   response.uri_path_len     = strlen(SL_WISUN_COAP_METER_COLLECTOR_MEASUREMENT_URI_PATH);     // CoAP URI path length
-  response.msg_code         = COAP_MSG_CODE_RESPONSE_CONTENT;                     // CoAP message code
-  response.content_format   = COAP_CT_JSON;                                       // CoAP content format
-  response.payload_ptr      = (uint8_t *) json_content;                           // CoAP Payload
-  response.payload_len      = (uint16_t) strlen(json_content);                    // CoAP Payload length
-  response.options_list_ptr = NULL;                                               // CoAP option list
-  response.msg_id           = SL_WISUN_COAP_METER_COLLECTOR_DEFAULT_MESSAGE_ID;   // CoAP message ID
+  response.msg_code         = COAP_MSG_CODE_RESPONSE_CONTENT;                                 // CoAP message code
+  response.content_format   = COAP_CT_JSON;                                                   // CoAP content format
+  response.payload_ptr      = (uint8_t *) json_content;                                       // CoAP Payload
+  response.payload_len      = (uint16_t) strlen(json_content);                                // CoAP Payload length
+  response.options_list_ptr = NULL;                                                           // CoAP option list
+  response.msg_id           = SL_WISUN_COAP_METER_COLLECTOR_DEFAULT_MESSAGE_ID;               // CoAP message ID
 
   printf("[Response packet]\n");
   sl_wisun_coap_print_packet(&response, false);
@@ -136,7 +136,9 @@ int32_t sl_wisun_coap_meter_meas_params_and_send(const int32_t sockd_meter, cons
   }
 
   memcpy(&dest, collector_addr, sizeof(wisun_addr_t));
-  dest.sin6_port = htons(SL_WISUN_COLLECTOR_PORT);
+  dest.sin6_port = htons((SL_WISUN_METER_USE_CUSTOM_COLLECTOR_PORT
+                          ? SL_WISUN_COLLECTOR_PORT
+                          : collector_addr->sin6_port));
 
   // build raw CoAP message
   builder_res = sl_wisun_coap_builder(message_buff, &response);

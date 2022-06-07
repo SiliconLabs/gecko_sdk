@@ -45,6 +45,8 @@ config_file:
   condition: [ 'device_sdid_215' ]
 - path: "platform/emdrv/dmadrv/config/s2_16ch/dmadrv_config.h"
   condition: [ 'device_sdid_220' ]
+- path: "platform/emdrv/dmadrv/config/s2_8ch/dmadrv_config.h"
+  condition: [ 'device_sdid_230' ]
 source:
 - path: "platform/emdrv/dmadrv/src/dmadrv.c"
 - path: "platform/emdrv/dmadrv/src/dmactrl.c"
@@ -64,6 +66,7 @@ requires:
     condition: ["device_has_ldma"]
   - name: "emlib_cmu"
   - name: "ecode"
+  - name: "enum"
 documentation:
     docset: gecko-platform
     document: driver/api/group-dmadrv

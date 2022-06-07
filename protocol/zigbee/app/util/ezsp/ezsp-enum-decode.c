@@ -291,6 +291,7 @@ const char *decodeEzspStatus(uint8_t value)
     case EZSP_ASH_STATUS: return "EZSP_ASH_STATUS";
     case EZSP_ASH_TX: return "EZSP_ASH_TX";
     case EZSP_ASH_RX: return "EZSP_ASH_RX";
+    case EZSP_CPC_ERROR_INIT: return "EZSP_CPC_ERROR_INIT";
     case EZSP_NO_ERROR: return "EZSP_NO_ERROR";
   }
   return "*** Not enumerated. ***";
@@ -608,6 +609,13 @@ const char *decodeFrameId(uint16_t value)
     case EZSP_SET_SECURITY_PARAMETERS: return "EZSP_SET_SECURITY_PARAMETERS";
     case EZSP_RESET_TO_FACTORY_DEFAULTS: return "EZSP_RESET_TO_FACTORY_DEFAULTS";
     case EZSP_GET_SECURITY_KEY_STATUS: return "EZSP_GET_SECURITY_KEY_STATUS";
+
+// Token Interface Frames
+    case EZSP_GET_TOKEN_COUNT: return "EZSP_GET_TOKEN_COUNT";
+    case EZSP_GET_TOKEN_INFO: return "EZSP_GET_TOKEN_INFO";
+    case EZSP_GET_TOKEN_DATA: return "EZSP_GET_TOKEN_DATA";
+    case EZSP_SET_TOKEN_DATA: return "EZSP_SET_TOKEN_DATA";
+    case EZSP_RESET_NODE: return "EZSP_RESET_NODE";
   }
   return "*** Not enumerated. ***";
 }

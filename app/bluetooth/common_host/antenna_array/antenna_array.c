@@ -30,6 +30,7 @@
 
 #include <stdlib.h>
 #include "antenna_array.h"
+#include "antenna_array_brd4191a.h"
 
 static uint8_t get_array_variant(uint8_t array_type, uint8_t *pattern);
 
@@ -93,20 +94,27 @@ static const uint8_t antenna_array_1x4_ula[] = {
 static const uint8_t array_size[ANTENNA_ARRAY_TYPE_LAST] = {
   16, // ANTENNA_ARRAY_TYPE_4x4_URA
   9,  // ANTENNA_ARRAY_TYPE_3x3_URA
-  4   // ANTENNA_ARRAY_TYPE_1x4_ULA
+  4,  // ANTENNA_ARRAY_TYPE_1x4_ULA
+  16  // ANTENNA_ARRAY_TYPE_4x4_DP_URA
 };
 
 static const uint8_t array_variants[ANTENNA_ARRAY_TYPE_LAST] = {
   1, // ANTENNA_ARRAY_TYPE_4x4_URA
   4, // ANTENNA_ARRAY_TYPE_3x3_URA
-  8  // ANTENNA_ARRAY_TYPE_1x4_ULA
+  8, // ANTENNA_ARRAY_TYPE_1x4_ULA
+  1  // ANTENNA_ARRAY_TYPE_4x4_DP_URA
 };
 
 static const uint8_t *array_list[ANTENNA_ARRAY_TYPE_LAST] = {
   antenna_array_4x4_ura,
   antenna_array_3x3_ura,
-  antenna_array_1x4_ula
+  antenna_array_1x4_ula,
+  antenna_array_4x4_ura  // 4x4 DP is the same as 4x4 CP.
 };
+
+static const uint8_t antenna_array_dp_vertical[] = ANT_VERTICAL;
+static const uint8_t antenna_array_dp_horizontal[] = ANT_HORIZONTAL;
+static const uint8_t reference_antenna = ANT_6_CP;
 
 /***************************************************************************//**
  * Initialize antenna switch pattern with default values.
@@ -175,18 +183,38 @@ sl_status_t antenna_array_get_pin_pattern(antenna_array_t *antenna_array,
                                           uint8_t *pattern,
                                           uint8_t *size)
 {
-  if ((antenna_array == NULL) || (pattern == NULL) || (size == NULL)) {
+  if ((antenna_array == NULL) || (size == NULL)) {
     return SL_STATUS_NULL_POINTER;
   }
-
-  if (*size < antenna_array->size) {
-    return SL_STATUS_INVALID_PARAMETER;
+  if (antenna_array_type_is_dp(antenna_array->array_type)) {
+    // Output buffer is optional.
+    if (pattern != NULL) {
+      // Check if output buffer size is large enough.
+      if (*size < (1 + (2 * antenna_array->size))) {
+        return SL_STATUS_INVALID_PARAMETER;
+      }
+      // Fill output buffer.
+      pattern[0] = reference_antenna;
+      for (uint8_t i = 0; i < antenna_array->size; i++) {
+        pattern[2 * i + 1] = antenna_array_dp_vertical[antenna_array->pattern[i]];
+        pattern[2 * i + 2] = antenna_array_dp_horizontal[antenna_array->pattern[i]];
+      }
+    }
+    *size = 1 + (2 * antenna_array->size);
+  } else {
+    // Output buffer is optional.
+    if (pattern != NULL) {
+      // Check if output buffer size is large enough.
+      if (*size < antenna_array->size) {
+        return SL_STATUS_INVALID_PARAMETER;
+      }
+      // Fill output buffer.
+      for (uint8_t i = 0; i < antenna_array->size; i++) {
+        pattern[i] = antenna_array->pattern[i];
+      }
+    }
+    *size = antenna_array->size;
   }
-
-  for (uint8_t i = 0; i < antenna_array->size; i++) {
-    pattern[i] = antenna_array->pattern[i];
-  }
-  *size = antenna_array->size;
 
   return SL_STATUS_OK;
 }
@@ -269,7 +297,7 @@ static uint8_t get_array_variant(uint8_t array_type, uint8_t *pattern)
       }
     }
     if (antenna_i == array_size[array_type]) {
-      // All antennae found for the variant.
+      // All antennas found for the variant.
       break;
     }
   }

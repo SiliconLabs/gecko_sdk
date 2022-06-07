@@ -17,6 +17,11 @@ class Calc_Misc_Bobcat(CALC_Misc_ocelot):
 
         self._reg_write(model.vars.MODEM_COCURRMODE_CONCURRENT, 0)
 
+    def calc_clkmult_misc(self, model):
+        # do not inherit ocelot's clkmult overrides
+        # ocelot's dualbrx_adcpll != bobcat's dualbclk_mult
+        pass
+
     def calc_aox_misc(self, model):
         # Always force these to zero so all AoX features are disabled.
         # RAIL will dynamically set these when an AoX  packet is detected.

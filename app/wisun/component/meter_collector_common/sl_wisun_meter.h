@@ -38,7 +38,7 @@
 #include <inttypes.h>
 #include "socket_hnd.h"
 #include "socket.h"
-#include "sl_wisun_meter_collector.h"
+#include "sli_wisun_meter_collector.h"
 #include "sl_wisun_meter_collector_config.h"
 
 // -----------------------------------------------------------------------------

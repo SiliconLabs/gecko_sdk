@@ -102,7 +102,7 @@ HalGenericInterruptControlIrqCfg* halGenericInterruptControlIrqCfgInitialize(
 
   // Configure the GPIO Interrupt port, pin, and configuration parameters:
   //   risingEdge, fallingEdge, and enable
-  GPIO_IntConfig((GPIO_Port_TypeDef)irqPort, irqPin, true, true, false);
+  GPIO_ExtIntConfig((GPIO_Port_TypeDef)irqPort, irqPin, irqPin, true, true, false);
 
   return(config);
 }
@@ -142,11 +142,12 @@ void halGenericInterruptControlIrqEdgeConfig(
       GPIO_EM4EnablePinWakeup(em4WuPins, em4WuPolarities);
       break;
   }
-  GPIO_IntConfig(config->irqPort,
-                 config->irqPin,
-                 risingEdge,
-                 fallingEdge,
-                 config->irqEnabled);
+  GPIO_ExtIntConfig(config->irqPort,
+                    config->irqPin,
+                    config->irqPin,
+                    risingEdge,
+                    fallingEdge,
+                    config->irqEnabled);
 }
 
 void halGenericInterruptControlIrqIsrAssignFxn(
@@ -213,11 +214,12 @@ void halGenericInterruptControlIrqEnable(
     em4WuPins |= config->em4WuPinMask;
     GPIO_EM4EnablePinWakeup(em4WuPins, em4WuPolarities);
   }
-  GPIO_IntConfig(config->irqPort,
-                 config->irqPin,
-                 risingEdge,
-                 fallingEdge,
-                 true);
+  GPIO_ExtIntConfig(config->irqPort,
+                    config->irqPin,
+                    config->irqPin,
+                    risingEdge,
+                    fallingEdge,
+                    true);
 }
 
 void halGenericInterruptControlIrqDisable(
@@ -242,11 +244,12 @@ void halGenericInterruptControlIrqDisable(
       fallingEdge = true;
       break;
   }
-  GPIO_IntConfig(config->irqPort,
-                 config->irqPin,
-                 risingEdge,
-                 fallingEdge,
-                 false);
+  GPIO_ExtIntConfig(config->irqPort,
+                    config->irqPin,
+                    config->irqPin,
+                    risingEdge,
+                    fallingEdge,
+                    false);
   if (config->em4WuPinMask) {
     em4WuPins &= ~config->em4WuPinMask;
     GPIO_EM4EnablePinWakeup(em4WuPins, em4WuPolarities);

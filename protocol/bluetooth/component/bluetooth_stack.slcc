@@ -25,6 +25,7 @@ include:
         condition:
           - "device_series_1"
 source:
+  - path: "src/sl_bt_stack_init.c"
   - path: "src/sl_bt_mbedtls_context.c"
     condition:
       - "device_series_1"
@@ -154,9 +155,29 @@ library:
     condition: ["toolchain_gcc","device_family_mgm24"]
   - path: "lib/EFR32MG24/IAR/libbluetooth.a"
     condition: ["toolchain_iar","device_family_mgm24"]
+#BGM24
+  - path: "lib/EFR32BG24/GCC/libbluetooth.a"
+    condition: ["toolchain_gcc","device_family_bgm24"]
+  - path: "lib/EFR32BG24/IAR/libbluetooth.a"
+    condition: ["toolchain_iar","device_family_bgm24"]
+#EFR32MG27
+  - path: "lib/EFR32MG27/GCC/libbluetooth.a"
+    condition: ["toolchain_gcc","device_family_efr32mg27"]
+  - path: "lib/EFR32MG27/IAR/libbluetooth.a"
+    condition: ["toolchain_iar","device_family_efr32mg27"]
+#EFR32BG27
+  - path: "lib/EFR32BG27/GCC/libbluetooth.a"
+    condition: ["toolchain_gcc","device_family_efr32bg27"]
+  - path: "lib/EFR32BG27/IAR/libbluetooth.a"
+    condition: ["toolchain_iar","device_family_efr32bg27"]
+
 template_contribution:
   - name: component_catalog
     value: bluetooth
+  - name: component_catalog
+    value: bluetooth_feature_multiprotocol
+    condition:
+      - "rail_lib_multiprotocol"
   - name: power_manager_handler
     value:
       event: is_ok_to_sleep
@@ -167,12 +188,6 @@ template_contribution:
       event: sleep_on_isr_exit
       include: "sl_bluetooth.h"
       handler: sli_bt_sleep_on_isr_exit
-  - name: bluetooth_stack_init
-    value:
-      function: "sl_bt_init_multiprotocol"
-    condition:
-      - "rail_lib_multiprotocol"
-    priority: 10
   - name: event_handler
     value:
       event: stack_init
@@ -195,16 +210,10 @@ template_contribution:
       include: "sl_bluetooth.h"
       handler: "sl_bt_step"
     priority: 9
-  - name: bluetooth_stack_init
-    value:
-      function: "sl_bt_init_coex_hal"
-      include: "coexistence-ble.h"
-    priority: 10
-    condition:
-      - "rail_util_coex"
   - name: application_type
     value: "APPLICATION_TYPE_BLUETOOTH_APP"
 requires:
+  - name: "bluetooth_configuration"
   - name: "bluetooth_gattdb_definition"
   - name: "sleeptimer"
   - name: "rail_lib"
@@ -226,6 +235,9 @@ requires:
   - name: "device_init"
   - name: "device_init_hfxo"
   - name: "sl_system"
+  - name: "sl_assert"
+  - name: "silabs_core_sl_malloc"
+  - name: "bluetooth_device_compatibility"
 recommends:
   - id: "psstore"
     condition:

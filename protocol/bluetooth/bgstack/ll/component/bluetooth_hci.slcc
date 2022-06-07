@@ -11,6 +11,7 @@ include:
     file_list:
       - path: sl_btctrl_hci.h
       - path: sl_hci_common_transport.h
+      - path: sl_btctrl_hci_handler.h
   - path: src/hci
     file_list:
       - path: hci_reset_interface.h
@@ -43,13 +44,47 @@ template_contribution:
     value:
       event: internal_app_init
       include: sl_btctrl_hci.h
-      handler: sl_btctrl_hci_parser_init_conn
+      handler: sl_btctrl_hci_parser_init_default
     priority: 5
+  - name: event_handler
+    value:
+      event: internal_app_init
+      include: sl_btctrl_hci.h
+      handler: sl_btctrl_hci_parser_init_conn
+    priority: 6
     condition: [bluetooth_feature_connection]
   - name: event_handler
     value:
       event: internal_app_init
       include: sl_btctrl_hci.h
       handler: sl_btctrl_hci_parser_init_adv
-    priority: 5
+    priority: 7
     condition: [bluetooth_feature_advertiser]
+  - name: event_handler
+    value:
+      event: internal_app_init
+      include: sl_btctrl_hci.h
+      handler: sl_btctrl_hci_parser_init_phy
+    priority: 8
+    condition: [bluetooth_feature_connection_phy_update]
+  - name: event_handler
+    value:
+      event: internal_app_init
+      include: sl_btctrl_hci.h
+      handler: sl_btctrl_hci_parser_init_past
+    priority: 9
+    condition: [bluetooth_feature_advertiser_past]
+  - name: event_handler
+    value:
+      event: internal_app_init
+      include: sl_btctrl_hci.h
+      handler: sl_btctrl_hci_parser_init_past
+    priority: 10
+    condition: [bluetooth_feature_sync_past]
+  - name: event_handler
+    value:
+      event: internal_app_init
+      include: sl_btctrl_hci.h
+      handler: sl_btctrl_hci_parser_init_past
+    priority: 11
+    condition: [bluetooth_feature_past_receiver]

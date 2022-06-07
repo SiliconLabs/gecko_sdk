@@ -41,7 +41,6 @@
 #if defined(SLI_PSA_WANT_ALG_ECDSA) || defined(SLI_PSA_WANT_ALG_EDDSA)
 #include "sl_se_manager.h"
 #include "sli_se_manager_internal.h"
-#include "sl_se_manager_hash.h"
 #include "sl_se_manager_signature.h"
 #include <string.h>
 #endif

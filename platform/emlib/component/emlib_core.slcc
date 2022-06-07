@@ -15,6 +15,7 @@ include:
     - path: "em_core.h"
       unless: [device_host]
   - path: "host/inc"
+    condition: [device_host]
     file_list:
     - path: "em_core.h"
       condition: [device_host]

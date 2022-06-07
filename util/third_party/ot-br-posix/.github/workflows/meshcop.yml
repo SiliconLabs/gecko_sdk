@@ -49,6 +49,7 @@ jobs:
   meshcop:
     runs-on: ubuntu-latest
     strategy:
+      fail-fast: false
       matrix:
         mdns: ["mDNSResponder", "avahi"]
     steps:
@@ -83,4 +84,4 @@ jobs:
         OTBR_USE_WEB_COMMISSIONER: 1
       run: script/test meshcop
     - name: Codecov
-      uses: codecov/codecov-action@v1
+      uses: codecov/codecov-action@v2

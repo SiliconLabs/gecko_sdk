@@ -13,6 +13,9 @@
   - name: hardware_board
   - name: hardware_board_stk
   - name: hardware_board_from_stk
+  - name: hardware_board_has_si70xx
+  - name: hardware_board_has_tempsensor
+  - name: hardware_board_has_vcom
   - name: hardware_board_has_spiflash
   - name: hardware_board_has_hfxo
   - name: hardware_board_has_lfxo

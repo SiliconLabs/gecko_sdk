@@ -197,7 +197,9 @@ void sl_rail_util_on_event(RAIL_Handle_t rail_handle,
   | (SL_RAIL_UTIL_INIT_EVENT_SCHEDULER_STATUS_{{ inst | upper }}_ENABLE                \
     ? RAIL_EVENT_SCHEDULER_STATUS : RAIL_EVENTS_NONE)                                  \
   | (SL_RAIL_UTIL_INIT_EVENT_CAL_NEEDED_{{ inst | upper }}_ENABLE                      \
-    ? RAIL_EVENT_CAL_NEEDED : RAIL_EVENTS_NONE))
+    ? RAIL_EVENT_CAL_NEEDED : RAIL_EVENTS_NONE)                                        \
+  | (SL_RAIL_UTIL_INIT_EVENT_DETECT_RSSI_THRESHOLD_{{ inst | upper }}_ENABLE            \
+    ? RAIL_EVENT_DETECT_RSSI_THRESHOLD : RAIL_EVENTS_NONE))
 
 /**
  * An inverted event mask, available to the application, specifying the radio

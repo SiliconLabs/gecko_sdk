@@ -13,6 +13,13 @@ description: >
   in turn update its object dictionary with the received value. The value of
   the object of both nodes is continuously displayed on the LCD.
 category: Example|MCU Example
+filter:
+  - name: "Device Type"
+    value: ["SoC"]
+  - name: "MCU"
+    value: ["32-bit MCU"]
+  - name: "Project Difficulty"
+    value: ["Advanced"]
 component:
   - id: glib
   - id: micriumos_canopen
@@ -40,8 +47,10 @@ include:
   - path: .
     file_list:
     - path: ex_canopen.h
-other_file:
-    - path: "readme.txt"
+readme:
+    - path: readme.md
+ui_hints:
+  highlight: readme.md
 define:
   - name: "DEBUG_EFM"
 configuration:

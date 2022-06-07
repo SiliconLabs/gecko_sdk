@@ -31,12 +31,6 @@ include:
   - path: protocol/zigbee/app/framework/plugin/ota-storage-simple-eeprom
     file_list:
       - path: ota-storage-eeprom.h
-  - path: protocol/zigbee/app/framework/plugin/ota-client
-    file_list:
-      - path: ota-client.h
-  - path: protocol/zigbee/app/framework/plugin/ota-client/config
-    file_list:
-      - path: ota-client-config.h
 template_contribution:
   - name: component_catalog
     value: zigbee_ota_storage_simple_eeprom

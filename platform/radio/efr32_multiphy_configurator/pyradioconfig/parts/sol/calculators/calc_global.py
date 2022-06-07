@@ -12,14 +12,6 @@ class Calc_Global_Sol(CALC_Global_ocelot):
         # new actual variables for Ocelot
         self._addModelActual(model,    'srcsrd'            , int,   ModelVariableFormat.DECIMAL)
 
-        self._addModelVariable(model, 'divx', int, ModelVariableFormat.DECIMAL)
-        self._addModelVariable(model, 'divy', int, ModelVariableFormat.DECIMAL)
-        self._addModelVariable(model, 'divn', int, ModelVariableFormat.DECIMAL)
-        self._addModelVariable(model, 'divr', int, ModelVariableFormat.DECIMAL)
-        self._addModelVariable(model, 'divxdacsel', int, ModelVariableFormat.DECIMAL)
-        self._addModelVariable(model, 'divxmodemsel', int, ModelVariableFormat.DECIMAL)
-        self._addModelVariable(model, 'divysel', int, ModelVariableFormat.DECIMAL)
-
         # new model variables for Sol
         self._addModelRegister(model, 'RFFPLL0.RFFPLLCTRL1.DIVXADCSEL', int, ModelVariableFormat.HEX)
         self._addModelRegister(model, 'RFFPLL0.RFFPLLCTRL1.DIVXDACSEL', int, ModelVariableFormat.HEX)
@@ -27,9 +19,6 @@ class Calc_Global_Sol(CALC_Global_ocelot):
         self._addModelRegister(model, 'RFFPLL0.RFFPLLCTRL1.DIVY', int, ModelVariableFormat.HEX)
         self._addModelRegister(model, 'RFFPLL0.RFFPLLCTRL1.DIVN', int, ModelVariableFormat.HEX)
         self._addModelRegister(model, 'RFFPLL0.RFFPLLCTRL1.DIVXMODEMSEL', int, ModelVariableFormat.HEX)
-        #self._addModelRegister(model, 'RFFPLL0.RFFPLLCTRL1.DIVXADCSEL', int, ModelVariableFormat.HEX)
-        #self._addModelRegister(model, 'RFFPLL0.RFFPLLCTRL1.DIVXDACSEL', int, ModelVariableFormat.HEX)
-
 
         self._addModelRegister(model, 'MODEM.CTRL5.INTOSR',              int, ModelVariableFormat.HEX)
         self._addModelRegister(model, 'MODEM.CTRL5.DEC2',              int, ModelVariableFormat.HEX)
@@ -197,6 +186,7 @@ class Calc_Global_Sol(CALC_Global_ocelot):
         self._addModelRegister(model, 'RAC.TXMIX.TXSELMIXGMSLICEQ', int, ModelVariableFormat.HEX)
         self._addModelRegister(model, 'RAC.TXMIX.TXSELMIXRLOAD', int, ModelVariableFormat.HEX)
         self._addModelRegister(model, 'RAC.TXMIX.TXSELMIXBAND', int, ModelVariableFormat.HEX)
+        self._addModelRegister(model, 'RAC.TXMIX.TXMIXCAPPULLDOWN', int, ModelVariableFormat.HEX)
         self._addModelRegister(model, 'RAC.SCRATCH6.SCRATCH6', int, ModelVariableFormat.HEX)           
         self._addModelRegister(model, 'RAC.SOFTMCTRL.TXMODSEL', int, ModelVariableFormat.HEX)
         self._addModelRegister(model, 'RAC.SOFTMCTRL.CLKEN', int, ModelVariableFormat.HEX)
@@ -294,9 +284,10 @@ class Calc_Global_Sol(CALC_Global_ocelot):
         self._addModelRegister(model, 'SUNFSK.CFG15.AFCADJPERIOD', int, ModelVariableFormat.HEX)
         self._addModelRegister(model, 'SUNFSK.CFG15.AFCCOSTTHD', int, ModelVariableFormat.HEX)
         self._addModelRegister(model, 'SUNFSK.CFG15.XTALFREQ', int, ModelVariableFormat.HEX)
+        self._addModelRegister(model, 'SUNFSK.CFG16.MODE', int, ModelVariableFormat.HEX)
 
-    def calc_family_name(self, model):
-        model.vars.family.value = "sol"
+        self._addModelRegister(model, 'FRC.SPARE.SPARE', int, ModelVariableFormat.HEX)
+
 
     def _add_modulation_type_variable(self, model):
 

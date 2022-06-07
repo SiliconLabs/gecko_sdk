@@ -1,8 +1,12 @@
 project_name: gpd-sensor
-label: "GPD Sensor"
+label: "Zigbee - SoC GPD Sensor"
 package: "Zigbee"
 category: "Zigbee Application"
 quality: production
+
+description: >
+  This is a Green Power Sensor Device that pairs with a GP Combo or Sink device and sends gpd reports periodically.
+author: "Silicon Laboratories, Inc."
 
 # Silicon Labs Project Configuration Tools: slcp, v0, Component selection file.
 include:
@@ -20,6 +24,7 @@ component:
 - id: rail_util_init
   instance:
   - gpdrail
+- id: psa_crypto
 #---------------- User Buttons -----------------------
 - id: simple_button
   instance:
@@ -113,9 +118,6 @@ source:
 
 define:
   - name: "UC_BUILD"
-
-description: |-
-  This is a Green Power Sensor Device that pairs with a GP Combo or Sink device and sends gpd reports periodically.
   
 #-------------- Template Contribution ----------------
 template_contribution:
@@ -144,3 +146,11 @@ ui_hints:
   highlight:
     - path: readme.html
       focus: false
+
+filter:
+  - name: "Wireless Technology"
+    value: ["Zigbee"]
+  - name: "Device Type"
+    value: ["SoC"]
+  - name: "Project Difficulty"
+    value: ["Advanced"]

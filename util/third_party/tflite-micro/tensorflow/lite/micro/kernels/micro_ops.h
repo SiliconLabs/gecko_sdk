@@ -36,6 +36,8 @@ TfLiteRegistration Register_ADD_N();
 TfLiteRegistration Register_ASSIGN_VARIABLE();
 TfLiteRegistration Register_AVERAGE_POOL_2D();
 TfLiteRegistration Register_BATCH_TO_SPACE_ND();
+TfLiteRegistration Register_BROADCAST_ARGS();
+TfLiteRegistration Register_BROADCAST_TO();
 TfLiteRegistration Register_CALL_ONCE();
 TfLiteRegistration Register_CAST();
 // TODO(b/160234179): Change custom OPs to also return by value.
@@ -62,6 +64,7 @@ TfLiteRegistration Register_LOGICAL_AND();
 TfLiteRegistration Register_LOGICAL_OR();
 TfLiteRegistration Register_LOGISTIC();
 TfLiteRegistration Register_MAX_POOL_2D();
+TfLiteRegistration Register_MIRROR_PAD();
 TfLiteRegistration Register_PRELU();
 TfLiteRegistration Register_MUL();
 TfLiteRegistration Register_QUANTIZE();
@@ -78,7 +81,10 @@ TfLiteRegistration Register_SUB();
 TfLiteRegistration Register_SVDF();
 TfLiteRegistration Register_TRANSPOSE();
 TfLiteRegistration Register_TRANSPOSE_CONV();
+// TODO(b/230666079): resolve conflict with xtensa implementation
+TfLiteRegistration Register_UNIDIRECTIONAL_SEQUENCE_LSTM();
 TfLiteRegistration Register_VAR_HANDLE();
+TfLiteRegistration Register_WHILE();
 TfLiteRegistration Register_ZEROS_LIKE();
 
 namespace ops {
@@ -117,7 +123,6 @@ TfLiteRegistration Register_SPLIT_V();
 TfLiteRegistration Register_SQRT();
 TfLiteRegistration Register_SQUARE();
 TfLiteRegistration Register_STRIDED_SLICE();
-TfLiteRegistration Register_UNIDIRECTIONAL_SEQUENCE_LSTM();
 TfLiteRegistration Register_UNPACK();
 TfLiteRegistration Register_L2_NORMALIZATION();
 TfLiteRegistration Register_TANH();

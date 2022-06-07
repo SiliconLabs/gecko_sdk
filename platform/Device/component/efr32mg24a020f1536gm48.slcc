@@ -12,14 +12,7 @@
   - path: platform/Device/SiliconLabs/EFR32MG24/Source/system_efr32mg24.c
     unless:
     - device_content_override
-  - condition:
-    - toolchain_iar
-    path: platform/Device/SiliconLabs/EFR32MG24/Source/IAR/startup_efr32mg24.c
-    unless:
-    - device_content_override
-  - condition:
-    - toolchain_gcc
-    path: platform/Device/SiliconLabs/EFR32MG24/Source/GCC/startup_efr32mg24.c
+  - path: platform/Device/SiliconLabs/EFR32MG24/Source/startup_efr32mg24.c
     unless:
     - device_content_override
 - include:
@@ -27,9 +20,7 @@
     - path: efr32mg24a020f1536gm48.h
     - path: efr32mg24_acmp.h
     - path: efr32mg24_aes.h
-    - path: efr32mg24_agc.h
     - path: efr32mg24_amuxcp.h
-    - path: efr32mg24_bufc.h
     - path: efr32mg24_buram.h
     - path: efr32mg24_burtc.h
     - path: efr32mg24_cmu.h
@@ -37,11 +28,8 @@
     - path: efr32mg24_devinfo.h
     - path: efr32mg24_dma_descriptor.h
     - path: efr32mg24_dpll.h
-    - path: efr32mg24_eca.h
-    - path: efr32mg24_ecaifadc.h
     - path: efr32mg24_emu.h
     - path: efr32mg24_eusart.h
-    - path: efr32mg24_frc.h
     - path: efr32mg24_fsrco.h
     - path: efr32mg24_gpcrc.h
     - path: efr32mg24_gpio.h
@@ -59,20 +47,15 @@
     - path: efr32mg24_lfrco.h
     - path: efr32mg24_lfxo.h
     - path: efr32mg24_mailbox.h
-    - path: efr32mg24_modem.h
     - path: efr32mg24_mpahbram.h
     - path: efr32mg24_msc.h
     - path: efr32mg24_mvp.h
     - path: efr32mg24_pcnt.h
-    - path: efr32mg24_protimer.h
     - path: efr32mg24_prs.h
     - path: efr32mg24_prs_signals.h
-    - path: efr32mg24_rac.h
-    - path: efr32mg24_rfcrc.h
     - path: efr32mg24_scratchpad.h
     - path: efr32mg24_semailbox.h
     - path: efr32mg24_smu.h
-    - path: efr32mg24_synth.h
     - path: efr32mg24_syscfg.h
     - path: efr32mg24_sysrtc.h
     - path: efr32mg24_timer.h
@@ -97,14 +80,13 @@
   - name: cortexm33
   - name: armv8m.main
   - name: device_security_se
+  - name: device_dcdc_buck
   - name: device_pa_20dbm
   - name: device_has_acmp
   - name: device_has_acmp0
   - name: device_has_acmp1
-  - name: device_has_agc
   - name: device_has_amuxcp
   - name: device_has_amuxcp0
-  - name: device_has_bufc
   - name: device_has_buram
   - name: device_has_burtc
   - name: device_has_cmu
@@ -113,13 +95,11 @@
   - name: device_has_dmem
   - name: device_has_dpll
   - name: device_has_dpll0
-  - name: device_has_ecaifadc
   - name: device_has_emu
   - name: device_has_euart
   - name: device_has_eusart
   - name: device_has_eusart0
   - name: device_has_eusart1
-  - name: device_has_frc
   - name: device_has_fsrco
   - name: device_has_gpcrc
   - name: device_has_gpio
@@ -144,24 +124,14 @@
   - name: device_has_letimer0
   - name: device_has_lfrco
   - name: device_has_lfxo
-  - name: device_has_modem
   - name: device_has_msc
   - name: device_has_pcnt
   - name: device_has_pcnt0
-  - name: device_has_protimer
   - name: device_has_prs
-  - name: device_has_rac
   - name: device_has_radioaes
-  - name: device_has_rfcrc
-  - name: device_has_rfeca
-  - name: device_has_rfeca0
-  - name: device_has_rfeca1
-  - name: device_has_rfmailbox
-  - name: device_has_rfscratchpad
   - name: device_has_scratchpad
   - name: device_has_semailbox
   - name: device_has_smu
-  - name: device_has_synth
   - name: device_has_syscfg
   - name: device_has_sysrtc
   - name: device_has_sysrtc0
@@ -198,6 +168,8 @@
   - name: device_supports_bluetooth_cte
   - name: device_supports_connect
   - name: device_compute_basic
+- recommends:
+  - id: trustzone_unaware
 - requires:
   - name: cmsis_core
 - template_contribution:
@@ -240,8 +212,25 @@
     value: cortex-m33
   - option: fpu
     value: fpv5-sp
+  - option: cmse
+    unless:
+    - trustzone_nonsecure
+    value: enabled
 - config_file:
   - condition:
     - custom_radio_config
     directory: rail
     path: platform/Device/config/215/device.yaml
+- metadata:
+    device:
+      memory:
+      - name: Main Flash
+        page_size: 8192
+        size: 1572864
+        start: 134217728
+        type: non-volatile
+      - name: RAM
+        size: 262144
+        start: 536870912
+        type: volatile
+      opn: efr32mg24a020f1536gm48

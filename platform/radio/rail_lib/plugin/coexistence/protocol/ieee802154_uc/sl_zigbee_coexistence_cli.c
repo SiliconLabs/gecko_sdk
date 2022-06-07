@@ -40,6 +40,7 @@
 // Console Response: "PTA is <ENABLED|DISABLED>"
 void emberAfPluginCoexistenceGetPtaState(sl_cli_command_arg_t *arguments)
 {
+  (void)arguments;
   bool ptaState = sl_rail_util_coex_is_enabled();
   sl_zigbee_app_debug_print("PTA is %s", (ptaState ? "ENABLED" : "DISABLED"));
 }
@@ -90,6 +91,7 @@ static const uint32_t ptaBitMask[PTA_OPTION_FIELDS] = { 0xFF, 0x1, 0x1, 0x1, 0x1
 // Console Response: "PTA Configuration Option: 0x<ptaOptions>"
 void emberAfPluginCoexistenceGetPtaOptions(sl_cli_command_arg_t *arguments)
 {
+  (void)arguments;
   uint8_t i;
   uint32_t value;
   sl_rail_util_coex_options_t ptaOptions = sl_rail_util_coex_get_options();
@@ -114,7 +116,8 @@ void emberAfPluginCoexistenceGetPtaOptions(sl_cli_command_arg_t *arguments)
 // Console Response: "PTA Configuration Option: 0x<ptaOptions>"
 void emberAfPluginCoexistenceSetPtaOptions(sl_cli_command_arg_t *arguments)
 {
-  sl_rail_util_coex_options_t ptaOptions = (sl_rail_util_coex_options_t)sl_cli_get_argument_uint32(arguments, 1);
+  sl_rail_util_coex_options_t ptaOptions = (sl_rail_util_coex_options_t)sl_cli_get_argument_uint32(arguments, 0);
+
   sl_rail_util_coex_set_options(ptaOptions);
   emberAfPluginCoexistenceGetPtaOptions(arguments);
 }
@@ -126,6 +129,7 @@ void emberAfPluginCoexistenceSetPtaOptions(sl_cli_command_arg_t *arguments)
 //                             <duty-cycle> (%DC), <0|1> (<LOW|HIGH> PRIORITY)"
 void emberAfPluginCoexistenceGetPwmState(sl_cli_command_arg_t *arguments)
 {
+  (void)arguments;
   uint8_t pwmPeriodHalfMs;
   uint8_t pwmPulseDc;
   bool pwmPriority;
@@ -194,15 +198,14 @@ void emberAfPluginCoexistenceGetDpState(sl_cli_command_arg_t *arguments)
 // if Directional PRIORITY compiled in:
 // 1. Enabled = pulse-width!=0, Disabled = pulse-width==0
 // 2. Pulse-width is adjustable in us resolution (1-255)
-  uint8_t dpPulse = 0U;
+  (void)arguments;
 #if SL_RAIL_UTIL_COEX_DP_ENABLED
-  dpPulse = sl_rail_util_coex_get_directional_priority_pulse_width();
+  uint8_t dpPulse = sl_rail_util_coex_get_directional_priority_pulse_width();
 
   sl_zigbee_app_debug_print("Directional PRIORITY: %s, %u (us)",
                             (dpPulse > 0u) ? "ENABLED" : "DISABLED",
                             dpPulse);
 #else //!SL_RAIL_UTIL_COEX_DP_ENABLED
-  (void)dpPulse;
   sl_zigbee_app_debug_print("Directional PRIORITY not included in build!");
 #endif //SL_RAIL_UTIL_COEX_DP_ENABLED
 }
@@ -216,11 +219,10 @@ void emberAfPluginCoexistenceSetDpState(sl_cli_command_arg_t *arguments)
 // if Directional PRIORITY compiled in:
 // 1. Enabled = pulse-width!=0, Disabled = pulse-width==0
 // 2. Pulse-width is adjustable in us resolution (1-255)
-  uint8_t dpPulse = sl_cli_get_argument_uint8(arguments, 0);
 #if SL_RAIL_UTIL_COEX_DP_ENABLED
+  uint8_t dpPulse = sl_cli_get_argument_uint8(arguments, 0);
   sl_rail_util_coex_set_directional_priority_pulse_width(dpPulse);
 #else //!SL_RAIL_UTIL_COEX_DP_ENABLED
-  (void)dpPulse;
   sl_zigbee_app_debug_print("Directional PRIORITY not included in build!");
 #endif //SL_RAIL_UTIL_COEX_DP_ENABLED
   emberAfPluginCoexistenceGetDpState(arguments);
@@ -230,6 +232,7 @@ void emberAfPluginCoexistenceSetDpState(sl_cli_command_arg_t *arguments)
 // clear all counters
 void emberAfPluginCoexistenceClearCounters(sl_cli_command_arg_t *arguments)
 {
+  (void)arguments;
   sl_zigbee_app_debug_print("Clearing counters");
   emberAfPluginCountersClear();
 }
@@ -245,15 +248,14 @@ void emberAfPluginCoexistenceGetPhyState(sl_cli_command_arg_t *arguments)
 // case 2. 0 < timeoutMs < PTA_PHY_SELECT_TIMEOUT_MAX -> disable COEX optimized PHY
 //   if there is no WiFi activity for timeoutMs
 // case 3. timeoutMs == PTA_PHY_SELECT_TIMEOUT_MAX -> enable COEX optimize PHY
-  uint8_t timeout = 0U;
+  (void)arguments;
 #if SL_RAIL_UTIL_COEX_RUNTIME_PHY_SELECT
-  timeout = sl_rail_util_coex_get_phy_select_timeout();
+  uint8_t timeout = sl_rail_util_coex_get_phy_select_timeout();
 
   sl_zigbee_app_debug_print("PHY Select: %s, %u (ms)",
                             (timeout > 0u) ? "ENABLED" : "DISABLED",
                             timeout);
 #else //!SL_RAIL_UTIL_COEX_RUNTIME_PHY_SELECT
-  (void)timeout;
   sl_zigbee_app_debug_print("PHY Select not included in build!");
 #endif //SL_RAIL_UTIL_COEX_RUNTIME_PHY_SELECT
 }
@@ -272,6 +274,7 @@ void emberAfPluginCoexistenceSetPhyState(sl_cli_command_arg_t *arguments)
   uint8_t timeout = sl_cli_get_argument_uint8(arguments, 0);
 #if SL_RAIL_UTIL_COEX_RUNTIME_PHY_SELECT
   sl_rail_util_coex_set_phy_select_timeout(timeout);
+  emberAfPluginCoexistenceGetPhyState(arguments);
 #else //!SL_RAIL_UTIL_COEX_RUNTIME_PHY_SELECT
   (void)timeout;
   sl_zigbee_app_debug_print("PHY Select not included in build!");
@@ -283,7 +286,8 @@ static const char * const gpioNames[] = {
   "PTA_GPIO_INDEX_RHO",
   "PTA_GPIO_INDEX_REQ",
   "PTA_GPIO_INDEX_GNT",
-  "PTA_GPIO_INDEX_PHY_SELECT"
+  "PTA_GPIO_INDEX_PHY_SELECT",
+  "PTA_GPIO_INDEX_WIFI_TX"
 };
 #endif //SL_RAIL_UTIL_COEX_OVERRIDE_GPIO_INPUT
 
@@ -295,12 +299,16 @@ void emberAfPluginCoexistenceGetGpioInputOverride(sl_cli_command_arg_t *argument
 {
 #if SL_RAIL_UTIL_COEX_OVERRIDE_GPIO_INPUT
   sl_rail_util_coex_gpio_index_t gpioIndex = (sl_rail_util_coex_gpio_index_t)sl_cli_get_argument_uint8(arguments, 0);
-  bool enabled = sl_rail_util_coex_get_gpio_input_override(gpioIndex);
-
-  sl_zigbee_app_debug_print("%s GPIO: %s",
-                            gpioNames[gpioIndex],
-                            enabled ? "ENABLED" : "DISABLED");
+  if (gpioIndex < (COEX_GPIO_INDEX_COUNT - 1)) {
+    bool enabled = sl_rail_util_coex_get_gpio_input_override(gpioIndex);
+    sl_zigbee_app_debug_print("%s GPIO: %s",
+                              gpioNames[gpioIndex],
+                              enabled ? "ENABLED" : "DISABLED");
+  } else {
+    sl_zigbee_app_debug_print("COEX GPIO index out of bounds!");
+  }
 #else //!SL_RAIL_UTIL_COEX_OVERRIDE_GPIO_INPUT
+  (void)arguments;
   sl_zigbee_app_debug_print("COEX GPIO input override not included in build!");
 #endif //SL_RAIL_UTIL_COEX_OVERRIDE_GPIO_INPUT
 }
@@ -314,9 +322,15 @@ void emberAfPluginCoexistenceSetGpioInputOverride(sl_cli_command_arg_t *argument
   // Set PTA GPIO input override by gpioIndex
 #if SL_RAIL_UTIL_COEX_OVERRIDE_GPIO_INPUT
   sl_rail_util_coex_gpio_index_t gpioIndex = (sl_rail_util_coex_gpio_index_t)sl_cli_get_argument_uint8(arguments, 0);
-  bool enabled = (bool)sl_cli_get_argument_uint8(arguments, 1);
-  sl_rail_util_coex_set_gpio_input_override(gpioIndex, enabled);
+  if (gpioIndex < (COEX_GPIO_INDEX_COUNT - 1)) {
+    bool enabled = (bool)sl_cli_get_argument_uint8(arguments, 1);
+    sl_rail_util_coex_set_gpio_input_override(gpioIndex, enabled);
+    emberAfPluginCoexistenceGetGpioInputOverride(arguments);
+  } else {
+    sl_zigbee_app_debug_print("COEX GPIO index out of bounds!");
+  }
 #else //!SL_RAIL_UTIL_COEX_OVERRIDE_GPIO_INPUT
+  (void)arguments;
   sl_zigbee_app_debug_print("PTA GPIO input override not included in build!");
 #endif //SL_RAIL_UTIL_COEX_OVERRIDE_GPIO_INPUT
 }
@@ -334,6 +348,7 @@ static void printCounter(uint8_t id)
 // Print all counters specific to coex
 void emberAfPluginCoexistencePrintCounters(sl_cli_command_arg_t *arguments)
 {
+  (void)arguments;
   sl_zigbee_app_debug_print("COUNTERS");
   printCounter(EMBER_COUNTER_PTA_LO_PRI_REQUESTED);
   printCounter(EMBER_COUNTER_PTA_HI_PRI_REQUESTED);

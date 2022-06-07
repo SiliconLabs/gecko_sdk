@@ -11,13 +11,6 @@ ui_hints:
 
 requires:
   - name: "device_supports_wisun"
-  - name: "mbedtls_core"
-  - name: "mbedtls_ecc_secp256r1"
-  - name: "mbedtls_ecdh"
-  - name: "mbedtls_ecdsa"
-  - name: "mbedtls_nist_kw"
-  - name: "mbedtls_sha"
-  - name: "mbedtls_tls"
   - name: "rail_lib_singleprotocol"
   - name: "rail_util_pa"
   - name: "cmsis_rtos2"
@@ -27,6 +20,7 @@ requires:
   - name: "sl_wisun_ns_list"
   - name: "rail_util_pti"
   - name: "wisun_mac_implementation"
+  - name: "wisun_crypto"
 recommends:
   - id: "wisun_mac_sources"
 
@@ -40,14 +34,6 @@ define:
     value: "TRACE_ACTIVE_LEVEL_ALL"
   - name: "MBED_CONF_MBED_TRACE_ENABLE"
     value: "1"
-
-template_contribution:
-  - name: "mbedtls_config"
-    value: "MBEDTLS_X509_CHECK_EXTENDED_KEY_USAGE"
-  - name: "mbedtls_config"
-    value: "MBEDTLS_SSL_EXPORT_KEYS"
-  - name: "mbedtls_config"
-    value: "MBEDTLS_KEY_EXCHANGE_ECDHE_ECDSA_ENABLED"
 
 include:
   - path: "inc"

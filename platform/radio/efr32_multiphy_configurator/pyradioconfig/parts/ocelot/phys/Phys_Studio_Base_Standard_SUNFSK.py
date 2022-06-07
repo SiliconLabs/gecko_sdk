@@ -1,5 +1,5 @@
 from pyradioconfig.calculator_model_framework.interfaces.iphy import IPhy
-from pyradioconfig.parts.ocelot.profiles.Profile_WiSUN import Profile_WiSUN_Ocelot
+from pyradioconfig.parts.ocelot.profiles.profile_wisun_fan_1_0 import ProfileWisunFanOcelot
 
 ##########SUN FSK PHYs (exposed using Base Profile)##########
 
@@ -66,8 +66,8 @@ class PHYS_Studio_Base_Standard_SUNFSK_Ocelot(IPhy):
         phy.profile_inputs.preamble_length.value = 8 * 8  # default to 64 bit preamble
         phy.profile_inputs.preamble_pattern.value = 1  # 802154 20.2.1.1 (Preamble field)
         phy.profile_inputs.preamble_pattern_len.value = 2
-        phy.profile_inputs.syncword_0.value = Profile_WiSUN_Ocelot.phySunFskSfd_0_uncoded
-        phy.profile_inputs.syncword_1.value = Profile_WiSUN_Ocelot.phySunFskSfd_0_coded
+        phy.profile_inputs.syncword_0.value = ProfileWisunFanOcelot.phySunFskSfd_0_uncoded
+        phy.profile_inputs.syncword_1.value = ProfileWisunFanOcelot.phySunFskSfd_0_uncoded
         phy.profile_inputs.syncword_length.value = 16
 
         # Tolerance values

@@ -1,19 +1,22 @@
+#ifndef _SL_OPENTHREAD_FEATURES_CONFIG_H
+#define _SL_OPENTHREAD_FEATURES_CONFIG_H
 //-------- <<< Use Configuration Wizard in Context Menu >>> -----------------
 //
 // <h> OpenThread Stack Configurations
 
 // <h>  Thread Stack Protocol Version
 // <o   OPENTHREAD_CONFIG_THREAD_VERSION>
-//      <2=> Thread 1.1 (OT_THREAD_VERSION_1_1 = 2)
-//      <3=> Thread 1.2 (OT_THREAD_VERSION_1_2 = 3)
-// <i>  Thread 1.2 is compatible with Thread 1.1.
-// <i>  Current Default: 3 (Thread 1.2)
+//      <OT_THREAD_VERSION_1_1=> Thread 1.1
+//      <OT_THREAD_VERSION_1_2=> Thread 1.2
+//      <OT_THREAD_VERSION_1_3=> Thread 1.3
+// <i>  Thread 1.2 and Thread 1.3 are compatible with Thread 1.1.
+// <i>  Current Default: OT_THREAD_VERSION_1_3
 #ifndef OPENTHREAD_CONFIG_THREAD_VERSION
-#define OPENTHREAD_CONFIG_THREAD_VERSION 3
+#define OPENTHREAD_CONFIG_THREAD_VERSION OT_THREAD_VERSION_1_3
 #endif
 // </h>
 
-#if (OPENTHREAD_CONFIG_THREAD_VERSION == 3)
+#if (OPENTHREAD_CONFIG_THREAD_VERSION >= OT_THREAD_VERSION_1_2)
 // <h>  The following features require at least Thread Stack Protocol Version 1.2
 // <q>  Backbone Router
 #ifndef OPENTHREAD_CONFIG_BACKBONE_ROUTER_ENABLE
@@ -72,7 +75,7 @@
 #define OPENTHREAD_CONFIG_RADIO_LINK_TREL_ENABLE 0
 #endif
 // </h>
-#endif // OPENTHREAD_CONFIG_THREAD_VERSION == 3
+#endif // OPENTHREAD_CONFIG_THREAD_VERSION >= OT_THREAD_VERSION_1_2
 
 // <e>  Border Agent
 #ifndef OPENTHREAD_CONFIG_BORDER_AGENT_ENABLE
@@ -252,6 +255,11 @@
 #define OPENTHREAD_CONFIG_UDP_FORWARD_ENABLE        0
 #endif
 // </e>
+// <e>  Enable Mac beacon payload parsing support
+#ifndef OPENTHREAD_CONFIG_MAC_BEACON_PAYLOAD_PARSING_ENABLE
+#define OPENTHREAD_CONFIG_MAC_BEACON_PAYLOAD_PARSING_ENABLE      1
+#endif
+// </e>
 // </h>
 // <h>  Logging
 // <o   OPENTHREAD_CONFIG_LOG_OUTPUT> LOG_OUTPUT
@@ -284,66 +292,9 @@
 #ifndef OPENTHREAD_CONFIG_LOG_LEVEL
 #define OPENTHREAD_CONFIG_LOG_LEVEL OT_LOG_LEVEL_DEBG
 #endif
-
-// <q>  API
-#ifndef OPENTHREAD_CONFIG_LOG_API
-#define OPENTHREAD_CONFIG_LOG_API                   1
-#endif
-// <q>  ARP
-#ifndef OPENTHREAD_CONFIG_LOG_ARP
-#define OPENTHREAD_CONFIG_LOG_ARP                   1
-#endif
-// <q>  BBR
-#ifndef OPENTHREAD_CONFIG_LOG_BBR
-#define OPENTHREAD_CONFIG_LOG_BBR                   1
-#endif
 // <q>  CLI
 #ifndef OPENTHREAD_CONFIG_LOG_CLI
 #define OPENTHREAD_CONFIG_LOG_CLI                   1
-#endif
-// <q>  COAP
-#ifndef OPENTHREAD_CONFIG_LOG_COAP
-#define OPENTHREAD_CONFIG_LOG_COAP                  1
-#endif
-// <q>  DUA
-#ifndef OPENTHREAD_CONFIG_LOG_DUA
-#define OPENTHREAD_CONFIG_LOG_DUA                   1
-#endif
-// <q>  ICMP
-#ifndef OPENTHREAD_CONFIG_LOG_ICMP
-#define OPENTHREAD_CONFIG_LOG_ICMP                  1
-#endif
-// <q>  IP6
-#ifndef OPENTHREAD_CONFIG_LOG_IP6
-#define OPENTHREAD_CONFIG_LOG_IP6                   1
-#endif
-// <q>  MAC
-#ifndef OPENTHREAD_CONFIG_LOG_MAC
-#define OPENTHREAD_CONFIG_LOG_MAC                   1
-#endif
-// <q>  MEM
-#ifndef OPENTHREAD_CONFIG_LOG_MEM
-#define OPENTHREAD_CONFIG_LOG_MEM                   1
-#endif
-// <q>  MESHCOP
-#ifndef OPENTHREAD_CONFIG_LOG_MESHCOP
-#define OPENTHREAD_CONFIG_LOG_MESHCOP               1
-#endif
-// <q>  MLE
-#ifndef OPENTHREAD_CONFIG_LOG_MLE
-#define OPENTHREAD_CONFIG_LOG_MLE                   1
-#endif
-// <q>  MLR
-#ifndef OPENTHREAD_CONFIG_LOG_MLR
-#define OPENTHREAD_CONFIG_LOG_MLR                   1
-#endif
-// <q>  NETDATA
-#ifndef OPENTHREAD_CONFIG_LOG_NETDATA
-#define OPENTHREAD_CONFIG_LOG_NETDATA               1
-#endif
-// <q>  NETDIAG
-#ifndef OPENTHREAD_CONFIG_LOG_NETDIAG
-#define OPENTHREAD_CONFIG_LOG_NETDIAG               1
 #endif
 // <q>  PKT_DUMP
 #ifndef OPENTHREAD_CONFIG_LOG_PKT_DUMP
@@ -357,10 +308,6 @@
 #ifndef OPENTHREAD_CONFIG_LOG_PREPEND_LEVEL
 #define OPENTHREAD_CONFIG_LOG_PREPEND_LEVEL         1
 #endif
-// <q>  PREPEND_REGION
-#ifndef OPENTHREAD_CONFIG_LOG_PREPEND_REGION
-#define OPENTHREAD_CONFIG_LOG_PREPEND_REGION        1
-#endif
 
 #endif
 // </h>
@@ -368,3 +315,4 @@
 // </h>
 
 // <<< end of configuration section >>>
+#endif // _SL_OPENTHREAD_FEATURES_CONFIG_H

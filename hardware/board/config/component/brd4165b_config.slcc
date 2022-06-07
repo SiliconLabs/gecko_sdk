@@ -52,45 +52,45 @@
   - condition:
     - brd4001a
     override:
-      component: cpc_primary_driver_spi
+      component: cpc_primary_driver_spi_usart
       file_id: cpc_drv_spi_primary_config
       instance: exp
-    path: brd4165b_brd4001a/sl_cpc_drv_spi_primary_exp_config.h
+    path: brd4165b_brd4001a/sl_cpc_drv_primary_spi_usart_exp_config.h
   - condition:
     - brd4001a
     override:
-      component: cpc_primary_driver_uart
+      component: cpc_primary_driver_uart_usart
       file_id: cpc_drv_uart_primary_config
       instance: vcom
-    path: brd4165b_brd4001a/sl_cpc_drv_uart_primary_vcom_config.h
+    path: brd4165b_brd4001a/sl_cpc_drv_primary_uart_usart_vcom_config.h
   - condition:
     - brd4001a
     override:
-      component: cpc_primary_driver_uart
+      component: cpc_primary_driver_uart_usart
       file_id: cpc_drv_uart_primary_config
       instance: exp
-    path: brd4165b_brd4001a/sl_cpc_drv_uart_primary_exp_config.h
+    path: brd4165b_brd4001a/sl_cpc_drv_primary_uart_usart_exp_config.h
   - condition:
     - brd4001a
     override:
-      component: cpc_secondary_driver_spi
-      file_id: cpc_drv_spi_secondary_config
+      component: cpc_secondary_driver_spi_usart
+      file_id: cpc_drv_secondary_spi_usart_config
       instance: exp
-    path: brd4165b_brd4001a/sl_cpc_drv_spi_secondary_exp_config.h
+    path: brd4165b_brd4001a/sl_cpc_drv_secondary_spi_usart_exp_config.h
   - condition:
     - brd4001a
     override:
-      component: cpc_secondary_driver_uart
-      file_id: cpc_drv_uart_secondary_config
+      component: cpc_secondary_driver_uart_usart
+      file_id: cpc_drv_secondary_uart_usart_config
       instance: vcom
-    path: brd4165b_brd4001a/sl_cpc_drv_uart_secondary_vcom_config.h
+    path: brd4165b_brd4001a/sl_cpc_drv_secondary_uart_usart_vcom_config.h
   - condition:
     - brd4001a
     override:
-      component: cpc_secondary_driver_uart
-      file_id: cpc_drv_uart_secondary_config
+      component: cpc_secondary_driver_uart_usart
+      file_id: cpc_drv_secondary_uart_usart_config
       instance: exp
-    path: brd4165b_brd4001a/sl_cpc_drv_uart_secondary_exp_config.h
+    path: brd4165b_brd4001a/sl_cpc_drv_secondary_uart_usart_exp_config.h
   - condition:
     - brd4001a
     override:
@@ -250,6 +250,12 @@
   - condition:
     - brd4001a
     override:
+      component: ot_ncp_spidrv
+      file_id: sl_ncp_spidrv_usart_config
+    path: brd4165b_brd4001a/sl_ncp_spidrv_usart_config.h
+  - condition:
+    - brd4001a
+    override:
       component: pwm
       file_id: pwm_config
       instance: led0
@@ -370,45 +376,45 @@
   - condition:
     - brd4002a
     override:
-      component: cpc_primary_driver_spi
+      component: cpc_primary_driver_spi_usart
       file_id: cpc_drv_spi_primary_config
       instance: exp
-    path: brd4165b_brd4002a/sl_cpc_drv_spi_primary_exp_config.h
+    path: brd4165b_brd4002a/sl_cpc_drv_primary_spi_usart_exp_config.h
   - condition:
     - brd4002a
     override:
-      component: cpc_primary_driver_uart
+      component: cpc_primary_driver_uart_usart
       file_id: cpc_drv_uart_primary_config
       instance: vcom
-    path: brd4165b_brd4002a/sl_cpc_drv_uart_primary_vcom_config.h
+    path: brd4165b_brd4002a/sl_cpc_drv_primary_uart_usart_vcom_config.h
   - condition:
     - brd4002a
     override:
-      component: cpc_primary_driver_uart
+      component: cpc_primary_driver_uart_usart
       file_id: cpc_drv_uart_primary_config
       instance: exp
-    path: brd4165b_brd4002a/sl_cpc_drv_uart_primary_exp_config.h
+    path: brd4165b_brd4002a/sl_cpc_drv_primary_uart_usart_exp_config.h
   - condition:
     - brd4002a
     override:
-      component: cpc_secondary_driver_spi
-      file_id: cpc_drv_spi_secondary_config
+      component: cpc_secondary_driver_spi_usart
+      file_id: cpc_drv_secondary_spi_usart_config
       instance: exp
-    path: brd4165b_brd4002a/sl_cpc_drv_spi_secondary_exp_config.h
+    path: brd4165b_brd4002a/sl_cpc_drv_secondary_spi_usart_exp_config.h
   - condition:
     - brd4002a
     override:
-      component: cpc_secondary_driver_uart
-      file_id: cpc_drv_uart_secondary_config
+      component: cpc_secondary_driver_uart_usart
+      file_id: cpc_drv_secondary_uart_usart_config
       instance: vcom
-    path: brd4165b_brd4002a/sl_cpc_drv_uart_secondary_vcom_config.h
+    path: brd4165b_brd4002a/sl_cpc_drv_secondary_uart_usart_vcom_config.h
   - condition:
     - brd4002a
     override:
-      component: cpc_secondary_driver_uart
-      file_id: cpc_drv_uart_secondary_config
+      component: cpc_secondary_driver_uart_usart
+      file_id: cpc_drv_secondary_uart_usart_config
       instance: exp
-    path: brd4165b_brd4002a/sl_cpc_drv_uart_secondary_exp_config.h
+    path: brd4165b_brd4002a/sl_cpc_drv_secondary_uart_usart_exp_config.h
   - condition:
     - brd4002a
     override:
@@ -565,6 +571,12 @@
       component: memlcd_usart
       file_id: sl_memlcd_usart_config
     path: brd4165b_brd4002a/sl_memlcd_usart_config.h
+  - condition:
+    - brd4002a
+    override:
+      component: ot_ncp_spidrv
+      file_id: sl_ncp_spidrv_usart_config
+    path: brd4165b_brd4002a/sl_ncp_spidrv_usart_config.h
   - condition:
     - brd4002a
     override:

@@ -31,7 +31,10 @@ static const char usage[] =
   " {options}\n"
   "  options:\n"
   "    -h                display usage information\n"
-  "    -t <trace flags>  trace B0=frames, B1=verbose frames, B2=events, B3=EZSP\n";
+  "    -t <trace flags>  trace B0=frames, B1=verbose frames, B2=events, B3=EZSP\n"
+  "    -d <OTA dir>      sets the directory to search OTA files.\n"
+  "                      NOTE: Option is useful only when zigbee OTA storage\n"
+  "                      posix filesystem component is present.\n";
 
 bool ezspInternalProcessCommandOptions(int argc, char *argv[], char *errStr);
 #endif //__SPI_HOST_UI_H___

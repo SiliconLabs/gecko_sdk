@@ -6,6 +6,13 @@ description: >
   Demonstrates how to setup a Wi-Fi station using the WF200 Wi-Fi station/softAP combo feature. The application exposes a Wi-Fi access point and a web server to configure the station.
 
 category: Example|Platform
+filter:
+  - name: "Device Type"
+    value: ["SoC"]
+  - name: "MCU"
+    value: ["32-bit MCU"]
+  - name: "Project Difficulty"
+    value: ["Advanced"]
 component:
   - id: simple_button
     instance: [btn0, btn1]
@@ -84,7 +91,9 @@ tag:
   - hardware:component:led:2+
   - hardware:component:button:2+
 readme:
-  - path: readme.html
+  - path: readme.md
 toolchain_settings:
   - option: optimize
     value: speed
+ui_hints:
+  highlight: readme.md

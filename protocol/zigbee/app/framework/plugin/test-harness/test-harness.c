@@ -754,7 +754,7 @@ bool emAfKeyEstablishmentTestHarnessMessageSendCallback(uint8_t message)
 
       ptr[0] = (message == ZCL_CONFIRM_KEY_DATA_REQUEST_COMMAND_ID
                 ? ZCL_INITIATE_KEY_ESTABLISHMENT_REQUEST_COMMAND_ID
-                : (message + 1));
+                : (message + 1u));
 
       // Setting the outgoing message to the right length without really
       // filling the message with valid data means there would

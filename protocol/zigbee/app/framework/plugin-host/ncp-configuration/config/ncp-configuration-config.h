@@ -23,11 +23,6 @@
 // <i> The number of entries that the binding table can hold.
 #define EMBER_BINDING_TABLE_SIZE   2
 
-// <o EMBER_SOURCE_ROUTE_TABLE_SIZE> Source Route Table Size <2-255>
-// <i> Default: 7
-// <i> The size of the source route table for storing source routes.
-#define EMBER_SOURCE_ROUTE_TABLE_SIZE   7
-
 // <o EMBER_MAX_END_DEVICE_CHILDREN> Child Table Size <6-64>
 // <i> Default: 6
 // <i> The maximum number of ZigBee PRO End Devices that can be supported by a single device.

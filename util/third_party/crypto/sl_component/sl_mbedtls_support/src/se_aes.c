@@ -552,7 +552,6 @@ int mbedtls_aes_crypt_cfb128(mbedtls_aes_context *ctx,
       }
       n = (n + 1) & 0x0F;
       processed++;
-      continue;
     } else {
       /* process one ore more blocks of data */
       size_t iterations = (length - processed) / 16;
@@ -704,7 +703,6 @@ int mbedtls_aes_crypt_ctr(mbedtls_aes_context *ctx,
       output[processed] = (unsigned char)(input[processed] ^ stream_block[n]);
       n = (n + 1) & 0x0F;
       processed++;
-      continue;
     } else {
       /* process one or more blocks of data */
       size_t iterations = (length - processed) / 16;

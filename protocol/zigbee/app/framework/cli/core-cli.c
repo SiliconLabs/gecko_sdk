@@ -218,6 +218,14 @@ static bool printSmartEnergySecurityInfo283k1(void)
   return false;
 #endif
 }
+#if defined(EMBER_TEST) && !defined(EZSP_HOST)
+extern void blacklist_mask(uint32_t channel_mask);
+void blackListCommand(sl_cli_command_arg_t *arguments)
+{
+  uint32_t channel_mask = sl_cli_get_argument_uint32(arguments, 0);
+  blacklist_mask(channel_mask);
+}
+#endif
 
 void emAfCliInfoCommand(sl_cli_command_arg_t *arguments)
 {

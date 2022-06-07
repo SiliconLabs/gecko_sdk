@@ -25,12 +25,20 @@
  *  limitations under the License.
  */
 
+#if defined(SL_TRUSTZONE_NONSECURE)
+
+/* The NonSecure app must use the crypto_extra.h from the trusted-firmware-m repo. */
+#include "../../trusted-firmware-m/interface/include/psa/crypto_extra.h"
+
+#else /* SL_TRUSTZONE_NONSECURE */
+
 #ifndef PSA_CRYPTO_EXTRA_H
 #define PSA_CRYPTO_EXTRA_H
 #include "mbedtls/private_access.h"
 
 #include "mbedtls/platform_util.h"
 
+#include "crypto_types.h"
 #include "crypto_compat.h"
 
 #ifdef __cplusplus
@@ -1822,3 +1830,5 @@ static inline struct psa_pake_operation_s psa_pake_operation_init(void)
 #endif
 
 #endif /* PSA_CRYPTO_EXTRA_H */
+
+#endif /* SL_TRUSTZONE_NONSECURE */

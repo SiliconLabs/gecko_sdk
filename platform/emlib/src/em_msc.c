@@ -31,9 +31,9 @@
 #include "em_msc.h"
 #if defined(MSC_COUNT) && (MSC_COUNT > 0)
 
-#include "em_assert.h"
+#include "sl_assert.h"
 #include "em_cmu.h"
-#include "em_common.h"
+#include "sl_common.h"
 #include "em_core.h"
 #include "em_system.h"
 
@@ -131,7 +131,8 @@
 #define ECC_RAM0_SYNDROMES_INIT (SYSCFG_DMEM0ECCCTRL_RAMECCEWEN)
 #define ECC_RAM0_CORRECTION_EN  (SYSCFG_DMEM0ECCCTRL_RAMECCCHKEN)
 
-#elif defined(_SILICON_LABS_32B_SERIES_2_CONFIG_2)
+#elif (defined(_SILICON_LABS_32B_SERIES_2_CONFIG_2) \
+  || defined(_SILICON_LABS_32B_SERIES_2_CONFIG_7))
 
 /* On Series 2 Config 2, aka EFR32XG22, ECC is supported for the
    main DMEM RAM banks which is controlled with one ECC encoder/decoder. */
@@ -170,7 +171,9 @@
 #define ECC_RAM0_MEM_BASE  (SRAM_BASE)
 #define ECC_RAM0_MEM_SIZE  (SRAM_SIZE)
 
-#if defined(_SILICON_LABS_32B_SERIES_2_CONFIG_1) || defined(_SILICON_LABS_32B_SERIES_2_CONFIG_2)
+#if (defined(_SILICON_LABS_32B_SERIES_2_CONFIG_1) \
+  || defined(_SILICON_LABS_32B_SERIES_2_CONFIG_2) \
+  || defined(_SILICON_LABS_32B_SERIES_2_CONFIG_7))
 #define ECC_CTRL_REG       (SYSCFG->DMEM0ECCCTRL)
 #define ECC_IFC_REG        (SYSCFG->IF_CLR)
 #define ECC_IFC_MASK       (SYSCFG_IF_RAMERR1B | SYSCFG_IF_RAMERR2B)
@@ -542,6 +545,13 @@ MSC_RAMFUNC_DEFINITION_END
  *   automatically by using attributes in the function proctype. For Keil
  *   uVision you must define a section called "ram_code" and place this manually
  *   in your project's scatter file.
+ *
+ *   The Flash memory is organized into 64-bit wide double-words.
+ *   Each 64-bit double-word can be written only twice using burst write
+ *   operation between erasing cycles. The user's application must store data in
+ *   RAM to sustain burst write operation.
+ *
+ *   EFR32XG21 RevC is not able to program every word twice before the next erase.
  *
  * @param[in] address
  *   Pointer to the flash word to write to. Must be aligned to words.
@@ -1511,11 +1521,13 @@ SL_RAMFUNC_DEFINITION_END
   || defined(_SYSCFG_DMEM0ECCCTRL_MASK) \
   || defined(_MPAHBRAM_CTRL_MASK)
 
-#if defined(_SILICON_LABS_32B_SERIES_2_CONFIG_2) || defined(_MPAHBRAM_CTRL_MASK)
+#if defined(_SILICON_LABS_32B_SERIES_2_CONFIG_2)  \
+  || defined(_SILICON_LABS_32B_SERIES_2_CONFIG_7) \
+  || defined(_MPAHBRAM_CTRL_MASK)
 
 /***************************************************************************//**
  * @brief
- *    Read and write existing values in RAM (for ECC initializaion).
+ *    Read and write existing values in RAM (for ECC initialization).
  *
  * @details
  *    This function uses core to load and store the existing data
@@ -1533,7 +1545,7 @@ static void mscEccReadWriteExistingPio(const MSC_EccBank_Typedef *eccBank)
 
   EFM_ASSERT(ramptr < endptr);
 
-#if defined(_SILICON_LABS_32B_SERIES_2_CONFIG_2)
+#if defined(_SILICON_LABS_32B_SERIES_2_CONFIG_2) || defined(_SILICON_LABS_32B_SERIES_2_CONFIG_7)
   enableEcc = eccBank->initSyndromeEnable;
 #elif defined(_MPAHBRAM_CTRL_MASK)
   /* MPAHBRAM ECC requires both ECCEN and ECCWEN to be set for the syndromes
@@ -1602,7 +1614,7 @@ static void mscEccReadWriteExistingPio(const MSC_EccBank_Typedef *eccBank)
 
 /***************************************************************************//**
  * @brief
- *    DMA read and write existing values (for ECC initializaion).
+ *    DMA read and write existing values (for ECC initialization).
  *
  * @details
  *    This function uses DMA to read and write the existing data values in
@@ -1757,9 +1769,11 @@ static void mscEccBankInit(const MSC_EccBank_Typedef *eccBank,
 
   CORE_ENTER_CRITICAL();
 
-#if defined(_SILICON_LABS_32B_SERIES_2_CONFIG_2) || defined(_MPAHBRAM_CTRL_MASK)
+#if defined(_SILICON_LABS_32B_SERIES_2_CONFIG_2)  \
+  || defined(_SILICON_LABS_32B_SERIES_2_CONFIG_7) \
+  || defined(_MPAHBRAM_CTRL_MASK)
   (void) dmaChannels;
-#if defined(_SILICON_LABS_32B_SERIES_2_CONFIG_2)
+#if !defined(_MPAHBRAM_CTRL_MASK)
   /* Disable ECC write */
   ECC_CTRL_REG &= ~eccBank->initSyndromeEnable;
 #endif
@@ -1878,8 +1892,8 @@ void MSC_EccConfigSet(MSC_EccConfig_TypeDef *eccConfig)
  * @details
  *   This function configures which MPAHBRAM slave port is used to access DMEM.
  *   Depending on the use case, it might improve performance by spreading the
- *   load over the two ports, instead of starving because a port is used by
- *   another master.
+ *   load over the N ports (N is usually 2 or 4), instead of starving because a
+ *   port is used by another master.
  *
  * @param[in] master
  *   AHBHOST master to be configured.
@@ -1920,7 +1934,7 @@ void MSC_DmemPortMapSet(MSC_DmemMaster_TypeDef master, uint8_t port)
 #if defined(_MPAHBRAM_CTRL_AHBPORTPRIORITY_MASK)
 /***************************************************************************//**
  * @brief
- *   Set MPAHBRAM port priority for arbitration when multiples concurrents
+ *   Set MPAHBRAM port priority for arbitration when multiple concurrent
  *   transactions to DMEM.
  *
  * @details

@@ -198,7 +198,7 @@ static EmberCommandEntry policyCommands[] = {
   emberCommandEntryTerminator(),
 };
 #define POLICY_COMMANDS emberCommandEntryAction("policy", NULL, (const char *)policyCommands, ""),
-#endif
+#endif // EMBER_AF_GENERATE_CLI
 
 #if defined(EMBER_TEST)
 #define LOAD_FILE_COMMAND emberCommandEntryAction("load-file", emAfOtaLoadFileCommand, "b", ""),
@@ -206,7 +206,7 @@ static EmberCommandEntry policyCommands[] = {
 #define LOAD_FILE_COMMAND
 #endif
 
-#endif // EMBER_AF_GENERATE_CLI
+#endif //EMBER_AF_PLUGIN_OTA_SERVER_POLICY
 
 #ifndef EMBER_AF_GENERATE_CLI
 static const char * notifyArguments[] = {

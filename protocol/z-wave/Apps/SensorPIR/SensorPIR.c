@@ -18,19 +18,11 @@
 //#define DEBUGPRINT
 #include "DebugPrint.h"
 #include "config_app.h"
-#include "ZAF_app_version.h"
 #include <ZAF_file_ids.h>
-#include "nvm3.h"
-#include "ZAF_nvm3_app.h"
-#include <em_system.h>
+#include "ZAF_nvm_app.h"
 #include <ZW_slave_api.h>
 #include <ZW_classcmd.h>
 #include <ZW_TransportLayer.h>
-
-#include <ZAF_uart_utils.h>
-
-/*IO control*/
-#include <board.h>
 
 #include <ev_man.h>
 #include <AppTimer.h>
@@ -44,9 +36,6 @@
 #include <agi.h>
 #include <CC_Association.h>
 #include <CC_AssociationGroupInfo.h>
-#include <CC_Version.h>
-#include <CC_ZWavePlusInfo.h>
-#include <CC_PowerLevel.h>
 #include <CC_DeviceResetLocally.h>
 #include <CC_Indicator.h>
 #include <CC_Basic.h>
@@ -62,18 +51,21 @@
 #include <CC_WakeUp.h>
 #include <zaf_event_helper.h>
 #include <zaf_job_helper.h>
+#include <zaf_config_api.h>
 
 #include <ZAF_Common_helper.h>
-#include <ZAF_PM_Wrapper.h>
 #include <ZAF_network_learn.h>
 #include <ZAF_network_management.h>
 #include <ZAF_TSE.h>
 #include <ota_util.h>
-#include "ZAF_adc.h"
 #include <ZAF_CmdPublisher.h>
-#include <em_wdog.h>
 #include "events.h"
 #include "zw_region_config.h"
+#include <zpal_watchdog.h>
+#include <zpal_misc.h>
+#include <SensorPIR_hw.h>
+#include <board_indicator.h>
+#include <board_init.h>
 
 #include "SensorPIR_UserTask_DataAcquisition.h"  // This module encapsulates an entire task!
 #include <ZW_UserTask.h>
@@ -99,64 +91,6 @@
  * Enable:  1
  ****************************************************/
 #define CREATE_USER_TASK          0
-
-/****************************************************************************/
-/* Application specific button and LED definitions                          */
-/****************************************************************************/
-
-#if defined(RADIO_BOARD_EFR32ZG13P32) || defined(RADIO_BOARD_EFR32ZG13S)
-  // The EFR32ZG13P32 device has reduced number of GPIO pins and hence less
-  // button inputs available for the application to use. Therefore alternative
-  // button mapping is required
-
-  #define PIR_EVENT_BTN        APP_BUTTON_LEARN_RESET  // Overload the LEARN_RESET button to also function as the PIR event button
-                                                       // (It's the only button that can wakeup from EM4 on EFR32ZG13P32)
-
-  // Define the button events used to signify PIR sensor state transitions:
-  //
-  // PIR_EVENT_TRANSITION_TO_ACTIVE
-  //   Triggered by the BTN_EVENT_HOLD event which means the button is pressed and held
-  #define PIR_EVENT_TRANSITION_TO_ACTIVE(event)   (BTN_EVENT_HOLD(PIR_EVENT_BTN) == (BUTTON_EVENT)event)
-  //
-  // PIR_EVENT_TRANSITION_TO_DEACTIVE
-  //   Triggered by the BTN_EVENT_UP event which means the button was released after a BTN_EVENT_HOLD period
-  #define PIR_EVENT_TRANSITION_TO_DEACTIVE(event) (BTN_EVENT_UP(PIR_EVENT_BTN) == (BUTTON_EVENT)event)
-
-#else
-
-  #define PIR_EVENT_BTN        APP_WAKEUP_SLDR_BTN  // We prefer a wakeup enabled slider, but a button will do
-
-  // Define the button events used to signify PIR sensor state transitions:
-  //
-  // PIR_EVENT_TRANSITION_TO_ACTIVE
-  //   The PIR_EVENT_BTN could be allocated to either a slider or a button.
-  //   - The slider will always send a DOWN event when moved to the ON position.
-  //   - A button will send SHORT_PRESS or HOLD event when pressed. Only the
-  //     HOLD event will be followed by an UP event when the button is
-  //     released. Since we need the UP event later to cancel the power
-  //     lock, we ignore the SHORT_PRESS event here.
-  #define PIR_EVENT_TRANSITION_TO_ACTIVE(event)   ((BTN_EVENT_DOWN(PIR_EVENT_BTN) == (BUTTON_EVENT)event) || \
-                                                   (BTN_EVENT_HOLD(PIR_EVENT_BTN) == (BUTTON_EVENT)event))
-  // PIR_EVENT_TRANSITION_TO_DEACTIVE
-  //   The PIR_EVENT_BTN could be allocated to either a slider or a button.
-  //   The slider will always send an UP event when moved to the OFF position.
-  //   A button will send either an UP, SHORT_PRESS or LONG_PRESS on release
-  //   depending on how long it has been pressed.
-  #define PIR_EVENT_TRANSITION_TO_DEACTIVE(event) ((BTN_EVENT_UP(PIR_EVENT_BTN) == (BUTTON_EVENT)event) || \
-                                                   (BTN_EVENT_SHORT_PRESS(PIR_EVENT_BTN) == (BUTTON_EVENT)event) || \
-                                                   (BTN_EVENT_LONG_PRESS(PIR_EVENT_BTN) == (BUTTON_EVENT)event))
-
-#endif
-#define BATTERY_REPORT_BTN   APP_BUTTON_A         // This button cannot wake up the device from EM4
-                                                  // (i.e. it will generally not work with SensorPIR)
-
-/* Ensure we did not allocate the same physical button to more than one function */
-#if !defined(RADIO_BOARD_EFR32ZG13P32) && !defined(RADIO_BOARD_EFR32ZG13S) // Skipped for EFR32ZG13P32 where the shortage of GPIOs means we need to assign dual function to buttons
-STATIC_ASSERT((APP_BUTTON_LEARN_RESET != PIR_EVENT_BTN) &&
-              (APP_BUTTON_LEARN_RESET != BATTERY_REPORT_BTN) &&
-              (PIR_EVENT_BTN != BATTERY_REPORT_BTN),
-              STATIC_ASSERT_FAILED_button_overlap);
-#endif
 
 /****************************************************************************/
 /*                      PRIVATE TYPES and DEFINITIONS                       */
@@ -193,7 +127,7 @@ STATE_APP;
 /*                              PRIVATE DATA                                */
 /****************************************************************************/
 
-static SPowerLock_t m_RadioPowerLock;
+static zpal_pm_handle_t radio_power_lock;
 
 /**
  * Please see the description of app_node_information_t.
@@ -266,11 +200,6 @@ app_node_information_t m_AppNIF =
 */
 static const uint8_t SecureKeysRequested = REQUESTED_SECURITY_KEYS;
 
-/**
- * Set up PowerDownDebug
- */
-static const EPowerDownDebug PowerDownDebug = APP_POWERDOWNDEBUG;
-
 static const SAppNodeInfo_t AppNodeInfo =
 {
   .DeviceOptionsMask = DEVICE_OPTIONS_MASK,
@@ -291,13 +220,12 @@ static const SRadioConfig_t RadioConfig =
   .iTxPowerLevelAdjust = APP_MEASURED_0DBM_TX_POWER,
   .iTxPowerLevelMaxLR = APP_MAX_TX_POWER_LR,
   .eRegion = ZW_REGION,
-  .enablePTI = ENABLE_PTI
+  .radio_debug_enable = ENABLE_RADIO_DEBUG
 };
 
 static const SProtocolConfig_t ProtocolConfig = {
   .pVirtualSlaveNodeInfoTable = NULL,
   .pSecureKeysRequested = &SecureKeysRequested,
-  .pPowerDownDebug = &PowerDownDebug,
   .pNodeInfo = &AppNodeInfo,
   .pRadioConfig = &RadioConfig
 };
@@ -310,18 +238,6 @@ AGI_GROUP agiTableRootDeviceGroups[] = {AGITABLE_ROOTDEVICE_GROUPS};
 static const AGI_PROFILE lifelineProfile = {
     ASSOCIATION_GROUP_INFO_REPORT_PROFILE_GENERAL,
     ASSOCIATION_GROUP_INFO_REPORT_PROFILE_GENERAL_LIFELINE
-};
-
-/**************************************************************************************************
- * Configuration for Z-Wave Plus Info CC
- **************************************************************************************************
- */
-static const SCCZWavePlusInfo CCZWavePlusInfo = {
-                               .pEndpointIconList = NULL,
-                               .roleType = APP_ROLE_TYPE,
-                               .nodeType = APP_NODE_TYPE,
-                               .installerIconType = APP_ICON_TYPE,
-                               .userIconType = APP_USER_ICON_TYPE
 };
 
 /**
@@ -337,6 +253,10 @@ static uint8_t basicValue = 0x00;
 static SSwTimer EventJobsTimer;
 
 static TaskHandle_t g_AppTaskHandle;
+
+#ifdef DEBUGPRINT
+static uint8_t m_aDebugPrintBuffer[96];
+#endif
 
 // Pointer to AppHandles that is passed as input to ApplicationTask(..)
 SApplicationHandles* g_pAppHandles;
@@ -379,14 +299,6 @@ static s_CC_indicator_data_t ZAF_TSE_localActuationIdentifyData = {
 
 void AppResetNvm(void);
 
-#if defined(DEBUGPRINT) && defined(BUILDING_WITH_UC)
-#include "sl_iostream.h"
-static void DebugPrinter(const uint8_t * buffer, uint32_t len)
-{
-  sl_iostream_write(SL_IOSTREAM_STDOUT, buffer, len);
-}
-#endif
-
 SBatteryData BatteryData;
 
 #define BATTERY_DATA_UNASSIGNED_VALUE (CMD_CLASS_BATTERY_LEVEL_FULL + 1)  // Just some value not defined in cc_battery_level_t
@@ -401,7 +313,7 @@ static StaticQueue_t m_AppEventQueueObject;
 static EVENT_APP eventQueueStorage[APP_EVENT_QUEUE_SIZE];
 static QueueHandle_t m_AppEventQueue;
 
-static nvm3_Handle_t* pFileSystemApplication;
+static zpal_nvm_handle_t pFileSystemApplication;
 
 /****************************************************************************/
 /*                         Thread related variable                          */
@@ -428,8 +340,6 @@ static uint8_t      DataAcquisitionStackBuffer[TASK_STACK_SIZE_DATA_ACQUISITION]
 /*                            PRIVATE FUNCTIONS                             */
 /****************************************************************************/
 void ZCB_BattReportSentDone(TRANSMISSION_RESULT * pTransmissionResult);
-void DeviceResetLocallyDone(TRANSMISSION_RESULT * pTransmissionResult);
-void DeviceResetLocally(void);
 STATE_APP GetAppState();
 void AppStateManager( EVENT_APP event);
 static void ChangeState( STATE_APP newState);
@@ -445,6 +355,8 @@ void writeBatteryData(const SBatteryData* pBatteryData);
 
 bool CheckBatteryLevel(void);
 bool ReportBatteryLevel(void);
+
+static void indicator_set_handler(uint32_t on_time_ms, uint32_t off_time_ms, uint32_t num_cycles);
 
 /**
 * @brief Called when protocol puts a frame on the ZwRxQueue.
@@ -565,10 +477,6 @@ static void EventHandlerZwCommandStatus(void)
         else if(ELEARNSTATUS_SMART_START_IN_PROGRESS == Status.Content.LearnModeStatus.Status)
         {
           ZAF_EventHelperEventEnqueue(EVENT_APP_SMARTSTART_IN_PROGRESS);
-        }
-        else if(ELEARNSTATUS_LEARN_IN_PROGRESS == Status.Content.LearnModeStatus.Status)
-        {
-          ZAF_EventHelperEventEnqueue(EVENT_APP_LEARN_IN_PROGRESS);
         }
         else if(ELEARNSTATUS_LEARN_MODE_COMPLETED_FAILED == Status.Content.LearnModeStatus.Status)
         {
@@ -693,63 +601,39 @@ static void EventQueueInit()
 ZW_APPLICATION_STATUS
 ApplicationInit(EResetReason_t eResetReason)
 {
+  UNUSED(eResetReason);
+
   // NULL - We dont have the Application Task handle yet
   AppTimerInit(EAPPLICATIONEVENT_TIMER, NULL);
 
   /* hardware initialization */
   Board_Init();
-  BRD420xBoardInit(RadioConfig.eRegion);
 
 #ifdef DEBUGPRINT
-  static uint8_t m_aDebugPrintBuffer[96];
-#if BUILDING_WITH_UC
-  DebugPrintConfig(m_aDebugPrintBuffer, sizeof(m_aDebugPrintBuffer), DebugPrinter);
-#else
-  ZAF_UART0_enable(115200, true, false);
-  DebugPrintConfig(m_aDebugPrintBuffer, sizeof(m_aDebugPrintBuffer), ZAF_UART0_tx_send);
-#endif // BUILDING_WITH_UC
+  zpal_debug_init();
+  DebugPrintConfig(m_aDebugPrintBuffer, sizeof(m_aDebugPrintBuffer), zpal_debug_output);
 #endif // DEBUGPRINT
 
   /* Init state machine*/
   currentState = STATE_APP_STARTUP;
 
-  uint8_t versionMajor      = ZAF_GetAppVersionMajor();
-  uint8_t versionMinor      = ZAF_GetAppVersionMinor();
-  uint8_t versionPatchLevel = ZAF_GetAppVersionPatchLevel();
-
   DPRINT("\n\n-----------------------------\n");
   DPRINT("Z-Wave Sample App: Sensor PIR\n");
-  DPRINTF("\r\nSDK: %d.%d.%d ZAF: %d.%d.%d.%d [Freq: %d]\n",
+  DPRINTF("\r\nSDK: %d.%d.%d ZAF: %d.%d.%d.%d\n",
           SDK_VERSION_MAJOR,
           SDK_VERSION_MINOR,
           SDK_VERSION_PATCH,
-          versionMajor,
-          versionMinor,
-          versionPatchLevel,
-          ZAF_BUILD_NO,
-          RadioConfig.eRegion);
-  DPRINT("-----------------------------\n");
-  DPRINTF("%s: Send battery report\n", Board_GetButtonLabel(BATTERY_REPORT_BTN));
-  DPRINTF("%s: Toggle learn mode\n", Board_GetButtonLabel(APP_BUTTON_LEARN_RESET));
-  DPRINT("      Hold 5 sec: Reset\n");
-  DPRINTF("%s: Activate PIR event\n", Board_GetButtonLabel(PIR_EVENT_BTN));
-  DPRINT("      (leave deactivated to allow going to sleep)\n");
-  DPRINTF("%s: Learn mode + identify\n", Board_GetLedLabel(APP_LED_INDICATOR));
-  DPRINT("-----------------------------\n\n");
+          zpal_get_app_version_major(),
+          zpal_get_app_version_minor(),
+          zpal_get_app_version_patch(),
+          ZAF_BUILD_NO);
 
   DPRINTF("\r\nApplicationInit eResetReason = %d", eResetReason);
-  DPRINTF("\r\nBoard_GetGpioEm4Flags()      = 0b%08x", Board_GetGpioEm4Flags());
 
-  if (eResetReason == ERESETREASON_EM4_WUT || eResetReason == ERESETREASON_EM4_EXT_INT)
-  {
-    #ifdef DEBUGPRINT
-      Board_DebugPrintEm4WakeupFlags(Board_GetGpioEm4Flags());
-    #endif
-  }
+  CC_Indicator_Init(indicator_set_handler);
 
-  CC_ZWavePlusInfo_Init(&CCZWavePlusInfo);
-
-  CC_Version_SetApplicationVersionInfo(versionMajor, versionMinor, versionPatchLevel, ZAF_BUILD_NO);
+  // Init file system
+  ApplicationFileSystemInit(&pFileSystemApplication);
 
   /*************************************************************************************
    * CREATE USER TASKS  -  ZW_ApplicationRegisterTask() and ZW_UserTask_CreateTask()
@@ -818,7 +702,7 @@ ApplicationTask(SApplicationHandles* pAppHandles)
 
   // Init
   DPRINT("Enabling watchdog\n");
-  WDOGn_Enable(DEFAULT_WDOG, true);
+  zpal_enable_watchdog(true);
 
   g_AppTaskHandle = xTaskGetCurrentTaskHandle();
   g_pAppHandles = pAppHandles;
@@ -827,9 +711,9 @@ ApplicationTask(SApplicationHandles* pAppHandles)
 
   AppTimerSetReceiverTask(g_AppTaskHandle);
 
-  /* Make sure to call AppTimerEm4PersistentRegister() _after_ ZAF_Init().
+  /* Make sure to call AppTimerDeepSleepPersistentRegister() _after_ ZAF_Init().
    * It will access the app handles */
-  AppTimerEm4PersistentRegister(&EventJobsTimer, false, ZCB_EventJobsTimer);  // register for event jobs timeout event
+  AppTimerDeepSleepPersistentRegister(&EventJobsTimer, false, ZCB_EventJobsTimer);  // register for event jobs timeout event
 
   // Initialize CC Wake Up
   CC_WakeUp_setConfiguration(WAKEUP_PAR_DEFAULT_SLEEP_TIME, DEFAULT_SLEEP_TIME);
@@ -837,7 +721,7 @@ ApplicationTask(SApplicationHandles* pAppHandles)
   CC_WakeUp_setConfiguration(WAKEUP_PAR_MIN_SLEEP_TIME,     MIN_SLEEP_TIME);
   CC_WakeUp_setConfiguration(WAKEUP_PAR_SLEEP_STEP,         STEP_SLEEP_TIME);
 
-  ZAF_PM_Register(&m_RadioPowerLock, PM_TYPE_RADIO);
+  radio_power_lock = zpal_pm_register(ZPAL_PM_TYPE_USE_RADIO);
 
   /*
    * Create an initialize some of the modules regarding queue and event handling and passing.
@@ -852,12 +736,9 @@ ApplicationTask(SApplicationHandles* pAppHandles)
   // Generate event that says the APP is initialized
   ZAF_EventHelperEventEnqueue(EVENT_APP_INIT);
 
-  //Enables events on test board
-  Board_EnableButton(APP_BUTTON_LEARN_RESET);
-  Board_EnableButton(BATTERY_REPORT_BTN);
-  Board_EnableButton(PIR_EVENT_BTN);
+  SensorPIR_hw_init();
 
-  Board_IndicatorInit(APP_LED_INDICATOR);
+  Board_IndicatorInit();
   Board_IndicateStatus(BOARD_STATUS_IDLE);
 
   CommandClassSupervisionInit(
@@ -889,12 +770,9 @@ static void doRemainingInitialization()
 {
   EResetReason_t resetReason = GetResetReason();
 
-  // Init file system
-  ApplicationFileSystemInit(&pFileSystemApplication);
-
   InitNotification(pFileSystemApplication);
 
-  /* Load the application settings from NVM3 file system */
+  /* Load the application settings from NVM file system */
   bool filesExist = LoadConfiguration();
 
   /* Setup AGI group lists*/
@@ -938,30 +816,25 @@ static void doRemainingInitialization()
    */
   Transport_OnApplicationInitSW( &m_AppNIF, CC_WakeUp_stayAwakeIfActive);
 
-  /* Re-load and process EM4 persistent application timers.
-   * NB: Before calling AppTimerEm4PersistentLoadAll here all
+  /* Re-load and process Deep Sleep persistent application timers.
+   * NB: Before calling AppTimerDeepSleepPersistentLoadAll here all
    *     application timers must have been been registered with
-   *     AppTimerRegister() or AppTimerEm4PersistentRegister().
+   *     AppTimerRegister() or AppTimerDeepSleepPersistentRegister().
    *     Essentially it means that all CC handlers must be
    *     initialized first.
    */
-  AppTimerEm4PersistentLoadAll(resetReason);
+  AppTimerDeepSleepPersistentLoadAll(resetReason);
 
   CC_FirmwareUpdate_Init(NULL, NULL, true);
 
-  if (ERESETREASON_EM4_EXT_INT == resetReason)
+  if (ERESETREASON_DEEP_SLEEP_EXT_INT == resetReason)
   {
-    uint32_t em4_wakeup_flags = Board_GetGpioEm4Flags();
-
-    if (0 != em4_wakeup_flags)
-    {
-      Board_ProcessEm4PinWakeupFlags(em4_wakeup_flags);
-    }
+    SensorPIR_hw_deep_sleep_wakeup_handler();
     ChangeState(STATE_APP_IDLE);
   }
 
   /* If we entered TRANSMIT state to send battery report, don't change it */
-  if ((ERESETREASON_EM4_WUT == resetReason) && (STATE_APP_TRANSMIT_DATA != currentState))
+  if ((ERESETREASON_DEEP_SLEEP_WUT == resetReason) && (STATE_APP_TRANSMIT_DATA != currentState))
   {
     ChangeState(STATE_APP_IDLE);
   }
@@ -983,7 +856,7 @@ static void doRemainingInitialization()
    */
   ZAF_SetMaxInclusionRequestIntervals(0);
 
-  if(ERESETREASON_EM4_EXT_INT != resetReason)
+  if(ERESETREASON_DEEP_SLEEP_EXT_INT != resetReason)
   {
     /* Enter SmartStart*/
     /* Protocol will commence SmartStart only if the node is NOT already included in the network */
@@ -1004,24 +877,24 @@ GetAppState(void)
 
 void notAppStateDependentActivity(EVENT_APP event)
 {
-  if ((BTN_EVENT_LONG_PRESS(APP_BUTTON_LEARN_RESET) == (BUTTON_EVENT)event) || (EVENT_SYSTEM_RESET == (EVENT_SYSTEM)event))
+  if ((EVENT_APP_BUTTON_LEARN_RESET_LONG_PRESS == event) || (EVENT_SYSTEM_RESET == (EVENT_SYSTEM)event))
   {
     /*Force state change to activate system-reset without taking care of current
       state.*/
     ChangeState(STATE_APP_RESET);
     /* Send reset notification*/
-    DeviceResetLocally();
+    CC_DeviceResetLocally_notification_tx();
   }
 
   // Handle received PIR event
-  if (PIR_EVENT_TRANSITION_TO_DEACTIVE(event))
+  if (EVENT_APP_TRANSITION_TO_DEACTIVE == event)
   {
     DPRINT("\r\n");
     DPRINT("\r\n      *!*!**!*!**!*!**!*!**!*!**!*!**!*!**!*!*");
     DPRINT("\r\n      *!*!*      PIR EVENT INACTIVE      *!*!*");
     DPRINT("\r\n      *!*!**!*!**!*!**!*!**!*!**!*!**!*!**!*!*");
     DPRINT("\r\n");
-    ZAF_PM_Cancel(&m_RadioPowerLock);
+    zpal_pm_cancel(radio_power_lock);
   }
 
   if (event == EVENT_APP_USERTASK_DATA_ACQUISITION_READY)
@@ -1081,7 +954,7 @@ AppStateManager(EVENT_APP event)
         ChangeState(STATE_APP_LEARN_MODE);
       }
 
-      if ((BTN_EVENT_SHORT_PRESS(APP_BUTTON_LEARN_RESET) == (BUTTON_EVENT)event) ||
+      if ((EVENT_APP_BUTTON_LEARN_RESET_SHORT_PRESS == event) ||
           (EVENT_SYSTEM_LEARNMODE_START == (EVENT_SYSTEM)event))
       {
         if (EINCLUSIONSTATE_EXCLUDED != g_pAppHandles->pNetworkInfo->eInclusionState){
@@ -1097,9 +970,9 @@ AppStateManager(EVENT_APP event)
       }
 
       // Handle received PIR event
-      if (PIR_EVENT_TRANSITION_TO_ACTIVE(event))
+      if (EVENT_APP_TRANSITION_TO_ACTIVE == event)
       {
-        ZAF_PM_StayAwake(&m_RadioPowerLock, 0);
+        zpal_pm_stay_awake(radio_power_lock, 0);
         DPRINT("\r\n");
         DPRINT("\r\n      *!*!**!*!**!*!**!*!**!*!**!*!**!*!**!*!*");
         DPRINT("\r\n      *!*!*       PIR EVENT ACTIVE       *!*!*");
@@ -1117,7 +990,7 @@ AppStateManager(EVENT_APP event)
         ZAF_JobHelperJobEnqueue(EVENT_APP_START_TIMER_EVENTJOB_STOP);
       }
 
-      if (BTN_EVENT_SHORT_PRESS(BATTERY_REPORT_BTN) == (BUTTON_EVENT)event)
+      if (EVENT_APP_BUTTON_BATTERY_REPORT == event)
       {
         /* BATTERY REPORT EVENT received. Send a battery level report */
         DPRINT("\r\nBattery Level report transmit (keypress trig)\r\n");
@@ -1140,7 +1013,7 @@ AppStateManager(EVENT_APP event)
         LoadConfiguration();
       }
 
-      if ((BTN_EVENT_SHORT_PRESS(APP_BUTTON_LEARN_RESET) == (BUTTON_EVENT)event) ||
+      if ((EVENT_APP_BUTTON_LEARN_RESET_SHORT_PRESS == event) ||
           (EVENT_SYSTEM_LEARNMODE_STOP == (EVENT_SYSTEM)event))
       {
         ZAF_setNetworkLearnMode(E_NETWORK_LEARN_MODE_DISABLE);
@@ -1153,7 +1026,10 @@ AppStateManager(EVENT_APP event)
         ChangeState(STATE_APP_IDLE);
 
         /* If we are in a network and the Identify LED state was changed to idle due to learn mode, report it to lifeline */
-        CC_Indicator_RefreshIndicatorProperties();
+        if (!Board_IsIndicatorActive())
+        {
+          CC_Indicator_RefreshIndicatorProperties();
+        }
         ZAF_TSE_Trigger(CC_Indicator_report_stx,
                         (void *)&ZAF_TSE_localActuationIdentifyData,
                         true);
@@ -1167,7 +1043,7 @@ AppStateManager(EVENT_APP event)
 
         /* Also tell application to automatically extend the stay awake period by 10
          * seconds on message activities - even though we did not get here by a proper
-         * wakeup from EM4
+         * wakeup from Deep Sleep
          */
         CC_WakeUp_AutoStayAwakeAfterInclusion();
 
@@ -1179,7 +1055,10 @@ AppStateManager(EVENT_APP event)
         ChangeState(STATE_APP_IDLE);
 
         /* If we are in a network and the Identify LED state was changed to idle due to learn mode, report it to lifeline */
-        CC_Indicator_RefreshIndicatorProperties();
+        if (!Board_IsIndicatorActive())
+        {
+          CC_Indicator_RefreshIndicatorProperties();
+        }
         ZAF_TSE_Trigger(CC_Indicator_report_stx,
                         (void *)&ZAF_TSE_localActuationIdentifyData,
                         true);
@@ -1197,7 +1076,7 @@ AppStateManager(EVENT_APP event)
       {
         AppResetNvm();
         /* Soft reset */
-        Board_ResetHandler();
+        zpal_reboot();
       }
       break;
 
@@ -1284,7 +1163,7 @@ AppStateManager(EVENT_APP event)
       if (EVENT_APP_START_TIMER_EVENTJOB_STOP== event)
       {
         DPRINT("\r\n#EVENT_APP_START_TIMER_EVENTJOB_STOP\r\n");
-        AppTimerEm4PersistentStart(&EventJobsTimer, BASIC_SET_TIMEOUT);
+        AppTimerDeepSleepPersistentStart(&EventJobsTimer, BASIC_SET_TIMEOUT);
       }
 
       if (EVENT_APP_SEND_BATTERY_LEVEL_REPORT == event)
@@ -1323,7 +1202,7 @@ ChangeState(STATE_APP newState)
  * @param pTransmissionResult Result of each transmission.
  */
 void
-DeviceResetLocallyDone(TRANSMISSION_RESULT * pTransmissionResult)
+CC_DeviceResetLocally_done(TRANSMISSION_RESULT * pTransmissionResult)
 {
   if (TRANSMISSION_RESULT_FINISHED == pTransmissionResult->isFinished)
   {
@@ -1333,58 +1212,13 @@ DeviceResetLocallyDone(TRANSMISSION_RESULT * pTransmissionResult)
     CommandPackage.eCommandType = EZWAVECOMMANDTYPE_SET_DEFAULT;
 
     DPRINT("\nDisabling watchdog during reset\n");
-    WDOGn_Enable(DEFAULT_WDOG, false);
+  zpal_enable_watchdog(false);
 
     EQueueNotifyingStatus Status = QueueNotifyingSendToBack(g_pAppHandles->pZwCommandQueue, (uint8_t*)&CommandPackage, 500);
     ASSERT(EQUEUENOTIFYING_STATUS_SUCCESS == Status);
   }
 }
 
-/**
- * @brief Reset delay callback.
- */
-void
-DeviceResetLocally(void)
-{
-  DPRINT("\r\nCall locally reset");
-
-  CC_DeviceResetLocally_notification_tx(&lifelineProfile, DeviceResetLocallyDone);
-}
-
-/**
- * @brief See description for function prototype in CC_Version.h.
- */
-uint8_t
-CC_Version_getNumberOfFirmwareTargets_handler(void)
-{
-  return 1; /*CHANGE THIS - firmware 0 version*/
-}
-
-/**
- * @brief See description for function prototype in CC_Version.h.
- */
-void
-handleGetFirmwareVersion(
-  uint8_t bFirmwareNumber,
-  VG_VERSION_REPORT_V2_VG *pVariantgroup)
-{
-  /*firmware 0 version and sub version*/
-  if (bFirmwareNumber == 0)
-  {
-    pVariantgroup->firmwareVersion = ZAF_GetAppVersionMajor();
-    pVariantgroup->firmwareSubVersion = ZAF_GetAppVersionMinor();
-  }
-  else
-  {
-    /*Just set it to 0 if firmware n is not present*/
-    pVariantgroup->firmwareVersion = 0;
-    pVariantgroup->firmwareSubVersion = 0;
-  }
-}
-
-#define MY_BATTERY_SPEC_LEVEL_FULL         3000  // My battery's 100% level (millivolts)
-#define MY_BATTERY_SPEC_LEVEL_EMPTY        2400  // My battery's 0% level (millivolts)
-#define BATTERY_LEVEL_REPORTING_DECREMENTS   10  // Round off and report the level in 10% decrements (100%, 90%, 80%, etc)
 /**
  * Report current battery level to battery command class handler
  *
@@ -1393,44 +1227,8 @@ handleGetFirmwareVersion(
 uint8_t
 CC_Battery_BatteryGet_handler(uint8_t endpoint)
 {
-  uint32_t VBattery;
-  uint8_t  accurateLevel;
-  uint8_t  roundedLevel;
-
   UNUSED(endpoint);
-
-  /*
-   * Simple example how to use the ADC to measure the battery voltage
-   * and convert to a percentage battery level on a linear scale.
-   */
-  ZAF_ADC_Enable();
-  VBattery = ZAF_ADC_Measure_VSupply();
-  DPRINTF("\r\nBattery voltage: %dmV", VBattery);
-  ZAF_ADC_Disable();
-
-  if (MY_BATTERY_SPEC_LEVEL_FULL <= VBattery)
-  {
-    // Level is full
-    return (uint8_t)CMD_CLASS_BATTERY_LEVEL_FULL;
-  }
-  else if (MY_BATTERY_SPEC_LEVEL_EMPTY > VBattery)
-  {
-    // Level is empty (<0%)
-    return (uint8_t)CMD_CLASS_BATTERY_LEVEL_WARNING;
-  }
-  else
-  {
-    // Calculate the percentage level from 0 to 100
-    accurateLevel = (uint8_t)((100 * (VBattery - MY_BATTERY_SPEC_LEVEL_EMPTY)) / (MY_BATTERY_SPEC_LEVEL_FULL - MY_BATTERY_SPEC_LEVEL_EMPTY));
-
-    // And round off to the nearest "BATTERY_LEVEL_REPORTING_DECREMENTS" level
-    roundedLevel =  (accurateLevel / BATTERY_LEVEL_REPORTING_DECREMENTS) * BATTERY_LEVEL_REPORTING_DECREMENTS; // Rounded down
-    if ((accurateLevel % BATTERY_LEVEL_REPORTING_DECREMENTS) >= (BATTERY_LEVEL_REPORTING_DECREMENTS / 2))
-    {
-      roundedLevel += BATTERY_LEVEL_REPORTING_DECREMENTS; // Round up
-    }
-  }
-  return roundedLevel;
+  return SensorPIR_hw_get_battery_level();
 }
 
 /**
@@ -1515,8 +1313,6 @@ ZCB_JobStatus(TRANSMISSION_RESULT * pTransmissionResult)
 void
 SetDefaultConfiguration(void)
 {
-  Ecode_t errCode;
-
   DPRINT("\r\nSet Default Configuration");
   AssociationInit(true, pFileSystemApplication);
 
@@ -1527,11 +1323,11 @@ SetDefaultConfiguration(void)
   BatteryData.lastReportedBatteryLevel = BATTERY_DATA_UNASSIGNED_VALUE;
   writeBatteryData(&BatteryData);
 
-  loadInitStatusPowerLevel();
+  ZAF_Reset();
 
-  uint32_t appVersion = ZAF_GetAppVersion();
-  errCode = nvm3_writeData(pFileSystemApplication, ZAF_FILE_ID_APP_VERSION, &appVersion, ZAF_FILE_SIZE_APP_VERSION);
-  ASSERT(ECODE_NVM3_OK == errCode); //Assert has been kept for debugging , can be removed from production code if this error can only be caused by some internal flash HW failure
+  uint32_t appVersion = zpal_get_app_version();
+  const zpal_status_t status = zpal_nvm_write(pFileSystemApplication, ZAF_FILE_ID_APP_VERSION, &appVersion, ZAF_FILE_SIZE_APP_VERSION);
+  ASSERT(ZPAL_STATUS_OK == status); //Assert has been kept for debugging , can be removed from production code if this error can only be caused by some internal flash HW failure
 }
 
 /**
@@ -1542,11 +1338,11 @@ bool
 LoadConfiguration(void)
 {
   uint32_t appVersion;
-  Ecode_t versionFileStatus = nvm3_readData(pFileSystemApplication, ZAF_FILE_ID_APP_VERSION, &appVersion, ZAF_FILE_SIZE_APP_VERSION);
+  const zpal_status_t status = zpal_nvm_read(pFileSystemApplication, ZAF_FILE_ID_APP_VERSION, &appVersion, ZAF_FILE_SIZE_APP_VERSION);
 
-  if (ECODE_NVM3_OK == versionFileStatus)
+  if (ZPAL_STATUS_OK == status)
   {
-    if (ZAF_GetAppVersion() != appVersion)
+    if (zpal_get_app_version() != appVersion)
     {
       // Add code for migration of file system to higher version here.
     }
@@ -1556,13 +1352,11 @@ LoadConfiguration(void)
     /* Initialize association module */
     AssociationInit(false, pFileSystemApplication);
 
-    loadStatusPowerLevel();
     return true;
   }
   else
   {
     DPRINT("\r\nApplication FileSystem Verify failed");
-    loadInitStatusPowerLevel();
 
     // Reset the file system if ZAF_FILE_ID_APP_VERSION is missing since this indicates
     // corrupt or missing file system.
@@ -1577,14 +1371,14 @@ void AppResetNvm(void)
 
   ASSERT(0 != pFileSystemApplication); //Assert has been kept for debugging , can be removed from production code. This error can only be caused by some internal flash HW failure
 
-  Ecode_t errCode = nvm3_eraseAll(pFileSystemApplication);
-  ASSERT(ECODE_NVM3_OK == errCode); //Assert has been kept for debugging , can be removed from production code. This error can only be caused by some internal flash HW failure
+  const zpal_status_t status = zpal_nvm_erase_all(pFileSystemApplication);
+  ASSERT(ZPAL_STATUS_OK == status); //Assert has been kept for debugging , can be removed from production code. This error can only be caused by some internal flash HW failure
 
-  /* Apparently there is no valid configuration in NVM3, so load */
+  /* Apparently there is no valid configuration in NVM, so load */
   /* default values and save them. */
   SetDefaultConfiguration();
 
-  AppTimerEm4PersistentResetStorage();
+  AppTimerDeepSleepPersistentResetStorage();
 }
 
 /**
@@ -1647,7 +1441,7 @@ ZCB_EventJobsTimer(SSwTimer *pTimer)
 {
   DPRINTF("\r\nTimer callback: ZCB_EventJobsTimer() pTimer->Id=%d", pTimer->Id);
 
-  /* If the node has been woken up from EM4 because the event job timer timed out
+  /* If the node has been woken up from Deep Sleep because the event job timer timed out
    * the app will now be in the state STATE_APP_STARTUP. Need to switch to
    * STATE_APP_TRANSMIT_DATA to properly process the job events
    */
@@ -1670,8 +1464,8 @@ readBatteryData(void)
 {
   SBatteryData StoredBatteryData;
 
-  Ecode_t errCode = nvm3_readData(pFileSystemApplication, ZAF_FILE_ID_BATTERYDATA, &StoredBatteryData, ZAF_FILE_SIZE_BATTERYDATA);
-  if(ECODE_NVM3_OK != errCode)
+  const zpal_status_t status = zpal_nvm_read(pFileSystemApplication, ZAF_FILE_ID_BATTERYDATA, &StoredBatteryData, ZAF_FILE_SIZE_BATTERYDATA);
+  if(ZPAL_STATUS_OK != status)
   {
     StoredBatteryData.lastReportedBatteryLevel = BATTERY_DATA_UNASSIGNED_VALUE;
     writeBatteryData(&BatteryData);
@@ -1685,8 +1479,8 @@ readBatteryData(void)
  */
 void writeBatteryData(const SBatteryData* pBatteryData)
 {
-  Ecode_t errCode = nvm3_writeData(pFileSystemApplication, ZAF_FILE_ID_BATTERYDATA, pBatteryData, ZAF_FILE_SIZE_BATTERYDATA);
-  ASSERT(ECODE_NVM3_OK == errCode); //Assert has been kept for debugging , can be removed from production code. This error can only be caused by some internal flash HW failure
+  const zpal_status_t status = zpal_nvm_write(pFileSystemApplication, ZAF_FILE_ID_BATTERYDATA, pBatteryData, ZAF_FILE_SIZE_BATTERYDATA);
+  ASSERT(ZPAL_STATUS_OK == status); //Assert has been kept for debugging , can be removed from production code. This error can only be caused by some internal flash HW failure
 }
 
 uint16_t handleFirmWareIdGet(uint8_t n)
@@ -1698,11 +1492,6 @@ uint16_t handleFirmWareIdGet(uint8_t n)
   }
   // Invalid Firmware number
   return 0;
-}
-
-uint8_t CC_Version_GetHardwareVersion_handler(void)
-{
-  return 1;
 }
 
 void CC_ManufacturerSpecific_ManufacturerSpecificGet_handler(uint16_t * pManufacturerID,
@@ -1723,18 +1512,44 @@ void CC_ManufacturerSpecific_DeviceSpecificGet_handler(device_id_type_t * pDevic
                                                        uint8_t * pDeviceIDDataLength,
                                                        uint8_t * pDeviceIDData)
 {
+  const size_t serial_length = zpal_get_serial_number_length();
+
+  ASSERT(serial_length <= 0x1F); // Device ID Data Length field size is 5 bits
+
   *pDeviceIDType = DEVICE_ID_TYPE_SERIAL_NUMBER;
   *pDeviceIDDataFormat = DEVICE_ID_FORMAT_BINARY;
-  *pDeviceIDDataLength = 8;
-  uint64_t uuID = SYSTEM_GetUnique();
-  DPRINTF("\r\n uuID: %x", (uint32_t)uuID);
-  *(pDeviceIDData + 0) = (uint8_t)(uuID >> 56);
-  *(pDeviceIDData + 1) = (uint8_t)(uuID >> 48);
-  *(pDeviceIDData + 2) = (uint8_t)(uuID >> 40);
-  *(pDeviceIDData + 3) = (uint8_t)(uuID >> 32);
-  *(pDeviceIDData + 4) = (uint8_t)(uuID >> 24);
-  *(pDeviceIDData + 5) = (uint8_t)(uuID >> 16);
-  *(pDeviceIDData + 6) = (uint8_t)(uuID >>  8);
-  *(pDeviceIDData + 7) = (uint8_t)(uuID >>  0);
+  *pDeviceIDDataLength = (uint8_t)serial_length;
+  zpal_get_serial_number(pDeviceIDData);
+
+  DPRINT("\r\nserial number: ");
+  for (size_t i = 0; i < serial_length; ++i)
+  {
+    DPRINTF("%02x", pDeviceIDData[i]);
+  }
+  DPRINT("\r\n");
 }
 
+static void indicator_set_handler(uint32_t on_time_ms, uint32_t off_time_ms, uint32_t num_cycles)
+{
+  Board_IndicatorControl(on_time_ms, off_time_ms, num_cycles, true);
+}
+
+
+/*
+ * The below functions should be implemented as hardware specific functions in a separate source
+ * file, e.g. SensorPIR_hw.c.
+ */
+ZW_WEAK void SensorPIR_hw_init(void)
+{
+
+}
+
+ZW_WEAK uint8_t SensorPIR_hw_get_battery_level(void)
+{
+  return (uint8_t)CMD_CLASS_BATTERY_LEVEL_FULL;
+}
+
+ZW_WEAK void SensorPIR_hw_deep_sleep_wakeup_handler(void)
+{
+
+}

@@ -70,11 +70,15 @@ jobs:
   check:
     runs-on: ubuntu-20.04
     strategy:
+      fail-fast: false
       matrix:
+        build_type: ["Debug", "Release"]
         mdns: ["mDNSResponder", "avahi"]
     env:
       BUILD_TARGET: check
+      OTBR_BUILD_TYPE: ${{ matrix.build_type }}
       OTBR_MDNS: ${{ matrix.mdns }}
+      OTBR_OPTIONS: "-DOTBR_SRP_ADVERTISING_PROXY=ON"
       OTBR_COVERAGE: 1
     steps:
     - uses: actions/checkout@v2
@@ -85,16 +89,19 @@ jobs:
     - name: Run
       run: script/test build check
     - name: Codecov
-      uses: codecov/codecov-action@v1
+      uses: codecov/codecov-action@v2
 
   rest-check:
     runs-on: ubuntu-18.04
     strategy:
+      fail-fast: false
       matrix:
         rest: ["rest-off", ""]
     env:
       BUILD_TARGET: check
       OTBR_REST: ${{ matrix.rest }}
+      OTBR_MDNS: mDNSResponder
+      OTBR_OPTIONS: "-DOTBR_SRP_ADVERTISING_PROXY=ON -DOTBR_DNSSD_DISCOVERY_PROXY=ON"
       OTBR_COVERAGE: 1
     steps:
     - uses: actions/checkout@v2
@@ -105,7 +112,7 @@ jobs:
     - name: Run
       run: script/test build check
     - name: Codecov
-      uses: codecov/codecov-action@v1
+      uses: codecov/codecov-action@v2
 
   script-check:
     runs-on: ubuntu-20.04
@@ -121,7 +128,7 @@ jobs:
     - name: Run
       run: tests/scripts/check-scripts
     - name: Codecov
-      uses: codecov/codecov-action@v1
+      uses: codecov/codecov-action@v2
 
   scan-build:
     runs-on: ubuntu-20.04

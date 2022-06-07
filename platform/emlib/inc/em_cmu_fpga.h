@@ -37,7 +37,7 @@
 #if defined(CMU_PRESENT) && defined(FPGA)
 
 #include <stdbool.h>
-#include "em_assert.h"
+#include "sl_assert.h"
 #include "em_bus.h"
 
 #ifdef __cplusplus
@@ -163,6 +163,9 @@ typedef enum {
   cmuClock_LSPCLK,                  /**< Low speed peripheral APB bus interface clock. */
   cmuClock_IADCCLK,                 /**< IADC clock. */
   cmuClock_EM01GRPACLK,             /**< EM01GRPA clock. */
+#if defined(_CMU_EM01GRPBCLKCTRL_MASK)
+  cmuClock_EM01GRPBCLK,             /**< EM01GRPB clock. */
+#endif
   cmuClock_EM01GRPCCLK,             /**< EM01GRPC clock. */
   cmuClock_EM23GRPACLK,             /**< EM23GRPA clock. */
   cmuClock_EM4GRPACLK,              /**< EM4GRPA clock. */
@@ -197,6 +200,7 @@ typedef enum {
   cmuClock_GPIO,                    /**< GPIO clock. */
   cmuClock_I2C0,                    /**< I2C0 clock. */
   cmuClock_I2C1,                    /**< I2C1 clock. */
+  cmuClock_SYSCFG,                  /**< SYSCFG clock. */
   cmuClock_IADC0,                   /**< IADC clock. */
   cmuClock_LDMA,                    /**< LDMA clock. */
   cmuClock_LDMAXBAR,                /**< LDMAXBAR clock. */
@@ -258,6 +262,7 @@ typedef enum {
   cmuClock_MSC,
   cmuClock_DMEM,
   cmuClock_SEMAILBOX,
+  cmuClock_SMU,
   cmuClock_VDAC0
 } CMU_Clock_TypeDef;
 
@@ -703,6 +708,35 @@ __STATIC_INLINE void CMU_Lock(void)
 __STATIC_INLINE void CMU_Unlock(void)
 {
 }
+
+#if !defined(_SILICON_LABS_32B_SERIES_0)
+/***************************************************************************//**
+ * @brief
+ *   Convert prescaler dividend to a logarithmic value. It only works for even
+ *   numbers equal to 2^n.
+ *
+ * @param[in] presc
+ *   An unscaled dividend (dividend = presc + 1).
+ *
+ * @return
+ *   Logarithm of 2, as used by fixed 2^n prescalers.
+ ******************************************************************************/
+__STATIC_INLINE uint32_t CMU_PrescToLog2(uint32_t presc)
+{
+  uint32_t log2;
+
+  /* Integer prescalers take argument less than 32768. */
+  EFM_ASSERT(presc < 32768U);
+
+  /* Count leading zeroes and "reverse" result. */
+  log2 = 31UL - __CLZ(presc + (uint32_t) 1);
+
+  /* Check that prescaler is a 2^n number. */
+  EFM_ASSERT(presc == (SL_Log2ToDiv(log2) - 1U));
+
+  return log2;
+}
+#endif // !defined(_SILICON_LABS_32B_SERIES_0)
 
 /** @} (end addtogroup CMU) */
 /** @} (end addtogroup emlib) */

@@ -1,4 +1,5 @@
 #include "stack/include/ember.h"
+#include "hal.h"
 #include <stdio.h>
 
 //----------------------------------------------------------------

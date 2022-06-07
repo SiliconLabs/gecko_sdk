@@ -56,7 +56,7 @@ typedef struct {
    * This member is only valid when
    * ::emberAfPluginScanDispatchScanResultsAreComplete returns true.
    */
-  EmberStatus status;
+  sl_status_t status;
 
   /** The RSSI found during a scan.
    *

@@ -1,7 +1,10 @@
 id: zw_cc_common
 label: Common Command Class
 category: Z-Wave|Command Classes
-description: Common Command Class!
+description: >
+  Common types and definitions for all command classes.
+ui_hints:
+  visibility: never
 package: Z-Wave
 quality: production
 source:
@@ -14,4 +17,3 @@ provides:
   - name: zw_cc_common
 requires:
   - name: zw_core
-  

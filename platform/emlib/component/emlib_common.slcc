@@ -7,8 +7,6 @@ description: >
 category: Platform|Peripheral
 quality: production
 component_root_path: platform/emlib
-source:
-  - path: "src/em_assert.c"
 include:
   - path: "inc"
     file_list:
@@ -22,6 +20,8 @@ provides:
 requires:
   - name: "cmsis_core"
   - name: "device"
+  - name: "sl_common"
+  - name: "sl_assert"
 documentation:
   docset: gecko-platform
   document:

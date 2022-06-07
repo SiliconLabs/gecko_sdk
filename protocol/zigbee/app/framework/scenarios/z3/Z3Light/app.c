@@ -234,7 +234,9 @@ void emberAfRadioNeedsCalibratingCallback(void)
 #if defined(SL_CATALOG_SIMPLE_BUTTON_PRESENT) && (SL_ZIGBEE_APP_FRAMEWORK_USE_BUTTON_TO_STAY_AWAKE == 0)
 #include "sl_simple_button.h"
 #include "sl_simple_button_instances.h"
-
+#ifdef SL_CATALOG_ZIGBEE_FORCE_SLEEP_AND_WAKEUP_PRESENT
+#include "force-sleep-wakeup.h"
+#endif //SL_CATALOG_ZIGBEE_FORCE_SLEEP_AND_WAKEUP_PRESENT
 /***************************************************************************//**
  * A callback called in interrupt context whenever a button changes its state.
  *
@@ -251,6 +253,9 @@ void sl_button_on_change(const sl_button_t *handle)
 {
   if (sl_button_get_state(handle) == SL_SIMPLE_BUTTON_RELEASED) {
     sl_zigbee_event_set_active(&finding_and_binding_event);
+    #ifdef SL_CATALOG_ZIGBEE_FORCE_SLEEP_AND_WAKEUP_PRESENT
+    sl_zigbee_app_framework_force_wakeup();
+    #endif //SL_CATALOG_ZIGBEE_FORCE_SLEEP_AND_WAKEUP_PRESENT
   }
 }
 #endif // SL_CATALOG_SIMPLE_BUTTON_PRESENT && SL_ZIGBEE_APP_FRAMEWORK_USE_BUTTON_TO_STAY_AWAKE == 0
@@ -263,4 +268,12 @@ void emberAfHalButtonIsrCallback(uint8_t button, uint8_t state)
     sl_zigbee_event_set_active(&finding_and_binding_event);
   }
 }
-#endif // EBER_TEST
+#endif // EMBER_TEST
+
+#ifdef SL_CATALOG_ZIGBEE_FORCE_SLEEP_AND_WAKEUP_PRESENT
+void sli_zigbee_app_framework_force_sleep_callback(void)
+{
+  // Do other things like turn off LEDs etc
+  sl_led_turn_off(&sl_led_led0);
+}
+#endif // SL_CATALOG_ZIGBEE_FORCE_SLEEP_AND_WAKEUP_PRESENT

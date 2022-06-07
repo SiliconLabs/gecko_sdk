@@ -11,13 +11,23 @@ from enum import IntEnum
 import itertools
 
 # Update kRAILVersion to be used in phyInfoData.
-kRAILVersion = 11
+kRAILVersion = 13
 
 class ConcPhyEnum(IntEnum):
   CONC_PHY_NONE = 0
   CONC_PHY_BASE = 1
   CONC_PHY_VT = 2
   CONC_PHY_9_6_NON_HOP = 3
+
+class ProtocolIDEnum(IntEnum):
+  CUSTOM = 0
+  EMBERPHY = 1
+  THREAD = 2
+  BLE = 3
+  CONNECT = 4
+  ZIGBEE = 5
+  ZWAVE = 6
+  WISUN = 7
 
 class RAIL_OptArgInput(object):
   channel_timing_name = "channel_timing_name"
@@ -224,7 +234,7 @@ class RAILAdapter_MultiPhy(RAILAdapter):
     # Make sure there is no duplicate address
     allWrites = [new_base]
     allWrites.extend(regs_channels)
-    if (self.partFamily in ["ocelot"]):
+    if (self.partFamily in ["ocelot", "margay"]):
       bcrdemoctrlReg = self.rm.MODEM.BCRDEMODCTRL
       viterbidemodReg = self.rm.MODEM.VITERBIDEMOD
     for j, chunkWrite in enumerate(allWrites):
@@ -242,7 +252,7 @@ class RAILAdapter_MultiPhy(RAILAdapter):
           print("chunkWrite[0]: {}".format(chunkWrite[0]))
         prevAddress = chunkWrite[0]
         for i, register in enumerate(chunkWrite):
-          if ((self.partFamily in ["ocelot"]) and (j != 0) and ((base_info["add"][j - 1][1][1].entryType.value == ConcPhyEnum.CONC_PHY_VT) or (base_info["add"][j - 1][1][1].entryType.value == ConcPhyEnum.CONC_PHY_9_6_NON_HOP))):
+          if ((self.partFamily in ["ocelot", "margay"]) and (j != 0) and ((base_info["add"][j - 1][1][1].entryType.value == ConcPhyEnum.CONC_PHY_VT) or (base_info["add"][j - 1][1][1].entryType.value == ConcPhyEnum.CONC_PHY_9_6_NON_HOP))):
             # apply calculator workaround for ZWave concurrent PHY
             # need to make sure  BCR demod is enable and viterbi demod is disabled for virtual concurrent PHY (i.e. Zwave 9.6K concurrent PHY)
             if (register[0] == self._getRegAddress("MODEM", "BCRDEMODCTRL")):
@@ -275,7 +285,7 @@ class RAILAdapter_MultiPhy(RAILAdapter):
                 raise
           prevAddress = register
 
-    if self.partFamily.lower() in ["ocelot"]:
+    if self.partFamily.lower() in ["ocelot", "margay"]:
       # Conc. PHY optimization
       # for virtual concurrent PHY (i.e. Zwave 9.6K concurrent PHY), this sequence has to be followed when writing the deltaAdd register set:
       #    --- MODEM_SRCCHF, MODEM_BCRDEMODCTRL, MODEM_VITERBIDEMOD has to be written first
@@ -438,7 +448,7 @@ class RAILAdapter_MultiPhy(RAILAdapter):
       # if there are any present, exclude the write if false
       dynamicSlicerTableEntry = phyConfigEntry.dynamicSlicerTableEntry.value
       if dynamicSlicerTableEntry and len(dynamicSlicerTableEntry._elements) > 0 and \
-         self.partFamily not in ["panther", "lynx", "ocelot", "sol", "leopard"]:
+         self.partFamily in ["dumbo", "jumbo", "nerio", "nixi", "bobcat"]:
           address = self._getRegAddress("SEQ","DYNAMIC_CHPWR_TABLE")
           regs.append((address, phyConfigEntry.dynamicSlicerTableEntry.value.lastElement, "SEQ.DYNAMIC_CHPWR_TABLE"))
 
@@ -509,20 +519,20 @@ class RAILAdapter_MultiPhy(RAILAdapter):
     data.freqOffsetFactor_fxp.value = int(outputs.get_output('frequency_offset_factor_fxp').var_value or 0)
     data.frameTypeConfig.value = phyConfigEntry.frameTypeEntry.value
     data.irCalConfig.value = phyConfigEntry.irCalConfigEntry.value
-    if self.partFamily.lower() in ["ocelot"]:
+    data.timingConfig.value = phyConfigEntry.timingConfigEntry.value
+    if phyConfigEntry.rffpllConfigEntry.value is not None:
+      data.rffpllConfig.value = phyConfigEntry.rffpllConfigEntry.value
+    if phyConfigEntry.dcdcRetimingConfigEntry.value is not None:
       data.dcdcRetimingConfig.value = phyConfigEntry.dcdcRetimingConfigEntry.value
     if self.partFamily.lower() not in ["dumbo", "jumbo", "nerio", "nixi", "panther"]:
       data.hfxoRetimingConfig.value = phyConfigEntry.hfxoRetimingTableEntry.value
+    if phyConfigEntry.txIrCalConfigEntry.value is not None:
+      data.txIrCalConfig.value = phyConfigEntry.txIrCalConfigEntry.value
     if getattr(outputs, 'rssi_adjust_db', None) != None:
       rssiAdjustDb = int(outputs.get_output('rssi_adjust_db').var_value)
     else:
       rssiAdjustDb = 0
 
-    # For the timingConfig, we give priority to the channelConfigOptions, and then
-    # the baseConfigOptions; we use "get" to avoid raising exception if the key
-    # is not defined; we use the phyConfigEntry.name as the fallback/default.
-    data.timingConfig.value = channelConfigOptions.get("channel_timing_name", \
-    baseConfigOptions.get("channel_timing_name", phyConfigEntry.name))
     data.antDivRxAutoConfig.value = antDivConfiguration
     data.src1Denominator.value = int(outputs.get_output('src1_calcDenominator').var_value or 0)
     data.src2Denominator.value = int(outputs.get_output('src2_calcDenominator').var_value or 0)
@@ -541,6 +551,7 @@ class RAILAdapter_MultiPhy(RAILAdapter):
                             | (model.vars.lodiv_actual.value << 25)
     data.zWaveChannelHopTiming.value = int(outputs.get_output('rx_ch_hopping_delay_usec').var_value or 0)
     data.rateInfo.value = (rssiAdjustDb & 0xFF) << 16 | data.baudPerSymbol.value << 8 | data.bitsPerSymbol.value
+
     if self.partFamily.lower() not in ["dumbo","jumbo","nerio","nixi"]:
       # Cap DEC0 at 3, since the decimation value for all values above 3 is 8.
       # Also don't use value 2, in case that's useful in the future
@@ -678,11 +689,17 @@ class RAILAdapter_MultiPhy(RAILAdapter):
         # Register the new entry with the current phyConfigEntry
         phyConfigEntry.frameTypeEntry.value = newFrameTypeEntry
 
-  def _generateIrCalStructure(self, phyConfigEntry, model):
+  def _generateIrCalStructure(self, phyConfigEntry, model, isBaseConfig, baseConfigAttr):
     # Get a local reference to model.profile.outputs to use here
     outputs = model.profile.outputs
 
-    if (self.partFamily.lower() in ["ocelot", "sol"]):
+    legacyIrConfig = True
+    if (self.partFamily.lower() in ["ocelot", "sol", "margay"]):
+      # For the subG chip,
+      # if there is a 2.4Ghz PHY being built, it should use the same ircal coefficient
+      # as all the 2.4GHz PHYs should get the coefficient from DEVINFO
+      if (model.vars.lodiv_actual.value != 1):
+        legacyIrConfig = False
       agcMangainReg = self.rm.AGC.MANGAIN
       agcMangainReg.io = 0
       agcMangainReg.MANGAINEN.io = 1
@@ -692,13 +709,16 @@ class RAILAdapter_MultiPhy(RAILAdapter):
 
       if (self.partFamily.lower() in ["sol"]):
         modemIrcalReg = self.rm.FEFILT1.IRCAL if self.rm.SEQ.MODEMINFO.SOFTMODEM_DEMOD_EN else self.rm.FEFILT0.IRCAL
+        modemIrcalReg.io = 0
+        modemIrcalReg.MURSHF.io = 28
+        modemIrcalReg.MUISHF.io = 38
       else:
         modemIrcalReg = self.rm.MODEM.IRCAL
+        modemIrcalReg.io = 0
+        modemIrcalReg.MURSHF.io = 24
+        modemIrcalReg.MUISHF.io = 34
 
-      modemIrcalReg.io = 0
       modemIrcalReg.IRCALEN.io = 1
-      modemIrcalReg.MURSHF.io = 24
-      modemIrcalReg.MUISHF.io = 34
 
       newIrCalConfig = [
         agcMangainReg.io & 0xFF,
@@ -759,12 +779,23 @@ class RAILAdapter_MultiPhy(RAILAdapter):
     entryFound = False
     commonStructures = self.railModel.multiPhyConfig.commonStructures
 
+    if legacyIrConfig is False:
+      if (isBaseConfig):
+        # for non-2.4Ghz, Create a new RAIL_ChannelConfigEntryAttr_t entry in
+        # common structures, so each PHY has its own ircal coefficient
+        newRailChannelConfigEntryAttr = commonStructures.railChannelConfigEntryAttrEntries.addNewElement("channelConfigEntryAttr")
+        newRailChannelConfigEntryAttr.calValues.value = 2
+        phyConfigEntry.channelConfigEntryAttr.value = newRailChannelConfigEntryAttr
+      else:
+        phyConfigEntry.channelConfigEntryAttr.value = baseConfigAttr
+
     for i, irCalConfigEntry in enumerate(commonStructures.irCalConfigEntries._elements):
       if irCalConfigEntry.values == newIrCalConfig:
         # Register the entry with the current phyConfigEntry
         phyConfigEntry.irCalConfigEntry.value = irCalConfigEntry
-        if not (self.partFamily.lower() in ["ocelot","sol"]):
+        if legacyIrConfig is True:
           phyConfigEntry.channelConfigEntryAttr.value = commonStructures.railChannelConfigEntryAttrEntries._elements[i]
+        #print("irCalConfigEntry {}".format(irCalConfigEntry.name))
         entryFound = True
         break
 
@@ -772,19 +803,92 @@ class RAILAdapter_MultiPhy(RAILAdapter):
       # Create a new irCalConfig entry in common structures
       newIrCalConfigEntry = commonStructures.irCalConfigEntries.addNewElement("irCalConfig")
       newIrCalConfigEntry.values = newIrCalConfig
-      if not (self.partFamily.lower() in ["ocelot","sol"]):
+      if legacyIrConfig is True:
         # Create a new RAIL_ChannelConfigEntryAttr_t entry in common structures
         newRailChannelConfigEntryAttr = commonStructures.railChannelConfigEntryAttrEntries.addNewElement("channelConfigEntryAttr")
-        if (self.partFamily.lower() in ["panther", "bobcat"]):
-          newRailChannelConfigEntryAttr.calValues.value = 2 #panther has 2 RF paths
-        else:
+        if (self.partFamily.lower() in ["dumbo","jumbo","nerio","nixi", "lynx", "leopard"]):
           newRailChannelConfigEntryAttr.calValues.value = 1
+        else:
+          newRailChannelConfigEntryAttr.calValues.value = 2 #panther has 2 RF paths
         phyConfigEntry.channelConfigEntryAttr.value = newRailChannelConfigEntryAttr
       # Register the new entries with the current phyConfigEntry
       phyConfigEntry.irCalConfigEntry.value = newIrCalConfigEntry
 
+    return phyConfigEntry.channelConfigEntryAttr.value
+
+  def _generateTxIrCalStructure(self, phyConfigEntry, model):
+    outputs = model.profile.outputs
+
+    newtxIrCalConfig = None
+    if (hasattr(outputs, 'softmodem_txircal_params')):
+      softmodem_txircal_params = outputs.get_output('softmodem_txircal_params').var_value
+      softmodem_txircal_freq = outputs.get_output('softmodem_txircal_freq').var_value
+
+      if softmodem_txircal_params is not None:
+        # Create a list containing all info
+        newtxIrCalConfig = [softmodem_txircal_freq]
+        newtxIrCalConfig.extend(softmodem_txircal_params)
+
+    commonStructures = self.railModel.multiPhyConfig.commonStructures
+
+    newTxIrCalBand = False
+    # Check for duplicates in the commonStructures containing all phy configurations
+    for i, txIrCalConfigEntry in enumerate(commonStructures.txIrCalConfigEntries._elements):
+      # if parameters changed, then another array must be created
+      if txIrCalConfigEntry.values != newtxIrCalConfig:
+        newTxIrCalBand = True
+
+      phyConfigEntry.txIrCalConfigEntry.value = txIrCalConfigEntry
+
+    if newtxIrCalConfig is not None:
+      # If there is no txIRCAL config yet, then create one
+      if phyConfigEntry.txIrCalConfigEntry.value == None or newTxIrCalBand:
+        newTxIrCalConfigEntry = commonStructures.txIrCalConfigEntries.addNewElement("txIrCalConfig")
+        newTxIrCalConfigEntry.values = newtxIrCalConfig
+        phyConfigEntry.txIrCalConfigEntry.value = newTxIrCalConfigEntry
+
+  def _generateStackInfo(self, phyConfigEntry, model):
+    outputs = model.profile.outputs
+
+    if (hasattr(outputs, 'stack_info')):
+      stack_info = outputs.get_output('stack_info').var_value
+      # Only reference non default values
+      if stack_info != [0, 0]:
+        newStackInfo = stack_info
+      else:
+        newStackInfo = None
+        phyConfigEntry.stackInfo.value = None
+
+      if newStackInfo is not None:
+        commonStructures = self.railModel.multiPhyConfig.commonStructures
+
+        # Create a new config in commonStructures by default
+        newStackInfoConfig = True
+        # Check for duplicates in the commonStructures containing all phy configurations
+        for i, stackInfoConfigEntry in enumerate(commonStructures.stackInfoEntries._elements):
+          phyConfigEntry.stackInfo.value = stackInfoConfigEntry
+
+          if stackInfoConfigEntry.values == newStackInfo:
+            # Duplicate found: no new config will be added to commonStructures
+            newStackInfoConfig = False
+            break
+
+        if phyConfigEntry.stackInfo.value == None or newStackInfoConfig:
+          length = 0
+
+          # Get commonStructures length for name uniqueness purposes
+          if commonStructures.stackInfoEntries.lastElement is not None:
+            length = len(commonStructures.stackInfoEntries._elements)
+
+          # Create a new config in commonStructures
+          newStackInfoConfigEntry = commonStructures.stackInfoEntries.addNewElement("stackInfo_%s" % length)
+          newStackInfoConfigEntry.values = newStackInfo
+          # Store that config in the linked phyConfigEntry
+          phyConfigEntry.stackInfo.value = newStackInfoConfigEntry
+
+
   def _generateDcdcRetimingStructure(self, phyConfigEntry, model):
-    if (self.partFamily in ["ocelot"]):
+    if (self.partFamily in ["ocelot", "margay"]):
       # Get a local reference to model.profile.outputs to use here
       outputs = model.profile.outputs
 
@@ -813,6 +917,41 @@ class RAILAdapter_MultiPhy(RAILAdapter):
           newDcdcRetimingConfigEntry.values = newDcdcRetimingConfig
           # Register the new entries with the current phyConfigEntry
           phyConfigEntry.dcdcRetimingConfigEntry.value = newDcdcRetimingConfigEntry
+
+  def _generateTimingStructure(self, phyConfigEntry, model):
+    # Get a local reference to model.profile.outputs to use here
+    outputs = model.profile.outputs
+
+    if outputs.get_output('rx_sync_delay_ns').var_value is not None:
+      if self.partFamily in ["jumbo", "nerio"]:
+        newTimingConfig = [
+          outputs.get_output('rx_sync_delay_ns').var_value,
+          outputs.get_output('tx_eof_delay_ns').var_value
+        ]
+      else:
+        newTimingConfig = [
+          outputs.get_output('rx_sync_delay_ns').var_value,
+          outputs.get_output('rx_eof_delay_ns').var_value,
+          outputs.get_output('tx_eof_delay_ns').var_value
+        ]
+
+      # Traverse existing dcdcRetimingConfigEntries and check for duplicates
+      entryFound = False
+      commonStructures = self.railModel.multiPhyConfig.commonStructures
+
+      for i, timingConfigEntry in enumerate(commonStructures.timingConfigEntries._elements):
+        if timingConfigEntry.values == newTimingConfig:
+          # Register the entry with the current phyConfigEntry
+          phyConfigEntry.timingConfigEntry.value = timingConfigEntry
+          entryFound = True
+          break
+
+      if not entryFound:
+        # Create a new timingConfig entry in common structures
+        newTimingConfigEntry = commonStructures.timingConfigEntries.addNewElement("timingConfig")
+        newTimingConfigEntry.values = newTimingConfig
+        # Register the new entries with the current phyConfigEntry
+        phyConfigEntry.timingConfigEntry.value = newTimingConfigEntry
 
   def _generateHfxoRetimingStructure(self, phyConfigEntry, model):
     if self.partFamily.lower() not in ["dumbo", "jumbo", "nerio", "nixi", "panther"]:
@@ -884,6 +1023,37 @@ class RAILAdapter_MultiPhy(RAILAdapter):
         # Register the new entries with the current phyConfigEntry
         phyConfigEntry.hfxoRetimingTableEntry.value = newHfxoRetimingConfigEntry
 
+  def _generateRffpllStructure(self, phyConfigEntry, model):
+    # Get a local reference to model.profile.outputs to use here
+    outputs = model.profile.outputs
+
+    if (hasattr(outputs, 'fpll_div_array')):
+      fpll_div_array = outputs.get_output('fpll_div_array').var_value
+      fpll_divx = fpll_div_array[0]
+      fpll_divy = fpll_div_array[1]
+      fpll_divn = fpll_div_array[2]
+
+      newRffpllConfig = [
+        fpll_divx | (fpll_divy << 8) | (fpll_divn << 16),
+        int(outputs.get_output('fpll_divx_freq').var_value),
+        int(outputs.get_output('fpll_divy_freq').var_value),
+      ]
+
+      # Traverse existing rffpllConfigEntries, check for duplicates, and ensure
+      # all configs are identical.
+      commonStructures = self.railModel.multiPhyConfig.commonStructures
+      for i, rffpllConfigEntry in enumerate(commonStructures.rffpllConfigEntries._elements):
+        assert rffpllConfigEntry.values == newRffpllConfig, "Multiple RFFPLL configurations not supported"
+
+        # Register the entry with the current phyConfigEntry
+        phyConfigEntry.rffpllConfigEntry.value = rffpllConfigEntry
+
+      # Create a new rffpllConfig entry in common structures
+      if phyConfigEntry.rffpllConfigEntry.value == None:
+        newRffpllConfigEntry = commonStructures.rffpllConfigEntries.addNewElement("rffpllConfig")
+        newRffpllConfigEntry.values = newRffpllConfig
+        phyConfigEntry.rffpllConfigEntry.value = newRffpllConfigEntry
+
   def _generateFrameCodingTable(self, phyConfigEntry, model):
 
     codingArray = model.profile.outputs.get_output('frame_coding_array_packed').var_value
@@ -919,6 +1089,7 @@ class RAILAdapter_MultiPhy(RAILAdapter):
     newChannelConfigEntry.maxPower.value = channelConfigEntry.max_power #"RAIL_TX_POWER_MAX"
     newChannelConfigEntry.attr.value = phyConfigEntry.channelConfigEntryAttr.value
     newChannelConfigEntry.entryType.value = phyConfigEntry.entryType.value
+    newChannelConfigEntry.stackInfo.value = phyConfigEntry.stackInfo.value #Not serialized in multiphy XML
 
     # Traverse existing channelConfigEntries and check for duplicates
     entryFound = False
@@ -1057,6 +1228,37 @@ class RAILAdapter_MultiPhy(RAILAdapter):
 
     return regs
 
+  def _genModeSwitchPhrs(self, radioConfigModel, phyConfigEntry):
+    if radioConfigModel.part_family.lower() in ['sol'] and hasattr(radioConfigModel.profile.outputs, 'wisun_phy_mode_id'):
+      wisun_phy_mode_ids = getattr(radioConfigModel.profile.outputs, 'wisun_phy_mode_id', None)
+      wisun_mode_switch_phrs = getattr(radioConfigModel.profile.outputs, 'wisun_mode_switch_phr', None)
+      mode_switch_dict = self.railModel.multiPhyConfig.commonStructures.modeSwitchPhyModeIds.value
+
+      # Make a copy of mode switch variables
+      phyModeIdsIter = copy.deepcopy(wisun_phy_mode_ids)
+      phrIter = copy.deepcopy(wisun_mode_switch_phrs)
+
+      if wisun_phy_mode_ids is not None and wisun_mode_switch_phrs is not None:
+        # Verify that these mode switch infos are not already saved in mode_switch_dict
+        for index, phyModeId in enumerate(wisun_phy_mode_ids.var_value):
+          if phyModeId in mode_switch_dict.keys():
+            # If phyModeId is already in the array: it's a duplicate, then remove it and the PHR from lists
+            phyModeIdsIter.var_value.remove(phyModeId)
+            phrIter.var_value.remove(mode_switch_dict[phyModeId])
+          else:
+            # It's a new element: save it and its associated PHR
+            mode_switch_dict[phyModeId] = wisun_mode_switch_phrs.var_value[index]
+
+        # Verify that modified list are not empty
+        if phyModeIdsIter.var_value and phrIter.var_value:
+          # Extract elements left from the modified list: those are new elements
+          phyConfigEntry.modeSwitchPhr.value = zip(phyModeIdsIter.var_value, phrIter.var_value)
+
+        # Update dict
+        self.railModel.multiPhyConfig.commonStructures.modeSwitchPhyModeIds.value = mode_switch_dict
+      else:
+        phyConfigEntry.modeSwitchPhr.value = None
+
   # -------- External ---------------------------------------------------------
   def setInstanceDict(self, mphyConfig):
     self.mphyConfig = mphyConfig
@@ -1090,9 +1292,10 @@ class RAILAdapter_MultiPhy(RAILAdapter):
     radio_configs = OrderedDict()
 
     # Create a dict that will be used to avoid duplicates in wisun_modeSwitchPhrs struct
-    modeSwitchPhyModeIds = {}
+    self.railModel.multiPhyConfig.commonStructures.modeSwitchPhyModeIds.value = OrderedDict()
 
     # Go through all base channel configurations (NOTE!, ask Rick to rename!)
+    baseConfigAttr = 0
     for baseChannelConfig in self.mphyConfig.base_channel_configurations.base_channel_configuration:
 
       configName = baseChannelConfig.name
@@ -1105,13 +1308,6 @@ class RAILAdapter_MultiPhy(RAILAdapter):
       # Start off by creating a new instance of multiPhyConfigEntry, use the baseChannelConfig name
       multiPhyConfigEntry = self.railModel.multiPhyConfig.multiPhyConfigEntries.addNewElement(configName)
       # multiPhyConfigEntry.signature.signature.value = 0
-
-      if (self.partFamily.lower() in ["ocelot","sol"]):
-        # For each PHY that support subGig, Create a new RAIL_ChannelConfigEntryAttr_t entry in common structures
-        newRailChannelConfigEntryAttr = self.railModel.multiPhyConfig.commonStructures.railChannelConfigEntryAttrEntries.addNewElement("channelConfigEntryAttr")
-        newRailChannelConfigEntryAttr.calValues.value = 2 #ocelot has 2 RF paths
-
-      modeSwitchPhrCount = 0
 
       # Now, iterate through all the channel configs and mark the "base" (right now, it's always the first entry)
       for index, channelConfigEntry in enumerate(baseChannelConfig.channel_config_entries.channel_config_entry):
@@ -1151,17 +1347,24 @@ class RAILAdapter_MultiPhy(RAILAdapter):
           self._generateFrameTypeStructures(phyConfigEntry, radioConfigModel)
 
           #Handle IR Cal Settings
-          self._generateIrCalStructure(phyConfigEntry, radioConfigModel)
+          baseConfigAttr = self._generateIrCalStructure(phyConfigEntry, radioConfigModel, isBaseConfig, baseConfigAttr)
 
           #Handle DCDC Retiming Settings
           self._generateDcdcRetimingStructure(phyConfigEntry, radioConfigModel)
 
+          #Handle timing structures
+          self._generateTimingStructure(phyConfigEntry, radioConfigModel)
+
           #Handle HFXO Retiming Settings
           self._generateHfxoRetimingStructure(phyConfigEntry, radioConfigModel)
 
+          #Handle RFFPLL Settings
+          self._generateRffpllStructure(phyConfigEntry, radioConfigModel)
+
+          # Handle TX IR Cal Settings
+          self._generateTxIrCalStructure(phyConfigEntry, radioConfigModel)
+
           self._generatePhyInfoStructure(phyConfigEntry, baseConfigOptions, channelConfigOptions, radioConfigModel)
-          if (self.partFamily.lower() in ["ocelot","sol"]):
-            phyConfigEntry.channelConfigEntryAttr.value = newRailChannelConfigEntryAttr
 
           #Handle Frame Coding tables
           self._generateFrameCodingTable(phyConfigEntry, radioConfigModel)
@@ -1179,34 +1382,10 @@ class RAILAdapter_MultiPhy(RAILAdapter):
           phyConfigEntry.fecEnabled.value = bool(radioConfigModel.profile.outputs.get_output('fec_enabled').var_value)
           phyConfigEntry.convDecodeBufferSize.value = radioConfigModel.profile.outputs.get_output('frc_conv_decoder_buffer_size').var_value
 
-          if radioConfigModel.profile.name.lower() == "wisun_ofdm" or radioConfigModel.profile.name.lower() == "wisun_fsk":
-            wisun_phy_mode_ids = getattr(radioConfigModel.profile.outputs, 'wisun_phy_mode_id', None)
-            wisun_mode_switch_phrs = getattr(radioConfigModel.profile.outputs, 'wisun_mode_switch_phr', None)
+          self._generateStackInfo(phyConfigEntry, radioConfigModel)
 
-            # Make a copy of mode switch variables
-            phyModeIdsIter = copy.deepcopy(wisun_phy_mode_ids)
-            phrIter = copy.deepcopy(wisun_mode_switch_phrs)
-
-            if wisun_phy_mode_ids is not None and wisun_mode_switch_phrs is not None:
-              # Verify that these mode switch infos are not already saved in modeSwitchPhyModeIds
-              for index, phyModeId in enumerate(wisun_phy_mode_ids.var_value):
-                if phyModeId in modeSwitchPhyModeIds.keys():
-                  # If phyModeId is already in the array: it's a duplicate, then remove it and the PHR from lists
-                  phyModeIdsIter.var_value.remove(phyModeId)
-                  phrIter.var_value.remove(modeSwitchPhyModeIds[phyModeId])
-                else:
-                  # It's a new element: save it and its associated PHR
-                  modeSwitchPhyModeIds[phyModeId] = wisun_mode_switch_phrs.var_value[index]
-
-              # Verify that modified list are not empty
-              if phyModeIdsIter.var_value and phrIter.var_value:
-                # Extract elements left from the modified list: those are new elements
-                phyConfigEntry.modeSwitchPhr.value = zip(phyModeIdsIter.var_value, phrIter.var_value)
-
-              # Update total array length
-              modeSwitchPhrCount = len(modeSwitchPhyModeIds.keys())
-            else:
-              phyConfigEntry.modeSwitchPhr.value = None
+          # Populate modeSwitchPhyModeIds
+          self._genModeSwitchPhrs(radioConfigModel, phyConfigEntry)
 
           # Extract the concurrent PHY optional argument marker
           phyConfigEntry.entryType.value = 0 # initialize as non-concurrent PHY
@@ -1267,9 +1446,6 @@ class RAILAdapter_MultiPhy(RAILAdapter):
 
         #Handle Channel Lists
         self._generateChannelStructures(multiPhyConfigEntry, phyConfigEntry, channelConfigEntry)
-
-    # Populate the mode switch PHR count now that we know it
-    self.railModel.multiPhyConfig.commonStructures.modeSwitchPhrCount.value = modeSwitchPhrCount
 
     # Populate the channelConfigs objects
     self._generateChannelConfigs(self.railModel)

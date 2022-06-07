@@ -91,7 +91,7 @@ void sleeptimer_app_get_datetime(sl_cli_command_arg_t *arguments)
   }
 }
 
-// Handler for CLI command get_datetime
+// Handler for CLI command set_datetime
 void sleeptimer_app_set_datetime(sl_cli_command_arg_t *arguments)
 {
   char *date_ptr = sl_cli_get_argument_string(arguments, 0);

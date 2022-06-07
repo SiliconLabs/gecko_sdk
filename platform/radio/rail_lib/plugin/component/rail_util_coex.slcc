@@ -17,15 +17,7 @@ requires:
   - name: rail_util_coex_cli
     condition:
       - cli
-      - ot_stack
-  - name: rail_util_coex_cli
-    condition:
-      - cli
       - rail_test_core
-  - name: rail_util_coex_cli
-    condition:
-      - cli
-      - zigbee_pro_stack_support
   - name: rail_util_ieee802154_stack_event
     condition:
       - ot_stack
@@ -70,11 +62,22 @@ include:
       - path: coexistence-ble-ll.h
     condition:
       - bluetooth_controller
+  - path: platform/radio/rail_lib/plugin/coexistence/protocol/ble
+    file_list:
+      - path: coexistence-ble.h
+      - path: coexistence-ble-ll.h
+    condition:
+      - rail_test_core      
   - path: platform/radio/rail_lib/plugin/coexistence/protocol/ieee802154_uc
     file_list:
       - path: coexistence-802154.h
     condition:
       - ot_stack
+  - path: platform/radio/rail_lib/plugin/coexistence/protocol/ieee802154_uc
+    file_list:
+      - path: coexistence-802154.h
+    condition:
+      - rail_test_core
   - path: platform/radio/rail_lib/plugin/coexistence/protocol/ieee802154_uc
     file_list:
       - path: coexistence-802154.h
@@ -96,9 +99,18 @@ source:
   - path: platform/radio/rail_lib/plugin/coexistence/protocol/ble/coexistence-ble-counters.c
     condition:
       - bluetooth_controller
+  - path: platform/radio/rail_lib/plugin/coexistence/protocol/ble/coexistence-ble.c
+    condition:
+      - rail_test_core
+  - path: platform/radio/rail_lib/plugin/coexistence/protocol/ble/coexistence-ble-counters.c
+    condition:
+      - rail_test_core
   - path: platform/radio/rail_lib/plugin/coexistence/protocol/ieee802154_uc/coexistence-802154.c
     condition:
       - ot_stack
+  - path: platform/radio/rail_lib/plugin/coexistence/protocol/ieee802154_uc/coexistence-802154.c
+    condition:
+      - rail_test_core
   - path: platform/radio/rail_lib/plugin/coexistence/protocol/ieee802154_uc/coexistence-802154.c
     condition:
       - zigbee_pro_stack_support
@@ -125,12 +137,27 @@ template_contribution:
       - bluetooth_controller
   - name: rail_util_coex_callbacks
     value:
+      handler: sli_bt_coex_radio_callback
+      event_filter: sli_bt_coex_event_filter
+    priority: -9010
+    condition:
+      - rail_test_core
+  - name: rail_util_coex_callbacks
+    value:
       include: "coexistence-802154.h"
       handler: sli_rail_util_ieee802154_coex_on_event
       event_filter: sli_rail_util_ieee802154_coex_event_filter
     priority: -9010
     condition:
       - ot_stack
+  - name: rail_util_coex_callbacks
+    value:
+      include: "coexistence-802154.h"
+      handler: sli_rail_util_ieee802154_coex_on_event
+      event_filter: sli_rail_util_ieee802154_coex_event_filter
+    priority: -9010
+    condition:
+      - rail_test_core
   - name: rail_util_coex_callbacks
     value:
       include: "coexistence-802154.h"

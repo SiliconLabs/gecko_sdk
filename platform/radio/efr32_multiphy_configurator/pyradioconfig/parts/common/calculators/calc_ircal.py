@@ -187,15 +187,16 @@ class CALC_IrCal(ICalculator):
     def calc_ircal_valid_methods(self, model):
         lodiv = model.vars.lodiv_actual.value
         subgig_band = model.vars.subgig_band.value
+        part_family = model.part_family.lower()
 
-        if model.vars.family.value == "dumbo":
+        if part_family == "dumbo":
             # Dumbo has a sub-gig PTE value on the Device Information page.
             if lodiv <= 3:
                 model.vars.ircal_manufconfigvalid.value = True
             else:
                 model.vars.ircal_manufconfigvalid.value = False
 
-        else:  # model.vars.family.value == "jumbo"
+        else:  # part_family == "jumbo"
             # Jumbo does NOT have a sub-gig PTE value on the Device Information page (at least not one we should access).
             # This setting is more conservative, so default to this as well.
             if not subgig_band:

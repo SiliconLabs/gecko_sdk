@@ -117,7 +117,7 @@ void emberAfPluginConcentratorMessageSentCallback(EmberOutgoingMessageType type,
 void emberAfSetSourceRouteOverheadCallback(EmberNodeId destination, uint8_t overhead)
 {
   #if defined(EZSP_HOST)
-  emberSetCurrentNetwork(emberGetCallbackNetwork());
+  (void)emberSetCurrentNetwork(emberGetCallbackNetwork());
 
   if (!(destination != targetId && overhead == EZSP_SOURCE_ROUTE_OVERHEAD_UNKNOWN)) {
     targetId = destination;
@@ -160,7 +160,7 @@ void ezspIncomingRouteErrorHandler(EmberStatus status, EmberNodeId target)
 
 void emberAfPluginConcentratorStackStatusCallback(EmberStatus status)
 {
-  emberSetCurrentNetwork(emberGetCallbackNetwork());
+  (void)emberSetCurrentNetwork(emberGetCallbackNetwork());
 
   EmberNodeType nodeType;
   if (status == EMBER_NETWORK_DOWN

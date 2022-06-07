@@ -29,6 +29,7 @@
  ******************************************************************************/
 
 #include <stdbool.h>
+#include <string.h>
 #include "sl_bluetooth.h"
 #include "gatt_db.h"
 #include "sli_gatt_service_cte.h"
@@ -102,17 +103,16 @@ void sl_gatt_service_cte_adv_on_event(sl_bt_msg_t *evt)
           break;
 
         case gattdb_adv_cte_interval:
-          if (len != sizeof(adv_cte_interval_t)) {
+          // Supports single byte values
+          if ((len > sizeof(adv_cte_interval_t)) || (len == 0)) {
             sc = SL_STATUS_BT_ATT_INVALID_ATT_LENGTH;
           } else {
-            // Cast to uint32_t instead of adv_cte_interval_t to avoid warning.
-            // adv_cte_interval_t > ADV_CTE_INTERVAL_MAX - is always false.
-            // uint16_t(max: 0xFFFF) > 0xFFFF(ADV_CTE_INTERVAL_MAX)
-            if ((*((adv_cte_interval_t *)data) < ADV_CTE_INTERVAL_MIN)
-                || (*((uint32_t *)data) > ADV_CTE_INTERVAL_MAX)) {
+            adv_cte_interval_t buffer = 0;
+            memcpy(&buffer, data, len);
+            if (buffer < ADV_CTE_INTERVAL_MIN) {
               sc = SL_STATUS_BT_ATT_OUT_OF_RANGE;
             } else {
-              adv_cte_interval = *((adv_cte_interval_t *)data);
+              adv_cte_interval = buffer;
             }
           }
           break;

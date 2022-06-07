@@ -41,6 +41,7 @@
 #include <openthread/link_raw.h>
 
 #include "common/locator.hpp"
+#include "common/log.hpp"
 #include "common/non_copyable.hpp"
 #include "mac/mac_frame.hpp"
 #include "mac/sub_mac.hpp"
@@ -171,6 +172,7 @@ public:
      * @param[in]  aCallback        A pointer to a function called on completion of a scanned channel.
      *
      * @retval kErrorNone            Successfully started scanning the channel.
+     * @retval kErrorBusy            The radio is performing energy scanning.
      * @retval kErrorNotImplemented  The radio doesn't support energy scanning.
      * @retval kErrorInvalidState    If the raw link-layer isn't enabled.
      *
@@ -285,6 +287,7 @@ public:
      */
     Error SetMacFrameCounter(uint32_t aMacFrameCounter);
 
+#if OT_SHOULD_LOG_AT(OT_LOG_LEVEL_INFO)
     /**
      * This method records the status of a frame transmission attempt and is mainly used for logging failures.
      *
@@ -302,7 +305,6 @@ public:
      *                        when there was an error in transmission (i.e., `aError` is not NONE).
      *
      */
-#if (OPENTHREAD_CONFIG_LOG_LEVEL >= OT_LOG_LEVEL_INFO) && (OPENTHREAD_CONFIG_LOG_MAC == 1)
     void RecordFrameTransmitStatus(const TxFrame &aFrame,
                                    const RxFrame *aAckFrame,
                                    Error          aError,

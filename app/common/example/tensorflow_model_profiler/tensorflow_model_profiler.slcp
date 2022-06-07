@@ -7,6 +7,13 @@ description: >
   which is generated from a Tensorflow tflite model file. Profiling is performed
   by running one inference with the model.
 category: Example|Machine Learning
+filter:
+  - name: "Device Type"
+    value: ["SoC"]
+  - name: "MCU"
+    value: ["32-bit MCU"]
+  - name: "Project Difficulty"
+    value: ["Advanced"]
 include:
   - path: .
     file_list:
@@ -45,6 +52,8 @@ configuration:
 toolchain_settings:
   - option: gcc_compiler_option
     value: "-Wno-unused-parameter"
+  - option: gcc_compiler_option
+    value: "-Wno-missing-field-initializers"
   - option: gcc_linker_option
     value: "-u _printf_float"
   - option: optimize

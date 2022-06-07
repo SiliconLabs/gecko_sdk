@@ -82,7 +82,10 @@ EmberEvent emPermitJoiningEvents[NUM_MULTI_PAN_FORKS];
 EmberEvent emNetworkManagementEvents[NUM_MULTI_PAN_FORKS];
 EmberEvent emNeighborExchangeEvents[NUM_MULTI_PAN_FORKS];
 EmberEvent emRequestKeyEvents[NUM_MULTI_PAN_FORKS];
+
+#if !defined(SL_ZIGBEE_LEAF_STACK) || defined (CSL_SUPPORT)
 EmberEvent emSendParentAnnounceEvents[NUM_MULTI_PAN_FORKS];
+#endif
 EmberEvent emTransientLinkKeyEvents[NUM_MULTI_PAN_FORKS];
 EmberEvent emGpTxEvents[NUM_MULTI_PAN_FORKS];
 EmberEvent emSourceRouteUpdateEvents[NUM_MULTI_PAN_FORKS];

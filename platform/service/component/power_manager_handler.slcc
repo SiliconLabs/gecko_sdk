@@ -1,4 +1,4 @@
-id: power_manager_handler
+id: power_manager_handler_implementation
 label: "Power Manager: Handler"
 package: platform
 category: Services|Power Manager
@@ -7,6 +7,7 @@ ui_hints:
 quality: production
 root_path: platform/service/power_manager
 provides:
+  - name: power_manager_handler_implementation
   - name: power_manager_handler
 template_file:
   - path: template/sl_power_manager_handler.c.jinja

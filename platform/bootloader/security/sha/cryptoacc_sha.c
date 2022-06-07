@@ -56,7 +56,7 @@ int sha_x_process(SHA_Type_t algo,
     case SHA256:
       hash_fct    = e_SHA256;
       data_in.len = SHA256_BLOCKSIZE * num_blocks;
-      state.len   = SHA256_INITSIZE;
+      state.len   = SHA256_STATESIZE;
       break;
     default:
       return MBEDTLS_ERR_PLATFORM_FEATURE_UNSUPPORTED;

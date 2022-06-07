@@ -41,7 +41,7 @@
 #define MX25_PORT_SCLK         gpioPortC
 #define MX25_PIN_SCLK          3
 #define MX25_PORT_CS           gpioPortC
-#define MX25_PIN_CS            0
+#define MX25_PIN_CS            4
 
 #define MX25_USART             USART0
 #define MX25_USART_ROUTE       GPIO->USARTROUTE[0]

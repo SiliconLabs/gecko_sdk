@@ -21,6 +21,7 @@ provides:
 requires:
   - name: status
   - name: sleeptimer
+  - name: sl_assert
 template_contribution:
   - name: event_handler
     value:

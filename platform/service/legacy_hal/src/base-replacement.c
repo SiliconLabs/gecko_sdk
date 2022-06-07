@@ -153,6 +153,10 @@ void halInit(void)
 
   EMU_UnlatchPinRetention();
 
+#if defined(SL_LEGACY_HAL_ENABLE_WATCHDOG) && !defined(SL_LEGACY_HAL_DISABLE_WATCHDOG)
+  halInternalEnableWatchDog();
+#endif // SL_LEGACY_HAL_ENABLE_WATCHDOG && !SL_LEGACY_HAL_DISABLE_WATCHDOG
+
   halInternalStartSystemTimer();
 
   RAIL_InitTxPowerCurvesAlt(&RAIL_TxPowerCurvesVbat);
@@ -168,7 +172,7 @@ void halInternalEnableWatchDog(void)
   CMU_OscillatorEnable(cmuOsc_LFRCO, true, true);
 #endif
 
-#if defined(_SILICON_LABS_32B_SERIES_2_CONFIG_2)
+#if defined(_SILICON_LABS_32B_SERIES_2) && !defined(_SILICON_LABS_32B_SERIES_2_CONFIG_1)
   CMU_ClockEnable(cmuClock_WDOG0, true);
 #endif
 

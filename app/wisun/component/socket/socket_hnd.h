@@ -104,7 +104,7 @@ extern "C" {
  *****************************************************************************/
 #define _set_errno(err) \
   do {                  \
-    errno = (err);   \
+    errno = (err);      \
   } while (0)
 
 /**************************************************************************//**
@@ -151,6 +151,9 @@ typedef struct _socket_state {
 
 /// Socket FIFO handler structure
 typedef struct _socket_fifo {
+  /// Overwrite previous fifo content.
+  /// Fifo is reset and start writing from begining of the buffer
+  bool _enable_overwrite;
   /// head pointer to write
   uint8_t *_head;
   /// tail pointer to read
@@ -383,6 +386,26 @@ static inline void socket_fifo_destroy(_socket_handler_t *hnd)
 {
   socket_handler_fifo_init(hnd, NULL, 0);
 }
+
+/**************************************************************************//**
+ * @brief Set FIFO overwrite mode
+ * @details Set overwrite mode with reset FIFO
+ * @param[in,out] hnd socket handler ptr
+ * @param[in] enabled overwrite mode enabled or disabled bool
+ * @return return -1 if an error occurred, otherwise 0
+ *****************************************************************************/
+int32_t socket_handler_fifo_set_overwrite(_socket_handler_t *hnd,
+                                          const bool enabled);
+
+/**************************************************************************//**
+ * @brief Get FIFO overwrite mode.
+ * @details Get overwrite mode with reset FIFO
+ * @param[in,out] hnd socket handler ptr
+ * @param[out] dest_val Result value
+ * @return return -1 if an error occurred, otherwise 0
+ *****************************************************************************/
+int32_t socket_handler_fifo_get_overwrite(const _socket_handler_t *hnd,
+                                          bool * const dest_val);
 
 /**************************************************************************//**
  * @brief Fill socket handler remote address with data

@@ -28,14 +28,14 @@
 #define WAITING_BIT 0x80
 
 enum {
-  NETWORK_INITIAL    = 0x00,
+  ZLL_NETWORK_INITIAL= 0x00,
   UNUSED_PRIMARY     = 0x01,
   JOINABLE_PRIMARY   = 0x02,
   JOINABLE_SECONDARY = 0x03,
   WAITING_PRIMARY    = WAITING_BIT | JOINABLE_PRIMARY,
   WAITING_SECONDARY  = WAITING_BIT | JOINABLE_SECONDARY,
 };
-static uint8_t state = NETWORK_INITIAL;
+static uint8_t state = ZLL_NETWORK_INITIAL;
 #ifdef UC_BUILD
 sl_zigbee_event_t emberAfPluginZllCommissioningNetworkNetworkEvent;
 #define zllCommissioningNetworkEventControl (&emberAfPluginZllCommissioningNetworkNetworkEvent)
@@ -68,7 +68,7 @@ void emAfPluginZllCommissioningNetworkInitCallback(SLXU_INIT_ARG)
 EmberStatus emberAfZllScanForJoinableNetwork(void)
 {
   EmberStatus status = EMBER_INVALID_CALL;
-  if (state == NETWORK_INITIAL) {
+  if (state == ZLL_NETWORK_INITIAL) {
     // TODO: The scan duration is hardcoded to 3 for the joinable part of the
     // form and join library, but ZLL specifies the duration should be 4.
     status = emberScanForJoinableNetwork(emberGetZllPrimaryChannelMask(),
@@ -87,7 +87,7 @@ EmberStatus emberAfZllScanForJoinableNetwork(void)
 EmberStatus emberAfZllScanForUnusedPanId(void)
 {
   EmberStatus status = EMBER_INVALID_CALL;
-  if (state == NETWORK_INITIAL) {
+  if (state == ZLL_NETWORK_INITIAL) {
     status = emberScanForUnusedPanId(emberGetZllPrimaryChannelMask(),
                                      SCAN_DURATION);
     if (status == EMBER_SUCCESS) {
@@ -185,7 +185,7 @@ void emberAfScanErrorCallback(EmberStatus status)
                      ? "could not find unused network"
                      : "could not find joinable network"),
                     status);
-  state = NETWORK_INITIAL;
+  state = ZLL_NETWORK_INITIAL;
 }
 
 void emberAfGetFormAndJoinExtendedPanIdCallback(uint8_t *resultLocation)
@@ -226,7 +226,7 @@ void emberAfPluginZllCommissioningNetworkNetworkEventHandler(SLXU_UC_EVENT)
   }
 
   if (status != EMBER_SUCCESS) {
-    state = NETWORK_INITIAL;
+    state = ZLL_NETWORK_INITIAL;
     emberFormAndJoinCleanup(EMBER_SUCCESS);
   }
 }

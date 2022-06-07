@@ -32,7 +32,7 @@
 #if defined(PCNT_COUNT) && (PCNT_COUNT > 0)
 
 #include "em_cmu.h"
-#include "em_assert.h"
+#include "sl_assert.h"
 #include "em_bus.h"
 
 /***************************************************************************//**
@@ -460,8 +460,8 @@ void PCNT_FreezeEnable(PCNT_TypeDef *pcnt, bool enable)
      * - then modifies the same register again
      * since modifying a register while it is in sync progress should be
      * avoided. */
-    while (pcnt->SYNCBUSY)
-      ;
+    while (pcnt->SYNCBUSY) {
+    }
 
     pcnt->FREEZE = PCNT_FREEZE_REGFREEZE;
   } else {
@@ -844,12 +844,14 @@ void PCNT_Reset(PCNT_TypeDef *pcnt)
   /* Recommended to switch to internal clock before reset. */
   CMU_PCNTClockExternalSet(inst, false);
 
-  while (pcnt->EN & _PCNT_EN_DISABLING_MASK) ;
+  while (pcnt->EN & _PCNT_EN_DISABLING_MASK) {
+  }
 
   /* Clear registers. */
   pcnt->SWRST_SET = PCNT_SWRST_SWRST;
 
-  while (pcnt->SWRST & PCNT_SWRST_RESETTING) ;
+  while (pcnt->SWRST & PCNT_SWRST_RESETTING) {
+  }
 
 #endif
 }

@@ -14,9 +14,9 @@
   - name: SL_KIT_NAME
     value: '"FG23-DK2600A"'
   - name: SL_KIT_REV
-    value: '"A01"'
+    value: '"A02"'
 - tag:
   - kit:opn:FG23-DK2600A
   - kit:pn:DK2600
   - kit:variant:A
-  - kit:revision:A01
+  - kit:revision:A02

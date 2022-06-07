@@ -36,11 +36,59 @@
 
 #include "psa/crypto_driver_common.h"
 
+/* Include the context structure definitions for the Mbed TLS software drivers */
+#include "psa/crypto_builtin_composites.h"
+
 /* Include the context structure definitions for those drivers that were
  * declared during the autogeneration process. */
 
-/* Include the context structure definitions for the Mbed TLS software drivers */
-#include "psa/crypto_builtin_composites.h"
+#if defined(MBEDTLS_TEST_LIBTESTDRIVER1)
+#include <libtestdriver1/include/psa/crypto.h>
+#endif
+
+#if defined(PSA_CRYPTO_DRIVER_TEST)
+#if defined(MBEDTLS_TEST_LIBTESTDRIVER1) && \
+    defined(LIBTESTDRIVER1_MBEDTLS_PSA_BUILTIN_MAC)
+typedef libtestdriver1_mbedtls_psa_mac_operation_t
+        mbedtls_transparent_test_driver_mac_operation_t;
+typedef libtestdriver1_mbedtls_psa_mac_operation_t
+        mbedtls_opaque_test_driver_mac_operation_t;
+
+#define MBEDTLS_TRANSPARENT_TEST_DRIVER_MAC_OPERATION_INIT \
+        LIBTESTDRIVER1_MBEDTLS_PSA_MAC_OPERATION_INIT
+#define MBEDTLS_OPAQUE_TEST_DRIVER_MAC_OPERATION_INIT \
+        LIBTESTDRIVER1_MBEDTLS_PSA_MAC_OPERATION_INIT
+
+#else
+typedef mbedtls_psa_mac_operation_t
+        mbedtls_transparent_test_driver_mac_operation_t;
+typedef mbedtls_psa_mac_operation_t
+        mbedtls_opaque_test_driver_mac_operation_t;
+
+#define MBEDTLS_TRANSPARENT_TEST_DRIVER_MAC_OPERATION_INIT \
+        MBEDTLS_PSA_MAC_OPERATION_INIT
+#define MBEDTLS_OPAQUE_TEST_DRIVER_MAC_OPERATION_INIT \
+        MBEDTLS_PSA_MAC_OPERATION_INIT
+
+#endif /* MBEDTLS_TEST_LIBTESTDRIVER1 && LIBTESTDRIVER1_MBEDTLS_PSA_BUILTIN_MAC */
+
+#if defined(MBEDTLS_TEST_LIBTESTDRIVER1) && \
+    defined(LIBTESTDRIVER1_MBEDTLS_PSA_BUILTIN_AEAD)
+typedef libtestdriver1_mbedtls_psa_aead_operation_t
+        mbedtls_transparent_test_driver_aead_operation_t;
+
+#define MBEDTLS_TRANSPARENT_TEST_DRIVER_AEAD_OPERATION_INIT \
+        LIBTESTDRIVER1_MBEDTLS_PSA_AEAD_OPERATION_INIT
+#else
+typedef mbedtls_psa_aead_operation_t
+        mbedtls_transparent_test_driver_aead_operation_t;
+
+#define MBEDTLS_TRANSPARENT_TEST_DRIVER_AEAD_OPERATION_INIT \
+        MBEDTLS_PSA_AEAD_OPERATION_INIT
+
+#endif /* MBEDTLS_TEST_LIBTESTDRIVER1 && LIBTESTDRIVER1_MBEDTLS_PSA_BUILTIN_AEAD */
+
+#endif /* PSA_CRYPTO_DRIVER_TEST */
 
 /* Define the context to be used for an operation that is executed through the
  * PSA Driver wrapper layer as the union of all possible driver's contexts.
@@ -73,6 +121,30 @@ typedef union {
 #endif /* CRYPTO_PRESENT */
 #endif
 } psa_driver_mac_context_t;
+
+typedef union {
+    unsigned dummy; /* Make sure this union is always non-empty */
+    mbedtls_psa_aead_operation_t mbedtls_ctx;
+#if defined(PSA_CRYPTO_DRIVER_TEST)
+    mbedtls_transparent_test_driver_aead_operation_t transparent_test_driver_ctx;
+#endif
+#if defined(MBEDTLS_PSA_CRYPTO_DRIVERS)
+#if defined(SEMAILBOX_PRESENT)
+    sli_se_transparent_aead_operation_t sli_se_transparent_ctx;
+#if defined(SEMAILBOX_PRESENT) && \
+  ( (_SILICON_LABS_SECURITY_FEATURE == _SILICON_LABS_SECURITY_FEATURE_VAULT) || \
+    defined(MBEDTLS_PSA_CRYPTO_BUILTIN_KEYS) )
+    sli_se_opaque_aead_operation_t sli_se_opaque_ctx;
+#endif /* SEMAILBOX_PRESENT  && (_SILICON_LABS_SECURITY_FEATURE == _SILICON_LABS_SECURITY_FEATURE_VAULT) */
+#endif /* SEMAILBOX_PRESENT */
+#if defined(CRYPTOACC_PRESENT)
+    sli_cryptoacc_transparent_aead_operation_t sli_cryptoacc_transparent_ctx;
+#endif /* CRYPTOACC_PRESENT */
+#if defined(CRYPTO_PRESENT)
+    sli_crypto_transparent_aead_operation_t sli_crypto_transparent_ctx;
+#endif /* CRYPTO_PRESENT */
+#endif
+} psa_driver_aead_context_t;
 
 #endif /* PSA_CRYPTO_DRIVER_CONTEXTS_COMPOSITES_H */
 /* End of automatically generated file. */

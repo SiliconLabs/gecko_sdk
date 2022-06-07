@@ -73,43 +73,43 @@ bool AppTimerRegister(
 
 /**
  * Wrapper for AppTimerRegister to register timers that should be re-loaded
- * after EM4 hibernate.
+ * after deep sleep hibernate.
  *
  * In addition to having AppTimerRegister() register the timer with a
- * TimerLiaison this function also marks the timer to survive EM4 hibernate.
+ * TimerLiaison this function also marks the timer to survive deep sleep hibernate.
  *
  * For parameter descriptions @see AppTimerRegister.
  */
-bool AppTimerEm4PersistentRegister(SSwTimer *pTimer,
+bool AppTimerDeepSleepPersistentRegister(SSwTimer *pTimer,
                                    bool bAutoReload,
                                    void (*pCallback)(SSwTimer *pTimer));
 
 
 /**
  * Wrapper for TimerStart() that ensures the timer value is saved so it
- * can be re-loaded after EM4 hibernate.
+ * can be re-loaded after deep sleep hibernate.
  *
  * For parameter descriptions @see TimerStart.
  */
-ESwTimerStatus AppTimerEm4PersistentStart(SSwTimer *pTimer, uint32_t iTimeout);
+ESwTimerStatus AppTimerDeepSleepPersistentStart(SSwTimer *pTimer, uint32_t iTimeout);
 
 
 /**
  * Wrapper for TimerRestart() that ensures the timer status is saved so it
- * can be re-loaded after EM4 hibernate.
+ * can be re-loaded after deep sleep hibernate.
  *
  * For parameter descriptions @see TimerRestart.
  */
-ESwTimerStatus AppTimerEm4PersistentRestart(SSwTimer *pTimer);
+ESwTimerStatus AppTimerDeepSleepPersistentRestart(SSwTimer *pTimer);
 
 
 /**
  * Wrapper for TimerStop() that ensures the timer status is saved so it
- * does not get re-started after EM4 hibernate.
+ * does not get re-started after deep sleep hibernate.
  *
  * For parameter descriptions @see TimerStop.
  */
-ESwTimerStatus AppTimerEm4PersistentStop(SSwTimer *pTimer);
+ESwTimerStatus AppTimerDeepSleepPersistentStop(SSwTimer *pTimer);
 
 
 /**
@@ -123,26 +123,26 @@ void AppTimerNotificationHandler(void);
 
 
 /**
- * Clear storage used for persisting application timers during EM4 hibernate
+ * Clear storage used for persisting application timers during deep sleep hibernate
  */
-void AppTimerEm4PersistentResetStorage(void);
+void AppTimerDeepSleepPersistentResetStorage(void);
 
 
 /**
- * Save SSwTimers that should survive EM4 Hibernate
+ * Save SSwTimers that should survive deep sleep Hibernate
  *
  * The number of remaining milliseconds until timeout are saved
  * to the RTCC retention registers for all application timers
- * registered to be persisted during EM4 sleep.
+ * registered to be persisted during Deep Sleep.
  */
-void AppTimerEm4PersistentSaveAll(void);
+void AppTimerDeepSleepPersistentSaveAll(void);
 
 
 /**
  * Save the FreeRTOS task tick value just before going to sleep in
- * EM4 hibernate
+ * deep sleep hibernate
  *
- * The saved task tick value is used by AppTimerEm4PersistentLoadAll() to
+ * The saved task tick value is used by AppTimerDeepSleepPersistentLoadAll() to
  * calculate the timeouts the application timers should be restarted
  * with.
  */
@@ -150,35 +150,35 @@ void AppTimerSaveTaskTickAtSleep(void);
 
 
 /**
- * Load SSwTimers after EM4 hibernate wakeup
+ * Load SSwTimers after deep sleep hibernate wakeup
  *
  * Activates callback registered for the timer causing the wakeup
  *
- * Must be called AFTER AppTimerInit() and AppTimerEm4PersistentRegister()
+ * Must be called AFTER AppTimerInit() and AppTimerDeepSleepPersistentRegister()
  *
  * @param resetReason Reason why the device woke up
  */
-void AppTimerEm4PersistentLoadAll(EResetReason_t resetReason);
+void AppTimerDeepSleepPersistentLoadAll(EResetReason_t resetReason);
 
 
 /**
- * Get index of first retention register used for saving EM4 persistent app timers.
+ * Get index of first retention register used for saving Deep Sleep persistent app timers.
  *
- * The retention registers are manipulated with the RetentionRegBank_xx() API.
+ * The retention registers are manipulated with the zpal_retention_register_xx() API.
  */
 uint32_t AppTimerGetFirstRetentionRegister(void);
 
 
 /**
- * Get index of last retention register used for saving EM4 persistent app timers.
+ * Get index of last retention register used for saving Deep Sleep persistent app timers.
  *
  * NB: The number of retention registers used depends on how many times
- *     AppTimerEm4PersistentRegister() have been called since system startup.
+ *     AppTimerDeepSleepPersistentRegister() have been called since system startup.
  *     It is not safe to use the returned value to locate "free" retention registers
- *     unless it is guarantees that all calls to AppTimerEm4PersistentRegister() has
+ *     unless it is guarantees that all calls to AppTimerDeepSleepPersistentRegister() has
  *     been performed.
  *
- * The retention registers are manipulated with the RetentionRegBank_xx() API.
+ * The retention registers are manipulated with the zpal_retention_register_xx() API.
  */
 uint32_t AppTimerGetLastRetentionRegister(void);
 

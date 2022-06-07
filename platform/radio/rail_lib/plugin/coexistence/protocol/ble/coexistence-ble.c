@@ -52,6 +52,9 @@ struct {
   uint8_t requestBackoffMax;
   COEX_ReqState_t reqState;
   COEX_ReqState_t scanPwmState;
+#if SL_RAIL_UTIL_COEX_BLE_SIGNAL_IDENTIFIER_ENABLED
+  COEX_ReqState_t signalIdentifierReqState;
+#endif
 } ll_coex;
 
 COEX_Events_t sli_bt_coex_event_filter = ~COEX_EVENT_REQUEST_EVENTS;
@@ -315,7 +318,7 @@ void sl_bt_enable_coex_pull_resistor(bool enable)
 static void scanPwmRequest(bool request)
 {
 #if SL_RAIL_UTIL_COEX_BLE_SIGNAL_IDENTIFIER_ENABLED
-  RAIL_BLE_EnableSignalIdentifier(ll_coex.handle, request);
+  RAIL_BLE_EnableSignalDetection(ll_coex.handle, request);
 #else
   COEX_SetRequest(&ll_coex.scanPwmState, (request ? COEX_REQ_PWM : COEX_REQ_OFF) | (ll_coex.pwmPriority ? COEX_REQ_HIPRI : COEX_REQ_OFF), NULL);
 #endif
@@ -467,11 +470,10 @@ RAIL_Events_t sl_bt_ll_coex_get_events(void)
 #endif
 }
 
+#if SL_RAIL_UTIL_COEX_BLE_SIGNAL_IDENTIFIER_ENABLED
 static RAIL_MultiTimer_t channelSwitchTimer;
 #define RAIL_UTIL_COEX_BLE_CHANNEL_SWITCH_TIME 30U
-#if SL_RAIL_UTIL_COEX_BLE_SIGNAL_IDENTIFIER_ENABLED
 extern void ll_scanHopToNextChannel(uint32_t minTimeToHop);
-#endif
 
 static void channelSwitchTimerCb(RAIL_MultiTimer_t *tmr,
                                  RAIL_Time_t expectedTimeOfEvent,
@@ -480,31 +482,41 @@ static void channelSwitchTimerCb(RAIL_MultiTimer_t *tmr,
   (void)tmr;
   (void)expectedTimeOfEvent;
   (void)cbArg;
-  COEX_SetRequest(&ll_coex.reqState, COEX_REQ_ON, NULL);
-#if SL_RAIL_UTIL_COEX_BLE_SIGNAL_IDENTIFIER_ENABLED
+  COEX_SetRequest(&ll_coex.signalIdentifierReqState, COEX_REQ_ON, NULL);
   ll_scanHopToNextChannel(SL_RAIL_UTIL_COEX_BLE_MIN_TIME_FOR_HOPPING);
-#endif
 }
+#endif
 
 void sl_bt_ll_coex_handle_events(RAIL_Events_t events)
 {
+  if (!isCoexEnabled()) {
+    return;
+  }
   switch (events) {
     case RAIL_EVENT_RX_PACKET_RECEIVED:
       sl_bt_ll_coex_update_grant(false);
-      COEX_SetRequest(&ll_coex.reqState, COEX_REQ_OFF, NULL);
+    #if SL_RAIL_UTIL_COEX_BLE_SIGNAL_IDENTIFIER_ENABLED
+      COEX_SetRequest(&ll_coex.signalIdentifierReqState, COEX_REQ_OFF, NULL);
+    #endif
       break;
     case RAIL_EVENT_RX_SYNC1_DETECT:
     case RAIL_EVENT_RX_SYNC2_DETECT:
+    #if SL_RAIL_UTIL_COEX_BLE_SIGNAL_IDENTIFIER_ENABLED
       RAIL_CancelMultiTimer(&channelSwitchTimer);
-      COEX_SetRequest(&ll_coex.reqState, COEX_REQ_OFF, NULL);
+      COEX_SetRequest(&ll_coex.signalIdentifierReqState, COEX_REQ_ON, NULL);
+    #endif
       break;
     case RAIL_EVENT_SIGNAL_DETECTED:
+    #if SL_RAIL_UTIL_COEX_BLE_SIGNAL_IDENTIFIER_ENABLED
       RAIL_SetMultiTimer(&channelSwitchTimer, RAIL_UTIL_COEX_BLE_CHANNEL_SWITCH_TIME, RAIL_TIME_DELAY, &channelSwitchTimerCb, NULL);
+    #endif
       break;
     case RAIL_EVENT_RX_TIMEOUT:
     case RAIL_EVENT_RX_SCHEDULED_RX_END:
     case RAIL_EVENT_RX_PACKET_ABORTED:
-      COEX_SetRequest(&ll_coex.reqState, COEX_REQ_OFF, NULL);
+    #if SL_RAIL_UTIL_COEX_BLE_SIGNAL_IDENTIFIER_ENABLED
+      COEX_SetRequest(&ll_coex.signalIdentifierReqState, COEX_REQ_OFF, NULL);
+    #endif
       break;
     default:
       break;

@@ -15,6 +15,8 @@ define:
     value: 1
 provides:
   - name: bootloader_ezsp_gpio_activation
+  - name: bootloader_nonsecure_incompatible
+    condition: [bootloader_core_nonsecure]
 config_file:
   - path: platform/bootloader/config/btl_ezsp_gpio_activation_cfg.h
     file_id: ezsp_gpio_activation_cfg

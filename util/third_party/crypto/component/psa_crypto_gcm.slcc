@@ -1,10 +1,14 @@
 id: psa_crypto_gcm
 package: platform
-label: PSA Crypto support for the GCM algorithm.
-description: >-
-  This component provides support for the GCM authenticated encryption
-  algorithm in PSA Crypto.
-category: Platform|Security
+label: GCM
+description:
+  "This component provides support for the GCM authenticated encryption \
+  algorithm in PSA Crypto.\n
+
+  Note: Silicon Labs' hardware can only handle IV's of the recommended \
+  length equal to 12 bytes. If support for other lengths is required, use \
+  the 'GCM with Non-Recommended IV Lengths' component."
+category: Platform|Security|PSA Crypto|Authenticated Encryption
 quality: production
 provides:
   - name: psa_crypto_gcm

@@ -150,6 +150,7 @@ void emStandAloneEncryptBlock(uint8_t* block)
     loadedKey,
     sizeof(loadedKey),
     PSA_ALG_ECB_NO_PADDING,
+    NULL, 0,
     block, SECURITY_BLOCK_SIZE,
     block, SECURITY_BLOCK_SIZE,
     &output_size);
@@ -175,6 +176,7 @@ void emAesEncrypt(uint8_t* block, const uint8_t* key)
     key,
     EMBER_ENCRYPTION_KEY_SIZE,
     PSA_ALG_ECB_NO_PADDING,
+    NULL, 0,
     block, SECURITY_BLOCK_SIZE,
     block, SECURITY_BLOCK_SIZE,
     &output_size);

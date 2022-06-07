@@ -267,7 +267,7 @@ void app_process_action(void)
         if (symmetric_key_storage_select > KEY_STORAGE_MAX) {
           symmetric_key_storage_select = VOLATILE_PLAIN_KEY;
         }
-#if defined(MBEDTLS_PSA_CRYPTO_BUILTIN_KEYS)
+#if defined(SEMAILBOX_PRESENT)
         if (symmetric_key_storage_select == KEY_STORAGE_MAX) {
           printf("  + Current symmetric key is a %s key.\n",
                  symmetric_key_storage_string[4]);
@@ -279,7 +279,7 @@ void app_process_action(void)
       }
       if (enter_press) {
         enter_press = false;
-#if defined(MBEDTLS_PSA_CRYPTO_BUILTIN_KEYS)
+#if defined(SEMAILBOX_PRESENT)
         if (symmetric_key_storage_select == KEY_STORAGE_MAX) {
           printf("\n  . Built-in AES-128 key encryption\n");
           set_key_id(SL_SE_BUILTIN_KEY_AES128_ID);
@@ -983,7 +983,7 @@ static void print_key_storage(void)
   }
 
   if (symmetric_key_storage_select == KEY_STORAGE_MAX) {
-#if defined(MBEDTLS_PSA_CRYPTO_BUILTIN_KEYS)
+#if defined(SEMAILBOX_PRESENT)
     printf("\n  + Current symmetric key is a %s key.\n",
            symmetric_key_storage_string[4]);
 #else
@@ -1005,7 +1005,7 @@ static void print_key_storage(void)
          symmetric_key_storage_string[4],
          symmetric_key_storage_string[4]);
 #else
-#if defined(MBEDTLS_PSA_CRYPTO_BUILTIN_KEYS)
+#if defined(SEMAILBOX_PRESENT)
   printf("  + Press SPACE to select a %s or %s or %s key, press ENTER to next "
          "option or run if %s key is selected.\n",
          symmetric_key_storage_string[0],

@@ -26,6 +26,7 @@
 #define SILABS_SECURE_EZSP_PROTOCOL_H
 
 #include "secure-ezsp-types.h"
+#include "stack/include/ember-types.h"
 
 //------------------------------------------------------------------------------
 // Protocol Definitions

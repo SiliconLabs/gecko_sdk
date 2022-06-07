@@ -37,7 +37,7 @@
  * Calls the init function for all of the registered sensor interfaces.
  */
 void
-sl_cc_multilevel_sensor_init_all_sensor(void);
+cc_multilevel_sensor_init_all_sensor(void);
 
 /**
  * Checks if the wanted scale is a legal one for an interface.
@@ -49,89 +49,89 @@ sl_cc_multilevel_sensor_init_all_sensor(void);
  * @return a usable scale value, if the input i_scale is valid that will be return, else the default one.
  */
 uint8_t
-sl_cc_multilevel_sensor_check_scale(const sl_sensor_interface_t* i_interface, uint8_t i_scale);
+cc_multilevel_sensor_check_scale(const sensor_interface_t* i_interface, uint8_t i_scale);
 
 /**
  * Checks if the wanted sensor type has a registered interface or not.
- * @param[in] sensor_type_value Sensor type value to check, this is the value in sl_sensor_type_t struct's value
- * @return SL_CC_MULTILEVEL_SENSOR_RETURN_VALUE_OK if interface is registered for a sensor, else SL_CC_MULTILEVEL_SENSOR_RETURN_VALUE_NOT_FOUND.
+ * @param[in] sensor_type_value Sensor type value to check, this is the value in sensor_type_t struct's value
+ * @return CC_MULTILEVEL_SENSOR_RETURN_VALUE_OK if interface is registered for a sensor, else CC_MULTILEVEL_SENSOR_RETURN_VALUE_NOT_FOUND.
  */
-sl_cc_multilevel_sensor_return_value
-sl_cc_multilevel_sensor_check_sensor_type_registered(uint8_t sensor_type_value);
+cc_multilevel_sensor_return_value
+cc_multilevel_sensor_check_sensor_type_registered(uint8_t sensor_type_value);
 
 /**
  * Registers an interface to a specific sensor type. The number of registered sensor
  * types is maximized with REGISTERED_SENSOR_NUMBER_LIMIT 
  * @param[in] i_new_sensor Pointer to a filled sensor interface struct
- * @return SL_CC_MULTILEVEL_SENSOR_RETURN_VALUE_OK if interface is registered for a sensor.
+ * @return CC_MULTILEVEL_SENSOR_RETURN_VALUE_OK if interface is registered for a sensor.
  */
-sl_cc_multilevel_sensor_return_value
-sl_cc_multilevel_sensor_registration(sl_sensor_interface_t* i_new_sensor);
+cc_multilevel_sensor_return_value
+cc_multilevel_sensor_registration(sensor_interface_t* i_new_sensor);
 
 /**
  * Fills an input buffer with flags where each flag represents a supported sensor.
  * @param[out] o_supported_sensor_buffer Pointer to a buffer where the supported sensors' are represented as flags in a byte array.
  * The position of each flag is calculated based on SDS13812. The buffer must be 11 byte long at least.
- * @return SL_CC_MULTILEVEL_SENSOR_RETURN_VALUE_OK if success, else SL_CC_MULTILEVEL_SENSOR_RETURN_VALUE_ERROR.
+ * @return CC_MULTILEVEL_SENSOR_RETURN_VALUE_OK if success, else CC_MULTILEVEL_SENSOR_RETURN_VALUE_ERROR.
  */
-sl_cc_multilevel_sensor_return_value
-sl_cc_multilevel_sensor_get_supported_sensors(uint8_t* o_supported_sensor_buffer);
+cc_multilevel_sensor_return_value
+cc_multilevel_sensor_get_supported_sensors(uint8_t* o_supported_sensor_buffer);
 
 /**
  * Fills an input buffer with flags where each flag represents a supported scale
- * @param[in] sensor_type_value Sensor type value to check, this is the value in sl_sensor_type_t struct's value
+ * @param[in] sensor_type_value Sensor type value to check, this is the value in sensor_type_t struct's value
  * @param[out] o_supported_scale Pointer to a buffer where the supported scales will be represented for a sensor type
- * @return SL_CC_MULTILEVEL_SENSOR_RETURN_VALUE_OK if interface is registered for a sensor.
+ * @return CC_MULTILEVEL_SENSOR_RETURN_VALUE_OK if interface is registered for a sensor.
  */
-sl_cc_multilevel_sensor_return_value
-sl_cc_multilevel_sensor_get_supported_scale(uint8_t sensor_type_value , uint8_t* o_supported_scale);
+cc_multilevel_sensor_return_value
+cc_multilevel_sensor_get_supported_scale(uint8_t sensor_type_value , uint8_t* o_supported_scale);
 
 /**
  * Getter function for a sensor type's interface
- * @param[in] sensor_type_value Sensor type value to check, this is the value in sl_sensor_type_t struct's value
+ * @param[in] sensor_type_value Sensor type value to check, this is the value in sensor_type_t struct's value
  * @param[out] o_interface This is a double pointer which will hold an interface reference
- * @return SL_CC_MULTILEVEL_SENSOR_RETURN_VALUE_OK if interface is registered for a sensor, else SL_CC_MULTILEVEL_SENSOR_RETURN_VALUE_NOT_FOUND.
+ * @return CC_MULTILEVEL_SENSOR_RETURN_VALUE_OK if interface is registered for a sensor, else CC_MULTILEVEL_SENSOR_RETURN_VALUE_NOT_FOUND.
  */
-sl_cc_multilevel_sensor_return_value
-sl_cc_multilevel_sensor_get_interface(uint8_t sensor_type_value, sl_sensor_interface_t** o_interface);
+cc_multilevel_sensor_return_value
+cc_multilevel_sensor_get_interface(uint8_t sensor_type_value, sensor_interface_t** o_interface);
 
 /**
  * Gets the default sensor type value. Basically the first registered sensor interface' type is the default one.
  * @param[in] o_default_sensor_type Pointer to a byte buffer which will hold the default sensor type value
- * @return SL_CC_MULTILEVEL_SENSOR_RETURN_VALUE_OK if there is any registered interface, else SL_CC_MULTILEVEL_SENSOR_RETURN_VALUE_ERROR.
+ * @return CC_MULTILEVEL_SENSOR_RETURN_VALUE_OK if there is any registered interface, else CC_MULTILEVEL_SENSOR_RETURN_VALUE_ERROR.
  */
-sl_cc_multilevel_sensor_return_value
-sl_cc_multilevel_sensor_get_default_sensor_type(uint8_t* o_default_sensor_type);
+cc_multilevel_sensor_return_value
+cc_multilevel_sensor_get_default_sensor_type(uint8_t* o_default_sensor_type);
 
 /**
  * Initialize an iterator struct for the registered sensor interfaces.
  * If there is any registered interface the iterator will be NULL.
  * @param[out] i_iterator This is a double pointer which will hold an interface reference to the first registered interface
- * @return SL_CC_MULTILEVEL_SENSOR_RETURN_VALUE_OK if success, else SL_CC_MULTILEVEL_SENSOR_RETURN_VALUE_ERROR..
+ * @return CC_MULTILEVEL_SENSOR_RETURN_VALUE_OK if success, else CC_MULTILEVEL_SENSOR_RETURN_VALUE_ERROR..
  */
-sl_cc_multilevel_sensor_return_value
-sl_cc_multilevel_sensor_init_iterator(sl_sensor_interface_iterator_t** i_iterator);
+cc_multilevel_sensor_return_value
+cc_multilevel_sensor_init_iterator(sensor_interface_iterator_t** i_iterator);
 
 /**
  * Moves the iterator reference forward to the next registered interface, if the current is the last one then NULL
  * If there is any registered interface the iterator will be NULL.
  * @param[out] i_iterator This is a double pointer which will hold an interface reference
- * @return SL_CC_MULTILEVEL_SENSOR_RETURN_VALUE_OK.
+ * @return CC_MULTILEVEL_SENSOR_RETURN_VALUE_OK.
  */
 void
-sl_cc_multilevel_sensor_next_iterator(sl_sensor_interface_iterator_t** i_iterator);
+cc_multilevel_sensor_next_iterator(sensor_interface_iterator_t** i_iterator);
 
 /**
  * Returns the number of registered sensor interfaces
  * @return Number of registered sensor interfaces.
  */
 uint8_t
-sl_cc_multilevel_sensor_get_number_of_registered_sensors(void);
+cc_multilevel_sensor_get_number_of_registered_sensors(void);
 
 /**
  * Removes all of the registered sensor interfaces from the administration
  */
 void
-sl_cc_multilevel_sensor_reset_administration(void);
+cc_multilevel_sensor_reset_administration(void);
 
 #endif  // CC_MULTILEVELSENSOR_SENSORHANDLER_H

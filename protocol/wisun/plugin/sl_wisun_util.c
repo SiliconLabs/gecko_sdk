@@ -38,6 +38,8 @@
 
 #define RTT_LogChannel ((unsigned int) 0)
 
+#define VERSION_WISUN_FAN1_0       0
+
 #define SLI_WISUN_ERROR_CHECK_SET_STATUS(__result, __value)\
 do {\
   if (!(__result)){\
@@ -63,390 +65,8 @@ typedef struct sli_wisun_rf_settings {
   uint16_t op_mode;                     ///< Operating mode
 } sli_wisun_rf_settings_t;
 
-static const sli_wisun_rf_settings_t rf_settings_CN_1_1b = {
-  .channel_0_center_frequency=470200000, .channel_spacing=200000, .datarate=50000, .number_of_channels=199, .reg_domain=4, .op_class=1, .op_mode=0x1b
-};
-static const sli_wisun_rf_settings_t rf_settings_CN_1_2a = {
-  .channel_0_center_frequency=470200000, .channel_spacing=200000, .datarate=100000, .number_of_channels=199, .reg_domain=4, .op_class=1, .op_mode=0x2a
-};
-static const sli_wisun_rf_settings_t rf_settings_CN_1_3 = {
-  .channel_0_center_frequency=470200000, .channel_spacing=200000, .datarate=150000, .number_of_channels=199, .reg_domain=4, .op_class=1, .op_mode=0x3
-};
-static const sli_wisun_rf_settings_t rf_settings_CN_2_1b = {
-  .channel_0_center_frequency=779200000, .channel_spacing=200000, .datarate=50000, .number_of_channels=39, .reg_domain=4, .op_class=2, .op_mode=0x1b
-};
-static const sli_wisun_rf_settings_t rf_settings_CN_2_2a = {
-  .channel_0_center_frequency=779200000, .channel_spacing=200000, .datarate=100000, .number_of_channels=39, .reg_domain=4, .op_class=2, .op_mode=0x2a
-};
-static const sli_wisun_rf_settings_t rf_settings_CN_3_3 = {
-  .channel_0_center_frequency=779400000, .channel_spacing=400000, .datarate=150000, .number_of_channels=19, .reg_domain=4, .op_class=3, .op_mode=0x3
-};
-static const sli_wisun_rf_settings_t rf_settings_CN_3_4a = {
-  .channel_0_center_frequency=779400000, .channel_spacing=400000, .datarate=200000, .number_of_channels=19, .reg_domain=4, .op_class=3, .op_mode=0x4a
-};
-static const sli_wisun_rf_settings_t rf_settings_CN_3_5 = {
-  .channel_0_center_frequency=779400000, .channel_spacing=400000, .datarate=300000, .number_of_channels=19, .reg_domain=4, .op_class=3, .op_mode=0x5
-};
-static const sli_wisun_rf_settings_t rf_settings_CN_4_1b = {
-  .channel_0_center_frequency=920625000, .channel_spacing=250000, .datarate=50000, .number_of_channels=16, .reg_domain=4, .op_class=4, .op_mode=0x1b
-};
-static const sli_wisun_rf_settings_t rf_settings_CN_4_2a = {
-  .channel_0_center_frequency=920625000, .channel_spacing=250000, .datarate=100000, .number_of_channels=16, .reg_domain=4, .op_class=4, .op_mode=0x2a
-};
-static const sli_wisun_rf_settings_t rf_settings_CN_4_3 = {
-  .channel_0_center_frequency=920625000, .channel_spacing=250000, .datarate=150000, .number_of_channels=16, .reg_domain=4, .op_class=4, .op_mode=0x3
-};
-static const sli_wisun_rf_settings_t rf_settings_EU_1_1a = {
-  .channel_0_center_frequency=863100000, .channel_spacing=100000, .datarate=50000, .number_of_channels=69, .reg_domain=3, .op_class=1, .op_mode=0x1a
-};
-static const sli_wisun_rf_settings_t rf_settings_EU_2_2a = {
-  .channel_0_center_frequency=863100000, .channel_spacing=200000, .datarate=100000, .number_of_channels=35, .reg_domain=3, .op_class=2, .op_mode=0x2a
-};
-static const sli_wisun_rf_settings_t rf_settings_EU_2_3 = {
-  .channel_0_center_frequency=863100000, .channel_spacing=200000, .datarate=150000, .number_of_channels=35, .reg_domain=3, .op_class=2, .op_mode=0x3
-};
-static const sli_wisun_rf_settings_t rf_settings_EU_3_1a = {
-  .channel_0_center_frequency=870100000, .channel_spacing=100000, .datarate=50000, .number_of_channels=55, .reg_domain=3, .op_class=3, .op_mode=0x1a
-};
-static const sli_wisun_rf_settings_t rf_settings_EU_4_2a = {
-  .channel_0_center_frequency=870200000, .channel_spacing=200000, .datarate=100000, .number_of_channels=27, .reg_domain=3, .op_class=4, .op_mode=0x2a
-};
-static const sli_wisun_rf_settings_t rf_settings_EU_4_3 = {
-  .channel_0_center_frequency=870200000, .channel_spacing=200000, .datarate=150000, .number_of_channels=27, .reg_domain=3, .op_class=4, .op_mode=0x3
-};
-static const sli_wisun_rf_settings_t rf_settings_IN_1_1a = {
-  .channel_0_center_frequency=865100000, .channel_spacing=100000, .datarate=50000, .number_of_channels=19, .reg_domain=5, .op_class=1, .op_mode=0x1a
-};
-static const sli_wisun_rf_settings_t rf_settings_IN_2_2a = {
-  .channel_0_center_frequency=865100000, .channel_spacing=200000, .datarate=100000, .number_of_channels=10, .reg_domain=5, .op_class=2, .op_mode=0x2a
-};
-static const sli_wisun_rf_settings_t rf_settings_IN_2_3 = {
-  .channel_0_center_frequency=865100000, .channel_spacing=200000, .datarate=150000, .number_of_channels=10, .reg_domain=5, .op_class=2, .op_mode=0x3
-};
-static const sli_wisun_rf_settings_t rf_settings_NA_1_1b = {
-  .channel_0_center_frequency=902200000, .channel_spacing=200000, .datarate=50000, .number_of_channels=129, .reg_domain=1, .op_class=1, .op_mode=0x1b
-};
-static const sli_wisun_rf_settings_t rf_settings_NA_1_2a = {
-  .channel_0_center_frequency=902200000, .channel_spacing=200000, .datarate=100000, .number_of_channels=129, .reg_domain=1, .op_class=1, .op_mode=0x2a
-};
-static const sli_wisun_rf_settings_t rf_settings_NA_2_3 = {
-  .channel_0_center_frequency=902400000, .channel_spacing=400000, .datarate=150000, .number_of_channels=64, .reg_domain=1, .op_class=2, .op_mode=0x3
-};
-static const sli_wisun_rf_settings_t rf_settings_NA_2_4a = {
-  .channel_0_center_frequency=902400000, .channel_spacing=400000, .datarate=200000, .number_of_channels=64, .reg_domain=1, .op_class=2, .op_mode=0x4a
-};
-static const sli_wisun_rf_settings_t rf_settings_NA_3_5 = {
-  .channel_0_center_frequency=902600000, .channel_spacing=600000, .datarate=300000, .number_of_channels=42, .reg_domain=1, .op_class=3, .op_mode=0x5
-};
-static const sli_wisun_rf_settings_t rf_settings_WW_1_1b = {
-  .channel_0_center_frequency=2400200000, .channel_spacing=200000, .datarate=50000, .number_of_channels=416, .reg_domain=0, .op_class=1, .op_mode=0x1b
-};
-static const sli_wisun_rf_settings_t rf_settings_WW_1_2a = {
-  .channel_0_center_frequency=2400200000, .channel_spacing=200000, .datarate=100000, .number_of_channels=416, .reg_domain=0, .op_class=1, .op_mode=0x2a
-};
-static const sli_wisun_rf_settings_t rf_settings_WW_2_3 = {
-  .channel_0_center_frequency=2400400000, .channel_spacing=400000, .datarate=150000, .number_of_channels=207, .reg_domain=0, .op_class=2, .op_mode=0x3
-};
-static const sli_wisun_rf_settings_t rf_settings_WW_2_4a = {
-  .channel_0_center_frequency=2400400000, .channel_spacing=400000, .datarate=200000, .number_of_channels=207, .reg_domain=0, .op_class=2, .op_mode=0x4a
-};
-static const sli_wisun_rf_settings_t rf_settings_WW_2_5 = {
-  .channel_0_center_frequency=2400400000, .channel_spacing=400000, .datarate=300000, .number_of_channels=207, .reg_domain=0, .op_class=2, .op_mode=0x5
-};
-static const sli_wisun_rf_settings_t rf_settings_JP_1_1b = {
-  .channel_0_center_frequency=920600000, .channel_spacing=200000, .datarate=50000, .number_of_channels=38, .reg_domain=2, .op_class=1, .op_mode=0x1b
-};
-static const sli_wisun_rf_settings_t rf_settings_JP_3_4b = {
-  .channel_0_center_frequency=920800000, .channel_spacing=600000, .datarate=200000, .number_of_channels=12, .reg_domain=2, .op_class=3, .op_mode=0x4b
-};
-static const sli_wisun_rf_settings_t rf_settings_JP_3_5 = {
-  .channel_0_center_frequency=920800000, .channel_spacing=600000, .datarate=300000, .number_of_channels=12, .reg_domain=2, .op_class=3, .op_mode=0x5
-};
-static const sli_wisun_rf_settings_t rf_settings_JP_2_2b = {
-  .channel_0_center_frequency=920900000, .channel_spacing=400000, .datarate=100000, .number_of_channels=18, .reg_domain=2, .op_class=2, .op_mode=0x2b
-};
-static const sli_wisun_rf_settings_t rf_settings_JP_2_3 = {
-  .channel_0_center_frequency=920900000, .channel_spacing=400000, .datarate=150000, .number_of_channels=18, .reg_domain=2, .op_class=2, .op_mode=0x3
-};
-static const sli_wisun_rf_settings_t rf_settings_MX_1_1b = {
-  .channel_0_center_frequency=902200000, .channel_spacing=200000, .datarate=50000, .number_of_channels=129, .reg_domain=6, .op_class=1, .op_mode=0x1b
-};
-static const sli_wisun_rf_settings_t rf_settings_MX_1_2a = {
-  .channel_0_center_frequency=902200000, .channel_spacing=200000, .datarate=100000, .number_of_channels=129, .reg_domain=6, .op_class=1, .op_mode=0x2a
-};
-static const sli_wisun_rf_settings_t rf_settings_MX_2_3 = {
-  .channel_0_center_frequency=902400000, .channel_spacing=400000, .datarate=150000, .number_of_channels=64, .reg_domain=6, .op_class=2, .op_mode=0x3
-};
-static const sli_wisun_rf_settings_t rf_settings_MX_2_4a = {
-  .channel_0_center_frequency=902400000, .channel_spacing=400000, .datarate=200000, .number_of_channels=64, .reg_domain=6, .op_class=2, .op_mode=0x4a
-};
-static const sli_wisun_rf_settings_t rf_settings_MX_2_5 = {
-  .channel_0_center_frequency=902400000, .channel_spacing=400000, .datarate=300000, .number_of_channels=64, .reg_domain=6, .op_class=2, .op_mode=0x5
-};
-static const sli_wisun_rf_settings_t rf_settings_BZ_1_1b = {
-  .channel_0_center_frequency=902200000, .channel_spacing=200000, .datarate=50000, .number_of_channels=129, .reg_domain=7, .op_class=1, .op_mode=0x1b
-};
-static const sli_wisun_rf_settings_t rf_settings_BZ_1_2a = {
-  .channel_0_center_frequency=902200000, .channel_spacing=200000, .datarate=100000, .number_of_channels=129, .reg_domain=7, .op_class=1, .op_mode=0x2a
-};
-static const sli_wisun_rf_settings_t rf_settings_BZ_2_3 = {
-  .channel_0_center_frequency=902400000, .channel_spacing=400000, .datarate=150000, .number_of_channels=64, .reg_domain=7, .op_class=2, .op_mode=0x3
-};
-static const sli_wisun_rf_settings_t rf_settings_BZ_2_4a = {
-  .channel_0_center_frequency=902400000, .channel_spacing=400000, .datarate=200000, .number_of_channels=64, .reg_domain=7, .op_class=2, .op_mode=0x4a
-};
-static const sli_wisun_rf_settings_t rf_settings_BZ_3_5 = {
-  .channel_0_center_frequency=902600000, .channel_spacing=600000, .datarate=300000, .number_of_channels=42, .reg_domain=7, .op_class=3, .op_mode=0x5
-};
-static const sli_wisun_rf_settings_t rf_settings_AZ_1_1b = {
-  .channel_0_center_frequency=915200000, .channel_spacing=200000, .datarate=50000, .number_of_channels=64, .reg_domain=8, .op_class=1, .op_mode=0x1b
-};
-static const sli_wisun_rf_settings_t rf_settings_AZ_1_2a = {
-  .channel_0_center_frequency=915200000, .channel_spacing=200000, .datarate=100000, .number_of_channels=64, .reg_domain=8, .op_class=1, .op_mode=0x2a
-};
-static const sli_wisun_rf_settings_t rf_settings_AZ_2_3 = {
-  .channel_0_center_frequency=915400000, .channel_spacing=400000, .datarate=150000, .number_of_channels=32, .reg_domain=8, .op_class=2, .op_mode=0x3
-};
-static const sli_wisun_rf_settings_t rf_settings_AZ_2_4a = {
-  .channel_0_center_frequency=915400000, .channel_spacing=400000, .datarate=200000, .number_of_channels=32, .reg_domain=8, .op_class=2, .op_mode=0x4a
-};
-static const sli_wisun_rf_settings_t rf_settings_AZ_2_5 = {
-  .channel_0_center_frequency=915400000, .channel_spacing=400000, .datarate=300000, .number_of_channels=32, .reg_domain=8, .op_class=2, .op_mode=0x5
-};
-static const sli_wisun_rf_settings_t rf_settings_NZ_1_1b = {
-  .channel_0_center_frequency=915200000, .channel_spacing=200000, .datarate=50000, .number_of_channels=64, .reg_domain=8, .op_class=1, .op_mode=0x1b
-};
-static const sli_wisun_rf_settings_t rf_settings_NZ_1_2a = {
-  .channel_0_center_frequency=915200000, .channel_spacing=200000, .datarate=100000, .number_of_channels=64, .reg_domain=8, .op_class=1, .op_mode=0x2a
-};
-static const sli_wisun_rf_settings_t rf_settings_NZ_2_3 = {
-  .channel_0_center_frequency=915400000, .channel_spacing=400000, .datarate=150000, .number_of_channels=32, .reg_domain=8, .op_class=2, .op_mode=0x3
-};
-static const sli_wisun_rf_settings_t rf_settings_NZ_2_4a = {
-  .channel_0_center_frequency=915400000, .channel_spacing=400000, .datarate=200000, .number_of_channels=32, .reg_domain=8, .op_class=2, .op_mode=0x4a
-};
-static const sli_wisun_rf_settings_t rf_settings_NZ_2_5 = {
-  .channel_0_center_frequency=915400000, .channel_spacing=400000, .datarate=300000, .number_of_channels=32, .reg_domain=8, .op_class=2, .op_mode=0x5
-};
-static const sli_wisun_rf_settings_t rf_settings_KR_1_1b = {
-  .channel_0_center_frequency=917100000, .channel_spacing=200000, .datarate=50000, .number_of_channels=32, .reg_domain=9, .op_class=1, .op_mode=0x1b
-};
-static const sli_wisun_rf_settings_t rf_settings_KR_1_2a = {
-  .channel_0_center_frequency=917100000, .channel_spacing=200000, .datarate=100000, .number_of_channels=32, .reg_domain=9, .op_class=1, .op_mode=0x2a
-};
-static const sli_wisun_rf_settings_t rf_settings_KR_2_3 = {
-  .channel_0_center_frequency=917300000, .channel_spacing=400000, .datarate=150000, .number_of_channels=16, .reg_domain=9, .op_class=2, .op_mode=0x3
-};
-static const sli_wisun_rf_settings_t rf_settings_KR_2_4a = {
-  .channel_0_center_frequency=917300000, .channel_spacing=400000, .datarate=200000, .number_of_channels=16, .reg_domain=9, .op_class=2, .op_mode=0x4a
-};
-static const sli_wisun_rf_settings_t rf_settings_KR_2_5 = {
-  .channel_0_center_frequency=917300000, .channel_spacing=400000, .datarate=300000, .number_of_channels=16, .reg_domain=9, .op_class=2, .op_mode=0x5
-};
-static const sli_wisun_rf_settings_t rf_settings_PH_1_1b = {
-  .channel_0_center_frequency=915200000, .channel_spacing=200000, .datarate=50000, .number_of_channels=14, .reg_domain=10, .op_class=1, .op_mode=0x1b
-};
-static const sli_wisun_rf_settings_t rf_settings_PH_1_2a = {
-  .channel_0_center_frequency=915200000, .channel_spacing=200000, .datarate=100000, .number_of_channels=14, .reg_domain=10, .op_class=1, .op_mode=0x2a
-};
-static const sli_wisun_rf_settings_t rf_settings_PH_2_3 = {
-  .channel_0_center_frequency=915400000, .channel_spacing=400000, .datarate=150000, .number_of_channels=7, .reg_domain=10, .op_class=2, .op_mode=0x3
-};
-static const sli_wisun_rf_settings_t rf_settings_PH_2_4a = {
-  .channel_0_center_frequency=915400000, .channel_spacing=400000, .datarate=200000, .number_of_channels=7, .reg_domain=10, .op_class=2, .op_mode=0x4a
-};
-static const sli_wisun_rf_settings_t rf_settings_PH_2_5 = {
-  .channel_0_center_frequency=915400000, .channel_spacing=400000, .datarate=300000, .number_of_channels=7, .reg_domain=10, .op_class=2, .op_mode=0x5
-};
-static const sli_wisun_rf_settings_t rf_settings_MY_1_1b = {
-  .channel_0_center_frequency=919200000, .channel_spacing=200000, .datarate=50000, .number_of_channels=19, .reg_domain=11, .op_class=1, .op_mode=0x1b
-};
-static const sli_wisun_rf_settings_t rf_settings_MY_1_2a = {
-  .channel_0_center_frequency=919200000, .channel_spacing=200000, .datarate=100000, .number_of_channels=19, .reg_domain=11, .op_class=1, .op_mode=0x2a
-};
-static const sli_wisun_rf_settings_t rf_settings_MY_2_3 = {
-  .channel_0_center_frequency=919400000, .channel_spacing=400000, .datarate=150000, .number_of_channels=10, .reg_domain=11, .op_class=2, .op_mode=0x3
-};
-static const sli_wisun_rf_settings_t rf_settings_MY_2_4a = {
-  .channel_0_center_frequency=919400000, .channel_spacing=400000, .datarate=200000, .number_of_channels=10, .reg_domain=11, .op_class=2, .op_mode=0x4a
-};
-static const sli_wisun_rf_settings_t rf_settings_MY_2_5 = {
-  .channel_0_center_frequency=919400000, .channel_spacing=400000, .datarate=300000, .number_of_channels=10, .reg_domain=11, .op_class=2, .op_mode=0x5
-};
-static const sli_wisun_rf_settings_t rf_settings_HK_1_1b = {
-  .channel_0_center_frequency=920200000, .channel_spacing=200000, .datarate=50000, .number_of_channels=24, .reg_domain=12, .op_class=1, .op_mode=0x1b
-};
-static const sli_wisun_rf_settings_t rf_settings_HK_1_2a = {
-  .channel_0_center_frequency=920200000, .channel_spacing=200000, .datarate=100000, .number_of_channels=24, .reg_domain=12, .op_class=1, .op_mode=0x2a
-};
-static const sli_wisun_rf_settings_t rf_settings_HK_2_3 = {
-  .channel_0_center_frequency=920400000, .channel_spacing=400000, .datarate=150000, .number_of_channels=12, .reg_domain=12, .op_class=2, .op_mode=0x3
-};
-static const sli_wisun_rf_settings_t rf_settings_HK_2_4a = {
-  .channel_0_center_frequency=920400000, .channel_spacing=400000, .datarate=200000, .number_of_channels=12, .reg_domain=12, .op_class=2, .op_mode=0x4a
-};
-static const sli_wisun_rf_settings_t rf_settings_HK_2_5 = {
-  .channel_0_center_frequency=920400000, .channel_spacing=400000, .datarate=300000, .number_of_channels=12, .reg_domain=12, .op_class=2, .op_mode=0x5
-};
-static const sli_wisun_rf_settings_t rf_settings_SG_1_1a = {
-  .channel_0_center_frequency=866100000, .channel_spacing=100000, .datarate=50000, .number_of_channels=29, .reg_domain=13, .op_class=1, .op_mode=0x1a
-};
-static const sli_wisun_rf_settings_t rf_settings_SG_2_2a = {
-  .channel_0_center_frequency=866100000, .channel_spacing=200000, .datarate=100000, .number_of_channels=15, .reg_domain=13, .op_class=2, .op_mode=0x2a
-};
-static const sli_wisun_rf_settings_t rf_settings_SG_2_3 = {
-  .channel_0_center_frequency=866100000, .channel_spacing=200000, .datarate=150000, .number_of_channels=15, .reg_domain=13, .op_class=2, .op_mode=0x3
-};
-static const sli_wisun_rf_settings_t rf_settings_SG_3_4a = {
-  .channel_0_center_frequency=866300000, .channel_spacing=400000, .datarate=200000, .number_of_channels=7, .reg_domain=13, .op_class=3, .op_mode=0x4a
-};
-static const sli_wisun_rf_settings_t rf_settings_SG_3_5 = {
-  .channel_0_center_frequency=866300000, .channel_spacing=400000, .datarate=300000, .number_of_channels=7, .reg_domain=13, .op_class=3, .op_mode=0x5
-};
-static const sli_wisun_rf_settings_t rf_settings_SG_4_1b = {
-  .channel_0_center_frequency=920200000, .channel_spacing=200000, .datarate=50000, .number_of_channels=24, .reg_domain=13, .op_class=4, .op_mode=0x1b
-};
-static const sli_wisun_rf_settings_t rf_settings_SG_4_2a = {
-  .channel_0_center_frequency=920200000, .channel_spacing=200000, .datarate=100000, .number_of_channels=24, .reg_domain=13, .op_class=4, .op_mode=0x2a
-};
-static const sli_wisun_rf_settings_t rf_settings_SG_5_3 = {
-  .channel_0_center_frequency=920400000, .channel_spacing=400000, .datarate=150000, .number_of_channels=12, .reg_domain=13, .op_class=5, .op_mode=0x3
-};
-static const sli_wisun_rf_settings_t rf_settings_SG_5_4a = {
-  .channel_0_center_frequency=920400000, .channel_spacing=400000, .datarate=200000, .number_of_channels=12, .reg_domain=13, .op_class=5, .op_mode=0x4a
-};
-static const sli_wisun_rf_settings_t rf_settings_SG_5_5 = {
-  .channel_0_center_frequency=920400000, .channel_spacing=400000, .datarate=300000, .number_of_channels=12, .reg_domain=13, .op_class=5, .op_mode=0x5
-};
-static const sli_wisun_rf_settings_t rf_settings_TH_1_1b = {
-  .channel_0_center_frequency=920200000, .channel_spacing=200000, .datarate=50000, .number_of_channels=24, .reg_domain=14, .op_class=1, .op_mode=0x1b
-};
-static const sli_wisun_rf_settings_t rf_settings_TH_1_2a = {
-  .channel_0_center_frequency=920200000, .channel_spacing=200000, .datarate=100000, .number_of_channels=24, .reg_domain=14, .op_class=1, .op_mode=0x2a
-};
-static const sli_wisun_rf_settings_t rf_settings_TH_2_3 = {
-  .channel_0_center_frequency=920400000, .channel_spacing=400000, .datarate=150000, .number_of_channels=12, .reg_domain=14, .op_class=2, .op_mode=0x3
-};
-static const sli_wisun_rf_settings_t rf_settings_TH_2_4a = {
-  .channel_0_center_frequency=920400000, .channel_spacing=400000, .datarate=200000, .number_of_channels=12, .reg_domain=14, .op_class=2, .op_mode=0x4a
-};
-static const sli_wisun_rf_settings_t rf_settings_TH_2_5 = {
-  .channel_0_center_frequency=920400000, .channel_spacing=400000, .datarate=300000, .number_of_channels=12, .reg_domain=14, .op_class=2, .op_mode=0x5
-};
-static const sli_wisun_rf_settings_t rf_settings_VN_1_1b = {
-  .channel_0_center_frequency=920200000, .channel_spacing=200000, .datarate=50000, .number_of_channels=24, .reg_domain=15, .op_class=1, .op_mode=0x1b
-};
-static const sli_wisun_rf_settings_t rf_settings_VN_1_2a = {
-  .channel_0_center_frequency=920200000, .channel_spacing=200000, .datarate=100000, .number_of_channels=24, .reg_domain=15, .op_class=1, .op_mode=0x2a
-};
-static const sli_wisun_rf_settings_t rf_settings_VN_2_3 = {
-  .channel_0_center_frequency=920400000, .channel_spacing=400000, .datarate=150000, .number_of_channels=12, .reg_domain=15, .op_class=2, .op_mode=0x3
-};
-static const sli_wisun_rf_settings_t rf_settings_VN_2_4a = {
-  .channel_0_center_frequency=920400000, .channel_spacing=400000, .datarate=200000, .number_of_channels=12, .reg_domain=15, .op_class=2, .op_mode=0x4a
-};
-static const sli_wisun_rf_settings_t rf_settings_VN_2_5 = {
-  .channel_0_center_frequency=920400000, .channel_spacing=400000, .datarate=300000, .number_of_channels=12, .reg_domain=15, .op_class=2, .op_mode=0x5
-};
-
-/** Supported Wi-SUN frequency band settings. */
-static const sli_wisun_rf_settings_t *rf_settings[] = {
-  &rf_settings_CN_1_1b,
-  &rf_settings_CN_1_2a,
-  &rf_settings_CN_1_3,
-  &rf_settings_CN_2_1b,
-  &rf_settings_CN_2_2a,
-  &rf_settings_CN_3_3,
-  &rf_settings_CN_3_4a,
-  &rf_settings_CN_3_5,
-  &rf_settings_CN_4_1b,
-  &rf_settings_CN_4_2a,
-  &rf_settings_CN_4_3,
-  &rf_settings_EU_1_1a,
-  &rf_settings_EU_2_2a,
-  &rf_settings_EU_2_3,
-  &rf_settings_EU_3_1a,
-  &rf_settings_EU_4_2a,
-  &rf_settings_EU_4_3,
-  &rf_settings_IN_1_1a,
-  &rf_settings_IN_2_2a,
-  &rf_settings_IN_2_3,
-  &rf_settings_NA_1_1b,
-  &rf_settings_NA_1_2a,
-  &rf_settings_NA_2_3,
-  &rf_settings_NA_2_4a,
-  &rf_settings_NA_3_5,
-  &rf_settings_WW_1_1b,
-  &rf_settings_WW_1_2a,
-  &rf_settings_WW_2_3,
-  &rf_settings_WW_2_4a,
-  &rf_settings_WW_2_5,
-  &rf_settings_JP_1_1b,
-  &rf_settings_JP_2_2b,
-  &rf_settings_JP_2_3,
-  &rf_settings_JP_3_4b,
-  &rf_settings_JP_3_5,
-  &rf_settings_MX_1_1b,
-  &rf_settings_MX_1_2a,
-  &rf_settings_MX_2_3,
-  &rf_settings_MX_2_4a,
-  &rf_settings_MX_2_5,
-  &rf_settings_BZ_1_1b,
-  &rf_settings_BZ_1_2a,
-  &rf_settings_BZ_2_3,
-  &rf_settings_BZ_2_4a,
-  &rf_settings_BZ_3_5,
-  &rf_settings_AZ_1_1b,
-  &rf_settings_AZ_1_2a,
-  &rf_settings_AZ_2_3,
-  &rf_settings_AZ_2_4a,
-  &rf_settings_AZ_2_5,
-  &rf_settings_NZ_1_1b,
-  &rf_settings_NZ_1_2a,
-  &rf_settings_NZ_2_3,
-  &rf_settings_NZ_2_4a,
-  &rf_settings_NZ_2_5,
-  &rf_settings_KR_1_1b,
-  &rf_settings_KR_1_2a,
-  &rf_settings_KR_2_3,
-  &rf_settings_KR_2_4a,
-  &rf_settings_KR_2_5,
-  &rf_settings_PH_1_1b,
-  &rf_settings_PH_1_2a,
-  &rf_settings_PH_2_3,
-  &rf_settings_PH_2_4a,
-  &rf_settings_PH_2_5,
-  &rf_settings_MY_1_1b,
-  &rf_settings_MY_1_2a,
-  &rf_settings_MY_2_3,
-  &rf_settings_MY_2_4a,
-  &rf_settings_MY_2_5,
-  &rf_settings_HK_1_1b,
-  &rf_settings_HK_1_2a,
-  &rf_settings_HK_2_3,
-  &rf_settings_HK_2_4a,
-  &rf_settings_HK_2_5,
-  &rf_settings_SG_1_1a,
-  &rf_settings_SG_2_2a,
-  &rf_settings_SG_2_3,
-  &rf_settings_SG_3_4a,
-  &rf_settings_SG_3_5,
-  &rf_settings_SG_4_1b,
-  &rf_settings_SG_4_2a,
-  &rf_settings_SG_5_3,
-  &rf_settings_SG_5_4a,
-  &rf_settings_SG_5_5,
-  &rf_settings_TH_1_1b,
-  &rf_settings_TH_1_2a,
-  &rf_settings_TH_2_3,
-  &rf_settings_TH_2_4a,
-  &rf_settings_TH_2_5,
-  &rf_settings_VN_1_1b,
-  &rf_settings_VN_1_2a,
-  &rf_settings_VN_2_3,
-  &rf_settings_VN_2_4a,
-  &rf_settings_VN_2_5,
-  NULL
+const uint8_t phy_mode_id_to_op_mode[9] = {
+  0xFF, 0x1a, 0x1b, 0x2a, 0x2b, 0x3, 0x4a, 0x4b, 0x5
 };
 
 sl_status_t sl_wisun_util_get_rf_settings(uint8_t *reg_domain, uint8_t *op_class, uint16_t *op_mode)
@@ -454,11 +74,9 @@ sl_status_t sl_wisun_util_get_rf_settings(uint8_t *reg_domain, uint8_t *op_class
   sl_status_t status = SL_STATUS_OK;
   RAIL_Handle_t rail_handle;
   const RAIL_ChannelConfig_t *channel_config;
+  const uint8_t *stack_info;
   RAIL_Status_t ret;
-  uint32_t datarate;
-  uint16_t number_of_channels;
-  const sli_wisun_rf_settings_t *iter=NULL;
-  int index = 0;
+  uint8_t phy_mode;
   SEGGER_RTT_printf(RTT_LogChannel, "sl_wisun_util_get_rf_settings()");
 
   status = sli_wisun_get_rail_handle(&rail_handle);
@@ -469,32 +87,30 @@ sl_status_t sl_wisun_util_get_rf_settings(uint8_t *reg_domain, uint8_t *op_class
   ret = RAIL_ConfigChannels(rail_handle, channel_config, NULL);
   SLI_WISUN_ERROR_CHECK_SET_STATUS(ret == RAIL_STATUS_NO_ERROR, SL_STATUS_FAIL);
 
-  datarate = RAIL_GetBitRate(rail_handle);
-  SLI_WISUN_ERROR_CHECK_SET_STATUS(datarate, SL_STATUS_FAIL);
-  number_of_channels = channel_config->configs->channelNumberEnd - channel_config->configs->channelNumberStart + 1;
-
-  /* Iterate through supported Wi-SUN frequency band settings to find
-    * the matching RAIL configuration. */
-  iter = rf_settings[index];
-  while (iter) {
-    if ((channel_config->configs->baseFrequency == iter->channel_0_center_frequency) &&
-        (channel_config->configs->channelSpacing == iter->channel_spacing) &&
-        (datarate == iter->datarate) &&
-        (number_of_channels == iter->number_of_channels)) {
-      /* Matching Wi-SUN frequency band settings found. */
-      *reg_domain = iter->reg_domain;
-      *op_class = iter->op_class;
-      *op_mode = iter->op_mode;
-      SEGGER_RTT_printf(RTT_LogChannel, "Using reg_domain %u, op_class %u, op_mode %x", *reg_domain, *op_class, *op_mode);
-      break;
-    }
-    iter = rf_settings[++index];
-  }
-
-  if (!iter) {
-    SEGGER_RTT_printf(RTT_LogChannel, "No matching WI-SUN frequency band settings");
+  stack_info = channel_config->configs[0].stackInfo;
+  if (stack_info[0] != RAIL_PTI_PROTOCOL_WISUN) {
+    // Not a Wi-SUN configuration
     SLI_WISUN_ERROR_SET_STATUS(SL_STATUS_FAIL);
   }
+  if (stack_info[1] & 0xE0) {
+    // Not a valid PHY Type
+    SLI_WISUN_ERROR_SET_STATUS(SL_STATUS_FAIL);
+  }
+  if (stack_info[2] == VERSION_WISUN_FAN1_0) {
+    *reg_domain = stack_info[4];
+    *op_class = stack_info[3];
+    phy_mode = stack_info[1] & 0x0F;
+    if (phy_mode == 0 || phy_mode > 8) {
+      // Not a valid PHY Mode
+      SLI_WISUN_ERROR_SET_STATUS(SL_STATUS_FAIL);
+    } else {
+      *op_mode = phy_mode_id_to_op_mode[phy_mode];
+    }
+  } else {
+    // Unknown configuration version
+    SLI_WISUN_ERROR_SET_STATUS(SL_STATUS_FAIL);
+  }
+  SEGGER_RTT_printf(RTT_LogChannel, "Using reg_domain %u, op_class %u, op_mode %x", *reg_domain, *op_class, *op_mode);
 
 error_handler:
 

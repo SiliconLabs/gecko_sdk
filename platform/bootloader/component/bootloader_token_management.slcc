@@ -8,7 +8,9 @@ source:
   - path: platform/bootloader/security/btl_security_tokens.c
 include:
   - path: platform/bootloader/security
-    file_list: 
+    file_list:
     - path: btl_security_tokens.h
 provides:
   - name: bootloader_token_management
+  - name: bootloader_nonsecure_incompatible
+    condition: [bootloader_core_nonsecure]

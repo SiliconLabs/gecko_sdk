@@ -174,7 +174,7 @@ context_t;
  * @param[in,out] context Context containing the list to which the CC / C pair must be added.
  * @return Always returns false.
  */
-static bool cc_callback(CC_handler_map_v3_t const * const p_cc_entry, zaf_cc_context_t context)
+static bool cc_callback(CC_handler_map_latest_t const * const p_cc_entry, zaf_cc_context_t context)
 {
   // Continue on invalid CC.
   if (0xFF == p_cc_entry->CC) {

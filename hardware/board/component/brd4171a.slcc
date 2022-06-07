@@ -15,6 +15,7 @@
   - name: hardware_board_rb
   - name: hardware_board_from_stk
   - name: hardware_board_from_slwrb4171a
+  - name: hardware_board_has_vcom
   - name: hardware_board_has_spiflash
   - name: hardware_board_has_hfxo
   - name: hardware_board_supports_rf_band_2400
@@ -27,15 +28,13 @@
     instance:
     - vcom
   - id: bootloader_uart_driver
-  - id: i2cspm
-    instance:
-    - sensor
   - id: ls013b7dh03
   - id: memlcd_usart
   - id: simple_led
     instance:
     - led0
     - led1
+  - id: skrhaae010
   - id: simple_button
     instance:
     - btn0
@@ -58,8 +57,8 @@
   - board:device:rm21z000f1024im32
   - hardware:has:vcom
   - hardware:has:pti
-  - hardware:has:sensor:si7021
   - hardware:has:display:ls013b7dh03
   - hardware:has:led:2
+  - hardware:has:joystick:skrhaae010
   - hardware:has:button:2
   - hardware:has:memory:spi:mx25r8035f

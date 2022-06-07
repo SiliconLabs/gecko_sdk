@@ -1,11 +1,11 @@
 /**************************************************************************//**
  * @file     irq_ctrl_gic.c
  * @brief    Interrupt controller handling implementation for GIC
- * @version  V1.0.0
- * @date     30. June 2017
+ * @version  V1.1.1
+ * @date     29. March 2021
  ******************************************************************************/
 /*
- * Copyright (c) 2017 ARM Limited. All rights reserved.
+ * Copyright (c) 2017-2021 ARM Limited. All rights reserved.
  *
  * SPDX-License-Identifier: Apache-2.0
  *
@@ -37,7 +37,7 @@
 #endif
 
 static IRQHandler_t IRQTable[IRQ_GIC_LINE_COUNT] = { 0U };
-static uint32_t   IRQ_ID0;
+static uint32_t     IRQ_ID0;
 
 /// Initialize interrupt controller.
 __WEAK int32_t IRQ_Initialize (void) {
@@ -69,6 +69,9 @@ __WEAK int32_t IRQ_SetHandler (IRQn_ID_t irqn, IRQHandler_t handler) {
 /// Get the registered interrupt handler.
 __WEAK IRQHandler_t IRQ_GetHandler (IRQn_ID_t irqn) {
   IRQHandler_t h;
+
+  // Ignore CPUID field (software generated interrupts)
+  irqn &= 0x3FFU;
 
   if ((irqn >= 0) && (irqn < (IRQn_ID_t)IRQ_GIC_LINE_COUNT)) {
     h = IRQTable[irqn];
@@ -145,6 +148,11 @@ __WEAK int32_t IRQ_SetMode (IRQn_ID_t irqn, uint32_t mode) {
       status = -1;
     }
 
+    val = (mode & IRQ_MODE_MODEL_Msk);
+    if (val == IRQ_MODE_MODEL_1N) {
+      cfg |= 1;   // 1-N model
+    }
+
     // Check interrupt type
     val = mode & IRQ_MODE_TYPE_Msk;
 
@@ -176,7 +184,7 @@ __WEAK int32_t IRQ_SetMode (IRQn_ID_t irqn, uint32_t mode) {
     if (val == IRQ_MODE_CPU_ALL) {
       cpu = 0xFFU;
     } else {
-      cpu = val >> IRQ_MODE_CPU_Pos;
+      cpu = (uint8_t)(val >> IRQ_MODE_CPU_Pos);
     }
 
     // Apply configuration if no mode error
@@ -213,6 +221,9 @@ __WEAK uint32_t IRQ_GetMode (IRQn_ID_t irqn) {
       mode |= IRQ_MODE_TRIG_LEVEL;
     }
 
+    if (val & 1U) {
+      mode |= IRQ_MODE_MODEL_1N;
+    }
     // Get interrupt CPU targets
     mode |= GIC_GetTarget ((IRQn_Type)irqn) << IRQ_MODE_CPU_Pos;
 
@@ -271,9 +282,12 @@ __WEAK IRQn_ID_t IRQ_GetActiveFIQ (void) {
 /// Signal end of interrupt processing.
 __WEAK int32_t IRQ_EndOfInterrupt (IRQn_ID_t irqn) {
   int32_t status;
+  IRQn_Type irq = (IRQn_Type)irqn;
+
+  irqn &= 0x3FFU;
 
   if ((irqn >= 0) && (irqn < (IRQn_ID_t)IRQ_GIC_LINE_COUNT)) {
-    GIC_EndInterrupt ((IRQn_Type)irqn);
+    GIC_EndInterrupt (irq);
 
     if (irqn == 0) {
       IRQ_ID0 = 0U;

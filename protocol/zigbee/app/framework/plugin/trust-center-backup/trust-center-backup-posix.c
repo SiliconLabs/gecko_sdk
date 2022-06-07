@@ -28,6 +28,7 @@
 #include "app/framework/util/af-main.h"
 
 #include <errno.h>
+#include <strings.h>
 
 #ifdef UC_BUILD
 #include "trust-center-backup-config.h"
@@ -41,6 +42,14 @@
 #endif
 
 #if defined(POSIX_FILE_BACKUP_SUPPORT)
+
+#ifdef EMBER_TEST
+// Token header defines these, but for the simulation test build the token
+// definitions are not pulled in.
+#ifndef NVM3KEY_STACK_RESTORED_EUI64
+#define NVM3KEY_STACK_RESTORED_EUI64 0x1E12A
+#endif  // NVM3KEY_STACK_RESTORED_EUI64
+#endif // EMBER_TEST
 
 // *****************************************************************************
 // Globals
@@ -165,6 +174,258 @@ EmberStatus emberAfTrustCenterExportBackupToFile(const char* filepath)
   return returnValue;
 }
 
+// The binary file format to save the tokens are
+//
+// Number of Tokens (1 byte)
+// Token0 (4 bytes) Token0Size(1 byte) Token0ArraySize(1 byte) Token0Data(Token0Size * Token0ArraySize)
+// :
+// :
+// TokenM (4 bytes) TokenMSize(1 byte) TokenMArraySize(1 byte) TokenMData(TokenMSize * TokenMArraySize)
+//
+
+EmberStatus emberAfTrustCenterBackupSaveTokensToFile(const char* filepath)
+{
+  EmberEUI64 blankEui = { 0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF };
+  EmberEUI64 eui;
+  emberAfGetEui64(eui);
+  EmberStatus returnValue = EMBER_ERR_FATAL;
+  printf("Opening file '%s'\n", filepath);
+
+  FILE* output = fopen(filepath, WRITE_FLAGS);
+  if (NULL == output) {
+    printf("Failed to open file: %s", strerror(errno));
+    return returnValue;
+  }
+  // ------- Token Data Saving to the provided File -----------
+  uint8_t numberOfTokens = emberGetTokenCount();
+  if (numberOfTokens) {
+    fwrite(&numberOfTokens, 1, 1, output);
+    for (uint8_t tokenIndex = 0; tokenIndex < numberOfTokens; tokenIndex++) {
+      EmberTokenInfo tokenInfo;
+      EmberStatus status = emberGetTokenInfo(tokenIndex, &tokenInfo);
+      if (status == EMBER_SUCCESS) {
+        fwrite(&(tokenInfo.nvm3Key), 4, 1, output);   // 4 Bytes Token Key
+        fwrite(&(tokenInfo.size), 1, 1, output);      // 1 byte Token size
+        fwrite(&(tokenInfo.arraySize), 1, 1, output); // 1 byte array size
+        for (uint8_t arrayIndex = 0; arrayIndex < tokenInfo.arraySize; arrayIndex++) {
+          uint8_t tokenDataDump[255];
+          EmberTokenData tokenData;
+          tokenData.size = 0;
+          tokenData.data = (void *)tokenDataDump;
+          EmberStatus getStatus = emberGetTokenData(tokenInfo.nvm3Key,
+                                                    arrayIndex,
+                                                    &tokenData);
+          if (getStatus == EMBER_SUCCESS) {
+            // Check the Key to see if the token to save is restoredEui64, in that case
+            // check if it is blank, then save the node EUI64 in its place, else save the value
+            // received from the API. Once it saves, during restore process the set token will
+            // simply write the restoredEUI64 and the node will start to use that.
+            if (tokenInfo.nvm3Key == NVM3KEY_STACK_RESTORED_EUI64  //0x1E12A
+                && tokenData.size == sizeof(EmberEUI64)
+                && (!MEMCOMPARE((uint8_t*)(tokenData.data), (uint8_t*)blankEui, sizeof(EmberEUI64)))
+                ) {
+              // Special case : Save the node EUI64 on the restoredEui64 token while saving.
+              memcpy((uint8_t*)(tokenData.data), (uint8_t*)eui, sizeof(EmberEUI64));
+            }
+            fwrite((uint8_t*)(tokenData.data), (uint8_t)tokenData.size, 1, output);
+          }
+        }
+      }
+    }
+  }
+  fclose(output);
+  return EMBER_SUCCESS;
+}
+#if !defined(EMBER_TEST)
+static const uint16_t creators[] = {
+  CREATOR_STACK_NVDATA_VERSION,
+  CREATOR_STACK_BOOT_COUNTER,
+  CREATOR_STACK_NONCE_COUNTER,
+  CREATOR_STACK_ANALYSIS_REBOOT,
+  CREATOR_STACK_KEYS,
+  CREATOR_STACK_NODE_DATA,
+  CREATOR_STACK_CLASSIC_DATA,
+  CREATOR_STACK_ALTERNATE_KEY,
+  CREATOR_STACK_APS_FRAME_COUNTER,
+  CREATOR_STACK_TRUST_CENTER,
+  CREATOR_STACK_NETWORK_MANAGEMENT,
+  CREATOR_STACK_PARENT_INFO,
+  CREATOR_STACK_PARENT_ADDITIONAL_INFO,
+  CREATOR_STACK_MULTI_PHY_NWK_INFO,
+  CREATOR_STACK_MIN_RECEIVED_RSSI,
+  CREATOR_STACK_RESTORED_EUI64,
+  CREATOR_MULTI_NETWORK_STACK_KEYS,
+  CREATOR_MULTI_NETWORK_STACK_NODE_DATA,
+  CREATOR_MULTI_NETWORK_STACK_ALTERNATE_KEY,
+  CREATOR_MULTI_NETWORK_STACK_TRUST_CENTER,
+  CREATOR_MULTI_NETWORK_STACK_NETWORK_MANAGEMENT,
+  CREATOR_MULTI_NETWORK_STACK_PARENT_INFO,
+  CREATOR_MULTI_NETWORK_STACK_NONCE_COUNTER,
+  CREATOR_MULTI_NETWORK_STACK_PARENT_ADDITIONAL_INFO,
+  CREATOR_STACK_GP_DATA,
+  CREATOR_STACK_GP_PROXY_TABLE,
+  CREATOR_STACK_GP_SINK_TABLE,
+  CREATOR_STACK_GP_INCOMING_FC,
+  CREATOR_STACK_GP_INCOMING_FC_IN_SINK,
+  CREATOR_STACK_BINDING_TABLE,
+  CREATOR_STACK_CHILD_TABLE,
+  CREATOR_STACK_KEY_TABLE,
+  CREATOR_STACK_CERTIFICATE_TABLE,
+  CREATOR_STACK_ZLL_DATA,
+  CREATOR_STACK_ZLL_SECURITY,
+  CREATOR_STACK_ADDITIONAL_CHILD_DATA,
+};
+
+static const uint32_t nvm3Keys[] = {
+  NVM3KEY_STACK_NVDATA_VERSION,
+  NVM3KEY_STACK_BOOT_COUNTER,
+  NVM3KEY_STACK_NONCE_COUNTER,
+  NVM3KEY_STACK_ANALYSIS_REBOOT,
+  NVM3KEY_STACK_KEYS,
+  NVM3KEY_STACK_NODE_DATA,
+  NVM3KEY_STACK_CLASSIC_DATA,
+  NVM3KEY_STACK_ALTERNATE_KEY,
+  NVM3KEY_STACK_APS_FRAME_COUNTER,
+  NVM3KEY_STACK_TRUST_CENTER,
+  NVM3KEY_STACK_NETWORK_MANAGEMENT,
+  NVM3KEY_STACK_PARENT_INFO,
+  NVM3KEY_STACK_PARENT_ADDITIONAL_INFO,
+  NVM3KEY_STACK_MULTI_PHY_NWK_INFO,
+  NVM3KEY_STACK_MIN_RECEIVED_RSSI,
+  NVM3KEY_STACK_RESTORED_EUI64,
+  NVM3KEY_MULTI_NETWORK_STACK_KEYS,
+  NVM3KEY_MULTI_NETWORK_STACK_NODE_DATA,
+  NVM3KEY_MULTI_NETWORK_STACK_ALTERNATE_KEY,
+  NVM3KEY_MULTI_NETWORK_STACK_TRUST_CENTER,
+  NVM3KEY_MULTI_NETWORK_STACK_NETWORK_MANAGEMENT,
+  NVM3KEY_MULTI_NETWORK_STACK_PARENT_INFO,
+  NVM3KEY_MULTI_NETWORK_STACK_NONCE_COUNTER,
+  NVM3KEY_MULTI_NETWORK_STACK_PARENT_ADDITIONAL_INFO,
+  NVM3KEY_STACK_GP_DATA,
+  NVM3KEY_STACK_GP_PROXY_TABLE,
+  NVM3KEY_STACK_GP_SINK_TABLE,
+  NVM3KEY_STACK_GP_INCOMING_FC,
+  NVM3KEY_STACK_BINDING_TABLE,
+  NVM3KEY_STACK_CHILD_TABLE,
+  NVM3KEY_STACK_KEY_TABLE,
+  NVM3KEY_STACK_CERTIFICATE_TABLE,
+  NVM3KEY_STACK_ZLL_DATA,
+  NVM3KEY_STACK_ZLL_SECURITY,
+  NVM3KEY_STACK_ADDITIONAL_CHILD_DATA,
+  NVM3KEY_STACK_GP_INCOMING_FC_IN_SINK,
+};
+
+static uint16_t getCreatorFromNvm3Key(uint32_t nvm3Key)
+{
+  for (int i = 0; i < (sizeof(nvm3Keys) / sizeof(uint32_t)); i++) {
+    if (nvm3Keys[i] == nvm3Key) {
+      return creators[i];
+    }
+  }
+  return 0xFFFF;
+}
+#else
+static uint16_t getCreatorFromNvm3Key(uint32_t nvm3Key)
+{
+  return 0xFFFF;
+}
+#endif
+// The following updates the ZIgbeed tokens from a NCP token set.
+EmberStatus emberAfTrustCenterBackupWriteNcpTokenToZigbeedTokens(const char* filepath)
+{
+  EmberStatus returnValue = EMBER_ERR_FATAL;
+  if (filepath == NULL) {
+    return returnValue;
+  }
+  printf("Opening file '%s'", filepath);
+
+  FILE* input = fopen(filepath, READ_FLAGS);
+  if (input == NULL) {
+    printf("Failed to open file: %p", strerror(errno));
+    return returnValue;
+  }
+  // -------------- Read Token Data from File and add set it to the token.
+  uint8_t numberOfTokens = 0;
+  fread(&numberOfTokens, 1, 1, input);
+  //printf("numberOfTokens = %d\n", numberOfTokens);
+  for (uint8_t i = 0; i < numberOfTokens; i++) {
+    uint32_t token = 0;
+    uint8_t size = 0;
+    uint8_t arraySize = 0;
+    fread(&token, 4, 1, input);     // 4 bytes Token Key/Creator
+    fread(&size, 1, 1, input);      // 1 byte token size
+    fread(&arraySize, 1, 1, input); // 1 byte array size.
+    //printf("Restoring Token=%08X Size=%d ArraySize=%d [", token, size, arraySize);
+    for (uint8_t arrayIndex = 0; arrayIndex < arraySize; arrayIndex++) {
+      uint8_t tokenDataDump[255];
+      memset(tokenDataDump, 0, 255);
+      fread(tokenDataDump, size, 1, input);
+      //for (int j = 0; j < size; j++) {
+      //  printf("%02X ",tokenDataDump[j]);
+      //}
+      //printf("]\n");
+      EmberTokenData tokenData;
+      tokenData.size = size;
+      tokenData.data = (void*)tokenDataDump;
+      uint16_t creator = getCreatorFromNvm3Key(token);
+      EmberStatus setStatus = emberSetTokenData(creator,
+                                                arrayIndex,
+                                                &tokenData);
+      //printf("[%d]-----Status = %d\n", arrayIndex, setStatus);
+      (void)setStatus;
+    }
+  }
+  fclose(input);
+  return EMBER_SUCCESS;
+}
+
+EmberStatus emberAfTrustCenterBackupRestoreTokensFromFile(const char* filepath)
+{
+  EmberStatus returnValue = EMBER_ERR_FATAL;
+  if (filepath == NULL) {
+    return returnValue;
+  }
+  printf("Opening file '%s'", filepath);
+
+  FILE* input = fopen(filepath, READ_FLAGS);
+  if (input == NULL) {
+    printf("Failed to open file: %p", strerror(errno));
+    return returnValue;
+  }
+  // -------------- Read Token Data from File and add set it to the token.
+  uint8_t numberOfTokens = 0;
+  fread(&numberOfTokens, 1, 1, input);
+  //printf("numberOfTokens = %d\n", numberOfTokens);
+  for (uint8_t i = 0; i < numberOfTokens; i++) {
+    uint32_t token = 0;
+    uint8_t size = 0;
+    uint8_t arraySize = 0;
+    fread(&token, 4, 1, input);     // 4 bytes Token Key/Creator
+    fread(&size, 1, 1, input);      // 1 byte token size
+    fread(&arraySize, 1, 1, input); // 1 byte array size.
+    //printf("Restoring Token=%08X Size=%d ArraySize=%d [", token, size, arraySize);
+    for (uint8_t arrayIndex = 0; arrayIndex < arraySize; arrayIndex++) {
+      uint8_t tokenDataDump[255];
+      memset(tokenDataDump, 0, 255);
+      fread(tokenDataDump, size, 1, input);
+      //for (int j = 0; j < size; j++) {
+      //  printf("%02X ",tokenDataDump[j]);
+      //}
+      //printf("]\n");
+      EmberTokenData tokenData;
+      tokenData.size = size;
+      tokenData.data = (void*)tokenDataDump;
+      EmberStatus setStatus = emberSetTokenData(token,
+                                                arrayIndex,
+                                                &tokenData);
+      //printf("[%d]-----Status = %d\n", arrayIndex, setStatus);
+      (void)setStatus;
+    }
+  }
+  fclose(input);
+  return EMBER_SUCCESS;
+}
+
 static bool writeHexData(FILE* output,
                          const uint8_t* data,
                          uint8_t length,
@@ -230,20 +491,20 @@ EmberStatus emberAfTrustCenterImportBackupFromFile(const char* filepath)
 
   uint8_t line[MAX_LINE_LENGTH];
 
-  while (NULL != fgets(line, MAX_LINE_LENGTH, input)) {
+  while (NULL != fgets((char*)line, MAX_LINE_LENGTH, input)) {
     const char* keyWordPtr;
     uint8_t* linePtr = line;
     lineNumber++;
-    chomp(linePtr);
+    chomp((char *)linePtr);
     linePtr = skipSpacesInLine(linePtr);
-    if (strnlen(line, MAX_LINE_LENGTH) == 0) {
+    if (strlen((const char *)line) == 0) {
       continue;
     }
     if (*linePtr == '#') { // comment line
       continue;
     }
     uint8_t* endToken;
-    endToken = strchr(linePtr, ':');
+    endToken = (uint8_t *)strchr((const char *)linePtr, (int)':');
     if (endToken == NULL) {
       emberAfSecurityPrintln("Error: Invalid format on line %d, must be <token>: <value>\n",
                              lineNumber);
@@ -251,7 +512,7 @@ EmberStatus emberAfTrustCenterImportBackupFromFile(const char* filepath)
     }
     // truncate the line so that we can compare this token to known values.
     *endToken = '\0';
-    if (0 == strncasecmp(linePtr,
+    if (0 == strncasecmp((const char *)linePtr,
                          extendedPanIdKeyWord,
                          strlen(extendedPanIdKeyWord) + 1)) { // +1 for '\0'
       if (0 != MEMCOMPARE(import.extendedPanId,
@@ -262,7 +523,7 @@ EmberStatus emberAfTrustCenterImportBackupFromFile(const char* filepath)
         goto importEnd;
       }
       keyWordPtr = extendedPanIdKeyWord;
-    } else if (0 == strncasecmp(linePtr,
+    } else if (0 == strncasecmp((const char *)linePtr,
                                 keyKeyWord,
                                 strlen(keyKeyWord) + 1)) { // +1 for '\0'
       keyWordPtr = keyKeyWord;

@@ -22,6 +22,9 @@ requires:
   - name: emlib_system
   - name: emlib_core
   - name: cmsis_core
+  - name: emlib_syscfg
+    condition: [device_has_syscfg]
+
 documentation:
   docset: gecko-platform
   document:

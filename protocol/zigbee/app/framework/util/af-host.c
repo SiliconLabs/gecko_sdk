@@ -34,6 +34,10 @@
 #include "app/framework/plugin/fragmentation/fragmentation.h"
 #endif // SL_CATALOG_ZIGBEE_FRAGMENTATION_PRESENT
 
+#ifdef SL_CATALOG_ZIGBEE_GREEN_POWER_SERVER_PRESENT
+#include "app/framework/plugin/green-power-server/green-power-server.h"
+#endif // SL_CATALOG_ZIGBEE_GREEN_POWER_SERVER_PRESENT
+
 #define MAX_CLUSTER (SECURE_EZSP_MAX_FRAME_LENGTH - 12) / 2 //currently == 94
 #define UNKNOWN_NETWORK_STATE 0xFF
 
@@ -622,6 +626,11 @@ void emAfResetAndInitNCP(void)
 
   // Initialize messageSentCallbacks table
   emAfInitializeMessageSentCallbackArray();
+
+#ifdef SL_CATALOG_ZIGBEE_GREEN_POWER_SERVER_PRESENT
+  // Initialize the GP Sink Table.
+  emberAfGreenPowerServerSinkTableInit();
+#endif // SL_CATALOG_ZIGBEE_GREEN_POWER_SERVER_PRESENT
 }
 
 void emAfHostFrameworkTick(void)

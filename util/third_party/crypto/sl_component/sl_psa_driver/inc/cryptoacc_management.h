@@ -66,25 +66,38 @@ extern "C" {
 #endif
 
 /**
- * \brief      Get ownership of the crypto device
+ * \brief Get ownership of the crypto device
  *
- * \return         PSA_SUCCESS if successful, PSA_ERROR_HARDWARE_FAILURE on error
+ * \return PSA_SUCCESS if successful, PSA_ERROR_HARDWARE_FAILURE on error
  */
 psa_status_t cryptoacc_management_acquire(void);
 
 /**
- * \brief          Release ownership of the crypto device
+ * \brief Release ownership of the crypto device
  *
- * \return         PSA_SUCCESS if successful, PSA_ERROR_HARDWARE_FAILURE on error
+ * \return PSA_SUCCESS if successful, PSA_ERROR_HARDWARE_FAILURE on error
  */
 psa_status_t cryptoacc_management_release(void);
 
 /**
- * \brief          TRNG initialization
+ * \brief TRNG initialization
  *
- * \return         PSA_SUCCESS if successful, PSA_ERROR_HARDWARE_FAILURE on error
+ * \return PSA_SUCCESS if successful, PSA_ERROR_HARDWARE_FAILURE on error
  */
 psa_status_t cryptoacc_trng_initialize(void);
+
+#if (_SILICON_LABS_32B_SERIES_2_CONFIG > 2)
+/**
+ * \brief Set up hardware SCA countermeasures
+ *
+ * \return PSA_SUCCESS if successful, PSA_ERROR_HARDWARE_FAILURE on error
+ *
+ * \note Will try to set up CM even if errors are returned early on.
+ *       In that case, the function will return the first error code that is
+ *       encountered, but only after CM has been set up.
+ */
+psa_status_t cryptoacc_initialize_countermeasures(void);
+#endif // _SILICON_LABS_32B_SERIES_2_CONFIG > 2
 
 #ifdef __cplusplus
 }

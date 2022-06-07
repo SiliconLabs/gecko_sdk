@@ -287,10 +287,12 @@ class CALC_Frame(ICalculator):
             words (unknown) : unknown
         """
 
-        if model.vars.family.value == "nerio":
+        part_family = model.part_family.lower()
+
+        if part_family == "nerio":
             self._reg_write(eval("model.vars.FRC_FCD{}_EXCLUDESUBFRAMEWCNT".format(fcdindex)), excludesubframewcnt)
 
-        if model.vars.family.value != "dumbo":
+        if part_family not in ['dumbo','unit_test_part']:
             self._reg_write(eval("model.vars.FRC_FCD{}_ADDTRAILTXDATA".format(fcdindex)), addtrailtxdata)
 
         if model.vars.ber_force_whitening.value == True:

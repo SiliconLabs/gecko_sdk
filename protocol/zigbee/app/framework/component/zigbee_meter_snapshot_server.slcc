@@ -14,6 +14,10 @@ source:
     condition:
       - "cli"
   - path: protocol/zigbee/app/framework/plugin/meter-snapshot-server/meter-snapshot-server-cb.c
+include:
+  - path: protocol/zigbee/app/framework/plugin/meter-snapshot-server/
+    file_list:
+      - path: meter-snapshot-server.h
 template_contribution:
   - name: component_catalog
     value: zigbee_meter_snapshot_server

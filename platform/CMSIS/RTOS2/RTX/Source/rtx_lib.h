@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2013-2018 Arm Limited. All rights reserved.
+ * Copyright (c) 2013-2021 Arm Limited. All rights reserved.
  *
  * SPDX-License-Identifier: Apache-2.0
  *
@@ -27,14 +27,15 @@
 #define RTX_LIB_H_
 
 #include <string.h>
+#include "rtx_def.h"                    // RTX Configuration definitions
 #include "rtx_core_c.h"                 // Cortex core definitions
-#if ((defined(__ARM_ARCH_8M_BASE__) && (__ARM_ARCH_8M_BASE__ != 0)) || \
-     (defined(__ARM_ARCH_8M_MAIN__) && (__ARM_ARCH_8M_MAIN__ != 0)))
+#if ((defined(__ARM_ARCH_8M_BASE__)   && (__ARM_ARCH_8M_BASE__   != 0)) || \
+     (defined(__ARM_ARCH_8M_MAIN__)   && (__ARM_ARCH_8M_MAIN__   != 0)) || \
+     (defined(__ARM_ARCH_8_1M_MAIN__) && (__ARM_ARCH_8_1M_MAIN__ != 0)))
 #include "tz_context.h"                 // TrustZone Context API
 #endif
 #include "os_tick.h"                    // CMSIS OS Tick API
 #include "cmsis_os2.h"                  // CMSIS RTOS API
-#include "RTX_Config.h"                 // RTX Configuration
 #include "rtx_os.h"                     // RTX OS definitions
 #include "rtx_evr.h"                    // RTX Event Recorder definitions
 
@@ -173,6 +174,9 @@ __STATIC_INLINE void osRtxThreadSetRunning (os_thread_t *thread) {
 
 //  ==== Library functions ====
 
+// Kernel Library functions
+extern void         osRtxKernelPreInit (void);
+
 // Thread Library functions
 extern void         osRtxThreadListPut    (os_object_t *object, os_thread_t *thread);
 extern os_thread_t *osRtxThreadListGet    (os_object_t *object);
@@ -185,14 +189,18 @@ extern void         osRtxThreadSwitch     (os_thread_t *thread);
 extern void         osRtxThreadDispatch   (os_thread_t *thread);
 extern void         osRtxThreadWaitExit   (os_thread_t *thread, uint32_t ret_val, bool_t dispatch);
 extern bool_t       osRtxThreadWaitEnter  (uint8_t state, uint32_t timeout);
-extern void         osRtxThreadStackCheck (void);
+#ifdef RTX_STACK_CHECK
+extern bool_t       osRtxThreadStackCheck (const os_thread_t *thread);
+#endif
 extern bool_t       osRtxThreadStartup    (void);
 
 // Timer Library functions
-extern void osRtxTimerThread (void *argument);
+extern int32_t osRtxTimerSetup  (void);
+extern void    osRtxTimerThread (void *argument);
 
 // Mutex Library functions
 extern void osRtxMutexOwnerRelease (os_mutex_t *mutex_list);
+extern void osRtxMutexOwnerRestore (const os_mutex_t *mutex, const os_thread_t *thread_wakeup);
 
 // Memory Heap Library functions
 extern uint32_t osRtxMemoryInit (void *mem, uint32_t size);
@@ -203,6 +211,9 @@ extern uint32_t osRtxMemoryFree (void *mem, void *block);
 extern uint32_t   osRtxMemoryPoolInit  (os_mp_info_t *mp_info, uint32_t block_count, uint32_t block_size, void *block_mem);
 extern void      *osRtxMemoryPoolAlloc (os_mp_info_t *mp_info);
 extern osStatus_t osRtxMemoryPoolFree  (os_mp_info_t *mp_info, void *block);
+
+// Message Queue Library functions
+extern int32_t osRtxMessageQueueTimerSetup (void);
 
 // System Library functions
 extern void osRtxTick_Handler   (void);

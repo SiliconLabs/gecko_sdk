@@ -35,8 +35,8 @@
  * @addtogroup app_framework_common
  * @brief Application framework common
  *
- * Declares all the required application framework globals, initializes the Connect stack and
- * dispatches stack callbacks calls as needed to the application components.
+ * Declare all required application framework globals, initialize the Connect stack, and
+ * dispatch stack callbacks calls as needed to the application components.
  *
  * @{
  *

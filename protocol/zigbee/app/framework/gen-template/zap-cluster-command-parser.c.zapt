@@ -37,10 +37,11 @@ static EmberAfStatus sli_do_decode(EmberAfClusterCommand *cmd,
                             cmd->payloadStartIndex, 
                             sig, 
                             outputBuffer);
-  if ( ret == SL_SIGNATURE_DECODE_OK )
+  if ( ret == SL_SIGNATURE_DECODE_OK ) {
     return EMBER_ZCL_STATUS_SUCCESS;
-  else
+  } else {
     return EMBER_ZCL_STATUS_MALFORMED_COMMAND;
+  }
 }
 
 {{#zcl_commands_with_arguments sortBy="signature"}}{{#if argCount }}

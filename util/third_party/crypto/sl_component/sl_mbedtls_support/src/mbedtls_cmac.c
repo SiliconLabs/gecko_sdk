@@ -326,7 +326,7 @@ int mbedtls_cipher_cmac(const mbedtls_cipher_info_t *cipher_info,
  */
 int mbedtls_aes_cmac_prf_128(const unsigned char *key, size_t key_length,
                              const unsigned char *input, size_t in_len,
-                             unsigned char *output)
+                             unsigned char output[16])
 {
   int ret;
   unsigned char zero_key[MBEDTLS_AES_BLOCK_SIZE];
@@ -363,7 +363,7 @@ int mbedtls_aes_cmac_prf_128(const unsigned char *key, size_t key_length,
                        int_key, MBEDTLS_AES_BLOCK_SIZE,
                        PSA_ALG_CMAC,
                        input, in_len,
-                       output, in_len, &olen) );
+                       (uint8_t*)output, in_len, &olen) );
 
   exit:
   mbedtls_platform_zeroize(int_key, sizeof(int_key) );

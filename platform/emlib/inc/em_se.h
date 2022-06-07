@@ -31,7 +31,7 @@
 #define EM_SE_H
 
 #include "em_device.h"
-#include "em_common.h"
+#include "sl_common.h"
 
 #if defined(SEMAILBOX_PRESENT) || defined(CRYPTOACC_PRESENT)
 

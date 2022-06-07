@@ -28,7 +28,7 @@
  *
  ******************************************************************************/
 
-#include "em_assert.h"
+#include "sl_assert.h"
 #include "sl_slist.h"
 #include <stdbool.h>
 #include <stdlib.h>

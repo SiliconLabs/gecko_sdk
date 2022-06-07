@@ -303,6 +303,7 @@ static void Serial_CtrlrDrvStart(SERIAL_DRV *p_ser_drv,
 
   p_drv_data->RxBufPtr = DEF_NULL;
 
+#if (_SILICON_LABS_32B_SERIES < 2)
 #if defined(_USART_ROUTELOC0_MASK)
   p_drv_data->InitCfg.portLocationTx = p_hw_info_silabs->PortLocationTx;
   p_drv_data->InitCfg.portLocationRx = p_hw_info_silabs->PortLocationRx;
@@ -315,6 +316,7 @@ static void Serial_CtrlrDrvStart(SERIAL_DRV *p_ser_drv,
                        RTOS_ERR_INVALID_CFG,; );
 
   p_drv_data->InitCfg.portLocation = p_hw_info_silabs->PortLocationTx;
+#endif
 #endif
 
   p_drv_data->InitCfg.bitOrder = spidrvBitOrderMsbFirst;
@@ -331,7 +333,7 @@ static void Serial_CtrlrDrvStart(SERIAL_DRV *p_ser_drv,
 
   return;
 
-end_err_io:
+  end_err_io:
   RTOS_ERR_SET(*p_err, RTOS_ERR_IO);
 }
 

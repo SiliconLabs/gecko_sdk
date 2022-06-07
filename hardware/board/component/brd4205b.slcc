@@ -16,6 +16,9 @@
   - name: hardware_board_from_stk
   - name: hardware_board_from_zgm230-rb4205b
   - name: hardware_board_from_zwave-pk800a
+  - name: hardware_board_has_si70xx
+  - name: hardware_board_has_tempsensor
+  - name: hardware_board_has_vcom
   - name: hardware_board_has_spiflash
   - name: hardware_board_supports_rf_band_868
   - name: hardware_board_supports_rf_band_914

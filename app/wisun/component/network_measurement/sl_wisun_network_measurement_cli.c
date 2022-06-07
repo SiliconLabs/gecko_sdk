@@ -37,6 +37,9 @@
 #include "sl_wisun_app_core.h"
 #include "sl_wisun_ping.h"
 #include "sl_wisun_network_measurement.h"
+#include "sl_wisun_network_measurement_config.h"
+#include "sl_wisun_cli_core.h"
+#include "sl_wisun_trace_util.h"
 // -----------------------------------------------------------------------------
 //                              Macros and Typedefs
 // -----------------------------------------------------------------------------
@@ -95,6 +98,7 @@ void app_measure(sl_cli_command_arg_t *arguments)
     sl_wisun_nwm_measure(&remote_addr, meas_count, meas_packet_length, false);
   }
 }
+
 // -----------------------------------------------------------------------------
 //                          Static Function Definitions
 // -----------------------------------------------------------------------------

@@ -10,7 +10,6 @@ requires:
   - name: ot_stack
   - name: ot_ncp
   - name: cpc_secondary
-  - name: cpc_security_secondary
 recommends:
   - id: ot_stack_rcp
 root_path: util/third_party/openthread/src
@@ -30,3 +29,9 @@ define:
     value: 0
   - name: OPENTHREAD_CONFIG_NCP_CPC_ENABLE
     value: 1
+
+toolchain_settings:
+  - option: optimize
+    value: speed
+    condition:
+    - "device_family_efr32mg1p"

@@ -583,6 +583,72 @@ EmberLibraryStatus emGetAesSecurityLibraryStatus(void)
   return EMBER_LIBRARY_IS_STUB;
 }
 
+typedef void* mbedtls_svc_key_id_t;
+EmberStatus emberSetPsaSecurityKey(mbedtls_svc_key_id_t key_id)
+{
+  (void)key_id;
+  return EMBER_LIBRARY_IS_STUB;
+}
+
+uint8_t emGetSecurityLevel(void)
+{
+  return 0;
+}
+
+EmberStatus emSetSecurityLevel(uint8_t level)
+{
+  (void)level;
+  return EMBER_LIBRARY_IS_STUB;
+}
+
+bool emLocalNodeSupportsSecurity(void)
+{
+  return false;
+}
+void emAddAuxiliaryMacHeader(uint8_t *finger,
+                             EmberMessageLength payloadLength,
+                             EmberMessageOptions options)
+{
+  (void)finger;
+  (void)payloadLength;
+  (void)options;
+  return;
+}
+
+uint32_t emGetNextOutgoingFrameCounter(void)
+{
+  return 0;
+}
+
+EmberStatus emEncryptAndSignPacket(uint8_t *packet)
+{
+  (void)packet;
+  return EMBER_LIBRARY_IS_STUB;
+}
+
+EmberStatus emDecryptAndAuthenticatePacket(uint8_t *packet,
+                                           bool checkFrameCounter)
+{
+  (void)packet;
+  (void)checkFrameCounter;
+  return EMBER_LIBRARY_IS_STUB;
+}
+
+void emSecurityInit(void)
+{
+  return;
+}
+
+void emLoadFrameCounterFromToken(void)
+{
+  return;
+}
+
+void emMarkSecurityBuffers(void)
+{
+  return;
+}
+
 #endif // SL_CATALOG_CONNECT_AES_SECURITY_PRESENT
 
 #ifndef SL_CATALOG_CONNECT_RADIO_STREAM_PRESENT

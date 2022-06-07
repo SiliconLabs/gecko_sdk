@@ -65,6 +65,7 @@ include:
       - path: mac-header.h
       - path: mac-packet-header.h
       - path: mac-types.h
+      - path: mac-phy.h
   - path: util/silicon_labs/silabs_core/
     file_list:
       - path: buffer_manager/legacy-packet-buffer.h

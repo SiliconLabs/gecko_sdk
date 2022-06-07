@@ -39,6 +39,7 @@
 #include "app_log.h"
 
 #include "sl_bt_api.h"
+#include "sl_common.h"
 #include "ncp_sec_host.h"
 
 typedef struct conn_nonce{

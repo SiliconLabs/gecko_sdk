@@ -24,6 +24,7 @@ set(src_crypto
     chachapoly.c
     cipher.c
     cipher_wrap.c
+    constant_time.c
     cmac.c
     ctr_drbg.c
     des.c
@@ -76,6 +77,7 @@ set(src_crypto
     sha1.c
     sha256.c
     sha512.c
+    ssl_debug_helpers_generated.c
     threading.c
     timing.c
     version.c
@@ -106,7 +108,62 @@ set(src_tls
     ssl_tls13_keys.c
     ssl_tls13_server.c
     ssl_tls13_client.c
+    ssl_tls13_generic.c
 )
+
+if(GEN_FILES)
+    find_package(Perl REQUIRED)
+
+    file(GLOB error_headers ${CMAKE_CURRENT_SOURCE_DIR}/../include/mbedtls/*.h)
+    add_custom_command(
+        OUTPUT
+            ${CMAKE_CURRENT_BINARY_DIR}/error.c
+        COMMAND
+            ${PERL_EXECUTABLE}
+                ${CMAKE_CURRENT_SOURCE_DIR}/../scripts/generate_errors.pl
+                ${CMAKE_CURRENT_SOURCE_DIR}/../include/mbedtls
+                ${CMAKE_CURRENT_SOURCE_DIR}/../scripts/data_files
+                ${CMAKE_CURRENT_BINARY_DIR}/error.c
+        DEPENDS
+            ${CMAKE_CURRENT_SOURCE_DIR}/../scripts/generate_errors.pl
+            ${error_headers}
+            ${CMAKE_CURRENT_SOURCE_DIR}/../scripts/data_files/error.fmt
+    )
+
+    add_custom_command(
+        OUTPUT
+            ${CMAKE_CURRENT_BINARY_DIR}/version_features.c
+        COMMAND
+            ${PERL_EXECUTABLE}
+                ${CMAKE_CURRENT_SOURCE_DIR}/../scripts/generate_features.pl
+                ${CMAKE_CURRENT_SOURCE_DIR}/../include/mbedtls
+                ${CMAKE_CURRENT_SOURCE_DIR}/../scripts/data_files
+                ${CMAKE_CURRENT_BINARY_DIR}/version_features.c
+        DEPENDS
+            ${CMAKE_CURRENT_SOURCE_DIR}/../scripts/generate_features.pl
+            ${CMAKE_CURRENT_SOURCE_DIR}/../include/mbedtls/mbedtls_config.h
+            ${CMAKE_CURRENT_SOURCE_DIR}/../scripts/data_files/version_features.fmt
+    )
+
+    add_custom_command(
+        OUTPUT
+            ${CMAKE_CURRENT_BINARY_DIR}/ssl_debug_helpers_generated.h
+            ${CMAKE_CURRENT_BINARY_DIR}/ssl_debug_helpers_generated.c
+        COMMAND
+            ${MBEDTLS_PYTHON_EXECUTABLE}
+                ${CMAKE_CURRENT_SOURCE_DIR}/../scripts/generate_ssl_debug_helpers.py
+                --mbedtls-root ${CMAKE_CURRENT_SOURCE_DIR}/..
+                ${CMAKE_CURRENT_BINARY_DIR}
+        DEPENDS
+            ${CMAKE_CURRENT_SOURCE_DIR}/../scripts/generate_ssl_debug_helpers.py
+            ${error_headers}
+    )
+else()
+    link_to_source(error.c)
+    link_to_source(version_features.c)
+    link_to_source(ssl_debug_helpers_generated.c)
+    link_to_source(ssl_debug_helpers_generated.h)
+endif()
 
 if(CMAKE_COMPILER_IS_GNUCC)
     set(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} -Wmissing-declarations -Wmissing-prototypes")
@@ -190,7 +247,7 @@ endif(USE_STATIC_MBEDTLS_LIBRARY)
 
 if(USE_SHARED_MBEDTLS_LIBRARY)
     add_library(${mbedcrypto_target} SHARED ${src_crypto})
-    set_target_properties(${mbedcrypto_target} PROPERTIES VERSION 3.0.0 SOVERSION 10)
+    set_target_properties(${mbedcrypto_target} PROPERTIES VERSION 3.1.0 SOVERSION 11)
     target_link_libraries(${mbedcrypto_target} PUBLIC ${libs})
 
     if(TARGET everest)
@@ -198,11 +255,11 @@ if(USE_SHARED_MBEDTLS_LIBRARY)
     endif()
 
     add_library(${mbedx509_target} SHARED ${src_x509})
-    set_target_properties(${mbedx509_target} PROPERTIES VERSION 3.0.0 SOVERSION 4)
+    set_target_properties(${mbedx509_target} PROPERTIES VERSION 3.1.0 SOVERSION 4)
     target_link_libraries(${mbedx509_target} PUBLIC ${libs} ${mbedcrypto_target})
 
     add_library(${mbedtls_target} SHARED ${src_tls})
-    set_target_properties(${mbedtls_target} PROPERTIES VERSION 3.0.0 SOVERSION 16)
+    set_target_properties(${mbedtls_target} PROPERTIES VERSION 3.1.0 SOVERSION 17)
     target_link_libraries(${mbedtls_target} PUBLIC ${libs} ${mbedx509_target})
 endif(USE_SHARED_MBEDTLS_LIBRARY)
 

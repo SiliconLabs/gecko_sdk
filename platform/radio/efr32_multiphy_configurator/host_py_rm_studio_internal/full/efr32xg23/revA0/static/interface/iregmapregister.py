@@ -214,7 +214,8 @@ class IRegMapRegister(object):
         """
         Read register and store in valueDict. Default to stdout if no file
         handle is passed. The file handle is passed to internal functions
-        to do the source dictionary output.
+        to do the source dictionary output.  Providing Dumper callable
+        enables skip reporting for failed reads.
 
         This dump is called for two cases:
             - From the register level in the course of performing a dump
@@ -234,7 +235,8 @@ class IRegMapRegister(object):
     def dump_field(self, outFH, valueDict, field_name):
         """
         Read register field and store in valueDict. The file handle is passed to
-        internal functions to do the source dictionary output.
+        internal functions to do the source dictionary output. Providing Dumper
+        callable in __init__() enables skip reporting for failed reads.
 
         .. note:: This is an internal function used by the device container.
                   Do not call directly.

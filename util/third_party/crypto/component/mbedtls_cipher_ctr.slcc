@@ -1,9 +1,9 @@
 id: mbedtls_cipher_ctr
 package: platform
-label: Mbed TLS Support for CTR Cipher modes
+label: CTR Mode
 description: >-
   This component provides support for CTR cipher modes in mbed TLS.
-category: Platform|Security
+category: Platform|Security|Mbed TLS|Encryption
 quality: production
 provides:
   - name: mbedtls_cipher_ctr

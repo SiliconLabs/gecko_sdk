@@ -61,11 +61,11 @@ typedef struct {
  *****************************************************************************/
 
 /* Bit fields for FSRCO IPVERSION */
-#define _FSRCO_IPVERSION_RESETVALUE           0x00000000UL                              /**< Default value for FSRCO_IPVERSION           */
+#define _FSRCO_IPVERSION_RESETVALUE           0x00000001UL                              /**< Default value for FSRCO_IPVERSION           */
 #define _FSRCO_IPVERSION_MASK                 0xFFFFFFFFUL                              /**< Mask for FSRCO_IPVERSION                    */
 #define _FSRCO_IPVERSION_IPVERSION_SHIFT      0                                         /**< Shift value for FSRCO_IPVERSION             */
 #define _FSRCO_IPVERSION_IPVERSION_MASK       0xFFFFFFFFUL                              /**< Bit mask for FSRCO_IPVERSION                */
-#define _FSRCO_IPVERSION_IPVERSION_DEFAULT    0x00000000UL                              /**< Mode DEFAULT for FSRCO_IPVERSION            */
+#define _FSRCO_IPVERSION_IPVERSION_DEFAULT    0x00000001UL                              /**< Mode DEFAULT for FSRCO_IPVERSION            */
 #define FSRCO_IPVERSION_IPVERSION_DEFAULT     (_FSRCO_IPVERSION_IPVERSION_DEFAULT << 0) /**< Shifted mode DEFAULT for FSRCO_IPVERSION    */
 
 /** @} End of group EFR32BG21_FSRCO_BitFields */

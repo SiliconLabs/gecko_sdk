@@ -41,9 +41,9 @@
 //                              Macros and Typedefs
 // -----------------------------------------------------------------------------
 /// Size of RAIL RX FIFO
-#define RAIL_RX_FIFO_SIZE (256u)
+#define RAIL_RX_FIFO_SIZE (256U)
 /// RAIL receive channel
-#define RX_CHANNEL (0u)
+#define RX_CHANNEL (0U)
 
 /// State machine of simple_trx
 typedef enum {

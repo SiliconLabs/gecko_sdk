@@ -82,20 +82,4 @@ sl_status_t aoa_serialize_position(aoa_position_t *position, char** str);
  ******************************************************************************/
 sl_status_t aoa_deserialize_position(char* str, aoa_position_t *position);
 
-/***************************************************************************//**
- * Serialize correction data structure into string.
- *
- * @param[in] correction Correction data structure.
- * @param[out] str Pointer to the string buffer, should be freed after use.
- ******************************************************************************/
-sl_status_t aoa_serialize_correction(aoa_correction_t *correction, char** str);
-
-/***************************************************************************//**
- * Deserialize correction data structure from string.
- *
- * @param[in] str String buffer.
- * @param[out] correction Correction data structure.
- ******************************************************************************/
-sl_status_t aoa_deserialize_correction(char* str, aoa_correction_t *correction);
-
 #endif // AOA_SERDES_H

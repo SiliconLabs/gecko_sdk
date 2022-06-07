@@ -35,7 +35,7 @@
 #if defined(RTCC_COUNT) && (RTCC_COUNT == 1)
 
 #include <stdbool.h>
-#include "em_assert.h"
+#include "sl_assert.h"
 
 #ifdef __cplusplus
 extern "C" {

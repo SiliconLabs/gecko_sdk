@@ -1,9 +1,9 @@
 id: mbedtls_entropy_nvseed
 package: platform
-label: Mbed TLS Support for non-volatile entropy seed
-description: >
+label: Device-Unique Seed Entropy Source
+description: >-
   This component provides support for using entropy gathered from a device-unique seed.
-category: Platform|Security
+category: Platform|Security|Mbed TLS|Randomness
 quality: production
 component_root_path: util/third_party/crypto
 source:

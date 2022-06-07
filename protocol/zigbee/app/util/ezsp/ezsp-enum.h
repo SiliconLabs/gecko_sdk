@@ -705,6 +705,8 @@ enum {
   EZSP_ASH_TX                                   = 0x84,
   // ASH RX
   EZSP_ASH_RX                                   = 0x85,
+  // Failed to connect to CPC daemon or failed to open CPC endpoint
+  EZSP_CPC_ERROR_INIT                           = 0x86,
   // No reset or error
   EZSP_NO_ERROR                                 = 0xFF
 };
@@ -1030,7 +1032,14 @@ enum {
   EZSP_SET_SECURITY_KEY                         = 0x00CA,
   EZSP_SET_SECURITY_PARAMETERS                  = 0x00CB,
   EZSP_RESET_TO_FACTORY_DEFAULTS                = 0x00CC,
-  EZSP_GET_SECURITY_KEY_STATUS                  = 0x00CD
+  EZSP_GET_SECURITY_KEY_STATUS                  = 0x00CD,
+
+// Token Interface Frames
+  EZSP_GET_TOKEN_COUNT                          = 0x0100,
+  EZSP_GET_TOKEN_INFO                           = 0x0101,
+  EZSP_GET_TOKEN_DATA                           = 0x0102,
+  EZSP_SET_TOKEN_DATA                           = 0x0103,
+  EZSP_RESET_NODE                               = 0x0104
 };
 
 #endif // __EZSP_ENUM_H__

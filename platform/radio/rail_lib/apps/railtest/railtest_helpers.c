@@ -36,6 +36,8 @@
 
 #include "rail.h"
 #include "em_core.h"
+#include "em_system.h"
+
 const char *getRfStateName(RAIL_RadioState_t state)
 {
   switch (state) {
@@ -219,6 +221,12 @@ void printRailAppEvents(void)
           responsePrint("getAvgRssi", "rssi:%s", bufAverageRssi);
         }
       }
+#if RAIL_IEEE802154_SUPPORTS_G_MODESWITCH && defined(WISUN_MODESWITCHPHRS_ARRAY_SIZE)
+      else if (railtestEvent->type == MODE_SWITCH_CHANGE_CHANNEL) {
+        responsePrint("modeSwitchChangeChannel", "channel:%u",
+                      railtestEvent->modeSwitchChangeChannel.channel);
+      }
+#endif
       memoryFree(railtestEventHandle);
     }
   }
@@ -231,4 +239,70 @@ void printRailAppEvents(void)
   if (eventsMissedCache > 0) {
     responsePrint("missedRailAppEvents", "count:%u", eventsMissedCache);
   }
+}
+
+void printChipInfo(void)
+{
+#define EVALIT(a, b)  a # b
+#define PASTEIT(a, b) EVALIT(a, b)
+#if defined(_SILICON_LABS_32B_SERIES_1)
+ #if   (_SILICON_LABS_32B_SERIES_1_CONFIG == 1)
+  #define FAMILY_NAME "EFR32XG1"
+ #else
+  #define FAMILY_NAME PASTEIT("EFR32XG1", _SILICON_LABS_32B_SERIES_1_CONFIG)
+ #endif
+#elif defined(_SILICON_LABS_32B_SERIES_2)
+  #define FAMILY_NAME PASTEIT("EFR32XG2", _SILICON_LABS_32B_SERIES_2_CONFIG)
+#else
+  #define FAMILY_NAME "??"
+#endif
+#ifndef _SILICON_LABS_GECKO_INTERNAL_SDID
+  #define _SILICON_LABS_GECKO_INTERNAL_SDID 0U
+#endif
+
+#if defined(_SILICON_LABS_32B_SERIES_2)
+  uint32_t moduleName32[8] = {
+    DEVINFO->MODULENAME0, DEVINFO->MODULENAME1, DEVINFO->MODULENAME2,
+    DEVINFO->MODULENAME3, DEVINFO->MODULENAME4, DEVINFO->MODULENAME5,
+    DEVINFO->MODULENAME6, 0UL
+  };
+  char *moduleName = (char *) moduleName32;
+  for (uint8_t i = 0U; i < sizeof(moduleName32); i++) {
+    if ((moduleName[i] == '\0') || (moduleName[i] == '\xFF')) {
+      moduleName[i] = '\0';
+      break;
+    }
+  }
+  responsePrint("radio", "FreqHz:%u,ModuleInfo:0x%08x,ModuleName:%s",
+                RAIL_GetRadioClockFreqHz(railHandle),
+                DEVINFO->MODULEINFO,
+                ((moduleName[0] == '\0') ? "N/A" : moduleName));
+#else
+  responsePrint("radio", "FreqHz:%u,ModuleInfo:0x%08x",
+                RAIL_GetRadioClockFreqHz(railHandle),
+                DEVINFO->MODULEINFO);
+#endif
+  SYSTEM_ChipRevision_TypeDef chipRev = { 0, };
+  SYSTEM_ChipRevisionGet(&chipRev);
+
+  // SYSTEM_ChipRevision_TypeDef defines either a partNumber field or a family field.
+  // If _SYSCFG_CHIPREV_PARTNUMBER_MASK is defined, there is a partNumber field.
+  // Otherwise, there is a family field.
+  responsePrint("system", "Family:%s,"
+#if defined(_SYSCFG_CHIPREV_PARTNUMBER_MASK)
+                "Part#:%u,"
+#else
+                "Fam#:%u,"
+#endif
+                "ChipRev:%u.%u,sdid:%u,Part:0x%08x",
+                FAMILY_NAME,
+#if defined(_SYSCFG_CHIPREV_PARTNUMBER_MASK)
+                chipRev.partNumber,
+#else
+                chipRev.family,
+#endif
+                chipRev.major,
+                chipRev.minor,
+                _SILICON_LABS_GECKO_INTERNAL_SDID,
+                DEVINFO->PART);
 }

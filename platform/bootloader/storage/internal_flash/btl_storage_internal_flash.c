@@ -62,8 +62,9 @@ static const BootloaderStorageImplementationInformation_t deviceInfo = {
   40, // Datasheet EFR32MG1: max 40 ms for mass erase
   FLASH_PAGE_SIZE,
   FLASH_SIZE,
-  "EFR32",
-  FLASH_ALIGNMENT
+  NULL,
+  FLASH_ALIGNMENT,
+  BOOTLOADER_STORAGE_INTERNAL_STORAGE
 };
 
 // -----------------------------------------------------------------------------
@@ -83,9 +84,9 @@ static bool verifyAddressRange(uint32_t address,
   // Flash starts at FLASH_BASE, and is FLASH_SIZE large
   if ((length > FLASH_SIZE)
 #if (FLASH_BASE > 0x0UL)
-     || (address < FLASH_BASE)
+      || (address < FLASH_BASE)
 #endif
-     || (address > FLASH_BASE + FLASH_SIZE)) {
+      || (address > FLASH_BASE + FLASH_SIZE)) {
     return false;
   }
 
@@ -145,7 +146,10 @@ int32_t storage_writeRaw(uint32_t address, uint8_t *data, size_t numBytes)
   if (!verifyErased(address, numBytes)) {
     return BOOTLOADER_ERROR_STORAGE_NEEDS_ERASE;
   }
-
+  //Ensure that numBytes is a multiple of 4
+  if (numBytes & 3U) {
+    return BOOTLOADER_ERROR_STORAGE_NEEDS_ALIGN;
+  }
 #if (BOOTLOADER_MSC_DMA_WRITE == 1)
   if (flash_writeBuffer_dma(address, data, numBytes, BOOTLOADER_MSC_DMA_CHANNEL)) {
     return BOOTLOADER_OK;
@@ -160,12 +164,19 @@ int32_t storage_writeRaw(uint32_t address, uint8_t *data, size_t numBytes)
   }
 }
 
-int32_t storage_getDMAchannel(void) {
+int32_t storage_getDMAchannel(void)
+{
 #if (BOOTLOADER_MSC_DMA_WRITE == 1)
   return BOOTLOADER_MSC_DMA_CHANNEL;
 #else
   return -1;
 #endif
+}
+
+uint32_t storage_getSpiUsartPPUSATD(uint32_t *ppusatdNr)
+{
+  (void)ppusatdNr;
+  return 0u;
 }
 
 int32_t storage_eraseRaw(uint32_t address, size_t totalLength)

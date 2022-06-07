@@ -28,10 +28,18 @@ constexpr int kOutputTensor = 0;
 TfLiteStatus Prepare(TfLiteContext* context, TfLiteNode* node) {
   TF_LITE_ENSURE_EQ(context, NumInputs(node), 1);
   TF_LITE_ENSURE_EQ(context, NumOutputs(node), 1);
-  const TfLiteTensor* input = GetInput(context, node, kInputTensor);
+
+  MicroContext* micro_context = GetMicroContext(context);
+
+  TfLiteTensor* input =
+      micro_context->AllocateTempInputTensor(node, kInputTensor);
   TF_LITE_ENSURE(context, input != nullptr);
-  TfLiteTensor* output = GetOutput(context, node, kOutputTensor);
+  TfLiteTensor* output =
+      micro_context->AllocateTempOutputTensor(node, kOutputTensor);
   TF_LITE_ENSURE(context, output != nullptr);
+
+  micro_context->DeallocateTempTfLiteTensor(input);
+  micro_context->DeallocateTempTfLiteTensor(output);
 
   return kTfLiteOk;
 }
@@ -51,6 +59,9 @@ TfLiteStatus copyToTensor(TfLiteContext* context, const FromT* in,
       break;
     case kTfLiteInt16:
       copyCast(in, out->data.i16, num_elements);
+      break;
+    case kTfLiteInt32:
+      copyCast(in, out->data.i32, num_elements);
       break;
     case kTfLiteFloat32:
       copyCast(in, tflite::micro::GetTensorData<float>(out), num_elements);
@@ -77,6 +88,13 @@ TfLiteStatus Eval(TfLiteContext* context, TfLiteNode* node) {
     case kTfLiteInt16:
       return copyToTensor(context, tflite::micro::GetTensorData<int16_t>(input),
                           output, num_elements);
+    case kTfLiteInt32:
+      return copyToTensor(context, tflite::micro::GetTensorData<int32_t>(input),
+                          output, num_elements);
+    case kTfLiteUInt32:
+      return copyToTensor(context,
+                          tflite::micro::GetTensorData<uint32_t>(input), output,
+                          num_elements);
     case kTfLiteFloat32:
       return copyToTensor(context, tflite::micro::GetTensorData<float>(input),
                           output, num_elements);

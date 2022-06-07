@@ -197,7 +197,7 @@ static void _progbar_updater(sl_wisun_ping_info_t *req, sl_wisun_ping_info_t *re
   (void) resp;
 
   assert(_meas_packet_cnt.max_count);
-  
+
   ++_meas_packet_cnt.cnt;
 
   sl_gui_progressbar_set_value((_meas_packet_cnt.cnt * 100) / _meas_packet_cnt.max_count);

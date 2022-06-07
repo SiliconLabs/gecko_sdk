@@ -1,7 +1,8 @@
 project_name: sleepy-demo-ftd
-label: sleepy-demo-ftd
+label: OpenThread - SoC Sleepy Demo (FTD)
 package: OpenThread
-description: This is a sample application to start and form a Thread network on an FTD for the sleepy-demo.
+description:  >
+  This is a sample application to start and form a Thread network on an FTD for the sleepy-demo.
 category: OpenThread Examples
 quality: production
 
@@ -67,3 +68,19 @@ configuration:
 
 tag:
   - prebuilt_demo
+
+readme:
+  - path: ./README.md
+
+filter:
+  - name: "Wireless Technology"
+    value: ["Thread"]
+  - name: "Device Type"
+    value: ["SoC"]
+  - name: "Project Difficulty"
+    value: ["Advanced"]
+
+ui_hints:
+  highlight:
+    - path: ./README.md
+      focus: true

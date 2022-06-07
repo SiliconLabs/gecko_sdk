@@ -18,7 +18,7 @@
 #include <stddef.h>
 #include "em_cmu.h"
 #include "em_gpio.h"
-#include "em_assert.h"
+#include "sl_assert.h"
 #include "sl_i2cspm.h"
 #include "sl_udelay.h"
 
@@ -97,27 +97,27 @@ void I2CSPM_Init(I2CSPM_Init_TypeDef *init)
   if (init->port == I2C0) {
     GPIO->I2CROUTE[0].ROUTEEN = GPIO_I2C_ROUTEEN_SDAPEN | GPIO_I2C_ROUTEEN_SCLPEN;
     GPIO->I2CROUTE[0].SCLROUTE = (uint32_t)((init->sclPin << _GPIO_I2C_SCLROUTE_PIN_SHIFT)
-                                 | (init->sclPort << _GPIO_I2C_SCLROUTE_PORT_SHIFT));
+                                            | (init->sclPort << _GPIO_I2C_SCLROUTE_PORT_SHIFT));
     GPIO->I2CROUTE[0].SDAROUTE = (uint32_t)((init->sdaPin << _GPIO_I2C_SDAROUTE_PIN_SHIFT)
-                                 | (init->sdaPort << _GPIO_I2C_SDAROUTE_PORT_SHIFT));
+                                            | (init->sdaPort << _GPIO_I2C_SDAROUTE_PORT_SHIFT));
   }
 #endif
 #if defined(I2C1)
   if (init->port == I2C1) {
     GPIO->I2CROUTE[1].ROUTEEN = GPIO_I2C_ROUTEEN_SDAPEN | GPIO_I2C_ROUTEEN_SCLPEN;
     GPIO->I2CROUTE[1].SCLROUTE = (uint32_t)((init->sclPin << _GPIO_I2C_SCLROUTE_PIN_SHIFT)
-                                 | (init->sclPort << _GPIO_I2C_SCLROUTE_PORT_SHIFT));
+                                            | (init->sclPort << _GPIO_I2C_SCLROUTE_PORT_SHIFT));
     GPIO->I2CROUTE[1].SDAROUTE = (uint32_t)((init->sdaPin << _GPIO_I2C_SDAROUTE_PIN_SHIFT)
-                                 | (init->sdaPort << _GPIO_I2C_SDAROUTE_PORT_SHIFT));
+                                            | (init->sdaPort << _GPIO_I2C_SDAROUTE_PORT_SHIFT));
   }
 #endif
 #if defined(I2C2)
   if (init->port == I2C2) {
     GPIO->I2CROUTE[2].ROUTEEN = GPIO_I2C_ROUTEEN_SDAPEN | GPIO_I2C_ROUTEEN_SCLPEN;
     GPIO->I2CROUTE[2].SCLROUTE = (uint32_t)((init->sclPin << _GPIO_I2C_SCLROUTE_PIN_SHIFT)
-                                 | (init->sclPort << _GPIO_I2C_SCLROUTE_PORT_SHIFT));
+                                            | (init->sclPort << _GPIO_I2C_SCLROUTE_PORT_SHIFT));
     GPIO->I2CROUTE[2].SDAROUTE = (uint32_t)((init->sdaPin << _GPIO_I2C_SDAROUTE_PIN_SHIFT)
-                                 | (init->sdaPort << _GPIO_I2C_SDAROUTE_PORT_SHIFT));
+                                            | (init->sdaPort << _GPIO_I2C_SDAROUTE_PORT_SHIFT));
   }
 #endif
 #endif

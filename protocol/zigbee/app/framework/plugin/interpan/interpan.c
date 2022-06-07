@@ -1146,9 +1146,6 @@ EmberStatus interpanFragmentationSendUnicast(EmberAfInterpanHeader* header,
   if (messageLen % maxFragLen) {
     numFragments++;
   }
-  if (numFragments > MAX_INT8U_VALUE) {
-    return EMBER_MESSAGE_TOO_LONG;
-  }
 
   // Fill in some info before we start the transmit process
   txPacket->messageType    = header->messageType;
@@ -1343,9 +1340,8 @@ void interpanFragmentationSendIpmfResponse(EmberAfInterpanHeader header,
   uint16_t messageLength, noPayloadLen = 0;
   uint8_t noPayload = 0;
 
-  if ((fragNum > MAX_INT8U_VALUE)
-      || ((INTERPAN_IPMF_RESPONSE_SUCCESS != response)
-          && (INTERPAN_IPMF_RESPONSE_FAILURE != response))) {
+  if ((INTERPAN_IPMF_RESPONSE_SUCCESS != response)
+      && (INTERPAN_IPMF_RESPONSE_FAILURE != response)) {
     return;
   }
 

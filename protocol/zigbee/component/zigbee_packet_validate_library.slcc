@@ -190,6 +190,19 @@ library:
       - device_family_efr32mg24
       - zigbee_phy_2_4
       - stack_protection_iar
+  - path: protocol/zigbee/build/packet-validate-library-cortexm3-iar-efr32mg27-rail/packet-validate-library.a
+    condition: 
+      - toolchain_iar
+      - device_family_efr32mg27
+      - zigbee_phy_2_4
+    unless:
+      - stack_protection_iar
+  - path: protocol/zigbee/build/packet-validate-library-cortexm3-iar-efr32mg27-rail-stack_protection/packet-validate-library.a
+    condition: 
+      - toolchain_iar
+      - device_family_efr32mg27
+      - zigbee_phy_2_4
+      - stack_protection_iar
   - path: protocol/zigbee/build/packet-validate-library-cortexm3-iar-mgm12-rail/packet-validate-library.a
     condition: 
       - toolchain_iar
@@ -342,6 +355,13 @@ library:
     condition: 
       - toolchain_gcc
       - device_family_efr32mg24
+      - zigbee_phy_2_4
+    unless:
+      - stack_protection_iar
+  - path: protocol/zigbee/build/packet-validate-library-cortexm3-gcc-efr32mg27-rail/packet-validate-library.a
+    condition: 
+      - toolchain_gcc
+      - device_family_efr32mg27
       - zigbee_phy_2_4
     unless:
       - stack_protection_iar

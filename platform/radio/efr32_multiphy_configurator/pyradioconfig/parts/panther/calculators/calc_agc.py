@@ -567,8 +567,7 @@ class CALC_AGC_panther(CALC_AGC_nixi):
             # % gain increments should be normally done very slowly - 2 dB steps
             self._reg_write(model.vars.AGC_GAINRANGE_GAININCSTEP, 1)
 
-            # % Disable IFPKD debounce feature for now - might need to tweak this
-            self._reg_write(model.vars.AGC_CTRL3_IFPKDDEB, 0)
+            self._reg_write(model.vars.AGC_CTRL3_IFPKDDEB, 0) #Known issue with IFPKD latch, so this is forced to 1 in many PHYs
             self._reg_write(model.vars.AGC_CTRL3_IFPKDDEBPRD, 0) # don't care, reset/default value
             self._reg_write(model.vars.AGC_CTRL3_IFPKDDEBRST, 4) # don't care, reset/default value
             self._reg_write(model.vars.AGC_CTRL3_IFPKDDEBTHD, 0) # don't care, reset/default value

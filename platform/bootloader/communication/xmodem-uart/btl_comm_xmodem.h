@@ -19,10 +19,17 @@
 #define BTL_COMM_XMODEM_H
 
 #include "core/btl_util.h"
-
 MISRAC_DISABLE
 #include "em_common.h"
 MISRAC_ENABLE
+
+#include "api/btl_interface.h"
+#if defined(BOOTLOADER_NONSECURE)
+  #include "parser/gbl/btl_gbl_parser_ns.h"
+#else
+  #include "parser/gbl/btl_gbl_parser.h"
+#endif
+
 #include "communication/xmodem-parser/btl_xmodem.h"
 
 /***************************************************************************//**
@@ -59,7 +66,31 @@ typedef enum {
 
 /** @endcond */
 
-/** @} addtogroup Communication 
+/***************************************************************************//**
+ * Initialize hardware for the UART XMODEM Bootloader communication.
+ ******************************************************************************/
+void bootloader_xmodem_communication_init(void);
+
+/***************************************************************************//**
+ * Initialize communication between the UART XMODEM bootloader
+ * and external host.
+ *
+ * @return Error code indicating success or failure.
+ ******************************************************************************/
+int32_t bootloader_xmodem_communication_start(void);
+
+/***************************************************************************//**
+ * Communication main for the UART XMODEM bootloader.
+ *
+ * @param imageProps    The image file processed
+ * @param parseCb       Bootloader parser callbacks
+ *
+ * @return Error code indicating success or failure.
+ ******************************************************************************/
+int32_t bootloader_xmodem_communication_main(ImageProperties_t *imageProps,
+                                             const BootloaderParserCallbacks_t* parseCb);
+
+/** @} addtogroup Communication
  *  @} addtogroup Components
 */
 #endif // BTL_COMM_XMODEM_H

@@ -19,6 +19,9 @@
 #include "app/framework/security/af-security.h"
 #include "app/util/serial/sl_zigbee_command_interpreter.h"
 #include "app/framework/cli/security-cli.h"
+#ifdef SL_COMPONENT_CATALOG_PRESENT
+#include "sl_component_catalog.h"
+#endif //SL_COMPONENT_CATALOG_PRESENT
 
 //------------------------------------------------------------------------------
 bool emberAfClearLinkKeyTableUponFormingOrJoining = true;

@@ -3,7 +3,7 @@
  * @brief Bluetooth event handler for Connectionless CTE mode.
  *******************************************************************************
  * # License
- * <b>Copyright 2021 Silicon Laboratories Inc. www.silabs.com</b>
+ * <b>Copyright 2022 Silicon Laboratories Inc. www.silabs.com</b>
  *******************************************************************************
  *
  * SPDX-License-Identifier: Zlib
@@ -27,10 +27,12 @@
  * 3. This notice may not be removed or altered from any source distribution.
  *
  ******************************************************************************/
+
 #include "sl_bt_api.h"
 #include "aoa_cte.h"
 #include "aoa_util.h"
 #include "aoa_cte_config.h"
+#include "app_log.h"
 
 // Module shared variables.
 extern uint8_t cte_switch_pattern[ANTENNA_ARRAY_MAX_PIN_PATTERN_SIZE];
@@ -52,7 +54,7 @@ sl_status_t cte_bt_on_event_conn_less(sl_bt_msg_t *evt)
     // This event indicates the device has started and the radio is ready.
     // Do not call any stack command before receiving this boot event!
     case sl_bt_evt_system_boot_id:
-      // Set passive scanning on 1Mb PHY
+      // Set passive scanning on 1M PHY
       sc = sl_bt_scanner_set_mode(sl_bt_gap_1m_phy, AOA_CTE_SCAN_MODE);
       if (SL_STATUS_OK != sc) {
         break;
@@ -65,52 +67,67 @@ sl_status_t cte_bt_on_event_conn_less(sl_bt_msg_t *evt)
       }
 
       // Start scanning - looking for tags
-      sc = sl_bt_scanner_start(sl_bt_gap_1m_phy, sl_bt_scanner_discover_observation);
+      sc = sl_bt_scanner_start(sl_bt_gap_1m_phy, sl_bt_scanner_discover_generic);
       break;
+
+    // -------------------------------
     case sl_bt_evt_scanner_scan_report_id:
     {
-      // Check if the tag is allowlisted
+      // Check if the tag is allowlisted.
       if (SL_STATUS_NOT_FOUND == aoa_db_allowlist_find(evt->data.evt_scanner_scan_report.address.addr)) {
-        // Tag is not on the allowlist, ignoring. Not an error.
         break;
       }
 
-      // Parse extended advertisement packets
-      if (evt->data.evt_scanner_scan_report.packet_type & 0x80) {
-        // If a CTE service is found...
-        uint16_t sync_handle;
-        if (find_service_in_advertisement(evt->data.evt_scanner_scan_report.data.data,
-                                          evt->data.evt_scanner_scan_report.data.len,
-                                          cte_service,
-                                          sizeof(cte_service))) {
-          // ...then sync on the periodic advertisement
-          sc = sl_bt_sync_open(evt->data.evt_scanner_scan_report.address,
-                               evt->data.evt_scanner_scan_report.address_type,
-                               evt->data.evt_scanner_scan_report.adv_sid,
-                               &sync_handle);
-          if (SL_STATUS_OK != sc) {
-            //Failed to synchronize to tag
-            break;
-          }
-          sc = aoa_db_get_tag_by_handle(sync_handle, &tag);
-          if (sc == SL_STATUS_NOT_FOUND) {
-            sc = aoa_db_add_tag(sync_handle,
-                                &evt->data.evt_scanner_scan_report.address,
-                                evt->data.evt_scanner_scan_report.address_type,
-                                &tag);
-          }
-        }
+      // Check if tag is already known.
+      // NOTE:
+      // It is possible that multiple scan report events arrive from the same
+      // asset tag before the sync opened event arrives and the asset tag
+      // is added to the database. Therefore, the asset tag is unknown at this
+      // point, and sync open command is sent multiple times in a row.
+      // This is normal and shouldn't cause any issues.
+      if (SL_STATUS_OK == aoa_db_get_tag_by_address(&evt->data.evt_scanner_scan_report.address, &tag)) {
+        break;
+      }
+
+      // Check for extended advertisement packet.
+      if ((evt->data.evt_scanner_scan_report.packet_type & 0x80) == 0) {
+        break;
+      }
+
+      // Check for CTE service.
+      if (!find_service_in_advertisement(evt->data.evt_scanner_scan_report.data.data,
+                                         evt->data.evt_scanner_scan_report.data.len,
+                                         cte_service,
+                                         sizeof(cte_service))) {
+        break;
+      }
+
+      // Establish synchronization with the advertising device.
+      uint16_t sync_handle;
+      sc = sl_bt_sync_open(evt->data.evt_scanner_scan_report.address,
+                           evt->data.evt_scanner_scan_report.address_type,
+                           evt->data.evt_scanner_scan_report.adv_sid,
+                           &sync_handle);
+      if (SL_STATUS_NO_MORE_RESOURCE == sc) {
+        app_log_warning("SL_BT_CONFIG_MAX_PERIODIC_ADVERTISING_SYNC reached, stop scanning." APP_LOG_NL);
+        sc = sl_bt_scanner_stop();
       }
       break;
     }
+
+    // -------------------------------
     case sl_bt_evt_sync_opened_id:
-      // Stop scanning
-      sc = sl_bt_scanner_stop();
-      if ((SL_STATUS_OK != sc) && (SL_STATUS_INVALID_STATE != sc)) {
+    {
+      // Add connection to the asset tag database.
+      sc = aoa_db_add_tag(evt->data.evt_sync_opened.sync,
+                          &evt->data.evt_sync_opened.address,
+                          evt->data.evt_sync_opened.address_type,
+                          &tag);
+      if (SL_STATUS_OK != sc) {
         break;
       }
 
-      // Start listening CTE on extended advertisements
+      // Start listening CTE on advertising packets.
       sc = sl_bt_cte_receiver_enable_connectionless_cte(evt->data.evt_sync_opened.sync,
                                                         aoa_cte_config.cte_slot_duration,
                                                         aoa_cte_config.cte_count,
@@ -120,24 +137,29 @@ sl_status_t cte_bt_on_event_conn_less(sl_bt_msg_t *evt)
         break;
       }
 
-      // Start scanning again for new devices
-      sc = sl_bt_scanner_start(sl_bt_gap_1m_phy, sl_bt_scanner_discover_generic);
-      if (SL_STATUS_INVALID_STATE == sc) {
-        // Scanning is already running, continue execution.
-        sc = SL_STATUS_OK;
+      size_t allowed_tags = aoa_db_allowlist_get_size();
+      size_t connected_tags = aoa_db_get_number_of_tags();
+      if ((allowed_tags > 0) && (connected_tags == allowed_tags)) {
+        app_log_debug("All allowed asset tags found, stop scanning." APP_LOG_NL);
+        sc = sl_bt_scanner_stop();
       }
-
       break;
+    }
+
+    // -------------------------------
     case sl_bt_evt_sync_closed_id:
       aoa_db_remove_tag(evt->data.evt_cte_receiver_connectionless_iq_report.sync);
-      // Start scanning again to find new devices
+
+      // Restart the scanner to discover new tags
       sc = sl_bt_scanner_start(sl_bt_gap_1m_phy, sl_bt_scanner_discover_generic);
+
       if (SL_STATUS_INVALID_STATE == sc) {
         // Scanning is already running, continue execution.
         sc = SL_STATUS_OK;
       }
-
       break;
+
+    // -------------------------------
     case sl_bt_evt_cte_receiver_connectionless_iq_report_id:
     {
       aoa_iq_report_t iq_report;
@@ -146,11 +168,13 @@ sl_status_t cte_bt_on_event_conn_less(sl_bt_msg_t *evt)
         // Nothing to be processed.
         break;
       }
+
       // Check if asset tag is known.
       if (aoa_db_get_tag_by_handle(evt->data.evt_cte_receiver_connectionless_iq_report.sync, &tag) == SL_STATUS_NOT_FOUND) {
         // Unknown tag, proceed with execution.
         break;
       }
+
       // Convert event to common IQ report format.
       iq_report.channel = evt->data.evt_cte_receiver_connectionless_iq_report.channel;
       iq_report.rssi = evt->data.evt_cte_receiver_connectionless_iq_report.rssi;
@@ -161,6 +185,7 @@ sl_status_t cte_bt_on_event_conn_less(sl_bt_msg_t *evt)
       aoa_cte_on_iq_report(tag, &iq_report);
     }
     break;
+
     // -------------------------------
     // Default event handler.
     default:

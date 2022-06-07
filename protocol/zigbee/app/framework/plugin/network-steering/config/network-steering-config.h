@@ -23,10 +23,10 @@
 // <i> The channels that the plugin will scan when forming and joining.
 #define EMBER_AF_PLUGIN_NETWORK_STEERING_CHANNEL_MASK       0x0318C800
 
-// <q EMBER_AF_PLUGIN_NETWORK_STEERING_RADIO_TX_POWER> Radio output power
+// <o EMBER_AF_PLUGIN_NETWORK_STEERING_RADIO_TX_POWER> Radio output power <-8..20>
 // <i> Default: 3
 // <i> The radio output power (in dBm) at which the node will operate.
-#define EMBER_AF_PLUGIN_NETWORK_STEERING_RADIO_TX_POWER     3
+#define EMBER_AF_PLUGIN_NETWORK_STEERING_RADIO_TX_POWER   3
 
 // <q EMBER_AF_PLUGIN_NETWORK_STEERING_RADIO_TX_CALLBACK> Get radio output power from callback
 // <i> Default: FALSE

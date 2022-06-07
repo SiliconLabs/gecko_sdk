@@ -32,7 +32,7 @@
 #if defined(DMA_PRESENT)
 
 #include "em_cmu.h"
-#include "em_assert.h"
+#include "sl_assert.h"
 #include "em_bus.h"
 
 /***************************************************************************//**

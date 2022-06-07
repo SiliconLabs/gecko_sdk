@@ -55,10 +55,10 @@
 #define SL_BTMESH_LPN_RECEIVE_DELAY_CFG_VAL   (50)
 
 // <o SL_BTMESH_LPN_REQUEST_RETRIES_CFG_VAL> The number of retry attempts to repeat <0-10>
-// <i> Default: 3
+// <i> Default: 8
 // <i> Request retry is the number of retry attempts to repeat e.g., the friend poll message
 // if the friend update was not received by the LPN
-#define SL_BTMESH_LPN_REQUEST_RETRIES_CFG_VAL   (3)
+#define SL_BTMESH_LPN_REQUEST_RETRIES_CFG_VAL   (8)
 
 // <o SL_BTMESH_LPN_RETRY_INTERVAL_CFG_VAL> Time interval between retry attempts in milliseconds <0-100>
 // <i> Default: 100

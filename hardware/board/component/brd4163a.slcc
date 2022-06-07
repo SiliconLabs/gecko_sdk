@@ -16,6 +16,9 @@
   - name: hardware_board_from_stk
   - name: hardware_board_from_slwrb4163a
   - name: hardware_board_from_slwstk6005a
+  - name: hardware_board_has_si70xx
+  - name: hardware_board_has_tempsensor
+  - name: hardware_board_has_vcom
   - name: hardware_board_has_spiflash
   - name: hardware_board_has_hfxo
   - name: hardware_board_has_lfxo
@@ -39,6 +42,7 @@
     instance:
     - led0
     - led1
+  - id: skrhaae010
   - id: simple_button
     instance:
     - btn0
@@ -64,6 +68,7 @@
   - hardware:has:sensor:si7021
   - hardware:has:display:ls013b7dh03
   - hardware:has:led:2
+  - hardware:has:joystick:skrhaae010
   - hardware:has:button:2
   - hardware:has:touch
   - hardware:has:memory:spi:mx25r8035f

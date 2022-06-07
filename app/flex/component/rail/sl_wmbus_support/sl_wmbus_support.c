@@ -140,7 +140,7 @@ static uint8_t WMBUS_encode3OutOf6Nibble(uint8_t inputbyte,
   if ( highNibble ) {
     inputbyte >>= 4;
   } else {
-    inputbyte &= 0x0f;
+    inputbyte &= 0x0F;
   }
   if ( outMode >= 0 ) {
     return lookuptable[inputbyte] << outMode;
@@ -368,56 +368,68 @@ uint16_t WMBUS_phy_software(uint8_t *buffer,
 
   uint32_t WMBUS_getMeterLimitedAccRxStart(bool slowMode)
   {
+    uint32_t return_value = 0UL;
     switch (wmbusMode) {
       case WMBUS_MODE_S:
       case WMBUS_MODE_R2:
-        return 3000;
+        return_value = 3000UL;
+        break;
       case WMBUS_MODE_T_METER:
       case WMBUS_MODE_T_COLLECTOR:
-        return 2000;
+        return_value = 2000UL;
+        break;
       case WMBUS_MODE_C:
       case WMBUS_MODE_F:
         if (slowMode) {
-          return 999500UL;
+          return_value = 999500UL;
         } else {
-          return 99500UL;
+          return_value = 99500UL;
         }
+        break;
       case WMBUS_MODE_N_24:
-        return 2099500UL;
+        return_value = 2099500UL;
+        break;
       case WMBUS_MODE_N_48:
       case WMBUS_MODE_N_192:
-        return 1099500UL;
+        return_value = 1099500UL;
+        break;
       default:
-        return 0UL;
+        break;
     }
-    return 0; //should never happen, just to make the compiler happy
+    return return_value;
   }
 
   uint32_t WMBUS_getMeterLimitedAccRxStop(bool slowMode)
   {
+    uint32_t return_value = 0UL;
     switch (wmbusMode) {
       case WMBUS_MODE_S:
       case WMBUS_MODE_R2:
-        return 50000;
+        return_value = 50000UL;
+        break;
       case WMBUS_MODE_T_METER:
       case WMBUS_MODE_T_COLLECTOR:
-        return 3000;
+        return_value = 3000UL;
+        break;
       case WMBUS_MODE_C:
       case WMBUS_MODE_F:
         if (slowMode) {
-          return 1000500UL;
+          return_value = 1000500UL;
         } else {
-          return 100500UL;
+          return_value = 100500UL;
         }
+        break;
       case WMBUS_MODE_N_24:
-        return 2100500UL;
+        return_value = 2100500UL;
+        break;
       case WMBUS_MODE_N_48:
       case WMBUS_MODE_N_192:
-        return 1100500UL;
+        return_value = 1100500UL;
+        break;
       default:
-        return 0UL;
+        break;
     }
-    return 0; //should never happen, just to make the compiler happy
+    return return_value;
   }
 
   uint16_t WMBUSframe_Chars2MField(const char* manuf)

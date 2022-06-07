@@ -154,7 +154,13 @@ void EUSART_UartInitLf(EUSART_TypeDef *eusart, const EUSART_UartInit_TypeDef *in
       clock_source = CMU_ClockSelectGet(cmuClock_EUSART0);
     }
 #endif
-    EFM_ASSERT((clock_source == cmuSelect_LFRCO) || (clock_source == cmuSelect_ULFRCO) || (clock_source == cmuSelect_LFXO));
+
+    EFM_ASSERT(
+      (clock_source == cmuSelect_ULFRCO)
+      || (clock_source == cmuSelect_LFXO)
+      || (clock_source == cmuSelect_LFRCO)
+      || (clock_source == cmuSelect_EM23GRPACLK) /* ULFRCO, LFXO, or LFRCO */
+      );
   }
 #endif
   // Uart mode only supports up to 9 databits frame.
@@ -1173,9 +1179,9 @@ static void EUSART_SyncInitCommon(EUSART_TypeDef *eusart,
   EUSART_Enable(eusart, eusartEnable);
 
   // Finally enable the Rx and/or Tx channel (as specified).
-  eusart_sync(eusart, _EUSART_SYNCBUSY_RXEN_MASK & _EUSART_SYNCBUSY_TXEN_MASK); // Wait for low frequency register synchronization.
+  eusart_sync(eusart, _EUSART_SYNCBUSY_RXEN_MASK | _EUSART_SYNCBUSY_TXEN_MASK); // Wait for low frequency register synchronization.
   eusart->CMD = (uint32_t)init->enable;
-  eusart_sync(eusart, _EUSART_SYNCBUSY_RXEN_MASK & _EUSART_SYNCBUSY_TXEN_MASK);
+  eusart_sync(eusart, _EUSART_SYNCBUSY_RXEN_MASK | _EUSART_SYNCBUSY_TXEN_MASK);
   while (~EUSART_StatusGet(eusart) & (_EUSART_STATUS_RXIDLE_MASK | _EUSART_STATUS_TXIDLE_MASK)) {
   }
 }

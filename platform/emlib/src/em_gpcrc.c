@@ -28,9 +28,9 @@
  *
  ******************************************************************************/
 
-#include "em_common.h"
+#include "sl_common.h"
 #include "em_gpcrc.h"
-#include "em_assert.h"
+#include "sl_assert.h"
 
 #if defined(GPCRC_PRESENT) && (GPCRC_COUNT > 0)
 

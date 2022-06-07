@@ -14,9 +14,9 @@
   - name: SL_KIT_NAME
     value: '"XG23-RB4204D"'
   - name: SL_KIT_REV
-    value: '"A00"'
+    value: '"A01"'
 - tag:
   - kit:opn:xG23-RB4204D
   - kit:pn:RB4204
   - kit:variant:D
-  - kit:revision:A00
+  - kit:revision:A01

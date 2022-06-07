@@ -75,6 +75,7 @@ bool COEX_HAL_ConfigPwmRequest(COEX_HAL_GpioConfig_t *gpioConfig);
 bool COEX_HAL_ConfigRadioHoldOff(COEX_HAL_GpioConfig_t *gpioConfig);
 bool COEX_HAL_ConfigPriority(COEX_HAL_GpioConfig_t *gpioConfig);
 bool COEX_HAL_ConfigGrant(COEX_HAL_GpioConfig_t *gpioConfig);
+bool COEX_HAL_ConfigPhySelect(COEX_HAL_GpioConfig_t *gpioConfig);
 bool COEX_HAL_ConfigDp(uint8_t pulseWidthUs);
 uint8_t COEX_HAL_GetDpPulseWidth(void);
 bool COEX_HAL_SetDpPulseWidth(uint8_t pulseWidthUs);

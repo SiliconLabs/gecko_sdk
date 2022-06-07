@@ -20,6 +20,7 @@
 #include "stack/include/ember-types.h"
 #include "stack/include/ember-types-internal.h"
 #include "stack/include/library.h"
+#include "upper-mac.h"
 
 //=============================================================================
 // Returns true if the device should continue to process, false if it
@@ -108,7 +109,7 @@ uint8_t emGetEbrPowerAndEuiListPointer(uint8_t **buffer)
   return 0;
 }
 
-boolean emAddEbrEuiAndPowerEntry(EmberEUI64 eui64, int8_t newPower)
+bool emAddEbrEuiAndPowerEntry(EmberEUI64 eui64, int8_t newPower)
 {
   (void)eui64;
   (void)newPower;

@@ -12,14 +12,7 @@
   - path: platform/Device/SiliconLabs/EFR32FG23/Source/system_efr32fg23.c
     unless:
     - device_content_override
-  - condition:
-    - toolchain_iar
-    path: platform/Device/SiliconLabs/EFR32FG23/Source/IAR/startup_efr32fg23.c
-    unless:
-    - device_content_override
-  - condition:
-    - toolchain_gcc
-    path: platform/Device/SiliconLabs/EFR32FG23/Source/GCC/startup_efr32fg23.c
+  - path: platform/Device/SiliconLabs/EFR32FG23/Source/startup_efr32fg23.c
     unless:
     - device_content_override
 - include:
@@ -27,9 +20,7 @@
     - path: efr32fg23a010f256gm40.h
     - path: efr32fg23_acmp.h
     - path: efr32fg23_aes.h
-    - path: efr32fg23_agc.h
     - path: efr32fg23_amuxcp.h
-    - path: efr32fg23_bufc.h
     - path: efr32fg23_buram.h
     - path: efr32fg23_burtc.h
     - path: efr32fg23_cmu.h
@@ -37,11 +28,8 @@
     - path: efr32fg23_devinfo.h
     - path: efr32fg23_dma_descriptor.h
     - path: efr32fg23_dpll.h
-    - path: efr32fg23_eca.h
-    - path: efr32fg23_ecaifadc.h
     - path: efr32fg23_emu.h
     - path: efr32fg23_eusart.h
-    - path: efr32fg23_frc.h
     - path: efr32fg23_fsrco.h
     - path: efr32fg23_gpcrc.h
     - path: efr32fg23_gpio.h
@@ -62,20 +50,15 @@
     - path: efr32fg23_lfrco.h
     - path: efr32fg23_lfxo.h
     - path: efr32fg23_mailbox.h
-    - path: efr32fg23_modem.h
     - path: efr32fg23_mpahbram.h
     - path: efr32fg23_msc.h
     - path: efr32fg23_pcnt.h
     - path: efr32fg23_pfmxpprf.h
-    - path: efr32fg23_protimer.h
     - path: efr32fg23_prs.h
     - path: efr32fg23_prs_signals.h
-    - path: efr32fg23_rac.h
-    - path: efr32fg23_rfcrc.h
     - path: efr32fg23_scratchpad.h
     - path: efr32fg23_semailbox.h
     - path: efr32fg23_smu.h
-    - path: efr32fg23_synth.h
     - path: efr32fg23_syscfg.h
     - path: efr32fg23_sysrtc.h
     - path: efr32fg23_timer.h
@@ -100,14 +83,13 @@
   - name: cortexm33
   - name: armv8m.main
   - name: device_security_se
+  - name: device_dcdc_buck
   - name: device_pa_14dbm
   - name: device_has_acmp
   - name: device_has_acmp0
   - name: device_has_acmp1
-  - name: device_has_agc
   - name: device_has_amuxcp
   - name: device_has_amuxcp0
-  - name: device_has_bufc
   - name: device_has_buram
   - name: device_has_burtc
   - name: device_has_cmu
@@ -116,14 +98,12 @@
   - name: device_has_dmem
   - name: device_has_dpll
   - name: device_has_dpll0
-  - name: device_has_ecaifadc
   - name: device_has_emu
   - name: device_has_euart
   - name: device_has_eusart
   - name: device_has_eusart0
   - name: device_has_eusart1
   - name: device_has_eusart2
-  - name: device_has_frc
   - name: device_has_fsrco
   - name: device_has_gpcrc
   - name: device_has_gpio
@@ -142,8 +122,6 @@
   - name: device_has_icache
   - name: device_has_icache0
   - name: device_has_keyscan
-  - name: device_has_lcd
-  - name: device_has_lcdrf
   - name: device_has_ldma
   - name: device_has_ldmaxbar
   - name: device_has_lesense
@@ -151,25 +129,15 @@
   - name: device_has_letimer0
   - name: device_has_lfrco
   - name: device_has_lfxo
-  - name: device_has_modem
   - name: device_has_msc
   - name: device_has_pcnt
   - name: device_has_pcnt0
   - name: device_has_pfmxpprf
-  - name: device_has_protimer
   - name: device_has_prs
-  - name: device_has_rac
   - name: device_has_radioaes
-  - name: device_has_rfcrc
-  - name: device_has_rfeca
-  - name: device_has_rfeca0
-  - name: device_has_rfeca1
-  - name: device_has_rfmailbox
-  - name: device_has_rfscratchpad
   - name: device_has_scratchpad
   - name: device_has_semailbox
   - name: device_has_smu
-  - name: device_has_synth
   - name: device_has_syscfg
   - name: device_has_sysrtc
   - name: device_has_sysrtc0
@@ -198,6 +166,8 @@
   - name: device_supports_rail_stack
   - name: device_supports_connect
   - name: device_compute_basic
+- recommends:
+  - id: trustzone_unaware
 - requires:
   - name: cmsis_core
 - template_contribution:
@@ -240,8 +210,25 @@
     value: cortex-m33
   - option: fpu
     value: fpv5-sp
+  - option: cmse
+    unless:
+    - trustzone_nonsecure
+    value: enabled
 - config_file:
   - condition:
     - custom_radio_config
     directory: rail
     path: platform/Device/config/210/device.yaml
+- metadata:
+    device:
+      memory:
+      - name: Main Flash
+        page_size: 8192
+        size: 262144
+        start: 134217728
+        type: non-volatile
+      - name: RAM
+        size: 32768
+        start: 536870912
+        type: volatile
+      opn: efr32fg23a010f256gm40

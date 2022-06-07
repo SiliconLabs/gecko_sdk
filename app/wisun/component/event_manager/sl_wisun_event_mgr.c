@@ -38,7 +38,6 @@
 #include "sl_cmsis_os2_common.h"
 #include "sl_wisun_api.h"
 #include "sl_wisun_event_mgr.h"
-
 // -----------------------------------------------------------------------------
 //                              Macros and Typedefs
 // -----------------------------------------------------------------------------
@@ -59,7 +58,8 @@ typedef enum {
   EVENT_IDX_CONNECTION_LOST,
   EVENT_IDX_SOCKET_DATA_SENT,
   EVENT_IDX_ERROR,
-  EVENT_IDX_JOIN_STATE
+  EVENT_IDX_JOIN_STATE,
+  EVENT_IDX_REGULATION_TX_LEVEL
 } app_wisun_event_id_t;
 
 // -----------------------------------------------------------------------------
@@ -142,6 +142,8 @@ static event_handler_t _wisun_events[] = {
     .callback = sl_wisun_error_event_hnd, .custom_callback = NULL },
   { .id = SL_WISUN_MSG_JOIN_STATE_IND_ID,
     .callback = sl_wisun_join_state_event_hnd, .custom_callback = NULL },
+  { .id = SL_WISUN_MSG_REGULATION_TX_LEVEL_IND_ID,
+    .callback = sl_wisun_regulation_tx_level_hnd, .custom_callback = NULL },
 };
 
 /**************************************************************************//**
@@ -266,6 +268,7 @@ static inline app_wisun_event_id_t _decode_ind(const sl_wisun_msg_ind_id_t ind)
     case SL_WISUN_MSG_SOCKET_DATA_SENT_IND_ID:              return EVENT_IDX_SOCKET_DATA_SENT;
     case SL_WISUN_MSG_ERROR_IND_ID:                         return EVENT_IDX_ERROR;
     case SL_WISUN_MSG_JOIN_STATE_IND_ID:                    return EVENT_IDX_JOIN_STATE;
+    case SL_WISUN_MSG_REGULATION_TX_LEVEL_IND_ID:           return EVENT_IDX_REGULATION_TX_LEVEL;
     default:                                                return EVENT_IDX_NOTVALID;
   }
 }
@@ -399,6 +402,17 @@ SL_WEAK void sl_wisun_error_event_hnd(sl_wisun_evt_t *evt)
  * @param[in] evt event ptr
  *****************************************************************************/
 SL_WEAK void sl_wisun_join_state_event_hnd(sl_wisun_evt_t *evt)
+{
+  (void) evt;
+  assert(false);
+}
+
+/**************************************************************************//**
+ * @brief Wi-SUN regulation TX level indication
+ * @details
+ * @param[in] evt event ptr
+ *****************************************************************************/
+SL_WEAK void sl_wisun_regulation_tx_level_hnd(sl_wisun_evt_t *evt)
 {
   (void) evt;
   assert(false);

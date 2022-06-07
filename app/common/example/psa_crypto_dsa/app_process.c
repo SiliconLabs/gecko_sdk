@@ -241,7 +241,7 @@ void app_process_action(void)
         if (asymmetric_key_storage_select > KEY_STORAGE_MAX) {
           asymmetric_key_storage_select = VOLATILE_PLAIN_KEY;
         }
-#if defined(MBEDTLS_PSA_CRYPTO_BUILTIN_KEYS)
+#if defined(SEMAILBOX_PRESENT)
         if (asymmetric_key_storage_select == KEY_STORAGE_MAX) {
           printf("  + Current asymmetric key is a %s key.\n",
                  asymmetric_key_storage_string[4]);
@@ -254,7 +254,7 @@ void app_process_action(void)
       if (enter_press) {
         enter_press = false;
         key_storage_public = asymmetric_key_storage_select;
-#if defined(MBEDTLS_PSA_CRYPTO_BUILTIN_KEYS)
+#if defined(SEMAILBOX_PRESENT)
         if (asymmetric_key_storage_select == KEY_STORAGE_MAX) {
           app_state = IMPORT_PRIVATE_KEY;
           dsa_state = ECDSA_SIGN_KEY_SIGN_HASH;
@@ -613,7 +613,7 @@ void app_process_action(void)
       }
       break;
 
-#if defined(MBEDTLS_PSA_CRYPTO_BUILTIN_KEYS)
+#if defined(SEMAILBOX_PRESENT)
     case OPEN_BUILTIN_KEY:
       if (dsa_state == ECDSA_SIGN_KEY_SIGN_HASH) {
         printf("\n  . Verify the signature of an already-calculated hash "
@@ -802,7 +802,7 @@ static void print_key_storage(void)
   }
 
   if (asymmetric_key_storage_select == KEY_STORAGE_MAX) {
-#if defined(MBEDTLS_PSA_CRYPTO_BUILTIN_KEYS)
+#if defined(SEMAILBOX_PRESENT)
     printf("\n  + Current asymmetric key is a %s key.\n",
            asymmetric_key_storage_string[4]);
 #else
@@ -824,7 +824,7 @@ static void print_key_storage(void)
          asymmetric_key_storage_string[4],
          asymmetric_key_storage_string[4]);
 #else
-#if defined(MBEDTLS_PSA_CRYPTO_BUILTIN_KEYS)
+#if defined(SEMAILBOX_PRESENT)
   printf("  + Press SPACE to select a %s or %s or %s key, press ENTER to next "
          "option or run if %s key is selected.\n",
          asymmetric_key_storage_string[0],

@@ -42,9 +42,6 @@
 //                              Macros and Typedefs
 // -----------------------------------------------------------------------------
 
-/// Maximum size of the URI path string
-#define SL_WISUN_COAP_URI_PATH_MAX_SIZE   (128U)
-
 /// Release coap mutex and return
 #define __release_wisun_coap_mtx_and_ret() \
   do {                                     \
@@ -629,4 +626,31 @@ static const char *_wisun_coap_store_uri_path(const sl_wisun_coap_packet_t *pack
   _wisun_coap_mutex_release();
 
   return (const char *) _tmp_uri_path;
+}
+
+/* Wi-SUN CoAP compare */
+bool sl_wisun_coap_compare(const char* str1,
+                           const uint16_t len1,
+                           const char* str2,
+                           const uint16_t len2)
+{
+  if (str1 == NULL || str2 == NULL || len1 != len2) {
+    return false;
+  }
+
+  if (osKernelGetState() == osKernelRunning) {
+    _wisun_coap_mutex_acquire();
+  }
+
+  for (uint16_t i = 0U; i < len1; ++i) {
+    if ( str1[i] != str2[i] ) {
+      return false;
+    }
+  }
+
+  if (osKernelGetState() == osKernelRunning) {
+    _wisun_coap_mutex_release();
+  }
+
+  return true;
 }

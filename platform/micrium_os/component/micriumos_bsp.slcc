@@ -18,5 +18,6 @@ provides:
   - name: micriumos_bsp
 requires:
   - name: emlib_chip
+  - name: device_init_dcdc
 ui_hints:
   visibility: never

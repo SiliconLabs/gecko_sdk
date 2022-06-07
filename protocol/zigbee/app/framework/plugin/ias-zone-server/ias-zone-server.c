@@ -28,7 +28,7 @@
 
 #include "app/framework/include/af.h"
 #include "ias-zone-server.h"
-#include "hal/micro/token.h"
+#include "hal/hal.h"
 
 #ifdef EMBER_SCRIPTED_TEST
 #include "app/framework/plugin/ias-zone-server/ias-zone-server-test.h"

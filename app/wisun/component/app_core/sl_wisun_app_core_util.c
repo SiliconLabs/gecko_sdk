@@ -36,6 +36,7 @@
 #include "sl_wisun_api.h"
 #include "sl_wisun_app_core_util.h"
 #include "sl_wisun_app_core_util_config.h"
+#include "app_project_info.h"
 
 // -----------------------------------------------------------------------------
 //                              Macros and Typedefs
@@ -53,9 +54,38 @@
 //                                Static Variables
 // -----------------------------------------------------------------------------
 
+/// Project info instance
+static app_project_info_t _app_project_info = { 0 };
+
 // -----------------------------------------------------------------------------
 //                          Public Function Definitions
 // -----------------------------------------------------------------------------
+
+/* Init project info */
+void app_wisun_project_info_init(const char * app_name)
+{
+  const app_project_info_version_t *stack_ver = NULL;
+  app_project_info_get(&_app_project_info);
+  _app_project_info.project_name = app_name;
+
+  // print app name
+  printf("\n%s\n", _app_project_info.project_name);
+
+  // print stack version
+  stack_ver = app_project_info_get_version(APP_PROJECT_INFO_VERSION_ID_WISUN, &_app_project_info);
+  app_project_info_print_version(stack_ver, printf, "* Wi-SUN Stack version", true);
+}
+
+/* Print project info */
+void app_wisun_project_info_print(const bool json_format)
+{
+  if (json_format) {
+    app_project_info_print_json(&_app_project_info, printf);
+  } else {
+    app_project_info_print_pretty(&_app_project_info, printf);
+  }
+}
+
 /* Connect and wait */
 void app_wisun_connect_and_wait(void)
 {

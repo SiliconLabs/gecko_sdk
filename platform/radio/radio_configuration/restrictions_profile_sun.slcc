@@ -11,8 +11,7 @@ requires:
 
 #------- Set provided component name
 provides:
-  - name: restrictions_profile
-    allow_multiple: true
+  - name: restrictions_profile_sun
 
 #-------- Include restriction config json file --------
 #

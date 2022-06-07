@@ -34,7 +34,8 @@
 // -----------------------------------------------------------------------------
 //                                   Includes
 // -----------------------------------------------------------------------------
-
+#include "rail_types.h"
+#include "stdbool.h"
 /*
  * IEEE 802.15.4/g
  * -----------------
@@ -99,9 +100,9 @@
 
 // IEEE 802.15.4 macros
 /// IEEE 802.15.4 CRC length is 2 bytes
-#define SL_FLEX_IEEE802154_CRC_LENGTH               (2u)
+#define SL_FLEX_IEEE802154_CRC_LENGTH               (2U)
 /// IEEE 802.15.4 PHR length is 1 byte
-#define SL_FLEX_IEEE802154_PHR_LENGTH               (1u)
+#define SL_FLEX_IEEE802154_PHR_LENGTH               (1U)
 /// Indicates the effective payload length excluding CRC (2 Bytes)
 #define SL_FLEX_IEEE802154_LEN_MAX                  (127)
 /// Size of FCF of MHR field
@@ -123,13 +124,13 @@
 
 // IEEE 802.15.4g macros
 /// IEEE Std. 802.15.4g CRC length 4 bytes
-#define SL_FLEX_IEEE802154G_CRC_LENGTH_4BYTE        (4u)
+#define SL_FLEX_IEEE802154G_CRC_LENGTH_4BYTE        (4U)
 /// IEEE Std. 802.15.4g CRC length 2 bytes
-#define SL_FLEX_IEEE802154G_CRC_LENGTH_2BYTE        (2u)
+#define SL_FLEX_IEEE802154G_CRC_LENGTH_2BYTE        (2U)
 /// IEEE Std. 802.15.4g max. length 11Bit
-#define SL_FLEX_IEEE802154G_LEN_MAX                 (2047u)
+#define SL_FLEX_IEEE802154G_LEN_MAX                 (2047U)
 /// IEEE Std. 802.15.4g PHR length is 2 byte
-#define SL_FLEX_IEEE802154G_PHR_LENGTH              (2u)
+#define SL_FLEX_IEEE802154G_PHR_LENGTH              (2U)
 // PHR bits next to the length in case of IEEE 802.15.4g
 /// Whitening switched on
 #define SL_FLEX_IEEE802154G_PHR_DATA_WHITENING_ON   (0x10)
@@ -205,8 +206,8 @@ typedef struct {
 #define SL_FLEX_BLE_PDU_TYPE                               (BLE_ADV_NONCONN_IND)
 /// BLE setup
 #define SL_FLEX_BLE_HEADER_LSB                             (SL_FLEX_BLE_PDU_TYPE)   // RFU(0)|ChSel(0)|TxAdd(0)|RxAdd(0)
-#define SL_FLEX_BLE_PHYSICAL_CH                            (0u)
-#define SL_FLEX_BLE_LOGICAL_CH                             (37u)
+#define SL_FLEX_BLE_PHYSICAL_CH                            (0U)
+#define SL_FLEX_BLE_LOGICAL_CH                             (37U)
 #define SL_FLEX_BLE_CRC_INIT                               (0x555555)
 #define SL_FLEX_BLE_ACCESS_ADDRESS                         (0x12345678)             // 0x8E89BED6
 #define SL_FLEX_BLE_COMPANY_ID                             ((uint16_t) 0x02FF)      // Company Identifier of Silicon Labs
@@ -250,7 +251,6 @@ typedef struct {
   uint16_t company_id;
   uint8_t version;
   uint8_t payload[SL_FLEX_BLE_PAYLOAD_LEN_MAX]; ///> Payload of the Data Frame
-  // uint32_t payload_len;
 } ble_advertising_manufacture_specific_t;
 
 typedef struct {
@@ -298,14 +298,53 @@ int16_t sl_flex_802154_packet_pack_g_opt_data_frame(uint8_t phr_cfg,
  * @param[out] *frame_buffer      buffer of packed frame
  *
  * @retval SL_FLEX_802154_PACKET_OK if the process has been successful.
- *  * @retval SL_FLEX_802154_PACKET_ERROR if the process has been failed.
+ * @retval SL_FLEX_802154_PACKET_ERROR if the process has been failed.
  *****************************************************************************/
-int16_t sl_flex_802154_packet_pack_data_frame(
-  sl_flex_802154_packet_mhr_frame_t *mhr_cfg,
-  uint16_t payload_size,
-  void *payload,
-  uint16_t *frame_size,
-  uint8_t *frame_buffer);
+int16_t sl_flex_802154_packet_pack_data_frame(const sl_flex_802154_packet_mhr_frame_t *mhr_cfg,
+                                              uint16_t payload_size,
+                                              void *payload,
+                                              uint16_t *frame_size,
+                                              uint8_t *frame_buffer);
+
+/**************************************************************************//**
+ * This function packs the IEEE 802.15.4 Wi-SUN OFDM frame.
+ *
+ * @param[in] rate                5 bits wide, The Rate field (RA4-RA0) specifies the data rate of the payload and is equal to the numerical value of the MCS
+ * @param[in] scrambler           2 bits wide, The Scrambler field (S1-S0) specifies the scrambling seed
+ * @param[in] payload_size        payload size
+ * @param[in] *payload            payload
+ * @param[out] *frame_size        frame_size that is calculated
+ * @param[out] *frame_buffer      buffer of packed frame
+ *
+ * @retval SL_FLEX_802154_PACKET_OK if the process has been successful.
+ * @retval SL_FLEX_802154_PACKET_ERROR if the process has been failed.
+ *****************************************************************************/
+int16_t sl_flex_802154_packet_pack_ofdm_data_frame(uint8_t rate,
+                                                   uint8_t scrambler,
+                                                   uint16_t payload_size,
+                                                   const uint8_t *payload,
+                                                   uint16_t *frame_size,
+                                                   uint8_t *frame_buffer);
+
+/**************************************************************************//**
+ * This function packs the IEEE 802.15.4 SUN OQPSK frame.
+ *
+ * @param[in] spreadingMode       spreading mode
+ * @param[in] rateMode            rate mode: 2 bits wide
+ * @param[in] payload_size        payload size
+ * @param[in] *payload            payload
+ * @param[out] *frame_size        frame_size that is calculated
+ * @param[out] *frame_buffer      buffer of packed frame
+ *
+ * @retval SL_FLEX_802154_PACKET_OK if the process has been successful.
+ * @retval SL_FLEX_802154_PACKET_ERROR if the process has been failed.
+ *****************************************************************************/
+int16_t sl_flex_802154_packet_pack_oqpsk_data_frame(bool spreadingMode,
+                                                    uint8_t rateMode,
+                                                    uint16_t payload_size,
+                                                    const uint8_t *payload,
+                                                    uint16_t *frame_size,
+                                                    uint8_t *frame_buffer);
 
 /**************************************************************************//**
  * This function unpacks the received packet to get IEEE 802.15.4g frame.
@@ -313,7 +352,7 @@ int16_t sl_flex_802154_packet_pack_data_frame(
  * @param[out] *phr_cfg           PHR config/information for IEEE 802.15.4g
  * @param[out] *mhr_cfg           MHR configuration
  * @param[out] *payload_size      payload size
- * @param[in] *payload            payload
+ * @param[in] *frame_buffer       buffer of packed frame
  *
  * @return pointer of the payload
  *****************************************************************************/
@@ -327,14 +366,49 @@ uint8_t *sl_flex_802154_packet_unpack_g_opt_data_frame(uint8_t *phr_cfg,
  *
  * @param[out] *mhr_cfg           MHR configuration
  * @param[out] *payload_size      payload size
- * @param[in] *payload            payload
+ * @param[in] *frame_buffer       buffer of packed frame
  *
  * @return pointer of the payload
  *****************************************************************************/
-uint8_t *sl_flex_802154_packet_unpack_data_frame(
-  sl_flex_802154_packet_mhr_frame_t *mhr_cfg,
-  uint16_t *payload_size,
-  uint8_t *frame_buffer);
+uint8_t *sl_flex_802154_packet_unpack_data_frame(sl_flex_802154_packet_mhr_frame_t *mhr_cfg,
+                                                 uint16_t *payload_size,
+                                                 uint8_t *frame_buffer);
+
+/**************************************************************************//**
+ * This function unpacks the received packet to get IEEE 802.15.4 OFDM frame.
+ *
+ * @param[in] *packet_information   packet information
+ * @param[out] *rate                5 bits wide, The Rate field (RA4-RA0) specifies the data rate of the payload and is equal to the numerical value of the MCS
+ * @param[out] *scrambler           2 bits wide, The Scrambler field (S1-S0) specifies the scrambling seed
+ * @param[out] *payload_size        payload size
+ * @param[in] *frame_buffer         buffer of packed frame
+ *
+ * @return pointer of the payload
+ * @return NULL on error
+ *****************************************************************************/
+uint8_t *sl_flex_802154_packet_unpack_ofdm_data_frame(const RAIL_RxPacketInfo_t *packet_information,
+                                                      uint8_t *rate,
+                                                      uint8_t *scrambler,
+                                                      uint16_t *payload_size,
+                                                      uint8_t *frame_buffer);
+
+/**************************************************************************//**
+ * This function unpacks the received packet to get IEEE 802.15.4 SUN OQPSK frame.
+ *
+ * @param[in] *packet_information   packet information
+ * @param[out] *spreadingMode       spreading mode
+ * @param[out] *rateMode            rate mode: 2 bits wide
+ * @param[out] *payload_size        payload size
+ * @param[in] *frame_buffer         buffer of packed frame
+ *
+ * @return pointer of the payload
+ * @return NULL on error
+ *****************************************************************************/
+uint8_t *sl_flex_802154_packet_unpack_oqpsk_data_frame(const RAIL_RxPacketInfo_t *packet_information,
+                                                       bool *spreadingMode,
+                                                       uint8_t *rateMode,
+                                                       uint16_t *payload_size,
+                                                       uint8_t *frame_buffer);
 
 /**************************************************************************//**
  * Pack the tx data buffer to get BLE advertising packet frame.

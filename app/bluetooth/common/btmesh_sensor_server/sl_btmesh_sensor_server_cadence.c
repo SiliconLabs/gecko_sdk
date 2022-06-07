@@ -154,8 +154,8 @@ uint32_t sl_btmesh_sensor_people_count_handle_cadence(count16_t people_count, sl
   uint32_t ret_timer_value = publish_period.period_ms;
 
   // Check if the measured value requires publishing period modification
-  if (sensor_people_count_fast_cadence(people_count)
-      || sensor_people_count_delta_cadence(people_count)) {
+  if (sensor_people_count_delta_cadence(people_count)
+      || sensor_people_count_fast_cadence(people_count)) {
     // Calculate new publishing timer value
     ret_timer_value = publish_period.period_ms / (1 << cadences[SENSOR_PEOPLE_COUNT_INDEX].period_divisor);
     if (ret_timer_value < (uint32_t)(1 << cadences[SENSOR_PEOPLE_COUNT_INDEX].min_interval)) {
@@ -350,8 +350,8 @@ uint32_t sl_btmesh_sensor_thermometer_handle_cadence(temperature_8_t temperature
   uint32_t ret_timer_value = publish_period.period_ms;
 
   // Check if the measured value requires publishing period modification
-  if (sensor_thermometer_fast_cadence(temperature)
-      || sensor_thermometer_delta_cadence(temperature)) {
+  if (sensor_thermometer_delta_cadence(temperature)
+      || sensor_thermometer_fast_cadence(temperature)) {
     // Calculate publishing timer value
     ret_timer_value = publish_period.period_ms / (1 << cadences[SENSOR_RHT_INDEX].period_divisor);
     if (ret_timer_value < (uint32_t)(1 << cadences[SENSOR_RHT_INDEX].min_interval)) {

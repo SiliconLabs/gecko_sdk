@@ -46,39 +46,55 @@
   Application specific sizes. Here we start to calculate the application view
   of the physical memory.
 #}
-{%- set app_flash_start = flash_addr %}
-{%- set app_flash_end = flash_addr + flash_size %}
-{%- set app_ram_start = sram_addr %}
-{%- set app_ram_end = sram_addr + sram_size %}
-
-{#-
-  On series-2 devices we reserve the last flash page for tokens and key storage
-#}
-{%- if (device_series | first) == 2 %}
-{%-   set app_flash_end = app_flash_end - flash_page_size %}
+{%- if memory_ram_start is defined %}
+{%-   set app_ram_start = memory_ram_start | first %}
+{%- else %}
+{%-   set app_ram_start = sram_addr %}
 {%- endif %}
 
+{%- if memory_ram_size is defined %}
+{%-   set app_ram_size = memory_ram_size | first %}
+{%- else %}
+{%-   set app_ram_size = sram_size %}
+{%- endif %}
+
+{%- if memory_flash_start is defined %}
+{%-   set app_flash_start = memory_flash_start | first %}
+{%- else %}
+{%-   set app_flash_start = flash_addr %}
 {#-
   Reserve space for the bootloader at the beginning of flash. Note that
   bootloader_size > 0 only for devices that place the bootloader in main flash.
   On devices where the bootloader is placed in the dedicated bootloader flash
   the bootloader_size value is 0.
 #}
-{%- set app_bootloader_size = bootloader_size | sum %}
-{%- if app_bootloader_size > 0 %}
-{%-   set app_flash_start = app_flash_start + app_bootloader_size %}
+{%-   set app_bootloader_size = bootloader_size | sum %}
+{%-   if app_bootloader_size > 0 %}
+{%-     set app_flash_start = app_flash_start + app_bootloader_size %}
+{%-   endif %}
 {%- endif %}
 
+{%- if memory_flash_size is defined %}
+{%-   set app_flash_size = memory_flash_size | first %}
+{%- else %}
+{%-   set app_flash_size = flash_size %}
+
+{%-   if app_bootloader_size > 0 %}
+{%-     set app_flash_size = app_flash_size - app_bootloader_size %}
+{%-   endif %}
+
 {#-
-  Calculate application flash and ram size based on start and end address.
+  On series-2 devices we reserve the last flash page for tokens and key storage
 #}
-{%- set app_flash_size = app_flash_end - app_flash_start %}
-{%- set app_ram_size = app_ram_end - app_ram_start %}
+{%-   if (device_series | first) == 2 %}
+{%-     set app_flash_size = app_flash_size - flash_page_size %}
+{%-   endif %}
+{%- endif %}
 
 {%- set rtt = 0 %}
-{% if linker_rtt_section is defined %}
+{%- if linker_rtt_section is defined %}
 {%-   set rtt = 1 %}
-{% endif %}
+{%- endif %}
 
 {%- if bootloader_enable %}
  MEMORY
@@ -143,6 +159,16 @@ SECTIONS
     *(.rodata*)
     *(.eh_frame*)
   } > FLASH
+{%- if trustzone_secure %}
+  .gnu.sgstubs : ALIGN(32)
+  {
+    . = ALIGN(32);
+    linker_sg_begin = .;
+    KEEP(*(.gnu.sgstubs*))
+    . = ALIGN(32);
+  } > FLASH
+  linker_sg_end = linker_sg_begin + SIZEOF(.gnu.sgstubs);
+{%- endif %}
 
   .ARM.extab :
   {
@@ -155,6 +181,37 @@ SECTIONS
     *(.ARM.exidx* .gnu.linkonce.armexidx.*)
   } > FLASH
   __exidx_end = .;
+
+    .copy.table :
+  {
+    . = ALIGN(4);
+    __copy_table_start__ = .;
+
+    LONG (__etext)
+    LONG (__data_start__)
+    LONG ((__data_end__ - __data_start__) / 4)
+
+    /* Add each additional data section here */
+/*
+    LONG (__etext2)
+    LONG (__data2_start__)
+    LONG ((__data2_end__ - __data2_start__) / 4)
+*/
+    __copy_table_end__ = .;
+  } > FLASH
+
+    .zero.table :
+  {
+    . = ALIGN(4);
+    __zero_table_start__ = .;
+    /* Add each additional bss section here */
+/*
+    LONG (__bss2_start__)
+    LONG ((__bss2_end__ - __bss2_start__) / 4)
+*/
+    __zero_table_end__ = .;
+  } > FLASH
+
   __etext = .;
 
   /* Start placing output sections which are loaded into RAM */
@@ -168,6 +225,20 @@ SECTIONS
     __StackTop = .;
     PROVIDE(__stack = __StackTop);
   } > RAM
+
+
+{%- if trustzone_secure %}
+  /* ARMv8-M stack sealing:
+     to use ARMv8-M stack sealing uncomment '.stackseal' section
+   */
+  .stackseal (COPY):
+  {
+    __StackSeal = .;
+    . = . + 8;
+    . = ALIGN(8);
+  } > RAM
+{%- endif %}
+
 
   .noinit . (NOLOAD):
   {
@@ -281,5 +352,20 @@ SECTIONS
   {%- else %}
     ASSERT( ((ORIGIN(FLASH) + LENGTH(FLASH)) - 0x4 - _app_rollback_protection_size) >= (__etext + SIZEOF(.data)), "FLASH memory overflowed !")
   {%- endif %}
+{%- else %}
+  ASSERT((linker_storage_begin >= (__etext + SIZEOF(.data))), "FLASH memory overflowed !")
+{%- endif %}
+
+{%- if app_flash_start and app_flash_size %}
+  app_flash_end = 0x{{ '%0x' % (app_flash_start) }} + 0x{{ '%0x' % (app_flash_size) }};
+  ASSERT( (linker_nvm_begin + SIZEOF(.nvm)) <= app_flash_end, "NVM3 is excessing the flash size !")
+{%- endif %}
+
+{%- if (memory_ram_start and not memory_ram_size) or (memory_ram_size and not memory_ram_start)  %}
+  ASSERT( 0, "memory_ram_start and memory_ram_size, Should define/undefine both!")
+{%- endif %}
+
+{%- if (memory_flash_start and not memory_flash_size) or (memory_flash_size and not memory_flash_start) %}
+  ASSERT( 0, "memory_flash_start and memory_flash_size, Should define/undefine both!")
 {%- endif %}
 }

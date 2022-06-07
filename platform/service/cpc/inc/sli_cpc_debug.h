@@ -34,7 +34,8 @@
 #include "sl_cpc_config.h"
 #include "string.h"
 
-#if (SL_CPC_DEBUG_SYSTEM_VIEW == 1)
+#if (SL_CPC_DEBUG_SYSTEM_VIEW_LOG_CORE_EVENT == 1) \
+  || (SL_CPC_DEBUG_SYSTEM_VIEW_LOG_ENDPOINT_EVENT == 1)
 #include "SEGGER_SYSVIEW.h"
 #endif
 
@@ -88,8 +89,8 @@
 #define SLI_CPC_DEBUG_TRACE_CORE_TXD_TRANSMIT_COMPLETED()               { SLI_CPC_DEBUG_CORE_COUNTER_INC(txd_completed); \
                                                                           SLI_CPC_SYSVIEW_MARK_EVENT_ON_CORE(TXD_TRANSMIT_COMPLETED); }
 
-#define SLI_CPC_DEBUG_TRACE_CORE_RE_TRANSMIT_FRAME()                     { SLI_CPC_DEBUG_CORE_COUNTER_INC(retxd_data_frame); \
-                                                                           SLI_CPC_SYSVIEW_MARK_EVENT_ON_CORE(RE_TRANSMIT_FRAME); }
+#define SLI_CPC_DEBUG_TRACE_CORE_RE_TRANSMIT_FRAME()                    { SLI_CPC_DEBUG_CORE_COUNTER_INC(retxd_data_frame); \
+                                                                          SLI_CPC_SYSVIEW_MARK_EVENT_ON_CORE(RETRANSMIT); }
 
 #define SLI_CPC_DEBUG_TRACE_ENDPOINT_RXD_FRAME(endpoint)                { SLI_CPC_DEBUG_ENDPOINT_COUNTER_INC(endpoint, rxd_packet); \
                                                                           SLI_CPC_SYSVIEW_MARK_EVENT_ON_ENDPOINT(RXD_FRAME, endpoint->id); }
@@ -186,7 +187,7 @@
 
 // DEBUG EVENTS COUNTERS ON CORE
 #if (SL_CPC_DEBUG_CORE_EVENT_COUNTERS == 1)
-#define SLI_CPC_DEBUG_CORE_INIT()                 (memset(&sl_cpc_core_debug.core_counters, sizeof(sl_cpc_core_debug.core_counters), 0))
+#define SLI_CPC_DEBUG_CORE_INIT()                 (memset(&sl_cpc_core_debug.core_counters, 0, sizeof(sl_cpc_core_debug.core_counters)))
 #define SLI_CPC_DEBUG_CORE_COUNTER_INC(counter)   ((sl_cpc_core_debug.core_counters.counter)++)
 #else // SL_CPC_DEBUG_CORE_EVENT_COUNTERS
 #define SLI_CPC_DEBUG_CORE_INIT()
@@ -195,7 +196,7 @@
 
 // DEBUG EVENTS COUNTERS ON ENDPOINT
 #if (SL_CPC_DEBUG_ENDPOINT_EVENT_COUNTERS == 1)
-#define SLI_CPC_DEBUG_ENDPOINT_INIT(endpoint)                   (memset(&endpoint->debug_counters, sizeof(endpoint->debug_counters), 0))
+#define SLI_CPC_DEBUG_ENDPOINT_INIT(endpoint)                   (memset(&endpoint->debug_counters, 0, sizeof(endpoint->debug_counters)))
 #define SLI_CPC_DEBUG_ENDPOINT_COUNTER_INC(endpoint, counter)   ((endpoint->debug_counters.counter)++)
 #else // SL_CPC_DEBUG_ENDPOINT_EVENT_COUNTERS
 #define SLI_CPC_DEBUG_ENDPOINT_INIT(endpoint)
@@ -204,8 +205,8 @@
 
 #if (SL_CPC_DEBUG_MEMORY_ALLOCATOR_COUNTERS == 1)
 #define SLI_CPC_DEBUG_MEMORY_POOL_INIT()          sl_cpc_core_debug.memory_pool.buffer_handle = &cpc_mempool_buffer_handle; \
-  sl_cpc_core_debug.memory_pool.hdlc_header = &cpc_mempool_buffer_handle;                                                   \
-  sl_cpc_core_debug.memory_pool.hdlc_reject = &cpc_mempool_hdlc_header;                                                     \
+  sl_cpc_core_debug.memory_pool.hdlc_header = &cpc_mempool_hdlc_header;                                                     \
+  sl_cpc_core_debug.memory_pool.hdlc_reject = &cpc_mempool_hdlc_reject;                                                     \
   sl_cpc_core_debug.memory_pool.rx_buffer = &cpc_mempool_rx_buffer;                                                         \
   sl_cpc_core_debug.memory_pool.endpoint = &cpc_mempool_endpoint;                                                           \
   sl_cpc_core_debug.memory_pool.rx_queue_item = &cpc_mempool_rx_queue_item;                                                 \
@@ -232,7 +233,6 @@
 // SYSTEMVIEW TRACE MACRO
 #define SLI_CPC_SYSVIEW_MARK_EVENT_ON_CORE(event)
 #define SLI_CPC_SYSVIEW_MARK_EVENT_ON_ENDPOINT(event, endpoint)
-#if (SL_CPC_DEBUG_SYSTEM_VIEW == 1)
 #if (SL_CPC_DEBUG_SYSTEM_VIEW_LOG_CORE_EVENT == 1)
 #undef SLI_CPC_SYSVIEW_MARK_EVENT_ON_CORE
 #define SLI_CPC_SYSVIEW_MARK_EVENT_ON_CORE(event) SEGGER_SYSVIEW_NameMarker(SLI_CPC_SYSVIEW_CORE_EVENT_ID, SLI_CPC_SYSVIEW_ON_CORE_ ## event ## _MESSAGE)
@@ -242,7 +242,6 @@
 #undef SLI_CPC_SYSVIEW_MARK_EVENT_ON_ENDPOINT
 #define SLI_CPC_SYSVIEW_MARK_EVENT_ON_ENDPOINT(event, endpoint) SEGGER_SYSVIEW_NameMarker(SLI_CPC_SYSVIEW_ON_ENDPOINT_ ## event ## _EVENT_ID + endpoint, SLI_CPC_SYSVIEW_ON_ENDPOINT_ ## event ## _EVENT_MESSAGE)
 #endif
-#endif  // SL_CPC_DEBUG_SYSTEM_VIEW
 
 #define STR_EXPAND(tok) #tok
 #define STR(tok) STR_EXPAND(tok)
@@ -261,6 +260,11 @@
 #define SLI_CPC_SYSVIEW_ON_CORE_INVALID_HEADER_CHECKSUM_MESSAGE "CPC: Invalid checksum in protocol header"
 #define SLI_CPC_SYSVIEW_ON_CORE_DRIVER_READ_ERROR_MESSAGE "CPC: Driver reported an error"
 #define SLI_CPC_SYSVIEW_ON_CORE_DRIVER_PACKET_DROPPED_MESSAGE "CPC: Driver dropped a packet"
+#define SLI_CPC_SYSVIEW_ON_CORE_RXD_VALID_IFRAME_MESSAGE "CPC: Valid iframe received"
+#define SLI_CPC_SYSVIEW_ON_CORE_RXD_VALID_SFRAME_MESSAGE "CPC: Valid sframe received"
+#define SLI_CPC_SYSVIEW_ON_CORE_RXD_VALID_UFRAME_MESSAGE "CPC: Valid uframe received"
+#define SLI_CPC_SYSVIEW_ON_CORE_INVALID_PAYLOAD_CHECKSUM_MESSAGE "CPC: Invalid checksum on payload"
+#define SLI_CPC_SYSVIEW_ON_CORE_RETRANSMIT_MESSAGE "CPC: Frame re-transmitted"
 
 // SYSTEMVIEW; ENDPOINT EVENT IDs and MESSAGES
 #define SLI_CPC_SYSVIEW_ON_ENDPOINT_RXD_FRAME_EVENT_NBR                         1
@@ -427,5 +431,15 @@
 #define SLI_CPC_SYSVIEW_ON_ENDPOINT_RXD_DATA_FRAME_QUEUED_EVENT_MARKER          (SLI_CPC_SYSVIEW_ON_ENDPOINT_RXD_DATA_FRAME_QUEUED_EVENT_NBR * CPC_ENDPOINT_EVENT_ID_MULTIPLIER)
 #define SLI_CPC_SYSVIEW_ON_ENDPOINT_RXD_DATA_FRAME_QUEUED_EVENT_ID              (SLI_CPC_SYSVIEW_ON_ENDPOINT_RXD_DATA_FRAME_QUEUED_EVENT_MARKER + CPC_ENDPOINT_EVENT_ID_OFFSET)
 #define SLI_CPC_SYSVIEW_ON_ENDPOINT_RXD_DATA_FRAME_QUEUED_EVENT_MESSAGE         ON_ENDPOINT_STR_MESSAGE("Received data has been push to endpoint's receive queue", SLI_CPC_SYSVIEW_ON_ENDPOINT_RXD_DATA_FRAME_QUEUED_EVENT_NBR, CPC_ENDPOINT_EVENT_ID_MULTIPLIER)
+
+#define SLI_CPC_SYSVIEW_ON_ENDPOINT_FRAME_TRANSMIT_SUBMITTED_NBR                36
+#define SLI_CPC_SYSVIEW_ON_ENDPOINT_FRAME_TRANSMIT_SUBMITTED_EVENT_MARKER       (SLI_CPC_SYSVIEW_ON_ENDPOINT_FRAME_TRANSMIT_SUBMITTED_NBR * CPC_ENDPOINT_EVENT_ID_MULTIPLIER)
+#define SLI_CPC_SYSVIEW_ON_ENDPOINT_FRAME_TRANSMIT_SUBMITTED_EVENT_ID           (SLI_CPC_SYSVIEW_ON_ENDPOINT_FRAME_TRANSMIT_SUBMITTED_EVENT_MARKER + CPC_ENDPOINT_EVENT_ID_OFFSET)
+#define SLI_CPC_SYSVIEW_ON_ENDPOINT_FRAME_TRANSMIT_SUBMITTED_EVENT_MESSAGE      ON_ENDPOINT_STR_MESSAGE("Transmit completed", SLI_CPC_SYSVIEW_ON_ENDPOINT_FRAME_TRANSMIT_SUBMITTED_NBR, CPC_ENDPOINT_EVENT_ID_MULTIPLIER)
+
+#define SLI_CPC_SYSVIEW_ON_ENDPOINT_RXD_DATA_FRAME_DROPPED_EVENT_NBR             37
+#define SLI_CPC_SYSVIEW_ON_ENDPOINT_RXD_DATA_FRAME_DROPPED_EVENT_MARKER          (SLI_CPC_SYSVIEW_ON_ENDPOINT_RXD_DATA_FRAME_DROPPED_EVENT_NBR * CPC_ENDPOINT_EVENT_ID_MULTIPLIER)
+#define SLI_CPC_SYSVIEW_ON_ENDPOINT_RXD_DATA_FRAME_DROPPED_EVENT_ID              (SLI_CPC_SYSVIEW_ON_ENDPOINT_RXD_DATA_FRAME_DROPPED_EVENT_MARKER + CPC_ENDPOINT_EVENT_ID_OFFSET)
+#define SLI_CPC_SYSVIEW_ON_ENDPOINT_RXD_DATA_FRAME_DROPPED_EVENT_MESSAGE         ON_ENDPOINT_STR_MESSAGE("Received data has been dropped", SLI_CPC_SYSVIEW_ON_ENDPOINT_RXD_DATA_FRAME_DROPPED_EVENT_NBR, CPC_ENDPOINT_EVENT_ID_MULTIPLIER)
 
 #endif // SLI_CPC_DEBUG_H

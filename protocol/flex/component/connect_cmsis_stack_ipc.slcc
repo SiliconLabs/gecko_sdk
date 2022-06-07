@@ -22,10 +22,10 @@ source:
   - path: "protocol/flex/cmsis-stack-ipc/cmsis-rtos-ipc-common.c"
   - path: "protocol/flex/cmsis-stack-ipc/cmsis-rtos-support.c"
   - path: "protocol/flex/cmsis-stack-ipc/cmsis-rtos-vncp-task.c"
-  
+
   # OS application hooks: these could be generated in the future.
   - path: "protocol/flex/cmsis-stack-ipc/os_app_hooks.c"
-  
+
 include:
   - path: "protocol/flex/cmsis-stack-ipc"
     file_list:
@@ -39,11 +39,11 @@ define:
   - name: "SKIP_API_RENAME"
 template_contribution:
   - name: stack_callback
-    value: 
+    value:
       callback_type: "stack_isr"
       function_name: "emberAfPluginCmsisRtosStackIsr"
   - name: stack_callback
-    value: 
+    value:
       callback_type: "mark_application_buffers"
       function_name: "emAfPluginCmsisRtosMarkBuffersCallback"
   - name: component_catalog

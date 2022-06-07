@@ -88,11 +88,35 @@ EmberStatus emberAfTrustCenterImportBackupFromFile(const char* filepath);
  */
 EmberStatus emberAfTrustCenterExportBackupToFile(const char* filepath);
 
+/** @brief saves tokens to a file
+ *
+ * @param filepath Ver.: always
+ *
+ * @return EmberStatus status code
+ *
+ * @note Available only for EMBER_AF_PLUGIN_TRUST_CENTER_BACKUP_POSIX_FILE_BACKUP_SUPPORT
+ *
+ */
+EmberStatus emberAfTrustCenterBackupSaveTokensToFile(const char* filepath);
+
+/** @brief restores tokens from a file
+ *
+ * @param filepath Ver.: always
+ *
+ * @return EmberStatus status code
+ *
+ * @note Available only for EMBER_AF_PLUGIN_TRUST_CENTER_BACKUP_POSIX_FILE_BACKUP_SUPPORT
+ *
+ */
+EmberStatus emberAfTrustCenterBackupRestoreTokensFromFile(const char* filepath);
+
 /** @} */ // end of name API
 /** @} */ // end of trust-center-backup
 #ifdef UC_BUILD
 void emAfTcExportCommand(sl_cli_command_arg_t *arguments);
 void emAfTcImportCommand(sl_cli_command_arg_t *arguments);
+void emAfTrustCenterBackupSaveTokensToFileCli(sl_cli_command_arg_t *arguments);
+void emAfTrustCenterBackupRestoreTokensFromFileCli(sl_cli_command_arg_t *arguments);
 #else
 void emAfTcExportCommand(void);
 void emAfTcImportCommand(void);

@@ -32,8 +32,8 @@ WEAK(void emberAfGroupsClusterClearGroupTableCallback(int8u endpoint))
  * @param endpoint The endpoint.  Ver.: always
  * @param groupId The group identifier.  Ver.: always
  */
-WEAK(boolean emberAfGroupsClusterEndpointInGroupCallback(int8u endpoint,
-                                                         int16u groupId))
+WEAK(bool emberAfGroupsClusterEndpointInGroupCallback(int8u endpoint,
+                                                      int16u groupId))
 {
   return false;
 }
@@ -118,7 +118,7 @@ WEAK(EmberAfStatus emberAfScenesClusterStoreCurrentSceneCallback(int8u endpoint,
  * @param newValue   Ver.: always
  */
 WEAK(void emberAfOnOffClusterLevelControlEffectCallback(int8u endpoint,
-                                                        boolean newValue))
+                                                        bool newValue))
 {
 }
 
@@ -133,7 +133,7 @@ WEAK(void emberAfOnOffClusterLevelControlEffectCallback(int8u endpoint,
  */
 WEAK(EmberAfStatus emberAfOnOffClusterSetValueCallback(int8u endpoint,
                                                        int8u command,
-                                                       boolean initiatedByLevelChange))
+                                                       bool initiatedByLevelChange))
 {
   return EMBER_ZCL_STATUS_UNSUP_COMMAND;
 }
@@ -148,7 +148,7 @@ WEAK(EmberAfStatus emberAfOnOffClusterSetValueCallback(int8u endpoint,
  *
  * @param cmd   Ver.: always
  */
-WEAK(boolean emberAfKeyEstablishmentClusterClientCommandReceivedCallback(EmberAfClusterCommand *cmd))
+WEAK(bool emberAfKeyEstablishmentClusterClientCommandReceivedCallback(EmberAfClusterCommand *cmd))
 {
   return false;
 }
@@ -163,7 +163,7 @@ WEAK(boolean emberAfKeyEstablishmentClusterClientCommandReceivedCallback(EmberAf
  *
  * @param cmd   Ver.: always
  */
-WEAK(boolean emberAfKeyEstablishmentClusterServerCommandReceivedCallback(EmberAfClusterCommand *cmd))
+WEAK(bool emberAfKeyEstablishmentClusterServerCommandReceivedCallback(EmberAfClusterCommand *cmd))
 {
   return false;
 }

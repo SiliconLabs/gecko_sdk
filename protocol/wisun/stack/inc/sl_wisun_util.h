@@ -60,6 +60,6 @@ sl_status_t sl_wisun_util_get_rf_settings(uint8_t *reg_domain, uint8_t *op_class
  *****************************************************************************/
 sl_status_t sl_wisun_util_connect(const uint8_t * network_name);
 
-/** @} (end addtogroup SL_WISUN_MSG_API) */
+/** @} (end addtogroup SL_WISUN_UTIL) */
 
 #endif  // SL_WISUN_UTIL_H

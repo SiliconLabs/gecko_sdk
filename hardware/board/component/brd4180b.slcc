@@ -16,6 +16,7 @@
   - name: hardware_board_from_stk
   - name: hardware_board_from_slwrb4180b
   - name: hardware_board_from_slwstk6006a
+  - name: hardware_board_has_vcom
   - name: hardware_board_has_hfxo
   - name: hardware_board_has_lfxo
   - name: hardware_board_supports_rf_band_2400
@@ -34,6 +35,7 @@
     instance:
     - led0
     - led1
+  - id: skrhaae010
   - id: simple_button
     instance:
     - btn0
@@ -56,4 +58,5 @@
   - hardware:has:pti
   - hardware:has:display:ls013b7dh03
   - hardware:has:led:2
+  - hardware:has:joystick:skrhaae010
   - hardware:has:button:2

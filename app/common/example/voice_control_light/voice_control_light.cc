@@ -46,7 +46,7 @@
  ***************************  LOCAL VARIABLES   ********************************
  ******************************************************************************/
 
-//  Instance Pointers  
+// Pointer to RecognizeCommands object for handling recognitions.
 static RecognizeCommands *command_recognizer = nullptr;
 
 // Micrium task control block
@@ -86,7 +86,7 @@ static sl_status_t run_inference()
 
 
 /***************************************************************************//**
- * Processes the output from output_tensor
+ * Processes the output from a model inference
  ******************************************************************************/
 static sl_status_t process_output(){
   // Determine whether a command was recognized based on the output of inference
@@ -98,6 +98,7 @@ static sl_status_t process_output(){
   // Get current time stamp needed by CommandRecognizer
   current_time_stamp = sl_sleeptimer_tick_to_ms(sl_sleeptimer_get_tick_count());
 
+  // Perform post processing and filtering of the model output to get a labeled output with a score value.
   TfLiteStatus process_status = command_recognizer->ProcessLatestResults(
       sl_tflite_micro_get_output_tensor(), current_time_stamp, &found_command_index, &score, &is_new_command);
 

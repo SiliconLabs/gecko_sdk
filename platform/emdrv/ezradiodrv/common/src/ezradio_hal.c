@@ -90,8 +90,8 @@ void ezradio_hal_GpioInit(GPIOINT_IrqCallbackPtr_t ezradioIrqCallback, bool enab
     GPIO_PinModeSet(gpioPortA, 1, gpioModePushPull, 0);
 
     /* Disable INT for PRS channels */
-    GPIO_IntConfig((GPIO_Port_TypeDef)RF_GPIO0_PORT, RF_GPIO0_PIN, false, false, false);
-    GPIO_IntConfig((GPIO_Port_TypeDef)RF_GPIO1_PORT, RF_GPIO1_PIN, false, false, false);
+    GPIO_ExtIntConfig((GPIO_Port_TypeDef)RF_GPIO0_PORT, RF_GPIO0_PIN, RF_GPIO0_PIN, false, false, false);
+    GPIO_ExtIntConfig((GPIO_Port_TypeDef)RF_GPIO1_PORT, RF_GPIO1_PIN, RF_GPIO1_PIN, false, false, false);
 
     /* Setup PRS for RF GPIO pins  */
     PRS_SourceAsyncSignalSet(0, PRS_CH_CTRL_SOURCESEL_GPIOH, PRS_CH_CTRL_SIGSEL_GPIOPIN15);
@@ -111,7 +111,7 @@ void ezradio_hal_GpioInit(GPIOINT_IrqCallbackPtr_t ezradioIrqCallback, bool enab
   if (NULL != ezradioIrqCallback) {
     /* Register callback and enable interrupt */
     GPIOINT_CallbackRegister(RF_INT_PIN, ezradioIrqCallback);
-    GPIO_IntConfig( (GPIO_Port_TypeDef) RF_INT_PORT, RF_INT_PIN, false, true, true);
+    GPIO_ExtIntConfig( (GPIO_Port_TypeDef) RF_INT_PORT, RF_INT_PIN, RF_INT_PIN, false, true, true);
   }
 }
 

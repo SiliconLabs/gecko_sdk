@@ -1,13 +1,13 @@
 id: sli_protocol_crypto
 label: Accelerated Crypto Primitives (CRYPTO and RADIOAES)
 package: platform
-description:
-  "This component provides accelerated cryptographic primitives using the CRYPTO \
-  (series-1) and RADIOAES (series-2) peripherals.\n
-
-  NOTE: This component is primarily meant for internal (Silicon Labs) use."
-category: Platform|Security|Internal
+description: >-
+  This component provides accelerated cryptographic primitives using the CRYPTO
+  (series-1) and RADIOAES (series-2) peripherals.
+category: Platform|Security|Protocol Crypto
 quality: production
+ui_hints:
+  visibility: never
 source:
   - path: util/third_party/crypto/sl_component/sl_protocol_crypto/src/sli_protocol_crypto_crypto.c
     condition: [device_has_crypto]
@@ -42,3 +42,12 @@ define:
 template_contribution:
   - name: component_catalog
     value: sli_protocol_crypto
+  - name: event_handler
+    value:
+      event: service_init
+      include: sli_protocol_crypto.h
+      handler: sli_aes_seed_mask
+    # Seeding of the RADIOAES mask should come after init of Mbed TLS and the
+    # PSA crypto core.
+    priority: 2
+    condition: [device_has_radioaes]

@@ -50,6 +50,9 @@
 #elif defined(EFR32BG24A010F1536IM40)
 #include "efr32bg24a010f1536im40.h"
 
+#elif defined(EFR32BG24A010F1536IM48)
+#include "efr32bg24a010f1536im48.h"
+
 #elif defined(EFR32BG24A020F1024IM40)
 #include "efr32bg24a020f1024im40.h"
 
@@ -67,6 +70,9 @@
 
 #elif defined(EFR32BG24B010F1536IM40)
 #include "efr32bg24b010f1536im40.h"
+
+#elif defined(EFR32BG24B010F1536IM48)
+#include "efr32bg24b010f1536im48.h"
 
 #elif defined(EFR32BG24B020F1536IM40)
 #include "efr32bg24b020f1536im40.h"
@@ -88,5 +94,13 @@
 
 #else
 #error "em_device.h: PART NUMBER undefined"
+#endif
+
+#if defined(SL_CATALOG_TRUSTZONE_SECURE_CONFIG_PRESENT) && defined(SL_TRUSTZONE_NONSECURE)
+#error "Can't define SL_CATALOG_TRUSTZONE_SECURE_CONFIG_PRESENT and SL_TRUSTZONE_NONSECURE MACRO at the same time."
+#endif
+
+#if defined(SL_TRUSTZONE_SECURE) && defined(SL_TRUSTZONE_NONSECURE)
+#error "Can't define SL_TRUSTZONE_SECURE and SL_TRUSTZONE_NONSECURE MACRO at the same time."
 #endif
 #endif /* EM_DEVICE_H */

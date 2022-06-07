@@ -29,20 +29,22 @@ requires:
 root_path: util/third_party/tflite-micro/tensorflow/lite/micro/kernels/cmsis_nn
 source:
   - path: add.cc
-    unless: [tensorflow_kernel_accelerated_add]
+    unless:
+      - tensorflow_kernel_accelerated_add
   - path: conv.cc
-    unless: [tensorflow_kernel_accelerated_conv]
+    unless:
+      - tensorflow_kernel_accelerated_conv
   - path: depthwise_conv.cc
-    unless: [tensorflow_kernel_accelerated_depthwise_conv]
+    unless:
+      - tensorflow_kernel_accelerated_depthwise_conv
   - path: fully_connected.cc
-    unless: [tensorflow_kernel_accelerated_fully_connected]
+    unless:
+      - tensorflow_kernel_accelerated_fully_connected
   - path: mul.cc
-    unless: [tensorflow_kernel_accelerated_mul]
   - path: pooling.cc
-    unless: [tensorflow_kernel_accelerated_pooling]
+    unless:
+      - tensorflow_kernel_accelerated_pooling
   - path: softmax.cc
-    unless: [tensorflow_kernel_accelerated_softmax]
   - path: svdf.cc
-    unless: [tensorflow_kernel_accelerated_svdf]
 define:
   - name: "CMSIS_NN"

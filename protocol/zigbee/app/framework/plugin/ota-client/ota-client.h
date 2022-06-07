@@ -188,7 +188,7 @@ void emberAfOtaServerSendUpgradeRequest();
  * Sets the behavior of OTA clients when determining whether or not
  * to use non Trust Center OTA servers and abort any download that is in progress.
  *
- * @param IgnoreNonTc a boolean determining whether client should ignore any
+ * @param IgnoreNonTc a bool determining whether client should ignore any
  *        non Trust Center OTA servers
  */
 void emberAfPluginOtaClientSetIgnoreNonTrustCenter(bool ignoreNonTc);
@@ -201,7 +201,7 @@ bool emberAfPluginOtaClientGetIgnoreNonTrustCenter();
 /**
  * @brief Set whether OTA Clients will permit firmware downgrades.
  *
- * @param isDisabled A boolean value indicating whether or not downgrades
+ * @param isDisabled A bool value indicating whether or not downgrades
  *        will be disabled
  */
 void emberAfPluginSetDisableOtaDowngrades(bool isDisabled);

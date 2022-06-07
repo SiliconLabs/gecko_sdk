@@ -35,9 +35,7 @@
 #include <stdbool.h>
 #include "sl_status.h"
 #include "sl_power_manager.h"
-#include "sl_sleeptimer.h"
 #include "app_scheduler_config.h"
-#include "sl_component_catalog.h"
 
 // -----------------------------------------------------------------------------
 // Definitions
@@ -52,6 +50,25 @@ typedef void (*app_scheduler_task_t)(void *data, uint16_t size);
 
 /// Task handle type
 typedef struct app_scheduler_entry *app_scheduler_task_handle_t;
+
+/***************************************************************************//**
+ * Prototype of a task manipulation function.
+ *
+ * @param[in] handle        Handle of the task.
+ * @param[in] task          Task function
+ * @param[in] data          Data that is passed to the task.
+ * @param[in] size          Size of the data.
+ * @param[in] is_triggered  True if the task is triggered.
+ * @param[in] is_periodic   True if the task is periodic.
+ *
+ * @return Sum of the return values of the operation
+ ******************************************************************************/
+typedef uint8_t (*app_scheduler_operation_t)(app_scheduler_task_handle_t handle, \
+                                             app_scheduler_task_t task_function, \
+                                             void *data,                         \
+                                             uint16_t size,                      \
+                                             bool is_triggered,                  \
+                                             bool is_periodic);
 
 /// Type for counting tasks
 typedef enum {
@@ -98,9 +115,7 @@ sl_status_t app_scheduler_add(app_scheduler_task_t task,
  * Add a task to be scheduled with optional data parameter
  *
  * @param[in] task Task function to be scheduled
- * @param[in] delay_ms Initial delay in ms. The maximum value is limited by
- *                     the value returned by
- *                     sl_sleeptimer_get_max_ms32_conversion
+ * @param[in] delay_ms Initial delay in ms.
  * @param[in] data The data that is passed to the task.
  * @param[in] size The size of the data.
  * @param[out] handle Handle of the task. NULL can be specified if
@@ -122,8 +137,7 @@ sl_status_t app_scheduler_add_delayed(app_scheduler_task_t task,
  * Add a periodic task to be scheduled with optional data parameter
  *
  * @param[in] task Task function to be scheduled
- * @param[in] period_ms Period in ms. The maximum value is limited by the
- *                      value returned by sl_sleeptimer_get_max_ms32_conversion
+ * @param[in] period_ms Period in ms.
  * @param[in] data The data that is passed to the task.
  * @param[in] size The size of the data.
  * @param[out] handle Handle of the task
@@ -164,6 +178,15 @@ void app_scheduler_resume(void);
  * @return Number of the tasks with the requested type
  ******************************************************************************/
 uint16_t app_scheduler_task_count_get(app_scheduler_task_type_t type);
+
+/***************************************************************************//**
+ * Execute an operation on each task
+ *
+ * @param[in] operation Function to execute on each entry
+ *
+ * @return Sum of the return values of the operation
+ ******************************************************************************/
+uint32_t app_scheduler_foreach_task(app_scheduler_operation_t operation);
 
 // -----------------------------------------------------------------------------
 // External callbacks

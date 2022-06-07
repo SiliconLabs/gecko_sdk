@@ -165,6 +165,9 @@
 #define CREATOR_STACK_PARENT_ADDITIONAL_INFO                 0xE127
 #define CREATOR_STACK_MULTI_PHY_NWK_INFO                     0xE128
 #define CREATOR_STACK_MIN_RECEIVED_RSSI                      0xE129
+// Restored EUI64
+#define CREATOR_STACK_RESTORED_EUI64                         0xE12A
+
 // MULTI-NETWORK STACK CREATORS
 #define CREATOR_MULTI_NETWORK_STACK_KEYS                     0xE210
 #define CREATOR_MULTI_NETWORK_STACK_NODE_DATA                0xE211
@@ -232,6 +235,9 @@
 #define NVM3KEY_STACK_PARENT_ADDITIONAL_INFO               (NVM3KEY_DOMAIN_ZIGBEE | 0xE127)
 #define NVM3KEY_STACK_MULTI_PHY_NWK_INFO                   (NVM3KEY_DOMAIN_ZIGBEE | 0xE128)
 #define NVM3KEY_STACK_MIN_RECEIVED_RSSI                    (NVM3KEY_DOMAIN_ZIGBEE | 0xE129)
+// Restored EUI64
+#define NVM3KEY_STACK_RESTORED_EUI64                       (NVM3KEY_DOMAIN_ZIGBEE | 0xE12A)
+
 // MULTI-NETWORK STACK KEYS
 // This key is used for an indexed token and the subsequent 0x7F keys are also reserved.
 #define NVM3KEY_MULTI_NETWORK_STACK_KEYS                   (NVM3KEY_DOMAIN_ZIGBEE | 0x0000)
@@ -350,6 +356,9 @@ typedef struct {
   uint32_t pg31ChannelMask;
   uint8_t optionsMask;
 } tokTypeStackMultiPhyNwkInfo;
+typedef struct {
+  uint8_t restoredEui[8];
+} tokTypeStackRestoredEui64;
 #endif //DEFINETYPES
 
 #ifdef DEFINETOKENS
@@ -376,7 +385,8 @@ typedef struct {
 #define STACK_PARENT_ADDITIONAL_INFO_LOCATION 286 //2 bytes
 #define STACK_MULTI_PHY_NWK_INFO_LOCATION  288    // 19 bytes
 #define STACK_MIN_RECEIVED_RSSI_LOCATION    307 // 1 byte
-// reserved                       308     107 bytes
+#define STACK_RESTORED_EUI64_LOCATION       308 // 8 bytes
+// reserved                       316     98 bytes
 
 DEFINE_FIXED_BASIC_TOKEN(STACK_NVDATA_VERSION,
                          tokTypeStackNvdataVersion,
@@ -434,7 +444,10 @@ DEFINE_FIXED_BASIC_TOKEN(STACK_MIN_RECEIVED_RSSI,
                          tokTypeRSSI,
                          STACK_MIN_RECEIVED_RSSI_LOCATION,
                          { -100, })
-
+DEFINE_FIXED_BASIC_TOKEN(STACK_RESTORED_EUI64,
+                         tokTypeStackRestoredEui64,
+                         STACK_RESTORED_EUI64_LOCATION,
+                         { { 0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF } })
 #endif //DEFINETOKENS
 
 //////////////////////////////////////////////////////////////////////////////

@@ -34,9 +34,9 @@
 extern "C" {
 #endif
 
-/**
- * Initialize CPC SECONDARY
- */
+/***************************************************************************/ /**
+ * Initialize CPC SECONDARY.
+ ******************************************************************************/
 void sl_cpc_secondary_init(void);
 
 #ifdef __cplusplus

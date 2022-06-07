@@ -27,6 +27,13 @@
  *  limitations under the License.
  */
 
+#if defined(SL_TRUSTZONE_NONSECURE)
+
+/* The NonSecure app must use the crypto_compat.h from the trusted-firmware-m repo. */
+#include "../../trusted-firmware-m/interface/include/psa/crypto_compat.h"
+
+#else /* SL_TRUSTZONE_NONSECURE */
+
 #ifndef PSA_CRYPTO_COMPAT_H
 #define PSA_CRYPTO_COMPAT_H
 
@@ -163,3 +170,5 @@ psa_status_t psa_close_key(psa_key_handle_t handle);
 #endif
 
 #endif /* PSA_CRYPTO_COMPAT_H */
+
+#endif /* SL_TRUSTZONE_NONSECURE */

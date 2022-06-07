@@ -37,13 +37,21 @@ requires:
   - name: power_manager
     condition:
       - device_cortexm
+  - name: cmsis_rtos2
+    condition: 
+      - ot_stack
+  - name: rail_mux
+    condition: 
+      - ot_stack
 
 recommends:
   - id: zigbee_phy_2_4
   - id: micriumos_kernel
     condition:
       - bluetooth_stack
-
+  - id: micriumos_kernel
+    condition:
+      - ot_stack
 source:
   - path: protocol/zigbee/app/framework/common/zigbee_app_framework_common.c
   - path: protocol/zigbee/app/framework/common/zigbee_app_framework_stack_cb.c

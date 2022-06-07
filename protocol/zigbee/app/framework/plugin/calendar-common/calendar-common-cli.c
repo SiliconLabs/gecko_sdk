@@ -311,6 +311,11 @@ void emberAfPluginCalendarCommonPrintDaysCommand(sl_cli_command_arg_t *arguments
 
 void emberAfPluginCalendarCommonSetupTestCalendarsCommand(sl_cli_command_arg_t *arguments)
 {
+#if EMBER_AF_PLUGIN_CALENDAR_COMMON_DAY_PROFILE_MAX >= 7       \
+  && EMBER_AF_PLUGIN_CALENDAR_COMMON_SCHEDULE_ENTRIES_MAX >= 5 \
+  && EMBER_AF_PLUGIN_CALENDAR_COMMON_WEEK_PROFILE_MAX >= 4     \
+  && EMBER_AF_PLUGIN_CALENDAR_COMMON_SEASON_PROFILE_MAX >= 4   \
+  && EMBER_AF_PLUGIN_CALENDAR_COMMON_SPECIAL_DAY_PROFILE_MAX >= 5
   uint8_t i;
   for (i = 0; i < 2; i++) {
     if (EMBER_AF_PLUGIN_CALENDAR_COMMON_TOTAL_CALENDARS <= i) {
@@ -337,6 +342,9 @@ void emberAfPluginCalendarCommonSetupTestCalendarsCommand(sl_cli_command_arg_t *
     setupTestSeasons(&(calendars[i]), i);
   }
   emberAfCalendarClusterPrintln("Calendars initialized with test-data.");
+#else
+  emberAfCalendarClusterPrintln("This command is not available with current set of configuration");
+#endif
 }
 
 void emberAfPluginCalendarCommonPrintSeasonsCommand(sl_cli_command_arg_t *arguments)
@@ -372,6 +380,10 @@ void emberAfPluginCalendarCommonClearCalendarsCommand(sl_cli_command_arg_t *argu
 // Load the Simple Calendar as defined in Appendix D.1 of the SE 1.2 test spec.
 void emberAfPluginCalendarCommonLoadSimpleCalendarCommand(sl_cli_command_arg_t *arguments)
 {
+#if EMBER_AF_PLUGIN_CALENDAR_COMMON_DAY_PROFILE_MAX >= 3       \
+  && EMBER_AF_PLUGIN_CALENDAR_COMMON_SCHEDULE_ENTRIES_MAX >= 2 \
+  && EMBER_AF_PLUGIN_CALENDAR_COMMON_WEEK_PROFILE_MAX >= 2     \
+  && EMBER_AF_PLUGIN_CALENDAR_COMMON_SEASON_PROFILE_MAX >= 4
   uint8_t length;
   uint8_t index = sl_cli_get_argument_uint8(arguments, 0);
   if (index < EMBER_AF_PLUGIN_CALENDAR_COMMON_TOTAL_CALENDARS) {
@@ -450,11 +462,18 @@ void emberAfPluginCalendarCommonLoadSimpleCalendarCommand(sl_cli_command_arg_t *
   } else {
     emberAfCalendarClusterPrintln("Index must be in the range of 0 to %d", EMBER_AF_PLUGIN_CALENDAR_COMMON_TOTAL_CALENDARS - 1);
   }
+#else
+  emberAfCalendarClusterPrintln("This command is not available with current set of configuration");
+#endif
 }
 
 // Load the Enhanced Calendar as defined in Appendix D.2 of the SE 1.2 test spec.
 void emberAfPluginCalendarCommonLoadEnhancedCalendarCommand(sl_cli_command_arg_t *arguments)
 {
+#if EMBER_AF_PLUGIN_CALENDAR_COMMON_DAY_PROFILE_MAX >= 6        \
+  && EMBER_AF_PLUGIN_CALENDAR_COMMON_SCHEDULE_ENTRIES_MAX >= 48 \
+  && EMBER_AF_PLUGIN_CALENDAR_COMMON_WEEK_PROFILE_MAX >= 2      \
+  && EMBER_AF_PLUGIN_CALENDAR_COMMON_SEASON_PROFILE_MAX >= 11
   uint8_t length;
   uint8_t i;
   uint8_t index = sl_cli_get_argument_uint8(arguments, 0);
@@ -579,11 +598,17 @@ void emberAfPluginCalendarCommonLoadEnhancedCalendarCommand(sl_cli_command_arg_t
   } else {
     emberAfCalendarClusterPrintln("Index must be in the range of 0 to %d", EMBER_AF_PLUGIN_CALENDAR_COMMON_TOTAL_CALENDARS - 1);
   }
+#else
+  emberAfCalendarClusterPrintln("This command is not available with current set of configuration");
+#endif
 }
 
 // Load the Flat Calendar as defined in Appendix D.3 of the SE 1.2 test spec.
 void emberAfPluginCalendarCommonLoadFlatCalendarCommand(sl_cli_command_arg_t *arguments)
 {
+#if EMBER_AF_PLUGIN_CALENDAR_COMMON_DAY_PROFILE_MAX >= 1       \
+  && EMBER_AF_PLUGIN_CALENDAR_COMMON_SCHEDULE_ENTRIES_MAX >= 1 \
+  && EMBER_AF_PLUGIN_CALENDAR_COMMON_WEEK_PROFILE_MAX >= 1
   uint8_t length;
   uint8_t index = sl_cli_get_argument_uint8(arguments, 0);
   if (index < EMBER_AF_PLUGIN_CALENDAR_COMMON_TOTAL_CALENDARS) {
@@ -630,10 +655,14 @@ void emberAfPluginCalendarCommonLoadFlatCalendarCommand(sl_cli_command_arg_t *ar
   } else {
     emberAfCalendarClusterPrintln("Index must be in the range of 0 to %d", EMBER_AF_PLUGIN_CALENDAR_COMMON_TOTAL_CALENDARS - 1);
   }
+#else
+  emberAfCalendarClusterPrintln("This command is not available with current set of configuration");
+#endif
 }
 
 void emberAfPluginCalendarCommonLoadSimpleSpecialDaysCommand(sl_cli_command_arg_t *arguments)
 {
+#if EMBER_AF_PLUGIN_CALENDAR_COMMON_SPECIAL_DAY_PROFILE_MAX >= 7
   uint8_t i;
   uint8_t index = sl_cli_get_argument_uint8(arguments, 0);
   if (index < EMBER_AF_PLUGIN_CALENDAR_COMMON_TOTAL_CALENDARS) {
@@ -652,10 +681,14 @@ void emberAfPluginCalendarCommonLoadSimpleSpecialDaysCommand(sl_cli_command_arg_
   } else {
     emberAfCalendarClusterPrintln("Index must be in the range of 0 to %d", EMBER_AF_PLUGIN_CALENDAR_COMMON_TOTAL_CALENDARS - 1);
   }
+#else
+  emberAfCalendarClusterPrintln("This command is not available with current set of configuration");
+#endif
 }
 
 void emberAfPluginCalendarCommonLoadEnhancedSpecialDaysCommand(sl_cli_command_arg_t *arguments)
 {
+#if EMBER_AF_PLUGIN_CALENDAR_COMMON_SPECIAL_DAY_PROFILE_MAX >= 50
   uint8_t i;
   uint8_t index = sl_cli_get_argument_uint8(arguments, 0);
   if (index < EMBER_AF_PLUGIN_CALENDAR_COMMON_TOTAL_CALENDARS) {
@@ -717,6 +750,9 @@ void emberAfPluginCalendarCommonLoadEnhancedSpecialDaysCommand(sl_cli_command_ar
   } else {
     emberAfCalendarClusterPrintln("Index must be in the range of 0 to %d", EMBER_AF_PLUGIN_CALENDAR_COMMON_TOTAL_CALENDARS - 1);
   }
+#else
+  emberAfCalendarClusterPrintln("This command is not available with current set of configuration");
+#endif
 }
 
 // plugin calendar-common set-cal-info <index:1> <providerId:1> <issuerEventId:1>
@@ -876,6 +912,11 @@ void emberAfPluginCalendarCommonPrintDaysCommand(void)
 
 void emberAfPluginCalendarCommonSetupTestCalendarsCommand(void)
 {
+#if EMBER_AF_PLUGIN_CALENDAR_COMMON_DAY_PROFILE_MAX >= 7       \
+  && EMBER_AF_PLUGIN_CALENDAR_COMMON_SCHEDULE_ENTRIES_MAX >= 5 \
+  && EMBER_AF_PLUGIN_CALENDAR_COMMON_WEEK_PROFILE_MAX >= 4     \
+  && EMBER_AF_PLUGIN_CALENDAR_COMMON_SEASON_PROFILE_MAX >= 4   \
+  && EMBER_AF_PLUGIN_CALENDAR_COMMON_SPECIAL_DAY_PROFILE_MAX >= 5
   uint8_t i;
   for (i = 0; i < 2; i++) {
     if (EMBER_AF_PLUGIN_CALENDAR_COMMON_TOTAL_CALENDARS <= i) {
@@ -902,6 +943,9 @@ void emberAfPluginCalendarCommonSetupTestCalendarsCommand(void)
     setupTestSeasons(&(calendars[i]), i);
   }
   emberAfCalendarClusterPrintln("Calendars initialized with test-data.");
+#else
+  emberAfCalendarClusterPrintln("This command is not available with current set of configuration");
+#endif
 }
 
 void emberAfPluginCalendarCommonPrintSeasonsCommand(void)
@@ -937,6 +981,10 @@ void emberAfPluginCalendarCommonClearCalendarsCommand(void)
 // Load the Simple Calendar as defined in Appendix D.1 of the SE 1.2 test spec.
 void emberAfPluginCalendarCommonLoadSimpleCalendarCommand(void)
 {
+#if EMBER_AF_PLUGIN_CALENDAR_COMMON_DAY_PROFILE_MAX >= 3       \
+  && EMBER_AF_PLUGIN_CALENDAR_COMMON_SCHEDULE_ENTRIES_MAX >= 2 \
+  && EMBER_AF_PLUGIN_CALENDAR_COMMON_WEEK_PROFILE_MAX >= 2     \
+  && EMBER_AF_PLUGIN_CALENDAR_COMMON_SEASON_PROFILE_MAX >= 4
   uint8_t length;
   uint8_t index = (uint8_t)emberUnsignedCommandArgument(0);
   if (index < EMBER_AF_PLUGIN_CALENDAR_COMMON_TOTAL_CALENDARS) {
@@ -1014,11 +1062,18 @@ void emberAfPluginCalendarCommonLoadSimpleCalendarCommand(void)
   } else {
     emberAfCalendarClusterPrintln("Index must be in the range of 0 to %d", EMBER_AF_PLUGIN_CALENDAR_COMMON_TOTAL_CALENDARS - 1);
   }
+#else
+  emberAfCalendarClusterPrintln("This command is not available with current set of configuration");
+#endif
 }
 
 // Load the Enhanced Calendar as defined in Appendix D.2 of the SE 1.2 test spec.
 void emberAfPluginCalendarCommonLoadEnhancedCalendarCommand(void)
 {
+#if EMBER_AF_PLUGIN_CALENDAR_COMMON_DAY_PROFILE_MAX >= 6        \
+  && EMBER_AF_PLUGIN_CALENDAR_COMMON_SCHEDULE_ENTRIES_MAX >= 48 \
+  && EMBER_AF_PLUGIN_CALENDAR_COMMON_WEEK_PROFILE_MAX >= 2      \
+  && EMBER_AF_PLUGIN_CALENDAR_COMMON_SEASON_PROFILE_MAX >= 11
   uint8_t length;
   uint8_t i;
   uint8_t index = (uint8_t)emberUnsignedCommandArgument(0);
@@ -1143,11 +1198,17 @@ void emberAfPluginCalendarCommonLoadEnhancedCalendarCommand(void)
   } else {
     emberAfCalendarClusterPrintln("Index must be in the range of 0 to %d", EMBER_AF_PLUGIN_CALENDAR_COMMON_TOTAL_CALENDARS - 1);
   }
+#else
+  emberAfCalendarClusterPrintln("This command is not available with current set of configuration");
+#endif
 }
 
 // Load the Flat Calendar as defined in Appendix D.3 of the SE 1.2 test spec.
 void emberAfPluginCalendarCommonLoadFlatCalendarCommand(void)
 {
+#if EMBER_AF_PLUGIN_CALENDAR_COMMON_DAY_PROFILE_MAX >= 1       \
+  && EMBER_AF_PLUGIN_CALENDAR_COMMON_SCHEDULE_ENTRIES_MAX >= 1 \
+  && EMBER_AF_PLUGIN_CALENDAR_COMMON_WEEK_PROFILE_MAX >= 1
   uint8_t index = (uint8_t)emberUnsignedCommandArgument(0);
   uint8_t length;
   if (index < EMBER_AF_PLUGIN_CALENDAR_COMMON_TOTAL_CALENDARS) {
@@ -1194,10 +1255,14 @@ void emberAfPluginCalendarCommonLoadFlatCalendarCommand(void)
   } else {
     emberAfCalendarClusterPrintln("Index must be in the range of 0 to %d", EMBER_AF_PLUGIN_CALENDAR_COMMON_TOTAL_CALENDARS - 1);
   }
+#else
+  emberAfCalendarClusterPrintln("This command is not available with current set of configuration");
+#endif
 }
 
 void emberAfPluginCalendarCommonLoadSimpleSpecialDaysCommand(void)
 {
+#if EMBER_AF_PLUGIN_CALENDAR_COMMON_SPECIAL_DAY_PROFILE_MAX >= 7
   uint8_t i;
   uint8_t index = (uint8_t)emberUnsignedCommandArgument(0);
   if (index < EMBER_AF_PLUGIN_CALENDAR_COMMON_TOTAL_CALENDARS) {
@@ -1216,10 +1281,14 @@ void emberAfPluginCalendarCommonLoadSimpleSpecialDaysCommand(void)
   } else {
     emberAfCalendarClusterPrintln("Index must be in the range of 0 to %d", EMBER_AF_PLUGIN_CALENDAR_COMMON_TOTAL_CALENDARS - 1);
   }
+#else
+  emberAfCalendarClusterPrintln("This command is not available with current set of configuration");
+#endif
 }
 
 void emberAfPluginCalendarCommonLoadEnhancedSpecialDaysCommand(void)
 {
+#if EMBER_AF_PLUGIN_CALENDAR_COMMON_SPECIAL_DAY_PROFILE_MAX >= 50
   uint8_t i;
   uint8_t index = (uint8_t)emberUnsignedCommandArgument(0);
   if (index < EMBER_AF_PLUGIN_CALENDAR_COMMON_TOTAL_CALENDARS) {
@@ -1281,6 +1350,9 @@ void emberAfPluginCalendarCommonLoadEnhancedSpecialDaysCommand(void)
   } else {
     emberAfCalendarClusterPrintln("Index must be in the range of 0 to %d", EMBER_AF_PLUGIN_CALENDAR_COMMON_TOTAL_CALENDARS - 1);
   }
+#else
+  emberAfCalendarClusterPrintln("This command is not available with current set of configuration");
+#endif
 }
 
 // plugin calendar-common set-cal-info <index:1> <providerId:1> <issuerEventId:1>

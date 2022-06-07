@@ -26,3 +26,8 @@ template_contribution:
 source:
   - path: "printf.c"
   - path: "src/iostream_printf.c"
+toolchain_settings:
+  - option: no_builtin_printf
+    value: "enabled"
+  - option: no_builtin_sprintf
+    value: "enabled"

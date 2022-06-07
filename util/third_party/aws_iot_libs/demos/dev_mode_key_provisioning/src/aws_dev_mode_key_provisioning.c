@@ -497,11 +497,11 @@ CK_RV xProvisionPublicKey( CK_SESSION_HANDLE xSession,
         size_t xLength;
         CK_BYTE xEcPoint[ 256 ] = { 0 };
 
-        mbedtls_ecdsa_context * pxEcdsaContext = ( mbedtls_ecdsa_context * ) xMbedPkContext.MBEDTLS_PRIVATE( pk_ctx );
+        mbedtls_ecp_keypair * pxEcKey = mbedtls_pk_ec( xMbedPkContext );
 
         /* DER encoded EC point. Leave 2 bytes for the tag and length. */
-        lMbedResult = mbedtls_ecp_point_write_binary( &pxEcdsaContext->MBEDTLS_PRIVATE( grp ),
-                                                      &pxEcdsaContext->MBEDTLS_PRIVATE( Q ),
+        lMbedResult = mbedtls_ecp_point_write_binary( &pxEcKey->MBEDTLS_PRIVATE( grp ),
+                                                      &pxEcKey->MBEDTLS_PRIVATE( Q ),
                                                       MBEDTLS_ECP_PF_UNCOMPRESSED,
                                                       &xLength,
                                                       xEcPoint + 2,

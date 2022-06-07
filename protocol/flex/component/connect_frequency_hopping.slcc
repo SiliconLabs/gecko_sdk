@@ -3,7 +3,7 @@ label: "Frequency Hopping"
 package: "Flex"
 category: "Connect"
 quality: "production"
-description: "Implements frequency hopping based on FCC specifications."
+description: "Implements frequency hopping based on FCC specifications. A companion component can be installed to add frequency hopping CLI commands."
 provides:
   - name: "connect_frequency_hopping"
 requires:

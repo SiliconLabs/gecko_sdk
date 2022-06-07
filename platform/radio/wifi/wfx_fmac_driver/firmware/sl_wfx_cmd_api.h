@@ -1,5 +1,5 @@
 /**************************************************************************//**
- * Copyright 2018, Silicon Laboratories Inc.
+ * Copyright 2022, Silicon Laboratories Inc.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -127,7 +127,8 @@ typedef enum sl_wfx_requests_ids_e {
   SL_WFX_GET_MAX_TX_POWER_REQ_ID                 = 0x61,   ///< \b GET_MAX_TX_POWER request ID uses body SL_WFX_GET_MAX_TX_POWER_REQ_BODY and returns SL_WFX_GET_MAX_TX_POWER_CNF_BODY
   SL_WFX_GET_PMK_REQ_ID                          = 0x62,   ///< \b GET_PMK request ID uses body SL_WFX_GET_PMK_REQ_BODY and returns SL_WFX_GET_PMK_CNF_BODY
   SL_WFX_GET_AP_CLIENT_SIGNAL_STRENGTH_REQ_ID    = 0x63,   ///< \b GET_AP_CLIENT_SIGNAL_STRENGTH request ID uses body SL_WFX_GET_AP_CLIENT_SIGNAL_STRENGTH_BODY and returns SL_WFX_GET_AP_CLIENT_SIGNAL_STRENGTH_CNF_BODY
-  SL_WFX_EXT_AUTH_REQ_ID                         = 0x64    ///< \b EXT_AUTH request ID uses body SL_WFX_EXT_AUTH_BODY and returns SL_WFX_EXT_AUTH_CNF_BODY
+  SL_WFX_EXT_AUTH_REQ_ID                         = 0x64,   ///< \b EXT_AUTH request ID uses body SL_WFX_EXT_AUTH_BODY and returns SL_WFX_EXT_AUTH_CNF_BODY
+  SL_WFX_AP_SCAN_REQUEST_FILTER_REQ_ID           = 0x65    ///< \b AP_SCAN_REQUEST request ID uses body SL_WFX_AP_SCAN_REQUEST_BODY and returns SL_WFX_AP_SCAN_REQUEST_CNF_BODY
 } sl_wfx_requests_ids_t;
 
 /**
@@ -163,7 +164,8 @@ typedef enum sl_wfx_confirmations_ids_e {
   SL_WFX_GET_MAX_TX_POWER_CNF_ID                 = 0x61,   ///< \b GET_MAX_TX_POWER confirmation Id. Returns body SL_WFX_GET_MAX_TX_POWER_CNF_BODY
   SL_WFX_GET_PMK_CNF_ID                          = 0x62,   ///< \b GET_PMK confirmation Id. Returns body SL_WFX_GET_PMK_CNF_BODY
   SL_WFX_GET_AP_CLIENT_SIGNAL_STRENGTH_CNF_ID    = 0x63,   ///< \b GET_AP_CLIENT_SIGNAL_STRENGTH confirmation Id. Returns body SL_WFX_GET_AP_CLIENT_SIGNAL_STRENGTH_CNF_BODY
-  SL_WFX_EXT_AUTH_CNF_ID                         = 0x64    ///< \b EXT_AUTH confirmation Id. Returns body SL_WFX_EXT_AUTH_BODY
+  SL_WFX_EXT_AUTH_CNF_ID                         = 0x64,   ///< \b EXT_AUTH confirmation Id. Returns body SL_WFX_EXT_AUTH_BODY
+  SL_WFX_AP_SCAN_REQUEST_FILTER_CNF_ID           = 0x65    ///< \b AP_SCAN_REQUEST confirmation Id. Returns body SL_WFX_AP_SCAN_REQUEST_CNF_BODY
 } sl_wfx_confirmations_ids_t;
 
 /**
@@ -181,7 +183,8 @@ typedef enum sl_wfx_indications_ids_e {
   SL_WFX_AP_CLIENT_REJECTED_IND_ID               = 0xce,   ///< \b AP_CLIENT_REJECTED indication id. Content is SL_WFX_AP_CLIENT_REJECTED_IND_BODY
   SL_WFX_AP_CLIENT_DISCONNECTED_IND_ID           = 0xcf,   ///< \b AP_CLIENT_DISCONNECTED indication id. Content is SL_WFX_AP_CLIENT_DISCONNECTED_IND_BODY
   SL_WFX_EXT_AUTH_IND_ID                         = 0xd2,   ///< \b EXT_AUTH indication Id. Content is SL_WFX_EXT_AUTH_IND_BODY
-  SL_WFX_PS_MODE_ERROR_IND_ID                    = 0xd3    ///< \b PS_MODE_ERROR indication Id. Content is SL_WFX_PS_MODE_ERROR_IND_BODY
+  SL_WFX_PS_MODE_ERROR_IND_ID                    = 0xd3,   ///< \b PS_MODE_ERROR indication Id. Content is SL_WFX_PS_MODE_ERROR_IND_BODY
+  SL_WFX_AP_SCAN_REQUEST_IND_ID                  = 0xd4    ///< \b AP_SCAN_REQUEST indication Id. Content is SL_WFX_AP_SCAN_REQUEST_IND_BODY
 } sl_wfx_indications_ids_t;
 
 /**
@@ -223,6 +226,8 @@ typedef union __attribute__((__packed__)) wfm_message_ids_u {
 #define SL_WFX_NS_IP_ADDR_SIZE                   2
 /** Length of the IPv6 address element. */
 #define SL_WFX_IPV6_ADDR_SIZE                    16
+/** Maximum size of IE data filter */
+#define SL_WFX_IE_DATA_FILTER_SIZE               16
 
 /**
  * @brief Client Isolation toggling.
@@ -1149,7 +1154,7 @@ typedef struct __attribute__((__packed__)) sl_wfx_set_pm_mode_cnf_s {
  * @ingroup WFM_GROUP_MESSAGES
  * @ingroup WFM_GROUP_MODE_STA
  */
-typedef sl_wfx_header_t SL_WFX_PS_MODE_ERROR_IND;
+typedef sl_wfx_header_t sl_wfx_ps_mode_error_ind_t;
 
 /**
  * @brief Request message body for sl_wfx_start_ap_req_t.
@@ -2444,6 +2449,7 @@ typedef struct __attribute__((__packed__)) sl_wfx_set_broadcast_filter_req_body_
    * @details <B>0</B>: The device will forward all received broadcast frames to the host.
    *          <BR><B>1</B>: The device will only forward ARP and DHCP frames to the host,
    *                        other broadcast frames are discarded.
+   *          <BR><B>2</B>: The device will discard all broadcast frames.
    *          <BR>See @ref WFM_CONCEPT_FILTERING for further details.
    */
   uint32_t filter;
@@ -3051,6 +3057,118 @@ typedef struct __attribute__((__packed__))  sl_wfx_ext_auth_ind_s {
   /** Indication message body. */
   sl_wfx_ext_auth_ind_body_t body;
 } sl_wfx_ext_auth_ind_t;
+
+/**
+ * @brief Request message body for sl_wfx_ap_scan_filter_req_body_t.
+ */
+typedef struct __attribute__((__packed__)) sl_wfx_ap_scan_filter_req_body_s {
+  /**
+   * @brief Length of vendor-specific Information Element (IE) byte pattern.
+   * @details <B>0</B>: The filter is disabled
+   *          <BR><B>1 - SL_WFX_IE_DATA_FILTER_SIZE</B>: The amount of bytes.
+   */
+  uint16_t ie_data_length;
+  /**
+   * @brief Vendor-specific IE byte pattern, starting from the Organization
+   *        Identifier field.
+   */
+  uint8_t ie_data[SL_WFX_IE_DATA_FILTER_SIZE];
+  /**
+   * @brief Vendor-specific IE byte pattern mask.
+   * @details The byte pattern mask is ANDed with the frame data before
+   *          pattern matching, fill with 0xFF to match the whole pattern.
+   */
+  uint8_t ie_data_mask[SL_WFX_IE_DATA_FILTER_SIZE];
+} sl_wfx_ap_scan_filter_req_body_t;
+
+/**
+ * @brief Request message for setting probe request forwarding filter.
+ * @details The host can use this request to set the filter for forwarded
+ *          probe requests. Any probe request where one the vendor-specific
+ *          IEs matches the given filter, is forwarded to the host using a
+ *          sl_wfx_ap_scan_filter_ind_t indication message. The forwarding can
+ *          be disabled by setting the IE byte pattern length to zero.
+ *          | Interface mode | Request allowed |
+ *          |:---------------|:----------------|
+ *          | idle           | No              |
+ *          | station        | No              |
+ *          | AP             | Yes             |
+ *          <BR>
+ * @ingroup WFM_GROUP_MESSAGES
+ * @ingroup WFM_GROUP_MODE_AP
+ */
+typedef struct __attribute__((__packed__)) sl_wfx_ap_scan_filter_req_s {
+  /** Common message header. */
+  sl_wfx_header_t header;
+  /** Request message body. */
+  sl_wfx_ap_scan_filter_req_body_t body;
+} sl_wfx_ap_scan_filter_req_t;
+
+/**
+ * @brief Confirmation message body for sl_wfx_ap_scan_filter_cnf_body_t.
+ */
+typedef struct __attribute__((__packed__)) sl_wfx_ap_scan_filter_cnf_body_s {
+  /**
+   * @brief Status of the set request.
+   * @details <B>WFM_STATUS_SUCCESS</B>: the set request was completed successfully.
+   *          <BR><B>any other value</B>: the set request failed.
+   *          <BR>See sl_wfx_fmac_status_t for enumeration values.
+   */
+  uint32_t status;
+} sl_wfx_ap_scan_filter_cnf_body_t;
+
+/**
+ * @brief Confirmation message for sl_wfx_ap_scan_filter_cnf_t.
+ * @ingroup WFM_GROUP_MODE_AP
+ */
+typedef struct __attribute__((__packed__)) sl_wfx_ap_scan_filter_cnf_t {
+  /** Common message header. */
+  sl_wfx_header_t header;
+  /** Confirmation message body. */
+  sl_wfx_ap_scan_filter_cnf_body_t body;
+} sl_wfx_ap_scan_filter_cnf_t;
+
+/**
+ * @brief Indication message body for sl_wfx_ap_scan_filter_ind_body_t.
+ */
+typedef struct __attribute__((__packed__)) sl_wfx_ap_scan_filter_ind_body_s {
+  /**
+   * @brief MAC address of the station.
+   */
+  uint8_t mac[SL_WFX_MAC_ADDR_SIZE];
+  /**
+   * @brief reserved field, set to 0
+   */
+  uint16_t reserved;
+  /**
+   * @brief Received Channel Power Indicator (RCPI) of the station.
+   * @details See @ref WFM_CONCEPT_RCPI for further details.
+   */
+  uint16_t rcpi;
+  /**
+   * @brief Length of access point Information Element (IE) data in bytes.
+   */
+  uint16_t ie_data_length;
+  /**
+   * @brief Station IE data from the 802.11 Probe Request frame.
+   */
+  uint8_t ie_data[];
+} sl_wfx_ap_scan_filter_ind_body_t;
+
+/**
+ * @brief Indication message used to signal a received probe request.
+ * @details The device will send this indication when a probe request matching
+ *          the filter set with sl_wfx_ap_scan_filter_req_t, has been
+ *          received.
+ * @ingroup WFM_GROUP_MESSAGES
+ * @ingroup WFM_GROUP_MODE_AP
+ */
+typedef struct __attribute__((__packed__)) sl_wfx_ap_scan_filter_ind_s {
+  /** Common message header. */
+  sl_wfx_header_t header;
+  /** Indication message body. */
+  sl_wfx_ap_scan_filter_ind_body_t body;
+} sl_wfx_ap_scan_filter_ind_t;
 
 /**************************************************/
 

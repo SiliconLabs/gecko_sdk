@@ -19,6 +19,7 @@
 #define SL_SIMPLE_BUTTON_H
 
 #include "sl_button.h"
+#include "em_gpio.h"
 
 /***************************************************************************//**
  * @addtogroup button

@@ -17,6 +17,9 @@ requires:
   - name: mx25_flash_shutdown_driver
     condition:
       - hardware_board_has_spiflash
+  - name : configuration_over_swo
+    condition:
+      - hardware_board_mainboard_wstk
 source:
   - path: src/sl_board_init.c
   - path: src/sl_board_control_gpio.c

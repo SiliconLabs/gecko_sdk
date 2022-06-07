@@ -12,6 +12,6 @@
   - name: hardware_board_from_stk
   - name: hardware_board_from_fg23-dk2600a
 - recommends:
-  - id: brd2600a_a02
+  - id: brd2600a_a03
 - ui_hints:
     visibility: never

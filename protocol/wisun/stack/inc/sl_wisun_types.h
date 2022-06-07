@@ -32,7 +32,7 @@
 #define SL_WISUN_TYPES_H
 
 #include <stdint.h>
-#include "em_common.h"
+#include "sl_common.h"
 
 /**************************************************************************//**
  * @defgroup SL_WISUN_TYPES Wi-SUN API type definitions
@@ -140,7 +140,9 @@ typedef enum {
   /// Wi-SUN statistics
   SL_WISUN_STATISTICS_TYPE_WISUN      = 3,
   /// 6LoWPAN/IP stack statistics
-  SL_WISUN_STATISTICS_TYPE_NETWORK    = 4
+  SL_WISUN_STATISTICS_TYPE_NETWORK    = 4,
+  /// Regional regulation
+  SL_WISUN_STATISTICS_TYPE_REGULATION = 5
 } sl_wisun_statistics_type_t;
 
 /// Enumerations for regulatory domain
@@ -229,13 +231,13 @@ typedef enum {
 
 /// Enumerations for channel spacing
 typedef enum {
-  /// 100 Hz
+  /// 100 kHz
   SL_WISUN_CHANNEL_SPACING_100HZ     = 0,
-  /// 200 Hz
+  /// 200 kHz
   SL_WISUN_CHANNEL_SPACING_200HZ     = 1,
-  /// 400 Hz
+  /// 400 kHz
   SL_WISUN_CHANNEL_SPACING_400HZ     = 2,
-  /// 600 Hz
+  /// 600 kHz
   SL_WISUN_CHANNEL_SPACING_600HZ     = 3
 } sl_wisun_channel_spacing_t;
 
@@ -316,6 +318,14 @@ typedef struct {
   uint32_t cca_attempts_count;
   /// Number of failed MAC transmissions due to CCA.
   uint32_t failed_cca_count;
+  /// Number of successfully received MAC frames using mode_switch.
+  uint32_t rx_ms_count;
+  /// Number of transmitted MAC frames using mode switch.
+  uint32_t tx_ms_count;
+  /// Number of failed reception using mode switch (no data after PHR or MDR Command).
+  uint32_t rx_ms_failed_count;
+  /// Number of failed MAC frames transmission using mode switch.
+  uint32_t tx_ms_failed_count;
 } sl_wisun_statistics_mac_t;
 
 /// Frequency hopping statistics
@@ -338,10 +348,10 @@ typedef struct {
 
 /// Wi-SUN statistics
 typedef struct {
-  /// Number of received asynchronous frames.
-  uint32_t asynch_rx_count;
-  /// Number of completed asynchronous transmission requests.
-  uint32_t asynch_tx_count;
+  /// Number of received PAN control frames.
+  uint32_t pan_control_rx_count;
+  /// Number of completed PAN control transmission requests.
+  uint32_t pan_control_tx_count;
 } sl_wisun_statistics_wisun_t;
 
 /// 6LoWPAN/IP stack statistics
@@ -404,6 +414,17 @@ typedef struct {
   uint16_t adapt_layer_tx_queue_peak;
 } sl_wisun_statistics_network_t;
 
+/** ARIB regulation statistics. */
+typedef struct {
+  uint32_t tx_duration_ms;  /**< Sum of transmission durations during the last
+                             * hour in milliseconds. */
+} sl_wisun_statistics_arib_regulation_t;
+
+/** Regional regulation statistics. */
+typedef union {
+  sl_wisun_statistics_arib_regulation_t arib;  /**< ARIB statistics. */
+} sl_wisun_statistics_regulation_t;
+
 /// Statistics
 typedef union {
   /// PHY/RF statistics
@@ -416,6 +437,8 @@ typedef union {
   sl_wisun_statistics_wisun_t wisun;
   /// 6LoWPAN/IP stack statistics
   sl_wisun_statistics_network_t network;
+  /// Regional regulation statistics
+  sl_wisun_statistics_regulation_t regulation;
 } sl_wisun_statistics_t;
 
 /// MAC address
@@ -514,6 +537,10 @@ typedef struct {
   uint32_t mac_tx_count;
   /// MAC TX failed count
   uint32_t mac_tx_failed_count;
+  /// MAC TX packet count using mode switch
+  uint32_t mac_tx_ms_count;
+  /// MAC TX failed count using mode switch
+  uint32_t mac_tx_ms_failed_count;
   /// RPL Rank value for parents (0xffff if unknown or child)
   uint16_t rpl_rank;
   /// Measured ETX value if known (0xffff if unknown)
@@ -550,7 +577,7 @@ typedef enum {
   SL_WISUN_TRACE_GROUP_WSBR    = 18,    /// Border router
   SL_WISUN_TRACE_GROUP_SEC     = 19,    /// Security
   SL_WISUN_TRACE_GROUP_TIME    = 20,    /// Time and timers
-  SL_WISUN_TRACE_GROUP_NEIGH   = 21,    /// Neigbour
+  SL_WISUN_TRACE_GROUP_NEIGH   = 21,    /// Neighbor
   SL_WISUN_TRACE_GROUP_STAT    = 22,    /// Statistics
   SL_WISUN_TRACE_GROUP_BUFF    = 23,    /// Dynamic Buffer
   SL_WISUN_TRACE_GROUP_ADDR    = 24,    /// Address Manipulation
@@ -562,9 +589,9 @@ typedef enum {
   SL_WISUN_TRACE_GROUP_ROUT    = 30,    /// Routing table
   SL_WISUN_TRACE_GROUP_EVLP    = 31,    /// Event loop
   SL_WISUN_TRACE_GROUP_NVM     = 32,    /// NVM
-  SL_WISUN_TRACE_GROUP_TRNG    = 33,    /// TRNG
+  SL_WISUN_TRACE_GROUP_CRYPTO  = 33,    /// Crypto
   SL_WISUN_TRACE_GROUP_RF      = 34,    /// Wi-SUN RF Driver
-  // 36 to 63 reserved for future used
+  // 35 to 63 reserved for future used
   SL_WISUN_TRACE_GROUP_INT     = 63,    /// Internal usage
   SL_WISUN_TRACE_GROUP_COUNT   = 64     /// Max number of trace group in this enum
 } sl_wisun_trace_group_t;
@@ -591,6 +618,48 @@ typedef struct {
   /// It is coded using enum sl_wisun_trace_level_t.
   uint8_t trace_level;
 } sl_wisun_trace_group_config_t;
+
+/// Enumerations for regional regulation
+typedef enum {
+  /// No regulation
+  SL_WISUN_REGULATION_NONE = 0,
+  /// ARIB, can only be used with JP regulatory domain
+  SL_WISUN_REGULATION_ARIB = 1,
+} sl_wisun_regulation_t;
+
+typedef struct {
+  /// Max duration of a fragment in ms
+  uint32_t fragment_duration_ms;
+} sl_wisun_async_fragmentation_t;
+
+/// Enumeration for Mode Switch mode
+typedef enum {
+  SL_WISUN_MODE_SWITCH_DISABLED     = 0,     /// Mode switch is not allowed
+  SL_WISUN_MODE_SWITCH_ALL_UNICAST  = 1,     /// Mode switch is allowed for all unicast data frames
+  SL_WISUN_MODE_SWITCH_ALWAYS       = 2,     /// Mode switch is allowed for all data frames
+} sl_wisun_mode_switch_mode_t;
+
+/// Enumeration for regional regulation transmission level.
+/// Thresholds are define with #sl_wisun_set_regulation_tx_thresholds.
+typedef enum {
+  /// Transmission duration is compliant with regional regulation
+  SL_WISUN_REGULATION_TX_LEVEL_LOW = 0,
+  /// Transmission duration is above warning threshold
+  SL_WISUN_REGULATION_TX_LEVEL_WARNING = 1,
+  /// Transmission duration is above alert threshold
+  SL_WISUN_REGULATION_TX_LEVEL_ALERT = 2
+} sl_wisun_regulation_tx_level_t;
+
+/// Enumeration for unicast transmission mode
+typedef enum {
+  /// Default unicast transmission
+  SL_WISUN_UNICAST_TX_MODE_DEFAULT = 0,
+  /// Allow unicast transmission only on a slot
+  SL_WISUN_UNICAST_TX_MODE_SLOT = 1,
+} sl_wisun_unicast_tx_mode_t;
+
+/// Maximum framgent duration. Disables advert fragmentation.
+#define SL_WISUN_ADVERT_FRAGMENT_DISABLE UINT32_MAX
 
 /** @} (end SL_WISUN_TYPES) */
 

@@ -3,7 +3,7 @@
  * @brief Bluetooth Network Co-Processor (NCP) Interface
  *******************************************************************************
  * # License
- * <b>Copyright 2020 Silicon Laboratories Inc. www.silabs.com</b>
+ * <b>Copyright 2022 Silicon Laboratories Inc. www.silabs.com</b>
  *******************************************************************************
  *
  * SPDX-License-Identifier: Zlib
@@ -37,7 +37,10 @@
 #include "sl_simple_com.h"
 #include "sl_ncp.h"
 #include "sl_ncp_evt_filter.h"
+#include "btl_interface.h"
+#ifdef SL_COMPONENT_CATALOG_PRESENT
 #include "sl_component_catalog.h"
+#endif // SL_COMPONENT_CATALOG_PRESENT
 #include "sl_simple_timer.h"
 #if defined(SL_CATALOG_WAKE_LOCK_PRESENT)
 #include "sl_wake_lock.h"
@@ -82,6 +85,8 @@ static uint8_t sleep_semaphore = 0;
 #define MSG_GET_LEN(x) ((uint16_t)(SL_BT_MSG_LEN((x)->header) \
                                    + SL_BT_MSG_HEADER_LEN))
 
+static bool handle_user_command(uint32_t hdr, void *data);
+
 // Command and event buffer helper functions
 static void cmd_enqueue(uint16_t len, uint8_t *data);
 static void cmd_dequeue(void);
@@ -92,8 +97,6 @@ static void evt_dequeue(void);
 static inline bool cmd_is_available(void);
 static inline void cmd_set_available(void);
 static inline void cmd_clr_available(void);
-static inline bool cmd_is_user_message_to_target(void);
-static inline bool cmd_is_user_manage_event_filter(void);
 static inline bool evt_is_available(void);
 static inline void evt_set_available(void);
 static inline void evt_clr_available(void);
@@ -136,12 +139,12 @@ void sl_ncp_init(void)
  *****************************************************************************/
 void sl_ncp_step(void)
 {
-  uint8_t    *response;
-  uint8array *param = (uint8array *)(&cmd.buf[SL_BT_MSG_HEADER_LEN]);
-
   // -------------------------------
   // Command available and NCP not busy
   if (cmd_is_available() && !busy && !evt_is_available()) {
+    sl_bt_msg_t *command = (sl_bt_msg_t *)cmd.buf;
+    sl_bt_msg_t *response;
+
     #if defined(SL_CATALOG_NCP_SEC_PRESENT)
     uint32_t result = 0;
     // store if cmd was encrypted during reception for further processing
@@ -151,27 +154,10 @@ void sl_ncp_step(void)
     #endif // SL_CATALOG_NCP_SEC_PRESENT
     {
       cmd_clr_available();
-      // User command
-      if (cmd_is_user_message_to_target()) {
-        //user command length checking
-        if (param->len > 0) {
-          // Call user command handler
-          sl_ncp_user_cmd_message_to_target_cb((void *)&cmd.buf[SL_BT_MSG_HEADER_LEN]);
-        } else {
-          sl_bt_send_rsp_user_message_to_target(SL_STATUS_FAIL, 0, NULL);
-        }
-      } else if (cmd_is_user_manage_event_filter()) {
-        if (param->len > 0) {
-          sl_ncp_evt_filter_handler((user_cmd_manage_event_filter_t *)&cmd.buf[SL_BT_MSG_HEADER_LEN]);
-        } else {
-          sl_bt_send_rsp_user_manage_event_filter(SL_STATUS_FAIL);
-        }
-      }
-      // Bluetooth stack command
-      else {
+      // Check for user command
+      if (!handle_user_command(command->header, command->data.payload)) {
         // Call Bluetooth API binary command handler
-        sl_bt_handle_command(*(uint32_t *)cmd.buf,
-                             (void*)&cmd.buf[SL_BT_MSG_HEADER_LEN]);
+        sl_bt_handle_command(command->header, command->data.payload);
       }
     }
     #if defined(SL_CATALOG_NCP_SEC_PRESENT)
@@ -180,11 +166,11 @@ void sl_ncp_step(void)
       cmd_dequeue();
     } else if ((result & SL_NCP_SEC_RSP_PROCESS)
                == SL_NCP_SEC_RSP_PROCESS) {
-      response = (uint8_t*)sl_ncp_sec_process_response(
+      response = sl_ncp_sec_process_response(
         sl_bt_get_command_response(), cmd_is_encrypted);
     #else
     {
-      response = (uint8_t*)sl_bt_get_command_response();
+      response = sl_bt_get_command_response();
     #endif // SL_CATALOG_NCP_SEC_PRESENT
       // Clear command buffer
       cmd_dequeue();
@@ -194,8 +180,8 @@ void sl_ncp_step(void)
       sl_wake_lock_set_remote_req();
     #endif // SL_CATALOG_WAKE_LOCK_PRESENT
       // Transmit command response
-      sl_simple_com_transmit((uint32_t)(MSG_GET_LEN((sl_bt_msg_t*)response)),
-                             response);
+      sl_simple_com_transmit((uint32_t)(MSG_GET_LEN(response)),
+                             (uint8_t *)response);
     }
   }
 
@@ -263,10 +249,6 @@ SL_WEAK bool sl_ncp_local_btmesh_evt_process(sl_btmesh_msg_t *evt)
 /**************************************************************************//**
  * User command (message_to_target) handler callback.
  *
- * Handles user defined commands received from NCP.
- *
- * @param[in] data Data received from NCP through uart.
- *
  * @note Weak implementation.
  *****************************************************************************/
 SL_WEAK void sl_ncp_user_cmd_message_to_target_cb(void *data)
@@ -275,30 +257,63 @@ SL_WEAK void sl_ncp_user_cmd_message_to_target_cb(void *data)
 }
 
 /**************************************************************************//**
- * Send user command (message_to_target) response
- *
- * Sends command response to user defined commands to NCP.
- *
- * @param[out] result Result of the response to the command received.
- * @param[out] len Message length.
- * @param[out] data Data to send to NCP.
+ * Send user command (message_to_target) response.
  *****************************************************************************/
-void sl_ncp_user_cmd_message_to_target_rsp(sl_status_t result, uint8_t len, uint8_t *data)
+void sl_ncp_user_cmd_message_to_target_rsp(sl_status_t result,
+                                           uint8_t len,
+                                           uint8_t *data)
 {
   sl_bt_send_rsp_user_message_to_target(result, len, data);
 }
 
 /**************************************************************************//**
- * Send NCP (message_to_target) user event response
- *
- * Sends event response to user defined commands to NCP.
- *
- * @param[out] len Message length.
- * @param[out] data Data to send to NCP.
+ * Send user event (message_to_host).
  *****************************************************************************/
-void sl_ncp_user_evt_message_to_target(uint8_t len, uint8_t *data)
+void sl_ncp_user_evt_message_to_host(uint8_t len, uint8_t *data)
 {
   sl_bt_send_evt_user_message_to_host(len, data);
+}
+
+/**************************************************************************//**
+ * Handle a user API command in binary format.
+ *
+ * @param[in] hdr the command header.
+ * @param[in] data the command payload in a byte array
+ *
+ * @retval true User command handled.
+ * @retval false No user command found.
+ *****************************************************************************/
+static bool handle_user_command(uint32_t hdr, void *data)
+{
+  bool cmd_handled = true;
+
+  switch (SL_BT_MSG_ID(hdr)) {
+    // -------------------------------
+    case sl_bt_cmd_user_message_to_target_id:
+      if (((uint8array *)data)->len > 0) {
+        sl_ncp_user_cmd_message_to_target_cb(data);
+      } else {
+        sl_bt_send_rsp_user_message_to_target(SL_STATUS_FAIL, 0, NULL);
+      }
+      break;
+    // -------------------------------
+    case sl_bt_cmd_user_manage_event_filter_id:
+      if (((uint8array *)data)->len > 0) {
+        sl_ncp_evt_filter_handler((user_cmd_manage_event_filter_t *)data);
+      } else {
+        sl_bt_send_rsp_user_manage_event_filter(SL_STATUS_FAIL);
+      }
+      break;
+    // -------------------------------
+    case sl_bt_cmd_user_reset_to_dfu_id:
+      bootloader_rebootAndInstall();
+      break;
+    // -------------------------------
+    default:
+      cmd_handled = false;
+      break;
+  }
+  return cmd_handled;
 }
 
 // -----------------------------------------------------------------------------
@@ -596,7 +611,7 @@ static void evt_enqueue(uint16_t len, uint8_t *data)
 }
 
 /**************************************************************************//**
- * Put event to event buffer
+ * Clear event buffer
  *****************************************************************************/
 static void evt_dequeue(void)
 {
@@ -647,24 +662,6 @@ static inline void cmd_set_available(void)
 static inline void cmd_clr_available(void)
 {
   cmd.available = false;
-}
-
-/**************************************************************************//**
- * Check message to target type command in command buffer
- *****************************************************************************/
-static inline bool cmd_is_user_message_to_target(void)
-{
-  return (sl_bt_cmd_user_message_to_target_id
-          == SL_BT_MSG_ID(*(uint32_t *)cmd.buf));
-}
-
-/**************************************************************************//**
- * Check manage event filter type command in command buffer
- *****************************************************************************/
-static inline bool cmd_is_user_manage_event_filter(void)
-{
-  return (sl_bt_cmd_user_manage_event_filter_id
-          == SL_BT_MSG_ID(*(uint32_t *)cmd.buf));
 }
 
 /**************************************************************************//**

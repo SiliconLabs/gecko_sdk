@@ -13,3 +13,6 @@ class InvalidOptionOverride(Exception):
 
 class CalculationException(Exception):
     pass
+
+class UnknownProfileException(Exception):
+    pass

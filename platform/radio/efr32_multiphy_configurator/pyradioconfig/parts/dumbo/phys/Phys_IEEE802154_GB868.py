@@ -82,6 +82,9 @@ class PHYS_IEEE802154_GB868(IPhy):
         phy.profile_inputs.symbols_in_timing_window.value = 8
         phy.profile_inputs.number_of_timing_windows.value = 3
 
+        phy.profile_outputs.rx_sync_delay_ns.override = 49000
+        phy.profile_outputs.rx_eof_delay_ns.override = 49000
+
     def PHY_IEEE802154_GB868_863MHz_PHR2(self, model, phy_name=None):
         # Great Britain smart metering PHY from 802.15.4g
         # refer to spec:

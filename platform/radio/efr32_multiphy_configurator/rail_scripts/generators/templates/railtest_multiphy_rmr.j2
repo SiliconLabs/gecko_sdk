@@ -26,6 +26,11 @@
   {%- else -%}
     {{"\n"}}updateConfigurationPointer {{ rmr_structs.phyInfo }} 12 {{ rmr_structs.null }}
   {%- endif -%}
+  {%- if phyInfoEntry.phyInfoData.rffpllConfig != None -%}
+    {{"\n"}}updateConfigurationPointer {{ rmr_structs.phyInfo }} 17 {{ rmr_structs.rffpllConfig }}
+  {%- else -%}
+    {{"\n"}}updateConfigurationPointer {{ rmr_structs.phyInfo }} 17 {{ rmr_structs.null }}
+  {%- endif -%}
   {{"\n"}}updateConfigurationPointer {{ rmr_structs.phyInfo}} 4 {{ rmr_structs.null }}{{"\n"}}
   {#- Write the irCalConfig info -#}
   {%- set irCalConfigEntry = firstDictValue(multiPhyConfig.commonStructures.irCalConfigEntries) -%}
@@ -125,6 +130,18 @@
     {%- endif -%}
   {%- endif -%}
   {#-TODO: DynamicSlicerConfigEntries should go in here -#}
+  {#- Write the rffpllConfig info -#}
+  {%- if phyInfoEntry.phyInfoData.rffpllConfig != None -%}
+    {%- set rffpllConfigEntry = firstDictValue(multiPhyConfig.commonStructures.rffpllConfigEntries) -%}
+    {%- if rffpllConfigEntry|length > 0 -%}
+      {%- for items in (rffpllConfigEntry|unrollAppendIndexLength(8, 0, 32))|batch(10) -%}
+        writeRmrStructure {{ rmr_structs.rffpllConfig }}
+        {%- for item in items -%}
+          {{" "}}{{item|int}}
+        {%- endfor -%}{{"\n"}}
+      {%- endfor -%}
+    {%- endif -%}
+  {%- endif -%}
   {#- Do the channel configuration next -#}
   {%- set multiPhyConfigEntry = firstDictValue(multiPhyConfig.multiPhyConfigEntries) -%}
   {%- set entry = firstDictValue(multiPhyConfigEntry.channelConfigEntries) -%}

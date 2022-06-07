@@ -1,14 +1,7 @@
 from pycalcmodel.core.output import ModelOutput, ModelOutputType
+from pyradioconfig.calculator_model_framework.interfaces.itarget import ITarget
 
 def build_modem_regs_sol_only(model, profile, family):
-    profile.outputs.append(ModelOutput(model.vars.RFFPLL0_RFFPLLCTRL1_DIVXADCSEL, '',         ModelOutputType.SVD_REG_FIELD, readable_name='RFFPLL0.RFFPLLCTRL1.DIVXADCSEL'           ))
-    profile.outputs.append(ModelOutput(model.vars.RFFPLL0_RFFPLLCTRL1_DIVXDACSEL, '',         ModelOutputType.SVD_REG_FIELD, readable_name='RFFPLL0.RFFPLLCTRL1.DIVXDACSEL'           ))
-
-    profile.outputs.append(ModelOutput(model.vars.RFFPLL0_RFFPLLCTRL1_DIVX, '',         ModelOutputType.SVD_REG_FIELD, readable_name='RFFPLL0.RFFPLLCTRL1.DIVX'           ))
-    profile.outputs.append(ModelOutput(model.vars.RFFPLL0_RFFPLLCTRL1_DIVY, '',         ModelOutputType.SVD_REG_FIELD, readable_name='RFFPLL0.RFFPLLCTRL1.DIVY'           ))
-    profile.outputs.append(ModelOutput(model.vars.RFFPLL0_RFFPLLCTRL1_DIVN, '',         ModelOutputType.SVD_REG_FIELD, readable_name='RFFPLL0.RFFPLLCTRL1.DIVN'           ))
-    profile.outputs.append(ModelOutput(model.vars.RFFPLL0_RFFPLLCTRL1_DIVXMODEMSEL, '', ModelOutputType.SVD_REG_FIELD, readable_name='RFFPLL0.RFFPLLCTRL1.DIVXMODEMSEL'))
-
 
     profile.outputs.append(ModelOutput(model.vars.MODEM_CTRL5_INTOSR, '',         ModelOutputType.SVD_REG_FIELD, readable_name='MODEM.CTRL5.INTOSR'           ))
     profile.outputs.append(ModelOutput(model.vars.MODEM_CTRL5_DEC2, '',         ModelOutputType.SVD_REG_FIELD, readable_name='MODEM.CTRL5.DEC2'           ))
@@ -171,6 +164,7 @@ def build_modem_regs_sol_only(model, profile, family):
     profile.outputs.append(ModelOutput(model.vars.RAC_TXMIX_TXSELMIXGMSLICEQ, '', ModelOutputType.SVD_REG_FIELD, readable_name='RAC.TXMIX.TXSELMIXGMSLICEQ'))
     profile.outputs.append(ModelOutput(model.vars.RAC_TXMIX_TXSELMIXRLOAD, '', ModelOutputType.SVD_REG_FIELD, readable_name='RAC.TXMIX.TXSELMIXRLOAD'))
     profile.outputs.append(ModelOutput(model.vars.RAC_TXMIX_TXSELMIXBAND, '', ModelOutputType.SVD_REG_FIELD, readable_name='RAC.TXMIX.TXSELMIXBAND'))
+    profile.outputs.append(ModelOutput(model.vars.RAC_TXMIX_TXMIXCAPPULLDOWN, '', ModelOutputType.SVD_REG_FIELD, readable_name='RAC.TXMIX.TXMIXCAPPULLDOWN'))
     profile.outputs.append(ModelOutput(model.vars.RAC_SOFTMCTRL_TXMODSEL, '',         ModelOutputType.SVD_REG_FIELD, readable_name='RAC.SOFTMCTRL.TXMODSEL'           ))
     profile.outputs.append(ModelOutput(model.vars.RAC_SOFTMCTRL_CLKEN, '', ModelOutputType.SVD_REG_FIELD, readable_name='RAC.SOFTMCTRL.CLKEN'))
     profile.outputs.append(ModelOutput(model.vars.RAC_RX_FEFILTOUTPUTSEL, '',         ModelOutputType.SVD_REG_FIELD, readable_name='RAC.RX.FEFILTOUTPUTSEL'           ))
@@ -186,6 +180,15 @@ def build_modem_regs_sol_only(model, profile, family):
     profile.outputs.append(ModelOutput(model.vars.AGC_SETTLINGINDPER_SETTLEDPERIOD, '',         ModelOutputType.SVD_REG_FIELD, readable_name='AGC.SETTLINGINDPER.SETTLEDPERIOD'           ))
     profile.outputs.append(ModelOutput(model.vars.AGC_SETTLINGINDPER_DELAYPERIOD, '',         ModelOutputType.SVD_REG_FIELD, readable_name='AGC.SETTLINGINDPER.DELAYPERIOD'           ))
 
+    # RFFPLL Configuration
+    profile.outputs.append(ModelOutput(model.vars.RFFPLL0_RFFPLLCTRL1_DIVXADCSEL, '', ModelOutputType.SVD_REG_FIELD, readable_name='RFFPLL0.RFFPLLCTRL1.DIVXADCSEL'))
+    if model.target == ITarget.SIM_str:
+        #These fields are owned by RAIL, but are written by the calculator for RTL sim and wired FPGA as RAIL is not running
+        profile.outputs.append(ModelOutput(model.vars.RFFPLL0_RFFPLLCTRL1_DIVXDACSEL, '', ModelOutputType.SVD_REG_FIELD, readable_name='RFFPLL0.RFFPLLCTRL1.DIVXDACSEL'))
+        profile.outputs.append(ModelOutput(model.vars.RFFPLL0_RFFPLLCTRL1_DIVX, '', ModelOutputType.SVD_REG_FIELD, readable_name='RFFPLL0.RFFPLLCTRL1.DIVX'))
+        profile.outputs.append(ModelOutput(model.vars.RFFPLL0_RFFPLLCTRL1_DIVY, '', ModelOutputType.SVD_REG_FIELD, readable_name='RFFPLL0.RFFPLLCTRL1.DIVY'))
+        profile.outputs.append(ModelOutput(model.vars.RFFPLL0_RFFPLLCTRL1_DIVN, '', ModelOutputType.SVD_REG_FIELD, readable_name='RFFPLL0.RFFPLLCTRL1.DIVN'))
+        profile.outputs.append(ModelOutput(model.vars.RFFPLL0_RFFPLLCTRL1_DIVXMODEMSEL, '', ModelOutputType.SVD_REG_FIELD, readable_name='RFFPLL0.RFFPLLCTRL1.DIVXMODEMSEL'))
 
     # SEQ Peripheral - MODEMINFO register
     profile.outputs.append(ModelOutput(model.vars.SEQ_MODEMINFO_LEGACY_EN, '',         ModelOutputType.SVD_REG_FIELD, readable_name='SEQ.MODEMINFO.LEGACY_EN'           ))
@@ -272,3 +275,7 @@ def build_modem_regs_sol_only(model, profile, family):
     profile.outputs.append(ModelOutput(model.vars.SUNFSK_CFG15_AFCADJPERIOD, '', ModelOutputType.SVD_REG_FIELD, readable_name='SUNFSK.CFG15.AFCADJPERIOD'))
     profile.outputs.append(ModelOutput(model.vars.SUNFSK_CFG15_AFCCOSTTHD, '', ModelOutputType.SVD_REG_FIELD, readable_name='SUNFSK.CFG15.AFCCOSTTHD'))
     profile.outputs.append(ModelOutput(model.vars.SUNFSK_CFG15_XTALFREQ, '', ModelOutputType.SVD_REG_FIELD, readable_name='SUNFSK.CFG15.XTALFREQ'))
+    profile.outputs.append(ModelOutput(model.vars.SUNFSK_CFG16_MODE, '', ModelOutputType.SVD_REG_FIELD, readable_name='SUNFSK.CFG16.MODE'))
+
+    #FRC Spare
+    profile.outputs.append(ModelOutput(model.vars.FRC_SPARE_SPARE, '', ModelOutputType.SVD_REG_FIELD, readable_name='FRC.SPARE.SPARE'))

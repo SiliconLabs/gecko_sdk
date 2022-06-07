@@ -134,8 +134,8 @@ static void gpioSetup(void)
   /* Rev2 Wheel-EXP OUTs C_0:(U2:0x31) & C_1:(U1:0x32) */
   GPIO_PinModeSet(SI72XXEXP_PORT, SI72XXEXP_U2_PIN, gpioModeInput, 1);
   GPIO_PinModeSet(SI72XXEXP_PORT, SI72XXEXP_U1_PIN, gpioModeInput, 1);
-  GPIO_IntConfig(SI72XXEXP_PORT, SI72XXEXP_U2_PIN, true, true, false);
-  GPIO_IntConfig(SI72XXEXP_PORT, SI72XXEXP_U1_PIN, true, true, false);
+  GPIO_ExtIntConfig(SI72XXEXP_PORT, SI72XXEXP_U2_PIN, SI72XXEXP_U2_PIN, true, true, false);
+  GPIO_ExtIntConfig(SI72XXEXP_PORT, SI72XXEXP_U1_PIN, SI72XXEXP_U1_PIN, true, true, false);
 
   GPIOINT_CallbackRegister(SI72XXEXP_U1_PIN,
                            (GPIOINT_IrqCallbackPtr_t)exp_pin_callback);
@@ -144,7 +144,7 @@ static void gpioSetup(void)
 
   /* Postage Stamp OUT D_4:(U0:0x30) */
   GPIO_PinModeSet(SI72XXPS_OUT_PORT, SI72XXPS_OUT_PIN, gpioModeInput, 0);
-  GPIO_IntConfig(SI72XXPS_OUT_PORT, SI72XXPS_OUT_PIN, true, true, false);
+  GPIO_ExtIntConfig(SI72XXPS_OUT_PORT, SI72XXPS_OUT_PIN, SI72XXPS_OUT_PIN, true, true, false);
 }
 
 /**************************************************************************//**

@@ -342,25 +342,6 @@ sl_status_t sl_bt_system_get_counters(uint8_t reset,
 
 }
 
-SL_BGAPI_DEPRECATED sl_status_t sl_bt_system_set_soft_timer(uint32_t time,
-                                        uint8_t handle,
-                                        uint8_t single_shot) {
-    struct sl_bt_packet *cmd = (struct sl_bt_packet *)sl_bt_cmd_msg;
-
-    struct sl_bt_packet *rsp = (struct sl_bt_packet *)sl_bt_rsp_msg;
-
-    cmd->data.cmd_system_set_soft_timer.time=time;
-    cmd->data.cmd_system_set_soft_timer.handle=handle;
-    cmd->data.cmd_system_set_soft_timer.single_shot=single_shot;
-
-    cmd->header=sl_bt_cmd_system_set_soft_timer_id+(((6)&0xff)<<8)+(((6)&0x700)>>8);
-
-
-    sl_bt_host_handle_command();
-    return rsp->data.rsp_system_set_soft_timer.result;
-
-}
-
 sl_status_t sl_bt_system_set_lazy_soft_timer(uint32_t time,
                                              uint32_t slack,
                                              uint8_t handle,
@@ -603,7 +584,7 @@ sl_status_t sl_bt_advertiser_delete_set(uint8_t advertising_set) {
 
 }
 
-sl_status_t sl_bt_advertiser_set_phy(uint8_t advertising_set,
+SL_BGAPI_DEPRECATED sl_status_t sl_bt_advertiser_set_phy(uint8_t advertising_set,
                                      uint8_t primary_phy,
                                      uint8_t secondary_phy) {
     struct sl_bt_packet *cmd = (struct sl_bt_packet *)sl_bt_cmd_msg;
@@ -622,7 +603,7 @@ sl_status_t sl_bt_advertiser_set_phy(uint8_t advertising_set,
 
 }
 
-sl_status_t sl_bt_advertiser_set_configuration(uint8_t advertising_set,
+SL_BGAPI_DEPRECATED sl_status_t sl_bt_advertiser_set_configuration(uint8_t advertising_set,
                                                uint32_t configurations) {
     struct sl_bt_packet *cmd = (struct sl_bt_packet *)sl_bt_cmd_msg;
 
@@ -639,7 +620,7 @@ sl_status_t sl_bt_advertiser_set_configuration(uint8_t advertising_set,
 
 }
 
-sl_status_t sl_bt_advertiser_clear_configuration(uint8_t advertising_set,
+SL_BGAPI_DEPRECATED sl_status_t sl_bt_advertiser_clear_configuration(uint8_t advertising_set,
                                                  uint32_t configurations) {
     struct sl_bt_packet *cmd = (struct sl_bt_packet *)sl_bt_cmd_msg;
 
@@ -656,7 +637,7 @@ sl_status_t sl_bt_advertiser_clear_configuration(uint8_t advertising_set,
 
 }
 
-sl_status_t sl_bt_advertiser_set_data(uint8_t advertising_set,
+SL_BGAPI_DEPRECATED sl_status_t sl_bt_advertiser_set_data(uint8_t advertising_set,
                                       uint8_t packet_type,
                                       size_t adv_data_len,
                                       const uint8_t* adv_data) {
@@ -677,7 +658,7 @@ sl_status_t sl_bt_advertiser_set_data(uint8_t advertising_set,
 
 }
 
-sl_status_t sl_bt_advertiser_set_long_data(uint8_t advertising_set,
+SL_BGAPI_DEPRECATED sl_status_t sl_bt_advertiser_set_long_data(uint8_t advertising_set,
                                            uint8_t packet_type) {
     struct sl_bt_packet *cmd = (struct sl_bt_packet *)sl_bt_cmd_msg;
 
@@ -694,7 +675,7 @@ sl_status_t sl_bt_advertiser_set_long_data(uint8_t advertising_set,
 
 }
 
-sl_status_t sl_bt_advertiser_start(uint8_t advertising_set,
+SL_BGAPI_DEPRECATED sl_status_t sl_bt_advertiser_start(uint8_t advertising_set,
                                    uint8_t discover,
                                    uint8_t connect) {
     struct sl_bt_packet *cmd = (struct sl_bt_packet *)sl_bt_cmd_msg;
@@ -713,7 +694,7 @@ sl_status_t sl_bt_advertiser_start(uint8_t advertising_set,
 
 }
 
-sl_status_t sl_bt_advertiser_start_periodic_advertising(uint8_t advertising_set,
+SL_BGAPI_DEPRECATED sl_status_t sl_bt_advertiser_start_periodic_advertising(uint8_t advertising_set,
                                                         uint16_t interval_min,
                                                         uint16_t interval_max,
                                                         uint32_t flags) {
@@ -734,7 +715,7 @@ sl_status_t sl_bt_advertiser_start_periodic_advertising(uint8_t advertising_set,
 
 }
 
-sl_status_t sl_bt_advertiser_stop_periodic_advertising(uint8_t advertising_set) {
+SL_BGAPI_DEPRECATED sl_status_t sl_bt_advertiser_stop_periodic_advertising(uint8_t advertising_set) {
     struct sl_bt_packet *cmd = (struct sl_bt_packet *)sl_bt_cmd_msg;
 
     struct sl_bt_packet *rsp = (struct sl_bt_packet *)sl_bt_rsp_msg;
@@ -914,6 +895,29 @@ sl_status_t sl_bt_extended_advertiser_start(uint8_t advertising_set,
 
 }
 
+sl_status_t sl_bt_extended_advertiser_start_directed(uint8_t advertising_set,
+                                                     uint8_t connect,
+                                                     uint32_t flags,
+                                                     bd_addr peer_addr,
+                                                     uint8_t peer_addr_type) {
+    struct sl_bt_packet *cmd = (struct sl_bt_packet *)sl_bt_cmd_msg;
+
+    struct sl_bt_packet *rsp = (struct sl_bt_packet *)sl_bt_rsp_msg;
+
+    cmd->data.cmd_extended_advertiser_start_directed.advertising_set=advertising_set;
+    cmd->data.cmd_extended_advertiser_start_directed.connect=connect;
+    cmd->data.cmd_extended_advertiser_start_directed.flags=flags;
+    memcpy(&cmd->data.cmd_extended_advertiser_start_directed.peer_addr,&peer_addr,sizeof(bd_addr));
+    cmd->data.cmd_extended_advertiser_start_directed.peer_addr_type=peer_addr_type;
+
+    cmd->header=sl_bt_cmd_extended_advertiser_start_directed_id+(((13)&0xff)<<8)+(((13)&0x700)>>8);
+
+
+    sl_bt_host_handle_command();
+    return rsp->data.rsp_extended_advertiser_start_directed.result;
+
+}
+
 sl_status_t sl_bt_periodic_advertiser_set_data(uint8_t advertising_set,
                                                size_t data_len,
                                                const uint8_t* data) {
@@ -984,6 +988,39 @@ sl_status_t sl_bt_periodic_advertiser_stop(uint8_t advertising_set) {
 
 }
 
+sl_status_t sl_bt_scanner_set_parameters(uint8_t mode,
+                                         uint16_t interval,
+                                         uint16_t window) {
+    struct sl_bt_packet *cmd = (struct sl_bt_packet *)sl_bt_cmd_msg;
+
+    struct sl_bt_packet *rsp = (struct sl_bt_packet *)sl_bt_rsp_msg;
+
+    cmd->data.cmd_scanner_set_parameters.mode=mode;
+    cmd->data.cmd_scanner_set_parameters.interval=interval;
+    cmd->data.cmd_scanner_set_parameters.window=window;
+
+    cmd->header=sl_bt_cmd_scanner_set_parameters_id+(((5)&0xff)<<8)+(((5)&0x700)>>8);
+
+
+    sl_bt_host_handle_command();
+    return rsp->data.rsp_scanner_set_parameters.result;
+
+}
+
+sl_status_t sl_bt_scanner_stop() {
+    struct sl_bt_packet *cmd = (struct sl_bt_packet *)sl_bt_cmd_msg;
+
+    struct sl_bt_packet *rsp = (struct sl_bt_packet *)sl_bt_rsp_msg;
+
+
+    cmd->header=sl_bt_cmd_scanner_stop_id+(((0)&0xff)<<8)+(((0)&0x700)>>8);
+
+
+    sl_bt_host_handle_command();
+    return rsp->data.rsp_scanner_stop.result;
+
+}
+
 sl_status_t sl_bt_scanner_set_timing(uint8_t phys,
                                      uint16_t scan_interval,
                                      uint16_t scan_window) {
@@ -1032,20 +1069,6 @@ sl_status_t sl_bt_scanner_start(uint8_t scanning_phy, uint8_t discover_mode) {
 
     sl_bt_host_handle_command();
     return rsp->data.rsp_scanner_start.result;
-
-}
-
-sl_status_t sl_bt_scanner_stop() {
-    struct sl_bt_packet *cmd = (struct sl_bt_packet *)sl_bt_cmd_msg;
-
-    struct sl_bt_packet *rsp = (struct sl_bt_packet *)sl_bt_rsp_msg;
-
-
-    cmd->header=sl_bt_cmd_scanner_stop_id+(((0)&0xff)<<8)+(((0)&0x700)>>8);
-
-
-    sl_bt_host_handle_command();
-    return rsp->data.rsp_scanner_stop.result;
 
 }
 
@@ -1118,6 +1141,88 @@ sl_status_t sl_bt_sync_close(uint16_t sync) {
 
     sl_bt_host_handle_command();
     return rsp->data.rsp_sync_close.result;
+
+}
+
+sl_status_t sl_bt_past_receiver_set_default_sync_receive_parameters(uint8_t mode,
+                                                                    uint16_t skip,
+                                                                    uint16_t timeout,
+                                                                    uint8_t reporting_mode) {
+    struct sl_bt_packet *cmd = (struct sl_bt_packet *)sl_bt_cmd_msg;
+
+    struct sl_bt_packet *rsp = (struct sl_bt_packet *)sl_bt_rsp_msg;
+
+    cmd->data.cmd_past_receiver_set_default_sync_receive_parameters.mode=mode;
+    cmd->data.cmd_past_receiver_set_default_sync_receive_parameters.skip=skip;
+    cmd->data.cmd_past_receiver_set_default_sync_receive_parameters.timeout=timeout;
+    cmd->data.cmd_past_receiver_set_default_sync_receive_parameters.reporting_mode=reporting_mode;
+
+    cmd->header=sl_bt_cmd_past_receiver_set_default_sync_receive_parameters_id+(((6)&0xff)<<8)+(((6)&0x700)>>8);
+
+
+    sl_bt_host_handle_command();
+    return rsp->data.rsp_past_receiver_set_default_sync_receive_parameters.result;
+
+}
+
+sl_status_t sl_bt_past_receiver_set_sync_receive_parameters(uint8_t connection,
+                                                            uint8_t mode,
+                                                            uint16_t skip,
+                                                            uint16_t timeout,
+                                                            uint8_t reporting_mode) {
+    struct sl_bt_packet *cmd = (struct sl_bt_packet *)sl_bt_cmd_msg;
+
+    struct sl_bt_packet *rsp = (struct sl_bt_packet *)sl_bt_rsp_msg;
+
+    cmd->data.cmd_past_receiver_set_sync_receive_parameters.connection=connection;
+    cmd->data.cmd_past_receiver_set_sync_receive_parameters.mode=mode;
+    cmd->data.cmd_past_receiver_set_sync_receive_parameters.skip=skip;
+    cmd->data.cmd_past_receiver_set_sync_receive_parameters.timeout=timeout;
+    cmd->data.cmd_past_receiver_set_sync_receive_parameters.reporting_mode=reporting_mode;
+
+    cmd->header=sl_bt_cmd_past_receiver_set_sync_receive_parameters_id+(((7)&0xff)<<8)+(((7)&0x700)>>8);
+
+
+    sl_bt_host_handle_command();
+    return rsp->data.rsp_past_receiver_set_sync_receive_parameters.result;
+
+}
+
+sl_status_t sl_bt_advertiser_past_transfer(uint8_t connection,
+                                           uint16_t service_data,
+                                           uint8_t advertising_set) {
+    struct sl_bt_packet *cmd = (struct sl_bt_packet *)sl_bt_cmd_msg;
+
+    struct sl_bt_packet *rsp = (struct sl_bt_packet *)sl_bt_rsp_msg;
+
+    cmd->data.cmd_advertiser_past_transfer.connection=connection;
+    cmd->data.cmd_advertiser_past_transfer.service_data=service_data;
+    cmd->data.cmd_advertiser_past_transfer.advertising_set=advertising_set;
+
+    cmd->header=sl_bt_cmd_advertiser_past_transfer_id+(((4)&0xff)<<8)+(((4)&0x700)>>8);
+
+
+    sl_bt_host_handle_command();
+    return rsp->data.rsp_advertiser_past_transfer.result;
+
+}
+
+sl_status_t sl_bt_sync_past_transfer(uint8_t connection,
+                                     uint16_t service_data,
+                                     uint16_t sync) {
+    struct sl_bt_packet *cmd = (struct sl_bt_packet *)sl_bt_cmd_msg;
+
+    struct sl_bt_packet *rsp = (struct sl_bt_packet *)sl_bt_rsp_msg;
+
+    cmd->data.cmd_sync_past_transfer.connection=connection;
+    cmd->data.cmd_sync_past_transfer.service_data=service_data;
+    cmd->data.cmd_sync_past_transfer.sync=sync;
+
+    cmd->header=sl_bt_cmd_sync_past_transfer_id+(((5)&0xff)<<8)+(((5)&0x700)>>8);
+
+
+    sl_bt_host_handle_command();
+    return rsp->data.rsp_sync_past_transfer.result;
 
 }
 
@@ -1383,6 +1488,27 @@ sl_status_t sl_bt_connection_read_remote_used_features(uint8_t connection) {
 
     sl_bt_host_handle_command();
     return rsp->data.rsp_connection_read_remote_used_features.result;
+
+}
+
+sl_status_t sl_bt_connection_get_security_status(uint8_t connection,
+                                                 uint8_t *security_mode,
+                                                 uint8_t *key_size,
+                                                 uint8_t *bonding_handle) {
+    struct sl_bt_packet *cmd = (struct sl_bt_packet *)sl_bt_cmd_msg;
+
+    struct sl_bt_packet *rsp = (struct sl_bt_packet *)sl_bt_rsp_msg;
+
+    cmd->data.cmd_connection_get_security_status.connection=connection;
+
+    cmd->header=sl_bt_cmd_connection_get_security_status_id+(((1)&0xff)<<8)+(((1)&0x700)>>8);
+
+
+    sl_bt_host_handle_command();
+    *security_mode = rsp->data.rsp_connection_get_security_status.security_mode;
+    *key_size = rsp->data.rsp_connection_get_security_status.key_size;
+    *bonding_handle = rsp->data.rsp_connection_get_security_status.bonding_handle;
+    return rsp->data.rsp_connection_get_security_status.result;
 
 }
 
@@ -2730,61 +2856,6 @@ sl_status_t sl_bt_sm_set_passkey(int32_t passkey) {
 
 }
 
-SL_BGAPI_DEPRECATED sl_status_t sl_bt_sm_set_oob_data(size_t oob_data_len, const uint8_t* oob_data) {
-    struct sl_bt_packet *cmd = (struct sl_bt_packet *)sl_bt_cmd_msg;
-
-    struct sl_bt_packet *rsp = (struct sl_bt_packet *)sl_bt_rsp_msg;
-
-    cmd->data.cmd_sm_set_oob_data.oob_data.len=oob_data_len;
-    memcpy(cmd->data.cmd_sm_set_oob_data.oob_data.data,oob_data,oob_data_len);
-
-    cmd->header=sl_bt_cmd_sm_set_oob_data_id+(((1+oob_data_len)&0xff)<<8)+(((1+oob_data_len)&0x700)>>8);
-
-
-    sl_bt_host_handle_command();
-    return rsp->data.rsp_sm_set_oob_data.result;
-
-}
-
-SL_BGAPI_DEPRECATED sl_status_t sl_bt_sm_use_sc_oob(uint8_t enable,
-                                size_t max_oob_data_size,
-                                size_t *oob_data_len,
-                                uint8_t *oob_data) {
-    struct sl_bt_packet *cmd = (struct sl_bt_packet *)sl_bt_cmd_msg;
-
-    struct sl_bt_packet *rsp = (struct sl_bt_packet *)sl_bt_rsp_msg;
-
-    cmd->data.cmd_sm_use_sc_oob.enable=enable;
-
-    cmd->header=sl_bt_cmd_sm_use_sc_oob_id+(((1)&0xff)<<8)+(((1)&0x700)>>8);
-
-
-    sl_bt_host_handle_command();
-    *oob_data_len = rsp->data.rsp_sm_use_sc_oob.oob_data.len;
-    if (rsp->data.rsp_sm_use_sc_oob.oob_data.len <= max_oob_data_size) {
-        memcpy(oob_data,rsp->data.rsp_sm_use_sc_oob.oob_data.data,rsp->data.rsp_sm_use_sc_oob.oob_data.len);
-    }
-    return rsp->data.rsp_sm_use_sc_oob.result;
-
-}
-
-SL_BGAPI_DEPRECATED sl_status_t sl_bt_sm_set_sc_remote_oob_data(size_t oob_data_len,
-                                            const uint8_t* oob_data) {
-    struct sl_bt_packet *cmd = (struct sl_bt_packet *)sl_bt_cmd_msg;
-
-    struct sl_bt_packet *rsp = (struct sl_bt_packet *)sl_bt_rsp_msg;
-
-    cmd->data.cmd_sm_set_sc_remote_oob_data.oob_data.len=oob_data_len;
-    memcpy(cmd->data.cmd_sm_set_sc_remote_oob_data.oob_data.data,oob_data,oob_data_len);
-
-    cmd->header=sl_bt_cmd_sm_set_sc_remote_oob_data_id+(((1+oob_data_len)&0xff)<<8)+(((1+oob_data_len)&0x700)>>8);
-
-
-    sl_bt_host_handle_command();
-    return rsp->data.rsp_sm_set_sc_remote_oob_data.result;
-
-}
-
 sl_status_t sl_bt_sm_increase_security(uint8_t connection) {
     struct sl_bt_packet *cmd = (struct sl_bt_packet *)sl_bt_cmd_msg;
 
@@ -2845,20 +2916,6 @@ sl_status_t sl_bt_sm_bonding_confirm(uint8_t connection, uint8_t confirm) {
 
     sl_bt_host_handle_command();
     return rsp->data.rsp_sm_bonding_confirm.result;
-
-}
-
-SL_BGAPI_DEPRECATED sl_status_t sl_bt_sm_list_all_bondings() {
-    struct sl_bt_packet *cmd = (struct sl_bt_packet *)sl_bt_cmd_msg;
-
-    struct sl_bt_packet *rsp = (struct sl_bt_packet *)sl_bt_rsp_msg;
-
-
-    cmd->header=sl_bt_cmd_sm_list_all_bondings_id+(((0)&0xff)<<8)+(((0)&0x700)>>8);
-
-
-    sl_bt_host_handle_command();
-    return rsp->data.rsp_sm_list_all_bondings.result;
 
 }
 
@@ -3193,108 +3250,109 @@ sl_status_t sl_bt_coex_get_counters(uint8_t reset,
 
 }
 
-sl_status_t sl_bt_l2cap_coc_send_connection_request(uint8_t connection,
-                                                    uint16_t le_psm,
-                                                    uint16_t mtu,
-                                                    uint16_t mps,
-                                                    uint16_t initial_credit) {
+sl_status_t sl_bt_l2cap_open_le_channel(uint8_t connection,
+                                        uint16_t spsm,
+                                        uint16_t max_sdu,
+                                        uint16_t max_pdu,
+                                        uint16_t credit,
+                                        uint16_t *cid) {
     struct sl_bt_packet *cmd = (struct sl_bt_packet *)sl_bt_cmd_msg;
 
     struct sl_bt_packet *rsp = (struct sl_bt_packet *)sl_bt_rsp_msg;
 
-    cmd->data.cmd_l2cap_coc_send_connection_request.connection=connection;
-    cmd->data.cmd_l2cap_coc_send_connection_request.le_psm=le_psm;
-    cmd->data.cmd_l2cap_coc_send_connection_request.mtu=mtu;
-    cmd->data.cmd_l2cap_coc_send_connection_request.mps=mps;
-    cmd->data.cmd_l2cap_coc_send_connection_request.initial_credit=initial_credit;
+    cmd->data.cmd_l2cap_open_le_channel.connection=connection;
+    cmd->data.cmd_l2cap_open_le_channel.spsm=spsm;
+    cmd->data.cmd_l2cap_open_le_channel.max_sdu=max_sdu;
+    cmd->data.cmd_l2cap_open_le_channel.max_pdu=max_pdu;
+    cmd->data.cmd_l2cap_open_le_channel.credit=credit;
 
-    cmd->header=sl_bt_cmd_l2cap_coc_send_connection_request_id+(((9)&0xff)<<8)+(((9)&0x700)>>8);
+    cmd->header=sl_bt_cmd_l2cap_open_le_channel_id+(((9)&0xff)<<8)+(((9)&0x700)>>8);
 
 
     sl_bt_host_handle_command();
-    return rsp->data.rsp_l2cap_coc_send_connection_request.result;
+    *cid = rsp->data.rsp_l2cap_open_le_channel.cid;
+    return rsp->data.rsp_l2cap_open_le_channel.result;
 
 }
 
-sl_status_t sl_bt_l2cap_coc_send_connection_response(uint8_t connection,
-                                                     uint16_t cid,
-                                                     uint16_t mtu,
-                                                     uint16_t mps,
-                                                     uint16_t initial_credit,
-                                                     uint16_t l2cap_errorcode) {
+sl_status_t sl_bt_l2cap_send_le_channel_open_response(uint8_t connection,
+                                                      uint16_t cid,
+                                                      uint16_t max_sdu,
+                                                      uint16_t max_pdu,
+                                                      uint16_t credit,
+                                                      uint16_t errorcode) {
     struct sl_bt_packet *cmd = (struct sl_bt_packet *)sl_bt_cmd_msg;
 
     struct sl_bt_packet *rsp = (struct sl_bt_packet *)sl_bt_rsp_msg;
 
-    cmd->data.cmd_l2cap_coc_send_connection_response.connection=connection;
-    cmd->data.cmd_l2cap_coc_send_connection_response.cid=cid;
-    cmd->data.cmd_l2cap_coc_send_connection_response.mtu=mtu;
-    cmd->data.cmd_l2cap_coc_send_connection_response.mps=mps;
-    cmd->data.cmd_l2cap_coc_send_connection_response.initial_credit=initial_credit;
-    cmd->data.cmd_l2cap_coc_send_connection_response.l2cap_errorcode=l2cap_errorcode;
+    cmd->data.cmd_l2cap_send_le_channel_open_response.connection=connection;
+    cmd->data.cmd_l2cap_send_le_channel_open_response.cid=cid;
+    cmd->data.cmd_l2cap_send_le_channel_open_response.max_sdu=max_sdu;
+    cmd->data.cmd_l2cap_send_le_channel_open_response.max_pdu=max_pdu;
+    cmd->data.cmd_l2cap_send_le_channel_open_response.credit=credit;
+    cmd->data.cmd_l2cap_send_le_channel_open_response.errorcode=errorcode;
 
-    cmd->header=sl_bt_cmd_l2cap_coc_send_connection_response_id+(((11)&0xff)<<8)+(((11)&0x700)>>8);
+    cmd->header=sl_bt_cmd_l2cap_send_le_channel_open_response_id+(((11)&0xff)<<8)+(((11)&0x700)>>8);
 
 
     sl_bt_host_handle_command();
-    return rsp->data.rsp_l2cap_coc_send_connection_response.result;
+    return rsp->data.rsp_l2cap_send_le_channel_open_response.result;
 
 }
 
-sl_status_t sl_bt_l2cap_coc_send_le_flow_control_credit(uint8_t connection,
-                                                        uint16_t cid,
-                                                        uint16_t credits) {
+sl_status_t sl_bt_l2cap_channel_send_data(uint8_t connection,
+                                          uint16_t cid,
+                                          size_t data_len,
+                                          const uint8_t* data) {
     struct sl_bt_packet *cmd = (struct sl_bt_packet *)sl_bt_cmd_msg;
 
     struct sl_bt_packet *rsp = (struct sl_bt_packet *)sl_bt_rsp_msg;
 
-    cmd->data.cmd_l2cap_coc_send_le_flow_control_credit.connection=connection;
-    cmd->data.cmd_l2cap_coc_send_le_flow_control_credit.cid=cid;
-    cmd->data.cmd_l2cap_coc_send_le_flow_control_credit.credits=credits;
+    cmd->data.cmd_l2cap_channel_send_data.connection=connection;
+    cmd->data.cmd_l2cap_channel_send_data.cid=cid;
+    cmd->data.cmd_l2cap_channel_send_data.data.len=data_len;
+    memcpy(cmd->data.cmd_l2cap_channel_send_data.data.data,data,data_len);
 
-    cmd->header=sl_bt_cmd_l2cap_coc_send_le_flow_control_credit_id+(((5)&0xff)<<8)+(((5)&0x700)>>8);
+    cmd->header=sl_bt_cmd_l2cap_channel_send_data_id+(((4+data_len)&0xff)<<8)+(((4+data_len)&0x700)>>8);
 
 
     sl_bt_host_handle_command();
-    return rsp->data.rsp_l2cap_coc_send_le_flow_control_credit.result;
+    return rsp->data.rsp_l2cap_channel_send_data.result;
 
 }
 
-sl_status_t sl_bt_l2cap_coc_send_disconnection_request(uint8_t connection,
-                                                       uint16_t cid) {
+sl_status_t sl_bt_l2cap_channel_send_credit(uint8_t connection,
+                                            uint16_t cid,
+                                            uint16_t credit) {
     struct sl_bt_packet *cmd = (struct sl_bt_packet *)sl_bt_cmd_msg;
 
     struct sl_bt_packet *rsp = (struct sl_bt_packet *)sl_bt_rsp_msg;
 
-    cmd->data.cmd_l2cap_coc_send_disconnection_request.connection=connection;
-    cmd->data.cmd_l2cap_coc_send_disconnection_request.cid=cid;
+    cmd->data.cmd_l2cap_channel_send_credit.connection=connection;
+    cmd->data.cmd_l2cap_channel_send_credit.cid=cid;
+    cmd->data.cmd_l2cap_channel_send_credit.credit=credit;
 
-    cmd->header=sl_bt_cmd_l2cap_coc_send_disconnection_request_id+(((3)&0xff)<<8)+(((3)&0x700)>>8);
+    cmd->header=sl_bt_cmd_l2cap_channel_send_credit_id+(((5)&0xff)<<8)+(((5)&0x700)>>8);
 
 
     sl_bt_host_handle_command();
-    return rsp->data.rsp_l2cap_coc_send_disconnection_request.result;
+    return rsp->data.rsp_l2cap_channel_send_credit.result;
 
 }
 
-sl_status_t sl_bt_l2cap_coc_send_data(uint8_t connection,
-                                      uint16_t cid,
-                                      size_t data_len,
-                                      const uint8_t* data) {
+sl_status_t sl_bt_l2cap_close_channel(uint8_t connection, uint16_t cid) {
     struct sl_bt_packet *cmd = (struct sl_bt_packet *)sl_bt_cmd_msg;
 
     struct sl_bt_packet *rsp = (struct sl_bt_packet *)sl_bt_rsp_msg;
 
-    cmd->data.cmd_l2cap_coc_send_data.connection=connection;
-    cmd->data.cmd_l2cap_coc_send_data.cid=cid;
-    cmd->data.cmd_l2cap_coc_send_data.data.len=data_len;
-    memcpy(cmd->data.cmd_l2cap_coc_send_data.data.data,data,data_len);
+    cmd->data.cmd_l2cap_close_channel.connection=connection;
+    cmd->data.cmd_l2cap_close_channel.cid=cid;
 
-    cmd->header=sl_bt_cmd_l2cap_coc_send_data_id+(((4+data_len)&0xff)<<8)+(((4+data_len)&0x700)>>8);
+    cmd->header=sl_bt_cmd_l2cap_close_channel_id+(((3)&0xff)<<8)+(((3)&0x700)>>8);
 
 
     sl_bt_host_handle_command();
-    return rsp->data.rsp_l2cap_coc_send_data.result;
+    return rsp->data.rsp_l2cap_close_channel.result;
 
 }
 
@@ -3501,6 +3559,54 @@ sl_status_t sl_bt_cte_receiver_set_sync_cte_type(uint8_t sync_cte_type) {
 
 }
 
+sl_status_t sl_bt_cte_receiver_set_default_sync_receive_parameters(uint8_t mode,
+                                                                   uint16_t skip,
+                                                                   uint16_t timeout,
+                                                                   uint8_t sync_cte_type,
+                                                                   uint8_t reporting_mode) {
+    struct sl_bt_packet *cmd = (struct sl_bt_packet *)sl_bt_cmd_msg;
+
+    struct sl_bt_packet *rsp = (struct sl_bt_packet *)sl_bt_rsp_msg;
+
+    cmd->data.cmd_cte_receiver_set_default_sync_receive_parameters.mode=mode;
+    cmd->data.cmd_cte_receiver_set_default_sync_receive_parameters.skip=skip;
+    cmd->data.cmd_cte_receiver_set_default_sync_receive_parameters.timeout=timeout;
+    cmd->data.cmd_cte_receiver_set_default_sync_receive_parameters.sync_cte_type=sync_cte_type;
+    cmd->data.cmd_cte_receiver_set_default_sync_receive_parameters.reporting_mode=reporting_mode;
+
+    cmd->header=sl_bt_cmd_cte_receiver_set_default_sync_receive_parameters_id+(((7)&0xff)<<8)+(((7)&0x700)>>8);
+
+
+    sl_bt_host_handle_command();
+    return rsp->data.rsp_cte_receiver_set_default_sync_receive_parameters.result;
+
+}
+
+sl_status_t sl_bt_cte_receiver_set_sync_receive_parameters(uint8_t connection,
+                                                           uint8_t mode,
+                                                           uint16_t skip,
+                                                           uint16_t timeout,
+                                                           uint8_t sync_cte_type,
+                                                           uint8_t reporting_mode) {
+    struct sl_bt_packet *cmd = (struct sl_bt_packet *)sl_bt_cmd_msg;
+
+    struct sl_bt_packet *rsp = (struct sl_bt_packet *)sl_bt_rsp_msg;
+
+    cmd->data.cmd_cte_receiver_set_sync_receive_parameters.connection=connection;
+    cmd->data.cmd_cte_receiver_set_sync_receive_parameters.mode=mode;
+    cmd->data.cmd_cte_receiver_set_sync_receive_parameters.skip=skip;
+    cmd->data.cmd_cte_receiver_set_sync_receive_parameters.timeout=timeout;
+    cmd->data.cmd_cte_receiver_set_sync_receive_parameters.sync_cte_type=sync_cte_type;
+    cmd->data.cmd_cte_receiver_set_sync_receive_parameters.reporting_mode=reporting_mode;
+
+    cmd->header=sl_bt_cmd_cte_receiver_set_sync_receive_parameters_id+(((8)&0xff)<<8)+(((8)&0x700)>>8);
+
+
+    sl_bt_host_handle_command();
+    return rsp->data.rsp_cte_receiver_set_sync_receive_parameters.result;
+
+}
+
 sl_status_t sl_bt_cte_receiver_configure(uint8_t flags) {
     struct sl_bt_packet *cmd = (struct sl_bt_packet *)sl_bt_cmd_msg;
 
@@ -3670,4 +3776,14 @@ sl_status_t sl_bt_user_manage_event_filter(size_t data_len,
     sl_bt_host_handle_command();
     return rsp->data.rsp_user_manage_event_filter.result;
 
+}
+
+void sl_bt_user_reset_to_dfu() {
+    struct sl_bt_packet *cmd = (struct sl_bt_packet *)sl_bt_cmd_msg;
+
+
+    cmd->header=sl_bt_cmd_user_reset_to_dfu_id+(((0)&0xff)<<8)+(((0)&0x700)>>8);
+
+
+    sl_bt_host_handle_command_noresponse();
 }

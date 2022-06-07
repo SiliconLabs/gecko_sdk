@@ -1,5 +1,5 @@
 /**************************************************************************//**
- * Copyright 2018, Silicon Laboratories Inc.
+ * Copyright 2022, Silicon Laboratories Inc.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -852,7 +852,11 @@ sl_status_t sl_wfx_set_ns_ip_address(uint8_t *ns_ip_addr, uint8_t num_ns_ip_addr
 /**************************************************************************//**
  * @brief Set the broadcast filter state
  *
- * @param filter is equal to 1 to enable broadcast filtering.
+ * @param filter is equal to:
+ *    <BR><B>0</B>: The device forwards all received broadcast frames to the host.
+ *    <BR><B>1</B>: The device only forwards ARP and DHCP frames to the host,
+ *                  other broadcast frames are discarded.
+ *    <BR><B>2</B>: The device does not receive broadcast frames.
  * @returns SL_STATUS_OK if the setting is applied correctly, SL_STATUS_FAIL otherwise
  *****************************************************************************/
 sl_status_t sl_wfx_set_broadcast_filter(uint32_t filter)
@@ -1231,6 +1235,49 @@ sl_status_t sl_wfx_ext_auth(sl_wfx_ext_auth_data_type_t auth_data_type,
   if (frame != NULL) {
     sl_wfx_free_command_buffer(frame, SL_WFX_EXT_AUTH_REQ_ID, SL_WFX_CONTROL_BUFFER);
   }
+  return result;
+}
+
+/**************************************************************************//**
+ * @brief Configure the probe request forwarding filter
+ *
+ * @param ie_data_mask is the Vendor-specific IE byte pattern mask.
+ * @details The byte pattern mask is ANDed with the frame data before
+ *          pattern matching, fill with 0xFF to match the whole pattern.
+ * @param ie_data is the Vendor-specific Information Element (IE) byte pattern,
+ * starting from the Organization Identifier field.
+ * @param ie_data_length is the length of vendor-specific IE byte pattern.
+ * @details <B>0</B>: The filter is disabled
+ *          <BR><B>1 - SL_WFX_IE_DATA_FILTER_SIZE</B>: The amount of bytes.
+ * @returns SL_STATUS_OK if the command has been sent correctly,
+ * SL_STATUS_FAIL otherwise
+ *****************************************************************************/
+sl_status_t sl_wfx_set_probe_request_filter(const uint8_t *ie_data_mask,
+                                            const uint8_t *ie_data,
+                                            uint16_t ie_data_length)
+{
+  sl_status_t                      result;
+  sl_wfx_ap_scan_filter_req_body_t payload;
+  sl_wfx_ap_scan_filter_cnf_t *reply = NULL;
+
+  if (ie_data_length > SL_WFX_IE_DATA_FILTER_SIZE) {
+    return SL_STATUS_INVALID_PARAMETER;
+  }
+
+  payload.ie_data_length = ie_data_length;
+  memcpy(payload.ie_data, ie_data, ie_data_length);
+  memcpy(payload.ie_data_mask, ie_data_mask, ie_data_length);
+
+  result = sl_wfx_send_command(SL_WFX_AP_SCAN_REQUEST_FILTER_REQ_ID,
+                               &payload,
+                               sizeof(payload),
+                               SL_WFX_SOFTAP_INTERFACE,
+                               (sl_wfx_generic_confirmation_t **)&reply);
+
+  if (result == SL_STATUS_OK) {
+    result = sl_wfx_get_status_code(sl_wfx_htole32(reply->body.status), SL_WFX_AP_SCAN_REQUEST_FILTER_REQ_ID);
+  }
+
   return result;
 }
 
@@ -1864,6 +1911,17 @@ sl_status_t sl_wfx_set_wake_up_bit(uint8_t state)
 sl_status_t sl_wfx_enable_device_power_save(void)
 {
   sl_status_t result;
+  sl_status_t unlock_result;
+
+  result = sl_wfx_host_lock();
+
+  if (result != SL_STATUS_OK) {
+#if (SL_WFX_DEBUG_MASK & SL_WFX_DEBUG_ERROR)
+    sl_wfx_host_log("Enable device power save lock error %u\n", result);
+#endif
+    //if driver lock is not successful, return
+    return result;
+  }
 
   if (sl_wfx_context->state & SL_WFX_POWER_SAVE_ACTIVE) {
     /* Power save is already active, return */
@@ -1886,6 +1944,11 @@ sl_status_t sl_wfx_enable_device_power_save(void)
 #endif
 
   error_handler:
+  unlock_result = sl_wfx_host_unlock();
+  if (unlock_result != SL_STATUS_OK) {
+    result = unlock_result;
+  }
+
   return result;
 }
 
@@ -1898,6 +1961,17 @@ sl_status_t sl_wfx_enable_device_power_save(void)
 sl_status_t sl_wfx_disable_device_power_save(void)
 {
   sl_status_t result;
+  sl_status_t unlock_result;
+
+  result = sl_wfx_host_lock();
+
+  if (result != SL_STATUS_OK) {
+#if (SL_WFX_DEBUG_MASK & SL_WFX_DEBUG_ERROR)
+    sl_wfx_host_log("Disable device power save lock error %u\n", result);
+#endif
+    //if driver lock is not successful, return
+    return result;
+  }
 
   if (!(sl_wfx_context->state & SL_WFX_POWER_SAVE_ACTIVE)) {
     /* Power save is already disable, return */
@@ -1921,6 +1995,11 @@ sl_status_t sl_wfx_disable_device_power_save(void)
 #endif
 
   error_handler:
+  unlock_result = sl_wfx_host_unlock();
+  if (unlock_result != SL_STATUS_OK) {
+    result = unlock_result;
+  }
+
   return result;
 }
 

@@ -147,6 +147,92 @@ typedef enum {
  * @{
  */
 
+/** @brief Prepare a GP proxy commissioning mode command buffer.
+ *
+ * This function prepares an application framework ZCL command buffer for the GP
+ * proxy commissioning mode command with supplied arguments and returns the buffer length.
+ *
+ * @param options Options Ver.: always
+ * @param commissioningWindow Commissioning window in seconds Ver.: always
+ * @param channel Proxy channel field Ver.: always
+ *
+ * @returns Length of the constructed command buffer
+ */
+#define emberAfFillCommandGreenPowerClusterGpProxyTableResponseSmart(status,                                 \
+                                                                     totalNumberOfNonEmptyProxyTableEntries, \
+                                                                     startIndex,                             \
+                                                                     entriesCount)                           \
+  emberAfFillExternalBuffer((ZCL_CLUSTER_SPECIFIC_COMMAND                                                    \
+                             | ZCL_DISABLE_DEFAULT_RESPONSE_MASK                                             \
+                             | ZCL_FRAME_CONTROL_CLIENT_TO_SERVER),                                          \
+                            ZCL_GREEN_POWER_CLUSTER_ID,                                                      \
+                            ZCL_GP_PROXY_TABLE_RESPONSE_COMMAND_ID,                                          \
+                            "uuuu",                                                                          \
+                            status,                                                                          \
+                            totalNumberOfNonEmptyProxyTableEntries,                                          \
+                            startIndex,                                                                      \
+                            entriesCount)
+
+/** @brief Prepare a GP sink table response command buffer.
+ *
+ * This function prepares an application framework ZCL command buffer for the GP
+ * sink table response command with supplied arguments and returns the buffer length.
+ *
+ * @param status Sink table response status Ver.: always
+ * @param totalNumberofNonEmptySinkTableEntries Total number of entires in the sink table Ver.: always
+ * @param startIndex Start index in the response Ver.: always
+ * @param sinkTableEntriesCount Number of entries in the response Ver.: always
+ *
+ * @returns Length of the constructed command buffer
+ */
+#define emberAfFillCommandGreenPowerClusterGpSinkTableResponseSmart(status,                                \
+                                                                    totalNumberofNonEmptySinkTableEntries, \
+                                                                    startIndex,                            \
+                                                                    sinkTableEntriesCount)                 \
+  emberAfFillExternalBuffer((ZCL_CLUSTER_SPECIFIC_COMMAND                                                  \
+                             | ZCL_DISABLE_DEFAULT_RESPONSE_MASK                                           \
+                             | ZCL_FRAME_CONTROL_SERVER_TO_CLIENT),                                        \
+                            ZCL_GREEN_POWER_CLUSTER_ID,                                                    \
+                            ZCL_GP_SINK_TABLE_RESPONSE_COMMAND_ID,                                         \
+                            "uuuu",                                                                        \
+                            status,                                                                        \
+                            totalNumberofNonEmptySinkTableEntries,                                         \
+                            startIndex,                                                                    \
+                            sinkTableEntriesCount)
+
+/** @brief To provide GPD Command Translation Table content.
+ *
+ * Cluster: Green Power, The Green Power cluster defines the format of the commands exchanged when handling GPDs.
+ * Command: GpTranslationTableResponse
+ * @param status uint8_t
+ * @param options uint8_t
+ * @param totalNumberOfEntries uint8_t
+ * @param startIndex uint8_t
+ * @param entriesCount uint8_t
+ * @param translationTableList uint8_t*
+ * @param translationTableListLen uint16_t
+ */
+#define emberAfFillCommandGreenPowerClusterGpTranslationTableResponseSmart(status,                  \
+                                                                           options,                 \
+                                                                           totalNumberOfEntries,    \
+                                                                           startIndex,              \
+                                                                           entriesCount,            \
+                                                                           translationTableList,    \
+                                                                           translationTableListLen) \
+  emberAfFillExternalBuffer((ZCL_CLUSTER_SPECIFIC_COMMAND                                           \
+                             | ZCL_DISABLE_DEFAULT_RESPONSE_MASK                                    \
+                             | ZCL_FRAME_CONTROL_SERVER_TO_CLIENT),                                 \
+                            ZCL_GREEN_POWER_CLUSTER_ID,                                             \
+                            ZCL_GP_TRANSLATION_TABLE_RESPONSE_COMMAND_ID,                           \
+                            "uuuuub",                                                               \
+                            status,                                                                 \
+                            options,                                                                \
+                            totalNumberOfEntries,                                                   \
+                            startIndex,                                                             \
+                            entriesCount,                                                           \
+                            translationTableList,                                                   \
+                            translationTableListLen)
+
 /** @brief Prepare a GP notification command buffer.
  *
  * This function prepares an application framework ZCL command buffer for the GP
@@ -357,25 +443,6 @@ uint16_t emberAfFillCommandGreenPowerClusterGpSinkTableRequestSmart(uint8_t opti
                                                                     uint8_t* gpdIeee,
                                                                     uint8_t gpdEndpoint,
                                                                     uint8_t index);
-/** @brief Prepare a GP proxy table response command buffer.
- *
- * This function prepares an application framework ZCL command buffer for the GP
- * proxy table response command with supplied arguments and returns the
- * buffer length.
- *
- * @param status Proxy table response status Ver.: always
- * @param totalNumberOfNonEmptyProxyTableEntries Total number of entires in the proxy table Ver.: always
- * @param startIndex Start index in the response Ver.: always
- * @param entriesCount Number of entries in the response Ver.: always
- * @param proxyTableEntries List of proxy table entries Ver.: always
- *
- * @returns Length of the constructed command buffer
- */
-uint16_t emberAfFillCommandGreenPowerClusterGpProxyTableResponseSmart(uint8_t status,
-                                                                      uint8_t totalNumberOfNonEmptyProxyTableEntries,
-                                                                      uint8_t startIndex,
-                                                                      uint8_t entriesCount,
-                                                                      uint8_t* proxyTableEntries);
 /** @brief Prepare a GP notification response command buffer.
  *
  * This function prepares an application framework ZCL command buffer for the GP
@@ -467,24 +534,6 @@ uint16_t emberAfFillCommandGreenPowerClusterGpResponseSmart(uint8_t  options,
                                                             uint8_t  gpdCommandId,
                                                             uint8_t gpdCommandPayloadLength,
                                                             uint8_t* gpdCommandPayload);
-/** @brief Prepare a GP sink table response command buffer.
- *
- * This function prepares an application framework ZCL command buffer for the GP
- * sink table response command with supplied arguments and returns the buffer length.
- *
- * @param status Sink table response status Ver.: always
- * @param totalNumberofNonEmptySinkTableEntries Total number of entires in the sink table Ver.: always
- * @param startIndex Start index in the response Ver.: always
- * @param sinkTableEntriesCount Number of entries in the response Ver.: always
- * @param sinkTableEntries List of sink table entries Ver.: always
- *
- * @returns Length of the constructed command buffer
- */
-uint16_t emberAfFillCommandGreenPowerClusterGpSinkTableResponseSmart(uint8_t status,
-                                                                     uint8_t totalNumberofNonEmptySinkTableEntries,
-                                                                     uint8_t startIndex,
-                                                                     uint8_t sinkTableEntriesCount,
-                                                                     uint8_t *sinkTableEntries);
 /** @brief Prepare a GP proxy table request command buffer.
  *
  * This function prepares an application framework ZCL command buffer for the GP
@@ -503,22 +552,6 @@ uint16_t emberAfFillCommandGreenPowerClusterGpProxyTableRequestSmart(uint8_t opt
                                                                      uint8_t* gpdIeee,
                                                                      uint8_t gpdEndpoint,
                                                                      uint8_t index);
-/** @brief Prepare a GP sink commissioning mode command buffer.
- *
- * This function prepares an application framework ZCL command buffer for the GP
- * sink commissioning mode command with supplied arguments and returns the buffer length.
- *
- * @param options Options Ver.: always
- * @param gpmAddrForSecurity GPM for Security short address Ver.: always
- * @param gpmAddrForPairing GPM for pairing short address Ver.: always
- * @param sinkEndpoint Sink endpoint that is currently in commissioning. Ver.: always
- *
- * @returns Length of the constructed command buffer
- */
-uint16_t emberAfFillCommandGreenPowerClusterGpSinkCommissioningModeSmart(uint8_t options,
-                                                                         uint16_t gpmAddrForSecurity,
-                                                                         uint16_t gpmAddrForPairing,
-                                                                         uint8_t sinkEndpoint);
 /** @brief Compare two GP Addresses.
  *
  * This function compares two GP Addresses and returns true if they are the same.

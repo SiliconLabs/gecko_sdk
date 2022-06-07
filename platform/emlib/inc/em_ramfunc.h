@@ -45,7 +45,7 @@ extern "C" {
  * @{
 
   @note
-   Other cross-compiler support macros are implemented in @ref common.
+   Other cross-compiler support macros are implemented in [COMMON](../../common/api/group-common).
 
   @note
     Functions executing from RAM should not be declared as static.

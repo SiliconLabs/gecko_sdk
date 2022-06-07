@@ -42,7 +42,9 @@
 #include "sl_wisun_api.h"
 #include "sl_wisun_cli_settings.h"
 #include "sl_wisun_app_setting.h"
-#include "sl_wisun_app_setting_config.h"
+#if defined(SL_CATALOG_WISUN_DEFAULT_PHY_PRESENT)
+  #include "sl_default_phy.h"
+#endif
 
 // -----------------------------------------------------------------------------
 //                              Macros and Typedefs
@@ -105,11 +107,25 @@ static app_setting_wisun_t _wisun_app_settings = { 0 };
 /**************************************************************************//**
  * @brief Default settings structure
  *****************************************************************************/
+#if defined(SL_CATALOG_WISUN_FULL_RADIOCONF_PRESENT)
 static const app_setting_wisun_t wisun_app_settings_default = {
-  .network_name = WISUN_NETWORK_NAME,
-  .network_size = WISUN_NETWORK_SIZE,
-  .tx_power = WISUN_TX_POWER
+  .network_name = APP_SETTING_NETWORK_NAME,
+  .network_size = APP_SETTING_NETWORK_SIZE,
+  .tx_power = APP_SETTING_TX_POWER,
+  .phy = {
+    .regulatory_domain = APP_SETTINGS_WISUN_DEFAULT_REGULATORY_DOMAIN,
+    .operating_class = APP_SETTINGS_WISUN_DEFAULT_OPERATING_CLASS,
+    .operating_mode = APP_SETTINGS_WISUN_DEFAULT_OPERATING_MODE,
+  },
 };
+#else
+static const app_setting_wisun_t wisun_app_settings_default = {
+  .network_name = APP_SETTING_NETWORK_NAME,
+  .network_size = APP_SETTING_NETWORK_SIZE,
+  .tx_power = APP_SETTING_TX_POWER,
+  .phy = { 0 },
+};
+#endif
 
 // -----------------------------------------------------------------------------
 //                                Global Variables
@@ -218,6 +234,21 @@ sl_status_t app_wisun_setting_set_tx_power(const int8_t *const tx_power)
   return SL_STATUS_OK;
 }
 
+/* Setting Wi-SUN PHY */
+sl_status_t app_wisun_setting_set_phy(const app_setting_phy *const phy)
+{
+  if (phy == NULL) {
+    return SL_STATUS_INVALID_PARAMETER;
+  }
+
+  _app_wisun_mutex_acquire();
+
+  memcpy(&_wisun_app_settings.phy, phy, sizeof(app_setting_phy));
+
+  _app_wisun_mutex_release();
+  return SL_STATUS_OK;
+}
+
 /* Getting network name */
 sl_status_t app_wisun_setting_get_network_name(char *const name, uint8_t size)
 {
@@ -232,6 +263,7 @@ sl_status_t app_wisun_setting_get_network_name(char *const name, uint8_t size)
   name_len = (uint8_t)sl_strlen(_wisun_app_settings.network_name);
 
   if (name_len < MAX_SIZE_OF_NETWORK_NAME) {
+    memset(name, 0U, MAX_SIZE_OF_NETWORK_NAME);
     memcpy(name, _wisun_app_settings.network_name, name_len);
   } else {
     return SL_STATUS_FAIL;
@@ -271,6 +303,21 @@ sl_status_t app_wisun_setting_get_tx_power(int8_t *const tx_power)
   return SL_STATUS_OK;
 }
 
+/* Getting PHY */
+sl_status_t app_wisun_setting_get_phy(app_setting_phy *const phy)
+{
+  if (phy == NULL) {
+    return SL_STATUS_INVALID_PARAMETER;
+  }
+
+  _app_wisun_mutex_acquire();
+
+  memcpy(phy, &_wisun_app_settings.phy, sizeof(app_setting_phy));
+
+  _app_wisun_mutex_release();
+  return SL_STATUS_OK;
+}
+
 // -----------------------------------------------------------------------------
 //                          Static Function Definitions
 // -----------------------------------------------------------------------------
@@ -289,13 +336,13 @@ static inline void _app_wisun_mutex_release(void)
 
 static const char* _app_check_nw_name(const char *name, size_t *const name_len)
 {
-  const char* ret_name = WISUN_NETWORK_NAME;
+  const char* ret_name = WISUN_CONFIG_NETWORK_NAME;
 
   *name_len = sl_strnlen((char*)name, SL_WISUN_NETWORK_NAME_SIZE);
   if (!(*name_len < SL_WISUN_NETWORK_NAME_SIZE) || (*name_len == 0) ) {
     // sets the default name and its size
-    ret_name = WISUN_NETWORK_NAME;
-    *name_len = sl_strnlen(WISUN_NETWORK_NAME, SL_WISUN_NETWORK_NAME_SIZE);
+    ret_name = WISUN_CONFIG_NETWORK_NAME;
+    *name_len = sl_strnlen(WISUN_CONFIG_NETWORK_NAME, SL_WISUN_NETWORK_NAME_SIZE);
     printf("\r\n[Warning: The name of Wi-SUN network is incorrect, default name used, \"%s\" ]\r\n", ret_name);
   } else {
     ret_name = name;

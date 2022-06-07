@@ -11,7 +11,7 @@ from pyradioconfig._version import __version__
 from pyradioconfig.calculator_model_framework.Utils.CalcStatus import CalcStatus
 from pyradioconfig.calculator_model_framework.Utils.ClassManager import ClassManager
 from pyradioconfig.calculator_model_framework.Utils.CustomExceptions import UnknownOPNTypeException, \
-    InvalidOptionOverride
+    InvalidOptionOverride, UnknownProfileException
 from pyradioconfig.calculator_model_framework.Utils.FileUtilities import FileUtilities
 from pyradioconfig.calculator_model_framework.Utils.LogMgr import LogMgr
 from pyradioconfig.calculator_model_framework.exceptions.exceptions import *
@@ -802,7 +802,7 @@ class CalcManager(object):
         self.__verifyPartFamilyPartRevisionIsSet()
 
         # Create empty modem model
-        modem_model_instance = ModelRoot(self.__part_family, self.__MODEL_VER, self.__target)
+        modem_model_instance = ModelRoot(self.__part_family, self.__MODEL_VER, self.__target, part_revision=self.__part_revision)
 
         # Build features
         Features.build(modem_model_instance)
@@ -822,6 +822,8 @@ class CalcManager(object):
             profile = self._findProfile(profile_name)
             if profile is not None:
                 profile.buildProfileModel(modem_model_instance)
+            else:
+                raise UnknownProfileException('Profile %s is not available in the Radio Configurator for this part. Please use an available Profile.' % profile_name)
 
         # Find and build phy
         if phy_name is not None:
@@ -857,7 +859,7 @@ class CalcManager(object):
         self.__verifyPartFamilyPartRevisionIsSet()
 
         # Create empty modem model
-        modem_type_model = ModelRoot(self.__part_family, self.__MODEL_VER, target=self.__target)
+        modem_type_model = ModelRoot(self.__part_family, self.__MODEL_VER, target=self.__target, part_revision=self.__part_revision)
 
         # Build features
         Features.build(modem_type_model)

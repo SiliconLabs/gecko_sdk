@@ -55,8 +55,10 @@
 /**************************************************************************//**
  * @brief Set fifo ptr to default macro function
  *****************************************************************************/
-#define _set_fifo_ptr_to_default(hnd_ptr) \
-  hnd_ptr->_fifo._head = hnd_ptr->_fifo._tail = hnd_ptr->_fifo._buff
+#define _set_fifo_ptr_to_default(hnd_ptr)                               \
+  do {                                                                  \
+    hnd_ptr->_fifo._head = hnd_ptr->_fifo._tail = hnd_ptr->_fifo._buff; \
+  } while (0)
 
 // -----------------------------------------------------------------------------
 //                          Static Function Declarations
@@ -210,19 +212,24 @@ void socket_handler_fifo_reset(_socket_handler_t *hnd)
 int32_t socket_handler_fifo_write(_socket_handler_t *hnd, const uint8_t *data, uint32_t * const size)
 {
   int32_t retval = RETVAL_OK;
-  uint32_t freespace = 0;
+  uint32_t usedspace = 0;
   if (hnd == NULL) {
     return RETVAL_ERROR;
   }
 
   _lock();
 
-  freespace = hnd->_fifo._head - hnd->_fifo._buff;
+  // Reset fifo befor write if overwrite options is enabled
+  if (hnd->_fifo._enable_overwrite) {
+    _reset_fifo(hnd);
+  }
 
-  if (freespace + *size > hnd->_fifo._size) {
+  usedspace = hnd->_fifo._head - hnd->_fifo._buff;
+
+  if (usedspace + *size > hnd->_fifo._size) {
     retval = RETVAL_ERROR; // overflow
     hnd->_state._fifo_overflow = true;
-    *size = hnd->_fifo._size - freespace;
+    *size = hnd->_fifo._size - usedspace;
   }
 
   if (*size) {
@@ -266,6 +273,32 @@ int32_t socket_handler_fifo_read(_socket_handler_t *hnd, uint8_t *data, uint32_t
   _unlock();
 
   return retval;
+}
+
+int32_t socket_handler_fifo_set_overwrite(_socket_handler_t *hnd, const bool enabled)
+{
+  if (hnd == NULL) {
+    return RETVAL_ERROR;
+  }
+
+  _lock();
+  hnd->_fifo._enable_overwrite = enabled;
+  _unlock();
+
+  return RETVAL_OK;
+}
+
+int32_t socket_handler_fifo_get_overwrite(const _socket_handler_t *hnd, bool * const dest_val)
+{
+  if (hnd == NULL) {
+    return RETVAL_ERROR;
+  }
+
+  _lock();
+  *dest_val = hnd->_fifo._enable_overwrite;
+  _unlock();
+
+  return RETVAL_OK;
 }
 
 /* Init socket handler */
@@ -604,6 +637,7 @@ static inline void _init_fifo(_socket_handler_t *hnd, uint8_t *buff_ptr, const u
 {
   hnd->_state._fifo_overflow = false; // reset states
   hnd->_state._fifo_underflow = false;
+  hnd->_fifo._enable_overwrite = false; // overwrite is disabled
   hnd->_fifo._buff = hnd->_fifo._head = hnd->_fifo._tail = buff_ptr;
   hnd->_fifo._size = size;
 }

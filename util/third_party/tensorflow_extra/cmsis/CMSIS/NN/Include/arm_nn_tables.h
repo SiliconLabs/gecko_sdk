@@ -29,7 +29,7 @@
 #ifndef _ARM_NN_TABLES_H
 #define _ARM_NN_TABLES_H
 
-#include "cmsis/CMSIS/NN/Include/arm_nn_math_types.h"
+#include "arm_nn_math_types.h"
 
 /**
  * @brief tables for various activation functions

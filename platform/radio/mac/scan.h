@@ -46,7 +46,7 @@ typedef uint32_t sl_channel_mask_t;
 
 typedef void (*sl_mac_energy_scan_result_callback_t) (uint8_t channel, int8_t rssi_min, int8_t rssi_max, int8_t rssi_avg);
 
-typedef void (*sl_mac_scan_complete_callback_t)(sl_status_t status, sl_channel_mask_t unscannedChannelsMask);
+typedef void (*sl_mac_scan_complete_callback_t)(sl_channel_mask_t unscannedChannelsMask);
 
 typedef void (*sli_mac_energy_scan_complete_callback_t)(Buffer result);
 

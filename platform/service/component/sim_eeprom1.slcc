@@ -13,11 +13,11 @@ requires:
   - name: device_series_1
 root_path: ./
 source:
-  - path: platform/service/sim_eeprom1/src/sl_sim_eeprom1.c
+  - path: platform/service/sim_eeprom/sim_eeprom1/src/sl_sim_eeprom1.c
 library:
-  - path: platform/service/sim_eeprom1/lib/libsim_eeprom1_CM4_gcc.a
+  - path: platform/service/sim_eeprom/sim_eeprom1/lib/libsim_eeprom1_CM4_gcc.a
     condition: [toolchain_gcc, cortexm4]
-  - path: platform/service/sim_eeprom1/lib/libsim_eeprom1_CM4_iar.a
+  - path: platform/service/sim_eeprom/sim_eeprom1/lib/libsim_eeprom1_CM4_iar.a
     condition: [toolchain_iar, cortexm4]
 define:
   - name: USE_SIMEE1

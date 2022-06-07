@@ -49,7 +49,7 @@ requires:
   - name: cmsis_rtos2_headers
   - name: cmsis_rtos2_tick
   - name: cmsis_rtos2_init
-    condition: [sl_system]
+    condition: [sl_system_init]
   - name: device
   - name: cpu
   - name: common_core

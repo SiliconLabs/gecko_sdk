@@ -8,22 +8,18 @@ root_path: "protocol/wisun/stack"
 
 requires:
   - name: "device_supports_wisun"
-  - name: "mbedtls_core"
-  - name: "mbedtls_ecc_secp256r1"
-  - name: "mbedtls_ecdh"
-  - name: "mbedtls_ecdsa"
-  - name: "mbedtls_nist_kw"
-  - name: "mbedtls_sha"
-  - name: "mbedtls_tls"
   - name: "rail_lib_singleprotocol"
   - name: "rail_util_pa"
   - name: "rail_util_pti"
   - name: "cmsis_rtos2"
   - name: "nvm3"
   - name: "slist"
+  - name: "sl_common"
   - name: "wisun_implementation"
+  - name: "wisun_crypto"
   - name: "sl_wisun_trace_util"
   - name: "sl_wisun_ns_list"
+
 recommends:
   - id: "wisun_stack_library"
 
@@ -36,27 +32,21 @@ template_contribution:
       event: "stack_init"
       include: "sl_wisun_stack.h"
       handler: "sl_wisun_stack_init"
-  - name: "mbedtls_config"
-    value: "MBEDTLS_X509_CHECK_EXTENDED_KEY_USAGE"
-  - name: "mbedtls_config"
-    value: "MBEDTLS_SSL_EXPORT_KEYS"
-  - name: "mbedtls_config"
-    value: "MBEDTLS_KEY_EXCHANGE_ECDHE_ECDSA_ENABLED"
 
 include:
-- path: "inc/"
-  file_list:
-    - path: "sl_wisun_api.h"
-    - path: "sl_wisun_events.h"
-    - path: "sl_wisun_stack.h"
-    - path: "sl_wisun_types.h"
-    - path: "sl_wisun_version.h"
-    - path: "sl_wisun_common.h"
-    - path: "sli_wisun_internal_api.h"
+  - path: "inc/"
+    file_list:
+      - path: "sl_wisun_api.h"
+      - path: "sl_wisun_events.h"
+      - path: "sl_wisun_stack.h"
+      - path: "sl_wisun_types.h"
+      - path: "sl_wisun_version.h"
+      - path: "sl_wisun_common.h"
+      - path: "sli_wisun_internal_api.h"
 
 documentation:
   docset: wisun
   document: wisun-stack-api/sl-wisun-api
 
 other_file:
-- path: "../LICENSE"
+  - path: "../LICENSE"

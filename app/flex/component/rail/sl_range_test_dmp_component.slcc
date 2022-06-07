@@ -13,7 +13,7 @@ requires:
   - name: gatt_configuration
   - name: bluetooth_feature_system
   - name: bluetooth_feature_gap
-  - name: bluetooth_feature_advertiser
+  - name: bluetooth_feature_legacy_advertiser
   - name: bluetooth_feature_connection
   - name: bluetooth_feature_gatt
   - name: bluetooth_feature_gatt_server

@@ -29,7 +29,7 @@
  ******************************************************************************/
 #include "sl_udelay.h"
 #include "em_device.h"
-#include "em_assert.h"
+#include "sl_assert.h"
 #include <stdbool.h>
 
 /* The Cortex-M33 has a faster execution of the hw loop

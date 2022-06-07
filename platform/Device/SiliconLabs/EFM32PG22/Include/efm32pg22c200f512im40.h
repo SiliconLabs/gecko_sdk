@@ -64,7 +64,7 @@ typedef enum IRQn{
   TRNG_IRQn              = 1,  /*!<  1 EFM32 TRNG Interrupt */
   PKE_IRQn               = 2,  /*!<  2 EFM32 PKE Interrupt */
   SMU_SECURE_IRQn        = 3,  /*!<  3 EFM32 SMU_SECURE Interrupt */
-  SMU_PRIVILEGED_IRQn    = 4,  /*!<  4 EFM32 SMU_PRIVILEGED Interrupt */
+  SMU_S_PRIVILEGED_IRQn  = 4,  /*!<  4 EFM32 SMU_S_PRIVILEGED Interrupt */
   SMU_NS_PRIVILEGED_IRQn = 5,  /*!<  5 EFM32 SMU_NS_PRIVILEGED Interrupt */
   EMU_IRQn               = 6,  /*!<  6 EFM32 EMU Interrupt */
   TIMER0_IRQn            = 7,  /*!<  7 EFM32 TIMER0 Interrupt */
@@ -147,25 +147,30 @@ typedef enum IRQn{
 #define PART_NUMBER                              "EFM32PG22C200F512IM40" /**< Part Number */
 
 /** Family / Line / Series / Config */
-#define _EFM32_PEARL_FAMILY                      1                                  /** Device Family Name Identifier */
-#define _EFM32_PG_FAMILY                         1                                  /** Device Family Identifier */
-#define _EFM_DEVICE                              1                                  /** Product Line Identifier */
-#define _SILICON_LABS_32B_SERIES_2                                                  /** Product Series Identifier */
-#define _SILICON_LABS_32B_SERIES                 2                                  /** Product Series Identifier */
-#define _SILICON_LABS_32B_SERIES_2_CONFIG_2                                         /** Product Config Identifier */
-#define _SILICON_LABS_32B_SERIES_2_CONFIG        2                                  /** Product Config Identifier */
-#define _SILICON_LABS_GECKO_INTERNAL_SDID        205                                /** Silicon Labs internal use only */
-#define _SILICON_LABS_GECKO_INTERNAL_SDID_205                                       /** Silicon Labs internal use only */
-#define _SILICON_LABS_SECURITY_FEATURE_SE        0                                  /** Mid */
-#define _SILICON_LABS_SECURITY_FEATURE_VAULT     1                                  /** High */
-#define _SILICON_LABS_SECURITY_FEATURE_ROT       2                                  /** Root Of Trust */
-#define _SILICON_LABS_SECURITY_FEATURE           _SILICON_LABS_SECURITY_FEATURE_ROT /** Security feature set */
-#define _SILICON_LABS_EFR32_RADIO_NONE           0                                  /** No radio present */
-#define _SILICON_LABS_EFR32_RADIO_SUBGHZ         1                                  /** Radio supports Sub-GHz */
-#define _SILICON_LABS_EFR32_RADIO_2G4HZ          2                                  /** Radio supports 2.4 GHz */
-#define _SILICON_LABS_EFR32_RADIO_DUALBAND       3                                  /** Radio supports dual band */
-#define _SILICON_LABS_EFR32_RADIO_TYPE           _SILICON_LABS_EFR32_RADIO_NONE     /** Radio type */
-#define LFRCO_PRECISION_MODE                     1                                  /** Precision mode of LFRCO enabled or disabled */
+#define _EFM32_PEARL_FAMILY                      1                                    /** Device Family Name Identifier */
+#define _EFM32_PG_FAMILY                         1                                    /** Device Family Identifier */
+#define _EFM_DEVICE                              1                                    /** Product Line Identifier */
+#define _SILICON_LABS_32B_SERIES_2                                                    /** Product Series Identifier */
+#define _SILICON_LABS_32B_SERIES                 2                                    /** Product Series Identifier */
+#define _SILICON_LABS_32B_SERIES_2_CONFIG_2                                           /** Product Config Identifier */
+#define _SILICON_LABS_32B_SERIES_2_CONFIG        2                                    /** Product Config Identifier */
+#define _SILICON_LABS_GECKO_INTERNAL_SDID        205                                  /** Silicon Labs internal use only */
+#define _SILICON_LABS_GECKO_INTERNAL_SDID_205                                         /** Silicon Labs internal use only */
+#define _SILICON_LABS_SECURITY_FEATURE_SE        0                                    /** Mid */
+#define _SILICON_LABS_SECURITY_FEATURE_VAULT     1                                    /** High */
+#define _SILICON_LABS_SECURITY_FEATURE_ROT       2                                    /** Root Of Trust */
+#define _SILICON_LABS_SECURITY_FEATURE           _SILICON_LABS_SECURITY_FEATURE_ROT   /** Security feature set */
+#define _SILICON_LABS_DCDC_FEATURE_NOTUSED       0                                    /** Not Used */
+#define _SILICON_LABS_DCDC_FEATURE_DCDC_BUCK     1                                    /** Includes Buck DCDC */
+#define _SILICON_LABS_DCDC_FEATURE_DCDC_BOOST    2                                    /** Includes Boost DCDC */
+#define _SILICON_LABS_DCDC_FEATURE_DCDC_BOB      3                                    /** Includes Buck or Boost DCDC */
+#define _SILICON_LABS_DCDC_FEATURE               _SILICON_LABS_DCDC_FEATURE_DCDC_BUCK /** DCDC feature set */
+#define _SILICON_LABS_EFR32_RADIO_NONE           0                                    /** No radio present */
+#define _SILICON_LABS_EFR32_RADIO_SUBGHZ         1                                    /** Radio supports Sub-GHz */
+#define _SILICON_LABS_EFR32_RADIO_2G4HZ          2                                    /** Radio supports 2.4 GHz */
+#define _SILICON_LABS_EFR32_RADIO_DUALBAND       3                                    /** Radio supports dual band */
+#define _SILICON_LABS_EFR32_RADIO_TYPE           _SILICON_LABS_EFR32_RADIO_NONE       /** Radio type */
+#define LFRCO_PRECISION_MODE                     1                                    /** Precision mode of LFRCO enabled or disabled */
 
 /** Memory Base addresses and limits */
 #define FLASH_MEM_BASE                           (0x00000000UL) /** FLASH_MEM base address */
@@ -461,48 +466,48 @@ typedef enum IRQn{
  * @{
  *****************************************************************************/
 
-#define EMU_BASE                     (0x40004000UL) /* EMU base address */
-#define CMU_BASE                     (0x40008000UL) /* CMU base address */
-#define HFXO0_BASE                   (0x4000C000UL) /* HFXO0 base address */
-#define HFRCO0_BASE                  (0x40010000UL) /* HFRCO0 base address */
-#define FSRCO_BASE                   (0x40018000UL) /* FSRCO base address */
-#define DPLL0_BASE                   (0x4001C000UL) /* DPLL0 base address */
-#define LFXO_BASE                    (0x40020000UL) /* LFXO base address */
-#define LFRCO_BASE                   (0x40024000UL) /* LFRCO base address */
-#define ULFRCO_BASE                  (0x40028000UL) /* ULFRCO base address */
-#define MSC_BASE                     (0x40030000UL) /* MSC base address */
-#define ICACHE0_BASE                 (0x40034000UL) /* ICACHE0 base address */
-#define PRS_BASE                     (0x40038000UL) /* PRS base address */
-#define GPIO_BASE                    (0x4003C000UL) /* GPIO base address */
-#define LDMA_BASE                    (0x40040000UL) /* LDMA base address */
-#define LDMAXBAR_BASE                (0x40044000UL) /* LDMAXBAR base address */
-#define TIMER0_BASE                  (0x40048000UL) /* TIMER0 base address */
-#define TIMER1_BASE                  (0x4004C000UL) /* TIMER1 base address */
-#define TIMER2_BASE                  (0x40050000UL) /* TIMER2 base address */
-#define TIMER3_BASE                  (0x40054000UL) /* TIMER3 base address */
-#define TIMER4_BASE                  (0x40058000UL) /* TIMER4 base address */
-#define USART0_BASE                  (0x4005C000UL) /* USART0 base address */
-#define USART1_BASE                  (0x40060000UL) /* USART1 base address */
-#define BURTC_BASE                   (0x40064000UL) /* BURTC base address */
-#define I2C1_BASE                    (0x40068000UL) /* I2C1 base address */
-#define SYSCFG_CFGNS_BASE            (0x40078000UL) /* SYSCFG_CFGNS base address */
-#define SYSCFG_BASE                  (0x4007C000UL) /* SYSCFG base address */
-#define BURAM_BASE                   (0x40080000UL) /* BURAM base address */
-#define GPCRC_BASE                   (0x40088000UL) /* GPCRC base address */
-#define DCDC_BASE                    (0x40094000UL) /* DCDC base address */
-#define PDM_BASE                     (0x40098000UL) /* PDM base address */
-#define SMU_BASE                     (0x44008000UL) /* SMU base address */
-#define SMU_CFGNS_BASE               (0x4400C000UL) /* SMU_CFGNS base address */
-#define RTCC_BASE                    (0x48000000UL) /* RTCC base address */
-#define LETIMER0_BASE                (0x4A000000UL) /* LETIMER0 base address */
-#define IADC0_BASE                   (0x4A004000UL) /* IADC0 base address */
-#define I2C0_BASE                    (0x4A010000UL) /* I2C0 base address */
-#define WDOG0_BASE                   (0x4A018000UL) /* WDOG0 base address */
-#define AMUXCP0_BASE                 (0x4A020000UL) /* AMUXCP0 base address */
-#define EUART0_BASE                  (0x4A030000UL) /* EUART0 base address */
-#define CRYPTOACC_BASE               (0x4C020000UL) /* CRYPTOACC base address */
-#define CRYPTOACC_RNGCTRL_BASE       (0x4C021000UL) /* CRYPTOACC_RNGCTRL base address */
-#define CRYPTOACC_PKCTRL_BASE        (0x4C022000UL) /* CRYPTOACC_PKCTRL base address */
+#define EMU_S_BASE                   (0x40004000UL) /* EMU_S base address */
+#define CMU_S_BASE                   (0x40008000UL) /* CMU_S base address */
+#define HFXO0_S_BASE                 (0x4000C000UL) /* HFXO0_S base address */
+#define HFRCO0_S_BASE                (0x40010000UL) /* HFRCO0_S base address */
+#define FSRCO_S_BASE                 (0x40018000UL) /* FSRCO_S base address */
+#define DPLL0_S_BASE                 (0x4001C000UL) /* DPLL0_S base address */
+#define LFXO_S_BASE                  (0x40020000UL) /* LFXO_S base address */
+#define LFRCO_S_BASE                 (0x40024000UL) /* LFRCO_S base address */
+#define ULFRCO_S_BASE                (0x40028000UL) /* ULFRCO_S base address */
+#define MSC_S_BASE                   (0x40030000UL) /* MSC_S base address */
+#define ICACHE0_S_BASE               (0x40034000UL) /* ICACHE0_S base address */
+#define PRS_S_BASE                   (0x40038000UL) /* PRS_S base address */
+#define GPIO_S_BASE                  (0x4003C000UL) /* GPIO_S base address */
+#define LDMA_S_BASE                  (0x40040000UL) /* LDMA_S base address */
+#define LDMAXBAR_S_BASE              (0x40044000UL) /* LDMAXBAR_S base address */
+#define TIMER0_S_BASE                (0x40048000UL) /* TIMER0_S base address */
+#define TIMER1_S_BASE                (0x4004C000UL) /* TIMER1_S base address */
+#define TIMER2_S_BASE                (0x40050000UL) /* TIMER2_S base address */
+#define TIMER3_S_BASE                (0x40054000UL) /* TIMER3_S base address */
+#define TIMER4_S_BASE                (0x40058000UL) /* TIMER4_S base address */
+#define USART0_S_BASE                (0x4005C000UL) /* USART0_S base address */
+#define USART1_S_BASE                (0x40060000UL) /* USART1_S base address */
+#define BURTC_S_BASE                 (0x40064000UL) /* BURTC_S base address */
+#define I2C1_S_BASE                  (0x40068000UL) /* I2C1_S base address */
+#define SYSCFG_S_CFGNS_BASE          (0x40078000UL) /* SYSCFG_S_CFGNS base address */
+#define SYSCFG_S_BASE                (0x4007C000UL) /* SYSCFG_S base address */
+#define BURAM_S_BASE                 (0x40080000UL) /* BURAM_S base address */
+#define GPCRC_S_BASE                 (0x40088000UL) /* GPCRC_S base address */
+#define DCDC_S_BASE                  (0x40094000UL) /* DCDC_S base address */
+#define PDM_S_BASE                   (0x40098000UL) /* PDM_S base address */
+#define SMU_S_BASE                   (0x44008000UL) /* SMU_S base address */
+#define SMU_S_CFGNS_BASE             (0x4400C000UL) /* SMU_S_CFGNS base address */
+#define RTCC_S_BASE                  (0x48000000UL) /* RTCC_S base address */
+#define LETIMER0_S_BASE              (0x4A000000UL) /* LETIMER0_S base address */
+#define IADC0_S_BASE                 (0x4A004000UL) /* IADC0_S base address */
+#define I2C0_S_BASE                  (0x4A010000UL) /* I2C0_S base address */
+#define WDOG0_S_BASE                 (0x4A018000UL) /* WDOG0_S base address */
+#define AMUXCP0_S_BASE               (0x4A020000UL) /* AMUXCP0_S base address */
+#define EUART0_S_BASE                (0x4A030000UL) /* EUART0_S base address */
+#define CRYPTOACC_S_BASE             (0x4C020000UL) /* CRYPTOACC_S base address */
+#define CRYPTOACC_S_RNGCTRL_BASE     (0x4C021000UL) /* CRYPTOACC_S_RNGCTRL base address */
+#define CRYPTOACC_S_PKCTRL_BASE      (0x4C022000UL) /* CRYPTOACC_S_PKCTRL base address */
 #define EMU_NS_BASE                  (0x50004000UL) /* EMU_NS base address */
 #define CMU_NS_BASE                  (0x50008000UL) /* CMU_NS base address */
 #define HFXO0_NS_BASE                (0x5000C000UL) /* HFXO0_NS base address */
@@ -545,7 +550,228 @@ typedef enum IRQn{
 #define CRYPTOACC_NS_BASE            (0x5C020000UL) /* CRYPTOACC_NS base address */
 #define CRYPTOACC_NS_RNGCTRL_BASE    (0x5C021000UL) /* CRYPTOACC_NS_RNGCTRL base address */
 #define CRYPTOACC_NS_PKCTRL_BASE     (0x5C022000UL) /* CRYPTOACC_NS_PKCTRL base address */
-#define DEVINFO_BASE                 (0x0FE08000UL) /* DEVINFO base address */
+
+#if defined(SL_COMPONENT_CATALOG_PRESENT)
+#include "sl_component_catalog.h"
+
+#endif
+#if defined(SL_CATALOG_TRUSTZONE_SECURE_CONFIG_PRESENT)
+#include "sl_trustzone_secure_config.h"
+
+#endif
+
+#if ((defined(SL_TRUSTZONE_SECURE) && !defined(SL_TRUSTZONE_PERIPHERAL_EMU_S)) || SL_TRUSTZONE_PERIPHERAL_EMU_S)
+#define EMU_BASE                  (EMU_S_BASE)               /* EMU base address */
+#else
+#define EMU_BASE                  (EMU_NS_BASE)              /* EMU base address */
+#endif /* SL_TRUSTZONE_PERIPHERAL_EMU_S */
+#if ((defined(SL_TRUSTZONE_SECURE) && !defined(SL_TRUSTZONE_PERIPHERAL_CMU_S)) || SL_TRUSTZONE_PERIPHERAL_CMU_S)
+#define CMU_BASE                  (CMU_S_BASE)               /* CMU base address */
+#else
+#define CMU_BASE                  (CMU_NS_BASE)              /* CMU base address */
+#endif /* SL_TRUSTZONE_PERIPHERAL_CMU_S */
+#if ((defined(SL_TRUSTZONE_SECURE) && !defined(SL_TRUSTZONE_PERIPHERAL_HFXO0_S)) || SL_TRUSTZONE_PERIPHERAL_HFXO0_S)
+#define HFXO0_BASE                (HFXO0_S_BASE)             /* HFXO0 base address */
+#else
+#define HFXO0_BASE                (HFXO0_NS_BASE)            /* HFXO0 base address */
+#endif /* SL_TRUSTZONE_PERIPHERAL_HFXO0_S */
+#if ((defined(SL_TRUSTZONE_SECURE) && !defined(SL_TRUSTZONE_PERIPHERAL_HFRCO0_S)) || SL_TRUSTZONE_PERIPHERAL_HFRCO0_S)
+#define HFRCO0_BASE               (HFRCO0_S_BASE)            /* HFRCO0 base address */
+#else
+#define HFRCO0_BASE               (HFRCO0_NS_BASE)           /* HFRCO0 base address */
+#endif /* SL_TRUSTZONE_PERIPHERAL_HFRCO0_S */
+#if ((defined(SL_TRUSTZONE_SECURE) && !defined(SL_TRUSTZONE_PERIPHERAL_FSRCO_S)) || SL_TRUSTZONE_PERIPHERAL_FSRCO_S)
+#define FSRCO_BASE                (FSRCO_S_BASE)             /* FSRCO base address */
+#else
+#define FSRCO_BASE                (FSRCO_NS_BASE)            /* FSRCO base address */
+#endif /* SL_TRUSTZONE_PERIPHERAL_FSRCO_S */
+#if ((defined(SL_TRUSTZONE_SECURE) && !defined(SL_TRUSTZONE_PERIPHERAL_DPLL0_S)) || SL_TRUSTZONE_PERIPHERAL_DPLL0_S)
+#define DPLL0_BASE                (DPLL0_S_BASE)             /* DPLL0 base address */
+#else
+#define DPLL0_BASE                (DPLL0_NS_BASE)            /* DPLL0 base address */
+#endif /* SL_TRUSTZONE_PERIPHERAL_DPLL0_S */
+#if ((defined(SL_TRUSTZONE_SECURE) && !defined(SL_TRUSTZONE_PERIPHERAL_LFXO_S)) || SL_TRUSTZONE_PERIPHERAL_LFXO_S)
+#define LFXO_BASE                 (LFXO_S_BASE)              /* LFXO base address */
+#else
+#define LFXO_BASE                 (LFXO_NS_BASE)             /* LFXO base address */
+#endif /* SL_TRUSTZONE_PERIPHERAL_LFXO_S */
+#if ((defined(SL_TRUSTZONE_SECURE) && !defined(SL_TRUSTZONE_PERIPHERAL_LFRCO_S)) || SL_TRUSTZONE_PERIPHERAL_LFRCO_S)
+#define LFRCO_BASE                (LFRCO_S_BASE)             /* LFRCO base address */
+#else
+#define LFRCO_BASE                (LFRCO_NS_BASE)            /* LFRCO base address */
+#endif /* SL_TRUSTZONE_PERIPHERAL_LFRCO_S */
+#if ((defined(SL_TRUSTZONE_SECURE) && !defined(SL_TRUSTZONE_PERIPHERAL_ULFRCO_S)) || SL_TRUSTZONE_PERIPHERAL_ULFRCO_S)
+#define ULFRCO_BASE               (ULFRCO_S_BASE)            /* ULFRCO base address */
+#else
+#define ULFRCO_BASE               (ULFRCO_NS_BASE)           /* ULFRCO base address */
+#endif /* SL_TRUSTZONE_PERIPHERAL_ULFRCO_S */
+#if ((defined(SL_TRUSTZONE_SECURE) && !defined(SL_TRUSTZONE_PERIPHERAL_MSC_S)) || SL_TRUSTZONE_PERIPHERAL_MSC_S)
+#define MSC_BASE                  (MSC_S_BASE)               /* MSC base address */
+#else
+#define MSC_BASE                  (MSC_NS_BASE)              /* MSC base address */
+#endif /* SL_TRUSTZONE_PERIPHERAL_MSC_S */
+#if ((defined(SL_TRUSTZONE_SECURE) && !defined(SL_TRUSTZONE_PERIPHERAL_ICACHE0_S)) || SL_TRUSTZONE_PERIPHERAL_ICACHE0_S)
+#define ICACHE0_BASE              (ICACHE0_S_BASE)           /* ICACHE0 base address */
+#else
+#define ICACHE0_BASE              (ICACHE0_NS_BASE)          /* ICACHE0 base address */
+#endif /* SL_TRUSTZONE_PERIPHERAL_ICACHE0_S */
+#if ((defined(SL_TRUSTZONE_SECURE) && !defined(SL_TRUSTZONE_PERIPHERAL_PRS_S)) || SL_TRUSTZONE_PERIPHERAL_PRS_S)
+#define PRS_BASE                  (PRS_S_BASE)               /* PRS base address */
+#else
+#define PRS_BASE                  (PRS_NS_BASE)              /* PRS base address */
+#endif /* SL_TRUSTZONE_PERIPHERAL_PRS_S */
+#if ((defined(SL_TRUSTZONE_SECURE) && !defined(SL_TRUSTZONE_PERIPHERAL_GPIO_S)) || SL_TRUSTZONE_PERIPHERAL_GPIO_S)
+#define GPIO_BASE                 (GPIO_S_BASE)              /* GPIO base address */
+#else
+#define GPIO_BASE                 (GPIO_NS_BASE)             /* GPIO base address */
+#endif /* SL_TRUSTZONE_PERIPHERAL_GPIO_S */
+#if ((defined(SL_TRUSTZONE_SECURE) && !defined(SL_TRUSTZONE_PERIPHERAL_LDMA_S)) || SL_TRUSTZONE_PERIPHERAL_LDMA_S)
+#define LDMA_BASE                 (LDMA_S_BASE)              /* LDMA base address */
+#else
+#define LDMA_BASE                 (LDMA_NS_BASE)             /* LDMA base address */
+#endif /* SL_TRUSTZONE_PERIPHERAL_LDMA_S */
+#if ((defined(SL_TRUSTZONE_SECURE) && !defined(SL_TRUSTZONE_PERIPHERAL_LDMAXBAR_S)) || SL_TRUSTZONE_PERIPHERAL_LDMAXBAR_S)
+#define LDMAXBAR_BASE             (LDMAXBAR_S_BASE)          /* LDMAXBAR base address */
+#else
+#define LDMAXBAR_BASE             (LDMAXBAR_NS_BASE)         /* LDMAXBAR base address */
+#endif /* SL_TRUSTZONE_PERIPHERAL_LDMAXBAR_S */
+#if ((defined(SL_TRUSTZONE_SECURE) && !defined(SL_TRUSTZONE_PERIPHERAL_TIMER0_S)) || SL_TRUSTZONE_PERIPHERAL_TIMER0_S)
+#define TIMER0_BASE               (TIMER0_S_BASE)            /* TIMER0 base address */
+#else
+#define TIMER0_BASE               (TIMER0_NS_BASE)           /* TIMER0 base address */
+#endif /* SL_TRUSTZONE_PERIPHERAL_TIMER0_S */
+#if ((defined(SL_TRUSTZONE_SECURE) && !defined(SL_TRUSTZONE_PERIPHERAL_TIMER1_S)) || SL_TRUSTZONE_PERIPHERAL_TIMER1_S)
+#define TIMER1_BASE               (TIMER1_S_BASE)            /* TIMER1 base address */
+#else
+#define TIMER1_BASE               (TIMER1_NS_BASE)           /* TIMER1 base address */
+#endif /* SL_TRUSTZONE_PERIPHERAL_TIMER1_S */
+#if ((defined(SL_TRUSTZONE_SECURE) && !defined(SL_TRUSTZONE_PERIPHERAL_TIMER2_S)) || SL_TRUSTZONE_PERIPHERAL_TIMER2_S)
+#define TIMER2_BASE               (TIMER2_S_BASE)            /* TIMER2 base address */
+#else
+#define TIMER2_BASE               (TIMER2_NS_BASE)           /* TIMER2 base address */
+#endif /* SL_TRUSTZONE_PERIPHERAL_TIMER2_S */
+#if ((defined(SL_TRUSTZONE_SECURE) && !defined(SL_TRUSTZONE_PERIPHERAL_TIMER3_S)) || SL_TRUSTZONE_PERIPHERAL_TIMER3_S)
+#define TIMER3_BASE               (TIMER3_S_BASE)            /* TIMER3 base address */
+#else
+#define TIMER3_BASE               (TIMER3_NS_BASE)           /* TIMER3 base address */
+#endif /* SL_TRUSTZONE_PERIPHERAL_TIMER3_S */
+#if ((defined(SL_TRUSTZONE_SECURE) && !defined(SL_TRUSTZONE_PERIPHERAL_TIMER4_S)) || SL_TRUSTZONE_PERIPHERAL_TIMER4_S)
+#define TIMER4_BASE               (TIMER4_S_BASE)            /* TIMER4 base address */
+#else
+#define TIMER4_BASE               (TIMER4_NS_BASE)           /* TIMER4 base address */
+#endif /* SL_TRUSTZONE_PERIPHERAL_TIMER4_S */
+#if ((defined(SL_TRUSTZONE_SECURE) && !defined(SL_TRUSTZONE_PERIPHERAL_USART0_S)) || SL_TRUSTZONE_PERIPHERAL_USART0_S)
+#define USART0_BASE               (USART0_S_BASE)            /* USART0 base address */
+#else
+#define USART0_BASE               (USART0_NS_BASE)           /* USART0 base address */
+#endif /* SL_TRUSTZONE_PERIPHERAL_USART0_S */
+#if ((defined(SL_TRUSTZONE_SECURE) && !defined(SL_TRUSTZONE_PERIPHERAL_USART1_S)) || SL_TRUSTZONE_PERIPHERAL_USART1_S)
+#define USART1_BASE               (USART1_S_BASE)            /* USART1 base address */
+#else
+#define USART1_BASE               (USART1_NS_BASE)           /* USART1 base address */
+#endif /* SL_TRUSTZONE_PERIPHERAL_USART1_S */
+#if ((defined(SL_TRUSTZONE_SECURE) && !defined(SL_TRUSTZONE_PERIPHERAL_BURTC_S)) || SL_TRUSTZONE_PERIPHERAL_BURTC_S)
+#define BURTC_BASE                (BURTC_S_BASE)             /* BURTC base address */
+#else
+#define BURTC_BASE                (BURTC_NS_BASE)            /* BURTC base address */
+#endif /* SL_TRUSTZONE_PERIPHERAL_BURTC_S */
+#if ((defined(SL_TRUSTZONE_SECURE) && !defined(SL_TRUSTZONE_PERIPHERAL_I2C1_S)) || SL_TRUSTZONE_PERIPHERAL_I2C1_S)
+#define I2C1_BASE                 (I2C1_S_BASE)              /* I2C1 base address */
+#else
+#define I2C1_BASE                 (I2C1_NS_BASE)             /* I2C1 base address */
+#endif /* SL_TRUSTZONE_PERIPHERAL_I2C1_S */
+#if ((defined(SL_TRUSTZONE_SECURE) && !defined(SL_TRUSTZONE_PERIPHERAL_SYSCFG_CFGNS_S)) || SL_TRUSTZONE_PERIPHERAL_SYSCFG_CFGNS_S)
+#define SYSCFG_CFGNS_BASE         (SYSCFG_S_CFGNS_BASE)      /* SYSCFG_CFGNS base address */
+#else
+#define SYSCFG_CFGNS_BASE         (SYSCFG_NS_CFGNS_BASE)     /* SYSCFG_CFGNS base address */
+#endif /* SL_TRUSTZONE_PERIPHERAL_SYSCFG_CFGNS_S */
+#if ((defined(SL_TRUSTZONE_SECURE) && !defined(SL_TRUSTZONE_PERIPHERAL_SYSCFG_S)) || SL_TRUSTZONE_PERIPHERAL_SYSCFG_S)
+#define SYSCFG_BASE               (SYSCFG_S_BASE)            /* SYSCFG base address */
+#else
+#define SYSCFG_BASE               (SYSCFG_NS_BASE)           /* SYSCFG base address */
+#endif /* SL_TRUSTZONE_PERIPHERAL_SYSCFG_S */
+#if ((defined(SL_TRUSTZONE_SECURE) && !defined(SL_TRUSTZONE_PERIPHERAL_BURAM_S)) || SL_TRUSTZONE_PERIPHERAL_BURAM_S)
+#define BURAM_BASE                (BURAM_S_BASE)             /* BURAM base address */
+#else
+#define BURAM_BASE                (BURAM_NS_BASE)            /* BURAM base address */
+#endif /* SL_TRUSTZONE_PERIPHERAL_BURAM_S */
+#if ((defined(SL_TRUSTZONE_SECURE) && !defined(SL_TRUSTZONE_PERIPHERAL_GPCRC_S)) || SL_TRUSTZONE_PERIPHERAL_GPCRC_S)
+#define GPCRC_BASE                (GPCRC_S_BASE)             /* GPCRC base address */
+#else
+#define GPCRC_BASE                (GPCRC_NS_BASE)            /* GPCRC base address */
+#endif /* SL_TRUSTZONE_PERIPHERAL_GPCRC_S */
+#if ((defined(SL_TRUSTZONE_SECURE) && !defined(SL_TRUSTZONE_PERIPHERAL_DCDC_S)) || SL_TRUSTZONE_PERIPHERAL_DCDC_S)
+#define DCDC_BASE                 (DCDC_S_BASE)              /* DCDC base address */
+#else
+#define DCDC_BASE                 (DCDC_NS_BASE)             /* DCDC base address */
+#endif /* SL_TRUSTZONE_PERIPHERAL_DCDC_S */
+#if ((defined(SL_TRUSTZONE_SECURE) && !defined(SL_TRUSTZONE_PERIPHERAL_PDM_S)) || SL_TRUSTZONE_PERIPHERAL_PDM_S)
+#define PDM_BASE                  (PDM_S_BASE)               /* PDM base address */
+#else
+#define PDM_BASE                  (PDM_NS_BASE)              /* PDM base address */
+#endif /* SL_TRUSTZONE_PERIPHERAL_PDM_S */
+#if ((defined(SL_TRUSTZONE_SECURE) && !defined(SL_TRUSTZONE_PERIPHERAL_SMU_S)) || SL_TRUSTZONE_PERIPHERAL_SMU_S)
+#define SMU_BASE                  (SMU_S_BASE)               /* SMU base address */
+#else
+#define SMU_BASE                  (SMU_S_BASE)               /* SMU base address */
+#endif /* SL_TRUSTZONE_PERIPHERAL_SMU_S */
+#if ((defined(SL_TRUSTZONE_SECURE) && !defined(SL_TRUSTZONE_PERIPHERAL_SMU_CFGNS_S)) || SL_TRUSTZONE_PERIPHERAL_SMU_CFGNS_S)
+#define SMU_CFGNS_BASE            (SMU_S_CFGNS_BASE)         /* SMU_CFGNS base address */
+#else
+#define SMU_CFGNS_BASE            (SMU_NS_CFGNS_BASE)        /* SMU_CFGNS base address */
+#endif /* SL_TRUSTZONE_PERIPHERAL_SMU_CFGNS_S */
+#if ((defined(SL_TRUSTZONE_SECURE) && !defined(SL_TRUSTZONE_PERIPHERAL_RTCC_S)) || SL_TRUSTZONE_PERIPHERAL_RTCC_S)
+#define RTCC_BASE                 (RTCC_S_BASE)              /* RTCC base address */
+#else
+#define RTCC_BASE                 (RTCC_NS_BASE)             /* RTCC base address */
+#endif /* SL_TRUSTZONE_PERIPHERAL_RTCC_S */
+#if ((defined(SL_TRUSTZONE_SECURE) && !defined(SL_TRUSTZONE_PERIPHERAL_LETIMER0_S)) || SL_TRUSTZONE_PERIPHERAL_LETIMER0_S)
+#define LETIMER0_BASE             (LETIMER0_S_BASE)          /* LETIMER0 base address */
+#else
+#define LETIMER0_BASE             (LETIMER0_NS_BASE)         /* LETIMER0 base address */
+#endif /* SL_TRUSTZONE_PERIPHERAL_LETIMER0_S */
+#if ((defined(SL_TRUSTZONE_SECURE) && !defined(SL_TRUSTZONE_PERIPHERAL_IADC0_S)) || SL_TRUSTZONE_PERIPHERAL_IADC0_S)
+#define IADC0_BASE                (IADC0_S_BASE)             /* IADC0 base address */
+#else
+#define IADC0_BASE                (IADC0_NS_BASE)            /* IADC0 base address */
+#endif /* SL_TRUSTZONE_PERIPHERAL_IADC0_S */
+#if ((defined(SL_TRUSTZONE_SECURE) && !defined(SL_TRUSTZONE_PERIPHERAL_I2C0_S)) || SL_TRUSTZONE_PERIPHERAL_I2C0_S)
+#define I2C0_BASE                 (I2C0_S_BASE)              /* I2C0 base address */
+#else
+#define I2C0_BASE                 (I2C0_NS_BASE)             /* I2C0 base address */
+#endif /* SL_TRUSTZONE_PERIPHERAL_I2C0_S */
+#if ((defined(SL_TRUSTZONE_SECURE) && !defined(SL_TRUSTZONE_PERIPHERAL_WDOG0_S)) || SL_TRUSTZONE_PERIPHERAL_WDOG0_S)
+#define WDOG0_BASE                (WDOG0_S_BASE)             /* WDOG0 base address */
+#else
+#define WDOG0_BASE                (WDOG0_NS_BASE)            /* WDOG0 base address */
+#endif /* SL_TRUSTZONE_PERIPHERAL_WDOG0_S */
+#if ((defined(SL_TRUSTZONE_SECURE) && !defined(SL_TRUSTZONE_PERIPHERAL_AMUXCP0_S)) || SL_TRUSTZONE_PERIPHERAL_AMUXCP0_S)
+#define AMUXCP0_BASE              (AMUXCP0_S_BASE)           /* AMUXCP0 base address */
+#else
+#define AMUXCP0_BASE              (AMUXCP0_NS_BASE)          /* AMUXCP0 base address */
+#endif /* SL_TRUSTZONE_PERIPHERAL_AMUXCP0_S */
+#if ((defined(SL_TRUSTZONE_SECURE) && !defined(SL_TRUSTZONE_PERIPHERAL_EUART0_S)) || SL_TRUSTZONE_PERIPHERAL_EUART0_S)
+#define EUART0_BASE               (EUART0_S_BASE)            /* EUART0 base address */
+#else
+#define EUART0_BASE               (EUART0_NS_BASE)           /* EUART0 base address */
+#endif /* SL_TRUSTZONE_PERIPHERAL_EUART0_S */
+#if ((defined(SL_TRUSTZONE_SECURE) && !defined(SL_TRUSTZONE_PERIPHERAL_CRYPTOACC_S)) || SL_TRUSTZONE_PERIPHERAL_CRYPTOACC_S)
+#define CRYPTOACC_BASE            (CRYPTOACC_S_BASE)         /* CRYPTOACC base address */
+#else
+#define CRYPTOACC_BASE            (CRYPTOACC_NS_BASE)        /* CRYPTOACC base address */
+#endif /* SL_TRUSTZONE_PERIPHERAL_CRYPTOACC_S */
+#if ((defined(SL_TRUSTZONE_SECURE) && !defined(SL_TRUSTZONE_PERIPHERAL_CRYPTOACC_RNGCTRL_S)) || SL_TRUSTZONE_PERIPHERAL_CRYPTOACC_RNGCTRL_S)
+#define CRYPTOACC_RNGCTRL_BASE    (CRYPTOACC_S_RNGCTRL_BASE)  /* CRYPTOACC_RNGCTRL base address */
+#else
+#define CRYPTOACC_RNGCTRL_BASE    (CRYPTOACC_NS_RNGCTRL_BASE) /* CRYPTOACC_RNGCTRL base address */
+#endif /* SL_TRUSTZONE_PERIPHERAL_CRYPTOACC_RNGCTRL_S */
+#if ((defined(SL_TRUSTZONE_SECURE) && !defined(SL_TRUSTZONE_PERIPHERAL_CRYPTOACC_PKCTRL_S)) || SL_TRUSTZONE_PERIPHERAL_CRYPTOACC_PKCTRL_S)
+#define CRYPTOACC_PKCTRL_BASE     (CRYPTOACC_S_PKCTRL_BASE)  /* CRYPTOACC_PKCTRL base address */
+#else
+#define CRYPTOACC_PKCTRL_BASE     (CRYPTOACC_NS_PKCTRL_BASE) /* CRYPTOACC_PKCTRL base address */
+#endif /* SL_TRUSTZONE_PERIPHERAL_CRYPTOACC_PKCTRL_S */
+
+#define DEVINFO_BASE              (0x0FE08000UL) /* DEVINFO base address */
 /** @} End of group EFM32PG22C200F512IM40_Peripheral_Base */
 
 /**************************************************************************//**
@@ -553,90 +779,48 @@ typedef enum IRQn{
  * @{
  *****************************************************************************/
 
-#define EMU_S                   ((EMU_TypeDef *) EMU_BASE)                                /**< EMU_S base pointer */
-#define EMU                     ((EMU_TypeDef *) EMU_BASE)                                /**< EMU_S base pointer */
-#define CMU_S                   ((CMU_TypeDef *) CMU_BASE)                                /**< CMU_S base pointer */
-#define CMU                     ((CMU_TypeDef *) CMU_BASE)                                /**< CMU_S base pointer */
-#define HFXO0_S                 ((HFXO_TypeDef *) HFXO0_BASE)                             /**< HFXO0_S base pointer */
-#define HFXO0                   ((HFXO_TypeDef *) HFXO0_BASE)                             /**< HFXO0_S base pointer */
-#define HFRCO0_S                ((HFRCO_TypeDef *) HFRCO0_BASE)                           /**< HFRCO0_S base pointer */
-#define HFRCO0                  ((HFRCO_TypeDef *) HFRCO0_BASE)                           /**< HFRCO0_S base pointer */
-#define FSRCO_S                 ((FSRCO_TypeDef *) FSRCO_BASE)                            /**< FSRCO_S base pointer */
-#define FSRCO                   ((FSRCO_TypeDef *) FSRCO_BASE)                            /**< FSRCO_S base pointer */
-#define DPLL0_S                 ((DPLL_TypeDef *) DPLL0_BASE)                             /**< DPLL0_S base pointer */
-#define DPLL0                   ((DPLL_TypeDef *) DPLL0_BASE)                             /**< DPLL0_S base pointer */
-#define LFXO_S                  ((LFXO_TypeDef *) LFXO_BASE)                              /**< LFXO_S base pointer */
-#define LFXO                    ((LFXO_TypeDef *) LFXO_BASE)                              /**< LFXO_S base pointer */
-#define LFRCO_S                 ((LFRCO_TypeDef *) LFRCO_BASE)                            /**< LFRCO_S base pointer */
-#define LFRCO                   ((LFRCO_TypeDef *) LFRCO_BASE)                            /**< LFRCO_S base pointer */
-#define ULFRCO_S                ((ULFRCO_TypeDef *) ULFRCO_BASE)                          /**< ULFRCO_S base pointer */
-#define ULFRCO                  ((ULFRCO_TypeDef *) ULFRCO_BASE)                          /**< ULFRCO_S base pointer */
-#define MSC_S                   ((MSC_TypeDef *) MSC_BASE)                                /**< MSC_S base pointer */
-#define MSC                     ((MSC_TypeDef *) MSC_BASE)                                /**< MSC_S base pointer */
-#define ICACHE0_S               ((ICACHE_TypeDef *) ICACHE0_BASE)                         /**< ICACHE0_S base pointer */
-#define ICACHE0                 ((ICACHE_TypeDef *) ICACHE0_BASE)                         /**< ICACHE0_S base pointer */
-#define PRS_S                   ((PRS_TypeDef *) PRS_BASE)                                /**< PRS_S base pointer */
-#define PRS                     ((PRS_TypeDef *) PRS_BASE)                                /**< PRS_S base pointer */
-#define GPIO_S                  ((GPIO_TypeDef *) GPIO_BASE)                              /**< GPIO_S base pointer */
-#define GPIO                    ((GPIO_TypeDef *) GPIO_BASE)                              /**< GPIO_S base pointer */
-#define LDMA_S                  ((LDMA_TypeDef *) LDMA_BASE)                              /**< LDMA_S base pointer */
-#define LDMA                    ((LDMA_TypeDef *) LDMA_BASE)                              /**< LDMA_S base pointer */
-#define LDMAXBAR_S              ((LDMAXBAR_TypeDef *) LDMAXBAR_BASE)                      /**< LDMAXBAR_S base pointer */
-#define LDMAXBAR                ((LDMAXBAR_TypeDef *) LDMAXBAR_BASE)                      /**< LDMAXBAR_S base pointer */
-#define TIMER0_S                ((TIMER_TypeDef *) TIMER0_BASE)                           /**< TIMER0_S base pointer */
-#define TIMER0                  ((TIMER_TypeDef *) TIMER0_BASE)                           /**< TIMER0_S base pointer */
-#define TIMER1_S                ((TIMER_TypeDef *) TIMER1_BASE)                           /**< TIMER1_S base pointer */
-#define TIMER1                  ((TIMER_TypeDef *) TIMER1_BASE)                           /**< TIMER1_S base pointer */
-#define TIMER2_S                ((TIMER_TypeDef *) TIMER2_BASE)                           /**< TIMER2_S base pointer */
-#define TIMER2                  ((TIMER_TypeDef *) TIMER2_BASE)                           /**< TIMER2_S base pointer */
-#define TIMER3_S                ((TIMER_TypeDef *) TIMER3_BASE)                           /**< TIMER3_S base pointer */
-#define TIMER3                  ((TIMER_TypeDef *) TIMER3_BASE)                           /**< TIMER3_S base pointer */
-#define TIMER4_S                ((TIMER_TypeDef *) TIMER4_BASE)                           /**< TIMER4_S base pointer */
-#define TIMER4                  ((TIMER_TypeDef *) TIMER4_BASE)                           /**< TIMER4_S base pointer */
-#define USART0_S                ((USART_TypeDef *) USART0_BASE)                           /**< USART0_S base pointer */
-#define USART0                  ((USART_TypeDef *) USART0_BASE)                           /**< USART0_S base pointer */
-#define USART1_S                ((USART_TypeDef *) USART1_BASE)                           /**< USART1_S base pointer */
-#define USART1                  ((USART_TypeDef *) USART1_BASE)                           /**< USART1_S base pointer */
-#define BURTC_S                 ((BURTC_TypeDef *) BURTC_BASE)                            /**< BURTC_S base pointer */
-#define BURTC                   ((BURTC_TypeDef *) BURTC_BASE)                            /**< BURTC_S base pointer */
-#define I2C1_S                  ((I2C_TypeDef *) I2C1_BASE)                               /**< I2C1_S base pointer */
-#define I2C1                    ((I2C_TypeDef *) I2C1_BASE)                               /**< I2C1_S base pointer */
-#define SYSCFG_S_CFGNS          ((SYSCFG_CFGNS_TypeDef *) SYSCFG_CFGNS_BASE)              /**< SYSCFG_S_CFGNS base pointer */
-#define SYSCFG_CFGNS            ((SYSCFG_CFGNS_TypeDef *) SYSCFG_CFGNS_BASE)              /**< SYSCFG_S_CFGNS base pointer */
-#define SYSCFG_S                ((SYSCFG_TypeDef *) SYSCFG_BASE)                          /**< SYSCFG_S base pointer */
-#define SYSCFG                  ((SYSCFG_TypeDef *) SYSCFG_BASE)                          /**< SYSCFG_S base pointer */
-#define BURAM_S                 ((BURAM_TypeDef *) BURAM_BASE)                            /**< BURAM_S base pointer */
-#define BURAM                   ((BURAM_TypeDef *) BURAM_BASE)                            /**< BURAM_S base pointer */
-#define GPCRC_S                 ((GPCRC_TypeDef *) GPCRC_BASE)                            /**< GPCRC_S base pointer */
-#define GPCRC                   ((GPCRC_TypeDef *) GPCRC_BASE)                            /**< GPCRC_S base pointer */
-#define DCDC_S                  ((DCDC_TypeDef *) DCDC_BASE)                              /**< DCDC_S base pointer */
-#define DCDC                    ((DCDC_TypeDef *) DCDC_BASE)                              /**< DCDC_S base pointer */
-#define PDM_S                   ((PDM_TypeDef *) PDM_BASE)                                /**< PDM_S base pointer */
-#define PDM                     ((PDM_TypeDef *) PDM_BASE)                                /**< PDM_S base pointer */
-#define SMU_S                   ((SMU_TypeDef *) SMU_BASE)                                /**< SMU_S base pointer */
-#define SMU                     ((SMU_TypeDef *) SMU_BASE)                                /**< SMU_S base pointer */
-#define SMU_S_CFGNS             ((SMU_CFGNS_TypeDef *) SMU_CFGNS_BASE)                    /**< SMU_S_CFGNS base pointer */
-#define SMU_CFGNS               ((SMU_CFGNS_TypeDef *) SMU_CFGNS_BASE)                    /**< SMU_S_CFGNS base pointer */
-#define RTCC_S                  ((RTCC_TypeDef *) RTCC_BASE)                              /**< RTCC_S base pointer */
-#define RTCC                    ((RTCC_TypeDef *) RTCC_BASE)                              /**< RTCC_S base pointer */
-#define LETIMER0_S              ((LETIMER_TypeDef *) LETIMER0_BASE)                       /**< LETIMER0_S base pointer */
-#define LETIMER0                ((LETIMER_TypeDef *) LETIMER0_BASE)                       /**< LETIMER0_S base pointer */
-#define IADC0_S                 ((IADC_TypeDef *) IADC0_BASE)                             /**< IADC0_S base pointer */
-#define IADC0                   ((IADC_TypeDef *) IADC0_BASE)                             /**< IADC0_S base pointer */
-#define I2C0_S                  ((I2C_TypeDef *) I2C0_BASE)                               /**< I2C0_S base pointer */
-#define I2C0                    ((I2C_TypeDef *) I2C0_BASE)                               /**< I2C0_S base pointer */
-#define WDOG0_S                 ((WDOG_TypeDef *) WDOG0_BASE)                             /**< WDOG0_S base pointer */
-#define WDOG0                   ((WDOG_TypeDef *) WDOG0_BASE)                             /**< WDOG0_S base pointer */
-#define AMUXCP0_S               ((AMUXCP_TypeDef *) AMUXCP0_BASE)                         /**< AMUXCP0_S base pointer */
-#define AMUXCP0                 ((AMUXCP_TypeDef *) AMUXCP0_BASE)                         /**< AMUXCP0_S base pointer */
-#define EUART0_S                ((EUSART_TypeDef *) EUART0_BASE)                          /**< EUART0_S base pointer */
-#define EUART0                  ((EUSART_TypeDef *) EUART0_BASE)                          /**< EUART0_S base pointer */
-#define CRYPTOACC_S             ((CRYPTOACC_TypeDef *) CRYPTOACC_BASE)                    /**< CRYPTOACC_S base pointer */
-#define CRYPTOACC               ((CRYPTOACC_TypeDef *) CRYPTOACC_BASE)                    /**< CRYPTOACC_S base pointer */
-#define CRYPTOACC_S_RNGCTRL     ((CRYPTOACC_RNGCTRL_TypeDef *) CRYPTOACC_RNGCTRL_BASE)    /**< CRYPTOACC_S_RNGCTRL base pointer */
-#define CRYPTOACC_RNGCTRL       ((CRYPTOACC_RNGCTRL_TypeDef *) CRYPTOACC_RNGCTRL_BASE)    /**< CRYPTOACC_S_RNGCTRL base pointer */
-#define CRYPTOACC_S_PKCTRL      ((CRYPTOACC_PKCTRL_TypeDef *) CRYPTOACC_PKCTRL_BASE)      /**< CRYPTOACC_S_PKCTRL base pointer */
-#define CRYPTOACC_PKCTRL        ((CRYPTOACC_PKCTRL_TypeDef *) CRYPTOACC_PKCTRL_BASE)      /**< CRYPTOACC_S_PKCTRL base pointer */
+#define EMU_S                   ((EMU_TypeDef *) EMU_S_BASE)                              /**< EMU_S base pointer */
+#define CMU_S                   ((CMU_TypeDef *) CMU_S_BASE)                              /**< CMU_S base pointer */
+#define HFXO0_S                 ((HFXO_TypeDef *) HFXO0_S_BASE)                           /**< HFXO0_S base pointer */
+#define HFRCO0_S                ((HFRCO_TypeDef *) HFRCO0_S_BASE)                         /**< HFRCO0_S base pointer */
+#define FSRCO_S                 ((FSRCO_TypeDef *) FSRCO_S_BASE)                          /**< FSRCO_S base pointer */
+#define DPLL0_S                 ((DPLL_TypeDef *) DPLL0_S_BASE)                           /**< DPLL0_S base pointer */
+#define LFXO_S                  ((LFXO_TypeDef *) LFXO_S_BASE)                            /**< LFXO_S base pointer */
+#define LFRCO_S                 ((LFRCO_TypeDef *) LFRCO_S_BASE)                          /**< LFRCO_S base pointer */
+#define ULFRCO_S                ((ULFRCO_TypeDef *) ULFRCO_S_BASE)                        /**< ULFRCO_S base pointer */
+#define MSC_S                   ((MSC_TypeDef *) MSC_S_BASE)                              /**< MSC_S base pointer */
+#define ICACHE0_S               ((ICACHE_TypeDef *) ICACHE0_S_BASE)                       /**< ICACHE0_S base pointer */
+#define PRS_S                   ((PRS_TypeDef *) PRS_S_BASE)                              /**< PRS_S base pointer */
+#define GPIO_S                  ((GPIO_TypeDef *) GPIO_S_BASE)                            /**< GPIO_S base pointer */
+#define LDMA_S                  ((LDMA_TypeDef *) LDMA_S_BASE)                            /**< LDMA_S base pointer */
+#define LDMAXBAR_S              ((LDMAXBAR_TypeDef *) LDMAXBAR_S_BASE)                    /**< LDMAXBAR_S base pointer */
+#define TIMER0_S                ((TIMER_TypeDef *) TIMER0_S_BASE)                         /**< TIMER0_S base pointer */
+#define TIMER1_S                ((TIMER_TypeDef *) TIMER1_S_BASE)                         /**< TIMER1_S base pointer */
+#define TIMER2_S                ((TIMER_TypeDef *) TIMER2_S_BASE)                         /**< TIMER2_S base pointer */
+#define TIMER3_S                ((TIMER_TypeDef *) TIMER3_S_BASE)                         /**< TIMER3_S base pointer */
+#define TIMER4_S                ((TIMER_TypeDef *) TIMER4_S_BASE)                         /**< TIMER4_S base pointer */
+#define USART0_S                ((USART_TypeDef *) USART0_S_BASE)                         /**< USART0_S base pointer */
+#define USART1_S                ((USART_TypeDef *) USART1_S_BASE)                         /**< USART1_S base pointer */
+#define BURTC_S                 ((BURTC_TypeDef *) BURTC_S_BASE)                          /**< BURTC_S base pointer */
+#define I2C1_S                  ((I2C_TypeDef *) I2C1_S_BASE)                             /**< I2C1_S base pointer */
+#define SYSCFG_S_CFGNS          ((SYSCFG_CFGNS_TypeDef *) SYSCFG_S_CFGNS_BASE)            /**< SYSCFG_S_CFGNS base pointer */
+#define SYSCFG_S                ((SYSCFG_TypeDef *) SYSCFG_S_BASE)                        /**< SYSCFG_S base pointer */
+#define BURAM_S                 ((BURAM_TypeDef *) BURAM_S_BASE)                          /**< BURAM_S base pointer */
+#define GPCRC_S                 ((GPCRC_TypeDef *) GPCRC_S_BASE)                          /**< GPCRC_S base pointer */
+#define DCDC_S                  ((DCDC_TypeDef *) DCDC_S_BASE)                            /**< DCDC_S base pointer */
+#define PDM_S                   ((PDM_TypeDef *) PDM_S_BASE)                              /**< PDM_S base pointer */
+#define SMU_S                   ((SMU_TypeDef *) SMU_S_BASE)                              /**< SMU_S base pointer */
+#define SMU_S_CFGNS             ((SMU_CFGNS_TypeDef *) SMU_S_CFGNS_BASE)                  /**< SMU_S_CFGNS base pointer */
+#define RTCC_S                  ((RTCC_TypeDef *) RTCC_S_BASE)                            /**< RTCC_S base pointer */
+#define LETIMER0_S              ((LETIMER_TypeDef *) LETIMER0_S_BASE)                     /**< LETIMER0_S base pointer */
+#define IADC0_S                 ((IADC_TypeDef *) IADC0_S_BASE)                           /**< IADC0_S base pointer */
+#define I2C0_S                  ((I2C_TypeDef *) I2C0_S_BASE)                             /**< I2C0_S base pointer */
+#define WDOG0_S                 ((WDOG_TypeDef *) WDOG0_S_BASE)                           /**< WDOG0_S base pointer */
+#define AMUXCP0_S               ((AMUXCP_TypeDef *) AMUXCP0_S_BASE)                       /**< AMUXCP0_S base pointer */
+#define EUART0_S                ((EUSART_TypeDef *) EUART0_S_BASE)                        /**< EUART0_S base pointer */
+#define CRYPTOACC_S             ((CRYPTOACC_TypeDef *) CRYPTOACC_S_BASE)                  /**< CRYPTOACC_S base pointer */
+#define CRYPTOACC_S_RNGCTRL     ((CRYPTOACC_RNGCTRL_TypeDef *) CRYPTOACC_S_RNGCTRL_BASE)  /**< CRYPTOACC_S_RNGCTRL base pointer */
+#define CRYPTOACC_S_PKCTRL      ((CRYPTOACC_PKCTRL_TypeDef *) CRYPTOACC_S_PKCTRL_BASE)    /**< CRYPTOACC_S_PKCTRL base pointer */
 #define EMU_NS                  ((EMU_TypeDef *) EMU_NS_BASE)                             /**< EMU_NS base pointer */
 #define CMU_NS                  ((CMU_TypeDef *) CMU_NS_BASE)                             /**< CMU_NS base pointer */
 #define HFXO0_NS                ((HFXO_TypeDef *) HFXO0_NS_BASE)                          /**< HFXO0_NS base pointer */
@@ -679,6 +863,48 @@ typedef enum IRQn{
 #define CRYPTOACC_NS            ((CRYPTOACC_TypeDef *) CRYPTOACC_NS_BASE)                 /**< CRYPTOACC_NS base pointer */
 #define CRYPTOACC_NS_RNGCTRL    ((CRYPTOACC_RNGCTRL_TypeDef *) CRYPTOACC_NS_RNGCTRL_BASE) /**< CRYPTOACC_NS_RNGCTRL base pointer */
 #define CRYPTOACC_NS_PKCTRL     ((CRYPTOACC_PKCTRL_TypeDef *) CRYPTOACC_NS_PKCTRL_BASE)   /**< CRYPTOACC_NS_PKCTRL base pointer */
+#define EMU                     ((EMU_TypeDef *) EMU_BASE)                                /**< EMU base pointer */
+#define CMU                     ((CMU_TypeDef *) CMU_BASE)                                /**< CMU base pointer */
+#define HFXO0                   ((HFXO_TypeDef *) HFXO0_BASE)                             /**< HFXO0 base pointer */
+#define HFRCO0                  ((HFRCO_TypeDef *) HFRCO0_BASE)                           /**< HFRCO0 base pointer */
+#define FSRCO                   ((FSRCO_TypeDef *) FSRCO_BASE)                            /**< FSRCO base pointer */
+#define DPLL0                   ((DPLL_TypeDef *) DPLL0_BASE)                             /**< DPLL0 base pointer */
+#define LFXO                    ((LFXO_TypeDef *) LFXO_BASE)                              /**< LFXO base pointer */
+#define LFRCO                   ((LFRCO_TypeDef *) LFRCO_BASE)                            /**< LFRCO base pointer */
+#define ULFRCO                  ((ULFRCO_TypeDef *) ULFRCO_BASE)                          /**< ULFRCO base pointer */
+#define MSC                     ((MSC_TypeDef *) MSC_BASE)                                /**< MSC base pointer */
+#define ICACHE0                 ((ICACHE_TypeDef *) ICACHE0_BASE)                         /**< ICACHE0 base pointer */
+#define PRS                     ((PRS_TypeDef *) PRS_BASE)                                /**< PRS base pointer */
+#define GPIO                    ((GPIO_TypeDef *) GPIO_BASE)                              /**< GPIO base pointer */
+#define LDMA                    ((LDMA_TypeDef *) LDMA_BASE)                              /**< LDMA base pointer */
+#define LDMAXBAR                ((LDMAXBAR_TypeDef *) LDMAXBAR_BASE)                      /**< LDMAXBAR base pointer */
+#define TIMER0                  ((TIMER_TypeDef *) TIMER0_BASE)                           /**< TIMER0 base pointer */
+#define TIMER1                  ((TIMER_TypeDef *) TIMER1_BASE)                           /**< TIMER1 base pointer */
+#define TIMER2                  ((TIMER_TypeDef *) TIMER2_BASE)                           /**< TIMER2 base pointer */
+#define TIMER3                  ((TIMER_TypeDef *) TIMER3_BASE)                           /**< TIMER3 base pointer */
+#define TIMER4                  ((TIMER_TypeDef *) TIMER4_BASE)                           /**< TIMER4 base pointer */
+#define USART0                  ((USART_TypeDef *) USART0_BASE)                           /**< USART0 base pointer */
+#define USART1                  ((USART_TypeDef *) USART1_BASE)                           /**< USART1 base pointer */
+#define BURTC                   ((BURTC_TypeDef *) BURTC_BASE)                            /**< BURTC base pointer */
+#define I2C1                    ((I2C_TypeDef *) I2C1_BASE)                               /**< I2C1 base pointer */
+#define SYSCFG_CFGNS            ((SYSCFG_CFGNS_TypeDef *) SYSCFG_CFGNS_BASE)              /**< SYSCFG_CFGNS base pointer */
+#define SYSCFG                  ((SYSCFG_TypeDef *) SYSCFG_BASE)                          /**< SYSCFG base pointer */
+#define BURAM                   ((BURAM_TypeDef *) BURAM_BASE)                            /**< BURAM base pointer */
+#define GPCRC                   ((GPCRC_TypeDef *) GPCRC_BASE)                            /**< GPCRC base pointer */
+#define DCDC                    ((DCDC_TypeDef *) DCDC_BASE)                              /**< DCDC base pointer */
+#define PDM                     ((PDM_TypeDef *) PDM_BASE)                                /**< PDM base pointer */
+#define SMU                     ((SMU_TypeDef *) SMU_BASE)                                /**< SMU base pointer */
+#define SMU_CFGNS               ((SMU_CFGNS_TypeDef *) SMU_CFGNS_BASE)                    /**< SMU_CFGNS base pointer */
+#define RTCC                    ((RTCC_TypeDef *) RTCC_BASE)                              /**< RTCC base pointer */
+#define LETIMER0                ((LETIMER_TypeDef *) LETIMER0_BASE)                       /**< LETIMER0 base pointer */
+#define IADC0                   ((IADC_TypeDef *) IADC0_BASE)                             /**< IADC0 base pointer */
+#define I2C0                    ((I2C_TypeDef *) I2C0_BASE)                               /**< I2C0 base pointer */
+#define WDOG0                   ((WDOG_TypeDef *) WDOG0_BASE)                             /**< WDOG0 base pointer */
+#define AMUXCP0                 ((AMUXCP_TypeDef *) AMUXCP0_BASE)                         /**< AMUXCP0 base pointer */
+#define EUART0                  ((EUSART_TypeDef *) EUART0_BASE)                          /**< EUART0 base pointer */
+#define CRYPTOACC               ((CRYPTOACC_TypeDef *) CRYPTOACC_BASE)                    /**< CRYPTOACC base pointer */
+#define CRYPTOACC_RNGCTRL       ((CRYPTOACC_RNGCTRL_TypeDef *) CRYPTOACC_RNGCTRL_BASE)    /**< CRYPTOACC_RNGCTRL base pointer */
+#define CRYPTOACC_PKCTRL        ((CRYPTOACC_PKCTRL_TypeDef *) CRYPTOACC_PKCTRL_BASE)      /**< CRYPTOACC_PKCTRL base pointer */
 #define DEVINFO                 ((DEVINFO_TypeDef *) DEVINFO_BASE)                        /**< DEVINFO base pointer */
 /** @} End of group EFM32PG22C200F512IM40_Peripheral_Declaration */
 

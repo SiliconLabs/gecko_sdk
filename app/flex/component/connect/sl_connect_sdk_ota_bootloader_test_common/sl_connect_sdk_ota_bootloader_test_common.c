@@ -159,12 +159,11 @@ void cli_bootloader_flash_read(sl_cli_command_arg_t *arguments)
   uint32_t address = sl_cli_get_argument_uint32(arguments, 0);
   uint8_t length = sl_cli_get_argument_uint8(arguments, 1);
   uint8_t buff[255];
-  uint8_t i;
 
   if (emberAfPluginBootloaderInterfaceRead(address, length, buff)) {
     app_log_info("flash read succeeded!\n");
     app_log_info("address: %lu, length: %d, data:\n", (long unsigned int) address, length);
-    for (i = 0; i < length; i++) {
+    for (uint8_t i = 0; i < length; i++) {
       app_log_info("0x%x ", buff[i]);
     }
     app_log_info("\n");
@@ -219,9 +218,6 @@ void cli_bootloader_set_tag(sl_cli_command_arg_t *arguments)
   app_log_info("image tag set\n");
 }
 
-// -----------------------------------------------------------------------------
-//                          Public Function Definitions
-// -----------------------------------------------------------------------------
 /**************************************************************************//**
  * This function initiates a bootload.
  *****************************************************************************/

@@ -33,6 +33,7 @@ class RailTest_rmrConfigGenerator:
   RMR_STRUCT_CONV_DECODE_BUFFER = 8
   RMR_STRUCT_DCDC_RETIMING_CONFIG = 9
   RMR_STRUCT_HFXO_RETIMING_CONFIG = 10
+  RMR_STRUCT_RFFPLL_CONFIG = 11
   RMR_STRUCT_NULL = 255
 
   _RAIL_INTERNAL_CONSTANTS = {"RAIL_TX_POWER_MAX": [255, 127]}
@@ -48,6 +49,7 @@ class RailTest_rmrConfigGenerator:
                   'convDecodeBuffer': RMR_STRUCT_CONV_DECODE_BUFFER,
                   'dcdcRetimingConfig': RMR_STRUCT_DCDC_RETIMING_CONFIG,
                   'hfxoRetimingConfig': RMR_STRUCT_HFXO_RETIMING_CONFIG,
+                  'rffpllConfig': RMR_STRUCT_RFFPLL_CONFIG,
                   'null': RMR_STRUCT_NULL}
 
   _TEMPLATE_PATH = os.path.join(os.path.dirname(os.path.realpath(__file__)), 'templates')
@@ -130,8 +132,32 @@ class RailTest_rmrConfigGenerator:
   # [0, 4, A, B, C, D,
   #  4, 4, E, F, G, H,
   #  8, 2, I, J]
+  #
+  # If the items in the list are integers, each item will be converted into
+  # wordWidth/8 items of width wordWidth, starting with the LSB. This is a way
+  # to represent, for example, 32-bit integers as 4 8-bit values.
+  # For example, unrollAppendIndexLength([A, B, C], 8, 0, 32) -->
+  # [0, 8, (A>>0) & 0xFF, (A>>8) & 0xFF, (A>>16) & 0xFF, (A>>24) & 0xFF, (B>>0) & 0xFF, (B>>8) & 0xFF, (B>>16) & 0xFF, (B>>24) & 0xFF,
+  #  8, 4, (C>>0) & 0xFF, (C>>8) & 0xFF, (C>>16) & 0xFF, (C>>24) & 0xFF,
+  #
   # Intended to be called with batch(unrollLength + 2)
-  def unrollAppendIndexLength(self, items, unrollLength, startingIndex):
+  def unrollAppendIndexLength(self, items, unrollLength, startingIndex, wordWidth = 8):
+    assert wordWidth == 8 or wordWidth == 16 or wordWidth == 32, \
+      "Error! The word width of each item in items must be 8, 16, or 32"
+
+    if wordWidth == 16:
+      newItems = []
+      for item in items:
+        newItems.extend(self.uint16ToBytes(item))
+      items = newItems
+      startingIndex *= 2
+    elif wordWidth == 32:
+      newItems = []
+      for item in items:
+        newItems.extend(self.uint32ToBytes(item))
+      items = newItems
+      startingIndex *= 4
+
     listToReturn = []
     groups = self.grouper(items, unrollLength)
     currentIndex = startingIndex

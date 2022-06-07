@@ -31,7 +31,7 @@
 #include "em_vcmp.h"
 #if defined(VCMP_COUNT) && (VCMP_COUNT > 0)
 
-#include "em_assert.h"
+#include "sl_assert.h"
 
 /***************************************************************************//**
  * @addtogroup vcmp VCMP - Voltage Comparator

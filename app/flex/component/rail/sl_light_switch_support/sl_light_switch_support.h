@@ -39,21 +39,21 @@
 //                              Macros and Typedefs
 // -----------------------------------------------------------------------------
 /// Size of RAIL RX/TX FIFO
-#define RAIL_FIFO_SIZE (256u)
+#define RAIL_FIFO_SIZE (256U)
 /// Transmit data length
-#define TX_PAYLOAD_LENGTH (16u)
+#define TX_PAYLOAD_LENGTH (16U)
 /// Used for checking, if the incoming message comes from a light device
-#define DEMO_CONTROL_PAYLOAD_SRC_ROLE_BIT       (0x80u)
+#define DEMO_CONTROL_PAYLOAD_SRC_ROLE_BIT       (0x80U)
 /// This is the actual payload of the message
-#define DEMO_CONTROL_PAYLOAD_BYTE               (15u)
+#define DEMO_CONTROL_PAYLOAD_BYTE               (15U)
 /// Used for checking if an advertise message has come from the Light device
-#define DEMO_CONTROL_PAYLOAD_CMD_MASK           (0x70u)
-#define DEMO_CONTROL_PAYLOAD_CMD_MASK_SHIFT     (4u)
+#define DEMO_CONTROL_PAYLOAD_CMD_MASK           (0x70U)
+#define DEMO_CONTROL_PAYLOAD_CMD_MASK_SHIFT     (4U)
 /// Used for checking the light state in the payload
-#define DEMO_CONTROL_PAYLOAD_CMD_DATA           (0x0Fu)
+#define DEMO_CONTROL_PAYLOAD_CMD_DATA           (0x0FU)
 /// The incoming message's 2. bit contains the length of the package
-#define PACKET_HEADER_LEN                       (2u)
-#define DEVICE_STATUS_PAYLOAD_BYTE              (14u)
+#define PACKET_HEADER_LEN                       (2U)
+#define DEVICE_STATUS_PAYLOAD_BYTE              (14U)
 
 // -----------------------------------------------------------------------------
 //                                Global Variables

@@ -345,12 +345,12 @@ typedef struct {
 #define _VDAC_STATUS_CH1FIFOEMPTY_MASK              0x800000UL                                     /**< Bit mask for VDAC_CH1FIFOEMPTY              */
 #define _VDAC_STATUS_CH1FIFOEMPTY_DEFAULT           0x00000000UL                                   /**< Mode DEFAULT for VDAC_STATUS                */
 #define VDAC_STATUS_CH1FIFOEMPTY_DEFAULT            (_VDAC_STATUS_CH1FIFOEMPTY_DEFAULT << 23)      /**< Shifted mode DEFAULT for VDAC_STATUS        */
-#define VDAC_STATUS_CH0FIFOFLBUSY                   (0x1UL << 26)                                  /**< CH0 WFIFO Flush Sync Busy                   */
+#define VDAC_STATUS_CH0FIFOFLBUSY                   (0x1UL << 26)                                  /**< CH0 FIFO Flush Sync Busy                    */
 #define _VDAC_STATUS_CH0FIFOFLBUSY_SHIFT            26                                             /**< Shift value for VDAC_CH0FIFOFLBUSY          */
 #define _VDAC_STATUS_CH0FIFOFLBUSY_MASK             0x4000000UL                                    /**< Bit mask for VDAC_CH0FIFOFLBUSY             */
 #define _VDAC_STATUS_CH0FIFOFLBUSY_DEFAULT          0x00000000UL                                   /**< Mode DEFAULT for VDAC_STATUS                */
 #define VDAC_STATUS_CH0FIFOFLBUSY_DEFAULT           (_VDAC_STATUS_CH0FIFOFLBUSY_DEFAULT << 26)     /**< Shifted mode DEFAULT for VDAC_STATUS        */
-#define VDAC_STATUS_CH1FIFOFLBUSY                   (0x1UL << 27)                                  /**< CH1 WFIFO Flush Sync Busy                   */
+#define VDAC_STATUS_CH1FIFOFLBUSY                   (0x1UL << 27)                                  /**< CH1 FIFO Flush Sync Busy                    */
 #define _VDAC_STATUS_CH1FIFOFLBUSY_SHIFT            27                                             /**< Shift value for VDAC_CH1FIFOFLBUSY          */
 #define _VDAC_STATUS_CH1FIFOFLBUSY_MASK             0x8000000UL                                    /**< Bit mask for VDAC_CH1FIFOFLBUSY             */
 #define _VDAC_STATUS_CH1FIFOFLBUSY_DEFAULT          0x00000000UL                                   /**< Mode DEFAULT for VDAC_STATUS                */

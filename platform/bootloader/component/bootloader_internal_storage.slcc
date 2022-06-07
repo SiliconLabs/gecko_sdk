@@ -23,10 +23,20 @@ include:
 define:
   - name: BOOTLOADER_SUPPORT_STORAGE
     value: 1
+  - name: BOOTLOADER_SUPPORT_INTERNAL_STORAGE
+    value : 1
 provides:
   - name: bootloader_internal_storage
+  - name: bootloader_nonsecure_incompatible
+    condition: [bootloader_core_nonsecure]
 requires:
   - name: bootloader_crc
 config_file:
-  - path: platform/bootloader/config/btl_internal_storage_cfg.h
+  - path: platform/bootloader/config/s1/btl_internal_storage_cfg.h
     file_id: btl_internal_storage_config
+    condition:
+      - device_series_1
+  - path: platform/bootloader/config/s2/btl_internal_storage_cfg.h
+    file_id: btl_internal_storage_config
+    condition:
+      - device_series_2

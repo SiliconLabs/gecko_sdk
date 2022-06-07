@@ -54,6 +54,27 @@ RAIL_Handle_t emPhyRailHandle;
 extern RAIL_Status_t sl_rail_util_ieee802154_config_radio(RAIL_Handle_t railHandle);
 #endif // SL_CATALOG_RAIL_UTIL_IEEE802154_STACK_EVENT_PRESENT
 
+extern RAIL_LbtConfig_t *lbtConfig;
+extern RAIL_CsmaConfig_t *csmaConfig;
+static int8_t ccaThreshold = RAIL_RSSI_INVALID_DBM;
+
+void emRadioHoldOffIsr(bool active)
+{
+  if (active) {
+    if (txType == TX_TYPE_CSMA) {
+      ccaThreshold = csmaConfig->ccaThreshold;
+      RAIL_SetCcaThreshold(railHandle, RAIL_RSSI_INVALID_DBM);
+    } else if (txType == TX_TYPE_LBT) {
+      ccaThreshold = lbtConfig->lbtThreshold;
+      RAIL_SetCcaThreshold(railHandle, RAIL_RSSI_INVALID_DBM);
+    }
+  } else if (ccaThreshold != RAIL_RSSI_INVALID_DBM) {
+    RAIL_SetCcaThreshold(railHandle, ccaThreshold);
+  } else {
+    // MISRA compliance
+  }
+}
+
 void sl_railtest_update_154_radio_config(void)
 {
 #ifdef SL_CATALOG_RAIL_UTIL_IEEE802154_STACK_EVENT_PRESENT
@@ -275,46 +296,6 @@ void config915Mhz802154(sl_cli_command_arg_t *args)
     }
   }
   responsePrint(sl_cli_get_command_string(args, 0), "802.15.4:%s", status ? "Disabled" : "Enabled");
-}
-
-void config863MhzSUNOFDMOpt(sl_cli_command_arg_t *args)
-{
-  if (!inRadioState(RAIL_RF_STATE_IDLE, sl_cli_get_command_string(args, 0))) {
-    return;
-  }
-  disableIncompatibleProtocols(RAIL_PTI_PROTOCOL_ZIGBEE);
-
-  RAIL_IEEE802154_OFDMOption_t ofdmOption = sl_cli_get_argument_uint8(args, 0);
-  if ((ofdmOption != 0) && (ofdmOption < RAIL_IEEE802154_OFDMOptionCount)) {
-    RAIL_Status_t status = RAIL_IEEE802154_Config863MHzSUNOFDMOptRadio(railHandle, ofdmOption);
-
-    responsePrint(sl_cli_get_command_string(args, 0),
-                  "SUN OFDM:%s,Option:%u", (status != RAIL_STATUS_NO_ERROR) ? "Disabled" : "Enabled", ofdmOption);
-  } else {
-    responsePrintError(sl_cli_get_command_string(args, 0), 0x20,
-                       "OFDM option must be between %u and %u",
-                       RAIL_IEEE802154_OFDMOption1, RAIL_IEEE802154_OFDMOptionCount - 1);
-  }
-}
-
-void config902MhzSUNOFDMOpt(sl_cli_command_arg_t *args)
-{
-  if (!inRadioState(RAIL_RF_STATE_IDLE, sl_cli_get_command_string(args, 0))) {
-    return;
-  }
-  disableIncompatibleProtocols(RAIL_PTI_PROTOCOL_ZIGBEE);
-
-  RAIL_IEEE802154_OFDMOption_t ofdmOption = sl_cli_get_argument_uint8(args, 0);
-  if ((ofdmOption != 0) && (ofdmOption < RAIL_IEEE802154_OFDMOptionCount)) {
-    RAIL_Status_t status = RAIL_IEEE802154_Config902MHzSUNOFDMOptRadio(railHandle, ofdmOption);
-
-    responsePrint(sl_cli_get_command_string(args, 0),
-                  "SUN OFDM:%s,Option:%u", (status != RAIL_STATUS_NO_ERROR) ? "Disabled" : "Enabled", ofdmOption);
-  } else {
-    responsePrintError(sl_cli_get_command_string(args, 0), 0x20,
-                       "OFDM option must be between %u and %u",
-                       RAIL_IEEE802154_OFDMOption1, RAIL_IEEE802154_OFDMOptionCount - 1);
-  }
 }
 
 void ieee802154AcceptFrames(sl_cli_command_arg_t *args)
@@ -668,36 +649,64 @@ void ieee802154SetPHR(sl_cli_command_arg_t *args)
   }
 }
 
-#if RAIL_IEEE802154_SUPPORTS_G_MODESWITCH && defined(WISUN_MODESWITCHPHRS_ARRAY)
+#if RAIL_IEEE802154_SUPPORTS_G_MODESWITCH && defined(WISUN_MODESWITCHPHRS_ARRAY_SIZE)
 
-uint16_t modeSwitchChannel = 0xFFFFU;
+uint16_t modeSwitchNewChannel = 0xFFFFU;
+uint16_t modeSwitchBaseChannel = 0xFFFFU;
+uint32_t modeSwitchSequenceIterations = 1;
+uint32_t modeSwitchSequenceId = 0;
 #define MSPHR_LENGTH 2
 uint8_t txData_2B[2] = { 0, 0 };
+uint8_t MSphr[2] = { 0, 0 };
 uint8_t txCountAfterModeSwitch;
+ModeSwitchState_t modeSwitchState = IDLE;
+uint32_t modeSwitchDelayUs = 0;
+RAIL_MultiTimer_t modeSwitchMultiTimer;
+uint8_t txCountAfterModeSwitchId = 0;
 
 void trigModeSwitchTx(sl_cli_command_arg_t *args)
 {
+  modeSwitchSequenceIterations = 1;
+  txCountAfterModeSwitchId = 0;
+  modeSwitchSequenceId = 0;
+  modeSwitchDelayUs = 0;
   uint8_t newPhyModeId = sl_cli_get_argument_uint32(args, 0);
   txCountAfterModeSwitch = sl_cli_get_argument_uint32(args, 1);
+  uint8_t argCount = sl_cli_get_argument_count(args);
+  if (argCount > 2) {
+    modeSwitchSequenceIterations = sl_cli_get_argument_uint32(args, 2);
+    if (argCount > 3) {
+      modeSwitchDelayUs = sl_cli_get_argument_uint32(args, 3) * 1000; // Argument is in milliseconds but multitimer takes microseconds
+      if (modeSwitchDelayUs > 0) {
+        if (!RAIL_ConfigMultiTimer(true)) {
+          responsePrintError(sl_cli_get_command_string(args, 0), 0x10, "Unable to configure the mode switch multiTimer.");
+          return;
+        }
+      }
+    }
+  }
   uint8_t i;
   uint8_t numPhrsInArray = sizeof(wisun_modeSwitchPhrs) / sizeof(RAIL_IEEE802154_ModeSwitchPhr_t);
 
-  // Retrieve PHR to send from RAIL config table
+// Retrieve PHR to send from RAIL config table
   for (i = 0; i < numPhrsInArray; i++) {
     if (wisun_modeSwitchPhrs[i].phyModeId == newPhyModeId) {
-      txData_2B[0] = txData[0];
-      txData_2B[1] = txData[1];
-      memcpy(txData, &(wisun_modeSwitchPhrs[i].phr), MSPHR_LENGTH);
       break;
     }
   }
 
   if (i < numPhrsInArray) {
     // Compute channel to switch to
-    modeSwitchChannel = 0xFFFFU;
-    RAIL_Status_t status = RAIL_IEEE802154_ComputeChannelFromPhyModeId(railHandle, newPhyModeId, &modeSwitchChannel);
+    modeSwitchNewChannel = 0xFFFFU;
+    RAIL_Status_t status = RAIL_IEEE802154_ComputeChannelFromPhyModeId(railHandle, newPhyModeId, &modeSwitchNewChannel);
 
     if (status == RAIL_STATUS_NO_ERROR) {
+      txData_2B[0] = txData[0];
+      txData_2B[1] = txData[1];
+      memcpy(txData, &(wisun_modeSwitchPhrs[i].phr), MSPHR_LENGTH);
+      memcpy(MSphr, &(wisun_modeSwitchPhrs[i].phr), MSPHR_LENGTH);
+      modeSwitchBaseChannel = channel;
+      modeSwitchState = TX_MS_PACKET;
       // Sends Mode Switch packet
       radioTransmit(1, "txModeSwitch");
       // Proper channel switch + sending packets on the new PHY moved to RAILCb_TxPacketSent()
@@ -709,12 +718,31 @@ void trigModeSwitchTx(sl_cli_command_arg_t *args)
   }
 }
 
+bool modeSwitchLifeReturn = false;
+void modeSwitchLife(sl_cli_command_arg_t *args)
+{
+  modeSwitchLifeReturn = !!sl_cli_get_argument_uint32(args, 0);
+  if (modeSwitchLifeReturn) {
+    if (!RAIL_ConfigMultiTimer(true)) {
+      responsePrintError(sl_cli_get_command_string(args, 0), 0x10, "Unable to configure the mode switch multiTimer.");
+      return;
+    }
+  }
+  responsePrint(sl_cli_get_command_string(args, 0), "ModeSwitchLife:%s", modeSwitchLifeReturn ? "Return to base PHY" : "Stay on new PHY");
+}
+
 #else//!RAIL_IEEE802154_SUPPORTS_G_MODESWITCH
 
 void trigModeSwitchTx(sl_cli_command_arg_t *args)
 {
   args->argc = sl_cli_get_command_count(args); /* only reference cmd str */
-  responsePrintError(sl_cli_get_command_string(args, 0), 31, "Mode switching not supported on this chip");
+  responsePrintError(sl_cli_get_command_string(args, 0), 31, "Mode switching not supported on this chip or missing PHR array");
+}
+
+void modeSwitchLife(sl_cli_command_arg_t *args)
+{
+  args->argc = sl_cli_get_command_count(args); /* only reference cmd str */
+  responsePrintError(sl_cli_get_command_string(args, 0), 31, "Mode switching not supported on this chip or missing PHR array");
 }
 
 #endif//RAIL_IEEE802154_SUPPORTS_G_MODESWITCH
@@ -1085,22 +1113,20 @@ void enable802154SignalIdentifier(sl_cli_command_arg_t *args)
 #if RAIL_IEEE802154_SUPPORTS_SIGNAL_IDENTIFIER
   RAIL_Status_t status;
   bool enable = sl_cli_get_argument_uint8(args, 0);
-  if (enable) {
-    if (RAIL_IEEE802154_IsEnabled(railHandle)) {
-      RAIL_IEEE802154_PtiRadioConfig_t radioConfig = RAIL_IEEE802154_GetPtiRadioConfig(railHandle);
-      if (radioConfig < RAIL_IEEE802154_PTI_RADIO_CONFIG_863MHZ_GB868) {
-        status = RAIL_IEEE802154_ConfigSignalIdentifier(railHandle);
-        status = RAIL_IEEE802154_EnableSignalIdentifier(railHandle, enable);
-      } else {
-        RAIL_IEEE802154_EnableSignalIdentifier(railHandle, false);
-        status = RAIL_STATUS_INVALID_CALL;
+  if (RAIL_IEEE802154_IsEnabled(railHandle)) {
+    RAIL_IEEE802154_PtiRadioConfig_t radioConfig = RAIL_IEEE802154_GetPtiRadioConfig(railHandle);
+    if (radioConfig < RAIL_IEEE802154_PTI_RADIO_CONFIG_863MHZ_GB868) {
+      status = RAIL_IEEE802154_ConfigSignalIdentifier(railHandle, (RAIL_IEEE802154_SignalIdentifierMode_t)enable);
+      if (status == RAIL_STATUS_NO_ERROR) {
+        status = RAIL_IEEE802154_EnableSignalDetection(railHandle, enable);
       }
     } else {
-      RAIL_IEEE802154_EnableSignalIdentifier(railHandle, false);
+      RAIL_IEEE802154_ConfigSignalIdentifier(railHandle, RAIL_IEEE802154_SIGNAL_IDENTIFIER_MODE_DISABLE);
       status = RAIL_STATUS_INVALID_CALL;
     }
   } else {
-    status = RAIL_IEEE802154_EnableSignalIdentifier(railHandle, false);
+    RAIL_IEEE802154_ConfigSignalIdentifier(railHandle, RAIL_IEEE802154_SIGNAL_IDENTIFIER_MODE_DISABLE);
+    status = RAIL_STATUS_INVALID_CALL;
   }
   responsePrint(sl_cli_get_command_string(args, 0), "Result:%s",
                 ((status == RAIL_STATUS_NO_ERROR) ? "Success"

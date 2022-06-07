@@ -29,7 +29,7 @@
  ******************************************************************************/
 
 #include "em_device.h"
-#include "em_common.h"
+#include "sl_common.h"
 #include "dmactrl.h"
 
 #if !defined(SL_DMADRV_USE_CUSTOM_DMA_CONTROL_BLOCK)

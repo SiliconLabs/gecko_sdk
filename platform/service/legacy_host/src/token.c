@@ -220,7 +220,7 @@ static void initializeTokenSystem(void)
   }
 
   nvm = mmap(NULL,                     // let system choose address
-             (buf.st_size == 0 ? TOTAL_SIZE : buf.st_size),
+             (buf.st_size == 0 ? TOTAL_SIZE : (size_t) buf.st_size),
              (PROT_READ | PROT_WRITE), // data can be read/written
              MAP_SHARED,               // writes change the file
              fd,
@@ -321,17 +321,17 @@ static void resetTokenData(void)
 
   #define DEFINETOKENS
   #define TOKEN_MFG(name, creator, iscnt, isidx, type, arraysize, ...)
-  #define TOKEN_DEF(name, creator, iscnt, isidx, type, arraysize, ...)  \
-  {                                                                     \
-    type data = __VA_ARGS__;                                            \
-    if (arraysize == 1) {                                               \
-      halInternalSetTokenData(TOKEN_##name, 0x7F, &data, sizeof(type)); \
-    } else {                                                            \
-      uint8_t i;                                                        \
-      for (i = 0; i < arraysize; i++) {                                 \
-        halInternalSetTokenData(TOKEN_##name, i, &data, sizeof(type));  \
-      }                                                                 \
-    }                                                                   \
+  #define TOKEN_DEF(name, creator, iscnt, isidx, type, arraysize, ...)     \
+  {                                                                        \
+    type data = __VA_ARGS__;                                               \
+    if (arraysize == 1) {                                                  \
+      halInternalSetTokenData(TOKEN_##name, 0x7F, &data, sizeof(type));    \
+    } else {                                                               \
+      uint8_t i;                                                           \
+      for (i = 1; i <= arraysize; i++) {                                   \
+        halInternalSetTokenData(TOKEN_##name, i - 1, &data, sizeof(type)); \
+      }                                                                    \
+    }                                                                      \
   }
   #include "stack/config/token-stack.h"
   #undef TOKEN_DEF

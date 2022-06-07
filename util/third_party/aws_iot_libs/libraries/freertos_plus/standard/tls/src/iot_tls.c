@@ -286,11 +286,11 @@ static int prvCheckCertificate( void * pvCtx,
         cCompilationMonth[ tlsCOMPILER_DATE_STRING_MONTH_LENGTH - 1 ] = '\0';
 
         /* Check for server expiration. First check the year. */
-        if( pxCertificate->MBEDTLS_PRIVATE(valid_to).MBEDTLS_PRIVATE(year) < lCompilationYear )
+        if( pxCertificate->valid_to.year < lCompilationYear )
         {
             *pulFlags |= MBEDTLS_X509_BADCERT_EXPIRED;
         }
-        else if( pxCertificate->MBEDTLS_PRIVATE(valid_to).MBEDTLS_PRIVATE(year) == lCompilationYear )
+        else if( pxCertificate->valid_to.year == lCompilationYear )
         {
             /* Convert the month. */
             lCompilationMonth =
@@ -298,14 +298,14 @@ static int prvCheckCertificate( void * pvCtx,
                   ( tlsCOMPILER_DATE_STRING_MONTH_LENGTH - 1 ) ) + 1;
 
             /* Check the month. */
-            if( pxCertificate->MBEDTLS_PRIVATE(valid_to).MBEDTLS_PRIVATE(mon) < lCompilationMonth )
+            if( pxCertificate->valid_to.mon < lCompilationMonth )
             {
                 *pulFlags |= MBEDTLS_X509_BADCERT_EXPIRED;
             }
-            else if( pxCertificate->MBEDTLS_PRIVATE(valid_to).MBEDTLS_PRIVATE(mon) == lCompilationMonth )
+            else if( pxCertificate->valid_to.mon == lCompilationMonth )
             {
                 /* Check the day. */
-                if( pxCertificate->MBEDTLS_PRIVATE(valid_to).MBEDTLS_PRIVATE(day) < lCompilationDay )
+                if( pxCertificate->valid_to.day < lCompilationDay )
                 {
                     *pulFlags |= MBEDTLS_X509_BADCERT_EXPIRED;
                 }

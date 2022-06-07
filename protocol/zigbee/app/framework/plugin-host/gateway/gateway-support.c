@@ -153,9 +153,11 @@ void emberAfPluginGatewayTickCallbackEventHandler(SLXU_UC_EVENT)
   uint8_t index;
   uint32_t msToNextEvent = emberAfMsToNextEventExtended(0xFFFFFFFFUL, &index);
 
+  SL_IGNORE_TYPE_LIMIT_BEGIN;
   msToNextEvent = (msToNextEvent > MAX_READ_TIMEOUT_MS
                    ? MAX_READ_TIMEOUT_MS
                    : msToNextEvent);
+  SL_IGNORE_TYPE_LIMIT_END;
   emberAfPluginFileDescriptorDispatchWaitForEvents(msToNextEvent);
 }
 

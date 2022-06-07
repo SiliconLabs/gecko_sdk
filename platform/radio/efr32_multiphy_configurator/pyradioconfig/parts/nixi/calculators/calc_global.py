@@ -58,6 +58,4 @@ class CALC_Global_nixi(CALC_Global_nerio):
         self._addModelRegister(model, 'MODEM.DSATHD2.JUMPDETEN',               int, ModelVariableFormat.HEX)
         self._addModelRegister(model, 'MODEM.DSATHD2.POWABSTHDLOG',            int, ModelVariableFormat.HEX)
 
-    def calc_family_name(self, model):
-        model.vars.family.value = "nixi"
 

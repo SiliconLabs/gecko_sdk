@@ -75,7 +75,7 @@ class RAILAdapter(object):
   def _encodeWriteAddress(self, reg_address, write_length=1, radio_action=0):
 
     # TODO: This is not generic enough for a real solution, but it unblocks validation
-    if self.partFamily.lower() in ["panther", "lynx", "ocelot", "bobcat", "leopard"]:
+    if self.partFamily.lower() in ["panther", "lynx", "ocelot", "bobcat", "leopard", "margay"]:
       reg_base = RAILAdapter._REG_BASES_EFR32XG2x[int(reg_address) & 0xFFFF0000]
     elif self.partFamily.lower() in ["sol"]:
       reg_base = RAILAdapter._REG_BASES_EFR32XG25[int(reg_address) & 0xFFFF0000]

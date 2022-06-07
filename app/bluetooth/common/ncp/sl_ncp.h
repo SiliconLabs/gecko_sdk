@@ -31,6 +31,7 @@
 #ifndef SL_NCP_H
 #define SL_NCP_H
 
+#include <stdbool.h>
 #include <stdint.h>
 #include "sl_status.h"
 #include "sl_ncp_config.h"
@@ -38,12 +39,12 @@
 #include "sl_power_manager.h"
 
 /**************************************************************************//**
- * Ncp Initialization function.
+ * NCP initialization function.
  *****************************************************************************/
 void sl_ncp_init(void);
 
 /**************************************************************************//**
- * Ncp process action function.
+ * NCP process action function.
  *****************************************************************************/
 void sl_ncp_step(void);
 
@@ -54,18 +55,35 @@ bool sl_ncp_local_evt_process(sl_bt_msg_t *evt);
 
 /**************************************************************************//**
  * User command (message_to_target) handler callback.
+ *
+ * Handle user defined commands received from NCP-host.
+ *
+ * @param[in] data Data received from NCP through UART.
  *****************************************************************************/
 void sl_ncp_user_cmd_message_to_target_cb(void *data);
 
 /**************************************************************************//**
- * Send user command (message_to_target) response
+ * Send user command (message_to_target) response.
+ *
+ * Send response to user defined (message_to_target) command to NCP-host.
+ *
+ * @param[out] result Result of the response to the command received.
+ * @param[out] len Message length.
+ * @param[out] data Data to send to NCP.
  *****************************************************************************/
-void sl_ncp_user_cmd_message_to_target_rsp(sl_status_t result, uint8_t len, uint8_t *data);
+void sl_ncp_user_cmd_message_to_target_rsp(sl_status_t result,
+                                           uint8_t len,
+                                           uint8_t *data);
 
 /**************************************************************************//**
- * Send NCP user event response
+ * Send user event (message_to_host).
+ *
+ * Send user defined (message_to_host) event to NCP-host.
+ *
+ * @param[out] len Message length.
+ * @param[out] data Data to send to NCP.
  *****************************************************************************/
-void sl_ncp_user_evt_message_to_target(uint8_t len, uint8_t *data);
+void sl_ncp_user_evt_message_to_host(uint8_t len, uint8_t *data);
 
 /**************************************************************************//**
  * Check if NCP allows go to sleep

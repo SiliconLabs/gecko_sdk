@@ -72,6 +72,25 @@ typedef struct {
 } BareBootTable_t;
 
 // --------------------------------
+// Bootloader defines
+
+/// Bootloader version major version shift value
+#define BOOTLOADER_VERSION_MAJOR_SHIFT (24U)
+/// Bootloader version minor version shift value
+#define BOOTLOADER_VERSION_MINOR_SHIFT (16U)
+/// Bootloader version major version mask
+#define BOOTLOADER_VERSION_MAJOR_MASK (0xFF000000U)
+/// Bootloader version minor version mask
+#define BOOTLOADER_VERSION_MINOR_MASK (0x00FF0000U)
+
+/// Bootloader interface APIs are trust zone aware
+#if defined(_SILICON_LABS_32B_SERIES_2) && !defined(BOOTLOADER_APPLOADER)
+// The bootloader with AppLoader as the communication interface will not
+// re-configure the SMU since it is using the NS peripherals by default.
+#define BOOTLOADER_INTERFACE_TRUSTZONE_AWARE
+#endif
+
+// --------------------------------
 // Bootloader information typedefs
 
 /// Type of bootloader
@@ -156,19 +175,37 @@ typedef struct {
   // ------------------------------
   /// Remaining number of application upgrades
   uint32_t (*remainingApplicationUpgrades)(void);
+  // ------------------------------
+  /// Get the list of the peripheral that is used by the bootloader
+  void (*getPeripheralList)(uint32_t *ppusatd0, uint32_t *ppusatd1);
+  // ------------------------------
+  /// Get base address of bootloader upgrade image
+  uint32_t (*getUpgradeLocation)(void);
 } MainBootloaderTable_t;
 
-// --------------------------------
-// Bootloader defines
+#if defined(BOOTLOADER_INTERFACE_TRUSTZONE_AWARE)
+/// Struct that represents the state of the PPUSATDn, PPUPATDn and CLKENn registers
+typedef struct {
+  uint32_t PPUSATD0;
+  uint32_t PPUSATD1;
+#if defined(SMU_NS_CFGNS_BASE)
+  uint32_t PPUPATD0;
+  uint32_t PPUPATD1;
+#endif
+#if defined(_CMU_CLKEN0_MASK)
+  uint32_t CLKEN0;
+  uint32_t CLKEN1;
+#endif
+  uint32_t SMU_STATUS;
+} Bootloader_PPUSATDnCLKENnState_t;
 
-/// Bootloader version major version shift value
-#define BOOTLOADER_VERSION_MAJOR_SHIFT (24U)
-/// Bootloader version minor version shift value
-#define BOOTLOADER_VERSION_MINOR_SHIFT (16U)
-/// Bootloader version major version mask
-#define BOOTLOADER_VERSION_MAJOR_MASK (0xFF000000U)
-/// Bootloader version minor version mask
-#define BOOTLOADER_VERSION_MINOR_MASK (0x00FF0000U)
+/// Struct containing function arguments
+typedef struct Bootloader_inOutVec {
+  void *base;   /// the start address of the memory buffer
+  size_t len;   /// the size in bytes
+} Bootloader_inOutVec_t;
+
+#endif // BOOTLOADER_INTERFACE_TRUSTZONE_AWARE
 
 // --------------------------------
 // Bootloader capabilities
@@ -195,12 +232,16 @@ typedef struct {
 #define BOOTLOADER_CAPABILITY_ENFORCE_CERTIFICATE_SECURE_BOOT  (1 << 8)
 /// Bootloader has the capability of application rollback protection
 #define BOOTLOADER_CAPABILITY_ROLLBACK_PROTECTION              (1 << 9)
+/// Bootloader has the capability to check the peripherals in use
+#define BOOTLOADER_CAPABILITY_PERIPHERAL_LIST                  (1 << 10)
+
 /// @brief Bootloader has the capability of storing data in an internal or
 /// external storage medium
 #define BOOTLOADER_CAPABILITY_STORAGE                     (1 << 16)
 /// @brief Bootloader has the capability of communicating with host processors
 /// using a communication interface
 #define BOOTLOADER_CAPABILITY_COMMUNICATION               (1 << 20)
+
 // --------------------------------
 // Magic constants for bootloader tables
 
@@ -211,7 +252,7 @@ typedef struct {
 
 /// @cond DO_NOT_INCLUDE_WITH_DOXYGEN
 #define BOOTLOADER_HEADER_VERSION_FIRST_STAGE             (0x00000001UL)
-#define BOOTLOADER_HEADER_VERSION_MAIN                    (0x00000001UL)
+#define BOOTLOADER_HEADER_VERSION_MAIN                    (0x00000002UL)
 /// @endcond
 
 // --------------------------------
@@ -282,33 +323,66 @@ typedef struct {
 #elif defined(_SILICON_LABS_GECKO_INTERNAL_SDID_200)
 // No bootloader area: Place the bootloader in main flash
 #define BTL_FIRST_STAGE_BASE              FLASH_BASE
+#if defined(BOOTLOADER_APPLOADER)
+#define BTL_APPLICATION_BASE              (FLASH_BASE + 0x00012000UL)
+#elif defined(BOOTLOADER_SECURE) && defined(BOOTLOADER_SUPPORT_COMMUNICATION)
+#define BTL_APPLICATION_BASE              (FLASH_BASE + 0x00006000UL)
+#else
 #define BTL_APPLICATION_BASE              (FLASH_BASE + 0x00004000UL)
+#endif // BOOTLOADER_APPLOADER
 #define BTL_MAIN_STAGE_MAX_SIZE           (BTL_APPLICATION_BASE \
                                            - BTL_FIRST_STAGE_SIZE)
 #elif defined(_SILICON_LABS_GECKO_INTERNAL_SDID_205)
 // No bootloader area: Place the bootloader in main flash
 #define BTL_FIRST_STAGE_BASE              FLASH_BASE
+#if defined(BOOTLOADER_APPLOADER)
+#define BTL_APPLICATION_BASE              (FLASH_BASE + 0x00012000UL)
+#else
 #define BTL_APPLICATION_BASE              (FLASH_BASE + 0x00006000UL)
+#endif // BOOTLOADER_APPLOADER
 #define BTL_MAIN_STAGE_MAX_SIZE           (BTL_APPLICATION_BASE \
                                            - BTL_FIRST_STAGE_SIZE)
 #elif defined(_SILICON_LABS_GECKO_INTERNAL_SDID_210)
 // No bootloader area: Place the bootloader in main flash
 #define BTL_FIRST_STAGE_BASE              FLASH_BASE
+#if defined(BOOTLOADER_APPLOADER)
+#define BTL_APPLICATION_BASE              (FLASH_BASE + 0x00012000UL)
+#else
 #define BTL_APPLICATION_BASE              (FLASH_BASE + 0x00006000UL)
+#endif // BOOTLOADER_APPLOADER
 #define BTL_MAIN_STAGE_MAX_SIZE           (BTL_APPLICATION_BASE    \
                                            - (BTL_FIRST_STAGE_BASE \
                                               + BTL_FIRST_STAGE_SIZE))
 #elif defined(_SILICON_LABS_GECKO_INTERNAL_SDID_215)
 // No bootloader area: Place the bootloader in main flash
 #define BTL_FIRST_STAGE_BASE              FLASH_BASE
+#if defined(BOOTLOADER_APPLOADER)
+#define BTL_APPLICATION_BASE              (FLASH_BASE + 0x00012000UL)
+#else
 #define BTL_APPLICATION_BASE              (FLASH_BASE + 0x00006000UL)
+#endif // BOOTLOADER_APPLOADER
 #define BTL_MAIN_STAGE_MAX_SIZE           (BTL_APPLICATION_BASE    \
                                            - (BTL_FIRST_STAGE_BASE \
                                               + BTL_FIRST_STAGE_SIZE))
 #elif defined(_SILICON_LABS_GECKO_INTERNAL_SDID_220)
 // No bootloader area: Place the bootloader in main flash
 #define BTL_FIRST_STAGE_BASE              FLASH_BASE
+#if defined(BOOTLOADER_APPLOADER)
+#define BTL_APPLICATION_BASE              (FLASH_BASE + 0x00012000UL)
+#else
 #define BTL_APPLICATION_BASE              (FLASH_BASE + 0x00006000UL)
+#endif // BOOTLOADER_APPLOADER
+#define BTL_MAIN_STAGE_MAX_SIZE           (BTL_APPLICATION_BASE    \
+                                           - (BTL_FIRST_STAGE_BASE \
+                                              + BTL_FIRST_STAGE_SIZE))
+#elif defined(_SILICON_LABS_GECKO_INTERNAL_SDID_230)
+// No bootloader area: Place the bootloader in main flash
+#define BTL_FIRST_STAGE_BASE              FLASH_BASE
+#if defined(BOOTLOADER_APPLOADER)
+#define BTL_APPLICATION_BASE              (FLASH_BASE + 0x00012000UL)
+#else
+#define BTL_APPLICATION_BASE              (FLASH_BASE + 0x00006000UL)
+#endif // BOOTLOADER_APPLOADER
 #define BTL_MAIN_STAGE_MAX_SIZE           (BTL_APPLICATION_BASE    \
                                            - (BTL_FIRST_STAGE_BASE \
                                               + BTL_FIRST_STAGE_SIZE))
@@ -428,6 +502,72 @@ bool bootloader_verifyApplication(uint32_t startAddress);
  ******************************************************************************/
 bool bootloader_secureBootEnforced(void);
 
+/***************************************************************************//**
+ * Get base address of the bootloader upgrade image.
+ *
+ * @param[out] location the base address of bootloader upgrade image.
+ *
+ * @return Returns true if the location was found.
+ ******************************************************************************/
+bool bootloader_getUpgradeLocation(uint32_t *location);
+
+#if defined(BOOTLOADER_INTERFACE_TRUSTZONE_AWARE)
+/***************************************************************************//**
+ * Get the list of the peripheral that is used by the bootloader.
+ *
+ * @param[out] ppusatd0      Word containing all the peripherals used by the
+ *                           bootloader. Each bit represents a peripheral,
+ *                           which is ordered after the PPUSATD0 register bit
+ *                           fields.
+ *
+ * @param[out] ppusatd1      Word containing all the peripherals used by the
+ *                           bootloader. Each bit represents a peripheral,
+ *                           which is ordered after the PPUSATD1 register bit
+ *                           fields.
+ ******************************************************************************/
+void bootloader_getPeripheralList(uint32_t *ppusatd0, uint32_t *ppusatd1);
+
+/***************************************************************************//**
+ * Save PPUSATDn state in RAM.
+ * Configure the peripheral attributes before calling into the bootloader.
+ *
+ * @note Enters ATOMIC section.
+ *
+ * @param[out] ctx      Context struct to save register state into
+ *
+ * @return True if a valid certificate version is found.
+ ******************************************************************************/
+void bootloader_ppusatdnSaveReconfigureState(Bootloader_PPUSATDnCLKENnState_t *ctx);
+
+/***************************************************************************//**
+ * Restore PPUSATDn state from RAM.
+ * Store the USART used by the bootloader if this is unknown.
+ *
+ * @note Exits ATOMIC section.
+ *
+ * @param[in] ctx      Context struct to restore register state from
+ *
+ * @return True if a valid certificate version is found.
+ ******************************************************************************/
+void bootloader_ppusatdnRestoreState(Bootloader_PPUSATDnCLKENnState_t *ctx);
+
+/***************************************************************************//**
+ * Called before the bootloader is initialized.
+ *
+ * This function implementation does not perform anything, but it is __weak
+ * so that it can be implemented by another application.
+ ******************************************************************************/
+void sli_bootloader_preHook(void);
+
+/***************************************************************************//**
+ * Called after the bootloader is de-initialized.
+ *
+ * This function implementation does not perform anything, but it is __weak
+ * so that it can be implemented by another application.
+ ******************************************************************************/
+void sli_bootloader_postHook(void);
+#endif
+
 #if !defined(_SILICON_LABS_GECKO_INTERNAL_SDID_80)
 /***************************************************************************//**
  * Count the total remaining number of application upgrades.
@@ -447,6 +587,13 @@ uint32_t bootloader_remainingApplicationUpgrades(void);
  ******************************************************************************/
 bool bootloader_getCertificateVersion(uint32_t *version);
 #endif // _SILICON_LABS_32B_SERIES_2
+
+/***************************************************************************//**
+ * Get reset cause of the bootloader.
+ *
+ * @return Reset cause of the bootloader.
+ ******************************************************************************/
+BootloaderResetCause_t bootloader_getResetReason(void);
 
 #if defined(BOOTLOADER_HAS_FIRST_STAGE)
 /***************************************************************************//**

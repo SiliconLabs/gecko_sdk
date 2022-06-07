@@ -32,10 +32,9 @@
 
 #if defined(CoreDebug_DHCSR_C_DEBUGEN_Msk)
 
-#include "em_assert.h"
+#include "sl_assert.h"
 #include "em_cmu.h"
 #include "em_gpio.h"
-#include "em_assert.h"
 #include "em_msc.h"
 #if defined(_SILICON_LABS_32B_SERIES_2)
 #include "em_se.h"

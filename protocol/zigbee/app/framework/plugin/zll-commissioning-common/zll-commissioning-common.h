@@ -235,17 +235,6 @@ enum
 #define ZLL_HEADER_TRANSACTION_ID_OFFSET  3 // four bytes
 #define ZLL_HEADER_OVERHEAD               7
 
-// Radio modes used by PHY
-#ifdef DOXYGEN_SHOULD_SKIP_THIS
-enum EmberRadioPowerModeEnum
-#else
-enum
-#endif
-{
-  EMBER_RADIO_POWER_MODE_RX_ON,
-  EMBER_RADIO_POWER_MODE_OFF
-};
-
 // Uncomment the next line for extra debugs!
 // #define PLUGIN_DEBUG
 #if defined(PLUGIN_DEBUG)

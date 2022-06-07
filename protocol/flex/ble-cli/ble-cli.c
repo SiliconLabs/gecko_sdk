@@ -79,9 +79,17 @@ void connect_ble_cli_start_adv_command(sl_cli_command_arg_t *arguments)
     sl_bt_advertiser_create_set(&adv_handle);
   }
 
-  sl_status_t status = sl_bt_advertiser_start(adv_handle,
-                                              discoverable_mode,
-                                              connectable_mode);
+  // Generate the advertising data from the GATT configurator
+  sl_status_t status = sl_bt_legacy_advertiser_generate_data(adv_handle,
+                                                             discoverable_mode);
+  if (status == SL_STATUS_OK) {
+    connect_core_debug_print("success\n");
+  } else {
+    connect_core_debug_print("error: 0x%04X\n", status);
+  }
+
+  status = sl_bt_legacy_advertiser_start(adv_handle,
+                                         connectable_mode);
 
   if (status == SL_STATUS_OK) {
     connect_core_debug_print("success\n");

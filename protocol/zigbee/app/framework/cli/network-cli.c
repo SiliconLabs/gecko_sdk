@@ -155,9 +155,7 @@ void networkChangeChannelCommand(sl_cli_command_arg_t *arguments)
                     status);
 }
 
-// TODO: Put gating back in after we have a mechanism in place to do so
-// for the generated CLI.
-//#if defined(EMBER_AF_TC_SWAP_OUT_TEST)
+#ifdef EMBER_AF_TC_SWAP_OUT_TEST
 void networkInitCommand(sl_cli_command_arg_t *arguments)
 {
   EmberNetworkInitStruct networkInitStruct = {
@@ -166,7 +164,11 @@ void networkInitCommand(sl_cli_command_arg_t *arguments)
   EmberStatus status = emberNetworkInit(&networkInitStruct);
   emberAfAppPrintln("Network Init returned: 0x%X", status);
 }
-//#endif
+#else
+void networkInitCommand(sl_cli_command_arg_t *arguments)
+{
+}
+#endif
 
 void networkSetCommand(sl_cli_command_arg_t *arguments)
 {
@@ -283,11 +285,7 @@ void networkChangeChildTimeoutOptionMaskCommand(void);
 void changeKeepAliveModeCommand(void);
 void networkCheckPjoinCommand(void);
 
-// TODO: Gate this again when we have the mechanism for doing so
-// with the generated CLI.
-//#if defined(EMBER_AF_TC_SWAP_OUT_TEST)
 void networkInitCommand(void);
-//#endif
 
 /**
  * @addtogroup cli
@@ -311,7 +309,7 @@ void networkInitCommand(void);
  *
  *        <b>network rejoin &lt;encrypted&gt;</b>
  *        - <i>Find and rejoin the previous network the device was connected to.</i>
- *           - <i>encrypted - uint8_t. A single byte boolean 0 or 1 indicating
+ *           - <i>encrypted - uint8_t. A single byte bool 0 or 1 indicating
  *                            whether or not the rejoin should be done with encryption.</i>
  *
  *        <b>network leave</b>
@@ -381,10 +379,8 @@ EmberCommandEntry networkCommands[] = {
   { "multi-phy-start", networkMultiPhyStartCommand, "uusu*" },
   { "multi-phy-stop", networkMultiPhyStopCommand, "" },
 
-#if defined(EMBER_AF_TC_SWAP_OUT_TEST)
   // Do not document this command.
   { "init", networkInitCommand, "" },
-#endif
 
   { "set", networkSetCommand, "u" },
   { "change-keep-alive-mode", changeKeepAliveModeCommand, "u" },
@@ -535,9 +531,7 @@ void networkChangeChannelCommand(void)
                     status);
 }
 
-// TODO: Put gating back in after we have a mechanism in place to do so
-// for the generated CLI.
-//#if defined(EMBER_AF_TC_SWAP_OUT_TEST)
+#ifdef EMBER_AF_TC_SWAP_OUT_TEST
 void networkInitCommand(void)
 {
   EmberNetworkInitStruct networkInitStruct = {
@@ -546,7 +540,11 @@ void networkInitCommand(void)
   EmberStatus status = emberNetworkInit(&networkInitStruct);
   emberAfAppPrintln("Network Init returned: 0x%X", status);
 }
-//#endif
+#else
+void networkInitCommand(void)
+{
+}
+#endif
 
 void networkSetCommand(void)
 {

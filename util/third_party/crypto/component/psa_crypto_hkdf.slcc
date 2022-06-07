@@ -1,16 +1,16 @@
 id: psa_crypto_hkdf
 package: platform
-label: PSA Crypto support for HKDF
+label: HKDF
 description: >-
-  This component provides support for key derivation using HKDF in PSA Crypto.
-  Hardware acceleration of HKDF is only supported on Vault High devices and
-  only for opaque keys but cannot operate standalone (currently). Therefore
-  the builtin HKDF implementation of PSA Crypto is applied on all devices.
-category: Platform|Security
+  This component provides support for one shot key derivation using HKDF through
+  a Silicon Labs custom API integrated into PSA Crypto in addition to the built-
+  in support through the standard PSA APIs.
+category: Platform|Security|PSA Crypto|Key Derivation
 quality: production
 provides:
   - name: psa_crypto_hkdf
 requires:
+  - name: psa_crypto
   - name: psa_crypto_hmac
 template_contribution:
   - name: psa_crypto_config

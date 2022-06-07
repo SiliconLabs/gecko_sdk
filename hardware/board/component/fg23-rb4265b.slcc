@@ -14,9 +14,9 @@
   - name: SL_KIT_NAME
     value: '"FG23-RB4265B"'
   - name: SL_KIT_REV
-    value: '"A00"'
+    value: '"A01"'
 - tag:
   - kit:opn:FG23-RB4265B
   - kit:pn:RB4265
   - kit:variant:B
-  - kit:revision:A00
+  - kit:revision:A01

@@ -139,7 +139,15 @@ static int32_t installImageFromSlot(int32_t slotId)
 #endif
     if (storage_upgradeSeFromSlot(parseContext.slotId)) {
       // SE upgrade should be applied
-      if (!bootload_commitSeUpgrade(BTL_UPGRADE_LOCATION)) {
+#if defined(BOOTLOADER_SE_UPGRADE_NO_STAGING) \
+      && (BOOTLOADER_SE_UPGRADE_NO_STAGING == 1)
+      const BootloaderStorageSlot_t storageSlots[] = BTL_STORAGE_SLOTS;
+      const uint32_t upgradeAddress = storageSlots[slotId].address
+                                      + parseContext.parserContext.offsetOfSeUpgradeTag;
+#else
+      const uint32_t upgradeAddress = BTL_UPGRADE_LOCATION;
+#endif
+      if (!bootload_commitSeUpgrade(upgradeAddress)) {
         BTL_DEBUG_PRINTLN("SE upgrade commit fail");
         return BOOTLOADER_ERROR_STORAGE_BOOTLOAD;
       }
@@ -147,7 +155,7 @@ static int32_t installImageFromSlot(int32_t slotId)
       BTL_DEBUG_PRINTLN("SE upgrade parse fail");
     }
   }
-#endif
+#endif // SEMAILBOX_PRESENT || CRYPTOACC_PRESENT
 
   if ((parseContext.imageProperties.contents & BTL_IMAGE_CONTENT_BOOTLOADER)) {
     BTL_DEBUG_PRINT("BL upg ");
@@ -175,22 +183,28 @@ static int32_t installImageFromSlot(int32_t slotId)
     }
     return BOOTLOADER_ERROR_STORAGE_BOOTLOAD;
   } else {
+#if (defined(BOOTLOADER_SE_UPGRADE_NO_STAGING)  \
+    && (BOOTLOADER_SE_UPGRADE_NO_STAGING == 0)) \
+    || !defined(BOOTLOADER_SE_UPGRADE_NO_STAGING)
     // This should be an application upgrade
     if (!(parseContext.imageProperties.contents & BTL_IMAGE_CONTENT_APPLICATION)) {
       // ...but there is no app in the GBL
       BTL_DEBUG_PRINTLN("No app in slot");
       // Continue to next image
       return BOOTLOADER_ERROR_STORAGE_BOOTLOAD;
-    } else if (!storage_bootloadApplicationFromSlot(
-                 parseContext.slotId,
-                 parseContext.imageProperties.application.version)) {
+    }
+#endif // BOOTLOADER_SE_UPGRADE_NO_STAGING
+
+    if ((parseContext.imageProperties.contents & BTL_IMAGE_CONTENT_APPLICATION)
+        && !storage_bootloadApplicationFromSlot(
+          parseContext.slotId,
+          parseContext.imageProperties.application.version)) {
       // App upgrade failed.
       BTL_DEBUG_PRINTLN("App upgrade fail");
       // Continue to next image
       return BOOTLOADER_ERROR_STORAGE_BOOTLOAD;
-    } else {
-      // Application was updated. Reboot into new image.
     }
+    // Application was updated. Reboot into new image.
   }
 
   return BOOTLOADER_OK;

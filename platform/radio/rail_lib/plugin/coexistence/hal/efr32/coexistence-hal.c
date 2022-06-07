@@ -112,9 +112,6 @@ static void (*reqCallback)(void) = NULL;
 static void (*gntCallback)(void) = NULL;
 static void (*rhoCallback)(void) = NULL;
 static void (*phySelectCallback)(void) = NULL;
-#ifdef SL_RAIL_UTIL_COEX_WIFI_TX_PORT
-static void (*wifiTxCallback)(void) = NULL;
-#endif
 
 static void COEX_HAL_REQ_ISR(uint8_t pin, void *callbackCtx)
 {
@@ -147,15 +144,6 @@ static void COEX_HAL_PHY_SELECT_ISR(uint8_t pin, void *callbackCtx)
 
   phySelectCallback();
 }
-
-#ifdef SL_RAIL_UTIL_COEX_WIFI_TX_PORT
-static void COEX_HAL_WIFI_TX_ISR(uint8_t pin, void *callbackCtx)
-{
-  (void)pin;
-  (void)callbackCtx;
-  wifiTxCallback();
-}
-#endif
 
 static void setGpioConfig(COEX_GpioHandle_t gpioHandle)
 {
@@ -358,19 +346,23 @@ bool COEX_HAL_ConfigPhySelect(COEX_HAL_GpioConfig_t *gpioConfig)
 #ifdef SL_RAIL_UTIL_COEX_WIFI_TX_PORT
 bool COEX_HAL_ConfigWifiTx(COEX_HAL_GpioConfig_t *gpioConfig)
 {
-  bool status = false;
-
-  gpioConfig->isr = &COEX_HAL_WIFI_TX_ISR;
-  status = COEX_ConfigWifiTx(gpioConfig);
-  if (status) {
-    wifiTxCallback = gpioConfig->config.cb;
+  bool status = COEX_ConfigWifiTx(gpioConfig);
+  if (!status) {
+    return false;
   }
-  return status;
-}
-
-bool COEX_HAL_GetWifiTx(void)
-{
-  return isGpioInSet((COEX_GpioHandle_t)&sli_coex_wifiTxCfg, false);
+  CMU_ClockEnable(cmuClock_PRS, true);
+  // enable wifiTx interrupt if not already enabled
+  if (gpioConfig->intNo == INVALID_INTERRUPT) {
+    sli_coex_enableGpioInt(gpioConfig, true, false);
+  }
+  // Connect WIFI_TX_CHANNEL to CONSUMER_MODEM_PAEN for signal identifier reset
+  // via PRS
+  PRS_SourceAsyncSignalSet(SL_RAIL_UTIL_COEX_WIFI_TX_CHANNEL,
+                           gpioConfig->source,
+                           gpioConfig->signal);
+  PRS_ConnectConsumer(SL_RAIL_UTIL_COEX_WIFI_TX_CHANNEL, prsTypeAsync,
+                      offsetof(PRS_TypeDef, CONSUMER_MODEM_PAEN));
+  return true;
 }
 #endif
 

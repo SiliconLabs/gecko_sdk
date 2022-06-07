@@ -12,6 +12,13 @@ description: Hall effect demo code for the Si72xx-WD-Kit using a Silicon Labs
   SLSTK3400A-EFM32HG Starter Kit which is included in the Si72xx-WD-Kit.
 
 category: Example|MCU Example
+filter:
+  - name: "Device Type"
+    value: ["SoC"]
+  - name: "MCU"
+    value: ["32-bit MCU"]
+  - name: "Project Difficulty"
+    value: ["Advanced"]
 component:
   - id: si72xx_driver
   - id: sleeptimer
@@ -49,8 +56,10 @@ include:
     - path: ps_si7211.h
     - path: ps_si7212.h
     - path: ps_si7213.h
-other_file:
-  - path: "readme.md"
+readme:
+  - path: readme.md
+ui_hints:
+  highlight: readme.md
 configuration:
   - name: SL_BOARD_ENABLE_DISPLAY
     value: 1

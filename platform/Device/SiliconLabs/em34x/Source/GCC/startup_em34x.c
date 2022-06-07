@@ -126,6 +126,10 @@ void DEBUG_IRQHandler(void) __attribute__ ((weak, alias("Default_Handler")));
 /*----------------------------------------------------------------------------
  * Exception / Interrupt Vector table
  *----------------------------------------------------------------------------*/
+#if defined (__ICCARM__)
+#pragma data_alignment=256
+#endif
+
 extern const tVectorEntry __Vectors[];
 const tVectorEntry       __Vectors[] __attribute__ ((section(".vectors"))) = {
   /* Cortex-M Exception Handlers */

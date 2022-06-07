@@ -199,8 +199,9 @@ static void printResult(void)
   if (testParams.messageSuccessCount > 0) {
     mean = testParams.sumSendTimeMs / testParams.messageSuccessCount;
     //10X scaling factor makes large number less likely to overflow
-    var = testParams.varSendTimeMs * 10 / testParams.messageSuccessCount - mean * mean;
-    if (var > 0) {
+    var = testParams.varSendTimeMs * 10 / testParams.messageSuccessCount;
+    if (var > (mean * mean) ) {
+      var -= (mean * mean);
       std = sqrt(fabs(var));
     } else {
       std = 0;

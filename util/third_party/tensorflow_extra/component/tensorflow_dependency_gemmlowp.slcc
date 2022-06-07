@@ -15,5 +15,7 @@ include:
       - path: fixedpoint/fixedpoint_neon.h
       - path: fixedpoint/fixedpoint_sse.h
       - path: internal/detect_platform.h
+source:
+  []
 ui_hints:
   visibility: never

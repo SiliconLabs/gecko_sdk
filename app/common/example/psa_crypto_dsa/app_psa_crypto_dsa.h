@@ -22,8 +22,8 @@
 // -----------------------------------------------------------------------------
 #include "app_psa_crypto_key.h"
 #include "app_psa_crypto_macro.h"
-#if defined(MBEDTLS_PSA_CRYPTO_BUILTIN_KEYS)
-#include "sli_se_opaque_types.h"
+#if defined(SEMAILBOX_PRESENT)
+#include "sl_psa_values.h"
 #endif
 
 // -----------------------------------------------------------------------------

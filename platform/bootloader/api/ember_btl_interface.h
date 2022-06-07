@@ -30,7 +30,7 @@
 #if !defined(SL_EMBER_BOOTLOADER_TYPE)
   #error SL_EMBER_BOOTLOADER_TYPE is undefined
 #elif (SL_EMBER_BOOTLOADER_TYPE != SL_EMBER_BOOTLOADER_TYPE_APPLICATION)
-      && (SL_EMBER_BOOTLOADER_TYPE != SL_EMBER_BOOTLOADER_TYPE_STANDALONE)
+&& (SL_EMBER_BOOTLOADER_TYPE != SL_EMBER_BOOTLOADER_TYPE_STANDALONE)
   #error SL_EMBER_BOOTLOADER_TYPE has an invalid value
 #endif
 
@@ -51,14 +51,14 @@
 typedef struct EblHeader_s {
   uint16_t tag;                 /* = EBLTAG_HEADER              */
   uint16_t len;                 /* =                            */
-  uint16_t version;             /* Version of the ebl format    */
+  uint16_t version;             /* Version of the EBL format    */
   uint16_t signature;           /* Magic signature: 0xE350      */
   uint32_t flashAddr;           /* Address where the AAT is stored */
-  uint32_t aatCrc;              /* CRC of the ebl header portion of the AAT */
+  uint32_t aatCrc;              /* CRC of the EBL header portion of the AAT */
   // aatBuff is oversized to account for the potential of the AAT to grow in
   //  the future.  Only the first 128 bytes of the AAT can be referenced as
-  //  part of the ebl header, although the AAT itself may grow to 256 total
-  uint8_t  aatBuff[AAT_MAX_SIZE];         /* buffer for the ebl portion of the AAT    */
+  //  part of the EBL header, although the AAT itself may grow to 256 total
+  uint8_t  aatBuff[AAT_MAX_SIZE];         /* buffer for the EBL portion of the AAT    */
 } EblHdeader_t;
 
 typedef struct CcmState_s {
@@ -166,25 +166,25 @@ typedef struct pageRange8bit_s {
 
 typedef struct {
   BaseAddressTable_t baseTable;
-  // The following fields are used for ebl and bootloader processing.
+  // The following fields are used for EBL and bootloader processing.
   uint8_t  platInfo;          // type of platform
   uint8_t  microInfo;         // type of micro
-  uint8_t  phyInfo;           // type of phy
+  uint8_t  phyInfo;           // type of PHY
   uint8_t  aatSize;           // size of the AAT itself
   uint16_t softwareVersion;   // EmberZNet SOFTWARE_VERSION
   uint16_t softwareBuild;     // EmberZNet EMBER_BUILD_NUMBER
-  uint32_t timestamp;         // Unix epoch time of .ebl file, filled in by ebl gen
+  uint32_t timestamp;         // Unix epoch time of .EBL file, filled in by EBL gen
 
-  // String, filled in by ebl generation. Used to be larger, reduced so that the
+  // String, filled in by EBL generation. Used to be larger, reduced so that the
   // app properties struct could be placed in the same word for apps regardless
   // of whether they had an AAT (which Bluetooth and MCU apps do not).
   uint8_t         imageInfo[IMAGE_INFO_MAXLEN];
   const void      *applicationProperties; // ptr to app properties struct for Gecko bootloader
   // eat up the remainder of the previous imageInfo space
   uint8_t         reserved[IMAGE_INFO_MAXLEN_OLD - IMAGE_INFO_MAXLEN - sizeof(void*)];
-  uint32_t        imageCrc;  // CRC over following pageRanges, filled in by ebl gen
+  uint32_t        imageCrc;  // CRC over following pageRanges, filled in by EBL gen
   pageRange8bit_t pageRanges[NUM_AAT_PAGE_RANGES];  // Flash pages used by app.
-                                                    // Filled in by ebl gen.
+                                                    // Filled in by EBL gen.
                                                     // 2 bytes per struct
 
   void *simeeSegmentBegin;                     // assumed to be 4 bytes on Cortex M3
@@ -209,7 +209,7 @@ typedef struct {
   // since only the first 128 bytes of the AAT become part of the EBL header.
   uint8_t bootloaderReserved[35 - (NUM_AAT_PAGE_RANGES * sizeof(pageRange8bit_t))];
 
-  // part of AAT, not included as part of ebl header
+  // part of AAT, not included as part of EBL header
   void *reserved1;
   void *noInitSegmentBegin;
   void *reserved2;
@@ -230,13 +230,13 @@ typedef struct {
   uint16_t                bootloaderVersion;
   const AppAddressTable_t *appAddressTable;
 
-  // plat/micro/phy info added in version 0x0104
+  // plat/micro/PHY info added in version 0x0104
   uint8_t platInfo;                            // type of platform, defined in micro.h
   uint8_t microInfo;                           // type of micro, defined in micro.h
-  uint8_t phyInfo;                             // type of phy, defined in micro.h
+  uint8_t phyInfo;                             // type of PHY, defined in micro.h
   uint8_t reserved;                            // reserved for future use
 
-  // Moved to this location after plat/micro/phy info added in version 0x0104
+  // Moved to this location after plat/micro/PHY info added in version 0x0104
   void (*eblProcessInit)(EblConfig_t *config,
                          void *dataState,
                          uint8_t *tagBuf,

@@ -3,7 +3,7 @@
 * @brief BT Mesh Provisioner component
 *******************************************************************************
 * # License
-* <b>Copyright 2021 Silicon Laboratories Inc. www.silabs.com</b>
+* <b>Copyright 2022 Silicon Laboratories Inc. www.silabs.com</b>
 *******************************************************************************
 *
 * SPDX-License-Identifier: Zlib
@@ -40,7 +40,7 @@
 #include "btmesh_db.h"
 #include "btmesh_prov.h"
 
-#include "system.h"
+#include "sl_common.h"
 
 // -----------------------------------------------------------------------------
 // Macros
@@ -146,7 +146,7 @@ void btmesh_prov_on_event(sl_btmesh_msg_t *evt)
       // note: this will initialize as not available, i.e. unprovisoned
       if (NULL == btmesh_db_node_get_by_uuid(uuid) && PB_ADV == bearer) {
         btmesh_db_create_node(uuid, address, 0, 0, PB_ADV);
-        btmesh_prov_on_node_found_evt(bearer, address, uuid, rssi);
+        btmesh_prov_on_node_found_evt(bearer, uuid, rssi);
       }
       break;
     }
@@ -338,34 +338,6 @@ sl_status_t btmesh_prov_start_provisioning_by_id(uint16_t netkey_index,
   // Return OK even if DB is wrong because the network is actually working at this time
   return SL_STATUS_OK;
 }
-sl_status_t btmesh_prov_start_provisioning_by_mac(uint16_t netkey_index,
-                                                  bd_addr mac_address,
-                                                  uint8_t attention_timer_sec)
-{
-  sl_status_t sc;
-  btmesh_db_node_t *node = btmesh_db_node_get_by_mac(mac_address);
-  if (NULL == node) {
-    return SL_STATUS_NULL_POINTER;
-  }
-  sc = sl_btmesh_prov_create_provisioning_session(netkey_index,
-                                                  node->prov.uuid,
-                                                  attention_timer_sec);
-  if (SL_STATUS_OK != sc) {
-    app_log_warning("Failed to create provisioning session" APP_LOG_NEW_LINE);
-    return sc;
-  }
-  sc = sl_btmesh_prov_provision_adv_device(node->prov.uuid);
-  if (SL_STATUS_OK != sc) {
-    app_log_error("Failed to start provisioning" APP_LOG_NEW_LINE);
-    return sc;
-  }
-  sc = btmesh_db_add_node_to_network_by_uuid(netkey_index, node->prov.uuid);
-  if (SL_STATUS_OK != sc) {
-    app_log_warning("Failed to add node to network in database!" APP_LOG_NEW_LINE);
-  }
-  // Return OK even if DB is wrong because the network is actually working at this time
-  return SL_STATUS_OK;
-}
 
 sl_status_t btmesh_prov_remove_node(btmesh_db_node_t *node,
                                     btmesh_conf_on_job_notification_t on_job_notification)
@@ -442,7 +414,7 @@ sl_status_t btmesh_prov_list_unprovisioned_nodes(void)
   btmesh_db_node_t *node;
   SL_SLIST_FOR_EACH_ENTRY(btmesh_db_get_node_list(), node, btmesh_db_node_t, list_elem) {
     if (false == node->node_available) {
-      btmesh_prov_on_unprovisioned_node_list_evt(id, node->prov.uuid, node->prov.mac_address);
+      btmesh_prov_on_unprovisioned_node_list_evt(id, node->prov.uuid);
       id++;
     }
   }
@@ -551,12 +523,10 @@ void print_uuid(uuid_128 *uuid)
 // Weak implementations of callbacks
 
 SL_WEAK void btmesh_prov_on_node_found_evt(uint8_t bearer,
-                                           bd_addr address,
                                            uuid_128 uuid,
                                            int8_t rssi)
 {
   (void)bearer;
-  (void)address;
   (void)uuid;
   (void)rssi;
 }
@@ -574,12 +544,10 @@ SL_WEAK void btmesh_prov_on_provision_failed_evt(uint8_t reason, uuid_128 uuid)
 }
 
 SL_WEAK void btmesh_prov_on_unprovisioned_node_list_evt(uint16_t id,
-                                                        uuid_128 uuid,
-                                                        bd_addr mac)
+                                                        uuid_128 uuid)
 {
   (void)id;
   (void)uuid;
-  (void)mac;
 }
 
 SL_WEAK void btmesh_prov_on_provisioned_node_list_evt(uint16_t id,

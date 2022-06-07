@@ -20,7 +20,7 @@
 #include "stack/include/error.h"
 #include "stack/include/ember-random-api.h"
 #include "hal/hal.h"
-#include "legacy_ncp_ash/inc/ash-protocol.h"
+#include "ash-protocol.h"
 #include "app/ezsp-host/ezsp-host-io.h"
 
 #ifndef UC_BUILD

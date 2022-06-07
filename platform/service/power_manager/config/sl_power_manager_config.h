@@ -42,6 +42,7 @@
 #define SL_POWER_MANAGER_CUSTOM_HF_OSCILLATOR_IRQ_HANDLER  0
 
 // <o SL_POWER_MANAGER_LOWEST_EM_ALLOWED> Lowest Energy mode allowed
+// <1=> EM1
 // <2=> EM2
 // <3=> EM3
 // <i> Default: 2

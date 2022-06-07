@@ -506,5 +506,6 @@ bool emGetClusterListFromCmdIdLookup(uint8_t gpdCommandId,
 void emGpForwardGpdCommandDefault(EmberGpAddress *addr,
                                   uint8_t gpdCommandId,
                                   uint8_t *gpdCommandPayload);
+void emberAfGreenPowerServerSinkTableInit(void);
 
 #endif //_GREEN_POWER_SERVER_H_

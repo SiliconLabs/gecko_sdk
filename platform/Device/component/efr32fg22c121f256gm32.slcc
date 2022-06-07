@@ -12,23 +12,14 @@
   - path: platform/Device/SiliconLabs/EFR32FG22/Source/system_efr32fg22.c
     unless:
     - device_content_override
-  - condition:
-    - toolchain_iar
-    path: platform/Device/SiliconLabs/EFR32FG22/Source/IAR/startup_efr32fg22.c
-    unless:
-    - device_content_override
-  - condition:
-    - toolchain_gcc
-    path: platform/Device/SiliconLabs/EFR32FG22/Source/GCC/startup_efr32fg22.c
+  - path: platform/Device/SiliconLabs/EFR32FG22/Source/startup_efr32fg22.c
     unless:
     - device_content_override
 - include:
   - file_list:
     - path: efr32fg22c121f256gm32.h
     - path: efr32fg22_aes.h
-    - path: efr32fg22_agc.h
     - path: efr32fg22_amuxcp.h
-    - path: efr32fg22_bufc.h
     - path: efr32fg22_buram.h
     - path: efr32fg22_burtc.h
     - path: efr32fg22_cmu.h
@@ -39,7 +30,6 @@
     - path: efr32fg22_dpll.h
     - path: efr32fg22_emu.h
     - path: efr32fg22_eusart.h
-    - path: efr32fg22_frc.h
     - path: efr32fg22_fsrco.h
     - path: efr32fg22_gpcrc.h
     - path: efr32fg22_gpio.h
@@ -55,19 +45,12 @@
     - path: efr32fg22_letimer.h
     - path: efr32fg22_lfrco.h
     - path: efr32fg22_lfxo.h
-    - path: efr32fg22_mailbox.h
-    - path: efr32fg22_modem.h
     - path: efr32fg22_msc.h
     - path: efr32fg22_pdm.h
-    - path: efr32fg22_protimer.h
     - path: efr32fg22_prs.h
     - path: efr32fg22_prs_signals.h
-    - path: efr32fg22_rac.h
-    - path: efr32fg22_rfcrc.h
-    - path: efr32fg22_rfsense.h
     - path: efr32fg22_rtcc.h
     - path: efr32fg22_smu.h
-    - path: efr32fg22_synth.h
     - path: efr32fg22_syscfg.h
     - path: efr32fg22_timer.h
     - path: efr32fg22_ulfrco.h
@@ -90,11 +73,10 @@
   - name: cortexm33
   - name: armv8m.main
   - name: device_security_rot
+  - name: device_dcdc_buck
   - name: device_pa_6dbm
-  - name: device_has_agc
   - name: device_has_amuxcp
   - name: device_has_amuxcp0
-  - name: device_has_bufc
   - name: device_has_buram
   - name: device_has_burtc
   - name: device_has_cmu
@@ -106,7 +88,6 @@
   - name: device_has_emu
   - name: device_has_euart
   - name: device_has_euart0
-  - name: device_has_frc
   - name: device_has_fsrco
   - name: device_has_gpcrc
   - name: device_has_gpio
@@ -127,22 +108,13 @@
   - name: device_has_letimer0
   - name: device_has_lfrco
   - name: device_has_lfxo
-  - name: device_has_modem
   - name: device_has_msc
   - name: device_has_pdm
   - name: device_has_prortc
-  - name: device_has_protimer
   - name: device_has_prs
-  - name: device_has_rac
   - name: device_has_radioaes
-  - name: device_has_rdmailbox
-  - name: device_has_rdmailbox0
-  - name: device_has_rdmailbox1
-  - name: device_has_rfcrc
-  - name: device_has_rfsense
   - name: device_has_rtcc
   - name: device_has_smu
-  - name: device_has_synth
   - name: device_has_syscfg
   - name: device_has_timer
   - name: device_has_timer0
@@ -167,6 +139,8 @@
   - name: device_supports_rail_stack
   - name: device_supports_connect
   - name: device_compute_basic
+- recommends:
+  - id: trustzone_unaware
 - requires:
   - name: cmsis_core
 - template_contribution:
@@ -209,8 +183,25 @@
     value: cortex-m33
   - option: fpu
     value: fpv5-sp
+  - option: cmse
+    unless:
+    - trustzone_nonsecure
+    value: enabled
 - config_file:
   - condition:
     - custom_radio_config
     directory: rail
     path: platform/Device/config/205/device.yaml
+- metadata:
+    device:
+      memory:
+      - name: Main Flash
+        page_size: 8192
+        size: 262144
+        start: 0
+        type: non-volatile
+      - name: RAM
+        size: 32768
+        start: 536870912
+        type: volatile
+      opn: efr32fg22c121f256gm32

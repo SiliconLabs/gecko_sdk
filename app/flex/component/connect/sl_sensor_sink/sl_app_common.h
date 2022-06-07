@@ -37,23 +37,11 @@
 #include "stack/include/ember.h"
 #include "hal/hal.h"
 #include "em_chip.h"
+#include "sl_sensor_sink_config.h"
 
 // -----------------------------------------------------------------------------
 //                              Macros and Typedefs
 // -----------------------------------------------------------------------------
-/// Default endpoint for Sensor and Sink apps
-#define SENSOR_SINK_ENDPOINT    (1)
-/// Default TX power level and IDs used for the network.
-#define SENSOR_SINK_TX_POWER    0
-#define SENSOR_SINK_PAN_ID      0x01FF
-/// Relevant offsets and field length within a message.
-#define SENSOR_SINK_DATA_OFFSET 0
-#define SENSOR_SINK_DATA_LENGTH 8
-/// The default security key to use for communications
-#define SENSOR_SINK_SECURITY_KEY    { 0xAA, 0xAA, 0xAA, 0xAA, 0xAA, 0xAA, \
-                                      0xAA, 0xAA, 0xAA, 0xAA, 0xAA, 0xAA, \
-                                      0xAA, 0xAA, 0xAA, 0xAA }
-
 #if defined(SINK_ROLE)
 #define SENSOR_REPORT_PERIOD_MS      (1 * MILLISECOND_TICKS_PER_SECOND)
 #define SENSOR_TIMEOUT_MS            (60 * MILLISECOND_TICKS_PER_SECOND)

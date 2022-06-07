@@ -560,19 +560,19 @@ EmberNetworkStatus ezspNetworkState(void)
   return sendStatus;
 }
 
-EmberStatus ezspStartScan(
+sl_status_t ezspStartScan(
   EzspNetworkScanType scanType,
   uint32_t channelMask,
   uint8_t duration)
 {
-  EmberStatus status;
+  sl_status_t status;
   startCommand(EZSP_START_SCAN);
   appendInt8u(scanType);
   appendInt32u(channelMask);
   appendInt8u(duration);
   EzspStatus sendStatus = sendCommand();
   if (sendStatus == EZSP_SUCCESS) {
-    status = fetchInt8u();
+    status = fetchInt32u();
     return status;
   }
   return sendStatus;
@@ -3232,6 +3232,83 @@ EzspStatus ezspGetSecurityKeyStatus(
     return status;
   }
   return sendStatus;
+}
+
+//------------------------------------------------------------------------------
+// Token Interface Frames
+//------------------------------------------------------------------------------
+
+uint8_t ezspGetTokenCount(void)
+{
+  uint8_t count;
+  startCommand(EZSP_GET_TOKEN_COUNT);
+  EzspStatus sendStatus = sendCommand();
+  if (sendStatus == EZSP_SUCCESS) {
+    count = fetchInt8u();
+    return count;
+  }
+  return 255;
+}
+
+EmberStatus ezspGetTokenInfo(
+  uint8_t index,
+  EmberTokenInfo *tokenInfo)
+{
+  EmberStatus status;
+  startCommand(EZSP_GET_TOKEN_INFO);
+  appendInt8u(index);
+  EzspStatus sendStatus = sendCommand();
+  if (sendStatus == EZSP_SUCCESS) {
+    status = fetchInt8u();
+    fetchEmberTokenInfo(tokenInfo);
+    return status;
+  }
+  return sendStatus;
+}
+
+EmberStatus ezspGetTokenData(
+  uint32_t token,
+  uint32_t index,
+  EmberTokenData *tokenData)
+{
+  EmberStatus status;
+  startCommand(EZSP_GET_TOKEN_DATA);
+  appendInt32u(token);
+  appendInt32u(index);
+  EzspStatus sendStatus = sendCommand();
+  if (sendStatus == EZSP_SUCCESS) {
+    status = fetchInt8u();
+    fetchEmberTokenData(tokenData);
+    return status;
+  }
+  return sendStatus;
+}
+
+EmberStatus ezspSetTokenData(
+  uint32_t token,
+  uint32_t index,
+  EmberTokenData *tokenData)
+{
+  EmberStatus status;
+  startCommand(EZSP_SET_TOKEN_DATA);
+  appendInt32u(token);
+  appendInt32u(index);
+  appendEmberTokenData(tokenData);
+  EzspStatus sendStatus = sendCommand();
+  if (sendStatus == EZSP_SUCCESS) {
+    status = fetchInt8u();
+    return status;
+  }
+  return sendStatus;
+}
+
+void ezspResetNode(void)
+{
+  startCommand(EZSP_RESET_NODE);
+  EzspStatus sendStatus = sendCommand();
+  if (sendStatus == EZSP_SUCCESS) {
+    EZSP_ASH_TRACE("%s(): sendCommand() error: 0x%x", __func__, sendStatus);
+  }
 }
 
 static void callbackDispatch(void)

@@ -14,6 +14,11 @@
  *
  ******************************************************************************/
 
+// TODO, BG-10780: This special init file is only used in the controller-only
+// build. The host stack build handles the init via the new feature definition
+// mechanism. The controller should migrate to use the same mechanism and the
+// same config instance.
+
 #include "sl_status.h"
 #include "sl_bt_power_control_config.h"
 #include "sl_bt_ll_config.h"
@@ -34,16 +39,17 @@
     .golden_rssi_max_coded_s2 = SL_BT_GOLDEN_RSSI_MAX_CODED_S2, \
   }
 
-extern sl_status_t sli_bt_init_power_control();
 extern sl_status_t ll_connPowerControlEnable(const sl_bt_ll_power_control_config_t *);
+extern sl_status_t ll_initDefaultPowerLevelRange(int16_t minPower, int16_t maxPower);
 
 sl_status_t sl_bt_init_power_control()
 {
-  sl_bt_ll_power_control_config_t config = SL_BT_POWER_CONTROL_CONFIG;
+  sl_status_t st = ll_initDefaultPowerLevelRange(SL_BT_DEFAULT_MIN_POWER_LEVEL,
+                                                 SL_BT_DEFAULT_MAX_POWER_LEVEL);
+  if (st) {
+    return st;
+  }
 
-  #ifdef SL_CATALOG_BLUETOOTH_CONTROLLER_ONLY_PRESENT
+  sl_bt_ll_power_control_config_t config = SL_BT_POWER_CONTROL_CONFIG;
   return ll_connPowerControlEnable(&config);
-  #else
-  return sli_bt_init_power_control(&config);
-  #endif
 }

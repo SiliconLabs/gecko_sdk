@@ -36,17 +36,17 @@
  * extender).
  *
  * To use this feature, the Poll plugin must be enabled on the end devices.
- * If polling is enabled, the end device sends a data request to the parent node
- * which notifies the device whether there is a pending message or not, using the
- * acknowledge with the pending bit cleared or set. If there is no pending message
- * the communication ends with the acknowledge. If there is a pending message,
+ * If polling is enabled, the end device sends a data request to the parent node,
+ * which notifies the device whether a message is pending or not using the
+ * acknowledge with the pending bit cleared or set. If a message is not pending,
+ * the communication ends with the acknowledge. If a message is pending,
  * the parent node sends a data packet containing the pending message which will
  * be acknowledged by the end device.
  *
- * For convenience, Connect supports two polling intervals, long and short, both
- * behaves the same, only the polling period differs. For long polling the period
- * specified in second while in case of short polling the period is in quarter
- * seconds. The API provides a function to easily switch between the two. Purpose
+ * For convenience, Connect supports two polling intervals, long and short, which
+ * behave the same only the polling period differs. For long polling, the period
+ * is specified in seconds while for short polling, the period is in quarter
+ * seconds. The API provides a function to easily switch between the two. The purpose
  * of long polling is maintaining the connection between the end device and the
  * parent.
  *

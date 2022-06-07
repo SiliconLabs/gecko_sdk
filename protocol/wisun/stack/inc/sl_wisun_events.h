@@ -65,7 +65,9 @@ typedef enum {
   /// This event is sent when the join state changes.
   SL_WISUN_MSG_JOIN_STATE_IND_ID                  = 0x8B,
   /// This event is sent when the network has been updated.
-  SL_WISUN_MSG_NETWORK_UPDATE_IND_ID              = 0x8C
+  SL_WISUN_MSG_NETWORK_UPDATE_IND_ID              = 0x8C,
+  /// This event is sent when regional regulation transmission level changes.
+  SL_WISUN_MSG_REGULATION_TX_LEVEL_IND_ID         = 0x8D,
 } sl_wisun_msg_ind_id_t;
 
 /**************************************************************************//**
@@ -401,6 +403,36 @@ SL_PACK_END()
 
 /** @} (end SL_WISUN_MSG_JOIN_STATE_IND) */
 
+/**************************************************************************//**
+ * @defgroup SL_WISUN_MSG_REGULATION_TX_LEVEL_IND sl_wisun_msg_regulation_tx_level_ind
+ * @{
+ ******************************************************************************/
+
+/// Indication message body
+SL_PACK_START(1)
+typedef struct {
+  /// Status of the indication
+  uint32_t status;
+  /// Sum of transmission durations during last hour in milliseconds
+  uint32_t tx_duration_ms;
+  /// Transmission level, one value of #sl_wisun_regulation_tx_level_t
+  uint8_t tx_level;
+  /// Reserved
+  uint8_t reserved[3];
+} SL_ATTRIBUTE_PACKED sl_wisun_msg_regulation_tx_level_ind_body_t;
+SL_PACK_END()
+
+/// Indication message
+SL_PACK_START(1)
+typedef struct {
+  /// Common message header
+  sl_wisun_msg_header_t header;
+  /// Indication message body
+  sl_wisun_msg_regulation_tx_level_ind_body_t body;
+} SL_ATTRIBUTE_PACKED sl_wisun_msg_regulation_tx_level_ind_t;
+SL_PACK_END()
+
+/** @} (end SL_WISUN_MSG_REGULATION_TX_LEVEL_IND) */
 
 /// @brief Wi-SUN event definitions
 /// @details This structure contains a Wi-SUN API event and its associated data.
@@ -439,6 +471,8 @@ typedef struct {
     sl_wisun_msg_join_state_ind_body_t join_state;
     /// #SL_WISUN_MSG_NETWORK_UPDATE_IND_ID event data
     sl_wisun_msg_network_update_ind_body_t network_update;
+    /// #SL_WISUN_MSG_REGULATION_TX_LEVEL_IND_ID event data
+    sl_wisun_msg_regulation_tx_level_ind_body_t regulation_tx_level;
   } evt;
 } SL_ATTRIBUTE_PACKED sl_wisun_evt_t;
 SL_PACK_END()

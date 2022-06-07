@@ -17,6 +17,7 @@
 
 #include "app/framework/include/af.h"
 #include "app/framework/plugin/ota-common/ota.h"
+#include "ota-storage-linux-config.h"
 
 #include "app/util/serial/sl_zigbee_command_interpreter.h"
 
@@ -41,7 +42,8 @@
   }
 
 EmberAfOtaImageId emberInvalidImageId = INVALID_OTA_IMAGE_ID;
-
+// Dummy variable only to fix build error for simulation host target.
+char defaultStorageDirectory[OTA_FILE_STORAGE_DIR_LENGTH] = "ota-files";
 //------------------------------------------------------------------------------
 // Forward Declarations
 

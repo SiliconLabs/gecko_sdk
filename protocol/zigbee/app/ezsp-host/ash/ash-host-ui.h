@@ -66,7 +66,10 @@ static const char usage[] =
   "                      is available from port 4900, and CLI access is available\n"
   "                      on port 4901.\n"
   "                      NOTE: No space is allowed between '-v' and [base-port].\n"
-  "    -x 0,1            enable/disable data randomization\n";
+  "    -x 0,1            enable/disable data randomization\n"
+  "    -d <OTA dir>      sets the directory to search OTA files.\n"
+  "                      NOTE: Option is useful only when zigbee OTA storage\n"
+  "                      posix filesystem component is present.\n";
 
 static const AshCount zeroAshCount = { 0 };
 

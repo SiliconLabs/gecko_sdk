@@ -81,10 +81,10 @@ WEAK(EmberAfAttributeWritePermission emberAfAllowNetworkWriteAttributeCallback(i
  * @param manufacturerCode   Ver.: always
  * @param attributeId   Ver.: always
  */
-WEAK(boolean emberAfAttributeReadAccessCallback(int8u endpoint,
-                                                EmberAfClusterId clusterId,
-                                                int16u manufacturerCode,
-                                                int16u attributeId))
+WEAK(bool emberAfAttributeReadAccessCallback(int8u endpoint,
+                                             EmberAfClusterId clusterId,
+                                             int16u manufacturerCode,
+                                             int16u attributeId))
 {
   return true;
 }
@@ -99,10 +99,10 @@ WEAK(boolean emberAfAttributeReadAccessCallback(int8u endpoint,
  * @param manufacturerCode   Ver.: always
  * @param attributeId   Ver.: always
  */
-WEAK(boolean emberAfAttributeWriteAccessCallback(int8u endpoint,
-                                                 EmberAfClusterId clusterId,
-                                                 int16u manufacturerCode,
-                                                 int16u attributeId))
+WEAK(bool emberAfAttributeWriteAccessCallback(int8u endpoint,
+                                              EmberAfClusterId clusterId,
+                                              int16u manufacturerCode,
+                                              int16u attributeId))
 {
   return true;
 }
@@ -145,10 +145,10 @@ WEAK(void emberAfClusterInitCallback(int8u endpoint,
  * always
  * @param commandId The ZCL command ID being sent/received.  Ver.: always
  */
-WEAK(boolean emberAfClusterSecurityCustomCallback(EmberAfProfileId profileId,
-                                                  EmberAfClusterId clusterId,
-                                                  boolean incoming,
-                                                  int8u commandId))
+WEAK(bool emberAfClusterSecurityCustomCallback(EmberAfProfileId profileId,
+                                               EmberAfClusterId clusterId,
+                                               bool incoming,
+                                               int8u commandId))
 {
   // By default, assume APS encryption is not required.
   return false;
@@ -164,7 +164,7 @@ WEAK(boolean emberAfClusterSecurityCustomCallback(EmberAfProfileId profileId,
  *
  * @param cmd   Ver.: always
  */
-WEAK(boolean emberAfConfigureReportingCommandCallback(const EmberAfClusterCommand *cmd))
+WEAK(bool emberAfConfigureReportingCommandCallback(const EmberAfClusterCommand *cmd))
 {
   return false;
 }
@@ -181,9 +181,9 @@ WEAK(boolean emberAfConfigureReportingCommandCallback(const EmberAfClusterComman
  * always
  * @param bufLen The length in bytes of the list.  Ver.: always
  */
-WEAK(boolean emberAfConfigureReportingResponseCallback(EmberAfClusterId clusterId,
-                                                       int8u *buffer,
-                                                       int16u bufLen))
+WEAK(bool emberAfConfigureReportingResponseCallback(EmberAfClusterId clusterId,
+                                                    int8u *buffer,
+                                                    int16u bufLen))
 {
   return false;
 }
@@ -200,9 +200,9 @@ WEAK(boolean emberAfConfigureReportingResponseCallback(EmberAfClusterId clusterI
  * @param status Specifies either SUCCESS or the nature of the error that was
  * detected in the received command.  Ver.: always
  */
-WEAK(boolean emberAfDefaultResponseCallback(EmberAfClusterId clusterId,
-                                            int8u commandId,
-                                            EmberAfStatus status))
+WEAK(bool emberAfDefaultResponseCallback(EmberAfClusterId clusterId,
+                                         int8u commandId,
+                                         EmberAfStatus status))
 {
   return false;
 }
@@ -227,11 +227,11 @@ WEAK(boolean emberAfDefaultResponseCallback(EmberAfClusterId clusterId,
  * @param extended Indicates whether the response is in the extended format or
  * not.  Ver.: always
  */
-WEAK(boolean emberAfDiscoverAttributesResponseCallback(EmberAfClusterId clusterId,
-                                                       boolean discoveryComplete,
-                                                       int8u *buffer,
-                                                       int16u bufLen,
-                                                       boolean extended))
+WEAK(bool emberAfDiscoverAttributesResponseCallback(EmberAfClusterId clusterId,
+                                                    bool discoveryComplete,
+                                                    int8u *buffer,
+                                                    int16u bufLen,
+                                                    bool extended))
 {
   return false;
 }
@@ -250,11 +250,11 @@ WEAK(boolean emberAfDiscoverAttributesResponseCallback(EmberAfClusterId clusterI
  * @param commandIdCount The length of bytes of the list, whish is the same as
  * the number of identifiers.  Ver.: always
  */
-WEAK(boolean emberAfDiscoverCommandsGeneratedResponseCallback(EmberAfClusterId clusterId,
-                                                              int16u manufacturerCode,
-                                                              boolean discoveryComplete,
-                                                              int8u *commandIds,
-                                                              int16u commandIdCount))
+WEAK(bool emberAfDiscoverCommandsGeneratedResponseCallback(EmberAfClusterId clusterId,
+                                                           int16u manufacturerCode,
+                                                           bool discoveryComplete,
+                                                           int8u *commandIds,
+                                                           int16u commandIdCount))
 {
   return false;
 }
@@ -273,11 +273,11 @@ WEAK(boolean emberAfDiscoverCommandsGeneratedResponseCallback(EmberAfClusterId c
  * @param commandIdCount The length of bytes of the list, whish is the same as
  * the number of identifiers.  Ver.: always
  */
-WEAK(boolean emberAfDiscoverCommandsReceivedResponseCallback(EmberAfClusterId clusterId,
-                                                             int16u manufacturerCode,
-                                                             boolean discoveryComplete,
-                                                             int8u *commandIds,
-                                                             int16u commandIdCount))
+WEAK(bool emberAfDiscoverCommandsReceivedResponseCallback(EmberAfClusterId clusterId,
+                                                          int16u manufacturerCode,
+                                                          bool discoveryComplete,
+                                                          int8u *commandIds,
+                                                          int16u commandIdCount))
 {
   return false;
 }
@@ -299,7 +299,7 @@ WEAK(void emberAfEepromInitCallback(void))
  * @param state The state of the EEPROM, false=re-initalization needed,
  * true=no-re-init needed  Ver.: always
  */
-WEAK(void emberAfEepromNoteInitializedStateCallback(boolean state))
+WEAK(void emberAfEepromNoteInitializedStateCallback(bool state))
 {
 }
 
@@ -545,8 +545,8 @@ WEAK(EmberAfEventSleepControl emberAfGetDefaultSleepControlCallback(void))
  * @param index The index of the endpoint.  Ver.: always
  * @param endpointReturn The value of endpoint.  Ver.: always
  */
-WEAK(boolean emberAfGetEndpointByIndexCallback(int8u index,
-                                               int8u* endpointReturn))
+WEAK(bool emberAfGetEndpointByIndexCallback(int8u index,
+                                            int8u* endpointReturn))
 {
   return false;
 }
@@ -567,8 +567,8 @@ WEAK(boolean emberAfGetEndpointByIndexCallback(int8u index,
  * information is written if the callback is providing the information.  Ver.:
  * always
  */
-WEAK(boolean emberAfGetEndpointDescriptionCallback(int8u endpoint,
-                                                   EmberEndpointDescription* result))
+WEAK(bool emberAfGetEndpointDescriptionCallback(int8u endpoint,
+                                                EmberEndpointDescription* result))
 {
   return false;
 }
@@ -590,9 +590,9 @@ WEAK(boolean emberAfGetEndpointDescriptionCallback(int8u endpoint,
  * @param returnEndpointInfo A pointer to a data struct that will be written
  * with information about the endpoint.  Ver.: always
  */
-WEAK(boolean emberAfGetEndpointInfoCallback(int8u endpoint,
-                                            int8u* returnNetworkIndex,
-                                            EmberAfEndpointInfoStruct* returnEndpointInfo))
+WEAK(bool emberAfGetEndpointInfoCallback(int8u endpoint,
+                                         int8u* returnNetworkIndex,
+                                         EmberAfEndpointInfoStruct* returnEndpointInfo))
 {
   return false;
 }
@@ -798,11 +798,11 @@ WEAK(EmberStatus emberAfInitiatePartnerLinkKeyExchangeCallback(EmberNodeId targe
  * @param eui64   Ver.: always
  * @param delayInSeconds   Ver.: always
  */
-WEAK(boolean emberAfInterPanKeyEstablishmentCallback(EmberAfKeyEstablishmentNotifyMessage status,
-                                                     boolean amInitiator,
-                                                     EmberPanId panId,
-                                                     const EmberEUI64 eui64,
-                                                     int8u delayInSeconds))
+WEAK(bool emberAfInterPanKeyEstablishmentCallback(EmberAfKeyEstablishmentNotifyMessage status,
+                                                  bool amInitiator,
+                                                  EmberPanId panId,
+                                                  const EmberEUI64 eui64,
+                                                  int8u delayInSeconds))
 {
   return true;
 }
@@ -838,10 +838,10 @@ WEAK(EmberStatus emberAfInterpanSendMessageCallback(EmberAfInterpanHeader* heade
  * @param partnerShortId   Ver.: always
  * @param delayInSeconds   Ver.: always
  */
-WEAK(boolean emberAfKeyEstablishmentCallback(EmberAfKeyEstablishmentNotifyMessage status,
-                                             boolean amInitiator,
-                                             EmberNodeId partnerShortId,
-                                             int8u delayInSeconds))
+WEAK(bool emberAfKeyEstablishmentCallback(EmberAfKeyEstablishmentNotifyMessage status,
+                                          bool amInitiator,
+                                          EmberNodeId partnerShortId,
+                                          int8u delayInSeconds))
 {
   return true;
 }
@@ -885,9 +885,9 @@ WEAK(void emberAfMainInitCallback(void))
  * @param argc   Ver.: always
  * @param argv   Ver.: always
  */
-WEAK(boolean emberAfMainStartCallback(int* returnCode,
-                                      int argc,
-                                      char** argv))
+WEAK(bool emberAfMainStartCallback(int* returnCode,
+                                   int argc,
+                                   char** argv))
 {
   // NOTE:  argc and argv may not be supported on all platforms, so argv MUST be
   // checked for NULL before referencing it.  On those platforms without argc
@@ -921,7 +921,7 @@ WEAK(void emberAfMainTickCallback(void))
  *
  * @param memoryAllocation   Ver.: always
  */
-WEAK(void emberAfNcpInitCallback(boolean memoryAllocation))
+WEAK(void emberAfNcpInitCallback(bool memoryAllocation))
 {
 }
 
@@ -991,7 +991,7 @@ WEAK(void emberAfOtaClientBootloadCallback(const EmberAfOtaImageId* id))
  * started.  Ver.: always
  * @param id This is ID of the image to be verified.  Ver.: always
  */
-WEAK(EmberAfImageVerifyStatus emberAfOtaClientCustomVerifyCallback(boolean newVerification,
+WEAK(EmberAfImageVerifyStatus emberAfOtaClientCustomVerifyCallback(bool newVerification,
                                                                    const EmberAfOtaImageId* id))
 {
   // Manufacturing specific checks can be made to the image in this function to
@@ -1024,8 +1024,8 @@ WEAK(EmberAfImageVerifyStatus emberAfOtaClientCustomVerifyCallback(boolean newVe
  * @param id This is the image identifier information that corresponds to the
  * download result.  Ver.: always
  */
-WEAK(boolean emberAfOtaClientDownloadCompleteCallback(EmberAfOtaDownloadResult success,
-                                                      const EmberAfOtaImageId* id))
+WEAK(bool emberAfOtaClientDownloadCompleteCallback(EmberAfOtaDownloadResult success,
+                                                   const EmberAfOtaImageId* id))
 {
   // At this point the image has been completely downloaded and cryptographic
   // checks (if applicable) have been performed.
@@ -1052,7 +1052,7 @@ WEAK(boolean emberAfOtaClientDownloadCompleteCallback(EmberAfOtaDownloadResult s
  * @param message A pointer to the structure containing the message buffer and
  * other information about it.  Ver.: always
  */
-WEAK(boolean emberAfOtaClientIncomingMessageRawCallback(EmberAfClusterCommand *message))
+WEAK(bool emberAfOtaClientIncomingMessageRawCallback(EmberAfClusterCommand *message))
 {
   return false;
 }
@@ -1177,7 +1177,7 @@ WEAK(int8u emberAfOtaServerBlockSizeCallback(EmberNodeId clientNodeId))
  * @param message A pointer to the structure containing the message buffer and
  * other information about it.  Ver.: always
  */
-WEAK(boolean emberAfOtaServerIncomingMessageRawCallback(EmberAfClusterCommand *message))
+WEAK(bool emberAfOtaServerIncomingMessageRawCallback(EmberAfClusterCommand *message))
 {
   return false;
 }
@@ -1228,11 +1228,11 @@ WEAK(int8u emberAfOtaServerQueryCallback(const EmberAfOtaImageId* currentImageId
  * within this struct that will be appended to the message is determined by the
  * previous 'payloadType' argument.  Ver.: always
  */
-WEAK(boolean emberAfOtaServerSendImageNotifyCallback(EmberNodeId dest,
-                                                     int8u endpoint,
-                                                     int8u payloadType,
-                                                     int8u queryJitter,
-                                                     const EmberAfOtaImageId* id))
+WEAK(bool emberAfOtaServerSendImageNotifyCallback(EmberNodeId dest,
+                                                  int8u endpoint,
+                                                  int8u payloadType,
+                                                  int8u queryJitter,
+                                                  const EmberAfOtaImageId* id))
 {
   return false;
 }
@@ -1255,10 +1255,10 @@ WEAK(boolean emberAfOtaServerSendImageNotifyCallback(EmberNodeId dest,
  * @param imageId This variable indicates the software version that the client
  * successfully downloaded and is asking to upgrade to.  Ver.: always
  */
-WEAK(boolean emberAfOtaServerUpgradeEndRequestCallback(EmberNodeId source,
-                                                       int8u status,
-                                                       int32u* returnValue,
-                                                       const EmberAfOtaImageId* imageId))
+WEAK(bool emberAfOtaServerUpgradeEndRequestCallback(EmberNodeId source,
+                                                    int8u status,
+                                                    int32u* returnValue,
+                                                    const EmberAfOtaImageId* imageId))
 {
   // If the status value is not EMBER_ZCL_STATUS_SUCCESS, then this callback is
   // merely informative and no response message will be generated by the server.
@@ -1346,7 +1346,7 @@ WEAK(void emberAfOtaStorageDriverDownloadFinishCallback(int32u offset))
  * The initialization code for the OTA storage driver.
  *
  */
-WEAK(boolean emberAfOtaStorageDriverInitCallback(void))
+WEAK(bool emberAfOtaStorageDriverInitCallback(void))
 {
   // The storage driver and the rest of the OTA bootload code will not function correctly unless it is implemnted.
   // Please implement me.
@@ -1394,9 +1394,9 @@ WEAK(EmberAfOtaStorageStatus emberAfOtaStorageDriverPrepareToResumeDownloadCallb
  * @param returnData A pointer where the data read from the device should be
  * written to.  Ver.: always
  */
-WEAK(boolean emberAfOtaStorageDriverReadCallback(int32u offset,
-                                                 int32u length,
-                                                 int8u* returnData))
+WEAK(bool emberAfOtaStorageDriverReadCallback(int32u offset,
+                                              int32u length,
+                                              int8u* returnData))
 {
   // The storage driver and the rest of the OTA bootload code will not function correctly unless it is implemnted.
   // Please implement me.
@@ -1431,9 +1431,9 @@ WEAK(int32u emberAfOtaStorageDriverRetrieveLastStoredOffsetCallback(void))
  * @param length The length of the data to be written to the storage device.
  * Ver.: always
  */
-WEAK(boolean emberAfOtaStorageDriverWriteCallback(const int8u* dataToWrite,
-                                                  int32u offset,
-                                                  int32u length))
+WEAK(bool emberAfOtaStorageDriverWriteCallback(const int8u* dataToWrite,
+                                               int32u offset,
+                                               int32u length))
 {
   // The storage driver and the rest of the OTA bootload code will not function correctly unless it is implemnted.
   // Please implement me.
@@ -1677,7 +1677,7 @@ WEAK(void emberAfPartnerLinkKeyExchangeResponseCallback(EmberNodeId sender,
  * establishment is in progress.
  *
  */
-WEAK(boolean emberAfPerformingKeyEstablishmentCallback(void))
+WEAK(bool emberAfPerformingKeyEstablishmentCallback(void))
 {
   return false;
 }
@@ -1764,11 +1764,11 @@ WEAK(EmberAfStatus emberAfPreAttributeChangeCallback(int8u endpoint,
  * @param message Pointer to the message payload  Ver.: always
  * @param messageLength Length of the message payload  Ver.: always
  */
-WEAK(boolean emberAfPreCliSendCallback(EmberApsFrame* apsFrame,
-                                       EmberNodeId source,
-                                       EmberNodeId destination,
-                                       int8u* message,
-                                       int16u messageLength))
+WEAK(bool emberAfPreCliSendCallback(EmberApsFrame* apsFrame,
+                                    EmberNodeId source,
+                                    EmberNodeId destination,
+                                    int8u* message,
+                                    int16u messageLength))
 {
   return false;
 }
@@ -1786,7 +1786,7 @@ WEAK(boolean emberAfPreCliSendCallback(EmberApsFrame* apsFrame,
  *
  * @param cmd   Ver.: always
  */
-WEAK(boolean emberAfPreCommandReceivedCallback(EmberAfClusterCommand* cmd))
+WEAK(bool emberAfPreCommandReceivedCallback(EmberAfClusterCommand* cmd))
 {
   return false;
 }
@@ -1814,7 +1814,7 @@ WEAK(boolean emberAfPreCommandReceivedCallback(EmberAfClusterCommand* cmd))
  *
  * @param incomingMessage   Ver.: always
  */
-WEAK(boolean emberAfPreMessageReceivedCallback(EmberAfIncomingMessage* incomingMessage))
+WEAK(bool emberAfPreMessageReceivedCallback(EmberAfIncomingMessage* incomingMessage))
 {
   return false;
 }
@@ -1838,8 +1838,8 @@ WEAK(boolean emberAfPreMessageReceivedCallback(EmberAfIncomingMessage* incomingM
  * @param status A pointer to the status code value that will be returned to the
  * caller.  Ver.: always
  */
-WEAK(boolean emberAfPreMessageSendCallback(EmberAfMessageStruct* messageStruct,
-                                           EmberStatus* status))
+WEAK(bool emberAfPreMessageSendCallback(EmberAfMessageStruct* messageStruct,
+                                        EmberStatus* status))
 {
   return false;
 }
@@ -1865,10 +1865,10 @@ WEAK(void emberAfPreNcpResetCallback(void))
  * @param message   Ver.: always
  * @param length   Ver.: always
  */
-WEAK(boolean emberAfPreZDOMessageReceivedCallback(EmberNodeId emberNodeId,
-                                                  EmberApsFrame* apsFrame,
-                                                  int8u* message,
-                                                  int16u length))
+WEAK(bool emberAfPreZDOMessageReceivedCallback(EmberNodeId emberNodeId,
+                                               EmberApsFrame* apsFrame,
+                                               int8u* message,
+                                               int16u length))
 {
   return false;
 }
@@ -1884,9 +1884,9 @@ WEAK(boolean emberAfPreZDOMessageReceivedCallback(EmberNodeId emberNodeId,
  * Ver.: always
  * @param bufLen The length in bytes of the list.  Ver.: always
  */
-WEAK(boolean emberAfReadAttributesResponseCallback(EmberAfClusterId clusterId,
-                                                   int8u *buffer,
-                                                   int16u bufLen))
+WEAK(bool emberAfReadAttributesResponseCallback(EmberAfClusterId clusterId,
+                                                int8u *buffer,
+                                                int16u bufLen))
 {
   return false;
 }
@@ -1899,7 +1899,7 @@ WEAK(boolean emberAfReadAttributesResponseCallback(EmberAfClusterId clusterId,
  *
  * @param cmd   Ver.: always
  */
-WEAK(boolean emberAfReadReportingConfigurationCommandCallback(const EmberAfClusterCommand *cmd))
+WEAK(bool emberAfReadReportingConfigurationCommandCallback(const EmberAfClusterCommand *cmd))
 {
   return false;
 }
@@ -1916,9 +1916,9 @@ WEAK(boolean emberAfReadReportingConfigurationCommandCallback(const EmberAfClust
  * records.  Ver.: always
  * @param bufLen The length in bytes of the list.  Ver.: always
  */
-WEAK(boolean emberAfReadReportingConfigurationResponseCallback(EmberAfClusterId clusterId,
-                                                               int8u *buffer,
-                                                               int16u bufLen))
+WEAK(bool emberAfReadReportingConfigurationResponseCallback(EmberAfClusterId clusterId,
+                                                            int8u *buffer,
+                                                            int16u bufLen))
 {
   return false;
 }
@@ -1942,7 +1942,7 @@ WEAK(void emberAfRegistrationAbortCallback(void))
  *
  * @param success true if registration succeeded, false otherwise.  Ver.: always
  */
-WEAK(void emberAfRegistrationCallback(boolean success))
+WEAK(void emberAfRegistrationCallback(bool success))
 {
 }
 
@@ -2013,9 +2013,9 @@ WEAK(void emberAfRemoveFromCurrentAppTasksCallback(EmberAfApplicationTask tasks)
  * always
  * @param bufLen The length in bytes of the list.  Ver.: always
  */
-WEAK(boolean emberAfReportAttributesCallback(EmberAfClusterId clusterId,
-                                             int8u *buffer,
-                                             int16u bufLen))
+WEAK(bool emberAfReportAttributesCallback(EmberAfClusterId clusterId,
+                                          int8u *buffer,
+                                          int16u bufLen))
 {
   return false;
 }
@@ -2059,7 +2059,7 @@ WEAK(void emberAfReportingAttributeChangeCallback(int8u endpoint,
  */
 WEAK(void emberAfSecurityInitCallback(EmberInitialSecurityState *state,
                                       EmberExtendedSecurityBitmask *extended,
-                                      boolean trustCenter))
+                                      bool trustCenter))
 {
 }
 
@@ -2225,7 +2225,7 @@ WEAK(void emberAfSetWakeTimeoutQsCallback(int16u wakeTimeoutQs))
  * to a new parent.
  *
  */
-WEAK(boolean emberAfStartMoveCallback(void))
+WEAK(bool emberAfStartMoveCallback(void))
 {
   return false;
 }
@@ -2294,7 +2294,7 @@ WEAK(void emberAfTrustCenterKeepaliveAbortCallback(void))
  *
  * @param registrationComplete   Ver.: always
  */
-WEAK(void emberAfTrustCenterKeepaliveUpdateCallback(boolean registrationComplete))
+WEAK(void emberAfTrustCenterKeepaliveUpdateCallback(bool registrationComplete))
 {
 }
 
@@ -2309,9 +2309,9 @@ WEAK(void emberAfTrustCenterKeepaliveUpdateCallback(boolean registrationComplete
  * Ver.: always
  * @param bufLen The length in bytes of the list.  Ver.: always
  */
-WEAK(boolean emberAfWriteAttributesResponseCallback(EmberAfClusterId clusterId,
-                                                    int8u *buffer,
-                                                    int16u bufLen))
+WEAK(bool emberAfWriteAttributesResponseCallback(EmberAfClusterId clusterId,
+                                                 int8u *buffer,
+                                                 int16u bufLen))
 {
   return false;
 }

@@ -188,9 +188,6 @@ void halInternalSetMfgTokenData(uint16_t token, void *data, uint8_t len);
 #define halStackGetIndexedToken(data, token, index, size) \
   halInternalGetTokenData(data, token, index, size)
 
-#define halStackGetIdxTokenPtrOrData(data, token, index) \
-  halInternalGetTokenData(*data, token, index, token##_SIZE)
-
 #define halCommonSetToken(token, data) \
   halInternalSetTokenData(token, 0x7F, data, token##_SIZE)
 

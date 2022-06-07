@@ -61,8 +61,8 @@
  * @{
  */
 
-/** @brief This stack handler is invoked if a beacon is received during the
- *  scanning procedure if this was initiated by the application with the
+/** @brief Invoked if a beacon is received during the scanning procedure
+ *  if the handler was initiated by the application with the
  *  ::emberStartActiveScan() stack APIs.
  *
  * @param[in] panId   The source pan ID of the received beacon.
@@ -96,15 +96,14 @@ void emberIncomingBeaconHandler(EmberPanId panId,
                                 uint8_t beaconPayloadLength,
                                 uint8_t *beaconPayload);
 
-/** @brief This stack handler is invoked after the application calls the
- *  ::emberStartActiveScan() stack API to inform the application that the
- *  scanning procedure is complete.
+/** @brief Invoked after the application calls the ::emberStartActiveScan()
+ *  stack API to inform the application that the scanning procedure is complete.
  */
 void emberActiveScanCompleteHandler(void);
 
-/** @brief This stack handler is invoked after the application calls the
- *  ::emberStartEnergyScan() stack API to inform the application that the energy
- *  scan procedure is complete and to provide statistics.
+/** @brief Invoked after the application calls the ::emberStartEnergyScan()
+ *  stack API to inform the application that the energy scan procedure
+ *  is complete and to provide statistics.
  *
  *  @param[in] mean        The average energy detected in dBm.
  *  @param[in] min         The minimum energy detected in dBm.
@@ -183,7 +182,7 @@ EmberStatus emberNetworkInit(void);
 EmberStatus emberStartActiveScan(uint16_t channel);
 
 /** @brief Set the time in milliseconds the node will spend listening for
- * incoming beacons during an active scan. The dafault value is set based on the
+ * incoming beacons during an active scan. The default value is set based on the
  * symbol time of the current PHY configuration according to the 802.15.4 specs.
  *
  * @param[in] durationMs  The active scan duration in milliseconds. A value of
@@ -202,9 +201,9 @@ EmberStatus emberSetActiveScanDuration(uint16_t durationMs);
  */
 uint16_t emberGetActiveScanDuration(void);
 
-/** @brief Starts an energy scan. ::EMBER_SUCCESS signals
+/** @brief Start an energy scan. ::EMBER_SUCCESS signals
  * that the scan successfully started. At the end of the scanning
- * procedure the ::emberEnergyScanCompleteHandler() stack handler
+ * procedure, the ::emberEnergyScanCompleteHandler() stack handler
  * is called. Note that, while a scan can be initiated
  * when the node is currently joined to a network, the node is generally
  * unable to communicate with its PAN during the scan period. In particular,
@@ -229,7 +228,7 @@ uint16_t emberGetActiveScanDuration(void);
  */
 EmberStatus emberStartEnergyScan(uint16_t channel, uint8_t samples);
 
-/** @brief Allows the application to set the application portion of the
+/** @brief Allow the application to set the application portion of the
  * beacon payload. It's by default set to the empty string.
  *
  * @param[in] payloadLength  The length in bytes of the application beacon
@@ -557,8 +556,8 @@ EmberStatus emberRemoveChild(EmberMacAddress *address);
 EmberStatus emberNetworkLeave(void);
 
 /**
- * @brief An API to populate the short-to-long address mapping table at the MAC
- * layer. The table is meaningful only when running as ::EMBER_MAC_MODE_DEVICE
+ * @brief Populate the short-to-long address mapping table at the MAC layer.
+ * The table is meaningful only when running as ::EMBER_MAC_MODE_DEVICE
  * or ::EMBER_MAC_MODE_SLEEPY_DEVICE. The standard 802.15.4 encryption and
  * authentication process requires the security nonce to be populated with the
  * source node long ID. A receiver must do the same to decrypt a
@@ -594,8 +593,7 @@ EmberStatus emberMacAddShortToLongAddressMapping(EmberNodeId shortId,
                                                  EmberEUI64 longId);
 
 /**
- * @brief An API to clear the short-to-long address mapping table at the MAC
- * layer.
+ * @brief Clear the short-to-long address mapping table at the MAC layer.
  *
  * @return an ::EmberStatus value of ::EMBER_SUCCESS if table was cleared, or
  * another ::EmberStatus value indicating the reason of failure.
@@ -647,7 +645,7 @@ EmberStatus emberMacClearShortToLongAddressMappings(void);
 EmberStatus emberFrequencyHoppingSetChannelMask(uint8_t channelMaskLength,
                                                 uint8_t *channelMask);
 
-/** @brief The device starts operating as a frequency hopping server. This API
+/** @brief Start the device operating as a frequency hopping server. This API
  * can only be invoked when the node is joined to a network. Notice that the
  * server upon starting hopping shall perform an initial advertisement across
  * the entire channel hopping sequence. This is done to resynchronize clients
@@ -694,7 +692,7 @@ EmberStatus emberFrequencyHoppingStartServer(void);
 EmberStatus emberFrequencyHoppingStartClient(EmberNodeId serverNodeId,
                                              EmberPanId serverPanId);
 
-/** @brief Stops frequency hopping. This API can only be invoked when
+/** @brief Stop frequency hopping. This API can only be invoked when
  * the node is frequency hopping. Applicable for both server and client.
  *
  * @return An ::EmberStatus value of ::EMBER_SUCCESS indicating that the node

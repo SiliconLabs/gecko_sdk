@@ -27,6 +27,7 @@ include:
 
 template_contribution:
   - name: component_catalog
+    value: zigbee_ble_event_handler
   - name: zigbee_af_callback
     value:
       callback_type: event_init

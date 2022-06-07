@@ -160,7 +160,7 @@ typedef struct otSrpClientService
  *
  * @param[in] aError            The error (see above).
  * @param[in] aHostInfo         A pointer to host info.
- * @param[in] aService          The head of linked-list containing all services (excluding the ones removed). NULL if
+ * @param[in] aServices         The head of linked-list containing all services (excluding the ones removed). NULL if
  *                              the list is empty.
  * @param[in] aRemovedServices  The head of linked-list containing all removed services. NULL if the list is empty.
  * @param[in] aContext          A pointer to an arbitrary context (provided when callback was registered).
@@ -180,9 +180,9 @@ typedef void (*otSrpClientCallback)(otError                    aError,
  * This callback is invoked when auto-start mode is enabled and the SRP client is either automatically started or
  * stopped.
  *
- * @param[in] aServerSockAddress   A non-NULL pointer indicates SRP server was started and pointer will give the
- *                                 selected server socket address. A NULL pointer indicates SRP server was stopped.
- * @param[in] aContext             A pointer to an arbitrary context (provided when callback was registered).
+ * @param[in] aServerSockAddr   A non-NULL pointer indicates SRP server was started and pointer will give the
+ *                              selected server socket address. A NULL pointer indicates SRP server was stopped.
+ * @param[in] aContext          A pointer to an arbitrary context (provided when callback was registered).
  *
  */
 typedef void (*otSrpClientAutoStartCallback)(const otSockAddr *aServerSockAddr, void *aContext);
@@ -316,6 +316,34 @@ void otSrpClientDisableAutoStartMode(otInstance *aInstance);
 bool otSrpClientIsAutoStartModeEnabled(otInstance *aInstance);
 
 /**
+ * This function gets the TTL value in every record included in SRP update requests.
+ *
+ * Note that this is the TTL requested by the SRP client. The server may choose to accept a different TTL.
+ *
+ * By default, the TTL will equal the lease interval. Passing 0 or a value larger than the lease interval via
+ * `otSrpClientSetTtl()` will also cause the TTL to equal the lease interval.
+ *
+ * @param[in] aInstance  A pointer to the OpenThread instance.
+ *
+ * @returns The TTL (in seconds).
+ *
+ */
+uint32_t otSrpClientGetTtl(otInstance *aInstance);
+
+/**
+ * This function sets the TTL value in every record included in SRP update requests.
+ *
+ * Changing the TTL does not impact the TTL of already registered services/host-info.
+ * It only affects future SRP update messages (i.e., adding new services and/or refreshes of the existing services).
+ *
+ * @param[in] aInstance   A pointer to the OpenThread instance.
+ * @param[in] aTtl        The TTL (in seconds). If value is zero or greater than lease interval, the TTL is set to the
+ *                        lease interval.
+ *
+ */
+void otSrpClientSetTtl(otInstance *aInstance, uint32_t aTtl);
+
+/**
  * This function gets the lease interval used in SRP update requests.
  *
  * Note that this is the lease duration requested by the SRP client. The server may choose to accept a different lease
@@ -408,15 +436,15 @@ otError otSrpClientSetHostName(otInstance *aInstance, const char *aName);
  * request from an earlier call to `otSrpClientRemoveHostAndServices()` and host info still being in  either
  * `STATE_TO_REMOVE` or `STATE_REMOVING` states).
  *
- * The host IPv6 address array pointed to by @p aAddresses MUST persist and remain unchanged after returning from this
- * function (with `OT_ERROR_NONE`). OpenThread will save the pointer to the array.
+ * The host IPv6 address array pointed to by @p aIp6Addresses MUST persist and remain unchanged after returning from
+ * this function (with `OT_ERROR_NONE`). OpenThread will save the pointer to the array.
  *
  * After a successful call to this function, `otSrpClientCallback` will be called to report the status of the address
  * registration with SRP server.
  *
  * @param[in] aInstance           A pointer to the OpenThread instance.
- * @param[in] aAddresses          A pointer to the an array containing the host IPv6 addresses.
- * @param[in] aNumAddresses       The number of addresses in the @p aAddresses array.
+ * @param[in] aIp6Addresses       A pointer to the an array containing the host IPv6 addresses.
+ * @param[in] aNumAddresses       The number of addresses in the @p aIp6Addresses array.
  *
  * @retval OT_ERROR_NONE            The host IPv6 address list change started successfully. The `otSrpClientCallback`
  *                                  will be called to report the status of registering addresses with server.

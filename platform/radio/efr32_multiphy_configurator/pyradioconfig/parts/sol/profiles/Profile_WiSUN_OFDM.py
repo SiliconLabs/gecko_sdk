@@ -55,7 +55,7 @@ class Profile_WiSUN_OFDM_Sol(IProfile):
         pass
 
     def build_advanced_profile_inputs(self, model, profile):
-        pass
+        self.make_linked_io(profile, model.vars.fpll_band, 'crystal', readable_name="RF Frequency Planning Band")
 
     def build_hidden_profile_inputs(self, model, profile):
         # Hidden inputs to allow for fixed frame length testing

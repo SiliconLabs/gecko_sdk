@@ -32,7 +32,7 @@
 #include <stdlib.h>
 #include <stdio.h>
 #include "aoa_db.h"
-#include "system.h"
+#include "sl_common.h"
 
 // -----------------------------------------------------------------------------
 // Type definitions.

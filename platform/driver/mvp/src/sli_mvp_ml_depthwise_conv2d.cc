@@ -18,7 +18,8 @@
 #include "sl_mvp_ml_depthwise_conv2d.h"
 #include "sl_mvp_math.h"
 #include "sl_mvp_util.h"
-#include "em_common.h"
+#include "sl_mvp_program_area.h"
+#include "sl_common.h"
 #include <cstdlib>
 #include <algorithm>
 #include <string.h>
@@ -32,8 +33,6 @@ namespace {
     }                                   \
   } while (0)
 
-static sli_mvp_program_context_t program;
-static sli_mvp_program_context_t *p = &program;
 static sl_status_t status;
 
 // Dimension info specific to loop structure of this kernel
@@ -228,13 +227,14 @@ private:
         }
 
         if (cnt > 0) {
-          sli_mvp_pb_begin_loop(p, cnt, &status);
+          sli_mvp_pb_begin_loop(p, cnt, &status); {
             sli_mvp_pb_compute(p,
                                SLI_MVP_OP(NOOP),
                                SLI_MVP_NONE,
                                SLI_MVP_LOAD(0, reg_no, array_no, 1 << dim_id),
                                SLI_MVP_NONE,
                                &status);
+          }
           sli_mvp_pb_end_loop(p);
         }
       }
@@ -291,8 +291,9 @@ sl_status_t sli_mvp_ml_depthwise_conv2d_s8_gen(const sli_mvp_ml_depthwise_conv2d
   const float16_t *output_scaler   = params->output_scaler;
   int8_t *output                   = params->output;
 
-  status = SL_STATUS_OK;
-  int mvp_prog_cnt = 0;
+  status                           = SL_STATUS_OK;
+  int mvp_prog_cnt                 = 0;
+  sli_mvp_program_context_t *p     = sli_mvp_get_program_area_context();
 
   // Error exit if more than one batch.
   if (batches != 1) {
@@ -749,11 +750,11 @@ sl_status_t sli_mvp_ml_depthwise_conv2d_s8_gen(const sli_mvp_ml_depthwise_conv2d
                              SLI_MVP_NONE,
                              &status);
 
-          sli_mvp_pb_begin_loop(p, out_y_offsets, &status);
-            sli_mvp_pb_begin_loop(p, output_width_truncated, &status);
-              sli_mvp_pb_begin_loop(p, out_y_groups, &status);
-                sli_mvp_pb_begin_loop(p, filter_height_truncated, &status);
-                  sli_mvp_pb_begin_loop(p, filter_width_truncated, &status);
+          sli_mvp_pb_begin_loop(p, out_y_offsets, &status); {
+            sli_mvp_pb_begin_loop(p, output_width_truncated, &status); {
+              sli_mvp_pb_begin_loop(p, out_y_groups, &status); {
+                sli_mvp_pb_begin_loop(p, filter_height_truncated, &status); {
+                  sli_mvp_pb_begin_loop(p, filter_width_truncated, &status); {
 
                     // LOAD(ARRAY0, R6)    input
                     // LOAD(ARRAY2, R7)    filter
@@ -781,12 +782,12 @@ sl_status_t sli_mvp_ml_depthwise_conv2d_s8_gen(const sli_mvp_ml_depthwise_conv2d
                                        SLI_MVP_NONE,
                                        SLI_MVP_NONE,
                                        &status);
-
+                  }
                   sli_mvp_pb_end_loop(p); // filter_width_truncated
                   sli_mvp_pb_postloop_incr_dim(p, SLI_MVP_ARRAY(2), SLI_MVP_INCRDIM_COL);
 
                   in_dims.mvp_incr_index_loop(p, kDimFilterY, SLI_MVP_R6);
-
+                }
                 sli_mvp_pb_end_loop(p);  // filter_height_truncated
 
                 in_dims.mvp_incr_index_loop(p, kDimOutYGroup, SLI_MVP_R6);
@@ -815,7 +816,7 @@ sl_status_t sli_mvp_ml_depthwise_conv2d_s8_gen(const sli_mvp_ml_depthwise_conv2d
                                      SLI_MVP_NONE,
                                      &status);
                 } else {
-                  sli_mvp_pb_begin_loop(p, out_dim_out_y_group_extra_incr, &status);
+                  sli_mvp_pb_begin_loop(p, out_dim_out_y_group_extra_incr, &status); {
                     // R5 = COPY(R4)       Compute(r_acc, COPY, r_bias_i)
                     sli_mvp_pb_compute(p,
                                        SLI_MVP_OP(COPY),
@@ -824,19 +825,20 @@ sl_status_t sli_mvp_ml_depthwise_conv2d_s8_gen(const sli_mvp_ml_depthwise_conv2d
                                        SLI_MVP_LOAD(0, SLI_MVP_R7, SLI_MVP_ARRAY(1), 1 << out_dims.mvp_dims[kDimOutYGroup]),
                                        SLI_MVP_NONE,
                                        &status);
+                  }
                   sli_mvp_pb_end_loop(p);
                 }
-
+              }
               sli_mvp_pb_end_loop(p);  // out_y_groups
 
               in_dims.mvp_incr_index_loop(p, kDimOutX, SLI_MVP_R7);
               out_dims.mvp_incr_index_loop(p, kDimOutX, SLI_MVP_R6);
-
+            }
             sli_mvp_pb_end_loop(p);  // output_width_truncated
 
             out_dims.mvp_incr_index_loop(p, kDimOutYOffset, SLI_MVP_R7);
             in_dims.mvp_incr_index_loop(p, kDimOutYOffset, SLI_MVP_R6);
-
+          }
           sli_mvp_pb_end_loop(p);  // out_y_offsets
           sli_mvp_pb_postloop_incr_dim(p, SLI_MVP_ARRAY(2), SLI_MVP_INCRDIM_VEC);
 

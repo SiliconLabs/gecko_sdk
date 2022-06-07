@@ -98,11 +98,6 @@ enum {
 #define halCommonIncrementCounterToken(token) \
   halInternalIncrementCounterToken(token)
 
-#define halStackGetIdxTokenPtrOrData(ptr, token, index) \
-  halInternalGetIdxTokenPtrOrData(ptr, token, index, token##_SIZE)
-
-void halInternalGetIdxTokenPtrOrData(void *ptr, uint16_t ID, uint8_t index, uint8_t len);
-
 EmberStatus halStackInitTokens(void);
 
 void halInternalGetTokenData(void *data, uint16_t token, uint8_t index, uint8_t len);

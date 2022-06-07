@@ -50,7 +50,7 @@
 //                              Macros and Typedefs
 // -----------------------------------------------------------------------------
 // Proprietary Application task priority
-#define PROPRIETARY_APP_TASK_PRIO         6u
+#define PROPRIETARY_APP_TASK_PRIO         6U
 // Proprietary Application task stack size
 #define PROPRIETARY_APP_TASK_STACK_SIZE      configMINIMAL_STACK_SIZE
 // Redefining DEF_TRUE in order to be able to test the infinite loop
@@ -61,7 +61,7 @@
 extern int num_loops;
 #define DEF_TRUE num_loops--
 #else
-#define DEF_TRUE 1u
+#define DEF_TRUE 1U
 #endif // __SL_UNIT_TEST
 
 // -----------------------------------------------------------------------------
@@ -104,7 +104,7 @@ void app_task_init(void)
   proprietary_task_handle = xTaskCreateStatic(proprietary_app_task,
                                               "Proprietary App Task",
                                               PROPRIETARY_APP_TASK_STACK_SIZE,
-                                              ( void * ) NULL,
+                                              NULL,
                                               PROPRIETARY_APP_TASK_PRIO,
                                               proprietary_app_task_stack,
                                               &proprietary_app_task_buffer);

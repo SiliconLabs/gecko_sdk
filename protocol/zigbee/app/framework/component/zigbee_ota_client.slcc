@@ -112,7 +112,7 @@ template_contribution:
       group: ota-client
       name: page-request
       handler: setPageRequest
-      help: 
+      help: Can be used to dynamically turn off sending page requests on the client side, if the server doesn't support this feature.
       argument:
       - type: uint8
         help: Boolean value turning on (1) or off (0) the page request flag
@@ -121,9 +121,11 @@ template_contribution:
       group: ota-client
       name: pause-at
       handler: setPausePercentage
-      help: 
+      help: For testing, can be used to pause the update at a set percentage.
       argument:
       - type: uint8
+    condition:
+      - zigbee_simulation
   - name: cli_command
     value:
       group: ota-client

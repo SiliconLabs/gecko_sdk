@@ -103,6 +103,13 @@
 #define emberSetBeaconClassificationParams  ezspSetBeaconClassificationParams
 #define emberSendPanIdUpdate                ezspSendPanIdUpdate
 
+//Token Interface Frames
+#define emberGetTokenCount                  ezspGetTokenCount
+#define emberGetTokenInfo                   ezspGetTokenInfo
+#define emberGetTokenData                   ezspGetTokenData
+#define emberSetTokenData                   ezspSetTokenData
+#define emberResetNode                      ezspResetNode
+
 //Security Frames
 #define emberSetInitialSecurityState        ezspSetInitialSecurityState
 #define emberGetCurrentSecurityState        ezspGetCurrentSecurityState

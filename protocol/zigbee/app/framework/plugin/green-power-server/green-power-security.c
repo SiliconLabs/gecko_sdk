@@ -711,7 +711,7 @@ void emGpTestSecurity(void)
   // A.1.5.7.1 NWK-key derived GPD group key
   uint8_t UNUSED nwkKey[EMBER_ENCRYPTION_KEY_SIZE] = { 0x01, 0x03, 0x05, 0x07, 0x09, 0x0b, 0x0d, 0x0f, 0x00, 0x02, 0x04, 0x06, 0x08, 0x0a, 0x0c, 0x0d };
   // Hash it with 'ZGP'
-  uint8_t result[EMBER_ENCRYPTION_KEY_SIZE];
+  uint8_t result[EMBER_ENCRYPTION_KEY_SIZE] = { 0 };
   emberHmacAesHash(nwkKey,
                    (uint8_t *)"ZGP",
                    3,

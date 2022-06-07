@@ -52,7 +52,7 @@ extern "C" {
 
 /* Interrupt vectortable entry */
 typedef union {
-  void (*pFunc)(void);
+  void (*VECTOR_TABLE_Type)(void);
   void *topOfStack;
 } tVectorEntry;
 
@@ -65,12 +65,23 @@ extern uint32_t SystemCoreClock;     /**< System Clock Frequency (Core Clock) */
 extern uint32_t SystemHfrcoFreq;     /**< System HFRCO frequency */
 #endif
 
-#if defined(__VTOR_PRESENT) && (__VTOR_PRESENT == 1U)
-#if defined(__ICCARM__)    /* IAR requires the __vector_table symbol */
-#define __Vectors    __vector_table
-#endif
-extern const tVectorEntry __Vectors[];
-#endif
+/*Re-direction of IRQn.*/
+#if (_SILICON_LABS_32B_SERIES_2_CONFIG >= 2)
+#if defined (SL_TRUSTZONE_SECURE)
+#define SMU_PRIVILEGED_IRQn    SMU_S_PRIVILEGED_IRQn
+#else
+#define SMU_PRIVILEGED_IRQn    SMU_NS_PRIVILEGED_IRQn
+#endif /* SL_TRUSTZONE_SECURE */
+#endif /* _SILICON_LABS_32B_SERIES_2_CONFIG */
+
+/*Re-direction of IRQHandler.*/
+#if (_SILICON_LABS_32B_SERIES_2_CONFIG >= 2)
+#if defined (SL_TRUSTZONE_SECURE)
+#define SMU_PRIVILEGED_IRQHandler    SMU_S_PRIVILEGED_IRQHandler
+#else
+#define SMU_PRIVILEGED_IRQHandler    SMU_NS_PRIVILEGED_IRQHandler
+#endif /* SL_TRUSTZONE_SECURE */
+#endif /* _SILICON_LABS_32B_SERIES_2_CONFIG */
 
 /*******************************************************************************
  *****************************   PROTOTYPES   **********************************
@@ -82,6 +93,7 @@ void HardFault_Handler(void);       /**< Hard Fault Handler */
 void MemManage_Handler(void);       /**< MPU Fault Handler */
 void BusFault_Handler(void);        /**< Bus Fault Handler */
 void UsageFault_Handler(void);      /**< Usage Fault Handler */
+void SecureFault_Handler(void);     /**< Secure Fault Handler */
 void SVC_Handler(void);             /**< SVCall Handler */
 void DebugMon_Handler(void);        /**< Debug Monitor Handler */
 void PendSV_Handler(void);          /**< PendSV Handler */

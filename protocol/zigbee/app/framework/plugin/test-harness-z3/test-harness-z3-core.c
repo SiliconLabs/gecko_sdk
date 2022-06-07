@@ -178,10 +178,18 @@ EmberPacketAction emberAfIncomingPacketFilterCallback(EmberZigbeePacketType pack
       break;
     }
     case EMBER_ZIGBEE_PACKET_TYPE_NWK_COMMAND: {
+      // Add the offset to make commandID points to correct `zigbee command` part
+      if (data == NULL
+          || (*(uint8_t *)data >= packetLength)) {
+        emberAfCorePrintln("Invalid data");
+        break;
+      }
+      uint8_t networkHeaderSize = *(uint8_t *)data;
+      commandId = packetData[networkHeaderSize];
       if (printingMask & PRINTING_MASK_NWK) {
         emberAfCorePrint("nwk:rx seq AC sec 28 cmd %X payload[",
                          commandId);
-        emberAfCorePrintBuffer(packetData + 1, packetLength - 1, true); // spaces?
+        emberAfCorePrintBuffer(packetData, packetLength, true); // spaces?
         emberAfCorePrintln("]");
       }
       if (commandId == NWK_LEAVE_COMMAND

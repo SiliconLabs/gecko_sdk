@@ -1,10 +1,10 @@
 project_name: "zigbeed"
-label: "zigbeed"
+label: "Zigbee - Host zigbeed"
 package: "Zigbee"
 category: "Zigbee Host Application"
 quality: "production"
 
-description: |-
+description: >
   Zigbeed is a Zigbee Stack daemon that runs on a Linux host processor.
   It communicates with an 802.15.4 RCP via CPCd, and exposes an EZSP
   interface to a Zigbee host app. See AN1333 for more information.
@@ -14,7 +14,6 @@ component:
   - id: "zigbee_source_route"
   - id: "zigbee_binding_table"
   - id: "zigbee_end_device_bind"
-  - id: "zigbee_multi_network_stub"
   - id: "zigbee_packet_validate"
   - id: "zigbee_gp"
   - id: "zigbee_security_link_keys"
@@ -26,7 +25,8 @@ component:
   - id: "toolchain_gcc"
   - id: "zigbee_stack_unix"
   # not required by zigbeed, but could be enabled
-  - id: "zigbee_r22_support" 
+  - id: "zigbee_r22_support"
+  - id: "zigbee_token_interface"
 
 configuration:
   - name: SL_BOARD_ENABLE_VCOM
@@ -92,3 +92,21 @@ define:
     value: "\"../../../stack/include/ember-types.h\""
   - name: "EMBER_AF_API_STACK"
     value: "\"../../../stack/include/ember.h\""
+
+readme:
+ - path: ./readme.html
+
+ui_hints:
+  highlight:
+    - path: readme.html
+      focus: false
+
+filter:
+  - name: "Wireless Technology"
+    value: ["Zigbee"]
+  - name: "Device Type"
+    value: ["Host"]
+  - name: "Capability"
+    value: ["Multiprotocol"]
+  - name: "Project Difficulty"
+    value: ["Beginner"]

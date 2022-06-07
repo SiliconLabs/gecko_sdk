@@ -25,11 +25,9 @@ requires:
 provides:
   - name: "bluetooth_feature_even_scheduling"
 template_contribution:
-  - name: bluetooth_stack_init
-    value:
-      function: "sl_bt_enable_even_scheduling"
-    priority: 1
-  - name: bluetooth_controller_feature_init
+  - name: component_catalog
+    value: bluetooth_feature_even_scheduling
+  - name: bluetooth_controller_init
     value:
       function: "sl_btctrl_enable_even_connsch()"
     priority: 10    

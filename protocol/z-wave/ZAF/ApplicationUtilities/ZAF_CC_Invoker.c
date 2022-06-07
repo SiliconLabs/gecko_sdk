@@ -4,7 +4,7 @@
 #include "ZAF_CC_Invoker.h"
 #include "Assert.h"
 
-received_frame_status_t ZAF_CC_invoke_specific(CC_handler_map_v3_t const * const p_cc_entry,
+received_frame_status_t ZAF_CC_invoke_specific(CC_handler_map_latest_t const * const p_cc_entry,
                              RECEIVE_OPTIONS_TYPE_EX *rxOpt,
                              ZW_APPLICATION_TX_BUFFER *pFrameIn,
                              uint8_t cmdLength,
@@ -17,22 +17,17 @@ received_frame_status_t ZAF_CC_invoke_specific(CC_handler_map_v3_t const * const
   switch (p_cc_entry->handler_api_version) {
     case 1:
     {
-#pragma GCC diagnostic push
-#pragma GCC diagnostic ignored "-Wpedantic"
       cc_handler_v1_t handler = (cc_handler_v1_t)p_cc_entry->handler;
-#pragma GCC diagnostic pop
       return handler(rxOpt, pFrameIn, cmdLength);
     }
     case 2:
     {
-#pragma GCC diagnostic push
-#pragma GCC diagnostic ignored "-Wpedantic"
       cc_handler_v2_t handler = (cc_handler_v2_t)p_cc_entry->handler;
-#pragma GCC diagnostic pop
       return handler(rxOpt, pFrameIn, cmdLength, pFrameOut, pLengthOut);
     }
     default:
       // Handler API version is not supported.
+      ASSERT(false);
       return RECEIVED_FRAME_STATUS_CC_NOT_FOUND;
   }
 }
@@ -43,7 +38,7 @@ received_frame_status_t invoke_cc_handler(RECEIVE_OPTIONS_TYPE_EX *rxOpt,
                                           ZW_APPLICATION_TX_BUFFER * pFrameOut,
                                           uint8_t * pLengthOut)
 {
-  CC_handler_map_v3_t const * iter = &cc_handlers_start;
+  CC_handler_map_latest_t const * iter = &cc_handlers_start;
   for ( ; iter < &cc_handlers_stop; ++iter)
   {
     if (iter->CC == pFrameIn->ZW_Common.cmdClass) {
@@ -62,7 +57,7 @@ received_frame_status_t invoke_cc_handler(RECEIVE_OPTIONS_TYPE_EX *rxOpt,
 void ZAF_CC_foreach(zaf_cc_invoker_callback_t callback, zaf_cc_context_t context)
 {
   ASSERT(callback != NULL);
-  CC_handler_map_v3_t const * iter = &cc_handlers_start;
+  CC_handler_map_latest_t const * iter = &cc_handlers_start;
   for ( ; iter < &cc_handlers_stop; ++iter)
   {
     if (true == callback(iter, context)) {
@@ -75,4 +70,4 @@ void ZAF_CC_foreach(zaf_cc_invoker_callback_t callback, zaf_cc_context_t context
  * Make sure at least one entry exists. If zero entries exist, the linking will fail because
  * start and stop variables are not defined.
  */
-REGISTER_CC_V2(0xFF, 0xFF, NULL);
+REGISTER_CC(0xFF, 0xFF, NULL);

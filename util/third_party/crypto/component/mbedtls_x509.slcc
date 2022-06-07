@@ -1,10 +1,10 @@
 id: mbedtls_x509
 package: platform
-label: Mbed TLS Support for X.509
+label: X.509
 description: >-
   This component provides full support for handling X.509 standard-
   based certificates in Mbed TLS.
-category: Platform|Security
+category: Platform|Security|Mbed TLS|Upper Layer
 quality: production
 source:
   - path: util/third_party/crypto/mbedtls/library/oid.c
@@ -18,6 +18,12 @@ source:
   - path: util/third_party/crypto/mbedtls/library/des.c
 provides:
   - name: mbedtls_x509
+  # This component will not become compatible with the SiliconLabs TrustZone Secure
+  # Key Library until the upper layer TLS code fully supports use of PSA APIs. For
+  # more details, please refer to the documentation of MBEDTLS_USE_PSA_CRYPTO in
+  # mbedtls/include/mbedtls/mbedtls_config.h.
+  - name: tz_ns_incompatible
+    condition: [tz_secure_key_library_ns]
 requires:
   - name: mbedtls_pki
   - name: mbedtls_pem

@@ -17,23 +17,23 @@ limitations under the License.
 <configurator>
   <atomic>
     <type id="0x00" name="no_data" size="0" description="No data"/>
-    <type id="0x08" name="data8" size="1" description="8-bit data" discrete="true" />
-    <type id="0x09" name="data16" size="2" description="16-bit data" discrete="true" />
-    <type id="0x0A" name="data24" size="3" description="24-bit data" discrete="true" />
-    <type id="0x0B" name="data32" size="4" description="32-bit data" discrete="true" />
-    <type id="0x0C" name="data40" size="5" description="40-bit data" discrete="true" />
-    <type id="0x0D" name="data48" size="6" description="48-bit data" discrete="true" />
-    <type id="0x0E" name="data56" size="7" description="56-bit data" discrete="true" />
-    <type id="0x0F" name="data64" size="8" description="64-bit data" discrete="true" />
-    <type id="0x10" name="boolean" size="1" description="Boolean" discrete="true" />
-    <type id="0x18" name="bitmap8" size="1" description="8-bit bitmap" discrete="true" />
-    <type id="0x19" name="bitmap16" size="2" description="16-bit bitmap" discrete="true" />
-    <type id="0x1A" name="bitmap24" size="3" description="24-bit bitmap" discrete="true" />
-    <type id="0x1B" name="bitmap32" size="4" description="32-bit bitmap" discrete="true" />
-    <type id="0x1C" name="bitmap40" size="5" description="40-bit bitmap" discrete="true" />
-    <type id="0x1D" name="bitmap48" size="6" description="48-bit bitmap" discrete="true" />
-    <type id="0x1E" name="bitmap56" size="7" description="56-bit bitmap" discrete="true" />
-    <type id="0x1F" name="bitmap64" size="8" description="64-bit bitmap" discrete="true" />
+    <type id="0x08" name="data8" size="1" description="8-bit data" discrete="true"/>
+    <type id="0x09" name="data16" size="2" description="16-bit data" discrete="true"/>
+    <type id="0x0A" name="data24" size="3" description="24-bit data" discrete="true"/>
+    <type id="0x0B" name="data32" size="4" description="32-bit data" discrete="true"/>
+    <type id="0x0C" name="data40" size="5" description="40-bit data" discrete="true"/>
+    <type id="0x0D" name="data48" size="6" description="48-bit data" discrete="true"/>
+    <type id="0x0E" name="data56" size="7" description="56-bit data" discrete="true"/>
+    <type id="0x0F" name="data64" size="8" description="64-bit data" discrete="true"/>
+    <type id="0x10" name="boolean" size="1" description="Boolean" discrete="true"/>
+    <type id="0x18" name="bitmap8" size="1" description="8-bit bitmap" discrete="true"/>
+    <type id="0x19" name="bitmap16" size="2" description="16-bit bitmap" discrete="true"/>
+    <type id="0x1A" name="bitmap24" size="3" description="24-bit bitmap" discrete="true"/>
+    <type id="0x1B" name="bitmap32" size="4" description="32-bit bitmap" discrete="true"/>
+    <type id="0x1C" name="bitmap40" size="5" description="40-bit bitmap" discrete="true"/>
+    <type id="0x1D" name="bitmap48" size="6" description="48-bit bitmap" discrete="true"/>
+    <type id="0x1E" name="bitmap56" size="7" description="56-bit bitmap" discrete="true"/>
+    <type id="0x1F" name="bitmap64" size="8" description="64-bit bitmap" discrete="true"/>
     <type id="0x20" name="int8u" size="1" description="Unsigned 8-bit integer"/>
     <type id="0x21" name="int16u" size="2" description="Unsigned 16-bit integer"/>
     <type id="0x22" name="int24u" size="3" description="Unsigned 24-bit integer"/>
@@ -50,27 +50,27 @@ limitations under the License.
     <type id="0x2D" name="int48s" size="6" description="Signed 48-bit integer" signed="true"/>
     <type id="0x2E" name="int56s" size="7" description="Signed 56-bit integer" signed="true"/>
     <type id="0x2F" name="int64s" size="8" description="Signed 64-bit integer" signed="true"/>
-    <type id="0x30" name="enum8" size="1" description="8-bit enumeration" discrete="true" />
-    <type id="0x31" name="enum16" size="2" description="16-bit enumeration" discrete="true" />
+    <type id="0x30" name="enum8" size="1" description="8-bit enumeration" discrete="true"/>
+    <type id="0x31" name="enum16" size="2" description="16-bit enumeration" discrete="true"/>
     <type id="0x38" name="float_semi" size="2" description="Semi-precision"/>
     <type id="0x39" name="float_single" size="4" description="Single precision"/>
     <type id="0x3A" name="float_double" size="8" description="Double precision"/>
-    <type id="0x41" name="octet_string" description="Octet string" discrete="true"  string="true"/>
+    <type id="0x41" name="octet_string" description="Octet string" discrete="true" string="true"/>
     <type id="0x42" name="char_string" description="Character string" discrete="true" string="true" char="true"/>
-    <type id="0x43" name="long_octet_string" description="Long octet string" discrete="true"  string="true" long="true"/>
-    <type id="0x44" name="long_char_string" description="Long character string" discrete="true"  string="true" char="true" long="true"/>
-    <type id="0x48" name="array" description="Array" discrete="true" />
-    <type id="0x4C" name="struct" description="Structure" discrete="true" />
-    <type id="0x50" name="set" description="Set" discrete="true" />
-    <type id="0x51" name="bag" description="Bag" discrete="true" />
+    <type id="0x43" name="long_octet_string" description="Long octet string" discrete="true" string="true" long="true"/>
+    <type id="0x44" name="long_char_string" description="Long character string" discrete="true" string="true" char="true" long="true"/>
+    <type id="0x48" name="array" description="Array" discrete="true"/>
+    <type id="0x4C" name="struct" description="Structure" discrete="true"/>
+    <type id="0x50" name="set" description="Set" discrete="true"/>
+    <type id="0x51" name="bag" description="Bag" discrete="true"/>
     <type id="0xE0" name="time_of_day" size="4" description="Time of day"/>
     <type id="0xE1" name="date" size="4" description="Date"/>
     <type id="0xE2" name="utc_time" size="4" description="UTC Time"/>
-    <type id="0xE8" name="cluster_id" size="2" description="Cluster ID" discrete="true" />
-    <type id="0xE9" name="attribute_id" size="2" description="Attribute ID" discrete="true" />
-    <type id="0xEA" name="bacnet_oid" size="4" description="BACnet OID" discrete="true" />
-    <type id="0xF0" name="ieee_address" size="8" description="IEEE address" discrete="true" />
-    <type id="0xF1" name="security_key" size="16" description="128-bit security key" discrete="true" />
+    <type id="0xE8" name="cluster_id" size="2" description="Cluster ID" discrete="true"/>
+    <type id="0xE9" name="attribute_id" size="2" description="Attribute ID" discrete="true"/>
+    <type id="0xEA" name="bacnet_oid" size="4" description="BACnet OID" discrete="true"/>
+    <type id="0xF0" name="ieee_address" size="8" description="IEEE address" discrete="true"/>
+    <type id="0xF1" name="security_key" size="16" description="128-bit security key" discrete="true"/>
     <type id="0xFF" name="unknown" size="0" description="Unknown"/>
   </atomic>
   <bitmap name="ShadeClosureStatus" type="BITMAP8">
@@ -210,7 +210,7 @@ limitations under the License.
     <item name="normal" value="0x0"/>
     <item name="configure" value="0x1"/>
   </enum>
-  <enum name="Status" type="INT8U" description="Status codes used in the ZigBee Cluster Library">
+  <enum name="Status" type="ENUM8" description="Status codes used in the ZigBee Cluster Library">
     <item name="SUCCESS" value="0x00"/>
     <item name="FAILURE" value="0x01"/>
     <item name="NOT_AUTHORIZED" value="0x7E"/>
@@ -797,7 +797,7 @@ limitations under the License.
     <item name="Silent" value="0x00"/>
     <item name="Low" value="0x01"/>
     <item name="High" value="0x02"/>
-    <item name="Medium" value="0x03" />
+    <item name="Medium" value="0x03"/>
   </enum>
   <enum name="DoorLockType" type="ENUM8">
     <item name="DeadBolt" value="0x00"/>
@@ -818,7 +818,7 @@ limitations under the License.
     <item name="ErrorJammed" value="0x02"/>
     <item name="ErrorForcedOpen" value="0x03"/>
     <item name="ErrorUnspecified" value="0x04"/>
-    <item name="ErrorAjar"        value="0x05" />
+    <item name="ErrorAjar" value="0x05"/>
   </enum>
   <enum name="DoorLockOperatingMode" type="ENUM8">
     <item name="NormalMode" value="0x00"/>
@@ -843,8 +843,8 @@ limitations under the License.
     <item name="WeekDayScheduleUser" value="0x02"/>
     <item name="MasterUser" value="0x03"/>
     <item name="NonAccessUser" value="0x04"/>
-    <item name="CoercedUser"      value="0x05" />
-    <item name="DisposableUser"   value="0x06" />
+    <item name="CoercedUser" value="0x05"/>
+    <item name="DisposableUser" value="0x06"/>
     <item name="NotSupported" value="0xFF"/>
   </enum>
   <bitmap name="DoorLockDayOfWeek" type="BITMAP8">
@@ -866,7 +866,7 @@ limitations under the License.
     <item name="Rf" value="0x01"/>
     <item name="Manual" value="0x02"/>
     <item name="Rfid" value="0x03"/>
-    <item name="BiometricCred" value="0x04" />
+    <item name="BiometricCred" value="0x04"/>
     <item name="Indeterminate" value="0xFF"/>
   </enum>
   <enum name="DoorLockSetPinOrIdStatus" type="ENUM8">
@@ -891,13 +891,13 @@ limitations under the License.
     <item name="ScheduleUnlock" value="0x0C"/>
     <item name="ManualLock" value="0x0D"/>
     <item name="ManualUnlock" value="0x0E"/>
-    <item name="UnlockCoercedUser"     value="0x10" />
-    <item name="FingerpintUnlock"      value="0x11" />
-    <item name="FaceIDUnlock"          value="0x12" />
-    <item name="FingerveinUnlock"      value="0x13" />
-    <item name="AutoUnlock"            value="0x14" />
-    <item name="ApplicationUnlock"     value="0x15" />
-    <item name="UnlockDisposableUser"  value="0x16" />
+    <item name="UnlockCoercedUser" value="0x10"/>
+    <item name="FingerpintUnlock" value="0x11"/>
+    <item name="FaceIDUnlock" value="0x12"/>
+    <item name="FingerveinUnlock" value="0x13"/>
+    <item name="AutoUnlock" value="0x14"/>
+    <item name="ApplicationUnlock" value="0x15"/>
+    <item name="UnlockDisposableUser" value="0x16"/>
   </enum>
   <enum name="DoorLockProgrammingEventCode" type="ENUM8">
     <item name="UnknownOrMfgSpecific" value="0x00"/>
@@ -907,23 +907,23 @@ limitations under the License.
     <item name="PinChanged" value="0x04"/>
     <item name="IdAdded" value="0x05"/>
     <item name="IdDeleted" value="0x06"/>
-    <item name="FingerprintAdded"     value="0x07" />
-    <item name="FingerprintDeleted"   value="0x08" />
-    <item name="FaceIdAdded"          value="0x09" />
-    <item name="FaceIdDeleted"        value="0x0A" />
-    <item name="FingerveinAdded"      value="0x0B" />
-    <item name="FingerveinDeleted"    value="0x0C" />
+    <item name="FingerprintAdded" value="0x07"/>
+    <item name="FingerprintDeleted" value="0x08"/>
+    <item name="FaceIdAdded" value="0x09"/>
+    <item name="FaceIdDeleted" value="0x0A"/>
+    <item name="FingerveinAdded" value="0x0B"/>
+    <item name="FingerveinDeleted" value="0x0C"/>
   </enum>
   <enum name="DoorLockAlarmCode" type="ENUM8">
-    <item name="DeadboltJammed"            value="0x00" />
-    <item name="ResetToFactoryDefaults"    value="0x01" />
-    <item name="RFModulePowerCycled"       value="0x03" />
-    <item name="TamperWrongCodeEntryLimit" value="0x04" />
-    <item name="TamperFrontEscutcheon"     value="0x05" />
-    <item name="ForcedDoorOpen"            value="0x06" />
-    <item name="DoorAjar"                  value="0x07" />
-    <item name="Coerced"                   value="0x08" />    
-  </enum>  
+    <item name="DeadboltJammed" value="0x00"/>
+    <item name="ResetToFactoryDefaults" value="0x01"/>
+    <item name="RFModulePowerCycled" value="0x03"/>
+    <item name="TamperWrongCodeEntryLimit" value="0x04"/>
+    <item name="TamperFrontEscutcheon" value="0x05"/>
+    <item name="ForcedDoorOpen" value="0x06"/>
+    <item name="DoorAjar" value="0x07"/>
+    <item name="Coerced" value="0x08"/>
+  </enum>
   <enum name="ThermostatRunningMode" type="ENUM8">
     <item name="Off" value="0x00"/>
     <item name="Cool" value="0x03"/>

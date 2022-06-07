@@ -14,6 +14,7 @@
   - name: hardware_board_stk
   - name: hardware_board_from_stk
   - name: hardware_board_from_efm32-g8xx-stk
+  - name: hardware_board_has_vcom
   - name: hardware_board_has_hfxo
   - name: hardware_board_has_lfxo
 - recommends:

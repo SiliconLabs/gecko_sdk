@@ -25,6 +25,7 @@ requires:
   - name: simple_com
   - name: simple_timer
   - name: status
+  - name: bootloader_interface
 recommends:
   - id: simple_timer
 define:

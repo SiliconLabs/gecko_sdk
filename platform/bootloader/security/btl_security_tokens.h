@@ -19,13 +19,17 @@
 
 #include <stdint.h>
 #include "em_device.h"
+#include "config/btl_config.h"
+
+/** @cond DO_NOT_INCLUDE_WITH_DOXYGEN */
+
+/** @cond DO_NOT_INCLUDE_WITH_DOXYGEN */
 
 #if defined(LOCKBITS_BASE)
 #define PUBKEY_OFFSET_X (0x34A)
 #define PUBKEY_OFFSET_Y (0x36A)
 #elif defined(SEMAILBOX_PRESENT)
 #include <stddef.h>
-#include "config/btl_config.h"
 // Lockbits are placed in the topmost flash page
 #define LOCKBITS_BASE ((FLASH_BASE) + (FLASH_SIZE) -(FLASH_PAGE_SIZE))
 #if defined(BOOTLOADER_FALLBACK_LEGACY_KEY) && (BOOTLOADER_FALLBACK_LEGACY_KEY == 1)
@@ -34,7 +38,7 @@
 #define PUBKEY_OFFSET_Y (0x36C)
 #endif
 // #elif defined(_SILICON_LABS_GECKO_INTERNAL_SDID_200)
-#elif defined(_SILICON_LABS_GECKO_INTERNAL_SDID_205)
+#elif defined(_SILICON_LABS_GECKO_INTERNAL_SDID_205) || defined(_SILICON_LABS_GECKO_INTERNAL_SDID_230)
 // Lockbits are placed in the topmost flash page
 #define LOCKBITS_BASE ((FLASH_BASE) + (FLASH_SIZE) -(FLASH_PAGE_SIZE))
 #define PUBKEY_OFFSET_X (0x34C)
@@ -43,6 +47,8 @@
 #else
 #error "Lockbits location unknown"
 #endif
+
+/** @endcond */
 
 /***************************************************************************//**
  * @addtogroup Components

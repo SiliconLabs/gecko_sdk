@@ -127,9 +127,13 @@ RAIL_Handle_t app_init(void)
 #endif
 #endif
 
-#if defined(RAIL0_CHANNEL_GROUP_1_PROFILE_WISUN_OFDM)
+#if defined(RAIL0_CHANNEL_GROUP_1_PROFILE_WISUN_OFDM) && !defined(HARDWARE_BOARD_HAS_EFF)
   _Static_assert(SL_RAIL_UTIL_PA_SELECTION_SUBGHZ == RAIL_TX_POWER_MODE_OFDM_PA,
                  "Please use the OFDM PA settings in the sl_rail_util_pa_config.h for OFDM phys.");
+#endif
+#if defined(RAIL0_CHANNEL_GROUP_1_PROFILE_WISUN_OFDM) && RAIL_SUPPORTS_EFF && defined(HARDWARE_BOARD_HAS_EFF)
+  _Static_assert(SL_RAIL_UTIL_PA_SELECTION_SUBGHZ >= RAIL_TX_POWER_MODE_OFDM_PA_EFF_30DBM,
+                 "Please use the OFDM PA for EFF settings in the sl_rail_util_pa_config.h for OFDM phys.");
 #endif
 
   return (RAIL_Handle_t) 0x01;

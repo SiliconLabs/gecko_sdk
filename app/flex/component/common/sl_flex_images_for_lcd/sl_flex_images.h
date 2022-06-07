@@ -129,8 +129,8 @@ static const uint8_t silabsLogo_image_bits[] =
 
 static const imgType_t silabsLogo =
 {
-  128u,
-  63u,
+  128U,
+  63U,
   (uint8_t*)silabsLogo_image_bits
 };
 
@@ -139,8 +139,8 @@ static const uint8_t icon_down_image_bits[] = { 0x1C, 0x1C, 0x1C, 0x5D, 0x3E, 0x
 
 imgType_t icon_down =
 {
-  8u,
-  8u,
+  8U,
+  8U,
   (uint8_t*)icon_down_image_bits
 };
 
@@ -160,8 +160,8 @@ static const uint8_t icon_plusminus_image_bits[] =
 
 imgType_t icon_plusminus =
 {
-  8u,
-  8u,
+  8U,
+  8U,
   (uint8_t*)icon_plusminus_image_bits
 };
 

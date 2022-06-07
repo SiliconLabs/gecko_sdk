@@ -6,6 +6,7 @@ category: Services
 quality: production
 config_file:
   - path: platform/service/sleeptimer/config/sl_sleeptimer_config.h
+    file_id: sleeptimer_config
 source:
   - path: platform/service/sleeptimer/src/sl_sleeptimer.c
   - path: platform/service/sleeptimer/src/sl_sleeptimer_hal_rtcc.c
@@ -33,6 +34,7 @@ requires:
   - name: emlib_core
   - name: atomic
   - name: status
+  - name: sl_assert
   - name: emlib_rtcc
     condition: [device_has_rtcc]
   - name: emlib_rtc

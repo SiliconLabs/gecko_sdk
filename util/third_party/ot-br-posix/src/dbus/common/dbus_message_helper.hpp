@@ -77,6 +77,16 @@ otbrError DBusMessageEncode(DBusMessageIter *aIter, const ChannelQuality &aQuali
 otbrError DBusMessageExtract(DBusMessageIter *aIter, ChannelQuality &aQuality);
 otbrError DBusMessageEncode(DBusMessageIter *aIter, const TxtEntry &aTxtEntry);
 otbrError DBusMessageExtract(DBusMessageIter *aIter, TxtEntry &aTxtEntry);
+otbrError DBusMessageEncode(DBusMessageIter *aIter, const SrpServerInfo::Registration &aRegistration);
+otbrError DBusMessageExtract(DBusMessageIter *aIter, SrpServerInfo::Registration &aRegistration);
+otbrError DBusMessageEncode(DBusMessageIter *aIter, const SrpServerInfo::ResponseCounters &aResponseCounters);
+otbrError DBusMessageExtract(DBusMessageIter *aIter, SrpServerInfo::ResponseCounters &aResponseCounters);
+otbrError DBusMessageEncode(DBusMessageIter *aIter, const SrpServerInfo &aSrpServerInfo);
+otbrError DBusMessageExtract(DBusMessageIter *aIter, SrpServerInfo &aSrpServerInfo);
+#if OTBR_ENABLE_DNSSD_DISCOVERY_PROXY
+otbrError DBusMessageEncode(DBusMessageIter *aIter, const DnssdCounters &aDnssdCounters);
+otbrError DBusMessageExtract(DBusMessageIter *aIter, DnssdCounters &aDnssdCounters);
+#endif
 
 template <typename T> struct DBusTypeTrait;
 
@@ -126,6 +136,18 @@ template <> struct DBusTypeTrait<std::vector<ExternalRoute>>
 {
     // array of {{array of bytes, byte}, uint16, byte, bool, bool}
     static constexpr const char *TYPE_AS_STRING = "a((ayy)qybb)";
+};
+
+template <> struct DBusTypeTrait<OnMeshPrefix>
+{
+    // struct of {{array of bytes, byte}, uint16, byte, bool, bool, bool, bool, bool, bool, bool, bool, bool}
+    static constexpr const char *TYPE_AS_STRING = "((ayy)qybbbbbbbbb)";
+};
+
+template <> struct DBusTypeTrait<std::vector<OnMeshPrefix>>
+{
+    // array of {{array of bytes, byte}, uint16, byte, bool, bool, bool, bool, bool, bool, bool, bool, bool}
+    static constexpr const char *TYPE_AS_STRING = "a((ayy)qybbbbbbbbb)";
 };
 
 template <> struct DBusTypeTrait<LeaderData>
@@ -198,6 +220,35 @@ template <> struct DBusTypeTrait<std::vector<TxtEntry>>
     // array of struct of { string, array<uint8> }
     static constexpr const char *TYPE_AS_STRING = "a(say)";
 };
+
+template <> struct DBusTypeTrait<SrpServerState>
+{
+    static constexpr int         TYPE           = DBUS_TYPE_BYTE;
+    static constexpr const char *TYPE_AS_STRING = DBUS_TYPE_BYTE_AS_STRING;
+};
+
+template <> struct DBusTypeTrait<SrpServerAddressMode>
+{
+    static constexpr int         TYPE           = DBUS_TYPE_BYTE;
+    static constexpr const char *TYPE_AS_STRING = DBUS_TYPE_BYTE_AS_STRING;
+};
+
+template <> struct DBusTypeTrait<SrpServerInfo>
+{
+    // struct of { uint8, uint16, uint8,
+    //              struct of { uint32, uint32, uint64, uint64, uint64, uint64 },
+    //              struct of { uint32, uint32, uint64, uint64, uint64, uint64 },
+    //              struct of { uint32, uint32, uint32, uint32, uint32, uint32} }
+    static constexpr const char *TYPE_AS_STRING = "(yqy(uutttt)(uutttt)(uuuuuu))";
+};
+
+#if OTBR_ENABLE_DNSSD_DISCOVERY_PROXY
+template <> struct DBusTypeTrait<DnssdCounters>
+{
+    // struct of { uint32, uint32, uint32, uint32, uint32, uint32, uint32 }
+    static constexpr const char *TYPE_AS_STRING = "(uuuuuuu)";
+};
+#endif
 
 template <> struct DBusTypeTrait<int8_t>
 {

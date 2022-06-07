@@ -31,36 +31,46 @@
 #include <stdbool.h>
 #include <string.h>
 
-#include "sl_gsdk_version.h"
-#include "sl_cpc_system_common.h"
-#include "sl_cpc_config.h"
-#include "sl_cpc.h"
+#include "em_rmu.h"
 #include "sli_cpc.h"
+#include "sli_cpc_drv.h"
+#include "sli_cpc_hdlc.h"
+#include "sli_cpc_system_common.h"
+#include "sli_mem_pool.h"
 #include "sl_atomic.h"
 #include "sl_component_catalog.h"
-#include "sli_mem_pool.h"
-#include "em_rmu.h"
+#include "sl_cpc.h"
+#include "sl_cpc_config.h"
+#include "sl_gsdk_version.h"
 
 #if (defined(SL_CATALOG_CPC_BOOTLOADER_INTERFACE_PRESENT))
 #include "btl_interface.h"
 #endif
 
 #if (defined(SL_CATALOG_CPC_SECURITY_PRESENT))
-#include "sl_cpc_security.h"
+#include "sli_cpc_security.h"
 #endif
 
 #define CPC_PACKED_ENDPOINT_PRESENT 0   // Not yet implemented
 
-#define CAPABILITIES                                                          \
-  (SL_CPC_ENDPOINT_SECURITY_ENABLED * CPC_CAPABILITIES_SECURITY_ENDPOINT_MASK \
-   + CPC_PACKED_ENDPOINT_PRESENT * CPC_CAPABILITIES_PACKED_ENDPOINT_MASK      \
-   + SLI_CPC_ENDPOINT_GPIO_ENABLED * CPC_CAPABILITIES_GPIO_ENDPOINT_MASK)
+/*******************************************************************************
+ ***************************  GLOBAL VARIABLES   ********************************
+ ******************************************************************************/
+
+extern sli_cpc_drv_capabilities_t sli_cpc_driver_capabilities;
 
 /*******************************************************************************
  ***************************  LOCAL VARIABLES   ********************************
  ******************************************************************************/
 
-static bool sli_cpc_system_restart_flag = false;
+static bool restart_flag = false;
+
+static uint32_t enter_irq_end_ms;
+static sl_sleeptimer_timer_handle_t enter_irq_timer;
+
+static bool process_uframes_flag = false;
+
+static uint32_t fc_validation_value;
 
 /***************************************************************************//**
  * System endpoint handle
@@ -74,7 +84,7 @@ static sl_cpc_endpoint_handle_t system_ep = { .ep = NULL };
  *      configuration of the bootloader, it either updates the application or
  *      starts an NCP mode.
  ******************************************************************************/
-static sl_cpc_system_reboot_mode_t prop_bootloader_reboot_mode = REBOOT_APPLICATION;
+static sli_cpc_system_reboot_mode_t prop_bootloader_reboot_mode = REBOOT_APPLICATION;
 
 /*******************************************************************************
  *****************************   PROTOTYPES   **********************************
@@ -85,7 +95,7 @@ static void on_write_completed(sl_cpc_user_endpoint_id_t endpoint_id,
                                void *arg,
                                sl_status_t status);
 
-static sl_status_t sli_cpc_system_open_endpoint(void);
+static sl_status_t open_endpoint(void);
 static void on_system_ep_error(sl_cpc_user_endpoint_id_t endpoint_id);
 
 static void send_reset_reason(void);
@@ -98,12 +108,15 @@ static void on_poll(uint8_t endpoint_id,
                     uint32_t * reply_data_lenght,
                     void **on_write_complete_arg);
 
+static void enter_irq_timer_callback(sl_sleeptimer_timer_handle_t *handle,
+                                     void *data);
+
 __WEAK void system_on_information_received(uint8_t endpoint_id, void *arg);
 
 /***************************************************************************//**
  * Initialize CPC System
  ******************************************************************************/
-static sl_status_t sli_cpc_system_open_endpoint(void)
+static sl_status_t open_endpoint(void)
 {
   sl_status_t status;
 
@@ -156,16 +169,28 @@ void sli_cpc_system_process(void)
 {
   sl_cpc_endpoint_state_t state;
 
-  if (sli_cpc_system_restart_flag) {
+  if (restart_flag) {
     state = sl_cpc_get_endpoint_state(&system_ep);
 
     if (state == SL_CPC_STATE_FREED) {
-      EFM_ASSERT(sli_cpc_system_open_endpoint() == SL_STATUS_OK);
-      sli_cpc_system_restart_flag = false;
+      EFM_ASSERT(open_endpoint() == SL_STATUS_OK);
+      restart_flag = false;
     } else {
       if (state != SL_CPC_STATE_CLOSED) {
         sl_cpc_close_endpoint(&system_ep);
       }
+    }
+  }
+
+  if (process_uframes_flag) {
+    void *data;
+    uint16_t data_length;
+    sl_status_t status = sl_cpc_read(&system_ep, &data, &data_length, 0, SL_CPC_FLAG_NO_BLOCK | SL_CPC_FLAG_UNNUMBERED_INFORMATION);
+    if (status == SL_STATUS_OK) {
+      if (data_length > 0) {
+        fc_validation_value += ((uint8_t *)data)[0];
+      }
+      sl_cpc_free_rx_buffer(data);
     }
   }
 }
@@ -175,7 +200,7 @@ void sli_cpc_system_process(void)
  ******************************************************************************/
 sl_status_t sli_cpc_system_init(void)
 {
-  sl_status_t status = sli_cpc_system_open_endpoint();
+  sl_status_t status = open_endpoint();
 
   send_reset_reason();
 
@@ -188,7 +213,7 @@ sl_status_t sli_cpc_system_init(void)
 static void on_system_ep_error(sl_cpc_user_endpoint_id_t endpoint_id)
 {
   EFM_ASSERT(endpoint_id == SL_CPC_ENDPOINT_SYSTEM);
-  sli_cpc_system_restart_flag = true;
+  restart_flag = true;
 }
 
 /***************************************************************************//**
@@ -231,7 +256,7 @@ static void on_write_completed(sl_cpc_user_endpoint_id_t endpoint_id,
     // Clear resetcause
     RMU->CMD = RMU_CMD_RCCLR;
     // Trigger a software system reset
-    RMU->CTRL = (RMU->CTRL & ~_RMU_CTRL_SYSRMODE_MASK) | RMU_CTRL_SYSRMODE_FULL;
+    RMU->CTRL = (RMU->CTRL & ~_RMU_CTRL_SYSRMODE_MASK) | RMU_CTRL_SYSRMODE_EXTENDED;
 #endif
     NVIC_SystemReset();
   }
@@ -243,8 +268,8 @@ static void on_write_completed(sl_cpc_user_endpoint_id_t endpoint_id,
 sl_status_t sli_cpc_send_disconnection_notification(uint8_t endpoint_id)
 {
   sl_status_t status;
-  sl_cpc_system_cmd_t *tx_command;
-  sl_cpc_system_property_cmd_t *tx_prop_command;
+  sli_cpc_system_cmd_t *tx_command;
+  sli_cpc_system_property_cmd_t *tx_prop_command;
   sl_cpc_endpoint_state_t *ep_state;
 
   status = sli_cpc_get_system_command_buffer(&tx_command);
@@ -254,23 +279,22 @@ sl_status_t sli_cpc_send_disconnection_notification(uint8_t endpoint_id)
 
   tx_command->header.command_id = CMD_SYSTEM_PROP_VALUE_IS;
 
-  /* Seq is irrelevant in u-frame information */
   tx_command->header.seq = 0;
 
-  tx_prop_command = (sl_cpc_system_property_cmd_t*)(tx_command->payload);
+  tx_prop_command = (sli_cpc_system_property_cmd_t*)(tx_command->payload);
 
   tx_prop_command->property_id = EP_ID_TO_PROPERTY_ID(endpoint_id);
 
   ep_state = (sl_cpc_endpoint_state_t *)tx_prop_command->payload;
 
-  tx_command->header.length = sizeof(sl_cpc_system_property_cmd_t) + sizeof(sl_cpc_endpoint_state_t);
+  tx_command->header.length = sizeof(sli_cpc_system_property_cmd_t) + sizeof(sl_cpc_endpoint_state_t);
 
   *ep_state = SL_CPC_STATE_CLOSING;
 
   status = sl_cpc_write(&system_ep,
                         (void *)tx_command,
-                        sizeof(sl_cpc_system_cmd_header_t) + tx_command->header.length,
-                        SL_CPC_FLAG_UNNUMBERED_INFORMATION,
+                        sizeof(sli_cpc_system_cmd_header_t) + tx_command->header.length,
+                        0,
                         NULL);
 
   EFM_ASSERT(status == SL_STATUS_OK);
@@ -284,8 +308,8 @@ sl_status_t sli_cpc_send_disconnection_notification(uint8_t endpoint_id)
 static void send_reset_reason(void)
 {
   sl_status_t status;
-  sl_cpc_system_cmd_t *tx_command;
-  sl_cpc_system_property_cmd_t *tx_prop_command;
+  sli_cpc_system_cmd_t *tx_command;
+  sli_cpc_system_property_cmd_t *tx_prop_command;
   sl_cpc_system_status_t *tx_prop_last_status;
   uint32_t reset_cause;
 
@@ -297,7 +321,7 @@ static void send_reset_reason(void)
   /* Seq is irrelevant in u-frame information */
   tx_command->header.seq = 0;
 
-  tx_prop_command = (sl_cpc_system_property_cmd_t*)(tx_command->payload);
+  tx_prop_command = (sli_cpc_system_property_cmd_t*)(tx_command->payload);
 
   tx_prop_command->property_id = PROP_LAST_STATUS;
 
@@ -353,7 +377,7 @@ static void send_reset_reason(void)
     *tx_prop_last_status = STATUS_RESET_WATCHDOG;
   }
 #endif
-#if defined(_RMU_CTRL_LOCKUPRMODE_MASK)
+#if defined(_EMU_RSTCTRL_LOCKUPRMODE_MASK)
   if (reset_cause & rmuResetCoreLockup) {
     *tx_prop_last_status = STATUS_RESET_CRASH;
   }
@@ -363,7 +387,7 @@ static void send_reset_reason(void)
     *tx_prop_last_status = STATUS_RESET_CRASH;
   }
 #endif
-#if defined(_RMU_CTRL_SYSRMODE_MASK)
+#if defined(_EMU_RSTCTRL_SYSRMODE_MASK)
   if (reset_cause & rmuResetSys) {
     *tx_prop_last_status = STATUS_RESET_SOFTWARE;
   }
@@ -377,50 +401,17 @@ static void send_reset_reason(void)
 
   RMU_ResetCauseClear();
 
-  tx_command->header.length = sizeof(sl_cpc_system_property_cmd_t) + sizeof(sl_cpc_system_status_t);
+  tx_command->header.length = sizeof(sli_cpc_system_property_cmd_t) + sizeof(sl_cpc_system_status_t);
 
   status = sl_cpc_write(&system_ep,
                         (void *)tx_command,
-                        sizeof(sl_cpc_system_cmd_header_t) + tx_command->header.length,
+                        sizeof(sli_cpc_system_cmd_header_t) + tx_command->header.length,
                         SL_CPC_FLAG_UNNUMBERED_INFORMATION,
                         NULL);
 
   EFM_ASSERT(status == SL_STATUS_OK);
 }
 
-void send_status_ok(void)
-{
-  sl_status_t status;
-  sl_cpc_system_cmd_t *tx_command;
-  sl_cpc_system_property_cmd_t *tx_prop_command;
-  sl_cpc_system_status_t *tx_prop_last_status;
-
-  status = sli_cpc_get_system_command_buffer(&tx_command);
-  EFM_ASSERT(status == SL_STATUS_OK);
-
-  tx_command->header.command_id = CMD_SYSTEM_PROP_VALUE_IS;
-
-  /* Seq is irrelevant in u-frame information */
-  tx_command->header.seq = 0;
-
-  tx_prop_command = (sl_cpc_system_property_cmd_t*)(tx_command->payload);
-
-  tx_prop_command->property_id = PROP_LAST_STATUS;
-
-  tx_prop_last_status = (sl_cpc_system_status_t*)tx_prop_command->payload;
-
-  tx_command->header.length = sizeof(sl_cpc_system_property_cmd_t) + sizeof(sl_cpc_system_status_t);
-
-  *tx_prop_last_status = STATUS_OK;
-
-  status = sl_cpc_write(&system_ep,
-                        (void *)tx_command,
-                        sizeof(sl_cpc_system_cmd_header_t) + tx_command->header.length,
-                        SL_CPC_FLAG_UNNUMBERED_INFORMATION,
-                        NULL);
-
-  EFM_ASSERT(status == SL_STATUS_OK);
-}
 /*******************************************************************************
  ***************************  PROPERTY-GET HANDLERS  ***************************
  ******************************************************************************/
@@ -433,15 +424,15 @@ void send_status_ok(void)
  *   property is specifically queried. There is nothing more meaningful than
  *   to reply with a STATUS_OK.
  ******************************************************************************/
-static void on_property_get_last_status(sl_cpc_system_cmd_t *tx_command)
+static void on_property_get_last_status(sli_cpc_system_cmd_t *tx_command)
 {
-  sl_cpc_system_property_cmd_t *prop_cmd_buff;
+  sli_cpc_system_property_cmd_t *prop_cmd_buff;
 
-  prop_cmd_buff = (sl_cpc_system_property_cmd_t*) tx_command->payload;
+  prop_cmd_buff = (sli_cpc_system_property_cmd_t*) tx_command->payload;
   prop_cmd_buff->property_id = PROP_LAST_STATUS;
   *((sl_cpc_system_status_t*)(prop_cmd_buff->payload)) = STATUS_OK;
 
-  tx_command->header.length = sizeof(sl_cpc_property_id_t) + sizeof(sl_cpc_system_status_t);
+  tx_command->header.length = sizeof(sli_cpc_property_id_t) + sizeof(sl_cpc_system_status_t);
 }
 
 /***************************************************************************//**
@@ -449,20 +440,36 @@ static void on_property_get_last_status(sl_cpc_system_cmd_t *tx_command)
  * Property ID: PROP_PROTOCOL_VERSION
  *   Ship the hardcoded major and minor version number back to the primary.
  ******************************************************************************/
-static void on_property_get_protocol_version(sl_cpc_system_cmd_t *tx_command)
+static void on_property_get_protocol_version(sli_cpc_system_cmd_t *tx_command)
 {
-  sl_cpc_system_property_cmd_t *prop_cmd_buff;
+  sli_cpc_system_property_cmd_t *prop_cmd_buff;
+
+  prop_cmd_buff = (sli_cpc_system_property_cmd_t*) tx_command->payload;
+  prop_cmd_buff->property_id = PROP_PROTOCOL_VERSION;
+  prop_cmd_buff->payload[0] = SLI_CPC_PROTOCOL_VERSION;
+
+  tx_command->header.length = sizeof(sli_cpc_property_id_t) + sizeof(uint8_t);
+}
+
+/***************************************************************************//**
+ * Command ID:  CMD_PROPERTY_GET
+ * Property ID: PROP_SECONDARY_VERSION
+ *   Ship the hardcoded major and minor version number back to the primary.
+ ******************************************************************************/
+static void on_property_get_secondary_version(sli_cpc_system_cmd_t *tx_command)
+{
+  sli_cpc_system_property_cmd_t *prop_cmd_buff;
   uint32_t* version;
 
-  prop_cmd_buff = (sl_cpc_system_property_cmd_t*) tx_command->payload;
-  prop_cmd_buff->property_id = PROP_PROTOCOL_VERSION;
+  prop_cmd_buff = (sli_cpc_system_property_cmd_t*) tx_command->payload;
+  prop_cmd_buff->property_id = PROP_SECONDARY_VERSION;
   version = (uint32_t*)(prop_cmd_buff->payload);
 
   version[0] = SL_GSDK_MAJOR_VERSION;
   version[1] = SL_GSDK_MINOR_VERSION;
   version[2] = SL_GSDK_PATCH_VERSION;
 
-  tx_command->header.length = sizeof(sl_cpc_property_id_t) + (3 * sizeof(uint32_t));
+  tx_command->header.length = sizeof(sli_cpc_property_id_t) + (3 * sizeof(uint32_t));
 }
 
 /***************************************************************************//**
@@ -470,18 +477,21 @@ static void on_property_get_protocol_version(sl_cpc_system_cmd_t *tx_command)
  * Property ID: PROP_CAPABILITIES
  *   Send the capabilities of the secondary to the primary
  ******************************************************************************/
-static void on_property_get_capabilities(sl_cpc_system_cmd_t *tx_command)
+static void on_property_get_capabilities(sli_cpc_system_cmd_t *tx_command)
 {
-  sl_cpc_system_property_cmd_t *prop_cmd_buff;
-  uint8_t* capabilities;
+  sli_cpc_system_property_cmd_t *prop_cmd_buff;
+  uint32_t *capabilities;
 
-  prop_cmd_buff = (sl_cpc_system_property_cmd_t*) tx_command->payload;
+  prop_cmd_buff = (sli_cpc_system_property_cmd_t*) tx_command->payload;
   prop_cmd_buff->property_id = PROP_CAPABILITIES;
-  capabilities = (uint8_t*)(prop_cmd_buff->payload);
+  capabilities = (uint32_t*)(prop_cmd_buff->payload);
 
-  capabilities[0] = CAPABILITIES;
+  *capabilities = SL_CPC_ENDPOINT_SECURITY_ENABLED * CPC_CAPABILITIES_SECURITY_ENDPOINT_MASK
+                  + CPC_PACKED_ENDPOINT_PRESENT * CPC_CAPABILITIES_PACKED_ENDPOINT_MASK
+                  + SLI_CPC_ENDPOINT_GPIO_ENABLED * CPC_CAPABILITIES_GPIO_ENDPOINT_MASK
+                  + sli_cpc_driver_capabilities.uart_flowcontrol * CPC_CAPABILITIES_UART_FLOW_CONTROL_MASK;
 
-  tx_command->header.length = sizeof(sl_cpc_property_id_t) + sizeof(uint8_t);
+  tx_command->header.length = sizeof(sli_cpc_property_id_t) + sizeof(uint32_t);
 }
 
 /***************************************************************************//**
@@ -489,17 +499,35 @@ static void on_property_get_capabilities(sl_cpc_system_cmd_t *tx_command)
  * Property ID: PROP_RX_CAPABILITY
  *   Send the rx buffer capability of the secondary to the primary
  ******************************************************************************/
-static void on_property_get_rx_capabilities(sl_cpc_system_cmd_t *tx_command)
+static void on_property_get_rx_capabilities(sli_cpc_system_cmd_t *tx_command)
 {
-  sl_cpc_system_property_cmd_t *prop_cmd_buff;
+  sli_cpc_system_property_cmd_t *prop_cmd_buff;
   uint16_t *rx_capability;
 
-  prop_cmd_buff = (sl_cpc_system_property_cmd_t*) tx_command->payload;
+  prop_cmd_buff = (sli_cpc_system_property_cmd_t*) tx_command->payload;
   prop_cmd_buff->property_id = PROP_RX_CAPABILITY;
   rx_capability = (uint16_t *)(prop_cmd_buff->payload);
   *rx_capability = SL_CPC_RX_PAYLOAD_MAX_LENGTH;
 
-  tx_command->header.length = sizeof(sl_cpc_property_id_t) + sizeof(uint16_t);
+  tx_command->header.length = sizeof(sli_cpc_property_id_t) + sizeof(uint16_t);
+}
+
+/***************************************************************************//**
+ * Command ID:  CMD_PROPERTY_GET
+ * Property ID: PROP_FC_VALIDATION_VALUE
+ *   Send the flow control validation value of the secondary to the primary
+ ******************************************************************************/
+static void on_property_get_fc_validation_value(sli_cpc_system_cmd_t *tx_command)
+{
+  sli_cpc_system_property_cmd_t *prop_cmd_buff;
+  uint32_t *flow_control_validation_value;
+
+  prop_cmd_buff = (sli_cpc_system_property_cmd_t*) tx_command->payload;
+  prop_cmd_buff->property_id = PROP_FC_VALIDATION_VALUE;
+  flow_control_validation_value = (uint32_t *)(prop_cmd_buff->payload);
+  *flow_control_validation_value = fc_validation_value;
+
+  tx_command->header.length = sizeof(sli_cpc_property_id_t) + sizeof(uint32_t);
 }
 
 /***************************************************************************//**
@@ -508,13 +536,13 @@ static void on_property_get_rx_capabilities(sl_cpc_system_cmd_t *tx_command)
  *   Reply to the PRIMARY the bootloader infos.
  ******************************************************************************/
 #if (defined(SL_CATALOG_CPC_BOOTLOADER_INTERFACE_PRESENT))
-static void on_property_get_bootloader_info(sl_cpc_system_cmd_t *tx_command)
+static void on_property_get_bootloader_info(sli_cpc_system_cmd_t *tx_command)
 {
-  sl_cpc_system_property_cmd_t *tx_property;
+  sli_cpc_system_property_cmd_t *tx_property;
   BootloaderInformation_t bootloader_infos;
   uint32_t* infos;
 
-  tx_property = (sl_cpc_system_property_cmd_t*) tx_command->payload;
+  tx_property = (sli_cpc_system_property_cmd_t*) tx_command->payload;
   tx_property->property_id = PROP_BOOTLOADER_INFO;
   infos = (uint32_t*)(tx_property->payload);
 
@@ -524,7 +552,7 @@ static void on_property_get_bootloader_info(sl_cpc_system_cmd_t *tx_command)
   infos[1] = (bootloader_infos.type == SL_BOOTLOADER) ? bootloader_infos.version : 0xFFFFFFFF;
   infos[2] = bootloader_infos.capabilities;
 
-  tx_command->header.length = sizeof(sl_cpc_property_id_t) + 3 * sizeof(uint32_t);
+  tx_command->header.length = sizeof(sli_cpc_property_id_t) + 3 * sizeof(uint32_t);
 }
 #endif
 
@@ -533,17 +561,17 @@ static void on_property_get_bootloader_info(sl_cpc_system_cmd_t *tx_command)
  * Property ID: PROP_BOOTLOADER_REBOOT_MODE
  *   Reply to the PRIMARY the bootloader reboot mode.
  ******************************************************************************/
-static void on_property_get_bootloader_reboot_mode(sl_cpc_system_cmd_t *tx_command)
+static void on_property_get_bootloader_reboot_mode(sli_cpc_system_cmd_t *tx_command)
 {
-  sl_cpc_system_property_cmd_t *tx_property;
-  sl_cpc_system_reboot_mode_t* mode;
+  sli_cpc_system_property_cmd_t *tx_property;
+  sli_cpc_system_reboot_mode_t* mode;
 
-  tx_property = (sl_cpc_system_property_cmd_t*) tx_command->payload;
+  tx_property = (sli_cpc_system_property_cmd_t*) tx_command->payload;
   tx_property->property_id = PROP_BOOTLOADER_REBOOT_MODE;
-  mode = (sl_cpc_system_reboot_mode_t*)(tx_property->payload);
+  mode = (sli_cpc_system_reboot_mode_t*)(tx_property->payload);
   *mode = prop_bootloader_reboot_mode;
 
-  tx_command->header.length = sizeof(sl_cpc_property_id_t) + sizeof(sl_cpc_system_reboot_mode_t);
+  tx_command->header.length = sizeof(sli_cpc_property_id_t) + sizeof(sli_cpc_system_reboot_mode_t);
 }
 
 /***************************************************************************//**
@@ -551,23 +579,23 @@ static void on_property_get_bootloader_reboot_mode(sl_cpc_system_cmd_t *tx_comma
  * Property ID: PROP_SECURITY_STATE
  *   Reply to the PRIMARY the security state.
  ******************************************************************************/
-static void on_property_get_security_state(sl_cpc_system_cmd_t *tx_command)
+static void on_property_get_security_state(sli_cpc_system_cmd_t *tx_command)
 {
-  sl_cpc_system_property_cmd_t *tx_property;
+  sli_cpc_system_property_cmd_t *tx_property;
   uint32_t* security_state;
 
-  tx_property = (sl_cpc_system_property_cmd_t*) tx_command->payload;
+  tx_property = (sli_cpc_system_property_cmd_t*) tx_command->payload;
   security_state = (uint32_t*)(tx_property->payload);
 
 #ifdef SL_CATALOG_CPC_SECURITY_SECONDARY_PRESENT
   tx_property->property_id = PROP_SECURITY_STATE;
-  *security_state = sl_cpc_security_get_state();
+  *security_state = 0;
 #else
   tx_property->property_id = PROP_LAST_STATUS;
   *security_state = STATUS_UNIMPLEMENTED;
 #endif
 
-  tx_command->header.length = sizeof(sl_cpc_property_id_t) + sizeof(sl_cpc_system_reboot_mode_t);
+  tx_command->header.length = sizeof(sli_cpc_property_id_t) + sizeof(sli_cpc_system_reboot_mode_t);
 }
 
 /***************************************************************************//**
@@ -575,14 +603,14 @@ static void on_property_get_security_state(sl_cpc_system_cmd_t *tx_command)
  * Property ID: PROP_ENDPOINT_STATE_x
  *   The primary queried the status of a specific endpoint number.
  ******************************************************************************/
-static void on_property_get_endpoint_state(sl_cpc_system_cmd_t *tx_command,
+static void on_property_get_endpoint_state(sli_cpc_system_cmd_t *tx_command,
                                            uint8_t ep_id)
 {
-  sl_cpc_system_property_cmd_t *reply_prop_cmd_buff;
+  sli_cpc_system_property_cmd_t *reply_prop_cmd_buff;
   sl_cpc_endpoint_state_t *reply_ep_state;
   sl_cpc_endpoint_handle_t dummy_ep;
 
-  reply_prop_cmd_buff = (sl_cpc_system_property_cmd_t*) tx_command->payload;
+  reply_prop_cmd_buff = (sli_cpc_system_property_cmd_t*) tx_command->payload;
   reply_ep_state = (sl_cpc_endpoint_state_t*) reply_prop_cmd_buff->payload;
   dummy_ep.ep = NULL;
   dummy_ep.id = ep_id;
@@ -591,7 +619,7 @@ static void on_property_get_endpoint_state(sl_cpc_system_cmd_t *tx_command,
 
   *reply_ep_state = sl_cpc_get_endpoint_state(&dummy_ep);
 
-  tx_command->header.length = sizeof(sl_cpc_property_id_t) + sizeof(sl_cpc_endpoint_state_t);
+  tx_command->header.length = sizeof(sli_cpc_property_id_t) + sizeof(sl_cpc_endpoint_state_t);
 }
 
 /***************************************************************************//**
@@ -599,12 +627,12 @@ static void on_property_get_endpoint_state(sl_cpc_system_cmd_t *tx_command,
  * Property ID: PROP_ENDPOINT_STATES
  *   The primary queried the status of all endpoints.
  ******************************************************************************/
-static void on_property_get_endpoint_states(sl_cpc_system_cmd_t *tx_command)
+static void on_property_get_endpoint_states(sli_cpc_system_cmd_t *tx_command)
 {
-  sl_cpc_system_property_cmd_t *reply_prop_cmd_buff;
+  sli_cpc_system_property_cmd_t *reply_prop_cmd_buff;
   uint8_t *reply_ep_states;
 
-  reply_prop_cmd_buff = (sl_cpc_system_property_cmd_t*) tx_command->payload;
+  reply_prop_cmd_buff = (sli_cpc_system_property_cmd_t*) tx_command->payload;
   reply_ep_states = (uint8_t*)(reply_prop_cmd_buff->payload);
   reply_prop_cmd_buff->property_id = PROP_ENDPOINT_STATES;
 
@@ -626,7 +654,7 @@ static void on_property_get_endpoint_states(sl_cpc_system_cmd_t *tx_command)
     reply_ep_states[i] = (ep2_state << 4) | ep1_state;
   }
 
-  tx_command->header.length = sizeof(sl_cpc_property_id_t) + (SL_CPC_ENDPOINT_MAX_COUNT * sizeof(uint8_t) / 2);
+  tx_command->header.length = sizeof(sli_cpc_property_id_t) + (SL_CPC_ENDPOINT_MAX_COUNT * sizeof(uint8_t) / 2);
 }
 
 /***************************************************************************//**
@@ -635,15 +663,15 @@ static void on_property_get_endpoint_states(sl_cpc_system_cmd_t *tx_command)
  *   The primary queried the debug counters.
  ******************************************************************************/
 #if (SL_CPC_DEBUG_CORE_EVENT_COUNTERS == 1)
-static void on_property_get_core_debug_counters(sl_cpc_system_cmd_t *tx_command)
+static void on_property_get_core_debug_counters(sli_cpc_system_cmd_t *tx_command)
 {
-  sl_cpc_system_property_cmd_t *reply_prop_cmd_buff;
+  sli_cpc_system_property_cmd_t *reply_prop_cmd_buff;
 
-  reply_prop_cmd_buff = (sl_cpc_system_property_cmd_t*) tx_command->payload;
+  reply_prop_cmd_buff = (sli_cpc_system_property_cmd_t*) tx_command->payload;
   memcpy(reply_prop_cmd_buff->payload, &sl_cpc_core_debug.core_counters, sizeof(sl_cpc_core_debug_counters_t));
 
   reply_prop_cmd_buff->property_id = PROP_CORE_DEBUG_COUNTERS;
-  tx_command->header.length = sizeof(sl_cpc_property_id_t) + sizeof(sl_cpc_core_debug_counters_t);
+  tx_command->header.length = sizeof(sli_cpc_property_id_t) + sizeof(sl_cpc_core_debug_counters_t);
 }
 #endif
 
@@ -653,15 +681,15 @@ static void on_property_get_core_debug_counters(sl_cpc_system_cmd_t *tx_command)
  *   a property id of PROP_LAST_STATUS. Since the property the primary asked about
  *   can't be handled by the rcp, the status returned is STATUS_PROP_NOT_FOUND.
  ******************************************************************************/
-static void on_property_get_set_not_found(sl_cpc_system_cmd_t *tx_command)
+static void on_property_get_set_not_found(sli_cpc_system_cmd_t *tx_command)
 {
-  sl_cpc_system_property_cmd_t *tx_property_cmd;
+  sli_cpc_system_property_cmd_t *tx_property_cmd;
 
-  tx_property_cmd = (sl_cpc_system_property_cmd_t*) tx_command->payload;
+  tx_property_cmd = (sli_cpc_system_property_cmd_t*) tx_command->payload;
   tx_property_cmd->property_id = PROP_LAST_STATUS;
   *((sl_cpc_system_status_t*)(tx_property_cmd->payload)) = STATUS_PROP_NOT_FOUND;
 
-  tx_command->header.length = sizeof(sl_cpc_property_id_t) + sizeof(sl_cpc_system_status_t);
+  tx_command->header.length = sizeof(sli_cpc_property_id_t) + sizeof(sl_cpc_system_status_t);
 }
 
 /***************************************************************************//**
@@ -670,18 +698,64 @@ static void on_property_get_set_not_found(sl_cpc_system_cmd_t *tx_command)
  *   The primary notifies the secondary of an endpoint state change
  ******************************************************************************/
 static void on_property_set_state(uint8_t endpoint_id,
-                                  sl_cpc_system_cmd_t *tx_command,
-                                  sl_cpc_system_cmd_t *rx_command)
+                                  sli_cpc_system_cmd_t *tx_command,
+                                  sli_cpc_system_cmd_t *rx_command)
 {
   (void)rx_command;
 
-  sl_cpc_system_property_cmd_t *tx_property_command;
-  tx_property_command = (sl_cpc_system_property_cmd_t*) tx_command->payload;
+  sli_cpc_system_property_cmd_t *tx_property_command;
+  tx_property_command = (sli_cpc_system_property_cmd_t*) tx_command->payload;
 
   sli_cpc_remote_disconnected(endpoint_id);
 
-  tx_command->header.length = sizeof(sl_cpc_property_id_t);
+  tx_command->header.length = sizeof(sli_cpc_property_id_t);
   tx_property_command->property_id = EP_ID_TO_PROPERTY_ID(endpoint_id);
+}
+
+/***************************************************************************//**
+ * Command ID:  CMD_PROPERTY_SET:
+ * Property ID: PROP_UFRAME_PROCESSING
+ *   The primary enables/disables u-frame processing on the secondary.
+ ******************************************************************************/
+static void on_property_set_uframe_processing(sli_cpc_system_cmd_t *tx_command,
+                                              sli_cpc_system_cmd_t *rx_command)
+{
+  sli_cpc_system_property_cmd_t *tx_property_command;
+  sli_cpc_system_property_cmd_t *rx_property_command;
+
+  rx_property_command = (sli_cpc_system_property_cmd_t*) rx_command->payload;
+  process_uframes_flag = *(bool*)rx_property_command->payload;
+
+  tx_property_command = (sli_cpc_system_property_cmd_t*) tx_command->payload;
+  tx_property_command->property_id = PROP_UFRAME_PROCESSING;
+  tx_command->header.length = sizeof(sli_cpc_property_id_t);
+}
+
+/***************************************************************************//**
+ * Command ID:  CMD_PROPERTY_SET:
+ * Property ID: PROP_ENTER_IRQ
+ *   The primary requests the secondary to enter IRQ in start_ms for end_ms time.
+ ******************************************************************************/
+static void on_property_set_enter_irq(sli_cpc_system_cmd_t *tx_command,
+                                      sli_cpc_system_cmd_t *rx_command)
+{
+  sli_cpc_system_property_cmd_t *tx_property_command;
+  sli_cpc_system_property_cmd_t *rx_property_command;
+  sli_cpc_system_enter_irq_cmd_t *enter_irq_command;
+
+  rx_property_command = (sli_cpc_system_property_cmd_t*) rx_command->payload;
+  enter_irq_command = (sli_cpc_system_enter_irq_cmd_t*) rx_property_command->payload;
+  enter_irq_end_ms = enter_irq_command->end_in_ms;
+  sl_sleeptimer_start_timer_ms(&enter_irq_timer,
+                               enter_irq_command->start_in_ms,
+                               enter_irq_timer_callback,
+                               &enter_irq_end_ms,
+                               0,
+                               0);
+
+  tx_property_command = (sli_cpc_system_property_cmd_t*) tx_command->payload;
+  tx_property_command->property_id = PROP_ENTER_IRQ;
+  tx_command->header.length = sizeof(sli_cpc_property_id_t);
 }
 
 /***************************************************************************//**
@@ -689,20 +763,20 @@ static void on_property_set_state(uint8_t endpoint_id,
  * Property ID: PROP_BOOTLOADER_REBOOT_MODE
  *   The primary sets the reboot mode.
  ******************************************************************************/
-static void on_property_set_bootloader_reboot_mode(sl_cpc_system_cmd_t *tx_command,
-                                                   sl_cpc_system_cmd_t *rx_command)
+static void on_property_set_bootloader_reboot_mode(sli_cpc_system_cmd_t *tx_command,
+                                                   sli_cpc_system_cmd_t *rx_command)
 {
-  sl_cpc_system_property_cmd_t *tx_property_command;
-  sl_cpc_system_property_cmd_t *rx_property_command;
-  sl_cpc_system_reboot_mode_t *rx_mode;
-  sl_cpc_system_reboot_mode_t *tx_mode;
+  sli_cpc_system_property_cmd_t *tx_property_command;
+  sli_cpc_system_property_cmd_t *rx_property_command;
+  sli_cpc_system_reboot_mode_t *rx_mode;
+  sli_cpc_system_reboot_mode_t *tx_mode;
 
-  tx_property_command = (sl_cpc_system_property_cmd_t*) tx_command->payload;
-  rx_property_command = (sl_cpc_system_property_cmd_t*) rx_command->payload;
-  rx_mode = (sl_cpc_system_reboot_mode_t*) rx_property_command->payload;
-  tx_mode = (sl_cpc_system_reboot_mode_t*) tx_property_command->payload;
+  tx_property_command = (sli_cpc_system_property_cmd_t*) tx_command->payload;
+  rx_property_command = (sli_cpc_system_property_cmd_t*) rx_command->payload;
+  rx_mode = (sli_cpc_system_reboot_mode_t*) rx_property_command->payload;
+  tx_mode = (sli_cpc_system_reboot_mode_t*) tx_property_command->payload;
 
-  tx_command->header.length = sizeof(sl_cpc_property_id_t);
+  tx_command->header.length = sizeof(sli_cpc_property_id_t);
 
   switch (*rx_mode) {
     case REBOOT_APPLICATION:
@@ -710,7 +784,7 @@ static void on_property_set_bootloader_reboot_mode(sl_cpc_system_cmd_t *tx_comma
       prop_bootloader_reboot_mode = *rx_mode;
       tx_property_command->property_id = PROP_BOOTLOADER_REBOOT_MODE;
       *tx_mode = *rx_mode;
-      tx_command->header.length += sizeof(sl_cpc_system_reboot_mode_t);
+      tx_command->header.length += sizeof(sli_cpc_system_reboot_mode_t);
       break;
 
     default:
@@ -726,15 +800,15 @@ static void on_property_set_bootloader_reboot_mode(sl_cpc_system_cmd_t *tx_comma
 /***************************************************************************//**
  * Handler for when the primary sets a read-only property
  ******************************************************************************/
-static void on_property_set_read_only(sl_cpc_system_cmd_t *tx_command)
+static void on_property_set_read_only(sli_cpc_system_cmd_t *tx_command)
 {
-  sl_cpc_system_property_cmd_t *tx_property_cmd;
+  sli_cpc_system_property_cmd_t *tx_property_cmd;
 
-  tx_property_cmd = (sl_cpc_system_property_cmd_t*) tx_command->payload;
+  tx_property_cmd = (sli_cpc_system_property_cmd_t*) tx_command->payload;
   tx_property_cmd->property_id = PROP_LAST_STATUS;
   *((sl_cpc_system_status_t*)(tx_property_cmd->payload)) = STATUS_INVALID_COMMAND_FOR_PROP;
 
-  tx_command->header.length = sizeof(sl_cpc_property_id_t) + sizeof(sl_cpc_system_status_t);
+  tx_command->header.length = sizeof(sli_cpc_property_id_t) + sizeof(sl_cpc_system_status_t);
 }
 
 /*******************************************************************************
@@ -747,14 +821,13 @@ static void on_property_set_read_only(sl_cpc_system_cmd_t *tx_command)
  *   The RCP simply sends a no-op back so that the primary can assert the success
  *   of the operation.
  ******************************************************************************/
-static void on_noop(sl_cpc_system_cmd_t *noop,
+static void on_noop(sli_cpc_system_cmd_t *noop,
                     uint32_t *reply_data_lenght)
 {
   noop->header.command_id = CMD_SYSTEM_NOOP;
   noop->header.length = 0;
-  *reply_data_lenght = sizeof(sl_cpc_system_cmd_header_t) + noop->header.length;
+  *reply_data_lenght = sizeof(sli_cpc_system_cmd_header_t) + noop->header.length;
 }
-
 /***************************************************************************//**
  * Handle reset from PRIMARY:
  *   This functions is called when a reset command is received from the PRIMARY.
@@ -762,7 +835,7 @@ static void on_noop(sl_cpc_system_cmd_t *noop,
  *   wheter or not it can reset in the desired mode dictated by 'prop_bootloader
  *   _reboot_mode'
  ******************************************************************************/
-static void on_reset(sl_cpc_system_cmd_t *reset,
+static void on_reset(sli_cpc_system_cmd_t *reset,
                      uint32_t *reply_data_lenght,
                      void **on_write_complete_arg)
 {
@@ -799,7 +872,7 @@ static void on_reset(sl_cpc_system_cmd_t *reset,
   }
 
   reset->header.length = sizeof(sl_cpc_system_status_t);
-  *reply_data_lenght = sizeof(sl_cpc_system_cmd_header_t) + reset->header.length;
+  *reply_data_lenght = sizeof(sli_cpc_system_cmd_header_t) + reset->header.length;
 
   // Set on_write_complete argument to 0xDEADBEEF. This will
   // indicate to the on_write_complete callback to reset the device.
@@ -821,11 +894,11 @@ static void on_reset(sl_cpc_system_cmd_t *reset,
  *   PRIMARY. Causes the SECONDARY to emit a "CMD_PROP_VALUE_IS " command for the
  *   given property identifier.
  ******************************************************************************/
-static void on_property_get(sl_cpc_system_cmd_t *rx_command,
-                            sl_cpc_system_cmd_t *reply,
+static void on_property_get(sli_cpc_system_cmd_t *rx_command,
+                            sli_cpc_system_cmd_t *reply,
                             uint32_t *reply_data_lenght)
 {
-  sl_cpc_system_property_cmd_t *rx_property_cmd = (sl_cpc_system_property_cmd_t *)rx_command->payload;
+  sli_cpc_system_property_cmd_t *rx_property_cmd = (sli_cpc_system_property_cmd_t *)rx_command->payload;
 
   // Reply to a PROPERTY-GET with a PROPERTY-IS
   reply->header.command_id = CMD_SYSTEM_PROP_VALUE_IS;
@@ -840,12 +913,20 @@ static void on_property_get(sl_cpc_system_cmd_t *rx_command,
       on_property_get_protocol_version(reply);
       break;
 
+    case PROP_SECONDARY_VERSION:
+      on_property_get_secondary_version(reply);
+      break;
+
     case PROP_CAPABILITIES:
       on_property_get_capabilities(reply);
       break;
 
     case PROP_RX_CAPABILITY:
       on_property_get_rx_capabilities(reply);
+      break;
+
+    case PROP_FC_VALIDATION_VALUE:
+      on_property_get_fc_validation_value(reply);
       break;
 
 #if (defined(SL_CATALOG_CPC_BOOTLOADER_INTERFACE_PRESENT))
@@ -885,7 +966,7 @@ static void on_property_get(sl_cpc_system_cmd_t *rx_command,
       break;
   }
 
-  *reply_data_lenght = sizeof(sl_cpc_system_cmd_header_t) + reply->header.length;
+  *reply_data_lenght = sizeof(sli_cpc_system_cmd_header_t) + reply->header.length;
 }
 
 /***************************************************************************//**
@@ -894,13 +975,13 @@ static void on_property_get(sl_cpc_system_cmd_t *rx_command,
  *   PRIMARY. Causes the RCP to emit a "CMD_PROP_VALUE_IS " command for the given
  *   property identifier.
  ******************************************************************************/
-static void on_property_set(sl_cpc_system_cmd_t* rx_command,
-                            sl_cpc_system_cmd_t *reply,
+static void on_property_set(sli_cpc_system_cmd_t* rx_command,
+                            sli_cpc_system_cmd_t *reply,
                             uint32_t * reply_data_lenght)
 {
-  sl_cpc_system_property_cmd_t *rx_property_cmd;
+  sli_cpc_system_property_cmd_t *rx_property_cmd;
 
-  rx_property_cmd = (sl_cpc_system_property_cmd_t*)(rx_command->payload);
+  rx_property_cmd = (sli_cpc_system_property_cmd_t*)(rx_command->payload);
 
   // Reply to a PROPERTY-GET with a PROPERTY-IS
   reply->header.command_id = CMD_SYSTEM_PROP_VALUE_IS;
@@ -913,6 +994,7 @@ static void on_property_set(sl_cpc_system_cmd_t* rx_command,
     switch (rx_property_cmd->property_id) {
       case PROP_LAST_STATUS:
       case PROP_PROTOCOL_VERSION:
+      case PROP_SECONDARY_VERSION:
       case PROP_CAPABILITIES:
       case PROP_BOOTLOADER_INFO:
       case PROP_SECURITY_STATE:
@@ -925,17 +1007,25 @@ static void on_property_set(sl_cpc_system_cmd_t* rx_command,
         on_property_set_bootloader_reboot_mode(reply, rx_command);
         break;
 
+      case PROP_UFRAME_PROCESSING:
+        on_property_set_uframe_processing(reply, rx_command);
+        break;
+
+      case PROP_ENTER_IRQ:
+        on_property_set_enter_irq(reply, rx_command);
+        break;
+
       default:
         on_property_get_set_not_found(reply);
         break;
     }
   }
 
-  *reply_data_lenght = sizeof(sl_cpc_system_cmd_header_t) + reply->header.length;
+  *reply_data_lenght = sizeof(sli_cpc_system_cmd_header_t) + reply->header.length;
 }
 
 /***************************************************************************//**
- * This function is called by CPC core when uframe/poll is received
+ * Called by CPC core when uframe/poll is received
  ******************************************************************************/
 static void on_poll(uint8_t endpoint_id,
                     void *arg,
@@ -945,16 +1035,17 @@ static void on_poll(uint8_t endpoint_id,
                     uint32_t *reply_data_lenght,
                     void **on_write_complete_arg)
 {
-  sl_cpc_system_cmd_t *rx_command = (sl_cpc_system_cmd_t *)poll_data;
-  sl_cpc_system_cmd_t *tx_command;
+  uint32_t frame_type = (uint32_t)arg;
+  sli_cpc_system_cmd_t *rx_command = (sli_cpc_system_cmd_t *)poll_data;
+  sli_cpc_system_cmd_t *tx_command;
   *reply_data = NULL;
   *reply_data_lenght = 0;
   (void)endpoint_id;
-  (void)arg;
 
+  EFM_ASSERT(frame_type == SLI_CPC_HDLC_FRAME_TYPE_UNNUMBERED || frame_type == SLI_CPC_HDLC_FRAME_TYPE_DATA);
   EFM_ASSERT(endpoint_id == SL_CPC_ENDPOINT_SYSTEM);
   // Make sure the length of the payload from the command matches the returned length.
-  EFM_ASSERT(rx_command->header.length == (poll_data_length - sizeof(sl_cpc_system_cmd_header_t)));
+  EFM_ASSERT(rx_command->header.length == (poll_data_length - sizeof(sli_cpc_system_cmd_header_t)));
 
   *on_write_complete_arg = NULL;
 
@@ -974,26 +1065,62 @@ static void on_poll(uint8_t endpoint_id,
   // route it back to the right request.
   tx_command->header.seq = rx_command->header.seq;
 
-  switch (rx_command->header.command_id) {
-    case CMD_SYSTEM_NOOP:
-      on_noop((sl_cpc_system_cmd_t *)*reply_data, reply_data_lenght);
-      break;
+  // Only the reset can be a u-frame (non encrypted)
+  if (frame_type == SLI_CPC_HDLC_FRAME_TYPE_UNNUMBERED) {
+    sli_cpc_system_property_cmd_t *rx_property_cmd = (sli_cpc_system_property_cmd_t *)rx_command->payload;
+    switch (rx_command->header.command_id) {
+      case CMD_SYSTEM_RESET:
+        on_reset((sli_cpc_system_cmd_t *)*reply_data, reply_data_lenght, on_write_complete_arg);
+        break;
+      case CMD_SYSTEM_PROP_VALUE_GET:
+        if (rx_property_cmd->property_id == PROP_RX_CAPABILITY
+            || rx_property_cmd->property_id == PROP_CAPABILITIES
+            || rx_property_cmd->property_id == PROP_PROTOCOL_VERSION
+            || rx_property_cmd->property_id == PROP_SECONDARY_VERSION) {
+          on_property_get(rx_command, (sli_cpc_system_cmd_t *)*reply_data, reply_data_lenght);
+        }
+        break;
+      case CMD_SYSTEM_PROP_VALUE_SET:
+        if (rx_property_cmd->property_id == PROP_BOOTLOADER_REBOOT_MODE) {
+          on_property_set(rx_command, (sli_cpc_system_cmd_t *)*reply_data, reply_data_lenght);
+        }
+        break;
+      default:
+        EFM_ASSERT(false);
+        break;
+    }
+  } else if (frame_type == SLI_CPC_HDLC_FRAME_TYPE_DATA) {
+    switch (rx_command->header.command_id) {
+      case CMD_SYSTEM_NOOP:
+        on_noop((sli_cpc_system_cmd_t *)*reply_data, reply_data_lenght);
+        break;
+      case CMD_SYSTEM_PROP_VALUE_GET:
+        on_property_get(rx_command, (sli_cpc_system_cmd_t *)*reply_data, reply_data_lenght);
+        break;
 
-    case CMD_SYSTEM_RESET:
-      on_reset((sl_cpc_system_cmd_t *)*reply_data, reply_data_lenght, on_write_complete_arg);
-      break;
+      case CMD_SYSTEM_PROP_VALUE_SET:
+        on_property_set(rx_command, (sli_cpc_system_cmd_t *)*reply_data, reply_data_lenght);
+        break;
 
-    case CMD_SYSTEM_PROP_VALUE_GET:
-      on_property_get(rx_command, (sl_cpc_system_cmd_t *)*reply_data, reply_data_lenght);
-      break;
-
-    case CMD_SYSTEM_PROP_VALUE_SET:
-      on_property_set(rx_command, (sl_cpc_system_cmd_t *)*reply_data, reply_data_lenght);
-      break;
-
-    default:
-      // Command not recognized
-      EFM_ASSERT(false);
-      break;
+      default:
+        // Command not supported
+        EFM_ASSERT(false);
+        break;
+    }
+  } else {
+    EFM_ASSERT(false);
   }
+}
+
+/***************************************************************************//**
+ * Function called when enter_irq_timer expires.
+ ******************************************************************************/
+static void enter_irq_timer_callback(sl_sleeptimer_timer_handle_t *handle,
+                                     void *data)
+{
+  (void)handle;
+
+  uint32_t now_ms = sl_sleeptimer_tick_to_ms(sl_sleeptimer_get_tick_count());
+  uint32_t end_ms = *(uint32_t*) data;
+  while ((sl_sleeptimer_tick_to_ms(sl_sleeptimer_get_tick_count()) - now_ms) <= end_ms) ;
 }

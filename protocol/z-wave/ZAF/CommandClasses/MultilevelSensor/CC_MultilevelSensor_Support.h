@@ -24,8 +24,8 @@
 // -----------------------------------------------------------------------------
 //                Macros and Typedefs
 // -----------------------------------------------------------------------------
-#define SL_MULTILEVEL_SENSOR_DEFAULT_AUTOREPORT_PEDIOD_SEC (SL_MULTILEVEL_SENSOR_DEFAULT_AUTOREPORT_PEDIOD_MIN*60)
-#define SL_MULTILEVEL_SENSOR_DEFAULT_AUTOREPORT_PEDIOD_MS  (SL_MULTILEVEL_SENSOR_DEFAULT_AUTOREPORT_PEDIOD_SEC*1000)
+#define MULTILEVEL_SENSOR_DEFAULT_AUTOREPORT_PEDIOD_SEC (MULTILEVEL_SENSOR_DEFAULT_AUTOREPORT_PEDIOD_MIN*60)
+#define MULTILEVEL_SENSOR_DEFAULT_AUTOREPORT_PEDIOD_MS  (MULTILEVEL_SENSOR_DEFAULT_AUTOREPORT_PEDIOD_SEC*1000)
 // -----------------------------------------------------------------------------
 //                Global Variables
 // -----------------------------------------------------------------------------
@@ -38,6 +38,6 @@
  * Initializes all registered sensor interfaces and starts a
  * periodic timer which will report the registered sensors' measured values.
  */
-void sl_cc_multilevel_sensor_init(void);
+void cc_multilevel_sensor_init(void);
 
 #endif  // CC_MULTILEVELSENSOR_SUPPORT_H

@@ -1,5 +1,5 @@
 /**************************************************************************//**
- * Copyright 2018, Silicon Laboratories Inc.
+ * Copyright 2022, Silicon Laboratories Inc.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -166,6 +166,10 @@ sl_status_t sl_wfx_get_ap_client_signal_strength(const sl_wfx_mac_address_t *cli
 sl_status_t sl_wfx_ext_auth(sl_wfx_ext_auth_data_type_t auth_data_type,
                             uint16_t auth_data_length,
                             const uint8_t *auth_data);
+
+sl_status_t sl_wfx_set_probe_request_filter(const uint8_t *ie_data_mask,
+                                            const uint8_t *ie_data,
+                                            uint16_t ie_data_length);
 
 /*
  * Asynchronous WF200 commands

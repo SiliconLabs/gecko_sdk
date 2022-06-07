@@ -40,8 +40,8 @@
 //                              Macros and Typedefs
 // -----------------------------------------------------------------------------
 /// BLE macros
-#define BLE_PHYSICAL_CH    (0u)
-#define BLE_LOGICAL_CH     (37u)
+#define BLE_PHYSICAL_CH    (0U)
+#define BLE_LOGICAL_CH     (37U)
 #define BLE_CRC_INIT       (0x555555)
 #define BLE_ACCESS_ADDRESS (0x12345678) //0x8E89BED6
 #define ADV_NONCONN_IND    (0x02)
@@ -57,7 +57,7 @@
 // Struct version (1 Byte)
 // pktSent + destId + srcId + repeat (5 Bytes)
 // Max remaining (0x55, 0xAA, 0x55, etc.) (19 Bytes)
-#define BLE_PAYLOAD_LEN_MAX          (24u)
+#define BLE_PAYLOAD_LEN_MAX          (24U)
 // AD Structure: Flags
 #define ADSTRUCT_TYPE_FLAG           (0x01)
 #define DISABLE_BR_EDR               (0x04)
@@ -66,11 +66,11 @@
 #define ADSTRUCT_TYPE_MANUFACTURER_SPECIFIC (0xFF)
 
 /// IEEE 802.15.4 macros
-#define IEEE802154_CHANNEL           (11u)    // 11 is the first 1st 2.4GHz channel
+#define IEEE802154_CHANNEL           (11U)    // 11 is the first 1st 2.4GHz channel
 // Indicates the effective payload length excluding CRC (2 Bytes)
-#define IEEE802154_PAYLOAD_LEN_MAX   (116u)   // 127bytes - 2bytes (CRC) - 9bytes (Data Frame::MHR)
-#define IEEE802154_CRC_LENGTH        (2u)     // IEEE 802.15.4 CRC length is 2 bytes
-#define IEEE802154_PHR_LENGTH        (1u)     // IEEE 802.15.4 PHR length is 1 byte
+#define IEEE802154_PAYLOAD_LEN_MAX   (116U)   // 127bytes - 2bytes (CRC) - 9bytes (Data Frame::MHR)
+#define IEEE802154_CRC_LENGTH        (2U)     // IEEE 802.15.4 CRC length is 2 bytes
+#define IEEE802154_PHR_LENGTH        (1U)     // IEEE 802.15.4 PHR length is 1 byte
 // Data Frame Format::Frame Control (2 bytes)
 #define FRAME_TYPE                   (0x0001) // Data Frame
 #define SECURITY_ENABLED             (0x0000) // Not enabled
@@ -91,8 +91,8 @@
 #define PAYLOAD_LEN_MIN   (sizeof(range_test_packet_t))
 
 /// In case of Series 2 (RD4171A,BRD4180A and BRD4181A) channelSpacing can not be set
-#define NO_CHANNEL_SPACING  (0u)
-#define _2450_MHZ           ((uint32_t) 2450000000u)
+#define NO_CHANNEL_SPACING  (0U)
+#define _2450_MHZ           ((uint32_t) 2450000000U)
 
 #pragma pack(1)
 /// IEEE 802.15.4 Data Frame:: MHR

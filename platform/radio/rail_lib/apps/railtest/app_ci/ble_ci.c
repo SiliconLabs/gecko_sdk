@@ -274,23 +274,19 @@ void enableBleSignalIdentifier(sl_cli_command_arg_t *args)
 {
 #if RAIL_BLE_SUPPORTS_SIGNAL_IDENTIFIER
   RAIL_Status_t status;
-  bool enable = sl_cli_get_argument_uint8(args, 0);
-  RAIL_BLE_SignalIdentifierMode_t siMode = (RAIL_BLE_SignalIdentifierMode_t)sl_cli_get_argument_uint8(args, 1);
+  RAIL_BLE_SignalIdentifierMode_t siMode = (RAIL_BLE_SignalIdentifierMode_t)sl_cli_get_argument_uint8(args, 0);
+  bool enable = (siMode != RAIL_BLE_SIGNAL_IDENTIFIER_MODE_DISABLE);
 
-  if (enable) {
-    if (RAIL_BLE_IsEnabled(railHandle)) {
-      status = RAIL_BLE_ConfigSignalIdentifier(railHandle, siMode);
-      if (status == RAIL_STATUS_NO_ERROR) {
-        status = RAIL_BLE_EnableSignalIdentifier(railHandle, enable);
-      }
-    } else {
-      // Disable the signal identifier just to be safe. Ignore the return type
-      // as we know it would be invalid call if it was not configured.
-      (void) RAIL_BLE_EnableSignalIdentifier(railHandle, false);
-      status = RAIL_STATUS_INVALID_CALL;
+  if (RAIL_BLE_IsEnabled(railHandle)) {
+    status = RAIL_BLE_ConfigSignalIdentifier(railHandle, siMode);
+    if (status == RAIL_STATUS_NO_ERROR) {
+      status = RAIL_BLE_EnableSignalDetection(railHandle, enable);
     }
   } else {
-    status = RAIL_BLE_EnableSignalIdentifier(railHandle, false);
+    // Disable the signal identifier just to be safe. Ignore the return type
+    // as we know it would be invalid call if it was not configured.
+    (void) RAIL_BLE_ConfigSignalIdentifier(railHandle, RAIL_BLE_SIGNAL_IDENTIFIER_MODE_DISABLE);
+    status = RAIL_STATUS_INVALID_CALL;
   }
   responsePrint(sl_cli_get_command_string(args, 0), "Result:%s",
                 ((status == RAIL_STATUS_NO_ERROR) ? "Success"

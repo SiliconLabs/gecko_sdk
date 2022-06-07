@@ -6,6 +6,7 @@ description: >
 category: Platform|Bootloader|Core
 quality: production
 source:
+  - path: platform/bootloader/core/btl_bootload.c
   - path: platform/bootloader/parser/gbl/btl_gbl_custom_tags.c
   - path: platform/bootloader/parser/gbl/btl_gbl_parser.c
 define:

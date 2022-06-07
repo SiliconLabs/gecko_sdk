@@ -31,7 +31,7 @@
 
 #if defined (__MPU_PRESENT) && (__MPU_PRESENT == 1U)
 
-#include "em_common.h"
+#include "sl_common.h"
 #include "em_core.h"
 #include "sl_mpu.h"
 #include <stdlib.h>

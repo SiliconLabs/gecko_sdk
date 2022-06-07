@@ -14,8 +14,14 @@
  * sections of the MSLA applicable to Source Code.
  *
  ******************************************************************************/
+#ifdef SL_COMPONENT_CATALOG_PRESENT
+#include "sl_component_catalog.h"
+#endif  // SL_COMPONENT_CATALOG_PRESENT
 
 #include "gpd-components-common.h"
+#ifdef SL_CATALOG_PSA_CRYPTO_PRESENT
+#include "psa/crypto.h"
+#endif
 
 /** @brief This is called by framework to initialise the NVM system
  *
@@ -98,11 +104,16 @@ SL_WEAK void emberGpdAfPluginSleepCallback(void)
  *
  * @return a 32bit random number.
  */
+#if defined(EMBER_AF_PLUGIN_APPS_MAC_SEQ) && (EMBER_AF_PLUGIN_APPS_MAC_SEQ == EMBER_GPD_MAC_SEQ_RANDOM)
 SL_WEAK uint32_t emberGpdAfPluginGetRandomCallback(void)
 {
-  volatile uint32_t randomValue; // Intentional to not initialise
+  uint32_t randomValue;
+  #ifdef SL_CATALOG_PSA_CRYPTO_PRESENT
+  (void) psa_generate_random( (uint8_t *)(&randomValue), sizeof(randomValue));
+  #endif //SL_CATALOG_PSA_CRYPTO_PRESENT
   return randomValue;
 }
+#endif
 
 /** @brief This is called by framework to get the IEEE (EUI64) address of the GPD.
  * Typically GPD application may have the IEEE address for each of the GPD programmed at a different

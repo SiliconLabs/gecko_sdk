@@ -19,6 +19,11 @@
 
 #include <limits>
 
+// Labels used by the Voice Control tflite model
+// 0 - on
+// 1 - off
+// 2 - unknown
+// 3 - background
 const char* kCategoryLabels[kCategoryCount] = {
   "on",
   "off",

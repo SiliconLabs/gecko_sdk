@@ -424,7 +424,7 @@ static CPU_INT32U BSP_SD_SDHC_ClkFreqGet(void)
 #else
   CMU_HFRCOFreq_TypeDef  freq;
 
-  freq = CMU_HFRCOFreqGet();
+  freq = CMU_HFRCOBandGet();
 #endif
 
   return ((CPU_INT32U)freq);

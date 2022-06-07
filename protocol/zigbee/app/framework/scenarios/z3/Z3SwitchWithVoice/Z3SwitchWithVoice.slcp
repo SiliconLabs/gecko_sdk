@@ -1,8 +1,13 @@
 project_name: "Z3SwitchWithVoice"
-label: "Machine Learning - Z3SwitchWithVoice"
+label: "Zigbee - SoC SwitchWithVoice"
 package: "Zigbee"
 category: "Zigbee Application"
 quality: "production"
+
+description: >
+  Zigbee 3.0 Switch with Voice
+author: "Silicon Laboratories, Inc."
+
 component:
   - id: "cli"
     instance:
@@ -11,11 +16,11 @@ component:
     instance:
       - vcom
   - id: "printf"
+  - id: "sl_assert"
   - id: "zigbee_debug_print"
   - id: "zigbee_pro_leaf_stack"
   - id: "zigbee_source_route"
   - id: "zigbee_binding_table"
-  - id: "zigbee_multi_network_stub"
   - id: "zigbee_packet_validate"
   - id: "zigbee_gp"
   - id: "zigbee_install_code"
@@ -79,6 +84,8 @@ configuration:
     value: 4096
   - name: SL_ML_AUDIO_FEATURE_GENERATION_AUDIO_GAIN
     value: 2
+  - name: SL_TFLITE_MICRO_ARENA_SIZE 
+    value: 7000
   - name: SL_CLI_PROMPT_STRING
     value:  "\"Z3SwitchWithVoice>\""
   - name: NVM3_DEFAULT_NVM_SIZE
@@ -114,9 +121,6 @@ tag:
   - hardware:component:microphone
   - hardware:device:ram:56
   - hardware:device:flash:130
-  
-description: |-
-  Zigbee 3.0 Switch with Voice
 
 readme:
   - path: ./readme.html
@@ -125,3 +129,13 @@ ui_hints:
   highlight:
     - path: readme.html
       focus: false
+
+filter:
+  - name: "Wireless Technology"
+    value: ["Zigbee"]
+  - name: "Device Type"
+    value: ["SoC"]
+  - name: "Capability"
+    value: ["Machine Learning"]
+  - name: "Project Difficulty"
+    value: ["Advanced"]

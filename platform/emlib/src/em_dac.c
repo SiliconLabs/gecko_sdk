@@ -31,7 +31,7 @@
 #include "em_dac.h"
 #if defined(DAC_COUNT) && (DAC_COUNT > 0)
 #include "em_cmu.h"
-#include "em_assert.h"
+#include "sl_assert.h"
 #include "em_bus.h"
 
 /***************************************************************************//**

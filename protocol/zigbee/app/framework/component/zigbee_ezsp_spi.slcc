@@ -13,6 +13,10 @@ provides:
 requires:
    - name: "zigbee_ezsp"
    - name: "device_host"
+   # cli_threaded_host component is required to correctly read I/O in a nonblocking fashion
+   - name: "cli_threaded_host"
+     condition:
+      - cli
 define:
    - name: "EZSP_SPI"
    - name: "EM_AF_LINK_PTHREAD"

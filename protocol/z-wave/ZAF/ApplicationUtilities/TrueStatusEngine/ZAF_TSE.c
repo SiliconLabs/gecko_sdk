@@ -4,6 +4,7 @@
  */
 
 #include "ZAF_TSE.h"
+#include "zaf_tse_config.h"
 #include "AppTimer.h"
 #include "association_plus.h"
 #include "misc.h"

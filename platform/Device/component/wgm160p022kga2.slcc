@@ -12,14 +12,7 @@
   - path: platform/Device/SiliconLabs/WGM160/Source/system_wgm160.c
     unless:
     - device_content_override
-  - condition:
-    - toolchain_iar
-    path: platform/Device/SiliconLabs/WGM160/Source/IAR/startup_wgm160.c
-    unless:
-    - device_content_override
-  - condition:
-    - toolchain_gcc
-    path: platform/Device/SiliconLabs/WGM160/Source/GCC/startup_wgm160.c
+  - path: platform/Device/SiliconLabs/WGM160/Source/startup_wgm160.c
     unless:
     - device_content_override
   - condition:
@@ -247,3 +240,21 @@
     - custom_radio_config
     directory: rail
     path: platform/Device/config/100/device.yaml
+- metadata:
+    device:
+      memory:
+      - name: Main Flash
+        page_size: 4096
+        size: 2097152
+        start: 0
+        type: non-volatile
+      - name: Bootloader Flash
+        page_size: 4096
+        size: 32768
+        start: 266403840
+        type: non-volatile
+      - name: RAM
+        size: 524288
+        start: 536870912
+        type: volatile
+      opn: wgm160p022kga2

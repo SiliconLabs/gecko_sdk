@@ -1,17 +1,26 @@
 <?xml version="1.0" ?>
 <contentItems>
 	<contentItemData category="Application Notes" description="Provides an overview and hyperlinks to all packaged documentation." itemURI="file:slOpenthread-index.html" label="Documentation Index" priority="9"/>
+	<contentItemData category="Application Notes" description="Summarizes the performance test effort and results for some testing scenarios of the CPCd interface  using multi-PAN for both OpenThread and Zigbee protocols.
+" itemURI="file:an1385-multi-pan-rcp-performance-test.pdf" label="AN1385: Supplemental Performance Results for Multi-PAN RCP for OpenThread and Zigbee" priority="30">
+		<property key="sdkAndProtocolTags" value="Zigbee Thread"/>
+	</contentItemData>
 	<contentItemData category="Application Notes" description="Provides details on developing Dynamic Multiprotocol applications using Bluetooth and OpenThread.
 " itemURI="file:an1265-openthread-bluetooth-dynamic-multiprotocol-gsdk-v3x.pdf" label="AN1265: Dynamic Multiprotocol Development with Bluetooth and OpenThread in GSDK v3.x" priority="25"/>
-	<contentItemData category="Application Notes" description="Describes how to run any combination of Zigbee EmberZNet, OpenThread, and Bluetooth networking stacks on a Linux host processor, interfacing with a single EFR32 Radio Coprocessor (RCP) with multiprotocol and multi-PAN support. 
+	<contentItemData category="Application Notes" description="Describes how to run any combination of Zigbee EmberZNet, OpenThread, and Bluetooth networking stacks on a Linux host processor, interfacing with a single EFR32 Radio Co-processor (RCP) with multiprotocol and multi-PAN support. 
 " itemURI="file:an1333-concurrent-protocols-with-802-15-4-rcp.pdf" label="AN1333: Running  Zigbee, OpenThread, and Bluetooth Concurrently on a Linux Host with a Multiprotocol RCP" priority="9">
-		<property key="sdkAndProtocolTags" value="Zigbee Thread"/>
+		<property key="sdkAndProtocolTags" value="Zigbee Thread Bluetooth"/>
 	</contentItemData>
 	<contentItemData category="User's Guides" description="Includes a brief background on the emergence of Thread, provides a technology overview,  and describes some key features of Thread to consider when implementing a Thread solution.
 " itemURI="file:ug103-11-fundamentals-thread.pdf" label="UG103.11: Thread Fundamentals" priority="10"/>
 	<contentItemData category="User's Guides" description="Describes the four multiprotocol modes, discusses considerations when selecting protocols for  multiprotocol implementations, and reviews the Radio Scheduler, a required component of a  dynamic multiprotocol solution.
 " itemURI="file:ug103-16-multiprotocol-fundamentals.pdf" label="UG103.16: Multiprotocol Fundamentals" priority="25">
 		<property key="sdkAndProtocolTags" value="Bluetooth Zigbee Proprietary Thread HomeKit"/>
+	</contentItemData>
+	<contentItemData category="Application Notes" description="How to program, provision, and configure the anti-tamper module on EFR32 Series 2 devices with  Secure Vault.
+        
+" itemURI="file:an1247-efr32-secure-vault-tamper.pdf" label="AN1247:  Anti-Tamper Protection Configuration and Use" priority="50">
+		<property key="sdkAndProtocolTags" value="Bluetooth Bluetooth\ Mesh Zigbee Proprietary Thread HomeKit"/>
 	</contentItemData>
 	<contentItemData category="User's Guides" description="Describes methods to improve the coexistence of 2.4 GHz IEEE 802.11b/g/n Wi-Fi and other 2.4 GHz radios such as Bluetooth, Bluetooth Mesh, Bluetooth Low Energy, and IEEE 802.15.4-based radios such as Zigbee and OpenThread
 " itemURI="file:ug103-17-wi-fi-coexistence-fundamentals.pdf" label="UG103.17: Wi-Fi Coexistence Fundamentals" priority="40">
@@ -26,12 +35,10 @@
 " itemURI="file:an1311-mbedtls-psa-crypto-porting-guide.pdf" label="AN1311:  Integrating Crypto Functionality Using PSA Crypto Compared to Mbed TLS" priority="50">
 		<property key="sdkAndProtocolTags" value="Bluetooth Bluetooth\ Mesh Zigbee Proprietary Thread HomeKit Wi-SUN"/>
 	</contentItemData>
-	<contentItemData category="Application Notes" description="Contains detailed information on configuring and using the Secure Boot with hardware Root of Trust and Secure Loader on  Series 2 devices, including how to provision the signing key. This is a companion document to UG266: Silicon Labs Gecko  Bootloader User's Guide.
+	<contentItemData category="Application Notes" description="Contains detailed information on configuring and using the Secure Boot with hardware Root of Trust and Secure Loader on  Series 2 devices, including how to provision the signing key. This is a companion document to UG489: Silicon Labs Gecko  Bootloader User's Guide for GSDK 4.0 and Higher.
 " itemURI="file:an1218-secure-boot-with-rtsl.pdf" label="AN1218: Series 2 Secure Boot with RTSL" priority="15">
 		<property key="sdkAndProtocolTags" value="Bluetooth Bluetooth\ Mesh Zigbee Proprietary Thread HomeKit"/>
 	</contentItemData>
-	<contentItemData category="Application Notes" description="Documents how to configure and run the CPC daemon (CPCd) on Linux. Does not cover how to use the CPC Library to write applications that interact with CPCd.  
-" itemURI="file:an1351-using-co-processor-communication_daemon.pdf" label="AN1351: Using the Co-Processor Communication Daemon (CPCd)" priority="12"/>
 	<contentItemData category="User's Guides" description="Introduces non-volatile data storage using flash and the three different storage implementations offered  for Silicon Labs microcontrollers and SoCs: Simulated EEPROM, PS Store, and NVM3.  
 " itemURI="file:ug103-07-non-volatile-data-storage-fundamentals.pdf" label="UG103.07: Non-Volatile Data Storage Fundamentals" priority="20">
 		<property key="sdkAndProtocolTags" value="Bluetooth Bluetooth\ Mesh Zigbee Proprietary Thread HomeKit Wi-SUN"/>
@@ -44,9 +51,8 @@
 " itemURI="file:an1326-gecko-bootloader-transitioning-guide.pdf" label="AN1326: Transitioning to the Updated Gecko Bootloader in GSDK 4.0 and Higher" priority="3">
 		<property key="sdkAndProtocolTags" value="Bluetooth Bluetooth\ Mesh Zigbee Proprietary Thread 32-bit\ MCU HomeKit Wi-SUN"/>
 	</contentItemData>
-	<contentItemData category="Application Notes" description="How to program, provision, and configure the anti-tamper module on EFR32 Series 2 devices with  Secure Vault.
-        
-" itemURI="file:an1247-efr32-secure-vault-tamper.pdf" label="AN1247:  Anti-Tamper Protection Configuration and Use" priority="50">
+	<contentItemData category="Application Notes" description="How to securely &quot;wrap&quot; keys in EFR32 Series 2 devices with Secure Vault, so they can be stored in  non-volatile storage.
+" itemURI="file:an1271-efr32-secure-key-storage.pdf" label="AN1271:  Secure Key Storage" priority="50">
 		<property key="sdkAndProtocolTags" value="Bluetooth Bluetooth\ Mesh Zigbee Proprietary Thread HomeKit"/>
 	</contentItemData>
 	<contentItemData category="Application Notes" description="Describes how to lock and unlock the debug access of EFR32 Gecko Series 2  devices. Many aspects of the debug access, including the secure debug unlock are described. The Debug  Challenge Interface (DCI) and Secure Engine (SE) Mailbox Interface for locking and unlocking debug  access are also included.
@@ -107,10 +113,6 @@
 	<contentItemData category="Application Notes" description="Reviews the Zigbee, Thread, and Bluetooth mesh networks to evaluate their differences in performance and behavior.
 " itemURI="file:an1142-mesh-network-performance-comparison.pdf" label="AN1142: Mesh Network Performance Comparison" priority="35">
 		<property key="sdkAndProtocolTags" value="Bluetooth\ Mesh Zigbee Thread HomeKit"/>
-	</contentItemData>
-	<contentItemData category="Application Notes" description="How to securely &quot;wrap&quot; keys in EFR32 Series 2 devices with Secure Vault, so they can be stored in  non-volatile storage.
-" itemURI="file:an1271-efr32-secure-key-storage.pdf" label="AN1271:  Secure Key Storage" priority="50">
-		<property key="sdkAndProtocolTags" value="Bluetooth Bluetooth\ Mesh Zigbee Proprietary Thread HomeKit"/>
 	</contentItemData>
 	<contentItemData category="Application Notes" description="Details the different options for integrating RF testing and characterization into standard test flows.
 " itemURI="file:an700-1-mfg-test-guidelines-efr32.pdf" label="AN700.1: Manufacturing Test Guidelines for the EFR32" priority="30">

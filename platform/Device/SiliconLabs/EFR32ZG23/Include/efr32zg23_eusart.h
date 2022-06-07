@@ -1026,97 +1026,97 @@ typedef struct {
 /* Bit fields for EUSART IEN */
 #define _EUSART_IEN_RESETVALUE                      0x00000000UL                             /**< Default value for EUSART_IEN                */
 #define _EUSART_IEN_MASK                            0x030D3FFFUL                             /**< Mask for EUSART_IEN                         */
-#define EUSART_IEN_TXC                              (0x1UL << 0)                             /**< TX Complete IEN                             */
+#define EUSART_IEN_TXC                              (0x1UL << 0)                             /**< TX Complete Enable                          */
 #define _EUSART_IEN_TXC_SHIFT                       0                                        /**< Shift value for EUSART_TXC                  */
 #define _EUSART_IEN_TXC_MASK                        0x1UL                                    /**< Bit mask for EUSART_TXC                     */
 #define _EUSART_IEN_TXC_DEFAULT                     0x00000000UL                             /**< Mode DEFAULT for EUSART_IEN                 */
 #define EUSART_IEN_TXC_DEFAULT                      (_EUSART_IEN_TXC_DEFAULT << 0)           /**< Shifted mode DEFAULT for EUSART_IEN         */
-#define EUSART_IEN_TXFL                             (0x1UL << 1)                             /**< TX FIFO Level IEN                           */
+#define EUSART_IEN_TXFL                             (0x1UL << 1)                             /**< TX FIFO Level Enable                        */
 #define _EUSART_IEN_TXFL_SHIFT                      1                                        /**< Shift value for EUSART_TXFL                 */
 #define _EUSART_IEN_TXFL_MASK                       0x2UL                                    /**< Bit mask for EUSART_TXFL                    */
 #define _EUSART_IEN_TXFL_DEFAULT                    0x00000000UL                             /**< Mode DEFAULT for EUSART_IEN                 */
 #define EUSART_IEN_TXFL_DEFAULT                     (_EUSART_IEN_TXFL_DEFAULT << 1)          /**< Shifted mode DEFAULT for EUSART_IEN         */
-#define EUSART_IEN_RXFL                             (0x1UL << 2)                             /**< RX FIFO Level IEN                           */
+#define EUSART_IEN_RXFL                             (0x1UL << 2)                             /**< RX FIFO Level Enable                        */
 #define _EUSART_IEN_RXFL_SHIFT                      2                                        /**< Shift value for EUSART_RXFL                 */
 #define _EUSART_IEN_RXFL_MASK                       0x4UL                                    /**< Bit mask for EUSART_RXFL                    */
 #define _EUSART_IEN_RXFL_DEFAULT                    0x00000000UL                             /**< Mode DEFAULT for EUSART_IEN                 */
 #define EUSART_IEN_RXFL_DEFAULT                     (_EUSART_IEN_RXFL_DEFAULT << 2)          /**< Shifted mode DEFAULT for EUSART_IEN         */
-#define EUSART_IEN_RXFULL                           (0x1UL << 3)                             /**< RX FIFO Full IEN                            */
+#define EUSART_IEN_RXFULL                           (0x1UL << 3)                             /**< RX FIFO Full Enable                         */
 #define _EUSART_IEN_RXFULL_SHIFT                    3                                        /**< Shift value for EUSART_RXFULL               */
 #define _EUSART_IEN_RXFULL_MASK                     0x8UL                                    /**< Bit mask for EUSART_RXFULL                  */
 #define _EUSART_IEN_RXFULL_DEFAULT                  0x00000000UL                             /**< Mode DEFAULT for EUSART_IEN                 */
 #define EUSART_IEN_RXFULL_DEFAULT                   (_EUSART_IEN_RXFULL_DEFAULT << 3)        /**< Shifted mode DEFAULT for EUSART_IEN         */
-#define EUSART_IEN_RXOF                             (0x1UL << 4)                             /**< RX FIFO Overflow IEN                        */
+#define EUSART_IEN_RXOF                             (0x1UL << 4)                             /**< RX FIFO Overflow Enable                     */
 #define _EUSART_IEN_RXOF_SHIFT                      4                                        /**< Shift value for EUSART_RXOF                 */
 #define _EUSART_IEN_RXOF_MASK                       0x10UL                                   /**< Bit mask for EUSART_RXOF                    */
 #define _EUSART_IEN_RXOF_DEFAULT                    0x00000000UL                             /**< Mode DEFAULT for EUSART_IEN                 */
 #define EUSART_IEN_RXOF_DEFAULT                     (_EUSART_IEN_RXOF_DEFAULT << 4)          /**< Shifted mode DEFAULT for EUSART_IEN         */
-#define EUSART_IEN_RXUF                             (0x1UL << 5)                             /**< RX FIFO Underflow IEN                       */
+#define EUSART_IEN_RXUF                             (0x1UL << 5)                             /**< RX FIFO Underflow Enable                    */
 #define _EUSART_IEN_RXUF_SHIFT                      5                                        /**< Shift value for EUSART_RXUF                 */
 #define _EUSART_IEN_RXUF_MASK                       0x20UL                                   /**< Bit mask for EUSART_RXUF                    */
 #define _EUSART_IEN_RXUF_DEFAULT                    0x00000000UL                             /**< Mode DEFAULT for EUSART_IEN                 */
 #define EUSART_IEN_RXUF_DEFAULT                     (_EUSART_IEN_RXUF_DEFAULT << 5)          /**< Shifted mode DEFAULT for EUSART_IEN         */
-#define EUSART_IEN_TXOF                             (0x1UL << 6)                             /**< TX FIFO Overflow IEN                        */
+#define EUSART_IEN_TXOF                             (0x1UL << 6)                             /**< TX FIFO Overflow Enable                     */
 #define _EUSART_IEN_TXOF_SHIFT                      6                                        /**< Shift value for EUSART_TXOF                 */
 #define _EUSART_IEN_TXOF_MASK                       0x40UL                                   /**< Bit mask for EUSART_TXOF                    */
 #define _EUSART_IEN_TXOF_DEFAULT                    0x00000000UL                             /**< Mode DEFAULT for EUSART_IEN                 */
 #define EUSART_IEN_TXOF_DEFAULT                     (_EUSART_IEN_TXOF_DEFAULT << 6)          /**< Shifted mode DEFAULT for EUSART_IEN         */
-#define EUSART_IEN_TXUF                             (0x1UL << 7)                             /**< TX FIFO Underflow IEN                       */
+#define EUSART_IEN_TXUF                             (0x1UL << 7)                             /**< TX FIFO Underflow Enable                    */
 #define _EUSART_IEN_TXUF_SHIFT                      7                                        /**< Shift value for EUSART_TXUF                 */
 #define _EUSART_IEN_TXUF_MASK                       0x80UL                                   /**< Bit mask for EUSART_TXUF                    */
 #define _EUSART_IEN_TXUF_DEFAULT                    0x00000000UL                             /**< Mode DEFAULT for EUSART_IEN                 */
 #define EUSART_IEN_TXUF_DEFAULT                     (_EUSART_IEN_TXUF_DEFAULT << 7)          /**< Shifted mode DEFAULT for EUSART_IEN         */
-#define EUSART_IEN_PERR                             (0x1UL << 8)                             /**< Parity Error IEN                            */
+#define EUSART_IEN_PERR                             (0x1UL << 8)                             /**< Parity Error Enable                         */
 #define _EUSART_IEN_PERR_SHIFT                      8                                        /**< Shift value for EUSART_PERR                 */
 #define _EUSART_IEN_PERR_MASK                       0x100UL                                  /**< Bit mask for EUSART_PERR                    */
 #define _EUSART_IEN_PERR_DEFAULT                    0x00000000UL                             /**< Mode DEFAULT for EUSART_IEN                 */
 #define EUSART_IEN_PERR_DEFAULT                     (_EUSART_IEN_PERR_DEFAULT << 8)          /**< Shifted mode DEFAULT for EUSART_IEN         */
-#define EUSART_IEN_FERR                             (0x1UL << 9)                             /**< Framing Error IEN                           */
+#define EUSART_IEN_FERR                             (0x1UL << 9)                             /**< Framing Error Enable                        */
 #define _EUSART_IEN_FERR_SHIFT                      9                                        /**< Shift value for EUSART_FERR                 */
 #define _EUSART_IEN_FERR_MASK                       0x200UL                                  /**< Bit mask for EUSART_FERR                    */
 #define _EUSART_IEN_FERR_DEFAULT                    0x00000000UL                             /**< Mode DEFAULT for EUSART_IEN                 */
 #define EUSART_IEN_FERR_DEFAULT                     (_EUSART_IEN_FERR_DEFAULT << 9)          /**< Shifted mode DEFAULT for EUSART_IEN         */
-#define EUSART_IEN_MPAF                             (0x1UL << 10)                            /**< Multi-Processor Addr Frame IEN              */
+#define EUSART_IEN_MPAF                             (0x1UL << 10)                            /**< Multi-Processor Addr Frame Enable           */
 #define _EUSART_IEN_MPAF_SHIFT                      10                                       /**< Shift value for EUSART_MPAF                 */
 #define _EUSART_IEN_MPAF_MASK                       0x400UL                                  /**< Bit mask for EUSART_MPAF                    */
 #define _EUSART_IEN_MPAF_DEFAULT                    0x00000000UL                             /**< Mode DEFAULT for EUSART_IEN                 */
 #define EUSART_IEN_MPAF_DEFAULT                     (_EUSART_IEN_MPAF_DEFAULT << 10)         /**< Shifted mode DEFAULT for EUSART_IEN         */
-#define EUSART_IEN_LOADERR                          (0x1UL << 11)                            /**< Load Error IEN                              */
+#define EUSART_IEN_LOADERR                          (0x1UL << 11)                            /**< Load Error Enable                           */
 #define _EUSART_IEN_LOADERR_SHIFT                   11                                       /**< Shift value for EUSART_LOADERR              */
 #define _EUSART_IEN_LOADERR_MASK                    0x800UL                                  /**< Bit mask for EUSART_LOADERR                 */
 #define _EUSART_IEN_LOADERR_DEFAULT                 0x00000000UL                             /**< Mode DEFAULT for EUSART_IEN                 */
 #define EUSART_IEN_LOADERR_DEFAULT                  (_EUSART_IEN_LOADERR_DEFAULT << 11)      /**< Shifted mode DEFAULT for EUSART_IEN         */
-#define EUSART_IEN_CCF                              (0x1UL << 12)                            /**< Collision Check Fail IEN                    */
+#define EUSART_IEN_CCF                              (0x1UL << 12)                            /**< Collision Check Fail Enable                 */
 #define _EUSART_IEN_CCF_SHIFT                       12                                       /**< Shift value for EUSART_CCF                  */
 #define _EUSART_IEN_CCF_MASK                        0x1000UL                                 /**< Bit mask for EUSART_CCF                     */
 #define _EUSART_IEN_CCF_DEFAULT                     0x00000000UL                             /**< Mode DEFAULT for EUSART_IEN                 */
 #define EUSART_IEN_CCF_DEFAULT                      (_EUSART_IEN_CCF_DEFAULT << 12)          /**< Shifted mode DEFAULT for EUSART_IEN         */
-#define EUSART_IEN_TXIDLE                           (0x1UL << 13)                            /**< TX IDLE IEN                                 */
+#define EUSART_IEN_TXIDLE                           (0x1UL << 13)                            /**< TX IDLE Enable                              */
 #define _EUSART_IEN_TXIDLE_SHIFT                    13                                       /**< Shift value for EUSART_TXIDLE               */
 #define _EUSART_IEN_TXIDLE_MASK                     0x2000UL                                 /**< Bit mask for EUSART_TXIDLE                  */
 #define _EUSART_IEN_TXIDLE_DEFAULT                  0x00000000UL                             /**< Mode DEFAULT for EUSART_IEN                 */
 #define EUSART_IEN_TXIDLE_DEFAULT                   (_EUSART_IEN_TXIDLE_DEFAULT << 13)       /**< Shifted mode DEFAULT for EUSART_IEN         */
-#define EUSART_IEN_CSWU                             (0x1UL << 16)                            /**< CS Wake-up IEN                              */
+#define EUSART_IEN_CSWU                             (0x1UL << 16)                            /**< CS Wake-up Enable                           */
 #define _EUSART_IEN_CSWU_SHIFT                      16                                       /**< Shift value for EUSART_CSWU                 */
 #define _EUSART_IEN_CSWU_MASK                       0x10000UL                                /**< Bit mask for EUSART_CSWU                    */
 #define _EUSART_IEN_CSWU_DEFAULT                    0x00000000UL                             /**< Mode DEFAULT for EUSART_IEN                 */
 #define EUSART_IEN_CSWU_DEFAULT                     (_EUSART_IEN_CSWU_DEFAULT << 16)         /**< Shifted mode DEFAULT for EUSART_IEN         */
-#define EUSART_IEN_STARTF                           (0x1UL << 18)                            /**< Start Frame IEN                             */
+#define EUSART_IEN_STARTF                           (0x1UL << 18)                            /**< Start Frame Enable                          */
 #define _EUSART_IEN_STARTF_SHIFT                    18                                       /**< Shift value for EUSART_STARTF               */
 #define _EUSART_IEN_STARTF_MASK                     0x40000UL                                /**< Bit mask for EUSART_STARTF                  */
 #define _EUSART_IEN_STARTF_DEFAULT                  0x00000000UL                             /**< Mode DEFAULT for EUSART_IEN                 */
 #define EUSART_IEN_STARTF_DEFAULT                   (_EUSART_IEN_STARTF_DEFAULT << 18)       /**< Shifted mode DEFAULT for EUSART_IEN         */
-#define EUSART_IEN_SIGF                             (0x1UL << 19)                            /**< Signal Frame IEN                            */
+#define EUSART_IEN_SIGF                             (0x1UL << 19)                            /**< Signal Frame Enable                         */
 #define _EUSART_IEN_SIGF_SHIFT                      19                                       /**< Shift value for EUSART_SIGF                 */
 #define _EUSART_IEN_SIGF_MASK                       0x80000UL                                /**< Bit mask for EUSART_SIGF                    */
 #define _EUSART_IEN_SIGF_DEFAULT                    0x00000000UL                             /**< Mode DEFAULT for EUSART_IEN                 */
 #define EUSART_IEN_SIGF_DEFAULT                     (_EUSART_IEN_SIGF_DEFAULT << 19)         /**< Shifted mode DEFAULT for EUSART_IEN         */
-#define EUSART_IEN_AUTOBAUDDONE                     (0x1UL << 24)                            /**< Auto Baud Complete IEN                      */
+#define EUSART_IEN_AUTOBAUDDONE                     (0x1UL << 24)                            /**< Auto Baud Complete Enable                   */
 #define _EUSART_IEN_AUTOBAUDDONE_SHIFT              24                                       /**< Shift value for EUSART_AUTOBAUDDONE         */
 #define _EUSART_IEN_AUTOBAUDDONE_MASK               0x1000000UL                              /**< Bit mask for EUSART_AUTOBAUDDONE            */
 #define _EUSART_IEN_AUTOBAUDDONE_DEFAULT            0x00000000UL                             /**< Mode DEFAULT for EUSART_IEN                 */
 #define EUSART_IEN_AUTOBAUDDONE_DEFAULT             (_EUSART_IEN_AUTOBAUDDONE_DEFAULT << 24) /**< Shifted mode DEFAULT for EUSART_IEN         */
-#define EUSART_IEN_RXTO                             (0x1UL << 25)                            /**< RX Timeout IEN                              */
+#define EUSART_IEN_RXTO                             (0x1UL << 25)                            /**< RX Timeout Enable                           */
 #define _EUSART_IEN_RXTO_SHIFT                      25                                       /**< Shift value for EUSART_RXTO                 */
 #define _EUSART_IEN_RXTO_MASK                       0x2000000UL                              /**< Bit mask for EUSART_RXTO                    */
 #define _EUSART_IEN_RXTO_DEFAULT                    0x00000000UL                             /**< Mode DEFAULT for EUSART_IEN                 */

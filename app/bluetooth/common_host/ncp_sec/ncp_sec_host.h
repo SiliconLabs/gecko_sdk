@@ -32,7 +32,6 @@
 #define NCP_SEC_HOST_H
 
 #include "sl_status.h"
-#include "system.h"
 
 // Optstring argument for getopt.
 #define NCP_SEC_OPTSTRING  "s"

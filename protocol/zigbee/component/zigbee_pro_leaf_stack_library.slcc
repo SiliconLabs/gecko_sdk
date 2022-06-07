@@ -118,6 +118,7 @@ library:
       - toolchain_iar
       - device_family_efr32mg12p
       - zigbee_phy_2_4
+      - zigbee_multi_network
     unless:
       - stack_protection_iar
   - path: protocol/zigbee/build/zigbee-pro-leaf-stack-cortexm3-iar-efr32mg12p-rail-stack_protection/zigbee-pro-leaf-stack.a
@@ -126,11 +127,29 @@ library:
       - device_family_efr32mg12p
       - zigbee_phy_2_4
       - stack_protection_iar
+      - zigbee_multi_network
+  - path: protocol/zigbee/build/zigbee-pro-leaf-stack-cortexm3-iar-efr32mg12p-rail-ember_multi_network_stripped/zigbee-pro-leaf-stack.a
+    condition: 
+      - toolchain_iar
+      - device_family_efr32mg12p
+      - zigbee_phy_2_4
+    unless:
+      - zigbee_multi_network
+      - stack_protection_iar
+  - path: protocol/zigbee/build/zigbee-pro-leaf-stack-cortexm3-iar-efr32mg12p-rail-ember_multi_network_stripped-stack_protection/zigbee-pro-leaf-stack.a
+    condition: 
+      - toolchain_iar
+      - device_family_efr32mg12p
+      - zigbee_phy_2_4
+      - stack_protection_iar
+    unless:
+      - zigbee_multi_network
   - path: protocol/zigbee/build/zigbee-pro-leaf-stack-cortexm3-iar-efr32mg13p-rail/zigbee-pro-leaf-stack.a
     condition: 
       - toolchain_iar
       - device_family_efr32mg13p
       - zigbee_phy_2_4
+      - zigbee_multi_network
     unless:
       - stack_protection_iar
   - path: protocol/zigbee/build/zigbee-pro-leaf-stack-cortexm3-iar-efr32mg13p-rail-stack_protection/zigbee-pro-leaf-stack.a
@@ -139,6 +158,23 @@ library:
       - device_family_efr32mg13p
       - zigbee_phy_2_4
       - stack_protection_iar
+      - zigbee_multi_network
+  - path: protocol/zigbee/build/zigbee-pro-leaf-stack-cortexm3-iar-efr32mg13p-rail-ember_multi_network_stripped/zigbee-pro-leaf-stack.a
+    condition: 
+      - toolchain_iar
+      - device_family_efr32mg13p
+      - zigbee_phy_2_4
+    unless:
+      - zigbee_multi_network
+      - stack_protection_iar
+  - path: protocol/zigbee/build/zigbee-pro-leaf-stack-cortexm3-iar-efr32mg13p-rail-ember_multi_network_stripped-stack_protection/zigbee-pro-leaf-stack.a
+    condition: 
+      - toolchain_iar
+      - device_family_efr32mg13p
+      - zigbee_phy_2_4
+      - stack_protection_iar
+    unless:
+      - zigbee_multi_network
   - path: protocol/zigbee/build/zigbee-pro-leaf-stack-cortexm3-iar-efr32mg14p-rail/zigbee-pro-leaf-stack.a
     condition: 
       - toolchain_iar
@@ -157,6 +193,7 @@ library:
       - toolchain_iar
       - device_family_efr32mg21
       - zigbee_phy_2_4
+      - zigbee_multi_network
     unless:
       - stack_protection_iar
   - path: protocol/zigbee/build/zigbee-pro-leaf-stack-cortexm3-iar-efr32mg21-rail-stack_protection/zigbee-pro-leaf-stack.a
@@ -165,11 +202,29 @@ library:
       - device_family_efr32mg21
       - zigbee_phy_2_4
       - stack_protection_iar
+      - zigbee_multi_network
+  - path: protocol/zigbee/build/zigbee-pro-leaf-stack-cortexm3-iar-efr32mg21-rail-ember_multi_network_stripped/zigbee-pro-leaf-stack.a
+    condition: 
+      - toolchain_iar
+      - device_family_efr32mg21
+      - zigbee_phy_2_4
+    unless:
+      - zigbee_multi_network
+      - stack_protection_iar
+  - path: protocol/zigbee/build/zigbee-pro-leaf-stack-cortexm3-iar-efr32mg21-rail-ember_multi_network_stripped-stack_protection/zigbee-pro-leaf-stack.a
+    condition: 
+      - toolchain_iar
+      - device_family_efr32mg21
+      - zigbee_phy_2_4
+      - stack_protection_iar
+    unless:
+      - zigbee_multi_network
   - path: protocol/zigbee/build/zigbee-pro-leaf-stack-cortexm3-iar-efr32mg22-rail/zigbee-pro-leaf-stack.a
     condition: 
       - toolchain_iar
       - device_family_efr32mg22
       - zigbee_phy_2_4
+      - zigbee_multi_network
     unless:
       - stack_protection_iar
   - path: protocol/zigbee/build/zigbee-pro-leaf-stack-cortexm3-iar-efr32mg22-rail-stack_protection/zigbee-pro-leaf-stack.a
@@ -178,11 +233,29 @@ library:
       - device_family_efr32mg22
       - zigbee_phy_2_4
       - stack_protection_iar
+      - zigbee_multi_network
+  - path: protocol/zigbee/build/zigbee-pro-leaf-stack-cortexm3-iar-efr32mg22-rail-ember_multi_network_stripped/zigbee-pro-leaf-stack.a
+    condition: 
+      - toolchain_iar
+      - device_family_efr32mg22
+      - zigbee_phy_2_4
+    unless:
+      - zigbee_multi_network
+      - stack_protection_iar
+  - path: protocol/zigbee/build/zigbee-pro-leaf-stack-cortexm3-iar-efr32mg22-rail-ember_multi_network_stripped-stack_protection/zigbee-pro-leaf-stack.a
+    condition: 
+      - toolchain_iar
+      - device_family_efr32mg22
+      - zigbee_phy_2_4
+      - stack_protection_iar
+    unless:
+      - zigbee_multi_network
   - path: protocol/zigbee/build/zigbee-pro-leaf-stack-cortexm3-iar-efr32mg24-rail/zigbee-pro-leaf-stack.a
     condition: 
       - toolchain_iar
       - device_family_efr32mg24
       - zigbee_phy_2_4
+      - zigbee_multi_network
     unless:
       - stack_protection_iar
   - path: protocol/zigbee/build/zigbee-pro-leaf-stack-cortexm3-iar-efr32mg24-rail-stack_protection/zigbee-pro-leaf-stack.a
@@ -191,11 +264,60 @@ library:
       - device_family_efr32mg24
       - zigbee_phy_2_4
       - stack_protection_iar
+      - zigbee_multi_network
+  - path: protocol/zigbee/build/zigbee-pro-leaf-stack-cortexm3-iar-efr32mg24-rail-ember_multi_network_stripped/zigbee-pro-leaf-stack.a
+    condition: 
+      - toolchain_iar
+      - device_family_efr32mg24
+      - zigbee_phy_2_4
+    unless:
+      - zigbee_multi_network
+      - stack_protection_iar
+  - path: protocol/zigbee/build/zigbee-pro-leaf-stack-cortexm3-iar-efr32mg24-rail-ember_multi_network_stripped-stack_protection/zigbee-pro-leaf-stack.a
+    condition: 
+      - toolchain_iar
+      - device_family_efr32mg24
+      - zigbee_phy_2_4
+      - stack_protection_iar
+    unless:
+      - zigbee_multi_network
+  - path: protocol/zigbee/build/zigbee-pro-leaf-stack-cortexm3-iar-efr32mg27-rail/zigbee-pro-leaf-stack.a
+    condition: 
+      - toolchain_iar
+      - device_family_efr32mg27
+      - zigbee_phy_2_4
+      - zigbee_multi_network
+    unless:
+      - stack_protection_iar
+  - path: protocol/zigbee/build/zigbee-pro-leaf-stack-cortexm3-iar-efr32mg27-rail-stack_protection/zigbee-pro-leaf-stack.a
+    condition: 
+      - toolchain_iar
+      - device_family_efr32mg27
+      - zigbee_phy_2_4
+      - stack_protection_iar
+      - zigbee_multi_network
+  - path: protocol/zigbee/build/zigbee-pro-leaf-stack-cortexm3-iar-efr32mg27-rail-ember_multi_network_stripped/zigbee-pro-leaf-stack.a
+    condition: 
+      - toolchain_iar
+      - device_family_efr32mg27
+      - zigbee_phy_2_4
+    unless:
+      - zigbee_multi_network
+      - stack_protection_iar
+  - path: protocol/zigbee/build/zigbee-pro-leaf-stack-cortexm3-iar-efr32mg27-rail-ember_multi_network_stripped-stack_protection/zigbee-pro-leaf-stack.a
+    condition: 
+      - toolchain_iar
+      - device_family_efr32mg27
+      - zigbee_phy_2_4
+      - stack_protection_iar
+    unless:
+      - zigbee_multi_network
   - path: protocol/zigbee/build/zigbee-pro-leaf-stack-cortexm3-iar-mgm12-rail/zigbee-pro-leaf-stack.a
     condition: 
       - toolchain_iar
       - device_family_mgm12
       - zigbee_phy_2_4
+      - zigbee_multi_network
     unless:
       - stack_protection_iar
   - path: protocol/zigbee/build/zigbee-pro-leaf-stack-cortexm3-iar-mgm12-rail-stack_protection/zigbee-pro-leaf-stack.a
@@ -204,11 +326,29 @@ library:
       - device_family_mgm12
       - zigbee_phy_2_4
       - stack_protection_iar
+      - zigbee_multi_network
+  - path: protocol/zigbee/build/zigbee-pro-leaf-stack-cortexm3-iar-mgm12-rail-ember_multi_network_stripped/zigbee-pro-leaf-stack.a
+    condition: 
+      - toolchain_iar
+      - device_family_mgm12
+      - zigbee_phy_2_4
+    unless:
+      - zigbee_multi_network
+      - stack_protection_iar
+  - path: protocol/zigbee/build/zigbee-pro-leaf-stack-cortexm3-iar-mgm12-rail-ember_multi_network_stripped-stack_protection/zigbee-pro-leaf-stack.a
+    condition: 
+      - toolchain_iar
+      - device_family_mgm12
+      - zigbee_phy_2_4
+      - stack_protection_iar
+    unless:
+      - zigbee_multi_network
   - path: protocol/zigbee/build/zigbee-pro-leaf-stack-cortexm3-iar-mgm13-rail/zigbee-pro-leaf-stack.a
     condition: 
       - toolchain_iar
       - device_family_mgm13
       - zigbee_phy_2_4
+      - zigbee_multi_network
     unless:
       - stack_protection_iar
   - path: protocol/zigbee/build/zigbee-pro-leaf-stack-cortexm3-iar-mgm13-rail-stack_protection/zigbee-pro-leaf-stack.a
@@ -217,11 +357,29 @@ library:
       - device_family_mgm13
       - zigbee_phy_2_4
       - stack_protection_iar
+      - zigbee_multi_network
+  - path: protocol/zigbee/build/zigbee-pro-leaf-stack-cortexm3-iar-mgm13-rail-ember_multi_network_stripped/zigbee-pro-leaf-stack.a
+    condition: 
+      - toolchain_iar
+      - device_family_mgm13
+      - zigbee_phy_2_4
+    unless:
+      - zigbee_multi_network
+      - stack_protection_iar
+  - path: protocol/zigbee/build/zigbee-pro-leaf-stack-cortexm3-iar-mgm13-rail-ember_multi_network_stripped-stack_protection/zigbee-pro-leaf-stack.a
+    condition: 
+      - toolchain_iar
+      - device_family_mgm13
+      - zigbee_phy_2_4
+      - stack_protection_iar
+    unless:
+      - zigbee_multi_network
   - path: protocol/zigbee/build/zigbee-pro-leaf-stack-cortexm3-iar-mgm21-rail/zigbee-pro-leaf-stack.a
     condition: 
       - toolchain_iar
       - device_family_mgm21
       - zigbee_phy_2_4
+      - zigbee_multi_network
     unless:
       - stack_protection_iar
   - path: protocol/zigbee/build/zigbee-pro-leaf-stack-cortexm3-iar-mgm21-rail-stack_protection/zigbee-pro-leaf-stack.a
@@ -230,11 +388,29 @@ library:
       - device_family_mgm21
       - zigbee_phy_2_4
       - stack_protection_iar
+      - zigbee_multi_network
+  - path: protocol/zigbee/build/zigbee-pro-leaf-stack-cortexm3-iar-mgm21-rail-ember_multi_network_stripped/zigbee-pro-leaf-stack.a
+    condition: 
+      - toolchain_iar
+      - device_family_mgm21
+      - zigbee_phy_2_4
+    unless:
+      - zigbee_multi_network
+      - stack_protection_iar
+  - path: protocol/zigbee/build/zigbee-pro-leaf-stack-cortexm3-iar-mgm21-rail-ember_multi_network_stripped-stack_protection/zigbee-pro-leaf-stack.a
+    condition: 
+      - toolchain_iar
+      - device_family_mgm21
+      - zigbee_phy_2_4
+      - stack_protection_iar
+    unless:
+      - zigbee_multi_network
   - path: protocol/zigbee/build/zigbee-pro-leaf-stack-cortexm3-iar-mgm22-rail/zigbee-pro-leaf-stack.a
     condition: 
       - toolchain_iar
       - device_family_mgm22
       - zigbee_phy_2_4
+      - zigbee_multi_network
     unless:
       - stack_protection_iar
   - path: protocol/zigbee/build/zigbee-pro-leaf-stack-cortexm3-iar-mgm22-rail-stack_protection/zigbee-pro-leaf-stack.a
@@ -243,11 +419,29 @@ library:
       - device_family_mgm22
       - zigbee_phy_2_4
       - stack_protection_iar
+      - zigbee_multi_network
+  - path: protocol/zigbee/build/zigbee-pro-leaf-stack-cortexm3-iar-mgm22-rail-ember_multi_network_stripped/zigbee-pro-leaf-stack.a
+    condition: 
+      - toolchain_iar
+      - device_family_mgm22
+      - zigbee_phy_2_4
+    unless:
+      - zigbee_multi_network
+      - stack_protection_iar
+  - path: protocol/zigbee/build/zigbee-pro-leaf-stack-cortexm3-iar-mgm22-rail-ember_multi_network_stripped-stack_protection/zigbee-pro-leaf-stack.a
+    condition: 
+      - toolchain_iar
+      - device_family_mgm22
+      - zigbee_phy_2_4
+      - stack_protection_iar
+    unless:
+      - zigbee_multi_network
   - path: protocol/zigbee/build/zigbee-pro-leaf-stack-cortexm3-iar-mgm24-rail/zigbee-pro-leaf-stack.a
     condition: 
       - toolchain_iar
       - device_family_mgm24
       - zigbee_phy_2_4
+      - zigbee_multi_network
     unless:
       - stack_protection_iar
   - path: protocol/zigbee/build/zigbee-pro-leaf-stack-cortexm3-iar-mgm24-rail-stack_protection/zigbee-pro-leaf-stack.a
@@ -256,6 +450,23 @@ library:
       - device_family_mgm24
       - zigbee_phy_2_4
       - stack_protection_iar
+      - zigbee_multi_network
+  - path: protocol/zigbee/build/zigbee-pro-leaf-stack-cortexm3-iar-mgm24-rail-ember_multi_network_stripped/zigbee-pro-leaf-stack.a
+    condition: 
+      - toolchain_iar
+      - device_family_mgm24
+      - zigbee_phy_2_4
+    unless:
+      - zigbee_multi_network
+      - stack_protection_iar
+  - path: protocol/zigbee/build/zigbee-pro-leaf-stack-cortexm3-iar-mgm24-rail-ember_multi_network_stripped-stack_protection/zigbee-pro-leaf-stack.a
+    condition: 
+      - toolchain_iar
+      - device_family_mgm24
+      - zigbee_phy_2_4
+      - stack_protection_iar
+    unless:
+      - zigbee_multi_network
   - path: protocol/zigbee/build/zigbee-pro-leaf-stack-cortexm3-gcc-efr32mg1p-rail/zigbee-pro-leaf-stack.a
     condition: 
       - toolchain_gcc
@@ -309,14 +520,32 @@ library:
       - toolchain_gcc
       - device_family_efr32mg12p
       - zigbee_phy_2_4
+      - zigbee_multi_network
     unless:
+      - stack_protection_iar
+  - path: protocol/zigbee/build/zigbee-pro-leaf-stack-cortexm3-gcc-efr32mg12p-rail-ember_multi_network_stripped/zigbee-pro-leaf-stack.a
+    condition: 
+      - toolchain_gcc
+      - device_family_efr32mg12p
+      - zigbee_phy_2_4
+    unless:
+      - zigbee_multi_network
       - stack_protection_iar
   - path: protocol/zigbee/build/zigbee-pro-leaf-stack-cortexm3-gcc-efr32mg13p-rail/zigbee-pro-leaf-stack.a
     condition: 
       - toolchain_gcc
       - device_family_efr32mg13p
       - zigbee_phy_2_4
+      - zigbee_multi_network
     unless:
+      - stack_protection_iar
+  - path: protocol/zigbee/build/zigbee-pro-leaf-stack-cortexm3-gcc-efr32mg13p-rail-ember_multi_network_stripped/zigbee-pro-leaf-stack.a
+    condition: 
+      - toolchain_gcc
+      - device_family_efr32mg13p
+      - zigbee_phy_2_4
+    unless:
+      - zigbee_multi_network
       - stack_protection_iar
   - path: protocol/zigbee/build/zigbee-pro-leaf-stack-cortexm3-gcc-efr32mg14p-rail/zigbee-pro-leaf-stack.a
     condition: 
@@ -330,56 +559,144 @@ library:
       - toolchain_gcc
       - device_family_efr32mg21
       - zigbee_phy_2_4
+      - zigbee_multi_network
     unless:
+      - stack_protection_iar
+  - path: protocol/zigbee/build/zigbee-pro-leaf-stack-cortexm3-gcc-efr32mg21-rail-ember_multi_network_stripped/zigbee-pro-leaf-stack.a
+    condition: 
+      - toolchain_gcc
+      - device_family_efr32mg21
+      - zigbee_phy_2_4
+    unless:
+      - zigbee_multi_network
       - stack_protection_iar
   - path: protocol/zigbee/build/zigbee-pro-leaf-stack-cortexm3-gcc-efr32mg22-rail/zigbee-pro-leaf-stack.a
     condition: 
       - toolchain_gcc
       - device_family_efr32mg22
       - zigbee_phy_2_4
+      - zigbee_multi_network
     unless:
+      - stack_protection_iar
+  - path: protocol/zigbee/build/zigbee-pro-leaf-stack-cortexm3-gcc-efr32mg22-rail-ember_multi_network_stripped/zigbee-pro-leaf-stack.a
+    condition: 
+      - toolchain_gcc
+      - device_family_efr32mg22
+      - zigbee_phy_2_4
+    unless:
+      - zigbee_multi_network
       - stack_protection_iar
   - path: protocol/zigbee/build/zigbee-pro-leaf-stack-cortexm3-gcc-efr32mg24-rail/zigbee-pro-leaf-stack.a
     condition: 
       - toolchain_gcc
       - device_family_efr32mg24
       - zigbee_phy_2_4
+      - zigbee_multi_network
     unless:
+      - stack_protection_iar
+  - path: protocol/zigbee/build/zigbee-pro-leaf-stack-cortexm3-gcc-efr32mg24-rail-ember_multi_network_stripped/zigbee-pro-leaf-stack.a
+    condition: 
+      - toolchain_gcc
+      - device_family_efr32mg24
+      - zigbee_phy_2_4
+    unless:
+      - zigbee_multi_network
+      - stack_protection_iar
+  - path: protocol/zigbee/build/zigbee-pro-leaf-stack-cortexm3-gcc-efr32mg27-rail/zigbee-pro-leaf-stack.a
+    condition: 
+      - toolchain_gcc
+      - device_family_efr32mg27
+      - zigbee_phy_2_4
+      - zigbee_multi_network
+    unless:
+      - stack_protection_iar
+  - path: protocol/zigbee/build/zigbee-pro-leaf-stack-cortexm3-gcc-efr32mg27-rail-ember_multi_network_stripped/zigbee-pro-leaf-stack.a
+    condition: 
+      - toolchain_gcc
+      - device_family_efr32mg27
+      - zigbee_phy_2_4
+    unless:
+      - zigbee_multi_network
       - stack_protection_iar
   - path: protocol/zigbee/build/zigbee-pro-leaf-stack-cortexm3-gcc-mgm12-rail/zigbee-pro-leaf-stack.a
     condition: 
       - toolchain_gcc
       - device_family_mgm12
       - zigbee_phy_2_4
+      - zigbee_multi_network
     unless:
+      - stack_protection_iar
+  - path: protocol/zigbee/build/zigbee-pro-leaf-stack-cortexm3-gcc-mgm12-rail-ember_multi_network_stripped/zigbee-pro-leaf-stack.a
+    condition: 
+      - toolchain_gcc
+      - device_family_mgm12
+      - zigbee_phy_2_4
+    unless:
+      - zigbee_multi_network
       - stack_protection_iar
   - path: protocol/zigbee/build/zigbee-pro-leaf-stack-cortexm3-gcc-mgm13-rail/zigbee-pro-leaf-stack.a
     condition: 
       - toolchain_gcc
       - device_family_mgm13
       - zigbee_phy_2_4
+      - zigbee_multi_network
     unless:
+      - stack_protection_iar
+  - path: protocol/zigbee/build/zigbee-pro-leaf-stack-cortexm3-gcc-mgm13-rail-ember_multi_network_stripped/zigbee-pro-leaf-stack.a
+    condition: 
+      - toolchain_gcc
+      - device_family_mgm13
+      - zigbee_phy_2_4
+    unless:
+      - zigbee_multi_network
       - stack_protection_iar
   - path: protocol/zigbee/build/zigbee-pro-leaf-stack-cortexm3-gcc-mgm21-rail/zigbee-pro-leaf-stack.a
     condition: 
       - toolchain_gcc
       - device_family_mgm21
       - zigbee_phy_2_4
+      - zigbee_multi_network
     unless:
+      - stack_protection_iar
+  - path: protocol/zigbee/build/zigbee-pro-leaf-stack-cortexm3-gcc-mgm21-rail-ember_multi_network_stripped/zigbee-pro-leaf-stack.a
+    condition: 
+      - toolchain_gcc
+      - device_family_mgm21
+      - zigbee_phy_2_4
+    unless:
+      - zigbee_multi_network
       - stack_protection_iar
   - path: protocol/zigbee/build/zigbee-pro-leaf-stack-cortexm3-gcc-mgm22-rail/zigbee-pro-leaf-stack.a
     condition: 
       - toolchain_gcc
       - device_family_mgm22
       - zigbee_phy_2_4
+      - zigbee_multi_network
     unless:
+      - stack_protection_iar
+  - path: protocol/zigbee/build/zigbee-pro-leaf-stack-cortexm3-gcc-mgm22-rail-ember_multi_network_stripped/zigbee-pro-leaf-stack.a
+    condition: 
+      - toolchain_gcc
+      - device_family_mgm22
+      - zigbee_phy_2_4
+    unless:
+      - zigbee_multi_network
       - stack_protection_iar
   - path: protocol/zigbee/build/zigbee-pro-leaf-stack-cortexm3-gcc-mgm24-rail/zigbee-pro-leaf-stack.a
     condition: 
       - toolchain_gcc
       - device_family_mgm24
       - zigbee_phy_2_4
+      - zigbee_multi_network
     unless:
+      - stack_protection_iar
+  - path: protocol/zigbee/build/zigbee-pro-leaf-stack-cortexm3-gcc-mgm24-rail-ember_multi_network_stripped/zigbee-pro-leaf-stack.a
+    condition: 
+      - toolchain_gcc
+      - device_family_mgm24
+      - zigbee_phy_2_4
+    unless:
+      - zigbee_multi_network
       - stack_protection_iar
   - path: protocol/zigbee/build/ncp-pro-library-cortexm3-iar-efr32mg1p-rail/ncp-pro-library.a
     condition: 
@@ -491,6 +808,7 @@ library:
       - toolchain_iar
       - device_family_efr32mg12p
       - zigbee_phy_2_4
+      - zigbee_multi_network
       - zigbee_ncp
     unless:
       - stack_protection_iar
@@ -500,12 +818,32 @@ library:
       - device_family_efr32mg12p
       - zigbee_phy_2_4
       - stack_protection_iar
+      - zigbee_multi_network
       - zigbee_ncp
+  - path: protocol/zigbee/build/ncp-pro-library-cortexm3-iar-efr32mg12p-rail-ember_multi_network_stripped/ncp-pro-library.a
+    condition: 
+      - toolchain_iar
+      - device_family_efr32mg12p
+      - zigbee_phy_2_4
+      - zigbee_ncp
+    unless:
+      - zigbee_multi_network
+      - stack_protection_iar
+  - path: protocol/zigbee/build/ncp-pro-library-cortexm3-iar-efr32mg12p-rail-ember_multi_network_stripped-stack_protection/ncp-pro-library.a
+    condition: 
+      - toolchain_iar
+      - device_family_efr32mg12p
+      - zigbee_phy_2_4
+      - stack_protection_iar
+      - zigbee_ncp
+    unless:
+      - zigbee_multi_network
   - path: protocol/zigbee/build/ncp-pro-library-cortexm3-iar-efr32mg13p-rail/ncp-pro-library.a
     condition: 
       - toolchain_iar
       - device_family_efr32mg13p
       - zigbee_phy_2_4
+      - zigbee_multi_network
       - zigbee_ncp
     unless:
       - stack_protection_iar
@@ -515,7 +853,26 @@ library:
       - device_family_efr32mg13p
       - zigbee_phy_2_4
       - stack_protection_iar
+      - zigbee_multi_network
       - zigbee_ncp
+  - path: protocol/zigbee/build/ncp-pro-library-cortexm3-iar-efr32mg13p-rail-ember_multi_network_stripped/ncp-pro-library.a
+    condition: 
+      - toolchain_iar
+      - device_family_efr32mg13p
+      - zigbee_phy_2_4
+      - zigbee_ncp
+    unless:
+      - zigbee_multi_network
+      - stack_protection_iar
+  - path: protocol/zigbee/build/ncp-pro-library-cortexm3-iar-efr32mg13p-rail-ember_multi_network_stripped-stack_protection/ncp-pro-library.a
+    condition: 
+      - toolchain_iar
+      - device_family_efr32mg13p
+      - zigbee_phy_2_4
+      - stack_protection_iar
+      - zigbee_ncp
+    unless:
+      - zigbee_multi_network
   - path: protocol/zigbee/build/ncp-pro-library-cortexm3-iar-efr32mg14p-rail/ncp-pro-library.a
     condition: 
       - toolchain_iar
@@ -536,6 +893,7 @@ library:
       - toolchain_iar
       - device_family_efr32mg21
       - zigbee_phy_2_4
+      - zigbee_multi_network
       - zigbee_ncp
     unless:
       - stack_protection_iar
@@ -545,12 +903,32 @@ library:
       - device_family_efr32mg21
       - zigbee_phy_2_4
       - stack_protection_iar
+      - zigbee_multi_network
       - zigbee_ncp
+  - path: protocol/zigbee/build/ncp-pro-library-cortexm3-iar-efr32mg21-rail-ember_multi_network_stripped/ncp-pro-library.a
+    condition: 
+      - toolchain_iar
+      - device_family_efr32mg21
+      - zigbee_phy_2_4
+      - zigbee_ncp
+    unless:
+      - zigbee_multi_network
+      - stack_protection_iar
+  - path: protocol/zigbee/build/ncp-pro-library-cortexm3-iar-efr32mg21-rail-ember_multi_network_stripped-stack_protection/ncp-pro-library.a
+    condition: 
+      - toolchain_iar
+      - device_family_efr32mg21
+      - zigbee_phy_2_4
+      - stack_protection_iar
+      - zigbee_ncp
+    unless:
+      - zigbee_multi_network
   - path: protocol/zigbee/build/ncp-pro-library-cortexm3-iar-efr32mg22-rail/ncp-pro-library.a
     condition: 
       - toolchain_iar
       - device_family_efr32mg22
       - zigbee_phy_2_4
+      - zigbee_multi_network
       - zigbee_ncp
     unless:
       - stack_protection_iar
@@ -560,12 +938,32 @@ library:
       - device_family_efr32mg22
       - zigbee_phy_2_4
       - stack_protection_iar
+      - zigbee_multi_network
       - zigbee_ncp
+  - path: protocol/zigbee/build/ncp-pro-library-cortexm3-iar-efr32mg22-rail-ember_multi_network_stripped/ncp-pro-library.a
+    condition: 
+      - toolchain_iar
+      - device_family_efr32mg22
+      - zigbee_phy_2_4
+      - zigbee_ncp
+    unless:
+      - zigbee_multi_network
+      - stack_protection_iar
+  - path: protocol/zigbee/build/ncp-pro-library-cortexm3-iar-efr32mg22-rail-ember_multi_network_stripped-stack_protection/ncp-pro-library.a
+    condition: 
+      - toolchain_iar
+      - device_family_efr32mg22
+      - zigbee_phy_2_4
+      - stack_protection_iar
+      - zigbee_ncp
+    unless:
+      - zigbee_multi_network
   - path: protocol/zigbee/build/ncp-pro-library-cortexm3-iar-efr32mg24-rail/ncp-pro-library.a
     condition: 
       - toolchain_iar
       - device_family_efr32mg24
       - zigbee_phy_2_4
+      - zigbee_multi_network
       - zigbee_ncp
     unless:
       - stack_protection_iar
@@ -575,12 +973,67 @@ library:
       - device_family_efr32mg24
       - zigbee_phy_2_4
       - stack_protection_iar
+      - zigbee_multi_network
       - zigbee_ncp
+  - path: protocol/zigbee/build/ncp-pro-library-cortexm3-iar-efr32mg24-rail-ember_multi_network_stripped/ncp-pro-library.a
+    condition: 
+      - toolchain_iar
+      - device_family_efr32mg24
+      - zigbee_phy_2_4
+      - zigbee_ncp
+    unless:
+      - zigbee_multi_network
+      - stack_protection_iar
+  - path: protocol/zigbee/build/ncp-pro-library-cortexm3-iar-efr32mg24-rail-ember_multi_network_stripped-stack_protection/ncp-pro-library.a
+    condition: 
+      - toolchain_iar
+      - device_family_efr32mg24
+      - zigbee_phy_2_4
+      - stack_protection_iar
+      - zigbee_ncp
+    unless:
+      - zigbee_multi_network
+  - path: protocol/zigbee/build/ncp-pro-library-cortexm3-iar-efr32mg27-rail/ncp-pro-library.a
+    condition: 
+      - toolchain_iar
+      - device_family_efr32mg27
+      - zigbee_phy_2_4
+      - zigbee_multi_network
+      - zigbee_ncp
+    unless:
+      - stack_protection_iar
+  - path: protocol/zigbee/build/ncp-pro-library-cortexm3-iar-efr32mg27-rail-stack_protection/ncp-pro-library.a
+    condition: 
+      - toolchain_iar
+      - device_family_efr32mg27
+      - zigbee_phy_2_4
+      - stack_protection_iar
+      - zigbee_multi_network
+      - zigbee_ncp
+  - path: protocol/zigbee/build/ncp-pro-library-cortexm3-iar-efr32mg27-rail-ember_multi_network_stripped/ncp-pro-library.a
+    condition: 
+      - toolchain_iar
+      - device_family_efr32mg27
+      - zigbee_phy_2_4
+      - zigbee_ncp
+    unless:
+      - zigbee_multi_network
+      - stack_protection_iar
+  - path: protocol/zigbee/build/ncp-pro-library-cortexm3-iar-efr32mg27-rail-ember_multi_network_stripped-stack_protection/ncp-pro-library.a
+    condition: 
+      - toolchain_iar
+      - device_family_efr32mg27
+      - zigbee_phy_2_4
+      - stack_protection_iar
+      - zigbee_ncp
+    unless:
+      - zigbee_multi_network
   - path: protocol/zigbee/build/ncp-pro-library-cortexm3-iar-mgm12-rail/ncp-pro-library.a
     condition: 
       - toolchain_iar
       - device_family_mgm12
       - zigbee_phy_2_4
+      - zigbee_multi_network
       - zigbee_ncp
     unless:
       - stack_protection_iar
@@ -590,12 +1043,32 @@ library:
       - device_family_mgm12
       - zigbee_phy_2_4
       - stack_protection_iar
+      - zigbee_multi_network
       - zigbee_ncp
+  - path: protocol/zigbee/build/ncp-pro-library-cortexm3-iar-mgm12-rail-ember_multi_network_stripped/ncp-pro-library.a
+    condition: 
+      - toolchain_iar
+      - device_family_mgm12
+      - zigbee_phy_2_4
+      - zigbee_ncp
+    unless:
+      - zigbee_multi_network
+      - stack_protection_iar
+  - path: protocol/zigbee/build/ncp-pro-library-cortexm3-iar-mgm12-rail-ember_multi_network_stripped-stack_protection/ncp-pro-library.a
+    condition: 
+      - toolchain_iar
+      - device_family_mgm12
+      - zigbee_phy_2_4
+      - stack_protection_iar
+      - zigbee_ncp
+    unless:
+      - zigbee_multi_network
   - path: protocol/zigbee/build/ncp-pro-library-cortexm3-iar-mgm13-rail/ncp-pro-library.a
     condition: 
       - toolchain_iar
       - device_family_mgm13
       - zigbee_phy_2_4
+      - zigbee_multi_network
       - zigbee_ncp
     unless:
       - stack_protection_iar
@@ -605,12 +1078,32 @@ library:
       - device_family_mgm13
       - zigbee_phy_2_4
       - stack_protection_iar
+      - zigbee_multi_network
       - zigbee_ncp
+  - path: protocol/zigbee/build/ncp-pro-library-cortexm3-iar-mgm13-rail-ember_multi_network_stripped/ncp-pro-library.a
+    condition: 
+      - toolchain_iar
+      - device_family_mgm13
+      - zigbee_phy_2_4
+      - zigbee_ncp
+    unless:
+      - zigbee_multi_network
+      - stack_protection_iar
+  - path: protocol/zigbee/build/ncp-pro-library-cortexm3-iar-mgm13-rail-ember_multi_network_stripped-stack_protection/ncp-pro-library.a
+    condition: 
+      - toolchain_iar
+      - device_family_mgm13
+      - zigbee_phy_2_4
+      - stack_protection_iar
+      - zigbee_ncp
+    unless:
+      - zigbee_multi_network
   - path: protocol/zigbee/build/ncp-pro-library-cortexm3-iar-mgm21-rail/ncp-pro-library.a
     condition: 
       - toolchain_iar
       - device_family_mgm21
       - zigbee_phy_2_4
+      - zigbee_multi_network
       - zigbee_ncp
     unless:
       - stack_protection_iar
@@ -620,12 +1113,32 @@ library:
       - device_family_mgm21
       - zigbee_phy_2_4
       - stack_protection_iar
+      - zigbee_multi_network
       - zigbee_ncp
+  - path: protocol/zigbee/build/ncp-pro-library-cortexm3-iar-mgm21-rail-ember_multi_network_stripped/ncp-pro-library.a
+    condition: 
+      - toolchain_iar
+      - device_family_mgm21
+      - zigbee_phy_2_4
+      - zigbee_ncp
+    unless:
+      - zigbee_multi_network
+      - stack_protection_iar
+  - path: protocol/zigbee/build/ncp-pro-library-cortexm3-iar-mgm21-rail-ember_multi_network_stripped-stack_protection/ncp-pro-library.a
+    condition: 
+      - toolchain_iar
+      - device_family_mgm21
+      - zigbee_phy_2_4
+      - stack_protection_iar
+      - zigbee_ncp
+    unless:
+      - zigbee_multi_network
   - path: protocol/zigbee/build/ncp-pro-library-cortexm3-iar-mgm22-rail/ncp-pro-library.a
     condition: 
       - toolchain_iar
       - device_family_mgm22
       - zigbee_phy_2_4
+      - zigbee_multi_network
       - zigbee_ncp
     unless:
       - stack_protection_iar
@@ -635,12 +1148,32 @@ library:
       - device_family_mgm22
       - zigbee_phy_2_4
       - stack_protection_iar
+      - zigbee_multi_network
       - zigbee_ncp
+  - path: protocol/zigbee/build/ncp-pro-library-cortexm3-iar-mgm22-rail-ember_multi_network_stripped/ncp-pro-library.a
+    condition: 
+      - toolchain_iar
+      - device_family_mgm22
+      - zigbee_phy_2_4
+      - zigbee_ncp
+    unless:
+      - zigbee_multi_network
+      - stack_protection_iar
+  - path: protocol/zigbee/build/ncp-pro-library-cortexm3-iar-mgm22-rail-ember_multi_network_stripped-stack_protection/ncp-pro-library.a
+    condition: 
+      - toolchain_iar
+      - device_family_mgm22
+      - zigbee_phy_2_4
+      - stack_protection_iar
+      - zigbee_ncp
+    unless:
+      - zigbee_multi_network
   - path: protocol/zigbee/build/ncp-pro-library-cortexm3-iar-mgm24-rail/ncp-pro-library.a
     condition: 
       - toolchain_iar
       - device_family_mgm24
       - zigbee_phy_2_4
+      - zigbee_multi_network
       - zigbee_ncp
     unless:
       - stack_protection_iar
@@ -650,7 +1183,26 @@ library:
       - device_family_mgm24
       - zigbee_phy_2_4
       - stack_protection_iar
+      - zigbee_multi_network
       - zigbee_ncp
+  - path: protocol/zigbee/build/ncp-pro-library-cortexm3-iar-mgm24-rail-ember_multi_network_stripped/ncp-pro-library.a
+    condition: 
+      - toolchain_iar
+      - device_family_mgm24
+      - zigbee_phy_2_4
+      - zigbee_ncp
+    unless:
+      - zigbee_multi_network
+      - stack_protection_iar
+  - path: protocol/zigbee/build/ncp-pro-library-cortexm3-iar-mgm24-rail-ember_multi_network_stripped-stack_protection/ncp-pro-library.a
+    condition: 
+      - toolchain_iar
+      - device_family_mgm24
+      - zigbee_phy_2_4
+      - stack_protection_iar
+      - zigbee_ncp
+    unless:
+      - zigbee_multi_network
   - path: protocol/zigbee/build/ncp-pro-library-cortexm3-gcc-efr32mg1p-rail/ncp-pro-library.a
     condition: 
       - toolchain_gcc
@@ -710,16 +1262,36 @@ library:
       - toolchain_gcc
       - device_family_efr32mg12p
       - zigbee_phy_2_4
+      - zigbee_multi_network
       - zigbee_ncp
     unless:
+      - stack_protection_iar
+  - path: protocol/zigbee/build/ncp-pro-library-cortexm3-gcc-efr32mg12p-rail-ember_multi_network_stripped/ncp-pro-library.a
+    condition: 
+      - toolchain_gcc
+      - device_family_efr32mg12p
+      - zigbee_phy_2_4
+      - zigbee_ncp
+    unless:
+      - zigbee_multi_network
       - stack_protection_iar
   - path: protocol/zigbee/build/ncp-pro-library-cortexm3-gcc-efr32mg13p-rail/ncp-pro-library.a
     condition: 
       - toolchain_gcc
       - device_family_efr32mg13p
       - zigbee_phy_2_4
+      - zigbee_multi_network
       - zigbee_ncp
     unless:
+      - stack_protection_iar
+  - path: protocol/zigbee/build/ncp-pro-library-cortexm3-gcc-efr32mg13p-rail-ember_multi_network_stripped/ncp-pro-library.a
+    condition: 
+      - toolchain_gcc
+      - device_family_efr32mg13p
+      - zigbee_phy_2_4
+      - zigbee_ncp
+    unless:
+      - zigbee_multi_network
       - stack_protection_iar
   - path: protocol/zigbee/build/ncp-pro-library-cortexm3-gcc-efr32mg14p-rail/ncp-pro-library.a
     condition: 
@@ -734,72 +1306,170 @@ library:
       - toolchain_gcc
       - device_family_efr32mg21
       - zigbee_phy_2_4
+      - zigbee_multi_network
       - zigbee_ncp
     unless:
+      - stack_protection_iar
+  - path: protocol/zigbee/build/ncp-pro-library-cortexm3-gcc-efr32mg21-rail-ember_multi_network_stripped/ncp-pro-library.a
+    condition: 
+      - toolchain_gcc
+      - device_family_efr32mg21
+      - zigbee_phy_2_4
+      - zigbee_ncp
+    unless:
+      - zigbee_multi_network
       - stack_protection_iar
   - path: protocol/zigbee/build/ncp-pro-library-cortexm3-gcc-efr32mg22-rail/ncp-pro-library.a
     condition: 
       - toolchain_gcc
       - device_family_efr32mg22
       - zigbee_phy_2_4
+      - zigbee_multi_network
       - zigbee_ncp
     unless:
+      - stack_protection_iar
+  - path: protocol/zigbee/build/ncp-pro-library-cortexm3-gcc-efr32mg22-rail-ember_multi_network_stripped/ncp-pro-library.a
+    condition: 
+      - toolchain_gcc
+      - device_family_efr32mg22
+      - zigbee_phy_2_4
+      - zigbee_ncp
+    unless:
+      - zigbee_multi_network
       - stack_protection_iar
   - path: protocol/zigbee/build/ncp-pro-library-cortexm3-gcc-efr32mg24-rail/ncp-pro-library.a
     condition: 
       - toolchain_gcc
       - device_family_efr32mg24
       - zigbee_phy_2_4
+      - zigbee_multi_network
       - zigbee_ncp
     unless:
+      - stack_protection_iar
+  - path: protocol/zigbee/build/ncp-pro-library-cortexm3-gcc-efr32mg24-rail-ember_multi_network_stripped/ncp-pro-library.a
+    condition: 
+      - toolchain_gcc
+      - device_family_efr32mg24
+      - zigbee_phy_2_4
+      - zigbee_ncp
+    unless:
+      - zigbee_multi_network
+      - stack_protection_iar
+  - path: protocol/zigbee/build/ncp-pro-library-cortexm3-gcc-efr32mg27-rail/ncp-pro-library.a
+    condition: 
+      - toolchain_gcc
+      - device_family_efr32mg27
+      - zigbee_phy_2_4
+      - zigbee_multi_network
+      - zigbee_ncp
+    unless:
+      - stack_protection_iar
+  - path: protocol/zigbee/build/ncp-pro-library-cortexm3-gcc-efr32mg27-rail-ember_multi_network_stripped/ncp-pro-library.a
+    condition: 
+      - toolchain_gcc
+      - device_family_efr32mg27
+      - zigbee_phy_2_4
+      - zigbee_ncp
+    unless:
+      - zigbee_multi_network
       - stack_protection_iar
   - path: protocol/zigbee/build/ncp-pro-library-cortexm3-gcc-mgm12-rail/ncp-pro-library.a
     condition: 
       - toolchain_gcc
       - device_family_mgm12
       - zigbee_phy_2_4
+      - zigbee_multi_network
       - zigbee_ncp
     unless:
+      - stack_protection_iar
+  - path: protocol/zigbee/build/ncp-pro-library-cortexm3-gcc-mgm12-rail-ember_multi_network_stripped/ncp-pro-library.a
+    condition: 
+      - toolchain_gcc
+      - device_family_mgm12
+      - zigbee_phy_2_4
+      - zigbee_ncp
+    unless:
+      - zigbee_multi_network
       - stack_protection_iar
   - path: protocol/zigbee/build/ncp-pro-library-cortexm3-gcc-mgm13-rail/ncp-pro-library.a
     condition: 
       - toolchain_gcc
       - device_family_mgm13
       - zigbee_phy_2_4
+      - zigbee_multi_network
       - zigbee_ncp
     unless:
+      - stack_protection_iar
+  - path: protocol/zigbee/build/ncp-pro-library-cortexm3-gcc-mgm13-rail-ember_multi_network_stripped/ncp-pro-library.a
+    condition: 
+      - toolchain_gcc
+      - device_family_mgm13
+      - zigbee_phy_2_4
+      - zigbee_ncp
+    unless:
+      - zigbee_multi_network
       - stack_protection_iar
   - path: protocol/zigbee/build/ncp-pro-library-cortexm3-gcc-mgm21-rail/ncp-pro-library.a
     condition: 
       - toolchain_gcc
       - device_family_mgm21
       - zigbee_phy_2_4
+      - zigbee_multi_network
       - zigbee_ncp
     unless:
+      - stack_protection_iar
+  - path: protocol/zigbee/build/ncp-pro-library-cortexm3-gcc-mgm21-rail-ember_multi_network_stripped/ncp-pro-library.a
+    condition: 
+      - toolchain_gcc
+      - device_family_mgm21
+      - zigbee_phy_2_4
+      - zigbee_ncp
+    unless:
+      - zigbee_multi_network
       - stack_protection_iar
   - path: protocol/zigbee/build/ncp-pro-library-cortexm3-gcc-mgm22-rail/ncp-pro-library.a
     condition: 
       - toolchain_gcc
       - device_family_mgm22
       - zigbee_phy_2_4
+      - zigbee_multi_network
       - zigbee_ncp
     unless:
+      - stack_protection_iar
+  - path: protocol/zigbee/build/ncp-pro-library-cortexm3-gcc-mgm22-rail-ember_multi_network_stripped/ncp-pro-library.a
+    condition: 
+      - toolchain_gcc
+      - device_family_mgm22
+      - zigbee_phy_2_4
+      - zigbee_ncp
+    unless:
+      - zigbee_multi_network
       - stack_protection_iar
   - path: protocol/zigbee/build/ncp-pro-library-cortexm3-gcc-mgm24-rail/ncp-pro-library.a
     condition: 
       - toolchain_gcc
       - device_family_mgm24
       - zigbee_phy_2_4
+      - zigbee_multi_network
       - zigbee_ncp
     unless:
       - stack_protection_iar
-  - path: protocol/zigbee/build/ncp-pro-library-unix-gcc-simulation-null-arm32v7/ncp-pro-library.a
+  - path: protocol/zigbee/build/ncp-pro-library-cortexm3-gcc-mgm24-rail-ember_multi_network_stripped/ncp-pro-library.a
+    condition: 
+      - toolchain_gcc
+      - device_family_mgm24
+      - zigbee_phy_2_4
+      - zigbee_ncp
+    unless:
+      - zigbee_multi_network
+      - stack_protection_iar
+  - path: protocol/zigbee/build/ncp-pro-library-unix-gcc-simulation-null-arm32v7-ember_multi_network_stripped/ncp-pro-library.a
     condition:
       - toolchain_gcc
       - zigbee_stack_unix
       - zigbee_ncp
       - linux_arch_32
-  - path: protocol/zigbee/build/ncp-pro-library-unix-gcc-simulation-null-arm64v8/ncp-pro-library.a
+  - path: protocol/zigbee/build/ncp-pro-library-unix-gcc-simulation-null-arm64v8-ember_multi_network_stripped/ncp-pro-library.a
     condition:
       - toolchain_gcc
       - zigbee_stack_unix

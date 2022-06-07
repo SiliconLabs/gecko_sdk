@@ -60,10 +60,21 @@ define memory mem with size = 4G;
 define region ROM_region   = mem:[from __ICFEDIT_region_ROM_start__   to __ICFEDIT_region_ROM_end__];
 define region RAM_region   = mem:[from __ICFEDIT_region_RAM_start__   to __ICFEDIT_region_RAM_end__];
 
+{%- if trustzone_secure %}
+define symbol STACK_SEAL_SIZE = 8;
+{%- endif %}
+
 define block CSTACK with alignment = 8
 {
   section .stack
 };
+
+{%-   if trustzone_secure %}
+define block STACKSEAL with size = STACK_SEAL_SIZE
+{
+  section .stackseal
+};
+{%- endif %}
 
 define block HEAP with alignment = 8
 {
@@ -88,6 +99,14 @@ define block nvm with alignment = {{ flash_page_size }}
 };
 keep { block nvm };
 
+{%- if trustzone_secure %}
+define block Veneer$$CMSE with alignment = {{ 32 }}
+{
+  section Veneer$$CMSE,
+};
+keep { block Veneer$$CMSE };
+{%- endif %}
+
 define block storage with alignment = {{ flash_page_size }}
 {
   section INTERNAL_STORAGE,
@@ -104,6 +123,9 @@ define block application with fixed order
 define block application_ram with fixed order
 {
   block CSTACK,
+{%- if trustzone_secure %}
+  block STACKSEAL,
+{%- endif %}
   readwrite,
   block HEAP
 };
@@ -114,6 +136,9 @@ do not initialize
 {
  section .noinit,
  section .stack,
+{%- if trustzone_secure %}
+ section .stackseal,
+{%- endif %}
  section .heap
 };
 

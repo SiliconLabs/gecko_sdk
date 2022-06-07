@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2013-2018 Arm Limited. All rights reserved.
+ * Copyright (c) 2013-2021 Arm Limited. All rights reserved.
  *
  * SPDX-License-Identifier: Apache-2.0
  *
@@ -26,9 +26,56 @@
 #ifndef RTX_EVR_H_
 #define RTX_EVR_H_
 
-#include "cmsis_os2.h"                  // CMSIS RTOS API
-#include "RTX_Config.h"                 // RTX Configuration
 #include "rtx_os.h"                     // RTX OS definitions
+
+// Initial Thread configuration covered also Thread Flags and Generic Wait
+#ifndef   OS_EVR_THFLAGS
+#define   OS_EVR_THFLAGS        OS_EVR_THREAD
+#endif
+#ifndef   OS_EVR_WAIT
+#define   OS_EVR_WAIT           OS_EVR_THREAD
+#endif
+
+#ifdef   _RTE_
+#include "RTE_Components.h"
+#endif
+
+#ifdef    RTE_Compiler_EventRecorder
+
+//lint -emacro((835,845),EventID) [MISRA Note 13]
+
+#include "EventRecorder.h"
+#include "EventRecorderConf.h"
+
+#if ((defined(OS_EVR_INIT) && (OS_EVR_INIT != 0)) || (EVENT_TIMESTAMP_SOURCE == 2))
+#ifndef EVR_RTX_KERNEL_GET_STATE_DISABLE
+#define EVR_RTX_KERNEL_GET_STATE_DISABLE
+#endif
+#endif
+
+#if (EVENT_TIMESTAMP_SOURCE == 2)
+#ifndef EVR_RTX_KERNEL_GET_SYS_TIMER_COUNT_DISABLE
+#define EVR_RTX_KERNEL_GET_SYS_TIMER_COUNT_DISABLE
+#endif
+#ifndef EVR_RTX_KERNEL_GET_SYS_TIMER_FREQ_DISABLE
+#define EVR_RTX_KERNEL_GET_SYS_TIMER_FREQ_DISABLE
+#endif
+#endif
+
+/// RTOS component number
+#define EvtRtxMemoryNo                  (0xF0U)
+#define EvtRtxKernelNo                  (0xF1U)
+#define EvtRtxThreadNo                  (0xF2U)
+#define EvtRtxThreadFlagsNo             (0xF4U)
+#define EvtRtxWaitNo                    (0xF3U)
+#define EvtRtxTimerNo                   (0xF6U)
+#define EvtRtxEventFlagsNo              (0xF5U)
+#define EvtRtxMutexNo                   (0xF7U)
+#define EvtRtxSemaphoreNo               (0xF8U)
+#define EvtRtxMemoryPoolNo              (0xF9U)
+#define EvtRtxMessageQueueNo            (0xFAU)
+
+#endif  // RTE_Compiler_EventRecorder
 
 
 /// Extended Status codes
@@ -150,10 +197,10 @@ extern void EvrRtxKernelInitialize (void);
 /**
   \brief  Event on successful RTOS kernel initialize (Op)
 */
-#if (!defined(EVR_RTX_DISABLE) && (OS_EVR_KERNEL != 0) && !defined(EVR_RTX_KERNEL_INITIALIZE_COMPLETED_DISABLE))
-extern void EvrRtxKernelInitializeCompleted (void);
+#if (!defined(EVR_RTX_DISABLE) && (OS_EVR_KERNEL != 0) && !defined(EVR_RTX_KERNEL_INITIALIZED_DISABLE))
+extern void EvrRtxKernelInitialized (void);
 #else
-#define EvrRtxKernelInitializeCompleted()
+#define EvrRtxKernelInitialized()
 #endif
 
 /**
@@ -172,11 +219,12 @@ extern void EvrRtxKernelGetInfo (osVersion_t *version, char *id_buf, uint32_t id
   \brief  Event on successful RTOS kernel information retrieve (Op)
   \param[in]  version       pointer to buffer for retrieving version information.
   \param[in]  id_buf        pointer to buffer for retrieving kernel identification string.
+  \param[in]  id_size       size of buffer for kernel identification string.
 */
 #if (!defined(EVR_RTX_DISABLE) && (OS_EVR_KERNEL != 0) && !defined(EVR_RTX_KERNEL_INFO_RETRIEVED_DISABLE))
-extern void EvrRtxKernelInfoRetrieved (osVersion_t *version, char *id_buf);
+extern void EvrRtxKernelInfoRetrieved (const osVersion_t *version, const char *id_buf, uint32_t id_size);
 #else
-#define EvrRtxKernelInfoRetrieved(version, id_buf)
+#define EvrRtxKernelInfoRetrieved(version, id_buf, id_size)
 #endif
 
 /**
@@ -343,6 +391,17 @@ extern void EvrRtxKernelGetSysTimerFreq (uint32_t freq);
 #define EvrRtxKernelGetSysTimerFreq(freq)
 #endif
 
+/**
+  \brief  Event on RTOS kernel system error (Error)
+  \param[in]  code          error code.
+  \param[in]  object_id     object that caused the error.
+*/
+#if (!defined(EVR_RTX_DISABLE) && (OS_EVR_KERNEL != 0) && !defined(EVR_RTX_KERNEL_ERROR_NOTIFY_DISABLE))
+extern void EvrRtxKernelErrorNotify (uint32_t code, void *object_id);
+#else
+#define EvrRtxKernelErrorNotify(code, object_id)
+#endif
+
 
 //  ==== Thread Events ====
 
@@ -373,11 +432,12 @@ extern void EvrRtxThreadNew (osThreadFunc_t func, void *argument, const osThread
   \brief  Event on successful thread create (Op)
   \param[in]  thread_id     thread ID obtained by \ref osThreadNew or \ref osThreadGetId.
   \param[in]  thread_addr   thread entry address.
+  \param[in]  name          pointer to thread object name.
 */
 #if (!defined(EVR_RTX_DISABLE) && (OS_EVR_THREAD != 0) && !defined(EVR_RTX_THREAD_CREATED_DISABLE))
-extern void EvrRtxThreadCreated (osThreadId_t thread_id, uint32_t thread_addr);
+extern void EvrRtxThreadCreated (osThreadId_t thread_id, uint32_t thread_addr, const char *name);
 #else
-#define EvrRtxThreadCreated(thread_id, thread_addr)
+#define EvrRtxThreadCreated(thread_id, thread_addr, name)
 #endif
 
 /**
@@ -443,6 +503,17 @@ extern void EvrRtxThreadGetStackSpace (osThreadId_t thread_id, uint32_t stack_sp
 extern void EvrRtxThreadSetPriority (osThreadId_t thread_id, osPriority_t priority);
 #else
 #define EvrRtxThreadSetPriority(thread_id, priority)
+#endif
+
+/**
+  \brief  Event on thread priority updated (Op)
+  \param[in]  thread_id     thread ID obtained by \ref osThreadNew or \ref osThreadGetId.
+  \param[in]  priority      new priority value for the thread function.
+*/
+#if (!defined(EVR_RTX_DISABLE) && (OS_EVR_THREAD != 0) && !defined(EVR_RTX_THREAD_PRIORITY_UPDATED_DISABLE))
+extern void EvrRtxThreadPriorityUpdated (osThreadId_t thread_id, osPriority_t priority);
+#else
+#define EvrRtxThreadPriorityUpdated(thread_id, priority)
 #endif
 
 /**
@@ -556,7 +627,7 @@ extern void EvrRtxThreadJoined (osThreadId_t thread_id);
 #endif
 
 /**
-  \brief  Event on thread execution block (Op)
+  \brief  Event on thread execution block (Detail)
   \param[in]  thread_id     thread ID obtained by \ref osThreadNew or \ref osThreadGetId.
   \param[in]  timeout       \ref CMSIS_RTOS_TimeOutValue or 0 in case of no time-out.
 */
@@ -567,7 +638,7 @@ extern void EvrRtxThreadBlocked (osThreadId_t thread_id, uint32_t timeout);
 #endif
 
 /**
-  \brief  Event on thread execution unblock (Op)
+  \brief  Event on thread execution unblock (Detail)
   \param[in]  thread_id     thread ID obtained by \ref osThreadNew or \ref osThreadGetId.
   \param[in]  ret_val       extended execution status of the thread.
 */
@@ -578,7 +649,7 @@ extern void EvrRtxThreadUnblocked (osThreadId_t thread_id, uint32_t ret_val);
 #endif
 
 /**
-  \brief  Event on running thread pre-emption (Op)
+  \brief  Event on running thread pre-emption (Detail)
   \param[in]  thread_id     thread ID obtained by \ref osThreadNew or \ref osThreadGetId.
 */
 #if (!defined(EVR_RTX_DISABLE) && (OS_EVR_THREAD != 0) && !defined(EVR_RTX_THREAD_PREEMPTED_DISABLE))
@@ -648,12 +719,26 @@ extern void EvrRtxThreadEnumerate (osThreadId_t *thread_array, uint32_t array_it
 #define EvrRtxThreadEnumerate(thread_array, array_items, count)
 #endif
 
+
+//  ==== Thread Flags Events ====
+
+/**
+  \brief  Event on thread flags error (Error)
+  \param[in]  thread_id     thread ID obtained by \ref osThreadNew or \ref osThreadGetId or NULL when ID is unknown.
+  \param[in]  status        extended execution status.
+*/
+#if (!defined(EVR_RTX_DISABLE) && (OS_EVR_THFLAGS != 0) && !defined(EVR_RTX_THREAD_FLAGS_ERROR_DISABLE))
+extern void EvrRtxThreadFlagsError (osThreadId_t thread_id, int32_t status);
+#else
+#define EvrRtxThreadFlagsError(thread_id, status)
+#endif
+
 /**
   \brief  Event on thread flags set (API)
   \param[in]   thread_id     thread ID obtained by \ref osThreadNew or \ref osThreadGetId.
   \param[in]   flags         flags of the thread that shall be set.
 */
-#if (!defined(EVR_RTX_DISABLE) && (OS_EVR_THREAD != 0) && !defined(EVR_RTX_THREAD_FLAGS_SET_DISABLE))
+#if (!defined(EVR_RTX_DISABLE) && (OS_EVR_THFLAGS != 0) && !defined(EVR_RTX_THREAD_FLAGS_SET_DISABLE))
 extern void EvrRtxThreadFlagsSet (osThreadId_t thread_id, uint32_t flags);
 #else
 #define EvrRtxThreadFlagsSet(thread_id, flags)
@@ -664,7 +749,7 @@ extern void EvrRtxThreadFlagsSet (osThreadId_t thread_id, uint32_t flags);
   \param[in]  thread_id     thread ID obtained by \ref osThreadNew or \ref osThreadGetId.
   \param[in]  thread_flags  thread flags after setting.
 */
-#if (!defined(EVR_RTX_DISABLE) && (OS_EVR_THREAD != 0) && !defined(EVR_RTX_THREAD_FLAGS_SET_DONE_DISABLE))
+#if (!defined(EVR_RTX_DISABLE) && (OS_EVR_THFLAGS != 0) && !defined(EVR_RTX_THREAD_FLAGS_SET_DONE_DISABLE))
 extern void EvrRtxThreadFlagsSetDone (osThreadId_t thread_id, uint32_t thread_flags);
 #else
 #define EvrRtxThreadFlagsSetDone(thread_id, thread_flags)
@@ -674,7 +759,7 @@ extern void EvrRtxThreadFlagsSetDone (osThreadId_t thread_id, uint32_t thread_fl
   \brief  Event on thread flags clear (API)
   \param[in]  flags         flags of the thread that shall be cleared.
 */
-#if (!defined(EVR_RTX_DISABLE) && (OS_EVR_THREAD != 0) && !defined(EVR_RTX_THREAD_FLAGS_CLEAR_DISABLE))
+#if (!defined(EVR_RTX_DISABLE) && (OS_EVR_THFLAGS != 0) && !defined(EVR_RTX_THREAD_FLAGS_CLEAR_DISABLE))
 extern void EvrRtxThreadFlagsClear (uint32_t flags);
 #else
 #define EvrRtxThreadFlagsClear(flags)
@@ -684,7 +769,7 @@ extern void EvrRtxThreadFlagsClear (uint32_t flags);
   \brief  Event on successful thread flags clear (Op)
   \param[in]  thread_flags  thread flags before clearing.
 */
-#if (!defined(EVR_RTX_DISABLE) && (OS_EVR_THREAD != 0) && !defined(EVR_RTX_THREAD_FLAGS_CLEAR_DONE_DISABLE))
+#if (!defined(EVR_RTX_DISABLE) && (OS_EVR_THFLAGS != 0) && !defined(EVR_RTX_THREAD_FLAGS_CLEAR_DONE_DISABLE))
 extern void EvrRtxThreadFlagsClearDone (uint32_t thread_flags);
 #else
 #define EvrRtxThreadFlagsClearDone(thread_flags)
@@ -694,7 +779,7 @@ extern void EvrRtxThreadFlagsClearDone (uint32_t thread_flags);
   \brief  Event on thread flags retrieve (API)
   \param[in]  thread_flags  current thread flags.
 */
-#if (!defined(EVR_RTX_DISABLE) && (OS_EVR_THREAD != 0) && !defined(EVR_RTX_THREAD_FLAGS_GET_DISABLE))
+#if (!defined(EVR_RTX_DISABLE) && (OS_EVR_THFLAGS != 0) && !defined(EVR_RTX_THREAD_FLAGS_GET_DISABLE))
 extern void EvrRtxThreadFlagsGet (uint32_t thread_flags);
 #else
 #define EvrRtxThreadFlagsGet(thread_flags)
@@ -706,7 +791,7 @@ extern void EvrRtxThreadFlagsGet (uint32_t thread_flags);
   \param[in]  options       flags options (osFlagsXxxx).
   \param[in]  timeout       \ref CMSIS_RTOS_TimeOutValue or 0 in case of no time-out.
 */
-#if (!defined(EVR_RTX_DISABLE) && (OS_EVR_THREAD != 0) && !defined(EVR_RTX_THREAD_FLAGS_WAIT_DISABLE))
+#if (!defined(EVR_RTX_DISABLE) && (OS_EVR_THFLAGS != 0) && !defined(EVR_RTX_THREAD_FLAGS_WAIT_DISABLE))
 extern void EvrRtxThreadFlagsWait (uint32_t flags, uint32_t options, uint32_t timeout);
 #else
 #define EvrRtxThreadFlagsWait(flags, options, timeout)
@@ -718,7 +803,7 @@ extern void EvrRtxThreadFlagsWait (uint32_t flags, uint32_t options, uint32_t ti
   \param[in]  options       flags options (osFlagsXxxx).
   \param[in]  timeout       \ref CMSIS_RTOS_TimeOutValue or 0 in case of no time-out.
 */
-#if (!defined(EVR_RTX_DISABLE) && (OS_EVR_THREAD != 0) && !defined(EVR_RTX_THREAD_FLAGS_WAIT_PENDING_DISABLE))
+#if (!defined(EVR_RTX_DISABLE) && (OS_EVR_THFLAGS != 0) && !defined(EVR_RTX_THREAD_FLAGS_WAIT_PENDING_DISABLE))
 extern void EvrRtxThreadFlagsWaitPending (uint32_t flags, uint32_t options, uint32_t timeout);
 #else
 #define EvrRtxThreadFlagsWaitPending(flags, options, timeout)
@@ -726,11 +811,12 @@ extern void EvrRtxThreadFlagsWaitPending (uint32_t flags, uint32_t options, uint
 
 /**
   \brief  Event on wait timeout for thread flags (Op)
+  \param[in]  thread_id     thread ID obtained by \ref osThreadNew or \ref osThreadGetId.
 */
-#if (!defined(EVR_RTX_DISABLE) && (OS_EVR_THREAD != 0) && !defined(EVR_RTX_THREAD_FLAGS_WAIT_TIMEOUT_DISABLE))
-extern void EvrRtxThreadFlagsWaitTimeout (void);
+#if (!defined(EVR_RTX_DISABLE) && (OS_EVR_THFLAGS != 0) && !defined(EVR_RTX_THREAD_FLAGS_WAIT_TIMEOUT_DISABLE))
+extern void EvrRtxThreadFlagsWaitTimeout (osThreadId_t thread_id);
 #else
-#define EvrRtxThreadFlagsWaitTimeout()
+#define EvrRtxThreadFlagsWaitTimeout(thread_id)
 #endif
 
 /**
@@ -738,11 +824,12 @@ extern void EvrRtxThreadFlagsWaitTimeout (void);
   \param[in]  flags         flags to wait for.
   \param[in]  options       flags options (osFlagsXxxx).
   \param[in]  thread_flags  thread flags before clearing.
+  \param[in]  thread_id     thread ID obtained by \ref osThreadNew or \ref osThreadGetId.
 */
-#if (!defined(EVR_RTX_DISABLE) && (OS_EVR_THREAD != 0) && !defined(EVR_RTX_THREAD_FLAGS_WAIT_COMPLETED_DISABLE))
-extern void EvrRtxThreadFlagsWaitCompleted (uint32_t flags, uint32_t options, uint32_t thread_flags);
+#if (!defined(EVR_RTX_DISABLE) && (OS_EVR_THFLAGS != 0) && !defined(EVR_RTX_THREAD_FLAGS_WAIT_COMPLETED_DISABLE))
+extern void EvrRtxThreadFlagsWaitCompleted (uint32_t flags, uint32_t options, uint32_t thread_flags, osThreadId_t thread_id);
 #else
-#define EvrRtxThreadFlagsWaitCompleted(flags, options, thread_flags)
+#define EvrRtxThreadFlagsWaitCompleted(flags, options, thread_flags, thread_id)
 #endif
 
 /**
@@ -750,41 +837,74 @@ extern void EvrRtxThreadFlagsWaitCompleted (uint32_t flags, uint32_t options, ui
   \param[in]  flags         flags to wait for.
   \param[in]  options       flags options (osFlagsXxxx).
 */
-#if (!defined(EVR_RTX_DISABLE) && (OS_EVR_THREAD != 0) && !defined(EVR_RTX_THREAD_FLAGS_WAIT_NOT_COMPLETED_DISABLE))
+#if (!defined(EVR_RTX_DISABLE) && (OS_EVR_THFLAGS != 0) && !defined(EVR_RTX_THREAD_FLAGS_WAIT_NOT_COMPLETED_DISABLE))
 extern void EvrRtxThreadFlagsWaitNotCompleted (uint32_t flags, uint32_t options);
 #else
 #define EvrRtxThreadFlagsWaitNotCompleted(flags, options)
 #endif
 
+
+//  ==== Generic Wait Events ====
+
 /**
-  \brief  Event on wait for timeout (API)
+  \brief  Event on delay error (Error)
+  \param[in]  status        extended execution status.
+*/
+#if (!defined(EVR_RTX_DISABLE) && (OS_EVR_WAIT != 0) && !defined(EVR_RTX_DELAY_ERROR_DISABLE))
+extern void EvrRtxDelayError (int32_t status);
+#else
+#define EvrRtxDelayError(status)
+#endif
+
+/**
+  \brief  Event on delay for specified time (API)
   \param[in]  ticks         \ref CMSIS_RTOS_TimeOutValue "time ticks" value.
 */
-#if (!defined(EVR_RTX_DISABLE) && (OS_EVR_THREAD != 0) && !defined(EVR_RTX_THREAD_DELAY_DISABLE))
-extern void EvrRtxThreadDelay (uint32_t ticks);
+#if (!defined(EVR_RTX_DISABLE) && (OS_EVR_WAIT != 0) && !defined(EVR_RTX_DELAY_DISABLE))
+extern void EvrRtxDelay (uint32_t ticks);
 #else
-#define EvrRtxThreadDelay(ticks)
+#define EvrRtxDelay(ticks)
 #endif
 
 /**
-  \brief  Event on wait until specified time (API)
+  \brief  Event on delay until specified time (API)
   \param[in]  ticks         absolute time in ticks.
 */
-#if (!defined(EVR_RTX_DISABLE) && (OS_EVR_THREAD != 0) && !defined(EVR_RTX_THREAD_DELAY_UNTIL_DISABLE))
-extern void EvrRtxThreadDelayUntil (uint32_t ticks);
+#if (!defined(EVR_RTX_DISABLE) && (OS_EVR_WAIT != 0) && !defined(EVR_RTX_DELAY_UNTIL_DISABLE))
+extern void EvrRtxDelayUntil (uint32_t ticks);
 #else
-#define EvrRtxThreadDelayUntil(ticks)
+#define EvrRtxDelayUntil(ticks)
 #endif
 
 /**
-  \brief  Event on completed wait (Op)
+  \brief  Event on delay started (Op)
+  \param[in]  ticks         \ref CMSIS_RTOS_TimeOutValue "time ticks" value.
 */
-#if (!defined(EVR_RTX_DISABLE) && (OS_EVR_THREAD != 0) && !defined(EVR_RTX_THREAD_DELAY_COMPLETED_DISABLE))
-extern void EvrRtxThreadDelayCompleted (void);
+#if (!defined(EVR_RTX_DISABLE) && (OS_EVR_WAIT != 0) && !defined(EVR_RTX_DELAY_STARTED_DISABLE))
+extern void EvrRtxDelayStarted (uint32_t ticks);
 #else
-#define EvrRtxThreadDelayCompleted()
+#define EvrRtxDelayStarted(ticks)
 #endif
 
+/**
+  \brief  Event on delay until specified time started (Op)
+  \param[in]  ticks         \ref CMSIS_RTOS_TimeOutValue "time ticks" value.
+*/
+#if (!defined(EVR_RTX_DISABLE) && (OS_EVR_WAIT != 0) && !defined(EVR_RTX_DELAY_UNTIL_STARTED_DISABLE))
+extern void EvrRtxDelayUntilStarted (uint32_t ticks);
+#else
+#define EvrRtxDelayUntilStarted(ticks)
+#endif
+
+/**
+  \brief  Event on delay completed (Op)
+  \param[in]  thread_id     thread ID obtained by \ref osThreadNew or \ref osThreadGetId.
+*/
+#if (!defined(EVR_RTX_DISABLE) && (OS_EVR_WAIT != 0) && !defined(EVR_RTX_DELAY_COMPLETED_DISABLE))
+extern void EvrRtxDelayCompleted (osThreadId_t thread_id);
+#else
+#define EvrRtxDelayCompleted(thread_id)
+#endif
 
 
 //  ==== Timer Events ====
@@ -797,7 +917,7 @@ extern void EvrRtxThreadDelayCompleted (void);
 #if (!defined(EVR_RTX_DISABLE) && (OS_EVR_TIMER != 0) && !defined(EVR_RTX_TIMER_ERROR_DISABLE))
 extern void EvrRtxTimerError (osTimerId_t timer_id, int32_t status);
 #else
-#define EvrRtxTimerError(timer_id, status);
+#define EvrRtxTimerError(timer_id, status)
 #endif
 
 /**
@@ -808,7 +928,7 @@ extern void EvrRtxTimerError (osTimerId_t timer_id, int32_t status);
 #if (!defined(EVR_RTX_DISABLE) && (OS_EVR_TIMER != 0) && !defined(EVR_RTX_TIMER_CALLBACK_DISABLE))
 extern void EvrRtxTimerCallback (osTimerFunc_t func, void *argument);
 #else
-#define EvrRtxTimerCallback(func, argument);
+#define EvrRtxTimerCallback(func, argument)
 #endif
 
 /**
@@ -821,7 +941,7 @@ extern void EvrRtxTimerCallback (osTimerFunc_t func, void *argument);
 #if (!defined(EVR_RTX_DISABLE) && (OS_EVR_TIMER != 0) && !defined(EVR_RTX_TIMER_NEW_DISABLE))
 extern void EvrRtxTimerNew (osTimerFunc_t func, osTimerType_t type, void *argument, const osTimerAttr_t *attr);
 #else
-#define EvrRtxTimerNew(func, type, argument, attr);
+#define EvrRtxTimerNew(func, type, argument, attr)
 #endif
 
 /**
@@ -832,7 +952,7 @@ extern void EvrRtxTimerNew (osTimerFunc_t func, osTimerType_t type, void *argume
 #if (!defined(EVR_RTX_DISABLE) && (OS_EVR_TIMER != 0) && !defined(EVR_RTX_TIMER_CREATED_DISABLE))
 extern void EvrRtxTimerCreated (osTimerId_t timer_id, const char *name);
 #else
-#define EvrRtxTimerCreated(timer_id, name);
+#define EvrRtxTimerCreated(timer_id, name)
 #endif
 
 /**
@@ -843,7 +963,7 @@ extern void EvrRtxTimerCreated (osTimerId_t timer_id, const char *name);
 #if (!defined(EVR_RTX_DISABLE) && (OS_EVR_TIMER != 0) && !defined(EVR_RTX_TIMER_GET_NAME_DISABLE))
 extern void EvrRtxTimerGetName (osTimerId_t timer_id, const char *name);
 #else
-#define EvrRtxTimerGetName(timer_id, name);
+#define EvrRtxTimerGetName(timer_id, name)
 #endif
 
 /**
@@ -854,7 +974,7 @@ extern void EvrRtxTimerGetName (osTimerId_t timer_id, const char *name);
 #if (!defined(EVR_RTX_DISABLE) && (OS_EVR_TIMER != 0) && !defined(EVR_RTX_TIMER_START_DISABLE))
 extern void EvrRtxTimerStart (osTimerId_t timer_id, uint32_t ticks);
 #else
-#define EvrRtxTimerStart(timer_id, ticks);
+#define EvrRtxTimerStart(timer_id, ticks)
 #endif
 
 /**
@@ -864,7 +984,7 @@ extern void EvrRtxTimerStart (osTimerId_t timer_id, uint32_t ticks);
 #if (!defined(EVR_RTX_DISABLE) && (OS_EVR_TIMER != 0) && !defined(EVR_RTX_TIMER_STARTED_DISABLE))
 extern void EvrRtxTimerStarted (osTimerId_t timer_id);
 #else
-#define EvrRtxTimerStarted(timer_id);
+#define EvrRtxTimerStarted(timer_id)
 #endif
 
 /**
@@ -874,7 +994,7 @@ extern void EvrRtxTimerStarted (osTimerId_t timer_id);
 #if (!defined(EVR_RTX_DISABLE) && (OS_EVR_TIMER != 0) && !defined(EVR_RTX_TIMER_STOP_DISABLE))
 extern void EvrRtxTimerStop (osTimerId_t timer_id);
 #else
-#define EvrRtxTimerStop(timer_id);
+#define EvrRtxTimerStop(timer_id)
 #endif
 
 /**
@@ -884,7 +1004,7 @@ extern void EvrRtxTimerStop (osTimerId_t timer_id);
 #if (!defined(EVR_RTX_DISABLE) && (OS_EVR_TIMER != 0) && !defined(EVR_RTX_TIMER_STOPPED_DISABLE))
 extern void EvrRtxTimerStopped (osTimerId_t timer_id);
 #else
-#define EvrRtxTimerStopped(timer_id);
+#define EvrRtxTimerStopped(timer_id)
 #endif
 
 /**
@@ -895,7 +1015,7 @@ extern void EvrRtxTimerStopped (osTimerId_t timer_id);
 #if (!defined(EVR_RTX_DISABLE) && (OS_EVR_TIMER != 0) && !defined(EVR_RTX_TIMER_IS_RUNNING_DISABLE))
 extern void EvrRtxTimerIsRunning (osTimerId_t timer_id, uint32_t running);
 #else
-#define EvrRtxTimerIsRunning(timer_id, running);
+#define EvrRtxTimerIsRunning(timer_id, running)
 #endif
 
 /**
@@ -905,7 +1025,7 @@ extern void EvrRtxTimerIsRunning (osTimerId_t timer_id, uint32_t running);
 #if (!defined(EVR_RTX_DISABLE) && (OS_EVR_TIMER != 0) && !defined(EVR_RTX_TIMER_DELETE_DISABLE))
 extern void EvrRtxTimerDelete (osTimerId_t timer_id);
 #else
-#define EvrRtxTimerDelete(timer_id);
+#define EvrRtxTimerDelete(timer_id)
 #endif
 
 /**
@@ -915,7 +1035,7 @@ extern void EvrRtxTimerDelete (osTimerId_t timer_id);
 #if (!defined(EVR_RTX_DISABLE) && (OS_EVR_TIMER != 0) && !defined(EVR_RTX_TIMER_DESTROYED_DISABLE))
 extern void EvrRtxTimerDestroyed (osTimerId_t timer_id);
 #else
-#define EvrRtxTimerDestroyed(timer_id);
+#define EvrRtxTimerDestroyed(timer_id)
 #endif
 
 
@@ -1165,7 +1285,7 @@ extern void EvrRtxMutexAcquire (osMutexId_t mutex_id, uint32_t timeout);
 #if (!defined(EVR_RTX_DISABLE) && (OS_EVR_MUTEX != 0) && !defined(EVR_RTX_MUTEX_ACQUIRE_PENDING_DISABLE))
 extern void EvrRtxMutexAcquirePending (osMutexId_t mutex_id, uint32_t timeout);
 #else
-#define EvrRtxMutexAcquirePending(mutex_id, timeout);
+#define EvrRtxMutexAcquirePending(mutex_id, timeout)
 #endif
 
 /**
@@ -1318,7 +1438,7 @@ extern void EvrRtxSemaphoreAcquire (osSemaphoreId_t semaphore_id, uint32_t timeo
 #if (!defined(EVR_RTX_DISABLE) && (OS_EVR_SEMAPHORE != 0) && !defined(EVR_RTX_SEMAPHORE_ACQUIRE_PENDING_DISABLE))
 extern void EvrRtxSemaphoreAcquirePending (osSemaphoreId_t semaphore_id, uint32_t timeout);
 #else
-#define EvrRtxSemaphoreAcquirePending(semaphore_id, timeout);
+#define EvrRtxSemaphoreAcquirePending(semaphore_id, timeout)
 #endif
 
 /**
@@ -1334,11 +1454,12 @@ extern void EvrRtxSemaphoreAcquireTimeout (osSemaphoreId_t semaphore_id);
 /**
   \brief  Event on successful semaphore acquire (Op)
   \param[in]  semaphore_id  semaphore ID obtained by \ref osSemaphoreNew.
+  \param[in]  tokens        number of available tokens.
 */
 #if (!defined(EVR_RTX_DISABLE) && (OS_EVR_SEMAPHORE != 0) && !defined(EVR_RTX_SEMAPHORE_ACQUIRED_DISABLE))
-extern void EvrRtxSemaphoreAcquired (osSemaphoreId_t semaphore_id);
+extern void EvrRtxSemaphoreAcquired (osSemaphoreId_t semaphore_id, uint32_t tokens);
 #else
-#define EvrRtxSemaphoreAcquired(semaphore_id)
+#define EvrRtxSemaphoreAcquired(semaphore_id, tokens)
 #endif
 
 /**
@@ -1364,11 +1485,12 @@ extern void EvrRtxSemaphoreRelease (osSemaphoreId_t semaphore_id);
 /**
   \brief  Event on successful semaphore release (Op)
   \param[in]  semaphore_id  semaphore ID obtained by \ref osSemaphoreNew.
+  \param[in]  tokens        number of available tokens.
 */
 #if (!defined(EVR_RTX_DISABLE) && (OS_EVR_SEMAPHORE != 0) && !defined(EVR_RTX_SEMAPHORE_RELEASED_DISABLE))
-extern void EvrRtxSemaphoreReleased (osSemaphoreId_t semaphore_id);
+extern void EvrRtxSemaphoreReleased (osSemaphoreId_t semaphore_id, uint32_t tokens);
 #else
-#define EvrRtxSemaphoreReleased(semaphore_id)
+#define EvrRtxSemaphoreReleased(semaphore_id, tokens)
 #endif
 
 /**

@@ -87,7 +87,7 @@ WEAK(void emberUnusedPanIdFoundHandler(
 // We can't include ember.h or ezsp.h from this file since it is used
 // for both host and node-size libraries.  However the emberStartScan()
 // API is identical in both.
-extern EmberStatus emberStartScan(uint8_t scanType,
+extern sl_status_t emberStartScan(uint8_t scanType,
                                   uint32_t channelMask,
                                   uint8_t duraiton);
 
@@ -427,7 +427,11 @@ static void panIdScanComplete(void)
   for (i = 0; i < NUM_PAN_ID_CANDIDATES; i++) {
     if (panIdCandidates[i] != 0xFFFF) {
       const EmberPanId panId = panIdCandidates[i];
+#ifdef EZSP_HOST
+      ezspUnusedPanIdFoundHandler(panId, channelCache);
+#else // !EZSP_HOST
       emberUnusedPanIdFoundHandler(panId, channelCache);
+#endif  // EZSP_HOST
       return;
     }
   }

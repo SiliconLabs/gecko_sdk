@@ -10,6 +10,8 @@ import inspect
 from pyradioconfig.calculator_model_framework.interfaces.icalculator import ICalculator
 from pycalcmodel.core.variable import ModelVariableFormat
 from pyradioconfig.parts.common.calculators.calc_misc import CALC_Misc
+from pycalcmodel.core.variable import ModelVariableFormat, CreateModelVariableEnum
+from enum import Enum
 
 from py_2_and_3_compatibility import *
 
@@ -22,6 +24,9 @@ class CALC_Misc_jumbo(CALC_Misc):
         Args:
             model (ModelRoot) : Data model to read and write variables from
         """
+
+        part_family = model.part_family.lower()
+
         self._reg_write(model.vars.MODEM_CTRL0_FRAMEDETDEL, 0)
 
         self._reg_write(model.vars.MODEM_CTRL1_SYNCERRORS, 0)
@@ -29,7 +34,7 @@ class CALC_Misc_jumbo(CALC_Misc):
 
         self._reg_write(model.vars.MODEM_CTRL2_BRDIVB, 0)
         self._reg_write(model.vars.MODEM_CTRL2_BRDIVA, 0)
-        if model.vars.family.value == 'dumbo':              # Temp until it's time to change all of the reference cfg files
+        if part_family == 'dumbo':              # Temp until it's time to change all of the reference cfg files
             self._reg_write(model.vars.MODEM_CTRL2_RATESELMODE, 0)
 
         self._reg_write(model.vars.MODEM_CTRL4_ADCSATDENS, 0)
@@ -278,6 +283,45 @@ class CALC_Misc_jumbo(CALC_Misc):
 
         model.vars.in_2fsk_opt_scope.value = in_scope
 
+    def calc_protocol_id(self, model):
+        profile_name = model.profile.name.lower()
 
+        if "wisun" in profile_name:
+            # This applies to all Wi-SUN Profiles
+            protocol_id = model.vars.protocol_id.var_enum.WiSUN
+        else:
+            protocol_id = model.vars.protocol_id.var_enum.Custom
 
+        model.vars.protocol_id.value = protocol_id
 
+    def calc_stack_info(self, model):
+        # Get parameters common to all protocols
+        protocol_id = model.vars.protocol_id.value
+        fec_tx_enable = model.vars.fec_tx_enable.value
+
+        # Other parameters are stored in this list
+        specific_parameters = []
+
+        #For Wi-SUN OFDM, fec_tx_enable is DISABLED and we use phyModeId of MCS0
+        #For Wi-SUN FSK, we use phyModeId for FEC ON/OFF depending on fec_tx_enable
+
+        if protocol_id == model.vars.protocol_id.var_enum.WiSUN:
+            wisun_operating_class = getattr(model.profile.inputs, "wisun_operating_class", None)
+
+            if fec_tx_enable == model.vars.fec_tx_enable.var_enum.ENABLED:
+                phy_id = model.vars.wisun_phy_mode_id.value[1]
+            else:
+                phy_id = model.vars.wisun_phy_mode_id.value[0]
+
+            if wisun_operating_class is not None:
+                # Get WiSUN specific parameters
+                version = 0  # FAN1.0 version
+                wisun_operating_class = model.vars.wisun_operating_class.value
+                wisun_reg_domain = int(model.vars.wisun_reg_domain.value)
+                # Fill in the specific parameters
+                specific_parameters.extend([version, wisun_operating_class, wisun_reg_domain])
+        else:
+            phy_id = 0
+
+        model.vars.stack_info.value = [int(protocol_id), int(phy_id)]
+        model.vars.stack_info.value.extend(specific_parameters)

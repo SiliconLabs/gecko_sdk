@@ -35,17 +35,24 @@ OPENTHREAD_SOURCE_VERSION := $(shell git -C $(LOCAL_PATH) describe --always --ma
 
 OPENTHREAD_PROJECT_CFLAGS                                                 ?= \
     -DOPENTHREAD_PROJECT_CORE_CONFIG_FILE=\"openthread-core-posix-config.h\" \
-    -DOPENTHREAD_CONFIG_FILE=\<openthread-config-android.h\>                 \
     $(NULL)
 
 OPENTHREAD_PUBLIC_CFLAGS                                         := \
-    -DOPENTHREAD_CONFIG_PING_SENDER_ENABLE=1                        \
-    -DOPENTHREAD_CONFIG_COMMISSIONER_ENABLE=1                       \
+    -DOPENTHREAD_CONFIG_BORDER_AGENT_ENABLE=1                       \
+    -DOPENTHREAD_CONFIG_BORDER_ROUTER_ENABLE=1                      \
+    -DOPENTHREAD_CONFIG_CHILD_SUPERVISION_ENABLE=1                  \
+    -DOPENTHREAD_CONFIG_DTLS_ENABLE=1                               \
     -DOPENTHREAD_CONFIG_IP6_SLAAC_ENABLE=1                          \
+    -DOPENTHREAD_CONFIG_JAM_DETECTION_ENABLE=1                      \
+    -DOPENTHREAD_CONFIG_JOINER_ENABLE=1                             \
     -DOPENTHREAD_CONFIG_LOG_LEVEL_DYNAMIC_ENABLE=1                  \
     -DOPENTHREAD_CONFIG_MAC_FILTER_ENABLE=1                         \
-    -DOPENTHREAD_POSIX_CONFIG_RCP_PTY_ENABLE=1                      \
+    -DOPENTHREAD_CONFIG_NCP_HDLC_ENABLE=1                           \
+    -DOPENTHREAD_CONFIG_PING_SENDER_ENABLE=1                        \
+    -DOPENTHREAD_CONFIG_TMF_NETDATA_SERVICE_ENABLE=1                \
     -DOPENTHREAD_FTD=1                                              \
+    -DOPENTHREAD_PLATFORM_POSIX=1                                   \
+    -DOPENTHREAD_POSIX_CONFIG_RCP_PTY_ENABLE=1                      \
     -DOPENTHREAD_SPINEL_CONFIG_OPENTHREAD_MESSAGE_ENABLE=1          \
     $(NULL)
 
@@ -214,7 +221,7 @@ LOCAL_SRC_FILES                                                  := \
     src/core/backbone_router/bbr_manager.cpp                        \
     src/core/backbone_router/multicast_listeners_table.cpp          \
     src/core/backbone_router/ndproxy_table.cpp                      \
-    src/core/border_router/infra_if_platform.cpp                    \
+    src/core/border_router/infra_if.cpp                             \
     src/core/border_router/router_advertisement.cpp                 \
     src/core/border_router/routing_manager.cpp                      \
     src/core/coap/coap.cpp                                          \
@@ -229,10 +236,10 @@ LOCAL_SRC_FILES                                                  := \
     src/core/common/heap_data.cpp                                   \
     src/core/common/heap_string.cpp                                 \
     src/core/common/instance.cpp                                    \
-    src/core/common/logging.cpp                                     \
+    src/core/common/log.cpp                                         \
     src/core/common/message.cpp                                     \
     src/core/common/notifier.cpp                                    \
-    src/core/common/random_manager.cpp                              \
+    src/core/common/random.cpp                                      \
     src/core/common/settings.cpp                                    \
     src/core/common/string.cpp                                      \
     src/core/common/tasklet.cpp                                     \
@@ -246,6 +253,7 @@ LOCAL_SRC_FILES                                                  := \
     src/core/crypto/aes_ecb.cpp                                     \
     src/core/crypto/crypto_platform.cpp                             \
     src/core/crypto/ecdsa.cpp                                       \
+    src/core/crypto/ecdsa_tinycrypt.cpp                             \
     src/core/crypto/hkdf_sha256.cpp                                 \
     src/core/crypto/hmac_sha256.cpp                                 \
     src/core/crypto/mbedtls.cpp                                     \
@@ -274,11 +282,13 @@ LOCAL_SRC_FILES                                                  := \
     src/core/meshcop/dataset_updater.cpp                            \
     src/core/meshcop/dtls.cpp                                       \
     src/core/meshcop/energy_scan_client.cpp                         \
+    src/core/meshcop/extended_panid.cpp                             \
     src/core/meshcop/joiner.cpp                                     \
     src/core/meshcop/joiner_router.cpp                              \
     src/core/meshcop/meshcop.cpp                                    \
     src/core/meshcop/meshcop_leader.cpp                             \
     src/core/meshcop/meshcop_tlvs.cpp                               \
+    src/core/meshcop/network_name.cpp                               \
     src/core/meshcop/panid_query_client.cpp                         \
     src/core/meshcop/timestamp.cpp                                  \
     src/core/net/checksum.cpp                                       \
@@ -406,6 +416,7 @@ LOCAL_SRC_FILES                                                  := \
     third_party/mbedtls/repo/library/cipher.c                       \
     third_party/mbedtls/repo/library/cipher_wrap.c                  \
     third_party/mbedtls/repo/library/cmac.c                         \
+    third_party/mbedtls/repo/library/constant_time.c                \
     third_party/mbedtls/repo/library/ctr_drbg.c                     \
     third_party/mbedtls/repo/library/debug.c                        \
     third_party/mbedtls/repo/library/des.c                          \

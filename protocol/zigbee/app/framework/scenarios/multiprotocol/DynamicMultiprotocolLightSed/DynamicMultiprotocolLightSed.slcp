@@ -1,8 +1,13 @@
 project_name: "DynamicMultiprotocolLightSed"
-label: "DynamicMultiprotocolLightSed"
+label: "Zigbee - SoC DynamicMultiprotocolLightSed"
 package: "Zigbee"
 category: "Zigbee Application"
 quality: "production"
+
+description: >
+  This is a sample application demonstrating a sleepy light application using
+  dynamic multiprotocol (Zigbee + Bluetooth LE) and NVM3 for persistent storage.
+author: "Silicon Laboratories, Inc." 
 
 component:
   - id: "cli"
@@ -24,7 +29,6 @@ component:
   - id: "bluetooth_feature_gatt"
   - id: "bluetooth_feature_gatt_server"
   - id: "bluetooth_feature_sm"
-  - id: "zigbee_multi_network_stub"
   - id: "zigbee_install_code"
   - id: "zigbee_zll"
   - id: "zigbee_zcl_framework_core"
@@ -126,10 +130,6 @@ tag:
   - hardware:device:flash:512
   - hardware:device:ram:64  
 
-description: |-
-  This is a sample application demonstrating a sleepy light application using
-  dynamic multiprotocol (Zigbee + Bluetooth LE) and NVM3 for persistent storage.
-
 readme:
   - path: ./readme.html
 
@@ -137,3 +137,13 @@ ui_hints:
   highlight:
     - path: readme.html
       focus: false
+
+filter:
+  - name: "Wireless Technology"
+    value: ["Zigbee", "Bluetooth"]
+  - name: "Device Type"
+    value: ["SoC"]
+  - name: "Capability"
+    value: ["Multiprotocol"]
+  - name: "Project Difficulty"
+    value: ["Advanced"]

@@ -33,7 +33,7 @@
 
 #include "em_device.h"
 #if (defined(RMU_COUNT) && (RMU_COUNT > 0)) || (_EMU_RSTCTRL_MASK)
-#include "em_assert.h"
+#include "sl_assert.h"
 
 #include <stdbool.h>
 

@@ -146,25 +146,6 @@ psa_status_t sli_se_transparent_aead_decrypt_setup(sli_se_transparent_aead_opera
                                                   0);
 }
 
-#if defined(PSA_CRYPTO_AEAD_MULTIPART_SUPPORTED)
-
-psa_status_t sli_se_transparent_aead_generate_nonce(sli_se_transparent_aead_operation_t *operation,
-                                                    uint8_t *nonce,
-                                                    size_t nonce_size,
-                                                    size_t *nonce_length)
-{
-  if (operation == NULL) {
-    return PSA_ERROR_INVALID_ARGUMENT;
-  }
-
-  return sli_se_driver_aead_generate_nonce(&(operation->operation),
-                                           nonce,
-                                           nonce_size,
-                                           nonce_length);
-}
-
-#endif // defined(PSA_CRYPTO_AEAD_MULTIPART_SUPPORTED)
-
 psa_status_t sli_se_transparent_aead_set_nonce(sli_se_transparent_aead_operation_t *operation,
                                                const uint8_t *nonce,
                                                size_t nonce_size)
@@ -262,8 +243,6 @@ psa_status_t sli_se_transparent_aead_verify(sli_se_transparent_aead_operation_t 
                                    tag_length);
 }
 
-#if defined(PSA_CRYPTO_AEAD_MULTIPART_SUPPORTED)
-
 psa_status_t sli_se_transparent_aead_abort(sli_se_transparent_aead_operation_t *operation)
 {
   // No state is ever left in HW, so zeroing context should do the trick
@@ -272,9 +251,7 @@ psa_status_t sli_se_transparent_aead_abort(sli_se_transparent_aead_operation_t *
   }
 
   memset(operation, 0, sizeof(*operation));
-  return PSA_ERROR_NOT_SUPPORTED;
+  return PSA_SUCCESS;
 }
-
-#endif // defined(PSA_CRYPTO_AEAD_MULTIPART_SUPPORTED)
 
 #endif // defined(SEMAILBOX_PRESENT)

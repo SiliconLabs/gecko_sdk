@@ -16,6 +16,7 @@ local slot2_start_addr = slc.config('SLOT2_START')
 local flash_page_size = 2048
 
 slotStartAddress = {slot0_start_addr.value,slot1_start_addr.value,slot2_start_addr.value}
+slotSizes = {slot0_size.value,slot1_size.value,slot2_size.value}
 isSlotEnabled = {slot0_enable.value,slot1_enable.value,slot2_enable.value}
 
 -- Set the correct flash page size based on the device family
@@ -35,6 +36,11 @@ if (not slc.is_selected("bootloader_spiflash_storage")) and (not slc.is_selected
 	 	    if tonumber(slotStartAddress[slotID],10) % flash_page_size ~= 0 then
 	 	        validation.warning('Slot '.. tostring(tonumber(slotID-1)) ..
 	 	                " is not page aligned. Try aligning the slot start address to a " .. tostring(flash_page_size) .. "bytes boundary",
+	 					validation.target_for_project())
+	 		end
+	 		if tonumber(slotSizes[slotID],10) % flash_page_size ~= 0 then
+	 	        validation.warning('Slot size for slot '.. tostring(tonumber(slotID-1)) ..
+	 	                " is not page aligned. Try aligning the slot size to a " .. tostring(flash_page_size) .. "bytes boundary",
 	 					validation.target_for_project())
 	 		end
 	 	end

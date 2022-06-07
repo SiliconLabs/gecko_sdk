@@ -35,7 +35,7 @@
 #if defined(BURTC_PRESENT)
 
 #include <stdbool.h>
-#include "em_assert.h"
+#include "sl_assert.h"
 #include "em_bus.h"
 
 #ifdef __cplusplus

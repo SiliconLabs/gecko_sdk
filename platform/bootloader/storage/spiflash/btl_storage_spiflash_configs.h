@@ -324,8 +324,9 @@ static const BootloaderStorageImplementationInformation_t spansion8MInfo = {
   TIMING_ERASE_SPANSION_8M_MAX_MS,
   DEVICE_SECTOR_SIZE,
   DEVICE_SIZE_8M,
-  "S25FL208K",
-  DEVICE_WORD_SIZE // word size in bytes
+  NULL,
+  DEVICE_WORD_SIZE, // word size in bytes
+  BOOTLOADER_STORAGE_SPANSION_S25FL208K
 };
 #endif
 
@@ -339,8 +340,9 @@ static const BootloaderStorageImplementationInformation_t windbond2MInfo = {
   TIMING_ERASE_WINBOND_2M_MAX_MS,
   DEVICE_SECTOR_SIZE,
   DEVICE_SIZE_2M,
-  "W25X20BV",
-  DEVICE_WORD_SIZE // word size in bytes
+  NULL,
+  DEVICE_WORD_SIZE, // word size in bytes
+  BOOTLOADER_STORAGE_WINBOND_W25X20BV
 };
 #endif
 
@@ -354,8 +356,9 @@ static const BootloaderStorageImplementationInformation_t windbond8MInfo = {
   TIMING_ERASE_WINBOND_8M_MAX_MS,
   DEVICE_SECTOR_SIZE,
   DEVICE_SIZE_8M,
-  "W25Q80BV",
-  DEVICE_WORD_SIZE // word size in bytes
+  NULL,
+  DEVICE_WORD_SIZE, // word size in bytes
+  BOOTLOADER_STORAGE_WINBOND_W25Q80BV
 };
 #endif
 
@@ -369,8 +372,9 @@ static const BootloaderStorageImplementationInformation_t macronix2MInfo = {
   TIMING_ERASE_MACRONIX_2M_MAX_MS,
   DEVICE_SECTOR_SIZE,
   DEVICE_SIZE_2M,
-  "MX25L2006E",
-  DEVICE_WORD_SIZE // word size in bytes
+  NULL,
+  DEVICE_WORD_SIZE, // word size in bytes
+  BOOTLOADER_STORAGE_MACRONIX_MX25L2006E
 };
 #endif
 
@@ -384,8 +388,9 @@ static const BootloaderStorageImplementationInformation_t macronix4MInfo = {
   TIMING_ERASE_MACRONIX_4M_MAX_MS,
   DEVICE_SECTOR_SIZE,
   DEVICE_SIZE_4M,
-  "MX25L4006E",
-  DEVICE_WORD_SIZE // word size in bytes
+  NULL,
+  DEVICE_WORD_SIZE, // word size in bytes
+  BOOTLOADER_STORAGE_MACRONIX_MX25L4006E
 };
 #endif
 
@@ -399,8 +404,9 @@ static const BootloaderStorageImplementationInformation_t macronix8MInfo = {
   TIMING_ERASE_MACRONIX_8M_MAX_MS,
   DEVICE_SECTOR_SIZE,
   DEVICE_SIZE_8M,
-  "MX25L8006E",
-  DEVICE_WORD_SIZE // word size in bytes
+  NULL,
+  DEVICE_WORD_SIZE, // word size in bytes
+  BOOTLOADER_STORAGE_MACRONIX_MX25L8006E
 };
 #endif
 
@@ -414,8 +420,9 @@ static const BootloaderStorageImplementationInformation_t macronix8MLPInfo = {
   TIMING_ERASE_MACRONIX_8M_LP_MAX_MS,
   DEVICE_SECTOR_SIZE,
   DEVICE_SIZE_8M,
-  "MX25R8035F",
-  DEVICE_WORD_SIZE // word size in bytes
+  NULL,
+  DEVICE_WORD_SIZE, // word size in bytes
+  BOOTLOADER_STORAGE_MACRONIX_MX25R8035F
 };
 #endif
 
@@ -429,8 +436,9 @@ static const BootloaderStorageImplementationInformation_t macronix16MInfo = {
   TIMING_ERASE_MACRONIX_16M_MAX_MS,
   DEVICE_SECTOR_SIZE,
   DEVICE_SIZE_16M,
-  "MX25L1606E",
-  DEVICE_WORD_SIZE // word size in bytes
+  NULL,
+  DEVICE_WORD_SIZE, // word size in bytes
+  BOOTLOADER_STORAGE_MACRONIX_MX25L1606E
 };
 #endif
 
@@ -444,8 +452,9 @@ static const BootloaderStorageImplementationInformation_t macronix16M2VInfo = {
   TIMING_ERASE_MACRONIX_16M_2V_MAX_MS,
   DEVICE_SECTOR_SIZE,
   DEVICE_SIZE_16M,
-  "MX25U1635E",
-  DEVICE_WORD_SIZE // word size in bytes
+  NULL,
+  DEVICE_WORD_SIZE, // word size in bytes
+  BOOTLOADER_STORAGE_MACRONIX_MX25U1635E
 };
 #endif
 
@@ -459,8 +468,9 @@ static const BootloaderStorageImplementationInformation_t macronix32MLPInfo = {
   TIMING_ERASE_MACRONIX_32M_LP_MAX_MS,
   DEVICE_SECTOR_SIZE,
   DEVICE_SIZE_32M,
-  "MX25R3235F",
-  DEVICE_WORD_SIZE // word size in bytes
+  NULL,
+  DEVICE_WORD_SIZE, // word size in bytes
+  BOOTLOADER_STORAGE_MACRONIX_MX25R3235F
 };
 #endif
 
@@ -475,8 +485,9 @@ static const BootloaderStorageImplementationInformation_t macronix64MLPInfo = {
   TIMING_ERASE_MACRONIX_64M_LP_MAX_MS,
   DEVICE_SECTOR_SIZE,
   DEVICE_SIZE_64M,
-  "MX25R6435F",
-  DEVICE_WORD_SIZE // word size in bytes
+  NULL,
+  DEVICE_WORD_SIZE, // word size in bytes
+  BOOTLOADER_STORAGE_MACRONIX_MX25R6435F
 };
 #endif
 
@@ -490,8 +501,9 @@ static const BootloaderStorageImplementationInformation_t atmel4MInfo = {
   TIMING_ERASE_ATMEL_4M_MAX_MS,
   DEVICE_SECTOR_SIZE,
   DEVICE_SIZE_4M,
-  "AT25DF041A",
-  DEVICE_WORD_SIZE // word size in bytes
+  NULL,
+  DEVICE_WORD_SIZE, // word size in bytes
+  BOOTLOADER_STORAGE_ATMEL_AT25DF041A
 };
 #endif
 
@@ -505,8 +517,9 @@ static const BootloaderStorageImplementationInformation_t atmel8MInfo = {
   TIMING_ERASE_ATMEL_8M_MAX_MS,
   DEVICE_SECTOR_SIZE,
   DEVICE_SIZE_8M,
-  "AT25DF081A",
-  DEVICE_WORD_SIZE // word size in bytes
+  NULL,
+  DEVICE_WORD_SIZE, // word size in bytes
+  BOOTLOADER_STORAGE_ATMEL_AT25DF081A
 };
 #endif
 
@@ -520,8 +533,9 @@ static const BootloaderStorageImplementationInformation_t adesto4MInfo = {
   TIMING_ERASE_ADESTO_4M_MAX_MS,
   DEVICE_SECTOR_SIZE,
   DEVICE_SIZE_4M,
-  "AT25SF041",
-  DEVICE_WORD_SIZE // word size in bytes
+  NULL,
+  DEVICE_WORD_SIZE, // word size in bytes
+  BOOTLOADER_STORAGE_ADESTO_AT25SF041
 };
 #endif
 
@@ -535,8 +549,9 @@ static const BootloaderStorageImplementationInformation_t numonyx2MInfo = {
   TIMING_ERASE_NUMONYX_2M_MAX_MS,
   DEVICE_BLOCK_SIZE_64K, // Numonyx does not support smaller sector erase
   DEVICE_SIZE_2M,
-  "M25P20",
-  DEVICE_WORD_SIZE // word size in bytes
+  NULL,
+  DEVICE_WORD_SIZE, // word size in bytes
+  BOOTLOADER_STORAGE_NUMONYX_M25P20
 };
 #endif
 
@@ -550,8 +565,9 @@ static const BootloaderStorageImplementationInformation_t numonyx4MInfo = {
   TIMING_ERASE_NUMONYX_4M_MAX_MS,
   DEVICE_BLOCK_SIZE_64K, // Numonyx does not support smaller sector erase
   DEVICE_SIZE_4M,
-  "M25P40",
-  DEVICE_WORD_SIZE // word size in bytes
+  NULL,
+  DEVICE_WORD_SIZE, // word size in bytes
+  BOOTLOADER_STORAGE_NUMONYX_M25P40
 };
 #endif
 
@@ -565,8 +581,9 @@ static const BootloaderStorageImplementationInformation_t numonyx8MInfo = {
   TIMING_ERASE_NUMONYX_8M_MAX_MS,
   DEVICE_BLOCK_SIZE_64K, // Numonyx does not support smaller sector erase
   DEVICE_SIZE_8M,
-  "M25P80",
-  DEVICE_WORD_SIZE // word size in bytes
+  NULL,
+  DEVICE_WORD_SIZE, // word size in bytes
+  BOOTLOADER_STORAGE_NUMONYX_M25P80
 };
 #endif
 
@@ -580,8 +597,9 @@ static const BootloaderStorageImplementationInformation_t numonyx16MInfo = {
   TIMING_ERASE_NUMONYX_16M_MAX_MS,
   DEVICE_BLOCK_SIZE_64K, // Numonyx does not support smaller sector erase
   DEVICE_SIZE_16M,
-  "M25P16",
-  DEVICE_WORD_SIZE // word size in bytes
+  NULL,
+  DEVICE_WORD_SIZE, // word size in bytes
+  BOOTLOADER_STORAGE_NUMONYX_M25P16
 };
 #endif
 
@@ -595,8 +613,9 @@ static const BootloaderStorageImplementationInformation_t issi256KInfo = {
   TIMING_ERASE_ISSI_256K_MAX_MS,
   DEVICE_SECTOR_SIZE,
   DEVICE_SIZE_256K,
-  "IS25LQ025B",
-  DEVICE_WORD_SIZE // word size in bytes
+  NULL,
+  DEVICE_WORD_SIZE, // word size in bytes
+  BOOTLOADER_STORAGE_ISSI_IS25LQ025B
 };
 #endif
 
@@ -610,8 +629,9 @@ static const BootloaderStorageImplementationInformation_t issi512KInfo = {
   TIMING_ERASE_ISSI_512K_MAX_MS,
   DEVICE_SECTOR_SIZE,
   DEVICE_SIZE_512K,
-  "IS25LQ512B",
-  DEVICE_WORD_SIZE // word size in bytes
+  NULL,
+  DEVICE_WORD_SIZE, // word size in bytes
+  BOOTLOADER_STORAGE_ISSI_IS25LQ512B
 };
 #endif
 
@@ -625,8 +645,9 @@ static const BootloaderStorageImplementationInformation_t issi1MInfo = {
   TIMING_ERASE_ISSI_1M_MAX_MS,
   DEVICE_SECTOR_SIZE,
   DEVICE_SIZE_1M,
-  "IS25LQ010B",
-  DEVICE_WORD_SIZE // word size in bytes
+  NULL,
+  DEVICE_WORD_SIZE, // word size in bytes
+  BOOTLOADER_STORAGE_ISSI_IS25LQ010B
 };
 #endif
 
@@ -640,8 +661,9 @@ static const BootloaderStorageImplementationInformation_t issi2MInfo = {
   TIMING_ERASE_ISSI_2M_MAX_MS,
   DEVICE_SECTOR_SIZE,
   DEVICE_SIZE_2M,
-  "IS25LQ020B",
-  DEVICE_WORD_SIZE // word size in bytes
+  NULL,
+  DEVICE_WORD_SIZE, // word size in bytes
+  BOOTLOADER_STORAGE_ISSI_IS25LQ020B
 };
 #endif
 
@@ -655,8 +677,9 @@ static const BootloaderStorageImplementationInformation_t issi4MInfo = {
   TIMING_ERASE_ISSI_4M_MAX_MS,
   DEVICE_SECTOR_SIZE,
   DEVICE_SIZE_4M,
-  "IS25LQ040B",
-  DEVICE_WORD_SIZE // word size in bytes
+  NULL,
+  DEVICE_WORD_SIZE, // word size in bytes
+  BOOTLOADER_STORAGE_ISSI_IS25LQ040B
 };
 #endif
 

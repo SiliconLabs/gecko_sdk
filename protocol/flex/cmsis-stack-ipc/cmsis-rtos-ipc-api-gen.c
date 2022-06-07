@@ -5,25 +5,12 @@
  * <b>Copyright 2018 Silicon Laboratories Inc. www.silabs.com</b>
  *******************************************************************************
  *
- * SPDX-License-Identifier: Zlib
- *
- * The licensor of this software is Silicon Laboratories Inc.
- *
- * This software is provided 'as-is', without any express or implied
- * warranty. In no event will the authors be held liable for any damages
- * arising from the use of this software.
- *
- * Permission is granted to anyone to use this software for any purpose,
- * including commercial applications, and to alter it and redistribute it
- * freely, subject to the following restrictions:
- *
- * 1. The origin of this software must not be misrepresented; you must not
- *    claim that you wrote the original software. If you use this software
- *    in a product, an acknowledgment in the product documentation would be
- *    appreciated but is not required.
- * 2. Altered source versions must be plainly marked as such, and must not be
- *    misrepresented as being the original software.
- * 3. This notice may not be removed or altered from any source distribution.
+ * The licensor of this software is Silicon Laboratories Inc. Your use of this
+ * software is governed by the terms of Silicon Labs Master Software License
+ * Agreement (MSLA) available at
+ * www.silabs.com/about-us/legal/master-software-license-agreement. This
+ * software is distributed to you in Source Code format and is governed by the
+ * sections of the MSLA applicable to Source Code.
  *
  ******************************************************************************/
 
@@ -82,6 +69,7 @@ static void stackIsUpCommandHandler(void)
                                   stackIsUp);
 }
 
+#ifdef SL_CATALOG_CONNECT_AES_SECURITY_PRESENT
 // setSecurityKey
 EmberStatus emberSetSecurityKey(EmberKeyData *key)
 {
@@ -108,6 +96,87 @@ static void setSecurityKeyCommandHandler(void)
                                   "u",
                                   status);
 }
+
+// GetSecurityKey
+EmberStatus emberGetSecurityKey(EmberKeyData *key)
+{
+  emAfPluginCmsisRtosAcquireCommandMutex();
+  emAfPluginCmsisRtosSendBlockingCommand(EMBER_GET_SECURITY_KEY_IPC_COMMAND_ID,
+                                         "b",
+                                         key->contents,
+                                         EMBER_ENCRYPTION_KEY_SIZE);
+
+  EmberStatus status;
+
+  uint8_t Size = EMBER_ENCRYPTION_KEY_SIZE;
+  emAfPluginCmsisRtosFetchApiParams("ub",
+                                    &status,
+                                    key->contents,
+                                    &Size);
+  emAfPluginCmsisRtosReleaseCommandMutex();
+  return status;
+}
+static void GetSecurityKeyCommandHandler(void)
+{
+  EmberKeyData key;
+  uint8_t emberEncryptionKeySize = EMBER_ENCRYPTION_KEY_SIZE;
+  emAfPluginCmsisRtosFetchApiParams("b",
+                                    &key.contents,
+                                    &emberEncryptionKeySize);
+  EmberStatus status = emApiGetSecurityKey(&key);
+  emAfPluginCmsisRtosSendResponse(EMBER_GET_SECURITY_KEY_IPC_COMMAND_ID,
+                                  "ub",
+                                  status,
+                                  key.contents,
+                                  emberEncryptionKeySize);
+}
+
+// setPsaSecurityKey
+EmberStatus emberSetPsaSecurityKey(mbedtls_svc_key_id_t key_id)
+{
+  emAfPluginCmsisRtosAcquireCommandMutex();
+  emAfPluginCmsisRtosSendBlockingCommand(EMBER_SET_PSA_SECURITY_KEY_IPC_COMMAND_ID,
+                                         "w",
+                                         key_id);
+
+  EmberStatus status;
+  emAfPluginCmsisRtosFetchApiParams("u",
+                                    &status);
+  emAfPluginCmsisRtosReleaseCommandMutex();
+  return status;
+}
+static void setPsaSecurityKeyCommandHandler(void)
+{
+  mbedtls_svc_key_id_t key_id;
+  emAfPluginCmsisRtosFetchApiParams("w",
+                                    &key_id);
+  EmberStatus status = emApiSetPsaSecurityKey(key_id);
+  emAfPluginCmsisRtosSendResponse(EMBER_SET_PSA_SECURITY_KEY_IPC_COMMAND_ID,
+                                  "u",
+                                  status);
+}
+
+// RemovePsaSecurityKey
+EmberStatus emberRemovePsaSecurityKey(void)
+{
+  emAfPluginCmsisRtosAcquireCommandMutex();
+  emAfPluginCmsisRtosSendBlockingCommand(EMBER_REMOVE_PSA_SECURITY_KEY_IPC_COMMAND_ID,
+                                         "");
+
+  EmberStatus status;
+  emAfPluginCmsisRtosFetchApiParams("u",
+                                    &status);
+  emAfPluginCmsisRtosReleaseCommandMutex();
+  return status;
+}
+static void RemovePsaSecurityKeyCommandHandler(void)
+{
+  EmberStatus status = emApiRemovePsaSecurityKey();
+  emAfPluginCmsisRtosSendResponse(EMBER_REMOVE_PSA_SECURITY_KEY_IPC_COMMAND_ID,
+                                  "u",
+                                  status);
+}
+#endif
 
 // getCounter
 EmberStatus emberGetCounter(EmberCounterType counterType,
@@ -401,27 +470,25 @@ EmberStatus emberCalibrateCurrentChannelExtended(uint32_t calValueIn,
 {
   emAfPluginCmsisRtosAcquireCommandMutex();
   emAfPluginCmsisRtosSendBlockingCommand(EMBER_CALIBRATE_CURRENT_CHANNEL_EXTENDED_IPC_COMMAND_ID,
-                                         "ww",
-                                         calValueIn,
-                                         calValueOut);
+                                         "w",
+                                         calValueIn);
 
   EmberStatus status;
 
   emAfPluginCmsisRtosFetchApiParams("uw",
                                     &status,
-                                    &calValueOut);
+                                    calValueOut);
   emAfPluginCmsisRtosReleaseCommandMutex();
   return status;
 }
 static void calibrateCurrentChannelExtendedCommandHandler(void)
 {
   uint32_t calValueIn;
-  uint32_t *calValueOut;
-  emAfPluginCmsisRtosFetchApiParams("ww",
-                                    &calValueIn,
-                                    &calValueOut);
+  uint32_t calValueOut;
+  emAfPluginCmsisRtosFetchApiParams("w",
+                                    &calValueIn);
   EmberStatus status = emApiCalibrateCurrentChannelExtended(calValueIn,
-                                                            calValueOut);
+                                                            &calValueOut);
   emAfPluginCmsisRtosSendResponse(EMBER_CALIBRATE_CURRENT_CHANNEL_EXTENDED_IPC_COMMAND_ID,
                                   "uw",
                                   status,
@@ -921,10 +988,12 @@ EmberStatus emberMacAddShortToLongAddressMapping(EmberNodeId shortId,
 static void macAddShortToLongAddressMappingCommandHandler(void)
 {
   EmberNodeId shortId;
+  uint8_t longIdLength;
   uint8_t longId[EUI64_SIZE];
   emAfPluginCmsisRtosFetchApiParams("vb",
                                     &shortId,
-                                    &longId);
+                                    &longId,
+                                    &longIdLength);
   EmberStatus status = emApiMacAddShortToLongAddressMapping(shortId,
                                                             longId);
   emAfPluginCmsisRtosSendResponse(EMBER_MAC_ADD_SHORT_TO_LONG_ADDRESS_MAPPING_IPC_COMMAND_ID,
@@ -1567,9 +1636,20 @@ void emAfPluginCmsisRtosHandleIncomingApiCommand(uint16_t commandId)
     case EMBER_STACK_IS_UP_IPC_COMMAND_ID:
       stackIsUpCommandHandler();
       break;
+#ifdef SL_CATALOG_CONNECT_AES_SECURITY_PRESENT
     case EMBER_SET_SECURITY_KEY_IPC_COMMAND_ID:
       setSecurityKeyCommandHandler();
       break;
+    case EMBER_GET_SECURITY_KEY_IPC_COMMAND_ID:
+      GetSecurityKeyCommandHandler();
+      break;
+    case EMBER_SET_PSA_SECURITY_KEY_IPC_COMMAND_ID:
+      setPsaSecurityKeyCommandHandler();
+      break;
+    case EMBER_REMOVE_PSA_SECURITY_KEY_IPC_COMMAND_ID:
+      RemovePsaSecurityKeyCommandHandler();
+      break;
+#endif
     case EMBER_GET_COUNTER_IPC_COMMAND_ID:
       getCounterCommandHandler();
       break;

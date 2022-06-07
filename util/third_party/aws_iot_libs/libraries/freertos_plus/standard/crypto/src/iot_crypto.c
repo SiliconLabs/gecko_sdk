@@ -221,7 +221,7 @@ static BaseType_t prvVerifySignature( char * pcSignerCertificate,
     if( pdTRUE == xResult )
     {
         if( 0 != mbedtls_pk_verify(
-                &xCertCtx.MBEDTLS_PRIVATE(pk),
+                &xCertCtx.pk,
                 xMbedHashAlg,
                 pucHash,
                 xHashLength,

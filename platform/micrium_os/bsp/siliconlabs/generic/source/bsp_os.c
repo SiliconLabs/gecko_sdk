@@ -75,6 +75,7 @@
 #include  "../include/bsp_opt_def.h"
 #include  <bsp_cfg.h>
 #include  <sl_sleeptimer_config.h>
+#include  "sl_device_init_dcdc.h"
 
 /********************************************************************************************************
  ********************************************************************************************************
@@ -88,18 +89,6 @@
 #define BSP_HFXO_CONFIG  CMU_HFXOINIT_WSTK_DEFAULT              // Use Wireless STK default HFXO configuration
 #else
 #define BSP_HFXO_CONFIG  CMU_HFXOINIT_DEFAULT                   // Use standard emlib HFXO configuration
-#endif
-
-#if defined(_SILICON_LABS_32B_SERIES_1)
-//                                                                 Configurations for EFM32xG1x and EFR32xG1x devices
-#if defined(EMU_DCDCINIT_STK_DEFAULT)                           // Use STK DCDC Configuration
-static const EMU_DCDCInit_TypeDef dcdcInit = EMU_DCDCINIT_STK_DEFAULT;
-#elif defined(EMU_DCDCINIT_WSTK_DEFAULT)                        // Use Wireless STK DCDC Configuration
-static const EMU_DCDCInit_TypeDef dcdcInit = EMU_DCDCINIT_WSTK_DEFAULT;
-#else //                                                           No DCDC Configuration found so we assume that the
-#define BSP_DCDC_POWEROFF                                       // board does not use the DCDC
-#endif
-
 #endif
 
 #if defined(RTOS_MODULE_USB_DEV_AVAIL)
@@ -194,14 +183,7 @@ void BSP_SystemInit(void)
 #endif
 
   CHIP_Init();                                                  // Chip revision alignment and errata fixes
-
-#if defined(_SILICON_LABS_32B_SERIES_1)
-#if defined(BSP_DCDC_POWEROFF)
-  EMU_DCDCPowerOff();                                           // DCDC is not used to we power it off
-#else
-  EMU_DCDCInit(&dcdcInit);                                      // Initialize DCDC regulator
-#endif
-#endif
+  sl_device_init_dcdc();
 
 #if (BSP_HF_CLK_SEL == BSP_HF_CLK_DEFAULT)
 #error "Missing definition of BSP_HF_CLK_SEL in bsp_cfg.h"

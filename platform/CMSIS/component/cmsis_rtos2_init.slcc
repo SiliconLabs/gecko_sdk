@@ -4,6 +4,8 @@ package: platform
 description: CMSIS RTOS2 Initialization Hooks.
 category: Platform|CMSIS
 quality: production
+source:
+  - path: platform/CMSIS/RTOS2/Source/os_systick.c
 provides:
   - name: cmsis_rtos2_init
 requires:

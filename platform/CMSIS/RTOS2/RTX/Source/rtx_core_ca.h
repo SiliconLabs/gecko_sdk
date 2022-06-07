@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2013-2018 Arm Limited. All rights reserved.
+ * Copyright (c) 2013-2021 Arm Limited. All rights reserved.
  *
  * SPDX-License-Identifier: Apache-2.0
  *
@@ -27,14 +27,22 @@
 #define RTX_CORE_CA_H_
 
 #ifndef RTX_CORE_C_H_
+#ifndef RTE_COMPONENTS_H
 #include "RTE_Components.h"
+#endif
 #include CMSIS_device_header
 #endif
 
 #include <stdbool.h>
 typedef bool bool_t;
+
+#ifndef FALSE
 #define FALSE                   ((bool_t)0)
+#endif
+
+#ifndef TRUE
 #define TRUE                    ((bool_t)1)
+#endif
 
 #define DOMAIN_NS               0
 #define EXCLUSIVE_ACCESS        1
@@ -104,26 +112,26 @@ __STATIC_INLINE uint32_t StackOffsetR0 (uint8_t stack_frame) {
 /// Get xPSR Register - emulate M profile: SP_usr - (8*4)
 /// \return      xPSR Register value
 #if defined(__CC_ARM)
+#pragma push
+#pragma arm
 static __asm    uint32_t __get_PSP (void) {
-  arm
   sub   sp, sp, #4
   stm   sp, {sp}^
   pop   {r0}
   sub   r0, r0, #32
   bx    lr
 }
+#pragma pop
 #else
 #ifdef __ICCARM__
 __arm
+#else
+__attribute__((target("arm")))
 #endif
 __STATIC_INLINE uint32_t __get_PSP (void) {
   register uint32_t ret;
 
   __ASM volatile (
-#ifndef __ICCARM__
-    ".syntax unified\n\t"
-    ".arm\n\t"
-#endif
     "sub  sp,sp,#4\n\t"
     "stm  sp,{sp}^\n\t"
     "pop  {%[ret]}\n\t"
@@ -152,9 +160,9 @@ __STATIC_INLINE bool_t IsPrivileged (void) {
   return (__get_mode() != CPSR_MODE_USER);
 }
 
-/// Check if in IRQ Mode
-/// \return     true=IRQ, false=thread
-__STATIC_INLINE bool_t IsIrqMode (void) {
+/// Check if in Exception
+/// \return     true=exception, false=thread
+__STATIC_INLINE bool_t IsException (void) {
   return ((__get_mode() != CPSR_MODE_USER) && (__get_mode() != CPSR_MODE_SYSTEM));
 }
 
@@ -728,66 +736,6 @@ __STATIC_INLINE uint32_t atomic_inc32 (uint32_t *mem) {
 }
 #endif
 
-/// atomic Access Operation: Increment (32-bit) if Less Than
-/// \param[in]  mem             Memory address
-/// \param[in]  max             Maximum value
-/// \return                     Previous value
-#if defined(__CC_ARM)
-static __asm    uint32_t atomic_inc32_lt (uint32_t *mem, uint32_t max) {
-  push  {r4,lr}
-  mov   r2,r0
-1
-  ldrex r0,[r2]
-  cmp   r1,r0
-  bhi   %F2
-  clrex
-  pop   {r4,pc}
-2
-  adds  r4,r0,#1
-  strex r3,r4,[r2]
-  cmp   r3,#0
-  bne   %B1
-  pop   {r4,pc}
-}
-#else
-__STATIC_INLINE uint32_t atomic_inc32_lt (uint32_t *mem, uint32_t max) {
-#ifdef  __ICCARM__
-#pragma diag_suppress=Pe550
-#endif
-  register uint32_t val, res;
-#ifdef  __ICCARM__
-#pragma diag_default=Pe550
-#endif
-  register uint32_t ret;
-
-  __ASM volatile (
-#ifndef __ICCARM__
-  ".syntax unified\n\t"
-#endif
-  "1:\n\t"
-    "ldrex %[ret],[%[mem]]\n\t"
-    "cmp   %[max],%[ret]\n\t"
-    "bhi    2f\n\t"
-    "clrex\n\t"
-    "b      3f\n"
-  "2:\n\t"
-    "adds  %[val],%[ret],#1\n\t"
-    "strex %[res],%[val],[%[mem]]\n\t"
-    "cmp   %[res],#0\n\t"
-    "bne   1b\n"
-  "3:"
-  : [ret] "=&l" (ret),
-    [val] "=&l" (val),
-    [res] "=&l" (res)
-  : [mem] "l"   (mem),
-    [max] "l"   (max)
-  : "cc", "memory"
-  );
-
-  return ret;
-}
-#endif
-
 /// Atomic Access Operation: Increment (16-bit) if Less Than
 /// \param[in]  mem             Memory address
 /// \param[in]  max             Maximum value
@@ -898,6 +846,52 @@ __STATIC_INLINE uint16_t atomic_inc16_lim (uint16_t *mem, uint16_t lim) {
     [res] "=&l" (res)
   : [mem] "l"   (mem),
     [lim] "l"   (lim)
+  : "cc", "memory"
+  );
+
+  return ret;
+}
+#endif
+
+/// Atomic Access Operation: Decrement (32-bit)
+/// \param[in]  mem             Memory address
+/// \return                     Previous value
+#if defined(__CC_ARM)
+static __asm    uint32_t atomic_dec32 (uint32_t *mem) {
+  mov   r2,r0
+1
+  ldrex r0,[r2]
+  subs  r1,r0,#1
+  strex r3,r1,[r2]
+  cmp   r3,#0
+  bne   %B1
+  bx    lr
+}
+#else
+__STATIC_INLINE uint32_t atomic_dec32 (uint32_t *mem) {
+#ifdef  __ICCARM__
+#pragma diag_suppress=Pe550
+#endif
+  register uint32_t val, res;
+#ifdef  __ICCARM__
+#pragma diag_default=Pe550
+#endif
+  register uint32_t ret;
+
+  __ASM volatile (
+#ifndef __ICCARM__
+  ".syntax unified\n\t"
+#endif
+  "1:\n\t"
+    "ldrex %[ret],[%[mem]]\n\t"
+    "subs  %[val],%[ret],#1\n\t"
+    "strex %[res],%[val],[%[mem]]\n\t"
+    "cmp   %[res],#0\n\t"
+    "bne   1b\n"
+  : [ret] "=&l" (ret),
+    [val] "=&l" (val),
+    [res] "=&l" (res)
+  : [mem] "l"   (mem)
   : "cc", "memory"
   );
 

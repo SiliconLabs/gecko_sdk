@@ -58,7 +58,7 @@
  * For calendar type 00 - 0x02, it is a rate switch time and
  * the data is a price tier enum (8-bit).
  * For calendar type 0x03, it is a friendly credit switch time and
- * the data is a boolean (8-bit), which is friendly credit enabled.
+ * the data is a bool (8-bit), which is friendly credit enabled.
  * For calendar type 0x04, it is an auxiliary load switch time and
  * the data is a bitmap (8-bit).
  */

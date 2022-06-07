@@ -25,10 +25,12 @@ config_file:
     condition: [device_series_2]
 source:
   - path: platform/emdrv/nvm3/src/nvm3_default_common_linker.c
+    unless: [trustzone_nonsecure]
 include:
   - path: platform/emdrv/nvm3/inc
     file_list:
       - path: nvm3_default.h
+    unless: [trustzone_nonsecure]
 provides:
   - name: nvm3_default
 requires:

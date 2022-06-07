@@ -92,18 +92,16 @@
   #define KEYSPEC_MODE_WRAPPED \
   (2UL << KEYSPEC_MODE_OFFSET)
 
-  #define KEYSPEC_RESTRICTION_INTERNAL \
-  (2UL << KEYSPEC_RESTRICTION_OFFSET)
-  #define KEYSPEC_RESTRICTION_RESTRICTED \
-  (3UL << KEYSPEC_RESTRICTION_OFFSET)
-
   #define KEYSPEC_ECC_WEIERSTRASS_PRIME_A_IS_ZERO \
   (1U << 9)
   #define KEYSPEC_ECC_WEIERSTRASS_PRIME_A_IS_MINUS_THREE \
   (1U << 8)
 
 #endif
+
 #define KEYSPEC_RESTRICTION_LOCKED          (1UL << KEYSPEC_RESTRICTION_OFFSET)
+#define KEYSPEC_RESTRICTION_INTERNAL        (2UL << KEYSPEC_RESTRICTION_OFFSET)
+#define KEYSPEC_RESTRICTION_RESTRICTED      (3UL << KEYSPEC_RESTRICTION_OFFSET)
 
 // -----------------------------------------------------------------------------
 // Local Functions
@@ -377,14 +375,12 @@ sl_status_t sli_se_key_to_keyspec(const sl_se_key_descriptor_t *key,
   if (key->flags & SL_SE_KEY_FLAG_NON_EXPORTABLE) {
     keyspec_restriction = KEYSPEC_RESTRICTION_LOCKED;
   }
-#if (_SILICON_LABS_SECURITY_FEATURE == _SILICON_LABS_SECURITY_FEATURE_VAULT)
   if (key->flags & SL_SE_KEY_FLAG_IS_DEVICE_GENERATED) {
     keyspec_restriction = KEYSPEC_RESTRICTION_INTERNAL;
   }
   if ((key->flags & SL_SE_KEY_FLAG_IS_RESTRICTED) == SL_SE_KEY_FLAG_IS_RESTRICTED) {
     keyspec_restriction = KEYSPEC_RESTRICTION_RESTRICTED;
   }
-#endif
   // Key restrictions are only applicable to volatile and wrapped keys
   if (key->storage.method == SL_SE_KEY_STORAGE_EXTERNAL_PLAINTEXT) {
     if (keyspec_restriction != 0) {
@@ -411,7 +407,7 @@ sl_status_t sli_se_key_to_keyspec(const sl_se_key_descriptor_t *key,
 
   if (key->storage.method == SL_SE_KEY_STORAGE_INTERNAL_IMMUTABLE) {
     if (key->storage.location.slot
-        < SL_SE_KEY_SLOT_APPLICATION_SECURE_DEBUG_KEY) {
+        < SL_SE_KEY_SLOT_INTERNAL_MIN) {
       return SL_STATUS_INVALID_PARAMETER;
     }
     *keyspec = (*keyspec & ~KEYSPEC_INDEX_MASK)
@@ -567,7 +563,7 @@ sl_status_t sli_se_keyspec_to_key(const uint32_t keyspec,
     } else
 #endif
     if ((key_index <= SL_SE_KEY_SLOT_APPLICATION_ATTESTATION_KEY)
-        && (key_index >= SL_SE_KEY_SLOT_APPLICATION_SECURE_DEBUG_KEY)) {
+        && (key_index >= SL_SE_KEY_SLOT_INTERNAL_MIN)) {
       key->storage.method = SL_SE_KEY_STORAGE_INTERNAL_IMMUTABLE;
     } else {
       return SL_STATUS_INVALID_PARAMETER;

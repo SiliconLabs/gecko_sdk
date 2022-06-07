@@ -862,7 +862,9 @@ osEventFlagsId_t  osEventFlagsNew(const  osEventFlagsAttr_t *attr)
     }
   }
 
-  OSFlagCreate(&p_flags->flag_grp, p_name, 0u, &err);
+  p_flags->flags = 0;
+
+  OSFlagCreate(&p_flags->flag_grp, p_name, p_flags->flags, &err);
 
   if (RTOS_ERR_CODE_GET(err) != RTOS_ERR_NONE) {
     if (p_flags->dyn_alloc == DEF_TRUE) {
@@ -927,7 +929,8 @@ uint32_t  osEventFlagsSet(osEventFlagsId_t  ef_id,
 
   CORE_ENTER_ATOMIC();
 
-  new_flags = p_grp->Flags | flags;                             // New flags after set
+  p_flags->flags |= flags;
+  new_flags = p_flags->flags;                                   // New flags after set
 
   p_tcb = p_grp->PendList.HeadPtr;                              // Loop over pending tasks
   while (p_tcb != DEF_NULL) {
@@ -1005,13 +1008,18 @@ uint32_t  osEventFlagsClear(osEventFlagsId_t  ef_id,
   osEventFlags_t *p_flags;
   RTOS_ERR        err;
   uint32_t        old_flags;
+  CORE_DECLARE_IRQ_STATE;
 
   p_flags = (osEventFlags_t *)ef_id;
   if (p_flags == (osEventFlags_t *)0) {
     return osFlagsErrorParameter;
   }
 
-  old_flags = (uint32_t)p_flags->flag_grp.Flags;                            // Get previous value of flags
+  CORE_ENTER_ATOMIC();
+  old_flags = p_flags->flags;                                   // Get previous value of flags
+  p_flags->flags &= ~flags;
+  CORE_EXIT_ATOMIC();
+
   OSFlagPost(&p_flags->flag_grp, flags, OS_OPT_POST_FLAG_CLR, &err);
 
   if (RTOS_ERR_CODE_GET(err) != RTOS_ERR_NONE) {
@@ -1056,7 +1064,7 @@ uint32_t  osEventFlagsGet(osEventFlagsId_t  ef_id)
     return 0u;
   }
 
-  flags = (uint32_t)p_flags->flag_grp.Flags;                                // Get current value of flags
+  flags = (uint32_t)p_flags->flags;                             // Get current value of flags
   return flags;
 #else
   (void)ef_id;
@@ -1118,9 +1126,8 @@ uint32_t  osEventFlagsWait(osEventFlagsId_t  ef_id,
   OS_OPT          opt;
   RTOS_ERR        err;
   CPU_TS          ts;
-  uint32_t        old_flags;
-  uint32_t        rdy_flags;
   uint32_t        rtn_flags;
+  CORE_DECLARE_IRQ_STATE;
 
   p_flags = (osEventFlags_t *)ef_id;
   if (p_flags == (osEventFlags_t *)0) {
@@ -1156,10 +1163,14 @@ uint32_t  osEventFlagsWait(osEventFlagsId_t  ef_id,
     opt |= OS_OPT_PEND_FLAG_CONSUME;
   }
 
-  old_flags = p_flags->flag_grp.Flags;   // Get flags
-  rdy_flags = (uint32_t)OSFlagPend(&p_flags->flag_grp, (OS_FLAGS)flags, os_timeout, opt,
-                                   &ts, &err);
-  rtn_flags  = rdy_flags | old_flags;
+  OSFlagPend(&p_flags->flag_grp, (OS_FLAGS)flags, os_timeout, opt, &ts, &err);
+
+  CORE_ENTER_ATOMIC();
+  rtn_flags = p_flags->flags;
+  if (!(options & osFlagsNoClear)) {
+    p_flags->flags &= ~flags;
+  }
+  CORE_EXIT_ATOMIC();
 
   switch (RTOS_ERR_CODE_GET(err)) {
     case RTOS_ERR_NONE:

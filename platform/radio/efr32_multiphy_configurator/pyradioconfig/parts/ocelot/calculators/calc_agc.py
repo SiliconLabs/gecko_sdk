@@ -155,12 +155,12 @@ class CALC_AGC_ocelot(CALC_AGC_panther):
         #We need to override this function because the variable fxo_or_fdec8 will go away (replaced by ADC rate calculations)
 
         mod_format = model.vars.modulation_type.value
-        hardmodem_freq_actual = model.vars.hardmodem_freq_actual.value
+        modem_frequency_hz = model.vars.modem_frequency_hz.value
         f_if = model.vars.if_frequency_hz_actual.value
 
         # period over which we count how many times we tripped the HI threshold - xtal PLL freq because AGC runs at this clock
         if f_if > 0:
-            periodhi = int(py2round(hardmodem_freq_actual / (2 * f_if)))
+            periodhi = int(py2round(modem_frequency_hz / (2 * f_if)))
         else:
             periodhi = 14 # for zero-IF used on FPGA tests fix periodhi to 14
 
@@ -169,7 +169,7 @@ class CALC_AGC_ocelot(CALC_AGC_panther):
         baudrate = model.vars.baudrate.value
 
         if (mod_format == model.vars.modulation_type.var_enum.OOK):
-            periodlow = int(py2round((hardmodem_freq_actual/(baudrate * 0.9))))
+            periodlow = int(py2round((modem_frequency_hz/(baudrate * 0.9))))
         else:
             periodlow = 3 * periodhi
 
@@ -665,3 +665,15 @@ class CALC_AGC_ocelot(CALC_AGC_panther):
 
         self._reg_write(model.vars.AGC_GAINRANGE_LNAINDEXBORDER, lnaindexborder)
         self._reg_write(model.vars.AGC_GAINRANGE_PGAINDEXBORDER, pgaindexborder)
+
+    def calc_rssiperiod_reg(self, model):
+
+        period = model.vars.rssi_period.value
+
+        if period > 15:
+            period = 15
+
+        if period < 0:
+            period = 0
+
+        self._reg_write(model.vars.AGC_CTRL1_RSSIPERIOD, period)

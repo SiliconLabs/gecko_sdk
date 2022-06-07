@@ -12,5 +12,7 @@ include:
     - path: btl_xmodem.h
 provides:
   - name: bootloader_xmodem_parser
+  - name: bootloader_nonsecure_incompatible
+    condition: [bootloader_core_nonsecure]
 requires:
   - name: bootloader_crc

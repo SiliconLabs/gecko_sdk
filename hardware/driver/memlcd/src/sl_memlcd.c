@@ -194,6 +194,9 @@ sl_status_t sl_memlcd_draw(const struct sl_memlcd_t *device, const void *data, u
   const uint8_t *p = data;
   uint16_t cmd;
   int row_len;
+#if defined(SL_MEMLCD_LPM013M126A)
+  uint16_t reversed_row;
+#endif
 
   row_len = (device->width * device->bpp) / 8;
   row_start++;
@@ -204,8 +207,17 @@ sl_status_t sl_memlcd_draw(const struct sl_memlcd_t *device, const void *data, u
   /* SCS setup time */
   sl_udelay_wait(device->setup_us);
 
+#if defined(SL_MEMLCD_LPM013M126A)
+  /* LPM013M126A uses MSB first for the row address */
+  reversed_row = SL_RBIT16(row_start);
+
+  /* Send update command and first line address */
+  /* CMD_UPDATE is only 6 bits and the address line is 10 bits */
+  cmd = CMD_UPDATE | reversed_row;
+#else
   /* Send update command and first line address */
   cmd = CMD_UPDATE | (row_start << 8);
+#endif
 
   sli_memlcd_spi_tx(&spi_handle, &cmd, 2);
 
@@ -215,10 +227,21 @@ sl_status_t sl_memlcd_draw(const struct sl_memlcd_t *device, const void *data, u
     sli_memlcd_spi_tx(&spi_handle, p, row_len);
     p += row_len;
 
-    if (i == row_count - 1) {
+    if (i == (row_count - 1)) {
+      /* Dummy Data transfer at the end of update mode by multiple lines */
       cmd = 0xffff;
     } else {
+#if defined(SL_MEMLCD_LPM013M126A)
+      /* LPM013M126A uses MSB first for the row address*/
+      reversed_row = SL_RBIT16(row_start + i + 1);
+
+      /* Send multiple line address */
+      /* Dummy data is only 6 bits and the address line is 10 bits */
+      cmd = 0x3f | reversed_row;
+#else
+      /* Dummy data is 8 bits and the address line is 8 bit */
       cmd = 0xff | ((row_start + i + 1) << 8);
+#endif
     }
     sli_memlcd_spi_tx(&spi_handle, &cmd, 2);
   }

@@ -31,7 +31,7 @@
 #include "em_pdm.h"
 #if defined(PDM_PRESENT) && (PDM_COUNT == 1)
 
-#include "em_assert.h"
+#include "sl_assert.h"
 
 /***************************************************************************//**
  * @addtogroup pdm

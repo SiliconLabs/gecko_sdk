@@ -52,6 +52,7 @@
 typedef struct {
   bool use_raw_rx_buffer;
   bool preprocess_hdlc_header;
+  bool uart_flowcontrol;
 } sli_cpc_drv_capabilities_t;
 
 #ifdef __cplusplus

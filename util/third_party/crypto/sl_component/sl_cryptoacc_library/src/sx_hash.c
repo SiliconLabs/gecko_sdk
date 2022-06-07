@@ -2,7 +2,7 @@
  * @file
  * @brief Defines the procedures to make operations with
  *          the BA413 hash function
- * @copyright Copyright (c) 2016-2018 Silex Insight. All Rights reserved
+ * @copyright Copyright (c) 2016-2020 Silex Insight. All Rights reserved
  */
 
 
@@ -18,6 +18,30 @@
 const uint8_t sx_sm3_iv[SM3_DIGESTSIZE] =
    {0x73, 0x80, 0x16, 0x6f, 0x49, 0x14, 0xb2, 0xb9, 0x17, 0x24, 0x42, 0xd7, 0xda, 0x8a, 0x06, 0x00,
     0xa9, 0x6f, 0x30, 0xbc, 0x16, 0x31, 0x38, 0xaa, 0xe3, 0x8d, 0xee, 0x4d, 0xb0, 0xfb, 0x0e, 0x4e};
+
+const uint8_t sx_sha1_initial_value[SHA1_STATESIZE] =
+                  {0x67, 0x45, 0x23, 0x01, 0xef, 0xcd, 0xab, 0x89, 0x98, 0xba,
+                  0xdc, 0xfe, 0x10, 0x32, 0x54, 0x76, 0xc3, 0xd2, 0xe1, 0xf0};
+
+const uint8_t sx_sha224_initial_value[SHA224_STATESIZE] =
+   {0xc1, 0x05, 0x9e, 0xd8, 0x36, 0x7c, 0xd5, 0x07, 0x30, 0x70, 0xdd, 0x17, 0xf7, 0x0e, 0x59, 0x39,
+   0xff, 0xc0, 0x0b, 0x31, 0x68, 0x58, 0x15, 0x11, 0x64, 0xf9, 0x8f, 0xa7, 0xbe, 0xfa, 0x4f, 0xa4};
+
+const uint8_t sx_sha256_initial_value[SHA256_STATESIZE] =
+   {0x6a, 0x09, 0xe6, 0x67, 0xbb, 0x67, 0xae, 0x85, 0x3c, 0x6e, 0xf3, 0x72, 0xa5, 0x4f, 0xf5, 0x3a,
+   0x51, 0x0e, 0x52, 0x7f, 0x9b, 0x05, 0x68, 0x8c, 0x1f, 0x83, 0xd9, 0xab, 0x5b, 0xe0, 0xcd, 0x19};
+
+const uint8_t sx_sha384_initial_value[SHA384_STATESIZE] =
+   {0xcb, 0xbb, 0x9d, 0x5d, 0xc1, 0x05, 0x9e, 0xd8, 0x62, 0x9a, 0x29, 0x2a, 0x36, 0x7c, 0xd5, 0x07,
+   0x91, 0x59, 0x01, 0x5a, 0x30, 0x70, 0xdd, 0x17, 0x15, 0x2f, 0xec, 0xd8, 0xf7, 0x0e, 0x59, 0x39,
+   0x67, 0x33, 0x26, 0x67, 0xff, 0xc0, 0x0b, 0x31, 0x8e, 0xb4, 0x4a, 0x87, 0x68, 0x58, 0x15, 0x11,
+   0xdb, 0x0c, 0x2e, 0x0d, 0x64, 0xf9, 0x8f, 0xa7, 0x47, 0xb5, 0x48, 0x1d, 0xbe, 0xfa, 0x4f, 0xa4};
+
+const uint8_t sx_sha512_initial_value[SHA512_STATESIZE] =
+   {0x6a, 0x09, 0xe6, 0x67, 0xf3, 0xbc, 0xc9, 0x08, 0xbb, 0x67, 0xae, 0x85, 0x84, 0xca, 0xa7, 0x3b,
+   0x3c, 0x6e, 0xf3, 0x72, 0xfe, 0x94, 0xf8, 0x2b, 0xa5, 0x4f, 0xf5, 0x3a, 0x5f, 0x1d, 0x36, 0xf1,
+   0x51, 0x0e, 0x52, 0x7f, 0xad, 0xe6, 0x82, 0xd1, 0x9b, 0x05, 0x68, 0x8c, 0x2b, 0x3e, 0x6c, 0x1f,
+   0x1f, 0x83, 0xd9, 0xab, 0xfb, 0x41, 0xbd, 0x6b, 0x5b, 0xe0, 0xcd, 0x19, 0x13, 0x7e, 0x21, 0x79};
 
 /* Internal functions */
 
@@ -52,48 +76,46 @@ static uint32_t sx_hash_internal(sx_hash_fct_t hash_fct,
    uint32_t genlen, outlen;
    block_t extra = extra_in;
 
+#ifndef CACHED_HW_CONFIG
+   if (!CRYPTOSOC_HW_CFG_HASH_IP_INCLUDED)
+      return CRYPTOLIB_UNSUPPORTED_ERR;
+#endif
+
    CRYPTOLIB_ASSERT(entries <= SX_HASH_ARRAY_MAX_ENTRIES, "Too many entries in data array");
 
    switch (hash_fct) {
    case e_MD5:
-      if ((BA413_HW_CFG & BA413_HW_CFG_MD5_SUPPORTED_MASK)
-           != BA413_HW_CFG_MD5_SUPPORTED_MASK)
+      if (!BA413_HW_CFG_MD5_SUPPORTED)
          return CRYPTOLIB_UNSUPPORTED_ERR;
       info.config = BA413_CONF_MODE_MD5;
       break;
    case e_SHA1:
-      if ((BA413_HW_CFG & BA413_HW_CFG_SHA1_SUPPORTED_MASK)
-           != BA413_HW_CFG_SHA1_SUPPORTED_MASK)
+      if (!BA413_HW_CFG_SHA1_SUPPORTED)
          return CRYPTOLIB_UNSUPPORTED_ERR;
       info.config = BA413_CONF_MODE_SHA1;
       break;
    case e_SHA224:
-      if ((BA413_HW_CFG & BA413_HW_CFG_SHA224_SUPPORTED_MASK)
-           != BA413_HW_CFG_SHA224_SUPPORTED_MASK)
+      if (!BA413_HW_CFG_SHA224_SUPPORTED)
          return CRYPTOLIB_UNSUPPORTED_ERR;
       info.config = BA413_CONF_MODE_SHA224;
       break;
    case e_SHA256:
-      if ((BA413_HW_CFG & BA413_HW_CFG_SHA256_SUPPORTED_MASK)
-           != BA413_HW_CFG_SHA256_SUPPORTED_MASK)
+      if (!BA413_HW_CFG_SHA256_SUPPORTED)
          return CRYPTOLIB_UNSUPPORTED_ERR;
       info.config = BA413_CONF_MODE_SHA256;
       break;
    case e_SHA384:
-      if ((BA413_HW_CFG & BA413_HW_CFG_SHA384_SUPPORTED_MASK)
-           != BA413_HW_CFG_SHA384_SUPPORTED_MASK)
+      if (!BA413_HW_CFG_SHA384_SUPPORTED)
          return CRYPTOLIB_UNSUPPORTED_ERR;
       info.config = BA413_CONF_MODE_SHA384;
       break;
    case e_SHA512:
-      if ((BA413_HW_CFG & BA413_HW_CFG_SHA512_SUPPORTED_MASK)
-           != BA413_HW_CFG_SHA512_SUPPORTED_MASK)
+      if (!BA413_HW_CFG_SHA512_SUPPORTED)
          return CRYPTOLIB_UNSUPPORTED_ERR;
       info.config = BA413_CONF_MODE_SHA512;
       break;
    case e_SM3:
-      if ((BA413_HW_CFG & BA413_HW_CFG_SM3_SUPPORTED_MASK)
-           != BA413_HW_CFG_SM3_SUPPORTED_MASK)
+      if (!BA413_HW_CFG_SM3_SUPPORTED)
          return CRYPTOLIB_UNSUPPORTED_ERR;
       info.config = BA413_CONF_MODE_SM3;
       break;
@@ -108,10 +130,8 @@ static uint32_t sx_hash_internal(sx_hash_fct_t hash_fct,
    // complete hash operation: no need to load extra info, enable padding in
    // hardware, output will be digest
    case OP_FULL_HASH:
-      if ((BA413_HW_CFG & BA413_HW_CFG_PADDING_SUPPORTED_MASK)
-           != BA413_HW_CFG_PADDING_SUPPORTED_MASK)
+      if (!BA413_HW_CFG_PADDING_SUPPORTED)
          return CRYPTOLIB_UNSUPPORTED_ERR;
-
       info.config |= BA413_CONF_HWPAD | BA413_CONF_FINAL;
       extra_in.len = 0;
       extra_in_tag = DMA_SG_ENGINESELECT_BA413;
@@ -122,10 +142,7 @@ static uint32_t sx_hash_internal(sx_hash_fct_t hash_fct,
    // hardware, output will be digest
    case OP_FULL_HMAC:
    {
-      if (((BA413_HW_CFG & BA413_HW_CFG_HMAC_SUPPORTED_MASK)
-           != BA413_HW_CFG_HMAC_SUPPORTED_MASK)
-         || (BA413_HW_CFG & BA413_HW_CFG_PADDING_SUPPORTED_MASK)
-             != BA413_HW_CFG_PADDING_SUPPORTED_MASK)
+      if (!(BA413_HW_CFG_PADDING_SUPPORTED && BA413_HW_CFG_HMAC_SUPPORTED))
          return CRYPTOLIB_UNSUPPORTED_ERR;
 
       uint32_t extra_ign_bytes;
@@ -338,15 +355,15 @@ uint32_t sx_hash_get_state_size(sx_hash_fct_t hash_fct)
    case e_MD5:
       return MD5_INITSIZE;
    case e_SHA1:
-      return SHA1_INITSIZE;
+      return SHA1_STATESIZE;
    case e_SHA224:
-      return SHA224_INITSIZE;
+      return SHA224_STATESIZE;
    case e_SHA256:
-      return SHA256_INITSIZE;
+      return SHA256_STATESIZE;
    case e_SHA384:
-      return SHA384_INITSIZE;
+      return SHA384_STATESIZE;
    case e_SHA512:
-      return SHA512_INITSIZE;
+      return SHA512_STATESIZE;
    case e_SM3:
       return SM3_INITSIZE;
    default:
@@ -385,7 +402,7 @@ uint32_t sx_hash_finish_blk(sx_hash_fct_t hash_fct, block_t state, block_t data_
    uint8_t padding[MAX_BLOCKSIZE+16+1];
    block_t padding_blk = BLK_LITARRAY(padding);
 
-   int padding_len = sx_hash_pad(hash_fct, data_in.len, total_len, padding_blk);
+   uint32_t padding_len = sx_hash_pad(hash_fct, data_in.len, total_len, padding_blk);
    padding_blk.len = padding_len;
 
    block_t input_padding[] = {data_in, padding_blk};

@@ -33,7 +33,7 @@
 #endif
 
 #ifndef ZCL_SL_WWAH_CLUSTER_ID
-#define ZCL_SL_WWAH_CLUSTER_ID                                             0xFC57
+#define ZCL_SL_WWAH_CLUSTER_ID 0xFC57u
 #endif
 //------------------------------------------------------------------------------
 // Forward Declarations
@@ -67,13 +67,13 @@ EmberAfClusterCommand *emAfCurrentCommand;
 uint8_t emAfTestApsSecurityOverride = APS_TEST_SECURITY_DEFAULT;
 
 // DEPRECATED.
-uint8_t emberAfIncomingZclSequenceNumber = 0xFF;
+uint8_t emberAfIncomingZclSequenceNumber = 0xFFu;
 
 static bool afNoSecurityForDefaultResponse = false;
 
 // Sequence used for outgoing messages if they are
 // not responses.
-uint8_t emberAfSequenceNumber = 0xFF;
+uint8_t emberAfSequenceNumber = 0xFFu;
 
 // A bool value so we know when the device is performing
 // key establishment.
@@ -116,7 +116,6 @@ EMBER_AF_GENERATED_PLUGIN_TICK_FUNCTION_DECLARATIONS
 // Device enabled/disabled functions
 bool emberAfIsDeviceEnabled(uint8_t endpoint)
 {
-  uint8_t index;
 #ifdef ZCL_USING_BASIC_CLUSTER_DEVICE_ENABLED_ATTRIBUTE
   bool deviceEnabled;
   if (emberAfReadServerAttribute(endpoint,
@@ -128,19 +127,24 @@ bool emberAfIsDeviceEnabled(uint8_t endpoint)
     return deviceEnabled;
   }
 #endif
+#if (MAX_ENDPOINT_COUNT > 0)
+  uint8_t index;
   index = emberAfIndexFromEndpoint(endpoint);
-  if (index != 0xFF && index < (uint8_t)sizeof(afDeviceEnabled)) {
+  if (index != 0xFFu && index < (uint8_t)sizeof(afDeviceEnabled)) {
     return afDeviceEnabled[index];
   }
+#endif // (MAX_ENDPOINT_COUNT > 0)
   return false;
 }
 
 void emberAfSetDeviceEnabled(uint8_t endpoint, bool enabled)
 {
+#if (MAX_ENDPOINT_COUNT > 0)
   uint8_t index = emberAfIndexFromEndpoint(endpoint);
-  if (index != 0xFF && index < (uint8_t)sizeof(afDeviceEnabled)) {
+  if (index != 0xFFu && index < (uint8_t)sizeof(afDeviceEnabled)) {
     afDeviceEnabled[index] = enabled;
   }
+#endif // (MAX_ENDPOINT_COUNT > 0)
 #ifdef ZCL_USING_BASIC_CLUSTER_DEVICE_ENABLED_ATTRIBUTE
   emberAfWriteServerAttribute(endpoint,
                               ZCL_BASIC_CLUSTER_ID,
@@ -160,7 +164,7 @@ bool emberAfIsDeviceIdentifying(uint8_t endpoint)
                                                     ZCL_IDENTIFY_TIME_ATTRIBUTE_ID,
                                                     (uint8_t *)&identifyTime,
                                                     sizeof(identifyTime));
-  return (status == EMBER_ZCL_STATUS_SUCCESS && 0 < identifyTime);
+  return (status == EMBER_ZCL_STATUS_SUCCESS && 0u < identifyTime);
 #else
   return false;
 #endif
@@ -319,7 +323,7 @@ void emberAfStackDown(void)
 
 uint16_t emberAfFindClusterNameIndexWithMfgCode(uint16_t cluster, uint16_t mfgCode)
 {
-  uint16_t index = 0;
+  uint16_t index = 0u;
   while (zclClusterNames[index].id != ZCL_NULL_CLUSTER_ID) {
     if (zclClusterNames[index].id == cluster
         // This check sees if its a standard cluster, in which mfgCode is ignored
@@ -328,14 +332,14 @@ uint16_t emberAfFindClusterNameIndexWithMfgCode(uint16_t cluster, uint16_t mfgCo
         // know the name of the cluster within the list.
         // If the mfgCode we are given is null, then we just ignore it for backward
         // compatibility reasons
-        && (cluster < 0xFC00
+        && (cluster < 0xFC00u
             || zclClusterNames[index].mfgCode == mfgCode
             || mfgCode == EMBER_AF_NULL_MANUFACTURER_CODE)) {
       return index;
     }
     index++;
   }
-  return 0xFFFF;
+  return 0xFFFFu;
 }
 
 uint16_t emberAfFindClusterNameIndex(uint16_t cluster)
@@ -348,7 +352,7 @@ uint16_t emberAfFindClusterNameIndex(uint16_t cluster)
 void emberAfDecodeAndPrintClusterWithMfgCode(uint16_t cluster, uint16_t mfgCode)
 {
   uint16_t index = emberAfFindClusterNameIndexWithMfgCode(cluster, mfgCode);
-  if (index == 0xFFFF) {
+  if (index == 0xFFFFu) {
     emberAfPrint(emberAfPrintActiveArea,
                  "(Unknown clus. [0x%2x])",
                  cluster);
@@ -410,7 +414,7 @@ static void printIncomingZclMessage(const EmberAfClusterCommand *cmd)
 static bool dispatchZclMessage(EmberAfClusterCommand *cmd)
 {
   uint8_t index = emberAfIndexFromEndpoint(cmd->apsFrame->destinationEndpoint);
-  if (index == 0xFF) {
+  if (index == 0xFFu) {
     emberAfDebugPrint("Drop cluster 0x%2x command 0x%x",
                       cmd->apsFrame->clusterId,
                       cmd->commandId);
@@ -485,10 +489,10 @@ bool emberAfProcessMessageIntoZclCmd(EmberApsFrame* apsFrame,
   returnCmd->direction       = ((message[0] & ZCL_FRAME_CONTROL_DIRECTION_MASK)
                                 ? ZCL_DIRECTION_SERVER_TO_CLIENT
                                 : ZCL_DIRECTION_CLIENT_TO_SERVER);
-  returnCmd->payloadStartIndex = 1;
+  returnCmd->payloadStartIndex = 1u;
   if (returnCmd->mfgSpecific) {
     returnCmd->mfgCode = emberAfGetInt16u(message, returnCmd->payloadStartIndex, messageLength);
-    returnCmd->payloadStartIndex += 2;
+    returnCmd->payloadStartIndex += 2u;
   } else {
     returnCmd->mfgCode = EMBER_AF_NULL_MANUFACTURER_CODE;
   }
@@ -589,7 +593,7 @@ bool emberAfProcessMessage(EmberApsFrame *apsFrame,
 
   if (curCmd.apsFrame->destinationEndpoint == EMBER_BROADCAST_ENDPOINT) {
     uint8_t i;
-    for (i = 0; i < emberAfEndpointCount(); i++) {
+    for (i = 0u; i < emberAfEndpointCount(); i++) {
       uint8_t endpoint = emberAfEndpointFromIndex(i);
       if (!emberAfEndpointIndexIsEnabled(i)
           || !emberAfContainsClusterWithMfgCode(endpoint, curCmd.apsFrame->clusterId, curCmd.mfgCode)) {
@@ -616,7 +620,7 @@ bool emberAfProcessMessage(EmberApsFrame *apsFrame,
   kickout:
   emberAfClearResponseData();
   MEMSET(&interpanResponseHeader,
-         0,
+         0u,
          sizeof(EmberAfInterpanHeader));
   emAfCurrentCommand = NULL;
   return msgHandled;
@@ -990,30 +994,30 @@ uint8_t emberAfMaximumApsPayloadLength(EmberOutgoingMessageType type,
 
 void emberAfCopyInt16u(uint8_t *data, uint16_t index, uint16_t x)
 {
-  data[index]   = (uint8_t) ( ((x)    ) & 0xFF);
-  data[index + 1] = (uint8_t) ( ((x) >> 8) & 0xFF);
+  data[index]   = (uint8_t) ( ((x)    ) & 0xFFu);
+  data[index + 1] = (uint8_t) ( ((x) >> 8) & 0xFFu);
 }
 
 void emberAfCopyInt24u(uint8_t *data, uint16_t index, uint32_t x)
 {
-  data[index]   = (uint8_t) ( ((x)    ) & 0xFF);
-  data[index + 1] = (uint8_t) ( ((x) >> 8) & 0xFF);
-  data[index + 2] = (uint8_t) ( ((x) >> 16) & 0xFF);
+  data[index]   = (uint8_t) ( ((x)    ) & 0xFFu);
+  data[index + 1] = (uint8_t) ( ((x) >> 8) & 0xFFu);
+  data[index + 2] = (uint8_t) ( ((x) >> 16) & 0xFFu);
 }
 
 void emberAfCopyInt32u(uint8_t *data, uint16_t index, uint32_t x)
 {
-  data[index]   = (uint8_t) ( ((x)    ) & 0xFF);
-  data[index + 1] = (uint8_t) ( ((x) >> 8) & 0xFF);
-  data[index + 2] = (uint8_t) ( ((x) >> 16) & 0xFF);
-  data[index + 3] = (uint8_t) ( ((x) >> 24) & 0xFF);
+  data[index]   = (uint8_t) ( ((x)    ) & 0xFFu);
+  data[index + 1] = (uint8_t) ( ((x) >> 8) & 0xFFu);
+  data[index + 2] = (uint8_t) ( ((x) >> 16) & 0xFFu);
+  data[index + 3] = (uint8_t) ( ((x) >> 24) & 0xFFu);
 }
 
 void emberAfCopyString(uint8_t *dest, uint8_t *src, uint8_t size)
 {
   if ( src == NULL ) {
-    dest[0] = 0; // Zero out the length of string
-  } else if (src[0] == 0xFF) {
+    dest[0] = 0u; // Zero out the length of string
+  } else if (src[0] == 0xFFu) {
     dest[0] = src[0];
   } else {
     uint8_t length = emberAfStringLength(src);
@@ -1028,11 +1032,11 @@ void emberAfCopyString(uint8_t *dest, uint8_t *src, uint8_t size)
 void emberAfCopyLongString(uint8_t *dest, uint8_t *src, uint16_t size)
 {
   if ( src == NULL ) {
-    dest[0] = dest[1] = 0; // Zero out the length of string
-  } else if ((src[0] == 0xFF)
-             && (src[1] == 0xFF)) {
-    dest[0] = 0xFF;
-    dest[1] = 0xFF;
+    dest[0] = dest[1] = 0u; // Zero out the length of string
+  } else if ((src[0] == 0xFFu)
+             && (src[1] == 0xFFu)) {
+    dest[0] = 0xFFu;
+    dest[1] = 0xFFu;
   } else {
     uint16_t length = emberAfLongStringLength(src);
     if (size < length) {
@@ -1135,12 +1139,12 @@ int8_t emberAfCompareDates(EmberAfDate* date1, EmberAfDate* date2)
 // 2.15 from the ZCL spec 075123r02
 uint8_t emberAfGetAttributeAnalogOrDiscreteType(uint8_t dataType)
 {
-  uint8_t index = 0;
+  uint8_t index = 0u;
 
   while ( emberAfAnalogDiscreteThresholds[index] < dataType ) {
-    index += 2;
+    index += 2u;
   }
-  return emberAfAnalogDiscreteThresholds[index + 1];
+  return emberAfAnalogDiscreteThresholds[index + 1u];
 }
 
 // Zigbee spec says types between signed 8 bit and signed 64 bit
@@ -1156,7 +1160,7 @@ EmberStatus emberAfEndpointEventControlSetInactive(EmberEventControl *controls,
                                                    uint8_t endpoint)
 {
   uint8_t index = emberAfIndexFromEndpoint(endpoint);
-  if (index == 0xFF) {
+  if (index == 0xFFu) {
     return EMBER_INVALID_ENDPOINT;
   }
   emberEventControlSetInactive(controls[index]);
@@ -1167,14 +1171,14 @@ bool emberAfEndpointEventControlGetActive(EmberEventControl *controls,
                                           uint8_t endpoint)
 {
   uint8_t index = emberAfIndexFromEndpoint(endpoint);
-  return (index != 0xFF && emberEventControlGetActive(controls[index]));
+  return (index != 0xFFu && emberEventControlGetActive(controls[index]));
 }
 
 EmberStatus emberAfEndpointEventControlSetActive(EmberEventControl *controls,
                                                  uint8_t endpoint)
 {
   uint8_t index = emberAfIndexFromEndpoint(endpoint);
-  if (index == 0xFF) {
+  if (index == 0xFFu) {
     return EMBER_INVALID_ENDPOINT;
   }
   emberEventControlSetActive(controls[index]);
@@ -1186,7 +1190,7 @@ EmberStatus emberAfEndpointEventControlSetDelayMS(EmberEventControl *controls,
                                                   uint32_t delayMs)
 {
   uint8_t index = emberAfIndexFromEndpoint(endpoint);
-  if (index == 0xFF) {
+  if (index == 0xFFu) {
     return EMBER_INVALID_ENDPOINT;
   }
   return emberAfEventControlSetDelayMS(&controls[index], delayMs);
@@ -1197,7 +1201,7 @@ EmberStatus emberAfEndpointEventControlSetDelayQS(EmberEventControl *controls,
                                                   uint32_t delayQs)
 {
   uint8_t index = emberAfIndexFromEndpoint(endpoint);
-  if (index == 0xFF) {
+  if (index == 0xFFu) {
     return EMBER_INVALID_ENDPOINT;
   }
   return emberAfEventControlSetDelayQS(&controls[index], delayQs);
@@ -1208,7 +1212,7 @@ EmberStatus emberAfEndpointEventControlSetDelayMinutes(EmberEventControl *contro
                                                        uint16_t delayM)
 {
   uint8_t index = emberAfIndexFromEndpoint(endpoint);
-  if (index == 0xFF) {
+  if (index == 0xFFu) {
     return EMBER_INVALID_ENDPOINT;
   }
   return emberAfEventControlSetDelayMinutes(&controls[index], delayM);
@@ -1235,23 +1239,23 @@ uint8_t emberAfAppendCharacters(uint8_t * zclString,
   uint8_t charsToWrite;
 
   if ((zclString == NULL)
-      || (zclStringMaxLen == 0)
+      || (zclStringMaxLen == 0u)
       || (appendingChars == NULL)
-      || (appendingCharsLen == 0)) {
+      || (appendingCharsLen == 0u)) {
     return 0;
   }
 
   curLen = emberAfStringLength(zclString);
 
-  if ((zclString[0] == 0xFF)
+  if ((zclString[0] == 0xFFu)
       || (curLen >= zclStringMaxLen)) {
-    return 0;
+    return 0u;
   }
 
   freeChars = zclStringMaxLen - curLen;
   charsToWrite = (freeChars > appendingCharsLen) ? appendingCharsLen : freeChars;
 
-  MEMCOPY(&zclString[1 + curLen], // 1 is to account for zcl's length byte
+  MEMCOPY(&zclString[1u + curLen], // 1 is to account for zcl's length byte
           appendingChars,
           charsToWrite);
   zclString[0] = curLen + charsToWrite;
@@ -1262,7 +1266,7 @@ uint32_t emberAfGetBufferCrc(uint8_t *pbuffer, uint16_t length, uint32_t initial
 {
   uint16_t i;
   uint32_t crc32 = initialValue;
-  for (i = 0; i < length; i++) {
+  for (i = 0u; i < length; i++) {
     crc32 = halCommonCrc32(pbuffer[i], crc32);
   }
   return crc32;
@@ -1281,21 +1285,21 @@ uint32_t emberAfGetBufferCrc(uint8_t *pbuffer, uint16_t length, uint32_t initial
 EmberStatus emAfValidateChannelPages(uint8_t page, uint8_t channel)
 {
   switch (page) {
-    case 0:
+    case 0u:
       if (!((channel <= EMBER_MAX_802_15_4_CHANNEL_NUMBER)
             && ((EMBER_MIN_802_15_4_CHANNEL_NUMBER == 0)
                 || (channel >= EMBER_MIN_802_15_4_CHANNEL_NUMBER)))) {
         return EMBER_PHY_INVALID_CHANNEL;
       }
       break;
-    case 28:
-    case 30:
-    case 31:
+    case 28u:
+    case 30u:
+    case 31u:
       if (channel > EMBER_MAX_SUBGHZ_CHANNEL_NUMBER_ON_PAGES_28_30_31) {
         return EMBER_PHY_INVALID_CHANNEL;
       }
       break;
-    case 29:
+    case 29u:
       if (channel > EMBER_MAX_SUBGHZ_CHANNEL_NUMBER_ON_PAGE_29) {
         return EMBER_PHY_INVALID_CHANNEL;
       }
@@ -1316,30 +1320,30 @@ void slabAssert(const char * file, int line)
   }
 }
 
-#define ENCODED_8BIT_CHANPG_PAGE_MASK           0xE0    // top 3 bits
-#define ENCODED_8BIT_CHANPG_PAGE_MASK_PAGE_0    0x00    // 0b000xxxxx
-#define ENCODED_8BIT_CHANPG_PAGE_MASK_PAGE_28   0x80    // 0b100xxxxx
-#define ENCODED_8BIT_CHANPG_PAGE_MASK_PAGE_29   0xA0    // 0b101xxxxx
-#define ENCODED_8BIT_CHANPG_PAGE_MASK_PAGE_30   0xC0    // 0b110xxxxx
-#define ENCODED_8BIT_CHANPG_PAGE_MASK_PAGE_31   0xE0    // 0b111xxxxx
+#define ENCODED_8BIT_CHANPG_PAGE_MASK           0xE0u   // top 3 bits
+#define ENCODED_8BIT_CHANPG_PAGE_MASK_PAGE_0    0x00u   // 0b000xxxxx
+#define ENCODED_8BIT_CHANPG_PAGE_MASK_PAGE_28   0x80u   // 0b100xxxxx
+#define ENCODED_8BIT_CHANPG_PAGE_MASK_PAGE_29   0xA0u   // 0b101xxxxx
+#define ENCODED_8BIT_CHANPG_PAGE_MASK_PAGE_30   0xC0u   // 0b110xxxxx
+#define ENCODED_8BIT_CHANPG_PAGE_MASK_PAGE_31   0xE0u   // 0b111xxxxx
 
-#define ENCODED_8BIT_CHANPG_CHANNEL_MASK        0x1F    // bottom 5 bits
+#define ENCODED_8BIT_CHANPG_CHANNEL_MASK        0x1Fu   // bottom 5 bits
 
 uint8_t emberAfGetPageFrom8bitEncodedChanPg(uint8_t chanPg)
 {
   switch (chanPg & ENCODED_8BIT_CHANPG_PAGE_MASK) {
     case ENCODED_8BIT_CHANPG_PAGE_MASK_PAGE_0:
-      return 0;
+      return 0u;
     case ENCODED_8BIT_CHANPG_PAGE_MASK_PAGE_28:
-      return 28;
+      return 28u;
     case ENCODED_8BIT_CHANPG_PAGE_MASK_PAGE_29:
-      return 29;
+      return 29u;
     case ENCODED_8BIT_CHANPG_PAGE_MASK_PAGE_30:
-      return 30;
+      return 30u;
     case ENCODED_8BIT_CHANPG_PAGE_MASK_PAGE_31:
-      return 31;
+      return 31u;
     default:
-      return 0xFF;
+      return 0xFFu;
   }
 }
 
@@ -1351,17 +1355,17 @@ uint8_t emberAfGetChannelFrom8bitEncodedChanPg(uint8_t chanPg)
 uint8_t emberAfMake8bitEncodedChanPg(uint8_t page, uint8_t channel)
 {
   if (emAfValidateChannelPages(page, channel) != EMBER_SUCCESS) {
-    return 0xFF;
+    return 0xFFu;
   }
 
   switch (page) {
-    case 28:
+    case 28u:
       return channel | ENCODED_8BIT_CHANPG_PAGE_MASK_PAGE_28;
-    case 29:
+    case 29u:
       return channel | ENCODED_8BIT_CHANPG_PAGE_MASK_PAGE_29;
-    case 30:
+    case 30u:
       return channel | ENCODED_8BIT_CHANPG_PAGE_MASK_PAGE_30;
-    case 31:
+    case 31u:
       return channel | ENCODED_8BIT_CHANPG_PAGE_MASK_PAGE_31;
     default:
       // Strictly speaking, we only need case 0 here, but MISRA in its infinite

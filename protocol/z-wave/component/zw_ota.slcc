@@ -11,12 +11,12 @@ provides:
 requires:
   - name: flash_storage
 config_file:
-  - path: config/zw_ota/s1/sl_storage_config.h
+  - path: platform/SiliconLabs/PAL/config/zw_ota/s1/sl_storage_config.h
     condition: [device_series_1]
     override:
       component: flash_storage
       file_id: storage_config
-  - path: config/zw_ota/s2/sl_storage_config.h
+  - path: platform/SiliconLabs/PAL/config/zw_ota/s2/sl_storage_config.h
     condition: [device_series_2]
     override:
       component: flash_storage

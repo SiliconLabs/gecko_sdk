@@ -324,9 +324,6 @@ typedef enum
 #define FUNC_ID_ZW_NUNIT_RUN                            0xE3 // DEPRECATED
 #define FUNC_ID_ZW_NUNIT_END                            0xE4 // DEPRECATED
 
-#define FUNC_ID_IO_PORT_STATUS                          0xE5
-#define FUNC_ID_IO_PORT                                 0xE6
-
 #define FUNC_ID_ENABLE_RADIO_PTI                        0xE7
 #define FUNC_ID_GET_RADIO_PTI                           0xE8
 

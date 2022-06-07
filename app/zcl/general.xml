@@ -27,7 +27,7 @@ limitations under the License.
     <older spec="ha-1.1-05-3520-27" dependsOn="zcl-1.0-07-5123-03" certifiable="true"/>
   </domain>
   <global>
-    <command code="0x00" name="ReadAttributes" source="either">
+    <command code="0x00" name="ReadAttributes" source="either" response="ReadAttributesResponse">
       <description>
         Command description for ReadAttributes
       </description>

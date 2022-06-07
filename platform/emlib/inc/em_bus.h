@@ -31,7 +31,7 @@
 #ifndef EM_BUS_H
 #define EM_BUS_H
 
-#include "em_assert.h"
+#include "sl_assert.h"
 #include "em_core.h"
 #include "em_device.h"
 

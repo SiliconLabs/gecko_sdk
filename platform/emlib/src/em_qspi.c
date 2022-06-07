@@ -32,7 +32,7 @@
 
 #if defined(QSPI_COUNT) && (QSPI_COUNT > 0)
 
-#include "em_assert.h"
+#include "sl_assert.h"
 
 /* *INDENT-OFF* */
 /***************************************************************************//**

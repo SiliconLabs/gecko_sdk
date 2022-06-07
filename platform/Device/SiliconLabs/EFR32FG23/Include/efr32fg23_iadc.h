@@ -921,7 +921,6 @@ typedef struct {
 #define _IADC_SINGLE_PORTNEG_DEFAULT                    0x00000000UL                         /**< Mode DEFAULT for IADC_SINGLE                */
 #define _IADC_SINGLE_PORTNEG_GND                        0x00000000UL                         /**< Mode GND for IADC_SINGLE                    */
 #define _IADC_SINGLE_PORTNEG_DAC1                       0x00000002UL                         /**< Mode DAC1 for IADC_SINGLE                   */
-#define _IADC_SINGLE_PORTNEG_PADANA1                    0x00000004UL                         /**< Mode PADANA1 for IADC_SINGLE                */
 #define _IADC_SINGLE_PORTNEG_PORTA                      0x00000008UL                         /**< Mode PORTA for IADC_SINGLE                  */
 #define _IADC_SINGLE_PORTNEG_PORTB                      0x00000009UL                         /**< Mode PORTB for IADC_SINGLE                  */
 #define _IADC_SINGLE_PORTNEG_PORTC                      0x0000000AUL                         /**< Mode PORTC for IADC_SINGLE                  */
@@ -929,7 +928,6 @@ typedef struct {
 #define IADC_SINGLE_PORTNEG_DEFAULT                     (_IADC_SINGLE_PORTNEG_DEFAULT << 4)  /**< Shifted mode DEFAULT for IADC_SINGLE        */
 #define IADC_SINGLE_PORTNEG_GND                         (_IADC_SINGLE_PORTNEG_GND << 4)      /**< Shifted mode GND for IADC_SINGLE            */
 #define IADC_SINGLE_PORTNEG_DAC1                        (_IADC_SINGLE_PORTNEG_DAC1 << 4)     /**< Shifted mode DAC1 for IADC_SINGLE           */
-#define IADC_SINGLE_PORTNEG_PADANA1                     (_IADC_SINGLE_PORTNEG_PADANA1 << 4)  /**< Shifted mode PADANA1 for IADC_SINGLE        */
 #define IADC_SINGLE_PORTNEG_PORTA                       (_IADC_SINGLE_PORTNEG_PORTA << 4)    /**< Shifted mode PORTA for IADC_SINGLE          */
 #define IADC_SINGLE_PORTNEG_PORTB                       (_IADC_SINGLE_PORTNEG_PORTB << 4)    /**< Shifted mode PORTB for IADC_SINGLE          */
 #define IADC_SINGLE_PORTNEG_PORTC                       (_IADC_SINGLE_PORTNEG_PORTC << 4)    /**< Shifted mode PORTC for IADC_SINGLE          */
@@ -944,7 +942,6 @@ typedef struct {
 #define _IADC_SINGLE_PORTPOS_GND                        0x00000000UL                         /**< Mode GND for IADC_SINGLE                    */
 #define _IADC_SINGLE_PORTPOS_SUPPLY                     0x00000001UL                         /**< Mode SUPPLY for IADC_SINGLE                 */
 #define _IADC_SINGLE_PORTPOS_DAC0                       0x00000002UL                         /**< Mode DAC0 for IADC_SINGLE                   */
-#define _IADC_SINGLE_PORTPOS_PADANA0                    0x00000004UL                         /**< Mode PADANA0 for IADC_SINGLE                */
 #define _IADC_SINGLE_PORTPOS_PORTA                      0x00000008UL                         /**< Mode PORTA for IADC_SINGLE                  */
 #define _IADC_SINGLE_PORTPOS_PORTB                      0x00000009UL                         /**< Mode PORTB for IADC_SINGLE                  */
 #define _IADC_SINGLE_PORTPOS_PORTC                      0x0000000AUL                         /**< Mode PORTC for IADC_SINGLE                  */
@@ -953,7 +950,6 @@ typedef struct {
 #define IADC_SINGLE_PORTPOS_GND                         (_IADC_SINGLE_PORTPOS_GND << 12)     /**< Shifted mode GND for IADC_SINGLE            */
 #define IADC_SINGLE_PORTPOS_SUPPLY                      (_IADC_SINGLE_PORTPOS_SUPPLY << 12)  /**< Shifted mode SUPPLY for IADC_SINGLE         */
 #define IADC_SINGLE_PORTPOS_DAC0                        (_IADC_SINGLE_PORTPOS_DAC0 << 12)    /**< Shifted mode DAC0 for IADC_SINGLE           */
-#define IADC_SINGLE_PORTPOS_PADANA0                     (_IADC_SINGLE_PORTPOS_PADANA0 << 12) /**< Shifted mode PADANA0 for IADC_SINGLE        */
 #define IADC_SINGLE_PORTPOS_PORTA                       (_IADC_SINGLE_PORTPOS_PORTA << 12)   /**< Shifted mode PORTA for IADC_SINGLE          */
 #define IADC_SINGLE_PORTPOS_PORTB                       (_IADC_SINGLE_PORTPOS_PORTB << 12)   /**< Shifted mode PORTB for IADC_SINGLE          */
 #define IADC_SINGLE_PORTPOS_PORTC                       (_IADC_SINGLE_PORTPOS_PORTC << 12)   /**< Shifted mode PORTC for IADC_SINGLE          */
@@ -985,7 +981,6 @@ typedef struct {
 #define _IADC_SCAN_PORTNEG_DEFAULT                      0x00000000UL                       /**< Mode DEFAULT for IADC_SCAN                  */
 #define _IADC_SCAN_PORTNEG_GND                          0x00000000UL                       /**< Mode GND for IADC_SCAN                      */
 #define _IADC_SCAN_PORTNEG_DAC1                         0x00000002UL                       /**< Mode DAC1 for IADC_SCAN                     */
-#define _IADC_SCAN_PORTNEG_PADANA1                      0x00000004UL                       /**< Mode PADANA1 for IADC_SCAN                  */
 #define _IADC_SCAN_PORTNEG_PORTA                        0x00000008UL                       /**< Mode PORTA for IADC_SCAN                    */
 #define _IADC_SCAN_PORTNEG_PORTB                        0x00000009UL                       /**< Mode PORTB for IADC_SCAN                    */
 #define _IADC_SCAN_PORTNEG_PORTC                        0x0000000AUL                       /**< Mode PORTC for IADC_SCAN                    */
@@ -993,7 +988,6 @@ typedef struct {
 #define IADC_SCAN_PORTNEG_DEFAULT                       (_IADC_SCAN_PORTNEG_DEFAULT << 4)  /**< Shifted mode DEFAULT for IADC_SCAN          */
 #define IADC_SCAN_PORTNEG_GND                           (_IADC_SCAN_PORTNEG_GND << 4)      /**< Shifted mode GND for IADC_SCAN              */
 #define IADC_SCAN_PORTNEG_DAC1                          (_IADC_SCAN_PORTNEG_DAC1 << 4)     /**< Shifted mode DAC1 for IADC_SCAN             */
-#define IADC_SCAN_PORTNEG_PADANA1                       (_IADC_SCAN_PORTNEG_PADANA1 << 4)  /**< Shifted mode PADANA1 for IADC_SCAN          */
 #define IADC_SCAN_PORTNEG_PORTA                         (_IADC_SCAN_PORTNEG_PORTA << 4)    /**< Shifted mode PORTA for IADC_SCAN            */
 #define IADC_SCAN_PORTNEG_PORTB                         (_IADC_SCAN_PORTNEG_PORTB << 4)    /**< Shifted mode PORTB for IADC_SCAN            */
 #define IADC_SCAN_PORTNEG_PORTC                         (_IADC_SCAN_PORTNEG_PORTC << 4)    /**< Shifted mode PORTC for IADC_SCAN            */
@@ -1008,7 +1002,6 @@ typedef struct {
 #define _IADC_SCAN_PORTPOS_GND                          0x00000000UL                       /**< Mode GND for IADC_SCAN                      */
 #define _IADC_SCAN_PORTPOS_SUPPLY                       0x00000001UL                       /**< Mode SUPPLY for IADC_SCAN                   */
 #define _IADC_SCAN_PORTPOS_DAC0                         0x00000002UL                       /**< Mode DAC0 for IADC_SCAN                     */
-#define _IADC_SCAN_PORTPOS_PADANA0                      0x00000004UL                       /**< Mode PADANA0 for IADC_SCAN                  */
 #define _IADC_SCAN_PORTPOS_PORTA                        0x00000008UL                       /**< Mode PORTA for IADC_SCAN                    */
 #define _IADC_SCAN_PORTPOS_PORTB                        0x00000009UL                       /**< Mode PORTB for IADC_SCAN                    */
 #define _IADC_SCAN_PORTPOS_PORTC                        0x0000000AUL                       /**< Mode PORTC for IADC_SCAN                    */
@@ -1017,7 +1010,6 @@ typedef struct {
 #define IADC_SCAN_PORTPOS_GND                           (_IADC_SCAN_PORTPOS_GND << 12)     /**< Shifted mode GND for IADC_SCAN              */
 #define IADC_SCAN_PORTPOS_SUPPLY                        (_IADC_SCAN_PORTPOS_SUPPLY << 12)  /**< Shifted mode SUPPLY for IADC_SCAN           */
 #define IADC_SCAN_PORTPOS_DAC0                          (_IADC_SCAN_PORTPOS_DAC0 << 12)    /**< Shifted mode DAC0 for IADC_SCAN             */
-#define IADC_SCAN_PORTPOS_PADANA0                       (_IADC_SCAN_PORTPOS_PADANA0 << 12) /**< Shifted mode PADANA0 for IADC_SCAN          */
 #define IADC_SCAN_PORTPOS_PORTA                         (_IADC_SCAN_PORTPOS_PORTA << 12)   /**< Shifted mode PORTA for IADC_SCAN            */
 #define IADC_SCAN_PORTPOS_PORTB                         (_IADC_SCAN_PORTPOS_PORTB << 12)   /**< Shifted mode PORTB for IADC_SCAN            */
 #define IADC_SCAN_PORTPOS_PORTC                         (_IADC_SCAN_PORTPOS_PORTC << 12)   /**< Shifted mode PORTC for IADC_SCAN            */

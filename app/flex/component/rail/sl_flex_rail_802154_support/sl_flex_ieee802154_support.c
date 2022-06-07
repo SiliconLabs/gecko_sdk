@@ -41,7 +41,7 @@
 // -----------------------------------------------------------------------------
 //                              Macros and Typedefs
 // -----------------------------------------------------------------------------
-#define ADDRESS_FILTER_INDEX                        (0u)
+#define ADDRESS_FILTER_INDEX                        (0U)
 
 // -----------------------------------------------------------------------------
 //                          Static Function Declarations
@@ -123,9 +123,9 @@ static sl_flex_ieee802154_std_t standard_protocol =
 /// currently requested or not ACK
 static bool is_ack_requested = false;
 /// currently used channel for standard
-static uint16_t channel = 0u;
+static uint16_t channel = 0U;
 /// system number, all devices have unique number.
-static uint64_t system_number = 0u;
+static uint64_t system_number = 0U;
 /// CSMA/CA configuration structure for IEEE 502.15.4 2003 2p4 GHz
 static RAIL_CsmaConfig_t csma_config_2p4 =
   RAIL_CSMA_CONFIG_802_15_4_2003_2p4_GHz_OQPSK_CSMA;
@@ -147,6 +147,8 @@ int16_t sl_flex_ieee802154_protocol_init(RAIL_Handle_t r_handle,
 {
   // based on the protocol (used via UC) setups the communication considering
   // the RF bands as well
+  int16_t status = SL_FLEX_IEEE802154_OK;
+
   switch (protocol) {
     case SL_FLEX_UTIL_PROTOCOL_IEEE802154_2P4GHZ:
     case SL_FLEX_UTIL_PROTOCOL_IEEE802154_2P4GHZ_ANTDIV:
@@ -164,8 +166,12 @@ int16_t sl_flex_ieee802154_protocol_init(RAIL_Handle_t r_handle,
       channel = SL_FLEX_IEEE802154_CHANNEL_863;
       break;
     default:
-      return SL_FLEX_IEEE802154_UNSUPPORTED_PROTOCOL;
+      status = SL_FLEX_IEEE802154_UNSUPPORTED_PROTOCOL;
       break;
+  }
+
+  if (status != SL_FLEX_IEEE802154_OK) {
+    return status;
   }
 
   // sets the PAN ID (by default for broadcast)
@@ -179,7 +185,7 @@ int16_t sl_flex_ieee802154_protocol_init(RAIL_Handle_t r_handle,
   // sets the long address
   (void)sl_flex_ieee802154_set_long_addr_filter(r_handle, &system_number);
 
-  return SL_FLEX_IEEE802154_OK;
+  return status;
 }
 
 sl_flex_ieee802154_std_t sl_flex_ieee802154_get_std(void)
@@ -200,8 +206,7 @@ void sl_flex_ieee802154_print_frame(sl_flex_ieee802154_std_t std,
     return;
   }
 
-  uint16_t i = 0;
-  uint8_t *tmp_payload = (uint8_t*)frame->payload;
+  const uint8_t *tmp_payload = (uint8_t*)frame->payload;
 
   // prints the PHR information in case of g option
   if ((std == SL_FLEX_IEEE802154_STD_IEEE802154G_863MHZ)
@@ -223,17 +228,16 @@ void sl_flex_ieee802154_print_frame(sl_flex_ieee802154_std_t std,
 
   // prints the payload
   app_log_info("Payload: ");
-  for (i = 0; i < frame->payload_size; i++) {
+  for (uint8_t i = 0; i < frame->payload_size; i++) {
     app_log_info("0x%02X, ", tmp_payload[i]);
   }
   app_log_info("\n");
 }
 
 void sl_flex_ieee802154_print_ack(sl_flex_ieee802154_std_t std,
-                                  uint8_t *buffer)
+                                  const uint8_t *buffer)
 {
-  uint8_t size = 0u;
-  uint8_t i = 0u;
+  uint8_t size = 0U;
 
   if (buffer == NULL) {
     app_log_error("sl_flex_ieee802154_print_ack ERR: parameter\n");
@@ -247,7 +251,7 @@ void sl_flex_ieee802154_print_ack(sl_flex_ieee802154_std_t std,
   }
 
   app_log_info("ACK: ");
-  for (i = 0; i < size; i++) {
+  for (uint8_t i = 0; i < size; i++) {
     app_log_info("0x%02X, ", buffer[i]);
   }
   app_log_info("\n");
@@ -345,7 +349,7 @@ void sl_flex_ieee802154_prepare_sending(sl_flex_ieee802154_frame_t *tx_frame,
 }
 
 void sl_flex_ieee802154_update_status(sl_flex_ieee802154_status_t *comm_status,
-                                      sl_flex_ieee802154_frame_t *tx_frame)
+                                      const sl_flex_ieee802154_frame_t *tx_frame)
 {
   if (comm_status == NULL || tx_frame == NULL) {
     app_log_error("sl_flex_ieee802154_update_status ERR: parameter\n");
@@ -393,7 +397,7 @@ bool sl_flex_ieee802154_is_change_requested(
 }
 
 RAIL_Status_t sl_flex_ieee802154_transmission(RAIL_Handle_t rail_handle,
-                                              uint8_t *packet,
+                                              const uint8_t *packet,
                                               uint16_t packet_size)
 {
   RAIL_Status_t status;
@@ -491,7 +495,8 @@ int16_t sl_flex_ieee802154_unpack_data_frame(sl_flex_ieee802154_std_t std,
                                              uint8_t *frame_buffer,
                                              uint16_t max_frame_size)
 {
-  uint16_t max_payload_size = 0u;
+  uint16_t max_payload_size = 0U;
+  int16_t status = SL_FLEX_IEEE802154_OK;
 
   if ((frame == NULL) || (frame_buffer == NULL)) {
     app_log_error("sl_flex_ieee802154_unpack_data_frame ERR: parameter");
@@ -505,7 +510,8 @@ int16_t sl_flex_ieee802154_unpack_data_frame(sl_flex_ieee802154_std_t std,
                                                                frame_buffer);
       if (frame->payload == NULL) {
         app_log_warning("sl_flex_802154_packet_unpack_data_frame failed");
-        return SL_FLEX_IEEE802154_ERROR;
+        status = SL_FLEX_IEEE802154_ERROR;
+        break;
       }
 
       // max payload calculation
@@ -517,7 +523,8 @@ int16_t sl_flex_ieee802154_unpack_data_frame(sl_flex_ieee802154_std_t std,
       // checks the size of the received payload
       if (frame->payload_size > max_payload_size) {
         app_log_warning("sl_flex_802154_packet_unpack_data_frame failed: Corrupted frame received: payload is too large.");
-        return SL_FLEX_IEEE802154_ERROR;
+        status = SL_FLEX_IEEE802154_ERROR;
+        break;
       }
 
       break;
@@ -531,7 +538,8 @@ int16_t sl_flex_ieee802154_unpack_data_frame(sl_flex_ieee802154_std_t std,
 
       if (frame->payload == NULL) {
         app_log_warning("sl_flex_802154_packet_unpack_data_frame failed");
-        return SL_FLEX_IEEE802154_ERROR;
+        status = SL_FLEX_IEEE802154_ERROR;
+        break;
       }
 
       // considering the size of the CRC the max payload is calculated
@@ -550,16 +558,17 @@ int16_t sl_flex_ieee802154_unpack_data_frame(sl_flex_ieee802154_std_t std,
       // checks the size of the received payload
       if (frame->payload_size > max_payload_size) {
         app_log_warning("sl_flex_802154_packet_unpack_data_frame failed: Corrupted frame received: payload is too large.");
-        return SL_FLEX_IEEE802154_ERROR;
+        status = SL_FLEX_IEEE802154_ERROR;
+        break;
       }
 
       break;
     default:
-      return SL_FLEX_IEEE802154_UNSUPPORTED_PROTOCOL;
+      status = SL_FLEX_IEEE802154_UNSUPPORTED_PROTOCOL;
       break;
   }
 
-  return SL_FLEX_IEEE802154_OK;
+  return status;
 }
 
 // -----------------------------------------------------------------------------
@@ -578,7 +587,7 @@ static void sl_flex_ieee802154_change_std(RAIL_Handle_t rail_handle,
   *current_std = std;
 
   // clear the seq.#
-  tx_frame->mhr_config.sequence_number = 0u;
+  tx_frame->mhr_config.sequence_number = 0U;
   // clear the ACK req. in  the FCF
   tx_frame->mhr_config.frame_control &= ~MAC_FRAME_FLAG_ACK_REQUIRED;
   *current_ack = false;
@@ -614,6 +623,8 @@ static void sl_flex_ieee802154_change_std(RAIL_Handle_t rail_handle,
       break;
     case SL_FLEX_IEEE802154_STD_IEEE802154G_915MHZ:
       *new_channel = SL_FLEX_IEEE802154_CHANNEL_915;
+      break;
+    default:
       break;
   }
 
@@ -664,8 +675,12 @@ static int16_t sl_flex_ieee802154_reinit(RAIL_Handle_t r_handle,
       }
       break;
     default:
-      return SL_FLEX_IEEE802154_ERROR;
+      status = RAIL_STATUS_INVALID_PARAMETER;
       break;
+  }
+
+  if (status != RAIL_STATUS_NO_ERROR) {
+    return SL_FLEX_IEEE802154_ERROR;
   }
 
   // configures G options for IEEE 802.15.4g (863/915MHz)

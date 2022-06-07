@@ -164,6 +164,44 @@ typedef enum
 } scanner_discover_mode_t;
 
 /*
+ * Deprecated and replaced by sl_bt_scanner_scan_mode_t.
+ */
+typedef enum
+{
+  scanner_scan_mode_passive = 0x0,
+  scanner_scan_mode_active  = 0x1
+} scanner_scan_mode_t;
+
+/*
+ * Deprecated and replaced by sl_bt_scanner_scan_phy_t.
+ */
+typedef enum
+{
+  scanner_scan_phy_1m           = 0x1,
+  scanner_scan_phy_coded        = 0x4,
+  scanner_scan_phy_1m_and_coded = 0x5
+} scanner_scan_phy_t;
+
+/*
+ * Deprecated and replaced by sl_bt_scanner_data_status_t.
+ */
+typedef enum
+{
+  scanner_data_status_complete          = 0x0,
+  scanner_data_status_incomplete_more   = 0x1,
+  scanner_data_status_incomplete_nomore = 0x2
+} scanner_data_status_t;
+
+/*
+ * Deprecated SCANNER_* defines replaced by SL_BT_SCANNER_*.
+ */
+#define SCANNER_EVENT_FLAG_CONNECTABLE   0x1       
+#define SCANNER_EVENT_FLAG_SCANNABLE     0x2       
+#define SCANNER_EVENT_FLAG_DIRECTED      0x4       
+#define SCANNER_EVENT_FLAG_SCAN_RESPONSE 0x8       
+
+
+/*
  * Deprecated and replaced by sl_bt_sync_reporting_mode_t.
  */
 typedef enum
@@ -186,6 +224,15 @@ typedef enum
   sync_clock_accuracy_30  = 0x1e,
   sync_clock_accuracy_20  = 0x14
 } sync_advertiser_clock_accuracy_t;
+
+/*
+ * Deprecated and replaced by sl_bt_past_receiver_mode_t.
+ */
+typedef enum
+{
+  past_receiver_mode_ignore      = 0x0,
+  past_receiver_mode_synchronize = 0x1
+} past_receiver_mode_t;
 
 /*
  * Deprecated and replaced by sl_bt_connection_security_t.
@@ -410,6 +457,18 @@ typedef enum
 } sm_io_capability_t;
 
 /*
+ * Deprecated SM_* defines replaced by SL_BT_SM_*.
+ */
+#define SM_CONFIGURATION_MITM_REQUIRED                        0x1       
+#define SM_CONFIGURATION_BONDING_REQUIRED                     0x2       
+#define SM_CONFIGURATION_SC_ONLY                              0x4       
+#define SM_CONFIGURATION_BONDING_REQUEST_REQUIRED             0x8       
+#define SM_CONFIGURATION_CONNECTIONS_FROM_BONDED_DEVICES_ONLY 0x10      
+#define SM_CONFIGURATION_PREFER_MITM                          0x20      
+#define SM_CONFIGURATION_OOB_FROM_BOTH_DEVICES_REQUIRED       0x40      
+
+
+/*
  * Deprecated and replaced by sl_bt_coex_option_t.
  */
 typedef enum
@@ -420,21 +479,21 @@ typedef enum
 } coex_option_t;
 
 /*
- * Deprecated and replaced by sl_bt_l2cap_coc_connection_result_t.
+ * Deprecated and replaced by sl_bt_l2cap_connection_result_t.
  */
 typedef enum
 {
-  l2cap_connection_successful            = 0x0,
-  l2cap_le_psm_not_supported             = 0x2,
-  l2cap_no_resources_available           = 0x4,
-  l2cap_insufficient_authentication      = 0x5,
-  l2cap_insufficient_authorization       = 0x6,
-  l2cap_insufficient_encryption_key_size = 0x7,
-  l2cap_insufficient_encryption          = 0x8,
-  l2cap_invalid_source_cid               = 0x9,
-  l2cap_source_cid_already_allocated     = 0xa,
-  l2cap_unacceptable_parameters          = 0xb
-} l2cap_coc_connection_result_t;
+  l2cap_connection_result_successful                    = 0x0,
+  l2cap_connection_result_spsm_not_supported            = 0x2,
+  l2cap_connection_result_no_resources_available        = 0x4,
+  l2cap_connection_result_insufficient_authentication   = 0x5,
+  l2cap_connection_result_insufficient_authorization    = 0x6,
+  l2cap_connection_result_encryption_key_size_too_short = 0x7,
+  l2cap_connection_result_insufficient_encryption       = 0x8,
+  l2cap_connection_result_invalid_source_cid            = 0x9,
+  l2cap_connection_result_source_cid_already_allocated  = 0xa,
+  l2cap_connection_result_unacceptable_parameters       = 0xb
+} l2cap_connection_result_t;
 
 /*
  * Deprecated and replaced by sl_bt_l2cap_command_reject_reason_t.
@@ -452,9 +511,18 @@ typedef enum
 typedef enum
 {
   l2cap_disconnection_request = 0x6,
-  l2cap_connection_request    = 0x14,
+  l2cap_le_connection_request = 0x14,
   l2cap_flow_control_credit   = 0x16
 } l2cap_command_code_t;
+
+/*
+ * Deprecated CTE_RECEIVER_* defines replaced by SL_BT_CTE_RECEIVER_*.
+ */
+#define CTE_RECEIVER_DO_NOT_SYNC_TO_AOA      0x1       
+#define CTE_RECEIVER_DO_NOT_SYNC_TO_AOD_1_US 0x2       
+#define CTE_RECEIVER_DO_NOT_SYNC_TO_AOD_2_US 0x4       
+#define CTE_RECEIVER_SYNC_TO_CTE_ONLY        0x10      
+
 /*
  * Deprecated and replaced by sl_bt_gap_phy_type_t.
  */

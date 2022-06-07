@@ -164,6 +164,17 @@ PROTECTED_FIELDS_SOL = {
     'RAC.IFADCPLLDCO': [
         'IFADCPLLDCOTEMPADJ'
     ],
+    'RFFPLL0.RFFPLLCAL1': [
+        'DIVR'
+    ],
+    'RFFPLL0.RFFPLLCTRL1': [
+        'DIVN',
+        'DIVX',
+        'DIVY',
+        'DIVXDACSEL',
+        'DIVXMODEMSEL',
+        'DIVYSEL'
+    ],
     'SYNTH.LPFCTRL2RX': [
         'LPFINCAPRX'
     ],
@@ -196,6 +207,7 @@ PROTECTED_FIELDS = {
     'bobcat': mergeDictionaries(PROTECTED_FIELDS_BASE, PROTECTED_FIELDS_BOBCAT),
     'sol': mergeDictionaries(PROTECTED_FIELDS_BASE, PROTECTED_FIELDS_SOL),
     'leopard': mergeDictionaries(PROTECTED_FIELDS_BASE, None),
+    'margay': mergeDictionaries(PROTECTED_FIELDS_BASE, PROTECTED_FIELDS_OCELOT),
 }
 
 # Radio config action "enum"

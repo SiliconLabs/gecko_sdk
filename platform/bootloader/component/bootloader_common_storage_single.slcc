@@ -18,6 +18,8 @@ include:
     - path: storage/bootloadinfo/btl_storage_bootloadinfo.h
 provides:
   - name: bootloader_common_storage_single
+  - name: bootloader_nonsecure_incompatible
+    condition: [bootloader_core_nonsecure]
 requires:
   - name: bootloader_storage_slots
   - name: bootloader_debug

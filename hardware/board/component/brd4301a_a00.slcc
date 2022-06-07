@@ -14,12 +14,18 @@
   - name: brd4301a_a00
   - name: hardware_board
   - name: hardware_board_rb
+  - name: hardware_board_has_si70xx
+  - name: hardware_board_has_tempsensor
+  - name: hardware_board_has_vcom
   - name: hardware_board_supports_rf_band_2400
   - name: hardware_board_supports_1_rf_band
   - name: hardware_board_default_rf_band
   - name: hardware_board_default_rf_band_2400
 - recommends:
   - id: brd4001a
+  - id: i2cspm
+    instance:
+    - sensor
   - id: simple_led
     instance:
     - led0

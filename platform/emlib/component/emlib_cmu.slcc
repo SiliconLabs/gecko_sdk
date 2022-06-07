@@ -20,9 +20,14 @@ requires:
   - name: device_has_cmu
   - name: emlib_common
   - name: emlib_emu
+  - name: emlib_msc
   - name: emlib_gpio
   - name: emlib_system
   - name: cmsis_core
+  - name: emlib_syscfg
+    condition: [device_has_syscfg]
+  - name: enum
+
 documentation:
   docset: gecko-platform
   document:

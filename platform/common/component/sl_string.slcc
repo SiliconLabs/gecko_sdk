@@ -11,8 +11,6 @@ include:
       - path: sl_string.h
 source:
   - path: src/sl_string.c
-requires:
-  - name: status
 provides:
   - name: sl_string
 documentation:

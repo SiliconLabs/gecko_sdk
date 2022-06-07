@@ -1,7 +1,12 @@
 project_name: "XncpLedHost"
+label: "Zigbee - Host XncpLedHost"
 package: "Zigbee"
 category: "Zigbee Host Application"
 quality: "production"
+
+description: >
+  This is a demonstration of a UNIX HOST controlling an LED on an NCP.
+author: "Silicon Laboratories, Inc."
 
 component:
   - id: "cli"
@@ -93,9 +98,6 @@ template_contribution:
       handler: getInfoCommand
       help: Display the XNCP information on the CLI.
 
-description: |-
-  This is a demonstration of a UNIX HOST controlling an LED on an NCP.
-
 readme:
   - path: ./readme.html
 
@@ -103,3 +105,11 @@ ui_hints:
   highlight:
     - path: readme.html
       focus: false
+
+filter:
+  - name: "Wireless Technology"
+    value: ["Zigbee"]
+  - name: "Device Type"
+    value: ["Host"]
+  - name: "Project Difficulty"
+    value: ["Advanced"]

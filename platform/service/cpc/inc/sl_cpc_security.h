@@ -28,13 +28,14 @@
  *
  ******************************************************************************/
 
-#ifndef SL_CPC_SECURITY_SECONDARY_H_
-#define SL_CPC_SECURITY_SECONDARY_H_
+#ifndef SL_CPC_SECURITY_SECONDARY_H
+#define SL_CPC_SECURITY_SECONDARY_H
 
 #include <stdint.h>
 #include "sl_status.h"
 #include "sl_enum.h"
 #include "psa/crypto.h"
+#include "sl_slist.h"
 #include "psa_crypto_storage.h"
 #include "sl_cpc_security_config.h"
 
@@ -44,76 +45,69 @@
 /// The security state bounded bit mask
 #define SL_CPC_SECURITY_STATE_BOUND_MASK  (1 << 1)
 
-SL_ENUM_GENERIC(sl_cpc_security_binding_key_method_t, uint8_t)
+// Binding types
+#define  SL_CPC_SECURITY_BINDING_KEY_CUSTOMER_SPECIFIC    0x03
+#define  SL_CPC_SECURITY_BINDING_KEY_ECDH                 0x02
+#define  SL_CPC_SECURITY_BINDING_KEY_PLAINTEXT_SHARE      0x01
+#define  SL_CPC_SECURITY_BINDING_KEY_NONE                 0x00
+
+#define SL_CPC_SECURITY_OK_TO_UNBIND 0xAAAAAAAAAAAAAAAA
+
+/***************************************************************************/ /**
+ * @addtogroup cpc_security_secondary
+ * @brief CPC Security Secondary
+ * @details
+ * ## Overview
+ *
+ *   TODO
+ *
+ * ## Initialization
+ *
+ *   TODO
+ *
+ * @{
+ ******************************************************************************/
+
+/// @brief Enumeration representing security state.
+SL_ENUM_GENERIC(sl_cpc_security_state_t, uint8_t)
 {
-  SL_CPC_SECURITY_BINDING_KEY_CUSTOMER_SPECIFIC = 0x03,
-  SL_CPC_SECURITY_BINDING_KEY_ECDH              = 0x02,
-  SL_CPC_SECURITY_BINDING_KEY_PLAINTEXT_SHARE   = 0x01,
-  SL_CPC_SECURITY_BINDING_KEY_NONE              = 0x00
+  SL_CPC_SECURITY_STATE_NOT_READY     = 0x00,         ///< Security is not yet setup, no I-frame allowed
+  SL_CPC_SECURITY_STATE_DISABLED      = 0x01,         ///< Security is not enabled, cleartext I-frame are allowed
+  SL_CPC_SECURITY_STATE_INITIALIZING  = 0x02,         ///< Security is being initialized, raw I-frame are only allowed on security endpoint
+  SL_CPC_SECURITY_STATE_RESETTING     = 0x03,         ///< Security is being reset
+  SL_CPC_SECURITY_STATE_WAITING_ON_TX_COMPLETE = 0x4, ///< Response to setup the security session is about to be sent, waiting for write completion
+  SL_CPC_SECURITY_STATE_INITIALIZED   = 0x05,         ///< Security is initialized, only encrypted I-frame are allowed
 };
 
-#define SLI_CPC_SECURITY_BINDING_TYPE_PLAINTEXT 0x00
-#define SLI_CPC_SECURITY_BINDING_TYPE_ECDH      0x01
+/***************************************************************************//**
+ * Typedef for the user-supplied callback function, which is called when
+ * unbinding (authorized).
+ *
+ * @param data   User-specific argument.
+ ******************************************************************************/
+typedef void (*sl_cpc_unbind_notification_t)(void *data);
 
-#define SLI_CPC_SECURITY_PROTOCOL_RESPONSE_MASK 0x8000
-
-SL_ENUM_GENERIC(sl_cpc_security_id_t, uint16_t)
-{
-  BINDING_REQUEST_ID       = 0x0001,
-  PLAIN_TEXT_KEY_SHARE_ID  = 0x0002,
-  PUBLIC_KEY_SHARE_ID      = 0x0003,
-  SESSION_INIT_ID          = 0x0004,
-  UNBIND_REQUEST_ID        = 0x0005
-};
-
-SL_ENUM_GENERIC(sl_cpc_binding_request_t, uint8_t)
-{
-  PLAIN_TEXT_KEY_SHARE_BINDING_REQUEST = 0x00,
-  ECDH_BINDING_REQUEST = 0x01
-};
-
+/// @brief Enumeration representing unbind notification handle.
 typedef struct {
-  uint16_t request_len;
-  uint16_t response_len;
-  sl_cpc_security_id_t command_id;
-}sl_cpc_security_protocol_cmd_info_t;
-
-#define SLI_SECURITY_BINDING_KEY_LENGTH_BYTES         16
-#define SLI_SECURITY_PUBLIC_KEY_LENGTH_BYTES          32
-#define SLI_SECURITY_SESSION_KEY_LENGTH_BYTES         32
-#define SLI_SECURITY_SESSION_ID_LENGTH_BYTES          8
-#define SLI_SECURITY_SESSION_INIT_RANDOM_LENGTH_BYTES 64
-#define SLI_SECURITY_SHA256_LENGTH_BYTES              32
-
-#define SLI_SECURITY_PROTOCOL_PAYLOAD_MAX_LENGTH (sizeof(sl_status_t) + SLI_SECURITY_SESSION_INIT_RANDOM_LENGTH_BYTES)
-#define SLI_SECURITY_PROTOCOL_HEADER_LENGTH (sizeof(uint16_t) + sizeof(sl_cpc_security_id_t))
-
-typedef __PACKED_STRUCT {
-  uint16_t len;
-  sl_cpc_security_id_t command_id;
-  uint8_t payload[SLI_SECURITY_PROTOCOL_PAYLOAD_MAX_LENGTH];
-} sl_cpc_security_protocol_cmd_t;
-
-typedef __PACKED_STRUCT {
-  sl_status_t status;
-  uint8_t random2[SLI_SECURITY_SESSION_INIT_RANDOM_LENGTH_BYTES];
-} session_init_response_t;
+  sl_cpc_unbind_notification_t fnct;      ///< Notification Callback
+  sl_slist_node_t node;                   ///< Single list node
+  void *data;                             ///< User-specific argument
+} sl_cpc_unbind_notification_handle_t;
 
 #ifdef __cplusplus
 extern "C"
 {
 #endif
 
-/***************************************************************************/ /**
- * @addtogroup cpc_security_secondary
- * @brief CPC Security Secondary
- * @details
- * @{
+/***************************************************************************//**
+ * Get the setup status of the security subsystem.
+ *
+ * @return The setup status of the security subsystem.
  ******************************************************************************/
-uint32_t sl_cpc_security_get_state(void);
+sl_cpc_security_state_t sl_cpc_security_get_state(void);
 
-/***************************************************************************/ /**
- * User callback to provide CPC with a binding key
+/***************************************************************************//**
+ * User callback to provide CPC with a binding key.
  *
  * SL_CPC_SECURITY_BINDING_KEY_METHOD config must be set to
  * SL_CPC_SECURITY_BINDING_KEY_CUSTOMER_SPECIFIC
@@ -124,20 +118,52 @@ uint32_t sl_cpc_security_get_state(void);
  ******************************************************************************/
 void sl_cpc_security_fetch_user_specified_binding_key(uint8_t **key, uint16_t *key_size_in_bytes);
 
-/***************************************************************************/ /**
- * Security endpoint init
+/***************************************************************************//**
+ * Authorize an unbind request.
+ *
+ * @note Declared as a weak symbol. If no strong definition is given by the user,
+ *       unbind requests are always denied. If the user gives a definition
+ *       for this function, its return value will dictate if unbind requests
+ *       are accepted.
+ *
+ * @return Whether to allow unbind or not, use SL_CPC_SECURITY_OK_TO_UNBIND as a return value
+ *         to allow. Return anything else to deny.
  ******************************************************************************/
-void sl_cpc_security_init(void);
+uint64_t sl_cpc_security_on_unbind_request(bool is_link_encrypted);
 
-/***************************************************************************/ /**
- * Security endpoint process action
+/***************************************************************************//**
+ * Unbind device.
+ *
+ * @return Status code.
  ******************************************************************************/
-void sli_cpc_security_process(void);
+sl_status_t sl_cpc_security_unbind(void);
 
-/** @} (end addtogroup cpc_security_secondary) */
+/***************************************************************************//**
+ * Register a callback that will be called when an unbind event occurs.
+ *
+ * @param[in] handle pointer to the unbind notification handle.
+ * @param[in] callback pointer to the unbind notification callback.
+ * @param[in] data pointer to pass to the unbind notification callback.
+ *
+ * @return Status code.
+ ******************************************************************************/
+sl_status_t sl_cpc_security_unbind_subscribe(sl_cpc_unbind_notification_handle_t *handle,
+                                             sl_cpc_unbind_notification_t callback,
+                                             void *data);
+
+/***************************************************************************//**
+ * Unregister a callback that will be called when an unbind event occurs.
+ *
+ * @param[in] handle pointer to the unbind notification handle.
+ *
+ * @return Status code.
+ ******************************************************************************/
+sl_status_t sl_cpc_security_unbind_unsubscribe(sl_cpc_unbind_notification_handle_t *handle);
 
 #ifdef __cplusplus
 }
 #endif
 
-#endif /* SL_CPC_SECURITY_SECONDARY_H_ */
+/** @} (end addtogroup cpc_security_secondary) */
+
+#endif /* SL_CPC_SECURITY_SECONDARY_H */

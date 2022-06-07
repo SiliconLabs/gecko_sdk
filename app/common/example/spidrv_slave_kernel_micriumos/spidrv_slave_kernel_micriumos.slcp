@@ -5,6 +5,13 @@ label: Platform - SPIDRV Slave on Micrium OS kernel
 description: > 
   This example project demonstrates how to use the slave mode of the Serial Peripheral Interface driver in a Micrium OS kernel task.
 category: Example|Platform
+filter:
+  - name: "Device Type"
+    value: ["SoC"]
+  - name: "MCU"
+    value: ["32-bit MCU"]
+  - name: "Project Difficulty"
+    value: ["Advanced"]
 source:
   - path: app.c
   - path: main.c
@@ -26,7 +33,7 @@ component:
 define:
   - name: DEBUG_EFM
 readme:
-  - path: "readme.html"
+  - path: readme.md
 configuration:
   - name: SL_SPIDRV_EXP_TYPE
     value: spidrvSlave
@@ -34,3 +41,5 @@ configuration:
     value: spidrvSlaveStartDelayed
   - name: SL_BOARD_ENABLE_VCOM
     value: 1
+ui_hints:
+  highlight: readme.md

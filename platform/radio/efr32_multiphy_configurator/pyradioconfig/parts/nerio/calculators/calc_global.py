@@ -68,6 +68,3 @@ class CALC_Global_nerio(CALC_Global_jumbo):
 
         # This register field was added specifically to enable the firmware fix for RAIL_LIB-2563
         self._addModelRegister(model, 'SEQ.MISC.BLE_VITERBI_FIX_EN',     int, ModelVariableFormat.HEX)
-
-    def calc_family_name(self, model):
-        model.vars.family.value = "nerio"

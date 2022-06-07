@@ -46,29 +46,30 @@
   - condition:
     - brd4001a
     override:
-      component: cpc_primary_driver_uart
+      component: cpc_primary_driver_uart_usart
       file_id: cpc_drv_uart_primary_config
       instance: vcom
-    path: brd4191a_brd4001a/sl_cpc_drv_uart_primary_vcom_config.h
+    path: brd4191a_brd4001a/sl_cpc_drv_primary_uart_usart_vcom_config.h
   - condition:
     - brd4001a
     override:
-      component: cpc_secondary_driver_uart
-      file_id: cpc_drv_uart_secondary_config
+      component: cpc_secondary_driver_uart_eusart
+      file_id: cpc_drv_secondary_uart_eusart_config
       instance: vcom
-    path: brd4191a_brd4001a/sl_cpc_drv_uart_secondary_vcom_config.h
+    path: brd4191a_brd4001a/sl_cpc_drv_secondary_uart_eusart_vcom_config.h
+  - condition:
+    - brd4001a
+    override:
+      component: cpc_secondary_driver_uart_usart
+      file_id: cpc_drv_secondary_uart_usart_config
+      instance: vcom
+    path: brd4191a_brd4001a/sl_cpc_drv_secondary_uart_usart_vcom_config.h
   - condition:
     - brd4001a
     override:
       component: device_init_hfxo
       file_id: device_init_hfxo_config
     path: brd4191a_brd4001a/sl_device_init_hfxo_config.h
-  - condition:
-    - brd4001a
-    override:
-      component: device_init_lfxo
-      file_id: device_init_lfxo_config
-    path: brd4191a_brd4001a/sl_device_init_lfxo_config.h
   - condition:
     - brd4001a
     override:
@@ -120,6 +121,12 @@
   - condition:
     - brd4001a
     override:
+      component: rail_util_aox
+      file_id: rail_util_aox_config
+    path: brd4191a_brd4001a/sl_rail_util_aox_config.h
+  - condition:
+    - brd4001a
+    override:
       component: rail_util_pa
       file_id: rail_util_pa_config
     path: brd4191a_brd4001a/sl_rail_util_pa_config.h
@@ -164,29 +171,30 @@
   - condition:
     - brd4002a
     override:
-      component: cpc_primary_driver_uart
+      component: cpc_primary_driver_uart_usart
       file_id: cpc_drv_uart_primary_config
       instance: vcom
-    path: brd4191a_brd4002a/sl_cpc_drv_uart_primary_vcom_config.h
+    path: brd4191a_brd4002a/sl_cpc_drv_primary_uart_usart_vcom_config.h
   - condition:
     - brd4002a
     override:
-      component: cpc_secondary_driver_uart
-      file_id: cpc_drv_uart_secondary_config
+      component: cpc_secondary_driver_uart_eusart
+      file_id: cpc_drv_secondary_uart_eusart_config
       instance: vcom
-    path: brd4191a_brd4002a/sl_cpc_drv_uart_secondary_vcom_config.h
+    path: brd4191a_brd4002a/sl_cpc_drv_secondary_uart_eusart_vcom_config.h
+  - condition:
+    - brd4002a
+    override:
+      component: cpc_secondary_driver_uart_usart
+      file_id: cpc_drv_secondary_uart_usart_config
+      instance: vcom
+    path: brd4191a_brd4002a/sl_cpc_drv_secondary_uart_usart_vcom_config.h
   - condition:
     - brd4002a
     override:
       component: device_init_hfxo
       file_id: device_init_hfxo_config
     path: brd4191a_brd4002a/sl_device_init_hfxo_config.h
-  - condition:
-    - brd4002a
-    override:
-      component: device_init_lfxo
-      file_id: device_init_lfxo_config
-    path: brd4191a_brd4002a/sl_device_init_lfxo_config.h
   - condition:
     - brd4002a
     override:
@@ -235,6 +243,12 @@
       component: mx25_flash_shutdown_usart
       file_id: mx25_flash_shutdown_usart_config
     path: brd4191a_brd4002a/sl_mx25_flash_shutdown_usart_config.h
+  - condition:
+    - brd4002a
+    override:
+      component: rail_util_aox
+      file_id: rail_util_aox_config
+    path: brd4191a_brd4002a/sl_rail_util_aox_config.h
   - condition:
     - brd4002a
     override:

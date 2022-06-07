@@ -172,7 +172,7 @@ psa_status_t store_csr_dn(bool root)
   if (root) {
     // The length of the string written (not including the NULL)
     ret = mbedtls_x509_dn_gets((char *)cert_buf, sizeof(cert_buf),
-                               &csr_ctx.MBEDTLS_PRIVATE(subject));
+                               &csr_ctx.subject);
     // Length = add spaces between commas - NULL = size + 2 - 1 = size + 1
     if (ret == (sizeof(root_cert_dn) + 1)) {
       return(PSA_SUCCESS);
@@ -182,7 +182,7 @@ psa_status_t store_csr_dn(bool root)
   } else {
     // The length of the string written (not including the NULL)
     ret = mbedtls_x509_dn_gets((char *)csr_buf, sizeof(csr_buf),
-                               &csr_ctx.MBEDTLS_PRIVATE(subject));
+                               &csr_ctx.subject);
     // Length = add spaces between commas - NULL = size + 2 - 1 = size + 1
     if (ret == (sizeof(device_cert_dn) + 1)) {
       return(PSA_SUCCESS);
@@ -200,7 +200,7 @@ psa_status_t store_root_dn(void)
   // The length of the string written (not including the NULL)
   if (mbedtls_x509_dn_gets((char *)cert_buf,
                            sizeof(cert_buf),
-                           &root_cert_ctx.MBEDTLS_PRIVATE(subject))
+                           &root_cert_ctx.subject)
       == (sizeof(root_cert_dn) + 1)) {
     // Length = add spaces between commas - NULL = size + 2 - 1 = size + 1
     return(PSA_SUCCESS);

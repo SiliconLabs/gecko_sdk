@@ -350,16 +350,21 @@ static void fetchParams(uint8_t *readPointer, PGM_P format, va_list args)
 
   while (*c) {
     ptr = va_arg(args, void*);
+
     switch (*c) {
       case 's': {
         uint8_t *realPointer = (uint8_t *)ptr;
-        *realPointer = (uint8_t)*readPointer;
+        if (ptr) {
+          *realPointer = (uint8_t)*readPointer;
+        }
         readPointer++;
       }
       break;
       case 'u': {
         uint8_t *realPointer = (uint8_t *)ptr;
-        *realPointer = (uint8_t)*readPointer;
+        if (ptr) {
+          *realPointer = (uint8_t)*readPointer;
+        }
         readPointer++;
       }
       break;
@@ -371,7 +376,9 @@ static void fetchParams(uint8_t *readPointer, PGM_P format, va_list args)
       break;
       case 'w': {
         uint32_t *realPointer = (uint32_t *)ptr;
-        *realPointer = emberFetchHighLowInt32u(readPointer);
+        if (ptr) {
+          *realPointer = emberFetchHighLowInt32u(readPointer);
+        }
         readPointer += 4;
       }
       break;
@@ -380,7 +387,10 @@ static void fetchParams(uint8_t *readPointer, PGM_P format, va_list args)
         uint8_t *lengthPointer = (uint8_t *)va_arg(args, void*);
         *lengthPointer = *readPointer;
         readPointer++;
-        MEMMOVE(realArray, readPointer, *lengthPointer);
+
+        if (ptr) {
+          MEMMOVE(realArray, readPointer, *lengthPointer);
+        }
         readPointer += *lengthPointer;
       }
       break;
@@ -389,7 +399,10 @@ static void fetchParams(uint8_t *readPointer, PGM_P format, va_list args)
         uint8_t *lengthPointer = (uint8_t *)va_arg(args, void*);
         *lengthPointer = *readPointer;
         readPointer++;
-        *realPointer = readPointer;
+
+        if (ptr) {
+          *realPointer = readPointer;
+        }
         readPointer += *lengthPointer;
       }
       break;

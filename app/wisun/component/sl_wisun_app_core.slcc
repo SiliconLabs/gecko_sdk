@@ -18,9 +18,13 @@ include:
     - path: "sl_wisun_app_core_util.h"
 
 requires:
+  - name: "wisun_config"
   - name: "sl_wisun_event_mgr"      # for handling core events
   - name: "sleeptimer"
-  - name: "wisun_test_certificates"
+  - name: "app_project_info"
+  - name: "wisun_default_phy"    # because if app_setting doesn't exist
+    condition:
+      - "wisun_full_radioconf"
 
 config_file:
   - path: "config/sl_wisun_app_core_util_config.h"

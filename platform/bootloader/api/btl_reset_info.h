@@ -80,6 +80,10 @@ typedef struct {
 #define BOOTLOADER_RESET_REASON_UPGRADE       0x0209u
 /// Bootloader timed out waiting for upgrade image
 #define BOOTLOADER_RESET_REASON_TIMEOUT       0x020Au
+/// Soft-reset was forced to handle a fault
+#define BOOTLOADER_RESET_REASON_FAULT         0x020Bu
+/// Soft-reset was forced to handle a security fault
+#define BOOTLOADER_RESET_REASON_TZ_FAULT      0x020Cu
 
 /// Reset signature is valid
 #define BOOTLOADER_RESET_SIGNATURE_VALID      0xF00Fu

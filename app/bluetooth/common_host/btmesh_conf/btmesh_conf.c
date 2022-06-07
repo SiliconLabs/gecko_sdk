@@ -39,7 +39,6 @@
 #include <stdint.h>
 
 #include "sl_status.h"
-#include "system.h"
 #include "sl_bt_api.h"
 #include "sl_btmesh_api.h"
 #include "sl_btmesh_model_specification_defs.h"

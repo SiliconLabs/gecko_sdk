@@ -33,7 +33,7 @@
 #if defined(LEUART_COUNT) && (LEUART_COUNT > 0)
 
 #include "em_cmu.h"
-#include "em_assert.h"
+#include "sl_assert.h"
 
 /***************************************************************************//**
  * @addtogroup leuart LEUART - Low Energy UART

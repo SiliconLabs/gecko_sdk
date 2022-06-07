@@ -15,8 +15,9 @@
  *
  ******************************************************************************/
 #include <sys/time.h>
-
-#include PLATFORM_HEADER
+#include <stddef.h>
+#include <stdint.h>
+#include <stdbool.h>
 
 bool halUseRealtime = false; // needed in ncp-common
 

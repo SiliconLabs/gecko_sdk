@@ -71,7 +71,7 @@
 #if defined(SL_CATALOG_MICRIUMOS_KERNEL_PRESENT) || defined(SL_CATALOG_FREERTOS_KERNEL_PRESENT)
 
 #include "cmsis_os2.h"
-#include "em_assert.h"
+#include "sl_assert.h"
 
 #if defined(SL_CATALOG_FREERTOS_KERNEL_PRESENT)
   #include "FreeRTOSConfig.h"

@@ -1,8 +1,14 @@
 project_name: "StandardizedRfTesting"
-label: "StandardizedRfTesting"
+label: "Zigbee - SoC StandardizedRfTesting"
 package: "Zigbee"
 category: "Zigbee Application"
 quality: "production"
+
+description: >
+  This is a pre-standardization implementation of Zigbee's RF testing standard. 
+  It utilizes the TIS (Total Isotropic Sensitivity)/ TRP (Total Radiated Power) 
+  testing interfaces and is optional for Zigbee certifications. This application adheres to the Zigbee RF Performance Test Spec v1.0.
+author: "Silicon Laboratories, Inc."
 
 component:
   - id: cli
@@ -53,11 +59,6 @@ config_file:
 include:
   - path: "./"
 
-description: |-
-  This is a pre-standardization implementation of Zigbee's RF testing standard. 
-  It utilizes the TIS (Total Isotropic Sensitivity)/ TRP (Total Radiated Power) 
-  testing interfaces and is optional for Zigbee certifications. This application adheres to the Zigbee RF Performance Test Spec v1.0.
-
 readme:
   - path: ./readme.html
 
@@ -65,3 +66,11 @@ ui_hints:
   highlight:
     - path: readme.html
       focus: false
+
+filter:
+  - name: "Wireless Technology"
+    value: ["Zigbee"]
+  - name: "Device Type"
+    value: ["SoC"]
+  - name: "Project Difficulty"
+    value: ["Beginner"]

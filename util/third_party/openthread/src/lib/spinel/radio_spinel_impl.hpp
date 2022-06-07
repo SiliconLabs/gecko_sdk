@@ -37,13 +37,13 @@
 #include <stdlib.h>
 
 #include <openthread/dataset.h>
+#include <openthread/logging.h>
 #include <openthread/platform/diag.h>
 #include <openthread/platform/time.h>
 
 #include "common/code_utils.hpp"
 #include "common/encoding.hpp"
 #include "common/instance.hpp"
-#include "common/logging.hpp"
 #include "common/new.hpp"
 #include "common/settings.hpp"
 #include "lib/platform/exit_code.h"
@@ -160,7 +160,7 @@ static inline void LogIfFail(const char *aText, otError aError)
     OT_UNUSED_VARIABLE(aText);
     OT_UNUSED_VARIABLE(aError);
 
-    if (aError != OT_ERROR_NONE)
+    if (aError != OT_ERROR_NONE && aError != OT_ERROR_NO_ACK)
     {
         otLogWarnPlat("%s: %s", aText, otThreadErrorToString(aError));
     }
@@ -439,7 +439,7 @@ otError RadioSpinel<InterfaceType, ProcessContextType>::RestoreDatasetFromNcp(vo
 {
     otError error = OT_ERROR_NONE;
 
-    Instance::Get().template Get<SettingsDriver>().Init();
+    Instance::Get().template Get<SettingsDriver>().Init(nullptr, 0);
 
     otLogInfoPlat("Trying to get saved dataset from NCP");
     SuccessOrExit(
@@ -1727,15 +1727,25 @@ exit:
 template <typename InterfaceType, typename ProcessContextType>
 spinel_tid_t RadioSpinel<InterfaceType, ProcessContextType>::GetNextTid(void)
 {
-    spinel_tid_t tid = 0;
+    spinel_tid_t tid = mCmdNextTid;
 
-    if (((1 << mCmdNextTid) & mCmdTidsInUse) == 0)
+    while (((1 << tid) & mCmdTidsInUse) != 0)
     {
-        tid         = mCmdNextTid;
-        mCmdNextTid = SPINEL_GET_NEXT_TID(mCmdNextTid);
-        mCmdTidsInUse |= (1 << tid);
+        tid = SPINEL_GET_NEXT_TID(tid);
+
+        if (tid == mCmdNextTid)
+        {
+            // We looped back to `mCmdNextTid` indicating that all
+            // TIDs are in-use.
+
+            ExitNow(tid = 0);
+        }
     }
 
+    mCmdTidsInUse |= (1 << tid);
+    mCmdNextTid = SPINEL_GET_NEXT_TID(tid);
+
+exit:
     return tid;
 }
 
@@ -1912,20 +1922,20 @@ void RadioSpinel<InterfaceType, ProcessContextType>::HandleTransmitDone(uint32_t
     aBuffer += unpacked;
     aLength -= static_cast<uint16_t>(unpacked);
 
+    unpacked = spinel_datatype_unpack(aBuffer, aLength, SPINEL_DATATYPE_BOOL_S, &framePending);
+    VerifyOrExit(unpacked > 0, error = OT_ERROR_PARSE);
+
+    aBuffer += unpacked;
+    aLength -= static_cast<uint16_t>(unpacked);
+
+    unpacked = spinel_datatype_unpack(aBuffer, aLength, SPINEL_DATATYPE_BOOL_S, &headerUpdated);
+    VerifyOrExit(unpacked > 0, error = OT_ERROR_PARSE);
+
+    aBuffer += unpacked;
+    aLength -= static_cast<uint16_t>(unpacked);
+
     if (status == SPINEL_STATUS_OK)
     {
-        unpacked = spinel_datatype_unpack(aBuffer, aLength, SPINEL_DATATYPE_BOOL_S, &framePending);
-        VerifyOrExit(unpacked > 0, error = OT_ERROR_PARSE);
-
-        aBuffer += unpacked;
-        aLength -= static_cast<uint16_t>(unpacked);
-
-        unpacked = spinel_datatype_unpack(aBuffer, aLength, SPINEL_DATATYPE_BOOL_S, &headerUpdated);
-        VerifyOrExit(unpacked > 0, error = OT_ERROR_PARSE);
-
-        aBuffer += unpacked;
-        aLength -= static_cast<uint16_t>(unpacked);
-
         SuccessOrExit(error = ParseRadioFrame(mAckRadioFrame, aBuffer, aLength, unpacked));
         aBuffer += unpacked;
         aLength -= static_cast<uint16_t>(unpacked);
@@ -2467,7 +2477,22 @@ exit:
 template <typename InterfaceType, typename ProcessContextType>
 otError RadioSpinel<InterfaceType, ProcessContextType>::SetRadioRegion(uint16_t aRegionCode)
 {
-    return Set(SPINEL_PROP_PHY_REGION_CODE, SPINEL_DATATYPE_UINT16_S, aRegionCode);
+    otError error;
+
+    error = Set(SPINEL_PROP_PHY_REGION_CODE, SPINEL_DATATYPE_UINT16_S, aRegionCode);
+
+    if (error == OT_ERROR_NONE)
+    {
+        otLogNotePlat("Set region code \"%c%c\" successfully", static_cast<char>(aRegionCode >> 8),
+                      static_cast<char>(aRegionCode));
+    }
+    else
+    {
+        otLogWarnPlat("Failed to set region code \"%c%c\": %s", static_cast<char>(aRegionCode >> 8),
+                      static_cast<char>(aRegionCode), otThreadErrorToString(error));
+    }
+
+    return error;
 }
 
 template <typename InterfaceType, typename ProcessContextType>
@@ -2516,6 +2541,30 @@ otError RadioSpinel<InterfaceType, ProcessContextType>::ConfigureEnhAckProbing(o
             aShortAddress, aExtAddress.m8, flags);
 
     return error;
+}
+#endif
+
+#if OPENTHREAD_CONFIG_MAC_CSL_RECEIVER_ENABLE || OPENTHREAD_CONFIG_MAC_CSL_TRANSMITTER_ENABLE
+template <typename InterfaceType, typename ProcessContextType>
+uint8_t RadioSpinel<InterfaceType, ProcessContextType>::GetCslAccuracy(void)
+{
+    uint8_t accuracy = UINT8_MAX;
+    otError error    = Get(SPINEL_PROP_RCP_CSL_ACCURACY, SPINEL_DATATYPE_UINT8_S, &accuracy);
+
+    LogIfFail("Get CSL Accuracy failed", error);
+    return accuracy;
+}
+#endif
+
+#if OPENTHREAD_CONFIG_MAC_CSL_TRANSMITTER_ENABLE
+template <typename InterfaceType, typename ProcessContextType>
+uint8_t RadioSpinel<InterfaceType, ProcessContextType>::GetCslUncertainty(void)
+{
+    uint8_t uncertainty = UINT8_MAX;
+    otError error       = Get(SPINEL_PROP_RCP_CSL_UNCERTAINTY, SPINEL_DATATYPE_UINT8_S, &uncertainty);
+
+    LogIfFail("Get CSL Uncertainty failed", error);
+    return uncertainty;
 }
 #endif
 

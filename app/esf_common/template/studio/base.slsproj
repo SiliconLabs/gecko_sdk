@@ -107,7 +107,6 @@
   <toolOption toolId="iar.arm.toolchain.compiler.v5.4.1"                                  optionId="iar.arm.toolchain.compiler.option.optScheduling.v5.4.0"                value="false"/>
   <toolOption toolId="iar.arm.toolchain.compiler.v5.4.1"                                  optionId="iar.arm.toolchain.compiler.option.optStaticClustering.v5.4.0"          value="true"/>
   <toolOption toolId="iar.arm.toolchain.compiler.v5.4.1"                                  optionId="iar.arm.toolchain.compiler.option.optUnroll.v5.4.0"                    value="false"/>
-  <toolOption toolId="iar.arm.toolchain.compiler.v5.4.1"                                  optionId="iar.arm.toolchain.compiler.option.wrapDiagnostics"                     value="true"/>
   <toolOption toolId="iar.arm.toolchain.compiler.v5.4.1"                                  optionId="iar.arm.toolchain.compiler.option.suppress.v5.4.0"                     value="Pa050"/>
   <toolOption toolId="iar.arm.toolchain.compiler.v5.4.1"                                  optionId="iar.arm.toolchain.compiler.option.treatAsErrors.v5.4.0"                value=""/>
   <toolOption toolId="iar.arm.toolchain.compiler.v5.4.1"                                  optionId="iar.arm.toolchain.compiler.option.treatAsRemarks.v5.4.0"               value=""/>

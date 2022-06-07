@@ -16,7 +16,7 @@ description: >
   commands of the "advertiser" class whose behaviors vary by specific advertising types
   are no longer supported. See the Bluetooth API reference for more details. When none
   of the three components is included, all commands of the "advertiser" class are
-  functional for providing the backward compatibility.
+  functional for providing the backwards compatibility.
 category: "Bluetooth|Feature"
 quality: "production"
 root_path: "protocol/bluetooth"
@@ -41,10 +41,3 @@ template_contribution:
       include: "sl_bluetooth_advertiser_config.h"
       function: sl_btctrl_init_adv()
     priority: 3
-  - name: bluetooth_bgapi_class
-    value:
-      class: "advertiser"
-    priority: 3
-  - name: bluetooth_controller_init
-    value:
-

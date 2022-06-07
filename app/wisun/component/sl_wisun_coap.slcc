@@ -14,16 +14,19 @@ provides:
 
 source:
   - path: "sl_wisun_coap.c"
-  - path: "sl_wisun_coap_mem.c"
+  - path: "sli_wisun_coap_mem.c"
+  - path: "sl_wisun_coap_resource_handler.c"
   - path: "mbed-coap/sn_coap_protocol.c"
   - path: "mbed-coap/sn_coap_parser.c"
   - path: "mbed-coap/sn_coap_header_check.c"
   - path: "mbed-coap/sn_coap_builder.c"
+
 include:
   - path: "."
     file_list:
     - "path": "sl_wisun_coap.h"
-    - "path": "sl_wisun_coap_mem.h"
+    - "path": "sli_wisun_coap_mem.h"
+    - "path": "sl_wisun_coap_resource_handler.h"
   - path: "./mbed-coap"
     file_list:
     - "path": "sn_config.h"

@@ -102,7 +102,7 @@ class CALC_Freq_Offset_Comp_ocelot(CALC_Freq_Offset_Comp_lynx):
         # Frequency offset estimate is not available for OOK/ASK.
 
         #Load model values into local variables
-        hardmodem_freq_actual = model.vars.hardmodem_freq_actual.value
+        modem_frequency_hz = model.vars.modem_frequency_hz.value
         dec0 = model.vars.dec0_actual.value
         dec1 = model.vars.dec1_actual.value
         dec2 = model.vars.dec2_actual.value
@@ -119,11 +119,11 @@ class CALC_Freq_Offset_Comp_ocelot(CALC_Freq_Offset_Comp_lynx):
                 if mod_format == model.vars.modulation_type.var_enum.FSK2 or \
                     mod_format == model.vars.modulation_type.var_enum.MSK or \
                     mod_format == model.vars.modulation_type.var_enum.FSK4:
-                    freq_offset_scale = hardmodem_freq_actual / (freq_gain * dec0 * dec1 * dec2 * 256.0)
+                    freq_offset_scale = modem_frequency_hz / (freq_gain * dec0 * dec1 * dec2 * 256.0)
                 elif mod_format == model.vars.modulation_type.var_enum.OQPSK or \
                     mod_format == model.vars.modulation_type.var_enum.BPSK or \
                     mod_format == model.vars.modulation_type.var_enum.DBPSK:
-                    freq_offset_scale = hardmodem_freq_actual / (osr * dec0 * dec1 * dec2 * 256.0)
+                    freq_offset_scale = modem_frequency_hz / (osr * dec0 * dec1 * dec2 * 256.0)
                 else:
                     freq_offset_scale = 0.0
         except ZeroDivisionError:

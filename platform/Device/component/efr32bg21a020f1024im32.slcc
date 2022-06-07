@@ -12,14 +12,7 @@
   - path: platform/Device/SiliconLabs/EFR32BG21/Source/system_efr32bg21.c
     unless:
     - device_content_override
-  - condition:
-    - toolchain_iar
-    path: platform/Device/SiliconLabs/EFR32BG21/Source/IAR/startup_efr32bg21.c
-    unless:
-    - device_content_override
-  - condition:
-    - toolchain_gcc
-    path: platform/Device/SiliconLabs/EFR32BG21/Source/GCC/startup_efr32bg21.c
+  - path: platform/Device/SiliconLabs/EFR32BG21/Source/startup_efr32bg21.c
     unless:
     - device_content_override
 - include:
@@ -27,7 +20,6 @@
     - path: efr32bg21a020f1024im32.h
     - path: efr32bg21_acmp.h
     - path: efr32bg21_aes.h
-    - path: efr32bg21_agc.h
     - path: efr32bg21_amuxcp.h
     - path: efr32bg21_bufc.h
     - path: efr32bg21_buram.h
@@ -37,7 +29,6 @@
     - path: efr32bg21_dma_descriptor.h
     - path: efr32bg21_dpll.h
     - path: efr32bg21_emu.h
-    - path: efr32bg21_frc.h
     - path: efr32bg21_fsrco.h
     - path: efr32bg21_gpcrc.h
     - path: efr32bg21_gpio.h
@@ -54,17 +45,12 @@
     - path: efr32bg21_lfrco.h
     - path: efr32bg21_lfxo.h
     - path: efr32bg21_lvgd.h
-    - path: efr32bg21_modem.h
     - path: efr32bg21_msc.h
-    - path: efr32bg21_protimer.h
     - path: efr32bg21_prs.h
     - path: efr32bg21_prs_signals.h
-    - path: efr32bg21_rac.h
-    - path: efr32bg21_rfcrc.h
     - path: efr32bg21_rtcc.h
     - path: efr32bg21_semailbox.h
     - path: efr32bg21_smu.h
-    - path: efr32bg21_synth.h
     - path: efr32bg21_syscfg.h
     - path: efr32bg21_timer.h
     - path: efr32bg21_ulfrco.h
@@ -87,11 +73,11 @@
   - name: cortexm33
   - name: armv8m.main
   - name: device_security_se
+  - name: device_dcdc_notused
   - name: device_pa_10dbm
   - name: device_has_acmp
   - name: device_has_acmp0
   - name: device_has_acmp1
-  - name: device_has_agc
   - name: device_has_amuxcp
   - name: device_has_amuxcp0
   - name: device_has_bufc
@@ -102,7 +88,6 @@
   - name: device_has_dpll
   - name: device_has_dpll0
   - name: device_has_emu
-  - name: device_has_frc
   - name: device_has_fsrco
   - name: device_has_gpcrc
   - name: device_has_gpio
@@ -126,18 +111,13 @@
   - name: device_has_lfrco
   - name: device_has_lfxo
   - name: device_has_lvgd
-  - name: device_has_modem
   - name: device_has_msc
   - name: device_has_prortc
-  - name: device_has_protimer
   - name: device_has_prs
-  - name: device_has_rac
   - name: device_has_radioaes
-  - name: device_has_rfcrc
   - name: device_has_rtcc
   - name: device_has_semailbox
   - name: device_has_smu
-  - name: device_has_synth
   - name: device_has_syscfg
   - name: device_has_timer
   - name: device_has_timer0
@@ -165,6 +145,8 @@
   - name: device_supports_bluetooth_coded_phy
   - name: device_supports_connect
   - name: device_compute_basic
+- recommends:
+  - id: trustzone_unaware
 - requires:
   - name: cmsis_core
 - template_contribution:
@@ -207,8 +189,25 @@
     value: cortex-m33
   - option: fpu
     value: fpv5-sp
+  - option: cmse
+    unless:
+    - trustzone_nonsecure
+    value: enabled
 - config_file:
   - condition:
     - custom_radio_config
     directory: rail
     path: platform/Device/config/200/device.yaml
+- metadata:
+    device:
+      memory:
+      - name: Main Flash
+        page_size: 8192
+        size: 1048576
+        start: 0
+        type: non-volatile
+      - name: RAM
+        size: 98304
+        start: 536870912
+        type: volatile
+      opn: efr32bg21a020f1024im32

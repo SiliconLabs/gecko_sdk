@@ -17,10 +17,20 @@
 
 #include "btl_interface.h"
 
+// -----------------------------------------------------------------------------
+// Defines
+
 // Make assert no-op if not configured
 #ifndef BTL_ASSERT
 #define BTL_ASSERT(x)
 #endif
+
+// -----------------------------------------------------------------------------
+// Static variables
+
+#if defined(BOOTLOADER_INTERFACE_TRUSTZONE_AWARE)
+static Bootloader_PPUSATDnCLKENnState_t blPPUSATDnCLKENnState = { 0 };
+#endif // BOOTLOADER_INTERFACE_TRUSTZONE_AWARE
 
 // -----------------------------------------------------------------------------
 // Functions
@@ -31,7 +41,15 @@ void bootloader_getStorageInfo(BootloaderStorageInformation_t *info)
       || !bootloader_pointerValid(mainBootloaderTable->storage)) {
     return;
   }
+#if defined(BOOTLOADER_INTERFACE_TRUSTZONE_AWARE)
+  bootloader_ppusatdnSaveReconfigureState(&blPPUSATDnCLKENnState);
+#endif // BOOTLOADER_INTERFACE_TRUSTZONE_AWARE
+
   mainBootloaderTable->storage->getInfo(info);
+
+#if defined(BOOTLOADER_INTERFACE_TRUSTZONE_AWARE)
+  bootloader_ppusatdnRestoreState(&blPPUSATDnCLKENnState);
+#endif // BOOTLOADER_INTERFACE_TRUSTZONE_AWARE
 }
 
 int32_t bootloader_getStorageSlotInfo(uint32_t                slotId,
@@ -53,7 +71,18 @@ int32_t bootloader_readStorage(uint32_t slotId,
       || !bootloader_pointerValid(mainBootloaderTable->storage)) {
     return BOOTLOADER_ERROR_INIT_TABLE;
   }
-  return mainBootloaderTable->storage->read(slotId, offset, buffer, length);
+
+#if defined(BOOTLOADER_INTERFACE_TRUSTZONE_AWARE)
+  bootloader_ppusatdnSaveReconfigureState(&blPPUSATDnCLKENnState);
+#endif // BOOTLOADER_INTERFACE_TRUSTZONE_AWARE
+
+  int32_t retVal = mainBootloaderTable->storage->read(slotId, offset, buffer, length);
+
+#if defined(BOOTLOADER_INTERFACE_TRUSTZONE_AWARE)
+  bootloader_ppusatdnRestoreState(&blPPUSATDnCLKENnState);
+#endif
+
+  return retVal;
 }
 
 int32_t bootloader_writeStorage(uint32_t slotId,
@@ -65,7 +94,18 @@ int32_t bootloader_writeStorage(uint32_t slotId,
       || !bootloader_pointerValid(mainBootloaderTable->storage)) {
     return BOOTLOADER_ERROR_INIT_TABLE;
   }
-  return mainBootloaderTable->storage->write(slotId, offset, buffer, length);
+
+#if defined(BOOTLOADER_INTERFACE_TRUSTZONE_AWARE)
+  bootloader_ppusatdnSaveReconfigureState(&blPPUSATDnCLKENnState);
+#endif // BOOTLOADER_INTERFACE_TRUSTZONE_AWARE
+
+  int32_t retVal = mainBootloaderTable->storage->write(slotId, offset, buffer, length);
+
+#if defined(BOOTLOADER_INTERFACE_TRUSTZONE_AWARE)
+  bootloader_ppusatdnRestoreState(&blPPUSATDnCLKENnState);
+#endif // BOOTLOADER_INTERFACE_TRUSTZONE_AWARE
+
+  return retVal;
 }
 
 int32_t bootloader_eraseWriteStorage(uint32_t slotId,
@@ -161,7 +201,18 @@ int32_t bootloader_eraseStorageSlot(uint32_t slotId)
       || !bootloader_pointerValid(mainBootloaderTable->storage)) {
     return BOOTLOADER_ERROR_INIT_TABLE;
   }
-  return mainBootloaderTable->storage->erase(slotId);
+
+#if defined(BOOTLOADER_INTERFACE_TRUSTZONE_AWARE)
+  bootloader_ppusatdnSaveReconfigureState(&blPPUSATDnCLKENnState);
+#endif // BOOTLOADER_INTERFACE_TRUSTZONE_AWARE
+
+  int32_t retVal = mainBootloaderTable->storage->erase(slotId);
+
+#if defined(BOOTLOADER_INTERFACE_TRUSTZONE_AWARE)
+  bootloader_ppusatdnRestoreState(&blPPUSATDnCLKENnState);
+#endif // BOOTLOADER_INTERFACE_TRUSTZONE_AWARE
+
+  return retVal;
 }
 
 int32_t bootloader_initChunkedEraseStorageSlot(uint32_t                slotId,
@@ -210,7 +261,18 @@ int32_t bootloader_setImageToBootload(int32_t slotId)
       || !bootloader_pointerValid(mainBootloaderTable->storage)) {
     return BOOTLOADER_ERROR_INIT_TABLE;
   }
-  return mainBootloaderTable->storage->setImagesToBootload(&slotId, 1);
+
+#if defined(BOOTLOADER_INTERFACE_TRUSTZONE_AWARE)
+  bootloader_ppusatdnSaveReconfigureState(&blPPUSATDnCLKENnState);
+#endif // BOOTLOADER_INTERFACE_TRUSTZONE_AWARE
+
+  int32_t retVal = mainBootloaderTable->storage->setImagesToBootload(&slotId, 1);
+
+#if defined(BOOTLOADER_INTERFACE_TRUSTZONE_AWARE)
+  bootloader_ppusatdnRestoreState(&blPPUSATDnCLKENnState);
+#endif // BOOTLOADER_INTERFACE_TRUSTZONE_AWARE
+
+  return retVal;
 }
 
 int32_t bootloader_setImagesToBootload(int32_t *slotIds, size_t length)
@@ -219,7 +281,18 @@ int32_t bootloader_setImagesToBootload(int32_t *slotIds, size_t length)
       || !bootloader_pointerValid(mainBootloaderTable->storage)) {
     return BOOTLOADER_ERROR_INIT_TABLE;
   }
-  return mainBootloaderTable->storage->setImagesToBootload(slotIds, length);
+
+#if defined(BOOTLOADER_INTERFACE_TRUSTZONE_AWARE)
+  bootloader_ppusatdnSaveReconfigureState(&blPPUSATDnCLKENnState);
+#endif // BOOTLOADER_INTERFACE_TRUSTZONE_AWARE
+
+  int32_t retVal = mainBootloaderTable->storage->setImagesToBootload(slotIds, length);
+
+#if defined(BOOTLOADER_INTERFACE_TRUSTZONE_AWARE)
+  bootloader_ppusatdnRestoreState(&blPPUSATDnCLKENnState);
+#endif // BOOTLOADER_INTERFACE_TRUSTZONE_AWARE
+
+  return retVal;
 }
 
 int32_t bootloader_getImagesToBootload(int32_t *slotIds, size_t length)
@@ -228,7 +301,18 @@ int32_t bootloader_getImagesToBootload(int32_t *slotIds, size_t length)
       || !bootloader_pointerValid(mainBootloaderTable->storage)) {
     return BOOTLOADER_ERROR_INIT_TABLE;
   }
-  return mainBootloaderTable->storage->getImagesToBootload(slotIds, length);
+
+#if defined(BOOTLOADER_INTERFACE_TRUSTZONE_AWARE)
+  bootloader_ppusatdnSaveReconfigureState(&blPPUSATDnCLKENnState);
+#endif // BOOTLOADER_INTERFACE_TRUSTZONE_AWARE
+
+  int32_t retVal = mainBootloaderTable->storage->getImagesToBootload(slotIds, length);
+
+#if defined(BOOTLOADER_INTERFACE_TRUSTZONE_AWARE)
+  bootloader_ppusatdnRestoreState(&blPPUSATDnCLKENnState);
+#endif // BOOTLOADER_INTERFACE_TRUSTZONE_AWARE
+
+  return retVal;
 }
 
 int32_t bootloader_appendImageToBootloadList(int32_t slotId)
@@ -237,14 +321,25 @@ int32_t bootloader_appendImageToBootloadList(int32_t slotId)
       || !bootloader_pointerValid(mainBootloaderTable->storage)) {
     return BOOTLOADER_ERROR_INIT_TABLE;
   }
-  return mainBootloaderTable->storage->appendImageToBootloadList(slotId);
+
+#if defined(BOOTLOADER_INTERFACE_TRUSTZONE_AWARE)
+  bootloader_ppusatdnSaveReconfigureState(&blPPUSATDnCLKENnState);
+#endif // BOOTLOADER_INTERFACE_TRUSTZONE_AWARE
+
+  int32_t retVal = mainBootloaderTable->storage->appendImageToBootloadList(slotId);
+
+#if defined(BOOTLOADER_INTERFACE_TRUSTZONE_AWARE)
+  bootloader_ppusatdnRestoreState(&blPPUSATDnCLKENnState);
+#endif // BOOTLOADER_INTERFACE_TRUSTZONE_AWARE
+
+  return retVal;
 }
 
 int32_t bootloader_initVerifyImage(uint32_t slotId,
                                    void     *context,
                                    size_t   contextSize)
 {
-  int32_t retval;
+  int32_t retVal;
   if (!bootloader_pointerValid(mainBootloaderTable)) {
     return BOOTLOADER_ERROR_PARSE_STORAGE;
   }
@@ -254,12 +349,20 @@ int32_t bootloader_initVerifyImage(uint32_t slotId,
     return BOOTLOADER_ERROR_PARSE_STORAGE;
   }
 
-  retval = mainBootloaderTable->storage->initParseImage(
+#if defined(BOOTLOADER_INTERFACE_TRUSTZONE_AWARE)
+  bootloader_ppusatdnSaveReconfigureState(&blPPUSATDnCLKENnState);
+#endif // BOOTLOADER_INTERFACE_TRUSTZONE_AWARE
+
+  retVal = mainBootloaderTable->storage->initParseImage(
     slotId,
     (BootloaderParserContext_t*)context,
     contextSize);
 
-  return retval;
+#if defined(BOOTLOADER_INTERFACE_TRUSTZONE_AWARE)
+  bootloader_ppusatdnRestoreState(&blPPUSATDnCLKENnState);
+#endif // BOOTLOADER_INTERFACE_TRUSTZONE_AWARE
+
+  return retVal;
 }
 
 int32_t bootloader_continueVerifyImage(void                       *context,
@@ -270,9 +373,19 @@ int32_t bootloader_continueVerifyImage(void                       *context,
     return BOOTLOADER_ERROR_PARSE_STORAGE;
   }
 
-  return mainBootloaderTable->storage->verifyImage(
+#if defined(BOOTLOADER_INTERFACE_TRUSTZONE_AWARE)
+  bootloader_ppusatdnSaveReconfigureState(&blPPUSATDnCLKENnState);
+#endif // BOOTLOADER_INTERFACE_TRUSTZONE_AWARE
+
+  int32_t retVal = mainBootloaderTable->storage->verifyImage(
     (BootloaderParserContext_t *)context,
     metadataCallback);
+
+#if defined(BOOTLOADER_INTERFACE_TRUSTZONE_AWARE)
+  bootloader_ppusatdnRestoreState(&blPPUSATDnCLKENnState);
+#endif // BOOTLOADER_INTERFACE_TRUSTZONE_AWARE
+
+  return retVal;
 }
 
 int32_t bootloader_verifyImage(uint32_t                   slotId,
@@ -319,30 +432,51 @@ int32_t bootloader_getImageInfo(uint32_t          slotId,
   // Check that the bootloader has image verification capability
   BTL_ASSERT(mainBootloaderTable->storage != NULL);
 
+#if defined(BOOTLOADER_INTERFACE_TRUSTZONE_AWARE)
+  bootloader_ppusatdnSaveReconfigureState(&blPPUSATDnCLKENnState);
+#endif // BOOTLOADER_INTERFACE_TRUSTZONE_AWARE
+
   retval = mainBootloaderTable->storage->initParseImage(
     slotId,
     (BootloaderParserContext_t *)context,
     BOOTLOADER_STORAGE_VERIFICATION_CONTEXT_SIZE);
-
   if (retval != BOOTLOADER_OK) {
+#if defined(BOOTLOADER_INTERFACE_TRUSTZONE_AWARE)
+    bootloader_ppusatdnRestoreState(&blPPUSATDnCLKENnState);
+#endif // BOOTLOADER_INTERFACE_TRUSTZONE_AWARE
     return retval;
   }
-
   retval = mainBootloaderTable->storage->getImageInfo(
     (BootloaderParserContext_t *)context,
     appInfo,
     bootloaderVersion);
+
+#if defined(BOOTLOADER_INTERFACE_TRUSTZONE_AWARE)
+  bootloader_ppusatdnRestoreState(&blPPUSATDnCLKENnState);
+#endif // BOOTLOADER_INTERFACE_TRUSTZONE_AWARE
 
   return retval;
 }
 
 bool bootloader_storageIsBusy(void)
 {
+  bool isBusy = false;
+
   if (!bootloader_pointerValid(mainBootloaderTable)
       || !bootloader_pointerValid(mainBootloaderTable->storage)) {
     return true;
   }
-  return mainBootloaderTable->storage->isBusy();
+#if defined(BOOTLOADER_INTERFACE_TRUSTZONE_AWARE)
+  bootloader_ppusatdnSaveReconfigureState(&blPPUSATDnCLKENnState);
+#endif // BOOTLOADER_INTERFACE_TRUSTZONE_AWARE
+
+  isBusy = mainBootloaderTable->storage->isBusy();
+
+#if defined(BOOTLOADER_INTERFACE_TRUSTZONE_AWARE)
+  bootloader_ppusatdnRestoreState(&blPPUSATDnCLKENnState);
+#endif // BOOTLOADER_INTERFACE_TRUSTZONE_AWARE
+
+  return isBusy;
 }
 
 int32_t bootloader_readRawStorage(uint32_t address,
@@ -353,7 +487,17 @@ int32_t bootloader_readRawStorage(uint32_t address,
       || !bootloader_pointerValid(mainBootloaderTable->storage)) {
     return BOOTLOADER_ERROR_INIT_STORAGE;
   }
-  return mainBootloaderTable->storage->readRaw(address, buffer, length);
+#if defined(BOOTLOADER_INTERFACE_TRUSTZONE_AWARE)
+  bootloader_ppusatdnSaveReconfigureState(&blPPUSATDnCLKENnState);
+#endif // BOOTLOADER_INTERFACE_TRUSTZONE_AWARE
+
+  int32_t retVal = mainBootloaderTable->storage->readRaw(address, buffer, length);
+
+#if defined(BOOTLOADER_INTERFACE_TRUSTZONE_AWARE)
+  bootloader_ppusatdnRestoreState(&blPPUSATDnCLKENnState);
+#endif // BOOTLOADER_INTERFACE_TRUSTZONE_AWARE
+
+  return retVal;
 }
 
 int32_t bootloader_writeRawStorage(uint32_t address,
@@ -364,7 +508,18 @@ int32_t bootloader_writeRawStorage(uint32_t address,
       || !bootloader_pointerValid(mainBootloaderTable->storage)) {
     return BOOTLOADER_ERROR_INIT_STORAGE;
   }
-  return mainBootloaderTable->storage->writeRaw(address, buffer, length);
+
+#if defined(BOOTLOADER_INTERFACE_TRUSTZONE_AWARE)
+  bootloader_ppusatdnSaveReconfigureState(&blPPUSATDnCLKENnState);
+#endif // BOOTLOADER_INTERFACE_TRUSTZONE_AWARE
+
+  int32_t retVal = mainBootloaderTable->storage->writeRaw(address, buffer, length);
+
+#if defined(BOOTLOADER_INTERFACE_TRUSTZONE_AWARE)
+  bootloader_ppusatdnRestoreState(&blPPUSATDnCLKENnState);
+#endif // BOOTLOADER_INTERFACE_TRUSTZONE_AWARE
+
+  return retVal;
 }
 
 int32_t bootloader_getAllocatedDMAChannel(void)
@@ -374,13 +529,17 @@ int32_t bootloader_getAllocatedDMAChannel(void)
     return BOOTLOADER_ERROR_INIT_STORAGE;
   }
 
-  BootloaderInformation_t info;
+  BootloaderInformation_t info = { .type = SL_BOOTLOADER, .version = 0U, .capabilities = 0U };
   bootloader_getInfo(&info);
 
+  if ((info.capabilities & BOOTLOADER_CAPABILITY_STORAGE) == 0u) {
+    return BOOTLOADER_ERROR_INIT_STORAGE;
+  }
+
   uint32_t blMajorVersion = ((info.version & BOOTLOADER_VERSION_MAJOR_MASK)
-                              >> BOOTLOADER_VERSION_MAJOR_SHIFT);
+                             >> BOOTLOADER_VERSION_MAJOR_SHIFT);
   uint32_t blMinorVersion = ((info.version & BOOTLOADER_VERSION_MINOR_MASK)
-                              >> BOOTLOADER_VERSION_MINOR_SHIFT);
+                             >> BOOTLOADER_VERSION_MINOR_SHIFT);
 
   if ((blMajorVersion < 1UL) || (blMajorVersion == 1UL && blMinorVersion < 11UL)) {
     return BOOTLOADER_ERROR_INIT_STORAGE;
@@ -396,5 +555,16 @@ int32_t bootloader_eraseRawStorage(uint32_t address,
       || !bootloader_pointerValid(mainBootloaderTable->storage)) {
     return BOOTLOADER_ERROR_INIT_STORAGE;
   }
-  return mainBootloaderTable->storage->eraseRaw(address, length);
+
+#if defined(BOOTLOADER_INTERFACE_TRUSTZONE_AWARE)
+  bootloader_ppusatdnSaveReconfigureState(&blPPUSATDnCLKENnState);
+#endif // BOOTLOADER_INTERFACE_TRUSTZONE_AWARE
+
+  int32_t retVal = mainBootloaderTable->storage->eraseRaw(address, length);
+
+#if defined(BOOTLOADER_INTERFACE_TRUSTZONE_AWARE)
+  bootloader_ppusatdnRestoreState(&blPPUSATDnCLKENnState);
+#endif // BOOTLOADER_INTERFACE_TRUSTZONE_AWARE
+
+  return retVal;
 }

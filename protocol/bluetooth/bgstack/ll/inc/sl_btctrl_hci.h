@@ -70,4 +70,34 @@ void sl_btctrl_hci_parser_init_conn(void);
 
 void sl_btctrl_hci_parser_init_adv(void);
 
+void sl_btctrl_hci_parser_init_phy(void);
+
+void sl_btctrl_hci_parser_init_past(void);
+
+void sl_btctrl_hci_parser_init_default(void);
+
+/**
+ * Create hardware error event and try to send it to the host.
+ * The created event shall be sent as high priority event.
+ * @param[in] errorCode Code describing the error. */
+void sl_btctrl_hci_send_hardware_error_event(uint8_t errorCode);
+
+/**
+ * @brief Sets PAST initiator feature bit,
+ * and links in PAST sender and ll_adv_sync symbols to the project.
+ */
+void sl_btctrl_init_past_local_sync_transfer(void);
+
+/**
+ * @brief Sets PAST initiator feature bit,
+ * and links in PAST sender, ll_scan_sync and ll_scan_sync_registry symbols to the project.
+ */
+void sl_btctrl_init_past_remote_sync_transfer(void);
+
+/**
+ * @brief Sets PAST receiver feature bit,
+ * and links in PAST receiver, ll_scan_sync and ll_scan_sync_registry symbols to the project.
+ */
+void sl_btctrl_init_past_receiver(void);
+
 #endif // _SL_BTCTRL_HCI_H_

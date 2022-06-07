@@ -1,6 +1,9 @@
 from pyradioconfig.calculator_model_framework.interfaces.icalculator import ICalculator
 from pycalcmodel.core.variable import ModelVariableFormat, CreateModelVariableEnum
+from pyradioconfig.parts.common.calculators.calc_frame_detect import CALC_Frame_Detect
+from pyradioconfig.parts.ocelot.calculators.calc_demodulator import CALC_Demodulator_ocelot
 from enum import Enum
+from math import *
 
 class calc_softmodem_sol(ICalculator):
 
@@ -89,7 +92,7 @@ class calc_softmodem_sol(ICalculator):
         self._addModelVariable(model, 'cw_nfft_log2', int, ModelVariableFormat.DECIMAL,
                                desc='CW RX log2 of Nfft')
 
-        self._addModelVariable(model, 'cw_fft_analyze', int, ModelVariableFormat.DECIMAL,
+        self._addModelVariable(model, 'cw_fft_analyze', Enum, ModelVariableFormat.DECIMAL,
                                desc='CW fft analysis')
         model.vars.cw_fft_analyze.var_enum = CreateModelVariableEnum(
             enum_name='CwFftAnalysisEnum',
@@ -150,7 +153,7 @@ class calc_softmodem_sol(ICalculator):
 
     def calc_fcs_type_802154(self, model):
 
-        #For the Wi-SUN Profiles, calc the CRC from the FCS that is specified as a Profile Input
+        #For the Wi-SUN Profiles, calc the CRC from the FCS that is specified in the Profile
         if 'sun' in model.profile.name.lower():
             fcs_type_802154 = model.vars.fcs_type_802154.value
             if fcs_type_802154 == model.vars.fcs_type_802154.var_enum.TWO_BYTE:
@@ -215,6 +218,34 @@ class calc_softmodem_sol(ICalculator):
             #Write the model var
             model.vars.band_freq_mhz_802154.value = band_freq_mhz_802154
 
+    def calc_softmodem_dont_cares(self, model):
+        # We must be very careful with softmodem virtual regs and don't cares,
+        # because multiple regs share the same memory space
+
+        #Read in the softmodem modulation type used
+        softmodem_modulation_type_actual = model.vars.softmodem_modulation_type.value
+        softmodem_modulation_type_enum = model.vars.softmodem_modulation_type.var_enum
+
+        #Store softmodem reg prefixes in a dict
+        softmodem_reg_prefixes = {
+            softmodem_modulation_type_enum.SUN_OFDM:'SUNOFDM_',
+            softmodem_modulation_type_enum.SUN_OQPSK:'SUNOQPSK_',
+            softmodem_modulation_type_enum.SUN_FSK:'SUNFSK_',
+            softmodem_modulation_type_enum.LEGACY_OQPSK:'LEGOQPSK_',
+            softmodem_modulation_type_enum.CW:'CW_'
+        }
+
+        #Build a tuple of prefix strings we want to don't care
+        prefix_tuple = ()
+        for modulation_type in softmodem_reg_prefixes:
+            if modulation_type != softmodem_modulation_type_actual:
+                prefix_tuple += (softmodem_reg_prefixes[modulation_type],)
+
+        #Set the don't cares
+        for model_var in model.vars:
+            if (model_var.name.startswith(prefix_tuple)) and (model_var.svd_mapping is not None):
+                    model_var.value_do_not_care = True
+
     def calc_softmodem_cw(self, model):
 
         #Read in model variables
@@ -228,7 +259,6 @@ class calc_softmodem_sol(ICalculator):
             model.vars.cw_nfft_log2.value = 9 # Set FFT size to 512
             model.vars.cw_fft_analyze.value = model.vars.cw_fft_analyze.var_enum.NONE
 
-            do_not_care = False
             cw_amp = model.vars.cw_amp.value
             cw_freq = model.vars.cw_freq.value
             cw_dual_path = model.vars.cw_dual_path.value
@@ -259,7 +289,6 @@ class calc_softmodem_sol(ICalculator):
             xtal_freq_field = xtal_frequency_hz / 1000
 
         else:
-            do_not_care = True
             modulation_field = model.vars.softmodem_modulation_type.var_enum.NONE
             freq_field = 0
             amp_field = 0
@@ -272,14 +301,14 @@ class calc_softmodem_sol(ICalculator):
         #Note that tone amplitude is managed by RAIL firmware
 
         #Write the registers
-        self._reg_write(model.vars.CW_CFG1_MODULATION, int(modulation_field), do_not_care=do_not_care)
-        self._reg_write(model.vars.CW_CFG1_NFFTLOG2, int(nfft_log2_field), do_not_care=do_not_care)
-        self._reg_write(model.vars.CW_CFG1_DUALPATH, int(dual_path_field), do_not_care=do_not_care)
-        self._reg_write(model.vars.CW_CFG1_FFTANALYZE, int(fft_analyze_field), do_not_care=do_not_care)
-        self._reg_write(model.vars.CW_CFG1_SIGTYPE, int(sig_type_field), do_not_care=do_not_care)
-        self._reg_write(model.vars.CW_CFG2_FREQ, int(freq_field), do_not_care=do_not_care)
-        self._reg_write(model.vars.CW_CFG2_AMP, int(amp_field), do_not_care=do_not_care)
-        self._reg_write(model.vars.CW_CFG3_XTALFREQ, int(xtal_freq_field), do_not_care=do_not_care)
+        self._reg_write(model.vars.CW_CFG1_MODULATION, int(modulation_field))
+        self._reg_write(model.vars.CW_CFG1_NFFTLOG2, int(nfft_log2_field))
+        self._reg_write(model.vars.CW_CFG1_DUALPATH, int(dual_path_field))
+        self._reg_write(model.vars.CW_CFG1_FFTANALYZE, int(fft_analyze_field))
+        self._reg_write(model.vars.CW_CFG1_SIGTYPE, int(sig_type_field))
+        self._reg_write(model.vars.CW_CFG2_FREQ, int(freq_field))
+        self._reg_write(model.vars.CW_CFG2_AMP, int(amp_field))
+        self._reg_write(model.vars.CW_CFG3_XTALFREQ, int(xtal_freq_field))
 
     def calc_softmodem_sunofdm(self, model):
 
@@ -291,7 +320,6 @@ class calc_softmodem_sol(ICalculator):
         xtal_frequency_hz = model.vars.xtal_frequency_hz.value
 
         if softmodem_modulation_type == model.vars.softmodem_modulation_type.var_enum.SUN_OFDM:
-            do_not_care = False
 
             # Copy modulation type into SUNOFDM register
             modulation_field = softmodem_modulation_type
@@ -309,7 +337,6 @@ class calc_softmodem_sol(ICalculator):
             xtal_freq_field = xtal_frequency_hz / 1000
 
         else:
-            do_not_care = True
             modulation_field = model.vars.softmodem_modulation_type.var_enum.NONE
             ofdmoption_field = 0
             interleaving_field = 0
@@ -317,11 +344,11 @@ class calc_softmodem_sol(ICalculator):
             xtal_freq_field = 0
 
         #Write the registers
-        self._reg_write(model.vars.SUNOFDM_CFG1_MODULATION, int(modulation_field), do_not_care=do_not_care)
-        self._reg_write(model.vars.SUNOFDM_CFG1_OFDMOPTION, int(ofdmoption_field), do_not_care=do_not_care)
-        self._reg_write(model.vars.SUNOFDM_CFG1_INTERLEAVING, int(interleaving_field), do_not_care=do_not_care)
-        self._reg_write(model.vars.SUNOFDM_CFG1_MACFCSTYPE, int(macfcstype_field), do_not_care=do_not_care)
-        self._reg_write(model.vars.SUNOFDM_CFG1_XTALFREQ, int(xtal_freq_field), do_not_care=do_not_care)
+        self._reg_write(model.vars.SUNOFDM_CFG1_MODULATION, int(modulation_field))
+        self._reg_write(model.vars.SUNOFDM_CFG1_OFDMOPTION, int(ofdmoption_field))
+        self._reg_write(model.vars.SUNOFDM_CFG1_INTERLEAVING, int(interleaving_field))
+        self._reg_write(model.vars.SUNOFDM_CFG1_MACFCSTYPE, int(macfcstype_field))
+        self._reg_write(model.vars.SUNOFDM_CFG1_XTALFREQ, int(xtal_freq_field))
 
     def calc_softmodem_sunoqpsk(self, model):
 
@@ -332,7 +359,6 @@ class calc_softmodem_sol(ICalculator):
         xtal_frequency_hz = model.vars.xtal_frequency_hz.value
 
         if softmodem_modulation_type == model.vars.softmodem_modulation_type.var_enum.SUN_OQPSK:
-            do_not_care = False
             sun_oqpsk_chiprate = model.vars.sun_oqpsk_chiprate.value
             band_freq_mhz_802154 = model.vars.band_freq_mhz_802154.value
 
@@ -352,7 +378,6 @@ class calc_softmodem_sol(ICalculator):
             xtal_freq_field = xtal_frequency_hz / 1000
 
         else:
-            do_not_care = True
             modulation_field = model.vars.softmodem_modulation_type.var_enum.NONE
             chiprate_field = 0
             bandfreqmhz_field = 0
@@ -360,11 +385,11 @@ class calc_softmodem_sol(ICalculator):
             xtal_freq_field = 0
 
         #Write the registers
-        self._reg_write(model.vars.SUNOQPSK_CFG1_MODULATION, int(modulation_field), do_not_care=do_not_care)
-        self._reg_write(model.vars.SUNOQPSK_CFG1_CHIPRATE, int(chiprate_field), do_not_care=do_not_care)
-        self._reg_write(model.vars.SUNOQPSK_CFG1_BANDFREQMHZ, int(bandfreqmhz_field), do_not_care=do_not_care)
-        self._reg_write(model.vars.SUNOQPSK_CFG2_MACFCSTYPE, int(macfcstype_field), do_not_care=do_not_care)
-        self._reg_write(model.vars.SUNOQPSK_CFG2_XTALFREQ, int(xtal_freq_field), do_not_care=do_not_care)
+        self._reg_write(model.vars.SUNOQPSK_CFG1_MODULATION, int(modulation_field))
+        self._reg_write(model.vars.SUNOQPSK_CFG1_CHIPRATE, int(chiprate_field))
+        self._reg_write(model.vars.SUNOQPSK_CFG1_BANDFREQMHZ, int(bandfreqmhz_field))
+        self._reg_write(model.vars.SUNOQPSK_CFG2_MACFCSTYPE, int(macfcstype_field))
+        self._reg_write(model.vars.SUNOQPSK_CFG2_XTALFREQ, int(xtal_freq_field))
 
     def calc_softmodem_legoqpsk(self, model):
 
@@ -374,7 +399,6 @@ class calc_softmodem_sol(ICalculator):
         xtal_frequency_hz = model.vars.xtal_frequency_hz.value
 
         if softmodem_modulation_type == model.vars.softmodem_modulation_type.var_enum.LEGACY_OQPSK:
-            do_not_care = False
             sun_oqpsk_chiprate = model.vars.sun_oqpsk_chiprate.value
 
             # Copy modulation type into LEGOQPSK register
@@ -390,17 +414,16 @@ class calc_softmodem_sol(ICalculator):
             xtal_freq_field = xtal_frequency_hz / 1000
 
         else:
-            do_not_care = True
             modulation_field = model.vars.softmodem_modulation_type.var_enum.NONE
             chiprate_field = 0
             bandfreqmhz_field = 0
             xtal_freq_field = 0
 
         # Write the registers
-        self._reg_write(model.vars.LEGOQPSK_CFG1_MODULATION, int(modulation_field), do_not_care=do_not_care)
-        self._reg_write(model.vars.LEGOQPSK_CFG1_CHIPRATE, int(chiprate_field), do_not_care=do_not_care)
-        self._reg_write(model.vars.LEGOQPSK_CFG1_BANDFREQMHZ, int(bandfreqmhz_field), do_not_care=do_not_care)
-        self._reg_write(model.vars.LEGOQPSK_CFG2_XTALFREQ, int(xtal_freq_field), do_not_care=do_not_care)
+        self._reg_write(model.vars.LEGOQPSK_CFG1_MODULATION, int(modulation_field))
+        self._reg_write(model.vars.LEGOQPSK_CFG1_CHIPRATE, int(chiprate_field))
+        self._reg_write(model.vars.LEGOQPSK_CFG1_BANDFREQMHZ, int(bandfreqmhz_field))
+        self._reg_write(model.vars.LEGOQPSK_CFG2_XTALFREQ, int(xtal_freq_field))
 
     def calc_softmodem_sunfsk(self, model):
 
@@ -411,179 +434,253 @@ class calc_softmodem_sol(ICalculator):
 
         # Read in model variables
         softmodem_modulation_type = model.vars.softmodem_modulation_type.value
-        sun_fsk_fecsel = model.vars.sun_fsk_fecsel.value
         sun_fsk_sfd = model.vars.sun_fsk_sfd.value
         preamble_length = model.vars.preamble_length.value #This is the TX preamble length, ok for now
-        modulation_index = model.vars.modulation_index.value
-        trecsosr = model.vars.MODEM_TRECSCFG_TRECSOSR.value
-        harddecision = model.vars.MODEM_VITERBIDEMOD_HARDDECISION.value
-        ksi1 = model.vars.MODEM_VITERBIDEMOD_VITERBIKSI1.value
-        ksi2 = model.vars.MODEM_VITERBIDEMOD_VITERBIKSI2.value
-        ksi3 = model.vars.MODEM_VITERBIDEMOD_VITERBIKSI3.value
-        ksi3w = model.vars.ksi3wb_actual.value
-        phscale = model.vars.MODEM_TRECPMDET_PHSCALE.value
-        pmmincostthd = model.vars.MODEM_TRECPMDET_PMMINCOSTTHD.value
-        rtschwin = model.vars.MODEM_REALTIMCFE_RTSCHWIN.value
-        pmcostvalthd = model.vars.MODEM_TRECPMDET_PMCOSTVALTHD.value
-        preamsch_len = model.vars.preamsch_len.value
-        errors_in_timing_window = model.vars.errors_in_timing_window.value
-        pmtimeoutsel = model.vars.MODEM_TRECPMDET_PMTIMEOUTSEL.value
-        vtfrqlim = model.vars.MODEM_VTCORRCFG1_VTFRQLIM.value
-        pmtimlosthd = model.vars.MODEM_PHDMODCTRL_PMTIMLOSTHD.value
-        syncword_0 = model.vars.syncword_0.value
-        syncword_1 = model.vars.syncword_1.value
         syncword_length = model.vars.syncword_length.value
-        mincostthd = model.vars.MODEM_REALTIMCFE_MINCOSTTHD.value
-        frmschtime = model.vars.MODEM_FRMSCHTIME_FRMSCHTIME.value
-        syncerrors = model.vars.MODEM_CTRL1_SYNCERRORS.value
-        timgear = model.vars.MODEM_VTTRACK_TIMGEAR.value
-        trackingwin = model.vars.MODEM_REALTIMCFE_TRACKINGWIN.value
-        timtrackthd = model.vars.MODEM_VTTRACK_TIMTRACKTHD.value
-        afc_scale = model.vars.afc_scale.value
-        afcadjlim = model.vars.MODEM_AFCADJLIM_AFCADJLIM.value
         xtal_frequency_hz = model.vars.xtal_frequency_hz.value
 
         if softmodem_modulation_type == model.vars.softmodem_modulation_type.var_enum.SUN_FSK:
+
             #This access is inside the SUN_FSK case as shaping_filter_param is not defined for some Mbus PHYs
             shaping_filter_param = model.vars.shaping_filter_param.value
 
-            do_not_care = False
-            modulation_field = softmodem_modulation_type
-            fecsel_field = sun_fsk_fecsel
-            physunfsksfd_field = sun_fsk_sfd
-            fskpreamblelength_field = int(preamble_length // 8) #This field is denoted in bytes
+            modulation_field = int(softmodem_modulation_type)
+            physunfsksfd_field = int(sun_fsk_sfd)
+            fskpreamblelength_field = int(preamble_length // 8)  # This field is denoted in bytes
             modscheme_field = 0 #Set to 0 for 2FSK
             bt_field = 0 if (shaping_filter_param < 0.6) else 1
-            modindex_field = int((modulation_index - 0.25)//0.5) # modulation index = 0.25 + (Modulation Index field value) × 0.05
-            osr_field = trecsosr
-            veqen_field = 1 if (harddecision == 0) else 0
-            ksi1_field = ksi1
-            ksi2_field = ksi2
-            ksi3_field = ksi3
-            ksi3w_field = int(ksi3w)
-            phasescale_field = phscale
-            preamblecostthd_field = pmmincostthd
-            preamblecntwin_field = rtschwin
-            preamblecntthd_field = pmcostvalthd
-            preamblelen_field = preamsch_len #Use calculated preamble search length
-            preambleerrors_field = errors_in_timing_window
-            preambletimeout_field = 16 + 8*pmtimeoutsel #pmtimeoutsel value in symbols
-            preamblepatt_field = 0x55555555 #Always alternating 01 for SUN FSK
-            preamblefreqlim_field = vtfrqlim
-            preamblecostmax_field = pmtimlosthd
-            sfd1_field = syncword_0
-            sfd2_field = syncword_1
+            preambletimeout_field = 2 #fnicolas : preambletimeout which was not used in the FW is instead used to set abort_cnt_thd (to 2)
+            preamblepatt_field =  0xAAAAAAAA #Always alternating 01 for SUN FSK - flipped in order
             sfdlen_field = syncword_length
-            sfdcostthd_field = mincostthd
-            sfdtimeout_field = frmschtime
-            sfderrors_field = syncerrors
-            timtrackgear_field = timgear
-            timtracksymb_field = (trackingwin + 1)  * 4
-            timmintrans_field = timtrackthd
-            realtimesearch_field = 1 #Always enable real time search for now
-            nsymbbatch_field = 26 #Static number of symbols in batch for now
-            chfiltswen_field = 1 #Enable BW narrowing (assume sufficient preamble for AFC)
-            afcmode_field = 1 #digmix one-shot
-            afcscale_field = int(afc_scale)
-            afcadjlim_field = afcadjlim
-            afcadjperiod_field = 1 #Hard coded for now
-            afccostthd_field = pmcostvalthd
-            xtal_freq_field = xtal_frequency_hz / 1000
+            timingtrackgear_field = 1 # scale prompt phase's cost by 0.75 before comparing to early/late to avoid jitter
+            timingtracksym_field = 32 # FW only supports 32 bit frame in timing search
+            timingmintrans_field = 2 # optimized for 32 bit frame in timing search
+            realtimesearch_field = 1 # this is currently not used in FW. We always do realtime search now.
+            nbsymbbatch_field = 26 # Static number of symbols in batch. optimized in FW for WISUN packet structure. Should not be changed without updating FW first.
+            chfilterswen_field = 1 # enable narrowing of channel filter after preamble detection. Not yet used in FW. We currently always narrow the filter.
+            afcmode_field = 1 # set to 1-shot update to mixer. Not yet used in FW. We currently always use 1-shot to feedback estimate to digital mixer.
+            xtalfreq_field = int(xtal_frequency_hz / 1000)
+
         else:
-            do_not_care = True
-            modulation_field = model.vars.softmodem_modulation_type.var_enum.NONE
-            fecsel_field = model.vars.sun_fsk_fecsel.var_enum.NONE
+            modulation_field = 0
             physunfsksfd_field = 0
             fskpreamblelength_field = 0
             modscheme_field = 0
             bt_field = 0
-            modindex_field = 0
-            osr_field = 0
-            veqen_field = 0
-            ksi1_field = 0
-            ksi2_field = 0
-            ksi3_field = 0
-            ksi3w_field = 0
-            phasescale_field = 0
-            preamblecostthd_field = 0
-            preamblecntwin_field = 0
-            preamblecntthd_field = 0
-            preamblelen_field = 0
-            preambleerrors_field = 0
             preambletimeout_field = 0
             preamblepatt_field = 0
-            preamblefreqlim_field = 0
-            preamblecostmax_field = 0
-            sfd1_field = 0
-            sfd2_field = 0
             sfdlen_field = 0
-            sfdcostthd_field = 0
-            sfdtimeout_field = 0
-            sfderrors_field = 0
-            timtrackgear_field = 0
-            timtracksymb_field = 0
-            timmintrans_field = 0
+            timingtrackgear_field = 0
+            timingtracksym_field = 0
+            timingmintrans_field = 0
             realtimesearch_field = 0
-            nsymbbatch_field = 0
-            chfiltswen_field = 0
+            nbsymbbatch_field = 0
+            chfilterswen_field = 0
             afcmode_field = 0
-            afcscale_field = 0
-            afcadjlim_field = 0
-            afcadjperiod_field = 0
-            afccostthd_field = 0
-            xtal_freq_field = 0
+            xtalfreq_field = 0
 
-        # Write the registers
-        self._reg_write(model.vars.SUNFSK_CFG1_MODULATION, int(modulation_field), do_not_care=do_not_care)
-        self._reg_write(model.vars.SUNFSK_CFG1_FECSEL, int(fecsel_field), do_not_care=do_not_care)
-        self._reg_write(model.vars.SUNFSK_CFG1_PHYSUNFSKSFD, int(physunfsksfd_field), do_not_care=do_not_care)
-        self._reg_write(model.vars.SUNFSK_CFG1_FSKPREAMBLELENGTH, fskpreamblelength_field, do_not_care=do_not_care)
-        self._reg_write(model.vars.SUNFSK_CFG1_MODSCHEME, modscheme_field, do_not_care=do_not_care)
-        self._reg_write(model.vars.SUNFSK_CFG1_BT, bt_field, do_not_care=do_not_care)
-        self._reg_write(model.vars.SUNFSK_CFG1_MODINDEX, modindex_field, do_not_care=do_not_care)
-        self._reg_write(model.vars.SUNFSK_CFG3_OSR, osr_field, do_not_care=do_not_care)
-        self._reg_write(model.vars.SUNFSK_CFG2_VEQEN, veqen_field, do_not_care=do_not_care)
-        self._reg_write(model.vars.SUNFSK_CFG2_KSI1, ksi1_field, do_not_care=do_not_care)
-        self._reg_write(model.vars.SUNFSK_CFG2_KSI2, ksi2_field, do_not_care=do_not_care)
-        self._reg_write(model.vars.SUNFSK_CFG2_KSI3, ksi3_field, do_not_care=do_not_care)
-        self._reg_write(model.vars.SUNFSK_CFG3_KSI3W, ksi3w_field, do_not_care=do_not_care)
-        self._reg_write(model.vars.SUNFSK_CFG3_PHASESCALE, phasescale_field, do_not_care=do_not_care)
-        self._reg_write(model.vars.SUNFSK_CFG4_PREAMBLECOSTTHD, preamblecostthd_field, do_not_care=do_not_care)
-        self._reg_write(model.vars.SUNFSK_CFG4_PREAMBLECNTWIN, preamblecntwin_field, do_not_care=do_not_care)
-        self._reg_write(model.vars.SUNFSK_CFG4_PREAMBLECNTTHD, preamblecntthd_field, do_not_care=do_not_care)
-        self._reg_write(model.vars.SUNFSK_CFG5_PREAMBLELEN, preamblelen_field, do_not_care=do_not_care)
-        self._reg_write(model.vars.SUNFSK_CFG5_PREAMBLEERRORS, preambleerrors_field, do_not_care=do_not_care)
-        self._reg_write(model.vars.SUNFSK_CFG5_PREAMBLETIMEOUT, preambletimeout_field, do_not_care=do_not_care)
-        self._reg_write(model.vars.SUNFSK_CFG6_PREAMBLEPATT, preamblepatt_field, do_not_care=do_not_care)
-        self._reg_write(model.vars.SUNFSK_CFG7_PREAMBLEFREQLIM, preamblefreqlim_field, do_not_care=do_not_care)
-        self._reg_write(model.vars.SUNFSK_CFG7_PREAMBLECOSTMAX, preamblecostmax_field, do_not_care=do_not_care)
-        self._reg_write(model.vars.SUNFSK_CFG8_SFD1, sfd1_field, do_not_care=do_not_care)
-        self._reg_write(model.vars.SUNFSK_CFG9_SFD2, sfd2_field, do_not_care=do_not_care)
-        self._reg_write(model.vars.SUNFSK_CFG10_SFDLEN, sfdlen_field, do_not_care=do_not_care)
-        self._reg_write(model.vars.SUNFSK_CFG10_SFDCOSTTHD, sfdcostthd_field, do_not_care=do_not_care)
-        self._reg_write(model.vars.SUNFSK_CFG11_SFDTIMEOUT, sfdtimeout_field, do_not_care=do_not_care)
-        self._reg_write(model.vars.SUNFSK_CFG11_SFDERRORS, sfderrors_field, do_not_care=do_not_care)
-        self._reg_write(model.vars.SUNFSK_CFG11_TIMINGTRACKGEAR, timtrackgear_field, do_not_care=do_not_care)
-        self._reg_write(model.vars.SUNFSK_CFG12_TIMINGTRACKSYMB, timtracksymb_field, do_not_care=do_not_care)
-        self._reg_write(model.vars.SUNFSK_CFG12_TIMINGMINTRANS, timmintrans_field, do_not_care=do_not_care)
-        self._reg_write(model.vars.SUNFSK_CFG12_REALTIMESEARCH, realtimesearch_field, do_not_care=do_not_care)
-        self._reg_write(model.vars.SUNFSK_CFG12_NBSYMBBATCH, nsymbbatch_field, do_not_care=do_not_care)
-        self._reg_write(model.vars.SUNFSK_CFG13_CHFILTERSWEN, chfiltswen_field, do_not_care=do_not_care)
-        self._reg_write(model.vars.SUNFSK_CFG13_AFCMODE, afcmode_field, do_not_care=do_not_care)
-        self._reg_write(model.vars.SUNFSK_CFG13_AFCSCALE, afcscale_field, do_not_care=do_not_care)
-        self._reg_write(model.vars.SUNFSK_CFG14_AFCADJLIM, afcadjlim_field, do_not_care=do_not_care)
-        self._reg_write(model.vars.SUNFSK_CFG15_AFCADJPERIOD, afcadjperiod_field, do_not_care=do_not_care)
-        self._reg_write(model.vars.SUNFSK_CFG15_AFCCOSTTHD, afccostthd_field, do_not_care=do_not_care)
-        self._reg_write(model.vars.SUNFSK_CFG15_XTALFREQ, int(xtal_freq_field), do_not_care=do_not_care)
+        self._reg_write(model.vars.SUNFSK_CFG1_MODULATION, modulation_field)
+        self._reg_write(model.vars.SUNFSK_CFG1_PHYSUNFSKSFD, physunfsksfd_field)
+        self._reg_write(model.vars.SUNFSK_CFG1_FSKPREAMBLELENGTH, fskpreamblelength_field)
+        self._reg_write(model.vars.SUNFSK_CFG1_MODSCHEME, modscheme_field)
+        self._reg_write(model.vars.SUNFSK_CFG1_BT, bt_field)
+        self._reg_write(model.vars.SUNFSK_CFG5_PREAMBLETIMEOUT, preambletimeout_field)
+        self._reg_write(model.vars.SUNFSK_CFG6_PREAMBLEPATT, preamblepatt_field)
+        self._reg_write(model.vars.SUNFSK_CFG10_SFDLEN, sfdlen_field)
+        self._reg_write(model.vars.SUNFSK_CFG11_TIMINGTRACKGEAR, timingtrackgear_field)
+        self._reg_write(model.vars.SUNFSK_CFG12_TIMINGTRACKSYMB, timingtracksym_field)
+        self._reg_write(model.vars.SUNFSK_CFG12_TIMINGMINTRANS, timingmintrans_field)
+        self._reg_write(model.vars.SUNFSK_CFG12_REALTIMESEARCH, realtimesearch_field)
+        self._reg_write(model.vars.SUNFSK_CFG12_NBSYMBBATCH, nbsymbbatch_field)
+        self._reg_write(model.vars.SUNFSK_CFG13_CHFILTERSWEN, chfilterswen_field)
+        self._reg_write(model.vars.SUNFSK_CFG13_AFCMODE, afcmode_field)
+        self._reg_write(model.vars.SUNFSK_CFG15_XTALFREQ, xtalfreq_field)
+
+    def calc_sunfsk_modindex(self, model):
+
+        modulation_index = model.vars.modulation_index.value
+        # modulation index = 0.25 + (Modulation Index field value) × 0.05
+        modindex_field = int((modulation_index - 0.25) // 0.5) if modulation_index >= 0.25 else 0
+        self._reg_write(model.vars.SUNFSK_CFG1_MODINDEX, modindex_field)
+
+    def calc_sunfsk_fecsel_reg(self, model):
+
+        if (model.vars.fec_tx_enable.value == model.vars.fec_tx_enable.var_enum.ENABLED):
+            sun_fsk_fecsel = 1
+        else:
+            sun_fsk_fecsel = 0
+
+        self._reg_write(model.vars.SUNFSK_CFG1_FECSEL, int(sun_fsk_fecsel))
+
+    def calc_sunfsk_sdfcostthd_reg(self, model):
+        # this function sets the threshold for frame (sync) detection
+        # note that compared to hard modem frequency samples the soft modem samples are scaled by 4
+        # value optimized for 16-bit SUN FSK sync words
+        sync_len = model.vars.syncword_length.value
+        val = 1500
+        self._reg_write(model.vars.SUNFSK_CFG10_SFDCOSTTHD, round(val/16*sync_len))
+
+    def calc_sunfsk_sfderrors_reg(self, model):
+        # this function sets the number of bit errors allowed in the sync word for valid frame (sync) detection
+        syncword_length = model.vars.syncword_length.value
+        # value optimized for SUN FSK where detected sync words determines if FEC is enabled or disabled
+        val = round(syncword_length/8)
+        self._reg_write(model.vars.SUNFSK_CFG11_SFDERRORS, val)
+
+    def calc_sunfsk_sfdtimeout_reg(self, model):
+        # this function sets the timeout in symbols between timing (preamble) detection and frame (sync) detection
+        preamble_length = model.vars.preamble_length.value
+        sync_len = model.vars.syncword_length.value
+        batch_size = model.vars.SUNFSK_CFG12_NBSYMBBATCH.value
+
+        # set timeout to preamble length + sync word length + number of symbols processed in one batch
+        self._reg_write(model.vars.SUNFSK_CFG11_SFDTIMEOUT, preamble_length + sync_len + batch_size)
+
+    def calc_sunfsk_afcscale_reg(self, model):
+        # AFSCALE has a slightly different meaning compared to the HW AFCSCALE register
+        # In HW this value holds the value needed to translate estimated offset in terms of frequency scale (nominal 64)
+        # to digital mixer scale. Sometimes that value is scaled to feedback more or less than the nominal estimate.
+        # In the soft modem the translation part is handled by FW and this scale only determines the desired scale.
+        # 1024 results in no scaling. 512 would feeback only half of the estimated offset to the digital mixer.
+        val = 1024
+        self._reg_write(model.vars.SUNFSK_CFG13_AFCSCALE, val)
+
+    def calc_sunfsk_afcadjlim_reg(self, model):
+        # adjustment limit disabled in soft modem SUN FSK PHYs until we see the need for it
+        #freq_limit = model.vars.freq_offset_hz.value
+        freq_limit = 0
+        digmix_res = model.vars.digmix_res_actual.value
+        self._reg_write(model.vars.SUNFSK_CFG14_AFCADJLIM, int(round(freq_limit / digmix_res)))
+
+    def calc_sunfsk_afcadjperiod_reg(self, model):
+        # continues frequency tracking disabled in soft modem SUN FSK PHYs until we see the need for it
+        # if non zero frequency is estimated and updated every period 32-bit intervals during payload decoding
+        # e.g. period = 1 updated every 32 bits, period = 2 update every 64 bits etc.
+        period = 0
+        self._reg_write(model.vars.SUNFSK_CFG15_AFCADJPERIOD, period)
+
+    def calc_sunfsk_afcostthd_reg(self, model):
+        # when frequency tracking is enabled this threshold determines if the frequency estimate should be used or not
+        # if the cost value is higher than this threshold the estimate is deemed unreliable and not used
+        # in this case we skip that periods update for frequency offset
+        # cost value is calclated over 32 bits so this threshold should be set accordingly
+        # if tracking is disabled with AFCADJPERIOD=0 this field is not used
+        val = 8
+        self._reg_write(model.vars.SUNFSK_CFG15_AFCCOSTTHD, val)
+
+    def calc_sunfsk_veqen_reg(self, model):
+        # this function sets the VEQ mode: 0 for no Viterbi equalization, 1 for hard decision, 2 for soft decision
+        mi = model.vars.modulation_index.value
+
+        veqen = 2 if mi < 1.0 else 0
+
+        self._reg_write(model.vars.SUNFSK_CFG2_VEQEN, veqen)
+
+    def calc_sunfsk_osr_reg(self, model):
+        # this function sets the oversampling rate at the SW demod
+        osr = int(model.vars.oversampling_rate_actual.value)
+        self._reg_write(model.vars.SUNFSK_CFG3_OSR, osr)
+
+    def calc_sunfsk_phscale_reg(self, model):
+        # this function sets the shift value to adjust phase value from the CORDIC
+        mi = model.vars.modulation_index.value
+        if mi > 0:
+            phscale = int(round(log(2 * mi, 2)))
+        else:
+            phscale = 0
+
+        phscale = 0 if phscale < 0 else phscale
+
+        self._reg_write(model.vars.SUNFSK_CFG3_PHASESCALE, phscale)
+
+    def calc_sunfsk_preamblelen_reg(self, model):
+        # this function set the preamble length used in timing search
+        preamsch_len = 32
+        self._reg_write(model.vars.SUNFSK_CFG5_PREAMBLELEN, preamsch_len)
+
+    def calc_sunfsk_preamblecntthd_reg(self, model):
+        # this function sets the number of times the cost value must go velow PREAMBLECOSTTHD within PREABMLECNTWIN
+        # symbols for timing detection
+        preamsch_len = model.vars.preamsch_len.value
+        reg = 2 if preamsch_len <= 16 else 3
+        self._reg_write(model.vars.SUNFSK_CFG4_PREAMBLECNTTHD, reg)
+
+    def calc_sunfsk_preamblecostthd_reg(self, model):
+        # this function sets the threshold for preamble detection
+        # val below is optimized for 32-bit SUN FSK preamble
+        preamsch_len = model.vars.preamsch_len.value
+        #val = 3000
+        val = 3072 #temporary fix as PREAMBLECOSTMAX is on 8 bits (instead of 16) and then set to 12*256=3072
+        self._reg_write(model.vars.SUNFSK_CFG4_PREAMBLECOSTTHD, round(val/32*preamsch_len))
+
+    def calc_sunfsk_preamblecntwin_reg(self, model):
+        # this function sets window size in symbols over which we count the number of threshold crossing for valid
+        # timing (preamble) detection
+        # cnt below is optmized for 32-bit SUN FSK premble
+        preamsch_len = model.vars.preamsch_len.value
+        cnt = 12
+        self._reg_write(model.vars.SUNFSK_CFG4_PREAMBLECNTWIN, round(cnt/32*preamsch_len))
+
+    def calc_sunfsk_preambleerrors_reg(self, model):
+        # this function sets the number of bit errors we allow for valid preamble (timing) detection
+        # errors below is optimized for 32-bit SUN FSK preamble
+        # SNR is lower with FEC enabled which can cause bit errors in the preamble
+        # setting this to 6 prevents us from missing frames due to bit errors in the preamble
+        preamsch_len = model.vars.preamsch_len.value
+        errors = 6
+        self._reg_write(model.vars.SUNFSK_CFG5_PREAMBLEERRORS, round(errors/32*preamsch_len))
+
+    def calc_sunfsk_preamblecostmax_reg(self, model):
+        # this function sets threshold for min cost above which we ignore timing (preamble) detection
+        # currently set to the same value as PREAMBLECOSTTHD which means this is inactive
+        # PREAMBLECOSTTHD is set higher than usual because when FEC is enabled and SNR is low the cost can be high
+        #val = 3000
+        val = 12 #temporary fix as PREAMBLECOSTMAX is on 8 bits instead of 16 : 12*256=3072
+        self._reg_write(model.vars.SUNFSK_CFG7_PREAMBLECOSTMAX, val)
+
+    def calc_sunfsk_preamblefreqlim_reg(self, model):
+        # this function sets the limit on the estimated frequency offset when detecting the preamble
+        # this feature is currently disabled by setting this register to 0
+        self._reg_write(model.vars.SUNFSK_CFG7_PREAMBLEFREQLIM, 0)
+
+    def calc_sunfsk_sfd1_reg(self, model):
+        # this function writes the first sync word in reverse bit order compared to the 802.15.4 definition
+        # this is the sync word for coded format
+        sync_len = model.vars.syncword_length.value
+        sync = CALC_Frame_Detect.flip_bits(model.vars.syncword_1.value, sync_len)
+        self._reg_write(model.vars.SUNFSK_CFG8_SFD1, sync)
+
+    def calc_sunfsk_sfd2_reg(self, model):
+        # this function writes the second sync word in reverse bit order compared to the 802.15.4 definition
+        # this is the sync word for uncoded format
+        sync_len = model.vars.syncword_length.value
+        sync = CALC_Frame_Detect.flip_bits(model.vars.syncword_0.value, sync_len)
+
+        self._reg_write(model.vars.SUNFSK_CFG9_SFD2, sync)
+
+    def calc_softmodem_ksi_reg(self, model):
+        # this function writes ksi values
+
+        ksi1 = model.vars.ksi1.value
+        ksi2 = model.vars.ksi2.value
+        ksi3 = model.vars.ksi3.value
+        ksi3wb = model.vars.ksi3wb.value
+
+        self._reg_sat_write(model.vars.SUNFSK_CFG2_KSI1, ksi1)
+        self._reg_sat_write(model.vars.SUNFSK_CFG2_KSI2, ksi2)
+        self._reg_sat_write(model.vars.SUNFSK_CFG2_KSI3, ksi3)
+        self._reg_sat_write(model.vars.SUNFSK_CFG3_KSI3W, ksi3wb)
 
     def calc_softmodem_clken(self, model):
-
         #Read in model vars
         demod_select = model.vars.demod_select.value
-
         #Need to set CLKEN=1 for RTL sims, but this is ignored in rail_scripts
         #Avoid disabling clock for hardmodem PHYs as this could impact LabATE testing
         if demod_select == model.vars.demod_select.var_enum.SOFT_DEMOD:
             self._reg_write(model.vars.RAC_SOFTMCTRL_CLKEN, 1)
         else:
             self._reg_do_not_care(model.vars.RAC_SOFTMCTRL_CLKEN)
+
+    def calc_sunfsk_mode_reg(self, model):
+        # MODE = 0 forces FW to read parameters from the calculator settings of SUNFSK_CFG registers
+        self._reg_sat_write(model.vars.SUNFSK_CFG16_MODE, 0)

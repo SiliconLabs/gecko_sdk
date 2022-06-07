@@ -2,7 +2,7 @@
  * @file
  * @brief Defines the procedures to make operations with
  *          the BA411E AES
- * @copyright Copyright (c) 2016-2019 Silex Insight. All Rights reserved
+ * @copyright Copyright (c) 2016-2020 Silex Insight. All Rights reserved
  */
 
 
@@ -45,20 +45,17 @@ uint32_t sx_aes_set_hw_config_for_key(block_t *key, uint32_t *config)
    // Check and configure for key length
    switch(key->len) {
    case 16:
-      if ((BA411E_HW_CFG_1 & AES_HW_CFG_KEY_SIZE_128_SUPPORTED_MASK)
-           != AES_HW_CFG_KEY_SIZE_128_SUPPORTED_MASK)
+      if (!AES_HW_CFG_KEY_SIZE_128_SUPPORTED)
          return CRYPTOLIB_UNSUPPORTED_ERR;
       *config |= SX_BLK_CIPHER_MODEID_128;
       break;
    case 24:
-      if ((BA411E_HW_CFG_1 & AES_HW_CFG_KEY_SIZE_192_SUPPORTED_MASK)
-           != AES_HW_CFG_KEY_SIZE_192_SUPPORTED_MASK)
+      if (!AES_HW_CFG_KEY_SIZE_192_SUPPORTED)
          return CRYPTOLIB_UNSUPPORTED_ERR;
       *config |= SX_BLK_CIPHER_MODEID_192;
       break;
    case 32:
-      if ((BA411E_HW_CFG_1 & AES_HW_CFG_KEY_SIZE_256_SUPPORTED_MASK)
-           != AES_HW_CFG_KEY_SIZE_256_SUPPORTED_MASK)
+      if (!AES_HW_CFG_KEY_SIZE_256_SUPPORTED)
          return CRYPTOLIB_UNSUPPORTED_ERR;
       *config |= SX_BLK_CIPHER_MODEID_256;
       break;
@@ -85,8 +82,7 @@ uint32_t sx_aes_ecb_encrypt(
       const block_t *plaintext,
       block_t *ciphertext)
 {
-   if ((BA411E_HW_CFG_1 & AES_HW_CFG_ECB_SUPPORTED_MASK)
-        != AES_HW_CFG_ECB_SUPPORTED_MASK)
+   if (!AES_HW_CFG_ECB_SUPPORTED)
       return CRYPTOLIB_UNSUPPORTED_ERR;
    return sx_blk_cipher_ecb(SX_BLK_CIPHER_AES, SX_BLK_CIPHER_ENCRYPT,
          key, plaintext, ciphertext);
@@ -97,8 +93,7 @@ uint32_t sx_aes_ecb_decrypt(
       const block_t *ciphertext,
       block_t *plaintext)
 {
-   if ((BA411E_HW_CFG_1 & AES_HW_CFG_ECB_SUPPORTED_MASK)
-        != AES_HW_CFG_ECB_SUPPORTED_MASK)
+   if (!AES_HW_CFG_ECB_SUPPORTED)
       return CRYPTOLIB_UNSUPPORTED_ERR;
    return sx_blk_cipher_ecb(SX_BLK_CIPHER_AES, SX_BLK_CIPHER_DECRYPT,
          key, ciphertext, plaintext);
@@ -112,8 +107,7 @@ uint32_t sx_aes_cbc_encrypt(
       block_t *ciphertext,
       const block_t *iv)
 {
-   if ((BA411E_HW_CFG_1 & AES_HW_CFG_CBC_SUPPORTED_MASK)
-        != AES_HW_CFG_CBC_SUPPORTED_MASK)
+   if (!AES_HW_CFG_CBC_SUPPORTED)
       return CRYPTOLIB_UNSUPPORTED_ERR;
    return sx_blk_cipher_cbc(SX_BLK_CIPHER_AES, SX_BLK_CIPHER_ENCRYPT,
          key, plaintext, ciphertext, iv);
@@ -124,8 +118,7 @@ uint32_t sx_aes_cbc_decrypt(
       block_t *plaintext,
       const block_t *iv)
 {
-   if ((BA411E_HW_CFG_1 & AES_HW_CFG_CBC_SUPPORTED_MASK)
-        != AES_HW_CFG_CBC_SUPPORTED_MASK)
+   if (!AES_HW_CFG_CBC_SUPPORTED)
       return CRYPTOLIB_UNSUPPORTED_ERR;
    return sx_blk_cipher_cbc(SX_BLK_CIPHER_AES, SX_BLK_CIPHER_DECRYPT,
          key, ciphertext, plaintext, iv);
@@ -138,8 +131,7 @@ uint32_t sx_aes_cbc_encrypt_init(
       const block_t *iv,
       block_t *ctx_out)
 {
-   if ((BA411E_HW_CFG_1 & AES_HW_CFG_CBC_SUPPORTED_MASK)
-        != AES_HW_CFG_CBC_SUPPORTED_MASK)
+   if (!AES_HW_CFG_CBC_SUPPORTED)
       return CRYPTOLIB_UNSUPPORTED_ERR;
    return sx_blk_cipher_cbc_ctr_ofb_cfb_init(SX_BLK_CIPHER_AES,
          SX_BLK_CIPHER_ENCRYPT, SX_BLK_CIPHER_MODE_CBC, key, plaintext,
@@ -153,8 +145,7 @@ uint32_t sx_aes_cbc_decrypt_init(
       const block_t *iv,
       block_t *ctx_out)
 {
-   if ((BA411E_HW_CFG_1 & AES_HW_CFG_CBC_SUPPORTED_MASK)
-        != AES_HW_CFG_CBC_SUPPORTED_MASK)
+   if (!AES_HW_CFG_CBC_SUPPORTED)
       return CRYPTOLIB_UNSUPPORTED_ERR;
    return sx_blk_cipher_cbc_ctr_ofb_cfb_init(SX_BLK_CIPHER_AES,
          SX_BLK_CIPHER_DECRYPT, SX_BLK_CIPHER_MODE_CBC, key, ciphertext,
@@ -168,8 +159,7 @@ uint32_t sx_aes_cbc_encrypt_update(
       const block_t *ctx_in,
       block_t *ctx_out)
 {
-   if ((BA411E_HW_CFG_1 & AES_HW_CFG_CBC_SUPPORTED_MASK)
-        != AES_HW_CFG_CBC_SUPPORTED_MASK)
+   if (!AES_HW_CFG_CBC_SUPPORTED)
       return CRYPTOLIB_UNSUPPORTED_ERR;
    return sx_blk_cipher_cbc_ctr_ofb_cfb_update(SX_BLK_CIPHER_AES,
          SX_BLK_CIPHER_ENCRYPT, SX_BLK_CIPHER_MODE_CBC, key, plaintext,
@@ -183,8 +173,7 @@ uint32_t sx_aes_cbc_decrypt_update(
       const block_t *ctx_in,
       block_t *ctx_out)
 {
-   if ((BA411E_HW_CFG_1 & AES_HW_CFG_CBC_SUPPORTED_MASK)
-        != AES_HW_CFG_CBC_SUPPORTED_MASK)
+   if (!AES_HW_CFG_CBC_SUPPORTED)
       return CRYPTOLIB_UNSUPPORTED_ERR;
    return sx_blk_cipher_cbc_ctr_ofb_cfb_update(SX_BLK_CIPHER_AES,
          SX_BLK_CIPHER_DECRYPT, SX_BLK_CIPHER_MODE_CBC, key, ciphertext,
@@ -197,8 +186,7 @@ uint32_t sx_aes_cbc_encrypt_final(
       block_t *ciphertext,
       const block_t *ctx_in)
 {
-   if ((BA411E_HW_CFG_1 & AES_HW_CFG_CBC_SUPPORTED_MASK)
-        != AES_HW_CFG_CBC_SUPPORTED_MASK)
+   if (!AES_HW_CFG_CBC_SUPPORTED)
       return CRYPTOLIB_UNSUPPORTED_ERR;
    return sx_blk_cipher_cbc_final(SX_BLK_CIPHER_AES, SX_BLK_CIPHER_ENCRYPT,
          key, plaintext, ciphertext, ctx_in);
@@ -210,8 +198,7 @@ uint32_t sx_aes_cbc_decrypt_final(
       block_t *plaintext,
       const block_t *ctx_in)
 {
-   if ((BA411E_HW_CFG_1 & AES_HW_CFG_CBC_SUPPORTED_MASK)
-        != AES_HW_CFG_CBC_SUPPORTED_MASK)
+   if (!AES_HW_CFG_CBC_SUPPORTED)
       return CRYPTOLIB_UNSUPPORTED_ERR;
    return sx_blk_cipher_cbc_final(SX_BLK_CIPHER_AES, SX_BLK_CIPHER_DECRYPT,
          key, ciphertext, plaintext, ctx_in);
@@ -225,8 +212,7 @@ uint32_t sx_aes_ctr_encrypt(
       block_t *ciphertext,
       const block_t *iv)
 {
-   if ((BA411E_HW_CFG_1 & AES_HW_CFG_CTR_SUPPORTED_MASK)
-        != AES_HW_CFG_CTR_SUPPORTED_MASK)
+   if (!AES_HW_CFG_CTR_SUPPORTED)
       return CRYPTOLIB_UNSUPPORTED_ERR;
    return sx_blk_cipher_ctr(SX_BLK_CIPHER_AES, SX_BLK_CIPHER_ENCRYPT,
          key, plaintext, ciphertext, iv);
@@ -238,8 +224,7 @@ uint32_t sx_aes_ctr_decrypt(
       block_t *plaintext,
       const block_t *iv)
 {
-   if ((BA411E_HW_CFG_1 & AES_HW_CFG_CTR_SUPPORTED_MASK)
-        != AES_HW_CFG_CTR_SUPPORTED_MASK)
+   if (!AES_HW_CFG_CTR_SUPPORTED)
       return CRYPTOLIB_UNSUPPORTED_ERR;
    return sx_blk_cipher_ctr(SX_BLK_CIPHER_AES, SX_BLK_CIPHER_DECRYPT,
          key, ciphertext, plaintext, iv);
@@ -252,8 +237,7 @@ uint32_t sx_aes_ctr_encrypt_init(
       const block_t *iv,
       block_t *ctx_out)
 {
-   if ((BA411E_HW_CFG_1 & AES_HW_CFG_CTR_SUPPORTED_MASK)
-        != AES_HW_CFG_CTR_SUPPORTED_MASK)
+   if (!AES_HW_CFG_CTR_SUPPORTED)
       return CRYPTOLIB_UNSUPPORTED_ERR;
    return sx_blk_cipher_cbc_ctr_ofb_cfb_init(SX_BLK_CIPHER_AES,
          SX_BLK_CIPHER_ENCRYPT, SX_BLK_CIPHER_MODE_CTR, key, plaintext,
@@ -267,8 +251,7 @@ uint32_t sx_aes_ctr_decrypt_init(
       const block_t *iv,
       block_t *ctx_out)
 {
-   if ((BA411E_HW_CFG_1 & AES_HW_CFG_CTR_SUPPORTED_MASK)
-        != AES_HW_CFG_CTR_SUPPORTED_MASK)
+   if (!AES_HW_CFG_CTR_SUPPORTED)
       return CRYPTOLIB_UNSUPPORTED_ERR;
    return sx_blk_cipher_cbc_ctr_ofb_cfb_init(SX_BLK_CIPHER_AES,
          SX_BLK_CIPHER_DECRYPT, SX_BLK_CIPHER_MODE_CTR, key, ciphertext,
@@ -282,8 +265,7 @@ uint32_t sx_aes_ctr_encrypt_update(
       const block_t *ctx_in,
       block_t *ctx_out)
 {
-   if ((BA411E_HW_CFG_1 & AES_HW_CFG_CTR_SUPPORTED_MASK)
-        != AES_HW_CFG_CTR_SUPPORTED_MASK)
+   if (!AES_HW_CFG_CTR_SUPPORTED)
       return CRYPTOLIB_UNSUPPORTED_ERR;
    return sx_blk_cipher_cbc_ctr_ofb_cfb_update(SX_BLK_CIPHER_AES,
          SX_BLK_CIPHER_ENCRYPT, SX_BLK_CIPHER_MODE_CTR, key, plaintext,
@@ -297,8 +279,7 @@ uint32_t sx_aes_ctr_decrypt_update(
       const block_t *ctx_in,
       block_t *ctx_out)
 {
-   if ((BA411E_HW_CFG_1 & AES_HW_CFG_CTR_SUPPORTED_MASK)
-        != AES_HW_CFG_CTR_SUPPORTED_MASK)
+   if (!AES_HW_CFG_CTR_SUPPORTED)
       return CRYPTOLIB_UNSUPPORTED_ERR;
    return sx_blk_cipher_cbc_ctr_ofb_cfb_update(SX_BLK_CIPHER_AES,
          SX_BLK_CIPHER_DECRYPT, SX_BLK_CIPHER_MODE_CTR, key, ciphertext,
@@ -311,8 +292,7 @@ uint32_t sx_aes_ctr_encrypt_final(
       block_t *ciphertext,
       const block_t *ctx_in)
 {
-   if ((BA411E_HW_CFG_1 & AES_HW_CFG_CTR_SUPPORTED_MASK)
-        != AES_HW_CFG_CTR_SUPPORTED_MASK)
+   if (!AES_HW_CFG_CTR_SUPPORTED)
       return CRYPTOLIB_UNSUPPORTED_ERR;
    return sx_blk_cipher_ctr_final(SX_BLK_CIPHER_AES, SX_BLK_CIPHER_ENCRYPT,
          key, plaintext, ciphertext, ctx_in);
@@ -324,8 +304,7 @@ uint32_t sx_aes_ctr_decrypt_final(
       block_t *plaintext,
       const block_t *ctx_in)
 {
-   if ((BA411E_HW_CFG_1 & AES_HW_CFG_CTR_SUPPORTED_MASK)
-        != AES_HW_CFG_CTR_SUPPORTED_MASK)
+   if (!AES_HW_CFG_CTR_SUPPORTED)
       return CRYPTOLIB_UNSUPPORTED_ERR;
    return sx_blk_cipher_ctr_final(SX_BLK_CIPHER_AES, SX_BLK_CIPHER_DECRYPT,
          key, ciphertext, plaintext, ctx_in);
@@ -339,8 +318,7 @@ uint32_t sx_aes_cfb_encrypt(
       block_t *ciphertext,
       const block_t *iv)
 {
-   if ((BA411E_HW_CFG_1 & AES_HW_CFG_CFB_SUPPORTED_MASK)
-        != AES_HW_CFG_CFB_SUPPORTED_MASK)
+   if (!AES_HW_CFG_CFB_SUPPORTED)
       return CRYPTOLIB_UNSUPPORTED_ERR;
    return sx_blk_cipher_cfb_ofb(SX_BLK_CIPHER_AES, SX_BLK_CIPHER_ENCRYPT,
          SX_BLK_CIPHER_MODE_CFB, key, plaintext, ciphertext, iv);
@@ -352,8 +330,7 @@ uint32_t sx_aes_cfb_decrypt(
       block_t *plaintext,
       const block_t *iv)
 {
-   if ((BA411E_HW_CFG_1 & AES_HW_CFG_CFB_SUPPORTED_MASK)
-        != AES_HW_CFG_CFB_SUPPORTED_MASK)
+   if (!AES_HW_CFG_CFB_SUPPORTED)
       return CRYPTOLIB_UNSUPPORTED_ERR;
    return sx_blk_cipher_cfb_ofb(SX_BLK_CIPHER_AES, SX_BLK_CIPHER_DECRYPT,
          SX_BLK_CIPHER_MODE_CFB, key, ciphertext, plaintext, iv);
@@ -366,8 +343,7 @@ uint32_t sx_aes_cfb_encrypt_init(
       const block_t *iv,
       block_t *ctx_out)
 {
-   if ((BA411E_HW_CFG_1 & AES_HW_CFG_CFB_SUPPORTED_MASK)
-        != AES_HW_CFG_CFB_SUPPORTED_MASK)
+   if (!AES_HW_CFG_CFB_SUPPORTED)
       return CRYPTOLIB_UNSUPPORTED_ERR;
    return sx_blk_cipher_cbc_ctr_ofb_cfb_init(SX_BLK_CIPHER_AES,
          SX_BLK_CIPHER_ENCRYPT, SX_BLK_CIPHER_MODE_CFB, key, plaintext,
@@ -381,8 +357,7 @@ uint32_t sx_aes_cfb_decrypt_init(
       const block_t *iv,
       block_t *ctx_out)
 {
-   if ((BA411E_HW_CFG_1 & AES_HW_CFG_CFB_SUPPORTED_MASK)
-        != AES_HW_CFG_CFB_SUPPORTED_MASK)
+   if (!AES_HW_CFG_CFB_SUPPORTED)
       return CRYPTOLIB_UNSUPPORTED_ERR;
    return sx_blk_cipher_cbc_ctr_ofb_cfb_init(SX_BLK_CIPHER_AES,
          SX_BLK_CIPHER_DECRYPT, SX_BLK_CIPHER_MODE_CFB, key, ciphertext,
@@ -396,8 +371,7 @@ uint32_t sx_aes_cfb_encrypt_update(
       const block_t *ctx_in,
       block_t *ctx_out)
 {
-   if ((BA411E_HW_CFG_1 & AES_HW_CFG_CFB_SUPPORTED_MASK)
-        != AES_HW_CFG_CFB_SUPPORTED_MASK)
+   if (!AES_HW_CFG_CFB_SUPPORTED)
       return CRYPTOLIB_UNSUPPORTED_ERR;
    return sx_blk_cipher_cbc_ctr_ofb_cfb_update(SX_BLK_CIPHER_AES,
          SX_BLK_CIPHER_ENCRYPT, SX_BLK_CIPHER_MODE_CFB, key, plaintext,
@@ -411,8 +385,7 @@ uint32_t sx_aes_cfb_decrypt_update(
       const block_t *ctx_in,
       block_t *ctx_out)
 {
-   if ((BA411E_HW_CFG_1 & AES_HW_CFG_CFB_SUPPORTED_MASK)
-        != AES_HW_CFG_CFB_SUPPORTED_MASK)
+   if (!AES_HW_CFG_CFB_SUPPORTED)
       return CRYPTOLIB_UNSUPPORTED_ERR;
    return sx_blk_cipher_cbc_ctr_ofb_cfb_update(SX_BLK_CIPHER_AES,
          SX_BLK_CIPHER_DECRYPT, SX_BLK_CIPHER_MODE_CFB, key, ciphertext,
@@ -425,8 +398,7 @@ uint32_t sx_aes_cfb_encrypt_final(
       block_t *ciphertext,
       const block_t *ctx_in)
 {
-   if ((BA411E_HW_CFG_1 & AES_HW_CFG_CFB_SUPPORTED_MASK)
-        != AES_HW_CFG_CFB_SUPPORTED_MASK)
+   if (!AES_HW_CFG_CFB_SUPPORTED)
       return CRYPTOLIB_UNSUPPORTED_ERR;
    return sx_blk_cipher_cfb_ofb_final(SX_BLK_CIPHER_AES, SX_BLK_CIPHER_ENCRYPT,
          SX_BLK_CIPHER_MODE_CFB, key, plaintext, ciphertext, ctx_in);
@@ -438,8 +410,7 @@ uint32_t sx_aes_cfb_decrypt_final(
       block_t *plaintext,
       const block_t *ctx_in)
 {
-   if ((BA411E_HW_CFG_1 & AES_HW_CFG_CFB_SUPPORTED_MASK)
-        != AES_HW_CFG_CFB_SUPPORTED_MASK)
+   if (!AES_HW_CFG_CFB_SUPPORTED)
       return CRYPTOLIB_UNSUPPORTED_ERR;
    return sx_blk_cipher_cfb_ofb_final(SX_BLK_CIPHER_AES, SX_BLK_CIPHER_DECRYPT,
          SX_BLK_CIPHER_MODE_CFB, key, ciphertext, plaintext, ctx_in);
@@ -453,8 +424,7 @@ uint32_t sx_aes_ofb_encrypt(
       block_t *ciphertext,
       const block_t *iv)
 {
-   if ((BA411E_HW_CFG_1 & AES_HW_CFG_OFB_SUPPORTED_MASK)
-        != AES_HW_CFG_OFB_SUPPORTED_MASK)
+   if (!AES_HW_CFG_OFB_SUPPORTED)
       return CRYPTOLIB_UNSUPPORTED_ERR;
    return sx_blk_cipher_cfb_ofb(SX_BLK_CIPHER_AES, SX_BLK_CIPHER_ENCRYPT,
          SX_BLK_CIPHER_MODE_OFB, key, plaintext, ciphertext, iv);
@@ -466,8 +436,7 @@ uint32_t sx_aes_ofb_decrypt(
       block_t *plaintext,
       const block_t *iv)
 {
-   if ((BA411E_HW_CFG_1 & AES_HW_CFG_OFB_SUPPORTED_MASK)
-        != AES_HW_CFG_OFB_SUPPORTED_MASK)
+   if (!AES_HW_CFG_OFB_SUPPORTED)
       return CRYPTOLIB_UNSUPPORTED_ERR;
    return sx_blk_cipher_cfb_ofb(SX_BLK_CIPHER_AES, SX_BLK_CIPHER_DECRYPT,
          SX_BLK_CIPHER_MODE_OFB, key, ciphertext, plaintext, iv);
@@ -480,8 +449,7 @@ uint32_t sx_aes_ofb_encrypt_init(
       const block_t *iv,
       block_t *ctx_out)
 {
-   if ((BA411E_HW_CFG_1 & AES_HW_CFG_OFB_SUPPORTED_MASK)
-        != AES_HW_CFG_OFB_SUPPORTED_MASK)
+   if (!AES_HW_CFG_OFB_SUPPORTED)
       return CRYPTOLIB_UNSUPPORTED_ERR;
    return sx_blk_cipher_cbc_ctr_ofb_cfb_init(SX_BLK_CIPHER_AES,
          SX_BLK_CIPHER_ENCRYPT, SX_BLK_CIPHER_MODE_OFB, key, plaintext,
@@ -495,8 +463,7 @@ uint32_t sx_aes_ofb_decrypt_init(
       const block_t *iv,
       block_t *ctx_out)
 {
-   if ((BA411E_HW_CFG_1 & AES_HW_CFG_OFB_SUPPORTED_MASK)
-        != AES_HW_CFG_OFB_SUPPORTED_MASK)
+   if (!AES_HW_CFG_OFB_SUPPORTED)
       return CRYPTOLIB_UNSUPPORTED_ERR;
    return sx_blk_cipher_cbc_ctr_ofb_cfb_init(SX_BLK_CIPHER_AES,
          SX_BLK_CIPHER_DECRYPT, SX_BLK_CIPHER_MODE_OFB, key, ciphertext,
@@ -510,8 +477,7 @@ uint32_t sx_aes_ofb_encrypt_update(
       const block_t *ctx_in,
       block_t *ctx_out)
 {
-   if ((BA411E_HW_CFG_1 & AES_HW_CFG_OFB_SUPPORTED_MASK)
-        != AES_HW_CFG_OFB_SUPPORTED_MASK)
+   if (!AES_HW_CFG_OFB_SUPPORTED)
       return CRYPTOLIB_UNSUPPORTED_ERR;
    return sx_blk_cipher_cbc_ctr_ofb_cfb_update(SX_BLK_CIPHER_AES,
          SX_BLK_CIPHER_ENCRYPT, SX_BLK_CIPHER_MODE_OFB, key, plaintext,
@@ -525,8 +491,7 @@ uint32_t sx_aes_ofb_decrypt_update(
       const block_t *ctx_in,
       block_t *ctx_out)
 {
-   if ((BA411E_HW_CFG_1 & AES_HW_CFG_OFB_SUPPORTED_MASK)
-        != AES_HW_CFG_OFB_SUPPORTED_MASK)
+   if (!AES_HW_CFG_OFB_SUPPORTED)
       return CRYPTOLIB_UNSUPPORTED_ERR;
    return sx_blk_cipher_cbc_ctr_ofb_cfb_update(SX_BLK_CIPHER_AES,
          SX_BLK_CIPHER_DECRYPT, SX_BLK_CIPHER_MODE_OFB, key, ciphertext,
@@ -539,8 +504,7 @@ uint32_t sx_aes_ofb_encrypt_final(
       block_t *ciphertext,
       const block_t *ctx_in)
 {
-   if ((BA411E_HW_CFG_1 & AES_HW_CFG_OFB_SUPPORTED_MASK)
-        != AES_HW_CFG_OFB_SUPPORTED_MASK)
+   if (!AES_HW_CFG_OFB_SUPPORTED)
       return CRYPTOLIB_UNSUPPORTED_ERR;
    return sx_blk_cipher_cfb_ofb_final(SX_BLK_CIPHER_AES, SX_BLK_CIPHER_ENCRYPT,
          SX_BLK_CIPHER_MODE_OFB, key, plaintext, ciphertext, ctx_in);
@@ -552,8 +516,7 @@ uint32_t sx_aes_ofb_decrypt_final(
       block_t *plaintext,
       const block_t *ctx_in)
 {
-   if ((BA411E_HW_CFG_1 & AES_HW_CFG_OFB_SUPPORTED_MASK)
-        != AES_HW_CFG_OFB_SUPPORTED_MASK)
+   if (!AES_HW_CFG_OFB_SUPPORTED)
       return CRYPTOLIB_UNSUPPORTED_ERR;
    return sx_blk_cipher_cfb_ofb_final(SX_BLK_CIPHER_AES, SX_BLK_CIPHER_DECRYPT,
          SX_BLK_CIPHER_MODE_OFB, key, ciphertext, plaintext, ctx_in);
@@ -568,8 +531,7 @@ uint32_t sx_aes_xts_encrypt(
       const block_t *iv,
       const block_t *key_xts)
 {
-   if ((BA411E_HW_CFG_1 & AES_HW_CFG_XTS_SUPPORTED_MASK)
-        != AES_HW_CFG_XTS_SUPPORTED_MASK)
+   if (!AES_HW_CFG_XTS_SUPPORTED)
       return CRYPTOLIB_UNSUPPORTED_ERR;
    return sx_blk_cipher_xts(SX_BLK_CIPHER_AES, SX_BLK_CIPHER_ENCRYPT,
          key, plaintext, ciphertext, iv, key_xts);
@@ -582,8 +544,7 @@ uint32_t sx_aes_xts_decrypt(
       const block_t *iv,
       const block_t *key_xts)
 {
-   if ((BA411E_HW_CFG_1 & AES_HW_CFG_XTS_SUPPORTED_MASK)
-        != AES_HW_CFG_XTS_SUPPORTED_MASK)
+   if (!AES_HW_CFG_XTS_SUPPORTED)
       return CRYPTOLIB_UNSUPPORTED_ERR;
    return sx_blk_cipher_xts(SX_BLK_CIPHER_AES, SX_BLK_CIPHER_DECRYPT,
          key, ciphertext, plaintext, iv, key_xts);
@@ -597,8 +558,7 @@ uint32_t sx_aes_xts_encrypt_init(
       block_t *ctx_out,
       const block_t *key_xts)
 {
-   if ((BA411E_HW_CFG_1 & AES_HW_CFG_XTS_SUPPORTED_MASK)
-        != AES_HW_CFG_XTS_SUPPORTED_MASK)
+   if (!AES_HW_CFG_XTS_SUPPORTED)
       return CRYPTOLIB_UNSUPPORTED_ERR;
    return sx_blk_cipher_xts_init(SX_BLK_CIPHER_AES, SX_BLK_CIPHER_ENCRYPT,
          key, plaintext, ciphertext, iv, ctx_out,
@@ -613,8 +573,7 @@ uint32_t sx_aes_xts_decrypt_init(
       block_t *ctx_out,
       const block_t *key_xts)
 {
-   if ((BA411E_HW_CFG_1 & AES_HW_CFG_XTS_SUPPORTED_MASK)
-        != AES_HW_CFG_XTS_SUPPORTED_MASK)
+   if (!AES_HW_CFG_XTS_SUPPORTED)
       return CRYPTOLIB_UNSUPPORTED_ERR;
    return sx_blk_cipher_xts_init(SX_BLK_CIPHER_AES, SX_BLK_CIPHER_DECRYPT,
          key, ciphertext, plaintext, iv, ctx_out,
@@ -629,8 +588,7 @@ uint32_t sx_aes_xts_encrypt_update(
       block_t *ctx_out,
       const block_t *key_xts)
 {
-   if ((BA411E_HW_CFG_1 & AES_HW_CFG_XTS_SUPPORTED_MASK)
-        != AES_HW_CFG_XTS_SUPPORTED_MASK)
+   if (!AES_HW_CFG_XTS_SUPPORTED)
       return CRYPTOLIB_UNSUPPORTED_ERR;
    return sx_blk_cipher_xts_update(SX_BLK_CIPHER_AES, SX_BLK_CIPHER_ENCRYPT,
          key, plaintext, ciphertext, ctx_in, ctx_out,
@@ -645,8 +603,7 @@ uint32_t sx_aes_xts_decrypt_update(
       block_t *ctx_out,
       const block_t *key_xts)
 {
-   if ((BA411E_HW_CFG_1 & AES_HW_CFG_XTS_SUPPORTED_MASK)
-        != AES_HW_CFG_XTS_SUPPORTED_MASK)
+   if (!AES_HW_CFG_XTS_SUPPORTED)
       return CRYPTOLIB_UNSUPPORTED_ERR;
    return sx_blk_cipher_xts_update(SX_BLK_CIPHER_AES, SX_BLK_CIPHER_DECRYPT,
          key, ciphertext, plaintext, ctx_in, ctx_out,
@@ -660,8 +617,7 @@ uint32_t sx_aes_xts_encrypt_final(
       const block_t *ctx_in,
       const block_t *key_xts)
 {
-   if ((BA411E_HW_CFG_1 & AES_HW_CFG_XTS_SUPPORTED_MASK)
-        != AES_HW_CFG_XTS_SUPPORTED_MASK)
+   if (!AES_HW_CFG_XTS_SUPPORTED)
       return CRYPTOLIB_UNSUPPORTED_ERR;
    return sx_blk_cipher_xts_final(SX_BLK_CIPHER_AES, SX_BLK_CIPHER_ENCRYPT,
          key, plaintext, ciphertext, ctx_in, key_xts);
@@ -674,8 +630,7 @@ uint32_t sx_aes_xts_decrypt_final(
       const block_t *ctx_in,
       const block_t *key_xts)
 {
-   if ((BA411E_HW_CFG_1 & AES_HW_CFG_XTS_SUPPORTED_MASK)
-        != AES_HW_CFG_XTS_SUPPORTED_MASK)
+   if (!AES_HW_CFG_XTS_SUPPORTED)
       return CRYPTOLIB_UNSUPPORTED_ERR;
    return sx_blk_cipher_xts_final(SX_BLK_CIPHER_AES, SX_BLK_CIPHER_DECRYPT,
          key, ciphertext, plaintext, ctx_in, key_xts);
@@ -691,8 +646,7 @@ uint32_t sx_aes_gcm_encrypt(
       block_t *mac,
       const block_t *aad)
 {
-   if ((BA411E_HW_CFG_1 & AES_HW_CFG_GCM_SUPPORTED_MASK)
-        != AES_HW_CFG_GCM_SUPPORTED_MASK)
+   if (!AES_HW_CFG_GCM_SUPPORTED)
       return CRYPTOLIB_UNSUPPORTED_ERR;
    return sx_blk_cipher_gcm(SX_BLK_CIPHER_AES, SX_BLK_CIPHER_ENCRYPT,
          key, plaintext, ciphertext, iv, mac, aad);
@@ -706,8 +660,7 @@ uint32_t sx_aes_gcm_decrypt(
       block_t *mac,
       const block_t *aad)
 {
-   if ((BA411E_HW_CFG_1 & AES_HW_CFG_GCM_SUPPORTED_MASK)
-        != AES_HW_CFG_GCM_SUPPORTED_MASK)
+   if (!AES_HW_CFG_GCM_SUPPORTED)
       return CRYPTOLIB_UNSUPPORTED_ERR;
    return sx_blk_cipher_gcm(SX_BLK_CIPHER_AES, SX_BLK_CIPHER_DECRYPT,
          key, ciphertext, plaintext, iv, mac, aad);
@@ -721,8 +674,7 @@ uint32_t sx_aes_gcm_decrypt_verify(
       const block_t *mac,
       const block_t *aad)
 {
-   if ((BA411E_HW_CFG_1 & AES_HW_CFG_GCM_SUPPORTED_MASK)
-        != AES_HW_CFG_GCM_SUPPORTED_MASK)
+   if (!AES_HW_CFG_GCM_SUPPORTED)
       return CRYPTOLIB_UNSUPPORTED_ERR;
    return sx_blk_cipher_gcm_decrypt_verify(SX_BLK_CIPHER_AES,
          SX_BLK_CIPHER_DECRYPT, key, ciphertext,
@@ -737,8 +689,7 @@ uint32_t sx_aes_gcm_encrypt_init(
       block_t *ctx_out,
       const block_t *aad)
 {
-   if ((BA411E_HW_CFG_1 & AES_HW_CFG_GCM_SUPPORTED_MASK)
-        != AES_HW_CFG_GCM_SUPPORTED_MASK)
+   if (!AES_HW_CFG_GCM_SUPPORTED)
       return CRYPTOLIB_UNSUPPORTED_ERR;
    return sx_blk_cipher_gcm_init(SX_BLK_CIPHER_AES, SX_BLK_CIPHER_ENCRYPT,
          key, plaintext, ciphertext, iv, ctx_out, aad);
@@ -753,8 +704,7 @@ uint32_t sx_aes_gcm_decrypt_init(
       block_t *ctx_out,
       const block_t *aad)
 {
-   if ((BA411E_HW_CFG_1 & AES_HW_CFG_GCM_SUPPORTED_MASK)
-        != AES_HW_CFG_GCM_SUPPORTED_MASK)
+   if (!AES_HW_CFG_GCM_SUPPORTED)
       return CRYPTOLIB_UNSUPPORTED_ERR;
    return sx_blk_cipher_gcm_init(SX_BLK_CIPHER_AES, SX_BLK_CIPHER_DECRYPT,
          key, ciphertext, plaintext, iv, ctx_out, aad);
@@ -767,8 +717,7 @@ uint32_t sx_aes_gcm_encrypt_update(
       const block_t *ctx_in,
       block_t *ctx_out)
 {
-   if ((BA411E_HW_CFG_1 & AES_HW_CFG_GCM_SUPPORTED_MASK)
-        != AES_HW_CFG_GCM_SUPPORTED_MASK)
+   if (!AES_HW_CFG_GCM_SUPPORTED)
       return CRYPTOLIB_UNSUPPORTED_ERR;
    return sx_blk_cipher_gcm_update(SX_BLK_CIPHER_AES, SX_BLK_CIPHER_ENCRYPT,
          key, plaintext, ciphertext, ctx_in, ctx_out);
@@ -781,8 +730,7 @@ uint32_t sx_aes_gcm_decrypt_update(
       const block_t *ctx_in,
       block_t *ctx_out)
 {
-   if ((BA411E_HW_CFG_1 & AES_HW_CFG_GCM_SUPPORTED_MASK)
-        != AES_HW_CFG_GCM_SUPPORTED_MASK)
+   if (!AES_HW_CFG_GCM_SUPPORTED)
       return CRYPTOLIB_UNSUPPORTED_ERR;
    return sx_blk_cipher_gcm_update(SX_BLK_CIPHER_AES, SX_BLK_CIPHER_DECRYPT,
          key, ciphertext, plaintext, ctx_in, ctx_out);
@@ -796,8 +744,7 @@ uint32_t sx_aes_gcm_encrypt_final(
       block_t *mac,
       const block_t *len_a_c)
 {
-   if ((BA411E_HW_CFG_1 & AES_HW_CFG_GCM_SUPPORTED_MASK)
-        != AES_HW_CFG_GCM_SUPPORTED_MASK)
+   if (!AES_HW_CFG_GCM_SUPPORTED)
       return CRYPTOLIB_UNSUPPORTED_ERR;
    return sx_blk_cipher_gcm_final(SX_BLK_CIPHER_AES, SX_BLK_CIPHER_ENCRYPT,
          key, plaintext, ciphertext, ctx_in, mac,
@@ -812,8 +759,7 @@ uint32_t sx_aes_gcm_decrypt_final(
       block_t *mac,
       const block_t *len_a_c)
 {
-   if ((BA411E_HW_CFG_1 & AES_HW_CFG_GCM_SUPPORTED_MASK)
-        != AES_HW_CFG_GCM_SUPPORTED_MASK)
+   if (!AES_HW_CFG_GCM_SUPPORTED)
       return CRYPTOLIB_UNSUPPORTED_ERR;
    return sx_blk_cipher_gcm_final(SX_BLK_CIPHER_AES, SX_BLK_CIPHER_DECRYPT,
          key, ciphertext, plaintext, ctx_in, mac,
@@ -828,8 +774,7 @@ uint32_t sx_aes_gcm_decrypt_verify_final(
       const block_t *mac,
       const block_t *len_a_c)
 {
-   if ((BA411E_HW_CFG_1 & AES_HW_CFG_GCM_SUPPORTED_MASK)
-        != AES_HW_CFG_GCM_SUPPORTED_MASK)
+   if (!AES_HW_CFG_GCM_SUPPORTED)
       return CRYPTOLIB_UNSUPPORTED_ERR;
    return sx_blk_cipher_gcm_decrypt_verify_final(SX_BLK_CIPHER_AES,
          SX_BLK_CIPHER_DECRYPT, key, ciphertext,
@@ -846,8 +791,7 @@ uint32_t sx_aes_ccm_encrypt(
       block_t *mac,
       const block_t *aad)
 {
-   if ((BA411E_HW_CFG_1 & AES_HW_CFG_CCM_SUPPORTED_MASK)
-        != AES_HW_CFG_CCM_SUPPORTED_MASK)
+   if (!AES_HW_CFG_CCM_SUPPORTED)
       return CRYPTOLIB_UNSUPPORTED_ERR;
    return sx_blk_cipher_ccm_encrypt(SX_BLK_CIPHER_AES, SX_BLK_CIPHER_ENCRYPT,
          key, plaintext, ciphertext, nonce, mac, aad);
@@ -861,8 +805,7 @@ uint32_t sx_aes_ccm_decrypt(
       block_t *mac,
       const block_t *aad)
 {
-   if ((BA411E_HW_CFG_1 & AES_HW_CFG_CCM_SUPPORTED_MASK)
-        != AES_HW_CFG_CCM_SUPPORTED_MASK)
+   if (!AES_HW_CFG_CCM_SUPPORTED)
       return CRYPTOLIB_UNSUPPORTED_ERR;
    return sx_blk_cipher_ccm_decrypt(SX_BLK_CIPHER_AES, SX_BLK_CIPHER_DECRYPT,
          key, ciphertext, plaintext, nonce, mac, aad);
@@ -876,8 +819,7 @@ uint32_t sx_aes_ccm_decrypt_verify(
       const block_t *mac,
       const block_t *aad)
 {
-   if ((BA411E_HW_CFG_1 & AES_HW_CFG_CCM_SUPPORTED_MASK)
-        != AES_HW_CFG_CCM_SUPPORTED_MASK)
+   if (!AES_HW_CFG_CCM_SUPPORTED)
       return CRYPTOLIB_UNSUPPORTED_ERR;
    return sx_blk_cipher_ccm_decrypt_verify(SX_BLK_CIPHER_AES,
          SX_BLK_CIPHER_DECRYPT, key, ciphertext,
@@ -891,14 +833,14 @@ uint32_t sx_aes_ccm_encrypt_init(
       const block_t *nonce,
       block_t *ctx_out,
       const block_t *aad,
-      uint32_t mac_len)
+      uint32_t mac_len,
+      uint32_t total_length)
 {
-   if ((BA411E_HW_CFG_1 & AES_HW_CFG_CCM_SUPPORTED_MASK)
-        != AES_HW_CFG_CCM_SUPPORTED_MASK)
+   if (!AES_HW_CFG_CCM_SUPPORTED)
       return CRYPTOLIB_UNSUPPORTED_ERR;
    return sx_blk_cipher_ccm_init(SX_BLK_CIPHER_AES, SX_BLK_CIPHER_ENCRYPT,
          key, plaintext, ciphertext, nonce, ctx_out,
-         aad, mac_len);
+         aad, mac_len, total_length);
 }
 
 uint32_t sx_aes_ccm_decrypt_init(
@@ -908,14 +850,14 @@ uint32_t sx_aes_ccm_decrypt_init(
       const block_t *nonce,
       block_t *ctx_out,
       const block_t *aad,
-      uint32_t mac_len)
+      uint32_t mac_len,
+      uint32_t total_length)
 {
-   if ((BA411E_HW_CFG_1 & AES_HW_CFG_CCM_SUPPORTED_MASK)
-        != AES_HW_CFG_CCM_SUPPORTED_MASK)
+   if (!AES_HW_CFG_CCM_SUPPORTED)
       return CRYPTOLIB_UNSUPPORTED_ERR;
    return sx_blk_cipher_ccm_init(SX_BLK_CIPHER_AES, SX_BLK_CIPHER_DECRYPT,
          key, ciphertext, plaintext, nonce, ctx_out,
-         aad, mac_len);
+         aad, mac_len, total_length);
 }
 
 
@@ -926,8 +868,7 @@ uint32_t sx_aes_ccm_encrypt_update(
       const block_t *ctx_in,
       block_t *ctx_out)
 {
-   if ((BA411E_HW_CFG_1 & AES_HW_CFG_CCM_SUPPORTED_MASK)
-        != AES_HW_CFG_CCM_SUPPORTED_MASK)
+   if (!AES_HW_CFG_CCM_SUPPORTED)
       return CRYPTOLIB_UNSUPPORTED_ERR;
    return sx_blk_cipher_ccm_update(SX_BLK_CIPHER_AES, SX_BLK_CIPHER_ENCRYPT,
          key, plaintext, ciphertext, ctx_in, ctx_out);
@@ -940,8 +881,7 @@ uint32_t sx_aes_ccm_decrypt_update(
       const block_t *ctx_in,
       block_t *ctx_out)
 {
-   if ((BA411E_HW_CFG_1 & AES_HW_CFG_CCM_SUPPORTED_MASK)
-        != AES_HW_CFG_CCM_SUPPORTED_MASK)
+   if (!AES_HW_CFG_CCM_SUPPORTED)
       return CRYPTOLIB_UNSUPPORTED_ERR;
    return sx_blk_cipher_ccm_update(SX_BLK_CIPHER_AES, SX_BLK_CIPHER_DECRYPT,
          key, ciphertext, plaintext, ctx_in, ctx_out);
@@ -954,8 +894,7 @@ uint32_t sx_aes_ccm_encrypt_final(
       const block_t *ctx_in,
       block_t *mac)
 {
-   if ((BA411E_HW_CFG_1 & AES_HW_CFG_CCM_SUPPORTED_MASK)
-        != AES_HW_CFG_CCM_SUPPORTED_MASK)
+   if (!AES_HW_CFG_CCM_SUPPORTED)
       return CRYPTOLIB_UNSUPPORTED_ERR;
    return sx_blk_cipher_ccm_encrypt_final(SX_BLK_CIPHER_AES,
          SX_BLK_CIPHER_ENCRYPT, key, plaintext,
@@ -969,8 +908,7 @@ uint32_t sx_aes_ccm_decrypt_final(
       const block_t *ctx_in,
       block_t *mac)
 {
-   if ((BA411E_HW_CFG_1 & AES_HW_CFG_CCM_SUPPORTED_MASK)
-        != AES_HW_CFG_CCM_SUPPORTED_MASK)
+   if (!AES_HW_CFG_CCM_SUPPORTED)
       return CRYPTOLIB_UNSUPPORTED_ERR;
    return sx_blk_cipher_ccm_decrypt_final(SX_BLK_CIPHER_AES,
          SX_BLK_CIPHER_DECRYPT, key, ciphertext,
@@ -984,8 +922,7 @@ uint32_t sx_aes_ccm_decrypt_verify_final(
       const block_t *ctx_in,
       const block_t *mac)
 {
-   if ((BA411E_HW_CFG_1 & AES_HW_CFG_CCM_SUPPORTED_MASK)
-        != AES_HW_CFG_CCM_SUPPORTED_MASK)
+   if (!AES_HW_CFG_CCM_SUPPORTED)
       return CRYPTOLIB_UNSUPPORTED_ERR;
    return sx_blk_cipher_ccm_decrypt_verify_final(SX_BLK_CIPHER_AES,
          SX_BLK_CIPHER_DECRYPT, key, ciphertext,
@@ -1000,8 +937,7 @@ uint32_t sx_aes_cmac_generate(
       const block_t *message,
       block_t *mac)
 {
-   if ((BA411E_HW_CFG_1 & AES_HW_CFG_CMAC_SUPPORTED_MASK)
-        != AES_HW_CFG_CMAC_SUPPORTED_MASK)
+   if (!AES_HW_CFG_CMAC_SUPPORTED)
       return CRYPTOLIB_UNSUPPORTED_ERR;
    return sx_blk_cipher_cmac_generate(SX_BLK_CIPHER_AES, key, message, mac);
 }
@@ -1011,8 +947,7 @@ uint32_t sx_aes_cmac_verify(
       const block_t *message,
       const block_t *mac)
 {
-   if ((BA411E_HW_CFG_1 & AES_HW_CFG_CMAC_SUPPORTED_MASK)
-        != AES_HW_CFG_CMAC_SUPPORTED_MASK)
+   if (!AES_HW_CFG_CMAC_SUPPORTED)
       return CRYPTOLIB_UNSUPPORTED_ERR;
    return sx_blk_cipher_cmac_verify(SX_BLK_CIPHER_AES, key, message, mac);
 }
@@ -1023,8 +958,7 @@ uint32_t sx_aes_cmac_generate_init(
       const block_t *message,
       block_t *ctx_out)
 {
-   if ((BA411E_HW_CFG_1 & AES_HW_CFG_CMAC_SUPPORTED_MASK)
-        != AES_HW_CFG_CMAC_SUPPORTED_MASK)
+   if (!AES_HW_CFG_CMAC_SUPPORTED)
       return CRYPTOLIB_UNSUPPORTED_ERR;
    return sx_blk_cipher_cmac_generate_init(SX_BLK_CIPHER_AES, key, message,
          ctx_out);
@@ -1037,8 +971,7 @@ uint32_t sx_aes_cmac_generate_update(
       const block_t *ctx_in,
       block_t *ctx_out)
 {
-   if ((BA411E_HW_CFG_1 & AES_HW_CFG_CMAC_SUPPORTED_MASK)
-        != AES_HW_CFG_CMAC_SUPPORTED_MASK)
+   if (!AES_HW_CFG_CMAC_SUPPORTED)
       return CRYPTOLIB_UNSUPPORTED_ERR;
    return sx_blk_cipher_cmac_generate_update(SX_BLK_CIPHER_AES, key, message,
          ctx_in, ctx_out);
@@ -1051,8 +984,7 @@ uint32_t sx_aes_cmac_generate_final(
       const block_t *ctx_in,
       block_t *mac)
 {
-   if ((BA411E_HW_CFG_1 & AES_HW_CFG_CMAC_SUPPORTED_MASK)
-        != AES_HW_CFG_CMAC_SUPPORTED_MASK)
+   if (!AES_HW_CFG_CMAC_SUPPORTED)
       return CRYPTOLIB_UNSUPPORTED_ERR;
    return sx_blk_cipher_cmac_generate_final(SX_BLK_CIPHER_AES, key, message,
          ctx_in, mac);
@@ -1064,8 +996,7 @@ uint32_t sx_aes_cmac_generate_verify_final(
       const block_t *ctx_in,
       const block_t *mac)
 {
-   if ((BA411E_HW_CFG_1 & AES_HW_CFG_CMAC_SUPPORTED_MASK)
-        != AES_HW_CFG_CMAC_SUPPORTED_MASK)
+   if (!AES_HW_CFG_CMAC_SUPPORTED)
       return CRYPTOLIB_UNSUPPORTED_ERR;
    return sx_blk_cipher_cmac_generate_verify_final(SX_BLK_CIPHER_AES, key,
          message, ctx_in, mac);

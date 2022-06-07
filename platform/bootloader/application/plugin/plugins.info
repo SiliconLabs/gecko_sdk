@@ -9,22 +9,22 @@ plugin(core) {
   root=$DEVICE/SiliconLabs/
 
   # Files that are released in source
-  (efm32~family[GI]~series[1]~device_configuration[2]+gcc):EFM32GG12B/Source/GCC/startup_efm32gg12b.c
-  (efm32~family[GI]~series[1]~device_configuration[1]+gcc):EFM32GG11B/Source/GCC/startup_efm32gg11b.c
+  (efm32~family[GI]~series[1]~device_configuration[2]+gcc):EFM32GG12B/Source/startup_efm32gg12b.c
+  (efm32~family[GI]~series[1]~device_configuration[1]+gcc):EFM32GG11B/Source/startup_efm32gg11b.c
 
-  (efm32~family[GI]~series[1]~device_configuration[2]+iar):EFM32GG12B/Source/IAR/startup_efm32gg12b.c
-  (efm32~family[GI]~series[1]~device_configuration[1]+iar):EFM32GG11B/Source/IAR/startup_efm32gg11b.c
+  (efm32~family[GI]~series[1]~device_configuration[2]+iar):EFM32GG12B/Source/startup_efm32gg12b.c
+  (efm32~family[GI]~series[1]~device_configuration[1]+iar):EFM32GG11B/Source/startup_efm32gg11b.c
 }
 
 plugin(bootloader-interface) {
-  name=Bootloader 
+  name=Bootloader
   category=Core
   architecture=efm32~series[1]
   description=Bootloader api
 
   root=$BOOTLOADER/api
 
-  #common files 
+  #common files
   btl_interface.c
   btl_interface_storage.c
 }
@@ -38,7 +38,6 @@ plugin(emlib) {
   root=$EMLIB/src
 
   # Files that are released in source
-  em_assert.c
   em_cmu.c
   em_emu.c
   em_gpio.c
@@ -52,6 +51,22 @@ plugin(emlib) {
 
   setup(additionalFiles) {
     PATH(ABSOLUTE):$EMLIB/inc
+  }
+}
+
+plugin(sl_assert) {
+  name=SL_ASSERT
+  category=Utils
+  architecture=efr32~series[1],efr32~series[2],efm32~series[1]
+  description= Plugin that provides assert functions
+
+  root=$COMMON/src
+
+  # Files that are released in source
+  sl_assert.c
+
+  setup(additionalFiles) {
+    PATH(ABSOLUTE):$COMMON/inc
   }
 }
 
@@ -71,6 +86,7 @@ plugin(usbd-driver){
     PATH(ABSOLUTE):$KIT/common/drivers
     PATH(ABSOLUTE):$KIT/common/bsp
     PATH(ABSOLUTE):$BOOTLOADER/application/config/usb-device/
+    PATH(ABSOLUTE):$CMSIS/Core/Include/
   }
 
   headerFiles(efm32~family[GI]~series[1]~device_configuration[1])=../../SLSTK3701A_EFM32GG11/config/retargetserialconfig.h
@@ -92,7 +108,7 @@ plugin(usbh-driver){
   root=$KIT/common/drivers
 
 
-  #common files 
+  #common files
   msdh.c
   msdscsi.c
   msdbot.c
@@ -107,6 +123,7 @@ plugin(usbh-driver){
   PATH(ABSOLUTE):$KIT/common/drivers
   PATH(ABSOLUTE):$KIT/common/bsp
   PATH(ABSOLUTE):$BOOTLOADER/application/config/usb-host/
+  PATH(ABSOLUTE):$CMSIS/Core/Include/  
 }
 
   headerFiles(efm32~family[GI]~series[1]~device_configuration[1])=../../../../hardware/kit/SLSTK3701A_EFM32GG11/config/retargetserialconfig.h
@@ -128,7 +145,7 @@ plugin(gecko-usb) {
 
   root=$USB_GECKO/src
 
-  #Files released in source 
+  #Files released in source
   em_usbd.c
   em_usbdch9.c
   em_usbdep.c

@@ -9,21 +9,8 @@ class CALC_Frame_Detect_Ocelot(CALC_Frame_Detect):
     def calc_txsync_reg(self, model):
         #This function calculates what syncword to transmit when using dualsync
 
-        #Read in model variables
-        dualsync = model.vars.syncword_dualsync.value
-        fec_enabled = model.vars.fec_enabled.value
-
-        #Use sync0 for TX unless using WiSUN with FEC
-        if model.profile.name.lower() == 'wisun' and dualsync:
-            if fec_enabled:
-                txsync = 1 #syncword 1 is always programmed with the coded value
-            else:
-                txsync = 0
-        else:
-            txsync = 0
-
-        #Write the register
-        self._reg_write(model.vars.MODEM_CTRL1_TXSYNC, txsync)
+        #Always use syncword0 to transmit by default
+        self._reg_write(model.vars.MODEM_CTRL1_TXSYNC, 0)
 
     def calc_syncerrors_reg(self, model):
         #This function calulates the SYNCERRORS field

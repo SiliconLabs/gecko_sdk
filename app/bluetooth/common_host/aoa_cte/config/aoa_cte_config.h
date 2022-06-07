@@ -3,7 +3,7 @@
  * @brief CTE Handle module config for AoA locator
  *******************************************************************************
  * # License
- * <b>Copyright 2021 Silicon Laboratories Inc. www.silabs.com</b>
+ * <b>Copyright 2022 Silicon Laboratories Inc. www.silabs.com</b>
  *******************************************************************************
  *
  * SPDX-License-Identifier: Zlib
@@ -31,16 +31,12 @@
 #ifndef AOA_CTE_CONFIG_H
 #define AOA_CTE_CONFIG_H
 
-#ifdef __cplusplus
-extern "C" {
-#endif
-
 // Default CTE Mode
 #define AOA_CTE_DEFAULT_MODE    AOA_CTE_TYPE_SILABS
 
-// Scanner timings
-#define AOA_CTE_SCAN_INTERVAL   16   //10ms
-#define AOA_CTE_SCAN_WINDOW     16   //10ms
+// Scanner timing values in units of 0.625 ms
+#define AOA_CTE_SCAN_INTERVAL   160
+#define AOA_CTE_SCAN_WINDOW     160
 
 // Scan mode, 0: passive, 1: active
 #define AOA_CTE_SCAN_MODE     0
@@ -58,7 +54,4 @@ extern "C" {
 // Switching and sampling slots in us (1 or 2).
 #define AOA_CTE_SLOT_DURATION              1
 
-#ifdef __cplusplus
-};
-#endif
 #endif /* AOA_CTE_CONFIG_H */

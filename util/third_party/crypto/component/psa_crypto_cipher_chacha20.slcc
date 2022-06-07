@@ -1,15 +1,9 @@
 id: psa_crypto_cipher_chacha20
 package: platform
-label: PSA Crypto support for Chacha20
+label: Chacha20 Stream Cipher
 description: >-
-  This component provides support for the ChaCha20 stream cipher in the
-  PSA Crypto cipher APIs. Hardware acceleration of ChaCha20 is only supported
-  on Vault High devices and only for one-shot Chacha20, that is multi-part cipher
-  APIs are not supported with ChaCha20. Hence if the user needs multi-part
-  ChaCha20 cipher streaming he will need to apply the
-  'Mbed TLS Support for ChaChaPoly' component in order to include fallback
-  to the software implementation in the Mbed TLS library.
-category: Platform|Security
+  This component provides support for the ChaCha20 stream cipher in PSA Crypto.
+category: Platform|Security|PSA Crypto|Encryption
 quality: production
 provides:
   - name: psa_crypto_cipher_chacha20

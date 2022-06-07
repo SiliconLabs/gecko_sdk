@@ -22,6 +22,9 @@ requires:
 provides:
   - name: dmd_driver
   - name: dmd_memlcd
+template_contribution:
+  - name: component_catalog
+    value: dmd_memlcd
 documentation:
     docset: gecko-platform
     document: middleware/api/group-dmd

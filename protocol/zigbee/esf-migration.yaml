@@ -683,15 +683,13 @@ zigbee:
     - pluginId: multi-network-library
       component:
         - id: zigbee_multi_network
-    - pluginId: multi-network-stub-library
-      component:
-        - id: zigbee_multi_network_stub
+#  - pluginId: multi-network-stub-library
+#    This plugin has been deprecated
     - pluginId: multi-pan-library
       component:
         - id: zigbee_multi_pan
-    - pluginId: multi-pan-stub
-      component:
-        - id: zigbee_multi_pan_stub
+#  - pluginId: multi-pan-stub
+#    This plugin has been deprecated
     - pluginId: packet-validate-library
       component:
         - id: zigbee_packet_validate

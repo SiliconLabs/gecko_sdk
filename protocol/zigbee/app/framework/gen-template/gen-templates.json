@@ -7,10 +7,11 @@
     "generator": {
       "enabled": "true",
       "postProcessConditionalFile": "../../../../../tool/script/uncrustify/uncrustify.cfg",
-      "postProcessMulti": "uncrustify --no-backup -c ../../../../../tool/script/uncrustify/uncrustify.cfg -l C --replace"
+      "postProcessMulti": "uncrustify --no-backup -c ../../../../../tool/script/uncrustify/uncrustify.cfg -l C --replace",
+      "shareClusterStatesAcrossEndpoints": "true"
     }
   },
-  "requiredFeatureLevel": 62,
+  "requiredFeatureLevel": 70,
   "templates": [
     {
       "path": "zap-id.zapt",

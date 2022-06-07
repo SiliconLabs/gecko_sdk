@@ -14,6 +14,9 @@ include:
     file_list:
     - "path": "sl_app_common.h"
 
+config_file:
+   - path: "config/sl_sensor_sink_config.h"
+
 #-------- Hides Component for user in Studio ---------
 ui_hints:
   visibility: never

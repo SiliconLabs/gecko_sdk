@@ -12,14 +12,7 @@
   - path: platform/Device/SiliconLabs/EFM32PG23/Source/system_efm32pg23.c
     unless:
     - device_content_override
-  - condition:
-    - toolchain_iar
-    path: platform/Device/SiliconLabs/EFM32PG23/Source/IAR/startup_efm32pg23.c
-    unless:
-    - device_content_override
-  - condition:
-    - toolchain_gcc
-    path: platform/Device/SiliconLabs/EFM32PG23/Source/GCC/startup_efm32pg23.c
+  - path: platform/Device/SiliconLabs/EFM32PG23/Source/startup_efm32pg23.c
     unless:
     - device_content_override
 - include:
@@ -87,6 +80,7 @@
   - name: cortexm33
   - name: armv8m.main
   - name: device_security_vault
+  - name: device_dcdc_buck
   - name: device_has_acmp
   - name: device_has_acmp0
   - name: device_has_acmp1
@@ -163,6 +157,8 @@
   - name: device_has_fpu
   - name: device_has_mpu
   - name: device_compute_basic
+- recommends:
+  - id: trustzone_unaware
 - requires:
   - name: cmsis_core
 - template_contribution:
@@ -205,8 +201,25 @@
     value: cortex-m33
   - option: fpu
     value: fpv5-sp
+  - option: cmse
+    unless:
+    - trustzone_nonsecure
+    value: enabled
 - config_file:
   - condition:
     - custom_radio_config
     directory: rail
     path: platform/Device/config/210/device.yaml
+- metadata:
+    device:
+      memory:
+      - name: Main Flash
+        page_size: 8192
+        size: 524288
+        start: 134217728
+        type: non-volatile
+      - name: RAM
+        size: 65536
+        start: 536870912
+        type: volatile
+      opn: efm32pg23b310f512im48

@@ -37,8 +37,10 @@
 #include <openthread/config.h>
 
 #define OT_THREAD_VERSION_INVALID 0
+
 #define OT_THREAD_VERSION_1_1 2
 #define OT_THREAD_VERSION_1_2 3
+#define OT_THREAD_VERSION_1_3 4
 
 #define OPENTHREAD_CORE_CONFIG_H_IN
 
@@ -51,10 +53,8 @@
 #endif
 
 #ifndef OPENTHREAD_CONFIG_THREAD_VERSION
-#define OPENTHREAD_CONFIG_THREAD_VERSION OT_THREAD_VERSION_1_2
+#define OPENTHREAD_CONFIG_THREAD_VERSION OT_THREAD_VERSION_1_3
 #endif
-
-#include "config/openthread-core-default-config.h"
 
 #include "config/announce_sender.h"
 #include "config/backbone_router.h"
@@ -81,6 +81,7 @@
 #include "config/link_raw.h"
 #include "config/logging.h"
 #include "config/mac.h"
+#include "config/misc.h"
 #include "config/mle.h"
 #include "config/netdata_publisher.h"
 #include "config/parent_search.h"

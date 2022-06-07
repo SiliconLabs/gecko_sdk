@@ -1,9 +1,9 @@
 /***************************************************************************//**
- * @file
+ * @file bsp_sd_hc.c
  * @brief IO-Sd Sdhc BSP - Silicon Labs - Stk3701
  *******************************************************************************
  * # License
- * <b>Copyright 2018 Silicon Laboratories Inc. www.silabs.com</b>
+ * <b>Copyright 2022 Silicon Laboratories Inc. www.silabs.com</b>
  *******************************************************************************
  *
  * The licensor of this software is Silicon Laboratories Inc.  Your use of this
@@ -424,7 +424,7 @@ static CPU_INT32U BSP_SD_SDHC_ClkFreqGet(void)
 #else
   CMU_HFRCOFreq_TypeDef  freq;
 
-  freq = CMU_HFRCOFreqGet();
+  freq = CMU_HFRCOBandGet();
 #endif
 
   return ((CPU_INT32U)freq);

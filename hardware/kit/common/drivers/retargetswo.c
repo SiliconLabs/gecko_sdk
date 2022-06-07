@@ -61,5 +61,5 @@ int RETARGET_ReadChar(void)
  */
 void RETARGET_SwoInit(void)
 {
-  BSP_TraceSwoSetup();
+  BSP_TraceProfilerSetup();
 }

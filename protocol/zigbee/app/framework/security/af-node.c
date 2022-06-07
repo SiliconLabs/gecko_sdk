@@ -19,6 +19,9 @@
 #define USE_REAL_SECURITY_PROTOTYPES
 #include "app/framework/security/af-security.h"
 
+#ifdef SL_COMPONENT_CATALOG_PRESENT
+#include "sl_component_catalog.h"
+#endif //SL_COMPONENT_CATALOG_PRESENT
 //------------------------------------------------------------------------------
 
 EmberStatus zaNodeSecurityInit(bool centralizedNetwork)

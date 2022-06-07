@@ -54,7 +54,13 @@ RAILModel:
                               - RAILModelInfo:
                                   name: irCalConfigEntry
                               - RAILModelInfo:
+                                  name: txIrCalConfigEntry
+                              - RAILModelInfo:
+                                  name: timingConfigEntry
+                              - RAILModelInfo:
                                   name: dcdcRetimingConfigEntry
+                              - RAILModelInfo:
+                                  name: rffpllConfigEntry
                               - RAILModelInfo:
                                   name: hfxoRetimingTableEntry
                               - RAILModelInfo:
@@ -73,7 +79,9 @@ RAILModel:
                                   name: phyModeId
                               - RAILModelInfo:
                                   name: modeSwitchPhr
-  
+                              - RAILModelInfo:
+                                  name: stackInfo
+
                   - RAILModelObjectArray:
                       name: channelConfigEntries
                       _elements:
@@ -107,6 +115,9 @@ RAILModel:
                               - name: entryType
                                 dataType: FieldDataType.UINT32_T
                                 isPtr: False
+                              - name: stackInfo
+                                dataType: FieldDataType.UINT8_T
+                                isPtr: True
 
                   - RAILModelStruct:
                       name: channelConfig
@@ -126,13 +137,13 @@ RAILModel:
                         - name: signature
                           dataType: FieldDataType.UINT32_T
                           isPtr: False
- 
+
       - RAILModelObjectCollection:
           name: commonStructures
           _elements:
 
             - RAILModelInfo:
-                name: modeSwitchPhrCount
+                name: modeSwitchPhyModeIds
 
             - RAILModelInfo:
                 name: convDecodeBufferSize
@@ -203,11 +214,32 @@ RAILModel:
                       dataType: FieldDataType.UINT8_T
 
             - RAILModelObjectArray:
+                name: txIrCalConfigEntries
+                _elements:
+                  - RAILModelSimpleArray:
+                      name: txIrCalConfig
+                      dataType: FieldDataType.UINT8_T
+
+            - RAILModelObjectArray:
+                name: rffpllConfigEntries
+                _elements:
+                  - RAILModelSimpleArray:
+                      name: rffpllConfig
+                      dataType: FieldDataType.UINT32_T
+
+            - RAILModelObjectArray:
                 name: dcdcRetimingConfigEntries
                 _elements:
                   - RAILModelSimpleArray:
                       name: dcdcRetimingConfig
                       dataType: FieldDataType.UINT8_T
+
+            - RAILModelObjectArray:
+                name: timingConfigEntries
+                _elements:
+                  - RAILModelSimpleArray:
+                      name: timingConfig
+                      dataType: FieldDataType.INT32_T
 
             - RAILModelObjectArray:
                 name: hfxoRetimingTableEntries
@@ -277,6 +309,9 @@ RAILModel:
                               - name: irCalConfig
                                 dataType: FieldDataType.UINT8_T
                                 isPtr: True
+                              - name: txIrCalConfig
+                                dataType: FieldDataType.UINT8_T
+                                isPtr: True
                               - name: timingConfig
                                 dataType: FieldDataType.UINT32_T
                                 isPtr: True
@@ -310,6 +345,9 @@ RAILModel:
                                 dataType: FieldDataType.UINT32_T
                               - name: psmMaxSleepUs
                                 dataType: FieldDataType.UINT32_T
+                              - name: rffpllConfig
+                                dataType: FieldDataType.UINT8_T
+                                isPtr: True
 
             - RAILModelObjectArray:
                 name: modemConfigEntries
@@ -347,3 +385,10 @@ RAILModel:
                 name: channelConfigArray
                 dataType: FieldDataType.UINT32_T
                 isPtr: True
+
+            - RAILModelObjectArray:
+                name: stackInfoEntries
+                _elements:
+                  - RAILModelSimpleArray:
+                      name: stackInfo
+                      dataType: FieldDataType.UINT8_T

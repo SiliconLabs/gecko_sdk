@@ -1,6 +1,6 @@
 /***************************************************************************//**
  * @file
- * @brief Reset cause signalling for the Silicon Labs bootloader
+ * @brief Reset cause signaling for the Silicon Labs bootloader
  *******************************************************************************
  * # License
  * <b>Copyright 2021 Silicon Laboratories Inc. www.silabs.com</b>
@@ -105,9 +105,6 @@ void reset_resetWithReason(uint16_t resetReason)
   RMU->CTRL = (RMU->CTRL & ~_RMU_CTRL_SYSRMODE_MASK) | RMU_CTRL_SYSRMODE_EXTENDED;
 #endif
   NVIC_SystemReset();
-
-  while (true) {
-  }
 }
 
 uint16_t reset_classifyReset(void)

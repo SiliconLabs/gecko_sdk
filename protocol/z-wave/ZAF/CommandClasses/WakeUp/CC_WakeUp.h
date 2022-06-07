@@ -12,7 +12,7 @@
  * Having an init function that takes a reset reason and a callback function, the module could
  * address both scenarios like this:
  *
- * 1) The init function is called with a reset reason set to ERESETREASON_EM4_WUT. This means
+ * 1) The init function is called with a reset reason set to ERESETREASON_DEEP_SLEEP_WUT. This means
  * that the chip woke up from reset caused by the wake up timer. In this case, the callback must be
  * invoked so that the application can do something.
  *
@@ -38,7 +38,7 @@
 
 #include <ZW_TransportEndpoint.h>
 #include <ZW_application_transport_interface.h>
-#include "nvm3.h"
+#include <zpal_nvm.h>
 
 /****************************************************************************/
 /*                     EXPORTED TYPES and DEFINITIONS                       */
@@ -93,7 +93,7 @@ typedef struct SWakeupCcData
  * @param[in] pFS Pointer to Application File System
  */
 void CC_WakeUp_init(EResetReason_t resetReason,
-                    nvm3_Handle_t* pFS);
+                    zpal_nvm_handle_t pFS);
 
 /**
  * Transmits a Wake Up Notification command and handles callback.
@@ -114,7 +114,7 @@ void CC_WakeUp_setConfiguration(
  * Resets the saved node ID in NVM.
  */
 
-void CC_WakeUp_notificationMemorySetDefault(nvm3_Handle_t* pFS);
+void CC_WakeUp_notificationMemorySetDefault(zpal_nvm_handle_t pFS);
 
 /**
  * Ensure that the node stays awake to wait for more messages from the
@@ -156,7 +156,7 @@ void CC_WakeUp_startWakeUpNotificationTimer(void);
  *
  * NB: A function to turn this special mode off is not needed. When we
  *     finally fall asleep after learn mode has completed we will go to
- *     EM4. Next wakeup will therefore be a reset where this mode by
+ *     deep sleep. Next wakeup will therefore be a reset where this mode by
  *     default is off.
  */
 void CC_WakeUp_AutoStayAwakeAfterInclusion(void);

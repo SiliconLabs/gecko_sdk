@@ -1,14 +1,15 @@
 id: mbedtls_entropy_hardware
 package: platform
-label: Mbed TLS Support for Default Hardware Entropy Source
+label: Hardware Entropy Source
 description: >-
   This component provides support for using entropy gathered from a strict
   hardware entropy source (TRNG, radio or ADC) on Silicon Labs devices.
-category: Platform|Security
+category: Platform|Security|Mbed TLS|Randomness
 quality: production
 component_root_path: util/third_party/crypto
 source:
   - path: sl_component/sl_mbedtls_support/src/sl_entropy_hardware.c
+    unless: [trustzone_nonsecure]
 provides:
   - name: mbedtls_entropy_source
     allow_multiple: true

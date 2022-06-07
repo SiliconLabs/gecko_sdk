@@ -55,9 +55,12 @@
  * @{
  ******************************************************************************/
 
-#include "sl_se_manager_key_handling.h"
+#if !defined(SL_CATALOG_TZ_SECURE_KEY_LIBRARY_NS_PRESENT)
+  #include "sl_se_manager_key_handling.h"
+  #include "sl_se_manager_cipher.h"
+#endif // SL_CATALOG_TZ_SECURE_KEY_LIBRARY_NS_PRESENT
 #include "sl_se_manager_types.h"
-#include "sl_se_manager_cipher.h"
+
 #include "em_se.h"
 #include "sl_status.h"
 #include <stdint.h>
@@ -96,6 +99,60 @@ sl_status_t sl_se_init(void);
  ******************************************************************************/
 sl_status_t sl_se_deinit(void);
 
+#if !defined(SL_CATALOG_TZ_SECURE_KEY_LIBRARY_NS_PRESENT) || defined(DOXYGEN)
+/***************************************************************************//**
+ * @brief
+ *   Set the yield attribute of the SE command context object.
+ *
+ * @param[in,out] cmd_ctx
+ *   Pointer to an SE command context object.
+ *
+ * @param[in] yield
+ *   The user may set this parameter to true in order to tell the SE Manager
+ *   to yield the cpu core while waiting for the SE mailbox command to complete.
+ *   If false, the SE Manager will busy-wait, by polling the SE mailbox response
+ *   register until the SE mailbox command completes.
+ *
+ * @return
+ *   Status code, @ref sl_status.h.
+ ******************************************************************************/
+sl_status_t sl_se_set_yield(sl_se_command_context_t *cmd_ctx,
+                            bool yield);
+#endif // !SL_CATALOG_TZ_SECURE_KEY_LIBRARY_NS_PRESENT || DOXYGEN
+
+#if defined(CRYPTOACC_PRESENT) || defined(DOXYGEN)
+/***************************************************************************//**
+ * @brief
+ *   From VSE mailbox read which command, if any, was executed.
+ *
+ * @param[in,out] cmd_ctx
+ *   Pointer to an SE command context object. If this function returns
+ *   SL_STATUS_OK the command word of the SE command context object will be set.
+ *
+ * @return
+ *   Status code, @ref sl_status.h.
+ ******************************************************************************/
+sl_status_t sl_se_read_executed_command(sl_se_command_context_t *cmd_ctx);
+
+/***************************************************************************//**
+ * @brief
+ *   Acknowledge and get status and output data of a completed command.
+ *
+ * @details
+ *   This function acknowledges and gets the status and output data of a
+ *   completed mailbox command. The acknowledge operation invalidates the
+ *   contents of the output mailbox. The output data is copied into the linked
+ *   list of output buffers pointed to in the given command data structure.
+ *
+ * @param[in,out] cmd_ctx
+ *   Pointer to an SE command context object.
+ *
+ * @return
+ *   Status code, @ref sl_status.h.
+ ******************************************************************************/
+sl_status_t sl_se_ack_command(sl_se_command_context_t *cmd_ctx);
+#endif //defined(CRYPTOACC_PRESENT)
+
 /***************************************************************************//**
  * @brief
  *   Initialize an SE command context object
@@ -133,59 +190,6 @@ sl_status_t sl_se_init_command_context(sl_se_command_context_t *cmd_ctx);
  *   Status code, @ref sl_status.h.
  ******************************************************************************/
 sl_status_t sl_se_deinit_command_context(sl_se_command_context_t *cmd_ctx);
-
-/***************************************************************************//**
- * @brief
- *   Set the yield attribute of the SE command context object.
- *
- * @param[in,out] cmd_ctx
- *   Pointer to an SE command context object.
- *
- * @param[in] yield
- *   The user may set this parameter to true in order to tell the SE Manager
- *   to yield the cpu core while waiting for the SE mailbox command to complete.
- *   If false, the SE Manager will busy-wait, by polling the SE mailbox response
- *   register until the SE mailbox command completes.
- *
- * @return
- *   Status code, @ref sl_status.h.
- ******************************************************************************/
-sl_status_t sl_se_set_yield(sl_se_command_context_t *cmd_ctx,
-                            bool yield);
-
-#if defined(CRYPTOACC_PRESENT) || defined(DOXYGEN)
-/***************************************************************************//**
- * @brief
- *   From VSE mailbox read which command, if any, was executed.
- *
- * @param[in,out] cmd_ctx
- *   Pointer to an SE command context object. If this function returns
- *   SL_STATUS_OK the command word of the SE command context object will be set.
- *
- * @return
- *   Status code, @ref sl_status.h.
- ******************************************************************************/
-sl_status_t sl_se_read_executed_command(sl_se_command_context_t *cmd_ctx);
-
-/***************************************************************************//**
- * @brief
- *   Acknowledge and get status and output data of a completed command.
- *
- * @details
- *   This function acknowledges and gets the status and output data of a
- *   completed mailbox command. The acknowledge operation invalidates the
- *   contents of the output mailbox. The output data is copied into the linked
- *   list of output buffers pointed to in the given command data structure.
- *
- * @param[in,out] cmd_ctx
- *   Pointer to an SE command context object.
- *
- * @return
- *   Status code, @ref sl_status.h.
- ******************************************************************************/
-sl_status_t sl_se_ack_command(sl_se_command_context_t *cmd_ctx);
-
-#endif //defined(CRYPTOACC_PRESENT)
 
 #ifdef __cplusplus
 }

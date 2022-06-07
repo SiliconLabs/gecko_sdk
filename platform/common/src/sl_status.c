@@ -17,6 +17,7 @@
 
 #include <stddef.h>
 #include <stdio.h>
+#include "sl_status.h"
 #include "sl_string.h"
 #include "sl_status_string_config.h"
 

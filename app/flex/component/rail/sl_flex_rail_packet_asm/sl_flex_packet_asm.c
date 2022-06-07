@@ -124,7 +124,7 @@ int16_t sl_flex_802154_packet_pack_g_opt_data_frame(uint8_t phr_cfg,
 
   if ((mhr_cfg == NULL) || (payload == NULL)
       || (frame_size == NULL) || (frame_buffer == NULL)) {
-    app_log_warning("app_ieee802154_pack_frame ERR: parameter");
+    app_log_warning("app_ieee802154_pack_frame ERR: parameter\r\n");
     return SL_FLEX_802154_PACKET_ERROR;
   }
 
@@ -141,7 +141,7 @@ int16_t sl_flex_802154_packet_pack_g_opt_data_frame(uint8_t phr_cfg,
   if (payload_size
       > (SL_FLEX_IEEE802154G_LEN_MAX - crc_size - SL_FLEX_IEEE802154_MHR_LENGTH)) {
     // the payload is too large
-    app_log_warning("app_ieee802154_pack_frame (802.15.4g) ERR: payload size");
+    app_log_warning("app_ieee802154_pack_frame (802.15.4g) ERR: payload size\r\n");
     return SL_FLEX_802154_PACKET_ERROR;
   }
 
@@ -185,12 +185,11 @@ int16_t sl_flex_802154_packet_pack_g_opt_data_frame(uint8_t phr_cfg,
   return 0;
 }
 
-int16_t sl_flex_802154_packet_pack_data_frame(
-  sl_flex_802154_packet_mhr_frame_t *mhr_cfg,
-  uint16_t payload_size,
-  void *payload,
-  uint16_t *frame_size,
-  uint8_t *frame_buffer)
+int16_t sl_flex_802154_packet_pack_data_frame(const sl_flex_802154_packet_mhr_frame_t *mhr_cfg,
+                                              uint16_t payload_size,
+                                              void *payload,
+                                              uint16_t *frame_size,
+                                              uint8_t *frame_buffer)
 {
   uint8_t *tmp_data = frame_buffer;
   uint8_t crc_size = 0;
@@ -198,7 +197,7 @@ int16_t sl_flex_802154_packet_pack_data_frame(
 
   if ((mhr_cfg == NULL) || (payload == NULL)
       || (frame_size == NULL) || (frame_buffer == NULL)) {
-    app_log_warning("app_ieee802154_pack_frame ERR: parameter");
+    app_log_warning("app_ieee802154_pack_frame ERR: parameter\r\n");
     return SL_FLEX_802154_PACKET_ERROR;
   }
 
@@ -209,7 +208,7 @@ int16_t sl_flex_802154_packet_pack_data_frame(
   if (payload_size
       > (SL_FLEX_IEEE802154_LEN_MAX - crc_size - SL_FLEX_IEEE802154_MHR_LENGTH)) {
     // the payload is too large
-    app_log_warning("app_ieee802154_pack_frame (802.15.4) ERR: payload size");
+    app_log_warning("app_ieee802154_pack_frame (802.15.4) ERR: payload size\r\n");
     return SL_FLEX_802154_PACKET_ERROR;
   }
 
@@ -250,26 +249,106 @@ int16_t sl_flex_802154_packet_pack_data_frame(
   return 0;
 }
 
+int16_t sl_flex_802154_packet_pack_ofdm_data_frame(uint8_t rate,
+                                                   uint8_t scrambler,
+                                                   uint16_t payload_size,
+                                                   const uint8_t *payload,
+                                                   uint16_t *frame_size,
+                                                   uint8_t *frame_buffer)
+{
+  uint32_t phr = 0U;
+  uint16_t frameLength = 0U;
+  uint8_t phr_size = 4U;
+  uint8_t fcs_size = 4U;
+
+  // Checking input parameters
+  if ((rate & 0xE0)
+      || (scrambler & 0xFC)
+      || (payload_size == 0)
+      || (payload == NULL)
+      || (frame_size == NULL)
+      || (frame_buffer == NULL)) {
+    app_log_warning("sl_flex_802154_packet_pack_ofdm_data_frame ERR: parameter\r\n");
+    return SL_FLEX_802154_PACKET_ERROR;
+  }
+
+  // The Frame Length field (L10-L0) specifies the total number of octets contained in the PSDU (prior to FEC encoding). The PSDU field carries the data of the PHY packet.
+  frameLength = ((payload_size + phr_size) - phr_size) + fcs_size;
+  phr = (rate << 19) | (frameLength << 7) | (scrambler << 3);
+  // Flip the 32 bits for all SUN modulations
+  phr = __RBIT(phr);
+
+  // Write the phr in the payload
+  for (uint8_t index = 0; index < phr_size; index++) {
+    frame_buffer[index] = (uint8_t)((phr & (0xFF << index * 8)) >> index * 8);
+  }
+  // Add payload bytes
+  *frame_size = payload_size + phr_size;
+  for (uint8_t index = phr_size; index < *frame_size; index++) {
+    frame_buffer[index] = payload[index - phr_size];
+  }
+
+  // return SL_FLEX_802154_PACKET_OK if the frame is ready
+  return SL_FLEX_802154_PACKET_OK;
+}
+
+int16_t sl_flex_802154_packet_pack_oqpsk_data_frame(bool spreadingMode,
+                                                    uint8_t rateMode,
+                                                    uint16_t payload_size,
+                                                    const uint8_t *payload,
+                                                    uint16_t *frame_size,
+                                                    uint8_t *frame_buffer)
+{
+  uint32_t phr = 0U;
+  uint16_t frameLength = 0U;
+  uint8_t phr_size = 4U;
+  uint8_t fcs_size = 4U;
+
+  // Checking input parameters
+  if ((rateMode & 0xFC)
+      || (payload_size == 0)
+      || (payload == NULL)
+      || (frame_size == NULL)
+      || (frame_buffer == NULL)) {
+    app_log_warning("sl_flex_802154_packet_pack_oqpsk_data_frame ERR: parameter\r\n");
+    return SL_FLEX_802154_PACKET_ERROR;
+  }
+
+  // The Frame Length field (L10-L0) specifies the total number of octets contained in the PSDU (prior to FEC encoding). The PSDU field carries the data of the PHY packet.
+  frameLength = ((payload_size + phr_size) - phr_size) + fcs_size;
+  phr = ((uint8_t)spreadingMode << 15) | (rateMode << 13) | frameLength;
+  // Flip the 32 bits for all SUN modulations
+  phr = __RBIT(phr);
+
+  // Write the phr in the payload
+  for (uint8_t index = 0; index < phr_size; index++) {
+    frame_buffer[index] = (uint8_t)((phr & (0xFF << index * 8)) >> index * 8);
+  }
+  // Add payload bytes
+  *frame_size = payload_size + phr_size;
+  for (uint8_t index = phr_size; index < *frame_size; index++) {
+    frame_buffer[index] = payload[index - phr_size];
+  }
+
+  // return SL_FLEX_802154_PACKET_OK if the frame is ready
+  return SL_FLEX_802154_PACKET_OK;
+}
+
 uint8_t *sl_flex_802154_packet_unpack_g_opt_data_frame(uint8_t *phr_cfg,
                                                        sl_flex_802154_packet_mhr_frame_t *mhr_cfg,
                                                        uint16_t *payload_size,
                                                        uint8_t *frame_buffer)
 {
   uint8_t *tmp = frame_buffer;
-  uint16_t length = 0u;
-  uint8_t crc_size = 0u;
+  uint16_t length = 0U;
+  uint8_t crc_size = 0U;
 
   if ((phr_cfg == NULL) || (payload_size == NULL) || (mhr_cfg == NULL)
       || (frame_buffer == NULL)) {
-    app_log_warning("app_ieee802154_unpack_frame_get_payload_mhr ERR: parameter");
+    app_log_warning("app_ieee802154_unpack_frame_get_payload_mhr ERR: parameter\r\n");
     return NULL;
   }
 
-  //PHR
-  if (phr_cfg == NULL) {
-    app_log_warning("app_ieee802154_unpack_frame_get_payload_mhr ERR: parameter");
-    return NULL;
-  }
   // get the PHR config
   *phr_cfg = tmp[0] & SL_FLEX_IEEE802154G_PHR_GET_PHR_CFG_MASK;
 
@@ -311,17 +390,16 @@ uint8_t *sl_flex_802154_packet_unpack_g_opt_data_frame(uint8_t *phr_cfg,
   return tmp;
 }
 
-uint8_t *sl_flex_802154_packet_unpack_data_frame(
-  sl_flex_802154_packet_mhr_frame_t *mhr_cfg,
-  uint16_t *payload_size,
-  uint8_t *frame_buffer)
+uint8_t *sl_flex_802154_packet_unpack_data_frame(sl_flex_802154_packet_mhr_frame_t *mhr_cfg,
+                                                 uint16_t *payload_size,
+                                                 uint8_t *frame_buffer)
 {
   uint8_t *tmp = frame_buffer;
-  uint16_t length = 0u;
-  uint8_t crc_size = 0u;
+  uint16_t length = 0U;
+  uint8_t crc_size = 0U;
 
   if ((payload_size == NULL) || (mhr_cfg == NULL) || (frame_buffer == NULL)) {
-    app_log_warning("app_ieee802154_unpack_frame_get_payload_mhr ERR: parameter");
+    app_log_warning("app_ieee802154_unpack_frame_get_payload_mhr ERR: parameter\r\n");
     return NULL;
   }
 
@@ -357,6 +435,75 @@ uint8_t *sl_flex_802154_packet_unpack_data_frame(
 
   return tmp;
 }
+
+uint8_t *sl_flex_802154_packet_unpack_ofdm_data_frame(const RAIL_RxPacketInfo_t *packet_information,
+                                                      uint8_t *rate,
+                                                      uint8_t *scrambler,
+                                                      uint16_t *payload_size,
+                                                      uint8_t *frame_buffer)
+{
+  uint32_t phr = 0U;
+  uint8_t *tmp = frame_buffer;
+  uint8_t phr_size = 4U;
+  uint8_t soft_modem_trailing_bytes = 6U;
+
+  if ((packet_information == NULL)
+      || (rate == NULL)
+      || (scrambler == NULL)
+      || (payload_size == NULL)
+      || (frame_buffer == NULL)) {
+    app_log_warning("sl_flex_802154_packet_unpack_ofdm_data_frame ERR: parameter\r\n");
+    return NULL;
+  }
+
+  for (uint8_t index = 0; index < phr_size; index++) {
+    phr |= frame_buffer[index] << (index * 8);
+  }
+  phr = __RBIT(phr);
+
+  *rate = (phr >> 19) & 0x1F;
+  *scrambler = (phr >> 3) & 0x03;
+
+  *payload_size = (packet_information->packetBytes - phr_size - soft_modem_trailing_bytes);
+  tmp += phr_size;
+
+  return tmp;
+}
+
+uint8_t *sl_flex_802154_packet_unpack_oqpsk_data_frame(const RAIL_RxPacketInfo_t *packet_information,
+                                                       bool *spreadingMode,
+                                                       uint8_t *rateMode,
+                                                       uint16_t *payload_size,
+                                                       uint8_t *frame_buffer)
+{
+  uint32_t phr = 0U;
+  uint8_t *tmp = frame_buffer;
+  uint8_t phr_size = 4U;
+  uint8_t soft_modem_trailing_bytes = 6U;
+
+  if ((packet_information == NULL)
+      || (spreadingMode == NULL)
+      || (rateMode == NULL)
+      || (payload_size == NULL)
+      || (frame_buffer == NULL)) {
+    app_log_warning("sl_flex_802154_packet_unpack_oqpsk_data_frame ERR: parameter\r\n");
+    return NULL;
+  }
+
+  for (uint8_t index = 0; index < phr_size; index++) {
+    phr |= frame_buffer[index] << (index * 8);
+  }
+  phr = __RBIT(phr);
+
+  *spreadingMode = (bool)((phr >> 15) & 0x01);
+  *rateMode = (phr >> 13) & 0x03;
+
+  *payload_size = (packet_information->packetBytes - phr_size - soft_modem_trailing_bytes);
+  tmp += phr_size;
+
+  return tmp;
+}
+
 // -----------------------------------------------------------------------------
 //                          Static Function Definitions
 // -----------------------------------------------------------------------------
@@ -408,7 +555,7 @@ void sl_flex_ble_prepare_packet(sl_flex_ble_advertising_packet_t *packet, const 
   sl_flex_ble_packet_size_t padding_size;
 
   if (packet == NULL || payload == NULL || payload_length == 0 || payload_length > SL_FLEX_BLE_PAYLOAD_LEN_MAX) {
-    app_log_warning("sl_flex_ble_prepare_packet ERR: parameter");
+    app_log_warning("sl_flex_ble_prepare_packet ERR: parameter\r\n");
     return;
   }
 
@@ -459,7 +606,7 @@ sl_flex_ble_packet_size_t sl_flex_ble_get_packet_size(const sl_flex_ble_advertis
 {
   // Check arguments
   if (packet == NULL) {
-    app_log_warning("sl_flex_ble_get_packet_size ERR: parameter");
+    app_log_warning("sl_flex_ble_get_packet_size ERR: parameter\r\n");
     return 0;
   }
   return (sizeof(sl_flex_ble_advertising_packet_t) - SL_FLEX_BLE_PAYLOAD_LEN_MAX + sl_flex_ble_get_payload_len(packet));
@@ -472,7 +619,7 @@ void sl_flex_ble_copy_packet_from_buff(sl_flex_ble_advertising_packet_t *packet,
 {
   // Check arguments
   if (packet == NULL || rx_data == NULL) {
-    app_log_warning("sl_flex_ble_get_packet ERR: parameter");
+    app_log_warning("sl_flex_ble_get_packet ERR: parameter\r\n");
     packet = NULL;
     return;
   }
@@ -494,7 +641,7 @@ void sl_flex_ble_copy_payload(sl_flex_ble_advertising_packet_t *packet, uint8_t 
 {
   // Check arguments
   if (packet == NULL || dest == NULL || payload_length == 0) {
-    app_log_warning("sl_flex_ble_copy_payload ERR: parameter");
+    app_log_warning("sl_flex_ble_copy_payload ERR: parameter\r\n");
     return;
   }
   memcpy(dest, packet->manufactSpec.payload, (payload_length > SL_FLEX_BLE_PAYLOAD_LEN_MAX) ? SL_FLEX_BLE_PAYLOAD_LEN_MAX : payload_length);
@@ -519,7 +666,7 @@ inline sl_flex_ble_packet_size_t sl_flex_ble_get_payload_len(const sl_flex_ble_a
   if (packet == NULL) {
     return 0;
   }
-  return (sl_flex_ble_packet_size_t)calc_ble_payload_length(packet->header.length);
+  return calc_ble_payload_length(packet->header.length);
 }
 
 /*******************************************************************************
@@ -529,7 +676,7 @@ static void fill_buffer(uint8_t *buffer, uint32_t length)
 {
   bool parity = (length % 2) ? false : true;
   for (uint32_t i = 0; i < length; ++i) {
-    buffer[i] = (parity) ? (0xAAu) : (0x55u);
+    buffer[i] = (parity) ? (0xAAU) : (0x55U);
     parity = !parity;
   }
 }

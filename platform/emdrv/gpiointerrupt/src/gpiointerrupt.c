@@ -31,8 +31,8 @@
 #include "em_gpio.h"
 #include "em_core.h"
 #include "gpiointerrupt.h"
-#include "em_assert.h"
-#include "em_common.h"
+#include "sl_assert.h"
+#include "sl_common.h"
 
 /***************************************************************************//**
  * @addtogroup gpioint
@@ -318,9 +318,6 @@ void GPIO_ODD_IRQHandler(void)
 ///
 ///   @ref GPIOINT_CallbackRegisterExt() @n
 ///    Register a callback function with context on a pin number.
-///
-///   @ref GPIOINT_CallbackUnRegisterExt() @n
-///    Un-register a callback function with context on a pin number.
 ///
 ///   @n @section gpioint_example Example
 ///   @code{.c}

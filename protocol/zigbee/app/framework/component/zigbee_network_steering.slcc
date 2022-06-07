@@ -87,8 +87,7 @@ template_contribution:
       help: Sets the pre-configured key so that the joining device can enter the network.
       argument:
       - type: hex
-        help: Sets the preconfigured key
-  # this must be mask, but it does not compile (EMZIGBEE-6470)      
+        help: Sets the preconfigured key    
   - name: cli_group
     value:
       group: network-steering

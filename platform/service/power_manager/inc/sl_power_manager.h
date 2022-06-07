@@ -256,13 +256,13 @@ typedef uint32_t sl_power_manager_em_transition_event_t;
 typedef void (*sl_power_manager_em_transition_on_event_t)(sl_power_manager_em_t from,
                                                           sl_power_manager_em_t to);
 
-/// @brief TODO
+/// @brief Struct representing energy mode transition event information
 typedef struct {
   const sl_power_manager_em_transition_event_t event_mask;  ///< Mask of the transitions on which the callback should be called.
   const sl_power_manager_em_transition_on_event_t on_event; ///< Function that must be called when the event occurs.
 } sl_power_manager_em_transition_event_info_t;
 
-/// @brief TODO
+/// @brief Struct representing energy mode transition event handle
 typedef struct {
   sl_slist_node_t node;                               ///< List node.
   sl_power_manager_em_transition_event_info_t *info;  ///< Handle event info.
@@ -338,6 +338,7 @@ void sl_power_manager_sleep(void);
  ******************************************************************************/
 __STATIC_INLINE void sl_power_manager_add_em_requirement(sl_power_manager_em_t em)
 {
+#if (SL_POWER_MANAGER_LOWEST_EM_ALLOWED != 1)
   CORE_DECLARE_IRQ_STATE;
 
   CORE_ENTER_CRITICAL();
@@ -345,6 +346,9 @@ __STATIC_INLINE void sl_power_manager_add_em_requirement(sl_power_manager_em_t e
 
   sli_power_manager_debug_log_em_requirement(em, true, (const char *)CURRENT_MODULE_NAME);
   CORE_EXIT_CRITICAL();
+#else
+  (void)em;
+#endif
 }
 
 /***************************************************************************//**
@@ -356,6 +360,7 @@ __STATIC_INLINE void sl_power_manager_add_em_requirement(sl_power_manager_em_t e
  ******************************************************************************/
 __STATIC_INLINE void sl_power_manager_remove_em_requirement(sl_power_manager_em_t em)
 {
+#if (SL_POWER_MANAGER_LOWEST_EM_ALLOWED != 1)
   CORE_DECLARE_IRQ_STATE;
 
   CORE_ENTER_CRITICAL();
@@ -363,6 +368,9 @@ __STATIC_INLINE void sl_power_manager_remove_em_requirement(sl_power_manager_em_
 
   sli_power_manager_debug_log_em_requirement(em, false, (const char *)CURRENT_MODULE_NAME);
   CORE_EXIT_CRITICAL();
+#else
+  (void)em;
+#endif
 }
 
 /***************************************************************************//**
@@ -428,6 +436,9 @@ void sl_power_manager_unsubscribe_em_transition_event(sl_power_manager_em_transi
  * when a schedule wake-up is set.
  *
  * @return  Current overhead value for early restore time.
+ *
+ * @note This function will return 0 in case SL_POWER_MANAGER_LOWEST_EM_ALLOWED
+ *       config is set to EM1.
  ******************************************************************************/
 int32_t sl_power_manager_schedule_wakeup_get_restore_overhead_tick(void);
 
@@ -440,6 +451,9 @@ int32_t sl_power_manager_schedule_wakeup_get_restore_overhead_tick(void);
  *
  * @note The overhead value can also be negative to remove time from the restore
  *       process.
+ *
+ * @note This function will do nothing when SL_POWER_MANAGER_LOWEST_EM_ALLOWED
+ *       config is set to EM1.
  ******************************************************************************/
 void sl_power_manager_schedule_wakeup_set_restore_overhead_tick(int32_t overhead_tick);
 
@@ -457,6 +471,9 @@ void sl_power_manager_schedule_wakeup_set_restore_overhead_tick(int32_t overhead
  *        wake-up will be greater than if we just keep the clock on until the next
  *        scheduled clock enabled. This threshold value is what we refer as the
  *        minimum off-time.
+ *
+ * @note This function will return 0 in case SL_POWER_MANAGER_LOWEST_EM_ALLOWED
+ *       config is set to EM1.
  ******************************************************************************/
 uint32_t sl_power_manager_schedule_wakeup_get_minimum_offtime_tick(void);
 
@@ -475,6 +492,9 @@ uint32_t sl_power_manager_schedule_wakeup_get_minimum_offtime_tick(void);
  *        wake-up will be greater than if we just keep the clock on until the next
  *        scheduled clock enabled. This threshold value is what we refer as the
  *        minimum off-time.
+ *
+ * @note This function will do nothing when SL_POWER_MANAGER_LOWEST_EM_ALLOWED
+ *       config is set to EM1.
  ******************************************************************************/
 void sl_power_manager_schedule_wakeup_set_minimum_offtime_tick(uint32_t minimum_offtime_tick);
 
@@ -483,6 +503,9 @@ void sl_power_manager_schedule_wakeup_set_minimum_offtime_tick(uint32_t minimum_
  * Enable or disable fast wake-up in EM2 and EM3
  *
  * @note Will also update the wake up time from EM2 to EM0.
+ *
+ * @note This function will do nothing when SL_POWER_MANAGER_LOWEST_EM_ALLOWED
+ *       config is set to EM1.
  ******************************************************************************/
 void sl_power_manager_em23_voltage_scaling_enable_fast_wakeup(bool enable);
 #endif
@@ -494,6 +517,10 @@ void sl_power_manager_em23_voltage_scaling_enable_fast_wakeup(bool enable);
  *
  * @return true if power manager sleep can return to sleep,
  *         false otherwise.
+ *
+ * @note This function will always return false in case
+ *       SL_POWER_MANAGER_LOWEST_EM_ALLOWED config is set to EM1, since we will
+ *       never sleep at a lower level than EM1.
  *****************************************************************************/
 bool sl_power_manager_is_latest_wakeup_internal(void);
 

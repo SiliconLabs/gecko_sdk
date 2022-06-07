@@ -1,8 +1,12 @@
 project_name: "Z3Light"
-label: "Z3Light"
+label: "Zigbee - SoC Light"
 package: "Zigbee"
 category: "Zigbee Application"
 quality: "production"
+
+description: >
+  This is a Zigbee 3.0 light application using NVM3 as the persistent storage.
+author: "Silicon Laboratories, Inc."
 
 component:
   - id: "cli"
@@ -16,8 +20,6 @@ component:
   - id: "zigbee_source_route"
   - id: "zigbee_binding_table"
   - id: "zigbee_stack_diagnostics"
-  # TODO: to be removed
-  - id: "zigbee_multi_network_stub"
   - id: "zigbee_gp"
   - id: "zigbee_install_code"
   - id: "zigbee_zll"
@@ -111,9 +113,6 @@ include:
 tag:
   - prebuilt_demo
 
-description: |-
-  This is a Zigbee 3.0 light application using NVM3 as the persistent storage.
-
 readme:
   - path: ./readme.html
 
@@ -121,4 +120,12 @@ ui_hints:
   highlight:
     - path: readme.html
       focus: false
+
+filter:
+  - name: "Wireless Technology"
+    value: ["Zigbee"]
+  - name: "Device Type"
+    value: ["SoC"]
+  - name: "Project Difficulty"
+    value: ["Beginner"]
 

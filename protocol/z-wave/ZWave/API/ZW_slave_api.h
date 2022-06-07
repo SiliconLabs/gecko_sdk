@@ -6,9 +6,7 @@
 #ifndef _ZW_SLAVE_API_H_
 #define _ZW_SLAVE_API_H_
 
-#ifndef ZW_SLAVE
-#define ZW_SLAVE
-#endif
+#ifdef ZW_SLAVE
 
 /****************************************************************************/
 /*                              INCLUDE FILES                               */
@@ -29,6 +27,8 @@
 #define ZW_ROUTE_UPDATE_ABORT     0x01
 #define ZW_ROUTE_UPDATE_WAIT      0x02
 #define ZW_ROUTE_UPDATE_DISABLED  0x03
+
+#endif /* ZW_SLAVE */
 
 #endif /* _ZW_SLAVE_API_H_ */
 

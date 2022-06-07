@@ -54,7 +54,7 @@ typedef struct {
 #if defined(SLI_RADIOAES_REQUIRES_MASKING)
 /// Static variable containing the masking value for the RADIOAES
 extern uint32_t sli_radioaes_mask;
-#endif
+#endif // SLI_RADIOAES_REQUIRES_MASKING
 
 /***************************************************************************//**
  * @brief          Acquire RADIOAES access

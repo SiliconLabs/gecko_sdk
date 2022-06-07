@@ -31,7 +31,7 @@
 #include "em_timer.h"
 #if defined(TIMER_COUNT) && (TIMER_COUNT > 0)
 
-#include "em_assert.h"
+#include "sl_assert.h"
 
 /***************************************************************************//**
  * @addtogroup timer TIMER - Timer/Counter

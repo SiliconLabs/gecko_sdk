@@ -35,8 +35,10 @@
 #if defined(GPIO_COUNT) && (GPIO_COUNT > 0)
 
 #include <stdbool.h>
-#include "em_assert.h"
+#include "sl_assert.h"
 #include "em_bus.h"
+#include "sl_common.h"
+#include "sl_enum.h"
 
 #ifdef __cplusplus
 extern "C" {
@@ -465,7 +467,7 @@ extern "C" {
  ******************************************************************************/
 
 /** GPIO ports IDs. */
-typedef enum {
+SL_ENUM(GPIO_Port_TypeDef) {
 #if (_GPIO_PORT_A_PIN_COUNT > 0)
   /** Port A. */
   gpioPortA = 0,
@@ -510,11 +512,11 @@ typedef enum {
   /** Port K. */
   gpioPortK = 10,
 #endif
-} GPIO_Port_TypeDef;
+};
 
 #if defined(_GPIO_P_CTRL_DRIVEMODE_MASK)
 /** GPIO drive mode. */
-typedef enum {
+SL_ENUM_GENERIC(GPIO_DriveMode_TypeDef, uint32_t) {
   /** Default 6mA. */
   gpioDriveModeStandard = GPIO_P_CTRL_DRIVEMODE_STANDARD,
   /** 0.5 mA. */
@@ -523,12 +525,12 @@ typedef enum {
   gpioDriveModeHigh     = GPIO_P_CTRL_DRIVEMODE_HIGH,
   /** 2 mA. */
   gpioDriveModeLow      = GPIO_P_CTRL_DRIVEMODE_LOW
-} GPIO_DriveMode_TypeDef;
+};
 #endif
 
 #if defined(_GPIO_P_CTRL_DRIVESTRENGTH_MASK) && defined(_GPIO_P_CTRL_DRIVESTRENGTHALT_MASK)
 /** GPIO drive strength. */
-typedef enum {
+SL_ENUM_GENERIC(GPIO_DriveStrength_TypeDef, uint32_t) {
   /** GPIO weak 1mA and alternate function weak 1mA. */
   gpioDriveStrengthWeakAlternateWeak     = GPIO_P_CTRL_DRIVESTRENGTH_WEAK | GPIO_P_CTRL_DRIVESTRENGTHALT_WEAK,
 
@@ -540,7 +542,7 @@ typedef enum {
 
   /** GPIO strong 10mA and alternate function strong 10mA. */
   gpioDriveStrengthStrongAlternateStrong = GPIO_P_CTRL_DRIVESTRENGTH_STRONG | GPIO_P_CTRL_DRIVESTRENGTHALT_STRONG,
-} GPIO_DriveStrength_TypeDef;
+};
 
 /* Deprecated enums. */
 /** @cond DO_NOT_INCLUDE_WITH_DOXYGEN */
@@ -551,7 +553,7 @@ typedef enum {
 
 /** Pin mode. For more details on each mode, refer to the
  * reference manual. */
-typedef enum {
+SL_ENUM_GENERIC(GPIO_Mode_TypeDef, uint32_t) {
   /** Input disabled. Pull-up if DOUT is set. */
   gpioModeDisabled                  = _GPIO_P_MODEL_MODE0_DISABLED,
   /** Input enabled. Filter if DOUT is set. */
@@ -602,7 +604,7 @@ typedef enum {
   /** Open-drain output using alternate control with filter and pull-up. */
   gpioModeWiredAndAlternatePullUpFilter = _GPIO_P_MODEL_MODE0_WIREDANDALTPULLUPFILTER,
 #endif
-} GPIO_Mode_TypeDef;
+};
 
 /*******************************************************************************
  *****************************   PROTOTYPES   **********************************
@@ -1328,11 +1330,11 @@ __STATIC_INLINE void GPIO_Unlock(void)
  *   Set to true if interrupt will be enabled after configuration completed,
  *   false to leave disabled. See @ref GPIO_IntDisable() and @ref GPIO_IntEnable().
  ******************************************************************************/
-__STATIC_INLINE void GPIO_IntConfig(GPIO_Port_TypeDef port,
-                                    unsigned int pin,
-                                    bool risingEdge,
-                                    bool fallingEdge,
-                                    bool enable)
+__STATIC_INLINE SL_DEPRECATED_API_SDK_4_1 void GPIO_IntConfig(GPIO_Port_TypeDef port,
+                                                              unsigned int pin,
+                                                              bool risingEdge,
+                                                              bool fallingEdge,
+                                                              bool enable)
 {
   GPIO_ExtIntConfig(port, pin, pin, risingEdge, fallingEdge, enable);
 }

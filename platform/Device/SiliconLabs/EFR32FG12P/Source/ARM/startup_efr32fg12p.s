@@ -15,7 +15,9 @@
 ; *
 ; *****************************************************************************/
 ;/*
-; * Copyright (c) 2009-2016 ARM Limited. All rights reserved.
+; ****************************************************************************/
+;/*
+; * Copyright (c) 2009-2021 Arm Limited. All rights reserved.
 ; *
 ; * SPDX-License-Identifier: Apache-2.0
 ; *
@@ -32,38 +34,6 @@
 ; * limitations under the License.
 ; */
 
-;/*
-;//-------- <<< Use Configuration Wizard in Context Menu >>> ------------------
-;*/
-
-; <h> Stack Configuration
-;   <o> Stack Size (in Bytes) <0x0-0xFFFFFFFF:8>
-; </h>
-                IF :DEF: __STACK_SIZE
-Stack_Size      EQU     __STACK_SIZE
-                ELSE
-Stack_Size      EQU     0x00000400
-                ENDIF
-
-                AREA    STACK, NOINIT, READWRITE, ALIGN=3
-Stack_Mem       SPACE   Stack_Size
-__initial_sp
-
-
-; <h> Heap Configuration
-;   <o>  Heap Size (in Bytes) <0x0-0xFFFFFFFF:8>
-; </h>
-                IF :DEF: __HEAP_SIZE
-Heap_Size       EQU     __HEAP_SIZE
-                ELSE
-Heap_Size       EQU     0x00000C00
-                ENDIF
-
-                AREA    HEAP, NOINIT, READWRITE, ALIGN=3
-__heap_base
-Heap_Mem        SPACE   Heap_Size
-__heap_limit
-
 
                 PRESERVE8
                 THUMB
@@ -71,279 +41,203 @@ __heap_limit
 
 ; Vector Table Mapped to Address 0 at Reset
 
-                AREA    RESET, DATA, READONLY, ALIGN=9
-                EXPORT  __Vectors
-                EXPORT  __Vectors_End
-                EXPORT  __Vectors_Size
+                AREA     RESET, DATA, READONLY
 
-__Vectors       DCD     __initial_sp              ; Top of Stack
-                DCD     Reset_Handler             ; Reset Handler
-                DCD     NMI_Handler               ; NMI Handler
-                DCD     HardFault_Handler         ; Hard Fault Handler
-                DCD     MemManage_Handler         ; MPU Fault Handler
-                DCD     BusFault_Handler          ; Bus Fault Handler
-                DCD     UsageFault_Handler        ; Usage Fault Handler
-                DCD     0                         ; Reserved
-                DCD     0                         ; Reserved
-                DCD     0                         ; Reserved
-                DCD     0                         ; Reserved
-                DCD     SVC_Handler               ; SVCall Handler
-                DCD     DebugMon_Handler          ; Debug Monitor Handler
-                DCD     sl_app_properties         ; Application properties
-                DCD     PendSV_Handler            ; PendSV Handler
-                DCD     SysTick_Handler           ; SysTick Handler
+                AREA     RESET, DATA, READONLY, ALIGN=9
+                EXPORT   __Vectors
+                EXPORT   __Vectors_End
+                EXPORT   __Vectors_Size
+
+__Vectors       DCD      __initial_sp                        ;     Top of Stack
+                DCD      Reset_Handler                       ; Reset Handler
+                DCD      NMI_Handler                         ; -14 NMI Handler
+                DCD      HardFault_Handler                   ; -13 Hard Fault Handler
+                DCD      MemManage_Handler                   ; -12 MPU Fault Handler
+                DCD      BusFault_Handler                    ; -11 Bus Fault Handler
+                DCD      UsageFault_Handler                  ; -10 Usage Fault Handler
+                DCD      0                                   ; Reserved
+                DCD      0                                   ; Reserved
+                DCD      0                                   ; Reserved
+                DCD      0                                   ; Reserved
+                DCD      SVC_Handler                         ; -5 SVCall Handler
+                DCD      DebugMon_Handler                    ; -4 Debug Monitor Handler
+                DCD      sl_app_properties                   ; Application properties
+                DCD      PendSV_Handler                      ; PendSV Handler
+                DCD      SysTick_Handler                     ; SysTick Handler
 
                 ; External Interrupts
 
-                DCD     EMU_IRQHandler            ; 0: EMU Interrupt
-                DCD     FRC_PRI_IRQHandler        ; 1: FRC_PRI Interrupt
-                DCD     WDOG0_IRQHandler          ; 2: WDOG0 Interrupt
-                DCD     WDOG1_IRQHandler          ; 3: WDOG1 Interrupt
-                DCD     FRC_IRQHandler            ; 4: FRC Interrupt
-                DCD     MODEM_IRQHandler          ; 5: MODEM Interrupt
-                DCD     RAC_SEQ_IRQHandler        ; 6: RAC_SEQ Interrupt
-                DCD     RAC_RSM_IRQHandler        ; 7: RAC_RSM Interrupt
-                DCD     BUFC_IRQHandler           ; 8: BUFC Interrupt
-                DCD     LDMA_IRQHandler           ; 9: LDMA Interrupt
-                DCD     GPIO_EVEN_IRQHandler      ; 10: GPIO_EVEN Interrupt
-                DCD     TIMER0_IRQHandler         ; 11: TIMER0 Interrupt
-                DCD     USART0_RX_IRQHandler      ; 12: USART0_RX Interrupt
-                DCD     USART0_TX_IRQHandler      ; 13: USART0_TX Interrupt
-                DCD     ACMP0_IRQHandler          ; 14: ACMP0 Interrupt
-                DCD     ADC0_IRQHandler           ; 15: ADC0 Interrupt
-                DCD     IDAC0_IRQHandler          ; 16: IDAC0 Interrupt
-                DCD     I2C0_IRQHandler           ; 17: I2C0 Interrupt
-                DCD     GPIO_ODD_IRQHandler       ; 18: GPIO_ODD Interrupt
-                DCD     TIMER1_IRQHandler         ; 19: TIMER1 Interrupt
-                DCD     USART1_RX_IRQHandler      ; 20: USART1_RX Interrupt
-                DCD     USART1_TX_IRQHandler      ; 21: USART1_TX Interrupt
-                DCD     LEUART0_IRQHandler        ; 22: LEUART0 Interrupt
-                DCD     PCNT0_IRQHandler          ; 23: PCNT0 Interrupt
-                DCD     CMU_IRQHandler            ; 24: CMU Interrupt
-                DCD     MSC_IRQHandler            ; 25: MSC Interrupt
-                DCD     CRYPTO0_IRQHandler        ; 26: CRYPTO0 Interrupt
-                DCD     LETIMER0_IRQHandler       ; 27: LETIMER0 Interrupt
-                DCD     AGC_IRQHandler            ; 28: AGC Interrupt
-                DCD     PROTIMER_IRQHandler       ; 29: PROTIMER Interrupt
-                DCD     RTCC_IRQHandler           ; 30: RTCC Interrupt
-                DCD     SYNTH_IRQHandler          ; 31: SYNTH Interrupt
-                DCD     CRYOTIMER_IRQHandler      ; 32: CRYOTIMER Interrupt
-                DCD     RFSENSE_IRQHandler        ; 33: RFSENSE Interrupt
-                DCD     FPUEH_IRQHandler          ; 34: FPUEH Interrupt
-                DCD     SMU_IRQHandler            ; 35: SMU Interrupt
-                DCD     WTIMER0_IRQHandler        ; 36: WTIMER0 Interrupt
-                DCD     WTIMER1_IRQHandler        ; 37: WTIMER1 Interrupt
-                DCD     PCNT1_IRQHandler          ; 38: PCNT1 Interrupt
-                DCD     PCNT2_IRQHandler          ; 39: PCNT2 Interrupt
-                DCD     USART2_RX_IRQHandler      ; 40: USART2_RX Interrupt
-                DCD     USART2_TX_IRQHandler      ; 41: USART2_TX Interrupt
-                DCD     I2C1_IRQHandler           ; 42: I2C1 Interrupt
-                DCD     USART3_RX_IRQHandler      ; 43: USART3_RX Interrupt
-                DCD     USART3_TX_IRQHandler      ; 44: USART3_TX Interrupt
-                DCD     VDAC0_IRQHandler          ; 45: VDAC0 Interrupt
-                DCD     CSEN_IRQHandler           ; 46: CSEN Interrupt
-                DCD     LESENSE_IRQHandler        ; 47: LESENSE Interrupt
-                DCD     CRYPTO1_IRQHandler        ; 48: CRYPTO1 Interrupt
-                DCD     TRNG0_IRQHandler          ; 49: TRNG0 Interrupt
-                DCD     0                         ; 50: Reserved
+
+                DCD      EMU_IRQHandler                      ; 0: EMU Interrupt
+                DCD      FRC_PRI_IRQHandler                  ; 1: FRC_PRI Interrupt
+                DCD      WDOG0_IRQHandler                    ; 2: WDOG0 Interrupt
+                DCD      WDOG1_IRQHandler                    ; 3: WDOG1 Interrupt
+                DCD      FRC_IRQHandler                      ; 4: FRC Interrupt
+                DCD      MODEM_IRQHandler                    ; 5: MODEM Interrupt
+                DCD      RAC_SEQ_IRQHandler                  ; 6: RAC_SEQ Interrupt
+                DCD      RAC_RSM_IRQHandler                  ; 7: RAC_RSM Interrupt
+                DCD      BUFC_IRQHandler                     ; 8: BUFC Interrupt
+                DCD      LDMA_IRQHandler                     ; 9: LDMA Interrupt
+                DCD      GPIO_EVEN_IRQHandler                ; 10: GPIO_EVEN Interrupt
+                DCD      TIMER0_IRQHandler                   ; 11: TIMER0 Interrupt
+                DCD      USART0_RX_IRQHandler                ; 12: USART0_RX Interrupt
+                DCD      USART0_TX_IRQHandler                ; 13: USART0_TX Interrupt
+                DCD      ACMP0_IRQHandler                    ; 14: ACMP0 Interrupt
+                DCD      ADC0_IRQHandler                     ; 15: ADC0 Interrupt
+                DCD      IDAC0_IRQHandler                    ; 16: IDAC0 Interrupt
+                DCD      I2C0_IRQHandler                     ; 17: I2C0 Interrupt
+                DCD      GPIO_ODD_IRQHandler                 ; 18: GPIO_ODD Interrupt
+                DCD      TIMER1_IRQHandler                   ; 19: TIMER1 Interrupt
+                DCD      USART1_RX_IRQHandler                ; 20: USART1_RX Interrupt
+                DCD      USART1_TX_IRQHandler                ; 21: USART1_TX Interrupt
+                DCD      LEUART0_IRQHandler                  ; 22: LEUART0 Interrupt
+                DCD      PCNT0_IRQHandler                    ; 23: PCNT0 Interrupt
+                DCD      CMU_IRQHandler                      ; 24: CMU Interrupt
+                DCD      MSC_IRQHandler                      ; 25: MSC Interrupt
+                DCD      CRYPTO0_IRQHandler                  ; 26: CRYPTO0 Interrupt
+                DCD      LETIMER0_IRQHandler                 ; 27: LETIMER0 Interrupt
+                DCD      AGC_IRQHandler                      ; 28: AGC Interrupt
+                DCD      PROTIMER_IRQHandler                 ; 29: PROTIMER Interrupt
+                DCD      RTCC_IRQHandler                     ; 30: RTCC Interrupt
+                DCD      SYNTH_IRQHandler                    ; 31: SYNTH Interrupt
+                DCD      CRYOTIMER_IRQHandler                ; 32: CRYOTIMER Interrupt
+                DCD      RFSENSE_IRQHandler                  ; 33: RFSENSE Interrupt
+                DCD      FPUEH_IRQHandler                    ; 34: FPUEH Interrupt
+                DCD      SMU_IRQHandler                      ; 35: SMU Interrupt
+                DCD      WTIMER0_IRQHandler                  ; 36: WTIMER0 Interrupt
+                DCD      WTIMER1_IRQHandler                  ; 37: WTIMER1 Interrupt
+                DCD      PCNT1_IRQHandler                    ; 38: PCNT1 Interrupt
+                DCD      PCNT2_IRQHandler                    ; 39: PCNT2 Interrupt
+                DCD      USART2_RX_IRQHandler                ; 40: USART2_RX Interrupt
+                DCD      USART2_TX_IRQHandler                ; 41: USART2_TX Interrupt
+                DCD      I2C1_IRQHandler                     ; 42: I2C1 Interrupt
+                DCD      USART3_RX_IRQHandler                ; 43: USART3_RX Interrupt
+                DCD      USART3_TX_IRQHandler                ; 44: USART3_TX Interrupt
+                DCD      VDAC0_IRQHandler                    ; 45: VDAC0 Interrupt
+                DCD      CSEN_IRQHandler                     ; 46: CSEN Interrupt
+                DCD      LESENSE_IRQHandler                  ; 47: LESENSE Interrupt
+                DCD      CRYPTO1_IRQHandler                  ; 48: CRYPTO1 Interrupt
+                DCD      TRNG0_IRQHandler                    ; 49: TRNG0 Interrupt
+                DCD      0                                   ; 50: Reserved
+
+                SPACE   (173 * 4)          ; Remaining Interrupts are left out
 
 __Vectors_End
-__Vectors_Size  EQU     __Vectors_End - __Vectors
+__Vectors_Size  EQU      __Vectors_End - __Vectors
 
-                AREA    |.text|, CODE, READONLY
+
+                AREA     |.text|, CODE, READONLY
 
 
 ; Reset Handler
 
 Reset_Handler   PROC
                 EXPORT  Reset_Handler             [WEAK]
-                IMPORT  SystemInit
-                IMPORT  __main
-                LDR     R0, =SystemInit
-                BLX     R0
-                LDR     R0, =__main
-                BX      R0
+                IMPORT   SystemInit
+                IMPORT   __main
+
+                LDR      R0, =SystemInit
+                BLX      R0
+                LDR      R0, =__main
+                BX       R0
                 ENDP
 
-
-; Dummy Exception Handlers (infinite loops which can be modified)
-
-NMI_Handler     PROC
-                EXPORT  NMI_Handler               [WEAK]
-                EXPORT  sl_app_properties         [WEAK]
-sl_app_properties     ; Provide a dummy value for the sl_app_properties symbol.
-                B       .
-                ENDP
-HardFault_Handler\
-                PROC
+; The default macro is not used for HardFault_Handler
+; because this results in a poor debug illusion.
+HardFault_Handler PROC
                 EXPORT  HardFault_Handler         [WEAK]
-                B       .
-                ENDP
-MemManage_Handler\
-                PROC
-                EXPORT  MemManage_Handler         [WEAK]
-                B       .
-                ENDP
-BusFault_Handler\
-                PROC
-                EXPORT  BusFault_Handler          [WEAK]
-                B       .
-                ENDP
-UsageFault_Handler\
-                PROC
-                EXPORT  UsageFault_Handler        [WEAK]
-                B       .
-                ENDP
-SVC_Handler     PROC
-                EXPORT  SVC_Handler               [WEAK]
-                B       .
-                ENDP
-DebugMon_Handler\
-                PROC
-                EXPORT  DebugMon_Handler          [WEAK]
-                B       .
-                ENDP
-PendSV_Handler  PROC
-                EXPORT  PendSV_Handler            [WEAK]
-                B       .
-                ENDP
-SysTick_Handler PROC
-                EXPORT  SysTick_Handler           [WEAK]
-                B       .
+                B        .
                 ENDP
 
-Default_Handler PROC
-
-                EXPORT  EMU_IRQHandler            [WEAK]
-                EXPORT  FRC_PRI_IRQHandler        [WEAK]
-                EXPORT  WDOG0_IRQHandler          [WEAK]
-                EXPORT  WDOG1_IRQHandler          [WEAK]
-                EXPORT  FRC_IRQHandler            [WEAK]
-                EXPORT  MODEM_IRQHandler          [WEAK]
-                EXPORT  RAC_SEQ_IRQHandler        [WEAK]
-                EXPORT  RAC_RSM_IRQHandler        [WEAK]
-                EXPORT  BUFC_IRQHandler           [WEAK]
-                EXPORT  LDMA_IRQHandler           [WEAK]
-                EXPORT  GPIO_EVEN_IRQHandler      [WEAK]
-                EXPORT  TIMER0_IRQHandler         [WEAK]
-                EXPORT  USART0_RX_IRQHandler      [WEAK]
-                EXPORT  USART0_TX_IRQHandler      [WEAK]
-                EXPORT  ACMP0_IRQHandler          [WEAK]
-                EXPORT  ADC0_IRQHandler           [WEAK]
-                EXPORT  IDAC0_IRQHandler          [WEAK]
-                EXPORT  I2C0_IRQHandler           [WEAK]
-                EXPORT  GPIO_ODD_IRQHandler       [WEAK]
-                EXPORT  TIMER1_IRQHandler         [WEAK]
-                EXPORT  USART1_RX_IRQHandler      [WEAK]
-                EXPORT  USART1_TX_IRQHandler      [WEAK]
-                EXPORT  LEUART0_IRQHandler        [WEAK]
-                EXPORT  PCNT0_IRQHandler          [WEAK]
-                EXPORT  CMU_IRQHandler            [WEAK]
-                EXPORT  MSC_IRQHandler            [WEAK]
-                EXPORT  CRYPTO0_IRQHandler        [WEAK]
-                EXPORT  LETIMER0_IRQHandler       [WEAK]
-                EXPORT  AGC_IRQHandler            [WEAK]
-                EXPORT  PROTIMER_IRQHandler       [WEAK]
-                EXPORT  RTCC_IRQHandler           [WEAK]
-                EXPORT  SYNTH_IRQHandler          [WEAK]
-                EXPORT  CRYOTIMER_IRQHandler      [WEAK]
-                EXPORT  RFSENSE_IRQHandler        [WEAK]
-                EXPORT  FPUEH_IRQHandler          [WEAK]
-                EXPORT  SMU_IRQHandler            [WEAK]
-                EXPORT  WTIMER0_IRQHandler        [WEAK]
-                EXPORT  WTIMER1_IRQHandler        [WEAK]
-                EXPORT  PCNT1_IRQHandler          [WEAK]
-                EXPORT  PCNT2_IRQHandler          [WEAK]
-                EXPORT  USART2_RX_IRQHandler      [WEAK]
-                EXPORT  USART2_TX_IRQHandler      [WEAK]
-                EXPORT  I2C1_IRQHandler           [WEAK]
-                EXPORT  USART3_RX_IRQHandler      [WEAK]
-                EXPORT  USART3_TX_IRQHandler      [WEAK]
-                EXPORT  VDAC0_IRQHandler          [WEAK]
-                EXPORT  CSEN_IRQHandler           [WEAK]
-                EXPORT  LESENSE_IRQHandler        [WEAK]
-                EXPORT  CRYPTO1_IRQHandler        [WEAK]
-                EXPORT  TRNG0_IRQHandler          [WEAK]
-
-
-EMU_IRQHandler
-FRC_PRI_IRQHandler
-WDOG0_IRQHandler
-WDOG1_IRQHandler
-FRC_IRQHandler
-MODEM_IRQHandler
-RAC_SEQ_IRQHandler
-RAC_RSM_IRQHandler
-BUFC_IRQHandler
-LDMA_IRQHandler
-GPIO_EVEN_IRQHandler
-TIMER0_IRQHandler
-USART0_RX_IRQHandler
-USART0_TX_IRQHandler
-ACMP0_IRQHandler
-ADC0_IRQHandler
-IDAC0_IRQHandler
-I2C0_IRQHandler
-GPIO_ODD_IRQHandler
-TIMER1_IRQHandler
-USART1_RX_IRQHandler
-USART1_TX_IRQHandler
-LEUART0_IRQHandler
-PCNT0_IRQHandler
-CMU_IRQHandler
-MSC_IRQHandler
-CRYPTO0_IRQHandler
-LETIMER0_IRQHandler
-AGC_IRQHandler
-PROTIMER_IRQHandler
-RTCC_IRQHandler
-SYNTH_IRQHandler
-CRYOTIMER_IRQHandler
-RFSENSE_IRQHandler
-FPUEH_IRQHandler
-SMU_IRQHandler
-WTIMER0_IRQHandler
-WTIMER1_IRQHandler
-PCNT1_IRQHandler
-PCNT2_IRQHandler
-USART2_RX_IRQHandler
-USART2_TX_IRQHandler
-I2C1_IRQHandler
-USART3_RX_IRQHandler
-USART3_TX_IRQHandler
-VDAC0_IRQHandler
-CSEN_IRQHandler
-LESENSE_IRQHandler
-CRYPTO1_IRQHandler
-TRNG0_IRQHandler
-                B       .
+; Macro to define default exception/interrupt handlers.
+; Default handler are weak symbols with an endless loop.
+; They can be overwritten by real handlers.
+                MACRO
+                Set_Default_Handler  $Handler_Name
+$Handler_Name   PROC
+                EXPORT  $Handler_Name             [WEAK]
+                B        .
                 ENDP
+                MEND
+
+
+; Default exception/interrupt handler
+
+                Set_Default_Handler  NMI_Handler
+                Set_Default_Handler  MemManage_Handler
+                Set_Default_Handler  BusFault_Handler
+                Set_Default_Handler  UsageFault_Handler
+                Set_Default_Handler  SVC_Handler
+                Set_Default_Handler  DebugMon_Handler
+                Set_Default_Handler  PendSV_Handler
+                Set_Default_Handler  SysTick_Handler
+
+
+                Set_Default_Handler  EMU_IRQHandler
+                Set_Default_Handler  FRC_PRI_IRQHandler
+                Set_Default_Handler  WDOG0_IRQHandler
+                Set_Default_Handler  WDOG1_IRQHandler
+                Set_Default_Handler  FRC_IRQHandler
+                Set_Default_Handler  MODEM_IRQHandler
+                Set_Default_Handler  RAC_SEQ_IRQHandler
+                Set_Default_Handler  RAC_RSM_IRQHandler
+                Set_Default_Handler  BUFC_IRQHandler
+                Set_Default_Handler  LDMA_IRQHandler
+                Set_Default_Handler  GPIO_EVEN_IRQHandler
+                Set_Default_Handler  TIMER0_IRQHandler
+                Set_Default_Handler  USART0_RX_IRQHandler
+                Set_Default_Handler  USART0_TX_IRQHandler
+                Set_Default_Handler  ACMP0_IRQHandler
+                Set_Default_Handler  ADC0_IRQHandler
+                Set_Default_Handler  IDAC0_IRQHandler
+                Set_Default_Handler  I2C0_IRQHandler
+                Set_Default_Handler  GPIO_ODD_IRQHandler
+                Set_Default_Handler  TIMER1_IRQHandler
+                Set_Default_Handler  USART1_RX_IRQHandler
+                Set_Default_Handler  USART1_TX_IRQHandler
+                Set_Default_Handler  LEUART0_IRQHandler
+                Set_Default_Handler  PCNT0_IRQHandler
+                Set_Default_Handler  CMU_IRQHandler
+                Set_Default_Handler  MSC_IRQHandler
+                Set_Default_Handler  CRYPTO0_IRQHandler
+                Set_Default_Handler  LETIMER0_IRQHandler
+                Set_Default_Handler  AGC_IRQHandler
+                Set_Default_Handler  PROTIMER_IRQHandler
+                Set_Default_Handler  RTCC_IRQHandler
+                Set_Default_Handler  SYNTH_IRQHandler
+                Set_Default_Handler  CRYOTIMER_IRQHandler
+                Set_Default_Handler  RFSENSE_IRQHandler
+                Set_Default_Handler  FPUEH_IRQHandler
+                Set_Default_Handler  SMU_IRQHandler
+                Set_Default_Handler  WTIMER0_IRQHandler
+                Set_Default_Handler  WTIMER1_IRQHandler
+                Set_Default_Handler  PCNT1_IRQHandler
+                Set_Default_Handler  PCNT2_IRQHandler
+                Set_Default_Handler  USART2_RX_IRQHandler
+                Set_Default_Handler  USART2_TX_IRQHandler
+                Set_Default_Handler  I2C1_IRQHandler
+                Set_Default_Handler  USART3_RX_IRQHandler
+                Set_Default_Handler  USART3_TX_IRQHandler
+                Set_Default_Handler  VDAC0_IRQHandler
+                Set_Default_Handler  CSEN_IRQHandler
+                Set_Default_Handler  LESENSE_IRQHandler
+                Set_Default_Handler  CRYPTO1_IRQHandler
+                Set_Default_Handler  TRNG0_IRQHandler
 
                 ALIGN
 
-; User Initial Stack & Heap
 
-                IF      :DEF:__MICROLIB
+; User setup Stack & Heap
 
-                EXPORT  __initial_sp
-                EXPORT  __heap_base
-                EXPORT  __heap_limit
+                IF       :LNOT::DEF:__MICROLIB
+                IMPORT   __use_two_region_memory
+                ENDIF
 
-                ELSE
-
-                IMPORT  __use_two_region_memory
-                EXPORT  __user_initial_stackheap
-
-__user_initial_stackheap PROC
-                LDR     R0, =  Heap_Mem
-                LDR     R1, =(Stack_Mem + Stack_Size)
-                LDR     R2, = (Heap_Mem +  Heap_Size)
-                LDR     R3, = Stack_Mem
-                BX      LR
-                ENDP
-
-                ALIGN
-
+                EXPORT   __stack_limit
+                EXPORT   __initial_sp
+                IF       Heap_Size != 0                      ; Heap is provided
+                EXPORT   __heap_base
+                EXPORT   __heap_limit
                 ENDIF
 
                 END

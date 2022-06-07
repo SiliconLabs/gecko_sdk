@@ -1,5 +1,6 @@
 /**
  * @file
+ * @copyright 2021 Silicon Laboratories Inc.
  */
 #ifndef _ZW_CONFIG_RF_H_
 #define _ZW_CONFIG_RF_H_
@@ -13,10 +14,10 @@
 // <i> Default: 140
 #define APP_MAX_TX_POWER_LR         140
 
-// <q> Enable PTI
-// <i> Enable PTI
+// <q> Enable Radio Debug
+// <i> Enable Radio Debug
 // <i> Default: 0
-#define ENABLE_PTI                  0
+#define ENABLE_RADIO_DEBUG          0
 
 // <o> The maximum allowed Tx power in decibel-milliwatts for Z-Wave network [dBm] <-10..140:1>
 // <i> The maximum allowed Tx power in decibel-milliwatts for Z-Wave Long Range network.

@@ -33,12 +33,16 @@
 #include "app_assert.h"
 #include "sli_gatt_service_cte.h"
 #include "sli_gatt_service_cte_adv.h"
+#include "sl_gatt_service_cte_connectionless_config.h"
 
 // The advertising set handle allocated from Bluetooth stack.
 static uint8_t advertising_set_handle = 0xff;
 
 // Advertising init status.
 static bool advertising_initialized;
+
+// Lower limit of the periodic advertising interval. Value in units of 1.25 ms
+const adv_cte_interval_t ADV_CTE_INTERVAL_MIN = 0x06; // 7.5 ms
 
 /**************************************************************************//**
  * Initialize advertisement package according to CTE specifications.
@@ -49,13 +53,17 @@ void adv_cte_init(void)
 
   // Set default values.
   advertising_initialized = false;
-  adv_cte_min_len = ADV_CTE_MIN_LEN_DEFAULT;
-  adv_cte_min_tx_count = ADV_CTE_MIN_TX_COUNT_DEFAULT;
-  adv_cte_interval = ADV_CTE_INTERVAL_DEFAULT;
-  adv_cte_phy = ADV_CTE_PHY_DEFAULT;
+  adv_cte_min_len = SL_GATT_SERVICE_CTE_CONNECTIONLESS_MIN_LEN;
+  adv_cte_min_tx_count = SL_GATT_SERVICE_CTE_CONNECTIONLESS_MIN_TX_COUNT;
+  adv_cte_interval = SL_GATT_SERVICE_CTE_CONNECTIONLESS_ADV_INTERVAL;
+  adv_cte_phy = SL_GATT_SERVICE_CTE_CONNECTIONLESS_ADV_CTE_PHY;
 
   // Create an advertising set.
   sc = sl_bt_advertiser_create_set(&advertising_set_handle);
+  app_assert_status(sc);
+
+  sc = sl_bt_extended_advertiser_generate_data(advertising_set_handle,
+                                               sl_bt_advertiser_general_discoverable);
   app_assert_status(sc);
 
   // Set advertising interval to 100ms.
@@ -65,12 +73,6 @@ void adv_cte_init(void)
     160, // max. adv. interval (milliseconds * 1.6)
     0,   // adv. duration
     0);  // max. num. adv. events
-  app_assert_status(sc);
-
-  // Turn off legacy PDU flag.
-  sc = sl_bt_advertiser_clear_configuration(
-    advertising_set_handle,
-    ADV_CONFIG_USE_LEGACY_PDUS_BIT_MASK);
   app_assert_status(sc);
 
   // Start advertising with CTE.
@@ -89,7 +91,7 @@ sl_status_t adv_cte_start(void)
 
   // Stop advertising.
   if (advertising_initialized) {
-    sc = sl_bt_advertiser_stop_periodic_advertising(advertising_set_handle);
+    sc = sl_bt_periodic_advertiser_stop(advertising_set_handle);
 
     if (sc == SL_STATUS_OK) {
       sc = sl_bt_advertiser_stop(advertising_set_handle);
@@ -98,27 +100,24 @@ sl_status_t adv_cte_start(void)
 
   // Set PHY.
   if (sc == SL_STATUS_OK) {
-    sc = sl_bt_advertiser_set_phy(
-      advertising_set_handle,
-      sl_bt_gap_1m_phy,
-      ADV_CTE_PHY_CONVERT(adv_cte_phy));
+    sc = sl_bt_extended_advertiser_set_phy(advertising_set_handle,
+                                           sl_bt_gap_1m_phy,
+                                           ADV_CTE_PHY_CONVERT(adv_cte_phy));
   }
 
-  // Start general advertising and disable connections.
+  // Start advertising and disable connections.
   if (sc == SL_STATUS_OK) {
-    sc = sl_bt_advertiser_start(
-      advertising_set_handle,
-      sl_bt_advertiser_general_discoverable,
-      sl_bt_advertiser_non_connectable);
+    sc = sl_bt_extended_advertiser_start(advertising_set_handle,
+                                         sl_bt_advertiser_non_connectable,
+                                         SL_BT_EXTENDED_ADVERTISER_INCLUDE_TX_POWER);
   }
 
   // Start periodic advertisement with 100 ms interval, include tx power in PDU.
   if (sc == SL_STATUS_OK) {
-    sc = sl_bt_advertiser_start_periodic_advertising(
-      advertising_set_handle,
-      adv_cte_interval,
-      adv_cte_interval,
-      PERIODIC_ADV_CONFIG_INCLUDE_TX_POWER);
+    sc = sl_bt_periodic_advertiser_start(advertising_set_handle,
+                                         adv_cte_interval,
+                                         adv_cte_interval,
+                                         SL_BT_PERIODIC_ADVERTISER_INCLUDE_TX_POWER);
   }
 
   // Add CTE to periodic advertisements.

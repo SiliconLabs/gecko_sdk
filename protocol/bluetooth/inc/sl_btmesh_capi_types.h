@@ -216,9 +216,13 @@ typedef struct __mesh_element *mesh_element_t;
 /** Primary element index */
 #define MESH_PRIMARY_ELEMENT_INDEX 0
 
+/** Maximum useful Access message size including an opcode */
+#define MESH_MAX_ACCESS_MESSAGE_SIZE 380
+
 /** Mesh advertisement types */
 typedef enum {
   mesh_packet_undefined = 0x00, /** Undefined packet type */
+  mesh_packet_service_data = 0x016, /** Service data */
   mesh_packet_uri = 0x24, /**< URI advertisement */
   mesh_packet_provisioning = 0x29, /**< Provisioning data */
   mesh_packet_generic = 0x2a, /**< Mesh data */
@@ -239,15 +243,30 @@ typedef struct {
   uint8_t relay_interval_max; /**< Maximum relay delay */
 } mesh_net_config_t;
 
+/** SAR Transmitter Configuration */
+typedef struct mesh_sar_transmitter_config {
+  uint32_t segment_interval_step; /**< Segment Interval Step */
+  uint32_t unicast_retrans_count; /**< Unicast Retransmissions Count */
+  uint32_t unicast_retrans_wo_progress_count; /**< Unicast Retransmissions Count Without Progress */
+  uint32_t unicast_retrans_interval_step; /**< Unicast Retransmission Interval Step */
+  uint32_t unicast_retrans_interval_increment; /**< Unicast Retransmission Interval Increment */
+  uint32_t multicast_retrans_count; /**< Multicast Retransmissions Count */
+  uint32_t multicast_retrans_interval_step; /**< Multicast Retransmission Interval Step */
+} mesh_sar_transmitter_config_t;
+
+/** SAR Receiver Configuration */
+typedef struct mesh_sar_receiver_config {
+  uint32_t segments_threshold; /**< Segments Threshold */
+  uint32_t ack_delay_increment; /**< Acknowledgement Delay Increment */
+  uint32_t discard_timeout; /**< Discard Timeout */
+  uint32_t segment_interval_step; /**< Segment Interval Step */
+  uint32_t ack_retrans_count; /**< Acknowledgement Retransmissions Count */
+} mesh_sar_receiver_config_t;
+
 /** Segmentation and reassembly configuration structure */
 typedef struct {
-  uint32_t incomplete_timer_ms; /**< Incomplete timer */
-  uint32_t pending_ack_base_ms; /**< Acknowledgement timer base */
-  uint32_t pending_ack_mul_ms; /**< Acknowledgement timer multiplier */
-  uint32_t wait_for_ack_base_ms; /**< Waiting for acknowledgement timer base */
-  uint32_t wait_for_ack_mul_ms; /**< Waiting for acknowledgement timer multiplier */
-  uint8_t max_send_rounds; /**< Tx iterations */
-  uint8_t wait_between_segments_ms; /**< Inter-segment delay */
+  mesh_sar_transmitter_config_t transmitter; /**< SAR Transmitter Configuration */
+  mesh_sar_receiver_config_t receiver;/**< SAR Receiver Configuration */
 } mesh_trans_sar_config_t;
 
 /**
@@ -288,16 +307,25 @@ typedef struct {
   uint8_t addr[16]; /**< Address data */
 } mesh_full_virtual_addr_t;
 
+/** A special nil label UUID */
+extern const mesh_full_virtual_addr_t MESH_VA_NIL;
+
 /** Unassigned address */
-#define MESH_ADDR_UNASSIGNED 0x0000
+#define MESH_ADDR_UNASSIGNED            0x0000
+/** All IPT border routers address */
+#define MESH_ADDR_ALLIPTBORDERROUTERS   0xfff9
+/** All IPT nodes address */
+#define MESH_ADDR_ALLIPTNODES           0xfffa
+/** All nodes with directed forwarding address */
+#define MESH_ADDR_ALLDIRECEDTFORWARDING 0xfffb
 /** All-proxies address */
-#define MESH_ADDR_ALLPROXIES 0xfffc
+#define MESH_ADDR_ALLPROXIES            0xfffc
 /** All-friends address */
-#define MESH_ADDR_ALLFRIENDS 0xfffd
+#define MESH_ADDR_ALLFRIENDS            0xfffd
 /** All-relays address */
-#define MESH_ADDR_ALLRELAYS  0xfffe
+#define MESH_ADDR_ALLRELAYS             0xfffe
 /** All-nodes address (broadcast) */
-#define MESH_ADDR_ALLNODES   0xffff
+#define MESH_ADDR_ALLNODES              0xffff
 
 /** Mesh address types */
 typedef enum {
@@ -539,6 +567,10 @@ typedef struct mesh_crypto_ecdh_secret mesh_crypto_ecdh_secret_t;
 #define MESH_NODE_FLAG_DEBUG        1   /**< Debugging enabled */
 #define MESH_NODE_FLAG_PROVISIONER  2   /**< Provisioner role */
 #define MESH_NODE_FLAG_CFG_CLIENT   4   /**< Node with config client */
+
+#define MESH_MAX_ACCESS_PDU_LEN (384)   /**< Maximum access PDU including MIC */
+
+#define MESH_MAX_ACCESS_MESSAGE_LEN (380)   /**< Maximum access PDU excluding MIC */
 
 /**
  * Mesh node state
@@ -910,6 +942,12 @@ typedef enum {
     mesh_platform_callback_schedule() has expired. */
 typedef void (*mesh_scheduled_cb_fn)(uint32_t handle, void *ctx);
 
+/** Scheduled callback function. for non-cancellable events
+    A scheduled callback will be called by
+    the platform once a request made by the mesh stack, by calling
+    mesh_platform_callback_schedule_event() has expired. */
+typedef void (*mesh_scheduled_event_cb_fn)(uint32_t event, void *ctx);
+
 /** Stack diagnostic event types */
 typedef enum {
   mesh_stack_diag_event_config_server_beacon_set,
@@ -933,6 +971,9 @@ typedef enum {
   mesh_stack_diag_event_replay_protection_list_set_entry,
   mesh_stack_diag_event_replay_protection_list_clear_entry,
   mesh_stack_diag_event_replay_protection_list_full,
+
+  mesh_stack_diag_event_sar_config_server_transmitter_set,
+  mesh_stack_diag_event_sar_config_server_receiver_set,
 } mesh_stack_diag_event_type_t;
 
 /** Diagnostic event for configuration server change */
@@ -979,12 +1020,19 @@ typedef union {
   // Nothing for full
 } mesh_stack_diag_event_replay_protection_list_t;
 
+/** Diagnostic event for SAR configuration server change */
+typedef union {
+  mesh_sar_transmitter_config_t transmitter; /**< SAR Transmitter configuration value after set request */
+  mesh_sar_receiver_config_t receiver; /**< SAR Receiver configuration value after set request */
+} mesh_stack_diag_event_sar_config_server_t;
+
 /** Stack diagnostic event */
 typedef struct {
   mesh_stack_diag_event_type_t type; /**< Event type */
   union {
     mesh_stack_diag_event_config_server_t config_server; /**< Config server event */
     mesh_stack_diag_event_replay_protection_list_t replay_protection_list; /**< Replay protection list event */
+    mesh_stack_diag_event_sar_config_server_t sar_config_server; /**< SAR Config server event */
   };
 } mesh_stack_diag_event_t;
 
@@ -1017,7 +1065,7 @@ typedef sl_status_t (*mesh_app_send_fn)(mesh_crypto_key_type_t app_key_type,
                                         mesh_crypto_key_index_t net_key_index,
                                         mesh_addr_t src,
                                         mesh_addr_t dst,
-                                        mesh_full_virtual_addr_t *va,
+                                        const mesh_full_virtual_addr_t *va,
                                         mesh_mic_t szmict,
                                         mesh_model_t model,
                                         struct bgbuf_t *message,
@@ -1069,6 +1117,7 @@ typedef void (*provisioner_event_handler_cb)(mesh_prov_event_type_t event_type,
 typedef enum {
   mesh_gatt_adv_type_provisioning_service = 0,
   mesh_gatt_adv_type_proxy_service,
+  mesh_gatt_adv_rfu_1,
   mesh_gatt_adv_type_last
 } mesh_gatt_adv_type_t;
 

@@ -47,7 +47,7 @@
 /* OS Event Flag ID */
 #define PROPRIETARY_FLAG  ((OS_FLAGS)0x01)
 // Proprietary Application task
-#define PROPRIETARY_APP_TASK_PRIO         6u
+#define PROPRIETARY_APP_TASK_PRIO         6U
 // Proprietary Application task stack size
 #define PROPRIETARY_APP_TASK_STACK_SIZE   (1024 / sizeof(CPU_STK))
 // Redefining DEF_TRUE in order to be able to test the infinite loop
@@ -95,14 +95,14 @@ void app_task_init(void)
   OSTaskCreate(&proprietary_app_task_TCB,
                "Proprietary App Task",
                proprietary_app_task,
-               0u,
+               0U,
                PROPRIETARY_APP_TASK_PRIO,
-               &proprietary_app_task_stack[0u],
-               (PROPRIETARY_APP_TASK_STACK_SIZE / 10u),
+               &proprietary_app_task_stack[0U],
+               (PROPRIETARY_APP_TASK_STACK_SIZE / 10U),
                PROPRIETARY_APP_TASK_STACK_SIZE,
-               0u,
-               0u,
-               0u,
+               0U,
+               0U,
+               0U,
                (OS_OPT_TASK_STK_CHK | OS_OPT_TASK_STK_CLR),
                &err);
 

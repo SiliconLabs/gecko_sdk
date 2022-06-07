@@ -18,6 +18,10 @@
  *
  ******************************************************************************/
 
+#ifndef _GNU_SOURCE
+#define _GNU_SOURCE
+#endif
+
 #include PLATFORM_HEADER //compiler/micro specifics, types
 
 #include "stack/include/ember-types.h"

@@ -1,6 +1,6 @@
 #include "tensorflow/lite/kernels/internal/reference/fully_connected.h"
 
-#include "cmsis/CMSIS/NN/Include/arm_nnfunctions.h"
+#include "CMSIS/NN/Include/arm_nnfunctions.h"
 #include "tensorflow/lite/c/builtin_op_data.h"
 #include "tensorflow/lite/c/common.h"
 #include "tensorflow/lite/kernels/internal/common.h"
@@ -53,14 +53,20 @@ void* Init(TfLiteContext* context, const char* buffer, size_t length) {
 TfLiteStatus Prepare(TfLiteContext* context, TfLiteNode* node) {
   TFLITE_DCHECK(node->user_data != nullptr);
   TFLITE_DCHECK(node->builtin_data != nullptr);
-
   OpData* data = static_cast<OpData*>(node->user_data);
   TfLiteFullyConnectedParams* params =
       reinterpret_cast<TfLiteFullyConnectedParams*>(node->builtin_data);
-  const TfLiteTensor* input  = GetInput(context, node, kInputTensor);
-  const TfLiteTensor* weight = GetInput(context, node, kWeightsTensor);
-  const TfLiteTensor* bias   = GetInput(context, node, kBiasTensor);
-  TfLiteTensor*       output = GetOutput(context, node, kOutputTensor);
+
+  MicroContext* micro_context = GetMicroContext(context);
+  TfLiteTensor* input =
+      micro_context->AllocateTempInputTensor(node, kInputTensor);
+  TfLiteTensor* weight = 
+      micro_context->AllocateTempInputTensor(node, kWeightsTensor);
+  TfLiteTensor* bias =
+      micro_context->AllocateTempInputTensor(node, kBiasTensor);
+  TfLiteTensor* output = 
+      micro_context->AllocateTempOutputTensor(node, kOutputTensor);
+
   int32_t             output_min;
   int32_t             output_max;
   float16_t           *bias_data = nullptr;
@@ -126,6 +132,13 @@ TfLiteStatus Prepare(TfLiteContext* context, TfLiteNode* node) {
       data->output_shift = -exponent;
     }
   }
+
+  micro_context->DeallocateTempTfLiteTensor(input);
+  micro_context->DeallocateTempTfLiteTensor(weight);
+  if (bias != nullptr) {
+    micro_context->DeallocateTempTfLiteTensor(bias);
+  }
+  micro_context->DeallocateTempTfLiteTensor(output);
 
   return kTfLiteOk;
 }

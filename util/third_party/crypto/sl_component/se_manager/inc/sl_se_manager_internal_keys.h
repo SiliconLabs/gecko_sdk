@@ -128,4 +128,16 @@
     },                                                  \
   }
 
+/// Key descriptor for TrustZone root key
+#define SL_SE_TRUSTZONE_ROOT_KEY                      \
+  {                                                   \
+    .type = SL_SE_KEY_TYPE_AES_256,                   \
+    .flags = SL_SE_KEY_FLAG_IS_DEVICE_GENERATED,      \
+    .storage = {                                      \
+      .method = SL_SE_KEY_STORAGE_INTERNAL_IMMUTABLE, \
+      .location = {                                   \
+        .slot = SL_SE_KEY_SLOT_TRUSTZONE_ROOT_KEY,    \
+      },                                              \
+    },                                                \
+  }
 #endif // SL_SE_MANAGER_INTERNAL_KEYS

@@ -17,13 +17,19 @@
 #ifndef BTL_SPI_CONTROLLER_USART_DRIVER_CONFIG_H
 #define BTL_SPI_CONTROLLER_USART_DRIVER_CONFIG_H
 
+// <<< Use Configuration Wizard in Context Menu >>>
+
+// <h>SPI Controller USART Driver
+
 // <o SL_USART_EXTFLASH_FREQUENCY> Frequency
 // <i> Default: 2000000
 #define SL_USART_EXTFLASH_FREQUENCY           2000000
 
-// <<< sl:start pin_tool >>>
-// <usart signal=TX,RX,CLK,(CS)> SL_USART_EXTFLASH
-// $[USART_SL_USART_EXTFLASH]
+// </h>
+
+// <<< end of configuration section >>>
+
+// SL_USART_EXTFLASH_PERIPHERAL
 #define SL_USART_EXTFLASH_PERIPHERAL                   USART1
 #define SL_USART_EXTFLASH_PERIPHERAL_NO                1
 
@@ -46,20 +52,13 @@
 #define SL_USART_EXTFLASH_CS_PORT                      gpioPortC
 #define SL_USART_EXTFLASH_CS_PIN                       8
 #define SL_USART_EXTFLASH_CS_LOC                       0
-// [USART_SL_USART_EXTFLASH]$
 
-// <gpio> SL_EXTFLASH_WP
-// $[GPIO_SL_EXTFLASH_WP]
+// SL_EXTFLASH_WP
 #define SL_EXTFLASH_WP_PORT                     gpioPortF
 #define SL_EXTFLASH_WP_PIN                      6
-// [GPIO_SL_EXTFLASH_WP]$
 
-// <gpio> SL_EXTFLASH_HOLD
-// $[GPIO_SL_EXTFLASH_HOLD]
+// SL_EXTFLASH_HOLD
 #define SL_EXTFLASH_HOLD_PORT                   gpioPortA
 #define SL_EXTFLASH_HOLD_PIN                    5
-// [GPIO_SL_EXTFLASH_HOLD]$
-
-// <<< sl:end pin_tool >>>
 
 #endif // BTL_SPI_CONTROLLER_USART_DRIVER_CONFIG_H

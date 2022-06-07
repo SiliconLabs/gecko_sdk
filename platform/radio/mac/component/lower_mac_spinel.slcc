@@ -31,6 +31,7 @@ include:
       - path: backbone_router/bbr_manager.hpp
       - path: backbone_router/multicast_listeners_table.hpp
       - path: backbone_router/ndproxy_table.hpp
+      - path: border_router/infra_if.hpp
       - path: border_router/router_advertisement.hpp
       - path: border_router/routing_manager.hpp
       - path: coap/coap.hpp
@@ -52,6 +53,7 @@ include:
       - path: common/error.hpp
       - path: common/extension.hpp
       - path: common/heap.hpp
+      - path: common/heap_array.hpp
       - path: common/heap_data.hpp
       - path: common/heap_string.hpp
       - path: common/instance.hpp
@@ -59,6 +61,7 @@ include:
       - path: common/linked_list.hpp
       - path: common/locator.hpp
       - path: common/locator_getters.hpp
+      - path: common/log.hpp
       - path: common/logging.hpp
       - path: common/message.hpp
       - path: common/new.hpp
@@ -67,7 +70,6 @@ include:
       - path: common/numeric_limits.hpp
       - path: common/pool.hpp
       - path: common/random.hpp
-      - path: common/random_manager.hpp
       - path: common/serial_number.hpp
       - path: common/settings.hpp
       - path: common/settings_driver.hpp
@@ -105,10 +107,10 @@ include:
       - path: config/link_raw.h
       - path: config/logging.h
       - path: config/mac.h
+      - path: config/misc.h
       - path: config/mle.h
       - path: config/netdata_publisher.h
       - path: config/openthread-core-config-check.h
-      - path: config/openthread-core-default-config.h
       - path: config/parent_search.h
       - path: config/ping_sender.h
       - path: config/platform.h
@@ -149,11 +151,13 @@ include:
       - path: meshcop/dataset_updater.hpp
       - path: meshcop/dtls.hpp
       - path: meshcop/energy_scan_client.hpp
+      - path: meshcop/extended_panid.hpp
       - path: meshcop/joiner.hpp
       - path: meshcop/joiner_router.hpp
       - path: meshcop/meshcop.hpp
       - path: meshcop/meshcop_leader.hpp
       - path: meshcop/meshcop_tlvs.hpp
+      - path: meshcop/network_name.hpp
       - path: meshcop/panid_query_client.hpp
       - path: meshcop/timestamp.hpp
       - path: net/checksum.hpp
@@ -170,6 +174,7 @@ include:
       - path: net/ip6_address.hpp
       - path: net/ip6_filter.hpp
       - path: net/ip6_headers.hpp
+      - path: net/ip6_types.hpp
       - path: net/ip6_mpl.hpp
       - path: net/nd_agent.hpp
       - path: net/netif.hpp
@@ -294,6 +299,7 @@ include:
       - path: srp_server.h
       - path: tasklet.h
       - path: tcp.h
+      - path: tcp_ext.h
       - path: thread.h
       - path: thread_ftd.h
       - path: trel.h
@@ -356,10 +362,8 @@ include:
       - path: openthread-posix-config.h
       - path: cpc_interface.hpp
       - path: platform-posix.h
-      - path: sl_cpc.h
-    
 
-# used by util/third_party/openthread/src/core/common/random_manager
+# used by util/third_party/openthread/src/core/common/random.cpp
   - path: "util/third_party/crypto/mbedtls/include"
 
 # ensure this file gets packaged
@@ -373,16 +377,11 @@ source:
   - path: "util/third_party/openthread/src/core/crypto/mbedtls.cpp"
  
 # OT Logging files
-  - path: "util/third_party/openthread/src/core/common/logging.cpp"
+  - path: "util/third_party/openthread/src/core/common/log.cpp"
 
 template_contribution:
   - name: component_catalog
     value: lower_mac_spinel
-  - name: event_handler
-    value:
-      event: stack_process_action
-      include: "lower-mac-spinel.h"
-      handler: sli_lower_mac_tick_callback
 
 config_file:
   - path: "platform/radio/mac/lower-mac-spinel-config.h"

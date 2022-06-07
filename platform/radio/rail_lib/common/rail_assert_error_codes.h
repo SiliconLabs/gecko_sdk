@@ -121,6 +121,12 @@ RAIL_ENUM_GENERIC(RAIL_AssertErrorCodes_t, uint32_t)
   RAIL_ASSERT_FAILED_RTCC_SYNC_STOP = 69,
   RAIL_ASSERT_FAILED_MULTITIMER_CORRUPT = 70,
   RAIL_ASSERT_FAILED_TEMPCAL_ERROR = 71,
+  RAIL_ASSERT_INVALID_EFF_CONFIGURATION = 72,
+  RAIL_ASSERT_INVALID_RFFPLL_CONFIGURATION = 73,
+  RAIL_ASSERT_SECURE_ACCESS_FAULT = 74,
+  RAIL_ASSERT_FAILED_SYSRTC0_NOT_RUNNING = 75,
+  RAIL_ASSERT_RADIO_CONFIG_NOT_UP_TO_DATE = 76,
+  RAIL_ASSERT_FAILED_RSSI_THRESHOLD = 77,
 };
 
 #ifndef DOXYGEN_SHOULD_SKIP_THIS
@@ -197,6 +203,12 @@ RAIL_ENUM_GENERIC(RAIL_AssertErrorCodes_t, uint32_t)
 #define RAIL_ASSERT_FAILED_RTCC_SYNC_STOP                      ((RAIL_AssertErrorCodes_t) RAIL_ASSERT_FAILED_RTCC_SYNC_STOP)
 #define RAIL_ASSERT_FAILED_MULTITIMER_CORRUPT                  ((RAIL_AssertErrorCodes_t) RAIL_ASSERT_FAILED_MULTITIMER_CORRUPT)
 #define RAIL_ASSERT_FAILED_TEMPCAL_ERROR                       ((RAIL_AssertErrorCodes_t) RAIL_ASSERT_FAILED_TEMPCAL_ERROR)
+#define RAIL_ASSERT_INVALID_EFF_CONFIGURATION                  ((RAIL_AssertErrorCodes_t) RAIL_ASSERT_INVALID_EFF_CONFIGURATION)
+#define RAIL_ASSERT_INVALID_RFFPLL_CONFIGURATION               ((RAIL_AssertErrorCodes_t) RAIL_ASSERT_INVALID_RFFPLL_CONFIGURATION)
+#define RAIL_ASSERT_SECURE_ACCESS_FAULT                        ((RAIL_AssertErrorCodes_t) RAIL_ASSERT_SECURE_ACCESS_FAULT)
+#define RAIL_ASSERT_FAILED_SYSRTC0_NOT_RUNNING                 ((RAIL_AssertErrorCodes_t) RAIL_ASSERT_FAILED_SYSRTC0_NOT_RUNNING)
+#define RAIL_ASSERT_RADIO_CONFIG_NOT_UP_TO_DATE                ((RAIL_AssertErrorCodes_t) RAIL_ASSERT_RADIO_CONFIG_NOT_UP_TO_DATE)
+#define RAIL_ASSERT_FAILED_RSSI_THRESHOLD                      ((RAIL_AssertErrorCodes_t) RAIL_ASSERT_FAILED_RSSI_THRESHOLD)
 #endif//DOXYGEN_SHOULD_SKIP_THIS
 
 /// Use this define to create an array of error messages that map to the codes
@@ -296,6 +308,12 @@ RAIL_ENUM_GENERIC(RAIL_AssertErrorCodes_t, uint32_t)
     /*69*/ "Failed to disable RTCC synchronization",                                   \
     /*70*/ "Multitimer linked list corrupted",                                         \
     /*71*/ "Unable to configure radio for temperature calibration",                    \
+    /*72*/ "Invalid EFF configuration",                                                \
+    /*73*/ "Invalid RFFPLL configuration",                                             \
+    /*74*/ "Secure access fault",                                                      \
+    /*75*/ "SYSRTC0 not running",                                                      \
+    /*76*/ "Radio Configurator not updated",                                           \
+    /*77*/ "Failed to set the event for configurable RSSI threshold",                  \
 }
 
 /**

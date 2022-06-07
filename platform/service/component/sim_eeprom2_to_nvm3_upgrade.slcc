@@ -19,15 +19,15 @@ requires:
   - name: device_series_1
 root_path: ./
 include:
-  - path: platform/service/sim_eeprom2_to_nvm3_upgrade/inc
+  - path: platform/service/sim_eeprom/sim_eeprom2_to_nvm3_upgrade/inc
     file_list:
       - path: sl_sim_eeprom2_to_nvm3_upgrade.h
 library:
-  - path: platform/service/sim_eeprom2_to_nvm3_upgrade/lib/libsim_eeprom2_to_nvm3_upgrade_CM4_gcc.a
+  - path: platform/service/sim_eeprom/sim_eeprom2_to_nvm3_upgrade/lib/libsim_eeprom2_to_nvm3_upgrade_CM4_gcc.a
     condition:
       - toolchain_gcc
       - "cortexm4"
-  - path: platform/service/sim_eeprom2_to_nvm3_upgrade/lib/libsim_eeprom2_to_nvm3_upgrade_CM4_iar.a
+  - path: platform/service/sim_eeprom/sim_eeprom2_to_nvm3_upgrade/lib/libsim_eeprom2_to_nvm3_upgrade_CM4_iar.a
     condition:
       - toolchain_iar
       - "cortexm4"

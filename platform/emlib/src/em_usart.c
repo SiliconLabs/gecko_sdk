@@ -34,7 +34,7 @@
 
 #include "em_cmu.h"
 #include "em_bus.h"
-#include "em_assert.h"
+#include "sl_assert.h"
 #if defined(USART_CTRLX_CTSEN)
 #include "em_gpio.h"
 #endif
@@ -266,12 +266,12 @@ static void prsTriggerInput(USART_TypeDef *usart, USART_PRS_Channel_t ch)
   if (usart == USART0) {
     PRS->CONSUMER_USART0_TRIGGER = ch;
   }
-#if USART_COUNT > 1
+#if (USART_COUNT > 1)
   else if (usart == USART1) {
     PRS->CONSUMER_USART1_TRIGGER = ch;
   }
 #endif
-#if USART_COUNT > 2
+#if (USART_COUNT > 2)
   else if (usart == USART2) {
     PRS->CONSUMER_USART2_TRIGGER = ch;
   }
@@ -629,6 +629,12 @@ uint32_t USART_BaudrateGet(USART_TypeDef *usart)
  *   mode, but in those cases it must be directly adjusted, possibly assisted
  *   by USART_BaudrateCalc():
  *
+ * @warning
+ *  The consequence of the aforementioned suppression of the fractional part of
+ *  the clock divider is that some frequencies won't be achievable. The divider
+ *  will only be able to be an integer value so the reference clock will only be
+ *  dividable by N (where N is a positive integer).
+ *
  * @param[in] usart
  *   A pointer to the USART peripheral register block. (Cannot be used on UART
  *   modules.)
@@ -670,6 +676,14 @@ void USART_BaudrateSyncSet(USART_TypeDef *usart, uint32_t refFreq, uint32_t baud
 #endif
   }
 
+  /*
+   * The clock divider computation is done by using unsigned integer.
+   * The goal is to truncate the fractional part of the resulting
+   * clock divider value.
+   * Note: The divider field of the USART->CLKDIV register is of the following form:
+   * xxxxxxxxxxxxxxx.yyyyy where x is the 15 bits integral part of the divider
+   * and y is the 5 bits fractional part.
+   */
   clkdiv = (refFreq - 1) / (2 * baudrate);
   clkdiv = clkdiv << 8;
 

@@ -3,7 +3,7 @@
  * @brief Location calculation engine.
  *******************************************************************************
  * # License
- * <b>Copyright 2021 Silicon Laboratories Inc. www.silabs.com</b>
+ * <b>Copyright 2022 Silicon Laboratories Inc. www.silabs.com</b>
  *******************************************************************************
  *
  * SPDX-License-Identifier: Zlib
@@ -57,6 +57,7 @@ enum axis_list{
 typedef struct {
   aoa_id_t id;
   uint32_t loc_id;                          // assigned by RTL lib
+  bool functional;
   struct sl_rtl_loc_locator_item item;
 } aoa_locator_t;
 
@@ -91,7 +92,7 @@ extern aoa_loc_config_t aoa_loc_config;
 // Public functions.
 
 /**************************************************************************//**
- * Initializes the locator engine.
+ * Initialize the locator engine.
  *
  * @retval SL_STATUS_FAIL - RTL lib initialization error.
  * @retval SL_STATUS_OK - Initialization ok.
@@ -99,7 +100,7 @@ extern aoa_loc_config_t aoa_loc_config;
 sl_status_t aoa_loc_init(void);
 
 /**************************************************************************//**
- * Finalizes the configuration.
+ * Finalize the configuration.
  *
  * @retval SL_STATUS_ALLOCATION_FAILED - Memory allocation error.
  * @retval SL_STATUS_FAIL - RTL lib error.
@@ -108,7 +109,7 @@ sl_status_t aoa_loc_init(void);
 sl_status_t aoa_loc_finalize_config(void);
 
 /**************************************************************************//**
- * Adds a new locator to the database.
+ * Add a new locator to the database.
  *
  * @param[in] locator_id ID of the locator.
  * @param[in] item Contains the locator coordinates and orientations.
@@ -122,7 +123,7 @@ sl_status_t aoa_loc_add_locator(aoa_id_t locator_id,
                                 aoa_locator_t **locator);
 
 /**************************************************************************//**
- * Gets a locator from the database.
+ * Get a locator from the database.
  *
  * @param[in] locator_id The desired locator id.
  * @param[in] locator_idx Locator entry index in the list.
@@ -136,7 +137,7 @@ sl_status_t aoa_loc_get_locator_by_id(aoa_id_t locator_id,
                                       aoa_locator_t **locator);
 
 /**************************************************************************//**
- * Gets a locator from the database by index.
+ * Get a locator from the database by index.
  *
  * @param[in] locator_idx Locator entry position in the list.
  * @param[in] locator Pointer to the entry.
@@ -148,14 +149,14 @@ sl_status_t aoa_loc_get_locator_by_index(uint32_t locator_idx,
                                          aoa_locator_t **locator);
 
 /**************************************************************************//**
- * Returns the number of locators on the list.
+ * Return the number of locators on the list.
  *
  * @retval Number of locators
  *****************************************************************************/
 uint32_t aoa_loc_get_number_of_locators(void);
 
 /**************************************************************************//**
- * Adds a new asset tag to the database.
+ * Add a new asset tag to the database.
  *
  * @param[in] tag_id Tag id.
  * @param[in] tag Pointer to the created entry.
@@ -168,7 +169,7 @@ sl_status_t aoa_loc_add_asset_tag(aoa_id_t tag_id,
                                   aoa_asset_tag_t **tag);
 
 /**************************************************************************//**
- * Gets a tag from the database by its id.
+ * Get a tag from the database by its id.
  *
  * @param[in] tag_id The desired tag id.
  * @param[in] tag Pointer to the entry.
@@ -180,7 +181,7 @@ sl_status_t aoa_loc_get_tag_by_id(aoa_id_t tag_id,
                                   aoa_asset_tag_t **tag);
 
 /**************************************************************************//**
- * Gets a tag from the database by its index.
+ * Get a tag from the database by its index.
  *
  * @param[in] index The desired tag index.
  * @param[in] tag Pointer to the entry.
@@ -192,7 +193,7 @@ sl_status_t aoa_loc_get_tag_by_index(uint32_t index,
                                      aoa_asset_tag_t **tag);
 
 /**************************************************************************//**
- * Calculates the asset tag position and notify the app.
+ * Calculate the asset tag position and notify the app.
  *
  * @param[in] tag_id Tag for calculate the location.
  * @param[in] angle_count Number of angles.
@@ -208,9 +209,31 @@ sl_status_t aoa_loc_calc_position(aoa_id_t tag_id,
                                   aoa_id_t *locator_list);
 
 /**************************************************************************//**
- * Destroys the module database.
+ * Destroy the module database.
  *****************************************************************************/
 void aoa_loc_destroy(void);
+
+/**************************************************************************//**
+ * Destroy the tags database
+ *****************************************************************************/
+void aoa_loc_destroy_tags(void);
+
+/**************************************************************************//**
+ * Remove a locator from the list.
+ *
+ * @retval SL_STATUS_NOT_FOUND - Locator is not on the list.
+ * @retval SL_STATUS_EMPTY - Locator list is empty.
+ * @retval SL_STATUS_OK - Locator removed.
+ *****************************************************************************/
+sl_status_t aoa_loc_remove_locator(aoa_id_t locator_id);
+
+/**************************************************************************//**
+ * Reinitialize the estimator.
+ *
+ * @retval SL_STATUS_FAIL - Reinitialization failed.
+ * @retval SL_STATUS_OK - Reinitialization was succesful.
+ *****************************************************************************/
+sl_status_t aoa_loc_reinit(void);
 
 /**************************************************************************//**
  * Position ready callback.
@@ -232,7 +255,7 @@ void aoa_loc_on_correction_ready(aoa_asset_tag_t *tag,
                                  int32_t sequence,
                                  aoa_id_t locator_id,
                                  uint32_t loc_idx,
-                                 aoa_correction_t *correction);
+                                 aoa_angle_t *correction);
 
 /**************************************************************************//**
  * Angle init callback. Used when angle calculation is needed from IQ report.

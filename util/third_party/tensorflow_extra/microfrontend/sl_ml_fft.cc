@@ -29,9 +29,9 @@
  ******************************************************************************/
 #include "microfrontend/sl_ml_fft.h"
 #include "sl_ml_audio_feature_generation_config.h"
-#include "cmsis/CMSIS/DSP/Include/arm_const_structs.h"
-#include "cmsis/CMSIS/DSP/Include/arm_common_tables.h"
-#include "cmsis/CMSIS/DSP/Include/dsp/transform_functions.h"
+#include "arm_const_structs.h"
+#include "arm_common_tables.h"
+#include "dsp/transform_functions.h"
 
 // Helper Functions
 #define SL_CONCAT(A, B) A ## B

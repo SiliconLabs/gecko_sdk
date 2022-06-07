@@ -106,7 +106,7 @@ SL_WEAK int32_t _external_send(int32_t sockfd, const void *buf, uint32_t len, in
 }
 
 SL_WEAK int32_t _external_sendto(int32_t sockfd, const void *buf, uint32_t len,
-                                               int32_t flags, const struct sockaddr *dest_addr, socklen_t addrlen)
+                                 int32_t flags, const struct sockaddr *dest_addr, socklen_t addrlen)
 {
   (void) sockfd;
   (void) buf;
@@ -129,7 +129,7 @@ SL_WEAK int32_t _external_recv(int32_t sockfd, const void *buf, uint32_t len, in
 }
 
 SL_WEAK int32_t _external_recvfrom(int32_t sockfd, void *buf, uint32_t len, int32_t flags,
-                                                 struct sockaddr *src_addr, socklen_t *addrlen)
+                                   struct sockaddr *src_addr, socklen_t *addrlen)
 {
   (void) sockfd;
   (void) buf;
@@ -142,7 +142,7 @@ SL_WEAK int32_t _external_recvfrom(int32_t sockfd, void *buf, uint32_t len, int3
 }
 
 SL_WEAK int32_t _external_getsockopt(int32_t sockfd, int32_t level, int32_t optname,
-                                                   void *optval, socklen_t *optlen)
+                                     void *optval, socklen_t *optlen)
 {
   (void) sockfd;
   (void) level;
@@ -153,7 +153,7 @@ SL_WEAK int32_t _external_getsockopt(int32_t sockfd, int32_t level, int32_t optn
   return RETVAL_ERROR;
 }
 SL_WEAK int32_t _external_setsockopt(int32_t sockfd, int32_t level, int32_t optname,
-                                                   const void *optval, socklen_t optlen)
+                                     const void *optval, socklen_t optlen)
 {
   (void) sockfd;
   (void) level;

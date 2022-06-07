@@ -22,8 +22,9 @@ class Target_Sim_Sol(ITarget):
         #except for PHY_Internal_Test_Max_Sampling
         if model.phy.name != 'PHY_Internal_Test_Max_Sampling' and model.phy.name != 'PHY_Internal_Freq_Plan_Test' and \
                 model.phy.name != 'PHY_Internal_Freq_Plan_Test_Max_Interp' and model.phy.name != 'PHY_Internal_Freq_Plan_Test_OFDM':
-            model.vars.RFFPLL0_RFFPLLCTRL1_DIVX.value_forced = 5
-            model.vars.RFFPLL0_RFFPLLCTRL1_DIVN.value_forced = 80
+            model.vars.fpll_divx.value_forced = 5
+            model.vars.fpll_divy.value_forced = 16
+            model.vars.fpll_divn.value_forced = 80
 
         #Configure softmodem regs as don't care
         # self._softmodem_do_not_care(model)

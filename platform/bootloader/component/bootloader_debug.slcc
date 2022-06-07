@@ -8,12 +8,16 @@ quality: production
 source:
   - path: platform/bootloader/debug/btl_debug.c
   - path: platform/bootloader/debug/btl_debug_swo.c
+  - path: platform/bootloader/debug/btl_debug_veneers.c
+    condition: [bootloader_core_secure]
 include:
   - path: platform/bootloader/debug
     file_list:
     - path: btl_debug.h
 provides:
   - name: bootloader_debug
+  - name: bootloader_nonsecure_incompatible
+    condition: [bootloader_core_nonsecure]
 config_file:
   - path: platform/bootloader/debug/config/s1/btl_debug_cfg.h
     condition: [device_series_1]

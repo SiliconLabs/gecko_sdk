@@ -5,6 +5,13 @@ label: Platform - SE Manager Block Cipher
 description: >
   This example project demonstrates the block cipher API of SE Manager.
 category: Example|Platform
+filter:
+  - name: "Device Type"
+    value: ["SoC"]
+  - name: "MCU"
+    value: ["32-bit MCU"]
+  - name: "Project Difficulty"
+    value: ["Advanced"]
 source:
   - path: main.c
   - path: app_init.c
@@ -18,10 +25,10 @@ include:
     - path: app_se_manager_macro.h
     - path: app_se_manager_block_cipher.h
 readme:
-  - path: readme.html
+  - path: readme.md
 ui_hints:
   highlight:
-    - path: readme.html
+    - path: readme.md
       focus: true
 component:
   - id: sl_string

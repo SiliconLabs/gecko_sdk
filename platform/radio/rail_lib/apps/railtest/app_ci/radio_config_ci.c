@@ -121,6 +121,72 @@ void getTransitionTime(sl_cli_command_arg_t *args)
                 RAIL_GetTransitionTime());
 }
 
+void getChannelConfigEntry(sl_cli_command_arg_t *args)
+{
+#if SL_RAIL_UTIL_INIT_RADIO_CONFIG_SUPPORT_INST0_ENABLE
+  uint8_t channelConfigIndex = sl_cli_get_argument_uint8(args, 0);
+  uint8_t channelConfigEntryIndex = sl_cli_get_argument_uint8(args, 1);
+
+  // Check if channelConfigs is empty
+  if (channelConfigs[0] == NULL) {
+    responsePrintError(sl_cli_get_command_string(args, 0), 0x11,
+                       "Empty channelConfigs");
+    return;
+  }
+
+  // Get number of channelConfig
+  uint8_t maxChannelConfigIndex;
+  for (maxChannelConfigIndex = 1; maxChannelConfigIndex < 0xFFU; maxChannelConfigIndex++) {
+    if (channelConfigs[maxChannelConfigIndex] == NULL) {
+      maxChannelConfigIndex--;
+      break;
+    }
+  }
+
+  // Get number of channelConfigEntry if valid channelConfigIndex
+  if (channelConfigIndex > maxChannelConfigIndex) {
+    responsePrintError(sl_cli_get_command_string(args, 0), 0x11,
+                       "Invalid channelConfigIndex '%u', maxChannelConfigIndex:%u",
+                       channelConfigIndex, maxChannelConfigIndex);
+    return;
+  }
+  uint8_t maxChannelConfigEntryIndex = channelConfigs[channelConfigIndex]->length - 1;
+
+  // Get parameters if valid channelConfigIndex & channelConfigEntryIndex
+  if (channelConfigEntryIndex > maxChannelConfigEntryIndex) {
+    responsePrintError(sl_cli_get_command_string(args, 0), 0x11,
+                       "Invalid channelConfigEntryIndex '%u', maxChannelConfigEntryIndex:%u",
+                       channelConfigEntryIndex, maxChannelConfigEntryIndex);
+    return;
+  }
+  const RAIL_ChannelConfigEntry_t* entry = &(channelConfigs[channelConfigIndex]->configs[channelConfigEntryIndex]);
+#ifdef RADIO_CONFIG_ENABLE_STACK_INFO
+  const uint8_t *stackInfo = entry->stackInfo;
+  if (stackInfo == NULL) {
+    responsePrint(sl_cli_get_command_string(args, 0),
+                  "maxChannelConfigIndex:%d,maxChannelConfigEntryIndex:%d,baseFrequency:%d,channelSpacing:%d,"
+                  "physicalChannelOffset:%d,channelNumberStart:%d,channelNumberEnd:%d,maxPower:%d,protocolId:%s,phyModeId:%s",
+                  maxChannelConfigIndex, maxChannelConfigEntryIndex, entry->baseFrequency, entry->channelSpacing,
+                  entry->physicalChannelOffset, entry->channelNumberStart, entry->channelNumberEnd, entry->maxPower, "N/A", "N/A");
+  } else {
+    responsePrint(sl_cli_get_command_string(args, 0),
+                  "maxChannelConfigIndex:%d,maxChannelConfigEntryIndex:%d,baseFrequency:%d,channelSpacing:%d,"
+                  "physicalChannelOffset:%d,channelNumberStart:%d,channelNumberEnd:%d,maxPower:%d,protocolId:%d,phyModeId:%d",
+                  maxChannelConfigIndex, maxChannelConfigEntryIndex, entry->baseFrequency, entry->channelSpacing,
+                  entry->physicalChannelOffset, entry->channelNumberStart, entry->channelNumberEnd, entry->maxPower, stackInfo[0], stackInfo[1]);
+  }
+#else // RADIO_CONFIG_ENABLE_STACK_INFO
+  responsePrint(sl_cli_get_command_string(args, 0),
+                "maxChannelConfigIndex:%d,maxChannelConfigEntryIndex:%d,baseFrequency:%d,channelSpacing:%d,"
+                "physicalChannelOffset:%d,channelNumberStart:%d,channelNumberEnd:%d,maxPower:%d",
+                maxChannelConfigIndex, maxChannelConfigEntryIndex, entry->baseFrequency, entry->channelSpacing,
+                entry->physicalChannelOffset, entry->channelNumberStart, entry->channelNumberEnd, entry->maxPower);
+#endif // RADIO_CONFIG_ENABLE_STACK_INFO
+#else // SL_RAIL_UTIL_INIT_RADIO_CONFIG_SUPPORT_INST0_ENABLE
+  responsePrintError(sl_cli_get_command_string(args, 0), 0x22, "External radio config support not enabled");
+#endif // SL_RAIL_UTIL_INIT_RADIO_CONFIG_SUPPORT_INST0_ENABLE
+}
+
 /******************************************************************************
  * Callbacks
  *****************************************************************************/

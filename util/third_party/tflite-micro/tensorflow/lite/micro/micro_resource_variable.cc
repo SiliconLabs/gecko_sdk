@@ -96,6 +96,9 @@ TfLiteStatus MicroResourceVariables::Allocate(int id, TfLiteContext* context,
       MicroPrintf("Failed to allocate resource buffer.");
       return kTfLiteError;
     }
+    // Zero out resource buffers by deafult. Buffers can be initialized to
+    // nonzero values using ASSIGN_VARIABLE.
+    memset(variable.resource_buffer, 0, variable.bytes);
   }
 
   return kTfLiteOk;
@@ -121,10 +124,20 @@ TfLiteStatus MicroResourceVariables::Assign(int id,
   return kTfLiteOk;
 }
 
+TfLiteStatus MicroResourceVariables::ResetAll() {
+  for (int i = 0; i < num_resource_variables_; i++) {
+    MicroResourceVariable variable = resource_variables_[i];
+    memset(variable.resource_buffer, 0, variable.bytes);
+  }
+  return kTfLiteOk;
+}
+
 int MicroResourceVariables::FindId(const char* container,
                                    const char* shared_name) {
   for (int i = 0; i < num_resource_variables_; i++) {
-    if (!strcmp(container, resource_variables_[i].container) &&
+    // Some TFLite flatbuffers contain null container names to save space.
+    if ((container == nullptr ||
+         !strcmp(container, resource_variables_[i].container)) &&
         !strcmp(shared_name, resource_variables_[i].shared_name)) {
       return i;
     }

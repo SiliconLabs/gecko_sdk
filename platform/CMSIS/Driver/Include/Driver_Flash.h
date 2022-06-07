@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2013-2017 ARM Limited. All rights reserved.
+ * Copyright (c) 2013-2020 ARM Limited. All rights reserved.
  *
  * SPDX-License-Identifier: Apache-2.0
  *
@@ -15,13 +15,17 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  *
- * $Date:        2. Feb 2017
- * $Revision:    V2.1
+ * $Date:        24. January 2020
+ * $Revision:    V2.3
  *
  * Project:      Flash Driver definitions
  */
 
 /* History:
+ *  Version 2.3
+ *    Removed volatile from ARM_FLASH_STATUS
+ *  Version 2.2
+ *    Padding bytes added to ARM_FLASH_INFO
  *  Version 2.1
  *    ARM_FLASH_STATUS made volatile
  *  Version 2.0
@@ -47,7 +51,7 @@ extern "C"
 
 #include "Driver_Common.h"
 
-#define ARM_FLASH_API_VERSION ARM_DRIVER_VERSION_MAJOR_MINOR(2,1)  /* API version */
+#define ARM_FLASH_API_VERSION ARM_DRIVER_VERSION_MAJOR_MINOR(2,3)  /* API version */
 
 
 #define _ARM_Driver_Flash_(n)      Driver_Flash##n
@@ -74,13 +78,14 @@ typedef struct _ARM_FLASH_INFO {
   uint32_t          page_size;          ///< Optimal programming page size in bytes
   uint32_t          program_unit;       ///< Smallest programmable unit in bytes
   uint8_t           erased_value;       ///< Contents of erased memory (usually 0xFF)
+  uint8_t           reserved[3];        ///< Reserved (must be zero)
 } const ARM_FLASH_INFO;
 
 
 /**
 \brief Flash Status
 */
-typedef volatile struct _ARM_FLASH_STATUS {
+typedef struct _ARM_FLASH_STATUS {
   uint32_t busy     : 1;                ///< Flash busy flag
   uint32_t error    : 1;                ///< Read/Program/Erase error flag (cleared on start of next operation)
   uint32_t reserved : 30;

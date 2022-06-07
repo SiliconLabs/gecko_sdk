@@ -172,30 +172,30 @@ typedef void (*sl_wisun_ping_req_resp_done_hnd_t)(sl_wisun_ping_info_t *req, sl_
 // -----------------------------------------------------------------------------
 
 /**************************************************************************//**
- * @brief Ping service module initialization
- * @details This function initializes the service thread, mutex
- *          and message queues
+ * @brief Initialize the ping service module.
+ * @details This function initializes the service thread, mutex,
+ *          and message queues.
  *****************************************************************************/
 void sl_wisun_ping_init(void);
 
 /**************************************************************************//**
- * @brief Ping request
+ * @brief Send a ping request.
  * @details The function sends a single ICMPv6 request.
  * @param[in] ping_request Ping Request Information
  *****************************************************************************/
 void sl_wisun_ping_request(const sl_wisun_ping_info_t * const ping_request);
 
 /**************************************************************************//**
- * @brief Ping response
+ * @brief Retrieve a ping response.
  * @details The function retrieves a ping response information.
  * @param[out] ping_response Ping Response Information
  *****************************************************************************/
 void sl_wisun_ping_response(sl_wisun_ping_info_t * const ping_response);
 
 /**************************************************************************//**
- * @brief High level ping API
- * @details The function provides an interface for sending and receiving
- *          periodically ping ICMPv6 packets, and collecting statistic data
+ * @brief Provide a high level ping API.
+ * @details The function provides an interface for periodically sending and
+ *          receiving ping ICMPv6 packets, and collecting statistic data.
  * @param[in] remote_addr Remote destination address
  * @param[in] packet_count Count of packets
  * @param[in] packet_length ICMPv6 packet length including header
@@ -211,9 +211,9 @@ bool sl_wisun_ping(const wisun_addr_t *const remote_addr,
                    sl_wisun_ping_req_resp_done_hnd_t req_resp_sent_hnd);
 
 /**************************************************************************//**
- * @brief Stop the current Ping process
+ * @brief Stop the current ping process.
  * @details Reset request and response queues and send a special
- *          ping request with interrupt ping status
+ *          ping request with interrupt ping status.
  *****************************************************************************/
 void sl_wisun_ping_stop(void);
 

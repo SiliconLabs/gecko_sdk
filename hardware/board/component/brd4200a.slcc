@@ -15,6 +15,9 @@
   - name: hardware_board_rb
   - name: hardware_board_from_stk
   - name: hardware_board_from_slwrb4200a
+  - name: hardware_board_has_si70xx
+  - name: hardware_board_has_tempsensor
+  - name: hardware_board_has_vcom
   - name: hardware_board_has_rfswitch
   - name: hardware_board_supports_rf_band_868
   - name: hardware_board_supports_rf_band_914
@@ -40,6 +43,7 @@
     - led2
     - led3
     - led4
+  - id: skrhaae010
   - id: simple_button
     instance:
     - btn0
@@ -63,4 +67,5 @@
   - hardware:has:sensor:si7021
   - hardware:has:display:ls013b7dh03
   - hardware:has:led:5
+  - hardware:has:joystick:skrhaae010
   - hardware:has:button:2

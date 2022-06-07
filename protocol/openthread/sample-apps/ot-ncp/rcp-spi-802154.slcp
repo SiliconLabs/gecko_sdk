@@ -1,10 +1,18 @@
 project_name: rcp-spi-802154
-label: rcp-spi-802154
+label: Multiprotocol (OpenThread+Zigbee) - RCP (SPI)
 package: OpenThread
 description: >
-  Multipan 802.15.4 RCP (Radio Co-Processor) application.
-  Access to 802.15.4 is provided using SPINEL carried over the CPC
-  (Co-Processor Communication) protocol using a SPI connection.
+  This multiprotocol radio co-processor (RCP) application supports running
+  OpenThread and Zigbee stacks simultaneously on a host processor.
+  It uses concurrent multiprotocol (CMP) / multi-PAN functionality to run the
+  802.15.4 networks simultaneously on the same channel.
+  The host stacks and the RCP communicate using the
+  Co-Processor Communication protocol (CPC), which acts as a protocol multiplexer
+  and serial transport layer. The host applications connect to the CPC daemon,
+  which in turn connects to the EFR via a SPI link.
+  Refer to *AN1333: Running Zigbee, OpenThread, and Bluetooth Concurrently on a
+  Linux Host with a Multiprotocol Co-processor* for more information on running
+  the multiprotocol RCP with different host applications.
 category: OpenThread Examples
 quality: production
 
@@ -12,7 +20,7 @@ component:
   - id: brd4001a
   - id: ot_stack_rcp
   - id: ot_ncp_cpc
-  - id: cpc_secondary_driver_spi
+  - id: cpc_secondary_driver_spi_usart
     instance:
       - exp
   - id: rail_util_pti
@@ -28,6 +36,8 @@ source:
   - path: app.c
 
 configuration:
+  - name: SL_STACK_SIZE
+    value: 2752
   - name: OPENTHREAD_CONFIG_HEAP_EXTERNAL_ENABLE
     value: 0
   - name: OPENTHREAD_CONFIG_BORDER_AGENT_ENABLE
@@ -65,3 +75,19 @@ configuration:
 
 tag:
   - prebuilt_demo
+
+readme:
+  - path: ./README-MP-RCP.md
+
+filter:
+  - name: "Wireless Technology"
+    value: ["Thread"]
+  - name: "Device Type"
+    value: ["RCP"]
+  - name: "Project Difficulty"
+    value: ["Advanced"]
+
+ui_hints:
+  highlight:
+    - path: ./README-MP-RCP.md
+      focus: true

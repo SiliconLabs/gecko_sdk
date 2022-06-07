@@ -13,6 +13,7 @@ class ITarget(object):
     _cfg_location = "" #Location of the target CFGs under both calculated_output and config_output (if stored)
     _tag = "" #This tag can be used by individual PHYs to indicate target compatibility (e.g. '-FPGA' indicates will not run on FPGA)
     IC_str = "IC" #Constant that we can use to refer to "IC" across the calculator
+    SIM_str = "Sim" #Constant that we can use to refer to "Sim" across the calculator
 
     """
     Returns target readable and searchable name

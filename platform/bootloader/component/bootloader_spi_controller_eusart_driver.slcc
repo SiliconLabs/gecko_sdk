@@ -16,6 +16,8 @@ include:
 provides:
   - name: bootloader_spi_controller_eusart_driver
   - name: bootloader_spi_controller_transport
+  - name: bootloader_nonsecure_incompatible
+    condition: [bootloader_core_nonsecure]
 requires:
   - name: bootloader_delay_driver
 config_file:

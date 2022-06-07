@@ -6,6 +6,13 @@ description: >
   This example project demonstrates a wide range of features of the EFM32GG11
   MCU and the SLSTK3701A Starter Kit.
 category: Example|MCU Example
+filter:
+  - name: "Device Type"
+    value: ["SoC"]
+  - name: "MCU"
+    value: ["32-bit MCU"]
+  - name: "Project Difficulty"
+    value: ["Advanced"]
 component:
   - id: sl_system
   - id: device_init
@@ -52,8 +59,10 @@ include:
     - path: app_sensor.h
     - path: displaybackend.h
     - path: siliconlabs_logo.h
-other_file:
-    - path: "readme.txt"
+readme:
+  - path: readme.md
+ui_hints:
+  highlight: readme.md
 define:
   - name: "DEBUG_EFM"
 configuration:

@@ -340,56 +340,6 @@ Ecode_t sl_token_get_data(uint32_t token,
 }
 
 /***************************************************************************//**
- * Read the data stored in or return a pointer to the specified data or
- * manufacturing token.
- ******************************************************************************/
-Ecode_t sl_token_get_pointer_or_data(uint32_t token,
-                                     uint8_t index,
-                                     void *pointer,
-                                     uint32_t length)
-{
-  token = remapTokenToTokenNvm3KeysIndex(token);
-
-  if (token < TOKEN_COUNT) {
-    // The token is within the SimEEPROM/NVM3's range, route to the SimEEPROM/NVM3
-    if (tokensActive) {
-      // NVM3 doesn't support pointers to data in the NVM storage so we instead copy the data
-      // to the location provided through the pointer.
-      sl_token_get_data(token, index, (void **) pointer, length);
-    } else {
-      TOKENDBG(printf("getIdxToken supressed.\r\n"); )
-    }
-  } else if (token >= 256U) {
-    #ifdef EMBER_TEST
-    assert(false);
-    #else //EMBER_TEST
-    uint32_t *ptrOut = (uint32_t *)pointer;
-    uint32_t realAddress = 0;
-
-    //0x7F is a non-indexed token.  Remap to 0 for the address calculation
-    index = (index == 0x7F) ? 0 : index;
-
-    if ((token & 0xF000) == (USERDATA_TOKENS & 0xF000)) {
-      realAddress = ((USERDATA_BASE | (token & 0x0FFF)) + (length * index));
-    } else if ((token & 0xF000) == (LOCKBITSDATA_TOKENS & 0xF000)) {
-      realAddress = ((LOCKBITS_BASE | (token & 0x0FFF)) + (length * index));
-    } else {
-      //This function must only ever be called from token code that passes
-      //a proper "token" parameter.  A valid 16bit token must pass the
-      //above check to find the 32bit realAddress.
-      assert(0);
-    }
-
-    *ptrOut = realAddress;
-    #endif //EMBER_TEST
-  } else {
-    assert(false);
-  }
-
-  return ECODE_NVM3_OK;
-}
-
-/***************************************************************************//**
  * Writes the data to the specified token.
  ******************************************************************************/
 Ecode_t sl_token_set_data(uint32_t token,
@@ -546,54 +496,6 @@ Ecode_t sl_token_get_data(uint32_t token,
     assert(false);
     #else //EMBER_TEST
     halInternalGetMfgTokenData(data, token, index, length);
-    #endif //EMBER_TEST
-  } else {
-    assert(false);
-  }
-
-  return ECODE_OK;
-}
-
-/***************************************************************************//**
- * Read the data stored in or return a pointer to the specified data or
- * manufacturing token.
- ******************************************************************************/
-Ecode_t sl_token_get_pointer_or_data(uint32_t token,
-                                     uint8_t index,
-                                     void *pointer,
-                                     uint32_t length)
-{
-  if (token < TOKEN_COUNT) {
-    // The token is within the SimEEPROM/NVM3's range, route to the SimEEPROM/NVM3
-    if (tokensActive) {
-      sl_token_get_data(token, index, pointer, length);
-    } else {
-      TOKENDBG(printf("getIdxToken supressed.\r\n"); )
-      // Tokens not being active is fatal for this function.
-      return ECODE_NVM3_ERR_NOT_OPENED;
-    }
-  } else if (token >= 256U) {
-    #ifdef EMBER_TEST
-    assert(false);
-    #else //EMBER_TEST
-    uint32_t *ptrOut = (uint32_t *)pointer;
-    uint32_t realAddress = 0;
-
-    //0x7F is a non-indexed token.  Remap to 0 for the address calculation
-    index = (index == 0x7F) ? 0 : index;
-
-    if ((token & 0xF000) == (USERDATA_TOKENS & 0xF000)) {
-      realAddress = ((USERDATA_BASE | (token & 0x0FFF)) + (length * index));
-    } else if ((token & 0xF000) == (LOCKBITSDATA_TOKENS & 0xF000)) {
-      realAddress = ((LOCKBITS_BASE | (token & 0x0FFF)) + (length * index));
-    } else {
-      //This function must only ever be called from token code that passes
-      //a proper "token" parameter.  A valid 16bit token must pass the
-      //above check to find the 32bit realAddress.
-      assert(0);
-    }
-
-    *ptrOut = realAddress;
     #endif //EMBER_TEST
   } else {
     assert(false);

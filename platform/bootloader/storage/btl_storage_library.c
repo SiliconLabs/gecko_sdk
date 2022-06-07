@@ -102,6 +102,27 @@ void storage_getInfo(BootloaderStorageInformation_t *info)
 static void advanceParser(BootloaderParserContext_t         *ctx,
                           const BootloaderParserCallbacks_t *callbacks)
 {
+  #if defined(BOOTLOADER_SUPPORT_INTERNAL_STORAGE) && defined(_SILICON_LABS_32B_SERIES_2)
+  // Only activate the check if we have a bootloader blob that will be parsed
+  if (callbacks->bootloaderCallback == bootload_bootloaderCallback) {
+    uint32_t upgradeLocation = bootload_getUpgradeLocation();
+    // Perform conservative check with the "worst" case upgrade size.
+    uint32_t startAddr = storageLayout.slot[ctx->slotId].address + ctx->slotOffset;
+    uint32_t endAddr = storageLayout.slot[ctx->slotId].address + ctx->slotOffset + BTL_STORAGE_READ_BUFFER_SIZE;
+    if ((upgradeLocation >= startAddr)
+        && (upgradeLocation < endAddr)) {
+      ctx->errorCode = BOOTLOADER_ERROR_PARSER_OVERLAP;
+      return;
+    }
+
+    if ((upgradeLocation < startAddr)
+        && ((upgradeLocation + MINIMUM_REQUIRED_UPGRADE_SIZE) > startAddr)) {
+      ctx->errorCode = BOOTLOADER_ERROR_PARSER_OVERLAP;
+      return;
+    }
+  }
+  #endif // BOOTLOADER_SUPPORT_INTERNAL_STORAGE
+
   uint8_t readBuffer[BTL_STORAGE_READ_BUFFER_SIZE];
 
   storage_readSlot(ctx->slotId,

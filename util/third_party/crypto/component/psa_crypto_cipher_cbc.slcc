@@ -1,10 +1,10 @@
 id: psa_crypto_cipher_cbc
 package: platform
-label: PSA Crypto support for the CBC block cipher mode.
+label: CBC Mode
 description: >-
   This component provides support for the CBC block cipher chaining mode
   (with no padding) in PSA Crypto.
-category: Platform|Security
+category: Platform|Security|PSA Crypto|Encryption
 quality: production
 provides:
   - name: psa_crypto_cipher_cbc

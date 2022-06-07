@@ -32,6 +32,7 @@ MISRAC_ENABLE
 
 // Image parser
 #include "parser/gbl/btl_gbl_parser.h"
+#include "parser/gbl/btl_gbl_format.h"
 
 // Security algorithms
 #include "security/btl_security_types.h"
@@ -296,10 +297,10 @@ static bool bootload_verifySecureBoot(uint32_t startAddress)
 // Global functions
 
 // Callbacks
-void bootload_applicationCallback(uint32_t address,
-                                  uint8_t  data[],
-                                  size_t   length,
-                                  void     *context)
+SL_WEAK void bootload_applicationCallback(uint32_t address,
+                                          uint8_t  data[],
+                                          size_t   length,
+                                          void     *context)
 {
   (void) context;
   // Check if addresses to write to are within writeable space
@@ -315,10 +316,10 @@ void bootload_applicationCallback(uint32_t address,
   flashData(address, data, length);
 }
 
-void bootload_bootloaderCallback(uint32_t offset,
-                                 uint8_t  data[],
-                                 size_t   length,
-                                 void     *context)
+SL_WEAK void bootload_bootloaderCallback(uint32_t offset,
+                                         uint8_t  data[],
+                                         size_t   length,
+                                         void     *context)
 {
   (void) context;
 
@@ -375,7 +376,7 @@ void bootload_bootloaderCallback(uint32_t offset,
 
 bool bootload_checkApplicationPropertiesMagic(void *appProperties)
 {
-  if (appProperties == NULL) {
+  if ((appProperties == NULL) || ((uint32_t) appProperties == 0xFFFFFFFFUL)) {
     return false;
   }
 
@@ -768,7 +769,7 @@ bool bootload_verifyApplicationCertificate(void *appProp, void *gotCert)
 // --------------------------------
 // Secure Element functions
 
-bool bootload_commitBootloaderUpgrade(uint32_t upgradeAddress, uint32_t size)
+SL_WEAK bool bootload_commitBootloaderUpgrade(uint32_t upgradeAddress, uint32_t size)
 {
   // Check CRC32 checksum on the bootloader image.
   uint32_t crc = btl_crc32Stream((void *)upgradeAddress, (size_t)size, BTL_CRC32_START);
@@ -883,27 +884,13 @@ bool bootload_lockApplicationArea(uint32_t startAddress, uint32_t endAddress)
 }
 #endif
 
-#if defined(SEMAILBOX_PRESENT)
-bool bootload_checkSeUpgradeVersion(uint32_t upgradeVersion)
+#if defined(SEMAILBOX_PRESENT) || defined(CRYPTOACC_PRESENT)
+SL_WEAK bool bootload_checkSeUpgradeVersion(uint32_t upgradeVersion)
 {
-#if defined(_CMU_CLKEN1_SEMAILBOXHOST_MASK)
-  CMU->CLKEN1_SET = CMU_CLKEN1_SEMAILBOXHOST;
-#endif
+  uint32_t runningVersion = 0xFFFFFFFFUL;
 
-  // Init with != SE_RESPONSE_OK response.
-  SE_Response_t response = 0x12345678U;
-  uint32_t runningVersion = 0xFFFFFFFFU;
-
-  SE_Command_t getVersion = SE_COMMAND_DEFAULT(SE_COMMAND_STATUS_SE_VERSION);
-  SE_DataTransfer_t dataOut = SE_DATATRANSFER_DEFAULT(&runningVersion, 4UL);
-  SE_addDataOutput(&getVersion, &dataOut);
-
-  SE_executeCommand(&getVersion);
-  response = SE_readCommandResponse();
-
-  if (response != SE_RESPONSE_OK) {
-    // Failed to communicate with SE, can't apply SE upgrade.
-    return false;
+  if (!bootload_getSeVersion(&runningVersion)) {
+    return false; // Could not retrieve SE version
   }
 
   // Only allow upgrade if it is higher than the running version
@@ -914,7 +901,8 @@ bool bootload_checkSeUpgradeVersion(uint32_t upgradeVersion)
   }
 }
 
-bool bootload_commitSeUpgrade(uint32_t upgradeAddress)
+#if defined(SEMAILBOX_PRESENT)
+SL_WEAK bool bootload_commitSeUpgrade(uint32_t upgradeAddress)
 {
 #if defined(_CMU_CLKEN1_SEMAILBOXHOST_MASK)
   CMU->CLKEN1_SET = CMU_CLKEN1_SEMAILBOXHOST;
@@ -949,21 +937,7 @@ bool bootload_commitSeUpgrade(uint32_t upgradeAddress)
 }
 
 #elif defined(CRYPTOACC_PRESENT)
-bool bootload_checkSeUpgradeVersion(uint32_t upgradeVersion)
-{
-  uint32_t runningVersion = 0xFFFFFFFFU;
-  if (SE_getVersion(&runningVersion) != SE_RESPONSE_OK) {
-    // Failed to communicate with SE, can't find the SE version.
-    return false;
-  }
-  // Only allow upgrade if it is higher than the running version
-  if (runningVersion < upgradeVersion) {
-    return true;
-  }
-  return false;
-}
-
-bool bootload_commitSeUpgrade(uint32_t upgradeAddress)
+SL_WEAK bool bootload_commitSeUpgrade(uint32_t upgradeAddress)
 {
   // Set reset code for when we get back
   reset_setResetReason(BOOTLOADER_RESET_REASON_BOOTLOAD);
@@ -978,3 +952,57 @@ bool bootload_commitSeUpgrade(uint32_t upgradeAddress)
   return false;
 }
 #endif // defined(CRYPTOACC_PRESENT)
+#endif // defined(SEMAILBOX_PRESENT) || defined(CRYPTOACC_PRESENT)
+
+uint32_t bootload_getBootloaderVersion(void)
+{
+  return mainBootloaderTable->header.version;
+}
+
+bool bootload_getApplicationVersion(uint32_t *version)
+{
+  ApplicationProperties_t *appProperties = (ApplicationProperties_t *)
+                                           mainBootloaderTable->startOfAppSpace->signature;
+
+  if (!bootload_checkApplicationPropertiesMagic(appProperties)) {
+    return false; // invalid application properties struct, return error
+  }
+
+  *version = appProperties->app.version;
+  return true;
+}
+
+#if defined(SEMAILBOX_PRESENT) || defined(CRYPTOACC_PRESENT)
+bool bootload_getSeVersion(uint32_t *version)
+{
+  // Init with != SE_RESPONSE_OK response.
+  SE_Response_t response = 0x12345678UL;
+
+#if defined(SEMAILBOX_PRESENT)
+#if defined(_CMU_CLKEN1_SEMAILBOXHOST_MASK)
+  CMU->CLKEN1_SET = CMU_CLKEN1_SEMAILBOXHOST;
+#endif
+
+  SE_Command_t getVersion = SE_COMMAND_DEFAULT(SE_COMMAND_STATUS_SE_VERSION);
+  SE_DataTransfer_t dataOut = SE_DATATRANSFER_DEFAULT(version, 4UL);
+  SE_addDataOutput(&getVersion, &dataOut);
+
+  SE_executeCommand(&getVersion);
+  response = SE_readCommandResponse();
+
+#elif defined(CRYPTOACC_PRESENT)
+  response = SE_getVersion(version);
+#endif
+
+  if (response != SE_RESPONSE_OK) {
+    return false; // error getting SE version
+  }
+
+  return true;
+}
+#endif // SEMAILBOX_PRESENT || CRYPTOACC_PRESENT
+
+SL_WEAK uint32_t bootload_getUpgradeLocation(void)
+{
+  return BTL_UPGRADE_LOCATION;
+}

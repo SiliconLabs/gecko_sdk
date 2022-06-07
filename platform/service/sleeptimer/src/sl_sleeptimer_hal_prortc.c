@@ -110,9 +110,6 @@ void sleeptimer_hal_init_timer(void)
 #endif
 #else
   bool use_clk_lfxo  = true;
-#if _SILICON_LABS_32B_SERIES_2_CONFIG > 1
-  bool use_clk_lfrco = true;
-#endif
 
   // Must enable radio clock branch to clock the radio bus as PRORTC is on this bus.
   CMU->RADIOCLKCTRL = CMU_RADIOCLKCTRL_EN;
@@ -124,7 +121,6 @@ void sleeptimer_hal_init_timer(void)
 #if _SILICON_LABS_32B_SERIES_2_CONFIG > 1
   uint32_t enabled_clocks = CMU->CLKEN0;
   use_clk_lfxo = ((enabled_clocks & _CMU_CLKEN0_LFXO_MASK) == _CMU_CLKEN0_LFXO_MASK);
-  use_clk_lfrco = ((enabled_clocks & _CMU_CLKEN0_LFRCO_MASK) == _CMU_CLKEN0_LFRCO_MASK);
 #endif //_SILICON_LABS_32B_SERIES_2_CONFIG == 2
 
   // On demand clocking for series 2 chips, make sure that the clock is
@@ -135,16 +131,6 @@ void sleeptimer_hal_init_timer(void)
                  && ((LFXO->CTRL
                       & (_LFXO_CTRL_FORCEEN_MASK | _LFXO_CTRL_DISONDEMAND_MASK))
                      != _LFXO_CTRL_DISONDEMAND_MASK);
-
-#if _SILICON_LABS_32B_SERIES_2_CONFIG > 1
-  if (!use_clk_lfxo) {
-    use_clk_lfrco = use_clk_lfrco
-                    && ((LFRCO->CTRL
-                         & (_LFRCO_CTRL_FORCEEN_MASK | _LFRCO_CTRL_DISONDEMAND_MASK))
-                        != _LFRCO_CTRL_DISONDEMAND_MASK);
-    // At this point, if LFRCO is force disabled, sleeptimer won't work.
-  }
-#endif
 
   if (use_clk_lfxo) {
     CMU->PRORTCCLKCTRL = CMU_PRORTCCLKCTRL_CLKSEL_LFXO;
@@ -214,9 +200,14 @@ uint32_t sleeptimer_hal_get_compare(void)
  *****************************************************************************/
 void sleeptimer_hal_set_compare(uint32_t value)
 {
-  uint32_t counter = sleeptimer_hal_get_counter();
-  uint32_t compare = sleeptimer_hal_get_compare();
+  CORE_DECLARE_IRQ_STATE;
+  uint32_t counter;
+  uint32_t compare;
   uint32_t compare_value = value;
+
+  CORE_ENTER_CRITICAL();
+  counter = sleeptimer_hal_get_counter();
+  compare = sleeptimer_hal_get_compare();
 
   if (((PRORTC->IF & PRORTC_IF_COMP_BIT) != 0)
       || get_time_diff(compare, counter) > SLEEPTIMER_COMPARE_MIN_DIFF
@@ -235,6 +226,7 @@ void sleeptimer_hal_set_compare(uint32_t value)
 
     sleeptimer_hal_enable_int(SLEEPTIMER_EVENT_COMP);
   }
+  CORE_EXIT_CRITICAL();
 
 #if defined(_SILICON_LABS_32B_SERIES_2)
   if (cc_disabled) {

@@ -8,9 +8,3 @@ class CALC_Global_dumbo(CALC_Global):
 
         #Build variables from the global calculations
         super().buildVariables(model)
-
-        #Add a chip identifier
-        self._addModelVariable(model, 'family',                           str,   ModelVariableFormat.ASCII)
-	
-    def calc_family_name(self, model):
-        model.vars.family.value = "dumbo"

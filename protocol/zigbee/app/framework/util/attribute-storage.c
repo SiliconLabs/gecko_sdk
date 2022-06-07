@@ -142,7 +142,7 @@ void emberAfEndpointConfigure(void)
 #endif
 
   emberEndpointCount = FIXED_ENDPOINT_COUNT;
-  for ( ep = 0; ep < FIXED_ENDPOINT_COUNT; ep++ ) {
+  for ( ep = 0; ep < emberEndpointCount; ep++ ) {
     emAfEndpoints[ep].endpoint      = endpointNumber(ep);
     emAfEndpoints[ep].profileId     = endpointProfileId(ep);
     emAfEndpoints[ep].deviceId      = endpointDeviceId(ep);
@@ -791,10 +791,12 @@ EmberAfCluster *emberAfFindClusterIncludingDisabledEndpointsWithMfgCode(uint8_t 
                                                                         EmberAfClusterMask mask,
                                                                         uint16_t manufacturerCode)
 {
+#if (MAX_ENDPOINT_COUNT > 0)
   uint8_t ep = emberAfIndexFromEndpointIncludingDisabledEndpoints(endpoint);
   if (ep < MAX_ENDPOINT_COUNT) {
     return emberAfFindClusterInTypeWithMfgCode(emAfEndpoints[ep].endpointType, clusterId, mask, manufacturerCode);
   }
+#endif // (MAX_ENDPOINT_COUNT > 0)
   return NULL;
 }
 
@@ -1279,12 +1281,11 @@ uint16_t emAfResolveMfgCodeForDiscoverCommand(bool outgoing,
                                               uint16_t clusterId,
                                               uint8_t startId)
 {
-  uint8_t cmdDirMask = 0;
   uint16_t commandMfgCode = 0xFFFF;
 #if (defined(UC_BUILD) && EMBER_AF_GENERATED_COMMAND_COUNT > 0) || !defined(UC_BUILD)
   bool foundFirst = false;
   uint8_t foundCmdId = 0;
-#endif // EMBER_AF_GENERATED_COMMAND_COUNT
+  uint8_t cmdDirMask = 0;
 
   // determine the appropriate mask to match the request
   // discover commands generated, client is asking server what commands do you generate?
@@ -1300,7 +1301,6 @@ uint16_t emAfResolveMfgCodeForDiscoverCommand(bool outgoing,
   } else {
     cmdDirMask = COMMAND_MASK_INCOMING_CLIENT;
   }
-#if (defined(UC_BUILD) && EMBER_AF_GENERATED_COMMAND_COUNT > 0) || !defined(UC_BUILD)
   for ( uint16_t i = 0; i < EMBER_AF_GENERATED_COMMAND_COUNT; i++ ) {
     if ( generatedCommands[i].clusterId != clusterId ) {
       continue;
@@ -1358,12 +1358,10 @@ bool emberAfExtractCommandIds(bool outgoing,
                               uint8_t startId,
                               uint8_t maxIdCount)
 {
+  bool returnValue = true;
 #if (defined(UC_BUILD) && EMBER_AF_GENERATED_COMMAND_COUNT > 0) || !defined(UC_BUILD)
   uint16_t i, count = 0;
-#endif // EMBER_AF_GENERATED_COMMAND_COUNT
-  bool returnValue = true;
   uint8_t cmdDirMask = 0;
-
   // determine the appropriate mask to match the request
   // discover commands generated, client is asking server what commands do you generate?
   if (outgoing && (cmd->direction == ZCL_DIRECTION_CLIENT_TO_SERVER)) {
@@ -1378,7 +1376,6 @@ bool emberAfExtractCommandIds(bool outgoing,
   } else {
     cmdDirMask = COMMAND_MASK_INCOMING_CLIENT;
   }
-#if (defined(UC_BUILD) && EMBER_AF_GENERATED_COMMAND_COUNT > 0) || !defined(UC_BUILD)
   for ( i = 0; i < EMBER_AF_GENERATED_COMMAND_COUNT; i++ ) {
     if ( generatedCommands[i].clusterId != clusterId ) {
       continue;

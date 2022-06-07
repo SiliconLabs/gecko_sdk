@@ -78,6 +78,22 @@ class IRegMapIO(object):
         pass
 
     @abstractmethod
+    def dumpRegister(self, reg):
+        """
+        Read the register. Return type will be list if Dumper function is provided,
+        else the logic falls back to the Reader function with int return.
+
+        For the Dumper function, the return type is a list of error message string and value.
+        An empty error message indicates successful read.
+
+        :type  reg: :class:`~Base_RM_Register`
+        :param reg: The register object
+        :rtype: Union[List[str, int], int]
+        :return: The value of the register
+        """
+        pass
+
+    @abstractmethod
     def readRegister(self, reg):
         """
         Read the register. Raises error if not readable.

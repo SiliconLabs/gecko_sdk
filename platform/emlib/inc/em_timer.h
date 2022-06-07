@@ -35,7 +35,7 @@
 #if defined(TIMER_COUNT) && (TIMER_COUNT > 0)
 
 #include <stdbool.h>
-#include "em_assert.h"
+#include "sl_assert.h"
 
 #ifdef __cplusplus
 extern "C" {

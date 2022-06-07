@@ -12,23 +12,14 @@
   - path: platform/Device/SiliconLabs/BGM22/Source/system_bgm22.c
     unless:
     - device_content_override
-  - condition:
-    - toolchain_iar
-    path: platform/Device/SiliconLabs/BGM22/Source/IAR/startup_bgm22.c
-    unless:
-    - device_content_override
-  - condition:
-    - toolchain_gcc
-    path: platform/Device/SiliconLabs/BGM22/Source/GCC/startup_bgm22.c
+  - path: platform/Device/SiliconLabs/BGM22/Source/startup_bgm22.c
     unless:
     - device_content_override
 - include:
   - file_list:
     - path: bgm220pc22wga.h
     - path: bgm22_aes.h
-    - path: bgm22_agc.h
     - path: bgm22_amuxcp.h
-    - path: bgm22_bufc.h
     - path: bgm22_buram.h
     - path: bgm22_burtc.h
     - path: bgm22_cmu.h
@@ -39,7 +30,6 @@
     - path: bgm22_dpll.h
     - path: bgm22_emu.h
     - path: bgm22_eusart.h
-    - path: bgm22_frc.h
     - path: bgm22_fsrco.h
     - path: bgm22_gpcrc.h
     - path: bgm22_gpio.h
@@ -55,19 +45,12 @@
     - path: bgm22_letimer.h
     - path: bgm22_lfrco.h
     - path: bgm22_lfxo.h
-    - path: bgm22_mailbox.h
-    - path: bgm22_modem.h
     - path: bgm22_msc.h
     - path: bgm22_pdm.h
-    - path: bgm22_protimer.h
     - path: bgm22_prs.h
     - path: bgm22_prs_signals.h
-    - path: bgm22_rac.h
-    - path: bgm22_rfcrc.h
-    - path: bgm22_rfsense.h
     - path: bgm22_rtcc.h
     - path: bgm22_smu.h
-    - path: bgm22_synth.h
     - path: bgm22_syscfg.h
     - path: bgm22_timer.h
     - path: bgm22_ulfrco.h
@@ -91,11 +74,10 @@
   - name: device_is_module
   - name: hardware_board_has_hfxo
   - name: device_security_rot
+  - name: device_dcdc_buck
   - name: device_pa_8dbm
-  - name: device_has_agc
   - name: device_has_amuxcp
   - name: device_has_amuxcp0
-  - name: device_has_bufc
   - name: device_has_buram
   - name: device_has_burtc
   - name: device_has_cmu
@@ -107,7 +89,6 @@
   - name: device_has_emu
   - name: device_has_euart
   - name: device_has_euart0
-  - name: device_has_frc
   - name: device_has_fsrco
   - name: device_has_gpcrc
   - name: device_has_gpio
@@ -128,22 +109,13 @@
   - name: device_has_letimer0
   - name: device_has_lfrco
   - name: device_has_lfxo
-  - name: device_has_modem
   - name: device_has_msc
   - name: device_has_pdm
   - name: device_has_prortc
-  - name: device_has_protimer
   - name: device_has_prs
-  - name: device_has_rac
   - name: device_has_radioaes
-  - name: device_has_rdmailbox
-  - name: device_has_rdmailbox0
-  - name: device_has_rdmailbox1
-  - name: device_has_rfcrc
-  - name: device_has_rfsense
   - name: device_has_rtcc
   - name: device_has_smu
-  - name: device_has_synth
   - name: device_has_syscfg
   - name: device_has_timer
   - name: device_has_timer0
@@ -170,6 +142,8 @@
   - name: device_supports_bluetooth_cte
   - name: device_supports_connect
   - name: device_compute_basic
+- recommends:
+  - id: trustzone_unaware
 - requires:
   - name: cmsis_core
   - name: BGM220PC22WGA_config
@@ -213,8 +187,25 @@
     value: cortex-m33
   - option: fpu
     value: fpv5-sp
+  - option: cmse
+    unless:
+    - trustzone_nonsecure
+    value: enabled
 - config_file:
   - condition:
     - custom_radio_config
     directory: rail
     path: platform/Device/config/205/device.yaml
+- metadata:
+    device:
+      memory:
+      - name: Main Flash
+        page_size: 8192
+        size: 360448
+        start: 0
+        type: non-volatile
+      - name: RAM
+        size: 32768
+        start: 536870912
+        type: volatile
+      opn: bgm220pc22wga

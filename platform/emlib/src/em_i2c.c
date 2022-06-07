@@ -33,7 +33,7 @@
 
 #include "em_cmu.h"
 #include "em_bus.h"
-#include "em_assert.h"
+#include "sl_assert.h"
 
  #include <limits.h>
 

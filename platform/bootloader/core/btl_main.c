@@ -58,8 +58,13 @@ const size_t __rom_end__ @ "ROM_SIZE";
 
 // --------------------------------
 // Local function declarations
+
 __STATIC_INLINE bool enterBootloader(void);
 SL_NORETURN static void bootToApp(uint32_t);
+
+#if defined(BOOTLOADER_INTERFACE_TRUSTZONE_AWARE)
+static void btl_getPeripheralList(uint32_t *ppusatd0, uint32_t *ppusatd1);
+#endif // BOOTLOADER_INTERFACE_TRUSTZONE_AWARE
 
 #if defined(BOOTLOADER_WRITE_DISABLE) && (BOOTLOADER_WRITE_DISABLE == 1)
 __STATIC_INLINE void lockBootloaderArea(void)
@@ -67,21 +72,50 @@ __STATIC_INLINE void lockBootloaderArea(void)
   // Disable write access to bootloader.
   // Prevents application from touching the bootloader.
 #if defined(_MSC_PAGELOCK0_MASK)
-#if defined(CRYPTOACC_PRESENT)
+#if defined(_CMU_CLKEN1_MASK)
   CMU->CLKEN1_SET = CMU_CLKEN1_MSC;
 #endif
-  for (uint32_t i = (BTL_FIRST_STAGE_BASE / FLASH_PAGE_SIZE);
-       i < ((BTL_MAIN_STAGE_MAX_SIZE + BTL_FIRST_STAGE_SIZE) / FLASH_PAGE_SIZE);
-       i++) {
-    MSC->PAGELOCK0_SET = (0x1 << i);
-  }
-#if defined(CRYPTOACC_PRESENT)
+
+  uint32_t num_pages = (BTL_MAIN_STAGE_MAX_SIZE + BTL_FIRST_STAGE_SIZE) / FLASH_PAGE_SIZE;
+  uint32_t pagelock = ~0;
+  pagelock = pagelock >> (32 - num_pages);
+  MSC->PAGELOCK0_SET = pagelock;
+
+#if defined(_CMU_CLKEN1_MASK)
   CMU->CLKEN1_CLR = CMU_CLKEN1_MSC;
 #endif
 #elif defined(MSC_BOOTLOADERCTRL_BLWDIS)
   MSC->BOOTLOADERCTRL |= MSC_BOOTLOADERCTRL_BLWDIS;
 #else
   // Do nothing
+#endif
+}
+#endif
+
+#if defined(BOOTLOADER_APPLOADER)
+__STATIC_INLINE void configureSMUToDefault(void)
+{
+#if defined(CMU_CLKEN1_SMU)
+  CMU->CLKEN1_SET = CMU_CLKEN1_SMU;
+#endif
+
+  // Config all peripherals to Secure
+  SMU->PPUSATD0_SET = _SMU_PPUSATD0_MASK;
+  SMU->PPUSATD1_SET = _SMU_PPUSATD1_MASK;
+
+  // SAU treats all access as secure
+  SAU->CTRL = 0;
+  __DSB();
+  __ISB();
+
+  // Clear and disable the SMU PPUSEC and BMPUSEC interrupt.
+  NVIC_DisableIRQ(SMU_SECURE_IRQn);
+  SMU->IEN_CLR = SMU_IEN_PPUSEC | SMU_IEN_BMPUSEC;
+  NVIC_ClearPendingIRQ(SMU_SECURE_IRQn);
+  SMU->IF_CLR = SMU_IF_PPUSEC | SMU_IF_BMPUSEC;
+
+#if defined(CMU_CLKEN1_SMU)
+  CMU->CLKEN1_CLR = CMU_CLKEN1_SMU;
 #endif
 }
 #endif
@@ -245,6 +279,9 @@ const MainBootloaderTable_t mainStageTable = {
 #if defined(BOOTLOADER_SUPPORT_COMMUNICATION) && (BOOTLOADER_SUPPORT_COMMUNICATION == 1)
                    | BOOTLOADER_CAPABILITY_COMMUNICATION
 #endif
+#if defined(BOOTLOADER_INTERFACE_TRUSTZONE_AWARE)
+                   | BOOTLOADER_CAPABILITY_PERIPHERAL_LIST
+#endif
                    ),
   .init = &btl_init,
   .deinit = &btl_deinit,
@@ -259,10 +296,16 @@ const MainBootloaderTable_t mainStageTable = {
   .parseImageInfo = core_parseImageInfo,
   .parserContextSize = core_parserContextSize,
 #if defined(BOOTLOADER_ROLLBACK_PROTECTION) && (BOOTLOADER_ROLLBACK_PROTECTION == 1)
-  .remainingApplicationUpgrades = &bootload_remainingApplicationUpgrades
+  .remainingApplicationUpgrades = &bootload_remainingApplicationUpgrades,
 #else
-  .remainingApplicationUpgrades = NULL
+  .remainingApplicationUpgrades = NULL,
 #endif
+#if defined(BOOTLOADER_INTERFACE_TRUSTZONE_AWARE)
+  .getPeripheralList = &btl_getPeripheralList,
+#else
+  .getPeripheralList = NULL,
+#endif
+  .getUpgradeLocation = bootload_getUpgradeLocation
 };
 
 #if defined(BOOTLOADER_SUPPORT_CERTIFICATES) && (BOOTLOADER_SUPPORT_CERTIFICATES == 1)
@@ -296,6 +339,7 @@ const ApplicationProperties_t sl_app_properties = {
   .cert = NULL,
 #endif
   .longTokenSectionAddress = NULL,
+  .decryptKey = { 0u },
 };
 
 /**
@@ -385,6 +429,10 @@ void SystemInit2(void)
     bootload_lockApplicationArea(startOfAppSpace, 0);
 #endif
 
+#if defined(BOOTLOADER_APPLOADER)
+    configureSMUToDefault();
+#endif
+
     // Set vector table to application's table
     SCB->VTOR = startOfAppSpace;
 
@@ -457,3 +505,44 @@ __STATIC_INLINE bool enterBootloader(void)
 
   return false;
 }
+
+#if defined(BOOTLOADER_INTERFACE_TRUSTZONE_AWARE)
+static void btl_getPeripheralList(uint32_t *ppusatd0, uint32_t *ppusatd1)
+{
+  if (ppusatd0 == NULL || ppusatd1 == NULL) {
+    return;
+  }
+  *ppusatd0 = 0u;
+  *ppusatd1 = 0u;
+
+  *ppusatd0 |= SMU_PPUSATD0_MSC;
+  *ppusatd0 |= SMU_PPUSATD0_CMU;
+  *ppusatd0 |= SMU_PPUSATD0_HFRCO0;
+  *ppusatd0 |= SMU_PPUSATD0_GPIO;
+  *ppusatd0 |= SMU_PPUSATD0_GPCRC;
+
+#ifdef BOOTLOADER_SUPPORT_STORAGE
+  if (storage_getDMAchannel() != -1) {
+    *ppusatd0 |= SMU_PPUPATD0_LDMA;
+    *ppusatd0 |= SMU_PPUSATD0_LDMAXBAR;
+  }
+
+#if defined(BTL_SPI_USART_ENABLE) || defined(BTL_SPI_EUSART_ENABLE)
+  uint32_t ppusatdNr = 0xFFFFFFFFUL;
+  uint32_t ppusatdUsartMask = storage_getSpiUsartPPUSATD(&ppusatdNr);
+  if (ppusatdNr == 0u) {
+    *ppusatd0 |= ppusatdUsartMask;
+  } else if (ppusatdNr == 1u) {
+    *ppusatd1 |= ppusatdUsartMask;
+  }
+#endif
+#endif // BOOTLOADER_SUPPORT_STORAGE
+
+#if defined(SMU_PPUSATD1_CRYPTOACC)
+  *ppusatd1 |= SMU_PPUSATD1_CRYPTOACC;
+#endif // SMU_PPUSATD1_CRYPTOACC
+#if defined(SMU_PPUPATD1_SEMAILBOX)
+  *ppusatd1 |= SMU_PPUPATD1_SEMAILBOX;
+#endif // SMU_PPUPATD1_SEMAILBOX
+}
+#endif // BOOTLOADER_INTERFACE_TRUSTZONE_AWARE

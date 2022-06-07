@@ -12,14 +12,7 @@
   - path: platform/Device/SiliconLabs/MGM13/Source/system_mgm13.c
     unless:
     - device_content_override
-  - condition:
-    - toolchain_iar
-    path: platform/Device/SiliconLabs/MGM13/Source/IAR/startup_mgm13.c
-    unless:
-    - device_content_override
-  - condition:
-    - toolchain_gcc
-    path: platform/Device/SiliconLabs/MGM13/Source/GCC/startup_mgm13.c
+  - path: platform/Device/SiliconLabs/MGM13/Source/startup_mgm13.c
     unless:
     - device_content_override
   - condition:
@@ -214,3 +207,21 @@
     - custom_radio_config
     directory: rail
     path: platform/Device/config/89/device.yaml
+- metadata:
+    device:
+      memory:
+      - name: Main Flash
+        page_size: 2048
+        size: 524288
+        start: 0
+        type: non-volatile
+      - name: Bootloader Flash
+        page_size: 2048
+        size: 16384
+        start: 266403840
+        type: non-volatile
+      - name: RAM
+        size: 65536
+        start: 536870912
+        type: volatile
+      opn: mgm13s12f512ga

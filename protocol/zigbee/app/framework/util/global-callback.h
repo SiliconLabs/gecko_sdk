@@ -84,10 +84,10 @@ EmberAfAttributeWritePermission emberAfAllowNetworkWriteAttributeCallback(int8u 
  * @param manufacturerCode   Ver.: always
  * @param attributeId   Ver.: always
  */
-boolean emberAfAttributeReadAccessCallback(int8u endpoint,
-                                           EmberAfClusterId clusterId,
-                                           int16u manufacturerCode,
-                                           int16u attributeId);
+bool emberAfAttributeReadAccessCallback(int8u endpoint,
+                                        EmberAfClusterId clusterId,
+                                        int16u manufacturerCode,
+                                        int16u attributeId);
 /** @brief Attribute Write Access
  *
  * This function is called whenever the Application Framework needs to check
@@ -98,10 +98,10 @@ boolean emberAfAttributeReadAccessCallback(int8u endpoint,
  * @param manufacturerCode   Ver.: always
  * @param attributeId   Ver.: always
  */
-boolean emberAfAttributeWriteAccessCallback(int8u endpoint,
-                                            EmberAfClusterId clusterId,
-                                            int16u manufacturerCode,
-                                            int16u attributeId);
+bool emberAfAttributeWriteAccessCallback(int8u endpoint,
+                                         EmberAfClusterId clusterId,
+                                         int16u manufacturerCode,
+                                         int16u attributeId);
 /** @brief Clear Report Table
  *
  * This function is called by the framework when the application should clear
@@ -133,10 +133,10 @@ void emberAfClusterInitCallback(int8u endpoint,
  * always
  * @param commandId The ZCL command ID being sent/received.  Ver.: always
  */
-boolean emberAfClusterSecurityCustomCallback(EmberAfProfileId profileId,
-                                             EmberAfClusterId clusterId,
-                                             boolean incoming,
-                                             int8u commandId);
+bool emberAfClusterSecurityCustomCallback(EmberAfProfileId profileId,
+                                          EmberAfClusterId clusterId,
+                                          bool incoming,
+                                          int8u commandId);
 /** @brief Configure Reporting Command
  *
  * This function is called by the application framework when a Configure
@@ -147,7 +147,7 @@ boolean emberAfClusterSecurityCustomCallback(EmberAfProfileId profileId,
  *
  * @param cmd   Ver.: always
  */
-boolean emberAfConfigureReportingCommandCallback(const EmberAfClusterCommand *cmd);
+bool emberAfConfigureReportingCommandCallback(const EmberAfClusterCommand *cmd);
 /** @brief Configure Reporting Response
  *
  * This function is called by the application framework when a Configure
@@ -160,9 +160,9 @@ boolean emberAfConfigureReportingCommandCallback(const EmberAfClusterCommand *cm
  * always
  * @param bufLen The length in bytes of the list.  Ver.: always
  */
-boolean emberAfConfigureReportingResponseCallback(EmberAfClusterId clusterId,
-                                                  int8u *buffer,
-                                                  int16u bufLen);
+bool emberAfConfigureReportingResponseCallback(EmberAfClusterId clusterId,
+                                               int8u *buffer,
+                                               int16u bufLen);
 /** @brief Default Response
  *
  * This function is called by the application framework when a Default Response
@@ -175,9 +175,9 @@ boolean emberAfConfigureReportingResponseCallback(EmberAfClusterId clusterId,
  * @param status Specifies either SUCCESS or the nature of the error that was
  * detected in the received command.  Ver.: always
  */
-boolean emberAfDefaultResponseCallback(EmberAfClusterId clusterId,
-                                       int8u commandId,
-                                       EmberAfStatus status);
+bool emberAfDefaultResponseCallback(EmberAfClusterId clusterId,
+                                    int8u commandId,
+                                    EmberAfStatus status);
 /** @brief Discover Attributes Response
  *
  * This function is called by the application framework when a Discover
@@ -198,11 +198,11 @@ boolean emberAfDefaultResponseCallback(EmberAfClusterId clusterId,
  * @param extended Indicates whether the response is in the extended format or
  * not.  Ver.: always
  */
-boolean emberAfDiscoverAttributesResponseCallback(EmberAfClusterId clusterId,
-                                                  boolean discoveryComplete,
-                                                  int8u *buffer,
-                                                  int16u bufLen,
-                                                  boolean extended);
+bool emberAfDiscoverAttributesResponseCallback(EmberAfClusterId clusterId,
+                                               bool discoveryComplete,
+                                               int8u *buffer,
+                                               int16u bufLen,
+                                               bool extended);
 /** @brief Discover Commands Generated Response
  *
  * This function is called by the framework when Discover Commands Generated
@@ -217,11 +217,11 @@ boolean emberAfDiscoverAttributesResponseCallback(EmberAfClusterId clusterId,
  * @param commandIdCount The length of bytes of the list, whish is the same as
  * the number of identifiers.  Ver.: always
  */
-boolean emberAfDiscoverCommandsGeneratedResponseCallback(EmberAfClusterId clusterId,
-                                                         int16u manufacturerCode,
-                                                         boolean discoveryComplete,
-                                                         int8u *commandIds,
-                                                         int16u commandIdCount);
+bool emberAfDiscoverCommandsGeneratedResponseCallback(EmberAfClusterId clusterId,
+                                                      int16u manufacturerCode,
+                                                      bool discoveryComplete,
+                                                      int8u *commandIds,
+                                                      int16u commandIdCount);
 /** @brief Discover Commands Received Response
  *
  * This function is called by the framework when Discover Commands Received
@@ -236,11 +236,11 @@ boolean emberAfDiscoverCommandsGeneratedResponseCallback(EmberAfClusterId cluste
  * @param commandIdCount The length of bytes of the list, whish is the same as
  * the number of identifiers.  Ver.: always
  */
-boolean emberAfDiscoverCommandsReceivedResponseCallback(EmberAfClusterId clusterId,
-                                                        int16u manufacturerCode,
-                                                        boolean discoveryComplete,
-                                                        int8u *commandIds,
-                                                        int16u commandIdCount);
+bool emberAfDiscoverCommandsReceivedResponseCallback(EmberAfClusterId clusterId,
+                                                     int16u manufacturerCode,
+                                                     bool discoveryComplete,
+                                                     int8u *commandIds,
+                                                     int16u commandIdCount);
 /** @brief Eeprom Init
  *
  * Tells the system to initialize the EEPROM if it is not already initialized.
@@ -255,7 +255,7 @@ void emberAfEepromInitCallback(void);
  * @param state The state of the EEPROM, false=re-initalization needed,
  * true=no-re-init needed  Ver.: always
  */
-void emberAfEepromNoteInitializedStateCallback(boolean state);
+void emberAfEepromNoteInitializedStateCallback(bool state);
 /** @brief Eeprom Shutdown
  *
  * Tells the system to shutdown the EEPROM if it is not already shutdown.
@@ -452,8 +452,8 @@ EmberAfEventSleepControl emberAfGetDefaultSleepControlCallback(void);
  * @param index The index of the endpoint.  Ver.: always
  * @param endpointReturn The value of endpoint.  Ver.: always
  */
-boolean emberAfGetEndpointByIndexCallback(int8u index,
-                                          int8u* endpointReturn);
+bool emberAfGetEndpointByIndexCallback(int8u index,
+                                       int8u* endpointReturn);
 /** @brief Get Endpoint Description
  *
  * This callback is called by the framework whenever it receives a ZDO request
@@ -470,8 +470,8 @@ boolean emberAfGetEndpointByIndexCallback(int8u index,
  * information is written if the callback is providing the information.  Ver.:
  * always
  */
-boolean emberAfGetEndpointDescriptionCallback(int8u endpoint,
-                                              EmberEndpointDescription* result);
+bool emberAfGetEndpointDescriptionCallback(int8u endpoint,
+                                           EmberEndpointDescription* result);
 /** @brief Get Endpoint Info
  *
  * This function is a callback to an application implemented endpoint that
@@ -489,9 +489,9 @@ boolean emberAfGetEndpointDescriptionCallback(int8u endpoint,
  * @param returnEndpointInfo A pointer to a data struct that will be written
  * with information about the endpoint.  Ver.: always
  */
-boolean emberAfGetEndpointInfoCallback(int8u endpoint,
-                                       int8u* returnNetworkIndex,
-                                       EmberAfEndpointInfoStruct* returnEndpointInfo);
+bool emberAfGetEndpointInfoCallback(int8u endpoint,
+                                    int8u* returnNetworkIndex,
+                                    EmberAfEndpointInfoStruct* returnEndpointInfo);
 /** @brief Get Form And Join Extended Pan Id
  *
  * This callback is called by the framework to get the extended PAN ID used by
@@ -672,11 +672,11 @@ EmberStatus emberAfInitiatePartnerLinkKeyExchangeCallback(EmberNodeId target,
  * @param eui64   Ver.: always
  * @param delayInSeconds   Ver.: always
  */
-boolean emberAfInterPanKeyEstablishmentCallback(EmberAfKeyEstablishmentNotifyMessage status,
-                                                boolean amInitiator,
-                                                EmberPanId panId,
-                                                const EmberEUI64 eui64,
-                                                int8u delayInSeconds);
+bool emberAfInterPanKeyEstablishmentCallback(EmberAfKeyEstablishmentNotifyMessage status,
+                                             bool amInitiator,
+                                             EmberPanId panId,
+                                             const EmberEUI64 eui64,
+                                             int8u delayInSeconds);
 /** @brief Interpan Send Message
  *
  * This function will send a raw MAC message with interpan frame format using
@@ -704,10 +704,10 @@ EmberStatus emberAfInterpanSendMessageCallback(EmberAfInterpanHeader* header,
  * @param partnerShortId   Ver.: always
  * @param delayInSeconds   Ver.: always
  */
-boolean emberAfKeyEstablishmentCallback(EmberAfKeyEstablishmentNotifyMessage status,
-                                        boolean amInitiator,
-                                        EmberNodeId partnerShortId,
-                                        int8u delayInSeconds);
+bool emberAfKeyEstablishmentCallback(EmberAfKeyEstablishmentNotifyMessage status,
+                                     bool amInitiator,
+                                     EmberNodeId partnerShortId,
+                                     int8u delayInSeconds);
 /** @brief Main Init
  *
  * This function is called from the application's main function. It gives the
@@ -744,9 +744,9 @@ void emberAfMainInitCallback(void);
  * @param argc   Ver.: always
  * @param argv   Ver.: always
  */
-boolean emberAfMainStartCallback(int* returnCode,
-                                 int argc,
-                                 char** argv);
+bool emberAfMainStartCallback(int* returnCode,
+                              int argc,
+                              char** argv);
 /** @brief Main Tick
  *
  * Whenever main application tick is called, this callback will be called at the
@@ -772,12 +772,12 @@ void emberAfMainTickCallback(void);
  * @param message   Ver.: always
  * @param status   Ver.: always
  */
-boolean emberAfMessageSentCallback(EmberOutgoingMessageType type,
-                                   int16u indexOrDestination,
-                                   EmberApsFrame* apsFrame,
-                                   int16u msgLen,
-                                   int8u* message,
-                                   EmberStatus status);
+bool emberAfMessageSentCallback(EmberOutgoingMessageType type,
+                                int16u indexOrDestination,
+                                EmberApsFrame* apsFrame,
+                                int16u msgLen,
+                                int8u* message,
+                                EmberStatus status);
 /** @brief Ncp Init
  *
  * This function is called when the network coprocessor is being initialized,
@@ -793,7 +793,7 @@ boolean emberAfMessageSentCallback(EmberOutgoingMessageType type,
  *
  * @param memoryAllocation   Ver.: always
  */
-void emberAfNcpInitCallback(boolean memoryAllocation);
+void emberAfNcpInitCallback(bool memoryAllocation);
 /** @brief Ncp Is Awake Isr
  *
  * This function is called IN ISR CONTEXT.  It notes that the NCP is awake after
@@ -842,7 +842,7 @@ void emberAfOtaClientBootloadCallback(const EmberAfOtaImageId* id);
  * started.  Ver.: always
  * @param id This is ID of the image to be verified.  Ver.: always
  */
-EmberAfImageVerifyStatus emberAfOtaClientCustomVerifyCallback(boolean newVerification,
+EmberAfImageVerifyStatus emberAfOtaClientCustomVerifyCallback(bool newVerification,
                                                               const EmberAfOtaImageId* id);
 /** @brief Ota Client Download Complete
  *
@@ -859,8 +859,8 @@ EmberAfImageVerifyStatus emberAfOtaClientCustomVerifyCallback(boolean newVerific
  * @param id This is the image identifier information that corresponds to the
  * download result.  Ver.: always
  */
-boolean emberAfOtaClientDownloadCompleteCallback(EmberAfOtaDownloadResult success,
-                                                 const EmberAfOtaImageId* id);
+bool emberAfOtaClientDownloadCompleteCallback(EmberAfOtaDownloadResult success,
+                                              const EmberAfOtaImageId* id);
 /** @brief Ota Client Incoming Message Raw
  *
  * This callback is for processing incoming messages for the Over-the-air
@@ -870,7 +870,7 @@ boolean emberAfOtaClientDownloadCompleteCallback(EmberAfOtaDownloadResult succes
  * @param message A pointer to the structure containing the message buffer and
  * other information about it.  Ver.: always
  */
-boolean emberAfOtaClientIncomingMessageRawCallback(EmberAfClusterCommand *message);
+bool emberAfOtaClientIncomingMessageRawCallback(EmberAfClusterCommand *message);
 /** @brief Ota Client Start
  *
  * This callback should be called when the profile specific registration has
@@ -925,7 +925,7 @@ int8u emberAfOtaServerBlockSizeCallback(EmberNodeId clientNodeId);
  * @param message A pointer to the structure containing the message buffer and
  * other information about it.  Ver.: always
  */
-boolean emberAfOtaServerIncomingMessageRawCallback(EmberAfClusterCommand *message);
+bool emberAfOtaServerIncomingMessageRawCallback(EmberAfClusterCommand *message);
 /** @brief Ota Server Query
  *
  * This callback is fired when the OTA server receives a query request by the
@@ -964,11 +964,11 @@ int8u emberAfOtaServerQueryCallback(const EmberAfOtaImageId* currentImageId,
  * within this struct that will be appended to the message is determined by the
  * previous 'payloadType' argument.  Ver.: always
  */
-boolean emberAfOtaServerSendImageNotifyCallback(EmberNodeId dest,
-                                                int8u endpoint,
-                                                int8u payloadType,
-                                                int8u queryJitter,
-                                                const EmberAfOtaImageId* id);
+bool emberAfOtaServerSendImageNotifyCallback(EmberNodeId dest,
+                                             int8u endpoint,
+                                             int8u payloadType,
+                                             int8u queryJitter,
+                                             const EmberAfOtaImageId* id);
 /** @brief Ota Server Upgrade End Request
  *
  * This function is called when the OTA server receives a request an upgrade end
@@ -987,10 +987,10 @@ boolean emberAfOtaServerSendImageNotifyCallback(EmberNodeId dest,
  * @param imageId This variable indicates the software version that the client
  * successfully downloaded and is asking to upgrade to.  Ver.: always
  */
-boolean emberAfOtaServerUpgradeEndRequestCallback(EmberNodeId source,
-                                                  int8u status,
-                                                  int32u* returnValue,
-                                                  const EmberAfOtaImageId* imageId);
+bool emberAfOtaServerUpgradeEndRequestCallback(EmberNodeId source,
+                                               int8u status,
+                                               int32u* returnValue,
+                                               const EmberAfOtaImageId* imageId);
 /** @brief Ota Storage Check Temp Data
  *
  * This callback will validate temporary data in the storage device to determine
@@ -1042,7 +1042,7 @@ void emberAfOtaStorageDriverDownloadFinishCallback(int32u offset);
  * The initialization code for the OTA storage driver.
  *
  */
-boolean emberAfOtaStorageDriverInitCallback(void);
+bool emberAfOtaStorageDriverInitCallback(void);
 /** @brief Ota Storage Driver Invalidate Image
  *
  * This callback invalidates the image stored on disk so that it will not be
@@ -1071,9 +1071,9 @@ EmberAfOtaStorageStatus emberAfOtaStorageDriverPrepareToResumeDownloadCallback(v
  * @param returnData A pointer where the data read from the device should be
  * written to.  Ver.: always
  */
-boolean emberAfOtaStorageDriverReadCallback(int32u offset,
-                                            int32u length,
-                                            int8u* returnData);
+bool emberAfOtaStorageDriverReadCallback(int32u offset,
+                                         int32u length,
+                                         int8u* returnData);
 /** @brief Ota Storage Driver Retrieve Last Stored Offset
  *
  * This callback defines the low-level means by which a device retrieves the
@@ -1094,9 +1094,9 @@ int32u emberAfOtaStorageDriverRetrieveLastStoredOffsetCallback(void);
  * @param length The length of the data to be written to the storage device.
  * Ver.: always
  */
-boolean emberAfOtaStorageDriverWriteCallback(const int8u* dataToWrite,
-                                             int32u offset,
-                                             int32u length);
+bool emberAfOtaStorageDriverWriteCallback(const int8u* dataToWrite,
+                                          int32u offset,
+                                          int32u length);
 /** @brief Ota Storage Finish Download
  *
  * This function indicates to the storage module that the download has finished.
@@ -1271,7 +1271,7 @@ void emberAfPartnerLinkKeyExchangeResponseCallback(EmberNodeId sender,
  * establishment is in progress.
  *
  */
-boolean emberAfPerformingKeyEstablishmentCallback(void);
+bool emberAfPerformingKeyEstablishmentCallback(void);
 /** @brief Post Attribute Change
  *
  * This function is called by the application framework after it changes an
@@ -1343,11 +1343,11 @@ EmberAfStatus emberAfPreAttributeChangeCallback(int8u endpoint,
  * @param message Pointer to the message payload  Ver.: always
  * @param messageLength Length of the message payload  Ver.: always
  */
-boolean emberAfPreCliSendCallback(EmberApsFrame* apsFrame,
-                                  EmberNodeId source,
-                                  EmberNodeId destination,
-                                  int8u* message,
-                                  int16u messageLength);
+bool emberAfPreCliSendCallback(EmberApsFrame* apsFrame,
+                               EmberNodeId source,
+                               EmberNodeId destination,
+                               int8u* message,
+                               int16u messageLength);
 /** @brief Pre Command Received
  *
  * This callback is the second in the Application Framework's message processing
@@ -1361,7 +1361,7 @@ boolean emberAfPreCliSendCallback(EmberApsFrame* apsFrame,
  *
  * @param cmd   Ver.: always
  */
-boolean emberAfPreCommandReceivedCallback(EmberAfClusterCommand* cmd);
+bool emberAfPreCommandReceivedCallback(EmberAfClusterCommand* cmd);
 /** @brief Pre Message Received
  *
  * This callback is the first in the Application Framework's message processing
@@ -1385,7 +1385,7 @@ boolean emberAfPreCommandReceivedCallback(EmberAfClusterCommand* cmd);
  *
  * @param incomingMessage   Ver.: always
  */
-boolean emberAfPreMessageReceivedCallback(EmberAfIncomingMessage* incomingMessage);
+bool emberAfPreMessageReceivedCallback(EmberAfIncomingMessage* incomingMessage);
 /** @brief Pre Message Send
  *
  * This function is called by the framework when it is about to pass a message
@@ -1405,8 +1405,8 @@ boolean emberAfPreMessageReceivedCallback(EmberAfIncomingMessage* incomingMessag
  * @param status A pointer to the status code value that will be returned to the
  * caller.  Ver.: always
  */
-boolean emberAfPreMessageSendCallback(EmberAfMessageStruct* messageStruct,
-                                      EmberStatus* status);
+bool emberAfPreMessageSendCallback(EmberAfMessageStruct* messageStruct,
+                                   EmberStatus* status);
 /** @brief Pre Ncp Reset
  *
  * This function will be called prior to the reset of the NCP by the host.
@@ -1425,10 +1425,10 @@ void emberAfPreNcpResetCallback(void);
  * @param message   Ver.: always
  * @param length   Ver.: always
  */
-boolean emberAfPreZDOMessageReceivedCallback(EmberNodeId emberNodeId,
-                                             EmberApsFrame* apsFrame,
-                                             int8u* message,
-                                             int16u length);
+bool emberAfPreZDOMessageReceivedCallback(EmberNodeId emberNodeId,
+                                          EmberApsFrame* apsFrame,
+                                          int8u* message,
+                                          int16u length);
 /** @brief Read Attributes Response
  *
  * This function is called by the application framework when a Read Attributes
@@ -1440,9 +1440,9 @@ boolean emberAfPreZDOMessageReceivedCallback(EmberNodeId emberNodeId,
  * Ver.: always
  * @param bufLen The length in bytes of the list.  Ver.: always
  */
-boolean emberAfReadAttributesResponseCallback(EmberAfClusterId clusterId,
-                                              int8u *buffer,
-                                              int16u bufLen);
+bool emberAfReadAttributesResponseCallback(EmberAfClusterId clusterId,
+                                           int8u *buffer,
+                                           int16u bufLen);
 /** @brief Read Reporting Configuration Command
  *
  * This function is called by the application framework when a Read Reporting
@@ -1451,7 +1451,7 @@ boolean emberAfReadAttributesResponseCallback(EmberAfClusterId clusterId,
  *
  * @param cmd   Ver.: always
  */
-boolean emberAfReadReportingConfigurationCommandCallback(const EmberAfClusterCommand *cmd);
+bool emberAfReadReportingConfigurationCommandCallback(const EmberAfClusterCommand *cmd);
 /** @brief Read Reporting Configuration Response
  *
  * This function is called by the application framework when a Read Reporting
@@ -1464,9 +1464,9 @@ boolean emberAfReadReportingConfigurationCommandCallback(const EmberAfClusterCom
  * records.  Ver.: always
  * @param bufLen The length in bytes of the list.  Ver.: always
  */
-boolean emberAfReadReportingConfigurationResponseCallback(EmberAfClusterId clusterId,
-                                                          int8u *buffer,
-                                                          int16u bufLen);
+bool emberAfReadReportingConfigurationResponseCallback(EmberAfClusterId clusterId,
+                                                       int8u *buffer,
+                                                       int16u bufLen);
 /** @brief Registration Abort
  *
  * This callback is called when the device should abort the registration
@@ -1483,7 +1483,7 @@ void emberAfRegistrationAbortCallback(void);
  *
  * @param success true if registration succeeded, false otherwise.  Ver.: always
  */
-void emberAfRegistrationCallback(boolean success);
+void emberAfRegistrationCallback(bool success);
 /** @brief Registration Start
  *
  * This callback is called when the device joins a network and the registration
@@ -1536,9 +1536,9 @@ void emberAfRemoveFromCurrentAppTasksCallback(EmberAfApplicationTask tasks);
  * always
  * @param bufLen The length in bytes of the list.  Ver.: always
  */
-boolean emberAfReportAttributesCallback(EmberAfClusterId clusterId,
-                                        int8u *buffer,
-                                        int16u bufLen);
+bool emberAfReportAttributesCallback(EmberAfClusterId clusterId,
+                                     int8u *buffer,
+                                     int16u bufLen);
 /** @brief Reporting Attribute Change
  *
  * This function is called by the framework when an attribute managed by the
@@ -1575,7 +1575,7 @@ void emberAfReportingAttributeChangeCallback(int8u endpoint,
  */
 void emberAfSecurityInitCallback(EmberInitialSecurityState *state,
                                  EmberExtendedSecurityBitmask *extended,
-                                 boolean trustCenter);
+                                 bool trustCenter);
 /** @brief Set Default Poll Control
  *
  * This function will set the default poll control for the current network to
@@ -1702,7 +1702,7 @@ void emberAfSetWakeTimeoutQsCallback(int16u wakeTimeoutQs);
  * to a new parent.
  *
  */
-boolean emberAfStartMoveCallback(void);
+bool emberAfStartMoveCallback(void);
 /** @brief Start Search For Joinable Network
  *
  * This function is called by the framework to search for joinable networks and
@@ -1754,7 +1754,7 @@ void emberAfTrustCenterKeepaliveAbortCallback(void);
  *
  * @param registrationComplete   Ver.: always
  */
-void emberAfTrustCenterKeepaliveUpdateCallback(boolean registrationComplete);
+void emberAfTrustCenterKeepaliveUpdateCallback(bool registrationComplete);
 /** @brief Write Attributes Response
  *
  * This function is called by the application framework when a Write Attributes
@@ -1766,7 +1766,7 @@ void emberAfTrustCenterKeepaliveUpdateCallback(boolean registrationComplete);
  * Ver.: always
  * @param bufLen The length in bytes of the list.  Ver.: always
  */
-boolean emberAfWriteAttributesResponseCallback(EmberAfClusterId clusterId,
-                                               int8u *buffer,
-                                               int16u bufLen);
+bool emberAfWriteAttributesResponseCallback(EmberAfClusterId clusterId,
+                                            int8u *buffer,
+                                            int16u bufLen);
 /** @} */ // end of global_callback

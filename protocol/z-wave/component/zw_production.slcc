@@ -4,25 +4,33 @@ category: Z-Wave
 description: defines and paths used for official z-wave package
 package: Z-Wave
 quality: production
+requires:
+  - name: zw_zpal_quality_mode
 provides:
-- name: zw_production
-- name: zw_quality_mode
+  - name: zw_production
+  - name: zw_quality_mode
+recommends:
+  - id: zw_zpal_production
 library:
-  - path: protocol/z-wave/ZWave/lib/libZWaveSlave_ZGM13.a
-    condition: [device_sdid_89, device_is_module]
-  - path: protocol/z-wave/ZWave/lib/libZWaveSlave_EFR32ZG13P32.a
-    condition: [efr32zg13p531f512gm32]
-  - path: protocol/z-wave/ZWave/lib/libZWaveSlave_EFR32ZG13P48.a
-    condition: [efr32zg13p531f512gm48]
-  - path: protocol/z-wave/ZWave/lib/libZWaveSlave_EFR32ZG13L.a
-    condition: [device_family_efr32zg13l]
-  - path: protocol/z-wave/ZWave/lib/libZWaveSlave_EFR32ZG13S.a
-    condition: [device_family_efr32zg13s]
-  - path: protocol/z-wave/ZWave/lib/libZWaveSlave_ZGM23A.a
-    condition: [zgm230sa27hnn, device_security_se]
-  - path: protocol/z-wave/ZWave/lib/libZWaveSlave_ZGM23A.a
-    condition: [zgm230sa27hgn, device_security_se]
-  - path: protocol/z-wave/ZWave/lib/libZWaveSlave_ZGM23B.a
-    condition: [zgm230sb27hgn, device_security_vault]
-  - path: protocol/z-wave/ZWave/lib/libZWaveSlave_EFR32ZG23.a
-    condition: [device_family_efr32zg23]
+  # Release build
+  ## End devices
+  ### Series 1
+  - path: protocol/z-wave/ZWave/lib/libZWaveSlave_700s.a
+    condition: [device_series_1, zw_end_device]
+  ### Series 2
+  - path: protocol/z-wave/ZWave/lib/libZWaveSlave_800s.a
+    condition: [device_series_2, zw_end_device]
+  ## Portable Controllers
+  ### Series 1
+  - path: protocol/z-wave/ZWave/lib/libZWaveControllerPortable_700s.a
+    condition: [device_series_1, zw_portable_controller]
+  ### Series 2
+  - path: protocol/z-wave/ZWave/lib/libZWaveControllerPortable_800s.a
+    condition: [device_series_2, zw_portable_controller]
+  ## Controllers
+  ### Series 1
+  - path: protocol/z-wave/ZWave/lib/libZWaveController_700s.a
+    condition: [device_series_1, zw_controller]
+  ### Series 2
+  - path: protocol/z-wave/ZWave/lib/libZWaveController_800s.a
+    condition: [device_series_2, zw_controller]

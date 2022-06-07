@@ -34,10 +34,12 @@
 
 #if defined(SEMAILBOX_PRESENT) || defined(CRYPTOACC_PRESENT) || defined(DOXYGEN)
 
+#if !defined(SL_TRUSTZONE_NONSECURE)
 #if !defined(SE_MANAGER_CONFIG_FILE)
 #include "sl_se_manager_config.h"
 #else
 #include SE_MANAGER_CONFIG_FILE
+#endif
 #endif
 
 #if defined (SL_COMPONENT_CATALOG_PRESENT)
@@ -210,6 +212,11 @@ extern "C" {
   #define SL_SE_KEY_SLOT_VOLATILE_3 0x03 ///< Internal volatile slot 3
 #endif
 
+/// Minimum key slot value for internal keys
+#define SL_SE_KEY_SLOT_INTERNAL_MIN                   0xF7
+
+/// Internal TrustZone root key
+#define SL_SE_KEY_SLOT_TRUSTZONE_ROOT_KEY             0xF7
 /// Internal immutable application secure debug key
 #define SL_SE_KEY_SLOT_APPLICATION_SECURE_DEBUG_KEY   0xF8
 /// Internal immutable application AES-128 key (bootloader key)

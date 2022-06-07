@@ -31,7 +31,7 @@ class PhyFilters(IPhyFilter):
 
     #Studio white list (these PHYs show in Studio as proprietary starting points)
     simplicity_studio_phy_groups = ['Phys_Studio_Base', 'Phys_Studio_Base_Standard_SUNFSK', 'Phys_Studio_Connect',
-                                    'Phys_Studio_LongRange', 'Phys_Studio_MBus','Phys_Studio_WiSUN']
+                                    'Phys_Studio_LongRange', 'Phys_Studio_MBus','phys_studio_wisun_fan_1_0', 'phys_studio_wisun_han']
 
     # Special designation for simulation PHYs
     sim_tests_phy_groups = []

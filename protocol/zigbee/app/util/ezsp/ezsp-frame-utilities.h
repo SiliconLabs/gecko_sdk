@@ -394,4 +394,8 @@ void formatStructEmberPerDeviceDutyCycleIntoBytes(uint8_t maxDevices,
 // be a reference as well.
 void emAfFetchOrAppend(bool fetch, const char * format, ...);
 
+void appendEmberTokenData(EmberTokenData * tokenData);
+void fetchEmberTokenData(EmberTokenData * tokenData);
+void appendEmberTokenInfo(EmberTokenInfo *tokenInfo);
+void fetchEmberTokenInfo(EmberTokenInfo *tokenInfo);
 #endif // __EZSP_FRAME_UTILITIES_H__

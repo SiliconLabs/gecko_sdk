@@ -20,10 +20,15 @@
 
 /* The max length of a node mask*/
 #define MAX_NODEMASK_LENGTH       (ZW_MAX_NODES/NODEMASK_NODES_PER_BYTE)     // 29 bytes
-#define MAX_LR_NODEMASK_LENGTH    (ZW_MAX_NODES_LR/NODEMASK_NODES_PER_BYTE)
+#define MAX_LR_NODEMASK_LENGTH    (ZW_MAX_NODES_LR/NODEMASK_NODES_PER_BYTE)  // 128 bytes
 
 typedef uint8_t NODE_MASK_TYPE[MAX_NODEMASK_LENGTH];
 typedef uint8_t LR_NODE_MASK_TYPE[MAX_LR_NODEMASK_LENGTH];
+
+typedef struct {
+  NODE_MASK_TYPE      nodeMask;     /// List of Z-wAve nodes.
+  LR_NODE_MASK_TYPE   nodeMask_LR;  /// List of Z-Wave LR nodes.
+} NODE_MASK_TYPE_ALL;
 
 /****************************  NodeMask  ************************************
 ** Functions used to manipulate bits (Node ID) in a byte array (NodeMask array)

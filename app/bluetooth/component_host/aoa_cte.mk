@@ -1,7 +1,6 @@
 ################################################################################
 # AoA Constant Tone Extension (CTE) handler component                          #
 ################################################################################
-override CFLAGS += -DAOA_CTE
 
 override INCLUDEPATHS += \
 $(SDK_DIR)/app/bluetooth/common_host/aoa_cte \

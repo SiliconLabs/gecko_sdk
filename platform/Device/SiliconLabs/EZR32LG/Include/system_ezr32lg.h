@@ -52,7 +52,7 @@ extern "C" {
 
 /* Interrupt vectortable entry */
 typedef union {
-  void (*pFunc)(void);
+  void (*VECTOR_TABLE_Type)(void);
   void *topOfStack;
 } tVectorEntry;
 
@@ -61,13 +61,6 @@ typedef union {
  ******************************************************************************/
 
 extern uint32_t SystemCoreClock;    /**< System Clock Frequency (Core Clock) */
-
-#if defined(__VTOR_PRESENT) && (__VTOR_PRESENT == 1U)
-#if defined(__ICCARM__)    /* IAR requires the __vector_table symbol */
-#define __Vectors    __vector_table
-#endif
-extern const tVectorEntry __Vectors[];
-#endif
 
 /*******************************************************************************
  *****************************   PROTOTYPES   **********************************

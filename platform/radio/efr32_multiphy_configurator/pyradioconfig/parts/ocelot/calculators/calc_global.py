@@ -27,13 +27,17 @@ class CALC_Global_ocelot(CALC_Global_lynx):
         self._addModelVariable(model, 'ppnd_1', int, ModelVariableFormat.DECIMAL)
         self._addModelVariable(model, 'ppnd_2', int, ModelVariableFormat.DECIMAL)
         self._addModelVariable(model, 'ppnd_3', int, ModelVariableFormat.DECIMAL)
-
+        self._addModelVariable(model, 'ksi1'  , int, ModelVariableFormat.DECIMAL)
+        self._addModelVariable(model, 'ksi2'  , int, ModelVariableFormat.DECIMAL)
+        self._addModelVariable(model, 'ksi3'  , int, ModelVariableFormat.DECIMAL)
+        self._addModelVariable(model, 'ksi3wb', int, ModelVariableFormat.DECIMAL)
 
         # new actual variables for Ocelot
         self._addModelActual(model,    'digmix_res'            , float,   ModelVariableFormat.DECIMAL)
         self._addModelActual(model,    'syncacqwin'            , int,     ModelVariableFormat.DECIMAL)
         self._addModelActual(model,    'phscale'               , float,     ModelVariableFormat.DECIMAL)
-        self._addModelActual(model,    'ksi3wb'                , float,       ModelVariableFormat.DECIMAL)
+
+
         self._addModelActual(model,    'syncbits'               , int,     ModelVariableFormat.DECIMAL)
         self._addModelActual(model,    'pmacquingwin'               , int,     ModelVariableFormat.DECIMAL)
         self._addModelActual(model,    'afc_scale_tx'               , float,     ModelVariableFormat.DECIMAL)
@@ -658,5 +662,3 @@ class CALC_Global_ocelot(CALC_Global_lynx):
         self._addModelRegister(model, 'MODEM.SHAPING15.COEFF62', int, ModelVariableFormat.HEX)
         self._addModelRegister(model, 'MODEM.SHAPING15.COEFF63', int, ModelVariableFormat.HEX)
 
-    def calc_family_name(self, model):
-        model.vars.family.value = "ocelot"

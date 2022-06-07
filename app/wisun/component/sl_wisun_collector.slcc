@@ -11,7 +11,7 @@ provides:
   - name: sl_wisun_collector
 
 source:
-  - path: "sl_wisun_meter_collector.c"
+  - path: "sli_wisun_meter_collector.c"
   - path: "sl_wisun_collector.c"
   - path: "sl_wisun_coap_collector.c"
     condition:
@@ -27,7 +27,7 @@ source:
 include:
   - path: "."
     file_list:
-    - path: "sl_wisun_meter_collector.h"
+    - path: "sli_wisun_meter_collector.h"
     - path: "sl_wisun_collector.h"
     - path: "sl_wisun_coap_collector.h"
       condition:

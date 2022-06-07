@@ -9,6 +9,13 @@ description: >
   using the buttons. Timer status is reported on the
   virtual COM serial port.
 category: Example|Platform
+filter:
+  - name: "Device Type"
+    value: ["SoC"]
+  - name: "MCU"
+    value: ["32-bit MCU"]
+  - name: "Project Difficulty"
+    value: ["Beginner"]
 source:
   - path: app.c
   - path: main.c
@@ -18,6 +25,10 @@ include:
     file_list:
     - path: app.h
     - path: sleeptimer_app.h
+readme:
+  - path: readme.md
+ui_hints:
+  highlight: readme.md
 component:
   - id: sl_system
   - id: device_init

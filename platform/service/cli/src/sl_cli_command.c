@@ -35,7 +35,7 @@
 #include "sli_cli_io.h"
 #include "sli_cli_arguments.h"
 #include "sl_string.h"
-#include "em_common.h"
+#include "sl_common.h"
 #include <stdlib.h>
 #include <string.h>
 #include <ctype.h>
@@ -336,7 +336,7 @@ bool sl_cli_command_remove_command_group(sl_cli_handle_t handle, sl_cli_command_
 }
 
 // The following function is only needed if advanced input handling is enabled
-#if SL_CLI_ADVANCED_INPUT_HANDLING
+#if !defined(SL_CLI_DUT) && (SL_CLI_ADVANCED_INPUT_HANDLING == 1)
 int sl_cli_command_find_matches(sl_cli_handle_t handle,
                                 char *possible_matches,
                                 size_t possible_matches_size,

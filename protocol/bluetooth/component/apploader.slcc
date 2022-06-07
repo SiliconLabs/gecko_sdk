@@ -1,7 +1,8 @@
 id: "apploader"
-label: "AppLoader"
+label: "AppLoader application binary for EFR series 1 devices"
 package: "Bluetooth"
-description: "Bluetooth Apploader OTA DFU"
+description: >
+  Bluetooth Apploader application for OTA DFU.
 category: "Bluetooth|OTA"
 quality: "production"
 root_path: "protocol/bluetooth"
@@ -309,111 +310,13 @@ library:
       - "toolchain_iar"
       - "device_family_efr32mg14p"
       - "nvm3"
-#EFR32BG21
-  - path: "lib/EFR32BG21/GCC/binapploader.o"
-    condition:
-      - "toolchain_gcc"
-      - "device_family_efr32bg21"
-  - path: "lib/EFR32BG21/IAR/binapploader.o"
-    condition:
-      - "toolchain_iar"
-      - "device_family_efr32bg21"
-#BGM21
-  - path: "lib/EFR32BG21/GCC/binapploader.o"
-    condition:
-      - "toolchain_gcc"
-      - "device_family_bgm21"
-  - path: "lib/EFR32BG21/IAR/binapploader.o"
-    condition:
-      - "toolchain_iar"
-      - "device_family_bgm21"
-#EFR32MG21
-  - path: "lib/EFR32MG21/GCC/binapploader.o"
-    condition:
-      - "toolchain_gcc"
-      - "device_family_efr32mg21"
-  - path: "lib/EFR32MG21/IAR/binapploader.o"
-    condition:
-      - "toolchain_iar"
-      - "device_family_efr32mg21"
-#MGM21
-  - path: "lib/EFR32MG21/GCC/binapploader.o"
-    condition:
-      - "toolchain_gcc"
-      - "device_family_mgm21"
-  - path: "lib/EFR32MG21/IAR/binapploader.o"
-    condition:
-      - "toolchain_iar"
-      - "device_family_mgm21"
-#EFR32BG22
-  - path: "lib/EFR32BG22/GCC/binapploader.o"
-    condition:
-      - "toolchain_gcc"
-      - "device_family_efr32bg22"
-  - path: "lib/EFR32BG22/IAR/binapploader.o"
-    condition:
-      - "toolchain_iar"
-      - "device_family_efr32bg22"
-#BGM22
-  - path: "lib/EFR32BG22/GCC/binapploader.o"
-    condition:
-      - "toolchain_gcc"
-      - "device_family_bgm22"
-  - path: "lib/EFR32BG22/IAR/binapploader.o"
-    condition:
-      - "toolchain_iar"
-      - "device_family_bgm22"
-#EFR32MG22
-  - path: "lib/EFR32MG22/GCC/binapploader.o"
-    condition:
-      - "toolchain_gcc"
-      - "device_family_efr32mg22"
-  - path: "lib/EFR32MG22/IAR/binapploader.o"
-    condition:
-      - "toolchain_iar"
-      - "device_family_efr32mg22"
-#MGM22
-  - path: "lib/EFR32MG22/GCC/binapploader.o"
-    condition:
-      - "toolchain_gcc"
-      - "device_family_mgm22"
-  - path: "lib/EFR32MG22/IAR/binapploader.o"
-    condition:
-      - "toolchain_iar"
-      - "device_family_mgm22"
-#EFR32MG24
-  - path: "lib/EFR32MG24/GCC/binapploader.o"
-    condition:
-      - "toolchain_gcc"
-      - "device_family_efr32mg24"
-  - path: "lib/EFR32MG24/IAR/binapploader.o"
-    condition:
-      - "toolchain_iar"
-      - "device_family_efr32mg24"
-#EFR32BG24
-  - path: "lib/EFR32BG24/GCC/binapploader.o"
-    condition:
-      - "toolchain_gcc"
-      - "device_family_efr32bg24"
-  - path: "lib/EFR32BG24/IAR/binapploader.o"
-    condition:
-      - "toolchain_iar"
-      - "device_family_efr32bg24"
-#MGM24
-  - path: "lib/EFR32MG24/GCC/binapploader.o"
-    condition:
-      - "toolchain_gcc"
-      - "device_family_mgm24"
-  - path: "lib/EFR32MG24/IAR/binapploader.o"
-    condition:
-      - "toolchain_iar"
-      - "device_family_mgm24"
 provides:
   - name: "apploader"
 template_contribution:
   - name: "apploader_enable"
     value: 1
+    condition: [device_series_1]
   - name: "apploader_size"
     value: 4096
-  
+    condition: [device_series_1]
 

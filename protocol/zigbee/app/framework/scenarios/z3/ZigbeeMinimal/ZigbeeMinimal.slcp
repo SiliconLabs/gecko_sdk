@@ -1,8 +1,13 @@
 project_name: "ZigbeeMinimal"
-label: "ZigbeeMinimal"
+label: "Zigbee - SoC ZigbeeMinimal"
 package: "Zigbee"
 category: "Zigbee Application"
 quality: "production"
+
+description: >
+  This is a Zigbee minimal SoC network-layer application suitable as a 
+  starting point for new application development.
+author: "Silicon Laboratories, Inc."
 
 component:
   - id: "cli"
@@ -18,7 +23,6 @@ component:
   - id: "zigbee_pro_stack"
   - id: "zigbee_source_route"
   - id: "zigbee_zcl_framework_core"
-  - id: "zigbee_multi_network_stub"
   - id: "zigbee_binding_table"
   - id: "zigbee_counters"
   - id: "zigbee_network_steering"
@@ -63,10 +67,6 @@ config_file:
 include:
   - path: "./"
 
-description: |-
-  This is a Zigbee minimal SoC network-layer application suitable as a 
-  starting point for new application development.
-
 readme:
   - path: ./readme.html
 
@@ -74,3 +74,11 @@ ui_hints:
   highlight:
     - path: readme.html
       focus: false
+
+filter:
+  - name: "Wireless Technology"
+    value: ["Zigbee"]
+  - name: "Device Type"
+    value: ["SoC"]
+  - name: "Project Difficulty"
+    value: ["Advanced"]

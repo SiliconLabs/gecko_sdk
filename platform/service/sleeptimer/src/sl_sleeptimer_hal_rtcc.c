@@ -106,9 +106,14 @@ uint32_t sleeptimer_hal_get_compare(void)
  *****************************************************************************/
 void sleeptimer_hal_set_compare(uint32_t value)
 {
-  uint32_t counter = sleeptimer_hal_get_counter();
-  uint32_t compare = sleeptimer_hal_get_compare();
+  CORE_DECLARE_IRQ_STATE;
+  uint32_t counter;
+  uint32_t compare;
   uint32_t compare_value = value;
+
+  CORE_ENTER_CRITICAL();
+  counter = sleeptimer_hal_get_counter();
+  compare = sleeptimer_hal_get_compare();
   if (((RTCC_IntGet() & RTCC_IEN_CC1) != 0)
       || get_time_diff(compare, counter) > SLEEPTIMER_COMPARE_MIN_DIFF
       || compare == counter) {
@@ -121,6 +126,7 @@ void sleeptimer_hal_set_compare(uint32_t value)
     RTCC_ChannelCCVSet(1u, compare_value - 1u);
     sleeptimer_hal_enable_int(SLEEPTIMER_EVENT_COMP);
   }
+  CORE_EXIT_CRITICAL();
 
   if (cc_disabled) {
     RTCC->CC[1].CTRL |= RTCC_CC_CTRL_MODE_OUTPUTCOMPARE;

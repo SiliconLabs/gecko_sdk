@@ -9,7 +9,7 @@
 #include <zaf_event_helper.h>
 #include "events.h"
 #include <SizeOf.h>
-#include <ZAF_PM_Wrapper.h>
+#include <zpal_power_manager.h>
 
 //#define DEBUGPRINT
 #include <DebugPrint.h>
@@ -39,8 +39,7 @@
 /****************************************************************
  * STATIC VARIABLES
  ***************************************************************/
-static SPowerLock_t m_TaskPowerLock;
-
+static zpal_pm_handle_t task_power_lock;
 /****************************************************************
  * EXTERNAL VARIABLES (none preferred)
  ***************************************************************/
@@ -56,14 +55,14 @@ NO_RETURN static void executeThread(void)
 {
   for (;;)
   {
-    ZAF_PM_StayAwake(&m_TaskPowerLock, 0);
+    zpal_pm_stay_awake(task_power_lock, 0);
 
     ////////////////////////////////////
     //Do something user specific
     ////////////////////////////////////
 
     ZAF_EventHelperEventEnqueue(EVENT_APP_USERTASK_DATA_ACQUISITION_FINISHED);  // An event to be send to the main app.
-    ZAF_PM_Cancel(&m_TaskPowerLock);
+    zpal_pm_cancel(task_power_lock);
 
     vTaskDelay(pdMS_TO_TICKS(USER_TASK_WAKEUP_PERIOD));
   }
@@ -99,7 +98,7 @@ SensorPIR_DataAcquisitionTask(void* pUserTaskParam)
     vTaskDelay(pdMS_TO_TICKS(15));  // Value tuned to to the needed wait time!
   }
 
-  ZAF_PM_Register(&m_TaskPowerLock, PM_TYPE_PERIPHERAL);
+  task_power_lock = zpal_pm_register(ZPAL_PM_TYPE_DEEP_SLEEP);
 
   // Generate event that says the Data acquisition UserTask has started!
   if (ZAF_EventHelperEventEnqueue(EVENT_APP_USERTASK_DATA_ACQUISITION_READY))

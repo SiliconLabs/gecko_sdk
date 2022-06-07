@@ -205,7 +205,8 @@ class CALC_Misc_ocelot(CALC_Misc_lynx):
         self._reg_write(model.vars.MODEM_FRMSCHTIME_PMRSTSYCNEN, 0)
         self._reg_write(model.vars.MODEM_FRMSCHTIME_DSARSTSYCNEN, 0)
 
-        #RAC settings
+    def calc_clkmult_misc(self, model):
+        # RAC settings
         self._reg_write_default(model.vars.RAC_CLKMULTEN0_CLKMULTENDRVN)
         self._reg_write_default(model.vars.RAC_CLKMULTEN0_CLKMULTENDRVP)
         self._reg_write_default(model.vars.RAC_CLKMULTEN0_CLKMULTENREG3)

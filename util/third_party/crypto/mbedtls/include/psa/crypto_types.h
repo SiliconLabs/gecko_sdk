@@ -30,6 +30,13 @@
  *  limitations under the License.
  */
 
+#if defined(SL_TRUSTZONE_NONSECURE)
+
+/* The NonSecure app must use the crypto_types.h from the trusted-firmware-m repo. */
+#include "../../trusted-firmware-m/interface/include/psa/crypto_types.h"
+
+#else /* SL_TRUSTZONE_NONSECURE */
+
 #ifndef PSA_CRYPTO_TYPES_H
 #define PSA_CRYPTO_TYPES_H
 #include "mbedtls/private_access.h"
@@ -387,3 +394,5 @@ typedef uint16_t psa_key_derivation_step_t;
 /**@}*/
 
 #endif /* PSA_CRYPTO_TYPES_H */
+
+#endif /* SL_TRUSTZONE_NONSECURE */

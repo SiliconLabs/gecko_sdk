@@ -39,7 +39,7 @@
 //                              Macros and Typedefs
 // -----------------------------------------------------------------------------
 /// Display-specific constants
-#define GRAPHICS_MENU_DISP_SIZE        (12u)
+#define GRAPHICS_MENU_DISP_SIZE        (12U)
 
 // -----------------------------------------------------------------------------
 //                                Global Variables
@@ -51,7 +51,7 @@
 /*******************************************************************************
  * @brief Initializes the graphics stack.
  * @note This function will /hang/ if errors occur (usually
- *       caused by faulty displays.
+ *       caused by faulty displays).
  ******************************************************************************/
 void graphics_init(void);
 

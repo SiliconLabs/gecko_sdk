@@ -128,6 +128,11 @@ uint8_t sl_mac_lower_mac_convert_rssi_to_ed(uint8_t mac_index, int8_t rssi);
 
 bool emRadioPacketTraceEnabled(void);
 
+// This function will handle radio state for force sleep/wakeup calls
+// to the device when component zigbee_force_sleep_and_wakeup is enabled
+// sleep is TRUE for force-sleep and FALSE to undo force-sleep
+void sli_mac_lower_mac_force_sleep(bool sleep);
+
 //------------------------------------------------------------------------------
 // zigbee only:
 
@@ -268,8 +273,6 @@ bool sl_mac_lower_mac_channel_is_valid(uint8_t mac_index, uint8_t mac_page_chan)
 
 sl_status_t sl_mac_set_cca_mode(uint8_t ccaMode);
 
-sl_status_t sl_mac_enable_duty_cycling(void);
-
 // CSL related structs and APIs
 typedef struct {
   uint16_t frame_type : 3;
@@ -333,5 +336,21 @@ bool sl_mac_802154_filter(uint8_t *packet);
 #define sli_mac_set_event_delay_ms(x, y) emberEventControlSetDelayMS(x, y)
 #define sli_mac_event_is_active(x) emberEventControlGetActive(x)
 #endif
+
+#ifdef SL_COMPONENT_CATALOG_PRESENT
+#include "sl_component_catalog.h"
+#endif
+
+#ifdef RAIL_MUX // from jam
+#define SL_CATALOG_RAIL_MULTIPLEXER_PRESENT 1
+#endif
+
+#ifdef SL_CATALOG_RAIL_MULTIPLEXER_PRESENT
+sl_status_t sli_lower_mac_lock_radio (void);
+sl_status_t sli_lower_mac_unlock_radio (void);
+#else
+#define sli_lower_mac_lock_radio() SL_STATUS_OK
+#define sli_lower_mac_unlock_radio() SL_STATUS_OK
+#endif //SL_CATALOG_RAIL_MULTIPLEXER_PRESENT
 
 #endif //LOWER_MAC_H

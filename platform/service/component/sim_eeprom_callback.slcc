@@ -10,7 +10,7 @@ requires:
   - name: device_series_1
 root_path: ./
 source:
-  - path: platform/service/sim_eeprom_callback/src/sl_sim_eeprom_callback.c
+  - path: platform/service/sim_eeprom/sim_eeprom_callback/src/sl_sim_eeprom_callback.c
 template_contribution:
   - name: component_catalog
     value: sim_eeprom_callback

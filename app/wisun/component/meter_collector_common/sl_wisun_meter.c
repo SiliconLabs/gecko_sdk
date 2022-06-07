@@ -35,7 +35,8 @@
 #include <string.h>
 #include "em_device.h"
 #include "sl_wisun_meter.h"
-#if !defined(_SILICON_LABS_GECKO_INTERNAL_SDID_220)
+#include "sl_component_catalog.h"
+#if defined(SL_CATALOG_TEMP_SENSOR_PRESENT)
   #include "sl_wisun_rht_measurement.h"
 #endif
 
@@ -64,7 +65,7 @@ static sl_wisun_meter_hnd_t _meter_hnd = { 0 };
 void sl_wisun_meter_init(void)
 {
   // Init meter-collector common component
-#if defined(_SILICON_LABS_GECKO_INTERNAL_SDID_220)
+#if !defined(SL_CATALOG_TEMP_SENSOR_PRESENT)
   sl_wisun_meter_set_initializer(&_meter_hnd, NULL);
 #else
   sl_wisun_meter_set_initializer(&_meter_hnd, sl_wisun_rht_init);
@@ -82,7 +83,7 @@ SL_WEAK void sl_wisun_meter_gen_packet_id(sl_wisun_meter_packet_t *packet)
 /* Measure temperature */
 SL_WEAK void sl_wisun_meter_get_temperature(sl_wisun_meter_packet_t *packet)
 {
-#if defined(_SILICON_LABS_GECKO_INTERNAL_SDID_220)
+#if !defined(SL_CATALOG_TEMP_SENSOR_PRESENT)
   /* Dummy temperature values table */
   static const uint16_t dummy_temp[] = { 32500U, 31200U, 29300U, 30000U, 28100U };
   static const uint16_t dummy_temp_size = sizeof(dummy_temp) / sizeof(uint16_t);
@@ -101,7 +102,7 @@ SL_WEAK void sl_wisun_meter_get_temperature(sl_wisun_meter_packet_t *packet)
 /* Measure relative humidity */
 SL_WEAK void sl_wisun_meter_get_humidity(sl_wisun_meter_packet_t *packet)
 {
-#if defined(_SILICON_LABS_GECKO_INTERNAL_SDID_220)
+#if !defined(SL_CATALOG_TEMP_SENSOR_PRESENT)
   /* Dummy humidity values table */
   static const uint16_t dummy_hum[] = { 40500U, 41200U, 39300U, 38000U, 37100U };
   static const uint16_t dummy_hum_size = sizeof(dummy_hum) / sizeof(uint16_t);

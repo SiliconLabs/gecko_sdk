@@ -46,6 +46,7 @@
 #include <openthread/netdata.h>
 #include <openthread/platform/toolchain.h>
 
+#include "common/const_cast.hpp"
 #include "common/encoding.hpp"
 #include "common/equatable.hpp"
 #include "net/icmp6.hpp"
@@ -56,14 +57,13 @@ using ot::Encoding::BigEndian::HostSwap16;
 using ot::Encoding::BigEndian::HostSwap32;
 
 namespace ot {
-
 namespace BorderRouter {
-
 namespace RouterAdv {
 
+typedef NetworkData::RoutePreference RoutePreference; ///< Route Preference
+
 /**
- * This class represents the variable length options in Neighbor
- * Discovery messages.
+ * This class represents the variable length options in Neighbor Discovery messages.
  *
  * @sa PrefixInfoOption
  * @sa RouteInfoOption
@@ -79,23 +79,10 @@ public:
         kRouteInfo  = 24, ///< Route Information Option.
     };
 
-    static constexpr uint8_t kLengthUnit = 8; ///< The unit of length in octets.
+    static constexpr uint16_t kLengthUnit = 8; ///< The unit of length in octets.
 
     /**
-     * This constructor initializes the option with given type and length.
-     *
-     * @param[in]  aType    The type of this option.
-     * @param[in]  aLength  The length of this option in unit of 8 octets.
-     *
-     */
-    explicit Option(Type aType, uint8_t aLength = 0)
-        : mType(aType)
-        , mLength(aLength)
-    {
-    }
-
-    /**
-     * This method returns the type of this option.
+     * This method gets the option type.
      *
      * @returns  The option type.
      *
@@ -103,20 +90,28 @@ public:
     Type GetType(void) const { return mType; }
 
     /**
-     * This method sets the size of the option (in bytes).
+     * This method sets the option type.
      *
-     * Since the option must end on their natural 64-bits boundaries,
-     * the actual length set to the option is padded to (aSize + 7) / 8 * 8.
+     * @param[in] aType  The option type.
      *
-     * @param[in]  aSize  The size of the option in unit of 1 byte.
+     *
+     */
+    void SetType(Type aType) { mType = aType; }
+
+    /**
+     * This method sets the length based on a given total option size in bytes.
+     *
+     * Th option must end on a 64-bit boundary, so the length is derived as `(aSize + 7) / 8 * 8`.
+     *
+     * @param[in]  aSize  The size of option in bytes.
      *
      */
     void SetSize(uint16_t aSize) { mLength = static_cast<uint8_t>((aSize + kLengthUnit - 1) / kLengthUnit); }
 
     /**
-     * This method returns the size of the option (in bytes).
+     * This method returns the size of the option in bytes.
      *
-     * @returns  The size of the option in unit of 1 byte.
+     * @returns  The size of the option in bytes.
      *
      */
     uint16_t GetSize(void) const { return mLength * kLengthUnit; }
@@ -150,72 +145,81 @@ public:
     static const Option *GetNextOption(const Option *aCurOption, const uint8_t *aBuffer, uint16_t aBufferLength);
 
     /**
-     * This method tells whether this option is valid.
+     * This method indicates whether or not this option is valid.
      *
-     * @return  A boolean that indicates whether this option is valid.
+     * @retval TRUE   The option is valid.
+     * @retval FALSE  The option is not valid.
      *
      */
     bool IsValid(void) const { return mLength > 0; }
 
 private:
     Type    mType;   // Type of the option.
-    uint8_t mLength; // Length of the option in unit of 8 octets,
-                     // including the `type` and `length` fields.
+    uint8_t mLength; // Length of the option in unit of 8 octets, including the `mType` and `mLength` fields.
 } OT_TOOL_PACKED_END;
 
 /**
  * This class represents the Prefix Information Option.
  *
- * See section 4.6.2 of RFC 4861 for definition of this option.
- * https://tools.ietf.org/html/rfc4861#section-4.6.2
+ * See section 4.6.2 of RFC 4861 for definition of this option [https://tools.ietf.org/html/rfc4861#section-4.6.2]
  *
  */
 OT_TOOL_PACKED_BEGIN
-class PrefixInfoOption : public Option
+class PrefixInfoOption : public Option, private Clearable<PrefixInfoOption>
 {
 public:
-    /**
-     * This constructor initializes this option with zero prefix
-     * length, valid lifetime and preferred lifetime.
-     *
-     */
-    PrefixInfoOption(void);
+    static constexpr Type kType = Type::kPrefixInfo; ///< Prefix Information Option Type.
 
     /**
-     * This method returns the on-link flag.
-     *
-     * @returns  A boolean which indicates whether the on-link flag is set.
+     * This method initializes the Prefix Info option with proper type and length and sets all other fields to zero.
      *
      */
-    bool GetOnLink(void) const { return (mReserved1 & kOnLinkFlagMask) != 0; }
+    void Init(void);
+
+    /**
+     * This method indicates whether or not the on-link flag is set.
+     *
+     * @retval TRUE  The on-link flag is set.
+     * @retval FALSE The on-link flag is not set.
+     *
+     */
+    bool IsOnLinkFlagSet(void) const { return (mFlags & kOnLinkFlagMask) != 0; }
 
     /**
      * This method sets the on-link (L) flag.
      *
-     * @param[in]  aOnLink  A boolean indicates whether the prefix is on-link or off-link.
-     *
      */
-    void SetOnLink(bool aOnLink);
+    void SetOnLinkFlag(void) { mFlags |= kOnLinkFlagMask; }
 
     /**
-     * This method returns the autonomous address-configuration (A) flag.
-     *
-     * @returns  A boolean which indicates whether the A flag is set.
+     * This method clears the on-link (L) flag.
      *
      */
-    bool GetAutoAddrConfig(void) const { return (mReserved1 & kAutoConfigFlagMask) != 0; }
+    void ClearOnLinkFlag(void) { mFlags &= ~kOnLinkFlagMask; }
+
+    /**
+     * This method indicates whether or not the autonomous address-configuration (A) flag is set.
+     *
+     * @retval TRUE  The auto address-config flag is set.
+     * @retval FALSE The auto address-config flag is not set.
+     *
+     */
+    bool IsAutoAddrConfigFlagSet(void) const { return (mFlags & kAutoConfigFlagMask) != 0; }
 
     /**
      * This method sets the autonomous address-configuration (A) flag.
      *
-     * @param[in]  aAutoAddrConfig  A boolean indicates whether this prefix can be used
-     *                              for SLAAC.
-     *
      */
-    void SetAutoAddrConfig(bool aAutoAddrConfig);
+    void SetAutoAddrConfigFlag(void) { mFlags |= kAutoConfigFlagMask; }
 
     /**
-     * This method set the valid lifetime of the prefix in seconds.
+     * This method clears the autonomous address-configuration (A) flag.
+     *
+     */
+    void ClearAutoAddrConfigFlag(void) { mFlags &= ~kAutoConfigFlagMask; }
+
+    /**
+     * This method sets the valid lifetime of the prefix in seconds.
      *
      * @param[in]  aValidLifetime  The valid lifetime in seconds.
      *
@@ -223,7 +227,7 @@ public:
     void SetValidLifetime(uint32_t aValidLifetime) { mValidLifetime = HostSwap32(aValidLifetime); }
 
     /**
-     * THis method returns the valid lifetime of the prefix in seconds.
+     * THis method gets the valid lifetime of the prefix in seconds.
      *
      * @returns  The valid lifetime in seconds.
      *
@@ -255,31 +259,52 @@ public:
     void SetPrefix(const Ip6::Prefix &aPrefix);
 
     /**
-     * This method returns the prefix in this option.
+     * This method gets the prefix in this option.
      *
-     * @returns  The IPv6 prefix in this option.
+     * @param[out] aPrefix   Reference to an `Ip6::Prefix` to return the prefix.
      *
      */
-    Ip6::Prefix GetPrefix(void) const;
+    void GetPrefix(Ip6::Prefix &aPrefix) const;
 
     /**
-     * This method tells whether this option is valid.
+     * This method indicates whether or not the option is valid.
      *
-     * @returns  A boolean indicates whether this option is valid.
+     * @retval TRUE  The option is valid
+     * @retval FALSE The option is not valid.
      *
      */
-    bool IsValid(void) const
-    {
-        return (GetSize() == sizeof(*this)) && (mPrefixLength <= OT_IP6_ADDRESS_SIZE * CHAR_BIT) &&
-               (GetPreferredLifetime() <= GetValidLifetime());
-    }
+    bool IsValid(void) const;
+
+    PrefixInfoOption(void) = delete;
 
 private:
-    static constexpr uint8_t kAutoConfigFlagMask = 0x40; // Bit mask of the Automatic Address Configure flag.
-    static constexpr uint8_t kOnLinkFlagMask     = 0x80; // Bit mask of the On-link flag.
+    // Prefix Information Option
+    //
+    //   0                   1                   2                   3
+    //   0 1 2 3 4 5 6 7 8 9 0 1 2 3 4 5 6 7 8 9 0 1 2 3 4 5 6 7 8 9 0 1
+    //  +-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
+    //  |     Type      |    Length     | Prefix Length |L|A| Reserved1 |
+    //  +-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
+    //  |                         Valid Lifetime                        |
+    //  +-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
+    //  |                       Preferred Lifetime                      |
+    //  +-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
+    //  |                           Reserved2                           |
+    //  +-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
+    //  |                                                               |
+    //  +                                                               +
+    //  |                                                               |
+    //  +                            Prefix                             +
+    //  |                                                               |
+    //  +                                                               +
+    //  |                                                               |
+    //  +-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
+
+    static constexpr uint8_t kAutoConfigFlagMask = 0x40; // Autonomous address-configuration flag.
+    static constexpr uint8_t kOnLinkFlagMask     = 0x80; // On-link flag.
 
     uint8_t      mPrefixLength;      // The prefix length in bits.
-    uint8_t      mReserved1;         // The reserved field.
+    uint8_t      mFlags;             // The flags field.
     uint32_t     mValidLifetime;     // The valid lifetime of the prefix.
     uint32_t     mPreferredLifetime; // The preferred lifetime of the prefix.
     uint32_t     mReserved2;         // The reserved field.
@@ -291,25 +316,21 @@ static_assert(sizeof(PrefixInfoOption) == 32, "invalid PrefixInfoOption structur
 /**
  * This class represents the Route Information Option.
  *
- * See section 2.3 of RFC 4191 for definition of this option.
- * https://tools.ietf.org/html/rfc4191#section-2.3
+ * See section 2.3 of RFC 4191 for definition of this option. [https://tools.ietf.org/html/rfc4191#section-2.3]
  *
  */
 OT_TOOL_PACKED_BEGIN
-class RouteInfoOption : public Option
+class RouteInfoOption : public Option, private Clearable<RouteInfoOption>
 {
 public:
-    /**
-     * This type represents a route preference.
-     *
-     */
-    typedef NetworkData::RoutePreference RoutePreference;
+    static constexpr uint16_t kMinSize = kLengthUnit;      ///< Minimum size (in bytes) of a Route Info Option
+    static constexpr Type     kType    = Type::kRouteInfo; ///< Route Information Option Type.
 
     /**
-     * This constructor initializes this option with zero prefix length.
+     * This method initializes the option setting the type and clearing (setting to zero) all other fields.
      *
      */
-    RouteInfoOption(void);
+    void Init(void);
 
     /**
      * This method sets the route preference.
@@ -320,7 +341,7 @@ public:
     void SetPreference(RoutePreference aPreference);
 
     /**
-     * This method returns the route preference.
+     * This method gets the route preference.
      *
      * @returns  The route preference.
      *
@@ -336,7 +357,7 @@ public:
     void SetRouteLifetime(uint32_t aLifetime) { mRouteLifetime = HostSwap32(aLifetime); }
 
     /**
-     * This method returns Route Lifetime in seconds.
+     * This method gets Route Lifetime in seconds.
      *
      * @returns  The Route Lifetime in seconds.
      *
@@ -344,7 +365,7 @@ public:
     uint32_t GetRouteLifetime(void) const { return HostSwap32(mRouteLifetime); }
 
     /**
-     * This method sets the prefix.
+     * This method sets the prefix and adjusts the option length based on the prefix length.
      *
      * @param[in]  aPrefix  The prefix contained in this option.
      *
@@ -352,12 +373,12 @@ public:
     void SetPrefix(const Ip6::Prefix &aPrefix);
 
     /**
-     * This method returns the prefix in this option.
+     * This method gets the prefix in this option.
      *
-     * @returns  The IPv6 prefix in this option.
+     * @param[out] aPrefix   Reference to an `Ip6::Prefix` to return the prefix.
      *
      */
-    Ip6::Prefix GetPrefix(void) const;
+    void GetPrefix(Ip6::Prefix &aPrefix) const;
 
     /**
      * This method tells whether this option is valid.
@@ -367,27 +388,72 @@ public:
      */
     bool IsValid(void) const;
 
+    /**
+     * This static method calculates the minimum option length for a given prefix length.
+     *
+     * The option length (which is in unit of 8 octets) can be 1, 2, or 3 depending on the prefix length. It can be 1
+     * for a zero prefix length, 2 if the prefix length is not greater than 64, and 3 otherwise.
+     *
+     * @param[in] aPrefixLength   The prefix length (in bits).
+     *
+     * @returns The option length (in unit of 8 octet) for @p aPrefixLength.
+     *
+     */
+    static uint8_t OptionLengthForPrefix(uint8_t aPrefixLength);
+
+    /**
+     * This static method calculates the minimum option size (in bytes) for a given prefix length.
+     *
+     * @param[in] aPrefixLength   The prefix length (in bits).
+     *
+     * @returns The option size (in bytes) for @p aPrefixLength.
+     *
+     */
+    static uint16_t OptionSizeForPrefix(uint8_t aPrefixLength)
+    {
+        return kLengthUnit * OptionLengthForPrefix(aPrefixLength);
+    }
+
+    RouteInfoOption(void) = delete;
+
 private:
+    // Route Information Option
+    //
+    //   0                   1                   2                   3
+    //   0 1 2 3 4 5 6 7 8 9 0 1 2 3 4 5 6 7 8 9 0 1 2 3 4 5 6 7 8 9 0 1
+    //  +-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
+    //  |     Type      |    Length     | Prefix Length |Resvd|Prf|Resvd|
+    //  +-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
+    //  |                        Route Lifetime                         |
+    //  +-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
+    //  |                   Prefix (Variable Length)                    |
+    //  .                                                               .
+    //  .                                                               .
+    //  +-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
+
     static constexpr uint8_t kPreferenceOffset = 3;
     static constexpr uint8_t kPreferenceMask   = 3 << kPreferenceOffset;
 
-    uint8_t      mPrefixLength;  // The prefix length in bits.
-    uint8_t      mReserved;      // The reserved field.
-    uint32_t     mRouteLifetime; // The lifetime in seconds.
-    Ip6::Address mPrefix;        // The prefix.
+    uint8_t *      GetPrefixBytes(void) { return AsNonConst(AsConst(this)->GetPrefixBytes()); }
+    const uint8_t *GetPrefixBytes(void) const { return reinterpret_cast<const uint8_t *>(this) + sizeof(*this); }
+
+    uint8_t  mPrefixLength;  // The prefix length in bits.
+    uint8_t  mResvdPrf;      // The preference.
+    uint32_t mRouteLifetime; // The lifetime in seconds.
+    // Followed by prefix bytes (variable length).
+
 } OT_TOOL_PACKED_END;
 
-static_assert(sizeof(RouteInfoOption) == 24, "invalid RouteInfoOption structure");
+static_assert(sizeof(RouteInfoOption) == 8, "invalid RouteInfoOption structure");
 
 /**
- * This class implements the Router Advertisement message.
+ * This class implements the Router Advertisement message header.
  *
- * See section 4.2 of RFC 4861 for definition of this message.
- * https://tools.ietf.org/html/rfc4861#section-4.2
+ * See section 2.2 of RFC 4191 [https://datatracker.ietf.org/doc/html/rfc4191]
  *
  */
 OT_TOOL_PACKED_BEGIN
-class RouterAdvMessage : public Unequatable<RouterAdvMessage>
+class RouterAdvMessage : public Equatable<RouterAdvMessage>, private Clearable<RouterAdvMessage>
 {
 public:
     /**
@@ -409,70 +475,70 @@ public:
      * @param[in]  aChecksum  The checksum value.
      *
      */
-    void SetChecksum(uint16_t aChecksum) { mHeader.SetChecksum(aChecksum); }
+    void SetChecksum(uint16_t aChecksum) { mChecksum = HostSwap16(aChecksum); }
 
     /**
      * This method sets the Router Lifetime in seconds.
      *
-     * Zero Router Lifetime means we are not a default router.
-     *
      * @param[in]  aRouterLifetime  The router lifetime in seconds.
      *
      */
-    void SetRouterLifetime(uint16_t aRouterLifetime)
-    {
-        mHeader.mData.m16[kRouteLifetimeIdx] = HostSwap16(aRouterLifetime);
-    }
+    void SetRouterLifetime(uint16_t aRouterLifetime) { mRouterLifetime = HostSwap16(aRouterLifetime); }
 
     /**
-     * This method returns the Router Lifetime.
+     * This method gets the Router Lifetime (in seconds).
      *
-     * Zero Router Lifetime means we are not a default router.
+     * Router Lifetime set to zero indicates that the sender is not a default router.
      *
      * @returns  The router lifetime in seconds.
      *
      */
-    uint16_t GetRouterLifetime(void) const { return HostSwap16(mHeader.mData.m16[kRouteLifetimeIdx]); }
+    uint16_t GetRouterLifetime(void) const { return HostSwap16(mRouterLifetime); }
 
     /**
-     * This method returns the Managed Address Configuration ('m') flag.
+     * This method sets the default router preference.
      *
-     * @returns  A boolean which indicates whether the 'm' flag is set.
+     * @param[in]  aPreference  The router preference.
      *
      */
-    bool GetManagedAddrConfig(void) const { return (mHeader.mData.m8[kReservedIdx] & kManagedAddressConfigMask) != 0; }
+    void SetDefaultRouterPreference(RoutePreference aPreference);
 
     /**
-     * This method overloads the assignment operator.
+     * This method gets the default router preference.
+     *
+     * @returns  The router preference.
      *
      */
-    const RouterAdvMessage &operator=(const RouterAdvMessage &aOther);
-
-    /**
-     * This method overloads operator `==` to evaluate whether or not
-     * two instances of `RouterAdvMessage` are equal.
-     *
-     * @param[in]  aOther  The other `RouterAdvMessage` instance to compare with.
-     *
-     * @retval TRUE   If the two `RouterAdvMessage` instances are equal.
-     * @retval FALSE  If the two `RouterAdvMessage` instances are not equal.
-     *
-     */
-    bool operator==(const RouterAdvMessage &aOther) const;
+    RoutePreference GetDefaultRouterPreference(void) const;
 
 private:
-    // The index of Route Lifetime in ICMPv6 Header Data. In unit of 2 octets.
-    static constexpr uint8_t kRouteLifetimeIdx = 1;
+    // Router Advertisement Message
+    //
+    //   0                   1                   2                   3
+    //   0 1 2 3 4 5 6 7 8 9 0 1 2 3 4 5 6 7 8 9 0 1 2 3 4 5 6 7 8 9 0 1
+    //  +-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
+    //  |     Type      |     Code      |          Checksum             |
+    //  +-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
+    //  | Cur Hop Limit |M|O|H|Prf|Resvd|       Router Lifetime         |
+    //  +-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
+    //  |                         Reachable Time                        |
+    //  +-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
+    //  |                          Retrans Timer                        |
+    //  +-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
+    //  |   Options ...
+    //  +-+-+-+-+-+-+-+-+-+-+-+-
 
-    // The index of Reserved byte in ICMPv6 Header Data. In unit of 1 octet.
-    static constexpr uint8_t kReservedIdx = 1;
+    static constexpr uint8_t kPreferenceOffset = 3;
+    static constexpr uint8_t kPreferenceMask   = 3 << kPreferenceOffset;
 
-    // The bitmask of the Managed Address Configuration ('m') flag.
-    static constexpr uint8_t kManagedAddressConfigMask = 0x80;
-
-    Ip6::Icmp::Header mHeader;        // The common ICMPv6 header.
-    uint32_t          mReachableTime; // The reachable time. In milliseconds.
-    uint32_t          mRetransTimer;  // The retransmission timer. In milliseconds.
+    uint8_t  mType;
+    uint8_t  mCode;
+    uint16_t mChecksum;
+    uint8_t  mCurHopLimit;
+    uint8_t  mFlags;
+    uint16_t mRouterLifetime;
+    uint32_t mReachableTime;
+    uint32_t mRetransTimer;
 } OT_TOOL_PACKED_END;
 
 static_assert(sizeof(RouterAdvMessage) == 16, "invalid RouterAdvMessage structure");
@@ -501,9 +567,7 @@ private:
 static_assert(sizeof(RouterSolicitMessage) == 8, "invalid RouterSolicitMessage structure");
 
 } // namespace RouterAdv
-
 } // namespace BorderRouter
-
 } // namespace ot
 
 #endif // OPENTHREAD_CONFIG_BORDER_ROUTING_ENABLE

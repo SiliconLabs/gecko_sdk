@@ -26,7 +26,7 @@
 #include "mbedtls/private_access.h"
 #include "string.h"
 #if defined(SEMAILBOX_PRESENT) && (_SILICON_LABS_SECURITY_FEATURE == _SILICON_LABS_SECURITY_FEATURE_VAULT)
-#include "sli_se_opaque_types.h"
+#include "sl_psa_values.h"
 #endif
 
 // -----------------------------------------------------------------------------

@@ -17,9 +17,17 @@
 #ifndef BTL_SPI_CONTROLLER_USART_DRIVER_CONFIG_H
 #define BTL_SPI_CONTROLLER_USART_DRIVER_CONFIG_H
 
+// <<< Use Configuration Wizard in Context Menu >>>
+
+// <h>SPI Controller USART Driver
+
 // <o SL_USART_EXTFLASH_FREQUENCY> Frequency
 // <i> Default: 6400000
 #define SL_USART_EXTFLASH_FREQUENCY           2000000U
+
+// </h>
+
+// <<< end of configuration section >>>
 
 // <<< sl:start pin_tool >>>
 // <usart signal=TX,RX,CLK,(CS)> SL_USART_EXTFLASH

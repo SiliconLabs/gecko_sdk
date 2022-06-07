@@ -139,9 +139,14 @@ uint32_t sleeptimer_hal_get_compare(void)
  *****************************************************************************/
 void sleeptimer_hal_set_compare(uint32_t value)
 {
-  uint32_t counter = sleeptimer_hal_get_counter();
-  uint32_t compare_current = sleeptimer_hal_get_compare();
+  CORE_DECLARE_IRQ_STATE;
+  uint32_t counter;
+  uint32_t compare_current;
   uint32_t compare_new = value;
+
+  CORE_ENTER_CRITICAL();
+  counter = sleeptimer_hal_get_counter();
+  compare_current = sleeptimer_hal_get_compare();
 
   if (((BURTC_IntGet() & _BURTC_IF_COMP_MASK) != 0)
       || get_time_diff(compare_current, counter) > SLEEPTIMER_COMPARE_MIN_DIFF
@@ -157,6 +162,7 @@ void sleeptimer_hal_set_compare(uint32_t value)
     BURTC_CompareSet(0U, compare_new - 1);
     sleeptimer_hal_enable_int(SLEEPTIMER_EVENT_COMP);
   }
+  CORE_EXIT_CRITICAL();
 }
 
 /******************************************************************************

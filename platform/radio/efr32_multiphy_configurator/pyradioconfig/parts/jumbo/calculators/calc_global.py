@@ -254,9 +254,6 @@ class CALC_Global_jumbo(CALC_Global):
         self._addModelActual(model,   'if_center_digital_hz',             int,   ModelVariableFormat.DECIMAL)
         self._addModelActual(model,   'afc_lim_reset',                    int,   ModelVariableFormat.DECIMAL)
 
-        # Chip Identifier
-        self._addModelVariable(model, 'family',                           str,   ModelVariableFormat.ASCII)
-
     def _add_SHAPING_regs(self, model):
 
         self._addModelRegister(model, 'MODEM.SHAPING2.COEFF9'	, int, ModelVariableFormat.HEX )
@@ -290,6 +287,3 @@ class CALC_Global_jumbo(CALC_Global):
         self._addModelRegister(model, 'MODEM.SHAPING6.COEFF37'	         , int, ModelVariableFormat.HEX )
         self._addModelRegister(model, 'MODEM.SHAPING6.COEFF38'	         , int, ModelVariableFormat.HEX )
         self._addModelRegister(model, 'MODEM.SHAPING6.COEFF39'	         , int, ModelVariableFormat.HEX )
-
-    def calc_family_name(self, model):
-        model.vars.family.value = "jumbo"

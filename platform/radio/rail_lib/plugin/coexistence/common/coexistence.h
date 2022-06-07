@@ -402,7 +402,7 @@ void COEX_HAL_CallAtomic(COEX_AtomicCallback_t cb, void *args);
 /**
  * Request permission to transmit from COEX master.
  *
- * @param[in] reqState Pointer to /ref COEX_ReqState_t structure.
+ * @param[in] reqState Pointer to \ref COEX_ReqState_t structure.
  *                     This structure should be zero initialized before its first use.
  * @param[in] coexReq This parameter is either ON, OFF, PRIORITY or FORCED. PRIORITY AND FORCED can be
  *                    combined with ON and OFF.
@@ -529,20 +529,6 @@ bool COEX_ConfigRadioHoldOff(COEX_GpioHandle_t gpioHandle);
 bool COEX_ConfigPhySelect(COEX_GpioHandle_t gpioHandle);
 
 /**
- * Configure the COEX Wifi Tx GPIO.
- *
- * @param[in] gpioHandle A GPIO instance handle.
- * @return This function returns true if the Wifi Tx GPIO
- *  was successfully configured, false otherwise.
- *
- * If the COEX_OPTION_SIGNAL_IDENTIFIER is enabled, deasserting
- * Wifi Tx will enable signal identifier for 802.15.4 signal detection.
- *
- * @note Pass NULL to disable the COEX Wifi Tx GPIO.
- */
-bool COEX_ConfigWifiTx(COEX_GpioHandle_t gpioHandle);
-
-/**
  * Set the COEX configuration options
  *
  * @param[in] options New COEX configuration options.
@@ -639,7 +625,7 @@ uint8_t COEX_GetDirectionalPriorityPulseWidth(void);
 /**
  * Get GPIO input override value.
  *
- * @param[in] gpioIndex /ref COEX_GpioIndex_t of COEX GPIO.
+ * @param[in] gpioIndex \ref COEX_GpioIndex_t of COEX GPIO.
  * @return This function returns the GPIO input override
  *  value.  The return is inverted if the selected GPIO is active low.
  */
@@ -648,7 +634,7 @@ bool COEX_GetGpioInputOverride(COEX_GpioIndex_t gpioIndex);
 /**
  * Set GPIO input override value.
  *
- * @param[in] gpioIndex /ref COEX_GpioIndex_t input value to override.
+ * @param[in] gpioIndex \ref COEX_GpioIndex_t input value to override.
  * @param[in] enabled value to return when selected GPIO input is read.
  *   Pass an inverted value if the selected GPIO is active low.
  * @return Return true if the override value was successfully set.

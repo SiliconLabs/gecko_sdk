@@ -55,6 +55,7 @@
 
 #include "backbone_router/bbr_leader.hpp"
 #include "common/locator.hpp"
+#include "common/log.hpp"
 #include "common/non_copyable.hpp"
 #include "net/netif.hpp"
 #include "thread/network_data.hpp"
@@ -254,27 +255,13 @@ public:
      */
     void SetDomainPrefixCallback(otBackboneRouterDomainPrefixCallback aCallback, void *aContext);
 
-#if OPENTHREAD_CONFIG_REFERENCE_DEVICE_ENABLE
-    /**
-     * This method configures the ability to increase or not the BBR Dataset Sequence Number when a
-     * BBR recovers its BBR Dataset from the Leader's Network Data.
-     *
-     * Note: available only when `OPENTHREAD_CONFIG_REFERENCE_DEVICE_ENABLE` is enabled.
-     *       Only used for certification.
-     *
-     * @param[in] aSkip  Whether to skip the increase of Sequence Number or not.
-     *
-     */
-    void ConfigSkipSeqNumIncrease(bool aSkip);
-#endif
-
 private:
     void SetState(BackboneRouterState aState);
     void RemoveService(void);
     void AddDomainPrefixToNetworkData(void);
     void RemoveDomainPrefixFromNetworkData(void);
     void SequenceNumberIncrease(void);
-#if (OPENTHREAD_CONFIG_LOG_LEVEL >= OT_LOG_LEVEL_INFO) && (OPENTHREAD_CONFIG_LOG_BBR == 1)
+#if OT_SHOULD_LOG_AT(OT_LOG_LEVEL_INFO)
     void LogBackboneRouterService(const char *aAction, Error aError);
     void LogDomainPrefix(const char *aAction, Error aError);
 #else
@@ -300,10 +287,6 @@ private:
     Ip6::Address                         mAllDomainBackboneRouters;
     otBackboneRouterDomainPrefixCallback mDomainPrefixCallback;
     void *                               mDomainPrefixCallbackContext;
-
-#if OPENTHREAD_CONFIG_REFERENCE_DEVICE_ENABLE
-    bool mSkipSeqNumIncrease : 1;
-#endif
 };
 
 } // namespace BackboneRouter

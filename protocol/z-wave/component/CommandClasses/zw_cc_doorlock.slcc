@@ -1,7 +1,8 @@
 id: zw_cc_doorlock
 label: DoorLock Command Class
 category: Z-Wave|Command Classes
-description: DoorLock Command Class!
+description: >
+  Door Lock Command Class is used to operate and configure a door lock device.
 package: Z-Wave
 quality: production
 source:
@@ -14,3 +15,5 @@ provides:
   - name: zw_cc_doorlock
 requires:
   - name: zw_core
+documentation:
+  url: "https://sdomembers.z-wavealliance.org/document/dl/638"

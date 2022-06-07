@@ -1188,7 +1188,7 @@ static Ecode_t ConfigGpio(UARTDRV_Handle_t handle, bool enable)
     if (handle->fcType == uartdrvFlowControlHw) {
       GPIO_PinModeSet(handle->ctsPort, handle->ctsPin, gpioModeInput, 0);
       GPIO_PinModeSet(handle->rtsPort, handle->rtsPin, gpioModePushPull, 0);
-      GPIO_IntConfig(handle->ctsPort, handle->ctsPin, true, true, true);
+      GPIO_ExtIntConfig(handle->ctsPort, handle->ctsPin, handle->ctsPin, true, true, true);
     } else if (handle->fcType == uartdrvFlowControlHwUart) {
       GPIO_PinModeSet(handle->ctsPort, handle->ctsPin, gpioModeInput, 0);
       GPIO_PinModeSet(handle->rtsPort, handle->rtsPin, gpioModePushPull, 0);
@@ -1201,7 +1201,7 @@ static Ecode_t ConfigGpio(UARTDRV_Handle_t handle, bool enable)
     if (handle->fcType == uartdrvFlowControlHw) {
       GPIO_PinModeSet(handle->ctsPort, handle->ctsPin, gpioModeDisabled, 0);
       GPIO_PinModeSet(handle->rtsPort, handle->rtsPin, gpioModeDisabled, 0);
-      GPIO_IntConfig(handle->ctsPort, handle->ctsPin, true, true, false);
+      GPIO_ExtIntConfig(handle->ctsPort, handle->ctsPin, handle->ctsPin, true, true, false);
     } else if (handle->fcType == uartdrvFlowControlHwUart) {
       GPIO_PinModeSet(handle->ctsPort, handle->ctsPin, gpioModeDisabled, 0);
       GPIO_PinModeSet(handle->rtsPort, handle->rtsPin, gpioModeDisabled, 0);
@@ -1824,7 +1824,7 @@ Ecode_t UARTDRV_InitEuart(UARTDRV_Handle_t handle,
     handle->txDmaSignal = dmadrvPeripheralSignal_EUART0_TXBL;
     handle->rxDmaSignal = dmadrvPeripheralSignal_EUART0_RXDATAV;
     uartAdvancedInit.dmaWakeUpOnRx = true;
-    uartAdvancedInit.dmaWakeUpOnTx = true;
+    uartAdvancedInit.dmaWakeUpOnTx = false;
     handle->txDmaActive = false;
     handle->rxDmaActive = false;
 #endif
@@ -1834,7 +1834,7 @@ Ecode_t UARTDRV_InitEuart(UARTDRV_Handle_t handle,
     handle->txDmaSignal = dmadrvPeripheralSignal_EUSART0_TXBL;
     handle->rxDmaSignal = dmadrvPeripheralSignal_EUSART0_RXDATAV;
     uartAdvancedInit.dmaWakeUpOnRx = true;
-    uartAdvancedInit.dmaWakeUpOnTx = true;
+    uartAdvancedInit.dmaWakeUpOnTx = false;
     handle->txDmaActive = false;
     handle->rxDmaActive = false;
 #endif
@@ -1844,7 +1844,7 @@ Ecode_t UARTDRV_InitEuart(UARTDRV_Handle_t handle,
     handle->txDmaSignal = dmadrvPeripheralSignal_EUSART1_TXBL;
     handle->rxDmaSignal = dmadrvPeripheralSignal_EUSART1_RXDATAV;
     uartAdvancedInit.dmaWakeUpOnRx = true;
-    uartAdvancedInit.dmaWakeUpOnTx = true;
+    uartAdvancedInit.dmaWakeUpOnTx = false;
     handle->txDmaActive = false;
     handle->rxDmaActive = false;
 #endif
@@ -1854,7 +1854,7 @@ Ecode_t UARTDRV_InitEuart(UARTDRV_Handle_t handle,
     handle->txDmaSignal = dmadrvPeripheralSignal_EUSART2_TXBL;
     handle->rxDmaSignal = dmadrvPeripheralSignal_EUSART2_RXDATAV;
     uartAdvancedInit.dmaWakeUpOnRx = true;
-    uartAdvancedInit.dmaWakeUpOnTx = true;
+    uartAdvancedInit.dmaWakeUpOnTx = false;
     handle->txDmaActive = false;
     handle->rxDmaActive = false;
 #endif
@@ -1864,7 +1864,7 @@ Ecode_t UARTDRV_InitEuart(UARTDRV_Handle_t handle,
     handle->txDmaSignal = dmadrvPeripheralSignal_EUSART3_TXBL;
     handle->rxDmaSignal = dmadrvPeripheralSignal_EUSART3_RXDATAV;
     uartAdvancedInit.dmaWakeUpOnRx = true;
-    uartAdvancedInit.dmaWakeUpOnTx = true;
+    uartAdvancedInit.dmaWakeUpOnTx = false;
     handle->txDmaActive = false;
     handle->rxDmaActive = false;
 #endif
@@ -1874,7 +1874,7 @@ Ecode_t UARTDRV_InitEuart(UARTDRV_Handle_t handle,
     handle->txDmaSignal = dmadrvPeripheralSignal_EUSART4_TXBL;
     handle->rxDmaSignal = dmadrvPeripheralSignal_EUSART4_RXDATAV;
     uartAdvancedInit.dmaWakeUpOnRx = true;
-    uartAdvancedInit.dmaWakeUpOnTx = true;
+    uartAdvancedInit.dmaWakeUpOnTx = false;
     handle->txDmaActive = false;
     handle->rxDmaActive = false;
 #endif
@@ -1900,7 +1900,8 @@ Ecode_t UARTDRV_InitEuart(UARTDRV_Handle_t handle,
   CMU_ClockEnable(handle->uartClock, true);
   if (initData->useLowFrequencyMode) {
     CMU_ClockEnable(cmuClock_LFRCO, true);
-#if defined(_SILICON_LABS_32B_SERIES_2_CONFIG_2)
+#if defined(_SILICON_LABS_32B_SERIES_2_CONFIG_2) \
+    || defined(_SILICON_LABS_32B_SERIES_2_CONFIG_7)
     CMU_ClockEnable(cmuClock_EM23GRPACLK, true);
     CMU_ClockSelectSet(cmuClock_EM23GRPACLK, cmuSelect_LFRCO);
     CMU_ClockSelectSet(handle->uartClock, cmuSelect_EM23GRPACLK);
@@ -1912,7 +1913,8 @@ Ecode_t UARTDRV_InitEuart(UARTDRV_Handle_t handle,
   #error "Please assign a LF clock to EUSART instance"
 #endif
   } else {
-#if defined(_SILICON_LABS_32B_SERIES_2_CONFIG_2)
+#if defined(_SILICON_LABS_32B_SERIES_2_CONFIG_2) \
+    || defined(_SILICON_LABS_32B_SERIES_2_CONFIG_7)
     CMU_ClockEnable(cmuClock_EM01GRPACLK, true);
     CMU_ClockSelectSet(handle->uartClock, cmuSelect_EM01GRPACLK);
 #elif defined(_SILICON_LABS_32B_SERIES_2_CONFIG_3)  \
@@ -2990,7 +2992,7 @@ sl_power_manager_on_isr_exit_t sl_uartdrv_sleep_on_isr_exit(void)
     for (handleIdx = 0; handleIdx < EMDRV_UARTDRV_MAX_DRIVER_INSTANCES; handleIdx++) {
       handle = uartdrvHandle[handleIdx];
       if (handle != NULL) {
-        if (handle->sleep == SL_POWER_MANAGER_SLEEP) {
+        if ((sl_power_manager_on_isr_exit_t)handle->sleep == SL_POWER_MANAGER_SLEEP) {
           handle->sleep = SL_POWER_MANAGER_IGNORE;
           result = SL_POWER_MANAGER_SLEEP;
         }

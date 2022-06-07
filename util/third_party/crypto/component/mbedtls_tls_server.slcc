@@ -1,12 +1,15 @@
 id: mbedtls_tls_server
 package: platform
-label: Mbed TLS Support for TLS Server
+label: TLS Server
 description: >-
   This component provides support for using TLS (as a server) in Mbed TLS.
-category: Platform|Security
+category: Platform|Security|Mbed TLS|Upper Layer
 quality: production
 provides:
   - name: mbedtls_tls_server
+  # Will not become compatible until upper layer TLS code only uses PSA APIs.
+  - name: tz_ns_incompatible
+    condition: [tz_secure_key_library_ns]
 requires:
   - name: mbedtls_tls
 template_contribution:

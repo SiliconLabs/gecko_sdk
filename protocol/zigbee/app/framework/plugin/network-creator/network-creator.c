@@ -257,7 +257,7 @@ static void handleScanComplete(EmberAfPluginScanDispatchScanResults *results)
     = emberAfPluginScanDispatchScanResultsGetScanType(results);
 
   // If then scan was unsuccessful...
-  if (results->status != EMBER_SUCCESS) {
+  if (results->status != SL_STATUS_OK) {
     // ...just turn off the channel on which the scan failed. The
     // network-creator will disregard this channel in the network
     // formation process.
@@ -268,7 +268,7 @@ static void handleScanComplete(EmberAfPluginScanDispatchScanResults *results)
     if (scanType == EMBER_ENERGY_SCAN) {
       results->status = tryToFormNetwork();
       // If we were not successful...
-      if (results->status != EMBER_SUCCESS) {
+      if (results->status != SL_STATUS_OK) {
         // ...then try the secondary mask if we were on the primary...
         // ...else fail because we tried both masks.
         if (!maskIsSecondary()) {

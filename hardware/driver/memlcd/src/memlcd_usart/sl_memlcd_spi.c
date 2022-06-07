@@ -23,6 +23,20 @@ sl_status_t sli_memlcd_spi_init(sli_memlcd_spi_handle_t *handle, int baudrate, U
   USART_InitSync_TypeDef init = USART_INITSYNC_DEFAULT;
   USART_TypeDef *usart = handle->usart;
 
+#if defined(_SILICON_LABS_32B_SERIES_1)
+  // take note if another driver has enable RX
+  uint32_t rxpen = usart->ROUTEPEN & _USART_ROUTEPEN_RXPEN_MASK;
+  uint32_t rxloc = usart->ROUTELOC0 & _USART_ROUTELOC0_RXLOC_MASK;
+#elif defined(_SILICON_LABS_32B_SERIES_2)
+#if USART_COUNT > 1
+  int usart_index = USART_NUM(usart);
+#else
+  int usart_index = 0;
+#endif
+  // take note if another driver has enable RX
+  uint32_t rxpen = GPIO->USARTROUTE[usart_index].ROUTEEN & _GPIO_USART_ROUTEEN_RXPEN_MASK;
+#endif
+
   CMU_ClockEnable(cmuClock_GPIO, true);
   CMU_ClockEnable(handle->clock, true);
 
@@ -39,23 +53,16 @@ sl_status_t sli_memlcd_spi_init(sli_memlcd_spi_handle_t *handle, int baudrate, U
   usart->ROUTE = (USART_ROUTE_CLKPEN | USART_ROUTE_TXPEN)
                  | (handle->loc << _USART_ROUTE_LOCATION_SHIFT);
 #elif defined(_SILICON_LABS_32B_SERIES_1)
-  // note if another driver has enable RX
-  uint32_t rxpen = usart->ROUTEPEN & _USART_ROUTEPEN_RXPEN_MASK;
+
   usart->ROUTELOC0 = (handle->mosi_loc << _USART_ROUTELOC0_TXLOC_SHIFT)
-                     | (handle->clk_loc << _USART_ROUTELOC0_CLKLOC_SHIFT);
+                     | (handle->clk_loc << _USART_ROUTELOC0_CLKLOC_SHIFT)
+                     | rxloc;
   usart->ROUTEPEN = USART_ROUTEPEN_TXPEN | USART_ROUTEPEN_CLKPEN | rxpen;
 #elif defined(_SILICON_LABS_32B_SERIES_2)
-#if USART_COUNT > 1
-  int usart_index = USART_NUM(usart);
-#else
-  int usart_index = 0;
-#endif
   GPIO->USARTROUTE[usart_index].TXROUTE = (handle->mosi_port << _GPIO_USART_TXROUTE_PORT_SHIFT)
                                           | (handle->mosi_pin << _GPIO_USART_TXROUTE_PIN_SHIFT);
   GPIO->USARTROUTE[usart_index].CLKROUTE = (handle->clk_port << _GPIO_USART_CLKROUTE_PORT_SHIFT)
                                            | (handle->clk_pin << _GPIO_USART_CLKROUTE_PIN_SHIFT);
-  // note if another driver has enable RX
-  uint32_t rxpen = GPIO->USARTROUTE[usart_index].ROUTEEN & _GPIO_USART_ROUTEEN_RXPEN_MASK;
   GPIO->USARTROUTE[usart_index].ROUTEEN = GPIO_USART_ROUTEEN_TXPEN | GPIO_USART_ROUTEEN_CLKPEN | rxpen;
 #endif
 
@@ -75,11 +82,7 @@ sl_status_t sli_memlcd_spi_tx(sli_memlcd_spi_handle_t *handle, const void *data,
   USART_TypeDef *usart = handle->usart;
 
   for (unsigned i = 0; i < len; i++) {
-#if defined(SL_MEMLCD_LPM013M126A)
-    USART_Tx(usart, buffer[i]);
-#else
     USART_Tx(usart, SL_RBIT8(buffer[i]));
-#endif
   }
 
   /* Note that at this point all the data is loaded into the fifo, this does

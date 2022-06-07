@@ -23,29 +23,36 @@ template_contribution:
 requires:
   - name: zw_build_mode
   - name: zw_quality_mode
+  - name: zw_role_type
   - name: zw_versions
+  - name: zw_series
+  - name: zw_target_boards
   - name: device_supports_zwave
   - name: sleeptimer
   - name: power_manager
   - name: freertos
   - name: bootloader_interface
-  - name: nvm3_default
   - name: emlib
   - name: status
+  - name: nvm3_default
   - name: rail_lib
   - name: rail_util_pa
-  - name: simple_led_core
-  - name: led
-  - name: mbedtls_sha1
   - name: psa_its
+    condition: [device_series_2]
   - name: psa_crypto
+    condition: [device_series_2]
   - name: psa_driver
+    condition: [device_series_2]
   - name: psa_crypto_ecdh
+    condition: [device_series_2]
   - name: psa_crypto_cmac
+    condition: [device_series_2]
   - name: psa_crypto_ccm
+    condition: [device_series_2]
   - name: psa_crypto_ecc_curve25519
+    condition: [device_series_2]
   - name: psa_builtin_key_support_se
-    condition: [device_has_semailbox]
+    condition: [device_series_2, device_has_semailbox]
 recommends:
   - id: zw_production
   - id: zw_release
@@ -54,15 +61,29 @@ include:
     file_list:
       - path: "ZW_security_api.h"
       - path: "ZW_typedefs.h"
-      - path: "ZW_classcmd.h"
       - path: "ZW_transport_api.h"
       - path: "ZW_basis_api.h"
-      - path: "ZW_radio_api.h"
       - path: "ZW_system_startup_api.h"
       - path: "ZW_application_transport_interface.h"
       - path: "ZW_slave_api.h"
       - path: "ZW_global_definitions.h"
       - path: "ZW_UserTask.h"
+  - path: "protocol/z-wave/PAL/inc"
+    file_list:
+      - path: "ZW_classcmd.h"
+      - path: "zpal_bootloader.h"
+      - path: "zpal_status.h"
+      - path: "zpal_entropy.h"
+      - path: "zpal_init.h"
+      - path: "zpal_misc.h"
+      - path: "zpal_nvm.h"
+      - path: "zpal_power_manager.h"
+      - path: "zpal_radio.h"
+      - path: "zpal_radio_utils.h"
+      - path: "zpal_retention_register.h"
+      - path: "zpal_uart.h"
+      - path: "zpal_watchdog.h"
+      - path: "ZW_classcmd.h"
   - path: "protocol/z-wave/Components/SwTimer"
     file_list:
       - path: "SwTimer.h"
@@ -83,37 +104,25 @@ include:
   - path: "protocol/z-wave/ZAF/ApplicationUtilities/PowerManagement"
     file_list:
       - path: "ZAF_PM_Wrapper.h"
-  - path: "protocol/z-wave/Components/PowerManager"
-    file_list:
-      - path: "PowerManager.h"
   - path: "protocol/z-wave/Components/Assert"
     file_list:
       - path: "Assert.h"
-  - path: "protocol/z-wave/ZAF/ApplicationUtilities/TargetSpecificIncludes"
-    file_list:
-      - path: "target_boards.h"
-      - path: "extension_board_8029a.h"
-      - path: "extension_board_8029a_efr32xg13.h"
-        condition: "device_sdid_89"
-      - path: "extension_board_8029a_efr32zg23.h"
-        condition: "device_sdid_210"
-      - path: "radio_board_zgm130s.h"
-        condition: "device_sdid_89"
-      - path: "radio_board_efr32zg23.h"
-        condition:
-          - "device_sdid_210"
-          - "device_security_vault"
   - path: "protocol/z-wave/ZAF/ApplicationUtilities/EventHandling"
     file_list:
       - path: "zaf_event_helper.h"
       - path: "zaf_job_helper.h"
-  - path: "protocol/z-wave/Processor/gecko/hal-config"
+  - path: "protocol/z-wave/platform/SiliconLabs/PAL/inc/application_properties"
+    file_list:
+      - path: "application_properties_config.h"
+  - path: "protocol/z-wave/platform/SiliconLabs/PAL/inc/hal-config"
     file_list:
       - path: "hal-config.h"
       - path: "hal-config-board-700.h"
-        condition: "device_sdid_89"
+        condition: [device_sdid_89]
+      - path: "hal-config-board-700.h"        
+        condition: [device_sdid_95]
       - path: "hal-config-board-800.h"
-        condition: "device_sdid_210"
+        condition: [device_sdid_210]
   - path: "platform/halconfig/inc/hal-config"
     file_list:
       - path: "hal-config-types.h"
@@ -127,80 +136,42 @@ include:
     file_list:
       - path: "ZAF_Common_interface.h"
       - path: "ZAF_Common_helper.h"
-  - path: "protocol/z-wave/Components/RetentionRegisterBank"
-    file_list:
-      - path: "RetentionRegisterBank.h"
   - path: "protocol/z-wave/Components/CRC"
     file_list:
       - path: "CRC.h"
   - path: "protocol/z-wave/Components/EventDistributor"
     file_list:
       - path: "EventDistributor.h"
+  - path: "protocol/z-wave/Components/SyncEvent"
+    file_list:
+      - path: "SyncEvent.h"
+  - path: "protocol/z-wave/Components/MfgTokens"
+    file_list:
+      - path: "MfgTokens.h"
+  - path: "protocol/z-wave/Components/Utils"
+    file_list:
+      - path: "Min2Max2.h"
 define:
   - name: EFR32ZG
     value: 1
-  - name: ZW_SLAVE_ENHANCED_232
+  - name: EFR32ZG14P
     value: 1
-  - name: ZW_SLAVE
-    value: 1
+    condition: [device_sdid_95]
   - name: EFR32ZG23
     value: 1
-    condition:
-      - "device_sdid_210"
-      - "device_security_vault"
-  - name: RADIO_BOARD_EFR32ZG23
-    value: 1
-    condition:
-      - "device_sdid_210"
-      - "device_security_vault"
-  - name: RADIO_BOARD_ZGM130S
-    value: 1
-    condition: "device_sdid_89"
-  - name: RADIO_BOARD_ZGM230SA
-    value: 1
-    condition:
-      - "device_sdid_210"
-      - "zgm230sa27hnn"
-      - "device_security_se"
-  - name: RADIO_BOARD_ZGM230SA
-    value: 1
-    condition:
-      - "device_sdid_210"
-      - "zgm230sa27hgn"
-      - "device_security_se"      
-  - name: RADIO_BOARD_ZGM230SB
-    value: 1
-    condition:
-      - "device_sdid_210"
-      - "zgm230sb27hgn"
-      - "device_security_vault"
+    condition: [device_sdid_210, device_security_vault]
   - name: ZGM23A
     value: 1
-    condition:
-      - "device_sdid_210"
-      - "zgm230sa27hnn"
-      - "device_security_se"
+    condition: [device_sdid_210, zgm230sa27hnn, device_security_se]
   - name: ZGM23A
     value: 1
-    condition:
-      - "device_sdid_210"
-      - "zgm230sa27hgn"
-      - "device_security_se"
+    condition: [device_sdid_210, zgm230sa27hgn, device_security_se]
   - name: ZGM23B
     value: 1
-    condition:
-      - "device_sdid_210"
-      - "zgm230sb27hgn"
-      - "device_security_vault"
+    condition: [device_sdid_210, zgm230sb27hgn, device_security_vault]
   - name: SL_SE_ASSUME_FW_AT_LEAST_2_1_7
     value: 1
-    condition:
-      - "device_sdid_210"
-
-  - name: EXT_BOARD_8029A
-    value: 1
-  - name: DISABLE_USART1
-    value: 1
+    condition: [device_sdid_210]
 # BUILDING_WITH_UC is used to ensure that non-UC builds still work as intended in the transition phase.
   - name: BUILDING_WITH_UC
     value: 1
@@ -209,18 +180,13 @@ define:
     value: enterPowerDown(ms)
   - name: configPOST_SLEEP_PROCESSING(ms)
     value: exitPowerDown(ms)
-  - name: ZWAVE_SERIES_700
-    condition: [device_supports_zwave, device_sdid_89]
-  - name: ZWAVE_SERIES_800
-    condition: [device_supports_zwave, device_sdid_210]
   - name: SL_IOSTREAM_UART_FLUSH_TX_BUFFER
   - name: CONFIG_MBEDTLS_USE_FREERTOS_PVCALLOC
 
-# Set GCC error flags as in CMake builds 
 toolchain_settings:
   - option: gcc_compiler_option
     value: "-s"
-  - option: optimize # options: none, debug, speed, size
+  - option: optimize
     value: debug
     condition: [zw_debug]
   - option: optimize
@@ -241,22 +207,20 @@ toolchain_settings:
     value: "-Werror=vla"
   - option: gcc_compiler_option
     value: "-Werror=unused-parameter"
+  # Platform code is not strict ISO C compliant
+  # - option: gcc_compiler_option
+  #   value: "-Wpedantic"
+  # Platform code contains implicit conversions that may alter a value
+  # - option: gcc_compiler_option
+  #   value: "-Wconversion"
+  - option: gcc_compiler_option
+    value: "-Wextra"
   # Allow implicit function declaration until freertos has an integration hook    
   - option: gcc_compiler_option
     value: "-Wno-implicit-function-declaration"
   # Linker flags
   - option: gcc_linker_option
     value: "-Wl,--start-group -lgcc -lc -Wl,--end-group"
-  # Studio warnings:
-  - tool: compiler
-    option: warnings.pedantic
-    value: true
-  - tool: compiler
-    option: warnings.conversion
-    value: true
-  - tool: compiler
-    option: warnings.extra
-    value: true
 
 provides:
   - name: zw_core
@@ -271,23 +235,21 @@ config_file:
     file_id: region_config
   - path: protocol/z-wave/config/zw_build_no.h
     file_id: build_no
-  # Default zw_config_rf that sets LR to 140
+  # Default to 20dbm
+  - path: protocol/z-wave/config/zw_rf/20dbm/zw_config_rf.h
+    file_id: config_rf
+  # Override with 14 dbm unless 20dbm opn
   - path: protocol/z-wave/config/zw_rf/zw_config_rf.h
-    file_id: config_rf
+    override:
+      component: zw_core
+      file_id: config_rf
     unless:
-    - brd4208a
-    - brd4209a
-    - brd4210a
-  - path: protocol/z-wave/config/zw_rf/20dbm/zw_config_rf.h
-    file_id: config_rf
-    condition:
-    - brd4208a
-  - path: protocol/z-wave/config/zw_rf/20dbm/zw_config_rf.h
-    file_id: config_rf
-    condition:
-    - brd4209a
-  - path: protocol/z-wave/config/zw_rf/20dbm/zw_config_rf.h
-    file_id: config_rf
-    condition:
-    - brd4210a
-  
+    # Series 1 opns that are 20dbm
+    - efr32zg14p731f256gm32
+    - efr32zg13p531f512gm48
+    # Series 2 opns that are 20dbm
+    - efr32zg23a020f512gm40
+    - efr32zg23a020f512gm48
+    - efr32zg23b020f512im40
+    - efr32zg23b020f512im48
+    - efr32zg23b021f512im40

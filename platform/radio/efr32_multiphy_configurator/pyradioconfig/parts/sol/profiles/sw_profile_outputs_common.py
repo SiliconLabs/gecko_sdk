@@ -95,3 +95,21 @@ class sw_profile_outputs_common_sol(sw_profile_outputs_common_ocelot):
                                            readable_name='Disable repeated measurement of first antenna when Select-Best algorithm is used'))
         profile.outputs.append(ModelOutput(model.vars.rssi_adjust_db, '', ModelOutputType.RAIL_CONFIG,
                                            readable_name='RSSI compensation value calculated from decimation and digital gains'))
+        profile.outputs.append(ModelOutput(model.vars.stack_info, '', ModelOutputType.RAIL_CONFIG,
+                                           readable_name='Stack information containing protocol and PHY IDs'))
+        profile.outputs.append(ModelOutput(model.vars.rx_sync_delay_ns, '', ModelOutputType.RAIL_CONFIG,
+                                           readable_name='Time needed from start of preamble on-air to sync detect'))
+        profile.outputs.append(ModelOutput(model.vars.rx_eof_delay_ns, '', ModelOutputType.RAIL_CONFIG,
+                                           readable_name='Time from end of frame on-air to RX EOF timestamp'))
+        profile.outputs.append(ModelOutput(model.vars.tx_eof_delay_ns, '', ModelOutputType.RAIL_CONFIG,
+                                           readable_name='Time from end of frame on-air to TX EOF timestamp'))
+        profile.outputs.append(ModelOutput(model.vars.fpll_div_array, '', ModelOutputType.RAIL_CONFIG,
+                                           readable_name='RFFPLL divider array [divx,divy,divn]'))
+        profile.outputs.append(ModelOutput(model.vars.fpll_divx_freq, '', ModelOutputType.RAIL_CONFIG,
+                                           readable_name='RFFPLL frequency after DIVX'))
+        profile.outputs.append(ModelOutput(model.vars.fpll_divy_freq, '', ModelOutputType.RAIL_CONFIG,
+                                           readable_name='RFFPLL frequency after DIVY'))
+        profile.outputs.append(ModelOutput(model.vars.softmodem_txircal_params, '', ModelOutputType.RAIL_CONFIG,
+                                           readable_name='TX IRCal parameters [kt, int2ratio, int2gain]'))
+        profile.outputs.append(ModelOutput(model.vars.softmodem_txircal_freq, '', ModelOutputType.RAIL_CONFIG,
+                                                   readable_name='TX IRCal tone freq'))

@@ -26,10 +26,6 @@ root_path: util/third_party/aws_iot_libs
 config_file:
   - path: vendors/siliconlabs/boards/all/aws_tests/config_files/aws_application_version.h
     condition: ["aws_tests_defs"]
-  - path: vendors/siliconlabs/boards/all/aws_tests/config_files/aws_clientcredential.h
-    condition: ["aws_tests_defs"]
-  - path: vendors/siliconlabs/boards/all/aws_tests/config_files/aws_clientcredential_keys.h
-    condition: ["aws_tests_defs"]
   - path: vendors/siliconlabs/boards/all/aws_tests/config_files/aws_test_runner_config.h
     condition: ["aws_tests_defs"]
   - path: vendors/siliconlabs/boards/all/aws_tests/config_files/aws_test_tcp_config.h

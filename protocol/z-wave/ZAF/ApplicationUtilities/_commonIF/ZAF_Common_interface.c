@@ -10,7 +10,7 @@
 static SApplicationHandles * m_pAppHandles;
 static const SProtocolConfig_t * m_pAppProtocolConfig;
 static TaskHandle_t m_AppTaskHandle;
-static SPowerLock_t* m_PowerLock;
+static zpal_pm_handle_t m_PowerLock;
 static CP_Handle_t m_CmdPublisherHandle;
 
 // setters
@@ -34,7 +34,7 @@ void ZAF_setAppHandle(SApplicationHandles* pAppHandle)
   m_pAppHandles = pAppHandle;
 }
 
-void ZAF_setPowerLock(SPowerLock_t* powerLock)
+void ZAF_setPowerLock(zpal_pm_handle_t powerLock)
 {
   m_PowerLock = powerLock;
 }
@@ -76,9 +76,8 @@ const SProtocolConfig_t* ZAF_getAppProtocolConfig()
   return m_pAppProtocolConfig;
 }
 
-SPowerLock_t* ZAF_getPowerLock()
+zpal_pm_handle_t ZAF_getPowerLock()
 {
-  ASSERT(m_PowerLock);
   return m_PowerLock;
 }
 

@@ -12,14 +12,7 @@
   - path: platform/Device/SiliconLabs/EFR32ZG13L/Source/system_efr32zg13l.c
     unless:
     - device_content_override
-  - condition:
-    - toolchain_iar
-    path: platform/Device/SiliconLabs/EFR32ZG13L/Source/IAR/startup_efr32zg13l.c
-    unless:
-    - device_content_override
-  - condition:
-    - toolchain_gcc
-    path: platform/Device/SiliconLabs/EFR32ZG13L/Source/GCC/startup_efr32zg13l.c
+  - path: platform/Device/SiliconLabs/EFR32ZG13L/Source/startup_efr32zg13l.c
     unless:
     - device_content_override
   - condition:
@@ -209,3 +202,21 @@
     - custom_radio_config
     directory: rail
     path: platform/Device/config/89/device.yaml
+- metadata:
+    device:
+      memory:
+      - name: Main Flash
+        page_size: 2048
+        size: 524288
+        start: 0
+        type: non-volatile
+      - name: Bootloader Flash
+        page_size: 2048
+        size: 16384
+        start: 266403840
+        type: non-volatile
+      - name: RAM
+        size: 65536
+        start: 536870912
+        type: volatile
+      opn: efr32zg13l231f512im32

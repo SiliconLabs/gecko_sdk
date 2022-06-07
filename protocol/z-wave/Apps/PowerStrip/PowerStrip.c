@@ -17,20 +17,12 @@
 //#define DEBUGPRINT
 #include "DebugPrint.h"
 #include "config_app.h"
-#include "ZAF_app_version.h"
 #include <ZAF_file_ids.h>
-#include "nvm3.h"
-#include "ZAF_nvm3_app.h"
-#include <em_system.h>
+#include "ZAF_nvm_app.h"
 
 #include <ZW_slave_api.h>
 #include <ZW_classcmd.h>
 #include <ZW_TransportLayer.h>
-
-#include <ZAF_uart_utils.h>
-
-/*IO control*/
-#include <board.h>
 
 #include <ev_man.h>
 #include <AppTimer.h>
@@ -51,11 +43,7 @@
 #include <CC_MultiChanAssociation.h>
 #include <CC_MultilevelSwitch_Support.h>
 #include <CC_Notification.h>
-#include <CC_PowerLevel.h>
-#include <CC_Security.h>
 #include <CC_Supervision.h>
-#include <CC_Version.h>
-#include <CC_ZWavePlusInfo.h>
 #include <CC_FirmwareUpdate.h>
 #include <CC_ManufacturerSpecific.h>
 
@@ -68,103 +56,17 @@
 #include "ZAF_TSE.h"
 #include <ota_util.h>
 #include <ZAF_CmdPublisher.h>
-#include <em_wdog.h>
 #include "events.h"
+#include <zpal_watchdog.h>
+#include <zpal_misc.h>
+#include <PowerStrip_hw.h>
+#include <board_indicator.h>
+#include <board_init.h>
+
 #include "zw_region_config.h"
 
-#include <sl_simple_rgb_pwm_led.h>
-#include "sl_led.h"
-
 #include "zw_build_no.h"
-
-/****************************************************************************/
-/* Application specific button and LED definitions                          */
-/****************************************************************************/
-
-#define OUTLET1_TOGGLE_BTN        APP_BUTTON_A
-#define OUTLET2_DIMMER_BTN        APP_BUTTON_B
-#define NOTIFICATION_TOGGLE_BTN   APP_BUTTON_C
-
-#define OUTLET1_STATUS_LED   APP_LED_A
-
-/* Ensure we did not allocate the same physical button or led to more than one function */
-STATIC_ASSERT((APP_BUTTON_LEARN_RESET != OUTLET1_TOGGLE_BTN) &&
-              (APP_BUTTON_LEARN_RESET != OUTLET2_DIMMER_BTN) &&
-              (APP_BUTTON_LEARN_RESET != NOTIFICATION_TOGGLE_BTN) &&
-              (OUTLET1_TOGGLE_BTN != OUTLET2_DIMMER_BTN) &&
-              (OUTLET1_TOGGLE_BTN != NOTIFICATION_TOGGLE_BTN) &&
-              (OUTLET2_DIMMER_BTN != NOTIFICATION_TOGGLE_BTN),
-              STATIC_ASSERT_FAILED_button_overlap);
-STATIC_ASSERT((APP_LED_INDICATOR != OUTLET1_STATUS_LED),
-              STATIC_ASSERT_FAILED_led_overlap);
-
-#if defined(BUILDING_WITH_UC)
-#include "sl_simple_rgb_pwm_led_instances.h"
-#else
-
-#include "sl_simple_rgb_pwm_led_led_config.h"
-
-sl_led_pwm_t red_led = {
-  .port = SL_SIMPLE_RGB_PWM_LED_LED_RED_PORT,
-  .pin = SL_SIMPLE_RGB_PWM_LED_LED_RED_PIN,
-  .polarity = SL_SIMPLE_RGB_PWM_LED_LED_RED_POLARITY,
-  .channel = SL_SIMPLE_RGB_PWM_LED_LED_RED_CHANNEL,
-#if defined(SL_SIMPLE_RGB_PWM_LED_LED_RED_LOC)
-  .location = SL_SIMPLE_RGB_PWM_LED_LED_RED_LOC,
-#endif
-  .timer = SL_SIMPLE_RGB_PWM_LED_LED_PERIPHERAL,
-  .frequency = SL_SIMPLE_RGB_PWM_LED_LED_FREQUENCY,
-  .resolution = SL_SIMPLE_RGB_PWM_LED_LED_RESOLUTION,
-};
-
-sl_led_pwm_t green_led = {
-  .port = SL_SIMPLE_RGB_PWM_LED_LED_GREEN_PORT,
-  .pin = SL_SIMPLE_RGB_PWM_LED_LED_GREEN_PIN,
-  .polarity = SL_SIMPLE_RGB_PWM_LED_LED_GREEN_POLARITY,
-  .channel = SL_SIMPLE_RGB_PWM_LED_LED_GREEN_CHANNEL,
-#if defined(SL_SIMPLE_RGB_PWM_LED_LED_GREEN_LOC)
-  .location = SL_SIMPLE_RGB_PWM_LED_LED_GREEN_LOC,
-#endif
-  .timer = SL_SIMPLE_RGB_PWM_LED_LED_PERIPHERAL,
-  .frequency = SL_SIMPLE_RGB_PWM_LED_LED_FREQUENCY,
-  .resolution = SL_SIMPLE_RGB_PWM_LED_LED_RESOLUTION,
-};
-
-sl_led_pwm_t blue_led = {
-  .port = SL_SIMPLE_RGB_PWM_LED_LED_BLUE_PORT,
-  .pin = SL_SIMPLE_RGB_PWM_LED_LED_BLUE_PIN,
-  .polarity = SL_SIMPLE_RGB_PWM_LED_LED_BLUE_POLARITY,
-  .channel = SL_SIMPLE_RGB_PWM_LED_LED_BLUE_CHANNEL,
-#if defined(SL_SIMPLE_RGB_PWM_LED_LED_BLUE_LOC)
-  .location = SL_SIMPLE_RGB_PWM_LED_LED_BLUE_LOC,
-#endif
-  .timer = SL_SIMPLE_RGB_PWM_LED_LED_PERIPHERAL,
-  .frequency = SL_SIMPLE_RGB_PWM_LED_LED_FREQUENCY,
-  .resolution = SL_SIMPLE_RGB_PWM_LED_LED_RESOLUTION,
-};
-
-sl_simple_rgb_pwm_led_context_t simple_rgb_pwm_led_context = {
-  .red = &red_led,
-  .green = &green_led,
-  .blue = &blue_led,
-
-  .timer = SL_SIMPLE_RGB_PWM_LED_LED_PERIPHERAL,
-  .frequency = SL_SIMPLE_RGB_PWM_LED_LED_FREQUENCY,
-  .resolution = SL_SIMPLE_RGB_PWM_LED_LED_RESOLUTION,
-};
-
-const sl_led_rgb_pwm_t sl_led = {
-  .led_common.context = &simple_rgb_pwm_led_context,
-  .led_common.init = sl_simple_rgb_pwm_led_init,
-  .led_common.turn_on = sl_simple_rgb_pwm_led_turn_on,
-  .led_common.turn_off = sl_simple_rgb_pwm_led_turn_off,
-  .led_common.toggle = sl_simple_rgb_pwm_led_toggle,
-  .led_common.get_state = sl_simple_rgb_pwm_led_get_state,
-  .set_rgb_color = sl_simple_rgb_pwm_led_set_color,
-  .get_rgb_color = sl_simple_rgb_pwm_led_get_color,
-};
-
-#endif // BUILDING_WITH_UC
+#include <zaf_config_api.h>
 
 /****************************************************************************/
 /*                      PRIVATE TYPES and DEFINITIONS                       */
@@ -266,11 +168,6 @@ static app_node_information_t m_AppNIF =
 */
 static const uint8_t SecureKeysRequested = REQUESTED_SECURITY_KEYS;
 
-/**
- * Set up PowerDownDebug
- */
-static const EPowerDownDebug PowerDownDebug = APP_POWERDOWNDEBUG;
-
 static SAppNodeInfo_t AppNodeInfo =
 {
   .DeviceOptionsMask = DEVICE_OPTIONS_MASK,
@@ -291,13 +188,11 @@ static const SRadioConfig_t RadioConfig =
   .iTxPowerLevelAdjust = APP_MEASURED_0DBM_TX_POWER,
   .iTxPowerLevelMaxLR = APP_MAX_TX_POWER_LR,
   .eRegion = ZW_REGION,
-  .enablePTI = ENABLE_PTI
+  .radio_debug_enable = ENABLE_RADIO_DEBUG
 };
-
 static const SProtocolConfig_t ProtocolConfig = {
   .pVirtualSlaveNodeInfoTable = NULL,
   .pSecureKeysRequested = &SecureKeysRequested,
-  .pPowerDownDebug = &PowerDownDebug,
   .pNodeInfo = &AppNodeInfo,
   .pRadioConfig = &RadioConfig
 };
@@ -427,12 +322,6 @@ static EP_FUNCTIONALITY_DATA endPointFunctionality =
   }
 };
 
-static const AGI_PROFILE lifelineProfile =
-{
- ASSOCIATION_GROUP_INFO_REPORT_PROFILE_GENERAL_V2,
- ASSOCIATION_GROUP_INFO_REPORT_PROFILE_GENERAL_LIFELINE_V2
-};
-
 /**
  * Setup AGI root device groups table from config_app.h
  */
@@ -448,24 +337,6 @@ static const AGI_PROFILE endpointProfile =
 
 #define ENDPOINT_PROFILE  &endpointProfile
 
-/**************************************************************************************************
- * Configuration for Z-Wave Plus Info CC
- **************************************************************************************************
- */
-static SEndpointIcon ZWavePlusEndpointIcons[] = {ENDPOINT_ICONS};
-
-const SEndpointIconList EndpointIconList = {
-                                      .pEndpointInfo = ZWavePlusEndpointIcons,
-                                      .endpointInfoSize = sizeof_array(ZWavePlusEndpointIcons)
-};
-
-static const SCCZWavePlusInfo CCZWavePlusInfo = {
-                               .pEndpointIconList = &EndpointIconList,
-                               .roleType = APP_ROLE_TYPE,
-                               .nodeType = APP_NODE_TYPE,
-                               .installerIconType = APP_ICON_TYPE,
-                               .userIconType = APP_USER_ICON_TYPE
-};
 
 /**
  * Application state-machine state.
@@ -504,6 +375,10 @@ static cc_multilevel_switch_t switches[] = {
 uint8_t supportedEvents = NOTIFICATION_EVENT_POWER_MANAGEMENT_OVERLOADED_DETECTED;
 
 static TaskHandle_t g_AppTaskHandle;
+
+#ifdef DEBUGPRINT
+static uint8_t m_aDebugPrintBuffer[96];
+#endif
 
 // Pointer to AppHandles that is passed as input to ApplicationTask(..)
 SApplicationHandles* g_pAppHandles;
@@ -545,14 +420,6 @@ static QueueHandle_t m_AppEventQueue;
 
 void AppResetNvm(void);
 
-#if defined(DEBUGPRINT) && defined(BUILDING_WITH_UC)
-#include "sl_iostream.h"
-static void DebugPrinter(const uint8_t * buffer, uint32_t len)
-{
-  sl_iostream_write(SL_IOSTREAM_STDOUT, buffer, len);
-}
-#endif
-
 /* True Status Engine (TSE) variables */
 /* TSE simulated RX option for local change addressed to End Point 1 */
 static RECEIVE_OPTIONS_TYPE_EX zaf_tse_local_ep1_actuation = {
@@ -577,7 +444,7 @@ static s_CC_indicator_data_t ZAF_TSE_localActuationIdentifyData = {
 
 s_CC_notification_data_t ZAF_TSE_NotificationData;
 
-static nvm3_Handle_t* pFileSystemApplication;
+static zpal_nvm_handle_t pFileSystemApplication;
 
 /****************************************************************************/
 /*                              EXPORTED DATA                               */
@@ -588,8 +455,6 @@ static nvm3_Handle_t* pFileSystemApplication;
 /****************************************************************************/
 /*                            PRIVATE FUNCTIONS                             */
 /****************************************************************************/
-void DeviceResetLocallyDone(TRANSMISSION_RESULT * pTransmissionResult);
-void DeviceResetLocally(void);
 STATE_APP GetAppState(void);
 void AppStateManager(EVENT_APP event);
 static void ChangeState(STATE_APP newState);
@@ -605,6 +470,8 @@ void ZCB_NotificationTimerCallback(SSwTimer *pTimer);
 static void ToggleSwitch(uint8_t switchID);
 static void notificationToggle(void);
 static void cc_multilevel_handler(cc_multilevel_switch_t * p_switch);
+
+static void indicator_set_handler(uint32_t on_time_ms, uint32_t off_time_ms, uint32_t num_cycles);
 
 /**
 * @brief Called when protocol puts a frame on the ZwRxQueue.
@@ -725,10 +592,6 @@ static void EventHandlerZwCommandStatus(void)
         else if(ELEARNSTATUS_SMART_START_IN_PROGRESS == Status.Content.LearnModeStatus.Status)
         {
           ZAF_EventHelperEventEnqueue(EVENT_APP_SMARTSTART_IN_PROGRESS);
-        }
-        else if(ELEARNSTATUS_LEARN_IN_PROGRESS == Status.Content.LearnModeStatus.Status)
-        {
-          ZAF_EventHelperEventEnqueue(EVENT_APP_LEARN_IN_PROGRESS);
         }
         else if(ELEARNSTATUS_LEARN_MODE_COMPLETED_TIMEOUT == Status.Content.LearnModeStatus.Status)
         {
@@ -853,51 +716,30 @@ ApplicationInit(EResetReason_t eResetReason)
 
   /* hardware initialization */
   Board_Init();
-  BRD420xBoardInit(RadioConfig.eRegion);
 
 #ifdef DEBUGPRINT
-#if BUILDING_WITH_UC
-  DebugPrintConfig(m_aDebugPrintBuffer, sizeof(m_aDebugPrintBuffer), DebugPrinter);
-#else
-  static uint8_t m_aDebugPrintBuffer[96];
-  ZAF_UART0_enable(115200, true, false);
-  DebugPrintConfig(m_aDebugPrintBuffer, sizeof(m_aDebugPrintBuffer), ZAF_UART0_tx_send);
-#endif // BUILDING_WITH_UC
-#endif // DEBUGPRINT
+  zpal_debug_init();
+  DebugPrintConfig(m_aDebugPrintBuffer, sizeof(m_aDebugPrintBuffer), zpal_debug_output);
+#endif
 
   /* Init state machine*/
   currentState = STATE_APP_STARTUP;
 
-  uint8_t versionMajor      = ZAF_GetAppVersionMajor();
-  uint8_t versionMinor      = ZAF_GetAppVersionMinor();
-  uint8_t versionPatchLevel = ZAF_GetAppVersionPatchLevel();
 
   DPRINT("\n\n------------------------------\n");
   DPRINT("Z-Wave Sample App: Power Strip\n");
-  DPRINTF("SDK: %d.%d.%d ZAF: %d.%d.%d.%d [Freq: %d]\n",
+  DPRINTF("SDK: %d.%d.%d ZAF: %d.%d.%d.%d\n",
           SDK_VERSION_MAJOR,
           SDK_VERSION_MINOR,
           SDK_VERSION_PATCH,
-          versionMajor,
-          versionMinor,
-          versionPatchLevel,
-          ZAF_BUILD_NO,
-          RadioConfig.eRegion);
-  DPRINT("------------------------------\n");
-  DPRINTF("%s: Outlet 1 toggle on/off\n", Board_GetButtonLabel(OUTLET1_TOGGLE_BTN));
-  DPRINTF("%s: Outlet 2 dim/on/off\n", Board_GetButtonLabel(OUTLET2_DIMMER_BTN));
-  DPRINT("      Hold: Dim up/down\n");
-  DPRINTF("%s: Toggle notification every 30 sec\n", Board_GetButtonLabel(NOTIFICATION_TOGGLE_BTN));
-  DPRINTF("%s: Toggle learn mode\n", Board_GetButtonLabel(APP_BUTTON_LEARN_RESET));
-  DPRINT("      Hold 5 sec: Reset\n");
-  DPRINTF("%s: Learn mode + identify\n", Board_GetLedLabel(APP_LED_INDICATOR));
-  DPRINTF("%s: Outlet 1 status on/off\n", Board_GetLedLabel(OUTLET1_STATUS_LED));
-  DPRINT("RGB: Outlet 2 level/intensity\n");
-  DPRINT("------------------------------\n\n");
+          zpal_get_app_version_major(),
+          zpal_get_app_version_minor(),
+          zpal_get_app_version_patch(),
+          ZAF_BUILD_NO);
 
   DPRINTF("ApplicationInit eResetReason = %d\n", eResetReason);
 
-  CC_ZWavePlusInfo_Init(&CCZWavePlusInfo);
+  CC_Indicator_Init(indicator_set_handler);
 
   cc_multilevel_switch_init(switches,
                             sizeof_array(switches),
@@ -906,9 +748,11 @@ ApplicationInit(EResetReason_t eResetReason)
 
   powerStrip.binSwitch.switchStatus = SWITCH_OFF;
 
-  CC_Version_SetApplicationVersionInfo(versionMajor, versionMinor, versionPatchLevel, ZAF_BUILD_NO);
-
   Transport_AddEndpointSupport( &endPointFunctionality, endpointsNIF, NUMBER_OF_ENDPOINTS);
+
+  // Init file system
+  ApplicationFileSystemInit(&pFileSystemApplication);
+
 
   /*************************************************************************************
    * CREATE USER TASKS  -  ZW_ApplicationRegisterTask() and ZW_UserTask_CreateTask()
@@ -947,7 +791,7 @@ ApplicationTask(SApplicationHandles* pAppHandles)
 {
   // Init
   DPRINT("Enabling watchdog\n");
-  WDOGn_Enable(DEFAULT_WDOG, true);
+  zpal_enable_watchdog(true);
 
   g_AppTaskHandle = xTaskGetCurrentTaskHandle();
   g_pAppHandles = pAppHandles;
@@ -968,16 +812,9 @@ ApplicationTask(SApplicationHandles* pAppHandles)
 
   ZAF_EventHelperEventEnqueue(EVENT_APP_INIT);
 
-#if !defined(BUILDING_WITH_UC)
-  sl_led_init((sl_led_t *)&sl_led);
-#endif /* !defined(BUILDING_WITH_UC) */
+  PowerStrip_hw_init();
 
-  Board_EnableButton(APP_BUTTON_LEARN_RESET);
-  Board_EnableButton(OUTLET1_TOGGLE_BTN);
-  Board_EnableButton(OUTLET2_DIMMER_BTN);
-  Board_EnableButton(NOTIFICATION_TOGGLE_BTN);
-
-  Board_IndicatorInit(APP_LED_INDICATOR);
+  Board_IndicatorInit();
   Board_IndicateStatus(BOARD_STATUS_IDLE);
 
   CommandClassSupervisionInit(
@@ -1020,12 +857,9 @@ GetAppState(void)
  */
 void doRemainingInitialization()
 {
-  // Init file system
-  ApplicationFileSystemInit(&pFileSystemApplication);
-
   InitNotification(pFileSystemApplication);  // This is needed by LoadConfiguration() in case of error.
 
-  /* Load the application settings from NVM3 file system */
+  /* Load the application settings from NVM file system */
   bool filesExist = LoadConfiguration();
   
     // Initialize AGI and set up groups.
@@ -1087,13 +921,13 @@ AppStateManager(EVENT_APP event)
 {
   DPRINTF("AppStateManager St: %d, Ev: %d\r\n", currentState, event);
 
-  if ((BTN_EVENT_LONG_PRESS(APP_BUTTON_LEARN_RESET) == (BUTTON_EVENT)event) ||
+  if ((EVENT_APP_BUTTON_LEARN_RESET_LONG_PRESS == event) ||
       (EVENT_SYSTEM_RESET == (EVENT_SYSTEM)event))
   {
     /*Force state change to activate system-reset without taking care of current state.*/
     ChangeState(STATE_APP_RESET);
     /* Send reset notification*/
-    DeviceResetLocally();
+    CC_DeviceResetLocally_notification_tx();
   }
 
   switch(currentState)
@@ -1136,7 +970,7 @@ AppStateManager(EVENT_APP event)
         ChangeState(STATE_APP_LEARN_MODE);
       }
 
-      if ((BTN_EVENT_SHORT_PRESS(APP_BUTTON_LEARN_RESET) == (BUTTON_EVENT)event) ||
+      if ((EVENT_APP_BUTTON_LEARN_RESET_SHORT_PRESS == event) ||
           (EVENT_SYSTEM_LEARNMODE_START == (EVENT_SYSTEM)event))
       {
         DPRINT("APP_BUTTON_LEARN_RESET SHORT_PRESS\n");
@@ -1154,14 +988,13 @@ AppStateManager(EVENT_APP event)
         ChangeState(STATE_APP_LEARN_MODE);
       }
 
-      if ((BTN_EVENT_SHORT_PRESS(OUTLET1_TOGGLE_BTN) == (BUTTON_EVENT)event) ||
-          (BTN_EVENT_UP(OUTLET1_TOGGLE_BTN) == (BUTTON_EVENT)event))
+      if (EVENT_APP_BUTTON_OUTLET1_TOGGLE == event)
       {
         DPRINT("+Toggle SW 1");
         ToggleSwitch(BIN_SWITCH_1);
       }
 
-      if (BTN_EVENT_SHORT_PRESS(OUTLET2_DIMMER_BTN) == (BUTTON_EVENT)event)
+      if (EVENT_APP_BUTTON_OUTLET2_DIMMER_SHORT_PRESS == event)
       {
         DPRINT("\nDimmer press");
         cc_multilevel_switch_stop_level_change(&switches[0]);
@@ -1177,13 +1010,13 @@ AppStateManager(EVENT_APP event)
         }
       }
 
-      if (BTN_EVENT_UP(OUTLET2_DIMMER_BTN) == (BUTTON_EVENT)event)
+      if (EVENT_APP_BUTTON_OUTLET2_DIMMER_RELEASE == event)
       {
         DPRINT("\nDimmer up");
         cc_multilevel_switch_stop_level_change(&switches[0]);
       }
 
-      if (BTN_EVENT_HOLD(OUTLET2_DIMMER_BTN) == (BUTTON_EVENT)event)
+      if (EVENT_APP_BUTTON_OUTLET2_DIMMER_HOLD == event)
       {
         DPRINT("\nDimmer hold");
         static int32_t direction = 1; // 1 = increase the value because we always boot with off.
@@ -1196,8 +1029,7 @@ AppStateManager(EVENT_APP event)
         DPRINTF("\ndir: %d", direction);
       }
 
-      if ((BTN_EVENT_SHORT_PRESS(NOTIFICATION_TOGGLE_BTN) == (BUTTON_EVENT)event) ||
-          (BTN_EVENT_UP(NOTIFICATION_TOGGLE_BTN) == (BUTTON_EVENT)event))
+      if (EVENT_APP_BUTTON_NOTIFICATION_TOGGLE == event)
       {
         /*
          * Pressing the NOTIFICATION_TOGGLE_BTN key will toggle the overload timer.
@@ -1219,7 +1051,7 @@ AppStateManager(EVENT_APP event)
         LoadConfiguration();
       }
 
-      if ((BTN_EVENT_SHORT_PRESS(APP_BUTTON_LEARN_RESET) == (BUTTON_EVENT)event) ||
+      if ((EVENT_APP_BUTTON_LEARN_RESET_SHORT_PRESS == event) ||
           (EVENT_SYSTEM_LEARNMODE_STOP == (EVENT_SYSTEM)event))
       {
         ZAF_setNetworkLearnMode(E_NETWORK_LEARN_MODE_DISABLE);
@@ -1232,7 +1064,10 @@ AppStateManager(EVENT_APP event)
         ChangeState(STATE_APP_IDLE);
 
         /* If we are in a network and the Identify LED state was changed to idle due to learn mode, report it to lifeline */
-        CC_Indicator_RefreshIndicatorProperties();
+        if (!Board_IsIndicatorActive())
+        {
+          CC_Indicator_RefreshIndicatorProperties();
+        }
         ZAF_TSE_Trigger(CC_Indicator_report_stx,
                         (void *)&ZAF_TSE_localActuationIdentifyData,
                         true);
@@ -1247,7 +1082,10 @@ AppStateManager(EVENT_APP event)
         ChangeState(STATE_APP_IDLE);
 
         /* If we are in a network and the Identify LED state was changed to idle due to learn mode, report it to lifeline */
-        CC_Indicator_RefreshIndicatorProperties();
+        if (!Board_IsIndicatorActive())
+        {
+          CC_Indicator_RefreshIndicatorProperties();
+        }
         ZAF_TSE_Trigger(CC_Indicator_report_stx,
                         (void *)&ZAF_TSE_localActuationIdentifyData,
                         true);
@@ -1261,7 +1099,7 @@ AppStateManager(EVENT_APP event)
       {
         AppResetNvm();
         /* Soft reset */
-        Board_ResetHandler();
+        zpal_reboot();
       }
       break;
 
@@ -1278,7 +1116,7 @@ AppStateManager(EVENT_APP event)
         ChangeState(STATE_APP_IDLE);
       }
 
-      if (BTN_EVENT_SHORT_PRESS(NOTIFICATION_TOGGLE_BTN) == (BUTTON_EVENT)event)
+      if (EVENT_APP_BUTTON_NOTIFICATION_TOGGLE == event)
       {
         /*
          * Short press on notification key will toggle the overload timer.
@@ -1307,7 +1145,7 @@ ChangeState(STATE_APP newState)
  * @param pTransmissionResult Result of each transmission.
  */
 void
-DeviceResetLocallyDone(TRANSMISSION_RESULT * pTransmissionResult)
+CC_DeviceResetLocally_done(TRANSMISSION_RESULT * pTransmissionResult)
 {
   if (TRANSMISSION_RESULT_FINISHED == pTransmissionResult->isFinished)
   {
@@ -1317,51 +1155,10 @@ DeviceResetLocallyDone(TRANSMISSION_RESULT * pTransmissionResult)
     CommandPackage.eCommandType = EZWAVECOMMANDTYPE_SET_DEFAULT;
 
     DPRINT("\nDisabling watchdog during reset\n");
-    WDOGn_Enable(DEFAULT_WDOG, false);
+    zpal_enable_watchdog(false);
 
     EQueueNotifyingStatus Status = QueueNotifyingSendToBack(g_pAppHandles->pZwCommandQueue, (uint8_t*)&CommandPackage, 500);
     ASSERT(EQUEUENOTIFYING_STATUS_SUCCESS == Status);
-  }
-}
-
-/**
- * @brief Send reset notification.
- */
-void
-DeviceResetLocally(void)
-{
-  DPRINT("Call locally reset\r\n");
-
-  CC_DeviceResetLocally_notification_tx(&lifelineProfile, DeviceResetLocallyDone);
-}
-
-/*
- * See description for function prototype in CC_Version.h.
- */
-uint8_t handleNbrFirmwareVersions()
-{
-  return 1; /*CHANGE THIS - firmware 0 version*/
-}
-
-/*
- * See description for function prototype in CC_Version.h.
- */
-void
-handleGetFirmwareVersion(
-  uint8_t bFirmwareNumber,
-  VG_VERSION_REPORT_V2_VG *pVariantgroup)
-{
-  /*firmware 0 version and sub version*/
-  if(bFirmwareNumber == 0)
-  {
-    pVariantgroup->firmwareVersion = ZAF_GetAppVersionMajor();
-    pVariantgroup->firmwareSubVersion = ZAF_GetAppVersionMinor();
-  }
-  else
-  {
-    /*Just set it to 0 if firmware n is not present*/
-    pVariantgroup->firmwareVersion = 0;
-    pVariantgroup->firmwareSubVersion = 0;
   }
 }
 
@@ -1381,7 +1178,7 @@ SetDefaultConfiguration(void)
 
   DefaultNotificationStatus(NOTIFICATION_STATUS_UNSOLICIT_ACTIVATED);
 
-  loadInitStatusPowerLevel();
+  ZAF_Reset();
 
   cc_multilevel_switch_init(switches,
                             sizeof_array(switches),
@@ -1390,9 +1187,9 @@ SetDefaultConfiguration(void)
 
   appBinarySwitchSet(CMD_CLASS_BIN_OFF, 0, 0);
 
-  uint32_t appVersion = ZAF_GetAppVersion();
-  Ecode_t errCode = nvm3_writeData(pFileSystemApplication, ZAF_FILE_ID_APP_VERSION, &appVersion, ZAF_FILE_SIZE_APP_VERSION);
-  ASSERT(ECODE_NVM3_OK == errCode); //Assert has been kept for debugging , can be removed from production code if this error can only be caused by some internal flash HW failure
+  uint32_t appVersion = zpal_get_app_version();
+  const zpal_status_t status = zpal_nvm_write(pFileSystemApplication, ZAF_FILE_ID_APP_VERSION, &appVersion, ZAF_FILE_SIZE_APP_VERSION);
+  ASSERT(ZPAL_STATUS_OK == status); //Assert has been kept for debugging , can be removed from production code if this error can only be caused by some internal flash HW failure
 }
 
 /**
@@ -1403,11 +1200,11 @@ bool
 LoadConfiguration(void)
 {
   uint32_t appVersion;
-  Ecode_t versionFileStatus = nvm3_readData(pFileSystemApplication, ZAF_FILE_ID_APP_VERSION, &appVersion, ZAF_FILE_SIZE_APP_VERSION);
+  const zpal_status_t status = zpal_nvm_read(pFileSystemApplication, ZAF_FILE_ID_APP_VERSION, &appVersion, ZAF_FILE_SIZE_APP_VERSION);
 
-  if (ECODE_NVM3_OK == versionFileStatus)
+  if (ZPAL_STATUS_OK == status)
   {
-    if (ZAF_GetAppVersion() != appVersion)
+    if (zpal_get_app_version() != appVersion)
     {
       // Add code for migration of file system to higher version here.
     }
@@ -1415,14 +1212,11 @@ LoadConfiguration(void)
     /* Initialize association module */
     AssociationInit(false, pFileSystemApplication);
 
-    /* Initialize PowerLevel functionality*/
-    loadStatusPowerLevel();
     return true;
   }
   else
   {
     DPRINT("Application FileSystem Verify failed\r\n");
-    loadInitStatusPowerLevel();
 
     // Reset the file system if ZAF_FILE_ID_APP_VERSION is missing since this indicates
     // corrupt or missing file system.
@@ -1438,10 +1232,10 @@ void AppResetNvm(void)
 
   ASSERT(0 != pFileSystemApplication); //Assert has been kept for debugging , can be removed from production code. This error can only be caused by some internal flash HW failure
 
-  Ecode_t errCode = nvm3_eraseAll(pFileSystemApplication);
-  ASSERT(ECODE_NVM3_OK == errCode); //Assert has been kept for debugging , can be removed from production code. This error can only be caused by some internal flash HW failure
+  const zpal_status_t status = zpal_nvm_erase_all(pFileSystemApplication);
+  ASSERT(ZPAL_STATUS_OK == status); //Assert has been kept for debugging , can be removed from production code. This error can only be caused by some internal flash HW failure
 
-  /* Apparently there is no valid configuration in the NVM3 file system, so load */
+  /* Apparently there is no valid configuration in the NVM file system, so load */
   /* default values and save them. */
   SetDefaultConfiguration();
 }
@@ -1558,12 +1352,12 @@ e_cmd_handler_return_code_t appBinarySwitchSet(
 #pragma GCC diagnostic ignored "-Wconversion"
     powerStrip.binSwitch.switchStatus &= ~SWITCH_ON;
 #pragma GCC diagnostic pop
-    Board_SetLed(OUTLET1_STATUS_LED, LED_OFF);
+    PowerStrip_hw_binary_switch_handler(false);
   }
   else if(CMD_CLASS_BIN_ON == val)
   {
     powerStrip.binSwitch.switchStatus |= SWITCH_ON;
-    Board_SetLed(OUTLET1_STATUS_LED, LED_ON);
+    PowerStrip_hw_binary_switch_handler(true);
   }
 
   return E_CMD_HANDLER_RETURN_CODE_HANDLED;
@@ -1580,10 +1374,12 @@ uint8_t appBinarySwitchGetFactoryDefaultDuration(uint8_t endpoint)
 
 static void cc_multilevel_handler(cc_multilevel_switch_t * p_switch)
 {
-  uint32_t level = (uint32_t)ZAF_Actuator_GetCurrentValue(&p_switch->actuator);
+#ifdef DEBUGPRINT
+  uint8_t level = ZAF_Actuator_GetCurrentValue(&p_switch->actuator);
   DPRINTF("\nValue: %u", level);
+#endif
 
-  sl_led_set_rgb_color(&sl_led, (uint16_t)level, (uint16_t)level, (uint16_t)level);
+  PowerStrip_hw_multilevel_switch_handler(p_switch);
 }
 
 void
@@ -1732,13 +1528,13 @@ static void ToggleSwitch(uint8_t switchID)
 #pragma GCC diagnostic ignored "-Wconversion"
         powerStrip.binSwitch.switchStatus &= ~SWITCH_ON;
 #pragma GCC diagnostic pop
-        Board_SetLed(OUTLET1_STATUS_LED, LED_OFF);
+        PowerStrip_hw_binary_switch_handler(false);
       }
       else
       {
         DPRINT(" ON\n"); /* Continuation of DPRINT in AppStateManager() */
         powerStrip.binSwitch.switchStatus |= SWITCH_ON;
-        Board_SetLed(OUTLET1_STATUS_LED, LED_ON);
+        PowerStrip_hw_binary_switch_handler(true);
       }
       /* Tell the lifeline destination that EP1 state has been modified */
       void* pDataEp1 = CC_BinarySwitch_prepare_zaf_tse_data(&zaf_tse_local_ep1_actuation);
@@ -1890,11 +1686,6 @@ uint16_t handleFirmWareIdGet(uint8_t n)
   return 0;
 }
 
-uint8_t CC_Version_GetHardwareVersion_handler(void)
-{
-  return 1;
-}
-
 void CC_ManufacturerSpecific_ManufacturerSpecificGet_handler(uint16_t * pManufacturerID,
                                                              uint16_t * pProductID)
 {
@@ -1913,17 +1704,43 @@ void CC_ManufacturerSpecific_DeviceSpecificGet_handler(device_id_type_t * pDevic
                                                        uint8_t * pDeviceIDDataLength,
                                                        uint8_t * pDeviceIDData)
 {
+  const size_t serial_length = zpal_get_serial_number_length();
+
+  ASSERT(serial_length <= 0x1F); // Device ID Data Length field size is 5 bits
+
   *pDeviceIDType = DEVICE_ID_TYPE_SERIAL_NUMBER;
   *pDeviceIDDataFormat = DEVICE_ID_FORMAT_BINARY;
-  *pDeviceIDDataLength = 8;
-  uint64_t uuID = SYSTEM_GetUnique();
-  DPRINTF("\r\nuuID: %x", (uint32_t)uuID);
-  *(pDeviceIDData + 0) = (uint8_t)(uuID >> 56);
-  *(pDeviceIDData + 1) = (uint8_t)(uuID >> 48);
-  *(pDeviceIDData + 2) = (uint8_t)(uuID >> 40);
-  *(pDeviceIDData + 3) = (uint8_t)(uuID >> 32);
-  *(pDeviceIDData + 4) = (uint8_t)(uuID >> 24);
-  *(pDeviceIDData + 5) = (uint8_t)(uuID >> 16);
-  *(pDeviceIDData + 6) = (uint8_t)(uuID >>  8);
-  *(pDeviceIDData + 7) = (uint8_t)(uuID >>  0);
+  *pDeviceIDDataLength = (uint8_t)serial_length;
+  zpal_get_serial_number(pDeviceIDData);
+
+  DPRINT("\r\nserial number: ");
+  for (size_t i = 0; i < serial_length; ++i)
+  {
+    DPRINTF("%02x", pDeviceIDData[i]);
+  }
+  DPRINT("\r\n");
+}
+
+static void indicator_set_handler(uint32_t on_time_ms, uint32_t off_time_ms, uint32_t num_cycles)
+{
+  Board_IndicatorControl(on_time_ms, off_time_ms, num_cycles, true);
+}
+
+/*
+ * The below functions should be implemented as hardware specific functions in a separate source
+ * file, e.g. PowerStrip_hw.c.
+ */
+ZW_WEAK void PowerStrip_hw_init(void)
+{
+
+}
+
+ZW_WEAK void PowerStrip_hw_binary_switch_handler(bool on)
+{
+  UNUSED(on);
+}
+
+ZW_WEAK void PowerStrip_hw_multilevel_switch_handler(cc_multilevel_switch_t * p_switch)
+{
+  UNUSED(p_switch);
 }

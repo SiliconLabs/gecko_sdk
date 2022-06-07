@@ -65,14 +65,18 @@ constexpr int kValueTensor = 1;
 constexpr int kOutputTensor = 0;
 
 TfLiteStatus Prepare(TfLiteContext* context, TfLiteNode* node) {
+  MicroContext* micro_context = GetMicroContext(context);
+
   // Ensure inputs and outputs exist.
-  const TfLiteTensor* dims;
-  TF_LITE_ENSURE_OK(context, GetInputSafe(context, node, kDimsTensor, &dims));
-  const TfLiteTensor* value;
-  TF_LITE_ENSURE_OK(context, GetInputSafe(context, node, kValueTensor, &value));
-  TfLiteTensor* output;
-  TF_LITE_ENSURE_OK(context,
-                    GetOutputSafe(context, node, kOutputTensor, &output));
+  TfLiteTensor* dims =
+      micro_context->AllocateTempInputTensor(node, kDimsTensor);
+  TF_LITE_ENSURE(context, dims != nullptr);
+  TfLiteTensor* value =
+      micro_context->AllocateTempInputTensor(node, kValueTensor);
+  TF_LITE_ENSURE(context, value != nullptr);
+  TfLiteTensor* output =
+      micro_context->AllocateTempOutputTensor(node, kOutputTensor);
+  TF_LITE_ENSURE(context, output != nullptr);
 
   // The value tensor must be a scalar.
   TF_LITE_ENSURE_EQ(context, NumDimensions(value), 0);
@@ -80,10 +84,19 @@ TfLiteStatus Prepare(TfLiteContext* context, TfLiteNode* node) {
   // The value type and output type must match.
   TF_LITE_ENSURE_EQ(context, value->type, output->type);
 
-  // The dims tensor must match the output tensor shape. As a byproduct,
-  // ensures the dims tensor is of an integer type.
-  TF_LITE_ENSURE_OK(context, EnsureEq(context, output->dims, dims));
+  // The dimension of the output tensor is known in model already.
+  TFLITE_DCHECK(output->dims != nullptr);
 
+  if (dims->data.data != nullptr) {
+    // When the dims tensor is specified in model already (i.e. is not an
+    // activation tensor), the dims tensor must match the output tensor shape.
+    // As a byproduct, ensures the dims tensor is of an integer type.
+    TF_LITE_ENSURE_OK(context, EnsureEq(context, output->dims, dims));
+  }
+
+  micro_context->DeallocateTempTfLiteTensor(dims);
+  micro_context->DeallocateTempTfLiteTensor(value);
+  micro_context->DeallocateTempTfLiteTensor(output);
   return kTfLiteOk;
 }
 
@@ -102,6 +115,12 @@ TfLiteStatus Eval(TfLiteContext* context, TfLiteNode* node) {
   switch (value->type) {
     case kTfLiteFloat32:
       FillImpl<float>(value, output);
+      break;
+    case kTfLiteInt32:
+      FillImpl<int32_t>(value, output);
+      break;
+    case kTfLiteInt8:
+      FillImpl<int8_t>(value, output);
       break;
     default:
       TF_LITE_KERNEL_LOG(

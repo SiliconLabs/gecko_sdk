@@ -3,7 +3,7 @@
  * @brief BT Mesh Provisioner component
  *******************************************************************************
  * # License
- * <b>Copyright 2021 Silicon Laboratories Inc. www.silabs.com</b>
+ * <b>Copyright 2022 Silicon Laboratories Inc. www.silabs.com</b>
  *******************************************************************************
  *
  * SPDX-License-Identifier: Zlib
@@ -110,20 +110,6 @@ sl_status_t btmesh_prov_start_provisioning_by_uuid(uint16_t netkey_index,
 sl_status_t btmesh_prov_start_provisioning_by_id(uint16_t netkey_index,
                                                  uint16_t id,
                                                  uint8_t attention_timer_sec);
-
-/**************************************************************************/ /**
-* Start provisioning by Bluetooth address
-*
-* @param[in] netkey_index Netkey index of the network
-* @param[in] mac_address Bluetooth address of the node
-* @param[in] attention_timer_sec Attention timer value in seconds
-* @return Status of the provisioning.
-* @retval SL_STATUS_OK If the provisioning \a started successfully.
-*         Error code otherwise.
-*******************************************************************************/
-sl_status_t btmesh_prov_start_provisioning_by_mac(uint16_t netkey_index,
-                                                  bd_addr mac_address,
-                                                  uint8_t attention_timer_sec);
 
 /***************************************************************************//**
 * Remove a node from a network by UUID
@@ -256,12 +242,10 @@ sl_status_t btmesh_prov_create_network(uint16_t netkey_index,
 * Callback to inform the application that a new node was found
 *
 * @param[in] bearer Type of the provisioning bearer of the node
-* @param[in] address Bluetooth address of the node
 * @param[in] uuid UUID of the node
 * @param[in] rssi Signal strength in dBm
 *******************************************************************************/
 void btmesh_prov_on_node_found_evt(uint8_t bearer,
-                                   bd_addr address,
                                    uuid_128 uuid,
                                    int8_t rssi);
 
@@ -286,11 +270,9 @@ void btmesh_prov_on_provision_failed_evt(uint8_t reason, uuid_128 uuid);
 *
 * @param[in] id List ID of the node
 * @param[in] uuid UUID of the node
-* @param[in] mac Bluetooth address of the node
 *******************************************************************************/
 void btmesh_prov_on_unprovisioned_node_list_evt(uint16_t id,
-                                                uuid_128 uuid,
-                                                bd_addr mac);
+                                                uuid_128 uuid);
 
 /**************************************************************************/ /**
 * Callback to inform the application of a provisioned node

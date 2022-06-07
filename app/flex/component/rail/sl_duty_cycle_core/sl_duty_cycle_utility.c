@@ -40,9 +40,9 @@
 //                              Macros and Typedefs
 // -----------------------------------------------------------------------------
 /// defines for calculating the minimum preamble to for the on time comaprison
-#define PREAMBLE_PATTERN_LENGTH (2u)
-#define PREAMBLE_PATTERN (2u)
-#define PREAMBLE_OVERSAMPLING (10u)
+#define PREAMBLE_PATTERN_LENGTH (2U)
+#define PREAMBLE_PATTERN (2U)
+#define PREAMBLE_OVERSAMPLING (10U)
 #define U_SEC  ((uint32_t) 1000000)
 // -----------------------------------------------------------------------------
 //                          Static Function Declarations
@@ -74,28 +74,28 @@ RAIL_Status_t calculate_preamble_bit_length_from_time(const uint32_t bit_rate, R
 {
   RAIL_Status_t ret_val = RAIL_STATUS_NO_ERROR;
 
-  float on_time = 0.0f;
-  float off_time = 0.0f;
-  float preamble_time = 0.0f;
-  float preamble_bit_length = 0.0f;
+  float on_time = 0.0F;
+  float off_time = 0.0F;
+  float preamble_time = 0.0F;
+  float preamble_bit_length = 0.0F;
 
-  if ((bit_length == NULL) || (duty_cycle_config == NULL) || (bit_rate == 0u || (duty_cycle_config->parameter == 0u) || (duty_cycle_config->delay == 0u))) {
+  if ((bit_length == NULL) || (duty_cycle_config == NULL) || (bit_rate == 0U || (duty_cycle_config->parameter == 0U) || (duty_cycle_config->delay == 0U))) {
     ret_val = RAIL_STATUS_INVALID_PARAMETER;
 
     if (bit_length != NULL) {
-      *bit_length = 0u;
+      *bit_length = 0U;
     }
   } else {
-    on_time = duty_cycle_config->parameter;
-    off_time = duty_cycle_config->delay;
+    on_time = (float)duty_cycle_config->parameter;
+    off_time = (float)duty_cycle_config->delay;
 
-    preamble_time = ((float)(PREAMBLE_PATTERN_LENGTH * PREAMBLE_PATTERN * PREAMBLE_OVERSAMPLING) * U_SEC) / bit_rate;
+    preamble_time = ((float)(PREAMBLE_PATTERN_LENGTH * PREAMBLE_PATTERN * PREAMBLE_OVERSAMPLING) * U_SEC) / (float)bit_rate;
 
     app_assert(preamble_time < on_time, "Please modify the on time according to the bitrate!\n");
 
     while (1) {
       preamble_time = (off_time + (2 * on_time)) / 1000000;
-      preamble_bit_length = (preamble_time * bit_rate);
+      preamble_bit_length = (preamble_time * (float)bit_rate);
       if (preamble_bit_length <= 50000) {
         break;
       }

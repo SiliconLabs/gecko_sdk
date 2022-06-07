@@ -7,7 +7,7 @@ description: "Implements the server side of the Connect OTA Unicast Bootloader p
 provides:
   - name: "connect_ota_unicast_bootloader_server"
 requires:
-  - name: "connect_stack_common"  
+  - name: "connect_stack_common"
 source:
       - path: "protocol/flex/ota-unicast-bootloader/ota-unicast-bootloader-server/ota-unicast-bootloader-server.c"
       - path: "protocol/flex/ota-unicast-bootloader/ota-unicast-bootloader-server/ota-unicast-bootloader-server-cb.c"
@@ -25,11 +25,11 @@ config_file:
   - path: "protocol/flex/ota-unicast-bootloader/ota-unicast-bootloader-server/config/ota-unicast-bootloader-server-config.h"
 template_contribution:
   - name: stack_callback
-    value: 
+    value:
       callback_type: "incoming_message"
       function_name: "emAfPluginOtaUnicastBootloaderServerIncomingMessageCallback"
   - name: stack_callback
-    value: 
+    value:
       callback_type: "message_sent"
       function_name: "emAfPluginOtaUnicastBootloaderServerMessageSentCallback"
   - name: event_system

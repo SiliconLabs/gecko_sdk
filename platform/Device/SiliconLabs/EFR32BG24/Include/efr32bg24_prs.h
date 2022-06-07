@@ -102,11 +102,11 @@ typedef struct {
   __IOM uint32_t       CONSUMER_SYSRTC0_IN1;              /**< IN1 Consumer register                              */
   __IOM uint32_t       CONSUMER_HFXO0_OSCREQ;             /**< OSCREQ consumer register                           */
   __IOM uint32_t       CONSUMER_HFXO0_TIMEOUT;            /**< TIMEOUT Consumer register                          */
-  __IOM uint32_t       CONSUMER_CORE_CTIIN0;              /**< CTI consumer register                              */
-  __IOM uint32_t       CONSUMER_CORE_CTIIN1;              /**< CTI Consumer register                              */
-  __IOM uint32_t       CONSUMER_CORE_CTIIN2;              /**< CTI Consumer register                              */
-  __IOM uint32_t       CONSUMER_CORE_CTIIN3;              /**< CTI Consumer register                              */
-  __IOM uint32_t       CONSUMER_CORE_M33RXEV;             /**< M33 Consumer register                              */
+  __IOM uint32_t       CONSUMER_CORE_CTIIN0;              /**< CTI0 Consumer Selection                            */
+  __IOM uint32_t       CONSUMER_CORE_CTIIN1;              /**< CTI1 Consumer Selection                            */
+  __IOM uint32_t       CONSUMER_CORE_CTIIN2;              /**< CTI2 Consumer Selection                            */
+  __IOM uint32_t       CONSUMER_CORE_CTIIN3;              /**< CTI3 Consumer Selection                            */
+  __IOM uint32_t       CONSUMER_CORE_M33RXEV;             /**< M33 Consumer Selection                             */
   __IOM uint32_t       CONSUMER_TIMER0_CC0;               /**< CC0 consumer register                              */
   __IOM uint32_t       CONSUMER_TIMER0_CC1;               /**< CC1 Consumer register                              */
   __IOM uint32_t       CONSUMER_TIMER0_CC2;               /**< CC2 Consumer register                              */
@@ -205,11 +205,11 @@ typedef struct {
   __IOM uint32_t       CONSUMER_SYSRTC0_IN1_SET;          /**< IN1 Consumer register                              */
   __IOM uint32_t       CONSUMER_HFXO0_OSCREQ_SET;         /**< OSCREQ consumer register                           */
   __IOM uint32_t       CONSUMER_HFXO0_TIMEOUT_SET;        /**< TIMEOUT Consumer register                          */
-  __IOM uint32_t       CONSUMER_CORE_CTIIN0_SET;          /**< CTI consumer register                              */
-  __IOM uint32_t       CONSUMER_CORE_CTIIN1_SET;          /**< CTI Consumer register                              */
-  __IOM uint32_t       CONSUMER_CORE_CTIIN2_SET;          /**< CTI Consumer register                              */
-  __IOM uint32_t       CONSUMER_CORE_CTIIN3_SET;          /**< CTI Consumer register                              */
-  __IOM uint32_t       CONSUMER_CORE_M33RXEV_SET;         /**< M33 Consumer register                              */
+  __IOM uint32_t       CONSUMER_CORE_CTIIN0_SET;          /**< CTI0 Consumer Selection                            */
+  __IOM uint32_t       CONSUMER_CORE_CTIIN1_SET;          /**< CTI1 Consumer Selection                            */
+  __IOM uint32_t       CONSUMER_CORE_CTIIN2_SET;          /**< CTI2 Consumer Selection                            */
+  __IOM uint32_t       CONSUMER_CORE_CTIIN3_SET;          /**< CTI3 Consumer Selection                            */
+  __IOM uint32_t       CONSUMER_CORE_M33RXEV_SET;         /**< M33 Consumer Selection                             */
   __IOM uint32_t       CONSUMER_TIMER0_CC0_SET;           /**< CC0 consumer register                              */
   __IOM uint32_t       CONSUMER_TIMER0_CC1_SET;           /**< CC1 Consumer register                              */
   __IOM uint32_t       CONSUMER_TIMER0_CC2_SET;           /**< CC2 Consumer register                              */
@@ -308,11 +308,11 @@ typedef struct {
   __IOM uint32_t       CONSUMER_SYSRTC0_IN1_CLR;          /**< IN1 Consumer register                              */
   __IOM uint32_t       CONSUMER_HFXO0_OSCREQ_CLR;         /**< OSCREQ consumer register                           */
   __IOM uint32_t       CONSUMER_HFXO0_TIMEOUT_CLR;        /**< TIMEOUT Consumer register                          */
-  __IOM uint32_t       CONSUMER_CORE_CTIIN0_CLR;          /**< CTI consumer register                              */
-  __IOM uint32_t       CONSUMER_CORE_CTIIN1_CLR;          /**< CTI Consumer register                              */
-  __IOM uint32_t       CONSUMER_CORE_CTIIN2_CLR;          /**< CTI Consumer register                              */
-  __IOM uint32_t       CONSUMER_CORE_CTIIN3_CLR;          /**< CTI Consumer register                              */
-  __IOM uint32_t       CONSUMER_CORE_M33RXEV_CLR;         /**< M33 Consumer register                              */
+  __IOM uint32_t       CONSUMER_CORE_CTIIN0_CLR;          /**< CTI0 Consumer Selection                            */
+  __IOM uint32_t       CONSUMER_CORE_CTIIN1_CLR;          /**< CTI1 Consumer Selection                            */
+  __IOM uint32_t       CONSUMER_CORE_CTIIN2_CLR;          /**< CTI2 Consumer Selection                            */
+  __IOM uint32_t       CONSUMER_CORE_CTIIN3_CLR;          /**< CTI3 Consumer Selection                            */
+  __IOM uint32_t       CONSUMER_CORE_M33RXEV_CLR;         /**< M33 Consumer Selection                             */
   __IOM uint32_t       CONSUMER_TIMER0_CC0_CLR;           /**< CC0 consumer register                              */
   __IOM uint32_t       CONSUMER_TIMER0_CC1_CLR;           /**< CC1 Consumer register                              */
   __IOM uint32_t       CONSUMER_TIMER0_CC2_CLR;           /**< CC2 Consumer register                              */
@@ -411,11 +411,11 @@ typedef struct {
   __IOM uint32_t       CONSUMER_SYSRTC0_IN1_TGL;          /**< IN1 Consumer register                              */
   __IOM uint32_t       CONSUMER_HFXO0_OSCREQ_TGL;         /**< OSCREQ consumer register                           */
   __IOM uint32_t       CONSUMER_HFXO0_TIMEOUT_TGL;        /**< TIMEOUT Consumer register                          */
-  __IOM uint32_t       CONSUMER_CORE_CTIIN0_TGL;          /**< CTI consumer register                              */
-  __IOM uint32_t       CONSUMER_CORE_CTIIN1_TGL;          /**< CTI Consumer register                              */
-  __IOM uint32_t       CONSUMER_CORE_CTIIN2_TGL;          /**< CTI Consumer register                              */
-  __IOM uint32_t       CONSUMER_CORE_CTIIN3_TGL;          /**< CTI Consumer register                              */
-  __IOM uint32_t       CONSUMER_CORE_M33RXEV_TGL;         /**< M33 Consumer register                              */
+  __IOM uint32_t       CONSUMER_CORE_CTIIN0_TGL;          /**< CTI0 Consumer Selection                            */
+  __IOM uint32_t       CONSUMER_CORE_CTIIN1_TGL;          /**< CTI1 Consumer Selection                            */
+  __IOM uint32_t       CONSUMER_CORE_CTIIN2_TGL;          /**< CTI2 Consumer Selection                            */
+  __IOM uint32_t       CONSUMER_CORE_CTIIN3_TGL;          /**< CTI3 Consumer Selection                            */
+  __IOM uint32_t       CONSUMER_CORE_M33RXEV_TGL;         /**< M33 Consumer Selection                             */
   __IOM uint32_t       CONSUMER_TIMER0_CC0_TGL;           /**< CC0 consumer register                              */
   __IOM uint32_t       CONSUMER_TIMER0_CC1_TGL;           /**< CC1 Consumer register                              */
   __IOM uint32_t       CONSUMER_TIMER0_CC2_TGL;           /**< CC2 Consumer register                              */

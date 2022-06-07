@@ -24,6 +24,9 @@ recommends:
 config_file:
   - path: protocol/zigbee/stack/config/component_config/sl_zigbee_pro_leaf_stack_config.h
 
+define:
+  - name: SL_ZIGBEE_LEAF_STACK
+
 validation_helper:
   # NCP doesn't have DEVICE_TYPE before it connects to Host
   # so we don't run the validation script for NCP

@@ -153,7 +153,7 @@ static const osThreadAttr_t _led_task_attr = {
   .cb_size     = sizeof(_led_task_cb),
   .stack_mem   = _led_stack,
   .stack_size  = sizeof(_led_stack),
-  .priority    = osPriorityNormal,
+  .priority    = osPriorityBelowNormal,
   .tz_module   = 0
 };
 

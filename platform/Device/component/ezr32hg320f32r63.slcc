@@ -12,14 +12,7 @@
   - path: platform/Device/SiliconLabs/EZR32HG/Source/system_ezr32hg.c
     unless:
     - device_content_override
-  - condition:
-    - toolchain_iar
-    path: platform/Device/SiliconLabs/EZR32HG/Source/IAR/startup_ezr32hg.c
-    unless:
-    - device_content_override
-  - condition:
-    - toolchain_gcc
-    path: platform/Device/SiliconLabs/EZR32HG/Source/GCC/startup_ezr32hg.c
+  - path: platform/Device/SiliconLabs/EZR32HG/Source/startup_ezr32hg.c
     unless:
     - device_content_override
   - condition:
@@ -158,3 +151,16 @@
     - custom_radio_config
     directory: rail
     path: platform/Device/config/77/device.yaml
+- metadata:
+    device:
+      memory:
+      - name: Main Flash
+        page_size: 1024
+        size: 32768
+        start: 0
+        type: non-volatile
+      - name: RAM
+        size: 8192
+        start: 536870912
+        type: volatile
+      opn: ezr32hg320f32r63g

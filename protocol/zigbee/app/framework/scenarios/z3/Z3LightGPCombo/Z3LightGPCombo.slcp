@@ -1,8 +1,12 @@
 project_name: "Z3LightGPCombo"
-label: "Z3LightGPCombo"
+label: "Zigbee - SoC LightGPCombo"
 package: "Zigbee"
 category: "Zigbee Application"
 quality: "production"
+
+description: >
+  This is a Zigbee 3.0 light application with Green Power endpoint, Green Power Proxy and Sink functionality.
+author: "Silicon Laboratories, Inc."
 
 component:
   - id: "cli"
@@ -16,7 +20,6 @@ component:
   - id: "zigbee_source_route"
   - id: "zigbee_binding_table"
   - id: "zigbee_stack_diagnostics"
-  - id: "zigbee_multi_network_stub"
   - id: "zigbee_gp"
   - id: "zigbee_install_code"
   - id: "zigbee_zll"
@@ -205,9 +208,6 @@ template_contribution:
     condition:
       - zigbee_multirail_demo
        
-description: |-
-  This is a Zigbee 3.0 light application with Green Power endpoint, Green Power Proxy and Sink functionality.
-
 readme:
   - path: ./readme.html
 
@@ -216,3 +216,10 @@ ui_hints:
     - path: readme.html
       focus: false
 
+filter:
+  - name: "Wireless Technology"
+    value: ["Zigbee"]
+  - name: "Device Type"
+    value: ["SoC"]
+  - name: "Project Difficulty"
+    value: ["Advanced"]

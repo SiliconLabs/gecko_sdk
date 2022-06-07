@@ -65,6 +65,7 @@ typedef enum {
 } sl_mac_transmit_priority_t;
 
 typedef enum {
+  SL_MAC_RADIO_OFF,
   SL_MAC_RX_OFF,
   SL_MAC_RX_ON_WHEN_IDLE,
   SL_MAC_RX_DUTY_CYCLING,
@@ -74,6 +75,7 @@ typedef void (*sl_mac_transmit_complete_callback_t) (uint8_t mac_index, sl_statu
 
 typedef struct {
   uint8_t channel;
+  uint8_t mac_index;
   int8_t tx_power;
   EmberPanId pan_id;
   EmberNodeId local_node_id;
@@ -95,8 +97,6 @@ typedef struct {
 } sl_mac_radio_parameters_t;
 
 sl_status_t sl_mac_init(uint8_t mac_index);
-
-sl_status_t sli_enable_rx_duty_cycling(uint8_t mac_index);
 
 void sl_mac_mark_upper_mac_buffers(void);
 
@@ -164,7 +164,7 @@ sl_status_t sl_mac_submit(uint8_t mac_index,
 // The prior Connect API simply sent the poll immediately.
 // However, in Zigbee/Thread, the transmit state machine attempts to
 // balance polls with other transmissions, so this API supports that
-void sl_mac_request_poll(uint8_t mac_index, uint8_t nwk_index);
+sl_status_t sl_mac_request_poll(uint8_t mac_index, uint8_t nwk_index);
 
 /** @brief cancel requested data poll
  */

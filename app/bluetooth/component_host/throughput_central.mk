@@ -11,3 +11,5 @@ $(SDK_DIR)/app/bluetooth/common/throughput_ui
 
 override C_SRC += \
 $(SDK_DIR)/app/bluetooth/common/throughput_central/throughput_central.c
+
+override CFLAGS += -DSL_CATALOG_THROUGHPUT_CENTRAL_PRESENT

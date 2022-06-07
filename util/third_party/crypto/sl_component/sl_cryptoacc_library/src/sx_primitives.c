@@ -155,7 +155,9 @@ static uint32_t primitive_operation(uint32_t op,
    /* Set command register with operation, operand size, swap and field
     * This is done before transferring data into cryptoRAM because
     * endianness needs to be known before transferring data */
-    ba414ep_set_command(op, size, BA414EP_BIGEND, BA414EP_SELCUR_NO_ACCELERATOR);
+    status = ba414ep_set_command(op, size, BA414EP_BIGEND, BA414EP_SELCUR_NO_ACCELERATOR);
+    if (status)
+       return status;
 
     if(modulo != NULL) {
       mem2CryptoRAM_rev(block_t_convert(modulo, size), size, PtrN);
@@ -182,6 +184,26 @@ static uint32_t primitive_operation(uint32_t op,
 }
 
 
+#if (PK_CM_ENABLED && PK_CM_RAND_SCALAR)
+/*@Brief Define used to set number of retries for point multiplication when
+ * counter measures are enabled */
+#define POINT_MULT_CM_RETRIES 10
+
+/** @brief Checks if the block does not have only zeros.
+ *
+ *  @param block Block_t to be verified
+ *  @return 0 - All bits are 0
+ *          > 0 - Not all bits are 0
+ *  */
+static uint8_t is_blk_not_zero(block_t block)
+{
+   uint8_t status = 0;
+   for (uint32_t i = 0; i < block.len; i++)
+      status |= block.addr[i];
+   return status;
+}
+#endif
+
 
 /* Modular Exponentiation    C = B^A mod N */
 uint32_t modular_exponentiation_blk(block_t a,
@@ -191,21 +213,16 @@ uint32_t modular_exponentiation_blk(block_t a,
                                 uint32_t  size)
 {
    uint32_t status;
-   uint32_t size_adapt = size;
 
-   #if PK_CM_ENABLED
-      if (PK_CM_RANDPROJ_MOD) {
-         size_adapt += PK_CM_RAND_SIZE;
-      }
-   #endif
-
-   ba414ep_set_command(BA414EP_OPTYPE_MOD_EXP, size_adapt, BA414EP_BIGEND, BA414EP_SELCUR_NO_ACCELERATOR);
+   status = ba414ep_set_command(BA414EP_OPTYPE_MOD_EXP, size, BA414EP_BIGEND, BA414EP_SELCUR_NO_ACCELERATOR);
+   if (status)
+      return status;
 
    ba414ep_set_config(BA414EP_MEMLOC_10, BA414EP_MEMLOC_11, BA414EP_MEMLOC_12, BA414EP_MEMLOC_0);
 
-   mem2CryptoRAM_rev(modulo, size_adapt, BA414EP_MEMLOC_0);
-   mem2CryptoRAM_rev(a, size_adapt, BA414EP_MEMLOC_10);
-   mem2CryptoRAM_rev(b, size_adapt, BA414EP_MEMLOC_11);
+   mem2CryptoRAM_rev(modulo, size, BA414EP_MEMLOC_0);
+   mem2CryptoRAM_rev(a, size, BA414EP_MEMLOC_10);
+   mem2CryptoRAM_rev(b, size, BA414EP_MEMLOC_11);
 
    /* Start BA414EP */
    status = ba414ep_start_wait_status();
@@ -258,7 +275,9 @@ uint32_t ecc_montgomery_mult(block_t curve, uint32_t curve_flags, uint32_t size,
 
 
    /* Set Command register - size 32 bytes - G(p) field */
-   ba414ep_set_command(BA414EP_OPTYPE_MONTGOMERY_POINT_MULT, size, BA414EP_LITTLEEND, curve_flags);
+   status = ba414ep_set_command(BA414EP_OPTYPE_MONTGOMERY_POINT_MULT, size, BA414EP_LITTLEEND, curve_flags);
+   if (status)
+      return status;
    mem2CryptoRAM(block_t_convert(buffer_pt, ECC_MAX_KEY_SIZE), size, BA414EP_MEMLOC_2);
    mem2CryptoRAM(block_t_convert(buffer_sc, ECC_MAX_KEY_SIZE), size, BA414EP_MEMLOC_3);
 
@@ -309,7 +328,9 @@ uint32_t ecc_point_decompress(block_t curve, block_t point_x, uint8_t y_bit,
    if (point_x.len != size || point_y.len != size)
       return CRYPTOLIB_INVALID_PARAM;
 
-   ba414ep_set_command(BA414EP_OPTYPE_ECC_POINT_DECOMP, size, BA414EP_BIGEND, curve_flags);
+   error = ba414ep_set_command(BA414EP_OPTYPE_ECC_POINT_DECOMP, size, BA414EP_BIGEND, curve_flags);
+   if (error)
+      return error;
    ba414ep_set_config(BA414EP_MEMLOC_6, 0x00, BA414EP_MEMLOC_7, 0x00);
 
    ba414ep_load_curve(curve, size, BA414EP_BIGEND, 1);
@@ -355,7 +376,6 @@ uint32_t ecc_point_compute_y2(block_t curve, block_t point_x, block_t point_y2,
    return CRYPTOLIB_SUCCESS;
 }
 
-
 uint32_t ecc_point_mul(block_t curve, block_t scalar, block_t point,
       block_t result, uint32_t size, uint32_t curve_flags)
 {
@@ -364,7 +384,9 @@ uint32_t ecc_point_mul(block_t curve, block_t scalar, block_t point,
  if (point.len != size * 2 || result.len != size * 2)
       return CRYPTOLIB_INVALID_PARAM;
 
-   ba414ep_set_command(BA414EP_OPTYPE_ECC_POINT_MULT, size, BA414EP_BIGEND, curve_flags);
+   error = ba414ep_set_command(BA414EP_OPTYPE_ECC_POINT_MULT, size, BA414EP_BIGEND, curve_flags);
+   if (error)
+      return error;
    ba414ep_set_config(BA414EP_MEMLOC_12, BA414EP_MEMLOC_14, BA414EP_MEMLOC_6, 0x0);
 
    ba414ep_load_curve(curve, size, BA414EP_BIGEND, 1);
@@ -373,10 +395,47 @@ uint32_t ecc_point_mul(block_t curve, block_t scalar, block_t point,
 
    point2CryptoRAM_rev(point, size, BA414EP_MEMLOC_12);
 
+#if (PK_CM_ENABLED && PK_CM_RAND_SCALAR)
+   /*
+    * Weierstrass point addition formula does not provide the correct result
+    * in some exceptional cases (P+P, P+(-P), P+0, 0+P).
+    * With counter-measure enabled it is possible to hit one of those cases
+    * during the point multiplication operation. If that case, the PK engine
+    * will return NotInvertible flag (point at infinity) - although the correct
+    * final result is not the point at infinity.
+    * When using a random scalar value, this will happen with extremely low
+    * probability. However this can happen with test vectors which use very
+    * small scalar value (k<=32) or very large scalar value (k>=n-32).
+    */
+
+   uint8_t i;
+   for (i = 0; i < POINT_MULT_CM_RETRIES; i++) {
+      /*
+       * For the first iteration, the commands was set before entering the for loop
+       */
+      error = ba414ep_start_wait_status();
+      if ((error & BA414EP_STS_NOTINVERTIBLE_MASK) && is_blk_not_zero(scalar)) {
+         /*
+          * The command needs to be reset before retrying, in order to generate another random.
+          */
+         error = ba414ep_set_command(BA414EP_OPTYPE_ECC_POINT_MULT, size, BA414EP_BIGEND, curve_flags);
+         if (error)
+            return error;
+         continue;
+      }
+      else
+         break;
+   }
+   if (error) {
+      if (i == POINT_MULT_CM_RETRIES)
+         CRYPTOLIB_PRINTF("ecc_point_mul: exceeded number of retries\n");
+      return CRYPTOLIB_CRYPTO_ERR;
+   }
+#else
    error = ba414ep_start_wait_status();
    if (error)
       return CRYPTOLIB_CRYPTO_ERR;
-
+#endif
    CryptoRAM2point_rev(result, size, BA414EP_MEMLOC_6);
    return CRYPTOLIB_SUCCESS;
 }
@@ -389,7 +448,9 @@ uint32_t ecc_point_add(block_t curve, block_t point_a, block_t point_b,
    if (point_a.len != size * 2 || point_b.len != size * 2 || result.len != size * 2)
       return CRYPTOLIB_INVALID_PARAM;
 
-   ba414ep_set_command(BA414EP_OPTYPE_ECC_POINT_ADD, size, BA414EP_BIGEND, curve_flags);
+   error = ba414ep_set_command(BA414EP_OPTYPE_ECC_POINT_ADD, size, BA414EP_BIGEND, curve_flags);
+   if (error)
+      return error;
    ba414ep_set_config(BA414EP_MEMLOC_6, BA414EP_MEMLOC_8, BA414EP_MEMLOC_10, 0x0);
 
     // Load curve parameters
@@ -413,7 +474,9 @@ uint32_t ecc_is_point_on_curve(block_t curve, block_t point, uint32_t size,
    if (point.len != size * 2)
       return CRYPTOLIB_INVALID_PARAM;
 
-   ba414ep_set_command(BA414EP_OPTYPE_ECC_CHECK_POINTONCURVE, size, BA414EP_BIGEND, curve_flags);
+   error = ba414ep_set_command(BA414EP_OPTYPE_ECC_CHECK_POINTONCURVE, size, BA414EP_BIGEND, curve_flags);
+   if (error)
+      return error;
    ba414ep_load_curve(curve, size, BA414EP_BIGEND, 1);
    point2CryptoRAM_rev(point, size , BA414EP_MEMLOC_6);
 
@@ -430,7 +493,9 @@ uint32_t ecc_pt_muladd(block_t curve, block_t scalar_m, block_t point1,
    uint32_t error;
 
     /* first multiply 'point1' with the 'scalar_m' */
-   ba414ep_set_command(BA414EP_OPTYPE_ECC_POINT_MULT, size, BA414EP_BIGEND, curve_flags);
+   error = ba414ep_set_command(BA414EP_OPTYPE_ECC_POINT_MULT, size, BA414EP_BIGEND, curve_flags);
+   if (error)
+      return error;
    ba414ep_set_config(BA414EP_MEMLOC_12, BA414EP_MEMLOC_14, BA414EP_MEMLOC_6, 0x0);
    // Load curve parameters
    ba414ep_load_curve(curve, size, BA414EP_BIGEND, 1);
@@ -456,7 +521,9 @@ uint32_t ecc_pt_muladd(block_t curve, block_t scalar_m, block_t point1,
       return CRYPTOLIB_CRYPTO_ERR;
 
    /* Add the results of the 2 products*/
-   ba414ep_set_command(BA414EP_OPTYPE_ECC_POINT_ADD, size, BA414EP_BIGEND, curve_flags);
+   error = ba414ep_set_command(BA414EP_OPTYPE_ECC_POINT_ADD, size, BA414EP_BIGEND, curve_flags);
+   if (error)
+      return error;
    ba414ep_set_config(BA414EP_MEMLOC_6, BA414EP_MEMLOC_8, BA414EP_MEMLOC_10, 0x0);
    // Start BA414EP
    error = ba414ep_start_wait_status();

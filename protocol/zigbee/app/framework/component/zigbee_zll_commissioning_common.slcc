@@ -14,6 +14,7 @@ requires:
 config_file:
   - path: protocol/zigbee/app/framework/plugin/zll-commissioning-common/config/zll-commissioning-common-config.h
 validation_helper:
+  - path: protocol/zigbee/component/scripts/zigbee_zll_commissioning_validation.lua
   - path: protocol/zigbee/app/framework/component/scripts/zigbee_radio_power_value_validation.lua
 source:
   - path: protocol/zigbee/app/framework/plugin/zll-commissioning-common/zll-commissioning-common.c

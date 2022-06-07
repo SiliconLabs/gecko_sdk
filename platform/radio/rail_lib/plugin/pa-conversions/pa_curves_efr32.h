@@ -67,6 +67,8 @@ extern "C" {
   #endif
 #elif defined (_SILICON_LABS_32B_SERIES_2_CONFIG_5)
 #include "efr32xg25/sl_rail_util_pa_curves.h"
+#elif (_SILICON_LABS_32B_SERIES_2_CONFIG == 7)
+#include "efr32xg27/sl_rail_util_pa_curves.h"
 #else
 #error "Unsupported platform!"
 #endif

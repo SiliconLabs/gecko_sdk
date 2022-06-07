@@ -1,5 +1,5 @@
 /**************************************************************************//**
- * Copyright 2018, Silicon Laboratories Inc.
+ * Copyright 2022, Silicon Laboratories Inc.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -20,7 +20,7 @@
 /** X.x.x: Major version of the driver */
 #define FMAC_DRIVER_VERSION_MAJOR      3
 /** x.X.x: Minor version of the driver */
-#define FMAC_DRIVER_VERSION_MINOR      4
+#define FMAC_DRIVER_VERSION_MINOR      5
 /** x.x.X: Revision of the driver */
 #define FMAC_DRIVER_VERSION_REVISION   0
 /** For release candidates, this is set to 1..254

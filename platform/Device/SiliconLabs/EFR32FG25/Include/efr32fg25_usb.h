@@ -49,7 +49,8 @@ typedef struct {
   __IOM uint32_t IF;                            /**< IRQ flag reg                                       */
   uint32_t       RESERVED0[2U];                 /**< Reserved for future use                            */
   __IOM uint32_t IEN;                           /**< IRQ enable reg                                     */
-  uint32_t       RESERVED1[3U];                 /**< Reserved for future use                            */
+  uint32_t       RESERVED1[2U];                 /**< Reserved for future use                            */
+  __IOM uint32_t CAL;                           /**< Cal values - PHY                                   */
   __IM uint32_t  STATUS;                        /**< STATUS reg                                         */
   uint32_t       RESERVED2[1013U];              /**< Reserved for future use                            */
   __IM uint32_t  IPVERSION_SET;                 /**< IP version                                         */
@@ -58,7 +59,8 @@ typedef struct {
   __IOM uint32_t IF_SET;                        /**< IRQ flag reg                                       */
   uint32_t       RESERVED3[2U];                 /**< Reserved for future use                            */
   __IOM uint32_t IEN_SET;                       /**< IRQ enable reg                                     */
-  uint32_t       RESERVED4[3U];                 /**< Reserved for future use                            */
+  uint32_t       RESERVED4[2U];                 /**< Reserved for future use                            */
+  __IOM uint32_t CAL_SET;                       /**< Cal values - PHY                                   */
   __IM uint32_t  STATUS_SET;                    /**< STATUS reg                                         */
   uint32_t       RESERVED5[1013U];              /**< Reserved for future use                            */
   __IM uint32_t  IPVERSION_CLR;                 /**< IP version                                         */
@@ -67,7 +69,8 @@ typedef struct {
   __IOM uint32_t IF_CLR;                        /**< IRQ flag reg                                       */
   uint32_t       RESERVED6[2U];                 /**< Reserved for future use                            */
   __IOM uint32_t IEN_CLR;                       /**< IRQ enable reg                                     */
-  uint32_t       RESERVED7[3U];                 /**< Reserved for future use                            */
+  uint32_t       RESERVED7[2U];                 /**< Reserved for future use                            */
+  __IOM uint32_t CAL_CLR;                       /**< Cal values - PHY                                   */
   __IM uint32_t  STATUS_CLR;                    /**< STATUS reg                                         */
   uint32_t       RESERVED8[1013U];              /**< Reserved for future use                            */
   __IM uint32_t  IPVERSION_TGL;                 /**< IP version                                         */
@@ -76,7 +79,8 @@ typedef struct {
   __IOM uint32_t IF_TGL;                        /**< IRQ flag reg                                       */
   uint32_t       RESERVED9[2U];                 /**< Reserved for future use                            */
   __IOM uint32_t IEN_TGL;                       /**< IRQ enable reg                                     */
-  uint32_t       RESERVED10[3U];                /**< Reserved for future use                            */
+  uint32_t       RESERVED10[2U];                /**< Reserved for future use                            */
+  __IOM uint32_t CAL_TGL;                       /**< Cal values - PHY                                   */
   __IM uint32_t  STATUS_TGL;                    /**< STATUS reg                                         */
 } USB_APBS_TypeDef;
 /** @} End of group EFR32FG25_USB_APBS */
@@ -112,8 +116,8 @@ typedef struct {
 #define USB_EN_DISABLING_DEFAULT            (_USB_EN_DISABLING_DEFAULT << 1)            /**< Shifted mode DEFAULT for USB_EN             */
 
 /* Bit fields for USB CTRL */
-#define _USB_CTRL_RESETVALUE                0x03040000UL                                /**< Default value for USB_CTRL                  */
-#define _USB_CTRL_MASK                      0x07070001UL                                /**< Mask for USB_CTRL                           */
+#define _USB_CTRL_RESETVALUE                0x03E40000UL                                /**< Default value for USB_CTRL                  */
+#define _USB_CTRL_MASK                      0x07E78001UL                                /**< Mask for USB_CTRL                           */
 #define USB_CTRL_TXDSE0MXSEL                (0x1UL << 0)                                /**< TXD SE0 chicken bit                         */
 #define _USB_CTRL_TXDSE0MXSEL_SHIFT         0                                           /**< Shift value for USB_TXDSE0MXSEL             */
 #define _USB_CTRL_TXDSE0MXSEL_MASK          0x1UL                                       /**< Bit mask for USB_TXDSE0MXSEL                */
@@ -134,6 +138,10 @@ typedef struct {
 #define _USB_CTRL_VBUSOVRIDE_MASK           0x40000UL                                   /**< Bit mask for USB_VBUSOVRIDE                 */
 #define _USB_CTRL_VBUSOVRIDE_DEFAULT        0x00000001UL                                /**< Mode DEFAULT for USB_CTRL                   */
 #define USB_CTRL_VBUSOVRIDE_DEFAULT         (_USB_CTRL_VBUSOVRIDE_DEFAULT << 18)        /**< Shifted mode DEFAULT for USB_CTRL           */
+#define _USB_CTRL_FSSLEW_SHIFT              21                                          /**< Shift value for USB_FSSLEW                  */
+#define _USB_CTRL_FSSLEW_MASK               0xE00000UL                                  /**< Bit mask for USB_FSSLEW                     */
+#define _USB_CTRL_FSSLEW_DEFAULT            0x00000007UL                                /**< Mode DEFAULT for USB_CTRL                   */
+#define USB_CTRL_FSSLEW_DEFAULT             (_USB_CTRL_FSSLEW_DEFAULT << 21)            /**< Shifted mode DEFAULT for USB_CTRL           */
 #define USB_CTRL_DISRUPTX                   (0x1UL << 24)                               /**< disable tx pull up res                      */
 #define _USB_CTRL_DISRUPTX_SHIFT            24                                          /**< Shift value for USB_DISRUPTX                */
 #define _USB_CTRL_DISRUPTX_MASK             0x1000000UL                                 /**< Bit mask for USB_DISRUPTX                   */
@@ -177,6 +185,14 @@ typedef struct {
 #define _USB_IEN_DWCOTG_MASK                0x2UL                                       /**< Bit mask for USB_DWCOTG                     */
 #define _USB_IEN_DWCOTG_DEFAULT             0x00000000UL                                /**< Mode DEFAULT for USB_IEN                    */
 #define USB_IEN_DWCOTG_DEFAULT              (_USB_IEN_DWCOTG_DEFAULT << 1)              /**< Shifted mode DEFAULT for USB_IEN            */
+
+/* Bit fields for USB CAL */
+#define _USB_CAL_RESETVALUE                 0x07078000UL                                /**< Default value for USB_CAL                   */
+#define _USB_CAL_MASK                       0x0707830FUL                                /**< Mask for USB_CAL                            */
+#define _USB_CAL_FSSLEWT_SHIFT              24                                          /**< Shift value for USB_FSSLEWT                 */
+#define _USB_CAL_FSSLEWT_MASK               0x7000000UL                                 /**< Bit mask for USB_FSSLEWT                    */
+#define _USB_CAL_FSSLEWT_DEFAULT            0x00000007UL                                /**< Mode DEFAULT for USB_CAL                    */
+#define USB_CAL_FSSLEWT_DEFAULT             (_USB_CAL_FSSLEWT_DEFAULT << 24)            /**< Shifted mode DEFAULT for USB_CAL            */
 
 /* Bit fields for USB STATUS */
 #define _USB_STATUS_RESETVALUE              0x00000000UL                                /**< Default value for USB_STATUS                */

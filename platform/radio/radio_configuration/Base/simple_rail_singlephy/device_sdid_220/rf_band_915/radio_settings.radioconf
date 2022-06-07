@@ -184,6 +184,10 @@
           <value>int:16</value>
         </input>
         <input>
+          <key>FPLL_BAND</key>
+          <value>null</value>
+        </input>
+        <input>
           <key>FRAME_BITENDIAN</key>
           <value>serializableObject:EnumDataItem:0</value>
         </input>

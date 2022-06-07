@@ -37,6 +37,7 @@
 
 #include "trel_dnssd/trel_dnssd.hpp"
 
+#include <inttypes.h>
 #include <net/if.h>
 
 #include <openthread/instance.h>
@@ -229,12 +230,12 @@ std::string TrelDnssd::GetTrelInstanceName(void)
 {
     const otExtAddress *extaddr = otLinkGetExtendedAddress(mNcp.GetInstance());
     std::string         name;
-    char                nameBuf[sizeof(extaddr) * 2 + 1];
+    char                nameBuf[sizeof(otExtAddress) * 2 + 1];
 
-    Utils::Bytes2Hex(extaddr->m8, sizeof(extaddr), nameBuf);
+    Utils::Bytes2Hex(extaddr->m8, sizeof(otExtAddress), nameBuf);
     name = StringUtils::ToLowercase(nameBuf);
 
-    assert(name.length() == sizeof(extaddr) * 2);
+    assert(name.length() == sizeof(otExtAddress) * 2);
 
     otbrLogDebug("Using instance name %s", name.c_str());
     return name;
@@ -247,8 +248,17 @@ void TrelDnssd::PublishTrelService(void)
     assert(mTrelNetifIndex > 0);
 
     mRegisterInfo.mInstanceName = GetTrelInstanceName();
-    mPublisher.PublishService(/* aHostName */ "", mRegisterInfo.mPort, mRegisterInfo.mInstanceName, kTrelServiceName,
-                              Mdns::Publisher::SubTypeList{}, mRegisterInfo.mTxtEntries);
+    mPublisher.PublishService(/* aHostName */ "", mRegisterInfo.mInstanceName, kTrelServiceName,
+                              Mdns::Publisher::SubTypeList{}, mRegisterInfo.mPort, mRegisterInfo.mTxtEntries,
+                              [](otbrError aError) { HandlePublishTrelServiceError(aError); });
+}
+
+void TrelDnssd::HandlePublishTrelServiceError(otbrError aError)
+{
+    if (aError != OTBR_ERROR_NONE)
+    {
+        otbrLogErr("Failed to publish TREL service: %s. TREL won't be working.", otbrErrorString(aError));
+    }
 }
 
 void TrelDnssd::UnpublishTrelService(void)
@@ -256,8 +266,17 @@ void TrelDnssd::UnpublishTrelService(void)
     assert(mRegisterInfo.IsValid());
     assert(mRegisterInfo.IsPublished());
 
-    mPublisher.UnpublishService(mRegisterInfo.mInstanceName, kTrelServiceName);
+    mPublisher.UnpublishService(mRegisterInfo.mInstanceName, kTrelServiceName,
+                                [](otbrError aError) { HandleUnpublishTrelServiceError(aError); });
     mRegisterInfo.mInstanceName = "";
+}
+
+void TrelDnssd::HandleUnpublishTrelServiceError(otbrError aError)
+{
+    if (aError != OTBR_ERROR_NONE)
+    {
+        otbrLogInfo("Failed to unpublish TREL service: %s", otbrErrorString(aError));
+    }
 }
 
 void TrelDnssd::OnTrelServiceInstanceAdded(const Mdns::Publisher::DiscoveredInstanceInfo &aInstanceInfo)
@@ -379,7 +398,7 @@ void TrelDnssd::CheckTrelNetifReady(void)
 
         if (mTrelNetifIndex != 0)
         {
-            otbrLogDebug("Netif %s is ready: index = %d", mTrelNetif.c_str(), mTrelNetifIndex);
+            otbrLogDebug("Netif %s is ready: index = %" PRIu32, mTrelNetif.c_str(), mTrelNetifIndex);
             OnBecomeReady();
         }
         else
@@ -404,8 +423,8 @@ void TrelDnssd::OnBecomeReady(void)
 {
     if (IsReady())
     {
-        otbrLogInfo("TREL DNS-SD Is Now Ready: Netif=%s(%u), SubscriberId=%u, Register=%s!", mTrelNetif.c_str(),
-                    mTrelNetifIndex, mSubscriberId, mRegisterInfo.mInstanceName.c_str());
+        otbrLogInfo("TREL DNS-SD Is Now Ready: Netif=%s(%" PRIu32 "), SubscriberId=%" PRIu64 ", Register=%s!",
+                    mTrelNetif.c_str(), mTrelNetifIndex, mSubscriberId, mRegisterInfo.mInstanceName.c_str());
 
         if (mSubscriberId > 0)
         {
@@ -478,20 +497,21 @@ void TrelDnssd::Peer::ReadExtAddrFromTxtData(void)
     {
         if (StringUtils::EqualCaseInsensitive(txtEntry.mName, kTxtRecordExtAddressKey))
         {
-            char extAddrHexBuf[sizeof(mExtAddr) * 2 + 1];
+            VerifyOrExit(txtEntry.mValue.size() == sizeof(mExtAddr));
 
-            VerifyOrExit(txtEntry.mValue.size() == sizeof(mExtAddr) * 2);
-
-            memcpy(extAddrHexBuf, txtEntry.mValue.data(), sizeof(mExtAddr) * 2);
-            extAddrHexBuf[sizeof(mExtAddr) * 2] = '\0';
-
-            VerifyOrExit(Utils::Hex2Bytes(extAddrHexBuf, mExtAddr.m8, sizeof(mExtAddr)) == sizeof(mExtAddr));
+            memcpy(mExtAddr.m8, txtEntry.mValue.data(), sizeof(mExtAddr));
             mValid = true;
             break;
         }
     }
 
 exit:
+
+    if (!mValid)
+    {
+        otbrLogInfo("Failed to dissect ExtAddr from peer TXT data");
+    }
+
     return;
 }
 

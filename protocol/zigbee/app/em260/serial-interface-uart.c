@@ -75,8 +75,10 @@ static uint16_t delayTestDelayLength = 0;
 //------------------------------------------------------------------------------
 // Serial Interface Downwards
 
-void serialInit(void)
+void serialInit(EmberEvent* event)
 {
+  (void)event;
+
 #ifndef UC_BUILD
   EmberStatus status;
   SerialBaudRate baud;

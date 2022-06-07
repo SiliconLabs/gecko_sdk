@@ -2992,17 +2992,17 @@ typedef struct {
 #define _GPIO_TIMER_ROUTEEN_CC2PEN_MASK                  0x4UL                                      /**< Bit mask for GPIO_CC2PEN                    */
 #define _GPIO_TIMER_ROUTEEN_CC2PEN_DEFAULT               0x00000000UL                               /**< Mode DEFAULT for GPIO_TIMER_ROUTEEN         */
 #define GPIO_TIMER_ROUTEEN_CC2PEN_DEFAULT                (_GPIO_TIMER_ROUTEEN_CC2PEN_DEFAULT << 2)  /**< Shifted mode DEFAULT for GPIO_TIMER_ROUTEEN */
-#define GPIO_TIMER_ROUTEEN_CCC0PEN                       (0x1UL << 3)                               /**< CCC0 pin enable control bit                 */
+#define GPIO_TIMER_ROUTEEN_CCC0PEN                       (0x1UL << 3)                               /**< CDTI0 pin enable control bit                */
 #define _GPIO_TIMER_ROUTEEN_CCC0PEN_SHIFT                3                                          /**< Shift value for GPIO_CCC0PEN                */
 #define _GPIO_TIMER_ROUTEEN_CCC0PEN_MASK                 0x8UL                                      /**< Bit mask for GPIO_CCC0PEN                   */
 #define _GPIO_TIMER_ROUTEEN_CCC0PEN_DEFAULT              0x00000000UL                               /**< Mode DEFAULT for GPIO_TIMER_ROUTEEN         */
 #define GPIO_TIMER_ROUTEEN_CCC0PEN_DEFAULT               (_GPIO_TIMER_ROUTEEN_CCC0PEN_DEFAULT << 3) /**< Shifted mode DEFAULT for GPIO_TIMER_ROUTEEN */
-#define GPIO_TIMER_ROUTEEN_CCC1PEN                       (0x1UL << 4)                               /**< CCC1 pin enable control bit                 */
+#define GPIO_TIMER_ROUTEEN_CCC1PEN                       (0x1UL << 4)                               /**< CDTI1 pin enable control bit                */
 #define _GPIO_TIMER_ROUTEEN_CCC1PEN_SHIFT                4                                          /**< Shift value for GPIO_CCC1PEN                */
 #define _GPIO_TIMER_ROUTEEN_CCC1PEN_MASK                 0x10UL                                     /**< Bit mask for GPIO_CCC1PEN                   */
 #define _GPIO_TIMER_ROUTEEN_CCC1PEN_DEFAULT              0x00000000UL                               /**< Mode DEFAULT for GPIO_TIMER_ROUTEEN         */
 #define GPIO_TIMER_ROUTEEN_CCC1PEN_DEFAULT               (_GPIO_TIMER_ROUTEEN_CCC1PEN_DEFAULT << 4) /**< Shifted mode DEFAULT for GPIO_TIMER_ROUTEEN */
-#define GPIO_TIMER_ROUTEEN_CCC2PEN                       (0x1UL << 5)                               /**< CCC2 pin enable control bit                 */
+#define GPIO_TIMER_ROUTEEN_CCC2PEN                       (0x1UL << 5)                               /**< CDTI2 pin enable control bit                */
 #define _GPIO_TIMER_ROUTEEN_CCC2PEN_SHIFT                5                                          /**< Shift value for GPIO_CCC2PEN                */
 #define _GPIO_TIMER_ROUTEEN_CCC2PEN_MASK                 0x20UL                                     /**< Bit mask for GPIO_CCC2PEN                   */
 #define _GPIO_TIMER_ROUTEEN_CCC2PEN_DEFAULT              0x00000000UL                               /**< Mode DEFAULT for GPIO_TIMER_ROUTEEN         */

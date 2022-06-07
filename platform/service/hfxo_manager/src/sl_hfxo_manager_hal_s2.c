@@ -29,7 +29,7 @@
  ******************************************************************************/
 #include "em_device.h"
 #if defined(_SILICON_LABS_32B_SERIES_2)
-#include "em_assert.h"
+#include "sl_assert.h"
 #include "sli_hfxo_manager.h"
 #include "sl_hfxo_manager.h"
 #include "sl_hfxo_manager_config.h"

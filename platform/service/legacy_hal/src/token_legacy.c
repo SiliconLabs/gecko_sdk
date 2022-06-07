@@ -82,11 +82,6 @@ void halInternalGetTokenData(void *data, uint16_t token, uint8_t index, uint8_t 
   (void) sl_token_get_data(token, index, data, len);
 }
 
-void halInternalGetIdxTokenPtrOrData(void *ptr, uint16_t token, uint8_t index, uint8_t len)
-{
-  (void) sl_token_get_pointer_or_data(token, index, ptr, len);
-}
-
 void halInternalSetTokenData(uint16_t token, uint8_t index, void *data, uint8_t len)
 {
   (void) sl_token_set_data(token, index, data, len);

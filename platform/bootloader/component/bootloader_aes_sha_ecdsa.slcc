@@ -17,17 +17,17 @@ source:
 include:
   - path: platform/bootloader
     file_list:
-        - path: security/btl_security_aes.h
-        - path: security/btl_security_ecdsa.h 
-        - path: security/btl_security_sha256.h
-        - path: security/btl_security_tokens.h
-        - path: security/btl_security_types.h
-        - path: security/btl_security_aes.h
-        - path: security/btl_crc32.h
-        - path: security/btl_crc16.h
-        - path: security/ecc/ecc.h
-        - path: security/sha/btl_sha256.h
+      - path: security/btl_security_aes.h
+      - path: security/btl_security_ecdsa.h
+      - path: security/btl_security_sha256.h
+      - path: security/btl_security_tokens.h
+      - path: security/btl_security_types.h
+      - path: security/btl_security_aes.h
+      - path: security/ecc/ecc.h
+      - path: security/sha/btl_sha256.h
 requires:
   - name: mbedtls_cipher_ctr
 provides:
   - name: bootloader_aes_sha_ecdsa
+  - name: bootloader_nonsecure_incompatible
+    condition: [bootloader_core_nonsecure]

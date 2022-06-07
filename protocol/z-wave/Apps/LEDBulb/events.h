@@ -5,8 +5,10 @@
  *
  * @copyright 2020 Silicon Laboratories Inc.
  */
-#ifndef APPS_SWITCHONOFF_EVENTS_H_
-#define APPS_SWITCHONOFF_EVENTS_H_
+#ifndef APPS_LEDBULB_EVENTS_H_
+#define APPS_LEDBULB_EVENTS_H_
+
+#include <ev_man.h>
 
 /**
  * Defines events for the application.
@@ -18,15 +20,16 @@
  * application files. An example could be a peripheral driver that enqueues an event when something
  * specific happens.
  */
-typedef enum EVENT_APP_SWITCH_ON_OFF
+typedef enum EVENT_APP_LED_BULB
 {
   EVENT_EMPTY = DEFINE_EVENT_APP_NBR,
   EVENT_APP_INIT,
   EVENT_APP_REFRESH_MMI,
   EVENT_APP_FLUSHMEM_READY,
   EVENT_APP_SMARTSTART_IN_PROGRESS,
-  EVENT_APP_LEARN_IN_PROGRESS
+  EVENT_APP_BUTTON_LEARN_RESET_SHORT_PRESS,
+  EVENT_APP_BUTTON_LEARN_RESET_LONG_PRESS,
 }
 EVENT_APP;
 
-#endif /* APPS_SWITCHONOFF_EVENTS_H_ */
+#endif /* APPS_LEDBULB_EVENTS_H_ */

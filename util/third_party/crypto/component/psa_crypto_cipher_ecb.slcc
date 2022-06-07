@@ -1,10 +1,10 @@
 id: psa_crypto_cipher_ecb
 package: platform
-label: PSA Crypto support for the ECB block cipher mode.
+label: ECB Mode
 description: >-
   This component provides support for the ECB block cipher mode
   (with no padding) in PSA Crypto.
-category: Platform|Security
+category: Platform|Security|PSA Crypto|Encryption
 quality: production
 provides:
   - name: psa_crypto_cipher_ecb

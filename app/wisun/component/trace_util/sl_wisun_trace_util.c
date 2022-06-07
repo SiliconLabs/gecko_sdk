@@ -131,6 +131,13 @@ const app_enum_t app_wisun_nw_size_enum[] = {
   { NULL, 0 }
 };
 
+/// Application enum for regulation
+const app_enum_t app_regulation_enum[] = {
+  { "none", SL_WISUN_REGULATION_NONE },
+  { "arib", SL_WISUN_REGULATION_ARIB },
+  { NULL, 0 }
+};
+
 // -----------------------------------------------------------------------------
 //                                Static Variables
 // -----------------------------------------------------------------------------

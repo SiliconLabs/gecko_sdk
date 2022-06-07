@@ -7,6 +7,8 @@ category: Platform|Bootloader|Drivers
 quality: production
 source:
   - path: platform/bootloader/driver/btl_driver_delay.c
+  - path: platform/bootloader/driver/btl_driver_delay_veneers.c
+    condition: [bootloader_core_secure]
 include:
   - path: platform/bootloader
     file_list:
@@ -15,3 +17,5 @@ requires:
   - name: udelay
 provides:
   - name: bootloader_delay_driver
+  - name: bootloader_nonsecure_incompatible
+    condition: [bootloader_core_nonsecure]

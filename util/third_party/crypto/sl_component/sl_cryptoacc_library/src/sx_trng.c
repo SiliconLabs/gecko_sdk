@@ -182,6 +182,8 @@ uint32_t sx_trng_init_part2(void)
 
 uint32_t sx_trng_init(uint32_t cond_test_en)
 {
+   /*Clear control register*/
+   ba431_clear_ctrl();
    uint32_t status = sx_trng_init_part1(cond_test_en);
    if (status)
       return status;
@@ -199,7 +201,7 @@ void sx_trng_set_startup_chk_flag(void)
    rng_needs_startup_chk = true;
 }
 
-bool sx_trng_critical_raised(void)
+uint32_t sx_trng_critical_raised(void)
 {
    uint32_t status = ba431_read_status();
    uint32_t critical_mask = BA431_STAT_MASK_REP_FAIL | BA431_STAT_MASK_PROP_FAIL;
@@ -336,4 +338,37 @@ void sx_trng_restore_state(struct sx_trng_internal_state *source)
    ba431_write_fifo_wakeup_threshold(source->wakeup_lvl);
    ba431_write_conditioning_key(source->key);
    ba431_write_controlreg(source->control);
+}
+
+uint32_t sx_trng_raw_init(void)
+ {
+   /*Clear control register*/
+   ba431_clear_ctrl();
+
+   /*Soft reset*/
+   ba431_softreset();
+
+   /*Program powerdown and clock settings*/
+   ba431_write_fifo_wakeup_threshold(RNG_FIFO_WAKEUP_LVL);
+   if (RNG_OFF_TIMER_VAL < 0) {
+      ba431_force_run();
+   } else {
+      ba431_write_switch_off_timer(RNG_OFF_TIMER_VAL);
+   }
+   ba431_write_clk_div(RNG_CLKDIV);
+   ba431_write_init_wait(RNG_INIT_WAIT_VAL);
+
+   /*Enable random raw mode*/
+   ba431_set_raw_mode();
+
+   /*Enable NDRNG*/
+   ba431_enable_ndrng();
+
+   uint32_t status = sx_trng_wait_startup();
+   if (status) {
+      rng_startup_failed = true;
+      return CRYPTOLIB_CRYPTO_ERR;
+   }
+
+   return status;
 }

@@ -16,6 +16,7 @@
  *
  ******************************************************************************/
 
+#include "sl_common.h"
 #include "app/framework/include/af.h"
 #include "app/util/common/form-and-join.h"
 #include "network-find.h"
@@ -400,6 +401,7 @@ void emberAfScanErrorCallback(EmberStatus status)
         status = EMBER_ERR_FATAL;
       }
       // ...and deliberately fall through
+      SL_FALLTHROUGH
 #endif
     // default case to print out error
     default:
@@ -543,7 +545,8 @@ void emberAfPluginNetworkFindStackStatusCallback(EmberStatus status)
       case NETWORK_FIND_WAIT:
       case NETWORK_FIND_WAIT_ALL_CHANNELS:
         state = WAIT_STATE_TO_JOIN_STATE(state);
-      // Deliberate fall-through.
+        // Deliberate fall-through.
+        SL_FALLTHROUGH
       case NETWORK_FIND_JOIN:
       case NETWORK_FIND_JOIN_ALL_CHANNELS:
         #ifdef UC_BUILD

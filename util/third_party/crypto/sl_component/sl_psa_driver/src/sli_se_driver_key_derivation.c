@@ -159,6 +159,133 @@ psa_status_t sli_se_driver_single_shot_hkdf(
 
 #endif // PSA_WANT_ALG_HKDF && VAULT
 
+#if (defined(PSA_WANT_ALG_PBKDF2_AES_CMAC_PRF_128) || defined(PSA_WANT_ALG_PBKDF2_HMAC)) \
+  && (_SILICON_LABS_SECURITY_FEATURE == _SILICON_LABS_SECURITY_FEATURE_VAULT)
+
+psa_status_t sli_se_driver_single_shot_pbkdf2(
+  psa_algorithm_t alg,
+  const psa_key_attributes_t *key_in_attributes,
+  const uint8_t *key_in_buffer,
+  size_t key_in_buffer_size,
+  const uint8_t* salt,
+  size_t salt_length,
+  const psa_key_attributes_t *key_out_attributes,
+  uint32_t iterations,
+  uint8_t *key_out_buffer,
+  size_t key_out_buffer_size)
+{
+  sl_se_hash_type_t sl_prf = SL_SE_HASH_NONE;
+  psa_algorithm_t psa_hash_alg = PSA_ALG_GET_HASH(alg);
+
+  switch (psa_hash_alg) {
+    case PSA_ALG_SHA_1:
+      sl_prf = SL_SE_PRF_HMAC_SHA1;
+      break;
+    case PSA_ALG_SHA_224:
+      sl_prf = SL_SE_PRF_HMAC_SHA224;
+      break;
+    case PSA_ALG_SHA_256:
+      sl_prf = SL_SE_PRF_HMAC_SHA256;
+      break;
+    case PSA_ALG_SHA_384:
+      sl_prf = SL_SE_PRF_HMAC_SHA384;
+      break;
+    case PSA_ALG_SHA_512:
+      sl_prf = SL_SE_PRF_HMAC_SHA512;
+      break;
+    default:
+      if (alg == PSA_ALG_PBKDF2_AES_CMAC_PRF_128) {
+        sl_prf = SL_SE_PRF_AES_CMAC_128;
+        break;
+      }
+      return PSA_ERROR_NOT_SUPPORTED;
+  }
+
+  // Create input key descriptor.
+  sl_se_key_descriptor_t key_in_desc = { 0 };
+  psa_status_t psa_status = sli_se_key_desc_from_input(key_in_attributes,
+                                                       key_in_buffer,
+                                                       key_in_buffer_size,
+                                                       &key_in_desc);
+  if (psa_status != PSA_SUCCESS) {
+    return psa_status;
+  }
+
+  size_t key_out_size = PSA_BITS_TO_BYTES(psa_get_key_bits(key_out_attributes));
+
+  if ( alg == PSA_ALG_PBKDF2_AES_CMAC_PRF_128 ) {
+    #define AES_CMAC_PRF_128_BLOCK_SIZE 128
+    // The out key length can atmost be 128 bits long.
+    if ( !key_out_size || (key_out_size > PSA_BITS_TO_BYTES(AES_CMAC_PRF_128_BLOCK_SIZE)) ) {
+      return PSA_ERROR_INVALID_ARGUMENT;
+    }
+  } else { // HMAC based
+    // In conformance with rfc 8018 (sec 5.2), max output length should not exceed
+    // 2 ^ 32 -1 * hlen.
+    // Our max key size is limited by type of key bits in attributes, so no further
+    // validation is necessary.Our key out size is narrower than the rfc specification.
+    if ( !key_out_size ) {
+      return PSA_ERROR_INVALID_ARGUMENT;
+    }
+  }
+
+  if ( !iterations ) {
+    return PSA_ERROR_INVALID_ARGUMENT;
+  }
+
+  // Create output key descriptor.
+  sl_se_key_descriptor_t key_out_desc = { 0 };
+  psa_status = sli_se_key_desc_from_psa_attributes(
+    key_out_attributes,
+    key_out_size,
+    &key_out_desc);
+  if (psa_status != PSA_SUCCESS) {
+    return psa_status;
+  }
+
+  psa_status = sli_se_set_key_desc_output(key_out_attributes,
+                                          key_out_buffer,
+                                          key_out_buffer_size,
+                                          key_out_size,
+                                          &key_out_desc);
+  if (psa_status != PSA_SUCCESS) {
+    return psa_status;
+  }
+
+  // Prepare SE command context.
+  sl_se_command_context_t cmd_ctx = { 0 };
+  sl_status_t sl_status = sl_se_init_command_context(&cmd_ctx);
+  if (sl_status != SL_STATUS_OK) {
+    return PSA_ERROR_INVALID_ARGUMENT;
+  }
+
+  // Execute the SE command.
+  sl_status = sl_se_derive_key_pbkdf2(&cmd_ctx,
+                                      &key_in_desc,
+                                      sl_prf,
+                                      salt,
+                                      salt_length,
+                                      iterations,
+                                      &key_out_desc);
+  if (sl_status != SL_STATUS_OK) {
+    return PSA_ERROR_HARDWARE_FAILURE;
+  } else {
+    psa_status = PSA_SUCCESS;
+  }
+
+  if (PSA_KEY_LIFETIME_GET_LOCATION(psa_get_key_lifetime(key_out_attributes))
+      == PSA_KEY_LOCATION_SLI_SE_OPAQUE) {
+    // Add the key desc to the output array for opaque keys.
+    psa_status = store_key_desc_in_context(&key_out_desc,
+                                           key_out_buffer,
+                                           key_out_buffer_size);
+  }
+
+  return psa_status;
+}
+
+#endif // (PSA_WANT_ALG_PBKDF2_AES_CMAC_PRF_128 || PSA_WANT_ALG_PBKDF2_HMAC) && VAULT
+
 psa_status_t sli_se_driver_key_agreement(psa_algorithm_t alg,
                                          const psa_key_attributes_t *attributes,
                                          const uint8_t *key_buffer,

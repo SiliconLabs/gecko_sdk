@@ -6,6 +6,13 @@ description: >
   This example project demonstrates use of the Power Manager module
   in a Micrium OS kernel task.
 category: Example|Platform
+filter:
+  - name: "Device Type"
+    value: ["SoC"]
+  - name: "MCU"
+    value: ["32-bit MCU"]
+  - name: "Project Difficulty"
+    value: ["Beginner"]
 source:
   - path: app.c
   - path: main.c
@@ -33,6 +40,8 @@ configuration:
   - name: SL_POWER_MANAGER_LOWEST_EM_ALLOWED
     value: 3
 readme:
-  - path: "readme.html"
+  - path: readme.md
+ui_hints:
+  highlight: readme.md
 tag:
   - hardware:component:button:2+

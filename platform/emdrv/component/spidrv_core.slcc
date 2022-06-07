@@ -30,6 +30,8 @@ requires:
   - name: "sleeptimer"
   - name: "ecode"
   - name: "dmadrv"
+  - name: "enum"
+  - name: "slist"
 include:
   - path: "inc"
     file_list:

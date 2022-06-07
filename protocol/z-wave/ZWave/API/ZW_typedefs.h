@@ -21,12 +21,6 @@
 #define ZW_WEAK             __attribute__((weak))
 #endif
 
-/*
- * Global nodeID type definitions.
- */
-typedef uint16_t node_id_t;    // This is used where 2 byte nodeID is needed, like in all that is related to LR.
-typedef uint8_t  node_id_8_t;  // This is used where a 1 byte nodeID is needed, like in all NVM3 related operations.
-
 #ifndef EOF
 #define EOF (-1)
 #endif

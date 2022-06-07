@@ -409,14 +409,13 @@ void ezspStackStatusHandler(
   EmberStatus status);
 
 // This function will start a scan.
-// Return: EMBER_SUCCESS signals that the scan successfully started. Possible
-// error responses and their meanings: EMBER_MAC_SCANNING, we are already
-// scanning; EMBER_MAC_JOINED_NETWORK, we are currently joined to a network and
-// cannot begin a scan; EMBER_MAC_BAD_SCAN_DURATION, we have set a duration
-// value that is not 0..14 inclusive; EMBER_MAC_INCORRECT_SCAN_TYPE, we have
-// requested an undefined scanning type; EMBER_MAC_INVALID_CHANNEL_MASK, our
-// channel mask did not specify any valid channels.
-EmberStatus ezspStartScan(
+// Return: SL_STATUS_OK signals that the scan successfully started. Possible
+// error responses and their meanings: SL_STATUS_MAC_SCANNING, we are already
+// scanning; SL_STATUS_BAD_SCAN_DURATION, we have set a duration value that is
+// not 0..14 inclusive; SL_STATUS_MAC_INCORRECT_SCAN_TYPE, we have requested an
+// undefined scanning type; SL_STATUS_INVALID_CHANNEL_MASK, our channel mask did
+// not specify any valid channels.
+sl_status_t ezspStartScan(
   // Indicates the type of scan to be performed. Possible values are:
   // EZSP_ENERGY_SCAN and EZSP_ACTIVE_SCAN. For each type, the respective
   // callback for reporting results is: energyScanResultHandler and
@@ -2769,3 +2768,42 @@ EzspStatus ezspResetToFactoryDefaults(void);
 EzspStatus ezspGetSecurityKeyStatus(
   // Return: The security type set at NCP for the Secure EZSP Protocol.
   SecureEzspSecurityType *returnSecurityType);
+
+//------------------------------------------------------------------------------
+// Token Interface Frames
+//------------------------------------------------------------------------------
+
+// Gets the total number of tokens.
+// Return: Total number of tokens.
+uint8_t ezspGetTokenCount(void);
+
+// Gets the token information for a single token at provided index
+// Return: An EmberStatus value indicating success or the reason for failure.
+EmberStatus ezspGetTokenInfo(
+  // Index of the token in the token table for which information is needed.
+  uint8_t index,
+  // Return: Token information.
+  EmberTokenInfo *tokenInfo);
+
+// Gets the token data for a single token with provided key
+// Return: An EmberStatus value indicating success or the reason for failure.
+EmberStatus ezspGetTokenData(
+  // Key of the token in the token table for which data is needed.
+  uint32_t token,
+  // Index in case of the indexed token.
+  uint32_t index,
+  // Return: Token Data
+  EmberTokenData *tokenData);
+
+// Sets the token data for a single token with provided key
+// Return: An EmberStatus value indicating success or the reason for failure.
+EmberStatus ezspSetTokenData(
+  // Key of the token in the token table for which data is to be set.
+  uint32_t token,
+  // Index in case of the indexed token.
+  uint32_t index,
+  // Token Data
+  EmberTokenData *tokenData);
+
+// Reset the node by calling halReboot.
+void ezspResetNode(void);

@@ -40,22 +40,27 @@
 void sl_simple_com_init(void);
 
 /**************************************************************************//**
- * Uart transmit function
+ * Step function (used in CPC mode)
+ *****************************************************************************/
+void sl_simple_com_step(void);
+
+/**************************************************************************//**
+ * Transmit function
  *****************************************************************************/
 void sl_simple_com_transmit(uint32_t len, uint8_t *data);
 
 /**************************************************************************//**
- * Uart transmit completed callback
+ * Transmit completed callback
  *****************************************************************************/
 void sl_simple_com_transmit_cb(sl_status_t status);
 
 /**************************************************************************//**
- * Uart receive function
+ * Receive function (used in UART mode)
  *****************************************************************************/
 void sl_simple_com_receive(void);
 
 /**************************************************************************//**
- * Uart receive completed callback
+ * Receive completed callback
  *****************************************************************************/
 void sl_simple_com_receive_cb(sl_status_t status, uint32_t len, uint8_t *data);
 

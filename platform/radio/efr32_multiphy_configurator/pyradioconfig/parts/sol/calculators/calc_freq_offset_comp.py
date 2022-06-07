@@ -19,13 +19,14 @@ class Calc_Freq_Offset_Comp_Sol(CALC_Freq_Offset_Comp_ocelot):
         mode_index = self.freq_comp_mode_index(model, mode)
         demod_sel = model.vars.demod_select.value
         digmixfb = Calc_Utilities_Sol().get_fefilt_actual(model, 'DIGMIXCTRL_DIGMIXFBENABLE')
-        baudrate = model.vars.rx_baud_rate_actual.value
         osr = model.vars.oversampling_rate_actual.value
+        vtafcframe = model.vars.MODEM_REALTIMCFE_VTAFCFRAME.value
         afc_tx_adjust_enable = model.vars.afc_tx_adjust_enable.value
         afc_oneshot = model.vars.MODEM_AFC_AFCONESHOT.value
+        bcr_det_en = model.vars.MODEM_PHDMODCTRL_BCRDETECTOR.value
         freq_offset_hz = model.vars.freq_offset_hz.value
         baudrate = model.vars.baudrate.value
-        modulation_index = model.vars.modulation_index.value
+        deviation = model.vars.deviation.value
 
         if digmixfb:
             res = digmix_res
@@ -55,13 +56,13 @@ class Calc_Freq_Offset_Comp_Sol(CALC_Freq_Offset_Comp_ocelot):
             if remoden and remodoutsel == 1:
                 afcscale = baudrate * osr * phscale / (256 * freqgain * res)
                 afcscale_tx = baudrate * osr * phscale / (256 * freqgain * synth_res)
-            elif (freq_offset_hz / baudrate) > 0.57 and modulation_index <= 0.5:
-                afc_boost = baudrate / freq_offset_hz
-                afcscale = afc_boost * baudrate * phscale / (256 * res)
-                afcscale_tx = baudrate * phscale / (256 * synth_res)
             else:
-                afcscale = baudrate * phscale / (256 * res)
+                afcscale = 1.0 * baudrate * phscale / (256 * res)
                 afcscale_tx = baudrate * phscale / (256 * synth_res)
+
+                # Reduce afc scale by eighth if oneshot is disabled. Following BLE case
+                if afc_oneshot == 0 and bcr_det_en == 1:
+                    afcscale = afcscale / 8.0
 
         elif (demod_sel == model.vars.demod_select.var_enum.BCR):
             # digital mixer frequency comp

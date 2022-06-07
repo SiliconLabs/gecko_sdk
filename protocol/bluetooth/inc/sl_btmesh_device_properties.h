@@ -50,6 +50,16 @@ typedef uint16_t electric_current_t;
  */
 typedef uint16_t voltage_t;
 
+/**
+ * High Voltage
+ * The High Voltage characteristic is used to represent a measure of positive electric potential difference
+ * in units of volt.
+ * Unit is volt with a resolution of 1/64V represented as a 24-bit number.
+ * Range: 0.0 to 262143.97
+ * A value of 0xFFFFFF represents “Value is not known”.
+ */
+typedef uint32_t high_voltage_t;
+
 /** Presence detected */
 /**
  * Time Exponential 8
@@ -214,6 +224,26 @@ typedef struct electric_current_statistics {
 typedef uint32_t energy_t;
 
 /**
+ * Energy32
+ * The Energy32 characteristic is used to represent a measure of energy in units of kilowatt-hours,
+ * with a precision of 1 Watt-hour.
+ * Format UINT32, ranging from 0.000 to 4294967.293.
+ * A value of 0xFFFFFFFE represents ’value is not valid’.
+   A value of 0xFFFFFFFF represents ‘value is not known’.
+ */
+typedef uint32_t energy32_t;
+
+/**
+ * Apparent Energy32
+ * The integral of Apparent Power over a time interval, represented in units of kVAh (kilo-volt-ampere-hour),
+ * with a resolution of 1 volt-ampere-hour.
+ * Format UINT32, ranging from 0.000 to 4294967.293.
+ * A value of 0xFFFFFFFE represents ’value is not valid’.
+   A value of 0xFFFFFFFF represents ‘value is not known’.
+ */
+typedef uint32_t apparent_energy32_t;
+
+/**
  * Energy In A Period Of Day
  * This characteristic aggregates the Energy characteristic, and two instances of the Time Decihour 8 characteristic,
  * to represent energy use in a period of day.
@@ -316,6 +346,16 @@ typedef average_current_t average_output_current_t;
  * NOTE: there is no 'UNKNOWN' value defined in the specification
  */
 typedef int16_t temperature_t;
+
+/**
+ * High Temperature
+ * Unit is in degrees Celsius with a resolution of 0.5 degrees Celsius
+ * Range: -273 to 16383.5
+ * Values 0x8002 to 0xFDDE are prohibited.
+ * A value of 0x8001 represents “Value is not valid”.
+ * A value of 0x8000 represents “Value is not known”.
+ */
+typedef int16_t high_temperature_t;
 
 /**
  * Temperature Statistics
@@ -473,6 +513,16 @@ typedef uint8_t percentage_8_t;
 typedef uint32_t power_t;
 
 /**
+ * Apparent Power
+ * Apparent power is expressed in volt-amperes (VA) since it is the product of quadratic mean
+ * voltage and quadratic mean current.
+ * Range is from 0 to 0 1677721.3 represented by a 24-bit unsiged integer.
+ * A value of 0xFFFFFE represents 'value is not valid'.
+ * A value of 0xFFFFFF represents 'value is not known'.
+ */
+typedef uint32_t apparent_power_t;
+
+/**
  * Power specification
  * This characteristic aggregates three instances of the Power characteristic to represent a specification of Power values.
  */
@@ -484,6 +534,7 @@ typedef struct power_specification {
   /** Maximum power value */
   power_t maximum_power_value;
 } power_specification_t;
+
 /**
  * Time Second 16
  * The Time Second 16 characteristic is used to represent a period of time with a unit of 1 second.
@@ -492,6 +543,15 @@ typedef struct power_specification {
  * A value of 0xFFFF represents 'value is not known'.
  */
 typedef uint16_t time_second_16_t;
+
+/**
+ * Time Second 32
+ * The Time Second 32 characteristic is used to represent a period of time with a unit of 1 second.
+ * Unit is second with a resolution of 1.
+ * Range: 0 to 4294967294.
+ * A value of 0xFFFFFFFF represents 'value is not known'.
+ */
+typedef uint32_t time_second_32_t;
 
 /**
  * Event Statistics
@@ -597,6 +657,221 @@ typedef average_voltage_t average_input_voltage_t;
 typedef average_voltage_t average_output_voltage;
 
 /**
+ * Voltage Frequency
+ * Power supply voltage frequency measured in hertz
+ * Unit is hertz with resolution of 1 represented as a 16-bit number.
+ * Range is from 1 to 65533.
+ * A value of 0 represents DC power supply.
+ * A value of 0xFFFE represents “Value is not valid”.
+ * A value of 0xFFFF represents “Value is not known”.
+ */
+typedef uint16_t voltage_frequency_t;
+
+/**
+ * Cosine Of The Angle
+ * The Cosine Of The Angle characteristic represents a value of cosine of the angle.
+ * This is unitless value, expressed as Cos(o)/100, with a resolution of 1.
+ * Unit: org.bluetooth.unit.unitless
+ * Allowed range is -100 to 100.
+ * A raw value of 0x7F represents ’value is not known’.
+ */
+typedef uint8_t cosine_of_the_angle_t;
+
+/**
+ * Humidity
+ * The Humidity characteristic is used to represent the humi
+ * Unit is in percent with a resolution of 0.01 percent.
+ * Allowed range is 0.00 to 100.00
+ * A value of 0xFFFF represents "value is not known"
+ */
+typedef uint16_t humidity_t;
+
+/**
+ * CO2 Concentration
+ * The CO2 Concentration characteristic is used to represent a measure of carbon dioxide
+ * concentration in units of parts per million.
+ * Unit is parts per million (ppm) with a resolution of 1.
+ * Allowed range is: 0 to 65533.
+ * A value of 0xFFFE represents ‘value is 65534 or greater’.
+ * A value of 0xFFFF represents ‘value is not known.
+ */
+typedef uint16_t co2_concentration_t;
+
+/**
+ * VOC Concentration
+ * The VOC Concentration characteristic is used to represent a measure of volatile organic
+ * compounds concentration in units of parts per billion
+ * Unit is parts per billion (ppb) with a resolution of 1.
+ * Allowed range is: 0 to 65533.
+ * A value of 0xFFFE represents ‘value is 65534 or greater’.
+ * A value of 0xFFFF represents ‘value is not known.
+ */
+typedef uint16_t voc_concentration_t;
+
+/**
+ * Pollen Concentration
+ * The Pollen Concentration characteristic is used to represent the pollen count.
+ * Unit is pollen count per cubic metre, represented as uint24
+ */
+typedef uint32_t pollen_concentration_t;
+
+/**
+ * Noise
+ * The Noise characteristic is used to represent a measure of sound pressure level in units of
+ * decibel.
+ * Unit is decibel with a resolution of 1.
+ * Allowed range is: 0 to 253.
+ * A value of 0xFE represents ‘value is 254 or greater’.
+ * A value of 0xFF represents ‘value is not known’.
+ */
+typedef uint8_t noise_t;
+
+/**
+ * Pressure
+ * Yhe Pressure characteristic is used to represent pressure
+ * Unit is Pascals with a resolution of 0.1 Pa
+ */
+typedef uint32_t pressure_t;
+
+/**
+ * Apparent Wind Direction
+ * The Apparent Wind Direction characteristic is used to represent the apparent wind direction
+ * Unit is degrees with a resolution of 0.01 degrees
+ * Range is from 0 to 359.99 represented as a 16-bit number.
+ */
+typedef uint16_t apparent_wind_direction_t;
+
+/**
+ * True Wind Direction
+ * The True Wind Direction characteristic is used to represent the true wind direction
+ * Unit is degrees with a resolution of 0.01 degrees
+ * Range is from 0 to 359.99 represented as a 16-bit number.
+ */
+typedef uint16_t true_wind_direction_t;
+
+/**
+ * Apparent Wind Speed
+ * The Apparent Wind Speed characteristic is used to represent the apparent wind speed
+ * Unit is in metres per second with a resolution of 0,01 m/s
+ * Range is from 0 to 655.35 represented as a 16-bit number.
+ */
+typedef uint16_t apparent_wind_speed_t;
+
+/**
+ * True Wind Speed
+ * The True Wind Speed characteristic is used to represent the true wind speed
+ * Unit is in metres per second with a resolution of 0,01 m/s
+ * Range is from 0 to 655.35 represented as a 16-bit number.
+ */
+typedef uint16_t true_wind_speed_t;
+
+/**
+ * Dew Point
+ * The Dew Point characteristic is used to represent the dew point in degrees Celsius.
+ * Unit is in degrees Celsius with a resolution of 1 degree Celsius.
+ */
+typedef int8_t dew_point_t;
+
+/**
+ * Gust Factor
+ * The Gust Factor characteristic is used to represent the gust factor
+ * Unitless value is represented as an 8-bit number.
+ * The factor has a fixed-point representation, where the actual factor is (attribute value * 0.1).
+ */
+typedef uint8_t gust_factor_t;
+
+/**
+ * Heat Index
+ * The Heat Index characteristic is used to represent the heat index
+ * The value is represented as a signed 8-bit number.
+ * Unit is in degrees Celsius.
+ */
+typedef int8_t heat_index_t;
+
+/**
+ * Light Distribution
+ * Light distribution is the projected pattern of outdoor light that a fixture disperses onto a surface.
+ * The value is represented as an unsigned 8-bit number and is an enumeration with the following values:
+ * 0: Type not specified
+ * 1: Type I
+ * 2: Type II
+ * 3: Type III
+ * 4: Type IV
+ * 5: Type V
+ * All other values are reserved for future use.
+ */
+typedef uint8_t light_distribution_t;
+
+/**
+ * Light Output
+ * Measure of the total quantity of visible light emitted by a source per unit of time.
+ * Unit is Lumen with resolution of 1, represented as 24 bit number.
+ * Range is from 0 to 16777213,
+ * A value of 0xFFFFFE represents “Value is not valid”.
+ * A value of 0xFFFFFF represents “Value is not known"
+ */
+typedef uint32_t light_output_t;
+
+/**
+ * Global Trade Item Number
+ * The Global Trade Item Number characteristic represents an identifier as issued by GS1 [6], which may
+ * consist up to 14 digits, and is here represented as a 48-bit unsigned integer.
+ */
+typedef uint8_t global_trade_item_number_t[6];
+
+/**
+ * Magnetic Declination
+ * The Magnetic Declination characteristic is used to represent the magnetic declination.
+ * Unit is degrees with a resolution of 0.01 degrees
+ * Range is from 0 to 359.99 represented as a 16-bit number.
+ */
+typedef uint16_t magnetic_declination_t;
+
+/**
+ * Magnetic Flux Density - 2D
+ * The Magnetic Flux Density - 2D characteristic is used to represent measurements of magnetic flux
+ * density for two orthogonal axes: X and Y.
+ * Unit is 10^-7 Tesla.
+ */
+typedef struct {
+  uint16_t x; /**< X axis density */
+  uint16_t y; /**< Y axis density */
+} magnetic_flux_density_2d_t;
+
+/**
+ * Magnetic Flux Density - 3D
+ * The Magnetic Flux Density - 3D characteristic is used to represent measurements of magnetic flux
+ * density for two orthogonal axes: X, Y, and Z.
+ * Unit is 10^-7 Tesla.
+ */
+typedef struct {
+  uint16_t x; /**< X axis density */
+  uint16_t y; /**< Y axis density */
+  uint16_t z; /**< Z axis density */
+} magnetic_flux_density_3d_t;
+
+/**
+ * Rainfall
+ * The Rainfall characteristic is used to represent the amount of rain that has fallen.
+ * Unit is meters with a resolution of 1mm, represented with a 16 bit number.
+ */
+typedef uint16_t rainfall_t;
+
+/**
+ * UV Index
+ * The UV Index characteristic is used to represent the UV Index.
+ * The unitless value is represented as an 8-bit number.
+ */
+typedef uint8_t uv_index_t;
+
+/**
+ * Wind Chill
+ * The Wind Chill characteristic is used to represent the wind chill factor.
+ * Unit is degrees Celsius, and the value is represented as a signed 8-bit number
+ */
+typedef int8_t wind_chill_t;
+
+/**
  * Mesh Device Property union
  */
 typedef struct mesh_device_property {
@@ -611,6 +886,14 @@ typedef struct mesh_device_property {
     uint16_t uint16;
     /** uint32 base type */
     uint32_t uint32;
+    /** Apparent Energy32 */
+    apparent_energy32_t apparent_energy;
+    /** Apparent Power */
+    apparent_power_t apparent_power;
+    /** Apparent Wind Direction */
+    apparent_wind_direction_t apparent_wind_direction;
+    /** Apparent Wind Speed */
+    apparent_wind_speed_t apparent_wind_speed;
     /** Average current */
     average_current_t average_current;
     /** Average Voltage */
@@ -621,14 +904,18 @@ typedef struct mesh_device_property {
     chromatic_distance_from_planckian_t chromatic_distance_from_planckian;
     /** Chromaticitiy coordinates */
     chromaticity_coordinates_t chromaticity_coordinates;
-    /** Cromaticity tolerance */
+    /** Chromaticity tolerance */
     //chromaticity_tolerance_t chromaticity_tolerance_t;
     // ** Color rendering index */
     //cie_color_rendering_index_t color_rendering_index;
+    /** CO2 Concentration */
+    co2_concentration_t co2_concentration;
     /** Coefficient */
     coefficient_t coefficient;
     /** Correlated color temperature */
     correlated_color_temperature_t correlated_color_temperature;
+    /** Cosine of the angle */
+    cosine_of_the_angle_t cosine_of_the_angle;
     /** Count16 */
     count16_t count16;
     /** Count24 */
@@ -637,6 +924,8 @@ typedef struct mesh_device_property {
     country_code_t country_code;
     /** Date UTC */
     date_utc_t date_utc;
+    /** Dew Point */
+    dew_point_t dew_point;
     /** Electric current */
     electric_current_t electric_current;
     /** Electric current range */
@@ -647,12 +936,30 @@ typedef struct mesh_device_property {
     electric_current_statistics_t electric_current_statistics;
     /** Energy */
     energy_t energy;
+    /** Energy32 */
+    energy32_t energy32;
     /** Energy in a period of day */
     energy_in_a_period_of_day_t energy_in_a_period_of_day;
     /** Event statistics */
     event_statistics_t event_statistics;
+    /** Global Trade Item Number */
+    global_trade_item_number_t global_trade_item_number;
+    /** Gust Factor */
+    gust_factor_t gust_factor;
+    /** Heat Index */
+    heat_index_t heat_index;
+    /** High Temperature */
+    high_temperature_t high_temperature;
+    /** High Voltage */
+    high_voltage_t high_voltage;
+    /** Humidity */
+    humidity_t humidity;
     /** Illuminance */
     illuminance_t illuminance;
+    /** Light distribution */
+    light_distribution_t light_distribution;
+    /** Light output */
+    light_output_t light_output;
     //luminous_efficacy_t luminous_efficacy;
     //luminous_energy_t luminous_energy;
     //luminous_exposure_t lumimous_exposure;
@@ -660,12 +967,26 @@ typedef struct mesh_device_property {
     //luminous_flux_range_t luminous_flux_range;
     //luminois_intensity_t luminous_intensity;
     //perceived_lightness_t perceived_lightness;
+    /** Magnetic Declination */
+    magnetic_declination_t magnetic_declination;
+    /** Magnetic Flux Density - 2D */
+    magnetic_flux_density_2d_t magnetic_flux_density_2d;
+    /** Magnetic Flux Density - 3D */
+    magnetic_flux_density_3d_t magnetic_flux_density_3d;
+    /** Noise */
+    noise_t noise;
     /** Percentage */
     percentage_8_t percentage;
+    /** Pollen Concentration */
+    pollen_concentration_t pollen_concentration;
     /** Power */
     power_t power;
     /** Power specification */
     power_specification_t power_specification;
+    /** Pressure */
+    pressure_t pressure;
+    /** Rainfall */
+    rainfall_t rainfall;
     //relative_runtime_in_a_current_range_t relative_runtime_in_a_current_range;
     //relative_runtime_in_a_relative_level_range_t relative_runtime_in_a_relative_level_range;
     //relative_runtime_in_a_temperature_range_t relative_runtime_in_a_temperature_range;
@@ -690,12 +1011,25 @@ typedef struct mesh_device_property {
     time_millisecond_24_t time_millisecond_24;
     /** Time second 16 */
     time_second_16_t time_second_16;
+    /** Time second 32 */
+    time_second_32_t time_second_32;
+    /** True Wind Direction */
+    true_wind_direction_t true_wind_direction;
+    /** True Wind Speed */
+    true_wind_speed_t true_wind_speed;
+    /** UV Index */
+    uv_index_t uv_index;
+    /** VOC Concentration */
+    voc_concentration_t voc_concentration;
     /** Voltage */
     voltage_t voltage;
+    /** Voltage Frequency */
+    voltage_frequency_t voltage_frequency;
     /** Voltage specification */
     voltage_specification_t voltage_specification;
     /** Voltage statistics */
     voltage_statistics_t voltage_statistics;
+    wind_chill_t wind_chill;
   };
 } mesh_device_property_t;
 
@@ -1047,7 +1381,205 @@ typedef enum mesh_device_properties_e {
   TOTAL_LIGHT_EXPOSURE_TIME                       = 0x006F,
   /** Total Luminous Energy
    * Type: Luminous Energy */
-  TOTAL_LUMINOUS_ENERGY                           = 0x0070
+  TOTAL_LUMINOUS_ENERGY                           = 0x0070,
+  /** Desired Ambient Temperature
+   * Type: Temperature 8 */
+  DESIRED_AMBIENT_TEMPERATURE                     = 0x0071,
+  /** Precise Total Device Energy Use
+   * Type: Energy32 */
+  PRECISE_TOTAL_DEVICE_ENERGY_USE                 = 0x0072,
+  /** Power Factor
+   * Type: Cosine Of The Angle */
+  POWER_FACTOR                                    = 0x0073,
+  /** Sensor Gain
+   * Type: Coefficient */
+  SENSOR_GAIN                                     = 0x0074,
+  /** Precise Present Ambient Temperature
+   * Type: Temperature */
+  PRECISE_PRESENT_AMBIENT_TEMPERATURE             = 0x0075,
+  /** Present Ambient Relative Humidity
+   * Type: Humidity */
+  PRESENT_AMBIENT_RELATIVE_HUMIDITY               = 0x0076,
+  /** Present Ambient Carbon Dioxide Concentration
+   * Type: CO2 Concentration */
+  PRESENT_AMBIENT_CO2_CONCENTRATION               = 0x0077,
+  /** Present Ambient Volatile Organic Compounds Concentration
+   * Type: VOC Concentration */
+  PRESENT_AMBIENT_VOC_CONCENTRATION               = 0x0078,
+  /** Present Ambient Noise
+   * Type: Noise */
+  PRESENT_AMBIENT_NOISE                           = 0x0079,
+
+  /* -- No entries for 0x007A .. 0x007F -- */
+
+  /** Active Energy Loadside
+   * Energy32 */
+  ACTIVE_ENERGY_LOADSIDE                          = 0x0080,
+  /** Active Power Loadside
+   * Type: Power */
+  ACTIVE_POWER_LOADSIDE                           = 0x0081,
+  /** Air Pressure
+   * Type: Pressure */
+  AIR_PRESSURE                                    = 0x0082,
+  /** Apparent Energy
+   * Type: Apparent Energy32 */
+  APPARENT_ENERGY                                 = 0x0083,
+  /** Apparent Power
+   * Type: Apparent Power */
+  APPARENT_POWER                                  = 0x0084,
+  /** Apparent Wind Direction
+   * Type: Apparent Wind Direction */
+  APPARENT_WIND_DIRECTION                         = 0x0085,
+  /** Apparent Wind Speed
+   * Type: Apparent Wind Speed */
+  APPARENT_WIND_SPEED                             = 0x0086,
+  /** Dew Point
+   * Type: Dew Point */
+  DEW_POINT                                       = 0x0087,
+  /** External Supply Voltage
+   * Type: High Voltage */
+  EXTERNAL_SUPPLY_VOLTAGE                         = 0x0088,
+  /** External Supply Voltage Frequency
+   * Type: Voltage Frequency */
+  EXTERNAL_SUPPLY_VOLTAGE_FREQUENCY               = 0x0089,
+  /** Gust Factor
+   * Type: Gust Factor */
+  GUST_FACTOR                                     = 0x008A,
+  /** Heat Index
+   * Type: Heat Index */
+  HEAT_INDEX                                      = 0x008B,
+  /** Light Distribution
+   * Type: Light Distribution */
+  LIGHT_DISTRIBUTION                              = 0x008C,
+  /** Light Source Current
+   * Type: Average Current */
+  LIGHT_SOURCE_CURRENT                            = 0x008D,
+  /** Light Source On Time Not Resettable
+   * Type: Time Second 32 */
+  LIGHT_SOURCE_ON_TIME_NOT_RESETTABLE             = 0x008E,
+  /** Light Source On Time Resettable
+   * Type: Time Second 32 */
+  LIGHT_SOURCE_ON_TIME_RESETTABLE                 = 0x008F,
+  /** Light Source Open Circuit Statistics
+   * Type: Event Statistics */
+  LIGHT_SOURCE_OPEN_CIRCUIT_STATISTICS            = 0x0090,
+  /** Light Source Overall Failures Statistics
+   * Type: Event Statistics */
+  LIGHT_SOURCE_OVERALL_FAILURES_STATISTICS        = 0x0091,
+  /** Light Source Short Circuit Statistics
+   * Type: Event Statistics */
+  LIGHT_SOURCE_SHORT_CIRCUIT_STATISTICS           = 0x0092,
+  /** Light Source Start Counter Resettable
+   * Type: Count 24 */
+  LIGHT_SOURCE_START_COUNTER_RESETTABLE           = 0x0093,
+  /** Light Source Temperature
+   * Type: High Temperature */
+  LIGHT_SOURCE_TEMPERATURE                        = 0x0094,
+  /** Light Source Thermal Derating Statistics
+   * Type: Event Statistics */
+  LIGHT_SOURCE_THERMAL_DERATING_STATISTICS        = 0x0095,
+  /** Light Source Thermal Shutdown Statistics
+   * Type: Event Statistics */
+  LIGHT_SOURCE_THERMAL_SHUTDOWN_STATISTICS        = 0x0096,
+  /** Light Source Power On Cycles
+   * Type: Count 24 */
+  LIGHT_SOURCE_TOTAL_POWER_ON_CYCLES              = 0x0097,
+  /** Light Source Voltage
+   * Type: Average Voltage */
+  LIGHT_SOURCE_VOLTAGE                            = 0x0098,
+  /** Luminaire Color
+   * Type: Fixed String 24 */
+  LUMINAIRE_COLOR                                 = 0x0099,
+  /** Luminaire Identification Number
+   * Type: Fixed String 24 */
+  LUMINAIRE_IDENTIFICATION_NUMBER                 = 0x009A,
+  /** Luminaire Manufacturer GTIN
+   * Type: Global Trade Item Number */
+  LUMINAIRE_MANUFACTURER_GTIN                     = 0x009B,
+  /** Luminaire Nominal Input Power
+   * Type: Power */
+  LUMINAIRE_NOMINAL_INPUT_POWER                   = 0x009C,
+  /** Luminaire Nominal Maximum AC Mains Voltage
+   * Type: Voltage */
+  LUMINAIRE_NOMINAL_MAXIMUM_AC_MAINS_VOLTAGE      = 0x009D,
+  /** Luminaire Nominal Minimum AC Mains Voltage
+   * Type: Voltage */
+  LUMINAIRE_NOMINAL_MINIMUM_AC_MAINS_VOLTAGE      = 0x009E,
+  /** Luminaire Power At Minimum Dim Level
+   * Type: Power */
+  LUMINAIRE_POWER_AT_MINIMUM_DIM_LEVEL            = 0x009F,
+  /** Luminaire Time Of Manufacture
+   * Type: Date UTC */
+  LUMINAIRE_TIME_OF_MANUFACTURE                   = 0x00A0,
+  /** Magnetic Declination
+   * Type: Magnetic Declination */
+  MAGNETIC_DECLINATION                            = 0x00A1,
+  /** Magnetic Flux Density - 2D
+   * Type: Magnetic Flux Density 2D  */
+  MAGNETIC_FLUX_DENSITY_2D                        = 0x00A2,
+  /** Magnetic Flux Density - 3D
+   * Type: Magnetic Flux Density 3D  */
+  MAGNETIC_FLUX_DENSITY_3D                        = 0x00A3,
+  /** Nominal Light Output
+   * Type: Light Output */
+  NOMINAL_LIGHT_OUTPUT                            = 0x00A4,
+  /** Overall Failure Condition
+   * Type: Event Statistics */
+  OVERALL_FAILURE_CONDITION                       = 0x00A5,
+  /** Pollen Concentration
+   * Type: Pollen Concentration */
+  POLLEN_CONCENTRATION                            = 0x00A6,
+  /** Present Indoor Relative Humidity
+   * Type; Humidity */
+  PRESENT_INDOOR_RELATIVE_HUMIDITY                = 0x00A7,
+  /** Present Outdoor Relative Humidity
+   * Type; Humidity */
+  PRESENT_OUTDOOR_RELATIVE_HUMIDITY               = 0x00A8,
+  /** Pressure
+   * Type: Pressure */
+  PRESSURE                                        = 0x00A9,
+  /** Rainfall
+   * Type: Rainfall */
+  RAINFALL                                        = 0x00AA,
+  /** Rated Median Useful Life of Luminaire
+   * Type: Time Hour 24 */
+  RATED_MEDIAN_USEFUL_LIFE_OF_LUMINAIRE           = 0x00AB,
+  /** Rated Median Useful Light Source Starts
+   * Type: Count 24 */
+  RATED_MEDIAN_USEFUL_LIGHT_SOURCE_STARTS         = 0x00AC,
+  /** Reference Temperature
+   * Type: High Temperature */
+  REFERENCE_TEMPERATURE                           = 0x00AD,
+  /** Total Device Starts
+   * Type: Count 24 */
+  TOTAL_DEVICE_STARTS                             = 0x00AE,
+  /** True Wind Direction
+   * Type: True Wind Direction */
+  TRUE_WIND_DIRECTION                             = 0x00AF,
+  /** True Wind Speed
+   * Type: True Wind Speed */
+  TRUE_WIND_SPEED                                 = 0x00B0,
+  /** UV Index
+   * Type: UV index */
+  UV_INDEX                                        = 0x00B1,
+  /** Wind Chill
+   * Type: Wind Chill */
+  WIND_CHILL                                      = 0x00B2,
+  /**
+   * */
+  LIGHT_SOURCE_TYPE                               = 0x00B3,
+  /** Luminaire Identification String
+   * Type: Fixed String 24 */
+  LUMINAIRE_IDENTIFICATION_STRING                 = 0x00B4,
+  /** Output Power Limitation
+  * Type: Event Statistics */
+  OUTPUT_POWER_LIMITATION                         = 0x00B5,
+  /** Thermal Derating
+   * Type: Event Statistics */
+  THERMAL_DERATING                                = 0x00B6,
+  /** Output Current Percent
+   * Type: Percentage 8 */
+  OUTPUT_CURRENT_PERCENT                          = 0x00B7,
 } mesh_device_properties_t;
 
 #if 0

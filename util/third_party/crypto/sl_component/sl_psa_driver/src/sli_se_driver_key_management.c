@@ -438,6 +438,7 @@ sli_se_key_desc_from_psa_attributes(const psa_key_attributes_t *attributes,
     return PSA_ERROR_NOT_SUPPORTED;
   }
 
+  #if (_SILICON_LABS_SECURITY_FEATURE == _SILICON_LABS_SECURITY_FEATURE_VAULT)
   // Add key restrictions. Only relevant for opaque drivers. If these properties
   // are set for transparent drivers, key generation becomes illegal, as the SE
   // does not allow writing a protected key to a plaintext buffer.
@@ -453,6 +454,9 @@ sli_se_key_desc_from_psa_attributes(const psa_key_attributes_t *attributes,
       key_desc->flags |= SL_SE_KEY_FLAG_NON_EXPORTABLE;
     }
   }
+  #else
+  (void)usage;
+  #endif
 
   return PSA_SUCCESS;
 }
@@ -576,6 +580,9 @@ sli_se_key_desc_from_input(const psa_key_attributes_t* attributes,
             break;
           case SL_SE_KEY_SLOT_APPLICATION_AES_128_KEY:
             builtin_key_desc = (sl_se_key_descriptor_t) SL_SE_APPLICATION_AES_128_KEY;
+            break;
+          case SL_SE_KEY_SLOT_TRUSTZONE_ROOT_KEY:
+            builtin_key_desc = (sl_se_key_descriptor_t) SL_SE_TRUSTZONE_ROOT_KEY;
             break;
           #if (_SILICON_LABS_SECURITY_FEATURE == _SILICON_LABS_SECURITY_FEATURE_VAULT)
           case SL_SE_KEY_SLOT_APPLICATION_ATTESTATION_KEY:

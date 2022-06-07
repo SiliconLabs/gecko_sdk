@@ -13,6 +13,6 @@ include:
     file_list:
       - path: ruy/profiler/instrumentation.h
 source:
-  - path: ruy/profiler/instrumentation.cc
+  []
 ui_hints:
   visibility: never

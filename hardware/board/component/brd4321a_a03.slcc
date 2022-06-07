@@ -15,6 +15,9 @@
   - name: hardware_board_wfx
   - name: hardware_board
   - name: hardware_board_rb
+  - name: hardware_board_has_si70xx
+  - name: hardware_board_has_tempsensor
+  - name: hardware_board_has_vcom
   - name: hardware_board_has_hfxo
   - name: hardware_board_supports_rf_band_2400
   - name: hardware_board_supports_1_rf_band

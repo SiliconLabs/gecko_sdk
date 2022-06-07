@@ -60,23 +60,6 @@ Ecode_t sl_token_get_data(uint32_t token,
                           uint32_t length);
 
 /***************************************************************************//**
- * Read the data stored in or return a pointer to the specified data or
- * manufacturing token.
- *
- * @param token The NVM3KEY or SimEE CREATOR define for the token.
- * @param index The index to access in the indexed token.
- * @param pointer A pointer to where the token data should be placed or a
- *                pointer to where the data can be read.
- * @param length The size of the token data in number of bytes.
- *
- * @return 0 if successful. Error code otherwise.
- ******************************************************************************/
-Ecode_t sl_token_get_pointer_or_data(uint32_t token,
-                                     uint8_t index,
-                                     void *pointer,
-                                     uint32_t length);
-
-/***************************************************************************//**
  * Writes the data to the specified token.
  *
  * @param token The NVM3KEY or SimEE CREATOR define for the token.

@@ -1,19 +1,14 @@
 id: psa_crypto_ecdsa
 package: platform
-label: PSA Crypto support for ECDSA
+label: ECDSA
 description: >-
   This component provides support for signature generation and verification
   with ECDSA in PSA Crypto.
-
-  If hardware acceleration of ECDSA is available and the 'Mbed TLS Support
-  for ECDSA' component is not included, PSA will not enable fallback to the
-  software implementation in the Mbed TLS library.
-category: Platform|Security
+category: Platform|Security|PSA Crypto|Signatures
 quality: production
 provides:
   - name: psa_crypto_ecdsa
 requires:
-  - name: psa_crypto
   - name: psa_crypto_ecc
   - name: psa_crypto_ecc_curve
   - name: mbedtls_ecdsa

@@ -59,6 +59,8 @@ API_INCREMENT_DEFAULT = 4
 NUM_SEGMENTS_DEFAULT = 8
 API_MIN_POWER = -50
 enablePlotting = False
+minPowerLevel = 255
+maxPowerLevel = 255
 
 def FitAndPlotPower(actPower, yAxisValues, min=-100, max=100):
   filtPwr=[]
@@ -97,16 +99,18 @@ def FitAndPlotPower(actPower, yAxisValues, min=-100, max=100):
   return minYAxisValue, maxYAxisValue, polynomial,MSE,errorflag
 
 def GenCArrayFromPolys(polylist):
-    # build the C array string
+  # build the C array string
+  # param polylist is [minYAxisValue, maxYAxisValue, 1st degree polycoeff,...]
   curveSegments = []
   for i in range(0, len(polylist), 3):
     if polylist[i] == RAIL_TX_POWER_LEVEL_INVALID :
       curveSegments.append(CurveSegment(polylist[i], int(polylist[i+1]*10), int(polylist[i+2]*10)))
       continue
-    maxPowerLevel = polylist[i+1]
+    maxpowerlevel = polylist[i+1]
     pwrcoeff = polylist[i+2]
-    curveSegments.append(CurveSegment(int(maxPowerLevel), int(pwrcoeff[1] * 100), int(pwrcoeff[0] * 1000)))
-
+    curveSegments.append(CurveSegment(int(maxpowerlevel), int(pwrcoeff[1] * 100), int(pwrcoeff[0] * 1000)))
+  global minPowerLevel
+  minPowerLevel = polylist[len(polylist)-3]
   return curveSegments
 
 def StringFromCurveSegments(curveSegments):
@@ -156,10 +160,12 @@ def AdjustMaxValues(curveSegments):
       curveSegments[i].maxValue = min(curveSegments[i-1].maxValue,
                                       (curveSegments[i].slope * x_intercept + curveSegments[i].intercept + 500) // 1000)
 
+  global maxPowerLevel
+  maxPowerLevel = curveSegments[start-1].maxValue
   return curveSegments
 
-def FitCharData(csvFile, increment=4, maxpwr=20):
-  fitResult = ProcessCharDataAndFindPoly(csvFile, increment , maxpwr)
+def FitCharData(csvFile, increment=API_INCREMENT_DEFAULT, maxpwr=API_MAX_POWER_DEFAULT, numSegment=NUM_SEGMENTS_DEFAULT):
+  fitResult = ProcessCharDataAndFindPoly(csvFile, increment , maxpwr, numSegment)
 
   cStr = ""
   cStr += '\nRAIL_TxPowerCurveSegment_t[] C Structure\n'
@@ -167,12 +173,12 @@ def FitCharData(csvFile, increment=4, maxpwr=20):
   cStr += '\n'
   return '\n' + cStr
 
-def ProcessCharDataAndFindPoly(filename, increment=4 , maxpwr=20):
+def ProcessCharDataAndFindPoly(filename, increment=API_INCREMENT_DEFAULT, maxpwr=API_MAX_POWER_DEFAULT, numSegment=NUM_SEGMENTS_DEFAULT):
   data = ReadAndProcessCharData(filename, maxpwr)
-  polys = CalcPowerPolys(data.pwrlvls, data.outpwrs, increment, maxpwr)
+  polys = CalcPowerPolys(data.pwrlvls, data.outpwrs, increment, maxpwr, numSegment)
   return polys
 
-def ReadAndProcessCharData(filename, maxpwr=20):
+def ReadAndProcessCharData(filename, maxpwr=API_MAX_POWER_DEFAULT):
   chardata = numpy.loadtxt(filename, delimiter=',')
   pwrlvls = []
   outpwrs = []
@@ -211,11 +217,10 @@ class CurveSegment():
             and self.slope == other.slope \
             and self.intercept == other.intercept)
 
-def CalcPowerPolys(yAxisValues, powers, increment, maxpwr):
-  global NUM_SEGMENTS_DEFAULT
+def CalcPowerPolys(yAxisValues, powers, increment, maxpwr, numSegment=NUM_SEGMENTS_DEFAULT):
   polylist = []
   pwr = maxpwr
-  numberOfSegments = NUM_SEGMENTS_DEFAULT
+  numberOfSegments = numSegment
   #Add extra segment to store maxpwr and increment
   
   if (maxpwr != API_MAX_POWER_DEFAULT) or (increment != API_INCREMENT_DEFAULT):
@@ -223,7 +228,7 @@ def CalcPowerPolys(yAxisValues, powers, increment, maxpwr):
   
   for x in range(0, numberOfSegments):
     
-    if x == 0 and numberOfSegments != NUM_SEGMENTS_DEFAULT :
+    if x == 0 and (numberOfSegments != numSegment):
       polylist.append(RAIL_TX_POWER_LEVEL_INVALID)
       polylist.append(maxpwr)
       polylist.append(increment)
@@ -262,12 +267,17 @@ def main():
                       type=float,
                       default=API_INCREMENT_DEFAULT,
                       required=False,
-                      help="The step size to chunk the powe range. ")
+                      help="The step size (in dBm rounded to 1 decimal place) to segment the power range. ")
   parser.add_argument('-m', '--maxPower',
                       type=int,
                       default=API_MAX_POWER_DEFAULT,
                       required=False,
-                      help="The maximum power the curve should fit.")
+                      help="The maximum power(in integer dBm) the curve should fit.")
+  parser.add_argument('-n', '--numSegment',
+                      type=int,
+                      default=NUM_SEGMENTS_DEFAULT,
+                      required=False,
+                      help="The number of curve segments to fit the data.")
   parser.add_argument('-o', '--output',
                       type=str,
                       default=None,
@@ -287,13 +297,15 @@ def main():
     return 1
 
   # Compute the fit and output the result
-  output = FitCharData(a.csvFile, round(a.increment,1), a.maxPower)
+  output = FitCharData(a.csvFile, round(a.increment,1), a.maxPower, a.numSegment)
   if a.output == None:
     print(output)
   else:
     with open(a.output, 'w') as f:
       f.write(output)
-
+  if (minPowerLevel == 255) or (maxPowerLevel == 255):
+    print("WARNING :: Curve doesn't have correct min/max powerlevels.")
+  print("\nMax Powerlevel: %d, Min Powerlevel: %d" %(minPowerLevel, maxPowerLevel))
   # Show the plot of the curve fit if requested
   if enablePlotting:
     plt.show()

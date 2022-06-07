@@ -1610,35 +1610,35 @@ limitations under the License.
        </description>
     </command>
     <command source="client" code="0x1A" name="SetDisposableSchedule" optional="true" introducedIn="zcl-nfr-20-52431-003-door-lock-20200611" cli="zcl lock set-disposable-schedule">
-       <description>
+      <description>
          Set the Disposable Schedule by specifying local start time and local end time for the specific user.
        </description>
-       <arg name="userId"         type="INT16U" />
-       <arg name="localStartTime" type="INT32U" />
-       <arg name="localEndTime"   type="INT32U" />
+      <arg name="userId" type="INT16U"/>
+      <arg name="localStartTime" type="INT32U"/>
+      <arg name="localEndTime" type="INT32U"/>
     </command>
     <command source="client" code="0x1B" name="GetDisposableSchedule" optional="true" introducedIn="zcl-nfr-20-52431-003-door-lock-20200611" cli="zcl lock get-disposable-schedule">
-       <description>
+      <description>
          Retrieve the disposable schedule for the specific user.
        </description>
-       <arg name="userId"         type="INT16U" />      
+      <arg name="userId" type="INT16U"/>
     </command>
     <command source="client" code="0x1C" name="ClearDisposableSchedule" optional="true" introducedIn="zcl-nfr-20-52431-003-door-lock-20200611" cli="zcl lock clear-disposable-schedule">
-       <description>
+      <description>
          Clear the Disposable schedule for the specific user
        </description>
-       <arg name="userId"         type="INT16U" />      
+      <arg name="userId" type="INT16U"/>
     </command>
     <command source="client" code="0x1D" name="ClearBiometricCredential" optional="true" introducedIn="zcl-nfr-20-52431-003-door-lock-20200611" cli="zcl lock clear-biometric-credential">
-       <description>
+      <description>
          Clear the Biometric Credential for the specific user
        </description>
-       <arg name="userId"         type="INT16U" />      
+      <arg name="userId" type="INT16U"/>
     </command>
     <command source="client" code="0x1E" name="ClearAllBiometricCredentials" optional="true" introducedIn="zcl-nfr-20-52431-003-door-lock-20200611" cli="zcl lock clear-all-biometric-credentials">
-       <description>
+      <description>
          Clear out all Biometric Credentials on the lock
-       </description>       
+       </description>
     </command>
     <command source="server" code="0x00" name="LockDoorResponse" optional="false" disableDefaultResponse="true">
       <description>
@@ -1826,37 +1826,37 @@ limitations under the License.
       <arg name="status" type="INT8U"/>
     </command>
     <command source="server" code="0x1A" name="SetDisposableScheduleResponse" optional="true" introducedIn="zcl-nfr-20-52431-003-door-lock-20200611" disableDefaultResponse="true">
-       <description>
+      <description>
          Returns pass/fail of the SetDisposableSchedule command
        </description>
-       <arg name="status"       type="INT8U" />       
+      <arg name="status" type="INT8U"/>
     </command>
     <command source="server" code="0x1B" name="GetDisposableScheduleResponse" optional="true" introducedIn="zcl-nfr-20-52431-003-door-lock-20200611" disableDefaultResponse="true">
-       <description>
+      <description>
          Returns the Disposable schedule data for the User ID.
        </description>
-       <arg name="userId"         type="INT16U" />       
-       <arg name="status"         type="INT8U"  />
-       <arg name="localStartTime" type="INT32U" />
-       <arg name="localEndTime"   type="INT32U" />
+      <arg name="userId" type="INT16U"/>
+      <arg name="status" type="INT8U"/>
+      <arg name="localStartTime" type="INT32U"/>
+      <arg name="localEndTime" type="INT32U"/>
     </command>
     <command source="server" code="0x1C" name="ClearDisposableScheduleResponse" optional="true" introducedIn="zcl-nfr-20-52431-003-door-lock-20200611" disableDefaultResponse="true">
-       <description>
+      <description>
          Returns pass/fail of the command
        </description>
-       <arg name="status"         type="INT8U"  />
+      <arg name="status" type="INT8U"/>
     </command>
     <command source="server" code="0x1D" name="ClearBiometricCredentialResponse" optional="true" introducedIn="zcl-nfr-20-52431-003-door-lock-20200611" disableDefaultResponse="true">
-       <description>
+      <description>
          Returns pass/fail of the command
        </description>
-       <arg name="status"         type="INT8U"  />
+      <arg name="status" type="INT8U"/>
     </command>
     <command source="server" code="0x1E" name="ClearAllBiometricCredentialsResponse" optional="true" introducedIn="zcl-nfr-20-52431-003-door-lock-20200611" disableDefaultResponse="true">
-       <description>
+      <description>
          Returns pass/fail of the command
        </description>
-       <arg name="status"         type="INT8U"  />
+      <arg name="status" type="INT8U"/>
     </command>
     <command source="server" code="0x20" name="OperationEventNotification" optional="true" introducedIn="ha-1.2-05-3520-29">
       <description>

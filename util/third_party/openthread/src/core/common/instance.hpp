@@ -40,17 +40,18 @@
 #include <stdint.h>
 
 #include <openthread/heap.h>
-#include <openthread/platform/logging.h>
 #if OPENTHREAD_CONFIG_HEAP_EXTERNAL_ENABLE
 #include <openthread/platform/memory.h>
 #endif
 
+#include "common/array.hpp"
 #include "common/as_core_type.hpp"
 #include "common/error.hpp"
 #include "common/extension.hpp"
+#include "common/log.hpp"
 #include "common/message.hpp"
 #include "common/non_copyable.hpp"
-#include "common/random_manager.hpp"
+#include "common/random.hpp"
 #include "common/tasklet.hpp"
 #include "common/time_ticker.hpp"
 #include "common/timer.hpp"
@@ -71,6 +72,8 @@
 #include "crypto/mbedtls.hpp"
 #include "meshcop/border_agent.hpp"
 #include "meshcop/dataset_updater.hpp"
+#include "meshcop/extended_panid.hpp"
+#include "meshcop/network_name.hpp"
 #include "net/ip6.hpp"
 #include "thread/announce_sender.hpp"
 #include "thread/link_metrics.hpp"
@@ -113,15 +116,23 @@ namespace ot {
 class Instance : public otInstance, private NonCopyable
 {
 public:
+    /**
+     * This type represents the message buffer information (number of messages/buffers in all OT stack message queues).
+     *
+     */
+    class BufferInfo : public otBufferInfo, public Clearable<BufferInfo>
+    {
+    };
+
 #if OPENTHREAD_CONFIG_MULTIPLE_INSTANCE_ENABLE
     /**
       * This static method initializes the OpenThread instance.
       *
       * This function must be called before any other calls on OpenThread instance.
       *
-      * @param[in]    aBuffer      The buffer for OpenThread to use for allocating the Instance.
-      * @param[inout] aBufferSize  On input, the size of `aBuffer`. On output, if not enough space for `Instance`, the
-                                   number of bytes required for `Instance`.
+      * @param[in]     aBuffer      The buffer for OpenThread to use for allocating the Instance.
+      * @param[in,out] aBufferSize  On input, the size of `aBuffer`. On output, if not enough space for `Instance`, the
+                                    number of bytes required for `Instance`.
       *
       * @returns  A pointer to the new OpenThread instance.
       *
@@ -181,14 +192,14 @@ public:
      * @returns The log level.
      *
      */
-    static otLogLevel GetLogLevel(void)
+    static LogLevel GetLogLevel(void)
 #if OPENTHREAD_CONFIG_LOG_LEVEL_DYNAMIC_ENABLE
     {
         return sLogLevel;
     }
 #else
     {
-        return static_cast<otLogLevel>(OPENTHREAD_CONFIG_LOG_LEVEL);
+        return static_cast<LogLevel>(OPENTHREAD_CONFIG_LOG_LEVEL);
     }
 #endif
 
@@ -199,11 +210,7 @@ public:
      * @param[in] aLogLevel  A log level.
      *
      */
-    static void SetLogLevel(otLogLevel aLogLevel)
-    {
-        OT_ASSERT(aLogLevel <= OT_LOG_LEVEL_DEBG && aLogLevel >= OT_LOG_LEVEL_NONE);
-        sLogLevel = aLogLevel;
-    }
+    static void SetLogLevel(LogLevel aLogLevel);
 #endif
 
     /**
@@ -285,6 +292,14 @@ public:
     static bool IsDnsNameCompressionEnabled(void) { return sDnsNameCompressionEnabled; }
 #endif
 
+    /**
+     * This method retrieves the the Message Buffer information.
+     *
+     * @param[out]  aInfo  A `BufferInfo` where information is written.
+     *
+     */
+    void GetBufferInfo(BufferInfo &aInfo);
+
 #endif // OPENTHREAD_MTD || OPENTHREAD_FTD
 
     /**
@@ -319,7 +334,7 @@ private:
 #endif
 
 #if OPENTHREAD_MTD || OPENTHREAD_FTD
-    // RandomManager is initialized before other objects. Note that it
+    // Random::Manager is initialized before other objects. Note that it
     // requires MbedTls which itself may use Heap.
 #if !OPENTHREAD_CONFIG_HEAP_EXTERNAL_ENABLE
     static Utils::Heap sHeap;
@@ -327,7 +342,7 @@ private:
     Crypto::MbedTls mMbedTls;
 #endif // OPENTHREAD_MTD || OPENTHREAD_FTD
 
-    RandomManager mRandomManager;
+    Random::Manager mRandomManager;
 
     // Radio is initialized before other member variables
     // (particularly, SubMac and Mac) to allow them to use its methods
@@ -396,7 +411,7 @@ private:
 #endif // OPENTHREAD_RADIO || OPENTHREAD_CONFIG_LINK_RAW_ENABLE
 
 #if OPENTHREAD_CONFIG_LOG_LEVEL_DYNAMIC_ENABLE
-    static otLogLevel sLogLevel;
+    static LogLevel sLogLevel;
 #endif
 #if OPENTHREAD_ENABLE_VENDOR_EXTENSION
     Extension::ExtensionBase &mExtension;
@@ -415,8 +430,14 @@ private:
 };
 
 DefineCoreType(otInstance, Instance);
+DefineCoreType(otBufferInfo, Instance::BufferInfo);
 
 // Specializations of the `Get<Type>()` method.
+
+template <> inline Instance &Instance::Get(void)
+{
+    return *this;
+}
 
 template <> inline Radio &Instance::Get(void)
 {
@@ -691,12 +712,22 @@ template <> inline Coap::CoapSecure &Instance::Get(void)
 }
 #endif
 
-template <> inline MeshCoP::ActiveDataset &Instance::Get(void)
+template <> inline MeshCoP::ExtendedPanIdManager &Instance::Get(void)
+{
+    return mThreadNetif.mExtendedPanIdManager;
+}
+
+template <> inline MeshCoP::NetworkNameManager &Instance::Get(void)
+{
+    return mThreadNetif.mNetworkNameManager;
+}
+
+template <> inline MeshCoP::ActiveDatasetManager &Instance::Get(void)
 {
     return mThreadNetif.mActiveDataset;
 }
 
-template <> inline MeshCoP::PendingDataset &Instance::Get(void)
+template <> inline MeshCoP::PendingDatasetManager &Instance::Get(void)
 {
     return mThreadNetif.mPendingDataset;
 }
@@ -944,6 +975,11 @@ template <> inline Utils::Otns &Instance::Get(void)
 template <> inline BorderRouter::RoutingManager &Instance::Get(void)
 {
     return mRoutingManager;
+}
+
+template <> inline BorderRouter::InfraIf &Instance::Get(void)
+{
+    return mRoutingManager.mInfraIf;
 }
 #endif
 

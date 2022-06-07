@@ -1,7 +1,8 @@
 project_name: ot-ncp-mtd
-label: ot-ncp-mtd
+label: OpenThread - NCP (MTD)
 package: OpenThread
-description: This is a simple OpenThread Minimal Thread Device NCP application.
+description:  >
+  This is a simple OpenThread Minimal Thread Device NCP application. This is equivalent to the ot-ncp-mtd application in the OpenThread GitHub repo.
 category: OpenThread Examples
 quality: production
 
@@ -49,3 +50,19 @@ configuration:
 
 tag:
   - prebuilt_demo
+  
+readme:
+  - path: ./README-OT-NCP.md
+
+filter:
+  - name: "Wireless Technology"
+    value: ["Thread"]
+  - name: "Device Type"
+    value: ["NCP"]
+  - name: "Project Difficulty"
+    value: ["Advanced"]
+
+ui_hints:
+  highlight:
+    - path: ./README-OT-NCP.md
+      focus: true

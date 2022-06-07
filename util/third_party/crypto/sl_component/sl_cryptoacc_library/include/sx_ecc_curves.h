@@ -88,13 +88,13 @@ extern const sx_ecc_curve_t sx_ecc_curve_curve448;
 extern const sx_ecc_curve_t sx_ecc_curve_sm2_p256_v1;
 extern const sx_ecc_curve_t sx_ecc_curve_sm2_p256_v2;
 extern const sx_ecc_curve_t sx_ecc_curve_sm2_fm257;
-extern const sx_ecc_curve_t sx_ecc_bp_curve_p160;
-extern const sx_ecc_curve_t sx_ecc_bp_curve_p192;
-extern const sx_ecc_curve_t sx_ecc_bp_curve_p224;
-extern const sx_ecc_curve_t sx_ecc_bp_curve_p256;
-extern const sx_ecc_curve_t sx_ecc_bp_curve_p320;
-extern const sx_ecc_curve_t sx_ecc_bp_curve_p384;
-extern const sx_ecc_curve_t sx_ecc_bp_curve_p512;
+extern const sx_ecc_curve_t sx_ecc_brainpoolP160r1;
+extern const sx_ecc_curve_t sx_ecc_brainpoolP192r1;
+extern const sx_ecc_curve_t sx_ecc_brainpoolP224r1;
+extern const sx_ecc_curve_t sx_ecc_brainpoolP256r1;
+extern const sx_ecc_curve_t sx_ecc_brainpoolP320r1;
+extern const sx_ecc_curve_t sx_ecc_brainpoolP384r1;
+extern const sx_ecc_curve_t sx_ecc_brainpoolP512r1;
 
 
 #endif

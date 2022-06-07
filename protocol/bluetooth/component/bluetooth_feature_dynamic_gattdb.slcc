@@ -23,8 +23,6 @@ quality: "production"
 root_path: "protocol/bluetooth"
 config_file:
   - path: "config/sl_bt_dynamic_gattdb_config.h"
-source:
-  - path: "src/sl_bt_dynamic_gattdb_config.c"
 requires:
   - name: "bluetooth_stack"
 provides:
@@ -32,12 +30,3 @@ provides:
 template_contribution:
   - name: component_catalog
     value: bluetooth_feature_dynamic_gattdb
-  - name: bluetooth_bgapi_class_config
-    value:
-      include: "sl_bt_dynamic_gattdb_config.h"
-      function: "sl_bt_dynamic_gattdb_configure"
-    priority: 6
-  - name: bluetooth_bgapi_class
-    value:
-      class: "gattdb"
-    priority: 6

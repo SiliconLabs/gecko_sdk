@@ -43,7 +43,7 @@
 /// Used for indicates the current status of forwarding rx packets on UART
 #define OFF  "OFF"
 /// RAIL payload length
-#define PAYLOAD_LENGTH (16u)
+#define PAYLOAD_LENGTH (16U)
 
 // -----------------------------------------------------------------------------
 //                          Static Function Declarations
@@ -110,9 +110,8 @@ void sl_simple_rail_rx_cli_tick(void)
   // Forward RAIL rx messages if the flag is enabled
   if (rx_forward) {
     if (sl_rx_packet_copied) {
-      uint8_t i = 0;
       app_log_info("Packet has been received: ");
-      for (i = 0; i < PAYLOAD_LENGTH; i++) {
+      for (uint8_t i = 0; i < PAYLOAD_LENGTH; i++) {
         app_log_info("0x%02X, ", rx_fifo[i]);
       }
       app_log_info("\n");

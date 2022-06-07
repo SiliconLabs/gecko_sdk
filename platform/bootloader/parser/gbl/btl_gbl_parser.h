@@ -126,6 +126,9 @@ typedef enum {
 #if defined(_SILICON_LABS_32B_SERIES_2)
   GblParserStateCertificate,          ///< Parsing certificate tag
 #endif
+#if defined(BTL_PARSER_SUPPORT_VERSION_DEPENDENCY_TAG)
+  GblParserStateVersionDependency,    ///< Parsing version dependency tag
+#endif
   GblParserStateSignature,            ///< Parsing signature tag
   GblParserStateCustomTag,            ///< Parsing custom tag
   GblParserStateError                 ///< Error state
@@ -155,6 +158,26 @@ typedef struct {
   uint32_t                    seUpgradeVersion;
 #endif
 } ImageProperties_t;
+
+#if defined(BOOTLOADER_SECURE)
+/// NS Structure containing state of the image file processed.
+typedef struct {
+  /// Image contents
+  uint8_t                     contents;
+  /// Flag to indicate parsing has completed
+  bool                        imageCompleted;
+  /// Flag to indicate the image file has been validated
+  bool                        imageVerified;
+  /// Version number of main bootloader extracted from image file
+  uint32_t                    bootloaderVersion;
+  /// Size of the bootloader upgrade contained in the image file
+  uint32_t                    bootloaderUpgradeSize;
+#if defined(SEMAILBOX_PRESENT) || defined(CRYPTOACC_PRESENT)
+  /// Version number of SE upgrade extracted from image file
+  uint32_t                    seUpgradeVersion;
+#endif
+} ImageProperties_NS_t;
+#endif
 
 /// Upgrade image contains application upgrade
 #define BTL_IMAGE_CONTENT_APPLICATION       0x01U
@@ -221,6 +244,18 @@ typedef struct {
   bool                gotCertificate;
   /// Reserved flags
   uint8_t             reservedFlags[3];
+  /// Current offset in the GBL file being parsed
+  size_t              offsetInGbl;
+  /// Offset of SE upgrade tag in the GBL file
+  size_t              offsetOfSeUpgradeTag;
+  /// Version dependency result for application
+  uint8_t             versionDependencyResultApp;
+  /// Version dependency result for bootloader
+  uint8_t             versionDependencyResultBootloader;
+  /// Version dependency result for SE
+  uint8_t             versionDependencyResultSe;
+  /// Reserved byte
+  uint8_t             reservedByte;
 #endif
 } ParserContext_t;
 

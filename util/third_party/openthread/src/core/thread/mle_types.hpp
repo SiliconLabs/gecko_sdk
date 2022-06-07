@@ -49,6 +49,7 @@
 #include "common/equatable.hpp"
 #include "common/string.hpp"
 #include "mac/mac_types.hpp"
+#include "meshcop/extended_panid.hpp"
 #include "net/ip6_address.hpp"
 #include "thread/network_data_types.hpp"
 
@@ -99,6 +100,7 @@ constexpr uint32_t kMaxResponseDelay               = 1000; ///< Max response del
 constexpr uint32_t kMaxChildIdRequestTimeout       = 5000; ///< Max delay to rx a Child ID Request (in msec)
 constexpr uint32_t kMaxChildUpdateResponseTimeout  = 2000; ///< Max delay to rx a Child Update Response (in msec)
 constexpr uint32_t kMaxLinkRequestTimeout          = 2000; ///< Max delay to rx a Link Accept
+constexpr uint8_t  kMulticastLinkRequestDelay      = 5;    ///< Max delay for sending a mcast Link Request (in sec)
 
 constexpr uint32_t kMinTimeoutKeepAlive = (((kMaxChildKeepAliveAttempts + 1) * kUnicastRetransmissionDelay) / 1000);
 constexpr uint32_t kMinPollPeriod       = OPENTHREAD_CONFIG_MAC_MINIMUM_POLL_PERIOD;
@@ -192,19 +194,6 @@ enum DeviceRole : uint8_t
     kRoleChild    = OT_DEVICE_ROLE_CHILD,    ///< The Thread Child role.
     kRoleRouter   = OT_DEVICE_ROLE_ROUTER,   ///< The Thread Router role.
     kRoleLeader   = OT_DEVICE_ROLE_LEADER,   ///< The Thread Leader role.
-};
-
-/**
- * MLE Attach modes
- *
- */
-enum AttachMode : uint8_t
-{
-    kAttachAny           = 0, ///< Attach to any Thread partition.
-    kAttachSame1         = 1, ///< Attach to the same Thread partition (attempt 1 when losing connectivity).
-    kAttachSame2         = 2, ///< Attach to the same Thread partition (attempt 2 when losing connectivity).
-    kAttachBetter        = 3, ///< Attach to a better (i.e. higher weight/partition id) Thread partition.
-    kAttachSameDowngrade = 4, ///< Attach to the same Thread partition during downgrade process.
 };
 
 constexpr uint16_t kAloc16Leader                      = 0xfc00;
@@ -428,24 +417,6 @@ private:
 };
 
 /**
- * This class represents a Mesh Local Prefix.
- *
- */
-OT_TOOL_PACKED_BEGIN
-class MeshLocalPrefix : public Ip6::NetworkPrefix
-{
-public:
-    /**
-     * This method derives and sets the Mesh Local Prefix from an Extended PAN ID.
-     *
-     * @param[in] aExtendedPanId   An Extended PAN ID.
-     *
-     */
-    void SetFromExtendedPanId(const Mac::ExtendedPanId &aExtendedPanId);
-
-} OT_TOOL_PACKED_END;
-
-/**
  * This class represents the Thread Leader Data.
  *
  */
@@ -590,7 +561,6 @@ typedef Mac::Key Key;
 
 } // namespace Mle
 
-DefineCoreType(otMeshLocalPrefix, Mle::MeshLocalPrefix);
 DefineCoreType(otLeaderData, Mle::LeaderData);
 DefineMapEnum(otDeviceRole, Mle::DeviceRole);
 

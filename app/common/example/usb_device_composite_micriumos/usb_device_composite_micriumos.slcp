@@ -5,6 +5,13 @@ label: Platform - USB Composite Device with Micrium OS kernel
 description: > 
   This example uses the USB stack with the Micrium OS kernel to create a composite device. 
 category: Example|Platform
+filter:
+  - name: "Device Type"
+    value: ["SoC"]
+  - name: "MCU"
+    value: ["32-bit MCU"]
+  - name: "Project Difficulty"
+    value: ["Advanced"]
 source:
   - path: app.c
   - path: main.c
@@ -30,6 +37,8 @@ configuration:
   - name: OS_CFG_TASK_Q_EN
     value: 1
 readme:
-  - path: "readme.html"
+  - path: readme.md
 tag:
   - hardware:component:usb
+ui_hints:
+  highlight: readme.md

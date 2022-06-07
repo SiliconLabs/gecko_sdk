@@ -162,7 +162,8 @@ sl_status_t sl_iostream_eusart_init(sl_iostream_uart_t *iostream_uart,
 
   CMU_ClockEnable(eusart_config->clock, true);
   if (eusart_config->enable_high_frequency == false) {
-#if defined(_SILICON_LABS_32B_SERIES_2_CONFIG_2)
+#if defined(_SILICON_LABS_32B_SERIES_2_CONFIG_2) \
+    || defined(_SILICON_LABS_32B_SERIES_2_CONFIG_7)
     CMU_ClockEnable(cmuClock_EM23GRPACLK, true);
     CMU_ClockSelectSet(eusart_config->clock, cmuSelect_EM23GRPACLK);
 #elif (_SILICON_LABS_32B_SERIES_2_CONFIG >= 3)
@@ -173,7 +174,8 @@ sl_status_t sl_iostream_eusart_init(sl_iostream_uart_t *iostream_uart,
 #endif
     EUSART_UartInitLf(eusart_config->eusart, init);
   } else {
-#if defined(_SILICON_LABS_32B_SERIES_2_CONFIG_2)
+#if defined(_SILICON_LABS_32B_SERIES_2_CONFIG_2) \
+    || defined(_SILICON_LABS_32B_SERIES_2_CONFIG_7)
     CMU_ClockEnable(cmuClock_EM01GRPACLK, true);
     CMU_ClockSelectSet(eusart_config->clock, cmuSelect_EM01GRPACLK);
 #elif (_SILICON_LABS_32B_SERIES_2_CONFIG >= 3)

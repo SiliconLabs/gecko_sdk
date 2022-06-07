@@ -28,7 +28,7 @@
  * @return Returns RECEIVED_FRAME_STATUS_CC_NOT_FOUND if the handler version is not supported.
  *         Otherwise, the return value from the handler is passed through.
  */
-received_frame_status_t ZAF_CC_invoke_specific(CC_handler_map_v3_t const * const p_cc_entry,
+received_frame_status_t ZAF_CC_invoke_specific(CC_handler_map_latest_t const * const p_cc_entry,
                              RECEIVE_OPTIONS_TYPE_EX *rxOpt,
                              ZW_APPLICATION_TX_BUFFER *pFrameIn,
                              uint8_t cmdLength,
@@ -58,7 +58,12 @@ received_frame_status_t invoke_cc_handler(RECEIVE_OPTIONS_TYPE_EX *rxOpt,
 
 typedef void * zaf_cc_context_t;
 
-typedef bool (*zaf_cc_invoker_callback_t)(CC_handler_map_v3_t const * const p_cc_entry, zaf_cc_context_t context);
+/**
+ * Callback type for ZAF_CC_foreach().
+ *
+ * The CC handler map must always be the latest available version.
+ */
+typedef bool (*zaf_cc_invoker_callback_t)(CC_handler_map_latest_t const * const p_cc_entry, zaf_cc_context_t context);
 
 /**
  * Invokes callback for each registered CC.

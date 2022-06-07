@@ -1,10 +1,10 @@
 id: psa_crypto_ecc_secp384r1
 package: platform
-label: PSA Crypto support for the secp384r1 ECC curve
+label: secp384r1
 description: >-
   This component adds support for the secp384r1 elliptic curve,
   a 384-bit prime field Weierstrass curve, in PSA Crypto.
-category: Platform|Security
+category: Platform|Security|PSA Crypto|Elliptic Curves
 quality: production
 provides:
   - name: psa_crypto_ecc_secp384r1

@@ -38,18 +38,27 @@ constexpr int kOutputTensor = 0;
 struct StridedSliceContext {
   StridedSliceContext(TfLiteContext* context, TfLiteNode* node) {
     params = reinterpret_cast<TfLiteStridedSliceParams*>(node->builtin_data);
-    input = GetInput(context, node, kInputTensor);
-    begin = GetInput(context, node, kBeginTensor);
-    end = GetInput(context, node, kEndTensor);
-    strides = GetInput(context, node, kStridesTensor);
-    output = GetOutput(context, node, kOutputTensor);
+    micro_context = GetMicroContext(context);
+    input = micro_context->AllocateTempInputTensor(node, kInputTensor);
+    begin = micro_context->AllocateTempInputTensor(node, kBeginTensor);
+    end = micro_context->AllocateTempInputTensor(node, kEndTensor);
+    strides = micro_context->AllocateTempInputTensor(node, kStridesTensor);
+    output = micro_context->AllocateTempOutputTensor(node, kOutputTensor);
     dims = NumDimensions(input);
   }
+  ~StridedSliceContext() {
+    micro_context->DeallocateTempTfLiteTensor(input);
+    micro_context->DeallocateTempTfLiteTensor(begin);
+    micro_context->DeallocateTempTfLiteTensor(end);
+    micro_context->DeallocateTempTfLiteTensor(strides);
+    micro_context->DeallocateTempTfLiteTensor(output);
+  }
   const TfLiteStridedSliceParams* params;
-  const TfLiteTensor* input;
-  const TfLiteTensor* begin;
-  const TfLiteTensor* end;
-  const TfLiteTensor* strides;
+  MicroContext* micro_context;
+  TfLiteTensor* input;
+  TfLiteTensor* begin;
+  TfLiteTensor* end;
+  TfLiteTensor* strides;
   TfLiteTensor* output;
   int dims;
 };
@@ -166,6 +175,13 @@ TfLiteStatus Eval(TfLiteContext* context, TfLiteNode* node) {
           tflite::micro::GetTensorData<int16_t>(input),
           tflite::micro::GetTensorShape(output),
           tflite::micro::GetTensorData<int16_t>(output));
+      break;
+    case kTfLiteInt32:
+      reference_ops::StridedSlice(
+          op_params, tflite::micro::GetTensorShape(input),
+          tflite::micro::GetTensorData<int32_t>(input),
+          tflite::micro::GetTensorShape(output),
+          tflite::micro::GetTensorData<int32_t>(output));
       break;
     default:
       TF_LITE_KERNEL_LOG(context, "Type %s (%d) not supported.",

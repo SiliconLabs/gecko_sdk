@@ -7,32 +7,20 @@
 
 #include <stdint.h>
 #include "rail_types.h"
-{%- if multiPhyConfig.commonStructures.modeSwitchPhrCount > 0 %}
+{%- if multiPhyConfig.commonStructures.modeSwitchPhyModeIds|length %}
 #include "rail_ieee802154.h"
 {%- endif %}
 {%- if rail_internal %}
 #include "timing_state.h"
-{%- if enable_timing %}
-#define RADIO_CONFIG_ENABLE_TIMING
-{%- endif %}
 {%- endif %}
 
 #define {{protocol|upper}}_ACCELERATION_BUFFER {{protocol}}AccelerationBuffer
 extern uint32_t {{protocol}}AccelerationBuffer[];
-{% if multiPhyConfig.commonStructures.convDecodeBufferSize > 0 %}
+{%- if multiPhyConfig.commonStructures.convDecodeBufferSize > 0 %}
 // NOTE: This buffer is to be used exclusively by hardware
 extern uint8_t convDecodeBuffer[];
-{% endif %}
-{%- if rail_internal %}
-{%- set timingConfigs = [] %}
-{%- for phyInfoEntryName, phyInfoEntry in multiPhyConfig.commonStructures.phyInfoEntries.items() %}
-{%- if phyInfoEntry.phyInfoData.timingConfig not in timingConfigs %}
-{%- do timingConfigs.append(phyInfoEntry.phyInfoData.timingConfig) %}
 {%- endif %}
-{%- endfor %}
-{%- for timingConfig in timingConfigs %}
-extern const ConfigTimings_t {{timingConfig}}_timing;
-{%- endfor %}
+{%- if rail_internal %}
 {%- if multiPhyConfig.commonStructures.modemConfigEntriesBase|length > 0 %}
 {% for modemConfigName, modemConfig in multiPhyConfig.commonStructures.modemConfigEntriesBase.items() %}
 extern const uint32_t {{modemConfigName}}[];
@@ -66,10 +54,17 @@ extern const RAIL_ChannelConfigEntry_t {{multiPhyConfigEntryName}}_channels[];
 extern const RAIL_ChannelConfig_t *channelConfigs[];
 {%- endif %}
 
-{%- if multiPhyConfig.commonStructures.modeSwitchPhrCount > 0 %}
-#define WISUN_MODESWITCHPHRS_ARRAY
-extern const RAIL_IEEE802154_ModeSwitchPhr_t wisun_modeSwitchPhrs[{{multiPhyConfig.commonStructures.modeSwitchPhrCount}}];
+{%- if multiPhyConfig.commonStructures.modeSwitchPhyModeIds|length %}
+#define WISUN_MODESWITCHPHRS_ARRAY_SIZE {{multiPhyConfig.commonStructures.modeSwitchPhyModeIds|length}}
+extern const uint8_t wisun_modeSwitchPhrsLength;
+extern const RAIL_IEEE802154_ModeSwitchPhr_t wisun_modeSwitchPhrs[WISUN_MODESWITCHPHRS_ARRAY_SIZE];
 {%- endif %}
+
+#ifdef RADIO_CONFIG_ENABLE_STACK_INFO
+{% for stackName, stackInfoEntry in multiPhyConfig.commonStructures.stackInfoEntries.items() -%}
+extern const uint8_t {{stackName}}[{{stackInfoEntry|length}}];
+{% endfor -%}
+#endif // RADIO_CONFIG_ENABLE_STACK_INFO
 
 #endif // __{{filename|upper}}_H__
 {% endblock %}

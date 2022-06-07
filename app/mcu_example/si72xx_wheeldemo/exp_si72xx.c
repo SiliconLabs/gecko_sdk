@@ -325,8 +325,8 @@ static void pcntSetup(void)
 
 static void disableExpOutputInterrupts(void)
 {
-  GPIO_IntConfig(SI72XXEXP_PORT, SI72XXEXP_U2_PIN, true, true, false);
-  GPIO_IntConfig(SI72XXEXP_PORT, SI72XXEXP_U1_PIN, true, false, false);
+  GPIO_ExtIntConfig(SI72XXEXP_PORT, SI72XXEXP_U2_PIN, SI72XXEXP_U2_PIN, true, true, false);
+  GPIO_ExtIntConfig(SI72XXEXP_PORT, SI72XXEXP_U1_PIN, SI72XXEXP_U1_PIN, true, false, false);
 }
 
 /**************************************************************************//**
@@ -351,15 +351,15 @@ void PCNT0_IRQHandler(void)
 static void enableQuadrantDetection(void)
 {
   detectQuadrant = true;
-  GPIO_IntConfig(SI72XXEXP_PORT, SI72XXEXP_U2_PIN, true, true, true);
-  GPIO_IntConfig(SI72XXEXP_PORT, SI72XXEXP_U1_PIN, true, true, true);
+  GPIO_ExtIntConfig(SI72XXEXP_PORT, SI72XXEXP_U2_PIN, SI72XXEXP_U2_PIN, true, true, true);
+  GPIO_ExtIntConfig(SI72XXEXP_PORT, SI72XXEXP_U1_PIN, SI72XXEXP_U1_PIN, true, true, true);
 }
 
 static void enableRevolutionDetection(void)
 {
   detectQuadrant = false;
-  GPIO_IntConfig(SI72XXEXP_PORT, SI72XXEXP_U2_PIN, true, true, false);
-  GPIO_IntConfig(SI72XXEXP_PORT, SI72XXEXP_U1_PIN, true, false, true);
+  GPIO_ExtIntConfig(SI72XXEXP_PORT, SI72XXEXP_U2_PIN, SI72XXEXP_U2_PIN, true, true, false);
+  GPIO_ExtIntConfig(SI72XXEXP_PORT, SI72XXEXP_U1_PIN, SI72XXEXP_U1_PIN, true, false, true);
 }
 
 static void changeQuadrantDetection(void)

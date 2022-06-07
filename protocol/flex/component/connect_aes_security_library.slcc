@@ -9,7 +9,7 @@ description: "Provides the Connect AES Security library."
 provides:
   - name: "connect_aes_security_implementation"
 requires:
-  - name: "connect_aes_security"  
+  - name: "connect_aes_security"
 library:
   - path: "protocol/flex/libs/libconnect-aes-security-library-efr32xg1-iar.a"
     condition:

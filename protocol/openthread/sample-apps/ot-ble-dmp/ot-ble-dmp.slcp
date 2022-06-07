@@ -1,7 +1,8 @@
 project_name: ot-ble-dmp
-label: ot-ble-dmp
+label: OpenThread BLE DMP - SoC FreeRTOS
 package: OpenThread
-description: This is a simple application to test DMP with OpenThread and Bluetooth running on FreeRTOS.
+description: >
+  This is a simple application to test DMP (Dynamic MultiProtocol) with OpenThread and Bluetooth running on FreeRTOS.
 category: OpenThread Examples
 quality: production
 
@@ -14,7 +15,7 @@ component:
   - id: bluetooth_feature_system
   - id: bluetooth_feature_gap
   - id: bluetooth_feature_scanner
-  - id: bluetooth_feature_advertiser
+  - id: bluetooth_feature_legacy_advertiser
   - id: bluetooth_feature_connection
   - id: bluetooth_feature_gatt
   - id: bluetooth_feature_gatt_server
@@ -43,9 +44,6 @@ source:
   - path: app.c
   - path: bluetooth_event_callback.c
 
-other_file:
-  - path: readme-ot-ble-dmp.txt
-
 configuration:
   - name: SL_BOARD_ENABLE_VCOM
     value: 1
@@ -69,3 +67,21 @@ configuration:
 
 tag:
   - prebuilt_demo
+
+readme:
+  - path: ./README.md
+
+filter:
+  - name: "Wireless Technology"
+    value: ["Thread", "Bluetooth"]
+  - name: "Device Type"
+    value: ["SoC"]
+  - name: "Capability"
+    value: ["Multiprotocol"]
+  - name: "Project Difficulty"
+    value: ["Advanced"]
+
+ui_hints:
+  highlight:
+    - path: ./README.md
+      focus: true

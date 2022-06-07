@@ -15,11 +15,9 @@ config_file:
 provides:
   - name: "bluetooth_feature_afh"
 template_contribution:
-  - name: bluetooth_stack_init
-    value:
-      function: "sl_bt_init_afh"
-    priority: 10
-  - name: bluetooth_controller_feature_init
+  - name: component_catalog
+    value: bluetooth_feature_afh
+  - name: bluetooth_controller_init
     value:
       include: "sl_bluetooth_afh_config.h"
       function: "sli_btctrl_enable_afh()"

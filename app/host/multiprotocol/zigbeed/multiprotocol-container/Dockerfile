@@ -3,7 +3,7 @@ ARG BASE_CONTAINER=${SYSTEM_ARCH}/otbr_cpc
 FROM    ${BASE_CONTAINER}
 ARG SYSTEM_ARCH=arm32v7a # trick to make the build environment have the variable defined
 
-RUN DEBIAN_FRONTEND=noninteractive apt update && apt install -y socat tmux procps libreadline7 systemd init lsb-release libmbedtls-dev
+RUN DEBIAN_FRONTEND=noninteractive apt update && apt install -y socat tmux procps libreadline8 systemd init lsb-release libmbedtls-dev
 
 # Install some non-essential software
 RUN DEBIAN_FRONTEND=noninteractive apt update && apt install -y nano gdb

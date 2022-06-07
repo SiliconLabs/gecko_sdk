@@ -20,6 +20,10 @@ class Profile_Base_Sol(Profile_Base_Ocelot):
         #Using .value only so that we can force this in internal test PHYs
         model.vars.ofdm_option.value = model.vars.ofdm_option.var_enum.OPT1
 
+    def build_advanced_profile_inputs(self, model, profile):
+        super().build_advanced_profile_inputs(model, profile)
+        self.make_linked_io(profile, model.vars.fpll_band, 'crystal', readable_name="RF Frequency Planning Band")
+
     def build_hidden_profile_inputs(self, model, profile):
         super().build_hidden_profile_inputs(model, profile)
         self.make_hidden_input(profile, model.vars.dual_fefilt, "Advanced",

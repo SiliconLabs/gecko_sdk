@@ -7,7 +7,7 @@ description: "Implements the client side of the broadcast-based Connect OTA Boot
 provides:
   - name: "connect_ota_broadcast_bootloader_client"
 requires:
-  - name: "connect_stack_common"  
+  - name: "connect_stack_common"
 source:
       - path: "protocol/flex/ota-broadcast-bootloader/ota-broadcast-bootloader-client/ota-broadcast-bootloader-client.c"
       - path: "protocol/flex/ota-broadcast-bootloader/ota-broadcast-bootloader-client/ota-broadcast-bootloader-client-cb.c"
@@ -25,15 +25,15 @@ config_file:
   - path: "protocol/flex/ota-broadcast-bootloader/ota-broadcast-bootloader-client/config/ota-broadcast-bootloader-client-config.h"
 template_contribution:
   - name: stack_callback
-    value: 
+    value:
       callback_type: "init"
       function_name: "emAfPluginOtaBootloaderClientInitCallback"
   - name: stack_callback
-    value: 
+    value:
       callback_type: "incoming_message"
       function_name: "emAfPluginOtaBootloaderClientIncomingMessageCallback"
   - name: stack_callback
-    value: 
+    value:
       callback_type: "mark_application_buffers"
       function_name: "emAfPluginOtaBootloaderClientMarkBuffersCallback"
   - name: event_system

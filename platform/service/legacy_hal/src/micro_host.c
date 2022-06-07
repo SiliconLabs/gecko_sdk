@@ -27,7 +27,7 @@
 #include "include/error.h"
 #include "micro-common.h"
 
-#if defined(EZSP_HOST) && !defined(EZSP_ASH) && !defined(EZSP_USB)
+#if defined(EZSP_HOST) && !defined(EZSP_ASH) && !defined(EZSP_USB) && !defined(EZSP_CPC)
   #include "spi-protocol-common.h"
   #define initSpiNcp() halNcpSerialInit()
 #else

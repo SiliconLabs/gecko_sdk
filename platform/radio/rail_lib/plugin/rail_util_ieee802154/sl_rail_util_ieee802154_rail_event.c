@@ -41,10 +41,28 @@ void sl_rail_util_ieee801254_on_rail_event(RAIL_Handle_t railHandle, RAIL_Events
 {
   if (events & (RAIL_EVENT_RX_SYNC1_DETECT
                 | RAIL_EVENT_RX_SYNC2_DETECT)) {
-    (void) sl_rail_util_ieee802154_on_event(SL_RAIL_UTIL_IEEE802154_STACK_EVENT_RX_STARTED, (uint32_t) isReceivingFrame(railHandle));
+    (void) sl_rail_util_ieee802154_on_event(SL_RAIL_UTIL_IEEE802154_STACK_EVENT_RX_STARTED,
+                                            (uint32_t) isReceivingFrame(railHandle));
   }
   if (events & RAIL_EVENT_RX_FILTER_PASSED) {
-    (void) sl_rail_util_ieee802154_on_event(SL_RAIL_UTIL_IEEE802154_STACK_EVENT_RX_ACCEPTED, (uint32_t) isReceivingFrame(railHandle));
+    (void) sl_rail_util_ieee802154_on_event(SL_RAIL_UTIL_IEEE802154_STACK_EVENT_RX_ACCEPTED,
+                                            (uint32_t) isReceivingFrame(railHandle));
+  }
+  if (events & RAIL_EVENT_SIGNAL_DETECTED) {
+    (void) sl_rail_util_ieee802154_on_event(SL_RAIL_UTIL_IEEE802154_STACK_EVENT_SIGNAL_DETECTED, 0U);
+  }
+  if (events & (RAIL_EVENT_TX_CHANNEL_BUSY | RAIL_EVENT_TX_BLOCKED)) {
+    (void) sl_rail_util_ieee802154_on_event(SL_RAIL_UTIL_IEEE802154_STACK_EVENT_TX_BLOCKED,
+                                            (uint32_t) RAIL_IsAutoAckWaitingForAck(railHandle));
+  }
+  if (events & (RAIL_EVENT_TX_UNDERFLOW | RAIL_EVENT_TX_ABORTED)) {
+    (void) sl_rail_util_ieee802154_on_event(SL_RAIL_UTIL_IEEE802154_STACK_EVENT_TX_ABORTED,
+                                            (uint32_t) RAIL_IsAutoAckWaitingForAck(railHandle));
+  }
+  if ((events & RAIL_EVENT_TX_PACKET_SENT) != RAIL_EVENTS_NONE) {
+    (void) sl_rail_util_ieee802154_on_event((RAIL_IsAutoAckWaitingForAck(railHandle)
+                                             ? SL_RAIL_UTIL_IEEE802154_STACK_EVENT_TX_ACK_WAITING
+                                             : SL_RAIL_UTIL_IEEE802154_STACK_EVENT_TX_ENDED), 0U);
   }
   if (events & RAIL_EVENT_TX_START_CCA) {
     // We are starting RXWARM for a CCA check
@@ -59,12 +77,29 @@ void sl_rail_util_ieee801254_on_rail_event(RAIL_Handle_t railHandle, RAIL_Events
     (void) sl_rail_util_ieee802154_on_event(SL_RAIL_UTIL_IEEE802154_STACK_EVENT_TX_STARTED, 0U);
   }
   if (events & RAIL_EVENT_RX_FRAME_ERROR) {
-    (void) sl_rail_util_ieee802154_on_event(SL_RAIL_UTIL_IEEE802154_STACK_EVENT_RX_CORRUPTED, (uint32_t) isReceivingFrame(railHandle));
+    (void) sl_rail_util_ieee802154_on_event(SL_RAIL_UTIL_IEEE802154_STACK_EVENT_RX_CORRUPTED,
+                                            (uint32_t) isReceivingFrame(railHandle));
   }
   // The following 3 events cause us to not receive a packet
   if (events & (RAIL_EVENT_RX_PACKET_ABORTED
                 | RAIL_EVENT_RX_ADDRESS_FILTERED
                 | RAIL_EVENT_RX_FIFO_OVERFLOW)) {
-    (void) sl_rail_util_ieee802154_on_event(SL_RAIL_UTIL_IEEE802154_STACK_EVENT_RX_FILTERED, (uint32_t) isReceivingFrame(railHandle));
+    (void) sl_rail_util_ieee802154_on_event(SL_RAIL_UTIL_IEEE802154_STACK_EVENT_RX_FILTERED,
+                                            (uint32_t) isReceivingFrame(railHandle));
+  }
+  if (events & RAIL_EVENT_TXACK_PACKET_SENT) {
+    (void) sl_rail_util_ieee802154_on_event(SL_RAIL_UTIL_IEEE802154_STACK_EVENT_RX_ACK_SENT,
+                                            (uint32_t) isReceivingFrame(railHandle));
+  }
+  if (events & (RAIL_EVENT_TXACK_ABORTED | RAIL_EVENT_TXACK_UNDERFLOW)) {
+    (void) sl_rail_util_ieee802154_on_event(SL_RAIL_UTIL_IEEE802154_STACK_EVENT_RX_ACK_ABORTED,
+                                            (uint32_t) isReceivingFrame(railHandle));
+  }
+  if (events & RAIL_EVENT_TXACK_BLOCKED) {
+    (void) sl_rail_util_ieee802154_on_event(SL_RAIL_UTIL_IEEE802154_STACK_EVENT_RX_ACK_BLOCKED,
+                                            (uint32_t) isReceivingFrame(railHandle));
+  }
+  if (events & RAIL_EVENT_CONFIG_UNSCHEDULED) {
+    (void) sl_rail_util_ieee802154_on_event(SL_RAIL_UTIL_IEEE802154_STACK_EVENT_RX_IDLED, 0U);
   }
 }

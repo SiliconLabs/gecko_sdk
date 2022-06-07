@@ -52,6 +52,8 @@
 #include "ecode.h"
 #include "uartdrv_config.h"
 #include "dmadrv.h"
+#include "sl_enum.h"
+#include "sl_sleeptimer.h"
 
 #ifdef __cplusplus
 extern "C" {
@@ -104,30 +106,30 @@ typedef uint32_t UARTDRV_Count_t;     ///< A UART transfer count
 typedef uint32_t UARTDRV_Status_t;    ///< A UART status return type. Bitfield of UARTDRV_STATUS_* values.
 
 /// Flow Control method
-typedef enum UARTDRV_FlowControlType{
+SL_ENUM(UARTDRV_FlowControlType_t) {
   uartdrvFlowControlNone   = 0,   ///< None
   uartdrvFlowControlSw     = 1,   ///< Software XON/XOFF
   uartdrvFlowControlHw     = 2,   ///< nRTS/nCTS hardware handshake
   uartdrvFlowControlHwUart = 3    ///< UART peripheral controls nRTS/nCTS
-} UARTDRV_FlowControlType_t;
+};
 
 /// Flow Control state
-typedef enum UARTDRV_FlowControlState{
+SL_ENUM(UARTDRV_FlowControlState_t) {
   uartdrvFlowControlOn = 0,         ///< XON or nRTS/nCTS low
   uartdrvFlowControlOff = 1,        ///< XOFF or nRTS/nCTS high
   uartdrvFlowControlAuto = 2        ///< This driver controls the state.
-} UARTDRV_FlowControlState_t;
+};
 
 /// Transfer abort type
-typedef enum UARTDRV_AbortType{
+SL_ENUM(UARTDRV_AbortType_t) {
   uartdrvAbortTransmit = 1,          ///< Abort current and queued transmit operations
   uartdrvAbortReceive = 2,           ///< Abort current and queued receive operations
   uartdrvAbortAll = 3                ///< Abort all current and queued operations
-} UARTDRV_AbortType_t;
+};
 
 /// @cond DO_NOT_INCLUDE_WITH_DOXYGEN
 /// Type of a UART peripheral
-typedef enum UARTDRV_UartType{
+SL_ENUM(UARTDRV_UartType_t) {
 #if (defined(UART_COUNT) && (UART_COUNT > 0)) || (defined(USART_COUNT) && (USART_COUNT > 0))
   uartdrvUartTypeUart = 0,         ///< USART/UART peripheral
 #endif
@@ -136,7 +138,7 @@ typedef enum UARTDRV_UartType{
 #elif (defined(EUART_COUNT) && (EUART_COUNT > 0)) || (defined(EUSART_COUNT) && (EUSART_COUNT > 0))
   uartdrvUartTypeEuart = 2         ///< EUART peripheral
 #endif
-} UARTDRV_UartType_t;
+};
 /// @endcond
 
 struct UARTDRV_HandleData;
@@ -245,7 +247,7 @@ typedef struct {
 /// @cond DO_NOT_INCLUDE_WITH_DOXYGEN
 /// Deprecated UART driver instance initialization structure alias.
 /// @deprecated This structure is deprecated. Use UARTDRV_InitUart_t instead.
-typedef UARTDRV_InitUart_t UARTDRV_Init_t;
+typedef UARTDRV_InitUart_t UARTDRV_Init_t SL_DEPRECATED_API_SDK_4_1;
 /// @endcond
 #endif
 
@@ -320,42 +322,37 @@ typedef struct UARTDRV_HandleData{
 #if (defined(EUART_COUNT) && (EUART_COUNT > 0)) || (defined(EUSART_COUNT) && (EUSART_COUNT > 0))
     EUSART_TypeDef * euart;
 #endif
+    void * __reserved_space;
   } peripheral;
-#if defined(_GPIO_USART_ROUTEEN_MASK) || defined(_GPIO_EUART_ROUTEEN_MASK) || defined(_GPIO_EUSART_ROUTEEN_MASK)
-  uint8_t                    uartNum;           // UART instance number
-#endif
-  unsigned int               txDmaCh;           // A DMA ch assigned to Tx
-  unsigned int               rxDmaCh;           // A DMA ch assigned to Rx
-  DMADRV_PeripheralSignal_t  txDmaSignal;       // A DMA Tx trigger source signal
-  DMADRV_PeripheralSignal_t  rxDmaSignal;       // A DMA Rx trigger source signal
-  UARTDRV_FlowControlState_t fcSelfState;       // A current self flow control state
-  UARTDRV_FlowControlState_t fcSelfCfg;         // A self flow control override configuration
-  UARTDRV_FlowControlState_t fcPeerState;       // A current peer flow control state
-  GPIO_Port_TypeDef          txPort;            // A Tx pin port number
-  GPIO_Port_TypeDef          rxPort;            // An Rx pin port number
-  GPIO_Port_TypeDef          ctsPort;           // A CTS pin port number
-  GPIO_Port_TypeDef          rtsPort;           // An RTS pin port number
-  uint8_t                    txPin;             // A Tx pin number
-  uint8_t                    rxPin;             // An Tx pin number
-  uint8_t                    ctsPin;            // A CTS pin number
-  uint8_t                    rtsPin;            // An RTS pin number
-  CMU_Clock_TypeDef          uartClock;         // A clock source select
-  UARTDRV_Buffer_FifoQueue_t *rxQueue;          // A receive operation queue
-  UARTDRV_Buffer_FifoQueue_t *txQueue;          // A transmit operation queue
-  volatile bool              rxDmaActive;       // A receive DMA is currently active
-  volatile bool              txDmaActive;       // A transmit DMA is currently active
-  volatile uint8_t           txDmaPaused;       // A transmit DMA pause counter
-  bool                       IgnoreRestrain;    // A transmit does not respect uartdrvFlowControlOff
-  bool                       hasTransmitted;    // Indicates whether the handle has transmitted data
-  UARTDRV_FlowControlType_t  fcType;            // A flow control mode
-  UARTDRV_UartType_t         type;              // A type of UART
-  int                        em1RequestCount;   // A EM1 request count for the handle
-#if defined(SL_CATALOG_POWER_MANAGER_PRESENT) && !defined(SL_CATALOG_KERNEL_PRESENT)
-  sl_power_manager_on_isr_exit_t sleep;         // Sleep state on isr return
-#endif
-#if defined(SL_CATALOG_POWER_MANAGER_PRESENT)
-  sl_sleeptimer_timer_handle_t   delayedTxTimer;// A timer to wait for the last byte out
-#endif
+  uint8_t                       uartNum;           // UART instance number
+  unsigned int                  txDmaCh;           // A DMA ch assigned to Tx
+  unsigned int                  rxDmaCh;           // A DMA ch assigned to Rx
+  DMADRV_PeripheralSignal_t     txDmaSignal;       // A DMA Tx trigger source signal
+  DMADRV_PeripheralSignal_t     rxDmaSignal;       // A DMA Rx trigger source signal
+  UARTDRV_FlowControlState_t    fcSelfState;       // A current self flow control state
+  UARTDRV_FlowControlState_t    fcSelfCfg;         // A self flow control override configuration
+  UARTDRV_FlowControlState_t    fcPeerState;       // A current peer flow control state
+  GPIO_Port_TypeDef             txPort;            // A Tx pin port number
+  GPIO_Port_TypeDef             rxPort;            // An Rx pin port number
+  GPIO_Port_TypeDef             ctsPort;           // A CTS pin port number
+  GPIO_Port_TypeDef             rtsPort;           // An RTS pin port number
+  uint8_t                       txPin;             // A Tx pin number
+  uint8_t                       rxPin;             // An Tx pin number
+  uint8_t                       ctsPin;            // A CTS pin number
+  uint8_t                       rtsPin;            // An RTS pin number
+  CMU_Clock_TypeDef             uartClock;         // A clock source select
+  UARTDRV_Buffer_FifoQueue_t    *rxQueue;          // A receive operation queue
+  UARTDRV_Buffer_FifoQueue_t    *txQueue;          // A transmit operation queue
+  volatile bool                 rxDmaActive;       // A receive DMA is currently active
+  volatile bool                 txDmaActive;       // A transmit DMA is currently active
+  volatile uint8_t              txDmaPaused;       // A transmit DMA pause counter
+  bool                          IgnoreRestrain;    // A transmit does not respect uartdrvFlowControlOff
+  bool                          hasTransmitted;    // Indicates whether the handle has transmitted data
+  UARTDRV_FlowControlType_t     fcType;            // A flow control mode
+  UARTDRV_UartType_t            type;              // A type of UART
+  volatile int                  em1RequestCount;   // A EM1 request count for the handle
+  sl_sleeptimer_timer_handle_t  delayedTxTimer;    // A timer to wait for the last byte out
+  size_t                        sleep;             // Sleep state on isr return
   /// @endcond
 } UARTDRV_HandleData_t;
 
@@ -457,7 +454,8 @@ Ecode_t UARTDRV_FlowControlIgnoreRestrain(UARTDRV_Handle_t handle);
  *    UARTDRV @ref Ecode_t is returned.
  ******************************************************************************/
 #if (defined(UART_COUNT) && (UART_COUNT > 0)) || (defined(USART_COUNT) && (USART_COUNT > 0))
-__STATIC_INLINE Ecode_t UARTDRV_Init(UARTDRV_Handle_t handle, UARTDRV_InitUart_t *initData)
+__STATIC_INLINE SL_DEPRECATED_API_SDK_4_1 Ecode_t UARTDRV_Init(UARTDRV_Handle_t handle,
+                                                               UARTDRV_InitUart_t *initData)
 {
   return UARTDRV_InitUart(handle, initData);
 }

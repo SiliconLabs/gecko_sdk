@@ -34,6 +34,7 @@
 #include "coap_message.hpp"
 
 #include "coap/coap.hpp"
+#include "common/array.hpp"
 #include "common/code_utils.hpp"
 #include "common/debug.hpp"
 #include "common/encoding.hpp"
@@ -76,26 +77,6 @@ Error Message::Init(Type aType, Code aCode, const char *aUriPath)
 
 exit:
     return error;
-}
-
-void Message::InitAsConfirmablePost(void)
-{
-    Init(kTypeConfirmable, kCodePost);
-}
-
-void Message::InitAsNonConfirmablePost(void)
-{
-    Init(kTypeNonConfirmable, kCodePost);
-}
-
-Error Message::InitAsConfirmablePost(const char *aUriPath)
-{
-    return Init(kTypeConfirmable, kCodePost, aUriPath);
-}
-
-Error Message::InitAsNonConfirmablePost(const char *aUriPath)
-{
-    return Init(kTypeNonConfirmable, kCodePost, aUriPath);
 }
 
 Error Message::InitAsPost(const Ip6::Address &aDestination, const char *aUriPath)
@@ -259,7 +240,7 @@ Error Message::ReadUriPathOptions(char (&aUriPath)[kMaxReceivedUriPath + 1]) con
             *curUriPath++ = '/';
         }
 
-        VerifyOrExit(curUriPath + optionLength < OT_ARRAY_END(aUriPath), error = kErrorParse);
+        VerifyOrExit(curUriPath + optionLength < GetArrayEnd(aUriPath), error = kErrorParse);
 
         IgnoreError(iterator.ReadOptionValue(curUriPath));
         curUriPath += optionLength;
@@ -474,6 +455,16 @@ const char *Message::CodeToString(void) const
     return Stringify::Lookup(GetCode(), kCodeTable, "Unknown");
 }
 #endif // OPENTHREAD_CONFIG_COAP_API_ENABLE
+
+Message::Iterator MessageQueue::begin(void)
+{
+    return Message::Iterator(GetHead());
+}
+
+Message::ConstIterator MessageQueue::begin(void) const
+{
+    return Message::ConstIterator(GetHead());
+}
 
 Error Option::Iterator::Init(const Message &aMessage)
 {

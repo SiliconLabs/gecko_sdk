@@ -93,6 +93,8 @@ psa_status_t sli_cryptoacc_transparent_cipher_encrypt(const psa_key_attributes_t
                                                       const uint8_t *key_buffer,
                                                       size_t key_buffer_size,
                                                       psa_algorithm_t alg,
+                                                      const uint8_t *iv,
+                                                      size_t iv_length,
                                                       const uint8_t *input,
                                                       size_t input_length,
                                                       uint8_t *output,
@@ -256,8 +258,6 @@ psa_status_t sli_cryptoacc_transparent_aead_decrypt_tag(const psa_key_attributes
                                                         size_t plaintext_size,
                                                         size_t *plaintext_length);
 
-#if defined(PSA_CRYPTO_AEAD_MULTIPART_SUPPORTED)
-
 psa_status_t sli_cryptoacc_transparent_aead_encrypt_setup(sli_cryptoacc_transparent_aead_operation_t *operation,
                                                           const psa_key_attributes_t *attributes,
                                                           const uint8_t *key_buffer,
@@ -269,11 +269,6 @@ psa_status_t sli_cryptoacc_transparent_aead_decrypt_setup(sli_cryptoacc_transpar
                                                           const uint8_t *key_buffer,
                                                           size_t key_buffer_size,
                                                           psa_algorithm_t alg);
-
-psa_status_t sli_cryptoacc_transparent_aead_generate_nonce(sli_cryptoacc_transparent_aead_operation_t *operation,
-                                                           uint8_t *nonce,
-                                                           size_t nonce_size,
-                                                           size_t *nonce_length);
 
 psa_status_t sli_cryptoacc_transparent_aead_set_nonce(sli_cryptoacc_transparent_aead_operation_t *operation,
                                                       const uint8_t *nonce,
@@ -310,8 +305,6 @@ psa_status_t sli_cryptoacc_transparent_aead_verify(sli_cryptoacc_transparent_aea
                                                    size_t tag_length);
 
 psa_status_t sli_cryptoacc_transparent_aead_abort(sli_cryptoacc_transparent_aead_operation_t *operation);
-
-#endif // defined(PSA_CRYPTO_AEAD_MULTIPART_SUPPORTED)
 
 psa_status_t sli_cryptoacc_transparent_generate_key(const psa_key_attributes_t *attributes,
                                                     uint8_t *key_buffer,

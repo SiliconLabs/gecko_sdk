@@ -18,9 +18,6 @@
 #include <ZW_transport_api.h>
 #include <ZW_classcmd.h>
 
-/* Driver includes */
-#include <ZW_radio_api.h>
-
 /**
  * \defgroup COMMON Z-Wave Common API
  * This section describes interface functions that are implemented within all Z Wave nodes.
@@ -45,14 +42,6 @@ typedef enum _APPLICATION_STATUS_
   APPLICATION_POWER_DOWN,
   APPLICATION_TEST
 } ZW_APPLICATION_STATUS;
-
-/* Z-Wave Library Chip type */
-#ifdef ZWAVE_SERIES_800
-#define ZW_CHIP_TYPE              8
-#else
-#define ZW_CHIP_TYPE              7
-#endif
-#define ZW_CHIP_REVISION          0
 
 /****************************************************************************/
 /*                     EXPORTED TYPES and DEFINITIONS                       */
@@ -112,7 +101,7 @@ typedef enum _E_NETWORK_LEARN_MODE_ACTION_
 
 /**
 * Description of reset reason.
-* 
+*
 * Enum is defined in ZW API as its not HW platform specific.
 * !!IMPORTANT: For backwards compability the enum values must comply with
 * the values from ZW_WAKEUP below.
@@ -120,10 +109,10 @@ typedef enum _E_NETWORK_LEARN_MODE_ACTION_
 typedef enum EResetReason_t
 {
   ERESETREASON_PIN         = 0,   /**< Reset triggered by reset pin */
-  ERESETREASON_EM4_WUT     = 1,   /**< Reset triggered by wake up by timer from deep sleep state  */
+  ERESETREASON_DEEP_SLEEP_WUT     = 1,   /**< Reset triggered by wake up by timer from deep sleep state  */
 //Legacy: ZW_WAKEUP_SENSOR = 2,   /**< Wake up by a Wakeup Beam */
   ERESETREASON_WATCHDOG    = 3,   /**< Reset triggered by watchdog */
-  ERESETREASON_EM4_EXT_INT = 4,   /**< Reset triggered by external interrupt event in deep sleep state */
+  ERESETREASON_DEEP_SLEEP_EXT_INT = 4,   /**< Reset triggered by external interrupt event in deep sleep state */
   ERESETREASON_POWER_ON    = 5,   /**< Reset triggered by power on */
 //Legacy: ZW_WAKEUP_USB_SUSPEND= 6  /**< Wake up by USB suspend */
   ERESETREASON_SOFTWARE    = 7,   /**< Reset triggered by software */

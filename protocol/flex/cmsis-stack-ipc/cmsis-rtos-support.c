@@ -157,13 +157,3 @@ bool emAfPluginCmsisStackIdleHandler(uint32_t *idleTimeMs)
   assert(0);
   return false;
 }
-
-void halPendSvIsr(void)
-{
-  PendSV_Handler();
-}
-
-void halSysTickIsr(void)
-{
-  SysTick_Handler();
-}

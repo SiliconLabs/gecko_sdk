@@ -134,7 +134,47 @@ static void startAdvertisingCommand(void *context, uint8_t argc, char *argv[]) {
     SuccessOrExit(error = ParseUnsignedLong(argv[1], &discoverableMode));
     SuccessOrExit(error = ParseUnsignedLong(argv[2], &connectableMode));
 
-    status = sl_bt_advertiser_start(handle, discoverableMode, connectableMode);
+    /**
+     *  Advertising discoverable mode handling
+     */
+
+    // In new Bluetooth advertiser APIs, discoverable mode handling is separated
+    // from the starting advertising functionality. The discoverable mode is a
+    // value carried by one flag field in the advertising data packet. In EFR
+    // Bluetooth stack, the mode should either be set by the user application if
+    // user-defined advertising data is used, or set by the Bluetooth stack
+    // when it is asked to generate the advertising data for the application.
+    // The code lines for generating advertising data in the stack (the
+    // @ref sl_bt_legacy_advertiser_generate_data command) uses more than 800
+    // bytes of flash, and thus it was refactored to own section so that
+    // applications using user-defined advertising data can save some flash
+    // space (Using user-defined advertising data is quite typical in customer
+    // products, and in the Zigbee DMP sample app as well.)
+    // Call the @ref sl_bt_legacy_advertiser_set_data command to set user-defined
+    // advertising data, as the alternative of asking the stack to generate data.
+
+    // If the discoverable mode passed in by the CLI is sl_bt_advertiser_user_data (4),
+    // it is invalid for generating the advertising data, thus is ignored. As the
+    // result, the advertiser will advertise with empty data payload if
+    // sl_bt_legacy_advertiser_generate_data has not been called.
+    if (discoverableMode <= sl_bt_advertiser_general_discoverable) {
+      if (discoverableMode == sl_bt_advertiser_broadcast) {
+        // The value sl_bt_advertiser_broadcast (3) is identical to
+        // sl_bt_advertiser_non_discoverable in the context of generating
+        // advertising data. And sl_bt_advertiser_broadcast is invalid in
+        // sl_bt_legacy_advertiser_generate_data
+        discoverableMode = sl_bt_advertiser_non_discoverable;
+      }
+      status = sl_bt_legacy_advertiser_generate_data(handle, discoverableMode);
+      if (status == SL_STATUS_OK) {
+          otCliOutputFormat("Generate advertising data success\r\n");
+      } else {
+          otCliOutputFormat("Generate advertising data error: 0x%04x\r\n", status);
+      }
+    }
+    /* End of advertising discoverable mode handling */
+
+    status = sl_bt_legacy_advertiser_start(handle, connectableMode);
 
     if (status == SL_STATUS_OK) {
         otCliOutputFormat("success\r\n");

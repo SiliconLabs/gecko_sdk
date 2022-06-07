@@ -38,7 +38,6 @@
 #include "sl_cli.h"
 #include "sl_connect_sdk_btl-interface.h"
 
-
 #if defined(SL_CATALOG_CONNECT_OTA_BROADCAST_BOOTLOADER_SERVER_PRESENT)
 #include "ota-broadcast-bootloader-server.h"
 #endif // SL_CATALOG_CONNECT_OTA_BROADCAST_BOOTLOADER_SERVER_PRESENT
@@ -62,8 +61,10 @@ EmberEventControl emAfPluginOtaBootloaderTestEventControl;
 // -----------------------------------------------------------------------------
 //                                Static Variables
 // -----------------------------------------------------------------------------
+#if defined(SL_CATALOG_CONNECT_OTA_BROADCAST_BOOTLOADER_SERVER_PRESENT)
 /// Number of registered client nodes subject to image transmission.
 static uint8_t target_list_length;
+#endif
 /// Client nodes list for image transmission.
 static EmberNodeId target_list[MAX_TARGET_LIST_SIZE];
 
@@ -254,11 +255,6 @@ bool emberAfPluginOtaBootloaderClientIncomingRequestBootloadCallback(EmberNodeId
 {
   // The client shall bootload an image with matching tag.
 
-  // TODO: we should also maintain a state machine to keep track whether this
-  // image was previously correctly received. For now we assume the server would
-  // issue a bootload request only if the client reported a successful image
-  // download.
-
   if (applicationStatus == NULL) {
     app_log_error("argument error\n");
     return false;
@@ -343,6 +339,7 @@ void cli_bootloader_broadcast_broadcast_distribute(sl_cli_command_arg_t *argumen
     app_log_error("image distribution failed 0x%x\n", status);
   }
 #else
+  (void)arguments;
   app_log_info("OTA bootloader server plugin not included\n");
 #endif // SL_CATALOG_CONNECT_OTA_BROADCAST_BOOTLOADER_SERVER_PRESENT
 }
@@ -378,6 +375,7 @@ void cli_bootloader_broadcast_request_bootload(sl_cli_command_arg_t *arguments)
     app_log_error("bootload request failed 0x%x\n", status);
   }
 #else
+  (void)arguments;
   app_log_warning("OTA bootloader server plugin not included\n");
 #endif // SL_CATALOG_CONNECT_OTA_BROADCAST_BOOTLOADER_SERVER_PRESENT
 }

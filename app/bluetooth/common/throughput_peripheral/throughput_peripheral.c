@@ -110,8 +110,10 @@ static throughput_notification_t transmission_indicated = sl_bt_gatt_disable;
 /// Advertising set handle
 static uint8_t advertising_set_handle  = 0xff;
 
+#ifdef SL_CATALOG_BLUETOOTH_FEATURE_EXTENDED_ADVERTISER_PRESENT
 /// Advertising set handle on coded PHY
 static uint8_t coded_advertising_set_handle  = 0xff;
+#endif // SL_CATALOG_BLUETOOTH_FEATURE_EXTENDED_ADVERTISER_PRESENT
 
 /// Enabled state
 static bool enabled = false;
@@ -269,7 +271,10 @@ static void throughput_peripheral_advertising_start(void)
 
   // Stop running advertising.
   sl_bt_advertiser_stop(advertising_set_handle);
+
+  #ifdef SL_CATALOG_BLUETOOTH_FEATURE_EXTENDED_ADVERTISER_PRESENT
   sl_bt_advertiser_stop(coded_advertising_set_handle);
+  #endif // SL_CATALOG_BLUETOOTH_FEATURE_EXTENDED_ADVERTISER_PRESENT
 
   // Convert power to mdBm
   int16_t power = ( ((int16_t)peripheral_state.tx_power_requested) * 10);
@@ -284,10 +289,18 @@ static void throughput_peripheral_advertising_start(void)
 
   // Delete sets.
   sl_bt_advertiser_delete_set(advertising_set_handle);
+
+  #ifdef SL_CATALOG_BLUETOOTH_FEATURE_EXTENDED_ADVERTISER_PRESENT
   sl_bt_advertiser_delete_set(coded_advertising_set_handle);
+  #endif // SL_CATALOG_BLUETOOTH_FEATURE_EXTENDED_ADVERTISER_PRESENT
 
   // Create an advertising set for 1M PHY.
   sc = sl_bt_advertiser_create_set(&advertising_set_handle);
+  app_assert_status(sc);
+
+  // Generate data for legacy advertising
+  sc = sl_bt_legacy_advertiser_generate_data(advertising_set_handle,
+                                             sl_bt_advertiser_general_discoverable);
   app_assert_status(sc);
 
   sc = sl_bt_advertiser_set_timing(advertising_set_handle,
@@ -297,19 +310,14 @@ static void throughput_peripheral_advertising_start(void)
                                    0);  // max. num. adv. events
   app_assert_status(sc);
 
-  sc = sl_bt_advertiser_set_channel_map(advertising_set_handle,
-                                        7);
+  sc = sl_bt_advertiser_set_channel_map(advertising_set_handle, 7);
   app_assert_status(sc);
 
-  sc = sl_bt_advertiser_set_phy(advertising_set_handle,
-                                sl_bt_gap_1m_phy_uncoded,
-                                sl_bt_gap_1m_phy_uncoded);
+  sc = sl_bt_legacy_advertiser_start(advertising_set_handle,
+                                     advertiser_connectable_scannable);
   app_assert_status(sc);
 
-  sc = sl_bt_advertiser_start(advertising_set_handle,
-                              advertiser_general_discoverable,
-                              advertiser_connectable_scannable);
-  app_assert_status(sc);
+  #ifdef SL_CATALOG_BLUETOOTH_FEATURE_EXTENDED_ADVERTISER_PRESENT
 
   // Create an advertising set for CODED PHY
   sc = sl_bt_advertiser_create_set(&coded_advertising_set_handle);
@@ -319,8 +327,9 @@ static void throughput_peripheral_advertising_start(void)
                                                 false);
   app_assert_status(sc);
 
-  sc = sl_bt_advertiser_set_configuration(coded_advertising_set_handle,
-                                          0);
+  // Generate data for extended advertising for CODED PHY
+  sc = sl_bt_extended_advertiser_generate_data(coded_advertising_set_handle,
+                                               sl_bt_advertiser_general_discoverable);
   app_assert_status(sc);
 
   sc = sl_bt_advertiser_set_timing(coded_advertising_set_handle,
@@ -334,20 +343,22 @@ static void throughput_peripheral_advertising_start(void)
                                         7);
   app_assert_status(sc);
 
-  sc = sl_bt_advertiser_set_phy(coded_advertising_set_handle,
-                                sl_bt_gap_coded_phy,
-                                sl_bt_gap_coded_phy);
+  // Set PHY for extended advertiser
+  sc = sl_bt_extended_advertiser_set_phy(coded_advertising_set_handle,
+                                         sl_bt_gap_coded_phy,
+                                         sl_bt_gap_coded_phy);
 
   app_assert( (sc == SL_STATUS_OK) || (sc == SL_STATUS_INVALID_PARAMETER),
               "[E: 0x%04x] Failed to set CODED PHY for the advertistment\n",
               (int)sc);
 
   if (sc == SL_STATUS_OK) {
-    sc = sl_bt_advertiser_start(coded_advertising_set_handle,
-                                advertiser_general_discoverable,
-                                advertiser_connectable_non_scannable);
+    sc = sl_bt_extended_advertiser_start(coded_advertising_set_handle,
+                                         advertiser_connectable_non_scannable,
+                                         SL_BT_EXTENDED_ADVERTISER_INCLUDE_TX_POWER);
     app_assert_status(sc);
   }
+  #endif // SL_CATALOG_BLUETOOTH_FEATURE_EXTENDED_ADVERTISER_PRESENT
 }
 
 /**************************************************************************//**
@@ -1075,8 +1086,10 @@ void throughput_peripheral_on_bt_event(sl_bt_msg_t *evt)
         sc = sl_bt_advertiser_stop(advertising_set_handle);
         app_assert_status(sc);
 
+        #ifdef SL_CATALOG_BLUETOOTH_FEATURE_EXTENDED_ADVERTISER_PRESENT
         sc = sl_bt_advertiser_stop(coded_advertising_set_handle);
         app_assert_status(sc);
+        #endif // SL_CATALOG_BLUETOOTH_FEATURE_EXTENDED_ADVERTISER_PRESENT
 
         peripheral_state.state = THROUGHPUT_STATE_CONNECTED;
         throughput_peripheral_refresh_connected_state();

@@ -79,6 +79,14 @@ bool rxFifoManual = false;
 // To enable power manager sleep from the main loop.
 extern volatile bool allowPowerManagerSleep;
 
+// Used to track the FEM protection configuration
+#ifdef SL_RAIL_UTIL_EFF_DEVICE
+RAIL_FemProtectionConfig_t femConfig = {
+  .PMaxContinuousTx = RAIL_UTIL_EFF_MAX_TX_CONTINUOUS_POWER_DBM,
+  .txDutyCycle = RAIL_UTIL_EFF_MAX_TX_DUTY_CYCLE
+};
+#endif
+
 /******************************************************************************
  * Static
  *****************************************************************************/
@@ -244,6 +252,7 @@ RAIL_RxPacketHandle_t processRxPacket(RAIL_Handle_t railHandle,
                                     phySwitchToRx.accessAddress,
                                     phySwitchToRx.logicalChannel,
                                     phySwitchToRx.disableWhitening);
+      phySwitchToRx.enable = false;
     }
 
     if (logLevel & ASYNC_RESPONSE) {
@@ -396,47 +405,87 @@ void configRxLengthSetting(uint16_t rxLength)
  *****************************************************************************/
 void RAILCb_TxPacketSent(RAIL_Handle_t railHandle, bool isAck)
 {
-#if RAIL_IEEE802154_SUPPORTS_G_MODESWITCH && defined(WISUN_MODESWITCHPHRS_ARRAY)
-  if (modeSwitchChannel != 0xFFFFU) {
-    if (RAIL_IsValidChannel(railHandle, modeSwitchChannel)
-        == RAIL_STATUS_NO_ERROR) {
-      changeChannel(modeSwitchChannel);
-      responsePrint("setChannel_ModeSwitch", "ChannelID: %d", modeSwitchChannel);
+#if RAIL_IEEE802154_SUPPORTS_G_MODESWITCH && defined(WISUN_MODESWITCHPHRS_ARRAY_SIZE)
+  if (modeSwitchState == TX_MS_PACKET || modeSwitchState == TX_ON_NEW_PHY) { // Packet has been sent in a MS context
+    if (txCountAfterModeSwitchId == 0) { // Sent packet was MS packet
+      if (RAIL_IsValidChannel(railHandle, modeSwitchNewChannel)
+          == RAIL_STATUS_NO_ERROR) {
+        changeChannel(modeSwitchNewChannel);
+        modeSwitchState = TX_ON_NEW_PHY;
+      }
+
+      // Restore first 2 bytes overwritten by Mode Switch PHR
+      txData[0] = txData_2B[0];
+      txData[1] = txData_2B[1];
+
+      if (txCountAfterModeSwitch != 0) {
+        // Send next packets asap
+        txCount = txCountAfterModeSwitch;
+        pendPacketTx();
+        sendPacketIfPending(); // txCount is decremented in this function
+        txCountAfterModeSwitchId++;
+      } else {
+        endModeSwitchSequence();
+      }
+    } else {
+      if (txCountAfterModeSwitchId < txCountAfterModeSwitch) { // Sent packet was not the last data packet to be tx
+        txCountAfterModeSwitchId++;
+        internalTransmitCounter++;
+        // previousTxAppendedInfo.isAck already initialized false
+        previousTxAppendedInfo.timeSent.totalPacketBytes = txDataLen;
+        (void) RAIL_GetTxPacketDetailsAlt2(railHandle, &previousTxAppendedInfo);
+        (void) (*txTimePosition)(railHandle, &previousTxAppendedInfo);
+        scheduleNextTx();
+      } else {
+        modeSwitchSequenceId++;
+        if (modeSwitchSequenceId < modeSwitchSequenceIterations) {
+          txCountAfterModeSwitchId = 0;
+          // Start timer if needed
+          if (modeSwitchDelayUs > 0) {
+            RAIL_SetMultiTimer(&modeSwitchMultiTimer,
+                               modeSwitchDelayUs,
+                               RAIL_TIME_DELAY,
+                               &RAILCb_ModeSwitchMultiTimerExpired,
+                               NULL);
+          } else {
+            restartModeSwitchSequence();
+          }
+        } else {
+          endModeSwitchSequence();
+          internalTransmitCounter++;
+          // previousTxAppendedInfo.isAck already initialized false
+          previousTxAppendedInfo.timeSent.totalPacketBytes = txDataLen;
+          (void) RAIL_GetTxPacketDetailsAlt2(railHandle, &previousTxAppendedInfo);
+          (void) (*txTimePosition)(railHandle, &previousTxAppendedInfo);
+          scheduleNextTx();
+        }
+      }
     }
-
-    // Restore first 2 bytes overwritten by Mode Switch PHR
-    txData[0] = txData_2B[0];
-    txData[1] = txData_2B[1];
-
-    if (txCountAfterModeSwitch != 0) {
-      txCount = txCountAfterModeSwitch;
-      pendPacketTx();
-      sendPacketIfPending();
-    }
-
-    modeSwitchChannel = 0xFFFFU;
-  }
+  } else
 #endif
+  {
+    // Store the previous tx time for printing later
+    if (isAck) {
+      sentAckPackets++;
+      // previousTxAckAppendedInfo.isAck already initialized true
+      previousTxAckAppendedInfo.timeSent.totalPacketBytes
+        = RAIL_IEEE802154_IsEnabled(railHandle) ? 4U : ackDataLen;
+      (void) RAIL_GetTxPacketDetailsAlt2(railHandle, &previousTxAckAppendedInfo);
+      (void) (*txTimePosition)(railHandle, &previousTxAckAppendedInfo);
+      pendFinishTxAckSequence();
+    } else {
+      internalTransmitCounter++;
+      // previousTxAppendedInfo.isAck already initialized false
+      previousTxAppendedInfo.timeSent.totalPacketBytes = txDataLen;
+      (void) RAIL_GetTxPacketDetailsAlt2(railHandle, &previousTxAppendedInfo);
+      (void) (*txTimePosition)(railHandle, &previousTxAppendedInfo);
+      scheduleNextTx();
+    }
+  }
+
+  // Move visualization update in order not to delay mode switching
   LedToggle(1);
   updateGraphics();
-
-  // Store the previous tx time for printing later
-  if (isAck) {
-    sentAckPackets++;
-    // previousTxAckAppendedInfo.isAck already initialized true
-    previousTxAckAppendedInfo.timeSent.totalPacketBytes
-      = RAIL_IEEE802154_IsEnabled(railHandle) ? 4U : ackDataLen;
-    (void) RAIL_GetTxPacketDetailsAlt2(railHandle, &previousTxAckAppendedInfo);
-    (void) (*txTimePosition)(railHandle, &previousTxAckAppendedInfo);
-    pendFinishTxAckSequence();
-  } else {
-    internalTransmitCounter++;
-    // previousTxAppendedInfo.isAck already initialized false
-    previousTxAppendedInfo.timeSent.totalPacketBytes = txDataLen;
-    (void) RAIL_GetTxPacketDetailsAlt2(railHandle, &previousTxAppendedInfo);
-    (void) (*txTimePosition)(railHandle, &previousTxAppendedInfo);
-    scheduleNextTx();
-  }
 }
 
 void RAILCb_RxPacketAborted(RAIL_Handle_t railHandle)

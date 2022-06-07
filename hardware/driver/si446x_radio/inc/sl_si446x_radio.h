@@ -3,7 +3,7 @@
  * @brief Si446x Radio driver
  *******************************************************************************
  * # License
- * <b>Copyright 2021 Silicon Laboratories Inc. www.silabs.com</b>
+ * <b>Copyright 2022 Silicon Laboratories Inc. www.silabs.com</b>
  *******************************************************************************
  *
  * The licensor of this software is Silicon Laboratories Inc.  Your use of this
@@ -107,6 +107,10 @@ SL_ENUM(sl_ext_device_interrupt_depth_t) {
  */
 extern const SPIDRV_Init_t sl_ext_device_spi_config;
 
+/** @brief Device SPI driver instance handle (pointer)
+ */
+extern SPIDRV_Handle_t sl_ext_device_spi_handle;
+
 //== API FUNCTIONS ==
 
 /** @brief Initialize Device GPIOs
@@ -200,4 +204,3 @@ extern sl_ext_device_interrupt_depth_t sl_ext_device_enable_interrupt(bool clear
 }
 #endif
 #endif // SL_SI446X_RADIO_H
-

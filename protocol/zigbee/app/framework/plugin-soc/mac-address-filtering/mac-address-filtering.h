@@ -174,7 +174,7 @@ EmberStatus emberAfPluginMacAddressFilteringGetStatsForShortAddress(uint8_t inde
  * @param totalPacketCountPtr Ver.: always
  *
  */
-void emberAfPluginMacAddressFilteringGetStats(boolean shortMode,
+void emberAfPluginMacAddressFilteringGetStats(bool shortMode,
                                               uint32_t* allowedPacketCountPtr,
                                               uint32_t* droppedPacketCountPtr,
                                               uint32_t* totalPacketCountPtr);

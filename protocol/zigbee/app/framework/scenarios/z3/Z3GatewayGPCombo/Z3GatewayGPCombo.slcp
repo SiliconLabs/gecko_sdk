@@ -1,8 +1,12 @@
 project_name: "Z3GatewayGPCombo"
-label: "Z3GatewayGPCombo"
+label: "Zigbee - Host GatewayGPCombo"
 package: "Zigbee"
 category: "Zigbee Host Application"
 quality: "production"
+
+description: >
+  This is a Zigbee 3.0 gateway Green Power Combo application for a Unix host.  
+author: "Silicon Laboratories, Inc."
 
 component:
   - id: "cli"
@@ -206,9 +210,6 @@ template_contribution:
       - type: hex
         help: MPDU
 
-description: |-
-  This is a Zigbee 3.0 gateway Green Power Combo application for a Unix host.  
-
 readme:
   - path: ./readme.html
 
@@ -217,3 +218,10 @@ ui_hints:
     - path: readme.html
       focus: false
 
+filter:
+  - name: "Wireless Technology"
+    value: ["Zigbee"]
+  - name: "Device Type"
+    value: ["Host"]
+  - name: "Project Difficulty"
+    value: ["Advanced"]

@@ -112,7 +112,6 @@ bool ezspProcessCommandOptions(int argc, char *argv[])
 const uint8_t* ezspErrorString(uint8_t error)
 {
   switch (error) {
-#ifndef UC_BUILD
     case EM2XX_RESET_UNKNOWN:
       return (uint8_t *) "unknown reset";
     case EM2XX_RESET_EXTERNAL:
@@ -127,7 +126,6 @@ const uint8_t* ezspErrorString(uint8_t error)
       return (uint8_t *) "bootloader reset";
     case EM2XX_RESET_SOFTWARE:
       return (uint8_t *) "software reset";
-#endif
     default:
       return (uint8_t *) decodeEzspStatus(error);
   }

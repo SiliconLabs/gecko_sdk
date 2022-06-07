@@ -27,9 +27,11 @@
 #include <unistd.h>
 
 #include "ember-types.h"
-
-typedef uint8_t SerialBaudRate;
-typedef uint8_t SerialParity;
+#include "serial_adapter.h"
+#include "openthread/openthread-system.h"
+#include "stack/include/ember.h"
+#include "app/em260/serial-interface.h"
+#include "app/framework/common/zigbee_app_framework_event.h"
 
 #define NULL_FILE_DESCRIPTOR  (-1)
 #define MAX_OUT_BLOCK_LEN     512   // maximum bytes to output at one time
@@ -190,4 +192,34 @@ EmberStatus emberSerialReadByte(uint8_t port, uint8_t *dataByte)
 EmberStatus emberSerialWriteString(uint8_t port, PGM_P string)
 {
   return EMBER_SUCCESS;
+}
+
+void sli_serial_adapter_tick_callback(void)
+{
+  otSysMainloopContext mainloop;
+  uint32_t timeoutMs = emberMsToNextStackEvent();
+  uint32_t appMs = sli_zigbee_ms_to_next_app_framework_event();
+  timeoutMs = (timeoutMs < appMs ? timeoutMs : appMs);
+
+  // Clear mainloop FDs
+  FD_ZERO(&mainloop.mReadFdSet);
+  FD_ZERO(&mainloop.mWriteFdSet);
+  FD_ZERO(&mainloop.mErrorFdSet);
+
+  // Update mainloop initial FD and its timeout value
+  mainloop.mMaxFd           = serialFd;
+  mainloop.mTimeout.tv_sec  = timeoutMs / 1000;
+  mainloop.mTimeout.tv_usec = (timeoutMs - mainloop.mTimeout.tv_sec * 1000) * 1000;
+
+  // Update mainloop FDs to monitor
+  FD_SET(serialFd, &mainloop.mReadFdSet);
+  FD_SET(serialFd, &mainloop.mErrorFdSet);
+  otSysMainloopUpdate(NULL, &mainloop);
+
+  if (otSysMainloopPoll(&mainloop) >= 0) {
+    otSysMainloopProcess(NULL, &mainloop);
+  } else if (errno != EINTR) {
+    //printf("%d\n", errno);
+    assert(false);
+  }
 }

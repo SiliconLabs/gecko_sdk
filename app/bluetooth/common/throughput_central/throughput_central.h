@@ -76,18 +76,18 @@ typedef union {
 bool throughput_central_allowlist_add(uint8_t *address);
 
 /**************************************************************************//**
- * Clears the allowlist
+ * Clear the allowlist
  * @return true if adding the clear was succesful
  *****************************************************************************/
 bool throughput_central_allowlist_clear(void);
 
 /**************************************************************************//**
- * Enables the the receiver.
+ * Enable receiver.
  *****************************************************************************/
 void throughput_central_enable(void);
 
 /**************************************************************************//**
- * Sets the the receiver mode.
+ * Set receiver mode.
  * @param[in] mode the transmission mode is either of:
  *          - THROUGHPUT_MODE_CONTINUOUS: transfer until stop
  *          - THROUGHPUT_MODE_FIXED_TIME: transfer data for a fixed time
@@ -99,14 +99,14 @@ sl_status_t throughput_central_set_mode(throughput_mode_t mode,
                                         uint32_t amount);
 
 /**************************************************************************//**
- * Sets the the data sizes for reception.
+ * Set data sizes for reception.
  * @param[in] mtu MTU size in bytes
  * @return status of the operation
  *****************************************************************************/
 sl_status_t throughput_central_set_mtu_size(uint8_t mtu);
 
 /**************************************************************************//**
- * Sets the the transmission power.
+ * Set transmission power.
  * @param[in] tx_power requested tx power in dBm
  * @param[in] power_control enable adaptive power control
  * @param[in] deep_sleep enable deep sleep during test
@@ -117,7 +117,7 @@ sl_status_t throughput_central_set_tx_power(throughput_tx_power_t tx_power,
                                             bool deep_sleep);
 
 /**************************************************************************//**
- * Sets the the transmission power.
+ * Set connection parameters.
  * @param[in] min_interval Minimum connection interval (in 1.25 ms steps)
  * @param[in] max_interval Maximum connection interval (in 1.25 ms steps)
  * @param[in] latency Responder latency (in connection intervals)
@@ -130,40 +130,40 @@ sl_status_t throughput_central_set_connection_parameters(throughput_time_t min_i
                                                          throughput_time_t timeout);
 
 /**************************************************************************//**
- * Sets the type of the the transmission
+ * Set type of transmission.
  * @param[in] type type of the test (notification or indication)
  * @return status of the operation
  *****************************************************************************/
 sl_status_t throughput_central_set_type(throughput_notification_t type);
 
 /**************************************************************************//**
- * Starts the reception.
+ * Start transmission on remote side.
  * @return status of the operation
  *****************************************************************************/
 sl_status_t throughput_central_start(void);
 
 /**************************************************************************//**
- * Stops the reception.
+ * Stop transmission on remote side.
  * @return status of the operation
  *****************************************************************************/
 sl_status_t throughput_central_stop(void);
 
 /**************************************************************************//**
- * Sets the PHY used for scanning
+ * Set PHY used for scanning.
  * @param[in] phy PHY used for scanning
  * @return status of the operation
  *****************************************************************************/
 sl_status_t throughput_central_set_scan_phy(throughput_phy_t phy);
 
 /**************************************************************************//**
- * Sets the PHY used for the connection
+ * Set PHY used for connection.
  * @param[in] phy PHY used for the connection
  * @return status of the operation
  *****************************************************************************/
 sl_status_t throughput_central_set_connection_phy(throughput_phy_t phy);
 
 /**************************************************************************//**
- * Changes PHY to the next one.
+ * Change PHY to next one.
  *   - In case of scanning, it is used for changing between CODED and 1M PHY
  *   - In a connection, it is used to change between 1M, 2M and CODED PHYs
  * @return status of the operation

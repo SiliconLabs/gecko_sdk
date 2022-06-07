@@ -48,7 +48,7 @@
 // <i> This is the last offset for where the OTA image may be stored in the EEPROM.
 #define EMBER_AF_PLUGIN_OTA_STORAGE_SIMPLE_EEPROM_STORAGE_END   262144
 
-// <q EMBER_AF_PLUGIN_OTA_STORAGE_SIMPLE_EEPROM_READ_MODIFY_WRITE_SUPPORT> SOC Bootloading Support
+// <q EMBER_AF_PLUGIN_OTA_STORAGE_SIMPLE_EEPROM_READ_MODIFY_WRITE_SUPPORT> SOC Read-Modify-Write Support
 // <i> Default: FALSE
 // <i> This indicates to the OTA code whether the underlying EEPROM driver has support for 'read-modify-write'.  Read-modify-write assumes a page erase is not required prior to writing, and any location or length of data can be re-written.  If not present, then the OTA code will note each full page of data downloaded and must erase entire pages before downloading a chunk of data.
 #define EMBER_AF_PLUGIN_OTA_STORAGE_SIMPLE_EEPROM_READ_MODIFY_WRITE_SUPPORT   0

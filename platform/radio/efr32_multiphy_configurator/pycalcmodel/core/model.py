@@ -28,10 +28,11 @@ __all__ = [ 'ModelRoot', 'ModelRootTypeXml', 'ModelRootInstanceXml' ]
 
 class ModelRoot(object):
 
-    def __init__(self, part_family, calc_version, target=None):
+    def __init__(self, part_family, calc_version, target=None, part_revision='ANY'):
         assert isinstance(part_family, basestring)
         assert isinstance(calc_version, basestring)
         self.part_family = part_family
+        self.part_revision = part_revision
         self.calc_version = calc_version
         self._xsd_version = __version__
         self.parser = ModelParser()

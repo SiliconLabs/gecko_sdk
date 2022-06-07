@@ -21,21 +21,25 @@ if slc.is_selected("simple_led") == true and slc.is_selected("simple_button") ==
     end
     if allow_button_conflicts == 0 then
         for led, v in pairs(leds.instances) do
-            local led_port = slc.config("SL_SIMPLE_LED_"..string.upper(led).."_PORT").value
-            local led_pin = slc.config("SL_SIMPLE_LED_"..string.upper(led).."_PIN").value
-            for button, val in pairs(buttons.instances) do
-                local button_port = slc.config("SL_SIMPLE_BUTTON_"..string.upper(button).."_PORT").value
-                local button_pin = slc.config("SL_SIMPLE_BUTTON_"..string.upper(button).."_PIN").value
-                if led_port == button_port and led_pin == button_pin then
-                    validation.error(
-                        "Button "..button.." and LED "..led.." port and pin conflict",
-                        validation.target_for_defines({"SL_SIMPLE_BUTTON_"..string.upper(button).."_PORT",
-                                                       "SL_SIMPLE_BUTTON_"..string.upper(button).."_PIN",
-                                                       "SL_SIMPLE_LED_"..string.upper(led).."_PORT",
-                                                       "SL_SIMPLE_LED_"..string.upper(led).."_PIN"}),
-                        "The Button and LED drivers are not designed to handle pin conflicts. Either choose separate pins for each button and LED or set SL_SIMPLE_BUTTON_ALLOW_LED_CONFLICT to 1 to indicate that the application will handle this.",
-                        nil
-                    )
+            local led_port = slc.config("SL_SIMPLE_LED_"..string.upper(led).."_PORT")
+            local led_pin = slc.config("SL_SIMPLE_LED_"..string.upper(led).."_PIN")
+            if led_port ~= nil and led_pin ~= nil then
+                for button, val in pairs(buttons.instances) do
+                    local button_port = slc.config("SL_SIMPLE_BUTTON_"..string.upper(button).."_PORT")
+                    local button_pin = slc.config("SL_SIMPLE_BUTTON_"..string.upper(button).."_PIN")
+                    if button_port ~= nil and button_pin ~= nil then
+                        if led_port.value == button_port.value and led_pin.value == button_pin.value then
+                            validation.error(
+                                "Button "..button.." and LED "..led.." port and pin conflict",
+                                validation.target_for_defines({"SL_SIMPLE_BUTTON_"..string.upper(button).."_PORT",
+                                                            "SL_SIMPLE_BUTTON_"..string.upper(button).."_PIN",
+                                                            "SL_SIMPLE_LED_"..string.upper(led).."_PORT",
+                                                            "SL_SIMPLE_LED_"..string.upper(led).."_PIN"}),
+                                "The Button and LED drivers are not designed to handle pin conflicts. Either choose separate pins for each button and LED or set SL_SIMPLE_BUTTON_ALLOW_LED_CONFLICT to 1 to indicate that the application will handle this.",
+                                nil
+                            )
+                        end
+                    end
                 end
             end
         end

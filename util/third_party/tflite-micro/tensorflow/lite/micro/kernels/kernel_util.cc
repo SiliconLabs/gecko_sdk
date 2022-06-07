@@ -16,9 +16,55 @@ limitations under the License.
 #include "tensorflow/lite/micro/kernels/kernel_util.h"
 
 #include "tensorflow/lite/c/common.h"
+#include "tensorflow/lite/micro/memory_helpers.h"
 
 namespace tflite {
 namespace micro {
+
+namespace {
+
+int ValidateTensorIndexing(const TfLiteContext* context, int index,
+                           int max_size, const int* tensor_indices) {
+  if (index >= 0 && index < max_size) {
+    const int tensor_index = tensor_indices[index];
+    if (tensor_index != kTfLiteOptionalTensor) {
+      return tensor_index;
+    }
+  }
+  return -1;
+}
+
+}  // namespace
+
+// Returns a mutable tensor for a given input index. is_variable must be checked
+// during prepare when the full TfLiteTensor is available.
+TfLiteEvalTensor* GetMutableEvalInput(const TfLiteContext* context,
+                                      const TfLiteNode* node, int index) {
+  TFLITE_DCHECK(context != nullptr);
+  TFLITE_DCHECK(node != nullptr);
+  const int tensor_index = ValidateTensorIndexing(
+      context, index, node->inputs->size, node->inputs->data);
+
+  if (tensor_index < 0) {
+    return nullptr;
+  }
+
+  return context->GetEvalTensor(context, node->inputs->data[index]);
+}
+
+// Returns the TfLiteEvalTensor struct for a given input index in a node.
+const TfLiteEvalTensor* GetEvalInput(const TfLiteContext* context,
+                                     const TfLiteNode* node, int index) {
+  return GetMutableEvalInput(context, node, index);
+}
+
+// Returns the TfLiteEvalTensor struct for a given output index in a node.
+TfLiteEvalTensor* GetEvalOutput(const TfLiteContext* context,
+                                const TfLiteNode* node, int index) {
+  TFLITE_DCHECK(context != nullptr);
+  TFLITE_DCHECK(node != nullptr);
+  return context->GetEvalTensor(context, node->outputs->data[index]);
+}
 
 bool HaveSameShapes(const TfLiteEvalTensor* input1,
                     const TfLiteEvalTensor* input2) {
@@ -71,6 +117,85 @@ TfLiteStatus CreateWritableTensorDimsWithCopy(TfLiteContext* context,
     new_dims->data[i] = old_dims->data[i];
   }
 
+  return kTfLiteOk;
+}
+
+// Verify that both tensors have the same type and size, then return the size
+// of both tensors in bytes if they are the same, or -1 if they are different.
+size_t ValidateAndGetTensorSizes(const TfLiteEvalTensor* tensor1,
+                                 const TfLiteEvalTensor* tensor2) {
+  TFLITE_DCHECK(tensor1->type == tensor2->type);
+  size_t tensor1_size = 0;
+  size_t tensor2_size = 0;
+  TfLiteEvalTensorByteLength(tensor1, &tensor1_size);
+  TfLiteEvalTensorByteLength(tensor2, &tensor2_size);
+  return (tensor1_size == tensor2_size) ? tensor1_size : -1;
+}
+
+TfLiteStatus CopyOpInputsToOpOutputs(TfLiteContext* context, TfLiteNode* node) {
+  TF_LITE_ENSURE(context, node->inputs->size == node->outputs->size);
+  for (int i = 0; i < node->inputs->size; i++) {
+    const TfLiteEvalTensor* input =
+        tflite::micro::GetEvalInput(context, node, i);
+    TfLiteEvalTensor* output = tflite::micro::GetEvalOutput(context, node, i);
+    int bytes = ValidateAndGetTensorSizes(input, output);
+    TF_LITE_ENSURE(context, bytes >= 0);
+    memcpy(output->data.raw, input->data.raw, bytes);
+  }
+  return kTfLiteOk;
+}
+
+TfLiteStatus CopyOpInputsToSubgraphInputs(TfLiteContext* context,
+                                          TfLiteNode* node,
+                                          MicroGraph* graph_info,
+                                          int subgraph_idx,
+                                          int first_tensor_idx) {
+  TF_LITE_ENSURE(context,
+                 static_cast<size_t>(node->inputs->size - first_tensor_idx) ==
+                     graph_info->NumSubgraphInputs(subgraph_idx));
+  for (int i = 0; i < node->inputs->size - first_tensor_idx; i++) {
+    const TfLiteEvalTensor* input =
+        tflite::micro::GetEvalInput(context, node, i + first_tensor_idx);
+    TfLiteEvalTensor* subgraph_input =
+        graph_info->GetSubgraphInput(subgraph_idx, i);
+    int bytes = ValidateAndGetTensorSizes(input, subgraph_input);
+    TF_LITE_ENSURE(context, bytes >= 0);
+    memcpy(subgraph_input->data.raw, input->data.raw, bytes);
+  }
+  return kTfLiteOk;
+}
+
+TfLiteStatus CopyOpOutputsToSubgraphInputs(TfLiteContext* context,
+                                           TfLiteNode* node,
+                                           MicroGraph* graph_info,
+                                           int subgraph_idx) {
+  TF_LITE_ENSURE(context, static_cast<size_t>(node->outputs->size) ==
+                              graph_info->NumSubgraphInputs(subgraph_idx));
+  for (int i = 0; i < node->outputs->size; i++) {
+    TfLiteEvalTensor* output = tflite::micro::GetEvalOutput(context, node, i);
+    TfLiteEvalTensor* subgraph_input =
+        graph_info->GetSubgraphInput(subgraph_idx, i);
+    int bytes = ValidateAndGetTensorSizes(output, subgraph_input);
+    TF_LITE_ENSURE(context, bytes >= 0);
+    memcpy(subgraph_input->data.raw, output->data.raw, bytes);
+  }
+  return kTfLiteOk;
+}
+
+TfLiteStatus CopySubgraphOutputsToOpOutputs(TfLiteContext* context,
+                                            TfLiteNode* node,
+                                            MicroGraph* graph_info,
+                                            int subgraph_idx) {
+  TF_LITE_ENSURE(context, static_cast<size_t>(node->outputs->size) ==
+                              graph_info->NumSubgraphOutputs(subgraph_idx));
+  for (int i = 0; i < node->outputs->size; i++) {
+    TfLiteEvalTensor* output = tflite::micro::GetEvalOutput(context, node, i);
+    TfLiteEvalTensor* subgraph_output =
+        graph_info->GetSubgraphOutput(subgraph_idx, i);
+    int bytes = ValidateAndGetTensorSizes(output, subgraph_output);
+    TF_LITE_ENSURE(context, bytes >= 0);
+    memcpy(output->data.raw, subgraph_output->data.raw, bytes);
+  }
   return kTfLiteOk;
 }
 

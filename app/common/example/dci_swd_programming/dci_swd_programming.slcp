@@ -5,6 +5,13 @@ label: Platform - Series 2 DCI and SWD Programming
 description: >
   This example project demonstrates the DCI and SWD Programming on Series 2 devices.
 category: Example|Platform
+filter:
+  - name: "Device Type"
+    value: ["SoC"]
+  - name: "MCU"
+    value: ["32-bit MCU"]
+  - name: "Project Difficulty"
+    value: ["Advanced"]
 source:
   - path: main.c
   - path: app_init.c
@@ -25,10 +32,10 @@ include:
     - path: app_prog_error.h
     - path: app_swd_task.h
 readme:
-  - path: readme.html
+  - path: readme.md
 ui_hints:
   highlight:
-    - path: readme.html
+    - path: readme.md
       focus: true
 component:
   - id: udelay

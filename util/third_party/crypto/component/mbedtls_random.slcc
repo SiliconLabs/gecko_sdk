@@ -1,25 +1,31 @@
 id: mbedtls_random
 package: platform
-label: Mbed TLS Support for CTR-DRBG
+label: CTR-DRBG
 description: >-
   This component provides support for pseudo-random number generation
   using the CTR-DRBG construction in Mbed TLS.
-category: Platform|Security
+category: Platform|Security|Mbed TLS|Randomness
 quality: production
 source:
   - path: util/third_party/crypto/mbedtls/library/entropy.c
+    unless: [trustzone_nonsecure]
   - path: util/third_party/crypto/mbedtls/library/entropy_poll.c
+    unless: [trustzone_nonsecure]
   - path: util/third_party/crypto/mbedtls/library/ctr_drbg.c
+    unless: [trustzone_nonsecure]
   - path: util/third_party/crypto/mbedtls/library/hmac_drbg.c
+    unless: [trustzone_nonsecure]
 include:
   - path: util/third_party/crypto/mbedtls/include
     file_list:
       - path: mbedtls/entropy.h
       - path: mbedtls/ctr_drbg.h
       - path: mbedtls/hmac_drbg.h
+    unless: [trustzone_nonsecure]
   - path: util/third_party/crypto/mbedtls/library
     file_list:
       - path: entropy_poll.h
+    unless: [trustzone_nonsecure]
 provides:
   - name: mbedtls_random
 requires:

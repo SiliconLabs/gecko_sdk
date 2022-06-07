@@ -6,9 +6,7 @@
 #ifndef _ZW_CONTROLLER_API_H_
 #define _ZW_CONTROLLER_API_H_
 
-#ifndef ZW_CONTROLLER
-#define ZW_CONTROLLER
-#endif
+#ifdef ZW_CONTROLLER
 
 /****************************************************************************/
 /*                              INCLUDE FILES                               */
@@ -121,13 +119,14 @@
 #define  FAILED_NODE_REMOVE_FAIL            5 /* The removing process could not */
                                               /* be started */
 
+#ifndef HOST_SECURITY_INCLUDED
 #define ZW_FAILED_NODE_REMOVE_STARTED       0 /* The removing/replacing failed node process started */
 #define ZW_NOT_PRIMARY_CONTROLLER           (1 << NOT_PRIMARY_CONTROLLER)
 #define ZW_NO_CALLBACK_FUNCTION             (1 << NO_CALLBACK_FUNCTION)
 #define ZW_FAILED_NODE_NOT_FOUND            (1 << FAILED_NODE_NOT_FOUND)
 #define ZW_FAILED_NODE_REMOVE_PROCESS_BUSY  (1 << FAILED_NODE_REMOVE_PROCESS_BUSY)
 #define ZW_FAILED_NODE_REMOVE_FAIL          (1 << FAILED_NODE_REMOVE_FAIL)
-
+#endif
 
 /* ZW_RemoveFailedNode and ZW_ReplaceFailedNode callback status definitions */
 #define ZW_NODE_OK                          0 /* The node is working properly (removed from the failed nodes list ) */
@@ -198,15 +197,14 @@
 #define NODEINFO_ZWAVE_SENSOR_MODE_WAKEUP_1000   0x40
 #define NODEINFO_ZWAVE_SENSOR_MODE_WAKEUP_250    0x20
 
-
 /* Learn node state information passed by the call back function */
-typedef struct _LEARN_INFO_
+typedef struct _LEARN_INFO_T_
 {
   uint8_t  bStatus;      /* Status of learn mode */
-  uint16_t bSource;      /* Node id of the node that send node info */
+  node_id_t bSource;      /* Node id of the node that send node info */
   uint8_t  *pCmd;        /* Pointer to Application Node information */
   uint8_t  bLen;         /* Node info length                        */
-} LEARN_INFO;
+} LEARN_INFO_T;
 
 /* Learn node "Application Node information" passed by call back function */
 /* to Application when controller is in SMART START mode and an aspiring */
@@ -219,7 +217,7 @@ typedef struct _LEARN_INFO_SMARTSTART_
   uint8_t      nodeInfo[NODEPARM_MAX]; /* Device status */
 } LEARN_INFO_SMARTSTART;
 
-typedef void (*learn_mode_callback_t)(LEARN_INFO *);
+typedef void (*learn_mode_callback_t)(LEARN_INFO_T *);
 
 /**
  *
@@ -266,6 +264,7 @@ typedef struct _CONTROLLER_UPDATE_INCLUDED_NODE_INFORMATION_FRAME_
 #define ZW_LAST_WORKING_ROUTE_SPEED_40K         ZW_PRIORITY_ROUTE_SPEED_40K
 #define ZW_LAST_WORKING_ROUTE_SPEED_100K        ZW_PRIORITY_ROUTE_SPEED_100K
 
+#endif /* ZW_CONTROLLER */
 
 #endif /* _ZW_CONTROLLER_API_H_ */
 

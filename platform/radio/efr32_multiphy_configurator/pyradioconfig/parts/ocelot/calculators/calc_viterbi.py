@@ -282,6 +282,7 @@ class CALC_Viterbi_ocelot(CALC_Viterbi_lynx):
         antdivmode = model.vars.antdivmode.value
         fast_detect_enable = (model.vars.fast_detect_enable.value == model.vars.fast_detect_enable.var_enum.ENABLED)
         modulation_index = model.vars.modulation_index.value
+        phscale_derate_factor = model.vars.phscale_derate_factor.value
 
         #Calculate the cost threshold based on preamble detect window and deviation tolerance requirement
         if preamsch_len > 0 and vtdemoden:
@@ -305,15 +306,20 @@ class CALC_Viterbi_ocelot(CALC_Viterbi_lynx):
         else:
             reg = 0
 
+        #Derate for PHSCALE if not set to nominal 64
+        reg = int(reg/phscale_derate_factor)
+
         self._reg_write(model.vars.MODEM_TRECPMDET_PMMINCOSTTHD, reg)
 
     def calc_mincostthd_reg(self, model):
 
         vtdemoden = model.vars.MODEM_VITERBIDEMOD_VTDEMODEN.value
         syncacqwin_reg = model.vars.MODEM_REALTIMCFE_SYNCACQWIN.value
+        phscale_derate_factor = model.vars.phscale_derate_factor.value
 
         if vtdemoden:
             reg = self.MIN_COST_THD_FULL - (7 - syncacqwin_reg) * 60
+            reg = int(reg / phscale_derate_factor)  #Derate for PHSCALE if not set to nominal 64
         else:
             reg = 0
 

@@ -281,7 +281,7 @@ class Base_RM_Device(IRegMapDevice):
             outFH.write(u"]\n\n")
         return filterList
 
-    def dump(self, filename, regFilterList=None, userMsg=''):
+    def dump(self, filename, regFilterList=None, userMsg='', ignoreFailures=False):
         valueDict = OrderedDict()
         with io.open(filename, mode='w', encoding='utf-8') as outFH:
             outFH.write(u"\n# -*- coding: utf-8 -*- \n")
@@ -307,18 +307,18 @@ class Base_RM_Device(IRegMapDevice):
                 for name in regFilterList:
                     obj = self.getObjectByName(name)
                     if isinstance(obj, Base_RM_Register):
-                        obj.dump(outFH, valueDict)
+                        obj.dump(outFH, valueDict, ignoreFailures=ignoreFailures)
                     elif isinstance(obj, Base_RM_Field):
                         obj = self.getObjectByName(self.getRegisterNameFromFieldName(name))
                         field_name = name.split('.')[-1]
-                        obj.dump_field(outFH, valueDict, field_name)
+                        obj.dump_field(outFH, valueDict, field_name, ignoreFailures=ignoreFailures)
                     else:
                         outFH.write(u"    # Skipping invalid name '{}'\n".format(name))
             else:
                 # no filter list, so call peripheral dump with check for dump
                 # flag, to allow skipping
                 for key in sorted(self.zz_pdict):
-                    self.zz_pdict[key].dump(outFH, valueDict)
+                    self.zz_pdict[key].dump(outFH, valueDict, ignoreFailures=ignoreFailures)
             outFH.write(u"])\n\n")
         return valueDict
 

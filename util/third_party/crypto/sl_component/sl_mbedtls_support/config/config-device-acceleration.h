@@ -99,6 +99,9 @@
  * \def MBEDTLS_CCM_ALT
  *
  * Enable hardware acceleration of CCM through mbed TLS APIs.
+ * Not enabled when PSA Crypto is present in the build together with the PSA driver for CCM,
+ * as that would preclude software fallback for cases where the hardware capabilites do not
+ * cover the full potential usage of the PSA Driver API
  *
  * Module:  sl_mbedtls_support/src/mbedtls_ccm.c for all devices, plus:
  *          - sl_psa_driver/src/sli_se_transparent_driver_aead.c and sl_psa_driver/src/sli_se_driver_aead.c for devices with HSE,
@@ -111,7 +114,12 @@
  */
 #if defined(CRYPTO_PRESENT) || defined(CRYPTOACC_PRESENT) || defined(DOXY_DOC_ONLY) \
   || (defined(SEMAILBOX_PRESENT) && defined(SE_COMMAND_AES_CCM_ENCRYPT) && defined(SE_COMMAND_AES_CCM_DECRYPT) )
+// Remove this when full multipart support is present in the CCM ALT driver
+// Todo: remove guard when [PSEC-1954][PSEC-2109][PSEC-3133] are done
+#if !(defined(MBEDTLS_PSA_CRYPTO_DRIVERS))
 #define MBEDTLS_CCM_ALT
+#endif
+
 #endif
 
 /**

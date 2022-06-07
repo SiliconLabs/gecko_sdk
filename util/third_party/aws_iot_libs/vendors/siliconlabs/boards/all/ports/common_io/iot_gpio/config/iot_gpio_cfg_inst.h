@@ -72,7 +72,7 @@
 // <i> Default: 0
 #define IOT_GPIO_CFG_INSTANCE_INTERRUPT_NUMBER                 0
 
-// <o IOT_GPIO_CFG_INSTANCE_TRIGGER> GPIO Trigger Mode
+// <o IOT_GPIO_CFG_INSTANCE_INTERRUPT_TRIGGER> GPIO Trigger Mode
 // <eGpioInterruptNone=> None
 // <eGpioInterruptRising=> Generate an interrupt when signal rises
 // <eGpioInterruptFalling=> Generate an interrupt when signal falls

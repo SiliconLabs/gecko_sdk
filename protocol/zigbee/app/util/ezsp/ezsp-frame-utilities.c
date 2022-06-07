@@ -653,3 +653,33 @@ void emAfFetchOrAppend(bool fetch, const char * format, ...)
 
   va_end(args);
 }
+
+void appendEmberTokenData(EmberTokenData * tokenData)
+{
+  appendInt32u(tokenData->size);
+  appendInt8uArray((uint8_t)tokenData->size, (uint8_t *)tokenData->data);
+}
+
+void fetchEmberTokenData(EmberTokenData * tokenData)
+{
+  tokenData->size = fetchInt32u();
+  fetchInt8uArray((uint8_t)tokenData->size, (uint8_t *)tokenData->data);
+}
+
+void fetchEmberTokenInfo(EmberTokenInfo *tokenInfo)
+{
+  tokenInfo->nvm3Key = fetchInt32u();
+  tokenInfo->isCnt = fetchInt8u();
+  tokenInfo->isIdx = fetchInt8u();
+  tokenInfo->size = fetchInt8u();
+  tokenInfo->arraySize = fetchInt8u();
+}
+
+void appendEmberTokenInfo(EmberTokenInfo *tokenInfo)
+{
+  appendInt32u(tokenInfo->nvm3Key);
+  appendInt8u(tokenInfo->isCnt);
+  appendInt8u(tokenInfo->isIdx);
+  appendInt8u(tokenInfo->size);
+  appendInt8u(tokenInfo->arraySize);
+}

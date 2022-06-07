@@ -401,7 +401,7 @@ class CALC_Demodulator(ICalculator):
         val = model.vars.dec0.value
         fxo = model.vars.xtal_frequency.value
         bw = model.vars.bandwidth_hz.value * 1.0
-        family = model.vars.family.value
+        family = model.part_family.lower()
 
         if val == 3:
             reg = 0
@@ -1317,8 +1317,9 @@ class CALC_Demodulator(ICalculator):
         xtal_frequency = model.vars.fxo_or_fdec8.value
         dec0 = model.vars.dec0.value
         dec1 = model.vars.dec1.value
+        part_family = model.part_family.lower()
 
-        if model.vars.family.value != "dumbo":
+        if part_family != "dumbo":
             src1_ratio_actual = model.vars.src1_ratio_actual.value
             src2_ratio_actual = model.vars.src2_ratio_actual.value
         else:

@@ -47,7 +47,7 @@ void getChannel(sl_cli_command_arg_t *args)
   if (RAIL_GetDebugMode(railHandle) & RAIL_DEBUG_MODE_FREQ_OVERRIDE) {
     responsePrintError(sl_cli_get_command_string(args, 0), 0x12, "Channels are not valid in Debug Mode");
   } else {
-    responsePrint(sl_cli_get_command_string(args, 0), "channel:%d", channel);
+    responsePrint(sl_cli_get_command_string(args, 0), "channel:%d", getLikelyChannel());
   }
 }
 
@@ -304,10 +304,58 @@ void sweepTxPower(sl_cli_command_arg_t *args)
       end = RAIL_TX_POWER_LEVEL_SUBGIG_LLP_MAX;
       break;
 #endif
+#if (defined(RAIL_TX_POWER_MODE_SUBGIG) && defined(_SILICON_LABS_32B_SERIES_1))
+    case RAIL_TX_POWER_MODE_SUBGIG:
+      start = RAIL_TX_POWER_LEVEL_SUBGIG_MIN;
+      end = RAIL_TX_POWER_LEVEL_SUBGIG_MAX;
+      break;
+#endif
+#ifdef RAIL_TX_POWER_MODE_SUBGIG_EFF_30DBM
+    case RAIL_TX_POWER_MODE_SUBGIG_EFF_30DBM:
+      start = RAIL_TX_POWER_LEVEL_SUBGIG_EFF_30DBM_MIN;
+      end = RAIL_TX_POWER_LEVEL_SUBGIG_EFF_30DBM_MAX;
+      break;
+#endif
+#ifdef RAIL_TX_POWER_MODE_SUBGIG_EFF_25DBM
+    case RAIL_TX_POWER_MODE_SUBGIG_EFF_25DBM:
+      start = RAIL_TX_POWER_LEVEL_SUBGIG_EFF_25DBM_MIN;
+      end = RAIL_TX_POWER_LEVEL_SUBGIG_EFF_25DBM_MAX;
+      break;
+#endif
+#ifdef RAIL_TX_POWER_MODE_SUBGIG_EFF_20DBM
+    case RAIL_TX_POWER_MODE_SUBGIG_EFF_20DBM:
+      start = RAIL_TX_POWER_LEVEL_SUBGIG_EFF_20DBM_MIN;
+      end = RAIL_TX_POWER_LEVEL_SUBGIG_EFF_20DBM_MAX;
+      break;
+#endif
 #ifdef RAIL_TX_POWER_MODE_OFDM_PA
     case RAIL_TX_POWER_MODE_OFDM_PA:
       start = RAIL_TX_POWER_LEVEL_OFDM_PA_MIN;
       end = RAIL_TX_POWER_LEVEL_OFDM_PA_MAX;
+      break;
+#endif
+#ifdef RAIL_TX_POWER_MODE_OFDM_PA_EFF_30DBM
+    case RAIL_TX_POWER_MODE_OFDM_PA_EFF_30DBM:
+      start = RAIL_TX_POWER_LEVEL_OFDM_PA_EFF_30DBM_MIN;
+      end = RAIL_TX_POWER_LEVEL_OFDM_PA_EFF_30DBM_MAX;
+      break;
+#endif
+#ifdef RAIL_TX_POWER_MODE_OFDM_PA_EFF_25DBM
+    case RAIL_TX_POWER_MODE_OFDM_PA_EFF_25DBM:
+      start = RAIL_TX_POWER_LEVEL_OFDM_PA_EFF_25DBM_MIN;
+      end = RAIL_TX_POWER_LEVEL_OFDM_PA_EFF_25DBM_MAX;
+      break;
+#endif
+#ifdef RAIL_TX_POWER_MODE_OFDM_PA_EFF_20DBM
+    case RAIL_TX_POWER_MODE_OFDM_PA_EFF_20DBM:
+      start = RAIL_TX_POWER_LEVEL_OFDM_PA_EFF_20DBM_MIN;
+      end = RAIL_TX_POWER_LEVEL_OFDM_PA_EFF_20DBM_MAX;
+      break;
+#endif
+#ifdef RAIL_TX_POWER_MODE_OFDM_PA_EFF_MAXDBM
+    case RAIL_TX_POWER_MODE_OFDM_PA_EFF_MAXDBM:
+      start = RAIL_TX_POWER_LEVEL_OFDM_PA_EFF_MAXDBM_MIN;
+      end = RAIL_TX_POWER_LEVEL_OFDM_PA_EFF_MAXDBM_MAX;
       break;
 #endif
     default:
@@ -332,6 +380,7 @@ void sweepTxPower(sl_cli_command_arg_t *args)
       }
       if (input == 'q') {
         responsePrintError(sl_cli_get_command_string(args, 0), 0x20, "Sweep Aborted.");
+        RAIL_Idle(railHandle, RAIL_IDLE_FORCE_SHUTDOWN_CLEAR_FLAGS, true);
         return;
       }
       input = getchar();
@@ -616,36 +665,67 @@ void delayUs(sl_cli_command_arg_t *args)
 #ifdef RAIL_PA_AUTO_MODE
 #include "pa_auto_mode.h"
 static bool paAutoModeEnable = false;
+RAIL_PaAutoModeConfigEntry_t *paAutoModeConfig = NULL;
 void configPaAutoMode(sl_cli_command_arg_t *args)
 {
-  uint8_t index = sl_cli_get_argument_uint8(args, 0);
-
-  int16_t min = sl_cli_get_argument_int16(args, 1);
-  int16_t max = sl_cli_get_argument_int16(args, 2);
-  uint8_t mode = sl_cli_get_argument_uint8(args, 3);
-
-  // Make sure the mode is valid
-  if (mode > RAIL_TX_POWER_MODE_NONE) {
-    responsePrintError(sl_cli_get_command_string(args, 0), 0x01, "Invalid mode (%d) specified", mode);
-    return;
-  }
+  CHECK_RAIL_HANDLE(sl_cli_get_command_string(args, 0));
   if (!paAutoModeEnable) {
     responsePrintError(sl_cli_get_command_string(args, 0), 0x01, "PA auto mode should be enabled to set configs.");
     return;
   }
-  RAIL_PaAutoModeConfig[index].min = min;
-  RAIL_PaAutoModeConfig[index].max = max;
-  RAIL_PaAutoModeConfig[index].mode = mode;
-  if (sl_cli_get_argument_count(args) >= 5) {
-    RAIL_PaAutoModeConfig[index].band = sl_cli_get_argument_uint8(args, 4);
+
+  if (sl_cli_get_argument_count(args) % 4U != 1U) {
+    responsePrintError(sl_cli_get_command_string(args, 0), 0x14,
+                       "Insufficient arguments. Must provide min, max, mode and band for each PA auto mode config entry.");
   }
-  responsePrint(sl_cli_get_command_string(args, 0), "Min:%d,Max:%d,Mode:%s,Band:%d", min, max, powerModes[mode], RAIL_PaAutoModeConfig[index].band);
+
+  // uint8_t index = sl_cli_get_argument_uint8(args, 0);
+  RAIL_Status_t status = RAIL_STATUS_NO_ERROR;
+
+  uint8_t numOfConfigs = 0U;
+  numOfConfigs = (sl_cli_get_argument_count(args) - 1U) / 4U;
+  if (numOfConfigs == 0U) {
+    responsePrintError(sl_cli_get_command_string(args, 0), 0x01,
+                       "There are no PA auto mode configs provided.");
+    return;
+  }
+  if (paAutoModeConfig != NULL) {
+    free(paAutoModeConfig);
+  }
+  paAutoModeConfig = (RAIL_PaAutoModeConfigEntry_t *)malloc(numOfConfigs * sizeof(RAIL_PaAutoModeConfigEntry_t));
+  if (paAutoModeConfig == NULL) {
+    responsePrintError(sl_cli_get_command_string(args, 0), 0x01,
+                       "The PA auto mode configs are not configured.");
+    return;
+  }
+
+  for (uint8_t i = 0U; i < numOfConfigs; i++) {
+    paAutoModeConfig[i].min = (int16_t)sl_cli_get_argument_int32(args, ((i * 4) + 1));
+    paAutoModeConfig[i].max = (int16_t)sl_cli_get_argument_int32(args, ((i * 4) + 2));
+    uint8_t mode = (uint8_t)sl_cli_get_argument_int32(args, ((i * 4) + 3));
+    // Make sure the mode is valid
+    if (mode > RAIL_TX_POWER_MODE_NONE) {
+      responsePrintError(sl_cli_get_command_string(args, 0), 0x01, "Invalid mode (%d) specified", mode);
+      return;
+    }
+    paAutoModeConfig[i].mode = mode;
+    paAutoModeConfig[i].band = (uint8_t)sl_cli_get_argument_int32(args, ((i * 4) + 4));
+  }
+
+  status = RAIL_ConfigPaAutoEntry(railHandle, paAutoModeConfig);
+  responsePrint(sl_cli_get_command_string(args, 0), "numberOfPaAutoModeEntries:%d,Success:%s",
+                numOfConfigs,
+                status == RAIL_STATUS_NO_ERROR ? "True" : "False");
 }
 
 void enablePaAutoMode(sl_cli_command_arg_t *args)
 {
   CHECK_RAIL_HANDLE(sl_cli_get_command_string(args, 0));
   paAutoModeEnable = !!sl_cli_get_argument_uint8(args, 0);
+  if ((!paAutoModeEnable) && (paAutoModeConfig != NULL)) {
+    free(paAutoModeConfig);
+    paAutoModeConfig = NULL;
+  }
   RAIL_EnablePaAutoMode(railHandle, paAutoModeEnable);
 
   responsePrint(sl_cli_get_command_string(args, 0), "enable:%s", paAutoModeEnable ? "True" : "False");

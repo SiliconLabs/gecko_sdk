@@ -145,7 +145,6 @@ bool emberAfPluginOtaUnicastBootloaderClientNewIncomingImageCallback(EmberNodeId
   // The client shall accept images with matching tag
   bool accept = (imageTag == ota_bootloader_test_image_tag);
 
-
   if (ota_resume_enable) {
     if (ota_resume_start_counter_reset) {
       *startIndex = 0;
@@ -228,11 +227,6 @@ bool emberAfPluginOtaUnicastBootloaderClientIncomingRequestBootloadCallback(Embe
                                                                             uint32_t bootloadDelayMs)
 {
   // The client shall bootload an image with matching tag.
-
-  // TODO: we should also maintain a state machine to keep track whether this
-  // image was previously correctly received. For now we assume the server would
-  // issue a bootload request only if the client reported a successful image
-  // download.
   (void)serverId;
   bool accept = (imageTag == ota_bootloader_test_image_tag);
 

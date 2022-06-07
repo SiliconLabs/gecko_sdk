@@ -826,6 +826,14 @@ typedef enum {
 #if defined(PRS_SEATAMPDET_SEATAMPDETSUPTPDELAY)
   prsSignalSEATAMPDET_SEATAMPDETSUPTPDELAY = PRS_SEATAMPDET_SEATAMPDETSUPTPDELAY, /**< SEATAMPDET SEATAMPDETSUPTPDELAY Signal. */
 #endif
+#if defined(PRS_DCDC_MONO70NSANA)
+  prsSignalDCDC_MONO70NSANA = PRS_DCDC_MONO70NSANA, /** DCDC Pulses for Coulomb Counter Calibration Signal. */
+#endif
+#if defined(PRS_LFRCO_CALMEAS)
+  prsSignalLFRCO_CALMEAS = PRS_LFRCO_CALMEAS, /** LFRCO Calibration Measure Signal. */
+  prsSignalLFRCO_SDM     = PRS_LFRCO_SDM,     /** LFRCO Sigma Delta Modulator output Signal. */
+  prsSignalLFRCO_TCMEAS  = PRS_LFRCO_TCMEAS,  /** LFRCO Temperature Check Measure Signal. */
+#endif
 } PRS_Signal_t;
 
 #if defined(_SILICON_LABS_32B_SERIES_2)

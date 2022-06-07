@@ -69,6 +69,11 @@ typedef struct {
 
 void sli_power_manager_init_hardware(void);
 
+void sli_power_manager_apply_em(sl_power_manager_em_t em);
+
+void sli_power_manager_debug_init(void);
+
+#if (SL_POWER_MANAGER_LOWEST_EM_ALLOWED != 1)
 void sli_power_manager_save_states(void);
 
 void sli_power_manager_handle_pre_deepsleep_operations(void);
@@ -79,34 +84,15 @@ bool sli_power_manager_is_high_freq_accuracy_clk_ready(bool wait);
 
 void sli_power_manager_restore_states(void);
 
-void sli_power_manager_apply_em(sl_power_manager_em_t em);
-
-void sli_power_manager_debug_init(void);
-
 /*******************************************************************************
- * Returns if the high frequency (ex. HFXO) is enabled or not.
- *
- * @return true, if HFXO is enabled,
- *         false, otherwise.
+ * Converts microseconds time in sleeptimer ticks.
  ******************************************************************************/
-bool sli_power_manager_is_high_frequency_running(void);
+uint32_t sli_power_manager_convert_delay_us_to_tick(uint32_t time_us);
 
 /*******************************************************************************
  * Returns the default minimum offtime for xtal high frequency oscillator.
  ******************************************************************************/
 uint32_t sli_power_manager_get_default_high_frequency_minimum_offtime(void);
-
-/*******************************************************************************
- * Gets the delay associated the wake-up process from EM23.
- *
- * @return Delay for the complete wake-up process with full restore.
- ******************************************************************************/
-uint32_t sli_power_manager_get_wakeup_process_time_overhead(void);
-
-/*******************************************************************************
- * Converts microseconds time in sleeptimer ticks.
- ******************************************************************************/
-uint32_t sli_power_manager_convert_delay_us_to_tick(uint32_t time_us);
 
 #if defined(EMU_VSCALE_PRESENT)
 /***************************************************************************//**
@@ -117,4 +103,15 @@ uint32_t sli_power_manager_convert_delay_us_to_tick(uint32_t time_us);
 void sli_power_manager_em23_voltage_scaling_enable_fast_wakeup(bool enable);
 #endif
 
+/*******************************************************************************
+ * Restores the Low Frequency clocks according to which LF oscillators are used.
+ ******************************************************************************/
 void sli_power_manager_low_frequency_restore(void);
+#endif
+
+/*******************************************************************************
+ * Gets the delay associated the wake-up process from EM23.
+ *
+ * @return Delay for the complete wake-up process with full restore.
+ ******************************************************************************/
+uint32_t sli_power_manager_get_wakeup_process_time_overhead(void);

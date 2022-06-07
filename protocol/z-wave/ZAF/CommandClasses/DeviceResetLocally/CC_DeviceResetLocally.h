@@ -10,27 +10,26 @@
 /****************************************************************************/
 /*                              INCLUDE FILES                               */
 /****************************************************************************/
-#include <ZW_classcmd.h>
-#include <CC_Common.h>
+#include <ZAF_types.h>
 
 /****************************************************************************/
 /*                       PUBLIC TYPES and DEFINITIONS                       */
 /****************************************************************************/
-
-// Nothing here.
 
 /****************************************************************************/
 /*                            PUBLIC FUNCTIONS                              */
 /****************************************************************************/
 
 /**
- * Transmits a Device Reset Locally Notification.
- * @param[in] pProfile Pointer to AGI profile.
- * @param[in] pCallback Callback function pointer. Use the callback call to reset the node.
- * This function callback MUST be implemented.
+ * @brief Transmission callback for CC_DeviceResetLocally_notification_tx().
+ * 
+ * @param pTransmissionResult Result of each transmission.
  */
-void CC_DeviceResetLocally_notification_tx(
-  const agi_profile_t * pProfile,
-  void(* pCallback)(transmission_result_t * pTransmissionResult));
+extern void CC_DeviceResetLocally_done(TRANSMISSION_RESULT * pTransmissionResult);
+
+/**
+ * @brief Transmits a Device Reset Locally Notification.
+ */
+void CC_DeviceResetLocally_notification_tx();
 
 #endif

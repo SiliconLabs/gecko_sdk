@@ -21,6 +21,10 @@ class Calc_Modulator_Sol(CALC_Modulator_Ocelot):
             [['IQ_MOD',0,'OFDM modulator'],
             ['LEGACY_MOD',1,'Legacy modulator'],
              ['NONE',2,'Not using softmodem']])
+        self._addModelVariable(model, 'softmodem_txircal_params', int, ModelVariableFormat.DECIMAL,
+                               desc='TX IRCal parameters [kt, int2ratio, int2gain]', is_array=True)
+        self._addModelVariable(model, 'softmodem_txircal_freq', int, ModelVariableFormat.DECIMAL,
+                               desc='TX IRCal tone freq')
 
     def calc_softmodem_modulator_select(self, model):
 
@@ -122,6 +126,47 @@ class Calc_Modulator_Sol(CALC_Modulator_Ocelot):
         self._reg_write(model.vars.TXFRONT_INT2CFG_RATIO, ratio)
         self._reg_write(model.vars.TXFRONT_INT2CFG_GAINSHIFT, gainshift)
 
+    def calc_softmodem_txircal(self, model):
+
+        #Read in model vars
+        divn = model.vars.fpll_divn.value
+        divx = model.vars.fpll_divx.value
+
+        #divn: [kt, int2_ratio, int2_gainshift]
+        txircal_dict = {
+            80:[5,5,5],
+            81:[9,9,7],
+            85:[5,17,9],
+            86:[5,43,11],
+            93:[3,31,10],
+            97:[2,97,14],
+            98:[7,7,6],
+            99:[9,11,7],
+            100:[5,5,5],
+            101:[2,101,14],
+            103:[2,103,14],
+            111:[3,37,11],
+            114:[3,19,9],
+            115:[5,23,10],
+            116:[5,29,10],
+            117:[9,13,8],
+            119:[3,59,12]
+        }
+
+        try:
+            softmodem_txircal_params = txircal_dict[divn]
+        except KeyError:
+            LogMgr.Error('Invalid RFFPLL divn for softmodem tx calibration')
+            softmodem_txircal_params = []
+            softmodem_txircal_freq = 0
+        else:
+            fft_size_log2 = 6
+            txircal_dec0 = 4
+            softmodem_txircal_freq = ((1 << (17 - fft_size_log2)) * softmodem_txircal_params[0] * divx * softmodem_txircal_params[1]) / txircal_dec0 / divn
+
+        model.vars.softmodem_txircal_params.value = softmodem_txircal_params
+        model.vars.softmodem_txircal_freq.value = int(softmodem_txircal_freq)
+
     def calc_srccfg_ratio_reg(self, model):
         #This method calulates the softmodem SRCCFG RATIO value
 
@@ -173,75 +218,83 @@ class Calc_Modulator_Sol(CALC_Modulator_Ocelot):
 
             if base_frequency_hz < 450e6:
                 #430M Band
-                txtrimfilgain = 1
+                txtrimfilgain = 2
                 txselmixctune = 43
                 txselmixgmslicei = 9
                 txselmixgmsliceq = 9
                 txselmixrload = 0
                 txselmixband = 0
+                txmixcappulldown = 1
 
             elif base_frequency_hz < 520e6:
                 # 470M Band
-                txtrimfilgain = 1
+                txtrimfilgain = 2
                 txselmixctune = 31
                 txselmixgmslicei = 8
                 txselmixgmsliceq = 8
                 txselmixrload = 0
                 txselmixband = 0
+                txmixcappulldown = 1
 
             elif base_frequency_hz < 625e6:
                 # 570M Band
-                txtrimfilgain = 1
+                txtrimfilgain = 2
                 txselmixctune = 13
                 txselmixgmslicei = 6
                 txselmixgmsliceq = 6
                 txselmixrload = 2
                 txselmixband = 0
+                txmixcappulldown = 1
 
             elif base_frequency_hz < 730e6:
                 # 680M Band
-                txtrimfilgain = 1
+                txtrimfilgain = 2
                 txselmixctune = 3
                 txselmixgmslicei = 6
                 txselmixgmsliceq = 6
                 txselmixrload = 5
                 txselmixband = 0
+                txmixcappulldown = 1
 
             elif base_frequency_hz < 825e6:
                 # 780M Band
-                txtrimfilgain = 1
+                txtrimfilgain = 2
                 txselmixctune = 24
                 txselmixgmslicei = 7
                 txselmixgmsliceq = 7
                 txselmixrload = 1
                 txselmixband = 1
+                txmixcappulldown = 0
 
             elif base_frequency_hz < 895e6:
                 # 870M Band
-                txtrimfilgain = 1
+                txtrimfilgain = 2
                 txselmixctune = 14
                 txselmixgmslicei = 6
                 txselmixgmsliceq = 6
                 txselmixrload = 2
                 txselmixband = 1
+                txmixcappulldown = 0
 
             elif base_frequency_hz < 940e6:
                 # 920M Band (settings from Eric Vapillon)
                 txtrimfilgain = 2
-                txselmixctune = 11
-                txselmixgmslicei = 4
-                txselmixgmsliceq = 4
+                txselmixctune = 9
+                txselmixgmslicei = 6
+                txselmixgmsliceq = 6
                 txselmixrload = 4
                 txselmixband = 1
+                txmixcappulldown = 0
 
             else:
                 # 960M Band
-                txtrimfilgain = 1
+                txtrimfilgain = 2
                 txselmixctune = 5
                 txselmixgmslicei = 6
                 txselmixgmsliceq = 6
                 txselmixrload = 5
                 txselmixband = 1
+                txmixcappulldown = 0
 
         else:
             #Use POR values
@@ -251,6 +304,7 @@ class Calc_Modulator_Sol(CALC_Modulator_Ocelot):
             txselmixgmsliceq = 4
             txselmixrload = 0
             txselmixband = 0
+            txmixcappulldown = 0
 
         #Write the register fields
         self._reg_write(model.vars.RAC_PATRIM6_TXTRIMFILGAIN, txtrimfilgain)
@@ -259,12 +313,13 @@ class Calc_Modulator_Sol(CALC_Modulator_Ocelot):
         self._reg_write(model.vars.RAC_TXMIX_TXSELMIXGMSLICEQ, txselmixgmsliceq)
         self._reg_write(model.vars.RAC_TXMIX_TXSELMIXRLOAD, txselmixrload)
         self._reg_write(model.vars.RAC_TXMIX_TXSELMIXBAND, txselmixband)
+        self._reg_write(model.vars.RAC_TXMIX_TXMIXCAPPULLDOWN, txmixcappulldown)
 
     def calc_symbol_rates_actual(self, model):
-        softmodem_modulation_type = model.vars.softmodem_modulation_type.value
+        modulation_type = model.vars.modulation_type.value
         max_bit_rate = model.vars.bitrate.value #We already store the max bitrate here
 
-        if (softmodem_modulation_type == model.vars.softmodem_modulation_type.var_enum.SUN_OFDM):
+        if (modulation_type == model.vars.modulation_type.var_enum.OFDM):
             # Symbol rate is constant for OFDM: 1/120us
             ofdm_tsym = 120e-6
             ofdm_symbol_rate = 1/ofdm_tsym

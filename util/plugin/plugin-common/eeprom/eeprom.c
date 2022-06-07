@@ -283,6 +283,10 @@ void emAfPluginEepromFakeEepromCallback(void)
 }
 #endif
 
+#ifdef _SILICON_LABS_32B_SERIES_2
+__ALIGNED(32) static uint8_t ota_buff[EEPROM_PAGE_SIZE];
+#endif
+
 uint8_t emberAfPluginEepromWrite(uint32_t address,
                                  const uint8_t *data,
                                  uint16_t totalLength)
@@ -355,13 +359,21 @@ uint8_t emberAfPluginEepromWrite(uint32_t address,
     tempPartialWrite.count = remainder;
     totalLength -= remainder;
   }
-
   eepromDebugPrintln("eepromWrite() Address: 0x%4X, len: %d",
                      address,
                      totalLength);
   if (totalLength > 0u) {
     emAfPluginEepromStateUpdate(HAL_EEPROM_WRITING);
+
+#ifdef _SILICON_LABS_32B_SERIES_2
+    // we need 32 bits alignment for some boards e.g. 4181
+    MEMCOPY(ota_buff,
+            data,
+            totalLength);
+    status = eepromWrite(address, ota_buff, totalLength);
+#else
     status = eepromWrite(address, data, totalLength);
+#endif
     emAfPluginEepromStateUpdate(HAL_EEPROM_INITIALIZED);
   }
 

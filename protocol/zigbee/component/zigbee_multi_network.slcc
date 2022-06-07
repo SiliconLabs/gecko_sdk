@@ -8,7 +8,6 @@ description: "Provides the ability for a single device to be on multiple network
 
 provides:
   - name: zigbee_multi_network
-  - name: zigbee_multi_network_feature
 
 requires:
   - name: zigbee_multi_network_implementation

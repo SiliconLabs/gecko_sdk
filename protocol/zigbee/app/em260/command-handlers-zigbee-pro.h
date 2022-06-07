@@ -141,6 +141,7 @@ void emberAfPluginEzspZigbeeProSetConfigurationValueCommandCallback(EmberAfPlugi
 EmberStatus emberAfEzspSetBrokenRouteErrorCodeCommandCallback(uint8_t errorCode);
 
 //ezsp command processing picks the wrong name
+uint8_t emberMaximumApsPayloadLength(void);
 #define emberMaximumPayloadLength emberMaximumApsPayloadLength
 #define emberUnicastNwkKeyUpdate emberSendUnicastNetworkKeyUpdate
 #define emberRemoveDevice emberSendRemoveDevice

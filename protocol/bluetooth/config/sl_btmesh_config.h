@@ -60,7 +60,7 @@
 // <o SL_BTMESH_CONFIG_MAX_PROV_BEARERS> Maximum number of provisioning bearers allowed
 // <i> Default: 2
 // <i> Define the number of provisioning bearers the application needs.
-// <i> The value is 1 or 2 (depending on whether only one or both of PB-ADV and PB-GATT are used).
+// <i> The value is 1,2 or 3.
 #define SL_BTMESH_CONFIG_MAX_PROV_BEARERS (2)
 
 // <o SL_BTMESH_CONFIG_MAX_GATT_CONNECTIONS> Number of connections to reserve for GATT Proxies <1-2>
@@ -105,14 +105,14 @@
 #define SL_BTMESH_CONFIG_FRIEND_MAX_SUBS_LIST       (5)
 
 // <o SL_BTMESH_CONFIG_FRIEND_MAX_TOTAL_CACHE> Maximum size of Total Friend Cache
-// <i> Default: 5
+// <i> Default: 4
 // <i> Define the Maximum size of Total Friend Cache. Only applicable for friend node.
-#define SL_BTMESH_CONFIG_FRIEND_MAX_TOTAL_CACHE       (5)
+#define SL_BTMESH_CONFIG_FRIEND_MAX_TOTAL_CACHE       (4)
 
 // <o SL_BTMESH_CONFIG_FRIEND_MAX_SINGLE_CACHE> Maximum size of Cache for a single Friendship
-// <i> Default: 5
+// <i> Default: 4
 // <i> Define the Maximum size of Cache for a single Friendship. Only applicable for friend node.
-#define SL_BTMESH_CONFIG_FRIEND_MAX_SINGLE_CACHE       (5)
+#define SL_BTMESH_CONFIG_FRIEND_MAX_SINGLE_CACHE       (4)
 
 // <o SL_BTMESH_CONFIG_APP_TXQ_SIZE> Access Layer TX Queue Size
 // <i> Default: 5

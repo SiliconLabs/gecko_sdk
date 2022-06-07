@@ -129,10 +129,10 @@ void CpcInterface::Read(uint64_t aTimeoutUs)
 
     if(aTimeoutUs > 0)
     {
-        struct timeval timeout;
+        cpc_timeval_t timeout;
 
-        timeout.tv_sec = static_cast<time_t>(aTimeoutUs / US_PER_S);
-        timeout.tv_usec = static_cast<suseconds_t>(aTimeoutUs % US_PER_S);
+        timeout.seconds = static_cast<int>(aTimeoutUs / US_PER_S);
+        timeout.microseconds = static_cast<int>(aTimeoutUs % US_PER_S);
 
         block = true;
         cpc_set_endpoint_option(mEndpoint, CPC_OPTION_BLOCKING, &block, sizeof(block));
@@ -248,7 +248,7 @@ void CpcInterface::Process(const RadioProcessContext &aContext)
 void CpcInterface::CheckAndReInitCpc(void)
 {
     int result;
-    int retryCount = 0;
+    int attempts = 0;
     
     //Check if CPC needs to be restarted
     VerifyOrExit(sCpcResetReq);
@@ -260,21 +260,21 @@ void CpcInterface::CheckAndReInitCpc(void)
         //Try to restart CPC
         result = cpc_restart(&mHandle);
         //Mark how many times the restart was attempted
-        retryCount++;
+        attempts++;
         //Continue to try and restore CPC communication until we
         //have exhausted the retries or restart was successful
-    }   while ((result != 0) && (retryCount > kMaxRestartRetries));
+    }   while ((result != 0) && (attempts < kMaxRestartAttempts));
 
-    otLogCritPlat("result : %d retryCount : %d", result, retryCount);
     //If the restart failed, exit.
     VerifyOrDie(result == 0, OT_EXIT_ERROR_ERRNO);
 
     //Reopen the endpoint for communication
     mSockFd = cpc_open_endpoint(mHandle, &mEndpoint, mId, 1);
 
-    otLogCritPlat("mSockFd : %d", mSockFd);
     //If the restart failed, exit.
     VerifyOrDie(mSockFd != -1, OT_EXIT_ERROR_ERRNO);
+
+    otLogCritPlat("Restarted CPC successfully");
 
     //Clear the flag
     SetCpcResetReq(false);

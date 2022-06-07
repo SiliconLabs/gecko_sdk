@@ -31,7 +31,7 @@
 #include "em_adc.h"
 #if defined(ADC_COUNT) && (ADC_COUNT > 0)
 
-#include "em_assert.h"
+#include "sl_assert.h"
 #include "em_cmu.h"
 #include <stddef.h>
 

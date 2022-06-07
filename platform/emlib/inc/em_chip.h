@@ -32,7 +32,7 @@
 #define EM_CHIP_H
 
 #include "em_device.h"
-#include "em_common.h"
+#include "sl_common.h"
 #include "em_system.h"
 #include "em_gpio.h"
 #include "em_bus.h"
@@ -305,7 +305,7 @@ __STATIC_INLINE void CHIP_Init(void)
   SYSTEM_ChipRevision_TypeDef chipRev;
   SYSTEM_ChipRevisionGet(&chipRev);
 
-  if ((HFXO0->STATUS & HFXO_STATUS_ENS) == 0U) {
+  if (chipRev.major == 0x01 && (HFXO0->STATUS & HFXO_STATUS_ENS) == 0U) {
     /* Change HFXO default peak detector settings. */
     *(volatile uint32_t*)(HFXO0_BASE + 0x34U) =
       (*(volatile uint32_t*)(HFXO0_BASE + 0x34U) & 0xFF8000FFU)
@@ -334,11 +334,17 @@ __STATIC_INLINE void CHIP_Init(void)
 #endif
 
 #if defined(_SILICON_LABS_GECKO_INTERNAL_SDID_205)
+#if defined(SL_TRUSTZONE_SECURE)
+#define HFRCO_CLK_CFG_CLR_ADDR (0x40012020UL)
+#else
+#define HFRCO_CLK_CFG_CLR_ADDR (0x50012020UL)
+#endif
+#define HFRCO_CLK_CFG_CLKOUTDIS0 (0x4UL)
   if (SYSTEM_GetProdRev() == 1) {
     bool hfrcoClkIsOff = (CMU->CLKEN0 & CMU_CLKEN0_HFRCO0) == 0;
     CMU->CLKEN0_SET = CMU_CLKEN0_HFRCO0;
     /* Enable HFRCO CLKOUT0. */
-    *(volatile uint32_t*)(0x40012020UL) = 0x4UL;
+    *(volatile uint32_t*)(HFRCO_CLK_CFG_CLR_ADDR) = HFRCO_CLK_CFG_CLKOUTDIS0;
     if (hfrcoClkIsOff) {
       CMU->CLKEN0_CLR = CMU_CLKEN0_HFRCO0;
     }
@@ -365,9 +371,11 @@ __STATIC_INLINE void CHIP_Init(void)
       /* Wait for BYPASS switch enable. */
     }
 
+#if (!defined(SL_TRUSTZONE_NONSECURE) && !defined(SL_TRUSTZONE_SECURE))
     if ((SYSCFG->ROOTLOCKSTATUS & SYSCFG_ROOTLOCKSTATUS_REGLOCK) == 0) {
       *(volatile uint32_t *)(DCDC_BASE + 0x205CUL) = (0x1UL << 18);
     }
+#endif // (!defined(SL_TRUSTZONE_NONSECURE) && !defined(SL_TRUSTZONE_SECURE))
 
     if (dcdcIsLock) {
       DCDC->LOCK = ~DCDC_LOCK_LOCKKEY_UNLOCKKEY;

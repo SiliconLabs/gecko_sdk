@@ -205,7 +205,7 @@ static sl_status_t new_queue(aoa_id_t tag_id,
 }
 
 /**************************************************************************//**
- * Returns a queue by it's id.
+ * Returns a queue by its id.
  *****************************************************************************/
 static sl_status_t get_queue_by_id(aoa_id_t tag_id, angle_queue_t **queue)
 {
@@ -256,7 +256,7 @@ static void add_data(aoa_id_t locator_id,
 }
 
 /**************************************************************************//**
- * Returns an index which correspondes to a sequence group.
+ * Returns an index which corresponds to a sequence group.
  *****************************************************************************/
 static uint32_t get_data_index(int32_t sequence,
                                angle_queue_t *queue)

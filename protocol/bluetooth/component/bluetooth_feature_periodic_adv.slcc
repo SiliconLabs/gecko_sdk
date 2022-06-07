@@ -22,12 +22,6 @@ provides:
 template_contribution:
   - name: component_catalog
     value: bluetooth_feature_periodic_adv
-    unless:
-      - "device_sdid_80"
-  - name: bluetooth_stack_init
-    value:
-      function: "sli_bt_init_periodic_advertising"
-    priority: 10
   - name: bluetooth_controller_init
     value:
       include: "sl_bluetooth_periodic_adv_config.h"

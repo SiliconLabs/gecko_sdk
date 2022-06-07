@@ -197,7 +197,7 @@ class SlProfiler : public tflite::MicroProfiler {
     uint32_t BeginEvent(const char* tag) override
     {
       printf("--------------------------------------------\n");
-      printf("%s\n", tag);
+      printf("%d: %s\n", operation_index_, tag);
 #if defined(SL_PRINT_MATRIX_DATA)
       harvest_input_matrix(operation_index_);
 #endif

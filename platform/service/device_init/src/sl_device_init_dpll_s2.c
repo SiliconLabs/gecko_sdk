@@ -55,9 +55,7 @@ sl_status_t sl_device_init_dpll(void)
     CMU_ClockSelectSet(cmuClock_SYSCLK, cmuSelect_FSRCO);
   }
 
-#if defined (_SILICON_LABS_32B_SERIES_2_CONFIG_2) \
-  || defined(_SILICON_LABS_32B_SERIES_2_CONFIG_3) \
-  || defined(_SILICON_LABS_32B_SERIES_2_CONFIG_4)
+#if (_SILICON_LABS_32B_SERIES_2_CONFIG > 1)
   CMU_ClockEnable(cmuClock_DPLL0, true);
 #endif
 

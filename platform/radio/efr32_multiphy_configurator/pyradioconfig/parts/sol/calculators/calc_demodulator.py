@@ -13,6 +13,9 @@ class Calc_Demodulator_Sol(CALC_Demodulator_ocelot):
     SRC2DENUM = 524288.0
     ofdm_tsym_useful = 96e-6
 
+    # override inhereited variable defining threshold for _channel_filter_clocks_valid
+    chf_required_clks_per_sample = 3  # fixed in PGSOL-2790
+
     def buildVariables(self, model):
 
         #Build variables from Ocelot
@@ -75,11 +78,11 @@ class Calc_Demodulator_Sol(CALC_Demodulator_ocelot):
         softmodem_modulation_type = model.vars.softmodem_modulation_type.value
 
         if (softmodem_modulation_type == model.vars.softmodem_modulation_type.var_enum.SUN_OFDM) or \
-                (softmodem_modulation_type == model.vars.softmodem_modulation_type.var_enum.CW):
-            # OFDM is not supported in the original demod - just put an arbitrary value in MODFORMAT
+                (softmodem_modulation_type == model.vars.softmodem_modulation_type.var_enum.CW) or \
+            (softmodem_modulation_type == model.vars.softmodem_modulation_type.var_enum.SUN_FSK):
+            # Not supported in the original demod - just put an arbitrary value in MODFORMAT
             self._reg_write(model.vars.MODEM_CTRL0_MODFORMAT, 0)
-        elif (softmodem_modulation_type == model.vars.softmodem_modulation_type.var_enum.SUN_OQPSK) or \
-                (softmodem_modulation_type == model.vars.softmodem_modulation_type.var_enum.SUN_FSK):
+        elif (softmodem_modulation_type == model.vars.softmodem_modulation_type.var_enum.SUN_OQPSK):
             self._reg_write(model.vars.MODEM_CTRL0_MODFORMAT, 5)
         else:
             #Call the inherited code from Ocelot
@@ -112,34 +115,32 @@ class Calc_Demodulator_Sol(CALC_Demodulator_ocelot):
 
     def calc_modeminfo_reg(self, model):
 
-        demod_select = model.vars.demod_select.value
-        soft_modem_used = 0
-        bcr_used = 0
-        trecs_used = 0
-        legacy_used = 0
-        coherent_used = 0
-        dsa_viterbi_used = 0
+        softmodem_modulation_type = model.vars.softmodem_modulation_type.value
+        dual_fefilt = model.vars.dual_fefilt.value
 
-        if demod_select == model.vars.demod_select.var_enum.SOFT_DEMOD:
-            soft_modem_used = 1
+        soft_modem_used = softmodem_modulation_type != model.vars.softmodem_modulation_type.var_enum.NONE
 
-        elif demod_select == model.vars.demod_select.var_enum.BCR:
-            bcr_used = 1
+        if (not soft_modem_used) or (soft_modem_used and dual_fefilt):
+            #Hardmodem non-concurrent or concurrent hard/soft modem
+            bcr_used = model.vars.MODEM_BCRDEMODCTRL_BCRDEMODEN.value
+            trecs_used = model.vars.MODEM_VITERBIDEMOD_VTDEMODEN.value
+            coherent_used = model.vars.MODEM_CTRL1_PHASEDEMOD.value == 2
+            dsa_viterbi_used = model.vars.MODEM_DSACTRL_DSAMODE.value #phase DSA
+            if bcr_used or trecs_used or coherent_used:
+                legacy_used = 0
+            else:
+                legacy_used = 1
+        else:
+            bcr_used = 0
+            trecs_used = 0
+            coherent_used = 0
+            dsa_viterbi_used = 0
+            legacy_used = 0
 
-        elif (demod_select == model.vars.demod_select.var_enum.TRECS_SLICER or
-              demod_select == model.vars.demod_select.var_enum.TRECS_VITERBI):
-            trecs_used = 1
-
-        elif demod_select == model.vars.demod_select.var_enum.LEGACY:
-            legacy_used = 1
-
-        elif demod_select == model.vars.demod_select.var_enum.COHERENT:
-            coherent_used = 1
-
-        self._reg_write(model.vars.SEQ_MODEMINFO_SOFTMODEM_DEMOD_EN, soft_modem_used)
-        self._reg_write(model.vars.SEQ_MODEMINFO_SOFTMODEM_MOD_EN, soft_modem_used)
+        self._reg_write(model.vars.SEQ_MODEMINFO_SOFTMODEM_DEMOD_EN, int(soft_modem_used))
+        self._reg_write(model.vars.SEQ_MODEMINFO_SOFTMODEM_MOD_EN, int(soft_modem_used))
         self._reg_write(model.vars.SEQ_MODEMINFO_BCR_EN, bcr_used)
-        self._reg_write(model.vars.SEQ_MODEMINFO_COHERENT_EN, coherent_used)
+        self._reg_write(model.vars.SEQ_MODEMINFO_COHERENT_EN, int(coherent_used))
         self._reg_write(model.vars.SEQ_MODEMINFO_TRECS_EN, trecs_used)
         self._reg_write(model.vars.SEQ_MODEMINFO_LEGACY_EN, legacy_used)
         self._reg_write(model.vars.SEQ_MODEMINFO_DSA_VITERBI_EN, dsa_viterbi_used)
@@ -921,7 +922,7 @@ class Calc_Demodulator_Sol(CALC_Demodulator_ocelot):
 
         self._reg_write_by_name_concat(model, fefilt_selected, 'SRC_UPGAPS', upgaps)
 
-    def check_trecs_required_clk_cycles(self, adc_freq, baudrate, osr, dec0, dec1, xtal_frequency_hz):
+    def _check_trecs_required_clk_cycles(self, adc_freq, baudrate, osr, dec0, dec1, xtal_frequency_hz, relaxsrc2, model):
         # Returns True if the filter chain configuration meets the requirement for trecs
         # minimum clock cycles between samples. Returns False if the configuration is invalid
         #
@@ -1181,3 +1182,27 @@ class Calc_Demodulator_Sol(CALC_Demodulator_ocelot):
     def calc_rssi_rf_adjust_db(self, model):
         #Temporary, to be entered based on measured validation data
         model.vars.rssi_rf_adjust_db.value = 0.0
+
+    def calc_phscale_derate_factor(self, model):
+        #This function calculates the derating factor for PHSCALE for TRECS PHYs with large freq offset tol
+
+        #Read in model vars
+        freq_offset_hz = model.vars.freq_offset_hz.value
+        deviation = model.vars.deviation.value
+        demod_select = model.vars.demod_select.value
+        remoden = (model.vars.MODEM_PHDMODCTRL_REMODEN.value == 1)
+
+        if deviation != 0:
+            large_freq_offset = (freq_offset_hz/deviation) > 2
+        else:
+            large_freq_offset = False
+
+        if large_freq_offset and not remoden and \
+            (demod_select == model.vars.demod_select.var_enum.TRECS_VITERBI or
+            demod_select == model.vars.demod_select.var_enum.TRECS_SLICER):
+            phscale_derate_factor = 2
+        else:
+            phscale_derate_factor = 1
+
+        #Write the model var
+        model.vars.phscale_derate_factor.value = phscale_derate_factor

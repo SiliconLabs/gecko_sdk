@@ -20,6 +20,8 @@ source:
   - path: "src/sl_bt_mbedtls_context.c"
     condition: ["device_series_1"]
 library:
+  - path: lib/libbgcommon_efr32xg27_gcc_release.a
+    condition: ["device_sdid_230","toolchain_gcc"]
   - path: lib/libbgcommon_efr32xg24_gcc_release.a
     condition: ["device_sdid_215","toolchain_gcc"]
   - path: lib/libbgcommon_efr32xg22_gcc_release.a
@@ -34,6 +36,8 @@ library:
     condition: ["device_sdid_84","toolchain_gcc"]
   - path: lib/libbgcommon_efr32xg1_gcc_release.a
     condition: ["device_sdid_80","toolchain_gcc"]
+  - path: lib/libbgcommon_efr32xg27_iar_release.a
+    condition: ["device_sdid_230","toolchain_iar"]
   - path: lib/libbgcommon_efr32xg24_iar_release.a
     condition: ["device_sdid_215","toolchain_iar"]
   - path: lib/libbgcommon_efr32xg22_iar_release.a

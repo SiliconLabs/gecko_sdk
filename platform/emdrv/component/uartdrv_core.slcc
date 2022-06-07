@@ -35,9 +35,8 @@ requires:
   - name: "emlib_core"
   - name: "ecode"
   - name: "dmadrv"
+  - name: "enum"
   - name: "sleeptimer"
-    condition:
-      - "power_manager"
   - name: "status"
     condition: [uartdrv_instance]      
 include:

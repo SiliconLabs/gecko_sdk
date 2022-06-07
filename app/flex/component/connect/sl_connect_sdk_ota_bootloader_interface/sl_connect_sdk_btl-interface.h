@@ -146,6 +146,6 @@ bool emberAfPluginBootloaderInterfaceRead(uint32_t startAddress,
  *****************************************************************************/
 bool emberAfPluginBootloaderInterfaceWrite(uint32_t startAddress,
                                            uint32_t length,
-                                           uint8_t *buffer);
+                                           const uint8_t *buffer);
 
 #endif // _SL_CONNECT_SDK_BOOTLOADER_INTERFACE_H_

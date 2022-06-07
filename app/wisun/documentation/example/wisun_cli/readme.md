@@ -1,6 +1,6 @@
 # Wi-SUN - SoC CLI
 
-The Wi-SUN CLI (Command-Line Interface) sample application allows developers to easily evaluate the Wi-SUN stack APIs. The Wi-SUN command line interface provides a serial interface to a number of the Wi-SUN stack functions. For example, it can be used to connect the Wi-SUN device to a Wi-SUN border router and exchange IP packets.
+The Wi-SUN CLI (Command-Line Interface) sample application allows developers to easily evaluate the Wi-SUN stack APIs. The Wi-SUN command line interface provides a serial interface to a number of the Wi-SUN stack functions. For example, it can be used to connect the Wi-SUN device to a Wi-SUN border router and exchange IP packets or perform RF tests.
 
 ## Getting Started
 
@@ -46,6 +46,12 @@ The list of available commands is output on the console with the associated help
 | wisun tcp_server \<local port> | Open a TCP server port | > wisun tcp_server 5001 |
 | wisun udp_client \<remote address> \<remote port> | Open a UDP connection to a remote host | > wisun udp_client fd00:6172:6d00:0:3038:5115:26:27 7 |
 | wisun udp_server \<local port> | Open a UDP server port | > wisun udp_server 5001 |
+| wisun socket_get_option \<socket Id> \<option> | Get a socket option| > wisun socket_get_option |
+| wisun clear_credential_cache | Clear the wisun credential cache | > wisun clear_credential_cache |
+| wisun reset_statistics | Reset the statistics | > wisun reset_statistics |
+| wisun set_trace_level \<string> | Set [trace level](https://docs.silabs.com/wisun/latest/wisun-stack-api/sl-wisun-types#sl-wisun-trace-level-t) for a [trace group](https://docs.silabs.com/wisun/latest/wisun-stack-api/sl-wisun-types#sl-wisun-trace-group-t) | > wisun set_trace_level all,debug<br>[Set 64 trace groups]<br>> wisun set_trace_level 1,none;4,info<br>[Set 2 trace groups]| 
+|wisun set_unicast_tx_mode \<value>| Configure unicast tx mode | > wisun set_unicast_tx_mode 0<br>[Unicast Tx mode set to 0 suceeded]<br>> wisun set_unicast_tx_mode 1<br>[Unicast Tx mode set to 1 suceeded]|
+|
 
 ## Wi-SUN Settings
 
@@ -86,6 +92,7 @@ The settings in the *wisun* section are directly related to the Wi-SUN stack beh
 | wisun.unicast_channel_mask.XXX-XXX | R/W | hexadecimal |  | Application-specific channel mask |
 | wisun.join_state | R | integer | 0: Idle<br>1: Select PAN<br>2: Authenticate<br>3: Acquire PAN Config<br>4: Configure Routing<br>5: Operational | Current join state in the connection process |
 | wisun.mac | R/W | MAC address |  | MAC address to use |
+|
 
 ### *statistics* Section Settings
 
@@ -98,6 +105,7 @@ The settings part of the *statistics* section are counters maintained by the Wi-
 | statistics.fhss | R | Frequency hopping statistics |
 | statistics.wisun | R | Wi-SUN layer statistics |
 | statistics.network | R | 6LoWPAN/IP stack statistics |
+|
 
 ### *app* Section Settings
 
@@ -107,6 +115,24 @@ The settings in the *app* section relate to the application options. A detailed 
 |---|---|---|---|---|
 | app.printable_data_length | R/W | integer | 0: received socket data is not printed<br>1 - 64: amount of characters per line | If enabled, received socket data is printed |
 | app.printable_data_as_hex | R/W | integer | 0: print received socket data as ASCII<br>1: print received socket data as hex | Output type for received socket data |
+|
+
+## RF test Commands
+
+To see the available commands, enter the following command in the console.
+
+    rftest help
+
+The list of available commands is output on the console with the associated help. Following is an extended description and examples of how to use each command.
+
+| Command | Description | Example |
+|---|---|---|
+| rftest start_stream \<channel ID> | Start an RF test stream on a specific channel | > rftest start_stream 5<br>RF Test stream started 21 |
+| rftest stop_stream | Stop the RF test | > rftest stop_stream<br>RF Test stream stopped 2 |
+|rftest start_tone \<channel ID>| Start an RF test tone on a specific channel | > rftest start_tone 5<br>RF Test tone started 21|
+|rftest stop_tone | Stop RF test tone | > rftest stop_tone<br>RF Test tone stopped 2|
+| rftest set_tx_power \<value> | Set Tx power for the RF test in dBm |> rftest set_tx_power 17<br>RF Test tx Power set to  17|
+|
 
 ## Troubleshooting
 

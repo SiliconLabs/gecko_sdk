@@ -1,5 +1,5 @@
-project_name: WallController
-label: WallController
+project_name: zwave_soc_wall_controller
+label: Z-Wave - SoC Wall Controller
 category: Z-Wave|Apps
 description: The Z-Wave certified Wall Controller application shows a push-button switch panel implementation to control devices in the Z-Wave network from push buttons (physical or virtual) on a device that is meant to be mounted on a wall. Examples include scene and zone controller and wall-mounted AV controllers.
 package: Z-Wave
@@ -9,8 +9,11 @@ component:
   - id: emlib_timer
   - id: emlib_msc
   - id: gpiointerrupt
+  - id: zw_role_type_always_on
   - id: zw_core
-  - id: zw_apputilities
+  - id: zw_appshw_wallcontroller
+  - id: zw_zaf
+  - id: zw_true_status
   - id: zw_ota
   - id: zw_cc_manufacturerspecific
   - id: zw_cc_common
@@ -26,10 +29,8 @@ component:
   - id: zw_cc_zwaveplusinfo
   - id: zw_cc_centralscene
   - id: zw_cc_multilevelswitchcontrol
-  - id: zw_cc_security
   - id: sl_system
   - id: device_init
-  - id: iostream_recommended_stream
   - id: mpu # disable execution from RAM
 source:
   - path: WallController.c
@@ -96,7 +97,7 @@ configuration:
 
 define:
   - name: APP_PROPERTIES_CONFIG_FILE
-    value: <config_app.h>
+    value: <application_properties_config.h>
   - name: OTA_MULTI_FRAME_ENABLED
     value: 1
 
@@ -105,3 +106,11 @@ other_file:
 
 tag:
   - prebuilt_demo
+
+filter:
+  - name: "Wireless Technology"
+    value: ["Z-Wave"]
+  - name: "Device Type"
+    value: ["SoC"]
+  - name: "Project Difficulty"
+    value: ["Beginner"]

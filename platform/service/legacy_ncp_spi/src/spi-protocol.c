@@ -133,11 +133,12 @@ void halHostSerialPowerup(void)
                   BSP_SPINCP_NWAKE_PIN,
                   gpioModeInputPullFilter,
                   1);
-  GPIO_IntConfig(BSP_SPINCP_NWAKE_PORT,
-                 BSP_SPINCP_NWAKE_PIN,
-                 false,
-                 true,
-                 true);
+  GPIO_ExtIntConfig(BSP_SPINCP_NWAKE_PORT,
+                    BSP_SPINCP_NWAKE_PIN,
+                    BSP_SPINCP_NWAKE_PIN,
+                    false,
+                    true,
+                    true);
   GPIOINT_CallbackRegister(BSP_SPINCP_NWAKE_PIN, nWAKE_ISR);
   #endif
 
@@ -147,7 +148,7 @@ void halHostSerialPowerup(void)
   // Initialize nSSEL as input with rising/falling edge interrupts
   GPIO_PinModeSet(SPI_NCP_CS_PORT, SPI_NCP_CS_PIN, gpioModeInputPullFilter, 1);
   GPIOINT_CallbackRegister(SPI_NCP_CS_PIN, nSSEL_ISR);
-  GPIO_IntConfig(SPI_NCP_CS_PORT, SPI_NCP_CS_PIN, true, true, true);
+  GPIO_ExtIntConfig(SPI_NCP_CS_PORT, SPI_NCP_CS_PIN, SPI_NCP_CS_PIN, true, true, true);
 
   // ----- Account for Noise and Crosstalk ------ //
   // on some hardware configurations there is a lot of noise and bootloading can fail

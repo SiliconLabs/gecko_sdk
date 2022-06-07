@@ -257,8 +257,6 @@
 #define _PRS_ASYNC_CH_CTRL_SOURCESEL_SMCTRLL                   (0x00000042UL)
 #define _PRS_ASYNC_CH_CTRL_SOURCESEL_SMCTRL                    (0x00000043UL)
 #define _PRS_ASYNC_CH_CTRL_SOURCESEL_HFRCO0                    (0x00000044UL)
-#define _PRS_ASYNC_CH_CTRL_SOURCESEL_SEHFRCO                   (0x00000045UL)
-#define _PRS_ASYNC_CH_CTRL_SOURCESEL_SEATAMPDET                (0x00000046UL)
 
 /** Asynchronous signal sources enumeration aligned with register bit field: */
 #define PRS_ASYNC_CH_CTRL_SOURCESEL_NONE                       (_PRS_ASYNC_CH_CTRL_SOURCESEL_NONE << 8)
@@ -323,8 +321,6 @@
 #define PRS_ASYNC_CH_CTRL_SOURCESEL_EMUL                       (_PRS_ASYNC_CH_CTRL_SOURCESEL_EMUL << 8)
 #define PRS_ASYNC_CH_CTRL_SOURCESEL_EMU                        (_PRS_ASYNC_CH_CTRL_SOURCESEL_EMU << 8)
 #define PRS_ASYNC_CH_CTRL_SOURCESEL_HFRCOEM23                  (_PRS_ASYNC_CH_CTRL_SOURCESEL_HFRCOEM23 << 8)
-#define PRS_ASYNC_CH_CTRL_SOURCESEL_SEHFRCO                    (_PRS_ASYNC_CH_CTRL_SOURCESEL_SEHFRCO << 8)
-#define PRS_ASYNC_CH_CTRL_SOURCESEL_SEATAMPDET                 (_PRS_ASYNC_CH_CTRL_SOURCESEL_SEATAMPDET << 8)
 
 /** Asynchronous signals enumeration: */
 #define _PRS_ASYNC_CH_CTRL_SIGSEL_TIMER0UF                     (0x00000000UL)

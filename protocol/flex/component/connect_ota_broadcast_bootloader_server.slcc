@@ -7,7 +7,7 @@ description: "Implements the server side of the Connect OTA Broadcast Bootloader
 provides:
   - name: "connect_ota_broadcast_bootloader_server"
 requires:
-  - name: "connect_stack_common"  
+  - name: "connect_stack_common"
 source:
       - path: "protocol/flex/ota-broadcast-bootloader/ota-broadcast-bootloader-server/ota-broadcast-bootloader-server.c"
       - path: "protocol/flex/ota-broadcast-bootloader/ota-broadcast-bootloader-server/ota-broadcast-bootloader-server-cb.c"
@@ -25,15 +25,15 @@ config_file:
   - path: "protocol/flex/ota-broadcast-bootloader/ota-broadcast-bootloader-server/config/ota-broadcast-bootloader-server-config.h"
 template_contribution:
   - name: stack_callback
-    value: 
+    value:
       callback_type: "incoming_message"
       function_name: "emAfPluginOtaBootloaderServerIncomingMessageCallback"
   - name: stack_callback
-    value: 
+    value:
       callback_type: "message_sent"
       function_name: "emAfPluginOtaBootloaderServerMessageSentCallback"
   - name: stack_callback
-    value: 
+    value:
       callback_type: "mark_application_buffers"
       function_name: "emAfPluginOtaBootloaderServerMarkBuffersCallback"
   - name: event_system

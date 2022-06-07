@@ -1,19 +1,17 @@
 id: psa_crypto_chachapoly
 package: platform
-label: PSA Crypto support for ChachaPoly
-description: >-
-  This component provides support for authenticated encryption and decryption
-  with ChaChaPoly in the PSA Crypto AEAD APIs.
-  The hardware acceleration of ChaChaPoly is only supported on Vault High devices.
-  However the special case where both the message and additional data length
-  are zero is not supported. Hence if the user needs zero data lengths he will
-  need to apply the 'Mbed TLS Support for ChaChaPoly' component in order to
-  include fallback to the software implementation in the Mbed TLS library.
+label: ChachaPoly
+description:
+  "This component provides support for authenticated encryption and decryption \
+  with ChaChaPoly in the PSA Crypto AEAD APIs.\n
 
-  NOTE: This component does not suppport Chacha20 in the PSA cipher APIs.
-  In order to support Chacha20 cipher as a standalone stream cipher, the user
-  must include 'PSA Crypto support for Chacha20'.
-category: Platform|Security
+  NOTE: There exists a special case which Silicon Labs' crypto acceleration driver \
+  cannot handle: that is the case where both the message- and additional authenticated \
+  data lengths are equal to zero. If the user needs zero data length, they will \
+  need to include the 'ChaChaPoly' component under the Platform|Security|\
+  Mbed TLS|Authenticated Encryption category in order to include fallback to the \ 
+  software implementation in the Mbed TLS library."
+category: Platform|Security|PSA Crypto|Authenticated Encryption
 quality: production
 provides:
   - name: psa_crypto_chachapoly

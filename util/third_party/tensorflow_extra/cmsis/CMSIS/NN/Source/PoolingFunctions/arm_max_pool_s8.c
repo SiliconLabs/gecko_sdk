@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2010-2021 Arm Limited or its affiliates. All rights reserved.
+ * Copyright (C) 2010-2021 Arm Limited or its affiliates.
  *
  * SPDX-License-Identifier: Apache-2.0
  *
@@ -28,8 +28,8 @@
  *
  * -------------------------------------------------------------------- */
 
-#include "cmsis/CMSIS/NN/Include/arm_nnfunctions.h"
-#include "cmsis/CMSIS/NN/Include/arm_nnsupportfunctions.h"
+#include "arm_nnfunctions.h"
+#include "arm_nnsupportfunctions.h"
 
 static void compare_and_replace_if_larger_q7(q7_t *base, const q7_t *target, int32_t length)
 {
@@ -205,7 +205,7 @@ arm_status arm_max_pool_s8(const cmsis_nn_context *ctx,
 
                     if (count == 0)
                     {
-                        __builtin_memcpy(dst, start, channel_in);
+                        arm_memcpy_q7(dst, start, channel_in);
                         count++;
                     }
                     else

@@ -801,8 +801,8 @@ __STATIC_INLINE void PCNT_Sync(PCNT_TypeDef *pcnt, uint32_t mask)
 
   /* Wait for any pending previous write operation to have been completed in
    * low-frequency domain. */
-  while (pcnt->SYNCBUSY & mask)
-    ;
+  while (pcnt->SYNCBUSY & mask) {
+  }
 }
 
 #if defined(_SILICON_LABS_32B_SERIES_2)

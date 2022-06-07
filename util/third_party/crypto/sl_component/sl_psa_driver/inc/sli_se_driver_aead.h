@@ -151,15 +151,6 @@ psa_status_t sli_se_driver_aead_encrypt_decrypt_setup(sli_se_driver_aead_operati
                                                       size_t key_storage_buffer_size,
                                                       size_t key_storage_overhead);
 
-#if defined(PSA_CRYPTO_AEAD_MULTIPART_SUPPORTED)
-
-psa_status_t sli_se_driver_aead_generate_nonce(sli_se_driver_aead_operation_t *operation,
-                                               uint8_t *nonce,
-                                               size_t nonce_size,
-                                               size_t *nonce_length);
-
-#endif // defined(PSA_CRYPTO_AEAD_MULTIPART_SUPPORTED)
-
 psa_status_t sli_se_driver_aead_set_nonce(sli_se_driver_aead_operation_t *operation,
                                           const uint8_t *nonce,
                                           size_t nonce_size);

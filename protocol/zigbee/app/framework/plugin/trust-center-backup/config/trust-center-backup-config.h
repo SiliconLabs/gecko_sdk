@@ -16,16 +16,16 @@
 
 // <<< Use Configuration Wizard in Context Menu >>>
 
-// <h>Zigbee Trust Center Backup configuration
+// <h>Zigbee Trust Center Backup Configuration
 
 // <o EMBER_AF_PLUGIN_TRUST_CENTER_BACKUP_MAX_CLI_BACKUP_SIZE> Maximum CLI backup size <1-255>
 // <i> Default: 6
 // <i> The maximum number of import/export entries that can be manipulated by the CLI.  This should be set larger than the link key table.
 #define EMBER_AF_PLUGIN_TRUST_CENTER_BACKUP_MAX_CLI_BACKUP_SIZE   6
 
-// <q EMBER_AF_PLUGIN_TRUST_CENTER_BACKUP_POSIX_FILE_BACKUP_SUPPORT> Enable Support for backing up to POSIX Filesystem
+// <q EMBER_AF_PLUGIN_TRUST_CENTER_BACKUP_POSIX_FILE_BACKUP_SUPPORT> Enable back up to POSIX file system
 // <i> Default: FALSE
-// <i> This enables APIs and CLI commands for exporting/importing Trust Center backup data to/from a POSIX filesystem.
+// <i> This enables APIs and CLI commands for exporting/importing Trust Center backup data to/from a POSIX file system.
 #define EMBER_AF_PLUGIN_TRUST_CENTER_BACKUP_POSIX_FILE_BACKUP_SUPPORT   0
 
 // </h>

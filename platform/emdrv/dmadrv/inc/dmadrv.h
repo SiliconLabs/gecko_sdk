@@ -33,6 +33,7 @@
 
 #include "em_device.h"
 #include "ecode.h"
+#include "sl_enum.h"
 
 #if defined(DMA_PRESENT) && (DMA_COUNT == 1)
 #define EMDRV_DMADRV_UDMA
@@ -103,7 +104,11 @@ typedef bool (*DMADRV_Callback_t)(unsigned int channel,
 #define DMADRV_MAX_XFER_COUNT ((int)((_DMA_CTRL_N_MINUS_1_MASK >> _DMA_CTRL_N_MINUS_1_SHIFT) + 1))
 
 /// Peripherals that can trigger UDMA transfers.
-typedef enum {
+#ifdef DOXY_DOC_ONLY
+SL_ENUM_GENERIC(DMADRV_Peripheralsignal_t, uint32_t) {
+#else
+SL_ENUM_GENERIC(DMADRV_PeripheralSignal_t, uint32_t) {
+#endif
   dmadrvPeripheralSignal_NONE = 0,                                        ///< No peripheral selected for DMA triggering.
   #if defined(DMAREQ_ADC0_SCAN)
   dmadrvPeripheralSignal_ADC0_SCAN = DMAREQ_ADC0_SCAN,                    ///< Trig on ADC0_SCAN.
@@ -300,22 +305,18 @@ typedef enum {
   #if defined(DMAREQ_USART2_TXEMPTY)
   dmadrvPeripheralSignal_USART2_TXEMPTY = DMAREQ_USART2_TXEMPTY,          ///< Trig on USART2_TXEMPTY.
   #endif
-#ifdef DOXY_DOC_ONLY
-} DMADRV_Peripheralsignal_t;
-#else
-} DMADRV_PeripheralSignal_t;
-#endif
+};
 
 /// Data size of one UDMA transfer item.
-typedef enum {
+#ifdef DOXY_DOC_ONLY
+SL_ENUM(DMADRV_Datasize_t) {
+#else
+SL_ENUM(DMADRV_DataSize_t) {
+#endif
   dmadrvDataSize1 = dmaDataSize1,     ///< Byte
   dmadrvDataSize2 = dmaDataSize2,     ///< Halfword
   dmadrvDataSize4 = dmaDataSize4      ///< Word
-#ifdef DOXY_DOC_ONLY
-} DMADRV_Datasize_t;
-#else
-} DMADRV_DataSize_t;
-#endif
+};
 
 #endif // defined( DMA_PRESENT ) && ( DMA_COUNT == 1 )
 
@@ -326,7 +327,7 @@ typedef enum {
 
 #if defined(LDMAXBAR_COUNT) && (LDMAXBAR_COUNT > 0)
 /// Peripherals that can trigger LDMA transfers.
-typedef enum {
+SL_ENUM_GENERIC(DMADRV_PeripheralSignal_t, uint32_t) {
   dmadrvPeripheralSignal_NONE = LDMAXBAR_CH_REQSEL_SOURCESEL_NONE,                                                          ///< No peripheral selected for DMA triggering.
   #if defined LDMAXBAR_CH_REQSEL_SIGSEL_TIMER0CC0
   dmadrvPeripheralSignal_TIMER0_CC0 = LDMAXBAR_CH_REQSEL_SIGSEL_TIMER0CC0 | LDMAXBAR_CH_REQSEL_SOURCESEL_TIMER0,
@@ -508,11 +509,11 @@ typedef enum {
   #if defined LDMAXBAR_CH_REQSEL_SIGSEL_EUSART4RXFL
   dmadrvPeripheralSignal_EUSART4_RXDATAV = LDMAXBAR_CH_REQSEL_SIGSEL_EUSART4RXFL | LDMAXBAR_CH_REQSEL_SOURCESEL_EUSART4,       ///< Trig on EUART4_RXBL.
   #endif
-} DMADRV_PeripheralSignal_t;
+};
 
 #else
 /// Peripherals that can trigger LDMA transfers.
-typedef enum {
+SL_ENUM_GENERIC(DMADRV_PeripheralSignal_t, uint32_t) {
   dmadrvPeripheralSignal_NONE = LDMA_CH_REQSEL_SOURCESEL_NONE,                                                              ///< No peripheral selected for DMA triggering.
   #if defined(LDMA_CH_REQSEL_SIGSEL_ADC0SCAN)
   dmadrvPeripheralSignal_ADC0_SCAN = LDMA_CH_REQSEL_SIGSEL_ADC0SCAN | LDMA_CH_REQSEL_SOURCESEL_ADC0,                        ///< Trig on ADC0_SCAN.
@@ -946,15 +947,15 @@ typedef enum {
   #if defined(LDMA_CH_REQSEL_SIGSEL_UART1TXEMPTY)
   dmadrvPeripheralSignal_UART1_TXEMPTY = LDMA_CH_REQSEL_SIGSEL_UART1TXEMPTY | LDMA_CH_REQSEL_SOURCESEL_UART1                ///< Trig on UART1_TXEMPTY.
   #endif
-} DMADRV_PeripheralSignal_t;
+};
 #endif
 
 /// Data size of one LDMA transfer item.
-typedef enum {
+SL_ENUM(DMADRV_DataSize_t) {
   dmadrvDataSize1 = ldmaCtrlSizeByte, ///< Byte
   dmadrvDataSize2 = ldmaCtrlSizeHalf, ///< Halfword
   dmadrvDataSize4 = ldmaCtrlSizeWord  ///< Word
-} DMADRV_DataSize_t;
+};
 
 #endif /* defined( LDMA_PRESENT ) && ( LDMA_COUNT == 1 ) */
 

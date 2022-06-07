@@ -5,6 +5,15 @@ label: Machine Learning - TensorFlow Lite Micro - Magic Wand
 description: >
   This application demonstrates a model trained to recognize various hand gestures with an accelerometer. The detected gestures are printed to the serial port. 
 category: Example|Machine Learning
+filter:
+  - name: "Device Type"
+    value: ["SoC"]
+  - name: "MCU"
+    value: ["32-bit MCU"]
+  - name: "Project Difficulty"
+    value: ["Advanced"]
+  - name: "Capability"
+    value: ["Machine Learning"]
 include:
   - path: .
     file_list:
@@ -61,6 +70,8 @@ configuration:
 toolchain_settings:
   - option: gcc_compiler_option
     value: "-Wno-unused-parameter"
+  - option: gcc_compiler_option
+    value: "-Wno-missing-field-initializers"
 tag:
   - hardware:component:led:2+
   - hardware:component:imu

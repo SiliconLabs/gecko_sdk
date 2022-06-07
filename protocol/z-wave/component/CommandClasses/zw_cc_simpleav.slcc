@@ -1,7 +1,8 @@
 id: zw_cc_simpleav
 label: Simple AV Command Class
 category: Z-Wave|Command Classes
-description: Simple AV Command Class!
+description: >
+  Simple AV Control Command Class is used to control an AV device in a Z-Wave network.
 package: Z-Wave
 quality: production
 source:
@@ -12,3 +13,5 @@ include:
     - path: CC_SimpleAv.h
 provides:
   - name: zw_cc_simpleav
+documentation:
+  url: "https://sdomembers.z-wavealliance.org/document/dl/638"

@@ -33,7 +33,7 @@
 
 #include <stdbool.h>
 #include "em_bus.h"
-#include "em_assert.h"
+#include "sl_assert.h"
 #include "em_gpio.h"
 
 /***************************************************************************//**
@@ -119,10 +119,16 @@
 #endif
 
 /** Map ACMP reference to index of device. */
+#if (ACMP_COUNT == 1)
+#define ACMP_DEVICE_ID(acmp) ( \
+    (acmp) == ACMP0  ? 0       \
+    : 0)
+#elif (ACMP_COUNT == 2)
 #define ACMP_DEVICE_ID(acmp) ( \
     (acmp) == ACMP0  ? 0       \
     : (acmp) == ACMP1  ? 1     \
     : 0)
+#endif
 
 /** @endcond */
 

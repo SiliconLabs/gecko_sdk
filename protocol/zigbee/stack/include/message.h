@@ -933,18 +933,24 @@ extern uint8_t emberMulticastTableSize;
  *
  * @param config         of the type sl_passive_ack_config_enum_t
  *                        SL_PASSIVE_ACK_DEFAULT_CONFIG - All non originating configured nodes check for passive acks from
- *                                                all neighbours. if no passive acks received it will rebroadcast max times.
- *                        SL_PASSIVE_ACK_DISABLE - disable passive ack. All configured nodes rebroadcast the incoming processed
+ *                                                all neighbours. If no passive acks received it will rebroadcast max times.
+ *                        SL_PASSIVE_ACK_DISABLE - Disable passive ack. All configured nodes rebroadcast the incoming processed
  *                                                broadcast the maximum configured number of times.
  *                        SL_PASSIVE_ACK_THRESHOLD_WITH_REBROADCAST - All non originating configured nodes check for passive acks from
- *                                                minAcksNeeded neighbours. They will rebroadcast received message atleast once even
- *                                                if all passive acks have been received. if no passive acks received it will rebroadcast max times.
+ *                                                minAcksNeeded neighbours. They will rebroadcast received message at least once even
+ *                                                if all passive acks have been received. If no passive acks received it will rebroadcast max times.
  *
  *                        SL_PASSIVE_ACK_THRESHOLD_NO_REBROADCAST - All non originating configured nodes check for passive acks from
  *                                                minAcksNeeded neighbours. They will not rebroadcast received message
- *                                                if all passive acks have been received. if no passive acks received it will rebroadcast max times.
+ *                                                if all passive acks have been received. If no passive acks received it will rebroadcast max times.
+ *                        SL_PASSIVE_ACK_THRESHOLD_WITH_REBROADCAST_ALL_NODES - This configuration is for both originating and relaying (non originating nodes).
+ *                                                All configured nodes check for passive acks from
+ *                                                minAcksNeeded neighbours. They will not rebroadcast received message if all passive acks have been received.
+ *                                                If no passive acks received it will rebroadcast max times if minAcksNeeded is not set to 0
  *
- * @param minAcksNeeded  The minimum number of acknowledgments (re-broadcasts)
+ *
+ *
+ *  @param minAcksNeeded  The minimum number of acknowledgments (re-broadcasts)
  * to wait for until deeming the broadcast transmission complete.
  *
  * @return None.
@@ -953,7 +959,8 @@ typedef enum {
   SL_PASSIVE_ACK_DEFAULT_CONFIG,
   SL_PASSIVE_ACK_DISABLE,
   SL_PASSIVE_ACK_THRESHOLD_WITH_REBROADCAST,
-  SL_PASSIVE_ACK_THRESHOLD_NO_REBROADCAST
+  SL_PASSIVE_ACK_THRESHOLD_NO_REBROADCAST,
+  SL_PASSIVE_ACK_THRESHOLD_WITH_REBROADCAST_ALL_NODES
 } sl_passive_ack_config_enum_t;
 
 void sl_set_passive_ack_config(sl_passive_ack_config_enum_t config, uint8_t minAcksNeeded);

@@ -8,6 +8,7 @@ quality: production
 provides:
 - name: radio_config_simple_long_preamble
 - name: a_radio_config
+  allow_multiple: true
 ui_hints:
   visibility: never
 template_contribution:
@@ -60,6 +61,19 @@ config_file:
   - device_sdid_220
   unless:
   - device_has_radio_2g4hz
+  - device_has_radio_dualband
+  - hardware_board_rb
+  - hardware_board_tb
+  - hardware_board_stk
+  - device_is_module
+  - device_sdid_200
+- path: platform/radio/radio_configuration/Base/simple_long_preamble/device_sdid_230/rf_band_2400/radio_settings.radioconf
+  directory: rail
+  condition:
+  - device_has_radio_2g4hz
+  - device_sdid_230
+  unless:
+  - device_has_radio_subghz
   - device_has_radio_dualband
   - hardware_board_rb
   - hardware_board_tb
@@ -291,6 +305,14 @@ config_file:
   condition:
   - hardware_board_default_rf_band_915
   - device_sdid_220
+  unless:
+  - device_is_module
+  - device_sdid_200
+- path: platform/radio/radio_configuration/Base/simple_long_preamble/device_sdid_230/rf_band_2400/radio_settings.radioconf
+  directory: rail
+  condition:
+  - hardware_board_default_rf_band_2400
+  - device_sdid_230
   unless:
   - device_is_module
   - device_sdid_200

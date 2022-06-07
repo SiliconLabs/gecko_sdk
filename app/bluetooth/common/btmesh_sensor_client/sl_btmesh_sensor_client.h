@@ -40,7 +40,7 @@
 
 #define SL_BTMESH_SENSOR_CLIENT_ILLUMINANCE_UNKNOWN  ((illuminance_t)   0xFFFFFF)
 #define SL_BTMESH_SENSOR_CLIENT_PEOPLE_COUNT_UNKNOWN ((count16_t)       0xFFFF)
-#define SL_BTMESH_SENSOR_CLIENT_TEMPERATURE_UNKNOWN  ((temperature_8_t) 0xFF)
+#define SL_BTMESH_SENSOR_CLIENT_TEMPERATURE_UNKNOWN  ((temperature_8_t) 0x7F)
 
 /***************************************************************************//**
  * Enumeration representing the status of the sensor data received from the

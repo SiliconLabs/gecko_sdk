@@ -1,0 +1,136 @@
+id: "btmesh_feature_crypto_key_cache_dummy"
+label: "Dummy RAM cache for cryptographic keys"
+package: "Btmesh"
+description: "Dummy (nonfunctional) RAM cache that provides no performance improvement."
+category: "Bluetooth Mesh"
+quality: "production"
+root_path: "protocol/bluetooth"
+library:
+#EFR32BG21
+  - path: "lib/EFR32BG21/GCC/libbtmesh_crypto_key_cache_dummy.a"
+    condition:
+      - "toolchain_gcc"
+      - "device_family_efr32bg21"
+  - path: "lib/EFR32BG21/IAR/libbtmesh_crypto_key_cache_dummy.a"
+    condition:
+      - "toolchain_iar"
+      - "device_family_efr32bg21"
+#BGM21
+  - path: "lib/EFR32BG21/GCC/libbtmesh_crypto_key_cache_dummy.a"
+    condition:
+      - "toolchain_gcc"
+      - "device_family_bgm21"
+  - path: "lib/EFR32BG21/IAR/libbtmesh_crypto_key_cache_dummy.a"
+    condition:
+      - "toolchain_iar"
+      - "device_family_bgm21"
+#EFR32MG21
+  - path: "lib/EFR32MG21/GCC/libbtmesh_crypto_key_cache_dummy.a"
+    condition:
+      - "toolchain_gcc"
+      - "device_family_efr32mg21"
+  - path: "lib/EFR32MG21/IAR/libbtmesh_crypto_key_cache_dummy.a"
+    condition:
+      - "toolchain_iar"
+      - "device_family_efr32mg21"
+#MGM21
+  - path: "lib/EFR32MG21/GCC/libbtmesh_crypto_key_cache_dummy.a"
+    condition:
+      - "toolchain_gcc"
+      - "device_family_mgm21"
+  - path: "lib/EFR32MG21/IAR/libbtmesh_crypto_key_cache_dummy.a"
+    condition:
+      - "toolchain_iar"
+      - "device_family_mgm21"
+#EFR32BG22
+  - path: "lib/EFR32BG22/GCC/libbtmesh_crypto_key_cache_dummy.a"
+    condition:
+      - "toolchain_gcc"
+      - "device_family_efr32bg22"
+  - path: "lib/EFR32BG22/IAR/libbtmesh_crypto_key_cache_dummy.a"
+    condition:
+      - "toolchain_iar"
+      - "device_family_efr32bg22"
+#BGM22
+  - path: "lib/EFR32BG22/GCC/libbtmesh_crypto_key_cache_dummy.a"
+    condition:
+      - "toolchain_gcc"
+      - "device_family_bgm22"
+  - path: "lib/EFR32BG22/IAR/libbtmesh_crypto_key_cache_dummy.a"
+    condition:
+      - "toolchain_iar"
+      - "device_family_bgm22"
+#EFR32MG22
+  - path: "lib/EFR32MG22/GCC/libbtmesh_crypto_key_cache_dummy.a"
+    condition:
+      - "toolchain_gcc"
+      - "device_family_efr32mg22"
+  - path: "lib/EFR32MG22/IAR/libbtmesh_crypto_key_cache_dummy.a"
+    condition:
+      - "toolchain_iar"
+      - "device_family_efr32mg22"
+#EFR32MG22
+  - path: "lib/EFR32MG22/GCC/libbtmesh_crypto_key_cache_dummy.a"
+    condition:
+      - "toolchain_gcc"
+      - "device_family_mgm22"
+  - path: "lib/EFR32MG22/IAR/libbtmesh_crypto_key_cache_dummy.a"
+    condition:
+      - "toolchain_iar"
+      - "device_family_mgm22"
+#MGM24
+  - path: "lib/EFR32MG24/GCC/libbtmesh_crypto_key_cache_dummy.a"
+    condition:
+      - "toolchain_gcc"
+      - "device_family_mgm24"
+  - path: "lib/EFR32MG24/IAR/libbtmesh_crypto_key_cache_dummy.a"
+    condition:
+      - "toolchain_iar"
+      - "device_family_mgm24"
+#BGM24
+  - path: "lib/EFR32BG24/GCC/libbtmesh_crypto_key_cache_dummy.a"
+    condition:
+      - "toolchain_gcc"
+      - "device_family_bgm24"
+  - path: "lib/EFR32BG24/IAR/libbtmesh_crypto_key_cache_dummy.a"
+    condition:
+      - "toolchain_iar"
+      - "device_family_bgm24"
+#EFR32BG24
+  - path: "lib/EFR32BG24/GCC/libbtmesh_crypto_key_cache_dummy.a"
+    condition:
+      - "toolchain_gcc"
+      - "device_family_efr32bg24"
+  - path: "lib/EFR32BG24/IAR/libbtmesh_crypto_key_cache_dummy.a"
+    condition:
+      - "toolchain_iar"
+      - "device_family_efr32bg24"
+#EFR32MG24
+  - path: "lib/EFR32MG24/GCC/libbtmesh_crypto_key_cache_dummy.a"
+    condition:
+      - "toolchain_gcc"
+      - "device_family_efr32mg24"
+  - path: "lib/EFR32MG24/IAR/libbtmesh_crypto_key_cache_dummy.a"
+    condition:
+      - "toolchain_iar"
+      - "device_family_efr32mg24"
+#EFR32MG27
+  - path: "lib/EFR32MG27/GCC/libbtmesh_crypto_key_cache_dummy.a"
+    condition:
+      - "toolchain_gcc"
+      - "device_family_efr32mg27"
+  - path: "lib/EFR32MG27/IAR/libbtmesh_crypto_key_cache_dummy.a"
+    condition:
+      - "toolchain_iar"
+      - "device_family_efr32mg27"
+#EFR32BG27
+  - path: "lib/EFR32BG27/GCC/libbtmesh_crypto_key_cache_dummy.a"
+    condition:
+      - "toolchain_gcc"
+      - "device_family_efr32bg27"
+  - path: "lib/EFR32BG27/IAR/libbtmesh_crypto_key_cache_dummy.a"
+    condition:
+      - "toolchain_iar"
+      - "device_family_efr32bg27"
+provides:
+  - name: "btmesh_feature_crypto_key_cache_dummy"

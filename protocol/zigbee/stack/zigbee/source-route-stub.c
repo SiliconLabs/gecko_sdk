@@ -20,6 +20,7 @@
 #include "stack/include/message.h"
 #include "stack/include/ember-types-internal.h"
 #include "source-route-table-update.h"
+#include "stack/core/ember-multi-network.h"
 
 // -----------------------------------------------------------------------------
 // Functions

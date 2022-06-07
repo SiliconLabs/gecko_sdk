@@ -12,24 +12,6 @@
 #include <CC_Common.h>
 #include <ZW_TransportEndpoint.h>
 
-/*
- * Local defines to get rid of context sensitive define names from ZW_classcmd.h
- */
-
-/* Indicator IDs */
-#define INDICATOR_IND_NA            INDICATOR_SET_NA_V3
-#define INDICATOR_IND_NODE_IDENTIFY INDICATOR_SET_NODE_IDENTIFY_V3
-
-/* Property IDs */
-#define INDICATOR_PROP_ON_OFF_PERIOD INDICATOR_SET_ON_OFF_PERIOD_V3
-#define INDICATOR_PROP_ON_OFF_CYCLES INDICATOR_SET_ON_OFF_CYCLES_V3
-#define INDICATOR_PROP_ON_TIME       INDICATOR_SET_ONE_TIME_ON_OFF_PERIOD_V3
-
-/* Masks etc. */
-#define INDICATOR_OBJECT_COUNT_MASK INDICATOR_SET_PROPERTIES1_INDICATOR_OBJECT_COUNT_MASK_V3
-#define INDICATOR_RESERVED_MASK     INDICATOR_SET_PROPERTIES1_RESERVED_MASK_V3
-#define INDICATOR_RESERVED_SHIFT    INDICATOR_SET_PROPERTIES1_RESERVED_SHIFT_V3
-
 /**
  * Struct used to pass operational data to TSE module
  */
@@ -38,6 +20,32 @@ typedef struct s_CC_indicator_data_t_
   RECEIVE_OPTIONS_TYPE_EX rxOptions; /**< rxOptions */
   uint8_t indicatorId; /**< Indicator Id */
 } s_CC_indicator_data_t;
+
+
+/**
+ * Indicator set callback.
+ *
+ * Even though on/off time parameters are given in milliseconds, the
+ * resolution is 1/10'th of a second.
+ *
+ * @param on_time_ms  ON duration (in milliseconds) for a single blink cycle.
+ *                    If on_time_ms is zero the indicator should be turned off.
+ *
+ * @param off_time_ms OFF duration (in milliseconds) for a single blink cycle.
+ *
+ * @param num_cycles  Number of blink cycles. If num_cycles is zero the indicator
+ *                    LED should blink "forever" or until the next time this
+ *                    function is called.
+ */
+typedef void (*cc_indicator_callback_t)(uint32_t on_time_ms,
+                                        uint32_t off_time_ms,
+                                        uint32_t num_cycles);
+
+/**
+ * Initializes the Indicator Command Class.
+ * @param callback Function that is invoked everytime indicator is set.
+ */
+void CC_Indicator_Init(cc_indicator_callback_t callback);
 
 /**
  * Send report when change happen via lifeLine by INDICATOR_SET

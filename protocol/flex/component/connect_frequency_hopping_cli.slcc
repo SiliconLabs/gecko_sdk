@@ -34,9 +34,9 @@ template_contribution:
       help: ""
       argument:
       - type: uint16
-        help: "Node ID" 
+        help: "Node ID"
       - type: uint16
-        help: "Pan ID" 
+        help: "Pan ID"
   - name: cli_command
     value:
       name: stack_stop_fh

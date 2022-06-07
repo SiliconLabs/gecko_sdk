@@ -32,15 +32,6 @@ requires:
   - name: zigbee_app_framework_common
   - name: component_catalog
   - name: token_manager
-  - name: zigbee_multi_network_feature
-  - name: zigbee_multi_pan_feature
-  # Requires multi network stub component for dumbo parts.
-  - name: zigbee_multi_network_stub
-    condition:
-      - device_sdid_80
-  - name: zigbee_multi_pan_stub
-    condition:
-      - zigbee_multi_network_stub
   - name: status
   - name: endianness
   # AES
@@ -70,8 +61,6 @@ requires:
 
 recommends:
   - id: rail_lib_singleprotocol
-  - id: zigbee_multi_network_stub
-  - id: zigbee_multi_pan_stub
   - id: zigbee_aes_psa
   - id: zigbee_ccm_psa
   - id: zigbee_strong_random_api_radio
@@ -107,6 +96,7 @@ include:
       - path: ember-duty-cycle.h
       - path: ember-static-struct.h
       - path: message.h
+      - path: multi-network.h
       - path: multi-phy.h
       - path: network-formation.h
       - path: security.h
@@ -132,6 +122,10 @@ include:
   - path: protocol/zigbee/stack/zigbee/
     file_list:
       - path: source-route-table-update.h
+  - path: platform/radio/mac/rail_mux
+    file_list:
+      - path: sl_rail_mux_rename.h
+      - path: sl_rail_mux.h      
   #ToDo: These should be treated as internal headers: as such, we should clean up
   #our released code so that we no longer need to release these (EMZIGBEE-6706)
   - path: platform/radio/mac
@@ -158,7 +152,9 @@ include:
       - path: event_queue/event-queue.h
   - path: protocol/zigbee/stack/core/
     file_list:
+      - path: ember-multi-network.h
       - path: multi-pan-token-config.h
+      - path: multi-pan.h
   - path: protocol/zigbee/stack/mac/
     file_list:
       - path: multi-mac.h
@@ -231,6 +227,13 @@ source:
   - path: protocol/zigbee/stack/gp/gp-stub.c
     unless:
       - zigbee_gp
+  - path: protocol/zigbee/stack/core/ember-multi-network-stub.c
+    unless:
+      - zigbee_multi_network
+  - path: protocol/zigbee/stack/core/multi-pan-stub.c
+    unless:
+      - zigbee_multi_pan
+  - path: protocol/zigbee/stack/core/multi-pan-common.c
   - path: protocol/zigbee/stack/security/packet-validate-stub.c
     unless:
       - zigbee_packet_validate
@@ -268,6 +271,9 @@ define:
     value: 1
     condition:
       - rail_util_ieee802154_phy_select
+  - name: EMBER_MULTI_NETWORK_STRIPPED
+    unless:
+      - zigbee_multi_network
 
 template_contribution:
   - name: component_catalog
@@ -282,6 +288,8 @@ template_contribution:
       runtime_phy_select_stack_support: SL_ZIGBEE_PHY_SELECT_STACK_SUPPORT
       update_active_radio_config: sl_mac_lower_mac_update_active_radio_config
     priority: -9020
+    unless:
+      - rail_mux
   - name: zigbee_ncp_callback
     value:
       callback_type: set_configuration_value

@@ -12,14 +12,7 @@
   - path: platform/Device/SiliconLabs/EFM32JG12B/Source/system_efm32jg12b.c
     unless:
     - device_content_override
-  - condition:
-    - toolchain_iar
-    path: platform/Device/SiliconLabs/EFM32JG12B/Source/IAR/startup_efm32jg12b.c
-    unless:
-    - device_content_override
-  - condition:
-    - toolchain_gcc
-    path: platform/Device/SiliconLabs/EFM32JG12B/Source/GCC/startup_efm32jg12b.c
+  - path: platform/Device/SiliconLabs/EFM32JG12B/Source/startup_efm32jg12b.c
     unless:
     - device_content_override
   - condition:
@@ -197,3 +190,21 @@
     - custom_radio_config
     directory: rail
     path: platform/Device/config/84/device.yaml
+- metadata:
+    device:
+      memory:
+      - name: Main Flash
+        page_size: 2048
+        size: 1048576
+        start: 0
+        type: non-volatile
+      - name: Bootloader Flash
+        page_size: 2048
+        size: 38912
+        start: 266403840
+        type: non-volatile
+      - name: RAM
+        size: 262144
+        start: 536870912
+        type: volatile
+      opn: efm32jg12b500f1024im48

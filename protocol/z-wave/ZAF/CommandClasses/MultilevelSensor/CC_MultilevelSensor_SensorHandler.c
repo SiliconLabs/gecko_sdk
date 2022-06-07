@@ -39,46 +39,46 @@
 //                Static Variables
 // -----------------------------------------------------------------------------
 /**< SENSOR_ADMINISTRATION instance which holds the registered sensor interface references. */
-static sl_sensor_administration_t sensor_administrator;
+static sensor_administration_t sensor_administrator;
 // -----------------------------------------------------------------------------
 //              Public Function Definitions
 // -----------------------------------------------------------------------------
-sl_cc_multilevel_sensor_return_value
-sl_cc_multilevel_sensor_check_sensor_type_registered(uint8_t sensor_type_value)
+cc_multilevel_sensor_return_value
+cc_multilevel_sensor_check_sensor_type_registered(uint8_t sensor_type_value)
 {
-  sl_cc_multilevel_sensor_return_value retval = SL_CC_MULTILEVEL_SENSOR_RETURN_VALUE_NOT_FOUND;
-  sl_sensor_interface_iterator_t* sensor_interface_iterator;
-  sl_cc_multilevel_sensor_init_iterator(&sensor_interface_iterator);
+  cc_multilevel_sensor_return_value retval = CC_MULTILEVEL_SENSOR_RETURN_VALUE_NOT_FOUND;
+  sensor_interface_iterator_t* sensor_interface_iterator;
+  cc_multilevel_sensor_init_iterator(&sensor_interface_iterator);
 
   while(sensor_interface_iterator)
   {
     if(sensor_type_value == sensor_interface_iterator->sensor_type->value)
     {
-      retval = SL_CC_MULTILEVEL_SENSOR_RETURN_VALUE_OK;
+      retval = CC_MULTILEVEL_SENSOR_RETURN_VALUE_OK;
       break;
     }
-    sl_cc_multilevel_sensor_next_iterator(&sensor_interface_iterator);
+    cc_multilevel_sensor_next_iterator(&sensor_interface_iterator);
   }
 
   return retval;
 }
 
-sl_cc_multilevel_sensor_return_value
-sl_cc_multilevel_sensor_get_default_sensor_type(uint8_t* o_default_sensor_type_value)
+cc_multilevel_sensor_return_value
+cc_multilevel_sensor_get_default_sensor_type(uint8_t* o_default_sensor_type_value)
 {
-  sl_cc_multilevel_sensor_return_value retval = SL_CC_MULTILEVEL_SENSOR_RETURN_VALUE_ERROR;
+  cc_multilevel_sensor_return_value retval = CC_MULTILEVEL_SENSOR_RETURN_VALUE_ERROR;
 
   if((o_default_sensor_type_value != NULL) && (sensor_administrator.number_of_registrated_sensors > 0))
   {
     *o_default_sensor_type_value = sensor_administrator.registrated_sensors[0]->sensor_type->value;
-    retval = SL_CC_MULTILEVEL_SENSOR_RETURN_VALUE_OK;
+    retval = CC_MULTILEVEL_SENSOR_RETURN_VALUE_OK;
   }
 
     return retval;
 }
 
 uint8_t
-sl_cc_multilevel_sensor_check_scale(const sl_sensor_interface_t* i_interface, uint8_t i_scale)
+cc_multilevel_sensor_check_scale(const sensor_interface_t* i_interface, uint8_t i_scale)
 {
   uint8_t default_scale = i_scale;
 
@@ -97,77 +97,77 @@ sl_cc_multilevel_sensor_check_scale(const sl_sensor_interface_t* i_interface, ui
     return default_scale;
 }
 
-sl_cc_multilevel_sensor_return_value
-sl_cc_multilevel_sensor_get_interface(uint8_t sensor_type_value, sl_sensor_interface_t** o_interface)
+cc_multilevel_sensor_return_value
+cc_multilevel_sensor_get_interface(uint8_t sensor_type_value, sensor_interface_t** o_interface)
 {
-  sl_cc_multilevel_sensor_return_value retval = SL_CC_MULTILEVEL_SENSOR_RETURN_VALUE_NOT_FOUND;
+  cc_multilevel_sensor_return_value retval = CC_MULTILEVEL_SENSOR_RETURN_VALUE_NOT_FOUND;
 
   if(o_interface != NULL)
   {
-    sl_sensor_interface_iterator_t* sensor_interface_iterator;
-    sl_cc_multilevel_sensor_init_iterator(&sensor_interface_iterator);
+    sensor_interface_iterator_t* sensor_interface_iterator;
+    cc_multilevel_sensor_init_iterator(&sensor_interface_iterator);
 
     while(sensor_interface_iterator)
     {
        if(sensor_type_value == sensor_interface_iterator->sensor_type->value)
       {
         *o_interface = sensor_interface_iterator;
-        retval = SL_CC_MULTILEVEL_SENSOR_RETURN_VALUE_OK;
+        retval = CC_MULTILEVEL_SENSOR_RETURN_VALUE_OK;
         break;
       }
-      sl_cc_multilevel_sensor_next_iterator(&sensor_interface_iterator);
+      cc_multilevel_sensor_next_iterator(&sensor_interface_iterator);
     }
   }
   else
   {
-    retval = SL_CC_MULTILEVEL_SENSOR_RETURN_VALUE_ERROR;
+    retval = CC_MULTILEVEL_SENSOR_RETURN_VALUE_ERROR;
   }
   
 
     return retval;
 }
 
-sl_cc_multilevel_sensor_return_value
-sl_cc_multilevel_sensor_get_supported_scale(uint8_t sensor_type_value , uint8_t* o_supported_scale)
+cc_multilevel_sensor_return_value
+cc_multilevel_sensor_get_supported_scale(uint8_t sensor_type_value , uint8_t* o_supported_scale)
 {
-    sl_cc_multilevel_sensor_return_value retval = SL_CC_MULTILEVEL_SENSOR_RETURN_VALUE_NOT_FOUND;
+    cc_multilevel_sensor_return_value retval = CC_MULTILEVEL_SENSOR_RETURN_VALUE_NOT_FOUND;
 
   if(o_supported_scale != NULL)
   {
-    sl_sensor_interface_iterator_t* sensor_interface_iterator;
-    sl_cc_multilevel_sensor_init_iterator(&sensor_interface_iterator);
+    sensor_interface_iterator_t* sensor_interface_iterator;
+    cc_multilevel_sensor_init_iterator(&sensor_interface_iterator);
 
     while(sensor_interface_iterator)
     {
       if(sensor_type_value == sensor_interface_iterator->sensor_type->value)
       {
         *o_supported_scale = sensor_interface_iterator->supported_scale;
-        retval = SL_CC_MULTILEVEL_SENSOR_RETURN_VALUE_OK;
+        retval = CC_MULTILEVEL_SENSOR_RETURN_VALUE_OK;
         break;
       }
-      sl_cc_multilevel_sensor_next_iterator(&sensor_interface_iterator);
+      cc_multilevel_sensor_next_iterator(&sensor_interface_iterator);
     }
   }
   else
   {
-    retval = SL_CC_MULTILEVEL_SENSOR_RETURN_VALUE_ERROR;
+    retval = CC_MULTILEVEL_SENSOR_RETURN_VALUE_ERROR;
   }
   
 
     return retval;
 }
 
-sl_cc_multilevel_sensor_return_value
-sl_cc_multilevel_sensor_get_supported_sensors(uint8_t* o_supported_sensor_buffer)
+cc_multilevel_sensor_return_value
+cc_multilevel_sensor_get_supported_sensors(uint8_t* o_supported_sensor_buffer)
 {
-  sl_cc_multilevel_sensor_return_value retval = SL_CC_MULTILEVEL_SENSOR_RETURN_VALUE_OK;
+  cc_multilevel_sensor_return_value retval = CC_MULTILEVEL_SENSOR_RETURN_VALUE_OK;
 
   if(o_supported_sensor_buffer != NULL)
   {
     memset(o_supported_sensor_buffer, 0, 11);
 
-    sl_sensor_interface_iterator_t* sensor_interface_iterator;
-    sl_cc_multilevel_sensor_init_iterator(&sensor_interface_iterator);
+    sensor_interface_iterator_t* sensor_interface_iterator;
+    cc_multilevel_sensor_init_iterator(&sensor_interface_iterator);
 
     while(sensor_interface_iterator)
     {
@@ -175,56 +175,56 @@ sl_cc_multilevel_sensor_get_supported_sensors(uint8_t* o_supported_sensor_buffer
       uint8_t bit_mask    = (uint8_t)(1 << sensor_interface_iterator->sensor_type->bit_mask);
 
       o_supported_sensor_buffer[byte_offset-1] |= bit_mask;
-      sl_cc_multilevel_sensor_next_iterator(&sensor_interface_iterator);
+      cc_multilevel_sensor_next_iterator(&sensor_interface_iterator);
     }
   }
   else
   {
-    retval = SL_CC_MULTILEVEL_SENSOR_RETURN_VALUE_ERROR;
+    retval = CC_MULTILEVEL_SENSOR_RETURN_VALUE_ERROR;
   }
   
 
   return retval;
 }
 
-sl_cc_multilevel_sensor_return_value
-sl_cc_multilevel_sensor_registration(sl_sensor_interface_t* i_new_sensor)
+cc_multilevel_sensor_return_value
+cc_multilevel_sensor_registration(sensor_interface_t* i_new_sensor)
 {
-  sl_cc_multilevel_sensor_return_value retval = SL_CC_MULTILEVEL_SENSOR_RETURN_VALUE_OK;
+  cc_multilevel_sensor_return_value retval = CC_MULTILEVEL_SENSOR_RETURN_VALUE_OK;
 
   if(i_new_sensor != NULL)
   {
-    if(sensor_administrator.number_of_registrated_sensors < SL_MULTILEVEL_SENSOR_REGISTERED_SENSOR_NUMBER_LIMIT)
+    if(sensor_administrator.number_of_registrated_sensors < MULTILEVEL_SENSOR_REGISTERED_SENSOR_NUMBER_LIMIT)
     {
-      if(sl_cc_multilevel_sensor_check_sensor_type_registered(i_new_sensor->sensor_type->value) ==
-         SL_CC_MULTILEVEL_SENSOR_RETURN_VALUE_NOT_FOUND)
+      if(cc_multilevel_sensor_check_sensor_type_registered(i_new_sensor->sensor_type->value) ==
+         CC_MULTILEVEL_SENSOR_RETURN_VALUE_NOT_FOUND)
       {
         sensor_administrator.registrated_sensors[sensor_administrator.number_of_registrated_sensors] = i_new_sensor;
         sensor_administrator.number_of_registrated_sensors++;
       }
       else
       {
-        retval = SL_CC_MULTILEVEL_SENSOR_RETURN_VALUE_ALREADY_REGISTRATED;
+        retval = CC_MULTILEVEL_SENSOR_RETURN_VALUE_ALREADY_REGISTRATED;
       }
     }
     else
     {
-    retval = SL_CC_MULTILEVEL_SENSOR_RETURN_VALUE_REGISTRATION_LIMIT_REACHED;
+    retval = CC_MULTILEVEL_SENSOR_RETURN_VALUE_REGISTRATION_LIMIT_REACHED;
     }
   }
   else
   {
-    retval = SL_CC_MULTILEVEL_SENSOR_RETURN_VALUE_ERROR;
+    retval = CC_MULTILEVEL_SENSOR_RETURN_VALUE_ERROR;
   }
   
   
   return retval;
 }
 
-sl_cc_multilevel_sensor_return_value
-sl_cc_multilevel_sensor_init_iterator(sl_sensor_interface_iterator_t** i_iterator)
+cc_multilevel_sensor_return_value
+cc_multilevel_sensor_init_iterator(sensor_interface_iterator_t** i_iterator)
 {
-  sl_cc_multilevel_sensor_return_value retval = SL_CC_MULTILEVEL_SENSOR_RETURN_VALUE_OK;
+  cc_multilevel_sensor_return_value retval = CC_MULTILEVEL_SENSOR_RETURN_VALUE_OK;
 
   if(sensor_administrator.number_of_registrated_sensors == 0)
   {
@@ -240,7 +240,7 @@ sl_cc_multilevel_sensor_init_iterator(sl_sensor_interface_iterator_t** i_iterato
 }
 
 void
-sl_cc_multilevel_sensor_next_iterator(sl_sensor_interface_iterator_t** i_iterator)
+cc_multilevel_sensor_next_iterator(sensor_interface_iterator_t** i_iterator)
 {
   if((sensor_administrator.number_of_registrated_sensors > 0) && (*i_iterator != NULL))
   {
@@ -248,9 +248,9 @@ sl_cc_multilevel_sensor_next_iterator(sl_sensor_interface_iterator_t** i_iterato
     uint8_t last_interface;
     uint8_t sensor_number_limit = sensor_administrator.number_of_registrated_sensors;
 
-    if( sensor_number_limit > SL_MULTILEVEL_SENSOR_REGISTERED_SENSOR_NUMBER_LIMIT)
+    if( sensor_number_limit > MULTILEVEL_SENSOR_REGISTERED_SENSOR_NUMBER_LIMIT)
     {
-      sensor_number_limit = SL_MULTILEVEL_SENSOR_REGISTERED_SENSOR_NUMBER_LIMIT;
+      sensor_number_limit = MULTILEVEL_SENSOR_REGISTERED_SENSOR_NUMBER_LIMIT;
     }
 
     last_interface = sensor_number_limit - 1;
@@ -283,10 +283,10 @@ sl_cc_multilevel_sensor_next_iterator(sl_sensor_interface_iterator_t** i_iterato
 }
 
 void
-sl_cc_multilevel_sensor_init_all_sensor(void)
+cc_multilevel_sensor_init_all_sensor(void)
 {
-  sl_sensor_interface_iterator_t* sensor_interface_iterator;
-  sl_cc_multilevel_sensor_init_iterator(&sensor_interface_iterator);
+  sensor_interface_iterator_t* sensor_interface_iterator;
+  cc_multilevel_sensor_init_iterator(&sensor_interface_iterator);
 
   while(sensor_interface_iterator)
   {
@@ -294,20 +294,20 @@ sl_cc_multilevel_sensor_init_all_sensor(void)
     {
       sensor_interface_iterator->init();
     }
-    sl_cc_multilevel_sensor_next_iterator(&sensor_interface_iterator);
+    cc_multilevel_sensor_next_iterator(&sensor_interface_iterator);
   }
 }
 
 uint8_t
-sl_cc_multilevel_sensor_get_number_of_registered_sensors(void)
+cc_multilevel_sensor_get_number_of_registered_sensors(void)
 {
   return sensor_administrator.number_of_registrated_sensors;
 }
 
 void
-sl_cc_multilevel_sensor_reset_administration(void)
+cc_multilevel_sensor_reset_administration(void)
 {
-  memset(&sensor_administrator, 0, sizeof(sl_sensor_administration_t));
+  memset(&sensor_administrator, 0, sizeof(sensor_administration_t));
 }
 // -----------------------------------------------------------------------------
 //              Static Function Definitions

@@ -39,7 +39,7 @@
 // <i> This is the shared resource URI path to get mesaurement results
 #define SL_WISUN_COAP_METER_COLLECTOR_MEASUREMENT_URI_PATH             "/measurement"
 
-// <s SL_WISUN_COAP_METER_COLLECTOR_LED_URI_PATH> Meter LEDs resource URI path
+// <s SL_WISUN_COAP_METER_COLLECTOR_LED_TOGGLE_URI_PATH> Meter LEDs resource URI path
 // <i> Default: "/led"
 // <i> This is the shared resource URI path to toggle LEDs
 #define SL_WISUN_COAP_METER_COLLECTOR_LED_TOGGLE_URI_PATH              "/led"

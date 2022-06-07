@@ -16,6 +16,9 @@ requires:
   # rail support
   - name: device_supports_rail_stack # device must support "RAIL Stacks" (e.g., RAILtest)
   - name: rail_util_pa
+  - name: rail_util_thermistor
+    condition:
+      - device_sdid_220
 
   # silabs_core
   - name: silabs_core_memory_manager
@@ -73,6 +76,9 @@ config_file:
   - path: platform/radio/rail_lib/apps/railtest/config/efr32xg25/sl_rail_test_config.h
     condition:
       - device_sdid_220
+  - path: platform/radio/rail_lib/apps/railtest/config/efr32xg27/sl_rail_test_config.h
+    condition:
+      - device_sdid_230
 
 include:
   - path: platform/radio/rail_lib/hal
@@ -406,18 +412,12 @@ template_contribution:
     value:
       name: configPaAutoMode
       handler: configPaAutoMode
-      help: "Configure an entry in the default PA Auto Mode plugin."
+      help: "Configure entries in the default PA Auto Mode plugin."
       argument:
         - type: uint8
-          help: "entryIndex"
-        - type: int32
-          help: "min: deci-dBm"
-        - type: int32
-          help: "max: deci-dBm"
-        - type: uint8
-          help: "RAIL_TX_POWER_MODE for this power range"
-        - type: uint8opt
-          help: "Band for the PA: [0]-2"
+          help: "start Index"
+        - type: int32opt
+          help: "min max mode band: PA auto config entries"
 
   - name: cli_command
     value:
@@ -1151,24 +1151,6 @@ template_contribution:
 
   - name: cli_command
     value:
-      name: config863MhzSUNOFDMOpt
-      handler: config863MhzSUNOFDMOpt
-      help: " Configure the radio for 863-876 MHz SUN OFDM modulations"
-      argument:
-        - type: uint8
-          help: "ofdmOption: 1-2-3-4"
-
-  - name: cli_command
-    value:
-      name: config902MhzSUNOFDMOpt
-      handler: config902MhzSUNOFDMOpt
-      help: " Configure the radio for 902-928 MHz SUN OFDM modulations"
-      argument:
-        - type: uint8
-          help: "ofdmOption: 1-2-3-4"
-
-  - name: cli_command
-    value:
       name: set802154e
       handler: ieee802154SetE
       help: "Configure 802.15.4E options."
@@ -1315,12 +1297,23 @@ template_contribution:
     value:
       name: trigModeSwitchTx
       handler: trigModeSwitchTx
-      help: "Transmit a Mode Switch packet then transmit packets on the new PHY with current TX options and stay on the new PHY."
+      help: "Transmit a Mode Switch packet then transmit packets on the new PHY with current\\n                    TX options Depending on modeSwitchLife configuration, after all iterations are\\n                    done, it either stays on the new PHY or returns to the base PHY."
       argument:
         - type: uint8
           help: "new PhyModeId, i.e. ID of the PHYMode we are switching to"
         - type: uint8
           help: "number of packets transmitted on the new PHY"
+        - type: uint32opt
+          help: "number of times the sequence -mode switch packet followed by data packets- is\\n                    repeated, default is 1 if argument is absent\\n                    [uint32opt] delayMilliseconds before switching back to base PHY after all packets have been\\n                    transmitted on the new PHY, default is 0 if argument is absent. Multitimer is\\n                    used for delay greater than 0."
+
+  - name: cli_command
+    value:
+      name: modeSwitchLife
+      handler: modeSwitchLife
+      help: "Return to the base PHY after all data packets transmission for TX or after\\n                    MODE_SWITCH_START event and multitimer expiration after first data packet\\n                    reception on new phy for RX."
+      argument:
+        - type: uint8
+          help: "0=stay on new PHY (normal Wi-SUN FAN behaviour) 1=return to base PHY (special test mode)"
 
   - name: cli_command
     value:
@@ -1885,11 +1878,19 @@ template_contribution:
 
   - name: cli_command
     value:
+      name: configHFXOThermistor
+      handler: configHFXOThermistor
+      help: "Configures the thermistor pin."
+
+  - name: cli_command
+    value:
       name: startThermistor
       handler: startThermistorMeasurement
-      help: "Configures the thermistor pin and starts a measurement."
+      help: "Starts a thermistor measurement."
       shortcuts:
         - name: startThermistorMeasurement
+    condition:
+      - device_series_2
 
   - name: cli_command
     value:
@@ -1898,6 +1899,172 @@ template_contribution:
       help: "Gets the thermistor impedance."
       shortcuts:
         - name: getThermistorImpedance
+    condition:
+      - device_series_2
+
+  - name: cli_command
+    value:
+      name: getHFXOPPMError
+      handler: getHFXOPPMError
+      help: "Compute the HFXO PPM deviation.\\n                    Must be called after a complete thermistor measurement\\n                    ie after getThermistor."
+    condition:
+      - device_series_2
+
+  - name: cli_command
+    value:
+      name: getTemperature
+      handler: getTemperature
+      help: "Show chip, FEM, XTAL temperatures in Celsius (255=invalid)"
+      argument:
+        - type: uint8opt
+          help: "1=reset temperature values after reading"
+    condition:
+      - device_sdid_220
+      - rail_util_eff
+
+  - name: cli_command
+    value:
+      name: getSetFemProtectionConfig
+      handler: getSetFemProtectionConfig
+      help: "Show/Configure the FEM protection configuration. Use 0 to restore default"
+      argument:
+        - type: uint16opt
+          help: "Arg1: Tx duty cycle in percentage\\n                               Arg2: Power in deci-dBm at FEM output"
+    condition:
+      - device_sdid_220
+      - rail_util_eff
+
+  - name: cli_command
+    value:
+      name: getSetEffControl
+      handler: getSetEffControl
+      help: "No parameters, returns the EFF Control structure"
+      argument:
+        - type: uint8opt
+          help: "non-zero=reset EFF Control structure to 0"
+    condition:
+      - device_sdid_220
+      - rail_util_eff
+
+  - name: cli_command
+    value:
+      name: getSetEffMode
+      handler: getSetEffMode
+      help: "No parameters, returns the EFF Mode on FEMDATA"
+      argument:
+        - type: uint8opt
+          help: "EffMode: Sets the EFF Mode on FEMDATA"
+    condition:
+      - device_sdid_220
+      - rail_util_eff
+
+  - name: cli_command
+    value:
+      name: getSetEffRuralUrban
+      handler: getSetEffRuralUrban
+      help: "Returns the trip voltage from rural to urban in mV"
+      argument:
+        - type: uint16opt
+          help: "TripVoltage: Sets the trip voltage, in mV"
+    condition:
+      - device_sdid_220
+      - rail_util_eff
+
+  - name: cli_command
+    value:
+      name: getSetEffUrbanBypass
+      handler: getSetEffUrbanBypass
+      help: "Returns the trip voltage from urban to bypass in mV"
+      argument:
+        - type: uint16opt
+          help: "TripVoltage: Sets the trip voltage, in mV"
+    condition:
+      - device_sdid_220
+      - rail_util_eff
+
+  - name: cli_command
+    value:
+      name: getSetEffUrbanDwellTime
+      handler: getSetEffUrbanDwellTime
+      help: "Returns the length of time the EFF LNA stays in urban mode before transitioning to rural mode in ms"
+      argument:
+        - type: uint32opt
+          help: "TransitionTime: Sets the transition time, in ms"
+    condition:
+      - device_sdid_220
+      - rail_util_eff
+
+  - name: cli_command
+    value:
+      name: getSetEffBypassDwellTime
+      handler: getSetEffBypassDwellTime
+      help: "Returns the length of time the EFF LNA stays in bypass mode before transitioning to urban or rural mode in ms"
+      argument:
+        - type: uint32opt
+          help: "TransitionTime: Sets the transition time, in ms"
+    condition:
+      - device_sdid_220
+      - rail_util_eff
+
+  - name: cli_command
+    value:
+      name: getSetClpcSlowLoop
+      handler: getSetClpcSlowLoop
+      help: "Returns the target power and gain for CLPC slow loop in mW"
+      argument:
+        - type: uint16opt
+          help: "TargetPower: Sets the target power, in mW\\n                    [uint16opt] Slope: Sets the delta gain/delta target, in GAINDIG/mW"
+    condition:
+      - device_sdid_220
+      - rail_util_eff
+
+  - name: cli_command
+    value:
+      name: getSetClpcFastLoop
+      handler: getSetClpcFastLoop
+      help: "Returns the target voltage and gain for CLPC fast loop in mV"
+      argument:
+        - type: uint16opt
+          help: "TargetVoltage: Sets the voltage, in mV\\n                    [uint16opt] Slope: Sets the delta gain/delta target, in GAINDIG/mV"
+    condition:
+      - device_sdid_220
+      - rail_util_eff
+
+  - name: cli_command
+    value:
+      name: getSetClpcEnable
+      handler: getSetClpcEnable
+      help: "No parameters, returns EFF CLPC Enable"
+      argument:
+        - type: uint8opt
+          help: "ClpcEnable: Sets the EFF CLPC Enable"
+    condition:
+      - device_sdid_220
+      - rail_util_eff
+
+  - name: cli_command
+    value:
+      name: getSetEffTempThreshold
+      handler: getSetEffTempThreshold
+      help: "Returns the EFF temperature threshold"
+      argument:
+        - type: uint16opt
+          help: "TempThreshold: Sets the EFF temperature threshold, in degrees Kelvin"
+    condition:
+      - device_sdid_220
+      - rail_util_eff
+
+  - name: cli_command
+    value:
+      name: getSetInternalTempThreshold
+      handler: getSetInternalTempThreshold
+      help: "Returns the internal temperature threshold"
+      argument:
+        - type: uint16opt
+          help: "TempThreshold: Sets the internal temperature threshold, in degrees Kelvin"
+    condition:
+      - device_sdid_220
+      - rail_util_eff
 
   - name: cli_command
     value:
@@ -2191,6 +2358,21 @@ template_contribution:
 
   - name: cli_command
     value:
+      name: setRssiDetectThreshold
+      handler: setRssiDetectThreshold
+      help: "Sets the RSSI detect threshold."
+      argument:
+        - type: int8
+          help: "RSSI detect threshold (in dBm). (-128 disables detection)"
+
+  - name: cli_command
+    value:
+      name: getRssiDetectThreshold
+      handler: getRssiDetectThreshold
+      help: "Gets the RSSI detect threshold(in dBm)."
+
+  - name: cli_command
+    value:
       name: txAt
       handler: txAtTime
       help: "Transmit a packet at a certain time."
@@ -2290,9 +2472,18 @@ template_contribution:
       help: " Enable Signal Identifier for BLE signal detection"
       argument:
         - type: uint8
-          help: "0=Disable 1=Enable"
+          help: "Mode 0=Disable 1=BLE1Mbps 2=BLE2Mbps"
+
+  - name: cli_command
+    value:
+      name: getChannelConfigEntry
+      handler: getChannelConfigEntry
+      help: " Get the maximum valid channelConfig index, the maximum valid channelConfigEntry index in the selected channelConfig and parameters of the selected channelConfigEntry"
+      argument:
         - type: uint8
-          help: "Mode 1=BLE1Mbps 2=BLE2Mbps"
+          help: "channelConfig index"
+        - type: uint8
+          help: "channelConfigEntry index"
 
   - name: rail_util_ieee802154_phy_select_callbacks
     value:

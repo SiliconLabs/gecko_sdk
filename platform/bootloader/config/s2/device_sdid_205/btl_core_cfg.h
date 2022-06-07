@@ -35,6 +35,11 @@
 // Use the symmetric key stored in Secure Element storage for encryption and decryption.
 #define BOOTLOADER_USE_SYMMETRIC_KEY_FROM_SE_STORAGE                    0
 
+// <q BOOTLOADER_USE_SYMMETRIC_KEY_FROM_APP_PROPERTIES> Use symmetric key stored in Application Properties Struct
+// <i> Default: 0
+// <i> Use the symmetric key stored in Application Properties Struct for encryption and decryption.
+#define BOOTLOADER_USE_SYMMETRIC_KEY_FROM_APP_PROPERTIES                0
+
 // <e BOOTLOADER_ENFORCE_SECURE_BOOT> Enable secure boot
 // <i> Default: 0
 // <i> Enforce signature verification on the application image in internal flash before every boot.
@@ -94,6 +99,12 @@
 // Skip verification of the application when the device wakes up from EM4 sleep.
 #define APPLICATION_VERIFICATION_SKIP_EM4_RST                    0
 
+// <q BOOTLOADER_SE_UPGRADE_NO_STAGING> Upgrade SE without using the staging area
+// <i> Default: 0
+// <i> Applicable to storage bootloaders only. When enabled, the SE upgrade image will be fetched for installation directly from inside the stored GBL file.
+// <i> This requires that the SE upgrade GBL tag is unencrypted.
+#define BOOTLOADER_SE_UPGRADE_NO_STAGING                    0
+
 // <o BTL_UPGRADE_LOCATION_BASE> Base address of bootloader upgrade image
 // <i> Default: 0x8000
 // <i> At the upgrade stage of the bootloader, the running main bootloader extracts the upgrade image from the GBL file,
@@ -101,9 +112,9 @@
 #define BTL_UPGRADE_LOCATION_BASE  0x8000UL
 
 // <o BOOTLOADER_VERSION_MAIN_CUSTOMER> Bootloader Version Main Customer
-// <i> Default: 2
+// <i> Default: 0
 // <i> Bootloader Version Main Customer
-#define BOOTLOADER_VERSION_MAIN_CUSTOMER                    2
+#define BOOTLOADER_VERSION_MAIN_CUSTOMER                    0
 
 // <e USE_CUSTOM_APP_SIZE> Use custom Bootloader Application Size
 // <i> Default: 0

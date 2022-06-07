@@ -1,6 +1,8 @@
-from pyradioconfig.calculator_model_framework.Utils.CustomExceptions import CalculationException
+from pyradioconfig.calculator_model_framework.Utils.LogMgr import LogMgr
 from pyradioconfig.parts.ocelot.calculators.calc_fpll import calc_fpll_ocelot
-from pycalcmodel.core.variable import ModelVariableFormat
+from pycalcmodel.core.variable import ModelVariableFormat, CreateModelVariableEnum
+from pyradioconfig.calculator_model_framework.interfaces.itarget import ITarget
+from enum import Enum
 
 class calc_fpll_sol(calc_fpll_ocelot):
 
@@ -10,173 +12,224 @@ class calc_fpll_sol(calc_fpll_ocelot):
         super().buildVariables(model)
 
         #Add calculator model variables
-        self._addModelVariable(model, 'fpll_vco_freq_actual', float, ModelVariableFormat.DECIMAL, units='Hz', desc='VCO frequency')
+        self._addModelVariable(model, 'fpll_divx', int, ModelVariableFormat.DECIMAL, desc='RFFPLL X divider')
+        self._addModelVariable(model, 'fpll_divy', int, ModelVariableFormat.DECIMAL, desc='RFFPLL Y divider')
+        self._addModelVariable(model, 'fpll_divn', int, ModelVariableFormat.DECIMAL, desc='RFFPLL N divider')
+        self._addModelVariable(model, 'fpll_div_array', int, ModelVariableFormat.DECIMAL, desc='RFFPLL divider array [divx,divy,divn]', is_array=True)
+        self._addModelVariable(model, 'fpll_divx_freq', float, ModelVariableFormat.DECIMAL, units='Hz', desc='RFFPLL frequency after DIVX')
+        self._addModelVariable(model, 'fpll_divy_freq', float, ModelVariableFormat.DECIMAL, units='Hz', desc='RFFPLL frequency after DIVY')
         self._addModelVariable(model, 'dac_freq_actual', float, ModelVariableFormat.DECIMAL, units='Hz', desc='DAC frequency')
+        self._addModelVariable(model, 'fpll_band', Enum , ModelVariableFormat.DECIMAL, desc='Used to optimize the modem and system clock rates based on the RF band selected. The same selection must be made for all PHYs in a configuration.')
+        model.vars.fpll_band.var_enum = CreateModelVariableEnum(
+            enum_name='FpllBandEnum',
+            enum_desc='RF Frequency Planning Band Selection',
+            member_data=[
+                ['BAND_928', 0, '928 to 960 MHz'],
+                ['BAND_9xx', 1, '902 to 928 MHz'],
+                ['BAND_896', 2, '896 to 901 MHz'],
+                ['BAND_863', 3, '863 to 870 MHz'],
+                ['BAND_780', 4, '779 to 787 MHz'],
+                ['BAND_470', 5, '470 to 510 MHz'],
+                ['BAND_450', 6, 'Below 470 MHz'],
+            ])
+
+
+    def calc_fpll_band(self, model):
+
+        rf_freq = model.vars.base_frequency_hz.value
+        fpll_band_enum = model.vars.fpll_band.var_enum
+
+        if (rf_freq < 470e6):
+            fpll_band = fpll_band_enum.BAND_450
+        elif (rf_freq < 600e6):
+            fpll_band = fpll_band_enum.BAND_470
+        elif (rf_freq < 800e6):
+            fpll_band = fpll_band_enum.BAND_780
+        elif (rf_freq < 880e6 ):
+            fpll_band = fpll_band_enum.BAND_863
+        elif (rf_freq < 902e6):
+            fpll_band = fpll_band_enum.BAND_896
+        elif (rf_freq < 928e6 ):
+            fpll_band = fpll_band_enum.BAND_9xx
+        else:
+            fpll_band = fpll_band_enum.BAND_928
+
+        # Write the model var
+        model.vars.fpll_band.value = fpll_band
 
     def calc_fpll_dividers(self, model):
 
-        rf_freq = model.vars.base_frequency_hz.value
         xtal_frequency_hz = model.vars.xtal_frequency_hz.value
+        fpll_band = model.vars.fpll_band.value
+        fpll_band_enum = model.vars.fpll_band.var_enum
 
         if xtal_frequency_hz == 38e6:
-            if ( rf_freq < 200e6 ):        # band_169
-                divx = 6
-                divy = 20
-                divn = 101
-            elif (rf_freq < 470e6):        # band_450
+            if fpll_band == fpll_band_enum.BAND_450:
                 divx = 7
-                divy = 23
                 divn = 118
-            elif (rf_freq < 600e6):        # band_470
+                divy = 23
+            elif fpll_band == fpll_band_enum.BAND_470:
                 divx = 6
-                divy = 19
                 divn = 98
-            elif (rf_freq < 800e6):         # band_780
+                divy = 19
+            elif fpll_band == fpll_band_enum.BAND_780:
                 divx = 7
-                divy = 23
                 divn = 118
-            elif (rf_freq < 880e6 ):        # band_863
+                divy = 23
+            elif fpll_band == fpll_band_enum.BAND_863:
                 divx = 6
-                divy = 20
                 divn = 101
-            elif (rf_freq < 901e6):        # band_896
-                divx = 7
-                divy = 23
-                divn = 118
-            elif (rf_freq < 928e6 ):        # band_9xx
-                divx = 6
                 divy = 20
+            elif fpll_band == fpll_band_enum.BAND_896:
+                divx = 7
+                divn = 118
+                divy = 23
+            elif fpll_band == fpll_band_enum.BAND_9xx:
+                divx = 6
                 divn = 103
-            else:                           # band_928
+                divy = 20
+            else: #BAND_928
                 divx = 7
-                divy = 23
                 divn = 118
+                divy = 23
         elif xtal_frequency_hz == 38.4e6:
-            if ( rf_freq < 200e6 ):        # band_169
+            if fpll_band == fpll_band_enum.BAND_450:
                 divx = 6
-                divy = 20
                 divn = 100
-            elif (rf_freq < 470e6):        # band_450
-                divx = 6
                 divy = 20
-                divn = 100
-            elif (rf_freq < 600e6):        # band_470
+            elif fpll_band == fpll_band_enum.BAND_470:
                 divx = 6
-                divy = 19
                 divn = 97
-            elif (rf_freq < 800e6):         # band_780
-                divx = 6
-                divy = 20
-                divn = 100
-            elif (rf_freq < 880e6 ):        # band_863
-                divx = 6
-                divy = 20
-                divn = 100
-            elif (rf_freq < 901e6):        # band_896
-                divx = 6
-                divy = 20
-                divn = 100
-            elif (rf_freq < 928e6 ):        # band_9xx
-                divx = 5
-                divy = 17
-                divn = 85
-            else:                           # band_928
-                divx = 7
-                divy = 23
-                divn = 117
-        elif xtal_frequency_hz == 39e6:
-            if ( rf_freq < 200e6 ):        # band_169
-                divx = 6
-                divy = 20
-                divn = 98
-            elif (rf_freq < 470e6):        # band_450
-                divx = 7
-                divy = 23
-                divn = 114
-            elif (rf_freq < 600e6):        # band_470
-                divx = 7
-                divy = 22
-                divn = 111
-            elif (rf_freq < 800e6):         # band_780
-                divx = 7
-                divy = 23
-                divn = 115
-            elif (rf_freq < 880e6 ):        # band_863
-                divx = 6
-                divy = 20
-                divn = 98
-            elif (rf_freq < 901e6):        # band_896
-                divx = 7
-                divy = 23
-                divn = 115
-            elif (rf_freq < 928e6 ):        # band_9xx
-                divx = 6
-                divy = 20
-                divn = 100
-            else:                           # band_928
-                divx = 6
-                divy = 20
-                divn = 99
-        elif xtal_frequency_hz == 40e6:
-            if ( rf_freq < 200e6 ):        # band_169
-                divx = 5
-                divy = 16
-                divn = 80
-            elif (rf_freq < 470e6):        # band_450
-                divx = 5
-                divy = 16
-                divn = 80
-            elif (rf_freq < 600e6):        # band_470
-                divx = 6
                 divy = 19
-                divn = 93
-            elif (rf_freq < 800e6):         # band_780
+            elif fpll_band == fpll_band_enum.BAND_780:
+                divx = 6
+                divn = 100
+                divy = 20
+            elif fpll_band == fpll_band_enum.BAND_863:
+                divx = 6
+                divn = 100
+                divy = 20
+            elif fpll_band == fpll_band_enum.BAND_896:
+                divx = 6
+                divn = 100
+                divy = 20
+            elif fpll_band == fpll_band_enum.BAND_9xx:
                 divx = 5
-                divy = 16
-                divn = 80
-            elif (rf_freq < 880e6 ):        # band_863
-                divx = 5
-                divy = 16
-                divn = 80
-            elif (rf_freq < 901e6):        # band_896
-                divx = 5
-                divy = 16
-                divn = 80
-            elif (rf_freq < 928e6 ):        # band_9xx
-                divx = 5
+                divn = 85
                 divy = 17
-                divn = 81
-            else:                           # band_928
+            else: #BAND_928
+                divx = 7
+                divn = 117
+                divy = 23
+        elif xtal_frequency_hz == 39e6:
+            if fpll_band == fpll_band_enum.BAND_450:
+                divx = 7
+                divn = 115
+                divy = 23
+            elif fpll_band == fpll_band_enum.BAND_470:
+                divx = 7
+                divn = 111
+                divy = 22
+            elif fpll_band == fpll_band_enum.BAND_780:
+                divx = 7
+                divn = 115
+                divy = 23
+            elif fpll_band == fpll_band_enum.BAND_863:
+                divx = 6
+                divn = 98
+                divy = 20
+            elif fpll_band == fpll_band_enum.BAND_896:
+                divx = 7
+                divn = 115
+                divy = 23
+            elif fpll_band == fpll_band_enum.BAND_9xx:
+                divx = 6
+                divn = 100
+                divy = 20
+            else: #BAND_928
+                divx = 6
+                divn = 99
+                divy = 20
+        elif xtal_frequency_hz == 40e6:
+            if fpll_band == fpll_band_enum.BAND_450:
                 divx = 5
-                divy = 16
                 divn = 80
+                divy = 16
+            elif fpll_band == fpll_band_enum.BAND_470:
+                divx = 6
+                divn = 93
+                divy = 19
+            elif fpll_band == fpll_band_enum.BAND_780:
+                divx = 5
+                divn = 80
+                divy = 16
+            elif fpll_band == fpll_band_enum.BAND_863:
+                divx = 5
+                divn = 80
+                divy = 16
+            elif fpll_band == fpll_band_enum.BAND_896:
+                divx = 5
+                divn = 80
+                divy = 16
+            elif fpll_band == fpll_band_enum.BAND_9xx:
+                divx = 5
+                divn = 81
+                divy = 17
+            else: #BAND_928
+                divx = 5
+                divn = 80
+                divy = 16
         else:
-            raise CalculationException('XTAL frequency not supported in calc_xtal_pll.py')
+            LogMgr.Warning("Unsupported xtal frequency, assuming modem clock equal to HFXO unless explicitly set")
+            divx = 5
+            divn = 80
+            divy = 16
 
-        self._reg_write(model.vars.RFFPLL0_RFFPLLCTRL1_DIVX, divx)
-        self._reg_write(model.vars.RFFPLL0_RFFPLLCTRL1_DIVY, divy)
-        self._reg_write(model.vars.RFFPLL0_RFFPLLCTRL1_DIVN, divn)
-        self._reg_write(model.vars.RFFPLL0_RFFPLLCTRL1_DIVXMODEMSEL, 1) #Corresponds to divider of 2
-        self._reg_write(model.vars.RFFPLL0_RFFPLLCTRL1_DIVXDACSEL, 7) #Corresponds to divider of 8
+        # Write the model vars
+        model.vars.fpll_divx.value = divx
+        model.vars.fpll_divy.value = divy
+        model.vars.fpll_divn.value = divn
 
-    def calc_fpll_vco_freq_actual(self, model):
+    def calc_fpll_div_array(self, model):
 
-        #Read in model variables
+        fpll_divx = model.vars.fpll_divx.value
+        fpll_divy = model.vars.fpll_divy.value
+        fpll_divn = model.vars.fpll_divn.value
+
+        model.vars.fpll_div_array.value = [fpll_divx, fpll_divy, fpll_divn]
+
+    def calc_fpll_output_freq(self, model):
+
         xtal_frequency_hz = model.vars.xtal_frequency_hz.value
-        divn = model.vars.RFFPLL0_RFFPLLCTRL1_DIVN.value
-        divr = 2 #Make assumption here
+        fpll_divn = model.vars.fpll_divn.value
+        fpll_divx = model.vars.fpll_divx.value
+        fpll_divy = model.vars.fpll_divy.value
+        divr = 2 #Assumption
 
-        #Calculate the VCO frequency given PLL settings
-        fvco = xtal_frequency_hz * divn / divr #Pull range 1.6 - 2.25GHz
+        # Calculate the VCO frequency given PLL settings
+        fvco = xtal_frequency_hz * fpll_divn / divr  # Pull range 1.6 - 2.25GHz
 
-        #Write the model variable
-        model.vars.fpll_vco_freq_actual.value = fvco
+        # Calculate the output rates
+        fpll_divx_freq = fvco / fpll_divx
+        fpll_divy_freq = fvco / fpll_divy
+
+        #Write the model vars
+        model.vars.fpll_divx_freq.value = fpll_divx_freq
+        model.vars.fpll_divy_freq.value = fpll_divy_freq
+
+    def calc_modem_frequency(self, model):
+
+        fpll_divx_freq = model.vars.fpll_divx_freq.value
+        divxmodemsel = 2  # Assumption
+
+        modem_frequency_hz = fpll_divx_freq / divxmodemsel / 4.0
+
+        model.vars.modem_frequency_hz.value = modem_frequency_hz
 
     def calc_adc_freq_actual(self, model):
 
         #Read in model variables
-        fvco = model.vars.fpll_vco_freq_actual.value
-        divx = model.vars.RFFPLL0_RFFPLLCTRL1_DIVX.value
+        fpll_divx_freq = model.vars.fpll_divx_freq.value
         divxadcsel = model.vars.RFFPLL0_RFFPLLCTRL1_DIVXADCSEL.value + 1
         xtal_frequency_hz = model.vars.xtal_frequency_hz.value
         rx_ifadc_en_xo_bypass = model.vars.RAC_IFADCTRIM1_IFADCENXOBYPASS.value
@@ -186,7 +239,7 @@ class calc_fpll_sol(calc_fpll_ocelot):
         adc_clock_mode_actual = model.vars.adc_clock_mode_actual.value
 
         # Calculate ADC rate based on xtal PLL settings
-        fadc = fvco / divx / divxadcsel         # ADC clock frequency
+        fadc = fpll_divx_freq / divxadcsel         # ADC clock frequency
 
         # If using XO bypass, then calculate ADC rate based on xtal only
         if adc_clock_mode_actual == model.vars.adc_clock_mode.var_enum.HFXOMULT:
@@ -209,25 +262,25 @@ class calc_fpll_sol(calc_fpll_ocelot):
     def calc_dac_freq_actual(self, model):
 
         # Read in model variables
-        fvco = model.vars.fpll_vco_freq_actual.value
-        divx = model.vars.RFFPLL0_RFFPLLCTRL1_DIVX.value
-        divxdacsel = model.vars.RFFPLL0_RFFPLLCTRL1_DIVXDACSEL.value + 1
+        fpll_divx_freq = model.vars.fpll_divx_freq.value
+        divxdacsel = 8
 
         # Calculate the DAC frequency given PLL settings
-        fdac = fvco / divx / divxdacsel  # DAC clock frequency
+        fdac = fpll_divx_freq / divxdacsel  # DAC clock frequency
 
         # Write model variables
         model.vars.dac_freq_actual.value = fdac
 
-    def calc_modem_freq_actual(self, model):
+    def calc_fpll_sim_regs(self, model):
 
-        # Read in model variables
-        fvco = model.vars.fpll_vco_freq_actual.value
-        divx = model.vars.RFFPLL0_RFFPLLCTRL1_DIVX.value
-        divmodemsel = model.vars.RFFPLL0_RFFPLLCTRL1_DIVXMODEMSEL.value + 1
+        fpll_divx = model.vars.fpll_divx.value
+        fpll_divy = model.vars.fpll_divy.value
+        fpll_divn = model.vars.fpll_divn.value
 
-        # Calculate the softmodem rate given the xtal pll settings
-        fmodem = fvco / divx / divmodemsel  # modem clock frequency
-
-        # Write model variables
-        model.vars.hardmodem_freq_actual.value = fmodem/4 #Assuming a divider of 4 for now even though this is programmable in FW
+        #Only write these in the case of Sim target
+        if model.target == ITarget.SIM_str:
+            self._reg_write(model.vars.RFFPLL0_RFFPLLCTRL1_DIVX, fpll_divx)
+            self._reg_write(model.vars.RFFPLL0_RFFPLLCTRL1_DIVY, fpll_divy)
+            self._reg_write(model.vars.RFFPLL0_RFFPLLCTRL1_DIVN, fpll_divn)
+            self._reg_write(model.vars.RFFPLL0_RFFPLLCTRL1_DIVXMODEMSEL, 1) #Corresponds to divider of 2
+            self._reg_write(model.vars.RFFPLL0_RFFPLLCTRL1_DIVXDACSEL, 7)  # Corresponds to divider of 8

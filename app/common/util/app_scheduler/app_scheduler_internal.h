@@ -33,8 +33,9 @@
 
 #include <stdbool.h>
 #include <stdint.h>
+#include <stddef.h>
 #include "sl_slist.h"
-#include "sl_sleeptimer.h"
+#include "sl_simple_timer.h"
 #include "app_scheduler.h"
 // -----------------------------------------------------------------------------
 // Definitions
@@ -43,10 +44,10 @@
 typedef struct {
   sl_slist_node_t node;                                     ///< List node.
   app_scheduler_task_t task;                                ///< Task function.
-  sl_sleeptimer_timer_handle_t sleeptimer_handle;           ///< Sleeptimer handle.
+  sl_simple_timer_t timer_handle;                           ///< Simple Timer handle.
   bool triggered;                                           ///< Timer is triggered.
   bool periodic;                                            ///< Timer is periodic.
-  uint16_t data_size;                                       ///< Size of the data
+  size_t data_size;                                         ///< Size of the data
   uint8_t data[APP_SCHEDULER_MAX_DATA_SIZE];                ///< Data to pass
 } app_scheduler_entry_t;
 

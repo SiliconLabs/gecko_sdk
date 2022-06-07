@@ -14,9 +14,9 @@
   - name: SL_KIT_NAME
     value: '"XG23-RB4210A"'
   - name: SL_KIT_REV
-    value: '"A00"'
+    value: '"A01"'
 - tag:
   - kit:opn:xG23-RB4210A
   - kit:pn:RB4210
   - kit:variant:A
-  - kit:revision:A00
+  - kit:revision:A01

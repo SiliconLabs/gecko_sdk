@@ -30,6 +30,8 @@ template_contribution:
       runtime_phy_select_stack_support: SL_OPENTHREAD_PHY_SELECT_STACK_SUPPORT
       update_active_radio_config: sl_ot_update_active_radio_config
     priority: -9020
+    unless:
+      - rail_mux
   - name: sl_ot_cli_command
     value:
       name: "coexistence"

@@ -633,7 +633,7 @@ typedef enum {
   EMBER_AF_BROADCAST_SERVICE_DISCOVERY_COMPLETE_WITH_EMPTY_RESPONSE = 0x06,
 } EmberAfServiceDiscoveryStatus;
 
-#define EM_AF_DISCOVERY_RESPONSE_MASK (0x05)
+#define EM_AF_DISCOVERY_RESPONSE_MASK (0x05u)
 
 /**
  * @brief A simple way to determine if the service discovery callback
@@ -910,7 +910,7 @@ typedef void (*EmberAfEndpointEventHandler)(uint8_t endpoint);
 /**
  * @brief Maximum length of Group names, not including the length byte.
  */
-#define ZCL_GROUPS_CLUSTER_MAXIMUM_NAME_LENGTH 16
+#define ZCL_GROUPS_CLUSTER_MAXIMUM_NAME_LENGTH 16u
 /**
  * @brief Store group table entries in RAM or in tokens,
  * depending on the platform.  If the endpoint field is
@@ -937,7 +937,7 @@ typedef struct {
 /**
  * @brief Maximum length of Scene names, not including the length byte.
  */
-#define ZCL_SCENES_CLUSTER_MAXIMUM_NAME_LENGTH 16
+#define ZCL_SCENES_CLUSTER_MAXIMUM_NAME_LENGTH 16u
 /**
  * @brief The group identifier for the global scene.
  */
@@ -1042,7 +1042,7 @@ typedef struct {
   uint8_t      message[EMBER_AF_PLUGIN_MESSAGING_CLIENT_MESSAGE_SIZE + 1];
 } EmberAfPluginMessagingClientMessage;
 
-#define ZCL_PRICE_CLUSTER_MAXIMUM_RATE_LABEL_LENGTH 11
+#define ZCL_PRICE_CLUSTER_MAXIMUM_RATE_LABEL_LENGTH 11u
 typedef struct {
   bool valid;
   bool active;
@@ -1296,9 +1296,9 @@ enum
  * @brief The maximum size of the string that is present in the header
  *   of the Zigbee Over-the-air file format.
  */
-#define EMBER_AF_OTA_MAX_HEADER_STRING_LENGTH 32
+#define EMBER_AF_OTA_MAX_HEADER_STRING_LENGTH 32u
 
-#define UID_SIZE 32
+#define UID_SIZE 32u
 /**
  * @brief This structure is an in-memory representation of
  *   the Over-the-air header data that resides on disk.
@@ -1563,7 +1563,7 @@ typedef struct {
  * @brief The length of the hardware tag in the Ember Bootloader Query
  *   Response.
  */
-#define EMBER_AF_STANDALONE_BOOTLOADER_HARDWARE_TAG_LENGTH 16
+#define EMBER_AF_STANDALONE_BOOTLOADER_HARDWARE_TAG_LENGTH 16u
 
 /**
  * @brief Use for the information retrieved during a response
@@ -1714,11 +1714,11 @@ enum
  * @brief Device Management plugin types
  */
 
-#define EMBER_AF_DEVICE_MANAGEMENT_MAXIMUM_PROPOSED_PROVIDER_NAME_LENGTH (16)
-#define EMBER_AF_DEVICE_MANAGEMENT_MAXIMUM_PROPOSED_PROVIDER_CONTACT_DETAILS_LENGTH (18)
-#define EMBER_AF_DEVICE_MANAGEMENT_MAXIMUM_SITE_ID_LENGTH (32)
-#define EMBER_AF_DEVICE_MANAGEMENT_MAXIMUM_CIN_LENGTH (24)
-#define EMBER_AF_DEVICE_MANAGEMENT_MAXIMUM_PASSWORD_LENGTH (10)
+#define EMBER_AF_DEVICE_MANAGEMENT_MAXIMUM_PROPOSED_PROVIDER_NAME_LENGTH (16u)
+#define EMBER_AF_DEVICE_MANAGEMENT_MAXIMUM_PROPOSED_PROVIDER_CONTACT_DETAILS_LENGTH (18u)
+#define EMBER_AF_DEVICE_MANAGEMENT_MAXIMUM_SITE_ID_LENGTH (32u)
+#define EMBER_AF_DEVICE_MANAGEMENT_MAXIMUM_CIN_LENGTH (24u)
+#define EMBER_AF_DEVICE_MANAGEMENT_MAXIMUM_PASSWORD_LENGTH (10u)
 
 #ifdef DOXYGEN_SHOULD_SKIP_THIS
 enum EmberAfDeviceManagementPasswordType
@@ -1909,13 +1909,13 @@ typedef struct {
 #ifdef SL_CATALOG_ZIGBEE_DEVICE_DATABASE_PRESENT
 #include "device-database-config.h"
 #else
-#define EMBER_AF_MAX_CLUSTERS_PER_ENDPOINT 3
-#define EMBER_AF_MAX_ENDPOINTS_PER_DEVICE  1
+#define EMBER_AF_MAX_CLUSTERS_PER_ENDPOINT 3u
+#define EMBER_AF_MAX_ENDPOINTS_PER_DEVICE  1u
 #endif
 #else // UC_BUILD
 #if !defined(EMBER_AF_MAX_CLUSTERS_PER_ENDPOINT)
-#define EMBER_AF_MAX_CLUSTERS_PER_ENDPOINT 3
-#define EMBER_AF_MAX_ENDPOINTS_PER_DEVICE  1
+#define EMBER_AF_MAX_CLUSTERS_PER_ENDPOINT 3u
+#define EMBER_AF_MAX_ENDPOINTS_PER_DEVICE  1u
 #endif
 #endif // UC_BUILD
 /**
@@ -1982,7 +1982,7 @@ typedef struct {
  * @brief The overhead of the ZDO response.
  *   1 byte for the sequence and 1 byte for the status code.
  */
-#define EMBER_AF_ZDO_RESPONSE_OVERHEAD 2
+#define EMBER_AF_ZDO_RESPONSE_OVERHEAD 2u
 
 /** @} END addtogroup */
 

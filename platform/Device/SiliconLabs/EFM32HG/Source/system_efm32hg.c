@@ -94,6 +94,11 @@ static uint32_t SystemLFXOClock = EFM32_LFXO_FREQ;
  */
 uint32_t SystemCoreClock = 14000000UL;
 
+/*---------------------------------------------------------------------------
+   Exception / Interrupt Vector table
+ *---------------------------------------------------------------------------*/
+extern const tVectorEntry __VECTOR_TABLE[16 + EXT_IRQ_COUNT];
+
 /*******************************************************************************
  **************************   GLOBAL FUNCTIONS   *******************************
  ******************************************************************************/
@@ -296,8 +301,8 @@ void SystemHFXOClockSet(uint32_t freq)
  ******************************************************************************/
 void SystemInit(void)
 {
-#if defined(__VTOR_PRESENT) && (__VTOR_PRESENT == 1U)
-  SCB->VTOR = (uint32_t)&__Vectors;
+#if defined (__VTOR_PRESENT) && (__VTOR_PRESENT == 1U)
+  SCB->VTOR = (uint32_t)(&__VECTOR_TABLE[0]);
 #endif
 }
 

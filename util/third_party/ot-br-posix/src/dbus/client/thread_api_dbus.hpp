@@ -162,6 +162,16 @@ public:
     ClientError Attach(const OtResultHandler &aHandler);
 
     /**
+     * This method detaches the device from the Thread network.
+     *
+     * @retval ERROR_NONE  Successfully performed the dbus function call
+     * @retval ERROR_DBUS  dbus encode/decode error
+     * @retval ...         OpenThread defined error value otherwise
+     *
+     */
+    ClientError Detach(const OtResultHandler &aHandler);
+
+    /**
      * This method attaches the device to the specified Thread network.
      *
      * If the device has already attached to a network, send a request to migrate the existing network.
@@ -660,6 +670,18 @@ public:
     ClientError GetExternalRoutes(std::vector<ExternalRoute> &aExternalRoutes);
 
     /**
+     * This method gets the on-mesh prefixes
+     *
+     * @param[out] aOnMeshPrefixes  The on-mesh prefixes
+     *
+     * @retval ERROR_NONE  Successfully performed the dbus function call
+     * @retval ERROR_DBUS  dbus encode/decode error
+     * @retval ...         OpenThread defined error value otherwise
+     *
+     */
+    ClientError GetOnMeshPrefixes(std::vector<OnMeshPrefix> &aOnMeshPrefixes);
+
+    /**
      * This method gets the active operational dataset
      *
      * @param[out] aDataset  The active operational dataset
@@ -682,6 +704,32 @@ public:
      *
      */
     ClientError GetRadioRegion(std::string &aRadioRegion);
+
+    /**
+     * This method gets the SRP server information.
+     *
+     * @param[out] aSrpServerInfo  The SRP server information.
+     *
+     * @retval ERROR_NONE  Successfully performed the dbus function call
+     * @retval ERROR_DBUS  dbus encode/decode error
+     * @retval ...         OpenThread defined error value otherwise
+     *
+     */
+    ClientError GetSrpServerInfo(SrpServerInfo &aSrpServerInfo);
+
+#if OTBR_ENABLE_DNSSD_DISCOVERY_PROXY
+    /**
+     * This method gets the DNS-SD counters.
+     *
+     * @param[out] aDnssdCounters  The DNS-SD counters.
+     *
+     * @retval ERROR_NONE  Successfully performed the dbus function call
+     * @retval ERROR_DBUS  dbus encode/decode error
+     * @retval ...         OpenThread defined error value otherwise
+     *
+     */
+    ClientError GetDnssdCounters(DnssdCounters &aDnssdCounters);
+#endif
 
     /**
      * This method returns the network interface name the client is bound to.
@@ -733,6 +781,7 @@ private:
     static void sHandleDBusPendingCall(DBusPendingCall *aPending, void *aThreadApiDBus);
 
     void        AttachPendingCallHandler(DBusPendingCall *aPending);
+    void        DetachPendingCallHandler(DBusPendingCall *aPending);
     void        FactoryResetPendingCallHandler(DBusPendingCall *aPending);
     void        JoinerStartPendingCallHandler(DBusPendingCall *aPending);
     static void sScanPendingCallHandler(DBusPendingCall *aPending, void *aThreadApiDBus);
@@ -748,6 +797,7 @@ private:
     ScanHandler       mScanHandler;
     EnergyScanHandler mEnergyScanHandler;
     OtResultHandler   mAttachHandler;
+    OtResultHandler   mDetachHandler;
     OtResultHandler   mFactoryResetHandler;
     OtResultHandler   mJoinerHandler;
 

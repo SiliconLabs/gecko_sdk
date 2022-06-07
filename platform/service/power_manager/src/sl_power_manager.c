@@ -33,7 +33,7 @@
 #include "sli_power_manager_private.h"
 #include "sli_power_manager.h"
 #include "sli_sleeptimer.h"
-#include "em_assert.h"
+#include "sl_assert.h"
 #include "sl_atomic.h"
 
 #include <stdlib.h>
@@ -44,7 +44,8 @@
  *********************************   DEFINES   *********************************
  ******************************************************************************/
 
-#if ((SL_POWER_MANAGER_LOWEST_EM_ALLOWED != 2) \
+#if ((SL_POWER_MANAGER_LOWEST_EM_ALLOWED != 1) \
+  && (SL_POWER_MANAGER_LOWEST_EM_ALLOWED != 2) \
   && (SL_POWER_MANAGER_LOWEST_EM_ALLOWED != 3))
 #error "Lowest Energy mode allowed is invalid."
 #endif
@@ -59,6 +60,16 @@
 
 // Initialization flag.
 static bool is_initialized = false;
+
+// Current active energy mode.
+static sl_power_manager_em_t current_em = SL_POWER_MANAGER_EM0;
+
+// Events subscribers lists
+static sl_slist_node_t *power_manager_em_transition_event_list = NULL;
+
+#if (SL_POWER_MANAGER_LOWEST_EM_ALLOWED != 1)
+// Store the sleeptimer module clock frequency for conversion calculation
+static uint32_t sleeptimer_frequency;
 
 // Table of energy modes counters. Each counter indicates the presence (not zero)
 // or absence (zero) of requirements on a given energy mode. The table doesn't
@@ -76,9 +87,6 @@ uint8_t requirement_high_accuracy_hf_clock_counter = 0;
 bool requirement_high_accuracy_hf_clock_back_to_zero = false;
 #endif
 
-// Current active energy mode.
-static sl_power_manager_em_t current_em = SL_POWER_MANAGER_EM0;
-
 // Saved energy mode we are coming from when waiting for HFXO ready.
 static sl_power_manager_em_t waiting_clock_restore_from_em = SL_POWER_MANAGER_EM0;
 
@@ -88,18 +96,12 @@ static bool is_sleeping_waiting_for_clock_restore = false;
 // Flag indicating if the system states (clocks) are saved and should be restored
 static bool is_states_saved = false;
 
-// Events subscribers lists
-static sl_slist_node_t *power_manager_em_transition_event_list = NULL;
-
 // Timer that it is used for enabling the clock for the scheduled wakeup
 static sl_sleeptimer_timer_handle_t clock_wakeup_timer_handle = { 0 };
 
 // Store if requirement on EM1 has been added before sleeping;
 // i.e. only possible if sleeping for less than minimum off time
 static bool requirement_on_em1_added = false;
-
-// Store the sleeptimer tick count at the beginning of the wake-up process.
-uint32_t wakeup_start_tick_count = 0;
 
 // Threshold delay in sleeptimer ticks indicating the minimum time required
 // to make the shut down of external high frequency oscillator worthwhile before
@@ -110,9 +112,6 @@ uint32_t high_frequency_min_offtime_tick = 0;
 // Store the configuration overhead value in sleeptimer tick to add/remove to the wake-up time.
 int32_t wakeup_time_config_overhead_tick = 0;
 
-// Store the sleeptimer module clock frequency for conversion calculation
-static uint32_t sleeptimer_frequency;
-
 static bool is_hf_x_oscillator_not_preserved;
 
 // Store if we are currently waiting for HF clock restoration to finish
@@ -121,6 +120,7 @@ static bool is_actively_waiting_for_clock_restore = false;
 // Indicates if the clock restore was completed from the HFXO ISR
 static bool is_restored_from_hfxo_isr = false;
 static bool is_restored_from_hfxo_isr_internal = false;
+#endif
 
 /*
  *********************************************************************************************************
@@ -156,14 +156,12 @@ bool sl_power_manager_is_ok_to_sleep(void);
  **************************   LOCAL FUNCTIONS   ********************************
  ******************************************************************************/
 
+#if (SL_POWER_MANAGER_LOWEST_EM_ALLOWED != 1)
 static sl_power_manager_em_t get_lowest_em(void);
 
 static void evaluate_wakeup(sl_power_manager_em_t to);
 
 static void update_em1_requirement(bool add);
-
-static void power_manager_notify_em_transition(sl_power_manager_em_t from,
-                                               sl_power_manager_em_t to);
 
 static void on_clock_wakeup_timeout(sl_sleeptimer_timer_handle_t *handle,
                                     void *data);
@@ -171,6 +169,10 @@ static void on_clock_wakeup_timeout(sl_sleeptimer_timer_handle_t *handle,
 static void clock_restore_and_wait(void);
 
 static void clock_restore(void);
+#endif
+
+static void power_manager_notify_em_transition(sl_power_manager_em_t from,
+                                               sl_power_manager_em_t to);
 
 /*******************************************************************************
  **************************   GLOBAL FUNCTIONS   *******************************
@@ -194,22 +196,27 @@ sl_status_t sl_power_manager_init(void)
       return status;
     }
 
-    // Get the sleeptimer frequency
-    sleeptimer_frequency = sl_sleeptimer_get_timer_frequency();
-
   #if (SL_POWER_MANAGER_DEBUG == 1)
     sli_power_manager_debug_init();
   #endif
     sl_slist_init(&power_manager_em_transition_event_list);
 
+#if (SL_POWER_MANAGER_LOWEST_EM_ALLOWED != 1)
     // Set the default wake-up overhead value
     wakeup_time_config_overhead_tick = SCHEDULE_WAKEUP_DEFAULT_RESTORE_TIME_OVERHEAD_TICK;
+
+    // Get the sleeptimer frequency
+    sleeptimer_frequency = sl_sleeptimer_get_timer_frequency();
+#endif
   }
 
   // Do all necessary hardware initialization.
   sli_power_manager_init_hardware();
+
+#if (SL_POWER_MANAGER_LOWEST_EM_ALLOWED != 1)
   // Set the HF minimum offtime in sleeptimer ticks
   high_frequency_min_offtime_tick = sli_power_manager_get_default_high_frequency_minimum_offtime();
+#endif
 
   is_initialized = true;
   CORE_EXIT_CRITICAL();
@@ -222,7 +229,6 @@ sl_status_t sl_power_manager_init(void)
  ******************************************************************************/
 void sl_power_manager_sleep(void)
 {
-  sl_power_manager_em_t lowest_em;
   CORE_DECLARE_IRQ_STATE;
 
   CORE_ENTER_CRITICAL();
@@ -234,6 +240,9 @@ void sl_power_manager_sleep(void)
     CORE_EXIT_CRITICAL();
     return;
   }
+
+#if (SL_POWER_MANAGER_LOWEST_EM_ALLOWED != 1)
+  sl_power_manager_em_t lowest_em;
 
   // Go to another energy mode (same, higher to lower or lower to higher)
   do {
@@ -338,6 +347,19 @@ void sl_power_manager_sleep(void)
   }
 
   evaluate_wakeup(SL_POWER_MANAGER_EM0);
+#else
+  current_em = SL_POWER_MANAGER_EM1;
+
+  // Notify listeners of transition to EM1
+  power_manager_notify_em_transition(SL_POWER_MANAGER_EM0, SL_POWER_MANAGER_EM1);
+  do {
+    // Apply EM1 energy mode
+    sli_power_manager_apply_em(SL_POWER_MANAGER_EM1);
+
+    CORE_EXIT_CRITICAL();
+    CORE_ENTER_CRITICAL();
+  } while (sl_power_manager_sleep_on_isr_exit() == true);
+#endif
 
   // Indicate back to EM0
   power_manager_notify_em_transition(current_em, SL_POWER_MANAGER_EM0);
@@ -359,10 +381,14 @@ void sl_power_manager_sleep(void)
  *                (false).
  *
  * @note Need to be call inside a critical section.
+ *
+ * @note This function will do nothing when SL_POWER_MANAGER_LOWEST_EM_ALLOWED
+ *       config is set to EM1.
  ******************************************************************************/
 void sli_power_manager_update_em_requirement(sl_power_manager_em_t em,
                                              bool add)
 {
+#if (SL_POWER_MANAGER_LOWEST_EM_ALLOWED != 1)
   // EM0 is not allowed
   EFM_ASSERT((em > SL_POWER_MANAGER_EM0) && (em < SL_POWER_MANAGER_EM3));
 
@@ -397,6 +423,10 @@ void sli_power_manager_update_em_requirement(sl_power_manager_em_t em,
       current_em = lowest_em;           // Keep new active energy mode
     }
   }
+#else
+  (void)em;
+  (void)add;
+#endif
 }
 
 #if defined(SLI_DEVICE_SUPPORTS_EM1P)
@@ -408,6 +438,7 @@ void sli_power_manager_update_em_requirement(sl_power_manager_em_t em,
  ******************************************************************************/
 void sli_power_manager_update_hf_clock_settings_preservation_requirement(bool add)
 {
+#if (SL_POWER_MANAGER_LOWEST_EM_ALLOWED != 1)
   CORE_DECLARE_IRQ_STATE;
 
   CORE_ENTER_CRITICAL();
@@ -426,6 +457,9 @@ void sli_power_manager_update_hf_clock_settings_preservation_requirement(bool ad
   requirement_high_accuracy_hf_clock_back_to_zero = (requirement_high_accuracy_hf_clock_counter == 0) ? true : false;
 
   CORE_EXIT_CRITICAL();
+#else
+  (void)add;
+#endif
 }
 #endif
 
@@ -434,11 +468,11 @@ void sli_power_manager_update_hf_clock_settings_preservation_requirement(bool ad
  * If we are not in the context of a deepsleep and therefore don't need to
  * do a restore, the return value is 0.
  *
- *
  * @return   Wake-up restore process time.
  ******************************************************************************/
 uint32_t sli_power_manager_get_restore_delay(void)
 {
+#if (SL_POWER_MANAGER_LOWEST_EM_ALLOWED != 1)
   uint32_t wakeup_delay = 0;
   CORE_DECLARE_IRQ_STATE;
 
@@ -457,6 +491,9 @@ uint32_t sli_power_manager_get_restore_delay(void)
   CORE_EXIT_CRITICAL();
 
   return wakeup_delay;
+#else
+  return 0;
+#endif
 }
 
 /***************************************************************************//**
@@ -464,6 +501,7 @@ uint32_t sli_power_manager_get_restore_delay(void)
  ******************************************************************************/
 void sli_power_manager_initiate_restore(void)
 {
+#if (SL_POWER_MANAGER_LOWEST_EM_ALLOWED != 1)
   CORE_DECLARE_IRQ_STATE;
 
   CORE_ENTER_CRITICAL();
@@ -472,6 +510,7 @@ void sli_power_manager_initiate_restore(void)
   clock_restore();
 
   CORE_EXIT_CRITICAL();
+#endif
 }
 
 /***************************************************************************//**
@@ -507,13 +546,20 @@ void sl_power_manager_unsubscribe_em_transition_event(sl_power_manager_em_transi
  * when a schedule wake-up is set.
  *
  * @return  Current overhead value for early wake-up time.
+ *
+ * @note This function will return 0 in case SL_POWER_MANAGER_LOWEST_EM_ALLOWED
+ *       config is set to EM1.
  ******************************************************************************/
 int32_t sl_power_manager_schedule_wakeup_get_restore_overhead_tick(void)
 {
+#if (SL_POWER_MANAGER_LOWEST_EM_ALLOWED != 1)
   int32_t overhead_tick;
 
   sl_atomic_load(overhead_tick, wakeup_time_config_overhead_tick);
   return overhead_tick;
+#else
+  return 0;
+#endif
 }
 
 /***************************************************************************//**
@@ -525,10 +571,17 @@ int32_t sl_power_manager_schedule_wakeup_get_restore_overhead_tick(void)
  *
  * @note The overhead value can also be negative to remove time from the restore
  *       process.
+ *
+ * @note This function will do nothing when SL_POWER_MANAGER_LOWEST_EM_ALLOWED
+ *       config is set to EM1.
  ******************************************************************************/
 void sl_power_manager_schedule_wakeup_set_restore_overhead_tick(int32_t overhead_tick)
 {
+#if (SL_POWER_MANAGER_LOWEST_EM_ALLOWED != 1)
   sl_atomic_store(wakeup_time_config_overhead_tick, overhead_tick);
+#else
+  (void)overhead_tick;
+#endif
 }
 
 /***************************************************************************//**
@@ -545,13 +598,20 @@ void sl_power_manager_schedule_wakeup_set_restore_overhead_tick(int32_t overhead
  *        taking into account the wake-up will be greater than if we just keep
  *        the oscillator on until the next scheduled oscillator enabled. This
  *        threshold value is what we refer as the minimum off-time.
+ *
+ * @note This function will return 0 in case SL_POWER_MANAGER_LOWEST_EM_ALLOWED
+ *       config is set to EM1.
  ******************************************************************************/
 uint32_t sl_power_manager_schedule_wakeup_get_minimum_offtime_tick(void)
 {
+#if (SL_POWER_MANAGER_LOWEST_EM_ALLOWED != 1)
   uint32_t offtime_tick;
 
   sl_atomic_load(offtime_tick, high_frequency_min_offtime_tick);
   return offtime_tick;
+#else
+  return 0;
+#endif
 }
 
 /***************************************************************************//**
@@ -569,12 +629,20 @@ uint32_t sl_power_manager_schedule_wakeup_get_minimum_offtime_tick(void)
  *        taking into account the wake-up will be greater than if we just keep
  *        the oscillator on until the next scheduled oscillator enabled. This
  *        threshold value is what we refer as the minimum off-time.
+ *
+ * @note This function will do nothing when SL_POWER_MANAGER_LOWEST_EM_ALLOWED
+ *       config is set to EM1.
  ******************************************************************************/
 void sl_power_manager_schedule_wakeup_set_minimum_offtime_tick(uint32_t minimum_offtime_tick)
 {
+#if (SL_POWER_MANAGER_LOWEST_EM_ALLOWED != 1)
   sl_atomic_store(high_frequency_min_offtime_tick, minimum_offtime_tick);
+#else
+  (void)minimum_offtime_tick;
+#endif
 }
 
+#if (SL_POWER_MANAGER_LOWEST_EM_ALLOWED != 1)
 /*******************************************************************************
  * Converts microseconds time in sleeptimer ticks.
  ******************************************************************************/
@@ -582,6 +650,7 @@ uint32_t sli_power_manager_convert_delay_us_to_tick(uint32_t time_us)
 {
   return (((time_us * sleeptimer_frequency) + (1000000 - 1)) / 1000000);
 }
+#endif
 
 /***************************************************************************//**
  * Last-chance check before sleep.
@@ -590,7 +659,7 @@ uint32_t sli_power_manager_convert_delay_us_to_tick(uint32_t time_us)
  *          False, if not.
  *
  * @note This is the fallback implementation of the callback, it can be
- * overridden by the application or other components.
+ *       overridden by the application or other components.
  ******************************************************************************/
 __WEAK bool sl_power_manager_is_ok_to_sleep(void)
 {
@@ -604,7 +673,7 @@ __WEAK bool sl_power_manager_is_ok_to_sleep(void)
  *          False, otherwise.
  *
  * @note This is the fallback implementation of the callback, it can be
- * overridden by the application or other components.
+ *       overridden by the application or other components.
  ******************************************************************************/
 __WEAK bool sl_power_manager_sleep_on_isr_exit(void)
 {
@@ -618,9 +687,14 @@ __WEAK bool sl_power_manager_sleep_on_isr_exit(void)
  *
  * @return true if power manager sleep can return to sleep,
  *         false otherwise.
+ *
+ * @note This function will always return false in case
+ *       SL_POWER_MANAGER_LOWEST_EM_ALLOWED config is set to EM1, since we will
+ *       never sleep at a lower level than EM1.
  *****************************************************************************/
 bool sl_power_manager_is_latest_wakeup_internal(void)
 {
+#if (SL_POWER_MANAGER_LOWEST_EM_ALLOWED != 1)
   CORE_DECLARE_IRQ_STATE;
   bool sleep;
 
@@ -630,14 +704,17 @@ bool sl_power_manager_is_latest_wakeup_internal(void)
   CORE_EXIT_CRITICAL();
 
   sleep |= sl_sleeptimer_is_power_manager_early_restore_timer_latest_to_expire();
-
   return sleep;
+#else
+  return false;
+#endif
 }
 
 /*******************************************************************************
  **************************   LOCAL FUNCTIONS   ********************************
  ******************************************************************************/
 
+#if (SL_POWER_MANAGER_LOWEST_EM_ALLOWED != 1)
 /***************************************************************************//**
  * Get lowest energy mode to apply given the requirements on the different
  * energy modes.
@@ -661,6 +738,7 @@ static sl_power_manager_em_t get_lowest_em(void)
 
   return em;
 }
+#endif
 
 /***************************************************************************//**
  * Notify subscribers about energy mode transition.
@@ -731,6 +809,7 @@ static void power_manager_notify_em_transition(sl_power_manager_em_t from,
  *
  * @note Must be called in a critical section.
  ******************************************************************************/
+#if (SL_POWER_MANAGER_LOWEST_EM_ALLOWED != 1)
 static void evaluate_wakeup(sl_power_manager_em_t to)
 {
   sl_status_t status;
@@ -789,7 +868,9 @@ static void evaluate_wakeup(sl_power_manager_em_t to)
       EFM_ASSERT(false);
   }
 }
+#endif
 
+#if (SL_POWER_MANAGER_LOWEST_EM_ALLOWED != 1)
 /***************************************************************************//**
  * Updates internal EM1 requirement.
  * We add an internal EM1 requirement when we would usually go into EM2/EM3
@@ -834,7 +915,9 @@ static void update_em1_requirement(bool add)
     clock_restore();
   }
 }
+#endif
 
+#if (SL_POWER_MANAGER_LOWEST_EM_ALLOWED != 1)
 /***************************************************************************//**
  * Do clock restore process and wait for it to be completed.
  ******************************************************************************/
@@ -869,7 +952,9 @@ static void clock_restore_and_wait(void)
   }
   CORE_EXIT_CRITICAL();
 }
+#endif
 
+#if (SL_POWER_MANAGER_LOWEST_EM_ALLOWED != 1)
 /***************************************************************************//**
  * Start clock restore process.
  *
@@ -900,7 +985,9 @@ static void clock_restore(void)
     }
   }
 }
+#endif
 
+#if (SL_POWER_MANAGER_LOWEST_EM_ALLOWED != 1)
 /***************************************************************************//**
  * Callback for clock enable timer.
  *
@@ -935,6 +1022,7 @@ static void on_clock_wakeup_timeout(sl_sleeptimer_timer_handle_t *handle,
 
   CORE_EXIT_CRITICAL();
 }
+#endif
 
 /***************************************************************************//**
  * HFXO ready notification callback for internal use with power manager
@@ -943,6 +1031,7 @@ static void on_clock_wakeup_timeout(sl_sleeptimer_timer_handle_t *handle,
  ******************************************************************************/
 void sli_hfxo_manager_notify_ready_for_power_manager(void)
 {
+#if (SL_POWER_MANAGER_LOWEST_EM_ALLOWED != 1)
   // Complete HF restore and change current Energy mode
   // The notification will be done once back in the sleep loop
   if (current_em != SL_POWER_MANAGER_EM0
@@ -953,6 +1042,7 @@ void sli_hfxo_manager_notify_ready_for_power_manager(void)
     is_restored_from_hfxo_isr = true;
     is_restored_from_hfxo_isr_internal = true;
   }
+#endif
 }
 
 #if defined(EMU_VSCALE_PRESENT)
@@ -960,9 +1050,13 @@ void sli_hfxo_manager_notify_ready_for_power_manager(void)
  * Enable or disable fast wake-up in EM2 and EM3
  *
  * @note Will also update the wake up time from EM2 to EM0.
+ *
+ * @note This function will do nothing when SL_POWER_MANAGER_LOWEST_EM_ALLOWED
+ *       config is set to EM1.
  ******************************************************************************/
 void sl_power_manager_em23_voltage_scaling_enable_fast_wakeup(bool enable)
 {
+#if (SL_POWER_MANAGER_LOWEST_EM_ALLOWED != 1)
   CORE_DECLARE_IRQ_STATE;
 
   CORE_ENTER_CRITICAL();
@@ -970,5 +1064,8 @@ void sl_power_manager_em23_voltage_scaling_enable_fast_wakeup(bool enable)
   sli_power_manager_em23_voltage_scaling_enable_fast_wakeup(enable);
 
   CORE_EXIT_CRITICAL();
+#else
+  (void)enable;
+#endif
 }
 #endif

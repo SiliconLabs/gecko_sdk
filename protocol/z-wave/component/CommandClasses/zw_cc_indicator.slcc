@@ -1,7 +1,9 @@
 id: zw_cc_indicator
 label: Indicator Command Class
 category: Z-Wave|Command Classes
-description: Indicator Command Class!
+description: >
+  Indicator Command Class is used to help end users to monitor
+  the operation or condition of the application provided by a supporting node.
 package: Z-Wave
 quality: production
 source:
@@ -9,8 +11,10 @@ source:
 include:
   - path: protocol/z-wave/ZAF/CommandClasses/Indicator/
     file_list:
-     - path: CC_Indicator.h
+     - path: CC_IndicatorPrivate.h
 provides:
   - name: zw_cc_indicator
 requires:
   - name: zw_core
+documentation:
+  url: "https://sdomembers.z-wavealliance.org/document/dl/643"

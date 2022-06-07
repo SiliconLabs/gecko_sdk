@@ -1,5 +1,6 @@
 from pyradioconfig.calculator_model_framework.interfaces.iphy import IPhy
-from pyradioconfig.parts.ocelot.phys.Phys_Studio_WiSUN import PHYS_IEEE802154_WiSUN_Ocelot
+from pyradioconfig.parts.ocelot.phys.phys_studio_wisun_fan_1_0 import PhysStudioWisunFanOcelot
+from pyradioconfig.parts.ocelot.phys.phys_studio_wisun_han import PhysStudioWisunHanOcelot
 from py_2_and_3_compatibility import *
 
 class PHYS_Internal_WiSUN_Ocelot(IPhy):
@@ -11,7 +12,7 @@ class PHYS_Internal_WiSUN_Ocelot(IPhy):
     # JIRA Link:
     def PHY_Internal_WISUN_868MHz_2GFSK_100kbps_2a_EU(self, model, phy_name=None):
         # modify Studio PHY
-        phy = PHYS_IEEE802154_WiSUN_Ocelot().PHY_IEEE802154_WISUN_868MHz_2GFSK_100kbps_2a_EU(model,phy_name='PHY_Internal_WISUN_868MHz_2GFSK_100kbps_2a_EU')
+        phy = PhysStudioWisunFanOcelot().PHY_IEEE802154_WISUN_868MHz_2GFSK_100kbps_2a_EU(model,phy_name='PHY_Internal_WISUN_868MHz_2GFSK_100kbps_2a_EU')
 
         # Sol xtal frequency of 40MHz
         phy.profile_inputs.xtal_frequency_hz.value = 40000000
@@ -44,7 +45,7 @@ class PHYS_Internal_WiSUN_Ocelot(IPhy):
     # JIRA Link:
     def PHY_Internal_WISUN_915MHz_2GFSK_150kbps_3_NA(self, model, phy_name=None):
         # modify Studio PHY
-        phy = PHYS_IEEE802154_WiSUN_Ocelot().PHY_IEEE802154_WISUN_915MHz_2GFSK_150kbps_3_NA(model,phy_name='PHY_Internal_WISUN_915MHz_2GFSK_150kbps_3_NA')
+        phy = PhysStudioWisunFanOcelot().PHY_IEEE802154_WISUN_915MHz_2GFSK_150kbps_3_NA(model,phy_name='PHY_Internal_WISUN_915MHz_2GFSK_150kbps_3_NA')
 
         # Sol xtal frequency of 40MHz
         phy.profile_inputs.xtal_frequency_hz.value = 40000000
@@ -77,7 +78,7 @@ class PHYS_Internal_WiSUN_Ocelot(IPhy):
     # For WiSun test with Antenna Diversity Enabled
     def PHY_Internal_WISUN_915MHz_2GFSK_150kbps_3_NA_antdiv(self, model, phy_name=None):
         # modify Studio phy
-        phy = PHYS_IEEE802154_WiSUN_Ocelot().PHY_IEEE802154_WISUN_915MHz_2GFSK_150kbps_3_NA(model,
+        phy = PhysStudioWisunFanOcelot().PHY_IEEE802154_WISUN_915MHz_2GFSK_150kbps_3_NA(model,
                                                                                             'PHY_Internal_WISUN_915MHz_2GFSK_150kbps_3_NA_antdiv')
         phy.profile_inputs.antdivmode.value = model.vars.antdivmode.var_enum.PHDEMODANTDIV
         phy.profile_inputs.skip2ant.value = model.vars.skip2ant.var_enum.SKIP2ANT
@@ -89,7 +90,7 @@ class PHYS_Internal_WiSUN_Ocelot(IPhy):
     # For WiSun test with Antenna Diversity Enabled
     def PHY_Internal_WISUN_868MHz_2GFSK_50kbps_1a_EU_antdiv(self, model, phy_name=None):
         # modify Studio phy
-        phy = PHYS_IEEE802154_WiSUN_Ocelot().PHY_IEEE802154_WISUN_868MHz_2GFSK_50kbps_1a_EU(model,
+        phy = PhysStudioWisunFanOcelot().PHY_IEEE802154_WISUN_868MHz_2GFSK_50kbps_1a_EU(model,
                                                                                             'PHY_Internal_WISUN_868MHz_2GFSK_50kbps_1a_EU_antdiv')
         phy.profile_inputs.antdivmode.value = model.vars.antdivmode.var_enum.PHDEMODANTDIV
         phy.profile_inputs.skip2ant.value = model.vars.skip2ant.var_enum.SKIP2ANT
@@ -104,7 +105,7 @@ class PHYS_Internal_WiSUN_Ocelot(IPhy):
     # For WiSun test with Antenna Diversity Enabled
     def PHY_Internal_WISUN_920MHz_2GFSK_50kbps_1b_JP_ECHONET_antdiv(self, model, phy_name=None):
         # modify Studio phy
-        phy = PHYS_IEEE802154_WiSUN_Ocelot().PHY_IEEE802154_WISUN_920MHz_2GFSK_50kbps_1b_JP_ECHONET(model, phy_name='PHY_Internal_WISUN_920MHz_2GFSK_50kbps_1b_JP_ECHONET_antdiv')
+        phy = PhysStudioWisunHanOcelot().PHY_IEEE802154_WISUN_920MHz_2GFSK_50kbps_1b_JP_ECHONET(model, phy_name='PHY_Internal_WISUN_920MHz_2GFSK_50kbps_1b_JP_ECHONET_antdiv')
         phy.profile_inputs.antdivmode.value = model.vars.antdivmode.var_enum.PHDEMODANTDIV
         phy.profile_inputs.skip2ant.value = model.vars.skip2ant.var_enum.SKIP2ANT
 
@@ -115,7 +116,7 @@ class PHYS_Internal_WiSUN_Ocelot(IPhy):
     # For WiSun test with Antenna Diversity Enabled
     def PHY_Internal_WISUN_868MHz_2GFSK_100kbps_2a_EU_antdiv(self, model, phy_name=None):
         # modify Studio PHY
-        phy = PHYS_IEEE802154_WiSUN_Ocelot().PHY_IEEE802154_WISUN_868MHz_2GFSK_100kbps_2a_EU(model,
+        phy = PhysStudioWisunFanOcelot().PHY_IEEE802154_WISUN_868MHz_2GFSK_100kbps_2a_EU(model,
                                                                                            phy_name='PHY_Internal_WISUN_868MHz_2GFSK_100kbps_2a_EU_antdiv')
         phy.profile_inputs.antdivmode.value = model.vars.antdivmode.var_enum.PHDEMODANTDIV
         phy.profile_inputs.skip2ant.value = model.vars.skip2ant.var_enum.SKIP2ANT
@@ -128,7 +129,7 @@ class PHYS_Internal_WiSUN_Ocelot(IPhy):
     # For WiSun test with Antenna Diversity Enabled
     def PHY_Internal_WISUN_920MHz_2GFSK_100kbps_2b_JP_ECHONET_antdiv(self, model, phy_name=None):
         # modify Studio PHY
-        phy = PHYS_IEEE802154_WiSUN_Ocelot().PHY_IEEE802154_WISUN_920MHz_2GFSK_100kbps_2b_JP_ECHONET(model, phy_name='PHY_Internal_WISUN_920MHz_2GFSK_100kbps_2b_JP_ECHONET_antdiv')
+        phy = PhysStudioWisunHanOcelot().PHY_IEEE802154_WISUN_920MHz_2GFSK_100kbps_2b_JP_ECHONET(model, phy_name='PHY_Internal_WISUN_920MHz_2GFSK_100kbps_2b_JP_ECHONET_antdiv')
 
         phy.profile_inputs.antdivmode.value = model.vars.antdivmode.var_enum.PHDEMODANTDIV
         phy.profile_inputs.skip2ant.value = model.vars.skip2ant.var_enum.SKIP2ANT
@@ -137,7 +138,7 @@ class PHYS_Internal_WiSUN_Ocelot(IPhy):
 
     #Used for validation with FEC enabled. This is simply a pointer to the non-FEC PHY with one parameter set to TX with FEC.
     def PHY_ValOnly_WISUN_915MHz_2GFSK_50kbps_1b_NA_FEC(self, model, phy_name=None):
-        phy = PHYS_IEEE802154_WiSUN_Ocelot().PHY_IEEE802154_WISUN_915MHz_2GFSK_50kbps_1b_NA(model, phy_name='PHY_ValOnly_WISUN_915MHz_2GFSK_50kbps_1b_NA_FEC')
+        phy = PhysStudioWisunFanOcelot().PHY_IEEE802154_WISUN_915MHz_2GFSK_50kbps_1b_NA(model, phy_name='PHY_ValOnly_WISUN_915MHz_2GFSK_50kbps_1b_NA_FEC')
         phy.profile_inputs.fec_tx_enable.value = model.vars.fec_tx_enable.var_enum.ENABLED
 
         return phy

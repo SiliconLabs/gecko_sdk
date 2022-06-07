@@ -42,9 +42,22 @@ static volatile bool                radioaes_lock_initialized = false;
 #endif
 
 #if defined(SLI_RADIOAES_REQUIRES_MASKING)
+
+#if defined(SL_COMPONENT_CATALOG_PRESENT)
+#include "sl_component_catalog.h"
+#endif
+
+#if defined(SL_CATALOG_PSA_CRYPTO_PRESENT)
+// If the PSA Crypto core is present, use its randomness abstraction to get
+// the initial mask seed.
 #include "psa/crypto.h"
+#else
+// If the PSA Crypto core is not present, we need to target the TRNG driver
+// directly to get the initial mask seed. We'll always have an external randomness
+// provider function on devices containing a RADIOAES instance.
 #include "sli_psa_driver_common.h"
-#include "em_assert.h"
+#endif
+#include "sl_assert.h"
 
 uint32_t sli_radioaes_mask = 0;
 
@@ -52,17 +65,22 @@ static void sli_radioaes_update_mask(void)
 {
   if (sli_radioaes_mask == 0) {
     // Mask has not been initialized yet, get a random value to start
+#if defined(SL_CATALOG_PSA_CRYPTO_PRESENT)
+    psa_status_t status = psa_generate_random((uint8_t*)&sli_radioaes_mask, sizeof(sli_radioaes_mask));
+    EFM_ASSERT(status == PSA_SUCCESS);
+#else
     size_t out_len = 0;
     psa_status_t status = mbedtls_psa_external_get_random(NULL, (uint8_t*)&sli_radioaes_mask, sizeof(sli_radioaes_mask), &out_len);
     EFM_ASSERT(status == PSA_SUCCESS);
     EFM_ASSERT(out_len == sizeof(sli_radioaes_mask));
+#endif
   }
 
   // Use a different mask for each new operation
   // The masking logic requires the upper mask bit to be set
   sli_radioaes_mask = (sli_radioaes_mask + 1) | (1UL << 31);
 }
-#endif
+#endif // SLI_RADIOAES_REQUIRES_MASKING
 
 sl_status_t sli_radioaes_acquire(void)
 {

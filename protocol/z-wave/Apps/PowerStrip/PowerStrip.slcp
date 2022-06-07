@@ -1,5 +1,5 @@
-project_name: PowerStrip
-label: PowerStrip
+project_name: zwave_soc_power_strip
+label: Z-Wave - SoC Power Strip
 category: Z-Wave|Apps
 description: The Z-Wave certified Power Strip application shows an extension block implementation used to turn on several devices that are connected to power. Examples include lights, appliances, etc.
 package: Z-Wave
@@ -9,8 +9,11 @@ component:
   - id: emlib_timer
   - id: emlib_msc
   - id: gpiointerrupt
+  - id: zw_role_type_always_on
   - id: zw_core
-  - id: zw_apputilities
+  - id: zw_appshw_powerstrip
+  - id: zw_zaf
+  - id: zw_true_status
   - id: zw_ota
   - id: zw_cc_association
   - id: zw_cc_basic  
@@ -32,7 +35,6 @@ component:
   - id: zw_cc_zwaveplusinfo
   - id: sl_system
   - id: device_init
-  - id: iostream_recommended_stream
   - id: mpu # disable execution from RAM
   - id: simple_rgb_pwm_led
     instance: [led]
@@ -101,17 +103,17 @@ configuration:
 
 define:
   - name: APP_PROPERTIES_CONFIG_FILE
-    value: <config_app.h>
+    value: <application_properties_config.h>
 
 config_file:
   # Override LED config
-  - path: config/s1/sl_simple_rgb_pwm_led_led_config.h
+  - path: ../../platform/SiliconLabs/AppsHw/src/PowerStrip/config/s1/sl_simple_rgb_pwm_led_led_config.h
     override:
       file_id: simple_rgb_pwm_led_config
       component: simple_rgb_pwm_led
       instance: led
     condition: ["device_series_1"]
-  - path: config/s2/sl_simple_rgb_pwm_led_led_config.h
+  - path: ../../platform/SiliconLabs/AppsHw/src/PowerStrip/config/s2/sl_simple_rgb_pwm_led_led_config.h
     override:
       file_id: simple_rgb_pwm_led_config
       component: simple_rgb_pwm_led
@@ -123,3 +125,11 @@ other_file:
 
 tag:
   - prebuilt_demo
+
+filter:
+  - name: "Wireless Technology"
+    value: ["Z-Wave"]
+  - name: "Device Type"
+    value: ["SoC"]
+  - name: "Project Difficulty"
+    value: ["Beginner"]

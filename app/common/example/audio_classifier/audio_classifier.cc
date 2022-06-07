@@ -1,6 +1,6 @@
 /***************************************************************************//**
  * @file
- * @brief Top level application functions
+ * @brief Audio classifier application
  *******************************************************************************
  * # License
  * <b>Copyright 2022 Silicon Laboratories Inc. www.silabs.com</b>
@@ -32,9 +32,14 @@
   #error "Sample application requires two leds"
 #endif
 
+// Pointer to RecognizeCommands object for handling recognitions.
 static RecognizeCommands *command_recognizer = nullptr;
+
+// Micrium OS Task variables
 static OS_TCB tcb;
 static CPU_STK stack[TASK_STACK_SIZE];
+
+// Variables for detection/activity
 static int32_t detected_timeout = 0;
 static int32_t activity_timestamp = 0;
 static int32_t activity_toggle_timestamp = 0;
@@ -42,6 +47,7 @@ static uint8_t previous_score = 0;
 static int32_t previous_score_timestamp = 0;
 static int previous_result = 0;
 
+// Category label variables
 int category_count = 0;
 const char* category_labels[] = CATEGORY_LABELS;
 static int category_label_count = sizeof(category_labels) / sizeof(category_labels[0]);
@@ -91,10 +97,12 @@ static sl_status_t process_output(){
   // Get current time stamp needed by CommandRecognizer
   current_time_stamp = sl_sleeptimer_tick_to_ms(sl_sleeptimer_get_tick_count());
 
+  // Process the latest result from the model output
   TfLiteStatus process_status = command_recognizer->ProcessLatestResults(
       sl_tflite_micro_get_output_tensor(), current_time_stamp, &result, &score, &is_new_command);
 
   if (process_status == kTfLiteOk) {
+    // Take an action based on the new result/score
     handle_result(current_time_stamp, result, score, is_new_command);
   } else {
     status = SL_STATUS_FAIL;
@@ -169,6 +177,7 @@ void audio_classifier_task(void *arg)
            category_count, category_label_count);
   }
 
+  // Validate input/output type of the tflite model
   if ((input->type != kTfLiteInt8) || (output->type != kTfLiteInt8)) {
     printf("ERROR: Invalid input/output tensor type.\n"
            "Application requires input and output tensors to be of type int8.\n");
@@ -218,6 +227,8 @@ static void handle_result(int32_t current_time, int result, uint8_t score, bool 
     sl_led_turn_off(&DETECTION_LED);
   }
 
+  // When detection timeout has passed we start to check for activity, which is
+  // signaled by a change in the score value.
   if (detected_timeout == 0) {
     if (previous_score == 0) {
       previous_result = result;

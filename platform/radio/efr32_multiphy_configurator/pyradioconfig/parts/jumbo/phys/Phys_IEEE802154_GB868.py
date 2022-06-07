@@ -78,6 +78,8 @@ class PHYS_IEEE802154_GB868_Jumbo(IPhy):
         phy.profile_inputs.rssi_period.value = 3    # 2^3 = 8 bits(symbols)
         phy.profile_inputs.in_2fsk_opt_scope.value = False
 
+        phy.profile_outputs.rx_sync_delay_ns.override = 56500
+        phy.profile_outputs.rx_eof_delay_ns.override = 56500
 
 
     def PHY_IEEE802154_GB868_863MHz_PHR2(self, model, phy_name=None):

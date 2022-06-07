@@ -8,7 +8,7 @@
 /*                              INCLUDE FILES                               */
 /****************************************************************************/
 
-#include <CC_ZWavePlusInfo.h>
+#include <CC_ZWavePlusInfoPrivate.h>
 #include <ZW_plus_version.h>
 #include <string.h>
 #include <ZW_TransportEndpoint.h>
@@ -19,25 +19,21 @@
 /*                      PRIVATE TYPES and DEFINITIONS                       */
 /****************************************************************************/
 
-// Nothing here.
-
 /****************************************************************************/
 /*                              PRIVATE DATA                                */
 /****************************************************************************/
 
-static SCCZWavePlusInfo const * pData = NULL;
+static SCCZWavePlusInfo const * pData = &pCCZWavePlusInfo;
 
 /****************************************************************************/
 /*                              EXPORTED DATA                               */
 /****************************************************************************/
 
-// Nothing here.
-
 /****************************************************************************/
 /*                            PRIVATE FUNCTIONS                             */
 /****************************************************************************/
 
-void CC_ZWavePlusInfo_Init(SCCZWavePlusInfo const * const pZWPlusInfo)
+void CC_ZWavePlusInfo_Set(SCCZWavePlusInfo const * const pZWPlusInfo)
 {
   pData = pZWPlusInfo;
 }

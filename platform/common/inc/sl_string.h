@@ -31,7 +31,6 @@
 #ifndef SL_STRING_H
 #define SL_STRING_H
 
-#include "sl_status.h"
 #include <stddef.h>
 #include <stdbool.h>
 #include <stdio.h>

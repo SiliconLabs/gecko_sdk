@@ -1,8 +1,14 @@
 project_name: "ZigbeeMinimalHost"
-label: "ZigbeeMinimalHost"
+label: "Zigbee - Host ZigbeeMinimalHost"
 package: "Zigbee"
 category: "Zigbee Application"
 quality: "production"
+
+description: >
+  This is a minimal Zigbee 3.0 gateway application for a Unix host, providing
+  only network-layer functionality and requiring the addition of application-layer 
+  functionality.
+author: "Silicon Laboratories, Inc."
 
 component:
   - id: "cli"
@@ -68,11 +74,6 @@ configuration:
   - name: EMBER_AF_PLUGIN_NETWORK_CREATOR_SECURITY_NETWORK_OPEN_TIME_S
     value: 180 
 
-description: |-
-  This is a minimal Zigbee 3.0 gateway application for a Unix host, providing
-  only network-layer functionality and requiring the addition of application-layer 
-  functionality.
-
 readme:
   - path: ./readme.html
 
@@ -80,3 +81,11 @@ ui_hints:
   highlight:
     - path: readme.html
       focus: false
+
+filter:
+  - name: "Wireless Technology"
+    value: ["Zigbee"]
+  - name: "Device Type"
+    value: ["Host"]
+  - name: "Project Difficulty"
+    value: ["Advanced"]

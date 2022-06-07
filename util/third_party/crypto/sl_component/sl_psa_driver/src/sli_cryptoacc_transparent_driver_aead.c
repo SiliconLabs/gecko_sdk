@@ -64,8 +64,7 @@ static psa_status_t check_aead_parameters(const psa_key_attributes_t *attributes
       if (psa_get_key_type(attributes) != PSA_KEY_TYPE_AES) {
         return PSA_ERROR_NOT_SUPPORTED;
       }
-      if (tag_length == 0
-          || tag_length == 2
+      if (tag_length < 4
           || tag_length > 16
           || tag_length % 2 != 0
           || nonce_length < 7
@@ -152,8 +151,8 @@ static psa_status_t sli_cryptoacc_software_gcm(const uint8_t* keybuf,
   if (status != PSA_SUCCESS) {
     return status;
   }
-  sx_ret = sx_aes_ecb_encrypt((const block_t *)&key,
-                              (const block_t *)&data_in,
+  sx_ret = sx_aes_ecb_encrypt(&key,
+                              &data_in,
                               &data_out);
   status = cryptoacc_management_release();
   if (sx_ret != CRYPTOLIB_SUCCESS
@@ -191,8 +190,8 @@ static psa_status_t sli_cryptoacc_software_gcm(const uint8_t* keybuf,
   if (status != PSA_SUCCESS) {
     return status;
   }
-  sx_ret = sx_aes_ecb_encrypt((const block_t *)&key,
-                              (const block_t *)&data_in,
+  sx_ret = sx_aes_ecb_encrypt(&key,
+                              &data_in,
                               &data_out);
   status = cryptoacc_management_release();
   if (sx_ret != CRYPTOLIB_SUCCESS
@@ -253,10 +252,10 @@ static psa_status_t sli_cryptoacc_software_gcm(const uint8_t* keybuf,
     if (status != PSA_SUCCESS) {
       return status;
     }
-    sx_ret = sx_aes_ctr_encrypt((const block_t *)&key,
-                                (const block_t *)&data_in,
+    sx_ret = sx_aes_ctr_encrypt(&key,
+                                &data_in,
                                 &data_out,
-                                (const block_t *)&nonce_internal);
+                                &nonce_internal);
 
     status = cryptoacc_management_release();
     if (sx_ret != CRYPTOLIB_SUCCESS
@@ -529,12 +528,12 @@ psa_status_t sli_cryptoacc_transparent_aead_encrypt_tag(const psa_key_attributes
       if (status != PSA_SUCCESS) {
         return status;
       }
-      sx_ret = sx_aes_ccm_encrypt((const block_t *)&key,
-                                  (const block_t *)&data_in,
+      sx_ret = sx_aes_ccm_encrypt(&key,
+                                  &data_in,
                                   &data_out,
-                                  (const block_t *)&nonce_internal,
+                                  &nonce_internal,
                                   &tag_block,
-                                  (const block_t *)&aad_block);
+                                  &aad_block);
       status = cryptoacc_management_release();
       if (sx_ret != CRYPTOLIB_SUCCESS
           || status != PSA_SUCCESS) {
@@ -554,12 +553,12 @@ psa_status_t sli_cryptoacc_transparent_aead_encrypt_tag(const psa_key_attributes
         if (status != PSA_SUCCESS) {
           return status;
         }
-        sx_ret = sx_aes_gcm_encrypt((const block_t *)&key,
-                                    (const block_t *)&data_in,
+        sx_ret = sx_aes_gcm_encrypt(&key,
+                                    &data_in,
                                     &data_out,
-                                    (const block_t *)&nonce_internal,
+                                    &nonce_internal,
                                     &tag_block,
-                                    (const block_t *)&aad_block);
+                                    &aad_block);
         status = cryptoacc_management_release();
         if (sx_ret != CRYPTOLIB_SUCCESS
             || status != PSA_SUCCESS) {
@@ -709,12 +708,12 @@ psa_status_t sli_cryptoacc_transparent_aead_decrypt_tag(const psa_key_attributes
       if (status != PSA_SUCCESS) {
         return status;
       }
-      sx_ret = sx_aes_ccm_decrypt_verify((const block_t *)&key,
-                                         (const block_t *)&data_in,
+      sx_ret = sx_aes_ccm_decrypt_verify(&key,
+                                         &data_in,
                                          &data_out,
-                                         (const block_t *)&nonce_internal,
+                                         &nonce_internal,
                                          &tag_block,
-                                         (const block_t *)&aad_block);
+                                         &aad_block);
       status = cryptoacc_management_release();
       if (sx_ret == CRYPTOLIB_INVALID_SIGN_ERR) {
         return_status = PSA_ERROR_INVALID_SIGNATURE;
@@ -744,12 +743,12 @@ psa_status_t sli_cryptoacc_transparent_aead_decrypt_tag(const psa_key_attributes
         if (status != PSA_SUCCESS) {
           return status;
         }
-        sx_ret = sx_aes_gcm_decrypt((const block_t *)&key,
-                                    (const block_t *)&data_in,
+        sx_ret = sx_aes_gcm_decrypt(&key,
+                                    &data_in,
                                     &data_out,
-                                    (const block_t *)&nonce_internal,
+                                    &nonce_internal,
                                     &tag_block,
-                                    (const block_t *)&aad_block);
+                                    &aad_block);
         status = cryptoacc_management_release();
         if (sx_ret != CRYPTOLIB_SUCCESS || status != PSA_SUCCESS) {
           return_status = PSA_ERROR_HARDWARE_FAILURE;
@@ -827,7 +826,70 @@ psa_status_t sli_cryptoacc_transparent_aead_decrypt_tag(const psa_key_attributes
 #endif // PSA_WANT_ALG_CCM || PSA_WANT_ALG_GCM
 }
 
-#if defined(PSA_CRYPTO_AEAD_MULTIPART_SUPPORTED)
+#if defined(PSA_WANT_ALG_CCM) || defined(PSA_WANT_ALG_GCM)
+static psa_status_t transparent_aead_encrypt_decrypt_setup(sli_cryptoacc_transparent_aead_operation_t *operation,
+                                                           const psa_key_attributes_t *attributes,
+                                                           const uint8_t *key_buffer,
+                                                           size_t key_buffer_size,
+                                                           psa_algorithm_t alg,
+                                                           sli_aes_mode_t operation_direction)
+{
+  if (operation == NULL
+      || attributes == NULL
+      || key_buffer == NULL) {
+    return PSA_ERROR_INVALID_ARGUMENT;
+  }
+
+  memset(operation, 0, sizeof(*operation));
+
+  size_t key_bits = psa_get_key_bits(attributes);
+  size_t key_size = PSA_BITS_TO_BYTES(key_bits);
+
+  if (key_buffer_size < key_size) {
+    return PSA_ERROR_INVALID_ARGUMENT;
+  }
+  if (sizeof(operation->key) < key_size) {
+    return PSA_ERROR_INVALID_ARGUMENT;
+  }
+
+  // Validate key type.
+  if (psa_get_key_type(attributes) != PSA_KEY_TYPE_AES) {
+    return PSA_ERROR_NOT_SUPPORTED;
+  }
+
+  // Validate tag length.
+  if ( PSA_AEAD_TAG_LENGTH(psa_get_key_type(attributes), key_bits, alg) > 16 ) {
+    return PSA_ERROR_INVALID_ARGUMENT;
+  }
+
+  // Validate operation.
+  switch (PSA_ALG_AEAD_WITH_SHORTENED_TAG(alg, 0)) {
+  #if defined (PSA_WANT_ALG_GCM)
+    case PSA_ALG_AEAD_WITH_SHORTENED_TAG(PSA_ALG_GCM, 0):
+    {
+      operation->alg = alg;
+      break;
+    }
+  #endif
+  #if defined (PSA_WANT_ALG_CCM)
+    case PSA_ALG_AEAD_WITH_SHORTENED_TAG(PSA_ALG_CCM, 0):
+    {
+      operation->alg = alg;
+      break;
+    }
+  #endif
+    default:
+      return PSA_ERROR_NOT_SUPPORTED;
+  }
+
+  memcpy(operation->key, key_buffer, key_size);
+  operation->key_len = key_size;
+
+  operation->direction = operation_direction;
+
+  return PSA_SUCCESS;
+}
+#endif // PSA_WANT_ALG_CCM || PSA_WANT_ALG_GCM
 
 psa_status_t sli_cryptoacc_transparent_aead_encrypt_setup(sli_cryptoacc_transparent_aead_operation_t *operation,
                                                           const psa_key_attributes_t *attributes,
@@ -835,12 +897,20 @@ psa_status_t sli_cryptoacc_transparent_aead_encrypt_setup(sli_cryptoacc_transpar
                                                           size_t key_buffer_size,
                                                           psa_algorithm_t alg)
 {
+  #if defined(PSA_WANT_ALG_CCM) || defined(PSA_WANT_ALG_GCM)
+
+  return transparent_aead_encrypt_decrypt_setup(operation, attributes, key_buffer, key_buffer_size, alg, SLI_AES_ENC);
+
+  #else // PSA_WANT_ALG_CCM || PSA_WANT_ALG_GCM
+
   (void)operation;
   (void)attributes;
   (void)key_buffer;
   (void)key_buffer_size;
   (void)alg;
+
   return PSA_ERROR_NOT_SUPPORTED;
+  #endif // PSA_WANT_ALG_CCM || PSA_WANT_ALG_GCM
 }
 
 psa_status_t sli_cryptoacc_transparent_aead_decrypt_setup(sli_cryptoacc_transparent_aead_operation_t *operation,
@@ -849,54 +919,259 @@ psa_status_t sli_cryptoacc_transparent_aead_decrypt_setup(sli_cryptoacc_transpar
                                                           size_t key_buffer_size,
                                                           psa_algorithm_t alg)
 {
+  #if defined(PSA_WANT_ALG_CCM) || defined(PSA_WANT_ALG_GCM)
+
+  return transparent_aead_encrypt_decrypt_setup(operation, attributes, key_buffer, key_buffer_size, alg, SLI_AES_DEC);
+
+  #else // PSA_WANT_ALG_CCM || PSA_WANT_ALG_GCM
   (void)operation;
   (void)attributes;
   (void)key_buffer;
   (void)key_buffer_size;
   (void)alg;
   return PSA_ERROR_NOT_SUPPORTED;
-}
-
-psa_status_t sli_cryptoacc_transparent_aead_generate_nonce(sli_cryptoacc_transparent_aead_operation_t *operation,
-                                                           uint8_t *nonce,
-                                                           size_t nonce_size,
-                                                           size_t *nonce_length)
-{
-  (void)operation;
-  (void)nonce;
-  (void)nonce_size;
-  (void)nonce_length;
-  return PSA_ERROR_NOT_SUPPORTED;
+  #endif // PSA_WANT_ALG_CCM || PSA_WANT_ALG_GCM
 }
 
 psa_status_t sli_cryptoacc_transparent_aead_set_nonce(sli_cryptoacc_transparent_aead_operation_t *operation,
                                                       const uint8_t *nonce,
                                                       size_t nonce_size)
 {
+#if defined(PSA_WANT_ALG_CCM) || defined(PSA_WANT_ALG_GCM)
+
+  if (operation == NULL || nonce == NULL) {
+    return PSA_ERROR_INVALID_ARGUMENT;
+  }
+
+  // Not able to set nonce twice.
+  if (operation->ctx.preinit.nonce_length != 0) {
+    return PSA_ERROR_BAD_STATE;
+  }
+
+  if (nonce_size > sizeof(operation->ctx.preinit.nonce)) {
+    return PSA_ERROR_NOT_SUPPORTED;
+  }
+
+  // Validate operation.
+  switch (PSA_ALG_AEAD_WITH_SHORTENED_TAG(operation->alg, 0)) {
+#if defined(PSA_WANT_ALG_GCM)
+    case PSA_ALG_AEAD_WITH_SHORTENED_TAG(PSA_ALG_GCM, 0):
+    {
+      if (nonce_size != 12) {
+        return PSA_ERROR_NOT_SUPPORTED;
+      }
+      break;
+    }
+#endif
+#if defined(PSA_WANT_ALG_CCM)
+    case PSA_ALG_AEAD_WITH_SHORTENED_TAG(PSA_ALG_CCM, 0):
+    {
+      if (nonce_size < 7 || nonce_size > 13) {
+        return PSA_ERROR_INVALID_ARGUMENT;
+      }
+      break;
+    }
+#endif
+    default:
+      return PSA_ERROR_NOT_SUPPORTED;
+  }
+
+  memcpy(operation->ctx.preinit.nonce, nonce, nonce_size);
+  operation->ctx.preinit.nonce_length = nonce_size;
+  return PSA_SUCCESS;
+
+#else //PSA_WANT_ALG_CCM || PSA_WANT_ALG_GCM
   (void)operation;
   (void)nonce;
   (void)nonce_size;
   return PSA_ERROR_NOT_SUPPORTED;
+#endif
 }
 
 psa_status_t sli_cryptoacc_transparent_aead_set_lengths(sli_cryptoacc_transparent_aead_operation_t *operation,
                                                         size_t ad_length,
                                                         size_t plaintext_length)
 {
+  #if defined(PSA_WANT_ALG_CCM) || defined(PSA_WANT_ALG_GCM)
+  if (operation == NULL) {
+    return PSA_ERROR_INVALID_ARGUMENT;
+  }
+
+  (void)ad_length;
+
+  // Check if operation has already started
+  if (operation->ad_len != 0 || operation->processed_len != 0) {
+    return PSA_ERROR_BAD_STATE;
+  }
+
+  // To pass current PSA Crypto test suite, tag length encoded in the
+  // algorithm needs to be checked at this point.
+  switch (PSA_ALG_AEAD_WITH_SHORTENED_TAG(operation->alg, 0)) {
+#if defined(PSA_WANT_ALG_CCM)
+    case PSA_ALG_AEAD_WITH_SHORTENED_TAG(PSA_ALG_CCM, 0):
+      if ((PSA_ALG_AEAD_GET_TAG_LENGTH(operation->alg) % 2 != 0)
+          || PSA_ALG_AEAD_GET_TAG_LENGTH(operation->alg) < 4
+          || PSA_ALG_AEAD_GET_TAG_LENGTH(operation->alg) > 16) {
+        return PSA_ERROR_INVALID_ARGUMENT;
+      }
+      operation->total_length = plaintext_length;
+
+      break;
+#endif
+#if defined(PSA_WANT_ALG_GCM)
+    case PSA_ALG_AEAD_WITH_SHORTENED_TAG(PSA_ALG_GCM, 0):
+      (void)plaintext_length;
+      if (PSA_ALG_AEAD_GET_TAG_LENGTH(operation->alg) < 4
+          || PSA_ALG_AEAD_GET_TAG_LENGTH(operation->alg) > 16) {
+        return PSA_ERROR_INVALID_ARGUMENT;
+      }
+      break;
+#endif
+    default:
+      return PSA_ERROR_BAD_STATE;
+  }
+
+  return PSA_SUCCESS;
+  #else//PSA_WANT_ALG_CCM
   (void)operation;
   (void)ad_length;
   (void)plaintext_length;
   return PSA_ERROR_NOT_SUPPORTED;
+  #endif//PSA_WANT_ALG_CCM
 }
+
+#if defined(PSA_WANT_ALG_CCM) || defined(PSA_WANT_ALG_GCM)
+static psa_status_t cryptoacc_aead_start(sli_cryptoacc_transparent_aead_operation_t *operation,
+                                         const uint8_t *input,
+                                         size_t input_length)
+{
+  psa_status_t return_status = PSA_ERROR_CORRUPTION_DETECTED;
+  uint32_t sx_ret = CRYPTOLIB_CRYPTO_ERR;
+
+  psa_algorithm_t alg = operation->alg;
+
+  block_t ctx_out_block = block_t_convert(operation->ctx.xcm_ctx, sizeof(operation->ctx.xcm_ctx));
+
+  block_t key = block_t_convert(operation->key, operation->key_len);
+  block_t aad_block = block_t_convert(input, input_length);
+  block_t nonce_block = block_t_convert(operation->ctx.preinit.nonce, operation->ctx.preinit.nonce_length);
+  block_t data_in = NULL_blk;
+  block_t data_out = NULL_blk;
+
+  // Get ownership.
+  return_status = cryptoacc_management_acquire();
+  if (return_status != PSA_SUCCESS) {
+    return return_status;
+  }
+
+  switch (PSA_ALG_AEAD_WITH_SHORTENED_TAG(alg, 0)) {
+#if defined(PSA_WANT_ALG_CCM)
+    case PSA_ALG_AEAD_WITH_SHORTENED_TAG(PSA_ALG_CCM, 0):
+    {
+      uint32_t tag_length = PSA_ALG_AEAD_GET_TAG_LENGTH(operation->alg);
+      if (operation->direction == SLI_AES_ENC) {
+        // CCM finish must have input data, in the case of pt_len = 0 and aad_len != 0 we
+        // need to precompute the tag. (Only needed for encrypt)
+        if (operation->total_length == 0) {
+          block_t tag_block = block_t_convert(operation->ctx.tag_buf, tag_length);
+          sx_ret = sx_aes_ccm_encrypt(&key,
+                                      &data_in,
+                                      &data_out,
+                                      &nonce_block,
+                                      &tag_block,
+                                      &aad_block);
+
+          goto exit;
+        } else {
+          sx_ret = sx_aes_ccm_encrypt_init(&key,
+                                           &data_in,
+                                           &data_out,
+                                           &nonce_block,
+                                           &ctx_out_block,
+                                           &aad_block,
+                                           tag_length,
+                                           operation->total_length);
+        }
+      } else {
+        sx_ret = sx_aes_ccm_decrypt_init(&key,
+                                         &data_in,
+                                         &data_out,
+                                         &nonce_block,
+                                         &ctx_out_block,
+                                         &aad_block,
+                                         tag_length,
+                                         operation->total_length);
+      }
+      break;
+    }
+#endif//PSA_WANT_ALG_CCM
+#if defined (PSA_WANT_ALG_GCM)
+    case PSA_ALG_AEAD_WITH_SHORTENED_TAG(PSA_ALG_GCM, 0):
+      if (operation->direction == SLI_AES_ENC) {
+        sx_ret = sx_aes_gcm_encrypt_init(&key,
+                                         &data_in,
+                                         &data_out,
+                                         &nonce_block,
+                                         &ctx_out_block,
+                                         &aad_block);
+      } else {
+        sx_ret = sx_aes_gcm_decrypt_init(&key,
+                                         &data_in,
+                                         &data_out,
+                                         &nonce_block,
+                                         &ctx_out_block,
+                                         &aad_block);
+      }
+      goto exit;
+      break;
+#endif//PSA_WANT_ALG_GCM
+  }
+
+  exit:
+
+  // Release ownership.
+  return_status = cryptoacc_management_release();
+  if (sx_ret != CRYPTOLIB_SUCCESS || return_status != PSA_SUCCESS ) {
+    return PSA_ERROR_HARDWARE_FAILURE;
+  }
+
+  operation->ad_len += input_length;
+  return PSA_SUCCESS;
+}
+#endif //PSA_WANT_ALG_CCM || PSA_WANT_ALG_GCM
 
 psa_status_t sli_cryptoacc_transparent_aead_update_ad(sli_cryptoacc_transparent_aead_operation_t *operation,
                                                       const uint8_t *input,
                                                       size_t input_length)
 {
+  #if defined(PSA_WANT_ALG_CCM) || defined(PSA_WANT_ALG_GCM)
+
+  if (operation == NULL
+      || (input == NULL && input_length > 0)) {
+    return PSA_ERROR_INVALID_ARGUMENT;
+  }
+
+  if (operation->alg == 0) {
+    return PSA_ERROR_BAD_STATE;
+  }
+
+  if (operation->ad_len > 0 || operation->processed_len > 0) {
+    return PSA_ERROR_BAD_STATE;
+  }
+
+  // No additional data.
+  if (input_length == 0) {
+    return PSA_SUCCESS;
+  }
+
+  return cryptoacc_aead_start(operation, input, input_length);
+#else //PSA_WANT_ALG_CCM || PSA_WANT_ALG_GCM
+
   (void)operation;
   (void)input;
   (void)input_length;
   return PSA_ERROR_NOT_SUPPORTED;
+#endif//PSA_WANT_ALG_CCM || PSA_WANT_ALG_GCM
 }
 
 psa_status_t sli_cryptoacc_transparent_aead_update(sli_cryptoacc_transparent_aead_operation_t *operation,
@@ -906,6 +1181,270 @@ psa_status_t sli_cryptoacc_transparent_aead_update(sli_cryptoacc_transparent_aea
                                                    size_t output_size,
                                                    size_t *output_length)
 {
+  #if defined(PSA_WANT_ALG_CCM) || defined(PSA_WANT_ALG_GCM)
+
+  if (output_size < input_length) {
+    return PSA_ERROR_BUFFER_TOO_SMALL;
+  }
+
+  if (operation == NULL
+      || ((input == NULL || output == NULL) && input_length > 0)
+      || output_length == NULL) {
+    return PSA_ERROR_INVALID_ARGUMENT;
+  }
+
+  if (operation->alg == 0) {
+    return PSA_ERROR_BAD_STATE;
+  }
+
+  if (input_length == 0) {
+    return PSA_SUCCESS;
+  }
+
+  *output_length = 0;
+
+  psa_algorithm_t alg = operation->alg;
+
+  psa_status_t return_status = PSA_ERROR_CORRUPTION_DETECTED;
+  uint32_t sx_ret = CRYPTOLIB_CRYPTO_ERR;
+
+  block_t key = block_t_convert(operation->key, operation->key_len);
+
+  block_t ctx_in_block = block_t_convert(operation->ctx.xcm_ctx, sizeof(operation->ctx.xcm_ctx));
+  block_t ctx_out_block = block_t_convert(operation->ctx.xcm_ctx, sizeof(operation->ctx.xcm_ctx));
+
+  block_t input_block = block_t_convert(input, input_length);
+  block_t output_block = block_t_convert(output, input_length);
+
+  block_t nonce_block = NULL_blk;
+  block_t aad_block = NULL_blk;
+
+#if defined(PSA_WANT_ALG_GCM)
+  if (PSA_ALG_AEAD_WITH_SHORTENED_TAG(alg, 0) == PSA_ALG_AEAD_WITH_SHORTENED_TAG(PSA_ALG_GCM, 0)) {
+    // The extra logic is to support non-blocksize input data for gcm.
+
+    // Store data in context if there is space in the data buffer.
+    if ((input_length + operation->final_data_length) < 16 && input_length < 16) {
+      if (operation->final_data_length > 16) {
+        //Invalid context.
+        return PSA_ERROR_INVALID_ARGUMENT;
+      }
+
+      memcpy(operation->final_data + operation->final_data_length, input, input_length);
+      operation->final_data_length += input_length;
+      return PSA_SUCCESS;
+    }
+  }
+  uint8_t input_offset = 0;
+  uint8_t output_offset = 0;
+#endif
+
+  if (operation->ad_len == 0 && operation->processed_len == 0) {
+    // Operation is not initialized.
+    nonce_block = block_t_convert(operation->ctx.preinit.nonce, operation->ctx.preinit.nonce_length);
+  }
+
+  #if defined(PSA_WANT_ALG_GCM)
+
+  if (PSA_ALG_AEAD_WITH_SHORTENED_TAG(alg, 0) == PSA_ALG_AEAD_WITH_SHORTENED_TAG(PSA_ALG_GCM, 0)) {
+    if (operation->final_data_length) {
+      if (operation->final_data_length > 16) {
+        //Invalid context.
+        return PSA_ERROR_INVALID_ARGUMENT;
+      }
+
+      // If there is data stored in context: fill final_data buffer and process it first.
+      input_offset = 16 - operation->final_data_length;
+      memcpy(operation->final_data + operation->final_data_length, input, input_offset);
+
+      block_t input_block_final = block_t_convert(operation->final_data, 16);
+      block_t output_block_final = block_t_convert(output, 16);
+
+      return_status = cryptoacc_management_acquire();
+      if (return_status != PSA_SUCCESS) {
+        return return_status;
+      }
+
+      if (operation->ad_len == 0 && operation->processed_len == 0) {
+        //Not initialized.
+        if (operation->direction == SLI_AES_ENC) {
+          sx_ret = sx_aes_gcm_encrypt_init(&key,
+                                           &input_block_final,
+                                           &output_block_final,
+                                           &nonce_block,
+                                           &ctx_out_block,
+                                           &aad_block);
+        } else {
+          sx_ret = sx_aes_gcm_decrypt_init(&key,
+                                           &input_block_final,
+                                           &output_block_final,
+                                           &nonce_block,
+                                           &ctx_out_block,
+                                           &aad_block);
+        }
+      } else {
+        if (operation->direction == SLI_AES_ENC) {
+          sx_ret = sx_aes_gcm_encrypt_update(&key,
+                                             &input_block_final,
+                                             &output_block_final,
+                                             &ctx_in_block,
+                                             &ctx_out_block);
+        } else {
+          sx_ret = sx_aes_gcm_decrypt_update(&key,
+                                             &input_block_final,
+                                             &output_block_final,
+                                             &ctx_in_block,
+                                             &ctx_out_block);
+        }
+      }
+
+      // Release ownership.
+      return_status = cryptoacc_management_release();
+      if (sx_ret != CRYPTOLIB_SUCCESS || return_status != PSA_SUCCESS ) {
+        return PSA_ERROR_HARDWARE_FAILURE;
+      }
+
+      operation->final_data_length = 0;
+      input_length -= input_offset;
+      operation->processed_len += 16;
+      output_offset += 16;
+      *output_length += 16;
+    }
+
+    // If data is less than 16: store data in context.
+    if (input_length < 16) {
+      memcpy(operation->final_data, input + input_offset, input_length);
+      operation->final_data_length = input_length;
+      return PSA_SUCCESS;
+    }
+    // Store data that is not a multiple of 16 in context.
+    uint8_t res_data_length = input_length % 16;
+    memcpy(operation->final_data, input + input_offset + (input_length - res_data_length), res_data_length);
+    operation->final_data_length = res_data_length;
+    input_length -= res_data_length;
+    input_block = block_t_convert(input + input_offset, input_length);
+    output_block = block_t_convert(output + output_offset, input_length);
+  }
+  #endif
+
+  // Get ownership.
+  return_status = cryptoacc_management_acquire();
+  if (return_status != PSA_SUCCESS) {
+    return return_status;
+  }
+
+  switch (PSA_ALG_AEAD_WITH_SHORTENED_TAG(alg, 0)) {
+      #if defined(PSA_WANT_ALG_CCM)
+    case PSA_ALG_AEAD_WITH_SHORTENED_TAG(PSA_ALG_CCM, 0):
+      // CCM multipart finish will hardfault without input data, so we must always save up to 16 bytes.
+      // Check for last operation.
+      if ((operation->processed_len + input_length) == operation->total_length) {
+        if (input_length <= 16) {
+          memcpy(operation->final_data, input, input_length);
+          operation->final_data_length = input_length;
+          return PSA_SUCCESS;
+        } else if (input_length % 16 > 0) {
+          memcpy(operation->final_data, input + (input_length - input_length % 16), input_length % 16);
+          operation->final_data_length = input_length % 16;
+        } else {
+          memcpy(operation->final_data, input + (input_length - 16), 16);
+          operation->final_data_length = 16;
+        }
+        input_length -= operation->final_data_length;
+      }
+      input_block = block_t_convert(input, input_length);
+      output_block = block_t_convert(output, input_length);
+
+      if (operation->ad_len == 0 && operation->processed_len == 0) {
+        uint32_t tag_length = PSA_ALG_AEAD_GET_TAG_LENGTH(operation->alg);
+
+        //Not initialized.
+        if (operation->direction == SLI_AES_ENC) {
+          sx_ret = sx_aes_ccm_encrypt_init(&key,
+                                           &input_block,
+                                           &output_block,
+                                           &nonce_block,
+                                           &ctx_out_block,
+                                           &aad_block,
+                                           tag_length,
+                                           operation->total_length);
+        } else {
+          sx_ret = sx_aes_ccm_decrypt_init(&key,
+                                           &input_block,
+                                           &output_block,
+                                           &nonce_block,
+                                           &ctx_out_block,
+                                           &aad_block,
+                                           tag_length,
+                                           operation->total_length);
+        }
+      } else {
+        if (operation->direction == SLI_AES_ENC) {
+          sx_ret = sx_aes_ccm_encrypt_update(&key,
+                                             &input_block,
+                                             &output_block,
+                                             &ctx_in_block,
+                                             &ctx_out_block);
+        } else {
+          sx_ret = sx_aes_ccm_decrypt_update(&key,
+                                             &input_block,
+                                             &output_block,
+                                             &ctx_in_block,
+                                             &ctx_out_block);
+        }
+      }
+      break;
+      #endif//PSA_WANT_ALG_CCM
+      #if defined(PSA_WANT_ALG_GCM)
+    case PSA_ALG_AEAD_WITH_SHORTENED_TAG(PSA_ALG_GCM, 0):
+      if (operation->ad_len == 0 && operation->processed_len == 0) {
+        //Not initialized.
+        if (operation->direction == SLI_AES_ENC) {
+          sx_ret = sx_aes_gcm_encrypt_init(&key,
+                                           &input_block,
+                                           &output_block,
+                                           &nonce_block,
+                                           &ctx_out_block,
+                                           &aad_block);
+        } else {
+          sx_ret = sx_aes_gcm_decrypt_init(&key,
+                                           &input_block,
+                                           &output_block,
+                                           &nonce_block,
+                                           &ctx_out_block,
+                                           &aad_block);
+        }
+      } else {
+        if (operation->direction == SLI_AES_ENC) {
+          sx_ret = sx_aes_gcm_encrypt_update(&key,
+                                             &input_block,
+                                             &output_block,
+                                             &ctx_in_block,
+                                             &ctx_out_block);
+        } else {
+          sx_ret = sx_aes_gcm_decrypt_update(&key,
+                                             &input_block,
+                                             &output_block,
+                                             &ctx_in_block,
+                                             &ctx_out_block);
+        }
+      }
+      break;
+      #endif//PSA_WANT_ALG_GCM
+    default:
+      return PSA_ERROR_NOT_SUPPORTED;
+  }
+  // Release ownership.
+  return_status = cryptoacc_management_release();
+  if (sx_ret != CRYPTOLIB_SUCCESS || return_status != PSA_SUCCESS ) {
+    return PSA_ERROR_HARDWARE_FAILURE;
+  }
+
+  *output_length += input_length;
+  operation->processed_len += input_length;
+  return return_status;
+
+  #else //PSA_WANT_ALG_CCM || PSA_WANT_ALG_GCM
   (void)operation;
   (void)input;
   (void)input_length;
@@ -913,6 +1452,7 @@ psa_status_t sli_cryptoacc_transparent_aead_update(sli_cryptoacc_transparent_aea
   (void)output_size;
   (void)output_length;
   return PSA_ERROR_NOT_SUPPORTED;
+  #endif //PSA_WANT_ALG_CCM || PSA_WANT_ALG_GCM
 }
 
 psa_status_t sli_cryptoacc_transparent_aead_finish(sli_cryptoacc_transparent_aead_operation_t *operation,
@@ -923,6 +1463,157 @@ psa_status_t sli_cryptoacc_transparent_aead_finish(sli_cryptoacc_transparent_aea
                                                    size_t tag_size,
                                                    size_t *tag_length)
 {
+  #if defined(PSA_WANT_ALG_CCM) || defined(PSA_WANT_ALG_GCM)
+
+  if (operation == NULL) {
+    return PSA_ERROR_INVALID_ARGUMENT;
+  }
+
+  if (ciphertext_size < operation->final_data_length) {
+    return PSA_ERROR_INVALID_ARGUMENT;
+  }
+  uint32_t tag_len = PSA_ALG_AEAD_GET_TAG_LENGTH(operation->alg);
+
+  if (tag_size < tag_len) {
+    return PSA_ERROR_BUFFER_TOO_SMALL;
+  }
+
+  block_t key = block_t_convert(operation->key, operation->key_len);
+
+  uint8_t tagbuf[16];
+  block_t tag_block = block_t_convert(tagbuf, sizeof(tagbuf));
+
+  psa_status_t status = PSA_ERROR_CORRUPTION_DETECTED;
+  uint32_t sx_ret = CRYPTOLIB_CRYPTO_ERR;
+
+  psa_algorithm_t alg = operation->alg;
+
+  if (operation->direction != SLI_AES_ENC) {
+    return PSA_ERROR_INVALID_ARGUMENT;
+  }
+
+  if (operation->ad_len == 0 && operation->processed_len == 0) {
+    // Operation is not initialized.
+
+    block_t nonce_block = block_t_convert(operation->ctx.preinit.nonce, operation->ctx.preinit.nonce_length);
+    block_t data_in = NULL_blk;
+    block_t data_out = NULL_blk;
+    block_t aad_block = NULL_blk;
+
+    // Get ownership.
+    status = cryptoacc_management_acquire();
+    if (status != PSA_SUCCESS) {
+      return status;
+    }
+    switch (PSA_ALG_AEAD_WITH_SHORTENED_TAG(alg, 0)) {
+      #if defined(PSA_WANT_ALG_CCM)
+      case PSA_ALG_AEAD_WITH_SHORTENED_TAG(PSA_ALG_CCM, 0):
+      {
+        tag_block = block_t_convert(tagbuf, tag_len);
+        sx_ret = sx_aes_ccm_encrypt(&key,
+                                    &data_in,
+                                    &data_out,
+                                    &nonce_block,
+                                    &tag_block,
+                                    &aad_block);
+        *ciphertext_length = 0;
+        break;
+      }
+      #endif//PSA_WANT_ALG_CCM
+      #if defined(PSA_WANT_ALG_GCM)
+      case PSA_ALG_AEAD_WITH_SHORTENED_TAG(PSA_ALG_GCM, 0):
+      {
+        data_in = block_t_convert(operation->final_data, operation->final_data_length);
+        data_out = block_t_convert(ciphertext, operation->final_data_length);
+        sx_ret = sx_aes_gcm_encrypt(&key,
+                                    &data_in,
+                                    &data_out,
+                                    &nonce_block,
+                                    &tag_block,
+                                    &aad_block);
+        *ciphertext_length = operation->final_data_length;
+        break;
+      }
+      #endif//PSA_WANT_ALG_GCM
+      default:
+        return PSA_ERROR_NOT_SUPPORTED;
+    }
+    //Release ownership.
+    status = cryptoacc_management_release();
+    if (sx_ret != CRYPTOLIB_SUCCESS || status != PSA_SUCCESS ) {
+      *ciphertext_length = 0;
+      return PSA_ERROR_HARDWARE_FAILURE;
+    }
+    memcpy(tag, tagbuf, tag_len);
+    return PSA_SUCCESS;
+  }
+
+  #if defined(PSA_WANT_ALG_GCM)
+  uint32_t lena_lenc[4];
+  lena_lenc[0] = __REV(operation->ad_len >> 29);
+  lena_lenc[1] = __REV((operation->ad_len << 3) & 0xFFFFFFFFUL);
+  lena_lenc[2] = __REV((operation->processed_len + operation->final_data_length) >> 29);
+  lena_lenc[3] = __REV(((operation->processed_len + operation->final_data_length) << 3) & 0xFFFFFFFFUL);
+
+  block_t len_a_c = block_t_convert(lena_lenc, sizeof(lena_lenc));
+  #endif
+
+  block_t ctx_in_block = block_t_convert(operation->ctx.xcm_ctx, sizeof(operation->ctx.xcm_ctx));
+
+  block_t data_in_block = block_t_convert(operation->final_data, operation->final_data_length);
+  block_t data_out_block = block_t_convert(ciphertext, operation->final_data_length);
+
+  // Get ownership.
+  status = cryptoacc_management_acquire();
+  if (status != PSA_SUCCESS) {
+    return status;
+  }
+  switch (PSA_ALG_AEAD_WITH_SHORTENED_TAG(alg, 0)) {
+      #if defined(PSA_WANT_ALG_CCM)
+    case PSA_ALG_AEAD_WITH_SHORTENED_TAG(PSA_ALG_CCM, 0):
+    {
+      if (operation->ad_len != 0 && operation->total_length == 0) {
+        // Tag is calculated in update_ad.
+        memcpy(tag, operation->ctx.tag_buf, tag_len);
+        return PSA_SUCCESS;
+      }
+
+      sx_ret = sx_aes_ccm_encrypt_final(
+        &key,
+        &data_in_block,
+        &data_out_block,
+        &ctx_in_block,
+        &tag_block);
+      break;
+    }
+      #endif//PSA_WANT_ALG_CCM
+      #if defined(PSA_WANT_ALG_GCM)
+    case PSA_ALG_AEAD_WITH_SHORTENED_TAG(PSA_ALG_GCM, 0):
+    {
+      sx_ret = sx_aes_gcm_encrypt_final(
+        &key,
+        &data_in_block,
+        &data_out_block,
+        &ctx_in_block,
+        &tag_block,
+        &len_a_c);
+      break;
+    }
+      #endif//PSA_WANT_ALG_GCM
+    default:
+      return PSA_ERROR_NOT_SUPPORTED;
+  }
+  // Release ownership.
+  status = cryptoacc_management_release();
+  if (sx_ret != CRYPTOLIB_SUCCESS || status != PSA_SUCCESS) {
+    return PSA_ERROR_HARDWARE_FAILURE;
+  }
+  memcpy(tag, tagbuf, tag_size);
+  *ciphertext_length = operation->final_data_length;
+  *tag_length = tag_len;
+  return status;
+
+  #else //PSA_WANT_ALG_CCM || PSA_WANT_ALG_GCM
   (void)operation;
   (void)ciphertext;
   (void)ciphertext_size;
@@ -931,6 +1622,7 @@ psa_status_t sli_cryptoacc_transparent_aead_finish(sli_cryptoacc_transparent_aea
   (void)tag_size;
   (void)tag_length;
   return PSA_ERROR_NOT_SUPPORTED;
+  #endif //PSA_WANT_ALG_CCM || PSA_WANT_ALG_GCM)
 }
 
 psa_status_t sli_cryptoacc_transparent_aead_verify(sli_cryptoacc_transparent_aead_operation_t *operation,
@@ -940,6 +1632,167 @@ psa_status_t sli_cryptoacc_transparent_aead_verify(sli_cryptoacc_transparent_aea
                                                    const uint8_t *tag,
                                                    size_t tag_length)
 {
+  #if defined(PSA_WANT_ALG_CCM) || defined(PSA_WANT_ALG_GCM)
+
+  if (operation == NULL) {
+    return PSA_ERROR_INVALID_ARGUMENT;
+  }
+
+  if (tag == NULL || tag_length == 0 ) {
+    return PSA_ERROR_INVALID_SIGNATURE;
+  }
+
+  if (plaintext_size < operation->final_data_length) {
+    return PSA_ERROR_INVALID_ARGUMENT;
+  }
+
+  block_t key = block_t_convert(operation->key, operation->key_len);
+
+  psa_status_t status = PSA_ERROR_CORRUPTION_DETECTED;
+  uint32_t sx_ret = CRYPTOLIB_CRYPTO_ERR;
+
+  psa_algorithm_t alg = operation->alg;
+  if (operation->direction != SLI_AES_DEC) {
+    return PSA_ERROR_INVALID_ARGUMENT;
+  }
+
+  if (operation->ad_len == 0 && operation->processed_len == 0) {
+    // Operation is not initialized.
+    block_t nonce_block = block_t_convert(operation->ctx.preinit.nonce, operation->ctx.preinit.nonce_length);
+    block_t aad_block = NULL_blk;
+    block_t data_in = NULL_blk;
+    block_t data_out = NULL_blk;
+    // Get ownership.
+    status = cryptoacc_management_acquire();
+    if (status != PSA_SUCCESS) {
+      return status;
+    }
+    switch (PSA_ALG_AEAD_WITH_SHORTENED_TAG(alg, 0)) {
+      #if defined(PSA_WANT_ALG_CCM)
+      case PSA_ALG_AEAD_WITH_SHORTENED_TAG(PSA_ALG_CCM, 0):
+      {
+        block_t tag_block = block_t_convert(tag, tag_length);
+        sx_ret = sx_aes_ccm_decrypt_verify(&key,
+                                           &data_in,
+                                           &data_out,
+                                           &nonce_block,
+                                           &tag_block,
+                                           &aad_block);
+        status = cryptoacc_management_release();
+        if (sx_ret != CRYPTOLIB_SUCCESS || status != PSA_SUCCESS) {
+          return PSA_ERROR_HARDWARE_FAILURE;
+        }
+        *plaintext_length = 0;
+        break;
+      }
+      #endif//PSA_WANT_ALG_CCM
+      #if defined(PSA_WANT_ALG_GCM)
+      case PSA_ALG_AEAD_WITH_SHORTENED_TAG(PSA_ALG_GCM, 0):
+      {
+        block_t tag_block = block_t_convert(tag, tag_length);
+
+        data_in = block_t_convert(operation->final_data, operation->final_data_length);
+        data_out = block_t_convert(plaintext, operation->final_data_length);
+
+        sx_ret = sx_aes_gcm_decrypt_verify(&key,
+                                           &data_in,
+                                           &data_out,
+                                           &nonce_block,
+                                           &tag_block,
+                                           &aad_block);
+        status = cryptoacc_management_release();
+        if (sx_ret == CRYPTOLIB_INVALID_SIGN_ERR) {
+          return PSA_ERROR_INVALID_SIGNATURE;
+        }
+        if (sx_ret != CRYPTOLIB_SUCCESS || status != PSA_SUCCESS) {
+          return PSA_ERROR_HARDWARE_FAILURE;
+        }
+
+        *plaintext_length = operation->final_data_length;
+        break;
+      }
+      #endif//PSA_WANT_ALG_GCM
+      default:
+        return PSA_ERROR_NOT_SUPPORTED;
+    }
+
+    return PSA_SUCCESS;
+  }
+
+  #if defined(PSA_WANT_ALG_GCM)
+  uint32_t lena_lenc[4];
+  lena_lenc[0] = __REV(operation->ad_len >> 29);
+  lena_lenc[1] = __REV((operation->ad_len << 3) & 0xFFFFFFFFUL);
+  lena_lenc[2] = __REV((operation->processed_len + operation->final_data_length) >> 29);
+  lena_lenc[3] = __REV(((operation->processed_len + operation->final_data_length) << 3) & 0xFFFFFFFFUL);
+  block_t len_a_c = block_t_convert(lena_lenc, sizeof(lena_lenc));
+  #endif
+
+  block_t ctx_in_block = block_t_convert(operation->ctx.xcm_ctx, sizeof(operation->ctx.xcm_ctx));
+  block_t tag_block = block_t_convert(tag, tag_length);
+
+  block_t data_in_block = block_t_convert(operation->final_data, operation->final_data_length);
+  block_t data_out_block = block_t_convert(plaintext, operation->final_data_length);
+
+  // Get ownership.
+  status = cryptoacc_management_acquire();
+  if (status != PSA_SUCCESS) {
+    return PSA_ERROR_HARDWARE_FAILURE;
+  }
+
+  switch (PSA_ALG_AEAD_WITH_SHORTENED_TAG(alg, 0)) {
+      #if defined(PSA_WANT_ALG_CCM)
+    case PSA_ALG_AEAD_WITH_SHORTENED_TAG(PSA_ALG_CCM, 0):
+    {
+      uint32_t tag_len = PSA_ALG_AEAD_GET_TAG_LENGTH(operation->alg);
+      if (tag_length != tag_len) {
+        return PSA_ERROR_INVALID_SIGNATURE;
+      }
+
+      sx_ret = sx_aes_ccm_decrypt_verify_final(
+        &key,
+        &data_in_block,
+        &data_out_block,
+        &ctx_in_block,
+        &tag_block);
+      break;
+    }
+      #endif//PSA_WANT_ALG_CCM
+      #if defined(PSA_WANT_ALG_GCM)
+    case PSA_ALG_AEAD_WITH_SHORTENED_TAG(PSA_ALG_GCM, 0):
+    {
+      sx_ret = sx_aes_gcm_decrypt_verify_final(
+        &key,
+        &data_in_block,
+        &data_out_block,
+        &ctx_in_block,
+        &tag_block,
+        &len_a_c);
+      break;
+    }
+      #endif//PSA_WANT_ALG_GCM
+    default:
+      return PSA_ERROR_NOT_SUPPORTED;
+  }
+
+  // Release ownership.
+  status = cryptoacc_management_release();
+
+  if (status != PSA_SUCCESS) {
+    return PSA_ERROR_HARDWARE_FAILURE;
+  }
+  if (sx_ret == CRYPTOLIB_INVALID_SIGN_ERR) {
+    return PSA_ERROR_INVALID_SIGNATURE;
+  }
+  if (sx_ret != PSA_SUCCESS) {
+    return PSA_ERROR_HARDWARE_FAILURE;
+  }
+
+  *plaintext_length = operation->final_data_length;
+
+  return PSA_SUCCESS;
+
+  #else//PSA_WANT_ALG_CCM || PSA_WANT_ALG_GCM
   (void)operation;
   (void)plaintext;
   (void)plaintext_size;
@@ -947,8 +1800,18 @@ psa_status_t sli_cryptoacc_transparent_aead_verify(sli_cryptoacc_transparent_aea
   (void)tag;
   (void)tag_length;
   return PSA_ERROR_NOT_SUPPORTED;
+  #endif//PSA_WANT_ALG_CCM || PSA_WANT_ALG_GCM
 }
 
-#endif // defined(PSA_CRYPTO_AEAD_MULTIPART_SUPPORTED)
+psa_status_t sli_cryptoacc_transparent_aead_abort(sli_cryptoacc_transparent_aead_operation_t *operation)
+{
+  // No state is ever left in HW, so zeroing context should do the trick
+  if (operation == NULL) {
+    return PSA_ERROR_INVALID_ARGUMENT;
+  }
 
-#endif // defined(SEMAILBOX_PRESENT)
+  memset(operation, 0, sizeof(*operation));
+  return PSA_SUCCESS;
+}
+
+#endif // defined(CRYPTOACC_PRESENT)

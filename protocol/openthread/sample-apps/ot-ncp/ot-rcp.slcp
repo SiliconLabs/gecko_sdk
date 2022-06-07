@@ -1,7 +1,8 @@
 project_name: ot-rcp
-label: ot-rcp
+label: OpenThread - RCP
 package: OpenThread
-description: This is a simple OpenThread RCP application.
+description:   >
+  This is a simple OpenThread RCP application. This is equivalent to the ot-rcp application in the OpenThread GitHub repo.
 category: OpenThread Examples
 quality: production
 
@@ -62,3 +63,19 @@ configuration:
 
 tag:
   - prebuilt_demo
+
+readme:
+  - path: ./README-OT-RCP.md
+
+filter:
+  - name: "Wireless Technology"
+    value: ["Thread"]
+  - name: "Device Type"
+    value: ["RCP"]
+  - name: "Project Difficulty"
+    value: ["Advanced"]
+
+ui_hints:
+  highlight:
+    - path: ./README-OT-RCP.md
+      focus: true

@@ -17,7 +17,7 @@
 * as so with he UNUSED macro.
 *              
 * Note that implementation of dprintf is a simplified version that
-* does not support floats and doubles etc. It uses TinyPrintf.
+* does not support floats and doubles etc.
 *
 * @copyright 2018 Silicon Laboratories Inc.
 */
@@ -26,8 +26,16 @@
 #ifndef _DEBUGPRINT_H_
 #define _DEBUGPRINT_H_
 
+#ifdef __cplusplus
+extern "C" {
+#endif
+
 void DebugPrintf(const char* pFormat, ...);
 void DebugPrint(const char* pString);
+
+#ifdef __cplusplus
+}
+#endif
 
 /*
  * Use TOSTRING() when printing #defines as strings.
@@ -40,7 +48,7 @@ void DebugPrint(const char* pString);
  * Suitable for writing runtime unit-tests and additional outputs after calculations that otherwise are redundant
  * in release.
  */
-#if !defined(NO_DEBUGPRINT) && defined(DEBUG)
+#if !defined(NO_DEBUGPRINT) && defined(DEBUGPRINT)
 #define DEBUG_CODE(code)        do {code} while(0)
 #else
 #define DEBUG_CODE(code)        do {} while(0)

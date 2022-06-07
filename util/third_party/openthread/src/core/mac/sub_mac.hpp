@@ -382,6 +382,7 @@ public:
      * @param[in] aScanDuration  The duration, in milliseconds, for the channel to be scanned.
      *
      * @retval kErrorNone            Successfully started scanning the channel.
+     * @retval kErrorBusy            The radio is performing energy scanning.
      * @retval kErrorInvalidState    The radio was disabled or transmitting.
      * @retval kErrorNotImplemented  Energy scan is not supported (applicable in link-raw/radio mode only).
      *
@@ -587,6 +588,11 @@ private:
     static constexpr uint32_t kAckTimeout        = 16;  // Timeout for waiting on an ACK (in msec).
     static constexpr uint32_t kCcaSampleInterval = 128; // CCA sample interval, 128 usec.
 
+#if OPENTHREAD_CONFIG_MAC_ADD_DELAY_ON_NO_ACK_ERROR_BEFORE_RETRY
+    static constexpr uint8_t kRetxDelayMinBackoffExponent = OPENTHREAD_CONFIG_MAC_RETX_DELAY_MIN_BACKOFF_EXPONENT;
+    static constexpr uint8_t kRetxDelayMaxBackoffExponent = OPENTHREAD_CONFIG_MAC_RETX_DELAY_MAX_BACKOFF_EXPONENT;
+#endif
+
 #if OPENTHREAD_CONFIG_PLATFORM_USEC_TIMER_ENABLE
     static constexpr uint32_t kEnergyScanRssiSampleInterval = 128; // RSSI sample interval for energy scan, 128 usec
 #else
@@ -601,6 +607,9 @@ private:
         kStateCsmaBackoff, // CSMA backoff before transmission.
         kStateTransmit,    // Radio is transmitting.
         kStateEnergyScan,  // Energy scan.
+#if OPENTHREAD_CONFIG_MAC_ADD_DELAY_ON_NO_ACK_ERROR_BEFORE_RETRY
+        kStateDelayBeforeRetx, // Delay before retx
+#endif
 #if !OPENTHREAD_MTD && OPENTHREAD_CONFIG_MAC_CSL_TRANSMITTER_ENABLE
         kStateCslTransmit, // CSL transmission.
 #endif
@@ -653,6 +662,7 @@ private:
     void ProcessTransmitSecurity(void);
     void SignalFrameCounterUsed(uint32_t aFrameCounter);
     void StartCsmaBackoff(void);
+    void StartTimerForBackoff(uint8_t aBackoffExponent);
     void BeginTransmit(void);
     void SampleRssi(void);
 
@@ -692,6 +702,9 @@ private:
     KeyMaterial        mNextKey;
     uint32_t           mFrameCounter;
     uint8_t            mKeyId;
+#if OPENTHREAD_CONFIG_MAC_ADD_DELAY_ON_NO_ACK_ERROR_BEFORE_RETRY
+    uint8_t mRetxDelayBackOffExponent;
+#endif
 #if OPENTHREAD_CONFIG_PLATFORM_USEC_TIMER_ENABLE
     TimerMicro mTimer;
 #else

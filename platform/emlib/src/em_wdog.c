@@ -217,11 +217,17 @@ void WDOGn_Init(WDOG_TypeDef *wdog, const WDOG_Init_TypeDef *init)
 #endif
   }
 
-  wdog->CFG = (init->debugRun       ? WDOG_CFG_DEBUGRUN   : 0U)
-              | (init->em2Run       ? WDOG_CFG_EM2RUN     : 0U)
-              | (init->em3Run       ? WDOG_CFG_EM3RUN     : 0U)
-              | (init->em4Block     ? WDOG_CFG_EM4BLOCK   : 0U)
-              | (init->resetDisable ? WDOG_CFG_WDOGRSTDIS : 0U)
+  wdog->CFG = (init->debugRun        ? WDOG_CFG_DEBUGRUN        : 0U)
+              | (init->clrSrc        ? WDOG_CFG_CLRSRC          : 0U)
+#if defined(_WDOG_CFG_EM1RUN_MASK)
+              | (init->em1Run        ? WDOG_CFG_EM1RUN          : 0U)
+#endif
+              | (init->em2Run        ? WDOG_CFG_EM2RUN          : 0U)
+              | (init->em3Run        ? WDOG_CFG_EM3RUN          : 0U)
+              | (init->em4Block      ? WDOG_CFG_EM4BLOCK        : 0U)
+              | (init->prs0MissRstEn ? WDOG_CFG_PRS0MISSRSTEN   : 0U)
+              | (init->prs1MissRstEn ? WDOG_CFG_PRS1MISSRSTEN   : 0U)
+              | (init->resetDisable  ? WDOG_CFG_WDOGRSTDIS : 0U)
               | ((uint32_t)(init->warnSel) << _WDOG_CFG_WARNSEL_SHIFT)
               | ((uint32_t)(init->winSel) << _WDOG_CFG_WINSEL_SHIFT)
               | ((uint32_t)(init->perSel) << _WDOG_CFG_PERSEL_SHIFT);
@@ -237,6 +243,9 @@ void WDOGn_Init(WDOG_TypeDef *wdog, const WDOG_Init_TypeDef *init)
 
   setting = (init->enable       ? WDOG_CTRL_EN         : 0U)
             | (init->debugRun   ? WDOG_CTRL_DEBUGRUN   : 0U)
+#if defined(_WDOG_CTRL_CLRSRC_MASK)
+            | (init->clrSrc     ? WDOG_CTRL_CLRSRC     : 0U)
+#endif
             | (init->em2Run     ? WDOG_CTRL_EM2RUN     : 0U)
             | (init->em3Run     ? WDOG_CTRL_EM3RUN     : 0U)
             | (init->em4Block   ? WDOG_CTRL_EM4BLOCK   : 0U)

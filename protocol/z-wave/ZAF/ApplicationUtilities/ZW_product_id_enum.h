@@ -32,7 +32,8 @@ typedef enum _PRODUCT_PLUS_ID_ENUM_
   PRODUCT_ID_PowerStrip = 0x0005,
   PRODUCT_ID_WallController = 0x0006,
   PRODUCT_ID_LEDBulb = 0x0007,
-  PRODUCT_ID_MultilevelSensor = 0x0008
+  PRODUCT_ID_MultilevelSensor = 0x0008,
+  PRODUCT_ID_KeyFob = 0x0009
 } eProductPlusID;
 
 #endif /* _PRODUCT_ID_ENUM_H_ */

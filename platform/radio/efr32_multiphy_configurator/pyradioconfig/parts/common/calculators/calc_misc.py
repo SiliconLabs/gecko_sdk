@@ -9,6 +9,8 @@ Calculator functions must start with "calc_", if they are to be consumed by the 
 import inspect
 from pyradioconfig.calculator_model_framework.interfaces.icalculator import ICalculator
 from pycalcmodel.core.variable import ModelVariableFormat
+from pycalcmodel.core.variable import ModelVariableFormat, CreateModelVariableEnum
+from enum import Enum
 
 class CALC_Misc(ICalculator):
 
@@ -50,6 +52,24 @@ class CALC_Misc(ICalculator):
         self._addModelRegister(model, 'MODEM.AFC.AFCTXMODE'            , int, ModelVariableFormat.HEX )
 
         self._addModelVariable(model, 'in_2fsk_opt_scope', bool, ModelVariableFormat.DECIMAL)
+
+        self._addModelVariable(model, 'protocol_id', Enum, ModelVariableFormat.DECIMAL, 'Protocol ID')
+        model.vars.protocol_id.var_enum = CreateModelVariableEnum(
+            enum_name='ProtocolIDEnum',
+            enum_desc='List of supported protocols',
+            member_data=[
+                ['Custom', 0, 'Custom stack'],
+                ['EmberPHY', 1, 'EFR32 EmberPHY (Zigbee/Thread)'],
+                ['Thread', 2, 'Thread on RAIL'],
+                ['BLE', 3, 'BLE'],
+                ['Connect', 4, 'Connect on RAIL'],
+                ['Zigbee', 5, 'Zigbee on rail'],
+                ['ZWave', 6, 'ZWave on RAIL'],
+                ['WiSUN', 7, 'WiSUN on RAIL']
+            ])
+
+        self._addModelVariable(model, 'stack_info', int, ModelVariableFormat.DECIMAL,
+                               desc='information dedicated to stack', is_array=True)
 
 
     def calc_misc(self, model):
@@ -126,3 +146,10 @@ class CALC_Misc(ICalculator):
         in_scope = is_2fsk and in_part_list and in_base_profile and antdiv_off and not_spread
 
         model.vars.in_2fsk_opt_scope.value = in_scope
+
+    def calc_protocol_id(self, model):
+        model.vars.protocol_id.value = model.vars.protocol_id.var_enum.Custom
+
+    def calc_stack_info(self, model):
+        protocol_id = model.vars.protocol_id.value
+        model.vars.stack_info.value = [int(protocol_id), 0]

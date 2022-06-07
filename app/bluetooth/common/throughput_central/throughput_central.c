@@ -31,6 +31,7 @@
 #include <stdlib.h>
 #include <stdio.h>
 #include "sl_bt_api.h"
+#include "sl_common.h"
 #include "app_log.h"
 #include "app_assert.h"
 #include "throughput_central.h"
@@ -141,7 +142,7 @@ const uint8_t transmission_characteristic_uuid[] = { 0x18, 0x77, 0xc6, 0x2b, 0xf
 const uint8_t result_characteristic_uuid[] = { 0x1b, 0x29, 0xcc, 0xa6, 0x03, 0xb9, 0xeb, 0x9e,
                                                0x0c, 0x40, 0x0f, 0xb0, 0x27, 0x22, 0xf3, 0xad };
 
-// Function deffinitions
+// Function declarations
 static bool process_scan_response(sl_bt_evt_scanner_scan_report_t *response);
 static void process_procedure_complete_event(sl_bt_msg_t *evt);
 static void check_characteristic_uuid(sl_bt_msg_t *evt);
@@ -152,7 +153,7 @@ static void handle_throughput_central_start(bool send_transmission_on);
 static void throughput_central_scanning_restart(void);
 static void throughput_central_scanning_start(void);
 static void throughput_central_scanning_stop(void);
-static sl_status_t throughput_central_apply_phy(throughput_phy_t phy);
+static sl_status_t throughput_central_scanning_apply_phy(throughput_phy_t phy);
 static bool throughput_central_allowlist_apply();
 static bool throughput_address_compare(uint8_t *address1, uint8_t *address2);
 
@@ -186,7 +187,8 @@ void bt_on_event_central(sl_bt_msg_t *evt)
 
   switch (SL_BT_MSG_ID(evt->header)) {
     case sl_bt_evt_scanner_scan_report_id:
-      if (process_scan_response(&(evt->data.evt_scanner_scan_report))) {
+      if ((central_state.discovery_state == THROUGHPUT_DISCOVERY_STATE_SCAN)
+          & process_scan_response(&(evt->data.evt_scanner_scan_report))) {
         // Apply allowlist filtering
         if (false == throughput_central_allowlist_apply(evt->data.evt_scanner_scan_report.address.addr)) {
           break;
@@ -223,16 +225,6 @@ void bt_on_event_central(sl_bt_msg_t *evt)
       break;
 
     case sl_bt_evt_connection_opened_id:
-      //Process the opened connection
-      sc = sl_bt_connection_set_parameters(connection_handle,
-                                           central_state.connection_interval_min,
-                                           central_state.connection_interval_max,
-                                           central_state.connection_responder_latency,
-                                           central_state.connection_timeout,
-                                           CONN_MIN_CE_LENGTH,
-                                           CONN_MAX_CE_LENGTH);
-      app_assert_status(sc);
-
       // Set remote connection power reporting - needed for Power Control
       sc = sl_bt_connection_set_remote_power_reporting(connection_handle,
                                                        power_control_enabled);
@@ -247,9 +239,7 @@ void bt_on_event_central(sl_bt_msg_t *evt)
       sc = sl_bt_gatt_discover_primary_services_by_uuid(connection_handle,
                                                         UUID_LEN,
                                                         service_uuid);
-
       app_assert_status(sc);
-
       break;
 
     case sl_bt_evt_connection_parameters_id:
@@ -265,12 +255,15 @@ void bt_on_event_central(sl_bt_msg_t *evt)
       throughput_central_on_connection_settings_change(central_state.pdu_size,
                                                        central_state.mtu_size);
       break;
+
     case sl_bt_evt_gatt_procedure_completed_id:
       process_procedure_complete_event(evt);
       break;
+
     case sl_bt_evt_gatt_characteristic_id:
       check_characteristic_uuid(evt);
       break;
+
     case sl_bt_evt_gatt_service_id:
       if (evt->data.evt_gatt_service.uuid.len == UUID_LEN) {
         if (memcmp(service_uuid, evt->data.evt_gatt_service.uuid.data, UUID_LEN) == 0) {
@@ -279,6 +272,7 @@ void bt_on_event_central(sl_bt_msg_t *evt)
         }
       }
       break;
+
     case sl_bt_evt_gatt_characteristic_value_id:
       if (evt->data.evt_gatt_characteristic_value.characteristic == transmission_handle) {
         if (evt->data.evt_gatt_characteristic_value.value.data[0]) {
@@ -319,6 +313,7 @@ void bt_on_event_central(sl_bt_msg_t *evt)
         }
       }
       break;
+
     case sl_bt_evt_gatt_mtu_exchanged_id:
       central_state.mtu_size = evt->data.evt_gatt_mtu_exchanged.mtu;
       throughput_central_on_connection_settings_change(central_state.pdu_size,
@@ -343,6 +338,7 @@ void bt_on_event_central(sl_bt_msg_t *evt)
       // Start scanning
       throughput_central_scanning_start();
       break;
+
     case sl_bt_evt_connection_rssi_id:
       central_state.rssi = evt->data.evt_connection_rssi.rssi;
       throughput_central_on_rssi_change(central_state.rssi);
@@ -353,7 +349,7 @@ void bt_on_event_central(sl_bt_msg_t *evt)
   }
 }
 /***************************************************************************//**
- * Checks received data for lost or error packages
+ * Check received data for lost or error packages.
  * @param[in] data received data
  * @param[in] len length of the data
  ******************************************************************************/
@@ -690,7 +686,7 @@ void throughput_central_scanning_stop(void)
 }
 
 // Apply phy for scanning
-sl_status_t throughput_central_apply_phy(throughput_phy_t phy)
+sl_status_t throughput_central_scanning_apply_phy(throughput_phy_t phy)
 {
   sl_status_t sc;
 
@@ -950,7 +946,7 @@ void throughput_central_step(void)
 }
 
 /**************************************************************************//**
- * Sets the the receiver mode.
+ * Set receiver mode.
  *****************************************************************************/
 sl_status_t throughput_central_set_mode(throughput_mode_t mode,
                                         uint32_t amount)
@@ -970,7 +966,7 @@ sl_status_t throughput_central_set_mode(throughput_mode_t mode,
 }
 
 /**************************************************************************//**
- * Sets the the data sizes for reception.
+ * Set data sizes for reception.
  *****************************************************************************/
 sl_status_t throughput_central_set_mtu_size(uint8_t mtu)
 {
@@ -987,7 +983,7 @@ sl_status_t throughput_central_set_mtu_size(uint8_t mtu)
 }
 
 /**************************************************************************//**
- * Sets the the transmission power.
+ * Set transmission power.
  *****************************************************************************/
 sl_status_t throughput_central_set_tx_power(throughput_tx_power_t tx_power,
                                             bool power_control,
@@ -1006,7 +1002,7 @@ sl_status_t throughput_central_set_tx_power(throughput_tx_power_t tx_power,
 }
 
 /**************************************************************************//**
- * Sets the the transmission power.
+ * Set connection parameters.
  *****************************************************************************/
 sl_status_t throughput_central_set_connection_parameters(throughput_time_t min_interval,
                                                          throughput_time_t max_interval,
@@ -1022,7 +1018,7 @@ sl_status_t throughput_central_set_connection_parameters(throughput_time_t min_i
     central_state.connection_responder_latency = latency;
     central_state.connection_timeout = timeout;
 
-    // Set the connection parameters for thic connection
+    // Set connection parameters for this connection.
     res = sl_bt_connection_set_parameters(connection_handle,
                                           central_state.connection_interval_min,
                                           central_state.connection_interval_max,
@@ -1030,7 +1026,6 @@ sl_status_t throughput_central_set_connection_parameters(throughput_time_t min_i
                                           central_state.connection_timeout,
                                           CONN_MIN_CE_LENGTH,
                                           CONN_MAX_CE_LENGTH);
-    app_assert_status(res);
   } else {
     res = SL_STATUS_INVALID_STATE;
   }
@@ -1038,7 +1033,7 @@ sl_status_t throughput_central_set_connection_parameters(throughput_time_t min_i
 }
 
 /**************************************************************************//**
- * Sets the type of the the transmission
+ * Set type of transmission.
  *****************************************************************************/
 sl_status_t throughput_central_set_type(throughput_notification_t type)
 {
@@ -1056,7 +1051,7 @@ sl_status_t throughput_central_set_type(throughput_notification_t type)
 }
 
 /**************************************************************************//**
- * Starts the the transmission on remote side.
+ * Start transmission on remote side.
  *****************************************************************************/
 sl_status_t throughput_central_start(void)
 {
@@ -1070,7 +1065,7 @@ sl_status_t throughput_central_start(void)
 }
 
 /**************************************************************************//**
- * Stops the the transmission on remote side.
+ * Stop transmission on remote side.
  *****************************************************************************/
 sl_status_t throughput_central_stop(void)
 {
@@ -1084,13 +1079,13 @@ sl_status_t throughput_central_stop(void)
 }
 
 /**************************************************************************//**
- * Sets the PHY used for scanning
+ * Set PHY used for scanning.
  *****************************************************************************/
 sl_status_t throughput_central_set_scan_phy(throughput_phy_t phy)
 {
   sl_status_t res = SL_STATUS_OK;
   if (enabled && central_state.state == THROUGHPUT_STATE_DISCONNECTED) {
-    res = throughput_central_apply_phy(phy);
+    res = throughput_central_scanning_apply_phy(phy);
   } else {
     res = SL_STATUS_INVALID_STATE;
   }
@@ -1098,7 +1093,7 @@ sl_status_t throughput_central_set_scan_phy(throughput_phy_t phy)
 }
 
 /**************************************************************************//**
- * Sets the PHY used for the connection
+ * Set PHY used for the connection.
  *****************************************************************************/
 sl_status_t throughput_central_set_connection_phy(throughput_phy_t phy)
 {
@@ -1118,7 +1113,7 @@ sl_status_t throughput_central_set_connection_phy(throughput_phy_t phy)
 }
 
 /**************************************************************************//**
- * Changes PHY to the next one.
+ * Change PHY to next one.
  *****************************************************************************/
 sl_status_t throughput_central_change_phy(void)
 {
@@ -1132,7 +1127,7 @@ sl_status_t throughput_central_change_phy(void)
       switch (current_phy) {
         case sl_bt_gap_1m_phy_uncoded:
           res = throughput_central_set_connection_phy(sl_bt_gap_2m_phy_uncoded);
-          // if cannot switch to coded, switch to 1M
+          // if cannot switch to 2M, switch to 1M
           if (res != SL_STATUS_OK) {
             res = throughput_central_set_connection_phy(sl_bt_gap_1m_phy_uncoded);
           }
@@ -1146,6 +1141,7 @@ sl_status_t throughput_central_change_phy(void)
           break;
         case sl_bt_gap_coded_phy_125k:
           res = throughput_central_set_connection_phy(sl_bt_gap_coded_phy_500k);
+          // if cannot switch to coded, switch to 1M
           if (res != SL_STATUS_OK) {
             res = throughput_central_set_connection_phy(sl_bt_gap_1m_phy_uncoded);
           }
@@ -1171,7 +1167,7 @@ sl_status_t throughput_central_change_phy(void)
 }
 
 /**************************************************************************//**
- * Enables the reception.
+ * Enable receiver.
  *****************************************************************************/
 void throughput_central_enable(void)
 {
@@ -1282,7 +1278,7 @@ void throughput_central_enable(void)
 
 #ifdef SL_CATALOG_POWER_MANAGER_PRESENT
 /**************************************************************************//**
- * Checks if it is ok to sleep now
+ * Check if it is ok to sleep now.
  *****************************************************************************/
 bool throughput_central_is_ok_to_sleep(void)
 {
@@ -1294,7 +1290,7 @@ bool throughput_central_is_ok_to_sleep(void)
 }
 
 /**************************************************************************//**
- * Routine for power manager handler
+ * Routine for power manager handler.
  *****************************************************************************/
 sl_power_manager_on_isr_exit_t throughput_central_sleep_on_isr_exit(void)
 {
@@ -1561,7 +1557,7 @@ SL_WEAK void throughput_central_on_connection_timings_change(throughput_time_t i
   throughput_ui_set_connection_interval(interval);
   throughput_ui_update();
   #else
-  app_log_info(THROUGHPUT_UI_INTERVAL_FORMAT APP_LOG_NEW_LINE, (int)interval);
+  app_log_info(THROUGHPUT_UI_INTERVAL_FORMAT APP_LOG_NEW_LINE, (int)((float)interval * 1.25));
   #endif
   app_log_info(THROUGHPUT_UI_LATENCY_FORMAT APP_LOG_NEW_LINE, (int)latency);
   app_log_info(THROUGHPUT_UI_TIMEOUT_FORMAT APP_LOG_NEW_LINE, (int)timeout);

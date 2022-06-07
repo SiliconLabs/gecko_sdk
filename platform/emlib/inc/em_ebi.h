@@ -36,7 +36,7 @@
 
 #include <stdint.h>
 #include <stdbool.h>
-#include "em_assert.h"
+#include "sl_assert.h"
 
 #ifdef __cplusplus
 extern "C" {

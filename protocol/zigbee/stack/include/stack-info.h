@@ -912,6 +912,48 @@ EmberStatus slx_zigbee_routing_set_route_record_policy(sl_zigbee_route_record_po
  */
 uint8_t slx_zigbee_routing_get_route_record_policy(void);
 
+/**
+ * @brief Get the total count of the tokens configured.
+ * @return The token count.
+ *
+ * Use this to get the number of tokens configured in a node.
+ */
+uint8_t emberGetTokenCount(void);
+
+/**
+ * @brief Get information of a token by providing the index.
+ * @param index An index to configured token array that ranges from 0 to emberGetTokenCount() - 1;
+ * @param tokenInfo A pointer to hold the information in a structure provided by the caller.
+ * @return Status of the call, EMBER_SUCCESS upon success or EMBER_INDEX_OUT_OF_RANGE for bad index.
+ *
+ */
+EmberStatus emberGetTokenInfo(uint8_t index,
+                              EmberTokenInfo *tokenInfo);
+/**
+ * @brief Get token data by providing the token key and index for the indexed token.
+ * @param token A valid token key, which may be obtained using emberGetTokenInfo.
+ * @param index An index in case the token is an indexed token, if token is indexed can be obtained
+ *              from emberGetTokenInfo.
+ * @param tokenData A pointer pointing to memory storage information, must be allocated and provided by the caller.
+ * @return Status of the call, EMBER_SUCCESS upon success or EMBER_ERR_FATAL for errors.
+ *
+ */
+EmberStatus emberGetTokenData(uint32_t token,
+                              uint32_t index,
+                              EmberTokenData *tokenData);
+/**
+ * @brief Set token data by providing the token key, index for an indexed token and token data.
+ * @param token A valid token key, which may be obtained using emberGetTokenInfo.
+ * @param index An index in case the token is an indexed token, if token is indexed can be obtained
+ *              from emberGetTokenInfo.
+ * @param tokenData A pointer pointing to memory storage holding the token data provided by the caller.
+ * @return Status of the call, EMBER_SUCCESS upon success or EMBER_ERR_FATAL for errors.
+ *
+ */
+EmberStatus emberSetTokenData(uint32_t token,
+                              uint32_t index,
+                              EmberTokenData *tokenData);
+
 /** @} END addtogroup */
 
 #endif // SILABS_STACK_INFO_H

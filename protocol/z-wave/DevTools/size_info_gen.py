@@ -4,6 +4,30 @@ import getopt
 import os
 import re
 
+def findMinHeapSize(pathToSizeFile):
+     # The heap value is taken from sl_memory_config.h
+     # If there is a problem, the default value is 2048
+     default_value = 2048
+
+     path = pathToSizeFile[0:pathToSizeFile.find("out/") + len("out/")]
+     path = path + "/config/sl_memory_config.h"
+
+     try:
+       f = open(path,"r")
+     except IOError:
+       return default_value
+
+     content = f.read()
+     content = content.rstrip("\n\r")
+     input_lines = content.splitlines()
+
+     for line in input_lines:
+       if "#define SL_HEAP_SIZE" in line:
+         cols = line.split()
+         return int(cols[2])
+
+     return default_value
+
 def main(argv):
      input_file = ""
      printEnabled = False
@@ -37,11 +61,14 @@ def main(argv):
      flash_storage_size = 0
      sram_size = 0
 
+     # The following value is taken from sl_memory_config.h
+     defined_heap_size = findMinHeapSize(input_file)
+
      # Do the summation line-by-line
      for line in input_lines:
        cols = line.split()
        if (len(cols) == 3) and (cols[0] != 'section') :
-         if cols[0] in ['.nvm3App', '.simee', '.nvm', '.zwave_nvm']:
+         if cols[0] in ['.zwavenvm', '.simee', '.nvm', '.zwave_nvm']:
            flash_storage_size = flash_storage_size + int(cols[1], 16)
          elif cols[0] in ['.text']:
            flash_binary_size = flash_binary_size + int(cols[1], 16)
@@ -51,6 +78,8 @@ def main(argv):
          elif cols[0] in [ '.internal_storage']:
            # skip this section
            continue
+         elif cols[0] in ['.heap']:
+           sram_size = sram_size + defined_heap_size
          else :
            addr = int(cols[2], 16)
            if (addr & int('0x20000000', 16)) != 0:
@@ -78,9 +107,9 @@ def main(argv):
      f.write("============================================\n")
      f.write("FLASH used as program memory:  (Including only the sections: .text, .ARM.exidx, .data, _cc_handlers_v3)\n")
      f.write("   " + str(flash_binary_size) + "\n")
-     f.write("FLASH used for storage: (Including only the sections: .nvm3App, .simee, .nvm, .zwave_nvm)\n")
+     f.write("FLASH used for storage: (Including only the sections: .zwavenvm, .simee, .nvm, .zwave_nvm)\n")
      f.write("   " + str(flash_storage_size) + "\n")
-     f.write("SRAM usage:             (Including only the sections: .data, .bss, .heap, .stack_dummy, .reset_info)\n")
+     f.write("SRAM usage:             (Including only the sections: .data, .bss, .heap (limited to " + str(defined_heap_size) + " per sl_memory_config.h), .stack_dummy, .reset_info)\n")
      f.write("   " + str(sram_size) + "\n")
      f.write("\n")
 

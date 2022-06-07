@@ -11,12 +11,25 @@ provides:
 include:
   - path: include
     file_list:
+      - path: flatbuffers/allocator.h
+      - path: flatbuffers/array.h
       - path: flatbuffers/base.h
+      - path: flatbuffers/buffer.h
+      - path: flatbuffers/buffer_ref.h
+      - path: flatbuffers/default_allocator.h
+      - path: flatbuffers/detached_buffer.h
+      - path: flatbuffers/flatbuffer_builder.h
       - path: flatbuffers/flatbuffers.h
       - path: flatbuffers/flexbuffers.h
       - path: flatbuffers/stl_emulation.h
+      - path: flatbuffers/string.h
+      - path: flatbuffers/struct.h
+      - path: flatbuffers/table.h
       - path: flatbuffers/util.h
+      - path: flatbuffers/vector.h
+      - path: flatbuffers/vector_downward.h
+      - path: flatbuffers/verifier.h
 source:
-  - path: "src/util.cpp"
+  []
 ui_hints:
   visibility: never

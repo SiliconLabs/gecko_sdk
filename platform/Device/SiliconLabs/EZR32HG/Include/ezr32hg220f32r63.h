@@ -250,7 +250,6 @@ typedef enum IRQn{
 /** @} End of group EZR32HG220F32R63_Part */
 
 #define ARM_MATH_CM0PLUS
-#include "arm_math.h"     /* To get __CLZ definitions etc. */
 #include "core_cm0plus.h" /* Cortex-M0+ processor and core peripherals */
 #include "system_ezr32hg.h" /* System Header */
 

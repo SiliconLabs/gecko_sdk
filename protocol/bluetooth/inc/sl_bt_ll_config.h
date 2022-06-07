@@ -54,4 +54,7 @@ typedef struct {
   int8_t golden_rssi_max_coded_s2; //<! Golden range highest RSSI for Coded PHY w/ S=2.
 } sl_bt_ll_power_control_config_t;
 
+#define SL_BT_USE_MAX_POWER_LEVEL_SUPPORTED_BY_RADIO 0x7fff
+#define SL_BT_USE_MIN_POWER_LEVEL_SUPPORTED_BY_RADIO 0x7fff
+
 #endif

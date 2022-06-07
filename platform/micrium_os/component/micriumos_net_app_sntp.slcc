@@ -17,7 +17,7 @@ include:
       - path: sntp_client.h
 template_contribution:
   - name: micriumos_component_avails
-    value: NET_SNTP
+    value: NET_SNTP_CLIENT
 provides:
   - name: net_app_sntp
 requires:

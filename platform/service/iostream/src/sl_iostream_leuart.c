@@ -134,7 +134,8 @@ sl_status_t sl_iostream_leuart_init(sl_iostream_uart_t *iostream_uart,
                                       | (leuart_config->tx_location << _LEUART_ROUTELOC0_TXLOC_SHIFT)
                                       | (leuart_config->rx_location << _LEUART_ROUTELOC0_RXLOC_SHIFT);
 #else
-  leuart_context->leuart->ROUTE = LEUART_ROUTE_RXPEN | LEUART_ROUTE_TXPEN | leuart_config->location;
+  leuart_context->leuart->ROUTE = LEUART_ROUTE_RXPEN | LEUART_ROUTE_TXPEN
+                                  | (leuart_config->location << _LEUART_ROUTE_LOCATION_SHIFT);
 #endif
 
   // Enable RX interrupts

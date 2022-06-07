@@ -192,7 +192,6 @@ void sl_wisun_nwm_stat_storage_init(void)
 /* Statistic printer */
 void sl_wisun_nwm_stat_handler(sl_wisun_ping_stat_t *stat)
 {
-  
   assert(stat != NULL);
   assert(stat->packet_count != 0);
 
@@ -273,13 +272,15 @@ uint8_t sl_wisun_nwm_get_nodes(sl_wisun_nwm_measurable_node_t * const storage,
       memset(&_nodes[j].ping_stat, 0, sizeof(sl_wisun_ping_stat_t));
     }
 
-    _nodes[j].stat.lifetime            = info.lifetime;
-    _nodes[j].stat.mac_tx_count        = info.mac_tx_count;
-    _nodes[j].stat.mac_tx_failed_count = info.mac_tx_failed_count;
-    _nodes[j].stat.rpl_rank            = info.rpl_rank;
-    _nodes[j].stat.etx                 = info.etx;
-    _nodes[j].stat.rsl_out             = info.rsl_out;
-    _nodes[j].stat.rsl_in              = info.rsl_in;
+    _nodes[j].stat.lifetime                   = info.lifetime;
+    _nodes[j].stat.mac_tx_count               = info.mac_tx_count;
+    _nodes[j].stat.mac_tx_failed_count        = info.mac_tx_failed_count;
+    _nodes[j].stat.mac_tx_ms_count            = info.mac_tx_ms_count;
+    _nodes[j].stat.mac_tx_ms_failed_count     = info.mac_tx_ms_failed_count;
+    _nodes[j].stat.rpl_rank                   = info.rpl_rank;
+    _nodes[j].stat.etx                        = info.etx;
+    _nodes[j].stat.rsl_out                    = info.rsl_out;
+    _nodes[j].stat.rsl_in                     = info.rsl_in;
 
     _print_node_info(&_nodes[j]);
     ++j;
@@ -368,13 +369,15 @@ static void _print_node_info(const sl_wisun_nwm_node_stat_t * const info)
   printf("[Node: %s]\n", app_wisun_trace_util_get_ip_address_str(&info->addr.sin6_addr));
   printf("  type: %s\n", info->name);
   printf("  statistic:\n");
-  printf("    lifetime:            %lu\n", info->stat.lifetime);
-  printf("    mac_tx_count:        %lu\n", info->stat.mac_tx_count);
-  printf("    mac_tx_failed_count: %lu\n", info->stat.mac_tx_failed_count);
-  printf("    rpl_rank:            %u\n", info->stat.rpl_rank);
-  printf("    etx:                 %u\n", info->stat.etx);
-  printf("    rsl_out:             %u\n", info->stat.rsl_out);
-  printf("    rsl_in:              %u\n", info->stat.rsl_in);
+  printf("    lifetime:               %lu\n", info->stat.lifetime);
+  printf("    mac_tx_count:           %lu\n", info->stat.mac_tx_count);
+  printf("    mac_tx_failed_count:    %lu\n", info->stat.mac_tx_failed_count);
+  printf("    mac_tx_ms_count:        %lu\n", info->stat.mac_tx_ms_count);
+  printf("    mac_tx_ms_failed_count: %lu\n", info->stat.mac_tx_ms_failed_count);
+  printf("    rpl_rank:               %u\n", info->stat.rpl_rank);
+  printf("    etx:                    %u\n", info->stat.etx);
+  printf("    rsl_out:                %u\n", info->stat.rsl_out);
+  printf("    rsl_in:                 %u\n", info->stat.rsl_in);
 }
 
 static bool _add_ping_stat_to_node_storage(const sl_wisun_ping_stat_t * const ping_stat)

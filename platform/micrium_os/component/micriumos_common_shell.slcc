@@ -23,6 +23,7 @@ requires:
   - name: common_lib
   - name: cpu
   - name: micriumos_kernel
+  - name: common_lib_mem_cmd
 template_contribution:
   - name: micriumos_component_avails
     value: COMMON_SHELL

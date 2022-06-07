@@ -44,40 +44,40 @@
 /** LFRCO Register Declaration. */
 typedef struct {
   __IM uint32_t  IPVERSION;                     /**< IP version                                         */
-  __IOM uint32_t CTRL;                          /**< Control Register                                   */
+  uint32_t       RESERVED0[1U];                 /**< Reserved for future use                            */
   __IM uint32_t  STATUS;                        /**< Status Register                                    */
   __IOM uint32_t CAL;                           /**< Calibration Register                               */
-  uint32_t       RESERVED0[1U];                 /**< Reserved for future use                            */
+  uint32_t       RESERVED1[1U];                 /**< Reserved for future use                            */
   __IOM uint32_t IF;                            /**< Interrupt Flag Register                            */
   __IOM uint32_t IEN;                           /**< Interrupt Enable Register                          */
   __IM uint32_t  SYNCBUSY;                      /**< Synchronization Busy Register                      */
   __IOM uint32_t LOCK;                          /**< Configuration Lock Register                        */
-  uint32_t       RESERVED1[1015U];              /**< Reserved for future use                            */
+  uint32_t       RESERVED2[1015U];              /**< Reserved for future use                            */
   __IM uint32_t  IPVERSION_SET;                 /**< IP version                                         */
-  __IOM uint32_t CTRL_SET;                      /**< Control Register                                   */
+  uint32_t       RESERVED3[1U];                 /**< Reserved for future use                            */
   __IM uint32_t  STATUS_SET;                    /**< Status Register                                    */
   __IOM uint32_t CAL_SET;                       /**< Calibration Register                               */
-  uint32_t       RESERVED2[1U];                 /**< Reserved for future use                            */
+  uint32_t       RESERVED4[1U];                 /**< Reserved for future use                            */
   __IOM uint32_t IF_SET;                        /**< Interrupt Flag Register                            */
   __IOM uint32_t IEN_SET;                       /**< Interrupt Enable Register                          */
   __IM uint32_t  SYNCBUSY_SET;                  /**< Synchronization Busy Register                      */
   __IOM uint32_t LOCK_SET;                      /**< Configuration Lock Register                        */
-  uint32_t       RESERVED3[1015U];              /**< Reserved for future use                            */
+  uint32_t       RESERVED5[1015U];              /**< Reserved for future use                            */
   __IM uint32_t  IPVERSION_CLR;                 /**< IP version                                         */
-  __IOM uint32_t CTRL_CLR;                      /**< Control Register                                   */
+  uint32_t       RESERVED6[1U];                 /**< Reserved for future use                            */
   __IM uint32_t  STATUS_CLR;                    /**< Status Register                                    */
   __IOM uint32_t CAL_CLR;                       /**< Calibration Register                               */
-  uint32_t       RESERVED4[1U];                 /**< Reserved for future use                            */
+  uint32_t       RESERVED7[1U];                 /**< Reserved for future use                            */
   __IOM uint32_t IF_CLR;                        /**< Interrupt Flag Register                            */
   __IOM uint32_t IEN_CLR;                       /**< Interrupt Enable Register                          */
   __IM uint32_t  SYNCBUSY_CLR;                  /**< Synchronization Busy Register                      */
   __IOM uint32_t LOCK_CLR;                      /**< Configuration Lock Register                        */
-  uint32_t       RESERVED5[1015U];              /**< Reserved for future use                            */
+  uint32_t       RESERVED8[1015U];              /**< Reserved for future use                            */
   __IM uint32_t  IPVERSION_TGL;                 /**< IP version                                         */
-  __IOM uint32_t CTRL_TGL;                      /**< Control Register                                   */
+  uint32_t       RESERVED9[1U];                 /**< Reserved for future use                            */
   __IM uint32_t  STATUS_TGL;                    /**< Status Register                                    */
   __IOM uint32_t CAL_TGL;                       /**< Calibration Register                               */
-  uint32_t       RESERVED6[1U];                 /**< Reserved for future use                            */
+  uint32_t       RESERVED10[1U];                /**< Reserved for future use                            */
   __IOM uint32_t IF_TGL;                        /**< Interrupt Flag Register                            */
   __IOM uint32_t IEN_TGL;                       /**< Interrupt Enable Register                          */
   __IM uint32_t  SYNCBUSY_TGL;                  /**< Synchronization Busy Register                      */
@@ -99,20 +99,6 @@ typedef struct {
 #define _LFRCO_IPVERSION_IPVERSION_MASK       0xFFFFFFFFUL                              /**< Bit mask for LFRCO_IPVERSION                */
 #define _LFRCO_IPVERSION_IPVERSION_DEFAULT    0x00000000UL                              /**< Mode DEFAULT for LFRCO_IPVERSION            */
 #define LFRCO_IPVERSION_IPVERSION_DEFAULT     (_LFRCO_IPVERSION_IPVERSION_DEFAULT << 0) /**< Shifted mode DEFAULT for LFRCO_IPVERSION    */
-
-/* Bit fields for LFRCO CTRL */
-#define _LFRCO_CTRL_RESETVALUE                0x00000000UL                              /**< Default value for LFRCO_CTRL                */
-#define _LFRCO_CTRL_MASK                      0x00000003UL                              /**< Mask for LFRCO_CTRL                         */
-#define LFRCO_CTRL_FORCEEN                    (0x1UL << 0)                              /**< Force Enable                                */
-#define _LFRCO_CTRL_FORCEEN_SHIFT             0                                         /**< Shift value for LFRCO_FORCEEN               */
-#define _LFRCO_CTRL_FORCEEN_MASK              0x1UL                                     /**< Bit mask for LFRCO_FORCEEN                  */
-#define _LFRCO_CTRL_FORCEEN_DEFAULT           0x00000000UL                              /**< Mode DEFAULT for LFRCO_CTRL                 */
-#define LFRCO_CTRL_FORCEEN_DEFAULT            (_LFRCO_CTRL_FORCEEN_DEFAULT << 0)        /**< Shifted mode DEFAULT for LFRCO_CTRL         */
-#define LFRCO_CTRL_DISONDEMAND                (0x1UL << 1)                              /**< Disable On-Demand                           */
-#define _LFRCO_CTRL_DISONDEMAND_SHIFT         1                                         /**< Shift value for LFRCO_DISONDEMAND           */
-#define _LFRCO_CTRL_DISONDEMAND_MASK          0x2UL                                     /**< Bit mask for LFRCO_DISONDEMAND              */
-#define _LFRCO_CTRL_DISONDEMAND_DEFAULT       0x00000000UL                              /**< Mode DEFAULT for LFRCO_CTRL                 */
-#define LFRCO_CTRL_DISONDEMAND_DEFAULT        (_LFRCO_CTRL_DISONDEMAND_DEFAULT << 1)    /**< Shifted mode DEFAULT for LFRCO_CTRL         */
 
 /* Bit fields for LFRCO STATUS */
 #define _LFRCO_STATUS_RESETVALUE              0x00000000UL                              /**< Default value for LFRCO_STATUS              */

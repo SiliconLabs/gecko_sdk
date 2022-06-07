@@ -12,14 +12,7 @@
   - path: platform/Device/SiliconLabs/ZGM23/Source/system_zgm23.c
     unless:
     - device_content_override
-  - condition:
-    - toolchain_iar
-    path: platform/Device/SiliconLabs/ZGM23/Source/IAR/startup_zgm23.c
-    unless:
-    - device_content_override
-  - condition:
-    - toolchain_gcc
-    path: platform/Device/SiliconLabs/ZGM23/Source/GCC/startup_zgm23.c
+  - path: platform/Device/SiliconLabs/ZGM23/Source/startup_zgm23.c
     unless:
     - device_content_override
 - include:
@@ -29,9 +22,7 @@
     - path: system_zgm23.h
     - path: zgm23_acmp.h
     - path: zgm23_aes.h
-    - path: zgm23_agc.h
     - path: zgm23_amuxcp.h
-    - path: zgm23_bufc.h
     - path: zgm23_buram.h
     - path: zgm23_burtc.h
     - path: zgm23_cmu.h
@@ -39,11 +30,8 @@
     - path: zgm23_devinfo.h
     - path: zgm23_dma_descriptor.h
     - path: zgm23_dpll.h
-    - path: zgm23_eca.h
-    - path: zgm23_ecaifadc.h
     - path: zgm23_emu.h
     - path: zgm23_eusart.h
-    - path: zgm23_frc.h
     - path: zgm23_fsrco.h
     - path: zgm23_gpcrc.h
     - path: zgm23_gpio.h
@@ -64,20 +52,15 @@
     - path: zgm23_lfrco.h
     - path: zgm23_lfxo.h
     - path: zgm23_mailbox.h
-    - path: zgm23_modem.h
     - path: zgm23_mpahbram.h
     - path: zgm23_msc.h
     - path: zgm23_pcnt.h
     - path: zgm23_pfmxpprf.h
-    - path: zgm23_protimer.h
     - path: zgm23_prs.h
     - path: zgm23_prs_signals.h
-    - path: zgm23_rac.h
-    - path: zgm23_rfcrc.h
     - path: zgm23_scratchpad.h
     - path: zgm23_semailbox.h
     - path: zgm23_smu.h
-    - path: zgm23_synth.h
     - path: zgm23_syscfg.h
     - path: zgm23_sysrtc.h
     - path: zgm23_timer.h
@@ -101,14 +84,13 @@
   - name: device_is_module
   - name: hardware_board_has_hfxo
   - name: device_security_se
-  - name: device_pa_4dbm
+  - name: device_dcdc_buck
+  - name: device_pa_14dbm
   - name: device_has_acmp
   - name: device_has_acmp0
   - name: device_has_acmp1
-  - name: device_has_agc
   - name: device_has_amuxcp
   - name: device_has_amuxcp0
-  - name: device_has_bufc
   - name: device_has_buram
   - name: device_has_burtc
   - name: device_has_cmu
@@ -117,14 +99,12 @@
   - name: device_has_dmem
   - name: device_has_dpll
   - name: device_has_dpll0
-  - name: device_has_ecaifadc
   - name: device_has_emu
   - name: device_has_euart
   - name: device_has_eusart
   - name: device_has_eusart0
   - name: device_has_eusart1
   - name: device_has_eusart2
-  - name: device_has_frc
   - name: device_has_fsrco
   - name: device_has_gpcrc
   - name: device_has_gpio
@@ -152,25 +132,15 @@
   - name: device_has_letimer0
   - name: device_has_lfrco
   - name: device_has_lfxo
-  - name: device_has_modem
   - name: device_has_msc
   - name: device_has_pcnt
   - name: device_has_pcnt0
   - name: device_has_pfmxpprf
-  - name: device_has_protimer
   - name: device_has_prs
-  - name: device_has_rac
   - name: device_has_radioaes
-  - name: device_has_rfcrc
-  - name: device_has_rfeca
-  - name: device_has_rfeca0
-  - name: device_has_rfeca1
-  - name: device_has_rfmailbox
-  - name: device_has_rfscratchpad
   - name: device_has_scratchpad
   - name: device_has_semailbox
   - name: device_has_smu
-  - name: device_has_synth
   - name: device_has_syscfg
   - name: device_has_sysrtc
   - name: device_has_sysrtc0
@@ -202,6 +172,8 @@
   - name: device_supports_zwave
   - name: device_supports_zwave_end_device
   - name: device_compute_basic
+- recommends:
+  - id: trustzone_unaware
 - requires:
   - name: cmsis_core
   - name: ZGM230SA27HGN_config
@@ -245,8 +217,25 @@
     value: cortex-m33
   - option: fpu
     value: fpv5-sp
+  - option: cmse
+    unless:
+    - trustzone_nonsecure
+    value: enabled
 - config_file:
   - condition:
     - custom_radio_config
     directory: rail
     path: platform/Device/config/210/device.yaml
+- metadata:
+    device:
+      memory:
+      - name: Main Flash
+        page_size: 8192
+        size: 524288
+        start: 134217728
+        type: non-volatile
+      - name: RAM
+        size: 65536
+        start: 536870912
+        type: volatile
+      opn: zgm230sa27hgn

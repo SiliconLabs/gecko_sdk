@@ -39,13 +39,15 @@
 #include "common/debug.hpp"
 #include "common/instance.hpp"
 #include "common/locator_getters.hpp"
-#include "common/logging.hpp"
+#include "common/log.hpp"
 #include "mac/mac_types.hpp"
 #include "thread/mle_types.hpp"
 #include "thread/thread_netif.hpp"
 
 namespace ot {
 namespace NetworkData {
+
+RegisterLogModule("NetworkData");
 
 #if OPENTHREAD_CONFIG_BORDER_ROUTER_ENABLE
 
@@ -62,9 +64,18 @@ exit:
     return error;
 }
 
-Error Local::RemoveOnMeshPrefix(const Ip6::Prefix &aPrefix)
+bool Local::ContainsOnMeshPrefix(const Ip6::Prefix &aPrefix) const
 {
-    return RemovePrefix(aPrefix, NetworkDataTlv::kTypeBorderRouter);
+    const PrefixTlv *tlv;
+    bool             contains = false;
+
+    VerifyOrExit((tlv = FindPrefix(aPrefix)) != nullptr);
+    VerifyOrExit(tlv->FindSubTlv(NetworkDataTlv::kTypeBorderRouter) != nullptr);
+
+    contains = true;
+
+exit:
+    return contains;
 }
 
 Error Local::AddHasRoutePrefix(const ExternalRouteConfig &aConfig)
@@ -79,18 +90,13 @@ exit:
     return error;
 }
 
-Error Local::RemoveHasRoutePrefix(const Ip6::Prefix &aPrefix)
-{
-    return RemovePrefix(aPrefix, NetworkDataTlv::kTypeHasRoute);
-}
-
 Error Local::AddPrefix(const Ip6::Prefix &aPrefix, NetworkDataTlv::Type aSubTlvType, uint16_t aFlags, bool aStable)
 {
     Error      error = kErrorNone;
     uint8_t    subTlvLength;
     PrefixTlv *prefixTlv;
 
-    IgnoreError(RemovePrefix(aPrefix, aSubTlvType));
+    IgnoreError(RemovePrefix(aPrefix));
 
     subTlvLength = (aSubTlvType == NetworkDataTlv::kTypeBorderRouter)
                        ? sizeof(BorderRouterTlv) + sizeof(BorderRouterEntry)
@@ -125,23 +131,22 @@ Error Local::AddPrefix(const Ip6::Prefix &aPrefix, NetworkDataTlv::Type aSubTlvT
         prefixTlv->GetSubTlvs()->SetStable();
     }
 
-    otDumpDebgNetData("AddPrefix", GetBytes(), GetLength());
+    DumpDebg("AddPrefix", GetBytes(), GetLength());
 
 exit:
     return error;
 }
 
-Error Local::RemovePrefix(const Ip6::Prefix &aPrefix, NetworkDataTlv::Type aSubTlvType)
+Error Local::RemovePrefix(const Ip6::Prefix &aPrefix)
 {
     Error      error = kErrorNone;
     PrefixTlv *tlv;
 
     VerifyOrExit((tlv = FindPrefix(aPrefix)) != nullptr, error = kErrorNotFound);
-    VerifyOrExit(tlv->FindSubTlv(aSubTlvType) != nullptr, error = kErrorNotFound);
     RemoveTlv(tlv);
 
 exit:
-    otDumpDebgNetData("RmvPrefix", GetBytes(), GetLength());
+    DumpDebg("RmvPrefix", GetBytes(), GetLength());
     return error;
 }
 
@@ -166,12 +171,6 @@ void Local::UpdateRloc(PrefixTlv &aPrefixTlv)
             OT_UNREACHABLE_CODE(break);
         }
     }
-}
-
-bool Local::IsConsistent(void) const
-{
-    return Get<Leader>().ContainsEntriesFrom(*this, Get<Mle::MleRouter>().GetRloc16()) &&
-           ContainsEntriesFrom(Get<Leader>(), Get<Mle::MleRouter>().GetRloc16());
 }
 
 #endif // OPENTHREAD_CONFIG_BORDER_ROUTER_ENABLE
@@ -210,7 +209,7 @@ Error Local::AddService(uint32_t           aEnterpriseNumber,
         serverTlv->SetStable();
     }
 
-    otDumpDebgNetData("AddService", GetBytes(), GetLength());
+    DumpDebg("AddService", GetBytes(), GetLength());
 
 exit:
     return error;
@@ -226,7 +225,7 @@ Error Local::RemoveService(uint32_t aEnterpriseNumber, const ServiceData &aServi
     RemoveTlv(tlv);
 
 exit:
-    otDumpDebgNetData("RmvService", GetBytes(), GetLength());
+    DumpDebg("RmvService", GetBytes(), GetLength());
     return error;
 }
 
@@ -277,6 +276,12 @@ void Local::UpdateRloc(void)
     }
 }
 
+bool Local::IsConsistent(void) const
+{
+    return Get<Leader>().ContainsEntriesFrom(*this, Get<Mle::MleRouter>().GetRloc16()) &&
+           ContainsEntriesFrom(Get<Leader>(), Get<Mle::MleRouter>().GetRloc16());
+}
+
 Error Local::UpdateInconsistentServerData(Coap::ResponseHandler aHandler, void *aContext)
 {
     Error    error = kErrorNone;
@@ -292,9 +297,7 @@ Error Local::UpdateInconsistentServerData(Coap::ResponseHandler aHandler, void *
 
     UpdateRloc();
 
-#if OPENTHREAD_CONFIG_BORDER_ROUTER_ENABLE
     VerifyOrExit(!IsConsistent(), error = kErrorNotFound);
-#endif
 
     if (mOldRloc == rloc)
     {

@@ -10,6 +10,7 @@ requires:
   - name: ot_stack_common
   - name: ot_platform_abstraction
   - name: ot_thirdparty
+  - name: ot_psa_crypto
 config_file:
   - path: protocol/openthread/config/sl_openthread_features_config.h
   - path: protocol/openthread/config/sl_openthread_generic_config.h

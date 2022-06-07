@@ -153,7 +153,7 @@ int mbedtls_gcm_starts(mbedtls_gcm_context *ctx,
   }
 
   /* Store input in context data structure. */
-  ctx->dir = mode == MBEDTLS_AES_ENCRYPT ? ENC : DEC;
+  ctx->dir = mode == MBEDTLS_AES_ENCRYPT ? SLI_GCM_ENC : SLI_GCM_DEC;
   ctx->add_len    = 0;
   ctx->len        = 0;
 
@@ -200,7 +200,7 @@ int mbedtls_gcm_update_ad(mbedtls_gcm_context *ctx,
     return status;
   }
   /* Execute GCM operation */
-  if (ctx->dir == ENC) {
+  if (ctx->dir == SLI_GCM_ENC) {
     sx_ret = sx_aes_gcm_encrypt_init((const block_t *)&key, (const block_t *)&dummy, &dummy,
                                      (const block_t *)&nonce, &hw_ctx, (const block_t *)&aad);
   } else {
@@ -267,7 +267,7 @@ int mbedtls_gcm_update(mbedtls_gcm_context *ctx,
       return status;
     }
     /* Execute GCM operation */
-    if (ctx->dir == ENC) {
+    if (ctx->dir == SLI_GCM_ENC) {
       sx_ret = sx_aes_gcm_encrypt_init((const block_t *)&key, (const block_t *)&data_in, &data_out,
                                        (const block_t *)&nonce, &hw_ctx, (const block_t *)&dummy);
     } else {
@@ -281,7 +281,7 @@ int mbedtls_gcm_update(mbedtls_gcm_context *ctx,
       return status;
     }
     /* Execute GCM operation */
-    if (ctx->dir == ENC) {
+    if (ctx->dir == SLI_GCM_ENC) {
       sx_ret = sx_aes_gcm_encrypt_update((const block_t *)&key, (const block_t *)&data_in, &data_out,
                                          (const block_t *)&hw_ctx, &hw_ctx);
     } else {
@@ -338,7 +338,7 @@ int mbedtls_gcm_finish(mbedtls_gcm_context *ctx,
        mbedtls_gcm_starts and update did not start the GCM operation,
        so we need to run the whole GCM now. */
     return mbedtls_gcm_crypt_and_tag(ctx,
-                                     ctx->dir == ENC ? MBEDTLS_GCM_ENCRYPT
+                                     ctx->dir == SLI_GCM_ENC ? MBEDTLS_GCM_ENCRYPT
                                      : MBEDTLS_GCM_DECRYPT,
                                      0, ctx->sx_ctx, AES_IV_GCM_SIZE, 0, 0, 0, 0,
                                      tag_len, tag);
@@ -355,7 +355,7 @@ int mbedtls_gcm_finish(mbedtls_gcm_context *ctx,
     if (status != 0) {
       return status;
     }
-    if (ctx->dir == ENC) {
+    if (ctx->dir == SLI_GCM_ENC) {
       sx_ret = sx_aes_gcm_encrypt_final((const block_t *)&key, (const block_t *)&dummy, &dummy,
                                         (const block_t *)&hw_ctx, &_tag, (const block_t *)&lena_lenc_blk);
     } else {
@@ -387,7 +387,7 @@ int mbedtls_gcm_crypt_and_tag(mbedtls_gcm_context *ctx,
 {
   int status;
   uint32_t sx_ret;
-  sx_aes_mode_t dir = mode == MBEDTLS_AES_ENCRYPT ? ENC : DEC;
+  sli_gcm_mode_t dir = mode == MBEDTLS_AES_ENCRYPT ? SLI_GCM_ENC : SLI_GCM_DEC;
   block_t key;
   block_t aad;
   block_t _tag;
@@ -420,7 +420,7 @@ int mbedtls_gcm_crypt_and_tag(mbedtls_gcm_context *ctx,
     return status;
   }
   /* Execute GCM operation */
-  if (dir == ENC) {
+  if (dir == SLI_GCM_ENC) {
     sx_ret = sx_aes_gcm_encrypt((const block_t *)&key, (const block_t *)&data_in, &data_out,
                                 (const block_t *)&nonce, &_tag, (const block_t *)&aad);
   } else {

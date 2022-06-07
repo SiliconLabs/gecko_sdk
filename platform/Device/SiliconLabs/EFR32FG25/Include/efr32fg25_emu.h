@@ -410,7 +410,7 @@ typedef struct {
 
 /* Bit fields for EMU CMD */
 #define _EMU_CMD_RESETVALUE                             0x00000000UL                         /**< Default value for EMU_CMD                   */
-#define _EMU_CMD_MASK                                   0x00060012UL                         /**< Mask for EMU_CMD                            */
+#define _EMU_CMD_MASK                                   0x00060E12UL                         /**< Mask for EMU_CMD                            */
 #define EMU_CMD_EM4UNLATCH                              (0x1UL << 1)                         /**< EM4 unlatch                                 */
 #define _EMU_CMD_EM4UNLATCH_SHIFT                       1                                    /**< Shift value for EMU_EM4UNLATCH              */
 #define _EMU_CMD_EM4UNLATCH_MASK                        0x2UL                                /**< Bit mask for EMU_EM4UNLATCH                 */
@@ -473,8 +473,8 @@ typedef struct {
 #define EMU_TEMPLIMITS_TEMPHIGH_DEFAULT                 (_EMU_TEMPLIMITS_TEMPHIGH_DEFAULT << 16) /**< Shifted mode DEFAULT for EMU_TEMPLIMITS     */
 
 /* Bit fields for EMU STATUS */
-#define _EMU_STATUS_RESETVALUE                          0x00000000UL                             /**< Default value for EMU_STATUS                */
-#define _EMU_STATUS_MASK                                0xFFFFDC0FUL                             /**< Mask for EMU_STATUS                         */
+#define _EMU_STATUS_RESETVALUE                          0x00000080UL                             /**< Default value for EMU_STATUS                */
+#define _EMU_STATUS_MASK                                0xFFFFDCFFUL                             /**< Mask for EMU_STATUS                         */
 #define EMU_STATUS_LOCK                                 (0x1UL << 0)                             /**< Lock status                                 */
 #define _EMU_STATUS_LOCK_SHIFT                          0                                        /**< Shift value for EMU_LOCK                    */
 #define _EMU_STATUS_LOCK_MASK                           0x1UL                                    /**< Bit mask for EMU_LOCK                       */

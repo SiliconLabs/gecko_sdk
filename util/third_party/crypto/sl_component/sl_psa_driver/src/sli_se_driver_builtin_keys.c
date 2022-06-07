@@ -33,7 +33,6 @@
 #if defined(SEMAILBOX_PRESENT)
 
 #include <psa/crypto.h>
-#include "mbedtls/platform.h"
 #include "sli_se_opaque_types.h"
 
 #include "string.h"
@@ -83,6 +82,12 @@ psa_status_t sli_se_opaque_get_builtin_key(psa_drv_slot_number_t slot_number,
       psa_set_key_usage_flags(attributes, PSA_KEY_USAGE_ENCRYPT | PSA_KEY_USAGE_DECRYPT);
       psa_set_key_algorithm(attributes, SL_SE_BUILTIN_KEY_AES128_ALG);
       break;
+    case SL_SE_KEY_SLOT_TRUSTZONE_ROOT_KEY:
+      psa_set_key_bits(attributes, 256);
+      psa_set_key_type(attributes, PSA_KEY_TYPE_AES);
+      psa_set_key_usage_flags(attributes, PSA_KEY_USAGE_ENCRYPT | PSA_KEY_USAGE_DECRYPT);
+      psa_set_key_algorithm(attributes, PSA_ALG_CMAC);
+      break;
     default:
       return(PSA_ERROR_DOES_NOT_EXIST);
   }
@@ -92,6 +97,16 @@ psa_status_t sli_se_opaque_get_builtin_key(psa_drv_slot_number_t slot_number,
                          PSA_KEY_PERSISTENCE_READ_ONLY,
                          PSA_KEY_LOCATION_SLI_SE_OPAQUE) );
 
+  // Check the key buffer size after populating the key attributes:
+  // From mbedTLS, psa-driver-interface.md (snippet):
+  //
+  //  This entry point may return the following status values:
+  //    (...)
+  //    * PSA_ERROR_BUFFER_TOO_SMALL: key_buffer_size is insufficient.
+  //      In this case, the driver must pass the key's attributes in
+  //      *attributes. In particular, get_builtin_key(slot_number,
+  //      &attributes, NULL, 0) is a way for the core to obtain the
+  //      key's attributes.
   if (key_buffer_size < sizeof(sli_se_opaque_key_context_header_t)) {
     return(PSA_ERROR_BUFFER_TOO_SMALL);
   }
@@ -127,6 +142,9 @@ psa_status_t mbedtls_psa_platform_get_builtin_key(
       break;
     case SL_SE_BUILTIN_KEY_AES128_ID:
       *slot_number = SL_SE_KEY_SLOT_APPLICATION_AES_128_KEY;
+      break;
+    case SL_SE_BUILTIN_KEY_TRUSTZONE_ID:
+      *slot_number = SL_SE_KEY_SLOT_TRUSTZONE_ROOT_KEY;
       break;
     default:
       return(PSA_ERROR_DOES_NOT_EXIST);

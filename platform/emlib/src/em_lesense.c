@@ -31,7 +31,7 @@
 #include "em_lesense.h"
 
 #if defined(LESENSE_COUNT) && (LESENSE_COUNT > 0)
-#include "em_assert.h"
+#include "sl_assert.h"
 #include "em_bus.h"
 #include "em_cmu.h"
 
@@ -1520,16 +1520,16 @@ void LESENSE_ScanStart(void)
 {
   /* Wait for any pending previous write operation to the CMD register to
      complete before accessing the CMD register. */
-  while (LESENSE_SYNCBUSY_CMD & LESENSE->SYNCBUSY)
-    ;
+  while (LESENSE_SYNCBUSY_CMD & LESENSE->SYNCBUSY) {
+  }
 
   /* Start scanning sensors. */
   LESENSE->CMD = LESENSE_CMD_START;
 
   /* Wait for the write operation to the CMD register to complete before
      returning. */
-  while (LESENSE_SYNCBUSY_CMD & LESENSE->SYNCBUSY)
-    ;
+  while (LESENSE_SYNCBUSY_CMD & LESENSE->SYNCBUSY) {
+  }
 }
 
 /***************************************************************************//**
@@ -1552,16 +1552,16 @@ void LESENSE_ScanStop(void)
 {
   /* Wait for any pending previous write operation to the CMD register to
      complete before accessing the CMD register. */
-  while (LESENSE_SYNCBUSY_CMD & LESENSE->SYNCBUSY)
-    ;
+  while (LESENSE_SYNCBUSY_CMD & LESENSE->SYNCBUSY) {
+  }
 
   /* Stop scanning sensors. */
   LESENSE->CMD = LESENSE_CMD_STOP;
 
   /* Wait for the write operation to the CMD register to complete before
      returning. */
-  while (LESENSE_SYNCBUSY_CMD & LESENSE->SYNCBUSY)
-    ;
+  while (LESENSE_SYNCBUSY_CMD & LESENSE->SYNCBUSY) {
+  }
 }
 
 /***************************************************************************//**
@@ -1581,16 +1581,16 @@ void LESENSE_DecoderStart(void)
 {
   /* Wait for any pending previous write operation to the CMD register to
      complete before accessing the CMD register. */
-  while (LESENSE_SYNCBUSY_CMD & LESENSE->SYNCBUSY)
-    ;
+  while (LESENSE_SYNCBUSY_CMD & LESENSE->SYNCBUSY) {
+  }
 
   /* Start the decoder. */
   LESENSE->CMD = LESENSE_CMD_DECODE;
 
   /* Wait for the write operation to the CMD register to complete before
      returning. */
-  while (LESENSE_SYNCBUSY_CMD & LESENSE->SYNCBUSY)
-    ;
+  while (LESENSE_SYNCBUSY_CMD & LESENSE->SYNCBUSY) {
+  }
 }
 
 /***************************************************************************//**
@@ -1610,15 +1610,15 @@ void LESENSE_ResultBufferClear(void)
 {
   /* Wait for any pending previous write operation to the CMD register to
      complete before accessing the CMD register. */
-  while (LESENSE_SYNCBUSY_CMD & LESENSE->SYNCBUSY)
-    ;
+  while (LESENSE_SYNCBUSY_CMD & LESENSE->SYNCBUSY) {
+  }
 
   LESENSE->CMD = LESENSE_CMD_CLEARBUF;
 
   /* Wait for the write operation to the CMD register to complete before
      returning. */
-  while (LESENSE_SYNCBUSY_CMD & LESENSE->SYNCBUSY)
-    ;
+  while (LESENSE_SYNCBUSY_CMD & LESENSE->SYNCBUSY) {
+  }
 
 #if defined(_SILICON_LABS_32B_SERIES_2)
   while (LESENSE->STATUS & _LESENSE_STATUS_FLUSHING_MASK)
@@ -1657,8 +1657,8 @@ void LESENSE_Reset(void)
 
   /* Wait for any pending previous write operation to the CMD register to
      complete before accessing the CMD register. */
-  while (LESENSE_SYNCBUSY_CMD & LESENSE->SYNCBUSY)
-    ;
+  while (LESENSE_SYNCBUSY_CMD & LESENSE->SYNCBUSY) {
+  }
 
   /* Stop the sensor scan and clear the result buffer. */
   LESENSE->CMD = (LESENSE_CMD_STOP | LESENSE_CMD_CLEARBUF);
@@ -1703,11 +1703,12 @@ void LESENSE_Reset(void)
   }
   /* Wait for the write operation to complete before
      returning. */
-  while (LESENSE->SYNCBUSY & LESENSE_SYNCBUSY_CMD)
-    ;
+  while (LESENSE->SYNCBUSY & LESENSE_SYNCBUSY_CMD) {
+  }
 #else
   LESENSE->SWRST_SET = LESENSE_SWRST_SWRST;
-  while (LESENSE->SWRST & _LESENSE_SWRST_RESETTING_MASK) ;
+  while (LESENSE->SWRST & _LESENSE_SWRST_RESETTING_MASK) {
+  }
 #endif
 }
 

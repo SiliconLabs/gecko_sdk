@@ -18,9 +18,12 @@ include:
 
 requires:
   - name: si70xx_driver
+    condition:
+    - "hardware_board_has_tempsensor"
   - name: i2cspm
+    condition:
+    - "hardware_board_has_tempsensor"
   - name: sl_wisun_app_core
-  - name: sl_wisun_rht_measurement
 
 ui_hints:
   visibility: never
@@ -29,4 +32,7 @@ template_contribution:
 #---------------- Component Catalog ------------------
   - name: component_catalog
     value: wisun_rht_measurement
+  - name: component_catalog
+    value: temp_sensor
+    condition: [hardware_board_has_tempsensor]
 

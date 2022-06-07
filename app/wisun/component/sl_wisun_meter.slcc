@@ -11,7 +11,7 @@ provides:
   - name: sl_wisun_meter
 
 source:
-  - path: "sl_wisun_meter_collector.c"
+  - path: "sli_wisun_meter_collector.c"
   - path: "sl_wisun_meter.c"
   - path: "sl_wisun_coap_meter.c"
     condition:
@@ -20,7 +20,7 @@ source:
 include:
   - path: "."
     file_list:
-    - path: "sl_wisun_meter_collector.h"
+    - path: "sli_wisun_meter_collector.h"
     - path: "sl_wisun_meter.h"
     - path: "sl_wisun_coap_meter.h"
       condition:
@@ -36,6 +36,8 @@ requires:
   - name: "sl_wisun_socket"
   - name: "sl_wisun_app_core"
   - name: "sl_wisun_rht_measurement"
+    condition:
+      - "hardware_board_has_tempsensor"
   - name: "sl_wisun_led_driver"
     condition:
       - "sl_wisun_coap"

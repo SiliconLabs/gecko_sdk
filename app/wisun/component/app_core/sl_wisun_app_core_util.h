@@ -46,7 +46,6 @@
 //                              Macros and Typedefs
 // -----------------------------------------------------------------------------
 
-
 /// Exit from thread (wrapper)
 #define exit(exitcode)                                    \
   do {                                                    \
@@ -82,7 +81,21 @@
  * @ingroup SL_WISUN_APP_CORE_API
  * @{
  *****************************************************************************/
- 
+
+/**************************************************************************//**
+ * @brief Initialize Wi-SUN project information.
+ * @details Init internal instance
+ * @param[in] app_name Application name
+ *****************************************************************************/
+void app_wisun_project_info_init(const char * app_name);
+
+/**************************************************************************//**
+ * @brief Print Wi-SUN project information.
+ * @details Print project info in pretty or json format.
+ * @param[in] json_format Json format required indicator
+ *****************************************************************************/
+void app_wisun_project_info_print(const bool json_format);
+
 /**************************************************************************//**
  * @brief Wait for the connection.
  * @details This function doesn't call the app_wisun_network_connect() function.
@@ -100,7 +113,7 @@ void app_wisun_wait_for_connection(void);
 void app_wisun_connect_and_wait(void);
 
 /**************************************************************************//**
- * @brief Network is connected.
+ * @brief The network is connected.
  * @details Wrapper function of join state getter
  * @return true Connected
  * @return false Not connected

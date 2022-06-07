@@ -3,7 +3,7 @@
  * @brief Si446x Radio driver
  *******************************************************************************
  * # License
- * <b>Copyright 2021 Silicon Laboratories Inc. www.silabs.com</b>
+ * <b>Copyright 2022 Silicon Laboratories Inc. www.silabs.com</b>
  *******************************************************************************
  *
  * The licensor of this software is Silicon Laboratories Inc.  Your use of this
@@ -24,7 +24,7 @@
 #include "em_eusart.h"
 #include "gpiointerrupt.h"
 
-#include "sl_si446x_radio_usart_config.h"
+#include "sl_si446x_radio_eusart_config.h"
 #include "sl_si446x_radio.h"
 
 //== DEVICE CAPABILITIES ==
@@ -41,11 +41,8 @@
   #define SL_EXT_DEVICE_READY_PORT         SL_SI446X_RADIO_CTS_PORT
   #define SL_EXT_DEVICE_READY_PIN          SL_SI446X_RADIO_CTS_PIN
   #define SL_EXT_DEVICE_READY_POLARITY     SL_EXT_DEVICE_POLARITY_NORMAL
-  #ifndef SL_SI446X_RADIO_CTS_INTNO
-    // This isn't exposed in GUI currently, but always use IRQ
-    #define SL_SI446X_RADIO_CTS_INTNO      SL_SI446X_RADIO_CTS_PIN
-  #endif//SL_SI446X_RADIO_CTS_INTNO
-  #define SL_EXT_DEVICE_READY_IRQ          SL_SI446X_RADIO_CTS_INTNO
+static unsigned int ctsIntNo = INTERRUPT_UNAVAILABLE;
+  #define SL_EXT_DEVICE_READY_IRQ          ctsIntNo
 #endif//(defined(SL_SI446X_RADIO_CTS_PORT) && defined(SL_SI446X_RADIO_CTS_PIN))
 
 #if     (defined(SL_SI446X_RADIO_CS_PORT) && defined(SL_SI446X_RADIO_CS_PIN))
@@ -58,11 +55,8 @@
   #define SL_EXT_DEVICE_INTERRUPT_PORT     SL_SI446X_RADIO_INT_PORT
   #define SL_EXT_DEVICE_INTERRUPT_PIN      SL_SI446X_RADIO_INT_PIN
   #define SL_EXT_DEVICE_INTERRUPT_POLARITY SL_EXT_DEVICE_POLARITY_INVERT
-  #ifndef SL_SI446X_RADIO_INT_INTNO
-    // This isn't exposed in GUI currently, but always use IRQ
-    #define SL_SI446X_RADIO_INT_INTNO      SL_SI446X_RADIO_INT_PIN
-  #endif//SL_SI446X_RADIO_INT_INTNO
-  #define SL_EXT_DEVICE_INTERRUPT_IRQ      SL_SI446X_RADIO_INT_INTNO
+static unsigned int intIntNo = INTERRUPT_UNAVAILABLE;
+  #define SL_EXT_DEVICE_INTERRUPT_IRQ      intIntNo
 #endif//(defined(SL_SI446X_RADIO_INT_PORT) && defined(SL_SI446X_RADIO_INT_PIN))
 
 #define SL_EXT_DEVICE_SPI_PORT             SL_SI446X_RADIO_PERIPHERAL
@@ -115,53 +109,13 @@ static volatile sl_ext_device_interrupt_depth_t sli_ext_device_interrupt_depth =
 
 #if     (defined(SL_EXT_DEVICE_READY_IRQ) || defined(SL_EXT_DEVICE_INTERRUPT_IRQ))
 
-#ifndef GPIOINT_INIT_IS_SAFE
-/** @brief Safe method to ensure GPIO interrupts are on at top-level
- *  since GPIOINT_Init() is *not* safe and could cause event lossage.
- *
- *  Must be called with interrupts disabled.
- */
-__STATIC_INLINE void GPIOINT_InitSafe(void)
-{
-  // Turn on GPIO interrupts only if they've not been enabled already
-  if (CORE_NvicIRQDisabled(GPIO_ODD_IRQn)
-      || CORE_NvicIRQDisabled(GPIO_EVEN_IRQn)) {
-    GPIOINT_Init();
-  }
-}
-#define GPIOINT_Init GPIOINT_InitSafe
-#endif//GPIOINT_INIT_IS_SAFE
-
-#ifndef GPIO_INT_ENABLE_DISABLE_ARE_SAFE
-/** @brief Interrupt-safe method to manipulate GPIO->IEN
- *  since GPIO_IntDisable() is *not* atomic.
- *
- *  May be called with interrupts enabled.
- */
-__STATIC_INLINE void GPIO_IntDisableSafe(uint32_t flags)
-{
-  BUS_RegMaskedClear(&GPIO->IEN, flags);
-}
-#define GPIO_IntDisable GPIO_IntDisableSafe
-
-/** @brief Interrupt-safe method to manipulate GPIO->IEN
- *  since GPIO_IntEnable() is *not* atomic.
- *
- *  May be called with interrupts enabled.
- */
-__STATIC_INLINE void GPIO_IntEnableSafe(uint32_t flags)
-{
-  BUS_RegMaskedSet(&GPIO->IEN, flags);
-}
-#define GPIO_IntEnable GPIO_IntEnableSafe
-#endif//GPIO_INT_ENABLE_DISABLE_ARE_SAFE
-
 /** @brief GPIO event handler to map interrupt event to its handler.
  *
  * Assume only called from interrupt context.
  */
-static void sli_ext_device_on_gpio_event(uint8_t irq)
+static void sli_ext_device_on_gpio_event(uint8_t irq, void *ctx)
 {
+  (void) ctx;
  #ifdef  SL_EXT_DEVICE_INTERRUPT_IRQ
   if (irq == SL_EXT_DEVICE_INTERRUPT_IRQ) {
     // Acknowledge interrupt before callback assuming edge-triggered
@@ -204,14 +158,14 @@ static void sli_ext_device_configure_ready_irq(void)
   CORE_ENTER_ATOMIC();
   // If device is powered and handler exists, configure & enable interrupt.
   if (sli_ext_device_is_powered && (sli_ext_device_ready_handler != NULL)) {
-    GPIO_InputSenseSet(GPIO_INSENSE_INT, GPIO_INSENSE_INT);
-    GPIOINT_CallbackRegister(SL_EXT_DEVICE_READY_IRQ, sli_ext_device_on_gpio_event);
+    SL_EXT_DEVICE_READY_IRQ = GPIOINT_CallbackRegisterExt(SL_EXT_DEVICE_READY_PIN, &sli_ext_device_on_gpio_event, NULL);
+    // assert(SL_EXT_DEVICE_READY_IRQ != INTERRUPT_UNAVAILABLE);
     GPIO_ExtIntConfig((GPIO_Port_TypeDef) SL_EXT_DEVICE_READY_PORT,
-                       SL_EXT_DEVICE_READY_PIN,
-                       SL_EXT_DEVICE_READY_IRQ,
-                       SL_EXT_DEVICE_READY_POLARITY == SL_EXT_DEVICE_POLARITY_NORMAL, // risingEdge
-                       SL_EXT_DEVICE_READY_POLARITY == SL_EXT_DEVICE_POLARITY_INVERT, // fallingEdge
-                       true); // enable
+                      SL_EXT_DEVICE_READY_PIN,
+                      SL_EXT_DEVICE_READY_IRQ,
+                      SL_EXT_DEVICE_READY_POLARITY == SL_EXT_DEVICE_POLARITY_NORMAL,  // risingEdge
+                      SL_EXT_DEVICE_READY_POLARITY == SL_EXT_DEVICE_POLARITY_INVERT,  // fallingEdge
+                      true);  // enable
   }
   CORE_EXIT_ATOMIC();
  #endif//SL_EXT_DEVICE_READY_IRQ
@@ -234,14 +188,14 @@ static void sli_ext_device_configure_interrupt_irq(void)
   sli_ext_device_interrupt_depth = SL_EXT_DEVICE_INTERRUPT_UNCONFIGURED;
   // If device is powered and handler exists, configure interrupt disabled
   if (sli_ext_device_is_powered && (sli_ext_device_interrupt_handler != NULL)) {
-    GPIO_InputSenseSet(GPIO_INSENSE_INT, GPIO_INSENSE_INT);
-    GPIOINT_CallbackRegister(SL_EXT_DEVICE_INTERRUPT_IRQ, sli_ext_device_on_gpio_event);
+    SL_EXT_DEVICE_INTERRUPT_IRQ = GPIOINT_CallbackRegisterExt(SL_EXT_DEVICE_INTERRUPT_PIN, &sli_ext_device_on_gpio_event, NULL);
+    // assert(SL_EXT_DEVICE_INTERRUPT_IRQ != INTERRUPT_UNAVAILABLE);
     GPIO_ExtIntConfig((GPIO_Port_TypeDef) SL_EXT_DEVICE_INTERRUPT_PORT,
-                       SL_EXT_DEVICE_INTERRUPT_PIN,
-                       SL_EXT_DEVICE_INTERRUPT_IRQ,
-                       SL_EXT_DEVICE_INTERRUPT_POLARITY == SL_EXT_DEVICE_POLARITY_NORMAL, // risingEdge
-                       SL_EXT_DEVICE_INTERRUPT_POLARITY == SL_EXT_DEVICE_POLARITY_INVERT, // fallingEdge
-                       false); // enable (leave disabled)
+                      SL_EXT_DEVICE_INTERRUPT_PIN,
+                      SL_EXT_DEVICE_INTERRUPT_IRQ,
+                      SL_EXT_DEVICE_INTERRUPT_POLARITY == SL_EXT_DEVICE_POLARITY_NORMAL,  // risingEdge
+                      SL_EXT_DEVICE_INTERRUPT_POLARITY == SL_EXT_DEVICE_POLARITY_INVERT,  // fallingEdge
+                      false);  // enable (leave disabled)
     sli_ext_device_interrupt_depth = SL_EXT_DEVICE_INTERRUPT_DEPTH_OFF;
     // Callers need to use sl_ext_device_enable_interrupt() to enable
   }
@@ -281,20 +235,23 @@ const SPIDRV_Init_t sl_ext_device_spi_config = {
   .pinCs           = SL_EXT_DEVICE_SPI_CS_PIN,
  #endif//SL_EXT_DEVICE_SELECT_PIN
  #else
-  .portLocation    = , //@TODO trigger compilation error for now
+  .portLocation    =,  //@TODO trigger compilation error for now
  #endif
   .bitRate         = SL_EXT_DEVICE_SPI_BAUDRATE,
-  .frameLength     = 8U,
-  .dummyTxValue    = 0xFFU,
-  .type            = spidrvMaster,
-  .bitOrder        = spidrvBitOrderMsbFirst,
-  .clockMode       = spidrvClockMode0,
+  .frameLength     = 8U,                     // DO NOT CHANGE!
+  .dummyTxValue    = 0xFFU,                  // DO NOT CHANGE!
+  .type            = spidrvMaster,           // DO NOT CHANGE!
+  .bitOrder        = spidrvBitOrderMsbFirst, // DO NOT CHANGE!
+  .clockMode       = spidrvClockMode0,       // DO NOT CHANGE!
  #ifdef  SL_EXT_DEVICE_SELECT_PIN
   .csControl       = spidrvCsControlApplication,
  #else//!SL_EXT_DEVICE_SELECT_PIN
   .csControl       = spidrvCsControlAuto,
  #endif//SL_EXT_DEVICE_SELECT_PIN
 };
+
+static SPIDRV_HandleData_t sli_ext_device_spi_handle_data;
+SPIDRV_Handle_t sl_ext_device_spi_handle = &sli_ext_device_spi_handle_data;
 
 #endif//SL_EXT_DEVICE_SPI_PORT
 
@@ -577,4 +534,3 @@ sl_ext_device_interrupt_depth_t sl_ext_device_enable_interrupt(bool clear_pendin
 // Do NOT provide stub API implementation; force linking to fail instead.
 
 #endif//SL_SI446X_RADIO_PERIPHERAL
-

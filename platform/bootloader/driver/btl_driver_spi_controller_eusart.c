@@ -15,6 +15,7 @@
  *
  ******************************************************************************/
 
+#include "api/btl_interface.h"
 #include "config/btl_config.h"
 #include "btl_driver_spi_controller.h"
 #include "em_cmu.h"
@@ -38,24 +39,84 @@
 #define BTL_DRIVER_SPI_EUSART          EUSART0
 #define BTL_DRIVER_SPI_EUSART_NUM      0
 #define BTL_DRIVER_SPI_EUSART_CLOCK    cmuClock_EUSART0
+
+#if defined(BOOTLOADER_INTERFACE_TRUSTZONE_AWARE)
+#if defined(SMU_PPUSATD0_EUSART0)
+#define BTL_DRIVER_SPI_PPUSATD_NUM     0UL
+#define BTL_DRIVER_SPI_PPUSATD         SMU_PPUSATD0_EUSART0
+#elif defined(SMU_PPUSATD1_EUSART0)
+#define BTL_DRIVER_SPI_PPUSATD_NUM     1UL
+#define BTL_DRIVER_SPI_PPUSATD         SMU_PPUSATD1_EUSART0
+#endif
+#endif // BOOTLOADER_INTERFACE_TRUSTZONE_AWARE
+
 #elif SL_EUSART_EXTFLASH_PERIPHERAL_NO == 1
 #define BTL_DRIVER_SPI_EUSART          EUSART1
 #define BTL_DRIVER_SPI_EUSART_NUM      1
 #define BTL_DRIVER_SPI_EUSART_CLOCK    cmuClock_EUSART1
+
+#if defined(BOOTLOADER_INTERFACE_TRUSTZONE_AWARE)
+#if defined(SMU_PPUSATD0_EUSART1)
+#define BTL_DRIVER_SPI_PPUSATD_NUM     0UL
+#define BTL_DRIVER_SPI_PPUSATD         SMU_PPUSATD0_EUSART1
+#elif defined(SMU_PPUSATD1_EUSART1)
+#define BTL_DRIVER_SPI_PPUSATD_NUM     1UL
+#define BTL_DRIVER_SPI_PPUSATD         SMU_PPUSATD1_EUSART1
+#endif
+#endif // BOOTLOADER_INTERFACE_TRUSTZONE_AWARE
+
 #elif SL_EUSART_EXTFLASH_PERIPHERAL_NO == 2
 #define BTL_DRIVER_SPI_EUSART          EUSART2
 #define BTL_DRIVER_SPI_EUSART_NUM      2
 #define BTL_DRIVER_SPI_EUSART_CLOCK    cmuClock_EUSART2
+
+#if defined(BOOTLOADER_INTERFACE_TRUSTZONE_AWARE)
+#if defined(SMU_PPUSATD0_EUSART2)
+#define BTL_DRIVER_SPI_PPUSATD_NUM     0UL
+#define BTL_DRIVER_SPI_PPUSATD         SMU_PPUSATD0_EUSART2
+#elif defined(SMU_PPUSATD1_EUSART2)
+#define BTL_DRIVER_SPI_PPUSATD_NUM     1UL
+#define BTL_DRIVER_SPI_PPUSATD         SMU_PPUSATD1_EUSART2
+#endif
+#endif // BOOTLOADER_INTERFACE_TRUSTZONE_AWARE
+
 #elif SL_EUSART_EXTFLASH_PERIPHERAL_NO == 3
 #define BTL_DRIVER_SPI_EUSART          EUSART3
 #define BTL_DRIVER_SPI_EUSART_NUM      3
 #define BTL_DRIVER_SPI_EUSART_CLOCK    cmuClock_EUSART3
+
+#if defined(BOOTLOADER_INTERFACE_TRUSTZONE_AWARE)
+#if defined(SMU_PPUSATD0_EUSART3)
+#define BTL_DRIVER_SPI_PPUSATD_NUM     0UL
+#define BTL_DRIVER_SPI_PPUSATD         SMU_PPUSATD0_EUSART3
+#elif defined(SMU_PPUSATD1_EUSART3)
+#define BTL_DRIVER_SPI_PPUSATD_NUM     1UL
+#define BTL_DRIVER_SPI_PPUSATD         SMU_PPUSATD1_EUSART3
+#endif
+#endif // BOOTLOADER_INTERFACE_TRUSTZONE_AWARE
+
 #elif SL_EUSART_EXTFLASH_PERIPHERAL_NO == 4
 #define BTL_DRIVER_SPI_EUSART          EUSART4
 #define BTL_DRIVER_SPI_EUSART_NUM      4
 #define BTL_DRIVER_SPI_EUSART_CLOCK    cmuClock_EUSART4
+
+#if defined(BOOTLOADER_INTERFACE_TRUSTZONE_AWARE)
+#if defined(SMU_PPUSATD0_EUSART4)
+#define BTL_DRIVER_SPI_PPUSATD_NUM     0UL
+#define BTL_DRIVER_SPI_PPUSATD         SMU_PPUSATD0_EUSART4
+#elif defined(SMU_PPUSATD1_EUSART4)
+#define BTL_DRIVER_SPI_PPUSATD_NUM     1UL
+#define BTL_DRIVER_SPI_PPUSATD         SMU_PPUSATD1_EUSART4
+#endif
+#endif // BOOTLOADER_INTERFACE_TRUSTZONE_AWARE
+
 #else
 #error "Invalid SL_EXTFLASH_PERIPHERAL"
+#endif
+
+#ifndef BTL_DRIVER_SPI_PPUSATD
+#define BTL_DRIVER_SPI_PPUSATD_NUM 0xFFFFFFFFUL
+#define BTL_DRIVER_SPI_PPUSATD     0UL
 #endif
 
 static void eusart_sync(EUSART_TypeDef *eusart, uint32_t mask)
@@ -66,7 +127,7 @@ static void eusart_sync(EUSART_TypeDef *eusart, uint32_t mask)
   }
 }
 
-void spi_init(void)
+static void clk_enable(void)
 {
 #if defined(CMU_CTRL_HFPERCLKEN)
   CMU_ClockEnable(cmuClock_GPIO, true);
@@ -82,6 +143,11 @@ void spi_init(void)
 #error "Invalid SL_USART_EXTFLASH_PERIPHERAL"
 #endif
 #endif
+}
+
+void spi_init(void)
+{
+  clk_enable();
 
   // MOSI
   GPIO_PinModeSet(SL_EUSART_EXTFLASH_TX_PORT,
@@ -161,19 +227,19 @@ void spi_init(void)
 
 void spi_deinit(void)
 {
+  clk_enable();
   EUSART_Enable(BTL_DRIVER_SPI_EUSART, eusartDisable);
-#if defined(_CMU_CLKEN0_MASK)
-  CMU->CLKEN0_CLR = CMU_CLKEN0_GPIO;
-#endif
 }
 
 void spi_writeByte(uint8_t data)
 {
+  clk_enable();
   EUSART_Spi_TxRx(BTL_DRIVER_SPI_EUSART, data);
 }
 
 void spi_writeHalfword(uint16_t data)
 {
+  clk_enable();
   EUSART_Tx(BTL_DRIVER_SPI_EUSART, (data >> 8) & 0xFF);
   EUSART_Tx(BTL_DRIVER_SPI_EUSART, data & 0xFF);
   EUSART_Rx(BTL_DRIVER_SPI_EUSART);
@@ -182,6 +248,7 @@ void spi_writeHalfword(uint16_t data)
 
 void spi_write3Byte(uint32_t data)
 {
+  clk_enable();
   EUSART_Tx(BTL_DRIVER_SPI_EUSART, (data >> 16) & 0xFF);
   EUSART_Tx(BTL_DRIVER_SPI_EUSART, (data >> 8) & 0xFF);
   EUSART_Tx(BTL_DRIVER_SPI_EUSART, data & 0xFF);
@@ -192,11 +259,13 @@ void spi_write3Byte(uint32_t data)
 
 uint8_t spi_readByte(void)
 {
+  clk_enable();
   return EUSART_Spi_TxRx(BTL_DRIVER_SPI_EUSART, 0xFF);
 }
 
 uint16_t spi_readHalfword(void)
 {
+  clk_enable();
   uint16_t retval = 0;
   EUSART_Tx(BTL_DRIVER_SPI_EUSART, 0xFF);
   EUSART_Tx(BTL_DRIVER_SPI_EUSART, 0xFF);
@@ -208,10 +277,18 @@ uint16_t spi_readHalfword(void)
 
 void spi_setCsActive(void)
 {
+  clk_enable();
   GPIO_PinOutClear(SL_EUSART_EXTFLASH_CS_PORT, SL_EUSART_EXTFLASH_CS_PIN);
 }
 
 void spi_setCsInactive(void)
 {
+  clk_enable();
   GPIO_PinOutSet(SL_EUSART_EXTFLASH_CS_PORT, SL_EUSART_EXTFLASH_CS_PIN);
+}
+
+uint32_t spi_getUsartPPUSATD(uint32_t *ppusatdNr)
+{
+  *ppusatdNr = BTL_DRIVER_SPI_PPUSATD_NUM;
+  return BTL_DRIVER_SPI_PPUSATD;
 }

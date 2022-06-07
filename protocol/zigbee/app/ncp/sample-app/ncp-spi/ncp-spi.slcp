@@ -1,15 +1,16 @@
 project_name: "ncp-spi"
-label: "ncp-spi"
+label: "Zigbee - NCP ncp-spi"
 package: "Zigbee"
 category: "Zigbee Application"
 quality: "production"
 
-description: |-
+description: >
   This network coprocessor (NCP) application supports communication with a host
   application over a SPI interface.  This NCP application can be built as
   configured, or optionally can be augmented with customized extensions for
   initialization, main loop processing, event definition/handling, and
   messaging with the host.
+author: "Silicon Laboratories, Inc."
 
 component:
   - id: "iostream_usart"
@@ -21,7 +22,6 @@ component:
   - id: "zigbee_source_route"
   - id: "zigbee_binding_table"
   - id: "zigbee_end_device_bind"
-  - id: "zigbee_multi_network_stub"
   - id: "zigbee_packet_validate"
   - id: "zigbee_gp"
   - id: "zigbee_r22_support"
@@ -82,4 +82,12 @@ ui_hints:
   highlight:
     - path: readme.html
       focus: false
+
+filter:
+  - name: "Wireless Technology"
+    value: ["Zigbee"]
+  - name: "Device Type"
+    value: ["NCP"]
+  - name: "Project Difficulty"
+    value: ["Beginner"]
 

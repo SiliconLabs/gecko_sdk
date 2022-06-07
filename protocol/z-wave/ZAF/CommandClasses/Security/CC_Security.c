@@ -1,8 +1,10 @@
-/***************************************************************************
-*
-* @copyright 2018 Silicon Laboratories Inc.
-* @brief Command class security supported Get functionality
-*/
+/**
+ * @file
+ * Handles SECURITY_COMMANDS_SUPPORTED_GET and SECURITY_2_COMMANDS_SUPPORTED_GET for endpoints.
+ *
+ * The Z-Wave stack will handle the above commands for the root device.
+ * @copyright 2022 Silicon Laboratories Inc.
+ */
 
 /****************************************************************************/
 /*                              INCLUDE FILES                               */
@@ -11,7 +13,6 @@
 #include <ZW_TransportLayer.h>
 #include <ZW_TransportMulticast.h>
 #include "config_app.h"
-#include <CC_Security.h>
 #include <string.h>
 #include <ZAF_Common_interface.h>
 #include "ZAF_tx_mutex.h"

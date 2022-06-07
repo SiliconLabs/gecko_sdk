@@ -4,7 +4,7 @@
 #include "tensorflow/lite/kernels/kernel_util.h"
 #include "tensorflow/lite/kernels/padding.h"
 #include "tensorflow/lite/micro/kernels/kernel_util.h"
-#include "cmsis/CMSIS/NN/Include/arm_nnfunctions.h"
+#include "CMSIS/NN/Include/arm_nnfunctions.h"
 
 #include "sl_mvp_ml_depthwise_conv2d.h"
 
@@ -104,10 +104,17 @@ TfLiteStatus Prepare(TfLiteContext* context, TfLiteNode* node)
   OpData* data = static_cast<OpData*>(node->user_data);
   const auto params = static_cast<const TfLiteDepthwiseConvParams*>(node->builtin_data);
 
-  TfLiteTensor* output       = GetOutput(context, node, kOutputTensor);
-  const TfLiteTensor* bias   = GetOptionalInputTensor(context, node, kBiasTensor);
-  const TfLiteTensor* input  = GetInput(context, node, kInputTensor);
-  const TfLiteTensor* filter = GetInput(context, node, kFilterTensor);
+  MicroContext* micro_context = GetMicroContext(context);
+
+  TfLiteTensor* output =
+      micro_context->AllocateTempOutputTensor(node, kOutputTensor);
+  TfLiteTensor* bias =
+      micro_context->AllocateTempInputTensor(node, kBiasTensor);
+  TfLiteTensor* input =
+      micro_context->AllocateTempInputTensor(node, kInputTensor);
+  TfLiteTensor* filter =
+      micro_context->AllocateTempInputTensor(node, kFilterTensor);
+
   TF_LITE_ENSURE(context, input  != nullptr);
   TF_LITE_ENSURE(context, output != nullptr);
   TF_LITE_ENSURE(context, filter != nullptr);
@@ -242,6 +249,13 @@ TfLiteStatus Prepare(TfLiteContext* context, TfLiteNode* node)
     data->scratch_buffer_index = -1;
   }
 
+  micro_context->DeallocateTempTfLiteTensor(input);
+  micro_context->DeallocateTempTfLiteTensor(filter);
+  micro_context->DeallocateTempTfLiteTensor(output);
+  if (bias != nullptr) {
+    micro_context->DeallocateTempTfLiteTensor(bias);
+  }
+  
   return kTfLiteOk;
 }
 

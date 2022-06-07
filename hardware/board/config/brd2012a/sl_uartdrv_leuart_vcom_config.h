@@ -47,11 +47,11 @@
 // <i> Default: uartdrvFlowControlHw
 #define SL_UARTDRV_LEUART_VCOM_FLOW_CONTROL_TYPE uartdrvFlowControlNone
 
-// <o SL_UARTDRV_LEUART_VCOM_MAX_CONCURRENT_RX_BUFS> Size of the receive operation queue
+// <o SL_UARTDRV_LEUART_VCOM_RX_BUFFER_SIZE> Size of the receive operation queue
 // <i> Default: 6
 #define SL_UARTDRV_LEUART_VCOM_RX_BUFFER_SIZE 6
 
-// <o SL_UARTDRV_LEUART_VCOM_MAX_CONCURRENT_TX_BUFS> Size of the transmit operation queue
+// <o SL_UARTDRV_LEUART_VCOM_TX_BUFFER_SIZE> Size of the transmit operation queue
 // <i> Default: 6
 #define SL_UARTDRV_LEUART_VCOM_TX_BUFFER_SIZE 6
 // </h>

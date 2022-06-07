@@ -31,7 +31,7 @@
 #include <stdlib.h>
 
 #include "em_device.h"
-#include "em_common.h"
+#include "sl_common.h"
 #include "em_core.h"
 #include "sl_sleeptimer.h"
 #include "sli_sleeptimer_hal.h"
@@ -584,18 +584,24 @@ sl_status_t sl_sleeptimer_set_datetime(sl_sleeptimer_date_t *date)
 {
   sl_sleeptimer_timestamp_t time = 0u;
   sl_status_t err_code = SL_STATUS_OK;
+  CORE_DECLARE_IRQ_STATE;
 
   if (!is_valid_date(date)) {
     return SL_STATUS_INVALID_PARAMETER;
   }
 
   err_code = sl_sleeptimer_convert_date_to_time(date, &time);
-
   if (err_code != SL_STATUS_OK) {
     return err_code;
   }
 
+  CORE_ENTER_ATOMIC();
   err_code = sl_sleeptimer_set_time(time);
+  if (err_code == SL_STATUS_OK) {
+    sl_sleeptimer_set_tz(date->time_zone);
+  }
+  CORE_EXIT_ATOMIC();
+
   return err_code;
 }
 

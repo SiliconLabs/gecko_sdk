@@ -335,7 +335,7 @@ int main( void )
   // Setup GPIO interrupt.
   NVIC_ClearPendingIRQ(GPIO_ODD_IRQn);
   NVIC_EnableIRQ(GPIO_ODD_IRQn);
-  GPIO_IntConfig(init.irq_port, init.irq_pin, false, true, true);
+  GPIO_ExtIntConfig(init.irq_port, init.irq_pin, init.irq_pin, false, true, true);
 
   ...
 
@@ -678,32 +678,12 @@ sl_status_t sl_efp_set_em_transition_mode(sl_efp_handle_t handle,
                                           sl_efp_em_transition_mode_t mode);
 sl_status_t sl_efp_set_voa_em01_ipk(sl_efp_handle_t handle, uint8_t ipk);
 sl_status_t sl_efp_set_voa_em23_ipk(sl_efp_handle_t handle, uint8_t ipk);
-sl_status_t sl_efp_set_voa_em01_peak_current(sl_efp_handle_t handle,
-                                             unsigned int current_ma,
-                                             unsigned int vddb_mv,
-                                             unsigned int voa_mv,
-                                             unsigned int inductor_nh) SL_DEPRECATED_API_SDK_3_2;
-sl_status_t sl_efp_set_voa_em23_peak_current(sl_efp_handle_t handle,
-                                             unsigned int current_ma,
-                                             unsigned int vddb_mv,
-                                             unsigned int voa_mv,
-                                             unsigned int inductor_nh) SL_DEPRECATED_API_SDK_3_2;
 sl_status_t sl_efp_set_voa_mode(sl_efp_handle_t handle, sl_efp_voa_mode_t mode);
 sl_status_t sl_efp_set_voa_sw_mode(sl_efp_handle_t handle, sl_efp_voa_sw_mode_t mode);
 sl_status_t sl_efp_set_voa_voltage(sl_efp_handle_t handle, unsigned int voltage_mv);
 sl_status_t sl_efp_set_vob_em01_ipk(sl_efp_handle_t handle, uint8_t ipk);
-sl_status_t sl_efp_set_vob_em01_peak_current(sl_efp_handle_t handle,
-                                             unsigned int current_ma,
-                                             unsigned int vddb_mv,
-                                             unsigned int vob_mv,
-                                             unsigned int inductor_nh) SL_DEPRECATED_API_SDK_3_2;
 sl_status_t sl_efp_set_vob_em01_voltage(sl_efp_handle_t handle, unsigned int voltage_mv);
 sl_status_t sl_efp_set_vob_em23_ipk(sl_efp_handle_t handle, uint8_t ipk);
-sl_status_t sl_efp_set_vob_em23_peak_current(sl_efp_handle_t handle,
-                                             unsigned int current_ma,
-                                             unsigned int vddb_mv,
-                                             unsigned int vob_mv,
-                                             unsigned int inductor_nh) SL_DEPRECATED_API_SDK_3_2;
 sl_status_t sl_efp_set_vob_em23_voltage(sl_efp_handle_t handle, unsigned int voltage_mv);
 sl_status_t sl_efp_set_vob_mode(sl_efp_handle_t handle, sl_efp_vob_mode_t mode);
 sl_status_t sl_efp_set_voc_voltage(sl_efp_handle_t handle, unsigned int voltage_mv);
@@ -987,36 +967,6 @@ sl_status_t sl_efp_set_voa_em01_ipk(sl_efp_handle_t handle, uint8_t ipk);
 
 /***************************************************************************//**
  * @brief
- *   Set regulator VOA EM01 peak output current.
- *
- * @param[in] handle
- *   EFP instance handle.
- *
- * @param[in] current_ma
- *   Target peak current expressed in milliamperes.
- *
- * @param[in] vddb_mv
- *   VDDB expressed in millivolt.
- *
- * @param[in] voa_mv
- *   VOA expressed in millivolt.
- *
- * @param[in] inductor_nh
- *   Inductor size expressed in nanohenry.
- *
- * @return
- *   SL_STATUS_OK or SL_STATUS_IO on I2C transfer errors.
- *
- * @deprecated
- ******************************************************************************/
-sl_status_t sl_efp_set_voa_em01_peak_current(sl_efp_handle_t handle,
-                                             unsigned int current_ma,
-                                             unsigned int vddb_mv,
-                                             unsigned int voa_mv,
-                                             unsigned int inductor_nh);
-
-/***************************************************************************//**
- * @brief
  *   Set regulator VOA EM23 peak output current.
  *
  * @param[in] handle
@@ -1029,36 +979,6 @@ sl_status_t sl_efp_set_voa_em01_peak_current(sl_efp_handle_t handle,
  *   SL_STATUS_OK or SL_STATUS_IO on I2C transfer errors.
  ******************************************************************************/
 sl_status_t sl_efp_set_voa_em23_ipk(sl_efp_handle_t handle, uint8_t ipk);
-
-/***************************************************************************//**
- * @brief
- *   Set regulator VOA EM23 peak output current.
- *
- * @param[in] handle
- *   EFP instance handle.
- *
- * @param[in] current_ma
- *   Target peak current expressed in milliamperes.
- *
- * @param[in] vddb_mv
- *   VDDB expressed in millivolt.
- *
- * @param[in] voa_mv
- *   VOA expressed in millivolt.
- *
- * @param[in] inductor_nh
- *   Inductor size expressed in nanohenry.
- *
- * @return
- *   SL_STATUS_OK or SL_STATUS_IO on I2C transfer errors.
- *
- * @deprecated
- ******************************************************************************/
-sl_status_t sl_efp_set_voa_em23_peak_current(sl_efp_handle_t handle,
-                                             unsigned int current_ma,
-                                             unsigned int vddb_mv,
-                                             unsigned int voa_mv,
-                                             unsigned int inductor_nh);
 
 /***************************************************************************//**
  * @brief
@@ -1122,36 +1042,6 @@ sl_status_t sl_efp_set_vob_em01_ipk(sl_efp_handle_t handle, uint8_t ipk);
 
 /***************************************************************************//**
  * @brief
- *   Set regulator VOB EM01 peak output current.
- *
- * @param[in] handle
- *   EFP instance handle.
- *
- * @param[in] current_ma
- *   Target peak current expressed in milliamperes.
- *
- * @param[in] vddb_mv
- *   VDDB expressed in millivolt.
- *
- * @param[in] vob_mv
- *   VOB expressed in millivolt.
- *
- * @param[in] inductor_nh
- *   Inductor size expressed in nanohenry.
- *
- * @return
- *   SL_STATUS_OK or SL_STATUS_IO on I2C transfer errors.
- *
- * @deprecated
- ******************************************************************************/
-sl_status_t sl_efp_set_vob_em01_peak_current(sl_efp_handle_t handle,
-                                             unsigned int current_ma,
-                                             unsigned int vddb_mv,
-                                             unsigned int vob_mv,
-                                             unsigned int inductor_nh);
-
-/***************************************************************************//**
- * @brief
  *   Set regulator VOB EM01 output voltage.
  *
  * @param[in] handle
@@ -1179,36 +1069,6 @@ sl_status_t sl_efp_set_vob_em01_voltage(sl_efp_handle_t handle, unsigned int vol
  *   SL_STATUS_OK or SL_STATUS_IO on I2C transfer errors.
  ******************************************************************************/
 sl_status_t sl_efp_set_vob_em23_ipk(sl_efp_handle_t handle, uint8_t ipk);
-
-/***************************************************************************//**
- * @brief
- *   Set regulator VOB EM23 peak output current.
- *
- * @param[in] handle
- *   EFP instance handle.
- *
- * @param[in] current_ma
- *   Target peak current expressed in milliamperes.
- *
- * @param[in] vddb_mv
- *   VDDB expressed in millivolt.
- *
- * @param[in] vob_mv
- *   VOB expressed in millivolt.
- *
- * @param[in] inductor_nh
- *   Inductor size expressed in nanohenry.
- *
- * @return
- *   SL_STATUS_OK or SL_STATUS_IO on I2C transfer errors.
- *
- * @deprecated
- ******************************************************************************/
-sl_status_t sl_efp_set_vob_em23_peak_current(sl_efp_handle_t handle,
-                                             unsigned int current_ma,
-                                             unsigned int vddb_mv,
-                                             unsigned int vob_mv,
-                                             unsigned int inductor_nh);
 
 /***************************************************************************//**
  * @brief

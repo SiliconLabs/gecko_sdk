@@ -68,8 +68,8 @@ typedef struct {
 /***************************************************************************//**
  * Initialize the image parser.
  *
- * @param[in] context     Pointer to the parser context struct
- * @param[in] contextSize Size of the context struct
+ * @param[in] context     Pointer to the parser context struct.
+ * @param[in] contextSize Size of the context struct.
  *
  * @return BOOTLOADER_OK if success, BOOTLOADER_ERROR_PARSE_CONTEXT if context
  *         struct is too small.
@@ -77,6 +77,7 @@ typedef struct {
 int32_t bootloader_initParser(BootloaderParserContext_t *context,
                               size_t                    contextSize);
 
+#if !defined(SL_TRUSTZONE_NONSECURE)
 /***************************************************************************//**
  * Parse a buffer.
  * @param[in] context   Pointer to the parser context struct.
@@ -93,6 +94,7 @@ int32_t bootloader_parseBuffer(BootloaderParserContext_t   *context,
                                BootloaderParserCallbacks_t *callbacks,
                                uint8_t                     data[],
                                size_t                      numBytes);
+#endif // SL_TRUSTZONE_NONSECURE
 
 /***************************************************************************//**
  * Parse a buffer and get application and bootloader upgrade metadata
@@ -103,17 +105,24 @@ int32_t bootloader_parseBuffer(BootloaderParserContext_t   *context,
  * @param[in]  context           Pointer to the parser context struct.
  * @param[in]  data              Data to be parsed.
  * @param[in]  numBytes          Size of the data buffer.
- * @param[out] appInfo           Pointer to @ref ApplicationData_t struct
+ * @param[out] appInfo           Pointer to @ref ApplicationData_t struct.
  * @param[out] bootloaderVersion Pointer to an integer representing bootloader
- *                               version
+ *                               version.
  *
- * @return @ref BOOTLOADER_OK if metadata was filled successfully
+ * @return @ref BOOTLOADER_OK if metadata was filled successfully.
  ******************************************************************************/
+#if !defined(SL_TRUSTZONE_NONSECURE)
 int32_t bootloader_parseImageInfo(BootloaderParserContext_t *context,
                                   uint8_t                   data[],
                                   size_t                    numBytes,
                                   ApplicationData_t         *appInfo,
                                   uint32_t                  *bootloaderVersion);
+#else
+int32_t bootloader_parseImageInfo(uint8_t                   data[],
+                                  size_t                    numBytes,
+                                  ApplicationData_t         *appInfo,
+                                  uint32_t                  *bootloaderVersion);
+#endif // SL_TRUSTZONE_NONSECURE
 
 /***************************************************************************//**
  * Find the size of the context struct BootloaderParserContext used by the bootloader

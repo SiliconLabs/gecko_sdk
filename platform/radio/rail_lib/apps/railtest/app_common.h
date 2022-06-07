@@ -48,7 +48,7 @@
 
 #include "sl_rail_test_config.h"
 #if SL_RAIL_UTIL_INIT_RADIO_CONFIG_SUPPORT_INST0_ENABLE
-#include "rail_config.h"
+#include "rail_config.h" // If compilation fails here, check the radio configurator output
 #endif
 
 #if defined(SL_CATALOG_IOSTREAM_USART_PRESENT)
@@ -57,6 +57,10 @@
 
 #if defined(SL_CATALOG_IOSTREAM_EUSART_PRESENT)
   #include "sl_iostream_eusart_vcom_config.h"
+#endif
+
+#if defined(SL_CATALOG_RAIL_UTIL_EFF_PRESENT)
+  #include "sl_rail_util_eff_config.h"
 #endif
 
 #ifdef __cplusplus
@@ -140,6 +144,7 @@ extern "C" {
     "SIGNAL_DETECTED",                                                  \
     "IEEE802154_MODESWITCH_START",                                      \
     "IEEE802154_MODESWITCH_END",                                        \
+    "DETECT_RSSI_THRESHOLD",                                            \
   }
 
 // Since channel hopping is pretty space intensive, put some limitations on it
@@ -206,6 +211,9 @@ typedef enum RailAppEventType {
   BEAM_PACKET,
   MULTITIMER,
   AVERAGE_RSSI,
+#if RAIL_IEEE802154_SUPPORTS_G_MODESWITCH && defined(WISUN_MODESWITCHPHRS_ARRAY_SIZE)
+  MODE_SWITCH_CHANGE_CHANNEL,
+#endif
 } RailAppEventType_t;
 
 typedef enum RailRfSenseMode {
@@ -213,6 +221,15 @@ typedef enum RailRfSenseMode {
   RAIL_RFSENSE_MODE_ENERGY_DETECTION,
   RAIL_RFSENSE_MODE_SELECTIVE_OOK,
 } RailRfSenseMode_t;
+
+#if RAIL_IEEE802154_SUPPORTS_G_MODESWITCH && defined(WISUN_MODESWITCHPHRS_ARRAY_SIZE)
+typedef enum ModeSwitchState {
+  IDLE,               /* Not in mode switch*/
+  TX_MS_PACKET,       /* TX device is sending MS packet*/
+  TX_ON_NEW_PHY,      /* TX device is on new PHY during mode switch*/
+  RX_ON_NEW_PHY,      /* RX device is on new PHY during mode switch*/
+} ModeSwitchState_t;
+#endif
 
 typedef struct ZWaveBeamData {
   /**
@@ -288,6 +305,12 @@ typedef struct AverageRssi {
   int16_t rssi;
 } AverageRssi_t;
 
+#if RAIL_IEEE802154_SUPPORTS_G_MODESWITCH && defined(WISUN_MODESWITCHPHRS_ARRAY_SIZE)
+typedef struct ModeSwitchChangeChannel {
+  uint16_t channel;
+} ModeSwitchChangeChannel_t;
+#endif
+
 typedef struct RailAppEvent {
   RailAppEventType_t type;
   union {
@@ -296,6 +319,9 @@ typedef struct RailAppEvent {
     RailEvent_t railEvent;
     Multitimer_t multitimer;
     AverageRssi_t rssi;
+#if RAIL_IEEE802154_SUPPORTS_G_MODESWITCH && defined(WISUN_MODESWITCHPHRS_ARRAY_SIZE)
+    ModeSwitchChangeChannel_t modeSwitchChangeChannel;
+#endif
   };
 } RailAppEvent_t;
 
@@ -430,9 +456,22 @@ extern volatile uint16_t rxDataSourceEventState;
 extern uint8_t logLevel;
 extern uint8_t txData[SL_RAIL_TEST_MAX_PACKET_LENGTH];
 extern uint16_t txDataLen;
+
+#if RAIL_IEEE802154_SUPPORTS_G_MODESWITCH && defined(WISUN_MODESWITCHPHRS_ARRAY_SIZE)
 extern uint8_t txData_2B[2];
 extern uint8_t txCountAfterModeSwitch;
-extern uint16_t modeSwitchChannel;
+extern uint16_t modeSwitchNewChannel;
+extern uint16_t modeSwitchBaseChannel;
+extern ModeSwitchState_t modeSwitchState;
+extern uint32_t modeSwitchDelayUs; // Delay in microseconds before switching back to base PHY after all packets have been transmitted on the new PHY
+#define RX_MODE_SWITCH_DELAY_US (1500) // Default delay on RX side in microseconds
+extern RAIL_MultiTimer_t modeSwitchMultiTimer;
+extern uint32_t modeSwitchSequenceIterations;
+extern uint32_t modeSwitchSequenceId;
+extern uint8_t MSphr[2];
+extern uint8_t txCountAfterModeSwitchId;
+extern bool modeSwitchLifeReturn;
+#endif
 
 extern uint8_t ackData[RAIL_AUTOACK_MAX_LENGTH];
 extern uint8_t ackDataLen;
@@ -483,6 +522,11 @@ extern uint32_t* channelHoppingBuffer;
 // Variable containing current receive frequency offset
 extern RAIL_FrequencyOffset_t rxFreqOffset;
 
+#ifdef SL_RAIL_UTIL_EFF_DEVICE
+// Variable tracking FEM configuration
+extern RAIL_FemProtectionConfig_t femConfig;
+#endif
+
 /**
  * @enum AppMode
  * @brief Enumeration of RAILtest transmit states.
@@ -517,6 +561,13 @@ void sl_rail_test_internal_app_init(void);
 void sl_rail_test_internal_app_process_action(void);
 
 void RAILCb_TimerExpired(RAIL_Handle_t railHandle);
+#if RAIL_IEEE802154_SUPPORTS_G_MODESWITCH && defined(WISUN_MODESWITCHPHRS_ARRAY_SIZE)
+void RAILCb_ModeSwitchMultiTimerExpired(RAIL_MultiTimer_t *tmr,
+                                        RAIL_Time_t expectedTimeOfEvent,
+                                        void *cbArg);
+void restartModeSwitchSequence(void);
+void endModeSwitchSequence(void);
+#endif
 void RAILCb_SwTimerExpired(RAIL_Handle_t railHandle);
 AppMode_t previousAppMode(void);
 AppMode_t currentAppMode(void);
@@ -577,6 +628,7 @@ const char *getStatusMessage(RAIL_Status_t status);
 void disableIncompatibleProtocols(RAIL_PtiProtocol_t newProtocol);
 bool checkRailHandle(char *command);
 bool getRxDutyCycleSchedWakeupEnable(RAIL_Time_t *sleepInterval);
+uint16_t getLikelyChannel(void);
 
 void RAILCb_TxPacketSent(RAIL_Handle_t railHandle, bool isAck);
 void RAILCb_RxPacketAborted(RAIL_Handle_t railHandle);
@@ -593,7 +645,7 @@ void getAddressFilter(sl_cli_command_arg_t *args);
 void printTxPacket(sl_cli_command_arg_t *args);
 void resetCounters(sl_cli_command_arg_t *args);
 void getPti(sl_cli_command_arg_t *args);
-
+void printChipInfo(void);
 #ifdef __cplusplus
 }
 #endif

@@ -60,7 +60,7 @@ source:
       - path: backbone_router/bbr_manager.cpp
       - path: backbone_router/multicast_listeners_table.cpp
       - path: backbone_router/ndproxy_table.cpp
-      - path: border_router/infra_if_platform.cpp
+      - path: border_router/infra_if.cpp
       - path: border_router/router_advertisement.cpp
       - path: border_router/routing_manager.cpp
       - path: coap/coap.cpp
@@ -79,6 +79,7 @@ source:
       - path: crypto/aes_ccm.cpp
       - path: crypto/aes_ecb.cpp
       - path: crypto/ecdsa.cpp
+      - path: crypto/ecdsa_tinycrypt.cpp
       - path: crypto/hkdf_sha256.cpp
       - path: crypto/hmac_sha256.cpp
       - path: crypto/mbedtls.cpp
@@ -100,11 +101,13 @@ source:
       - path: meshcop/dataset_updater.cpp
       - path: meshcop/dtls.cpp
       - path: meshcop/energy_scan_client.cpp
+      - path: meshcop/extended_panid.cpp
       - path: meshcop/joiner.cpp
       - path: meshcop/joiner_router.cpp
       - path: meshcop/meshcop.cpp
       - path: meshcop/meshcop_leader.cpp
       - path: meshcop/meshcop_tlvs.cpp
+      - path: meshcop/network_name.cpp
       - path: meshcop/panid_query_client.cpp
       - path: meshcop/timestamp.cpp
       - path: net/checksum.cpp

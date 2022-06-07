@@ -401,6 +401,8 @@ RAIL_Status_t RAIL_ApplyIrCalibration(RAIL_Handle_t railHandle,
  * determined from a previous run of \ref RAIL_CalibrateIrAlt on the same
  * physical device with the same radio configuration. The imageRejection value
  * will also be stored to the \ref RAIL_ChannelConfigEntry_t::attr, if possible.
+ * @note: To make sure the imageRejection value is stored/configured correctly,
+ * \ref RAIL_ConfigAntenna should be called before calling this API.
  *
  * If multiple protocols are used, this function will return
  * \ref RAIL_STATUS_INVALID_STATE if it is called and the given railHandle is
@@ -453,6 +455,8 @@ RAIL_Status_t RAIL_CalibrateIr(RAIL_Handle_t railHandle,
  * calibration that adds significant code space when run and can be run with a
  * separate firmware image on each device to save code space in the
  * final image.
+ * @note: To make sure the imageRejection value is stored/configured correctly,
+ * \ref RAIL_ConfigAntenna should be called before calling this API.
  *
  * If multiple protocols are used, this function will return
  * \ref RAIL_STATUS_INVALID_STATE if it is called and the given railHandle is
@@ -747,7 +751,7 @@ RAIL_ENUM(RAIL_TxPowerMode_t) {
 };
 
 /**
- * The number of PA's on this chip.
+ * The number of PA's on this chip. (Including Virtual PAs)
  */
 #define RAIL_NUM_PA (3U)
 
@@ -771,7 +775,7 @@ RAIL_ENUM(RAIL_TxPowerMode_t) {
 #define RAIL_TX_POWER_MODE_NAMES {  \
     "RAIL_TX_POWER_MODE_2P4GIG_HP", \
     "RAIL_TX_POWER_MODE_2P4GIG_LP", \
-    "RAIL_TX_POWER_MODE_SUBGIG_HP", \
+    "RAIL_TX_POWER_MODE_SUBGIG",    \
     "RAIL_TX_POWER_MODE_NONE"       \
 }
 
@@ -883,9 +887,9 @@ typedef struct RAIL_PtiConfig {
  * @ingroup RAIL_API
  *
  * The EFR product families have many digital and analog modules that can run
- * in parallel with a radio. Such combinations can result in interference and
- * degradation on the radio RX sensitivity. Retiming have the capability to
- * modify the clocking of the digital modules to reduce such interference.
+ * in parallel with a radio. These combinations can cause interference and
+ * degradation on the radio RX sensitivity. Retiming can
+ * modify the clocking of the digital modules to reduce the interference.
  */
 
 /**
@@ -940,7 +944,7 @@ RAIL_Status_t RAIL_ConfigRetimeOptions(RAIL_Handle_t railHandle,
                                        RAIL_RetimeOptions_t options);
 
 /**
- * Gets currently configured retiming option.
+ * Get the currently configured retiming option.
  *
  * @param[in] railHandle A handle of RAIL instance.
  * @param[out] pOptions A pointer to configured retiming options
@@ -949,6 +953,16 @@ RAIL_Status_t RAIL_ConfigRetimeOptions(RAIL_Handle_t railHandle,
  */
 RAIL_Status_t RAIL_GetRetimeOptions(RAIL_Handle_t railHandle,
                                     RAIL_RetimeOptions_t *pOptions);
+
+/**
+ * Indicate that the DCDC peripheral bus clock enable has changed allowing
+ * RAIL to react accordingly.
+ *
+ * @note This should be called after DCDC has been enabled or disabled.
+ *
+ * @return Status code indicating success of the function call.
+ */
+RAIL_Status_t RAIL_ChangedDcdc(void);
 
 /** @} */ // end of group Retiming_EFR32
 

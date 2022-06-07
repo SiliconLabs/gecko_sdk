@@ -71,6 +71,9 @@ template_file:
 template_contribution:
   - name: component_catalog
     value: zigbee_ncp_framework
+  # The zigbee_ncp catalog entry is used with CPC right now
+  - name: component_catalog
+    value: zigbee_ncp
   - name: event_handler
     value:
       event: stack_init

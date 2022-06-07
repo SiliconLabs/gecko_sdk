@@ -19,6 +19,13 @@
  *  limitations under the License.
  */
 
+#if defined(SL_TRUSTZONE_NONSECURE)
+
+/* The NonSecure app must use the crypto.h from the trusted-firmware-m repo. */
+#include "../../trusted-firmware-m/interface/include/psa/crypto.h"
+
+#else /* SL_TRUSTZONE_NONSECURE */
+
 #ifndef PSA_CRYPTO_H
 #define PSA_CRYPTO_H
 
@@ -153,10 +160,10 @@ static void psa_set_key_id( psa_key_attributes_t *attributes,
  * the owner of a key.
  *
  * \param[out] attributes  The attribute structure to write to.
- * \param owner_id         The key owner identifier.
+ * \param owner            The key owner identifier.
  */
 static void mbedtls_set_key_owner_id( psa_key_attributes_t *attributes,
-                                      mbedtls_key_owner_id_t owner_id );
+                                      mbedtls_key_owner_id_t owner );
 #endif
 
 /** Set the location of a persistent key.
@@ -3017,7 +3024,9 @@ psa_status_t psa_verify_message( mbedtls_svc_key_id_t key,
  * \param key                   Identifier of the key to use for the operation.
  *                              It must be an asymmetric key pair. The key must
  *                              allow the usage #PSA_KEY_USAGE_SIGN_HASH.
- * \param alg                   A signature algorithm that is compatible with
+ * \param alg                   A signature algorithm (PSA_ALG_XXX
+ *                              value such that #PSA_ALG_IS_SIGN_HASH(\p alg)
+ *                              is true), that is compatible with
  *                              the type of \p key.
  * \param[in] hash              The hash or message to sign.
  * \param hash_length           Size of the \p hash buffer in bytes.
@@ -3070,7 +3079,9 @@ psa_status_t psa_sign_hash(mbedtls_svc_key_id_t key,
  *                          must be a public key or an asymmetric key pair. The
  *                          key must allow the usage
  *                          #PSA_KEY_USAGE_VERIFY_HASH.
- * \param alg               A signature algorithm that is compatible with
+ * \param alg               A signature algorithm (PSA_ALG_XXX
+ *                          value such that #PSA_ALG_IS_SIGN_HASH(\p alg)
+ *                          is true), that is compatible with
  *                          the type of \p key.
  * \param[in] hash          The hash or message whose signature is to be
  *                          verified.
@@ -3564,8 +3575,7 @@ psa_status_t psa_key_derivation_input_key(
  * NOTE: this is a Silicon Labs custom API, and is not a part of the official
  * PSA Cryptography specification.
  *
- * This function currently only supports the HKDF algorithm, but it has been
- * future-proofed in order to be able to handle PBKDF2 as well.
+ * This function supports HKDF and PBKDF2.
  *
  * This function obtains its secret input from a key object, and any additional
  * inputs such as buffers and integers. The output of this function is a key
@@ -3582,9 +3592,9 @@ psa_status_t psa_key_derivation_input_key(
  *                                information string. Only used for HKDF, but
  *                                can be omitted.
  * \param info_length             The length of the provided info in bytes.
- * \param[in] salt                A salt value (a non-secret random value). Used
- *                                for both HKDF and PBKDF2, but can be omitted
- *                                for both algorithms.
+ * \param[in] salt                An optional salt value (a non-secret random value).
+ *                                Used for both HKDF and PBKDF2. Recommended for
+ *                                PBKDF2.
  * \param salt_length             The length of the provided salt in bytes.
  * \param iterations              The number of iterations to use. Maximum
  *                                supported value is 16384. Only used for PBKDF2.
@@ -3774,6 +3784,7 @@ psa_status_t psa_key_derivation_output_bytes(
  *   The following key types defined in this specification follow this scheme:
  *
  *     - #PSA_KEY_TYPE_AES;
+ *     - #PSA_KEY_TYPE_ARIA;
  *     - #PSA_KEY_TYPE_CAMELLIA;
  *     - #PSA_KEY_TYPE_DERIVE;
  *     - #PSA_KEY_TYPE_HMAC;
@@ -4199,3 +4210,5 @@ psa_status_t psa_generate_key(const psa_key_attributes_t *attributes,
 #include "crypto_extra.h"
 
 #endif /* PSA_CRYPTO_H */
+
+#endif /* SL_TRUSTZONE_NONSECURE */

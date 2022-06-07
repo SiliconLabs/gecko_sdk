@@ -14,7 +14,5 @@ requires:
 provides:
   - name: "bluetooth_feature_nvm"
 template_contribution:
-  - name: bluetooth_bgapi_class
-    value:
-      class: "nvm"
-    priority: 8
+  - name: component_catalog
+    value: bluetooth_feature_nvm

@@ -22,3 +22,7 @@ define:
   - name: _LZMA_SIZE_OPT
 provides:
   - name: bootloader_compression_lzma
+  - name: bootloader_nonsecure_incompatible
+    condition: [bootloader_core_nonsecure]
+  - name: bootloader_secure_incompatible
+    condition: [bootloader_core_secure]

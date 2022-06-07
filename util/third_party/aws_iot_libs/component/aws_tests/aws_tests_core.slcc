@@ -39,6 +39,8 @@ include:
       - path: aws_test_utils.h
       - path: aws_unity_config.h
       - path: iot_config_common.h
+      - path: aws_clientcredential.h
+      - path: aws_clientcredential_keys.h
 
 define:
   - name: UNITY_EXCLUDE_STDIO_H

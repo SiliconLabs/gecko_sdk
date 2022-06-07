@@ -12,14 +12,7 @@
   - path: platform/Device/SiliconLabs/EFM32WG/Source/system_efm32wg.c
     unless:
     - device_content_override
-  - condition:
-    - toolchain_iar
-    path: platform/Device/SiliconLabs/EFM32WG/Source/IAR/startup_efm32wg.c
-    unless:
-    - device_content_override
-  - condition:
-    - toolchain_gcc
-    path: platform/Device/SiliconLabs/EFM32WG/Source/GCC/startup_efm32wg.c
+  - path: platform/Device/SiliconLabs/EFM32WG/Source/startup_efm32wg.c
     unless:
     - device_content_override
   - condition:
@@ -196,3 +189,16 @@
     - custom_radio_config
     directory: rail
     path: platform/Device/config/74/device.yaml
+- metadata:
+    device:
+      memory:
+      - name: Main Flash
+        page_size: 2048
+        size: 262144
+        start: 0
+        type: non-volatile
+      - name: RAM
+        size: 32768
+        start: 536870912
+        type: volatile
+      opn: efm32wg380f256

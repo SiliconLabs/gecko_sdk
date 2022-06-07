@@ -59,6 +59,10 @@ typedef struct {
 } BootloaderStorageSlot_t;
 
 /// Information about the bootloader storage implementation
+/// <b>Note:</b> From Gecko Bootloader version >= 2.1,
+/// the pointer <b>partType</b> will only contain a zero value.
+/// The <b>partType</b> variable can be used to find information
+/// about the attached storage.
 typedef struct {
   /// The version of this data structure
   uint16_t version;
@@ -76,6 +80,8 @@ typedef struct {
   char *partDescription;
   /// The number of bytes in a word for the storage
   uint8_t wordSizeBytes;
+  /// Value representing the attached storage
+  uint32_t partType;
 } BootloaderStorageImplementationInformation_t;
 
 /// Information about the bootloader storage \n
@@ -163,13 +169,13 @@ typedef struct BootloaderStorageFunctions {
 
 /// Context size for bootloader verification context
 #if defined(_SILICON_LABS_32B_SERIES_2)
-#define BOOTLOADER_STORAGE_VERIFICATION_CONTEXT_SIZE            (556)
+#define BOOTLOADER_STORAGE_VERIFICATION_CONTEXT_SIZE            (568)
 #else
 #define BOOTLOADER_STORAGE_VERIFICATION_CONTEXT_SIZE            (384)
 #endif
 
 /// Current version of the BootloaderStorageInformation_t struct
-#define BOOTLOADER_STORAGE_INFO_VERSION                         (0x20000U)
+#define BOOTLOADER_STORAGE_INFO_VERSION                         (0x30000U)
 /// Current version of the BootloaderStorageImplementationInformation_t struct
 #define BOOTLOADER_STORAGE_IMPL_INFO_VERSION                    (0x0201U)
 /// Major version of the BootloaderStorageImplementationInformation_t struct
@@ -186,6 +192,57 @@ typedef struct BootloaderStorageFunctions {
 #define BOOTLOADER_STORAGE_IMPL_CAPABILITY_BLOCKING_WRITE       (1 << 2)
 /// Spiflash capability indicating that the erase function is blocking
 #define BOOTLOADER_STORAGE_IMPL_CAPABILITY_BLOCKING_ERASE       (1 << 3)
+
+/// ISSI IS25LQ040B SPI Flash
+#define BOOTLOADER_STORAGE_ISSI_IS25LQ040B       (1 << 0)
+/// ISSI IS25LQ020B SPI Flash
+#define BOOTLOADER_STORAGE_ISSI_IS25LQ020B       (1 << 1)
+/// ISSI IS25LQ010B SPI Flash
+#define BOOTLOADER_STORAGE_ISSI_IS25LQ010B       (1 << 2)
+/// ISSI IS25LQ512B SPI Flash
+#define BOOTLOADER_STORAGE_ISSI_IS25LQ512B       (1 << 3)
+/// ISSI IS25LQ025B SPI Flash
+#define BOOTLOADER_STORAGE_ISSI_IS25LQ025B       (1 << 4)
+/// Numonyx M25P16 SPI Flash
+#define BOOTLOADER_STORAGE_NUMONYX_M25P16        (1 << 5)
+/// Numonyx M25P80 SPI Flash
+#define BOOTLOADER_STORAGE_NUMONYX_M25P80        (1 << 6)
+/// Numonyx M25P40 SPI Flash
+#define BOOTLOADER_STORAGE_NUMONYX_M25P40        (1 << 7)
+/// Numonyx M25P20 SPI Flash
+#define BOOTLOADER_STORAGE_NUMONYX_M25P20        (1 << 8)
+/// Adesto AT25SF041 SPI Flash
+#define BOOTLOADER_STORAGE_ADESTO_AT25SF041      (1 << 9)
+/// Atmel AT25DF081A SPI Flash
+#define BOOTLOADER_STORAGE_ATMEL_AT25DF081A      (1 << 10)
+/// Atmel AT25DF041A SPI Flash
+#define BOOTLOADER_STORAGE_ATMEL_AT25DF041A      (1 << 11)
+/// Macronix MX25R6435F SPI Flash
+#define BOOTLOADER_STORAGE_MACRONIX_MX25R6435F   (1 << 12)
+/// Macronix MX25R6435F SPI Flash
+#define BOOTLOADER_STORAGE_MACRONIX_MX25R3235F   (1 << 13)
+/// Macronix MX25U1635E SPI Flash
+#define BOOTLOADER_STORAGE_MACRONIX_MX25U1635E   (1 << 14)
+/// Macronix MX25L1606E SPI Flash
+#define BOOTLOADER_STORAGE_MACRONIX_MX25L1606E   (1 << 15)
+/// Macronix MX25R8035F SPI Flash
+#define BOOTLOADER_STORAGE_MACRONIX_MX25R8035F   (1 << 16)
+/// Macronix MX25L8006E SPI Flash
+#define BOOTLOADER_STORAGE_MACRONIX_MX25L8006E   (1 << 17)
+/// Macronix MX25L4006E SPI Flash
+#define BOOTLOADER_STORAGE_MACRONIX_MX25L4006E   (1 << 18)
+/// Macronix MX25L2006E SPI Flash
+#define BOOTLOADER_STORAGE_MACRONIX_MX25L2006E   (1 << 19)
+/// Winbond W25Q80BV SPI Flash
+#define BOOTLOADER_STORAGE_WINBOND_W25Q80BV      (1 << 20)
+/// Winbond W25X20BV SPI Flash
+#define BOOTLOADER_STORAGE_WINBOND_W25X20BV      (1 << 21)
+/// Spansion S25L208K SPI Flash
+#define BOOTLOADER_STORAGE_SPANSION_S25FL208K    (1 << 22)
+/// Internal storage
+#define BOOTLOADER_STORAGE_INTERNAL_STORAGE      (1 << 30)
+/// JEDEC Supported SPI Flash
+#define BOOTLOADER_STORAGE_JEDEC                 (1 << 31)
 
 // -----------------------------------------------------------------------------
 // Functions
@@ -394,9 +451,13 @@ int32_t bootloader_setImageToBootload(int32_t slotId);
  * @return @ref BOOTLOADER_OK if the image parser was initialized, else error
  *         code.
  ******************************************************************************/
+#if !defined(SL_TRUSTZONE_NONSECURE)
 int32_t bootloader_initVerifyImage(uint32_t slotId,
                                    void     *context,
                                    size_t   contextSize);
+#else
+int32_t bootloader_initVerifyImage(uint32_t slotId);
+#endif // SL_TRUSTZONE_NONSECURE
 
 /***************************************************************************//**
  * Continue image verification.
@@ -430,8 +491,12 @@ int32_t bootloader_initVerifyImage(uint32_t slotId,
  *         the parser has successfully parsed the image and it passes
  *         verification. Else error code.
  ******************************************************************************/
+#if !defined(SL_TRUSTZONE_NONSECURE)
 int32_t bootloader_continueVerifyImage(void                       *context,
                                        BootloaderParserCallback_t metadataCallback);
+#else
+int32_t bootloader_continueVerifyImage(void);
+#endif // SL_TRUSTZONE_NONSECURE
 
 /***************************************************************************//**
  * Verify that the image in the given storage slot is valid.
@@ -450,8 +515,12 @@ int32_t bootloader_continueVerifyImage(void                       *context,
  *
  * @return @ref BOOTLOADER_OK if the image is valid, else error code.
  ******************************************************************************/
+#if !defined(SL_TRUSTZONE_NONSECURE)
 int32_t bootloader_verifyImage(uint32_t                   slotId,
                                BootloaderParserCallback_t metadataCallback);
+#else
+int32_t bootloader_verifyImage(uint32_t slotId);
+#endif // SL_TRUSTZONE_NONSECURE
 
 /***************************************************************************//**
  * Get application and bootloader upgrade metadata from the storage slot.
@@ -474,6 +543,7 @@ int32_t bootloader_getImageInfo(uint32_t          slotId,
  ******************************************************************************/
 bool bootloader_storageIsBusy(void);
 
+#if !defined(SL_TRUSTZONE_NONSECURE)
 /***************************************************************************//**
  * Read raw data from storage.
  *
@@ -521,12 +591,14 @@ int32_t bootloader_writeRawStorage(uint32_t address,
  *         @ref BOOTLOADER_ERROR_STORAGE_BASE range
  ******************************************************************************/
 int32_t bootloader_eraseRawStorage(uint32_t address, size_t length);
+#endif // !SL_TRUSTZONE_NONSECURE
 
 /***************************************************************************//**
  * Get allocated DMA channel for MSC write.
  *
  * @return A positive number channel. -1 if DMA-based MSC write
- *         is not enabled. Otherwise, an error code.
+ *         is not enabled. Otherwise, the error code
+ *         BOOTLOADER_ERROR_INIT_STORAGE.
  ******************************************************************************/
 int32_t bootloader_getAllocatedDMAChannel(void);
 

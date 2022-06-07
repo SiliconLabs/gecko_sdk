@@ -245,7 +245,7 @@ static void set_leds(int32_t temp)
     sl_led_turn_off(&sl_led_led1);
     printf("Turning LED0 on!\r\n");
   } else if (temp < low_limit) {
-    // For higher temperature, turn led1 on and turn led0 off
+    // For lower temperature, turn led1 on and turn led0 off
     sl_led_turn_off(&sl_led_led0);
     sl_led_turn_on(&sl_led_led1);
     printf("Turning LED1 on!\r\n");

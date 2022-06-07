@@ -63,16 +63,6 @@ extern "C"
 
 /***************************************************************************/ /**
  * @addtogroup cpc CPC
- * @brief CPC
- * @details
- * ## Overview
- *
- *   TODO
- *
- * ## Initialization
- *
- *   TODO
- *
  * @{
  ******************************************************************************/
 
@@ -106,135 +96,157 @@ SL_ENUM(sl_cpc_endpoint_state_t){
 
 /// @brief Enumeration representing the possible configurable options for an endpoint.
 SL_ENUM(sl_cpc_endpoint_option_t){
-  SL_CPC_ENDPOINT_ON_IFRAME_RECEIVE = 0,     ///< Option: iframe receive
-  SL_CPC_ENDPOINT_ON_IFRAME_RECEIVE_ARG,     ///< Option: iframe receive argument
-  SL_CPC_ENDPOINT_ON_UFRAME_RECEIVE,         ///< Option: uframe receive
-  SL_CPC_ENDPOINT_ON_UFRAME_RECEIVE_ARG,     ///< Option: uframe receive argument
-  SL_CPC_ENDPOINT_ON_IFRAME_WRITE_COMPLETED, ///< Option: iframe write completed
-  SL_CPC_ENDPOINT_ON_UFRAME_WRITE_COMPLETED, ///< Option: uframe write completed
-  SL_CPC_ENDPOINT_ON_POLL,                   ///< Option: on poll
-  SL_CPC_ENDPOINT_ON_POLL_ARG,               ///< Option: on poll argument
-  SL_CPC_ENDPOINT_ON_FINAL,                  ///< Option: on final
-  SL_CPC_ENDPOINT_ON_FINAL_ARG,              ///< Option: on final argument
-  SL_CPC_ENDPOINT_ON_ERROR,                  ///< Option: on error
-  SL_CPC_ENDPOINT_ON_ERROR_ARG,              ///< Option: on error argument
+  SL_CPC_ENDPOINT_ON_IFRAME_RECEIVE = 0,     ///< Set callback for iframe received notification
+  SL_CPC_ENDPOINT_ON_IFRAME_RECEIVE_ARG,     ///< Set callback argument for iframe received notification
+  SL_CPC_ENDPOINT_ON_IFRAME_WRITE_COMPLETED, ///< Set callback for write complete notification
+  SL_CPC_ENDPOINT_ON_ERROR,                  ///< Set callback for error notification
+  SL_CPC_ENDPOINT_ON_ERROR_ARG,              ///< Set callback argument for error notification
+  // Private options
+  SL_CPC_ENDPOINT_ON_UFRAME_RECEIVE,
+  SL_CPC_ENDPOINT_ON_UFRAME_RECEIVE_ARG,
+  SL_CPC_ENDPOINT_ON_UFRAME_WRITE_COMPLETED,
+  SL_CPC_ENDPOINT_ON_POLL,
+  SL_CPC_ENDPOINT_ON_POLL_ARG,
+  SL_CPC_ENDPOINT_ON_FINAL,
+  SL_CPC_ENDPOINT_ON_FINAL_ARG,
 };
 
-// S-frame: Supervisory frames are used for flow and error control; Always required
-// I-frame: Information frames are used to transfert data that is guarranteed to be received by the other side; Include retransmisttion and acknolegment
-// U-frame: Un-numberred frames are used to transmit miscellaneous information without retransmission and acknowledgement services.
-#define SL_CPC_OPEN_ENDPOINT_FLAG_NONE              0           // I-frame enabled and u-frame disabled; s-frame are always required and can be disabled.
+#define SL_CPC_OPEN_ENDPOINT_FLAG_NONE              0
 
+/***************************************************************************//**
+ * Typedef for the user - supplied callback function which is called when
+ * CPC is done with the provided buffer.
+ *
+ * @param endpoint_id   Endpoint ID
+ *
+ * @param buffer  Pointer to data buffer.
+ *
+ * @param arg   Transaction user's argument.
+ *
+ * @param status  Status indicating the transaction result:
+ *                  SL_STATUS_OK  Remote should have receive the frame
+ *                  SL_STATUS_TRANSMIT_INCOMPLETE Remote has not received the frame.
+ ******************************************************************************/
 typedef void (*sl_cpc_on_write_completed_t)(sl_cpc_user_endpoint_id_t endpoint_id,
                                             void *buffer,
                                             void *arg,
                                             sl_status_t status);
 
+/***************************************************************************//**
+ * Typedef for the user - supplied callback function which is called when
+ * CPC receive data on an endpoint.
+ *
+ * @param endpoint_id   Endpoint ID
+ *
+ * @param arg   User-specific argument .
+ ******************************************************************************/
 typedef void (*sl_cpc_on_data_reception_t)(uint8_t endpoint_id, void *arg);
 
+/***************************************************************************//**
+ * Typedef for the user-supplied callback function which is called when
+ * CPC detects a fatal error on an endpoint.
+ *
+ * @param endpoint_id   Endpoint ID
+ *
+ * @param arg   User-specific argument .
+ ******************************************************************************/
 typedef void (*sl_cpc_on_error_callback_t)(uint8_t endpoint_id, void *arg);
-
-typedef void (*sl_cpc_on_poll_t)(uint8_t endpoint_id, void *arg,
-                                 void *poll_data, uint32_t poll_data_length,    // Rx buffer is freed once this on_poll function return
-                                 void **reply_data, uint32_t *reply_data_lenght,
-                                 void **on_write_complete_arg);
-
-typedef void (*sl_cpc_on_final_t)(uint8_t endpoint_id, void *arg, void *answer, uint32_t answer_lenght);
 
 /// @brief Struct representing an CPC endpoint handle.
 typedef struct {
-  void *ep;
-  uint8_t id;
-  uint32_t ref_count;
+  void *ep;           ///< Endpoint object; Do not touch
+  uint8_t id;         ///< Endpoint ID; Do not touch
+  uint32_t ref_count; ///< Endpoint reference counter; Do not touch
 } sl_cpc_endpoint_handle_t;
 
 /// @brief Struct representing CPC Core debug stats.
 typedef struct {
-  uint32_t rxd_packet;
-  uint32_t rxd_data_frame;
-  uint32_t rxd_data_frame_queued;
-  uint32_t rxd_data_frame_dropped;
+  uint32_t rxd_packet;                            ///< Number of packet received
+  uint32_t rxd_data_frame;                        ///< Number of frame with payload (dataframe);
+  uint32_t rxd_data_frame_queued;                 ///< Number of dataframe with data queued
+  uint32_t rxd_data_frame_dropped;                ///< Number of dataframe with data dropped
 
-  uint32_t rxd_supervisory_frame;
-  uint32_t rxd_supervisory_frame_processed;
-  uint32_t rxd_supervisory_frame_dropped;
+  uint32_t rxd_supervisory_frame;                 ///< Number of supervisory frame received
+  uint32_t rxd_supervisory_frame_processed;       ///< Number of supervisory frame processed
+  uint32_t rxd_supervisory_frame_dropped;         ///< Number of supervisory frame dropped
 
-  uint32_t rxd_unnumbered_frame;
-  uint32_t rxd_unnumbered_frame_processed;
-  uint32_t rxd_unnumbered_frame_dropped;
+  uint32_t rxd_unnumbered_frame;                  ///< Number of unnumbered frame received
+  uint32_t rxd_unnumbered_frame_processed;        ///< Number of unnumbered frame processed
+  uint32_t rxd_unnumbered_frame_dropped;          ///< Number of unnumbered frame dropped
 
-  uint32_t rxd_duplicate_data_frame;
-  uint32_t rxd_ack;
-  uint32_t rxd_reject_destination_unreachable;
-  uint32_t rxd_reject_seq_mismatch;
-  uint32_t rxd_reject_checksum_mismatch;
-  uint32_t rxd_reject_security_issue;
-  uint32_t rxd_reject_out_of_memory;
-  uint32_t rxd_reject_fault;
+  uint32_t rxd_duplicate_data_frame;              ///< Number of duplicate dataframe received
+  uint32_t rxd_ack;                               ///< Number of ACK supervisory-frame received
+  uint32_t rxd_reject_destination_unreachable;    ///< Number of destination unreachable supervisory-frame received
+  uint32_t rxd_reject_seq_mismatch;               ///< Number of out of order supervisory-frame received
+  uint32_t rxd_reject_checksum_mismatch;          ///< Number of checksum error supervisory-frame received
+  uint32_t rxd_reject_security_issue;             ///< Number of security issue supervisory-frame received
+  uint32_t rxd_reject_out_of_memory;              ///< Number of out of memorry supervisory-frame received
+  uint32_t rxd_reject_fault;                      ///< Number of fault supervisory-frame received
 
-  uint32_t txd_data_frame;
-  uint32_t txd_ack;
-  uint32_t txd_reject_destination_unreachable;
-  uint32_t txd_reject_seq_mismatch;
-  uint32_t txd_reject_checksum_mismatch;
-  uint32_t txd_reject_security_issue;
-  uint32_t txd_reject_out_of_memory;
-  uint32_t txd_reject_fault;
+  uint32_t txd_data_frame;                        ///< Number of dataframe transmitted
+  uint32_t txd_ack;                               ///< Number of ACK supervisory-frame transmitted
+  uint32_t txd_reject_destination_unreachable;    ///< Number of destination unreachable supervisory-frame transmitted
+  uint32_t txd_reject_seq_mismatch;               ///< Number of out of order supervisory-frame transmitted
+  uint32_t txd_reject_checksum_mismatch;          ///< Number of checksum error supervisory-frame transmitted
+  uint32_t txd_reject_security_issue;             ///< Number of security issue supervisory-frame transmitted
+  uint32_t txd_reject_out_of_memory;              ///< Number of out of memorry supervisory-frame transmitted
+  uint32_t txd_reject_fault;                      ///< Number of fault supervisory-frame transmitted
 
-  uint32_t retxd_data_frame;
+  uint32_t retxd_data_frame;                      ///< Number of dataframe retransmitted
 
-  uint32_t frame_transmit_submitted;
-  uint32_t frame_transmit_completed;
-  uint32_t data_frame_transmit_completed;
-  uint32_t supervisory_frame_transmit_completed;
+  uint32_t frame_transmit_submitted;              ///< Number of frame submitted to the driver
+  uint32_t frame_transmit_completed;              ///< Number of frame confirmed sent by the driver
+  uint32_t data_frame_transmit_completed;         ///< Number of dataframe-frame confirmed sent by the driver
+  uint32_t supervisory_frame_transmit_completed;  ///< Number of supervisory-frame confirmed sent by the driver
 } sl_cpc_endpoint_debug_counters_t;
 
 /// @brief Struct representing CPC Core debug counters.
 typedef struct {
-  uint32_t endpoint_opened;
-  uint32_t endpoint_closed;
-  uint32_t rxd_frame;
-  uint32_t rxd_valid_iframe;
-  uint32_t rxd_valid_uframe;
-  uint32_t rxd_valid_sframe;
-  uint32_t rxd_data_frame_dropped;
-  uint32_t txd_reject_destination_unreachable;
-  uint32_t txd_reject_error_fault;
-  uint32_t txd_completed;
-  uint32_t retxd_data_frame;
-  uint32_t driver_error;
-  uint32_t driver_packet_dropped;
-  uint32_t invalid_header_checksum;
-  uint32_t invalid_payload_checksum;
+  uint32_t endpoint_opened;                     ///< Number of endpoint opened
+  uint32_t endpoint_closed;                     ///< Number of endpoint closed
+  uint32_t rxd_frame;                           ///< Total number of frame received
+  uint32_t rxd_valid_iframe;                    ///< Total number of i-frame received
+  uint32_t rxd_valid_uframe;                    ///< Total number of u-frame received
+  uint32_t rxd_valid_sframe;                    ///< Total number of s-frame received
+  uint32_t rxd_data_frame_dropped;              ///< Total number of frame dropped
+  uint32_t txd_reject_destination_unreachable;  ///< Total number of unreachable destination transmisted
+  uint32_t txd_reject_error_fault;              ///< Total number of fault transmisted
+  uint32_t txd_completed;                       ///< Total number of frame confirmed sent by the driver
+  uint32_t retxd_data_frame;                    ///< Total number of dataframe retransmission
+  uint32_t driver_error;                        ///< Total number of error reported by the driver
+  uint32_t driver_packet_dropped;               ///< Total number of frame dropped by the driver
+  uint32_t invalid_header_checksum;             ///< Total number of frame received with invalid header checksum
+  uint32_t invalid_payload_checksum;            ///< Total number of frame received with invalid frame checksum
 } sl_cpc_core_debug_counters_t;
 
 /// @brief Struct representing a memory pool handle.
 typedef struct sl_cpc_mem_pool_handle_t {
-  void *pool_handle;
-  uint32_t used_block_cnt;
+  void *pool_handle;            ///< Pool handle; Do not touch
+  uint32_t used_block_cnt;      ///< Number of block in use
 } sl_cpc_mem_pool_handle_t;
 
 /// @brief Struct representing a memory pool debug.
 typedef struct {
-  sl_cpc_mem_pool_handle_t *buffer_handle;
-  sl_cpc_mem_pool_handle_t *hdlc_header;
-  sl_cpc_mem_pool_handle_t *hdlc_reject;
-  sl_cpc_mem_pool_handle_t *rx_buffer;
-  sl_cpc_mem_pool_handle_t *endpoint;
-  sl_cpc_mem_pool_handle_t *rx_queue_item;
-  sl_cpc_mem_pool_handle_t *tx_queue_item;
-  sl_cpc_mem_pool_handle_t *endpoint_closed_arg_item;
-  sl_cpc_mem_pool_handle_t *system_command;
+  sl_cpc_mem_pool_handle_t *buffer_handle;            ///< Buffer handle object memory pool usage
+  sl_cpc_mem_pool_handle_t *hdlc_header;              ///< HDLC object memory pool usage
+  sl_cpc_mem_pool_handle_t *hdlc_reject;              ///< HDLC reject object  memory pool usage
+  sl_cpc_mem_pool_handle_t *rx_buffer;                ///< RX buffer memory pool usage
+  sl_cpc_mem_pool_handle_t *endpoint;                 ///< Endpoint object memory pool usage
+  sl_cpc_mem_pool_handle_t *rx_queue_item;            ///< RX queue object memory pool usage
+  sl_cpc_mem_pool_handle_t *tx_queue_item;            ///< TX queue object memory pool usage
+  sl_cpc_mem_pool_handle_t *endpoint_closed_arg_item; ///< Endpoint closing object memory pool usage
+  sl_cpc_mem_pool_handle_t *system_command;           ///< System endpoint object memory pool usage
 } sl_cpc_debug_memory_t;
 
+/// @brief Struct representing a core debug
 #if ((SL_CPC_DEBUG_CORE_EVENT_COUNTERS == 1) \
   || (SL_CPC_DEBUG_MEMORY_ALLOCATOR_COUNTERS == 1))
 typedef struct {
 #if (SL_CPC_DEBUG_MEMORY_ALLOCATOR_COUNTERS == 1)
-  sl_cpc_debug_memory_t memory_pool;
+  sl_cpc_debug_memory_t memory_pool;            ///< Memory pools usage
 #endif
 #if (SL_CPC_DEBUG_CORE_EVENT_COUNTERS == 1)
-  sl_cpc_core_debug_counters_t core_counters;
+  sl_cpc_core_debug_counters_t core_counters;   ///< Core debug counters
 #endif
 } sl_cpc_core_debug_t;
 #endif
@@ -244,11 +256,12 @@ typedef struct {
 
 #define SL_CPC_FLAG_NO_BLOCK    0x01
 
-#define SL_CPC_APP_DATA_MAX_LENGTH  2048u
+#define SL_CPC_APP_DATA_MAX_LENGTH  (4087)
 
-#define SL_CPC_TRANSMIT_WINDOW_MIN_SIZE  1u
-#define SL_CPC_TRANSMIT_WINDOW_MAX_SIZE  1u
+#define SL_CPC_TRANSMIT_WINDOW_MIN_SIZE  1
+#define SL_CPC_TRANSMIT_WINDOW_MAX_SIZE  1
 
+/// @brief Global variable that contains the core debug information
 #if ((SL_CPC_DEBUG_CORE_EVENT_COUNTERS == 1) \
   || (SL_CPC_DEBUG_MEMORY_ALLOCATOR_COUNTERS == 1))
 extern sl_cpc_core_debug_t sl_cpc_core_debug;
@@ -260,29 +273,29 @@ extern sl_cpc_core_debug_t sl_cpc_core_debug;
 /***************************************************************************/ /**
  * Initialize CPC module.
  *
- * @return Status code
+ * @return Status code.
  ******************************************************************************/
 sl_status_t sl_cpc_init(void);
 
 /***************************************************************************/ /**
- *  The baremetal process action function.
+ *  The bare metal process action function.
  ******************************************************************************/
 #if !defined(SL_CATALOG_KERNEL_PRESENT)
 void sl_cpc_process_action(void);
 #endif
 
 /***************************************************************************/ /**
- * Open endpoint
+ * Open user endpoint.
  *
- * @param[in] endpoint_handle  Endpoint handle
+ * @param[in] endpoint_handle  Endpoint handle.
  *
- * @param[in] id  Endpoint ID
+ * @param[in] id  Endpoint ID [90 to 99].
  *
- * @param[in] flags   Endpoint type flags
+ * @param[in] flags   Endpoint type flags.
  *
- * @param[in] tx_window_size  Transmit window size
+ * @param[in] tx_window_size  Transmit window size.
  *
- * @return Status code
+ * @return Status code.
  ******************************************************************************/
 sl_status_t sl_cpc_open_user_endpoint(sl_cpc_endpoint_handle_t *endpoint_handle,
                                       sl_cpc_user_endpoint_id_t id,
@@ -290,45 +303,26 @@ sl_status_t sl_cpc_open_user_endpoint(sl_cpc_endpoint_handle_t *endpoint_handle,
                                       uint8_t tx_window_size);
 
 /***************************************************************************/ /**
- * Set endpoint option
+ * Set endpoint option.
  *
- * @param[in] endpoint_handle  Endpoint handle
+ * @param[in] endpoint_handle  Endpoint handle.
  *
- * @param[in] option  Endpoint Option to set
+ * @param[in] option  Endpoint Option.
  *
- * @param[in] value   Option value
+ * @param[in] value   Pointer to the option value.
  *
- * @return Status code
+ * @return Status code.
  *
- * @note Options are as follow:
+ * @note Public options are:
  *
  * SL_CPC_ENDPOINT_ON_IFRAME_RECEIVE: Set an on iframe receive callback.
  *                                    value is a sl_cpc_on_data_reception_t type.
  *
  * SL_CPC_ENDPOINT_ON_IFRAME_RECEIVE_ARG: Set an on iframe receive argument.
  *
- * SL_CPC_ENDPOINT_ON_UFRAME_RECEIVE: Set an on uframe receive callback.
- *                                    value is a sl_cpc_on_data_reception_t type.
- *
- * SL_CPC_ENDPOINT_ON_UFRAME_RECEIVE_ARG: Set an on uframe receive argument.
- *
  * SL_CPC_ENDPOINT_ON_IFRAME_WRITE_COMPLETED: Set an on iframe write completed
  *                                            callback. value is a
  *                                            sl_cpc_on_write_completed_t type.
- *
- * SL_CPC_ENDPOINT_ON_UFRAME_WRITE_COMPLETED: Set an on uframe write completed
- *                                            callback. value is a
- *                                            sl_cpc_on_write_completed_t type.
- *
- * SL_CPC_ENDPOINT_ON_POLL: Set an on poll callback. value is a sl_cpc_on_poll_t
- *                          type.
- *
- * SL_CPC_ENDPOINT_ON_POLL_ARG: Set an on poll callback argument.
- *
- * SL_CPC_ENDPOINT_ON_FINAL: Set an on final callback. value is a
- *                           sl_cpc_on_final_t type.
- *
- * SL_CPC_ENDPOINT_ON_FINAL_ARG: Set an on final callback argument.
  *
  * SL_CPC_ENDPOINT_ON_ERROR: Set an on error callback. value is a
  *                           sl_cpc_on_error_callback_t type.
@@ -340,20 +334,20 @@ sl_status_t sl_cpc_set_endpoint_option(sl_cpc_endpoint_handle_t *endpoint_handle
                                        void *value);
 
 /***************************************************************************/ /**
- * Close endpoint
+ * Close endpoint.
  *
- * @param[in] endpoint_handle  Endpoint handle
+ * @param[in] endpoint_handle  Endpoint handle.
  *
- * @return Status code
+ * @return Status code.
  ******************************************************************************/
 sl_status_t sl_cpc_close_endpoint(sl_cpc_endpoint_handle_t *endpoint_handle);
 
 /***************************************************************************/ /**
- * Abort read
+ * Abort read; Allow unblockling task in blocked by a read.
  *
- * @param[in] endpoint_handle   Endpoint handle
+ * @param[in] endpoint_handle   Endpoint handle.
  *
- * @return Status code
+ * @return Status code.
  *
  * @note This function can be called from an ISR.
  ******************************************************************************/
@@ -362,18 +356,18 @@ sl_status_t sl_cpc_abort_read(sl_cpc_endpoint_handle_t *endpoint_handle);
 #endif
 
 /***************************************************************************/ /**
- * Read Data
+ * Read data.
  *
- * @param[in] endpoint_handle   Endpoint handle
+ * @param[in] endpoint_handle   Endpoint handle.
  * @param[out] data             Address of the variable that will receive the data pointer.
  * @param[out] data_length      Length of the data contained in the buffer.
- * @param[in] timeout           Timeout in ticks for the read operation. (Requires RTOS)
+ * @param[in] timeout           Timeout in ticks for the read operation. (Requires RTOS).
  *                              Note: No effect if SL_CPC_FLAG_NO_BLOCK is provided as a flag
- * @param[in] flags             Optional flags. i.g. SL_CPC_FLAG_NO_BLOCK
+ * @param[in] flags             Optional flags. i.g. SL_CPC_FLAG_NO_BLOCK.
  *                              Note: SL_CPC_FLAG_NO_BLOCK will cause the function to return
- *                                    SL_STATUS_EMPTY on baremetal applications
+ *                                    SL_STATUS_EMPTY on kernel applications
  *
- * @return Status code
+ * @return Status code.
  ******************************************************************************/
 sl_status_t sl_cpc_read(sl_cpc_endpoint_handle_t *endpoint_handle,
                         void **data,
@@ -382,15 +376,15 @@ sl_status_t sl_cpc_read(sl_cpc_endpoint_handle_t *endpoint_handle,
                         uint8_t flags);
 
 /***************************************************************************/ /**
- * Write Data
+ * Write data.
  *
- * @param[in] endpoint_handle   Endpoint handle
+ * @param[in] endpoint_handle   Endpoint handle.
  * @param[in] data              Pointer to data buffer.
  * @param[in] data_length       Length of the data contained in the buffer.
  * @param[in] flags             Optional flags.
  * @param[in] on_write_completed_arg  Argument that will be passed to on_write_completed().
  *
- * @return Status code
+ * @return Status code.
  *
  * @note This function cannot be called from an ISR.
  ******************************************************************************/
@@ -401,11 +395,11 @@ sl_status_t sl_cpc_write(sl_cpc_endpoint_handle_t *endpoint_handle,
                          void *on_write_completed_arg);
 
 /***************************************************************************/ /**
- * Get endpoint state
+ * Get endpoint state.
  *
- * @param[in] endpoint_handle   Endpoint handle
+ * @param[in] endpoint_handle   Endpoint handle.
  *
- * @return Endpoint state
+ * @return Endpoint state.
  ******************************************************************************/
 sl_cpc_endpoint_state_t sl_cpc_get_endpoint_state(sl_cpc_endpoint_handle_t *endpoint_handle);
 
@@ -414,25 +408,16 @@ sl_cpc_endpoint_state_t sl_cpc_get_endpoint_state(sl_cpc_endpoint_handle_t *endp
  *
  * @param[in] data  Pointer to data buffer to free.
  *
- * @return Status code
+ * @return Status code.
  ******************************************************************************/
 sl_status_t sl_cpc_free_rx_buffer(void *data);
 
-/***************************************************************************/ /**
- * Determines if CPC is ok to enter sleep mode.
- *
- * @return true if no CPC actions to process. False otherwise.
- ******************************************************************************/
+// -----------------------------------------------------------------------------
+// Internal Prototypes only to be used by Power Manager module.
 #if !defined(SL_CATALOG_KERNEL_PRESENT) && defined(SL_CATALOG_POWER_MANAGER_PRESENT)
 bool sl_cpc_is_ok_to_sleep(void);
 #endif
 
-/***************************************************************************//**
- * Determines if CPC is ok to return to sleep mode on ISR exit.
- *
- * @return SL_POWER_MANAGER_IGNORE if no CPC actions to process.
- *         SL_POWER_MANAGER_WAKEUP if CPC actions have to be processed.
- ******************************************************************************/
 #if !defined(SL_CATALOG_KERNEL_PRESENT) && defined(SL_CATALOG_POWER_MANAGER_PRESENT)
 sl_power_manager_on_isr_exit_t sl_cpc_sleep_on_isr_exit(void);
 #endif

@@ -3,7 +3,7 @@
  * @brief sl_btmesh_sensor_server.h
  *******************************************************************************
  * # License
- * <b>Copyright 2020 Silicon Laboratories Inc. www.silabs.com</b>
+ * <b>Copyright 2022 Silicon Laboratories Inc. www.silabs.com</b>
  *******************************************************************************
  *
  * SPDX-License-Identifier: Zlib
@@ -33,8 +33,8 @@
 
 #include "sl_btmesh_device_properties.h"
 
-#define SL_BTMESH_SENSOR_LIGHT_VALUE_IS_NOT_KNOWN           (0xFFFFFFFF)
-#define SL_BTMESH_SENSOR_TEMPERATURE_VALUE_IS_NOT_KNOWN     (0xFF)
+#define SL_BTMESH_SENSOR_LIGHT_VALUE_UNKNOWN           (0xFFFFFFFF)
+#define SL_BTMESH_SENSOR_TEMPERATURE_VALUE_UNKNOWN     (0x7F)
 
 /**************************************************************************//**
  * Initialize Sensor Server.

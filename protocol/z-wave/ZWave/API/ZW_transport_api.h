@@ -14,6 +14,7 @@
 #ifndef _ZW_TRANSPORT_API_H_
 #define _ZW_TRANSPORT_API_H_
 #include <ZW_security_api.h>
+#include <zpal_radio.h>
 
 /****************************************************************************/
 /*                              INCLUDE FILES                               */
@@ -127,16 +128,16 @@ typedef uint32_t TxOptions_t;  //< The universal TX-Option flag count.
 
 /* RSSI value array used in TX_STATUS_TYPE.
  * Each value is an RSSI feedback constant defined above. */
-struct rssi_val {
+struct s_rssi_val {
   signed char incoming[MAX_REPEATERS + 1];
 };
 
 
-typedef struct _S_ROUTE_LINK_
+typedef struct _S_ROUTE_LINK_T_
 {
   uint8_t from;
   uint8_t to;
-} S_ROUTE_LINK;
+} S_ROUTE_LINK_T;
 
 
 typedef struct _TX_STATUS_TYPE_
@@ -145,13 +146,13 @@ typedef struct _TX_STATUS_TYPE_
   uint8_t bRepeaters;         /* Repeaters in route, zero for direct range */
   /* rssi_values per hop for direct and routed frames.
    * Contains repeaters + 1 values. */
-  struct rssi_val rssi_values;
+  struct s_rssi_val rssi_values;
   uint8_t bACKChannelNo;
   uint8_t bLastTxChannelNo;
   uint8_t bRouteSchemeState;
   uint8_t pLastUsedRoute[LAST_USED_ROUTE_SIZE];
   uint8_t bRouteTries;
-  S_ROUTE_LINK bLastFailedLink;
+  S_ROUTE_LINK_T bLastFailedLink;
   int8_t bUsedTxpower;
   int8_t bMeasuredNoiseFloor;
   int8_t bDestinationAckUsedTxPower;
@@ -188,7 +189,6 @@ typedef struct _RECEIVE_OPTIONS_TYPE
 } RECEIVE_OPTIONS_TYPE;
 
 
-#if defined(ZW_SLAVE)
 
 /**
 * This flag will activate frame delivery.
@@ -214,8 +214,6 @@ typedef struct _RECEIVE_OPTIONS_TYPE
 * cast followup message in a S2 multicast transmission.
 */
 #define S2_TXOPTION_FIRST_SINGLECAST_FOLLOWUP 4
-
-#endif // #if defined(ZW_SLAVE)
 
 
 /* Transmit options for ZW_SendDataEx */

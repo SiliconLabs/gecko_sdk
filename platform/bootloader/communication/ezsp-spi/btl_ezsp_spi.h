@@ -1,6 +1,6 @@
 /***************************************************************************//**
  * @file
- * @brief XMODEM parser component for Silicon Labs Bootloader.
+ * @brief EZSP-SPI communication header for Gecko Bootloader.
  *******************************************************************************
  * # License
  * <b>Copyright 2021 Silicon Laboratories Inc. www.silabs.com</b>
@@ -21,12 +21,26 @@
 #include <stdbool.h>
 #include <stddef.h>
 #include <string.h>
-
+#include "config/btl_config.h"
 #include "core/btl_util.h"
-
 MISRAC_DISABLE
 #include "em_common.h"
 MISRAC_ENABLE
+#include "em_gpio.h"
+#include "api/btl_interface.h"
+
+#if defined(BOOTLOADER_NONSECURE)
+  #include "parser/gbl/btl_gbl_parser_ns.h"
+#else
+  #include "btl_ezsp_gpio_activation_cfg.h"
+  #ifdef BTL_SPI_EUSART_ENABLE
+    #include "btl_spi_peripheral_eusart_driver_cfg.h"
+  #else
+    #include "btl_spi_peripheral_usart_driver_cfg.h"
+  #endif
+  #include "parser/gbl/btl_gbl_parser.h"
+#endif
+
 #include "communication/btl_communication.h"
 #include "communication/xmodem-parser/btl_xmodem.h"
 
@@ -139,6 +153,74 @@ typedef struct {
 SL_PACK_END()
 
 /** @endcond */
+
+// -‐‐‐‐‐‐‐‐‐‐‐‐‐‐‐‐‐‐‐‐‐‐‐‐‐‐‐‐‐‐‐‐‐‐‐‐‐‐‐‐‐‐‐‐‐‐‐‐‐‐‐‐‐‐‐‐‐‐‐‐‐‐‐‐‐‐‐‐‐‐‐‐‐‐‐‐
+// Helper macros
+
+/** @cond DO_NOT_INCLUDE_WITH_DOXYGEN */
+
+#if defined(BOOTLOADER_NONSECURE)
+  #define nHOST_ASSERT()    bootloader_ezsp_nhost_assert()
+  #define nHOST_DEASSERT()  bootloader_ezsp_nhost_deassert()
+  #define nCS_ACTIVE()      bootloader_ezsp_ncs_active()
+#else
+  #define nHOST_ASSERT()    GPIO_PinOutClear(SL_EZSPSPI_HOST_INT_PORT, \
+                                             SL_EZSPSPI_HOST_INT_PIN)
+  #define nHOST_DEASSERT()  GPIO_PinOutSet(SL_EZSPSPI_HOST_INT_PORT, \
+                                           SL_EZSPSPI_HOST_INT_PIN)
+  #ifdef BTL_SPI_EUSART_ENABLE
+  #define nCS_ACTIVE()      (GPIO_PinInGet(SL_EUSART_SPINCP_CS_PORT, \
+                                           SL_EUSART_SPINCP_CS_PIN) == 0)
+  #else
+  #define nCS_ACTIVE()      (GPIO_PinInGet(SL_USART_SPINCP_CS_PORT, \
+                                           SL_USART_SPINCP_CS_PIN) == 0)
+  #endif
+#endif
+
+// ‐‐‐‐‐‐‐‐‐‐‐‐‐‐‐‐‐‐‐‐‐‐‐‐‐‐‐‐‐‐‐‐‐‐‐‐‐‐‐‐‐‐‐‐‐‐‐‐‐‐‐‐‐‐‐‐‐‐‐‐‐‐‐‐‐‐‐‐‐‐‐‐‐‐‐‐‐
+// Function declarations
+
+void bootloader_ezsp_init(void);
+void bootloader_ezsp_shutdown(void);
+void bootloader_ezsp_wakeHandshake(void);
+#if defined(BOOTLOADER_NONSECURE)
+  void bootloader_ezsp_nhost_assert(void);
+  void bootloader_ezsp_nhost_deassert(void);
+  bool bootloader_ezsp_ncs_active(void);
+#endif
+
+/** @endcond */
+
+/***************************************************************************//**
+ * Initialize hardware for the EZSP SPI Bootloader communication.
+ ******************************************************************************/
+void bootloader_ezsp_communication_init(void);
+
+/***************************************************************************//**
+ * Initialize communication between the EZSP SPI bootloader
+ * and external host.
+ *
+ * @return Error code indicating success or failure.
+ ******************************************************************************/
+int32_t bootloader_ezsp_communication_start(void);
+
+/***************************************************************************//**
+ * Communication main for the EZSP SPI bootloader.
+ *
+ * @param imageProps    The image file processed
+ * @param parserContext Image parser context
+ * @param parseCb       Bootloader parser callbacks
+ *
+ * @return Error code indicating success or failure.
+ ******************************************************************************/
+int32_t bootloader_ezsp_communication_main(ImageProperties_t *imageProps,
+                                           ParserContext_t *parserContext,
+                                           const BootloaderParserCallbacks_t* parseCb);
+
+/***************************************************************************//**
+ * Stop communication between the bootloader and external host.
+ ******************************************************************************/
+void bootloader_ezsp_communication_shutdown(void);
 
 /** @} addtogroup Communication */
 /** @} addtogroup Components */

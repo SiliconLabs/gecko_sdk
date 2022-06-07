@@ -204,7 +204,7 @@ void readTouch(void)
 void LCD_X_Config(void)
 {
   // Crank up the clocks
-  CMU_HFRCOFreqSet(cmuHFRCOFreq_72M0Hz);
+  CMU_HFRCOBandSet(cmuHFRCOFreq_72M0Hz);
   CMU_ClockSelectSet(cmuClock_HF, cmuSelect_HFRCO);
 
   // Enable framebuffer SRAM and Direct Drive

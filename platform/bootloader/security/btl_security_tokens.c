@@ -17,6 +17,11 @@
 #include "btl_security_tokens.h"
 #include "em_device.h"
 
+#if defined(BOOTLOADER_USE_SYMMETRIC_KEY_FROM_APP_PROPERTIES) \
+  && (BOOTLOADER_USE_SYMMETRIC_KEY_FROM_APP_PROPERTIES == 1)
+extern const ApplicationProperties_t sl_app_properties;
+#endif
+
 const uint8_t* btl_getSignedBootloaderKeyXPtr(void)
 {
 #if defined(SEMAILBOX_PRESENT)
@@ -65,13 +70,18 @@ const uint8_t* btl_getSignedBootloaderKeyYPtr(void)
 
 const uint8_t* btl_getImageFileEncryptionKeyPtr(void)
 {
-#if defined(SEMAILBOX_PRESENT)
-#if defined(BOOTLOADER_USE_SYMMETRIC_KEY_FROM_SE_STORAGE) && (BOOTLOADER_USE_SYMMETRIC_KEY_FROM_SE_STORAGE == 1)
+#if defined(SEMAILBOX_PRESENT)                             \
+  && defined(BOOTLOADER_USE_SYMMETRIC_KEY_FROM_SE_STORAGE) \
+  && (BOOTLOADER_USE_SYMMETRIC_KEY_FROM_SE_STORAGE == 1)
   return NULL;
+#elif defined(BOOTLOADER_USE_SYMMETRIC_KEY_FROM_APP_PROPERTIES) \
+  && (BOOTLOADER_USE_SYMMETRIC_KEY_FROM_APP_PROPERTIES == 1)
+  return sl_app_properties.decryptKey;
 #else
-  return (const uint8_t*)(LOCKBITS_BASE + 0x286);
-#endif
-#else
+  #if defined(BOOTLOADER_SECURE)
+    #error "The GBL decryption key has to be either embedded into the Application Properties struct or stored in Secure Element"
+  #endif
+
   return (const uint8_t*)(LOCKBITS_BASE + 0x286);
 #endif
 }

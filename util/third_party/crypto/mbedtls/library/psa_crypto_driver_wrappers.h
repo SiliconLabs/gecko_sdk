@@ -26,9 +26,10 @@
 #include "psa/crypto_driver_common.h"
 
 /*
- * Init function
+ * Initialization and termination functions
  */
 psa_status_t psa_driver_wrapper_init( void );
+void psa_driver_wrapper_free( void );
 
 /*
  * Key derivation functions
@@ -46,6 +47,19 @@ psa_status_t sli_se_driver_single_shot_hkdf(
     uint8_t *key_out_buffer,
     size_t key_out_buffer_size);
 
+psa_status_t sli_se_driver_single_shot_pbkdf2(
+  psa_algorithm_t alg,
+  const psa_key_attributes_t *key_in_attributes,
+  const uint8_t *key_in_buffer,
+  size_t key_in_buffer_size,
+  const uint8_t* salt,
+  size_t salt_length,
+  const psa_key_attributes_t *key_out_attributes,
+  uint32_t iterations,
+  uint8_t *key_out_buffer,
+  size_t key_out_buffer_size);
+
+
 /*
  * Key agreement functions
  */
@@ -57,30 +71,6 @@ psa_status_t psa_driver_wrapper_key_agreement(
     uint8_t *shared_secret,
     size_t shared_secret_size,
     size_t *shared_secret_length );
-
-/*
- * Asymmetric functions
- */
-psa_status_t psa_driver_wrapper_asymmetric_encrypt(
-    psa_key_slot_t *slot,
-    psa_algorithm_t alg,
-    const uint8_t *input,
-    size_t input_length,
-    const uint8_t *salt,
-    size_t salt_length,
-    uint8_t *output,
-    size_t output_size,
-    size_t *output_length );
-psa_status_t psa_driver_wrapper_asymmetric_decrypt(
-    psa_key_slot_t *slot,
-    psa_algorithm_t alg,
-    const uint8_t *input,
-    size_t input_length,
-    const uint8_t *salt,
-    size_t salt_length,
-    uint8_t *output,
-    size_t output_size,
-    size_t *output_length );
 
 /*
  * Signature functions
@@ -142,6 +132,12 @@ psa_status_t psa_driver_wrapper_get_key_buffer_size(
     const psa_key_attributes_t *attributes,
     size_t *key_buffer_size );
 
+psa_status_t psa_driver_wrapper_get_key_buffer_size_from_key_data(
+    const psa_key_attributes_t *attributes,
+    const uint8_t *data,
+    size_t data_length,
+    size_t *key_buffer_size );
+
 psa_status_t psa_driver_wrapper_generate_key(
     const psa_key_attributes_t *attributes,
     uint8_t *key_buffer, size_t key_buffer_size, size_t *key_buffer_length );
@@ -151,6 +147,11 @@ psa_status_t psa_driver_wrapper_get_builtin_key(
     psa_key_attributes_t *attributes,
     uint8_t *key_buffer, size_t key_buffer_size, size_t *key_buffer_length );
 
+psa_status_t psa_driver_wrapper_copy_key(
+    psa_key_attributes_t *attributes,
+    const uint8_t *source_key, size_t source_key_length,
+    uint8_t *target_key_buffer, size_t target_key_buffer_size,
+    size_t *target_key_buffer_length );
 /*
  * Cipher functions
  */
@@ -159,6 +160,8 @@ psa_status_t psa_driver_wrapper_cipher_encrypt(
     const uint8_t *key_buffer,
     size_t key_buffer_size,
     psa_algorithm_t alg,
+    const uint8_t *iv,
+    size_t iv_length,
     const uint8_t *input,
     size_t input_length,
     uint8_t *output,
@@ -264,6 +267,61 @@ psa_status_t psa_driver_wrapper_aead_decrypt(
     const uint8_t *additional_data, size_t additional_data_length,
     const uint8_t *ciphertext, size_t ciphertext_length,
     uint8_t *plaintext, size_t plaintext_size, size_t *plaintext_length );
+
+psa_status_t psa_driver_wrapper_aead_encrypt_setup(
+    psa_aead_operation_t *operation,
+    const psa_key_attributes_t *attributes,
+    const uint8_t *key_buffer, size_t key_buffer_size,
+    psa_algorithm_t alg );
+
+psa_status_t psa_driver_wrapper_aead_decrypt_setup(
+    psa_aead_operation_t *operation,
+    const psa_key_attributes_t *attributes,
+    const uint8_t *key_buffer, size_t key_buffer_size,
+    psa_algorithm_t alg );
+
+psa_status_t psa_driver_wrapper_aead_set_nonce(
+    psa_aead_operation_t *operation,
+    const uint8_t *nonce,
+    size_t nonce_length );
+
+psa_status_t psa_driver_wrapper_aead_set_lengths(
+    psa_aead_operation_t *operation,
+    size_t ad_length,
+    size_t plaintext_length );
+
+psa_status_t psa_driver_wrapper_aead_update_ad(
+    psa_aead_operation_t *operation,
+    const uint8_t *input,
+    size_t input_length );
+
+psa_status_t psa_driver_wrapper_aead_update(
+    psa_aead_operation_t *operation,
+    const uint8_t *input,
+    size_t input_length,
+    uint8_t *output,
+    size_t output_size,
+    size_t *output_length );
+
+psa_status_t psa_driver_wrapper_aead_finish(
+    psa_aead_operation_t *operation,
+    uint8_t *ciphertext,
+    size_t ciphertext_size,
+    size_t *ciphertext_length,
+    uint8_t *tag,
+    size_t tag_size,
+    size_t *tag_length );
+
+psa_status_t psa_driver_wrapper_aead_verify(
+    psa_aead_operation_t *operation,
+    uint8_t *plaintext,
+    size_t plaintext_size,
+    size_t *plaintext_length,
+    const uint8_t *tag,
+    size_t tag_length );
+
+psa_status_t psa_driver_wrapper_aead_abort(
+    psa_aead_operation_t *operation );
 
 /*
  * MAC functions

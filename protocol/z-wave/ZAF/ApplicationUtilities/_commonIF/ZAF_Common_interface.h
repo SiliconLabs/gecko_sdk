@@ -9,7 +9,7 @@
 #define _ZAF_COMMON_IF_H_
 
 #include <ZAF_CmdPublisher.h>
-#include <PowerManager.h>
+#include <zpal_power_manager.h>
 
 #include <ZW_application_transport_interface.h>
 
@@ -51,7 +51,7 @@ void ZAF_setAppHandle(SApplicationHandles* pAppHandle);
  *
  * @param powerLock pointer to power lock object in application
  */
-void ZAF_setPowerLock(SPowerLock_t* powerLock);
+void ZAF_setPowerLock(zpal_pm_handle_t powerLock);
 
 /**
  * Pass an application protocol configuration handle to the ZAF framework. Can be later used by CC-s.
@@ -103,7 +103,7 @@ const SProtocolConfig_t* ZAF_getAppProtocolConfig();
  * Get m_PowerLock object
  * @return m_PowerLock
  */
-SPowerLock_t* ZAF_getPowerLock();
+zpal_pm_handle_t ZAF_getPowerLock();
 
 /**
  * Returns the granted security keys.

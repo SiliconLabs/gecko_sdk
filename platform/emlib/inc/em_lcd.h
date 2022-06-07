@@ -541,7 +541,8 @@ __STATIC_INLINE void LCD_Reset(void)
   LCD->SWRST_SET = LCD_SWRST_SWRST;
 
   /* Wait for reset to complete. */
-  while ((LCD->SWRST & _LCD_SWRST_RESETTING_MASK)) ;
+  while ((LCD->SWRST & _LCD_SWRST_RESETTING_MASK)) {
+  }
 }
 #endif
 

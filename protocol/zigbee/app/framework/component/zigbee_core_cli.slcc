@@ -208,3 +208,15 @@ template_contribution:
       name: set
       handler: getSetMfgToken
       help: "Set MFG token, CANNOT BE UNSET BY CLI."
+  - name: cli_command
+    value:
+      name: black-list
+      handler: blackListCommand
+      argument:
+      - type: uint32
+        help: "Blacklisted channel bitmask"
+      help: "Black lists a channel for scanning."
+    condition:
+     - zigbee_simulation
+    unless:
+     - zigbee_ezsp     

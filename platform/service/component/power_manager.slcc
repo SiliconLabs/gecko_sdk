@@ -11,7 +11,8 @@ provides:
 requires:
   - name: power_manager_core
   - name: power_manager_handler
-    unless: [power_manager_custom_handler]
+recommends:
+  - id: power_manager_handler_implementation
 documentation:
   docset: gecko-platform
   document: service/power_manager/overview

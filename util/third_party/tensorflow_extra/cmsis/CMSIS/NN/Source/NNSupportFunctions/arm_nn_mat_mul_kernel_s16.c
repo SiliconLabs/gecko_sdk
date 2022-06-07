@@ -27,8 +27,8 @@
  * Target Processor:  Cortex-M cores
  * -------------------------------------------------------------------- */
 
-#include "cmsis/CMSIS/NN/Include/arm_nnfunctions.h"
-#include "cmsis/CMSIS/NN/Include/arm_nnsupportfunctions.h"
+#include "arm_nnfunctions.h"
+#include "arm_nnsupportfunctions.h"
 
 /*
  * Matrix-multiplication function for convolution with per-channel requantization.

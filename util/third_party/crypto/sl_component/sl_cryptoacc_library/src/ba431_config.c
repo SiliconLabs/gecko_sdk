@@ -35,7 +35,7 @@ void ba431_write_controlreg(uint32_t control)
    WR_REG32(&BA431_REGS->ControlReg, control);
 }
 
-uint32_t ba431_read_fifo_wakeup_threshold()
+uint32_t ba431_read_fifo_wakeup_threshold(void)
 {
    return RD_REG32(&BA431_REGS->FIFOThresholdReg);
 }
@@ -45,7 +45,7 @@ void ba431_write_fifo_wakeup_threshold(uint32_t fifo_threshold)
 }
 
 
-uint32_t ba431_read_switch_off_timer()
+uint32_t ba431_read_switch_off_timer(void)
 {
    return RD_REG32(&BA431_REGS->SwOffTmrValReg);
 }
@@ -58,7 +58,7 @@ void ba431_write_switch_off_timer(uint32_t sw_off_timer_val)
 }
 
 
-uint32_t ba431_read_clk_div()
+uint32_t ba431_read_clk_div(void)
 {
    return RD_REG32(&BA431_REGS->ClkDivReg);
 }
@@ -69,7 +69,7 @@ void ba431_write_clk_div(uint8_t clk_div)
 }
 
 
-uint32_t ba431_read_init_wait()
+uint32_t ba431_read_init_wait(void)
 {
    return RD_REG32(&BA431_REGS->InitWaitReg);
 }
@@ -205,4 +205,10 @@ void ba431_write_test_data(uint32_t test_data)
 ba431_state_t ba431_get_state(void)
 {
    return (ba431_state_t) (ba431_read_status() & BA431_STAT_MASK_STATE);
+}
+
+void ba431_set_raw_mode(void)
+{
+   WR_REG32(&BA431_REGS->ControlReg, ba431_read_controlreg() | BA431_CTRL_COND_BYPASS |
+         BA431_CTRL_BYPASS_HEALTH_TEST | BA431_CTRL_BYPASS_AIS31_TEST);
 }

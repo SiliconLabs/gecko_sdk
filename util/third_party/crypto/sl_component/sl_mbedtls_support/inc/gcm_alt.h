@@ -59,12 +59,19 @@
 #elif defined(SEMAILBOX_PRESENT)
 #include "em_se.h"
 #elif defined(CRYPTOACC_PRESENT)
-#include "ba411e_config.h"
 #include "sx_aes.h"
+#include "sl_enum.h"
 #endif
 
 #ifdef __cplusplus
 extern "C" {
+#endif
+
+#if defined(CRYPTOACC_PRESENT)
+SL_ENUM(sli_gcm_mode_t) {
+  SLI_GCM_ENC = 1,
+  SLI_GCM_DEC = 2,
+};
 #endif
 
 /**
@@ -96,7 +103,7 @@ typedef struct {
 
 #elif defined(CRYPTOACC_PRESENT)
   unsigned char        key[32];          /*!< AES key 128, 192 or 256 bits */
-  sx_aes_mode_t        dir;              /*!< Encryption or decryption */
+  sli_gcm_mode_t       dir;              /*!< Encryption or decryption */
   uint8_t              sx_ctx[AES_CTX_xCM_SIZE];   /*!< CRYPTOACC GCM state */
 #endif
 }

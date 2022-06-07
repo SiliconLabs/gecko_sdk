@@ -28,7 +28,7 @@
  *
  * -------------------------------------------------------------------- */
 
-#include "cmsis/CMSIS/NN/Include/arm_nnsupportfunctions.h"
+#include "arm_nnsupportfunctions.h"
 
 /**
  * @ingroup groupSupport

@@ -10,7 +10,12 @@ root_path: app/bluetooth/common/simple_com
 config_file:
   - path: config/sl_simple_com_config.h
 source:
-  - path: sl_simple_com.c
+  - path: sl_simple_com_usart.c
+    condition:
+      - uartdrv_core
+  - path: sl_simple_com_cpc.c
+    condition:
+      - cpc_core
 include:
   - path: .
     file_list:
@@ -19,6 +24,11 @@ provides:
   - name: simple_com
 requires:
   - name: uartdrv_usart
+    condition:
+    - uartdrv_core
+  - name: cpc_secondary
+    condition:
+    - cpc_core
   - name: app_assert
   - name: status
   - name: emlib_common
@@ -38,9 +48,20 @@ template_file:
 template_contribution:
   - name: component_catalog
     value: simple_com
+  - name: component_catalog
+    value: bluetooth_ncp
+    condition:
+    - cpc_core
   - name: event_handler
     value:
       event: internal_app_init
       include: sl_simple_com.h
       handler: sl_simple_com_init
     priority: 1
+  - name: event_handler
+    value:
+      event: service_process_action
+      include: sl_simple_com.h
+      handler: sl_simple_com_step
+    condition:
+    - cpc_core

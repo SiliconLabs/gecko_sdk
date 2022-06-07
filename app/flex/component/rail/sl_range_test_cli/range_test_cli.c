@@ -157,9 +157,9 @@ void cli_get_phy(sl_cli_command_arg_t *arguments)
 {
   // Eliminate compiler warning
   (void) arguments;
-  char phy_name[13u];
+  char phy_name[13U];
   if (!is_current_phy_standard()) {
-    sprintf(phy_name, "custom_%u", (range_test_settings.current_phy));
+    snprintf(phy_name, sizeof(phy_name), "custom_%u", (range_test_settings.current_phy));
   } else {
     print_standard_name(phy_name);
   }
@@ -258,21 +258,21 @@ void cli_get_frequency(sl_cli_command_arg_t *arguments)
 {
   // Eliminate compiler warning
   (void) arguments;
-  char freq_string[11u];
+  char freq_string[11U];
   uint32_t base_frequency = 0;
   uint32_t channel_spacing = 0;
   int16_t power = 0;
   get_rail_config_data(&base_frequency, &channel_spacing, &power);
 
-  if (base_frequency % 1000000u) {
-    sprintf(freq_string,
-            "%u.%02uMHz",
-            (uint16_t) (base_frequency / 1000000u),
-            (uint16_t) ((base_frequency % 1000000u) / 10000u));
+  if (base_frequency % 1000000U) {
+    snprintf(freq_string, sizeof(freq_string),
+             "%u.%02uMHz",
+             (uint16_t) (base_frequency / 1000000U),
+             (uint16_t) ((base_frequency % 1000000U) / 10000U));
   } else {
-    sprintf(freq_string,
-            "%uMHz",
-            (uint16_t) (base_frequency / 1000000u));
+    snprintf(freq_string, sizeof(freq_string),
+             "%uMHz",
+             (uint16_t) (base_frequency / 1000000U));
   }
 
   app_log_info("Frequency:        %s\n", freq_string);
@@ -380,8 +380,8 @@ void cli_set_packet_count(sl_cli_command_arg_t *arguments)
     return;
   }
 
-  static uint16_t pktsNum[8u] =
-  { 500u, 1000u, 2500u, 5000u, 10000u, 25000u, 50000u, 0xFFFF };
+  static uint16_t pktsNum[8U] =
+  { 500U, 1000U, 2500U, 5000U, 10000U, 25000U, 50000U, 0xFFFF };
   uint8_t packets_repeat_number = sl_cli_get_argument_uint8(arguments, 0);
   if (packets_repeat_number < 8) {
     range_test_settings.packets_repeat_number = pktsNum[packets_repeat_number];
@@ -628,7 +628,7 @@ void cli_info(sl_cli_command_arg_t *arguments)
 #if defined(SL_CATALOG_RANGE_TEST_DMP_COMPONENT_PRESENT)
   app_log_info("\n");
   cli_is_ble_connected(arguments);
-  app_log_info("Device Name:      DMP%0X\n", *(uint16_t*)(bluetooth_address.addr));
+  app_log_info("Device Name:      DMP%04X\n", *(uint16_t*)(bluetooth_address.addr));
   app_log_info("Device Address:   %02X:%02X:%02X:%02X:%02X:%02X\n",
                bluetooth_address.addr[5],
                bluetooth_address.addr[4],

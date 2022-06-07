@@ -30,7 +30,7 @@
 #ifndef SLEEP_H
 #define SLEEP_H
 
-#ifndef SL_SUPRESS_DEPRECATION_WARNINGS_SDK_3_2
+#ifndef SL_SUPPRESS_DEPRECATION_WARNINGS_SDK_3_2
 #warning "The sleep driver is deprecated and marked for removal in a later release. Please use the power_manager service instead."
 #endif
 
@@ -247,7 +247,7 @@ typedef struct {
  ******************************   PROTOTYPES   *********************************
  ******************************************************************************/
 
-void SLEEP_Init(SLEEP_CbFuncPtr_t pSleepCb, SLEEP_CbFuncPtr_t pWakeUpCb);
+void SLEEP_Init(SLEEP_CbFuncPtr_t pSleepCb, SLEEP_CbFuncPtr_t pWakeUpCb) SL_DEPRECATED_API_SDK_4_1;
 
 void SLEEP_InitEx(const SLEEP_Init_t * init);
 

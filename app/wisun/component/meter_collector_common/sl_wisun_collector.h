@@ -37,7 +37,7 @@
 
 #include "socket_hnd.h"
 #include "socket.h"
-#include "sl_wisun_meter_collector.h"
+#include "sli_wisun_meter_collector.h"
 #include "sl_wisun_collector_config.h"
 
 // -----------------------------------------------------------------------------
@@ -51,6 +51,11 @@
 // -----------------------------------------------------------------------------
 //                          Public Function Declarations
 // -----------------------------------------------------------------------------
+
+/**************************************************************************//**
+ * @brief Gets the socket used by the (CoAP) Collector app
+ *****************************************************************************/
+int32_t sl_wisun_collector_get_shared_socket(void);
 
 /**************************************************************************//**
  * @brief Init collector component.

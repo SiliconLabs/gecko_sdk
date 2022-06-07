@@ -106,19 +106,19 @@ psa_status_t sli_cryptoacc_transparent_hash_setup(sli_cryptoacc_transparent_hash
 #if defined(PSA_WANT_ALG_SHA_1)
     case PSA_ALG_SHA_1:
       operation->hash_type = e_SHA1;
-      memcpy(operation->state, init_state_sha1, SHA1_INITSIZE);
+      memcpy(operation->state, init_state_sha1, SHA1_STATESIZE);
       break;
 #endif // PSA_WANT_ALG_SHA_1
 #if defined(PSA_WANT_ALG_SHA_224)
     case PSA_ALG_SHA_224:
       operation->hash_type = e_SHA224;
-      memcpy(operation->state, init_state_sha224, SHA224_INITSIZE);
+      memcpy(operation->state, init_state_sha224, SHA224_STATESIZE);
       break;
 #endif // PSA_WANT_ALG_SHA_224
 #if defined(PSA_WANT_ALG_SHA_256)
     case PSA_ALG_SHA_256:
       operation->hash_type = e_SHA256;
-      memcpy(operation->state, init_state_sha256, SHA256_INITSIZE);
+      memcpy(operation->state, init_state_sha256, SHA256_STATESIZE);
       break;
 #endif // PSA_WANT_ALG_SHA_256
     default:

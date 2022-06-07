@@ -8,6 +8,7 @@ quality: production
 provides:
 - name: radio_config_simple_rail_singlephy
 - name: a_radio_config
+  allow_multiple: true
 ui_hints:
   visibility: never
 template_contribution:
@@ -38,6 +39,7 @@ config_file:
   - hardware_board_rb
   - hardware_board_tb
   - hardware_board_stk
+  - device_supports_zwave
   - device_is_module
   - device_sdid_200
 - path: platform/radio/radio_configuration/Base/simple_rail_singlephy/device_sdid_210/rf_band_868/radio_settings.radioconf
@@ -72,6 +74,19 @@ config_file:
   - device_sdid_220
   unless:
   - device_has_radio_2g4hz
+  - device_has_radio_dualband
+  - hardware_board_rb
+  - hardware_board_tb
+  - hardware_board_stk
+  - device_is_module
+  - device_sdid_200
+- path: platform/radio/radio_configuration/Base/simple_rail_singlephy/device_sdid_230/rf_band_2400/radio_settings.radioconf
+  directory: rail
+  condition:
+  - device_has_radio_2g4hz
+  - device_sdid_230
+  unless:
+  - device_has_radio_subghz
   - device_has_radio_dualband
   - hardware_board_rb
   - hardware_board_tb
@@ -163,6 +178,7 @@ config_file:
   - hardware_board_rb
   - hardware_board_tb
   - hardware_board_stk
+  - device_supports_zwave
   - device_is_module
   - device_sdid_200
 - path: platform/radio/radio_configuration/Base/simple_rail_singlephy/device_sdid_89/rf_band_2400/radio_settings.radioconf
@@ -188,6 +204,7 @@ config_file:
   - hardware_board_rb
   - hardware_board_tb
   - hardware_board_stk
+  - device_supports_zwave
   - device_is_module
   - device_sdid_200
 - path: platform/radio/radio_configuration/Base/simple_rail_singlephy/device_sdid_89/rf_band_868/radio_settings.radioconf
@@ -211,6 +228,7 @@ config_file:
   - hardware_board_rb
   - hardware_board_tb
   - hardware_board_stk
+  - device_supports_zwave
   - device_is_module
   - device_sdid_200
 - path: platform/radio/radio_configuration/Base/simple_rail_singlephy/device_sdid_89/rf_band_868/radio_settings.radioconf
@@ -234,6 +252,7 @@ config_file:
   - hardware_board_rb
   - hardware_board_tb
   - hardware_board_stk
+  - device_supports_zwave
   - device_is_module
   - device_sdid_200
 - path: platform/radio/radio_configuration/Base/simple_rail_singlephy/device_sdid_95/rf_band_2400/radio_settings.radioconf
@@ -259,6 +278,7 @@ config_file:
   - hardware_board_rb
   - hardware_board_tb
   - hardware_board_stk
+  - device_supports_zwave
   - device_is_module
   - device_sdid_200
 - path: platform/radio/radio_configuration/Base/simple_rail_singlephy/device_sdid_95/rf_band_868/radio_settings.radioconf
@@ -282,6 +302,7 @@ config_file:
   - hardware_board_rb
   - hardware_board_tb
   - hardware_board_stk
+  - device_supports_zwave
   - device_is_module
   - device_sdid_200
 - path: platform/radio/radio_configuration/Base/simple_rail_singlephy/device_sdid_95/rf_band_868/radio_settings.radioconf
@@ -310,6 +331,7 @@ config_file:
   unless:
   - device_is_module
   - device_sdid_200
+  - device_supports_zwave
 - path: platform/radio/radio_configuration/Base/simple_rail_singlephy/device_sdid_210/rf_band_169/radio_settings.radioconf
   directory: rail
   condition:
@@ -324,6 +346,7 @@ config_file:
   unless:
   - device_is_module
   - device_sdid_200
+  - device_supports_zwave
 - path: platform/radio/radio_configuration/Base/simple_rail_singlephy/device_sdid_210/rf_band_315/radio_settings.radioconf
   directory: rail
   condition:
@@ -338,6 +361,7 @@ config_file:
   unless:
   - device_is_module
   - device_sdid_200
+  - device_supports_zwave
 - path: platform/radio/radio_configuration/Base/simple_rail_singlephy/device_sdid_210/rf_band_434/radio_settings.radioconf
   directory: rail
   condition:
@@ -352,6 +376,7 @@ config_file:
   unless:
   - device_is_module
   - device_sdid_200
+  - device_supports_zwave
 - path: platform/radio/radio_configuration/Base/simple_rail_singlephy/device_sdid_210/rf_band_470/radio_settings.radioconf
   directory: rail
   condition:
@@ -366,6 +391,7 @@ config_file:
   unless:
   - device_is_module
   - device_sdid_200
+  - device_supports_zwave
 - path: platform/radio/radio_configuration/Base/simple_rail_singlephy/device_sdid_210/rf_band_868/radio_settings.radioconf
   directory: rail
   condition:
@@ -401,6 +427,14 @@ config_file:
   condition:
   - hardware_board_default_rf_band_915
   - device_sdid_220
+  unless:
+  - device_is_module
+  - device_sdid_200
+- path: platform/radio/radio_configuration/Base/simple_rail_singlephy/device_sdid_230/rf_band_2400/radio_settings.radioconf
+  directory: rail
+  condition:
+  - hardware_board_default_rf_band_2400
+  - device_sdid_230
   unless:
   - device_is_module
   - device_sdid_200
@@ -508,6 +542,7 @@ config_file:
   unless:
   - device_is_module
   - device_sdid_200
+  - device_supports_zwave
 - path: platform/radio/radio_configuration/Base/simple_rail_singlephy/device_sdid_89/rf_band_169/radio_settings.radioconf
   directory: rail
   condition:
@@ -522,6 +557,7 @@ config_file:
   unless:
   - device_is_module
   - device_sdid_200
+  - device_supports_zwave
 - path: platform/radio/radio_configuration/Base/simple_rail_singlephy/device_sdid_89/rf_band_2400/radio_settings.radioconf
   directory: rail
   condition:
@@ -536,6 +572,7 @@ config_file:
   unless:
   - device_is_module
   - device_sdid_200
+  - device_supports_zwave
 - path: platform/radio/radio_configuration/Base/simple_rail_singlephy/device_sdid_89/rf_band_434/radio_settings.radioconf
   directory: rail
   condition:
@@ -550,6 +587,7 @@ config_file:
   unless:
   - device_is_module
   - device_sdid_200
+  - device_supports_zwave
 - path: platform/radio/radio_configuration/Base/simple_rail_singlephy/device_sdid_89/rf_band_490/radio_settings.radioconf
   directory: rail
   condition:
@@ -564,6 +602,7 @@ config_file:
   unless:
   - device_is_module
   - device_sdid_200
+  - device_supports_zwave
 - path: platform/radio/radio_configuration/Base/simple_rail_singlephy/device_sdid_89/rf_band_868/radio_settings.radioconf
   directory: rail
   condition:
@@ -578,6 +617,7 @@ config_file:
   unless:
   - device_is_module
   - device_sdid_200
+  - device_supports_zwave
 - path: platform/radio/radio_configuration/Base/simple_rail_singlephy/device_sdid_89/rf_band_915/radio_settings.radioconf
   directory: rail
   condition:
@@ -592,6 +632,7 @@ config_file:
   unless:
   - device_is_module
   - device_sdid_200
+  - device_supports_zwave
 - path: platform/radio/radio_configuration/Base/simple_rail_singlephy/device_sdid_95/rf_band_169/radio_settings.radioconf
   directory: rail
   condition:
@@ -606,6 +647,7 @@ config_file:
   unless:
   - device_is_module
   - device_sdid_200
+  - device_supports_zwave
 - path: platform/radio/radio_configuration/Base/simple_rail_singlephy/device_sdid_95/rf_band_2400/radio_settings.radioconf
   directory: rail
   condition:
@@ -620,6 +662,7 @@ config_file:
   unless:
   - device_is_module
   - device_sdid_200
+  - device_supports_zwave
 - path: platform/radio/radio_configuration/Base/simple_rail_singlephy/device_sdid_95/rf_band_434/radio_settings.radioconf
   directory: rail
   condition:
@@ -634,6 +677,7 @@ config_file:
   unless:
   - device_is_module
   - device_sdid_200
+  - device_supports_zwave
 - path: platform/radio/radio_configuration/Base/simple_rail_singlephy/device_sdid_95/rf_band_490/radio_settings.radioconf
   directory: rail
   condition:
@@ -648,6 +692,7 @@ config_file:
   unless:
   - device_is_module
   - device_sdid_200
+  - device_supports_zwave
 - path: platform/radio/radio_configuration/Base/simple_rail_singlephy/device_sdid_95/rf_band_868/radio_settings.radioconf
   directory: rail
   condition:
@@ -662,6 +707,7 @@ config_file:
   unless:
   - device_is_module
   - device_sdid_200
+  - device_supports_zwave
 - path: platform/radio/radio_configuration/Base/simple_rail_singlephy/device_sdid_95/rf_band_915/radio_settings.radioconf
   directory: rail
   condition:

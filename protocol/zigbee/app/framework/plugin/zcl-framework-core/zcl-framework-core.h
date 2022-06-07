@@ -18,7 +18,7 @@
 /** @brief EZSP Error Handler.
  *
  * This callback is fired when the host process receives an error from the EZSP
- * link when talking to the NCP. The return boolean gives the user application
+ * link when talking to the NCP. The return bool gives the user application
  * the option to reboot the NCP. If this function returns true, the NCP will be
  * rebooted and the connection between the host and NCP will drop. If not, the
  * NCP will continue operating.

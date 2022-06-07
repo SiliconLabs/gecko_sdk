@@ -1,10 +1,10 @@
 id: mbedtls_ecc_secp224r1
 package: platform
-label: Mbed TLS Support for secp224r1 Curve
+label: secp224r1
 description: >-
   This component adds support for the secp224r1 elliptic curve,
   a 224-bit prime field Weierstrass curve, in Mbed TLS.
-category: Platform|Security
+category: Platform|Security|Mbed TLS|Elliptic Curves
 quality: production
 provides:
   - name: mbedtls_ecc_secp224r1

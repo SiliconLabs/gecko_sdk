@@ -563,20 +563,6 @@ sl_status_t sl_btmesh_node_get_local_dcd(uint8_t page) {
 
 }
 
-SL_BGAPI_DEPRECATED sl_status_t sl_btmesh_node_erase_mesh_nvm() {
-    struct sl_btmesh_packet *cmd = (struct sl_btmesh_packet *)sl_btmesh_cmd_msg;
-
-    struct sl_btmesh_packet *rsp = (struct sl_btmesh_packet *)sl_btmesh_rsp_msg;
-
-
-    cmd->header=sl_btmesh_cmd_node_erase_mesh_nvm_id+(((0)&0xff)<<8)+(((0)&0x700)>>8);
-
-
-    sl_btmesh_host_handle_command();
-    return rsp->data.rsp_node_erase_mesh_nvm.result;
-
-}
-
 sl_status_t sl_btmesh_node_power_off() {
     struct sl_btmesh_packet *cmd = (struct sl_btmesh_packet *)sl_btmesh_cmd_msg;
 

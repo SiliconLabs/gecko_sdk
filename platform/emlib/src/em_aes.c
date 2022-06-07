@@ -31,7 +31,7 @@
 #include "em_aes.h"
 #if defined(AES_COUNT) && (AES_COUNT > 0)
 
-#include "em_assert.h"
+#include "sl_assert.h"
 #include <string.h>
 
 /***************************************************************************//**

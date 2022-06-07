@@ -16,6 +16,7 @@
   - name: hardware_board_from_stk
   - name: hardware_board_from_slwrb4308c
   - name: hardware_board_from_slwstk6102a
+  - name: hardware_board_has_vcom
   - name: hardware_board_has_lfxo
   - name: hardware_board_supports_rf_band_2400
   - name: hardware_board_supports_1_rf_band

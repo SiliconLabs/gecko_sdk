@@ -51,6 +51,13 @@
 // <i> This is the port number where Meter is listening
 // <1-65536>
 #define SL_WISUN_METER_PORT                                             5683U
+
+// <o SL_WISUN_METER_USE_CUSTOM_COLLECTOR_PORT> Send Meter responses to fixed port
+//   <true => Respond to SL_WISUN_COLLECTOR_PORT
+//   <false => Respond to sender's port
+// <i> Default: false
+// <i> This option tells Meter apps to send responses to a fixed port rather than the port the request is received from.
+#define SL_WISUN_METER_USE_CUSTOM_COLLECTOR_PORT                        false
 // </h>
 
 // <h>Wi-SUN Collector configuration

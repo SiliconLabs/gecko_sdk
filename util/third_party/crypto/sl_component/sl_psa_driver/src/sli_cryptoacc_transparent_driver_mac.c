@@ -118,7 +118,8 @@ psa_status_t sli_cryptoacc_transparent_mac_compute(const psa_key_attributes_t *a
   if (key_buffer == NULL
       || attributes == NULL
       || mac == NULL
-      || mac_length == NULL ) {
+      || mac_length == NULL
+      || ((input == NULL) && (input_length > 0))) {
     return PSA_ERROR_INVALID_ARGUMENT;
   }
 

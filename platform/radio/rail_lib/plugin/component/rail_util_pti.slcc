@@ -28,3 +28,7 @@ template_contribution:
       include: sl_rail_util_pti.h
       handler: sl_rail_util_pti_init
     priority: -9010
+  - name: component_catalog
+    value: rail_util_pti
+validation_helper:
+  - path: platform/radio/rail_lib/plugin/rail_util_pti/pti_validation.lua

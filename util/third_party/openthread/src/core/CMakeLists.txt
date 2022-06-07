@@ -87,7 +87,7 @@ set(COMMON_SOURCES
     backbone_router/bbr_manager.cpp
     backbone_router/multicast_listeners_table.cpp
     backbone_router/ndproxy_table.cpp
-    border_router/infra_if_platform.cpp
+    border_router/infra_if.cpp
     border_router/router_advertisement.cpp
     border_router/routing_manager.cpp
     coap/coap.cpp
@@ -102,10 +102,10 @@ set(COMMON_SOURCES
     common/heap_data.cpp
     common/heap_string.cpp
     common/instance.cpp
-    common/logging.cpp
+    common/log.cpp
     common/message.cpp
     common/notifier.cpp
-    common/random_manager.cpp
+    common/random.cpp
     common/settings.cpp
     common/string.cpp
     common/tasklet.cpp
@@ -119,6 +119,7 @@ set(COMMON_SOURCES
     crypto/aes_ecb.cpp
     crypto/crypto_platform.cpp
     crypto/ecdsa.cpp
+    crypto/ecdsa_tinycrypt.cpp
     crypto/hkdf_sha256.cpp
     crypto/hmac_sha256.cpp
     crypto/mbedtls.cpp
@@ -147,11 +148,13 @@ set(COMMON_SOURCES
     meshcop/dataset_updater.cpp
     meshcop/dtls.cpp
     meshcop/energy_scan_client.cpp
+    meshcop/extended_panid.cpp
     meshcop/joiner.cpp
     meshcop/joiner_router.cpp
     meshcop/meshcop.cpp
     meshcop/meshcop_leader.cpp
     meshcop/meshcop_tlvs.cpp
+    meshcop/network_name.cpp
     meshcop/panid_query_client.cpp
     meshcop/timestamp.cpp
     net/checksum.cpp
@@ -249,8 +252,8 @@ set(RADIO_COMMON_SOURCES
     common/binary_search.cpp
     common/error.cpp
     common/instance.cpp
-    common/logging.cpp
-    common/random_manager.cpp
+    common/log.cpp
+    common/random.cpp
     common/string.cpp
     common/tasklet.cpp
     common/timer.cpp

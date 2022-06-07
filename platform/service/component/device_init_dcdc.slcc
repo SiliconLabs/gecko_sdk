@@ -51,6 +51,8 @@ provides:
 requires:
   - name: emlib_emu
   - name: device_has_dcdc
+  - name: device_dcdc_buck
+    condition: [device_series_2]
   - name: status
 template_contribution:
   - name: event_handler

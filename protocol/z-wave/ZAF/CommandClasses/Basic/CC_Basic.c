@@ -124,7 +124,7 @@ CC_Basic_handler(
          * Also two variables are automatically created and these represent the beginning and the end
          * of the section. The variables can be used to loop through the section.
          */
-        CC_handler_map_v3_t const *cc_Handler_Iter = &cc_handlers_start;
+        CC_handler_map_latest_t const *cc_Handler_Iter = &cc_handlers_start;
 
         // For each linked CC
         for (; cc_Handler_Iter < &cc_handlers_stop; ++cc_Handler_Iter)

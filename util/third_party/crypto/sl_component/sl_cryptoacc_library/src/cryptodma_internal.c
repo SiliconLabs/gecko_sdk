@@ -8,6 +8,7 @@
 #include "sxregs.h"
 #include "cryptolib_def.h"
 #include "sx_errors.h"
+#include <stddef.h> // for size_t
 
 /**
  * @brief This function is used for writing registers that hold addresses.
@@ -61,7 +62,7 @@ void cryptodma_wait(void) {
    #if WAIT_CRYPTOMASTER_WITH_REGISTER_POLLING // polling
       while (RD_REG32(ADDR_DMA_STATUS)&DMA_AXI_STATUSREG_MASK_PUSHER_BUSY);
    #else  // wait interrupt
-      #error "Interrupt not supported, polling is the only option"
+      CRYPTOMASTER_WAITIRQ_FCT();
    #endif
 }
 
@@ -114,10 +115,10 @@ void debug_print_sg(struct dma_sg_descr_s * desc_in)
    uint32_t i = 0;
    while(desc_ptr != DMA_AXI_DESCR_NEXT_STOP)
    {
-      if(i>50)
+      if (i>50) {
          TRIGGER_HARDFAULT_FCT();
-
-      CRYPTOLIB_PRINTF("desc #%02d @%08X: %08X %08X %08X %08X\n", i, desc_ptr, desc_ptr->addr, desc_ptr->next_descr, desc_ptr->length_irq, desc_ptr->tag);
+      }
+      CRYPTOLIB_PRINTF("desc #%02d @%p: %p %p %08X %08X\n", i, desc_ptr, desc_ptr->addr, desc_ptr->next_descr, desc_ptr->length_irq, desc_ptr->tag);
       desc_ptr = desc_ptr->next_descr;
       i++;
    }

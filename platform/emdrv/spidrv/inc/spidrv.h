@@ -36,13 +36,10 @@
 
 #include "ecode.h"
 #include "spidrv_config.h"
-#if defined(EMDRV_SPIDRV_INCLUDE_SLAVE)
 #include "sl_sleeptimer.h"
-#endif
-#if defined(SL_CATALOG_POWER_MANAGER_PRESENT) && defined(EUSART_PRESENT)
 #include "sl_slist.h"
-#endif
 #include "dmadrv.h"
+#include "sl_enum.h"
 
 #ifdef __cplusplus
 extern "C" {
@@ -71,46 +68,50 @@ extern "C" {
 /** @} (end addtogroup error codes) */
 
 /// SPI driver instance type.
-typedef enum SPIDRV_Type{
+SL_ENUM(SPIDRV_Type_t) {
   spidrvMaster = 0,               ///< Act as an SPI master.
   spidrvSlave  = 1                ///< Act as an SPI slave.
-} SPIDRV_Type_t;
+};
 
 /// SPI bus bit order.
-typedef enum SPIDRV_BitOrder{
+SL_ENUM(SPIDRV_BitOrder_t) {
   spidrvBitOrderLsbFirst = 0,     ///< LSB bit is transmitted first.
   spidrvBitOrderMsbFirst = 1      ///< MSB bit is transmitted first.
-} SPIDRV_BitOrder_t;
+};
 
 /// SPI clock mode (clock polarity and phase).
-typedef enum SPIDRV_ClockMode{
+SL_ENUM(SPIDRV_ClockMode_t) {
   spidrvClockMode0 = 0,           ///< SPI mode 0: CLKPOL=0, CLKPHA=0.
   spidrvClockMode1 = 1,           ///< SPI mode 1: CLKPOL=0, CLKPHA=1.
   spidrvClockMode2 = 2,           ///< SPI mode 2: CLKPOL=1, CLKPHA=0.
   spidrvClockMode3 = 3            ///< SPI mode 3: CLKPOL=1, CLKPHA=1.
-} SPIDRV_ClockMode_t;
+};
 
 /// SPI master chip select (CS) control scheme.
-typedef enum SPIDRV_CsControl{
+SL_ENUM(SPIDRV_CsControl_t) {
   spidrvCsControlAuto = 0,        ///< CS controlled by the SPI driver.
   spidrvCsControlApplication = 1  ///< CS controlled by the application.
-} SPIDRV_CsControl_t;
+};
 
 /// SPI slave transfer start scheme.
-typedef enum SPIDRV_SlaveStart{
+SL_ENUM(SPIDRV_SlaveStart_t) {
   spidrvSlaveStartImmediate = 0,  ///< Transfer starts immediately.
   spidrvSlaveStartDelayed = 1     ///< Transfer starts when the bus is idle (CS deasserted).
-} SPIDRV_SlaveStart_t;
+};
 
 /// @cond DO_NOT_INCLUDE_WITH_DOXYGEN
 /// Type of a USART peripheral
-typedef enum SPIDRV_UsartType{
+SL_ENUM(SPIDRV_PeripheralType_t) {
   spidrvPeripheralTypeUsart = 0,         ///< USART peripheral
 #if defined(EUSART_PRESENT)
   spidrvPeripheralTypeEusart = 1         ///< EUSART peripheral
 #endif
-} SPIDRV_PeripheralType_t;
+};
 
+SL_ENUM(SPIDRV_State_t) {
+  spidrvStateIdle = 0,
+  spidrvStateTransferring = 1
+};
 /// @endcond
 struct SPIDRV_HandleData;
 
@@ -186,6 +187,7 @@ typedef struct SPIDRV_HandleData {
 #if defined(EUSART_PRESENT)
     EUSART_TypeDef          *eusartPort;
 #endif
+    void                    *__reserved_space;
   } peripheral;
   SPIDRV_Init_t             initData;
   unsigned int              txDMACh;
@@ -199,17 +201,13 @@ typedef struct SPIDRV_HandleData {
   GPIO_Port_TypeDef         portCs;
   uint8_t                   pinCs;
   Ecode_t                   transferStatus;
-  volatile enum             { spidrvStateIdle = 0, spidrvStateTransferring = 1 } state;
+  volatile SPIDRV_State_t   state;
   CMU_Clock_TypeDef         usartClock;
   volatile bool             blockingCompleted;
   int                       em1RequestCount;
   SPIDRV_PeripheralType_t   peripheralType;
-#if defined(EMDRV_SPIDRV_INCLUDE_SLAVE)
   sl_sleeptimer_timer_handle_t timer;
-#endif
-#if defined(SL_CATALOG_POWER_MANAGER_PRESENT) && defined(EUSART_PRESENT)
   sl_slist_node_t           node;
-#endif
   /// @endcond
 } SPIDRV_HandleData_t;
 

@@ -24,9 +24,9 @@
 void btl_debugInit(void)
 {
 //Below variable is supported for Cortex-M4,M33
-#if((__CORTEX_M == 4) || (__CORTEX_M == 33))  
+#if ((__CORTEX_M == 4) || (__CORTEX_M == 33))
   uint32_t tpiu_prescaler_val;
-#endif 
+#endif
 
 #if defined(_CMU_HFBUSCLKEN0_GPIO_MASK)
   CMU->HFBUSCLKEN0 |= CMU_HFBUSCLKEN0_GPIO;
@@ -38,7 +38,6 @@ void btl_debugInit(void)
 //Check for Series
 #if defined(_SILICON_LABS_32B_SERIES_1)
 #if !defined(_SILICON_LABS_GECKO_INTERNAL_SDID_103)
-
 #if defined (_GPIO_ROUTEPEN_MASK)
   GPIO->ROUTEPEN |= GPIO_ROUTEPEN_SWVPEN;
 #endif
@@ -48,7 +47,7 @@ void btl_debugInit(void)
 
   // Set TPIU prescaler to 22 (19 MHz / 22 = 863.63 kHz SWO speed)
   tpiu_prescaler_val = 22 - 1;
-#endif                    
+#endif
   // Enable output on pin
 #if (SL_DEBUG_SWV_PIN > 7U)
   GPIO->P[SL_DEBUG_SWV_PORT].MODEH &= ~(_GPIO_P_MODEL_MODE0_MASK << (SL_DEBUG_SWV_PIN * 4U));
@@ -78,8 +77,13 @@ void btl_debugInit(void)
 #endif
 #else
 #if defined(_CMU_TRACECLKCTRL_CLKSEL_MASK)
+#if defined(_SILICON_LABS_GECKO_INTERNAL_SDID_230)
+  /* Select SYSCLK as source for TRACECLK */
+  CMU_ClockSelectSet(cmuClock_TRACECLK, cmuSelect_SYSCLK);
+#else
   /* Select HFRCOEM23 as source for TRACECLK */
   CMU_ClockSelectSet(cmuClock_TRACECLK, cmuSelect_HFRCOEM23);
+#endif
 #endif
 #endif
 
@@ -93,13 +97,11 @@ void btl_debugInit(void)
 #if (_SILICON_LABS_32B_SERIES < 2)
   // Enable debug clock AUXHFRCO
   CMU->OSCENCMD = CMU_OSCENCMD_AUXHFRCOEN;
-
   while ((CMU->STATUS & CMU_STATUS_AUXHFRCORDY) == 0UL) {
   }
 #endif
-
 //Below registers are supported for Cortex-M3,M4,M33
-#if((__CORTEX_M == 4) || (__CORTEX_M == 33))
+#if ((__CORTEX_M == 4) || (__CORTEX_M == 33))
   // Enable trace in core debug
   CoreDebug->DHCSR |= 1UL;
   CoreDebug->DEMCR |= CoreDebug_DEMCR_TRCENA_Msk;
@@ -122,7 +124,7 @@ void btl_debugInit(void)
 
   // ITM Channel 0 is used for UART output
   ITM->TER |= (1UL << 0);
-#endif  
+#endif
 }
 
 void btl_debugWriteChar(char c)

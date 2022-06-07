@@ -98,8 +98,9 @@ void emAfInitCallback(SLXU_INIT_ARG)
 
 EmberZdoStatus emAfRemoteSetBindingCallback(EmberBindingTableEntry *entry)
 {
-  EmberStatus setStatus;
   EmberZdoStatus status = EMBER_ZDP_TABLE_FULL;
+#if (EMBER_BINDING_TABLE_SIZE > 0)
+  EmberStatus setStatus;
   EmberBindingTableEntry candidate;
   uint8_t i;
 
@@ -132,6 +133,7 @@ EmberZdoStatus emAfRemoteSetBindingCallback(EmberBindingTableEntry *entry)
   }
 
   kickout:
+#endif
   return status;
 }
 

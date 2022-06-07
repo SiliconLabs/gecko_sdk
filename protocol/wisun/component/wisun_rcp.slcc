@@ -4,7 +4,7 @@ description: "Provide Wi-SUN Border Router RCP"
 package: "wisun"
 category: "Wi-SUN"
 quality: "production"
-root_path: "protocol/wisun/wisunrcp"
+root_path: "protocol/wisun/app/wisun_rcp"
 
 ui_hints:
   visibility: never
@@ -22,11 +22,9 @@ requires:
     condition:
       - device_sdid_220
   - name: "wisun_br_rcp_implementation"
-    recommends:
-    - id: "wisun_br_rcp_sources"
 
 recommends:
-- id: "wisun_br_rcp_sources"
+  - id: "wisun_br_rcp_sources"
 
 provides:
   - name: "wisun_rcp"

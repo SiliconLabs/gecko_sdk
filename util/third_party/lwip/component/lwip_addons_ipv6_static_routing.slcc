@@ -1,6 +1,5 @@
 id: lwip_addons_ip6_static_routing
 label: "IPv6 static routing"
-pretty_name : "IPv6 Static Routing"
 package: platform
 description: >
   IPv6 static routing addon.

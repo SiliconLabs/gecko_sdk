@@ -28,7 +28,7 @@
  *
  ******************************************************************************/
 
-#include "system.h"
+#include "sl_common.h"
 #include "btmesh_conf_job.h"
 #include "btmesh_conf_config.h"
 

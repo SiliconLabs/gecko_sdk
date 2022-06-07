@@ -366,7 +366,7 @@ sl_status_t sl_se_ecjpake_write_round_two(sl_se_ecjpake_context_t *ctx,
  *
  * @param[in,out] out_key
  *   Pointer to the generated key material. The length member of out_key is
- *   used to request a given lenght of the generated key.
+ *   used to request a given length of the generated key.
  *
  * @return
  *   SL_STATUS_OK if the signature is successfully verified, otherwise an
@@ -408,7 +408,7 @@ sl_status_t sl_se_derive_key_hkdf(sl_se_command_context_t *cmd_ctx,
  *
  * @param[in,out] out_key
  *   Pointer to the generated key material. The length member of out_key is
- *   used to request a given lenght of the generated key.
+ *   used to request a given length of the generated key.
  *
  * @return
  *   SL_STATUS_OK if the signature is successfully verified, otherwise an

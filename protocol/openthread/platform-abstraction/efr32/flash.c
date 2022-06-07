@@ -116,9 +116,11 @@ static nvm3_ObjectKey_t makeNvm3ObjKey(uint16_t otSettingsKey, int index);
 static otError          mapNvm3Error(Ecode_t nvm3Res);
 static bool             nvmOpenedByOT;
 
-void otPlatSettingsInit(otInstance *aInstance)
+void otPlatSettingsInit(otInstance *aInstance, const uint16_t *aSensitiveKeys, uint16_t aSensitiveKeysLength)
 {
     OT_UNUSED_VARIABLE(aInstance);
+    OT_UNUSED_VARIABLE(aSensitiveKeys);
+    OT_UNUSED_VARIABLE(aSensitiveKeysLength);
 
     // Only call nmv3_open if it has not been opened yet.
     if (nvm3_defaultHandle->hasBeenOpened) {

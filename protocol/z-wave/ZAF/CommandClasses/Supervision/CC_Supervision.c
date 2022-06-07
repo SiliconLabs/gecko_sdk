@@ -15,6 +15,7 @@
 #include "ZAF_tx_mutex.h"
 //#define DEBUGPRINT
 #include "DebugPrint.h"
+#include "zpal_entropy.h"
 
 /****************************************************************************/
 /*                      PRIVATE TYPES and DEFINITIONS                       */
@@ -63,9 +64,7 @@ CommandClassSupervisionInit( cc_supervision_status_updates_t status_updates,
   m_status_updates = status_updates;
   m_pGetReceivedHandler = pGetReceivedHandler;
   m_pReportReceivedHandler = pReportReceivedHandler;
-
-  SApplicationHandles* pAppHandle = ZAF_getAppHandle();
-  supervision_session_id = (pAppHandle->m_randomSeed % 64);
+  supervision_session_id = zpal_get_pseudo_random() % 64;
 }
 
 /**

@@ -18,8 +18,8 @@ limitations under the License.
 #include <cmath>
 #include <cstring>
 
-#include "tensorflow/lite/experimental/microfrontend/lib/frontend.h"
-#include "tensorflow/lite/experimental/microfrontend/lib/frontend_util.h"
+#include "microfrontend/lib/frontend.h"
+#include "microfrontend/lib/frontend_util.h"
 #include "micro_features/micro_model_settings.h"
 
 namespace {

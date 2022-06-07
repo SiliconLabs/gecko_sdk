@@ -31,11 +31,13 @@
 
 #include <openthread/border_router.h>
 #include <openthread/channel_monitor.h>
+#include <openthread/dnssd_server.h>
 #include <openthread/instance.h>
 #include <openthread/joiner.h>
 #include <openthread/link_raw.h>
 #include <openthread/ncp.h>
 #include <openthread/netdata.h>
+#include <openthread/srp_server.h>
 #include <openthread/thread_ftd.h>
 #include <openthread/platform/radio.h>
 
@@ -207,10 +209,16 @@ otbrError DBusThreadObject::Init(void)
                                std::bind(&DBusThreadObject::GetRadioTxPowerHandler, this, _1));
     RegisterGetPropertyHandler(OTBR_DBUS_THREAD_INTERFACE, OTBR_DBUS_PROPERTY_EXTERNAL_ROUTES,
                                std::bind(&DBusThreadObject::GetExternalRoutesHandler, this, _1));
+    RegisterGetPropertyHandler(OTBR_DBUS_THREAD_INTERFACE, OTBR_DBUS_PROPERTY_ON_MESH_PREFIXES,
+                               std::bind(&DBusThreadObject::GetOnMeshPrefixesHandler, this, _1));
     RegisterGetPropertyHandler(OTBR_DBUS_THREAD_INTERFACE, OTBR_DBUS_PROPERTY_ACTIVE_DATASET_TLVS,
                                std::bind(&DBusThreadObject::GetActiveDatasetTlvsHandler, this, _1));
     RegisterGetPropertyHandler(OTBR_DBUS_THREAD_INTERFACE, OTBR_DBUS_PROPERTY_RADIO_REGION,
                                std::bind(&DBusThreadObject::GetRadioRegionHandler, this, _1));
+    RegisterGetPropertyHandler(OTBR_DBUS_THREAD_INTERFACE, OTBR_DBUS_PROPERTY_SRP_SERVER_INFO,
+                               std::bind(&DBusThreadObject::GetSrpServerInfoHandler, this, _1));
+    RegisterGetPropertyHandler(OTBR_DBUS_THREAD_INTERFACE, OTBR_DBUS_PROPERTY_DNSSD_COUNTERS,
+                               std::bind(&DBusThreadObject::GetDnssdCountersHandler, this, _1));
 
     return error;
 }
@@ -249,19 +257,11 @@ void DBusThreadObject::ReplyScanResult(DBusRequest &                          aR
         {
             ActiveScanResult result;
 
-            result.mExtAddress    = ConvertOpenThreadUint64(r.mExtAddress.m8);
-            result.mExtendedPanId = ConvertOpenThreadUint64(r.mExtendedPanId.m8);
-            result.mNetworkName   = r.mNetworkName.m8;
-            result.mSteeringData =
-                std::vector<uint8_t>(r.mSteeringData.m8, r.mSteeringData.m8 + r.mSteeringData.mLength);
-            result.mPanId         = r.mPanId;
-            result.mJoinerUdpPort = r.mJoinerUdpPort;
-            result.mChannel       = r.mChannel;
-            result.mRssi          = r.mRssi;
-            result.mLqi           = r.mLqi;
-            result.mVersion       = r.mVersion;
-            result.mIsNative      = r.mIsNative;
-            result.mIsJoinable    = r.mIsJoinable;
+            result.mExtAddress = ConvertOpenThreadUint64(r.mExtAddress.m8);
+            result.mPanId      = r.mPanId;
+            result.mChannel    = r.mChannel;
+            result.mRssi       = r.mRssi;
+            result.mLqi        = r.mLqi;
 
             results.emplace_back(result);
         }
@@ -1057,6 +1057,40 @@ exit:
     return error;
 }
 
+otError DBusThreadObject::GetOnMeshPrefixesHandler(DBusMessageIter &aIter)
+{
+    auto                      threadHelper = mNcp->GetThreadHelper();
+    otError                   error        = OT_ERROR_NONE;
+    otNetworkDataIterator     iter         = OT_NETWORK_DATA_ITERATOR_INIT;
+    otBorderRouterConfig      config;
+    std::vector<OnMeshPrefix> onMeshPrefixes;
+
+    while (otNetDataGetNextOnMeshPrefix(threadHelper->GetInstance(), &iter, &config) == OT_ERROR_NONE)
+    {
+        OnMeshPrefix prefix;
+
+        prefix.mPrefix.mPrefix = std::vector<uint8_t>(&config.mPrefix.mPrefix.mFields.m8[0],
+                                                      &config.mPrefix.mPrefix.mFields.m8[OTBR_IP6_PREFIX_SIZE]);
+        prefix.mPrefix.mLength = config.mPrefix.mLength;
+        prefix.mRloc16         = config.mRloc16;
+        prefix.mPreference     = config.mPreference;
+        prefix.mPreferred      = config.mPreferred;
+        prefix.mSlaac          = config.mSlaac;
+        prefix.mDhcp           = config.mDhcp;
+        prefix.mConfigure      = config.mConfigure;
+        prefix.mDefaultRoute   = config.mDefaultRoute;
+        prefix.mOnMesh         = config.mOnMesh;
+        prefix.mStable         = config.mStable;
+        prefix.mNdDns          = config.mNdDns;
+        prefix.mDp             = config.mDp;
+        onMeshPrefixes.push_back(prefix);
+    }
+    VerifyOrExit(DBusMessageEncodeToVariant(&aIter, onMeshPrefixes) == OTBR_ERROR_NONE, error = OT_ERROR_INVALID_ARGS);
+
+exit:
+    return error;
+}
+
 otError DBusThreadObject::SetActiveDatasetTlvsHandler(DBusMessageIter &aIter)
 {
     auto                     threadHelper = mNcp->GetThreadHelper();
@@ -1146,6 +1180,94 @@ otError DBusThreadObject::GetRadioRegionHandler(DBusMessageIter &aIter)
 
 exit:
     return error;
+}
+
+otError DBusThreadObject::GetSrpServerInfoHandler(DBusMessageIter &aIter)
+{
+#if OTBR_ENABLE_SRP_ADVERTISING_PROXY
+    auto                               threadHelper = mNcp->GetThreadHelper();
+    auto                               instance     = threadHelper->GetInstance();
+    otError                            error        = OT_ERROR_NONE;
+    SrpServerInfo                      srpServerInfo{};
+    otSrpServerLeaseInfo               leaseInfo;
+    const otSrpServerHost *            host             = nullptr;
+    const otSrpServerResponseCounters *responseCounters = otSrpServerGetResponseCounters(instance);
+
+    srpServerInfo.mState       = SrpServerState(static_cast<uint8_t>(otSrpServerGetState(instance)));
+    srpServerInfo.mPort        = otSrpServerGetPort(instance);
+    srpServerInfo.mAddressMode = SrpServerAddressMode(static_cast<uint8_t>(otSrpServerGetAddressMode(instance)));
+
+    while ((host = otSrpServerGetNextHost(instance, host)))
+    {
+        const otSrpServerService *service = nullptr;
+
+        if (otSrpServerHostIsDeleted(host))
+        {
+            ++srpServerInfo.mHosts.mDeletedCount;
+        }
+        else
+        {
+            ++srpServerInfo.mHosts.mFreshCount;
+            otSrpServerHostGetLeaseInfo(host, &leaseInfo);
+            srpServerInfo.mHosts.mLeaseTimeTotal += leaseInfo.mLease;
+            srpServerInfo.mHosts.mKeyLeaseTimeTotal += leaseInfo.mKeyLease;
+            srpServerInfo.mHosts.mRemainingLeaseTimeTotal += leaseInfo.mRemainingLease;
+            srpServerInfo.mHosts.mRemainingKeyLeaseTimeTotal += leaseInfo.mRemainingKeyLease;
+        }
+
+        while ((service = otSrpServerHostGetNextService(host, service)))
+        {
+            if (otSrpServerServiceIsDeleted(service))
+            {
+                ++srpServerInfo.mServices.mDeletedCount;
+            }
+            else
+            {
+                ++srpServerInfo.mServices.mFreshCount;
+                otSrpServerServiceGetLeaseInfo(service, &leaseInfo);
+                srpServerInfo.mServices.mLeaseTimeTotal += leaseInfo.mLease;
+                srpServerInfo.mServices.mKeyLeaseTimeTotal += leaseInfo.mKeyLease;
+                srpServerInfo.mServices.mRemainingLeaseTimeTotal += leaseInfo.mRemainingLease;
+                srpServerInfo.mServices.mRemainingKeyLeaseTimeTotal += leaseInfo.mRemainingKeyLease;
+            }
+        }
+    }
+
+    srpServerInfo.mResponseCounters.mSuccess       = responseCounters->mSuccess;
+    srpServerInfo.mResponseCounters.mServerFailure = responseCounters->mServerFailure;
+    srpServerInfo.mResponseCounters.mFormatError   = responseCounters->mFormatError;
+    srpServerInfo.mResponseCounters.mNameExists    = responseCounters->mNameExists;
+    srpServerInfo.mResponseCounters.mRefused       = responseCounters->mRefused;
+    srpServerInfo.mResponseCounters.mOther         = responseCounters->mOther;
+
+    VerifyOrExit(DBusMessageEncodeToVariant(&aIter, srpServerInfo) == OTBR_ERROR_NONE, error = OT_ERROR_INVALID_ARGS);
+
+exit:
+    return error;
+#else  // OTBR_ENABLE_SRP_ADVERTISING_PROXY
+    OTBR_UNUSED_VARIABLE(aIter);
+
+    return OT_ERROR_NOT_IMPLEMENTED;
+#endif // OTBR_ENABLE_SRP_ADVERTISING_PROXY
+}
+
+otError DBusThreadObject::GetDnssdCountersHandler(DBusMessageIter &aIter)
+{
+#if OTBR_ENABLE_DNSSD_DISCOVERY_PROXY
+    auto          threadHelper  = mNcp->GetThreadHelper();
+    auto          instance      = threadHelper->GetInstance();
+    otError       error         = OT_ERROR_NONE;
+    DnssdCounters dnssdCounters = *otDnssdGetCounters(instance);
+
+    VerifyOrExit(DBusMessageEncodeToVariant(&aIter, dnssdCounters) == OTBR_ERROR_NONE, error = OT_ERROR_INVALID_ARGS);
+
+exit:
+    return error;
+#else  // OTBR_ENABLE_DNSSD_DISCOVERY_PROXY
+    OTBR_UNUSED_VARIABLE(aIter);
+
+    return OT_ERROR_NOT_IMPLEMENTED;
+#endif // OTBR_ENABLE_DNSSD_DISCOVERY_PROXY
 }
 
 } // namespace DBus

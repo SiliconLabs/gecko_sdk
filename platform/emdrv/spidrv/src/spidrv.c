@@ -36,7 +36,9 @@
 #include "em_device.h"
 #include "em_gpio.h"
 #include "em_core.h"
+#if defined (USART_PRESENT)
 #include "em_usart.h"
+#endif
 #if defined(EUSART_PRESENT)
 #include "em_eusart.h"
 #endif
@@ -638,8 +640,11 @@ static Ecode_t SPIDRV_InitEusart(SPIDRV_Handle_t handle, SPIDRV_Init_t *initData
     eusartSpiInit.master  = false;
     eusartSpiInit.bitRate = 1000000;
   } else {
+    eusartAdvancedSpiInit.forceLoad = false;
     eusartSpiInit.bitRate = initData->bitRate;
   }
+  // Leave eusartAdvancedSpiInit.defaultTxData = 0, not initData->dummyTxValue
+  // for EUSART compatibility with USART behavior.
 
   CMU_ClockEnable(cmuClock_GPIO, true);
   CMU_ClockEnable(handle->usartClock, true);
@@ -651,23 +656,13 @@ static Ecode_t SPIDRV_InitEusart(SPIDRV_Handle_t handle, SPIDRV_Init_t *initData
   uint32_t databits = initData->frameLength - 7U + EUSART_FRAMECFG_DATABITS_SEVEN;
   eusartSpiInit.databits = (EUSART_Databits_TypeDef)databits;
 
-  if ((initData->type == spidrvMaster)
-      && (initData->csControl == spidrvCsControlAuto)) {
-    eusartAdvancedSpiInit.autoCsEnable = true;
+  if (initData->type == spidrvMaster) {
+    // Don't assume EUSART_SPI_ADVANCED_INIT_DEFAULT has desired autoCsEnable
+    eusartAdvancedSpiInit.autoCsEnable = (initData->csControl == spidrvCsControlAuto);
   }
 
-  EUSART_SpiInit(initData->port, &eusartSpiInit);
-
-  // SPI 4 wire mode
-  if (initData->csControl == spidrvCsControlAuto) {
-    GPIO->EUSARTROUTE[spiPortNum].ROUTEEN = GPIO_EUSART_ROUTEEN_TXPEN
-                                            | GPIO_EUSART_ROUTEEN_RXPEN
-                                            | GPIO_EUSART_ROUTEEN_SCLKPEN
-                                            | GPIO_EUSART_ROUTEEN_CSPEN;
-  } else {
-    GPIO->EUSARTROUTE[spiPortNum].ROUTEEN = GPIO_EUSART_ROUTEEN_TXPEN
-                                            | GPIO_EUSART_ROUTEEN_RXPEN
-                                            | GPIO_EUSART_ROUTEEN_SCLKPEN;
+  if ((retVal = ConfigGPIO(handle, true)) != ECODE_EMDRV_SPIDRV_OK) {
+    return retVal;
   }
 
   GPIO->EUSARTROUTE[spiPortNum].TXROUTE = ((uint32_t)initData->portTx
@@ -691,9 +686,19 @@ static Ecode_t SPIDRV_InitEusart(SPIDRV_Handle_t handle, SPIDRV_Init_t *initData
                                                << _GPIO_EUSART_CSROUTE_PIN_SHIFT);
   }
 
-  if ((retVal = ConfigGPIO(handle, true)) != ECODE_EMDRV_SPIDRV_OK) {
-    return retVal;
+  // SPI 4 wire mode
+  if (initData->csControl == spidrvCsControlAuto) {
+    GPIO->EUSARTROUTE[spiPortNum].ROUTEEN = GPIO_EUSART_ROUTEEN_TXPEN
+                                            | GPIO_EUSART_ROUTEEN_RXPEN
+                                            | GPIO_EUSART_ROUTEEN_SCLKPEN
+                                            | GPIO_EUSART_ROUTEEN_CSPEN;
+  } else {
+    GPIO->EUSARTROUTE[spiPortNum].ROUTEEN = GPIO_EUSART_ROUTEEN_TXPEN
+                                            | GPIO_EUSART_ROUTEEN_RXPEN
+                                            | GPIO_EUSART_ROUTEEN_SCLKPEN;
   }
+
+  EUSART_SpiInit(initData->port, &eusartSpiInit);
 
   CORE_ENTER_ATOMIC();
   if (!spidrvIsInitialized) {
@@ -2084,18 +2089,11 @@ static void SlaveTimeout(sl_sleeptimer_timer_handle_t *sleepdriver_handle, void 
  ******************************************************************************/
 static void clearEusartFifos(EUSART_TypeDef *eusart)
 {
-  eusart->CMD = EUSART_CMD_CLEARTX;
-
-  while ((eusart->STATUS & EUSART_STATUS_CLEARTXBUSY) != 0U) {
-  }
-
-  // Read data until FIFO is emptied
-  // but taking care not to underflow the receiver
-  while (eusart->STATUS & EUSART_STATUS_RXFL) {
-    eusart->RXDATA;
-  }
-
-  return;
+  // EUSART_CMD_CLEARTX reportedly only affects UART, not SPI mode,
+  // and there is no EUSART_CMD_CLEARRX. Only way to clear the
+  // FIFOs is via the big hammer of disabling then reenabling it.
+  EUSART_Enable(eusart, eusartDisable);
+  EUSART_Enable(eusart, eusartEnable);
 }
 #endif
 

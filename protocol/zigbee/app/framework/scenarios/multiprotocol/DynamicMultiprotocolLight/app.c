@@ -27,10 +27,12 @@
 #include "app/framework/plugin/network-creator-security/network-creator-security.h"
 #include "app/framework/plugin/network-creator/network-creator.h"
 #include "app/framework/plugin/reporting/reporting.h"
+#ifdef SL_CATALOG_ZIGBEE_BLE_EVENT_HANDLER_PRESENT
+#include "sl_ble_event_handler.h"
+#endif
 
 #include "sl_component_catalog.h"
 #include "app/util/common/uc-temp-macros.h"
-#include "sl_ble_event_handler.h"
 
 #ifdef SL_CATALOG_ZIGBEE_DISPLAY_PRESENT
 #include "sl_dmp_ui.h"
@@ -101,7 +103,7 @@ static void button_event_handler(sl_zigbee_event_t *event)
         } else {
           if (startPjoinAndIdentifying(180)) {
             sl_dmp_ui_zigbee_permit_join(true);
-            sl_zigbee_app_debug_print("pJoin for 180 sec: 0x%02X\n", status);
+            sl_zigbee_app_debug_print("pJoin for 180 sec\n");
           }
         }
       } else {
@@ -190,11 +192,15 @@ void emberAfPostAttributeChangeCallback(uint8_t endpoint,
         led_turn_off(LED0);
         led_turn_off(LED1);
         sl_dmp_ui_light_off();
+#ifdef SL_CATALOG_ZIGBEE_BLE_EVENT_HANDLER_PRESENT
         zb_ble_dmp_notify_light(DMP_UI_LIGHT_OFF);
+#endif
       } else {
         led_turn_on(LED0);
         led_turn_on(LED1);
+#ifdef SL_CATALOG_ZIGBEE_BLE_EVENT_HANDLER_PRESENT
         zb_ble_dmp_notify_light(DMP_UI_LIGHT_ON);
+#endif
         sl_dmp_ui_light_on();
       }
       if ((sl_dmp_ui_get_light_direction() == DMP_UI_DIRECTION_BLUETOOTH)
@@ -202,7 +208,9 @@ void emberAfPostAttributeChangeCallback(uint8_t endpoint,
         sl_dmp_ui_update_direction(sl_dmp_ui_get_light_direction());
       } else {
         sl_dmp_ui_update_direction(DMP_UI_DIRECTION_ZIGBEE);
+#ifdef SL_CATALOG_ZIGBEE_BLE_EVENT_HANDLER_PRESENT
         zb_ble_dmp_set_source_address(SwitchEUI);
+#endif
       }
 
       sl_dmp_ui_set_light_direction(DMP_UI_DIRECTION_INVALID);
@@ -221,7 +229,7 @@ void emberAfPostAttributeChangeCallback(uint8_t endpoint,
  * called emberAfCurrentCommand, in app/framework/util/util.c. When command
  * processing is complete, this pointer is cleared.
  */
-boolean emberAfPreCommandReceivedCallback(EmberAfClusterCommand* cmd)
+bool emberAfPreCommandReceivedCallback(EmberAfClusterCommand* cmd)
 {
   if ((cmd->commandId == ZCL_ON_COMMAND_ID)
       || (cmd->commandId == ZCL_OFF_COMMAND_ID)
@@ -350,7 +358,9 @@ static void toggleOnoffAttribute(void)
 
     sl_dmp_ui_set_light_direction(DMP_UI_DIRECTION_SWITCH);
     emberAfGetEui64(lightEUI);
+#ifdef SL_CATALOG_ZIGBEE_BLE_EVENT_HANDLER_PRESENT
     zb_ble_dmp_set_source_address(lightEUI);
+#endif
   } else {
     sl_zigbee_app_debug_print("read onoff attr: 0x%x\n", status);
   }
@@ -377,7 +387,7 @@ static void setDefaultReportEntry(void)
   reportingEntry.manufacturerCode = EMBER_AF_NULL_MANUFACTURER_CODE;
   reportingEntry.data.reported.minInterval = 0x0001;
   reportingEntry.data.reported.maxInterval = 0x0002;
-  reportingEntry.data.reported.reportableChange = 0; //onoff is boolean type so it is unused
+  reportingEntry.data.reported.reportableChange = 0; //onoff is bool type so it is unused
   emberAfPluginReportingConfigureReportedAttribute(&reportingEntry);
 }
 

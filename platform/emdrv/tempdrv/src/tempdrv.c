@@ -44,7 +44,7 @@
 
 typedef struct {
   TEMPDRV_Callback_t callback;    ///< Callback function
-  uint8_t temp;                   ///< Limit temperature (EMU value)
+  uint16_t temp;                   ///< Limit temperature (EMU value)
 } TEMPDRV_CallbackSet_t;
 
 #if defined(_SILICON_LABS_GECKO_INTERNAL_SDID_80)
@@ -80,7 +80,7 @@ static TEMPDRV_CallbackSet_t *lowCallback;
 static bool TEMPDRV_InitState = false;
 static bool TEMPDRV_EnableState = false;
 
-static uint32_t convertToEmu(int temp);
+static uint16_t convertToEmu(int temp);
 static void updateInterrupts(void);
 
 #if defined(_DEVINFO_CAL_TEMP_MASK)
@@ -239,8 +239,8 @@ static void errataInit(void)
 
   /* Rev A temp errata handling */
   if (rev.major == 0x01) {
-    uint8_t limitLow;
-    uint8_t limitHigh;
+    uint16_t limitLow;
+    uint16_t limitHigh;
 
     // Initialize Low temperature state [*, 65]
     limitHigh = convertToEmu(ERRATA_MID_LIMIT);
@@ -369,7 +369,7 @@ static bool removeCallback(TEMPDRV_CallbackSet_t *set,
 static bool checkForDuplicates(TEMPDRV_CallbackSet_t *set, int8_t temp)
 {
   uint8_t index;
-  uint8_t emu = convertToEmu(temp);
+  uint16_t emu = convertToEmu(temp);
   for (index = TEMPDRV_CUSTOM_CALLBACK_INDEX; index < TEMPDRV_CALLBACK_DEPTH; index++) {
     // filter out only entries with valid callbacks
     if (set[index].callback != NULL) {
@@ -393,10 +393,10 @@ static bool checkForDuplicates(TEMPDRV_CallbackSet_t *set, int8_t temp)
  * @return
  *   EMU temperature sensor value that represents the given temperature
  ******************************************************************************/
-static uint32_t convertToEmu(int temp)
+static uint16_t convertToEmu(int temp)
 {
 #if defined(_SILICON_LABS_32B_SERIES_2)
-  return (uint32_t)(temp + 273); // Convert from Celsius to Kelvin
+  return (uint16_t)((temp + 273) & 0x1FF); // Convert from Celsius to Kelvin (9 bits)
 #else
   int32_t res = (int32_t) calibrationEMU -  ((temp * 5) >> 3);
   // Cap conversion results at uint8_t bounds
@@ -466,14 +466,14 @@ static void updateInterrupts(void)
   // On Series-1 devices the temperature code is inverted (high value = low temperature)
   if (highCallback->callback != NULL) {
     EMU->TEMPLIMITS = (EMU->TEMPLIMITS & ~_EMU_TEMPLIMITS_TEMPLOW_MASK)
-                      | (highCallback->temp << _EMU_TEMPLIMITS_TEMPLOW_SHIFT);
+                      | ((highCallback->temp << _EMU_TEMPLIMITS_TEMPLOW_SHIFT) & _EMU_TEMPLIMITS_TEMPLOW_MASK);
     EMU_IntEnable(EMU_IEN_TEMPLOW);
   } else {
     EMU_IntDisable(EMU_IEN_TEMPLOW);
   }
   if (lowCallback->callback != NULL) {
     EMU->TEMPLIMITS = (EMU->TEMPLIMITS & ~_EMU_TEMPLIMITS_TEMPHIGH_MASK)
-                      | (lowCallback->temp << _EMU_TEMPLIMITS_TEMPHIGH_SHIFT);
+                      | ((lowCallback->temp << _EMU_TEMPLIMITS_TEMPHIGH_SHIFT) & _EMU_TEMPLIMITS_TEMPHIGH_MASK);
     EMU_IntEnable(EMU_IEN_TEMPHIGH);
   } else {
     EMU_IntDisable(EMU_IEN_TEMPHIGH);
@@ -482,14 +482,14 @@ static void updateInterrupts(void)
   // On Series-2 devices the temperature code is normal (high value = high temperature)
   if (highCallback->callback != NULL) {
     EMU->TEMPLIMITS = (EMU->TEMPLIMITS & ~_EMU_TEMPLIMITS_TEMPHIGH_MASK)
-                      | (highCallback->temp << _EMU_TEMPLIMITS_TEMPHIGH_SHIFT);
+                      | ((highCallback->temp << _EMU_TEMPLIMITS_TEMPHIGH_SHIFT) & _EMU_TEMPLIMITS_TEMPHIGH_MASK);
     EMU_IntEnable(EMU_IEN_TEMPHIGH);
   } else {
     EMU_IntDisable(EMU_IEN_TEMPHIGH);
   }
   if (lowCallback->callback != NULL) {
     EMU->TEMPLIMITS = (EMU->TEMPLIMITS & ~_EMU_TEMPLIMITS_TEMPLOW_MASK)
-                      | (lowCallback->temp << _EMU_TEMPLIMITS_TEMPLOW_SHIFT);
+                      | ((lowCallback->temp << _EMU_TEMPLIMITS_TEMPLOW_SHIFT) & _EMU_TEMPLIMITS_TEMPLOW_MASK);
     EMU_IntEnable(EMU_IEN_TEMPLOW);
   } else {
     EMU_IntDisable(EMU_IEN_TEMPLOW);

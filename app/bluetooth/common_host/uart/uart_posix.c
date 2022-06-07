@@ -93,12 +93,7 @@ int32_t uartOpen(void *handle, int8_t *port, uint32_t baudRate,
 
 void uartFlush(void *handle)
 {
-  uint8_t buf[4];
-
-  // Flush all accumulated data in target
-  usleep(50000);
-  while (uartRxNonBlocking(handle, 4, buf) == 4) {
-  }
+  tcflush(*(int32_t *)handle, TCIOFLUSH);
 }
 
 int32_t uartClose(void *handle)

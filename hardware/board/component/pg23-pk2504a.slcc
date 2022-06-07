@@ -14,9 +14,9 @@
   - name: SL_KIT_NAME
     value: '"PG23-PK2504A"'
   - name: SL_KIT_REV
-    value: '"A02"'
+    value: '"A03"'
 - tag:
   - kit:opn:PG23-PK2504A
   - kit:pn:PK2504
   - kit:variant:A
-  - kit:revision:A02
+  - kit:revision:A03

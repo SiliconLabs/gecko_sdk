@@ -29,12 +29,14 @@
  *
  ******************************************************************************/
 
+// <<< Use Configuration Wizard in Context Menu >>>
+
 #ifndef SL_CLI_STORAGE_RAM_CONFIG_INSTANCE_H
 #define SL_CLI_STORAGE_RAM_CONFIG_INSTANCE_H
 
 // <o SL_CLI_STORAGE_RAM_INSTANCE_CLI_HANDLE> The cli handle used by the cli_storage_ram instance
 // <i> Default: sl_cli_default_handle
-  #define SL_CLI_STORAGE_RAM_INSTANCE_CLI_HANDLE   sl_cli_default_handle
+#define SL_CLI_STORAGE_RAM_INSTANCE_CLI_HANDLE     sl_cli_default_handle
 
 // <s.20 SL_CLI_STORAGE_RAM_INSTANCE_END_STRING> String to indicate end of CLI entry.
 // <i> Default: "zzz"

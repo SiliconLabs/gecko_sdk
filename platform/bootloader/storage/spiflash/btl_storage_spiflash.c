@@ -528,6 +528,10 @@ int32_t storage_getDMAchannel(void)
   return -1;
 }
 
+uint32_t storage_getSpiUsartPPUSATD(uint32_t *ppusatdNr) {
+  return spi_getUsartPPUSATD(ppusatdNr);
+}
+
 int32_t storage_eraseRaw(uint32_t address, size_t totalLength)
 {
   // Get device characteristics

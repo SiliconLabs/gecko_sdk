@@ -5,6 +5,13 @@ label: Platform - Blink Bare-metal
 description: > 
   This example project shows how to blink an LED in a bare-metal configuration.
 category: Example|Platform
+filter:
+  - name: "Device Type"
+    value: ["SoC"]
+  - name: "MCU"
+    value: ["32-bit MCU"]
+  - name: "Project Difficulty"
+    value: ["Beginner"]
 source:
   - path: app.c
   - path: main.c
@@ -22,5 +29,9 @@ component:
     instance: [led0]
 define:
   - name: DEBUG_EFM
+readme:
+  - path: readme.md
+ui_hints:
+  highlight: readme.md
 tag:
   - hardware:component:led:1+

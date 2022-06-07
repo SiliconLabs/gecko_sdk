@@ -12,14 +12,7 @@
   - path: platform/Device/SiliconLabs/EFM32GG11B/Source/system_efm32gg11b.c
     unless:
     - device_content_override
-  - condition:
-    - toolchain_iar
-    path: platform/Device/SiliconLabs/EFM32GG11B/Source/IAR/startup_efm32gg11b.c
-    unless:
-    - device_content_override
-  - condition:
-    - toolchain_gcc
-    path: platform/Device/SiliconLabs/EFM32GG11B/Source/GCC/startup_efm32gg11b.c
+  - path: platform/Device/SiliconLabs/EFM32GG11B/Source/startup_efm32gg11b.c
     unless:
     - device_content_override
   - condition:
@@ -246,3 +239,21 @@
     - custom_radio_config
     directory: rail
     path: platform/Device/config/100/device.yaml
+- metadata:
+    device:
+      memory:
+      - name: Main Flash
+        page_size: 4096
+        size: 1048576
+        start: 0
+        type: non-volatile
+      - name: Bootloader Flash
+        page_size: 4096
+        size: 32768
+        start: 266403840
+        type: non-volatile
+      - name: RAM
+        size: 524288
+        start: 536870912
+        type: volatile
+      opn: efm32gg11b840f1024gq64

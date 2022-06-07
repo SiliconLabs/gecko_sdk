@@ -31,7 +31,7 @@ class CALC_Pro2_Demod_Ocelot(ICalculator):
         # This method calls the pro2 calculator
 
         # Load model values into local variables
-        hardmodem_freq_actual = model.vars.hardmodem_freq_actual.value
+        modem_frequency_hz = model.vars.modem_frequency_hz.value
         rx_xtal_error_ppm = model.vars.rx_xtal_error_ppm.value
         tx_xtal_error_ppm = model.vars.tx_xtal_error_ppm.value
         bandwidth_hz = model.vars.bandwidth_hz.value
@@ -58,7 +58,7 @@ class CALC_Pro2_Demod_Ocelot(ICalculator):
         #Create the input dict
             fdeverror = model.vars.deviation_tol_ppm.value
             pro2_inputs = OrderedDict({})
-            pro2_inputs["API_freq_xo"] = hardmodem_freq_actual
+            pro2_inputs["API_freq_xo"] = modem_frequency_hz
             pro2_inputs["API_crystal_tol"] = (rx_xtal_error_ppm + tx_xtal_error_ppm)/2.0
             pro2_inputs["API_if_mode"] = 2 #Fixed IF = 468.75kHz
             pro2_inputs["API_High_perf_Ch_Fil"] = 1 #High performance channel filter enabled, don't care since we aren't using this IP
@@ -608,7 +608,7 @@ class CALC_Pro2_Demod_Ocelot(ICalculator):
         # This function calculates the KSI3 value for the BCR demod
         # Load model values into local variables
         calculated_phscale = model.vars.MODEM_TRECPMDET_PHSCALE.value
-        ksi3wb_actual = model.vars.ksi3wb_actual.value
+        ksi3wb_actual = model.vars.ksi3wb.value
 
         model.vars.calculated_ksi3.value = int(round(ksi3wb_actual))
         model.vars.calculated_phscale.value = calculated_phscale

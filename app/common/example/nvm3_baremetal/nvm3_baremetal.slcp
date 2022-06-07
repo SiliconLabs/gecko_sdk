@@ -8,6 +8,13 @@ description: >
   NVM3 data objects through the serial connection. The number of
   writes and deletes are tracked in counter objects.
 category: Example|Platform
+filter:
+  - name: "Device Type"
+    value: ["SoC"]
+  - name: "MCU"
+    value: ["32-bit MCU"]
+  - name: "Project Difficulty"
+    value: ["Beginner"]
 source:
   - path: app.c
   - path: main.c
@@ -32,6 +39,10 @@ define:
 configuration:
   - name: SL_BOARD_ENABLE_VCOM
     value: 1
+  - name: NVM3_DEFAULT_MAX_OBJECT_SIZE
+    value: 204
+  - name: SL_CLI_INPUT_BUFFER_SIZE
+    value: 256
 template_contribution:
   - name: cli_command
     value:
@@ -69,3 +80,7 @@ template_contribution:
       name: reset
       handler: nvm3_app_reset
       help: "Erase all NVM3 data"
+readme:
+  - path: readme.md
+ui_hints:
+  highlight: readme.md

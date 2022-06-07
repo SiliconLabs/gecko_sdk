@@ -7,6 +7,8 @@ category: Platform|Bootloader|Storage
 quality: production
 provides:
   - name: bootloader_storage_slots
+  - name: bootloader_nonsecure_incompatible
+    condition: [bootloader_core_nonsecure]
 config_file:
   - path: platform/bootloader/config/btl_storage_slot_cfg.h
     file_id: btl_storage_slot_cfg

@@ -153,6 +153,16 @@ class MicroMutableOpResolver : public MicroOpResolver {
                       Register_BATCH_TO_SPACE_ND(), ParseBatchToSpaceNd);
   }
 
+  TfLiteStatus AddBroadcastArgs() {
+    return AddBuiltin(BuiltinOperator_BROADCAST_ARGS, Register_BROADCAST_ARGS(),
+                      ParseBroadcastArgs);
+  }
+
+  TfLiteStatus AddBroadcastTo() {
+    return AddBuiltin(BuiltinOperator_BROADCAST_TO, Register_BROADCAST_TO(),
+                      ParseBroadcastTo);
+  }
+
   TfLiteStatus AddCallOnce() {
     return AddBuiltin(BuiltinOperator_CALL_ONCE, Register_CALL_ONCE(),
                       ParseCallOnce);
@@ -356,6 +366,11 @@ class MicroMutableOpResolver : public MicroOpResolver {
                       tflite::Register_MAX_POOL_2D(), ParsePool);
   }
 
+  TfLiteStatus AddMirrorPad() {
+    return AddBuiltin(BuiltinOperator_MIRROR_PAD, tflite::Register_MIRROR_PAD(),
+                      ParseMirrorPad);
+  }
+
   TfLiteStatus AddMean() {
     return AddBuiltin(BuiltinOperator_MEAN, tflite::ops::micro::Register_MEAN(),
                       ParseReducer);
@@ -459,6 +474,10 @@ class MicroMutableOpResolver : public MicroOpResolver {
                       ParseSin);
   }
 
+  TfLiteStatus AddSlice() {
+    return AddBuiltin(BuiltinOperator_SLICE, Register_SLICE(), ParseSlice);
+  }
+
   TfLiteStatus AddSoftmax(
       const TfLiteRegistration& registration = Register_SOFTMAX()) {
     return AddBuiltin(BuiltinOperator_SOFTMAX, registration, ParseSoftmax);
@@ -535,15 +554,18 @@ class MicroMutableOpResolver : public MicroOpResolver {
   }
 
   TfLiteStatus AddUnidirectionalSequenceLSTM() {
-    return AddBuiltin(
-        BuiltinOperator_UNIDIRECTIONAL_SEQUENCE_LSTM,
-        tflite::ops::micro::Register_UNIDIRECTIONAL_SEQUENCE_LSTM(),
-        ParseUnidirectionalSequenceLSTM);
+    return AddBuiltin(BuiltinOperator_UNIDIRECTIONAL_SEQUENCE_LSTM,
+                      Register_UNIDIRECTIONAL_SEQUENCE_LSTM(),
+                      ParseUnidirectionalSequenceLSTM);
   }
 
   TfLiteStatus AddVarHandle() {
     return AddBuiltin(BuiltinOperator_VAR_HANDLE, Register_VAR_HANDLE(),
                       ParseVarHandle);
+  }
+
+  TfLiteStatus AddWhile() {
+    return AddBuiltin(BuiltinOperator_WHILE, Register_WHILE(), ParseWhile);
   }
 
   TfLiteStatus AddZerosLike() {

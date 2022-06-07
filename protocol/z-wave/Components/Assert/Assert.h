@@ -54,7 +54,7 @@ extern "C" {
 
 typedef void (*AssertCb_t)();
 
-void Assert(bool bMustBeTrue, const char* pFileName, int iLineNumber);
+void Assert(const char* pFileName, int iLineNumber);
 /**
  * @brief Sets the callback function which is executed at the end of an assertion
  * 
@@ -76,9 +76,9 @@ void Assert_SetCb(AssertCb_t cb);
 // The defines will ensure that the std full path __FILE__ is used if __FILENAME__ is not available
 #ifndef NDEBUG
   #ifdef __FILENAME__
-  #define ASSERT(BMUSTBETRUE)   ( Assert( (BMUSTBETRUE), (__FILENAME__), (__LINE__) ) )
+  #define ASSERT(BMUSTBETRUE)    ((BMUSTBETRUE) ? ((void)0) : Assert(__FILENAME__, __LINE__))  
   #else // __FILENAME__
-  #define ASSERT(BMUSTBETRUE)   ( Assert( (BMUSTBETRUE), (__FILE__), (__LINE__) ) )
+  #define ASSERT(BMUSTBETRUE)    ((BMUSTBETRUE) ? ((void)0) : Assert(__FILE__, __LINE__))  
   #endif // __FILENAME__
 #endif // NDEBUG
 
@@ -89,7 +89,7 @@ void Assert_SetCb(AssertCb_t cb);
 // Do-while wrapping ensures macro requires a ';' at the end, and prevents issues with the if in
 // cases where the macro is used within an if/else statement, in which case the following
 // else can become else to the if(0).
-#define ASSERT(BMUSTBETRUE)   do { if(0) {Assert( (BMUSTBETRUE), "", 0);} } while (0)
+#define ASSERT(BMUSTBETRUE)   do { (void) (BMUSTBETRUE); } while (0)
 #endif // NDEBUG
 
 // Usage: STATIC_ASSERT(bMustBeTrue, STATIC_ASSERT_FAILED_my_scope_unique_static_assert_error_message);

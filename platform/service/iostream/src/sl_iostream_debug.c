@@ -42,7 +42,7 @@
 #include "sl_iostream_debug.h"
 #include "sl_status.h"
 #include "sl_atomic.h"
-#include "em_assert.h"
+#include "sl_assert.h"
 #include "em_gpio.h"
 #include "em_cmu.h"
 

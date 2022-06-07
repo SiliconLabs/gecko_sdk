@@ -17,7 +17,7 @@
         <TargetCommonOption>
           <Device>ARMCM0</Device>
           <Vendor>ARM</Vendor>
-          <PackID>ARM.CMSIS.5.2.0</PackID>
+          <PackID>ARM.CMSIS.5.7.0</PackID>
           <PackURL>http://www.keil.com/pack/</PackURL>
           <Cpu>IRAM(0x20000000,0x00020000) IROM(0x00000000,0x00040000) CPUTYPE("Cortex-M0") CLOCK(12000000) ESEL ELITTLE</Cpu>
           <FlashUtilSpec></FlashUtilSpec>
@@ -169,6 +169,8 @@
             <hadXRAM>0</hadXRAM>
             <uocXRam>0</uocXRam>
             <RvdsVP>0</RvdsVP>
+            <RvdsMve>0</RvdsMve>
+            <RvdsCdeCp>0</RvdsCdeCp>
             <hadIRAM2>0</hadIRAM2>
             <hadIROM2>0</hadIROM2>
             <OnChipMemories>
@@ -243,7 +245,7 @@
               <MiscControls>-ffunction-sections</MiscControls>
               <Define>EVR_RTX_DISABLE</Define>
               <Undefine></Undefine>
-              <IncludePath>..\..\..\Config;..\..\..\Include;..\..\..\..\Include</IncludePath>
+              <IncludePath>..\..\..\Library;..\..\..\Include;..\..\..\..\Include</IncludePath>
             </VariousControls>
           </Carm>
           <Aarm>
@@ -273,6 +275,16 @@
         </TargetArm>
       </TargetOption>
       <Groups>
+        <Group>
+          <GroupName>Configuration</GroupName>
+          <Files>
+            <File>
+              <FileName>RTX_Config.h</FileName>
+              <FileType>5</FileType>
+              <FilePath>..\..\RTX_Config.h</FilePath>
+            </File>
+          </Files>
+        </Group>
         <Group>
           <GroupName>Core</GroupName>
           <Files>
@@ -347,14 +359,14 @@
           <GroupName>Handlers</GroupName>
           <Files>
             <File>
-              <FileName>irq_cm0.S</FileName>
-              <FileType>2</FileType>
-              <FilePath>..\..\..\Source\GCC\irq_cm0.S</FilePath>
+              <FileName>irq_armv6m.S</FileName>
+              <FileType>1</FileType>
+              <FilePath>..\..\..\Source\GCC\irq_armv6m.S</FilePath>
             </File>
             <File>
-              <FileName>irq_cm3.S</FileName>
-              <FileType>2</FileType>
-              <FilePath>..\..\..\Source\GCC\irq_cm3.S</FilePath>
+              <FileName>irq_armv7m.S</FileName>
+              <FileType>1</FileType>
+              <FilePath>..\..\..\Source\GCC\irq_armv7m.S</FilePath>
               <FileOption>
                 <CommonProperty>
                   <UseCPPCompiler>2</UseCPPCompiler>
@@ -373,57 +385,29 @@
                   <ComprImg>1</ComprImg>
                 </CommonProperty>
                 <FileArm>
-                  <Aarm>
-                    <bBE>2</bBE>
+                  <Carm>
+                    <arpcs>2</arpcs>
+                    <stkchk>2</stkchk>
+                    <reentr>2</reentr>
                     <interw>2</interw>
+                    <bigend>2</bigend>
+                    <Strict>0</Strict>
+                    <Optim>0</Optim>
+                    <wLevel>0</wLevel>
+                    <uThumb>2</uThumb>
                     <VariousControls>
                       <MiscControls></MiscControls>
                       <Define></Define>
                       <Undefine></Undefine>
                       <IncludePath></IncludePath>
                     </VariousControls>
-                  </Aarm>
-                </FileArm>
-              </FileOption>
-            </File>
-            <File>
-              <FileName>irq_cm4f.S</FileName>
-              <FileType>2</FileType>
-              <FilePath>..\..\..\Source\GCC\irq_cm4f.S</FilePath>
-              <FileOption>
-                <CommonProperty>
-                  <UseCPPCompiler>2</UseCPPCompiler>
-                  <RVCTCodeConst>0</RVCTCodeConst>
-                  <RVCTZI>0</RVCTZI>
-                  <RVCTOtherData>0</RVCTOtherData>
-                  <ModuleSelection>0</ModuleSelection>
-                  <IncludeInBuild>0</IncludeInBuild>
-                  <AlwaysBuild>2</AlwaysBuild>
-                  <GenerateAssemblyFile>2</GenerateAssemblyFile>
-                  <AssembleAssemblyFile>2</AssembleAssemblyFile>
-                  <PublicsOnly>2</PublicsOnly>
-                  <StopOnExitCode>11</StopOnExitCode>
-                  <CustomArgument></CustomArgument>
-                  <IncludeLibraryModules></IncludeLibraryModules>
-                  <ComprImg>1</ComprImg>
-                </CommonProperty>
-                <FileArm>
-                  <Aarm>
-                    <bBE>2</bBE>
-                    <interw>2</interw>
-                    <VariousControls>
-                      <MiscControls></MiscControls>
-                      <Define></Define>
-                      <Undefine></Undefine>
-                      <IncludePath></IncludePath>
-                    </VariousControls>
-                  </Aarm>
+                  </Carm>
                 </FileArm>
               </FileOption>
             </File>
             <File>
               <FileName>irq_armv8mbl.S</FileName>
-              <FileType>2</FileType>
+              <FileType>1</FileType>
               <FilePath>..\..\..\Source\GCC\irq_armv8mbl.S</FilePath>
               <FileOption>
                 <CommonProperty>
@@ -443,22 +427,29 @@
                   <ComprImg>1</ComprImg>
                 </CommonProperty>
                 <FileArm>
-                  <Aarm>
-                    <bBE>2</bBE>
+                  <Carm>
+                    <arpcs>2</arpcs>
+                    <stkchk>2</stkchk>
+                    <reentr>2</reentr>
                     <interw>2</interw>
+                    <bigend>2</bigend>
+                    <Strict>0</Strict>
+                    <Optim>0</Optim>
+                    <wLevel>0</wLevel>
+                    <uThumb>2</uThumb>
                     <VariousControls>
                       <MiscControls></MiscControls>
                       <Define></Define>
                       <Undefine></Undefine>
                       <IncludePath></IncludePath>
                     </VariousControls>
-                  </Aarm>
+                  </Carm>
                 </FileArm>
               </FileOption>
             </File>
             <File>
               <FileName>irq_armv8mml.S</FileName>
-              <FileType>2</FileType>
+              <FileType>1</FileType>
               <FilePath>..\..\..\Source\GCC\irq_armv8mml.S</FilePath>
               <FileOption>
                 <CommonProperty>
@@ -478,16 +469,23 @@
                   <ComprImg>1</ComprImg>
                 </CommonProperty>
                 <FileArm>
-                  <Aarm>
-                    <bBE>2</bBE>
+                  <Carm>
+                    <arpcs>2</arpcs>
+                    <stkchk>2</stkchk>
+                    <reentr>2</reentr>
                     <interw>2</interw>
+                    <bigend>2</bigend>
+                    <Strict>0</Strict>
+                    <Optim>0</Optim>
+                    <wLevel>0</wLevel>
+                    <uThumb>2</uThumb>
                     <VariousControls>
                       <MiscControls></MiscControls>
                       <Define></Define>
                       <Undefine></Undefine>
                       <IncludePath></IncludePath>
                     </VariousControls>
-                  </Aarm>
+                  </Carm>
                 </FileArm>
               </FileOption>
             </File>
@@ -509,7 +507,7 @@
         <TargetCommonOption>
           <Device>ARMCM3</Device>
           <Vendor>ARM</Vendor>
-          <PackID>ARM.CMSIS.5.2.0</PackID>
+          <PackID>ARM.CMSIS.5.7.0</PackID>
           <PackURL>http://www.keil.com/pack/</PackURL>
           <Cpu>IRAM(0x20000000,0x00020000) IROM(0x00000000,0x00040000) CPUTYPE("Cortex-M3") CLOCK(12000000) ESEL ELITTLE</Cpu>
           <FlashUtilSpec></FlashUtilSpec>
@@ -661,6 +659,8 @@
             <hadXRAM>0</hadXRAM>
             <uocXRam>0</uocXRam>
             <RvdsVP>0</RvdsVP>
+            <RvdsMve>0</RvdsMve>
+            <RvdsCdeCp>0</RvdsCdeCp>
             <hadIRAM2>0</hadIRAM2>
             <hadIROM2>0</hadIROM2>
             <OnChipMemories>
@@ -735,7 +735,7 @@
               <MiscControls>-ffunction-sections</MiscControls>
               <Define>EVR_RTX_DISABLE</Define>
               <Undefine></Undefine>
-              <IncludePath>..\..\..\Config;..\..\..\Include;..\..\..\..\Include</IncludePath>
+              <IncludePath>..\..\..\Library;..\..\..\Include;..\..\..\..\Include</IncludePath>
             </VariousControls>
           </Carm>
           <Aarm>
@@ -765,6 +765,16 @@
         </TargetArm>
       </TargetOption>
       <Groups>
+        <Group>
+          <GroupName>Configuration</GroupName>
+          <Files>
+            <File>
+              <FileName>RTX_Config.h</FileName>
+              <FileType>5</FileType>
+              <FilePath>..\..\RTX_Config.h</FilePath>
+            </File>
+          </Files>
+        </Group>
         <Group>
           <GroupName>Core</GroupName>
           <Files>
@@ -839,9 +849,9 @@
           <GroupName>Handlers</GroupName>
           <Files>
             <File>
-              <FileName>irq_cm0.S</FileName>
-              <FileType>2</FileType>
-              <FilePath>..\..\..\Source\GCC\irq_cm0.S</FilePath>
+              <FileName>irq_armv6m.S</FileName>
+              <FileType>1</FileType>
+              <FilePath>..\..\..\Source\GCC\irq_armv6m.S</FilePath>
               <FileOption>
                 <CommonProperty>
                   <UseCPPCompiler>2</UseCPPCompiler>
@@ -860,62 +870,34 @@
                   <ComprImg>1</ComprImg>
                 </CommonProperty>
                 <FileArm>
-                  <Aarm>
-                    <bBE>2</bBE>
+                  <Carm>
+                    <arpcs>2</arpcs>
+                    <stkchk>2</stkchk>
+                    <reentr>2</reentr>
                     <interw>2</interw>
+                    <bigend>2</bigend>
+                    <Strict>0</Strict>
+                    <Optim>0</Optim>
+                    <wLevel>0</wLevel>
+                    <uThumb>2</uThumb>
                     <VariousControls>
                       <MiscControls></MiscControls>
                       <Define></Define>
                       <Undefine></Undefine>
                       <IncludePath></IncludePath>
                     </VariousControls>
-                  </Aarm>
+                  </Carm>
                 </FileArm>
               </FileOption>
             </File>
             <File>
-              <FileName>irq_cm3.S</FileName>
-              <FileType>2</FileType>
-              <FilePath>..\..\..\Source\GCC\irq_cm3.S</FilePath>
-            </File>
-            <File>
-              <FileName>irq_cm4f.S</FileName>
-              <FileType>2</FileType>
-              <FilePath>..\..\..\Source\GCC\irq_cm4f.S</FilePath>
-              <FileOption>
-                <CommonProperty>
-                  <UseCPPCompiler>2</UseCPPCompiler>
-                  <RVCTCodeConst>0</RVCTCodeConst>
-                  <RVCTZI>0</RVCTZI>
-                  <RVCTOtherData>0</RVCTOtherData>
-                  <ModuleSelection>0</ModuleSelection>
-                  <IncludeInBuild>0</IncludeInBuild>
-                  <AlwaysBuild>2</AlwaysBuild>
-                  <GenerateAssemblyFile>2</GenerateAssemblyFile>
-                  <AssembleAssemblyFile>2</AssembleAssemblyFile>
-                  <PublicsOnly>2</PublicsOnly>
-                  <StopOnExitCode>11</StopOnExitCode>
-                  <CustomArgument></CustomArgument>
-                  <IncludeLibraryModules></IncludeLibraryModules>
-                  <ComprImg>1</ComprImg>
-                </CommonProperty>
-                <FileArm>
-                  <Aarm>
-                    <bBE>2</bBE>
-                    <interw>2</interw>
-                    <VariousControls>
-                      <MiscControls></MiscControls>
-                      <Define></Define>
-                      <Undefine></Undefine>
-                      <IncludePath></IncludePath>
-                    </VariousControls>
-                  </Aarm>
-                </FileArm>
-              </FileOption>
+              <FileName>irq_armv7m.S</FileName>
+              <FileType>1</FileType>
+              <FilePath>..\..\..\Source\GCC\irq_armv7m.S</FilePath>
             </File>
             <File>
               <FileName>irq_armv8mbl.S</FileName>
-              <FileType>2</FileType>
+              <FileType>1</FileType>
               <FilePath>..\..\..\Source\GCC\irq_armv8mbl.S</FilePath>
               <FileOption>
                 <CommonProperty>
@@ -935,22 +917,29 @@
                   <ComprImg>1</ComprImg>
                 </CommonProperty>
                 <FileArm>
-                  <Aarm>
-                    <bBE>2</bBE>
+                  <Carm>
+                    <arpcs>2</arpcs>
+                    <stkchk>2</stkchk>
+                    <reentr>2</reentr>
                     <interw>2</interw>
+                    <bigend>2</bigend>
+                    <Strict>0</Strict>
+                    <Optim>0</Optim>
+                    <wLevel>0</wLevel>
+                    <uThumb>2</uThumb>
                     <VariousControls>
                       <MiscControls></MiscControls>
                       <Define></Define>
                       <Undefine></Undefine>
                       <IncludePath></IncludePath>
                     </VariousControls>
-                  </Aarm>
+                  </Carm>
                 </FileArm>
               </FileOption>
             </File>
             <File>
               <FileName>irq_armv8mml.S</FileName>
-              <FileType>2</FileType>
+              <FileType>1</FileType>
               <FilePath>..\..\..\Source\GCC\irq_armv8mml.S</FilePath>
               <FileOption>
                 <CommonProperty>
@@ -970,16 +959,23 @@
                   <ComprImg>1</ComprImg>
                 </CommonProperty>
                 <FileArm>
-                  <Aarm>
-                    <bBE>2</bBE>
+                  <Carm>
+                    <arpcs>2</arpcs>
+                    <stkchk>2</stkchk>
+                    <reentr>2</reentr>
                     <interw>2</interw>
+                    <bigend>2</bigend>
+                    <Strict>0</Strict>
+                    <Optim>0</Optim>
+                    <wLevel>0</wLevel>
+                    <uThumb>2</uThumb>
                     <VariousControls>
                       <MiscControls></MiscControls>
                       <Define></Define>
                       <Undefine></Undefine>
                       <IncludePath></IncludePath>
                     </VariousControls>
-                  </Aarm>
+                  </Carm>
                 </FileArm>
               </FileOption>
             </File>
@@ -1048,7 +1044,7 @@
         <TargetCommonOption>
           <Device>ARMCM4_FP</Device>
           <Vendor>ARM</Vendor>
-          <PackID>ARM.CMSIS.5.2.0</PackID>
+          <PackID>ARM.CMSIS.5.7.0</PackID>
           <PackURL>http://www.keil.com/pack/</PackURL>
           <Cpu>IRAM(0x20000000,0x00020000) IROM(0x00000000,0x00040000) CPUTYPE("Cortex-M4") FPU2 CLOCK(12000000) ESEL ELITTLE</Cpu>
           <FlashUtilSpec></FlashUtilSpec>
@@ -1200,6 +1196,8 @@
             <hadXRAM>0</hadXRAM>
             <uocXRam>0</uocXRam>
             <RvdsVP>2</RvdsVP>
+            <RvdsMve>0</RvdsMve>
+            <RvdsCdeCp>0</RvdsCdeCp>
             <hadIRAM2>0</hadIRAM2>
             <hadIROM2>0</hadIROM2>
             <OnChipMemories>
@@ -1271,17 +1269,17 @@
             <wLevel>2</wLevel>
             <uThumb>1</uThumb>
             <VariousControls>
-              <MiscControls>-mfpu=fpv4-sp-d16 -mfloat-abi=hard -ffunction-sections</MiscControls>
+              <MiscControls>-mcpu=cortex-m4 -mfpu=fpv4-sp-d16 -mfloat-abi=hard -ffunction-sections</MiscControls>
               <Define>EVR_RTX_DISABLE</Define>
               <Undefine></Undefine>
-              <IncludePath>..\..\..\Config;..\..\..\Include;..\..\..\..\Include</IncludePath>
+              <IncludePath>..\..\..\Library;..\..\..\Include;..\..\..\..\Include</IncludePath>
             </VariousControls>
           </Carm>
           <Aarm>
             <bBE>0</bBE>
             <interw>0</interw>
             <VariousControls>
-              <MiscControls>-mfpu=fpv4-sp-d16 -mfloat-abi=hard</MiscControls>
+              <MiscControls>-mcpu=cortex-m4 -mfpu=fpv4-sp-d16 -mfloat-abi=hard</MiscControls>
               <Define></Define>
               <Undefine></Undefine>
               <IncludePath></IncludePath>
@@ -1304,6 +1302,16 @@
         </TargetArm>
       </TargetOption>
       <Groups>
+        <Group>
+          <GroupName>Configuration</GroupName>
+          <Files>
+            <File>
+              <FileName>RTX_Config.h</FileName>
+              <FileType>5</FileType>
+              <FilePath>..\..\RTX_Config.h</FilePath>
+            </File>
+          </Files>
+        </Group>
         <Group>
           <GroupName>Core</GroupName>
           <Files>
@@ -1378,9 +1386,9 @@
           <GroupName>Handlers</GroupName>
           <Files>
             <File>
-              <FileName>irq_cm0.S</FileName>
-              <FileType>2</FileType>
-              <FilePath>..\..\..\Source\GCC\irq_cm0.S</FilePath>
+              <FileName>irq_armv6m.S</FileName>
+              <FileType>1</FileType>
+              <FilePath>..\..\..\Source\GCC\irq_armv6m.S</FilePath>
               <FileOption>
                 <CommonProperty>
                   <UseCPPCompiler>2</UseCPPCompiler>
@@ -1399,62 +1407,34 @@
                   <ComprImg>1</ComprImg>
                 </CommonProperty>
                 <FileArm>
-                  <Aarm>
-                    <bBE>2</bBE>
+                  <Carm>
+                    <arpcs>2</arpcs>
+                    <stkchk>2</stkchk>
+                    <reentr>2</reentr>
                     <interw>2</interw>
+                    <bigend>2</bigend>
+                    <Strict>0</Strict>
+                    <Optim>0</Optim>
+                    <wLevel>0</wLevel>
+                    <uThumb>2</uThumb>
                     <VariousControls>
                       <MiscControls></MiscControls>
                       <Define></Define>
                       <Undefine></Undefine>
                       <IncludePath></IncludePath>
                     </VariousControls>
-                  </Aarm>
+                  </Carm>
                 </FileArm>
               </FileOption>
             </File>
             <File>
-              <FileName>irq_cm3.S</FileName>
-              <FileType>2</FileType>
-              <FilePath>..\..\..\Source\GCC\irq_cm3.S</FilePath>
-              <FileOption>
-                <CommonProperty>
-                  <UseCPPCompiler>2</UseCPPCompiler>
-                  <RVCTCodeConst>0</RVCTCodeConst>
-                  <RVCTZI>0</RVCTZI>
-                  <RVCTOtherData>0</RVCTOtherData>
-                  <ModuleSelection>0</ModuleSelection>
-                  <IncludeInBuild>0</IncludeInBuild>
-                  <AlwaysBuild>2</AlwaysBuild>
-                  <GenerateAssemblyFile>2</GenerateAssemblyFile>
-                  <AssembleAssemblyFile>2</AssembleAssemblyFile>
-                  <PublicsOnly>2</PublicsOnly>
-                  <StopOnExitCode>11</StopOnExitCode>
-                  <CustomArgument></CustomArgument>
-                  <IncludeLibraryModules></IncludeLibraryModules>
-                  <ComprImg>1</ComprImg>
-                </CommonProperty>
-                <FileArm>
-                  <Aarm>
-                    <bBE>2</bBE>
-                    <interw>2</interw>
-                    <VariousControls>
-                      <MiscControls></MiscControls>
-                      <Define></Define>
-                      <Undefine></Undefine>
-                      <IncludePath></IncludePath>
-                    </VariousControls>
-                  </Aarm>
-                </FileArm>
-              </FileOption>
-            </File>
-            <File>
-              <FileName>irq_cm4f.S</FileName>
-              <FileType>2</FileType>
-              <FilePath>..\..\..\Source\GCC\irq_cm4f.S</FilePath>
+              <FileName>irq_armv7m.S</FileName>
+              <FileType>1</FileType>
+              <FilePath>..\..\..\Source\GCC\irq_armv7m.S</FilePath>
             </File>
             <File>
               <FileName>irq_armv8mbl.S</FileName>
-              <FileType>2</FileType>
+              <FileType>1</FileType>
               <FilePath>..\..\..\Source\GCC\irq_armv8mbl.S</FilePath>
               <FileOption>
                 <CommonProperty>
@@ -1474,22 +1454,29 @@
                   <ComprImg>1</ComprImg>
                 </CommonProperty>
                 <FileArm>
-                  <Aarm>
-                    <bBE>2</bBE>
+                  <Carm>
+                    <arpcs>2</arpcs>
+                    <stkchk>2</stkchk>
+                    <reentr>2</reentr>
                     <interw>2</interw>
+                    <bigend>2</bigend>
+                    <Strict>0</Strict>
+                    <Optim>0</Optim>
+                    <wLevel>0</wLevel>
+                    <uThumb>2</uThumb>
                     <VariousControls>
                       <MiscControls></MiscControls>
                       <Define></Define>
                       <Undefine></Undefine>
                       <IncludePath></IncludePath>
                     </VariousControls>
-                  </Aarm>
+                  </Carm>
                 </FileArm>
               </FileOption>
             </File>
             <File>
               <FileName>irq_armv8mml.S</FileName>
-              <FileType>2</FileType>
+              <FileType>1</FileType>
               <FilePath>..\..\..\Source\GCC\irq_armv8mml.S</FilePath>
               <FileOption>
                 <CommonProperty>
@@ -1509,16 +1496,23 @@
                   <ComprImg>1</ComprImg>
                 </CommonProperty>
                 <FileArm>
-                  <Aarm>
-                    <bBE>2</bBE>
+                  <Carm>
+                    <arpcs>2</arpcs>
+                    <stkchk>2</stkchk>
+                    <reentr>2</reentr>
                     <interw>2</interw>
+                    <bigend>2</bigend>
+                    <Strict>0</Strict>
+                    <Optim>0</Optim>
+                    <wLevel>0</wLevel>
+                    <uThumb>2</uThumb>
                     <VariousControls>
                       <MiscControls></MiscControls>
                       <Define></Define>
                       <Undefine></Undefine>
                       <IncludePath></IncludePath>
                     </VariousControls>
-                  </Aarm>
+                  </Carm>
                 </FileArm>
               </FileOption>
             </File>
@@ -1540,7 +1534,7 @@
         <TargetCommonOption>
           <Device>ARMv8MBL</Device>
           <Vendor>ARM</Vendor>
-          <PackID>ARM.CMSIS.5.2.0</PackID>
+          <PackID>ARM.CMSIS.5.7.0</PackID>
           <PackURL>http://www.keil.com/pack/</PackURL>
           <Cpu>IRAM(0x20000000,0x00020000) IROM(0x00000000,0x00040000) CPUTYPE("ARMV8MBL") CLOCK(12000000) ELITTLE</Cpu>
           <FlashUtilSpec></FlashUtilSpec>
@@ -1692,6 +1686,8 @@
             <hadXRAM>0</hadXRAM>
             <uocXRam>0</uocXRam>
             <RvdsVP>0</RvdsVP>
+            <RvdsMve>0</RvdsMve>
+            <RvdsCdeCp>0</RvdsCdeCp>
             <hadIRAM2>0</hadIRAM2>
             <hadIROM2>0</hadIROM2>
             <OnChipMemories>
@@ -1766,7 +1762,7 @@
               <MiscControls>-march=armv8-m.base -ffunction-sections</MiscControls>
               <Define>EVR_RTX_DISABLE</Define>
               <Undefine></Undefine>
-              <IncludePath>..\..\..\Config;..\..\..\Include;..\..\..\..\Include</IncludePath>
+              <IncludePath>..\..\..\Library;..\..\..\Include;..\..\..\..\Include</IncludePath>
             </VariousControls>
           </Carm>
           <Aarm>
@@ -1796,6 +1792,16 @@
         </TargetArm>
       </TargetOption>
       <Groups>
+        <Group>
+          <GroupName>Configuration</GroupName>
+          <Files>
+            <File>
+              <FileName>RTX_Config.h</FileName>
+              <FileType>5</FileType>
+              <FilePath>..\..\RTX_Config.h</FilePath>
+            </File>
+          </Files>
+        </Group>
         <Group>
           <GroupName>Core</GroupName>
           <Files>
@@ -1870,9 +1876,9 @@
           <GroupName>Handlers</GroupName>
           <Files>
             <File>
-              <FileName>irq_cm0.S</FileName>
-              <FileType>2</FileType>
-              <FilePath>..\..\..\Source\GCC\irq_cm0.S</FilePath>
+              <FileName>irq_armv6m.S</FileName>
+              <FileType>1</FileType>
+              <FilePath>..\..\..\Source\GCC\irq_armv6m.S</FilePath>
               <FileOption>
                 <CommonProperty>
                   <UseCPPCompiler>2</UseCPPCompiler>
@@ -1891,23 +1897,30 @@
                   <ComprImg>1</ComprImg>
                 </CommonProperty>
                 <FileArm>
-                  <Aarm>
-                    <bBE>2</bBE>
+                  <Carm>
+                    <arpcs>2</arpcs>
+                    <stkchk>2</stkchk>
+                    <reentr>2</reentr>
                     <interw>2</interw>
+                    <bigend>2</bigend>
+                    <Strict>0</Strict>
+                    <Optim>0</Optim>
+                    <wLevel>0</wLevel>
+                    <uThumb>2</uThumb>
                     <VariousControls>
                       <MiscControls></MiscControls>
                       <Define></Define>
                       <Undefine></Undefine>
                       <IncludePath></IncludePath>
                     </VariousControls>
-                  </Aarm>
+                  </Carm>
                 </FileArm>
               </FileOption>
             </File>
             <File>
-              <FileName>irq_cm3.S</FileName>
-              <FileType>2</FileType>
-              <FilePath>..\..\..\Source\GCC\irq_cm3.S</FilePath>
+              <FileName>irq_armv7m.S</FileName>
+              <FileType>1</FileType>
+              <FilePath>..\..\..\Source\GCC\irq_armv7m.S</FilePath>
               <FileOption>
                 <CommonProperty>
                   <UseCPPCompiler>2</UseCPPCompiler>
@@ -1926,62 +1939,34 @@
                   <ComprImg>1</ComprImg>
                 </CommonProperty>
                 <FileArm>
-                  <Aarm>
-                    <bBE>2</bBE>
+                  <Carm>
+                    <arpcs>2</arpcs>
+                    <stkchk>2</stkchk>
+                    <reentr>2</reentr>
                     <interw>2</interw>
+                    <bigend>2</bigend>
+                    <Strict>0</Strict>
+                    <Optim>0</Optim>
+                    <wLevel>0</wLevel>
+                    <uThumb>2</uThumb>
                     <VariousControls>
                       <MiscControls></MiscControls>
                       <Define></Define>
                       <Undefine></Undefine>
                       <IncludePath></IncludePath>
                     </VariousControls>
-                  </Aarm>
-                </FileArm>
-              </FileOption>
-            </File>
-            <File>
-              <FileName>irq_cm4f.S</FileName>
-              <FileType>2</FileType>
-              <FilePath>..\..\..\Source\GCC\irq_cm4f.S</FilePath>
-              <FileOption>
-                <CommonProperty>
-                  <UseCPPCompiler>2</UseCPPCompiler>
-                  <RVCTCodeConst>0</RVCTCodeConst>
-                  <RVCTZI>0</RVCTZI>
-                  <RVCTOtherData>0</RVCTOtherData>
-                  <ModuleSelection>0</ModuleSelection>
-                  <IncludeInBuild>0</IncludeInBuild>
-                  <AlwaysBuild>2</AlwaysBuild>
-                  <GenerateAssemblyFile>2</GenerateAssemblyFile>
-                  <AssembleAssemblyFile>2</AssembleAssemblyFile>
-                  <PublicsOnly>2</PublicsOnly>
-                  <StopOnExitCode>11</StopOnExitCode>
-                  <CustomArgument></CustomArgument>
-                  <IncludeLibraryModules></IncludeLibraryModules>
-                  <ComprImg>1</ComprImg>
-                </CommonProperty>
-                <FileArm>
-                  <Aarm>
-                    <bBE>2</bBE>
-                    <interw>2</interw>
-                    <VariousControls>
-                      <MiscControls></MiscControls>
-                      <Define></Define>
-                      <Undefine></Undefine>
-                      <IncludePath></IncludePath>
-                    </VariousControls>
-                  </Aarm>
+                  </Carm>
                 </FileArm>
               </FileOption>
             </File>
             <File>
               <FileName>irq_armv8mbl.S</FileName>
-              <FileType>2</FileType>
+              <FileType>1</FileType>
               <FilePath>..\..\..\Source\GCC\irq_armv8mbl.S</FilePath>
             </File>
             <File>
               <FileName>irq_armv8mml.S</FileName>
-              <FileType>2</FileType>
+              <FileType>1</FileType>
               <FilePath>..\..\..\Source\GCC\irq_armv8mml.S</FilePath>
               <FileOption>
                 <CommonProperty>
@@ -2001,16 +1986,23 @@
                   <ComprImg>1</ComprImg>
                 </CommonProperty>
                 <FileArm>
-                  <Aarm>
-                    <bBE>2</bBE>
+                  <Carm>
+                    <arpcs>2</arpcs>
+                    <stkchk>2</stkchk>
+                    <reentr>2</reentr>
                     <interw>2</interw>
+                    <bigend>2</bigend>
+                    <Strict>0</Strict>
+                    <Optim>0</Optim>
+                    <wLevel>0</wLevel>
+                    <uThumb>2</uThumb>
                     <VariousControls>
                       <MiscControls></MiscControls>
                       <Define></Define>
                       <Undefine></Undefine>
                       <IncludePath></IncludePath>
                     </VariousControls>
-                  </Aarm>
+                  </Carm>
                 </FileArm>
               </FileOption>
             </File>
@@ -2079,7 +2071,7 @@
         <TargetCommonOption>
           <Device>ARMv8MBL</Device>
           <Vendor>ARM</Vendor>
-          <PackID>ARM.CMSIS.5.2.0</PackID>
+          <PackID>ARM.CMSIS.5.7.0</PackID>
           <PackURL>http://www.keil.com/pack/</PackURL>
           <Cpu>IRAM(0x20000000,0x00020000) IROM(0x00000000,0x00040000) CPUTYPE("ARMV8MBL") CLOCK(12000000) ELITTLE</Cpu>
           <FlashUtilSpec></FlashUtilSpec>
@@ -2231,6 +2223,8 @@
             <hadXRAM>0</hadXRAM>
             <uocXRam>0</uocXRam>
             <RvdsVP>0</RvdsVP>
+            <RvdsMve>0</RvdsMve>
+            <RvdsCdeCp>0</RvdsCdeCp>
             <hadIRAM2>0</hadIRAM2>
             <hadIROM2>0</hadIROM2>
             <OnChipMemories>
@@ -2305,7 +2299,7 @@
               <MiscControls>-march=armv8-m.base -ffunction-sections</MiscControls>
               <Define>EVR_RTX_DISABLE DOMAIN_NS=1</Define>
               <Undefine></Undefine>
-              <IncludePath>..\..\..\Config;..\..\..\Include;..\..\..\..\Include</IncludePath>
+              <IncludePath>..\..\..\Library;..\..\..\Include;..\..\..\..\Include</IncludePath>
             </VariousControls>
           </Carm>
           <Aarm>
@@ -2335,6 +2329,16 @@
         </TargetArm>
       </TargetOption>
       <Groups>
+        <Group>
+          <GroupName>Configuration</GroupName>
+          <Files>
+            <File>
+              <FileName>RTX_Config.h</FileName>
+              <FileType>5</FileType>
+              <FilePath>..\..\RTX_Config.h</FilePath>
+            </File>
+          </Files>
+        </Group>
         <Group>
           <GroupName>Core</GroupName>
           <Files>
@@ -2409,9 +2413,9 @@
           <GroupName>Handlers</GroupName>
           <Files>
             <File>
-              <FileName>irq_cm0.S</FileName>
-              <FileType>2</FileType>
-              <FilePath>..\..\..\Source\GCC\irq_cm0.S</FilePath>
+              <FileName>irq_armv6m.S</FileName>
+              <FileType>1</FileType>
+              <FilePath>..\..\..\Source\GCC\irq_armv6m.S</FilePath>
               <FileOption>
                 <CommonProperty>
                   <UseCPPCompiler>2</UseCPPCompiler>
@@ -2430,23 +2434,30 @@
                   <ComprImg>1</ComprImg>
                 </CommonProperty>
                 <FileArm>
-                  <Aarm>
-                    <bBE>2</bBE>
+                  <Carm>
+                    <arpcs>2</arpcs>
+                    <stkchk>2</stkchk>
+                    <reentr>2</reentr>
                     <interw>2</interw>
+                    <bigend>2</bigend>
+                    <Strict>0</Strict>
+                    <Optim>0</Optim>
+                    <wLevel>0</wLevel>
+                    <uThumb>2</uThumb>
                     <VariousControls>
                       <MiscControls></MiscControls>
                       <Define></Define>
                       <Undefine></Undefine>
                       <IncludePath></IncludePath>
                     </VariousControls>
-                  </Aarm>
+                  </Carm>
                 </FileArm>
               </FileOption>
             </File>
             <File>
-              <FileName>irq_cm3.S</FileName>
-              <FileType>2</FileType>
-              <FilePath>..\..\..\Source\GCC\irq_cm3.S</FilePath>
+              <FileName>irq_armv7m.S</FileName>
+              <FileType>1</FileType>
+              <FilePath>..\..\..\Source\GCC\irq_armv7m.S</FilePath>
               <FileOption>
                 <CommonProperty>
                   <UseCPPCompiler>2</UseCPPCompiler>
@@ -2465,62 +2476,34 @@
                   <ComprImg>1</ComprImg>
                 </CommonProperty>
                 <FileArm>
-                  <Aarm>
-                    <bBE>2</bBE>
+                  <Carm>
+                    <arpcs>2</arpcs>
+                    <stkchk>2</stkchk>
+                    <reentr>2</reentr>
                     <interw>2</interw>
+                    <bigend>2</bigend>
+                    <Strict>0</Strict>
+                    <Optim>0</Optim>
+                    <wLevel>0</wLevel>
+                    <uThumb>2</uThumb>
                     <VariousControls>
                       <MiscControls></MiscControls>
                       <Define></Define>
                       <Undefine></Undefine>
                       <IncludePath></IncludePath>
                     </VariousControls>
-                  </Aarm>
-                </FileArm>
-              </FileOption>
-            </File>
-            <File>
-              <FileName>irq_cm4f.S</FileName>
-              <FileType>2</FileType>
-              <FilePath>..\..\..\Source\GCC\irq_cm4f.S</FilePath>
-              <FileOption>
-                <CommonProperty>
-                  <UseCPPCompiler>2</UseCPPCompiler>
-                  <RVCTCodeConst>0</RVCTCodeConst>
-                  <RVCTZI>0</RVCTZI>
-                  <RVCTOtherData>0</RVCTOtherData>
-                  <ModuleSelection>0</ModuleSelection>
-                  <IncludeInBuild>0</IncludeInBuild>
-                  <AlwaysBuild>2</AlwaysBuild>
-                  <GenerateAssemblyFile>2</GenerateAssemblyFile>
-                  <AssembleAssemblyFile>2</AssembleAssemblyFile>
-                  <PublicsOnly>2</PublicsOnly>
-                  <StopOnExitCode>11</StopOnExitCode>
-                  <CustomArgument></CustomArgument>
-                  <IncludeLibraryModules></IncludeLibraryModules>
-                  <ComprImg>1</ComprImg>
-                </CommonProperty>
-                <FileArm>
-                  <Aarm>
-                    <bBE>2</bBE>
-                    <interw>2</interw>
-                    <VariousControls>
-                      <MiscControls></MiscControls>
-                      <Define></Define>
-                      <Undefine></Undefine>
-                      <IncludePath></IncludePath>
-                    </VariousControls>
-                  </Aarm>
+                  </Carm>
                 </FileArm>
               </FileOption>
             </File>
             <File>
               <FileName>irq_armv8mbl.S</FileName>
-              <FileType>2</FileType>
+              <FileType>1</FileType>
               <FilePath>..\..\..\Source\GCC\irq_armv8mbl.S</FilePath>
             </File>
             <File>
               <FileName>irq_armv8mml.S</FileName>
-              <FileType>2</FileType>
+              <FileType>1</FileType>
               <FilePath>..\..\..\Source\GCC\irq_armv8mml.S</FilePath>
               <FileOption>
                 <CommonProperty>
@@ -2540,16 +2523,23 @@
                   <ComprImg>1</ComprImg>
                 </CommonProperty>
                 <FileArm>
-                  <Aarm>
-                    <bBE>2</bBE>
+                  <Carm>
+                    <arpcs>2</arpcs>
+                    <stkchk>2</stkchk>
+                    <reentr>2</reentr>
                     <interw>2</interw>
+                    <bigend>2</bigend>
+                    <Strict>0</Strict>
+                    <Optim>0</Optim>
+                    <wLevel>0</wLevel>
+                    <uThumb>2</uThumb>
                     <VariousControls>
                       <MiscControls></MiscControls>
                       <Define></Define>
                       <Undefine></Undefine>
                       <IncludePath></IncludePath>
                     </VariousControls>
-                  </Aarm>
+                  </Carm>
                 </FileArm>
               </FileOption>
             </File>
@@ -2618,7 +2608,7 @@
         <TargetCommonOption>
           <Device>ARMv8MML</Device>
           <Vendor>ARM</Vendor>
-          <PackID>ARM.CMSIS.5.2.0</PackID>
+          <PackID>ARM.CMSIS.5.7.0</PackID>
           <PackURL>http://www.keil.com/pack/</PackURL>
           <Cpu>IRAM(0x20000000,0x00020000) IROM(0x00000000,0x00040000) CPUTYPE("ARMV8MML") CLOCK(12000000) ELITTLE</Cpu>
           <FlashUtilSpec></FlashUtilSpec>
@@ -2770,6 +2760,8 @@
             <hadXRAM>0</hadXRAM>
             <uocXRam>0</uocXRam>
             <RvdsVP>0</RvdsVP>
+            <RvdsMve>0</RvdsMve>
+            <RvdsCdeCp>0</RvdsCdeCp>
             <hadIRAM2>0</hadIRAM2>
             <hadIROM2>0</hadIROM2>
             <OnChipMemories>
@@ -2844,7 +2836,7 @@
               <MiscControls>-march=armv8-m.main -ffunction-sections</MiscControls>
               <Define>EVR_RTX_DISABLE</Define>
               <Undefine></Undefine>
-              <IncludePath>..\..\..\Config;..\..\..\Include;..\..\..\..\Include</IncludePath>
+              <IncludePath>..\..\..\Library;..\..\..\Include;..\..\..\..\Include</IncludePath>
             </VariousControls>
           </Carm>
           <Aarm>
@@ -2874,6 +2866,16 @@
         </TargetArm>
       </TargetOption>
       <Groups>
+        <Group>
+          <GroupName>Configuration</GroupName>
+          <Files>
+            <File>
+              <FileName>RTX_Config.h</FileName>
+              <FileType>5</FileType>
+              <FilePath>..\..\RTX_Config.h</FilePath>
+            </File>
+          </Files>
+        </Group>
         <Group>
           <GroupName>Core</GroupName>
           <Files>
@@ -2948,9 +2950,9 @@
           <GroupName>Handlers</GroupName>
           <Files>
             <File>
-              <FileName>irq_cm0.S</FileName>
-              <FileType>2</FileType>
-              <FilePath>..\..\..\Source\GCC\irq_cm0.S</FilePath>
+              <FileName>irq_armv6m.S</FileName>
+              <FileType>1</FileType>
+              <FilePath>..\..\..\Source\GCC\irq_armv6m.S</FilePath>
               <FileOption>
                 <CommonProperty>
                   <UseCPPCompiler>2</UseCPPCompiler>
@@ -2969,23 +2971,30 @@
                   <ComprImg>1</ComprImg>
                 </CommonProperty>
                 <FileArm>
-                  <Aarm>
-                    <bBE>2</bBE>
+                  <Carm>
+                    <arpcs>2</arpcs>
+                    <stkchk>2</stkchk>
+                    <reentr>2</reentr>
                     <interw>2</interw>
+                    <bigend>2</bigend>
+                    <Strict>0</Strict>
+                    <Optim>0</Optim>
+                    <wLevel>0</wLevel>
+                    <uThumb>2</uThumb>
                     <VariousControls>
                       <MiscControls></MiscControls>
                       <Define></Define>
                       <Undefine></Undefine>
                       <IncludePath></IncludePath>
                     </VariousControls>
-                  </Aarm>
+                  </Carm>
                 </FileArm>
               </FileOption>
             </File>
             <File>
-              <FileName>irq_cm3.S</FileName>
-              <FileType>2</FileType>
-              <FilePath>..\..\..\Source\GCC\irq_cm3.S</FilePath>
+              <FileName>irq_armv7m.S</FileName>
+              <FileType>1</FileType>
+              <FilePath>..\..\..\Source\GCC\irq_armv7m.S</FilePath>
               <FileOption>
                 <CommonProperty>
                   <UseCPPCompiler>2</UseCPPCompiler>
@@ -3004,57 +3013,29 @@
                   <ComprImg>1</ComprImg>
                 </CommonProperty>
                 <FileArm>
-                  <Aarm>
-                    <bBE>2</bBE>
+                  <Carm>
+                    <arpcs>2</arpcs>
+                    <stkchk>2</stkchk>
+                    <reentr>2</reentr>
                     <interw>2</interw>
+                    <bigend>2</bigend>
+                    <Strict>0</Strict>
+                    <Optim>0</Optim>
+                    <wLevel>0</wLevel>
+                    <uThumb>2</uThumb>
                     <VariousControls>
                       <MiscControls></MiscControls>
                       <Define></Define>
                       <Undefine></Undefine>
                       <IncludePath></IncludePath>
                     </VariousControls>
-                  </Aarm>
-                </FileArm>
-              </FileOption>
-            </File>
-            <File>
-              <FileName>irq_cm4f.S</FileName>
-              <FileType>2</FileType>
-              <FilePath>..\..\..\Source\GCC\irq_cm4f.S</FilePath>
-              <FileOption>
-                <CommonProperty>
-                  <UseCPPCompiler>2</UseCPPCompiler>
-                  <RVCTCodeConst>0</RVCTCodeConst>
-                  <RVCTZI>0</RVCTZI>
-                  <RVCTOtherData>0</RVCTOtherData>
-                  <ModuleSelection>0</ModuleSelection>
-                  <IncludeInBuild>0</IncludeInBuild>
-                  <AlwaysBuild>2</AlwaysBuild>
-                  <GenerateAssemblyFile>2</GenerateAssemblyFile>
-                  <AssembleAssemblyFile>2</AssembleAssemblyFile>
-                  <PublicsOnly>2</PublicsOnly>
-                  <StopOnExitCode>11</StopOnExitCode>
-                  <CustomArgument></CustomArgument>
-                  <IncludeLibraryModules></IncludeLibraryModules>
-                  <ComprImg>1</ComprImg>
-                </CommonProperty>
-                <FileArm>
-                  <Aarm>
-                    <bBE>2</bBE>
-                    <interw>2</interw>
-                    <VariousControls>
-                      <MiscControls></MiscControls>
-                      <Define></Define>
-                      <Undefine></Undefine>
-                      <IncludePath></IncludePath>
-                    </VariousControls>
-                  </Aarm>
+                  </Carm>
                 </FileArm>
               </FileOption>
             </File>
             <File>
               <FileName>irq_armv8mbl.S</FileName>
-              <FileType>2</FileType>
+              <FileType>1</FileType>
               <FilePath>..\..\..\Source\GCC\irq_armv8mbl.S</FilePath>
               <FileOption>
                 <CommonProperty>
@@ -3074,22 +3055,29 @@
                   <ComprImg>1</ComprImg>
                 </CommonProperty>
                 <FileArm>
-                  <Aarm>
-                    <bBE>2</bBE>
+                  <Carm>
+                    <arpcs>2</arpcs>
+                    <stkchk>2</stkchk>
+                    <reentr>2</reentr>
                     <interw>2</interw>
+                    <bigend>2</bigend>
+                    <Strict>0</Strict>
+                    <Optim>0</Optim>
+                    <wLevel>0</wLevel>
+                    <uThumb>2</uThumb>
                     <VariousControls>
                       <MiscControls></MiscControls>
                       <Define></Define>
                       <Undefine></Undefine>
                       <IncludePath></IncludePath>
                     </VariousControls>
-                  </Aarm>
+                  </Carm>
                 </FileArm>
               </FileOption>
             </File>
             <File>
               <FileName>irq_armv8mml.S</FileName>
-              <FileType>2</FileType>
+              <FileType>1</FileType>
               <FilePath>..\..\..\Source\GCC\irq_armv8mml.S</FilePath>
             </File>
           </Files>
@@ -3157,7 +3145,7 @@
         <TargetCommonOption>
           <Device>ARMv8MML</Device>
           <Vendor>ARM</Vendor>
-          <PackID>ARM.CMSIS.5.2.0</PackID>
+          <PackID>ARM.CMSIS.5.7.0</PackID>
           <PackURL>http://www.keil.com/pack/</PackURL>
           <Cpu>IRAM(0x20000000,0x00020000) IROM(0x00000000,0x00040000) CPUTYPE("ARMV8MML") CLOCK(12000000) ELITTLE</Cpu>
           <FlashUtilSpec></FlashUtilSpec>
@@ -3309,6 +3297,8 @@
             <hadXRAM>0</hadXRAM>
             <uocXRam>0</uocXRam>
             <RvdsVP>0</RvdsVP>
+            <RvdsMve>0</RvdsMve>
+            <RvdsCdeCp>0</RvdsCdeCp>
             <hadIRAM2>0</hadIRAM2>
             <hadIROM2>0</hadIROM2>
             <OnChipMemories>
@@ -3383,7 +3373,7 @@
               <MiscControls>-march=armv8-m.main -ffunction-sections</MiscControls>
               <Define>EVR_RTX_DISABLE DOMAIN_NS=1</Define>
               <Undefine></Undefine>
-              <IncludePath>..\..\..\Config;..\..\..\Include;..\..\..\..\Include</IncludePath>
+              <IncludePath>..\..\..\Library;..\..\..\Include;..\..\..\..\Include</IncludePath>
             </VariousControls>
           </Carm>
           <Aarm>
@@ -3413,6 +3403,16 @@
         </TargetArm>
       </TargetOption>
       <Groups>
+        <Group>
+          <GroupName>Configuration</GroupName>
+          <Files>
+            <File>
+              <FileName>RTX_Config.h</FileName>
+              <FileType>5</FileType>
+              <FilePath>..\..\RTX_Config.h</FilePath>
+            </File>
+          </Files>
+        </Group>
         <Group>
           <GroupName>Core</GroupName>
           <Files>
@@ -3487,9 +3487,9 @@
           <GroupName>Handlers</GroupName>
           <Files>
             <File>
-              <FileName>irq_cm0.S</FileName>
-              <FileType>2</FileType>
-              <FilePath>..\..\..\Source\GCC\irq_cm0.S</FilePath>
+              <FileName>irq_armv6m.S</FileName>
+              <FileType>1</FileType>
+              <FilePath>..\..\..\Source\GCC\irq_armv6m.S</FilePath>
               <FileOption>
                 <CommonProperty>
                   <UseCPPCompiler>2</UseCPPCompiler>
@@ -3508,23 +3508,30 @@
                   <ComprImg>1</ComprImg>
                 </CommonProperty>
                 <FileArm>
-                  <Aarm>
-                    <bBE>2</bBE>
+                  <Carm>
+                    <arpcs>2</arpcs>
+                    <stkchk>2</stkchk>
+                    <reentr>2</reentr>
                     <interw>2</interw>
+                    <bigend>2</bigend>
+                    <Strict>0</Strict>
+                    <Optim>0</Optim>
+                    <wLevel>0</wLevel>
+                    <uThumb>2</uThumb>
                     <VariousControls>
                       <MiscControls></MiscControls>
                       <Define></Define>
                       <Undefine></Undefine>
                       <IncludePath></IncludePath>
                     </VariousControls>
-                  </Aarm>
+                  </Carm>
                 </FileArm>
               </FileOption>
             </File>
             <File>
-              <FileName>irq_cm3.S</FileName>
-              <FileType>2</FileType>
-              <FilePath>..\..\..\Source\GCC\irq_cm3.S</FilePath>
+              <FileName>irq_armv7m.S</FileName>
+              <FileType>1</FileType>
+              <FilePath>..\..\..\Source\GCC\irq_armv7m.S</FilePath>
               <FileOption>
                 <CommonProperty>
                   <UseCPPCompiler>2</UseCPPCompiler>
@@ -3543,57 +3550,29 @@
                   <ComprImg>1</ComprImg>
                 </CommonProperty>
                 <FileArm>
-                  <Aarm>
-                    <bBE>2</bBE>
+                  <Carm>
+                    <arpcs>2</arpcs>
+                    <stkchk>2</stkchk>
+                    <reentr>2</reentr>
                     <interw>2</interw>
+                    <bigend>2</bigend>
+                    <Strict>0</Strict>
+                    <Optim>0</Optim>
+                    <wLevel>0</wLevel>
+                    <uThumb>2</uThumb>
                     <VariousControls>
                       <MiscControls></MiscControls>
                       <Define></Define>
                       <Undefine></Undefine>
                       <IncludePath></IncludePath>
                     </VariousControls>
-                  </Aarm>
-                </FileArm>
-              </FileOption>
-            </File>
-            <File>
-              <FileName>irq_cm4f.S</FileName>
-              <FileType>2</FileType>
-              <FilePath>..\..\..\Source\GCC\irq_cm4f.S</FilePath>
-              <FileOption>
-                <CommonProperty>
-                  <UseCPPCompiler>2</UseCPPCompiler>
-                  <RVCTCodeConst>0</RVCTCodeConst>
-                  <RVCTZI>0</RVCTZI>
-                  <RVCTOtherData>0</RVCTOtherData>
-                  <ModuleSelection>0</ModuleSelection>
-                  <IncludeInBuild>0</IncludeInBuild>
-                  <AlwaysBuild>2</AlwaysBuild>
-                  <GenerateAssemblyFile>2</GenerateAssemblyFile>
-                  <AssembleAssemblyFile>2</AssembleAssemblyFile>
-                  <PublicsOnly>2</PublicsOnly>
-                  <StopOnExitCode>11</StopOnExitCode>
-                  <CustomArgument></CustomArgument>
-                  <IncludeLibraryModules></IncludeLibraryModules>
-                  <ComprImg>1</ComprImg>
-                </CommonProperty>
-                <FileArm>
-                  <Aarm>
-                    <bBE>2</bBE>
-                    <interw>2</interw>
-                    <VariousControls>
-                      <MiscControls></MiscControls>
-                      <Define></Define>
-                      <Undefine></Undefine>
-                      <IncludePath></IncludePath>
-                    </VariousControls>
-                  </Aarm>
+                  </Carm>
                 </FileArm>
               </FileOption>
             </File>
             <File>
               <FileName>irq_armv8mbl.S</FileName>
-              <FileType>2</FileType>
+              <FileType>1</FileType>
               <FilePath>..\..\..\Source\GCC\irq_armv8mbl.S</FilePath>
               <FileOption>
                 <CommonProperty>
@@ -3613,22 +3592,29 @@
                   <ComprImg>1</ComprImg>
                 </CommonProperty>
                 <FileArm>
-                  <Aarm>
-                    <bBE>2</bBE>
+                  <Carm>
+                    <arpcs>2</arpcs>
+                    <stkchk>2</stkchk>
+                    <reentr>2</reentr>
                     <interw>2</interw>
+                    <bigend>2</bigend>
+                    <Strict>0</Strict>
+                    <Optim>0</Optim>
+                    <wLevel>0</wLevel>
+                    <uThumb>2</uThumb>
                     <VariousControls>
                       <MiscControls></MiscControls>
                       <Define></Define>
                       <Undefine></Undefine>
                       <IncludePath></IncludePath>
                     </VariousControls>
-                  </Aarm>
+                  </Carm>
                 </FileArm>
               </FileOption>
             </File>
             <File>
               <FileName>irq_armv8mml.S</FileName>
-              <FileType>2</FileType>
+              <FileType>1</FileType>
               <FilePath>..\..\..\Source\GCC\irq_armv8mml.S</FilePath>
             </File>
           </Files>
@@ -3696,7 +3682,7 @@
         <TargetCommonOption>
           <Device>ARMv8MML_SP</Device>
           <Vendor>ARM</Vendor>
-          <PackID>ARM.CMSIS.5.2.0</PackID>
+          <PackID>ARM.CMSIS.5.7.0</PackID>
           <PackURL>http://www.keil.com/pack/</PackURL>
           <Cpu>IRAM(0x20000000,0x00020000) IROM(0x00000000,0x00040000) CPUTYPE("ARMV8MML") FPU3(SFPU) CLOCK(12000000) ESEL ELITTLE</Cpu>
           <FlashUtilSpec></FlashUtilSpec>
@@ -3848,6 +3834,8 @@
             <hadXRAM>0</hadXRAM>
             <uocXRam>0</uocXRam>
             <RvdsVP>2</RvdsVP>
+            <RvdsMve>0</RvdsMve>
+            <RvdsCdeCp>0</RvdsCdeCp>
             <hadIRAM2>0</hadIRAM2>
             <hadIROM2>0</hadIROM2>
             <OnChipMemories>
@@ -3922,7 +3910,7 @@
               <MiscControls>-march=armv8-m.main -mfpu=fpv5-sp-d16 -mfloat-abi=hard -ffunction-sections</MiscControls>
               <Define>EVR_RTX_DISABLE</Define>
               <Undefine></Undefine>
-              <IncludePath>..\..\..\Config;..\..\..\Include;..\..\..\..\Include</IncludePath>
+              <IncludePath>..\..\..\Library;..\..\..\Include;..\..\..\..\Include</IncludePath>
             </VariousControls>
           </Carm>
           <Aarm>
@@ -3930,7 +3918,7 @@
             <interw>0</interw>
             <VariousControls>
               <MiscControls>-march=armv8-m.main -mfpu=fpv5-sp-d16 -mfloat-abi=hard</MiscControls>
-              <Define>__FPU_USED=1</Define>
+              <Define>FPU_USED=1</Define>
               <Undefine></Undefine>
               <IncludePath></IncludePath>
             </VariousControls>
@@ -3952,6 +3940,16 @@
         </TargetArm>
       </TargetOption>
       <Groups>
+        <Group>
+          <GroupName>Configuration</GroupName>
+          <Files>
+            <File>
+              <FileName>RTX_Config.h</FileName>
+              <FileType>5</FileType>
+              <FilePath>..\..\RTX_Config.h</FilePath>
+            </File>
+          </Files>
+        </Group>
         <Group>
           <GroupName>Core</GroupName>
           <Files>
@@ -4026,9 +4024,9 @@
           <GroupName>Handlers</GroupName>
           <Files>
             <File>
-              <FileName>irq_cm0.S</FileName>
-              <FileType>2</FileType>
-              <FilePath>..\..\..\Source\GCC\irq_cm0.S</FilePath>
+              <FileName>irq_armv6m.S</FileName>
+              <FileType>1</FileType>
+              <FilePath>..\..\..\Source\GCC\irq_armv6m.S</FilePath>
               <FileOption>
                 <CommonProperty>
                   <UseCPPCompiler>2</UseCPPCompiler>
@@ -4047,23 +4045,30 @@
                   <ComprImg>1</ComprImg>
                 </CommonProperty>
                 <FileArm>
-                  <Aarm>
-                    <bBE>2</bBE>
+                  <Carm>
+                    <arpcs>2</arpcs>
+                    <stkchk>2</stkchk>
+                    <reentr>2</reentr>
                     <interw>2</interw>
+                    <bigend>2</bigend>
+                    <Strict>0</Strict>
+                    <Optim>0</Optim>
+                    <wLevel>0</wLevel>
+                    <uThumb>2</uThumb>
                     <VariousControls>
                       <MiscControls></MiscControls>
                       <Define></Define>
                       <Undefine></Undefine>
                       <IncludePath></IncludePath>
                     </VariousControls>
-                  </Aarm>
+                  </Carm>
                 </FileArm>
               </FileOption>
             </File>
             <File>
-              <FileName>irq_cm3.S</FileName>
-              <FileType>2</FileType>
-              <FilePath>..\..\..\Source\GCC\irq_cm3.S</FilePath>
+              <FileName>irq_armv7m.S</FileName>
+              <FileType>1</FileType>
+              <FilePath>..\..\..\Source\GCC\irq_armv7m.S</FilePath>
               <FileOption>
                 <CommonProperty>
                   <UseCPPCompiler>2</UseCPPCompiler>
@@ -4082,57 +4087,29 @@
                   <ComprImg>1</ComprImg>
                 </CommonProperty>
                 <FileArm>
-                  <Aarm>
-                    <bBE>2</bBE>
+                  <Carm>
+                    <arpcs>2</arpcs>
+                    <stkchk>2</stkchk>
+                    <reentr>2</reentr>
                     <interw>2</interw>
+                    <bigend>2</bigend>
+                    <Strict>0</Strict>
+                    <Optim>0</Optim>
+                    <wLevel>0</wLevel>
+                    <uThumb>2</uThumb>
                     <VariousControls>
                       <MiscControls></MiscControls>
                       <Define></Define>
                       <Undefine></Undefine>
                       <IncludePath></IncludePath>
                     </VariousControls>
-                  </Aarm>
-                </FileArm>
-              </FileOption>
-            </File>
-            <File>
-              <FileName>irq_cm4f.S</FileName>
-              <FileType>2</FileType>
-              <FilePath>..\..\..\Source\GCC\irq_cm4f.S</FilePath>
-              <FileOption>
-                <CommonProperty>
-                  <UseCPPCompiler>2</UseCPPCompiler>
-                  <RVCTCodeConst>0</RVCTCodeConst>
-                  <RVCTZI>0</RVCTZI>
-                  <RVCTOtherData>0</RVCTOtherData>
-                  <ModuleSelection>0</ModuleSelection>
-                  <IncludeInBuild>0</IncludeInBuild>
-                  <AlwaysBuild>2</AlwaysBuild>
-                  <GenerateAssemblyFile>2</GenerateAssemblyFile>
-                  <AssembleAssemblyFile>2</AssembleAssemblyFile>
-                  <PublicsOnly>2</PublicsOnly>
-                  <StopOnExitCode>11</StopOnExitCode>
-                  <CustomArgument></CustomArgument>
-                  <IncludeLibraryModules></IncludeLibraryModules>
-                  <ComprImg>1</ComprImg>
-                </CommonProperty>
-                <FileArm>
-                  <Aarm>
-                    <bBE>2</bBE>
-                    <interw>2</interw>
-                    <VariousControls>
-                      <MiscControls></MiscControls>
-                      <Define></Define>
-                      <Undefine></Undefine>
-                      <IncludePath></IncludePath>
-                    </VariousControls>
-                  </Aarm>
+                  </Carm>
                 </FileArm>
               </FileOption>
             </File>
             <File>
               <FileName>irq_armv8mbl.S</FileName>
-              <FileType>2</FileType>
+              <FileType>1</FileType>
               <FilePath>..\..\..\Source\GCC\irq_armv8mbl.S</FilePath>
               <FileOption>
                 <CommonProperty>
@@ -4152,22 +4129,29 @@
                   <ComprImg>1</ComprImg>
                 </CommonProperty>
                 <FileArm>
-                  <Aarm>
-                    <bBE>2</bBE>
+                  <Carm>
+                    <arpcs>2</arpcs>
+                    <stkchk>2</stkchk>
+                    <reentr>2</reentr>
                     <interw>2</interw>
+                    <bigend>2</bigend>
+                    <Strict>0</Strict>
+                    <Optim>0</Optim>
+                    <wLevel>0</wLevel>
+                    <uThumb>2</uThumb>
                     <VariousControls>
                       <MiscControls></MiscControls>
                       <Define></Define>
                       <Undefine></Undefine>
                       <IncludePath></IncludePath>
                     </VariousControls>
-                  </Aarm>
+                  </Carm>
                 </FileArm>
               </FileOption>
             </File>
             <File>
               <FileName>irq_armv8mml.S</FileName>
-              <FileType>2</FileType>
+              <FileType>1</FileType>
               <FilePath>..\..\..\Source\GCC\irq_armv8mml.S</FilePath>
             </File>
           </Files>
@@ -4235,7 +4219,7 @@
         <TargetCommonOption>
           <Device>ARMv8MML_SP</Device>
           <Vendor>ARM</Vendor>
-          <PackID>ARM.CMSIS.5.2.0</PackID>
+          <PackID>ARM.CMSIS.5.7.0</PackID>
           <PackURL>http://www.keil.com/pack/</PackURL>
           <Cpu>IRAM(0x20000000,0x00020000) IROM(0x00000000,0x00040000) CPUTYPE("ARMV8MML") FPU3(SFPU) CLOCK(12000000) ESEL ELITTLE</Cpu>
           <FlashUtilSpec></FlashUtilSpec>
@@ -4387,6 +4371,8 @@
             <hadXRAM>0</hadXRAM>
             <uocXRam>0</uocXRam>
             <RvdsVP>2</RvdsVP>
+            <RvdsMve>0</RvdsMve>
+            <RvdsCdeCp>0</RvdsCdeCp>
             <hadIRAM2>0</hadIRAM2>
             <hadIROM2>0</hadIROM2>
             <OnChipMemories>
@@ -4461,7 +4447,7 @@
               <MiscControls>-march=armv8-m.main -mfpu=fpv5-sp-d16 -mfloat-abi=hard -ffunction-sections</MiscControls>
               <Define>EVR_RTX_DISABLE DOMAIN_NS=1</Define>
               <Undefine></Undefine>
-              <IncludePath>..\..\..\Config;..\..\..\Include;..\..\..\..\Include</IncludePath>
+              <IncludePath>..\..\..\Library;..\..\..\Include;..\..\..\..\Include</IncludePath>
             </VariousControls>
           </Carm>
           <Aarm>
@@ -4469,7 +4455,7 @@
             <interw>0</interw>
             <VariousControls>
               <MiscControls>-march=armv8-m.main -mfpu=fpv5-sp-d16 -mfloat-abi=hard</MiscControls>
-              <Define>__FPU_USED=1 DOMAIN_NS=1</Define>
+              <Define>FPU_USED=1 DOMAIN_NS=1</Define>
               <Undefine></Undefine>
               <IncludePath></IncludePath>
             </VariousControls>
@@ -4491,6 +4477,16 @@
         </TargetArm>
       </TargetOption>
       <Groups>
+        <Group>
+          <GroupName>Configuration</GroupName>
+          <Files>
+            <File>
+              <FileName>RTX_Config.h</FileName>
+              <FileType>5</FileType>
+              <FilePath>..\..\RTX_Config.h</FilePath>
+            </File>
+          </Files>
+        </Group>
         <Group>
           <GroupName>Core</GroupName>
           <Files>
@@ -4565,9 +4561,9 @@
           <GroupName>Handlers</GroupName>
           <Files>
             <File>
-              <FileName>irq_cm0.S</FileName>
-              <FileType>2</FileType>
-              <FilePath>..\..\..\Source\GCC\irq_cm0.S</FilePath>
+              <FileName>irq_armv6m.S</FileName>
+              <FileType>1</FileType>
+              <FilePath>..\..\..\Source\GCC\irq_armv6m.S</FilePath>
               <FileOption>
                 <CommonProperty>
                   <UseCPPCompiler>2</UseCPPCompiler>
@@ -4586,23 +4582,30 @@
                   <ComprImg>1</ComprImg>
                 </CommonProperty>
                 <FileArm>
-                  <Aarm>
-                    <bBE>2</bBE>
+                  <Carm>
+                    <arpcs>2</arpcs>
+                    <stkchk>2</stkchk>
+                    <reentr>2</reentr>
                     <interw>2</interw>
+                    <bigend>2</bigend>
+                    <Strict>0</Strict>
+                    <Optim>0</Optim>
+                    <wLevel>0</wLevel>
+                    <uThumb>2</uThumb>
                     <VariousControls>
                       <MiscControls></MiscControls>
                       <Define></Define>
                       <Undefine></Undefine>
                       <IncludePath></IncludePath>
                     </VariousControls>
-                  </Aarm>
+                  </Carm>
                 </FileArm>
               </FileOption>
             </File>
             <File>
-              <FileName>irq_cm3.S</FileName>
-              <FileType>2</FileType>
-              <FilePath>..\..\..\Source\GCC\irq_cm3.S</FilePath>
+              <FileName>irq_armv7m.S</FileName>
+              <FileType>1</FileType>
+              <FilePath>..\..\..\Source\GCC\irq_armv7m.S</FilePath>
               <FileOption>
                 <CommonProperty>
                   <UseCPPCompiler>2</UseCPPCompiler>
@@ -4621,57 +4624,29 @@
                   <ComprImg>1</ComprImg>
                 </CommonProperty>
                 <FileArm>
-                  <Aarm>
-                    <bBE>2</bBE>
+                  <Carm>
+                    <arpcs>2</arpcs>
+                    <stkchk>2</stkchk>
+                    <reentr>2</reentr>
                     <interw>2</interw>
+                    <bigend>2</bigend>
+                    <Strict>0</Strict>
+                    <Optim>0</Optim>
+                    <wLevel>0</wLevel>
+                    <uThumb>2</uThumb>
                     <VariousControls>
                       <MiscControls></MiscControls>
                       <Define></Define>
                       <Undefine></Undefine>
                       <IncludePath></IncludePath>
                     </VariousControls>
-                  </Aarm>
-                </FileArm>
-              </FileOption>
-            </File>
-            <File>
-              <FileName>irq_cm4f.S</FileName>
-              <FileType>2</FileType>
-              <FilePath>..\..\..\Source\GCC\irq_cm4f.S</FilePath>
-              <FileOption>
-                <CommonProperty>
-                  <UseCPPCompiler>2</UseCPPCompiler>
-                  <RVCTCodeConst>0</RVCTCodeConst>
-                  <RVCTZI>0</RVCTZI>
-                  <RVCTOtherData>0</RVCTOtherData>
-                  <ModuleSelection>0</ModuleSelection>
-                  <IncludeInBuild>0</IncludeInBuild>
-                  <AlwaysBuild>2</AlwaysBuild>
-                  <GenerateAssemblyFile>2</GenerateAssemblyFile>
-                  <AssembleAssemblyFile>2</AssembleAssemblyFile>
-                  <PublicsOnly>2</PublicsOnly>
-                  <StopOnExitCode>11</StopOnExitCode>
-                  <CustomArgument></CustomArgument>
-                  <IncludeLibraryModules></IncludeLibraryModules>
-                  <ComprImg>1</ComprImg>
-                </CommonProperty>
-                <FileArm>
-                  <Aarm>
-                    <bBE>2</bBE>
-                    <interw>2</interw>
-                    <VariousControls>
-                      <MiscControls></MiscControls>
-                      <Define></Define>
-                      <Undefine></Undefine>
-                      <IncludePath></IncludePath>
-                    </VariousControls>
-                  </Aarm>
+                  </Carm>
                 </FileArm>
               </FileOption>
             </File>
             <File>
               <FileName>irq_armv8mbl.S</FileName>
-              <FileType>2</FileType>
+              <FileType>1</FileType>
               <FilePath>..\..\..\Source\GCC\irq_armv8mbl.S</FilePath>
               <FileOption>
                 <CommonProperty>
@@ -4691,22 +4666,29 @@
                   <ComprImg>1</ComprImg>
                 </CommonProperty>
                 <FileArm>
-                  <Aarm>
-                    <bBE>2</bBE>
+                  <Carm>
+                    <arpcs>2</arpcs>
+                    <stkchk>2</stkchk>
+                    <reentr>2</reentr>
                     <interw>2</interw>
+                    <bigend>2</bigend>
+                    <Strict>0</Strict>
+                    <Optim>0</Optim>
+                    <wLevel>0</wLevel>
+                    <uThumb>2</uThumb>
                     <VariousControls>
                       <MiscControls></MiscControls>
                       <Define></Define>
                       <Undefine></Undefine>
                       <IncludePath></IncludePath>
                     </VariousControls>
-                  </Aarm>
+                  </Carm>
                 </FileArm>
               </FileOption>
             </File>
             <File>
               <FileName>irq_armv8mml.S</FileName>
-              <FileType>2</FileType>
+              <FileType>1</FileType>
               <FilePath>..\..\..\Source\GCC\irq_armv8mml.S</FilePath>
             </File>
           </Files>
@@ -4785,5 +4767,14 @@
     </components>
     <files/>
   </RTE>
+
+  <LayerInfo>
+    <Layers>
+      <Layer>
+        <LayName>RTX_CM</LayName>
+        <LayPrjMark>1</LayPrjMark>
+      </Layer>
+    </Layers>
+  </LayerInfo>
 
 </Project>

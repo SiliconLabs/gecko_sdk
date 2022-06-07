@@ -30,7 +30,7 @@
 
 #include "peripheral_sysrtc.h"
 #if defined(SYSRTC_COUNT) && (SYSRTC_COUNT > 0)
-#include "em_assert.h"
+#include "sl_assert.h"
 #include "em_bus.h"
 #include "stddef.h"
 

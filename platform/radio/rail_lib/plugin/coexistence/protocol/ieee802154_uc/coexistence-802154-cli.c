@@ -45,9 +45,15 @@ void cli_coex_154_set_options(sl_cli_command_arg_t *args)
   responsePrint(sl_cli_get_command_string(args, 0), "Status:0x%x", status);
 }
 
+static bool coex_154_cli_initialized = false;
+
 void cli_coex_154_set_enable(sl_cli_command_arg_t *args)
 {
   bool enabled = !!(bool)sl_cli_get_argument_uint8(args, 0);
+  if (enabled && !coex_154_cli_initialized) {
+    sl_rail_util_coex_init();
+    coex_154_cli_initialized = true;
+  }
   sl_status_t status = sl_rail_util_coex_set_enable(enabled);
   responsePrint(sl_cli_get_command_string(args, 0), "Status:0x%x", status);
 }
@@ -129,8 +135,12 @@ void cli_coex_154_is_coex_phy_selected(sl_cli_command_arg_t *args)
 void cli_coex_154_get_gpio_input_override(sl_cli_command_arg_t *args)
 {
   sl_rail_util_coex_gpio_index_t gpioIndex = (sl_rail_util_coex_gpio_index_t)sl_cli_get_argument_uint8(args, 0);
-  bool enabled = sl_rail_util_coex_get_gpio_input_override(gpioIndex);
-  responsePrint(sl_cli_get_command_string(args, 0), "gpioOverride:0x%x", enabled);
+  if (gpioIndex < (COEX_GPIO_INDEX_COUNT - 1)) {
+    bool enabled = sl_rail_util_coex_get_gpio_input_override(gpioIndex);
+    responsePrint(sl_cli_get_command_string(args, 0), "gpioOverride:0x%x", enabled);
+  } else {
+    responsePrint(sl_cli_get_command_string(args, 0), "COEX GPIO index out of bounds!");
+  }
 }
 
 void cli_coex_154_set_gpio_input_override(sl_cli_command_arg_t *args)
@@ -138,5 +148,6 @@ void cli_coex_154_set_gpio_input_override(sl_cli_command_arg_t *args)
   sl_rail_util_coex_gpio_index_t gpioIndex = (sl_rail_util_coex_gpio_index_t)sl_cli_get_argument_uint8(args, 0);
   bool enabled = (bool)sl_cli_get_argument_uint8(args, 1);
   sl_status_t status = sl_rail_util_coex_set_gpio_input_override(gpioIndex, enabled);
-  responsePrint(sl_cli_get_command_string(args, 0), "gpioOverrideValue:0x%x", status);
+  responsePrint(sl_cli_get_command_string(args, 0), "Status:0x%x", status);
+  cli_coex_154_get_gpio_input_override(args);
 }

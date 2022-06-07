@@ -40,21 +40,21 @@
 //              Static Function Declarations
 // -----------------------------------------------------------------------------
 static void 
-sl_cc_multilevel_sensor_autoreport_callback(SSwTimer *pTimer);
+cc_multilevel_sensor_autoreport_callback(SSwTimer *pTimer);
 
 static void 
-sl_cc_multilevel_sensor_operation_report_stx(TRANSMIT_OPTIONS_TYPE_SINGLE_EX txOptions, void* pData);
+cc_multilevel_sensor_operation_report_stx(TRANSMIT_OPTIONS_TYPE_SINGLE_EX txOptions, void* pData);
 
 static received_frame_status_t 
-sl_cc_multilevel_sensor_cmd_sensor_multilevel_get(  RECEIVE_OPTIONS_TYPE_EX *pRxOpt,
+cc_multilevel_sensor_cmd_sensor_multilevel_get(  RECEIVE_OPTIONS_TYPE_EX *pRxOpt,
                                                     const ZW_APPLICATION_TX_BUFFER *pCmd,
                                                     uint8_t cmdLength);
 static received_frame_status_t
-sl_cc_multilevel_sensor_cmd_sensor_multilevel_get_supported_sensor( RECEIVE_OPTIONS_TYPE_EX *pRxOpt,
+cc_multilevel_sensor_cmd_sensor_multilevel_get_supported_sensor( RECEIVE_OPTIONS_TYPE_EX *pRxOpt,
                                                                     const ZW_APPLICATION_TX_BUFFER *pCmd,
                                                                     uint8_t cmdLength);
 static received_frame_status_t
-sl_cc_multilevel_sensor_cmd_sensor_multilevel_get_supported_scale( RECEIVE_OPTIONS_TYPE_EX *pRxOpt,
+cc_multilevel_sensor_cmd_sensor_multilevel_get_supported_scale( RECEIVE_OPTIONS_TYPE_EX *pRxOpt,
                                                                    const ZW_APPLICATION_TX_BUFFER *pCmd,
                                                                    uint8_t cmdLength);
 
@@ -81,13 +81,13 @@ CC_MultilevelSensor_handler(RECEIVE_OPTIONS_TYPE_EX *pRxOpt,
   switch (pCmd->ZW_Common.cmd)
   {
     case SENSOR_MULTILEVEL_GET_V11:
-      return_value =  sl_cc_multilevel_sensor_cmd_sensor_multilevel_get(pRxOpt, pCmd, cmdLength);
+      return_value = cc_multilevel_sensor_cmd_sensor_multilevel_get(pRxOpt, pCmd, cmdLength);
     break;
     case SENSOR_MULTILEVEL_SUPPORTED_GET_SENSOR_V11:
-      return_value =  sl_cc_multilevel_sensor_cmd_sensor_multilevel_get_supported_sensor(pRxOpt, pCmd, cmdLength);
+      return_value = cc_multilevel_sensor_cmd_sensor_multilevel_get_supported_sensor(pRxOpt, pCmd, cmdLength);
     break;
     case SENSOR_MULTILEVEL_SUPPORTED_GET_SCALE_V11:
-      return_value =  sl_cc_multilevel_sensor_cmd_sensor_multilevel_get_supported_scale(pRxOpt, pCmd, cmdLength);
+      return_value = cc_multilevel_sensor_cmd_sensor_multilevel_get_supported_scale(pRxOpt, pCmd, cmdLength);
     break;
     default:
       return_value = RECEIVED_FRAME_STATUS_NO_SUPPORT;
@@ -97,27 +97,27 @@ CC_MultilevelSensor_handler(RECEIVE_OPTIONS_TYPE_EX *pRxOpt,
   return return_value;
 }
 
-void sl_cc_multilevel_sensor_init(void)
+void cc_multilevel_sensor_init(void)
 {
-  sl_cc_multilevel_sensor_init_all_sensor();
-  AppTimerEm4PersistentRegister(&cc_multilevel_sensor_autoreport_timer, false, sl_cc_multilevel_sensor_autoreport_callback);
-  AppTimerEm4PersistentStart(&cc_multilevel_sensor_autoreport_timer, SL_MULTILEVEL_SENSOR_DEFAULT_AUTOREPORT_PEDIOD_MS);
+  cc_multilevel_sensor_init_all_sensor();
+  AppTimerDeepSleepPersistentRegister(&cc_multilevel_sensor_autoreport_timer, false, cc_multilevel_sensor_autoreport_callback);
+  AppTimerDeepSleepPersistentStart(&cc_multilevel_sensor_autoreport_timer, MULTILEVEL_SENSOR_DEFAULT_AUTOREPORT_PEDIOD_MS);
 }
 
 typedef struct tse_data_t {
   RECEIVE_OPTIONS_TYPE_EX zaf_tse_local_actuation;
-  sl_sensor_interface_iterator_t* sensor_interface;  
+  sensor_interface_iterator_t* sensor_interface;  
 } tse_data_t;
  
   
-static tse_data_t tse_data[SL_MULTILEVEL_SENSOR_REGISTERED_SENSOR_NUMBER_LIMIT] = {0};
+static tse_data_t tse_data[MULTILEVEL_SENSOR_REGISTERED_SENSOR_NUMBER_LIMIT] = {0};
 
 /**
  * This is a callback for the autoreport timer to trigger periodically the lifeline
  * report of the sensors' measured values.
  * @param[in] pTimer timer instance which called the callback
  */
-static void sl_cc_multilevel_sensor_autoreport_callback(SSwTimer *pTimer)
+static void cc_multilevel_sensor_autoreport_callback(SSwTimer *pTimer)
 {
   UNUSED(pTimer);
   /**
@@ -125,18 +125,18 @@ static void sl_cc_multilevel_sensor_autoreport_callback(SSwTimer *pTimer)
   * All applications can use this variable when triggering the TSE after
   * a local / non Z-Wave initiated change
   */
-  sl_sensor_interface_iterator_t* sensor_interface_iterator;
-  sl_cc_multilevel_sensor_init_iterator(&sensor_interface_iterator);
+  sensor_interface_iterator_t* sensor_interface_iterator;
+  cc_multilevel_sensor_init_iterator(&sensor_interface_iterator);
   uint8_t i = 0;
   while(sensor_interface_iterator)
   {
 
     tse_data[i].sensor_interface = sensor_interface_iterator;
-    ZAF_TSE_Trigger(sl_cc_multilevel_sensor_operation_report_stx, (void*)&tse_data[i], false);
-    sl_cc_multilevel_sensor_next_iterator(&sensor_interface_iterator);
+    ZAF_TSE_Trigger(cc_multilevel_sensor_operation_report_stx, (void*)&tse_data[i], false);
+    cc_multilevel_sensor_next_iterator(&sensor_interface_iterator);
     i++;
   }
-  AppTimerEm4PersistentStart(&cc_multilevel_sensor_autoreport_timer, SL_MULTILEVEL_SENSOR_DEFAULT_AUTOREPORT_PEDIOD_MS);
+  AppTimerDeepSleepPersistentStart(&cc_multilevel_sensor_autoreport_timer, MULTILEVEL_SENSOR_DEFAULT_AUTOREPORT_PEDIOD_MS);
 }
 
 /**
@@ -144,7 +144,7 @@ static void sl_cc_multilevel_sensor_autoreport_callback(SSwTimer *pTimer)
  * @param[in] txOptions TxOptions, filled in by TSE
  * @param[in] pData this parameter is not used in this case
  */
-static void sl_cc_multilevel_sensor_operation_report_stx(TRANSMIT_OPTIONS_TYPE_SINGLE_EX txOptions, void *pData)
+static void cc_multilevel_sensor_operation_report_stx(TRANSMIT_OPTIONS_TYPE_SINGLE_EX txOptions, void *pData)
 {
   if (NULL == pData)
   {
@@ -152,7 +152,7 @@ static void sl_cc_multilevel_sensor_operation_report_stx(TRANSMIT_OPTIONS_TYPE_S
     return;
   }
 
-  sl_sensor_interface_iterator_t *sensor_interface_iterator = ((tse_data_t *)pData)->sensor_interface;
+  sensor_interface_iterator_t *sensor_interface_iterator = ((tse_data_t *)pData)->sensor_interface;
   if (NULL == sensor_interface_iterator) {
     ASSERT(0);  // this only for debugging purpose.
     return;
@@ -162,7 +162,7 @@ static void sl_cc_multilevel_sensor_operation_report_stx(TRANSMIT_OPTIONS_TYPE_S
   ZW_APPLICATION_TX_BUFFER *pTxBuf = &(TxBuf.appTxBuf);
   uint8_t *pTxBufRaw = (uint8_t *)pTxBuf;
 
-  sl_sensor_read_result_t read_result;
+  sensor_read_result_t read_result;
   size_t raw_buffer_offset = 0;
   uint8_t sensor_type_value = 0;
   uint8_t scale = 0;
@@ -178,7 +178,7 @@ static void sl_cc_multilevel_sensor_operation_report_stx(TRANSMIT_OPTIONS_TYPE_S
 
   if (sensor_interface_iterator->read_value != NULL)
   {
-    scale = sl_cc_multilevel_sensor_check_scale(sensor_interface_iterator, 0);
+    scale = cc_multilevel_sensor_check_scale(sensor_interface_iterator, 0);
     if (true == sensor_interface_iterator->read_value(&read_result, scale))
     {
       pTxBufRaw[raw_buffer_offset++] = (uint8_t)(read_result.precision << 5) |
@@ -196,7 +196,7 @@ static void sl_cc_multilevel_sensor_operation_report_stx(TRANSMIT_OPTIONS_TYPE_S
 }
 
 static received_frame_status_t 
-sl_cc_multilevel_sensor_cmd_sensor_multilevel_get( RECEIVE_OPTIONS_TYPE_EX *pRxOpt,
+cc_multilevel_sensor_cmd_sensor_multilevel_get( RECEIVE_OPTIONS_TYPE_EX *pRxOpt,
                                                    const ZW_APPLICATION_TX_BUFFER *pCmd,
                                                    uint8_t cmdLength)
 {
@@ -209,7 +209,7 @@ sl_cc_multilevel_sensor_cmd_sensor_multilevel_get( RECEIVE_OPTIONS_TYPE_EX *pRxO
   ZAF_TRANSPORT_TX_BUFFER  TxBuf;
   ZW_APPLICATION_TX_BUFFER *pTxBuf = &(TxBuf.appTxBuf);
   TRANSMIT_OPTIONS_TYPE_SINGLE_EX *pTxOptionsEx;
-  sl_sensor_interface_t* sensor_interface;
+  sensor_interface_t* sensor_interface;
   uint8_t sensor_type_value =  pCmd->ZW_SensorMultilevelGetV11Frame.sensorType;
   uint8_t scale             = (pCmd->ZW_SensorMultilevelGetV11Frame.properties1 >> 3) & 0x03;
 
@@ -219,20 +219,20 @@ sl_cc_multilevel_sensor_cmd_sensor_multilevel_get( RECEIVE_OPTIONS_TYPE_EX *pRxO
   pTxBuf->ZW_SensorMultilevelReport4byteV11Frame.cmdClass = COMMAND_CLASS_SENSOR_MULTILEVEL_V11;
   pTxBuf->ZW_SensorMultilevelReport4byteV11Frame.cmd      = SENSOR_MULTILEVEL_REPORT_V11;
 
-  if( SL_CC_MULTILEVEL_SENSOR_RETURN_VALUE_NOT_FOUND == 
-      sl_cc_multilevel_sensor_check_sensor_type_registered(sensor_type_value))
+  if( CC_MULTILEVEL_SENSOR_RETURN_VALUE_NOT_FOUND == 
+      cc_multilevel_sensor_check_sensor_type_registered(sensor_type_value))
   {
-    sl_cc_multilevel_sensor_get_default_sensor_type(&sensor_type_value);
+    cc_multilevel_sensor_get_default_sensor_type(&sensor_type_value);
   }
 
   pTxBuf->ZW_SensorMultilevelReport4byteV11Frame.sensorType = sensor_type_value;
 
-  if(SL_CC_MULTILEVEL_SENSOR_RETURN_VALUE_OK == 
-     sl_cc_multilevel_sensor_get_interface(sensor_type_value, &sensor_interface))
+  if(CC_MULTILEVEL_SENSOR_RETURN_VALUE_OK == 
+     cc_multilevel_sensor_get_interface(sensor_type_value, &sensor_interface))
   {
-    sl_sensor_read_result_t read_result;
+    sensor_read_result_t read_result;
 
-    scale = sl_cc_multilevel_sensor_check_scale(sensor_interface, scale);
+    scale = cc_multilevel_sensor_check_scale(sensor_interface, scale);
     if( (sensor_interface->read_value != NULL) && (true == sensor_interface->read_value(&read_result, scale)))
     {
       pTxBuf->ZW_SensorMultilevelReport4byteV11Frame.level =  (uint8_t)(read_result.precision << 5) |
@@ -264,7 +264,7 @@ sl_cc_multilevel_sensor_cmd_sensor_multilevel_get( RECEIVE_OPTIONS_TYPE_EX *pRxO
 }
 
 static received_frame_status_t 
-sl_cc_multilevel_sensor_cmd_sensor_multilevel_get_supported_sensor( RECEIVE_OPTIONS_TYPE_EX *pRxOpt,
+cc_multilevel_sensor_cmd_sensor_multilevel_get_supported_sensor( RECEIVE_OPTIONS_TYPE_EX *pRxOpt,
                                                                     const ZW_APPLICATION_TX_BUFFER *pCmd,
                                                                     uint8_t cmdLength)
 {
@@ -284,7 +284,7 @@ sl_cc_multilevel_sensor_cmd_sensor_multilevel_get_supported_sensor( RECEIVE_OPTI
   uint8_t* raw_buffer_payload     = (uint8_t*)&pTxBuf->ZW_SensorMultilevelSupportedSensorReport4byteV11Frame.bitMask1;
   pTxBuf->ZW_SensorMultilevelSupportedSensorReport4byteV11Frame.cmdClass = COMMAND_CLASS_SENSOR_MULTILEVEL_V11;
   pTxBuf->ZW_SensorMultilevelSupportedSensorReport4byteV11Frame.cmd      = SENSOR_MULTILEVEL_SUPPORTED_SENSOR_REPORT_V11;
-  sl_cc_multilevel_sensor_get_supported_sensors(&pTxBuf->ZW_SensorMultilevelSupportedSensorReport4byteV11Frame.bitMask1);
+  cc_multilevel_sensor_get_supported_sensors(&pTxBuf->ZW_SensorMultilevelSupportedSensorReport4byteV11Frame.bitMask1);
   while(payload_length)
   {
     if(raw_buffer_payload[payload_length - 1] != 0){break;}
@@ -303,7 +303,7 @@ sl_cc_multilevel_sensor_cmd_sensor_multilevel_get_supported_sensor( RECEIVE_OPTI
 }
 
 static received_frame_status_t
-sl_cc_multilevel_sensor_cmd_sensor_multilevel_get_supported_scale( RECEIVE_OPTIONS_TYPE_EX *pRxOpt,
+cc_multilevel_sensor_cmd_sensor_multilevel_get_supported_scale( RECEIVE_OPTIONS_TYPE_EX *pRxOpt,
                                                                    const ZW_APPLICATION_TX_BUFFER *pCmd,
                                                                    uint8_t cmdLength)
 {
@@ -326,8 +326,8 @@ sl_cc_multilevel_sensor_cmd_sensor_multilevel_get_supported_scale( RECEIVE_OPTIO
 
   supported_scale = 0;
 
-  if(SL_CC_MULTILEVEL_SENSOR_RETURN_VALUE_OK == 
-     sl_cc_multilevel_sensor_get_supported_scale(pCmd->ZW_SensorMultilevelGetV11Frame.sensorType, &supported_scale))
+  if(CC_MULTILEVEL_SENSOR_RETURN_VALUE_OK == 
+     cc_multilevel_sensor_get_supported_scale(pCmd->ZW_SensorMultilevelGetV11Frame.sensorType, &supported_scale))
   {
     pTxBuf->ZW_SensorMultilevelSupportedScaleReportV5Frame.properties1 = supported_scale;
   }

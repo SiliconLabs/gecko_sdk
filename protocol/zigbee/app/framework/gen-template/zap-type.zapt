@@ -22,13 +22,17 @@ enum {
 // ZCL enums
 
 {{#zcl_enums}}
-
-// Enum for {{label}}
-typedef enum {
 {{#zcl_enum_items}}
+{{#first}}
+// Enum for {{parent.label}}
+typedef enum {
+{{/first}}
 {{indent}}EMBER_ZCL_{{as_delimited_macro parent.label}}_{{as_delimited_macro label}} = {{value}},
+{{#last}}
+} EmberAf{{as_type parent.label}};
+
+{{/last}}
 {{/zcl_enum_items}}
-} EmberAf{{as_type label}};
 {{/zcl_enums}}
 
 // ZCL bitmaps

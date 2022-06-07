@@ -34,6 +34,7 @@
 const HalBootloaderAddressTableType *halBootloaderAddressTable = (HalBootloaderAddressTableType*)(FLASH_BASE);
 
 extern const ApplicationProperties_t appProperties;
+extern const tVectorEntry __VECTOR_TABLE[];
 
 VAR_AT_SEGMENT(NO_STRIPPING const HalAppAddressTableType halAppAddressTable, __AAT__) = {
   { _CSTACK_SEGMENT_END,
@@ -42,7 +43,7 @@ VAR_AT_SEGMENT(NO_STRIPPING const HalAppAddressTableType halAppAddressTable, __A
     HardFault_Handler,
     APP_ADDRESS_TABLE_TYPE,
     AAT_VERSION,
-    __Vectors },
+    __VECTOR_TABLE },
   SL_PLAT,
   SL_MICRO,
   SL_PHY,

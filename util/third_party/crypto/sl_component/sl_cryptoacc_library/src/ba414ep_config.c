@@ -17,7 +17,25 @@
 #include "sx_errors.h"
 #include "sx_hw_cfg.h"
 
+static BA414EPRegs_t * const BA414EP_REGS = (BA414EPRegs_t *)ADDR_BA414EP_REGS;
+const volatile uint32_t * const ADDR_BA414EP_HW_CFG = &(((BA414EPRegs_t *)ADDR_BA414EP_REGS)->HwConfigReg);
+
+
 // #define PK_DEBUG_ENABLED
+
+#ifdef PK_DEBUG_ENABLED
+static void CRYPTOLIB_PRINT_BLK(block_t blk)
+{
+   if (blk.flags & BLOCK_S_CONST_ADDR)
+      return;
+   for (uint32_t i = 0; i < blk.len; i++) {
+      if ((i != 0) && (i % 16 == 0))
+         CRYPTOLIB_PRINTF("\n");
+      CRYPTOLIB_PRINTF("0x%02x, ", blk.addr[i]);
+   }
+   CRYPTOLIB_PRINTF("\n");
+}
+#endif
 
 #if PK_CM_ENABLED
 struct sx_rng pk_rng = {
@@ -30,8 +48,7 @@ void ba414ep_set_rng(struct sx_rng rng)
    pk_rng = rng;
 }
 #endif
-static BA414EPRegs_t * const BA414EP_REGS = (BA414EPRegs_t *)ADDR_BA414EP_REGS;
-const volatile uint32_t* ADDR_BA414EP_HW_CFG = &(((BA414EPRegs_t *)ADDR_BA414EP_REGS)->HwConfigReg);
+
 
 /** @brief This function starts the given PK
  *  @return The start bit of the CommandReg of the given BA414EP struct has been set
@@ -74,7 +91,7 @@ static CHECK_RESULT uint32_t ba414ep_wait_status(void)
    #if WAIT_PK_WITH_REGISTER_POLLING
       while(ba414ep_is_busy());
    #else
-      #error "Interrupt not supported, polling is the only option"
+      PK_WAITIRQ_FCT();
    #endif
 
 
@@ -93,7 +110,7 @@ void ba414ep_set_config(uint32_t PtrA, uint32_t PtrB, uint32_t PtrC, uint32_t Pt
    WR_REG32(&BA414EP_REGS->PointerReg, DataReg);
 }
 
-void ba414ep_set_command(uint32_t op, uint32_t operandsize, uint32_t swap, uint32_t curve_flags)
+uint32_t ba414ep_set_command(uint32_t op, uint32_t operandsize, uint32_t swap, uint32_t curve_flags)
 {
    uint32_t DataReg = 0x80000000;
    uint32_t NumberOfBytes;
@@ -104,27 +121,32 @@ void ba414ep_set_command(uint32_t op, uint32_t operandsize, uint32_t swap, uint3
       NumberOfBytes = 0;
    }
 
+   // Check that the operand size encoding does not exceed the max allocated size.
+   if (NumberOfBytes > (BA414EP_CMD_OPSIZE_MASK >> BA414EP_CMD_OPSIZE_LSB)) {
+      return CRYPTOLIB_UNSUPPORTED_ERR;
+   }
+
    // Data ram is erased automatically after reset in PK engine.
    // Wait until erasing is finished before writing any data
    // (this routine is called before any data transfer)
    #if WAIT_PK_WITH_REGISTER_POLLING
       while(ba414ep_is_busy());
    #else
-      #error "Interrupt not supported, polling is the only option"
+      PK_WAITIRQ_FCT();
    #endif
 
    DataReg = DataReg | op;
-   DataReg = DataReg | (NumberOfBytes  << BA414EP_CMD_OPSIZE_LSB);
+   DataReg = DataReg | BA414EP_CMD_OPSIZE(NumberOfBytes);
    #if PK_CM_ENABLED
       // Counter-Measures for the Public Key
-      if (BA414EP_IS_OP_WITH_SECRET_ECC(op)) {
+      if (BA414EP_IS_OP_WITH_PTMUL_CM(op)) {
          // ECC operation
-         DataReg = DataReg | (BA414EP_CMD_RANDPR(PK_CM_RANDPROJ_ECC));
-         DataReg = DataReg | (BA414EP_CMD_RANDKE(PK_CM_RANDKE_ECC));
-      } else if (BA414EP_IS_OP_WITH_SECRET_MOD(op)) {
+         DataReg = DataReg | (BA414EP_CMD_RANDPR(PK_CM_RAND_PROJ));
+         DataReg = DataReg | (BA414EP_CMD_RANDKE(PK_CM_RAND_SCALAR));
+      } else if (BA414EP_IS_OP_WITH_EXPO_CM(op)) {
          // Modular operations
-         DataReg = DataReg | (BA414EP_CMD_RANDPR(PK_CM_RANDPROJ_MOD));
-         DataReg = DataReg | (BA414EP_CMD_RANDKE(PK_CM_RANDKE_MOD));
+         DataReg = DataReg | (BA414EP_CMD_RANDMOD(PK_CM_RAND_MODULUS));
+         DataReg = DataReg | (BA414EP_CMD_RANDKE(PK_CM_RAND_EXPONENT));
       }
    #endif
    DataReg = DataReg | (BA414EP_CMD_SWAP_MASK & (swap << BA414EP_CMD_SWAP_LSB));
@@ -140,20 +162,18 @@ void ba414ep_set_command(uint32_t op, uint32_t operandsize, uint32_t swap, uint3
    #if PK_CM_ENABLED
    CRYPTOLIB_ASSERT_NM(pk_rng.get_rand_blk != NULL);
    // Copy random value in the CryptoRAM for the counter-measures
-   if ((BA414EP_IS_OP_WITH_SECRET_ECC(op) && (PK_CM_RANDKE_ECC || PK_CM_RANDPROJ_ECC)) ||
-       (BA414EP_IS_OP_WITH_SECRET_MOD(op) && (PK_CM_RANDKE_MOD || PK_CM_RANDPROJ_MOD))) {
+   if ((BA414EP_IS_OP_WITH_PTMUL_CM(op) && (PK_CM_RAND_SCALAR || PK_CM_RAND_PROJ)) ||
+       (BA414EP_IS_OP_WITH_EXPO_CM(op) && (PK_CM_RAND_EXPONENT || PK_CM_RAND_MODULUS))) {
       uint8_t pk_cm_rand[8] = { 0xb5, 0xb5, 0xb5, 0xb5, 0xb5, 0xb5, 0xb5, 0xb5 };
       block_t rnd_blk = block_t_convert(pk_cm_rand, PK_CM_RAND_SIZE);
 
       // Generate non-null random value
       do {
-#if !CRYPTOLIB_TEST_ENABLED
          pk_rng.get_rand_blk(pk_rng.param, rnd_blk);
-#endif //!CRYPTOLIB_TEST_ENABLED
       } while(!sx_math_array_is_not_null(rnd_blk.addr, PK_CM_RAND_SIZE));
 
       // Random has to be odd
-      if (BA414EP_IS_OP_WITH_SECRET_MOD(op) && PK_CM_RANDPROJ_MOD) {
+      if (BA414EP_IS_OP_WITH_EXPO_CM(op) && PK_CM_RAND_MODULUS) {
          pk_cm_rand[PK_CM_RAND_SIZE-1] |= 1;
       }
 
@@ -165,6 +185,7 @@ void ba414ep_set_command(uint32_t op, uint32_t operandsize, uint32_t swap, uint3
       }
    }
    #endif
+   return CRYPTOLIB_SUCCESS;
 }
 
 
@@ -203,7 +224,7 @@ void mem2CryptoRAM_rev(block_t src, uint32_t size, uint32_t offset)
    }
    #ifdef PK_DEBUG_ENABLED
    dst.addr = BA414EP_ADDR_MEMLOC(offset, size);
-   SX_PRINT_BLK(dst);
+   CRYPTOLIB_PRINT_BLK(dst);
    #endif
 }
 
@@ -242,6 +263,16 @@ void point2CryptoRAM_rev(block_t src, uint32_t size, uint32_t offset) {
    set_last_desc(&desc_to[1]);
 
    cryptodma_run_sg(&desc_from, desc_to);
+
+   #ifdef PK_DEBUG_ENABLED
+   block_t dbg;
+   dbg.addr    = BA414EP_ADDR_MEMLOC(offset, size);
+   dbg.len     = size;
+   dbg.flags   = BLOCK_S_INCR_ADDR;
+   CRYPTOLIB_PRINT_BLK(dbg);
+   dbg.addr    = BA414EP_ADDR_MEMLOC(offset+1, size);
+   CRYPTOLIB_PRINT_BLK(dbg);
+   #endif
 }
 
 void point2CryptoRAM(block_t src, uint32_t size, uint32_t offset) {
@@ -286,9 +317,16 @@ void CryptoRAM2point_rev(block_t dst, uint32_t size, uint32_t offset) {
    struct dma_sg_descr_s desc_to;
 
 #ifdef PK_DEBUG_ENABLED
-   CRYPTOLIB_PRINTF("Debug BA414EP: DMA transfer point (rev): "
+   CRYPTOLIB_PRINTF("Debug BA414EP: Read point (rev): @Address: %p ,"
                     "%d bytes from loc %d & %d with operand size = %d\n",
-                    dst.len, offset, offset+1, size);
+                    dst.addr, dst.len, offset, offset+1, size);
+   block_t dbg;
+   dbg.addr  = BA414EP_ADDR_MEMLOC(offset, size);
+   dbg.len   = size;
+   dbg.flags = BLOCK_S_INCR_ADDR;
+   CRYPTOLIB_PRINT_BLK(dbg);
+   dbg.addr  = BA414EP_ADDR_MEMLOC(offset + 1, size);
+   CRYPTOLIB_PRINT_BLK(dbg);
 #endif
    CRYPTOLIB_ASSERT((dst.len >= size*2), "destination length smaller then point size.");
 
@@ -323,9 +361,16 @@ void CryptoRAM2point(block_t dst, uint32_t size, uint32_t offset) {
    struct dma_sg_descr_s desc_to;
 
 #ifdef PK_DEBUG_ENABLED
-   CRYPTOLIB_PRINTF("Debug BA414EP: DMA transfer point (rev): "
+   CRYPTOLIB_PRINTF("Debug BA414EP: Read point: "
                     "%d bytes from loc %d & %d with operand size = %d\n",
                     dst.len, offset, offset+1, size);
+   block_t dbg;
+   dbg.addr  = BA414EP_ADDR_MEMLOC(offset, size);
+   dbg.len   = size;
+   dbg.flags = BLOCK_S_INCR_ADDR;
+   CRYPTOLIB_PRINT_BLK(dbg);
+   dbg.addr  = BA414EP_ADDR_MEMLOC(offset + 1, size);
+   CRYPTOLIB_PRINT_BLK(dbg);
 #endif
    CRYPTOLIB_ASSERT((dst.len >= size*2), "destination length smaller then point size.");
 
@@ -360,15 +405,20 @@ void CryptoRAM2mem_rev(block_t dst, uint32_t size, uint32_t offset)
 {
    block_t src;
 
+   #ifdef PK_DEBUG_ENABLED
+   CRYPTOLIB_PRINTF("Debug BA414EP: Read mem (rev): @Address: %p, %d bytes "
+         "from loc %d:\n", dst.addr, size, offset);
+   block_t dbg;
+   dbg.addr  = BA414EP_ADDR_MEMLOC(offset, size);
+   dbg.len   = size;
+   dbg.flags = BLOCK_S_INCR_ADDR;
+   CRYPTOLIB_PRINT_BLK(dbg);
+   #endif
+
    src.addr    = BA414EP_ADDR_MEMLOC(offset, size);
    src.len     = size;
    src.flags   = BLOCK_S_INCR_ADDR;
    memcpy_blk(dst, src, size);
-
-   #ifdef PK_DEBUG_ENABLED
-   CRYPTOLIB_PRINTF("Debug BA414EP: Read %d bytes from loc %d:\n", size, offset);
-   SX_PRINT_BLK(src);
-   #endif
 }
 
 void mem2CryptoRAM(block_t src, uint32_t size, uint32_t offset)
@@ -382,7 +432,7 @@ void mem2CryptoRAM(block_t src, uint32_t size, uint32_t offset)
 
    #ifdef PK_DEBUG_ENABLED
    CRYPTOLIB_PRINTF("Debug BA414EP: Write %d bytes to loc %d:\n", size, offset);
-   SX_PRINT_BLK(dst);
+   CRYPTOLIB_PRINT_BLK(dst);
    #endif
 }
 
@@ -397,7 +447,7 @@ void CryptoRAM2mem(block_t dst, uint32_t size, uint32_t offset)
 
    #ifdef PK_DEBUG_ENABLED
    CRYPTOLIB_PRINTF("Debug BA414EP: Read %d bytes from loc %d:\n", size, offset);
-   SX_PRINT_BLK(src);
+   CRYPTOLIB_PRINT_BLK(src);
    #endif
 }
 
@@ -407,7 +457,11 @@ uint32_t ba414ep_start_wait_status(void)
    uint32_t status;
    ba414ep_start();
    status = ba414ep_wait_status();
+#ifdef PK_DEBUG_ENABLED
+   if(status) {
+#else
    if (status&~(BA414EP_STS_BADSIGNATURE_MASK|BA414EP_STS_NOTPRIME_MASK|BA414EP_STS_NOTINVERTIBLE_MASK)) {
+#endif
       CRYPTOLIB_PRINTF("BA414EP: error status: %08X\n", status);
    }
    return status;
@@ -445,7 +499,10 @@ void ba414ep_load_curve(
 
 uint32_t ba414ep_load_and_modN(uint8_t outloc, uint8_t nloc, uint32_t size, block_t in, block_t out, uint32_t flags)
 {
-   ba414ep_set_command(BA414EP_OPTYPE_MOD_RED_ODD, size, BA414EP_BIGEND, flags);
+   uint32_t result = ba414ep_set_command(BA414EP_OPTYPE_MOD_RED_ODD, size, BA414EP_BIGEND, flags);
+   if (result)
+      return result;
+
    ba414ep_set_config(outloc, outloc, outloc, nloc);
    mem2CryptoRAM_rev(in, size, outloc);
    if(ba414ep_start_wait_status())
@@ -455,4 +512,3 @@ uint32_t ba414ep_load_and_modN(uint8_t outloc, uint8_t nloc, uint32_t size, bloc
 
    return CRYPTOLIB_SUCCESS;
 }
-

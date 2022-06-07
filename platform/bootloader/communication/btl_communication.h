@@ -51,8 +51,8 @@ void communication_init(void);
 int32_t communication_start(void);
 
 /***************************************************************************//**
- * This function is not supposed to return until the host signals the end of the
- * current session, or a new image has been flashed and verified.
+ * Not supposed to return until either the host signals the end of the
+ * current session or a new image has been flashed and verified.
  *
  * @return Error code indicating success or failure
  * @retval ::BOOTLOADER_OK when a new image was flashed

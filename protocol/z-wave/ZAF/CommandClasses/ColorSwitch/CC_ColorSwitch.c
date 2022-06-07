@@ -48,6 +48,7 @@ void CC_ColorSwitch_Init(s_colorComponent *colors,
   for (int i = 0; i < colorsSupportedCount; i++)
   {
     ZAF_Actuator_Init(&pColorComponents[i].obj, 0 , 0xFF, 20, durationDefault, &CC_ColorSwitch_ColorChanged_cb);
+    ZAF_Actuator_Set(&pColorComponents[i].obj, 0xFF, 0);
   }
 
   if (NULL != CC_ColorSwitch_callback)

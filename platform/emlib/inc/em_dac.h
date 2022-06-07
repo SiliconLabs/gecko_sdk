@@ -35,7 +35,7 @@
 
 #if defined(DAC_COUNT) && (DAC_COUNT > 0)
 
-#include "em_assert.h"
+#include "sl_assert.h"
 #include <stdbool.h>
 
 #ifdef __cplusplus
