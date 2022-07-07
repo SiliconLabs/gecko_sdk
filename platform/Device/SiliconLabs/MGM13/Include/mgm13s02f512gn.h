@@ -4,7 +4,7 @@
  *        for MGM13S02F512GN
  *******************************************************************************
  * # License
- * <b>Copyright 2021 Silicon Laboratories Inc. www.silabs.com</b>
+ * <b>Copyright 2022 Silicon Laboratories Inc. www.silabs.com</b>
  *******************************************************************************
  *
  * SPDX-License-Identifier: Zlib

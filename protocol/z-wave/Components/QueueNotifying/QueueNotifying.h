@@ -92,12 +92,10 @@ EQueueNotifyingStatus QueueNotifyingSendToBack(SQueueNotifying* pThis, const uin
 * @param[in]     pThis        Pointer to the QueueNotifying object.
 * @param[in]     pItem        Pointer to item to put on Queue. Expected size if the size
 *                             configured in the Queue passed on QueueNotifyingInit.
-* @param[out]    pxHigherPriorityTaskWoken  An optional parameter that can be set to NULL.
 */
 EQueueNotifyingStatus
 QueueNotifyingSendToBackFromISR(SQueueNotifying* pThis,
-                                const uint8_t* pItem,
-                                long *pxHigherPriorityTaskWoken);
+                                const uint8_t* pItem);
 
 /**
 * Adds item to front of queue and notifies receiver task.

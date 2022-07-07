@@ -284,13 +284,10 @@
 // Pull in the platform-specific manufacturing tokens
 #if defined(CORTEXM3)
 // Cortex-M3 handles MFG tokens separately via mfg-token.h.
-#elif (defined(PHY_NULL) || defined(BOARD_SIMULATION)) && (defined(STACK) || defined(ZIGBEE_STACK_ON_HOST))
-// Zigbeed
-  #include "sl_token_manufacturing_unix.h"
+#elif defined(EZSP_HOST) || defined(ZIGBEE_STACK_ON_HOST)
+// No MFG tokens on hosts or Zigbeed.
 #elif defined(EMBER_TEST)
   #include "hal/micro/unix/simulation/token-manufacturing.h"
-#elif defined(EZSP_HOST)
-// No MFG tokens on hosts.
 #else
   #error no platform defined
 #endif

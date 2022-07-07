@@ -16,5 +16,7 @@ include:
       - path: bsp_opt_def.h
 provides:
   - name: micriumos_bsp
+requires:
+  - name: emlib_chip
 ui_hints:
   visibility: never

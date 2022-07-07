@@ -417,6 +417,19 @@ enum sl_rtl_error_code sl_rtl_aox_set_switch_pattern_mode(sl_rtl_aox_libitem* it
  * This function must be called before calling the function sl_rtl_aox_process.
  * Call this function at run-time after initializing and creating the estimator.
  *
+ * When using a custom pattern in SL_RTL_AOX_SWITCH_PATTERN_MODE_EXTERNAL mode,
+ * the pattern in switch_pattern_in must not contain duplicate elements and the
+ * antenna indices must be within the range 0 to (number_of_antennas - 1).
+ * Number_of_antennas is the amount of antennas in the set array type, for example
+ * for the 4x4 URA this is 16 and for the 1x4 ULA this is 4.
+ * The length of the switching pattern must be equal to number_of_antennas.
+ *
+ * Note: The RF switch pattern indices may be different to the indices required by
+ * the RTL algorithm. For example, a 1x4 ULA might use RF controls [12, 13, 14, 15]
+ * for switching the antennas 1-4, but the RTL algorithm would require this switch pattern
+ * given as [0, 1, 2, 3]. If the RF controls would be switched as [14, 15, 13, 12],
+ * then the RTL algorithm would require the pattern given as [2, 3, 1, 0].
+ *
  * @param[in] item Pointer to the initialized and configured AoX libitem
  * @param[in] switch_pattern_in Pointer to the switch pattern array. The pointer must point to a valid switch pattern when
  * SL_RTL_AOX_SWITCH_PATTERN_MODE_EXTERNAL is used.
@@ -432,7 +445,6 @@ enum sl_rtl_error_code sl_rtl_aox_update_switch_pattern(sl_rtl_aox_libitem* item
  *
  * @param[in] item Pointer to the initialized and configured AoX libitem
  * @param[in] seed_value The seed value to be used.
- * internally defined switch pattern modes, otherwise can be zero.
  * @return ::SL_RTL_ERROR_SUCCESS if successful
  *****************************************************************************/
 enum sl_rtl_error_code sl_rtl_aox_set_switch_pattern_seed(sl_rtl_aox_libitem* item, int32_t seed_value);

@@ -23,12 +23,12 @@
 </ul>
 <h5 class="code-line" data-line-start=30 data-line-end=31><a id="ECC_Montgomery__30"></a><code>ECC Montgomery</code> :</h5>
 <ul>
-<li class="has-line-data" data-line-start="32" data-line-end="33">x25519 - 255-bit (Secure Vault High only)</li>
+<li class="has-line-data" data-line-start="32" data-line-end="33">x25519 - 255-bit (HSE only)</li>
 <li class="has-line-data" data-line-start="33" data-line-end="35">x448 - 448-bit (Secure Vault High only)</li>
 </ul>
 <h5 class="code-line" data-line-start=35 data-line-end=36><a id="ECC_EdDSA__35"></a><code>ECC EdDSA</code> :</h5>
 <ul>
-<li class="has-line-data" data-line-start="37" data-line-end="39">Ed25519 - 256-bit (Secure Vault High only)</li>
+<li class="has-line-data" data-line-start="37" data-line-end="39">Ed25519 - 256-bit (HSE only)</li>
 </ul>
 <h2 class="code-line" data-line-start=39 data-line-end=40><a id="SE_Manager_API_39"></a>SE Manager API</h2>
 <p class="has-line-data" data-line-start="41" data-line-end="42">The following SE Manager APIs are used in this example:</p>
@@ -57,9 +57,10 @@
 </ol>
 <h2 class="code-line" data-line-start=65 data-line-end=66><a id="Additional_Information_65"></a>Additional Information</h2>
 <ol>
-<li class="has-line-data" data-line-start="67" data-line-end="69">The default optimization level is <code>Optimize for debugging (-Og)</code> on Simplicity IDE and <code>None</code> on IAR Embedded Workbench.</li>
+<li class="has-line-data" data-line-start="67" data-line-end="68">The HSE Secure Vault Mid devices require SE firmware v1.2.11 or higher (EFR32xG21) and v2.1.7 or higher (other HSE devices) to support hardware acceleration on <code>x25519</code> and <code>Ed25519</code>.</li>
+<li class="has-line-data" data-line-start="68" data-line-end="70">The default optimization level is <code>Optimize for debugging (-Og)</code> on Simplicity IDE and <code>None</code> on IAR Embedded Workbench.</li>
 </ol>
-<h2 class="code-line" data-line-start=69 data-line-end=70><a id="Resources_69"></a>Resources</h2>
-<p class="has-line-data" data-line-start="71" data-line-end="72"><a href="https://docs.silabs.com/gecko-platform/latest/service/api/group-sl-se-manager">SE Manager API</a></p>
-<p class="has-line-data" data-line-start="73" data-line-end="74"><a href="https://www.silabs.com/documents/public/application-notes/an1271-efr32-secure-key-storage.pdf">AN1271: Secure Key Storage</a></p>
+<h2 class="code-line" data-line-start=70 data-line-end=71><a id="Resources_70"></a>Resources</h2>
+<p class="has-line-data" data-line-start="72" data-line-end="73"><a href="https://docs.silabs.com/gecko-platform/latest/service/api/group-sl-se-manager">SE Manager API</a></p>
+<p class="has-line-data" data-line-start="74" data-line-end="75"><a href="https://www.silabs.com/documents/public/application-notes/an1271-efr32-secure-key-storage.pdf">AN1271: Secure Key Storage</a></p>
 </body></html>

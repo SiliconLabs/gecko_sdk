@@ -7,6 +7,8 @@ ui_hints:
   visibility: never
 quality: alpha
 root_path: platform/service/cpc
+config_file:
+  - path: config/sl_cpc_security_config.h
 source:
   - path: src/sl_cpc_security.c
 include:
@@ -24,7 +26,7 @@ requires:
   - name: psa_crypto_sha256
 template_contribution:
   - name: component_catalog
-    value: cpc
+    value: cpc_security
   - name: event_handler
     unless: [cpc_test_unity]
     value:
@@ -32,3 +34,5 @@ template_contribution:
       include: sl_cpc_security.h
       handler: sl_cpc_security_init
       priority: -1
+validation_helper:
+  - path: cpc_configuration_security_validation.lua

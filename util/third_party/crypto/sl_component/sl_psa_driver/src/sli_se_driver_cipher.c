@@ -948,7 +948,7 @@ psa_status_t sli_se_driver_cipher_decrypt(const psa_key_attributes_t *attributes
       status = sl_se_chacha20_crypt(&cmd_ctx,
                                     SL_SE_ENCRYPT,
                                     &key_desc,
-                                    input_length,
+                                    input_length - 12, // - 12 due to the nonce.
                                     iv_buf,
                                     input,
                                     &input[12],

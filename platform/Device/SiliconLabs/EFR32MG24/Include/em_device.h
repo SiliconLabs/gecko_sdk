@@ -14,7 +14,7 @@
  * @endverbatim
  ******************************************************************************
  * # License
- * <b>Copyright 2021 Silicon Laboratories, Inc. www.silabs.com</b>
+ * <b>Copyright 2022 Silicon Laboratories, Inc. www.silabs.com</b>
  ******************************************************************************
  *
  * SPDX-License-Identifier: Zlib
@@ -94,6 +94,18 @@
 
 #elif defined(EFR32MG24A121F1536GM48)
 #include "efr32mg24a121f1536gm48.h"
+
+#elif defined(EFR32MG24A410F1536IM40)
+#include "efr32mg24a410f1536im40.h"
+
+#elif defined(EFR32MG24A410F1536IM48)
+#include "efr32mg24a410f1536im48.h"
+
+#elif defined(EFR32MG24A420F1536IM40)
+#include "efr32mg24a420f1536im40.h"
+
+#elif defined(EFR32MG24A420F1536IM48)
+#include "efr32mg24a420f1536im48.h"
 
 #elif defined(EFR32MG24A610F1536IM40)
 #include "efr32mg24a610f1536im40.h"

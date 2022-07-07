@@ -3,7 +3,7 @@
  * @brief Ambient light and UV index sensor header
  *******************************************************************************
  * # License
- * <b>Copyright 2020 Silicon Laboratories Inc. www.silabs.com</b>
+ * <b>Copyright 2022 Silicon Laboratories Inc. www.silabs.com</b>
  *******************************************************************************
  *
  * SPDX-License-Identifier: Zlib
@@ -39,8 +39,9 @@
  * \note With certain boards (e.g. 4166A, 4184A), using this initialization
  * function enables other sensors, because they're on the same enable pin.
  * Please take that into account when using this function.
+ * @return Status of the operation.
  *****************************************************************************/
-void sl_sensor_light_init(void);
+sl_status_t sl_sensor_light_init(void);
 
 /**************************************************************************//**
  * Deinitialize ambient light and UV index sensor.

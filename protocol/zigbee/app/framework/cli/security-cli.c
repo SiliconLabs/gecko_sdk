@@ -239,6 +239,39 @@ void changeKeyCommand(sl_cli_command_arg_t *arguments)
   }
 }
 
+void getSetMfgToken(sl_cli_command_arg_t *arguments)
+{
+#ifndef EMBER_AF_HAS_SECURITY_PROFILE_NONE
+  EmberMfgSecurityStruct config;
+  EmberStatus status;
+
+  if (sl_cli_get_command_string(arguments, 2)[0] == 'g') {
+    status = emberGetMfgSecurityConfig(&config);
+    if (status == EMBER_SUCCESS) {
+      emberAfSecurityPrintln("EmberKeySettings: 0x%04X", config.keySettings);
+      emberAfSecurityPrintln("  Permissions: %s",
+                             ((config.keySettings & EMBER_KEY_PERMISSIONS_READING_ALLOWED)
+                              ? "Reading Allowed"
+                              : ((config.keySettings & EMBER_KEY_PERMISSIONS_HASHING_ALLOWED)
+                                 ? "Hashing only"
+                                 : "NONE")));
+    } else {
+      emberAfSecurityPrintln("Error: Failed to get config, status: 0x%02X", status);
+    }
+  } else {
+    uint32_t magicNumber = sl_cli_get_argument_uint32(arguments, 0);
+    config.keySettings = (EmberKeySettings)sl_cli_get_argument_uint32(arguments, 1);
+    status = emberSetMfgSecurityConfig(magicNumber, &config);
+  }
+
+  if (status != EMBER_SUCCESS) {
+    emberAfSecurityPrintln("Failed: 0x%02X", status);
+  }
+#else
+  emberAfSecurityPrintln("Cannot get/set mfg tokens with no security profile");
+#endif // EMBER_AF_HAS_SECURITY_PROFILE_NONE
+}
+
 #else //!UC_BUILD
 
 #include "app/framework/util/common.h"

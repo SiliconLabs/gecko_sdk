@@ -5,7 +5,7 @@ description: >
   CMSIS neural network library for TensorFlow Lite for microcontrollers.
 
   This library has been patched by TensorFlow and Silicon Labs.
-category: Platform|Machine Learning|TensorFlow|Dependency
+category: Machine Learning|TensorFlow|Dependency
 quality: production
 provides:
   - name: tensorflow_dependency_cmsis_nn

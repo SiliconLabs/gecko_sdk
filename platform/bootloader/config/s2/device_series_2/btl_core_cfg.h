@@ -101,9 +101,9 @@
 #define BTL_UPGRADE_LOCATION_BASE  0x8000UL
 
 // <o BOOTLOADER_VERSION_MAIN_CUSTOMER> Bootloader Version Main Customer
-// <i> Default: 1
+// <i> Default: 2
 // <i> Bootloader Version Main Customer
-#define BOOTLOADER_VERSION_MAIN_CUSTOMER                    1
+#define BOOTLOADER_VERSION_MAIN_CUSTOMER                    2
 
 // <e USE_CUSTOM_APP_SIZE> Use custom Bootloader Application Size
 // <i> Default: 0

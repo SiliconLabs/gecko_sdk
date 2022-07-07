@@ -30,8 +30,3 @@ define:
     value: 0
   - name: OPENTHREAD_CONFIG_NCP_CPC_ENABLE
     value: 1
-
-# CPC needs compilier optimizations to be turned off
-toolchain_settings:
-  - option: optimize
-    value: "none"

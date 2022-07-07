@@ -4,7 +4,7 @@
  *        for EFM32TG11B140F64GM32
  *******************************************************************************
  * # License
- * <b>Copyright 2021 Silicon Laboratories Inc. www.silabs.com</b>
+ * <b>Copyright 2022 Silicon Laboratories Inc. www.silabs.com</b>
  *******************************************************************************
  *
  * SPDX-License-Identifier: Zlib

@@ -78,7 +78,7 @@ requires:
   - name: connect_app_framework_common
     condition: [device_sdid_95, device_has_radio]
   - name: psa_crypto_eddsa
-    condition: [device_security_vault]
+    condition: [device_has_semailbox]
 configuration:
   - name: SL_DEVICE_INIT_HFRCO_BAND
     value: cmuHFRCOFreq_38M0Hz

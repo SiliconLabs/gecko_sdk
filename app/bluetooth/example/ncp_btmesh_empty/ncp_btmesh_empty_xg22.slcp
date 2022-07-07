@@ -35,7 +35,6 @@ component:
   - id: rail_util_pti
   - id: uartdrv_usart
     instance:
-      - exp
       - vcom
 
 source:
@@ -140,7 +139,6 @@ configuration:
       - hardware_board_tb
 
 tag:
-  - hardware:device:sdid:!215
   - hardware:device:sdid:205
   - hardware:device:flash:512
   - hardware:device:ram:32

@@ -1,0 +1,11 @@
+tag:
+  - hardware:
+      device:
+        memory:
+          flash: 216
+          ram: 26
+      board:
+        rf_bands:
+          - any
+        communication:
+          - vcom

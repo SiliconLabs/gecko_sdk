@@ -12,12 +12,16 @@ provides:
   - name: lwip_core
 requires:
   - name: lwip_netif
-  - name: lwip_netif_ppp
-  - name: lwip_port
+  - name: lwip_port_freertos
+    condition:
+    - freertos
+  - name: lwip_port_micriumos
+    condition:
+    - micriumos
+  - name: kernel
 recommends:
-  - id: lwip_netif_ethernet
-  - id: lwip_port_freertos
-  - id: lwip_api
+  - id: lwip_netif_ppp
+  - id: freertos
 source:
   - path: util/third_party/lwip/lwip/src/core/altcp.c
   - path: util/third_party/lwip/lwip/src/core/altcp_alloc.c
@@ -134,3 +138,5 @@ include:
     - path: lwip/prot/nd6.h
     - path: lwip/prot/tcp.h
     - path: lwip/prot/udp.h
+    - path: netif/ppp/ppp_opts.h
+    - path: netif/ppp/ppp_impl.h

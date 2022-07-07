@@ -13,7 +13,7 @@ template_contribution:
       include: ZW_basis_api.h
       handler: sl_zwave_protocol_startup
   - name: event_handler
-    priority: 9999 # Ensure this is the last platform item
+    priority: 999 # Ensure this is the one before the last platform item. Should be called before the power_manager
     value:
       event: platform_init
       include: ZW_basis_api.h
@@ -133,9 +133,6 @@ include:
   - path: "protocol/z-wave/Components/CRC"
     file_list:
       - path: "CRC.h"
-  - path: "protocol/z-wave/"
-    file_list:
-      - path: "BootLoader/OTA/bootloader-slot-configuration.h"
   - path: "protocol/z-wave/Components/EventDistributor"
     file_list:
       - path: "EventDistributor.h"
@@ -165,6 +162,12 @@ define:
       - "device_sdid_210"
       - "zgm230sa27hnn"
       - "device_security_se"
+  - name: RADIO_BOARD_ZGM230SA
+    value: 1
+    condition:
+      - "device_sdid_210"
+      - "zgm230sa27hgn"
+      - "device_security_se"      
   - name: RADIO_BOARD_ZGM230SB
     value: 1
     condition:
@@ -177,12 +180,23 @@ define:
       - "device_sdid_210"
       - "zgm230sa27hnn"
       - "device_security_se"
+  - name: ZGM23A
+    value: 1
+    condition:
+      - "device_sdid_210"
+      - "zgm230sa27hgn"
+      - "device_security_se"
   - name: ZGM23B
     value: 1
     condition:
       - "device_sdid_210"
       - "zgm230sb27hgn"
       - "device_security_vault"
+  - name: SL_SE_ASSUME_FW_AT_LEAST_2_1_7
+    value: 1
+    condition:
+      - "device_sdid_210"
+
   - name: EXT_BOARD_8029A
     value: 1
   - name: DISABLE_USART1

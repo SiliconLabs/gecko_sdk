@@ -220,8 +220,8 @@ am__libopenthread_posix_a_SOURCES_DIST = alarm.cpp backbone.cpp \
 	daemon.cpp entropy.cpp firewall.cpp hdlc_interface.cpp \
 	infra_if.cpp logging.cpp mainloop.cpp memory.cpp misc.cpp \
 	multicast_routing.cpp netif.cpp radio.cpp radio_url.cpp \
-	settings.cpp spi_interface.cpp system.cpp trel_udp6.cpp \
-	udp.cpp utils.cpp virtual_time.cpp cpc_interface.cpp
+	settings.cpp spi_interface.cpp system.cpp trel.cpp udp.cpp \
+	utils.cpp virtual_time.cpp cpc_interface.cpp
 @OPENTHREAD_ENABLE_CPC_TRUE@am__objects_1 = libopenthread_posix_a-cpc_interface.$(OBJEXT)
 am_libopenthread_posix_a_OBJECTS =  \
 	libopenthread_posix_a-alarm.$(OBJEXT) \
@@ -242,7 +242,7 @@ am_libopenthread_posix_a_OBJECTS =  \
 	libopenthread_posix_a-settings.$(OBJEXT) \
 	libopenthread_posix_a-spi_interface.$(OBJEXT) \
 	libopenthread_posix_a-system.$(OBJEXT) \
-	libopenthread_posix_a-trel_udp6.$(OBJEXT) \
+	libopenthread_posix_a-trel.$(OBJEXT) \
 	libopenthread_posix_a-udp.$(OBJEXT) \
 	libopenthread_posix_a-utils.$(OBJEXT) \
 	libopenthread_posix_a-virtual_time.$(OBJEXT) $(am__objects_1)
@@ -668,8 +668,8 @@ libopenthread_posix_a_SOURCES = alarm.cpp backbone.cpp daemon.cpp \
 	entropy.cpp firewall.cpp hdlc_interface.cpp infra_if.cpp \
 	logging.cpp mainloop.cpp memory.cpp misc.cpp \
 	multicast_routing.cpp netif.cpp radio.cpp radio_url.cpp \
-	settings.cpp spi_interface.cpp system.cpp trel_udp6.cpp \
-	udp.cpp utils.cpp virtual_time.cpp $(NULL) $(am__append_2)
+	settings.cpp spi_interface.cpp system.cpp trel.cpp udp.cpp \
+	utils.cpp virtual_time.cpp $(NULL) $(am__append_2)
 libopenthread_posix_a_LIBADD = \
     $(call ot_list_objects,$(top_builddir)/src/lib/url/libopenthread-url.a)           \
     $(call ot_list_objects,$(top_builddir)/src/lib/platform/libopenthread-platform.a) \
@@ -807,7 +807,7 @@ distclean-compile:
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/libopenthread_posix_a-settings.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/libopenthread_posix_a-spi_interface.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/libopenthread_posix_a-system.Po@am__quote@
-@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/libopenthread_posix_a-trel_udp6.Po@am__quote@
+@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/libopenthread_posix_a-trel.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/libopenthread_posix_a-udp.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/libopenthread_posix_a-utils.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/libopenthread_posix_a-virtual_time.Po@am__quote@
@@ -1089,19 +1089,19 @@ libopenthread_posix_a-system.obj: system.cpp
 @AMDEP_TRUE@@am__fastdepCXX_FALSE@	DEPDIR=$(DEPDIR) $(CXXDEPMODE) $(depcomp) @AMDEPBACKSLASH@
 @am__fastdepCXX_FALSE@	$(AM_V_CXX@am__nodep@)$(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(libopenthread_posix_a_CPPFLAGS) $(CPPFLAGS) $(AM_CXXFLAGS) $(CXXFLAGS) -c -o libopenthread_posix_a-system.obj `if test -f 'system.cpp'; then $(CYGPATH_W) 'system.cpp'; else $(CYGPATH_W) '$(srcdir)/system.cpp'; fi`
 
-libopenthread_posix_a-trel_udp6.o: trel_udp6.cpp
-@am__fastdepCXX_TRUE@	$(AM_V_CXX)$(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(libopenthread_posix_a_CPPFLAGS) $(CPPFLAGS) $(AM_CXXFLAGS) $(CXXFLAGS) -MT libopenthread_posix_a-trel_udp6.o -MD -MP -MF $(DEPDIR)/libopenthread_posix_a-trel_udp6.Tpo -c -o libopenthread_posix_a-trel_udp6.o `test -f 'trel_udp6.cpp' || echo '$(srcdir)/'`trel_udp6.cpp
-@am__fastdepCXX_TRUE@	$(AM_V_at)$(am__mv) $(DEPDIR)/libopenthread_posix_a-trel_udp6.Tpo $(DEPDIR)/libopenthread_posix_a-trel_udp6.Po
-@AMDEP_TRUE@@am__fastdepCXX_FALSE@	$(AM_V_CXX)source='trel_udp6.cpp' object='libopenthread_posix_a-trel_udp6.o' libtool=no @AMDEPBACKSLASH@
+libopenthread_posix_a-trel.o: trel.cpp
+@am__fastdepCXX_TRUE@	$(AM_V_CXX)$(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(libopenthread_posix_a_CPPFLAGS) $(CPPFLAGS) $(AM_CXXFLAGS) $(CXXFLAGS) -MT libopenthread_posix_a-trel.o -MD -MP -MF $(DEPDIR)/libopenthread_posix_a-trel.Tpo -c -o libopenthread_posix_a-trel.o `test -f 'trel.cpp' || echo '$(srcdir)/'`trel.cpp
+@am__fastdepCXX_TRUE@	$(AM_V_at)$(am__mv) $(DEPDIR)/libopenthread_posix_a-trel.Tpo $(DEPDIR)/libopenthread_posix_a-trel.Po
+@AMDEP_TRUE@@am__fastdepCXX_FALSE@	$(AM_V_CXX)source='trel.cpp' object='libopenthread_posix_a-trel.o' libtool=no @AMDEPBACKSLASH@
 @AMDEP_TRUE@@am__fastdepCXX_FALSE@	DEPDIR=$(DEPDIR) $(CXXDEPMODE) $(depcomp) @AMDEPBACKSLASH@
-@am__fastdepCXX_FALSE@	$(AM_V_CXX@am__nodep@)$(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(libopenthread_posix_a_CPPFLAGS) $(CPPFLAGS) $(AM_CXXFLAGS) $(CXXFLAGS) -c -o libopenthread_posix_a-trel_udp6.o `test -f 'trel_udp6.cpp' || echo '$(srcdir)/'`trel_udp6.cpp
+@am__fastdepCXX_FALSE@	$(AM_V_CXX@am__nodep@)$(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(libopenthread_posix_a_CPPFLAGS) $(CPPFLAGS) $(AM_CXXFLAGS) $(CXXFLAGS) -c -o libopenthread_posix_a-trel.o `test -f 'trel.cpp' || echo '$(srcdir)/'`trel.cpp
 
-libopenthread_posix_a-trel_udp6.obj: trel_udp6.cpp
-@am__fastdepCXX_TRUE@	$(AM_V_CXX)$(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(libopenthread_posix_a_CPPFLAGS) $(CPPFLAGS) $(AM_CXXFLAGS) $(CXXFLAGS) -MT libopenthread_posix_a-trel_udp6.obj -MD -MP -MF $(DEPDIR)/libopenthread_posix_a-trel_udp6.Tpo -c -o libopenthread_posix_a-trel_udp6.obj `if test -f 'trel_udp6.cpp'; then $(CYGPATH_W) 'trel_udp6.cpp'; else $(CYGPATH_W) '$(srcdir)/trel_udp6.cpp'; fi`
-@am__fastdepCXX_TRUE@	$(AM_V_at)$(am__mv) $(DEPDIR)/libopenthread_posix_a-trel_udp6.Tpo $(DEPDIR)/libopenthread_posix_a-trel_udp6.Po
-@AMDEP_TRUE@@am__fastdepCXX_FALSE@	$(AM_V_CXX)source='trel_udp6.cpp' object='libopenthread_posix_a-trel_udp6.obj' libtool=no @AMDEPBACKSLASH@
+libopenthread_posix_a-trel.obj: trel.cpp
+@am__fastdepCXX_TRUE@	$(AM_V_CXX)$(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(libopenthread_posix_a_CPPFLAGS) $(CPPFLAGS) $(AM_CXXFLAGS) $(CXXFLAGS) -MT libopenthread_posix_a-trel.obj -MD -MP -MF $(DEPDIR)/libopenthread_posix_a-trel.Tpo -c -o libopenthread_posix_a-trel.obj `if test -f 'trel.cpp'; then $(CYGPATH_W) 'trel.cpp'; else $(CYGPATH_W) '$(srcdir)/trel.cpp'; fi`
+@am__fastdepCXX_TRUE@	$(AM_V_at)$(am__mv) $(DEPDIR)/libopenthread_posix_a-trel.Tpo $(DEPDIR)/libopenthread_posix_a-trel.Po
+@AMDEP_TRUE@@am__fastdepCXX_FALSE@	$(AM_V_CXX)source='trel.cpp' object='libopenthread_posix_a-trel.obj' libtool=no @AMDEPBACKSLASH@
 @AMDEP_TRUE@@am__fastdepCXX_FALSE@	DEPDIR=$(DEPDIR) $(CXXDEPMODE) $(depcomp) @AMDEPBACKSLASH@
-@am__fastdepCXX_FALSE@	$(AM_V_CXX@am__nodep@)$(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(libopenthread_posix_a_CPPFLAGS) $(CPPFLAGS) $(AM_CXXFLAGS) $(CXXFLAGS) -c -o libopenthread_posix_a-trel_udp6.obj `if test -f 'trel_udp6.cpp'; then $(CYGPATH_W) 'trel_udp6.cpp'; else $(CYGPATH_W) '$(srcdir)/trel_udp6.cpp'; fi`
+@am__fastdepCXX_FALSE@	$(AM_V_CXX@am__nodep@)$(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(libopenthread_posix_a_CPPFLAGS) $(CPPFLAGS) $(AM_CXXFLAGS) $(CXXFLAGS) -c -o libopenthread_posix_a-trel.obj `if test -f 'trel.cpp'; then $(CYGPATH_W) 'trel.cpp'; else $(CYGPATH_W) '$(srcdir)/trel.cpp'; fi`
 
 libopenthread_posix_a-udp.o: udp.cpp
 @am__fastdepCXX_TRUE@	$(AM_V_CXX)$(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(libopenthread_posix_a_CPPFLAGS) $(CPPFLAGS) $(AM_CXXFLAGS) $(CXXFLAGS) -MT libopenthread_posix_a-udp.o -MD -MP -MF $(DEPDIR)/libopenthread_posix_a-udp.Tpo -c -o libopenthread_posix_a-udp.o `test -f 'udp.cpp' || echo '$(srcdir)/'`udp.cpp

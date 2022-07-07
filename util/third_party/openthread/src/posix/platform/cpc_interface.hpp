@@ -149,6 +149,12 @@ public:
       */
     otError ResetConnection(void) { return OT_ERROR_NONE; }
 
+    /**
+      * This method is called reinitialise the CPC interface if sCpcResetReq indicates that a restart
+      * is required.
+      */
+    void CheckAndReInitCpc(void);
+
 private:
     /**
      * This method instructs `CpcInterface` to read data from radio over the socket.
@@ -194,9 +200,11 @@ private:
 
     enum
     {
-        kMaxFrameSize = SL_CPC_READ_MINIMUM_SIZE,
-        kMaxWaitTime  = 2000, ///< Maximum wait time in Milliseconds for socket to become writable (see `SendFrame`).
-        kResetCMDSize = 4
+        kMaxFrameSize       = SL_CPC_READ_MINIMUM_SIZE,
+        kMaxWaitTime        = 2000, ///< Maximum wait time in Milliseconds for socket to become writable (see `SendFrame`).
+        kMaxSleepDuration   = 1000,
+        kMaxRestartRetries  = 10,
+        kResetCMDSize       = 4
     };
 
     Spinel::SpinelInterface::ReceiveFrameCallback mReceiveFrameCallback;
@@ -209,12 +217,16 @@ private:
     cpc_read_flags_t    mReadFlags;
     cpc_write_flags_t   mWriteFlags;
 
+    static void HandleSecondaryReset(void);
+    static void SetCpcResetReq(bool state) { sCpcResetReq = state; }
+
     // Hard Coded Reset Response
     // 0x72 -> STATUS_RESET_SOFTWARE
     uint8_t mResetResponse[kResetCMDSize] = {0x80, 0x06, 0x00, 0x72};
 
-    const uint8_t       mId = SL_CPC_ENDPOINT_15_4;
+    const   uint8_t     mId = SL_CPC_ENDPOINT_15_4;
     typedef uint8_t     cpcError;
+    static  bool        sCpcResetReq;
 
     // Non-copyable, intentionally not implemented.
     CpcInterface(const CpcInterface &);

@@ -36,9 +36,14 @@
 #include "sl_sensor_pressure.h"
 
 // -----------------------------------------------------------------------------
+// Private variables
+
+static bool initialized = false;
+
+// -----------------------------------------------------------------------------
 // Public function definitions
 
-void sl_sensor_pressure_init(void)
+sl_status_t sl_sensor_pressure_init(void)
 {
   sl_status_t sc;
   sl_i2cspm_t *pressure_sensor = sl_sensor_select(SL_BOARD_SENSOR_PRESSURE);
@@ -47,18 +52,30 @@ void sl_sensor_pressure_init(void)
              "[E: %#04x] Pressure sensor not available\n",
              sc);
   sc = sl_pressure_init(pressure_sensor);
-  app_assert_status(sc);
+  if (SL_STATUS_OK == sc) {
+    initialized = true;
+  } else {
+    initialized = false;
+  }
+  return sc;
 }
 
 void sl_sensor_pressure_deinit(void)
 {
   (void)sl_board_disable_sensor(SL_BOARD_SENSOR_PRESSURE);
+  initialized = false;
 }
 
 sl_status_t sl_sensor_pressure_get(float *pressure)
 {
   sl_status_t sc;
-  sl_i2cspm_t *pressure_sensor = sl_sensor_select(SL_BOARD_SENSOR_PRESSURE);
-  sc = sl_pressure_measure_temperature(pressure_sensor, pressure);
+
+  if (initialized) {
+    sl_i2cspm_t *pressure_sensor = sl_sensor_select(SL_BOARD_SENSOR_PRESSURE);
+    sc = sl_pressure_measure_temperature(pressure_sensor, pressure);
+  } else {
+    sc = SL_STATUS_NOT_INITIALIZED;
+  }
+
   return sc;
 }

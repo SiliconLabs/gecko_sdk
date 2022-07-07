@@ -157,7 +157,7 @@ void FPUEH_IRQHandler(void)          __attribute__ ((weak, alias("Default_Handle
  * Exception / Interrupt Vector table
  *----------------------------------------------------------------------------*/
 extern const tVectorEntry __Vectors[];
-const tVectorEntry        __Vectors[] __attribute__ ((section(".vectors"))) = {
+const tVectorEntry        __Vectors[] __attribute__ ((aligned(256))) __attribute__ ((section(".vectors"))) = {
   /* Cortex-M Exception Handlers */
   { .topOfStack = &__StackTop },              /* Initial Stack Pointer */
   { Reset_Handler             },              /* Reset Handler */

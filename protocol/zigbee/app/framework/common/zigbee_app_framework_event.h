@@ -22,6 +22,14 @@
 #include "event_queue/event-queue.h"
 #include "stack/include/ember-types.h"
 
+#ifdef SL_COMPONENT_CATALOG_PRESENT
+#include "sl_component_catalog.h"
+#endif // SL_COMPONENT_CATALOG_PRESENT
+
+#ifdef SL_CATALOG_ZIGBEE_CORE_CLI_PRESENT
+#include "zigbee_core_cli_config.h"
+#endif // SL_CATALOG_ZIGBEE_CORE_CLI_PRESENT
+
 /**
  * @defgroup zigbee_event Event System
  * @ingroup af
@@ -83,8 +91,16 @@ typedef EmberEvent sl_zigbee_event_t;
 void sl_zigbee_event_init(sl_zigbee_event_t *event,
                           void (*handler)(sl_zigbee_event_t *));
 #else
-#define sl_zigbee_event_init(event, handler) \
-  sli_zigbee_event_init((event), (void *)(handler), 0xFF, 0xFF)
+#if (SL_ZIGBEE_EVENT_DEBUG_ENABLED)
+  #define sl_zigbee_event_init(event, handler)                     \
+  do {                                                             \
+    sli_zigbee_event_init((event), (void *)(handler), 0xFF, 0xFF); \
+    ((event)->actions).name = (#event);                            \
+  } while (0)
+#else
+  #define sl_zigbee_event_init(event, handler) \
+  sli_zigbee_event_init((event), (void *)(handler), 0xFF, 0xFF);
+#endif // SL_ZIGBEE_EVENT_DEBUG_ENABLED
 #endif // DOXYGEN_SHOULD_SKIP_THIS
 
 #if defined(DOXYGEN_SHOULD_SKIP_THIS)
@@ -253,11 +269,30 @@ extern EmberEventQueue emAppEventQueue;
 #define sli_zigbee_run_events() \
   emberRunEventQueue(&emAppEventQueue)
 
-#define sl_zigbee_endpoint_event_init(event, handler, endpoint) \
-  sli_zigbee_event_init((event), (void *)(handler), 0xFF, (endpoint))
+#if (SL_ZIGBEE_EVENT_DEBUG_ENABLED)
+  #define sl_zigbee_endpoint_event_init(event, handler, endpoint)        \
+  do {                                                                   \
+    sli_zigbee_event_init((event), (void *)(handler), 0xFF, (endpoint)); \
+    ((event)->actions).name = (#event);                                  \
+  } while (0)
+#else
+  #define sl_zigbee_endpoint_event_init(event, handler, endpoint) \
+  sli_zigbee_event_init((event), (void *)(handler), 0xFF, (endpoint));
+#endif // SL_ZIGBEE_EVENT_DEBUG_ENABLED
 
-void sl_zigbee_network_event_init(sl_zigbee_event_t *event,
-                                  void (*handler)(sl_zigbee_event_t *));
+void sli_zigbee_network_event_init(sl_zigbee_event_t *event,
+                                   void (*handler)(sl_zigbee_event_t *));
+
+#if (SL_ZIGBEE_EVENT_DEBUG_ENABLED)
+  #define sl_zigbee_network_event_init(event, handler) \
+  do {                                                 \
+    sli_zigbee_network_event_init((event), (handler)); \
+    ((event)->actions).name = (#event);                \
+  } while (0)
+#else
+  #define sl_zigbee_network_event_init(event, handler) \
+  sli_zigbee_network_event_init((event), (handler));
+#endif // SL_ZIGBEE_EVENT_DEBUG_ENABLED
 
 #define sl_zigbee_event_set_delay_qs(event, delay) \
   emberEventSetDelayMs(sli_zigbee_get_event_ptr((event), 0xFF), ((delay) * 250u))

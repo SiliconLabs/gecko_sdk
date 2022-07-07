@@ -169,6 +169,7 @@ uint16_t emberAfFillCommandGreenPowerClusterGpPairingSearchSmart(uint16_t option
   }
 
   charCount += emberAfFillExternalBuffer((ZCL_CLUSTER_SPECIFIC_COMMAND           \
+                                          | ZCL_DISABLE_DEFAULT_RESPONSE_MASK    \
                                           | ZCL_FRAME_CONTROL_CLIENT_TO_SERVER), \
                                          ZCL_GREEN_POWER_CLUSTER_ID,             \
                                          ZCL_GP_PAIRING_SEARCH_COMMAND_ID,       \
@@ -204,6 +205,7 @@ uint16_t emberAfFillCommandGreenPowerClusterGpTunnelingStopSmart(uint8_t options
   }
 
   charCount += emberAfFillExternalBuffer((ZCL_CLUSTER_SPECIFIC_COMMAND           \
+                                          | ZCL_DISABLE_DEFAULT_RESPONSE_MASK    \
                                           | ZCL_FRAME_CONTROL_CLIENT_TO_SERVER), \
                                          ZCL_GREEN_POWER_CLUSTER_ID,             \
                                          ZCL_GP_TUNNELING_STOP_COMMAND_ID,       \
@@ -310,6 +312,7 @@ uint16_t emberAfFillCommandGreenPowerClusterGpTranslationTableUpdateSmart(uint16
   }
 
   charCount += emberAfFillExternalBuffer((ZCL_CLUSTER_SPECIFIC_COMMAND               \
+                                          | ZCL_DISABLE_DEFAULT_RESPONSE_MASK        \
                                           | ZCL_FRAME_CONTROL_CLIENT_TO_SERVER),     \
                                          ZCL_GREEN_POWER_CLUSTER_ID,                 \
                                          ZCL_GP_TRANSLATION_TABLE_UPDATE_COMMAND_ID, \
@@ -392,6 +395,7 @@ uint16_t emberAfFillCommandGreenPowerClusterGpPairingConfigurationSmart(uint8_t 
   }
 
   charCount += emberAfFillExternalBuffer((ZCL_CLUSTER_SPECIFIC_COMMAND            \
+                                          | ZCL_DISABLE_DEFAULT_RESPONSE_MASK     \
                                           | ZCL_FRAME_CONTROL_CLIENT_TO_SERVER),  \
                                          ZCL_GREEN_POWER_CLUSTER_ID,              \
                                          ZCL_GP_PAIRING_CONFIGURATION_COMMAND_ID, \
@@ -512,6 +516,7 @@ uint16_t emberAfFillCommandGreenPowerClusterGpSinkTableRequestSmart(uint8_t opti
   }
 
   charCount += emberAfFillExternalBuffer((ZCL_CLUSTER_SPECIFIC_COMMAND           \
+                                          | ZCL_DISABLE_DEFAULT_RESPONSE_MASK    \
                                           | ZCL_FRAME_CONTROL_CLIENT_TO_SERVER), \
                                          ZCL_GREEN_POWER_CLUSTER_ID,             \
                                          ZCL_GP_SINK_TABLE_REQUEST_COMMAND_ID,   \
@@ -546,7 +551,8 @@ uint16_t emberAfFillCommandGreenPowerClusterGpProxyTableResponseSmart(uint8_t st
                                                                       uint8_t* proxyTableEntries)
 {
   uint16_t charCount = 0;
-  charCount += emberAfFillExternalBuffer((ZCL_CLUSTER_SPECIFIC_COMMAND \
+  charCount += emberAfFillExternalBuffer((ZCL_CLUSTER_SPECIFIC_COMMAND        \
+                                          | ZCL_DISABLE_DEFAULT_RESPONSE_MASK \
                                           | ZCL_FRAME_CONTROL_CLIENT_TO_SERVER),
                                          ZCL_GREEN_POWER_CLUSTER_ID,
                                          ZCL_GP_PROXY_TABLE_RESPONSE_COMMAND_ID,
@@ -576,7 +582,8 @@ uint32_t emberAfFillCommandGreenPowerClusterGpNotificationResponseSmart(uint8_t 
     return 0;
   }
 
-  charCount += emberAfFillExternalBuffer((ZCL_CLUSTER_SPECIFIC_COMMAND
+  charCount += emberAfFillExternalBuffer((ZCL_CLUSTER_SPECIFIC_COMMAND        \
+                                          | ZCL_DISABLE_DEFAULT_RESPONSE_MASK \
                                           | ZCL_FRAME_CONTROL_SERVER_TO_CLIENT),
                                          ZCL_GREEN_POWER_CLUSTER_ID,
                                          ZCL_GP_NOTIFICATION_RESPONSE_COMMAND_ID,
@@ -721,6 +728,7 @@ uint16_t emberAfFillCommandGreenPowerClusterGpResponseSmart(uint8_t  options,
   }
 
   charCount += emberAfFillExternalBuffer((ZCL_CLUSTER_SPECIFIC_COMMAND
+                                          | ZCL_DISABLE_DEFAULT_RESPONSE_MASK
                                           | ZCL_FRAME_CONTROL_SERVER_TO_CLIENT),
                                          ZCL_GREEN_POWER_CLUSTER_ID,
                                          ZCL_GP_RESPONSE_COMMAND_ID,
@@ -756,6 +764,7 @@ uint16_t emberAfFillCommandGreenPowerClusterGpSinkTableResponseSmart(uint8_t sta
   uint16_t charCount = 0;
 
   charCount += emberAfFillExternalBuffer((ZCL_CLUSTER_SPECIFIC_COMMAND           \
+                                          | ZCL_DISABLE_DEFAULT_RESPONSE_MASK    \
                                           | ZCL_FRAME_CONTROL_SERVER_TO_CLIENT), \
                                          ZCL_GREEN_POWER_CLUSTER_ID,             \
                                          ZCL_GP_SINK_TABLE_RESPONSE_COMMAND_ID,  \
@@ -785,6 +794,7 @@ uint16_t emberAfFillCommandGreenPowerClusterGpProxyTableRequestSmart(uint8_t opt
   }
 
   charCount += emberAfFillExternalBuffer((ZCL_CLUSTER_SPECIFIC_COMMAND
+                                          | ZCL_DISABLE_DEFAULT_RESPONSE_MASK
                                           | ZCL_FRAME_CONTROL_SERVER_TO_CLIENT),
                                          ZCL_GREEN_POWER_CLUSTER_ID,
                                          ZCL_GP_PROXY_TABLE_REQUEST_COMMAND_ID,

@@ -40,8 +40,17 @@ while [[ $# -gt 0 ]]; do
             exit
             ;;
         -T|--ot-ctl)
+            echo "Cleaning up stale OTBR firewall rules. Ignore errors..."
+            docker exec -it multiprotocol ip6tables -D FORWARD 1
+            docker exec -it multiprotocol ip6tables -F
+            docker exec -it multiprotocol ip6tables -X OTBR_FORWARD_INGRESS
+            echo "Starting OTBR..."
             docker exec -it multiprotocol systemctl start otbr
-            echo "OTBR started. Attempting to run ot-ctl..."
+            sleep 5
+            echo "Starting ot-ctl..."
+            echo "(If errors persist, run 'journalctl -fex' inside container for logs.)"
+            echo "Press ENTER for prompt..."
+            echo
             while 
                 docker exec -it multiprotocol ot-ctl
                 [[ $? -eq 1 ]]
@@ -67,12 +76,6 @@ while [[ $# -gt 0 ]]; do
             ;;
         -b|--bash)
             DAEMON=0
-            shift
-            ;;
-        -B|--build)
-            BUILD=1
-            # Only affect local build of multiprotocol
-            CONTAINER_NAME=multiprotocol
             shift
             ;;
         *)

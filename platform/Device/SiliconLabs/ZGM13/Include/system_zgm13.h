@@ -3,7 +3,7 @@
  * @brief CMSIS Cortex-M3/M4 System Layer for EFR32 devices.
  *******************************************************************************
  * # License
- * <b>Copyright 2021 Silicon Laboratories Inc. www.silabs.com</b>
+ * <b>Copyright 2022 Silicon Laboratories Inc. www.silabs.com</b>
  *******************************************************************************
  *
  * SPDX-License-Identifier: Zlib

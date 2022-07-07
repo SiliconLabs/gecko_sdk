@@ -53,10 +53,19 @@ configuration:
     value: 255
   - name: EMBER_CUSTOM_MAC_FILTER_TABLE_SIZE
     value: 64  
+  - name: EMBER_MAC_FILTER_TABLE_SIZE
+    value: 32    
+  - name: EMBER_CHILD_TABLE_SIZE
+    value: 64
   - name: EMBER_AF_PLUGIN_ZIGBEE_PRO_STACK_CHILD_TABLE_SIZE
     value: 64
   - name:  EMBER_KEY_TABLE_SIZE
     value: 128
+  - name:  EMBER_APS_UNICAST_MESSAGE_COUNT
+    value: 32
+  - name:  EMBER_APS_MESSAGE_COUNT
+    value: 64     
+
 
 include:
   - path: "./"

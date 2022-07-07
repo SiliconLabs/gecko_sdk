@@ -67,7 +67,7 @@ __HeapLimit:
     .size       __HeapLimit, . - __HeapLimit
 
     .section    .vectors
-    .align      2
+    .align      9
     .globl      __Vectors
 __Vectors:
     .long       __StackTop                 /* Top of Stack */

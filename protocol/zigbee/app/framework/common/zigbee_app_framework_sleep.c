@@ -90,11 +90,14 @@ bool sli_zigbee_app_framework_is_ok_to_sleep(void)
   uint32_t duration_ms = 0;
 
   duration_ms = sli_zigbee_app_framework_set_pm_requirements_and_get_ms_to_next_wakeup();
+  // Limit the value of sleep duration to what the sleep timer allows
+  uint32_t max_millisecond_allowed_by_sleeptimer = sl_sleeptimer_get_max_ms32_conversion();
+  duration_ms = SL_MIN(duration_ms, max_millisecond_allowed_by_sleeptimer);
 
   // Set up sleep timer to wake us up in time for the next event
   // Note that this duration is always over SL_ZIGBEE_APP_FRAMEWORK_MINIMUM_SLEEP_DURATION_MS
   // for EM2, but may not adhere to this minimum for EM1
-  if ( duration_ms > 0 && duration_ms < MAX_INT32U_VALUE ) {
+  if ( duration_ms > 0 ) {
     assert(sl_sleeptimer_restart_timer_ms(&wakeup_timer_id,
                                           duration_ms,
                                           wakeup_timer_callback,

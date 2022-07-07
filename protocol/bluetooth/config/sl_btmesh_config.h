@@ -10,7 +10,7 @@
 // <i> Define the number of application bindings allowed.
 #define SL_BTMESH_CONFIG_MAX_APP_BINDS       (4)
 
-// <o SL_BTMESH_CONFIG_MAX_SUBSCRIPTIONS> Maximum number of subscriptions allowed <0-4>
+// <o SL_BTMESH_CONFIG_MAX_SUBSCRIPTIONS> Maximum number of subscriptions allowed <0-255>
 // <i> Default: 4
 // <i> Define the number of subscriptions allowed.
 #define SL_BTMESH_CONFIG_MAX_SUBSCRIPTIONS       (4)
@@ -35,14 +35,14 @@
 // <i> Define the Replay Protection List size. Must be dividable by 16.
 #define SL_BTMESH_CONFIG_RPL_SIZE       (32)
 
-// <o SL_BTMESH_CONFIG_MAX_SEND_SEGS> Maximum number segments allowed for transmitted packets
+// <o SL_BTMESH_CONFIG_MAX_SEND_SEGS> Maximum number of simultaneous segmented transmissions
 // <i> Default: 4
-// <i> Define the maximum number segments allowed for transmitted packets. Set to a low number if not much segmentation is used
+// <i> Define the maximum number simultaneous segmented transmissions allowed. Set to a low number if not much segmentation is used.
 #define SL_BTMESH_CONFIG_MAX_SEND_SEGS       (4)
 
-// <o SL_BTMESH_CONFIG_MAX_RECV_SEGS> Maximum number segments allowed for received packets
+// <o SL_BTMESH_CONFIG_MAX_RECV_SEGS> Maximum number of simultaneous segmented receptions
 // <i> Default: 4
-// <i> Define the maximum number segments allowed for received packets. Set to a low number if not much segmentation is used.
+// <i> Define the maximum number of simultaneous segmented receptions. Set to a low number if not much segmentation is used.
 #define SL_BTMESH_CONFIG_MAX_RECV_SEGS       (4)
 
 // <o SL_BTMESH_CONFIG_MAX_VAS> Maximum number of virtual addresses

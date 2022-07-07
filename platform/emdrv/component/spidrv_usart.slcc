@@ -2,7 +2,7 @@ id: spidrv_usart
 package: platform
 label: "SPIDRV USART"
 description: >
-  The SPI EUSART driver sets up the USART for SPI communication and supports
+  The SPI USART driver sets up the USART for SPI communication and supports
   both master and slave roles. Both blocking and interrupt driven asynchrounous
   APIs are provided for transmit and receive operations.
 

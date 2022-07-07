@@ -68,6 +68,15 @@ void sl_bt_ll_coex_set_context(RAIL_Handle_t railHandle, sl_bt_coex_abort_tx_cal
 uint16_t sl_bt_ll_coex_fast_random(void);
 
 bool sl_bt_coex_tx_allowed(void);
+/**
+ * Get coex events that need to be enabled by the link layer.
+ */
+RAIL_Events_t sl_bt_ll_coex_get_events(void);
+
+/**
+ * Handle the coex events passed down by the link layer.
+ */
+void sl_bt_ll_coex_handle_events(RAIL_Events_t events);
 
 #ifdef __cplusplus
 }

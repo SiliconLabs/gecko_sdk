@@ -67,34 +67,35 @@
 <li class="has-line-data" data-line-start="83" data-line-end="84"><code>psa_generate_random</code></li>
 <li class="has-line-data" data-line-start="84" data-line-end="85"><code>psa_hash_compute</code></li>
 <li class="has-line-data" data-line-start="85" data-line-end="86"><code>psa_hash_compare</code></li>
-<li class="has-line-data" data-line-start="86" data-line-end="87"><code>psa_cipher_operation_init</code></li>
-<li class="has-line-data" data-line-start="87" data-line-end="88"><code>psa_cipher_encrypt_setup</code></li>
-<li class="has-line-data" data-line-start="88" data-line-end="89"><code>psa_cipher_decrypt_setup</code></li>
-<li class="has-line-data" data-line-start="89" data-line-end="90"><code>psa_cipher_generate_iv</code></li>
-<li class="has-line-data" data-line-start="90" data-line-end="91"><code>psa_cipher_set_iv</code></li>
-<li class="has-line-data" data-line-start="91" data-line-end="92"><code>psa_cipher_update</code></li>
-<li class="has-line-data" data-line-start="92" data-line-end="93"><code>psa_cipher_finish</code></li>
-<li class="has-line-data" data-line-start="93" data-line-end="95"><code>mbedtls_psa_crypto_free</code></li>
+<li class="has-line-data" data-line-start="86" data-line-end="87"><code>psa_cipher_encrypt</code></li>
+<li class="has-line-data" data-line-start="87" data-line-end="88"><code>psa_cipher_decrypt</code></li>
+<li class="has-line-data" data-line-start="88" data-line-end="89"><code>psa_cipher_operation_init</code></li>
+<li class="has-line-data" data-line-start="89" data-line-end="90"><code>psa_cipher_encrypt_setup</code></li>
+<li class="has-line-data" data-line-start="90" data-line-end="91"><code>psa_cipher_decrypt_setup</code></li>
+<li class="has-line-data" data-line-start="91" data-line-end="92"><code>psa_cipher_generate_iv</code></li>
+<li class="has-line-data" data-line-start="92" data-line-end="93"><code>psa_cipher_set_iv</code></li>
+<li class="has-line-data" data-line-start="93" data-line-end="94"><code>psa_cipher_update</code></li>
+<li class="has-line-data" data-line-start="94" data-line-end="95"><code>psa_cipher_finish</code></li>
+<li class="has-line-data" data-line-start="95" data-line-end="97"><code>mbedtls_psa_crypto_free</code></li>
 </ul>
-<h2 class="code-line" data-line-start=95 data-line-end=96><a id="Getting_Started_95"></a>Getting Started</h2>
+<h2 class="code-line" data-line-start=97 data-line-end=98><a id="Getting_Started_97"></a>Getting Started</h2>
 <ol>
-<li class="has-line-data" data-line-start="97" data-line-end="98">Upgrade the kit’s firmware to the latest version (see <code>Adapter Firmware</code> under <a href="https://docs.silabs.com/simplicity-studio-5-users-guide/latest/ss-5-users-guide-about-the-launcher/welcome-and-device-tabs#general-device-information">General Device Information</a> in Simplicity Studio 5 Users Guide).</li>
-<li class="has-line-data" data-line-start="98" data-line-end="99">Upgrade the device’s SE firmware to the latest version when Series 2 device is used (see <code>Secure Firmware</code> under <a href="https://docs.silabs.com/simplicity-studio-5-users-guide/latest/ss-5-users-guide-about-the-launcher/welcome-and-device-tabs#general-device-information">General Device Information</a> in Simplicity Studio 5 Users Guide).</li>
-<li class="has-line-data" data-line-start="99" data-line-end="100">Open any terminal program and connect to the kit’s VCOM port (if using <code>Device Console</code> in Simplicity Studio 5, <code>Line terminator:</code> must be set to <code>None</code>).</li>
-<li class="has-line-data" data-line-start="100" data-line-end="101">Create this platform example project in the Simplicity IDE (see <a href="https://docs.silabs.com/simplicity-studio-5-users-guide/latest/ss-5-users-guide-getting-started/start-a-project#examples">Examples</a> in Simplicity Studio 5 Users Guide, check <code>Platform()</code> checkbox to browse the platform examples).</li>
-<li class="has-line-data" data-line-start="101" data-line-end="102">Build the example and download it to the kit (see <a href="https://docs.silabs.com/simplicity-studio-5-users-guide/latest/ss-5-users-guide-building-and-flashing/building#simple-build">Simple Build</a> and <a href="https://docs.silabs.com/simplicity-studio-5-users-guide/latest/ss-5-users-guide-building-and-flashing/flashing#flash-programmer">Flash Programmer</a> in Simplicity Studio 5 Users Guide).</li>
-<li class="has-line-data" data-line-start="102" data-line-end="104">Run the example and follow the instructions shown on the console.</li>
+<li class="has-line-data" data-line-start="99" data-line-end="100">Upgrade the kit’s firmware to the latest version (see <code>Adapter Firmware</code> under <a href="https://docs.silabs.com/simplicity-studio-5-users-guide/latest/ss-5-users-guide-about-the-launcher/welcome-and-device-tabs#general-device-information">General Device Information</a> in Simplicity Studio 5 Users Guide).</li>
+<li class="has-line-data" data-line-start="100" data-line-end="101">Upgrade the device’s SE firmware to the latest version when Series 2 device is used (see <code>Secure Firmware</code> under <a href="https://docs.silabs.com/simplicity-studio-5-users-guide/latest/ss-5-users-guide-about-the-launcher/welcome-and-device-tabs#general-device-information">General Device Information</a> in Simplicity Studio 5 Users Guide).</li>
+<li class="has-line-data" data-line-start="101" data-line-end="102">Open any terminal program and connect to the kit’s VCOM port (if using <code>Device Console</code> in Simplicity Studio 5, <code>Line terminator:</code> must be set to <code>None</code>).</li>
+<li class="has-line-data" data-line-start="102" data-line-end="103">Create this platform example project in the Simplicity IDE (see <a href="https://docs.silabs.com/simplicity-studio-5-users-guide/latest/ss-5-users-guide-getting-started/start-a-project#examples">Examples</a> in Simplicity Studio 5 Users Guide, check <code>Platform()</code> checkbox to browse the platform examples).</li>
+<li class="has-line-data" data-line-start="103" data-line-end="104">Build the example and download it to the kit (see <a href="https://docs.silabs.com/simplicity-studio-5-users-guide/latest/ss-5-users-guide-building-and-flashing/building#simple-build">Simple Build</a> and <a href="https://docs.silabs.com/simplicity-studio-5-users-guide/latest/ss-5-users-guide-building-and-flashing/flashing#flash-programmer">Flash Programmer</a> in Simplicity Studio 5 Users Guide).</li>
+<li class="has-line-data" data-line-start="104" data-line-end="106">Run the example and follow the instructions shown on the console.</li>
 </ol>
-<h2 class="code-line" data-line-start=104 data-line-end=105><a id="Additional_Information_104"></a>Additional Information</h2>
+<h2 class="code-line" data-line-start=106 data-line-end=107><a id="Additional_Information_106"></a>Additional Information</h2>
 <ol>
-<li class="has-line-data" data-line-start="106" data-line-end="107">The example uses the CTR-DRBG, a pseudo-random number generator (PRNG) included in <a href="https://docs.silabs.com/mbed-tls/latest/">Mbed TLS</a> to generate the random number. If the example is running on a device including a TRNG (True Random Number Generator) hardware module, the TRNG will be used as an entropy source to seed the CTR-DRBG. If the device does not incorporate a TRNG, the example will use <a href="https://docs.silabs.com/rail/latest/">RAIL</a> or NV (non-volatile) seed (requires NVM3) as the entropy source.</li>
-<li class="has-line-data" data-line-start="107" data-line-end="108">If an algorithm is not supported in the hardware accelerator of the selected device, the PSA Crypto will use the software fallback feature in Mbed TLS.</li>
-<li class="has-line-data" data-line-start="108" data-line-end="109">Change the <code>PERSISTENT_KEY_ID</code> value in <code>app_process.h</code> if this key ID had already existed in NVM3.</li>
-<li class="has-line-data" data-line-start="109" data-line-end="110">The Series 1 devices do not support 192-bit key on unauthenticated ciphers.</li>
-<li class="has-line-data" data-line-start="110" data-line-end="111">The single-part cipher functions (<code>psa_cipher_encrypt</code> and <code>psa_cipher_decrypt</code>) are not supported yet.</li>
-<li class="has-line-data" data-line-start="111" data-line-end="113">The default optimization level is <code>Optimize for debugging (-Og)</code> on Simplicity IDE and <code>None</code> on IAR Embedded Workbench.</li>
+<li class="has-line-data" data-line-start="108" data-line-end="109">The example uses the CTR-DRBG, a pseudo-random number generator (PRNG) included in <a href="https://docs.silabs.com/mbed-tls/latest/">Mbed TLS</a> to generate the random number. If the example is running on a device including a TRNG (True Random Number Generator) hardware module, the TRNG will be used as an entropy source to seed the CTR-DRBG. If the device does not incorporate a TRNG, the example will use <a href="https://docs.silabs.com/rail/latest/">RAIL</a> or NV (non-volatile) seed (requires NVM3) as the entropy source.</li>
+<li class="has-line-data" data-line-start="109" data-line-end="110">If an algorithm is not supported in the hardware accelerator of the selected device, the PSA Crypto will use the software fallback feature in Mbed TLS.</li>
+<li class="has-line-data" data-line-start="110" data-line-end="111">Change the <code>PERSISTENT_KEY_ID</code> value in <code>app_process.h</code> if this key ID had already existed in NVM3.</li>
+<li class="has-line-data" data-line-start="111" data-line-end="112">The Series 1 devices do not support 192-bit key on unauthenticated ciphers.</li>
+<li class="has-line-data" data-line-start="112" data-line-end="114">The default optimization level is <code>Optimize for debugging (-Og)</code> on Simplicity IDE and <code>None</code> on IAR Embedded Workbench.</li>
 </ol>
-<h2 class="code-line" data-line-start=113 data-line-end=114><a id="Resources_113"></a>Resources</h2>
-<p class="has-line-data" data-line-start="115" data-line-end="116"><a href="https://www.silabs.com/documents/public/application-notes/an1222-efr32xg2x-production-programming.pdf">AN1222: Production Programming of Series 2 Devices</a></p>
-<p class="has-line-data" data-line-start="117" data-line-end="118"><a href="https://www.silabs.com/documents/public/application-notes/an1311-mbedtls-psa-crypto-porting-guide.pdf">AN1311: Integrating Crypto Functionality Using PSA Crypto Compared to Mbed TLS</a></p>
+<h2 class="code-line" data-line-start=114 data-line-end=115><a id="Resources_114"></a>Resources</h2>
+<p class="has-line-data" data-line-start="116" data-line-end="117"><a href="https://www.silabs.com/documents/public/application-notes/an1222-efr32xg2x-production-programming.pdf">AN1222: Production Programming of Series 2 Devices</a></p>
+<p class="has-line-data" data-line-start="118" data-line-end="119"><a href="https://www.silabs.com/documents/public/application-notes/an1311-mbedtls-psa-crypto-porting-guide.pdf">AN1311: Integrating Crypto Functionality Using PSA Crypto Compared to Mbed TLS</a></p>
 </body></html>

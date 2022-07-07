@@ -89,6 +89,20 @@
 #define LOW_BYTE(n) ((uint8_t)((n)&0xFF))
 #define HIGH_BYTE(n) ((uint8_t)(LOW_BYTE((n) >> 8)))
 
+//Intentionally maintaining separate groups for series-1 and series-2 devices
+//This gives flexibility to add new elements to be read, like CCA Thresholds. 
+#if defined(_SILICON_LABS_32B_SERIES_1)
+#define USERDATA_MFG_CUSTOM_EUI_64          (2)
+#elif defined(_SILICON_LABS_32B_SERIES_2)
+#define USERDATA_MFG_CUSTOM_EUI_64          (2)
+#else
+#error "UNSUPPORTED DEVICE"
+#endif
+
+#ifndef USERDATA_END
+#define USERDATA_END                        (USERDATA_BASE + FLASH_PAGE_SIZE)
+#endif
+
 #define EFR32_RECEIVE_SENSITIVITY           -100 // dBm
 #define EFR32_RSSI_AVERAGING_TIME           16   // us
 #define EFR32_RSSI_AVERAGING_TIMEOUT        300  // us
@@ -274,6 +288,27 @@ static uint32_t sCoexCounters[SL_RAIL_UTIL_COEX_EVENT_COUNT] = {0};
 #endif
 
 static otExtAddress  sExtAddress[RADIO_EXT_ADDR_COUNT];
+
+#if RADIO_CONFIG_ENABLE_CUSTOM_EUI_SUPPORT
+/*
+ * This API reads the UserData page on the given EFR device.
+ */
+static int readUserData(void *buffer, uint16_t index, int len)
+{
+    long unsigned int readLocation = USERDATA_BASE + index;
+
+    // Sanity check to verify if the ouput buffer is valid and the index and len are valid.
+    // If invalid, change the len to -1 and return.
+    otEXPECT_ACTION((buffer != NULL) && ((readLocation + len) <= USERDATA_END), len = -1);
+
+    // Copy the contents of flash into output buffer.
+    memcpy(buffer, (uint8_t *)readLocation, len);
+
+exit:
+    // Return len, len was changed to -1 to indicate failure.
+    return len;
+}
+#endif
 
 /*
  * This API converts the FilterMask to appropriate IID. If there are any errors, it will fallback on bcast IID.
@@ -935,6 +970,7 @@ void efr32RadioInit(void)
                                 RAIL_RX_OPTION_TRACK_ABORTED_FRAMES)
            == RAIL_STATUS_NO_ERROR);
     efr32PhyStackInit();
+    efr32RadioSetCcaMode(SL_OPENTHREAD_RADIO_CCA_MODE);
 
     sEnergyScanStatus = ENERGY_SCAN_STATUS_IDLE;
     sTransmitError    = OT_ERROR_NONE;
@@ -1002,19 +1038,36 @@ exit:
 //------------------------------------------------------------------------------
 // Stack support
 
+uint64_t otPlatRadioGetNow(otInstance *aInstance)
+{
+  OT_UNUSED_VARIABLE(aInstance);
+
+  return otPlatTimeGet();
+}
+
 void otPlatRadioGetIeeeEui64(otInstance *aInstance, uint8_t *aIeeeEui64)
 {
     OT_UNUSED_VARIABLE(aInstance);
 
-    uint64_t eui64;
-    uint8_t *eui64Ptr = NULL;
+#if RADIO_CONFIG_ENABLE_CUSTOM_EUI_SUPPORT
+    // Invalid EUI
+    uint8_t nullEui[] = { 0xFFU, 0xFFU, 0xFFU, 0xFFU, 0xFFU, 0xFFU, 0xFFU, 0xFFU };
 
-    eui64    = SYSTEM_GetUnique();
-    eui64Ptr = (uint8_t *)&eui64;
-
-    for (uint8_t i = 0; i < OT_EXT_ADDRESS_SIZE; i++)
+    // Read the Custom EUI and compare it to nullEui
+    if ((readUserData(aIeeeEui64, USERDATA_MFG_CUSTOM_EUI_64, OT_EXT_ADDRESS_SIZE) == -1) || 
+        (memcmp(aIeeeEui64, nullEui, OT_EXT_ADDRESS_SIZE) == 0))
+#endif
     {
-        aIeeeEui64[i] = eui64Ptr[(OT_EXT_ADDRESS_SIZE - 1) - i];
+        uint64_t eui64;
+        uint8_t *eui64Ptr = NULL;
+
+        eui64    = SYSTEM_GetUnique();
+        eui64Ptr = (uint8_t *)&eui64;
+
+        for (uint8_t i = 0; i < OT_EXT_ADDRESS_SIZE; i++)
+        {
+            aIeeeEui64[i] = eui64Ptr[(OT_EXT_ADDRESS_SIZE - 1) - i];
+        }
     }
 }
 
@@ -1216,12 +1269,10 @@ otError otPlatRadioTransmit(otInstance *aInstance, otRadioFrame *aFrame)
 
 #if OPENTHREAD_CONFIG_THREAD_VERSION >= OT_THREAD_VERSION_1_2
     updateIeInfoTxFrame();
-#if OPENTHREAD_CONFIG_MAC_SOFTWARE_TX_SECURITY_ENABLE
     // Note - we need to call this outside of txCurrentPacket as for Series 2,
     // this results in calling the SE interface from a critical section which is not permitted.
     otEXPECT_ACTION(radioProcessTransmitSecurity(sTxFrame, iid) == OT_ERROR_NONE,
                     error = OT_ERROR_INVALID_STATE);
-#endif
 #endif // OPENTHREAD_CONFIG_THREAD_VERSION >= OT_THREAD_VERSION_1_2
 
     CORE_DECLARE_IRQ_STATE;
@@ -1365,6 +1416,9 @@ void txCurrentPacket(void)
         csmaConfig.csmaTries    = sTxFrame->mInfo.mTxInfo.mMaxCsmaBackoffs;
         csmaConfig.ccaThreshold = sCcaThresholdDbm;
 
+// Note: We don't support scheduled-tx, but here's placeholder code
+// if we ever implement it.
+/*
 #if OPENTHREAD_CONFIG_THREAD_VERSION >= OT_THREAD_VERSION_1_2
         // Delayed tx in radio, such as for CSL
         if (sTxFrame->mInfo.mTxInfo.mTxDelay != 0)
@@ -1393,6 +1447,7 @@ void txCurrentPacket(void)
         }
         else
 #endif
+*/
         {
             status = RAIL_StartCcaCsmaTx(gRailHandle,
                                          sTxFrame->mChannel,
@@ -1471,7 +1526,7 @@ otRadioCaps otPlatRadioGetCaps(otInstance *aInstance)
                                 | OT_RADIO_CAPS_ENERGY_SCAN
                                 | OT_RADIO_CAPS_SLEEP_TO_TX);
 
-#if OPENTHREAD_CONFIG_MAC_SOFTWARE_TX_SECURITY_ENABLE
+#if (OPENTHREAD_CONFIG_THREAD_VERSION >= OT_THREAD_VERSION_1_2)
     capabilities |= OT_RADIO_CAPS_TRANSMIT_SEC;
 #endif
 

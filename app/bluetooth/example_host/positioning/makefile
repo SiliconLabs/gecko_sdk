@@ -20,6 +20,7 @@ include $(SDK_DIR)/app/bluetooth/component_host/cjson.mk
 include $(SDK_DIR)/app/bluetooth/component_host/mqtt.mk
 include $(SDK_DIR)/app/bluetooth/component_host/rtl_lib.mk
 include $(SDK_DIR)/app/bluetooth/component_host/aoa_angle.mk
+include $(SDK_DIR)/app/bluetooth/component_host/antenna_array.mk
 
 ################################################################################
 # Include paths                                                                #

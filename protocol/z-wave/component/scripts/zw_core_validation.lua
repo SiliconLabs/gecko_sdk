@@ -14,7 +14,6 @@
 --  2. SL_PSA_KEY_USER_SLOT_COUNT must be set to 12 in Z_Wave applications for Series 2 with Security Vault
 -- 4. sl_sleeptimer required settings
 --  1. SL_SLEEPTIMER_PERIPHERAL must be set to SL_SLEEPTIMER_PERIPHERAL_BURTC in Z_Wave applications for Series 2
---  2. SL_SLEEPTIMER_FREQ_DIVIDER must be set to 2 in Z_Wave applications for Series 2
 -- 5. sl_power_manager
 --  1. SL_POWER_MANAGER_LOWEST_EM_ALLOWED must be set to 3 in Z_Wave applications
 local device_series_1 = slc.is_provided("device_series_1")
@@ -69,7 +68,6 @@ end
 -- sl_sleeptimer
 if device_series_2 then
     validate_config_component(SL_SLEEPTIMER_PERIPHERAL, "SL_SLEEPTIMER_PERIPHERAL_BURTC")
-    validate_config_component(SL_SLEEPTIMER_FREQ_DIVIDER, "2")
 end
 
 -- sl_board

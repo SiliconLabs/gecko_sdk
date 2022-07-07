@@ -14,9 +14,9 @@
   - name: SL_KIT_NAME
     value: '"SLWRB4306D"'
   - name: SL_KIT_REV
-    value: '"A00"'
+    value: '"A01"'
 - tag:
   - kit:opn:SLWRB4306D
   - kit:pn:WRB4306
   - kit:variant:D
-  - kit:revision:A00
+  - kit:revision:A01

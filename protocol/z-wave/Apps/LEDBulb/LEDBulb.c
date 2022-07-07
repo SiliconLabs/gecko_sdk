@@ -784,7 +784,7 @@ ApplicationTask(SApplicationHandles* pAppHandles)
 
   // Wait for and process events
   DPRINT("LED Bulb Event processor Started\r\n");
-  uint32_t iMaxTaskSleep = 10;
+  uint32_t iMaxTaskSleep = 0xFFFFFFFF;
   for (;;)
   {
     if (0xFFFFFFFF == EventDistributorDistribute(&g_EventDistributor, iMaxTaskSleep, 0))

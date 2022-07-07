@@ -14,9 +14,15 @@
   - name: hardware_board
   - name: hardware_board_rb
   - name: hardware_board_from_stk
+  - name: hardware_board_from_bg22-pk6022a
+  - name: hardware_board_from_bg22-rb4191a
   - name: hardware_board_has_spiflash
   - name: hardware_board_has_hfxo
   - name: hardware_board_has_lfxo
+  - name: hardware_board_supports_rf_band_2400
+  - name: hardware_board_supports_1_rf_band
+  - name: hardware_board_default_rf_band
+  - name: hardware_board_default_rf_band_2400
 - recommends:
   - id: brd4001a
   - id: iostream_eusart
@@ -32,11 +38,11 @@
   - name: SL_BOARD_NAME
     value: '"BRD4191A"'
   - name: SL_BOARD_REV
-    value: '"A00"'
+    value: '"A02"'
 - tag:
   - board:pn:BRD4191
   - board:variant:A
-  - board:revision:A00
+  - board:revision:A02
   - board:device:efr32bg22c224f512im40
   - hardware:has:vcom
   - hardware:has:pti

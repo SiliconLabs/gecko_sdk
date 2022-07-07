@@ -141,15 +141,17 @@ static void force_current_rx_dma_length(uint16_t new_length);
 
 static bool update_current_rx_dma_length(uint16_t new_length);
 
+#if (SL_CPC_DRV_UART_FLOW_CONTROL_TYPE == usartHwFlowControlNone_D)
 static bool update_current_rx_dma_large_payload_length(uint16_t new_length);
 
-static void update_dma_desc_link_abs(LDMA_Descriptor_t *current_dma_desc,
-                                     LDMA_Descriptor_t *next_dma_desc);
+static void rx_buffer_free_from_isr(void);
 
 static void push_back_new_rx_dma_desc(LDMA_Descriptor_t *new_dma_desc,
                                       void *buffer);
 
-static void rx_buffer_free_from_isr(void);
+static void update_dma_desc_link_abs(LDMA_Descriptor_t *current_dma_desc,
+                                     LDMA_Descriptor_t *next_dma_desc);
+#endif
 
 static void notify_core_error(sl_cpc_reject_reason_t reason);
 
@@ -206,11 +208,12 @@ sl_status_t sli_cpc_drv_init(void)
   GPIO_PinModeSet(SL_CPC_DRV_UART_TX_PORT, SL_CPC_DRV_UART_TX_PIN, gpioModePushPull, 1);
   GPIO_PinModeSet(SL_CPC_DRV_UART_RX_PORT, SL_CPC_DRV_UART_RX_PIN, gpioModeInputPull, 1);
 
-#if defined(USE_WSTK_VCOM)
-  GPIO_PinModeSet(SL_CPC_DRV_VCOM_ENABLE_PORT, SL_CPC_DRV_VCOM_ENABLE_PIN, gpioModePushPull, 1);
+#if (SL_CPC_DRV_UART_FLOW_CONTROL_TYPE == usartHwFlowControlNone_D)
+  init.hwFlowControl = usartHwFlowControlNone;
+#elif (SL_CPC_DRV_UART_FLOW_CONTROL_TYPE == usartHwFlowControlCtsAndRts_D)
+  init.hwFlowControl = usartHwFlowControlCtsAndRts;
 #endif
 
-  init.hwFlowControl = SL_CPC_DRV_UART_FLOW_CONTROL_TYPE;
   init.baudrate = SL_CPC_DRV_UART_BAUDRATE;
   init.enable = usartDisable;
 
@@ -244,7 +247,7 @@ sl_status_t sli_cpc_drv_init(void)
     | (SL_CPC_DRV_UART_RX_PIN << _GPIO_USART_RXROUTE_PIN_SHIFT);
 #endif
 
-  if (SL_CPC_DRV_UART_FLOW_CONTROL_TYPE == usartHwFlowControlCtsAndRts) {
+  if (SL_CPC_DRV_UART_FLOW_CONTROL_TYPE == usartHwFlowControlCtsAndRts_D) {
     GPIO_PinModeSet(SL_CPC_DRV_UART_CTS_PORT, SL_CPC_DRV_UART_CTS_PIN, gpioModeInputPull, 0);
 
 #if defined(_USART_ROUTEPEN_RTSPEN_MASK) && defined(_USART_ROUTEPEN_CTSPEN_MASK)
@@ -299,6 +302,21 @@ sl_status_t sli_cpc_drv_init(void)
                       rx_descriptor,
                       sizeof(rx_descriptor));
 
+#if (SL_CPC_DRV_UART_FLOW_CONTROL_TYPE == usartHwFlowControlCtsAndRts_D)
+  (void)dma_desc_cnt;
+  (void)previous_desc;
+  (void)nb_desc_free;
+
+  sl_status_t status;
+
+  status = sli_cpc_get_raw_rx_buffer(&buffer_ptr);
+  EFM_ASSERT(status == SL_STATUS_OK);
+
+  current_desc = (LDMA_Descriptor_t *)sli_mem_pool_alloc(&mempool_rx_dma_desc);
+  *current_desc = (LDMA_Descriptor_t)LDMA_DESCRIPTOR_SINGLE_P2M_BYTE(&(SL_CPC_DRV_UART_PERIPHERAL->RXDATA), buffer_ptr, (SLI_CPC_RX_DATA_MAX_LENGTH < DMA_MAX_XFER_LEN) ? SLI_CPC_RX_DATA_MAX_LENGTH : DMA_MAX_XFER_LEN);
+
+  rx_descriptor_tail = current_desc;
+#else
   // Prime rx dma channel will all available descriptors.
   while (dma_desc_cnt < RX_DMA_DESCRIPTOR_QTY) {
     sl_status_t status;
@@ -308,8 +326,6 @@ sl_status_t sli_cpc_drv_init(void)
 
     current_desc = (LDMA_Descriptor_t *)sli_mem_pool_alloc(&mempool_rx_dma_desc);
     *current_desc = (LDMA_Descriptor_t)LDMA_DESCRIPTOR_SINGLE_P2M_BYTE(&(SL_CPC_DRV_UART_PERIPHERAL->RXDATA), buffer_ptr, (SLI_CPC_RX_DATA_MAX_LENGTH < DMA_MAX_XFER_LEN) ? SLI_CPC_RX_DATA_MAX_LENGTH : DMA_MAX_XFER_LEN);
-
-    current_desc->xfer.doneIfs = 1u;
 
     if (dma_desc_cnt == 0) {
       rx_descriptor_tail = current_desc;
@@ -322,6 +338,7 @@ sl_status_t sli_cpc_drv_init(void)
     dma_desc_cnt++;
     previous_desc = current_desc;
   }
+#endif
 
   current_desc->xfer.xferCnt = SLI_CPC_HDLC_HEADER_RAW_SIZE - 1u;
   next_rx_buf_tot_len = SLI_CPC_HDLC_HEADER_RAW_SIZE;
@@ -520,6 +537,7 @@ void sli_cpc_memory_on_rx_buffer_free(void)
     }
   } while (status == SL_STATUS_OK && rx_free_no_buf_list_head != NULL);
 
+#if (SL_CPC_DRV_UART_FLOW_CONTROL_TYPE == usartHwFlowControlNone_D)
   do {
     current_desc = (LDMA_Descriptor_t *)sli_mem_pool_alloc(&mempool_rx_dma_desc);
     if (current_desc == NULL) {
@@ -545,6 +563,11 @@ void sli_cpc_memory_on_rx_buffer_free(void)
     rx_need_desc = false;
     USART_IntEnable(SL_CPC_DRV_UART_PERIPHERAL, USART_IF_RXDATAV);
   }
+#else
+  (void)resource_allocation_flag;
+  (void)buffer_ptr;
+  (void)current_desc;
+#endif
 
   CORE_EXIT_ATOMIC();
 }
@@ -557,9 +580,10 @@ void SL_CPC_ISR_RX_HANDLER(SL_CPC_DRV_UART_PERIPHERAL_NO)(void)
   uint32_t flag = USART_IntGet(SL_CPC_DRV_UART_PERIPHERAL);
 
   USART_IntClear(SL_CPC_DRV_UART_PERIPHERAL, flag);
-  EFM_ASSERT(header_expected_next == true); // Can't resync when waiting for a payload
 
   if (flag & USART_IF_RXDATAV) {
+    EFM_ASSERT(header_expected_next == true); // Can't resync when waiting for a payload
+
     uint8_t data = SL_CPC_DRV_UART_PERIPHERAL->RXDATA;
 
     if (((rx_synch_byte_cnt < SLI_CPC_HDLC_HEADER_RAW_SIZE)
@@ -688,7 +712,9 @@ static bool rx_dma_complete(unsigned int channel,
 
   EFM_ASSERT(completed_desc != NULL);
 
+#if (SL_CPC_DRV_UART_FLOW_CONTROL_TYPE == usartHwFlowControlNone_D)
   rx_descriptor_head = (LDMA_Descriptor_t *)(uint32_t)(rx_descriptor_head->xfer.linkAddr << _LDMA_CH_LINK_LINKADDR_SHIFT);
+#endif
 
   if (rx_descriptor_head == NULL) {
     rx_need_desc = true;
@@ -747,6 +773,14 @@ static bool rx_dma_complete(unsigned int channel,
         return false;
       }
 
+#if (SL_CPC_DRV_UART_FLOW_CONTROL_TYPE == usartHwFlowControlCtsAndRts_D)
+      if (next_rx_payload_len > 0) {
+        (void)update_current_rx_dma_length(next_rx_payload_len);
+      } else {
+        (void)update_current_rx_dma_length(SLI_CPC_HDLC_HEADER_RAW_SIZE);
+      }
+      (void)rx_buf_free;
+#else
       if (current_rx_buf_tot_len == 0) {
         bool update_success = false;
 
@@ -771,6 +805,7 @@ static bool rx_dma_complete(unsigned int channel,
           return false;
         }
       }
+#endif
 
       // Copy useful fields of header. Unfortunately with this method the header must always be copied
       // Copy only useful bytes
@@ -779,6 +814,10 @@ static bool rx_dma_complete(unsigned int channel,
       ((uint8_t *)current_rx_entry->handle->hdlc_header)[3] = current_rx_buffer[3];
       ((uint8_t *)current_rx_entry->handle->hdlc_header)[4] = current_rx_buffer[4];
       current_rx_entry->handle->data_length = next_rx_payload_len;
+
+#if (SL_CPC_DRV_UART_FLOW_CONTROL_TYPE == usartHwFlowControlCtsAndRts_D)
+      sli_cpc_free_raw_rx_buffer(current_rx_buffer);
+#endif
 
       if (next_rx_payload_len > SLI_CPC_RX_DATA_MAX_LENGTH) {
         SLI_CPC_DEBUG_TRACE_CORE_DRIVER_PACKET_DROPPED();
@@ -837,9 +876,11 @@ static bool rx_dma_complete(unsigned int channel,
     }
   }
 
+#if (SL_CPC_DRV_UART_FLOW_CONTROL_TYPE == usartHwFlowControlNone_D)
   if (rx_buf_free) {
     // We end up in that case when we received a header. Since the buffer has not
     // been pushed to the core, we can re-use it right away.
+
     push_back_new_rx_dma_desc(completed_desc, rx_buffer);
   } else {
     LDMA_Descriptor_t *desc = (LDMA_Descriptor_t *)(completed_desc->xfer.linkAddr << _LDMA_CH_LINK_LINKADDR_SHIFT);
@@ -855,7 +896,7 @@ static bool rx_dma_complete(unsigned int channel,
     nb_desc_free = 0u;
     rx_buffer_free_from_isr();
   }
-
+#endif
   return false;
 }
 
@@ -907,6 +948,34 @@ static void force_current_rx_dma_length(uint16_t new_length)
  ******************************************************************************/
 static bool update_current_rx_dma_length(uint16_t new_length)
 {
+#if (SL_CPC_DRV_UART_FLOW_CONTROL_TYPE == usartHwFlowControlCtsAndRts_D)
+  Ecode_t ecode;
+  void *buffer_ptr;
+  sl_status_t status;
+
+  status = sli_cpc_get_raw_rx_buffer(&buffer_ptr);
+  EFM_ASSERT(status == SL_STATUS_OK);
+
+  if (new_length <= DMA_MAX_XFER_LEN) {
+    rx_descriptor[0u] = (LDMA_Descriptor_t)LDMA_DESCRIPTOR_SINGLE_P2M_BYTE(&(SL_CPC_DRV_UART_PERIPHERAL->RXDATA), buffer_ptr, new_length);
+  } else {
+    rx_descriptor[0u] = (LDMA_Descriptor_t)LDMA_DESCRIPTOR_LINKREL_P2M_BYTE(&(SL_CPC_DRV_UART_PERIPHERAL->RXDATA), buffer_ptr, DMA_MAX_XFER_LEN, 1u);
+    rx_descriptor[1u] = (LDMA_Descriptor_t)LDMA_DESCRIPTOR_SINGLE_P2M_BYTE(&(SL_CPC_DRV_UART_PERIPHERAL->RXDATA), &((uint8_t *)buffer_ptr)[DMA_MAX_XFER_LEN], (new_length - DMA_MAX_XFER_LEN));
+    rx_descriptor[0u].xfer.doneIfs = 0u;
+    rx_descriptor[1u].xfer.doneIfs = 1u;
+  }
+
+  rx_descriptor_head = rx_descriptor;
+  next_rx_buf_tot_len = new_length;
+
+  // Start read channel
+  ecode = DMADRV_LdmaStartTransfer(read_channel,
+                                   &rx_config,
+                                   rx_descriptor_head,
+                                   rx_dma_complete,
+                                   0);
+  EFM_ASSERT(ecode == ECODE_OK);
+#else
   uint32_t ctrl;
   uint16_t already_recvd_cnt;
   uint16_t remaining;
@@ -943,10 +1012,12 @@ static bool update_current_rx_dma_length(uint16_t new_length)
   DMADRV_ResumeTransfer(read_channel);
 
   next_rx_buf_tot_len = new_length;
+#endif
 
   return true;
 }
 
+#if (SL_CPC_DRV_UART_FLOW_CONTROL_TYPE == usartHwFlowControlNone_D)
 /***************************************************************************/ /**
  * Update XferCnt of the current DMA xfer with the length passed as argument.
  *
@@ -1031,7 +1102,9 @@ static bool update_current_rx_dma_large_payload_length(uint16_t new_length)
 
   return true;
 }
+#endif
 
+#if (SL_CPC_DRV_UART_FLOW_CONTROL_TYPE == usartHwFlowControlNone_D)
 /***************************************************************************/ /**
  * Update dma desccriptor link absolute address.
  *
@@ -1104,10 +1177,10 @@ static void rx_buffer_free_from_isr(void)
       sli_mem_pool_free(&mempool_rx_dma_desc, (void *)current_desc);
       break;
     }
-
     push_back_new_rx_dma_desc(current_desc, buffer_ptr);
   } while (true);
 }
+#endif
 
 /***************************************************************************/ /**
  * Send a reject notification to CPC core.

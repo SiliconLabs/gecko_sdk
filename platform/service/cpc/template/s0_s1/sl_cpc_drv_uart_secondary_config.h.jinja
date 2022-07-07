@@ -3,14 +3,25 @@
 {% for instance in cpc_secondary_uart_instance %} 
 #include "sl_cpc_drv_uart_secondary_{{ instance }}_config.h"
 
+#define usartHwFlowControlNone_D         0
+#define usartHwFlowControlCtsAndRts_D    1
+
+#define CAT(a,...) CAT_IMPL(a, __VA_ARGS__)
+#define CAT_IMPL(a,...) a ## __VA_ARGS__
+
 #define SL_CPC_DRV_UART_RX_QUEUE_SIZE                SL_CPC_DRV_UART_{{ instance | upper }}_RX_QUEUE_SIZE
 #define SL_CPC_DRV_UART_TX_QUEUE_SIZE                SL_CPC_DRV_UART_{{ instance | upper }}_TX_QUEUE_SIZE
 #define SL_CPC_DRV_UART_BAUDRATE                     SL_CPC_DRV_UART_{{ instance | upper }}_BAUDRATE
 
 #if !defined(SL_CPC_DRV_UART_{{ instance | upper }}_FLOW_CONTROL_TYPE)
-#define SL_CPC_DRV_UART_FLOW_CONTROL_TYPE usartHwFlowControlNone
+#define SL_CPC_DRV_UART_FLOW_CONTROL_TYPE usartHwFlowControlNone_D
 #else
-#define SL_CPC_DRV_UART_FLOW_CONTROL_TYPE SL_CPC_DRV_UART_{{ instance | upper }}_FLOW_CONTROL_TYPE
+#define FC_USER_VAL CAT(SL_CPC_DRV_UART_{{ instance | upper }}_FLOW_CONTROL_TYPE, _D)
+#define SL_CPC_DRV_UART_FLOW_CONTROL_TYPE  FC_USER_VAL
+#endif
+
+#if ((SL_CPC_DRV_UART_FLOW_CONTROL_TYPE != usartHwFlowControlNone_D) && (SL_CPC_DRV_UART_FLOW_CONTROL_TYPE != usartHwFlowControlCtsAndRts_D))
+#error Invalid Flow control value
 #endif
 
 #if !defined(SL_CPC_DRV_UART_{{ instance | upper }}_CTS_PORT)

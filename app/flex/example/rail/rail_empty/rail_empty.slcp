@@ -50,6 +50,9 @@ source:
 readme:
   - path: ../../../documentation/example/rail/rail_empty/readme.md
 
+other_file:
+  - path: "hw_filter_tags.yaml"
+
 #------------ Configuration overrides ----------------
 configuration:
   - name: SL_STACK_SIZE
@@ -202,16 +205,3 @@ ui_hints:
     - path: "config/rail/radio_settings.radioconf"
     - path: "readme.md"
       focus: true
-
-tag:
-  - hardware:
-      device:
-        memory:
-          flash: 68
-          ram: 7
-      board:
-        rf_bands:
-          - any
-        communication:
-          - pti
-  

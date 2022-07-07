@@ -120,6 +120,10 @@ static StorageSpiflashDevice_t getDeviceType(void)
         case DEVICE_ID_MACRONIX_16M_2V:
           return MACRONIX_16M_2V_DEVICE;
 #endif
+#if defined(BTL_STORAGE_SPIFLASH_MACRONIX_MX25R3235F) && (BTL_STORAGE_SPIFLASH_MACRONIX_MX25R3235F == 1)
+        case DEVICE_ID_MACRONIX_32M_LP:
+          return MACRONIX_32M_LP_DEVICE;
+#endif
 #if defined(BTL_STORAGE_SPIFLASH_MACRONIX_MX25R6435F) && (BTL_STORAGE_SPIFLASH_MACRONIX_MX25R6435F == 1)
         case DEVICE_ID_MACRONIX_64M_LP:
           return MACRONIX_64M_LP_DEVICE;
@@ -237,6 +241,11 @@ BootloaderStorageImplementationInformation_t getDeviceInfo(void)
     case MACRONIX_16M_2V_DEVICE:
       return macronix16M2VInfo;
 #endif
+#if defined(BTL_STORAGE_SPIFLASH_MACRONIX_MX25R3235F) && (BTL_STORAGE_SPIFLASH_MACRONIX_MX25R3235F == 1)
+    case MACRONIX_32M_LP_DEVICE:
+      return macronix32MLPInfo;
+#endif
+
 #if defined(BTL_STORAGE_SPIFLASH_MACRONIX_MX25R6435F) && (BTL_STORAGE_SPIFLASH_MACRONIX_MX25R6435F == 1)
     case MACRONIX_64M_LP_DEVICE:
       return macronix64MLPInfo;
@@ -336,6 +345,8 @@ static uint32_t getDeviceSize(StorageSpiflashDevice_t *pDeviceType)
     case MACRONIX_16M_2V_DEVICE:
     case NUMONYX_16M_DEVICE:
       return DEVICE_SIZE_16M;
+    case MACRONIX_32M_LP_DEVICE:
+      return DEVICE_SIZE_32M;
     case MACRONIX_64M_LP_DEVICE:
       return DEVICE_SIZE_64M;
     default:

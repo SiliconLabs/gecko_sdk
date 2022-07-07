@@ -353,7 +353,8 @@ void app_process_action(void)
       if (enter_press) {
         enter_press = false;
         key_storage_public = asymmetric_key_storage_select;
-#if defined(SEMAILBOX_PRESENT) && (_SILICON_LABS_SECURITY_FEATURE == _SILICON_LABS_SECURITY_FEATURE_VAULT)
+#if defined(SEMAILBOX_PRESENT)
+#if (_SILICON_LABS_SECURITY_FEATURE == _SILICON_LABS_SECURITY_FEATURE_VAULT)
         printf("\n  . Current ECC curve is %s.\n",
                asymmetric_key_curve_string[asymmetric_key_curve_select]);
         printf("  + Press SPACE to select ECC curve (%s or %s or %s), press "
@@ -361,6 +362,21 @@ void app_process_action(void)
                asymmetric_key_curve_string[0],
                asymmetric_key_curve_string[1],
                asymmetric_key_curve_string[2]);
+#else
+        // No software fallback on X448
+        if (asymmetric_key_curve_select == 1) {
+          printf("\n  . Current ECC curve is %s.\n",
+                 montgomery_key_size_string[0]);
+        } else {
+          printf("\n  . Current ECC curve is %s.\n",
+                 asymmetric_key_curve_string[asymmetric_key_curve_select]);
+        }
+        printf("  + Press SPACE to select ECC curve (%s or %s or %s), press "
+               "ENTER to next option.\n",
+               asymmetric_key_curve_string[0],
+               montgomery_key_size_string[0],
+               asymmetric_key_curve_string[2]);
+#endif
 #else
         // No software fallback on X448
         if (asymmetric_key_curve_select == 0) {
@@ -386,9 +402,20 @@ void app_process_action(void)
         if (asymmetric_key_curve_select > KEY_CURVE_MAX) {
           asymmetric_key_curve_select = 0;
         }
-#if defined(SEMAILBOX_PRESENT) && (_SILICON_LABS_SECURITY_FEATURE == _SILICON_LABS_SECURITY_FEATURE_VAULT)
+#if defined(SEMAILBOX_PRESENT)
+#if (_SILICON_LABS_SECURITY_FEATURE == _SILICON_LABS_SECURITY_FEATURE_VAULT)
         printf("  + Current ECC curve is %s.\n",
                asymmetric_key_curve_string[asymmetric_key_curve_select]);
+#else
+        // No software fallback on X448
+        if (asymmetric_key_curve_select == 1) {
+          printf("  + Current ECC curve is %s.\n",
+                 montgomery_key_size_string[0]);
+        } else {
+          printf("  + Current ECC curve is %s.\n",
+                 asymmetric_key_curve_string[asymmetric_key_curve_select]);
+        }
+#endif
 #else
         // No software fallback on X448
         if (asymmetric_key_curve_select == 0) {

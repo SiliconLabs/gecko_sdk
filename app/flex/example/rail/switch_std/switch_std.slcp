@@ -85,6 +85,9 @@ source:
     condition:
       - cli
 
+other_file:
+  - path: "hw_filter_tags.yaml"
+
 #------------ Configuration overrides ----------------
 configuration:
   - name: SL_STACK_SIZE
@@ -309,20 +312,3 @@ ui_hints:
     - path: "config/rail/radio_settings.radioconf"
       focus: true
 
-tag:
-  - hardware:
-      device:
-        memory:
-          flash: 184
-          ram: 19
-      board:
-        rf_bands:
-          - 868|915|2400
-        communication:
-          - vcom
-          - pti
-        io:
-          led: 2
-          button: 2
-          display: true
-  

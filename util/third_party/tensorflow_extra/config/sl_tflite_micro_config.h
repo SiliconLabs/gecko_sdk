@@ -37,30 +37,29 @@
  ******************************   DEFINES   ************************************
  ******************************************************************************/
 
-// <s SL_TFLITE_MICRO_MODEL_ARRAY> The name of the model array
-// <i> Default: default_model_array
-// <i> Use the default_model_array or the name of the actual model array.
-// <i> The array will be defined in the sl_tflite_micro_model.h if it is auto
-// <i> generated from a flatbuffer.
-#define SL_TFLITE_MICRO_MODEL_ARRAY     default_model_array
 
-// <o SL_TFLITE_MICRO_ARENA_SIZE> Arena size
-// <i> TensorFlow Lite Micro require a static allocated buffer to store the
-// <i> model's activation buffers. Different models may require different
-// <i> buffer sizes, and this configuration is used to define the size.
-// <i> For background information on arena size, please refer to:
-// <i> https://github.com/tensorflow/tensorflow/issues/35070 and
-// <i> https://www.tensorflow.org/lite/microcontrollers/get_started_low_level#7_allocate_memory
-// <i> for more information.
-// <i> Default: 10240
-#define SL_TFLITE_MICRO_ARENA_SIZE     (10240)
-
-// <q SL_TFLITE_MICRO_INTERPRETER_INIT_ENABLE> Enable initialization of interpreter
-// <i> If enabled, an instance of the MicroInterpreter will be created and
-// <i> initialized automatically. If you required control of when and how the
-// <i> MicroInterpreter is initialized then set this configuration to 0.
+// <e SL_TFLITE_MICRO_INTERPRETER_INIT_ENABLE> Automatically initialize model
+// <i> If this is enabled, TensorFlow Lite for Microcontrollers will be 
+// <i> initalized using metadata from the flatbuffer model in the 
+// <i> configuration folder.
+// <i> This includes instantiating an interpreter based on the model 
+// <i> operations and allocating memory required for the tensors. Modify
+// <i> the memory allocation size below.
 // <i> Default: 1
 #define SL_TFLITE_MICRO_INTERPRETER_INIT_ENABLE    (1)
+
+// <o SL_TFLITE_MICRO_ARENA_SIZE> Tensor Arena Size
+// <i> TensorFlow Lite for Microcontrollers requires a certain amount of 
+// <i> preallocated working memory for input, output and intermediate arrays.
+// <i> The memory requirement varies between models, and is best found by trial 
+// <i> and error.
+// <i> Note: Models provided by the MLTK (Silicon Labs Machine Learning Toolkit)
+// <i> have a pre-configured arena size associated with them. Changing this
+// <i> configuration to a non-zero value will overwrite any pre-configured value
+// <i> in the model's metadata.
+// <i> Default: 0
+#define SL_TFLITE_MICRO_ARENA_SIZE     			   (0)
+// </e>
 
 #endif // SL_TFLITE_MICRO_CONFIG_H
 

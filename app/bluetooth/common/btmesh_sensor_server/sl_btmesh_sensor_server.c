@@ -206,16 +206,16 @@ void sl_btmesh_sensor_server_node_init(void)
 #endif // SL_CATALOG_BTMESH_SENSOR_PEOPLE_COUNT_PRESENT
 #if defined(SL_BOARD_ENABLE_SENSOR_LIGHT) && SL_BOARD_ENABLE_SENSOR_LIGHT
 #ifdef SL_CATALOG_SENSOR_LIGHT_PRESENT
-  sl_sensor_light_init();
+  (void)sl_sensor_light_init();
 #endif // SL_CATALOG_SENSOR_LIGHT_PRESENT
 #ifdef SL_CATALOG_SENSOR_LUX_PRESENT
-  sl_sensor_lux_init();
+  (void)sl_sensor_lux_init();
 #endif // SL_CATALOG_SENSOR_LUX_PRESENT
 #endif // SL_BOARD_ENABLE_SENSOR_LIGHT
 #if defined(SL_CATALOG_SENSOR_RHT_PRESENT) \
   && defined(SL_BOARD_ENABLE_SENSOR_RHT)   \
   && SL_BOARD_ENABLE_SENSOR_RHT
-  sl_sensor_rht_init();
+  (void)sl_sensor_rht_init();
 #endif // SL_CATALOG_SENSOR_RHT_PRESENT
 
 #if SENSOR_PEOPLE_COUNT_CADENCE && SENSOR_THERMOMETER_CADENCE

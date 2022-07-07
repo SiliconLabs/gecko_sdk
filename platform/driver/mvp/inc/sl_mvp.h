@@ -38,6 +38,12 @@
 extern "C" {
 #endif
 
+/// @cond DO_NOT_INCLUDE_WITH_DOXYGEN
+/***************************************************************************//**
+ * @addtogroup mvp MVP API
+ * @{
+ ******************************************************************************/
+
 // Defines for each of the 8 MVP registers.
 #define SLI_MVP_R0 0
 #define SLI_MVP_R1 1
@@ -57,6 +63,11 @@ extern "C" {
 #define SLI_MVP_INCRDIM_ROW SLI_MVP_INCRDIM1
 #define SLI_MVP_INCRDIM_COL SLI_MVP_INCRDIM2
 
+// Alternative INCRDIM macros, useful when using "NHWC" tensors.
+#define SLI_MVP_INCRDIM_DEPTH   SLI_MVP_INCRDIM_VEC
+#define SLI_MVP_INCRDIM_HEIGHT  SLI_MVP_INCRDIM_ROW
+#define SLI_MVP_INCRDIM_WIDTH   SLI_MVP_INCRDIM_COL
+
 // Defines for Loop dimension resets.
 #define SLI_MVP_NO_DIM_RESET  0x0
 #define SLI_MVP_RESETDIM0 0x1
@@ -65,6 +76,11 @@ extern "C" {
 #define SLI_MVP_RESETDIM_VEC SLI_MVP_RESETDIM0
 #define SLI_MVP_RESETDIM_ROW SLI_MVP_RESETDIM1
 #define SLI_MVP_RESETDIM_COL SLI_MVP_RESETDIM2
+
+// Alternative RESETDIM macros, useful when using "NHWC" tensors.
+#define SLI_MVP_RESETDIM_DEPTH  SLI_MVP_RESETDIM_VEC
+#define SLI_MVP_RESETDIM_HEIGHT SLI_MVP_RESETDIM_ROW
+#define SLI_MVP_RESETDIM_WIDTH  SLI_MVP_RESETDIM_COL
 
 // Defines for Instruction RegLoad/RegStore selection (for STREAM macro).
 #define SLI_MVP_REGLOAD0 0
@@ -505,13 +521,17 @@ void sli_mvp_prog_set_array_full(sli_mvp_program_t *prog,
  * @brief
  *   Configure a specific array in a program.
  *
+ * @note
+ *   The resulting memory ordering will be "NCHW" i.e. "vector major".
+ *   This aligns with the memory ordering of a C-language 3D array.
+ *
  * @param[in] prog  The program to configure.
  * @param[in] index Array index. Values in the range 0-4
  * @param[in] addr  Base address of the array.
  * @param[in] datatype Datatype of each array element.
- * @param[in] vecs Number of vectors (DIM0).
+ * @param[in] vecs Number of vectors (DIM0, major dimension).
  * @param[in] rows Number of rows (DIM1).
- * @param[in] cols Number of columns (DIM2).
+ * @param[in] cols Number of columns (DIM2, minor dimension).
  */
 void sli_mvp_prog_set_array(sli_mvp_program_t *prog,
                             uint8_t index,
@@ -541,12 +561,15 @@ void sli_mvp_prog_set_vector(sli_mvp_program_t *prog,
  * @brief
  *   Configure a specific 2D matrix in a program.
  *
+ * @note
+ *   The resulting memory ordering will be "row major".
+ *
  * @param[in] prog  The program to configure.
  * @param[in] index index. Values in the range 0-4
  * @param[in] addr  Base address of the matrix.
  * @param[in] datatype Datatype of each matrix element.
- * @param[in] rows Number of rows (DIM1).
- * @param[in] cols Number of columns (DIM2).
+ * @param[in] rows Number of rows (DIM1, major dimension).
+ * @param[in] cols Number of columns (DIM2, minor dimension).
  */
 void sli_mvp_prog_set_matrix(sli_mvp_program_t *prog,
                              uint8_t index,
@@ -646,12 +669,15 @@ uint32_t sli_mvp_progcnt_get(void);
  * @brief
  *  Start a MVP program loop.
  *
+ * @note
+ *   This function is part of the MVP program builder (pb) convenience API.
+ *
  * @param[in] p Pointer to MVP program context.
  * @param[in] iterations Loop count.
  * @param[out] status Returns SL_STATUS_INVALID_PARAMETER when loop count is exhausted.
- *             status is only written to when this error occur.
+ *             status is only updated when this error occur.
  */
-void sli_mvp_begin_loop(sli_mvp_program_context_t *p, int iterations, sl_status_t *status);
+void sli_mvp_pb_begin_loop(sli_mvp_program_context_t *p, int iterations, sl_status_t *status);
 
 /**
  * @brief
@@ -659,13 +685,19 @@ void sli_mvp_begin_loop(sli_mvp_program_context_t *p, int iterations, sl_status_
  *  Must be called once for each MVP program, and prior to any loop, compute
  *  or execute functions.
  *
+ * @note
+ *   This function is part of the MVP program builder (pb) convenience API.
+ *
  * @param[in] p Pointer to MVP program context.
  */
-void sli_mvp_begin_program(sli_mvp_program_context_t *p);
+void sli_mvp_pb_begin_program(sli_mvp_program_context_t *p);
 
 /**
  * @brief
  *  Insert a MVP instruction in the program.
+ *
+ * @note
+ *   This function is part of the MVP program builder (pb) convenience API.
  *
  * @param[in] p Pointer to MVP program context.
  * @param[in] opcode Instruction opcode.
@@ -673,46 +705,150 @@ void sli_mvp_begin_program(sli_mvp_program_context_t *p);
  * @param[in] load_cfg Instruction load configuration.
  * @param[in] store_cfg Instruction store configuration.
  * @param[out] status Returns SL_STATUS_INVALID_PARAMETER when instruction count is exhausted.
- *             status is only written to when this error occur.
+ *             status is only updated when this error occur.
  */
-void sli_mvp_compute(sli_mvp_program_context_t *p, uint32_t opcode, uint32_t alu_cfg, uint32_t load_cfg, uint32_t store_cfg, sl_status_t *status);
+void sli_mvp_pb_compute(sli_mvp_program_context_t *p, uint32_t opcode, uint32_t alu_cfg, uint32_t load_cfg, uint32_t store_cfg, sl_status_t *status);
+
+/**
+ * @brief
+ *   Configure a specific 3D array in a program.
+ *
+ * @param[in] prog  The program to configure.
+ * @param[in] index Array index. Values in the range 0-4.
+ * @param[in] addr  Base address of the array.
+ * @param[in] datatype Datatype of each array element.
+ * @param[in] vecs Number of vectors (DIM0).
+ * @param[in] rows Number of rows (DIM1).
+ * @param[in] cols Number of columns (DIM2).
+ * @param[in] vecstride Number of elements to advance when moving to the next vector (can be negative).
+ * @param[in] rowstride Number of elements to advance when moving to the next row (can be negative).
+ * @param[in] colstride Number of elements to advance when moving to the next column (can be negative).
+ * @param[out] status Returns SL_STATUS_INVALID_PARAMETER if an invalid array
+ *             index is specified. Returns SL_STATUS_INVALID_RANGE if invalid
+ *             array size.
+ *             status is only updated when these errors occur.
+ */
+void sli_mvp_pb_config_array_full(sli_mvp_program_t *prog,
+                                  uint8_t index,
+                                  void *addr,
+                                  sli_mvp_datatype_t type,
+                                  unsigned short vecs,
+                                  unsigned short rows,
+                                  unsigned short cols,
+                                  int vecstride,
+                                  int rowstride,
+                                  int colstride,
+                                  sl_status_t *status);
+
+/**
+ * @brief
+ *   Configure a 3D MVP array in a program in NHWC or "row major" style.
+ *
+ * @note
+ *   NHWC: N = batch, H = height, W = width, C = channel.
+ *   NHWC memory ordering is "row major" within each batch, and is the default
+ *   memory ordering used in TensorFlow.
+ *   Since MVP handles only three dimensions, we silently treat n (batches)
+ *   of nhwc as 1.
+ *
+ * @param[in] prog  The program to configure.
+ * @param[in] index Array index. Values in the range 0-4
+ * @param[in] addr  Base address of the array.
+ * @param[in] datatype Datatype of each array element.
+ * @param[in] h  Matrix height (rows, DIM1, major dimension).
+ * @param[in] w  Matrix width (cols, DIM2).
+ * @param[in] c  Matrix depth (vecs or channels, DIM0, minor dimension).
+ * @param[out] status Returns SL_STATUS_INVALID_PARAMETER if an invalid array
+ *             index is specified. Returns SL_STATUS_INVALID_RANGE if invalid
+ *             array size.
+ *             status is only updated when these errors occur.
+ */
+void sli_mvp_pb_config_array_nhwc(sli_mvp_program_t *prog,
+                                  uint8_t index,
+                                  void *addr,
+                                  sli_mvp_datatype_t type,
+                                  unsigned short h,
+                                  unsigned short w,
+                                  unsigned short c,
+                                  sl_status_t *status);
+
+/**
+ * @brief
+ *   Configure a specific 2D matrix in a program in "row major" style.
+ *
+ * @param[in] prog  The program to configure.
+ * @param[in] index index. Values in the range 0-4
+ * @param[in] addr  Base address of the matrix.
+ * @param[in] datatype Datatype of each matrix element.
+ * @param[in] rows Number of rows (DIM1, major dimension).
+ * @param[in] cols Number of columns (DIM2, minor dimension).
+ * @param[out] status Returns SL_STATUS_INVALID_PARAMETER if an invalid array
+ *             index is specified. Returns SL_STATUS_INVALID_RANGE if invalid
+ *             matrix size.
+ *             status is only updated when these errors occur.
+ */
+void sli_mvp_pb_config_matrix(sli_mvp_program_t *prog,
+                              uint8_t index,
+                              void *addr,
+                              sli_mvp_datatype_t type,
+                              unsigned short rows,
+                              unsigned short cols,
+                              sl_status_t *status);
+
+/**
+ * @brief
+ *   Configure a specific vector in a program.
+ *
+ * @param[in] prog  The program to configure.
+ * @param[in] index index. Values in the range 0-4
+ * @param[in] addr  Base address of the vector.
+ * @param[in] datatype Datatype of each vector element.
+ * @param[in] len Number of elements in vector (DIM2).
+ * @param[out] status Returns SL_STATUS_INVALID_PARAMETER if an invalid array
+ *             index is specified. Returns SL_STATUS_INVALID_RANGE if invalid
+ *             vector size.
+ *             status is only updated when these errors occur.
+ */
+void sli_mvp_pb_config_vector(sli_mvp_program_t *prog,
+                              uint8_t index,
+                              void *addr,
+                              sli_mvp_datatype_t type,
+                              unsigned short len,
+                              sl_status_t *status);
 
 /**
  * @brief
  *  End a MVP program loop.
  *
+ * @note
+ *   This function is part of the MVP program builder (pb) convenience API.
+ *
  * @param[in] p Pointer to MVP program context.
  */
-void sli_mvp_end_loop(sli_mvp_program_context_t *p);
+void sli_mvp_pb_end_loop(sli_mvp_program_context_t *p);
 
 /**
  * @brief
  *  Execute a MVP program.
  *
+ * @note
+ *   This function is part of the MVP program builder (pb) convenience API.
+ *
  * @param[in] p Pointer to MVP program context.
  */
-void sli_mvp_execute_program(sli_mvp_program_context_t *p);
+void sli_mvp_pb_execute_program(sli_mvp_program_context_t *p);
 
 /**
  * @brief
  *  Initialize a MVP program context. Must be called once before a group of
  *  MVP programs are executed.
  *
- * @param[in] p Pointer to MVP program context.
- */
-void sli_mvp_init_program(sli_mvp_program_context_t *p);
-
-/**
- * @brief
- *  Set array dimension index incrementer in previous loop iterator.
- *  When used after a call to @ref sli_mvp_end_loop(), the index will increment
- *  on loop exit.
+ * @note
+ *   This function is part of the MVP program builder (pb) convenience API.
  *
  * @param[in] p Pointer to MVP program context.
- * @param[in] array_index Index of array.
- * @param[in] dimension Dimension to increment.
  */
-void sli_mvp_postloop_reset_dim(sli_mvp_program_context_t *p, uint8_t array_index, uint8_t dimension);
+void sli_mvp_pb_init_program(sli_mvp_program_context_t *p);
 
 /**
  * @brief
@@ -720,11 +856,32 @@ void sli_mvp_postloop_reset_dim(sli_mvp_program_context_t *p, uint8_t array_inde
  *  When used after a call to @ref sli_mvp_end_loop(), the index will be reset
  *  on loop exit.
  *
+ * @note
+ *   This function is part of the MVP program builder (pb) convenience API.
+ *
  * @param[in] p Pointer to MVP program context.
  * @param[in] array_index Index of array.
  * @param[in] dimension Dimension to reset.
  */
-void sli_mvp_postloop_incr_dim(sli_mvp_program_context_t *p, uint8_t array_index, uint8_t dimension);
+void sli_mvp_pb_postloop_incr_dim(sli_mvp_program_context_t *p, uint8_t array_index, uint8_t dimension);
+
+/**
+ * @brief
+ *  Set array dimension index incrementer in previous loop iterator.
+ *  When used after a call to @ref sli_mvp_end_loop(), the index will increment
+ *  on loop exit.
+ *
+ * @note
+ *   This function is part of the MVP program builder (pb) convenience API.
+ *
+ * @param[in] p Pointer to MVP program context.
+ * @param[in] array_index Index of array.
+ * @param[in] dimension Dimension to increment.
+ */
+void sli_mvp_pb_postloop_reset_dim(sli_mvp_program_context_t *p, uint8_t array_index, uint8_t dimension);
+
+/** @} (end addtogroup mvp) */
+/// @endcond
 
 #ifdef __cplusplus
 }

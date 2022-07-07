@@ -4,7 +4,7 @@ The **Bluetooth Mesh - SoC Light HSL** example is a working example application 
 
 The example is an out-of-the-box Software Demo where the LEDs of the device can be controlled by button presses on another device (for example **Bluetooth Mesh - SoC Switch**). The LEDs can be switched on and off, and their **lighting intensity** can also be set. **Hue** and **saturation** (shown only on the LCD or in UART logs, depending on the mainboard) can be set by the Light HSL Client model. The example also tries to establish friendship as a Friend node and prints its status to the LCD or UART. The example is based on the Bluetooth Mesh Generic On/Off Model, the Light Lightness Model, the Light HSL Server Model and the Light LC Server Model. This example requires one of the Internal Storage Bootloader (single image) variants, depending on device memory.
 
-*Note: Currently the* ***Bluetooth Mesh - SoC Switch*** *does not support HSL Client (i.e. cannot set hue or saturation). Only the mobile application supports HSL Client. All the other features work.*
+*Note: Currently **Bluetooth Mesh - SoC Switch** does not support HSL Client (i.e. cannot set hue or saturation). Only the mobile application supports HSL Client. All the other features work.*
 
 ![Bluetooth Mesh lighting system - Light](readme_img7.png)
 
@@ -12,13 +12,13 @@ The example is an out-of-the-box Software Demo where the LEDs of the device can 
 
 To learn Bluetooth mesh technology basics, see [Bluetooth Mesh Network - An Introduction for Developers](https://www.bluetooth.com/wp-content/uploads/2019/03/Mesh-Technology-Overview.pdf).
 
-To get started with Bluetooth Mesh and Simplicity Studio, see [QSG176: Bluetooth® Mesh SDK v2.x Quick Start Guide](https://www.silabs.com/documents/public/quick-start-guides/qsg176-bluetooth-mesh-sdk-v2x-quick-start-guide.pdf).
+To get started with Bluetooth Mesh and Simplicity Studio, see [QSG176: Bluetooth Mesh SDK v2.x Quick Start Guide](https://www.silabs.com/documents/public/quick-start-guides/qsg176-bluetooth-mesh-sdk-v2x-quick-start-guide.pdf).
 
 The term SoC stands for "System on Chip", meaning that this is a standalone application that runs on the EFR32/BGM and does not require any external MCU or other active components to operate.
 
 This is an example of a Bluetooth Mesh HSL light application. It demonstrates how to control a light source, an LED mounted on a mainboard and a radio board or similar hardware, connected to a Bluetooth Mesh network. The light source lightness can be controlled with a light client, such as another radio board running the **Bluetooth Mesh - SoC Switch** application, or with **Bluetooth Mesh** smartphone application.
 
-*Note: Currently the* ***Bluetooth Mesh - SoC Switch*** *nor the mobile application do not support HSL Client. All the other features work.*
+*Note: Currently neither **Bluetooth Mesh - SoC Switch** nor the mobile application supports HSL Client. All the other features work.*
 
 The LED light can be controlled in many ways using different models:
 
@@ -26,16 +26,16 @@ The LED light can be controlled in many ways using different models:
 - **Generic Level Server** model can control the light brightness
 - **Light Lightness Server** model can control the light Lightness
 - **Light HSL Server** model can control light Lightness, (Hue and Saturation only virtually, can be seen only in the LCD and logs)
-- **Light LC Server** model, i.e. Light Controller, can automatically control the switch on/&off based on the sensors
+- **Light LC Server** model, that is Light Controller, can automatically control the switch on/&off based on the sensors
 - **Scene Server** model saves the light settings to recall them later
 - **Scheduler Server** model provides time- and date-dependent lighting operations
 
-For more information on the HSL light model, please refer to the following [Wikipedia link](https://en.wikipedia.org/wiki/HSL_and_HSV#HSL_to_RGB_alternative).
+For more information on the HSL light model, see the following [Wikipedia link](https://en.wikipedia.org/wiki/HSL_and_HSV#HSL_to_RGB_alternative).
 
 To add or remove features from the example, follow this process:
 
 - Add model and feature components to your project
-- Optionally configure your Mesh node through the "Bluetooth Mesh Configurator"
+- Optionally configure the Mesh node through the "Bluetooth Mesh Configurator"
 
 ![Bluetooth Mesh Configurator](readme_img1.png)
 
@@ -54,22 +54,22 @@ To learn more about programming an SoC application, see [UG472: Silicon Labs Blu
 
 To test the application, do the following:
 
-1. Make sure a bootloader is installed. See Troubleshooting section.
-2. Build and flash the **Bluetooth Mesh - SoC Light HSL** sample app to your device.
-3. Reset the device by pressing and releasing the reset button on the mainboard while pressing BTN0. The message "Factory reset" should appear on the LCD screen.
+1. Make sure a bootloader is installed. See the Troubleshooting section.
+2. Build and flash the **Bluetooth Mesh - SoC Light HSL** example to your device.
+3. Reset the device by pressing and releasing the reset button on the mainboard while pressing BTN0. The message "Factory reset" should appear on the LCD.
 4. Provision the device in one of three ways:
 
    - NCP Host provisioner examples, see for example an SDK folder `app/bluetooth/example_host/btmesh_provisioner` or [github](https://github.com/SiliconLabs/bluetooth_mesh_stack_features/tree/master/provisioning)
 
-   - NCP Commander with NCP target device, see [Bluetooth NCP Commander guide](https://docs.silabs.com/simplicity-studio-5-users-guide/latest/ss-5-users-guide-tools-bluetooth-ncp-commander) or [AN1259: Using the v3.x Silicon Labs Bluetooth® Stack in Network Co-Processor Mode](https://www.silabs.com/documents/public/application-notes/an1259-bt-ncp-mode-sdk-v3x.pdf)
+   - NCP Commander with NCP target device, see [Bluetooth NCP Commander guide](https://docs.silabs.com/simplicity-studio-5-users-guide/latest/ss-5-users-guide-tools-bluetooth-ncp-commander) or [AN1259: Using the v3.x Silicon Labs Bluetooth Stack in Network Co-Processor Mode](https://www.silabs.com/documents/public/application-notes/an1259-bt-ncp-mode-sdk-v3x.pdf)
 
-   - For Mobile Phone use, see the [QSG176: Bluetooth® Mesh SDK v2.x Quick-Start Guide](https://www.silabs.com/documents/public/quick-start-guides/qsg176-bluetooth-mesh-sdk-v2x-quick-start-guide.pdf) for more information how to download and use the Silicon Labs Bluetooth Mesh application.
+   - For Mobile Phone use, see the [QSG176: Bluetooth Mesh SDK v2.x Quick-Start Guide](https://www.silabs.com/documents/public/quick-start-guides/qsg176-bluetooth-mesh-sdk-v2x-quick-start-guide.pdf) for more information how to download and use the Silicon Labs Bluetooth Mesh application.
 
    Mobile Phone provisioning is illustrated in the following figure.
 
 ![Bluetooth Mesh start screen](readme_img6.png)
 
-5. Open the app and choose the Provision Browser and tap **Scan**.
+5. Open the app, choose the Provision Browser, and tap **Scan**.
 
 ![Bluetooth Mesh Provision Browser](readme_img2.png)
 
@@ -77,28 +77,28 @@ To test the application, do the following:
 
 ![Bluetooth Mesh Provisioning Device](readme_img3.png)
 
-7. Configure the device as **Light Lightness Server** and select the correct group to which the messages will be published (Demo group). If you want to test the Bluetooth Mesh Generic OnOff Model, the Light HSL Model, the Scene Model or some other Mesh Model, then select the respective client instead. You can use only one at a time in our mobile application. The Mobile application does not support Light HSL Model yet, therefore use the Light Lightness Model.
+7. Configure the device as **Light Lightness Server** and select the correct group to which the messages will be published (Demo group). If you want to test the Bluetooth Mesh Generic OnOff Model, the Light HSL Model, the Scene Model or some other Mesh Model, then select the respective client instead. You can use only one at a time in our mobile application. The mobile application does not support Light HSL Model yet, therefore use the Light Lightness Model.
 
 ![Bluetooth Mesh Device Configuration](readme_img4.png)
 
-8. Use the slider to set the lightness of the WSKT + radio board LED.
+8. Use the slider to set the lightness of the mainboard + radio board LED.
 
 ![Lightness slider](readme_img5.png)
 
 9. The next step is to add a switch or several switches into your network, if it has not already been done. This is required to fully test the whole system, for example the friendship and other features. You can then control the light example by pressing the buttons in the **Bluetooth Mesh - SoC Switch** and **Bluetooth Mesh - SoC Switch Low Power** examples. Read the applicable example project documentation to learn more.
 
-For more information on the example, please refer to [AN1299: Understanding the Silicon Labs Bluetooth Mesh SDK v2.x Lighting Demonstration](https://www.silabs.com/documents/public/application-notes/an1299-understanding-bluetooth-mesh-lighting-demo-sdk-2x.pdf).
+For more information on the example, see [AN1299: Understanding the Silicon Labs Bluetooth Mesh SDK v2.x Lighting Demonstration](https://www.silabs.com/documents/public/application-notes/an1299-understanding-bluetooth-mesh-lighting-demo-sdk-2x.pdf).
 
 ## Troubleshooting
 
-Note that **NO** Bootloader is included in any example projects, but they are configured to expect a bootloader to be present on the device. To install a bootloader, from the Launcher perspective's EXAMPLE PROJECTS & DEMOS tab either build and flash one of the bootloader examples or run one of the precompiled demos. Precompiled demos flash a bootloader as well as the application image.
+Note that Software Example-based projects do not include a bootloader. However, they are configured to expect a bootloader to be present on the device. To install a bootloader, from the Launcher perspective's EXAMPLE PROJECTS & DEMOS tab either build and flash one of the bootloader examples or run one of the precompiled demos. Precompiled demos flash a bootloader as well as the application image.
 
-- The **Bluetooth Mesh - SoC Switch** demo includes an OTA DFU-capable bootloader.
-- The **Bluetooth Mesh - NCP Empty** demo includes a UART DFU-capable bootloader.
-- For other bootloader types, create your own bootloader project and flash it to your device before flashing your application.
+- To flash an OTA DFU-capable bootloader to the device, flash the **Bluetooth Mesh - SoC Switch** demo.
+- To flash a UART DFU-capable bootloader to the device, flash the **Bluetooth Mesh - NCP Empty** demo.
+- For other bootloader types, create your own bootloader project and flash it to the device before flashing your application.
 - When you flash your application image to the device, use the *.hex* or *.s37* output file. Flashing *.bin* files may overwrite (erase) the bootloader.
-- On Series 1 devices (EFR32xG1x), both first stage and second stage bootloaders have to be flashed. This can be done at once by flashing the **-combined.s37* file found in your bootloader project after building the project.
-- For more information, see *[UG103.6: Bootloader Fundamentals](https://www.silabs.com/documents/public/user-guides/ug103-06-fundamentals-bootloading.pdf)* and *[UG489: Silicon Labs Gecko Bootloader User's Guide for GSDK 4.0 and Higher](https://www.silabs.com/documents/public/user-guides/ug489-gecko-bootloader-user-guide-gsdk-4.pdf)*.
+- On Series 1 devices (EFR32xG1x), both first stage and second stage bootloaders have to be flashed. This can be done at once by flashing the *-combined.s37* file found in the bootloader project after building the project.
+- For more information, see [UG103.6: Bootloader Fundamentals](https://www.silabs.com/documents/public/user-guides/ug103-06-fundamentals-bootloading.pdf) and [UG489: Silicon Labs Gecko Bootloader User's Guide for GSDK 4.0 and Higher](https://cn.silabs.com/documents/public/user-guides/ug489-gecko-bootloader-user-guide-gsdk-4.pdf).
 
 Before programming the radio board mounted on the mainboard, make sure the power supply switch the AEM position (right side) as shown below.
 
@@ -110,7 +110,7 @@ Before programming the radio board mounted on the mainboard, make sure the power
 
 [Bluetooth Mesh Network - An Introduction for Developers](https://www.bluetooth.com/wp-content/uploads/2019/03/Mesh-Technology-Overview.pdf)
 
-[QSG176: Bluetooth® Mesh SDK v2.x Quick Start Guide](https://www.silabs.com/documents/public/quick-start-guides/qsg176-bluetooth-mesh-sdk-v2x-quick-start-guide.pdf)
+[QSG176: Bluetooth Mesh SDK v2.x Quick Start Guide](https://www.silabs.com/documents/public/quick-start-guides/qsg176-bluetooth-mesh-sdk-v2x-quick-start-guide.pdf)
 
 [AN1315: Bluetooth Mesh Device Power Consumption Measurements](https://www.silabs.com/documents/public/application-notes/an1315-bluetooth-mesh-power-consumption-measurements.pdf)
 

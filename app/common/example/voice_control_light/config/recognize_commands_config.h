@@ -28,7 +28,7 @@
 // <i> reduce the chance of misdetections, but lowers the confidence score which
 // <i> may result in missed commands.
 // <i> Default: 600
-#define SMOOTHING_WINDOW_DURATION_MS 600
+#define SMOOTHING_WINDOW_DURATION_MS 1000
 
 // <o> Minimum detection count <0-50>
 // <i> Sets the minimum number of results required in the smoothing window for
@@ -42,13 +42,13 @@
 // <i> misclassifications.
 // <i> The confidence scores are in the range <0-255>
 // <i> Default: 50
-#define DETECTION_THRESHOLD 100
+#define DETECTION_THRESHOLD 160
 
 // <o> Suppresion time after detection [ms] <0-2000>
 // <i> Sets a time window to wait after a detected keyword before triggering
 // <i> a new detection.
 // <i> Default: 1000
-#define SUPPRESION_TIME_MS 1500
+#define SUPPRESION_TIME_MS 750
 
 // <<< end of configuration section >>>
 

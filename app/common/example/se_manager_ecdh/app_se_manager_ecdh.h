@@ -58,6 +58,9 @@
 /// Domain size of asymmetric custom key
 #define DOMAIN_SIZE             (32)
 #else
+/// Private key size of ECC Montgomery keys
+#define ECC_X25519_PRIVKEY_SIZE (SL_SE_KEY_TYPE_ECC_X25519 & SL_SE_KEY_TYPE_ATTRIBUTES_MASK)
+
 /// Use the biggest ECC curve as private key size
 #define ECC_PRIVKEY_SIZE        (ECC_P256_PRIVKEY_SIZE)
 #endif

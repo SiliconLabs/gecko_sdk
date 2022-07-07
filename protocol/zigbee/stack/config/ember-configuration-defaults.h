@@ -736,8 +736,13 @@
 
 #endif // UC_BUILD
 
+// This table temporarily keeps track of devices that are joining
+// To allow "n" devices to join simulataneously, this table needs to be capable of
+// holding n entries. Since this space is only used when necessary and times out fairly
+// quickly, we set it to 64 (same as max child table size) to prevent all the additional
+// code to allow configuration of this table size
 #ifndef SL_ZIGBEE_TRANSIENT_DEVICE_MGMT_MAX_CAPACITY
-  #define SL_ZIGBEE_TRANSIENT_DEVICE_MGMT_MAX_CAPACITY 10
+  #define SL_ZIGBEE_TRANSIENT_DEVICE_MGMT_MAX_CAPACITY 64
 #endif
 
 #ifndef SL_ZIGBEE_TRANSIENT_DEVICE_DEFAULT_TIMEOUT_MS
@@ -745,7 +750,32 @@
 #endif
 
 #ifndef EMBER_CUSTOM_MAC_FILTER_TABLE_SIZE
+#if !defined(EMBER_TEST) && !defined(ZIGBEE_STACK_ON_HOST)
   #define EMBER_CUSTOM_MAC_FILTER_TABLE_SIZE 2
+#else
+  #define EMBER_CUSTOM_MAC_FILTER_TABLE_SIZE 64
+#endif
+#endif
+
+/** @brief The 802.15.4 CCA mode that should be used at startup. The default
+ * value is RAIL_IEEE802154_CCA_MODE_RSSI.
+ * This value is configured in the radio during initialization. The user may
+ * override this value at runtime using ::emberSetRadioIeee802154CcaMode.
+ *
+ * @note The value of this macro is used at startup for SoC and NCP
+ * applications only. A host application does not use this value, nor does it
+ * set the CCA mode at startup by default.
+ */
+#ifdef SL_CATALOG_RAIL_LIB_PRESENT
+  #include "rail_ieee802154.h"
+  #ifndef EMBER_RADIO_802154_CCA_MODE
+    #define EMBER_RADIO_802154_CCA_MODE RAIL_IEEE802154_CCA_MODE_RSSI
+  #endif // EMBER_RADIO_802154_CCA_MODE
+#endif // SL_CATALOG_RAIL_LIB_PRESENT
+
+#ifdef EMBER_TEST
+  #undef EMBER_RADIO_802154_CCA_MODE
+  #define EMBER_RADIO_802154_CCA_MODE 0
 #endif
 
 /** @} END addtogroup */

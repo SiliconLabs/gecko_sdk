@@ -5,8 +5,8 @@ description: >
   The audio feature generator can be used to extract mel-flterbank features from an audio 
   signal for use with machine learning audio classification applications. The microphone
   is used as an audio source and the features are calculated in real time. 
-category: Platform|Machine Learning
-quality: beta
+category: Machine Learning|Feature Generator
+quality: production
 provides:
   - name: ml_audio_feature_generation
 requires:
@@ -59,5 +59,4 @@ source:
   - path: microfrontend/lib/window_util.c
 documentation:
   docset: gecko-platform
-  document: 
-    - machine_learning/api/group-ml-audio-feature-generation
+  document: machine-learning/api/group-ml-audio-feature-generation

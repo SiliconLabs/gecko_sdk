@@ -220,6 +220,15 @@ library:
     condition:
       - "toolchain_iar"
       - "device_family_efr32mg24"
+#EFR32BG24
+  - path: "lib/EFR32BG24/GCC/libbluetooth_mesh.a"
+    condition:
+      - "toolchain_gcc"
+      - "device_family_efr32bg24"
+  - path: "lib/EFR32BG24/IAR/libbluetooth_mesh.a"
+    condition:
+      - "toolchain_iar"
+      - "device_family_efr32bg24"
 #MGM24
   - path: "lib/EFR32MG24/GCC/libbluetooth_mesh.a"
     condition:

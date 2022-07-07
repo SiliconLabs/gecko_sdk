@@ -103,7 +103,6 @@ configuration:
     value: "0x1000"
 
 tag:
-  - hardware:device:sdid:!215
   - hardware:board_only
   - hardware:component:button:2+
   - hardware:component:led:2+

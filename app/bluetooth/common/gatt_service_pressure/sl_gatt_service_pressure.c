@@ -3,7 +3,7 @@
  * @brief Air Pressure GATT Service
  *******************************************************************************
  * # License
- * <b>Copyright 2020 Silicon Laboratories Inc. www.silabs.com</b>
+ * <b>Copyright 2022 Silicon Laboratories Inc. www.silabs.com</b>
  *******************************************************************************
  *
  * SPDX-License-Identifier: Zlib
@@ -33,6 +33,7 @@
 #include "gatt_db.h"
 #include "app_assert.h"
 #include "sl_gatt_service_pressure.h"
+#include "sl_gatt_service_pressure_config.h"
 
 // -----------------------------------------------------------------------------
 // Private variables
@@ -52,10 +53,15 @@ static void pressure_read_cb(sl_bt_evt_gatt_server_user_read_request_t *data)
   sl_status_t sc;
   float p;
 
+  sc = sl_gatt_service_pressure_get(&p);
   // keep previous data if measurement fails
-  if (SL_STATUS_OK == sl_gatt_service_pressure_get(&p)) {
+  if (SL_STATUS_OK == sc) {
     /* 1 mbar = 100 Pa. We want 0.1 Pa, so multiply by 1000 */
     pressure = (uint32_t)(p * 1000.0f);
+  } else if (SL_STATUS_NOT_INITIALIZED == sc) {
+    pressure = SL_GATT_SERVICE_PRESSURE_INVALID;
+  } else {
+    return;
   }
 
   sc = sl_bt_gatt_server_send_user_read_response(

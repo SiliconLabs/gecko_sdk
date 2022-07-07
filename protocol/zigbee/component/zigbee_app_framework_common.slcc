@@ -57,9 +57,6 @@ source:
   - path: protocol/zigbee/app/framework/common/zigbee_app_framework_common_rtos.c
     condition:
       - cmsis_rtos2
-  - path: protocol/zigbee/app/framework/plugin-soc/rtos-common/os_app_hooks.c   
-    condition:
-      - cmsis_rtos2
 
 include:
   - path: protocol/zigbee/app/framework/common

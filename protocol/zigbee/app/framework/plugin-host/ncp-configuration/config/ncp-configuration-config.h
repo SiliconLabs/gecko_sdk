@@ -73,7 +73,7 @@
 // <i> The number of unique group identifiers that this device requires.
 #define EMBER_ZLL_GROUP_ADDRESSES   0
 
-// <o EMBER_ZLL_RSSI_THRESHOLD> ZLL RSSI threshold <-128-127>
+// <o EMBER_ZLL_RSSI_THRESHOLD> ZLL RSSI threshold <-128..127>
 // <i> Default: -40
 // <i> The RSSI threshold applied to incoming scan requests.  The stack will ignore scan requests with corrected RSSI values less than this threshold.
 #define EMBER_ZLL_RSSI_THRESHOLD   -40

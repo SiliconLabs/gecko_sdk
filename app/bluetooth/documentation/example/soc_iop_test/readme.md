@@ -31,7 +31,7 @@ The IOP embedded software is available for virtually any Silicon Labs kit that s
 
 ### Software Requirements
 
-The IOP sample application is available beginning with Bluetooth SDK 3.3.0. Install Simplicity Studio 5 and the Bluetooth SDK that is part of the GSDK. For more information about installing Simplicity Studio 5, see the [Simplicity Studio 5 documentation](https://docs.silabs.com/simplicity-studio-5-users-guide/5.2.1/ss-5-users-guide-getting-started/install-ss-5-and-software).
+The IOP example application is available beginning with Bluetooth SDK 3.3.0. Install Simplicity Studio 5 and the Bluetooth SDK that is part of the GSDK. For more information about installing Simplicity Studio 5, see the [Simplicity Studio 5 documentation](https://docs.silabs.com/simplicity-studio-5-users-guide/5.2.1/ss-5-users-guide-getting-started/install-ss-5-and-software).
 
 ### Mobile App Requirements
 
@@ -47,19 +47,19 @@ The minimum OS versions supported by the EFR Connect mobile app are Android™ 9
 
 The IOP test consists of a sequence of BLE operations executed between a mobile device and an EFR32 SoC running the interoperability test embedded software (the embedded device).
 
-To flash the embedded software into one of the supported boards, create the sample app *Bluetooth - SoC Interoperability Test*, build it, and flash it to the target. 
+To flash the embedded software into one of the supported boards, create the example **Bluetooth - SoC Interoperability Test**, build it, and flash it to the target. 
 
-Then run the script *iop_create_bl_files.sh* (for MacOS/Linux) or *iop_create_bl_files.ps1* (for Windows powershell). The script generates two files into the **output_gbl** folder that is inside the project folder: *ota-dfu_ack.gbl* and *ota-dfu_non_ack.gbl*.
+Then run the script *iop_create_bl_files.sh* (for MacOS/Linux) or *iop_create_bl_files.ps1* (for Windows powershell). The script generates two files into the *output_gbl* folder that is inside the project folder: *ota-dfu_ack.gbl* and *ota-dfu_non_ack.gbl*.
 
 These files must be provided to the IOP Test on EFR Connect mobile app when prompted to do so. Copy them to the mobile phone's local storage or a cloud drive that is accessible from the mobile phone. The file *ota-dfu_ack.gbl* is used for the first OTA test and *ota-dfu_non_ack.gbl* for the second OTA test.
 
-Note that you need to have a bootloader flashed into the board as well, otherwise the firmware will not run. The easiest way is to run one of the pre-compiled demos (e.g., Bluetooth - SoC Blinky), which will flash both application and bootloader. If demos are not available for the board you are using then you must create the bootloader project *Bluetooth in-place OTA DFU Bootloader*, build it and flash to the board separately.
+Note that you must have a bootloader flashed to the board as well, otherwise the firmware will not run. See below under **Troubleshooting** for instructions on various ways to flash a bootloader. 
 
-Once the sample app and bootloader are flashed into the target you should see the following information on the kit display, as shown below. If you are using a kit without display (e.g. Explorer Kit) then you will see information being sent out through the UART which can be captured by a terminal on the PC (more information [here](#collecting-additional-data-from-the-embedded-device)).
+Once the example and bootloader are flashed to the target you should see the information on the mainboard display shown below. If you are using a mainboard without display (e.g., Explorer Kit) then you will see information being sent out through the UART, which can be captured by a terminal on the PC (more information [here](#collecting-additional-data-from-the-embedded-device)).
 
 ![](readme_img1.png)
 
-On your mobile phone launch the EFR Connect mobile app, which automatically opens in Develop view. Tap the Interoperability Test tile to bring up a list of all the nearby boards running the IOP Test firmware. Tap the board that you want to test against. The app automatically goes to the IOP view, where you can tap “Run Tests” to get started.
+On your smartphone, launch the EFR Connect mobile app, which automatically opens in Develop view. Tap the Interoperability Test tile to bring up a list of all the nearby boards running the IOP Test firmware. Tap the board that you want to test against. The app automatically goes to the IOP view, where you can tap “Run Tests” to get started.
 
 ![](readme_img2.png)
 
@@ -75,7 +75,7 @@ During OTA tests you are prompted to upload the gbl file. The file can be retrie
 
 ![](readme_img11.png)
 
-During the security tests, you are prompted several times to bond with the device on the mobile app side. Some of those prompts require simple confirmation (Just Works pairing) while other prompts require entering a PIN (authenticated pairing), which can be read from the kit display or from the UART logs, if you are using a kit without display.
+During the security tests, you are prompted several times to bond with the device on the mobile app side. Some of those prompts require simple confirmation (Just Works pairing) while other prompts require entering a PIN (authenticated pairing), which can be read from the mainboard display or from the UART logs, if you are using a mainboard without display.
 
 ![](readme_img4.png)
 
@@ -89,7 +89,7 @@ After the test is finalized on the mobile app, you can rerun the test or share t
 
 To rerun the tests, first reset the embedded device by pressing the reset button on the lower right side of the mainboard. Additionally, remove the bond from the phone’s Bluetooth settings.
 
-The *Share* option allows sharing the test log through OS-standard mediums, such as cloud storage (e.g., Dropbox, Google Drive, iCloud, and so on), email, or saving it locally. The log is in xml format and contains information about the phone model, OS version, Bluetooth connection parameters, and the result of each test. Below is an example of a test log from running IOP test on a Pixel 2 with Android 11.
+The *Share* option allows sharing the test log through OS-standard mediums, such as cloud storage (e.g., Dropbox, Google Drive, iCloud, and so on) or email, or saving it locally. The log is in xml format and contains information about the phone model, OS version, Bluetooth connection parameters, and the result of each test. Below is an example of a test log from running IOP test on a Pixel 2 with Android 11.
 
 ![](readme_img7.png)
 
@@ -113,38 +113,34 @@ While UART logs have multiple COMPort emulators such as tera term, you can also 
 
 ## Troubleshooting
 
-Note that __NO__ Bootloader is included in any Software Example projects, but they are configured to expect a bootloader to be present on the device. For your application to work, you should either
+Note that Software Example-based projects do not include a bootloader. However, they are configured to expect a bootloader to be present on the device. To get your application to work, either
 - flash a bootloader to the device or
 - uninstall the **OTA DFU** and **Bootloader Application Interface** software components.
 
-To flash a bootloader, you can either create and flash a bootloader project or run a precompiled **Demo** on your device from the Launcher perspective. Precompiled Demos flash both bootloader and application images to your device.
+To flash a bootloader, either create a bootloader project or run a precompiled **Demo** on your device from the Launcher view. Precompiled demos flash both bootloader and application images to the device. Then flash your own application image to overwrite the demo application but leave the bootloader in place. 
 
-- To flash an OTA DFU capable bootloader to your device, flash *SoC-Thermometer* demo before flashing your application.
-- To flash a UART DFU capable bootloader to your device, flash *NCP-Empty* demo before flashing your application.
-- For your custom application, create your own bootloader project and flash it to your device before flashing your application.
+- To flash an OTA DFU-capable bootloader to the device, flash the **Bluetooth - SoC Thermometer** demo.
+- To flash a UART DFU-capable bootloader to the device, flash the **Bluetooth - NCP** demo.
+- For other bootloader types, create your own bootloader project and flash it to the device before flashing your application.
 - When you flash your application image to the device, use the *.hex* or *.s37* output file. Flashing *.bin* files may overwrite (erase) the bootloader.
-- On Series 1 devices (EFR32xG1x), both first stage and second stage bootloaders have to be flashed. This can be done in one step by flashing the **-combined.s37* file found in your bootloader project after building the project.
-- For more information, see *[UG103: Bootloading fundamentals](https://www.silabs.com/documents/public/user-guides/ug103-06-fundamentals-bootloading.pdf)* and either *[UG266: Silicon Labs Gecko Bootloader User's Guide](https://www.silabs.com/documents/public/user-guides/ug266-gecko-bootloader-user-guide.pdf)* or *[UG489: Silicon Labs Gecko Bootloader User's Guide for GSDK 4.0 and Higher](https://www.silabs.com/documents/public/user-guides/ug489-gecko-bootloader-user-guide-gsdk-4.pdf).*
+- On Series 1 devices (EFR32xG1x), both first stage and second stage bootloaders have to be flashed. This can be done at once by flashing the *-combined.s37* file found in the bootloader project after building the project.
+- For more information, see [UG103.6: Bootloader Fundamentals](https://www.silabs.com/documents/public/user-guides/ug103-06-fundamentals-bootloading.pdf) and [UG489: Silicon Labs Gecko Bootloader User's Guide for GSDK 4.0 and Higher](https://cn.silabs.com/documents/public/user-guides/ug489-gecko-bootloader-user-guide-gsdk-4.pdf).
 
-Before programming the radio board mounted on the WSTK, make sure the power supply switch the AEM position (right side) as shown below.
+Before programming the radio board mounted on the mainboard, make sure the power supply switch the AEM position (right side) as shown below.
 
 ![Radio board power supply switch](readme_img0.png)
-
-
 
 ## Resources
 
 [Bluetooth Documentation](https://docs.silabs.com/bluetooth/latest/)
 
-[UG103.14: Bluetooth® LE Fundamentals](https://www.silabs.com/documents/public/user-guides/ug103-14-fundamentals-ble.pdf)
+[UG103.14: Bluetooth LE Fundamentals](https://www.silabs.com/documents/public/user-guides/ug103-14-fundamentals-ble.pdf)
 
-[QSG169: Bluetooth® SDK v3.x Quick Start Guide](https://www.silabs.com/documents/public/quick-start-guides/qsg169-bluetooth-sdk-v3x-quick-start-guide.pdf)
+[QSG169: Bluetooth SDK v3.x Quick Start Guide](https://www.silabs.com/documents/public/quick-start-guides/qsg169-bluetooth-sdk-v3x-quick-start-guide.pdf)
 
 [UG434: Silicon Labs Bluetooth ® C Application Developer's Guide for SDK v3.x](https://www.silabs.com/documents/public/user-guides/ug434-bluetooth-c-soc-dev-guide-sdk-v3x.pdf)
 
 [Bluetooth Training](https://www.silabs.com/support/training/bluetooth)
-
-
 
 ## Report Bugs & Get Support
 

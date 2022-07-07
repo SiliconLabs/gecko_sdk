@@ -98,9 +98,14 @@
 #define BTL_STORAGE_SPIFLASH_MACRONIX_MX25U1635E               0
 
 // <q BTL_STORAGE_SPIFLASH_MACRONIX_MX25R8035F> Support Macronix MX25R8035F (8 Mb LP)
-// <i> Default: 0
+// <i> Default: 1
 // <i> Enable support for the Macronix MX25R8035F SPI flash in the bootloader. Adding support for multiple SPI flashes in the bootloader requires more flash memory.
 #define BTL_STORAGE_SPIFLASH_MACRONIX_MX25R8035F               1
+
+// <q BTL_STORAGE_SPIFLASH_MACRONIX_MX25R3235F> Support Macronix MX25R3235F (32 Mb ULP)
+// <i> Default: 1
+// <i> Enable support for the Macronix MX25R3235F SPI flash in the bootloader. Adding support for multiple SPI flashes in the bootloader requires more flash memory.
+#define BTL_STORAGE_SPIFLASH_MACRONIX_MX25R3235F               1
 
 // <q BTL_STORAGE_SPIFLASH_MACRONIX_MX25R6435F> Support Macronix MX25R6435F  (64 Mb LP)
 // <i> Default: 0

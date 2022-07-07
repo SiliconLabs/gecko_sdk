@@ -146,7 +146,6 @@ template_contribution:
       - cli
 
 tag:
-  - hardware:device:sdid:!215
   - hardware:board_only
   - hardware:component:button:2+
   - hardware:component:display:ls013b7dh03

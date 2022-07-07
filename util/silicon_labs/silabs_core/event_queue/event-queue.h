@@ -22,6 +22,11 @@
 struct Event_s;
 struct EventQueue_s;
 
+// We use this instead of NULL at the end of a list so that unscheduled
+// events can be marked by having a 'next' field of NULL.  This makes them
+// easier to initialize.
+#define EVENT_QUEUE_LIST_END ((EmberEvent *) 1)
+
 /** @brief The static part of an event.  Each event can be used with only one
  * event queue.
  */

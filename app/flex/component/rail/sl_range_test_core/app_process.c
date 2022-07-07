@@ -211,6 +211,9 @@ void app_process_action(RAIL_Handle_t pointer)
         set_next_state(MENU_SCREEN);
         refresh_screen = true;
         range_test_measurement.tx_is_running = false;
+#if defined(SL_CATALOG_RANGE_TEST_DMP_COMPONENT_PRESENT)
+        add_bluetooth_indication(gattdb_isRunning);
+#endif
         set_all_radio_handlers_to_idle();
 #if defined(SL_CATALOG_RANGE_TEST_DMP_COMPONENT_PRESENT)
         if (!is_bluetooth_connected()) {
@@ -219,6 +222,9 @@ void app_process_action(RAIL_Handle_t pointer)
 #endif
       } else if (get_and_clear_button_state(BUTTON_0)) {
         range_test_measurement.tx_is_running = !range_test_measurement.tx_is_running;
+#if defined(SL_CATALOG_RANGE_TEST_DMP_COMPONENT_PRESENT)
+        add_bluetooth_indication(gattdb_isRunning);
+#endif
         range_test_reset_values();
         refresh_screen = true;
 #if defined(SL_CATALOG_RANGE_TEST_DMP_COMPONENT_PRESENT)

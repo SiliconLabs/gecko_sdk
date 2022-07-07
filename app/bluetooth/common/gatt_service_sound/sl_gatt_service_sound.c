@@ -3,7 +3,7 @@
  * @brief Sound Level GATT Service
  *******************************************************************************
  * # License
- * <b>Copyright 2020 Silicon Laboratories Inc. www.silabs.com</b>
+ * <b>Copyright 2022 Silicon Laboratories Inc. www.silabs.com</b>
  *******************************************************************************
  *
  * SPDX-License-Identifier: Zlib
@@ -33,6 +33,7 @@
 #include "gatt_db.h"
 #include "app_assert.h"
 #include "sl_gatt_service_sound.h"
+#include "sl_gatt_service_sound_config.h"
 
 // -----------------------------------------------------------------------------
 // Private variables
@@ -52,10 +53,15 @@ static void sound_read_cb(sl_bt_evt_gatt_server_user_read_request_t *data)
   sl_status_t sc;
   float sl;
 
+  sc = sl_gatt_service_sound_get(&sl);
   // keep previous data if measurement fails
-  if (SL_STATUS_OK == sl_gatt_service_sound_get(&sl)) {
+  if (SL_STATUS_OK == sc) {
     /* Sound level from sensor represented in dB, characteristic represented in 0.01 dB */
     sound_level = (int16_t)(sl * 100.0f);
+  } else if (SL_STATUS_NOT_INITIALIZED == sc) {
+    sound_level = SL_GATT_SERVICE_SOUND_INVALID;
+  } else {
+    return;
   }
 
   sc = sl_bt_gatt_server_send_user_read_response(

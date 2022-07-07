@@ -3,7 +3,7 @@
  * @brief Air quality sensor header
  *******************************************************************************
  * # License
- * <b>Copyright 2020 Silicon Laboratories Inc. www.silabs.com</b>
+ * <b>Copyright 2022 Silicon Laboratories Inc. www.silabs.com</b>
  *******************************************************************************
  *
  * SPDX-License-Identifier: Zlib
@@ -36,8 +36,10 @@
 
 /**************************************************************************//**
  * Initialize air quality sensor.
+ *
+ * @return Status of the operation.
  *****************************************************************************/
-void sl_sensor_gas_init(void);
+sl_status_t sl_sensor_gas_init(void);
 
 /**************************************************************************//**
  * Deinitialize air quality sensor.
@@ -48,7 +50,11 @@ void sl_sensor_gas_deinit(void);
  * Getter for air quality sensor measurement data.
  * @param[out] eco2 Equivalent CO2 level (in ppm).
  * @param[out] tvoc Total Volatile Organic Compounds level (in ppb).
- * @return Status of the operation.
+ *
+ * @retval SL_STATUS_OK Measurement was successful.
+ * @retval SL_STATUS_NOT_READY There is no new data ready.
+ * @retval SL_STATUS_TRANSMIT I2C transmission error.
+ * @retval SL_STATUS_NOT_INITIALIZED Sensor has not been initialized.
  *****************************************************************************/
 sl_status_t sl_sensor_gas_get(uint16_t *eco2, uint16_t *tvoc);
 

@@ -45,6 +45,16 @@ void  sli_get_pti_radio_config(sl_cli_command_arg_t *arguments)
 }
 
 #endif
+
+void sli_zigbee_cli_config_cca_mode_command(sl_cli_command_arg_t *arguments)
+{
+  uint8_t ccaMode = sl_cli_get_argument_uint8(arguments, 0);
+  EmberStatus status = emberSetRadioIeee802154CcaMode(ccaMode);
+  (void)emberSerialPrintfLine(APP_SERIAL, "Set CCA mode to %d: %0x",
+                              ccaMode,
+                              status);
+}
+
 void sli_cli_pre_cmd_hook(sl_cli_command_arg_t* arguments)
 {
   (void)arguments;
@@ -364,6 +374,69 @@ void sli_zigbee_cli_version_command(sl_cli_command_arg_t *arguments)
 void resetCommand(sl_cli_command_arg_t *arguments)
 {
   halReboot();
+}
+
+void endpointPrint(sl_cli_command_arg_t *arguments)
+{
+  (void)arguments;
+  uint8_t i;
+  for (i = 0; i < emberAfEndpointCount(); i++) {
+    sl_zigbee_core_debug_print("EP %d: %s ",
+                               emAfEndpoints[i].endpoint,
+                               (emberAfEndpointIndexIsEnabled(i)
+                                ? "Enabled"
+                                : "Disabled"));
+    emAfPrintEzspEndpointFlags(emAfEndpoints[i].endpoint);
+    sl_zigbee_core_debug_print("\n");
+  }
+}
+
+void enableDisableEndpoint(sl_cli_command_arg_t *arguments)
+{
+  uint8_t endpoint = (uint8_t)sl_cli_get_argument_uint32(arguments, 0);
+  bool enable = (sl_cli_get_command_string(arguments, 1)[0] == 'e'
+                 ? true
+                 : false);
+  if (!emberAfEndpointEnableDisable(endpoint,
+                                    enable)) {
+    sl_zigbee_core_debug_print("Error:  Unknown endpoint.\n");
+  }
+}
+
+#if SL_ZIGBEE_EVENT_DEBUG_ENABLED
+#ifndef EVENT_QUEUE_LIST_END
+#define EVENT_QUEUE_LIST_END ((EmberEvent *) 1)
+#endif
+#endif
+
+void printEvents(sl_cli_command_arg_t *arguments)
+{
+  (void)arguments;
+#if SL_ZIGBEE_EVENT_DEBUG_ENABLED
+
+  EmberEvent *finger = emAppEventQueue.events;
+
+  while (finger != EVENT_QUEUE_LIST_END) {
+    sl_zigbee_core_debug_print("Event %s : ", (finger->actions.name == NULL
+                                               ? "?"
+                                               : finger->actions.name));
+    // Get NWK Index
+    if (sli_zigbee_event_is_network_event(finger)) {
+      sl_zigbee_core_debug_print("NWK %d : ", sli_zigbee_event_get_network_index(finger));
+    }
+
+    // Get Endpoint
+    if (sli_zigbee_event_is_endpoint_event(finger)) {
+      sl_zigbee_core_debug_print("EP %d : ", sli_zigbee_event_get_endpoint(finger));
+    }
+
+    // Get Remaining Time
+    sl_zigbee_core_debug_print("%d ms\n", sl_zigbee_event_get_remaining_ms(finger));
+    finger = finger->next;
+  }
+#else
+  sl_zigbee_core_debug_print("Enable event debug info in Core CLI component");
+#endif // SL_ZIGBEE_EVENT_DEBUG_ENABLED
 }
 
 #else // !UC_BUILD

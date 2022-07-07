@@ -40,6 +40,9 @@
   #define P521_PADDING_BYTES      0
 #endif
 
+/// Private key size of EdDSA key
+#define ECC_ED25519_PRIVKEY_SIZE  (SL_SE_KEY_TYPE_ECC_ED25519 & SL_SE_KEY_TYPE_ATTRIBUTES_MASK)
+
 /// Private key size of ECC Weierstrass Prime keys
 #define ECC_P192_PRIVKEY_SIZE     (SL_SE_KEY_TYPE_ECC_P192 & SL_SE_KEY_TYPE_ATTRIBUTES_MASK)
 #define ECC_P256_PRIVKEY_SIZE     (SL_SE_KEY_TYPE_ECC_P256 & SL_SE_KEY_TYPE_ATTRIBUTES_MASK)
@@ -51,15 +54,15 @@
 #define ECC_X25519_PRIVKEY_SIZE   (SL_SE_KEY_TYPE_ECC_X25519 & SL_SE_KEY_TYPE_ATTRIBUTES_MASK)
 #define ECC_X448_PRIVKEY_SIZE     (SL_SE_KEY_TYPE_ECC_X448 & SL_SE_KEY_TYPE_ATTRIBUTES_MASK)
 
-/// Private key size of EdDSA key
-#define ECC_ED25519_PRIVKEY_SIZE  (SL_SE_KEY_TYPE_ECC_ED25519 & SL_SE_KEY_TYPE_ATTRIBUTES_MASK)
-
 /// Use the biggest ECC curve as private key size
 #define ECC_PRIVKEY_SIZE          (ECC_P521_PRIVKEY_SIZE)
 
 /// Domain size of asymmetric custom key
 #define DOMAIN_SIZE               (32)
 #else
+/// Private key size of ECC Montgomery keys
+#define ECC_X25519_PRIVKEY_SIZE   (SL_SE_KEY_TYPE_ECC_X25519 & SL_SE_KEY_TYPE_ATTRIBUTES_MASK)
+
 /// Use the biggest ECC curve as private key size
 #define ECC_PRIVKEY_SIZE          (ECC_P256_PRIVKEY_SIZE)
 #endif

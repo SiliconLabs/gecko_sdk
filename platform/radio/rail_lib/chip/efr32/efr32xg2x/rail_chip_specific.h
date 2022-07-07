@@ -161,6 +161,61 @@ typedef struct RAIL_Config {
   RAIL_StateBuffer_t buffer;
 } RAIL_Config_t;
 
+#ifndef DOXYGEN_SHOULD_SKIP_THIS
+/**
+ * @enum RAIL_RadioStateEfr32_t
+ * @brief Radio state machine statuses.
+ */
+RAIL_ENUM(RAIL_RadioStateEfr32_t) {
+  RAIL_RAC_STATE_OFF,         /**< Radio is off. */
+  RAIL_RAC_STATE_RXWARM,      /**< Radio is enabling the receiver. */
+  RAIL_RAC_STATE_RXSEARCH,    /**< Radio is listening for incoming frames. */
+  RAIL_RAC_STATE_RXFRAME,     /**< Radio is receiving a frame. */
+  RAIL_RAC_STATE_RXPD,        /**< Radio is powering down receiver and going to
+                                   OFF state. */
+  RAIL_RAC_STATE_RX2RX,       /**< Radio is going back to receive mode after
+                                   receiving a frame. */
+  RAIL_RAC_STATE_RXOVERFLOW,  /**< Received data was lost due to full receive
+                                   buffer. */
+  RAIL_RAC_STATE_RX2TX,       /**< Radio is disabling receiver and enabling
+                                   transmitter. */
+  RAIL_RAC_STATE_TXWARM,      /**< Radio is enabling transmitter. */
+  RAIL_RAC_STATE_TX,          /**< Radio is transmitting data. */
+  RAIL_RAC_STATE_TXPD,        /**< Radio is powering down transmitter and going
+                                   to OFF state. */
+  RAIL_RAC_STATE_TX2RX,       /**< Radio is disabling transmitter and enabling
+                                   reception. */
+  RAIL_RAC_STATE_TX2TX,       /**< Radio is preparing a transmission after the
+                                   previous transmission was ended. */
+  RAIL_RAC_STATE_SHUTDOWN,    /**< Radio is powering down receiver and going to
+                                   OFF state. */
+#if _SILICON_LABS_32B_SERIES_2_CONFIG >= 2
+  RAIL_RAC_STATE_POR,         /**< Radio power-on-reset state. */
+#endif
+  RAIL_RAC_STATE_NONE         /**< Invalid Radio state, must be the last entry */
+};
+
+// Self-referencing defines minimize compiler complaints when using RAIL_ENUM
+#define RAIL_RAC_STATE_OFF          ((RAIL_RadioStateEfr32_t) RAIL_RAC_STATE_OFF)
+#define RAIL_RAC_STATE_RXWARM       ((RAIL_RadioStateEfr32_t) RAIL_RAC_STATE_RXWARM)
+#define RAIL_RAC_STATE_RXSEARCH     ((RAIL_RadioStateEfr32_t) RAIL_RAC_STATE_RXSEARCH)
+#define RAIL_RAC_STATE_RXFRAME      ((RAIL_RadioStateEfr32_t) RAIL_RAC_STATE_RXFRAME)
+#define RAIL_RAC_STATE_RXPD         ((RAIL_RadioStateEfr32_t) RAIL_RAC_STATE_RXPD)
+#define RAIL_RAC_STATE_RX2RX        ((RAIL_RadioStateEfr32_t) RAIL_RAC_STATE_RX2RX)
+#define RAIL_RAC_STATE_RXOVERFLOW   ((RAIL_RadioStateEfr32_t) RAIL_RAC_STATE_RXOVERFLOW)
+#define RAIL_RAC_STATE_RX2TX        ((RAIL_RadioStateEfr32_t) RAIL_RAC_STATE_RX2TX)
+#define RAIL_RAC_STATE_TXWARM       ((RAIL_RadioStateEfr32_t) RAIL_RAC_STATE_TXWARM)
+#define RAIL_RAC_STATE_TX           ((RAIL_RadioStateEfr32_t) RAIL_RAC_STATE_TX)
+#define RAIL_RAC_STATE_TXPD         ((RAIL_RadioStateEfr32_t) RAIL_RAC_STATE_TXPD)
+#define RAIL_RAC_STATE_TX2RX        ((RAIL_RadioStateEfr32_t) RAIL_RAC_STATE_TX2RX)
+#define RAIL_RAC_STATE_TX2TX        ((RAIL_RadioStateEfr32_t) RAIL_RAC_STATE_TX2TX)
+#define RAIL_RAC_STATE_SHUTDOWN     ((RAIL_RadioStateEfr32_t) RAIL_RAC_STATE_SHUTDOWN)
+#if _SILICON_LABS_32B_SERIES_2_CONFIG >= 2
+#define RAIL_RAC_STATE_POR          ((RAIL_RadioStateEfr32_t) RAIL_RAC_STATE_POR)
+#endif
+#define RAIL_RAC_STATE_NONE         ((RAIL_RadioStateEfr32_t) RAIL_RAC_STATE_NONE)
+#endif//DOXYGEN_SHOULD_SKIP_THIS
+
 /** @} */ // end of group General_EFR32XG2
 
 // -----------------------------------------------------------------------------
@@ -786,7 +841,8 @@ typedef uint8_t RAIL_TxPowerLevel_t;
  *  EFR32XG24: capable of 20dBm max output power has max powerlevel:180
  *  EFR32XG24: capable of 10dBm max output power has max powerlevel:90
  */
-#if (_SILICON_LABS_EFR32_2G4HZ_HP_PA_MAX_OUTPUT_DBM > 10)
+#if defined (_SILICON_LABS_EFR32_2G4HZ_HP_PA_PRESENT) \
+  && (_SILICON_LABS_EFR32_2G4HZ_HP_PA_MAX_OUTPUT_DBM > 10)
 #define RAIL_TX_POWER_LEVEL_2P4_HP_MAX     (180U)
 #else
 #define RAIL_TX_POWER_LEVEL_2P4_HP_MAX     (90U)

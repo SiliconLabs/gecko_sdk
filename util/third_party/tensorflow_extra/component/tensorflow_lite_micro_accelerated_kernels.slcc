@@ -1,16 +1,17 @@
 id: tensorflow_lite_micro_accelerated_kernels
 package: platform
-label: TensorFlow Lite Micro MVP Accelerated Kernels
+label: MVP Accelerated Kernels
 description: >
-  This component includes kernel implementations that are accelerated on MVP
-  (Matrix Vector Processor) hardware. By including this component, the MVP
-  kernel implementations will be used instead of the optimized kernels.
-
+  This component includes kernel implementations that are accelerated 
+  using the MVP accelerator on compatible devices. By including this
+  component, the MVP kernel implementations will be used instead of the
+  optimized kernels.
+  
   The kernels which have MVP accelerated implementations are:
-    pooling, fully_connected, add, conv and depthwise_conv.
-  Remaining kernels fallback to use optimized or reference kernel
+  pooling, fully_connected, add, conv, depthwise_conv and transpose_conv.
+  Remaining kernels fall back to using optimized or reference kernel
   implementations.
-category: Platform|Machine Learning|TensorFlow
+category: Machine Learning|TensorFlow|Kernels
 quality: production
 provides:
   - name: tensorflow_lite_micro_accelerated_kernels

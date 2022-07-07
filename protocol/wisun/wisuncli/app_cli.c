@@ -46,6 +46,9 @@
 #error "Toolchain undefined"
 #endif
 
+#define APP_TASK_PRIORITY (osPriority_t)35
+#define APP_TASK_STACK_SIZE 500 // in units of CPU_INT32U
+
 SL_PACK_START(1)
 typedef struct {
   uint8_t type;
@@ -98,6 +101,8 @@ static sl_status_t app_get_ip_address(sl_wisun_ip_address_t *value,
                                       const char *value_str);
 
 static const char* app_get_ip_address_str(const sl_wisun_ip_address_t *value);
+
+void app_connect(sl_cli_command_arg_t *arguments);
 
 typedef struct
 {
@@ -226,9 +231,21 @@ static app_socket_entry_t *app_socket_entry(sl_wisun_socket_id_t socket_id)
  **************************   GLOBAL FUNCTIONS   *******************************
  ******************************************************************************/
 
+static void app_cli_task(void *argument)
+{
+  (void)argument;
+
+  if (app_settings_app.autoconnect) {
+    app_connect(NULL);
+  }
+
+  osThreadExit();
+}
+
 void app_cli_init(void)
 {
   int i;
+  osThreadId_t app_task_id;
 
   // Initialize socket entry lists
   sl_slist_init(&app_socket_entry_list_free);
@@ -237,6 +254,21 @@ void app_cli_init(void)
   for (i = 0; i < APP_MAX_SOCKET_ENTRIES; ++i) {
     sl_slist_push(&app_socket_entry_list_free, &app_socket_entries[i].node);
   }
+
+  const osThreadAttr_t app_task_attribute = {
+    "App Task",
+    osThreadDetached,
+    NULL,
+    0,
+    NULL,
+    (APP_TASK_STACK_SIZE * sizeof(void *)) & 0xFFFFFFF8u,
+    APP_TASK_PRIORITY,
+    0,
+    0
+  };
+
+  app_task_id = osThreadNew(app_cli_task, NULL, &app_task_attribute);
+  assert(app_task_id != 0);
 }
 
 static void app_handle_network_update_ind(sl_wisun_evt_t *evt)

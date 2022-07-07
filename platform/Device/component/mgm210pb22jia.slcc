@@ -167,6 +167,7 @@
   - name: device_supports_bluetooth
   - name: device_supports_bluetooth_coded_phy
   - name: device_supports_connect
+  - name: device_compute_basic
 - requires:
   - name: cmsis_core
   - name: MGM210PB22JIA_config

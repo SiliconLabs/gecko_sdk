@@ -13,6 +13,6 @@
   - name: hardware_board_from_slwrb4321a
   - name: hardware_board_from_slwstk6121a
 - recommends:
-  - id: brd4321a_a06
+  - id: brd4321a_a07
 - ui_hints:
     visibility: never

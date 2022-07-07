@@ -33,6 +33,10 @@
 #include "aoa_util.h"
 #include "aoa_cte_config.h"
 
+// Module shared variables.
+extern uint8_t cte_switch_pattern[ANTENNA_ARRAY_MAX_PIN_PATTERN_SIZE];
+extern uint8_t cte_switch_pattern_size;
+
 // connection parameters
 #define CONN_INTERVAL_MIN 80     //100ms
 #define CONN_INTERVAL_MAX 80     //100ms
@@ -199,8 +203,8 @@ sl_status_t cte_bt_on_event_conn(sl_bt_msg_t *evt)
                                                         aoa_cte_config.cte_min_length,
                                                         CTE_TYPE_AOA,
                                                         aoa_cte_config.cte_slot_duration,
-                                                        aoa_cte_config.switching_pattern_length,
-                                                        aoa_cte_config.switching_pattern);
+                                                        cte_switch_pattern_size,
+                                                        cte_switch_pattern);
           if (SL_STATUS_OK != sc) {
             break;
           }

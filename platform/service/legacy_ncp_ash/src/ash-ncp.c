@@ -1251,4 +1251,14 @@ void halIrqDIsr(void)
 
 #endif // CORTEXM3
 
+#else //!SLEEPY_EZSP_ASH
+
+// In our power_manager, is_ok_to_sleep() returns true by default (refer to sl_power_manager_handler.c).
+// Without SLEEPY_EZSP_ASH defined, we should keep ncp-uart awake. Hence, this serialOkToSleep() is used
+// to subscribe the is_ok_to_sleep() power_manager_handler in zigbee_ncp_framework.slcc to make it awake.
+bool serialOkToSleep(void)
+{
+  return false;
+}
+
 #endif //SLEEPY_EZSP_ASH

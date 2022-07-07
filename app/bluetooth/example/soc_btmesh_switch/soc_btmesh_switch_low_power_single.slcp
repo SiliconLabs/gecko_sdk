@@ -109,7 +109,6 @@ define:
   value: "1"
 
 tag:
-  - hardware:device:sdid:!215
   - hardware:board_only
   - hardware:component:button:1
   - hardware:component:led:1

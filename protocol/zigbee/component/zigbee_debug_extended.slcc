@@ -20,10 +20,21 @@ requires:
 recommends:
   - id: zigbee_debug_extended_source
 
+include:
+  - path: protocol/zigbee/stack/framework
+    file_list:
+      - path: zigbee-debug-extended.h
+
 template_contribution:
   - name: component_catalog
     value: zigbee_debug_extended
-
+  - name: event_handler
+    value:
+      event: stack_init
+      include: "zigbee-debug-extended.h"
+      handler: sli_zigbee_debug_extended_init
+    # arbitrary priority; no dependencies exist
+    priority: -9000
 
 documentation:
   docset: zigbee

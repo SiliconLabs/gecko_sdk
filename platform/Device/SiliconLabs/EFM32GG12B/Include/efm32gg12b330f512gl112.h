@@ -4,7 +4,7 @@
  *        for EFM32GG12B330F512GL112
  *******************************************************************************
  * # License
- * <b>Copyright 2021 Silicon Laboratories Inc. www.silabs.com</b>
+ * <b>Copyright 2022 Silicon Laboratories Inc. www.silabs.com</b>
  *******************************************************************************
  *
  * SPDX-License-Identifier: Zlib

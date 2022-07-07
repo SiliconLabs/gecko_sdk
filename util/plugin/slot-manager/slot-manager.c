@@ -15,7 +15,7 @@
 #endif
 
 static uint32_t gBootloaderNumSlots;
-static uint8_t  gVerificationContext[BOOTLOADER_STORAGE_VERIFICATION_CONTEXT_SIZE];
+__ALIGNED(4) static uint8_t  gVerificationContext[BOOTLOADER_STORAGE_VERIFICATION_CONTEXT_SIZE];
 static int32_t  gSlotsToBoot[SLOT_MANAGER_NUM_SLOTS];
 
 // Prototypes

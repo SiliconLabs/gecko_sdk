@@ -141,6 +141,19 @@ void efr32LogInit(void);
 void efr32LogDeinit(void);
 
 /**
+ * Set 802.15.4 CCA mode
+ *
+ * A call to this function should be made after RAIL has been
+ * initialized and a valid handle is available. On platforms that
+ * don't support different CCA modes, a call to this function will
+ * do nothing.
+ *
+ * @param[in] aMode Mode of CCA operation.
+ * @return RAIL Status code indicating success of the function call.
+ */
+RAIL_Status_t efr32RadioSetCcaMode(uint8_t aMode);
+
+/**
  * This callback is used to check if is safe to put the EFR32 into a
  * low energy sleep mode.
  *

@@ -143,6 +143,44 @@ psa_status_t compare_msg_hash(void)
 }
 
 /***************************************************************************//**
+ * Process an unauthenticated encryption.
+ ******************************************************************************/
+psa_status_t encrypt_cipher(void)
+{
+  psa_algorithm_t algo = get_key_algo();
+  if (algo == 0) {
+    return(PSA_ERROR_NOT_SUPPORTED);
+  }
+
+  print_error_cycle(psa_cipher_encrypt(get_key_id(),
+                                       algo,
+                                       plain_msg_buf,
+                                       plain_msg_len,
+                                       cipher_msg_buf,
+                                       sizeof(cipher_msg_buf),
+                                       &out_len));
+}
+
+/***************************************************************************//**
+ * Process an unauthenticated decryption.
+ ******************************************************************************/
+psa_status_t decrypt_cipher(void)
+{
+  psa_algorithm_t algo = get_key_algo();
+  if (algo == 0) {
+    return(PSA_ERROR_NOT_SUPPORTED);
+  }
+
+  print_error_cycle(psa_cipher_decrypt(get_key_id(),
+                                       algo,
+                                       cipher_msg_buf,
+                                       out_len,
+                                       plain_msg_buf,
+                                       sizeof(plain_msg_buf),
+                                       &out_len));
+}
+
+/***************************************************************************//**
  * Start an encryption.
  ******************************************************************************/
 psa_status_t start_cipher_encryption(void)
@@ -152,6 +190,7 @@ psa_status_t start_cipher_encryption(void)
     return(PSA_ERROR_NOT_SUPPORTED);
   }
 
+  out_len = 0;
   out_total = 0;
   cipher_op = psa_cipher_operation_init();
   print_error_cycle(psa_cipher_encrypt_setup(&cipher_op, get_key_id(), algo));

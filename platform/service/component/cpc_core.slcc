@@ -33,7 +33,6 @@ requires:
   - name: emlib_gpcrc
   - name: component_catalog
   - name: mem_pool
-  - name: cpc_security_secondary
 documentation:
     docset: gecko-platform
     document: service/api/group-cpc

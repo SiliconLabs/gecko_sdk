@@ -54,7 +54,7 @@ uint8_t sl_zigbee_copy_eui64_arg(sl_cli_command_arg_t *arguments,
 // TODO: doxygen
 
 #define sl_zigbee_copy_key_arg(arg, index, key_data_ptr)    \
-  (sl_zigbee_copy_hex_arg((arg)                             \
+  (sl_zigbee_copy_hex_arg((arg),                            \
                           (index),                          \
                           emberKeyContents((key_data_ptr)), \
                           EMBER_ENCRYPTION_KEY_SIZE,        \

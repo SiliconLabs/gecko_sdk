@@ -45,6 +45,11 @@ schema:
     enum:
       - enabled
       - disabled
+  fp16:
+    type: str
+    enum:
+      - enabled
+      - disabled
   gcc_compiler_option:
     type: str
   gcc_c_compiler_option:
@@ -144,6 +149,25 @@ exporter:
           - tool: linker
             option: nano_c_libs
             value: true
+        disabled: []
+      fp16:
+        enabled:
+          - tool: makefile.arm.gcc.compiler
+            option: misc
+            action: append
+            value: "-mfp16-format=ieee"
+          - tool: makefile.host.gcc.compiler
+            option: misc
+            action: append
+            value: "-mfp16-format=ieee"
+          - tool: com.silabs.ide.si32.gcc.cdt.managedbuild.tool.gnu.c.compiler.base
+            option: com.silabs.gnu.c.compiler.option.misc.otherlist
+            action: append
+            value: "-mfp16-format=ieee"
+          - tool: com.silabs.ide.si32.gcc.cdt.managedbuild.tool.gnu.cpp.compiler.base
+            option: com.silabs.gnu.cpp.compiler.option.misc.otherlist
+            action: append
+            value: "-mfp16-format=ieee"
         disabled: []
       device_type:
         embedded:

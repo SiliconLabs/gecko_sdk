@@ -31,8 +31,16 @@ void emAfInterpanEnableCommand(sl_cli_command_arg_t *args);
 void emAfInterpanDisableCommand(sl_cli_command_arg_t *args);
 void emAfInterpanFragmentTestCommand(sl_cli_command_arg_t *args);
 void emAfInterpanSetMessageTimeoutCommand(sl_cli_command_arg_t *args);
+void emAfInterpanGroupShortCommand(sl_cli_command_arg_t *args);
+void emAfInterpanLongCommand(sl_cli_command_arg_t *args);
 
 // Global variables
+
+// The following variables are defined in app/framework/cli/zcl-cli.c
+extern uint8_t appZclBuffer[];
+extern uint16_t appZclBufferLen;
+extern bool zclCmdIsBuilt;
+extern EmberApsFrame globalApsFrame;
 
 // This is large. It may go away or be refactored for future releases.
 uint8_t testMessage[EMBER_AF_PLUGIN_INTERPAN_FRAGMENTATION_MAX_PAYLOAD_SIZE];
@@ -101,6 +109,71 @@ void emAfInterpanSetMessageTimeoutCommand(sl_cli_command_arg_t *args)
 #else
   emberAfCorePrintln("ERR: inter-PAN fragmentation feature missing");
 #endif //ALLOW_FRAGMENTATION
+}
+
+// plugin interpan group <groupId:2> <destPAN:2> <destProfileID:2>
+// plugin interpan short <shortId:2> <destPAN:2> <destProfileID:2>
+void emAfInterpanGroupShortCommand(sl_cli_command_arg_t *args)
+{
+  EmberStatus status;
+  EmberAfInterpanHeader header;
+  uint16_t shortOrGroupId;
+
+  if (zclCmdIsBuilt == false) {
+    emberAfCorePrintln("no cmd");
+    return;
+  }
+
+  MEMSET(&header, 0, sizeof(EmberAfInterpanHeader));
+  shortOrGroupId = (uint16_t)sl_cli_get_argument_uint16(args, 0);
+  header.panId = (uint16_t)sl_cli_get_argument_uint16(args, 1);
+  header.profileId = (uint16_t)sl_cli_get_argument_uint16(args, 2);
+  header.clusterId = globalApsFrame.clusterId;
+
+  if (sl_cli_get_command_string(args, 2)[0] == 'g') {
+    header.groupId = shortOrGroupId;
+    emberAfDebugPrintln("interpan %s %04x", "group", header.groupId);
+  } else {
+    header.shortAddress = shortOrGroupId;
+    emberAfDebugPrintln("interpan %s %04x", "short", shortOrGroupId);
+  }
+
+  status = emberAfInterpanSendMessageCallback(&header,
+                                              appZclBufferLen,
+                                              appZclBuffer);
+  if (status != EMBER_SUCCESS) {
+    emberAfDebugPrintln("ERR: Inter-PAN send failed: 0x%02X", status);
+  }
+}
+
+// plugin interpan long  <longId:8>  <destPAN:2> <destProfileID:2> <options:2>
+//    Options: Bit(0) = encrypt.  Can only encrypt with this CLI command
+//    since long address must be present.
+void emAfInterpanLongCommand(sl_cli_command_arg_t *args)
+{
+  EmberStatus status;
+  EmberAfInterpanHeader header;
+
+  if (zclCmdIsBuilt == false) {
+    emberAfCorePrintln("no cmd");
+    return;
+  }
+
+  MEMSET(&header, 0, sizeof(EmberAfInterpanHeader));
+  header.panId = (uint16_t)sl_cli_get_argument_uint16(args, 1);
+  header.profileId = (uint16_t)sl_cli_get_argument_uint16(args, 2);
+  header.options = ((uint16_t)sl_cli_get_argument_uint16(args, 3)
+                    | EMBER_AF_INTERPAN_OPTION_MAC_HAS_LONG_ADDRESS);
+  header.clusterId = globalApsFrame.clusterId;
+
+  sl_zigbee_copy_eui64_arg(args, 0, header.longAddress, true);
+
+  status = emberAfInterpanSendMessageCallback(&header,
+                                              appZclBufferLen,
+                                              appZclBuffer);
+  if (status != EMBER_SUCCESS) {
+    emberAfDebugPrintln("ERR: Inter-PAN send failed: 0x%02X", status);
+  }
 }
 
 #else // UC_BUILD

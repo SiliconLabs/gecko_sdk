@@ -268,9 +268,6 @@ NcpBase::NcpBase(Instance *aInstance)
     , mRxSpinelOutOfOrderTidCounter(0)
     , mTxSpinelFrameCounter(0)
     , mDidInitialUpdates(false)
-#if OPENTHREAD_CONFIG_RADIO_LINK_TREL_ENABLE
-    , mTrelTestModeEnable(true)
-#endif
     , mLogTimestampBase(0)
 {
     OT_ASSERT(mInstance != nullptr);
@@ -914,6 +911,7 @@ otError NcpBase::HandlePendingTransmit(PendingCommandEntry *entry)
     frame = otLinkRawGetTransmitBuffer(mInstance);
     VerifyOrExit(frame != nullptr, error = OT_ERROR_NO_BUFS);
     memcpy(frame, &entry->mTransmitFrame, sizeof(*frame));
+    frame->mIid = entry->mIid;
     SuccessOrExit(error = otLinkRawTransmit(mInstance, &NcpBase::LinkRawTransmitDone));
 
 exit:

@@ -33,6 +33,7 @@
 #include "sl_status.h"
 #include "sl_sensor_rht.h"
 #include "app_log.h"
+#include "app_assert.h"
 #include "app.h"
 
 #define APP_INIT_TASK_NAME          "app_init"
@@ -52,9 +53,14 @@ TaskHandle_t app_init_task_handle = NULL;
 void app_init_task(void *p_arg)
 {
   (void)p_arg;
+  sl_status_t sc;
   app_log_info("health thermometer initialised\n");
   // Init temperature sensor.
-  sl_sensor_rht_init();
+  sc = sl_sensor_rht_init();
+  if (sc != SL_STATUS_OK) {
+    app_log_warning("Relative Humidity and Temperature sensor initialization failed.");
+    app_log_nl();
+  }
   vTaskDelete(NULL);
 }
 

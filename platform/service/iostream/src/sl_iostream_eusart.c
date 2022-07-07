@@ -108,6 +108,12 @@ sl_status_t sl_iostream_eusart_init(sl_iostream_uart_t *iostream_uart,
   bool rts = false;
   uint8_t em_req = 1;
 
+  // Set advanced Settings in config init struct
+  if (eusart_config->flow_control != eusartHwFlowControlNone) {
+    advanced_init.hwFlowControl = eusart_config->flow_control;
+  }
+  init->advancedSettings = &advanced_init;
+
   if (eusart_config->enable_high_frequency) {
     em_req = 1;
   } else {
@@ -198,10 +204,6 @@ sl_status_t sl_iostream_eusart_init(sl_iostream_uart_t *iostream_uart,
     | (eusart_config->rx_pin << _GPIO_EUSART_RXROUTE_PIN_SHIFT);
 #endif
   // Configure GPIOs for hwflowcontrol
-  if (eusart_config->flow_control != eusartHwFlowControlNone) {
-    advanced_init.hwFlowControl = eusart_config->flow_control;
-    init->advancedSettings = &advanced_init;
-  }
   switch (eusart_config->flow_control) {
     case eusartHwFlowControlNone:
       break;

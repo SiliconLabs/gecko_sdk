@@ -46,24 +46,24 @@ extern "C" {
 
 /***************************************************************************//**
  * @addtogroup ml_audio_feature_generation Audio Feature Generator
- * The audio feature generator is used to extract mel-filterbank features
- * from an audio signal for use with machine learning audio classification
- * applications using a microphone as an audio source. 
+ * The audio feature generator extracts mel-filterbank features
+ * from an audio signal to use with machine learning audio classification
+ * applications using a microphone as an audio source.
  *
  * @details
  * ## Feature Generation
  *
- * The Mel scale replicates the behaviour of the human ear, which has a higher
- * resolution for lower frequencies and are less discriminative of the higher 
- * frequencies. To create a mel filterbank, a number of filters are applied 
- * to the signal where the pass-band of the lower channel filters is narrow 
- * and increases towards higher frequencies. 
+ * The Mel scale replicates the behavior of the human ear, which has a higher
+ * resolution for lower frequencies and is less discriminative of the higher
+ * frequencies. To create a mel filterbank, a number of filters are applied
+ * to the signal, where the pass-band of the lower channel filters is narrow
+ * and increases towards higher frequencies.
 
  * The audio signal is split into short overlapping segments using
- * a window function (Hamming). The FFT (Fast Fourier Transform) is applied
+ * a window function (Hamming). The Fast Fourier Transform (FFT) is applied
  * to each segment to retrieve the frequency spectrum and then the power spectrum
- * of the segment. The filterbank is created by applying a series of mel-scaled 
- * filters to the output. Finally, the log is applied to the output to increase 
+ * of the segment. The filterbank is created by applying a series of mel-scaled
+ * filters to the output. Finally, the log is applied to the output to increase
  * the sensitivity between the lower channels.
  *
  *              Audio Signal
@@ -95,11 +95,16 @@ extern "C" {
  * ##  Usage
  * sl_ml_audio_feature_generation_init() initializes the frontend for feature generation
  * based on the configuration in sl_ml_audio_feature_generation_config.h. It also
- * initializes and starts the microphone in streaming mode which places the audio
+ * initializes and starts the microphone in streaming mode, which places the audio
  * samples into a ring-buffer.
  *
- * The features are generated first when sl_ml_audio_feature_generation_update_features()
- * is called. The feature generator will then update the features for as many
+ * If used together with the Flatbuffer Converter Tool and a compatible TensorFlow Lite
+ * model, the configuration is pulled from the TensorFlow Lite model by default. Set the
+ * configuration option `SL_ML_AUDIO_FEATURE_GENERATION_MANUAL_CONFIG_ENABLE` to override
+ * this behavior and use manually-configured options from the configuration header.
+ *
+ * The features are generated when sl_ml_audio_feature_generation_update_features()
+ * is called. The feature generator then updates the features for as many
  * new segments of audio as possible, starting from the last time the function
  * was called up until the current time. The new features are appended to the
  * feature buffer, replacing the oldest features such that the feature array
@@ -109,20 +114,21 @@ extern "C" {
  * required to generate features between calls to
  * sl_ml_audio_feature_generation_update_features(), audio data will simply be
  * overwritten. The generator will not return an error. The audio buffer must
- * therefore be configured large enough to store all new sampled data between
- * updating features.
+ * therefore be configured to be large enough to store all new sampled data
+ * between updating features.
 
- * To retrieve the generated features, either 
- * sl_ml_audio_feature_generation_get_features_raw()|quantized() or
+ * To retrieve the generated features, either
+ * sl_ml_audio_feature_generation_get_features_raw(),
+ * sl_ml_audio_feature_generation_get_features_quantized(), or
  * sl_ml_audio_feature_generation_fill_tensor() must be called.
  *
  *
  * ### Example
  *
  * When used with TensorFlow Lite Micro, the audio feature generator can be used to fill
- * a tensor directly by using sl_ml_audio_feature_generation_fill_tensor(). This requires
- * that the model has been trained using the same feature generator configurations as in
- * sl_ml_audio_feature_generation_config.h
+ * a tensor directly by using sl_ml_audio_feature_generation_fill_tensor(). However,
+ * the model has to be trained using the same feature generator configurations as
+ * used for inference, configured in sl_ml_audio_feature_generation_config.h.
  *
  * ```
  * #include "sl_tflite_micro_init.h"
@@ -147,16 +153,16 @@ extern "C" {
  *
  * ```
  *
- * Note that updating features and retrieving them can be performed independently,
- * updating features should be done often enough to avoid overwriting the audio buffer
+ * Note that updating features and retrieving them can be performed independently.
+ * Updating features should be done often enough to avoid overwriting the audio buffer
  * while retrieving them only needs to be done prior to inference.
  * @{
  ******************************************************************************/
 
 /***************************************************************************//**
  * @brief
- *    Sets up the microphone as an audio source for feature generation and
- *    initializes the frontend for feature generation.
+ *    Set up the microphone as an audio source for feature generation and
+ *    initialize the frontend for feature generation.
  *
  * @return
  *    SL_STATUS_OK for success
@@ -166,8 +172,8 @@ sl_status_t sl_ml_audio_feature_generation_init();
 
 /***************************************************************************//**
  * @brief
- *    Initializes microfrontend according to the configuration in
- *    sl_ml_audio_feature_generation_config.h
+ *    Initialize microfrontend according to the configuration in
+ *    sl_ml_audio_feature_generation_config.h.
  *
  * @return
  *    SL_STATUS_OK for success
@@ -176,7 +182,7 @@ sl_status_t sl_ml_audio_feature_generation_init();
 sl_status_t sl_ml_audio_feature_generation_frontend_init();
 
 /***************************************************************************//**
- *  Writes one chunk of audio samples into the audio buffer
+ *  Write one chunk of audio samples into the audio buffer.
  *
  *  @param[in] new_samples
  *    New audio samples to copy
@@ -196,15 +202,15 @@ sl_status_t sli_ml_audio_feature_generation_audio_buffer_write_chunk(const int16
 
 /***************************************************************************//**
  * @brief
- *  Updates the feature buffer with the missing features slices since last call
+ *  Update the feature buffer with the missing feature slices since the last call
  *  to this function.
  *
- *  To retrieve the features call sl_ml_audio_feature_generation_get_features_raw or
+ *  To retrieve the features, call sl_ml_audio_feature_generation_get_features_raw or
  *  sl_ml_audio_feature_generation_fill_tensor.
  *
  * @note
  *  This function needs to be called often enough to ensure that the audio
- *  buffer isn't overwritten
+ *  buffer isn't overwritten.
  *
  * @return
  *    SL_STATUS_OK for success
@@ -214,18 +220,18 @@ sl_status_t sl_ml_audio_feature_generation_update_features();
 
 /***************************************************************************//**
  * @brief
- *    Retrieves the features as type uint16 and copies them to the provided buffer.
+ *    Retrieve the features as type uint16 and copy them to the provided buffer.
  *
  * @param[out] buffer
  *    Pointer to the buffer to store the feature data
  *
  * @param[in] num_elements
- *    The number of elements corresponding to the size of the buffer, if this is
+ *    The number of elements corresponding to the size of the buffer; If this is
  *    not large enough to store the entire feature buffer the function will return
  *    with an error.
  *
  * @note
- *    This function overwrites the entire buffer
+ *    This function overwrites the entire buffer.
  *
  * @return
  *    SL_STATUS_OK for success
@@ -235,8 +241,8 @@ sl_status_t sl_ml_audio_feature_generation_get_features_raw(uint16_t *buffer, si
 
 /***************************************************************************//**
  * @brief
- *    Retrieves the features quantized to signed integer numbers in the range
- *    -128 to 127 (int8) and copies them to the provided buffer.
+ *    Retrieve the features quantized to signed integer numbers in the range
+ *    -128 to 127 (int8) and copy them to the provided buffer.
  *
  *    @ref range_min and @ref range_max set the valid range of which values are
  *    quantized from.
@@ -256,7 +262,7 @@ sl_status_t sl_ml_audio_feature_generation_get_features_raw(uint16_t *buffer, si
  *    Determines the largest point of the range to quantize features from
  *
  * @note
- *    This function overwrites the entire buffer
+ *    This function overwrites the entire buffer.
  *
  * @return
  *    SL_STATUS_OK for success
@@ -270,20 +276,20 @@ sl_status_t sli_ml_audio_feature_generation_get_features_quantized(int8_t *buffe
 #if defined(SL_CATALOG_TFLITE_MICRO_PRESENT) || defined(DOXYGEN)
 /***************************************************************************//**
  * @brief
- *    Fills a TensorFlow tensor with feature data of type int8
+ *    Fill a TensorFlow tensor with feature data of type int8.
  *
  *    The int8 values are derived by quantizing the microfrontend output, expected
- *    to be in the range 0 to 670, to signed integer numbers in the range
- *    -128 to 127.
+ *    to be in the range 0 to 670, to signed integer numbers in
+ *    -128 to 127 range.
  *
  * @param[in] input_tensor
  *    The input tensor to fill with features.
  *
  * @note
- *    This function overwrites the entire input tensor
+ *    This function overwrites the entire input tensor.
  *
  * @note
- *    Supports tensors of type kTfLiteInt8
+ *    Supports tensors of type kTfLiteInt8.
  *
  * @return
  *    SL_STATUS_OK for success
@@ -295,9 +301,9 @@ sl_status_t sl_ml_audio_feature_generation_fill_tensor(TfLiteTensor* input_tenso
 
 /***************************************************************************//**
  * @brief
- *    Returns how many new or unfetched feature slices that have been updated
- *    since last call to sl_ml_audio_feature_generation_get_features_raw or
- *    sl_ml_audio_feature_generation_fill_tensor;
+ *    Return the number of new or unfetched feature slices that have been updated
+ *    since the last call to sl_ml_audio_feature_generation_get_features_raw or
+ *    sl_ml_audio_feature_generation_fill_tensor.
  *
  * @return
  *    The number of unfetched feature slices
@@ -306,7 +312,7 @@ int sl_ml_audio_feature_generation_get_new_feature_slice_count();
 
 /***************************************************************************//**
  * @brief
- *    Returns the feature buffer size
+ *    Return the feature buffer size.
  *
  * @return
  *    Size of the feature buffer
@@ -315,7 +321,7 @@ int sl_ml_audio_feature_generation_get_feature_buffer_size();
 
 /***************************************************************************//**
  * @brief
- *    Resets the state of the audio feature generator
+ *    Reset the state of the audio feature generator.
  ******************************************************************************/
 void sl_ml_audio_feature_generation_reset();
 /** @} (end addtogroup ml_audio_feature_generation) */

@@ -5,8 +5,8 @@
     <properties key="keywords" value="universal\ configurator"/>
     <properties key="projectFilePaths" value="example/ncp_btmesh_empty/ncp_btmesh_empty.slcp"/>
     <properties key="readmeFiles" value="documentation/example/ncp_btmesh_empty/readme.md"/>
-    <properties key="boardCompatibility" value="brd4103a brd4104a brd4158a brd4159a brd4161a brd4162a brd4163a brd4164a brd4165b brd4166a brd4167a brd4168a brd4170a brd4171a brd4172a brd4172b brd4173a brd4174a brd4174b brd4175a brd4176a brd4177a brd4179b brd4180a brd4180b brd4181a brd4181b brd4181c brd4190a brd4304a brd4305a brd4305c brd4305d brd4305e brd4306a brd4306b brd4306c brd4306d brd4308a brd4308b brd4308c brd4308d brd4309a brd4309b com.silabs.board.none"/>
-    <properties key="partCompatibility" value=".*bgm13.* .*bgm21.* .*efr32bg12p.* .*efr32bg13p.* .*efr32bg21.* .*efr32mg12p.* .*efr32mg13p.* .*efr32mg21.* .*mgm12.* .*mgm13.* .*mgm21.*"/>
+    <properties key="boardCompatibility" value="brd2601b brd4103a brd4104a brd4158a brd4159a brd4161a brd4162a brd4163a brd4164a brd4165b brd4166a brd4167a brd4168a brd4170a brd4171a brd4172a brd4172b brd4173a brd4174a brd4174b brd4175a brd4176a brd4177a brd4179b brd4180a brd4180b brd4181a brd4181b brd4181c brd4186c brd4187c brd4188b brd4190a brd4304a brd4305a brd4305c brd4305d brd4305e brd4306a brd4306b brd4306c brd4306d brd4308a brd4308b brd4308c brd4308d brd4309a brd4309b brd4316a brd4317a com.silabs.board.none"/>
+    <properties key="partCompatibility" value=".*bgm13.* .*bgm21.* .*efr32bg12p.* .*efr32bg13p.* .*efr32bg21.* .*efr32bg24.* .*efr32mg12p.* .*efr32mg13p.* .*efr32mg21.* .*efr32mg24.* .*mgm12.* .*mgm13.* .*mgm21.*"/>
     <properties key="ideCompatibility" value="iar-embedded-workbench makefile-ide segger-embedded-studio simplicity-ide"/>
     <properties key="toolchainCompatibility" value="gcc iar segger"/>
     <properties key="category" value="Bluetooth Mesh Examples"/>
@@ -31,8 +31,21 @@
     <properties key="keywords" value="universal\ configurator"/>
     <properties key="projectFilePaths" value="example/soc_btmesh_empty/soc_btmesh_empty.slcp"/>
     <properties key="readmeFiles" value="documentation/example/soc_btmesh_empty/readme.md"/>
-    <properties key="boardCompatibility" value="brd4103a brd4104a brd4158a brd4159a brd4161a brd4162a brd4163a brd4164a brd4165b brd4166a brd4167a brd4168a brd4170a brd4171a brd4172a brd4172b brd4173a brd4174a brd4174b brd4175a brd4176a brd4177a brd4179b brd4180a brd4180b brd4181a brd4181b brd4181c brd4182a brd4183a brd4183c brd4184a brd4184b brd4190a brd4304a brd4305a brd4305c brd4305d brd4305e brd4306a brd4306b brd4306c brd4306d brd4308a brd4308b brd4308c brd4308d brd4309a brd4309b brd4311a brd4311b brd4312a com.silabs.board.none"/>
-    <properties key="partCompatibility" value=".*bgm13.* .*bgm21.* .*bgm22.*hna.* .*efr32bg12p.* .*efr32bg13p.* .*efr32bg21.* .*efr32bg22.*f512.* .*efr32mg12p.* .*efr32mg13p.* .*efr32mg21.* .*efr32mg22.* .*mgm12.* .*mgm13.* .*mgm21.* .*mgm22.*"/>
+    <properties key="boardCompatibility" value="brd2601b brd4103a brd4104a brd4158a brd4159a brd4161a brd4162a brd4163a brd4164a brd4165b brd4166a brd4167a brd4168a brd4170a brd4171a brd4172a brd4172b brd4173a brd4174a brd4174b brd4175a brd4176a brd4177a brd4179b brd4180a brd4180b brd4181a brd4181b brd4181c brd4182a brd4183a brd4183c brd4184a brd4184b brd4186c brd4187c brd4188b brd4190a brd4304a brd4305a brd4305c brd4305d brd4305e brd4306a brd4306b brd4306c brd4306d brd4308a brd4308b brd4308c brd4308d brd4309a brd4309b brd4311a brd4311b brd4312a brd4316a brd4317a com.silabs.board.none"/>
+    <properties key="partCompatibility" value=".*bgm13.* .*bgm21.* .*bgm22.*hna.* .*efr32bg12p.* .*efr32bg13p.* .*efr32bg21.* .*efr32bg22.*f512.* .*efr32bg24.* .*efr32mg12p.* .*efr32mg13p.* .*efr32mg21.* .*efr32mg22.* .*efr32mg24.* .*mgm12.* .*mgm13.* .*mgm21.* .*mgm22.*"/>
+    <properties key="ideCompatibility" value="iar-embedded-workbench makefile-ide segger-embedded-studio simplicity-ide"/>
+    <properties key="toolchainCompatibility" value="gcc iar segger"/>
+    <properties key="category" value="Bluetooth Mesh Examples"/>
+    <properties key="quality" value="PRODUCTION"/>
+    <properties key="stockConfigCompatibility" value="com.silabs.ss.framework.project.toolchain.core.default"/>
+  </descriptors>
+  <descriptors name="soc_btmesh_hsl" label="Bluetooth Mesh - SoC HSL Light" description="This example is an out-of-the-box Software Demo where the LED of the  board can be controlled by push button presses on another  device (soc_btmesh_switch). Beside switching on and off the LED, it's lighting intensity can also be set. Hue and saturation (only by UART logs) can be set by hsl client. The example also tries to establish friendship as Friend node and prints its status to the UART. The example is based on the Bluetooth Mesh Generic On/Off Model, the Light Lightness Model, HSL Model and LC Model. This example requires Internal Storage Bootloader (single image on 1536kB device).&#xA;">
+    <properties key="namespace" value="template.uc"/>
+    <properties key="keywords" value="universal\ configurator"/>
+    <properties key="projectFilePaths" value="example/soc_btmesh_hsl/soc_btmesh_hsl_brd2601b.slcp"/>
+    <properties key="readmeFiles" value="documentation/example/soc_btmesh_hsl/readme.md"/>
+    <properties key="boardCompatibility" value="brd2601b"/>
+    <properties key="partCompatibility" value=".*efr32mg24.*"/>
     <properties key="ideCompatibility" value="iar-embedded-workbench makefile-ide segger-embedded-studio simplicity-ide"/>
     <properties key="toolchainCompatibility" value="gcc iar segger"/>
     <properties key="category" value="Bluetooth Mesh Examples"/>
@@ -57,8 +70,8 @@
     <properties key="keywords" value="universal\ configurator"/>
     <properties key="projectFilePaths" value="example/soc_btmesh_hsl/soc_btmesh_hsl_display.slcp"/>
     <properties key="readmeFiles" value="documentation/example/soc_btmesh_hsl/readme.md"/>
-    <properties key="boardCompatibility" value="brd4103a brd4104a brd4158a brd4159a brd4161a brd4162a brd4163a brd4164a brd4165b brd4167a brd4168a brd4170a brd4171a brd4172a brd4172b brd4173a brd4174a brd4174b brd4175a brd4176a brd4177a brd4180a brd4180b brd4181a brd4181b brd4181c brd4190a brd4304a brd4305a brd4305c brd4305d brd4305e brd4306a brd4306b brd4306c brd4306d brd4308a brd4308b brd4308c brd4308d"/>
-    <properties key="partCompatibility" value=".*bgm13.* .*bgm21.* .*efr32bg12p.* .*efr32bg13p.* .*efr32bg21.* .*efr32mg12p.* .*efr32mg13p.* .*efr32mg21.* .*mgm12.* .*mgm13.* .*mgm21.*"/>
+    <properties key="boardCompatibility" value="brd4103a brd4104a brd4158a brd4159a brd4161a brd4162a brd4163a brd4164a brd4165b brd4167a brd4168a brd4170a brd4171a brd4172a brd4172b brd4173a brd4174a brd4174b brd4175a brd4176a brd4177a brd4180a brd4180b brd4181a brd4181b brd4181c brd4186c brd4187c brd4188b brd4190a brd4304a brd4305a brd4305c brd4305d brd4305e brd4306a brd4306b brd4306c brd4306d brd4308a brd4308b brd4308c brd4308d brd4316a brd4317a"/>
+    <properties key="partCompatibility" value=".*bgm13.* .*bgm21.* .*efr32bg12p.* .*efr32bg13p.* .*efr32bg21.* .*efr32bg24.* .*efr32mg12p.* .*efr32mg13p.* .*efr32mg21.* .*efr32mg24.* .*mgm12.* .*mgm13.* .*mgm21.*"/>
     <properties key="ideCompatibility" value="iar-embedded-workbench makefile-ide segger-embedded-studio simplicity-ide"/>
     <properties key="toolchainCompatibility" value="gcc iar segger"/>
     <properties key="category" value="Bluetooth Mesh Examples"/>
@@ -71,7 +84,20 @@
     <properties key="projectFilePaths" value="example/soc_btmesh_hsl/soc_btmesh_hsl_log.slcp"/>
     <properties key="readmeFiles" value="documentation/example/soc_btmesh_hsl/readme.md"/>
     <properties key="boardCompatibility" value="brd4179b brd4309a brd4309b"/>
-    <properties key="partCompatibility" value=".*bgm13.* .*bgm21.* .*efr32bg12p.* .*efr32bg13p.* .*efr32bg21.* .*efr32mg12p.* .*efr32mg13p.* .*efr32mg21.* .*mgm12.* .*mgm13.* .*mgm21.*"/>
+    <properties key="partCompatibility" value=".*bgm13.* .*bgm21.* .*efr32bg12p.* .*efr32bg13p.* .*efr32bg21.* .*efr32bg24.* .*efr32mg12p.* .*efr32mg13p.* .*efr32mg21.* .*efr32mg24.* .*mgm12.* .*mgm13.* .*mgm21.*"/>
+    <properties key="ideCompatibility" value="iar-embedded-workbench makefile-ide segger-embedded-studio simplicity-ide"/>
+    <properties key="toolchainCompatibility" value="gcc iar segger"/>
+    <properties key="category" value="Bluetooth Mesh Examples"/>
+    <properties key="quality" value="PRODUCTION"/>
+    <properties key="stockConfigCompatibility" value="com.silabs.ss.framework.project.toolchain.core.default"/>
+  </descriptors>
+  <descriptors name="soc_btmesh_light" label="Bluetooth Mesh - SoC Light" description="This example is an out-of-the-box Software Demo where the LED of the  board can be controlled by push button presses on another  device (soc_btmesh_switch). Beside switching on and off the LED, it's  lighting intensity, color temperature and delta UV can also be set. The  example is based on the Bluetooth Mesh Generic On/Off Model, the Light  Lightness Model, CTL Model and LC Model. This example requires Internal Storage Bootloader (single image on 1536kB device).&#xA;">
+    <properties key="namespace" value="template.uc"/>
+    <properties key="keywords" value="universal\ configurator"/>
+    <properties key="projectFilePaths" value="example/soc_btmesh_light/soc_btmesh_light_brd2601b.slcp"/>
+    <properties key="readmeFiles" value="documentation/example/soc_btmesh_light/readme.md"/>
+    <properties key="boardCompatibility" value="brd2601b"/>
+    <properties key="partCompatibility" value=".*efr32mg24.*"/>
     <properties key="ideCompatibility" value="iar-embedded-workbench makefile-ide segger-embedded-studio simplicity-ide"/>
     <properties key="toolchainCompatibility" value="gcc iar segger"/>
     <properties key="category" value="Bluetooth Mesh Examples"/>
@@ -96,8 +122,8 @@
     <properties key="keywords" value="universal\ configurator"/>
     <properties key="projectFilePaths" value="example/soc_btmesh_light/soc_btmesh_light_display.slcp"/>
     <properties key="readmeFiles" value="documentation/example/soc_btmesh_light/readme.md"/>
-    <properties key="boardCompatibility" value="brd4103a brd4104a brd4158a brd4159a brd4161a brd4162a brd4163a brd4164a brd4165b brd4167a brd4168a brd4170a brd4171a brd4172a brd4172b brd4173a brd4174a brd4174b brd4175a brd4176a brd4177a brd4180a brd4180b brd4181a brd4181b brd4181c brd4190a brd4304a brd4305a brd4305c brd4305d brd4305e brd4306a brd4306b brd4306c brd4306d brd4308a brd4308b brd4308c brd4308d"/>
-    <properties key="partCompatibility" value=".*bgm13.* .*bgm21.* .*efr32bg12p.* .*efr32bg13p.* .*efr32bg21.* .*efr32mg12p.* .*efr32mg13p.* .*efr32mg21.* .*mgm12.* .*mgm13.* .*mgm21.*"/>
+    <properties key="boardCompatibility" value="brd4103a brd4104a brd4158a brd4159a brd4161a brd4162a brd4163a brd4164a brd4165b brd4167a brd4168a brd4170a brd4171a brd4172a brd4172b brd4173a brd4174a brd4174b brd4175a brd4176a brd4177a brd4180a brd4180b brd4181a brd4181b brd4181c brd4186c brd4187c brd4188b brd4190a brd4304a brd4305a brd4305c brd4305d brd4305e brd4306a brd4306b brd4306c brd4306d brd4308a brd4308b brd4308c brd4308d brd4316a brd4317a"/>
+    <properties key="partCompatibility" value=".*bgm13.* .*bgm21.* .*efr32bg12p.* .*efr32bg13p.* .*efr32bg21.* .*efr32bg24.* .*efr32mg12p.* .*efr32mg13p.* .*efr32mg21.* .*efr32mg24.* .*mgm12.* .*mgm13.* .*mgm21.*"/>
     <properties key="ideCompatibility" value="iar-embedded-workbench makefile-ide segger-embedded-studio simplicity-ide"/>
     <properties key="toolchainCompatibility" value="gcc iar segger"/>
     <properties key="category" value="Bluetooth Mesh Examples"/>
@@ -110,7 +136,7 @@
     <properties key="projectFilePaths" value="example/soc_btmesh_light/soc_btmesh_light_log.slcp"/>
     <properties key="readmeFiles" value="documentation/example/soc_btmesh_light/readme.md"/>
     <properties key="boardCompatibility" value="brd4179b brd4309a brd4309b"/>
-    <properties key="partCompatibility" value=".*bgm13.* .*bgm21.* .*efr32bg12p.* .*efr32bg13p.* .*efr32bg21.* .*efr32mg12p.* .*efr32mg13p.* .*efr32mg21.* .*mgm12.* .*mgm13.* .*mgm21.*"/>
+    <properties key="partCompatibility" value=".*bgm13.* .*bgm21.* .*efr32bg12p.* .*efr32bg13p.* .*efr32bg21.* .*efr32bg24.* .*efr32mg12p.* .*efr32mg13p.* .*efr32mg21.* .*efr32mg24.* .*mgm12.* .*mgm13.* .*mgm21.*"/>
     <properties key="ideCompatibility" value="iar-embedded-workbench makefile-ide segger-embedded-studio simplicity-ide"/>
     <properties key="toolchainCompatibility" value="gcc iar segger"/>
     <properties key="category" value="Bluetooth Mesh Examples"/>
@@ -122,8 +148,8 @@
     <properties key="keywords" value="universal\ configurator"/>
     <properties key="projectFilePaths" value="example/soc_btmesh_sensor_client/soc_btmesh_sensor_client_display.slcp"/>
     <properties key="readmeFiles" value="documentation/example/soc_btmesh_sensor_client/readme.md"/>
-    <properties key="boardCompatibility" value="brd4103a brd4104a brd4158a brd4159a brd4161a brd4162a brd4163a brd4164a brd4165b brd4167a brd4168a brd4170a brd4171a brd4172a brd4172b brd4173a brd4174a brd4174b brd4175a brd4176a brd4177a brd4180a brd4180b brd4181a brd4181b brd4181c brd4182a brd4190a brd4304a brd4305a brd4305c brd4305d brd4305e brd4306a brd4306b brd4306c brd4306d brd4308a brd4308b brd4308c brd4308d brd4311a brd4311b brd4312a"/>
-    <properties key="partCompatibility" value=".*bgm13.* .*bgm21.* .*bgm22.*hna.* .*efr32bg12p.* .*efr32bg13p.* .*efr32bg21.* .*efr32bg22.*f512.* .*efr32mg12p.* .*efr32mg13p.* .*efr32mg21.* .*efr32mg22.* .*mgm12.* .*mgm13.* .*mgm21.* .*mgm22.*"/>
+    <properties key="boardCompatibility" value="brd4103a brd4104a brd4158a brd4159a brd4161a brd4162a brd4163a brd4164a brd4165b brd4167a brd4168a brd4170a brd4171a brd4172a brd4172b brd4173a brd4174a brd4174b brd4175a brd4176a brd4177a brd4180a brd4180b brd4181a brd4181b brd4181c brd4182a brd4186c brd4187c brd4188b brd4190a brd4304a brd4305a brd4305c brd4305d brd4305e brd4306a brd4306b brd4306c brd4306d brd4308a brd4308b brd4308c brd4308d brd4311a brd4311b brd4312a brd4316a brd4317a"/>
+    <properties key="partCompatibility" value=".*bgm13.* .*bgm21.* .*bgm22.*hna.* .*efr32bg12p.* .*efr32bg13p.* .*efr32bg21.* .*efr32bg22.*f512.* .*efr32bg24.* .*efr32mg12p.* .*efr32mg13p.* .*efr32mg21.* .*efr32mg22.* .*efr32mg24.* .*mgm12.* .*mgm13.* .*mgm21.* .*mgm22.*"/>
     <properties key="ideCompatibility" value="iar-embedded-workbench makefile-ide segger-embedded-studio simplicity-ide"/>
     <properties key="toolchainCompatibility" value="gcc iar segger"/>
     <properties key="category" value="Bluetooth Mesh Examples"/>
@@ -135,8 +161,8 @@
     <properties key="keywords" value="universal\ configurator"/>
     <properties key="projectFilePaths" value="example/soc_btmesh_sensor_client/soc_btmesh_sensor_client_log.slcp"/>
     <properties key="readmeFiles" value="documentation/example/soc_btmesh_sensor_client/readme.md"/>
-    <properties key="boardCompatibility" value="brd4166a brd4179b brd4309a brd4309b"/>
-    <properties key="partCompatibility" value=".*bgm13.* .*bgm21.* .*bgm22.*hna.* .*efr32bg12p.* .*efr32bg13p.* .*efr32bg21.* .*efr32bg22.*f512.* .*efr32mg12p.* .*efr32mg13p.* .*efr32mg21.* .*efr32mg22.* .*mgm12.* .*mgm13.* .*mgm21.* .*mgm22.*"/>
+    <properties key="boardCompatibility" value="brd2601b brd4166a brd4179b brd4309a brd4309b"/>
+    <properties key="partCompatibility" value=".*bgm13.* .*bgm21.* .*bgm22.*hna.* .*efr32bg12p.* .*efr32bg13p.* .*efr32bg21.* .*efr32bg22.*f512.* .*efr32bg24.* .*efr32mg12p.* .*efr32mg13p.* .*efr32mg21.* .*efr32mg22.* .*efr32mg24.* .*mgm12.* .*mgm13.* .*mgm21.* .*mgm22.*"/>
     <properties key="ideCompatibility" value="iar-embedded-workbench makefile-ide segger-embedded-studio simplicity-ide"/>
     <properties key="toolchainCompatibility" value="gcc iar segger"/>
     <properties key="category" value="Bluetooth Mesh Examples"/>
@@ -149,7 +175,20 @@
     <properties key="projectFilePaths" value="example/soc_btmesh_sensor_client/soc_btmesh_sensor_client_log_single.slcp"/>
     <properties key="readmeFiles" value="documentation/example/soc_btmesh_sensor_client/readme.md"/>
     <properties key="boardCompatibility" value="brd4183a brd4183c brd4184a brd4184b"/>
-    <properties key="partCompatibility" value=".*bgm13.* .*bgm21.* .*bgm22.*hna.* .*efr32bg12p.* .*efr32bg13p.* .*efr32bg21.* .*efr32bg22.*f512.* .*efr32mg12p.* .*efr32mg13p.* .*efr32mg21.* .*efr32mg22.* .*mgm12.* .*mgm13.* .*mgm21.* .*mgm22.*"/>
+    <properties key="partCompatibility" value=".*bgm13.* .*bgm21.* .*bgm22.*hna.* .*efr32bg12p.* .*efr32bg13p.* .*efr32bg21.* .*efr32bg22.*f512.* .*efr32bg24.* .*efr32mg12p.* .*efr32mg13p.* .*efr32mg21.* .*efr32mg22.* .*efr32mg24.* .*mgm12.* .*mgm13.* .*mgm21.* .*mgm22.*"/>
+    <properties key="ideCompatibility" value="iar-embedded-workbench makefile-ide segger-embedded-studio simplicity-ide"/>
+    <properties key="toolchainCompatibility" value="gcc iar segger"/>
+    <properties key="category" value="Bluetooth Mesh Examples"/>
+    <properties key="quality" value="PRODUCTION"/>
+    <properties key="stockConfigCompatibility" value="com.silabs.ss.framework.project.toolchain.core.default"/>
+  </descriptors>
+  <descriptors name="soc_btmesh_sensor_server" label="Bluetooth Mesh - SoC Sensor Server" description="This example demonstrates the Bluetooth Mesh Sensor Server Model and  Sensor Setup Server Model. It measures temperature, people count and  illuminance and sends the mearurement data to a remote device (eg  soc_btmesh_sensor_client). The current status is sent to UART. This example requires Internal Storage Bootloader (single image  on 1536kB device).&#xA;">
+    <properties key="namespace" value="template.uc"/>
+    <properties key="keywords" value="universal\ configurator"/>
+    <properties key="projectFilePaths" value="example/soc_btmesh_sensor_server/soc_btmesh_sensor_server_brd2601b.slcp"/>
+    <properties key="readmeFiles" value="documentation/example/soc_btmesh_sensor_server/readme.md"/>
+    <properties key="boardCompatibility" value="brd2601b"/>
+    <properties key="partCompatibility" value=".*efr32mg24b310f1536im48.*"/>
     <properties key="ideCompatibility" value="iar-embedded-workbench makefile-ide segger-embedded-studio simplicity-ide"/>
     <properties key="toolchainCompatibility" value="gcc iar segger"/>
     <properties key="category" value="Bluetooth Mesh Examples"/>
@@ -161,8 +200,8 @@
     <properties key="keywords" value="universal\ configurator"/>
     <properties key="projectFilePaths" value="example/soc_btmesh_sensor_server/soc_btmesh_sensor_server_display.slcp"/>
     <properties key="readmeFiles" value="documentation/example/soc_btmesh_sensor_server/readme.md"/>
-    <properties key="boardCompatibility" value="brd4103a brd4104a brd4158a brd4159a brd4161a brd4162a brd4163a brd4164a brd4165b brd4167a brd4168a brd4170a brd4171a brd4172a brd4172b brd4173a brd4174a brd4174b brd4175a brd4176a brd4177a brd4182a brd4190a brd4304a brd4305a brd4305c brd4305d brd4305e brd4306a brd4306b brd4306c brd4306d brd4311a brd4311b brd4312a"/>
-    <properties key="partCompatibility" value=".*bgm13.* .*bgm21.* .*bgm22.*hna.* .*efr32bg12p.* .*efr32bg13p.* .*efr32bg21.* .*efr32bg22.*f512.* .*efr32mg12p.* .*efr32mg13p.* .*efr32mg21.* .*efr32mg22.* .*mgm12.* .*mgm13.* .*mgm21.* .*mgm22.*"/>
+    <properties key="boardCompatibility" value="brd4103a brd4104a brd4158a brd4159a brd4161a brd4162a brd4163a brd4164a brd4165b brd4167a brd4168a brd4170a brd4171a brd4172a brd4172b brd4173a brd4174a brd4174b brd4175a brd4176a brd4177a brd4182a brd4186c brd4187c brd4188b brd4190a brd4304a brd4305a brd4305c brd4305d brd4305e brd4306a brd4306b brd4306c brd4306d brd4311a brd4311b brd4312a brd4316a brd4317a"/>
+    <properties key="partCompatibility" value=".*bgm13.* .*bgm21.* .*bgm22.*hna.* .*efr32bg12p.* .*efr32bg13p.* .*efr32bg21.* .*efr32bg22.*f512.* .*efr32bg24.* .*efr32mg12p.* .*efr32mg13p.* .*efr32mg21.* .*efr32mg22.* .*efr32mg24.* .*mgm12.* .*mgm13.* .*mgm21.* .*mgm22.*"/>
     <properties key="ideCompatibility" value="iar-embedded-workbench makefile-ide segger-embedded-studio simplicity-ide"/>
     <properties key="toolchainCompatibility" value="gcc iar segger"/>
     <properties key="category" value="Bluetooth Mesh Examples"/>
@@ -175,7 +214,7 @@
     <properties key="projectFilePaths" value="example/soc_btmesh_sensor_server/soc_btmesh_sensor_server_mock_display.slcp"/>
     <properties key="readmeFiles" value="documentation/example/soc_btmesh_sensor_server/readme.md"/>
     <properties key="boardCompatibility" value="brd4180a brd4180b brd4181a brd4181b brd4181c brd4308a brd4308b brd4308c brd4308d"/>
-    <properties key="partCompatibility" value=".*bgm13.* .*bgm21.* .*bgm22.*hna.* .*efr32bg12p.* .*efr32bg13p.* .*efr32bg21.* .*efr32bg22.*f512.* .*efr32mg12p.* .*efr32mg13p.* .*efr32mg21.* .*efr32mg22.* .*mgm12.* .*mgm13.* .*mgm21.* .*mgm22.*"/>
+    <properties key="partCompatibility" value=".*bgm13.* .*bgm21.* .*bgm22.*hna.* .*efr32bg12p.* .*efr32bg13p.* .*efr32bg21.* .*efr32bg22.*f512.* .*efr32bg24.* .*efr32mg12p.* .*efr32mg13p.* .*efr32mg21.* .*efr32mg22.* .*efr32mg24.* .*mgm12.* .*mgm13.* .*mgm21.* .*mgm22.*"/>
     <properties key="ideCompatibility" value="iar-embedded-workbench makefile-ide segger-embedded-studio simplicity-ide"/>
     <properties key="toolchainCompatibility" value="gcc iar segger"/>
     <properties key="category" value="Bluetooth Mesh Examples"/>
@@ -188,7 +227,7 @@
     <properties key="projectFilePaths" value="example/soc_btmesh_sensor_server/soc_btmesh_sensor_server_mock_log.slcp"/>
     <properties key="readmeFiles" value="documentation/example/soc_btmesh_sensor_server/readme.md"/>
     <properties key="boardCompatibility" value="brd4179b brd4309a brd4309b"/>
-    <properties key="partCompatibility" value=".*bgm13.* .*bgm21.* .*bgm22.*hna.* .*efr32bg12p.* .*efr32bg13p.* .*efr32bg21.* .*efr32bg22.*f512.* .*efr32mg12p.* .*efr32mg13p.* .*efr32mg21.* .*efr32mg22.* .*mgm12.* .*mgm13.* .*mgm21.* .*mgm22.*"/>
+    <properties key="partCompatibility" value=".*bgm13.* .*bgm21.* .*bgm22.*hna.* .*efr32bg12p.* .*efr32bg13p.* .*efr32bg21.* .*efr32bg22.*f512.* .*efr32bg24.* .*efr32mg12p.* .*efr32mg13p.* .*efr32mg21.* .*efr32mg22.* .*efr32mg24.* .*mgm12.* .*mgm13.* .*mgm21.* .*mgm22.*"/>
     <properties key="ideCompatibility" value="iar-embedded-workbench makefile-ide segger-embedded-studio simplicity-ide"/>
     <properties key="toolchainCompatibility" value="gcc iar segger"/>
     <properties key="category" value="Bluetooth Mesh Examples"/>
@@ -201,7 +240,7 @@
     <properties key="projectFilePaths" value="example/soc_btmesh_sensor_server/soc_btmesh_sensor_server_mock_log_single.slcp"/>
     <properties key="readmeFiles" value="documentation/example/soc_btmesh_sensor_server/readme.md"/>
     <properties key="boardCompatibility" value="brd4183a brd4183c"/>
-    <properties key="partCompatibility" value=".*bgm13.* .*bgm21.* .*bgm22.*hna.* .*efr32bg12p.* .*efr32bg13p.* .*efr32bg21.* .*efr32bg22.*f512.* .*efr32mg12p.* .*efr32mg13p.* .*efr32mg21.* .*efr32mg22.* .*mgm12.* .*mgm13.* .*mgm21.* .*mgm22.*"/>
+    <properties key="partCompatibility" value=".*bgm13.* .*bgm21.* .*bgm22.*hna.* .*efr32bg12p.* .*efr32bg13p.* .*efr32bg21.* .*efr32bg22.*f512.* .*efr32bg24.* .*efr32mg12p.* .*efr32mg13p.* .*efr32mg21.* .*efr32mg22.* .*efr32mg24.* .*mgm12.* .*mgm13.* .*mgm21.* .*mgm22.*"/>
     <properties key="ideCompatibility" value="iar-embedded-workbench makefile-ide segger-embedded-studio simplicity-ide"/>
     <properties key="toolchainCompatibility" value="gcc iar segger"/>
     <properties key="category" value="Bluetooth Mesh Examples"/>
@@ -252,8 +291,8 @@
     <properties key="keywords" value="universal\ configurator"/>
     <properties key="projectFilePaths" value="example/soc_btmesh_switch/soc_btmesh_switch_display.slcp"/>
     <properties key="readmeFiles" value="documentation/example/soc_btmesh_switch/readme.md"/>
-    <properties key="boardCompatibility" value="brd4103a brd4104a brd4158a brd4159a brd4161a brd4162a brd4163a brd4164a brd4165b brd4167a brd4168a brd4170a brd4171a brd4172a brd4172b brd4173a brd4174a brd4174b brd4175a brd4176a brd4177a brd4180a brd4180b brd4181a brd4181b brd4181c brd4182a brd4190a brd4304a brd4305a brd4305c brd4305d brd4305e brd4306a brd4306b brd4306c brd4306d brd4308a brd4308b brd4308c brd4308d brd4311a brd4311b brd4312a"/>
-    <properties key="partCompatibility" value=".*bgm13.* .*bgm21.* .*bgm22.*hna.* .*efr32bg12p.* .*efr32bg13p.* .*efr32bg21.* .*efr32bg22.*f512.* .*efr32mg12p.* .*efr32mg13p.* .*efr32mg21.* .*efr32mg22.* .*mgm12.* .*mgm13.* .*mgm21.* .*mgm22.*"/>
+    <properties key="boardCompatibility" value="brd4103a brd4104a brd4158a brd4159a brd4161a brd4162a brd4163a brd4164a brd4165b brd4167a brd4168a brd4170a brd4171a brd4172a brd4172b brd4173a brd4174a brd4174b brd4175a brd4176a brd4177a brd4180a brd4180b brd4181a brd4181b brd4181c brd4182a brd4186c brd4187c brd4188b brd4190a brd4304a brd4305a brd4305c brd4305d brd4305e brd4306a brd4306b brd4306c brd4306d brd4308a brd4308b brd4308c brd4308d brd4311a brd4311b brd4312a brd4316a brd4317a"/>
+    <properties key="partCompatibility" value=".*bgm13.* .*bgm21.* .*bgm22.*hna.* .*efr32bg12p.* .*efr32bg13p.* .*efr32bg21.* .*efr32bg22.*f512.* .*efr32bg24.* .*efr32mg12p.* .*efr32mg13p.* .*efr32mg21.* .*efr32mg22.* .*efr32mg24.* .*mgm12.* .*mgm13.* .*mgm21.* .*mgm22.*"/>
     <properties key="ideCompatibility" value="iar-embedded-workbench makefile-ide segger-embedded-studio simplicity-ide"/>
     <properties key="toolchainCompatibility" value="gcc iar segger"/>
     <properties key="category" value="Bluetooth Mesh Examples"/>
@@ -265,8 +304,8 @@
     <properties key="keywords" value="universal\ configurator"/>
     <properties key="projectFilePaths" value="example/soc_btmesh_switch/soc_btmesh_switch_log.slcp"/>
     <properties key="readmeFiles" value="documentation/example/soc_btmesh_switch/readme.md"/>
-    <properties key="boardCompatibility" value="brd4166a brd4179b brd4309a brd4309b"/>
-    <properties key="partCompatibility" value=".*bgm13.* .*bgm21.* .*bgm22.*hna.* .*efr32bg12p.* .*efr32bg13p.* .*efr32bg21.* .*efr32bg22.*f512.* .*efr32mg12p.* .*efr32mg13p.* .*efr32mg21.* .*efr32mg22.* .*mgm12.* .*mgm13.* .*mgm21.* .*mgm22.*"/>
+    <properties key="boardCompatibility" value="brd2601b brd4166a brd4179b brd4309a brd4309b"/>
+    <properties key="partCompatibility" value=".*bgm13.* .*bgm21.* .*bgm22.*hna.* .*efr32bg12p.* .*efr32bg13p.* .*efr32bg21.* .*efr32bg22.*f512.* .*efr32bg24.* .*efr32mg12p.* .*efr32mg13p.* .*efr32mg21.* .*efr32mg22.* .*efr32mg24.* .*mgm12.* .*mgm13.* .*mgm21.* .*mgm22.*"/>
     <properties key="ideCompatibility" value="iar-embedded-workbench makefile-ide segger-embedded-studio simplicity-ide"/>
     <properties key="toolchainCompatibility" value="gcc iar segger"/>
     <properties key="category" value="Bluetooth Mesh Examples"/>
@@ -279,7 +318,7 @@
     <properties key="projectFilePaths" value="example/soc_btmesh_switch/soc_btmesh_switch_log_single.slcp"/>
     <properties key="readmeFiles" value="documentation/example/soc_btmesh_switch/readme.md"/>
     <properties key="boardCompatibility" value="brd4183a brd4183c brd4184a brd4184b"/>
-    <properties key="partCompatibility" value=".*bgm13.* .*bgm21.* .*bgm22.*hna.* .*efr32bg12p.* .*efr32bg13p.* .*efr32bg21.* .*efr32bg22.*f512.* .*efr32mg12p.* .*efr32mg13p.* .*efr32mg21.* .*efr32mg22.* .*mgm12.* .*mgm13.* .*mgm21.* .*mgm22.*"/>
+    <properties key="partCompatibility" value=".*bgm13.* .*bgm21.* .*bgm22.*hna.* .*efr32bg12p.* .*efr32bg13p.* .*efr32bg21.* .*efr32bg22.*f512.* .*efr32bg24.* .*efr32mg12p.* .*efr32mg13p.* .*efr32mg21.* .*efr32mg22.* .*efr32mg24.* .*mgm12.* .*mgm13.* .*mgm21.* .*mgm22.*"/>
     <properties key="ideCompatibility" value="iar-embedded-workbench makefile-ide segger-embedded-studio simplicity-ide"/>
     <properties key="toolchainCompatibility" value="gcc iar segger"/>
     <properties key="category" value="Bluetooth Mesh Examples"/>
@@ -290,9 +329,9 @@
     <properties key="namespace" value="template.uc"/>
     <properties key="keywords" value="universal\ configurator"/>
     <properties key="projectFilePaths" value="example/soc_btmesh_switch/soc_btmesh_switch_low_power.slcp"/>
-    <properties key="readmeFiles" value="documentation/example/soc_btmesh_switch/readme_low_power.html"/>
-    <properties key="boardCompatibility" value="brd4103a brd4104a brd4158a brd4159a brd4161a brd4162a brd4163a brd4164a brd4165b brd4166a brd4167a brd4168a brd4170a brd4171a brd4172a brd4172b brd4173a brd4174a brd4174b brd4175a brd4176a brd4177a brd4179b brd4180a brd4180b brd4181a brd4181b brd4181c brd4182a brd4190a brd4304a brd4305a brd4305c brd4305d brd4305e brd4306a brd4306b brd4306c brd4306d brd4308a brd4308b brd4308c brd4308d brd4309a brd4309b brd4311a brd4311b brd4312a"/>
-    <properties key="partCompatibility" value=".*bgm13.* .*bgm21.* .*bgm22.*hna.* .*efr32bg12p.* .*efr32bg13p.* .*efr32bg21.* .*efr32bg22.*f512.* .*efr32mg12p.* .*efr32mg13p.* .*efr32mg21.* .*efr32mg22.* .*mgm12.* .*mgm13.* .*mgm21.* .*mgm22.*"/>
+    <properties key="readmeFiles" value="documentation/example/soc_btmesh_switch/readme_low_power.md"/>
+    <properties key="boardCompatibility" value="brd2601b brd4103a brd4104a brd4158a brd4159a brd4161a brd4162a brd4163a brd4164a brd4165b brd4166a brd4167a brd4168a brd4170a brd4171a brd4172a brd4172b brd4173a brd4174a brd4174b brd4175a brd4176a brd4177a brd4179b brd4180a brd4180b brd4181a brd4181b brd4181c brd4182a brd4186c brd4187c brd4188b brd4190a brd4304a brd4305a brd4305c brd4305d brd4305e brd4306a brd4306b brd4306c brd4306d brd4308a brd4308b brd4308c brd4308d brd4309a brd4309b brd4311a brd4311b brd4312a brd4316a brd4317a"/>
+    <properties key="partCompatibility" value=".*bgm13.* .*bgm21.* .*bgm22.*hna.* .*efr32bg12p.* .*efr32bg13p.* .*efr32bg21.* .*efr32bg22.*f512.* .*efr32bg24.* .*efr32mg12p.* .*efr32mg13p.* .*efr32mg21.* .*efr32mg22.* .*efr32mg24.* .*mgm12.* .*mgm13.* .*mgm21.* .*mgm22.*"/>
     <properties key="ideCompatibility" value="iar-embedded-workbench makefile-ide segger-embedded-studio simplicity-ide"/>
     <properties key="toolchainCompatibility" value="gcc iar segger"/>
     <properties key="category" value="Bluetooth Mesh Examples"/>
@@ -303,9 +342,9 @@
     <properties key="namespace" value="template.uc"/>
     <properties key="keywords" value="universal\ configurator"/>
     <properties key="projectFilePaths" value="example/soc_btmesh_switch/soc_btmesh_switch_low_power_single.slcp"/>
-    <properties key="readmeFiles" value="documentation/example/soc_btmesh_switch/readme_low_power.html"/>
+    <properties key="readmeFiles" value="documentation/example/soc_btmesh_switch/readme_low_power.md"/>
     <properties key="boardCompatibility" value="brd4183a brd4183c brd4184a brd4184b"/>
-    <properties key="partCompatibility" value=".*bgm13.* .*bgm21.* .*bgm22.*hna.* .*efr32bg12p.* .*efr32bg13p.* .*efr32bg21.* .*efr32bg22.*f512.* .*efr32mg12p.* .*efr32mg13p.* .*efr32mg21.* .*efr32mg22.* .*mgm12.* .*mgm13.* .*mgm21.* .*mgm22.*"/>
+    <properties key="partCompatibility" value=".*bgm13.* .*bgm21.* .*bgm22.*hna.* .*efr32bg12p.* .*efr32bg13p.* .*efr32bg21.* .*efr32bg22.*f512.* .*efr32bg24.* .*efr32mg12p.* .*efr32mg13p.* .*efr32mg21.* .*efr32mg22.* .*efr32mg24.* .*mgm12.* .*mgm13.* .*mgm21.* .*mgm22.*"/>
     <properties key="ideCompatibility" value="iar-embedded-workbench makefile-ide segger-embedded-studio simplicity-ide"/>
     <properties key="toolchainCompatibility" value="gcc iar segger"/>
     <properties key="category" value="Bluetooth Mesh Examples"/>

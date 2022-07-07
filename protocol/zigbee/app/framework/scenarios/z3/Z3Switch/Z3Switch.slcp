@@ -42,12 +42,19 @@ component:
   - id: "zigbee_zll_utility_client"
   - id: "zigbee_zll_utility_server"
   - id: "zigbee_debug_basic"
+  # -- LEDs and Buttons GPIO Conflcit Note --
+  # Some of the development boards (and modules) have limited GPIO to be used by
+  # appplication and share the exact same port/pin definition between leds and
+  # buttons. These are defined in the board configuration as indexed instances.
+  # The simple_led and simple_button components instantiate the same order of
+  # configuration from boards. So led0 and btn0 instances end up using the same
+  # GPIO configuration in that case. To avoid this conflict, in this slcp, led0
+  # and btn1 are instanciated (and not led0 and btn0) as default instances.
   - id: simple_led
     instance:
       - led0
   - id: simple_button
     instance:
-      - btn0
       - btn1
   - id: "zigbee_application_bootloader"
 

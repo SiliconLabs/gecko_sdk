@@ -144,6 +144,9 @@ extern "C" {
 #define sl_btmesh_cmd_node_power_off_id                                  0x21140028
 #define sl_btmesh_cmd_node_set_adv_phy_id                                0x22140028
 #define sl_btmesh_cmd_node_get_adv_phy_id                                0x23140028
+#define sl_btmesh_cmd_node_set_unprov_beaconing_adv_interval_id          0x28140028
+#define sl_btmesh_cmd_node_set_proxy_service_adv_interval_id             0x29140028
+#define sl_btmesh_cmd_node_set_provisioning_service_adv_interval_id      0x30140028
 #define sl_btmesh_rsp_node_init_id                                       0x00140028
 #define sl_btmesh_rsp_node_set_exportable_keys_id                        0x24140028
 #define sl_btmesh_rsp_node_start_unprov_beaconing_id                     0x01140028
@@ -180,6 +183,9 @@ extern "C" {
 #define sl_btmesh_rsp_node_power_off_id                                  0x21140028
 #define sl_btmesh_rsp_node_set_adv_phy_id                                0x22140028
 #define sl_btmesh_rsp_node_get_adv_phy_id                                0x23140028
+#define sl_btmesh_rsp_node_set_unprov_beaconing_adv_interval_id          0x28140028
+#define sl_btmesh_rsp_node_set_proxy_service_adv_interval_id             0x29140028
+#define sl_btmesh_rsp_node_set_provisioning_service_adv_interval_id      0x30140028
 
 /**
  * @brief Flags for supported OOB authentication methods during provisioning,
@@ -1445,6 +1451,9 @@ sl_status_t sl_btmesh_node_get_element_seqnum(uint16_t elem_index,
  * @param[in] option Option to set. The following options are defined:
  *     - <b>0x80</b> Generic level delta behavior. Used only with generic level
  *       models.
+ *     - <b>0xa0</b> Light models range status behavior. Used only with
+ *       Lightness, Ctl and Hsl models. Note that state codes are different for
+ *       states with status
  * @param[in] value @parblock
  *   Value for the option.
  *
@@ -1453,6 +1462,13 @@ sl_status_t sl_btmesh_node_get_element_seqnum(uint16_t elem_index,
  *       application
  *     - <b>0x1</b> Generic level delta behavior: pass processed delta request
  *       data to application (default)
+ *
+ *   The following values are defined for for Lightness, Ctl and Hsl range
+ *   status message behavior option:
+ *     - <b>0x0</b> Range Status behavior: pass status messages without status
+ *       field(default)
+ *     - <b>0x1</b> Range Status behavior: pass status messagages with status
+ *       field
  *   @endparblock
  *
  * @return SL_STATUS_OK if successful. Error code otherwise.
@@ -1536,6 +1552,67 @@ sl_status_t sl_btmesh_node_set_adv_phy(uint8_t phy);
  * @endcond
  ******************************************************************************/
 sl_status_t sl_btmesh_node_get_adv_phy(uint8_t *phy);
+
+/***************************************************************************//**
+ *
+ * Set Unprovisioned Device Beaconing advertisement interval timing parameters
+ * both with and without URI.
+ *
+ * This command sets the timing parameters of Unprovisioned Device Beaconing
+ * advertisement interval with and without URI. This setting will take effect
+ * next time the Unprovisioned Device Beaconing advertisement is started.
+ *
+ * @param[in] adv_interval_min Minimum advertisement interval. Value is in units
+ *   of 0.625 ms. Range: 0x20 to 0xFFFF. Time range: 20 ms to 40.96 s
+ * @param[in] adv_interval_max Maximum advertisement interval. Value is in units
+ *   of 0.625 ms. Must be equal to or greater than the minimum interval. Range:
+ *   0x20 to 0xFFFF. Time range: 20 ms to 40.96 s
+ *
+ * @return SL_STATUS_OK if successful. Error code otherwise.
+ *
+ ******************************************************************************/
+sl_status_t sl_btmesh_node_set_unprov_beaconing_adv_interval(uint16_t adv_interval_min,
+                                                             uint16_t adv_interval_max);
+
+/***************************************************************************//**
+ *
+ * Set Mesh Proxy Service advertisement interval timing parameters.
+ *
+ * This command sets the timing parameters of Mesh Proxy Service advertisement
+ * interval. This setting will take effect next time the Mesh Proxy Service
+ * advertisement is started.
+ *
+ * @param[in] adv_interval_min Minimum advertisement interval. Value is in units
+ *   of 0.625 ms. Range: 0x20 to 0xFFFF. Time range: 20 ms to 40.96 s
+ * @param[in] adv_interval_max Maximum advertisement interval. Value is in units
+ *   of 0.625 ms. Must be equal to or greater than the minimum interval. Range:
+ *   0x20 to 0xFFFF. Time range: 20 ms to 40.96 s
+ *
+ * @return SL_STATUS_OK if successful. Error code otherwise.
+ *
+ ******************************************************************************/
+sl_status_t sl_btmesh_node_set_proxy_service_adv_interval(uint16_t adv_interval_min,
+                                                          uint16_t adv_interval_max);
+
+/***************************************************************************//**
+ *
+ * Set Mesh Provisioning Service advertisement interval timing parameters.
+ *
+ * This command sets the timing parameters of Mesh Provisioning Service
+ * advertisement interval. This setting will take effect next time the Mesh
+ * Provisioning Service advertisement is started.
+ *
+ * @param[in] adv_interval_min Minimum advertisement interval. Value is in units
+ *   of 0.625 ms. Range: 0x20 to 0xFFFF. Time range: 20 ms to 40.96 s
+ * @param[in] adv_interval_max Maximum advertisement interval. Value is in units
+ *   of 0.625 ms. Must be equal to or greater than the minimum interval. Range:
+ *   0x20 to 0xFFFF. Time range: 20 ms to 40.96 s
+ *
+ * @return SL_STATUS_OK if successful. Error code otherwise.
+ *
+ ******************************************************************************/
+sl_status_t sl_btmesh_node_set_provisioning_service_adv_interval(uint16_t adv_interval_min,
+                                                                 uint16_t adv_interval_max);
 
 /** @} */ // end addtogroup sl_btmesh_node
 
@@ -12134,6 +12211,31 @@ typedef struct sl_btmesh_evt_scheduler_server_scene_changed_s sl_btmesh_evt_sche
 
 /** @} */ // end addtogroup sl_btmesh_evt_scheduler_server_scene_changed
 
+/**
+ * @addtogroup sl_btmesh_evt_scheduler_server_action_triggered sl_btmesh_evt_scheduler_server_action_triggered
+ * @{
+ * @brief Notification about a Scheduler Action that had its deadline expired"
+ */
+
+/** @brief Identifier of the action_triggered event */
+#define sl_btmesh_evt_scheduler_server_action_triggered_id               0x035500a8
+
+/***************************************************************************//**
+ * @brief Data structure of the action_triggered event
+ ******************************************************************************/
+PACKSTRUCT( struct sl_btmesh_evt_scheduler_server_action_triggered_s
+{
+  uint16_t elem_index;         /**< Scheduler server model element index */
+  uint8_t  index;              /**< Index of the Scheduler Register */
+  uint8_t  action;             /**< Action to be performed at the scheduled time */
+  uint32_t transition_time_ms; /**< Transition time for this action */
+  uint16_t scene_number;       /**< Scene number to be used for some actions */
+});
+
+typedef struct sl_btmesh_evt_scheduler_server_action_triggered_s sl_btmesh_evt_scheduler_server_action_triggered_t;
+
+/** @} */ // end addtogroup sl_btmesh_evt_scheduler_server_action_triggered
+
 /***************************************************************************//**
  *
  * Initialize the Scheduler Server model
@@ -13175,6 +13277,7 @@ PACKSTRUCT( struct sl_btmesh_msg {
     sl_btmesh_evt_scheduler_client_action_status_t               evt_scheduler_client_action_status; /**< Data field for scheduler_client action_status event*/
     sl_btmesh_evt_scheduler_server_action_changed_t              evt_scheduler_server_action_changed; /**< Data field for scheduler_server action_changed event*/
     sl_btmesh_evt_scheduler_server_scene_changed_t               evt_scheduler_server_scene_changed; /**< Data field for scheduler_server scene_changed event*/
+    sl_btmesh_evt_scheduler_server_action_triggered_t            evt_scheduler_server_action_triggered; /**< Data field for scheduler_server action_triggered event*/
     sl_btmesh_evt_time_server_time_updated_t                     evt_time_server_time_updated; /**< Data field for time_server time_updated event*/
     sl_btmesh_evt_time_server_time_zone_offset_updated_t         evt_time_server_time_zone_offset_updated; /**< Data field for time_server time_zone_offset_updated event*/
     sl_btmesh_evt_time_server_tai_utc_delta_updated_t            evt_time_server_tai_utc_delta_updated; /**< Data field for time_server tai_utc_delta_updated event*/

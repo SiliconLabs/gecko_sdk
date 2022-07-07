@@ -3,7 +3,7 @@
  * @brief Sound level sensor
  *******************************************************************************
  * # License
- * <b>Copyright 2020 Silicon Laboratories Inc. www.silabs.com</b>
+ * <b>Copyright 2022 Silicon Laboratories Inc. www.silabs.com</b>
  *******************************************************************************
  *
  * SPDX-License-Identifier: Zlib
@@ -46,29 +46,33 @@
 // -----------------------------------------------------------------------------
 // Private variables
 
-static bool mic_enabled = false;
+static bool initialized = false;
 static float sound_level = 0;
 static int16_t buffer[MIC_SAMPLE_BUFFER_SIZE * MIC_N_CHANNELS];
 
 // -----------------------------------------------------------------------------
 // Public function definitions
 
-void sl_sensor_sound_init(void)
+sl_status_t sl_sensor_sound_init(void)
 {
   sl_status_t sc;
   // Enable microphone and wait 50 ms power up time
   sl_board_enable_sensor(SL_BOARD_SENSOR_MICROPHONE);
   sl_sleeptimer_delay_millisecond(50);
   sc = sl_mic_init(MIC_SAMPLE_RATE, MIC_N_CHANNELS);
-  app_assert_status(sc);
-  // Start sampling
-  sl_mic_get_n_samples(buffer, MIC_SAMPLE_BUFFER_SIZE);
-  mic_enabled = true;
+  if (SL_STATUS_OK == sc) {
+    // Start sampling
+    sl_mic_get_n_samples(buffer, MIC_SAMPLE_BUFFER_SIZE);
+    initialized = true;
+  } else {
+    initialized = false;
+  }
+  return sc;
 }
 
 void sl_sensor_sound_deinit(void)
 {
-  mic_enabled = false;
+  initialized = false;
   sl_mic_deinit();
   sl_board_disable_sensor(SL_BOARD_SENSOR_MICROPHONE);
 }
@@ -76,13 +80,17 @@ void sl_sensor_sound_deinit(void)
 sl_status_t sl_sensor_sound_get(float *sl)
 {
   *sl = sound_level;
-  return SL_STATUS_OK;
+  if (initialized) {
+    return SL_STATUS_OK;
+  } else {
+    return SL_STATUS_NOT_INITIALIZED;
+  }
 }
 
 void sl_sensor_sound_step(void)
 {
   float sl;
-  if (mic_enabled) {
+  if (initialized) {
     if (sl_mic_sample_buffer_ready()) {
       if (SL_STATUS_OK == sl_mic_calculate_sound_level(&sl, buffer, MIC_SAMPLE_BUFFER_SIZE, 0)) {
         // Apply IIR filter on the measured value

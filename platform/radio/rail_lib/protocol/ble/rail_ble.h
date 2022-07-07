@@ -170,6 +170,77 @@ RAIL_ENUM(RAIL_BLE_Phy_t) {
 #define RAIL_BLE_Coded500kbps ((RAIL_BLE_Phy_t) RAIL_BLE_Coded500kbps)
 #endif //DOXYGEN_SHOULD_SKIP_THIS
 
+/// @addtogroup BLE_PHY BLE Radio Configurations
+/// Radio configurations for the RAIL BLE Accelerator
+///
+/// These radio configurations are used to configure BLE when a function such
+/// as \ref RAIL_BLE_ConfigPhy1MbpsViterbi() is called. Each radio
+/// configuration listed below is compiled into the RAIL library as a weak
+/// symbol that will take into account per-die defaults. If the board
+/// configuration in use has different settings than the default, such as a
+/// different radio subsystem clock frequency, these radio configurations can
+/// be overriden to account for those settings.
+/// @{
+
+/**
+ * Default PHY to use for BLE 1M non-Viterbi. Will be NULL if
+ * \ref RAIL_BLE_SUPPORTS_1MBPS_NON_VITERBI is 0.
+ */
+extern const RAIL_ChannelConfig_t *const RAIL_BLE_Phy1Mbps;
+
+/**
+ * Default PHY to use for BLE 2M non-Viterbi. Will be NULL if
+ * \ref RAIL_BLE_SUPPORTS_2MBPS_NON_VITERBI is 0.
+ */
+extern const RAIL_ChannelConfig_t *const RAIL_BLE_Phy2Mbps;
+
+/**
+ * Default PHY to use for BLE 1M Viterbi. Will be NULL if
+ * \ref RAIL_BLE_SUPPORTS_1MBPS_VITERBI is 0.
+ */
+extern const RAIL_ChannelConfig_t *const RAIL_BLE_Phy1MbpsViterbi;
+
+/**
+ * Default PHY to use for BLE 2M Viterbi. Will be NULL if
+ * \ref RAIL_BLE_SUPPORTS_2MBPS_VITERBI is 0.
+ */
+extern const RAIL_ChannelConfig_t *const RAIL_BLE_Phy2MbpsViterbi;
+
+/**
+ * PHY to use for BLE 2M with AoX functionality. Will be NULL if either
+ * \ref RAIL_BLE_SUPPORTS_2MBPS_VITERBI or \ref RAIL_BLE_SUPPORTS_AOX is 0.
+ */
+extern const RAIL_ChannelConfig_t *const RAIL_BLE_Phy2MbpsAox;
+
+/**
+ * Default PHY to use for BLE Coded 125kbps. Will be NULL if
+ * \ref RAIL_BLE_SUPPORTS_CODED_PHY is 0. This PHY can receive on both
+ * 125kbps and 500kbps BLE Coded, but will only transmit at 125kbps.
+ */
+extern const RAIL_ChannelConfig_t *const RAIL_BLE_Phy125kbps;
+
+/**
+ * Default PHY to use for BLE Coded 500kbps. Will be NULL if
+ * \ref RAIL_BLE_SUPPORTS_CODED_PHY is 0. This PHY can receive on both
+ * 125kbps and 500kbps BLE Coded, but will only transmit at 125kbps.
+ */
+extern const RAIL_ChannelConfig_t *const RAIL_BLE_Phy500kbps;
+
+/**
+ * Default PHY to use for BLE Simulscan. Will be NULL if
+ * \ref RAIL_BLE_SUPPORTS_SIMULSCAN_PHY is 0. This PHY can receive on 1Mbps
+ * as well as 125kbps and 500kbps BLE Coded, but will only transmit at 1Mbps.
+ */
+extern const RAIL_ChannelConfig_t *const RAIL_BLE_PhySimulscan;
+
+/**
+ * Default 1Mbps Quuppa PHY. Will be NULL if
+ * \ref RAIL_BLE_SUPPORTS_QUUPPA is 0.
+ */
+extern const RAIL_ChannelConfig_t *const RAIL_BLE_PhyQuuppa;
+
+/// @} // End of group BLE_PHY
+
 // Defines for subPhyID field in RAIL_RxPacketDetails_t
 /** subPhyId indicating a 500kbps packet */
 #define RAIL_BLE_RX_SUBPHY_ID_500K     (0U)

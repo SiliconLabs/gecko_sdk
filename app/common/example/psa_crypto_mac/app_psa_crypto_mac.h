@@ -82,6 +82,20 @@ void set_mac_len(uint8_t length);
 psa_status_t generate_random_number(uint8_t *buf, uint32_t size);
 
 /***************************************************************************//**
+ * Compute the MAC of the message.
+ *
+ * @returns Returns PSA error code, @ref crypto_values.h.
+ ******************************************************************************/
+psa_status_t compute_mac(void);
+
+/***************************************************************************//**
+ * Compute the MAC of a message and compare it with an expected value.
+ *
+ * @returns Returns PSA error code, @ref crypto_values.h.
+ ******************************************************************************/
+psa_status_t verify_mac(void);
+
+/***************************************************************************//**
  * Start a MAC sign stream.
  *
  * @returns Returns PSA error code, @ref crypto_values.h.

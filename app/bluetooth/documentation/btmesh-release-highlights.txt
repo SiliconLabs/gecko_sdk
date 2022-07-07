@@ -1,5 +1,7 @@
-Bluetooth Mesh SDK 2.2.1.0
-- Selected quality improvements and bug fixes
+Bluetooth Mesh SDK 2.2.2.0
+- EFR32M|BG24 support
+- Added support for controlling the advertising interval for unprovisioned device beacons, GATT provisioning service advertisements, and GATT proxy service advertisements. 
+- Made a number of small optimizations reducing the flash consumption of projects; exact amount saved depends on the feature set a project uses.
 
 
 

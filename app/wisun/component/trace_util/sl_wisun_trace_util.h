@@ -112,7 +112,7 @@ const char * app_wisun_trace_util_nw_size_to_str(const uint32_t val);
  * @param[in] num The swappng number
  * @return uint16_t integer 
  *****************************************************************************/
-inline uint16_t app_wisun_trace_swap_u16(uint16_t num) {
+static inline uint16_t app_wisun_trace_swap_u16(uint16_t num) {
   return (((num & 0xFF) << 8) | ((num & 0xFF00) >> 8));
 }
 

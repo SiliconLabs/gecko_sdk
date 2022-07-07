@@ -3,7 +3,7 @@
  * @brief CMSIS Compatible MGM24 startup file in C for IAR EWARM
  ******************************************************************************
  * # License
- * <b>Copyright 2021 Silicon Laboratories, Inc. www.silabs.com</b>
+ * <b>Copyright 2022 Silicon Laboratories, Inc. www.silabs.com</b>
  ******************************************************************************
  *
  * SPDX-License-Identifier: Zlib
@@ -200,11 +200,6 @@ __weak void EUSART1_RX_IRQHandler(void)
   }
 }
 __weak void EUSART1_TX_IRQHandler(void)
-{
-  while (true) {
-  }
-}
-__weak void MVP_IRQHandler(void)
 {
   while (true) {
   }
@@ -550,7 +545,7 @@ const tVectorEntry __vector_table[] = {
   { EUSART0_TX_IRQHandler },        /* -4 - EUSART0_TX */
   { EUSART1_RX_IRQHandler },        /* -3 - EUSART1_RX */
   { EUSART1_TX_IRQHandler },        /* -2 - EUSART1_TX */
-  { MVP_IRQHandler },               /* -1 - MVP */
+  { 0 },                            /* Reserved */
   { ICACHE0_IRQHandler },           /* 00 - ICACHE0 */
   { BURTC_IRQHandler },             /* 01 - BURTC */
   { LETIMER0_IRQHandler },          /* 02 - LETIMER0 */

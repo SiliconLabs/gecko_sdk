@@ -1,4 +1,5 @@
-Flex SDK 3.3.0.0
-- Selected quality improvements and bug fixes 
+Flex SDK 3.3.2.0
+- EFR32xG24 support
+- Targeted quality improvements and bug fixes 
 
 

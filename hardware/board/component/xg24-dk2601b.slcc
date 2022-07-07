@@ -14,9 +14,9 @@
   - name: SL_KIT_NAME
     value: '"XG24-DK2601B"'
   - name: SL_KIT_REV
-    value: '"A00"'
+    value: '"A02"'
 - tag:
   - kit:opn:xG24-DK2601B
   - kit:pn:DK2601
   - kit:variant:B
-  - kit:revision:A00
+  - kit:revision:A02

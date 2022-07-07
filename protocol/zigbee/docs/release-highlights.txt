@@ -1,7 +1,7 @@
-Zigbee EmberZNet SDK 7.0.1.0
-- Added sl_set_passive_ack_config, which allows the higher layers to control the broadcast behavior of  a routing device.
-- The Known Issues table in the release notes has been scrubbed. Issues fixed in version 7.0.0.0 are now reflected in the Fixed Issues section. 
-- Other selected quality improvements and bug fixes
+Zigbee EmberZNet SDK 7.0.2.0
+- EFR32MG24 support
+- New APIs including setting the power descriptor dynamic value.
+- Other targeted quality improvements and bug fixes
 
 
 

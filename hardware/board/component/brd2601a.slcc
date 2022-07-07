@@ -64,5 +64,5 @@
   - hardware:has:microphone
   - hardware:has:led:3
   - hardware:has:button:2
-  - hardware:has:memory:spi:mx25r8035f
+  - hardware:has:memory:spi:mx25r3235f
   - hardware:has:imu

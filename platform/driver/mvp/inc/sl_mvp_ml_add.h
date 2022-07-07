@@ -38,6 +38,12 @@
 extern "C" {
 #endif
 
+/// @cond DO_NOT_INCLUDE_WITH_DOXYGEN
+/***************************************************************************//**
+ * @addtogroup mvp MVP API
+ * @{
+ ******************************************************************************/
+
 /** Add operation data structure. */
 typedef struct {
   const int8_t    *input1;            ///< Input 1 data pointer.
@@ -92,6 +98,9 @@ sl_status_t sli_mvp_ml_add_s8(const sli_mvp_ml_add_s8_params_t *params);
  *    false otherwise.
  ******************************************************************************/
 bool sli_mvp_ml_add_s8_is_supported(const sli_mvp_ml_add_s8_params_t *params);
+
+/** @} (end addtogroup mvp) */
+/// @endcond
 
 #ifdef __cplusplus
 }

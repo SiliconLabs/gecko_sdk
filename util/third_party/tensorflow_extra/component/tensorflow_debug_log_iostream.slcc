@@ -1,10 +1,10 @@
 id: tensorflow_debug_log_iostream
 package: platform
-label: TensorFlow Lite Micro Debug Log - IO Stream
+label: Debug Logging using IO Stream
 description: >
   This component enables debug logging in TensorFlow Lite Micro
   and provides an implementation using IO Stream.
-category: Platform|Machine Learning|TensorFlow
+category: Machine Learning|TensorFlow|Debug
 quality: production
 root_path: util/third_party/tensorflow_extra
 provides:

@@ -174,9 +174,15 @@ enum {
   // to the trust center even without receiving a many-to-one route request. The
   // default concentrator type can be changed by setting appropriate
   // EmberAssumeTrustCenterConcentratorType config value.
-  EZSP_CONFIG_ASSUME_TC_CONCENTRATOR_TYPE       = 0x40
+  EZSP_CONFIG_ASSUME_TC_CONCENTRATOR_TYPE       = 0x40,
+  // This is green power proxy table size. This value is read-only and cannot be
+  // set at runtime
+  EZSP_CONFIG_GP_PROXY_TABLE_SIZE               = 0x41,
+  // This is green power sink table size. This value is read-only and cannot be
+  // set at runtime
+  EZSP_CONFIG_GP_SINK_TABLE_SIZE                = 0x42
 };
-#define EZSP_CONFIG_ID_MAX  0x40
+#define EZSP_CONFIG_ID_MAX  0x42
 
 //------------------------------------------------------------------------------
 // Identifies a value.
@@ -808,11 +814,13 @@ enum {
   EZSP_GET_RADIO_PARAMETERS                     = 0x00FD,
   EZSP_GET_PARENT_CHILD_PARAMETERS              = 0x0029,
   EZSP_GET_CHILD_DATA                           = 0x004A,
+  EZSP_SET_CHILD_DATA                           = 0x00AC,
   EZSP_GET_SOURCE_ROUTE_TABLE_TOTAL_SIZE        = 0x00C3,
   EZSP_GET_SOURCE_ROUTE_TABLE_FILLED_SIZE       = 0x00C2,
   EZSP_GET_SOURCE_ROUTE_TABLE_ENTRY             = 0x00C1,
   EZSP_GET_NEIGHBOR                             = 0x0079,
   EZSP_GET_NEIGHBOR_FRAME_COUNTER               = 0x003E,
+  EZSP_SET_NEIGHBOR_FRAME_COUNTER               = 0x00AD,
   EZSP_SET_ROUTING_SHORTCUT_THRESHOLD           = 0x00D0,
   EZSP_GET_ROUTING_SHORTCUT_THRESHOLD           = 0x00D1,
   EZSP_NEIGHBOR_COUNT                           = 0x007A,
@@ -820,6 +828,7 @@ enum {
   EZSP_SET_RADIO_POWER                          = 0x0099,
   EZSP_SET_RADIO_CHANNEL                        = 0x009A,
   EZSP_GET_RADIO_CHANNEL                        = 0x00FF,
+  EZSP_SET_RADIO_IEEE802154_CCA_MODE            = 0x0095,
   EZSP_SET_CONCENTRATOR                         = 0x0010,
   EZSP_SET_BROKEN_ROUTE_ERROR_CODE              = 0x0011,
   EZSP_MULTI_PHY_START                          = 0x00F8,

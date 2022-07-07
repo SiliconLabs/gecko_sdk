@@ -118,7 +118,7 @@ void app_set(sl_cli_command_arg_t *arguments)
       printf("[Failed: unable to get the set help]\r\n");
     }
   } else if (argument_count == 0 || (!strcmp(sl_cli_get_argument_string(arguments, argument_count - 1), "help"))) {
-    domain_and_key = sl_cli_get_argument_string(arguments, 0);
+    domain_and_key = (char *) sl_cli_get_argument_string(arguments, 0);
     value = NULL;
     if (app_settings_help(domain_and_key, 0) != SL_STATUS_OK) {
       printf("[Failed: unable to get the get help of : %s]\r\n", domain_and_key);
@@ -129,7 +129,7 @@ void app_set(sl_cli_command_arg_t *arguments)
       app_wisun_release_cli_mutex_and_return();
     }
 
-    domain_and_key = sl_cli_get_argument_string(arguments, 0);
+    domain_and_key = (char *) sl_cli_get_argument_string(arguments, 0);
     value = sl_cli_get_argument_string(arguments, 1);
 
     if (value == NULL || domain_and_key == NULL) {
@@ -163,7 +163,7 @@ void app_get(sl_cli_command_arg_t *arguments)
       printf("[Failed: unable to get the get help]\r\n");
     }
   } else if (argument_count == 0 || (!strcmp(sl_cli_get_argument_string(arguments, argument_count - 1), "help"))) {
-    domain_and_key = sl_cli_get_argument_string(arguments, 0);
+    domain_and_key = (char *) sl_cli_get_argument_string(arguments, 0);
     if (app_settings_help(domain_and_key, 1) != SL_STATUS_OK) {
       printf("[Failed: unable to get the set help of : %s]\r\n", domain_and_key);
     }
@@ -173,7 +173,7 @@ void app_get(sl_cli_command_arg_t *arguments)
       app_wisun_release_cli_mutex_and_return();
     }
 
-    domain_and_key = sl_cli_get_argument_string(arguments, 0);
+    domain_and_key = (char *) sl_cli_get_argument_string(arguments, 0);
     if (app_settings_get(domain_and_key) != SL_STATUS_OK) {
       printf("[Failed: unable to get the key: %s]\r\n", domain_and_key);
     }

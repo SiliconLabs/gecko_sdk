@@ -44,8 +44,12 @@
 #define emberSetRadioPower                  ezspSetRadioPower
 #define emberSetRadioChannel                ezspSetRadioChannel
 #define emberGetRadioChannel                ezspGetRadioChannel
+#define emberSetRadioIeee802154CcaMode      ezspSetRadioIeee802154CcaMode
 #define emberSetBrokenRouteErrorCode        ezspSetBrokenRouteErrorCode
 #define emberGetNeighborFrameCounter        ezspGetNeighborFrameCounter
+#define emberSetNeighborFrameCounter        ezspSetNeighborFrameCounter
+#define emberGetChildData                   ezspGetChildData
+#define emberSetChildData                   ezspSetChildData
 
 #define emberSetConcentrator                ezspSetConcentrator
 #define emberSetSourceRouteDiscoveryMode    ezspSetSourceRouteDiscoveryMode

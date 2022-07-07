@@ -90,6 +90,10 @@ EmberStatus emberAfTrustCenterExportBackupToFile(const char* filepath);
 
 /** @} */ // end of name API
 /** @} */ // end of trust-center-backup
-
+#ifdef UC_BUILD
+void emAfTcExportCommand(sl_cli_command_arg_t *arguments);
+void emAfTcImportCommand(sl_cli_command_arg_t *arguments);
+#else
 void emAfTcExportCommand(void);
 void emAfTcImportCommand(void);
+#endif

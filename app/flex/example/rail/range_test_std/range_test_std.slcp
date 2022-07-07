@@ -72,6 +72,9 @@ source:
 readme:
   - path: ../../../documentation/example/rail/range_test/readme.md
 
+other_file:
+  - path: "hw_filter_tags.yaml"
+
 #------------ Configuration overrides ----------------
 configuration:
 #----------------- OS --------------------------------
@@ -180,19 +183,3 @@ ui_hints:
     - path: "config/rail/radio_settings.radioconf"
       focus: true
 
-tag:
-  - hardware:
-      device:
-        memory:
-          flash: 126
-          ram: 20
-      board:
-        rf_bands:
-          - 2400
-        communication:
-          - vcom
-          - pti
-        io:
-          button: 2
-          display: true
-  

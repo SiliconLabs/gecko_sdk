@@ -23,11 +23,11 @@ limitations under the License.
 #include "tensorflow/lite/kernels/internal/tensor_ctypes.h"
 #include "tensorflow/lite/kernels/kernel_util.h"
 #include "tensorflow/lite/kernels/op_macros.h"
+#include "tensorflow/lite/micro/kernels/kernel_util.h"
 #include "sl_mvp_ml_add.h"
 
 namespace tflite {
-namespace ops {
-namespace micro {
+namespace sl {
 namespace add {
 
 constexpr int kInputTensor1 = 0;
@@ -108,29 +108,28 @@ TfLiteStatus CalculateOpData(TfLiteContext* context, TfLiteAddParams* params,
 }
 
 void EvalAdd(TfLiteContext* context, TfLiteNode* node, TfLiteAddParams* params,
-             const OpData* data, const TfLiteTensor* input1,
-             const TfLiteTensor* input2, TfLiteTensor* output) {
+             const OpData* data, const TfLiteEvalTensor* input1,
+             const TfLiteEvalTensor* input2, TfLiteEvalTensor* output) {
   tflite::ArithmeticParams op_params;
   SetActivationParams(data->output_activation_min_f32,
                       data->output_activation_max_f32, &op_params);
   if (data->requires_broadcast) {
-    reference_ops::BroadcastAdd4DSlow(op_params,
-                                      GetTensorShape(input1), GetTensorData<float>(input1),
-                                      GetTensorShape(input2), GetTensorData<float>(input2),
-                                      GetTensorShape(output), GetTensorData<float>(output));
+    reference_ops::BroadcastAdd4DSlow(op_params, tflite::micro::GetTensorShape(input1), tflite::micro::GetTensorData<float>(input1),
+                                      tflite::micro::GetTensorShape(input2), tflite::micro::GetTensorData<float>(input2),
+                                      tflite::micro::GetTensorShape(output), tflite::micro::GetTensorData<float>(output));
   } else {
     reference_ops::Add(op_params,
-                       GetTensorShape(input1), GetTensorData<float>(input1),
-                       GetTensorShape(input2), GetTensorData<float>(input2),
-                       GetTensorShape(output), GetTensorData<float>(output));
+                       tflite::micro::GetTensorShape(input1), tflite::micro::GetTensorData<float>(input1),
+                       tflite::micro::GetTensorShape(input2), tflite::micro::GetTensorData<float>(input2),
+                       tflite::micro::GetTensorShape(output), tflite::micro::GetTensorData<float>(output));
   }
 }
 
 TfLiteStatus EvalAddQuantized(TfLiteContext* context, TfLiteNode* node,
                               TfLiteAddParams* params, const OpData* data,
-                              const TfLiteTensor* input1,
-                              const TfLiteTensor* input2,
-                              TfLiteTensor* output) {
+                              const TfLiteEvalTensor* input1,
+                              const TfLiteEvalTensor* input2,
+                              TfLiteEvalTensor* output) {
   TfLiteStatus status = kTfLiteOk;
   tflite::ArithmeticParams op_params;
   op_params.left_shift = data->left_shift;
@@ -147,18 +146,18 @@ TfLiteStatus EvalAddQuantized(TfLiteContext* context, TfLiteNode* node,
   op_params.quantized_activation_max = data->params.activation_max;
 
   // TODO: Do we need to support the broadcast scenario?
-  bool need_broadcast = reference_ops::ProcessBroadcastShapes(GetTensorShape(input1), GetTensorShape(input2), &op_params);
+  bool need_broadcast = reference_ops::ProcessBroadcastShapes(tflite::micro::GetTensorShape(input1), tflite::micro::GetTensorShape(input2), &op_params);
 
   if (need_broadcast) {
     reference_integer_ops::BroadcastAdd4DSlow(op_params,
-                                              GetTensorShape(input1), GetTensorData<int8_t>(input1),
-                                              GetTensorShape(input2), GetTensorData<int8_t>(input2),
-                                              GetTensorShape(output), GetTensorData<int8_t>(output));
+                                              tflite::micro::GetTensorShape(input1), tflite::micro::GetTensorData<int8_t>(input1),
+                                              tflite::micro::GetTensorShape(input2), tflite::micro::GetTensorData<int8_t>(input2),
+                                              tflite::micro::GetTensorShape(output), tflite::micro::GetTensorData<int8_t>(output));
   } else {
     sli_mvp_ml_add_s8_params_t params = data->params;
-    params.input1 = GetTensorData<int8_t>(input1);
-    params.input2 = GetTensorData<int8_t>(input2);
-    params.output = GetTensorData<int8_t>(output);
+    params.input1 = tflite::micro::GetTensorData<int8_t>(input1);
+    params.input2 = tflite::micro::GetTensorData<int8_t>(input2);
+    params.output = tflite::micro::GetTensorData<int8_t>(output);
     sl_status_t ret = sli_mvp_ml_add_s8(&params);
     if (ret != SL_STATUS_OK) {
         status = kTfLiteError;
@@ -199,9 +198,9 @@ TfLiteStatus Eval(TfLiteContext* context, TfLiteNode* node) {
   TFLITE_DCHECK(node->user_data != nullptr);
   const OpData* data = static_cast<const OpData*>(node->user_data);
 
-  const TfLiteTensor* input1 = GetInput(context, node, kInputTensor1);
-  const TfLiteTensor* input2 = GetInput(context, node, kInputTensor2);
-  TfLiteTensor* output = GetOutput(context, node, kOutputTensor);
+  const TfLiteEvalTensor* input1 = tflite::micro::GetEvalInput(context, node, kInputTensor1);
+  const TfLiteEvalTensor* input2 = tflite::micro::GetEvalInput(context, node, kInputTensor2);
+  TfLiteEvalTensor* output = tflite::micro::GetEvalOutput(context, node, kOutputTensor);
 
   if (output->type == kTfLiteFloat32) {
     EvalAdd(context, node, params, data, input1, input2, output);
@@ -218,14 +217,13 @@ TfLiteStatus Eval(TfLiteContext* context, TfLiteNode* node) {
 }
 
 }  // namespace add
-}  // namespace micro
-}  // namespace ops
+}  // namespace sl
 
 TfLiteRegistration Register_ADD() {
-  return {/*init=*/ops::micro::add::Init,
+  return {/*init=*/sl::add::Init,
           /*free=*/nullptr,
-          /*prepare=*/ops::micro::add::Prepare,
-          /*invoke=*/ops::micro::add::Eval,
+          /*prepare=*/sl::add::Prepare,
+          /*invoke=*/sl::add::Eval,
           /*profiling_string=*/nullptr,
           /*builtin_code=*/0,
           /*custom_name=*/nullptr,

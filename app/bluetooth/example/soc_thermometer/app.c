@@ -66,9 +66,14 @@ static void app_periodic_timer_cb(sl_simple_timer_t *timer, void *data);
  *****************************************************************************/
 SL_WEAK void app_init(void)
 {
+  sl_status_t sc;
   app_log_info("health thermometer initialised\n");
   // Init temperature sensor.
-  sl_sensor_rht_init();
+  sc = sl_sensor_rht_init();
+  if (sc != SL_STATUS_OK) {
+    app_log_warning("Relative Humidity and Temperature sensor initialization failed.");
+    app_log_nl();
+  }
 }
 
 #ifndef SL_CATALOG_KERNEL_PRESENT
@@ -285,7 +290,10 @@ static void app_periodic_timer_cb(sl_simple_timer_t *timer, void *data)
 
   // Measure temperature; units are % and milli-Celsius.
   sc = sl_sensor_rht_get(&humidity, &temperature);
-  if (sc != SL_STATUS_OK) {
+  if (SL_STATUS_NOT_INITIALIZED == sc) {
+    app_log_info("Relative Humidity and Temperature sensor is not initialized.");
+    app_log_nl();
+  } else if (sc != SL_STATUS_OK) {
     app_log_warning("Invalid RHT reading: %lu %ld\n", humidity, temperature);
   }
 

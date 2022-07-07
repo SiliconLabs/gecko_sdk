@@ -29,7 +29,7 @@ Further readings:
 
 ## Prepare the Application
 
-Open the *Flex (Connect) - SoC Sink* and *Flex (Connect) - SoC Sink* examples
+Open the *Flex (Connect) - SoC Sensor* and *Flex (Connect) - SoC Sink* examples
 through Simplicity Studio project wizard.
 
 Compile both projects and download Sink (acts as *coordinator*) to one device

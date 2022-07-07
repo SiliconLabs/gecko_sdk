@@ -3,7 +3,7 @@
  * @brief Air Quality GATT Service
  *******************************************************************************
  * # License
- * <b>Copyright 2020 Silicon Laboratories Inc. www.silabs.com</b>
+ * <b>Copyright 2022 Silicon Laboratories Inc. www.silabs.com</b>
  *******************************************************************************
  *
  * SPDX-License-Identifier: Zlib
@@ -33,6 +33,7 @@
 #include "gatt_db.h"
 #include "app_assert.h"
 #include "sl_gatt_service_gas.h"
+#include "sl_gatt_service_gas_config.h"
 
 // -----------------------------------------------------------------------------
 // Private variables
@@ -52,12 +53,18 @@ static void gas_tvoc_read_cb(sl_bt_evt_gatt_server_user_read_request_t *data);
 
 static void gas_update(void)
 {
+  sl_status_t sc;
   uint16_t eco2;
   uint16_t tvoc;
+
+  sc = sl_gatt_service_gas_get(&eco2, &tvoc);
   // keep previous data if measurement fails
-  if (SL_STATUS_OK == sl_gatt_service_gas_get(&eco2, &tvoc)) {
+  if (SL_STATUS_OK == sc) {
     gas_eco2 = eco2;
     gas_tvoc = tvoc;
+  } else if (SL_STATUS_NOT_INITIALIZED == sc) {
+    gas_eco2 = SL_GATT_SERVICE_GAS_ECO2_INVALID;
+    gas_tvoc = SL_GATT_SERVICE_GAS_TVOC_INVALID;
   }
 }
 

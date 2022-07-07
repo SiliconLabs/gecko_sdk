@@ -28,13 +28,21 @@
  *
  ******************************************************************************/
 
+#if defined(SL_COMPONENT_CATALOG_PRESENT)
+#include "sl_component_catalog.h"
+#endif
+
 #include "psa/crypto.h"
 #include "psa/crypto_sizes.h"
 
 #include "sl_cpc.h"
 #include "sli_cpc.h"
-#include "sl_cpc_security.h"
 #include "sl_atomic.h"
+#if defined(SL_CATALOG_CPC_SECURITY_PRESENT)
+#include "sl_cpc_security.h"
+#endif
+
+#include "em_assert.h"
 
 #define SLI_CPC_SECURITY_PSA_CRYPTO_BINDING_KEY_ID 0x00004200
 

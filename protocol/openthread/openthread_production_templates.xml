@@ -5,7 +5,7 @@
     <properties key="keywords" value="universal\ configurator"/>
     <properties key="projectFilePaths" value="sample-apps/ot-ble-dmp/ot-ble-dmp.slcp"/>
     <properties key="readmeFiles" value=""/>
-    <properties key="boardCompatibility" value="brd2601a brd4158a brd4159a brd4161a brd4162a brd4163a brd4164a brd4165b brd4166a brd4167a brd4168a brd4169a brd4169b brd4170a brd4171a brd4172a brd4172b brd4173a brd4174a brd4174b brd4175a brd4176a brd4177a brd4179b brd4180a brd4180b brd4181a brd4181b brd4181c brd4186a brd4186b brd4187a brd4187b brd4188a brd4190a brd4300b brd4304a brd4305d brd4305e brd4306c brd4306d brd4308a brd4308b brd4308c brd4308d brd4309a brd4309b brd4316a brd4317a com.silabs.board.none"/>
+    <properties key="boardCompatibility" value="brd2601a brd2601b brd4158a brd4159a brd4161a brd4162a brd4163a brd4164a brd4165b brd4166a brd4167a brd4168a brd4169a brd4169b brd4170a brd4171a brd4172a brd4172b brd4173a brd4174a brd4174b brd4175a brd4176a brd4177a brd4179b brd4180a brd4180b brd4181a brd4181b brd4181c brd4186a brd4186b brd4186c brd4187a brd4187b brd4187c brd4188a brd4188b brd4190a brd4300b brd4304a brd4305d brd4305e brd4306c brd4306d brd4308a brd4308b brd4308c brd4308d brd4309a brd4309b brd4316a brd4317a brd4319a com.silabs.board.none"/>
     <properties key="partCompatibility" value=".*efr32mg12p.* .*efr32mg13p.* .*efr32mg14p.* .*efr32mg1p.* .*efr32mg21.* .*efr32mg24.* .*mgm1.* .*mgm12.* .*mgm13.* .*mgm21.* .*mgm24.*"/>
     <properties key="ideCompatibility" value="makefile-ide segger-embedded-studio simplicity-ide"/>
     <properties key="toolchainCompatibility" value="gcc"/>
@@ -18,7 +18,7 @@
     <properties key="keywords" value="universal\ configurator"/>
     <properties key="projectFilePaths" value="sample-apps/ot-cli/ot-cli-ftd.slcp"/>
     <properties key="readmeFiles" value=""/>
-    <properties key="boardCompatibility" value="brd2601a brd4158a brd4159a brd4161a brd4162a brd4163a brd4164a brd4165b brd4166a brd4167a brd4168a brd4169a brd4169b brd4170a brd4171a brd4172a brd4172b brd4173a brd4174a brd4174b brd4175a brd4176a brd4177a brd4179b brd4180a brd4180b brd4181a brd4181b brd4181c brd4186a brd4186b brd4187a brd4187b brd4188a brd4190a brd4300b brd4304a brd4305d brd4305e brd4306c brd4306d brd4308a brd4308b brd4308c brd4308d brd4309a brd4309b brd4316a brd4317a com.silabs.board.none"/>
+    <properties key="boardCompatibility" value="brd2601a brd2601b brd4158a brd4159a brd4161a brd4162a brd4163a brd4164a brd4165b brd4166a brd4167a brd4168a brd4169a brd4169b brd4170a brd4171a brd4172a brd4172b brd4173a brd4174a brd4174b brd4175a brd4176a brd4177a brd4179b brd4180a brd4180b brd4181a brd4181b brd4181c brd4186a brd4186b brd4186c brd4187a brd4187b brd4187c brd4188a brd4188b brd4190a brd4300b brd4304a brd4305d brd4305e brd4306c brd4306d brd4308a brd4308b brd4308c brd4308d brd4309a brd4309b brd4316a brd4317a brd4319a com.silabs.board.none"/>
     <properties key="partCompatibility" value=".*efr32mg12p.* .*efr32mg13p.* .*efr32mg14p.* .*efr32mg1p.* .*efr32mg21.* .*efr32mg24.* .*mgm1.* .*mgm12.* .*mgm13.* .*mgm21.* .*mgm24.*"/>
     <properties key="ideCompatibility" value="makefile-ide segger-embedded-studio simplicity-ide"/>
     <properties key="toolchainCompatibility" value="gcc"/>
@@ -31,7 +31,7 @@
     <properties key="keywords" value="universal\ configurator"/>
     <properties key="projectFilePaths" value="sample-apps/ot-cli/ot-cli-mtd.slcp"/>
     <properties key="readmeFiles" value=""/>
-    <properties key="boardCompatibility" value="brd2601a brd4158a brd4159a brd4161a brd4162a brd4163a brd4164a brd4165b brd4166a brd4167a brd4168a brd4169a brd4169b brd4170a brd4171a brd4172a brd4172b brd4173a brd4174a brd4174b brd4175a brd4176a brd4177a brd4179b brd4180a brd4180b brd4181a brd4181b brd4181c brd4186a brd4186b brd4187a brd4187b brd4188a brd4190a brd4300b brd4304a brd4305d brd4305e brd4306c brd4306d brd4308a brd4308b brd4308c brd4308d brd4309a brd4309b brd4316a brd4317a com.silabs.board.none"/>
+    <properties key="boardCompatibility" value="brd2601a brd2601b brd4158a brd4159a brd4161a brd4162a brd4163a brd4164a brd4165b brd4166a brd4167a brd4168a brd4169a brd4169b brd4170a brd4171a brd4172a brd4172b brd4173a brd4174a brd4174b brd4175a brd4176a brd4177a brd4179b brd4180a brd4180b brd4181a brd4181b brd4181c brd4186a brd4186b brd4186c brd4187a brd4187b brd4187c brd4188a brd4188b brd4190a brd4300b brd4304a brd4305d brd4305e brd4306c brd4306d brd4308a brd4308b brd4308c brd4308d brd4309a brd4309b brd4316a brd4317a brd4319a com.silabs.board.none"/>
     <properties key="partCompatibility" value=".*efr32mg12p.* .*efr32mg13p.* .*efr32mg14p.* .*efr32mg1p.* .*efr32mg21.* .*efr32mg24.* .*mgm1.* .*mgm12.* .*mgm13.* .*mgm21.* .*mgm24.*"/>
     <properties key="ideCompatibility" value="makefile-ide segger-embedded-studio simplicity-ide"/>
     <properties key="toolchainCompatibility" value="gcc"/>
@@ -44,7 +44,7 @@
     <properties key="keywords" value="universal\ configurator"/>
     <properties key="projectFilePaths" value="sample-apps/ot-ncp/ot-ncp-ftd.slcp"/>
     <properties key="readmeFiles" value=""/>
-    <properties key="boardCompatibility" value="brd2601a brd4158a brd4159a brd4161a brd4162a brd4163a brd4164a brd4165b brd4166a brd4167a brd4168a brd4169a brd4169b brd4170a brd4171a brd4172a brd4172b brd4173a brd4174a brd4174b brd4175a brd4176a brd4177a brd4179b brd4180a brd4180b brd4181a brd4181b brd4181c brd4186a brd4186b brd4187a brd4187b brd4188a brd4190a brd4300b brd4304a brd4305d brd4305e brd4306c brd4306d brd4308a brd4308b brd4308c brd4308d brd4309a brd4309b brd4316a brd4317a com.silabs.board.none"/>
+    <properties key="boardCompatibility" value="brd2601a brd2601b brd4158a brd4159a brd4161a brd4162a brd4163a brd4164a brd4165b brd4166a brd4167a brd4168a brd4169a brd4169b brd4170a brd4171a brd4172a brd4172b brd4173a brd4174a brd4174b brd4175a brd4176a brd4177a brd4179b brd4180a brd4180b brd4181a brd4181b brd4181c brd4186a brd4186b brd4186c brd4187a brd4187b brd4187c brd4188a brd4188b brd4190a brd4300b brd4304a brd4305d brd4305e brd4306c brd4306d brd4308a brd4308b brd4308c brd4308d brd4309a brd4309b brd4316a brd4317a brd4319a com.silabs.board.none"/>
     <properties key="partCompatibility" value=".*efr32mg12p.* .*efr32mg13p.* .*efr32mg14p.* .*efr32mg1p.* .*efr32mg21.* .*efr32mg24.* .*mgm1.* .*mgm12.* .*mgm13.* .*mgm21.* .*mgm24.*"/>
     <properties key="ideCompatibility" value="makefile-ide segger-embedded-studio simplicity-ide"/>
     <properties key="toolchainCompatibility" value="gcc"/>
@@ -57,7 +57,7 @@
     <properties key="keywords" value="universal\ configurator"/>
     <properties key="projectFilePaths" value="sample-apps/ot-ncp/ot-ncp-mtd.slcp"/>
     <properties key="readmeFiles" value=""/>
-    <properties key="boardCompatibility" value="brd2601a brd4158a brd4159a brd4161a brd4162a brd4163a brd4164a brd4165b brd4166a brd4167a brd4168a brd4169a brd4169b brd4170a brd4171a brd4172a brd4172b brd4173a brd4174a brd4174b brd4175a brd4176a brd4177a brd4179b brd4180a brd4180b brd4181a brd4181b brd4181c brd4186a brd4186b brd4187a brd4187b brd4188a brd4190a brd4300b brd4304a brd4305d brd4305e brd4306c brd4306d brd4308a brd4308b brd4308c brd4308d brd4309a brd4309b brd4316a brd4317a com.silabs.board.none"/>
+    <properties key="boardCompatibility" value="brd2601a brd2601b brd4158a brd4159a brd4161a brd4162a brd4163a brd4164a brd4165b brd4166a brd4167a brd4168a brd4169a brd4169b brd4170a brd4171a brd4172a brd4172b brd4173a brd4174a brd4174b brd4175a brd4176a brd4177a brd4179b brd4180a brd4180b brd4181a brd4181b brd4181c brd4186a brd4186b brd4186c brd4187a brd4187b brd4187c brd4188a brd4188b brd4190a brd4300b brd4304a brd4305d brd4305e brd4306c brd4306d brd4308a brd4308b brd4308c brd4308d brd4309a brd4309b brd4316a brd4317a brd4319a com.silabs.board.none"/>
     <properties key="partCompatibility" value=".*efr32mg12p.* .*efr32mg13p.* .*efr32mg14p.* .*efr32mg1p.* .*efr32mg21.* .*efr32mg24.* .*mgm1.* .*mgm12.* .*mgm13.* .*mgm21.* .*mgm24.*"/>
     <properties key="ideCompatibility" value="makefile-ide segger-embedded-studio simplicity-ide"/>
     <properties key="toolchainCompatibility" value="gcc"/>
@@ -70,7 +70,33 @@
     <properties key="keywords" value="universal\ configurator"/>
     <properties key="projectFilePaths" value="sample-apps/ot-ncp/ot-rcp.slcp"/>
     <properties key="readmeFiles" value=""/>
-    <properties key="boardCompatibility" value="brd2601a brd4150a brd4150b brd4150c brd4151a brd4152a brd4153a brd4154a brd4155a brd4158a brd4159a brd4161a brd4162a brd4163a brd4164a brd4165b brd4166a brd4167a brd4168a brd4169a brd4169b brd4170a brd4171a brd4172a brd4172b brd4173a brd4174a brd4174b brd4175a brd4176a brd4177a brd4179b brd4180a brd4180b brd4181a brd4181b brd4181c brd4186a brd4186b brd4187a brd4187b brd4188a brd4190a brd4300b brd4304a brd4305d brd4305e brd4306c brd4306d brd4308a brd4308b brd4308c brd4308d brd4309a brd4309b brd4316a brd4317a com.silabs.board.none"/>
+    <properties key="boardCompatibility" value="brd2601a brd2601b brd4150a brd4150b brd4150c brd4151a brd4152a brd4153a brd4154a brd4155a brd4158a brd4159a brd4161a brd4162a brd4163a brd4164a brd4165b brd4166a brd4167a brd4168a brd4169a brd4169b brd4170a brd4171a brd4172a brd4172b brd4173a brd4174a brd4174b brd4175a brd4176a brd4177a brd4179b brd4180a brd4180b brd4181a brd4181b brd4181c brd4186a brd4186b brd4186c brd4187a brd4187b brd4187c brd4188a brd4188b brd4190a brd4300b brd4304a brd4305d brd4305e brd4306c brd4306d brd4308a brd4308b brd4308c brd4308d brd4309a brd4309b brd4316a brd4317a brd4319a com.silabs.board.none"/>
+    <properties key="partCompatibility" value=".*efr32mg12p.* .*efr32mg13p.* .*efr32mg14p.* .*efr32mg1p.* .*efr32mg21.* .*efr32mg24.* .*mgm1.* .*mgm12.* .*mgm13.* .*mgm21.* .*mgm24.* .*efr32mr21.*"/>
+    <properties key="ideCompatibility" value="makefile-ide segger-embedded-studio simplicity-ide"/>
+    <properties key="toolchainCompatibility" value="gcc"/>
+    <properties key="category" value="OpenThread Examples"/>
+    <properties key="quality" value="PRODUCTION"/>
+    <properties key="stockConfigCompatibility" value="com.silabs.ss.framework.project.toolchain.core.default"/>
+  </descriptors>
+  <descriptors name="rcp-spi-802154" label="rcp-spi-802154" description="Multipan 802.15.4 RCP (Radio Co-Processor) application. Access to 802.15.4 is provided using SPINEL carried over the CPC (Co-Processor Communication) protocol using a SPI connection.&#xA;">
+    <properties key="namespace" value="template.uc"/>
+    <properties key="keywords" value="universal\ configurator"/>
+    <properties key="projectFilePaths" value="sample-apps/ot-ncp/rcp-spi-802154.slcp"/>
+    <properties key="readmeFiles" value=""/>
+    <properties key="boardCompatibility" value="brd2601a brd2601b brd4150a brd4150b brd4150c brd4151a brd4152a brd4153a brd4154a brd4155a brd4158a brd4159a brd4161a brd4162a brd4163a brd4164a brd4165b brd4166a brd4167a brd4168a brd4169a brd4169b brd4170a brd4171a brd4172a brd4172b brd4173a brd4174a brd4174b brd4175a brd4176a brd4177a brd4179b brd4180a brd4180b brd4181a brd4181b brd4181c brd4186a brd4186b brd4186c brd4187a brd4187b brd4187c brd4188a brd4188b brd4190a brd4300b brd4304a brd4305d brd4305e brd4306c brd4306d brd4308a brd4308b brd4308c brd4308d brd4309a brd4309b brd4316a brd4317a brd4319a com.silabs.board.none"/>
+    <properties key="partCompatibility" value=".*efr32mg12p.* .*efr32mg13p.* .*efr32mg14p.* .*efr32mg1p.* .*efr32mg21.* .*efr32mg24.* .*mgm1.* .*mgm12.* .*mgm13.* .*mgm21.* .*mgm24.* .*efr32mr21.*"/>
+    <properties key="ideCompatibility" value="makefile-ide segger-embedded-studio simplicity-ide"/>
+    <properties key="toolchainCompatibility" value="gcc"/>
+    <properties key="category" value="OpenThread Examples"/>
+    <properties key="quality" value="PRODUCTION"/>
+    <properties key="stockConfigCompatibility" value="com.silabs.ss.framework.project.toolchain.core.default"/>
+  </descriptors>
+  <descriptors name="rcp-uart-802154" label="rcp-uart-802154" description="Multipan 802.15.4 RCP (Radio Co-Processor) application. Access to 802.15.4 is provided using SPINEL carried over the CPC (Co-Processor Communication) protocol using a UART connection.&#xA;">
+    <properties key="namespace" value="template.uc"/>
+    <properties key="keywords" value="universal\ configurator"/>
+    <properties key="projectFilePaths" value="sample-apps/ot-ncp/rcp-uart-802154.slcp"/>
+    <properties key="readmeFiles" value=""/>
+    <properties key="boardCompatibility" value="brd2601a brd2601b brd4150a brd4150b brd4150c brd4151a brd4152a brd4153a brd4154a brd4155a brd4158a brd4159a brd4161a brd4162a brd4163a brd4164a brd4165b brd4166a brd4167a brd4168a brd4169a brd4169b brd4170a brd4171a brd4172a brd4172b brd4173a brd4174a brd4174b brd4175a brd4176a brd4177a brd4179b brd4180a brd4180b brd4181a brd4181b brd4181c brd4186a brd4186b brd4186c brd4187a brd4187b brd4187c brd4188a brd4188b brd4190a brd4300b brd4304a brd4305d brd4305e brd4306c brd4306d brd4308a brd4308b brd4308c brd4308d brd4309a brd4309b brd4316a brd4317a brd4319a com.silabs.board.none"/>
     <properties key="partCompatibility" value=".*efr32mg12p.* .*efr32mg13p.* .*efr32mg14p.* .*efr32mg1p.* .*efr32mg21.* .*efr32mg24.* .*mgm1.* .*mgm12.* .*mgm13.* .*mgm21.* .*mgm24.* .*efr32mr21.*"/>
     <properties key="ideCompatibility" value="makefile-ide segger-embedded-studio simplicity-ide"/>
     <properties key="toolchainCompatibility" value="gcc"/>
@@ -83,7 +109,7 @@
     <properties key="keywords" value="universal\ configurator"/>
     <properties key="projectFilePaths" value="sample-apps/sleepy-demo/sleepy-demo-ftd.slcp"/>
     <properties key="readmeFiles" value=""/>
-    <properties key="boardCompatibility" value="brd2601a brd4158a brd4159a brd4161a brd4162a brd4163a brd4164a brd4165b brd4166a brd4167a brd4168a brd4169a brd4169b brd4170a brd4171a brd4172a brd4172b brd4173a brd4174a brd4174b brd4175a brd4176a brd4177a brd4179b brd4180a brd4180b brd4181a brd4181b brd4181c brd4186a brd4186b brd4187a brd4187b brd4188a brd4190a brd4300b brd4304a brd4305d brd4305e brd4306c brd4306d brd4308a brd4308b brd4308c brd4308d brd4309a brd4309b brd4316a brd4317a com.silabs.board.none"/>
+    <properties key="boardCompatibility" value="brd2601a brd2601b brd4158a brd4159a brd4161a brd4162a brd4163a brd4164a brd4165b brd4166a brd4167a brd4168a brd4169a brd4169b brd4170a brd4171a brd4172a brd4172b brd4173a brd4174a brd4174b brd4175a brd4176a brd4177a brd4179b brd4180a brd4180b brd4181a brd4181b brd4181c brd4186a brd4186b brd4186c brd4187a brd4187b brd4187c brd4188a brd4188b brd4190a brd4300b brd4304a brd4305d brd4305e brd4306c brd4306d brd4308a brd4308b brd4308c brd4308d brd4309a brd4309b brd4316a brd4317a brd4319a com.silabs.board.none"/>
     <properties key="partCompatibility" value=".*efr32mg12p.* .*efr32mg13p.* .*efr32mg14p.* .*efr32mg1p.* .*efr32mg21.* .*efr32mg24.* .*mgm1.* .*mgm12.* .*mgm13.* .*mgm21.* .*mgm24.*"/>
     <properties key="ideCompatibility" value="makefile-ide segger-embedded-studio simplicity-ide"/>
     <properties key="toolchainCompatibility" value="gcc"/>
@@ -96,7 +122,7 @@
     <properties key="keywords" value="universal\ configurator"/>
     <properties key="projectFilePaths" value="sample-apps/sleepy-demo/sleepy-demo-mtd.slcp"/>
     <properties key="readmeFiles" value=""/>
-    <properties key="boardCompatibility" value="brd2601a brd4158a brd4159a brd4161a brd4162a brd4163a brd4164a brd4165b brd4166a brd4167a brd4168a brd4169a brd4169b brd4170a brd4171a brd4172a brd4172b brd4173a brd4174a brd4174b brd4175a brd4176a brd4177a brd4179b brd4180a brd4180b brd4181a brd4181b brd4181c brd4186a brd4186b brd4187a brd4187b brd4188a brd4190a brd4300b brd4304a brd4305d brd4305e brd4306c brd4306d brd4308a brd4308b brd4308c brd4308d brd4309a brd4309b brd4316a brd4317a com.silabs.board.none"/>
+    <properties key="boardCompatibility" value="brd2601a brd2601b brd4158a brd4159a brd4161a brd4162a brd4163a brd4164a brd4165b brd4166a brd4167a brd4168a brd4169a brd4169b brd4170a brd4171a brd4172a brd4172b brd4173a brd4174a brd4174b brd4175a brd4176a brd4177a brd4179b brd4180a brd4180b brd4181a brd4181b brd4181c brd4186a brd4186b brd4186c brd4187a brd4187b brd4187c brd4188a brd4188b brd4190a brd4300b brd4304a brd4305d brd4305e brd4306c brd4306d brd4308a brd4308b brd4308c brd4308d brd4309a brd4309b brd4316a brd4317a brd4319a com.silabs.board.none"/>
     <properties key="partCompatibility" value=".*efr32mg12p.* .*efr32mg13p.* .*efr32mg14p.* .*efr32mg1p.* .*efr32mg21.* .*efr32mg24.* .*mgm1.* .*mgm12.* .*mgm13.* .*mgm21.* .*mgm24.*"/>
     <properties key="ideCompatibility" value="makefile-ide segger-embedded-studio simplicity-ide"/>
     <properties key="toolchainCompatibility" value="gcc"/>

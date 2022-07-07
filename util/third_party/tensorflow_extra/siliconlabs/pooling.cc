@@ -10,8 +10,7 @@
 #include "sl_mvp_ml_pooling.h"
 
 namespace tflite {
-namespace ops {
-namespace micro {
+namespace sl {
 namespace pooling {
 
 namespace {
@@ -155,12 +154,12 @@ TfLiteStatus AverageEval(TfLiteContext* context, TfLiteNode* node)
   TFLITE_DCHECK(node->builtin_data != nullptr);
 
   OpData* data = static_cast<OpData*>(node->user_data);
-  const TfLiteTensor* input  = GetInput(context, node, kInputTensor);
-  TfLiteTensor*       output = GetOutput(context, node, kOutputTensor);
+  const TfLiteEvalTensor* input  = tflite::micro::GetEvalInput(context, node, kInputTensor);
+  TfLiteEvalTensor*       output = tflite::micro::GetEvalOutput(context, node, kOutputTensor);
   TF_LITE_ENSURE(context, input  != nullptr);
   TF_LITE_ENSURE(context, output != nullptr);
-  data->op_params.input  = GetTensorData<int8_t>(input);
-  data->op_params.output = GetTensorData<int8_t>(output);
+  data->op_params.input  = tflite::micro::GetTensorData<int8_t>(input);
+  data->op_params.output = tflite::micro::GetTensorData<int8_t>(output);
 
   if (data->supported == kMvp) {
     // Use MVP accelerated kernel.
@@ -221,10 +220,10 @@ TfLiteStatus AverageEval(TfLiteContext* context, TfLiteNode* node)
     op_params.float_activation_min  = data->activation_min_f32;
     op_params.float_activation_max  = data->activation_max_f32;
     reference_ops::AveragePool(op_params,
-                               GetTensorShape(input),
-                               GetTensorData<float>(input),
-                               GetTensorShape(output),
-                               GetTensorData<float>(output));
+                               tflite::micro::GetTensorShape(input),
+                               tflite::micro::GetTensorData<float>(input),
+                               tflite::micro::GetTensorShape(output),
+                               tflite::micro::GetTensorData<float>(output));
 
   } else {
     return kTfLiteError;
@@ -239,12 +238,12 @@ TfLiteStatus MaxEval(TfLiteContext* context, TfLiteNode* node)
   TFLITE_DCHECK(node->builtin_data != nullptr);
 
   OpData* data = static_cast<OpData*>(node->user_data);
-  const TfLiteTensor* input  = GetInput(context, node, kInputTensor);
-  TfLiteTensor*       output = GetOutput(context, node, kOutputTensor);
+  const TfLiteEvalTensor* input  = tflite::micro::GetEvalInput(context, node, kInputTensor);
+  TfLiteEvalTensor*       output = tflite::micro::GetEvalOutput(context, node, kOutputTensor);
   TF_LITE_ENSURE(context, input  != nullptr);
   TF_LITE_ENSURE(context, output != nullptr);
-  data->op_params.input  = GetTensorData<int8_t>(input);
-  data->op_params.output = GetTensorData<int8_t>(output);
+  data->op_params.input  = tflite::micro::GetTensorData<int8_t>(input);
+  data->op_params.output = tflite::micro::GetTensorData<int8_t>(output);
 
   if (data->supported == kMvp) {
     // Use MVP accelerated kernel.
@@ -302,10 +301,10 @@ TfLiteStatus MaxEval(TfLiteContext* context, TfLiteNode* node)
     op_params.float_activation_min  = data->activation_min_f32;
     op_params.float_activation_max  = data->activation_max_f32;
     reference_ops::MaxPool(op_params,
-                           GetTensorShape(input),
-                           GetTensorData<float>(input),
-                           GetTensorShape(output),
-                           GetTensorData<float>(output));
+                           tflite::micro::GetTensorShape(input),
+                           tflite::micro::GetTensorData<float>(input),
+                           tflite::micro::GetTensorShape(output),
+                           tflite::micro::GetTensorData<float>(output));
 
   } else {
     return kTfLiteError;
@@ -315,15 +314,14 @@ TfLiteStatus MaxEval(TfLiteContext* context, TfLiteNode* node)
 }
 
 }  // namespace pooling
-}  // namespace micro
-}  // namespace ops
+}  // namespace sl
 
 TfLiteRegistration Register_MAX_POOL_2D() {
   static TfLiteRegistration max_pool_registration = {
-    /*init=*/ops::micro::pooling::Init,
+    /*init=*/sl::pooling::Init,
     /*free=*/nullptr,
-    /*prepare=*/ops::micro::pooling::MaxPrepare,
-    /*invoke=*/ops::micro::pooling::MaxEval,
+    /*prepare=*/sl::pooling::MaxPrepare,
+    /*invoke=*/sl::pooling::MaxEval,
     /*profiling_string=*/nullptr,
     /*builtin_code=*/0,
     /*custom_name=*/nullptr,
@@ -336,10 +334,10 @@ TfLiteRegistration Register_MAX_POOL_2D() {
 // Just to keep all_ops_resolver() happy during development ...
 TfLiteRegistration Register_AVERAGE_POOL_2D() {
   static TfLiteRegistration avg_pool_registration = {
-    /*init=*/ops::micro::pooling::Init,
+    /*init=*/sl::pooling::Init,
     /*free=*/nullptr,
-    /*prepare=*/ops::micro::pooling::AveragePrepare,
-    /*invoke=*/ops::micro::pooling::AverageEval,
+    /*prepare=*/sl::pooling::AveragePrepare,
+    /*invoke=*/sl::pooling::AverageEval,
     /*profiling_string=*/nullptr,
     /*builtin_code=*/0,
     /*custom_name=*/nullptr,

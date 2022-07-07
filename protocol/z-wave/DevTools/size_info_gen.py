@@ -47,7 +47,10 @@ def main(argv):
            flash_binary_size = flash_binary_size + int(cols[1], 16)
          elif cols[0] in ['.data']:
            flash_binary_size = flash_binary_size + int(cols[1], 16)
-           sram_size = sram_size + int(cols[1], 16)           
+           sram_size = sram_size + int(cols[1], 16)
+         elif cols[0] in [ '.internal_storage']:
+           # skip this section
+           continue
          else :
            addr = int(cols[2], 16)
            if (addr & int('0x20000000', 16)) != 0:
@@ -73,7 +76,7 @@ def main(argv):
      f.write("\n")
      f.write("The calculated FLASH and SRAM usage summary:\n")
      f.write("============================================\n")
-     f.write("FLASH used as program memory:  (Including only the sections: .text, .ARM.exidx, .data, _cc_handlers_v3, internal_storage)\n")
+     f.write("FLASH used as program memory:  (Including only the sections: .text, .ARM.exidx, .data, _cc_handlers_v3)\n")
      f.write("   " + str(flash_binary_size) + "\n")
      f.write("FLASH used for storage: (Including only the sections: .nvm3App, .simee, .nvm, .zwave_nvm)\n")
      f.write("   " + str(flash_storage_size) + "\n")

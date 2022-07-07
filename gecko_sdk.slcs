@@ -2,7 +2,7 @@ id: "gecko_sdk"
 label: "Gecko SDK Suite"
 description: |-
   Gecko SDK Suite for EM3xx, EFM32, EZR32 and EFR32 microcontrollers and radios.
-sdk_version: "4.0.1"
+sdk_version: "4.0.2"
 specification_version: 7
 component_path:
   - path: "app/amazon/component"

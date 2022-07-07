@@ -47,9 +47,13 @@ typedef enum {
 } state_t;
 
 /// Option selection maximum values
-#if defined(SEMAILBOX_PRESENT) && (_SILICON_LABS_SECURITY_FEATURE == _SILICON_LABS_SECURITY_FEATURE_VAULT)
-#define KEY_STORAGE_MAX         PERSISTENT_WRAP_KEY
+#if defined(SEMAILBOX_PRESENT)
 #define KEY_CURVE_MAX           (2)
+#if (_SILICON_LABS_SECURITY_FEATURE == _SILICON_LABS_SECURITY_FEATURE_VAULT)
+#define KEY_STORAGE_MAX         PERSISTENT_WRAP_KEY
+#else
+#define KEY_STORAGE_MAX         PERSISTENT_PLAIN_KEY
+#endif
 #else
 #define KEY_STORAGE_MAX         PERSISTENT_PLAIN_KEY
 #define KEY_CURVE_MAX           (1)

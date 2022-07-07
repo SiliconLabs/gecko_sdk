@@ -23,6 +23,10 @@ component:
       - vcom
   - id: "iostream_recommended_stream"
 
+requires:
+  - name: freertos_heap_3
+    condition: [freertos]
+
 source:
   - path: "app.c"
   - path: "main.c"
@@ -61,19 +65,14 @@ configuration:
     value: "1"
     condition: [micriumos_kernel]
   - name: "SL_HEAP_SIZE"
-    value: "0x10000"
-  - name: "configTOTAL_HEAP_SIZE"
-    value: "16384"
-    condition: [freertos]
-  - name: "LIB_MEM_CFG_HEAP_SIZE"
-    value: "16384"
-    condition: [micriumos_kernel]
+    value: "0xD000"
 
 readme:
   - path: ../../documentation/example/wisun_cli/readme.md
 
 other_file:
   - path: ../../documentation/example/wisun_cli/readme_img0.png
+  - path: hw_filter_tags.yaml
 
 #--------------------- Toolchain ------------------------
 toolchain_settings:
@@ -87,15 +86,4 @@ ui_hints:
 
 tag:
   - prebuilt_demo
-  - hardware:
-      device:
-        memory:
-          flash: 615
-          ram: 120
-      board:
-        rf_bands:
-          - 434|490|868|915
-        communication:
-          - vcom
-          - pti
-  
+

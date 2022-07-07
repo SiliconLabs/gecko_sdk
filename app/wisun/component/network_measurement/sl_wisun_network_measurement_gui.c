@@ -470,10 +470,10 @@ static void _node_info_form(void *args)
   sl_gui_title_set_label("Node Info");
 
   sl_gui_title_update();
-  sl_gui_button_set_label(SL_GUI_BUTTON1, "Back");
-  sl_gui_button_set_callback(SL_GUI_BUTTON1, sl_wisun_nwm_main_form, NULL);
-  sl_gui_button_set_label(SL_GUI_BUTTON0, "Down");
-  sl_gui_button_set_callback(SL_GUI_BUTTON0, _scroll_txt_box, NULL);
+  sl_gui_button_set_label(SL_GUI_BUTTON0, "Back");
+  sl_gui_button_set_callback(SL_GUI_BUTTON0, sl_wisun_nwm_main_form, NULL);
+  sl_gui_button_set_label(SL_GUI_BUTTON1, "Down");
+  sl_gui_button_set_callback(SL_GUI_BUTTON1, _scroll_txt_box, NULL);
 
   sl_gui_button_update(SL_GUI_BUTTON1);
   sl_gui_button_update(SL_GUI_BUTTON0);
@@ -709,10 +709,10 @@ static void _set_test_result_txtbox(void *args)
   sl_gui_textbox_set(_str_buff);
   sl_gui_textbox_update();
 
-  sl_gui_button_set_label(SL_GUI_BUTTON1, "Back");
-  sl_gui_button_set_callback(SL_GUI_BUTTON1, sl_wisun_nwm_test_result_form, NULL);
-  sl_gui_button_set_label(SL_GUI_BUTTON0, "Down");
-  sl_gui_button_set_callback(SL_GUI_BUTTON0, _scroll_txt_box, NULL);
+  sl_gui_button_set_label(SL_GUI_BUTTON0, "Back");
+  sl_gui_button_set_callback(SL_GUI_BUTTON0, sl_wisun_nwm_test_result_form, NULL);
+  sl_gui_button_set_label(SL_GUI_BUTTON1, "Down");
+  sl_gui_button_set_callback(SL_GUI_BUTTON1, _scroll_txt_box, NULL);
 
   sl_gui_button_update(SL_GUI_BUTTON1);
   sl_gui_button_update(SL_GUI_BUTTON0);
@@ -741,10 +741,10 @@ static void _set_nbinfo_txtbox(void *args)
   sl_gui_textbox_set(_str_buff);
   sl_gui_textbox_update();
 
-  sl_gui_button_set_label(SL_GUI_BUTTON1, "Back");
-  sl_gui_button_set_callback(SL_GUI_BUTTON1, _neighbors_info_form, NULL);
-  sl_gui_button_set_label(SL_GUI_BUTTON0, "Down");
-  sl_gui_button_set_callback(SL_GUI_BUTTON0, _scroll_txt_box, NULL);
+  sl_gui_button_set_label(SL_GUI_BUTTON0, "Back");
+  sl_gui_button_set_callback(SL_GUI_BUTTON0, _neighbors_info_form, NULL);
+  sl_gui_button_set_label(SL_GUI_BUTTON1, "Down");
+  sl_gui_button_set_callback(SL_GUI_BUTTON1, _scroll_txt_box, NULL);
 
   sl_gui_button_update(SL_GUI_BUTTON1);
   sl_gui_button_update(SL_GUI_BUTTON0);

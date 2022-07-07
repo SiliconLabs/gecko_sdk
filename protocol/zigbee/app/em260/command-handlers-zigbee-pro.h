@@ -35,9 +35,6 @@ EmberStatus emberAfEzspGetNetworkParametersCommandCallback(EmberNodeType* nodeTy
 uint8_t emberAfEzspGetParentChildParametersCommandCallback(EmberEUI64 parentEui64,
                                                            EmberNodeId* parentNodeId);
 
-EmberStatus emberAfEzspGetChildDataCommandCallback(uint8_t index,
-                                                   EmberChildData *childData);
-
 EmberStatus emberAfEzspSendUnicastCommandCallback(EmberOutgoingMessageType type,
                                                   EmberNodeId indexOrDestination,
                                                   EmberApsFrame* apsFrame,

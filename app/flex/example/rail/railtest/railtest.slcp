@@ -52,6 +52,9 @@ include:
 readme:
   - path: ../../../documentation/example/rail/railtest/readme.md
 
+other_file:
+  - path: "hw_filter_tags.yaml"
+
 #------------ Configuration overrides ----------------
 configuration:
   - name: SL_STACK_SIZE
@@ -140,7 +143,6 @@ configuration:
       - a_radio_config
     unless:
       - device_sdid_200
-      - device_sdid_215
       - device_is_module
 #------------- RAIL init, Protocol -------------------
   - name: SL_RAIL_UTIL_INIT_PROTOCOLS_INST0_ENABLE
@@ -157,7 +159,6 @@ configuration:
     unless:
       - device_is_module
       - device_sdid_200
-      - device_sdid_215
 
     # Non modules without a radio configuration
     # that don't have 2.4GHz band and support ZWave
@@ -291,15 +292,3 @@ ui_hints:
     - path: "config/rail/radio_settings.radioconf"
       focus: true
 
-tag:
-  - hardware:
-      device:
-        memory:
-          flash: 216
-          ram: 26
-      board:
-        rf_bands:
-          - any
-        communication:
-          - vcom
-  

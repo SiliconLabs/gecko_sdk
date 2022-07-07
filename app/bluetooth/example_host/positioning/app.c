@@ -241,6 +241,9 @@ static void parse_config(const char *payload)
   angle_queue_config_t angle_queue_config = ANGLE_QUEUE_DEFAULT_CONFIG;
   float mask_min = 0;
   float mask_max = 0;
+  uint8_t *antenna_switch_pattern = NULL;
+  uint8_t antenna_switch_pattern_size = 0;
+  enum sl_rtl_aox_array_type antenna_array_type;
 
   sc = aoa_parse_init(payload);
   app_assert_status(sc);
@@ -344,18 +347,39 @@ static void parse_config(const char *payload)
                    aox_mode_string[angle_config->aox_mode]);
     }
 
-    sc = aoa_parse_antenna_mode(&angle_config->array_type, locator_id);
+    sc = aoa_parse_antenna_mode(&antenna_array_type, locator_id);
     if (sc == SL_STATUS_OK) {
       app_log_info("Antenna mode set to: %s" APP_LOG_NL,
-                   antenna_type_string[angle_config->array_type]);
+                   antenna_type_string[antenna_array_type]);
+      sc = antenna_array_init(&angle_config->antenna_array, antenna_array_type);
+      if (sc != SL_STATUS_OK) {
+        app_log_status_error_f(sc,
+                               "antenna_array_init failed for %s" APP_LOG_NL,
+                               antenna_type_string[antenna_array_type]);
+      }
     }
 
-    sc = aoa_parse_antenna_array(&angle_config->switching_pattern,
-                                 &angle_config->switching_pattern_length,
+    sc = aoa_parse_antenna_array(&antenna_switch_pattern,
+                                 &antenna_switch_pattern_size,
                                  locator_id);
     if (sc == SL_STATUS_OK) {
-      app_log_info("Antenna array length set to: %d" APP_LOG_NL,
-                   angle_config->switching_pattern_length);
+      sc = antenna_array_set_pattern(&angle_config->antenna_array,
+                                     antenna_switch_pattern,
+                                     antenna_switch_pattern_size);
+      if (sc == SL_STATUS_OK) {
+        app_log_info("Antenna array set to:");
+        if (_app_log_check_level(APP_LOG_LEVEL_INFO)) {
+          for (uint8_t i = 0; i < antenna_switch_pattern_size; i++) {
+            app_log(" %d", antenna_switch_pattern[i]);
+          }
+          app_log_nl();
+        }
+      } else {
+        app_log_status_error_f(sc,
+                               "antenna_array_set_pattern failed with size %d" APP_LOG_NL,
+                               antenna_switch_pattern_size);
+      }
+      free(antenna_switch_pattern);
     }
 
     sc = aoa_parse_simple_config(&angle_config->cte_min_length,
@@ -385,14 +409,6 @@ static void parse_config(const char *payload)
     if (sc == SL_STATUS_OK) {
       app_log_info("Angle filtering weight set to: %f" APP_LOG_NL,
                    angle_config->angle_filtering_weight);
-    }
-
-    sc = aoa_parse_simple_config(&angle_config->period_samples,
-                                 "periodSamples",
-                                 locator_id);
-    if (sc == SL_STATUS_OK) {
-      app_log_info("Sample period set to: %d" APP_LOG_NL,
-                   angle_config->period_samples);
     }
 
     sc = aoa_parse_simple_config(&angle_config->angle_correction_timeout,

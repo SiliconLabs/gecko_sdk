@@ -53,7 +53,9 @@ void emberAfPluginAddressTableNcpInitCallback(bool memoryAllocation)
 
   // If the host and the ncp disagree on the address table size, explode.
   ezspGetConfigurationValue(EZSP_CONFIG_ADDRESS_TABLE_SIZE, &addressTableSize);
-  assert(EMBER_AF_PLUGIN_ADDRESS_TABLE_SIZE == addressTableSize);
+  // After the change of ncp memory model in UC, we can not increase the default NCP table sizes anymore.
+  // Therefore, checking for EMBER_AF_PLUGIN_ADDRESS_TABLE_SIZE == (ncp)addressTableSize might not be always true anymore
+  assert(EMBER_AF_PLUGIN_ADDRESS_TABLE_SIZE <= addressTableSize);
 
   if (initPending) {
     // Initialize all the entries to all 0xFFs. All 0xFFs means that the entry

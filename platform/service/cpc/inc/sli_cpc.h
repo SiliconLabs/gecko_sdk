@@ -46,10 +46,20 @@
 #include "sl_cpc.h"
 #include "sl_cpc_config.h"
 #include "sl_cpc_system_common.h"
+#if defined(SL_CATALOG_CPC_SECURITY_PRESENT)
+#include "sl_cpc_security_config.h"
+#endif
 
-#define SLI_CPC_ENDPOINT_SYSTEM                           (1)
-#if !defined(SL_CPC_ENDPOINT_SECURITY_ENABLED)
-#define SL_CPC_ENDPOINT_SECURITY_ENABLED                 (0)
+#define SLI_CPC_ENDPOINT_SYSTEM             (1)
+
+#if (!defined(SL_CATALOG_CPC_SECURITY_PRESENT))
+#define SL_CPC_ENDPOINT_SECURITY_ENABLED    (0)
+#else
+#if (SL_CPC_SECURITY_ENABLED >= 1)
+#define SL_CPC_ENDPOINT_SECURITY_ENABLED    (1)
+#else
+#define SL_CPC_ENDPOINT_SECURITY_ENABLED    (0)
+#endif
 #endif
 
 #if defined(SL_CATALOG_BLUETOOTH_NCP_PRESENT)
@@ -144,7 +154,8 @@
 // SL_CPC_FLAG_NO_BLOCK = 0x01 << 0
 #define SL_CPC_FLAG_UNNUMBERED_INFORMATION      0x01 << 1
 #define SL_CPC_FLAG_UNNUMBERED_POLL             0x01 << 2
-#define SL_CPC_FLAG_INFORMATION_FINAL           0x01 << 3
+#define SL_CPC_FLAG_UNNUMBERED_ACKNOWLEDGE      0x01 << 3
+#define SL_CPC_FLAG_INFORMATION_FINAL           0x01 << 4
 
 /// @brief Enumeration representing the possible id
 SL_ENUM(sl_cpc_service_endpoint_id_t){
@@ -262,6 +273,10 @@ typedef struct {
 #define SLI_CPC_MIN_RE_TRANSMIT_TIMEOUT_MINIMUM_VARIATION_MS (50)
 
 #define SLI_CPC_MAX_WRITE_SIZE              (4087)
+
+#if (SL_CPC_RX_PAYLOAD_MAX_LENGTH > 4087)
+  #error Invalid SL_CPC_RX_PAYLOAD_MAX_LENGTH; Must be less or equal to 4087
+#endif
 
 #if !defined(SLI_CPC_ENDPOINT_TEMPORARY_MAX_COUNT)
 #define SLI_CPC_ENDPOINT_TEMPORARY_MAX_COUNT      (0) // Not yet available
@@ -394,6 +409,7 @@ typedef struct {
   sl_cpc_endpoint_t *endpoint;
   sl_cpc_reject_reason_t reason;
   void *arg;
+  bool on_write_complete_pending;
 } sl_cpc_buffer_handle_t;
 
 typedef struct {
@@ -488,6 +504,15 @@ sl_status_t sli_cpc_get_reject_buffer(sl_cpc_buffer_handle_t **handle);
  * @return Status code
  ******************************************************************************/
 sl_status_t sli_cpc_get_raw_rx_buffer(void **raw_rx_buffer);
+
+/***************************************************************************//**
+ * Free a CPC RAW rx buffer.
+ *
+ * @param[out] handle  Address of the variable that will receive the RAW buffer.
+ *
+ * @return Status code
+ ******************************************************************************/
+sl_status_t sli_cpc_free_raw_rx_buffer(void *raw_rx_buffer);
 
 /***************************************************************************//**
  * Get a CPC buffer for reception.

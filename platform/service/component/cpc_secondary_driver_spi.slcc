@@ -1,7 +1,7 @@
 id: cpc_secondary_driver_spi
 package: platform
 description: SPI driver for Co-Processor Communication Secondary Device
-label: CPC Secondary - SPI driver
+label: CPC Secondary - SPI
 category: Services|Co-Processor Communication|Secondary Device
 quality: alpha
 root_path: platform/service/cpc

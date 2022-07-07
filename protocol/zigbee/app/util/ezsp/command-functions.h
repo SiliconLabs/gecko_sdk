@@ -782,6 +782,22 @@ EmberStatus ezspGetChildData(
   return sendStatus;
 }
 
+EmberStatus ezspSetChildData(
+  uint8_t index,
+  EmberChildData *childData)
+{
+  EmberStatus status;
+  startCommand(EZSP_SET_CHILD_DATA);
+  appendInt8u(index);
+  appendEmberChildData(childData);
+  EzspStatus sendStatus = sendCommand();
+  if (sendStatus == EZSP_SUCCESS) {
+    status = fetchInt8u();
+    return status;
+  }
+  return sendStatus;
+}
+
 uint8_t ezspGetSourceRouteTableTotalSize(void)
 {
   uint8_t sourceRouteTableTotalSize;
@@ -851,6 +867,22 @@ EmberStatus ezspGetNeighborFrameCounter(
   if (sendStatus == EZSP_SUCCESS) {
     status = fetchInt8u();
     *returnFrameCounter = fetchInt32u();
+    return status;
+  }
+  return sendStatus;
+}
+
+EmberStatus ezspSetNeighborFrameCounter(
+  EmberEUI64 eui64,
+  uint32_t frameCounter)
+{
+  EmberStatus status;
+  startCommand(EZSP_SET_NEIGHBOR_FRAME_COUNTER);
+  appendInt8uArray(8, eui64);
+  appendInt32u(frameCounter);
+  EzspStatus sendStatus = sendCommand();
+  if (sendStatus == EZSP_SUCCESS) {
+    status = fetchInt8u();
     return status;
   }
   return sendStatus;
@@ -948,6 +980,20 @@ uint8_t ezspGetRadioChannel(void)
     return channel;
   }
   return 255;
+}
+
+EmberStatus ezspSetRadioIeee802154CcaMode(
+  uint8_t ccaMode)
+{
+  EmberStatus status;
+  startCommand(EZSP_SET_RADIO_IEEE802154_CCA_MODE);
+  appendInt8u(ccaMode);
+  EzspStatus sendStatus = sendCommand();
+  if (sendStatus == EZSP_SUCCESS) {
+    status = fetchInt8u();
+    return status;
+  }
+  return sendStatus;
 }
 
 EmberStatus ezspSetConcentrator(

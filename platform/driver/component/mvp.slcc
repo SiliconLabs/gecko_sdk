@@ -5,6 +5,10 @@ description: >
   This component provides a driver for using the MVP hardware capable of
   accelerating mathematical operations. This component can be used to accelerate
   machine learning kernel operations as well as other general math operations.
+
+  The API of this component is marked as internal, and is used to implement
+  acceleration for TensorFlow Lite Micro. See the TensorFlow Lite Micro component
+  for Machine Learning APIs.
 category: Platform|Driver
 quality: production
 root_path: platform/driver/mvp/
@@ -46,8 +50,8 @@ requires:
   - name: component_catalog
   - name: device_has_mvp
 toolchain_settings:
-  - option: gcc_compiler_option
-    value: "-mfp16-format=ieee"
+  - option: fp16
+    value: enabled
 template_contribution:
   - name: component_catalog
     value: mvp
@@ -56,8 +60,3 @@ template_contribution:
       event: driver_init
       include: "sl_mvp.h"
       handler: sli_mvp_init
-documentation:
-    docset: gecko-platform
-    document: driver/api/group-mvp
-ui_hints:
-  visibility: never

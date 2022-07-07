@@ -3,7 +3,7 @@
  * @brief CMSIS Compatible EFM32GG11B startup file in C for IAR EWARM
  *******************************************************************************
  * # License
- * <b>Copyright 2021 Silicon Laboratories Inc. www.silabs.com</b>
+ * <b>Copyright 2022 Silicon Laboratories Inc. www.silabs.com</b>
  *******************************************************************************
  *
  * SPDX-License-Identifier: Zlib
@@ -535,7 +535,7 @@ __weak void QSPI0_IRQHandler(void)
   }
 }
 
-#pragma data_alignment=256
+#pragma data_alignment=512
 #pragma location = ".intvec"
 const tVectorEntry __vector_table[] = {
   { .topOfStack = &CSTACK$$Limit },  /* With IAR, the CSTACK is defined via */

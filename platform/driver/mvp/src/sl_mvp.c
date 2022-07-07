@@ -362,37 +362,9 @@ uint32_t sli_mvp_progcnt_get(void)
   return mvp.program_count;
 }
 
-// Loading program using LDMA
-static void dma_load(sli_mvp_program_t *program, bool wait)
-{
-  ldma_descriptor.xfer.srcAddr = (uint32_t)program;
-  LDMA_StartTransfer(mvp.dma_ch, &ldma_config, &ldma_descriptor);
-
-  if (wait) {
-    // Wait for program to finish loading
-    while (!LDMA_TransferDone(mvp.dma_ch)) {
-      ;
-    }
-  }
-}
-
-// Loading a program using the CPU
-static void cpu_load(sli_mvp_program_t *program, bool wait)
-{
-  (void) wait; // unused
-
-  uint32_t *src = (uint32_t *) program;
-  uint32_t *dst = (uint32_t *) &MVP->ALU[0];
-  size_t n = sizeof(sli_mvp_program_t) / sizeof(uint32_t);
-
-  for (size_t i = 0; i < n; i++) {
-    dst[i] = src[i];
-  }
-}
-
-void sli_mvp_begin_loop(sli_mvp_program_context_t *p,
-                        int iterations,
-                        sl_status_t *status)
+void sli_mvp_pb_begin_loop(sli_mvp_program_context_t *p,
+                           int iterations,
+                           sl_status_t *status)
 {
   if (p->last_loop >= 7) {
     if (status != NULL) {
@@ -422,7 +394,7 @@ void sli_mvp_begin_loop(sli_mvp_program_context_t *p,
   p->loop_begin_end[p->last_instr + 1] |= 1 << (p->last_loop << 1);
 }
 
-void sli_mvp_begin_program(sli_mvp_program_context_t *p)
+void sli_mvp_pb_begin_program(sli_mvp_program_context_t *p)
 {
   p->last_loop  = -1;
   p->last_instr = -1;
@@ -430,12 +402,12 @@ void sli_mvp_begin_program(sli_mvp_program_context_t *p)
   memset(p->loop_begin_end, 0, sizeof(p->loop_begin_end));
 }
 
-void sli_mvp_compute(sli_mvp_program_context_t *p,
-                     uint32_t opcode,
-                     uint32_t alu_cfg,
-                     uint32_t load_cfg,
-                     uint32_t store_cfg,
-                     sl_status_t *status)
+void sli_mvp_pb_compute(sli_mvp_program_context_t *p,
+                        uint32_t opcode,
+                        uint32_t alu_cfg,
+                        uint32_t load_cfg,
+                        uint32_t store_cfg,
+                        sl_status_t *status)
 {
   if (p->last_instr >= 7) {
     if (status != NULL) {
@@ -448,15 +420,99 @@ void sli_mvp_compute(sli_mvp_program_context_t *p,
   sli_mvp_prog_set_instr(p->p, p->last_instr, opcode, alu_cfg, load_cfg, store_cfg, false);
 }
 
+void sli_mvp_pb_config_array_full(sli_mvp_program_t *prog,
+                                  uint8_t index,
+                                  void *addr,
+                                  sli_mvp_datatype_t type,
+                                  unsigned short vecs,
+                                  unsigned short rows,
+                                  unsigned short cols,
+                                  int vecstride,
+                                  int rowstride,
+                                  int colstride,
+                                  sl_status_t *status)
+{
+  if (index >= MAX_NUM_ARRAYS) {
+    if (status != NULL) {
+      *status = SL_STATUS_INVALID_PARAMETER;
+    }
+    return;
+  }
 
-void sli_mvp_end_loop(sli_mvp_program_context_t *p)
+  if ((vecs > MAX_ARRAY_DIM_SIZE)
+      || (rows > MAX_ARRAY_DIM_SIZE)
+      || (cols > MAX_ARRAY_DIM_SIZE)
+      || (vecstride < MIN_ARRAY_STRIDE_SIZE || vecstride > MAX_ARRAY_STRIDE_SIZE)
+      || (rowstride < MIN_ARRAY_STRIDE_SIZE || rowstride > MAX_ARRAY_STRIDE_SIZE)
+      || (colstride < MIN_ARRAY_STRIDE_SIZE || colstride > MAX_ARRAY_STRIDE_SIZE)) {
+    if (status != NULL) {
+      *status = SL_STATUS_INVALID_RANGE;
+    }
+    return;
+  }
+
+  sli_mvp_prog_set_array_full(prog, index, addr, type,
+                              vecs, rows, cols,
+                              vecstride, rowstride, colstride);
+}
+
+void sli_mvp_pb_config_array_nhwc(sli_mvp_program_t *prog,
+                                  uint8_t index,
+                                  void *addr,
+                                  sli_mvp_datatype_t type,
+                                  unsigned short h,
+                                  unsigned short w,
+                                  unsigned short c,
+                                  sl_status_t *status)
+{
+  sli_mvp_pb_config_array_full(prog, index, addr, type,
+                               c,        // vecs (DIM0)
+                               h,        // rows (DIM1)
+                               w,        // cols (DIM2)
+                               1,        // vecstride
+                               w * c,    // rowstride
+                               c,        // colstride
+                               status);
+}
+
+void sli_mvp_pb_config_matrix(sli_mvp_program_t *prog,
+                              uint8_t index,
+                              void *addr,
+                              sli_mvp_datatype_t type,
+                              unsigned short rows,
+                              unsigned short cols,
+                              sl_status_t *status)
+{
+  int colstride = 1;
+  int rowstride = cols;
+  sli_mvp_pb_config_array_full(prog, index, addr, type,
+                               1, rows, cols,
+                               0, rowstride, colstride,
+                               status);
+}
+
+void sli_mvp_pb_config_vector(sli_mvp_program_t *prog,
+                              uint8_t index,
+                              void *addr,
+                              sli_mvp_datatype_t type,
+                              unsigned short len,
+                              sl_status_t *status)
+{
+  int colstride = 1;
+  sli_mvp_pb_config_array_full(prog, index, addr, type,
+                               1, 1, len,
+                               0, 0, colstride,
+                               status);
+}
+
+void sli_mvp_pb_end_loop(sli_mvp_program_context_t *p)
 {
   // Record loop end bit for instruction.
   p->loop_begin_end[p->last_instr] |= 2 << (p->loop_stack[p->loop_level] << 1);
   p->loop_level--;
 }
 
-void sli_mvp_execute_program(sli_mvp_program_context_t *p)
+void sli_mvp_pb_execute_program(sli_mvp_program_context_t *p)
 {
   // Patch instruction loop begin & end bits.
   for (int i = 0; i <= p->last_instr; i++) {
@@ -470,13 +526,13 @@ void sli_mvp_execute_program(sli_mvp_program_context_t *p)
   p->p = &p->program[p->prog_index];
 }
 
-void sli_mvp_init_program(sli_mvp_program_context_t *p)
+void sli_mvp_pb_init_program(sli_mvp_program_context_t *p)
 {
   p->prog_index = 0;
   p->p = &p->program[p->prog_index];
 }
 
-void sli_mvp_postloop_incr_dim(sli_mvp_program_context_t *p,
+void sli_mvp_pb_postloop_incr_dim(sli_mvp_program_context_t *p,
                                uint8_t array_index,
                                uint8_t dimension)
 {
@@ -484,12 +540,40 @@ void sli_mvp_postloop_incr_dim(sli_mvp_program_context_t *p,
     |= dimension << ((array_index * 4) + _MVP_LOOPCFG_ARRAY0INCRDIM0_SHIFT);
 }
 
-void sli_mvp_postloop_reset_dim(sli_mvp_program_context_t *p,
+void sli_mvp_pb_postloop_reset_dim(sli_mvp_program_context_t *p,
                                 uint8_t array_index,
                                 uint8_t dimension)
 {
   p->p->LOOP[p->loop_stack[p->loop_level + 1]].RST
     |= dimension << ((array_index * 4) + _MVP_LOOPRST_ARRAY0RESETDIM0_SHIFT);
+}
+
+// Loading program using LDMA
+static void dma_load(sli_mvp_program_t *program, bool wait)
+{
+  ldma_descriptor.xfer.srcAddr = (uint32_t)program;
+  LDMA_StartTransfer(mvp.dma_ch, &ldma_config, &ldma_descriptor);
+
+  if (wait) {
+    // Wait for program to finish loading
+    while (!LDMA_TransferDone(mvp.dma_ch)) {
+      ;
+    }
+  }
+}
+
+// Loading a program using the CPU
+static void cpu_load(sli_mvp_program_t *program, bool wait)
+{
+  (void) wait; // unused
+
+  uint32_t *src = (uint32_t *) program;
+  uint32_t *dst = (uint32_t *) &MVP->ALU[0];
+  size_t n = sizeof(sli_mvp_program_t) / sizeof(uint32_t);
+
+  for (size_t i = 0; i < n; i++) {
+    dst[i] = src[i];
+  }
 }
 
 /**

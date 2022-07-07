@@ -15,7 +15,6 @@ component:
   - id: "sl_system"
   - id: "device_init"
   - id: "slist"
-  - id: "cmsis_rtos2"
   - id: "sleeptimer"
   - id: "nvm3_default"
   - id: "micriumos_kernel"
@@ -34,7 +33,13 @@ component:
   - id: i2cspm
     instance:
       - sensor
-
+  - id: cli
+    instance:
+    - example
+requires:
+  - name: "cmsis_rtos2"
+  - name: freertos_heap_3
+    condition: [freertos]
 source:
   - path: "app.c"
   - path: "app_init.c"
@@ -67,13 +72,7 @@ configuration:
     value: "1"
     condition: [micriumos_kernel]
   - name: "SL_HEAP_SIZE"
-    value: "0x10000"
-  - name: "configTOTAL_HEAP_SIZE"
-    value: "16384"
-    condition: [freertos]
-  - name: "LIB_MEM_CFG_HEAP_SIZE"
-    value: "16384"
-    condition: [micriumos_kernel]
+    value: "0xD000"
   - name: "configUSE_POSIX_ERRNO"
     value: "1"
     condition: [freertos]
@@ -87,26 +86,16 @@ readme:
 other_file:
   - path: ../../documentation/example/wisun_coap_meter/readme_img0.png
   - path: ../../documentation/example/wisun_coap_meter/readme_img1.png
+  - path: hw_filter_tags.yaml
 
 ui_hints:
   highlight:
     - path: "config/rail/radio_settings.radioconf"
+    - path: readme.md
+      focus: true
 
 #--------------------- Toolchain ------------------------
 toolchain_settings:
   - option: optimize
     value: debug
 
-tag:
-  - hardware:
-      device:
-        memory:
-          flash: 610
-          ram: 146
-      board:
-        rf_bands:
-          - 434|490|868|915
-        communication:
-          - vcom
-          - pti
-  

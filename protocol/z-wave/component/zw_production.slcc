@@ -20,6 +20,8 @@ library:
     condition: [device_family_efr32zg13s]
   - path: protocol/z-wave/ZWave/lib/libZWaveSlave_ZGM23A.a
     condition: [zgm230sa27hnn, device_security_se]
+  - path: protocol/z-wave/ZWave/lib/libZWaveSlave_ZGM23A.a
+    condition: [zgm230sa27hgn, device_security_se]
   - path: protocol/z-wave/ZWave/lib/libZWaveSlave_ZGM23B.a
     condition: [zgm230sb27hgn, device_security_vault]
   - path: protocol/z-wave/ZWave/lib/libZWaveSlave_EFR32ZG23.a

@@ -3,7 +3,7 @@
  * @brief Inertial Measurement Unit GATT Service
  *******************************************************************************
  * # License
- * <b>Copyright 2020 Silicon Laboratories Inc. www.silabs.com</b>
+ * <b>Copyright 2022 Silicon Laboratories Inc. www.silabs.com</b>
  *******************************************************************************
  *
  * SPDX-License-Identifier: Zlib
@@ -34,6 +34,7 @@
 #include "app_assert.h"
 #include "app_log.h"
 #include "sl_gatt_service_imu.h"
+#include "sl_gatt_service_imu_config.h"
 
 // -----------------------------------------------------------------------------
 // Private macros
@@ -255,8 +256,16 @@ void sl_gatt_service_imu_on_event(sl_bt_msg_t *evt)
 
 void sl_gatt_service_imu_step(void)
 {
+  sl_status_t sc;
   if (imu_state) {
-    if (SL_STATUS_OK == sl_gatt_service_imu_get(imu_ovec, imu_avec)) {
+    sc = sl_gatt_service_imu_get(imu_ovec, imu_avec);
+    if (SL_STATUS_OK == sc || SL_STATUS_NOT_INITIALIZED == sc) {
+      if (SL_STATUS_NOT_INITIALIZED == sc) {
+        for (int i = 0; i < 3; i++) {
+          imu_ovec[i] = SL_GATT_SERVICE_IMU_OVEC_INVALID;
+          imu_avec[i] = SL_GATT_SERVICE_IMU_AVEC_INVALID;
+        }
+      }
       if (imu_acceleration_notification) {
         imu_acceleration_notify();
       }

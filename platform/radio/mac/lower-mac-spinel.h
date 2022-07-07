@@ -28,7 +28,6 @@ sl_status_t sl_mac_spinel_clear_src_match_ext_entry(uint8_t *ext_address);
 //-------------------------------------------------------------------------------
 // uc callbacks
 
-void sli_lower_mac_init_callback(void);
 void sli_lower_mac_tick_callback(void);
 
 #endif // LOWER_MAC_SPINEL_H

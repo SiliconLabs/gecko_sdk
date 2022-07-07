@@ -1,10 +1,10 @@
 id: ml_kissfft
-label: kissfft
+label: KissFFT
 package: platform
 description: >
   Includes the KissFFT library to perform RFFT on 16 bit fixed point types.
-category: Platform|Machine Learning
-quality: beta
+category: Machine Learning|Utilities
+quality: production
 provides:
   - name: ml_kissfft
   - name: frontend_fft_implementation

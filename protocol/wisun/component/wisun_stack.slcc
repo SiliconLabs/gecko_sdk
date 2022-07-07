@@ -7,6 +7,7 @@ quality: "production"
 root_path: "protocol/wisun/stack"
 
 requires:
+  - name: "device_supports_wisun"
   - name: "mbedtls_core"
   - name: "mbedtls_ecc_secp256r1"
   - name: "mbedtls_ecdh"
@@ -17,7 +18,7 @@ requires:
   - name: "rail_lib_singleprotocol"
   - name: "rail_util_pa"
   - name: "rail_util_pti"
-  - name: "cmsis_rtos2_port"
+  - name: "cmsis_rtos2"
   - name: "nvm3"
   - name: "slist"
   - name: "wisun_implementation"

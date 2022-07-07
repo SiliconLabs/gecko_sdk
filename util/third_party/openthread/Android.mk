@@ -73,7 +73,6 @@ ifeq ($(USE_OTBR_DAEMON), 1)
 OPENTHREAD_PUBLIC_CFLAGS                                         += \
     -DOPENTHREAD_CONFIG_PLATFORM_NETIF_ENABLE=1                     \
     -DOPENTHREAD_CONFIG_PLATFORM_UDP_ENABLE=1                       \
-    -DOPENTHREAD_CONFIG_UNSECURE_TRAFFIC_MANAGED_BY_STACK_ENABLE=1  \
     -DOPENTHREAD_POSIX_CONFIG_DAEMON_ENABLE=1                       \
     $(NULL)
 else
@@ -154,6 +153,7 @@ LOCAL_SHARED_LIBRARIES := libcutils
 
 LOCAL_CFLAGS                                             += \
     -DOPENTHREAD_ENABLE_ANDROID_NDK=1                       \
+    -Wno-sign-compare                                       \
     $(NULL)
 endif
 
@@ -176,7 +176,6 @@ LOCAL_SRC_FILES                                                  := \
     src/core/api/diags_api.cpp                                      \
     src/core/api/dns_api.cpp                                        \
     src/core/api/dns_server_api.cpp                                 \
-    src/core/api/entropy_api.cpp                                    \
     src/core/api/error_api.cpp                                      \
     src/core/api/heap_api.cpp                                       \
     src/core/api/history_tracker_api.cpp                            \
@@ -207,6 +206,7 @@ LOCAL_SRC_FILES                                                  := \
     src/core/api/tcp_api.cpp                                        \
     src/core/api/thread_api.cpp                                     \
     src/core/api/thread_ftd_api.cpp                                 \
+    src/core/api/trel_api.cpp                                       \
     src/core/api/udp_api.cpp                                        \
     src/core/backbone_router/backbone_tmf.cpp                       \
     src/core/backbone_router/bbr_leader.cpp                         \
@@ -285,6 +285,7 @@ LOCAL_SRC_FILES                                                  := \
     src/core/net/dhcp6_client.cpp                                   \
     src/core/net/dhcp6_server.cpp                                   \
     src/core/net/dns_client.cpp                                     \
+    src/core/net/dns_dso.cpp                                        \
     src/core/net/dns_types.cpp                                      \
     src/core/net/dnssd_server.cpp                                   \
     src/core/net/icmp6.cpp                                          \
@@ -385,7 +386,7 @@ LOCAL_SRC_FILES                                                  := \
     src/posix/platform/settings.cpp                                 \
     src/posix/platform/spi_interface.cpp                            \
     src/posix/platform/system.cpp                                   \
-    src/posix/platform/trel_udp6.cpp                                \
+    src/posix/platform/trel.cpp                                     \
     src/posix/platform/udp.cpp                                      \
     src/posix/platform/utils.cpp                                    \
     third_party/mbedtls/repo/library/aes.c                          \
@@ -474,6 +475,18 @@ LOCAL_SRC_FILES                                                  := \
     third_party/mbedtls/repo/library/x509write_crt.c                \
     third_party/mbedtls/repo/library/x509write_csr.c                \
     third_party/mbedtls/repo/library/xtea.c                         \
+    third_party/tcplp/bsdtcp/tcp_usrreq.c                           \
+    third_party/tcplp/bsdtcp/tcp_subr.c                             \
+    third_party/tcplp/bsdtcp/tcp_output.c                           \
+    third_party/tcplp/bsdtcp/cc/cc_newreno.c                        \
+    third_party/tcplp/bsdtcp/tcp_reass.c                            \
+    third_party/tcplp/bsdtcp/tcp_timewait.c                         \
+    third_party/tcplp/bsdtcp/tcp_sack.c                             \
+    third_party/tcplp/bsdtcp/tcp_input.c                            \
+    third_party/tcplp/bsdtcp/tcp_timer.c                            \
+    third_party/tcplp/lib/bitmap.c                                  \
+    third_party/tcplp/lib/cbuf.c                                    \
+    third_party/tcplp/lib/lbuf.c                                    \
     $(OPENTHREAD_PROJECT_SRC_FILES)                                 \
     $(NULL)
 

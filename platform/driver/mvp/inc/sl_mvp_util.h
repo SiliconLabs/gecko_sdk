@@ -32,20 +32,13 @@
 
 #include "sl_mvp.h"
 
-#define SLI_MVP_INCRDIM_DEPTH   SLI_MVP_INCRDIM_VEC
-#define SLI_MVP_INCRDIM_HEIGHT  SLI_MVP_INCRDIM_ROW
-#define SLI_MVP_INCRDIM_WIDTH   SLI_MVP_INCRDIM_COL
-
-#define SLI_MVP_RESETDIM_DEPTH  SLI_MVP_RESETDIM_VEC
-#define SLI_MVP_RESETDIM_HEIGHT SLI_MVP_RESETDIM_ROW
-#define SLI_MVP_RESETDIM_WIDTH  SLI_MVP_RESETDIM_COL
-
 #ifdef __cplusplus
 extern "C" {
 #endif
 
+/// @cond DO_NOT_INCLUDE_WITH_DOXYGEN
 /***************************************************************************//**
- * @addtogroup mvp_util MVP utility functions.
+ * @addtogroup mvp MVP API
  * @{
  ******************************************************************************/
 
@@ -101,43 +94,8 @@ __INLINE int sli_mvp_util_offset_nhwc(int height,
   return (((((n * height) + h) * width) + w) * depth) + c;
 }
 
-/**
- * @brief
- *   Configure a MVP array in a program in NHWC or "row major" style.
- *
- * @note
- *   NHWC: N = batch, H = height, W = width, C = channel.
- *   NHWC memory ordering is "row major" within each batch, and is the default
- *   memory ordering used in TensorFlow.
- *   Since MVP handles only three dimensions, we silently treat n (batches)
- *   of nhwc as 1.
- *
- * @param[in] prog  The program to configure.
- * @param[in] index Array index. Values in the range 0-4
- * @param[in] addr  Base address of the array.
- * @param[in] datatype Datatype of each array element.
- * @param[in] h  Matrix height.
- * @param[in] w  Matrix width.
- * @param[in] c  Matrix depth (channels).
- */
-__INLINE void sli_mvp_util_prog_set_array_nhwc(sli_mvp_program_t *prog,
-                                               uint8_t index,
-                                               void *addr,
-                                               sli_mvp_datatype_t type,
-                                               unsigned short h,
-                                               unsigned short w,
-                                               unsigned short c)
-{
-  sli_mvp_prog_set_array_full(prog, index, addr, type,
-                              c,        // vecs (DIM0)
-                              h,        // rows (DIM1)
-                              w,        // cols (DIM2)
-                              1,        // vecstride
-                              w * c,    // rowstride
-                              c);       // colstride
-}
-
-/** @} (end addtogroup mvp_util) */
+/** @} (end addtogroup mvp) */
+/// @endcond
 
 #ifdef __cplusplus
 }

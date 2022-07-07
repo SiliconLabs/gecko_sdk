@@ -102,6 +102,20 @@ psa_status_t compute_msg_hash(void);
 psa_status_t compare_msg_hash(void);
 
 /***************************************************************************//**
+ * Process an unauthenticated encryption.
+ *
+ * @returns Returns PSA error code, @ref crypto_values.h.
+ ******************************************************************************/
+psa_status_t encrypt_cipher(void);
+
+/***************************************************************************//**
+ * Process an unauthenticated decryption.
+ *
+ * @returns Returns PSA error code, @ref crypto_values.h.
+ ******************************************************************************/
+psa_status_t decrypt_cipher(void);
+
+/***************************************************************************//**
  * Start an encryption.
  *
  * @returns Returns PSA error code, @ref crypto_values.h.

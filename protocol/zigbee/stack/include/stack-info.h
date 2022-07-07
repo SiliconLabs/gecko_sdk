@@ -99,6 +99,14 @@ EmberStatus emberWriteNodeData(bool erase);
  */
 uint32_t emberMsToNextStackEvent(void);
 
+/** @brief Set the power descriptor to the specified value. The power
+ * descriptor is a dynamic value, therefore this function should be called
+ * whenever the value changes.
+ *
+ * @param descriptor  The new power descriptor for the local node.
+ */
+void emberSetPowerDescriptor(uint16_t descriptor);
+
 #ifdef DOXYGEN_SHOULD_SKIP_THIS
 /** @brief Return the EUI64 ID of the local node.
  *
@@ -134,14 +142,6 @@ EmberNodeId emberRadioGetNodeId(void);
  * @param code  The manufacturer code for the local node.
  */
 void emberSetManufacturerCode(uint16_t code);
-
-/** @brief Set the power descriptor to the specified value. The power
- * descriptor is a dynamic value, therefore this function should be called
- * whenever the value changes.
- *
- * @param descriptor  The new power descriptor for the local node.
- */
-void emberSetPowerDescriptor(uint16_t descriptor);
 
 /** @brief Set the maximum incoming transfer size to the specified value.
  * The maximum incoming transfer size is one of the fields of the node
@@ -219,8 +219,6 @@ EmberStatus emberSetBrokenRouteErrorCode(uint8_t errorCode);
 
 #define emberSetManufacturerCode(code) \
   (emManufacturerCode = (code))
-#define emberSetPowerDescriptor(descriptor) \
-  (emPowerDescriptor = (descriptor))
 #define emberSetMaximumIncomingTransferSize(size) \
   (emMaximumIncomingTransferSize = (size))
 #define emberSetMaximumOutgoingTransferSize(size) \
@@ -341,6 +339,21 @@ EmberPanId emberGetPanId(void);
  * @return A PAN ID.
  */
 EmberPanId emberRadioGetPanId(void);
+
+/** @brief Set the configured 802.15.4 CCA mode in the radio. For a list of
+ * CCA modes, please refer to RAIL documentation regarding
+ * RAIL_IEEE802154_CcaMode_t.
+ *
+ * @param ccaMode  A RAIL_IEEE802154_CcaMode_t value
+ *
+ * @return EMBER_SUCCESS upon success, EMBER_ERR_FATAL otherwise.
+ *
+ * @note The default CCA mode for zigbee is RAIL_IEEE802154_CCA_MODE_RSSI.
+ *
+ * @note As mentioned in the RAIL documentation, on platforms that don't support
+ * different CCA modes, a call to this function will do nothing.
+ */
+EmberStatus emberSetRadioIeee802154CcaMode(uint8_t ccaMode);
 
 /** @brief Fetch a node's 8 byte Extended PAN identifier. If this is called
  *  when a device is not currently on a network (see ::emberNetworkState),
@@ -616,6 +629,16 @@ bool emberIsResetRejoiningNeighborsFCEnabled(void);
  */
 EmberStatus emberGetNeighborFrameCounter(EmberEUI64 nodeEui64,
                                          uint32_t *returnFrameCounter);
+
+/** @brief Sets the frame counter for the specified neighbor or child.
+ *  @param nodeEui64  The neighbor or child EUI to search.
+ *  @param frameCounter  The frame counter to set.
+ *
+ *  @return EmberStatus depending on whether the frame counter is set in the
+ *   neighbor or child table.
+ */
+EmberStatus emberSetNeighborFrameCounter(EmberEUI64 nodeEui64,
+                                         uint32_t frameCounter);
 
 /** @brief Copy a route table entry to the structure that the
  * \c result points to. Unused route table entries have a destination

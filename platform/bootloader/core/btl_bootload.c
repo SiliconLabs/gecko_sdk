@@ -51,6 +51,8 @@ MISRAC_ENABLE
 #ifdef __ICCARM__
 // Silence MISRA warning disallowing statements without side effects
 #pragma diag_suppress=Pm049
+// Silence MISRA warning disallowing access to volatile object in right-hand operand of || operator
+#pragma diag_suppress=Pm026
 #endif
 
 //
@@ -327,10 +329,33 @@ void bootload_bootloaderCallback(uint32_t offset,
   }
 #endif
 
-  uint32_t address = BTL_UPGRADE_LOCATION + offset;
-  if ((address + length) > (uint32_t)(FLASH_BASE + FLASH_SIZE)) {
-    BTL_DEBUG_PRINT("OOB 0x");
+  // Do not allow overwriting the last page of main flash if it coincides with
+  // the "lock bits" page.
+#if defined(LOCKBITS_BASE) \
+  && (LOCKBITS_BASE != (FLASH_BASE + FLASH_SIZE - FLASH_PAGE_SIZE))
+  const uint32_t max_address = FLASH_BASE + FLASH_SIZE;
+#else
+  const uint32_t max_address = FLASH_BASE + FLASH_SIZE - FLASH_PAGE_SIZE;
+#endif
+  volatile uint32_t address = BTL_UPGRADE_LOCATION + offset;
+
+  // OOB checks
+  // i) if NOT (BTL_UPGRADE_LOCATION <= address < max_address),
+  //    with integer overflow check for address
+  if ((offset > (uint32_t) (UINT32_MAX - BTL_UPGRADE_LOCATION))
+      || (address >= max_address)) {
+    BTL_DEBUG_PRINT("OOB, address not in allowed range; (address) 0x");
     BTL_DEBUG_PRINT_WORD_HEX(address);
+    BTL_DEBUG_PRINT_LF();
+    return;
+  }
+  // ii) Semantically equivalent to (address + length > max_address),
+  //     but without the risk of integer overflow (or underflow, because of (i))
+  if (length > (uint32_t) (max_address - address)) {
+    BTL_DEBUG_PRINT("OOB, length too large; (address) 0x");
+    BTL_DEBUG_PRINT_WORD_HEX(address);
+    BTL_DEBUG_PRINT(", (length) 0x");
+    BTL_DEBUG_PRINT_WORD_HEX(length);
     BTL_DEBUG_PRINT_LF();
     return;
   }

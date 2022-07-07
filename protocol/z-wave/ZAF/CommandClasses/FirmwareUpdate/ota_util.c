@@ -23,10 +23,9 @@
 #include <ZAF_Common_interface.h>
 #include <ZAF_transport.h>
 
-#include<btl_interface.h>
-#include<btl_interface_storage.h>
+#include <btl_interface.h>
+#include <btl_interface_storage.h>
 
-#include<BootLoader/OTA/bootloader-slot-configuration.h>
 #include <em_wdog.h>
 
 
@@ -104,8 +103,6 @@ STATIC_ASSERT(sizeof(SFirmwareUpdateFile) > sizeof(SFirmwareUpdateFile_DEPRECATE
 /* Used for extending FIRMWARE_UPDATE_REQUEST_TIMEOUTS on MdGet retries - in 1ms ticks */
 #define FIRMWARE_UPDATE_REQUEST_TIMEOUT_RETRY_INC 1500
 
-#define BOOTLOADER_NO_OF_FLASHPAGES_IN_SECTOR  116U // This is the number of the flash pages in bootloader section
-
 #define APPLICATION_IMAGE_STORAGE_SLOT 0x0
 
 #define ACTIVATION_SUPPORT_MASK_APP        0x80U
@@ -144,6 +141,10 @@ static uint8_t mdGetNumberOfReports;
 /// Actual fragment size calculated upon receiving REQUEST GET.
 static uint8_t firmware_update_packetsize;
 
+static BootloaderStorageSlot_t bootloader_storage_slot = {
+  .address = 0,
+  .length  = 0  
+};
 typedef struct _OTA_UTIL_
 {
   CC_FirmwareUpdate_start_callback_t pOtaStart;
@@ -263,7 +264,6 @@ bool CC_FirmwareUpdate_Init(
 {
   int32_t retvalue;
 
-  BootloaderStorageSlot_t slot;
   BootloaderInformation_t bloaderInfo;
 
   myOta.pOtaStart = pOtaStart;
@@ -305,12 +305,14 @@ bool CC_FirmwareUpdate_Init(
      myOta.NVM_valid = false;
   }
 
-  //Get the bootloader storage slot information
-  slot.address = 0;
-  slot.length  = 0;
-  bootloader_getStorageSlotInfo(APPLICATION_IMAGE_STORAGE_SLOT, &slot);
+  retvalue = bootloader_getStorageSlotInfo(APPLICATION_IMAGE_STORAGE_SLOT, &bootloader_storage_slot);
+  if(retvalue != BOOTLOADER_OK)
+  {
+    DPRINTF("Could not get storage slot info! %x\n", retvalue);
+    myOta.NVM_valid = false;
+  }
 
-  DPRINTF("\r\nslot address %d, length %d", slot.address, slot.length);
+  DPRINTF("\r\nslot address %d, length %d\n", bootloader_storage_slot.address, bootloader_storage_slot.length);
 
   Ecode_t errCode = 0;
   uint32_t objectType;
@@ -442,13 +444,13 @@ static void OTA_WriteData(uint32_t offset, uint8_t *pData, uint16_t length)
 {
   int32_t retvalue = BOOTLOADER_OK;
 
-  if (pageCnt < BOOTLOADER_NO_OF_FLASHPAGES_IN_SECTOR)
+  if (pageCnt < (bootloader_storage_slot.length / FLASH_PAGE_SIZE))
   {
     pageno = ((offset + length) / FLASH_PAGE_SIZE) + 1;
     if (pageno != prevpage) //address on the same page so no write
     {
       retvalue = bootloader_eraseRawStorage(
-          BTL_STORAGE_SLOT_START_ADDRESS + (pageCnt * FLASH_PAGE_SIZE), FLASH_PAGE_SIZE);
+          bootloader_storage_slot.address + (pageCnt * FLASH_PAGE_SIZE), FLASH_PAGE_SIZE);
       prevpage = pageno;
       if (retvalue != BOOTLOADER_OK)
       {
@@ -456,28 +458,28 @@ static void OTA_WriteData(uint32_t offset, uint8_t *pData, uint16_t length)
       }
       else
       {
-        //DPRINTF("OTA_SUCESS_ERASING_FLASH page=%d\n",pageCnt);
+        DPRINTF("OTA_SUCESS_ERASING_FLASH page=%d\n", pageCnt);
         pageCnt++;
       }
     }
+    /*writing gbl image to the flash*/
+    if (0 == (length % 4))
+    {
+      retvalue = bootloader_writeRawStorage(bootloader_storage_slot.address + offset, pData, length); //for EFR32ZG Chip
+    }
+    else
+    {
+      //last packet make the writing as 4 bytes alligned
+      DPRINTF("Writing the last packet length is %d...\n", length);
+      retvalue = bootloader_writeRawStorage(bootloader_storage_slot.address + offset, pData,
+                                            (size_t)(length + (4 - (length % 4))));
+    }
+    if (retvalue != BOOTLOADER_OK)
+    {
+      DPRINTF("OTA_ERROR_WRITING_FLASH ERROR =0x%x,length=%d,offset=%d", retvalue, length, offset);
+    }
+    OtaFlashWriteEraseDone(); // Required after end flash write/erase operation    
   }
-  /*writing gbl image to the flash*/
-  if (0 == (length % 4))
-  {
-    retvalue = bootloader_writeRawStorage(BTL_STORAGE_SLOT_START_ADDRESS + offset, pData, length); //for EFR32ZG Chip
-  }
-  else
-  {
-    //last packet make the writing as 4 bytes alligned
-    DPRINTF("Writing the last packet length is %d...\n", length);
-    retvalue = bootloader_writeRawStorage(BTL_STORAGE_SLOT_START_ADDRESS + offset, pData,
-                                          (size_t)(length + (4 - (length % 4))));
-  }
-  if (retvalue != BOOTLOADER_OK)
-  {
-    DPRINTF("OTA_ERROR_WRITING_FLASH ERROR =0x%x,length=%d,offset=%d", retvalue, length, offset);
-  }
-  OtaFlashWriteEraseDone(); // Required after end flash write/erase operation
 }
 
 /*======================== UpdateStatusSuccess ==========================
@@ -818,9 +820,6 @@ void handleCmdClassFirmwareUpdateMdReqGet(
   uint16_t checksumIncoming = (uint16_t)((((uint16_t)pFrame->checksum1) << 8)
                               | (uint16_t)pFrame->checksum2);
 
-  // Keep awake for a long time, but not forever.
-  ZAF_PM_StayAwake(&m_radioPowerLock, OTA_AWAKE_PERIOD_LONG_TERM);
-
   /*Firmware valid.. ask OtaStart to start update*/
   if (NON_NULL(myOta.pOtaStart) &&
       (false == myOta.pOtaStart(handleFirmWareIdGet(fwTarget), checksumIncoming)))
@@ -831,6 +830,10 @@ void handleCmdClassFirmwareUpdateMdReqGet(
     handleEvent(FW_EVENT_REQ_GET_RECEIVED_INVALID);
     return;
   }
+
+  // Keep awake for a long time, but not forever.
+  ZAF_PM_StayAwake(&m_radioPowerLock, OTA_AWAKE_PERIOD_LONG_TERM);
+
   initOTAState();
   memcpy( (uint8_t*) &myOta.rxOpt, (uint8_t*)rxOpt, sizeof(RECEIVE_OPTIONS_TYPE_EX));
 
@@ -1028,6 +1031,7 @@ static bool OtaVerifyImage()
     // Rewind the page counters and erase the storage
     pageno=1;
     prevpage=0;
+    pageCnt = 0;
     int32_t retvalue = bootloader_eraseStorageSlot(APPLICATION_IMAGE_STORAGE_SLOT);
     if (BOOTLOADER_OK != retvalue)
     {
@@ -1288,9 +1292,7 @@ static void fw_action_verify_image(void)
 static void fw_action_reboot_and_Install(void)
 {
   DPRINTF(">> %s() \n", __func__);
-#ifndef ZWAVE_SERIES_800  
   bootloader_rebootAndInstall();
-#endif
 }
 /// No action needed.
 static void fw_action_none(void)

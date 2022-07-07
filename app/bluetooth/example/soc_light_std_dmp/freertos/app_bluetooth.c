@@ -408,35 +408,7 @@ void demo_queue_post(demo_msg_t msg)
 // Private functions
 
 /**************************************************************************//**
- * Set Bluetooth TX power
- *
- *****************************************************************************/
-static void app_bluetooth_tx_power_set(void)
-{
-  sl_status_t sc;
-  // Radio power parameters
-  int16_t support_min, support_max;
-  int16_t set_min, set_max;
-  int16_t rf_path_gain;
-
-  // Get transmit power capabilities
-  sc = sl_bt_system_get_tx_power_setting(&support_min,
-                                         &support_max,
-                                         &set_min,
-                                         &set_max,
-                                         &rf_path_gain);
-  app_assert_status(sc);
-
-  // Set transmit power
-  sc = sl_bt_system_set_tx_power((support_min > 0) ? support_min : 0,
-                                 support_max,
-                                 &set_min,
-                                 &set_max);
-  app_assert_status(sc);
-}
-
-/**************************************************************************//**
- * Aquire Light mutex
+ * Acquire Light mutex
  * @param[in] handle timer handle
  * @param[in] data additional data
  *****************************************************************************/
@@ -451,7 +423,7 @@ static void app_single_timer_cb(sl_simple_timer_t *handle,
 }
 
 /**************************************************************************//**
- * Swithcing LEDs off
+ * Switching LEDs off
  *
  *****************************************************************************/
 void appUiLedOff(void)
@@ -461,7 +433,7 @@ void appUiLedOff(void)
 }
 
 /**************************************************************************//**
- * Swithcing LEDs on
+ * Switching LEDs on
  *
  *****************************************************************************/
 void appUiLedOn(void)
@@ -1381,9 +1353,7 @@ static void demo_app_task(void *p_arg)
                    (void*)demo.own_addr.addr,
                    sizeof(demo.src_addr.addr));
             light_post();
-            // Set tx power
-            app_bluetooth_tx_power_set();
-            // Enable advertistments for the first time
+            // Enable advertisements for the first time
             enable_ble_advertisements();
             // Start beaconing
             beacon_advertisements();

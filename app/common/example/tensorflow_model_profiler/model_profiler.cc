@@ -280,7 +280,7 @@ bool model_profiler_init(void)
   // Load the model.
   printf("--------------------------------------------\n");
   printf("Loading model.\n");
-  model = tflite::GetModel(default_model_array);
+  model = tflite::GetModel(sl_tflite_model_array);
   if (model->version() != TFLITE_SCHEMA_VERSION) {
     printf("Model provided is schema version %ld, only version "
            "%d is supported.",

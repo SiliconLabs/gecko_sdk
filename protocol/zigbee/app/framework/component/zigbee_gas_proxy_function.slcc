@@ -14,6 +14,7 @@ requires:
    - name: "zigbee_meter_mirror"
    - name: "zigbee_events_server"
    - name: "zigbee_gbcs_compatibility"
+   - name: "zigbee_price_server"
 config_file:
   - path: protocol/zigbee/app/framework/plugin/gas-proxy-function/config/gas-proxy-function-config.h
 source:
@@ -52,13 +53,31 @@ template_contribution:
        cluster_id: "0x0708"
        mfg_id: "NOT_MFG_SPECIFIC"
        side: "CLIENT"
-       service_function: "emberAfDeviceManagementClusterClientCommandParse"
+       service_function: "emAfGasProxyFunctionDeviceManagementClusterClientCommandParse"
   - name: cluster_service
     value:
        cluster_id: "0x0707"
        mfg_id: "NOT_MFG_SPECIFIC"
        side: "CLIENT"       
-       service_function: "emberAfCalendarClusterClientCommandParse"       
+       service_function: "emAfGasProxyFunctionCalendarClusterClientCommandParse"
+  - name: cluster_service
+    value:
+       cluster_id: "0x0700"
+       mfg_id: "NOT_MFG_SPECIFIC"
+       side: "CLIENT"       
+       service_function: "emAfGasProxyFunctionPriceClusterClientCommandParse"       
+  - name: cluster_service
+    value:
+       cluster_id: "0x0703"
+       mfg_id: "NOT_MFG_SPECIFIC"
+       side: "CLIENT"       
+       service_function: "emAfGasProxyFunctionMessagingClusterClientCommandParse"       
+  - name: cluster_service
+    value:
+       cluster_id: "0x0702"
+       mfg_id: "NOT_MFG_SPECIFIC"
+       side: "CLIENT"       
+       service_function: "emAfGasProxyFunctionSimpleMeteringClusterClientCommandParse"
   - name: cli_group
     value:
       group: plugin

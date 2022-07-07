@@ -5446,6 +5446,66 @@ RAIL_Status_t RAIL_Verify(RAIL_VerifyConfig_t *configVerify,
                           uint32_t durationUs,
                           bool restart);
 
+#ifndef DOXYGEN_SHOULD_SKIP_THIS
+
+/**
+ * A global pointer to the memory address of the internal RAIL hardware timer
+ * that drives the RAIL timebase.
+ *
+ * @note The corresponding timer tick value is not adjusted for overflow or the
+ *   clock period, and will simply be a register read. The ticks wrap after
+ *   about 17 minutes since it does not use the full 32-bit range.
+ *   For more details, check the documentation for \ref RAIL_TimerTick_t.
+ */
+extern const volatile RAIL_TimerTick_t *RAIL_TimerTick;
+
+/**
+ * Get elapsed time, in microseconds, between two \ref RAIL_TimerTick_t ticks.
+ *
+ * @param[in] startTick Tick recorded at the start of the operation.
+ * @param[in] endTick Tick recorded at the end of the operation.
+ *
+ * @return Returns the elapsed time, in microseconds, between two timer ticks.
+ */
+RAIL_Time_t RAIL_TimerTicksToUs(RAIL_TimerTick_t startTick,
+                                RAIL_TimerTick_t endTick);
+
+/**
+ * Get \ref RAIL_TimerTick_t tick corresponding to the \ref RAIL_Time_t time.
+ *
+ * @param[in] microseconds Time in microseconds.
+ *
+ * @return Returns the \ref RAIL_TimerTick_t tick corresponding to the
+ *   \ref RAIL_Time_t time.
+ */
+RAIL_TimerTick_t RAIL_UsToTimerTicks(RAIL_Time_t microseconds);
+
+/**
+ * Enable Radio state change interrupt.
+ *
+ * @param[in] railHandle A RAIL instance handle.
+ * @param[in] enable Enable/disable Radio state change interrupt.
+ * @return Status code indicating success of the function call. Returns
+ *   \ref RAIL_STATUS_NO_ERROR once the interrupt has been enabled or disabled.
+ *
+ * @note If enabled, state change events are reported through the separate
+ *   RAILCb_RadioStateChanged() callback.
+ */
+RAIL_Status_t RAIL_EnableRadioStateChanged(RAIL_Handle_t railHandle,
+                                           bool enable);
+
+/**
+ * Get the current radio state.
+ *
+ * @param[in] railHandle A RAIL instance handle.
+ * @return An enumeration, \ref RAIL_RadioStateEfr32_t, for the current radio
+ *   state.
+ *
+ */
+RAIL_RadioStateEfr32_t RAIL_GetRadioStateAlt(RAIL_Handle_t railHandle);
+
+#endif//DOXYGEN_SHOULD_SKIP_THIS
+
 /** @} */ // end of group Diagnostic
 
 #ifndef DOXYGEN_SHOULD_SKIP_THIS

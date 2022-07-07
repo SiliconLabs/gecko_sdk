@@ -7,11 +7,9 @@ description: >
 category: LwIP|OS
 quality: production
 provides:
-  - name: lwip_port
   - name: lwip_port_freertos
 requires:
   - name: lwip_core
-  - name: freertos
 source:
   - path: util/third_party/lwip/lwip-contrib/ports/freertos/sys_arch.c
 include:

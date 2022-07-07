@@ -103,6 +103,43 @@ psa_status_t generate_random_number(uint8_t *buf, uint32_t size)
 }
 
 /***************************************************************************//**
+ * Compute the MAC of a message.
+ ******************************************************************************/
+psa_status_t compute_mac(void)
+{
+  psa_algorithm_t algo = get_key_algo();
+  if (algo == 0) {
+    return(PSA_ERROR_NOT_SUPPORTED);
+  }
+
+  print_error_cycle(psa_mac_compute(get_key_id(),
+                                    algo,
+                                    msg_buf_ptr,
+                                    msg_len,
+                                    mac_buf,
+                                    sizeof(mac_buf),
+                                    &mac_len));
+}
+
+/***************************************************************************//**
+ * Compute the MAC of a message and compare it with an expected value.
+ ******************************************************************************/
+psa_status_t verify_mac(void)
+{
+  psa_algorithm_t algo = get_key_algo();
+  if (algo == 0) {
+    return(PSA_ERROR_NOT_SUPPORTED);
+  }
+
+  print_error_cycle(psa_mac_verify(get_key_id(),
+                                   algo,
+                                   msg_buf_ptr,
+                                   msg_len,
+                                   mac_buf,
+                                   mac_len));
+}
+
+/***************************************************************************//**
  * Start a MAC sign stream.
  ******************************************************************************/
 psa_status_t start_mac_sign_stream(void)

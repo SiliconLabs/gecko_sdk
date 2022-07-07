@@ -35,6 +35,7 @@
 
 #include "aoa_angle.h"
 #include "aoa_angle_config.h"
+#include "app_log.h"
 
 // -----------------------------------------------------------------------------
 // Defines
@@ -43,6 +44,7 @@
 
 #define GUARD_PERIOD_US          4
 #define REFERENCE_PERIOD_US      8
+#define REFERENCE_PERIOD_SAMPLES 8
 
 // -----------------------------------------------------------------------------
 // Type definitions
@@ -52,9 +54,8 @@ struct aoa_angle_config_node_s {
   aoa_id_t id;
   aoa_angle_config_t aoa_angle_config;
   aoa_angle_config_node_t *next;
-  float *ref_i_samples;
-  float *ref_q_samples;
-  size_t ref_sample_length;
+  float ref_i_samples[REFERENCE_PERIOD_SAMPLES];
+  float ref_q_samples[REFERENCE_PERIOD_SAMPLES];
   float **i_samples;
   float **q_samples;
   size_t sample_rows;
@@ -80,7 +81,7 @@ static void free_masks(aoa_mask_node_t *mask_head);
 static void get_samples(aoa_iq_report_t *iq_report,
                         aoa_angle_config_node_t *node);
 static float channel_to_frequency(uint8_t channel);
-static void aoa_angle_set_default_config(aoa_angle_config_t *aoa_angle_config);
+static sl_status_t aoa_angle_set_default_config(aoa_angle_config_t *aoa_angle_config);
 static sl_status_t aoa_angle_finalize_node(aoa_angle_config_node_t *node);
 static sl_status_t aoa_angle_find(aoa_id_t id, aoa_angle_config_node_t **node);
 
@@ -94,6 +95,7 @@ sl_status_t aoa_angle_add_config(aoa_id_t id,
                                  aoa_angle_config_t **config)
 {
   aoa_angle_config_node_t *new;
+  sl_status_t sc;
 
   if (SL_STATUS_OK == aoa_angle_find(id, NULL)) {
     return SL_STATUS_ALREADY_EXISTS;
@@ -112,16 +114,16 @@ sl_status_t aoa_angle_add_config(aoa_id_t id,
   }
 
   // Initialize sample buffers
-  new->ref_i_samples = NULL;
-  new->ref_q_samples = NULL;
-  new->ref_sample_length = 0;
   new->i_samples = NULL;
   new->q_samples = NULL;
   new->sample_rows = 0;
   new->sample_cols = 0;
 
-  aoa_angle_set_default_config(&new->aoa_angle_config);
-  return aoa_angle_finalize_node(new);
+  sc = aoa_angle_set_default_config(&new->aoa_angle_config);
+  if (sc == SL_STATUS_OK) {
+    sc = aoa_angle_finalize_node(new);
+  }
+  return sc;
 }
 
 /**************************************************************************//**
@@ -225,7 +227,6 @@ void aoa_angle_reset_configs(void)
     free_sample_buffers(current);
     free_masks(current->aoa_angle_config.azimuth_mask_head);
     free_masks(current->aoa_angle_config.elevation_mask_head);
-    free(current->aoa_angle_config.switching_pattern);
     free(current);
     current = head_config;
   }
@@ -273,19 +274,27 @@ enum sl_rtl_error_code aoa_init_rtl(aoa_state_t *aoa_state, aoa_id_t config_id)
   aoa_angle_config_t *aoa_angle_config = NULL;
   aoa_mask_node_t *current_azimuth;
   aoa_mask_node_t *current_elevation;
-  uint32_t *switch_pattern_in;
-  uint8_t antenna_pattern_iterator;
+  uint32_t antenna_switch_pattern[ANTENNA_ARRAY_MAX_PATTERN_SIZE];
+  uint32_t antenna_switch_pattern_size = sizeof(antenna_switch_pattern) / sizeof(uint32_t);
 
   sc = aoa_angle_get_config(config_id, &aoa_angle_config);
   if (SL_STATUS_OK != sc) {
     return SL_RTL_ERROR_ARGUMENT;
   }
 
-  // Copy the uint8_t based pattern to a uint32_t based array
-  switch_pattern_in = malloc(sizeof(uint32_t) * aoa_angle_config->switching_pattern_length);
-
-  for (antenna_pattern_iterator = 0; antenna_pattern_iterator < aoa_angle_config->switching_pattern_length; antenna_pattern_iterator++) {
-    switch_pattern_in[antenna_pattern_iterator] = aoa_angle_config->switching_pattern[antenna_pattern_iterator];
+  sc = antenna_array_get_continuous_pattern(&aoa_angle_config->antenna_array,
+                                            antenna_switch_pattern,
+                                            &antenna_switch_pattern_size);
+  if (SL_STATUS_OK != sc) {
+    return SL_RTL_ERROR_ARGUMENT;
+  } else {
+    app_log_debug("RTL switch pattern:");
+    if (_app_log_check_level(APP_LOG_LEVEL_DEBUG)) {
+      for (uint32_t i = 0; i < antenna_switch_pattern_size; i++) {
+        app_log(" %d", antenna_switch_pattern[i]);
+      }
+      app_log_nl();
+    }
   }
 
   current_azimuth = aoa_angle_config->azimuth_mask_head;
@@ -302,7 +311,7 @@ enum sl_rtl_error_code aoa_init_rtl(aoa_state_t *aoa_state, aoa_id_t config_id)
   CHECK_ERROR(ec);
   // Set the antenna array type
   ec = sl_rtl_aox_set_array_type(&aoa_state->libitem,
-                                 aoa_angle_config->array_type);
+                                 aoa_angle_config->antenna_array.array_type);
   CHECK_ERROR(ec);
   // Select mode (high speed/high accuracy/etc.)
   ec = sl_rtl_aox_set_mode(&aoa_state->libitem,
@@ -339,9 +348,8 @@ enum sl_rtl_error_code aoa_init_rtl(aoa_state_t *aoa_state, aoa_id_t config_id)
   ec = sl_rtl_aox_set_switch_pattern_mode(&aoa_state->libitem, SL_RTL_AOX_SWITCH_PATTERN_MODE_EXTERNAL);
   CHECK_ERROR(ec);
   // Set the switching pattern
-  ec = sl_rtl_aox_update_switch_pattern(&aoa_state->libitem, switch_pattern_in, NULL);
+  ec = sl_rtl_aox_update_switch_pattern(&aoa_state->libitem, antenna_switch_pattern, NULL);
   CHECK_ERROR(ec);
-  free(switch_pattern_in);
   if (aoa_angle_config->angle_filtering == true) {
     // Initialize an util item
     ec = sl_rtl_util_init(&aoa_state->util_libitem);
@@ -386,7 +394,7 @@ enum sl_rtl_error_code aoa_calculate(aoa_state_t *aoa_state,
                                                      2.0f,
                                                      node->ref_i_samples,
                                                      node->ref_q_samples,
-                                                     aoa_angle_config->period_samples,
+                                                     REFERENCE_PERIOD_SAMPLES,
                                                      &phase_rotation);
   CHECK_ERROR(ec);
 
@@ -533,7 +541,7 @@ static void get_samples(aoa_iq_report_t *iq_report, aoa_angle_config_node_t *nod
 {
   size_t index = 0;
   // Write reference IQ samples into the IQ sample buffer (sampled on one antenna)
-  for (size_t sample = 0; sample < node->ref_sample_length; ++sample) {
+  for (size_t sample = 0; sample < REFERENCE_PERIOD_SAMPLES; ++sample) {
     node->ref_i_samples[sample] = iq_report->samples[index++] / 127.0;
     if (index == iq_report->length) {
       break;
@@ -543,7 +551,8 @@ static void get_samples(aoa_iq_report_t *iq_report, aoa_angle_config_node_t *nod
       break;
     }
   }
-  index = node->ref_sample_length * 2;
+  // The last reference sample is the first measurement sample too.
+  index = (REFERENCE_PERIOD_SAMPLES - 1) * 2;
   // Write antenna IQ samples into the IQ sample buffer (sampled on all antennas)
   for (size_t snapshot = 0; snapshot < node->sample_rows; ++snapshot) {
     for (size_t antenna = 0; antenna < node->sample_cols; ++antenna) {
@@ -565,25 +574,19 @@ static void get_samples(aoa_iq_report_t *iq_report, aoa_angle_config_node_t *nod
 /**************************************************************************//**
  * Sets the default config.
  *****************************************************************************/
-static void aoa_angle_set_default_config(aoa_angle_config_t *aoa_angle_config)
+static sl_status_t aoa_angle_set_default_config(aoa_angle_config_t *aoa_angle_config)
 {
   aoa_angle_config->aox_mode = AOA_ANGLE_AOX_MODE;
-  aoa_angle_config->array_type = AOX_ARRAY_TYPE;
-  aoa_angle_config->period_samples = AOA_REF_PERIOD_SAMPLES;
   aoa_angle_config->angle_filtering = true;
   aoa_angle_config->angle_filtering_weight = AOA_ANGLE_FILTERING_AMOUNT;
   aoa_angle_config->angle_correction_timeout = AOA_ANGLE_CORRECTION_TIMEOUT;
   aoa_angle_config->angle_correction_delay = AOA_ANGLE_MAX_CORRECTION_DELAY;
-  aoa_angle_config->switching_pattern_length = AOA_NUM_ARRAY_ELEMENTS;
   aoa_angle_config->cte_min_length = AOA_ANGLE_CTE_MIN_LENGTH;
   aoa_angle_config->cte_slot_duration = AOA_ANGLE_CTE_SLOT_DURATION;
   aoa_angle_config->azimuth_mask_head = NULL;
   aoa_angle_config->elevation_mask_head = NULL;
-
-  // Set default antenna pattern
-  uint8_t antenna_array[AOA_NUM_ARRAY_ELEMENTS] = SWITCHING_PATTERN;
-  aoa_angle_config->switching_pattern = malloc(AOA_NUM_ARRAY_ELEMENTS * sizeof(uint8_t));
-  memcpy(aoa_angle_config->switching_pattern, antenna_array, sizeof(antenna_array));
+  return antenna_array_init(&aoa_angle_config->antenna_array,
+                            AOA_ANGLE_ANTENNA_ARRAY_TYPE);
 }
 
 static sl_status_t aoa_angle_finalize_node(aoa_angle_config_node_t *node)
@@ -593,7 +596,7 @@ static sl_status_t aoa_angle_finalize_node(aoa_angle_config_node_t *node)
   cfg->num_snapshots = (uint8_t)(((cfg->cte_min_length * 8)
                                   - GUARD_PERIOD_US - REFERENCE_PERIOD_US)
                                  / (cfg->cte_slot_duration * 2)
-                                 / cfg->switching_pattern_length);
+                                 / cfg->antenna_array.size);
 
   return allocate_sample_buffers(node);
 }
@@ -603,36 +606,22 @@ static sl_status_t allocate_sample_buffers(aoa_angle_config_node_t *node)
   sl_status_t sc;
   aoa_angle_config_t *cfg = &node->aoa_angle_config;
 
-  // Reallocate reference sample buffers
-  if (node->ref_sample_length != cfg->period_samples) {
-    node->ref_i_samples = realloc(node->ref_i_samples, sizeof(float) * cfg->period_samples);
-    if (node->ref_i_samples == NULL) {
-      return SL_STATUS_ALLOCATION_FAILED;
-    }
-    node->ref_q_samples = realloc(node->ref_q_samples, sizeof(float) * cfg->period_samples);
-    if (node->ref_q_samples == NULL) {
-      return SL_STATUS_ALLOCATION_FAILED;
-    }
-    // Store new reference sample buffer length
-    node->ref_sample_length = cfg->period_samples;
-  }
-
   // Reallocate sample buffers
   if ((node->sample_rows != cfg->num_snapshots)
-      || (node->sample_cols != cfg->switching_pattern_length)) {
+      || (node->sample_cols != cfg->antenna_array.size)) {
     free_2D_float_buffer(node->i_samples, node->sample_rows);
     free_2D_float_buffer(node->q_samples, node->sample_rows);
-    sc = allocate_2D_float_buffer(&node->i_samples, cfg->num_snapshots, cfg->switching_pattern_length);
+    sc = allocate_2D_float_buffer(&node->i_samples, cfg->num_snapshots, cfg->antenna_array.size);
     if (SL_STATUS_OK != sc) {
       return sc;
     }
-    sc = allocate_2D_float_buffer(&node->q_samples, cfg->num_snapshots, cfg->switching_pattern_length);
+    sc = allocate_2D_float_buffer(&node->q_samples, cfg->num_snapshots, cfg->antenna_array.size);
     if (SL_STATUS_OK != sc) {
       return sc;
     }
     // Store new sample buffer dimensions
     node->sample_rows = cfg->num_snapshots;
-    node->sample_cols = cfg->switching_pattern_length;
+    node->sample_cols = cfg->antenna_array.size;
   }
 
   return SL_STATUS_OK;
@@ -640,8 +629,6 @@ static sl_status_t allocate_sample_buffers(aoa_angle_config_node_t *node)
 
 static void free_sample_buffers(aoa_angle_config_node_t *node)
 {
-  free(node->ref_i_samples);
-  free(node->ref_q_samples);
   free_2D_float_buffer(node->i_samples, node->sample_rows);
   free_2D_float_buffer(node->q_samples, node->sample_rows);
 }

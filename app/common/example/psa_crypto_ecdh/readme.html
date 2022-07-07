@@ -65,9 +65,10 @@
 <li class="has-line-data" data-line-start="75" data-line-end="76">The example uses the CTR-DRBG, a pseudo-random number generator (PRNG) included in <a href="https://docs.silabs.com/mbed-tls/latest/">Mbed TLS</a> to generate the random number. If the example is running on a device including a TRNG (True Random Number Generator) hardware module, the TRNG will be used as an entropy source to seed the CTR-DRBG. If the device does not incorporate a TRNG, the example will use <a href="https://docs.silabs.com/rail/latest/">RAIL</a> or NV (non-volatile) seed (requires NVM3) as the entropy source.</li>
 <li class="has-line-data" data-line-start="76" data-line-end="77">If an algorithm is not supported in the hardware accelerator of the selected device, the PSA Crypto will use the software fallback feature in Mbed TLS.</li>
 <li class="has-line-data" data-line-start="77" data-line-end="78">The PSA Crypto does not yet support software fallback on the <code>CURVE448</code> curve.</li>
-<li class="has-line-data" data-line-start="78" data-line-end="79">Change the <code>CLIENT_KEY_ID</code> and <code>SERVER_KEY_ID</code> values in <code>app_process.h</code> if these key IDs had already existed in NVM3.</li>
-<li class="has-line-data" data-line-start="79" data-line-end="81">The default optimization level is <code>Optimize for debugging (-Og)</code> on Simplicity IDE and <code>None</code> on IAR Embedded Workbench.</li>
+<li class="has-line-data" data-line-start="78" data-line-end="79">The HSE Secure Vault Mid devices require SE firmware v1.2.11 or higher (EFR32xG21) and v2.1.7 or higher (other HSE devices) to support hardware acceleration on <code>CURVE25519</code>.</li>
+<li class="has-line-data" data-line-start="79" data-line-end="80">Change the <code>CLIENT_KEY_ID</code> and <code>SERVER_KEY_ID</code> values in <code>app_process.h</code> if these key IDs had already existed in NVM3.</li>
+<li class="has-line-data" data-line-start="80" data-line-end="82">The default optimization level is <code>Optimize for debugging (-Og)</code> on Simplicity IDE and <code>None</code> on IAR Embedded Workbench.</li>
 </ol>
-<h2 class="code-line" data-line-start=81 data-line-end=82><a id="Resources_81"></a>Resources</h2>
-<p class="has-line-data" data-line-start="83" data-line-end="84"><a href="https://www.silabs.com/documents/public/application-notes/an1311-mbedtls-psa-crypto-porting-guide.pdf">AN1311: Integrating Crypto Functionality Using PSA Crypto Compared to Mbed TLS</a></p>
+<h2 class="code-line" data-line-start=82 data-line-end=83><a id="Resources_82"></a>Resources</h2>
+<p class="has-line-data" data-line-start="84" data-line-end="85"><a href="https://www.silabs.com/documents/public/application-notes/an1311-mbedtls-psa-crypto-porting-guide.pdf">AN1311: Integrating Crypto Functionality Using PSA Crypto Compared to Mbed TLS</a></p>
 </body></html>

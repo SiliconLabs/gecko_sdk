@@ -18,12 +18,11 @@ description: >
   CMSIS NN and CMSIS DSP to the project. To avoid conflicts, these libraries should
   not be included elsewhere in the project.
 
-category: Platform|Machine Learning|TensorFlow
+category: Machine Learning|TensorFlow
 quality: production
 provides:
   - name: tensorflow_lite_micro
 requires:
-  - name: tensorflow_lite_micro_init
   - name: tensorflow_dependency_ruy
   - name: tensorflow_dependency_flatbuffers
   - name: tensorflow_dependency_gemmlowp
@@ -31,6 +30,7 @@ requires:
   - name: tensorflow_debug_log_implementation
   - name: toolchain_gcc
   - name: cpp_support
+  - name: emlib_common
 recommends:
   - id: tensorflow_lite_micro_reference_kernels
     condition: [cortexm0plus]
@@ -39,17 +39,16 @@ recommends:
   - id: tensorflow_lite_micro_optimized_kernels
     condition: [cortexm4]
   - id: tensorflow_lite_micro_optimized_kernels
-    condition: [device_sdid_200]
-  - id: tensorflow_lite_micro_optimized_kernels
-    condition: [device_sdid_205]
-  - id: tensorflow_lite_micro_optimized_kernels
-    condition: [device_sdid_210]
+    condition: [device_compute_basic]
   - id: tensorflow_lite_micro_accelerated_kernels
-    condition: [device_has_mvp]
+    condition: [device_compute_mvp]
   - id: tensorflow_debug_log_iostream
-root_path: util/third_party/tflite-micro
+root_path: util/third_party
 include:
-  - path: .
+  - path: tensorflow_extra/inc
+    file_list:
+      - path: sl_tflite_micro_init.h
+  - path: tflite-micro/
     file_list:
       - path: tensorflow/lite/c/builtin_op_data.h
       - path: tensorflow/lite/c/c_api_types.h
@@ -194,41 +193,49 @@ include:
       - path: tensorflow/lite/schema/schema_generated.h
       - path: tensorflow/lite/schema/schema_utils.h
 source:
-  - path: tensorflow/lite/c/common.c
-  - path: tensorflow/lite/core/api/error_reporter.cc
-  - path: tensorflow/lite/core/api/flatbuffer_conversions.cc
-  - path: tensorflow/lite/core/api/op_resolver.cc
-  - path: tensorflow/lite/core/api/tensor_utils.cc
-  - path: tensorflow/lite/kernels/internal/quantization_util.cc
-  - path: tensorflow/lite/kernels/internal/reference/portable_tensor_utils.cc
-  - path: tensorflow/lite/kernels/kernel_util.cc
-  - path: tensorflow/lite/micro/all_ops_resolver.cc
-  - path: tensorflow/lite/micro/flatbuffer_utils.cc
-  - path: tensorflow/lite/micro/memory_helpers.cc
-  - path: tensorflow/lite/micro/memory_planner/greedy_memory_planner.cc
-  - path: tensorflow/lite/micro/memory_planner/linear_memory_planner.cc
-  - path: tensorflow/lite/micro/memory_planner/non_persistent_buffer_planner_shim.cc
-  - path: tensorflow/lite/micro/micro_allocator.cc
-  - path: tensorflow/lite/micro/micro_error_reporter.cc
-  - path: tensorflow/lite/micro/micro_graph.cc
-  - path: tensorflow/lite/micro/micro_interpreter.cc
-  - path: tensorflow/lite/micro/micro_profiler.cc
-  - path: tensorflow/lite/micro/micro_resource_variable.cc
-  - path: tensorflow/lite/micro/micro_string.cc
-  - path: tensorflow/lite/micro/micro_time.cc
-  - path: tensorflow/lite/micro/micro_utils.cc
-  - path: tensorflow/lite/micro/mock_micro_graph.cc
-  - path: tensorflow/lite/micro/recording_micro_allocator.cc
-  - path: tensorflow/lite/micro/recording_simple_memory_allocator.cc
-  - path: tensorflow/lite/micro/simple_memory_allocator.cc
-  - path: tensorflow/lite/micro/system_setup.cc
-  - path: tensorflow/lite/micro/test_helpers.cc
-  - path: tensorflow/lite/schema/schema_utils.cc
-documentation:
-  docset: gecko-platform
-  document: machine_learning/tensorflow/overview
-define:
-  - name: "TF_LITE_STATIC_MEMORY"
+  - path: tensorflow_extra/src/sl_tflite_micro_init.cc
+  - path: tflite-micro/tensorflow/lite/c/common.c
+  - path: tflite-micro/tensorflow/lite/core/api/error_reporter.cc
+  - path: tflite-micro/tensorflow/lite/core/api/flatbuffer_conversions.cc
+  - path: tflite-micro/tensorflow/lite/core/api/op_resolver.cc
+  - path: tflite-micro/tensorflow/lite/core/api/tensor_utils.cc
+  - path: tflite-micro/tensorflow/lite/kernels/internal/quantization_util.cc
+  - path: tflite-micro/tensorflow/lite/kernels/internal/reference/portable_tensor_utils.cc
+  - path: tflite-micro/tensorflow/lite/kernels/kernel_util.cc
+  - path: tflite-micro/tensorflow/lite/micro/all_ops_resolver.cc
+  - path: tflite-micro/tensorflow/lite/micro/flatbuffer_utils.cc
+  - path: tflite-micro/tensorflow/lite/micro/memory_helpers.cc
+  - path: tflite-micro/tensorflow/lite/micro/memory_planner/greedy_memory_planner.cc
+  - path: tflite-micro/tensorflow/lite/micro/memory_planner/linear_memory_planner.cc
+  - path: tflite-micro/tensorflow/lite/micro/memory_planner/non_persistent_buffer_planner_shim.cc
+  - path: tflite-micro/tensorflow/lite/micro/micro_allocator.cc
+  - path: tflite-micro/tensorflow/lite/micro/micro_error_reporter.cc
+  - path: tflite-micro/tensorflow/lite/micro/micro_graph.cc
+  - path: tflite-micro/tensorflow/lite/micro/micro_interpreter.cc
+  - path: tflite-micro/tensorflow/lite/micro/micro_profiler.cc
+  - path: tflite-micro/tensorflow/lite/micro/micro_resource_variable.cc
+  - path: tflite-micro/tensorflow/lite/micro/micro_string.cc
+  - path: tflite-micro/tensorflow/lite/micro/micro_time.cc
+  - path: tflite-micro/tensorflow/lite/micro/micro_utils.cc
+  - path: tflite-micro/tensorflow/lite/micro/mock_micro_graph.cc
+  - path: tflite-micro/tensorflow/lite/micro/recording_micro_allocator.cc
+  - path: tflite-micro/tensorflow/lite/micro/recording_simple_memory_allocator.cc
+  - path: tflite-micro/tensorflow/lite/micro/simple_memory_allocator.cc
+  - path: tflite-micro/tensorflow/lite/micro/system_setup.cc
+  - path: tflite-micro/tensorflow/lite/micro/test_helpers.cc
+  - path: tflite-micro/tensorflow/lite/schema/schema_utils.cc
+config_file:
+  - path: tensorflow_extra/config/sl_tflite_micro_config.h
 template_contribution:
+  - name: event_handler
+    value:
+      event: internal_app_init
+      include: sl_tflite_micro_init.h
+      handler: sl_tflite_micro_init
   - name: component_catalog
     value: tflite_micro
+documentation:
+  docset: gecko-platform
+  document: machine-learning/tensorflow/overview
+define:
+  - name: "TF_LITE_STATIC_MEMORY"

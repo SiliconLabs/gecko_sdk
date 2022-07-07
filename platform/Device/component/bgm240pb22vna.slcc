@@ -62,7 +62,6 @@
     - path: bgm24_modem.h
     - path: bgm24_mpahbram.h
     - path: bgm24_msc.h
-    - path: bgm24_mvp.h
     - path: bgm24_pcnt.h
     - path: bgm24_protimer.h
     - path: bgm24_prs.h
@@ -147,7 +146,6 @@
   - name: device_has_lfxo
   - name: device_has_modem
   - name: device_has_msc
-  - name: device_has_mvp
   - name: device_has_pcnt
   - name: device_has_pcnt0
   - name: device_has_protimer
@@ -189,6 +187,15 @@
   - name: device_has_mpu
   - name: device_has_radio
   - name: device_has_radio_2g4hz
+  - name: device_supports_rail
+  - name: device_no_rail_api
+  - name: device_supports_bluetooth
+  - name: device_supports_bluetooth_iq_sampling
+  - name: device_supports_bluetooth_antenna_switching
+  - name: device_supports_bluetooth_coded_phy
+  - name: device_supports_bluetooth_cte
+  - name: device_supports_connect
+  - name: device_compute_basic
 - requires:
   - name: cmsis_core
   - name: BGM240PB22VNA_config

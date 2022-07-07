@@ -40,11 +40,11 @@
   - name: SL_BOARD_NAME
     value: '"BRD4319A"'
   - name: SL_BOARD_REV
-    value: '"A00"'
+    value: '"A01"'
 - tag:
   - board:pn:BRD4319
   - board:variant:A
-  - board:revision:A00
+  - board:revision:A01
   - board:device:mgm240l022vnf
   - hardware:has:vcom
   - hardware:has:pti

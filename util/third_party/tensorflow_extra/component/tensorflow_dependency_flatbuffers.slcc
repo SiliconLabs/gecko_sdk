@@ -3,7 +3,7 @@ package: platform
 label: Flatbuffers
 description: >
   Flatbuffers library
-category: Platform|Machine Learning|TensorFlow|Dependency
+category: Machine Learning|TensorFlow|Dependency
 quality: production
 root_path: util/third_party/tensorflow_extra/flatbuffers
 provides:

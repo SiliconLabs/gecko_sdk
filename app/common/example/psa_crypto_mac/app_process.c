@@ -660,16 +660,8 @@ static void compute_mac_single(psa_algorithm_t algo)
   // Free resources
   reset_key_attr();
 
-  printf("  + Starting a MAC sign stream... ");
-  if (start_mac_sign_stream() != PSA_SUCCESS) {
-    return;
-  }
-  printf("  + Updating a MAC sign stream... ");
-  if (update_mac_stream(0) != PSA_SUCCESS) {
-    return;
-  }
-  printf("  + Finishing a MAC sign stream... ");
-  if (finish_mac_sign_stream() != PSA_SUCCESS) {
+  printf("  + Computing a MAC... ");
+  if (compute_mac() != PSA_SUCCESS) {
     return;
   }
   app_state = PSA_CRYPTO_INIT;
@@ -686,16 +678,8 @@ static void verify_mac_single(void)
          symmetric_key_size[symmetric_key_size_select]);
 
   // Use the key to calculate the MAC for verification
-  printf("  + Starting a MAC verify stream... ");
-  if (start_mac_verify_stream() != PSA_SUCCESS) {
-    return;
-  }
-  printf("  + Updating a MAC verify stream... ");
-  if (update_mac_stream(0) != PSA_SUCCESS) {
-    return;
-  }
-  printf("  + Finishing a MAC verify stream... ");
-  if (finish_mac_verify_stream() != PSA_SUCCESS) {
+  printf("  + Computing a MAC and verify... ");
+  if (verify_mac() != PSA_SUCCESS) {
     return;
   }
   printf("  + Destroying a %d-bit %s key... ",

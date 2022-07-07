@@ -6,6 +6,9 @@ category: "Wi-SUN|Wi-SUN Plugin"
 quality: "production"
 root_path: "protocol/wisun/stack"
 
+requires:
+  - name: "device_supports_wisun"
+
 provides:
   - name: "wisun_stack_debug"
 

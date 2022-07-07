@@ -3,7 +3,7 @@
  * @brief Relative Humidity and Temperature GATT Service
  *******************************************************************************
  * # License
- * <b>Copyright 2020 Silicon Laboratories Inc. www.silabs.com</b>
+ * <b>Copyright 2022 Silicon Laboratories Inc. www.silabs.com</b>
  *******************************************************************************
  *
  * SPDX-License-Identifier: Zlib
@@ -33,6 +33,7 @@
 #include "gatt_db.h"
 #include "app_assert.h"
 #include "sl_gatt_service_rht.h"
+#include "sl_gatt_service_rht_config.h"
 
 // -----------------------------------------------------------------------------
 // Private variables
@@ -54,12 +55,18 @@ static void rht_temperature_read_cb(sl_bt_evt_gatt_server_user_read_request_t *d
 
 static void rht_update(void)
 {
+  sl_status_t sc;
   uint32_t humidity;
   int32_t temperature;
+
+  sc = sl_gatt_service_rht_get(&humidity, &temperature);
   // keep previous data if measurement fails
-  if (SL_STATUS_OK == sl_gatt_service_rht_get(&humidity, &temperature)) {
+  if (SL_STATUS_OK == sc) {
     rht_humidity = humidity / 10;       // 0.01 %
     rht_temperature = temperature / 10; // 0.01 C
+  } else if (SL_STATUS_NOT_INITIALIZED == sc) {
+    rht_humidity = SL_GATT_SERVICE_RHT_RH_INVALID;
+    rht_temperature = SL_GATT_SERVICE_RHT_T_INVALID;
   }
 }
 

@@ -1062,4 +1062,14 @@ typedef void (*provisioner_event_handler_cb)(mesh_prov_event_type_t event_type,
                                              const uint8_t *uuid,
                                              uint8_t len,
                                              const uint8_t *data);
+
+/**
+ * GATT Service advertisement type
+ */
+typedef enum {
+  mesh_gatt_adv_type_provisioning_service = 0,
+  mesh_gatt_adv_type_proxy_service,
+  mesh_gatt_adv_type_last
+} mesh_gatt_adv_type_t;
+
 #endif

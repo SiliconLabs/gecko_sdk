@@ -33,7 +33,13 @@
 #include "sl_btmesh_lighting_server.h"
 #include "sl_btmesh_lighting_server_config.h"
 #include "sl_btmesh_ctl_server.h"
-#include "board_4166a.h"
+#include <math.h>
+
+#ifdef SL_BTMESH_LIGHT_RGB_BRD4166
+#include "rgbled_brd4166.h"
+#elif SL_BTMESH_LIGHT_RGB_BRD2601
+#include "rgbled_brd2601.h"
+#endif
 
 // -----------------------------------------------------------------------------
 // Definitions
@@ -41,10 +47,50 @@
 #define RGB_LED_MASK        0xF           // Use all LEDs
 
 // -----------------------------------------------------------------------------
+// Type definitions
+
+typedef struct {
+  uint8_t R;  ///< Red value
+  uint8_t G;  ///< Green value
+  uint8_t B;  ///< Blue value
+}RGB_t;
+
+// -----------------------------------------------------------------------------
 // Private variables
 
 static uint16_t light_level = 0;
 static uint16_t light_color = 0;
+
+// -----------------------------------------------------------------------------
+// Private function declaration
+
+/***************************************************************************//**
+ * Set LED color based on lightness and temperature.
+ *
+ * @param[in] m            LED instance mask
+ * @param[in] level        Lightness level.
+ * @param[in] temperature  Color temperature in Kelvins.
+ ******************************************************************************/
+static void rgb_led_set(uint8_t m, uint16_t level, uint16_t temperature);
+
+/***************************************************************************//**
+ * Change lightness of given color temperature.
+ *
+ * @param[in] color  RGB color representing color temperature.
+ * @param[in] level  Lightness level of given color.
+ *
+ * @return RGB color representing given temperature and lightness level.
+ ******************************************************************************/
+static RGB_t RGB_to_LightnessRGB(RGB_t color, uint16_t level);
+
+/***************************************************************************//**
+ * Convert temperature to RGB color using approximation functions.
+ *
+ * @param[in] temperature  Color temperature in Kelvins.
+ *
+ * @return RGB color representing given temperature.
+ ******************************************************************************/
+static RGB_t Temperature_to_RGB(uint16_t temperature);
 
 // -----------------------------------------------------------------------------
 // Public function definitions
@@ -98,4 +144,82 @@ void app_led_init(void)
  ******************************************************************************/
 void app_led_change_buttons_to_leds(void)
 {
+}
+
+// -----------------------------------------------------------------------------
+// Private function definitions
+
+/***************************************************************************//**
+ * Convert temperature to RGB color using approximation functions.
+ *
+ * @param[in] temperature  Color temperature in Kelvins.
+ *
+ * @return RGB color representing given temperature.
+ ******************************************************************************/
+static RGB_t Temperature_to_RGB(uint16_t temperature)
+{
+  RGB_t color;
+  double temp_R, temp_G, temp_B;
+
+  //approximation of temperature using RGB
+  if (temperature < 6563) {
+    temp_R = 255;
+    if (temperature < 1925) {
+      temp_B = 0;
+    } else {
+      temp_B = temperature - 1918.74282;
+      temp_B = 2.55822107 * pow(temp_B, 0.546877914);
+    }
+    if ( temperature < 909) {
+      temp_G = 0;
+    } else {
+      temp_G = temperature - 636.62578769;
+      temp_G = 73.13384712 * log(temp_G) - 383.76244858;
+    }
+  } else {
+    temp_R = temperature - 5882.02392431;
+    temp_R = -29.28670147 * log(temp_R) + 450.50427359;
+    temp_R = temp_R + 0.5;
+    temp_G = temperature - 5746.13180276;
+    temp_G = -18.69512921 * log(temp_G) + 377.39334366;
+    temp_B = 255;
+  }
+
+  // Norming
+  double temp_max = SL_MAX(temp_R, SL_MAX(temp_G, temp_B));
+
+  temp_R = temp_R * 255 / temp_max;
+  temp_G = temp_G * 255 / temp_max;
+  temp_B = temp_B * 255 / temp_max;
+
+  color.R = temp_R > 255 ? 255 : (temp_R >= 0 ? (int)(temp_R + 0.5) : 0);
+  color.G = temp_G > 255 ? 255 : (temp_G >= 0 ? (int)(temp_G + 0.5) : 0);
+  color.B = temp_B > 255 ? 255 : (temp_B >= 0 ? (int)(temp_B + 0.5) : 0);
+
+  return color;
+}
+
+static RGB_t RGB_to_LightnessRGB(RGB_t color, uint16_t level)
+{
+  uint32_t temp_level;
+  RGB_t new_color;
+
+  temp_level = color.R * (uint32_t) level / 65535;
+  new_color.R = temp_level;
+  temp_level = color.G * (uint32_t) level / 65535;
+  new_color.G = temp_level;
+  temp_level = color.B * (uint32_t) level / 65535;
+  new_color.B = temp_level;
+
+  return new_color;
+}
+
+static void rgb_led_set(uint8_t m, uint16_t level, uint16_t temperature)
+{
+  RGB_t color = Temperature_to_RGB(temperature);
+  color = RGB_to_LightnessRGB(color, level);
+  rgb_led_set_rgb(m,
+                  color.R,
+                  color.G,
+                  color.B);
 }

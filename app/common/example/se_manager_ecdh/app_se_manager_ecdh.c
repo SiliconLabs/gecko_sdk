@@ -134,6 +134,9 @@ size_t get_shared_secret_length(sl_se_key_type_t key_type)
     case SL_SE_KEY_TYPE_ECC_P256:
       return (ECC_P256_PRIVKEY_SIZE * 2);
 
+    case SL_SE_KEY_TYPE_ECC_X25519:
+      return (ECC_X25519_PRIVKEY_SIZE);
+
 #if (_SILICON_LABS_SECURITY_FEATURE == _SILICON_LABS_SECURITY_FEATURE_VAULT)
     case SL_SE_KEY_TYPE_ECC_P384:
       return (ECC_P384_PRIVKEY_SIZE * 2);
@@ -143,9 +146,6 @@ size_t get_shared_secret_length(sl_se_key_type_t key_type)
 
     case SL_SE_KEY_TYPE_ECC_WEIERSTRASS_PRIME_CUSTOM:
       return (DOMAIN_SIZE * 2);
-
-    case SL_SE_KEY_TYPE_ECC_X25519:
-      return (ECC_X25519_PRIVKEY_SIZE);
 
     case SL_SE_KEY_TYPE_ECC_X448:
       return (ECC_X448_PRIVKEY_SIZE);

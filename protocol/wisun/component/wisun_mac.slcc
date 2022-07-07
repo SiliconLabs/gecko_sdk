@@ -10,6 +10,7 @@ ui_hints:
   visibility: never
 
 requires:
+  - name: "device_supports_wisun"
   - name: "mbedtls_core"
   - name: "mbedtls_ecc_secp256r1"
   - name: "mbedtls_ecdh"

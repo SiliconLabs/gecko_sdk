@@ -3,7 +3,7 @@
  * @brief Ambient Light and UV Index GATT Service
  *******************************************************************************
  * # License
- * <b>Copyright 2020 Silicon Laboratories Inc. www.silabs.com</b>
+ * <b>Copyright 2022 Silicon Laboratories Inc. www.silabs.com</b>
  *******************************************************************************
  *
  * SPDX-License-Identifier: Zlib
@@ -33,6 +33,7 @@
 #include "gatt_db.h"
 #include "app_assert.h"
 #include "sl_gatt_service_light.h"
+#include "sl_gatt_service_light_config.h"
 
 // -----------------------------------------------------------------------------
 // Private variables
@@ -54,12 +55,18 @@ static void light_uvindex_read_cb(sl_bt_evt_gatt_server_user_read_request_t *dat
 
 static void light_update(void)
 {
+  sl_status_t sc;
   float lux;
   float uvi;
+
+  sc = sl_gatt_service_light_get(&lux, &uvi);
   // keep previous data if measurement fails
-  if (SL_STATUS_OK == sl_gatt_service_light_get(&lux, &uvi)) {
+  if (SL_STATUS_OK == sc) {
     light_lux = (uint32_t)(lux * 100);
     light_uvi = (uint8_t)uvi;
+  } else if (sc == SL_STATUS_NOT_INITIALIZED) {
+    light_lux = SL_GATT_SERVICE_LIGHT_LUX_INVALID;
+    light_uvi = SL_GATT_SERVICE_LIGHT_UVI_INVALID;
   }
 }
 

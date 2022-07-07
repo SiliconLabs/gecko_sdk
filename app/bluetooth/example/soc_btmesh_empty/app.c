@@ -3,7 +3,7 @@
  * @brief Core application logic.
  *******************************************************************************
  * # License
- * <b>Copyright 2020 Silicon Laboratories Inc. www.silabs.com</b>
+ * <b>Copyright 2022 Silicon Laboratories Inc. www.silabs.com</b>
  *******************************************************************************
  *
  * SPDX-License-Identifier: Zlib
@@ -29,7 +29,6 @@
  ******************************************************************************/
 #include "em_common.h"
 #include "app_assert.h"
-#include "app_log.h"
 #include "sl_status.h"
 #include "app.h"
 
@@ -77,7 +76,6 @@ void sl_bt_on_event(struct sl_bt_msg *evt)
     case sl_bt_evt_system_boot_id:
       // Initialize Mesh stack in Node operation mode,
       // wait for initialized event
-      app_log("Node init\r\n");
       sc = sl_btmesh_node_init();
       app_assert_status_f(sc, "Failed to init node\n");
       break;
@@ -106,7 +104,6 @@ void sl_btmesh_on_event(sl_btmesh_msg_t *evt)
       if (!evt->data.evt_node_initialized.provisioned) {
         // The Node is now initialized,
         // start unprovisioned Beaconing using PB-ADV and PB-GATT Bearers
-        app_log("Initialized\r\n");
         sc = sl_btmesh_node_start_unprov_beaconing(PB_ADV | PB_GATT);
         app_assert_status_f(sc, "Failed to start unprovisioned beaconing\n");
       }

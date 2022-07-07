@@ -172,6 +172,21 @@ typedef struct RAIL_StateBufferEntry {
  */
 typedef uint32_t RAIL_Time_t;
 
+#ifndef DOXYGEN_SHOULD_SKIP_THIS
+/**
+ * @typedef RAIL_TimerTick_t
+ * @brief Internal RAIL hardware timer tick that drives the RAIL timebase.
+ *
+ * @note \ref RAIL_TimerTick_t does not use the full 32-bit range since we also
+ *   account for fractional error drift on timebase overflow. This counts up
+ *   to ~17 minutes before wrapping.
+ *
+ * @note \ref RAIL_TimerTicksToUs() can be used to convert the delta between
+ *   two \ref RAIL_TimerTick_t values to microseconds.
+ */
+typedef uint32_t RAIL_TimerTick_t;
+#endif//DOXYGEN_SHOULD_SKIP_THIS
+
 /**
  * A pointer to the callback called when the RAIL timer expires.
  *

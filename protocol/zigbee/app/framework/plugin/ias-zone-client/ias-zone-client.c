@@ -577,7 +577,8 @@ void emberAfPluginIasZoneClientReadAttributesResponseCallback(EmberAfClusterId c
                                                               uint8_t * buffer,
                                                               uint16_t bufLen)
 {
-  uint8_t zoneStatus, zoneType, zoneState;
+  uint16_t zoneStatus, zoneType;
+  uint8_t zoneState;
   if (clusterId == ZCL_IAS_ZONE_CLUSTER_ID
       && (iasZoneClientState == IAS_ZONE_CLIENT_STATE_READ_ATTRIBUTES
           || iasZoneClientState == IAS_ZONE_CLIENT_STATE_READ_CIE_ADDRESS)) {

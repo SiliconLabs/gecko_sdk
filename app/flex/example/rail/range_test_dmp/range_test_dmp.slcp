@@ -76,6 +76,10 @@ source:
 
 readme:
   - path: ../../../documentation/example/rail/range_test/readme.md
+
+other_file:
+  - path: "hw_filter_tags.yaml"
+
 #------------ Configuration overrides ----------------
 configuration:
 #----------------- OS --------------------------------
@@ -124,6 +128,13 @@ configuration:
     value: "1"
   - name: SL_RAIL_UTIL_INIT_PROTOCOL_INST0_DEFAULT
     value: "SL_RAIL_UTIL_PROTOCOL_PROPRIETARY"
+#------------- RAIL init, Calibrations ---------------
+  - name: SL_RAIL_UTIL_INIT_CALIBRATIONS_INST0_ENABLE
+    value: "1"
+  - name: SL_RAIL_UTIL_INIT_CALIBRATION_TEMPERATURE_NOTIFY_INST0_ENABLE
+    value: "1"
+  - name: SL_RAIL_UTIL_INIT_CALIBRATION_ONETIME_NOTIFY_INST0_ENABLE
+    value: "1"
 #------------- RAIL init, Multi-protocol Support -----
   - name: SL_RAIL_UTIL_INIT_SCHEDULER_SUPPORT_INST0_ENABLE
     value: "1"
@@ -191,18 +202,3 @@ ui_hints:
 
 tag:
   - prebuilt_demo
-  - hardware:
-      device:
-        memory:
-          flash: 304
-          ram: 52
-      board:
-        rf_bands:
-          - 2400
-        communication:
-          - vcom
-          - pti
-        io:
-          button: 2
-          display: true
-  

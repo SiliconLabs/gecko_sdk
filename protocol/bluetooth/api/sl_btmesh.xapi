@@ -1,5 +1,5 @@
 <?xml version="1.0" ?>
-<api device_id="5" device_name="btmesh" version="3.3.1">
+<api device_id="5" device_name="btmesh" version="3.3.2">
     <datatypes>
         <datatype base="uint16" name="errorcode"/>
         <datatype base="int16" name="int16"/>
@@ -315,6 +315,33 @@
             <returns>
                 <param datatype="errorcode" name="result" type="uint16"/>
                 <param datatype="uint8" name="phy" type="uint8"/>
+            </returns>
+        </command>
+        <command index="40" name="set_unprov_beaconing_adv_interval" >
+            <params>
+                <param datatype="uint16" name="adv_interval_min" type="uint16"/>
+                <param datatype="uint16" name="adv_interval_max" type="uint16"/>
+            </params>
+            <returns>
+                <param datatype="errorcode" name="result" type="uint16"/>
+            </returns>
+        </command>
+        <command index="41" name="set_proxy_service_adv_interval" >
+            <params>
+                <param datatype="uint16" name="adv_interval_min" type="uint16"/>
+                <param datatype="uint16" name="adv_interval_max" type="uint16"/>
+            </params>
+            <returns>
+                <param datatype="errorcode" name="result" type="uint16"/>
+            </returns>
+        </command>
+        <command index="48" name="set_provisioning_service_adv_interval" >
+            <params>
+                <param datatype="uint16" name="adv_interval_min" type="uint16"/>
+                <param datatype="uint16" name="adv_interval_max" type="uint16"/>
+            </params>
+            <returns>
+                <param datatype="errorcode" name="result" type="uint16"/>
             </returns>
         </command>
         <event index="0" name="initialized">
@@ -4231,6 +4258,15 @@
         <event index="2" name="scene_changed">
             <params>
                 <param datatype="uint16" name="elem_index" type="uint16"/>
+                <param datatype="uint32" name="transition_time_ms" type="uint32"/>
+                <param datatype="uint16" name="scene_number" type="uint16"/>
+            </params>
+        </event>
+        <event index="3" name="action_triggered">
+            <params>
+                <param datatype="uint16" name="elem_index" type="uint16"/>
+                <param datatype="uint8" name="index" type="uint8"/>
+                <param datatype="uint8" name="action" type="uint8"/>
                 <param datatype="uint32" name="transition_time_ms" type="uint32"/>
                 <param datatype="uint16" name="scene_number" type="uint16"/>
             </params>

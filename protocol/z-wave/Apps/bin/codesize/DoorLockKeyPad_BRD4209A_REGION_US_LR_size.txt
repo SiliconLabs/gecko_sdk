@@ -5,36 +5,35 @@ The output of the size tool: (e.g. arm-none-ambi-size.exe)
 
 DoorLockKeyPad.out  :
 section                 size         addr
-.text                0x2eb5c          0x0
-_cc_handlers_v3        0x1c0      0x2eb5c
-.ARM.exidx               0x8      0x2ed1c
+.text                0x2eb3c          0x0
+_cc_handlers_v3        0x1c0      0x2eb3c
+.ARM.exidx               0x8      0x2ecfc
 .stack                0x1000   0x20000000
 .data                  0x404   0x20001000
-.reset_info              0x4   0x20001404
-.bss                  0x9f3c   0x20001408
+.bss                  0x9f44   0x20001404
 .heap                 0x4cb8   0x2000b348
-.internal_storage    0x3a000      0x2ed24
-.zwave_nvm            0x3000      0x68d24
-.nvm                  0x9000      0x6bd24
+.internal_storage    0x3a000      0x2ed04
+.zwave_nvm            0x3000      0x68d04
+.nvm                  0x9000      0x6bd04
 .ARM.attributes         0x2e          0x0
 .comment                0x4d          0x0
-.debug_frame          0x7008          0x0
-.debug_info         0x8ee261          0x0
-.debug_abbrev        0x1144a          0x0
-.debug_loc           0x25d3d          0x0
+.debug_frame          0x7004          0x0
+.debug_info         0x8ee221          0x0
+.debug_abbrev        0x11460          0x0
+.debug_loc           0x25dca          0x0
 .debug_aranges        0x2a58          0x0
-.debug_ranges         0x4d08          0x0
-.debug_line          0x2e721          0x0
-.debug_str           0x6b829          0x0
+.debug_ranges         0x4cf8          0x0
+.debug_line          0x2e6ae          0x0
+.debug_str           0x6b848          0x0
 .stabstr               0x14d          0x0
-Total               0xa52982
+Total               0xa52961
 
 The calculated FLASH and SRAM usage summary:
 ============================================
-FLASH used as program memory:  (Including only the sections: .text, .ARM.exidx, .data, _cc_handlers_v3, internal_storage)
-   430376
+FLASH used as program memory:  (Including only the sections: .text, .ARM.exidx, .data, _cc_handlers_v3)
+   192776
 FLASH used for storage: (Including only the sections: .nvm3App, .simee, .nvm, .zwave_nvm)
    49152
 SRAM usage:             (Including only the sections: .data, .bss, .heap, .stack_dummy, .reset_info)
-   65532
+   65536
 

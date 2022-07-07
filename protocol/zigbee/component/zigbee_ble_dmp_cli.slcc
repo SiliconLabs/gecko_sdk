@@ -290,7 +290,7 @@ template_contribution:
       argument:
       - type: uint8
         help: "Connection handle on which discovery should be performed"
-      - type: uint8
+      - type: uint32
         help: "Service handle on which discovery should be performed"
 
   - name: cli_command

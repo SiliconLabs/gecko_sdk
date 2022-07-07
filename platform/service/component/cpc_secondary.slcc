@@ -4,6 +4,8 @@ package: platform
 description: Co-Processor Communication (CPC) for Secondary Device
 category: Services|Co-Processor Communication|Secondary Device
 quality: alpha
+ui_hints:
+  visibility: never
 root_path: platform/service/cpc
 config_file:
   - path: config/sl_cpc_config.h
@@ -18,7 +20,6 @@ provides:
 requires:
   - name: cpc_core
   - name: cpc_secondary_driver
-  - name: bootloader_interface
   - name: emlib_rmu
   - name: gsdk_version
 validation_helper:
@@ -26,6 +27,9 @@ validation_helper:
 template_contribution:
   - name: component_catalog
     value: cpc_secondary
+  - name: component_catalog
+    value: cpc_bootloader_interface
+    condition: [bootloader_interface]
 documentation:
     docset: gecko-platform
     document: service/api/group-cpc
