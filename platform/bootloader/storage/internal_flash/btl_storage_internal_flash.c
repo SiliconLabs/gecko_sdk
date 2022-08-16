@@ -146,12 +146,16 @@ int32_t storage_writeRaw(uint32_t address, uint8_t *data, size_t numBytes)
   if (!verifyErased(address, numBytes)) {
     return BOOTLOADER_ERROR_STORAGE_NEEDS_ERASE;
   }
-  //Ensure that numBytes is a multiple of 4
-  if (numBytes & 3U) {
-    return BOOTLOADER_ERROR_STORAGE_NEEDS_ALIGN;
-  }
+
 #if (BOOTLOADER_MSC_DMA_WRITE == 1)
-  if (flash_writeBuffer_dma(address, data, numBytes, BOOTLOADER_MSC_DMA_CHANNEL)) {
+  if ((uint32_t) data & 3UL) {
+    //Data address not aligned. Use normal write.
+    if (flash_writeBuffer(address, data, numBytes)) {
+      return BOOTLOADER_OK;
+    } else {
+      return BOOTLOADER_ERROR_STORAGE_INVALID_ADDRESS;
+    }
+  } else if (flash_writeBuffer_dma(address, data, numBytes, BOOTLOADER_MSC_DMA_CHANNEL)) {
     return BOOTLOADER_OK;
   }
 #else

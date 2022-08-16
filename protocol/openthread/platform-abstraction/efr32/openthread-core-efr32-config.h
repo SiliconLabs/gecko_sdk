@@ -165,6 +165,22 @@
 #endif
 
 /**
+  * @def OPENTHREAD_CONFIG_SRP_CLIENT_BUFFERS_MAX_SERVICES
+  *
+  * Specifies number of service entries in the SRP client service pool.
+  *
+  * This config is applicable only when `OPENTHREAD_CONFIG_SRP_CLIENT_BUFFERS_ENABLE` is enabled.
+  *
+  */
+#ifndef OPENTHREAD_CONFIG_SRP_CLIENT_BUFFERS_MAX_SERVICES
+#if OPENTHREAD_CONFIG_REFERENCE_DEVICE_ENABLE
+#define OPENTHREAD_CONFIG_SRP_CLIENT_BUFFERS_MAX_SERVICES 10
+#else
+#define OPENTHREAD_CONFIG_SRP_CLIENT_BUFFERS_MAX_SERVICES 2
+#endif
+#endif
+
+/**
  * @def OPENTHREAD_CONFIG_MAC_CSL_AUTO_SYNC_ENABLE
  *
  * This setting configures CSL auto synchronization based on data poll mechanism in Thread 1.2.

@@ -46,7 +46,18 @@ static void retrySendReport(EmberOutgoingMessageType type,
                             uint8_t *message,
                             EmberStatus status);
 static uint32_t computeStringHash(uint8_t *data, uint8_t length);
-
+static EmberStatus readAttributeAndGetLastValue(const EmberAfPluginReportingEntry* const entry,
+                                                uint8_t entryIndex,
+                                                EmberAfAttributeType* pDataType,
+                                                uint16_t* pDataSize,
+                                                uint8_t* pReadData,
+                                                uint16_t readDataSize,
+                                                bool reportChange);
+static void markReportTableChange(uint8_t *dataRef,
+                                  uint8_t dataSize,
+                                  EmberAfAttributeType dataType,
+                                  const EmberAfPluginReportingEntry* const entry,
+                                  uint8_t entryIndex);
 #ifdef UC_BUILD
 sl_zigbee_event_t emberAfPluginReportingTickEvent;
 #define tickEvent (&emberAfPluginReportingTickEvent)
@@ -258,36 +269,9 @@ void emberAfPluginReportingTickEventHandler(SLXU_UC_EVENT)
                        * MILLISECOND_TICKS_PER_SECOND))))) {
       continue;
     }
-
-    status = emAfReadAttribute(entry.endpoint,
-                               entry.clusterId,
-                               entry.attributeId,
-                               entry.mask,
-                               entry.manufacturerCode,
-                               (uint8_t *)&readData,
-                               READ_DATA_SIZE,
-                               &dataType);
+    status = readAttributeAndGetLastValue(&entry, i, &dataType, &dataSize, readData, READ_DATA_SIZE, false);
     if (status != EMBER_ZCL_STATUS_SUCCESS) {
-      emberAfReportingPrintln("ERR: reading cluster 0x%2x attribute 0x%2x: 0x%x",
-                              entry.clusterId,
-                              entry.attributeId,
-                              status);
       goto skipAttribute;
-    }
-
-    if (emberAfIsLongStringAttributeType(dataType)) {
-      // LONG string types are rarely used and even more rarely (never?)
-      // reported; ignore and leave ensuing handling of other types unchanged.
-      emberAfReportingPrintln("ERR: reporting of LONG string attribute type not supported: cluster 0x%2x attribute 0x%2x",
-                              entry.clusterId,
-                              entry.attributeId);
-      goto skipAttribute;
-    }
-
-    // find size of current report
-    dataSize = emberAfAttributeValueSize(dataType, readData, sizeof(readData));
-    if (dataSize == 0) {
-      goto skipAttribute; // defensive; read attribute above should have failed
     }
 
     reportSize = sizeof(entry.attributeId) + sizeof(dataType) + dataSize;
@@ -363,33 +347,6 @@ void emberAfPluginReportingTickEventHandler(SLXU_UC_EVENT)
 #else
     emberAfPutBlockInResp(readData, dataSize);
 #endif
-
-    // Store the current attribute value for comparison with future values
-    // to detect reportable changes. Use the actual attribute value for
-    // data types that are small enough to efficiently store; for string
-    // types, substitute a 32-bit hash of the string value.
-    uint32_t stringHash = 0;
-    uint8_t *copyData = readData;
-    uint8_t copySize = dataSize;
-    if (dataType == ZCL_OCTET_STRING_ATTRIBUTE_TYPE || dataType == ZCL_CHAR_STRING_ATTRIBUTE_TYPE) {
-      // dataSize was set above to count the string's length byte, in addition to string length.
-      // Compute hash on string value only.
-      stringHash = computeStringHash(readData + 1, dataSize - 1);
-      copyData = (uint8_t *)&stringHash;
-      copySize = sizeof(stringHash);
-    }
-    if (copySize <= sizeof(emAfPluginReportVolatileData[i].lastReportValue)) {
-      emAfPluginReportVolatileData[i].lastReportValue = 0;
-#if (BIGENDIAN_CPU)
-      MEMMOVE(((uint8_t *)&emAfPluginReportVolatileData[i].lastReportValue
-               + sizeof(emAfPluginReportVolatileData[i].lastReportValue)
-               - copySize),
-              copyData,
-              copySize);
-#else
-      MEMMOVE(&emAfPluginReportVolatileData[i].lastReportValue, copyData, copySize);
-#endif
-    }
 
     // Normally will arrive here at the conclusion of attribute processing.
     // Update the state used to decide if an attribute value is ready to
@@ -773,6 +730,140 @@ EmberStatus emAfPluginReportingRemoveEntry(uint16_t index)
   return status;
 }
 
+// This function will check all entries in report table and update
+// lastReportValue field with current value of attributes
+void emAfPluginReportingGetLastValueAll(void)
+{
+  uint16_t i;
+  for (i = 0; i < reportTableActiveLength; i++) {
+    EmberAfPluginReportingEntry entry;
+    emAfPluginReportingGetEntry(i, &entry);
+    if (emberAfEndpointIsEnabled(entry.endpoint)
+        && entry.direction == EMBER_ZCL_REPORTING_DIRECTION_REPORTED) {
+      readAttributeAndGetLastValue(&entry, i, NULL, NULL, NULL, 0, true);
+    }
+  }
+  scheduleTick();
+}
+
+static void markReportTableChange(uint8_t *dataRef,
+                                  uint8_t dataSize,
+                                  EmberAfAttributeType dataType,
+                                  const EmberAfPluginReportingEntry* const entry,
+                                  uint8_t entryIndex)
+{
+  // If we are reporting this particular attribute, we only care whether
+  // the new value meets the reportable change criteria.  If it does, we
+  // mark the entry as ready to report and reschedule the tick.  Whether
+  // the tick will be scheduled for immediate or delayed execution depends
+  // on the minimum reporting interval.  This is handled in the scheduler.
+  EmberAfDifferenceType difference
+    = emberAfGetDifference(dataRef,
+                           emAfPluginReportVolatileData[entryIndex].lastReportValue,
+                           dataSize);
+  uint8_t analogOrDiscrete = emberAfGetAttributeAnalogOrDiscreteType(dataType);
+  if ((analogOrDiscrete == EMBER_AF_DATA_TYPE_DISCRETE && difference != 0)
+      || (analogOrDiscrete == EMBER_AF_DATA_TYPE_ANALOG
+          && entry->data.reported.reportableChange <= difference)) {
+    emAfPluginReportVolatileData[entryIndex].reportableChange = true;
+    scheduleTick();
+  }
+}
+
+// This function will check specified entry in report table and update
+// lastReportValue field with current value of attribute
+static EmberStatus readAttributeAndGetLastValue(const EmberAfPluginReportingEntry* const entry,
+                                                uint8_t entryIndex,
+                                                EmberAfAttributeType* pDataType,
+                                                uint16_t* pDataSize,
+                                                uint8_t* pReadData,
+                                                uint16_t readDataSize,
+                                                bool reportChange)
+{
+  uint8_t readData[READ_DATA_SIZE];
+  uint16_t dataSize;
+  EmberAfAttributeType dataType;
+
+  EmberStatus status = emAfReadAttribute(entry->endpoint,
+                                         entry->clusterId,
+                                         entry->attributeId,
+                                         entry->mask,
+                                         entry->manufacturerCode,
+                                         readData,
+                                         READ_DATA_SIZE,
+                                         &dataType);
+
+  if (status != EMBER_ZCL_STATUS_SUCCESS) {
+    emberAfReportingPrintln("ERR: reading cluster 0x%2x attribute 0x%2x: 0x%x",
+                            entry->clusterId,
+                            entry->attributeId,
+                            status);
+    return status;
+  }
+
+  if (emberAfIsLongStringAttributeType(dataType)) {
+    // LONG string types are rarely used and even more rarely (never?)
+    // reported; ignore and leave ensuing handling of other types unchanged.
+    emberAfReportingPrintln("ERR: reporting of LONG string attribute type not supported: cluster 0x%2x attribute 0x%2x",
+                            entry->clusterId,
+                            entry->attributeId);
+    return EMBER_ZCL_STATUS_INVALID_DATA_TYPE;
+  }
+
+  // find size of current report
+  dataSize = emberAfAttributeValueSize(dataType, readData, READ_DATA_SIZE);
+  if (dataSize == 0  || (pReadData != NULL && dataSize > readDataSize)) {
+    return EMBER_ZCL_STATUS_FAILURE;   // defensive; read attribute above should have failed
+  }
+
+  // Store the current attribute value for comparison with future values
+  // to detect reportable changes. Use the actual attribute value for
+  // data types that are small enough to efficiently store; for string
+  // types, substitute a 32-bit hash of the string value.
+  uint32_t stringHash = 0;
+  uint8_t *copyData = readData;
+  uint8_t copySize = dataSize;
+  if (dataType == ZCL_OCTET_STRING_ATTRIBUTE_TYPE || dataType == ZCL_CHAR_STRING_ATTRIBUTE_TYPE) {
+    // dataSize was set above to count the string's length byte, in addition to string length.
+    // Compute hash on string value only.
+    stringHash = computeStringHash(readData + 1, dataSize - 1);
+    copyData = (uint8_t *)&stringHash;
+    copySize = sizeof(stringHash);
+  }
+
+  // If need to report attribute change, calculate the difference and schedule to send reportAttributes
+  if (reportChange) {
+    markReportTableChange(readData, copySize, dataType, entry, entryIndex);
+    // The lastReportValue will be updated later in emberAfPluginReportingTickEventHandler
+    return EMBER_ZCL_STATUS_SUCCESS;
+  }
+
+  if (copySize <= sizeof(emAfPluginReportVolatileData[entryIndex].lastReportValue)) {
+    emAfPluginReportVolatileData[entryIndex].lastReportValue = 0;
+#if (BIGENDIAN_CPU)
+    MEMMOVE(((uint8_t *)&emAfPluginReportVolatileData[entryIndex].lastReportValue
+             + sizeof(emAfPluginReportVolatileData[entryIndex].lastReportValue)
+             - copySize),
+            copyData,
+            copySize);
+#else
+    MEMMOVE(&emAfPluginReportVolatileData[entryIndex].lastReportValue, copyData, copySize);
+#endif
+  }
+
+  if (pDataType != NULL) {
+    *pDataType = dataType;
+  }
+  if (pDataSize != NULL) {
+    *pDataSize = dataSize;
+  }
+  if (pReadData != NULL) {
+    memcpy(pReadData, readData, dataSize);
+  }
+
+  return EMBER_ZCL_STATUS_SUCCESS;
+}
+
 void emberAfReportingAttributeChangeCallback(uint8_t endpoint,
                                              EmberAfClusterId clusterId,
                                              EmberAfAttributeId attributeId,
@@ -802,22 +893,7 @@ void emberAfReportingAttributeChangeCallback(uint8_t endpoint,
         dataRef = (uint8_t *)&stringHash;
         dataSize = sizeof(stringHash);
       }
-      // If we are reporting this particular attribute, we only care whether
-      // the new value meets the reportable change criteria.  If it does, we
-      // mark the entry as ready to report and reschedule the tick.  Whether
-      // the tick will be scheduled for immediate or delayed execution depends
-      // on the minimum reporting interval.  This is handled in the scheduler.
-      EmberAfDifferenceType difference
-        = emberAfGetDifference(dataRef,
-                               emAfPluginReportVolatileData[i].lastReportValue,
-                               dataSize);
-      uint8_t analogOrDiscrete = emberAfGetAttributeAnalogOrDiscreteType(type);
-      if ((analogOrDiscrete == EMBER_AF_DATA_TYPE_DISCRETE && difference != 0)
-          || (analogOrDiscrete == EMBER_AF_DATA_TYPE_ANALOG
-              && entry.data.reported.reportableChange <= difference)) {
-        emAfPluginReportVolatileData[i].reportableChange = true;
-        scheduleTick();
-      }
+      markReportTableChange(dataRef, dataSize, type, &entry, i);
       break;
     }
   }
@@ -1051,9 +1127,11 @@ EmberAfStatus emberAfPluginReportingConfigureReportedAttribute(const EmberAfPlug
     if (index == reportTableActiveLength) {
       reportTableActiveLength++;
     }
+    // Always update the lastReportTimeMs and lastReportValue when the entry is updated or newly added
     emAfPluginReportVolatileData[index].lastReportTimeMs = halCommonGetInt32uMillisecondTick();
-    emAfPluginReportVolatileData[index].lastReportValue = 0;
-
+    if (readAttributeAndGetLastValue(&entry, index, NULL, NULL, NULL, 0, false) != EMBER_ZCL_STATUS_SUCCESS) {
+      emAfPluginReportVolatileData[index].lastReportValue = 0;
+    }
     emAfPluginReportingSetEntry(index, &entry);
     scheduleTick();
   }

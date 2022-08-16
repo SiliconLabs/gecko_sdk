@@ -107,11 +107,15 @@ SL_WEAK void emberGpdAfPluginSleepCallback(void)
 #if defined(EMBER_AF_PLUGIN_APPS_MAC_SEQ) && (EMBER_AF_PLUGIN_APPS_MAC_SEQ == EMBER_GPD_MAC_SEQ_RANDOM)
 SL_WEAK uint32_t emberGpdAfPluginGetRandomCallback(void)
 {
-  uint32_t randomValue;
-  #ifdef SL_CATALOG_PSA_CRYPTO_PRESENT
+  // randomValue is not initialised intentionally.
+  // The reason is, if the call returns 0 (i.e entropy is not supported), whatever randomness stack has that will be taken.
+  volatile uint8_t randomValue;
+#ifdef SL_CATALOG_PSA_CRYPTO_PRESENT
   (void) psa_generate_random( (uint8_t *)(&randomValue), sizeof(randomValue));
-  #endif //SL_CATALOG_PSA_CRYPTO_PRESENT
-  return randomValue;
+#else
+  (void)emberGpdRailGetRadioEntropyWrapper((uint8_t*)(&randomValue), sizeof(randomValue));
+#endif //SL_CATALOG_PSA_CRYPTO_PRESENT
+  return (uint32_t)randomValue;
 }
 #endif
 

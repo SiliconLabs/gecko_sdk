@@ -15,6 +15,7 @@ requires:
   - name: "wisun_mac"
   - name: "wisun_radioconf"
   - name: "micriumos_kernel"
+  - name: "dmadrv"
   - name: "emlib_usart"
     condition:
       - device_sdid_84
@@ -35,15 +36,19 @@ include:
       - path: "sl_micrium_debug.h"
       - path: "sl_ring.h"
       - path: "sl_wsrcp.h"
+      - path: "sl_wsrcp_crc.h"
       - path: "sl_wsrcp_log.h"
       - path: "sl_wsrcp_mac.h"
+      - path: "sl_wsrcp_utils.h"
       - path: "sl_wsrcp_uart.h"
+      - path: "sl_wsrcp_uart_config.h"
 
 source:
   - path: "sl_micrium_debug.c"
   - path: "sl_ring.c"
   - path: "sl_wsrcp.c"
   - path: "sl_wsrcp_os_main.c"
+  - path: "sl_wsrcp_crc.c"
   - path: "sl_wsrcp_uart.c"
   - path: "sl_wsrcp_usart.c"
     condition: [emlib_usart]

@@ -204,6 +204,7 @@ typedef enum EZwaveTransmitType
   EZWAVETRANSMITTYPE_SEND_SLAVE_DATA,
   EZWAVETRANSMITTYPE_INCLUDEDNODEINFORMATION,
   EZWAVETRANSMITTYPE_SECURE,
+  EZWAVETRANSMITTYPE_NON_SECURE,
   NUM_EZWAVETRANSMITTYPE
 } EZwaveTransmitType;
 
@@ -1055,7 +1056,7 @@ typedef enum EZwaveCommandType
 
   // TOOD:
   /**
-   * @brief 
+   * @brief
    * 
    * @param[in] NvmBackupRestore.offset
    * @param[in] NvmBackupRestore.length
@@ -1203,16 +1204,66 @@ typedef enum EZwaveCommandType
    */
   EZWAVECOMMANDTYPE_ZW_SET_TX_ATTENUATION, // 125
 
+
   /*********************************************
    * SECURE API interface functions used in apps.
    ********************************************/
+  /**
+   * @brief Add a new node to the network
+   *
+   * @details Used by Portable Controller application to start the process of including a new node to its network.
+   * After successful inclusion the protocol will send an EZWAVECOMMANDSTATUS_SECURE_ON_NODE_ADDED event
+   * to the application.
+   */
+  EZWAVECOMMANDTYPE_SECURE_NETWORK_MANAGEMENT_ADD_NODE, // 126
 
-  EZWAVECOMMANDTYPE_SECURE_NETWORK_MANAGEMENT_ADD_NODE,
-  EZWAVECOMMANDTYPE_SECURE_NETWORK_MANAGEMENT_ABORT,
-  EZWAVECOMMANDTYPE_SECURE_NETWORK_MANAGEMENT_REMOVE_NODE,
-  EZWAVECOMMANDTYPE_SECURE_SEND_DATA,
-  EZWAVECOMMANDTYPE_SECURE_NETWORK_MANAGEMENT_LEARN_MODE_INCLUSION,
-  EZWAVECOMMANDTYPE_SECURE_NETWORK_MANAGEMENT_LEARN_MODE_EXCLUSION,
+  /**
+   * @brief Abort Inclusion or Exclusion of node.
+   *
+   * @details Used by Portable Controller application to abort an Inclusion or Exclusion process it has started.
+   */
+  EZWAVECOMMANDTYPE_SECURE_NETWORK_MANAGEMENT_ABORT, // 127
+
+  /**
+   * @brief Remove a node from the network
+   *
+   * @details Used by Portable Controller application to start the process of excluding a node from its network.
+   * After successful exclusion the protocol will send an EZWAVECOMMANDSTATUS_SECURE_ON_NODE_DELETED event
+   * to the application.
+   */
+  EZWAVECOMMANDTYPE_SECURE_NETWORK_MANAGEMENT_REMOVE_NODE, // 128
+
+  /**
+   * @brief Unused. Data frames to network nodes are placed directly on the Zwave TxQueue
+   */
+  EZWAVECOMMANDTYPE_SECURE_SEND_DATA, // 129
+
+  /**
+   * @brief Put the application in Network Wide Inclusion mode so it can be included in a network.
+   *
+   * @details Used by Portable Controller application to get included by a different Controller.
+   * After successful inclusion the protocol will send an EZWAVECOMMANDSTATUS_SECURE_ON_NEW_NETWORK_ENTERED event
+   * to the application.
+   */
+  EZWAVECOMMANDTYPE_SECURE_NETWORK_MANAGEMENT_LEARN_MODE_INCLUSION, // 130
+
+  /**
+   * @brief Put the application in Network Wide Exclusion mode so it can be excluded from a network.
+   *
+   * @details Used by Portable Controller application to get excluded from a network.
+   * After successful exclusion the protocol will send an EZWAVECOMMANDSTATUS_SECURE_ON_NETWORK_MANAGEMENT_STATE_UPDATE
+   * event to the application.
+   */
+  EZWAVECOMMANDTYPE_SECURE_NETWORK_MANAGEMENT_LEARN_MODE_EXCLUSION, // 131
+
+  /**
+   * @brief Set security flags for a network node.
+   *
+   * @details Used by Portable Controller application to set security related flags for a node in its network.
+   * S2 capable flag, S2 included flag, Secure included flag.
+   */
+  EZWAVECOMMANDTYPE_SECURE_NETWORK_MANAGEMENT_SET_SECURITY_FLAGS, // 132
+
   NUM_EZWAVECOMMANDTYPE
 } EZwaveCommandType;
 
@@ -1421,6 +1472,7 @@ typedef struct SAssignReturnRoute
   node_id_t RouteDestinationNodeId;     // Destination of route (if 0 destination will be self). Destination can be a SUC.
   uint8_t   aPriorityRouteRepeaters[4]; // Route to be assigned as priority route - set to zeroes to NOT supply a priority route (recommended)
   uint8_t   PriorityRouteSpeed;
+  uint8_t   isSucRoute;
 } SAssignReturnRoute;
 
 typedef struct SCommandSetRfReceiveMode
@@ -1620,8 +1672,8 @@ typedef struct SApplicationHandles
 typedef struct SRadioConfig_t
 {
   int8_t iListenBeforeTalkThreshold;  /**< Db (negative) or EListenBeforeTalkThreshold_t */
-  int8_t iTxPowerLevelMax;            /**< Db (negative) or EtxPowerLevel_t */
-  int8_t iTxPowerLevelAdjust;         /**< Db (negative) or EtxPowerLevel_t */
+  zpal_tx_power_t iTxPowerLevelMax;   /**< Db (negative) or EtxPowerLevel_t */
+  zpal_tx_power_t iTxPowerLevelAdjust;/**< Db (negative) or EtxPowerLevel_t */
   int16_t iTxPowerLevelMaxLR;         /**< Maximum transmission power for Z-Wave LR */
   zpal_radio_region_t eRegion;        /**< RF Region setting */
   uint8_t radio_debug_enable;         /**< Enable radio PTI */
@@ -1853,6 +1905,15 @@ typedef struct SCommandInitiateShutdown
   void (*Handle) (void);      // Placeholder for callback function
 
 } SCommandInitiateShutdown;
+
+
+typedef struct SCommandSetSecurityFlags
+{
+  node_id_t nodeID;
+  bool nodeS2Capable;
+  bool nodeS2Included;
+  bool nodeSecureIncluded;
+} SCommandSetSecurityFlags;
 
 
 typedef struct SZWaveGetPriorityRouteStatus
@@ -2173,6 +2234,7 @@ typedef struct {
 typedef struct {
   ZW_controller_connection_info_t  connection;
   ZW_tx_options_t                  tx_options;
+  zwave_keyset_t                   tx_keys;
   uint16_t                         data_length;
   uint8_t                          data[TX_BUFFER_SIZE];
   void                             (*ptxCompleteCallback)(uint8_t, const TX_STATUS_TYPE*);
@@ -2311,6 +2373,7 @@ typedef union UCommandParameters
   SCommandGeniric8bParameter          SetLRChannel;
   SCommandGeniric8bParameter          SetLRVirtualNodeIDs;
   SCommandGeniric8bParameter          SetTxAttenuation;
+  SCommandSetSecurityFlags            SetSecurityFlags;
 } UCommandParameters;
 
 /**************************************************************************

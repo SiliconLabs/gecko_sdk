@@ -42,7 +42,7 @@
 // Used by the application file system.
 typedef struct SNotificationData
 {
-  uint8_t AlarmStatus[MAX_NOTIFICATIONS];
+  uint8_t AlarmStatus[MAX_NUM_OF_NOTIFICATION_GROUPS];
 } SNotificationData;
 
 #define ZAF_FILE_SIZE_NOTIFICATIONDATA     (sizeof(SNotificationData))

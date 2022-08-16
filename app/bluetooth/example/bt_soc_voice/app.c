@@ -126,8 +126,8 @@ void sl_bt_on_event(sl_bt_msg_t *evt)
                    evt->data.evt_system_boot.patch,
                    evt->data.evt_system_boot.build);
 
-      // Set maximal MTU.
-      sc = sl_bt_gatt_set_max_mtu(250, &max_mtu_out);
+      // Set maximal MTU for GATT Server.
+      sc = sl_bt_gatt_server_set_max_mtu(250, &max_mtu_out);
       app_assert_status(sc);
 
       // Extract unique ID from BT Address.

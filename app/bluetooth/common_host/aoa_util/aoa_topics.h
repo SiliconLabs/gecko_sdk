@@ -40,5 +40,7 @@
 #define AOA_TOPIC_CORRECTION_PRINT   "silabs/aoa/correction/%s/%s"
 #define AOA_TOPIC_CORRECTION_SCAN    "silabs/aoa/correction/%64[^/]/%64[^/]"
 #define AOA_TOPIC_CONFIG_PRINT       "silabs/aoa/config/%s"
+#define AOA_TOPIC_CONFIG_SCAN        "silabs/aoa/config/%64[^/]"
+#define AOA_TOPIC_CONFIG_BROADCAST   "silabs/aoa/config"
 
 #endif // AOA_TOPICS_H

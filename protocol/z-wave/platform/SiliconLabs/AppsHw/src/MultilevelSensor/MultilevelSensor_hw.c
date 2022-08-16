@@ -15,14 +15,19 @@
 #include <CC_Battery.h>
 #include <zpal_init.h>
 
+#include <em_emu.h>
+
 #define MY_BATTERY_SPEC_LEVEL_FULL         3000  // My battery's 100% level (millivolts)
 #define MY_BATTERY_SPEC_LEVEL_EMPTY        2400  // My battery's 0% level (millivolts)
 
 // Only use BTN PB1 and PB2 on Multilevel Sensor
 // PB3 and PB4 from the extension board use the same 
 // Ports and Pins that the I2C uses
-#define EVENT_BTN        APP_BUTTON_LEARN_RESET
-#define BATTERY_REPORT_BTN   APP_BUTTON_A         // This button cannot wake up the device from EM4
+#define EVENT_BTN             APP_BUTTON_LEARN_RESET
+#define REPORT_BTN            APP_BUTTON_A         // This button cannot wake up the device from EM4
+#define BASIC_SET_BTN         APP_BUTTON_A
+
+#define APP_LED_POWER_ON      APP_LED_A
 
 // Define the button events used to signify  sensor state transitions:
 //
@@ -35,7 +40,7 @@
 #define EVENT_TRANSITION_TO_DEACTIVE(event) (BTN_EVENT_UP(EVENT_BTN) == (BUTTON_EVENT)event)
 
 /* Ensure we did not allocate the same physical button to more than one function */
-STATIC_ASSERT((APP_BUTTON_LEARN_RESET != BATTERY_REPORT_BTN),
+STATIC_ASSERT((APP_BUTTON_LEARN_RESET != REPORT_BTN),
               STATIC_ASSERT_FAILED_button_overlap);
 
 static void button_handler(BUTTON_EVENT event, bool is_called_from_isr)
@@ -50,9 +55,9 @@ static void button_handler(BUTTON_EVENT event, bool is_called_from_isr)
   {
     app_event = EVENT_APP_BUTTON_LEARN_RESET_SHORT_PRESS;
   }
-  else if (BTN_EVENT_SHORT_PRESS(BATTERY_REPORT_BTN) == event)
+  else if (BTN_EVENT_SHORT_PRESS(REPORT_BTN) == event)
   {
-    app_event = EVENT_APP_BUTTON_BATTERY_REPORT;
+    app_event = EVENT_APP_BUTTON_BATTERY_AND_SENSOR_REPORT;
   }
   else if (EVENT_TRANSITION_TO_ACTIVE(event))
   {
@@ -61,6 +66,10 @@ static void button_handler(BUTTON_EVENT event, bool is_called_from_isr)
   else if (EVENT_TRANSITION_TO_DEACTIVE(event))
   {
     app_event = EVENT_APP_TRANSITION_TO_DEACTIVE;
+  }
+  else if (BTN_EVENT_HOLD(BASIC_SET_BTN) == event)
+  {
+    app_event = EVENT_APP_BUTTON_BASIC_SET_REPORT;
   }
 
   if (app_event != EVENT_EMPTY)
@@ -78,14 +87,17 @@ static void button_handler(BUTTON_EVENT event, bool is_called_from_isr)
 
 void MultilevelSensor_hw_init(void)
 {
+  /* Init indicator LED */
+  Board_SetLed(APP_LED_POWER_ON, LED_ON);
+
   /* hardware initialization */
   Board_SetButtonCallback(button_handler);
   Board_EnableButton(APP_BUTTON_LEARN_RESET);
-  Board_EnableButton(BATTERY_REPORT_BTN);
+  Board_EnableButton(REPORT_BTN); // BASIC_SET_BTN mapped to the same button
   Board_EnableButton(EVENT_BTN);
 
   DPRINT("-----------------------------\n");
-  DPRINTF("%s: Send battery report\n", Board_GetButtonLabel(BATTERY_REPORT_BTN));
+  DPRINTF("%s: Send battery and temperature report\n", Board_GetButtonLabel(REPORT_BTN));
   DPRINTF("%s: Toggle learn mode\n", Board_GetButtonLabel(APP_BUTTON_LEARN_RESET));
   DPRINT("      Hold 5 sec: Reset\n");
   DPRINTF("%s: Activate  event\n", Board_GetButtonLabel(EVENT_BTN));
@@ -152,4 +164,9 @@ uint8_t MultilevelSensor_hw_get_battery_level(void)
     }
   }
   return roundedLevel;
+}
+
+void EMU_EM4PresleepHook(void)
+{
+  Board_SetLed(APP_LED_POWER_ON, LED_OFF);
 }

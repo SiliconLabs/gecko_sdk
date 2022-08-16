@@ -6,7 +6,9 @@
 #include "tensorflow/lite/micro/kernels/kernel_util.h"
 #include "CMSIS/NN/Include/arm_nnfunctions.h"
 
+#include "sl_mvp_config.h"
 #include "sl_mvp_ml_conv2d.h"
+
 
 namespace tflite {
 namespace sl {
@@ -170,6 +172,9 @@ TfLiteStatus Prepare(TfLiteContext* context, TfLiteNode* node)
       float16_t *scaler_data = static_cast<float16_t*>(context->AllocatePersistentBuffer(
                                context, num_channels * sizeof(float16_t)));
       data->op_params.output_scaler = scaler_data;
+
+      scratch_buffer_size = sli_mvp_ml_conv2d_s8_get_scratch_buffer_size(&data->op_params);
+
       TF_LITE_ENSURE_STATUS(PopulateConvolutionQuantizationParams(
         context, input, filter, output, params->activation,
         reinterpret_cast<int32_t*>(&data->op_params.output_activation_min),
@@ -267,6 +272,11 @@ TfLiteStatus eval_mvp_int8(TfLiteContext* context,
   data->op_params.input  = tflite::micro::GetTensorData<int8_t>(input);
   data->op_params.output = tflite::micro::GetTensorData<int8_t>(output);
   data->op_params.filter = tflite::micro::GetTensorData<int8_t>(filter);
+
+  // Add scratch buffer pointer to op_params
+  if (data->scratch_buffer_index > -1){
+    data->op_params.scratch_buffer = (float16_t*)context->GetScratchBuffer(context, data->scratch_buffer_index);
+  }
 
   TF_LITE_ENSURE_EQ(context, SL_STATUS_OK, sli_mvp_ml_conv2d_s8(&data->op_params));
 

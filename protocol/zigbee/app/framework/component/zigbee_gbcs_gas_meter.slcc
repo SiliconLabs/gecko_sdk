@@ -26,6 +26,12 @@ include:
 template_contribution:
   - name: component_catalog
     value: zigbee_gbcs_gas_meter
+  - name: cluster_service
+    value:
+       cluster_id: "0x0702"
+       mfg_id: "NOT_MFG_SPECIFIC"
+       side: "SERVER"
+       service_function: "emAfGbcsGasMeterSimpleMeteringClusterServerCommandParse"
   - name: zigbee_af_callback
     value:
       callback_type: event_init

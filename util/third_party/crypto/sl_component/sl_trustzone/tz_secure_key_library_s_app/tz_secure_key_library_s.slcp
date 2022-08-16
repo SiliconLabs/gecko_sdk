@@ -80,6 +80,8 @@ toolchain_settings:
     value: -Xlinker --cmse-implib
   - option: gcc_linker_option
     value: -Xlinker --out-implib=skl_secure_lib.o
+  - option: iar_linker_option
+    value: --import_cmse_lib_out=$PROJ_DIR$\skl_secure_lib.o
 
 tag:
   - "companion:user-trustzone-non-secure-app.slcp"

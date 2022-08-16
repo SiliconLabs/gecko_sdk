@@ -131,3 +131,15 @@ EInclusionMode_t ZAF_GetInclusionMode(void)
   ASSERT(false);  // Crash in debug
   return EINCLUSIONMODE_NOT_SET;
 }
+
+bool isRfRegionValid(zpal_radio_region_t region)
+{
+  if (REGION_US_LR >= region ||
+      REGION_US_LR_END_DEVICE == region ||
+      REGION_JP == region ||
+      REGION_KR == region) {
+    return true;
+  } else {
+    return false;
+  }
+}

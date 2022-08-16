@@ -236,6 +236,9 @@ extern void emRadioHoldOffIsr(bool active);
    || COEX_RHO_SUPPORT)          \
 
 #if SL_RAIL_UTIL_COEX_PHY_ENABLED
+  #ifdef _SILICON_LABS_32B_SERIES_1_CONFIG_1
+  #error "COEX PHY is not supported on the selected platform."
+  #endif
 static uint8_t phySelectTimeoutMs = SL_RAIL_UTIL_COEX_PHY_SELECT_TIMEOUT_MAX;
 #else //!SL_RAIL_UTIL_COEX_PHY_ENABLED
 static uint8_t phySelectTimeoutMs = 0U;

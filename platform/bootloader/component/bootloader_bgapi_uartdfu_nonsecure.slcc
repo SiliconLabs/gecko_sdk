@@ -1,5 +1,5 @@
 id: bootloader_bgapi_uartdfu_nonsecure
-label: "BGAPI UART DFU"
+label: "BGAPI UART DFU (Non-Secure)"
 package: bootloader
 description: UART DFU for Bluetooth applications using the BGAPI protocol.
 category: Platform|Bootloader|TrustZone NonSecure|Communication

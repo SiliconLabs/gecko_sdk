@@ -129,7 +129,7 @@ configuration:
     condition:
       - psa_crypto
   - name: SL_STACK_SIZE
-    value: "0x1200"
+    value: "0x1400"
   - name: SL_UARTDRV_USART_VCOM_FLOW_CONTROL_TYPE
     value: uartdrvFlowControlNone
     condition:

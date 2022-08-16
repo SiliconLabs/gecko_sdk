@@ -1508,16 +1508,17 @@ exit:
 otError NcpBase::HandlePropertySet_SPINEL_PROP_COPROCESSOR_RPC(uint8_t aHeader)
 {
     const char *string = nullptr;
-    char        output[OPENTHREAD_CONFIG_COPROCESSOR_RPC_OUTPUT_BUFFER_SIZE];
+    char       *output = otCRPCGetStaticOutputBuffer();
+    size_t      output_buffer_size = otCRPCGetStaticOutputBufferSize();
     otError     error = OT_ERROR_NONE;
 
     error = mDecoder.ReadUtf8(string);
 
     VerifyOrExit(error == OT_ERROR_NONE, error = WriteLastStatusFrame(aHeader, ThreadErrorToSpinelStatus(error)));
 
-    output[sizeof(output) - 1] = '\0';
+    output[output_buffer_size - 1] = '\0';
 
-    otCRPCProcessCmdLine(string, output, sizeof(output) - 1);
+    otCRPCProcessCmdLine(string, output, output_buffer_size - 1);
 
     // Prepare the response
     SuccessOrExit(error = mEncoder.BeginFrame(aHeader, SPINEL_CMD_PROP_VALUE_IS, SPINEL_PROP_COPROCESSOR_RPC));

@@ -97,6 +97,11 @@ void emberGpdRailWriteTxFifoWrapper(const uint8_t *dataPtr,
   }
 }
 
+uint16_t emberGpdRailGetRadioEntropyWrapper(uint8_t *dataPtr, uint16_t dataLength)
+{
+  return RAIL_GetRadioEntropy(railHandle, dataPtr, dataLength);
+}
+
 void emberGpdRadioInit(void)
 {
   // Set TX FIFO, and verify that the size is correct

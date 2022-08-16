@@ -16,13 +16,13 @@
 //------------------------------------------------------------------------------
 
 // The command allows the Host to specify the desired EZSP version and must be
-// sent before any other command. This document describes EZSP version 8 and
+// sent before any other command. This document describes EZSP version 9 and
 // stack type 2 (mesh). The response provides information about the firmware
 // running on the NCP.
-// Return: The EZSP version the NCP is using (8).
+// Return: The EZSP version the NCP is using (9).
 uint8_t ezspVersion(
   // The EZSP version the Host wishes to use. To successfully set the
-  // version and allow other commands, this must be 8.
+  // version and allow other commands, this must be 9.
   uint8_t desiredProtocolVersion,
   // Return: The type of stack running on the NCP (2).
   uint8_t *stackType,
@@ -656,7 +656,7 @@ uint8_t ezspGetSourceRouteTableFilledSize(void);
 
 // Returns information about a source route table entry
 // Return: EMBER_SUCCESS if there is source route entry at
-// index. EMBER_SOURCE_ROUTE_FAILURE if there is no
+// index. EMBER_NOT_FOUND if there is no
 // source route at index.
 EmberStatus ezspGetSourceRouteTableEntry(
   // The index of the entry of interest in the
@@ -2297,7 +2297,8 @@ void ezspMfglibRxHandler(
   // The length of the packetContents parameter in bytes. Will be greater
   // than 3 and less than 123.
   uint8_t packetLength,
-  // The received packet. The last two bytes are the 16-bit CRC.
+  // The received packet (last 2 bytes are not FCS / CRC and may be
+  // discarded)
   uint8_t *packetContents);
 
 //------------------------------------------------------------------------------

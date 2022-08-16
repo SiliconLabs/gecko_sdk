@@ -177,7 +177,7 @@ typedef struct BootloaderStorageFunctions {
 /// Current version of the BootloaderStorageInformation_t struct
 #define BOOTLOADER_STORAGE_INFO_VERSION                         (0x30000U)
 /// Current version of the BootloaderStorageImplementationInformation_t struct
-#define BOOTLOADER_STORAGE_IMPL_INFO_VERSION                    (0x0201U)
+#define BOOTLOADER_STORAGE_IMPL_INFO_VERSION                    (0x0210U)
 /// Major version of the BootloaderStorageImplementationInformation_t struct
 #define BOOTLOADER_STORAGE_IMPL_INFO_VERSION_MAJOR              (0x0200U)
 /// Major version mask for @ref BOOTLOADER_STORAGE_IMPL_INFO_VERSION
@@ -194,55 +194,55 @@ typedef struct BootloaderStorageFunctions {
 #define BOOTLOADER_STORAGE_IMPL_CAPABILITY_BLOCKING_ERASE       (1 << 3)
 
 /// ISSI IS25LQ040B SPI Flash
-#define BOOTLOADER_STORAGE_ISSI_IS25LQ040B       (1 << 0)
+#define BOOTLOADER_STORAGE_ISSI_IS25LQ040B       (1U << 0)
 /// ISSI IS25LQ020B SPI Flash
-#define BOOTLOADER_STORAGE_ISSI_IS25LQ020B       (1 << 1)
+#define BOOTLOADER_STORAGE_ISSI_IS25LQ020B       (1U << 1)
 /// ISSI IS25LQ010B SPI Flash
-#define BOOTLOADER_STORAGE_ISSI_IS25LQ010B       (1 << 2)
+#define BOOTLOADER_STORAGE_ISSI_IS25LQ010B       (1U << 2)
 /// ISSI IS25LQ512B SPI Flash
-#define BOOTLOADER_STORAGE_ISSI_IS25LQ512B       (1 << 3)
+#define BOOTLOADER_STORAGE_ISSI_IS25LQ512B       (1U << 3)
 /// ISSI IS25LQ025B SPI Flash
-#define BOOTLOADER_STORAGE_ISSI_IS25LQ025B       (1 << 4)
+#define BOOTLOADER_STORAGE_ISSI_IS25LQ025B       (1U << 4)
 /// Numonyx M25P16 SPI Flash
-#define BOOTLOADER_STORAGE_NUMONYX_M25P16        (1 << 5)
+#define BOOTLOADER_STORAGE_NUMONYX_M25P16        (1U << 5)
 /// Numonyx M25P80 SPI Flash
-#define BOOTLOADER_STORAGE_NUMONYX_M25P80        (1 << 6)
+#define BOOTLOADER_STORAGE_NUMONYX_M25P80        (1U << 6)
 /// Numonyx M25P40 SPI Flash
-#define BOOTLOADER_STORAGE_NUMONYX_M25P40        (1 << 7)
+#define BOOTLOADER_STORAGE_NUMONYX_M25P40        (1U << 7)
 /// Numonyx M25P20 SPI Flash
-#define BOOTLOADER_STORAGE_NUMONYX_M25P20        (1 << 8)
+#define BOOTLOADER_STORAGE_NUMONYX_M25P20        (1U << 8)
 /// Adesto AT25SF041 SPI Flash
-#define BOOTLOADER_STORAGE_ADESTO_AT25SF041      (1 << 9)
+#define BOOTLOADER_STORAGE_ADESTO_AT25SF041      (1U << 9)
 /// Atmel AT25DF081A SPI Flash
-#define BOOTLOADER_STORAGE_ATMEL_AT25DF081A      (1 << 10)
+#define BOOTLOADER_STORAGE_ATMEL_AT25DF081A      (1U << 10)
 /// Atmel AT25DF041A SPI Flash
-#define BOOTLOADER_STORAGE_ATMEL_AT25DF041A      (1 << 11)
+#define BOOTLOADER_STORAGE_ATMEL_AT25DF041A      (1U << 11)
 /// Macronix MX25R6435F SPI Flash
-#define BOOTLOADER_STORAGE_MACRONIX_MX25R6435F   (1 << 12)
+#define BOOTLOADER_STORAGE_MACRONIX_MX25R6435F   (1U << 12)
 /// Macronix MX25R6435F SPI Flash
-#define BOOTLOADER_STORAGE_MACRONIX_MX25R3235F   (1 << 13)
+#define BOOTLOADER_STORAGE_MACRONIX_MX25R3235F   (1U << 13)
 /// Macronix MX25U1635E SPI Flash
-#define BOOTLOADER_STORAGE_MACRONIX_MX25U1635E   (1 << 14)
+#define BOOTLOADER_STORAGE_MACRONIX_MX25U1635E   (1U << 14)
 /// Macronix MX25L1606E SPI Flash
-#define BOOTLOADER_STORAGE_MACRONIX_MX25L1606E   (1 << 15)
+#define BOOTLOADER_STORAGE_MACRONIX_MX25L1606E   (1U << 15)
 /// Macronix MX25R8035F SPI Flash
-#define BOOTLOADER_STORAGE_MACRONIX_MX25R8035F   (1 << 16)
+#define BOOTLOADER_STORAGE_MACRONIX_MX25R8035F   (1U << 16)
 /// Macronix MX25L8006E SPI Flash
-#define BOOTLOADER_STORAGE_MACRONIX_MX25L8006E   (1 << 17)
+#define BOOTLOADER_STORAGE_MACRONIX_MX25L8006E   (1U << 17)
 /// Macronix MX25L4006E SPI Flash
-#define BOOTLOADER_STORAGE_MACRONIX_MX25L4006E   (1 << 18)
+#define BOOTLOADER_STORAGE_MACRONIX_MX25L4006E   (1U << 18)
 /// Macronix MX25L2006E SPI Flash
-#define BOOTLOADER_STORAGE_MACRONIX_MX25L2006E   (1 << 19)
+#define BOOTLOADER_STORAGE_MACRONIX_MX25L2006E   (1U << 19)
 /// Winbond W25Q80BV SPI Flash
-#define BOOTLOADER_STORAGE_WINBOND_W25Q80BV      (1 << 20)
+#define BOOTLOADER_STORAGE_WINBOND_W25Q80BV      (1U << 20)
 /// Winbond W25X20BV SPI Flash
-#define BOOTLOADER_STORAGE_WINBOND_W25X20BV      (1 << 21)
+#define BOOTLOADER_STORAGE_WINBOND_W25X20BV      (1U << 21)
 /// Spansion S25L208K SPI Flash
-#define BOOTLOADER_STORAGE_SPANSION_S25FL208K    (1 << 22)
+#define BOOTLOADER_STORAGE_SPANSION_S25FL208K    (1U << 22)
 /// Internal storage
-#define BOOTLOADER_STORAGE_INTERNAL_STORAGE      (1 << 30)
+#define BOOTLOADER_STORAGE_INTERNAL_STORAGE      (1U << 30)
 /// JEDEC Supported SPI Flash
-#define BOOTLOADER_STORAGE_JEDEC                 (1 << 31)
+#define BOOTLOADER_STORAGE_JEDEC                 (1U << 31)
 
 // -----------------------------------------------------------------------------
 // Functions
@@ -287,7 +287,9 @@ int32_t bootloader_readStorage(uint32_t slotId,
  *
  * @note
  *   If DMA-based MSC write is enabled on the bootloader, writing data from
- *   flash to flash is not supported on Series-1 devices.
+ *   flash to flash is not supported on Series-1 devices. DMA-based MSC write is
+ *   enabled, both offset and buffer should be word aligned. In case the buffer
+ *   is not aligned, the normal write procedure is used instead of DMA.
  *
  * @param[in] slotId ID of the slot
  * @param[in] offset Offset into the slot to start writing to

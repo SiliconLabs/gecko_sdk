@@ -19,5 +19,3 @@ include:
      - path: ZW_plus_version.h
 provides:
   - name: zw_cc_zwaveplusinfo
-documentation:
-  url: "https://sdomembers.z-wavealliance.org/document/dl/643"

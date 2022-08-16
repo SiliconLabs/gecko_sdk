@@ -26,6 +26,7 @@ requires:
   - name: app_assert
   - name: gatt_configuration
   - name: bluetooth_stack
+  - name: bluetooth_feature_system
   - name: bluetooth_feature_afh
   - name: bluetooth_feature_power_control
   - name: bluetooth_feature_connection

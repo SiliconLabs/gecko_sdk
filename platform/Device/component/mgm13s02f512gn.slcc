@@ -81,6 +81,7 @@
   - name: device
   - name: device_series_1
   - name: device_sdid_89
+  - name: device_generic_family_efr32xg13
   - name: device_family_mgm13
   - name: device_cortexm
   - name: device_arm

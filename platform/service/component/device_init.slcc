@@ -11,11 +11,17 @@ provides:
   - name: device_init
 requires:
   - name: device_init_dcdc
-    condition: [device_has_dcdc]
+    condition: [device_series_1, device_has_dcdc]
+  - name: device_init_dcdc
+    condition: [device_series_2, device_has_dcdc, device_dcdc_buck]
+  - name: device_init_dcdc_boost
+    condition: [device_series_2, device_has_dcdc, device_dcdc_boost]
   - name: device_init_hfrco
     condition: [device_sdid_200]
   - name: device_init_lfrco
     condition: [device_sdid_205, bluetooth_stack]
+  - name: device_init_lfrco
+    condition: [device_sdid_215, bluetooth_stack]
   - name: device_init_hfxo
     condition: [hardware_board_has_hfxo]
   - name: device_init_usbpll

@@ -1735,7 +1735,7 @@ static RAIL_Status_t fn_start_pending_tx(void)
   for (i = 0; i < SUPPORTED_PROTOCOL_COUNT; i++) {
     // Pending scheduled TX
     if (fn_get_context_flag_by_index(i, RAIL_MUX_PROTOCOL_FLAGS_SCHEDULED_TX_PENDING)) {
-      RAIL_Status_t status;
+      RAIL_Status_t status = RAIL_STATUS_NO_ERROR;
       if ( !check_lock_permissions(i)) {
         // Post a tx blocked event to notify mac state machines
         fn_mux_rail_events_callback(mux_rail_handle, RAIL_EVENT_TX_BLOCKED);

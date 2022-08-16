@@ -47,7 +47,6 @@
 #include "nvm3_spe.h"
 #endif
 
-#include "nvm3_default_config.h"
-#include "nvm3_default.h"
+#include "nvm3.h"
 
 #endif /* __TFM_NVM3_INCLUDE_H__ */

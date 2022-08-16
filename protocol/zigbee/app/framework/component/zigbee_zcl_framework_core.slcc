@@ -102,6 +102,11 @@ include:
       - path: zcl-framework-core.h
     condition:
       - zigbee_ezsp
+  - path: protocol/zigbee/app/framework/cli
+    file_list:
+      - path: zcl-cli.h
+    condition:
+      - cli
 source:
   - path: protocol/zigbee/app/framework/cli/core-cli.c
     condition:
@@ -421,6 +426,15 @@ template_contribution:
       group: keys
       handler: keysPrintCommand
       help: "Prints all security keys."
+  - name: cli_command
+    value:
+      name: delete
+      group: keys
+      handler: keysDeleteCommand
+      help: "Delete the specified link key index."
+      argument:
+      - type: uint8
+        help: "index"
   - name: cli_command
     value:
       name: clear

@@ -47,6 +47,11 @@ static COEX_GpioHandle_t gntHandle = NULL;
 /** PTA request GPIO configuration */
 static COEX_GpioHandle_t reqHandle = NULL;
 
+#if SL_RAIL_UTIL_COEX_OUTPUT_OVERRIDE_GPIO_INPUT
+/** PTA external request GPIO configuration */
+static COEX_GpioHandle_t externalReqHandle = NULL;
+#endif // SL_RAIL_UTIL_COEX_OUTPUT_OVERRIDE_GPIO_INPUT
+
 /** PTA PWM request GPIO configuration */
 static COEX_GpioHandle_t pwmReqHandle = NULL;
 
@@ -118,12 +123,21 @@ static COEX_GpioConfig_t gntCfg = {
 
 static COEX_GpioConfig_t reqCfg = {
 #if SL_RAIL_UTIL_COEX_OVERRIDE_GPIO_INPUT
-  .index = COEX_GPIO_INDEX_REQ,
+  .index = COEX_GPIO_INDEX_INTERNAL_REQ,
 #endif //SL_RAIL_UTIL_COEX_OVERRIDE_GPIO_INPUT
   .options = (COEX_GpioOptions_t)(COEX_GPIO_OPTION_INT_DEASSERTED
                                   | COEX_GPIO_OPTION_OUTPUT),
   .cb = &COEX_REQ_ISR
 };
+
+#ifdef SL_RAIL_UTIL_COEX_OUTPUT_OVERRIDE_GPIO_INPUT
+static COEX_GpioConfig_t externalReqCfg = {
+  .index = COEX_GPIO_INDEX_REQ,
+  .options = (COEX_GpioOptions_t)(COEX_GPIO_OPTION_INT_DEASSERTED
+                                  | COEX_GPIO_OPTION_OUTPUT),
+  .cb = &COEX_REQ_ISR
+};
+#endif
 
 static COEX_GpioConfig_t pwmReqCfg = {
   .options = (COEX_GpioOptions_t)(COEX_GPIO_OPTION_OUTPUT
@@ -511,7 +525,10 @@ bool COEX_SetGpioInputOverride(COEX_GpioIndex_t gpioIndex, bool enable)
     } else {
       gpioInputOverride &= ~gpioMask;
     }
-    setGpioFlag(overrideGpioHandles[gpioIndex]);
+    if (gpioIndex != COEX_GPIO_INDEX_INTERNAL_REQ) {
+      setGpio(overrideGpioHandles[gpioIndex], enable);
+      setGpioFlag(overrideGpioHandles[gpioIndex]);
+    }
   }
   return true;
 }
@@ -581,10 +598,19 @@ bool COEX_ConfigGrant(COEX_GpioHandle_t gpioHandle)
   return true;
 }
 
+#if SL_RAIL_UTIL_COEX_OUTPUT_OVERRIDE_GPIO_INPUT
+bool COEX_ConfigExternalRequest(COEX_GpioHandle_t gpioHandle)
+{
+  overrideGpioHandles[COEX_GPIO_INDEX_REQ] = gpioHandle;
+  configGpio(gpioHandle, &externalReqHandle, &externalReqCfg);
+  return true;
+}
+#endif //SL_RAIL_UTIL_COEX_OUTPUT_OVERRIDE_GPIO_INPUT
+
 bool COEX_ConfigRequest(COEX_GpioHandle_t gpioHandle)
 {
 #if SL_RAIL_UTIL_COEX_OVERRIDE_GPIO_INPUT
-  overrideGpioHandles[COEX_GPIO_INDEX_REQ] = gpioHandle;
+  overrideGpioHandles[COEX_GPIO_INDEX_INTERNAL_REQ] = gpioHandle;
 #endif //SL_RAIL_UTIL_COEX_OVERRIDE_GPIO_INPUT
   if ((coexCfg.options & COEX_OPTION_REQ_SHARED) != 0U) {
     reqCfg.options |= COEX_GPIO_OPTION_SHARED;

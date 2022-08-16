@@ -66,6 +66,7 @@
   - name: device
   - name: device_series_2
   - name: device_sdid_200
+  - name: device_generic_family_efr32xg21
   - name: device_family_bgm21
   - name: device_cortexm
   - name: device_arm

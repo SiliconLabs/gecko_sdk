@@ -122,7 +122,7 @@ configuration:
     condition:
       - "device_sdid_205"
   - name: SL_HEAP_SIZE
-    value: "0x4000"
+    value: "0x4100"
     unless:
       - "device_sdid_205"
   - name: SL_PSA_KEY_USER_SLOT_COUNT
@@ -132,13 +132,7 @@ configuration:
   - name: SL_SIMPLE_BUTTON_ALLOW_LED_CONFLICT
     value: "1"
   - name: SL_STACK_SIZE
-    value: "0xE00"
-    condition:
-      - "device_sdid_205"
-  - name: SL_STACK_SIZE
-    value: "0x1000"
-    unless:
-      - "device_sdid_205"
+    value: "0x1300"
 
 template_contribution:
   - name: cli_command

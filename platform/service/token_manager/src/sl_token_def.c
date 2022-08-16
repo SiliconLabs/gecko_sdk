@@ -18,8 +18,7 @@
 #include <stdint.h>
 #include <stdbool.h>
 #define EUI64_SIZE 8
-typedef uint8_t EmberEUI64[EUI64_SIZE];
-typedef uint16_t EmberNodeId;
+#include "ember-types.h"
 #include "stack/config/ember-configuration-defaults.h"
 
 //-- Build structure defines (these define all the data types of the tokens).

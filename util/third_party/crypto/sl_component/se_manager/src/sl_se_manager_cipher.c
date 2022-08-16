@@ -37,6 +37,8 @@
 #include "sl_assert.h"
 #include <string.h>
 
+#define BUFSIZE 16
+
 /// @addtogroup sl_se_manager
 /// @{
 
@@ -556,6 +558,360 @@ sl_status_t sl_se_ccm_auth_decrypt(sl_se_command_context_t *cmd_ctx,
   }
 }
 
+#if (_SILICON_LABS_32B_SERIES_2_CONFIG == 1)
+sl_status_t sl_se_ccm_multipart_starts(sl_se_ccm_multipart_context_t *ccm_ctx,
+                                       sl_se_command_context_t *cmd_ctx,
+                                       const sl_se_key_descriptor_t *key,
+                                       sl_se_cipher_operation_t mode,
+                                       uint32_t total_message_length,
+                                       const uint8_t *iv,
+                                       size_t iv_len,
+                                       const uint8_t *aad,
+                                       size_t aad_len,
+                                       size_t tag_len)
+{
+  sl_status_t status = SL_STATUS_OK;
+  uint8_t q;
+  uint8_t b[BUFSIZE] = { 0 };
+  uint8_t tag_out[BUFSIZE] = { 0 };
+  uint8_t cbc_mac_state[BUFSIZE] = { 0 };
+  uint8_t nonce_counter[BUFSIZE] = { 0 };
+  uint32_t len_left;
+
+  //Check input parameters
+  if (ccm_ctx == NULL || cmd_ctx == NULL || key == NULL || iv == NULL) {
+    return SL_STATUS_INVALID_PARAMETER;
+  }
+  if (aad_len > 0 && aad == NULL) {
+    return SL_STATUS_INVALID_PARAMETER;
+  }
+
+  if (tag_len == 2 || tag_len > 16 || tag_len % 2 != 0) {
+    return SL_STATUS_INVALID_PARAMETER;
+  }
+
+  if (iv_len < 7 || iv_len > 13) {
+    return SL_STATUS_INVALID_PARAMETER;
+  }
+
+  // q is the the octet length of Q which again is a bit string representation of
+  // the octet length of the payload.
+  q = 16 - 1 - (uint8_t) iv_len;
+
+  // The parameter q determines the maximum length of the payload: by definition, p<2^(8*q),
+  // where p is payload.
+  if ((q < sizeof(total_message_length)) && (total_message_length >= (1UL << (q * 8)))) {
+    return SL_STATUS_INVALID_PARAMETER;
+  }
+  memset(ccm_ctx, 0, sizeof(sl_se_ccm_multipart_context_t));
+
+  // Format first input block B_O according to the formatting function:
+
+  // 0        .. 0        flags
+  // 1        .. iv_len   nonce (aka iv)
+  // iv_len+1 .. 15       length
+  //
+  // With flags as (bits):
+  // 7        0
+  // 6        add present?
+  // 5 .. 3   (t - 2) / 2
+  // 2 .. 0   q - 1
+
+  b[0] = 0;
+  b[0] |= (aad_len > 0) << 6;
+  b[0] |= ((tag_len - 2) / 2) << 3;
+  b[0] |= q - 1;
+
+  memcpy(b + 1, iv, iv_len);
+
+  len_left = total_message_length;
+  for (uint32_t i = 0; i < q; i++, len_left >>= 8) {
+    b[15 - i] = (unsigned char)(len_left & 0xFF);
+  }
+
+  ccm_ctx->mode = mode;
+  ccm_ctx->processed_message_length = 0;
+  ccm_ctx->total_message_length = total_message_length;
+  ccm_ctx->tag_len = tag_len;
+  ccm_ctx->mode = mode;
+  ccm_ctx->iv_len = iv_len;
+  memcpy(ccm_ctx->iv, iv, iv_len);
+
+  status = sl_se_aes_crypt_cbc(cmd_ctx,
+                               key,
+                               SL_SE_ENCRYPT,
+                               BUFSIZE,
+                               cbc_mac_state,
+                               b,
+                               tag_out);
+
+  if (status != SL_STATUS_OK) {
+    return status;
+  }
+
+  // If there is additional data, update using CBC. Must be done
+  // blockwise to achieve the same behaviour as CBC-MAC.
+  if (aad_len > 0) {
+    uint8_t use_len;
+    len_left = aad_len;
+    memset(b, 0, sizeof(b));
+    // First block.
+    b[0] = (unsigned char)((aad_len >> 8) & 0xFF);
+    b[1] = (unsigned char)((aad_len) & 0xFF);
+    use_len = len_left < BUFSIZE - 2 ? len_left : 16 - 2;
+    memcpy(b + 2, aad, use_len);
+    len_left -= use_len;
+    aad += use_len;
+
+    status = sl_se_aes_crypt_cbc(cmd_ctx,
+                                 key,
+                                 SL_SE_ENCRYPT,
+                                 BUFSIZE,
+                                 cbc_mac_state,
+                                 b,
+                                 tag_out);
+    if (status != SL_STATUS_OK) {
+      return status;
+    }
+
+    while (len_left) {
+      use_len = len_left > 16 ? 16 : len_left;
+
+      memset(b, 0, sizeof(b));
+      memcpy(b, aad, use_len);
+      status = sl_se_aes_crypt_cbc(cmd_ctx,
+                                   key,
+                                   SL_SE_ENCRYPT,
+                                   BUFSIZE,
+                                   cbc_mac_state,
+                                   b,
+                                   tag_out);
+
+      if (status != SL_STATUS_OK) {
+        return status;
+      }
+      len_left -= use_len;
+      aad += use_len;
+    }
+  }
+
+  memcpy(ccm_ctx->cbc_mac_state, cbc_mac_state, sizeof(cbc_mac_state));
+
+  // Prepare nonce counter for encryption/decryption operation.
+  nonce_counter[0] = q - 1;
+  memcpy(nonce_counter + 1, iv, iv_len);
+  memset(nonce_counter + 1 + iv_len, 0, q);
+  nonce_counter[15] = 1;
+
+  memcpy(ccm_ctx->nonce_counter, nonce_counter, sizeof(ccm_ctx->nonce_counter));
+
+  return SL_STATUS_OK;
+}
+
+sl_status_t sl_se_ccm_multipart_update(sl_se_ccm_multipart_context_t *ccm_ctx,
+                                       sl_se_command_context_t *cmd_ctx,
+                                       const sl_se_key_descriptor_t *key,
+                                       size_t length,
+                                       const uint8_t *input,
+                                       uint8_t *output,
+                                       size_t *output_length)
+{
+  sl_status_t status = SL_STATUS_OK;
+  *output_length = 0;
+
+  uint8_t out_buf[BUFSIZE] = { 0 };
+  uint8_t empty[BUFSIZE] = { 0 };
+  uint8_t b[BUFSIZE] = { 0 };
+
+  size_t len_left;
+
+  // Check input parameters.
+  if (ccm_ctx == NULL || cmd_ctx == NULL || key == NULL) {
+    return SL_STATUS_INVALID_PARAMETER;
+  }
+
+  if (length == 0) {
+    return SL_STATUS_OK;
+  }
+
+  // Check variable overflow
+  if (ccm_ctx->processed_message_length > 0xFFFFFFFF - length) {
+    return SL_STATUS_INVALID_PARAMETER;
+  }
+
+  if (ccm_ctx->processed_message_length + length > ccm_ctx->total_message_length) {
+    return SL_STATUS_INVALID_PARAMETER;
+  }
+
+  if (length > 0 && (input == NULL || output == NULL)) {
+    return SL_STATUS_INVALID_PARAMETER;
+  }
+
+  if ((uint32_t)output + length > RAM_MEM_END) {
+    return SL_STATUS_INVALID_PARAMETER;
+  }
+
+  // Support partial overlap.
+  if ((output > input) && (output < (input + length))) {
+    memmove(output, input, length);
+    input = output;
+  }
+
+  if (length + ccm_ctx->final_data_length < BUFSIZE && length < BUFSIZE && ccm_ctx->processed_message_length + length != ccm_ctx->total_message_length ) {
+    if (ccm_ctx->final_data_length > BUFSIZE) {
+      // Context is not valid.
+      return SL_STATUS_INVALID_PARAMETER;
+    }
+    memcpy(ccm_ctx->final_data + ccm_ctx->final_data_length, input, length);
+    ccm_ctx->final_data_length += length;
+    *output_length = 0;
+    return SL_STATUS_OK;
+  }
+
+  len_left = length + ccm_ctx->final_data_length;
+
+  // Authenticate and {en,de}crypt the message.
+
+  // The only difference between encryption and decryption is
+  // the respective order of authentication and {en,de}cryption.
+  while (len_left > 0 ) {
+    uint8_t use_len = len_left > BUFSIZE ? BUFSIZE : len_left;
+
+    memset(b, 0, sizeof(b));
+
+    // Process data stored in context first.
+    if (ccm_ctx->final_data_length > 0) {
+      if (ccm_ctx->final_data_length > BUFSIZE) {
+        // Context is not valid.
+        return SL_STATUS_INVALID_PARAMETER;
+      }
+      memcpy(b, ccm_ctx->final_data, ccm_ctx->final_data_length);
+      memcpy(b + ccm_ctx->final_data_length, input, BUFSIZE - ccm_ctx->final_data_length);
+      input += BUFSIZE - ccm_ctx->final_data_length;
+      ccm_ctx->final_data_length = 0;
+    } else {
+      memcpy(b, input, use_len);
+      input += use_len;
+    }
+    if (ccm_ctx->mode == SL_SE_ENCRYPT) {
+      // Authenticate input.
+      status = sl_se_aes_crypt_cbc(cmd_ctx,
+                                   key,
+                                   SL_SE_ENCRYPT,
+                                   BUFSIZE,
+                                   ccm_ctx->cbc_mac_state,
+                                   b,
+                                   out_buf);
+
+      if (status != SL_STATUS_OK) {
+        return status;
+      }
+    }
+    // Encrypt/decrypt data with CTR.
+    status = sl_se_aes_crypt_ctr(cmd_ctx,
+                                 key,
+                                 use_len,
+                                 NULL,
+                                 ccm_ctx->nonce_counter,
+                                 empty,
+                                 b,
+                                 output);
+
+    if (ccm_ctx->mode == SL_SE_DECRYPT) {
+      // Authenticate output.
+      memset(b, 0, sizeof(b));
+      memcpy(b, output, use_len);
+      status = sl_se_aes_crypt_cbc(cmd_ctx,
+                                   key,
+                                   SL_SE_ENCRYPT,
+                                   BUFSIZE,
+                                   ccm_ctx->cbc_mac_state,
+                                   b,
+                                   out_buf);
+
+      if (status != SL_STATUS_OK) {
+        return status;
+      }
+    }
+    ccm_ctx->processed_message_length += use_len;
+    *output_length += use_len;
+    len_left -= use_len;
+    output += use_len;
+
+    if (len_left < BUFSIZE && ((ccm_ctx->processed_message_length + len_left) != ccm_ctx->total_message_length)) {
+      memcpy(ccm_ctx->final_data, input, len_left);
+      ccm_ctx->final_data_length = len_left;
+      break;
+    }
+  }
+
+  if (status != SL_STATUS_OK) {
+    return status;
+  }
+
+  return SL_STATUS_OK;
+}
+
+sl_status_t sl_se_ccm_multipart_finish(sl_se_ccm_multipart_context_t *ccm_ctx,
+                                       sl_se_command_context_t *cmd_ctx,
+                                       const sl_se_key_descriptor_t *key,
+                                       uint8_t *tag,
+                                       uint8_t tag_size,
+                                       uint8_t *output,
+                                       uint8_t output_size,
+                                       uint8_t *output_length)
+{
+  (void)output;
+  uint8_t q;
+  uint8_t ctr[BUFSIZE] = { 0 };
+  uint8_t out_tag[BUFSIZE] = { 0 };
+  //Check input parameters
+  if (ccm_ctx == NULL || cmd_ctx == NULL || key == NULL || tag == NULL) {
+    return SL_STATUS_INVALID_PARAMETER;
+  }
+
+  if (tag_size < ccm_ctx->tag_len || output_size < ccm_ctx->final_data_length) {
+    return SL_STATUS_INVALID_PARAMETER;
+  }
+
+  sl_status_t status = SL_STATUS_OK;
+
+  // Reset CTR counter.
+  q = 16 - 1 - (unsigned char) ccm_ctx->iv_len;
+
+  ctr[0] = q - 1;
+  memcpy(ctr + 1, ccm_ctx->iv, ccm_ctx->iv_len);
+
+  // Encrypt the tag with CTR.
+  uint8_t empty[BUFSIZE] = { 0 };
+  status =  sl_se_aes_crypt_ctr(cmd_ctx,
+                                key,
+                                ccm_ctx->tag_len,
+                                NULL,
+                                ctr,
+                                empty,
+                                ccm_ctx->cbc_mac_state,
+                                out_tag);
+
+  if (status != SL_STATUS_OK) {
+    memset(out_tag, 0, sizeof(out_tag));
+    return status;
+  }
+
+  if (ccm_ctx->mode == SL_SE_DECRYPT) {
+    if (memcmp_time_cst(tag, out_tag, ccm_ctx->tag_len) != 0) {
+      memset(tag, 0, ccm_ctx->tag_len);
+      return SL_STATUS_INVALID_SIGNATURE;
+    }
+  } else {
+    memcpy(tag, out_tag, ccm_ctx->tag_len);
+  }
+
+  *output_length = 0;
+  return SL_STATUS_OK;
+}
+#endif// _SILICON_LABS_32B_SERIES_2_CONFIG == 1
+
 #if (_SILICON_LABS_32B_SERIES_2_CONFIG > 2)
 /***************************************************************************//**
  *   Prepare a CCM streaming command context object to be used in subsequent
@@ -574,7 +930,7 @@ sl_status_t sl_se_ccm_multipart_starts(sl_se_ccm_multipart_context_t *ccm_ctx,
 
 {
   sl_status_t status = SL_STATUS_OK;
-  unsigned char q;
+  uint8_t q;
 
   //Check input parameters
   if (ccm_ctx == NULL || cmd_ctx == NULL || key == NULL || iv == NULL) {
@@ -600,10 +956,9 @@ sl_status_t sl_se_ccm_multipart_starts(sl_se_ccm_multipart_context_t *ccm_ctx,
   memset(ccm_ctx, 0, sizeof(sl_se_ccm_multipart_context_t));
 
   ccm_ctx->mode = mode;
-  ccm_ctx->message_length = 0;
+  ccm_ctx->processed_message_length = 0;
   ccm_ctx->total_message_length = total_message_length;
   ccm_ctx->tag_len = tag_len;
-  ccm_ctx->last_update_operation = false;
   memcpy(ccm_ctx->iv, iv, iv_len);
 
   SE_Command_t *se_cmd = &cmd_ctx->command;
@@ -700,11 +1055,15 @@ sl_status_t sl_se_ccm_multipart_update(sl_se_ccm_multipart_context_t *ccm_ctx,
   }
 
   if (length == 0) {
-    ccm_ctx->last_update_operation = true;
     return SL_STATUS_OK;
   }
 
-  if ((ccm_ctx->message_length) + length > ccm_ctx->total_message_length) {
+  if (ccm_ctx->processed_message_length + length > ccm_ctx->total_message_length) {
+    return SL_STATUS_INVALID_PARAMETER;
+  }
+
+  // Check variable overflow
+  if (ccm_ctx->processed_message_length > 0xFFFFFFFF - length) {
     return SL_STATUS_INVALID_PARAMETER;
   }
 
@@ -716,40 +1075,104 @@ sl_status_t sl_se_ccm_multipart_update(sl_se_ccm_multipart_context_t *ccm_ctx,
     return SL_STATUS_INVALID_PARAMETER;
   }
 
-  if (ccm_ctx->last_update_operation == true) {
-    // We've already closed the input stream, no way back.
-    return SL_STATUS_INVALID_PARAMETER;
-  }
-
   SE_Command_t *se_cmd = &cmd_ctx->command;
+  *output_length = 0;
 
   // Approach:
   // Encrypt or decrypt regularly with context store. The crypto DMA must have input data in the 'END' operation, thus,
   // some data must be saved in the context.
-  ccm_ctx->message_length += length;
 
-  if ((length % 16 != 0) && (ccm_ctx->message_length != ccm_ctx->total_message_length)) {
-    return SL_STATUS_INVALID_PARAMETER;
+  if ((ccm_ctx->final_data_length + length) < 16 && length < 16) {
+    if (ccm_ctx->final_data_length > 16) {
+      // Context is not valid.
+      return SL_STATUS_INVALID_PARAMETER;
+    }
+
+    memcpy(ccm_ctx->mode_specific_buffer.final_data + ccm_ctx->final_data_length, input, length);
+    ccm_ctx->final_data_length += length;
+    return SL_STATUS_OK;
   }
 
-  if ((ccm_ctx->message_length == ccm_ctx->total_message_length)) {
-    // Indicate that this is our last operation
-    ccm_ctx->last_update_operation = true;
-    //The update operation must have a multiple of 16 as input, so what is left up to or equal 16 bytes will be stored.
-    if (length <= 16) {
-      //go directly to finish
-      memcpy(ccm_ctx->mode_specific_buffer.final_data, input, length);
-      ccm_ctx->final_data_length = length;
-      *output_length = 0;
-      return SL_STATUS_OK;
-    } else if (length % 16 > 0) {
-      memcpy(ccm_ctx->mode_specific_buffer.final_data, input + (length - length % 16), length % 16);
-      ccm_ctx->final_data_length = length % 16;
-    } else {
-      memcpy(ccm_ctx->mode_specific_buffer.final_data, input + (length - 16), 16);
-      ccm_ctx->final_data_length = 16;
+  // If there is data in final_data, this must be processed first
+  if (ccm_ctx->final_data_length) {
+    if (ccm_ctx->final_data_length > 16) {
+      // Context is not valid.
+      return SL_STATUS_INVALID_PARAMETER;
     }
-    length -= ccm_ctx->final_data_length;
+
+    // Fill up the remainder of the buffer.
+    memcpy(ccm_ctx->mode_specific_buffer.final_data + ccm_ctx->final_data_length, input, 16 - ccm_ctx->final_data_length);
+
+    if (ccm_ctx->processed_message_length + 16 == ccm_ctx->total_message_length ) {
+      // The finish operation must have some data or the SE fails.
+      ccm_ctx->final_data_length = 16;
+      return SL_STATUS_OK;
+    }
+
+    SE_DataTransfer_t iv_ctx_in = SE_DATATRANSFER_DEFAULT(ccm_ctx->se_ctx, sizeof(ccm_ctx->se_ctx));
+
+    SE_DataTransfer_t data_in =
+      SE_DATATRANSFER_DEFAULT(ccm_ctx->mode_specific_buffer.final_data, 16);
+    SE_DataTransfer_t data_out =
+      SE_DATATRANSFER_DEFAULT(output, 16);
+
+    SE_DataTransfer_t ctx_out = SE_DATATRANSFER_DEFAULT(ccm_ctx->se_ctx, sizeof(ccm_ctx->se_ctx));
+
+    sli_se_command_init(cmd_ctx,
+                        ((ccm_ctx->mode == SL_SE_DECRYPT)
+                         ? SLI_SE_COMMAND_AES_CCM_DECRYPT : SLI_SE_COMMAND_AES_CCM_ENCRYPT)
+                        | SLI_SE_COMMAND_OPTION_CONTEXT_ADD);
+
+    sli_add_key_parameters(cmd_ctx, key, status);
+
+    SE_addParameter(se_cmd, 16);
+
+    sli_add_key_metadata(cmd_ctx, key, status);
+    sli_add_key_input(cmd_ctx, key, status);
+
+    SE_addDataInput(se_cmd, &iv_ctx_in);
+    SE_addDataInput(se_cmd, &data_in);
+
+    SE_addDataOutput(se_cmd, &data_out);
+    SE_addDataOutput(se_cmd, &ctx_out);
+
+    status = sli_se_execute_and_wait(cmd_ctx);
+    if (status != SL_STATUS_OK) {
+      memset(output, 0, length);
+      memset(ccm_ctx->se_ctx, 0, sizeof(ccm_ctx->se_ctx));
+      *output_length = 0;
+      return status;
+    }
+    ccm_ctx->processed_message_length += 16;
+    output += 16;
+    length -= (16 - ccm_ctx->final_data_length);
+    input += (16 - ccm_ctx->final_data_length);
+    ccm_ctx->final_data_length = 0;
+    *output_length += 16;
+  }
+
+  if (length < 16) {
+    memcpy(ccm_ctx->mode_specific_buffer.final_data, input, length);
+    ccm_ctx->final_data_length += length;
+    return SL_STATUS_OK;
+  }
+
+  // Run only multiples of 16 and store residue data in context
+  if (length % 16 != 0) {
+    uint8_t residue_data_length = length % 16;
+    memcpy(ccm_ctx->mode_specific_buffer.final_data, input + (length - residue_data_length), residue_data_length);
+    length -= residue_data_length;
+    ccm_ctx->final_data_length = residue_data_length;
+  }
+
+  if ((ccm_ctx->total_message_length == ccm_ctx->processed_message_length + length) && !ccm_ctx->final_data_length) {
+    // The finish operation must have some data or the SE fails.
+    memcpy(ccm_ctx->mode_specific_buffer.final_data, input + (length - 16), 16);
+    ccm_ctx->final_data_length = 16;
+    length -= 16;
+    if (!length) {
+      return SL_STATUS_OK;
+    }
   }
 
   SE_DataTransfer_t iv_ctx_in = SE_DATATRANSFER_DEFAULT(ccm_ctx->se_ctx, sizeof(ccm_ctx->se_ctx));
@@ -786,7 +1209,8 @@ sl_status_t sl_se_ccm_multipart_update(sl_se_ccm_multipart_context_t *ccm_ctx,
     return status;
   }
 
-  *output_length = length;
+  *output_length += length;
+  ccm_ctx->processed_message_length += length;
 
   return status;
 }
@@ -2226,6 +2650,15 @@ sl_status_t sl_se_gcm_multipart_update(sl_se_gcm_multipart_context_t *gcm_ctx,
   //  Case final_data_length + length < 16: Store input data in gcm_ctx and return SL_STATUS_OKAY
   //  Case final_data_length + length > 16: Add data to fill up the gcm_ctx->final_data-buffer, run update
   //  on the gcm_ctx->final_data-buffer and finally run update as explained above on the rest of the data.
+
+  // Our drivers only support full or no overlap between input and output
+  // buffers. So in the case of partial overlap, copy the input buffer into
+  // the output buffer and process it in place as if the buffers fully
+  // overlapped.
+  if ((output > input) && (output < (input + length))) {
+    memmove(output, input, length);
+    input = output;
+  }
 
   // Check for data in final_data_length.
   if (gcm_ctx->final_data_length && gcm_ctx->final_data_length != 16) {

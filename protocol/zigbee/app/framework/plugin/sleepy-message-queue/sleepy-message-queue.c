@@ -62,7 +62,30 @@ enum {
 
 //------------------------------------------------------------------------------
 
-void emberAfPluginSleepyMessageQueueInitCallback()
+#ifdef UC_BUILD
+void emberAfPluginSleepyMessageQueueInitCallback(uint8_t init_level)
+{
+  switch (init_level) {
+    case SL_ZIGBEE_INIT_LEVEL_EVENT:
+    {
+      slxu_zigbee_event_init(&emberAfPluginSleepyMessageQueueTimeoutEvent,
+                             emberAfPluginSleepyMessageQueueTimeoutEventHandler);
+      break;
+    }
+    case SL_ZIGBEE_INIT_LEVEL_LOCAL_DATA:
+    {
+      // Initialize sleepy buffer plugin.
+      uint8_t x;
+      for ( x = 0; x < SLEEPY_MSG_QUEUE_NUM_ENTRIES; x++ ) {
+        emSleepyMessageQueueInitEntry(x);
+      }
+      emberAfAppPrintln("Initialized Sleepy Message Queue");
+      break;
+    }
+  }
+}
+#else // !UC_BUILD
+void emberAfPluginSleepyMessageQueueInitCallback(void)
 {
   slxu_zigbee_event_init(msgTimeoutEvent,
                          emberAfPluginSleepyMessageQueueTimeoutEventHandler);
@@ -73,6 +96,7 @@ void emberAfPluginSleepyMessageQueueInitCallback()
   }
   emberAfAppPrintln("Initialized Sleepy Message Queue");
 }
+#endif  // UC_BUILD
 
 static void emSleepyMessageQueueInitEntry(uint8_t x)
 {

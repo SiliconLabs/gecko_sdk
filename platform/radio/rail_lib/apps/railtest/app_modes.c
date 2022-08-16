@@ -49,12 +49,12 @@ volatile bool transitionPend = false;
 RAIL_TxOptions_t antOptions = RAIL_TX_OPTIONS_DEFAULT;
 RAIL_StreamMode_t streamMode = RAIL_STREAM_PN9_STREAM;
 
-AppMode_t currentAppMode()
+AppMode_t currentAppMode(void)
 {
   return currAppMode;
 }
 
-AppMode_t previousAppMode()
+AppMode_t previousAppMode(void)
 {
   return prevAppMode;
 }
@@ -186,7 +186,7 @@ static void setAppModeInternal(void)
 }
 
 // This should be called from a main loop, to update the AppMode
-void changeAppModeIfPending()
+void changeAppModeIfPending(void)
 {
   if (transitionPend) {
     transitionPend = false;

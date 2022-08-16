@@ -223,6 +223,7 @@ RadioSpinel<InterfaceType, ProcessContextType>::RadioSpinel(void)
     , mRadioTimeOffset(0)
 {
     mVersion[0] = '\0';
+    memset(&mRadioSpinelMetrics, 0, sizeof(mRadioSpinelMetrics));
 }
 
 template <typename InterfaceType, typename ProcessContextType>
@@ -496,6 +497,8 @@ exit:
         mRxFrameBuffer.DiscardFrame();
         otLogWarnPlat("Error handling hdlc frame: %s", otThreadErrorToString(error));
     }
+
+    UpdateParseErrorCount(error);
 }
 
 template <typename InterfaceType, typename ProcessContextType>
@@ -549,6 +552,7 @@ exit:
         aFrameBuffer.DiscardFrame();
     }
 
+    UpdateParseErrorCount(error);
     LogIfFail("Error processing notification", error);
 }
 
@@ -570,6 +574,7 @@ void RadioSpinel<InterfaceType, ProcessContextType>::HandleNotification(const ui
     HandleValueIs(key, data, static_cast<uint16_t>(len));
 
 exit:
+    UpdateParseErrorCount(error);
     LogIfFail("Error processing saved notification", error);
 }
 
@@ -614,6 +619,7 @@ void RadioSpinel<InterfaceType, ProcessContextType>::HandleResponse(const uint8_
     }
 
 exit:
+    UpdateParseErrorCount(error);
     LogIfFail("Error processing response", error);
 }
 
@@ -769,7 +775,7 @@ otError RadioSpinel<InterfaceType, ProcessContextType>::ThreadDatasetHandler(con
      * Initially set Active Timestamp to 0. This is to allow the node to join the network
      * yet retrieve the full Active Dataset from a neighboring device if one exists.
      */
-    opDataset.mActiveTimestamp                      = 0;
+    memset(&opDataset.mActiveTimestamp, 0, sizeof(opDataset.mActiveTimestamp));
     opDataset.mComponents.mIsActiveTimestampPresent = true;
 
     SuccessOrExit(error = dataset.SetFrom(static_cast<MeshCoP::Dataset::Info &>(opDataset)));
@@ -857,6 +863,7 @@ void RadioSpinel<InterfaceType, ProcessContextType>::HandleWaitingResponse(uint3
     }
 
 exit:
+    UpdateParseErrorCount(mError);
     LogIfFail("Error processing result", mError);
 }
 
@@ -964,6 +971,7 @@ void RadioSpinel<InterfaceType, ProcessContextType>::HandleValueIs(spinel_prop_k
     }
 
 exit:
+    UpdateParseErrorCount(error);
     LogIfFail("Failed to handle ValueIs", error);
 }
 
@@ -1035,6 +1043,7 @@ otError RadioSpinel<InterfaceType, ProcessContextType>::ParseRadioFrame(otRadioF
     }
 
 exit:
+    UpdateParseErrorCount(error);
     LogIfFail("Handle radio frame failed", error);
     return error;
 }
@@ -1699,18 +1708,11 @@ otError RadioSpinel<InterfaceType, ProcessContextType>::WaitResponse(void)
     do
     {
         uint64_t now;
-        uint64_t remain;
 
         now = otPlatTimeGet();
-        if (end <= now)
+        if ((end <= now) || (mSpinelInterface.WaitForFrame(end - now) != OT_ERROR_NONE))
         {
-            HandleRcpTimeout();
-            ExitNow(mError = OT_ERROR_NONE);
-        }
-        remain = end - now;
-
-        if (mSpinelInterface.WaitForFrame(remain) != OT_ERROR_NONE)
-        {
+            otLogWarnPlat("Wait for response timeout");
             HandleRcpTimeout();
             ExitNow(mError = OT_ERROR_NONE);
         }
@@ -1942,7 +1944,7 @@ void RadioSpinel<InterfaceType, ProcessContextType>::HandleTransmitDone(uint32_t
     }
     else
     {
-        ExitNow(error = SpinelStatusToOtError(status));
+        error = SpinelStatusToOtError(status);
     }
 
     static_cast<Mac::TxFrame *>(mTransmitFrame)->SetIsHeaderUpdated(headerUpdated);
@@ -1964,6 +1966,7 @@ void RadioSpinel<InterfaceType, ProcessContextType>::HandleTransmitDone(uint32_t
 exit:
     mState   = kStateTransmitDone;
     mTxError = error;
+    UpdateParseErrorCount(error);
     LogIfFail("Handle transmit done failed", error);
 }
 
@@ -2177,6 +2180,7 @@ uint32_t RadioSpinel<InterfaceType, ProcessContextType>::GetRadioChannelMask(boo
     channelMask &= mMaxPowerTable.GetSupportedChannelMask();
 
 exit:
+    UpdateParseErrorCount(error);
     LogIfFail("Get radio channel mask failed", error);
     return channelMask;
 }
@@ -2271,6 +2275,7 @@ void RadioSpinel<InterfaceType, ProcessContextType>::HandleRcpUnexpectedReset(sp
 {
     OT_UNUSED_VARIABLE(aStatus);
 
+    mRadioSpinelMetrics.mRcpUnexpectedResetCount++;
     otLogCritPlat("Unexpected RCP reset: %s", spinel_status_to_cstr(aStatus));
 
 #if OPENTHREAD_SPINEL_CONFIG_RCP_RESTORATION_MAX_COUNT > 0
@@ -2283,6 +2288,8 @@ void RadioSpinel<InterfaceType, ProcessContextType>::HandleRcpUnexpectedReset(sp
 template <typename InterfaceType, typename ProcessContextType>
 void RadioSpinel<InterfaceType, ProcessContextType>::HandleRcpTimeout(void)
 {
+    mRadioSpinelMetrics.mRcpTimeoutCount++;
+
 #if OPENTHREAD_SPINEL_CONFIG_RCP_RESTORATION_MAX_COUNT > 0
     mRcpFailure = kRcpFailureTimeout;
 #else
@@ -2311,6 +2318,7 @@ void RadioSpinel<InterfaceType, ProcessContextType>::RecoverFromRcpFailure(void)
 
     otLogWarnPlat("RCP failure detected");
 
+    ++mRadioSpinelMetrics.mRcpRestorationCount;
     ++mRcpFailureCount;
     if (mRcpFailureCount > kMaxFailureCount)
     {
@@ -2375,6 +2383,7 @@ void RadioSpinel<InterfaceType, ProcessContextType>::RecoverFromRcpFailure(void)
     }
 
     --mRcpFailureCount;
+    otLogNotePlat("RCP recovery is done");
 
 exit:
     return;

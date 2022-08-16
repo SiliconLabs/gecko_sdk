@@ -94,7 +94,7 @@
 
 typedef struct {
   uint16_t connection_interval;
-  sl_bt_gap_phy_and_coding_type_t phy;
+  sl_bt_gap_phy_coding_t phy;
   uint16_t mtu_size;
   sl_bt_gatt_client_config_flag_t test_type;
   throughput_mode_t mode;
@@ -163,14 +163,14 @@ void app_init(int argc, char *argv[])
 
       // PHY to use
       case 'p':
-        test_parameters.phy = (sl_bt_gap_phy_and_coding_type_t)strtoul(optarg,
-                                                                       NULL,
-                                                                       0);
+        test_parameters.phy = (sl_bt_gap_phy_coding_t)strtoul(optarg,
+                                                              NULL,
+                                                              0);
         // Validate input value
-        if (test_parameters.phy != sl_bt_gap_1m_phy_uncoded
-            && test_parameters.phy != sl_bt_gap_2m_phy_uncoded
-            && test_parameters.phy != sl_bt_gap_coded_phy_125k
-            && test_parameters.phy != sl_bt_gap_coded_phy_500k) {
+        if (test_parameters.phy != sl_bt_gap_phy_coding_1m_uncoded
+            && test_parameters.phy != sl_bt_gap_phy_coding_2m_uncoded
+            && test_parameters.phy != sl_bt_gap_phy_coding_125k_coded
+            && test_parameters.phy != sl_bt_gap_phy_coding_500k_coded) {
           app_log_critical("PHY must be one of these: 1 => 1M, 2 => 2M, "
                            "4 => 125k, 8 => 500k" APP_LOG_NL);
           exit(EXIT_FAILURE);
@@ -285,7 +285,7 @@ void app_init(int argc, char *argv[])
   app_log_info("Resetting NCP..." APP_LOG_NL);
   // Reset NCP to ensure it gets into a defined state.
   // Once the chip successfully boots, boot event should be received.
-  sl_bt_system_reset(0);
+  sl_bt_system_reset(sl_bt_system_boot_mode_normal);
 }
 
 /**************************************************************************//**

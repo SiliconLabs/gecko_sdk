@@ -60,8 +60,6 @@
 // Hardware clock ticks that equal one second
 #define HW_TICKS_PER_SECOND                         32768
 
-#define SCAN_PASSIVE                                0
-#define TRANSMISSION_ON                             1
 #define TRANSMISSION_OFF                            0
 
 #define UUID_LEN                                    16
@@ -90,8 +88,8 @@ static throughput_count_t bytes_received = 0;
 static throughput_count_t operation_count = 0;
 
 /// Power control status
-static connection_power_reporting_mode_t power_control_enabled
-  = connection_power_reporting_disable;
+static sl_bt_connection_power_reporting_mode_t power_control_enabled
+  = sl_bt_connection_power_reporting_disable;
 
 /// Deep sleep enabled
 static bool deep_sleep_enabled = THROUGHPUT_CENTRAL_SLEEP_ENABLE;
@@ -143,7 +141,11 @@ const uint8_t result_characteristic_uuid[] = { 0x1b, 0x29, 0xcc, 0xa6, 0x03, 0xb
                                                0x0c, 0x40, 0x0f, 0xb0, 0x27, 0x22, 0xf3, 0xad };
 
 // Function declarations
-static bool process_scan_response(sl_bt_evt_scanner_scan_report_t *response);
+static void handle_scan_event(bd_addr *address,
+                              uint8_t address_type,
+                              uint8_t * data,
+                              uint16_t len);
+static bool process_scan_response(uint8_t *data, uint16_t data_len);
 static void process_procedure_complete_event(sl_bt_msg_t *evt);
 static void check_characteristic_uuid(sl_bt_msg_t *evt);
 static void reset_variables(void);
@@ -186,45 +188,30 @@ void bt_on_event_central(sl_bt_msg_t *evt)
   }
 
   switch (SL_BT_MSG_ID(evt->header)) {
-    case sl_bt_evt_scanner_scan_report_id:
-      if ((central_state.discovery_state == THROUGHPUT_DISCOVERY_STATE_SCAN)
-          & process_scan_response(&(evt->data.evt_scanner_scan_report))) {
-        // Apply allowlist filtering
-        if (false == throughput_central_allowlist_apply(evt->data.evt_scanner_scan_report.address.addr)) {
-          break;
-        }
-
-        // Stop scanning
-        sc = sl_bt_scanner_stop();
-        app_assert_status(sc);
-
-        // Open the connection
-        central_state.discovery_state = THROUGHPUT_DISCOVERY_STATE_CONN;
-        throughput_central_on_discovery_state_change(central_state.discovery_state);
-
-        sc = sl_bt_connection_open(evt->data.evt_scanner_scan_report.address,
-                                   evt->data.evt_scanner_scan_report.address_type,
-                                   central_state.phy,
-                                   &connection_handle);
-
-        // Handle if the default PHY is not supported
-        if (sc == SL_STATUS_INVALID_PARAMETER) {
-          app_log_status_warning_f(sc, "Connection PHY is not supported and set to 1M PHY" APP_LOG_NEW_LINE);
-
-          central_state.phy = sl_bt_gap_1m_phy_uncoded;
-          sc = sl_bt_connection_open(evt->data.evt_scanner_scan_report.address,
-                                     evt->data.evt_scanner_scan_report.address_type,
-                                     central_state.phy,
-                                     &connection_handle);
-        }
-        // Assertion to first or second attempt to connect
-        app_assert_status(sc);
-      } else {
-        waiting_indication();
+    case sl_bt_evt_scanner_legacy_advertisement_report_id:
+      // If the device is connectable and scannable
+      if (evt->data.evt_scanner_legacy_advertisement_report.event_flags
+          & (SL_BT_SCANNER_EVENT_FLAG_CONNECTABLE | SL_BT_SCANNER_EVENT_FLAG_SCANNABLE)) {
+        handle_scan_event(&evt->data.evt_scanner_legacy_advertisement_report.address,
+                          evt->data.evt_scanner_legacy_advertisement_report.address_type,
+                          evt->data.evt_scanner_legacy_advertisement_report.data.data,
+                          evt->data.evt_scanner_legacy_advertisement_report.data.len);
       }
       break;
-
+    case sl_bt_evt_scanner_extended_advertisement_report_id:
+      // If the device is connectable, scannable and the data is complete
+      if ((evt->data.evt_scanner_extended_advertisement_report.event_flags
+           & (SL_BT_SCANNER_EVENT_FLAG_CONNECTABLE | SL_BT_SCANNER_EVENT_FLAG_SCANNABLE))
+          && (evt->data.evt_scanner_extended_advertisement_report.data_completeness
+              == sl_bt_scanner_data_status_complete)) {
+        handle_scan_event(&evt->data.evt_scanner_extended_advertisement_report.address,
+                          evt->data.evt_scanner_extended_advertisement_report.address_type,
+                          evt->data.evt_scanner_extended_advertisement_report.data.data,
+                          evt->data.evt_scanner_extended_advertisement_report.data.len);
+      }
+      break;
     case sl_bt_evt_connection_opened_id:
+      connection_handle = evt->data.evt_connection_opened.connection;
       // Set remote connection power reporting - needed for Power Control
       sc = sl_bt_connection_set_remote_power_reporting(connection_handle,
                                                        power_control_enabled);
@@ -281,7 +268,7 @@ void bt_on_event_central(sl_bt_msg_t *evt)
           finish_test = true;
         }
       } else if (evt->data.evt_gatt_characteristic_value.characteristic == result_handle) {
-        if (evt->data.evt_gatt_characteristic_value.att_opcode == gatt_handle_value_indication) {
+        if (evt->data.evt_gatt_characteristic_value.att_opcode == sl_bt_gatt_handle_value_indication) {
           sl_bt_gatt_send_characteristic_confirmation(evt->data.evt_gatt_characteristic_value.connection);
           // Responder sends indication about result after each test. Data is uint8array LSB first.
           memcpy(&results.throughput_peripheral_side, evt->data.evt_gatt_characteristic_value.value.data, 4);
@@ -294,7 +281,7 @@ void bt_on_event_central(sl_bt_msg_t *evt)
           || evt->data.evt_gatt_characteristic_value.characteristic == notifications_handle) {
         // Send confirmation if needed
         if (evt->data.evt_gatt_characteristic_value.characteristic == indications_handle) {
-          if (evt->data.evt_gatt_characteristic_value.att_opcode == gatt_handle_value_indication) {
+          if (evt->data.evt_gatt_characteristic_value.att_opcode == sl_bt_gatt_handle_value_indication) {
             sl_bt_gatt_send_characteristic_confirmation(evt->data.evt_gatt_characteristic_value.connection);
           }
         }
@@ -395,22 +382,67 @@ static void check_received_data(uint8_t * data, uint8_t len)
   }
 }
 
+static void handle_scan_event(bd_addr *address,
+                              uint8_t address_type,
+                              uint8_t * data,
+                              uint16_t len)
+{
+  sl_status_t sc;
+
+  if ((central_state.discovery_state == THROUGHPUT_DISCOVERY_STATE_SCAN)
+      & process_scan_response(data, len)) {
+    // Apply allowlist filtering
+    if (false == throughput_central_allowlist_apply(address->addr)) {
+      return;
+    }
+
+    // Stop scanning
+    app_log_info("Scanning stop." APP_LOG_NL);
+    sc = sl_bt_scanner_stop();
+    app_assert_status(sc);
+
+    // Open the connection
+    central_state.discovery_state = THROUGHPUT_DISCOVERY_STATE_CONN;
+    throughput_central_on_discovery_state_change(central_state.discovery_state);
+
+    sc = sl_bt_connection_open(*address,
+                               address_type,
+                               central_state.phy,
+                               &connection_handle);
+
+    // Handle if the default PHY is not supported
+    if (sc == SL_STATUS_INVALID_PARAMETER) {
+      app_log_status_warning_f(sc, "Connection PHY is not supported and set to 1M PHY" APP_LOG_NEW_LINE);
+
+      central_state.phy = sl_bt_gap_phy_coding_1m_uncoded;
+      sc = sl_bt_connection_open(*address,
+                                 address_type,
+                                 central_state.phy,
+                                 &connection_handle);
+    }
+    // Assertion to first or second attempt to connect
+    app_assert_status(sc);
+  } else {
+    waiting_indication();
+  }
+}
+
 // Cycle through advertisement contents and look for matching device name.
-static bool process_scan_response(sl_bt_evt_scanner_scan_report_t *response)
+static bool process_scan_response(uint8_t *data, uint16_t data_len)
 {
   int i = 0;
   bool device_name_match = false;
   uint8_t advertisement_length;
   uint8_t advertisement_type;
 
-  while (i < (response->data.len - 1)) {
-    advertisement_length = response->data.data[i];
-    advertisement_type = response->data.data[i + 1];
+  while (i < (data_len - 1)) {
+    advertisement_length = data[i];
+    advertisement_type = data[i + 1];
 
     /* Type 0x09 = Complete Local Name, 0x08 Shortened Name */
     if (advertisement_type == 0x09) {
       /* Check if device name is Throughput Tester */
-      if (memcmp(response->data.data + i + 2, device_name, strlen(device_name)) == 0) {
+      if (memcmp(data + i + 2, device_name, strlen(device_name)) == 0) {
         device_name_match = true;
         break;
       }
@@ -678,6 +710,7 @@ void throughput_central_scanning_stop(void)
 {
   sl_status_t sc;
   if (central_state.discovery_state == THROUGHPUT_DISCOVERY_STATE_SCAN) {
+    app_log_info("Scanning stop." APP_LOG_NL);
     sc = sl_bt_scanner_stop();
     app_assert_status(sc);
     central_state.discovery_state = THROUGHPUT_DISCOVERY_STATE_IDLE;
@@ -688,16 +721,10 @@ void throughput_central_scanning_stop(void)
 // Apply phy for scanning
 sl_status_t throughput_central_scanning_apply_phy(throughput_phy_t phy)
 {
-  sl_status_t sc;
-
   throughput_central_scanning_stop();
-  // Set passive scanning on selected PHY
-  sc = sl_bt_scanner_set_mode(phy, SCAN_PASSIVE);
-  if (sc == SL_STATUS_OK) {
-    central_state.scan_phy = phy;
-  }
+  central_state.scan_phy = phy;
   throughput_central_scanning_start();
-  return sc;
+  return SL_STATUS_OK;
 }
 
 // Start scanning
@@ -735,14 +762,6 @@ void throughput_central_scanning_start(void)
   sc = sl_bt_gatt_server_set_max_mtu(central_state.mtu_size, &(central_state.mtu_size));
   app_assert_status(sc);
 
-  // Set passive scanning on selected PHY
-  // Check if scanning phy is supported by setting mode
-  sc = sl_bt_scanner_set_mode(central_state.scan_phy, SCAN_PASSIVE);
-  if (sc != SL_STATUS_OK) {
-    central_state.scan_phy = sl_bt_gap_1m_phy_uncoded;
-    app_log_warning("Scanning PHY is not supported and set to 1M PHY" APP_LOG_NEW_LINE);
-  }
-
   // Set the default connection parameters for subsequent connections
   sc = sl_bt_connection_set_default_parameters(central_state.connection_interval_min,
                                                central_state.connection_interval_max,
@@ -753,7 +772,13 @@ void throughput_central_scanning_start(void)
   app_assert_status(sc);
 
   // Start scanning - looking for peripheral devices
-  sc = sl_bt_scanner_start(central_state.scan_phy, scanner_discover_generic);
+  sc = sl_bt_scanner_start(central_state.scan_phy, sl_bt_scanner_discover_generic);
+  if (sc != SL_STATUS_OK) {
+    central_state.scan_phy = sl_bt_gap_phy_coding_1m_uncoded;
+    app_log_warning("Requested scanning PHY is not supported and set to 1M PHY" APP_LOG_NEW_LINE);
+    // Start scanning with the modified PHY
+    sc = sl_bt_scanner_start(central_state.scan_phy, sl_bt_scanner_discover_generic);
+  }
   app_assert_status(sc);
 }
 
@@ -992,7 +1017,7 @@ sl_status_t throughput_central_set_tx_power(throughput_tx_power_t tx_power,
   sl_status_t res = SL_STATUS_OK;
   if (enabled && central_state.state != THROUGHPUT_STATE_TEST) {
     central_state.tx_power_requested = tx_power;
-    power_control_enabled = (connection_power_reporting_mode_t)power_control;
+    power_control_enabled = (sl_bt_connection_power_reporting_mode_t)power_control;
     deep_sleep_enabled = deep_sleep;
     throughput_central_scanning_restart();
   } else {
@@ -1102,8 +1127,8 @@ sl_status_t throughput_central_set_connection_phy(throughput_phy_t phy)
   if (enabled
       && (central_state.state == THROUGHPUT_STATE_CONNECTED
           || central_state.state == THROUGHPUT_STATE_SUBSCRIBED) ) {
-    if (phy == sl_bt_gap_coded_phy_500k) {
-      accepted_phy = sl_bt_gap_coded_phy;
+    if (phy == sl_bt_gap_phy_coding_500k_coded) {
+      accepted_phy = sl_bt_gap_phy_coded;
     }
     res = sl_bt_connection_set_preferred_phy(connection_handle,
                                              phy,
@@ -1125,41 +1150,41 @@ sl_status_t throughput_central_change_phy(void)
       // If connected
       current_phy = central_state.phy;
       switch (current_phy) {
-        case sl_bt_gap_1m_phy_uncoded:
-          res = throughput_central_set_connection_phy(sl_bt_gap_2m_phy_uncoded);
+        case sl_bt_gap_phy_coding_1m_uncoded:
+          res = throughput_central_set_connection_phy(sl_bt_gap_phy_coding_2m_uncoded);
           // if cannot switch to 2M, switch to 1M
           if (res != SL_STATUS_OK) {
-            res = throughput_central_set_connection_phy(sl_bt_gap_1m_phy_uncoded);
+            res = throughput_central_set_connection_phy(sl_bt_gap_phy_coding_1m_uncoded);
           }
           break;
-        case sl_bt_gap_2m_phy_uncoded:
-          res = throughput_central_set_connection_phy(sl_bt_gap_coded_phy_125k);
+        case sl_bt_gap_phy_coding_2m_uncoded:
+          res = throughput_central_set_connection_phy(sl_bt_gap_phy_coding_125k_coded);
           // if cannot switch to coded, switch to 1M
           if (res != SL_STATUS_OK) {
-            res = throughput_central_set_connection_phy(sl_bt_gap_1m_phy_uncoded);
+            res = throughput_central_set_connection_phy(sl_bt_gap_phy_coding_1m_uncoded);
           }
           break;
-        case sl_bt_gap_coded_phy_125k:
-          res = throughput_central_set_connection_phy(sl_bt_gap_coded_phy_500k);
+        case sl_bt_gap_phy_coding_125k_coded:
+          res = throughput_central_set_connection_phy(sl_bt_gap_phy_coding_500k_coded);
           // if cannot switch to coded, switch to 1M
           if (res != SL_STATUS_OK) {
-            res = throughput_central_set_connection_phy(sl_bt_gap_1m_phy_uncoded);
+            res = throughput_central_set_connection_phy(sl_bt_gap_phy_coding_1m_uncoded);
           }
           break;
-        case sl_bt_gap_coded_phy_500k:
-          res = throughput_central_set_connection_phy(sl_bt_gap_1m_phy_uncoded);
+        case sl_bt_gap_phy_coding_500k_coded:
+          res = throughput_central_set_connection_phy(sl_bt_gap_phy_coding_1m_uncoded);
           break;
         default:
-          res = throughput_central_set_connection_phy(sl_bt_gap_1m_phy_uncoded);
+          res = throughput_central_set_connection_phy(sl_bt_gap_phy_coding_1m_uncoded);
           break;
       }
     } else if (central_state.state == THROUGHPUT_STATE_DISCONNECTED) {
       // if disconnected
       current_phy = central_state.scan_phy;
-      if (current_phy == sl_bt_gap_1m_phy_uncoded) {
-        res = throughput_central_set_scan_phy(sl_bt_gap_coded_phy_125k);
+      if (current_phy == sl_bt_gap_phy_coding_1m_uncoded) {
+        res = throughput_central_set_scan_phy(sl_bt_gap_phy_coding_125k_coded);
       } else {
-        res = throughput_central_set_scan_phy(sl_bt_gap_1m_phy_uncoded);
+        res = throughput_central_set_scan_phy(sl_bt_gap_phy_coding_1m_uncoded);
       }
     }
   }
@@ -1208,9 +1233,9 @@ void throughput_central_enable(void)
   central_state.packet_lost   = 0;
 
   if (THROUGHPUT_CENTRAL_POWER_CONTROL_ENABLE) {
-    power_control_enabled = connection_power_reporting_enable;
+    power_control_enabled = sl_bt_connection_power_reporting_enable;
   } else {
-    power_control_enabled = connection_power_reporting_disable;
+    power_control_enabled = sl_bt_connection_power_reporting_disable;
   }
   // if the power is greater than 10 dBm AFH must be used
   afh_bit = (central_state.tx_power_requested > 10);
@@ -1262,13 +1287,6 @@ void throughput_central_enable(void)
   #ifdef SL_CATALOG_THROUGHPUT_UI_PRESENT
   throughput_ui_set_all(central_state);
   #endif // SL_CATALOG_THROUGHPUT_UI_PRESENT
-
-  // Check if scanning phy is supported by setting mode
-  sc = sl_bt_scanner_set_mode(central_state.scan_phy, SCAN_PASSIVE);
-  if (sc != SL_STATUS_OK) {
-    central_state.scan_phy = sl_bt_gap_1m_phy_uncoded;
-    app_log_warning("Default scanning PHY is not supported and set to 1M PHY" APP_LOG_NEW_LINE);
-  }
 
   // Start scanning
   throughput_central_scanning_start();
@@ -1436,16 +1454,16 @@ SL_WEAK void throughput_central_on_phy_change(throughput_phy_t phy)
   throughput_ui_update();
   #else
   switch (phy) {
-    case sl_bt_gap_1m_phy_uncoded:
+    case sl_bt_gap_phy_coding_1m_uncoded:
       app_log_info(THROUGHPUT_UI_PHY_1M_TEXT);
       break;
-    case sl_bt_gap_2m_phy_uncoded:
+    case sl_bt_gap_phy_coding_2m_uncoded:
       app_log_info(THROUGHPUT_UI_PHY_2M_TEXT);
       break;
-    case sl_bt_gap_coded_phy_125k:
+    case sl_bt_gap_phy_coding_125k_coded:
       app_log_info(THROUGHPUT_UI_PHY_CODED_125K_TEXT);
       break;
-    case sl_bt_gap_coded_phy_500k:
+    case sl_bt_gap_phy_coding_500k_coded:
       app_log_info(THROUGHPUT_UI_PHY_CODED_500K_TEXT);
       break;
     default:
@@ -1846,22 +1864,11 @@ void cli_throughput_central_phy_scan_set(sl_cli_command_arg_t *arguments)
     return;
   }
   uint8_t phy_scan;
-  sl_status_t sc;
   if (central_state.state != THROUGHPUT_STATE_TEST) {
     phy_scan = sl_cli_get_argument_uint8(arguments, 0);
+    central_state.scan_phy = (throughput_phy_t)phy_scan;
     throughput_central_scanning_restart();
-
-    // Set passive scanning on selected PHY
-    sc = sl_bt_scanner_set_mode(phy_scan, SCAN_PASSIVE);
-    if (sc == SL_STATUS_OK) {
-      central_state.scan_phy = (throughput_phy_t)phy_scan;
-    }
-
-    if (sc == SL_STATUS_OK) {
-      CLI_RESPONSE(CLI_OK);
-    } else {
-      CLI_RESPONSE(CLI_ERROR);
-    }
+    CLI_RESPONSE(CLI_OK);
   } else {
     CLI_RESPONSE(CLI_ERROR);
   }

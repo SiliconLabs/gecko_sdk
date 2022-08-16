@@ -1,5 +1,5 @@
 id: bootloader_spi_peripheral_driver_nonsecure
-label: Bootloader SPI Peripheral Driver
+label: Bootloader SPI Peripheral Driver (Non-Secure)
 package: bootloader
 description: >
   DMA-driven SPI Peripheral driver.

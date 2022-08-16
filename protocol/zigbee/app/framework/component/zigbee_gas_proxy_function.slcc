@@ -50,34 +50,52 @@ template_contribution:
       function_name: emAfPluginGasProxyFunctionPreCommandReceivedCallback
   - name: cluster_service
     value:
-       cluster_id: "0x0708"
-       mfg_id: "NOT_MFG_SPECIFIC"
-       side: "CLIENT"
-       service_function: "emAfGasProxyFunctionDeviceManagementClusterClientCommandParse"
+      cluster_id: "0x0708"
+      mfg_id: "NOT_MFG_SPECIFIC"
+      side: "CLIENT"
+      service_function: "emAfGasProxyFunctionDeviceManagementClusterClientCommandParse"
   - name: cluster_service
     value:
-       cluster_id: "0x0707"
-       mfg_id: "NOT_MFG_SPECIFIC"
-       side: "CLIENT"       
-       service_function: "emAfGasProxyFunctionCalendarClusterClientCommandParse"
+      cluster_id: "0x0707"
+      mfg_id: "NOT_MFG_SPECIFIC"
+      side: "CLIENT"
+      service_function: "emAfGasProxyFunctionCalendarClusterClientCommandParse"
   - name: cluster_service
     value:
-       cluster_id: "0x0700"
-       mfg_id: "NOT_MFG_SPECIFIC"
-       side: "CLIENT"       
-       service_function: "emAfGasProxyFunctionPriceClusterClientCommandParse"       
+      cluster_id: "0x0700"
+      mfg_id: "NOT_MFG_SPECIFIC"
+      side: "CLIENT"
+      service_function: "emAfGasProxyFunctionPriceClusterClientCommandParse"
   - name: cluster_service
     value:
-       cluster_id: "0x0703"
-       mfg_id: "NOT_MFG_SPECIFIC"
-       side: "CLIENT"       
-       service_function: "emAfGasProxyFunctionMessagingClusterClientCommandParse"       
+      cluster_id: "0x0703"
+      mfg_id: "NOT_MFG_SPECIFIC"
+      side: "CLIENT"
+      service_function: "emAfGasProxyFunctionMessagingClusterClientCommandParse"
   - name: cluster_service
     value:
-       cluster_id: "0x0702"
-       mfg_id: "NOT_MFG_SPECIFIC"
-       side: "CLIENT"       
-       service_function: "emAfGasProxyFunctionSimpleMeteringClusterClientCommandParse"
+      cluster_id: "0x0702"
+      mfg_id: "NOT_MFG_SPECIFIC"
+      side: "CLIENT"
+      service_function: "emAfGasProxyFunctionSimpleMeteringClusterClientCommandParse"
+  - name: cluster_service
+    value:
+      cluster_id: "0x0702"
+      mfg_id: "NOT_MFG_SPECIFIC"
+      side: "SERVER"
+      service_function: "emAfGasProxyFunctionSimpleMeteringClusterServerCommandParse"
+  - name: cluster_service
+    value:
+      cluster_id: "0x0705"
+      mfg_id: "NOT_MFG_SPECIFIC"
+      side: "CLIENT"
+      service_function: "emAfGasProxyFunctionPrepaymentClusterClientCommandParse"
+  - name: cluster_service
+    value:
+      cluster_id: "0x0705"
+      mfg_id: "NOT_MFG_SPECIFIC"
+      side: "SERVER"
+      service_function: "emAfGasProxyFunctionPrepaymentClusterServerCommandParse"
   - name: cli_group
     value:
       group: plugin

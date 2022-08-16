@@ -10,5 +10,3 @@ source:
   - path: protocol/z-wave/ZAF/CommandClasses/DeviceResetLocally/CC_DeviceResetLocally.c
 provides:
   - name: zw_cc_deviceresetlocally
-documentation:
-  url: "https://sdomembers.z-wavealliance.org/document/dl/643"

@@ -1,5 +1,5 @@
 id: bootloader_delay_driver_nonsecure
-label: Bootloader Delay Driver
+label: Bootloader Delay Driver (Non-Secure)
 package: bootloader
 description: >
   Micro and millisecond delays

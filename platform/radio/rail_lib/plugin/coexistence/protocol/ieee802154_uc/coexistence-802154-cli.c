@@ -32,10 +32,106 @@
 #include "response_print.h"
 #include "coexistence-802154.h"
 
+#if RAILTEST
+#define EMBER_COUNTER_STRINGS \
+  "PTA Lo Pri Req",           \
+  "PTA Hi Pri Req",           \
+  "PTA Lo Pri Denied",        \
+  "PTA Hi Pri Denied",        \
+  "PTA Lo Pri Tx Abrt",       \
+  "PTA Hi Pri Tx Abrt",       \
+  NULL
+
+const char * titleStrings[] = {
+  EMBER_COUNTER_STRINGS
+};
+
+uint16_t emberCounters[SL_RAIL_UTIL_COEX_EVENT_COUNT];
+
+void emberClearCounters(void)
+{
+  memset(&emberCounters, 0, sizeof(emberCounters));
+}
+
+void sl_rail_util_coex_counter_on_event(sl_rail_util_coex_event_t event)
+{
+  emberCounters[event] += 1;
+}
+#else
+extern const char * titleStrings[];
+extern uint16_t emberCounters[];
+extern void emberClearCounters(void);
+#endif
+
+static void printCounter(uint8_t id)
+{
+  responsePrintContinue("%s: %u", titleStrings[id], emberCounters[id]);
+}
+
+static void printLastCounter(uint8_t id)
+{
+  responsePrintEnd("%s: %u", titleStrings[id], emberCounters[id]);
+}
+
+void cli_coex_154_print_counters(sl_cli_command_arg_t *args)
+{
+  responsePrintStart(sl_cli_get_command_string(args, 0));
+  printCounter(SL_RAIL_UTIL_COEX_EVENT_LO_PRI_REQUESTED);
+  printCounter(SL_RAIL_UTIL_COEX_EVENT_HI_PRI_REQUESTED);
+  printCounter(SL_RAIL_UTIL_COEX_EVENT_LO_PRI_DENIED);
+  printCounter(SL_RAIL_UTIL_COEX_EVENT_HI_PRI_DENIED);
+  printCounter(SL_RAIL_UTIL_COEX_EVENT_LO_PRI_TX_ABORTED);
+  printLastCounter(SL_RAIL_UTIL_COEX_EVENT_HI_PRI_TX_ABORTED);
+}
+
+void cli_coex_154_clear_counters(sl_cli_command_arg_t *args)
+{
+  (void)args;
+  emberClearCounters();
+  responsePrint(sl_cli_get_command_string(args, 0), "Status:0x%x", 0);
+}
+
 void cli_coex_154_get_options(sl_cli_command_arg_t *args)
 {
   sl_rail_util_coex_options_t options = sl_rail_util_coex_get_options();
-  responsePrint(sl_cli_get_command_string(args, 0), "Options:0x%x", options);
+  responsePrintStart(sl_cli_get_command_string(args, 0));
+  responsePrintContinue("Options:0x%x,"
+                        "rxRetryTimoutMs:%u,"
+                        "ackHoldoff:%s,"
+                        "abortTx:%s,"
+                        "txHipri:%s,"
+                        "rxHipri:%s,"
+                        "rxRetryHipri:%s,"
+                        "rxRetryReq:%s,"
+                        "radioHoldOff:%s,"
+                        "toggleReqOnMacRetransmit:%s,"
+                        "forceHoldoff:%s,"
+                        "MACHoldoff:%s,"
+                        "reqFilterPass:%s,"
+                        "hipriFilterPass:%s,"
+                        "ccaThreshold:%u",
+                        options,
+                        (uint8_t)(options & SL_RAIL_UTIL_COEX_OPT_RX_RETRY_TIMEOUT_MS),
+                        ((options & SL_RAIL_UTIL_COEX_OPT_ACK_HOLDOFF) ? "True" : "False"),
+                        ((options & SL_RAIL_UTIL_COEX_OPT_ABORT_TX) ? "True" : "False"),
+                        ((options & SL_RAIL_UTIL_COEX_OPT_TX_HIPRI) ? "True" : "False"),
+                        ((options & SL_RAIL_UTIL_COEX_OPT_RX_HIPRI) ? "True" : "False"),
+                        ((options & SL_RAIL_UTIL_COEX_OPT_RX_RETRY_HIPRI) ? "True" : "False"),
+                        ((options & SL_RAIL_UTIL_COEX_OPT_RX_RETRY_REQ) ? "True" : "False"),
+                        ((options & SL_RAIL_UTIL_COEX_OPT_RHO_ENABLED) ? "True" : "False"),
+                        ((options & SL_RAIL_UTIL_COEX_OPT_TOGGLE_REQ_ON_MACRETRANSMIT) ? "True" : "False"),
+                        ((options & SL_RAIL_UTIL_COEX_OPT_FORCE_HOLDOFF) ? "True" : "False"),
+                        ((options & SL_RAIL_UTIL_COEX_OPT_MAC_HOLDOFF) ? "True" : "False"),
+                        ((options & SL_RAIL_UTIL_COEX_OPT_REQ_FILTER_PASS) ? "True" : "False"),
+                        ((options & SL_RAIL_UTIL_COEX_OPT_HIPRI_FILTER_PASS) ? "True" : "False"),
+                        (uint8_t)(options & SL_RAIL_UTIL_COEX_OPT_CCA_THRESHOLD));
+
+  responsePrintEnd("MACRetryThreshold:%u,"
+                   "MACFailThreshold:%u,"
+                   "longReq:%s",
+                   (uint8_t)(options & SL_RAIL_UTIL_COEX_OPT_MAC_RETRY_THRESHOLD),
+                   (uint8_t)(options & SL_RAIL_UTIL_COEX_OPT_MAC_FAIL_THRESHOLD),
+                   ((options & SL_RAIL_UTIL_COEX_OPT_LONG_REQ) ? "True" : "False"));
 }
 
 void cli_coex_154_set_options(sl_cli_command_arg_t *args)

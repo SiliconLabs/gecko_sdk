@@ -96,7 +96,8 @@ bool emberAfMfglibEnabled(void)
 #ifndef EMBER_TEST
   halCommonGetToken(&enabled, TOKEN_MFG_LIB_ENABLED);
 #else
-  return false;
+  // no op
+  enabled = true;
 #endif
 
   (void) emberSerialPrintf(APP_SERIAL,

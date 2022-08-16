@@ -116,7 +116,7 @@ void KeyFob_hw_init(EResetReason_t reset_reason)
 
 
   DPRINT("-----------------------------\n");
-//  DPRINT("Press RESET BTN to activate ADD/REMOVE End device BTN for 4sec\n"); //If deep sleep is enabled.
+
   DPRINTF("%s: Press for ADD, HOLD for REMOVE End device\n",
                                                        Board_GetButtonLabel(BUTTON_NETWORK_ADD_REMOVE));
   DPRINTF("%s: Hold 5+ sec and release for Reset to Default\n",

@@ -92,11 +92,6 @@
 //@ [AGI_TABLE_ID]
 
 /**
- * Max notifications types
- */
-#define MAX_NOTIFICATIONS           2
-
-/**
  * Heat event notification handler period in ms
  */
 #define HEAT_EVENT_CHECK_PERIOD_MS           5000

@@ -121,3 +121,13 @@ template_contribution:
           help: "GPIO index"
         - type: uint8
           help: "0=Disable 1=Enable"
+  - name: cli_command
+    value:
+      name: coex_154_print_counters
+      handler: cli_coex_154_print_counters
+      help: " Print coexistence specific counters"
+  - name: cli_command
+    value:
+      name: coex_154_clear_counters
+      handler: cli_coex_154_clear_counters
+      help: " Reset coexistence specific counters"

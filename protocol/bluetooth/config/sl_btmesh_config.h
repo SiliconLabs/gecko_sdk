@@ -76,7 +76,7 @@
 
 // <o SL_BTMESH_CONFIG_MAX_PROVISIONED_DEVICES> Maximum number of provisioned devices allowed
 // <i> Default: 0
-// <i> Define the number of provisioned devices the application needs. Only applicable for provisioner
+// <i> Define the number of provisioned devices the application needs. Only applicable for provisioner. Please note that provisiner reserves one entry for its own data
 #define SL_BTMESH_CONFIG_MAX_PROVISIONED_DEVICES       (0)
 
 // <o SL_BTMESH_CONFIG_MAX_PROVISIONED_DEVICE_APPKEYS> Maximum number of Application Keys allowed for each Provisioned Device

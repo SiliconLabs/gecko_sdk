@@ -32,6 +32,7 @@
 #include <stdbool.h>
 #include <stdlib.h>
 #include <string.h>
+#include <libgen.h>
 #include <limits.h>
 #include <math.h>
 #include "app.h"
@@ -74,21 +75,26 @@
 // -----------------------------------------------------------------------------
 // Private variables
 static mqtt_handle_t mqtt_handle = MQTT_DEFAULT_HANDLE;
+static aoa_id_t mqtt_client_id;
 static aoa_id_t positioning_id = "";
 static aoa_report_mode_t *loc_report_mode = NULL;
+static angle_queue_config_t angle_queue_config = ANGLE_QUEUE_DEFAULT_CONFIG;
 
 // -----------------------------------------------------------------------------
 // Private function declarations
+static char *get_app_name(char *arg_0);
 static void parse_config_file(const char *filename);
 static void parse_config(const char *payload);
+static void parse_locator_config(void);
 static void on_message(mqtt_handle_t *handle,
                        const char *topic,
                        const char *payload);
-static void subscribe_topic(char *topic_template,
-                            size_t topic_size,
-                            aoa_locator_t *loc);
-static void subscribe_config(void);
-static sl_status_t check_config_topic(const char* topic);
+static void on_locator_report(aoa_id_t loc_id,
+                              aoa_id_t tag_id,
+                              aoa_report_mode_t report_mode,
+                              const char *payload);
+static void locator_subscription(aoa_id_t loc_id, bool subscribe);
+static void on_new_positioning_id(char *new_id);
 static void angle_queue_on_angles_ready(aoa_id_t tag_id,
                                         uint32_t angle_count,
                                         aoa_angle_t *angle_list,
@@ -103,6 +109,7 @@ void app_init(int argc, char *argv[])
   int opt;
   char *port_str = NULL;
   char *config_file = NULL;
+  char *app_name = get_app_name(argv[0]);
 
   // Process command line options.
   while ((opt = getopt(argc, argv, OPTSTRING)) != -1) {
@@ -128,7 +135,7 @@ void app_init(int argc, char *argv[])
 
       // Print help.
       case 'h':
-        app_log(USAGE, argv[0]);
+        app_log(USAGE, app_name);
         app_log(OPTIONS);
         exit(EXIT_SUCCESS);
 
@@ -136,18 +143,28 @@ void app_init(int argc, char *argv[])
       default:
         sc = app_log_set_option((char)opt, optarg);
         if (sc != SL_STATUS_OK) {
-          app_log(USAGE, argv[0]);
+          app_log(USAGE, app_name);
           exit(EXIT_FAILURE);
         }
     }
   }
 
-  // Configuration file is mandatory.
-  if (config_file == NULL) {
-    app_log(USAGE, argv[0]);
-    exit(EXIT_FAILURE);
+  // MQTT client init.
+  snprintf(mqtt_client_id, sizeof(mqtt_client_id), "%s_%i", app_name, getpid());
+  mqtt_handle.client_id = mqtt_client_id;
+  mqtt_handle.on_message = on_message;
+
+  sc = mqtt_init(&mqtt_handle);
+  app_assert_status(sc);
+
+  sc = mqtt_subscribe(&mqtt_handle, AOA_TOPIC_CONFIG_BROADCAST);
+  app_assert_status(sc);
+
+  angle_queue_config.on_angles_ready = &angle_queue_on_angles_ready;
+
+  if (config_file != NULL) {
+    parse_config_file(config_file);
   }
-  parse_config_file(config_file);
 
   app_log("Press Crtl+C to quit" APP_LOG_NL APP_LOG_NL);
 }
@@ -171,12 +188,28 @@ void app_deinit(void)
   sc = mqtt_deinit(&mqtt_handle);
   app_assert_status(sc);
 
-  aoa_loc_destroy();
+  aoa_loc_destroy_tags();
+  aoa_loc_destroy_locators();
+  (void)aoa_loc_deinit();
   angle_queue_deinit();
 }
 
 /**************************************************************************//**
- * Configuration file parser
+ * Application name helper.
+ *****************************************************************************/
+static char *get_app_name(char *arg_0)
+{
+  char *app_name = basename(arg_0);
+  // Remove the trailing .exe on Windows.
+  char *extension = strstr(app_name, ".exe");
+  if (extension != NULL) {
+    *extension = '\0';
+  }
+  return app_name;
+}
+
+/**************************************************************************//**
+ * Configuration file parser.
  *****************************************************************************/
 static void parse_config_file(const char *filename)
 {
@@ -194,46 +227,26 @@ static void parse_config(const char *payload)
 {
   sl_status_t sc;
   aoa_locator_t *loc;
-  aoa_id_t locator_id;
-  struct sl_rtl_loc_locator_item item;
-  aoa_angle_config_t *angle_config;
-  angle_queue_config_t angle_queue_config = ANGLE_QUEUE_DEFAULT_CONFIG;
-  float mask_min = 0;
-  float mask_max = 0;
-  uint8_t *antenna_switch_pattern = NULL;
-  uint8_t antenna_switch_pattern_size = 0;
-  enum sl_rtl_aox_array_type antenna_array_type;
   char *str_config;
 
   sc = aoa_parse_init(payload);
   app_assert_status(sc);
 
-  sc = aoa_parse_string_config(&str_config, "id", NULL);
-  if (sc == SL_STATUS_OK) {
-    aoa_id_copy(positioning_id, str_config);
-  }
-
-  if (positioning_id != mqtt_handle.client_id) {
-    mqtt_handle.on_message = on_message;
-    mqtt_handle.client_id = positioning_id;
-
-    sc = mqtt_init(&mqtt_handle);
-    app_assert_status(sc);
-    app_log_nl();
-  }
-  subscribe_config();
-
-  aoa_loc_destroy();
-  aoa_angle_reset_configs();
   angle_queue_deinit();
+  aoa_loc_destroy_tags();
 
+  (void)aoa_loc_deinit();
   sc = aoa_loc_init();
   app_assert_status(sc);
 
-  angle_queue_config.on_angles_ready = &angle_queue_on_angles_ready;
+  app_log_info("----------CONFIG START----------" APP_LOG_NL);
 
-  app_log_info("Parsing positioning configuration:"  APP_LOG_NL);
-  app_log_nl();
+  sc = aoa_parse_string_config(&str_config, "id", NULL);
+  if (sc == SL_STATUS_OK) {
+    app_log_info("Positioning ID set to: %s" APP_LOG_NL, str_config);
+    on_new_positioning_id(str_config);
+  }
+
   sc = aoa_parse_string_config(&str_config, "estimationModeLocation", NULL);
   if (sc == SL_STATUS_OK) {
     sc = aoa_parse_estimation_mode_from_string(str_config, &aoa_loc_config.estimation_mode);
@@ -296,15 +309,83 @@ static void parse_config(const char *payload)
 
   aoa_loc_config.max_sequence_diff = angle_queue_config.max_sequence_diff;
 
-  app_log_nl();
-  app_log_info("Parsing locator configurations:" APP_LOG_NL);
+  sc = aoa_parse_check_config_exist("locators", NULL);
+  if (sc == SL_STATUS_OK) {
+    // Configuration contains locators.
+    if (aoa_loc_config.locator_count > 0) {
+      // Clear current locators.
+      for (uint32_t i = 0; i < aoa_loc_config.locator_count; i++) {
+        aoa_loc_get_locator_by_index(i, &loc);
+        locator_subscription(loc->id, false);
+      }
+      aoa_loc_destroy_locators();
+      aoa_angle_reset_configs();
+    }
+    parse_locator_config();
+
+    aoa_loc_config.locator_count = aoa_loc_get_number_of_locators();
+    if (aoa_loc_config.locator_count > 0) {
+      angle_queue_config.locator_count = aoa_loc_config.locator_count;
+      // Parse report modes of the locators.
+      loc_report_mode = (aoa_report_mode_t *)realloc(loc_report_mode,
+                                                     aoa_loc_config.locator_count
+                                                     * sizeof(aoa_report_mode_t));
+      for (uint32_t i = 0; i < aoa_loc_config.locator_count; i++) {
+        aoa_loc_get_locator_by_index(i, &loc);
+        sc = aoa_parse_string_config(&str_config, "reportMode", loc->id);
+        if (sc == SL_STATUS_OK) {
+          sc = aoa_parse_report_mode_from_string(str_config, &loc_report_mode[i]);
+          if (sc == SL_STATUS_OK) {
+            app_log_info("Report mode set to: %s" APP_LOG_NL, str_config);
+          } else {
+            app_log_error("Failed to set report mode to %s" APP_LOG_NL, str_config);
+          }
+        }
+        locator_subscription(loc->id, true);
+      }
+      app_log_info("Locator count: %d" APP_LOG_NL, aoa_loc_config.locator_count);
+    }
+  }
+  app_log_info("-----------CONFIG END-----------" APP_LOG_NL);
+
+  // If no locator configured, just wait for MQTT config
+  if (aoa_loc_config.locator_count > 0) {
+    sc = aoa_loc_finalize_config();
+    app_assert_status(sc);
+
+    sc = angle_queue_init(&angle_queue_config);
+    app_assert_status(sc);
+  }
+
+  sc = aoa_parse_deinit();
+  app_assert_status(sc);
+}
+
+/**************************************************************************//**
+ * Parse locator specific configuration.
+ * @pre aoa_parse_init
+ * @post aoa_parse_deinit
+ *****************************************************************************/
+static void parse_locator_config(void)
+{
+  sl_status_t sc;
+  aoa_locator_t *loc;
+  aoa_id_t locator_id;
+  struct sl_rtl_loc_locator_item item;
+  aoa_angle_config_t *angle_config;
+  float mask_min = 0;
+  float mask_max = 0;
+  uint8_t *antenna_switch_pattern = NULL;
+  uint8_t antenna_switch_pattern_size = 0;
+  enum sl_rtl_aox_array_type antenna_array_type;
+  char *str_config;
+
   while (aoa_parse_locator(locator_id, &item) == SL_STATUS_OK) {
-    app_log_nl();
     sc = aoa_loc_add_locator(locator_id, item, &loc);
     app_assert_status_f(sc, "Failed to allocate memory for locator");
     sc = aoa_angle_add_config(locator_id, &angle_config);
     app_assert_status_f(sc, "Failed to allocate memory for locator");
-    app_log_info("Locator added:" APP_LOG_NL);
+    app_log_info("----LOCATOR----" APP_LOG_NL);
     app_log_info("id: %s," APP_LOG_NL, loc->id);
     app_log_info("coordinate: %f %f %f" APP_LOG_NL,
                  loc->item.coordinate_x,
@@ -316,7 +397,6 @@ static void parse_config(const char *payload)
                  loc->item.orientation_z_axis_degrees);
     loc->functional = true;
 
-    app_log_nl();
     sc = aoa_parse_string_config(&str_config, "aoxMode", locator_id);
     if (sc == SL_STATUS_OK) {
       sc = aoa_parse_aox_mode_from_string(str_config, &angle_config->aox_mode);
@@ -448,104 +528,68 @@ static void parse_config(const char *payload)
     sc = aoa_angle_finalize_config(locator_id);
     app_assert_status(sc);
   }
-  app_log_nl();
-  aoa_loc_config.locator_count = aoa_loc_get_number_of_locators();
-
-  // If no locator configured, just wait for MQTT config
-  if (0 != aoa_loc_config.locator_count) {
-    angle_queue_config.locator_count = aoa_loc_config.locator_count;
-    loc_report_mode = (aoa_report_mode_t *)realloc(loc_report_mode,
-                                                   aoa_loc_config.locator_count
-                                                   * sizeof(aoa_report_mode_t));
-    sc = aoa_loc_finalize_config();
-    app_assert_status(sc);
-
-    for (uint32_t i = 0; i < aoa_loc_config.locator_count; i++) {
-      aoa_loc_get_locator_by_index(i, &loc);
-      sc = aoa_parse_string_config(&str_config, "reportMode", loc->id);
-      if (sc == SL_STATUS_OK) {
-        sc = aoa_parse_report_mode_from_string(str_config, &loc_report_mode[i]);
-        if (sc == SL_STATUS_OK) {
-          app_log_info("Report mode set to: %s" APP_LOG_NL, str_config);
-        } else {
-          app_log_error("Failed to set report mode to %s" APP_LOG_NL, str_config);
-        }
-      }
-
-      subscribe_topic(AOA_TOPIC_ANGLE_PRINT,
-                      sizeof(AOA_TOPIC_ANGLE_PRINT),
-                      loc);
-
-      subscribe_topic(AOA_TOPIC_IQ_REPORT_PRINT,
-                      sizeof(AOA_TOPIC_IQ_REPORT_PRINT),
-                      loc);
-    }
-    sc = angle_queue_init(&angle_queue_config);
-    app_assert_status(sc);
-  }
-
-  app_log_nl();
-  app_log_info("Locator count: %d" APP_LOG_NL, aoa_loc_config.locator_count);
-
-  sc = aoa_parse_deinit();
-  app_assert_status(sc);
 }
 
 /**************************************************************************//**
- * Subscribe for a topic.
+ * Manage locator subscriptions.
  *****************************************************************************/
-static void subscribe_topic(char *topic_template,
-                            size_t topic_size,
-                            aoa_locator_t *loc)
+static void locator_subscription(aoa_id_t loc_id, bool subscribe)
 {
   sl_status_t sc;
-  size_t size = (topic_size + sizeof(aoa_id_t) + 1);
-  char *topic = malloc(size);
-  app_assert(NULL != topic, "Failed to allocate memory for MQTT topic.");
+  const char angle_topic_template[] = AOA_TOPIC_ANGLE_PRINT;
+  char angle_topic[sizeof(angle_topic_template) + sizeof(aoa_id_t) + 1];
+  snprintf(angle_topic, sizeof(angle_topic), angle_topic_template, loc_id, "+");
 
-  snprintf(topic, size, topic_template, loc->id, "+");
-
-  app_log_info("Subscribing to topic '%s'." APP_LOG_NL, topic);
-
-  sc = mqtt_subscribe(&mqtt_handle, topic);
+  if (subscribe) {
+    sc = mqtt_subscribe(&mqtt_handle, angle_topic);
+  } else {
+    sc = mqtt_unsubscribe(&mqtt_handle, angle_topic);
+  }
   app_assert_status(sc);
-  free(topic);
+
+  const char iq_report_topic_template[] = AOA_TOPIC_IQ_REPORT_PRINT;
+  char iq_report_topic[sizeof(iq_report_topic_template) + sizeof(aoa_id_t) + 1];
+  snprintf(iq_report_topic, sizeof(iq_report_topic), iq_report_topic_template, loc_id, "+");
+
+  if (subscribe) {
+    sc = mqtt_subscribe(&mqtt_handle, iq_report_topic);
+  } else {
+    sc = mqtt_unsubscribe(&mqtt_handle, iq_report_topic);
+  }
+  app_assert_status(sc);
 }
 
 /**************************************************************************//**
- * Subscribe for config topic.
+ * Handle new positioning ID.
  *****************************************************************************/
-static void subscribe_config(void)
+static void on_new_positioning_id(char *new_id)
 {
   const char topic_template[] = AOA_TOPIC_CONFIG_PRINT;
   char topic[sizeof(topic_template) + sizeof(aoa_id_t) + 1];
   sl_status_t sc;
 
+  if (strlen(new_id) == 0) {
+    // Positioning ID is invalid, nothing to do.
+    return;
+  }
+
+  if (aoa_id_compare(positioning_id, new_id) == 0) {
+    // Positioning ID is unchanged, nothing to do.
+    return;
+  }
+
+  if (strlen(positioning_id) > 0) {
+    snprintf(topic, sizeof(topic), topic_template, positioning_id);
+    sc = mqtt_unsubscribe(&mqtt_handle, topic);
+    app_assert_status(sc);
+  }
+
+  // Store new ID.
+  aoa_id_copy(positioning_id, new_id);
+
   snprintf(topic, sizeof(topic), topic_template, positioning_id);
-
-  app_log_info("Subscribing to topic '%s'." APP_LOG_NL, topic);
-
   sc = mqtt_subscribe(&mqtt_handle, topic);
   app_assert_status(sc);
-}
-
-/**************************************************************************//**
- * Check the received topic
- *****************************************************************************/
-static sl_status_t check_config_topic(const char* topic)
-{
-  char topic_buffer[sizeof(AOA_TOPIC_CONFIG_PRINT) + sizeof(aoa_id_t)];
-
-  snprintf(topic_buffer,
-           sizeof(topic_buffer),
-           AOA_TOPIC_CONFIG_PRINT,
-           positioning_id);
-
-  if (strncmp(topic_buffer, topic, sizeof(AOA_TOPIC_CONFIG_PRINT)) == 0) {
-    return SL_STATUS_OK;
-  } else {
-    return SL_STATUS_NOT_FOUND;
-  }
 }
 
 /**************************************************************************//**
@@ -555,34 +599,54 @@ static void on_message(mqtt_handle_t *handle,
                        const char *topic,
                        const char *payload)
 {
-  int result;
+  aoa_id_t pos_id;
   aoa_id_t loc_id;
   aoa_id_t tag_id;
-  uint32_t locator_idx;
-  aoa_asset_tag_t *tag;
-  aoa_locator_t *locator;
-  aoa_angle_t angle;
-  sl_status_t sc;
-  aoa_iq_report_t iq_report;
-  int8_t samples[256];
-  aoa_report_mode_t report_mode = ANGLE_REPORT;
 
   (void)handle;
 
-  if (check_config_topic(topic) == SL_STATUS_OK) {
-    // Unsubscribe from all topics
-    sc = mqtt_unsubscribe_all(&mqtt_handle);
-    app_assert_status(sc);
+  if (strcmp(topic, AOA_TOPIC_CONFIG_BROADCAST) == 0) {
+    // Broadcast config
     parse_config(payload);
     return;
   }
 
-  // Parse topic.
-  if (2 != sscanf(topic, AOA_TOPIC_ANGLE_SCAN, loc_id, tag_id)) {
-    result = sscanf(topic, AOA_TOPIC_IQ_REPORT_SCAN, loc_id, tag_id);
-    app_assert(result == 2, "Failed to parse topic: %d." APP_LOG_NL, result);
-    report_mode = IQ_REPORT;
+  if (sscanf(topic, AOA_TOPIC_CONFIG_SCAN, pos_id) == 1) {
+    if (aoa_id_compare(pos_id, positioning_id) == 0) {
+      // Unicast config
+      parse_config(payload);
+    }
+    return;
   }
+
+  if (sscanf(topic, AOA_TOPIC_ANGLE_SCAN, loc_id, tag_id) == 2) {
+    on_locator_report(loc_id, tag_id, ANGLE_REPORT, payload);
+    return;
+  }
+
+  if (sscanf(topic, AOA_TOPIC_IQ_REPORT_SCAN, loc_id, tag_id) == 2) {
+    on_locator_report(loc_id, tag_id, IQ_REPORT, payload);
+    return;
+  }
+
+  app_log_error("Failed to parse topic: %s." APP_LOG_NL, topic);
+}
+
+/**************************************************************************//**
+ * IQ and angle report handler callback.
+ *****************************************************************************/
+static void on_locator_report(aoa_id_t loc_id,
+                              aoa_id_t tag_id,
+                              aoa_report_mode_t report_mode,
+                              const char *payload)
+{
+  sl_status_t sc;
+  uint32_t locator_idx;
+  aoa_asset_tag_t *tag;
+  aoa_locator_t *locator;
+  aoa_angle_t angle;
+  aoa_iq_report_t iq_report;
+  int8_t samples[256];
 
   // Find locator.
   sc = aoa_loc_get_locator_by_id(loc_id, &locator_idx, &locator);

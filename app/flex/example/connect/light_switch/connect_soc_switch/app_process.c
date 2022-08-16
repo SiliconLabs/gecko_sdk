@@ -106,7 +106,7 @@ psa_key_id_t security_key_id = 0;
 //                                Static Variables
 // -----------------------------------------------------------------------------
 /// Destination of the currently processed sink node
-static EmberNodeId light_node_id = EMBER_NULL_NODE_ID;
+static EmberNodeId light_node_id = EMBER_COORDINATOR_ADDRESS;
 /// Store the Connect's status
 static EmberStatus stack_status;
 
@@ -381,6 +381,6 @@ static void toggle_light()
                                         tx_options);
 
   if (status == EMBER_SUCCESS) {
-    app_log_info("TX: Data to 0x%04X: \n", light_node_id);
+    app_log_info("TX: Data to 0x%04X:\n", light_node_id);
   }
 }

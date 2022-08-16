@@ -11,7 +11,7 @@
 #include <string.h>
 #include "AppTimer.h"
 #include "Assert.h"
-
+#include "serial_api_config.h"
 
 #define BUFFER_CHECK_TIME_MS    250
 #define DEFAULT_ACK_TIMEOUT_MS  1500
@@ -207,6 +207,24 @@ void comm_interface_init(void)
 {
   const zpal_uart_config_t uart_config =
   {
+#if defined(SERIAL_API_TX_PIN)
+    .tx_pin = SERIAL_API_TX_PIN,
+#endif /* defined(SERIAL_API_TX_PIN) */
+#if defined(SERIAL_API_TX_PORT)
+    .tx_port = SERIAL_API_TX_PORT,
+#endif /* defined(SERIAL_API_TX_PORT) */
+#if defined(SERIAL_API_TX_LOC)
+    .tx_loc = SERIAL_API_TX_LOC,
+#endif /* defined(SERIAL_API_TX_LOC) */
+#if defined(SERIAL_API_RX_PIN)
+    .rx_pin = SERIAL_API_RX_PIN,
+#endif /* defined(SERIAL_API_RX_PIN) */
+#if defined(SERIAL_API_RX_PORT)
+    .rx_port = SERIAL_API_RX_PORT,
+#endif /* defined(SERIAL_API_RX_PORT) */
+#if defined(SERIAL_API_RX_LOC)
+    .rx_loc = SERIAL_API_RX_LOC,
+#endif /* defined(SERIAL_API_RX_LOC) */
     .tx_buffer = tx_data,
     .tx_buffer_len = COMM_INT_TX_BUFFER_SIZE,
     .rx_buffer = rx_data,

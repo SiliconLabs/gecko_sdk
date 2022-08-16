@@ -16,5 +16,3 @@ provides:
   - name: zw_cc_battery
 requires:
   - name: zw_core
-documentation:
-  url: "https://sdomembers.z-wavealliance.org/document/dl/643" 

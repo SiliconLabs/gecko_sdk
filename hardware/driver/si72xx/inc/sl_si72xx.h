@@ -35,6 +35,10 @@
 #include <stddef.h>
 #include <stdbool.h>
 
+#ifdef __cplusplus
+extern "C" {
+#endif
+
 /***************************************************************************//**
  * @addtogroup si72xx Si72xx - Magnetic Hall Effect Sensor
  * @{
@@ -450,5 +454,9 @@ uint32_t sl_si72xx_read_variant_and_sleep(I2C_TypeDef *i2c,
                                           uint8_t *pnVariant);
 
 /** @} (end group si72xx) */
+
+#ifdef __cplusplus
+}
+#endif
 
 #endif /* SL_SI72xx_H */

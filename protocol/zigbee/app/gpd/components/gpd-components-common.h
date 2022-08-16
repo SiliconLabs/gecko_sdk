@@ -335,6 +335,7 @@ void emberGpdRailWriteTxFifoWrapper(const uint8_t *dataPtr,
                                     uint16_t writeLength);
 void emberGpdRailStartRxWrapper(uint8_t channel);
 void emberGpdRailIdleWrapper(void);
+uint16_t emberGpdRailGetRadioEntropyWrapper(uint8_t *dataPtr, uint16_t dataLength);
 void emberGpdRailProvideRailHandle(RAIL_Handle_t handle);
 
 // Security Function Prototypes

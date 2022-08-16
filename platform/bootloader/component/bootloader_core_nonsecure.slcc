@@ -1,5 +1,5 @@
 id: bootloader_core_nonsecure
-label: Bootloader Core
+label: Bootloader Core (Non-Secure)
 package: bootloader
 description: NonSecure Core library for Gecko bootloader.
 category: Platform|Bootloader|TrustZone NonSecure|Core
@@ -92,12 +92,36 @@ template_contribution:
     value: 0x8005000
     condition:
       - device_sdid_230 # xG27
+
+  # Memory flash size
   - name: memory_flash_size
     value: 4096
+    unless:
+      - bootloader_apploader
+  - name: memory_flash_size
+    value: 0xF000
+    condition:
+      - bootloader_apploader
+
+  # Memory RAM start
   - name: memory_ram_start
     value: 0x20006000
+    unless:
+      - bootloader_apploader
+  - name: memory_ram_start
+    value: 0x20002000
+    condition:
+      - bootloader_apploader
+
+  # Memory RAM size
   - name: memory_ram_size
     value: 0x2000
+    unless:
+      - bootloader_apploader
+  - name: memory_ram_size
+    value: 0x6000
+    condition:
+      - bootloader_apploader
 
 toolchain_settings:
   - option: optimize

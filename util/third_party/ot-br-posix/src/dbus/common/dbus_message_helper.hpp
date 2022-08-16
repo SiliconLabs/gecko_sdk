@@ -83,10 +83,12 @@ otbrError DBusMessageEncode(DBusMessageIter *aIter, const SrpServerInfo::Respons
 otbrError DBusMessageExtract(DBusMessageIter *aIter, SrpServerInfo::ResponseCounters &aResponseCounters);
 otbrError DBusMessageEncode(DBusMessageIter *aIter, const SrpServerInfo &aSrpServerInfo);
 otbrError DBusMessageExtract(DBusMessageIter *aIter, SrpServerInfo &aSrpServerInfo);
-#if OTBR_ENABLE_DNSSD_DISCOVERY_PROXY
+otbrError DBusMessageEncode(DBusMessageIter *aIter, const MdnsResponseCounters &aMdnsResponseCounters);
+otbrError DBusMessageExtract(DBusMessageIter *aIter, MdnsResponseCounters &aMdnsResponseCounters);
+otbrError DBusMessageEncode(DBusMessageIter *aIter, const MdnsTelemetryInfo &aMdnsTelemetryInfo);
+otbrError DBusMessageExtract(DBusMessageIter *aIter, MdnsTelemetryInfo &aMdnsTelemetryInfo);
 otbrError DBusMessageEncode(DBusMessageIter *aIter, const DnssdCounters &aDnssdCounters);
 otbrError DBusMessageExtract(DBusMessageIter *aIter, DnssdCounters &aDnssdCounters);
-#endif
 
 template <typename T> struct DBusTypeTrait;
 
@@ -242,13 +244,21 @@ template <> struct DBusTypeTrait<SrpServerInfo>
     static constexpr const char *TYPE_AS_STRING = "(yqy(uutttt)(uutttt)(uuuuuu))";
 };
 
-#if OTBR_ENABLE_DNSSD_DISCOVERY_PROXY
+template <> struct DBusTypeTrait<MdnsTelemetryInfo>
+{
+    // struct of { struct of { uint32, uint32, uint32, uint32, uint32, uint32 },
+    //              struct of { uint32, uint32, uint32, uint32, uint32, uint32 },
+    //              struct of { uint32, uint32, uint32, uint32, uint32, uint32 },
+    //              struct of { uint32, uint32, uint32, uint32, uint32, uint32 },
+    //              uint32, uint32, uint32, uint32 }
+    static constexpr const char *TYPE_AS_STRING = "((uuuuuu)(uuuuuu)(uuuuuu)(uuuuuu)uuuu)";
+};
+
 template <> struct DBusTypeTrait<DnssdCounters>
 {
     // struct of { uint32, uint32, uint32, uint32, uint32, uint32, uint32 }
     static constexpr const char *TYPE_AS_STRING = "(uuuuuuu)";
 };
-#endif
 
 template <> struct DBusTypeTrait<int8_t>
 {
@@ -519,6 +529,24 @@ public:
 
     exit:
         return error;
+    }
+};
+
+template <> class DBusMessageIterFor<0, 0>
+{
+public:
+    static otbrError ConvertToTuple(DBusMessageIter *aIter, std::tuple<> &aValues)
+    {
+        OTBR_UNUSED_VARIABLE(aIter);
+        OTBR_UNUSED_VARIABLE(aValues);
+        return OTBR_ERROR_NONE;
+    }
+
+    static otbrError ConvertToDBusMessage(DBusMessageIter *aIter, const std::tuple<> &aValues)
+    {
+        OTBR_UNUSED_VARIABLE(aIter);
+        OTBR_UNUSED_VARIABLE(aValues);
+        return OTBR_ERROR_NONE;
     }
 };
 

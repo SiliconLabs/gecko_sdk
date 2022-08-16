@@ -20,14 +20,7 @@
 #define SUPPORT_NVM_EXT_READ_LONG_BYTE                  1 /* NVM_ext_read_long_byte */
 #define SUPPORT_NVM_EXT_WRITE_LONG_BYTE                 0 /* NVM_ext_write_long_byte */
 #define SUPPORT_NVM_EXT_WRITE_LONG_BUFFER               0 /* NVM_ext_write_long_buffer*/
-
-//Safety precaution due to PLATFORM_MTL-6522
-#ifdef ZWAVE_SERIES_800
-#define SUPPORT_NVM_BACKUP_RESTORE                      0 /* MemoryGetBuffer */
-#else
-#define SUPPORT_NVM_BACKUP_RESTORE                      1 /* MemoryGetBuffer */
-#endif
-
+#define SUPPORT_NVM_BACKUP_RESTORE                      1 /* NVM_backup_restore */
 #define SUPPORT_PWR_CLK_PD                              0 /* PWR_Clk_PD */
 #define SUPPORT_PWR_CLK_PUP                             0 /* PWR_Clk_PUp */
 #define SUPPORT_PWR_SELECT_CLK                          0 /* PWR_Select_Clk */

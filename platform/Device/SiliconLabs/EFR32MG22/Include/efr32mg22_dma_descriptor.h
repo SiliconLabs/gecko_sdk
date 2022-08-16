@@ -27,6 +27,8 @@
  * 3. This notice may not be removed or altered from any source distribution.
  *
  *****************************************************************************/
+#ifndef EFR32MG22_DMA_DESCRIPTOR_H
+#define EFR32MG22_DMA_DESCRIPTOR_H
 
 #if defined(__ICCARM__)
 #pragma system_include       /* Treat file as system include file. */
@@ -53,3 +55,5 @@ typedef struct {
 } DMA_DESCRIPTOR_TypeDef;      /**< @} */
 
 /** @} End of group Parts */
+
+#endif /* EFR32MG22_DMA_DESCRIPTOR_H */

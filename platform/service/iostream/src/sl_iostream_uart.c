@@ -377,10 +377,12 @@ void sli_uart_push_rxd_data(void *context,
   uart_context->sleep = SL_POWER_MANAGER_WAKEUP;
 #endif
 
-  if (uart_context->rx_count == uart_context->rx_buffer_length) {
-    uint8_t xoff = XOFF;
-    nolock_uart_write(context, &xoff, sizeof(xoff));
-    uart_context->remote_xon = false;
+  if (uart_context->sw_flow_control) {
+    if (uart_context->rx_count == uart_context->rx_buffer_length) {
+      uint8_t xoff = XOFF;
+      nolock_uart_write(context, &xoff, sizeof(xoff));
+      uart_context->remote_xon = false;
+    }
   }
 }
 

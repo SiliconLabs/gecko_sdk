@@ -134,7 +134,7 @@ configuration:
   - name: SL_SIMPLE_COM_TX_BUF_SIZE
     value: "768"
   - name: SL_STACK_SIZE
-    value: "0xD00"
+    value: "0xE00"
   - name: SL_UARTDRV_USART_VCOM_FLOW_CONTROL_TYPE
     value: uartdrvFlowControlNone
     condition:

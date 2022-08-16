@@ -21,6 +21,10 @@
 #include "sl_button.h"
 #include "em_gpio.h"
 
+#ifdef __cplusplus
+extern "C" {
+#endif
+
 /***************************************************************************//**
  * @addtogroup button
  * @{
@@ -203,5 +207,9 @@ void sl_simple_button_disable(const sl_button_t *handle);
 ///   See @ref buttondrv_usage.
 ///
 /// @} end group simple_button ********************************************************/
+
+#ifdef __cplusplus
+}
+#endif
 
 #endif // SL_SIMPLE_BUTTON_H

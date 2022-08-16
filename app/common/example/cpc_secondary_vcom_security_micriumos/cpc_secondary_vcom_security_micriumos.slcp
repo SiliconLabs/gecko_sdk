@@ -1,4 +1,4 @@
-project_name: cpc_secondary_vcom_micriumos_security
+project_name: cpc_secondary_vcom_security_micriumos
 package: platform
 quality: production
 label: Platform - CPC Secondary with Micrium OS and Security Enabled

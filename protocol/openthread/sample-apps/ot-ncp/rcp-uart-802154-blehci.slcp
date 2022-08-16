@@ -19,6 +19,7 @@ quality: alpha
 
 component:
   - id: brd4001a
+  - id: ot_reference_device
   - id: ot_stack_rcp
   - id: ot_ncp_cpc
   - id: cpc_secondary_driver_uart_usart
@@ -41,6 +42,9 @@ include:
   - path: .
     file_list:
     - path: app.h
+  - path: ../../../../util/third_party/openthread/src/lib/platform
+    file_list:
+    - path: reset_util.h
 
 source:
   - path: main.c
@@ -81,36 +85,12 @@ configuration:
     value: usartHwFlowControlCtsAndRts
   - name: OPENTHREAD_CONFIG_HEAP_EXTERNAL_ENABLE
     value: 0
-  - name: OPENTHREAD_CONFIG_BORDER_AGENT_ENABLE
-    value: 1
-  - name: OPENTHREAD_CONFIG_BORDER_ROUTER_ENABLE
-    value: 1
-  - name: OPENTHREAD_CONFIG_COAP_API_ENABLE
-    value: 1
-  - name: OPENTHREAD_CONFIG_COAP_OBSERVE_API_ENABLE
-    value: 1
-  - name: OPENTHREAD_CONFIG_COAP_SECURE_API_ENABLE
-    value: 1
-  - name: OPENTHREAD_CONFIG_COMMISSIONER_ENABLE
-    value: 1
-  - name: OPENTHREAD_CONFIG_DHCP6_CLIENT_ENABLE
-    value: 1
-  - name: OPENTHREAD_CONFIG_DHCP6_SERVER_ENABLE
-    value: 1
-  - name: OPENTHREAD_CONFIG_DNSSD_SERVER_ENABLE
-    value: 1
-  - name: OPENTHREAD_CONFIG_JOINER_ENABLE
-    value: 1
-  - name: OPENTHREAD_CONFIG_REFERENCE_DEVICE_ENABLE
-    value: 1
-  - name: OPENTHREAD_CONFIG_SRP_SERVER_ENABLE
-    value: 1
-  - name: OPENTHREAD_CONFIG_TMF_NETDATA_SERVICE_ENABLE
-    value: 1
   - name: OPENTHREAD_CONFIG_LOG_OUTPUT
     value: OPENTHREAD_CONFIG_LOG_OUTPUT_PLATFORM_DEFINED
   - name: OPENTHREAD_CONFIG_MULTIPAN_RCP_ENABLE
     value: 1
+  - name: OPENTHREAD_CONFIG_DIAG_ENABLE
+    value: 1  
   - name: OPENTHREAD_CONFIG_PLATFORM_KEY_REFERENCES_ENABLE
     value: 0
 

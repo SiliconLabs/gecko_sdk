@@ -444,7 +444,7 @@ const char *otPlatRadioGetVersionString(otInstance *aInstance);
 int8_t otPlatRadioGetReceiveSensitivity(otInstance *aInstance);
 
 /**
- * Get the factory-assigned IEEE EUI-64 for this interface.
+ * Gets the factory-assigned IEEE EUI-64 for this interface.
  *
  * @param[in]  aInstance   The OpenThread instance structure.
  * @param[out] aIeeeEui64  A pointer to the factory-assigned IEEE EUI-64.
@@ -1142,6 +1142,33 @@ otError otPlatRadioConfigureEnhAckProbing(otInstance *        aInstance,
                                           otLinkMetrics       aLinkMetrics,
                                           otShortAddress      aShortAddress,
                                           const otExtAddress *aExtAddress);
+
+
+#if OPENTHREAD_CONFIG_DIAG_ENABLE
+
+/**
+ * Enable transmitting stream random character mode.
+ *
+ */
+otError otPlatDiagTxStreamRandom(void);
+
+/**
+ * Enable transmitting stream unmodulated tone mode.
+ *
+ */
+otError otPlatDiagTxStreamTone(void);
+
+/**
+ * Disable transmitting stream mode.
+ *
+ */
+otError otPlatDiagTxStreamStop(void);
+
+otError otPlatDiagTxStreamAddrMatch(uint8_t enable);
+otError otPlatDiagTxStreamAutoAck(uint8_t autoAckEnabled);
+
+#endif // #if OPENTHREAD_CONFIG_DIAG_ENABLE
+
 
 /**
  * @}

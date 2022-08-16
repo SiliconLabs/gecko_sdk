@@ -25,18 +25,7 @@
 #include "openthread-system.h"
 #include "app.h"
 
-#if OPENTHREAD_EXAMPLES_SIMULATION
-#include <setjmp.h>
-#include <unistd.h>
-
-jmp_buf gResetJump;
-
-void __gcov_flush();
-#endif
-
-#ifndef OPENTHREAD_ENABLE_COVERAGE
-#define OPENTHREAD_ENABLE_COVERAGE 0
-#endif
+#include "reset_util.h"
 
 /**
  * This function initializes the NCP app.
@@ -85,16 +74,7 @@ void sl_ot_ncp_init(void)
 
 void app_init(void)
 {
-#if OPENTHREAD_EXAMPLES_SIMULATION
-    if (setjmp(gResetJump))
-    {
-        alarm(0);
-#if OPENTHREAD_ENABLE_COVERAGE
-        __gcov_flush();
-#endif
-        execvp(argv[0], argv); // TO DO: argc, argv?
-    }
-#endif
+    OT_SETUP_RESET_JUMP(argv);
 }
 
 /**************************************************************************//**

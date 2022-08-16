@@ -322,7 +322,7 @@ __STATIC_INLINE bool MSC_LockGetLocked(void)
   return (bool)sli_tz_ns_interface_dispatch_simple(
     (sli_tz_simple_veneer_fn)sli_tz_msc_get_locked,
     SLI_TZ_DISPATCH_UNUSED_ARG);
-#elif (_MSC_STATUS_REGLOCK_MASK)
+#elif defined(_MSC_STATUS_REGLOCK_MASK)
   return (MSC->STATUS & _MSC_STATUS_REGLOCK_MASK) != MSC_STATUS_REGLOCK_UNLOCKED;
 #else
   return (MSC->LOCK & _MSC_LOCK_MASK) != MSC_LOCK_LOCKKEY_UNLOCK;

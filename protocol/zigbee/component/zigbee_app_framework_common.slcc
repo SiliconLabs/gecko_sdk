@@ -87,6 +87,8 @@ define:
   # for app builder while we make changes to make it work within UC.
   - name: UC_BUILD
 
+# NOTE: Some cflags come in via platform/common/toolchain/toolchains.slct
+# Example: -Wall, -Wextra. So there is no need to explicitly add them
 toolchain_settings:
   - option: gcc_compiler_option
     value: "-Wno-unused-parameter"
@@ -94,6 +96,12 @@ toolchain_settings:
     value: "-Wno-missing-field-initializers"
   - option: gcc_compiler_option
     value: "-Wno-missing-braces"
+    # turn on warnings as errors only when compiling from source
+  - option: gcc_compiler_option
+    value: "-Werror"
+    condition:
+      - zigbee_pro_stack_common_source
+
 # TODO: EMZIGBEE-6659    
   - option: gcc_compiler_option
     value: "-Wno-format"

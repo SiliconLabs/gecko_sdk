@@ -258,19 +258,19 @@ void throughput_ui_set_phy(throughput_phy_t phy)
 {
   clear_row(ROW_PHY);
   switch (phy) {
-    case sl_bt_gap_1m_phy_uncoded:
+    case sl_bt_gap_phy_coding_1m_uncoded:
       write_row(THROUGHPUT_UI_PHY_1M_TEXT, ROW_PHY);
       LOG(THROUGHPUT_UI_PHY_1M_TEXT);
       break;
-    case sl_bt_gap_2m_phy_uncoded:
+    case sl_bt_gap_phy_coding_2m_uncoded:
       write_row(THROUGHPUT_UI_PHY_2M_TEXT, ROW_PHY);
       LOG(THROUGHPUT_UI_PHY_2M_TEXT);
       break;
-    case sl_bt_gap_coded_phy_125k:
+    case sl_bt_gap_phy_coding_125k_coded:
       write_row(THROUGHPUT_UI_PHY_CODED_125K_TEXT, ROW_PHY);
       LOG(THROUGHPUT_UI_PHY_CODED_125K_TEXT);
       break;
-    case sl_bt_gap_coded_phy_500k:
+    case sl_bt_gap_phy_coding_500k_coded:
       write_row(THROUGHPUT_UI_PHY_CODED_500K_TEXT, ROW_PHY);
       LOG(THROUGHPUT_UI_PHY_CODED_500K_TEXT);
       break;

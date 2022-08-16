@@ -9,3 +9,14 @@ provides:
 requires:
   - name: ot_mbedtls
   - name: segger_rtt
+define:
+  - name: BUFFER_SIZE_DOWN
+    value: 0
+  - name: BUFFER_SIZE_UP
+    value: 768
+    unless:
+    - "device_family_efr32mg1"
+  - name: BUFFER_SIZE_UP
+    value: 128
+    condition:
+    - "device_family_efr32mg1"

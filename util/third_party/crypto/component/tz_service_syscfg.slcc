@@ -20,5 +20,6 @@ source:
     condition: [trustzone_secure]
 
 requires:
+  - name: tz_util
   - name: emlib_syscfg
     condition: [trustzone_secure]

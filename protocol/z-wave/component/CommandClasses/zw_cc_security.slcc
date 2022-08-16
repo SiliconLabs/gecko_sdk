@@ -11,5 +11,3 @@ source:
 provides:
   - name: zw_cc_security
 
-documentation:
-  url: "https://sdomembers.z-wavealliance.org/document/dl/652"

@@ -1,5 +1,5 @@
 id: bootloader_include_parser_nonsecure
-label: Bootloader Include Parser
+label: Bootloader Include Parser (Non-Secure)
 package: bootloader
 description: >
    Image Parser Header Files

@@ -17,6 +17,10 @@
 #ifndef DEMO_UI_H
 #define DEMO_UI_H
 
+#ifdef __cplusplus
+extern "C" {
+#endif
+
 /**************************************************************************//**
 * DEMO UI uses the underlying DMD interface and the GLIB and exposes several
 * wrapper functions to application. These functions are used to display
@@ -171,4 +175,7 @@ void demoUIClearMainScreen(uint8_t* name, bool showPROT1, bool showPROT2);
  *****************************************************************************/
 void demoUIDisplayChan(uint8_t channel);
 
+#ifdef __cplusplus
+}
+#endif
 #endif //DEMO_UI_H

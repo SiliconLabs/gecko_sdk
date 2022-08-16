@@ -235,6 +235,14 @@ sl_status_t sl_bt_ots_client_init(sl_bt_ots_client_handle_t    client,
 
   client->status = CLIENT_STATUS_BEGIN;
 
+  // Active parameter clear
+  client->active_handle_index    = SL_BT_OTS_CHARACTERISTIC_UUID_INDEX_INVALID;
+  client->active_opcode          = 0;
+  client->active_transfer_size   = 0;
+  client->active_transfer_offset = 0;
+  client->active_transfer_sdu    = 0;
+  client->active_transfer_pdu    = 0;
+
   // Add client to the list
   sl_slist_push_back(&client_list, &client->node);
 
@@ -783,8 +791,12 @@ sl_status_t sl_bt_ots_client_oacp_execute(sl_bt_ots_client_handle_t client,
     return SL_STATUS_NULL_POINTER;
   }
 
-  uint8_t total_size = sizeof(sl_bt_ots_oacp_opcode_t) + optional_data_size;
-  uint8_t content[total_size];
+  uint16_t total_size = sizeof(sl_bt_ots_oacp_opcode_t) + optional_data_size;
+  if (total_size > SL_BT_OTS_CLIENT_CONFIG_WRITE_REQUEST_DATA_SIZE) {
+    return SL_STATUS_INVALID_PARAMETER;
+  }
+
+  uint8_t content[SL_BT_OTS_CLIENT_CONFIG_WRITE_REQUEST_DATA_SIZE];
   sl_bt_ots_oacp_message_t *message = (sl_bt_ots_oacp_message_t *)&content;
 
   message->opcode = SL_BT_OTS_OACP_OPCODE_EXECUTE;
@@ -820,7 +832,7 @@ sl_status_t sl_bt_ots_client_oacp_read(sl_bt_ots_client_handle_t client,
   }
 
   uint8_t total_size = sizeof(sl_bt_ots_oacp_opcode_t) + sizeof(sl_bt_ots_oacp_read_parameters_t);
-  uint8_t content[total_size];
+  uint8_t content[sizeof(sl_bt_ots_oacp_opcode_t) + sizeof(sl_bt_ots_oacp_read_parameters_t)];
   sl_bt_ots_oacp_message_t *message = (sl_bt_ots_oacp_message_t *)&content;
   sl_bt_ots_oacp_read_parameters_t *parameters
     = (sl_bt_ots_oacp_read_parameters_t *)message->data;
@@ -862,7 +874,7 @@ sl_status_t sl_bt_ots_client_oacp_write(sl_bt_ots_client_handle_t   client,
   }
 
   uint8_t total_size = sizeof(sl_bt_ots_oacp_opcode_t) + sizeof(sl_bt_ots_oacp_write_parameters_t);
-  uint8_t content[total_size];
+  uint8_t content[sizeof(sl_bt_ots_oacp_opcode_t) + sizeof(sl_bt_ots_oacp_write_parameters_t)];
   sl_bt_ots_oacp_message_t *message = (sl_bt_ots_oacp_message_t *)&content;
   sl_bt_ots_oacp_write_parameters_t *parameters
     = (sl_bt_ots_oacp_write_parameters_t *)message->data;
@@ -894,7 +906,7 @@ sl_status_t sl_bt_ots_client_oacp_abort(sl_bt_ots_client_handle_t client)
 
   // Check status for read in progress
   if ((client->status) != CLIENT_STATUS_WAIT_OACP_TRANSFER
-      && client->active_opcode == SL_BT_OTS_OACP_OPCODE_READ) {
+      || client->active_opcode != SL_BT_OTS_OACP_OPCODE_READ) {
     return SL_STATUS_INVALID_STATE;
   }
 
@@ -921,6 +933,30 @@ sl_status_t sl_bt_ots_client_increase_credit(sl_bt_ots_client_handle_t client,
     if (sc == SL_STATUS_IN_PROGRESS) {
       sc = sl_bt_l2cap_transfer_increase_credit(&client->l2cap_transfer,
                                                 credit);
+    }
+  }
+  return sc;
+}
+
+sl_status_t sl_bt_ots_client_abort(sl_bt_ots_client_handle_t client)
+{
+  sl_status_t sc = SL_STATUS_INVALID_STATE;
+
+  // Check arguments
+  CHECK_NULL(client);
+
+  // Check state
+  if (client->status == CLIENT_STATUS_WAIT_OACP_TRANSFER) {
+    if (client->active_opcode == SL_BT_OTS_OACP_OPCODE_READ) {
+      // Abort read in a gentle way.
+      sc = sl_bt_ots_client_oacp_abort(client);
+    } else if (client->active_opcode == SL_BT_OTS_OACP_OPCODE_WRITE) {
+      // Check progress of the operation
+      sc = sl_bt_l2cap_transfer_check_progress(&client->l2cap_transfer);
+      if (sc == SL_STATUS_IN_PROGRESS) {
+        // Abort the L2CAP transfer
+        sc = sl_bt_l2cap_transfer_abort_transfer(&client->l2cap_transfer);
+      }
     }
   }
   return sc;
@@ -1035,6 +1071,10 @@ void sli_bt_ots_client_on_bt_event(sl_bt_msg_t *evt)
           }
           // Set status
           handle->status = CLIENT_STATUS_DISCONNECTED;
+
+          // Remove client from the list
+          sl_slist_remove(&client_list, &handle->node);
+
           // Do callback
           CALL_SAFE(handle, on_disconnect, handle);
         }
@@ -1164,7 +1204,7 @@ void sli_bt_ots_client_on_bt_event(sl_bt_msg_t *evt)
         memcpy(buffer->data, evt->data.evt_gatt_characteristic_value.value.data, buffer->len);
       }
       // Handle indication
-      if (evt->data.evt_gatt_characteristic_value.att_opcode == gatt_handle_value_indication
+      if (evt->data.evt_gatt_characteristic_value.att_opcode == sl_bt_gatt_handle_value_indication
           && handle != NULL) {
         uint8_t att_error = ATT_ERR_SUCCESS;
         // OLCP indication
@@ -1270,9 +1310,10 @@ void sli_bt_ots_client_on_bt_event(sl_bt_msg_t *evt)
                 && (response->opcode == SL_BT_OTS_OACP_OPCODE_READ
                     || response->opcode == SL_BT_OTS_OACP_OPCODE_WRITE)) {
               // Set transfer parameters
-              handle->l2cap_transfer.callbacks = &l2cap_transfer_callbacks;
-              handle->l2cap_transfer.connection = handle->connection;
+              handle->l2cap_transfer.callbacks   = &l2cap_transfer_callbacks;
+              handle->l2cap_transfer.connection  = handle->connection;
               handle->l2cap_transfer.data_length = handle->active_transfer_size;
+              handle->l2cap_transfer.data_offset = handle->active_transfer_offset;
               handle->l2cap_transfer.mode
                 = (response->opcode == SL_BT_OTS_OACP_OPCODE_WRITE) ? SL_BT_L2CAP_TRANSFER_MODE_TRANSMIT : SL_BT_L2CAP_TRANSFER_MODE_RECEIVE;
 
@@ -1457,6 +1498,12 @@ static void l2cap_transfer_transfer_finished(sl_bt_l2cap_transfer_transfer_handl
       if (error_code != SL_STATUS_OK) {
         result = SL_BT_OTS_TRANSFER_FINISHED_RESPONSE_CODE_CHANNEL_ERROR;
       }
+      // Active transfer clear
+      handle->active_transfer_size   = 0;
+      handle->active_transfer_offset = 0;
+      handle->active_transfer_sdu    = 0;
+      handle->active_transfer_pdu    = 0;
+
       CALL_SAFE(handle,
                 on_data_transfer_finished,
                 handle,
@@ -1666,6 +1713,11 @@ static sl_bt_ots_client_status_t finish_init(sl_bt_ots_client_t *client,
 
   // Clear active client for connection
   active_client[HANDLE_TO_INDEX(client->connection)] = NULL;
+
+  if (client->status == CLIENT_STATUS_ERROR) {
+    // Remove client from the list
+    sl_slist_remove(&client_list, &client->node);
+  }
 
   return client->status;
 }

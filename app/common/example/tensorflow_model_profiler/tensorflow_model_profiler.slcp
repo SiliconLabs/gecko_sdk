@@ -14,6 +14,8 @@ filter:
     value: ["32-bit MCU"]
   - name: "Project Difficulty"
     value: ["Advanced"]
+  - name: "Capability"
+    value: ["Machine Learning"]
 include:
   - path: .
     file_list:

@@ -95,8 +95,9 @@ static void print_address(bd_addr address)
  **************************************************************************************************/
 void SCAN_Process_scan_response(sl_bt_msg_t *evt)
 {
-  if ( is_voble_service(evt->data.evt_scanner_scan_report.data.data, evt->data.evt_scanner_scan_report.data.len) ) {
-    memcpy(&CONF_get()->remote_address, &evt->data.evt_scanner_scan_report.address, sizeof(bd_addr));
+  if ( is_voble_service(evt->data.evt_scanner_legacy_advertisement_report.data.data,
+                        evt->data.evt_scanner_legacy_advertisement_report.data.len) ) {
+    memcpy(&CONF_get()->remote_address, &evt->data.evt_scanner_legacy_advertisement_report.address, sizeof(bd_addr));
     app_log("\r"); DEBUG_INFO("VoBLE device found: "); print_address(CONF_get()->remote_address); app_log("\n");
     sl_status_t sc = sl_bt_scanner_stop();
     app_assert(sc == SL_STATUS_OK,

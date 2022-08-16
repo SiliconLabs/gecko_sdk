@@ -82,8 +82,20 @@ while [[ $# -gt 0 ]]; do
             exit
             ;;
         -Z|--zigbee-host)
+            echo "Starting zigbeed..."
             docker exec -it multiprotocol systemctl start zigbeed
             sleep 5
+            echo "Checking zigbeed status..."
+            while
+                docker exec -it multiprotocol systemctl status zigbeed | grep 'RCP version'
+                [[ $? -ne 0 ]]
+            do
+                sleep 3
+                echo "Failed to start zigbeed, restarting..."
+                echo "(If errors persist, run 'journalctl -fex' inside container for logs.)"
+                docker exec -it multiprotocol systemctl restart zigbeed
+            done
+            echo "Starting Z3Gateway..."
             docker exec -it multiprotocol /usr/local/bin/Z3Gateway -p ttyZigbeeNCP
             exit
             ;;

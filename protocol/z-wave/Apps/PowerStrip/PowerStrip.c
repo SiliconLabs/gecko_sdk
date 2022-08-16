@@ -13,6 +13,7 @@
 #include <string.h>
 #include "SizeOf.h"
 #include "Assert.h"
+#include <MfgTokens.h>
 #include "DebugPrintConfig.h"
 //#define DEBUGPRINT
 #include "DebugPrint.h"
@@ -181,7 +182,7 @@ static SAppNodeInfo_t AppNodeInfo =
   .CommandClasses.SecureIncludedSecureCC.pCommandClasses = cmdClassListSecure
 };
 
-static const SRadioConfig_t RadioConfig =
+static SRadioConfig_t RadioConfig =
 {
   .iListenBeforeTalkThreshold = ELISTENBEFORETALKTRESHOLD_DEFAULT,
   .iTxPowerLevelMax = APP_MAX_TX_POWER,
@@ -753,6 +754,14 @@ ApplicationInit(EResetReason_t eResetReason)
   // Init file system
   ApplicationFileSystemInit(&pFileSystemApplication);
 
+  // Read Rf region from MFG_ZWAVE_COUNTRY_FREQ
+  zpal_radio_region_t regionMfg;
+  ZW_GetMfgTokenDataCountryFreq((void*) &regionMfg);
+  if (isRfRegionValid(regionMfg)) {
+    RadioConfig.eRegion = regionMfg;
+  } else {
+    ZW_SetMfgTokenDataCountryRegion((void*) &RadioConfig.eRegion);
+  }
 
   /*************************************************************************************
    * CREATE USER TASKS  -  ZW_ApplicationRegisterTask() and ZW_UserTask_CreateTask()
@@ -1502,13 +1511,14 @@ ZCB_NotificationTimerCallback(SSwTimer *pTimer)
     ZCB_JobStatus(&transmissionResult);
   }
 
-  /* Trigger TSE */
-  if (pData)
+  NOTIFICATION_STATUS notification_enable = CmdClassNotificationGetNotificationStatus(NOTIFICATION_TYPE_POWER_MANAGEMENT, notificationOverLoadendpoint);
+  if (pData && (NOTIFICATION_STATUS_UNSOLICIT_ACTIVATED == notification_enable))
   {
+    /* Trigger TSE */
     ZAF_TSE_Trigger(CC_Notification_report_stx, pData, true);
+    ChangeState(STATE_APP_TRANSMIT_DATA);
   }
 
-  ChangeState(STATE_APP_TRANSMIT_DATA);
 }
 
 static void ToggleSwitch(uint8_t switchID)

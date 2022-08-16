@@ -100,6 +100,12 @@ typedef void (*zpal_uart_transmit_done_t)(zpal_uart_handle_t handle);
  */
 typedef struct {
   zpal_uart_id_t id;                              ///<Uart id.
+  uint8_t tx_pin;                                 ///< Pin for UART Tx.
+  uint8_t tx_port;                                ///< Port for UART Tx pin.
+  uint8_t tx_loc;                                 ///< Location number for UART Tx pin.
+  uint8_t rx_pin;                                 ///< Pin for UART Rx.
+  uint8_t rx_port;                                ///< Port for UART Rx pin.
+  uint8_t rx_loc;                                 ///< Location number for UART Tx pin.
   uint8_t *tx_buffer;                             ///<Poniter to transmit buffer.
   size_t tx_buffer_len;                           ///<Size of transmit buffer.
   uint8_t *rx_buffer;                             ///<Poniter to receive buffer.

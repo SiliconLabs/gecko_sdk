@@ -45,7 +45,9 @@
 #define QOS                    1
 #define KEEPALIVE_INTERVAL_SEC 30
 #define LOOP_TIMEOUT_MS        1
-#define LOG_MASK               MOSQ_LOG_NONE
+#ifndef MQTT_LOG_MASK
+#define MQTT_LOG_MASK          MOSQ_LOG_NONE
+#endif
 
 static void mqtt_on_connect(struct mosquitto *mosq, void *obj, int rc);
 static void mqtt_on_disconnect(struct mosquitto *mosq, void *obj, int rc);
@@ -99,6 +101,9 @@ sl_status_t mqtt_init(mqtt_handle_t *handle)
     }
   } else {
     handle->client = mosq;
+  }
+  if (sc == SL_STATUS_OK) {
+    app_log_info("MQTT init client: %s" APP_LOG_NL, handle->client_id);
   }
 
   return sc;
@@ -182,6 +187,9 @@ sl_status_t mqtt_subscribe(mqtt_handle_t *handle, const char *topic)
   } else {
     sc = SL_STATUS_NOT_INITIALIZED;
   }
+  if (sc == SL_STATUS_OK) {
+    app_log_info("MQTT subscribe: %s" APP_LOG_NL, topic);
+  }
 
   return sc;
 }
@@ -199,7 +207,7 @@ sl_status_t mqtt_unsubscribe(mqtt_handle_t *handle, const char *topic)
     rc = mosquitto_unsubscribe(handle->client, NULL, topic);
 
     if ((rc != MOSQ_ERR_SUCCESS) && (rc != MOSQ_ERR_NO_CONN)) {
-      app_log_info("MQTT unsubscribe attempt failed from topic '%s': '%s'\n",
+      app_log_info("MQTT unsubscribe attempt failed from topic '%s': '%s'" APP_LOG_NL,
                    topic,
                    mqtt_err2str(rc));
       sc = SL_STATUS_FAIL;
@@ -208,11 +216,14 @@ sl_status_t mqtt_unsubscribe(mqtt_handle_t *handle, const char *topic)
     // Remove topic from topic list.
     sc = mqtt_remove_topic(handle, topic);
     if (SL_STATUS_OK != sc) {
-      app_log_info("MQTT failed to remove topic from topic list.\n");
+      app_log_info("MQTT failed to remove topic from topic list." APP_LOG_NL);
       sc = SL_STATUS_FAIL;
     }
   } else {
     sc = SL_STATUS_NOT_INITIALIZED;
+  }
+  if (sc == SL_STATUS_OK) {
+    app_log_info("MQTT unsubscribe: %s" APP_LOG_NL, topic);
   }
 
   return sc;
@@ -335,7 +346,7 @@ static void mqtt_on_message(struct mosquitto *mosq, void *obj, const struct mosq
 
 static void mqtt_on_log(struct mosquitto *mosq, void *obj, int level, const char *str)
 {
-  if (level & LOG_MASK) {
+  if (level & MQTT_LOG_MASK) {
     app_log("MQTT log (%d): %s" APP_LOG_NL, level, str);
   }
 }

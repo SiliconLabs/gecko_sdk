@@ -32,7 +32,7 @@ component:
   - id: device_init
   - id: tensorflow_lite_micro
   - id: ml_audio_feature_generation
-  - id: printf 
+  - id: printf
   - id: iostream_recommended_stream
   - id: iostream_retarget_stdio
   - id: simple_led
@@ -41,11 +41,16 @@ component:
   - id: micriumos_kernel
   - id: power_manager
   - id: sleeptimer
-config_file: 
+config_file:
   - path: config/audio_classifier_config.h
-  - path: "config/tflite/audio_classifier.tflite"
+  - path: "tflite_models/tflite/keyword_spotting_on_off.tflite"
     file_id: flatbuffer_file_id
     directory: "tflite"
+    unless: [tensorflow_lite_micro_accelerated_kernels]
+  - path: "tflite_models/tflite/keyword_spotting_on_off_v2.tflite"
+    file_id: flatbuffer_file_id
+    directory: "tflite"
+    condition: [tensorflow_lite_micro_accelerated_kernels]
 define:
   - name: DEBUG_EFM
   - name: TF_LITE_STATIC_MEMORY
@@ -64,8 +69,8 @@ configuration:
     value: "4096"
   - name: SL_ML_AUDIO_FEATURE_GENERATION_AUDIO_GAIN
     value: "2"
-  - name: SL_TFLITE_MICRO_ARENA_SIZE 
-    value: "7000"
+  - name: SL_TFLITE_MICRO_ARENA_SIZE
+    value: "50000"
   - name: SL_HEAP_SIZE
     value: "0x2000"
   - name: SL_SIMPLE_LED_LED1_PIN
@@ -74,6 +79,8 @@ configuration:
 toolchain_settings:
   - option: gcc_compiler_option
     value: "-Wno-unused-parameter"
+  - option: gcc_compiler_option
+    value: "-Wno-missing-field-initializers"
 readme:
   - path: readme.md
 ui_hints:

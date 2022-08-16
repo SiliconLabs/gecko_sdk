@@ -14,5 +14,3 @@ include:
     - path: CC_CentralScene.h
 provides:
   - name: zw_cc_centralscene
-documentation:
-  url: "https://sdomembers.z-wavealliance.org/document/dl/638"

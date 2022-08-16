@@ -258,8 +258,8 @@
   - override:
       component: simple_rgb_pwm_led
       file_id: simple_rgb_pwm_led_config
-      instance: inst0
-    path: brd2601a/sl_simple_rgb_pwm_led_inst0_config.h
+      instance: rgb_led0
+    path: brd2601a/sl_simple_rgb_pwm_led_rgb_led0_config.h
   - override:
       component: spidrv
       file_id: spidrv_config

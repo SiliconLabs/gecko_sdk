@@ -47,6 +47,9 @@
 #endif
 #endif // defined(TFM_CONFIG_SL_SECURE_LIBRARY)
 
+nvm3_Handle_t  nvm3_defaultHandleData;
+nvm3_Handle_t *nvm3_defaultHandle = &nvm3_defaultHandleData;
+
 psa_status_t tfm_nvm3_init(void)
 {
   // This init function is required by TFM and not used otherwise.
@@ -92,7 +95,7 @@ psa_status_t tfm_nvm3_deinit_default(psa_invec in_vec[],
 
   Ecode_t *nvm3_status = out_vec[0].base;
 
-  *nvm3_status = nvm3_deinitDefault();
+  *nvm3_status = nvm3_close(nvm3_defaultHandle);
 
   return PSA_SUCCESS;
 }

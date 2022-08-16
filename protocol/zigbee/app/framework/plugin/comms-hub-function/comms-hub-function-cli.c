@@ -502,11 +502,20 @@ void emAfPluginCommsHubFunctionCliSend(sl_cli_command_arg_t *arguments)
   EmberEUI64 deviceId;
   uint8_t length;
   uint8_t message[255];
+  uint8_t* command = sl_zigbee_cli_get_argument_string_and_length(arguments, -1, &length);
+
   sl_zigbee_copy_eui64_arg(arguments, 0, deviceId, true);
-  length = sl_zigbee_copy_hex_arg(arguments,
-                                  1,
-                                  message,
-                                  255, false);
+  if (command[5] == 's') {
+    length = sl_zigbee_copy_string_arg(arguments,
+                                       1,
+                                       message,
+                                       255, false);
+  } else {
+    length = sl_zigbee_copy_hex_arg(arguments,
+                                    1,
+                                    message,
+                                    255, false);
+  }
   sendMessage(deviceId, length, message, false, TEST_MESSAGE_CODE);
 }
 

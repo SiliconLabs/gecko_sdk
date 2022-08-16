@@ -86,6 +86,9 @@ using ot::Encoding::BigEndian::HostSwap16;
 const RPC::Command RPC::sCommands[] = {
     {"help-crpc", otCRPCProcessHelp},
 };
+
+char     RPC::mStaticOutputBuffer[RPC::kMaxStaticOutputBufferSize];
+
 #else
 
 RPC::Arg RPC::mCachedCommands[RPC::kMaxCommands];
@@ -145,15 +148,16 @@ exit:
 void RPC::ProcessLine(const char *aString, char *aOutput, size_t aOutputMaxLen)
 {
     Error   error = kErrorNone;
-    char    buffer[kMaxCommandBuffer];
+    char    temp_command_buffer[kMaxCommandLineBufferSize];
     char *  args[kMaxArgs];
     uint8_t argCount = 0;
 
-    VerifyOrExit(StringLength(aString, kMaxCommandBuffer) < kMaxCommandBuffer, error = kErrorNoBufs);
+    VerifyOrExit(StringLength(aString, kMaxCommandLineBufferSize) < kMaxCommandLineBufferSize, error = kErrorNoBufs);
 
-    strcpy(buffer, aString);
+    strcpy(temp_command_buffer, aString);
     argCount = kMaxArgs;
-    error    = ParseCmd(buffer, argCount, args);
+    // Parse the argCount and arguments
+    error    = ParseCmd(temp_command_buffer, argCount, args);
 
 exit:
 
@@ -327,6 +331,14 @@ int RPC::OutputFormatV(const char *aFormat, va_list aArguments)
     if (rval > 0)
     {
         mOutputBufferCount += static_cast<size_t>(rval);
+
+        // NOTE: vsnprintf returns "the number of bytes that would have been written if the buffer had enough space"
+        //       It does NOT return the actual number of bytes written.
+        //
+        //       Because of this, we need to set mOutputBufferCount to a maximum value of mOutputBufferMaxLen
+        if (mOutputBufferCount > mOutputBufferMaxLen) {
+            mOutputBufferCount = mOutputBufferMaxLen;
+        }
     }
 exit:
     return rval;

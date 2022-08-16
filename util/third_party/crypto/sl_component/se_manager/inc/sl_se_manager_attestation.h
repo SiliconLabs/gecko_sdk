@@ -32,7 +32,9 @@
 
 #include "em_device.h"
 
-#if defined(SEMAILBOX_PRESENT) || defined(DOXYGEN)
+#if (defined(SEMAILBOX_PRESENT)                                                \
+  && (_SILICON_LABS_SECURITY_FEATURE == _SILICON_LABS_SECURITY_FEATURE_VAULT)) \
+  || defined(DOXYGEN)
 
 /// @addtogroup sl_se_manager
 /// @{
@@ -60,8 +62,6 @@
 #ifdef __cplusplus
 extern "C" {
 #endif
-
-#if (_SILICON_LABS_SECURITY_FEATURE == _SILICON_LABS_SECURITY_FEATURE_VAULT) || defined(DOXYGEN)
 
 // -----------------------------------------------------------------------------
 // Defines
@@ -198,8 +198,6 @@ sl_status_t sl_se_attestation_get_config_token_size(sl_se_command_context_t *cmd
                                                     size_t challenge_size,
                                                     size_t *token_size);
 
-#endif // (_SILICON_LABS_SECURITY_FEATURE == _SILICON_LABS_SECURITY_FEATURE_VAULT)
-
 #ifdef __cplusplus
 }
 #endif
@@ -207,6 +205,6 @@ sl_status_t sl_se_attestation_get_config_token_size(sl_se_command_context_t *cmd
 /// @} (end addtogroup sl_se_manager_attestation)
 /// @} (end addtogroup sl_se_manager)
 
-#endif // defined(SEMAILBOX_PRESENT)
+#endif // SEMAILBOX_PRESENT && VAULT
 
 #endif // SL_SE_MANAGER_ATTESTATION_H

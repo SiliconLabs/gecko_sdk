@@ -22,11 +22,18 @@
 #include "app/framework/util/af-main.h"
 #include "app/framework/util/common.h"
 #include "hal/hal.h"
+
 #ifdef UC_BUILD
+#include "sl_component_catalog.h"
+#ifdef SL_CATALOG_ZIGBEE_TEST_HARNESS_PRESENT
 #include "test-harness.h"
-#else
+#endif // SL_CATALOG_ZIGBEE_TEST_HARNESS_PRESENT
+#else // !UC_BUILD
+#ifdef EMBER_AF_PLUGIN_TEST_HARNESS
+#define SL_CATALOG_ZIGBEE_TEST_HARNESS_PRESENT
 #include "app/framework/plugin/test-harness/test-harness.h"
-#endif
+#endif // EMBER_AF_PLUGIN_TEST_HARNESS
+#endif // UC_BUILD
 
 #if !defined(EZSP_HOST)
   #include "stack/include/cbke-crypto-engine.h"
@@ -35,7 +42,6 @@
 #include "key-establishment-storage.h"
 
 #ifdef UC_BUILD
-#include "sl_component_catalog.h"
 #include "zap-cluster-command-parser.h"
 #include "zigbee_af_cluster_functions.h"
 
@@ -45,11 +51,6 @@
 #define ZCL_TERMINATE_KEY_ESTABLISHMENT_COMMAND_ID ZCL_TERMINATE_KEY_ESTABLISHMENT_FROM_CLIENT_COMMAND_ID
 #else
 #error "ZCL TerminateKeyEstablishment Command ID not defined"
-#endif
-
-#else // !UC_BUILD
-#ifdef EMBER_AF_PLUGIN_TEST_HARNESS
-#define SL_CATALOG_ZIGBEE_TEST_HARNESS_PRESENT
 #endif
 
 WEAK(bool emberAfPluginKeyEstablishmentInterPanCallback(EmberAfKeyEstablishmentNotifyMessage status,
@@ -161,7 +162,9 @@ EmberEventControl emberAfPluginKeyEstablishmentApsDuplicateDetectionEventControl
 
 EmberAfCbkeKeyEstablishmentSuite emAfAvailableCbkeSuite = EMBER_AF_CBKE_KEY_ESTABLISHMENT_SUITE_163K1;
 EmberAfCbkeKeyEstablishmentSuite emAfCurrentCbkeSuite   = EMBER_AF_CBKE_KEY_ESTABLISHMENT_SUITE_163K1;
-EmberAfCbkeKeyEstablishmentSuite emUseTestHarnessSuite  = EMBER_AF_INVALID_KEY_ESTABLISHMENT_SUITE;
+#ifdef SL_CATALOG_ZIGBEE_TEST_HARNESS_PRESENT
+static EmberAfCbkeKeyEstablishmentSuite emUseTestHarnessSuite  = EMBER_AF_INVALID_KEY_ESTABLISHMENT_SUITE;
+#endif // SL_CATALOG_ZIGBEE_TEST_HARNESS_PRESENT
 
 #if defined EMBER_TEST
 KeyEstablishEvent timeoutState = NO_KEY_ESTABLISHMENT_EVENT;
@@ -250,9 +253,16 @@ static const char * terminateStatus[] = TERMINATE_STATUS_STRINGS;
 
 // Over the air message lengths for Initiate Key Establishment Request and Response
 // certificate + keyEstablishmentSuite + ephemeralDataGenerateTime + confirmKeyGenerateTime
-# define INITIATE_KEY_ESTABLISHMENT_LENGTH_163K1 EMBER_CERTIFICATE_SIZE + 2 + 1 + 1
-# define INITIATE_KEY_ESTABLISHMENT_LENGTH_283K1 EMBER_CERTIFICATE_283K1_SIZE + 2 + 1 + 1
+#define INITIATE_KEY_ESTABLISHMENT_LENGTH_163K1 EMBER_CERTIFICATE_SIZE + 2 + 1 + 1
+#define INITIATE_KEY_ESTABLISHMENT_LENGTH_283K1 EMBER_CERTIFICATE_283K1_SIZE + 2 + 1 + 1
+// The fixed length of the Key Establishment commands.
+#define INITIATE_KEY_ESTABLISHMENT_REQUEST_COMMAND_MIN_LENGTH INITIATE_KEY_ESTABLISHMENT_LENGTH_163K1
+#define EPHEMERAL_DATA_REQUEST_COMMAND_MIN_LENGTH 22
+#define CONFIRM_KEY_DATA_REQUEST_COMMAND_MIN_LENGTH 16
 
+#define INITIATE_KEY_ESTABLISHMENT_RESPONSE_COMMAND_MIN_LENGTH INITIATE_KEY_ESTABLISHMENT_LENGTH_163K1
+#define EPHEMERAL_DATA_RESPONSE_COMMAND_MIN_LENGTH 22
+#define CONFIRM_KEY_DATA_RESPONSE_COMMAND_MIN_LENGTH 16
 //------------------------------------------------------------------------------
 // Forward declarations
 static bool checkMalformed283k1Command(bool isCertificate);
@@ -812,9 +822,11 @@ static void sendKeyEstablishMessage(KeyEstablishMessage message)
   *ptr++ = keyEstPartner.sequenceNumber;
   *ptr   = message;
 
+#ifdef SL_CATALOG_ZIGBEE_TEST_HARNESS_PRESENT
   if (!emAfKeyEstablishmentTestHarnessMessageSendCallback(message)) {
     return;
   }
+#endif // SL_CATALOG_ZIGBEE_TEST_HARNESS_PRESENT
 
   if (keyEstPartner.isIntraPan) {
     EmberApsFrame apsFrame;
@@ -1129,13 +1141,16 @@ static EmberStatus initiateKeyEstablishment(const EmberEUI64 eui64,
     // The Test Harness can skip the read attributes stage. This is useful
     // in running curve specific key establishment tests, irrespective of
     // which binaries are supported.
-    if (emUseTestHarnessSuite == EMBER_AF_INVALID_KEY_ESTABLISHMENT_SUITE) {
-      keyEstablishStateMachine(CHECK_SUPPORTED_CURVES, NULL, NULL);
-    } else {
+#ifdef SL_CATALOG_ZIGBEE_TEST_HARNESS_PRESENT
+    if (emUseTestHarnessSuite != EMBER_AF_INVALID_KEY_ESTABLISHMENT_SUITE) {
       lastEvent = CHECK_SUPPORTED_CURVES;
       validLastEvent = CHECK_SUPPORTED_CURVES;
       emAfKeyEstablishmentSelectCurve(emUseTestHarnessSuite);
       keyEstablishStateMachine(BEGIN_KEY_ESTABLISHMENT, NULL, NULL);
+    } else
+#endif // SL_CATALOG_ZIGBEE_TEST_HARNESS_PRESENT
+    {
+      keyEstablishStateMachine(CHECK_SUPPORTED_CURVES, NULL, NULL);
     }
 
     return ((lastEvent == validLastEvent)
@@ -1250,7 +1265,9 @@ void sendNextKeyEstablishMessage(KeyEstablishMessage message,
 
 void emAfSkipCheckSupportedCurves(EmberAfCbkeKeyEstablishmentSuite suite)
 {
+#ifdef SL_CATALOG_ZIGBEE_TEST_HARNESS_PRESENT
   emUseTestHarnessSuite = suite;
+#endif // SL_CATALOG_ZIGBEE_TEST_HARNESS_PRESENT
 }
 
 void emAfSetAvailableCurves(EmberAfCbkeKeyEstablishmentSuite suite)
@@ -1652,11 +1669,13 @@ void emAfPluginKeyEstablishmentGenerateCbkeKeysHandler(EmberStatus status,
     return;
   }
 
+#ifdef SL_CATALOG_ZIGBEE_TEST_HARNESS_PRESENT
   if (emAfKeyEstablishmentTestHarnessCbkeCallback(CBKE_OPERATION_GENERATE_KEYS,
                                                   ephemeralPublicKey->contents,
                                                   NULL)) {
     return;
   }
+#endif //SL_CATALOG_ZIGBEE_TEST_HARNESS_PRESENT
 
   (void) emberAfPushEndpointNetworkIndex(keyEstablishmentEndpoint);
   keyEstablishStateMachine(SEND_EPHEMERAL_DATA_MESSAGE,
@@ -1680,11 +1699,13 @@ void emAfPluginKeyEstablishmentCalculateSmacsHandler(EmberStatus status,
     return;
   }
 
+#ifdef SL_CATALOG_ZIGBEE_TEST_HARNESS_PRESENT
   if (emAfKeyEstablishmentTestHarnessCbkeCallback(CBKE_OPERATION_GENERATE_SECRET,
                                                   initiatorSmac->contents,
                                                   responderSmac->contents)) {
     return;
   }
+#endif // SL_CATALOG_ZIGBEE_TEST_HARNESS_PRESENT
 
   (void) emberAfPushEndpointNetworkIndex(keyEstablishmentEndpoint);
   keyEstablishStateMachine(SEND_CONFIRM_KEY_MESSAGE,
@@ -1705,11 +1726,13 @@ void emAfPluginKeyEstablishmentGenerateCbkeKeysHandler283k1(EmberStatus status,
     return;
   }
 
+#ifdef SL_CATALOG_ZIGBEE_TEST_HARNESS_PRESENT
   if (emAfKeyEstablishmentTestHarnessCbkeCallback(CBKE_OPERATION_GENERATE_KEYS_283K1,
                                                   ephemeralPublicKey->contents,
                                                   NULL)) {
     return;
   }
+#endif // SL_CATALOG_ZIGBEE_TEST_HARNESS_PRESENT
 
   (void) emberAfPushEndpointNetworkIndex(keyEstablishmentEndpoint);
   keyEstablishStateMachine(SEND_EPHEMERAL_DATA_MESSAGE,
@@ -1731,11 +1754,13 @@ void emAfPluginKeyEstablishmentCalculateSmacsHandler283k1(EmberStatus status,
     return;
   }
 
+#ifdef SL_CATALOG_ZIGBEE_TEST_HARNESS_PRESENT
   if (emAfKeyEstablishmentTestHarnessCbkeCallback(CBKE_OPERATION_GENERATE_SECRET_283K1,
                                                   initiatorSmac->contents,
                                                   responderSmac->contents)) {
     return;
   }
+#endif // SL_CATALOG_ZIGBEE_TEST_HARNESS_PRESENT
 
   (void) emberAfPushEndpointNetworkIndex(keyEstablishmentEndpoint);
   keyEstablishStateMachine(SEND_CONFIRM_KEY_MESSAGE,
@@ -1789,34 +1814,51 @@ uint32_t emberAfKeyEstablishmentClusterServerCommandParse(sl_service_opcode_t op
     switch (cmd->commandId) {
       case ZCL_INITIATE_KEY_ESTABLISHMENT_REQUEST_COMMAND_ID:
       {
-        sl_zcl_key_establishment_cluster_initiate_key_establishment_request_command_t cmd_data;
-        zclStatus = zcl_decode_key_establishment_cluster_initiate_key_establishment_request_command(cmd, &cmd_data);
+        uint16_t payloadOffset = cmd->payloadStartIndex;
+        if (cmd->bufLen < payloadOffset + INITIATE_KEY_ESTABLISHMENT_REQUEST_COMMAND_MIN_LENGTH) {
+          zclStatus = EMBER_ZCL_STATUS_MALFORMED_COMMAND;
+        } else {
+          sl_zcl_key_establishment_cluster_initiate_key_establishment_request_command_t cmd_data;
+          zclStatus = zcl_decode_key_establishment_cluster_initiate_key_establishment_request_command(cmd, &cmd_data);
 
-        if (zclStatus == EMBER_ZCL_STATUS_SUCCESS) {
-          emberAfKeyEstablishmentClusterInitiateKeyEstablishmentRequestCallback(cmd_data.keyEstablishmentSuite,
-                                                                                cmd_data.ephemeralDataGenerateTime,
-                                                                                cmd_data.confirmKeyGenerateTime,
-                                                                                cmd_data.identity);
+          if (zclStatus == EMBER_ZCL_STATUS_SUCCESS) {
+            emberAfKeyEstablishmentClusterInitiateKeyEstablishmentRequestCallback(cmd_data.keyEstablishmentSuite,
+                                                                                  cmd_data.ephemeralDataGenerateTime,
+                                                                                  cmd_data.confirmKeyGenerateTime,
+                                                                                  cmd_data.identity);
+          }
         }
         break;
       }
       case ZCL_EPHEMERAL_DATA_REQUEST_COMMAND_ID:
       {
-        sl_zcl_key_establishment_cluster_ephemeral_data_request_command_t cmd_data;
-        zclStatus = zcl_decode_key_establishment_cluster_ephemeral_data_request_command(cmd, &cmd_data);
+        // The minimum length for this command is 16 + 6 bytes
+        uint16_t payloadOffset = cmd->payloadStartIndex;
+        if (cmd->bufLen < payloadOffset + EPHEMERAL_DATA_REQUEST_COMMAND_MIN_LENGTH) {
+          zclStatus = EMBER_ZCL_STATUS_MALFORMED_COMMAND;
+        } else {
+          sl_zcl_key_establishment_cluster_ephemeral_data_request_command_t cmd_data;
+          zclStatus = zcl_decode_key_establishment_cluster_ephemeral_data_request_command(cmd, &cmd_data);
 
-        if (zclStatus == EMBER_ZCL_STATUS_SUCCESS) {
-          emberAfKeyEstablishmentClusterEphemeralDataRequestCallback(cmd_data.ephemeralData);
+          if (zclStatus == EMBER_ZCL_STATUS_SUCCESS) {
+            emberAfKeyEstablishmentClusterEphemeralDataRequestCallback(cmd_data.ephemeralData);
+          }
         }
         break;
       }
       case ZCL_CONFIRM_KEY_DATA_REQUEST_COMMAND_ID:
       {
-        sl_zcl_key_establishment_cluster_confirm_key_data_request_command_t cmd_data;
-        zclStatus = zcl_decode_key_establishment_cluster_confirm_key_data_request_command(cmd, &cmd_data);
+        // The minimum length for this command is 16 bytes
+        uint16_t payloadOffset = cmd->payloadStartIndex;
+        if (cmd->bufLen < payloadOffset + CONFIRM_KEY_DATA_REQUEST_COMMAND_MIN_LENGTH) {
+          zclStatus = EMBER_ZCL_STATUS_MALFORMED_COMMAND;
+        } else {
+          sl_zcl_key_establishment_cluster_confirm_key_data_request_command_t cmd_data;
+          zclStatus = zcl_decode_key_establishment_cluster_confirm_key_data_request_command(cmd, &cmd_data);
 
-        if (zclStatus == EMBER_ZCL_STATUS_SUCCESS) {
-          emberAfKeyEstablishmentClusterConfirmKeyDataRequestCallback(cmd_data.secureMessageAuthenticationCode);
+          if (zclStatus == EMBER_ZCL_STATUS_SUCCESS) {
+            emberAfKeyEstablishmentClusterConfirmKeyDataRequestCallback(cmd_data.secureMessageAuthenticationCode);
+          }
         }
         break;
       }
@@ -1866,34 +1908,49 @@ uint32_t emberAfKeyEstablishmentClusterClientCommandParse(sl_service_opcode_t op
       }
       case ZCL_INITIATE_KEY_ESTABLISHMENT_RESPONSE_COMMAND_ID:
       {
-        sl_zcl_key_establishment_cluster_initiate_key_establishment_response_command_t cmd_data;
-        zclStatus = zcl_decode_key_establishment_cluster_initiate_key_establishment_response_command(cmd, &cmd_data);
+        uint16_t payloadOffset = cmd->payloadStartIndex;
+        if (cmd->bufLen < payloadOffset + INITIATE_KEY_ESTABLISHMENT_RESPONSE_COMMAND_MIN_LENGTH) {
+          zclStatus = EMBER_ZCL_STATUS_MALFORMED_COMMAND;
+        } else {
+          sl_zcl_key_establishment_cluster_initiate_key_establishment_response_command_t cmd_data;
+          zclStatus = zcl_decode_key_establishment_cluster_initiate_key_establishment_response_command(cmd, &cmd_data);
 
-        if (zclStatus == EMBER_ZCL_STATUS_SUCCESS) {
-          emberAfKeyEstablishmentClusterInitiateKeyEstablishmentResponseCallback(cmd_data.requestedKeyEstablishmentSuite,
-                                                                                 cmd_data.ephemeralDataGenerateTime,
-                                                                                 cmd_data.confirmKeyGenerateTime,
-                                                                                 cmd_data.identity);
+          if (zclStatus == EMBER_ZCL_STATUS_SUCCESS) {
+            emberAfKeyEstablishmentClusterInitiateKeyEstablishmentResponseCallback(cmd_data.requestedKeyEstablishmentSuite,
+                                                                                   cmd_data.ephemeralDataGenerateTime,
+                                                                                   cmd_data.confirmKeyGenerateTime,
+                                                                                   cmd_data.identity);
+          }
         }
         break;
       }
       case ZCL_EPHEMERAL_DATA_RESPONSE_COMMAND_ID:
       {
-        sl_zcl_key_establishment_cluster_ephemeral_data_response_command_t cmd_data;
-        zclStatus = zcl_decode_key_establishment_cluster_ephemeral_data_response_command(cmd, &cmd_data);
+        uint16_t payloadOffset = cmd->payloadStartIndex;
+        if (cmd->bufLen < payloadOffset + EPHEMERAL_DATA_RESPONSE_COMMAND_MIN_LENGTH) {
+          zclStatus = EMBER_ZCL_STATUS_MALFORMED_COMMAND;
+        } else {
+          sl_zcl_key_establishment_cluster_ephemeral_data_response_command_t cmd_data;
+          zclStatus = zcl_decode_key_establishment_cluster_ephemeral_data_response_command(cmd, &cmd_data);
 
-        if (zclStatus == EMBER_ZCL_STATUS_SUCCESS) {
-          emberAfKeyEstablishmentClusterEphemeralDataResponseCallback(cmd_data.ephemeralData);
+          if (zclStatus == EMBER_ZCL_STATUS_SUCCESS) {
+            emberAfKeyEstablishmentClusterEphemeralDataResponseCallback(cmd_data.ephemeralData);
+          }
         }
         break;
       }
       case ZCL_CONFIRM_KEY_DATA_RESPONSE_COMMAND_ID:
       {
-        sl_zcl_key_establishment_cluster_confirm_key_data_response_command_t cmd_data;
-        zclStatus = zcl_decode_key_establishment_cluster_confirm_key_data_response_command(cmd, &cmd_data);
+        uint16_t payloadOffset = cmd->payloadStartIndex;
+        if (cmd->bufLen < payloadOffset + CONFIRM_KEY_DATA_RESPONSE_COMMAND_MIN_LENGTH) {
+          zclStatus = EMBER_ZCL_STATUS_MALFORMED_COMMAND;
+        } else {
+          sl_zcl_key_establishment_cluster_confirm_key_data_response_command_t cmd_data;
+          zclStatus = zcl_decode_key_establishment_cluster_confirm_key_data_response_command(cmd, &cmd_data);
 
-        if (zclStatus == EMBER_ZCL_STATUS_SUCCESS) {
-          emberAfKeyEstablishmentClusterConfirmKeyDataResponseCallback(cmd_data.secureMessageAuthenticationCode);
+          if (zclStatus == EMBER_ZCL_STATUS_SUCCESS) {
+            emberAfKeyEstablishmentClusterConfirmKeyDataResponseCallback(cmd_data.secureMessageAuthenticationCode);
+          }
         }
         break;
       }

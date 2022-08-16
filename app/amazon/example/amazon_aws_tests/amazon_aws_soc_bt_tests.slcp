@@ -80,7 +80,7 @@ configuration:
 tag:
   - hardware:device:ram:64
   - hardware:rf:band:2400
-  - hardware:device:sdid:200|205
+  - hardware:device:sdid:200|205|215
 
 filter:
   - name: "Wireless Technology"

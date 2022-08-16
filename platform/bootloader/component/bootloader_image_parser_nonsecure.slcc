@@ -1,5 +1,5 @@
 id: bootloader_image_parser_nonsecure
-label: Image Parser
+label: Image Parser (Non-Secure)
 package: bootloader
 description: >
   Image parser

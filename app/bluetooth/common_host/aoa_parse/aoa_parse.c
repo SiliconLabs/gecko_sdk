@@ -121,7 +121,7 @@ sl_status_t aoa_parse_init(const char *config)
 sl_status_t aoa_parse_check_config_exist(char *config_name,
                                          aoa_id_t locator_id)
 {
-  cJSON *array;
+  cJSON *item;
   cJSON *locator;
   sl_status_t sc;
 
@@ -133,8 +133,8 @@ sl_status_t aoa_parse_check_config_exist(char *config_name,
   }
 
   // Try parse locator specific config
-  array = cJSON_GetObjectItem(locator, config_name);
-  if (NULL == array) {
+  item = cJSON_GetObjectItem(locator, config_name);
+  if (item == NULL) {
     return SL_STATUS_NOT_FOUND;
   }
 
@@ -354,6 +354,10 @@ sl_status_t aoa_parse_locator(aoa_id_t id,
 
   // Increment locator index.
   ++locator_index;
+  // Reset array indices.
+  allowlist_index = 0;
+  azimuth_mask_index = 0;
+  elevation_mask_index = 0;
 
   return SL_STATUS_OK;
 }
@@ -594,6 +598,10 @@ static sl_status_t aoa_parse_find_locator_config(cJSON **locator,
   cJSON *array;
   cJSON *item;
   uint32_t i = 0;
+
+  if (locator_id == NULL) {
+    return SL_STATUS_NULL_POINTER;
+  }
 
   array = cJSON_GetObjectItem(root, "locators");
   CHECK_TYPE(array, cJSON_Array);

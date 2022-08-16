@@ -15,5 +15,3 @@ include:
      - path: CC_WakeUp.h
 provides:
   - name: zw_cc_wakeup
-documentation:
-  url: "https://sdomembers.z-wavealliance.org/document/dl/643"

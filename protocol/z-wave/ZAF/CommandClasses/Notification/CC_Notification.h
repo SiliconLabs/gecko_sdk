@@ -292,13 +292,13 @@ JOB_STATUS CmdClassNotificationReport(
   VOID_CALLBACKFUNC(pCallback)(TRANSMISSION_RESULT * pTransmissionResult));
 
 /**
- * @brief GetGroupNotificationType
+ * @brief GetGroupIndex
  * Read last active notification type
  * @param[in,out] pNotificationType
  * @param[in] endpoint is the destination endpoint
  * @return Success: group number, else: 0xFF
  */
-extern uint8_t GetGroupNotificationType(notification_type_t * pNotificationType, uint8_t endpoint);
+extern uint8_t GetGroupIndex(notification_type_t * pNotificationType, uint8_t endpoint);
 
 /**
  * Validates or finds a combination of notification type and endpoint.

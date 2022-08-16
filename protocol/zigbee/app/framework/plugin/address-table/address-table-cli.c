@@ -74,7 +74,7 @@ void emberAfPluginAddressTablePrintCommand(sl_cli_command_arg_t *arguments)
 {
   uint8_t i;
   uint8_t used = 0;
-  sl_zigbee_core_debug_print("#  node   eui");
+  sl_zigbee_core_debug_print("#  node   eui\n");
   for (i = 0; i < emberAfGetAddressTableSize(); i++) {
     EmberNodeId nodeId = emberGetAddressTableRemoteNodeId(i);
     if (nodeId != EMBER_TABLE_ENTRY_UNUSED_NODE_ID) {
@@ -87,7 +87,7 @@ void emberAfPluginAddressTablePrintCommand(sl_cli_command_arg_t *arguments)
       emberAfAppFlush();
     }
   }
-  sl_zigbee_core_debug_print("%d of %d entries used.",
+  sl_zigbee_core_debug_print("%d of %d entries used.\n",
                              used,
                              emberAfGetAddressTableSize());
 }

@@ -1,5 +1,5 @@
 id: bootloader_serial_driver_nonsecure
-label: Bootloader Serial Driver
+label: Bootloader Serial Driver (Non-Secure)
 package: bootloader
 description: >
   DMA-driven Serial driver.

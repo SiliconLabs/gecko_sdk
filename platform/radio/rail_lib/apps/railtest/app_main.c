@@ -340,7 +340,8 @@ void sl_rail_test_internal_app_init(void)
   responsePrintEnable(printingEnabled);
   // Print app initialization information.
   RAILTEST_PRINTF("\n");
-  responsePrint("reset", "App:%s,Built:%s", SL_RAIL_TEST_APP_NAME, buildDateTime);
+  responsePrint("reset", "App:%s,Built:%s,Cause:0x%x",
+                SL_RAIL_TEST_APP_NAME, buildDateTime, resetCause);
   printChipInfo();
   getPti(NULL);
 

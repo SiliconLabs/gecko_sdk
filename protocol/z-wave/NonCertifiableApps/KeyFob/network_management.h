@@ -31,7 +31,10 @@ typedef enum
   NETWORK_MANAGEMENT_STATE_START_EXCLUSION,
   NETWORK_MANAGEMENT_STATE_ADD_GROUP,
   NETWORK_MANAGEMENT_STATE_REMOVE_GROUP,
-  NETWORK_MANAGEMENT_STATE_LEARNMODE
+  NETWORK_MANAGEMENT_STATE_LEARNMODE,
+  NETWORK_MANAGEMENT_STATE_SECURITY_PROBE,
+  NETWORK_MANAGEMENT_STATE_S2_PROBE,
+  NETWORK_MANAGEMENT_STATE_S0_PROBE
 } sl_network_management_states_t;
 // -----------------------------------------------------------------------------
 //                                Global Variables
@@ -41,17 +44,17 @@ typedef enum
 //                          Public Function Declarations
 // -----------------------------------------------------------------------------
 
-bool portable_controller_start_inclusion();
+bool key_fob_start_inclusion();
 
-bool portable_controller_start_exclusion();
+bool key_fob_start_exclusion();
 
-bool portable_controller_stop_exclusion();
+bool key_fob_stop_exclusion();
 
-bool portable_controller_stop_inclusion();
+bool key_fob_stop_inclusion();
 
-bool portable_controller_start_network_learnmode();
+bool key_fob_start_network_learnmode();
 
-bool portable_controller_stop_network_learnmode();
+bool key_fob_stop_network_learnmode();
 
 bool set_new_network_management_state( sl_network_management_states_t new_state);
 

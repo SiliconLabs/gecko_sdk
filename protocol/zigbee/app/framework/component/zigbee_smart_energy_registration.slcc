@@ -17,7 +17,6 @@ provides:
    - name: "zigbee_smart_energy_registration"
 requires:
    - name: "zigbee_address_table"
-   - name: "zigbee_test_harness"
    - name: "zigbee_esi_management"
 config_file:
   - path: protocol/zigbee/app/framework/plugin/smart-energy-registration/config/smart-energy-registration-config.h

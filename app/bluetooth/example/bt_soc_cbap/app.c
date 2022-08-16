@@ -28,44 +28,84 @@
  *
  ******************************************************************************/
 #include <stdio.h>
+#include <stdbool.h>
 #include "em_common.h"
 #include "sl_bluetooth.h"
 #include "gatt_db.h"
 #include "app_assert.h"
 #include "app_log.h"
 #include "sl_simple_led_instances.h"
+#include "sl_simple_timer.h"
 #include "sl_bt_cbap.h"
 #include "cbap_config.h"
 #include "app.h"
 
-#define SCAN_INTERVAL                 16 // 10ms
-#define SCAN_WINDOW                   16 // 10ms
+#define LED_TIMEOUT                   500 // ms
+#define NO_CALLBACK_DATA              (void *)NULL // Callback has no parameters
 
-#define BT_ADDR_LEN                   6  // Bluetooth address length
+#if SL_BT_CONFIG_MAX_CONNECTIONS < 1
+  #error At least 1 connection has to be enabled!
+#endif
+
+// Connection properties
+typedef struct {
+  uint8_t connection_handle;
+  bd_addr address;
+} conn_properties_t;
 
 // The advertising set handle allocated from Bluetooth stack.
-static uint8_t advertising_set_handle = 0xff;
-// Connection handle
-static uint8_t connection = 0xff;
+static uint8_t advertising_set_handle = SL_BT_INVALID_ADVERTISING_SET_HANDLE;
+
+// The connectiopn handle and the Bluetooth address of the remote device we
+// have CBAP in progress with
+static conn_properties_t candidate_device;
+
+// Array for holding properties of the trusted connections
+static conn_properties_t trusted_devices[SL_BT_CONFIG_MAX_CONNECTIONS];
 
 // Device role
 static sl_bt_cbap_role_t role = ROLE;
 // Should we search for a specified peripheral device or not
 static bool peripheral_target_defined = ADDR_ENABLE;
 // Target device Bluetooth address
-static uint8_t peripheral_target_addr[BT_ADDR_LEN];
+static bd_addr peripheral_target_addr;
+
+// Timer handle
+static sl_simple_timer_t led_timer;
+
+// Clears candidate device.
+static void clear_connection_info(void);
+// Adds the candidate device to the trusted devices array.
+static void save_connection_info(void);
+// Logs the connection handle and the Bluetooth address of the trusted devices.
+static void print_trusted_devices(void);
 
 // Convert address string to address data bytes.
-static bool decode_address(char *addess_str, uint8_t *address);
+static bool decode_address(char *addess_str, bd_addr *address);
 
 // Examine a scan report and decide if a connection should be established.
-bool check_scan_report(sl_bt_evt_scanner_scan_report_t *scan_report);
+bool check_scan_report(sl_bt_evt_scanner_legacy_advertisement_report_t *scan_report);
+
+// Timer Callback.
+static void led_timer_cb(sl_simple_timer_t *handle, void *data);
 
 /**************************************************************************//**
  * Application Init.
  *****************************************************************************/
 SL_WEAK void app_init(void)
 {
+  // Initialize candidate device data
+  clear_connection_info();
+
+  // Initialize connection array
+  uint8_t i, j;
+  for (i = 0; i < SL_BT_CONFIG_MAX_CONNECTIONS; i++) {
+    trusted_devices[i].connection_handle = SL_BT_INVALID_CONNECTION_HANDLE;
+    for (j = 0; j < sizeof(bd_addr); j++) {
+      trusted_devices[i].address.addr[j] = 0xff;
+    }
+  }
+
   /////////////////////////////////////////////////////////////////////////////
   // Put your additional application init code here!                         //
   // This is called once during start-up.                                    //
@@ -156,14 +196,14 @@ void sl_bt_on_event(sl_bt_msg_t *evt)
 
           // If defined, get target address
           if (peripheral_target_defined) {
-            if (decode_address(ADDR, peripheral_target_addr)) {
-              app_log_info("Searching for %02X:%02X:%02X:%02X:%02X:%02X. ",
-                           peripheral_target_addr[5],
-                           peripheral_target_addr[4],
-                           peripheral_target_addr[3],
-                           peripheral_target_addr[2],
-                           peripheral_target_addr[1],
-                           peripheral_target_addr[0]);
+            if (decode_address(ADDR, &peripheral_target_addr)) {
+              app_log_info("Searching for %02X:%02X:%02X:%02X:%02X:%02X. " APP_LOG_NL,
+                           peripheral_target_addr.addr[5],
+                           peripheral_target_addr.addr[4],
+                           peripheral_target_addr.addr[3],
+                           peripheral_target_addr.addr[2],
+                           peripheral_target_addr.addr[1],
+                           peripheral_target_addr.addr[0]);
             } else {
               peripheral_target_defined = false;
               app_log_error("Reading target address failed. Searching for any " \
@@ -173,12 +213,6 @@ void sl_bt_on_event(sl_bt_msg_t *evt)
             app_log_info("Searching for any device advertising the CBAP " \
                          "Service." APP_LOG_NL);
           }
-
-          // Set default scanning parameters.
-          sc = sl_bt_scanner_set_parameters(sl_bt_scanner_scan_mode_passive,
-                                            SCAN_INTERVAL,
-                                            SCAN_WINDOW);
-          app_assert_status(sc);
 
           // Start scanning
           sc = sl_bt_scanner_start(sl_bt_scanner_scan_phy_1m,
@@ -196,19 +230,20 @@ void sl_bt_on_event(sl_bt_msg_t *evt)
     // -------------------------------
     // This event is generated when an advertisement packet or a scan response
     // is received from a responder
-    case sl_bt_evt_scanner_scan_report_id:
+    case sl_bt_evt_scanner_legacy_advertisement_report_id:
       if (role == SL_BT_CBAP_ROLE_CENTRAL) {
         // Filter for connectable scannable undirected advertisements
-        if (evt->data.evt_scanner_scan_report.packet_type == 0
-            && check_scan_report(&evt->data.evt_scanner_scan_report)) {
+        if ((evt->data.evt_scanner_legacy_advertisement_report.event_flags
+             == (SL_BT_SCANNER_EVENT_FLAG_CONNECTABLE | SL_BT_SCANNER_EVENT_FLAG_SCANNABLE))
+            && check_scan_report(&evt->data.evt_scanner_legacy_advertisement_report)) {
           // Target device found. Stop scanning.
           sc = sl_bt_scanner_stop();
           app_assert_status(sc);
 
           // Connect to device
-          sc = sl_bt_connection_open(evt->data.evt_scanner_scan_report.address,
-                                     evt->data.evt_scanner_scan_report.address_type,
-                                     sl_bt_gap_1m_phy,
+          sc = sl_bt_connection_open(evt->data.evt_scanner_legacy_advertisement_report.address,
+                                     evt->data.evt_scanner_legacy_advertisement_report.address_type,
+                                     sl_bt_gap_phy_1m,
                                      NULL);
           app_assert_status(sc);
         }
@@ -219,47 +254,35 @@ void sl_bt_on_event(sl_bt_msg_t *evt)
     // This event indicates that a new connection was opened.
     case sl_bt_evt_connection_opened_id:
       app_log_info("Connection opened." APP_LOG_NL);
-      connection = evt->data.evt_connection_opened.connection;
+      // Store data of the candidate device
+      candidate_device.connection_handle = evt->data.evt_connection_opened.connection;
+      candidate_device.address = evt->data.evt_connection_opened.address;
 
       if (evt->data.evt_connection_opened.bonding
           != SL_BT_INVALID_BONDING_HANDLE) {
         app_log_warning("Devices are already bonded." APP_LOG_NL);
       }
 
-      sl_bt_cbap_start(role, connection);
+      sc = sl_bt_cbap_start(role, candidate_device.connection_handle);
+      app_log_status_error(sc);
+      if (sc == SL_STATUS_OK) {
+        app_log_info("CBAP procedure start." APP_LOG_NL);
+      }
       break;
 
     // -------------------------------
     // This event indicates that a connection was closed.
     case sl_bt_evt_connection_closed_id:
-      switch (role) {
-        case SL_BT_CBAP_ROLE_PERIPHERAL:
-          // Turn off LED
-          sl_led_turn_off(SL_SIMPLE_LED_INSTANCE(0));
-          app_log_info("LED off." APP_LOG_NL);
-
-          // Generate data for advertising
-          sc = sl_bt_legacy_advertiser_generate_data(advertising_set_handle,
-                                                     sl_bt_advertiser_general_discoverable);
-          app_assert_status(sc);
-
-          // Restart advertising after client has disconnected
-          sc = sl_bt_legacy_advertiser_start(advertising_set_handle,
-                                             sl_bt_advertiser_connectable_scannable);
-          app_assert_status(sc);
-          app_log_info("Connection closed. Advertising started." APP_LOG_NL);
-          break;
-
-        case SL_BT_CBAP_ROLE_CENTRAL:
-          // Start scanning
-          sc = sl_bt_scanner_start(sl_bt_scanner_scan_phy_1m,
-                                   sl_bt_scanner_discover_generic);
-          app_log_info("Connection closed. Scanning started." APP_LOG_NL);
-          break;
-
-        default:
-          app_assert_status_f(SL_STATUS_INVALID_STATE, "Invalid role!");
-          break;
+      // Remove connection from the connection array if present
+      for (int i = 0; i < SL_BT_CONFIG_MAX_CONNECTIONS; i++) {
+        if (trusted_devices[i].connection_handle == evt->data.evt_connection_closed.connection) {
+          trusted_devices[i].connection_handle = SL_BT_INVALID_CONNECTION_HANDLE;
+          for (uint8_t j = 0; j < sizeof(bd_addr); j++) {
+            trusted_devices[i].address.addr[j] = 0xff;
+          }
+          app_log_info("Trusted device [%d] removed." APP_LOG_NL,
+                       evt->data.evt_connection_closed.connection);
+        }
       }
       break;
 
@@ -286,13 +309,20 @@ void sl_bt_on_event(sl_bt_msg_t *evt)
           break;
         }
 
-        // Set LED state.
         if (data_recv == 0x00) {
+          // Turn off LED.
           sl_led_turn_off(SL_SIMPLE_LED_INSTANCE(0));
           app_log_info("LED off." APP_LOG_NL);
         } else {
+          // Blink LED.
           sl_led_turn_on(SL_SIMPLE_LED_INSTANCE(0));
           app_log_info("LED on." APP_LOG_NL);
+          sc = sl_simple_timer_start(&led_timer,
+                                     LED_TIMEOUT,
+                                     led_timer_cb,
+                                     NO_CALLBACK_DATA,
+                                     false);
+          app_assert_status(sc);
         }
       }
       break;
@@ -311,6 +341,8 @@ void sl_bt_on_event(sl_bt_msg_t *evt)
 // CBAP Peripheral event handler.
 void sl_bt_cbap_peripheral_on_event(sl_bt_cbap_peripheral_state_t status)
 {
+  sl_status_t sc;
+
   switch (status) {
     case SL_BT_CBAP_PERIPHERAL_IDLE:
       break;
@@ -325,6 +357,15 @@ void sl_bt_cbap_peripheral_on_event(sl_bt_cbap_peripheral_state_t status)
 
     case SL_BT_CBAP_PERIPHERAL_DONE:
       app_log_info("CBAP procedure complete." APP_LOG_NL);
+      save_connection_info();
+      clear_connection_info();
+      print_trusted_devices();
+
+      // Restart advertising and enable connections
+      sc = sl_bt_legacy_advertiser_start(advertising_set_handle,
+                                         sl_bt_advertiser_connectable_scannable);
+      app_assert_status(sc);
+      app_log_info("Advertising started." APP_LOG_NL);
       break;
 
     default:
@@ -372,13 +413,22 @@ void sl_bt_cbap_central_on_event(sl_bt_cbap_central_state_t status)
     case SL_BT_CBAP_CENTRAL_DONE: {
       app_log_info("CBAP procedure complete." APP_LOG_NL);
 
-      // Turn on LED on peripheral
-      uint8_t led_on = 0x01;
-      sc = sl_bt_gatt_write_characteristic_value(connection,
+      // Blink LED on peripheral
+      uint8_t led = 0x01;
+      sc = sl_bt_gatt_write_characteristic_value(candidate_device.connection_handle,
                                                  gattdb_aio_digital_out,
-                                                 sizeof(led_on),
-                                                 &led_on);
+                                                 sizeof(led),
+                                                 &led);
       app_assert_status(sc);
+
+      save_connection_info();
+      clear_connection_info();
+      print_trusted_devices();
+
+      // Start scanning
+      sc = sl_bt_scanner_start(sl_bt_scanner_scan_phy_1m,
+                               sl_bt_scanner_discover_generic);
+      app_log_info("Scanning started." APP_LOG_NL);
       break;
     }
 
@@ -387,16 +437,114 @@ void sl_bt_cbap_central_on_event(sl_bt_cbap_central_state_t status)
   }
 }
 
+// Callback to handle CBAP process errors.
+void sl_bt_on_cbap_error(void)
+{
+  sl_status_t sc;
+  app_log_info("CBAP procedure was aborted for connection %d." APP_LOG_NL,
+               candidate_device.connection_handle);
+
+  sc = sl_bt_connection_close(candidate_device.connection_handle);
+  app_log_status_error(sc);
+  clear_connection_info();
+
+  switch (role) {
+    case SL_BT_CBAP_ROLE_PERIPHERAL:
+      // Restart advertising and enable connections
+      sc = sl_bt_legacy_advertiser_start(advertising_set_handle,
+                                         sl_bt_advertiser_connectable_scannable);
+      app_assert_status(sc);
+      app_log_info("Advertising started." APP_LOG_NL);
+      break;
+
+    case SL_BT_CBAP_ROLE_CENTRAL:
+      // Start scanning
+      sc = sl_bt_scanner_start(sl_bt_scanner_scan_phy_1m,
+                               sl_bt_scanner_discover_generic);
+      app_assert_status(sc);
+      app_log_info("Scanning started." APP_LOG_NL);
+      break;
+
+    default:
+      app_assert_status_f(SL_STATUS_INVALID_STATE, "Invalid role!");
+      break;
+  }
+}
+
+/**************************************************************************//**
+ * Clears candidate device.
+ *****************************************************************************/
+static void clear_connection_info(void)
+{
+  candidate_device.connection_handle = SL_BT_INVALID_CONNECTION_HANDLE;
+  for (uint8_t i = 0; i < sizeof(bd_addr); i++) {
+    candidate_device.address.addr[i] = 0xff;
+  }
+}
+
+/**************************************************************************//**
+ * Adds the candidate device to the trusted devices array.
+ *****************************************************************************/
+static void save_connection_info(void)
+{
+  // Find next available slot
+  int index = -1;
+  for (int i = 0; i < SL_BT_CONFIG_MAX_CONNECTIONS; i++) {
+    if (trusted_devices[i].connection_handle == SL_BT_INVALID_CONNECTION_HANDLE) {
+      index = i;
+      break;
+    }
+  }
+  if (index == -1) {
+    app_log_error("Connection array is full." APP_LOG_NL);
+    return;
+  }
+
+  // Save connection parameters
+  trusted_devices[index].connection_handle = candidate_device.connection_handle;
+  trusted_devices[index].address = candidate_device.address;
+
+  app_log_info("Trusted device [%d] added." APP_LOG_NL,
+               trusted_devices[index].connection_handle);
+}
+
+/**************************************************************************//**
+ * Logs the connection handle and the Bluetooth address of the trusted devices.
+ *****************************************************************************/
+static void print_trusted_devices(void)
+{
+  bool found = false;
+  app_log_info("List of trusted connections:" APP_LOG_NL);
+
+  for (int i = 0; i < SL_BT_CONFIG_MAX_CONNECTIONS; i++) {
+    if (trusted_devices[i].connection_handle != SL_BT_INVALID_CONNECTION_HANDLE) {
+      found = true;
+      app_log_info("  Connection handle: %d  Address: %02X:%02X:%02X:%02X:%02X:%02X" APP_LOG_NL,
+                   trusted_devices[i].connection_handle,
+                   trusted_devices[i].address.addr[5],
+                   trusted_devices[i].address.addr[4],
+                   trusted_devices[i].address.addr[3],
+                   trusted_devices[i].address.addr[2],
+                   trusted_devices[i].address.addr[1],
+                   trusted_devices[i].address.addr[0]);
+    }
+  }
+
+  if (!found) {
+    app_log_info("  None." APP_LOG_NL);
+  }
+}
+
 /**************************************************************************//**
  * Convert address string to address data bytes.
  * @param[in] addess_str Address string
- * @param[out] address address byte array
+ * @param[out] address Bluetooth address byte array
  * @return true if operation was successful
  *****************************************************************************/
-static bool decode_address(char *addess_str, uint8_t *address)
+static bool decode_address(char *addess_str, bd_addr *address)
 {
   uint8_t retval;
-  unsigned int address_cache[BT_ADDR_LEN];
+  unsigned int address_cache[sizeof(bd_addr)];
 
   retval = sscanf(addess_str, "%02X:%02X:%02X:%02X:%02X:%02X",
                   &address_cache[5],
@@ -406,13 +554,13 @@ static bool decode_address(char *addess_str, uint8_t *address)
                   &address_cache[1],
                   &address_cache[0]);
 
-  if (retval != BT_ADDR_LEN) {
+  if (retval != sizeof(bd_addr)) {
     app_log_error("Invalid Bluetooth address." APP_LOG_NL);
     return false;
   }
 
-  for (int i = 0; i < BT_ADDR_LEN; i++) {
-    address[i] = (uint8_t)(address_cache[i]);
+  for (uint8_t i = 0; i < sizeof(bd_addr); i++) {
+    address->addr[i] = (uint8_t)(address_cache[i]);
   }
   return true;
 }
@@ -422,15 +570,36 @@ static bool decode_address(char *addess_str, uint8_t *address)
  * @param[in] scan_report Scan report coming from the Bluetooth stack event.
  * return true if a connection should be established with the device.
  *****************************************************************************/
-bool check_scan_report(sl_bt_evt_scanner_scan_report_t *scan_report)
+bool check_scan_report(sl_bt_evt_scanner_legacy_advertisement_report_t *scan_report)
 {
+  // Check if there is a connection with this device already
+  for (int i = 0; i < SL_BT_CONFIG_MAX_CONNECTIONS; i++) {
+    if (memcmp(scan_report->address.addr, trusted_devices[i].address.addr, sizeof(bd_addr)) == 0) {
+      return false;
+    }
+  }
+
   // If target defined, check the address
   if (peripheral_target_defined
-      && memcmp(scan_report->address.addr, peripheral_target_addr, BT_ADDR_LEN) != 0) {
+      && memcmp(scan_report->address.addr, peripheral_target_addr.addr, sizeof(bd_addr)) != 0) {
     return false; // Target device is defined but with different address.
   }
 
   // Look for CBAP service in advertisement packets
   return sl_bt_cbap_find_service_in_advertisement(scan_report->data.data,
                                                   scan_report->data.len);
+}
+
+/***************************************************************************//**
+ * Timer Callback.
+ * @param[in] handle pointer to handle instance
+ * @param[in] data pointer to input data
+ ******************************************************************************/
+static void led_timer_cb(sl_simple_timer_t *handle, void *data)
+{
+  (void)handle;
+  (void)data;
+
+  sl_led_turn_off(SL_SIMPLE_LED_INSTANCE(0));
+  app_log_info("LED off." APP_LOG_NL);
 }

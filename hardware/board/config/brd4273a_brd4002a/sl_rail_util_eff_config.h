@@ -100,11 +100,11 @@
 // <i> Default: 50
 #define RAIL_UTIL_EFF_MAX_TX_DUTY_CYCLE   50
 // <o SL_RAIL_UTIL_EFF_TEMPERATURE_THRESHOLD_EFF_DEGREES_K> Temperature of EFF above which transmit is not allowed, in degrees Kelvin
-// <1-373:1>
+// <1-398:1>
 // <i> Default: 373
 #define SL_RAIL_UTIL_EFF_TEMPERATURE_THRESHOLD_EFF_DEGREES_K 373
-// <o SL_RAIL_UTIL_EFF_TEMPERATURE_THRESHOLD_INTERNAL_DEGREES_K> Chip's internal temperature above which continuous transmit is aborted, in degrees Kelvin
-// <1-373:1>
+// <o SL_RAIL_UTIL_EFF_TEMPERATURE_THRESHOLD_INTERNAL_DEGREES_K> Chip's internal temperature above which transmit is not allowed, in degrees Kelvin
+// <1-398:1>
 // <i> Default: 373
 #define SL_RAIL_UTIL_EFF_TEMPERATURE_THRESHOLD_INTERNAL_DEGREES_K 373
 // </h>

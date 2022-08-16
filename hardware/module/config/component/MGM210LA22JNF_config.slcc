@@ -21,3 +21,8 @@
       component: device_init_hfxo
       file_id: device_init_hfxo_config
     path: MGM210LA22JNF/sl_device_init_hfxo_config.h
+  - override:
+      component: iot_flash
+      file_id: iot_flash_cfg
+      instance: msc
+    path: MGM210LA22JNF/iot_flash_cfg_msc.h

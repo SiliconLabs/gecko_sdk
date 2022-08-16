@@ -8,5 +8,3 @@ provides:
 - name: zw_debug
 - name: zw_build_mode
 
-requires:
-  - name: iostream_recommended_stream

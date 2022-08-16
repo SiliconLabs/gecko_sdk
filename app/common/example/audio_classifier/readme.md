@@ -30,21 +30,28 @@ being filtered out in the audio classifier application based on the label text.
 By default any labels that start with an underscore are ignored when processing
 results. This behavior can be disabled in the application configuration file.
 
-## Model  
-The default model used in this application is called "audio_classifier.tflite"
-and is able to classify audio into 4 different classes labeled "on", "off",
-"_unknown_", "_silence_". The source for the model can be found here: https://github.com/siliconlabs/mltk/blob/master/mltk/models/siliconlabs/keyword_spotting_on_off.py
+## Model
+The application uses one of two different available models
+(```keyword_spotting_on_off.tflite``` or ```keyword_spotting_on_off_v2.tflite```)
+as the default model, depending on whether the application is generated for a
+development board featuring an MVP hardware accelerator or not. When an MVP
+hardware accelerator is featured on the board, inference will run at a faster
+speed such that a larger model can be chosen, yielding more accurate keyword
+detections.
+
+Details about the model architectures and scripts for generating the models can
+be found in the [Silicon Labs machine learning applications](https://github.com/SiliconLabs/machine_learning_applications/tree/main/) repository, under
+```voice/keyword_spotting/model```.
 
 The application is designed to work with an audio classification model created
 using the Silicon Labs Machine Learning Toolkit
 ([MLTK](https://siliconlabs.github.io/mltk)). Use the MLTK to train a new audio
 classifier model and replace the model inside this example with the new audio
 classification model. To replace the audio classification model with a new model
-created using the MLTK you can rename the new .tflite file to
-"audio_classifier.tflite" and copy it into the config/tflite folder of this
-project. After a new .tflite file is added to the project Simplicity Studio will
-automatically use the [flatbuffer converter tool](https://docs.silabs.com/gecko-platform/latest/machine-learning/tensorflow/flatbuffer-conversion)
-to convert a .tflite file into a c file which is added to the project.
+created using the MLTK simply replace the .tflite file in the config/tflite folder
+of this project with your new. tflite file. After a new .tflite file is added
+to the project Simplicity Studio will automatically use the [flatbuffer converter tool](https://docs.silabs.com/gecko-platform/latest/machine-learning/tensorflow/flatbuffer-conversion)
+to convert the .tflite file into a c file which is added to the project.
 
 In order for the audio classification to work correctly we need to use the same
 audio feature generator configuration parameters for inference as is used when

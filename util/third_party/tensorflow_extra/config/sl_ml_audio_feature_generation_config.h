@@ -48,7 +48,6 @@
 // <i> Default: 1
 #define SL_ML_AUDIO_FEATURE_GENERATION_AUDIO_GAIN                      1
 
-
 // <q SL_ML_AUDIO_FEATURE_GENERATION_MANUAL_CONFIG_ENABLE> Enable Manual Frontend Configurations
 // <i> Enable manual configuration of the Frontend
 // <i> This may overwrite settings that are already embedded in
@@ -56,6 +55,7 @@
 // <i> Default: 0
 #define SL_ML_AUDIO_FEATURE_GENERATION_MANUAL_CONFIG_ENABLE            0
 // </h>
+
 
 // <<< end of configuration section >>>
 /*******************************************************************************
@@ -92,18 +92,22 @@
 #define SL_ML_FRONTEND_PCAN_GAIN_BITS                         SL_TFLITE_MODEL_FE_PCAN_GAIN_BITS
 #define SL_ML_FRONTEND_LOG_SCALE_ENABLE                       SL_TFLITE_MODEL_FE_LOG_SCALE_ENABLE
 #define SL_ML_FRONTEND_LOG_SCALE_SHIFT                        SL_TFLITE_MODEL_FE_LOG_SCALE_SHIFT
-#else 
+#else
 #error No frontend configurations were found in the model, enable manual configurations in "sl_ml_audio_feature_generation_config.h"
 #endif // SL_TFLITE_MODEL_FE_SAMPLE_RATE
 
-#else // SL_ML_AUDIO_FEATURE_GENERATION_MANUAL_CONFIG_ENABLE == 1 
+#ifdef SL_TFLITE_MODEL_FE_QUANTIZE_DYNAMIC_SCALE_ENABLE
+#define SL_ML_AUDIO_FEATURE_GENERATION_QUANTIZE_DYNAMIC_SCALE_ENABLE 	SL_TFLITE_MODEL_FE_QUANTIZE_DYNAMIC_SCALE_ENABLE
+#endif
+
+#else // SL_ML_AUDIO_FEATURE_GENERATION_MANUAL_CONFIG_ENABLE == 1
 
 // <o> Audio Sample Rate
 // <i> Default: 8000
 #define SL_ML_FRONTEND_SAMPLE_RATE_HZ                            8000
 
 // <o> Length of an audio sample in milliseconds
-// <i> This determines how much audio is used to generate a 
+// <i> This determines how much audio is used to generate a
 // <i> single feature buffer.
 // <i> Default: 1000
 #define SL_ML_FRONTEND_SAMPLE_LENGTH_MS                          1000
@@ -202,6 +206,15 @@
 // <i> Default: 6
 #define SL_ML_FRONTEND_LOG_SCALE_SHIFT                           6
 // </e>
+
+// <q> Enable dynamic quantization when filling tensor with features
+// <i> When using sl_ml_audio_feature_generation_fill_tensor(), this
+// <i> will enable dynamic scaling of the microfrontend output before
+// <i> quantizing the values to int8.
+// <i> When not enabled, the fill tensor function performs a static
+// <i> quantization.
+// <i> Default: 0
+#define SL_ML_AUDIO_FEATURE_GENERATION_QUANTIZE_DYNAMIC_SCALE_ENABLE   0
 
 #endif // SL_ML_AUDIO_FEATURE_GENERATION_MANUAL_CONFIG_ENABLE == 0
 

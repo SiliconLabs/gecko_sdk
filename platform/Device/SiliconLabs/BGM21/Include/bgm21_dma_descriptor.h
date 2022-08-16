@@ -27,6 +27,8 @@
  * 3. This notice may not be removed or altered from any source distribution.
  *
  *****************************************************************************/
+#ifndef BGM21_DMA_DESCRIPTOR_H
+#define BGM21_DMA_DESCRIPTOR_H
 
 #if defined(__ICCARM__)
 #pragma system_include       /* Treat file as system include file. */
@@ -53,3 +55,5 @@ typedef struct {
 } DMA_DESCRIPTOR_TypeDef;      /**< @} */
 
 /** @} End of group Parts */
+
+#endif /* BGM21_DMA_DESCRIPTOR_H */

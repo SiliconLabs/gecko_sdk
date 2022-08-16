@@ -91,8 +91,8 @@ typedef struct {
 #define SL_BT_COEX_OPTION_REQUEST_WINDOW_MASK   0xffff0000
 
 void sl_bt_init_coex(const sl_bt_coex_init_t *coexInit);
-void sl_bt_class_coex_init();
-static inline void sl_bt_init_coex_hal()
+void sl_bt_class_coex_init(void);
+static inline void sl_bt_init_coex_hal(void)
 {
 //#if (HAL_COEX_ENABLE)
 // Initialise coexistence interface
@@ -135,7 +135,7 @@ typedef struct {
   uint8_t coex_pwm_period;    /** PWM Period in ms, if 0 Pwm is disabled*/
   uint8_t coex_pwm_dutycycle; /** PWM dutycycle percentage, if 0 pwm is disabled, if >= 100 scanPwm line is always enabled*/
 } sl_bt_ll_coex_config_t;
-#define SL_BT_COEX_DEFAULT_CONFIG { 175, 255, SL_RAIL_UTIL_COEX_PWM_REQ_PERIOD, SL_RAIL_UTIL_COEX_PWM_REQ_DUTYCYCLE }
+#define SL_BT_COEX_DEFAULT_CONFIG { 175, 255, (SL_RAIL_UTIL_COEX_PWM_REQ_PERIOD + 1) / 2, SL_RAIL_UTIL_COEX_PWM_REQ_DUTYCYCLE }
 
 /**
  * Update coex configuration

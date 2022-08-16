@@ -74,7 +74,7 @@ sl_simple_rgb_pwm_led_context_t simple_rgb_pwm_{{ inst | lower }}_context = {
   .resolution = SL_SIMPLE_RGB_PWM_LED_{{ inst | upper }}_RESOLUTION,
 };
 
-const sl_led_rgb_pwm_t sl_{{ inst | lower }} = {
+const sl_led_rgb_pwm_t sl_simple_rgb_pwm_led_{{ inst | lower }} = {
   .led_common.context = &simple_rgb_pwm_{{ inst | lower }}_context,
   .led_common.init = sl_simple_rgb_pwm_led_init,
   .led_common.turn_on = sl_simple_rgb_pwm_led_turn_on,
@@ -90,6 +90,6 @@ const sl_led_rgb_pwm_t sl_{{ inst | lower }} = {
 void sl_simple_rgb_pwm_led_init_instances(void)
 {
   {% for inst in simple_rgb_pwm_led_instance %}
-  sl_led_init((sl_led_t *)&sl_{{ inst | lower }});
+  sl_led_init((sl_led_t *)&sl_simple_rgb_pwm_led_{{ inst | lower }});
   {% endfor %}
 }

@@ -23,9 +23,10 @@ config_file:
     condition: [device_series_1]
   - path: platform/emdrv/nvm3/config/s2/nvm3_default_config.h
     condition: [device_series_2]
+    unless: [trustzone_secure]
 source:
   - path: platform/emdrv/nvm3/src/nvm3_default_common_linker.c
-    unless: [trustzone_nonsecure]
+    unless: [trustzone_nonsecure, trustzone_secure]
 include:
   - path: platform/emdrv/nvm3/inc
     file_list:
@@ -43,6 +44,7 @@ template_contribution:
       event: platform_init
       include: nvm3_default.h
       handler: nvm3_initDefault
+    unless: [trustzone_secure]
 documentation:
     docset: gecko-platform
     document: driver/api/group-nvm3default

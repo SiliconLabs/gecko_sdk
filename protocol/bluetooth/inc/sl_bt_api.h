@@ -8836,10 +8836,20 @@ typedef enum
  *
  * Configure coexistence options at runtime.
  *
- * @param[in] mask Enum @ref sl_bt_coex_option_t. Mask defines which coexistence
- *   options are changed.
- * @param[in] options Enum @ref sl_bt_coex_option_t. Value of options to be
- *   changed. This parameter is used together with the mask parameter.
+ * @param[in] mask Bitmask of following coexistence options to change
+ *     - <b>@ref sl_bt_coex_option_enable</b> : (0x100) Enable coexistence
+ *       feature
+ *     - <b>@ref sl_bt_coex_option_tx_abort</b> : (0x400) Abort transmission if
+ *       grant is denied
+ *     - <b>@ref sl_bt_coex_option_high_priority</b> : (0x800) Enable priority
+ *       signal
+ * @param[in] options Bitmask of following coexistence option values to set
+ *     - <b>@ref sl_bt_coex_option_enable</b> : (0x100) Enable coexistence
+ *       feature
+ *     - <b>@ref sl_bt_coex_option_tx_abort</b> : (0x400) Abort transmission if
+ *       grant is denied
+ *     - <b>@ref sl_bt_coex_option_high_priority</b> : (0x800) Enable priority
+ *       signal
  *
  * @return SL_STATUS_OK if successful. Error code otherwise.
  *

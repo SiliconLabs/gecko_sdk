@@ -413,3 +413,20 @@ void otPlatRadioClearSrcMatchExtEntries(otInstance *aInstance)
     printExtEntryTable(iid);
 }
 #endif // RADIO_CONFIG_SRC_MATCH_EXT_ENTRY_NUM
+
+
+uint8_t utilsSoftSrcMatchFindIidFromPanId(otPanId panId)
+{
+    uint8_t iid = 0xFF;
+
+    for(uint8_t index = 0; index < RADIO_CONFIG_SRC_MATCH_PANID_NUM; index++)
+    {
+        if(sPanId[index] == panId)
+        {
+            iid = index + 1;
+            break;
+        }
+    }
+
+    return iid;
+}

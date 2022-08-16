@@ -121,6 +121,10 @@ define block apploader with alignment = {{ flash_page_size }}
 keep { section .binapploader };
 {%- endif %}
 
+{#-
+  Exclude the NVM3 region for the TZ secure applications
+#}
+{% if trustzone_secure is not defined %}
 {%- if linker_zwave_nvm is defined %}
 define block zwavenvm with alignment = {{ flash_page_size }}
 {
@@ -134,7 +138,7 @@ define block nvm with alignment = {{ flash_page_size }}
   section SIMEE,
 };
 keep { block nvm };
-
+{%- endif %} {#- trustzone_secure #}
 {%- if trustzone_secure %}
 define block Veneer$$CMSE with alignment = {{ 32 }}
 {
@@ -201,10 +205,12 @@ place at start of ROM_region { block application };
 "storage_regions":
 place at end of MAIN_FLASH_region {
   block storage,
+{% if trustzone_secure is not defined %}
 {%- if linker_zwave_nvm is defined %}
   block zwavenvm,
 {%- endif %}
   block nvm,
+{%- endif %} {#- trustzone_secure #}
 {%- if trustzone_secure %}
   block Veneer$$CMSE
 {%- endif %}

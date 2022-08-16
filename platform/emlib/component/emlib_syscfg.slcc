@@ -18,4 +18,4 @@ provides:
 requires:
   - name: emlib_common
   - name: tz_service_syscfg
-    condition: [tz_secure_key_library_ns]
+    condition: [trustzone_nonsecure]

@@ -913,7 +913,7 @@ void sli_cpc_drv_notify_tx_complete(sl_cpc_buffer_handle_t *buffer_handle)
         // Notify caller that it can free the tx buffer now
         arg->on_iframe_write_completed(arg->id, buffer_handle->data, arg->arg, SL_STATUS_TRANSMIT_INCOMPLETE);
       } else if ((frame_type == SLI_CPC_HDLC_FRAME_TYPE_UNNUMBERED)
-                 && (arg->on_iframe_write_completed != NULL)) {
+                 && (arg->on_uframe_write_completed != NULL)) {
         arg->on_uframe_write_completed(arg->id, buffer_handle->data, arg->arg, SL_STATUS_TRANSMIT_INCOMPLETE);
       }
       buffer_handle->data = NULL;
@@ -926,6 +926,7 @@ void sli_cpc_drv_notify_tx_complete(sl_cpc_buffer_handle_t *buffer_handle)
       if (buffer_handle->on_write_complete_pending) {
         // Push to the dispatcher queue in order to call on_write_completed outside of IRQ context
         sli_cpc_dispatcher_push(&dispatcher_handle, process_deferred_on_write_completed, buffer_handle);
+        buffer_handle->on_write_complete_pending = false;
       }
 
       // Drop the buffer restart re_transmit_timer if it was not acknowledged (still referenced)
@@ -2329,7 +2330,7 @@ static sl_status_t process_tx_queue(void)
     }
 
     /*
-     * recompute FCS as the payload is now encrypted and there is
+     * Recompute FCS as the payload is now encrypted and there is
      * an additional security tag to take into account.
      */
     fcs = sli_cpc_get_crc_sw_with_security(frame->data,

@@ -57,10 +57,12 @@ EmberEventControl emAfPluginOtaUnicastBootloaderTestEventControl;
 // -----------------------------------------------------------------------------
 /// Node ID of the target
 static EmberNodeId target;
+#if defined(SL_CATALOG_CONNECT_OTA_UNICAST_BOOTLOADER_CLIENT_PRESENT)
 /// Enable resuming an image after the timeout period.
 static bool ota_resume_enable = true;
 /// the image index to start/resume the download
 static uint32_t unicast_download_start_index = 0;
+#endif
 
 // -----------------------------------------------------------------------------
 //                          Public Function Definitions

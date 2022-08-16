@@ -1076,6 +1076,23 @@ ApplicationInit(
   DebugPrintConfig(m_aDebugPrintBuffer, sizeof(m_aDebugPrintBuffer), zpal_debug_output);
 #endif
 
+  DPRINT("\n\n--------------------------------\n");
+  DPRINT("Z-Wave Sample App: Serial API ");
+#if defined(ZW_SLAVE)
+  DPRINT("Slave\n");
+#else /* defined(ZW_SLAVE) */
+  DPRINT("Controller\n");
+#endif /* defined(ZW_SLAVE) */
+  DPRINTF("SDK: %d.%d.%d ZAF: %d.%d.%d.%d\n",
+          SDK_VERSION_MAJOR,
+          SDK_VERSION_MINOR,
+          SDK_VERSION_PATCH,
+          zpal_get_app_version_major(),
+          zpal_get_app_version_minor(),
+          zpal_get_app_version_patch(),
+          ZAF_BUILD_NO);
+
+  DPRINTF("ApplicationInit eResetReason = %d\n", eResetReason);
 
   appFileSystemInit();
   /*************************************************************************************

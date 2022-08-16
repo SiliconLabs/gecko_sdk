@@ -64,7 +64,9 @@ struct ring {
 
 void ring_init(struct ring *ring, void *buf, size_t buf_size);
 int ring_push(struct ring *ring, uint8_t data);
+int ring_push_buf(struct ring *ring, uint8_t *data, size_t len);
 int ring_pop(struct ring *ring);
+int ring_pop_buf(struct ring *ring, uint8_t *data, size_t len);
 int ring_get(struct ring *ring, unsigned int index);
 bool ring_is_empty(struct ring *ring);
 unsigned int ring_data_len(struct ring *ring);

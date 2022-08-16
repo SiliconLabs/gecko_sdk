@@ -201,7 +201,7 @@ sl_status_t aoa_loc_get_tag_by_index(uint32_t index,
  * @param[in] locator_list Locator list.
  *
  * @retval SL_STATUS_FAIL - Position calculation failed in the RTL lib.
- * @retval SL_STATUS_OK - Calculation was succesful.
+ * @retval SL_STATUS_OK - Calculation was successful.
  *****************************************************************************/
 sl_status_t aoa_loc_calc_position(aoa_id_t tag_id,
                                   uint32_t angle_count,
@@ -209,9 +209,9 @@ sl_status_t aoa_loc_calc_position(aoa_id_t tag_id,
                                   aoa_id_t *locator_list);
 
 /**************************************************************************//**
- * Destroy the module database.
+ * Destroy the locator database.
  *****************************************************************************/
-void aoa_loc_destroy(void);
+void aoa_loc_destroy_locators(void);
 
 /**************************************************************************//**
  * Destroy the tags database
@@ -230,10 +230,20 @@ sl_status_t aoa_loc_remove_locator(aoa_id_t locator_id);
 /**************************************************************************//**
  * Reinitialize the estimator.
  *
+ * @deprecated Use the combination of aoa_loc_deinit and aoa_loc_init instead.
+ *
  * @retval SL_STATUS_FAIL - Reinitialization failed.
- * @retval SL_STATUS_OK - Reinitialization was succesful.
+ * @retval SL_STATUS_OK - Reinitialization was successful.
  *****************************************************************************/
 sl_status_t aoa_loc_reinit(void);
+
+/**************************************************************************//**
+ * Deinitialize the estimator.
+ *
+ * @retval SL_STATUS_FAIL - Deinitialization failed.
+ * @retval SL_STATUS_OK - Deinitialization was successful.
+ *****************************************************************************/
+sl_status_t aoa_loc_deinit(void);
 
 /**************************************************************************//**
  * Position ready callback.

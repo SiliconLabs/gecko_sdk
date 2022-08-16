@@ -343,13 +343,21 @@ SL_WEAK void bootload_bootloaderCallback(uint32_t offset,
   // OOB checks
   // i) if NOT (BTL_UPGRADE_LOCATION <= address < max_address),
   //    with integer overflow check for address
+  //    Skip offset > (uint32_t) (UINT32_MAX - BTL_UPGRADE_LOCATION)
+  //     if BTL_UPGRADE_LOCATION is zero
+  #if (BTL_UPGRADE_LOCATION != 0UL)
   if ((offset > (uint32_t) (UINT32_MAX - BTL_UPGRADE_LOCATION))
-      || (address >= max_address)) {
+      || (address >= max_address))
+  #else
+  if (address >= max_address)
+  #endif
+  {
     BTL_DEBUG_PRINT("OOB, address not in allowed range; (address) 0x");
     BTL_DEBUG_PRINT_WORD_HEX(address);
     BTL_DEBUG_PRINT_LF();
     return;
   }
+
   // ii) Semantically equivalent to (address + length > max_address),
   //     but without the risk of integer overflow (or underflow, because of (i))
   if (length > (uint32_t) (max_address - address)) {
@@ -777,6 +785,12 @@ SL_WEAK bool bootload_commitBootloaderUpgrade(uint32_t upgradeAddress, uint32_t 
     // CRC32 check failed. Return early.
     return false;
   }
+
+#if defined(_SILICON_LABS_32B_SERIES_2)
+  // The CRC32 checksum has been appended to the image and it has already been checked above
+  // so just disregard it. This give us the correct image size.
+  size = size - 4u;
+#endif
 
 #if defined(SEMAILBOX_PRESENT)
 #if defined(_CMU_CLKEN1_SEMAILBOXHOST_MASK)

@@ -21,9 +21,9 @@
 // <i> is set to false. This value will control how much of the flash memory
 // <i> is reserved for bootloader storage.
 #if defined(NDEBUG)
-#define SL_BOOTLOADER_STORAGE_SIZE  0x0002A000
+#define SL_BOOTLOADER_STORAGE_SIZE  0x0002C000
 #else /* defined(NDEBUG) */
-#define SL_BOOTLOADER_STORAGE_SIZE  0x00025000
+#define SL_BOOTLOADER_STORAGE_SIZE  0x00027000
 #endif /* defined(NDEBUG) */
 
 // </e>

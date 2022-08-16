@@ -53,9 +53,6 @@ static uint8_t pub_device_key_buf[SL_SE_CERT_KEY_SIZE];
 /// Signature buffer
 static uint8_t signature_buf[SL_SE_CERT_SIGN_SIZE];
 
-/// Number of bytes actually used in the token.
-static size_t token_len;
-
 // -----------------------------------------------------------------------------
 //                          Public Function Definitions
 // -----------------------------------------------------------------------------
@@ -97,14 +94,6 @@ uint8_t * get_cert_buf_ptr(void)
 uint8_t * get_pub_device_key_buf_ptr(void)
 {
   return(pub_device_key_buf);
-}
-
-/***************************************************************************//**
- * Get token length.
- ******************************************************************************/
-size_t get_token_len(void)
-{
-  return(token_len);
 }
 
 /***************************************************************************//**

@@ -71,12 +71,50 @@ namespace FactoryDiags {
 
 const struct Diags::Command Diags::sCommands[] = {
     {"channel", &Diags::ProcessChannel}, {"echo", &Diags::ProcessEcho}, {"power", &Diags::ProcessPower},
-    {"start", &Diags::ProcessStart},     {"stop", &Diags::ProcessStop},
+    {"start", &Diags::ProcessStart},     {"stop", &Diags::ProcessStop}, {"stream", &Diags::ProcessStream},
 };
 
 Diags::Diags(Instance &aInstance)
     : InstanceLocator(aInstance)
 {
+}
+
+Error Diags::ProcessStream(uint8_t aArgsLength, char *aArgs[], char *aOutput, size_t aOutputMaxLen)
+{
+    Error error = kErrorNone;
+
+    VerifyOrExit(aArgsLength > 0, error = kErrorInvalidArgs);
+
+    if (strcmp(aArgs[0], "stop") == 0)
+    {
+        otPlatDiagTxStreamStop();
+    }
+    else if (strcmp(aArgs[0], "tone") == 0)
+    {
+        otPlatDiagTxStreamTone();
+    }
+    else if (strcmp(aArgs[0], "random") == 0)
+    {
+        otPlatDiagTxStreamRandom();
+    }
+    else if (strcmp(aArgs[0], "addrMatch") == 0)
+    {
+        long  value;
+        SuccessOrExit(ParseLong(aArgs[1], value));
+
+        otPlatDiagTxStreamAddrMatch(static_cast<uint8_t>(value));
+    }
+    else if (strcmp(aArgs[0], "autoAck") == 0)
+    {
+        long  value;
+        SuccessOrExit(ParseLong(aArgs[1], value));
+
+        otPlatDiagTxStreamAutoAck(static_cast<uint8_t>(value));
+    }
+
+exit:
+    AppendErrorResult(error, aOutput, aOutputMaxLen);
+    return error;
 }
 
 Error Diags::ProcessChannel(uint8_t aArgsLength, char *aArgs[], char *aOutput, size_t aOutputMaxLen)
@@ -183,7 +221,7 @@ extern "C" void otPlatDiagAlarmFired(otInstance *aInstance)
 const struct Diags::Command Diags::sCommands[] = {
     {"channel", &Diags::ProcessChannel}, {"power", &Diags::ProcessPower}, {"radio", &Diags::ProcessRadio},
     {"repeat", &Diags::ProcessRepeat},   {"send", &Diags::ProcessSend},   {"start", &Diags::ProcessStart},
-    {"stats", &Diags::ProcessStats},     {"stop", &Diags::ProcessStop},
+    {"stats", &Diags::ProcessStats},     {"stop", &Diags::ProcessStop}, {"stream", &Diags::ProcessStream},
 };
 
 Diags::Diags(Instance &aInstance)
@@ -199,6 +237,52 @@ Diags::Diags(Instance &aInstance)
 {
     mStats.Clear();
 }
+
+
+Error Diags::ProcessStream(uint8_t aArgsLength, char *aArgs[], char *aOutput, size_t aOutputMaxLen)
+{
+    Error error = kErrorNone;
+
+    VerifyOrExit(otPlatDiagModeGet(), error = kErrorInvalidState);
+    VerifyOrExit(aArgsLength > 0, error = kErrorInvalidArgs);
+
+    SuccessOrExit(error = Get<Radio>().Sleep());
+
+    if (strcmp(aArgs[0], "stop") == 0)
+    {
+        SuccessOrExit(error = Get<Radio>().TxStreamStop());
+        snprintf(aOutput, aOutputMaxLen, "stop stream transmission\r\nstatus 0x%02x\r\n", error);
+    }
+    else if (strcmp(aArgs[0], "tone") == 0)
+    {
+        SuccessOrExit(error = Get<Radio>().TxStreamTone());
+        snprintf(aOutput, aOutputMaxLen, "start transmitting unmodulated tone\r\nstatus 0x%02x\r\n", error);
+    }
+    else if (strcmp(aArgs[0], "random") == 0)
+    {
+        SuccessOrExit(error = Get<Radio>().TxStreamRandom());
+        snprintf(aOutput, aOutputMaxLen, "start transmitting random characters stream\r\nstatus 0x%02x\r\n", error);
+    }
+    else if (strcmp(aArgs[0], "addrMatch") == 0)
+    {
+        long  value;
+        SuccessOrExit(ParseLong(aArgs[1], value));
+        SuccessOrExit(error = Get<Radio>().TxStreamAddrMatch(static_cast<uint8_t>(value)));
+        snprintf(aOutput, aOutputMaxLen, "Toggle stream AddrMatch\r\nstatus 0x%02x\r\n", error);
+    }
+    else if (strcmp(aArgs[0], "autoAck") == 0)
+    {
+        long  value;
+        SuccessOrExit(ParseLong(aArgs[1], value));
+        SuccessOrExit(error = Get<Radio>().TxStreamAutoAck(static_cast<uint8_t>(value)));
+        snprintf(aOutput, aOutputMaxLen, "Toggle stream AutoAck\r\nstatus 0x%02x\r\n", error);
+    }
+
+exit:
+    AppendErrorResult(error, aOutput, aOutputMaxLen);
+    return error;
+}
+
 
 Error Diags::ProcessChannel(uint8_t aArgsLength, char *aArgs[], char *aOutput, size_t aOutputMaxLen)
 {

@@ -30,6 +30,10 @@
 #ifndef SL_BOARD_INIT_H
 #define SL_BOARD_INIT_H
 
+#ifdef __cplusplus
+extern "C" {
+#endif
+
 /***************************************************************************//**
  * @addtogroup board_init Board Init
  * @brief Initialization of Silicon Labs board features
@@ -53,5 +57,9 @@ void sl_board_init(void);
  ******************************************************************************/
 void sl_board_preinit(void);
 /** @} */
+
+#ifdef __cplusplus
+}
+#endif
 
 #endif // SL_BOARD_INIT_H

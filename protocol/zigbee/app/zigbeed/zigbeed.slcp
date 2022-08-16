@@ -24,6 +24,7 @@ component:
   - id: "zigbee_xncp"
   - id: "toolchain_gcc"
   - id: "zigbee_stack_unix"
+  - id: "zigbee_mfglib"
   # not required by zigbeed, but could be enabled
   - id: "zigbee_r22_support"
   - id: "zigbee_token_interface"

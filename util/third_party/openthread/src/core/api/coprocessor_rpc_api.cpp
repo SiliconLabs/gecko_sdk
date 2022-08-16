@@ -125,6 +125,16 @@ extern "C" void otCRPCSetUserCommands(const otCliCommand *aUserCommands, uint8_t
 {
     RPC::GetRPC().SetUserCommands(aUserCommands, aLength, aContext);
 }
+
+extern "C" char* otCRPCGetStaticOutputBuffer(void)
+{
+    return RPC::GetRPC().GetStaticOutputBuffer();
+}
+
+extern "C" size_t otCRPCGetStaticOutputBufferSize(void)
+{
+    return RPC::GetRPC().GetStaticOutputBufferSize();
+}
 #endif
 
 #endif // OPENTHREAD_CONFIG_COPROCESSOR_RPC_ENABLE

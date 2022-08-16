@@ -661,11 +661,17 @@ typedef enum {
   /** Internal 1.2V Band Gap Reference (buffered) to ground */
   iadcCfgReferenceInt1V2     = _IADC_CFG_REFSEL_VBGR,
 
-  /** External reference (unbuffered) VREFP to VREFN. Up to 1.25V. */
+  /** External reference (unbuffered) VREFP to VREFN.
+   * VEVREF up to AVDD. When inputs are routed to external GPIO pins,
+   * the maximum pin voltage is limited to the lower
+   * of the IOVDD and AVDD supplies.
+   * The internal calibration values correspond to a 1.25V reference,
+   * use of other voltages may require recalibration.
+   * See AN1189: Incremental Analog to Digital Converter (IADC) */
   iadcCfgReferenceExt1V25    = _IADC_CFG_REFSEL_VREF,
 
 #if defined(_IADC_CFG_REFSEL_VREF2P5)
-  /** External reference (unbuffered) VREFP to VREFN. Up to 1.25V. */
+  /** External reference (unbuffered) VREFP to VREFN. Supports 2.5V in high accuracy mode. */
   iadcCfgReferenceExt2V5     = _IADC_CFG_REFSEL_VREF2P5,
 #endif
 

@@ -1,16 +1,8 @@
 <?xml version="1.0" ?>
 <contentItems>
 	<contentItemData category="Application Notes" description="Provides an overview and hyperlinks to all packaged documentation." itemURI="file:slOpenthread-index.html" label="Documentation Index" priority="9"/>
-	<contentItemData category="Application Notes" description="Summarizes the performance test effort and results for some testing scenarios of the CPCd interface  using multi-PAN for both OpenThread and Zigbee protocols.
-" itemURI="file:an1385-multi-pan-rcp-performance-test.pdf" label="AN1385: Supplemental Performance Results for Multi-PAN RCP for OpenThread and Zigbee" priority="30">
-		<property key="sdkAndProtocolTags" value="Zigbee Thread"/>
-	</contentItemData>
 	<contentItemData category="Application Notes" description="Provides details on developing Dynamic Multiprotocol applications using Bluetooth and OpenThread.
 " itemURI="file:an1265-openthread-bluetooth-dynamic-multiprotocol-gsdk-v3x.pdf" label="AN1265: Dynamic Multiprotocol Development with Bluetooth and OpenThread in GSDK v3.x" priority="25"/>
-	<contentItemData category="Application Notes" description="Describes how to run any combination of Zigbee EmberZNet, OpenThread, and Bluetooth networking stacks on a Linux host processor, interfacing with a single EFR32 Radio Co-processor (RCP) with multiprotocol and multi-PAN support. 
-" itemURI="file:an1333-concurrent-protocols-with-802-15-4-rcp.pdf" label="AN1333: Running  Zigbee, OpenThread, and Bluetooth Concurrently on a Linux Host with a Multiprotocol RCP" priority="9">
-		<property key="sdkAndProtocolTags" value="Zigbee Thread Bluetooth"/>
-	</contentItemData>
 	<contentItemData category="User's Guides" description="Includes a brief background on the emergence of Thread, provides a technology overview,  and describes some key features of Thread to consider when implementing a Thread solution.
 " itemURI="file:ug103-11-fundamentals-thread.pdf" label="UG103.11: Thread Fundamentals" priority="10"/>
 	<contentItemData category="User's Guides" description="Describes the four multiprotocol modes, discusses considerations when selecting protocols for  multiprotocol implementations, and reviews the Radio Scheduler, a required component of a  dynamic multiprotocol solution.
@@ -69,6 +61,10 @@
 " itemURI="file:an718-mfg-test-overview.pdf" label="AN718: Manufacturing Test Overview" priority="30">
 		<property key="sdkAndProtocolTags" value="Zigbee Thread"/>
 	</contentItemData>
+	<contentItemData category="Application Notes" description="Describes how to run any combination of Zigbee EmberZNet, OpenThread, and Bluetooth networking stacks on a  Linux host processor, interfacing with a single EFR32 radio co-processor (RCP) with multiprotocol and multi-PAN  support, as well as how to run the Zigbee stack on the EFR32 as a network co-processor (NCP) alongside the  OpenThread RCP. 
+" itemURI="file:an1333-concurrent-protocols-with-802-15-4-rcp.pdf" label="AN1333: Running  Zigbee, OpenThread, and Bluetooth Concurrently on a Linux Host with a Multiprotocol Co-Processor" priority="9">
+		<property key="sdkAndProtocolTags" value="Zigbee Thread Bluetooth"/>
+	</contentItemData>
 	<contentItemData category="Application Notes" description="Details on programming, provisioning, and configuring Series 2 devices in production environments.  Covers Secure Engine Subsystem of Series 2 devices, which runs easily upgradeable Secure Engine (SE) or Virtual Secure Engine (VSE) firmware.
   
 " itemURI="file:an1222-efr32xg2x-production-programming.pdf" label="AN1222:  Production Programming of Series 2 Devices" priority="50">
@@ -88,6 +84,10 @@
 	</contentItemData>
 	<contentItemData category="Reference Manuals" description="Contains a comprehensive list of APIs used to interface to the Silicon Labs OpenThread stack.
 " itemURI="file:OpenThread-Doxygen/index.html" label="Silicon Labs OpenThread API Reference Guide" priority="1"/>
+	<contentItemData category="Application Notes" description="Summarizes the results of simultaneous Thread and Zigbee throughput performance testing for the concurrent  multiprotocol / multi-PAN RCP, running both OpenThread and Zigbee on the host processor. 
+" itemURI="file:an1385-multi-pan-rcp-performance-test.pdf" label="AN1385: Performance Results for Multi-PAN RCP for OpenThread and Zigbee" priority="30">
+		<property key="sdkAndProtocolTags" value="Zigbee Thread"/>
+	</contentItemData>
 	<contentItemData category="Application Notes" description="Provides instructions for configuring OpenThread SoC and Border Router applications to use Thread 1.3 features.  
 " itemURI="file:an1372-configuring-for-thread-1-3.pdf" label="AN1372: Configuring OpenThread Applications for Thread 1.3" priority="12"/>
 	<contentItemData category="User's Guides" description="Describes the high-level implementation of the Silicon Labs Gecko Bootloader for EFR32 SoCs and NCPs,  and provides information on how to get started using the Gecko Bootloader with Silicon Labs wireless protocol stacks in GSDK 4.0 and higher. 

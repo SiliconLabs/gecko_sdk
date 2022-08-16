@@ -163,7 +163,7 @@ EmberStatus emberAfPluginNetworkCreatorNetworkForm(bool centralizedNetwork,
 
   status = emberAfPluginNetworkCreatorSecurityStart(centralizedNetwork);
   if (status == EMBER_SUCCESS) {
-    status = emberFormNetwork(&networkParameters);
+    status = emberAfFormNetwork(&networkParameters);
     emberAfCorePrintln("%p: Form. Channel: %d. Status: 0x%X",
                        EMBER_AF_PLUGIN_NETWORK_CREATOR_PLUGIN_NAME,
                        channel,
@@ -229,7 +229,7 @@ static EmberStatus tryToFormNetwork(void)
 
       // Try to form the network.
       networkParameters.radioChannel = channel;
-      status = emberFormNetwork(&networkParameters);
+      status = emberAfFormNetwork(&networkParameters);
       emberAfCorePrintln("%p: Form. Channel: %d. Status: 0x%X",
                          EMBER_AF_PLUGIN_NETWORK_CREATOR_PLUGIN_NAME,
                          channel,

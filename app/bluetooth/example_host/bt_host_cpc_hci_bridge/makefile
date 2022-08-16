@@ -95,7 +95,7 @@ bridge.c
 
 LIBS = $(CPC_DIR)/daemon/build/libcpc.so
 
-override LDFLAGS += -lpthread -lutil
+override LDFLAGS += -lutil
 
 ################################################################################
 # Rules                                                                        #

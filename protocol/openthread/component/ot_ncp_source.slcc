@@ -24,6 +24,7 @@ include:
     file_list:
       - path: radio_spinel.hpp
       - path: radio_spinel_impl.hpp
+      - path: radio_spinel_metrics.h
       - path: spinel.h
       - path: spinel_buffer.hpp
       - path: spinel_decoder.hpp

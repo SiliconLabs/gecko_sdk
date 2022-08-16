@@ -152,4 +152,11 @@ node_id_t ZAF_GetNodeID(void);
  */
 EInclusionMode_t ZAF_GetInclusionMode(void);
 
+/**
+ * Checks if region is valid Z-Wave radio region
+ * @param region Region to check
+ * @return True if region is valid, false if it isn't.
+ */
+bool isRfRegionValid(zpal_radio_region_t region);
+
 #endif /*_ZAF_COMMON_IF_H_ */

@@ -27,6 +27,10 @@
 
 #include "bmp_conf.h"
 
+#ifdef __cplusplus
+extern "C" {
+#endif
+
 /***************************************************************************//**
  * @addtogroup glib
  * @{
@@ -174,5 +178,9 @@ int32_t BMP_getFileSize(void);
 
 /** @} (end addtogroup bmp) */
 /** @} (end addtogroup glib) */
+
+#ifdef __cplusplus
+}
+#endif
 
 #endif /* __BMP_H_ */

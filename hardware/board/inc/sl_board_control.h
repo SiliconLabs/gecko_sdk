@@ -33,6 +33,10 @@
 #include "sl_status.h"
 #include "sl_enum.h"
 
+#ifdef __cplusplus
+extern "C" {
+#endif
+
 /***************************************************************************//**
  * @addtogroup board_control Board Control
  * @brief Functions to control Silicon Labs board features
@@ -207,5 +211,9 @@ sl_status_t sl_board_enable_oscillator(sl_board_oscillator_t oscillator);
 sl_status_t sl_board_disable_oscillator(sl_board_oscillator_t oscillator);
 
 /** @} */
+
+#ifdef __cplusplus
+}
+#endif
 
 #endif // SL_BOARD_CONTROL_H

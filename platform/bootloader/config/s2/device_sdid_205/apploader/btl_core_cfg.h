@@ -14,8 +14,8 @@
  * sections of the MSLA applicable to Source Code.
  *
  ******************************************************************************/
-#ifndef BTL_CORE_APPLOADER_CONFIG_H
-#define BTL_CORE_APPLOADER_CONFIG_H
+#ifndef BTL_CORE_CONFIG_H
+#define BTL_CORE_CONFIG_H
 
 // <<< Use Configuration Wizard in Context Menu >>>
 // <h> Bootloader Core Configuration
@@ -103,7 +103,7 @@
 // <o BOOTLOADER_VERSION_MAIN_CUSTOMER> Bootloader Version Main Customer
 // <i> Default: 0
 // <i> Bootloader Version Main Customer
-#define BOOTLOADER_VERSION_MAIN_CUSTOMER                    0
+#define BOOTLOADER_VERSION_MAIN_CUSTOMER                    1
 
 // <e USE_CUSTOM_APP_SIZE> Use custom Bootloader Application Size
 // <i> Default: 0
@@ -125,4 +125,4 @@
 
 // <<< end of configuration section >>>
 
-#endif // BTL_CORE_APPLOADER_CONFIG_H
+#endif // BTL_CORE_CONFIG_H

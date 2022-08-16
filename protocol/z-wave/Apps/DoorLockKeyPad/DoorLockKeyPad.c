@@ -13,7 +13,7 @@
 #include <string.h>
 #include "SizeOf.h"
 #include "Assert.h"
-
+#include <MfgTokens.h>
 //#define DEBUGPRINT
 #include "DebugPrint.h"
 #include "DebugPrintConfig.h"
@@ -177,7 +177,7 @@ static const SAppNodeInfo_t AppNodeInfo =
   .CommandClasses.SecureIncludedSecureCC.pCommandClasses = cmdClassListSecure
 };
 
-static const SRadioConfig_t RadioConfig =
+static SRadioConfig_t RadioConfig =
 {
   .iListenBeforeTalkThreshold = ELISTENBEFORETALKTRESHOLD_DEFAULT,
   .iTxPowerLevelMax = APP_MAX_TX_POWER,
@@ -614,8 +614,6 @@ ZW_APPLICATION_STATUS ApplicationInit(EResetReason_t eResetReason)
           zpal_get_app_version_patch(),
           ZAF_BUILD_NO);
 
-  DPRINTF("ApplicationInit eResetReason = %d\n", eResetReason);
-
   CC_Indicator_Init(indicator_set_handler);
 
   memset((uint8_t *)&myDoorLock, 0x00, sizeof(myDoorLock));
@@ -623,6 +621,18 @@ ZW_APPLICATION_STATUS ApplicationInit(EResetReason_t eResetReason)
 
   // Init file system
   ApplicationFileSystemInit(&pFileSystemApplication);
+
+  // Read Rf region from MFG_ZWAVE_COUNTRY_FREQ
+  zpal_radio_region_t regionMfg;
+  ZW_GetMfgTokenDataCountryFreq((void*) &regionMfg);
+  if (isRfRegionValid(regionMfg)) {
+    RadioConfig.eRegion = regionMfg;
+  } else {
+    ZW_SetMfgTokenDataCountryRegion((void*) &RadioConfig.eRegion);
+  }
+
+  DPRINTF("Rf region: %d\n", RadioConfig.eRegion);
+  DPRINTF("ApplicationInit eResetReason = %d\n", eResetReason);
 
   /*************************************************************************************
    * CREATE USER TASKS  -  ZW_ApplicationRegisterTask() and ZW_UserTask_CreateTask()

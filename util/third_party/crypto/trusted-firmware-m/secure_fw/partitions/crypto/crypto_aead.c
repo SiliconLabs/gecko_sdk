@@ -143,9 +143,10 @@ psa_status_t tfm_crypto_aead_encrypt_setup(psa_invec in_vec[],
     if (status != PSA_SUCCESS) {
 #if defined(TFM_CONFIG_SL_SECURE_LIBRARY)
         if (status == PSA_ERROR_BAD_STATE) {
-            *handle_out = handle;
+            /* Invalidate the handle and abort the operation since the setup functon
+               never gets called to perform the proper abort operation */
             /* Release the operation context, ignore if the operation fails. */
-            (void)tfm_crypto_operation_release(handle_out);
+            (void)tfm_crypto_operation_release(handle_out, true);
         }
 #endif
         return status;
@@ -161,7 +162,7 @@ psa_status_t tfm_crypto_aead_encrypt_setup(psa_invec in_vec[],
 
 exit:
     /* Release the operation context, ignore if the operation fails. */
-    (void)tfm_crypto_operation_release(handle_out);
+    (void)tfm_crypto_operation_release(handle_out, true);
     return status;
 #endif /* TFM_CRYPTO_AEAD_MODULE_DISABLED */
 }
@@ -197,9 +198,10 @@ psa_status_t tfm_crypto_aead_decrypt_setup(psa_invec in_vec[],
     if (status != PSA_SUCCESS) {
 #if defined(TFM_CONFIG_SL_SECURE_LIBRARY)
         if (status == PSA_ERROR_BAD_STATE) {
-            *handle_out = handle;
+            /* Invalidate the handle and abort the operation since the setup functon
+               never gets called to perform the proper abort operation */
             /* Release the operation context, ignore if the operation fails. */
-            (void)tfm_crypto_operation_release(handle_out);
+            (void)tfm_crypto_operation_release(handle_out, true);
         }
 #endif
         return status;
@@ -215,7 +217,7 @@ psa_status_t tfm_crypto_aead_decrypt_setup(psa_invec in_vec[],
 
 exit:
     /* Release the operation context, ignore if the operation fails. */
-    (void)tfm_crypto_operation_release(handle_out);
+    (void)tfm_crypto_operation_release(handle_out, true);
     return status;
 #endif /* TFM_CRYPTO_AEAD_MODULE_DISABLED */
 }
@@ -258,11 +260,13 @@ psa_status_t tfm_crypto_aead_abort(psa_invec in_vec[],
 
     if (status != PSA_SUCCESS) {
         /* Release the operation context, ignore if the operation fails. */
-        (void)tfm_crypto_operation_release(handle_out);
+        (void)tfm_crypto_operation_release(handle_out, true);
         return status;
     }
 
-    return tfm_crypto_operation_release(handle_out);
+    /* The abort() function is called by the underlying crypto function
+       so just invalidate the operation */
+    return tfm_crypto_operation_release(handle_out, false);
 #endif /* TFM_CRYPTO_AEAD_MODULE_DISABLED */
 }
 
@@ -304,27 +308,15 @@ psa_status_t tfm_crypto_aead_finish(psa_invec in_vec[],
                                          handle,
                                          (void **)&operation);
     if (status != PSA_SUCCESS) {
-#if defined(TFM_CONFIG_SL_SECURE_LIBRARY)
-        if (status == PSA_ERROR_BAD_STATE) {
-            *handle_out = handle;
-            /* Release the operation context, ignore if the operation fails. */
-            (void)tfm_crypto_operation_release(handle_out);
-        }
-#endif
         return status;
     }
 
     status = psa_aead_finish(operation,
                              ciphertext, ciphertext_size, &out_vec[1].len,
                              tag, tag_size, &out_vec[2].len);
-
-#if !defined(TFM_CONFIG_SL_SECURE_LIBRARY)
-    if (status == PSA_SUCCESS)
-#endif
-    {
-        /* Release the operation context, ignore if the operation fails. */
-        (void)tfm_crypto_operation_release(handle_out);
-    }
+    /* The abort() function is called by the underlying crypto function
+       so just indicate that the operation is invalid. */
+    (void)tfm_crypto_operation_release(handle_out, false);
 
     return status;
 #endif /* TFM_CRYPTO_AEAD_MODULE_DISABLED */
@@ -363,25 +355,17 @@ psa_status_t tfm_crypto_aead_generate_nonce(psa_invec in_vec[],
                                          handle,
                                          (void **)&operation);
     if (status != PSA_SUCCESS) {
-#if defined(TFM_CONFIG_SL_SECURE_LIBRARY)
-        if (status == PSA_ERROR_BAD_STATE) {
-            *handle_out = handle;
-            /* Release the operation context, ignore if the operation fails. */
-            (void)tfm_crypto_operation_release(handle_out);
-        }
-#endif
         return status;
     }
 
     *handle_out = handle;
 
     status = psa_aead_generate_nonce(operation, nonce, nonce_size, &out_vec[1].len);
-#if defined(TFM_CONFIG_SL_SECURE_LIBRARY)
-    if (status == PSA_ERROR_BAD_STATE) {
-        /* Release the operation context, ignore if the operation fails. */
-        (void)tfm_crypto_operation_release(handle_out);
+    if (status != PSA_SUCCESS) {
+        /* If the operation failed, the abort() function is called by the underlying crypto function
+           so just indicate that the operation is invalid. */
+        (void)tfm_crypto_operation_release(handle_out, false);
     }
-#endif
     return status;
 #endif /* TFM_CRYPTO_AEAD_MODULE_DISABLED */
 }
@@ -418,23 +402,15 @@ psa_status_t tfm_crypto_aead_set_nonce(psa_invec in_vec[],
                                          handle,
                                          (void **)&operation);
     if (status != PSA_SUCCESS) {
-#if defined(TFM_CONFIG_SL_SECURE_LIBRARY)
-        if (status == PSA_ERROR_BAD_STATE) {
-            *handle_out = handle;
-            /* Release the operation context, ignore if the operation fails. */
-            (void)tfm_crypto_operation_release(handle_out);
-        }
-#endif
         return status;
     }
 
     status = psa_aead_set_nonce(operation, nonce, nonce_length);
-#if defined(TFM_CONFIG_SL_SECURE_LIBRARY)
-    if (status == PSA_ERROR_BAD_STATE) {
-        /* Release the operation context, ignore if the operation fails. */
-        (void)tfm_crypto_operation_release(handle_out);
+    if (status != PSA_SUCCESS) {
+        /* If the operation failed, the abort() function is called by the underlying crypto function
+           so just indicate that the operation is invalid. */
+        (void)tfm_crypto_operation_release(handle_out, false);
     }
-#endif
     return status;
 #endif /* TFM_CRYPTO_AEAD_MODULE_DISABLED */
 }
@@ -471,23 +447,15 @@ psa_status_t tfm_crypto_aead_set_lengths(psa_invec in_vec[],
                                          handle,
                                          (void **)&operation);
     if (status != PSA_SUCCESS) {
-#if defined(TFM_CONFIG_SL_SECURE_LIBRARY)
-        if (status == PSA_ERROR_BAD_STATE) {
-            *handle_out = handle;
-            /* Release the operation context, ignore if the operation fails. */
-            (void)tfm_crypto_operation_release(handle_out);
-        }
-#endif
         return status;
     }
 
     status = psa_aead_set_lengths(operation, *ad_length, *plaintext_length);
-#if defined(TFM_CONFIG_SL_SECURE_LIBRARY)
-    if (status == PSA_ERROR_BAD_STATE) {
-        /* Release the operation context, ignore if the operation fails. */
-        (void)tfm_crypto_operation_release(handle_out);
+    if (status != PSA_SUCCESS) {
+        /* If the operation failed, the abort() function is called by the underlying crypto function
+           so just indicate that the operation is invalid. */
+        (void)tfm_crypto_operation_release(handle_out, false);
     }
-#endif
     return status;
 #endif /* TFM_CRYPTO_AEAD_MODULE_DISABLED */
 }
@@ -530,28 +498,18 @@ psa_status_t tfm_crypto_aead_update(psa_invec in_vec[],
                                          handle,
                                          (void **)&operation);
     if (status != PSA_SUCCESS) {
-#if defined(TFM_CONFIG_SL_SECURE_LIBRARY)
-        if (status == PSA_ERROR_BAD_STATE) {
-            *handle_out = handle;
-            /* Release the operation context, ignore if the operation fails. */
-            (void)tfm_crypto_operation_release(handle_out);
-        }
-#endif
         return status;
     }
 
-#if defined(TFM_CONFIG_SL_SECURE_LIBRARY)
     status = psa_aead_update(operation, input, input_length,
-                               output, output_size, &out_vec[1].len);
-    if (status == PSA_ERROR_BAD_STATE) {
-        /* Release the operation context, ignore if the operation fails. */
-        (void)tfm_crypto_operation_release(handle_out);
-    }
-    return status;
-#else
-    return psa_aead_update(operation, input, input_length,
                              output, output_size, &out_vec[1].len);
-#endif
+    if (status != PSA_SUCCESS) {
+        /* If the operation failed, the abort() function is called by the underlying crypto function
+           so just indicate that the operation is invalid. */
+        (void)tfm_crypto_operation_release(handle_out, false);
+    }
+
+    return status;
 #endif /* TFM_CRYPTO_AEAD_MODULE_DISABLED */
 }
 
@@ -587,23 +545,16 @@ psa_status_t tfm_crypto_aead_update_ad(psa_invec in_vec[],
                                          handle,
                                          (void **)&operation);
     if (status != PSA_SUCCESS) {
-#if defined(TFM_CONFIG_SL_SECURE_LIBRARY)
-        if (status == PSA_ERROR_BAD_STATE) {
-            *handle_out = handle;
-            /* Release the operation context, ignore if the operation fails. */
-            (void)tfm_crypto_operation_release(handle_out);
-        }
-#endif
         return status;
     }
 
     status = psa_aead_update_ad(operation, input, input_length);
-#if defined(TFM_CONFIG_SL_SECURE_LIBRARY)
-    if (status == PSA_ERROR_BAD_STATE) {
-        /* Release the operation context, ignore if the operation fails. */
-        (void)tfm_crypto_operation_release(handle_out);
+    if (status != PSA_SUCCESS) {
+        /* If the operation failed, the abort() function is called by the underlying crypto function
+           so just indicate that the operation is invalid. */
+        (void)tfm_crypto_operation_release(handle_out, false);
     }
-#endif
+
     return status;
 #endif /* TFM_CRYPTO_AEAD_MODULE_DISABLED */
 }
@@ -646,29 +597,18 @@ psa_status_t tfm_crypto_aead_verify(psa_invec in_vec[],
                                          handle,
                                          (void **)&operation);
     if (status != PSA_SUCCESS) {
-#if defined(TFM_CONFIG_SL_SECURE_LIBRARY)
-        if (status == PSA_ERROR_BAD_STATE) {
-            *handle_out = handle;
-            /* Release the operation context, ignore if the operation fails. */
-            (void)tfm_crypto_operation_release(handle_out);
-        }
-#endif
         return status;
     }
 
-#if defined(TFM_CONFIG_SL_SECURE_LIBRARY)
     status = psa_aead_verify(operation,
                              plaintext, plaintext_size, &out_vec[1].len,
                              tag, tag_length);
-    if (status == PSA_ERROR_BAD_STATE) {
-        /* Release the operation context, ignore if the operation fails. */
-        (void)tfm_crypto_operation_release(handle_out);
-    }
-    return status;
-#else
-    return psa_aead_update(operation, input, input_length,
-                             output, output_size, &out_vec[1].len);
-#endif
+
+    /* The abort() function is called by the underlying crypto function
+       so just indicate that the operation is invalid. */
+    (void)tfm_crypto_operation_release(handle_out, false);
+
+     return status;
 #endif /* TFM_CRYPTO_AEAD_MODULE_DISABLED */
 }
 /*!@}*/

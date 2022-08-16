@@ -27,6 +27,9 @@
  * 3. This notice may not be removed or altered from any source distribution.
  *
  *****************************************************************************/
+#ifndef BGM21_PRS_SIGNALS_H
+#define BGM21_PRS_SIGNALS_H
+
 /** Synchronous signal sources enumeration: */
 #define _PRS_SYNC_CH_CTRL_SOURCESEL_NONE                     (0x00000000UL)
 #define _PRS_SYNC_CH_CTRL_SOURCESEL_TIMER0                   (0x00000001UL)
@@ -768,3 +771,5 @@
 #define PRS_SE_STATE0GATED                                   (PRS_ASYNC_SE_STATE0GATED)
 #define PRS_SE_STATE1GATED                                   (PRS_ASYNC_SE_STATE1GATED)
 #define PRS_SE_STATE2GATED                                   (PRS_ASYNC_SE_STATE2GATED)
+
+#endif /* BGM21_PRS_SIGNALS_H */

@@ -28,6 +28,7 @@
  *
  ******************************************************************************/
 
+#include "sl_mvp_config.h"
 #include "sl_mvp_ml_conv2d.h"
 #include "sl_mvp.h"
 #include "sl_mvp_util.h"
@@ -77,6 +78,28 @@ bool sli_mvp_ml_conv2d_s8_is_supported(const sli_mvp_ml_conv2d_s8_params_t *para
   return conv2d(params, false) == SL_STATUS_OK;
 }
 
+/***************************************************************************//**
+ *
+ * Return the required scratch buffer size to perform the Conv2D operation
+ *
+ ******************************************************************************/
+int sli_mvp_ml_conv2d_s8_get_scratch_buffer_size(const sli_mvp_ml_conv2d_s8_params_t *params)
+{
+  int scratch_buffer_size = 0;
+
+  #if SL_MVP_OPTIMIZE_SPEED == 1
+  // Required scratch buffer size is the input tensor as float16_t
+  const int input_depth       = params->in_channels;
+  const int input_height      = params->input_height;
+  const int input_width       = params->input_width;
+  scratch_buffer_size = (input_width * input_height * input_depth) * sizeof(float16_t);
+  #else
+  (void)params;
+  #endif
+
+  return scratch_buffer_size;
+}
+
 static sl_status_t conv2d(const sli_mvp_ml_conv2d_s8_params_t *params, bool execute)
 {
   // Consume all input parameters.
@@ -94,6 +117,10 @@ static sl_status_t conv2d(const sli_mvp_ml_conv2d_s8_params_t *params, bool exec
   const float16_t *output_scaler      = params->output_scaler;
   const float16_t zero                = 0.0f;
   int8_t *output                      = params->output;
+
+  #if SL_MVP_OPTIMIZE_SPEED == 1
+  float16_t *scaled_input = (float16_t*)params->scratch_buffer;
+  #endif
 
   sl_status_t status                  = SL_STATUS_OK;
   sli_mvp_program_context_t *p        = sli_mvp_get_program_area_context();
@@ -140,6 +167,118 @@ static sl_status_t conv2d(const sli_mvp_ml_conv2d_s8_params_t *params, bool exec
   const int output_width      = params->output_width;
   const int32_t output_offset = params->output_offset;
 
+
+#if (SL_MVP_OPTIMIZE_SPEED == 1)
+
+  // If SL_MVP_OPTIMIZE_SPEED is enabled, calculate the input accumulator scaler
+  // in a separate program. The scaled inputs are stored in a temporary array 
+  // and used directly by the conv2D algorithm.
+  for (int batch = 0; batch < batches; ++batch) {
+    int input_stride_dim2 = 1;
+    int input_size_dim2   = input_depth;
+    int input_stride_dim1 = input_size_dim2;
+    int input_size_dim1   = input_width;
+    int input_stride_dim0 = input_size_dim2 * input_size_dim1;
+    int input_size_dim0   = input_height;
+
+    int input_index = sli_mvp_util_offset_nhwc(input_height, input_width, input_depth,
+                                                batch /* out_channel_start */,
+                                                0,
+                                                0,
+                                                0);
+
+    // Condition to pack two reals to use both FMACs in MVP and double throughput.
+    const bool use_parallel_mac_input_scaling =  (input_size_dim2    % 2 == 0)
+                                              && (input_stride_dim1  % 2 == 0)
+                                              && (input_stride_dim0  % 2 == 0)
+                                              && (input_index        % 2 == 0);
+
+    if (use_parallel_mac_input_scaling) {
+      input_size_dim2    /= 2;
+      input_stride_dim1  /= 2;
+      input_stride_dim0  /= 2;
+    }
+
+    SLI_MVP_CHECK(input_stride_dim0 <= (int)SLI_MVP_MAX_VECTOR_STRIDE);
+
+    sli_mvp_pb_begin_program(p);
+
+    // Input array
+    sli_mvp_pb_config_array_full(p->p,
+                                 SLI_MVP_ARRAY(0),
+                                 (void*)&input[input_index],
+                                 use_parallel_mac_input_scaling == true
+                                 ? SLI_MVP_DATATYPE_COMPLEX_INT8
+                                 : SLI_MVP_DATATYPE_INT8,
+                                 input_size_dim0,
+                                 input_size_dim1,
+                                 input_size_dim2,
+                                 input_stride_dim0,
+                                 input_stride_dim1,
+                                 input_stride_dim2,
+                                 &status);
+
+    // Output array
+    sli_mvp_pb_config_array_full(p->p,
+                                 SLI_MVP_ARRAY(1),
+                                 (void*)&scaled_input[input_index],
+                                 use_parallel_mac_input_scaling == true
+                                 ? SLI_MVP_DATATYPE_COMPLEX_BINARY16
+                                 : SLI_MVP_DATATYPE_BINARY16,
+                                 input_size_dim0,
+                                 input_size_dim1,
+                                 input_size_dim2,
+                                 input_stride_dim0,
+                                 input_stride_dim1,
+                                 input_stride_dim2,
+                                 &status);
+
+    sli_mvp_prog_set_reg_f16(p->p, SLI_MVP_R0, SLI_MVP_ACCUMULATOR_SCALER);
+    if (use_parallel_mac_input_scaling) {
+      sli_mvp_prog_set_reg_f16c(p->p, SLI_MVP_R1, input_offset_scaled, input_offset_scaled);
+    } else {
+      sli_mvp_prog_set_reg_f16(p->p, SLI_MVP_R1, input_offset_scaled);
+    }
+
+    sli_mvp_pb_begin_loop(p, input_size_dim0, &status); // input width
+      sli_mvp_pb_begin_loop(p, input_size_dim1, &status); // input height
+        sli_mvp_pb_begin_loop(p, input_size_dim2, &status); // input depth
+          // LOAD(ARRAY0, R5)      Input
+          // LOAD(ARRAY1, R7)      Filter
+          // R6 = MACC(R5, R0, R1) Compute(r_input_i, MACC, r_input_i, c_accumulator_scaler, c_input_offset_scaled)
+          sli_mvp_pb_compute(p,
+                             SLI_MVP_OP(MACC),
+                             SLI_MVP_ALU_Z(SLI_MVP_R6)
+                             | SLI_MVP_ALU_X(SLI_MVP_R5)
+                             | SLI_MVP_ALU_Y(SLI_MVP_R0)
+                             | SLI_MVP_ALU_A(SLI_MVP_R1),
+                             SLI_MVP_LOAD(0, SLI_MVP_R5, SLI_MVP_ARRAY(0), SLI_MVP_INCRDIM2),
+                             SLI_MVP_STORE(SLI_MVP_R6, SLI_MVP_ARRAY(1), SLI_MVP_INCRDIM2),
+                             &status);
+
+        sli_mvp_pb_end_loop(p); // input depth
+        sli_mvp_pb_postloop_incr_dim(p, SLI_MVP_ARRAY(0), SLI_MVP_INCRDIM1);
+        sli_mvp_pb_postloop_incr_dim(p, SLI_MVP_ARRAY(1), SLI_MVP_INCRDIM1);
+      sli_mvp_pb_end_loop(p); // input height
+      sli_mvp_pb_postloop_incr_dim(p, SLI_MVP_ARRAY(0), SLI_MVP_INCRDIM0);
+      sli_mvp_pb_postloop_incr_dim(p, SLI_MVP_ARRAY(1), SLI_MVP_INCRDIM0);
+    sli_mvp_pb_end_loop(p); // input width
+
+
+    // Check if any errors found during program generation.
+    if (status != SL_STATUS_OK) {
+      if (execute) {
+        EFM_ASSERT(false);
+      }
+      return status;
+    }
+
+    if (execute) {
+      sli_mvp_pb_execute_program(p);
+    }
+  }
+#endif
+
   // Implemented as single parameterizable MVP program.
   // Note that there is some flexibility lost by having to compute full output
   // values at once vs. being able to have a partial sum stored in the output
@@ -156,6 +295,8 @@ static sl_status_t conv2d(const sli_mvp_ml_conv2d_s8_params_t *params, bool exec
   const int out_x_center_max = sli_div_floor_int(in_x_origin_center_max + pad_width, stride_width);
 
   for (int out_x_min = 0, out_x_max; out_x_min < output_width; out_x_min = out_x_max + 1) {
+    /* Truncate filter width to actual filter width when filter starts outside of
+    valid input area, i.e. padded area */
     const int in_x_origin_min = (out_x_min * stride_width) - pad_width;
     const int filter_x_start = SL_MAX(0, -in_x_origin_min);
     const int filter_x_end   = SL_MIN(filter_width, input_width - in_x_origin_min);
@@ -360,7 +501,23 @@ static sl_status_t conv2d(const sli_mvp_ml_conv2d_s8_params_t *params, bool exec
           //   Array2  bias
           //   Array3  scaler
           //   Array4  output
-
+          #if (SL_MVP_OPTIMIZE_SPEED == 1)
+          // Use the prescaled input values
+          sli_mvp_pb_config_array_full(p->p,
+                                       SLI_MVP_ARRAY(0),
+                                       (void*)&scaled_input[input_index_base],
+                                       use_parallel_mac == true
+                                       ? SLI_MVP_DATATYPE_COMPLEX_BINARY16
+                                       : SLI_MVP_DATATYPE_BINARY16,
+                                       input_size_vec,
+                                       input_size_row,
+                                       input_size_col,
+                                       input_stride_vec,
+                                       input_stride_row,
+                                       input_stride_col,
+                                       &status);
+          #else
+          // Use unscaled input values
           sli_mvp_pb_config_array_full(p->p,
                                        SLI_MVP_ARRAY(0),
                                        (void*)&input[input_index_base],
@@ -374,6 +531,7 @@ static sl_status_t conv2d(const sli_mvp_ml_conv2d_s8_params_t *params, bool exec
                                        input_stride_row,
                                        input_stride_col,
                                        &status);
+          #endif
 
           sli_mvp_pb_config_array_full(p->p,
                                        SLI_MVP_ARRAY(1),
@@ -442,6 +600,26 @@ static sl_status_t conv2d(const sli_mvp_ml_conv2d_s8_params_t *params, bool exec
                 sli_mvp_pb_begin_loop(p, filter_height_truncated, &status); {
                   sli_mvp_pb_begin_loop(p, input_size_col, &status); {
 
+                    #if (SL_MVP_OPTIMIZE_SPEED == 1)
+                    // Accumulate input * filter
+
+                    // R5 = MAC(R6, R7, R5) Compute(r_acc, MACR2A, r_input_i, r_filter_i, r_acc)
+                    sli_mvp_pb_compute(p,
+                                       SLI_MVP_OP(MACR2A),
+                                       SLI_MVP_ALU_Z(SLI_MVP_R5)
+                                       | SLI_MVP_ALU_X(SLI_MVP_R6)
+                                       | SLI_MVP_ALU_Y(SLI_MVP_R7)
+                                       | SLI_MVP_ALU_A(SLI_MVP_R5),
+                                       SLI_MVP_LOAD(0, SLI_MVP_R6, SLI_MVP_ARRAY(0), SLI_MVP_INCRDIM_COL)
+                                       | SLI_MVP_LOAD(1, SLI_MVP_R7, SLI_MVP_ARRAY(1), SLI_MVP_INCRDIM_COL),
+                                       SLI_MVP_NONE,
+                                       &status);
+
+                    #else // SL_MVP_OPTIMIZE_SPEED == 0
+
+                    // 1. Scale the inputs by accumulator scaler and offset
+                    // 2. Accumulate input * filter
+
                     // LOAD(ARRAY0, R6)      Input
                     // LOAD(ARRAY1, R7)      Filter
                     // R6 = MACC(R6, R0, R1) Compute(r_input_i, MACC, r_input_i, c_accumulator_scaler, c_input_offset_scaled)
@@ -466,6 +644,7 @@ static sl_status_t conv2d(const sli_mvp_ml_conv2d_s8_params_t *params, bool exec
                                        SLI_MVP_NONE,
                                        SLI_MVP_NONE,
                                        &status);
+                    #endif
                   }
                   sli_mvp_pb_end_loop(p);          // input_size_col
                   sli_mvp_pb_postloop_incr_dim(p, SLI_MVP_ARRAY(0), SLI_MVP_INCRDIM_ROW);

@@ -145,11 +145,22 @@ void emberAfPluginSleepyMessageQueueRemoveAllMessages(EmberEUI64 dstEui64);
  * @{
  */
 
+#ifdef UC_BUILD
+/**
+ * @brief Initialize the sleepy message queue.
+ *
+ * @param init_level  Initialize event and local data
+ *                    - SL_ZIGBEE_INIT_LEVEL_EVENT (0x00)
+ *                    - SL_ZIGBEE_INIT_LEVEL_LOCAL_DATA (0x01)
+ **/
+void emberAfPluginSleepyMessageQueueInitCallback(uint8_t init_level);
+#else // !UC_BUILD
 /**
  * @brief Initialize the sleepy message queue.
  *
  **/
 void  emberAfPluginSleepyMessageQueueInitCallback(void);
+#endif  // UC_BUILD
 
 /** @brief Message time out.
  *

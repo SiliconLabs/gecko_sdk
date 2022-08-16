@@ -33,7 +33,7 @@
 
 #include "em_device.h"
 
-#if defined(SL_CATALOG_TZ_SECURE_KEY_LIBRARY_NS_PRESENT)
+#if defined(SL_TRUSTZONE_NONSECURE)
 #include "sli_tz_service_syscfg.h"
 #endif
 
@@ -52,7 +52,7 @@ extern "C" {
  ******************************************************************************/
 __STATIC_INLINE uint32_t SYSCFG_readChipRev(void)
 {
-#if defined(SL_CATALOG_TZ_SECURE_KEY_LIBRARY_NS_PRESENT)
+#if defined(SL_TRUSTZONE_NONSECURE)
   return sli_tz_syscfg_read_chiprev_register();
 #else
   return SYSCFG->CHIPREV;
@@ -66,7 +66,7 @@ __STATIC_INLINE uint32_t SYSCFG_readChipRev(void)
  ******************************************************************************/
 __STATIC_INLINE void SYSCFG_setDmem0RamCtrlRamwsenBit(void)
 {
-#if defined(SL_CATALOG_TZ_SECURE_KEY_LIBRARY_NS_PRESENT)
+#if defined(SL_TRUSTZONE_NONSECURE)
   sli_tz_syscfg_set_dmem0ramctrl_ramwsen_bit();
 #else
 
@@ -79,7 +79,7 @@ __STATIC_INLINE void SYSCFG_setDmem0RamCtrlRamwsenBit(void)
  ******************************************************************************/
 __STATIC_INLINE void SYSCFG_clearDmem0RamCtrlRamwsenBit(void)
 {
-#if defined(SL_CATALOG_TZ_SECURE_KEY_LIBRARY_NS_PRESENT)
+#if defined(SL_TRUSTZONE_NONSECURE)
   sli_tz_syscfg_clear_dmem0ramctrl_ramwsen_bit();
 #else
   SYSCFG->DMEM0RAMCTRL = SYSCFG->DMEM0RAMCTRL & ~_SYSCFG_DMEM0RAMCTRL_RAMWSEN_MASK;
@@ -91,7 +91,7 @@ __STATIC_INLINE void SYSCFG_clearDmem0RamCtrlRamwsenBit(void)
  ******************************************************************************/
 __STATIC_INLINE uint32_t SYSCFG_getDmem0RamCtrlRamwsenBit(void)
 {
-#if defined(SL_CATALOG_TZ_SECURE_KEY_LIBRARY_NS_PRESENT)
+#if defined(SL_TRUSTZONE_NONSECURE)
   return sli_tz_syscfg_get_dmem0ramctrl_ramwsen_bit();
 #else
   return (SYSCFG->DMEM0RAMCTRL & _SYSCFG_DMEM0RAMCTRL_RAMWSEN_MASK) >> _SYSCFG_DMEM0RAMCTRL_RAMWSEN_SHIFT;
@@ -106,7 +106,7 @@ __STATIC_INLINE uint32_t SYSCFG_getDmem0RamCtrlRamwsenBit(void)
  ******************************************************************************/
 __STATIC_INLINE uint32_t SYSCFG_readDmem0RetnCtrl(void)
 {
-#if defined(SL_CATALOG_TZ_SECURE_KEY_LIBRARY_NS_PRESENT)
+#if defined(SL_TRUSTZONE_NONSECURE)
   return sli_tz_syscfg_read_dmem0retnctrl_register();
 #else
   return SYSCFG->DMEM0RETNCTRL;
@@ -119,7 +119,7 @@ __STATIC_INLINE uint32_t SYSCFG_readDmem0RetnCtrl(void)
  ******************************************************************************/
 __STATIC_INLINE void SYSCFG_maskDmem0RetnCtrl(uint32_t mask)
 {
-#if defined(SL_CATALOG_TZ_SECURE_KEY_LIBRARY_NS_PRESENT)
+#if defined(SL_TRUSTZONE_NONSECURE)
   sli_tz_syscfg_mask_dmem0retnctrl_register(mask);
 #else
   SYSCFG->DMEM0RETNCTRL = SYSCFG->DMEM0RETNCTRL | mask;
@@ -131,7 +131,7 @@ __STATIC_INLINE void SYSCFG_maskDmem0RetnCtrl(uint32_t mask)
  ******************************************************************************/
 __STATIC_INLINE void SYSCFG_zeroDmem0RetnCtrl(void)
 {
-#if defined(SL_CATALOG_TZ_SECURE_KEY_LIBRARY_NS_PRESENT)
+#if defined(SL_TRUSTZONE_NONSECURE)
   sli_tz_syscfg_zero_dmem0retnctrl_register();
 #else
   SYSCFG->DMEM0RETNCTRL = 0x0UL;
@@ -145,7 +145,7 @@ __STATIC_INLINE void SYSCFG_zeroDmem0RetnCtrl(void)
  ******************************************************************************/
 __STATIC_INLINE void SYSCFG_setSysTicExtClkEnCfgSysTic(void)
 {
-#if defined(SL_CATALOG_TZ_SECURE_KEY_LIBRARY_NS_PRESENT)
+#if defined(SL_TRUSTZONE_NONSECURE)
   sli_tz_syscfg_set_systicextclken_cfgsystic();
 #else
   SYSCFG->CFGSYSTIC = (SYSCFG->CFGSYSTIC | _SYSCFG_CFGSYSTIC_SYSTICEXTCLKEN_MASK);
@@ -157,7 +157,7 @@ __STATIC_INLINE void SYSCFG_setSysTicExtClkEnCfgSysTic(void)
  ******************************************************************************/
 __STATIC_INLINE void SYSCFG_clearSysTicExtClkEnCfgSysTic(void)
 {
-#if defined(SL_CATALOG_TZ_SECURE_KEY_LIBRARY_NS_PRESENT)
+#if defined(SL_TRUSTZONE_NONSECURE)
   sli_tz_syscfg_clear_systicextclken_cfgsystic();
 #else
   SYSCFG->CFGSYSTIC = (SYSCFG->CFGSYSTIC & ~_SYSCFG_CFGSYSTIC_SYSTICEXTCLKEN_MASK);

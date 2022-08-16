@@ -39,6 +39,20 @@
 
 #include "rail_features.h"
 
+#if     (defined(DOXYGEN_SHOULD_SKIP_THIS) && !defined(RAIL_ENUM))
+//  Copied from rail_types.h to satisfy doxygen build.
+/// The RAIL library does not use enumerations because the ARM EABI leaves their
+/// size ambiguous, which causes problems if the application is built
+/// with different flags than the library. Instead, uint8_t typedefs
+/// are used in compiled code for all enumerations. For documentation purposes, this is
+/// converted to an actual enumeration since it's much easier to read in Doxygen.
+#define RAIL_ENUM(name) enum name
+/// This macro is a more generic version of the \ref RAIL_ENUM() macro that
+/// allows the size of the type to be overridden instead of forcing the use of
+/// a uint8_t. See \ref RAIL_ENUM() for more information.
+#define RAIL_ENUM_GENERIC(name, type) enum name
+#endif//(defined(DOXYGEN_SHOULD_SKIP_THIS) && !defined(RAIL_ENUM))
+
 #ifdef __cplusplus
 extern "C" {
 #endif

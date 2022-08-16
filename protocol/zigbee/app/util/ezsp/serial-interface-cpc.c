@@ -35,8 +35,7 @@
 
 #define ZIGBEE_CPC_TRANSMIT_WINDOW 1
 
-#define WAIT_FOR_RESPONSE_TIMEOUT_MS 50
-#define WAIT_FOR_RESPONSE_TIMEOUT_US (WAIT_FOR_RESPONSE_TIMEOUT_MS * 1000)
+#define WAIT_FOR_RESPONSE_TIMEOUT_S 5
 
 static uint8_t ezspFrameLength;
 uint8_t *ezspFrameLengthLocation = &ezspFrameLength;
@@ -58,10 +57,28 @@ static uint8_t zigbee_cpc_rx_buffer[SL_CPC_READ_MINIMUM_SIZE];
  #define test_print(...)
 #endif // CPC_TEST_CODE
 
+static int max_restart_attempts = 3;
+/******************************************************************************
+ * Callback to register reset from other end.
+ *****************************************************************************/
 static void reset_crash_callback(void)
 {
-  printf("Connection lost. Restart host process.\n");
-  exit(-1);
+  int ret = 0;
+  int attempts = 0;
+  // Reset cpc communication if daemon signals
+  do {
+    //Try to restart CPC
+    ret = cpc_restart(&zigbee_cpc_handle);
+    //Mark how many times the restart was attempted
+    attempts++;
+    //Continue to try and restore CPC communication until we
+    //have exhausted the retries or restart was successful
+  }   while ((ret != 0) && (attempts < max_restart_attempts));
+
+  if (ret < 0) {
+    perror("reset error");
+    exit(EXIT_FAILURE);
+  }
 }
 
 EzspStatus ezspInit(void)
@@ -137,8 +154,7 @@ WEAK_TEST EzspStatus serialResponseReceived(void)
                           sizeof(waitingForResponse));
 
   if (waitingForResponse) {
-    struct timeval timeout;
-    timeout.tv_usec = WAIT_FOR_RESPONSE_TIMEOUT_US;
+    cpc_timeval_t timeout = { WAIT_FOR_RESPONSE_TIMEOUT_S, 0 };
     cpc_set_endpoint_option(zigbee_cpc_endpoint,
                             CPC_OPTION_RX_TIMEOUT,
                             &timeout,

@@ -18,5 +18,3 @@ include:
     - path: CC_ManufacturerSpecific_config.h
 provides:
   - name: zw_cc_manufacturerspecific
-documentation:
-  url: "https://sdomembers.z-wavealliance.org/document/dl/643"

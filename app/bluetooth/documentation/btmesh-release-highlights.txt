@@ -1,5 +1,2 @@
-Bluetooth Mesh SDK 3.0.0.0
-- Reduced project flash consumption by optimizing Mesh stack code size
-- Support added for xGM240P PCB Modules and BG22/BGM220 Explorer Kits
-- Support added for GCC version 10.3-2021.10 and IAR version 9.20.4
-
+Bluetooth Mesh SDK 3.0.1.0
+- Targeted quality improvements and bug fixes

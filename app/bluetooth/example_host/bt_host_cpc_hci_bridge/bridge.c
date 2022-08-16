@@ -33,18 +33,24 @@
  *
  ******************************************************************************/
 #include "sl_cpc.h"
+#include <fcntl.h>
 #include <stdint.h>
 #include <unistd.h>
 #include <stdio.h>
 #include <errno.h>
-#include <pthread.h>
 #include <pty.h>
 #include <stdlib.h>
 #include <string.h>
 #include <signal.h>
+#include <time.h>
 
 // set this to 1 for more runtime log messages
 #define DEBUG 0
+
+#define SUCCESS             0
+#define FAILURE             (-1)
+#define TIMEOUT_IN_SEC      0
+#define TIMEOUT_IN_USEC     5000
 
 #define TO_CPC_BUF_SIZE     256
 #define FROM_CPC_BUF_SIZE   SL_CPC_READ_MINIMUM_SIZE
@@ -55,6 +61,8 @@
 #define THREAD_SLEEP_NS     1L
 #define CPC_TRANSMIT_WINDOW 1
 #define SYMLINK_PATH        "pts_hci"
+
+#define MAX(x, y) ((x) > (y) ? (x) : (y))
 
 // cpc related structures
 static cpc_handle_t lib_handle;
@@ -67,6 +75,7 @@ static char cpc_instance[INST_NAME_LEN];
 
 static int pty_m;
 static int pty_s;
+static int ep_sock_fd;
 
 // end the receiving loop if signal is received.
 static volatile bool run = true;
@@ -74,14 +83,7 @@ static volatile bool run = true;
 static volatile bool has_reset = false;
 
 static void reset_callback(void);
-
-// two worker threads
-static pthread_t thread_rx;
-static pthread_t thread_tx;
-
-// Static receive function
-static void *cpc_to_pty_func(void *ptr);
-static void *pty_to_cpc_func(void *ptr);
+static int cpc_poll_fds(void);
 
 // Custom signal handler.
 static void signal_handler(int sig)
@@ -123,10 +125,14 @@ uint32_t startup(void)
     perror("cpc_open_endpoint ");
     return ret;
   }
+  ep_sock_fd = ret;
 
   // Open virtual UART device
   ret = openpty(&pty_m, &pty_s, NULL, NULL, NULL);
   if (ret >= 0) {
+    int flags = fcntl(pty_m, F_GETFL, 0);
+    flags = flags | O_NONBLOCK;
+    fcntl(pty_m, F_SETFL, flags);
     char *pName = ttyname(pty_s);
     printf("Name of secondary pty side is <%s>\n", pName);
     remove(SYMLINK_PATH);
@@ -182,10 +188,12 @@ int reset_cpc(void)
                           &endpoint,
                           SL_CPC_ENDPOINT_BLUETOOTH_RCP,
                           CPC_TRANSMIT_WINDOW);
+
   if (ret < 0) {
     perror(" open endpoint ");
   }
 
+  ep_sock_fd = ret;
   return ret;
 }
 
@@ -211,21 +219,6 @@ int main(int argc, char *argv[])
   if (startup() < 0) {
     exit(EXIT_FAILURE);
   }
-  // Creating receiving working threads
-  ret = pthread_create(&thread_rx, NULL, cpc_to_pty_func, NULL);
-  if (ret) {
-    printf("Error - pthread_create(thread_rx) return code: %d\n", ret);
-    exit(EXIT_FAILURE);
-  }
-  ret = pthread_create(&thread_tx, NULL, pty_to_cpc_func, NULL);
-  if (ret) {
-    printf("Error - pthread_create(thread_tx) return code: %d\n", ret);
-    exit(EXIT_FAILURE);
-  }
-
-  if (DEBUG) {
-    printf("\nCPC - VHCI bridge working, main thread is going to sleep\n\n");
-  }
 
   // Reset cpc communication if daemon signals
   while (run) {
@@ -235,23 +228,58 @@ int main(int argc, char *argv[])
         perror("reset ");
         exit(EXIT_FAILURE);
       }
+    } else {
+      ret = cpc_poll_fds();
+      if (ret < 0) {
+        perror("select error");
+      }
     }
-    nanosleep((const struct timespec[]){{ 0, CPC_RESET_SLEEP_NS } }, NULL);
   }
 }
 
-/**************************************************************************//**
- * Working thread from CPCd
- *****************************************************************************/
-void *cpc_to_pty_func(void *ptr)
+int cpc_poll_fds(void)
 {
+  int ret;
+  int max_fd;
   ssize_t size = 0;
+  struct timeval tv;
+  tv.tv_sec  = TIMEOUT_IN_SEC;
+  tv.tv_usec = TIMEOUT_IN_USEC;
 
-  // unused variable
-  (void)ptr;
+  fd_set readfds;
 
-  while (run) {
-    // Read data from cpc
+  FD_ZERO(&readfds);
+  FD_SET(pty_m, &readfds);
+  FD_SET(ep_sock_fd, &readfds);
+
+  max_fd = MAX(pty_m, ep_sock_fd);
+
+  ret = select(max_fd + 1, &readfds, NULL, NULL, &tv);
+  if ((ret < 0) && (errno != EINTR)) {
+    return ret;
+  }
+
+  if (FD_ISSET(pty_m, &readfds)) {
+    size = read(pty_m, data_to_cpc, TO_CPC_BUF_SIZE);
+    if (size > 0) {
+      if (DEBUG) {
+        printf("Len to cpc %zd\n", size);
+        printf("Data to cpc: ");
+        for (int i = 0; i < size; i++) {
+          printf("%x ", data_to_cpc[i]);
+        }
+        printf("\n");
+      }
+      // Write data to cpc
+      cpc_write_endpoint(endpoint, &data_to_cpc[0], size, 0);
+      memset(&data_to_cpc[0], 0, TO_CPC_BUF_SIZE);
+    } else if (errno != EAGAIN && errno != ECONNRESET) {
+      perror("pty_to_cpc_func error");
+      return FAILURE;
+    }
+  }
+
+  if (FD_ISSET(ep_sock_fd, &readfds)) {
     size = cpc_read_endpoint(endpoint,
                              &data_from_cpc[0],
                              FROM_CPC_BUF_SIZE,
@@ -268,49 +296,11 @@ void *cpc_to_pty_func(void *ptr)
       // Write data to pty
       write(pty_m, &data_from_cpc[0], size);
       memset(&data_from_cpc[0], 0, FROM_CPC_BUF_SIZE);
-    } else if (has_reset) {
-      // intentionally left blank
     } else if (errno != EAGAIN && errno != ECONNRESET) {
       perror("cpc_to_pty_func error ");
-      exit(-1);
+      return FAILURE;
     }
-    nanosleep((const struct timespec[]){{ 0, THREAD_SLEEP_NS } }, NULL);
   }
-  return NULL;
-}
 
-/**************************************************************************//**
- * Working thread to CPCd
- *****************************************************************************/
-void *pty_to_cpc_func(void *ptr)
-{
-  ssize_t size = 0;
-
-  // unused variable
-  (void)ptr;
-
-  while (run) {
-    // Read data from pty
-    size = read(pty_m, data_to_cpc, TO_CPC_BUF_SIZE);
-    if (size > 0) {
-      if (DEBUG) {
-        printf("Len to cpc %zd\n", size);
-        printf("Data to cpc: ");
-        for (int i = 0; i < size; i++) {
-          printf("%x ", data_to_cpc[i]);
-        }
-        printf("\n");
-      }
-      // Write data to cpc
-      cpc_write_endpoint(endpoint, &data_to_cpc[0], size, 0);
-      memset(&data_to_cpc[0], 0, TO_CPC_BUF_SIZE);
-    } else if (has_reset) {
-      // intentionally left blank
-    } else if (errno != EAGAIN && errno != ECONNRESET) {
-      perror("pty_to_cpc_func error");
-      exit(-1);
-    }
-    nanosleep((const struct timespec[]){{ 0, THREAD_SLEEP_NS } }, NULL);
-  }
-  return NULL;
+  return SUCCESS;
 }

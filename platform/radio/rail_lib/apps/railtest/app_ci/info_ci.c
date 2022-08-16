@@ -937,6 +937,10 @@ void printChipFeatures(sl_cli_command_arg_t *args)
                      RAIL_SUPPORTS_SQ_PHY ? "Yes" : "No",
                      RAIL_SupportsSQPhy(railHandle) ? "Yes" : "No");
   responsePrintMulti("Feature:%s,CompileTime:%s,RunTime:%s",
+                     "RAIL_SUPPORTS_RX_RAW_DATA",
+                     RAIL_SUPPORTS_RX_RAW_DATA ? "Yes" : "No",
+                     RAIL_SupportsRxRawData(railHandle) ? "Yes" : "No");
+  responsePrintMulti("Feature:%s,CompileTime:%s,RunTime:%s",
                      "RAIL_SUPPORTS_DIRECT_MODE",
                      RAIL_SUPPORTS_DIRECT_MODE ? "Yes" : "No",
                      RAIL_SupportsDirectMode(railHandle) ? "Yes" : "No");

@@ -47,6 +47,10 @@
  #include "critical-message-queue.h"
 #endif
 
+#ifdef SL_CATALOG_ZIGBEE_TEST_HARNESS_PRESENT
+  #include "test-harness-config.h"
+#endif
+
 #ifdef EZSP_HOST
 #define INVALID_MESSAGE_TAG 0xFFFF
 #define setStackProfile(stackProfile) \
@@ -704,18 +708,27 @@ EmberAfCbkeKeyEstablishmentSuite emberAfIsFullSmartEnergySecurityPresent(void)
 EmberStatus emberAfFormNetwork(EmberNetworkParameters *parameters)
 {
   EmberStatus status = EMBER_INVALID_CALL;
-#ifdef EMBER_AF_HAS_COORDINATOR_NETWORK
-  if (emAfProIsCurrentNetwork()
-      && emAfCurrentZigbeeProNetwork->nodeType == EMBER_COORDINATOR) {
-    zaTrustCenterSecurityInit(true); // centralized network
+  EmberCurrentSecurityState securityState;
+  if (emAfProIsCurrentNetwork()) {
     emberAfCorePrintln("%ping on ch %d, panId 0x%2X",
                        "Form",
                        parameters->radioChannel,
                        parameters->panId);
     emberAfCoreFlush();
-    status = emberFormNetwork(parameters);
+    if (emAfCurrentZigbeeProNetwork->nodeType == EMBER_COORDINATOR) {
+      zaTrustCenterSecurityInit(true); // centralized network
+    }
+    // ignore return value for now since it always returns EMBER_SUCCESS
+    (void)emberGetCurrentSecurityState(&securityState);
+    if (emAfCurrentZigbeeProNetwork->nodeType == EMBER_COORDINATOR  \
+        || ((emAfCurrentZigbeeProNetwork->nodeType == EMBER_ROUTER) \
+            && (securityState.bitmask & EMBER_DISTRIBUTED_TRUST_CENTER_MODE))) {
+      status = emberFormNetwork(parameters);
+    } else {
+      emberAfCorePrintln("Error: Device does not support %s network formation",
+                         (securityState.bitmask & EMBER_DISTRIBUTED_TRUST_CENTER_MODE) ? "distributed" : "centralized");
+    }
   }
-#endif
   return status;
 }
 
@@ -813,7 +826,7 @@ void emAfNetworkSecurityInit(void)
 // If possible, initialize each network.  For ZigBee PRO networks, the node
 // type of the device must match the one used previously, but note that
 // coordinator-capable devices are allowed to initialize as routers.
-#ifndef EMBER_AF_TC_SWAP_OUT_TEST
+#if (EMBER_AF_TC_SWAP_OUT_TEST == 0)
 void emAfNetworkInit(SLXU_INIT_ARG)
 {
   SLXU_INIT_UNUSED_ARG;

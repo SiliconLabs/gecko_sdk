@@ -50,3 +50,9 @@ uint32_t bootload_nsc_getBootloaderVersion(void)
 {
   return bootload_getBootloaderVersion();
 }
+
+__attribute__((cmse_nonsecure_entry))
+bool bootload_nsc_getApplicationVersion(uint32_t *version)
+{
+  return bootload_getApplicationVersion(version);
+}

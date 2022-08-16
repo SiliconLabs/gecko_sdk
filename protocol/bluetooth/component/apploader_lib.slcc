@@ -1,9 +1,11 @@
 id: "apploader_lib"
-label: "AppLoader library for EFR series 2 and above"
+label: "AppLoader library for Gecko Bootloader"
 package: "Bluetooth"
 description: >
-  Bluetooth Apploader library for OTA DFU. The Apploader runs as a plugin
-  of the Bootloader.
+  Bluetooth AppLoader library for Gecko Bootloader with AppLoader OTA DFU plugin for series 2 devices and above.
+
+  AppLoader is a minimal version of the Bluetooth stack designed to enable device firmware updates over BLE connections
+  It allows to update application using in-place update where the old application is directly overwritten with the new one.
 category: "Bluetooth|OTA"
 quality: "production"
 root_path: "protocol/bluetooth"

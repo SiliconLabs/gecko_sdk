@@ -21,5 +21,3 @@ provides:
   - name: zw_cc_basic
 requires:
   - name: zw_core
-documentation:
-  url: "https://sdomembers.z-wavealliance.org/document/dl/638"

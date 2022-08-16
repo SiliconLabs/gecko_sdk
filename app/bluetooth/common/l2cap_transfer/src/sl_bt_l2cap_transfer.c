@@ -449,11 +449,11 @@ static void register_open_response_from_server(sl_bt_evt_l2cap_le_channel_open_r
   transfer = select_transfer_by_connection(response_event->connection,
                                            request_pending_transfer_list);
 
-  transfer->max_pdu = response_event->max_pdu;
-  transfer->max_sdu = response_event->max_sdu;
-  transfer->credit = response_event->credit;
-
   if (transfer != NULL) {
+    transfer->max_pdu = response_event->max_pdu;
+    transfer->max_sdu = response_event->max_sdu;
+    transfer->credit = response_event->credit;
+
     CORE_ENTER_CRITICAL();
 
     sl_slist_remove(&request_pending_transfer_list, &transfer->node);
@@ -466,11 +466,11 @@ static void register_open_response_from_server(sl_bt_evt_l2cap_le_channel_open_r
     }
 
     CORE_EXIT_CRITICAL();
-  }
 
-  if (sl_bt_l2cap_connection_result_successful != error_code) {
-    transfer->channel_error = error_code;
-    close_transfer(transfer->connection, transfer->cid, error_code);
+    if (sl_bt_l2cap_connection_result_successful != error_code) {
+      transfer->channel_error = error_code;
+      close_transfer(transfer->connection, transfer->cid, error_code);
+    }
   }
 }
 

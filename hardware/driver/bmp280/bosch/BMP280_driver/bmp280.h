@@ -59,6 +59,10 @@
 #ifndef BMP280_H
 #define BMP280_H
 
+#ifdef __cplusplus
+extern "C" {
+#endif
+
 /*!
 * @brief The following definition uses for define the data types
 *
@@ -1446,4 +1450,10 @@ u32 bmp280_compensate_pressure_int64(s32 v_uncomp_pressure_s32);
  */
 BMP280_RETURN_FUNCTION_TYPE bmp280_compute_wait_time(u8
 		*v_delaytime_u8r);
+
+
+#ifdef __cplusplus
+}
+#endif
+
 #endif

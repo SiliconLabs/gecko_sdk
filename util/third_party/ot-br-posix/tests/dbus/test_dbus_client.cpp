@@ -91,6 +91,7 @@ static void CheckExternalRoute(ThreadApiDBus *aApi, const Ip6Prefix &aPrefix)
     route.mPreference = 0;
 
     TEST_ASSERT(aApi->AddExternalRoute(route) == OTBR_ERROR_NONE);
+    sleep(10);
     TEST_ASSERT(aApi->GetExternalRoutes(externalRouteTable) == OTBR_ERROR_NONE);
     TEST_ASSERT(externalRouteTable.size() == 1);
     TEST_ASSERT(externalRouteTable[0].mPrefix == aPrefix);
@@ -99,6 +100,7 @@ static void CheckExternalRoute(ThreadApiDBus *aApi, const Ip6Prefix &aPrefix)
     TEST_ASSERT(externalRouteTable[0].mNextHopIsThisDevice);
 
     TEST_ASSERT(aApi->RemoveExternalRoute(aPrefix) == OTBR_ERROR_NONE);
+    sleep(10);
     TEST_ASSERT(aApi->GetExternalRoutes(externalRouteTable) == OTBR_ERROR_NONE);
     TEST_ASSERT(externalRouteTable.empty());
 }
@@ -115,6 +117,7 @@ static void CheckOnMeshPrefix(ThreadApiDBus *aApi)
     prefix.mStable     = true;
 
     TEST_ASSERT(aApi->AddOnMeshPrefix(prefix) == OTBR_ERROR_NONE);
+    sleep(10);
     TEST_ASSERT(aApi->GetOnMeshPrefixes(onMeshPrefixes) == OTBR_ERROR_NONE);
     TEST_ASSERT(onMeshPrefixes.size() == 1);
     TEST_ASSERT(onMeshPrefixes[0].mPrefix == prefix.mPrefix);
@@ -122,6 +125,7 @@ static void CheckOnMeshPrefix(ThreadApiDBus *aApi)
     TEST_ASSERT(onMeshPrefixes[0].mStable);
 
     TEST_ASSERT(aApi->RemoveOnMeshPrefix(prefix.mPrefix) == OTBR_ERROR_NONE);
+    sleep(10);
     TEST_ASSERT(aApi->GetOnMeshPrefixes(onMeshPrefixes) == OTBR_ERROR_NONE);
     TEST_ASSERT(onMeshPrefixes.empty());
 }
@@ -155,7 +159,7 @@ void CheckSrpServerInfo(ThreadApiDBus *aApi)
 
 void CheckDnssdCounters(ThreadApiDBus *aApi)
 {
-    OT_UNUSED_VARIABLE(aApi);
+    OTBR_UNUSED_VARIABLE(aApi);
 #if OTBR_ENABLE_DNSSD_DISCOVERY_PROXY
     otbr::DBus::DnssdCounters dnssdCounters;
 
@@ -168,6 +172,16 @@ void CheckDnssdCounters(ThreadApiDBus *aApi)
     TEST_ASSERT(dnssdCounters.mOtherResponse == 0);
     TEST_ASSERT(dnssdCounters.mResolvedBySrp == 0);
 #endif
+}
+
+void CheckMdnsInfo(ThreadApiDBus *aApi)
+{
+    otbr::MdnsTelemetryInfo mdnsInfo;
+
+    TEST_ASSERT(aApi->GetMdnsTelemetryInfo(mdnsInfo) == OTBR_ERROR_NONE);
+
+    TEST_ASSERT(mdnsInfo.mServiceRegistrations.mSuccess > 0);
+    TEST_ASSERT(mdnsInfo.mServiceRegistrationEmaLatency > 0);
 }
 
 int main()
@@ -235,7 +249,7 @@ int main()
         api->Attach("Test", 0x3456, extpanid, networkKey, {}, 1 << channel,
                     [&api, channel, extpanid, &stepDone](ClientError aError) {
                         printf("Attach result %d\n", static_cast<int>(aError));
-                        sleep(10);
+                        sleep(20);
                         uint64_t             extpanidCheck;
                         std::vector<uint8_t> activeDataset;
 
@@ -272,6 +286,7 @@ int main()
                             TEST_ASSERT(api->GetRadioTxPower(txPower) == OTBR_ERROR_NONE);
                             TEST_ASSERT(api->GetActiveDatasetTlvs(activeDataset) == OTBR_ERROR_NONE);
                             CheckSrpServerInfo(api.get());
+                            CheckMdnsInfo(api.get());
                             CheckDnssdCounters(api.get());
                             api->FactoryReset(nullptr);
                             TEST_ASSERT(api->GetNetworkName(name) == OTBR_ERROR_NONE);

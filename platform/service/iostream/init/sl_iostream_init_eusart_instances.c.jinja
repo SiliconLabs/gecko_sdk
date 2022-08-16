@@ -62,7 +62,7 @@ sl_status_t sl_iostream_eusart_init_{{ instance }}(void)
 #if (SL_IOSTREAM_EUSART_{{ instance | upper }}_FLOW_CONTROL_TYPE != uartFlowControlSoftware)
     .flow_control = SL_IOSTREAM_EUSART_{{ instance | upper }}_FLOW_CONTROL_TYPE,
 #else
-    .flow_control = usartHwFlowControlNone,
+    .flow_control = eusartHwFlowControlNone,
 #endif
     .enable_high_frequency = SL_IOSTREAM_EUSART_{{ instance | upper }}_ENABLE_HIGH_FREQUENCY,
     .clock = SL_IOSTREAM_EUSART_CLOCK_REF(SL_IOSTREAM_EUSART_{{ instance | upper }}_PERIPHERAL_NO),

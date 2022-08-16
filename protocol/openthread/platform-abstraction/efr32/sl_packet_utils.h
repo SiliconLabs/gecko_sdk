@@ -61,6 +61,16 @@ void efr32PlatProcessTransmitAesCcm(otRadioFrame *aFrame, const otExtAddress *aE
  */
 bool efr32IsFramePending(otRadioFrame *aFrame);
 
+/**
+ * This function returns the Destination PanId, if present.
+ *
+ * @param[in]  aFrame       A pointer to the MAC frame buffer.
+ *
+ * @retval  DstPanId    If present.
+ * @retval  BcastPanId  If Dest PanId is compressed.
+ */
+otPanId efr32GetDstPanId(otRadioFrame *aFrame);
+
 #ifdef __cplusplus
 } // extern "C"
 #endif

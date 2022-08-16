@@ -37,7 +37,9 @@
 
 #define APPL_DATA_FILE_SIZE            512
 
-#define APP_VERSION_NO_20DBM_SUPPORT   0x00070F02
+#define APP_VERSION_7_15_3             0x00070F03  // 7.15.3 (NO_20DBM_SUPPORT)
+#define APP_VERSION_7_18_1             0x00071201  /* 7.18.1 - The changes include the capability to set tx power to
+                                                    * 20+ dBm over the serial link. */
 
 // Used by the application data file.
 typedef struct SApplicationData
@@ -63,13 +65,22 @@ typedef struct SApplicationCmdClassInfo
 
 } SApplicationCmdClassInfo;
 
-typedef struct SApplicationConfiguration
+typedef struct SApplicationConfiguration_v7_15_3  // Cannot pack this (change size) as it is already in the field.
 {
   zpal_radio_region_t rfRegion;
-  int8_t              iTxPower;
-  int8_t              ipower0dbmMeasured;
+  int8_t              iTxPower;            // changed to zpal_tx_power_t { aka int16_t } in APP_VERSION_7_18_1
+  int8_t              ipower0dbmMeasured;  // changed to zpal_tx_power_t { aka int16_t } in APP_VERSION_7_18_1
   uint8_t             radio_debug_enable;
-  int16_t             maxTxPower;
+  int16_t             maxTxPower;          // changed to zpal_tx_power_t { aka int16_t } in APP_VERSION_7_18_1
+} SApplicationConfiguration_v7_15_3;
+
+typedef struct __attribute__((packed)) SApplicationConfiguration  // Must be packet as it is saved on NVM.
+{
+  zpal_radio_region_t rfRegion;
+  zpal_tx_power_t     iTxPower;
+  zpal_tx_power_t     ipower0dbmMeasured;
+  uint8_t             radio_debug_enable;
+  zpal_tx_power_t     maxTxPower;          // For LR only
 } SApplicationConfiguration;
 
 #define FILE_SIZE_APPLICATIONDATA        (sizeof(SApplicationData))
@@ -82,6 +93,127 @@ static void WriteDefault(void);
 // Application file system
 static zpal_nvm_handle_t pFileSystemApplication;
 
+
+static void WriteDefaultApplicationConfiguration(void);
+static bool ObjectExist(zpal_nvm_object_key_t key);
+
+bool SerialAPI_GetZWVersion(uint32_t * appVersion)
+{
+  if( ZPAL_STATUS_OK == zpal_nvm_read(pFileSystemApplication, ZAF_FILE_ID_APP_VERSION, appVersion, ZAF_FILE_SIZE_APP_VERSION) )
+  {
+    return true;
+  }
+  return false;
+}
+
+bool SerialAPI_SetZWVersion(const uint32_t * appVersion)
+{
+  if( ZPAL_STATUS_OK == zpal_nvm_write(pFileSystemApplication, ZAF_FILE_ID_APP_VERSION, appVersion, ZAF_FILE_SIZE_APP_VERSION) )
+  {
+    return true;
+  }
+  return false;
+}
+
+static void
+SerialAPI_FileSystemMigrationManagement()
+{
+  //Read present file system version file
+  uint32_t presentFilesysVersion;
+  uint32_t expectedFilesysVersion;  // This will hold the file system version that current SW will support.
+
+  SerialAPI_GetZWVersion(&presentFilesysVersion);
+
+  expectedFilesysVersion = zpal_get_app_version();
+
+  if(expectedFilesysVersion < presentFilesysVersion)
+  {
+    //System downgrade. Should not be allowed.
+    ASSERT(false);
+  }
+  else if(expectedFilesysVersion > presentFilesysVersion)  // File system upgrade needed. Initiating file system migration...
+  {
+    /**
+     * Continuous migration until all needed migrations are performed,
+     * to lift from any version to the latest file system version.
+     */
+
+    // If current version is 7.15.2 or older then update the FILE_ID_APPLICATIONCONFIGURATION file to the current format
+    if ( presentFilesysVersion < APP_VERSION_7_15_3 )
+    {
+      // Add code for migration of file system to version APP_VERSION_7_15_3 (7.15.3).
+
+      //Get length of legacy file
+      size_t   dataLen;
+      zpal_nvm_get_object_size(pFileSystemApplication, FILE_ID_APPLICATIONCONFIGURATION, &dataLen);
+
+      //Read legacy file to first members of tApplicationConfiguration
+      SApplicationConfiguration_v7_15_3 tApplicationConfiguration;
+      // Initialize, since zpal_nvm_read() might fail.
+      memset(&tApplicationConfiguration, 0, sizeof(tApplicationConfiguration));
+      zpal_nvm_read(pFileSystemApplication, FILE_ID_APPLICATIONCONFIGURATION, &tApplicationConfiguration, dataLen);
+
+      //Write default values to new members of tApplicationConfiguration and update the file.
+      tApplicationConfiguration.radio_debug_enable = 0;
+      tApplicationConfiguration.maxTxPower = 140;
+      zpal_status_t status = zpal_nvm_write(pFileSystemApplication, FILE_ID_APPLICATIONCONFIGURATION, &tApplicationConfiguration,
+          sizeof(tApplicationConfiguration));
+      if (ZPAL_STATUS_OK == status)
+      {
+        presentFilesysVersion = APP_VERSION_7_15_3;
+      }
+    }
+
+    // Migrate files from file system version APP_VERSION_7_15_3 to APP_VERSION_7_18_1.
+    if ( presentFilesysVersion < APP_VERSION_7_18_1 )
+    {
+      SApplicationConfiguration_v7_15_3 tApplicationConfiguration_v7_15_3;
+      SApplicationConfiguration tApplicationConfiguration;
+      zpal_status_t status;
+
+      status = zpal_nvm_read(pFileSystemApplication, FILE_ID_APPLICATIONCONFIGURATION, &tApplicationConfiguration_v7_15_3,
+          sizeof(tApplicationConfiguration_v7_15_3));
+      if (ZPAL_STATUS_OK != status)
+      {
+        WriteDefaultApplicationConfiguration();
+      }
+      else
+      {
+        tApplicationConfiguration.rfRegion           = tApplicationConfiguration_v7_15_3.rfRegion;
+        tApplicationConfiguration.iTxPower           = tApplicationConfiguration_v7_15_3.iTxPower;
+        tApplicationConfiguration.ipower0dbmMeasured = tApplicationConfiguration_v7_15_3.ipower0dbmMeasured;
+        tApplicationConfiguration.radio_debug_enable = tApplicationConfiguration_v7_15_3.radio_debug_enable;
+        tApplicationConfiguration.maxTxPower         = tApplicationConfiguration_v7_15_3.maxTxPower;
+
+        status = zpal_nvm_write(pFileSystemApplication, FILE_ID_APPLICATIONCONFIGURATION, &tApplicationConfiguration,
+            sizeof(tApplicationConfiguration));  /* Do not use FILE_SIZE_APPLICATIONCONFIGURATION in
+                                                  * migration functions, instead hard-code the size as
+                                                  * sizes do change with FW upgrades. */
+        if (ZPAL_STATUS_OK == status)
+        {
+          presentFilesysVersion = APP_VERSION_7_18_1;
+        }
+      }
+
+      // Lifted to version APP_VERSION_7_18_1
+    }
+
+    /*
+     * If this fails, some of the migrations were not performed due to earlier migrations that have failed.
+     */
+    ASSERT(APP_VERSION_7_18_1 <= presentFilesysVersion);
+
+    /**
+     * @attention This implementation assumes that the build is going to update the ZAF_FILE_ID_APP_VERSION to the current!
+     */
+
+    /**
+     * Write the new file system version number to NMV.
+     */
+    SerialAPI_SetZWVersion(&expectedFilesysVersion);
+  }
+}
+
 uint8_t SerialApiFileInit(void)
 {
   // Init application filesystem
@@ -93,39 +225,25 @@ uint8_t SerialApiFileInit(void)
   }
 
   uint32_t appVersion;
-  const zpal_status_t status = zpal_nvm_read(pFileSystemApplication, ZAF_FILE_ID_APP_VERSION, &appVersion, ZAF_FILE_SIZE_APP_VERSION);
+  bool status = SerialAPI_GetZWVersion(&appVersion);
 
-  if (ZPAL_STATUS_OK == status)
+  if (status)
   {
     if (zpal_get_app_version() != appVersion)
     {
-      // Add code for migration of file system to higher version here.
-
-
-      // If current version is 7.15.2 or older then update the FILE_ID_APPLICATIONCONFIGURATION file to the current format
-      if (APP_VERSION_NO_20DBM_SUPPORT >= appVersion) {
-        //Get length of legacy file
-        size_t   dataLen;
-        zpal_nvm_get_object_size(pFileSystemApplication, FILE_ID_APPLICATIONCONFIGURATION, &dataLen);
-
-        //Read legacy file to first members of tApplicationConfiguration
-        SApplicationConfiguration tApplicationConfiguration;
-        zpal_nvm_read(pFileSystemApplication, FILE_ID_APPLICATIONCONFIGURATION, &tApplicationConfiguration, dataLen);
-
-        //Write default values to new members of tApplicationConfiguration and update the file.
-        tApplicationConfiguration.radio_debug_enable = 0;
-        tApplicationConfiguration.maxTxPower = 140;
-        zpal_nvm_write(pFileSystemApplication, FILE_ID_APPLICATIONCONFIGURATION, &tApplicationConfiguration, FILE_SIZE_APPLICATIONCONFIGURATION);
-      }
-      appVersion = zpal_get_app_version();
-      zpal_nvm_write(pFileSystemApplication, ZAF_FILE_ID_APP_VERSION, &appVersion, ZAF_FILE_SIZE_APP_VERSION);
+      /**
+       * In case the file-system is older than supported by this version of the FW, then upgrade.
+       */
+      SerialAPI_FileSystemMigrationManagement();
     }
   }
   else
   {
+	//There are no files on first boot up. Write default files.
     WriteDefault();
     return false;
   }
+
   return true;
 }
 
@@ -402,7 +520,7 @@ ReadApplicationRfRegion(zpal_radio_region_t* rfRegion)
 }
 
 uint8_t
-SaveApplicationTxPowerlevel(int8_t ipower, int8_t power0dbmMeasured)
+SaveApplicationTxPowerlevel(zpal_tx_power_t ipower, zpal_tx_power_t power0dbmMeasured)
 {
   SApplicationConfiguration tApplicationConfiguration;
   uint8_t dataIsWritten = false;
@@ -424,7 +542,7 @@ SaveApplicationTxPowerlevel(int8_t ipower, int8_t power0dbmMeasured)
 
 
 uint8_t
-ReadApplicationTxPowerlevel(int8_t *ipower, int8_t *power0dbmMeasured)
+ReadApplicationTxPowerlevel(zpal_tx_power_t *ipower, zpal_tx_power_t *power0dbmMeasured)
 {
   SApplicationConfiguration tApplicationConfiguration;
   uint8_t dataIsRead = false;
@@ -445,7 +563,7 @@ ReadApplicationTxPowerlevel(int8_t *ipower, int8_t *power0dbmMeasured)
 
 
 uint8_t
-SaveApplicationMaxLRTxPwr(int16_t maxTxPwr)
+SaveApplicationMaxLRTxPwr(zpal_tx_power_t maxTxPwr)
 {
   SApplicationConfiguration tApplicationConfiguration;
   uint8_t dataIsWritten = false;
@@ -466,7 +584,7 @@ SaveApplicationMaxLRTxPwr(int16_t maxTxPwr)
 
 
 uint8_t
-ReadApplicationMaxLRTxPwr(int16_t *maxTxPwr)
+ReadApplicationMaxLRTxPwr(zpal_tx_power_t *maxTxPwr)
 {
   SApplicationConfiguration tApplicationConfiguration;
   uint8_t dataIsRead = false;
@@ -530,7 +648,7 @@ uint32_t
 ReadApplicationVersion(void)
 {
   uint32_t appVersion;
-  zpal_nvm_read(pFileSystemApplication, ZAF_FILE_ID_APP_VERSION, &appVersion, sizeof(appVersion));
+  SerialAPI_GetZWVersion(&appVersion);
 
   return appVersion;
 }
@@ -579,19 +697,16 @@ WriteDefaultApplicationConfiguration(void)
   //Write default Application Configuration file
   SApplicationConfiguration tApplicationConfiguration;
   memset(&tApplicationConfiguration, 0 , sizeof(SApplicationConfiguration));
-  status = zpal_nvm_write(pFileSystemApplication, FILE_ID_APPLICATIONCONFIGURATION, &tApplicationConfiguration, sizeof(SApplicationConfiguration));
-  ASSERT(ZPAL_STATUS_OK == status); //Assert has been kept for debugging only, can be removed from production code. This error can only be caused by some internal flash driver/Hw prroblem
+  status = zpal_nvm_write(pFileSystemApplication, FILE_ID_APPLICATIONCONFIGURATION, &tApplicationConfiguration, FILE_SIZE_APPLICATIONCONFIGURATION);
+  ASSERT(ZPAL_STATUS_OK == status); //Assert has been kept for debugging only, can be removed from production code. This error can only be caused by some internal flash driver/Hw problem
 }
 
 static void
 WriteDefaultApplicationFileSystemVersion(void)
 {
-  zpal_status_t status;
-
   //Write Application filesystem version
   uint32_t appVersion = (APP_VERSION << 16) | (APP_REVISION << 8) | APP_PATCH;
-  status = zpal_nvm_write(pFileSystemApplication, ZAF_FILE_ID_APP_VERSION, &appVersion, sizeof(appVersion));
-  ASSERT(ZPAL_STATUS_OK == status); //Assert has been kept for debugging only, can be removed from production code. This error can only be caused by some internal flash driver/Hw prroblem
+  SerialAPI_SetZWVersion(&appVersion);
 }
 
 static void

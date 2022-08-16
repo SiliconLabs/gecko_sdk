@@ -1563,6 +1563,11 @@ static void HTTPsReq_HdrParse(HTTPs_INSTANCE *p_instance,
                                                        len);
                         len = p_field_end - p_val;
 
+                        if (len > HTTPs_FORM_BOUNDARY_STR_LEN_MAX) {
+                          *p_err = HTTPs_ERR_REQ_FORMAT_INVALID;
+                          return;
+                        }
+
                         //                                         Copy boundary val to Conn struct.
                         Str_Copy_N(p_conn->FormBoundaryPtr,
                                    p_val,

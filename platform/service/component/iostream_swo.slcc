@@ -5,6 +5,8 @@ description: IO Stream over Single Wire Output (SWO) communication protocol.
 category: Services|IO Stream
 quality: production
 root_path: platform/service/iostream
+config_file:
+  - path: "config/sl_iostream_swo_config.h"
 provides:
   - name: iostream_swo
   - name: iostream_transport_core

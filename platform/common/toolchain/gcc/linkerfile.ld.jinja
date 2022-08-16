@@ -320,6 +320,10 @@ SECTIONS
     KEEP(*(.internal_storage*))
   } > FLASH
 
+  {#-
+    Exclude the NVM3 region for the TZ secure applications
+  #}
+  {% if trustzone_secure is not defined %}
   {%- if linker_zwave_nvm is defined %}
   .zwave_nvm (DSECT) : {
     KEEP(*(.zwavenvm*))
@@ -341,9 +345,13 @@ SECTIONS
   {%- else %}
   linker_storage_end = linker_nvm_begin;
   {%- endif %}
+  __nvm3Base = linker_nvm_begin;
+  {%- else %} {#- trustzone_secure #}
+  linker_storage_end = __main_flash_end__;
+  {%- endif %} {#- trustzone_secure #}
+
   linker_storage_begin = linker_storage_end - SIZEOF(.internal_storage);
   linker_storage_size = SIZEOF(.internal_storage);
-  __nvm3Base = linker_nvm_begin;
 
 {%- if bootloader_enable %}
   _app_rollback_protection_size = 0x{{ '%0x' % (app_rollback_protection_size | sum) }};
@@ -356,10 +364,12 @@ SECTIONS
   ASSERT((linker_storage_begin >= (__etext + SIZEOF(.data))), "FLASH memory overflowed !")
 {%- endif %}
 
+{% if trustzone_secure is not defined %}
 {%- if app_flash_start and app_flash_size %}
   app_flash_end = 0x{{ '%0x' % (app_flash_start) }} + 0x{{ '%0x' % (app_flash_size) }};
   ASSERT( (linker_nvm_begin + SIZEOF(.nvm)) <= app_flash_end, "NVM3 is excessing the flash size !")
 {%- endif %}
+{%- endif %} {#- trustzone_secure #}
 
 {%- if (memory_ram_start and not memory_ram_size) or (memory_ram_size and not memory_ram_start)  %}
   ASSERT( 0, "memory_ram_start and memory_ram_size, Should define/undefine both!")

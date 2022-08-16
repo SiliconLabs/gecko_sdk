@@ -226,6 +226,9 @@ uint8_t ezspEcho(
   EzspStatus sendStatus = sendCommand();
   if (sendStatus == EZSP_SUCCESS) {
     echoLength = fetchInt8u();
+    if (echoLength > dataLength) {
+      return 0;
+    }
     fetchInt8uArray(echoLength, echo);
     return echoLength;
   }
@@ -283,6 +286,46 @@ uint8_t ezspGetMfgToken(
   EzspStatus sendStatus = sendCommand();
   if (sendStatus == EZSP_SUCCESS) {
     tokenDataLength = fetchInt8u();
+    uint8_t expectedTokenDataLength = 0;
+    // the size of corresponding the EZSP Mfg token,
+    // please refer to app/util/ezsp/ezsp-enum.h
+    switch (tokenId) {
+      // 2 bytes
+      case EZSP_MFG_CUSTOM_VERSION:
+      case EZSP_MFG_MANUF_ID:
+      case EZSP_MFG_PHY_CONFIG:
+      case EZSP_MFG_CTUNE:
+        expectedTokenDataLength = 2;
+        break;
+      // 8 bytes
+      case EZSP_MFG_EZSP_STORAGE:
+      case EZSP_MFG_CUSTOM_EUI_64:
+        expectedTokenDataLength = 8;
+        break;
+      // 16 bytes
+      case EZSP_MFG_STRING:
+      case EZSP_MFG_BOARD_NAME:
+      case EZSP_MFG_BOOTLOAD_AES_KEY:
+        expectedTokenDataLength = 16;
+        break;
+      // 20 bytes
+      case EZSP_MFG_INSTALLATION_CODE:
+        expectedTokenDataLength = 20;
+        break;
+      // 40 bytes
+      case EZSP_MFG_ASH_CONFIG:
+        expectedTokenDataLength = 40;
+        break;
+      // 92 bytes
+      case EZSP_MFG_CBKE_DATA:
+        expectedTokenDataLength = 92;
+        break;
+      default:
+        break;
+    }
+    if (tokenDataLength != expectedTokenDataLength) {
+      return 255;
+    }
     fetchInt8uArray(tokenDataLength, tokenData);
     return tokenDataLength;
   }

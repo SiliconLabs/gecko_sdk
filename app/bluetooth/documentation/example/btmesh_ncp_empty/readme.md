@@ -40,7 +40,7 @@ NCP Commander can be used to control the target and test NCP firmware without de
 
 ![step 3](readme_img6.png)
 
-5. Once you have factory-reset the node, you can initialize the stack as a node by calling the initializing routine `sl_btmesh_node_init()`. In the API help menu, select the corresponding routine, copy it in the command field and send it. You can now see the device scanning. If you want to prevent the device scanning (as the display may be flooded with the scan response messages), you can also call `sl_bt_user_manage_event_filter(00 A0 00 05 01)` to block all the Bluetooth LE scan reports. This can be called even before the node initialization.
+5. Once you have factory-reset the node, you can initialize the stack as a node by calling the initializing routine `sl_btmesh_node_init()`. In the API help menu, select the corresponding routine, copy it in the command field and send it. You can now see the device scanning. If you want to prevent the device scanning (as the display may be flooded with the scan response messages), you can also call `sl_bt_user_manage_event_filter(00 A0 00 05 00)`, `sl_bt_user_manage_event_filter(00 A0 00 05 01)` and `sl_bt_user_manage_event_filter(00 A0 00 05 02)` to block all the Bluetooth LE scan reports. This can be called even before the node initialization.
 
 ![step 3](readme_img7.png)
 

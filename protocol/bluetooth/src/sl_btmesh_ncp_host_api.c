@@ -2,7 +2,7 @@
  * @brief SL_BT_API commands for NCP host
  *******************************************************************************
  * # License
- * <b>Copyright 2021 Silicon Laboratories Inc. www.silabs.com</b>
+ * <b>Copyright 2022 Silicon Laboratories Inc. www.silabs.com</b>
  *******************************************************************************
  *
  * The licensor of this software is Silicon Laboratories Inc. Your use of this
@@ -100,6 +100,10 @@ sl_status_t sl_btmesh_node_send_input_oob_request_response(size_t data_len,
 
     struct sl_btmesh_packet *rsp = (struct sl_btmesh_packet *)sl_btmesh_rsp_msg;
 
+    if ((1+data_len) > SL_BGAPI_MAX_PAYLOAD_SIZE )
+    {
+        return SL_STATUS_COMMAND_TOO_LONG;
+    }
     cmd->data.cmd_node_send_input_oob_request_response.data.len=data_len;
     memcpy(cmd->data.cmd_node_send_input_oob_request_response.data.data,data,data_len);
 
@@ -392,6 +396,10 @@ sl_status_t sl_btmesh_node_send_static_oob_request_response(size_t data_len,
 
     struct sl_btmesh_packet *rsp = (struct sl_btmesh_packet *)sl_btmesh_rsp_msg;
 
+    if ((1+data_len) > SL_BGAPI_MAX_PAYLOAD_SIZE )
+    {
+        return SL_STATUS_COMMAND_TOO_LONG;
+    }
     cmd->data.cmd_node_send_static_oob_request_response.data.len=data_len;
     memcpy(cmd->data.cmd_node_send_static_oob_request_response.data.data,data,data_len);
 
@@ -807,6 +815,10 @@ sl_status_t sl_btmesh_prov_create_network(uint16_t netkey_index,
     struct sl_btmesh_packet *rsp = (struct sl_btmesh_packet *)sl_btmesh_rsp_msg;
 
     cmd->data.cmd_prov_create_network.netkey_index=netkey_index;
+    if ((3+key_len) > SL_BGAPI_MAX_PAYLOAD_SIZE )
+    {
+        return SL_STATUS_COMMAND_TOO_LONG;
+    }
     cmd->data.cmd_prov_create_network.key.len=key_len;
     memcpy(cmd->data.cmd_prov_create_network.key.data,key,key_len);
 
@@ -831,6 +843,10 @@ sl_status_t sl_btmesh_prov_create_appkey(uint16_t netkey_index,
 
     cmd->data.cmd_prov_create_appkey.netkey_index=netkey_index;
     cmd->data.cmd_prov_create_appkey.appkey_index=appkey_index;
+    if ((5+key_len) > SL_BGAPI_MAX_PAYLOAD_SIZE )
+    {
+        return SL_STATUS_COMMAND_TOO_LONG;
+    }
     cmd->data.cmd_prov_create_appkey.key.len=key_len;
     memcpy(cmd->data.cmd_prov_create_appkey.key.data,key,key_len);
 
@@ -854,6 +870,10 @@ sl_status_t sl_btmesh_prov_send_oob_pkey_response(uuid_128 uuid,
     struct sl_btmesh_packet *rsp = (struct sl_btmesh_packet *)sl_btmesh_rsp_msg;
 
     cmd->data.cmd_prov_send_oob_pkey_response.uuid=uuid;
+    if ((17+pkey_len) > SL_BGAPI_MAX_PAYLOAD_SIZE )
+    {
+        return SL_STATUS_COMMAND_TOO_LONG;
+    }
     cmd->data.cmd_prov_send_oob_pkey_response.pkey.len=pkey_len;
     memcpy(cmd->data.cmd_prov_send_oob_pkey_response.pkey.data,pkey,pkey_len);
 
@@ -873,6 +893,10 @@ sl_status_t sl_btmesh_prov_send_oob_auth_response(uuid_128 uuid,
     struct sl_btmesh_packet *rsp = (struct sl_btmesh_packet *)sl_btmesh_rsp_msg;
 
     cmd->data.cmd_prov_send_oob_auth_response.uuid=uuid;
+    if ((17+data_len) > SL_BGAPI_MAX_PAYLOAD_SIZE )
+    {
+        return SL_STATUS_COMMAND_TOO_LONG;
+    }
     cmd->data.cmd_prov_send_oob_auth_response.data.len=data_len;
     memcpy(cmd->data.cmd_prov_send_oob_auth_response.data.data,data,data_len);
 
@@ -921,6 +945,10 @@ sl_status_t sl_btmesh_prov_start_key_refresh(uint16_t netkey_index,
 
     cmd->data.cmd_prov_start_key_refresh.netkey_index=netkey_index;
     cmd->data.cmd_prov_start_key_refresh.num_appkeys=num_appkeys;
+    if ((4+appkey_indices_len) > SL_BGAPI_MAX_PAYLOAD_SIZE )
+    {
+        return SL_STATUS_COMMAND_TOO_LONG;
+    }
     cmd->data.cmd_prov_start_key_refresh.appkey_indices.len=appkey_indices_len;
     memcpy(cmd->data.cmd_prov_start_key_refresh.appkey_indices.data,appkey_indices,appkey_indices_len);
 
@@ -1194,6 +1222,10 @@ sl_status_t sl_btmesh_prov_start_key_refresh_from_phase(uint8_t phase,
     cmd->data.cmd_prov_start_key_refresh_from_phase.phase=phase;
     cmd->data.cmd_prov_start_key_refresh_from_phase.netkey_index=netkey_index;
     cmd->data.cmd_prov_start_key_refresh_from_phase.num_appkeys=num_appkeys;
+    if ((5+appkey_indices_len) > SL_BGAPI_MAX_PAYLOAD_SIZE )
+    {
+        return SL_STATUS_COMMAND_TOO_LONG;
+    }
     cmd->data.cmd_prov_start_key_refresh_from_phase.appkey_indices.len=appkey_indices_len;
     memcpy(cmd->data.cmd_prov_start_key_refresh_from_phase.appkey_indices.data,appkey_indices,appkey_indices_len);
 
@@ -1231,6 +1263,10 @@ sl_status_t sl_btmesh_prov_test_identity(uint16_t address,
 
     cmd->data.cmd_prov_test_identity.address=address;
     cmd->data.cmd_prov_test_identity.netkey_index=netkey_index;
+    if ((5+data_len) > SL_BGAPI_MAX_PAYLOAD_SIZE )
+    {
+        return SL_STATUS_COMMAND_TOO_LONG;
+    }
     cmd->data.cmd_prov_test_identity.data.len=data_len;
     memcpy(cmd->data.cmd_prov_test_identity.data.data,data,data_len);
 
@@ -1370,6 +1406,10 @@ sl_status_t sl_btmesh_vendor_model_send(uint16_t destination_address,
     cmd->data.cmd_vendor_model_send.nonrelayed=nonrelayed;
     cmd->data.cmd_vendor_model_send.opcode=opcode;
     cmd->data.cmd_vendor_model_send.final=final;
+    if ((15+payload_len) > SL_BGAPI_MAX_PAYLOAD_SIZE )
+    {
+        return SL_STATUS_COMMAND_TOO_LONG;
+    }
     cmd->data.cmd_vendor_model_send.payload.len=payload_len;
     memcpy(cmd->data.cmd_vendor_model_send.payload.data,payload,payload_len);
 
@@ -1397,6 +1437,10 @@ sl_status_t sl_btmesh_vendor_model_set_publication(uint16_t elem_index,
     cmd->data.cmd_vendor_model_set_publication.model_id=model_id;
     cmd->data.cmd_vendor_model_set_publication.opcode=opcode;
     cmd->data.cmd_vendor_model_set_publication.final=final;
+    if ((9+payload_len) > SL_BGAPI_MAX_PAYLOAD_SIZE )
+    {
+        return SL_STATUS_COMMAND_TOO_LONG;
+    }
     cmd->data.cmd_vendor_model_set_publication.payload.len=payload_len;
     memcpy(cmd->data.cmd_vendor_model_set_publication.payload.data,payload,payload_len);
 
@@ -1460,6 +1504,10 @@ sl_status_t sl_btmesh_vendor_model_init(uint16_t elem_index,
     cmd->data.cmd_vendor_model_init.vendor_id=vendor_id;
     cmd->data.cmd_vendor_model_init.model_id=model_id;
     cmd->data.cmd_vendor_model_init.publish=publish;
+    if ((8+opcodes_len) > SL_BGAPI_MAX_PAYLOAD_SIZE )
+    {
+        return SL_STATUS_COMMAND_TOO_LONG;
+    }
     cmd->data.cmd_vendor_model_init.opcodes.len=opcodes_len;
     memcpy(cmd->data.cmd_vendor_model_init.opcodes.data,opcodes,opcodes_len);
 
@@ -1517,6 +1565,10 @@ sl_status_t sl_btmesh_vendor_model_send_tracked(uint16_t destination_address,
     cmd->data.cmd_vendor_model_send_tracked.segment=segment;
     cmd->data.cmd_vendor_model_send_tracked.opcode=opcode;
     cmd->data.cmd_vendor_model_send_tracked.final=final;
+    if ((16+payload_len) > SL_BGAPI_MAX_PAYLOAD_SIZE )
+    {
+        return SL_STATUS_COMMAND_TOO_LONG;
+    }
     cmd->data.cmd_vendor_model_send_tracked.payload.len=payload_len;
     memcpy(cmd->data.cmd_vendor_model_send_tracked.payload.data,payload,payload_len);
 
@@ -1548,6 +1600,10 @@ sl_status_t sl_btmesh_vendor_model_set_publication_tracked(uint16_t elem_index,
     cmd->data.cmd_vendor_model_set_publication_tracked.segment=segment;
     cmd->data.cmd_vendor_model_set_publication_tracked.opcode=opcode;
     cmd->data.cmd_vendor_model_set_publication_tracked.final=final;
+    if ((10+payload_len) > SL_BGAPI_MAX_PAYLOAD_SIZE )
+    {
+        return SL_STATUS_COMMAND_TOO_LONG;
+    }
     cmd->data.cmd_vendor_model_set_publication_tracked.payload.len=payload_len;
     memcpy(cmd->data.cmd_vendor_model_set_publication_tracked.payload.data,payload,payload_len);
 
@@ -1814,6 +1870,10 @@ sl_status_t sl_btmesh_generic_client_set(uint16_t server_address,
     cmd->data.cmd_generic_client_set.delay_ms=delay_ms;
     cmd->data.cmd_generic_client_set.flags=flags;
     cmd->data.cmd_generic_client_set.type=type;
+    if ((19+parameters_len) > SL_BGAPI_MAX_PAYLOAD_SIZE )
+    {
+        return SL_STATUS_COMMAND_TOO_LONG;
+    }
     cmd->data.cmd_generic_client_set.parameters.len=parameters_len;
     memcpy(cmd->data.cmd_generic_client_set.parameters.data,parameters,parameters_len);
 
@@ -1845,6 +1905,10 @@ sl_status_t sl_btmesh_generic_client_publish(uint16_t elem_index,
     cmd->data.cmd_generic_client_publish.delay_ms=delay_ms;
     cmd->data.cmd_generic_client_publish.flags=flags;
     cmd->data.cmd_generic_client_publish.type=type;
+    if ((15+parameters_len) > SL_BGAPI_MAX_PAYLOAD_SIZE )
+    {
+        return SL_STATUS_COMMAND_TOO_LONG;
+    }
     cmd->data.cmd_generic_client_publish.parameters.len=parameters_len;
     memcpy(cmd->data.cmd_generic_client_publish.parameters.data,parameters,parameters_len);
 
@@ -1872,6 +1936,10 @@ sl_status_t sl_btmesh_generic_client_get_params(uint16_t server_address,
     cmd->data.cmd_generic_client_get_params.model_id=model_id;
     cmd->data.cmd_generic_client_get_params.appkey_index=appkey_index;
     cmd->data.cmd_generic_client_get_params.type=type;
+    if ((10+parameters_len) > SL_BGAPI_MAX_PAYLOAD_SIZE )
+    {
+        return SL_STATUS_COMMAND_TOO_LONG;
+    }
     cmd->data.cmd_generic_client_get_params.parameters.len=parameters_len;
     memcpy(cmd->data.cmd_generic_client_get_params.parameters.data,parameters,parameters_len);
 
@@ -2085,6 +2153,10 @@ sl_status_t sl_btmesh_generic_server_respond(uint16_t client_address,
     cmd->data.cmd_generic_server_respond.remaining_ms=remaining_ms;
     cmd->data.cmd_generic_server_respond.flags=flags;
     cmd->data.cmd_generic_server_respond.type=type;
+    if ((16+parameters_len) > SL_BGAPI_MAX_PAYLOAD_SIZE )
+    {
+        return SL_STATUS_COMMAND_TOO_LONG;
+    }
     cmd->data.cmd_generic_server_respond.parameters.len=parameters_len;
     memcpy(cmd->data.cmd_generic_server_respond.parameters.data,parameters,parameters_len);
 
@@ -2110,6 +2182,10 @@ sl_status_t sl_btmesh_generic_server_update(uint16_t elem_index,
     cmd->data.cmd_generic_server_update.model_id=model_id;
     cmd->data.cmd_generic_server_update.remaining_ms=remaining_ms;
     cmd->data.cmd_generic_server_update.type=type;
+    if ((10+parameters_len) > SL_BGAPI_MAX_PAYLOAD_SIZE )
+    {
+        return SL_STATUS_COMMAND_TOO_LONG;
+    }
     cmd->data.cmd_generic_server_update.parameters.len=parameters_len;
     memcpy(cmd->data.cmd_generic_server_update.parameters.data,parameters,parameters_len);
 
@@ -2617,6 +2693,10 @@ sl_status_t sl_btmesh_test_add_local_model_sub_va(uint16_t elem_index,
     cmd->data.cmd_test_add_local_model_sub_va.elem_index=elem_index;
     cmd->data.cmd_test_add_local_model_sub_va.vendor_id=vendor_id;
     cmd->data.cmd_test_add_local_model_sub_va.model_id=model_id;
+    if ((7+sub_address_len) > SL_BGAPI_MAX_PAYLOAD_SIZE )
+    {
+        return SL_STATUS_COMMAND_TOO_LONG;
+    }
     cmd->data.cmd_test_add_local_model_sub_va.sub_address.len=sub_address_len;
     memcpy(cmd->data.cmd_test_add_local_model_sub_va.sub_address.data,sub_address,sub_address_len);
 
@@ -2640,6 +2720,10 @@ sl_status_t sl_btmesh_test_remove_local_model_sub_va(uint16_t elem_index,
     cmd->data.cmd_test_remove_local_model_sub_va.elem_index=elem_index;
     cmd->data.cmd_test_remove_local_model_sub_va.vendor_id=vendor_id;
     cmd->data.cmd_test_remove_local_model_sub_va.model_id=model_id;
+    if ((7+sub_address_len) > SL_BGAPI_MAX_PAYLOAD_SIZE )
+    {
+        return SL_STATUS_COMMAND_TOO_LONG;
+    }
     cmd->data.cmd_test_remove_local_model_sub_va.sub_address.len=sub_address_len;
     memcpy(cmd->data.cmd_test_remove_local_model_sub_va.sub_address.data,sub_address,sub_address_len);
 
@@ -2730,6 +2814,10 @@ sl_status_t sl_btmesh_test_set_local_model_pub_va(uint16_t elem_index,
     cmd->data.cmd_test_set_local_model_pub_va.period=period;
     cmd->data.cmd_test_set_local_model_pub_va.retrans=retrans;
     cmd->data.cmd_test_set_local_model_pub_va.credentials=credentials;
+    if ((13+pub_address_len) > SL_BGAPI_MAX_PAYLOAD_SIZE )
+    {
+        return SL_STATUS_COMMAND_TOO_LONG;
+    }
     cmd->data.cmd_test_set_local_model_pub_va.pub_address.len=pub_address_len;
     memcpy(cmd->data.cmd_test_set_local_model_pub_va.pub_address.data,pub_address,pub_address_len);
 
@@ -2870,6 +2958,10 @@ SL_BGAPI_DEPRECATED sl_status_t sl_btmesh_test_set_local_config(uint16_t id,
 
     cmd->data.cmd_test_set_local_config.id=id;
     cmd->data.cmd_test_set_local_config.netkey_index=netkey_index;
+    if ((5+value_len) > SL_BGAPI_MAX_PAYLOAD_SIZE )
+    {
+        return SL_STATUS_COMMAND_TOO_LONG;
+    }
     cmd->data.cmd_test_set_local_config.value.len=value_len;
     memcpy(cmd->data.cmd_test_set_local_config.value.data,value,value_len);
 
@@ -3027,6 +3119,10 @@ sl_status_t sl_btmesh_test_prov_prepare_key_refresh(aes_key_128 net_key,
     struct sl_btmesh_packet *rsp = (struct sl_btmesh_packet *)sl_btmesh_rsp_msg;
 
     memcpy(&cmd->data.cmd_test_prov_prepare_key_refresh.net_key,&net_key,sizeof(aes_key_128));
+    if ((17+app_keys_len) > SL_BGAPI_MAX_PAYLOAD_SIZE )
+    {
+        return SL_STATUS_COMMAND_TOO_LONG;
+    }
     cmd->data.cmd_test_prov_prepare_key_refresh.app_keys.len=app_keys_len;
     memcpy(cmd->data.cmd_test_prov_prepare_key_refresh.app_keys.data,app_keys,app_keys_len);
 
@@ -4559,6 +4655,10 @@ sl_status_t sl_btmesh_sensor_server_init(uint16_t elem_index,
     struct sl_btmesh_packet *rsp = (struct sl_btmesh_packet *)sl_btmesh_rsp_msg;
 
     cmd->data.cmd_sensor_server_init.elem_index=elem_index;
+    if ((3+descriptors_len) > SL_BGAPI_MAX_PAYLOAD_SIZE )
+    {
+        return SL_STATUS_COMMAND_TOO_LONG;
+    }
     cmd->data.cmd_sensor_server_init.descriptors.len=descriptors_len;
     memcpy(cmd->data.cmd_sensor_server_init.descriptors.data,descriptors,descriptors_len);
 
@@ -4599,6 +4699,10 @@ sl_status_t sl_btmesh_sensor_server_send_descriptor_status(uint16_t client_addre
     cmd->data.cmd_sensor_server_send_descriptor_status.elem_index=elem_index;
     cmd->data.cmd_sensor_server_send_descriptor_status.appkey_index=appkey_index;
     cmd->data.cmd_sensor_server_send_descriptor_status.flags=flags;
+    if ((8+descriptors_len) > SL_BGAPI_MAX_PAYLOAD_SIZE )
+    {
+        return SL_STATUS_COMMAND_TOO_LONG;
+    }
     cmd->data.cmd_sensor_server_send_descriptor_status.descriptors.len=descriptors_len;
     memcpy(cmd->data.cmd_sensor_server_send_descriptor_status.descriptors.data,descriptors,descriptors_len);
 
@@ -4624,6 +4728,10 @@ sl_status_t sl_btmesh_sensor_server_send_status(uint16_t client_address,
     cmd->data.cmd_sensor_server_send_status.elem_index=elem_index;
     cmd->data.cmd_sensor_server_send_status.appkey_index=appkey_index;
     cmd->data.cmd_sensor_server_send_status.flags=flags;
+    if ((8+sensor_data_len) > SL_BGAPI_MAX_PAYLOAD_SIZE )
+    {
+        return SL_STATUS_COMMAND_TOO_LONG;
+    }
     cmd->data.cmd_sensor_server_send_status.sensor_data.len=sensor_data_len;
     memcpy(cmd->data.cmd_sensor_server_send_status.sensor_data.data,sensor_data,sensor_data_len);
 
@@ -4651,6 +4759,10 @@ sl_status_t sl_btmesh_sensor_server_send_column_status(uint16_t client_address,
     cmd->data.cmd_sensor_server_send_column_status.appkey_index=appkey_index;
     cmd->data.cmd_sensor_server_send_column_status.flags=flags;
     cmd->data.cmd_sensor_server_send_column_status.property_id=property_id;
+    if ((10+sensor_data_len) > SL_BGAPI_MAX_PAYLOAD_SIZE )
+    {
+        return SL_STATUS_COMMAND_TOO_LONG;
+    }
     cmd->data.cmd_sensor_server_send_column_status.sensor_data.len=sensor_data_len;
     memcpy(cmd->data.cmd_sensor_server_send_column_status.sensor_data.data,sensor_data,sensor_data_len);
 
@@ -4678,6 +4790,10 @@ sl_status_t sl_btmesh_sensor_server_send_series_status(uint16_t client_address,
     cmd->data.cmd_sensor_server_send_series_status.appkey_index=appkey_index;
     cmd->data.cmd_sensor_server_send_series_status.flags=flags;
     cmd->data.cmd_sensor_server_send_series_status.property_id=property_id;
+    if ((10+sensor_data_len) > SL_BGAPI_MAX_PAYLOAD_SIZE )
+    {
+        return SL_STATUS_COMMAND_TOO_LONG;
+    }
     cmd->data.cmd_sensor_server_send_series_status.sensor_data.len=sensor_data_len;
     memcpy(cmd->data.cmd_sensor_server_send_series_status.sensor_data.data,sensor_data,sensor_data_len);
 
@@ -4705,6 +4821,10 @@ sl_status_t sl_btmesh_sensor_setup_server_send_cadence_status(uint16_t client_ad
     cmd->data.cmd_sensor_setup_server_send_cadence_status.appkey_index=appkey_index;
     cmd->data.cmd_sensor_setup_server_send_cadence_status.flags=flags;
     cmd->data.cmd_sensor_setup_server_send_cadence_status.property_id=property_id;
+    if ((10+params_len) > SL_BGAPI_MAX_PAYLOAD_SIZE )
+    {
+        return SL_STATUS_COMMAND_TOO_LONG;
+    }
     cmd->data.cmd_sensor_setup_server_send_cadence_status.params.len=params_len;
     memcpy(cmd->data.cmd_sensor_setup_server_send_cadence_status.params.data,params,params_len);
 
@@ -4732,6 +4852,10 @@ sl_status_t sl_btmesh_sensor_setup_server_send_settings_status(uint16_t client_a
     cmd->data.cmd_sensor_setup_server_send_settings_status.appkey_index=appkey_index;
     cmd->data.cmd_sensor_setup_server_send_settings_status.flags=flags;
     cmd->data.cmd_sensor_setup_server_send_settings_status.property_id=property_id;
+    if ((10+setting_ids_len) > SL_BGAPI_MAX_PAYLOAD_SIZE )
+    {
+        return SL_STATUS_COMMAND_TOO_LONG;
+    }
     cmd->data.cmd_sensor_setup_server_send_settings_status.setting_ids.len=setting_ids_len;
     memcpy(cmd->data.cmd_sensor_setup_server_send_settings_status.setting_ids.data,setting_ids,setting_ids_len);
 
@@ -4761,6 +4885,10 @@ sl_status_t sl_btmesh_sensor_setup_server_send_setting_status(uint16_t client_ad
     cmd->data.cmd_sensor_setup_server_send_setting_status.flags=flags;
     cmd->data.cmd_sensor_setup_server_send_setting_status.property_id=property_id;
     cmd->data.cmd_sensor_setup_server_send_setting_status.setting_id=setting_id;
+    if ((12+raw_value_len) > SL_BGAPI_MAX_PAYLOAD_SIZE )
+    {
+        return SL_STATUS_COMMAND_TOO_LONG;
+    }
     cmd->data.cmd_sensor_setup_server_send_setting_status.raw_value.len=raw_value_len;
     memcpy(cmd->data.cmd_sensor_setup_server_send_setting_status.raw_value.data,raw_value,raw_value_len);
 
@@ -4862,6 +4990,10 @@ sl_status_t sl_btmesh_sensor_client_get_column(uint16_t server_address,
     cmd->data.cmd_sensor_client_get_column.appkey_index=appkey_index;
     cmd->data.cmd_sensor_client_get_column.flags=flags;
     cmd->data.cmd_sensor_client_get_column.property_id=property_id;
+    if ((10+column_id_len) > SL_BGAPI_MAX_PAYLOAD_SIZE )
+    {
+        return SL_STATUS_COMMAND_TOO_LONG;
+    }
     cmd->data.cmd_sensor_client_get_column.column_id.len=column_id_len;
     memcpy(cmd->data.cmd_sensor_client_get_column.column_id.data,column_id,column_id_len);
 
@@ -4889,6 +5021,10 @@ sl_status_t sl_btmesh_sensor_client_get_series(uint16_t server_address,
     cmd->data.cmd_sensor_client_get_series.appkey_index=appkey_index;
     cmd->data.cmd_sensor_client_get_series.flags=flags;
     cmd->data.cmd_sensor_client_get_series.property_id=property_id;
+    if ((10+column_ids_len) > SL_BGAPI_MAX_PAYLOAD_SIZE )
+    {
+        return SL_STATUS_COMMAND_TOO_LONG;
+    }
     cmd->data.cmd_sensor_client_get_series.column_ids.len=column_ids_len;
     memcpy(cmd->data.cmd_sensor_client_get_series.column_ids.data,column_ids,column_ids_len);
 
@@ -4939,6 +5075,10 @@ sl_status_t sl_btmesh_sensor_client_set_cadence(uint16_t server_address,
     cmd->data.cmd_sensor_client_set_cadence.appkey_index=appkey_index;
     cmd->data.cmd_sensor_client_set_cadence.flags=flags;
     cmd->data.cmd_sensor_client_set_cadence.property_id=property_id;
+    if ((10+params_len) > SL_BGAPI_MAX_PAYLOAD_SIZE )
+    {
+        return SL_STATUS_COMMAND_TOO_LONG;
+    }
     cmd->data.cmd_sensor_client_set_cadence.params.len=params_len;
     memcpy(cmd->data.cmd_sensor_client_set_cadence.params.data,params,params_len);
 
@@ -5016,6 +5156,10 @@ sl_status_t sl_btmesh_sensor_client_set_setting(uint16_t server_address,
     cmd->data.cmd_sensor_client_set_setting.flags=flags;
     cmd->data.cmd_sensor_client_set_setting.property_id=property_id;
     cmd->data.cmd_sensor_client_set_setting.setting_id=setting_id;
+    if ((12+raw_value_len) > SL_BGAPI_MAX_PAYLOAD_SIZE )
+    {
+        return SL_STATUS_COMMAND_TOO_LONG;
+    }
     cmd->data.cmd_sensor_client_set_setting.raw_value.len=raw_value_len;
     memcpy(cmd->data.cmd_sensor_client_set_setting.raw_value.data,raw_value,raw_value_len);
 
@@ -5211,6 +5355,10 @@ sl_status_t sl_btmesh_lc_client_set_property(uint16_t server_address,
     cmd->data.cmd_lc_client_set_property.appkey_index=appkey_index;
     cmd->data.cmd_lc_client_set_property.flags=flags;
     cmd->data.cmd_lc_client_set_property.property_id=property_id;
+    if ((10+params_len) > SL_BGAPI_MAX_PAYLOAD_SIZE )
+    {
+        return SL_STATUS_COMMAND_TOO_LONG;
+    }
     cmd->data.cmd_lc_client_set_property.params.len=params_len;
     memcpy(cmd->data.cmd_lc_client_set_property.params.data,params,params_len);
 
@@ -5402,6 +5550,10 @@ sl_status_t sl_btmesh_lc_setup_server_update_property(uint16_t elem_index,
 
     cmd->data.cmd_lc_setup_server_update_property.elem_index=elem_index;
     cmd->data.cmd_lc_setup_server_update_property.property_id=property_id;
+    if ((5+params_len) > SL_BGAPI_MAX_PAYLOAD_SIZE )
+    {
+        return SL_STATUS_COMMAND_TOO_LONG;
+    }
     cmd->data.cmd_lc_setup_server_update_property.params.len=params_len;
     memcpy(cmd->data.cmd_lc_setup_server_update_property.params.data,params,params_len);
 

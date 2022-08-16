@@ -165,7 +165,7 @@ static const uint32_t phyInfo_2[] = {
   (uint32_t) NULL,
   0UL,
   0UL,
-  999997UL,
+  999978UL,
   (uint32_t) NULL,
   (uint32_t) NULL,
 };
@@ -187,7 +187,7 @@ static const uint32_t phyInfo_3[] = {
   (uint32_t) NULL,
   0UL,
   0UL,
-  999997UL,
+  999978UL,
   (uint32_t) NULL,
   (uint32_t) NULL,
 };
@@ -342,7 +342,7 @@ const uint32_t sl_rail_ble_phy_1Mbps_viterbi_39MHz_modemConfigBase[] = {
   0xFFFFFFFFUL,
 };
 
-const uint32_t sl_rail_ble_phy_1Mbps_viterbi_39MHz_modemConfig[] = {
+const uint32_t sl_rail_ble_phy_1Mbps_viterbi_39MHz_0_37_modemConfig[] = {
   0x03014FFCUL, (uint32_t) &phyInfo_0,
   0x00014010UL, 0x00004101UL,
   0x0004403CUL, 0x00000000UL,
@@ -439,7 +439,7 @@ const uint32_t sl_rail_ble_phy_1Mbps_viterbi_39MHz_modemConfig[] = {
   0xFFFFFFFFUL,
 };
 
-const uint32_t sl_rail_ble_phy_2Mbps_viterbi_39MHz_0_34_modemConfig[] = {
+const uint32_t sl_rail_ble_phy_2Mbps_viterbi_39MHz_0_37_modemConfig[] = {
   0x03014FFCUL, (uint32_t) &phyInfo_1,
   0x00014010UL, 0x00004101UL,
   0x0004403CUL, 0x00000000UL,
@@ -633,7 +633,7 @@ const uint32_t sl_rail_ble_phy_2Mbps_aox_39MHz_0_34_modemConfig[] = {
   0xFFFFFFFFUL,
 };
 
-const uint32_t sl_rail_ble_phy_125kbps_39MHz_modemConfig[] = {
+const uint32_t sl_rail_ble_phy_125kbps_39MHz_0_37_modemConfig[] = {
   0x03014FFCUL, (uint32_t) &phyInfo_2,
   0x00014010UL, 0x00004100UL,
   0x0004403CUL, 0x00000010UL,
@@ -677,9 +677,9 @@ const uint32_t sl_rail_ble_phy_125kbps_39MHz_modemConfig[] = {
   /*    40B8 */ 0x00000000UL,
   /*    40BC */ 0x00000000UL,
   /*    40C0 */ 0x00000000UL,
-  0x0101411CUL, 0x8C418000UL,
+  0x0101411CUL, 0x8C2C3000UL,
   0x01074138UL, 0xF00A20BCUL,
-  /*    413C */ 0x0051B782UL,
+  /*    413C */ 0x0051C049UL,
   /*    4140 */ 0x40000001UL,
   /*    4144 */ 0x123556B7UL,
   /*    4148 */ 0x50087800UL,
@@ -730,7 +730,7 @@ const uint32_t sl_rail_ble_phy_125kbps_39MHz_modemConfig[] = {
   0xFFFFFFFFUL,
 };
 
-const uint32_t sl_rail_ble_phy_500kbps_39MHz_modemConfig[] = {
+const uint32_t sl_rail_ble_phy_500kbps_39MHz_0_37_modemConfig[] = {
   0x03014FFCUL, (uint32_t) &phyInfo_3,
   0x00014010UL, 0x00004100UL,
   0x0004403CUL, 0x00000010UL,
@@ -774,9 +774,9 @@ const uint32_t sl_rail_ble_phy_500kbps_39MHz_modemConfig[] = {
   /*    40B8 */ 0x00000000UL,
   /*    40BC */ 0x00000000UL,
   /*    40C0 */ 0x00000000UL,
-  0x0101411CUL, 0x8C418000UL,
+  0x0101411CUL, 0x8C2C3000UL,
   0x01074138UL, 0xF00A20BCUL,
-  /*    413C */ 0x0051B782UL,
+  /*    413C */ 0x0051C049UL,
   /*    4140 */ 0x40000001UL,
   /*    4144 */ 0x123556B7UL,
   /*    4148 */ 0x50087800UL,
@@ -827,7 +827,7 @@ const uint32_t sl_rail_ble_phy_500kbps_39MHz_modemConfig[] = {
   0xFFFFFFFFUL,
 };
 
-const uint32_t sl_rail_ble_phy_simulscan_39MHz_modemConfig[] = {
+const uint32_t sl_rail_ble_phy_simulscan_39MHz_0_37_modemConfig[] = {
   0x03014FFCUL, (uint32_t) &phyInfo_4,
   0x00014010UL, 0x00004100UL,
   0x0004403CUL, 0x00000010UL,
@@ -926,13 +926,45 @@ const uint32_t sl_rail_ble_phy_simulscan_39MHz_modemConfig[] = {
 
 const RAIL_ChannelConfigEntry_t sl_rail_ble_phy_1Mbps_viterbi_39MHz_channels[] = {
   {
-    .phyConfigDeltaAdd = sl_rail_ble_phy_1Mbps_viterbi_39MHz_modemConfig,
+    .phyConfigDeltaAdd = sl_rail_ble_phy_1Mbps_viterbi_39MHz_0_37_modemConfig,
     .baseFrequency = 2402000000,
     .channelSpacing = 2000000,
     .physicalChannelOffset = 0,
     .channelNumberStart = 0,
-    .channelNumberEnd = 39,
+    .channelNumberEnd = 37,
     .maxPower = RAIL_TX_POWER_MAX,
+    .attr = &channelConfigEntryAttr_0,
+#ifdef RADIO_CONFIG_ENABLE_CONC_PHY
+    .entryType = 0,
+#endif
+#ifdef RADIO_CONFIG_ENABLE_STACK_INFO
+    .stackInfo = NULL,
+#endif
+  },
+  {
+    .phyConfigDeltaAdd = sl_rail_ble_phy_1Mbps_viterbi_39MHz_0_37_modemConfig,
+    .baseFrequency = 2402000000,
+    .channelSpacing = 2000000,
+    .physicalChannelOffset = 0,
+    .channelNumberStart = 38,
+    .channelNumberEnd = 38,
+    .maxPower = 183,
+    .attr = &channelConfigEntryAttr_0,
+#ifdef RADIO_CONFIG_ENABLE_CONC_PHY
+    .entryType = 0,
+#endif
+#ifdef RADIO_CONFIG_ENABLE_STACK_INFO
+    .stackInfo = NULL,
+#endif
+  },
+  {
+    .phyConfigDeltaAdd = sl_rail_ble_phy_1Mbps_viterbi_39MHz_0_37_modemConfig,
+    .baseFrequency = 2402000000,
+    .channelSpacing = 2000000,
+    .physicalChannelOffset = 0,
+    .channelNumberStart = 39,
+    .channelNumberEnd = 39,
+    .maxPower = 140,
     .attr = &channelConfigEntryAttr_0,
 #ifdef RADIO_CONFIG_ENABLE_CONC_PHY
     .entryType = 0,
@@ -945,12 +977,12 @@ const RAIL_ChannelConfigEntry_t sl_rail_ble_phy_1Mbps_viterbi_39MHz_channels[] =
 
 const RAIL_ChannelConfigEntry_t sl_rail_ble_phy_2Mbps_viterbi_39MHz_channels[] = {
   {
-    .phyConfigDeltaAdd = sl_rail_ble_phy_2Mbps_viterbi_39MHz_0_34_modemConfig,
+    .phyConfigDeltaAdd = sl_rail_ble_phy_2Mbps_viterbi_39MHz_0_37_modemConfig,
     .baseFrequency = 2402000000,
     .channelSpacing = 2000000,
     .physicalChannelOffset = 0,
     .channelNumberStart = 0,
-    .channelNumberEnd = 34,
+    .channelNumberEnd = 37,
     .maxPower = RAIL_TX_POWER_MAX,
     .attr = &channelConfigEntryAttr_0,
 #ifdef RADIO_CONFIG_ENABLE_CONC_PHY
@@ -961,61 +993,13 @@ const RAIL_ChannelConfigEntry_t sl_rail_ble_phy_2Mbps_viterbi_39MHz_channels[] =
 #endif
   },
   {
-    .phyConfigDeltaAdd = sl_rail_ble_phy_2Mbps_viterbi_39MHz_0_34_modemConfig,
-    .baseFrequency = 2402000000,
-    .channelSpacing = 2000000,
-    .physicalChannelOffset = 0,
-    .channelNumberStart = 35,
-    .channelNumberEnd = 35,
-    .maxPower = 182,
-    .attr = &channelConfigEntryAttr_0,
-#ifdef RADIO_CONFIG_ENABLE_CONC_PHY
-    .entryType = 0,
-#endif
-#ifdef RADIO_CONFIG_ENABLE_STACK_INFO
-    .stackInfo = NULL,
-#endif
-  },
-  {
-    .phyConfigDeltaAdd = sl_rail_ble_phy_2Mbps_viterbi_39MHz_0_34_modemConfig,
-    .baseFrequency = 2402000000,
-    .channelSpacing = 2000000,
-    .physicalChannelOffset = 0,
-    .channelNumberStart = 36,
-    .channelNumberEnd = 36,
-    .maxPower = 157,
-    .attr = &channelConfigEntryAttr_0,
-#ifdef RADIO_CONFIG_ENABLE_CONC_PHY
-    .entryType = 0,
-#endif
-#ifdef RADIO_CONFIG_ENABLE_STACK_INFO
-    .stackInfo = NULL,
-#endif
-  },
-  {
-    .phyConfigDeltaAdd = sl_rail_ble_phy_2Mbps_viterbi_39MHz_0_34_modemConfig,
-    .baseFrequency = 2402000000,
-    .channelSpacing = 2000000,
-    .physicalChannelOffset = 0,
-    .channelNumberStart = 37,
-    .channelNumberEnd = 37,
-    .maxPower = 125,
-    .attr = &channelConfigEntryAttr_0,
-#ifdef RADIO_CONFIG_ENABLE_CONC_PHY
-    .entryType = 0,
-#endif
-#ifdef RADIO_CONFIG_ENABLE_STACK_INFO
-    .stackInfo = NULL,
-#endif
-  },
-  {
-    .phyConfigDeltaAdd = sl_rail_ble_phy_2Mbps_viterbi_39MHz_0_34_modemConfig,
+    .phyConfigDeltaAdd = sl_rail_ble_phy_2Mbps_viterbi_39MHz_0_37_modemConfig,
     .baseFrequency = 2402000000,
     .channelSpacing = 2000000,
     .physicalChannelOffset = 0,
     .channelNumberStart = 38,
     .channelNumberEnd = 38,
-    .maxPower = 83,
+    .maxPower = 160,
     .attr = &channelConfigEntryAttr_0,
 #ifdef RADIO_CONFIG_ENABLE_CONC_PHY
     .entryType = 0,
@@ -1025,7 +1009,7 @@ const RAIL_ChannelConfigEntry_t sl_rail_ble_phy_2Mbps_viterbi_39MHz_channels[] =
 #endif
   },
   {
-    .phyConfigDeltaAdd = sl_rail_ble_phy_2Mbps_viterbi_39MHz_0_34_modemConfig,
+    .phyConfigDeltaAdd = sl_rail_ble_phy_2Mbps_viterbi_39MHz_0_37_modemConfig,
     .baseFrequency = 2402000000,
     .channelSpacing = 2000000,
     .physicalChannelOffset = 0,
@@ -1143,13 +1127,45 @@ const RAIL_ChannelConfigEntry_t sl_rail_ble_phy_2Mbps_aox_39MHz_channels[] = {
 
 const RAIL_ChannelConfigEntry_t sl_rail_ble_phy_125kbps_39MHz_channels[] = {
   {
-    .phyConfigDeltaAdd = sl_rail_ble_phy_125kbps_39MHz_modemConfig,
+    .phyConfigDeltaAdd = sl_rail_ble_phy_125kbps_39MHz_0_37_modemConfig,
     .baseFrequency = 2402000000,
     .channelSpacing = 2000000,
     .physicalChannelOffset = 0,
     .channelNumberStart = 0,
-    .channelNumberEnd = 39,
+    .channelNumberEnd = 37,
     .maxPower = RAIL_TX_POWER_MAX,
+    .attr = &channelConfigEntryAttr_1,
+#ifdef RADIO_CONFIG_ENABLE_CONC_PHY
+    .entryType = 0,
+#endif
+#ifdef RADIO_CONFIG_ENABLE_STACK_INFO
+    .stackInfo = NULL,
+#endif
+  },
+  {
+    .phyConfigDeltaAdd = sl_rail_ble_phy_125kbps_39MHz_0_37_modemConfig,
+    .baseFrequency = 2402000000,
+    .channelSpacing = 2000000,
+    .physicalChannelOffset = 0,
+    .channelNumberStart = 38,
+    .channelNumberEnd = 38,
+    .maxPower = 183,
+    .attr = &channelConfigEntryAttr_1,
+#ifdef RADIO_CONFIG_ENABLE_CONC_PHY
+    .entryType = 0,
+#endif
+#ifdef RADIO_CONFIG_ENABLE_STACK_INFO
+    .stackInfo = NULL,
+#endif
+  },
+  {
+    .phyConfigDeltaAdd = sl_rail_ble_phy_125kbps_39MHz_0_37_modemConfig,
+    .baseFrequency = 2402000000,
+    .channelSpacing = 2000000,
+    .physicalChannelOffset = 0,
+    .channelNumberStart = 39,
+    .channelNumberEnd = 39,
+    .maxPower = 140,
     .attr = &channelConfigEntryAttr_1,
 #ifdef RADIO_CONFIG_ENABLE_CONC_PHY
     .entryType = 0,
@@ -1162,13 +1178,45 @@ const RAIL_ChannelConfigEntry_t sl_rail_ble_phy_125kbps_39MHz_channels[] = {
 
 const RAIL_ChannelConfigEntry_t sl_rail_ble_phy_500kbps_39MHz_channels[] = {
   {
-    .phyConfigDeltaAdd = sl_rail_ble_phy_500kbps_39MHz_modemConfig,
+    .phyConfigDeltaAdd = sl_rail_ble_phy_500kbps_39MHz_0_37_modemConfig,
     .baseFrequency = 2402000000,
     .channelSpacing = 2000000,
     .physicalChannelOffset = 0,
     .channelNumberStart = 0,
-    .channelNumberEnd = 39,
+    .channelNumberEnd = 37,
     .maxPower = RAIL_TX_POWER_MAX,
+    .attr = &channelConfigEntryAttr_1,
+#ifdef RADIO_CONFIG_ENABLE_CONC_PHY
+    .entryType = 0,
+#endif
+#ifdef RADIO_CONFIG_ENABLE_STACK_INFO
+    .stackInfo = NULL,
+#endif
+  },
+  {
+    .phyConfigDeltaAdd = sl_rail_ble_phy_500kbps_39MHz_0_37_modemConfig,
+    .baseFrequency = 2402000000,
+    .channelSpacing = 2000000,
+    .physicalChannelOffset = 0,
+    .channelNumberStart = 38,
+    .channelNumberEnd = 38,
+    .maxPower = 183,
+    .attr = &channelConfigEntryAttr_1,
+#ifdef RADIO_CONFIG_ENABLE_CONC_PHY
+    .entryType = 0,
+#endif
+#ifdef RADIO_CONFIG_ENABLE_STACK_INFO
+    .stackInfo = NULL,
+#endif
+  },
+  {
+    .phyConfigDeltaAdd = sl_rail_ble_phy_500kbps_39MHz_0_37_modemConfig,
+    .baseFrequency = 2402000000,
+    .channelSpacing = 2000000,
+    .physicalChannelOffset = 0,
+    .channelNumberStart = 39,
+    .channelNumberEnd = 39,
+    .maxPower = 140,
     .attr = &channelConfigEntryAttr_1,
 #ifdef RADIO_CONFIG_ENABLE_CONC_PHY
     .entryType = 0,
@@ -1181,13 +1229,45 @@ const RAIL_ChannelConfigEntry_t sl_rail_ble_phy_500kbps_39MHz_channels[] = {
 
 const RAIL_ChannelConfigEntry_t sl_rail_ble_phy_simulscan_39MHz_channels[] = {
   {
-    .phyConfigDeltaAdd = sl_rail_ble_phy_simulscan_39MHz_modemConfig,
+    .phyConfigDeltaAdd = sl_rail_ble_phy_simulscan_39MHz_0_37_modemConfig,
     .baseFrequency = 2402000000,
     .channelSpacing = 2000000,
     .physicalChannelOffset = 0,
     .channelNumberStart = 0,
-    .channelNumberEnd = 39,
+    .channelNumberEnd = 37,
     .maxPower = RAIL_TX_POWER_MAX,
+    .attr = &channelConfigEntryAttr_1,
+#ifdef RADIO_CONFIG_ENABLE_CONC_PHY
+    .entryType = 0,
+#endif
+#ifdef RADIO_CONFIG_ENABLE_STACK_INFO
+    .stackInfo = NULL,
+#endif
+  },
+  {
+    .phyConfigDeltaAdd = sl_rail_ble_phy_simulscan_39MHz_0_37_modemConfig,
+    .baseFrequency = 2402000000,
+    .channelSpacing = 2000000,
+    .physicalChannelOffset = 0,
+    .channelNumberStart = 38,
+    .channelNumberEnd = 38,
+    .maxPower = 183,
+    .attr = &channelConfigEntryAttr_1,
+#ifdef RADIO_CONFIG_ENABLE_CONC_PHY
+    .entryType = 0,
+#endif
+#ifdef RADIO_CONFIG_ENABLE_STACK_INFO
+    .stackInfo = NULL,
+#endif
+  },
+  {
+    .phyConfigDeltaAdd = sl_rail_ble_phy_simulscan_39MHz_0_37_modemConfig,
+    .baseFrequency = 2402000000,
+    .channelSpacing = 2000000,
+    .physicalChannelOffset = 0,
+    .channelNumberStart = 39,
+    .channelNumberEnd = 39,
+    .maxPower = 140,
     .attr = &channelConfigEntryAttr_1,
 #ifdef RADIO_CONFIG_ENABLE_CONC_PHY
     .entryType = 0,
@@ -1202,7 +1282,7 @@ const RAIL_ChannelConfig_t sl_rail_ble_phy_1Mbps_viterbi_39MHz_channelConfig = {
   .phyConfigBase = sl_rail_ble_phy_1Mbps_viterbi_39MHz_modemConfigBase,
   .phyConfigDeltaSubtract = NULL,
   .configs = sl_rail_ble_phy_1Mbps_viterbi_39MHz_channels,
-  .length = 1U,
+  .length = 3U,
   .signature = 0UL,
 };
 
@@ -1210,7 +1290,7 @@ const RAIL_ChannelConfig_t sl_rail_ble_phy_2Mbps_viterbi_39MHz_channelConfig = {
   .phyConfigBase = sl_rail_ble_phy_1Mbps_viterbi_39MHz_modemConfigBase,
   .phyConfigDeltaSubtract = NULL,
   .configs = sl_rail_ble_phy_2Mbps_viterbi_39MHz_channels,
-  .length = 6U,
+  .length = 3U,
   .signature = 0UL,
 };
 
@@ -1226,7 +1306,7 @@ const RAIL_ChannelConfig_t sl_rail_ble_phy_125kbps_39MHz_channelConfig = {
   .phyConfigBase = sl_rail_ble_phy_1Mbps_viterbi_39MHz_modemConfigBase,
   .phyConfigDeltaSubtract = NULL,
   .configs = sl_rail_ble_phy_125kbps_39MHz_channels,
-  .length = 1U,
+  .length = 3U,
   .signature = 0UL,
 };
 
@@ -1234,7 +1314,7 @@ const RAIL_ChannelConfig_t sl_rail_ble_phy_500kbps_39MHz_channelConfig = {
   .phyConfigBase = sl_rail_ble_phy_1Mbps_viterbi_39MHz_modemConfigBase,
   .phyConfigDeltaSubtract = NULL,
   .configs = sl_rail_ble_phy_500kbps_39MHz_channels,
-  .length = 1U,
+  .length = 3U,
   .signature = 0UL,
 };
 
@@ -1242,6 +1322,6 @@ const RAIL_ChannelConfig_t sl_rail_ble_phy_simulscan_39MHz_channelConfig = {
   .phyConfigBase = sl_rail_ble_phy_1Mbps_viterbi_39MHz_modemConfigBase,
   .phyConfigDeltaSubtract = NULL,
   .configs = sl_rail_ble_phy_simulscan_39MHz_channels,
-  .length = 1U,
+  .length = 3U,
   .signature = 0UL,
 };

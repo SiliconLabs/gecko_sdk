@@ -30,6 +30,10 @@
 #include <errno.h>
 #include <strings.h>
 
+// For some reason gcc/armgcc 10 does not declare strnlen in string(s).h
+// Hence, declare it as extern here.
+extern size_t strnlen (const char *, size_t);
+
 #ifdef UC_BUILD
 #include "trust-center-backup-config.h"
 #if (EMBER_AF_PLUGIN_TRUST_CENTER_BACKUP_POSIX_FILE_BACKUP_SUPPORT == 1)

@@ -60,9 +60,15 @@
     <!-- AttachAllNodesTo: Request to attach all nodes to the specified Thread network.
       @dataset: The Operational Dataset that contains parameter values of the Thread network
                 to attach to. It must be a full dataset.
+      @delay_ms: The delay between the method returns and the dataset takes effect, in
+                 milliseconds. If this value is 0, then the node is attached to the given network
+                 when this method returns. If this value is not 0, then the node is attached to
+                 its existing network when this method returns, and will attach to the given
+                 network after the delay.
     -->
     <method name="AttachAllNodesTo">
       <arg name="dataset" type="ay"/>
+      <arg name="delay_ms" type="x" direction="out"/>
     </method>
 
     <!-- Detach: Detach the current device from the Thread network. -->
@@ -200,6 +206,13 @@
     -->
     <method name="UpdateVendorMeshCopTxtEntries">
       <arg name="update" type="a(say)" direction="in"/>
+    </method>
+
+    <!-- GetProperties: Get one or more OpenThread properties.
+      @properties: Names of properties.
+    -->
+    <method name="GetProperties">
+      <arg name="properties" type="as" direction="in"/>
     </method>
 
     <!-- MeshLocalPrefix: The /64 mesh-local prefix.  -->
@@ -562,6 +575,72 @@
       </literallayout>
     -->
     <property name="DnssdCounters" type="(uuuuuuu)" access="read">
+      <annotation name="org.freedesktop.DBus.Property.EmitsChangedSignal" value="false"/>
+    </property>
+
+    <!-- MdnsTelemetryInfo: The MDNS information
+    <literallayout>
+        struct {
+          struct {  // host registration responses
+            uint32 success
+            uint32 not_found
+            uint32 invalid_args
+            uint32 duplicated
+            uint32 not_implemented
+            uint32 unknown_error
+          }
+          struct {  // service registration responses
+            uint32 success
+            uint32 not_found
+            uint32 invalid_args
+            uint32 duplicated
+            uint32 not_implemented
+            uint32 unknown_error
+          }
+          struct {  // host resolution responses
+            uint32 success
+            uint32 not_found
+            uint32 invalid_args
+            uint32 duplicated
+            uint32 not_implemented
+            uint32 unknown_error
+          }
+          struct {  // service resolution responses
+            uint32 success
+            uint32 not_found
+            uint32 invalid_args
+            uint32 duplicated
+            uint32 not_implemented
+            uint32 unknown_error
+          }
+          uint32 host_registration_ema_latency
+          uint32 service_registration_ema_latency
+          uint32 host_resolution_ema_latency
+          uint32 service_resolution_ema_latency
+        }
+      </literallayout>
+    -->
+    <property name="MdnsTelemetryInfo" type="(uuuuuu)(uuuuuu)(uuuuuu)(uuuuuu)uuuu" access="read">
+      <annotation name="org.freedesktop.DBus.Property.EmitsChangedSignal" value="false"/>
+    </property>
+
+    <!-- OtHostVersion: The version string of the host build. -->
+    <property name="OtHostVersion" type="s" access="read">
+      <annotation name="org.freedesktop.DBus.Property.EmitsChangedSignal" value="false"/>
+    </property>
+
+    <!-- OtRcpVersion: The version string of the RCP firmware. -->
+    <property name="OtRcpVersion" type="s" access="read">
+      <annotation name="org.freedesktop.DBus.Property.EmitsChangedSignal" value="false"/>
+    </property>
+
+    <!-- ThreadVersion: The Thread protocol version. -->
+    <property name="ThreadVersion" type="q" access="read">
+      <annotation name="org.freedesktop.DBus.Property.EmitsChangedSignal" value="false"/>
+    </property>
+
+    <!-- Eui64: The IEEE EUI-64 of this Thread interface. -->
+    <property name="Eui64" type="t" access="read">
       <annotation name="org.freedesktop.DBus.Property.EmitsChangedSignal" value="false"/>
     </property>
   </interface>

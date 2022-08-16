@@ -53,11 +53,11 @@
   - name: SL_BOARD_NAME
     value: '"BRD4317A"'
   - name: SL_BOARD_REV
-    value: '"A01"'
+    value: '"A03"'
 - tag:
   - board:pn:BRD4317
   - board:variant:A
-  - board:revision:A01
+  - board:revision:A03
   - board:device:mgm240pb32vna
   - hardware:has:vcom
   - hardware:has:pti

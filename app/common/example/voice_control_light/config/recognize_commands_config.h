@@ -48,7 +48,7 @@
 // <i> Sets a time window to wait after a detected keyword before triggering
 // <i> a new detection.
 // <i> Default: 1000
-#define SUPPRESION_TIME_MS 750
+#define SUPPRESION_TIME_MS 1000
 
 // <<< end of configuration section >>>
 

@@ -51,6 +51,13 @@ template_contribution:
       - type: uint8
         help: The destination endpoint
       - type: uint32
+        help: The earliest time of a snapshot to be published
+      - type: uint32
+        help: The latest time of a snapshot to be published
+      - type: uint8
+        help: Identifies the snapshot to be published
+      - type: uint32
+        help: Select only snapshots that were taken due to a specific cause
 documentation:
   docset: zigbee
   document: zigbee-af-api/meter-snapshot-server

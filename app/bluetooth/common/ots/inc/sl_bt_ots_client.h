@@ -642,6 +642,16 @@ sl_status_t sl_bt_ots_client_increase_credit(sl_bt_ots_client_handle_t client,
                                              uint16_t                  credit);
 
 /***************************************************************************//**
+ * Abort current write or read operation. Close the L2CAP channel in case of
+ * Write operation is in progress or execute OACP Abort in case of Read
+ * operation is in progress.
+ *
+ * @param[in] client Client handle.
+ * @return           Status code
+ ******************************************************************************/
+sl_status_t sl_bt_ots_client_abort(sl_bt_ots_client_handle_t client);
+
+/***************************************************************************//**
  * Internal Bluetooth event handler.
  * @param[in] evt  Bluetooth event.
  ******************************************************************************/

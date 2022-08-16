@@ -76,6 +76,7 @@
   - name: device
   - name: device_series_2
   - name: device_sdid_210
+  - name: device_generic_family_efr32xg23
   - name: device_family_fgm23
   - name: device_cortexm
   - name: device_arm

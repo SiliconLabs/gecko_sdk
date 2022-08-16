@@ -40,6 +40,8 @@ component:
   - id: printf
   - id: iostream_retarget_stdio
   - id: iostream_recommended_stream
+requires:
+  - name: device_sdid_200
 configuration:
   - name: SL_STATUS_STRING_ENABLE_BLUETOOTH
     value: 0

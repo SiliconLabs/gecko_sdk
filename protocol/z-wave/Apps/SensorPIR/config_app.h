@@ -91,9 +91,9 @@
 //@ [AGI_TABLE_ID]
 
 /**
- * Max notifications types
+ * Maximum number of notification groups for storing End Points - Notification Type pairs.
  */
-#define MAX_NOTIFICATIONS         1
+#define MAX_NUM_OF_NOTIFICATION_GROUPS         1
 
 /**
  * The value basic set command should use when an event occur.

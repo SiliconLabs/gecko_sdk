@@ -102,6 +102,10 @@ configuration:
     condition:
       - psa_crypto
 
+requires:
+  - name: device_supports_bluetooth
+  - name: device_security_vault
+
 tag:
   - hardware:device:flash:512
   - hardware:device:ram:32

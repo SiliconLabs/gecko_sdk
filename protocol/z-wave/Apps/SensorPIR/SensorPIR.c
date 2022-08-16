@@ -13,8 +13,8 @@
 
 #include "SizeOf.h"
 #include "Assert.h"
+#include <MfgTokens.h>
 #include "DebugPrintConfig.h"
-
 //#define DEBUGPRINT
 #include "DebugPrint.h"
 #include "config_app.h"
@@ -213,7 +213,7 @@ static const SAppNodeInfo_t AppNodeInfo =
   .CommandClasses.SecureIncludedSecureCC.pCommandClasses = cmdClassListSecure
 };
 
-static const SRadioConfig_t RadioConfig =
+static SRadioConfig_t RadioConfig =
 {
   .iListenBeforeTalkThreshold = ELISTENBEFORETALKTRESHOLD_DEFAULT,
   .iTxPowerLevelMax = APP_MAX_TX_POWER,
@@ -634,6 +634,15 @@ ApplicationInit(EResetReason_t eResetReason)
 
   // Init file system
   ApplicationFileSystemInit(&pFileSystemApplication);
+
+  // Read Rf region from MFG_ZWAVE_COUNTRY_FREQ
+  zpal_radio_region_t regionMfg;
+  ZW_GetMfgTokenDataCountryFreq((void*) &regionMfg);
+  if (isRfRegionValid(regionMfg)) {
+    RadioConfig.eRegion = regionMfg;
+  } else {
+    ZW_SetMfgTokenDataCountryRegion((void*) &RadioConfig.eRegion);
+  }
 
   /*************************************************************************************
    * CREATE USER TASKS  -  ZW_ApplicationRegisterTask() and ZW_UserTask_CreateTask()

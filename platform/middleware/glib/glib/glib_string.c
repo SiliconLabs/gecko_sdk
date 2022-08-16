@@ -73,7 +73,7 @@ EMSTATUS GLIB_drawChar(GLIB_Context_t *pContext, char myChar, int32_t x, int32_t
   }
 
   /* Sets the index in the font array */
-  if (pContext->font.class == NumbersOnlyFont) {
+  if (pContext->font.fontClass == NumbersOnlyFont) {
     fontIdx = (myChar - '0');
     if (myChar == ':') {
       fontIdx = 10;
@@ -190,7 +190,7 @@ EMSTATUS GLIB_drawString(GLIB_Context_t *pContext, const char* pString, uint32_t
     return GLIB_ERROR_INVALID_ARGUMENT;
   }
 
-  if (pContext->font.class == InvalidFont) {
+  if (pContext->font.fontClass == InvalidFont) {
     return GLIB_ERROR_INVALID_CHAR;
   }
 

@@ -8,7 +8,7 @@
     <properties key="readmeFiles" value=""/>
     <properties key="boardCompatibility" value="brd4200a brd4202a brd4204a brd4204b brd4204c brd4204d brd4205a brd4205b brd4207a brd4209a brd4210a com.silabs.board.none"/>
     <properties key="partCompatibility" value=".*efr32zg13l.* .*efr32zg13p.* .*efr32zg13s.* .*efr32zg14p.* .*efr32zg23.* .*zgm13.* .*zgm23.*"/>
-    <properties key="ideCompatibility" value="iar-embedded-workbench makefile-ide segger-embedded-studio simplicity-ide"/>
+    <properties key="ideCompatibility" value="iar-embedded-workbench makefile-ide simplicity-ide"/>
     <properties key="toolchainCompatibility" value="gcc iar segger"/>
     <properties key="category" value="Z-Wave|Apps"/>
     <properties key="quality" value="PRODUCTION"/>
@@ -23,7 +23,7 @@
     <properties key="readmeFiles" value=""/>
     <properties key="boardCompatibility" value="brd4200a brd4202a brd4205a brd4205b brd4207a brd4209a com.silabs.board.none"/>
     <properties key="partCompatibility" value=".*efr32zg13l.* .*efr32zg13p.* .*efr32zg13s.* .*efr32zg14p.* .*efr32zg23.* .*zgm13.* .*zgm23.*"/>
-    <properties key="ideCompatibility" value="iar-embedded-workbench makefile-ide segger-embedded-studio simplicity-ide"/>
+    <properties key="ideCompatibility" value="iar-embedded-workbench makefile-ide simplicity-ide"/>
     <properties key="toolchainCompatibility" value="gcc iar segger"/>
     <properties key="category" value="Z-Wave|Apps"/>
     <properties key="quality" value="PRODUCTION"/>
@@ -38,7 +38,7 @@
     <properties key="readmeFiles" value=""/>
     <properties key="boardCompatibility" value="brd4200a brd4202a brd4205a brd4205b brd4207a brd4209a com.silabs.board.none"/>
     <properties key="partCompatibility" value=".*efr32zg13l.* .*efr32zg13p.* .*efr32zg13s.* .*efr32zg14p.* .*efr32zg23.* .*zgm13.* .*zgm23.*"/>
-    <properties key="ideCompatibility" value="iar-embedded-workbench makefile-ide segger-embedded-studio simplicity-ide"/>
+    <properties key="ideCompatibility" value="iar-embedded-workbench makefile-ide simplicity-ide"/>
     <properties key="toolchainCompatibility" value="gcc iar segger"/>
     <properties key="category" value="Z-Wave|Apps"/>
     <properties key="quality" value="PRODUCTION"/>
@@ -53,7 +53,7 @@
     <properties key="readmeFiles" value=""/>
     <properties key="boardCompatibility" value="brd4200a brd4202a brd4204a brd4204b brd4204c brd4204d brd4205a brd4205b brd4207a brd4209a brd4210a com.silabs.board.none"/>
     <properties key="partCompatibility" value=".*efr32zg13l.* .*efr32zg13p.* .*efr32zg13s.* .*efr32zg14p.* .*efr32zg23.* .*zgm13.* .*zgm23.*"/>
-    <properties key="ideCompatibility" value="iar-embedded-workbench makefile-ide segger-embedded-studio simplicity-ide"/>
+    <properties key="ideCompatibility" value="iar-embedded-workbench makefile-ide simplicity-ide"/>
     <properties key="toolchainCompatibility" value="gcc iar segger"/>
     <properties key="category" value="Z-Wave|Apps"/>
     <properties key="quality" value="PRODUCTION"/>
@@ -68,7 +68,7 @@
     <properties key="readmeFiles" value=""/>
     <properties key="boardCompatibility" value="brd2603a brd4200a brd4201a brd4202a brd4204a brd4204b brd4204c brd4204d brd4205a brd4205b brd4206a brd4207a brd4208a brd4210a com.silabs.board.none"/>
     <properties key="partCompatibility" value=".*efr32zg13l.* .*efr32zg13p.* .*efr32zg13s.* .*efr32zg14p.* .*efr32zg23.* .*zgm13.* .*zgm23.*"/>
-    <properties key="ideCompatibility" value="iar-embedded-workbench makefile-ide segger-embedded-studio simplicity-ide"/>
+    <properties key="ideCompatibility" value="iar-embedded-workbench makefile-ide simplicity-ide"/>
     <properties key="toolchainCompatibility" value="gcc iar segger"/>
     <properties key="category" value="Z-Wave|Apps"/>
     <properties key="quality" value="PRODUCTION"/>
@@ -83,7 +83,7 @@
     <properties key="readmeFiles" value=""/>
     <properties key="boardCompatibility" value="brd4200a brd4202a brd4204a brd4204b brd4204c brd4204d brd4205a brd4205b brd4207a brd4209a brd4210a com.silabs.board.none"/>
     <properties key="partCompatibility" value=".*efr32zg13l.* .*efr32zg13p.* .*efr32zg13s.* .*efr32zg14p.* .*efr32zg23.* .*zgm13.* .*zgm23.*"/>
-    <properties key="ideCompatibility" value="iar-embedded-workbench makefile-ide segger-embedded-studio simplicity-ide"/>
+    <properties key="ideCompatibility" value="iar-embedded-workbench makefile-ide simplicity-ide"/>
     <properties key="toolchainCompatibility" value="gcc iar segger"/>
     <properties key="category" value="Z-Wave|Apps"/>
     <properties key="quality" value="PRODUCTION"/>
@@ -98,7 +98,7 @@
     <properties key="readmeFiles" value=""/>
     <properties key="boardCompatibility" value="brd2603a brd4200a brd4202a brd4204a brd4204b brd4204c brd4204d brd4205a brd4205b brd4207a brd4209a brd4210a com.silabs.board.none"/>
     <properties key="partCompatibility" value=".*efr32zg13l.* .*efr32zg13p.* .*efr32zg13s.* .*efr32zg14p.* .*efr32zg23.* .*zgm13.* .*zgm23.*"/>
-    <properties key="ideCompatibility" value="iar-embedded-workbench makefile-ide segger-embedded-studio simplicity-ide"/>
+    <properties key="ideCompatibility" value="iar-embedded-workbench makefile-ide simplicity-ide"/>
     <properties key="toolchainCompatibility" value="gcc iar segger"/>
     <properties key="category" value="Z-Wave|Apps"/>
     <properties key="quality" value="PRODUCTION"/>
@@ -113,7 +113,7 @@
     <properties key="readmeFiles" value=""/>
     <properties key="boardCompatibility" value="brd4200a brd4202a brd4204a brd4204b brd4204c brd4204d brd4205a brd4205b brd4207a brd4209a brd4210a com.silabs.board.none"/>
     <properties key="partCompatibility" value=".*efr32zg13l.* .*efr32zg13p.* .*efr32zg13s.* .*efr32zg14p.* .*efr32zg23.* .*zgm13.* .*zgm23.*"/>
-    <properties key="ideCompatibility" value="iar-embedded-workbench makefile-ide segger-embedded-studio simplicity-ide"/>
+    <properties key="ideCompatibility" value="iar-embedded-workbench makefile-ide simplicity-ide"/>
     <properties key="toolchainCompatibility" value="gcc iar segger"/>
     <properties key="category" value="Z-Wave|Apps"/>
     <properties key="quality" value="PRODUCTION"/>
@@ -128,7 +128,7 @@
     <properties key="readmeFiles" value=""/>
     <properties key="boardCompatibility" value="brd4200a brd4202a brd4205a brd4205b brd4207a brd4210a com.silabs.board.none"/>
     <properties key="partCompatibility" value=".*efr32zg13l.* .*efr32zg13p.* .*efr32zg13s.* .*efr32zg14p.* .*efr32zg23.* .*zgm13.* .*zgm23.*"/>
-    <properties key="ideCompatibility" value="iar-embedded-workbench makefile-ide segger-embedded-studio simplicity-ide"/>
+    <properties key="ideCompatibility" value="iar-embedded-workbench makefile-ide simplicity-ide"/>
     <properties key="toolchainCompatibility" value="gcc iar segger"/>
     <properties key="category" value="Z-Wave|Apps"/>
     <properties key="quality" value="PRODUCTION"/>
@@ -143,7 +143,7 @@
     <properties key="readmeFiles" value=""/>
     <properties key="boardCompatibility" value="brd2603a brd4200a brd4202a brd4204a brd4204b brd4204c brd4204d brd4205a brd4205b brd4207a brd4209a brd4210a com.silabs.board.none"/>
     <properties key="partCompatibility" value=".*efr32zg13l.* .*efr32zg13p.* .*efr32zg13s.* .*efr32zg14p.* .*efr32zg23.* .*zgm13.* .*zgm23.*"/>
-    <properties key="ideCompatibility" value="iar-embedded-workbench makefile-ide segger-embedded-studio simplicity-ide"/>
+    <properties key="ideCompatibility" value="iar-embedded-workbench makefile-ide simplicity-ide"/>
     <properties key="toolchainCompatibility" value="gcc iar segger"/>
     <properties key="category" value="Z-Wave|Apps"/>
     <properties key="quality" value="PRODUCTION"/>

@@ -21,6 +21,10 @@
 #include "em_timer.h"
 #include "em_cmu.h"
 
+#ifdef __cplusplus
+extern "C" {
+#endif
+
 /// A Simple PWM LED
 typedef struct {
   void   (*set_color)(void *context, uint16_t color);  ///< Member function to set color of PWM LED
@@ -84,5 +88,9 @@ void sl_pwm_led_set_color(void *led, uint16_t color);
  * @param[out] color          Color level (PWM duty-cycle [0-65535])
  ******************************************************************************/
 void sl_pwm_led_get_color(void *led, uint16_t *color);
+
+#ifdef __cplusplus
+}
+#endif
 
 #endif

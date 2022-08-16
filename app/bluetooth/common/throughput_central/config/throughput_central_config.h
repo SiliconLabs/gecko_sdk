@@ -37,18 +37,18 @@
 #define THROUGHPUT_CENTRAL_MTU_SIZE                   247
 
 // <o THROUGHPUT_DEFAULT_SCAN_PHY> Default PHY for scanning
-//   <sl_bt_gap_1m_phy_uncoded=> 1M PHY
-//   <sl_bt_gap_coded_phy_125k=> Coded PHY
-// <i> Default: sl_bt_gap_1m_phy_uncoded
-#define THROUGHPUT_DEFAULT_SCAN_PHY              sl_bt_gap_1m_phy_uncoded
+//   <sl_bt_gap_phy_coding_1m_uncoded=> 1M PHY
+//   <sl_bt_gap_phy_coding_125k_coded=> Coded PHY
+// <i> Default: sl_bt_gap_phy_coding_1m_uncoded
+#define THROUGHPUT_DEFAULT_SCAN_PHY              sl_bt_gap_phy_coding_1m_uncoded
 
 // <o THROUGHPUT_DEFAULT_PHY> Default PHY
-//   <sl_bt_gap_1m_phy_uncoded=> 1M PHY
-//   <sl_bt_gap_2m_phy_uncoded=> 2M PHY
-//   <sl_bt_gap_coded_phy_125k=> 125k Coded PHY (S=8)
-//   <sl_bt_gap_coded_phy_500k=> 500k Coded PHY (S=2)
-// <i> Default: sl_bt_gap_1m_phy_uncoded
-#define THROUGHPUT_DEFAULT_PHY                   sl_bt_gap_1m_phy_uncoded
+//   <sl_bt_gap_phy_coding_1m_uncoded=> 1M PHY
+//   <sl_bt_gap_phy_coding_2m_uncoded=> 2M PHY
+//   <sl_bt_gap_phy_coding_125k_coded=> 125k Coded PHY (S=8)
+//   <sl_bt_gap_phy_coding_500k_coded=> 500k Coded PHY (S=2)
+// <i> Default: sl_bt_gap_phy_coding_1m_uncoded
+#define THROUGHPUT_DEFAULT_PHY                   sl_bt_gap_phy_coding_1m_uncoded
 
 // </h>
 

@@ -85,9 +85,9 @@
 // #define SL_RAIL_UTIL_COEX_PRI_PORT               gpioPortD
 // #define SL_RAIL_UTIL_COEX_PRI_PIN                13
 // [GPIO_SL_RAIL_UTIL_COEX_PRI]$
-#ifndef SL_RAIL_UTIL_COEX_PRI_PORT
+#if !defined(SL_RAIL_UTIL_COEX_PRI_PORT) && !SL_RAIL_UTIL_COEX_DP_ENABLED
 #error "SL_RAIL_UTIL_COEX_PRI undefined"
-#endif //SL_RAIL_UTIL_COEX_PRI_PORT
+#endif //!defined(SL_RAIL_UTIL_COEX_PRI_PORT) && !SL_RAIL_UTIL_COEX_DP_ENABLED
 #endif //SL_RAIL_UTIL_COEX_PRI_ENABLED
 
 #if SL_RAIL_UTIL_COEX_REQ_ENABLED
@@ -135,7 +135,7 @@
 // PRS CH3 on PD12
 // #define SL_RAIL_UTIL_COEX_DP_OUT_PORT                gpioPortD
 // #define SL_RAIL_UTIL_COEX_DP_OUT_PIN                 12
-// [PRS_SL_RAIL_UTIL_COEX_DP]$
+// [PRS_SL_RAIL_UTIL_COEX_DP_OUT]$
 
 // Directional Priority timer module
 // <timer channel=CC0 optional=true> SL_RAIL_UTIL_COEX_DP_TIMER

@@ -2,7 +2,7 @@
  * @brief SL_BT_API commands for NCP host
  *******************************************************************************
  * # License
- * <b>Copyright 2019 Silicon Laboratories Inc. www.silabs.com</b>
+ * <b>Copyright 2022 Silicon Laboratories Inc. www.silabs.com</b>
  *******************************************************************************
  *
  * The licensor of this software is Silicon Laboratories Inc. Your use of this
@@ -53,6 +53,10 @@ sl_status_t sl_bt_dfu_flash_upload(size_t data_len, const uint8_t* data) {
 
     struct sl_bt_packet *rsp = (struct sl_bt_packet *)sl_bt_rsp_msg;
 
+    if ((1+data_len) > SL_BGAPI_MAX_PAYLOAD_SIZE )
+    {
+        return SL_STATUS_COMMAND_TOO_LONG;
+    }
     cmd->data.cmd_dfu_flash_upload.data.len=data_len;
     memcpy(cmd->data.cmd_dfu_flash_upload.data.data,data,data_len);
 
@@ -179,6 +183,10 @@ sl_status_t sl_bt_system_linklayer_configure(uint8_t key,
     struct sl_bt_packet *rsp = (struct sl_bt_packet *)sl_bt_rsp_msg;
 
     cmd->data.cmd_system_linklayer_configure.key=key;
+    if ((2+data_len) > SL_BGAPI_MAX_PAYLOAD_SIZE )
+    {
+        return SL_STATUS_COMMAND_TOO_LONG;
+    }
     cmd->data.cmd_system_linklayer_configure.data.len=data_len;
     memcpy(cmd->data.cmd_system_linklayer_configure.data.data,data,data_len);
 
@@ -294,6 +302,10 @@ sl_status_t sl_bt_system_data_buffer_write(size_t data_len,
 
     struct sl_bt_packet *rsp = (struct sl_bt_packet *)sl_bt_rsp_msg;
 
+    if ((1+data_len) > SL_BGAPI_MAX_PAYLOAD_SIZE )
+    {
+        return SL_STATUS_COMMAND_TOO_LONG;
+    }
     cmd->data.cmd_system_data_buffer_write.data.len=data_len;
     memcpy(cmd->data.cmd_system_data_buffer_write.data.data,data,data_len);
 
@@ -385,6 +397,10 @@ sl_status_t sl_bt_gap_set_data_channel_classification(size_t channel_map_len,
 
     struct sl_bt_packet *rsp = (struct sl_bt_packet *)sl_bt_rsp_msg;
 
+    if ((1+channel_map_len) > SL_BGAPI_MAX_PAYLOAD_SIZE )
+    {
+        return SL_STATUS_COMMAND_TOO_LONG;
+    }
     cmd->data.cmd_gap_set_data_channel_classification.channel_map.len=channel_map_len;
     memcpy(cmd->data.cmd_gap_set_data_channel_classification.channel_map.data,channel_map,channel_map_len);
 
@@ -647,6 +663,10 @@ SL_BGAPI_DEPRECATED sl_status_t sl_bt_advertiser_set_data(uint8_t advertising_se
 
     cmd->data.cmd_advertiser_set_data.advertising_set=advertising_set;
     cmd->data.cmd_advertiser_set_data.packet_type=packet_type;
+    if ((3+adv_data_len) > SL_BGAPI_MAX_PAYLOAD_SIZE )
+    {
+        return SL_STATUS_COMMAND_TOO_LONG;
+    }
     cmd->data.cmd_advertiser_set_data.adv_data.len=adv_data_len;
     memcpy(cmd->data.cmd_advertiser_set_data.adv_data.data,adv_data,adv_data_len);
 
@@ -740,6 +760,10 @@ sl_status_t sl_bt_legacy_advertiser_set_data(uint8_t advertising_set,
 
     cmd->data.cmd_legacy_advertiser_set_data.advertising_set=advertising_set;
     cmd->data.cmd_legacy_advertiser_set_data.type=type;
+    if ((3+data_len) > SL_BGAPI_MAX_PAYLOAD_SIZE )
+    {
+        return SL_STATUS_COMMAND_TOO_LONG;
+    }
     cmd->data.cmd_legacy_advertiser_set_data.data.len=data_len;
     memcpy(cmd->data.cmd_legacy_advertiser_set_data.data.data,data,data_len);
 
@@ -833,6 +857,10 @@ sl_status_t sl_bt_extended_advertiser_set_data(uint8_t advertising_set,
     struct sl_bt_packet *rsp = (struct sl_bt_packet *)sl_bt_rsp_msg;
 
     cmd->data.cmd_extended_advertiser_set_data.advertising_set=advertising_set;
+    if ((2+data_len) > SL_BGAPI_MAX_PAYLOAD_SIZE )
+    {
+        return SL_STATUS_COMMAND_TOO_LONG;
+    }
     cmd->data.cmd_extended_advertiser_set_data.data.len=data_len;
     memcpy(cmd->data.cmd_extended_advertiser_set_data.data.data,data,data_len);
 
@@ -926,6 +954,10 @@ sl_status_t sl_bt_periodic_advertiser_set_data(uint8_t advertising_set,
     struct sl_bt_packet *rsp = (struct sl_bt_packet *)sl_bt_rsp_msg;
 
     cmd->data.cmd_periodic_advertiser_set_data.advertising_set=advertising_set;
+    if ((2+data_len) > SL_BGAPI_MAX_PAYLOAD_SIZE )
+    {
+        return SL_STATUS_COMMAND_TOO_LONG;
+    }
     cmd->data.cmd_periodic_advertiser_set_data.data.len=data_len;
     memcpy(cmd->data.cmd_periodic_advertiser_set_data.data.data,data,data_len);
 
@@ -1551,6 +1583,10 @@ sl_status_t sl_bt_gatt_discover_primary_services_by_uuid(uint8_t connection,
     struct sl_bt_packet *rsp = (struct sl_bt_packet *)sl_bt_rsp_msg;
 
     cmd->data.cmd_gatt_discover_primary_services_by_uuid.connection=connection;
+    if ((2+uuid_len) > SL_BGAPI_MAX_PAYLOAD_SIZE )
+    {
+        return SL_STATUS_COMMAND_TOO_LONG;
+    }
     cmd->data.cmd_gatt_discover_primary_services_by_uuid.uuid.len=uuid_len;
     memcpy(cmd->data.cmd_gatt_discover_primary_services_by_uuid.uuid.data,uuid,uuid_len);
 
@@ -1606,6 +1642,10 @@ sl_status_t sl_bt_gatt_discover_characteristics_by_uuid(uint8_t connection,
 
     cmd->data.cmd_gatt_discover_characteristics_by_uuid.connection=connection;
     cmd->data.cmd_gatt_discover_characteristics_by_uuid.service=service;
+    if ((6+uuid_len) > SL_BGAPI_MAX_PAYLOAD_SIZE )
+    {
+        return SL_STATUS_COMMAND_TOO_LONG;
+    }
     cmd->data.cmd_gatt_discover_characteristics_by_uuid.uuid.len=uuid_len;
     memcpy(cmd->data.cmd_gatt_discover_characteristics_by_uuid.uuid.data,uuid,uuid_len);
 
@@ -1714,6 +1754,10 @@ sl_status_t sl_bt_gatt_read_multiple_characteristic_values(uint8_t connection,
     struct sl_bt_packet *rsp = (struct sl_bt_packet *)sl_bt_rsp_msg;
 
     cmd->data.cmd_gatt_read_multiple_characteristic_values.connection=connection;
+    if ((2+characteristic_list_len) > SL_BGAPI_MAX_PAYLOAD_SIZE )
+    {
+        return SL_STATUS_COMMAND_TOO_LONG;
+    }
     cmd->data.cmd_gatt_read_multiple_characteristic_values.characteristic_list.len=characteristic_list_len;
     memcpy(cmd->data.cmd_gatt_read_multiple_characteristic_values.characteristic_list.data,characteristic_list,characteristic_list_len);
 
@@ -1735,6 +1779,10 @@ sl_status_t sl_bt_gatt_read_characteristic_value_by_uuid(uint8_t connection,
 
     cmd->data.cmd_gatt_read_characteristic_value_by_uuid.connection=connection;
     cmd->data.cmd_gatt_read_characteristic_value_by_uuid.service=service;
+    if ((6+uuid_len) > SL_BGAPI_MAX_PAYLOAD_SIZE )
+    {
+        return SL_STATUS_COMMAND_TOO_LONG;
+    }
     cmd->data.cmd_gatt_read_characteristic_value_by_uuid.uuid.len=uuid_len;
     memcpy(cmd->data.cmd_gatt_read_characteristic_value_by_uuid.uuid.data,uuid,uuid_len);
 
@@ -1756,6 +1804,10 @@ sl_status_t sl_bt_gatt_write_characteristic_value(uint8_t connection,
 
     cmd->data.cmd_gatt_write_characteristic_value.connection=connection;
     cmd->data.cmd_gatt_write_characteristic_value.characteristic=characteristic;
+    if ((4+value_len) > SL_BGAPI_MAX_PAYLOAD_SIZE )
+    {
+        return SL_STATUS_COMMAND_TOO_LONG;
+    }
     cmd->data.cmd_gatt_write_characteristic_value.value.len=value_len;
     memcpy(cmd->data.cmd_gatt_write_characteristic_value.value.data,value,value_len);
 
@@ -1778,6 +1830,10 @@ sl_status_t sl_bt_gatt_write_characteristic_value_without_response(uint8_t conne
 
     cmd->data.cmd_gatt_write_characteristic_value_without_response.connection=connection;
     cmd->data.cmd_gatt_write_characteristic_value_without_response.characteristic=characteristic;
+    if ((4+value_len) > SL_BGAPI_MAX_PAYLOAD_SIZE )
+    {
+        return SL_STATUS_COMMAND_TOO_LONG;
+    }
     cmd->data.cmd_gatt_write_characteristic_value_without_response.value.len=value_len;
     memcpy(cmd->data.cmd_gatt_write_characteristic_value_without_response.value.data,value,value_len);
 
@@ -1803,6 +1859,10 @@ sl_status_t sl_bt_gatt_prepare_characteristic_value_write(uint8_t connection,
     cmd->data.cmd_gatt_prepare_characteristic_value_write.connection=connection;
     cmd->data.cmd_gatt_prepare_characteristic_value_write.characteristic=characteristic;
     cmd->data.cmd_gatt_prepare_characteristic_value_write.offset=offset;
+    if ((6+value_len) > SL_BGAPI_MAX_PAYLOAD_SIZE )
+    {
+        return SL_STATUS_COMMAND_TOO_LONG;
+    }
     cmd->data.cmd_gatt_prepare_characteristic_value_write.value.len=value_len;
     memcpy(cmd->data.cmd_gatt_prepare_characteristic_value_write.value.data,value,value_len);
 
@@ -1828,6 +1888,10 @@ sl_status_t sl_bt_gatt_prepare_characteristic_value_reliable_write(uint8_t conne
     cmd->data.cmd_gatt_prepare_characteristic_value_reliable_write.connection=connection;
     cmd->data.cmd_gatt_prepare_characteristic_value_reliable_write.characteristic=characteristic;
     cmd->data.cmd_gatt_prepare_characteristic_value_reliable_write.offset=offset;
+    if ((6+value_len) > SL_BGAPI_MAX_PAYLOAD_SIZE )
+    {
+        return SL_STATUS_COMMAND_TOO_LONG;
+    }
     cmd->data.cmd_gatt_prepare_characteristic_value_reliable_write.value.len=value_len;
     memcpy(cmd->data.cmd_gatt_prepare_characteristic_value_reliable_write.value.data,value,value_len);
 
@@ -1884,6 +1948,10 @@ sl_status_t sl_bt_gatt_write_descriptor_value(uint8_t connection,
 
     cmd->data.cmd_gatt_write_descriptor_value.connection=connection;
     cmd->data.cmd_gatt_write_descriptor_value.descriptor=descriptor;
+    if ((4+value_len) > SL_BGAPI_MAX_PAYLOAD_SIZE )
+    {
+        return SL_STATUS_COMMAND_TOO_LONG;
+    }
     cmd->data.cmd_gatt_write_descriptor_value.value.len=value_len;
     memcpy(cmd->data.cmd_gatt_write_descriptor_value.value.data,value,value_len);
 
@@ -1923,6 +1991,10 @@ sl_status_t sl_bt_gattdb_add_service(uint16_t session,
     cmd->data.cmd_gattdb_add_service.session=session;
     cmd->data.cmd_gattdb_add_service.type=type;
     cmd->data.cmd_gattdb_add_service.property=property;
+    if ((5+uuid_len) > SL_BGAPI_MAX_PAYLOAD_SIZE )
+    {
+        return SL_STATUS_COMMAND_TOO_LONG;
+    }
     cmd->data.cmd_gattdb_add_service.uuid.len=uuid_len;
     memcpy(cmd->data.cmd_gattdb_add_service.uuid.data,uuid,uuid_len);
 
@@ -2012,6 +2084,10 @@ sl_status_t sl_bt_gattdb_add_uuid16_characteristic(uint16_t session,
     cmd->data.cmd_gattdb_add_uuid16_characteristic.uuid=uuid;
     cmd->data.cmd_gattdb_add_uuid16_characteristic.value_type=value_type;
     cmd->data.cmd_gattdb_add_uuid16_characteristic.maxlen=maxlen;
+    if ((16+value_len) > SL_BGAPI_MAX_PAYLOAD_SIZE )
+    {
+        return SL_STATUS_COMMAND_TOO_LONG;
+    }
     cmd->data.cmd_gattdb_add_uuid16_characteristic.value.len=value_len;
     memcpy(cmd->data.cmd_gattdb_add_uuid16_characteristic.value.data,value,value_len);
 
@@ -2047,6 +2123,10 @@ sl_status_t sl_bt_gattdb_add_uuid128_characteristic(uint16_t session,
     cmd->data.cmd_gattdb_add_uuid128_characteristic.uuid=uuid;
     cmd->data.cmd_gattdb_add_uuid128_characteristic.value_type=value_type;
     cmd->data.cmd_gattdb_add_uuid128_characteristic.maxlen=maxlen;
+    if ((30+value_len) > SL_BGAPI_MAX_PAYLOAD_SIZE )
+    {
+        return SL_STATUS_COMMAND_TOO_LONG;
+    }
     cmd->data.cmd_gattdb_add_uuid128_characteristic.value.len=value_len;
     memcpy(cmd->data.cmd_gattdb_add_uuid128_characteristic.value.data,value,value_len);
 
@@ -2097,6 +2177,10 @@ sl_status_t sl_bt_gattdb_add_uuid16_descriptor(uint16_t session,
     cmd->data.cmd_gattdb_add_uuid16_descriptor.uuid=uuid;
     cmd->data.cmd_gattdb_add_uuid16_descriptor.value_type=value_type;
     cmd->data.cmd_gattdb_add_uuid16_descriptor.maxlen=maxlen;
+    if ((15+value_len) > SL_BGAPI_MAX_PAYLOAD_SIZE )
+    {
+        return SL_STATUS_COMMAND_TOO_LONG;
+    }
     cmd->data.cmd_gattdb_add_uuid16_descriptor.value.len=value_len;
     memcpy(cmd->data.cmd_gattdb_add_uuid16_descriptor.value.data,value,value_len);
 
@@ -2130,6 +2214,10 @@ sl_status_t sl_bt_gattdb_add_uuid128_descriptor(uint16_t session,
     cmd->data.cmd_gattdb_add_uuid128_descriptor.uuid=uuid;
     cmd->data.cmd_gattdb_add_uuid128_descriptor.value_type=value_type;
     cmd->data.cmd_gattdb_add_uuid128_descriptor.maxlen=maxlen;
+    if ((29+value_len) > SL_BGAPI_MAX_PAYLOAD_SIZE )
+    {
+        return SL_STATUS_COMMAND_TOO_LONG;
+    }
     cmd->data.cmd_gattdb_add_uuid128_descriptor.value.len=value_len;
     memcpy(cmd->data.cmd_gattdb_add_uuid128_descriptor.value.data,value,value_len);
 
@@ -2297,6 +2385,10 @@ sl_status_t sl_bt_gatt_server_find_attribute(uint16_t start,
     struct sl_bt_packet *rsp = (struct sl_bt_packet *)sl_bt_rsp_msg;
 
     cmd->data.cmd_gatt_server_find_attribute.start=start;
+    if ((3+type_len) > SL_BGAPI_MAX_PAYLOAD_SIZE )
+    {
+        return SL_STATUS_COMMAND_TOO_LONG;
+    }
     cmd->data.cmd_gatt_server_find_attribute.type.len=type_len;
     memcpy(cmd->data.cmd_gatt_server_find_attribute.type.data,type,type_len);
 
@@ -2365,6 +2457,10 @@ sl_status_t sl_bt_gatt_server_write_attribute_value(uint16_t attribute,
 
     cmd->data.cmd_gatt_server_write_attribute_value.attribute=attribute;
     cmd->data.cmd_gatt_server_write_attribute_value.offset=offset;
+    if ((5+value_len) > SL_BGAPI_MAX_PAYLOAD_SIZE )
+    {
+        return SL_STATUS_COMMAND_TOO_LONG;
+    }
     cmd->data.cmd_gatt_server_write_attribute_value.value.len=value_len;
     memcpy(cmd->data.cmd_gatt_server_write_attribute_value.value.data,value,value_len);
 
@@ -2389,6 +2485,10 @@ sl_status_t sl_bt_gatt_server_send_user_read_response(uint8_t connection,
     cmd->data.cmd_gatt_server_send_user_read_response.connection=connection;
     cmd->data.cmd_gatt_server_send_user_read_response.characteristic=characteristic;
     cmd->data.cmd_gatt_server_send_user_read_response.att_errorcode=att_errorcode;
+    if ((5+value_len) > SL_BGAPI_MAX_PAYLOAD_SIZE )
+    {
+        return SL_STATUS_COMMAND_TOO_LONG;
+    }
     cmd->data.cmd_gatt_server_send_user_read_response.value.len=value_len;
     memcpy(cmd->data.cmd_gatt_server_send_user_read_response.value.data,value,value_len);
 
@@ -2430,6 +2530,10 @@ sl_status_t sl_bt_gatt_server_send_notification(uint8_t connection,
 
     cmd->data.cmd_gatt_server_send_notification.connection=connection;
     cmd->data.cmd_gatt_server_send_notification.characteristic=characteristic;
+    if ((4+value_len) > SL_BGAPI_MAX_PAYLOAD_SIZE )
+    {
+        return SL_STATUS_COMMAND_TOO_LONG;
+    }
     cmd->data.cmd_gatt_server_send_notification.value.len=value_len;
     memcpy(cmd->data.cmd_gatt_server_send_notification.value.data,value,value_len);
 
@@ -2451,6 +2555,10 @@ sl_status_t sl_bt_gatt_server_send_indication(uint8_t connection,
 
     cmd->data.cmd_gatt_server_send_indication.connection=connection;
     cmd->data.cmd_gatt_server_send_indication.characteristic=characteristic;
+    if ((4+value_len) > SL_BGAPI_MAX_PAYLOAD_SIZE )
+    {
+        return SL_STATUS_COMMAND_TOO_LONG;
+    }
     cmd->data.cmd_gatt_server_send_indication.value.len=value_len;
     memcpy(cmd->data.cmd_gatt_server_send_indication.value.data,value,value_len);
 
@@ -2470,6 +2578,10 @@ sl_status_t sl_bt_gatt_server_notify_all(uint16_t characteristic,
     struct sl_bt_packet *rsp = (struct sl_bt_packet *)sl_bt_rsp_msg;
 
     cmd->data.cmd_gatt_server_notify_all.characteristic=characteristic;
+    if ((3+value_len) > SL_BGAPI_MAX_PAYLOAD_SIZE )
+    {
+        return SL_STATUS_COMMAND_TOO_LONG;
+    }
     cmd->data.cmd_gatt_server_notify_all.value.len=value_len;
     memcpy(cmd->data.cmd_gatt_server_notify_all.value.data,value,value_len);
 
@@ -2514,6 +2626,10 @@ sl_status_t sl_bt_gatt_server_send_user_prepare_write_response(uint8_t connectio
     cmd->data.cmd_gatt_server_send_user_prepare_write_response.characteristic=characteristic;
     cmd->data.cmd_gatt_server_send_user_prepare_write_response.att_errorcode=att_errorcode;
     cmd->data.cmd_gatt_server_send_user_prepare_write_response.offset=offset;
+    if ((7+value_len) > SL_BGAPI_MAX_PAYLOAD_SIZE )
+    {
+        return SL_STATUS_COMMAND_TOO_LONG;
+    }
     cmd->data.cmd_gatt_server_send_user_prepare_write_response.value.len=value_len;
     memcpy(cmd->data.cmd_gatt_server_send_user_prepare_write_response.value.data,value,value_len);
 
@@ -2612,6 +2728,10 @@ sl_status_t sl_bt_nvm_save(uint16_t key,
     struct sl_bt_packet *rsp = (struct sl_bt_packet *)sl_bt_rsp_msg;
 
     cmd->data.cmd_nvm_save.key=key;
+    if ((3+value_len) > SL_BGAPI_MAX_PAYLOAD_SIZE )
+    {
+        return SL_STATUS_COMMAND_TOO_LONG;
+    }
     cmd->data.cmd_nvm_save.value.len=value_len;
     memcpy(cmd->data.cmd_nvm_save.value.data,value,value_len);
 
@@ -3099,6 +3219,10 @@ sl_status_t sl_bt_sm_set_bonding_data(uint8_t connection,
 
     cmd->data.cmd_sm_set_bonding_data.connection=connection;
     cmd->data.cmd_sm_set_bonding_data.type=type;
+    if ((3+data_len) > SL_BGAPI_MAX_PAYLOAD_SIZE )
+    {
+        return SL_STATUS_COMMAND_TOO_LONG;
+    }
     cmd->data.cmd_sm_set_bonding_data.data.len=data_len;
     memcpy(cmd->data.cmd_sm_set_bonding_data.data.data,data,data_len);
 
@@ -3115,6 +3239,10 @@ sl_status_t sl_bt_ota_set_device_name(size_t name_len, const uint8_t* name) {
 
     struct sl_bt_packet *rsp = (struct sl_bt_packet *)sl_bt_rsp_msg;
 
+    if ((1+name_len) > SL_BGAPI_MAX_PAYLOAD_SIZE )
+    {
+        return SL_STATUS_COMMAND_TOO_LONG;
+    }
     cmd->data.cmd_ota_set_device_name.name.len=name_len;
     memcpy(cmd->data.cmd_ota_set_device_name.name.data,name,name_len);
 
@@ -3134,6 +3262,10 @@ sl_status_t sl_bt_ota_set_advertising_data(uint8_t packet_type,
     struct sl_bt_packet *rsp = (struct sl_bt_packet *)sl_bt_rsp_msg;
 
     cmd->data.cmd_ota_set_advertising_data.packet_type=packet_type;
+    if ((2+adv_data_len) > SL_BGAPI_MAX_PAYLOAD_SIZE )
+    {
+        return SL_STATUS_COMMAND_TOO_LONG;
+    }
     cmd->data.cmd_ota_set_advertising_data.adv_data.len=adv_data_len;
     memcpy(cmd->data.cmd_ota_set_advertising_data.adv_data.data,adv_data,adv_data_len);
 
@@ -3310,6 +3442,10 @@ sl_status_t sl_bt_l2cap_channel_send_data(uint8_t connection,
 
     cmd->data.cmd_l2cap_channel_send_data.connection=connection;
     cmd->data.cmd_l2cap_channel_send_data.cid=cid;
+    if ((4+data_len) > SL_BGAPI_MAX_PAYLOAD_SIZE )
+    {
+        return SL_STATUS_COMMAND_TOO_LONG;
+    }
     cmd->data.cmd_l2cap_channel_send_data.data.len=data_len;
     memcpy(cmd->data.cmd_l2cap_channel_send_data.data.data,data,data_len);
 
@@ -3366,6 +3502,10 @@ sl_status_t sl_bt_cte_transmitter_set_dtm_parameters(uint8_t cte_length,
 
     cmd->data.cmd_cte_transmitter_set_dtm_parameters.cte_length=cte_length;
     cmd->data.cmd_cte_transmitter_set_dtm_parameters.cte_type=cte_type;
+    if ((3+switching_pattern_len) > SL_BGAPI_MAX_PAYLOAD_SIZE )
+    {
+        return SL_STATUS_COMMAND_TOO_LONG;
+    }
     cmd->data.cmd_cte_transmitter_set_dtm_parameters.switching_pattern.len=switching_pattern_len;
     memcpy(cmd->data.cmd_cte_transmitter_set_dtm_parameters.switching_pattern.data,switching_pattern,switching_pattern_len);
 
@@ -3401,6 +3541,10 @@ sl_status_t sl_bt_cte_transmitter_enable_connection_cte(uint8_t connection,
 
     cmd->data.cmd_cte_transmitter_enable_connection_cte.connection=connection;
     cmd->data.cmd_cte_transmitter_enable_connection_cte.cte_types=cte_types;
+    if ((3+switching_pattern_len) > SL_BGAPI_MAX_PAYLOAD_SIZE )
+    {
+        return SL_STATUS_COMMAND_TOO_LONG;
+    }
     cmd->data.cmd_cte_transmitter_enable_connection_cte.switching_pattern.len=switching_pattern_len;
     memcpy(cmd->data.cmd_cte_transmitter_enable_connection_cte.switching_pattern.data,switching_pattern,switching_pattern_len);
 
@@ -3441,6 +3585,10 @@ sl_status_t sl_bt_cte_transmitter_enable_connectionless_cte(uint8_t handle,
     cmd->data.cmd_cte_transmitter_enable_connectionless_cte.cte_length=cte_length;
     cmd->data.cmd_cte_transmitter_enable_connectionless_cte.cte_type=cte_type;
     cmd->data.cmd_cte_transmitter_enable_connectionless_cte.cte_count=cte_count;
+    if ((5+switching_pattern_len) > SL_BGAPI_MAX_PAYLOAD_SIZE )
+    {
+        return SL_STATUS_COMMAND_TOO_LONG;
+    }
     cmd->data.cmd_cte_transmitter_enable_connectionless_cte.switching_pattern.len=switching_pattern_len;
     memcpy(cmd->data.cmd_cte_transmitter_enable_connectionless_cte.switching_pattern.data,switching_pattern,switching_pattern_len);
 
@@ -3481,6 +3629,10 @@ sl_status_t sl_bt_cte_transmitter_enable_silabs_cte(uint8_t handle,
     cmd->data.cmd_cte_transmitter_enable_silabs_cte.cte_length=cte_length;
     cmd->data.cmd_cte_transmitter_enable_silabs_cte.cte_type=cte_type;
     cmd->data.cmd_cte_transmitter_enable_silabs_cte.cte_count=cte_count;
+    if ((5+switching_pattern_len) > SL_BGAPI_MAX_PAYLOAD_SIZE )
+    {
+        return SL_STATUS_COMMAND_TOO_LONG;
+    }
     cmd->data.cmd_cte_transmitter_enable_silabs_cte.switching_pattern.len=switching_pattern_len;
     memcpy(cmd->data.cmd_cte_transmitter_enable_silabs_cte.switching_pattern.data,switching_pattern,switching_pattern_len);
 
@@ -3519,6 +3671,10 @@ sl_status_t sl_bt_cte_receiver_set_dtm_parameters(uint8_t cte_length,
     cmd->data.cmd_cte_receiver_set_dtm_parameters.cte_length=cte_length;
     cmd->data.cmd_cte_receiver_set_dtm_parameters.cte_type=cte_type;
     cmd->data.cmd_cte_receiver_set_dtm_parameters.slot_durations=slot_durations;
+    if ((4+switching_pattern_len) > SL_BGAPI_MAX_PAYLOAD_SIZE )
+    {
+        return SL_STATUS_COMMAND_TOO_LONG;
+    }
     cmd->data.cmd_cte_receiver_set_dtm_parameters.switching_pattern.len=switching_pattern_len;
     memcpy(cmd->data.cmd_cte_receiver_set_dtm_parameters.switching_pattern.data,switching_pattern,switching_pattern_len);
 
@@ -3638,6 +3794,10 @@ sl_status_t sl_bt_cte_receiver_enable_connection_cte(uint8_t connection,
     cmd->data.cmd_cte_receiver_enable_connection_cte.cte_length=cte_length;
     cmd->data.cmd_cte_receiver_enable_connection_cte.cte_type=cte_type;
     cmd->data.cmd_cte_receiver_enable_connection_cte.slot_durations=slot_durations;
+    if ((7+switching_pattern_len) > SL_BGAPI_MAX_PAYLOAD_SIZE )
+    {
+        return SL_STATUS_COMMAND_TOO_LONG;
+    }
     cmd->data.cmd_cte_receiver_enable_connection_cte.switching_pattern.len=switching_pattern_len;
     memcpy(cmd->data.cmd_cte_receiver_enable_connection_cte.switching_pattern.data,switching_pattern,switching_pattern_len);
 
@@ -3676,6 +3836,10 @@ sl_status_t sl_bt_cte_receiver_enable_connectionless_cte(uint16_t sync,
     cmd->data.cmd_cte_receiver_enable_connectionless_cte.sync=sync;
     cmd->data.cmd_cte_receiver_enable_connectionless_cte.slot_durations=slot_durations;
     cmd->data.cmd_cte_receiver_enable_connectionless_cte.cte_count=cte_count;
+    if ((5+switching_pattern_len) > SL_BGAPI_MAX_PAYLOAD_SIZE )
+    {
+        return SL_STATUS_COMMAND_TOO_LONG;
+    }
     cmd->data.cmd_cte_receiver_enable_connectionless_cte.switching_pattern.len=switching_pattern_len;
     memcpy(cmd->data.cmd_cte_receiver_enable_connectionless_cte.switching_pattern.data,switching_pattern,switching_pattern_len);
 
@@ -3712,6 +3876,10 @@ sl_status_t sl_bt_cte_receiver_enable_silabs_cte(uint8_t slot_durations,
 
     cmd->data.cmd_cte_receiver_enable_silabs_cte.slot_durations=slot_durations;
     cmd->data.cmd_cte_receiver_enable_silabs_cte.cte_count=cte_count;
+    if ((3+switching_pattern_len) > SL_BGAPI_MAX_PAYLOAD_SIZE )
+    {
+        return SL_STATUS_COMMAND_TOO_LONG;
+    }
     cmd->data.cmd_cte_receiver_enable_silabs_cte.switching_pattern.len=switching_pattern_len;
     memcpy(cmd->data.cmd_cte_receiver_enable_silabs_cte.switching_pattern.data,switching_pattern,switching_pattern_len);
 
@@ -3746,6 +3914,10 @@ sl_status_t sl_bt_user_message_to_target(size_t data_len,
 
     struct sl_bt_packet *rsp = (struct sl_bt_packet *)sl_bt_rsp_msg;
 
+    if ((1+data_len) > SL_BGAPI_MAX_PAYLOAD_SIZE )
+    {
+        return SL_STATUS_COMMAND_TOO_LONG;
+    }
     cmd->data.cmd_user_message_to_target.data.len=data_len;
     memcpy(cmd->data.cmd_user_message_to_target.data.data,data,data_len);
 
@@ -3767,6 +3939,10 @@ sl_status_t sl_bt_user_manage_event_filter(size_t data_len,
 
     struct sl_bt_packet *rsp = (struct sl_bt_packet *)sl_bt_rsp_msg;
 
+    if ((1+data_len) > SL_BGAPI_MAX_PAYLOAD_SIZE )
+    {
+        return SL_STATUS_COMMAND_TOO_LONG;
+    }
     cmd->data.cmd_user_manage_event_filter.data.len=data_len;
     memcpy(cmd->data.cmd_user_manage_event_filter.data.data,data,data_len);
 

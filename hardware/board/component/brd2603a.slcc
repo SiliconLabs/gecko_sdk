@@ -13,6 +13,7 @@
   - name: hardware_board
   - name: hardware_board_stk
   - name: hardware_board_from_stk
+  - name: hardware_board_from_zgm230-dk2603a
   - name: hardware_board_has_si70xx
   - name: hardware_board_has_tempsensor
   - name: hardware_board_has_vcom
@@ -47,11 +48,11 @@
   - name: SL_BOARD_NAME
     value: '"BRD2603A"'
   - name: SL_BOARD_REV
-    value: '"A00"'
+    value: '"A01"'
 - tag:
   - board:pn:BRD2603
   - board:variant:A
-  - board:revision:A00
+  - board:revision:A01
   - board:device:zgm230sb27hgn
   - hardware:has:vcom
   - hardware:has:pti

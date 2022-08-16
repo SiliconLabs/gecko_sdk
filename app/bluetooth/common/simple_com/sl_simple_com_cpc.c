@@ -39,8 +39,15 @@ static uint8_t tx_buf[SL_SIMPLE_COM_TX_BUF_SIZE] = { 0 };
 
 static sl_cpc_endpoint_handle_t endpoint_handle;
 
+// Write completed signal
+typedef struct {
+  uint8_t     write_completed;
+  sl_status_t wr_comp_status;
+} sig_wr_comp;
+
 // Signals to handle communication between callback functions
 static uint8_t signal_write = 0;
+static sig_wr_comp signal_wr_comp = { 0 };
 static uint8_t signal_read = 0;
 static uint8_t signal_init = 1;
 
@@ -109,8 +116,18 @@ void sl_simple_com_step(void)
       // Everything OK, send msg to upper layers
       memcpy(rx_buf, rx_buf_p, len);
       sl_simple_com_receive_cb(status, len, rx_buf);
+      sl_cpc_free_rx_buffer((void *) &rx_buf);
       signal_read--;
       memset(rx_buf, 0, sizeof(rx_buf));
+    }
+  }
+
+  if (signal_wr_comp.write_completed > 0) {
+    if (!signal_init) {
+      memset(tx_buf, 0, sizeof(tx_buf));
+      sl_simple_com_transmit_cb(signal_wr_comp.wr_comp_status);
+      signal_wr_comp.wr_comp_status = SL_STATUS_FAIL;
+      signal_wr_comp.write_completed--;
     }
   }
 }
@@ -189,6 +206,7 @@ void cpc_rx_cb(uint8_t endpoint_id, void *arg)
 {
   (void)endpoint_id;
   (void)arg;
+
   signal_read++;
 }
 
@@ -204,8 +222,8 @@ void cpc_tx_cb(sl_cpc_user_endpoint_id_t endpoint_id,
   (void)(buffer);
   (void)(arg);
 
-  if (!signal_init) {
-    memset(tx_buf, 0, sizeof(tx_buf));
-    sl_simple_com_transmit_cb(status);
-  }
+  CORE_ATOMIC_SECTION(
+    signal_wr_comp.wr_comp_status = status;
+    signal_wr_comp.write_completed++;
+    )
 }

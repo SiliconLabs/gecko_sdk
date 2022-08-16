@@ -193,5 +193,5 @@ uint16_t emAfPluginReportingConditionallyAddReportingEntry(EmberAfPluginReportin
 
 uint16_t emAfPluginReportingNumEntries(void);
 uint16_t emAfPluginReportingAppendEntry(EmberAfPluginReportingEntry* newEntry);
-
+void emAfPluginReportingGetLastValueAll(void);
 #endif //REPORTING_H

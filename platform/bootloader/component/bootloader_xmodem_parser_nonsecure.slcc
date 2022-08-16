@@ -1,5 +1,5 @@
 id: bootloader_xmodem_parser_nonsecure
-label: "XMODEM Parser"
+label: "XMODEM Parser (Non-Secure)"
 package: bootloader
 description: XMODEM parser implementation.
 category: Platform|Bootloader|TrustZone NonSecure|Communication

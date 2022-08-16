@@ -162,6 +162,13 @@ constexpr uint8_t kRouterSelectionJitter      = 120; ///< (in sec)
 constexpr uint8_t kRouterDowngradeThreshold = 23;
 constexpr uint8_t kRouterUpgradeThreshold   = 16;
 
+/**
+ * Threshold to accept a router upgrade request with reason `kBorderRouterRequest` (number of BRs acting as router in
+ * Network Data).
+ *
+ */
+constexpr uint8_t kRouterUpgradeBorderRouterRequestThreshold = 2;
+
 constexpr uint32_t kMaxLeaderToRouterTimeout = 90;  ///< (in sec)
 constexpr uint32_t kReedAdvertiseInterval    = 570; ///< (in sec)
 constexpr uint32_t kReedAdvertiseJitter      = 60;  ///< (in sec)
@@ -210,6 +217,18 @@ constexpr uint16_t kAloc16NeighborDiscoveryAgentEnd   = 0xfc4e;
 
 constexpr uint8_t kServiceMinId = 0x00; ///< Minimal Service ID.
 constexpr uint8_t kServiceMaxId = 0x0f; ///< Maximal Service ID.
+
+/**
+ * This enumeration specifies the leader role start mode.
+ *
+ * The start mode indicates whether device is starting normally as leader or restoring its role after reset.
+ *
+ */
+enum LeaderStartMode : uint8_t
+{
+    kStartingAsLeader,              ///< Starting as leader normally.
+    kRestoringLeaderRoleAfterReset, ///< Restoring leader role after reset.
+};
 
 #if OPENTHREAD_CONFIG_THREAD_VERSION >= OT_THREAD_VERSION_1_2
 

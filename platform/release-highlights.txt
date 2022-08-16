@@ -1,23 +1,3 @@
-Gecko Platform 4.1.0.0
-
-- Initial release of CPC
-- Added support for EFR32xG24; MGM240, EFR32MR21 and FGM230
-- Several code size improvements related to Power Manager, HFXO Manager and em_crypto
-
-- Tools and Dependencies
-  - Updated compiler support to GCC 10.3-2021.10 and IAR 9.20.4
-  - Updated CMSIS to version 5.8.0
-  
-- Drivers
-  - Added a new component to synchronize UART/PTI settings between WSTK mainboard and the radio board
-  - Added support for Analog Joystick driver to use the joystick functionality on mainboard v2
-
-- Security
-  - Mbed TLS is updated to version 3.1.0
-  - Added software support for TrustZone, BETA quality
-
-- Bootloader
-  - Jedec driver support for external SPI flash 
-  - Added a new bootloader sample application for devices with external SPI flash
-
+Gecko Platform 4.1.1.0
+- Targeted quality improvements and bug fixes
 

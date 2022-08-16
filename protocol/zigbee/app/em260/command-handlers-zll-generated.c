@@ -17,6 +17,7 @@
 #include "stack/include/cbke-crypto-engine.h"
 #include "stack/include/mfglib.h"
 #include "stack/include/binding-table.h"
+#include "stack/include/message.h"
 #include "app/util/ezsp/ezsp-frame-utilities.h"
 #include "app/em260/command-handlers-cbke.h"
 #include "app/em260/command-handlers-binding.h"

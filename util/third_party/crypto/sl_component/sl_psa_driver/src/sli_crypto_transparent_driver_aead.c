@@ -2135,77 +2135,82 @@ psa_status_t sli_crypto_transparent_aead_update(sli_crypto_transparent_aead_oper
     return PSA_SUCCESS;
   }
 
-#if defined(PSA_WANT_ALG_GCM)
-  if (PSA_ALG_AEAD_WITH_SHORTENED_TAG(operation->alg, 0) == PSA_ALG_AEAD_WITH_SHORTENED_TAG(PSA_ALG_GCM, 0)) {
-    // Deal with input that are not a multiple of 16.
-    if ((operation->unprocessed_length + input_length) < 16 && input_length < 16) {
-      if (operation->unprocessed_length > 16) {
-        // Context is not valid.
-        return PSA_ERROR_INVALID_ARGUMENT;
-      }
-
-      // Fill context buffer and end operation.
-      memcpy(operation->unprocessed_block + operation->unprocessed_length, input, input_length);
-      operation->unprocessed_length += input_length;
-      *output_length = 0;
-
-      return PSA_SUCCESS;
+  // Deal with input that are not a multiple of 16.
+  if ((operation->unprocessed_length + input_length) < 16 && input_length < 16) {
+    if (operation->unprocessed_length > 16) {
+      // Context is not valid.
+      return PSA_ERROR_INVALID_ARGUMENT;
     }
+
+    // Fill context buffer and end operation.
+    memcpy(operation->unprocessed_block + operation->unprocessed_length, input, input_length);
+    operation->unprocessed_length += input_length;
+    *output_length = 0;
+
+    return PSA_SUCCESS;
   }
-#endif
 
   if (operation->processed_len == 0 && operation->add_len == 0) {
     // Multipart operation not initialized.
     crypto_aead_start(operation);
   }
 
-#if defined(PSA_WANT_ALG_GCM)
   uint8_t input_offset = 0;
   uint8_t output_offset = 0;
 
-  if (PSA_ALG_AEAD_WITH_SHORTENED_TAG(operation->alg, 0) == PSA_ALG_AEAD_WITH_SHORTENED_TAG(PSA_ALG_GCM, 0)) {
-    if (operation->unprocessed_length != 0) {
-      if (operation->unprocessed_length > 16) {
-        // Context is not valid.
-        return PSA_ERROR_INVALID_ARGUMENT;
-      }
+  if (operation->unprocessed_length != 0) {
+    if (operation->unprocessed_length > 16) {
+      // Context is not valid.
+      return PSA_ERROR_INVALID_ARGUMENT;
+    }
 
-      // If there is data stored in the context it must be processed first.
-      input_offset = 16 - operation->unprocessed_length;
+    // If there is data stored in the context it must be processed first.
+    input_offset = 16 - operation->unprocessed_length;
 
-      memcpy(operation->unprocessed_block + operation->unprocessed_length, input, input_offset);
+    memcpy(operation->unprocessed_block + operation->unprocessed_length, input, input_offset);
 
+#if defined(PSA_WANT_ALG_GCM)
+    if (PSA_ALG_AEAD_WITH_SHORTENED_TAG(operation->alg, 0) == PSA_ALG_AEAD_WITH_SHORTENED_TAG(PSA_ALG_GCM, 0)) {
       sli_gcm_update(operation,
                      NULL,
                      sizeof(operation->unprocessed_block),
                      operation->unprocessed_block,
                      output);
-
-      input_length -= input_offset;
-      output_offset += 16;
-      input += input_offset;
-      output += output_offset;
-
-      sli_psa_zeroize(operation->unprocessed_block, sizeof(operation->unprocessed_block));
-      operation->unprocessed_length = 0;
-
-      if (input_length < 16) {
-        // Fill context buffer and end operation.
-        memcpy(operation->unprocessed_block, input, input_length);
-        operation->unprocessed_length = input_length;
-        *output_length = output_offset;
-
-        return PSA_SUCCESS;
-      }
     }
-    // Store data that is not a multiple of 16 in context.
-    uint8_t res_data_length = input_length % 16;
-    memcpy(operation->unprocessed_block, input + (input_length - res_data_length),
-           res_data_length);
-    operation->unprocessed_length = res_data_length;
-    input_length -= res_data_length;
+#endif
+#if defined(PSA_WANT_ALG_CCM)
+    if (PSA_ALG_AEAD_WITH_SHORTENED_TAG(operation->alg, 0) == PSA_ALG_AEAD_WITH_SHORTENED_TAG(PSA_ALG_CCM, 0)) {
+      sli_ccm_update(operation,
+                     NULL,
+                     sizeof(operation->unprocessed_block),
+                     operation->unprocessed_block,
+                     output);
+    }
+#endif
+
+    input_length -= input_offset;
+    output_offset += 16;
+    input += input_offset;
+    output += output_offset;
+
+    sli_psa_zeroize(operation->unprocessed_block, sizeof(operation->unprocessed_block));
+    operation->unprocessed_length = 0;
+
+    if (input_length < 16) {
+      // Fill context buffer and end operation.
+      memcpy(operation->unprocessed_block, input, input_length);
+      operation->unprocessed_length = input_length;
+      *output_length = output_offset;
+
+      return PSA_SUCCESS;
+    }
   }
-#endif // PSA_WANT_ALG_GCM
+  // Store data that is not a multiple of 16 in context.
+  uint8_t res_data_length = input_length % 16;
+  memcpy(operation->unprocessed_block, input + (input_length - res_data_length),
+         res_data_length);
+  operation->unprocessed_length = res_data_length;
+  input_length -= res_data_length;
 
   // Our drivers only support full or no overlap between input and output
   // buffers. So in the case of partial overlap, copy the input buffer into
@@ -2239,7 +2244,7 @@ psa_status_t sli_crypto_transparent_aead_update(sli_crypto_transparent_aead_oper
                      input,
                      output);
 
-      *output_length = input_length;
+      *output_length = input_length + output_offset;
       break;
     }
 #endif
@@ -2302,29 +2307,23 @@ psa_status_t sli_crypto_transparent_aead_finish(sli_crypto_transparent_aead_oper
     crypto_aead_start(operation);
   }
 
-#if defined(PSA_WANT_ALG_GCM)
-  if (PSA_ALG_AEAD_WITH_SHORTENED_TAG(operation->alg, 0) == PSA_ALG_AEAD_WITH_SHORTENED_TAG(PSA_ALG_GCM, 0)) {
-    if (operation->unprocessed_length) {
-      // Any unprocessed data in context must be processed first.
-      if (ciphertext_size < operation->unprocessed_length) {
-        return PSA_ERROR_INVALID_ARGUMENT;
-      }
-
-      sli_gcm_update(operation,
-                     NULL,
-                     operation->unprocessed_length,
-                     operation->unprocessed_block,
-                     ciphertext);
-
-      *ciphertext_length = operation->unprocessed_length;
-    }
-  }
-#endif
-
   switch (PSA_ALG_AEAD_WITH_SHORTENED_TAG(operation->alg, 0)) {
 #if defined(PSA_WANT_ALG_GCM)
     case PSA_ALG_AEAD_WITH_SHORTENED_TAG(PSA_ALG_GCM, 0):
     {
+      if (operation->unprocessed_length) {
+        // Any unprocessed data in context must be processed first.
+        if (ciphertext_size < operation->unprocessed_length) {
+          return PSA_ERROR_INVALID_ARGUMENT;
+        }
+        sli_gcm_update(operation,
+                       NULL,
+                       operation->unprocessed_length,
+                       operation->unprocessed_block,
+                       ciphertext);
+
+        *ciphertext_length = operation->unprocessed_length;
+      }
       sli_gcm_finish(operation,
                      NULL,
                      tag,
@@ -2336,6 +2335,19 @@ psa_status_t sli_crypto_transparent_aead_finish(sli_crypto_transparent_aead_oper
 #if defined(PSA_WANT_ALG_CCM)
     case PSA_ALG_AEAD_WITH_SHORTENED_TAG(PSA_ALG_CCM, 0):
     {
+      if (operation->unprocessed_length) {
+        // Any unprocessed data in context must be processed first.
+        if (ciphertext_size < operation->unprocessed_length) {
+          return PSA_ERROR_INVALID_ARGUMENT;
+        }
+        sli_ccm_update(operation,
+                       NULL,
+                       operation->unprocessed_length,
+                       operation->unprocessed_block,
+                       ciphertext);
+
+        *ciphertext_length = operation->unprocessed_length;
+      }
       sli_ccm_finish(operation,
                      NULL,
                      tag,

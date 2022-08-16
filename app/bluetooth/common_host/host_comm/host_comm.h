@@ -33,6 +33,23 @@
 
 #include "sl_status.h"
 
+// Macros used by CPC
+#if defined(POSIX) && POSIX == 1 && defined (CPC) && CPC == 1
+#define HOST_COMM_CPC_OPTSTRING  "C:"
+
+// Usage info.
+#define HOST_COMM_CPC_USAGE " | -C <cpcd_instance_name>"
+
+// Options info.
+#define HOST_COMM_CPC_OPTIONS \
+  "    -C  CPC connection\n"  \
+  "        <cpcd_instance_name> Name of the CPCd instance to connect to.\n"
+#else // defined(POSIX) && POSIX == 1 && defined (CPC) && CPC == 1
+#define HOST_COMM_CPC_OPTSTRING
+#define HOST_COMM_CPC_USAGE
+#define HOST_COMM_CPC_OPTIONS
+#endif // defined(POSIX) && POSIX == 1 && defined (CPC) && CPC == 1
+
 // Macros used by Named Socket
 #if defined(POSIX) && POSIX == 1
 #define CLIENT_PATH "client_unencrypted"
@@ -54,10 +71,10 @@
 #endif // defined(POSIX) && POSIX == 1
 
 // Optstring argument for getopt.
-#define HOST_COMM_OPTSTRING  HOST_COMM_NS_OPTSTRING "t:u:b:f"
+#define HOST_COMM_OPTSTRING  HOST_COMM_NS_OPTSTRING HOST_COMM_CPC_OPTSTRING "t:u:b:f"
 
 // Usage info.
-#define HOST_COMM_USAGE "-t <tcp_address> | -u <serial_port>" HOST_COMM_NS_USAGE " [-b <baud_rate>] [-f]"
+#define HOST_COMM_USAGE "-t <tcp_address> | -u <serial_port>" HOST_COMM_NS_USAGE HOST_COMM_CPC_USAGE " [-b <baud_rate>] [-f]"
 
 // Options info.
 #define HOST_COMM_OPTIONS                                                                                                      \
@@ -65,7 +82,7 @@
   "        <tcp_address>    TCP/IP address of the dev board.\n"                                                                \
   "    -u  UART serial connection option.\n"                                                                                   \
   "        <serial_port>    Serial port assigned to the dev board by the host system. (COM# on Windows, /dev/tty# on POSIX)\n" \
-  HOST_COMM_NS_OPTIONS                                                                                                         \
+  HOST_COMM_NS_OPTIONS HOST_COMM_CPC_OPTIONS                                                                                   \
   "    -b  Baud rate of the serial connection.\n"                                                                              \
   "        <baud_rate>      Baud rate, default: 115200\n"                                                                      \
   "    -f  Disable flow control (RTS/CTS), default: enabled\n"                                                                 \

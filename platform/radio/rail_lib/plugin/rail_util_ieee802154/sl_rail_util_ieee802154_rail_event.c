@@ -37,6 +37,8 @@ static inline bool isReceivingFrame(RAIL_Handle_t railHandle)
          == RAIL_RF_STATE_RX_ACTIVE;
 }
 
+static bool ack_waiting = false;
+
 void sl_rail_util_ieee801254_on_rail_event(RAIL_Handle_t railHandle, RAIL_Events_t events)
 {
   if (events & (RAIL_EVENT_RX_SYNC1_DETECT
@@ -59,10 +61,26 @@ void sl_rail_util_ieee801254_on_rail_event(RAIL_Handle_t railHandle, RAIL_Events
     (void) sl_rail_util_ieee802154_on_event(SL_RAIL_UTIL_IEEE802154_STACK_EVENT_TX_ABORTED,
                                             (uint32_t) RAIL_IsAutoAckWaitingForAck(railHandle));
   }
+  if (events & RAIL_EVENT_RX_PACKET_RECEIVED) {
+    (void) sl_rail_util_ieee802154_on_event(SL_RAIL_UTIL_IEEE802154_STACK_EVENT_RX_ENDED,
+                                            (uint32_t) isReceivingFrame(railHandle));
+  }
+  if (events & RAIL_EVENT_RX_ACK_TIMEOUT) {
+    (void) sl_rail_util_ieee802154_on_event(SL_RAIL_UTIL_IEEE802154_STACK_EVENT_TX_ACK_TIMEDOUT, 0);
+  }
   if ((events & RAIL_EVENT_TX_PACKET_SENT) != RAIL_EVENTS_NONE) {
-    (void) sl_rail_util_ieee802154_on_event((RAIL_IsAutoAckWaitingForAck(railHandle)
+    ack_waiting = RAIL_IsAutoAckWaitingForAck(railHandle);
+    (void) sl_rail_util_ieee802154_on_event((ack_waiting
                                              ? SL_RAIL_UTIL_IEEE802154_STACK_EVENT_TX_ACK_WAITING
                                              : SL_RAIL_UTIL_IEEE802154_STACK_EVENT_TX_ENDED), 0U);
+  }
+  if (events & RAIL_EVENT_RX_PACKET_RECEIVED) {
+    (void) sl_rail_util_ieee802154_on_event(SL_RAIL_UTIL_IEEE802154_STACK_EVENT_RX_ENDED,
+                                            (uint32_t) isReceivingFrame(railHandle));
+    if (ack_waiting) {
+      ack_waiting = false;
+      (void) sl_rail_util_ieee802154_on_event(SL_RAIL_UTIL_IEEE802154_STACK_EVENT_TX_ACK_RECEIVED, 0U);
+    }
   }
   if (events & RAIL_EVENT_TX_START_CCA) {
     // We are starting RXWARM for a CCA check
@@ -86,6 +104,10 @@ void sl_rail_util_ieee801254_on_rail_event(RAIL_Handle_t railHandle, RAIL_Events
                 | RAIL_EVENT_RX_FIFO_OVERFLOW)) {
     (void) sl_rail_util_ieee802154_on_event(SL_RAIL_UTIL_IEEE802154_STACK_EVENT_RX_FILTERED,
                                             (uint32_t) isReceivingFrame(railHandle));
+  }
+  if (events & RAIL_EVENT_RX_ACK_TIMEOUT) {
+    ack_waiting = false;
+    (void) sl_rail_util_ieee802154_on_event(SL_RAIL_UTIL_IEEE802154_STACK_EVENT_TX_ACK_TIMEDOUT, 0);
   }
   if (events & RAIL_EVENT_TXACK_PACKET_SENT) {
     (void) sl_rail_util_ieee802154_on_event(SL_RAIL_UTIL_IEEE802154_STACK_EVENT_RX_ACK_SENT,

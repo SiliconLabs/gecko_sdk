@@ -16,6 +16,16 @@
  *
  ******************************************************************************/
 
+#ifdef UC_BUILD
+#ifdef SL_COMPONENT_CATALOG_PRESENT
+#include "sl_component_catalog.h"
+#endif // SL_COMPONENT_CATALOG_PRESENT
+#else // !UC_BUILD
+#ifdef EMBER_AF_PLUGIN_TEST_HARNESS
+#define SL_CATALOG_ZIGBEE_TEST_HARNESS_PRESENT
+#endif // EMBER_AF_PLUGIN_TEST_HARNESS
+#endif // UC_BUILD
+
 #include "app/framework/include/af.h"
 #include "app/framework/util/af-main.h"                     //emberAfIsFullSmartEnergySecurityPresent
 #include "app/util/zigbee-framework/zigbee-device-common.h" //emberBindRequest
@@ -26,7 +36,9 @@
 #endif //EZSP_HOST
 
 #include "smart-energy-registration.h"
+#ifdef SL_CATALOG_ZIGBEE_TEST_HARNESS_PRESENT
 #include "app/framework/plugin/test-harness/test-harness.h"
+#endif // SL_CATALOG_ZIGBEE_TEST_HARNESS_PRESENT
 
 #include "app/framework/plugin/esi-management/esi-management.h"
 
@@ -249,9 +261,11 @@ EmberStatus emberAfRegistrationStartCallback(void)
     return EMBER_INVALID_CALL;
   }
 
+#ifdef SL_CATALOG_ZIGBEE_TEST_HARNESS_PRESENT
   if (!emAfTestHarnessAllowRegistration) {
     return EMBER_SECURITY_CONFIGURATION_INVALID;
   }
+#endif // SL_CATALOG_ZIGBEE_TEST_HARNESS_PRESENT
 
   // Registration is unnecessary for the trust center.  For other nodes, wait
   // for the network broadcast traffic to die down and neighbor information to

@@ -1,5 +1,5 @@
 id: bootloader_core_secure
-label: Bootloader Core
+label: Bootloader Core (Secure)
 package: bootloader
 description: Secure Core library for Gecko bootloader.
 category: Platform|Bootloader|TrustZone Secure|Core
@@ -28,14 +28,23 @@ define:
     value: 1
   - name: BOOTLOADER_SECOND_STAGE
     value: 1
-  - name: NS_FLASH_OFFSET
-    value: 0x5000
-  - name: NS_RAM_OFFSET
-    value: 0x6000
   - name: SL_STACK_SIZE
     value: 2048
   - name: SL_HEAP_SIZE
     value: 0
+
+  # Non-Secure Memory layout
+  - name: NS_FLASH_OFFSET
+    value: 0x5000
+
+  - name: NS_RAM_OFFSET
+    value: 0x2000
+    condition:
+      - bootloader_apploader
+  - name: NS_RAM_OFFSET
+    value: 0x6000
+    unless:
+      - bootloader_apploader
 
 include:
   - path: platform/bootloader
@@ -61,7 +70,10 @@ provides:
   - name: bootloader_secure_incompatible
 
 requires:
+  - name: device_init
+    condition: [bootloader_apploader]
   - name: emlib
+  - name: tz_service_syscfg
   - name: bootloader_tz_secure
   - name: bootloader_tz_utils
 
@@ -84,9 +96,24 @@ config_file:
     file_id: btl_core_config
     condition:
       - device_sdid_205
+    unless:
+      - bootloader_apploader
+  - path: platform/bootloader/config/s2/device_sdid_205/apploader/btl_core_s_cfg.h
+    file_id: btl_core_config
+    condition:
+      - device_sdid_205
+      - bootloader_apploader
+
   # Series-2
   - path: platform/bootloader/config/s2/device_series_2/btl_core_s_cfg.h
     file_id: btl_core_config
+    unless:
+      - device_sdid_205
+      - bootloader_apploader
+  - path: platform/bootloader/config/s2/device_series_2/apploader/btl_core_s_cfg.h
+    file_id: btl_core_config
+    condition:
+      - bootloader_apploader
     unless:
       - device_sdid_205
 
@@ -99,6 +126,12 @@ template_contribution:
     value: 0x20000000
   - name: memory_ram_size
     value: 0x6000
+    unless:
+      - bootloader_apploader
+  - name: memory_ram_size
+    value: 0x2000
+    condition:
+      - bootloader_apploader
 
   - name: bootloader_flash_addr
     value: 0x0
@@ -120,12 +153,15 @@ template_contribution:
     value: 0x8000000
     condition:
       - device_sdid_220 # xG25
-  - name: bootloader_main_size
-    value: 0x5000
   - name: bootloader_flash_addr
     value: 0x08000000
     condition:
       - device_sdid_230 # XG27
+
+  # Bootloader size
+  - name: bootloader_main_size
+    value: 0x5000
+
 toolchain_settings:
   - option: gcc_compiler_option
     value: -std=gnu99

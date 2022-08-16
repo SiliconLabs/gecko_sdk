@@ -31,6 +31,7 @@
 #include "sli_cli_io.h"
 #include "sl_cli_input.h"
 #include "sl_cli_threaded_host.h"
+#include <unistd.h> // for pipe()
 
 #if defined(EZSP_HOST) && !defined(EMBER_TEST)
 
@@ -40,6 +41,11 @@ static volatile sl_cli_handle_t threaded_tick_cli_handle = 0;
 pthread_t thread_rx;
 
 static volatile bool tick_handle_input = false;
+
+#define INVALID_FD -1
+static int sl_cli_threaded_host_pipe_fds[2] = { INVALID_FD, INVALID_FD };
+#define PIPE_DATA_READER sl_cli_threaded_host_pipe_fds[0]
+#define PIPE_DATA_WRITER sl_cli_threaded_host_pipe_fds[1]
 
 static inline void sema_init(struct semaphore *s, uint32_t value)
 {
@@ -70,11 +76,22 @@ static inline void sema_post(struct semaphore *s)
 #endif // __APPLE__
 }
 
+bool sli_cli_is_input_handled(void)
+{
+  return tick_handle_input;
+}
+
+int sli_cli_get_pipe_read_fd(void)
+{
+  return PIPE_DATA_READER;
+}
+
 void *threaded_tick(void *ptr)
 {
   int c;
   bool newline = false;
   tick_handle_input = false;
+  char newLineChars[] = "\r\n"; // used by PIPE_DATA_WRITER to wake up the host app
 
   (void) ptr;
 
@@ -119,6 +136,8 @@ void *threaded_tick(void *ptr)
       } while ((c != EOF) && (!newline));
 
       if (newline) {
+        // Write a new line to the pipe to wake up the host app
+        write(PIPE_DATA_WRITER, &newLineChars, 2);
 #ifdef PRINT_SEMA_POST_ACTIVITY
         fprintf(stderr, "[sema_post]");
 #endif // PRINT_SEMA_POST_ACTIVITY
@@ -156,6 +175,15 @@ void sli_cli_threaded_host_init(void)
   iret = pthread_create(&thread_rx, NULL, threaded_tick, NULL);
   if (iret) {
     fprintf(stderr, "pthread_create:%d\n", iret);
+    assert(0);
+  }
+
+  // CLI is processed in a thread running threaded_tick while the host app
+  // can be blocked at the select() running in the main thread. Hence, create
+  // pipe descriptors here that can be used to wake up the host app.
+  iret = pipe(sl_cli_threaded_host_pipe_fds);
+  if (iret) {
+    fprintf(stderr, "pipe:%d\n", iret);
     assert(0);
   }
 

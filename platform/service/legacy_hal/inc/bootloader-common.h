@@ -26,7 +26,12 @@
 /** @brief Define the bootloader status type.
  */
 typedef uint8_t BL_Status;
+#ifndef __EMBERSTATUS_TYPE__
+#define __EMBERSTATUS_TYPE__
+#ifndef DOXYGEN_SHOULD_SKIP_THIS
 typedef uint8_t EmberStatus;
+#endif
+#endif // __EMBERSTATUS_TYPE__
 
 #define EBL_MIN_TAG_SIZE                  128U
 #define IMAGE_STAMP_SIZE                  8U

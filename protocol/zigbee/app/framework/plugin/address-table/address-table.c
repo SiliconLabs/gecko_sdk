@@ -148,7 +148,6 @@ uint8_t emberAfAddAddressTableEntry(EmberEUI64 longId, EmberNodeId shortId)
       }
     } else if (index == EMBER_NULL_ADDRESS_TABLE_INDEX) {
       index = i;
-      break;
     } else {
       // MISRA requires ..else if.. to have terminating else.
     }

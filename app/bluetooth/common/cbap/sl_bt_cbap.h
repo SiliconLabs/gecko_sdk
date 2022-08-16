@@ -71,7 +71,7 @@ void sl_bt_cbap_init(void);
  * Start CBAP procedure.
  * @param[in] cbap_role Device role. Should be either SL_BT_CBAP_ROLE_PERIPHERAL or
  * SL_BT_CBAP_ROLE_CENTRAL.
- * @param[in] connection Connection handle.
+ * @param[in] connection Handle of the active connection.
  *
  * @param SL_STATUS_OK if successful otherwise error code.
  *****************************************************************************/
@@ -99,9 +99,15 @@ void sl_bt_cbap_peripheral_on_event(sl_bt_cbap_peripheral_state_t status);
 void sl_bt_cbap_central_on_event(sl_bt_cbap_central_state_t status);
 
 /**************************************************************************//**
+ * Callback to handle CBAP process errors.
+ * @note To be implemented in user code.
+ *****************************************************************************/
+void sl_bt_on_cbap_error(void);
+
+/**************************************************************************//**
  * Search for a the CBAP Service UUID in scan report.
  *
- * @param[in] scan_data Data received in evt_scanner_scan_report
+ * @param[in] scan_data Data received in scanner advertisement report event
  * @param[in] scan_data_len Length of the scan data
  * @return true if the CBAP service is found
  *****************************************************************************/

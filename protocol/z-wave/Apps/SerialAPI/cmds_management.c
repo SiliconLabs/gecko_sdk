@@ -13,6 +13,7 @@
 #include <ZAF_types.h>
 #include <string.h>
 #include <zpal_misc.h>
+#include "zw_config_rf.h"
 
 //#define DEBUGPRINT
 #include <DebugPrint.h>
@@ -33,6 +34,17 @@
 #define BYTE_OFFSET(x) (1 << ((x) % 8))
 /** Add the SERIAL_API_SETUP command to the bitmask array */
 #define BITMASK_ADD_CMD(bitmask, cmd) (bitmask[BYTE_INDEX(cmd)] |= BYTE_OFFSET(cmd))
+
+#ifndef MAX
+/** Return the larger of two values.
+ *
+ * \param x         An integer-valued expression without side effects.
+ * \param y         An integer-valued expression without side effects.
+ *
+ * \return The larger of \p x and \p y.
+ */
+#define MAX( x, y ) ( ( x ) > ( y ) ? ( x ) : ( y ) )
+#endif // MAX
 
 void func_id_serial_api_get_init_data(uint8_t inputLength,
                                       const uint8_t *pInputBuffer,
@@ -126,7 +138,7 @@ void func_id_serial_api_setup(uint8_t inputLength,
   uint8_t i=0;
   uint8_t cmdRes;
   zpal_radio_region_t rfRegion;
-  int8_t iPowerLevel, iPower0dbmMeasured;
+  zpal_tx_power_t iPowerLevel, iPower0dbmMeasured;
 
   /* We assume operation is nonesuccessful */
   cmdRes = false;
@@ -163,17 +175,20 @@ void func_id_serial_api_setup(uint8_t inputLength,
     memset(supportedBitmask, 0, sizeof(supportedBitmask));
     /* For each command in eSerialAPISetupCmd, find a byte number in supportedBitmask where it should be,
      * and position (offset) in it and then add it to the array. */
-    BITMASK_ADD_CMD(supportedBitmask, SERIAL_API_SETUP_CMD_SUPPORTED);
-    BITMASK_ADD_CMD(supportedBitmask, SERIAL_API_SETUP_CMD_TX_STATUS_REPORT);
-    BITMASK_ADD_CMD(supportedBitmask, SERIAL_API_SETUP_CMD_TX_POWERLEVEL_SET);
-    BITMASK_ADD_CMD(supportedBitmask, SERIAL_API_SETUP_CMD_TX_POWERLEVEL_GET);
-    BITMASK_ADD_CMD(supportedBitmask, SERIAL_API_SETUP_CMD_TX_GET_MAX_PAYLOAD_SIZE);
-    BITMASK_ADD_CMD(supportedBitmask, SERIAL_API_SETUP_CMD_TX_GET_MAX_LR_PAYLOAD_SIZE);
-    BITMASK_ADD_CMD(supportedBitmask, SERIAL_API_SETUP_CMD_RF_REGION_GET);
-    BITMASK_ADD_CMD(supportedBitmask, SERIAL_API_SETUP_CMD_RF_REGION_SET);
-    BITMASK_ADD_CMD(supportedBitmask, SERIAL_API_SETUP_CMD_NODEID_BASETYPE_SET);
-    BITMASK_ADD_CMD(supportedBitmask, SERIAL_API_SETUP_CMD_MAX_LR_TX_PWR_SET);
-    BITMASK_ADD_CMD(supportedBitmask, SERIAL_API_SETUP_CMD_MAX_LR_TX_PWR_GET);
+    BITMASK_ADD_CMD(supportedBitmask, SERIAL_API_SETUP_CMD_SUPPORTED);                    // (1)
+    BITMASK_ADD_CMD(supportedBitmask, SERIAL_API_SETUP_CMD_TX_STATUS_REPORT);             // (2)
+    BITMASK_ADD_CMD(supportedBitmask, SERIAL_API_SETUP_CMD_TX_POWERLEVEL_SET);            // (4)
+    BITMASK_ADD_CMD(supportedBitmask, SERIAL_API_SETUP_CMD_TX_POWERLEVEL_GET);            // (8)
+    BITMASK_ADD_CMD(supportedBitmask, SERIAL_API_SETUP_CMD_TX_GET_MAX_PAYLOAD_SIZE);      // (16)
+    BITMASK_ADD_CMD(supportedBitmask, SERIAL_API_SETUP_CMD_RF_REGION_GET);                // (32)
+    BITMASK_ADD_CMD(supportedBitmask, SERIAL_API_SETUP_CMD_RF_REGION_SET);                // (64)
+    BITMASK_ADD_CMD(supportedBitmask, SERIAL_API_SETUP_CMD_NODEID_BASETYPE_SET);          // (128)
+
+    BITMASK_ADD_CMD(supportedBitmask, SERIAL_API_SETUP_CMD_MAX_LR_TX_PWR_SET);            // (3)
+    BITMASK_ADD_CMD(supportedBitmask, SERIAL_API_SETUP_CMD_MAX_LR_TX_PWR_GET);            // (5)
+    BITMASK_ADD_CMD(supportedBitmask, SERIAL_API_SETUP_CMD_TX_GET_MAX_LR_PAYLOAD_SIZE);   // (17)
+    BITMASK_ADD_CMD(supportedBitmask, SERIAL_API_SETUP_CMD_TX_POWERLEVEL_SET_16_BIT);     // (18)
+    BITMASK_ADD_CMD(supportedBitmask, SERIAL_API_SETUP_CMD_TX_POWERLEVEL_GET_16_BIT);     // (19)
     
     /* Currently supported command with the highest value is SERIAL_API_SETUP_CMD_NODEID_BASETYPE_SET.
      No commands after it. */
@@ -227,22 +242,25 @@ void func_id_serial_api_setup(uint8_t inputLength,
 
   case SERIAL_API_SETUP_CMD_TX_POWERLEVEL_SET:
   {
-    int8_t iTxPower, iAdjust;
+    zpal_tx_power_t iTxPower, iAdjust;
     /**
      *  HOST->ZW: SERIAL_API_SETUP_CMD_TX_POWER_SET | NormalTxPowerLevel | Measured0dBmPower
-     *  ZW->HOST: SERIAL_API_SETUP_CMD_TX_POWER_SET | retVal
+     *  ZW->HOST: SERIAL_API_SETUP_CMD_TX_POWER_SET | cmdRes
      */
     if (SERIAL_API_SETUP_CMD_TX_POWERLEVEL_SET_CMD_LENGTH_MIN <= inputLength)
     {
       iTxPower = (int8_t)pInputBuffer[1];
-      iAdjust =  (int8_t)pInputBuffer[2];
-      /* Only allow power level between -10dBm and 10dBm (API is in deci dBm) */
-      if ((iTxPower > -100 ) && (iTxPower < 100 ) && (iAdjust > -100 ) && (iAdjust < 100 ))
-      {
-        cmdRes = SaveApplicationTxPowerlevel(iTxPower, iAdjust);
-      }
+      iAdjust  = (int8_t)pInputBuffer[2];
+      /**
+       * The min and max boundaries of int8_t are valid boundaries of the parameters that are being stored.
+       * However, this command does not support a higher value than 127 deci dBm or lower than -127 deci dBm
+       * for the parameters as a limitation of this SerialAPI command.
+       *
+       * Please use SERIAL_API_SETUP_CMD_TX_POWERLEVEL_SET_16_BIT which support our entire tx power range.
+       */
+      cmdRes = SaveApplicationTxPowerlevel(iTxPower, iAdjust);
     }
-    BYTE_IN_AR(pOutputBuffer, i++) = cmdRes;
+    BYTE_IN_AR(pOutputBuffer, i++) = cmdRes;  // true if success
     break;
   }
 
@@ -252,8 +270,66 @@ void func_id_serial_api_setup(uint8_t inputLength,
      *  ZW->HOST: SERIAL_API_SETUP_CMD_TX_POWER_GET | NormalTxPowerLevel | Measured0dBmPower
      */
     ReadApplicationTxPowerlevel(&iPowerLevel, &iPower0dbmMeasured);
+
+    /**
+     * This SerialAPI command has the following limitation that it cannot retrieve stored tx power values that are
+     * larger than 127 deci dBm or lower than -127 deci dBm.
+     */
+
+    // Clamp values to fit into the return parameter type of int8_t.
+    if (iPowerLevel > INT8_MAX) {
+      iPowerLevel = INT8_MAX;
+    } else if (iPowerLevel < INT8_MIN) {
+      iPowerLevel = INT8_MIN;
+    }
+
+    if (iPower0dbmMeasured > INT8_MAX) {
+      iPower0dbmMeasured = INT8_MAX;
+    } else if (iPower0dbmMeasured < INT8_MIN) {
+      iPower0dbmMeasured = INT8_MIN;
+    }
+
     BYTE_IN_AR(pOutputBuffer, i++) = (uint8_t)iPowerLevel;
     BYTE_IN_AR(pOutputBuffer, i++) = (uint8_t)iPower0dbmMeasured;
+    break;
+
+  case SERIAL_API_SETUP_CMD_TX_POWERLEVEL_SET_16_BIT:
+  {
+    zpal_tx_power_t iTxPower, iAdjust;
+    /**
+     *  HOST->ZW: SERIAL_API_SETUP_CMD_TX_POWER_SET | NormalTxPowerLevel (MSB) |NormalTxPowerLevel (LSB) | Measured0dBmPower (MSB)| Measured0dBmPower (LSB)
+     *  ZW->HOST: SERIAL_API_SETUP_CMD_TX_POWER_SET | cmdRes
+     */
+    if (SERIAL_API_SETUP_CMD_TX_POWERLEVEL_SET_CMD_LENGTH_MIN <= inputLength)
+    {
+      iTxPower = (zpal_tx_power_t)GET_16BIT_VALUE(&pInputBuffer[1]);
+      iAdjust  = (zpal_tx_power_t)GET_16BIT_VALUE(&pInputBuffer[3]);
+
+      /* Only allow power level between -10dBm and 10dBm (API is in deci dBm) */
+      if ((   iTxPower >= (zpal_radio_get_minimum_lr_tx_power() * 10) )
+          && (iTxPower <=  MAX(APP_MAX_TX_POWER, zpal_radio_get_maximum_lr_tx_power()) )
+          && (iAdjust  >=  -ZW_TX_POWER_20DBM)
+          && (iAdjust  <=  ZW_TX_POWER_20DBM )  /* We might not need these checks as these are made for calibration and
+                                                 * we can't tell in advance how large or small the value needs to be. */
+          )
+      {
+        cmdRes = SaveApplicationTxPowerlevel(iTxPower, iAdjust);
+      }
+    }
+    BYTE_IN_AR(pOutputBuffer, i++) = cmdRes;  // true if success
+    break;
+  }
+
+  case SERIAL_API_SETUP_CMD_TX_POWERLEVEL_GET_16_BIT:
+    /**
+     *  HOST->ZW: SERIAL_API_SETUP_CMD_TX_POWER_GET_2
+     *  ZW->HOST: SERIAL_API_SETUP_CMD_TX_POWER_GET_2 | NormalTxPowerLevel (16bit) | Measured0dBmPower (16bit)
+     */
+    ReadApplicationTxPowerlevel(&iPowerLevel, &iPower0dbmMeasured);
+    BYTE_IN_AR(pOutputBuffer, i++) = (uint8_t)((iPowerLevel >> 8) & 0xFF);  // Big-endian
+    BYTE_IN_AR(pOutputBuffer, i++) = (uint8_t)(iPowerLevel & 0xFF);
+    BYTE_IN_AR(pOutputBuffer, i++) = (uint8_t)((iPower0dbmMeasured >> 8) & 0xFF);
+    BYTE_IN_AR(pOutputBuffer, i++) = (uint8_t)(iPower0dbmMeasured & 0xFF);
     break;
 
   case SERIAL_API_SETUP_CMD_TX_GET_MAX_PAYLOAD_SIZE:
@@ -282,12 +358,12 @@ void func_id_serial_api_setup(uint8_t inputLength,
   case SERIAL_API_SETUP_CMD_MAX_LR_TX_PWR_SET:
     /**
      *  HOST->ZW: SERIAL_API_SETUP_CMD_MAX_LR_TX_PWR_SET | maxtxpower (16-bit)
-     *  ZW->HOST: SERIAL_API_SETUP_CMD_MAX_LR_TX_PWR_SET | retVal
+     *  ZW->HOST: SERIAL_API_SETUP_CMD_MAX_LR_TX_PWR_SET | cmdRes
      */
     if (SERIAL_API_SETUP_CMD_MAX_LR_TX_PWR_SET_CMD_LENGTH_MIN <= inputLength)
     {
-      uint16_t val = (uint16_t)(((uint16_t)pInputBuffer[1] << 8) | (uint16_t)pInputBuffer[2]);
-      cmdRes = SaveApplicationMaxLRTxPwr((int16_t)val);
+      zpal_tx_power_t val = (zpal_tx_power_t)GET_16BIT_VALUE(&pInputBuffer[1]);
+      cmdRes = SaveApplicationMaxLRTxPwr(val);
     }
     BYTE_IN_AR(pOutputBuffer, i++) = cmdRes;
     break;

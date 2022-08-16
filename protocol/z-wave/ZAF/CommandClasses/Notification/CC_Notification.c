@@ -141,7 +141,7 @@ CC_Notification_handler(
              a pending notification from its internal list (Pull mode). We also do it for Push mode.*/
 
           notification_type_t notificationType = (notification_type_t)pTxBuf->ZW_NotificationReport1byteV4Frame.notificationType;
-          uint8_t grp = GetGroupNotificationType(&notificationType,tempEndpoint);
+          uint8_t grp = GetGroupIndex(&notificationType,tempEndpoint);
 
           pTxBuf->ZW_NotificationReport1byteV4Frame.notificationType = (uint8_t)notificationType;
           if(0xff == grp)

@@ -22,7 +22,7 @@ requires:
   - name: "bluetooth_controller"
   - name: "bluetooth_feature_scanner"
 provides:
-  - name: "bluetooth_feature_legcy_scanner"
+  - name: "bluetooth_feature_legacy_scanner"
   - name: "bluetooth_feature_central_connection"
     allow_multiple: true
   - name: "bluetooth_feature_connection_creation"

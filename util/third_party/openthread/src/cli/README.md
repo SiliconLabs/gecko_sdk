@@ -62,7 +62,6 @@ Done
 - [leaderdata](#leaderdata)
 - [leaderweight](#leaderweight)
 - [linkmetrics](#linkmetrics-mgmt-ipaddr-enhanced-ack-clear)
-- [linkquality](#linkquality-extaddr)
 - [locate](#locate)
 - [log](#log-filename-filename)
 - [mac](#mac-retries-direct)
@@ -392,6 +391,25 @@ Get the local NAT64 prefix of the Border Router.
 ```bash
 > br nat64prefix
 fd14:1078:b3d5:b0b0:0:0::/96
+Done
+```
+
+### br rioprf
+
+Get the preference used when advertising Route Info Options (e.g., for discovered OMR prefixes) in emitted Router Advertisement message.
+
+```bash
+> br rioprf
+med
+Done
+```
+
+### br rioprf \<prf\>
+
+Set the preference (which may be 'high', 'med', or 'low') to use when advertising Route Info Options (e.g., for discovered OMR prefixes) in emitted Router Advertisement message.
+
+```bash
+> br rioprf low
 Done
 ```
 
@@ -1625,25 +1643,6 @@ Done
  - LQI: 76 (Exponential Moving Average)
  - Margin: 82 (dB) (Exponential Moving Average)
  - RSSI: -18 (dBm) (Exponential Moving Average)
-```
-
-### linkquality \<extaddr\>
-
-Get the link quality on the link to a given extended address.
-
-```bash
-> linkquality 36c1dd7a4f5201ff
-3
-Done
-```
-
-### linkquality \<extaddr\> \<linkquality\>
-
-Set the link quality on the link to a given extended address.
-
-```bash
-> linkquality 36c1dd7a4f5201ff 3
-Done
 ```
 
 ### locate

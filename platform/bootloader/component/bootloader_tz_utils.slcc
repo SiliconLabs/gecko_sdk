@@ -3,7 +3,7 @@ label: Bootloader TZ utilities
 package: bootloader
 description: >
   Provides the TZ utilities
-category: Platform|Bootloader|Secure|Utils
+category: Platform|Bootloader|TrustZone Secure|Utils
 quality: production
 source:
   - path: platform/bootloader/core/btl_tz_utils.c

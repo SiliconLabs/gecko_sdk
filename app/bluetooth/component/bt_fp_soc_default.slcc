@@ -14,7 +14,8 @@ requires:
   - name: bluetooth_feature_connection
   - name: bluetooth_feature_gatt
   - name: bluetooth_feature_gatt_server
-  - name: bluetooth_feature_scanner
+  - name: bluetooth_feature_legacy_scanner
+  - name: bluetooth_feature_extended_scanner
   - name: bluetooth_feature_sm
   - name: bluetooth_feature_system
 ui_hints:

@@ -34,6 +34,8 @@
 
 #define ZIGBEE_STACK_TASK_PRIORITY SL_ZIGBEE_OS_STACK_TASK_PRIORITY
 #define ZIGBEE_TASK_YIELD 0x0001U
+#define ZIGBEE_TASK_SEMAPHORE_MAX_COUNT 255
+#define ZIGBEE_TASK_SEMAPHORE_INITIAL_COUNT 0
 
 //Zigbee stack size is specified in "word-increments". Multiply by size of void pointer
 static osThreadId_t zigbee_task_id;
@@ -41,12 +43,12 @@ __ALIGNED(8) static uint8_t zigbee_task_stack[SL_ZIGBEE_OS_STACK_TASK_SIZE * siz
 __ALIGNED(4) static uint8_t zigbee_task_cb[osThreadCbSize];
 static osThreadAttr_t zigbee_task_attr;
 
-static osEventFlagsId_t zigbee_task_event_flags_id;
-__ALIGNED(4) static uint8_t zigbee_task_event_flags_cb[osEventFlagsCbSize];
-static osEventFlagsAttr_t zigbee_task_event_flags_attr = {
-  .name = "Zigbee event flags",
-  .cb_mem = zigbee_task_event_flags_cb,
-  .cb_size = osEventFlagsCbSize,
+static osSemaphoreId_t zigbee_task_semaphore_id;
+__ALIGNED(4) static uint8_t zigbee_task_semaphore_cb[osSemaphoreCbSize];
+static osSemaphoreAttr_t zigbee_task_semaphore_attr = {
+  .name = "Zigbee task semphore",
+  .cb_mem = zigbee_task_semaphore_cb,
+  .cb_size = osSemaphoreCbSize,
   .attr_bits = 0
 };
 
@@ -63,8 +65,8 @@ static void zigbee_stack_task_yield(void);
 
 void sl_zigbee_common_rtos_wakeup_stack_task(void)
 {
-  uint32_t flags = osEventFlagsSet(zigbee_task_event_flags_id, ZIGBEE_TASK_YIELD);
-  assert((flags & osFlagsError) == 0);
+  osStatus_t retVal = osSemaphoreRelease(zigbee_task_semaphore_id);
+  assert(retVal != osErrorParameter);
 }
 
 void sli_zigbee_common_rtos_init_callback(void)
@@ -84,8 +86,10 @@ void sli_zigbee_common_rtos_init_callback(void)
                                &zigbee_task_attr);
   assert(zigbee_task_id != NULL);
 
-  zigbee_task_event_flags_id = osEventFlagsNew(&zigbee_task_event_flags_attr);
-  assert(zigbee_task_event_flags_id != NULL);
+  zigbee_task_semaphore_id =   osSemaphoreNew(ZIGBEE_TASK_SEMAPHORE_MAX_COUNT,
+                                              ZIGBEE_TASK_SEMAPHORE_INITIAL_COUNT,
+                                              &zigbee_task_semaphore_attr);
+  assert(zigbee_task_semaphore_id != NULL);
 }
 
 void sli_zigbee_common_rtos_wakeup_isr_callback(void)
@@ -142,11 +146,7 @@ static void zigbee_stack_task_yield(void)
   }
 
   if (yield_time_ticks > 0) {
-    uint32_t flags = osEventFlagsWait(zigbee_task_event_flags_id,
-                                      ZIGBEE_TASK_YIELD,
-                                      osFlagsWaitAny,
-                                      yield_time_ticks);
-
-    assert((flags != osFlagsErrorUnknown) && (flags != osFlagsErrorParameter) && (flags != osFlagsErrorResource));
+    osStatus_t retVal = osSemaphoreAcquire(zigbee_task_semaphore_id, yield_time_ms);
+    assert((retVal != osErrorParameter) && (retVal != osErrorResource));
   }
 }

@@ -28,7 +28,6 @@ component:
   - id: zw_cc_powerlevel
   - id: zw_cc_zwaveplusinfo
   - id: zw_cc_battery
-  - id: zw_cc_notification
   - id: zw_cc_wakeup
   - id: zw_cc_configuration
   - id: zw_cc_multilevelsensor

@@ -1,5 +1,5 @@
 id: bootloader_crc_nonsecure
-label: Cyclic Redundancy Check
+label: Cyclic Redundancy Check (Non-Secure)
 package: bootloader
 description: >
   Software implementations of 16- and 32-bit CRC

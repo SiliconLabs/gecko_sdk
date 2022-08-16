@@ -53,7 +53,7 @@ component:
       - btn1
   - id: simple_rgb_pwm_led
     instance:
-      - led_rgb
+      - rgb_led0
   - id: simple_timer
 
 source:
@@ -77,11 +77,6 @@ config_file:
       file_id: gatt_configuration_file_id
     path: gatt_configuration.btconf
     directory: btconf
-  - override:
-      component: simple_rgb_pwm_led
-      file_id: simple_rgb_pwm_led_config
-      instance: led_rgb
-    path: sl_simple_rgb_pwm_led_led_rgb_brd2601_config.h
   - override:
       component: btmesh_dcd_configuration
       file_id: dcd_configuration_file_id
@@ -147,7 +142,7 @@ configuration:
     condition:
       - psa_crypto
   - name: SL_STACK_SIZE
-    value: "0x1300"
+    value: "0x1500"
 
 define:
   - name: SL_BTMESH_HSL_RGB_BRD2601

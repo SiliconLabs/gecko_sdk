@@ -25,6 +25,8 @@
 #include "SizeOf.h"
 
 #include <hal-config.h>
+#include <system_startup.h>
+
 /****************************************************************************/
 /*                      PRIVATE TYPES and DEFINITIONS                       */
 /****************************************************************************/
@@ -1256,14 +1258,6 @@ void Board_GPIO_PinOutSet(GPIO_Port_TypeDef port, unsigned int pin)
   GPIO_PinOutSet(port, pin);
 }
 
-void on_pre_unlatch_pin_retention(void)
-{
-  CMU_ClockEnable(cmuClock_GPIO, true);
-
-  g_gpioEm4Flags = GPIO_IntGet() & _GPIO_IF_EM4WU_MASK;
-  GPIO_IntClear(g_gpioEm4Flags);
-}
-
 /* ------------------------------ BOARD INIT ------------------------------ */
 
 uint32_t Board_Initialize()
@@ -1271,29 +1265,12 @@ uint32_t Board_Initialize()
   CMU_ClockEnable(cmuClock_GPIO, true);
   m_button_timer_value = 0;
 
-#if !defined(BUILDING_WITH_UC)
-  /* Unlatch EM4 GPIO pin states after wakeup (OK to call even if not EM4 wakeup) */
-  EMU_UnlatchPinRetention();
-
-  /* Save the EM4 GPIO wakeup flags */
-  g_gpioEm4Flags = GPIO_IntGet() & _GPIO_IF_EM4WU_MASK;
-  GPIO_IntClear(g_gpioEm4Flags);
-#endif /* !defined(BUILDING_WITH_UC) */
+  g_gpioEm4Flags = getWakeUpFlags();
 
   for (uint32_t led = 0; led < BOARD_LED_COUNT; led++)
   {
     Board_ConfigLed(led, true);
   }
-
-#if !defined(BUILDING_WITH_UC)
-// UART init is handled by iostream_recommended_stream automatically
-#if defined(HAL_VCOM_ENABLE) && defined(BSP_VCOM_ENABLE_PORT)
-  GPIO_PinModeSet(BSP_VCOM_ENABLE_PORT, //VCOM_ENABLE_PORT,
-                  BSP_VCOM_ENABLE_PIN, //VCOM_ENABLE_PIN,
-                  gpioModePushPull,
-                  1);
-#endif
-#endif // BUILDING_WITH_UC
 
   Assert_SetCb(&Board_DefaultHandler);
 

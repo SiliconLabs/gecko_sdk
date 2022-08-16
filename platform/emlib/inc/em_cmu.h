@@ -1278,9 +1278,11 @@ void                       CMU_HFRCODPLLBandSet(CMU_HFRCODPLLFreq_TypeDef freq);
 bool                       CMU_DPLLLock(const CMU_DPLLInit_TypeDef *init);
 #if defined(USBPLL_PRESENT)
 void                       CMU_USBPLLInit(const CMU_PLL_Init_TypeDef *pllInit);
+__STATIC_INLINE void       CMU_WaitUSBPLLLock(void);
 #endif
 #if defined(RFFPLL_PRESENT)
 void                       CMU_RFFPLLInit(const CMU_RFFPLL_Init_TypeDef *pllInit);
+__STATIC_INLINE void       CMU_WaitRFFPLLLock(void);
 #endif
 void                       CMU_HFXOInit(const CMU_HFXOInit_TypeDef *hfxoInit);
 #if defined(HFXO0_BUFOUT)
@@ -1379,7 +1381,7 @@ __STATIC_INLINE void CMU_DPLLUnlock(void)
 {
   DPLL0->EN_CLR = DPLL_EN_EN;
 #if defined(DPLL_EN_DISABLING)
-  while (DPLL0->EN & DPLL_EN_DISABLING) {
+  while ((DPLL0->EN & DPLL_EN_DISABLING) != 0U) {
   }
 #endif
 }
@@ -1560,7 +1562,9 @@ __STATIC_INLINE void CMU_WdogUnlock(void)
 __STATIC_INLINE void CMU_WaitUSBPLLLock()
 {
   while ((USBPLL0->STATUS & (PLL_STATUS_PLLRDY | PLL_STATUS_PLLLOCK))
-         != (PLL_STATUS_PLLRDY | PLL_STATUS_PLLLOCK)) ;
+         != (PLL_STATUS_PLLRDY | PLL_STATUS_PLLLOCK)) {
+    /* Wait for USB PLL lock and ready */
+  }
 }
 #endif
 
@@ -1572,7 +1576,9 @@ __STATIC_INLINE void CMU_WaitUSBPLLLock()
 __STATIC_INLINE void CMU_WaitRFFPLLLock()
 {
   while ((RFFPLL0->STATUS & (RFFPLL_STATUS_RFFPLLRADIORDY | RFFPLL_STATUS_RFFPLLSYSRDY))
-         != (RFFPLL_STATUS_RFFPLLRADIORDY | RFFPLL_STATUS_RFFPLLSYSRDY)) ;
+         != (RFFPLL_STATUS_RFFPLLRADIORDY | RFFPLL_STATUS_RFFPLLSYSRDY)) {
+    /* Wait for RFF PLL lock and ready. */
+  }
 }
 #endif
 
@@ -3348,14 +3354,15 @@ __STATIC_INLINE void CMU_CalibrateStop(void)
 
 /***************************************************************************//**
  * @brief
- *   Convert dividend to logarithmic value. It only works for even
+ *   Convert divider to logarithmic value. It only works for even
  *   numbers equal to 2^n.
  *
  * @param[in] div
- *   An unscaled dividend.
+ *   An unscaled divider.
  *
  * @return
- *   Logarithm of 2, as used by fixed prescalers.
+ *   Logarithm base 2 (binary) value, i.e. exponent as used by fixed
+ *   2^n prescalers.
  ******************************************************************************/
 __STATIC_INLINE uint32_t CMU_DivToLog2(CMU_ClkDiv_TypeDef div)
 {
@@ -3585,14 +3592,17 @@ __STATIC_INLINE SL_DEPRECATED_API_SDK_4_1 void CMU_AUXHFRCOFreqSet(CMU_AUXHFRCOF
 #if !defined(_SILICON_LABS_32B_SERIES_0)
 /***************************************************************************//**
  * @brief
- *   Convert prescaler dividend to a logarithmic value. It only works for even
+ *   Convert prescaler divider to a logarithmic value. It only works for even
  *   numbers equal to 2^n.
  *
  * @param[in] presc
- *   An unscaled dividend (dividend = presc + 1).
+ *   Prescaler value used to set the frequency divider. The divider is equal to
+ *   ('presc' + 1). If a divider value is passed for 'presc', 'presc' will be
+ *   equal to (divider - 1).
  *
  * @return
- *   Logarithm of 2, as used by fixed 2^n prescalers.
+ *   Logarithm base 2 (binary) value, i.e. exponent as used by fixed
+ *   2^n prescalers.
  ******************************************************************************/
 __STATIC_INLINE uint32_t CMU_PrescToLog2(uint32_t presc)
 {
@@ -3601,7 +3611,8 @@ __STATIC_INLINE uint32_t CMU_PrescToLog2(uint32_t presc)
   /* Integer prescalers take argument less than 32768. */
   EFM_ASSERT(presc < 32768U);
 
-  /* Count leading zeroes and "reverse" result. */
+  /* Count leading zeroes and "reverse" result. Consider divider value to get
+   * exponent n from 2^n, so ('presc' +1). */
   log2 = 31UL - __CLZ(presc + (uint32_t) 1);
 
   /* Check that prescaler is a 2^n number. */

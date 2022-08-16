@@ -135,7 +135,7 @@ void sl_bt_on_event(sl_bt_msg_t* evt)
 
       // Generate data for advertising
       sc = sl_bt_legacy_advertiser_generate_data(advertising_set_handle,
-                                                 advertiser_general_discoverable);
+                                                 sl_bt_advertiser_general_discoverable);
       app_log_status_error(sc);
 
       // Default advertisement parameters: 32 (20 ms) interval. Other optional
@@ -149,7 +149,7 @@ void sl_bt_on_event(sl_bt_msg_t* evt)
 
       // Start advertising and enable connections.
       sc = sl_bt_legacy_advertiser_start(advertising_set_handle,
-                                         advertiser_connectable_scannable);
+                                         sl_bt_advertiser_connectable_scannable);
       app_assert_status(sc);
 
       if (sc == SL_STATUS_OK) {
@@ -251,22 +251,22 @@ void sl_bt_on_event(sl_bt_msg_t* evt)
                    (int)supv_timeout);
 
       switch (evt->data.evt_connection_parameters.security_mode) {
-        case connection_mode1_level1: {
+        case sl_bt_connection_mode1_level1: {
           app_log_info("Connection security: No Security." APP_LOG_NL);
           break;
         }
 
-        case connection_mode1_level2: {
+        case sl_bt_connection_mode1_level2: {
           app_log_info("Connection security: Unauthenticated pairing." APP_LOG_NL);
           break;
         }
 
-        case connection_mode1_level3: {
+        case sl_bt_connection_mode1_level3: {
           app_log_info("Connection security: Authenticated pairing." APP_LOG_NL);
           break;
         }
 
-        case connection_mode1_level4: {
+        case sl_bt_connection_mode1_level4: {
           app_log_info("Connection security: Bonded." APP_LOG_NL);
           break;
         }
@@ -372,12 +372,12 @@ void sl_bt_on_event(sl_bt_msg_t* evt)
 
         // Generate data for advertising
         sc = sl_bt_legacy_advertiser_generate_data(advertising_set_handle,
-                                                   advertiser_general_discoverable);
+                                                   sl_bt_advertiser_general_discoverable);
         app_log_status_error(sc);
 
         // Restart advertising.
         sc = sl_bt_legacy_advertiser_start(advertising_set_handle,
-                                           advertiser_connectable_scannable);
+                                           sl_bt_advertiser_connectable_scannable);
         app_log_status_error(sc);
 
         if (sc == SL_STATUS_OK) {

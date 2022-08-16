@@ -16,5 +16,3 @@ include:
     - path: notification.h
 provides:
   - name: zw_cc_notification
-documentation:
-  url: "https://sdomembers.z-wavealliance.org/document/dl/638"

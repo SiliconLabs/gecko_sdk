@@ -43,6 +43,8 @@ bool bootload_commitSeUpgrade(void);
 bool bootload_commitBootloaderUpgrade(uint32_t size);
 // Get the version of the bootloader.
 uint32_t bootload_getBootloaderVersion(void);
+// Get the version of the application.
+bool bootload_getApplicationVersion(uint32_t *version);
 
 /** @endcond */
 

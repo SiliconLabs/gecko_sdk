@@ -22,6 +22,9 @@
 // TODO: this is to bring in emAfPermitJoin() and emberAfGetBindingTableSize()
 // prototypes.
 #include "app/framework/util/af-main.h"
+#ifdef SL_CATALOG_ZIGBEE_TEST_HARNESS_PRESENT
+#include "test-harness-config.h"
+#endif
 
 uint8_t emAfCliNetworkIndex = EMBER_AF_DEFAULT_NETWORK_INDEX;
 extern uint8_t emAfExtendedPanId[];
@@ -88,11 +91,11 @@ void networkLeaveCommand(sl_cli_command_arg_t *arguments)
   sl_zigbee_core_debug_print("%s 0x%02X\n", "leave", status);
 }
 
-// network rejoin <haveCurrentNetworkKey:1>
+// network rejoin <haveCurrentNetworkKey:1> <channelMask:4>
 void networkRejoinCommand(sl_cli_command_arg_t *arguments)
 {
   bool haveCurrentNetworkKey = (bool)sl_cli_get_argument_uint8(arguments, 0);
-  uint32_t channelMask = sl_cli_get_argument_uint32(arguments, 0);
+  uint32_t channelMask = sl_cli_get_argument_uint32(arguments, 1);
   if (channelMask == 0) {
     channelMask = EMBER_ALL_802_15_4_CHANNELS_MASK;
   }
@@ -154,8 +157,9 @@ void networkChangeChannelCommand(sl_cli_command_arg_t *arguments)
                     channel,
                     status);
 }
-
-#ifdef EMBER_AF_TC_SWAP_OUT_TEST
+// This block of code is under UC_BUILD, so the EMBER_AF_TC_SWAP_OUT_TEST
+// is defined to either 1 or 0 as a UC configuration.
+#if (EMBER_AF_TC_SWAP_OUT_TEST == 1)
 void networkInitCommand(sl_cli_command_arg_t *arguments)
 {
   EmberNetworkInitStruct networkInitStruct = {
@@ -425,7 +429,7 @@ void networkJoinCommand(void)
   emberAfAppPrintln("%p 0x%x", "join", status);
 }
 
-// network rejoin <haveCurrentNetworkKey:1>
+// network rejoin <haveCurrentNetworkKey:1> <channelMask:4>
 void networkRejoinCommand(void)
 {
   bool haveCurrentNetworkKey = (bool)emberUnsignedCommandArgument(0);

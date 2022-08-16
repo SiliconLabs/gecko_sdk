@@ -21,7 +21,7 @@ component:
   - id: bluetooth_feature_connection
   - id: bluetooth_feature_gatt
   - id: bluetooth_feature_gatt_server
-  - id: bluetooth_feature_scanner
+  - id: bluetooth_feature_legacy_scanner
   - id: bluetooth_feature_sm
   - id: bluetooth_feature_system
   - id: in_place_ota_dfu
@@ -34,6 +34,7 @@ component:
   - id: simple_led
     instance:
       - led0
+  - id: simple_timer
   - id: cbap
 
 source:
@@ -72,7 +73,7 @@ configuration:
   - name: SL_HEAP_SIZE
     value: "15000"
   - name: SL_PSA_KEY_USER_SLOT_COUNT
-    value: "0"
+    value: "1"
     condition:
       - psa_crypto
   - name: SL_BOARD_ENABLE_VCOM
@@ -81,6 +82,9 @@ configuration:
     value: "1"
   - name: APP_LOG_LEVEL_FILTER_THRESHOLD
     value: APP_LOG_LEVEL_INFO
+
+requires:
+  - name: device_security_vault
 
 tag:
   - hardware:rf:band:2400

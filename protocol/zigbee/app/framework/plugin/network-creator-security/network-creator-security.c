@@ -27,9 +27,6 @@
 #ifdef UC_BUILD
 #include "network-creator-security-config.h"
 #include "sl_component_catalog.h"
-#if (EMBER_AF_PLUGIN_NETWORK_CREATOR_SECURITY_TRUST_CENTER_SUPPORT == 1)
-#define TRUST_CENTER_SUPPORT
-#endif
 #if (EMBER_AF_PLUGIN_NETWORK_CREATOR_SECURITY_ALLOW_HA_DEVICES_TO_STAY == 1)
 #define ALLOW_HA_DEVICES_TO_STAY
 #endif
@@ -40,9 +37,6 @@
 #define ALLOW_TC_REJOIN_WITH_WELL_KNOWN_KEY
 #endif
 #else // !UC_BUILD
-#ifdef EMBER_AF_PLUGIN_NETWORK_CREATOR_SECURITY_TRUST_CENTER_SUPPORT
-#define TRUST_CENTER_SUPPORT
-#endif
 #ifdef EMBER_AF_PLUGIN_NETWORK_CREATOR_SECURITY_ALLOW_HA_DEVICES_TO_STAY
 #define ALLOW_HA_DEVICES_TO_STAY
 #endif
@@ -160,7 +154,7 @@ void emAfPluginNetworkCreatorSecurityStackStatusCallback(EmberStatus status)
 void emberAfPluginNetworkCreatorSecurityStackStatusCallback(EmberStatus status)
 #endif
 {
-#ifdef TRUST_CENTER_SUPPORT
+#ifdef EMBER_AF_HAS_COORDINATOR_NETWORK
   if (status == EMBER_NETWORK_UP
       && emberAfGetNodeId() == EMBER_TRUST_CENTER_NODE_ID) {
     EmberExtendedSecurityBitmask extended;
@@ -179,13 +173,13 @@ void emberAfPluginNetworkCreatorSecurityStackStatusCallback(EmberStatus status)
     extended |= EMBER_NWK_LEAVE_REQUEST_NOT_ALLOWED;
     emberSetExtendedSecurityBitmask(extended);
   }
-#endif /* TRUST_CENTER_SUPPORT */
+#endif /* EMBER_AF_HAS_COORDINATOR_NETWORK */
 }
 
 // -----------------------------------------------------------------------------
 // Stack Callbacks
 
-#if (defined(TRUST_CENTER_SUPPORT) || defined(SL_CATALOG_ZIGBEE_TEST_HARNESS_Z3_PRESENT))
+#if (defined(EMBER_AF_HAS_COORDINATOR_NETWORK) || defined(SL_CATALOG_ZIGBEE_TEST_HARNESS_Z3_PRESENT))
 static bool isWildcardEui64(EmberEUI64 eui64)
 {
   for (uint8_t i = 0; i < EUI64_SIZE; i++) {
@@ -195,7 +189,7 @@ static bool isWildcardEui64(EmberEUI64 eui64)
   }
   return true;
 }
-#endif // defined(TRUST_CENTER_SUPPORT) || defined(SL_CATALOG_ZIGBEE_TEST_HARNESS_Z3_PRESENT)
+#endif // defined(EMBER_AF_HAS_COORDINATOR_NETWORK) || defined(SL_CATALOG_ZIGBEE_TEST_HARNESS_Z3_PRESENT)
 
 #if defined(SL_CATALOG_ZIGBEE_TEST_HARNESS_Z3_PRESENT)
 extern uint8_t emAfPluginTestHarnessZ3ServerMaskHigh;
@@ -204,7 +198,7 @@ extern uint8_t emAfPluginTestHarnessZ3ServerMaskHigh;
 void emberAfPluginNetworkCreatorSecurityZigbeeKeyEstablishmentCallback(EmberEUI64 eui64,
                                                                        EmberKeyStatus keyStatus)
 {
-#if (defined(TRUST_CENTER_SUPPORT) || defined(SL_CATALOG_ZIGBEE_TEST_HARNESS_Z3_PRESENT))
+#if (defined(EMBER_AF_HAS_COORDINATOR_NETWORK) || defined(SL_CATALOG_ZIGBEE_TEST_HARNESS_Z3_PRESENT))
   // If we are notified that a joining node failed to verify their
   // TCLK properly, then we are going to kick them off the network,
   // as they pose a potential security hazard.
@@ -234,7 +228,7 @@ void emberAfPluginNetworkCreatorSecurityZigbeeKeyEstablishmentCallback(EmberEUI6
                        destinationId,
                        status);
   }
-#endif // defined(TRUST_CENTER_SUPPORT) || defined(SL_CATALOG_ZIGBEE_TEST_HARNESS_Z3_PRESENT)
+#endif // defined(EMBER_AF_HAS_COORDINATOR_NETWORK) || defined(SL_CATALOG_ZIGBEE_TEST_HARNESS_Z3_PRESENT)
 }
 
 // -----------------------------------------------------------------------------
@@ -263,7 +257,7 @@ EmberStatus emberAfPluginNetworkCreatorSecurityStart(bool centralizedNetwork)
     // Use distributed trust center mode.
     state.bitmask |= EMBER_DISTRIBUTED_TRUST_CENTER_MODE;
   }
-#if (defined(TRUST_CENTER_SUPPORT) || defined(SL_CATALOG_ZIGBEE_TEST_HARNESS_Z3_PRESENT))
+#if (defined(EMBER_AF_HAS_COORDINATOR_NETWORK) || defined(SL_CATALOG_ZIGBEE_TEST_HARNESS_Z3_PRESENT))
   else { // centralizedNetwork
     // Generate a random global link key.
     // This is the key the trust center will send to a joining node when it
@@ -279,7 +273,13 @@ EmberStatus emberAfPluginNetworkCreatorSecurityStart(bool centralizedNetwork)
     // Tell the trust center to ignore leave requests.
     extended |= EMBER_NWK_LEAVE_REQUEST_NOT_ALLOWED;
   }
-#endif // defined(TRUST_CENTER_SUPPORT) || defined(SL_CATALOG_ZIGBEE_TEST_HARNESS_Z3_PRESENT)
+#else
+  else { // centralizedNetwork
+    // in case device doesn't support centralized network we should return EMBER_INVALID_CALL immediately
+    status = EMBER_INVALID_CALL;
+    goto kickout;
+  }
+#endif // defined(EMBER_AF_HAS_COORDINATOR_NETWORK) || defined(SL_CATALOG_ZIGBEE_TEST_HARNESS_Z3_PRESENT)
 
   // Generate a random network key.
   status = emberAfGenerateRandomKey(&(state.networkKey));
@@ -324,13 +324,13 @@ EmberStatus emberAfPluginNetworkCreatorSecurityOpenNetwork(void)
     setTcRejoinsUsingWellKnownKeyAllowed(true);
     #endif
 
-    #if (defined(TRUST_CENTER_SUPPORT) || defined(SL_CATALOG_ZIGBEE_TEST_HARNESS_Z3_PRESENT))
+    #if (defined(EMBER_AF_HAS_COORDINATOR_NETWORK) || defined(SL_CATALOG_ZIGBEE_TEST_HARNESS_Z3_PRESENT))
     if (emberAfGetNodeId() == EMBER_TRUST_CENTER_NODE_ID) {
       EmberEUI64 wildcardEui64 = { 0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF, };
       EmberKeyData centralizedKey = ZIGBEE_3_CENTRALIZED_SECURITY_LINK_KEY;
       status = emberAddTransientLinkKey(wildcardEui64, &centralizedKey);
     }
-  #endif // defined(TRUST_CENTER_SUPPORT) || defined(SL_CATALOG_ZIGBEE_TEST_HARNESS_Z3_PRESENT)
+  #endif // defined(EMBER_AF_HAS_COORDINATOR_NETWORK) || defined(SL_CATALOG_ZIGBEE_TEST_HARNESS_Z3_PRESENT)
   }
 
   if (status == EMBER_SUCCESS) {
@@ -373,11 +373,11 @@ EmberStatus emberAfPluginNetworkCreatorSecurityOpenNetworkWithKeyPair(EmberEUI64
     return EMBER_ERR_FATAL;
   }
 
-#if (defined(TRUST_CENTER_SUPPORT) || defined(SL_CATALOG_ZIGBEE_TEST_HARNESS_Z3_PRESENT))
+#if (defined(EMBER_AF_HAS_COORDINATOR_NETWORK) || defined(SL_CATALOG_ZIGBEE_TEST_HARNESS_Z3_PRESENT))
   if (emberAfGetNodeId() == EMBER_TRUST_CENTER_NODE_ID) {
     status = emberAddTransientLinkKey(eui64, &keyData);
   }
-#endif // defined(TRUST_CENTER_SUPPORT) || defined(SL_CATALOG_ZIGBEE_TEST_HARNESS_Z3_PRESENT)
+#endif // defined(EMBER_AF_HAS_COORDINATOR_NETWORK) || defined(SL_CATALOG_ZIGBEE_TEST_HARNESS_Z3_PRESENT)
 
   if (status == EMBER_SUCCESS) {
     openNetworkTimeRemainingS = NETWORK_OPEN_TIME_S;

@@ -54,6 +54,10 @@
 #include "em_se.h"
 #endif
 
+#if defined(SL_COMPONENT_CATALOG_PRESENT)
+#include "sl_component_catalog.h"
+#endif
+
 /**
  * @name SECTION: Silicon Labs Acceleration settings
  *
@@ -498,8 +502,10 @@
   && (defined(_SILICON_LABS_GECKO_INTERNAL_SDID_80) \
   || defined(_SILICON_LABS_GECKO_INTERNAL_SDID_89)  \
   || defined(_SILICON_LABS_GECKO_INTERNAL_SDID_95) )
+#if defined(SL_CATALOG_RAIL_LIB_PRESENT)
 #undef MBEDTLS_ENTROPY_RAIL_PRESENT
 #define MBEDTLS_ENTROPY_RAIL_PRESENT
+#endif
 #endif
 
 /* Default ECC configuration for Silicon Labs devices: */

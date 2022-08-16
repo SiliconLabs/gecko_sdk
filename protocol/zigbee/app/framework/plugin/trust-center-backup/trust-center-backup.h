@@ -110,6 +110,17 @@ EmberStatus emberAfTrustCenterBackupSaveTokensToFile(const char* filepath);
  */
 EmberStatus emberAfTrustCenterBackupRestoreTokensFromFile(const char* filepath);
 
+/** @brief Updates zigbeed tokens from a file that stores NCP tokens.
+ *
+ * @param filepath Ver.: always
+ *
+ * @return EmberStatus status code
+ *
+ * @note Available only for EMBER_AF_PLUGIN_TRUST_CENTER_BACKUP_POSIX_FILE_BACKUP_SUPPORT
+ *
+ */
+EmberStatus emberAfTrustCenterBackupWriteNcpTokenToZigbeedTokens(const char* filepath);
+
 /** @} */ // end of name API
 /** @} */ // end of trust-center-backup
 #ifdef UC_BUILD

@@ -34,12 +34,12 @@ template_contribution:
     value: zigbee_gateway
   - name: zigbee_af_callback
     value:
-      callback_type: event_init
-      function_name: emberAfPluginGatewayInitCallback  
-  - name: zigbee_af_callback
-    value:
       callback_type: init_done
       function_name: emberAfPluginGatewayInitCallback
+  - name: zigbee_af_callback
+    value:
+      callback_type: tick
+      function_name: emberAfPluginGatewayTickCallback
   - name: cli_group
     value:
       group: plugin

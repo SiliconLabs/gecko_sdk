@@ -333,31 +333,27 @@ typedef struct {
 #define _DCDC_BSTEM01CTRL_IPKVAL_SHIFT                0                                                 /**< Shift value for DCDC_IPKVAL                 */
 #define _DCDC_BSTEM01CTRL_IPKVAL_MASK                 0xFUL                                             /**< Bit mask for DCDC_IPKVAL                    */
 #define _DCDC_BSTEM01CTRL_IPKVAL_DEFAULT              0x0000000CUL                                      /**< Mode DEFAULT for DCDC_BSTEM01CTRL           */
-#define _DCDC_BSTEM01CTRL_IPKVAL_Load36mA             0x00000003UL                                      /**< Mode Load36mA for DCDC_BSTEM01CTRL          */
-#define _DCDC_BSTEM01CTRL_IPKVAL_Load40mA             0x00000004UL                                      /**< Mode Load40mA for DCDC_BSTEM01CTRL          */
-#define _DCDC_BSTEM01CTRL_IPKVAL_Load44mA             0x00000005UL                                      /**< Mode Load44mA for DCDC_BSTEM01CTRL          */
-#define _DCDC_BSTEM01CTRL_IPKVAL_Load48mA             0x00000006UL                                      /**< Mode Load48mA for DCDC_BSTEM01CTRL          */
-#define _DCDC_BSTEM01CTRL_IPKVAL_Load52mA             0x00000007UL                                      /**< Mode Load52mA for DCDC_BSTEM01CTRL          */
-#define _DCDC_BSTEM01CTRL_IPKVAL_Load56mA             0x00000008UL                                      /**< Mode Load56mA for DCDC_BSTEM01CTRL          */
-#define _DCDC_BSTEM01CTRL_IPKVAL_Load60mA             0x00000009UL                                      /**< Mode Load60mA for DCDC_BSTEM01CTRL          */
-#define _DCDC_BSTEM01CTRL_IPKVAL_Load64mA             0x0000000AUL                                      /**< Mode Load64mA for DCDC_BSTEM01CTRL          */
-#define _DCDC_BSTEM01CTRL_IPKVAL_Load68mA             0x0000000BUL                                      /**< Mode Load68mA for DCDC_BSTEM01CTRL          */
-#define _DCDC_BSTEM01CTRL_IPKVAL_Load72mA             0x0000000CUL                                      /**< Mode Load72mA for DCDC_BSTEM01CTRL          */
-#define _DCDC_BSTEM01CTRL_IPKVAL_Load76mA             0x0000000DUL                                      /**< Mode Load76mA for DCDC_BSTEM01CTRL          */
-#define _DCDC_BSTEM01CTRL_IPKVAL_Load80mA             0x0000000EUL                                      /**< Mode Load80mA for DCDC_BSTEM01CTRL          */
+#define _DCDC_BSTEM01CTRL_IPKVAL_Load10mA             0x00000003UL                                      /**< Mode Load10mA for DCDC_BSTEM01CTRL          */
+#define _DCDC_BSTEM01CTRL_IPKVAL_Load11mA             0x00000004UL                                      /**< Mode Load11mA for DCDC_BSTEM01CTRL          */
+#define _DCDC_BSTEM01CTRL_IPKVAL_Load13mA             0x00000005UL                                      /**< Mode Load13mA for DCDC_BSTEM01CTRL          */
+#define _DCDC_BSTEM01CTRL_IPKVAL_Load15mA             0x00000006UL                                      /**< Mode Load15mA for DCDC_BSTEM01CTRL          */
+#define _DCDC_BSTEM01CTRL_IPKVAL_Load16mA             0x00000007UL                                      /**< Mode Load16mA for DCDC_BSTEM01CTRL          */
+#define _DCDC_BSTEM01CTRL_IPKVAL_Load18mA             0x00000008UL                                      /**< Mode Load18mA for DCDC_BSTEM01CTRL          */
+#define _DCDC_BSTEM01CTRL_IPKVAL_Load20mA             0x00000009UL                                      /**< Mode Load20mA for DCDC_BSTEM01CTRL          */
+#define _DCDC_BSTEM01CTRL_IPKVAL_Load21mA             0x0000000AUL                                      /**< Mode Load21mA for DCDC_BSTEM01CTRL          */
+#define _DCDC_BSTEM01CTRL_IPKVAL_Load23mA             0x0000000BUL                                      /**< Mode Load23mA for DCDC_BSTEM01CTRL          */
+#define _DCDC_BSTEM01CTRL_IPKVAL_Load25mA             0x0000000CUL                                      /**< Mode Load25mA for DCDC_BSTEM01CTRL          */
 #define DCDC_BSTEM01CTRL_IPKVAL_DEFAULT               (_DCDC_BSTEM01CTRL_IPKVAL_DEFAULT << 0)           /**< Shifted mode DEFAULT for DCDC_BSTEM01CTRL   */
-#define DCDC_BSTEM01CTRL_IPKVAL_Load36mA              (_DCDC_BSTEM01CTRL_IPKVAL_Load36mA << 0)          /**< Shifted mode Load36mA for DCDC_BSTEM01CTRL  */
-#define DCDC_BSTEM01CTRL_IPKVAL_Load40mA              (_DCDC_BSTEM01CTRL_IPKVAL_Load40mA << 0)          /**< Shifted mode Load40mA for DCDC_BSTEM01CTRL  */
-#define DCDC_BSTEM01CTRL_IPKVAL_Load44mA              (_DCDC_BSTEM01CTRL_IPKVAL_Load44mA << 0)          /**< Shifted mode Load44mA for DCDC_BSTEM01CTRL  */
-#define DCDC_BSTEM01CTRL_IPKVAL_Load48mA              (_DCDC_BSTEM01CTRL_IPKVAL_Load48mA << 0)          /**< Shifted mode Load48mA for DCDC_BSTEM01CTRL  */
-#define DCDC_BSTEM01CTRL_IPKVAL_Load52mA              (_DCDC_BSTEM01CTRL_IPKVAL_Load52mA << 0)          /**< Shifted mode Load52mA for DCDC_BSTEM01CTRL  */
-#define DCDC_BSTEM01CTRL_IPKVAL_Load56mA              (_DCDC_BSTEM01CTRL_IPKVAL_Load56mA << 0)          /**< Shifted mode Load56mA for DCDC_BSTEM01CTRL  */
-#define DCDC_BSTEM01CTRL_IPKVAL_Load60mA              (_DCDC_BSTEM01CTRL_IPKVAL_Load60mA << 0)          /**< Shifted mode Load60mA for DCDC_BSTEM01CTRL  */
-#define DCDC_BSTEM01CTRL_IPKVAL_Load64mA              (_DCDC_BSTEM01CTRL_IPKVAL_Load64mA << 0)          /**< Shifted mode Load64mA for DCDC_BSTEM01CTRL  */
-#define DCDC_BSTEM01CTRL_IPKVAL_Load68mA              (_DCDC_BSTEM01CTRL_IPKVAL_Load68mA << 0)          /**< Shifted mode Load68mA for DCDC_BSTEM01CTRL  */
-#define DCDC_BSTEM01CTRL_IPKVAL_Load72mA              (_DCDC_BSTEM01CTRL_IPKVAL_Load72mA << 0)          /**< Shifted mode Load72mA for DCDC_BSTEM01CTRL  */
-#define DCDC_BSTEM01CTRL_IPKVAL_Load76mA              (_DCDC_BSTEM01CTRL_IPKVAL_Load76mA << 0)          /**< Shifted mode Load76mA for DCDC_BSTEM01CTRL  */
-#define DCDC_BSTEM01CTRL_IPKVAL_Load80mA              (_DCDC_BSTEM01CTRL_IPKVAL_Load80mA << 0)          /**< Shifted mode Load80mA for DCDC_BSTEM01CTRL  */
+#define DCDC_BSTEM01CTRL_IPKVAL_Load10mA              (_DCDC_BSTEM01CTRL_IPKVAL_Load10mA << 0)          /**< Shifted mode Load10mA for DCDC_BSTEM01CTRL  */
+#define DCDC_BSTEM01CTRL_IPKVAL_Load11mA              (_DCDC_BSTEM01CTRL_IPKVAL_Load11mA << 0)          /**< Shifted mode Load11mA for DCDC_BSTEM01CTRL  */
+#define DCDC_BSTEM01CTRL_IPKVAL_Load13mA              (_DCDC_BSTEM01CTRL_IPKVAL_Load13mA << 0)          /**< Shifted mode Load13mA for DCDC_BSTEM01CTRL  */
+#define DCDC_BSTEM01CTRL_IPKVAL_Load15mA              (_DCDC_BSTEM01CTRL_IPKVAL_Load15mA << 0)          /**< Shifted mode Load15mA for DCDC_BSTEM01CTRL  */
+#define DCDC_BSTEM01CTRL_IPKVAL_Load16mA              (_DCDC_BSTEM01CTRL_IPKVAL_Load16mA << 0)          /**< Shifted mode Load16mA for DCDC_BSTEM01CTRL  */
+#define DCDC_BSTEM01CTRL_IPKVAL_Load18mA              (_DCDC_BSTEM01CTRL_IPKVAL_Load18mA << 0)          /**< Shifted mode Load18mA for DCDC_BSTEM01CTRL  */
+#define DCDC_BSTEM01CTRL_IPKVAL_Load20mA              (_DCDC_BSTEM01CTRL_IPKVAL_Load20mA << 0)          /**< Shifted mode Load20mA for DCDC_BSTEM01CTRL  */
+#define DCDC_BSTEM01CTRL_IPKVAL_Load21mA              (_DCDC_BSTEM01CTRL_IPKVAL_Load21mA << 0)          /**< Shifted mode Load21mA for DCDC_BSTEM01CTRL  */
+#define DCDC_BSTEM01CTRL_IPKVAL_Load23mA              (_DCDC_BSTEM01CTRL_IPKVAL_Load23mA << 0)          /**< Shifted mode Load23mA for DCDC_BSTEM01CTRL  */
+#define DCDC_BSTEM01CTRL_IPKVAL_Load25mA              (_DCDC_BSTEM01CTRL_IPKVAL_Load25mA << 0)          /**< Shifted mode Load25mA for DCDC_BSTEM01CTRL  */
 #define _DCDC_BSTEM01CTRL_DRVSPEED_SHIFT              8                                                 /**< Shift value for DCDC_DRVSPEED               */
 #define _DCDC_BSTEM01CTRL_DRVSPEED_MASK               0x300UL                                           /**< Bit mask for DCDC_DRVSPEED                  */
 #define _DCDC_BSTEM01CTRL_DRVSPEED_DEFAULT            0x00000001UL                                      /**< Mode DEFAULT for DCDC_BSTEM01CTRL           */

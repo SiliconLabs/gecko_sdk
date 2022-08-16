@@ -70,7 +70,7 @@ void rgb_led_init(void)
 
 void rgb_led_deinit(void)
 {
-  sl_simple_rgb_pwm_led_turn_off(sl_led_rgb.led_common.context);
+  sl_simple_rgb_pwm_led_turn_off(sl_simple_rgb_pwm_led_rgb_led0.led_common.context);
 }
 
 void rgb_led_set(uint8_t m, uint8_t r, uint8_t g, uint8_t b)
@@ -82,18 +82,18 @@ void rgb_led_set(uint8_t m, uint8_t r, uint8_t g, uint8_t b)
   }
 
   if (m != 0) {
-    sl_simple_rgb_pwm_led_set_color(sl_led_rgb.led_common.context,
+    sl_simple_rgb_pwm_led_set_color(sl_simple_rgb_pwm_led_rgb_led0.led_common.context,
                                     light_levels[r],
                                     light_levels[g],
                                     light_levels[b]);
   } else {
-    sl_simple_rgb_pwm_led_turn_off(sl_led_rgb.led_common.context);
+    sl_simple_rgb_pwm_led_turn_off(sl_simple_rgb_pwm_led_rgb_led0.led_common.context);
   }
 }
 
 void adv_led_turn_on(void)
 {
-  sl_simple_rgb_pwm_led_set_color(sl_led_rgb.led_common.context,
+  sl_simple_rgb_pwm_led_set_color(sl_simple_rgb_pwm_led_rgb_led0.led_common.context,
                                   light_levels[ADV_LED_RED_INTENSITY],
                                   light_levels[ADV_LED_GREEN_INTENSITY],
                                   light_levels[ADV_LED_BLUE_INTENSITY]);
@@ -101,10 +101,10 @@ void adv_led_turn_on(void)
 
 void adv_led_turn_off(void)
 {
-  sl_simple_rgb_pwm_led_turn_off(sl_led_rgb.led_common.context);
+  sl_simple_rgb_pwm_led_turn_off(sl_simple_rgb_pwm_led_rgb_led0.led_common.context);
 }
 
 void adv_led_toggle(void)
 {
-  sl_simple_rgb_pwm_led_toggle(sl_led_rgb.led_common.context);
+  sl_simple_rgb_pwm_led_toggle(sl_simple_rgb_pwm_led_rgb_led0.led_common.context);
 }

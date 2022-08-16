@@ -23,6 +23,10 @@
 #include "em_gpio.h"
 #include <stdint.h>
 
+#ifdef __cplusplus
+extern "C" {
+#endif
+
 /***************************************************************************//**
  * @addtogroup led
  * @{
@@ -320,5 +324,9 @@ void sl_led_get_rgb_color(const sl_led_rgb_pwm_t *rgb,    ///< LED Instance hand
 ///   @endcode
 ///
 /// @} end group led ********************************************************/
+
+#ifdef __cplusplus
+}
+#endif
 
 #endif // SL_SIMPLE_RGB_PWM_LED_H

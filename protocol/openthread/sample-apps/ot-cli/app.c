@@ -28,6 +28,8 @@
 #include "openthread-system.h"
 #include "app.h"
 
+#include "reset_util.h"
+
 #include "sl_component_catalog.h"
 #ifdef SL_CATALOG_POWER_MANAGER_PRESENT
 #include "sl_power_manager.h"
@@ -36,19 +38,6 @@
 #if (defined(SL_CATALOG_BTN0_PRESENT) || defined(SL_CATALOG_BTN1_PRESENT))
 #include "sl_button.h"
 #include "sl_simple_button.h"
-#endif
-
-#if OPENTHREAD_EXAMPLES_SIMULATION
-#include <setjmp.h>
-#include <unistd.h>
-
-jmp_buf gResetJump;
-
-void __gcov_flush();
-#endif
-
-#ifndef OPENTHREAD_ENABLE_COVERAGE
-#define OPENTHREAD_ENABLE_COVERAGE 0
 #endif
 
 /**
@@ -149,16 +138,7 @@ void sl_ot_cli_init(void)
 
 void app_init(void)
 {
-#if OPENTHREAD_EXAMPLES_SIMULATION
-    if (setjmp(gResetJump))
-    {
-        alarm(0);
-#if OPENTHREAD_ENABLE_COVERAGE
-        __gcov_flush();
-#endif
-        execvp(argv[0], argv); // TO DO: argc, argv?
-    }
-#endif
+    OT_SETUP_RESET_JUMP(argv);
 }
 
 /**************************************************************************//**

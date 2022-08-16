@@ -175,7 +175,7 @@ template_contribution:
   - name: cli_command
     value:
       group: consol-bill
-      name: print
+      name: print-bill
       handler: emAfPriceClientCliConsolidatedBillTablePrint
       help: Prints the entry of the consolidated bill table.
       argument:
@@ -220,7 +220,7 @@ template_contribution:
   - name: cli_command
     value:
       group: cpp-event
-      name: print
+      name: print-event
       handler: emAfPriceClientCliCppEventPrint
       help: Prints the entry of the CPP event table.
       argument:

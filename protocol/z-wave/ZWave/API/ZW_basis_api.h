@@ -217,5 +217,11 @@ void sl_zwave_protocol_startup(void);
  */
 void sl_zwave_platform_startup(void);
 
+/**
+ * Gets Z-Wave Protocol Build number
+ * @return Z-Wave Protocol Build number
+ */
+uint16_t ZW_GetProtocolBuildNumber();
+
 #endif /* _ZW_BASIS_API_H_ */
 

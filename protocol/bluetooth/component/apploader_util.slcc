@@ -1,5 +1,5 @@
 id: "apploader_util"
-label: "Apploader Utility"
+label: "AppLoader Utility"
 package: "Bluetooth"
 description: >
   This component provides utility functions related to OTA DFU, such as a

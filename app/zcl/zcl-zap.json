@@ -1,6 +1,11 @@
 {
-  "version": "Zigbee Silabs ZCL data",
-  "xmlRoot": [".", "../../../../app/zcl/"],
+  "description": "Zigbee Silabs ZCL data",
+  "category": "zigbee",
+  "version": 1,
+  "xmlRoot": [
+    ".",
+    "../../../../app/zcl/"
+  ],
   "xmlFile": [
     "ami-devices.xml",
     "ami.xml",
@@ -30,9 +35,15 @@
   "manufacturersXml": "manufacturers.xml",
   "options": {
     "text": {
-      "defaultResponsePolicy": ["Always", "Conditional", "Never"]
+      "defaultResponsePolicy": [
+        "Always",
+        "Conditional",
+        "Never"
+      ]
     },
-    "bool": ["commandDiscovery"]
+    "bool": [
+      "commandDiscovery"
+    ]
   },
   "defaults": {
     "text": {

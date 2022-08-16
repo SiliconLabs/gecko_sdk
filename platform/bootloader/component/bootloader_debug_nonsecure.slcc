@@ -1,5 +1,5 @@
 id: bootloader_debug_nonsecure
-label: Debug
+label: Debug (Non-Secure)
 package: bootloader
 description: >
   Build debug instrumentation into the bootloader.

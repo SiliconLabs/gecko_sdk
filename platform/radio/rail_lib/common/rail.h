@@ -6024,6 +6024,251 @@ RAIL_Status_t RAIL_ConfigHFXOThermistor(RAIL_Handle_t railHandle,
  */
 
 /**
+ * Indicate whether RAIL supports 2.4 GHz band operation on this chip.
+ *
+ * @param[in] railHandle A RAIL instance handle.
+ * @return true if the 2.4 GHz band is supported; false otherwise.
+ *
+ * Runtime refinement of compile-time \ref RAIL_SUPPORTS_2P4GHZ_BAND.
+ */
+bool RAIL_Supports2p4GHzBand(RAIL_Handle_t railHandle);
+
+/**
+ * Indicate whether RAIL supports SubGHz band operation on this chip.
+ *
+ * @param[in] railHandle A RAIL instance handle.
+ * @return true if the SubGHz band is supported; false otherwise.
+ *
+ * Runtime refinement of compile-time \ref RAIL_SUPPORTS_SUBGHZ_BAND.
+ */
+bool RAIL_SupportsSubGHzBand(RAIL_Handle_t railHandle);
+
+/**
+ * Indicate whether this chip supports dual 2.4 GHz and SubGHz band operation.
+ *
+ * @param[in] railHandle A RAIL instance handle.
+ * @return true if the dual band is supported; false otherwise.
+ *
+ * Runtime refinement of compile-time \ref RAIL_SUPPORTS_DUAL_BAND.
+ */
+bool RAIL_SupportsDualBand(RAIL_Handle_t railHandle);
+
+/**
+ * Indicate whether this chip supports bit masked address filtering
+ *
+ * @param[in] railHandle A RAIL instance handle.
+ * @return true if bit masked address filtering is supported; false otherwise.
+ *
+ * Runtime refinement of compile-time
+ * \ref RAIL_SUPPORTS_ADDR_FILTER_ADDRESS_BIT_MASK.
+ */
+bool RAIL_SupportsAddrFilterAddressBitMask(RAIL_Handle_t railHandle);
+
+/**
+ * Indicate whether this chip supports address filter mask information
+ * for incoming packets in
+ * \ref RAIL_RxPacketInfo_t::filterMask and
+ * \ref RAIL_IEEE802154_Address_t::filterMask.
+ *
+ * @param[in] railHandle A RAIL instance handle.
+ * @return true if address filter information is supported; false otherwise
+ *   (in which case \ref RAIL_RxPacketInfo_t::filterMask value is undefined).
+ *
+ * Runtime refinement of compile-time \ref RAIL_SUPPORTS_ADDR_FILTER_MASK.
+ */
+bool RAIL_SupportsAddrFilterMask(RAIL_Handle_t railHandle);
+
+/**
+ * Indicate whether this chip supports alternate TX power settings.
+ *
+ * @param[in] railHandle A RAIL instance handle.
+ * @return true if alternate TX power settings are supported; false otherwise.
+ *
+ * Runtime refinement of compile-time \ref
+ * RAIL_SUPPORTS_ALTERNATE_TX_POWER.
+ */
+bool RAIL_SupportsAlternateTxPower(RAIL_Handle_t railHandle);
+
+/**
+ * Indicate whether this chip supports antenna diversity.
+ *
+ * @param[in] railHandle A RAIL instance handle.
+ * @return true if antenna diversity is supported; false otherwise.
+ *
+ * Runtime refinement of compile-time \ref RAIL_SUPPORTS_ANTENNA_DIVERSITY.
+ *
+ * @note Certain radio configurations may not support this feature even
+ *   if the chip in general claims to support it.
+ */
+bool RAIL_SupportsAntennaDiversity(RAIL_Handle_t railHandle);
+
+/**
+ * Indicate whether RAIL supports AUXADC measurements on this chip.
+ *
+ * @param[in] railHandle A RAIL instance handle.
+ * @return true if AUXADC measurements are supported; false otherwise.
+ *
+ * Runtime refinement of compile-time \ref RAIL_SUPPORTS_AUXADC.
+ */
+bool RAIL_SupportsAuxAdc(RAIL_Handle_t railHandle);
+
+/**
+ * Indicate whether RAIL supports channel hopping on this chip.
+ *
+ * @param[in] railHandle A RAIL instance handle.
+ * @return true if channel hopping is supported; false otherwise.
+ *
+ * Runtime refinement of compile-time \ref RAIL_SUPPORTS_CHANNEL_HOPPING.
+ */
+bool RAIL_SupportsChannelHopping(RAIL_Handle_t railHandle);
+
+/**
+ * Indicate whether this chip supports direct mode.
+ *
+ * @param[in] railHandle A RAIL instance handle.
+ * @return true if direct mode is supported; false otherwise.
+ *
+ * Runtime refinement of compile-time \ref
+ * RAIL_SUPPORTS_DIRECT_MODE.
+ */
+bool RAIL_SupportsDirectMode(RAIL_Handle_t railHandle);
+
+/**
+ * Indicate whether this chip supports dual sync words.
+ *
+ * @param[in] railHandle A RAIL instance handle.
+ * @return true if dual sync words are supported; false otherwise.
+ *
+ * Runtime refinement of compile-time \ref RAIL_SUPPORTS_DUAL_SYNC_WORDS.
+ *
+ * @note Certain radio configurations may not support this feature even
+ *   if the chip in general claims to support it.
+ */
+bool RAIL_SupportsDualSyncWords(RAIL_Handle_t railHandle);
+
+/**
+ * Indicate whether this chip supports EFF.
+ *
+ * @param[in] railHandle A RAIL instance handle.
+ * @return true if EFF identifier is supported; false otherwise.
+ */
+bool RAIL_SupportsEff(RAIL_Handle_t railHandle);
+
+/**
+ * Indicate whether RAIL supports thermistor measurements on this chip.
+ *
+ * @param[in] railHandle A RAIL instance handle.
+ * @return true if thermistor measurements are supported; false otherwise.
+ *
+ * Runtime refinement of compile-time \ref RAIL_SUPPORTS_EXTERNAL_THERMISTOR.
+ */
+bool RAIL_SupportsExternalThermistor(RAIL_Handle_t railHandle);
+
+/**
+ * Indicate whether this chip supports MFM protocol.
+ *
+ * @param[in] railHandle A RAIL instance handle.
+ * @return true if MFM protocol is supported; false otherwise.
+ *
+ * Runtime refinement of compile-time \ref RAIL_SUPPORTS_MFM.
+ */
+bool RAIL_SupportsMfm(RAIL_Handle_t railHandle);
+
+/**
+ * Indicate whether RAIL supports OFDM band operation on this chip.
+ *
+ * @param[in] railHandle A RAIL instance handle.
+ * @return true if OFDM operation is supported; false otherwise.
+ *
+ * Runtime refinement of compile-time \ref RAIL_SUPPORTS_OFDM_PA.
+ */
+bool RAIL_SupportsOFDMPA(RAIL_Handle_t railHandle);
+
+/**
+ * Indicate whether this chip supports a high-precision LFRCO.
+ *
+ * @param[in] railHandle A RAIL instance handle.
+ * @return true if high-precision LFRCO is supported; false otherwise.
+ *
+ * Runtime refinement of compile-time \ref RAIL_SUPPORTS_PRECISION_LFRCO.
+ */
+bool RAIL_SupportsPrecisionLFRCO(RAIL_Handle_t railHandle);
+
+/**
+ * Indicate whether this chip supports radio entropy.
+ *
+ * @param[in] railHandle A RAIL instance handle.
+ * @return true if radio entropy is supported; false otherwise.
+ *
+ * Runtime refinement of compile-time \ref RAIL_SUPPORTS_RADIO_ENTROPY.
+ */
+bool RAIL_SupportsRadioEntropy(RAIL_Handle_t railHandle);
+
+/**
+ * Indicate whether RAIL supports RFSENSE Energy Detection Mode on this chip.
+ *
+ * @param[in] railHandle A RAIL instance handle.
+ * @return true if RFSENSE Energy Detection Mode is supported; false otherwise.
+ *
+ * Runtime refinement of compile-time
+ * \ref RAIL_SUPPORTS_RFSENSE_ENERGY_DETECTION.
+ */
+bool RAIL_SupportsRfSenseEnergyDetection(RAIL_Handle_t railHandle);
+
+/**
+ * Indicate whether RAIL supports RFSENSE Selective(OOK) Mode on this chip.
+ *
+ * @param[in] railHandle A RAIL instance handle.
+ * @return true if RFSENSE Selective(OOK) Mode is supported; false otherwise.
+ *
+ * Runtime refinement of compile-time \ref RAIL_SUPPORTS_RFSENSE_SELECTIVE_OOK.
+ */
+bool RAIL_SupportsRfSenseSelectiveOok(RAIL_Handle_t railHandle);
+
+/**
+ * Indicate whether this chip supports configurable RSSI threshold
+ * set by \ref RAIL_SetRssiDetectThreshold().
+ *
+ * @param[in] railHandle A RAIL instance handle.
+ * @return true if setting configurable RSSI is supported; false otherwise.
+ *
+ * Runtime refinement of compile-time \ref RAIL_SUPPORTS_RSSI_DETECT_THRESHOLD.
+ */
+bool RAIL_SupportsRssiDetectThreshold(RAIL_Handle_t railHandle);
+
+/**
+ * Indicate whether this chip supports RX direct mode data to FIFO.
+ *
+ * @param[in] railHandle A RAIL instance handle.
+ * @return true if direct mode data to FIFO is supported; false otherwise.
+ *
+ * Runtime refinement of compile-time \ref
+ * RAIL_SUPPORTS_RX_DIRECT_MODE_DATA_TO_FIFO.
+ */
+bool RAIL_SupportsRxDirectModeDataToFifo(RAIL_Handle_t railHandle);
+
+/**
+ * Indicate whether this chip supports raw RX data
+ * sources other than \ref RAIL_RxDataSource_t::RX_PACKET_DATA.
+ *
+ * @param[in] railHandle A RAIL instance handle.
+ * @return true if direct mode is supported; false otherwise.
+ *
+ * Runtime refinement of compile-time \ref RAIL_SUPPORTS_RX_RAW_DATA.
+ */
+bool RAIL_SupportsRxRawData(RAIL_Handle_t railHandle);
+
+/**
+ * Indicate whether this chip supports SQ-based PHY.
+ *
+ * @param[in] railHandle A RAIL instance handle.
+ * @return true if the SQ-based PHY is supported; false otherwise.
+ *
+ * Runtime refinement of compile-time \ref RAIL_SUPPORTS_SQ_PHY.
+ */
+bool RAIL_SupportsSQPhy(RAIL_Handle_t railHandle);
+
+/**
  * Indicate whether this chip supports a particular power mode (PA).
  * @note Consider using \ref RAIL_SupportsTxPowerModeAlt to also get the power
  * mode's lowest allowed power level.
@@ -6063,6 +6308,412 @@ bool RAIL_SupportsTxPowerModeAlt(RAIL_Handle_t railHandle,
                                  RAIL_TxPowerMode_t *powerMode,
                                  RAIL_TxPowerLevel_t *maxPowerLevel,
                                  RAIL_TxPowerLevel_t *minPowerLevel);
+
+/**
+ * Indicate whether this chip supports automatic TX to TX transitions.
+ *
+ * @param[in] railHandle A RAIL instance handle.
+ * @return true if TX to TX transitions are supported; false otherwise.
+ *
+ * Runtime refinement of compile-time \ref RAIL_SUPPORTS_TX_TO_TX.
+ */
+bool RAIL_SupportsTxToTx(RAIL_Handle_t railHandle);
+
+/**
+ * Indicate whether RAIL supports the BLE protocol on this chip.
+ *
+ * @param[in] railHandle A RAIL instance handle.
+ * @return true if BLE is supported; false otherwise.
+ *
+ * Runtime refinement of compile-time \ref RAIL_SUPPORTS_PROTOCOL_BLE.
+ */
+bool RAIL_SupportsProtocolBLE(RAIL_Handle_t railHandle);
+
+/**
+ * Indicate whether this chip supports BLE 1Mbps Non-Viterbi PHY.
+ *
+ * @param[in] railHandle A RAIL instance handle.
+ * @return true if BLE 1Mbps Non-Viterbi is supported; false otherwise.
+ *
+ * Runtime refinement of compile-time \ref RAIL_BLE_SUPPORTS_1MBPS_NON_VITERBI.
+ */
+bool RAIL_BLE_Supports1MbpsNonViterbi(RAIL_Handle_t railHandle);
+
+/**
+ * Indicate whether this chip supports BLE 1Mbps Viterbi PHY.
+ *
+ * @param[in] railHandle A RAIL instance handle.
+ * @return true if BLE 1Mbps Viterbi is supported; false otherwise.
+ *
+ * Runtime refinement of compile-time \ref RAIL_BLE_SUPPORTS_1MBPS_VITERBI.
+ */
+bool RAIL_BLE_Supports1MbpsViterbi(RAIL_Handle_t railHandle);
+
+/**
+ * Indicate whether this chip supports BLE 1Mbps operation.
+ *
+ * @param[in] railHandle A RAIL instance handle.
+ * @return true if BLE 1Mbps operation is supported; false otherwise.
+ *
+ * Runtime refinement of compile-time \ref RAIL_BLE_SUPPORTS_1MBPS.
+ */
+static inline
+bool RAIL_BLE_Supports1Mbps(RAIL_Handle_t railHandle)
+{
+  return (RAIL_BLE_Supports1MbpsNonViterbi(railHandle)
+          || RAIL_BLE_Supports1MbpsViterbi(railHandle));
+}
+
+/**
+ * Indicate whether this chip supports BLE 2Mbps Non-Viterbi PHY.
+ *
+ * @param[in] railHandle A RAIL instance handle.
+ * @return true if BLE 2Mbps Non-Viterbi is supported; false otherwise.
+ *
+ * Runtime refinement of compile-time \ref RAIL_BLE_SUPPORTS_2MBPS_NON_VITERBI.
+ */
+bool RAIL_BLE_Supports2MbpsNonViterbi(RAIL_Handle_t railHandle);
+
+/**
+ * Indicate whether this chip supports BLE 2Mbps Viterbi PHY.
+ *
+ * @param[in] railHandle A RAIL instance handle.
+ * @return true if BLE 2Mbps Viterbi is supported; false otherwise.
+ *
+ * Runtime refinement of compile-time \ref RAIL_BLE_SUPPORTS_2MBPS_VITERBI.
+ */
+bool RAIL_BLE_Supports2MbpsViterbi(RAIL_Handle_t railHandle);
+
+/**
+ * Indicate whether this chip supports BLE 2Mbps operation.
+ *
+ * @param[in] railHandle A RAIL instance handle.
+ * @return true if BLE 2Mbps operation is supported; false otherwise.
+ *
+ * Runtime refinement of compile-time \ref RAIL_BLE_SUPPORTS_2MBPS.
+ */
+static inline
+bool RAIL_BLE_Supports2Mbps(RAIL_Handle_t railHandle)
+{
+  return (RAIL_BLE_Supports2MbpsNonViterbi(railHandle)
+          || RAIL_BLE_Supports2MbpsViterbi(railHandle));
+}
+
+/**
+ * Indicate whether this chip supports BLE Antenna Switching needed for
+ * Angle-of-Arrival receives or Angle-of-Departure transmits.
+ * @param[in] railHandle A RAIL instance handle.
+ * @return true if BLE Antenna Switching is supported; false otherwise.
+ *
+ * Runtime refinement of compile-time \ref RAIL_BLE_SUPPORTS_ANTENNA_SWITCHING.
+ */
+bool RAIL_BLE_SupportsAntennaSwitching(RAIL_Handle_t railHandle);
+
+/**
+ * Indicate whether this chip supports BLE Coded PHY used for Long-Range.
+ *
+ * @param[in] railHandle A RAIL instance handle.
+ * @return true if BLE Coded PHY is supported; false otherwise.
+ *
+ * Runtime refinement of compile-time \ref RAIL_BLE_SUPPORTS_CODED_PHY.
+ */
+bool RAIL_BLE_SupportsCodedPhy(RAIL_Handle_t railHandle);
+
+/**
+ * Indicate whether this chip supports BLE CTE (Constant Tone Extension)
+ * needed for Angle-of-Arrival/Departure transmits.
+ *
+ * @param[in] railHandle A RAIL instance handle.
+ * @return true if BLE CTE is supported; false otherwise.
+ *
+ * Runtime refinement of compile-time \ref RAIL_BLE_SUPPORTS_CTE.
+ */
+bool RAIL_BLE_SupportsCte(RAIL_Handle_t railHandle);
+
+/**
+ * Indicate whether this chip supports BLE IQ Sampling needed for
+ * Angle-of-Arrival/Departure receives.
+ *
+ * @param[in] railHandle A RAIL instance handle.
+ * @return true if BLE IQ Sampling is supported; false otherwise.
+ *
+ * Runtime refinement of compile-time \ref RAIL_BLE_SUPPORTS_IQ_SAMPLING.
+ */
+bool RAIL_BLE_SupportsIQSampling(RAIL_Handle_t railHandle);
+
+/**
+ * Indicate whether this chip supports BLE PHY switch to RX
+ * functionality, which is used to switch BLE PHYs at a specific time
+ * to receive auxiliary packets.
+ *
+ * @param[in] railHandle A RAIL instance handle.
+ * @return true if BLE PHY switch to RX is supported; false otherwise.
+ *
+ * Runtime refinement of compile-time \ref RAIL_BLE_SUPPORTS_PHY_SWITCH_TO_RX.
+ */
+bool RAIL_BLE_SupportsPhySwitchToRx(RAIL_Handle_t railHandle);
+
+/**
+ * Indicate whether this chip supports the Quuppa PHY.
+ *
+ * @param[in] railHandle A RAIL instance handle.
+ * @return true if the Quuppa is supported; false otherwise.
+ *
+ * Runtime refinement of compile-time \ref RAIL_BLE_SUPPORTS_QUUPPA.
+ */
+bool RAIL_BLE_SupportsQuuppa(RAIL_Handle_t railHandle);
+
+/**
+ * Indicate whether this chip supports BLE signal identifier.
+ *
+ * @param[in] railHandle A RAIL instance handle.
+ * @return true if signal identifier is supported; false otherwise.
+ */
+bool RAIL_BLE_SupportsSignalIdentifier(RAIL_Handle_t railHandle);
+
+/**
+ * Indicate whether this chip supports BLE Simulscan PHY used for simultaneous
+ * BLE 1Mbps and Coded PHY reception.
+ *
+ * @param[in] railHandle A RAIL instance handle.
+ * @return true if BLE Simulscan PHY is supported; false otherwise.
+ *
+ * Runtime refinement of compile-time \ref RAIL_BLE_SUPPORTS_SIMULSCAN_PHY.
+ */
+bool RAIL_BLE_SupportsSimulscanPhy(RAIL_Handle_t railHandle);
+
+/**
+ * Indicate whether this chip supports the IEEE 802.15.4 protocol.
+ *
+ * @param[in] railHandle A RAIL instance handle.
+ * @return true if the 802.15.4 protocol is supported; false otherwise.
+ *
+ * Runtime refinement of compile-time \ref RAIL_SUPPORTS_PROTOCOL_IEEE802154.
+ */
+bool RAIL_SupportsProtocolIEEE802154(RAIL_Handle_t railHandle);
+
+/**
+ * Indicate whether this chip supports the IEEE 802.15.4 Wi-Fi Coexistence PHY.
+ *
+ * @param[in] railHandle A RAIL instance handle.
+ * @return true if the 802.15.4 COEX PHY is supported; false otherwise.
+ *
+ * Runtime refinement of compile-time \ref RAIL_IEEE802154_SUPPORTS_COEX_PHY.
+ */
+bool RAIL_IEEE802154_SupportsCoexPhy(RAIL_Handle_t railHandle);
+
+/**
+ * Indicate whether this chip supports the IEEE 802.15.4 PHY with custom settings.
+ *
+ * @param[in] railHandle A RAIL instance handle.
+ * @return true if the 802.15.4 PHY with custom settings is supported; false otherwise.
+ *
+ * Runtime refinement of compile-time \ref RAIL_IEEE802154_SUPPORTS_CUSTOM1_PHY.
+ */
+bool RAIL_IEEE802154_SupportsCustom1Phy(RAIL_Handle_t railHandle);
+
+/**
+ * Indicate whether this chip supports the IEEE 802.15.4
+ * front end module optimized PHY.
+ *
+ * @param[in] railHandle A RAIL instance handle.
+ * @return true if a front end module is supported; false otherwise.
+ *
+ * Runtime refinement of compile-time \ref RAIL_IEEE802154_SUPPORTS_FEM_PHY.
+ */
+bool RAIL_IEEE802154_SupportsFemPhy(RAIL_Handle_t railHandle);
+
+/**
+ * Indicate whether this chip supports canceling the frame-pending lookup
+ * event \ref RAIL_EVENT_IEEE802154_DATA_REQUEST_COMMAND when the radio
+ * transitions to a state that renders the the reporting of this event moot
+ * (i.e., too late for the stack to influence the outgoing ACK).
+ *
+ * @param[in] railHandle A RAIL instance handle.
+ * @return true if canceling the lookup event is supported; false otherwise.
+ *
+ * Runtime refinement of compile-time \ref
+ * RAIL_IEEE802154_SUPPORTS_CANCEL_FRAME_PENDING_LOOKUP.
+ */
+bool RAIL_IEEE802154_SupportsCancelFramePendingLookup(RAIL_Handle_t railHandle);
+
+/**
+ * Indicate whether this chip supports early triggering of the frame-pending
+ * lookup event \ref RAIL_EVENT_IEEE802154_DATA_REQUEST_COMMAND
+ * just after MAC address fields have been received.
+ *
+ * @param[in] railHandle A RAIL instance handle.
+ * @return true if early triggering is supported; false otherwise.
+ *
+ * Runtime refinement of compile-time \ref
+ * RAIL_IEEE802154_SUPPORTS_EARLY_FRAME_PENDING_LOOKUP.
+ */
+bool RAIL_IEEE802154_SupportsEarlyFramePendingLookup(RAIL_Handle_t railHandle);
+
+/**
+ * Indicate whether RAIL supports dual PA mode on this chip.
+ *
+ * @param[in] railHandle A RAIL instance handle.
+ * @return true if the dual PA mode is supported; false otherwise.
+ *
+ * Runtime refinement of compile-time \ref RAIL_IEEE802154_SUPPORTS_DUAL_PA_CONFIG.
+ */
+bool RAIL_IEEE802154_SupportsDualPaConfig(RAIL_Handle_t railHandle);
+
+/**
+ * Indicate whether this chip supports IEEE 802.15.4E-2012 Enhanced ACKing.
+ *
+ * @param[in] railHandle A RAIL instance handle.
+ * @return true if 802.15.4E Enhanced ACKing is supported; false otherwise.
+ *
+ * Runtime refinement of compile-time \ref
+ * RAIL_IEEE802154_SUPPORTS_E_ENHANCED_ACK.
+ */
+bool RAIL_IEEE802154_SupportsEEnhancedAck(RAIL_Handle_t railHandle);
+
+/**
+ * Indicate whether this chip supports IEEE 802.15.4E-2012 Multipurpose frame
+ * reception.
+ *
+ * @param[in] railHandle A RAIL instance handle.
+ * @return true if Multipurpose frame reception is supported; false otherwise.
+ *
+ * Runtime refinement of compile-time \ref
+ * RAIL_IEEE802154_SUPPORTS_E_MULTIPURPOSE_FRAMES.
+ */
+bool RAIL_IEEE802154_SupportsEMultipurposeFrames(RAIL_Handle_t railHandle);
+
+/**
+ * Indicate whether this chip supports the IEEE 802.15.4E-2012 feature
+ * subset needed for Zigbee R22 GB868.
+ *
+ * @param[in] railHandle A RAIL instance handle.
+ * @return true if 802.15.4E GB868 subset is supported; false otherwise.
+ *
+ * Runtime refinement of compile-time \ref
+ * RAIL_IEEE802154_SUPPORTS_E_SUBSET_GB868.
+ */
+bool RAIL_IEEE802154_SupportsESubsetGB868(RAIL_Handle_t railHandle);
+
+/**
+ * Indicate whether this chip supports IEEE 802.15.4G-2012 reception and
+ * transmission of frames with 4-byte CRC.
+ *
+ * @param[in] railHandle A RAIL instance handle.
+ * @return true if 802.15.4G 4-byte CRC is supported; false otherwise.
+ *
+ * Runtime refinement of compile-time \ref
+ * RAIL_IEEE802154_SUPPORTS_G_4BYTE_CRC.
+ */
+bool RAIL_IEEE802154_SupportsG4ByteCrc(RAIL_Handle_t railHandle);
+
+/**
+ * Indicate whether this chip supports IEEE 802.15.4G dynamic FEC
+ *
+ * @param[in] railHandle A RAIL instance handle.
+ * @return true if dynamic FEC is supported; false otherwise.
+ *
+ * Runtime refinement of compile-time \ref
+ * RAIL_IEEE802154_SUPPORTS_G_DYNFEC.
+ */
+bool RAIL_IEEE802154_SupportsGDynFec(RAIL_Handle_t railHandle);
+
+/**
+ * Indicate whether this chip supports Wi-SUN mode switching
+ *
+ * @param[in] railHandle A RAIL instance handle.
+ * @return true if Wi-SUN mode switching is supported; false otherwise.
+ *
+ * Runtime refinement of compile-time \ref
+ * RAIL_IEEE802154_SUPPORTS_G_MODESWITCH.
+ */
+bool RAIL_IEEE802154_SupportsGModeSwitch(RAIL_Handle_t railHandle);
+
+/**
+ * Indicate whether this chip supports IEEE 802.15.4G-2012 feature
+ * subset needed for Zigbee R22 GB868.
+ *
+ * @param[in] railHandle A RAIL instance handle.
+ * @return true if 802.15.4G GB868 subset is supported; false otherwise.
+ *
+ * Runtime refinement of compile-time \ref
+ * RAIL_IEEE802154_SUPPORTS_G_SUBSET_GB868.
+ */
+bool RAIL_IEEE802154_SupportsGSubsetGB868(RAIL_Handle_t railHandle);
+
+/**
+ * Indicate whether this chip supports IEEE 802.15.4G-2012 reception
+ * of unwhitened frames.
+ *
+ * @param[in] railHandle A RAIL instance handle.
+ * @return true if 802.15.4G unwhitened frame reception is supported;
+ *   false otherwise.
+ *
+ * Runtime refinement of compile-time \ref
+ * RAIL_IEEE802154_SUPPORTS_G_UNWHITENED_RX.
+ */
+bool RAIL_IEEE802154_SupportsGUnwhitenedRx(RAIL_Handle_t railHandle);
+
+/**
+ * Indicate whether this chip supports IEEE 802.15.4G-2012 transmission
+ * of unwhitened frames.
+ *
+ * @param[in] railHandle A RAIL instance handle.
+ * @return true if 802.15.4G unwhitened frame transmit is supported;
+ *   false otherwise.
+ *
+ * Runtime refinement of compile-time \ref
+ * RAIL_IEEE802154_SUPPORTS_G_UNWHITENED_TX.
+ */
+bool RAIL_IEEE802154_SupportsGUnwhitenedTx(RAIL_Handle_t railHandle);
+
+/**
+ * Indicate whether this chip supports the Z-Wave protocol.
+ *
+ * @param[in] railHandle A RAIL instance handle.
+ * @return true if the Z-Wave protocol is supported; false otherwise.
+ *
+ * Runtime refinement of compile-time \ref RAIL_SUPPORTS_PROTOCOL_ZWAVE.
+ */
+bool RAIL_SupportsProtocolZWave(RAIL_Handle_t railHandle);
+
+/**
+ * Indicate whether this chip supports the Z-Wave concurrent PHY.
+ *
+ * @param[in] railHandle A RAIL instance handle.
+ * @return true if the Z-Wave concurrent PHY is supported; false otherwise.
+ *
+ * Runtime refinement of compile-time \ref RAIL_ZWAVE_SUPPORTS_CONC_PHY.
+ */
+bool RAIL_ZWAVE_SupportsConcPhy(RAIL_Handle_t railHandle);
+
+/**
+ * Indicate whether this chip supports the Z-Wave energy detect PHY.
+ *
+ * @param[in] railHandle A RAIL instance handle.
+ * @return true if the Z-Wave energy detect PHY is supported; false otherwise.
+ *
+ * Runtime refinement of compile-time \ref RAIL_ZWAVE_SUPPORTS_ED_PHY.
+ */
+bool RAIL_ZWAVE_SupportsEnergyDetectPhy(RAIL_Handle_t railHandle);
+
+/**
+ * Indicate whether this chip supports Z-Wave Region in PTI.
+ *
+ * @param[in] railHandle A RAIL instance handle.
+ * @return true if ZWAVE Region in PTI is supported; false otherwise.
+ *
+ * Runtime refinement of compile-time \ref RAIL_ZWAVE_SUPPORTS_REGION_PTI.
+ */
+bool RAIL_ZWAVE_SupportsRegionPti(RAIL_Handle_t railHandle);
+
+/**
+ * Indicate whether this chip supports IEEE 802.15.4 signal identifier.
+ *
+ * @param[in] railHandle A RAIL instance handle.
+ * @return true if signal identifier is supported; false otherwise.
+ */
+bool RAIL_IEEE802154_SupportsSignalIdentifier(RAIL_Handle_t railHandle);
 
 /** @} */ // end of group Features
 

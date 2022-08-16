@@ -7551,7 +7551,8 @@ uint32_t CMU_ClockPrescGet(CMU_Clock_TypeDef clock)
  *   have a prescaler. See the CMU overview in the reference manual.
  *
  * @param[in] presc
- *   The clock prescaler.
+ *   The clock prescaler. The prescaler value is linked to the clock divider by:
+ *   divider = 'presc' + 1.
  ******************************************************************************/
 void CMU_ClockPrescSet(CMU_Clock_TypeDef clock, CMU_ClkPresc_TypeDef presc)
 {

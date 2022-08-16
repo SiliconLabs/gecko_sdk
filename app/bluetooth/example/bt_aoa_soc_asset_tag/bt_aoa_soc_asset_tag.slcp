@@ -23,7 +23,6 @@ component:
   - id: bluetooth_feature_connection
   - id: bluetooth_feature_gatt
   - id: bluetooth_feature_gatt_server
-  - id: bluetooth_feature_scanner
   - id: bluetooth_feature_sm
   - id: bluetooth_feature_system
   - id: in_place_ota_dfu
@@ -34,11 +33,6 @@ component:
   - id: mpu
   - id: gatt_service_cte
   - id: gatt_service_cte_silabs
-  - id: app_log
-  - id: iostream_usart
-    instance:
-      - vcom
-  - id: iostream_retarget_stdio
 
 source:
   - path: main.c
@@ -74,10 +68,6 @@ configuration:
     value: "2752"
   - name: SL_HEAP_SIZE
     value: "9200"
-  - name: SL_BOARD_ENABLE_VCOM
-    value: "1"
-    condition:
-      - iostream_usart
   - name: SL_PSA_KEY_USER_SLOT_COUNT
     value: "0"
     condition:

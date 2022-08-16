@@ -100,8 +100,6 @@ configuration:
     value: 1
   - name: OPENTHREAD_CONFIG_PLATFORM_KEY_REFERENCES_ENABLE
     value: 0
-  - name: SL_CPC_SECURITY_ENABLED
-    value: 0
 
 source:
   - path: "main.c"

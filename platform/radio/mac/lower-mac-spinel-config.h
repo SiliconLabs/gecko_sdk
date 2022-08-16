@@ -100,6 +100,9 @@
 //Dont use PSA for multiPAN builds.
 #define OPENTHREAD_CONFIG_PLATFORM_KEY_REFERENCES_ENABLE 0
 
+// for mfglib commands
+#define OPENTHREAD_CONFIG_DIAG_ENABLE 1
+
 // <<< end of configuration section >>>
 
 #endif // LOWER_MAC_SPINEL_CONFIG_H

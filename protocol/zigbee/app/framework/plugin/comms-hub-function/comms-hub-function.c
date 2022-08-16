@@ -782,10 +782,11 @@ static void checkForAnyDeviceThatNeedsTunnelCreated(void)
 void emberAfPluginCommsHubFunctionStackStatusCallback(EmberStatus status)
 {
   if (status != EMBER_NETWORK_UP) {
-    slxu_zigbee_event_set_inactive(tunnelCheckEventControl);
-    // Disable
-    // sToDo: this actually seems wrong, if this needs to be disabled, the following calls actually enable it
-    //emberAfEventControlSetDelay(&tunnelCheckEventControl, 0);
+    if (status == EMBER_NETWORK_DOWN) {
+      slxu_zigbee_event_set_inactive(tunnelCheckEventControl);
+    } else {
+      slxu_zigbee_event_set_delay_ms(tunnelCheckEventControl, 0);
+    }
     return;
   }
 

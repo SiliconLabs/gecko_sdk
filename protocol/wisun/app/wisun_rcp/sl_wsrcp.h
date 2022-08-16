@@ -18,13 +18,10 @@
 #include <stdbool.h>
 #include <cmsis_os2.h>
 #include <em_device.h>
+#include <em_ldma.h>
+#include <dmadrv.h>
 
-#if defined(EUSART_PRESENT)
-#include <em_eusart.h>
-#else
-#include <em_usart.h>
-#endif
-
+#include "sl_wsrcp_uart.h"
 #include "sl_ring.h"
 
 struct ws_mac_ctxt;
@@ -34,19 +31,10 @@ enum {
 };
 
 struct sl_wsrcp_app {
-#if defined(EUSART_PRESENT)
-    EUSART_TypeDef *sdk_uart;
-#else
-    USART_TypeDef *sdk_uart;
-#endif
-    osMutexId_t uart_tx_lock;
-    uint8_t rx_buf_data[4096];
-    struct ring rx_buf;
-    int irq_rxof_cnt;
-
     osEventFlagsId_t main_events;
     osThreadId_t main_task;
 
+    struct sl_wsrcp_uart uart;
     struct sl_wsrcp_mac *rcp_mac;
 };
 

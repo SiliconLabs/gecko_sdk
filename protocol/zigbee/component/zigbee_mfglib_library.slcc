@@ -19,99 +19,6 @@ requires:
   - name: zigbee_mfglib
 
 library:
-  - path: protocol/zigbee/build/mfglib-library-cortexm3-iar-efr32mg1p-rail/mfglib-library.a
-    condition: 
-      - toolchain_iar
-      - device_family_efr32mg1p
-      - zigbee_phy_2_4
-    unless:
-      - stack_protection_iar
-      - zigbee_smart_energy_token_optimization
-  - path: protocol/zigbee/build/mfglib-library-cortexm3-iar-efr32mg1p-rail-stack_protection/mfglib-library.a
-    condition: 
-      - toolchain_iar
-      - device_family_efr32mg1p
-      - zigbee_phy_2_4
-      - stack_protection_iar
-    unless:
-      - zigbee_smart_energy_token_optimization
-  - path: protocol/zigbee/build/mfglib-library-cortexm3-iar-efr32mg1p-rail-smart_energy_stack_tokens/mfglib-library.a
-    condition: 
-      - toolchain_iar
-      - device_family_efr32mg1p
-      - zigbee_phy_2_4
-      - zigbee_smart_energy_token_optimization
-    unless:
-      - stack_protection_iar
-  - path: protocol/zigbee/build/mfglib-library-cortexm3-iar-efr32mg1p-rail-smart_energy_stack_tokens-stack_protection/mfglib-library.a
-    condition: 
-      - toolchain_iar
-      - device_family_efr32mg1p
-      - zigbee_phy_2_4
-      - zigbee_smart_energy_token_optimization
-      - stack_protection_iar
-  - path: protocol/zigbee/build/mfglib-library-cortexm3-iar-efr32mg1b-rail/mfglib-library.a
-    condition: 
-      - toolchain_iar
-      - device_family_efr32mg1b
-      - zigbee_phy_2_4
-    unless:
-      - stack_protection_iar
-      - zigbee_smart_energy_token_optimization
-  - path: protocol/zigbee/build/mfglib-library-cortexm3-iar-efr32mg1b-rail-stack_protection/mfglib-library.a
-    condition: 
-      - toolchain_iar
-      - device_family_efr32mg1b
-      - zigbee_phy_2_4
-      - stack_protection_iar
-    unless:
-      - zigbee_smart_energy_token_optimization
-  - path: protocol/zigbee/build/mfglib-library-cortexm3-iar-efr32mg1b-rail-smart_energy_stack_tokens/mfglib-library.a
-    condition: 
-      - toolchain_iar
-      - device_family_efr32mg1b
-      - zigbee_phy_2_4
-      - zigbee_smart_energy_token_optimization
-    unless:
-      - stack_protection_iar
-  - path: protocol/zigbee/build/mfglib-library-cortexm3-iar-efr32mg1b-rail-smart_energy_stack_tokens-stack_protection/mfglib-library.a
-    condition: 
-      - toolchain_iar
-      - device_family_efr32mg1b
-      - zigbee_phy_2_4
-      - zigbee_smart_energy_token_optimization
-      - stack_protection_iar
-  - path: protocol/zigbee/build/mfglib-library-cortexm3-iar-efr32mg1v-rail/mfglib-library.a
-    condition: 
-      - toolchain_iar
-      - device_family_efr32mg1v
-      - zigbee_phy_2_4
-    unless:
-      - stack_protection_iar
-      - zigbee_smart_energy_token_optimization
-  - path: protocol/zigbee/build/mfglib-library-cortexm3-iar-efr32mg1v-rail-stack_protection/mfglib-library.a
-    condition: 
-      - toolchain_iar
-      - device_family_efr32mg1v
-      - zigbee_phy_2_4
-      - stack_protection_iar
-    unless:
-      - zigbee_smart_energy_token_optimization
-  - path: protocol/zigbee/build/mfglib-library-cortexm3-iar-efr32mg1v-rail-smart_energy_stack_tokens/mfglib-library.a
-    condition: 
-      - toolchain_iar
-      - device_family_efr32mg1v
-      - zigbee_phy_2_4
-      - zigbee_smart_energy_token_optimization
-    unless:
-      - stack_protection_iar
-  - path: protocol/zigbee/build/mfglib-library-cortexm3-iar-efr32mg1v-rail-smart_energy_stack_tokens-stack_protection/mfglib-library.a
-    condition: 
-      - toolchain_iar
-      - device_family_efr32mg1v
-      - zigbee_phy_2_4
-      - zigbee_smart_energy_token_optimization
-      - stack_protection_iar
   - path: protocol/zigbee/build/mfglib-library-cortexm3-iar-efr32mg12p-rail/mfglib-library.a
     condition: 
       - toolchain_iar
@@ -174,19 +81,6 @@ library:
       - stack_protection_iar
     unless:
       - zigbee_multi_network
-  - path: protocol/zigbee/build/mfglib-library-cortexm3-iar-efr32mg14p-rail/mfglib-library.a
-    condition: 
-      - toolchain_iar
-      - device_family_efr32mg14p
-      - zigbee_phy_2_4
-    unless:
-      - stack_protection_iar
-  - path: protocol/zigbee/build/mfglib-library-cortexm3-iar-efr32mg14p-rail-stack_protection/mfglib-library.a
-    condition: 
-      - toolchain_iar
-      - device_family_efr32mg14p
-      - zigbee_phy_2_4
-      - stack_protection_iar
   - path: protocol/zigbee/build/mfglib-library-cortexm3-iar-efr32mg21-rail/mfglib-library.a
     condition: 
       - toolchain_iar
@@ -466,54 +360,6 @@ library:
       - stack_protection_iar
     unless:
       - zigbee_multi_network
-  - path: protocol/zigbee/build/mfglib-library-cortexm3-gcc-efr32mg1p-rail/mfglib-library.a
-    condition: 
-      - toolchain_gcc
-      - device_family_efr32mg1p
-      - zigbee_phy_2_4
-    unless:
-      - stack_protection_iar
-      - zigbee_smart_energy_token_optimization
-  - path: protocol/zigbee/build/mfglib-library-cortexm3-gcc-efr32mg1p-rail-smart_energy_stack_tokens/mfglib-library.a
-    condition: 
-      - toolchain_gcc
-      - device_family_efr32mg1p
-      - zigbee_phy_2_4
-      - zigbee_smart_energy_token_optimization
-    unless:
-      - stack_protection_iar
-  - path: protocol/zigbee/build/mfglib-library-cortexm3-gcc-efr32mg1b-rail/mfglib-library.a
-    condition: 
-      - toolchain_gcc
-      - device_family_efr32mg1b
-      - zigbee_phy_2_4
-    unless:
-      - stack_protection_iar
-      - zigbee_smart_energy_token_optimization
-  - path: protocol/zigbee/build/mfglib-library-cortexm3-gcc-efr32mg1b-rail-smart_energy_stack_tokens/mfglib-library.a
-    condition: 
-      - toolchain_gcc
-      - device_family_efr32mg1b
-      - zigbee_phy_2_4
-      - zigbee_smart_energy_token_optimization
-    unless:
-      - stack_protection_iar
-  - path: protocol/zigbee/build/mfglib-library-cortexm3-gcc-efr32mg1v-rail/mfglib-library.a
-    condition: 
-      - toolchain_gcc
-      - device_family_efr32mg1v
-      - zigbee_phy_2_4
-    unless:
-      - stack_protection_iar
-      - zigbee_smart_energy_token_optimization
-  - path: protocol/zigbee/build/mfglib-library-cortexm3-gcc-efr32mg1v-rail-smart_energy_stack_tokens/mfglib-library.a
-    condition: 
-      - toolchain_gcc
-      - device_family_efr32mg1v
-      - zigbee_phy_2_4
-      - zigbee_smart_energy_token_optimization
-    unless:
-      - stack_protection_iar
   - path: protocol/zigbee/build/mfglib-library-cortexm3-gcc-efr32mg12p-rail/mfglib-library.a
     condition: 
       - toolchain_gcc
@@ -545,13 +391,6 @@ library:
       - zigbee_phy_2_4
     unless:
       - zigbee_multi_network
-      - stack_protection_iar
-  - path: protocol/zigbee/build/mfglib-library-cortexm3-gcc-efr32mg14p-rail/mfglib-library.a
-    condition: 
-      - toolchain_gcc
-      - device_family_efr32mg14p
-      - zigbee_phy_2_4
-    unless:
       - stack_protection_iar
   - path: protocol/zigbee/build/mfglib-library-cortexm3-gcc-efr32mg21-rail/mfglib-library.a
     condition: 
@@ -697,111 +536,6 @@ library:
     unless:
       - zigbee_multi_network
       - stack_protection_iar
-  - path: protocol/zigbee/build/ncp-mfglib-library-cortexm3-iar-efr32mg1p-rail/ncp-mfglib-library.a
-    condition: 
-      - toolchain_iar
-      - device_family_efr32mg1p
-      - zigbee_phy_2_4
-      - zigbee_ncp
-    unless:
-      - stack_protection_iar
-      - zigbee_smart_energy_token_optimization
-  - path: protocol/zigbee/build/ncp-mfglib-library-cortexm3-iar-efr32mg1p-rail-stack_protection/ncp-mfglib-library.a
-    condition: 
-      - toolchain_iar
-      - device_family_efr32mg1p
-      - zigbee_phy_2_4
-      - stack_protection_iar
-      - zigbee_ncp
-    unless:
-      - zigbee_smart_energy_token_optimization
-  - path: protocol/zigbee/build/ncp-mfglib-library-cortexm3-iar-efr32mg1p-rail-smart_energy_stack_tokens/ncp-mfglib-library.a
-    condition: 
-      - toolchain_iar
-      - device_family_efr32mg1p
-      - zigbee_phy_2_4
-      - zigbee_smart_energy_token_optimization
-      - zigbee_ncp
-    unless:
-      - stack_protection_iar
-  - path: protocol/zigbee/build/ncp-mfglib-library-cortexm3-iar-efr32mg1p-rail-smart_energy_stack_tokens-stack_protection/ncp-mfglib-library.a
-    condition: 
-      - toolchain_iar
-      - device_family_efr32mg1p
-      - zigbee_phy_2_4
-      - zigbee_smart_energy_token_optimization
-      - stack_protection_iar
-      - zigbee_ncp
-  - path: protocol/zigbee/build/ncp-mfglib-library-cortexm3-iar-efr32mg1b-rail/ncp-mfglib-library.a
-    condition: 
-      - toolchain_iar
-      - device_family_efr32mg1b
-      - zigbee_phy_2_4
-      - zigbee_ncp
-    unless:
-      - stack_protection_iar
-      - zigbee_smart_energy_token_optimization
-  - path: protocol/zigbee/build/ncp-mfglib-library-cortexm3-iar-efr32mg1b-rail-stack_protection/ncp-mfglib-library.a
-    condition: 
-      - toolchain_iar
-      - device_family_efr32mg1b
-      - zigbee_phy_2_4
-      - stack_protection_iar
-      - zigbee_ncp
-    unless:
-      - zigbee_smart_energy_token_optimization
-  - path: protocol/zigbee/build/ncp-mfglib-library-cortexm3-iar-efr32mg1b-rail-smart_energy_stack_tokens/ncp-mfglib-library.a
-    condition: 
-      - toolchain_iar
-      - device_family_efr32mg1b
-      - zigbee_phy_2_4
-      - zigbee_smart_energy_token_optimization
-      - zigbee_ncp
-    unless:
-      - stack_protection_iar
-  - path: protocol/zigbee/build/ncp-mfglib-library-cortexm3-iar-efr32mg1b-rail-smart_energy_stack_tokens-stack_protection/ncp-mfglib-library.a
-    condition: 
-      - toolchain_iar
-      - device_family_efr32mg1b
-      - zigbee_phy_2_4
-      - zigbee_smart_energy_token_optimization
-      - stack_protection_iar
-      - zigbee_ncp
-  - path: protocol/zigbee/build/ncp-mfglib-library-cortexm3-iar-efr32mg1v-rail/ncp-mfglib-library.a
-    condition: 
-      - toolchain_iar
-      - device_family_efr32mg1v
-      - zigbee_phy_2_4
-      - zigbee_ncp
-    unless:
-      - stack_protection_iar
-      - zigbee_smart_energy_token_optimization
-  - path: protocol/zigbee/build/ncp-mfglib-library-cortexm3-iar-efr32mg1v-rail-stack_protection/ncp-mfglib-library.a
-    condition: 
-      - toolchain_iar
-      - device_family_efr32mg1v
-      - zigbee_phy_2_4
-      - stack_protection_iar
-      - zigbee_ncp
-    unless:
-      - zigbee_smart_energy_token_optimization
-  - path: protocol/zigbee/build/ncp-mfglib-library-cortexm3-iar-efr32mg1v-rail-smart_energy_stack_tokens/ncp-mfglib-library.a
-    condition: 
-      - toolchain_iar
-      - device_family_efr32mg1v
-      - zigbee_phy_2_4
-      - zigbee_smart_energy_token_optimization
-      - zigbee_ncp
-    unless:
-      - stack_protection_iar
-  - path: protocol/zigbee/build/ncp-mfglib-library-cortexm3-iar-efr32mg1v-rail-smart_energy_stack_tokens-stack_protection/ncp-mfglib-library.a
-    condition: 
-      - toolchain_iar
-      - device_family_efr32mg1v
-      - zigbee_phy_2_4
-      - zigbee_smart_energy_token_optimization
-      - stack_protection_iar
-      - zigbee_ncp
   - path: protocol/zigbee/build/ncp-mfglib-library-cortexm3-iar-efr32mg12p-rail/ncp-mfglib-library.a
     condition: 
       - toolchain_iar
@@ -872,21 +606,6 @@ library:
       - zigbee_ncp
     unless:
       - zigbee_multi_network
-  - path: protocol/zigbee/build/ncp-mfglib-library-cortexm3-iar-efr32mg14p-rail/ncp-mfglib-library.a
-    condition: 
-      - toolchain_iar
-      - device_family_efr32mg14p
-      - zigbee_phy_2_4
-      - zigbee_ncp
-    unless:
-      - stack_protection_iar
-  - path: protocol/zigbee/build/ncp-mfglib-library-cortexm3-iar-efr32mg14p-rail-stack_protection/ncp-mfglib-library.a
-    condition: 
-      - toolchain_iar
-      - device_family_efr32mg14p
-      - zigbee_phy_2_4
-      - stack_protection_iar
-      - zigbee_ncp
   - path: protocol/zigbee/build/ncp-mfglib-library-cortexm3-iar-efr32mg21-rail/ncp-mfglib-library.a
     condition: 
       - toolchain_iar
@@ -1202,60 +921,6 @@ library:
       - zigbee_ncp
     unless:
       - zigbee_multi_network
-  - path: protocol/zigbee/build/ncp-mfglib-library-cortexm3-gcc-efr32mg1p-rail/ncp-mfglib-library.a
-    condition: 
-      - toolchain_gcc
-      - device_family_efr32mg1p
-      - zigbee_phy_2_4
-      - zigbee_ncp
-    unless:
-      - stack_protection_iar
-      - zigbee_smart_energy_token_optimization
-  - path: protocol/zigbee/build/ncp-mfglib-library-cortexm3-gcc-efr32mg1p-rail-smart_energy_stack_tokens/ncp-mfglib-library.a
-    condition: 
-      - toolchain_gcc
-      - device_family_efr32mg1p
-      - zigbee_phy_2_4
-      - zigbee_smart_energy_token_optimization
-      - zigbee_ncp
-    unless:
-      - stack_protection_iar
-  - path: protocol/zigbee/build/ncp-mfglib-library-cortexm3-gcc-efr32mg1b-rail/ncp-mfglib-library.a
-    condition: 
-      - toolchain_gcc
-      - device_family_efr32mg1b
-      - zigbee_phy_2_4
-      - zigbee_ncp
-    unless:
-      - stack_protection_iar
-      - zigbee_smart_energy_token_optimization
-  - path: protocol/zigbee/build/ncp-mfglib-library-cortexm3-gcc-efr32mg1b-rail-smart_energy_stack_tokens/ncp-mfglib-library.a
-    condition: 
-      - toolchain_gcc
-      - device_family_efr32mg1b
-      - zigbee_phy_2_4
-      - zigbee_smart_energy_token_optimization
-      - zigbee_ncp
-    unless:
-      - stack_protection_iar
-  - path: protocol/zigbee/build/ncp-mfglib-library-cortexm3-gcc-efr32mg1v-rail/ncp-mfglib-library.a
-    condition: 
-      - toolchain_gcc
-      - device_family_efr32mg1v
-      - zigbee_phy_2_4
-      - zigbee_ncp
-    unless:
-      - stack_protection_iar
-      - zigbee_smart_energy_token_optimization
-  - path: protocol/zigbee/build/ncp-mfglib-library-cortexm3-gcc-efr32mg1v-rail-smart_energy_stack_tokens/ncp-mfglib-library.a
-    condition: 
-      - toolchain_gcc
-      - device_family_efr32mg1v
-      - zigbee_phy_2_4
-      - zigbee_smart_energy_token_optimization
-      - zigbee_ncp
-    unless:
-      - stack_protection_iar
   - path: protocol/zigbee/build/ncp-mfglib-library-cortexm3-gcc-efr32mg12p-rail/ncp-mfglib-library.a
     condition: 
       - toolchain_gcc
@@ -1291,14 +956,6 @@ library:
       - zigbee_ncp
     unless:
       - zigbee_multi_network
-      - stack_protection_iar
-  - path: protocol/zigbee/build/ncp-mfglib-library-cortexm3-gcc-efr32mg14p-rail/ncp-mfglib-library.a
-    condition: 
-      - toolchain_gcc
-      - device_family_efr32mg14p
-      - zigbee_phy_2_4
-      - zigbee_ncp
-    unless:
       - stack_protection_iar
   - path: protocol/zigbee/build/ncp-mfglib-library-cortexm3-gcc-efr32mg21-rail/ncp-mfglib-library.a
     condition: 
@@ -1462,3 +1119,27 @@ library:
     unless:
       - zigbee_multi_network
       - stack_protection_iar
+  - path: protocol/zigbee/build/mfglib-library-unix-gcc-simulation-null-arm32v7-ember_multi_network_stripped/mfglib-library.a
+    condition:
+      - toolchain_gcc
+      - zigbee_stack_unix
+      - zigbee_ncp
+      - linux_arch_32
+  - path: protocol/zigbee/build/mfglib-library-unix-gcc-simulation-null-arm64v8-ember_multi_network_stripped/mfglib-library.a
+    condition:
+      - toolchain_gcc
+      - zigbee_stack_unix
+      - zigbee_ncp
+      - linux_arch_64
+  - path: protocol/zigbee/build/ncp-mfglib-library-unix-gcc-simulation-null-arm32v7-ember_multi_network_stripped/ncp-mfglib-library.a
+    condition:
+      - toolchain_gcc
+      - zigbee_stack_unix
+      - zigbee_ncp
+      - linux_arch_32
+  - path: protocol/zigbee/build/ncp-mfglib-library-unix-gcc-simulation-null-arm64v8-ember_multi_network_stripped/ncp-mfglib-library.a
+    condition:
+      - toolchain_gcc
+      - zigbee_stack_unix
+      - zigbee_ncp
+      - linux_arch_64

@@ -32,7 +32,8 @@ component:
   - id: bluetooth_feature_extended_advertiser
   - id: bluetooth_feature_periodic_advertiser
   - id: bluetooth_feature_connection_phy_update
-  - id: bluetooth_feature_scanner
+  - id: bluetooth_feature_legacy_scanner
+  - id: bluetooth_feature_extended_scanner
   - id: device_init
   - id: bootloader_interface
 

@@ -27,6 +27,9 @@
  * 3. This notice may not be removed or altered from any source distribution.
  *
  *****************************************************************************/
+#ifndef EFR32BG24_LDMAXBAR_DEFINES_H
+#define EFR32BG24_LDMAXBAR_DEFINES_H
+
 /* Module source selection indices */
 #define _LDMAXBAR_CH_REQSEL_SOURCESEL_NONE               0x00000000UL /**< Mode NONE for LDMAXBAR_CH_REQSEL */
 #define _LDMAXBAR_CH_REQSEL_SOURCESEL_LDMAXBAR           0x00000001UL /**< Mode LDMAXBAR for LDMAXBAR_CH_REQSEL */
@@ -150,3 +153,5 @@
 #define LDMAXBAR_CH_REQSEL_SIGSEL_VDAC0CH1_REQ           (_LDMAXBAR_CH_REQSEL_SIGSEL_VDAC0CH1_REQ << 0)       /** Shifted Mode VDAC0CH1_REQ for LDMAXBAR_CH_REQSEL**/
 #define LDMAXBAR_CH_REQSEL_SIGSEL_VDAC1CH0_REQ           (_LDMAXBAR_CH_REQSEL_SIGSEL_VDAC1CH0_REQ << 0)       /** Shifted Mode VDAC1CH0_REQ for LDMAXBAR_CH_REQSEL**/
 #define LDMAXBAR_CH_REQSEL_SIGSEL_VDAC1CH1_REQ           (_LDMAXBAR_CH_REQSEL_SIGSEL_VDAC1CH1_REQ << 0)       /** Shifted Mode VDAC1CH1_REQ for LDMAXBAR_CH_REQSEL**/
+
+#endif /* EFR32BG24_LDMAXBAR_DEFINES_H */

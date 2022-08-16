@@ -99,7 +99,7 @@ void emAfPluginGbcsDeviceLogCliPrint(sl_cli_command_arg_t *arguments)
 // plugin gbcs-device-log is-sleepy <deviceType:1>
 void emAfPluginGbcsDeviceLogCliIsSleepy(sl_cli_command_arg_t *arguments)
 {
-  EmberAfGBCSDeviceType deviceType = (EmberAfGBCSDeviceType)sl_cli_get_argument_uint8(arguments, 1);
+  EmberAfGBCSDeviceType deviceType = (EmberAfGBCSDeviceType)sl_cli_get_argument_uint8(arguments, 0);
   if (emberAfPluginGbcsDeviceLogIsSleepyType(deviceType)) {
     emberAfPluginGbcsDeviceLogPrintln("Device type %d is a sleepy device type", deviceType);
   } else {

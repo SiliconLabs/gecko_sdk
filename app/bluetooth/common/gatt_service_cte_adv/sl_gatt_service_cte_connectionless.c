@@ -101,7 +101,7 @@ sl_status_t adv_cte_start(void)
   // Set PHY.
   if (sc == SL_STATUS_OK) {
     sc = sl_bt_extended_advertiser_set_phy(advertising_set_handle,
-                                           sl_bt_gap_1m_phy,
+                                           sl_bt_gap_phy_1m,
                                            ADV_CTE_PHY_CONVERT(adv_cte_phy));
   }
 

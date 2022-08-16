@@ -86,13 +86,13 @@ ReadApplicationRfRegion(zpal_radio_region_t* rfRegion);
  * @brief Writes the application Tx power configuration to file system
  */
 uint8_t
-SaveApplicationTxPowerlevel(int8_t ipower, int8_t power0dbmMeasured);
+SaveApplicationTxPowerlevel(zpal_tx_power_t ipower, zpal_tx_power_t power0dbmMeasured);
 
 /**
  * @brief Reads the application Tx power configuration from file system
  */
 uint8_t
-ReadApplicationTxPowerlevel(int8_t *ipower, int8_t *power0dbmMeasured);
+ReadApplicationTxPowerlevel(zpal_tx_power_t *ipower, zpal_tx_power_t *power0dbmMeasured);
 
 
 /**
@@ -102,7 +102,7 @@ ReadApplicationTxPowerlevel(int8_t *ipower, int8_t *power0dbmMeasured);
  * @return value was saved correctly
  */
 uint8_t
-SaveApplicationMaxLRTxPwr(int16_t maxTxPwr);
+SaveApplicationMaxLRTxPwr(zpal_tx_power_t maxTxPwr);
 
 /**
  * Reads the application Max LR tx power value configuration from file system
@@ -111,7 +111,7 @@ SaveApplicationMaxLRTxPwr(int16_t maxTxPwr);
  * @return value was read correctly
  */
 uint8_t
-ReadApplicationMaxLRTxPwr(int16_t *maxTxPwr);
+ReadApplicationMaxLRTxPwr(zpal_tx_power_t *maxTxPwr);
 
 /**
  * @brief Writes radio_debug_enable to file system

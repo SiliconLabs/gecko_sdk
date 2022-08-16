@@ -149,19 +149,19 @@ static void refresh_ui(uint8_t refresh_row)
         break;
       case ROW_PHY:
         switch (ui_state.phy) {
-          case sl_bt_gap_1m_phy_uncoded:
+          case sl_bt_gap_phy_coding_1m_uncoded:
             UI_PRINTF(THROUGHPUT_UI_PHY_1M_TEXT);
             UI_PRINTBOX("         ");
             break;
-          case sl_bt_gap_2m_phy_uncoded:
+          case sl_bt_gap_phy_coding_2m_uncoded:
             UI_PRINTF(THROUGHPUT_UI_PHY_2M_TEXT);
             UI_PRINTBOX("         ");
             break;
-          case sl_bt_gap_coded_phy_125k:
+          case sl_bt_gap_phy_coding_125k_coded:
             UI_PRINTF(THROUGHPUT_UI_PHY_CODED_125K_TEXT);
             UI_PRINTBOX(" ");
             break;
-          case sl_bt_gap_coded_phy_500k:
+          case sl_bt_gap_phy_coding_500k_coded:
             UI_PRINTF(THROUGHPUT_UI_PHY_CODED_500K_TEXT);
             UI_PRINTBOX(" ");
             break;

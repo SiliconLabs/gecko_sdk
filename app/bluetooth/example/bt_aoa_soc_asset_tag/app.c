@@ -3,7 +3,7 @@
  * @brief Core application logic.
  *******************************************************************************
  * # License
- * <b>Copyright 2020 Silicon Laboratories Inc. www.silabs.com</b>
+ * <b>Copyright 2022 Silicon Laboratories Inc. www.silabs.com</b>
  *******************************************************************************
  *
  * SPDX-License-Identifier: Zlib
@@ -28,7 +28,6 @@
  *
  ******************************************************************************/
 #include "em_common.h"
-#include "app_log.h"
 #include "app_assert.h"
 #include "sl_bluetooth.h"
 #include "gatt_db.h"
@@ -81,13 +80,6 @@ void sl_bt_on_event(sl_bt_msg_t *evt)
     // This event indicates the device has started and the radio is ready.
     // Do not call any stack command before receiving this boot event!
     case sl_bt_evt_system_boot_id:
-      // Print boot message.
-      app_log_info("Bluetooth stack booted: v%d.%d.%d-b%d\n",
-                   evt->data.evt_system_boot.major,
-                   evt->data.evt_system_boot.minor,
-                   evt->data.evt_system_boot.patch,
-                   evt->data.evt_system_boot.build);
-
       // Extract unique ID from BT Address.
       sc = sl_bt_system_get_identity_address(&address, &address_type);
       app_assert_status(sc);
@@ -108,20 +100,11 @@ void sl_bt_on_event(sl_bt_msg_t *evt)
                                                    system_id);
       app_assert_status(sc);
 
-      app_log_info("Bluetooth %s address: %02X:%02X:%02X:%02X:%02X:%02X\n",
-                   address_type ? "static random" : "public device",
-                   address.addr[5],
-                   address.addr[4],
-                   address.addr[3],
-                   address.addr[2],
-                   address.addr[1],
-                   address.addr[0]);
-
       // Create an advertising set.
       sc = sl_bt_advertiser_create_set(&advertising_set_handle);
       app_assert_status(sc);
 
-      // Generate data for advertising
+      // Generate data for advertising.
       sc = sl_bt_legacy_advertiser_generate_data(advertising_set_handle,
                                                  sl_bt_advertiser_general_discoverable);
       app_assert_status(sc);
@@ -134,56 +117,33 @@ void sl_bt_on_event(sl_bt_msg_t *evt)
         0,   // adv. duration
         0);  // max. num. adv. events
       app_assert_status(sc);
-      // Start general advertising and enable connections.
+
+      // Enable connections.
       sc = sl_bt_legacy_advertiser_start(advertising_set_handle,
                                          sl_bt_advertiser_connectable_scannable);
       app_assert_status(sc);
-      app_log_info("Started advertising\n");
       break;
 
     // -------------------------------
     // This event indicates that a new connection was opened.
     case sl_bt_evt_connection_opened_id:
-      app_log_info("Connection opened: %d\n", evt->data.evt_connection_opened.connection);
-      app_log_info("Client address: %02X:%02X:%02X:%02X:%02X:%02X\n",
-                   evt->data.evt_connection_opened.address.addr[5],
-                   evt->data.evt_connection_opened.address.addr[4],
-                   evt->data.evt_connection_opened.address.addr[3],
-                   evt->data.evt_connection_opened.address.addr[2],
-                   evt->data.evt_connection_opened.address.addr[1],
-                   evt->data.evt_connection_opened.address.addr[0]);
       connection_count++;
       // Continue advertising if the stack allows further connections.
       if (connection_count < SL_BT_CONFIG_MAX_CONNECTIONS) {
-        // Generate data for advertising
-        sc = sl_bt_legacy_advertiser_generate_data(advertising_set_handle,
-                                                   sl_bt_advertiser_general_discoverable);
-        app_assert_status(sc);
-
         sc = sl_bt_legacy_advertiser_start(advertising_set_handle,
                                            sl_bt_advertiser_connectable_scannable);
         app_assert_status(sc);
-        app_log_info("Continue advertising\n");
       }
       break;
 
     // -------------------------------
     // This event indicates that a connection was closed.
     case sl_bt_evt_connection_closed_id:
-      app_log_info("Connection closed: %d\n",
-                   evt->data.evt_connection_closed.connection);
-
-      // Generate data for advertising
-      sc = sl_bt_legacy_advertiser_generate_data(advertising_set_handle,
-                                                 sl_bt_advertiser_general_discoverable);
-      app_assert_status(sc);
-
       if (connection_count >= SL_BT_CONFIG_MAX_CONNECTIONS) {
         // Restart advertising after client has disconnected.
         sc = sl_bt_legacy_advertiser_start(advertising_set_handle,
                                            sl_bt_advertiser_connectable_scannable);
         app_assert_status(sc);
-        app_log_info("Restart advertising\n");
       }
       connection_count--;
       break;

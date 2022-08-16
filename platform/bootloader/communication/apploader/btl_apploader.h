@@ -68,9 +68,9 @@ int32_t bootloader_apploader_communication_start(void);
  * @return Error code indicating success or failure.
  ******************************************************************************/
 int32_t bootloader_apploader_communication_main(ImageProperties_t *imageProps,
-                                                ParserContext_t *parserContext,
-                                                DecryptContext_t *decryptContext,
-                                                AuthContext_t *authContext,
+                                                void *parserContext,
+                                                void *decryptContext,
+                                                void *authContext,
                                                 const BootloaderParserCallbacks_t *parseCb);
 
 /** @} addtogroup Communication */

@@ -1,5 +1,5 @@
 id: bootloader_uart_xmodem_nonsecure
-label: "UART XMODEM"
+label: "UART XMODEM (Non-Secure)"
 package: bootloader
 description: Firmware upgrade over UART using the XMODEM-CRC file transfer protocol
 category: Platform|Bootloader|TrustZone NonSecure|Communication

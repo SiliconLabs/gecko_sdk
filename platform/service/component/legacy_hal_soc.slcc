@@ -27,6 +27,7 @@ requires:
   - name: emlib_rmu
   - name: status
   - name: token_manager
+  - name: legacy_hal_wdog
   - name: iostream_usart_core
     condition:
       - iostream

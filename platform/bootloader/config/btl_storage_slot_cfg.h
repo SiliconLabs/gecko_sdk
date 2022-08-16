@@ -31,9 +31,11 @@
 #define SLOT0_ENABLE  0
 
 // <o SLOT0_START> Start Address
+// <f .h>
 #define SLOT0_START   0
 
 // <o SLOT0_SIZE> Slot Size
+// <f .h>
 #define SLOT0_SIZE 65536
 
 // <e SLOT1_ENABLE> Enable Slot 1
@@ -41,9 +43,11 @@
 #define SLOT1_ENABLE  0
 
 // <o SLOT1_START> Start Address
+// <f .h>
 #define SLOT1_START 0
 
 // <o SLOT1_SIZE> Slot Size
+// <f .h>
 #define SLOT1_SIZE 69632
 
 // <e SLOT2_ENABLE> Enable Slot 2
@@ -51,9 +55,11 @@
 #define SLOT2_ENABLE  0
 
 // <o SLOT2_START> Start Address
+// <f .h>
 #define SLOT2_START 0
 
 // <o SLOT2_SIZE> Slot Size
+// <f .h>
 #define SLOT2_SIZE 73728
 // </e>
 // </e>
@@ -94,6 +100,7 @@
     #define BTL_STORAGE_NUM_SLOTS (0)
     #define BTL_STORAGE_SLOTS \
   {                           \
+    { 0, 0 },                 \
   }                           \
   // Number of slots in bootload list
     #define BTL_STORAGE_BOOTLOAD_LIST_LENGTH BTL_STORAGE_NUM_SLOTS

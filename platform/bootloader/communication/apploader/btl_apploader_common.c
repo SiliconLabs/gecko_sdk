@@ -35,9 +35,6 @@
   #include "core/btl_reset.h"
 #endif
 
-// Debug
-#include "debug/btl_debug.h"
-
 #include <stdint.h>
 #include <string.h>
 
@@ -69,11 +66,14 @@
 static volatile bool isConnected;
 static volatile bool hasDisconnected;
 static volatile bool started;
+
 static ImageProperties_t *apploader_imageProps;
-static ParserContext_t *apploader_parserContext;
-static DecryptContext_t *apploader_decryptContext;
-static AuthContext_t *apploader_authContext;
+#if !defined (BOOTLOADER_NONSECURE)
 static const BootloaderParserCallbacks_t *apploader_parseCb;
+static void *apploader_parserContext;
+static void *apploader_decryptContext;
+static void *apploader_authContext;
+#endif
 
 // -----------------------------------------------------------------------------
 // Static local functions
@@ -100,13 +100,21 @@ void bootloader_apploader_disconnection_complete()
     if (apploader_imageProps->contents & BTL_IMAGE_CONTENT_SE) {
       if (bootload_checkSeUpgradeVersion(apploader_imageProps->seUpgradeVersion)) {
         // Install SE upgrade
+#if defined(BOOTLOADER_NONSECURE)
+        bootload_commitSeUpgrade();
+#else
         bootload_commitSeUpgrade(BTL_UPGRADE_LOCATION);
+#endif
       }
     }
     if (apploader_imageProps->contents & BTL_IMAGE_CONTENT_BOOTLOADER) {
       if (apploader_imageProps->bootloaderVersion > bootload_getBootloaderVersion()) {
         // Install bootloader upgrade
+#if defined(BOOTLOADER_NONSECURE)
+        bootload_commitBootloaderUpgrade(apploader_imageProps->bootloaderUpgradeSize);
+#else
         bootload_commitBootloaderUpgrade(BTL_UPGRADE_LOCATION, apploader_imageProps->bootloaderUpgradeSize);
+#endif
       }
     }
   }
@@ -120,17 +128,11 @@ uint32_t bootloader_apploader_get_bootloader_version()
 uint32_t bootloader_apploader_get_application_version()
 {
   uint32_t appVersion = 0;
-  BareBootTable_t *appStart = (BareBootTable_t *)BTL_APPLICATION_BASE;
-  ApplicationProperties_t *appProperties = (ApplicationProperties_t *)(appStart->signature);
-
-  if (((size_t)appProperties > (size_t)mainBootloaderTable->startOfAppSpace)
-      && ((size_t)appProperties < (size_t)mainBootloaderTable->endOfAppSpace)) {
-    // App properties points into flash
-    if (bootload_checkApplicationPropertiesMagic(appProperties)) {
-      appVersion = appProperties->app.version;
-    }
+  if (bootload_getApplicationVersion(&appVersion)) {
+    return appVersion;
   }
-  return appVersion;
+
+  return 0u;
 }
 
 int32_t bootloader_apploader_parse_gbl(uint8_t *data, size_t len)
@@ -142,7 +144,7 @@ int32_t bootloader_apploader_parse_gbl(uint8_t *data, size_t len)
                      len,
                      apploader_imageProps);
 #else
-  ret = parser_parse(apploader_parserContext,
+  ret = parser_parse((ParserContext_t *)apploader_parserContext,
                      apploader_imageProps,
                      data,
                      len,
@@ -156,9 +158,9 @@ int32_t bootloader_apploader_parser_init()
 #if defined(BOOTLOADER_NONSECURE)
   return parser_init(PARSER_FLAG_PARSE_CUSTOM_TAGS);
 #else
-  return parser_init(apploader_parserContext,
-                     apploader_decryptContext,
-                     apploader_authContext,
+  return parser_init((ParserContext_t *)apploader_parserContext,
+                     (DecryptContext_t *)apploader_decryptContext,
+                     (AuthContext_t *)apploader_authContext,
                      PARSER_FLAG_PARSE_CUSTOM_TAGS);
 #endif
 }
@@ -182,7 +184,9 @@ int32_t bootloader_apploader_parser_finish()
 
 void bootloader_apploader_communication_init(void)
 {
+#if !defined(BOOTLOADER_NONSECURE)
   sl_device_init_clocks();
+#endif
 
   // Configure Bluetooth
   static sl_apploader_config_t btConfig = {
@@ -253,16 +257,19 @@ int32_t bootloader_apploader_communication_start(void)
 }
 
 int32_t bootloader_apploader_communication_main(ImageProperties_t *imageProps,
-                                                ParserContext_t *parserContext,
-                                                DecryptContext_t *decryptContext,
-                                                AuthContext_t *authContext,
+                                                void *parserContext,
+                                                void *decryptContext,
+                                                void *authContext,
                                                 const BootloaderParserCallbacks_t *parseCb)
 {
   apploader_imageProps = imageProps;
+#if !defined (BOOTLOADER_NONSECURE)
   apploader_parserContext = parserContext;
   apploader_decryptContext = decryptContext;
   apploader_authContext = authContext;
   apploader_parseCb = parseCb;
+#endif
+
   while (1) {
     if (isConnected) {
       sl_apploader_run();

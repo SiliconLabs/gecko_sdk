@@ -20,6 +20,10 @@
 
 #include "emstatus.h"
 
+#ifdef __cplusplus
+extern "C" {
+#endif
+
 #define DMD_HORIZONTAL_SIZE         (480)
 #define DMD_VERTICAL_SIZE           (272)
 #define DMD_DISPLAY_BACKLIGHT_PORT  (gpioPortI)
@@ -29,5 +33,9 @@
 
 EMSTATUS DMD_startDrawing(void);
 EMSTATUS DMD_stopDrawing(void);
+
+#ifdef __cplusplus
+}
+#endif
 
 #endif /* __DMD_ETM043010EDH6_H__ */

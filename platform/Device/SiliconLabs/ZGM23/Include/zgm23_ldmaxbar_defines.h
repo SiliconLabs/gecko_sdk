@@ -27,6 +27,9 @@
  * 3. This notice may not be removed or altered from any source distribution.
  *
  *****************************************************************************/
+#ifndef ZGM23_LDMAXBAR_DEFINES_H
+#define ZGM23_LDMAXBAR_DEFINES_H
+
 /* Module source selection indices */
 #define _LDMAXBAR_CH_REQSEL_SOURCESEL_NONE               0x00000000UL /**< Mode NONE for LDMAXBAR_CH_REQSEL */
 #define _LDMAXBAR_CH_REQSEL_SOURCESEL_LDMAXBAR           0x00000001UL /**< Mode LDMAXBAR for LDMAXBAR_CH_REQSEL */
@@ -158,3 +161,5 @@
 #define LDMAXBAR_CH_REQSEL_SIGSEL_EUSART2TXFL            (_LDMAXBAR_CH_REQSEL_SIGSEL_EUSART2TXFL << 0)        /** Shifted Mode EUSART2TXFL for LDMAXBAR_CH_REQSEL**/
 #define LDMAXBAR_CH_REQSEL_SIGSEL_LESENSEFIFO            (_LDMAXBAR_CH_REQSEL_SIGSEL_LESENSEFIFO << 0)        /** Shifted Mode LESENSEFIFO for LDMAXBAR_CH_REQSEL**/
 #define LDMAXBAR_CH_REQSEL_SIGSEL_LCD                    (_LDMAXBAR_CH_REQSEL_SIGSEL_LCD << 0)                /** Shifted Mode LCD for LDMAXBAR_CH_REQSEL**/
+
+#endif /* ZGM23_LDMAXBAR_DEFINES_H */

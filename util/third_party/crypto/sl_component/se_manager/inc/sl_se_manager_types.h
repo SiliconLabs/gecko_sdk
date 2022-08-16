@@ -346,18 +346,24 @@ typedef struct {
 
 /// CCM streaming context.
 typedef struct {
-  uint32_t message_length;          ///< Current length of the encrypted/decrypted data
+  uint32_t processed_message_length;///< Current length of the encrypted/decrypted data
   uint32_t total_message_length;    ///< Total length of data to be encrypted/decrypted
   uint8_t  iv[13];                  ///< Nonce (MAX size is 13 bytes)
-  uint8_t  se_ctx[32];              ///< SE encryption state
   uint32_t tag_len;                 ///< Tag length
   sl_se_cipher_operation_t     mode;///< CCM mode (decrypt or encrypt)
+  #if (_SILICON_LABS_32B_SERIES_2_CONFIG == 1)
+  uint8_t nonce_counter[16];        ///< Counter to keep CTR state
+  uint8_t iv_len;                   ///< Nonce length
+  uint8_t cbc_mac_state[16];        ///< State of authenication/MAC
+  uint8_t final_data[16];           ///< Input data saved for finish operation
+  #else
+  uint8_t  se_ctx[32];              ///< SE encryption state
   union {
     uint8_t tagbuf[16];             ///< Tag
     uint8_t final_data[16];         ///< Input data saved for finish operation
   } mode_specific_buffer;
+  #endif
   uint8_t final_data_length;        ///< Length of data saved
-  bool    last_update_operation;    ///< Last operation / update
 } sl_se_ccm_multipart_context_t;
 
 /// GCM streaming context. Deprecated.

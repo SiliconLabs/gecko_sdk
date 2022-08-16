@@ -630,7 +630,7 @@ void app_process_action(void)
         printf("  + Destroying a %d-bit %s key... ", sizeof(cfb_key) * 8,
                symmetric_key_storage_string[symmetric_key_storage_select]);
         if (destroy_key() != PSA_SUCCESS) {
-          return;
+          break;
         }
         // Start encryption
         encrypt_decrypt = false;
@@ -771,7 +771,7 @@ void app_process_action(void)
         printf("  + Destroying a %d-bit %s key... ", sizeof(ctr_key) * 8,
                symmetric_key_storage_string[symmetric_key_storage_select]);
         if (destroy_key() != PSA_SUCCESS) {
-          return;
+          break;
         }
         // Start encryption
         encrypt_decrypt = false;
@@ -913,7 +913,7 @@ void app_process_action(void)
         printf("  + Destroying a %d-bit %s key... ", sizeof(chacha20_key) * 8,
                symmetric_key_storage_string[symmetric_key_storage_select]);
         if (destroy_key() != PSA_SUCCESS) {
-          return;
+          break;
         }
         encrypt_decrypt = false;
         print_key_storage();

@@ -32,18 +32,23 @@
 #include "microfrontend/lib/frontend_util.h"
 #include "sl_ml_audio_feature_generation.h"
 #include "sl_ml_audio_feature_generation_config.h"
+#include "sl_common.h"
 
 /*******************************************************************************
  *********************************   DEFINES   *********************************
  ******************************************************************************/
 #define AUDIO_BUFFER_CHUNK_SIZE     512
 #define AUDIO_BUFFER_SIZE           (SL_ML_AUDIO_FEATURE_GENERATION_AUDIO_BUFFER_SIZE)
-#define FEATURE_BUFFER_SLICE_COUNT  (1 + ((SL_ML_FRONTEND_SAMPLE_LENGTH_MS - SL_ML_FRONTEND_WINDOW_SIZE_MS) / SL_ML_FRONTEND_WINDOW_STEP_MS)) 
-#define FEATURE_BUFFER_SIZE         (SL_ML_FRONTEND_FILTERBANK_N_CHANNELS * FEATURE_BUFFER_SLICE_COUNT)                    
+#define FEATURE_BUFFER_SLICE_COUNT  (1 + ((SL_ML_FRONTEND_SAMPLE_LENGTH_MS - SL_ML_FRONTEND_WINDOW_SIZE_MS) / SL_ML_FRONTEND_WINDOW_STEP_MS))
+#define FEATURE_BUFFER_SIZE         (SL_ML_FRONTEND_FILTERBANK_N_CHANNELS * FEATURE_BUFFER_SLICE_COUNT)
 
+// Quantization constants
 // Feature range min and max, used for determining valid range to quantize from
 #define SL_ML_AUDIO_FEATURE_GENERATION_QUANTIZE_FEATURE_RANGE_MIN      0
-#define SL_ML_AUDIO_FEATURE_GENERATION_QUANTIZE_FEATURE_RANGE_MAX      666     
+#define SL_ML_AUDIO_FEATURE_GENERATION_QUANTIZE_FEATURE_RANGE_MAX      666
+
+// Dynamic quantization scale range in dB
+#define SL_ML_AUDIO_FEATURE_GENERATION_QUANTIZE_DYNAMIC_SCALE_RANGE_DB 40
 
 /*******************************************************************************
  ***************************  LOCAL VARIABLES   ********************************
@@ -249,6 +254,53 @@ sl_status_t sli_ml_audio_feature_generation_get_features_quantized(int8_t *buffe
   return SL_STATUS_OK;
 }
 
+/***************************************************************************//**
+ * @brief
+ *     This converts the uint16 spectrograms to int8 using dynamic scaling
+ *
+ *    @ref dynamic_range the dynamic range of uint16 spectrogram to be mapped to int8
+ *    dynamic_range = DYNAMIC_RANGE_DB*(2^log_scale_shift)*ln(10)/20
+ *    A dynamic range of 300 corresponds to a DYNAMIC_RANGE_DB of 40 dB
+ ******************************************************************************/
+sl_status_t sli_ml_audio_feature_generation_get_features_dynamically_quantized(int8_t *buffer,
+                                                                               size_t num_elements,
+                                                                               uint16_t dynamic_range)
+{
+  if (num_elements != FEATURE_BUFFER_SIZE) {
+    return SL_STATUS_INVALID_PARAMETER;
+  }
+
+  if (dynamic_range == 0) {
+    return SL_STATUS_INVALID_PARAMETER;
+  }
+
+  // Find the maximum value in the uint16 spectrogram
+  int32_t maxval = 0;
+  for (int i = 0; i < FEATURE_BUFFER_SIZE; i++) {
+    const int capture_index = (feature_buffer_start + i) % FEATURE_BUFFER_SIZE;
+    const int32_t value = (int32_t)feature_buffer[capture_index];
+    maxval = SL_MAX(value, maxval);
+  }
+
+  const int32_t minval = SL_MAX(maxval - dynamic_range, 0);
+  const int32_t val_range = SL_MAX(maxval - minval, 1);
+
+  // Scaling the uint16 spectrogram between -128 and +127 using the given range
+  for (int i = 0; i < FEATURE_BUFFER_SIZE; i++) {
+    const int capture_index = (feature_buffer_start + i) % FEATURE_BUFFER_SIZE;
+    int32_t value = (int32_t)feature_buffer[capture_index];
+    value -= minval;
+    value *= 255;
+    value /= val_range;
+    value -= 128;
+    value = SL_MIN(SL_MAX(value, -128), 127);
+    buffer[i] = (int8_t)value;
+  }
+
+  num_unfetched_slices = 0;
+  return SL_STATUS_OK;
+}
+
 #if defined(SL_CATALOG_TFLITE_MICRO_PRESENT)
 /***************************************************************************//**
  *  Fills a TensorFlow tensor with feature data
@@ -257,10 +309,23 @@ sl_status_t sl_ml_audio_feature_generation_fill_tensor(TfLiteTensor *input_tenso
 {
   sl_status_t status = SL_STATUS_OK;
   if (input_tensor->type == kTfLiteInt8) {
-    status = sli_ml_audio_feature_generation_get_features_quantized(input_tensor->data.int8,
-                                                                   input_tensor->bytes, 
-                                                                   SL_ML_AUDIO_FEATURE_GENERATION_QUANTIZE_FEATURE_RANGE_MIN, 
-                                                                   SL_ML_AUDIO_FEATURE_GENERATION_QUANTIZE_FEATURE_RANGE_MAX);
+
+    #if defined(SL_ML_AUDIO_FEATURE_GENERATION_QUANTIZE_DYNAMIC_SCALE_ENABLE) && (SL_ML_AUDIO_FEATURE_GENERATION_QUANTIZE_DYNAMIC_SCALE_ENABLE == 1)
+
+      // Set the scale range for dynamic quantization
+      // dynamic_range = DYNAMIC_SCALE_RANGE_DB*(2^log_scale_shift)*ln(10)/20
+      #define LN10_DIV_20 0.11512925465
+      const int dynamic_scale_range = (int)(SL_ML_AUDIO_FEATURE_GENERATION_QUANTIZE_DYNAMIC_SCALE_RANGE_DB * (float)(1 << SL_ML_FRONTEND_LOG_SCALE_SHIFT) * LN10_DIV_20);
+      status = sli_ml_audio_feature_generation_get_features_dynamically_quantized(input_tensor->data.int8,
+                                                                                  input_tensor->bytes,
+                                                                                  dynamic_scale_range);
+    #else
+      status = sli_ml_audio_feature_generation_get_features_quantized(input_tensor->data.int8,
+                                                                    input_tensor->bytes,
+                                                                    SL_ML_AUDIO_FEATURE_GENERATION_QUANTIZE_FEATURE_RANGE_MIN,
+                                                                    SL_ML_AUDIO_FEATURE_GENERATION_QUANTIZE_FEATURE_RANGE_MAX);
+    #endif
+
   } else {
     status = SL_STATUS_INVALID_PARAMETER;
   }

@@ -7,6 +7,7 @@
 #include <PowerStrip_hw.h>
 #include <ZAF_Actuator.h>
 #include <sl_simple_rgb_pwm_led.h>
+#include <sl_simple_rgb_pwm_led_instances.h>
 #include <Assert.h>
 #include <ev_man.h>
 #include <events.h>
@@ -15,7 +16,6 @@
 //#define DEBUGPRINT
 #include "DebugPrint.h"
 #include <board.h>
-
 
 #define OUTLET1_TOGGLE_BTN        APP_BUTTON_A
 #define OUTLET2_DIMMER_BTN        APP_BUTTON_B
@@ -34,74 +34,6 @@ STATIC_ASSERT((APP_BUTTON_LEARN_RESET != OUTLET1_TOGGLE_BTN) &&
 STATIC_ASSERT((APP_LED_INDICATOR != OUTLET1_STATUS_LED),
               STATIC_ASSERT_FAILED_led_overlap);
 
-
-#if defined(BUILDING_WITH_UC)
-#include "sl_simple_rgb_pwm_led_instances.h"
-#else
-
-#include "sl_simple_rgb_pwm_led_led_config.h"
-
-sl_led_pwm_t red_led = {
-  .port = SL_SIMPLE_RGB_PWM_LED_LED_RED_PORT,
-  .pin = SL_SIMPLE_RGB_PWM_LED_LED_RED_PIN,
-  .polarity = SL_SIMPLE_RGB_PWM_LED_LED_RED_POLARITY,
-  .channel = SL_SIMPLE_RGB_PWM_LED_LED_RED_CHANNEL,
-#if defined(SL_SIMPLE_RGB_PWM_LED_LED_RED_LOC)
-  .location = SL_SIMPLE_RGB_PWM_LED_LED_RED_LOC,
-#endif
-  .timer = SL_SIMPLE_RGB_PWM_LED_LED_PERIPHERAL,
-  .frequency = SL_SIMPLE_RGB_PWM_LED_LED_FREQUENCY,
-  .resolution = SL_SIMPLE_RGB_PWM_LED_LED_RESOLUTION,
-};
-
-sl_led_pwm_t green_led = {
-  .port = SL_SIMPLE_RGB_PWM_LED_LED_GREEN_PORT,
-  .pin = SL_SIMPLE_RGB_PWM_LED_LED_GREEN_PIN,
-  .polarity = SL_SIMPLE_RGB_PWM_LED_LED_GREEN_POLARITY,
-  .channel = SL_SIMPLE_RGB_PWM_LED_LED_GREEN_CHANNEL,
-#if defined(SL_SIMPLE_RGB_PWM_LED_LED_GREEN_LOC)
-  .location = SL_SIMPLE_RGB_PWM_LED_LED_GREEN_LOC,
-#endif
-  .timer = SL_SIMPLE_RGB_PWM_LED_LED_PERIPHERAL,
-  .frequency = SL_SIMPLE_RGB_PWM_LED_LED_FREQUENCY,
-  .resolution = SL_SIMPLE_RGB_PWM_LED_LED_RESOLUTION,
-};
-
-sl_led_pwm_t blue_led = {
-  .port = SL_SIMPLE_RGB_PWM_LED_LED_BLUE_PORT,
-  .pin = SL_SIMPLE_RGB_PWM_LED_LED_BLUE_PIN,
-  .polarity = SL_SIMPLE_RGB_PWM_LED_LED_BLUE_POLARITY,
-  .channel = SL_SIMPLE_RGB_PWM_LED_LED_BLUE_CHANNEL,
-#if defined(SL_SIMPLE_RGB_PWM_LED_LED_BLUE_LOC)
-  .location = SL_SIMPLE_RGB_PWM_LED_LED_BLUE_LOC,
-#endif
-  .timer = SL_SIMPLE_RGB_PWM_LED_LED_PERIPHERAL,
-  .frequency = SL_SIMPLE_RGB_PWM_LED_LED_FREQUENCY,
-  .resolution = SL_SIMPLE_RGB_PWM_LED_LED_RESOLUTION,
-};
-
-sl_simple_rgb_pwm_led_context_t simple_rgb_pwm_led_context = {
-  .red = &red_led,
-  .green = &green_led,
-  .blue = &blue_led,
-
-  .timer = SL_SIMPLE_RGB_PWM_LED_LED_PERIPHERAL,
-  .frequency = SL_SIMPLE_RGB_PWM_LED_LED_FREQUENCY,
-  .resolution = SL_SIMPLE_RGB_PWM_LED_LED_RESOLUTION,
-};
-
-const sl_led_rgb_pwm_t sl_led = {
-  .led_common.context = &simple_rgb_pwm_led_context,
-  .led_common.init = sl_simple_rgb_pwm_led_init,
-  .led_common.turn_on = sl_simple_rgb_pwm_led_turn_on,
-  .led_common.turn_off = sl_simple_rgb_pwm_led_turn_off,
-  .led_common.toggle = sl_simple_rgb_pwm_led_toggle,
-  .led_common.get_state = sl_simple_rgb_pwm_led_get_state,
-  .set_rgb_color = sl_simple_rgb_pwm_led_set_color,
-  .get_rgb_color = sl_simple_rgb_pwm_led_get_color,
-};
-
-#endif // BUILDING_WITH_UC
 
 static void button_handler(BUTTON_EVENT event, bool is_called_from_isr)
 {
@@ -170,10 +102,6 @@ void PowerStrip_hw_init(void)
   Board_EnableButton(OUTLET1_TOGGLE_BTN);
   Board_EnableButton(OUTLET2_DIMMER_BTN);
   Board_EnableButton(NOTIFICATION_TOGGLE_BTN);
-
-#if !defined(BUILDING_WITH_UC)
-  sl_led_init((sl_led_t *)&sl_led);
-#endif /* !defined(BUILDING_WITH_UC) */
 }
 
 void PowerStrip_hw_binary_switch_handler(bool on)
@@ -184,5 +112,5 @@ void PowerStrip_hw_binary_switch_handler(bool on)
 void PowerStrip_hw_multilevel_switch_handler(cc_multilevel_switch_t * p_switch)
 {
   const uint8_t level = ZAF_Actuator_GetCurrentValue(&p_switch->actuator);
-  sl_led_set_rgb_color(&sl_led, (uint16_t)level, (uint16_t)level, (uint16_t)level);
+  sl_led_set_rgb_color(&sl_simple_rgb_pwm_led_led, (uint16_t)level, (uint16_t)level, (uint16_t)level);
 }

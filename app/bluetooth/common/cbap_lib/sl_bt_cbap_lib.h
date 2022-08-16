@@ -86,4 +86,11 @@ sl_status_t sl_bt_cbap_lib_verify_remote_oob_data(uint8_t *remote_random,
                                                   uint8_t *remote_confirm,
                                                   uint8_t *remote_oob_signature);
 
+/***************************************************************************//**
+ * Destroys the keys which were used during the CBAP process.
+ *
+ * @return SL_STATUS_OK if OK, error code otherwise.
+ ******************************************************************************/
+sl_status_t sl_bt_cbap_destroy_key(void);
+
 #endif // SL_BT_CBAP_LIB_H

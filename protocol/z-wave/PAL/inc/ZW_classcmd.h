@@ -1,10 +1,11 @@
-// Generated on: 5/6/2022 2:34:49 PM
+// This file is auto generated. Do not edit it manually!
+// Generated on: 7/1/2022 10:08:05 AM
  /**
  * @file
  * @version 2.10.0
  * Device and command class types and definitions.
  * 
- * @copyright 2018 Silicon Laboratories Inc.
+ * @copyright 2022 Silicon Laboratories Inc.
  */
 #ifndef _ZW_CLASSCMD_H_
 #define _ZW_CLASSCMD_H_
@@ -14080,6 +14081,9 @@
 
 /* Max. frame size to allow routing over 4 hops */
 #define META_DATA_MAX_DATA_SIZE                      48
+
+/* Max frame that can be transmitted */
+#define TX_DATA_MAX_DATA_SIZE                        170
 
 /************************************************************/
 /* Structs and unions that can be used by the application   */
@@ -52540,6 +52544,7 @@ ZW_FRAME_COLLECTION_MACRO4
 ZW_FRAME_COLLECTION_MACRO5
 ZW_FRAME_COLLECTION_MACRO6
 ZW_FRAME_COLLECTION_MACRO7
+  uint8_t                                bPadding[TX_DATA_MAX_DATA_SIZE];
 } ZW_APPLICATION_TX_BUFFER;
 
 /************************************************************/
@@ -52561,7 +52566,7 @@ ZW_FRAME_COLLECTION_MACRO4
 ZW_FRAME_COLLECTION_MACRO5
 ZW_FRAME_COLLECTION_MACRO6
 ZW_FRAME_COLLECTION_MACRO7
-  uint8_t                                    bPadding[META_DATA_MAX_DATA_SIZE];
+  uint8_t                                bPadding[META_DATA_MAX_DATA_SIZE];
 } ZW_APPLICATION_META_TX_BUFFER;
 
 

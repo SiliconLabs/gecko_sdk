@@ -327,7 +327,7 @@ void sl_bt_on_event(sl_bt_msg_t* evt)
         connect_remote(CONF_get()->remote_address);
       } else {
         DEBUG_INFO("Scanning for VoBLE devices...");
-        sc = sl_bt_scanner_start(sl_bt_gap_1m_phy, sl_bt_scanner_discover_generic);
+        sc = sl_bt_scanner_start(sl_bt_gap_phy_1m, sl_bt_scanner_discover_generic);
         app_assert(sc == SL_STATUS_OK,
                    "[E: 0x%04x] Failed to start discovery #1\n",
                    (int)sc);
@@ -527,7 +527,7 @@ void sl_bt_on_event(sl_bt_msg_t* evt)
 
     // -------------------------------
     // This event is triggered when a scan report received
-    case sl_bt_evt_scanner_scan_report_id:
+    case sl_bt_evt_scanner_legacy_advertisement_report_id:
       SCAN_Process_scan_response(evt);
 
       if (SCAN_Is_Device_Found()) {
@@ -631,7 +631,7 @@ static void connect_remote(bd_addr remote_address)
   }
 
   //move to connect state, connect to device address
-  sc = sl_bt_connection_open(remote_address, /* le_gap_address_type_public = */ 0, sl_bt_gap_1m_phy, &ble_connection);
+  sc = sl_bt_connection_open(remote_address, /* le_gap_address_type_public = */ 0, sl_bt_gap_phy_1m, &ble_connection);
   if (sc != SL_STATUS_OK) {
     ERROR_EXIT("Error, open failed,%x", sc);
   }

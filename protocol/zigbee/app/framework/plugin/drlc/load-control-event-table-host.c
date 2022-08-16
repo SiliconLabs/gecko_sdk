@@ -19,7 +19,11 @@
 #include "load-control-event-table.h"
 #include "app/framework/security/crypto-state.h"
 
+#ifdef UC_BUILD
+void emAfDemandResponseLoadControlClusterDsaSignCallback(EmberStatus status, EmberMessageBuffer message)
+#else // !UC_BUILD
 void ezspDsaSignHandler(EmberStatus status, uint8_t messageLength, uint8_t* message)
+#endif // UC_BUILD
 {
   // Message has been queued by the stack for sending.  Nothing more to do.
   emAfCryptoOperationComplete();

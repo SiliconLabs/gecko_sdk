@@ -44,7 +44,7 @@
 // <gpio optional=true> SL_MEMLCD_EXTCOMIN
 // $[GPIO_SL_MEMLCD_EXTCOMIN]
 #define SL_MEMLCD_EXTCOMIN_PORT                  gpioPortC
-#define SL_MEMLCD_EXTCOMIN_PIN                   9
+#define SL_MEMLCD_EXTCOMIN_PIN                   8
 
 // [GPIO_SL_MEMLCD_EXTCOMIN]$
 

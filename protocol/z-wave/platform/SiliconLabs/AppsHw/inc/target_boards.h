@@ -50,9 +50,6 @@
 #elif defined(RADIO_BOARD_BRD2603A)
 #include "radio_board_brd2603a.h"
 
-#else
-#error "Undefined board!"
-
 #endif
 
 #endif /* TARGET_BOARDS_H */

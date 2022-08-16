@@ -104,7 +104,7 @@ static sl_status_t process_output(){
 
   if (process_status != kTfLiteOk) {
     return SL_STATUS_FAIL;
-  } 
+  }
 
   if (is_new_command) {
         // Print heard command 

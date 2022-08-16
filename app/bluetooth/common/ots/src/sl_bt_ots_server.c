@@ -576,9 +576,9 @@ static void set_object_invalid(sl_bt_ots_object_id_t *object)
 static sl_bt_ots_characteristic_uuid_index find_characteristic_index(uint16_t handle,
                                                                      sl_bt_ots_server_t **server)
 {
+  *server = NULL;
   // Find handle on a server
   if (INVALID_CHARACTERISTIC_HANDLE == handle) {
-    server = NULL;
     return SL_BT_OTS_CHARACTERISTIC_UUID_INDEX_INVALID;
   }
   // Find handle on a server
@@ -1818,14 +1818,15 @@ static void handle_gatt_write(sl_bt_evt_gatt_server_user_write_request_t *write_
 {
   sl_bt_ots_server_t *server = NULL;
   sl_bt_ots_server_client_db_entry_t *client = NULL;
-  sl_bt_ots_characteristic_uuid_index characteristic_index =  SL_BT_OTS_CHARACTERISTIC_UUID_INDEX_INVALID;
+  sl_bt_ots_characteristic_uuid_index characteristic_index = SL_BT_OTS_CHARACTERISTIC_UUID_INDEX_INVALID;
   uint8_t att_error = ATT_ERR_SUCCESS;
 
   // Find characteristic handle
   characteristic_index = find_characteristic_index(write_request->characteristic,
                                                    &server);
   // Check server hand characteristic index
-  if (server != NULL && characteristic_index != SL_BT_OTS_CHARACTERISTIC_UUID_INDEX_INVALID) {
+  if (server != NULL
+      && characteristic_index != SL_BT_OTS_CHARACTERISTIC_UUID_INDEX_INVALID) {
     // Identify client
     client = find_client(server, write_request->connection);
 
@@ -1908,15 +1909,16 @@ static void handle_gatt_write(sl_bt_evt_gatt_server_user_write_request_t *write_
 
 static void handle_cccd(sl_bt_evt_gatt_server_characteristic_status_t *characteristic_status)
 {
-  sl_bt_ots_server_t *server;
+  sl_bt_ots_server_t *server = NULL;
   if (sl_bt_gatt_server_client_config == characteristic_status->status_flags ) {
     sl_bt_ots_characteristic_uuid_index characteristic_index
       = find_characteristic_index(characteristic_status->characteristic,
                                   &server);
     bool value = (sl_bt_gatt_indication & characteristic_status->client_config_flags) > 0;
-    if (server != NULL) {
-      sl_bt_ots_server_client_db_entry_t * client = find_client(server,
-                                                                characteristic_status->connection);
+    if (server != NULL
+        && characteristic_index != SL_BT_OTS_CHARACTERISTIC_UUID_INDEX_INVALID) {
+      sl_bt_ots_server_client_db_entry_t *client = find_client(server,
+                                                               characteristic_status->connection);
       bool changed = false;
       if (client != NULL) {
         switch (characteristic_index) {

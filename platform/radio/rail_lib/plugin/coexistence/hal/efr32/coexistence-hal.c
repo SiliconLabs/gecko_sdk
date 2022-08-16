@@ -84,6 +84,17 @@ COEX_HAL_GpioConfig_t sli_coex_ptaReqCfg = {
 };
 #endif //SL_RAIL_UTIL_COEX_REQ_PORT
 
+#ifdef SL_RAIL_UTIL_COEX_EXTERNAL_REQ_PORT
+COEX_HAL_GpioConfig_t sli_coex_ptaExternalReqCfg = {
+  .signal = INVALID_SIGNAL,
+  .source = INVALID_SOURCE,
+  .intNo = INVALID_INTERRUPT,
+  .port = SL_RAIL_UTIL_COEX_EXTERNAL_REQ_PORT,
+  .pin = SL_RAIL_UTIL_COEX_EXTERNAL_REQ_PIN,
+  .polarity = SL_RAIL_UTIL_COEX_REQ_ASSERT_LEVEL
+};
+#endif //SL_RAIL_UTIL_COEX_EXTERNAL_REQ_PORT
+
 #ifdef SL_RAIL_UTIL_COEX_PWM_REQ_PORT
 COEX_HAL_GpioConfig_t sli_coex_ptaPwmReqCfg = {
   .signal = INVALID_SIGNAL,
@@ -222,6 +233,11 @@ static void setGpio(COEX_GpioHandle_t gpioHandle, bool enabled)
   if (gpioHandle != NULL) {
     COEX_HAL_GpioConfig_t *gpio = (COEX_HAL_GpioConfig_t*)gpioHandle;
 
+#if SL_RAIL_UTIL_COEX_OUTPUT_OVERRIDE_GPIO_INPUT
+    if (gpio->config.index == COEX_GPIO_INDEX_INTERNAL_REQ) {
+      COEX_SetGpioInputOverride(COEX_GPIO_INDEX_INTERNAL_REQ, enabled);
+    }
+#endif
     if (enabled == gpio->polarity) {
       GPIO_PinOutSet((GPIO_Port_TypeDef)gpio->port, gpio->pin);
     } else {
@@ -251,7 +267,11 @@ static void configGpio(COEX_GpioHandle_t gpioHandle, COEX_GpioConfig_t *coexGpio
     COEX_HAL_GpioConfig_t *gpio = (COEX_HAL_GpioConfig_t*)gpioHandle;
     bool defaultAsserted = (coexGpio->options & COEX_GPIO_OPTION_DEFAULT_ASSERTED) != 0U;
     gpio->config = *coexGpio;
-
+#if SL_RAIL_UTIL_COEX_OUTPUT_OVERRIDE_GPIO_INPUT
+    if ((coexGpio->options & COEX_GPIO_OPTION_OUTPUT) == 0U) {
+      coexGpio->options |= COEX_GPIO_OPTION_SHARED;
+    }
+#endif //SL_RAIL_UTIL_COEX_OUTPUT_OVERRIDE_GPIO_INPUT
     if ((coexGpio->options & COEX_GPIO_OPTION_SHARED) != 0U) {
       gpio->mode = gpio->polarity ? GPIO_CONFIG_OR : GPIO_CONFIG_AND;
     } else if ((coexGpio->options & COEX_GPIO_OPTION_OUTPUT) != 0U) {
@@ -283,6 +303,11 @@ static bool isGpioOutSet(COEX_GpioHandle_t gpioHandle, bool defaultValue)
 {
   if (gpioHandle != NULL) {
     COEX_HAL_GpioConfig_t *gpio = (COEX_HAL_GpioConfig_t*)gpioHandle;
+#if SL_RAIL_UTIL_COEX_OUTPUT_OVERRIDE_GPIO_INPUT
+    if (gpio->config.index == COEX_GPIO_INDEX_INTERNAL_REQ) {
+      return COEX_GetGpioInputOverride(COEX_GPIO_INDEX_INTERNAL_REQ);
+    }
+#endif
     return !!GPIO_PinOutGet((GPIO_Port_TypeDef)gpio->port,
                             gpio->pin) == !!gpio->polarity;
   } else {
@@ -372,6 +397,18 @@ bool COEX_HAL_ConfigRequest(COEX_HAL_GpioConfig_t *gpioConfig)
 
   gpioConfig->isr = &COEX_HAL_REQ_ISR;
   status = COEX_ConfigRequest(gpioConfig);
+  if (status) {
+    reqCallback = gpioConfig->config.cb;
+  }
+  return status;
+}
+
+bool COEX_HAL_ConfigExternalRequest(COEX_HAL_GpioConfig_t *gpioConfig)
+{
+  bool status = false;
+
+  gpioConfig->isr = &COEX_HAL_REQ_ISR;
+  status = COEX_ConfigExternalRequest(gpioConfig);
   if (status) {
     reqCallback = gpioConfig->config.cb;
   }
@@ -549,6 +586,13 @@ void COEX_HAL_Init(void)
   #ifdef SL_RAIL_UTIL_COEX_REQ_PORT
   COEX_HAL_ConfigRequest(&sli_coex_ptaReqCfg);
   #endif //SL_RAIL_UTIL_COEX_REQ_PORT
+  #if SL_RAIL_UTIL_COEX_OUTPUT_OVERRIDE_GPIO_INPUT
+  #if SL_RAIL_UTIL_COEX_EXTERNAL_REQ_PORT
+  COEX_HAL_ConfigExternalRequest(&sli_coex_ptaExternalReqCfg);
+  #else
+  COEX_HAL_ConfigExternalRequest(&sli_coex_ptaReqCfg);
+  #endif //SL_RAIL_UTIL_COEX_EXTERNAL_REQ_PORT
+  #endif //SL_RAIL_UTIL_COEX_OUTPUT_OVERRIDE_GPIO_INPUT
   #ifdef SL_RAIL_UTIL_COEX_PRI_PORT
   COEX_HAL_ConfigPriority(&sli_coex_ptaPriCfg);
   #endif //SL_RAIL_UTIL_COEX_PRI_PORT

@@ -112,6 +112,16 @@ static void enter_irq_timer_callback(sl_sleeptimer_timer_handle_t *handle,
                                      void *data);
 
 __WEAK void system_on_information_received(uint8_t endpoint_id, void *arg);
+__WEAK const char* sl_cpc_secondary_app_version(void);
+
+/***************************************************************************//**
+ * Called when secondary app version is requested.
+ * The format is up to the user. The string should be null terminated.
+ ******************************************************************************/
+__WEAK const char* sl_cpc_secondary_app_version(void)
+{
+  return "UNDEFINED";
+}
 
 /***************************************************************************//**
  * Initialize CPC System
@@ -453,16 +463,16 @@ static void on_property_get_protocol_version(sli_cpc_system_cmd_t *tx_command)
 
 /***************************************************************************//**
  * Command ID:  CMD_PROPERTY_GET
- * Property ID: PROP_SECONDARY_VERSION
+ * Property ID: PROP_SECONDARY_CPC_VERSION
  *   Ship the hardcoded major and minor version number back to the primary.
  ******************************************************************************/
-static void on_property_get_secondary_version(sli_cpc_system_cmd_t *tx_command)
+static void on_property_get_secondary_cpc_version(sli_cpc_system_cmd_t *tx_command)
 {
   sli_cpc_system_property_cmd_t *prop_cmd_buff;
   uint32_t* version;
 
   prop_cmd_buff = (sli_cpc_system_property_cmd_t*) tx_command->payload;
-  prop_cmd_buff->property_id = PROP_SECONDARY_VERSION;
+  prop_cmd_buff->property_id = PROP_SECONDARY_CPC_VERSION;
   version = (uint32_t*)(prop_cmd_buff->payload);
 
   version[0] = SL_GSDK_MAJOR_VERSION;
@@ -470,6 +480,26 @@ static void on_property_get_secondary_version(sli_cpc_system_cmd_t *tx_command)
   version[2] = SL_GSDK_PATCH_VERSION;
 
   tx_command->header.length = sizeof(sli_cpc_property_id_t) + (3 * sizeof(uint32_t));
+}
+
+/***************************************************************************//**
+ * Command ID:  CMD_PROPERTY_GET
+ * Property ID: PROP_SECONDARY_APP_VERSION
+ *   Send a string version of the secondary application to the primary
+ ******************************************************************************/
+static void on_property_get_secondary_app_version(sli_cpc_system_cmd_t *tx_command)
+{
+  sli_cpc_system_property_cmd_t *prop_cmd_buff;
+  const char* app_version;
+  uint32_t app_version_len;
+
+  prop_cmd_buff = (sli_cpc_system_property_cmd_t*) tx_command->payload;
+  prop_cmd_buff->property_id = PROP_SECONDARY_APP_VERSION;
+  app_version = sl_cpc_secondary_app_version();
+  app_version_len = strlen(app_version) + 1;
+  memcpy(prop_cmd_buff->payload, app_version, app_version_len > SL_CPC_RX_PAYLOAD_MAX_LENGTH ? SL_CPC_RX_PAYLOAD_MAX_LENGTH : app_version_len);
+
+  tx_command->header.length = sizeof(sli_cpc_property_id_t) + app_version_len;
 }
 
 /***************************************************************************//**
@@ -587,15 +617,15 @@ static void on_property_get_security_state(sli_cpc_system_cmd_t *tx_command)
   tx_property = (sli_cpc_system_property_cmd_t*) tx_command->payload;
   security_state = (uint32_t*)(tx_property->payload);
 
-#ifdef SL_CATALOG_CPC_SECURITY_SECONDARY_PRESENT
+#ifdef SL_CATALOG_CPC_SECURITY_PRESENT
   tx_property->property_id = PROP_SECURITY_STATE;
-  *security_state = 0;
+  *security_state = sl_cpc_security_get_state();
 #else
   tx_property->property_id = PROP_LAST_STATUS;
   *security_state = STATUS_UNIMPLEMENTED;
 #endif
 
-  tx_command->header.length = sizeof(sli_cpc_property_id_t) + sizeof(sli_cpc_system_reboot_mode_t);
+  tx_command->header.length = sizeof(sli_cpc_property_id_t) + sizeof(uint32_t);
 }
 
 /***************************************************************************//**
@@ -913,8 +943,12 @@ static void on_property_get(sli_cpc_system_cmd_t *rx_command,
       on_property_get_protocol_version(reply);
       break;
 
-    case PROP_SECONDARY_VERSION:
-      on_property_get_secondary_version(reply);
+    case PROP_SECONDARY_CPC_VERSION:
+      on_property_get_secondary_cpc_version(reply);
+      break;
+
+    case PROP_SECONDARY_APP_VERSION:
+      on_property_get_secondary_app_version(reply);
       break;
 
     case PROP_CAPABILITIES:
@@ -994,7 +1028,8 @@ static void on_property_set(sli_cpc_system_cmd_t* rx_command,
     switch (rx_property_cmd->property_id) {
       case PROP_LAST_STATUS:
       case PROP_PROTOCOL_VERSION:
-      case PROP_SECONDARY_VERSION:
+      case PROP_SECONDARY_CPC_VERSION:
+      case PROP_SECONDARY_APP_VERSION:
       case PROP_CAPABILITIES:
       case PROP_BOOTLOADER_INFO:
       case PROP_SECURITY_STATE:
@@ -1076,7 +1111,8 @@ static void on_poll(uint8_t endpoint_id,
         if (rx_property_cmd->property_id == PROP_RX_CAPABILITY
             || rx_property_cmd->property_id == PROP_CAPABILITIES
             || rx_property_cmd->property_id == PROP_PROTOCOL_VERSION
-            || rx_property_cmd->property_id == PROP_SECONDARY_VERSION) {
+            || rx_property_cmd->property_id == PROP_SECONDARY_CPC_VERSION
+            || rx_property_cmd->property_id == PROP_SECONDARY_APP_VERSION) {
           on_property_get(rx_command, (sli_cpc_system_cmd_t *)*reply_data, reply_data_lenght);
         }
         break;

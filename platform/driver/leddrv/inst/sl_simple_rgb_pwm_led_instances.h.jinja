@@ -21,7 +21,7 @@
 #include "sl_simple_rgb_pwm_led.h"
  
 {% for inst in simple_rgb_pwm_led_instance -%}
-extern const sl_led_rgb_pwm_t sl_{{ inst | lower }};
+extern const sl_led_rgb_pwm_t sl_simple_rgb_pwm_led_{{ inst | lower }};
 {% endfor %}
 
 void sl_simple_rgb_pwm_led_init_instances(void);

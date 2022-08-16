@@ -340,6 +340,8 @@ limitations under the License.
     <item name="emergencyHeating" value="0x5"/>
     <item name="precooling" value="0x6"/>
     <item name="fanOnly" value="0x7"/>
+    <item name="dry" value="0x8"/>
+    <item name="sleep" value="0x9"/>
   </enum>
   <enum name="SetpointAdjustMode" type="ENUM8">
     <item name="heatSetpoint" value="0x0"/>

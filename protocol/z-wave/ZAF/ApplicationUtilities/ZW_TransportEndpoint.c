@@ -31,9 +31,30 @@ STATIC_ASSERT((ZAF_ENQUEUE_STATUS_SUCCESS == (EZAF_EnqueueStatus_t)EQUEUENOTIFYI
 /*                      PRIVATE TYPES and DEFINITIONS                       */
 /****************************************************************************/
 
-#define BIT_FIELD_SIZE  3     // Number can be adjusted. It should be at least big enough so that
-                              //CALLBACK_FUNCTION_QUEUE_SIZE is greater than max associations in a group
+/**
+ * @attention Transmissions with follow ups are able to fill the buffers configured here or in app.
+ *
+ * The number of transmissions we can queue with the transport service is limited by the queue size indicated with
+ * CALLBACK_FUNCTION_QUEUE_SIZE and that of the QueueNotifying.h module allocated by the app. If filled, subsequent
+ * transmissions are avoided and the segmentation process is abruptly halted. This leads to an disrupted/incomplete
+ * segmentation that does not see a termination. The receiver will timeout and discard all previously received frames
+ * for that transaction.
+ *
+ * CALLBACK_FUNCTION_QUEUE_SIZE must always be greater or equal to APP_EVENT_QUEUE_SIZE that is defined in the app.
+ * Currently set to 5 in the example apps, but customers may have lowered this.
+ */
+
+#define BIT_FIELD_SIZE  3     /* Number can be adjusted. It should be at least big enough so that
+                               * CALLBACK_FUNCTION_QUEUE_SIZE is greater than max associations in a group.
+                               * It should also be big enough to store the max number of reports_to_follow + 1
+                               * for transmissions that needs it. */
 #define CALLBACK_FUNCTION_QUEUE_SIZE   (1 << BIT_FIELD_SIZE)
+
+#define QUEUE_NOTIFYING_SEND_MAX_WAIT  4000  /* [ms] Due to limitations in RAM, the allocated amount of frames with
+                                              * follow-ups are limited to the queue size determined by application with
+                                              * APP_EVENT_QUEUE_SIZE, and this will halt certain operations if
+                                              * QUEUE_NOTIFYING_SEND_MAX_WAIT is set to zero.
+                                              * See the detailed description above. */
 
 typedef struct {
   uint8_t head : BIT_FIELD_SIZE; // Head of queue index
@@ -304,6 +325,7 @@ Transport_SendRequestEP(
   VOID_CALLBACKFUNC(pCallback)(TRANSMISSION_RESULT * pTransmissionResult))
 {
   EZAF_EnqueueStatus_t result;
+
   // Check for multi channel
   if(false == pTxOptionsEx->pDestNode->nodeInfo.BitMultiChannelEncap)
   {
@@ -330,6 +352,20 @@ Transport_SendRequestEP(
     return ZAF_ENQUEUE_STATUS_BUFFER_OVERRUN;
   }
 
+#ifdef HOST_SECURITY_INCLUDED
+  UNUSED(pCallback);
+  SZwaveTransmitPackage TransmitPackage;
+  memset(&TransmitPackage, 0, sizeof(TransmitPackage));
+  TransmitPackage.eTransmitType = EZWAVETRANSMITTYPE_SECURE;
+  SSecureSendData *params = &TransmitPackage.uTransmitParams.SendDataParams;
+  params->connection.remote.is_multicast = false;
+  params->data_length = dataLength;
+  memcpy(params->data, pData, params->data_length);
+  params->tx_options.number_of_responses = 0;
+  params->ptxCompleteCallback = (void *)ZCB_RequestCompleted;
+  params->connection.remote.address.node_id = pTxOptionsEx->pDestNode->node.nodeId;
+  result = (EZAF_EnqueueStatus_t)QueueNotifyingSendToBack(m_pTxQueueNotifying, (uint8_t *)&TransmitPackage, 0);
+#else
   CmdClassMultiChannelEncapsulate(&pData,
                                   &dataLength,
                                   pTxOptionsEx);
@@ -349,7 +385,8 @@ Transport_SendRequestEP(
   FramePackage.eTransmitType = EZWAVETRANSMITTYPE_EX;
 
   // Put the package on queue (and don't wait for it)
-  result = (EZAF_EnqueueStatus_t)QueueNotifyingSendToBack(m_pTxQueueNotifying, (uint8_t*)&FramePackage, 0);
+  result = (EZAF_EnqueueStatus_t)QueueNotifyingSendToBack(m_pTxQueueNotifying, (uint8_t*)&FramePackage, QUEUE_NOTIFYING_SEND_MAX_WAIT);
+#endif
   if (ZAF_ENQUEUE_STATUS_SUCCESS == result)
   {
     // Success. Advance the callback function queue counters
@@ -373,7 +410,7 @@ Transport_SendResponseEP(
   UNUSED(pCallback);
   SZwaveTransmitPackage TransmitPackage;
   memset(&TransmitPackage, 0, sizeof(TransmitPackage));
-  TransmitPackage.eTransmitType = EZWAVETRANSMITTYPE_SECURE;
+  TransmitPackage.eTransmitType = pTxOptionsEx->pDestNode->nodeInfo.security == SECURITY_KEY_NONE ? EZWAVETRANSMITTYPE_NON_SECURE : EZWAVETRANSMITTYPE_SECURE;
   SSecureSendData *params = &TransmitPackage.uTransmitParams.SendDataParams;
   params->connection.remote.is_multicast = false;
   params->data_length = dataLength;
@@ -426,7 +463,7 @@ Transport_SendResponseEP(
 
   FramePackage.eTransmitType = EZWAVETRANSMITTYPE_EX;
   // Put the package on queue (and dont wait for it)
-  result = (EZAF_EnqueueStatus_t)QueueNotifyingSendToBack(m_pTxQueueNotifying, (uint8_t*)&FramePackage, 0);
+  result = (EZAF_EnqueueStatus_t)QueueNotifyingSendToBack(m_pTxQueueNotifying, (uint8_t*)&FramePackage, QUEUE_NOTIFYING_SEND_MAX_WAIT);
   if (ZAF_ENQUEUE_STATUS_SUCCESS == result)
   {
     // Success. Advance the callback function queue counters

@@ -20,6 +20,7 @@
 
 #include "app/framework/include/af.h"
 #include "file-descriptor-dispatch.h"
+#include "platform/service/cli/inc/sl_cli_threaded_host.h"
 
 #include <stdlib.h>     // for malloc()
 #include <sys/time.h>   // for select()
@@ -54,6 +55,13 @@ const char emAfFileDescriptorDispatchPluginName[] = "FD Dispatch";
 #else
 #define debugPrint(...)
 #endif
+
+#ifdef EMBER_TEST
+// Simulation apps are still using platform/base
+// instead of platform/service
+#define sli_cli_get_pipe_read_fd() (-1)
+#define sli_cli_is_input_handled() (false)
+#endif // EMBER_TEST
 
 //=============================================================================
 // Forward Declarations
@@ -205,6 +213,14 @@ static void cleanupItemsMarkedForRemoval(void)
   }
 }
 
+static void setCliInFd(int *maxFd, fd_set *readSet, fd_set *errorSet)
+{
+  int pipeReadFd = sli_cli_get_pipe_read_fd();
+  FD_SET(pipeReadFd, readSet);
+  FD_SET(pipeReadFd, errorSet);
+  *maxFd = (*maxFd < pipeReadFd ? pipeReadFd : *maxFd);
+}
+
 EmberStatus emberAfPluginFileDescriptorDispatchWaitForEvents(uint32_t timeoutMs)
 {
   fd_set readSet;
@@ -258,6 +274,11 @@ EmberStatus emberAfPluginFileDescriptorDispatchWaitForEvents(uint32_t timeoutMs)
     }
     iterator = iterator->next;
   }
+
+  // Set CLI pipe read fd so that we can wake up the host
+  // by entering CLI commands.
+  setCliInFd(&highestFd, &readSet, &exceptSet);
+
   struct timeval timeoutStruct = {
     timeoutMs / 1000,           // seconds
     (timeoutMs % 1000) * 1000,  // micro seconds
@@ -274,6 +295,13 @@ EmberStatus emberAfPluginFileDescriptorDispatchWaitForEvents(uint32_t timeoutMs)
                     (timeoutMs != MAX_INT32U_VALUE
                      ? &timeoutStruct
                      : NULL));
+
+    // If the command is handled by the CLI component, read the data
+    // to empty the pipe so that it is ready for the next command.
+    if (sli_cli_is_input_handled()) {
+      char buff[2];
+      read(sli_cli_get_pipe_read_fd(), buff, 2);
+    }
   }
   if (status < 0) {
     emberAfCorePrintln("%p select() failed: %p", PLUGIN_NAME, strerror(errno));

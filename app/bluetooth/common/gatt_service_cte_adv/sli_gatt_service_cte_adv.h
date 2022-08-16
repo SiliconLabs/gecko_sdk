@@ -62,7 +62,7 @@ typedef uint8_t adv_cte_phy_t;
 extern adv_cte_phy_t adv_cte_phy;
 #define ADV_CTE_PHY_1M                0
 #define ADV_CTE_PHY_2M                1
-#define ADV_CTE_PHY_CONVERT(p)        (((p) == ADV_CTE_PHY_2M) ? sl_bt_gap_2m_phy : sl_bt_gap_1m_phy)
+#define ADV_CTE_PHY_CONVERT(p)        (((p) == ADV_CTE_PHY_2M) ? sl_bt_gap_phy_2m : sl_bt_gap_phy_1m)
 
 /**************************************************************************//**
  * Initialize advertisement package according to CTE specifications.

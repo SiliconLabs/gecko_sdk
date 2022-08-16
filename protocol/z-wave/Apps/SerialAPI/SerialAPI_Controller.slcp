@@ -58,14 +58,13 @@ include:
       - path: virtual_slave_node_info.h
       - path: app.h
       - path: config_app.h
-requires:
-  - name: iostream_swo
-    condition: [zw_debug]
 configuration:
   - name: NVM3_DEFAULT_MAX_OBJECT_SIZE
     value: 1900
   - name: NVM3_DEFAULT_CACHE_SIZE
     value: 100
+  - name: SL_BOARD_ENABLE_VCOM
+    value: 1
   - name: SL_DEVICE_INIT_EMU_EM4_STATE
     value: emuEM4Hibernate
   - name: SL_DEVICE_INIT_EMU_EM4_RETAIN_LFRCO

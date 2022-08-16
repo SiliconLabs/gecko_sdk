@@ -154,7 +154,7 @@ psa_status_t tfm_crypto_operation_alloc(enum tfm_crypto_operation_type type,
     return PSA_ERROR_NOT_PERMITTED;
 }
 
-psa_status_t tfm_crypto_operation_release(uint32_t *handle)
+psa_status_t tfm_crypto_operation_release(uint32_t *handle, bool clean_backend_context)
 {
     uint32_t h_val = *handle;
     int32_t partition_id = 0;
@@ -169,8 +169,9 @@ psa_status_t tfm_crypto_operation_release(uint32_t *handle)
          (h_val <= TFM_CRYPTO_CONC_OPER_NUM) &&
          (operation[h_val - 1].in_use == TFM_CRYPTO_IN_USE) &&
          (operation[h_val - 1].owner == partition_id)) {
-
-        memset_operation_context(h_val - 1);
+        if (clean_backend_context) {
+            memset_operation_context(h_val - 1);
+        }
         operation[h_val - 1].in_use = TFM_CRYPTO_NOT_IN_USE;
         operation[h_val - 1].type = TFM_CRYPTO_OPERATION_NONE;
         operation[h_val - 1].owner = 0;

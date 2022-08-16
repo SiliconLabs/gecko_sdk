@@ -441,7 +441,7 @@ class OtCli:
         cmd = './ot-cli-%s' % (mode)
 
         # For Thread 1.2 MTD node, use ot-cli-mtd build regardless of OT_CLI_PATH
-        if self.version == '1.2' and mode == 'mtd' and 'top_builddir' in os.environ:
+        if self.version != '1.1' and mode == 'mtd' and 'top_builddir' in os.environ:
             srcdir = os.environ['top_builddir']
             cmd = '%s/examples/apps/cli/ot-cli-%s %d' % (srcdir, mode, nodeid)
 
@@ -449,11 +449,11 @@ class OtCli:
         elif self.version == self.env_version:
             # Load Thread 1.2 BBR device when testing Thread 1.2 scenarios
             # which requires device with Backbone functionality.
-            if self.version == '1.2' and self.is_bbr:
-                if 'OT_CLI_PATH_1_2_BBR' in os.environ:
-                    cmd = os.environ['OT_CLI_PATH_1_2_BBR']
-                elif 'top_builddir_1_2_bbr' in os.environ:
-                    srcdir = os.environ['top_builddir_1_2_bbr']
+            if self.version != '1.1' and self.is_bbr:
+                if 'OT_CLI_PATH_BBR' in os.environ:
+                    cmd = os.environ['OT_CLI_PATH_BBR']
+                elif 'top_builddir_1_3_bbr' in os.environ:
+                    srcdir = os.environ['top_builddir_1_3_bbr']
                     cmd = '%s/examples/apps/cli/ot-cli-%s' % (srcdir, mode)
 
             # Load Thread device of the testing environment version (may be 1.1 or 1.2)
@@ -518,14 +518,14 @@ class OtCli:
 
             # Load Thread 1.2 BBR device when testing Thread 1.2 scenarios
             # which requires device with Backbone functionality.
-            if self.version == '1.2' and self.is_bbr:
-                if 'OT_NCP_PATH_1_2_BBR' in os.environ:
+            if self.version != '1.1' and self.is_bbr:
+                if 'OT_NCP_PATH_1_3_BBR' in os.environ:
                     cmd = 'spinel-cli.py -p "%s%s" -n' % (
-                        os.environ['OT_NCP_PATH_1_2_BBR'],
+                        os.environ['OT_NCP_PATH_1_3_BBR'],
                         args,
                     )
-                elif 'top_builddir_1_2_bbr' in os.environ:
-                    srcdir = os.environ['top_builddir_1_2_bbr']
+                elif 'top_builddir_1_3_bbr' in os.environ:
+                    srcdir = os.environ['top_builddir_1_3_bbr']
                     cmd = '%s/examples/apps/ncp/ot-ncp-%s' % (srcdir, mode)
                     cmd = 'spinel-cli.py -p "%s%s" -n' % (
                         cmd,
@@ -814,6 +814,30 @@ class NodeImpl:
     def thread_stop(self):
         self.send_command('thread stop')
         self._expect_done()
+
+    def detach(self, is_async=False):
+        cmd = 'detach'
+        if is_async:
+            cmd += ' async'
+
+        self.send_command(cmd)
+
+        if is_async:
+            self._expect_done()
+            return
+
+        end = self.simulator.now() + 4
+        while True:
+            self.simulator.go(1)
+            try:
+                self._expect_done(timeout=0.1)
+                return
+            except (pexpect.TIMEOUT, socket.timeout):
+                if self.simulator.now() > end:
+                    raise
+
+    def expect_finished_detaching(self):
+        self._expect('Finished detaching')
 
     def commissioner_start(self):
         cmd = 'commissioner start'
@@ -1120,6 +1144,10 @@ class NodeImpl:
 
     def srp_client_clear_host(self):
         self.send_command(f'srp client host clear')
+        self._expect_done()
+
+    def srp_client_enable_auto_host_address(self):
+        self.send_command(f'srp client host address auto')
         self._expect_done()
 
     def srp_client_set_host_address(self, *addrs: str):

@@ -2,9 +2,9 @@ id: ml_audio_feature_generation
 package: platform
 label: Audio Feature Generator
 description: >
-  The audio feature generator can be used to extract mel-flterbank features from an audio 
+  The audio feature generator can be used to extract mel-flterbank features from an audio
   signal for use with machine learning audio classification applications. The microphone
-  is used as an audio source and the features are calculated in real time. 
+  is used as an audio source and the features are calculated in real time.
 category: Machine Learning|Feature Generator
 quality: production
 provides:
@@ -15,6 +15,7 @@ requires:
   - name: frontend_fft_implementation
   - name: component_catalog
   - name: mic_driver
+  - name: sl_common
 recommends:
   - id: ml_cmsis_dsp_rfft_q15
 root_path: util/third_party/tensorflow_extra

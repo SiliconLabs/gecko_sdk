@@ -60,7 +60,7 @@ void rgb_led_deinit(void)
 void rgb_led_set_rgb(uint8_t m, uint8_t r, uint8_t g, uint8_t b)
 {
   (void) m;
-  sl_led_set_rgb_color(&sl_led_rgb,
+  sl_led_set_rgb_color(&sl_simple_rgb_pwm_led_rgb_led0,
                        (uint16_t)r,
                        (uint16_t)g,
                        (uint16_t)b);

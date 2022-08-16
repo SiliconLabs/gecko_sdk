@@ -41,7 +41,7 @@ void emAfMeterSnapshotServerCliPublish(sl_cli_command_arg_t *arguments)
   uint8_t dstEndpoint = sl_cli_get_argument_uint8(arguments, 2);
   uint32_t startTime = sl_cli_get_argument_uint32(arguments, 3);
   uint32_t endTime = sl_cli_get_argument_uint32(arguments, 4);
-  uint32_t offset = sl_cli_get_argument_uint32(arguments, 5);
+  uint8_t offset = sl_cli_get_argument_uint8(arguments, 5);
   uint32_t cause = sl_cli_get_argument_uint32(arguments, 6);
   uint8_t snapshotCriteria[13];
 

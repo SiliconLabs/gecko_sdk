@@ -55,4 +55,7 @@ void sli_cli_handle_input_and_history(sl_cli_handle_t handle);
 
 void sli_cli_threaded_host_init(void);
 
+bool sli_cli_is_input_handled(void);
+
+int sli_cli_get_pipe_read_fd(void);
 #endif // EZSP_HOST

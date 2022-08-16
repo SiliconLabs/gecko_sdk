@@ -18,11 +18,7 @@ filter:
 component:
   - id: bootloader_core
   - id: bootloader_apploader
-  - id: bootloader_crc
-  - id: bootloader_aes_sha_ecdsa
-  - id: bootloader_delay_driver
   - id: bootloader_image_parser
-  - id: bootloader_token_management
   - id: bootloader_debug
 
 readme:

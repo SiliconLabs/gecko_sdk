@@ -139,13 +139,7 @@ configuration:
   - name: SL_SIMPLE_BUTTON_ALLOW_LED_CONFLICT
     value: "1"
   - name: SL_STACK_SIZE
-    value: "0x1000"
-    unless:
-      - "device_sdid_205"
-  - name: SL_STACK_SIZE
-    value: "0xF00"
-    condition:
-      - "device_sdid_205"
+    value: "0x1300"
 
 template_contribution:
   - name: cli_command

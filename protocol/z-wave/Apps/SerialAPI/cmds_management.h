@@ -11,18 +11,32 @@
 /* FUNC_ID_SERIAL_API_SETUP command definitions */
 typedef enum
 {
+  /**
+   * The first 8 commands are given as bit-flags, and when all bits were consumed, a byte-array was created to give
+   * more room.
+   * The first 8 flags are the only ones that shall be used to fill the first byte when generating the response in
+   * pOutputBuffer for the command, SERIAL_API_SETUP_CMD_SUPPORTED.
+   * This is kept for backwards compatibility.
+   */
   SERIAL_API_SETUP_CMD_UNSUPPORTED,
   SERIAL_API_SETUP_CMD_SUPPORTED                  = 1,   //1<<0
   SERIAL_API_SETUP_CMD_TX_STATUS_REPORT           = 2,   //1<<1
-  SERIAL_API_SETUP_CMD_MAX_LR_TX_PWR_SET          = 3,
-  SERIAL_API_SETUP_CMD_MAX_LR_TX_PWR_GET          = 5,
-  SERIAL_API_SETUP_CMD_TX_POWERLEVEL_SET          = 4,   //1<<2
-  SERIAL_API_SETUP_CMD_TX_POWERLEVEL_GET          = 8,   //1<<3
+  SERIAL_API_SETUP_CMD_TX_POWERLEVEL_SET          = 4,   //1<<2 @Deprecated
+  SERIAL_API_SETUP_CMD_TX_POWERLEVEL_GET          = 8,   //1<<3 @Deprecated
   SERIAL_API_SETUP_CMD_TX_GET_MAX_PAYLOAD_SIZE    = 16,  //1<<4
-  SERIAL_API_SETUP_CMD_TX_GET_MAX_LR_PAYLOAD_SIZE = 17,  //(1<<4) + 1
   SERIAL_API_SETUP_CMD_RF_REGION_GET              = 32,  //1<<5
   SERIAL_API_SETUP_CMD_RF_REGION_SET              = 64,  //1<<6
-  SERIAL_API_SETUP_CMD_NODEID_BASETYPE_SET        = 128  //1<<7
+  SERIAL_API_SETUP_CMD_NODEID_BASETYPE_SET        = 128, //1<<7
+  /**
+   * The below values are not flags and shall only be used with BITMASK_ADD_CMD() when generating
+   * the response for the command, SERIAL_API_SETUP_CMD_SUPPORTED.
+   */
+  SERIAL_API_SETUP_CMD_MAX_LR_TX_PWR_SET          = 3,
+  SERIAL_API_SETUP_CMD_MAX_LR_TX_PWR_GET          = 5,
+                        // The values 6 and 7 are unused, but not reserved.
+  SERIAL_API_SETUP_CMD_TX_GET_MAX_LR_PAYLOAD_SIZE = 17,
+  SERIAL_API_SETUP_CMD_TX_POWERLEVEL_SET_16_BIT   = 18,
+  SERIAL_API_SETUP_CMD_TX_POWERLEVEL_GET_16_BIT   = 19,
 } eSerialAPISetupCmd;
 
 /* SERIAL_API_SETUP_CMD_NODEID_BASETYPE_SET definitions */
@@ -49,6 +63,9 @@ extern eSerialAPISetupNodeIdBaseType nodeIdBaseType;
         idx++; \
       } \
     } while (0)
+
+#define GET_16BIT_VALUE(pData) \
+    ( ( (uint16_t)((uint8_t*)pData)[0] << 8) | (uint16_t)((uint8_t*)pData)[1] ) /* 16 bit, MSB | LSB */
 
 /* Commands minimum length (bytes) */
 #define SERIAL_API_SETUP_CMD_TX_STATUS_REPORT_CMD_LENGTH_MIN    2

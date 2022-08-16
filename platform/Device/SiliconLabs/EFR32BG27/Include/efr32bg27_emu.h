@@ -69,7 +69,7 @@ typedef struct {
   __IOM uint32_t DGIF;                          /**< Interrupt Flags Debug                              */
   __IOM uint32_t DGIEN;                         /**< Interrupt Enables Debug                            */
   uint32_t       RESERVED7[5U];                 /**< Reserved for future use                            */
-  __IOM uint32_t BOOSTCTRL;                     /**< EMU boost mode controller reigsiters               */
+  __IOM uint32_t BOOSTCTRL;                     /**< EMU boost mode controller register                 */
   uint32_t       RESERVED8[1U];                 /**< Reserved for future use                            */
   uint32_t       RESERVED9[15U];                /**< Reserved for future use                            */
   __IOM uint32_t EFPIF;                         /**< EFP Interrupt Register                             */
@@ -103,7 +103,7 @@ typedef struct {
   __IOM uint32_t DGIF_SET;                      /**< Interrupt Flags Debug                              */
   __IOM uint32_t DGIEN_SET;                     /**< Interrupt Enables Debug                            */
   uint32_t       RESERVED20[5U];                /**< Reserved for future use                            */
-  __IOM uint32_t BOOSTCTRL_SET;                 /**< EMU boost mode controller reigsiters               */
+  __IOM uint32_t BOOSTCTRL_SET;                 /**< EMU boost mode controller register                 */
   uint32_t       RESERVED21[1U];                /**< Reserved for future use                            */
   uint32_t       RESERVED22[15U];               /**< Reserved for future use                            */
   __IOM uint32_t EFPIF_SET;                     /**< EFP Interrupt Register                             */
@@ -137,7 +137,7 @@ typedef struct {
   __IOM uint32_t DGIF_CLR;                      /**< Interrupt Flags Debug                              */
   __IOM uint32_t DGIEN_CLR;                     /**< Interrupt Enables Debug                            */
   uint32_t       RESERVED33[5U];                /**< Reserved for future use                            */
-  __IOM uint32_t BOOSTCTRL_CLR;                 /**< EMU boost mode controller reigsiters               */
+  __IOM uint32_t BOOSTCTRL_CLR;                 /**< EMU boost mode controller register                 */
   uint32_t       RESERVED34[1U];                /**< Reserved for future use                            */
   uint32_t       RESERVED35[15U];               /**< Reserved for future use                            */
   __IOM uint32_t EFPIF_CLR;                     /**< EFP Interrupt Register                             */
@@ -171,7 +171,7 @@ typedef struct {
   __IOM uint32_t DGIF_TGL;                      /**< Interrupt Flags Debug                              */
   __IOM uint32_t DGIEN_TGL;                     /**< Interrupt Enables Debug                            */
   uint32_t       RESERVED46[5U];                /**< Reserved for future use                            */
-  __IOM uint32_t BOOSTCTRL_TGL;                 /**< EMU boost mode controller reigsiters               */
+  __IOM uint32_t BOOSTCTRL_TGL;                 /**< EMU boost mode controller register                 */
   uint32_t       RESERVED47[1U];                /**< Reserved for future use                            */
   uint32_t       RESERVED48[15U];               /**< Reserved for future use                            */
   __IOM uint32_t EFPIF_TGL;                     /**< EFP Interrupt Register                             */
@@ -710,7 +710,7 @@ typedef struct {
 #define _EMU_RSTCAUSE_DCI_MASK                          0x10000UL                               /**< Bit mask for EMU_DCI                        */
 #define _EMU_RSTCAUSE_DCI_DEFAULT                       0x00000000UL                            /**< Mode DEFAULT for EMU_RSTCAUSE               */
 #define EMU_RSTCAUSE_DCI_DEFAULT                        (_EMU_RSTCAUSE_DCI_DEFAULT << 16)       /**< Shifted mode DEFAULT for EMU_RSTCAUSE       */
-#define EMU_RSTCAUSE_BOOSTON                            (0x1UL << 18)                           /**< BOOSTON PIN reset                           */
+#define EMU_RSTCAUSE_BOOSTON                            (0x1UL << 18)                           /**< BOOST_EN pin reset                          */
 #define _EMU_RSTCAUSE_BOOSTON_SHIFT                     18                                      /**< Shift value for EMU_BOOSTON                 */
 #define _EMU_RSTCAUSE_BOOSTON_MASK                      0x40000UL                               /**< Bit mask for EMU_BOOSTON                    */
 #define _EMU_RSTCAUSE_BOOSTON_DEFAULT                   0x00000000UL                            /**< Mode DEFAULT for EMU_RSTCAUSE               */
@@ -772,7 +772,7 @@ typedef struct {
 /* Bit fields for EMU BOOSTCTRL */
 #define _EMU_BOOSTCTRL_RESETVALUE                       0x00000001UL                              /**< Default value for EMU_BOOSTCTRL             */
 #define _EMU_BOOSTCTRL_MASK                             0x00000001UL                              /**< Mask for EMU_BOOSTCTRL                      */
-#define EMU_BOOSTCTRL_BOOSTENCTRL                       (0x1UL << 0)                              /**< BOOST_EN_CTRL BIT                           */
+#define EMU_BOOSTCTRL_BOOSTENCTRL                       (0x1UL << 0)                              /**< BOOST_EN Control                            */
 #define _EMU_BOOSTCTRL_BOOSTENCTRL_SHIFT                0                                         /**< Shift value for EMU_BOOSTENCTRL             */
 #define _EMU_BOOSTCTRL_BOOSTENCTRL_MASK                 0x1UL                                     /**< Bit mask for EMU_BOOSTENCTRL                */
 #define _EMU_BOOSTCTRL_BOOSTENCTRL_DEFAULT              0x00000001UL                              /**< Mode DEFAULT for EMU_BOOSTCTRL              */

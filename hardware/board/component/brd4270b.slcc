@@ -14,6 +14,7 @@
   - name: hardware_board
   - name: hardware_board_rb
   - name: hardware_board_from_stk
+  - name: hardware_board_from_fg25-pk6011a
   - name: hardware_board_from_fg25-rb4270b
   - name: hardware_board_has_vcom
   - name: hardware_board_has_spiflash
@@ -50,11 +51,11 @@
   - name: SL_BOARD_NAME
     value: '"BRD4270B"'
   - name: SL_BOARD_REV
-    value: '"A00"'
+    value: '"A04"'
 - tag:
   - board:pn:BRD4270
   - board:variant:B
-  - board:revision:A00
+  - board:revision:A04
   - board:device:efr32fg25b222f1920im56
   - hardware:has:vcom
   - hardware:has:pti

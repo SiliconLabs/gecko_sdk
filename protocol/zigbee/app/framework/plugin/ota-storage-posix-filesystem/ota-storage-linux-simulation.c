@@ -33,6 +33,7 @@
 #define INVALID_DEVICE_ID        0xFFFF
 #define INVALID_FIRMWARE_VERSION 0xFFFFFFFFL
 #define INVALID_EUI64 { 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00 }
+#define INVALID_SLOT (uint32_t)-1
 
 #define INVALID_OTA_IMAGE_ID  \
   { INVALID_MANUFACTURER_ID,  \
@@ -123,4 +124,16 @@ EmberAfOtaImageId emberAfOtaStorageSearchCallback(uint16_t manufacturerId,
                                                   const uint16_t* hardwareVersion)
 {
   return emberInvalidImageId;
+}
+
+uint32_t emAfOtaStorageGetSlot(void)
+{
+  return INVALID_SLOT;
+}
+
+uint32_t emberAfOtaStorageDriverMaxDownloadSizeCallback(void)
+{
+  // In theory we are limited by the local disk space, but for now
+  // assume there is no limit.
+  return 0xFFFFFFFFUL;
 }

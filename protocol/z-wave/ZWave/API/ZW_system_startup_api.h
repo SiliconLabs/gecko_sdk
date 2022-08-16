@@ -97,4 +97,10 @@ void ZW_system_startup_SetMainApplicationTaskHandle(TaskHandle_t xHandle);
  */
 bool ZW_system_startup_IsSchedulerStarted(void);
 
+/**
+ * Used to get a pointer to The Application node information @ref SAppNodeInfo_t structure.
+ * 
+ *  @return const SAppNodeInfo_t* 
+ */
+const SAppNodeInfo_t* ZW_system_startup_getAppNodeInfo(void);
 #endif /* _ZW_SYSTEM_STARTUP_H_ */

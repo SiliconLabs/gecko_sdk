@@ -50,10 +50,6 @@
 #define CONN_MIN_CE_LENGTH            0
 #define CONN_MAX_CE_LENGTH            0xffff
 
-#define SCAN_INTERVAL                 16   //10ms
-#define SCAN_WINDOW                   16   //10ms
-#define SCAN_PASSIVE                  0
-
 #define TEMP_INVALID                  NAN
 #define UNIT_INVALID                  ('?')
 #define UNIT_CELSIUS                  ('C')
@@ -183,12 +179,7 @@ void sl_bt_on_event(sl_bt_msg_t* evt)
                    evt->data.evt_system_boot.build);
       // Print bluetooth address.
       print_bluetooth_address();
-      // Set passive scanning on 1Mb PHY
-      sc = sl_bt_scanner_set_mode(sl_bt_gap_1m_phy, SCAN_PASSIVE);
-      app_assert_status(sc);
-      // Set scan interval and scan window
-      sc = sl_bt_scanner_set_timing(sl_bt_gap_1m_phy, SCAN_INTERVAL, SCAN_WINDOW);
-      app_assert_status(sc);
+
       // Set the default connection parameters for subsequent connections
       sc = sl_bt_connection_set_default_parameters(CONN_INTERVAL_MIN,
                                                    CONN_INTERVAL_MAX,
@@ -198,7 +189,7 @@ void sl_bt_on_event(sl_bt_msg_t* evt)
                                                    CONN_MAX_CE_LENGTH);
       app_assert_status(sc);
       // Start scanning - looking for thermometer devices
-      sc = sl_bt_scanner_start(sl_bt_gap_1m_phy, sl_bt_scanner_discover_generic);
+      sc = sl_bt_scanner_start(sl_bt_gap_phy_1m, sl_bt_scanner_discover_generic);
       app_assert_status_f(sc,
                           "Failed to start discovery #1\n");
       conn_state = scanning;
@@ -207,20 +198,21 @@ void sl_bt_on_event(sl_bt_msg_t* evt)
     // -------------------------------
     // This event is generated when an advertisement packet or a scan response
     // is received from a responder
-    case sl_bt_evt_scanner_scan_report_id:
+    case sl_bt_evt_scanner_legacy_advertisement_report_id:
       // Parse advertisement packets
-      if (evt->data.evt_scanner_scan_report.packet_type == 0) {
+      if (evt->data.evt_scanner_legacy_advertisement_report.event_flags
+          == (SL_BT_SCANNER_EVENT_FLAG_CONNECTABLE | SL_BT_SCANNER_EVENT_FLAG_SCANNABLE)) {
         // If a thermometer advertisement is found...
-        if (find_service_in_advertisement(&(evt->data.evt_scanner_scan_report.data.data[0]),
-                                          evt->data.evt_scanner_scan_report.data.len) != 0) {
+        if (find_service_in_advertisement(&(evt->data.evt_scanner_legacy_advertisement_report.data.data[0]),
+                                          evt->data.evt_scanner_legacy_advertisement_report.data.len) != 0) {
           // then stop scanning for a while
           sc = sl_bt_scanner_stop();
           app_assert_status(sc);
           // and connect to that device
           if (active_connections_num < SL_BT_CONFIG_MAX_CONNECTIONS) {
-            sc = sl_bt_connection_open(evt->data.evt_scanner_scan_report.address,
-                                       evt->data.evt_scanner_scan_report.address_type,
-                                       sl_bt_gap_1m_phy,
+            sc = sl_bt_connection_open(evt->data.evt_scanner_legacy_advertisement_report.address,
+                                       evt->data.evt_scanner_legacy_advertisement_report.address_type,
+                                       sl_bt_gap_phy_1m,
                                        NULL);
             app_assert_status(sc);
             conn_state = opening;
@@ -307,7 +299,7 @@ void sl_bt_on_event(sl_bt_msg_t* evt)
         // and we can connect to more devices
         if (active_connections_num < SL_BT_CONFIG_MAX_CONNECTIONS) {
           // start scanning again to find new devices
-          sc = sl_bt_scanner_start(sl_bt_gap_1m_phy, sl_bt_scanner_discover_generic);
+          sc = sl_bt_scanner_start(sl_bt_gap_phy_1m, sl_bt_scanner_discover_generic);
           app_assert_status_f(sc,
                               "Failed to start discovery #2\n");
           conn_state = scanning;
@@ -325,7 +317,7 @@ void sl_bt_on_event(sl_bt_msg_t* evt)
       remove_connection(evt->data.evt_connection_closed.connection);
       if (conn_state != scanning) {
         // start scanning again to find new devices
-        sc = sl_bt_scanner_start(sl_bt_gap_1m_phy, sl_bt_scanner_discover_generic);
+        sc = sl_bt_scanner_start(sl_bt_gap_phy_1m, sl_bt_scanner_discover_generic);
         app_assert_status_f(sc,
                             "Failed to start discovery #3\n");
         conn_state = scanning;

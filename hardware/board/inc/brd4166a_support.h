@@ -28,8 +28,15 @@
  *
  ******************************************************************************/
 
+#ifndef BRD4166A_SUPPORT_H
+#define BRD4166A_SUPPORT_H
+
 #include "sl_status.h"
 #include "sl_enum.h"
+
+#ifdef __cplusplus
+extern "C" {
+#endif
 
 /**************************************************************************//**
 * @defgroup brd4166a_support Thunderboard Sense 2 Support
@@ -72,4 +79,9 @@ SL_ENUM_GENERIC(sl_thunderboard_i2c_bus_select_t, int) {
  ******************************************************************************/
 sl_status_t sl_thunderboard_require_i2c(sl_thunderboard_i2c_bus_select_t select);
 
+#ifdef __cplusplus
+}
+#endif
 /** @} */
+
+#endif // BRD4166A_SUPPORT_H

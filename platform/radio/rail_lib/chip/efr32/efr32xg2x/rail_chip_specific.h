@@ -39,6 +39,20 @@
 
 #include "rail_features.h"
 
+#if     (defined(DOXYGEN_SHOULD_SKIP_THIS) && !defined(RAIL_ENUM))
+//  Copied from rail_types.h to satisfy doxygen build.
+/// The RAIL library does not use enumerations because the ARM EABI leaves their
+/// size ambiguous, which causes problems if the application is built
+/// with different flags than the library. Instead, uint8_t typedefs
+/// are used in compiled code for all enumerations. For documentation purposes, this is
+/// converted to an actual enumeration since it's much easier to read in Doxygen.
+#define RAIL_ENUM(name) enum name
+/// This macro is a more generic version of the \ref RAIL_ENUM() macro that
+/// allows the size of the type to be overridden instead of forcing the use of
+/// a uint8_t. See \ref RAIL_ENUM() for more information.
+#define RAIL_ENUM_GENERIC(name, type) enum name
+#endif//(defined(DOXYGEN_SHOULD_SKIP_THIS) && !defined(RAIL_ENUM))
+
 #ifdef __cplusplus
 extern "C" {
 #endif
@@ -339,8 +353,8 @@ typedef struct RAIL_AntennaConfig {
 /** EFR32-specific IR calibration bit */
 #define RAIL_CAL_RX_IRCAL         (0x00010000U)
 
-#if RAIL_SUPPORTS_OFDM_PA
 /** EFR32-specific Tx IR calibration bit */
+#if RAIL_SUPPORTS_OFDM_PA
 #define RAIL_CAL_OFDM_TX_IRCAL    (0x00100000U)
 #else
 #define RAIL_CAL_OFDM_TX_IRCAL    (0U)
@@ -377,7 +391,7 @@ typedef struct RAIL_AntennaConfig {
 #endif
 
 /**
- * @def RAIL_RF_PATHS_SUBG
+ * @def RAIL_RF_PATHS_SUBGIG
  * @brief Indicates the number of sub-GHz RF Paths supported
  */
 #if _SILICON_LABS_32B_SERIES_2_CONFIG == 3
@@ -401,6 +415,10 @@ typedef struct RAIL_AntennaConfig {
  */
 #if RAIL_RF_PATHS > 1
 #define RADIO_CONFIG_ENABLE_IRCAL_MULTIPLE_RF_PATHS 1
+#else
+#ifdef  DOXYGEN_SHOULD_SKIP_THIS // Leave undefined except for doxygen
+#define RADIO_CONFIG_ENABLE_IRCAL_MULTIPLE_RF_PATHS 0
+#endif//DOXYGEN_SHOULD_SKIP_THIS
 #endif
 
 #if RAIL_SUPPORTS_OFDM_PA
@@ -1270,6 +1288,14 @@ RAIL_ENUM(RAIL_TxPowerMode_t) {
 #endif
 #endif
 
+/**
+ * @def RAIL_TX_POWER_MODE_NAMES_2P4GIG
+ * @brief The names of the TX power modes for 2.4 GHz band.
+ *
+ * A list of the names for the TX power modes on the EFR32 series 2 parts
+ * supporting 2.4 GHz operation.
+ * This macro is useful for test applications and debugging output.
+ */
 #if RAIL_FEAT_2G4_RADIO
 #if (_SILICON_LABS_32B_SERIES_2_CONFIG == 1)
 #define RAIL_TX_POWER_MODE_NAMES_2P4GIG \
@@ -1277,21 +1303,24 @@ RAIL_ENUM(RAIL_TxPowerMode_t) {
   "RAIL_TX_POWER_MODE_2P4GIG_MP",       \
   "RAIL_TX_POWER_MODE_2P4GIG_LP",       \
   "RAIL_TX_POWER_MODE_2P4GIG_HIGHEST",
-#elif (_SILICON_LABS_32B_SERIES_2_CONFIG == 2) \
-  || (_SILICON_LABS_32B_SERIES_2_CONFIG == 4)  \
-  || (_SILICON_LABS_32B_SERIES_2_CONFIG == 7)
+#else // (_SILICON_LABS_32B_SERIES_2_CONFIG == 2|4|7)
 #define RAIL_TX_POWER_MODE_NAMES_2P4GIG \
   "RAIL_TX_POWER_MODE_2P4GIG_HP",       \
   "RAIL_TX_POWER_MODE_2P4GIG_LP",       \
-  "RAIL_TX_POWER_MODE_2P4GIG_HIGHEST",
-#elif (_SILICON_LABS_32B_SERIES_2_CONFIG == 3)
-#define RAIL_TX_POWER_MODE_NAMES_2P4GIG \
-  "RAIL_TX_POWER_MODE_2P4GIG_HP",       \
   "RAIL_TX_POWER_MODE_2P4GIG_HIGHEST",
 #endif
 #else
 #define RAIL_TX_POWER_MODE_NAMES_2P4GIG
 #endif //RAIL_FEAT_2G4_RADIO
+
+/**
+ * @def RAIL_TX_POWER_MODE_NAMES_SUBGIG
+ * @brief The names of the TX power modes for Sub-GHz band.
+ *
+ * A list of the names for the TX power modes on the EFR32 series 2 parts
+ * supporting Sub-GHz operation.
+ * This macro is useful for test applications and debugging output.
+ */
 #if RAIL_FEAT_SUBGIG_RADIO
 #if RAIL_SUPPORTS_EFF
 #define RAIL_TX_POWER_MODE_NAMES_SUBGIG \
@@ -1312,6 +1341,14 @@ RAIL_ENUM(RAIL_TxPowerMode_t) {
 #define RAIL_TX_POWER_MODE_NAMES_SUBGIG
 #endif
 
+/**
+ * @def RAIL_TX_POWER_MODE_NAMES_OFDM_PA
+ * @brief The names of the TX power modes for the OFDM PA.
+ *
+ * A list of the names for the TX power modes on EFR32 series 2 parts
+ * with an OFDM PA.
+ * This macro is useful for test applications and debugging output.
+ */
 #if RAIL_SUPPORTS_OFDM_PA
 #define RAIL_TX_POWER_MODE_NAMES_OFDM_PA \
   "RAIL_TX_POWER_MODE_OFDM_PA",
@@ -1319,6 +1356,14 @@ RAIL_ENUM(RAIL_TxPowerMode_t) {
 #define RAIL_TX_POWER_MODE_NAMES_OFDM_PA
 #endif
 
+/**
+ * @def RAIL_TX_POWER_MODE_NAMES_SUBGIG_EFF
+ * @brief The names of the TX power modes for Sub-GHz band with an EFF.
+ *
+ * A list of the names for the Sub-GHz TX power modes on EFR32 series 2 parts
+ * with an EFF.
+ * This macro is useful for test applications and debugging output.
+ */
 #if RAIL_SUPPORTS_EFF
 #if RAIL_FEAT_SUBGIG_RADIO
 #define RAIL_TX_POWER_MODE_NAMES_SUBGIG_EFF \
@@ -1328,6 +1373,19 @@ RAIL_ENUM(RAIL_TxPowerMode_t) {
 #else
 #define RAIL_TX_POWER_MODE_NAMES_SUBGIG_EFF
 #endif
+#else
+#define RAIL_TX_POWER_MODE_NAMES_SUBGIG_EFF
+#endif//RAIL_SUPPORTS_EFF
+
+/**
+ * @def RAIL_TX_POWER_MODE_NAMES_OFDM_PA_EFF
+ * @brief The names of the TX power modes for the OFDM PA with an EFF.
+ *
+ * A list of the names for the TX power modes on EFR32 series 2 parts
+ * with an OFDM PA and EFF.
+ * This macro is useful for test applications and debugging output.
+ */
+#if RAIL_SUPPORTS_EFF
 #if RAIL_SUPPORTS_OFDM_PA
 #define RAIL_TX_POWER_MODE_NAMES_OFDM_PA_EFF \
   "RAIL_TX_POWER_MODE_OFDM_PA_EFF_30DBM",    \
@@ -1338,7 +1396,6 @@ RAIL_ENUM(RAIL_TxPowerMode_t) {
 #define RAIL_TX_POWER_MODE_NAMES_OFDM_PA_EFF
 #endif
 #else
-#define RAIL_TX_POWER_MODE_NAMES_SUBGIG_EFF
 #define RAIL_TX_POWER_MODE_NAMES_OFDM_PA_EFF
 #endif//RAIL_SUPPORTS_EFF
 

@@ -23,11 +23,6 @@
 // <i> The time, in seconds, that the network will remain open.
 #define EMBER_AF_PLUGIN_NETWORK_CREATOR_SECURITY_NETWORK_OPEN_TIME_S   300
 
-// <q EMBER_AF_PLUGIN_NETWORK_CREATOR_SECURITY_TRUST_CENTER_SUPPORT> Trust Center Support
-// <i> Default: TRUE
-// <i> Set this option to true to include trust center security support in this plugin. If the option is set to false, then the application will only support creating distributed security networks.
-#define EMBER_AF_PLUGIN_NETWORK_CREATOR_SECURITY_TRUST_CENTER_SUPPORT   1
-
 // <q EMBER_AF_PLUGIN_NETWORK_CREATOR_SECURITY_ALLOW_HA_DEVICES_TO_STAY> Allow Home Automation Devices to remain on network (non-compliant)
 // <i> Default: TRUE
 // <i> Set this option to allow Home Automation devices to remain on the network after joining.

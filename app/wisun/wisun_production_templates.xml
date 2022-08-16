@@ -22,7 +22,7 @@
     <properties key="boardCompatibility" value="brd4163a brd4164a brd4170a brd4172a brd4253a brd4254a brd4270a brd4270b brd4271a brd4272a com.silabs.board.none"/>
     <properties key="partCompatibility" value=".*efr32fg12.* .*efr32mg12.* .*efr32fg25.*"/>
     <properties key="ideCompatibility" value="makefile-ide segger-embedded-studio simplicity-ide"/>
-    <properties key="toolchainCompatibility" value="gcc segger"/>
+    <properties key="toolchainCompatibility" value="gcc iar segger"/>
     <properties key="category" value="Wi-SUN Examples"/>
     <properties key="quality" value="PRODUCTION"/>
     <properties key="stockConfigCompatibility" value="com.silabs.ss.framework.project.toolchain.core.default"/>

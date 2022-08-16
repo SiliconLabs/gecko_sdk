@@ -89,11 +89,6 @@
 //@ [DEFAULT_USERCODE_ID]
 
 /**
- * Max notifications types
- */
-#define MAX_NOTIFICATIONS     1
-
-/**
  * Security keys
  */
 //@ [REQUESTED_SECURITY_KEYS_ID]

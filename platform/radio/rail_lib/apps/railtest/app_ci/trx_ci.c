@@ -403,14 +403,16 @@ void setRxOptions(sl_cli_command_arg_t *args)
   responsePrint(sl_cli_get_command_string(args, 0),
                 "storeCrc:%s,ignoreCrcErrors:%s,enableDualSync:%s,"
                 "trackAborted:%s,removeAppendedInfo:%s,rxAntenna:%s,"
-                "frameDet:%s",
+                "frameDet:%s,skipDCCal:%s,skipSynthCa:%s",
                 (rxOptions & RAIL_RX_OPTION_STORE_CRC) ? "True" : "False",
                 (rxOptions & RAIL_RX_OPTION_IGNORE_CRC_ERRORS) ? "True" : "False",
                 (rxOptions & RAIL_RX_OPTION_ENABLE_DUALSYNC) ? "True" : "False",
                 (rxOptions & RAIL_RX_OPTION_TRACK_ABORTED_FRAMES) ? "True" : "False",
                 (rxOptions & RAIL_RX_OPTION_REMOVE_APPENDED_INFO) ? "True" : "False",
                 configuredRxAntenna(rxOptions),
-                (rxOptions & RAIL_RX_OPTION_DISABLE_FRAME_DETECTION) ? "Off" : "On");
+                (rxOptions & RAIL_RX_OPTION_DISABLE_FRAME_DETECTION) ? "Off" : "On",
+                (rxOptions & RAIL_RX_OPTION_SKIP_DC_CAL) ? "True" : "False",
+                (rxOptions & RAIL_RX_OPTION_SKIP_SYNTH_CAL) ? "True" : "False");
 }
 
 void setTxTone(sl_cli_command_arg_t *args)

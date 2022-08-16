@@ -190,10 +190,20 @@ extern "C" {
 #define ZPAL_RADIO_INVALID_RSSI_DBM (-128)
 #define ZPAL_RADIO_RSSI_NOT_AVAILABLE (127)
 
+//deci-dBm values
+#define ZW_TX_POWER_10DBM  100
+#define ZW_TX_POWER_14DBM  140
+#define ZW_TX_POWER_20DBM  200
+
 /**
  * @brief Node ID type.
  */
 typedef uint16_t node_id_t;
+
+/**
+ * @brief Parameter type to store deci dBm values.
+ */
+typedef int16_t zpal_tx_power_t;
 
 typedef enum
 {
@@ -431,9 +441,9 @@ typedef struct
   zpal_radio_wakeup_t wakeup;                      ///< Wakeup interval for the radio.
   uint8_t primary_lr_channel;                      ///< Primary Long Range Channel.
   int8_t listen_before_talk_threshold;             ///< LBT Threshold for Transmit backoff in dBm.
-  int8_t tx_power_max;                             ///< Z-Wave Transmit Power in deci dBm.
-  int8_t tx_power_adjust;                          ///< Adjustment for antenna gain in deci dBm.
-  int16_t tx_power_max_lr;                         ///< Max transmit power for Z-Wave LR in deci dBm.
+  zpal_tx_power_t tx_power_max;                    ///< Z-Wave Transmit Power in deci dBm.
+  zpal_tx_power_t tx_power_adjust;                 ///< Adjustment for antenna gain in deci dBm.
+  zpal_tx_power_t tx_power_max_lr;                 ///< Max transmit power for Z-Wave LR in deci dBm.
   uint8_t *home_id;                                ///< Pointer to current HomeID(uint8_t homeID[4]).
   zpal_radio_callback_t rx_cb;                     ///< Pointer to function called by RF on Rx Completion.
   zpal_radio_callback_t tx_cb;                     ///< Pointer to function called by RF on Tx Completion.
@@ -591,9 +601,9 @@ zpal_status_t zpal_radio_get_background_rssi(uint8_t channel, bool force_rx, int
 /**
  * @brief Function for getting the current reduce RF tx power compared to the default normal power in dBm.
  *
- * @return The current reduced RF TX power in dBm.
+ * @return The current reduce RF TX power in dBm.
  */
-uint8_t zpal_radio_get_reduced_tx_power(void);
+uint8_t zpal_radio_get_reduce_tx_power(void);
 
 /**
  * @brief Allows the radio to go into FLiRS receive mode.
@@ -663,14 +673,14 @@ node_id_t zpal_radio_get_beam_node_id(void);
  *
  * @return Minimum TX power in dBm.
  */
-int8_t zpal_radio_get_minimum_lr_tx_power(void);
+zpal_tx_power_t zpal_radio_get_minimum_lr_tx_power(void);
 
 /**
  * @brief Returns the maximum transmit power for Z-Wave Long Range.
  *
  * @return Maximum TX power in dBm.
  */
-int8_t zpal_radio_get_maximum_lr_tx_power(void);
+zpal_tx_power_t zpal_radio_get_maximum_lr_tx_power(void);
 
 /**
  * @brief Returns whether debug is enabled or disabled.

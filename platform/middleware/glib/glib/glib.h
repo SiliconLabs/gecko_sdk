@@ -264,7 +264,7 @@ typedef struct __GLIB_Font_t{
 
   /** The font class is used to tell glib if the font contains numbers only
    *  or characters and numbers */
-  GLIB_Font_Class class;
+  GLIB_Font_Class fontClass;
 } GLIB_Font_t;
 
 /** @brief Rectangle structure

@@ -20,6 +20,10 @@
 
 #include "dmd/dmd.h"
 
+#ifdef __cplusplus
+extern "C" {
+#endif
+
 /** @cond DO_NOT_INCLUDE_WITH_DOXYGEN */
 
 /** Frame update frequency of display */
@@ -32,5 +36,9 @@
 EMSTATUS DMDIF_init(uint32_t cmdRegAddr, uint32_t dataRegAddr);
 
 /** @endcond */
+
+#ifdef __cplusplus
+}
+#endif
 
 #endif

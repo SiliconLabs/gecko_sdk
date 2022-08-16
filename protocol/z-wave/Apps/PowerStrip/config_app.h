@@ -78,6 +78,11 @@
 #define MAX_ASSOCIATION_GROUPS      4
 #define MAX_ASSOCIATION_IN_GROUP    5
 
+/**
+ * @brief Maximum number of notification groups for storing End Points - Notification Type pairs.
+ */
+#define MAX_NUM_OF_NOTIFICATION_GROUPS 2
+
 /*
  * File identifiers for application file system
  * Range: 0x00000 - 0x0FFFF
@@ -98,14 +103,6 @@
  {{ASSOCIATION_GROUP_INFO_REPORT_PROFILE_NOTIFICATION, NOTIFICATION_REPORT_POWER_MANAGEMENT_V4}, 1, {{COMMAND_CLASS_NOTIFICATION_V3, NOTIFICATION_REPORT_V3}},"alarm EP 2"}
 
 //@ [AGI_TABLE_ID]
-
-/**
- * Configuration for ApplicationUtilities/notification.h + .c
- *
- * Set to NUMBER_OF_ENDPOINTS because there'is one notification for each endpoint.
- */
-#define MAX_NOTIFICATIONS     NUMBER_OF_ENDPOINTS
-
 
 /**
  * Security keys

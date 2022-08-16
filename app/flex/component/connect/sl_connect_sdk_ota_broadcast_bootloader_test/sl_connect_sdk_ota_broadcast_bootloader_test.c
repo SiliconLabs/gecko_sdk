@@ -179,6 +179,8 @@ bool emberAfPluginOtaBootloaderClientNewIncomingImageCallback(EmberNodeId server
                                                               EmberNodeId *alternateServerId,
                                                               uint8_t imageTag)
 {
+  (void)alternateServerId;
+  (void)serverId;
   // The client shall accept images with matching tag
   bool accept = (imageTag == ota_bootloader_test_image_tag);
 
@@ -200,6 +202,7 @@ void emberAfPluginOtaBootloaderClientIncomingImageSegmentCallback(EmberNodeId se
                                                                   uint8_t imageTag,
                                                                   uint8_t *imageSegment)
 {
+  (void)serverId;
   app_log_info("(client): incoming segment, start: %d, end: %d, tag: 0x%x\n",
                startIndex, endIndex, imageTag);
 
@@ -253,6 +256,7 @@ bool emberAfPluginOtaBootloaderClientIncomingRequestBootloadCallback(EmberNodeId
                                                                      uint32_t bootloadDelayMs,
                                                                      uint8_t *applicationStatus)
 {
+  (void)serverId;
   // The client shall bootload an image with matching tag.
 
   if (applicationStatus == NULL) {

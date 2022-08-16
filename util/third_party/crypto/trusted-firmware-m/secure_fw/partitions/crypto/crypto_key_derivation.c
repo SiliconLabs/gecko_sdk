@@ -188,7 +188,7 @@ psa_status_t tfm_crypto_key_derivation_setup(psa_invec in_vec[],
     }
     if (status != PSA_SUCCESS) {
         /* Release the operation context, ignore if the operation fails. */
-        (void)tfm_crypto_operation_release(handle_out);
+        (void)tfm_crypto_operation_release(handle_out, true);
         return status;
     }
 
@@ -504,13 +504,11 @@ psa_status_t tfm_crypto_key_derivation_abort(psa_invec in_vec[],
     }
     if (status != PSA_SUCCESS) {
         /* Release the operation context, ignore if the operation fails. */
-        (void)tfm_crypto_operation_release(handle_out);
+        (void)tfm_crypto_operation_release(handle_out, true);
         return status;
     }
 
-    status = tfm_crypto_operation_release(handle_out);
-
-    return status;
+    return tfm_crypto_operation_release(handle_out, false);
 #endif /* TFM_CRYPTO_KEY_DERIVATION_MODULE_DISABLED */
 }
 

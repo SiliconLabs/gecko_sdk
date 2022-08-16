@@ -9,6 +9,7 @@ provides:
 requires:
   - name: ot_ncp
   - name: ot_radio
+  - name: ot_headers
   - name: ot_platform_abstraction
   - name: ot_thirdparty
 config_file:

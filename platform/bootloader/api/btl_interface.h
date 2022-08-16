@@ -84,7 +84,9 @@ typedef struct {
 #define BOOTLOADER_VERSION_MINOR_MASK (0x00FF0000U)
 
 /// Bootloader interface APIs are trust zone aware
-#if defined(_SILICON_LABS_32B_SERIES_2) && !defined(BOOTLOADER_APPLOADER)
+#if defined(BOOTLOADER_SECURE)
+#define BOOTLOADER_INTERFACE_TRUSTZONE_AWARE
+#elif defined(_SILICON_LABS_32B_SERIES_2) && !defined(BOOTLOADER_APPLOADER)
 // The bootloader with AppLoader as the communication interface will not
 // re-configure the SMU since it is using the NS peripherals by default.
 #define BOOTLOADER_INTERFACE_TRUSTZONE_AWARE
@@ -324,7 +326,11 @@ typedef struct Bootloader_inOutVec {
 // No bootloader area: Place the bootloader in main flash
 #define BTL_FIRST_STAGE_BASE              FLASH_BASE
 #if defined(BOOTLOADER_APPLOADER)
+#if defined(BOOTLOADER_SECURE)
+#define BTL_APPLICATION_BASE              (FLASH_BASE + 0x00014000UL)
+#else
 #define BTL_APPLICATION_BASE              (FLASH_BASE + 0x00012000UL)
+#endif // BOOTLOADER_SECURE
 #elif defined(BOOTLOADER_SECURE) && defined(BOOTLOADER_SUPPORT_COMMUNICATION)
 #define BTL_APPLICATION_BASE              (FLASH_BASE + 0x00006000UL)
 #else
@@ -336,7 +342,11 @@ typedef struct Bootloader_inOutVec {
 // No bootloader area: Place the bootloader in main flash
 #define BTL_FIRST_STAGE_BASE              FLASH_BASE
 #if defined(BOOTLOADER_APPLOADER)
+#if defined(BOOTLOADER_SECURE)
+#define BTL_APPLICATION_BASE              (FLASH_BASE + 0x00014000UL)
+#else
 #define BTL_APPLICATION_BASE              (FLASH_BASE + 0x00012000UL)
+#endif // BOOTLOADER_SECURE
 #else
 #define BTL_APPLICATION_BASE              (FLASH_BASE + 0x00006000UL)
 #endif // BOOTLOADER_APPLOADER
@@ -346,7 +356,13 @@ typedef struct Bootloader_inOutVec {
 // No bootloader area: Place the bootloader in main flash
 #define BTL_FIRST_STAGE_BASE              FLASH_BASE
 #if defined(BOOTLOADER_APPLOADER)
+#if defined(BOOTLOADER_SECURE)
+#define BTL_APPLICATION_BASE              (FLASH_BASE + 0x00014000UL)
+#else
 #define BTL_APPLICATION_BASE              (FLASH_BASE + 0x00012000UL)
+#endif // BOOTLOADER_SECURE
+#elif defined(BOOTLOADER_CUSTOM_SIZE)
+#define BTL_APPLICATION_BASE              (FLASH_BASE + 0x00004000UL)
 #else
 #define BTL_APPLICATION_BASE              (FLASH_BASE + 0x00006000UL)
 #endif // BOOTLOADER_APPLOADER
@@ -357,7 +373,11 @@ typedef struct Bootloader_inOutVec {
 // No bootloader area: Place the bootloader in main flash
 #define BTL_FIRST_STAGE_BASE              FLASH_BASE
 #if defined(BOOTLOADER_APPLOADER)
+#if defined(BOOTLOADER_SECURE)
+#define BTL_APPLICATION_BASE              (FLASH_BASE + 0x00014000UL)
+#else
 #define BTL_APPLICATION_BASE              (FLASH_BASE + 0x00012000UL)
+#endif // BOOTLOADER_SECURE
 #else
 #define BTL_APPLICATION_BASE              (FLASH_BASE + 0x00006000UL)
 #endif // BOOTLOADER_APPLOADER
@@ -368,7 +388,11 @@ typedef struct Bootloader_inOutVec {
 // No bootloader area: Place the bootloader in main flash
 #define BTL_FIRST_STAGE_BASE              FLASH_BASE
 #if defined(BOOTLOADER_APPLOADER)
+#if defined(BOOTLOADER_SECURE)
+#define BTL_APPLICATION_BASE              (FLASH_BASE + 0x00014000UL)
+#else
 #define BTL_APPLICATION_BASE              (FLASH_BASE + 0x00012000UL)
+#endif // BOOTLOADER_SECURE
 #else
 #define BTL_APPLICATION_BASE              (FLASH_BASE + 0x00006000UL)
 #endif // BOOTLOADER_APPLOADER
@@ -379,7 +403,11 @@ typedef struct Bootloader_inOutVec {
 // No bootloader area: Place the bootloader in main flash
 #define BTL_FIRST_STAGE_BASE              FLASH_BASE
 #if defined(BOOTLOADER_APPLOADER)
+#if defined(BOOTLOADER_SECURE)
+#define BTL_APPLICATION_BASE              (FLASH_BASE + 0x00014000UL)
+#else
 #define BTL_APPLICATION_BASE              (FLASH_BASE + 0x00012000UL)
+#endif // BOOTLOADER_SECURE
 #else
 #define BTL_APPLICATION_BASE              (FLASH_BASE + 0x00006000UL)
 #endif // BOOTLOADER_APPLOADER

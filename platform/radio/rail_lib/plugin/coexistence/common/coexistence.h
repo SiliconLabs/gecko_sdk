@@ -101,6 +101,7 @@ COEX_ENUM(COEX_GpioIndex_t) {
   COEX_GPIO_INDEX_GNT = 3,
   COEX_GPIO_INDEX_PHY_SELECT = 4,
   COEX_GPIO_INDEX_WIFI_TX = 5,
+  COEX_GPIO_INDEX_INTERNAL_REQ = 6,
   COEX_GPIO_INDEX_COUNT
 };
 
@@ -451,6 +452,22 @@ bool COEX_SetPwmRequest(COEX_Req_t coexReq,
  * @note Pass NULL to disable the request GPIO.
  */
 bool COEX_ConfigRequest(COEX_GpioHandle_t gpioHandle);
+
+/**
+ * Configure the COEX external request GPIO.
+ *
+ * @param[in] gpioHandle A GPIO instance handle.
+ * @return This function returns true if the request GPIO
+ *  was successfully configured, false otherwise.
+ *
+ * The external request GPIO is used with
+ * \ref COEX_GetGpioInputOverride to simulate
+ * a request from an external coexistence device.
+ * This GPIO output can be used to debug shared request.
+ *
+ * @note Pass NULL to disable the external request GPIO.
+ */
+bool COEX_ConfigExternalRequest(COEX_GpioHandle_t gpioHandle);
 
 /**
  * Configure the COEX PWM request GPIO.

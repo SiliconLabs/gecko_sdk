@@ -1196,8 +1196,9 @@ static int32_t parser_parseNewTagHeader(ParserContext_t  *parserContext,
         if (PARSER_REQUIRE_AUTHENTICITY) {
           parserContext->internalState = GblParserStateError;
           return BOOTLOADER_ERROR_PARSER_UNEXPECTED;
+        } else {
+          parserContext->internalState = GblParserStateFinalize;
         }
-        parserContext->internalState = GblParserStateFinalize;
         break;
 
 #if defined(SEMAILBOX_PRESENT) || defined(CRYPTOACC_PRESENT)

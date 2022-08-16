@@ -112,10 +112,11 @@ psa_status_t tfm_crypto_operation_alloc(enum tfm_crypto_operation_type type,
  * \brief Release an operation context in the backend
  *
  * \param[in] handle Pointer to the handle of the context to release
+ * \param[in] clean_backend_context Clean the backend operation context
  *
  * \return Return values as described in \ref psa_status_t
  */
-psa_status_t tfm_crypto_operation_release(uint32_t *handle);
+psa_status_t tfm_crypto_operation_release(uint32_t *handle, bool clean_backend_context);
 /**
  * \brief Look up an operation context in the backend for the corresponding
  *        frontend operation

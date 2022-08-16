@@ -288,13 +288,24 @@ public:
 
     void ProcessHelp(void *aContext, uint8_t aArgsLength, char *aArgs[]);
 
+    char * GetStaticOutputBuffer(void)
+    {
+        return mStaticOutputBuffer;
+    }
+
+    size_t GetStaticOutputBufferSize(void)
+    {
+        return sizeof(mStaticOutputBuffer);
+    }
+
 #endif
     enum
     {
-        kMaxCommands              = OPENTHREAD_CONFIG_COPROCESSOR_RPC_COMMANDS_MAX,
-        kMaxArgs                  = OPENTHREAD_CONFIG_COPROCESSOR_RPC_CMD_LINE_ARGS_MAX,
-        kMaxCommandBuffer         = OPENTHREAD_CONFIG_COPROCESSOR_RPC_OUTPUT_BUFFER_SIZE,
-        kCommandCacheBufferLength = OPENTHREAD_CONFIG_COPROCESSOR_RPC_COMMAND_CACHE_BUFFER_SIZE,
+        kMaxCommands                = OPENTHREAD_CONFIG_COPROCESSOR_RPC_COMMANDS_MAX,
+        kMaxCommandLineBufferSize   = OPENTHREAD_CONFIG_COPROCESSOR_RPC_CMD_LINE_BUFFER_SIZE,
+        kMaxArgs                    = OPENTHREAD_CONFIG_COPROCESSOR_RPC_CMD_LINE_ARGS_MAX,
+        kMaxStaticOutputBufferSize  = OPENTHREAD_CONFIG_COPROCESSOR_RPC_OUTPUT_BUFFER_SIZE,
+        kCommandCacheBufferLength   = OPENTHREAD_CONFIG_COPROCESSOR_RPC_COMMAND_CACHE_BUFFER_SIZE,
     };
 
 protected:
@@ -327,6 +338,7 @@ private:
     void *         mUserCommandsContext;
     otError        mUserCommandsError;
     uint8_t        mUserCommandsLength;
+    static char    mStaticOutputBuffer[kMaxStaticOutputBufferSize];
 #else
     static Arg     mCachedCommands[kMaxCommands];
     static char    mCachedCommandsBuffer[kCommandCacheBufferLength];

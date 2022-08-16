@@ -71,6 +71,7 @@ typedef struct COEX_HAL_GpioConfig {
 
 void COEX_HAL_Init(void);
 bool COEX_HAL_ConfigRequest(COEX_HAL_GpioConfig_t *gpioConfig);
+bool COEX_HAL_ConfigExternalRequest(COEX_HAL_GpioConfig_t *gpioConfig);
 bool COEX_HAL_ConfigPwmRequest(COEX_HAL_GpioConfig_t *gpioConfig);
 bool COEX_HAL_ConfigRadioHoldOff(COEX_HAL_GpioConfig_t *gpioConfig);
 bool COEX_HAL_ConfigPriority(COEX_HAL_GpioConfig_t *gpioConfig);

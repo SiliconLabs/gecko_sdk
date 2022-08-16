@@ -35,6 +35,10 @@
 #include "sl_status.h"
 #include "sl_enum.h"
 
+#ifdef __cplusplus
+extern "C" {
+#endif
+
 /**************************************************************************//**
 * @addtogroup veml6035 VEML6035 - Ambient Light Sensor
 * @brief Driver for the Vishay VEML6025 ambient light sensor
@@ -339,4 +343,9 @@ sl_status_t sl_veml6035_read_interrupt_status(sl_i2cspm_t *i2cspm,
                                               bool *threshold_high);
 
 /** @} (end addtogroup veml6035) */
+
+#ifdef __cplusplus
+}
+#endif
+
 #endif //SL_VEML6035_H

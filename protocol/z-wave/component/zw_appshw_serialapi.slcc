@@ -4,8 +4,15 @@ category: Z-Wave|AppsHw
 description: AppsHw for SerialAPI application
 package: Z-Wave
 quality: production
-ui_hints:
-  visibility: never
+config_file:
+  # For series 1
+  - path: protocol/z-wave/platform/SiliconLabs/AppsHw/inc/SerialAPI/config/s1/serial_api_config.h
+    file_id: serial_api_config
+    condition: [device_series_1]
+  # For series 2
+  - path: protocol/z-wave/platform/SiliconLabs/AppsHw/inc/SerialAPI/config/s2/serial_api_config.h
+    file_id: serial_api_config
+    condition: [device_series_2]
 source:
   - path: "protocol/z-wave/platform/SiliconLabs/AppsHw/src/SerialAPI/SerialAPI_hw.c"
 include:

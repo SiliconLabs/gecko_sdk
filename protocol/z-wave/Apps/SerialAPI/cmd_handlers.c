@@ -869,24 +869,19 @@ ZW_ADD_CMD(FUNC_ID_MEMORY_GET_ID)
 {
   UNUSED(frame);
 
+  uint8_t i = 0;
   /*  */
-  compl_workbuf[0] = (uint8_t) ((g_pAppHandles->pNetworkInfo->HomeId & 0xff000000) >> 24);
-  compl_workbuf[1] = (uint8_t) ((g_pAppHandles->pNetworkInfo->HomeId & 0x00ff0000) >> 16);
-  compl_workbuf[2] = (uint8_t) ((g_pAppHandles->pNetworkInfo->HomeId & 0x0000ff00) >> 8);
-  compl_workbuf[3] = (uint8_t)  (g_pAppHandles->pNetworkInfo->HomeId & 0x000000ff);
+  compl_workbuf[i++] = (uint8_t) ((g_pAppHandles->pNetworkInfo->HomeId & 0xff000000) >> 24);
+  compl_workbuf[i++] = (uint8_t) ((g_pAppHandles->pNetworkInfo->HomeId & 0x00ff0000) >> 16);
+  compl_workbuf[i++] = (uint8_t) ((g_pAppHandles->pNetworkInfo->HomeId & 0x0000ff00) >> 8);
+  compl_workbuf[i++] = (uint8_t)  (g_pAppHandles->pNetworkInfo->HomeId & 0x000000ff);
   if (SERIAL_API_SETUP_NODEID_BASE_TYPE_16_BIT == nodeIdBaseType)
   {
     // 16 bit nodeID
-    compl_workbuf[4] = (uint8_t)(g_pAppHandles->pNetworkInfo->NodeId >> 8);  // MSB
-    compl_workbuf[5] = (uint8_t)(g_pAppHandles->pNetworkInfo->NodeId & 0xFF);       // LSB
-    DoRespond_workbuf(6);
+    compl_workbuf[i++] = (uint8_t)(g_pAppHandles->pNetworkInfo->NodeId >> 8);  // MSB(16bit)
   }
-  else
-  {
-    // Legacy 8 bit nodeID
-    compl_workbuf[4] = (uint8_t)(g_pAppHandles->pNetworkInfo->NodeId & 0xFF);
-    DoRespond_workbuf(5);
-  }
+  compl_workbuf[i++] = (uint8_t)(g_pAppHandles->pNetworkInfo->NodeId & 0xFF);  // LSB(16bit)/8bit
+  DoRespond_workbuf(i);
 }
 #endif
 
@@ -1399,13 +1394,13 @@ ZW_ADD_CMD(FUNC_ID_ZW_ADD_NODE_TO_NETWORK)
 #if defined (SUPPORT_ZW_REMOVE_NODE_ID_FROM_NETWORK) && (SUPPORT_ZW_REMOVE_NODE_ID_FROM_NETWORK == 1)
 static void RemoveNodeFromNetwork(uint8_t mode, node_id_t node_id, void (*pCallBack)(LEARN_INFO_T *statusInfo))
 {
-  SZwaveCommandPackage pCmdPackage = {
-    .eCommandType = EZWAVECOMMANDTYPE_REMOVE_NODE_FROM_NETWORK,
-    .uCommandParams.NetworkManagement.mode = mode,
-    .uCommandParams.NetworkManagement.pHandle = (ZW_Void_Callback_t)pCallBack
-                                      };
+   SZwaveCommandPackage pCmdPackage;
+   pCmdPackage.eCommandType = EZWAVECOMMANDTYPE_REMOVE_NODE_FROM_NETWORK;
+   pCmdPackage.uCommandParams.NetworkManagement.mode = mode;
+   pCmdPackage.uCommandParams.NetworkManagement.pHandle = (ZW_Void_Callback_t)pCallBack;
+
   if (0 != node_id) {
-    pCmdPackage.uCommandParams.NetworkManagement.mode = EZWAVECOMMANDTYPE_REMOVE_NODEID_FROM_NETWORK;
+    pCmdPackage.eCommandType = EZWAVECOMMANDTYPE_REMOVE_NODEID_FROM_NETWORK;
     pCmdPackage.uCommandParams.NetworkManagement.nodeID = node_id;
   }
   // Put the package on queue (and dont wait for it)
@@ -1493,22 +1488,17 @@ static void                             /*RET Nothing                       */
 ZCB_ComplHandler_ZW_SetLearnMode(
   uint32_t bStatus)                         /*IN  ZW_SetLearnMode status        */
 {
-  uint8_t offset = 0;
-  BYTE_IN_AR(compl_workbuf, 0) = funcID_ComplHandler_ZW_SetLearnMode;
-  BYTE_IN_AR(compl_workbuf, 1) = (uint8_t)bStatus;
+  uint8_t i = 0;
+  BYTE_IN_AR(compl_workbuf, i++) = funcID_ComplHandler_ZW_SetLearnMode;
+  BYTE_IN_AR(compl_workbuf, i++) = (uint8_t)bStatus;
   if (SERIAL_API_SETUP_NODEID_BASE_TYPE_16_BIT == nodeIdBaseType)
   {
-    BYTE_IN_AR(compl_workbuf, 2) = (uint8_t)(g_pAppHandles->pNetworkInfo->NodeId >> 8); // MSB
-    BYTE_IN_AR(compl_workbuf, 3) = (uint8_t)(g_pAppHandles->pNetworkInfo->NodeId & 0xFF);     // LSB
-    offset++;  // 16 bit nodeID means the command fields that follow are offset by one byte
+    BYTE_IN_AR(compl_workbuf, i++) = (uint8_t)(g_pAppHandles->pNetworkInfo->NodeId >> 8); // MSB 16bit node Id
   }
-  else
-  {
-    BYTE_IN_AR(compl_workbuf, 2) = (uint8_t)(g_pAppHandles->pNetworkInfo->NodeId & 0xFF);      // Legacy 8 bit nodeID
-  }
+  BYTE_IN_AR(compl_workbuf, i++) = (uint8_t)(g_pAppHandles->pNetworkInfo->NodeId & 0xFF); // LSB(16bit)/Legacy 8 bit node Id
   /* For safty we transmit len = 0, to indicate that no data follows */
-  BYTE_IN_AR(compl_workbuf, offset + 3) = 0;
-  Request(FUNC_ID_ZW_SET_LEARN_MODE, compl_workbuf, offset + 4);
+  BYTE_IN_AR(compl_workbuf, i++) = 0;
+  Request(FUNC_ID_ZW_SET_LEARN_MODE, compl_workbuf, i);
 }
 #endif /* ZW_SLAVE */
 
@@ -1908,6 +1898,7 @@ static uint8_t AssignSucReturnRoute(uint16_t srcNodeID, uint8_t sucNode, ZW_TX_C
   pAssignReturnRoute->RouteDestinationNodeId = sucNode;
   memset(pAssignReturnRoute->aPriorityRouteRepeaters, 0, sizeof(pAssignReturnRoute->aPriorityRouteRepeaters));
   pAssignReturnRoute->PriorityRouteSpeed = 0;
+  pAssignReturnRoute->isSucRoute = true;
   pAssignReturnRoute->Handle = (ZW_Void_Callback_t)pCallBack;
   FramePackage.eTransmitType = EZWAVETRANSMITTYPE_ASSIGNRETURNROUTE;
 
@@ -1946,6 +1937,7 @@ static uint8_t AssignPrioritySucReturnRoute(uint16_t srcNode, uint8_t sucNode,  
   pAssignReturnRoute->RouteDestinationNodeId = sucNode;
   memcpy(pAssignReturnRoute->aPriorityRouteRepeaters, pRoute, 4);
   pAssignReturnRoute->PriorityRouteSpeed = routeSpeed;
+  pAssignReturnRoute->isSucRoute = true;
   pAssignReturnRoute->Handle = (ZW_Void_Callback_t)pCallBack;
   FramePackage.eTransmitType = EZWAVETRANSMITTYPE_ASSIGNRETURNROUTE;
 

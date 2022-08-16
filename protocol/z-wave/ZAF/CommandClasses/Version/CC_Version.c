@@ -258,6 +258,8 @@ static received_frame_status_t CC_Version_handler(
       
       uint16_t zaf_build_no;
       zaf_build_no = zaf_config_get_build_no();
+      uint16_t protocol_build_no;
+      protocol_build_no = ZW_GetProtocolBuildNumber();
 
       pTxBuf->ZW_VersionZwaveSoftwareReportV3Frame.cmdClass    = COMMAND_CLASS_VERSION_V3;
       pTxBuf->ZW_VersionZwaveSoftwareReportV3Frame.cmd         = VERSION_ZWAVE_SOFTWARE_REPORT_V3;
@@ -283,8 +285,8 @@ static received_frame_status_t CC_Version_handler(
       pTxBuf->ZW_VersionZwaveSoftwareReportV3Frame.zWaveProtocolVersion1 = pAppHandles->pProtocolInfo->ProtocolVersion.Major;
       pTxBuf->ZW_VersionZwaveSoftwareReportV3Frame.zWaveProtocolVersion2 = pAppHandles->pProtocolInfo->ProtocolVersion.Minor;
       pTxBuf->ZW_VersionZwaveSoftwareReportV3Frame.zWaveProtocolVersion3 = pAppHandles->pProtocolInfo->ProtocolVersion.Revision;
-      pTxBuf->ZW_VersionZwaveSoftwareReportV3Frame.zWaveProtocolBuildNumber1 = (uint8_t)(ZW_BUILD_NO >> 8);
-      pTxBuf->ZW_VersionZwaveSoftwareReportV3Frame.zWaveProtocolBuildNumber2 = (uint8_t)ZW_BUILD_NO;
+      pTxBuf->ZW_VersionZwaveSoftwareReportV3Frame.zWaveProtocolBuildNumber1 = (uint8_t)(protocol_build_no >> 8);
+      pTxBuf->ZW_VersionZwaveSoftwareReportV3Frame.zWaveProtocolBuildNumber2 = (uint8_t)protocol_build_no;
 
       pTxBuf->ZW_VersionZwaveSoftwareReportV3Frame.applicationVersion1 = zpal_get_app_version_major();
       pTxBuf->ZW_VersionZwaveSoftwareReportV3Frame.applicationVersion2 = zpal_get_app_version_minor();

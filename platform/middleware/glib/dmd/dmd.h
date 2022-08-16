@@ -44,6 +44,11 @@
 
 #include <stdint.h>
 #include "em_types.h"
+
+#ifdef __cplusplus
+extern "C" {
+#endif
+
 /* TODO: remove this and replace with include types and ecodes */
 /** Base of DMD error codes */
 #define ECODE_DMD_BASE    0x00000000
@@ -331,5 +336,9 @@ EMSTATUS DMD_runTests(uint32_t tests, uint32_t *result);
 
 /** @} (end addtogroup dmd) */
 /** @} (end addtogroup glib) */
+
+#ifdef __cplusplus
+}
+#endif
 
 #endif /* __DISPLAY_DMD_H__ */

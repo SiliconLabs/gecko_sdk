@@ -100,8 +100,7 @@ static int rail_get_random(unsigned char *output,
 }
 #endif // radio fallback
 
-#if defined(MBEDTLS_ENTROPY_ADC_C)          \
-  && !defined(MBEDTLS_ENTROPY_RAIL_PRESENT) \
+#if defined(MBEDTLS_ENTROPY_ADC_C) \
   && (!defined(SLI_ENTROPY_HAVE_TRNG) || defined(SLI_ENTROPY_REQUIRE_FALLBACK))
 #if !defined(MBEDTLS_ENTROPY_ADC_INSTANCE)
 #define MBEDTLS_ENTROPY_ADC_INSTANCE 0
@@ -129,6 +128,33 @@ static int adc_get_random(unsigned char *output,
 }
 #endif // ADC fallback
 
+#if (defined(MBEDTLS_ENTROPY_RAIL_PRESENT) || defined(MBEDTLS_ENTROPY_ADC_C)) \
+  && (!defined(SLI_ENTROPY_HAVE_TRNG) || defined(SLI_ENTROPY_REQUIRE_FALLBACK))
+static int rail_adc_entropy(unsigned char *output,
+                            size_t len,
+                            size_t *olen)
+{
+  (void) output;
+  (void) len;
+  (void) olen;
+
+  *olen = 0;
+  int ret = MBEDTLS_ERR_ENTROPY_SOURCE_FAILED;
+  #if defined(MBEDTLS_ENTROPY_RAIL_PRESENT)
+  ret = rail_get_random(output, len, olen);
+  if (*olen > 0 && ret == 0) {
+    // Return if we actually gathered something
+    // Otherwise, fallback to the ADC source if it is available.
+    return ret;
+  }
+  #endif // MBEDTLS_ENTROPY_RAIL_PRESENT
+  #if defined(MBEDTLS_ENTROPY_ADC_C)
+  ret = adc_get_random(output, len, olen);
+  #endif // MBEDTLS_ENTROPY_ADC_C
+  return ret;
+}
+#endif // RAIL and ADC entropy
+
 // -------------------------------------
 // Global function definitions
 
@@ -146,24 +172,12 @@ int mbedtls_hardware_poll(void *data,
 
   if ((rev.major == 1) && (rev.minor < 3)) {
     // On affected revisions, fall back to radio (prefered) or ADC entropy
-    #if defined(MBEDTLS_ENTROPY_RAIL_PRESENT)
-    return rail_get_random(output, len, olen);
-    #elif defined(MBEDTLS_ENTROPY_ADC_C)
-    return adc_get_random(output, len, olen);
-    #else
-    return MBEDTLS_ERR_ENTROPY_SOURCE_FAILED;
-    #endif
+    return rail_adc_entropy(output, len, olen);
   }
 #elif defined(SLI_ENTROPY_REQUIRE_FALLBACK)
   // Other devices for which this symbol is defined have TRNG erratas requiring
   // fallback to other sources for all revisions.
-  #if defined(MBEDTLS_ENTROPY_RAIL_PRESENT)
-  return rail_get_random(output, len, olen);
-  #elif defined(MBEDTLS_ENTROPY_ADC_C)
-  return adc_get_random(output, len, olen);
-  #else
-  return MBEDTLS_ERR_ENTROPY_SOURCE_FAILED;
-  #endif
+  return rail_adc_entropy(output, len, olen);
 #endif
 
 #if !defined(SLI_ENTROPY_REQUIRE_FALLBACK) \
@@ -178,13 +192,9 @@ int mbedtls_hardware_poll(void *data,
   } else {
     return MBEDTLS_ERR_ENTROPY_SOURCE_FAILED;
   }
-  #elif defined(MBEDTLS_ENTROPY_RAIL_PRESENT)
-  return rail_get_random(output, len, olen);
-  #elif defined(MBEDTLS_ENTROPY_ADC_C)
-  return adc_get_random(output, len, olen);
-  #else
-  return MBEDTLS_ERR_ENTROPY_SOURCE_FAILED;
-  #endif
+  #else // SLI_ENTROPY_HAVE_TRNG
+  return rail_adc_entropy(output, len, olen);
+  #endif // SLI_ENTROPY_HAVE_TRNG
 #endif
 }
 

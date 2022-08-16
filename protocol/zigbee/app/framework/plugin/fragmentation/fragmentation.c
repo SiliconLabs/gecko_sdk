@@ -82,8 +82,7 @@ uint8_t emAfPluginFragmentationArtificiallyDropBlockNumber = NO_BLOCK_TO_DROP;
 
 #endif
 
-#define messageTag(txPacket) ((txPacket)->sequence)
-
+#define messageTag(txPacket) ((txPacket)->apsFrame.sequence)
 //------------------------------------------------------------------------------
 // Functions
 

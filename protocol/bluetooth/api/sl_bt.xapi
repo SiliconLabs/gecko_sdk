@@ -1,5 +1,5 @@
 <?xml version="1.0" ?>
-<api device_id="4" device_name="bt" version="4.0.0">
+<api device_id="4" device_name="bt" version="4.1.0">
     <datatypes>
         <datatype base="uint16" name="errorcode" length="2"/>
         <datatype base="int16" name="int16" length="2"/>
@@ -2035,6 +2035,11 @@
             <params>
                 <param datatype="errorcode" name="result" type="uint16"/>
                 <param datatype="uint16" name="number_of_packets" type="uint16"/>
+            </params>
+        </event>
+        <event index="1" name="debug_event">
+            <params>
+                <param datatype="uint8array" name="data" type="uint8array"/>
             </params>
         </event>
         <enums name="packet_type">

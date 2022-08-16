@@ -885,7 +885,7 @@ psa_status_t sli_se_driver_aead_encrypt_decrypt_setup(sli_se_driver_aead_operati
                                                       size_t key_storage_buffer_size,
                                                       size_t key_storage_overhead)
 {
-#if (defined(PSA_WANT_ALG_CCM) && (_SILICON_LABS_32B_SERIES_2_CONFIG > 2)) \
+#if defined(PSA_WANT_ALG_CCM) \
   || defined(PSA_WANT_ALG_GCM)
 
   if (operation == NULL
@@ -921,7 +921,7 @@ psa_status_t sli_se_driver_aead_encrypt_decrypt_setup(sli_se_driver_aead_operati
       operation->alg = alg;
       break;
 #endif
-#if (defined(PSA_WANT_ALG_CCM) && (_SILICON_LABS_32B_SERIES_2_CONFIG > 2))
+#if defined(PSA_WANT_ALG_CCM)
     case PSA_ALG_AEAD_WITH_SHORTENED_TAG(PSA_ALG_CCM, 0):
       operation->alg = alg;
       break;
@@ -988,8 +988,8 @@ psa_status_t sli_se_driver_aead_set_nonce(sli_se_driver_aead_operation_t *operat
                                           const uint8_t *nonce,
                                           size_t nonce_size)
 {
-#if (defined(PSA_WANT_ALG_CCM) && (_SILICON_LABS_32B_SERIES_2_CONFIG > 2)) \
-  || defined(PSA_WANT_ALG_GCM)                                             \
+#if defined(PSA_WANT_ALG_CCM)  \
+  || defined(PSA_WANT_ALG_GCM) \
 
   if (operation == NULL
       || nonce == NULL) {
@@ -1034,7 +1034,7 @@ psa_status_t sli_se_driver_aead_set_lengths(sli_se_driver_aead_operation_t *oper
                                             size_t ad_length,
                                             size_t plaintext_length)
 {
-#if (defined(PSA_WANT_ALG_CCM) && (_SILICON_LABS_32B_SERIES_2_CONFIG > 2)) \
+#if (defined(PSA_WANT_ALG_CCM)) \
   || defined(PSA_WANT_ALG_GCM)
 
   if (operation == NULL) {
@@ -1044,7 +1044,6 @@ psa_status_t sli_se_driver_aead_set_lengths(sli_se_driver_aead_operation_t *oper
   // To pass current PSA Crypto test suite, tag length encoded in the
   // algorithm needs to be checked at this point.
   switch (PSA_ALG_AEAD_WITH_SHORTENED_TAG(operation->alg, 0)) {
-#if defined(PSA_WANT_ALG_CCM) && (_SILICON_LABS_32B_SERIES_2_CONFIG > 2)
     case PSA_ALG_AEAD_WITH_SHORTENED_TAG(PSA_ALG_CCM, 0):
       if ((PSA_ALG_AEAD_GET_TAG_LENGTH(operation->alg) % 2 != 0)
           || PSA_ALG_AEAD_GET_TAG_LENGTH(operation->alg) < 4
@@ -1052,7 +1051,6 @@ psa_status_t sli_se_driver_aead_set_lengths(sli_se_driver_aead_operation_t *oper
         return PSA_ERROR_INVALID_ARGUMENT;
       }
       break;
-#endif
 #if defined(PSA_WANT_ALG_GCM)
     case PSA_ALG_AEAD_WITH_SHORTENED_TAG(PSA_ALG_GCM, 0):
       if (PSA_ALG_AEAD_GET_TAG_LENGTH(operation->alg) < 4
@@ -1083,7 +1081,7 @@ psa_status_t sli_se_driver_aead_set_lengths(sli_se_driver_aead_operation_t *oper
 #endif // PSA_WANT_ALG_CCM || PSA_WANT_ALG_GCM
 }
 
-#if (defined(PSA_WANT_ALG_CCM) && (_SILICON_LABS_32B_SERIES_2_CONFIG > 2)) \
+#if defined(PSA_WANT_ALG_CCM) \
   || defined(PSA_WANT_ALG_GCM)
 
 static psa_status_t aead_start(sli_se_driver_aead_operation_t *operation,
@@ -1092,7 +1090,7 @@ static psa_status_t aead_start(sli_se_driver_aead_operation_t *operation,
 {
   // Ephemeral contexts
 #if defined(PSA_WANT_ALG_GCM) \
-  || (defined(PSA_WANT_ALG_CCM) && (_SILICON_LABS_32B_SERIES_2_CONFIG > 2))
+  || defined(PSA_WANT_ALG_CCM)
   sli_se_driver_aead_preinit_t preinit = operation->ctx.preinit;
 #endif
 
@@ -1103,7 +1101,7 @@ static psa_status_t aead_start(sli_se_driver_aead_operation_t *operation,
     return PSA_ERROR_HARDWARE_FAILURE;
   }
 
-#if defined(PSA_WANT_ALG_CCM) && (_SILICON_LABS_32B_SERIES_2_CONFIG > 2)
+#if defined(PSA_WANT_ALG_CCM)
   uint8_t tag_length = PSA_ALG_AEAD_GET_TAG_LENGTH(operation->alg);
 #endif//PSA_WANT_ALG_CCM
 
@@ -1127,7 +1125,7 @@ static psa_status_t aead_start(sli_se_driver_aead_operation_t *operation,
       operation->ad_len += input_length;
       return PSA_SUCCESS;
 #endif//PSA_WANT_ALG_GCM
-#if defined(PSA_WANT_ALG_CCM) && (_SILICON_LABS_32B_SERIES_2_CONFIG > 2)
+#if defined(PSA_WANT_ALG_CCM)
     case PSA_ALG_CCM:
       status = sl_se_ccm_multipart_starts(&operation->ctx.ccm,
                                           &cmd_ctx,
@@ -1159,7 +1157,7 @@ psa_status_t sli_se_driver_aead_update_ad(sli_se_driver_aead_operation_t *operat
                                           const uint8_t *input,
                                           size_t input_length)
 {
-#if (defined(PSA_WANT_ALG_CCM) && (_SILICON_LABS_32B_SERIES_2_CONFIG > 2)) \
+#if defined(PSA_WANT_ALG_CCM) \
   || defined(PSA_WANT_ALG_GCM)
 
   if (operation == NULL
@@ -1203,7 +1201,7 @@ psa_status_t sli_se_driver_aead_update(sli_se_driver_aead_operation_t *operation
                                        size_t output_size,
                                        size_t *output_length)
 {
-#if (defined(PSA_WANT_ALG_CCM) && (_SILICON_LABS_32B_SERIES_2_CONFIG > 2)) \
+#if defined(PSA_WANT_ALG_CCM) \
   || defined(PSA_WANT_ALG_GCM)
 
   (void)key_buffer;
@@ -1267,7 +1265,7 @@ psa_status_t sli_se_driver_aead_update(sli_se_driver_aead_operation_t *operation
       break;
     }
 #endif // PSA_WANT_ALG_GCM
-#if defined(PSA_WANT_ALG_CCM) && (_SILICON_LABS_32B_SERIES_2_CONFIG > 2)
+#if defined(PSA_WANT_ALG_CCM)
     case PSA_ALG_CCM:
     {
       status = sl_se_ccm_multipart_update(&operation->ctx.ccm,
@@ -1316,7 +1314,7 @@ psa_status_t sli_se_driver_aead_finish(sli_se_driver_aead_operation_t *operation
                                        size_t tag_size,
                                        size_t *tag_length)
 {
-#if (defined(PSA_WANT_ALG_CCM) && (_SILICON_LABS_32B_SERIES_2_CONFIG > 2)) \
+#if (defined(PSA_WANT_ALG_CCM)) \
   || defined(PSA_WANT_ALG_GCM)
 
   (void)ciphertext;
@@ -1389,7 +1387,7 @@ psa_status_t sli_se_driver_aead_finish(sli_se_driver_aead_operation_t *operation
       psa_status = PSA_SUCCESS;
       break;
 #endif // PSA_WANT_ALG_GCM
-#if defined(PSA_WANT_ALG_CCM) && (_SILICON_LABS_32B_SERIES_2_CONFIG > 2)
+#if defined(PSA_WANT_ALG_CCM)
     case PSA_ALG_CCM:
       if (operation->ctx.ccm.mode != SL_SE_ENCRYPT) {
         psa_status = PSA_ERROR_INVALID_ARGUMENT;
@@ -1452,7 +1450,7 @@ psa_status_t sli_se_driver_aead_verify(sli_se_driver_aead_operation_t *operation
                                        const uint8_t *tag,
                                        size_t tag_length)
 {
-#if (defined(PSA_WANT_ALG_CCM) && (_SILICON_LABS_32B_SERIES_2_CONFIG > 2)) \
+#if defined(PSA_WANT_ALG_CCM) \
   || defined(PSA_WANT_ALG_GCM)
 
   (void)plaintext;
@@ -1519,7 +1517,7 @@ psa_status_t sli_se_driver_aead_verify(sli_se_driver_aead_operation_t *operation
       psa_status = PSA_SUCCESS;
       break;
 #endif // PSA_WANT_ALG_GCM
-#if defined(PSA_WANT_ALG_CCM) && (_SILICON_LABS_32B_SERIES_2_CONFIG > 2)
+#if defined(PSA_WANT_ALG_CCM)
     case PSA_ALG_CCM:
     {
       uint32_t tag_len = PSA_ALG_AEAD_GET_TAG_LENGTH(operation->alg);

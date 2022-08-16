@@ -40,7 +40,7 @@ typedef struct _NOTIFICATION_
 typedef struct _MY_NOTIFICATION_
 {
   uint8_t lastActionGrp;
-  NOTIFICATION grp[MAX_NOTIFICATIONS];
+  NOTIFICATION grp[MAX_NUM_OF_NOTIFICATION_GROUPS];
 } MY_NOTIFICATION;
 
 
@@ -80,7 +80,7 @@ static void SaveNotificationStatus(
   status = zpal_nvm_read(pFileSystem, ZAF_FILE_ID_NOTIFICATIONDATA, &tSource, sizeof(SNotificationData));
   ASSERT(ZPAL_STATUS_OK == status);
 
-  uint8_t tGroupNumber = GetGroupNotificationType(&notificationType, endpoint);
+  uint8_t tGroupNumber = GetGroupIndex(&notificationType, endpoint);
 
   if(0xFF != tGroupNumber)
   {
@@ -94,6 +94,32 @@ static void SaveNotificationStatus(
   }
 }
 
+//Saves notificationStatus to persistent memory
+static void SaveNotificationStatusForType(
+    notification_type_t notificationType,
+    NOTIFICATION_STATUS notificationStatus)
+{
+  zpal_status_t status;
+
+  ASSERT(pFileSystem != 0);
+
+  for (uint8_t i = 0; i < MAX_NUM_OF_NOTIFICATION_GROUPS; i++) {
+    if(myNotification.grp[i].type == notificationType)
+    {
+      SNotificationData tSource;
+      status = zpal_nvm_read(pFileSystem, ZAF_FILE_ID_NOTIFICATIONDATA, &tSource, sizeof(SNotificationData));
+      ASSERT(ZPAL_STATUS_OK == status);
+
+      if(tSource.AlarmStatus[i] != (uint8_t)notificationStatus)
+      {
+        tSource.AlarmStatus[i] = (uint8_t)notificationStatus;
+        status = zpal_nvm_write(pFileSystem, ZAF_FILE_ID_NOTIFICATIONDATA, &tSource, sizeof(SNotificationData));
+        ASSERT(ZPAL_STATUS_OK == status);
+      }
+    }
+  }
+}
+
 void InitNotification(zpal_nvm_handle_t pFS)
 {
   ASSERT(pFS != NULL);
@@ -101,7 +127,7 @@ void InitNotification(zpal_nvm_handle_t pFS)
   uint8_t i = 0;
   notificationBurglerUnknownEvent = false;
 
-  for(i = 0; i< MAX_NOTIFICATIONS; i++)
+  for(i = 0; i< MAX_NUM_OF_NOTIFICATION_GROUPS; i++)
   {
     myNotification.grp[i].agiProfile.profile_MS = 0;
     myNotification.grp[i].agiProfile.profile_LS = 0;
@@ -127,6 +153,33 @@ void InitNotification(zpal_nvm_handle_t pFS)
     //By default set: NOTIFICATION_STATUS_UNSOLICIT_ACTIVATED
     DefaultNotificationStatus(NOTIFICATION_STATUS_UNSOLICIT_ACTIVATED);
   }
+}
+
+/**
+ * @brief In case of multidevice type (0xff) replace the endpoint to the endpoint of the last action group, if the lastActionGrp is not valid than return endpoint of group 0
+ * @param notificationType Notification type.
+ * @param pEndpoint Endpoint number to be updated
+ * @return bool
+ */
+static bool UpdateEndpointForRoot(
+    notification_type_t notificationType,
+    uint8_t *pEndpoint) 
+{
+  if (0xFF == notificationType)
+  {
+    if (0xFF != myNotification.lastActionGrp)
+    {
+      *pEndpoint = myNotification.grp[myNotification.lastActionGrp].ep;
+    }
+    else
+    {
+      *pEndpoint = myNotification.grp[0].ep;
+    }
+
+    return true;
+  }
+
+  return false;
 }
 
 void DefaultNotificationStatus(NOTIFICATION_STATUS status)
@@ -168,7 +221,7 @@ bool AddNotification(
 {
   uint8_t i;
   /*Find free slot*/
-  for(i = 0; i< MAX_NOTIFICATIONS; i++)
+  for(i = 0; i< MAX_NUM_OF_NOTIFICATION_GROUPS; i++)
   {
     if( 0 == myNotification.grp[i].type)
     {
@@ -199,11 +252,17 @@ bool AddNotification(
   return false;
 }
 
-uint8_t GetGroupNotificationType(notification_type_t* pNotificationType, uint8_t endpoint)
+/**
+ * @brief Search the index of group.
+ * @param notificationType Notification type.
+ * @param endpoint Endpoint number
+ * @return If the given endpoint is 0 (root) it return the firs groupnumber where the notification type is the same. Otherwise return the group number where the endpoint and type is matched.
+ */
+uint8_t GetGroupIndex(notification_type_t* pNotificationType, uint8_t endpoint)
 {
   uint8_t i = 0;
 
-  DPRINTF("\r\nGetGroupNotificationType %d", *pNotificationType);
+  DPRINTF("\r\nGetGroupIndex %d", *pNotificationType);
 
   if(0xFF == *pNotificationType)
   {
@@ -226,7 +285,7 @@ uint8_t GetGroupNotificationType(notification_type_t* pNotificationType, uint8_t
       }
       else{
         /*find notification out from end-point*/
-        for(i = 0; i< MAX_NOTIFICATIONS; i++)
+        for(i = 0; i< MAX_NUM_OF_NOTIFICATION_GROUPS; i++)
         {
           if(myNotification.grp[i].ep == endpoint)
           {
@@ -237,69 +296,49 @@ uint8_t GetGroupNotificationType(notification_type_t* pNotificationType, uint8_t
     }
   }
 
-  for(i = 0; i< MAX_NOTIFICATIONS; i++)
+  for(i = 0; i< MAX_NUM_OF_NOTIFICATION_GROUPS; i++)
   {
     DPRINTF("%d %d ", myNotification.grp[i].type, *myNotification.grp[i].pSupportedEvents);
-    if((myNotification.grp[i].type == *pNotificationType) && (myNotification.grp[i].ep == endpoint))
+  
+    if( (myNotification.grp[i].type == *pNotificationType) && (ENDPOINT_ROOT == endpoint) )
     {
       DPRINTF("ID %d", i);
       return i;
+    }
+    else
+    {
+       if((myNotification.grp[i].type == *pNotificationType) && (myNotification.grp[i].ep == endpoint))
+       {
+        DPRINTF("ID %d", i);
+        return i;
+       }
+
     }
   }
   return 0xff;
 }
 
-/*
-  Find the endpoint that assigned to a certian notification type from myNotification structure
-*/
-static bool ExtractEndpoint(
-    notification_type_t notificationType,
-    uint8_t *pEndpoint) {
-  if (0xFF == notificationType)
-  {
-    if (0xFF != myNotification.lastActionGrp)
-    {
-      *pEndpoint = myNotification.grp[myNotification.lastActionGrp].ep;
-    }
-    else
-    {
-      *pEndpoint = myNotification.grp[0].ep;
-    }
-    return true;
-  }
-  else
-  {
-    if ((0xFF != myNotification.lastActionGrp) &&
-        (myNotification.grp[myNotification.lastActionGrp].type == notificationType)) {
-      *pEndpoint = myNotification.grp[myNotification.lastActionGrp].ep;
-      return true;
-    }
-    for (uint8_t i = 0; i < MAX_NOTIFICATIONS; i++)  {
-      if ((myNotification.grp[i].type == notificationType) &&
-          (0xff != myNotification.grp[i].ep)) {
-        *pEndpoint = myNotification.grp[i].ep;
-        return true;
-      }
-    }
-  }
-  return false;
-}
-
+/**
+ * @brief Validates the given notificationType - endpoint pairs, and updates the endpoint in a special case.
+ * @param notificationType Notification type.
+ * @param endpoint Endpoint number
+ * @return False if the given endpoint not suppert the given notification type, otherwise is true.
+ */
 bool FindNotificationEndpoint(
     notification_type_t notificationType,
     uint8_t * pEndpoint)
 {
   DPRINTF("\r\nFindNotificationEndpoint %d EP %d\r\n", notificationType, *pEndpoint);
-  if (false == ValidateNotificationType(notificationType , *pEndpoint ) || (0 == *pEndpoint))
+  bool valid = ValidateNotificationType(notificationType , *pEndpoint );
+  if (valid)
   {
-    if((0 == *pEndpoint) && ExtractEndpoint(notificationType, pEndpoint)) {
-      return true;
-    } else {
-      return false;
-    }
-  } else {
-    return true;
+	  return true;
   }
+  else if ( (false == valid) && (ENDPOINT_ROOT == *pEndpoint) && (UpdateEndpointForRoot(notificationType, pEndpoint)) )
+  {
+	  return true;
+  }
+  return false;
 }
 
 e_cmd_handler_return_code_t handleAppNotificationSet(
@@ -307,6 +346,7 @@ e_cmd_handler_return_code_t handleAppNotificationSet(
     NOTIFICATION_STATUS_SET notificationStatus,
     uint8_t endpoint)
 {
+  UNUSED(endpoint);
   NOTIFICATION_STATUS newStatus = NOTIFICATION_STATUS_NO_PENDING_NOTIFICATION;
 
   if(NOTIFICATION_STATUS_SET_UNSOLICIT_DEACTIVATED == notificationStatus)
@@ -317,13 +357,22 @@ e_cmd_handler_return_code_t handleAppNotificationSet(
   {
 	  newStatus = NOTIFICATION_STATUS_UNSOLICIT_ACTIVATED;
   }
+  
+  if (endpoint == 0) {
+      // Enable/disable notification status for all EndPoints in case of root node is addressed
 
-  //Saves notificationStatus to persistent memory
-  SaveNotificationStatus(
-      notificationType,
-      newStatus,
-      endpoint
-     );
+      SaveNotificationStatusForType(
+              notificationType,
+              newStatus);
+    } else {
+      // Enable/disable notification status for the requested EndPoint only
+      SaveNotificationStatus(
+          notificationType,
+          newStatus,
+          endpoint
+        );
+    }
+
   return E_CMD_HANDLER_RETURN_CODE_HANDLED;
 }
 
@@ -333,10 +382,10 @@ void handleCmdClassNotificationEventSupportedReport(
     uint8_t * pBitMaskArray,
     uint8_t endpoint)
 {
-  if( true == FindNotificationEndpoint(notificationType, &endpoint) )
+  if( true == (ValidateNotificationType(notificationType, endpoint)) )
   {
     notification_type_t temp_notificationType = notificationType;
-    uint8_t grpNo = GetGroupNotificationType(&temp_notificationType, endpoint );
+    uint8_t grpNo = GetGroupIndex(&temp_notificationType, endpoint );
     uint8_t i;
 
     if(temp_notificationType != notificationType)
@@ -361,7 +410,8 @@ void handleCmdClassNotificationEventSupportedReport(
     /*calc number of bitmask bytes*/
     *pNbrBitMask = (*pNbrBitMask / 8) + 1;
   }
-  else{
+  else
+  {
     /*Only support Unkown event why bit maks is 0*/
     *pNbrBitMask = 0;
   }
@@ -372,7 +422,7 @@ NOTIFICATION_STATUS CmdClassNotificationGetNotificationStatus(
     uint8_t endpoint)
 {
   NOTIFICATION_STATUS status = NOTIFICATION_STATUS_UNSOLICIT_DEACTIVATED;
-  uint8_t grp = GetGroupNotificationType( &notificationType, endpoint );
+  uint8_t grp = GetGroupIndex( &notificationType, endpoint );
 
   if(0xff != grp)
   {
@@ -403,7 +453,7 @@ bool CmdClassNotificationGetNotificationEvent(
     uint8_t endpoint)
 {
   uint8_t i = 0;
-  uint8_t grpNo = GetGroupNotificationType(pNotificationType, endpoint );
+  uint8_t grpNo = GetGroupIndex(pNotificationType, endpoint );
   *pEventPar = 0;
   *pEvNbrs = 0;
   if(0xff == grpNo)
@@ -413,7 +463,7 @@ bool CmdClassNotificationGetNotificationEvent(
 
   DPRINTF("GetNotificationEvent %d %d ", *pNotificationType, *pNotificationEvent);
   /*check valid type*/
-  if(true == ValidateNotificationType(*pNotificationType, endpoint ))
+  if( true == (ValidateNotificationType(*pNotificationType, endpoint)) )
   {
     DPRINTF("%d", myNotification.grp[grpNo].event);
 
@@ -493,7 +543,7 @@ void NotificationEventTrigger(
     uint8_t sourceEndpoint)
 {
   uint8_t i;
-  for(i = 0; i< MAX_NOTIFICATIONS; i++)
+  for(i = 0; i< MAX_NUM_OF_NOTIFICATION_GROUPS; i++)
   {
     if( myNotification.grp[i].agiProfile.profile_MS == pAgiProfile->profile_MS &&
         myNotification.grp[i].agiProfile.profile_LS  == pAgiProfile->profile_LS &&
@@ -509,7 +559,7 @@ void NotificationEventTrigger(
       myNotification.grp[i].pEvPar = pEvPar;
       myNotification.grp[i].evParLen = evParLen;
       myNotification.grp[i].trigged = 1;
-      i = MAX_NOTIFICATIONS;
+      i = MAX_NUM_OF_NOTIFICATION_GROUPS;
     }
   }
 }
@@ -519,7 +569,7 @@ JOB_STATUS UnsolicitedNotificationAction(
   uint8_t sourceEndpoint,
   VOID_CALLBACKFUNC(pCallback)(TRANSMISSION_RESULT * pTransmissionResult))
 {
-  if (myNotification.lastActionGrp >= MAX_NOTIFICATIONS)
+  if (myNotification.lastActionGrp >= MAX_NUM_OF_NOTIFICATION_GROUPS)
   {
     return JOB_STATUS_BUSY;
   }
@@ -549,7 +599,7 @@ JOB_STATUS UnsolicitedNotificationAction(
 
 void ClearLastNotificationAction(AGI_PROFILE const * const pAgiProfile, uint8_t sourceEndpoint)
 {
-  if (myNotification.lastActionGrp < MAX_NOTIFICATIONS)
+  if (myNotification.lastActionGrp < MAX_NUM_OF_NOTIFICATION_GROUPS)
   {
     if( myNotification.grp[myNotification.lastActionGrp].agiProfile.profile_MS == pAgiProfile->profile_MS &&
         myNotification.grp[myNotification.lastActionGrp].agiProfile.profile_LS  == pAgiProfile->profile_LS &&
@@ -595,7 +645,7 @@ void handleCmdClassNotificationSupportedReport(
     uint8_t endpoint)
 {
   *pNbrBitMask = 0;
-  for(uint8_t i = 0; i< MAX_NOTIFICATIONS; i++) {
+  for(uint8_t i = 0; i< MAX_NUM_OF_NOTIFICATION_GROUPS; i++) {
     if((0 == endpoint) ||                          /* find all notification types for device*/
        (myNotification.grp[i].ep == endpoint) ) {  /* find all notification types for endpoint*/
       SetNotificationBit(i, pNbrBitMask, pBitMaskArray, bBitMaskLen);
@@ -615,7 +665,7 @@ static bool ValidateNotificationType(notification_type_t notificationType, uint8
 
   if( 0xFF == notificationType)
   {
-    for(i = 0; i< MAX_NOTIFICATIONS; i++)
+    for(i = 0; i< MAX_NUM_OF_NOTIFICATION_GROUPS; i++)
     {
       if(myNotification.grp[i].ep == endpoint)
       {
@@ -625,9 +675,9 @@ static bool ValidateNotificationType(notification_type_t notificationType, uint8
     return false;
   }
 
-  for(i = 0; i< MAX_NOTIFICATIONS; i++)
+  for(i = 0; i< MAX_NUM_OF_NOTIFICATION_GROUPS; i++)
   {
-    if(myNotification.grp[i].type == notificationType && myNotification.grp[i].ep == endpoint)
+    if(myNotification.grp[i].type == notificationType)
     {
       return true;
     }

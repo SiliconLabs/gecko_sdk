@@ -73,13 +73,6 @@ uint8_t * get_cert_buf_ptr(void);
 uint8_t * get_pub_device_key_buf_ptr(void);
 
 /***************************************************************************//**
- * Get token length.
- *
- * @returns Returns length of the token.
- ******************************************************************************/
-size_t get_token_len(void);
-
-/***************************************************************************//**
  * Initialize the SE Manager.
  *
  * @returns Returns status code, @ref sl_status.h.

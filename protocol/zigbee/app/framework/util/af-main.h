@@ -145,15 +145,6 @@ void emAfStackStatusHandler(EmberStatus status);
 void emAfNetworkSecurityInit(void);
 void emAfNetworkInit(SLXU_INIT_ARG);
 
-// For testing purposes only, we suppress the normal call to emberNetworkInit()
-// at reboot.  This allows us to call it manually later and prevent the node
-// from immediately coming back up on the network after reboot.
-#ifdef EMBER_AF_TC_SWAP_OUT_TEST
-  #define EM_AF_NETWORK_INIT()
-#else
-  #define EM_AF_NETWORK_INIT() emAfNetworkInit()
-#endif
-
 #define emberAfCopyBigEndianEui64Argument emberCopyBigEndianEui64Argument
 void emAfScheduleFindAndRejoinEvent(void);
 

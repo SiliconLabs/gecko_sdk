@@ -182,8 +182,8 @@ static bool notification_sent = false;
 static bool indication_confirmed = false;
 
 /// Power control status
-static connection_power_reporting_mode_t power_control_enabled
-  = connection_power_reporting_disable;
+static sl_bt_connection_power_reporting_mode_t power_control_enabled
+  = sl_bt_connection_power_reporting_disable;
 
 /// Requested notification data size
 static uint8_t requested_notification_size =
@@ -314,7 +314,7 @@ static void throughput_peripheral_advertising_start(void)
   app_assert_status(sc);
 
   sc = sl_bt_legacy_advertiser_start(advertising_set_handle,
-                                     advertiser_connectable_scannable);
+                                     sl_bt_advertiser_connectable_scannable);
   app_assert_status(sc);
 
   #ifdef SL_CATALOG_BLUETOOTH_FEATURE_EXTENDED_ADVERTISER_PRESENT
@@ -345,8 +345,8 @@ static void throughput_peripheral_advertising_start(void)
 
   // Set PHY for extended advertiser
   sc = sl_bt_extended_advertiser_set_phy(coded_advertising_set_handle,
-                                         sl_bt_gap_coded_phy,
-                                         sl_bt_gap_coded_phy);
+                                         sl_bt_gap_phy_coded,
+                                         sl_bt_gap_phy_coded);
 
   app_assert( (sc == SL_STATUS_OK) || (sc == SL_STATUS_INVALID_PARAMETER),
               "[E: 0x%04x] Failed to set CODED PHY for the advertistment\n",
@@ -354,7 +354,7 @@ static void throughput_peripheral_advertising_start(void)
 
   if (sc == SL_STATUS_OK) {
     sc = sl_bt_extended_advertiser_start(coded_advertising_set_handle,
-                                         advertiser_connectable_non_scannable,
+                                         sl_bt_advertiser_connectable_non_scannable,
                                          SL_BT_EXTENDED_ADVERTISER_INCLUDE_TX_POWER);
     app_assert_status(sc);
   }
@@ -829,7 +829,7 @@ void throughput_peripheral_enable(void)
   peripheral_state.mode          = THROUGHPUT_PERIPHERAL_MODE_DEFAULT;
   peripheral_state.tx_power      = THROUGHPUT_PERIPHERAL_TX_POWER;
   peripheral_state.rssi          = 0;
-  peripheral_state.phy           = sl_bt_gap_1m_phy_uncoded;
+  peripheral_state.phy           = sl_bt_gap_phy_coding_1m_uncoded;
   peripheral_state.interval      = 0;
   peripheral_state.pdu_size      = 0;
   peripheral_state.mtu_size      = THROUGHPUT_PERIPHERAL_MTU_SIZE;
@@ -842,9 +842,9 @@ void throughput_peripheral_enable(void)
   peripheral_state.packet_lost   = 0;
 
   if (THROUGHPUT_PERIPHERAL_TX_POWER_CONTROL_ENABLE) {
-    power_control_enabled = connection_power_reporting_enable;
+    power_control_enabled = sl_bt_connection_power_reporting_enable;
   } else {
-    power_control_enabled = connection_power_reporting_disable;
+    power_control_enabled = sl_bt_connection_power_reporting_disable;
   }
 
   // Convert power to mdBm
@@ -1171,7 +1171,7 @@ void throughput_peripheral_on_bt_event(sl_bt_msg_t *evt)
         // Handle received data
         // Send confirmation if needed
         if (evt->data.evt_gatt_characteristic_value.characteristic == indications_handle) {
-          if (evt->data.evt_gatt_characteristic_value.att_opcode == gatt_handle_value_indication) {
+          if (evt->data.evt_gatt_characteristic_value.att_opcode == sl_bt_gatt_handle_value_indication) {
             sl_bt_gatt_send_characteristic_confirmation(evt->data.evt_gatt_characteristic_value.connection);
           }
         }
@@ -1276,9 +1276,9 @@ sl_status_t throughput_peripheral_set_tx_power(throughput_tx_power_t tx_power,
     deep_sleep_enabled = deep_sleep;
 
     if (power_control) {
-      power_control_enabled = connection_power_reporting_enable;
+      power_control_enabled = sl_bt_connection_power_reporting_enable;
     } else {
-      power_control_enabled = connection_power_reporting_disable;
+      power_control_enabled = sl_bt_connection_power_reporting_disable;
     }
 
     // Reconnect if required

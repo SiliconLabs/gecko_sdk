@@ -221,8 +221,8 @@ void sl_iperf_print_test_log_json(sl_iperf_test_t * const test)
   sl_iperf_log_print(test->log, "%*s\"duration_ms\": %u,\n", __indent(3U), test->opt.duration_ms);
   sl_iperf_log_print(test->log, "%*s\"win_size\":    %u,\n", __indent(3U), test->opt.win_size);
   sl_iperf_log_print(test->log, "%*s\"persistent\":  %s,\n", __indent(3U), _bool_to_json(test->opt.persistent));
-  sl_iperf_log_print(test->log, "%*s\"interval_ms\": %u\n", __indent(3U), test->opt.interval_ms);
-  sl_iperf_log_print(test->log, "%*s\"bw_format\": \"%s\",\n", __indent(3U), test->opt.bw_format);
+  sl_iperf_log_print(test->log, "%*s\"interval_ms\": %u,\n", __indent(3U), test->opt.interval_ms);
+  sl_iperf_log_print(test->log, "%*s\"bw_format\": \"%s\"\n", __indent(3U), sl_iperf_opt_bw_format_to_str(test->opt.bw_format));
   sl_iperf_log_print(test->log, "%*s},\n", __indent(2U));
   sl_iperf_log_print(test->log, "%*s\"statistic\": {\n", __indent(2U));
   sl_iperf_log_print(test->log, "%*s\"nbr_calls\":             %lu,\n", __indent(3U), test->statistic.nbr_calls);
@@ -248,7 +248,7 @@ void sl_iperf_print_test_log_json(sl_iperf_test_t * const test)
   sl_iperf_log_print(test->log, "%*s\"bandwidth\":             %lu,\n", __indent(3U), test->statistic.bandwidth);
   sl_iperf_log_print(test->log, "%*s\"finack_tot_len\":        %lu,\n", __indent(3U), test->statistic.finack_tot_len);
   sl_iperf_log_print(test->log, "%*s\"finack_duration_ms\":    %lu,\n", __indent(3U), test->statistic.finack_duration_ms);
-  sl_iperf_log_print(test->log, "%*s\"finack_pkt\":            %lu,\n", __indent(3U), test->statistic.finack_pkt);
+  sl_iperf_log_print(test->log, "%*s\"finack_pkt\":            %lu\n", __indent(3U), test->statistic.finack_pkt);
   sl_iperf_log_print(test->log, "%*s}\n", __indent(2U));
   sl_iperf_log_print(test->log, "%*s}\n", __indent(1U));
   sl_iperf_log_print(test->log, "}\n");
@@ -616,7 +616,14 @@ void sl_iperf_test_calculate_average_bandwidth(sl_iperf_test_t * const test)
   _data_converter(test->statistic.bytes,
                   SL_IPERF_DATA_KBYTE_TO_BYTE_ML,
                   &params.fval_data);
-
+  if (time_duration_ms) {
+    // calculate bandwidth for statistic in bits/sec
+    test->statistic.bandwidth = (uint32_t)(((uint64_t)test->statistic.bytes * SL_IPERF_DATA_BYTE_TO_BIT_ML * 
+                              SL_IPERF_TIME_S_TO_MS_ML) / time_duration_ms);
+  } else {
+    test->statistic.bandwidth = 0UL;
+  }
+  
   sl_iperf_calc_time_from_ms(&params.end_time, time_duration_ms);
   params.pkt_cnt = test->statistic.tot_packets;
   params.lost_pkt_curr = test->statistic.udp_lost_pkt;

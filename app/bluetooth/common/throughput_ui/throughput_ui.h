@@ -120,9 +120,9 @@ void throughput_ui_set_data_size(throughput_data_size_t size);
  *   Sets the PHY on UI.
  *
  * @param[in] phy can be either of
- *  - sl_bt_gap_1m_phy: 1M phy
- *  - sl_bt_gap_2m_phy: 2M phy
- *  - sl_bt_gap_coded_phy: Coded phy
+ *  - sl_bt_gap_phy_coding_1m_uncoded: 1M phy
+ *  - sl_bt_gap_phy_coding_2m_uncoded: 2M phy
+ *  - sl_bt_gap_phy_coding_500k_coded: Coded phy
  *****************************************************************************/
 void throughput_ui_set_phy(throughput_phy_t phy);
 

@@ -22,6 +22,14 @@ include:
 template_contribution:
   - name: component_catalog
     value: zigbee_sleepy_message_queue
+  - name: zigbee_af_callback
+    value:
+      callback_type: event_init
+      function_name: emberAfPluginSleepyMessageQueueInitCallback
+  - name: zigbee_af_callback
+    value:
+      callback_type: local_data_init
+      function_name: emberAfPluginSleepyMessageQueueInitCallback
   - name: cli_group
     value:
       group: plugin
@@ -33,6 +41,9 @@ template_contribution:
       name: init
       handler: emberAfPluginSleepyMessageQueueInitCallback
       help: Initializes the sleepy message queue.
+      argument:
+      - type: uint8
+        help: Initialize EVENT (0x00) or LOCAL_DATA (0x01)
   - name: cli_command
     value:
       group: sleepy-message-queue

@@ -10,6 +10,12 @@ requires:
   - name: ot_stack
   - name: ot_ncp
   - name: cpc_secondary
+  - name: ot_coex
+    unless:
+      - "zigbee_ncp_cpc"
+  - name: mbedtls_entropy_adc
+    condition:
+      - "device_family_efr32mg1"
 recommends:
   - id: ot_stack_rcp
 root_path: util/third_party/openthread/src
@@ -29,9 +35,13 @@ define:
     value: 0
   - name: OPENTHREAD_CONFIG_NCP_CPC_ENABLE
     value: 1
+  - name: OPENTHREAD_CONFIG_COPROCESSOR_RPC_OUTPUT_BUFFER_SIZE
+    value: 512
+    condition:
+    - "device_family_efr32mg1"
 
 toolchain_settings:
   - option: optimize
     value: speed
     condition:
-    - "device_family_efr32mg1p"
+    - "device_family_efr32mg1"

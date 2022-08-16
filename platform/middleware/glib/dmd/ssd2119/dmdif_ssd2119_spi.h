@@ -20,6 +20,10 @@
 
 #include <stdint.h>
 
+#ifdef __cplusplus
+extern "C" {
+#endif
+
 /** @cond DO_NOT_INCLUDE_WITH_DOXYGEN */
 
 /* Module Prototypes */
@@ -32,5 +36,9 @@ uint32_t DMDIF_readData(void);
 EMSTATUS DMDIF_delay(uint32_t ms);
 
 /** @endcond */
+
+#ifdef __cplusplus
+}
+#endif
 
 #endif

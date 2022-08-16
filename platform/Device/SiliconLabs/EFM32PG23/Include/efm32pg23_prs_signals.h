@@ -27,6 +27,9 @@
  * 3. This notice may not be removed or altered from any source distribution.
  *
  *****************************************************************************/
+#ifndef EFM32PG23_PRS_SIGNALS_H
+#define EFM32PG23_PRS_SIGNALS_H
+
 /** Synchronous signal sources enumeration: */
 #define _PRS_SYNC_CH_CTRL_SOURCESEL_NONE                   (0x00000000UL)
 #define _PRS_SYNC_CH_CTRL_SOURCESEL_TIMER0                 (0x00000001UL)
@@ -667,3 +670,5 @@
 #define PRS_EUSART2L_TXC                                   (PRS_ASYNC_EUSART2L_TXC)
 #define PRS_EUSART2L_RXFL                                  (PRS_ASYNC_EUSART2L_RXFL)
 #define PRS_EUSART2L_TXFL                                  (PRS_ASYNC_EUSART2L_TXFL)
+
+#endif /* EFM32PG23_PRS_SIGNALS_H */

@@ -130,7 +130,7 @@ void rgb_led_set(uint8_t m, uint8_t r, uint8_t g, uint8_t b)
 {
   rgb_led_enable(false, (~m & BOARD_RGBLED_MASK));
   rgb_led_enable(true, m);
-  sl_led_set_rgb_color(&sl_led_rgb,
+  sl_led_set_rgb_color(&sl_simple_rgb_pwm_led_rgb_led0,
                        light_levels[r],
                        light_levels[g],
                        light_levels[b]);

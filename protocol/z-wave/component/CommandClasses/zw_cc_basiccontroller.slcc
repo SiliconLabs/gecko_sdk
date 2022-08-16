@@ -19,5 +19,3 @@ include:
     - path: CC_Basic.h
 provides:
   - name: zw_cc_basiccontroller
-documentation:
-  url: "https://sdomembers.z-wavealliance.org/document/dl/638"

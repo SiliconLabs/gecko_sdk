@@ -23,6 +23,7 @@
 #include "app/framework/util/af-main.h"
 #include "app/framework/util/util.h"
 #include "zap-config.h"
+#include "zcl-cli.h"
 
 //------------------------------------------------------------------------------
 // Globals
@@ -91,6 +92,13 @@ void eraseKeyTableEntry(uint8_t index)
                                index,
                                status);
   }
+}
+
+// Key Delete command
+void keysDeleteCommand(sl_cli_command_arg_t *arguments)
+{
+  uint8_t index = sl_cli_get_argument_uint8(arguments, 0);
+  eraseKeyTableEntry(index);
 }
 
 // keys clear
@@ -442,6 +450,39 @@ void sli_zigbee_zcl_buffer_add_length_and_string(sl_cli_command_arg_t *arguments
   appZclBufferLen += length + prefixSize;
 }
 
+/**
+ * @brief
+ * Given a 32-bit value and a specified number of bits fewer than 32, check that
+ * the value does not exceed the range of the specified number of bits.
+ * @param val
+ * @param bits
+ * @return true if value in range else return false
+ */
+static bool is_zcl_data_type_in_range(uint32_t val, uint8_t bits)
+{
+  if (bits == 0 || bits > 31) {
+    return false;
+  }
+  // Construct mask of the container's unused higher order bits.
+  uint32_t unusedBitsMask = ~((1u << bits) - 1u);
+  // Return true if the unused higher order bits are all zero.
+  return (unusedBitsMask & val) == 0;
+}
+
+/**
+ * @brief
+ * Given a value then add n number of bytes into the zcl buffer from that value
+ * @param val
+ * @param noOfBytes
+ */
+static void add_bytes_to_zcl_buffer(uint32_t val, uint8_t noOfBytes)
+{
+  for (uint8_t i = 0; i < noOfBytes; i++) {
+    uint8_t byteN = (uint8_t)(val >> (8u * i));
+    sli_zigbee_zcl_buffer_add_byte(byteN);
+  }
+}
+
 // Handles any zcl command where the argument list of the
 // command is simply appended to the zcl buffer.  Handles argument types
 // mentioned in the switch case below.  String arguments are written with
@@ -456,56 +497,88 @@ void sli_zigbee_zcl_simple_command(uint8_t frameControl,
   uint8_t count = sl_cli_get_argument_count(arguments);
   uint8_t type;
   uint8_t typeIndex = 0;
+  uint8_t *hex_value = 0;
+  size_t hex_length = 0;
 
   zclBufferSetup(frameControl, clusterId, commandId);
   for (argumentIndex = 0; argumentIndex < count; argumentIndex++) {
     type = argumentTypes[typeIndex];
     // For zcl cli array arguments are referenced as optional arguments.
     // Therefore the type of the arguments should remain the same for them.
-    if (type != SL_CLI_ARG_UINT8OPT
-        && type != SL_CLI_ARG_UINT16OPT
-        && type != SL_CLI_ARG_UINT32OPT
-        && type != SL_CLI_ARG_INT8OPT
-        && type != SL_CLI_ARG_INT16OPT
-        && type != SL_CLI_ARG_INT32OPT
-        && type != SL_CLI_ARG_STRINGOPT
-        && type != SL_CLI_ARG_HEXOPT) {
+    if (type != SL_ZCL_CLI_ARG_UINT8OPT
+        && type != SL_ZCL_CLI_ARG_UINT16OPT
+        && type != SL_ZCL_CLI_ARG_UINT24OPT
+        && type != SL_ZCL_CLI_ARG_UINT32OPT
+        && type != SL_ZCL_CLI_ARG_UINT40OPT
+        && type != SL_ZCL_CLI_ARG_UINT48OPT
+        && type != SL_ZCL_CLI_ARG_UINT56OPT
+        && type != SL_ZCL_CLI_ARG_UINT64OPT
+        && type != SL_ZCL_CLI_ARG_INT8OPT
+        && type != SL_ZCL_CLI_ARG_INT16OPT
+        && type != SL_ZCL_CLI_ARG_INT24OPT
+        && type != SL_ZCL_CLI_ARG_INT32OPT
+        && type != SL_ZCL_CLI_ARG_INT40OPT
+        && type != SL_ZCL_CLI_ARG_INT48OPT
+        && type != SL_ZCL_CLI_ARG_INT56OPT
+        && type != SL_ZCL_CLI_ARG_INT64OPT
+        && type != SL_ZCL_CLI_ARG_STRINGOPT
+        && type != SL_ZCL_CLI_ARG_HEXOPT) {
       typeIndex++;
     }
     switch (type) {
-      case SL_CLI_ARG_UINT8:
-      case SL_CLI_ARG_UINT8OPT:
+      case SL_ZCL_CLI_ARG_UINT8:
+      case SL_ZCL_CLI_ARG_UINT8OPT:
         sli_zigbee_zcl_buffer_add_byte((uint8_t)sl_cli_get_argument_uint8(arguments, argumentIndex));
         break;
-      case SL_CLI_ARG_UINT16:
-      case SL_CLI_ARG_UINT16OPT:
+      case SL_ZCL_CLI_ARG_UINT16:
+      case SL_ZCL_CLI_ARG_UINT16OPT:
         sli_zigbee_zcl_buffer_add_word(sl_cli_get_argument_uint16(arguments, argumentIndex));
         break;
-      case SL_CLI_ARG_UINT32:
-      case SL_CLI_ARG_UINT32OPT:
+      case SL_ZCL_CLI_ARG_UINT24:
+      case SL_ZCL_CLI_ARG_UINT24OPT:
+        if (is_zcl_data_type_in_range(sl_cli_get_argument_uint32(arguments, argumentIndex), 24u)) {
+          add_bytes_to_zcl_buffer(sl_cli_get_argument_uint32(arguments, argumentIndex), 3);
+        } else {
+          emberAfAppPrintln("Argument at index: %d is out of range", argumentIndex);
+          goto kickout;
+        }
+        break;
+      case SL_ZCL_CLI_ARG_UINT32:
+      case SL_ZCL_CLI_ARG_UINT32OPT:
         sli_zigbee_zcl_buffer_add_int32(sl_cli_get_argument_uint32(arguments, argumentIndex));
         break;
-      case SL_CLI_ARG_INT8:
-      case SL_CLI_ARG_INT8OPT:
+      case SL_ZCL_CLI_ARG_INT8:
+      case SL_ZCL_CLI_ARG_INT8OPT:
         sli_zigbee_zcl_buffer_add_byte((uint8_t)sl_cli_get_argument_int8(arguments, argumentIndex));
         break;
-      case SL_CLI_ARG_INT16:
-      case SL_CLI_ARG_INT16OPT:
+      case SL_ZCL_CLI_ARG_INT16:
+      case SL_ZCL_CLI_ARG_INT16OPT:
         sli_zigbee_zcl_buffer_add_word(sl_cli_get_argument_int16(arguments, argumentIndex));
         break;
-      case SL_CLI_ARG_INT32:
-      case SL_CLI_ARG_INT32OPT:
+      case SL_ZCL_CLI_ARG_INT24:
+      case SL_ZCL_CLI_ARG_INT24OPT:
+        if (is_zcl_data_type_in_range(sl_cli_get_argument_int32(arguments, argumentIndex), 24u)) {
+          add_bytes_to_zcl_buffer(sl_cli_get_argument_int32(arguments, argumentIndex), 3);
+        } else {
+          emberAfAppPrintln("Argument at index: %d is out of range", argumentIndex);
+          goto kickout;
+        }
+        break;
+      case SL_ZCL_CLI_ARG_INT32:
+      case SL_ZCL_CLI_ARG_INT32OPT:
         sli_zigbee_zcl_buffer_add_int32(sl_cli_get_argument_int32(arguments, argumentIndex));
         break;
-      case SL_CLI_ARG_STRING:
-      case SL_CLI_ARG_HEX:
-      case SL_CLI_ARG_STRINGOPT:
-      case SL_CLI_ARG_HEXOPT:
-        sli_zigbee_zcl_buffer_add_length_and_string(arguments, argumentIndex, false);
+      case SL_ZCL_CLI_ARG_HEX:
+      case SL_ZCL_CLI_ARG_HEXOPT:
+        hex_value = sl_cli_get_argument_hex(arguments, argumentIndex, &hex_length);
+        for (uint8_t i = 0; i < hex_length; i++) {
+          appZclBuffer[appZclBufferLen + i] = hex_value[i];
+        }
+        appZclBufferLen += hex_length;
         break;
-      case SL_CLI_ARG_ADDITIONAL:
-      case SL_CLI_ARG_WILDCARD:
-      case SL_CLI_ARG_GROUP:
+      case SL_ZCL_CLI_ARG_STRING:
+      case SL_ZCL_CLI_ARG_STRINGOPT:
+        sli_zigbee_zcl_buffer_add_length_and_string(arguments, argumentIndex, false);
         break;
       default:
         goto kickout;

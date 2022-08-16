@@ -14,9 +14,9 @@
   - name: SL_KIT_NAME
     value: '"XGM240-RB4316A"'
   - name: SL_KIT_REV
-    value: '"A01"'
+    value: '"A03"'
 - tag:
   - kit:opn:xGM240-RB4316A
   - kit:pn:RB4316
   - kit:variant:A
-  - kit:revision:A01
+  - kit:revision:A03

@@ -138,6 +138,7 @@ void EUSART0_RX_IRQHandler(void) __attribute__ ((weak, alias("Default_Handler"))
 void EUSART0_TX_IRQHandler(void) __attribute__ ((weak, alias("Default_Handler")));
 void EUSART1_RX_IRQHandler(void) __attribute__ ((weak, alias("Default_Handler")));
 void EUSART1_TX_IRQHandler(void) __attribute__ ((weak, alias("Default_Handler")));
+void MVP_IRQHandler(void) __attribute__ ((weak, alias("Default_Handler")));
 void ICACHE0_IRQHandler(void) __attribute__ ((weak, alias("Default_Handler")));
 void BURTC_IRQHandler(void) __attribute__ ((weak, alias("Default_Handler")));
 void LETIMER0_IRQHandler(void) __attribute__ ((weak, alias("Default_Handler")));
@@ -261,7 +262,7 @@ const tVectorEntry __VECTOR_TABLE[TOTAL_INTERRUPTS] __VECTOR_TABLE_ATTRIBUTE = {
   { EUSART0_TX_IRQHandler },                       /* -4 = EUSART0_TX */
   { EUSART1_RX_IRQHandler },                       /* -3 = EUSART1_RX */
   { EUSART1_TX_IRQHandler },                       /* -2 = EUSART1_TX */
-  { Default_Handler },                             /* Reserved */
+  { MVP_IRQHandler },                              /* -1 = MVP */
   { ICACHE0_IRQHandler },                          /* 00 = ICACHE0 */
   { BURTC_IRQHandler },                            /* 01 = BURTC */
   { LETIMER0_IRQHandler },                         /* 02 = LETIMER0 */

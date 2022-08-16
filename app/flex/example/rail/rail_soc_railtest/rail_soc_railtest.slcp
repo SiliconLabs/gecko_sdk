@@ -311,8 +311,6 @@ configuration:
 toolchain_settings:
   - option: optimize
     value: debug
-  - option: gcc_compiler_option
-    value: --no-builtin
 
 ui_hints:
   highlight:

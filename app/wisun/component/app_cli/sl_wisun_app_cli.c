@@ -384,7 +384,7 @@ const app_cli_entry_t app_settings_entries[] =
     .get_handler = _app_cli_get_phy
   },
   {
-    .key = "connection_state",
+    .key = "join_state",
     .domain = WISUN_CLI_DOMAIN_ID,
     .value_size = APP_CLI_VALUE_SIZE_UINT8,
     .input = APP_CLI_INPUT_FLAG_DEFAULT,
@@ -424,6 +424,19 @@ const app_cli_entry_t app_settings_entries[] =
   },
   {
     .key = "ip_address_border_router",
+    .domain = WISUN_CLI_DOMAIN_ID,
+    .value_size = APP_CLI_VALUE_SIZE_NONE,
+    .input = APP_CLI_INPUT_FLAG_DEFAULT,
+    .output = APP_CLI_OUTPUT_FLAG_DEFAULT,
+    .value = NULL,
+    .input_enum_list = NULL,
+    .output_enum_list = NULL,
+    .set_handler = NULL,
+    .get_handler = app_settings_get_ip_address,
+    .description = NULL
+  },
+  {
+    .key = "ip_address_primary_parent",
     .domain = WISUN_CLI_DOMAIN_ID,
     .value_size = APP_CLI_VALUE_SIZE_NONE,
     .input = APP_CLI_INPUT_FLAG_DEFAULT,
@@ -578,7 +591,7 @@ void app_disconnect(sl_cli_command_arg_t *arguments)
 
   ret = sl_wisun_get_join_state(&join_state);
   if (ret != SL_STATUS_OK) {
-    printf("[Failed: Getting joint state failed]\r\n");
+    printf("[Failed: Getting join state failed]\r\n");
     app_wisun_cli_mutex_unlock();
     return;
   }
@@ -822,7 +835,7 @@ static sl_status_t _app_cli_get_phy(char *value_str,
     sprintf(value_str, "%d", phy.operating_class);
     // operating mode
   } else if (strstr(entry->key, "operating_mode")) {
-    sprintf(value_str, "0x%02x", phy.operating_mode);
+    sprintf(value_str, "0x%x", phy.operating_mode);
   }
 
   return SL_STATUS_OK;

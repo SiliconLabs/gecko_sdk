@@ -58,29 +58,27 @@ void sli_zigbee_cli_config_cca_mode_command(sl_cli_command_arg_t *arguments)
 void sli_cli_pre_cmd_hook(sl_cli_command_arg_t* arguments)
 {
   (void)arguments;
-
   emberAfPushNetworkIndex(emAfCliNetworkIndex);
 
-#if defined(SL_CATALOG_KERNEL_PRESENT)
-  #if defined(SL_CATALOG_BLUETOOTH_PRESENT)
+#if defined(SL_CATALOG_BLUETOOTH_PRESENT)
   //Do not lock/unlock kernel for BLE commands
   uint8_t cmd_count = sl_cli_get_command_count(arguments);
-
-  if ( cmd_count >= 2) {
+  if (cmd_count >= 2) {
     char *cmd1_ptr = sl_cli_get_command_string(arguments, 0);
     char *cmd2_ptr =  sl_cli_get_command_string(arguments, 1);
+    // condition below should be true for any cli that starts with plug ble
+    // strncmp returns 0 when the comparison results in a match
+    if ( (strncmp(cmd1_ptr, "plug", 4) == 0) && (strncmp(cmd2_ptr, "ble", 3) == 0) ) {
+      return;
+    }
+  }
+#endif //#if defined(SL_CATALOG_BLUETOOTH_PRESENT)
 
-    if ( (strncmp(cmd1_ptr, "plug", 4) || strcmp(cmd2_ptr, "ble"))
-         && (strcmp(cmd1_ptr, "dmp_test"))) {
-  #endif //#if defined(SL_CATALOG_BLUETOOTH_PRESENT)
-
+  // Lock OS kernel to prevent CLI task from calling ember functions
+  // CLI task is lower priority than zigbee and can be preempted
+  #if defined(SL_CATALOG_KERNEL_PRESENT)
   (void)osKernelLock();
-
-  #if defined(SL_CATALOG_BLUETOOTH_PRESENT)
-}
-}
-  #endif //  #if defined(SL_CATALOG_BLUETOOTH_PRESENT)
-#endif //#if defined(SL_CATALOG_KERNEL_PRESENT)
+  #endif //#if defined(SL_CATALOG_KERNEL_PRESENT)
 }
 
 void sli_cli_post_cmd_hook(sl_cli_command_arg_t* arguments)

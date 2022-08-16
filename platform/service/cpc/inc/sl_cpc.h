@@ -31,6 +31,10 @@
 #ifndef SL_CPC_H
 #define SL_CPC_H
 
+#if defined(__linux__)
+#error Wrong platform - this header file is intended for the secondary application
+#endif
+
 #if defined(SL_COMPONENT_CATALOG_PRESENT)
 #include "sl_component_catalog.h"
 #endif

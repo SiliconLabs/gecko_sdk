@@ -60,12 +60,6 @@
 #define  HTTPs_CFG_POOLS_INIT_NBR       1
 
 /********************************************************************************************************
- *                                               FORM DEFINES
- *******************************************************************************************************/
-
-#define  HTTPs_FORM_BOUNDARY_STR_LEN_MAX                     72u
-
-/********************************************************************************************************
  ********************************************************************************************************
  *                                           GLOBAL VARIABLES
  ********************************************************************************************************
@@ -164,7 +158,7 @@ void HTTPsMem_InstanceInit(MEM_SEG  *p_mem_seg,
 
   RTOS_ERR_SET(*p_err, RTOS_ERR_NONE);
 
-exit:
+  exit:
   return;
 }
 
@@ -212,7 +206,7 @@ HTTPs_OS_TASK_OBJ *HTTPsMem_InstanceTaskInit(RTOS_ERR *p_err)
 
   RTOS_ERR_SET(*p_err, RTOS_ERR_NONE);
 
-exit:
+  exit:
   return (p_os_task_obj);
 }
 
@@ -393,7 +387,7 @@ void HTTPsMem_InstanceWorkingDirInit(HTTPs_INSTANCE *p_instance,
 
   RTOS_ERR_SET(*p_err, RTOS_ERR_NONE);
 
-exit:
+  exit:
   return;
 }
 #endif
@@ -943,7 +937,7 @@ HTTPs_CONN *HTTPsMem_ConnGet(HTTPs_INSTANCE *p_instance,
 
 #if ((HTTPs_CFG_FORM_EN == DEF_ENABLED) \
   && (HTTPs_CFG_FORM_MULTIPART_EN == DEF_ENABLED))
-exit_free_host:
+  exit_free_host:
 #if (HTTPs_CFG_ABSOLUTE_URI_EN == DEF_ENABLED)
   Mem_DynPoolBlkFree(&p_instance->PoolHost,                   // Release host previously acquired.
                      p_conn->HostPtr,
@@ -954,7 +948,7 @@ exit_free_host:
 #endif
 
 #if (HTTPs_CFG_ABSOLUTE_URI_EN == DEF_ENABLED)
-exit_free_path:
+  exit_free_path:
   Mem_DynPoolBlkFree(&p_instance->PoolPath,                   // Release path previously acquired.
                      p_conn->PathPtr,
                      &local_err);
@@ -962,21 +956,21 @@ exit_free_path:
   p_conn->PathPtr = DEF_NULL;
 #endif
 
-exit_free_buf:
+  exit_free_buf:
   Mem_DynPoolBlkFree(&p_instance->PoolBuf,                    // Release buf previously acquired.
                      p_conn->BufPtr,
                      &local_err);
   RTOS_ASSERT_CRITICAL((RTOS_ERR_CODE_GET(local_err) == RTOS_ERR_NONE), RTOS_ERR_ASSERT_CRITICAL_FAIL, DEF_NULL);
   p_conn->BufPtr = DEF_NULL;
 
-exit_free_conn:
+  exit_free_conn:
   Mem_DynPoolBlkFree(&p_instance->PoolConn,                   // Release conn previously acquired.
                      p_conn,
                      &local_err);
   RTOS_ASSERT_CRITICAL((RTOS_ERR_CODE_GET(local_err) == RTOS_ERR_NONE), RTOS_ERR_ASSERT_CRITICAL_FAIL, DEF_NULL);
   p_conn = DEF_NULL;
 
-exit:
+  exit:
   return (p_conn);
 }
 
@@ -1273,7 +1267,7 @@ CPU_BOOLEAN HTTPsMem_TokenGet(HTTPs_INSTANCE *p_instance,
 
   goto exit;
 
-exit_release_blk:
+  exit_release_blk:
   {
     RTOS_ERR local_err;
 
@@ -1283,7 +1277,7 @@ exit_release_blk:
     RTOS_ASSERT_CRITICAL((RTOS_ERR_CODE_GET(local_err) == RTOS_ERR_NONE), RTOS_ERR_ASSERT_CRITICAL_FAIL, DEF_FAIL);
   }
 
-exit:
+  exit:
   return (result);
 }
 #endif
@@ -1414,21 +1408,21 @@ HTTPs_KEY_VAL *HTTPsMem_QueryStrKeyValBlkGet(HTTPs_INSTANCE *p_instance,
 
   goto exit;
 
-exit_release_key:
+  exit_release_key:
   Mem_DynPoolBlkFree(&p_instance->PoolQueryStrKeyStr,           // Key String block previously acquired.
                      p_key_val->KeyPtr,
                      &local_err);
   RTOS_ASSERT_CRITICAL((RTOS_ERR_CODE_GET(local_err) == RTOS_ERR_NONE), RTOS_ERR_ASSERT_CRITICAL_FAIL, DEF_NULL);
   p_key_val->KeyPtr = DEF_NULL;
 
-exit_release_blk:
+  exit_release_blk:
   Mem_DynPoolBlkFree(&p_instance->PoolKeyVal,                   // Key-Val block previously acquired.
                      p_key_val,
                      &local_err);
   RTOS_ASSERT_CRITICAL((RTOS_ERR_CODE_GET(local_err) == RTOS_ERR_NONE), RTOS_ERR_ASSERT_CRITICAL_FAIL, DEF_NULL);
   p_key_val = DEF_NULL;
 
-exit:
+  exit:
   return (p_key_val);
 }
 #endif
@@ -1585,21 +1579,21 @@ HTTPs_KEY_VAL *HTTPsMem_FormKeyValBlkGet(HTTPs_INSTANCE *p_instance,
 
   goto exit;
 
-exit_release_key:
+  exit_release_key:
   Mem_DynPoolBlkFree(&p_instance->PoolFormKeyStr,               // Key String block previously acquired.
                      p_key_val->KeyPtr,
                      &local_err);
   RTOS_ASSERT_CRITICAL((RTOS_ERR_CODE_GET(local_err) == RTOS_ERR_NONE), RTOS_ERR_ASSERT_CRITICAL_FAIL, DEF_NULL);
   p_key_val->KeyPtr = DEF_NULL;
 
-exit_release_blk:
+  exit_release_blk:
   Mem_DynPoolBlkFree(&p_instance->PoolKeyVal,                   // Key-Val block previously acquired.
                      p_key_val,
                      &local_err);
   RTOS_ASSERT_CRITICAL((RTOS_ERR_CODE_GET(local_err) == RTOS_ERR_NONE), RTOS_ERR_ASSERT_CRITICAL_FAIL, DEF_NULL);
   p_key_val = DEF_NULL;
 
-exit:
+  exit:
   return (p_key_val);
 }
 #endif

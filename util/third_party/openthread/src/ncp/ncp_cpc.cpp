@@ -102,8 +102,8 @@ void NcpCPC::HandleOpenEndpoint(void)
 
     OT_ASSERT(status == SL_STATUS_OK);
 
-    status = sl_cpc_set_endpoint_option(&mUserEp, 
-                                        SL_CPC_ENDPOINT_ON_IFRAME_WRITE_COMPLETED, 
+    status = sl_cpc_set_endpoint_option(&mUserEp,
+                                        SL_CPC_ENDPOINT_ON_IFRAME_WRITE_COMPLETED,
                                         reinterpret_cast<void *>(HandleCPCSendDone));
 
     OT_ASSERT(status == SL_STATUS_OK);
@@ -118,7 +118,7 @@ void NcpCPC::HandleOpenEndpoint(void)
                                         SL_CPC_ENDPOINT_ON_ERROR,
                                         reinterpret_cast<void *>(HandleCPCEndpointError));
 
-    OT_ASSERT(status == SL_STATUS_OK);    
+    OT_ASSERT(status == SL_STATUS_OK);
 
     mTxFrameBuffer.SetFrameAddedCallback(HandleFrameAddedToNcpBuffer, this);
 }
@@ -151,26 +151,25 @@ void NcpCPC::SendToCPC(Tasklet &aTasklet)
 void NcpCPC::SendToCPC(void)
 {
     Spinel::Buffer &txFrameBuffer = mTxFrameBuffer;
-    uint8_t bufferLen;
-    //uint8_t *buffer;
+    uint16_t bufferLen;
 
     VerifyOrExit(mIsReady && !mIsWriting && !txFrameBuffer.IsEmpty());
-    
+
     mIsWriting = true;
     IgnoreError(txFrameBuffer.OutFrameBegin());
     bufferLen = txFrameBuffer.OutFrameGetLength();
-    //buffer = (uint8_t *)(malloc(bufferLen*sizeof(uint8_t)));
 
-    //txFrameBuffer.OutFrameRead(bufferLen,buffer);
     txFrameBuffer.OutFrameRead(bufferLen, mCpcTxBuffer);
     sl_cpc_write(&mUserEp, mCpcTxBuffer, bufferLen, 0, NULL);
     IgnoreError(txFrameBuffer.OutFrameRemove());
 
 exit:
-    // If the CPCd link isn't ready yet, just remove the frame from 
-    // the queue so that it doesn't fill up unncessarily
+    // If the CPCd link isn't ready yet, just remove the frame from
+    // the queue so that it doesn't fill up unnecessarily
     if(!mIsReady)
+    {
         IgnoreError(txFrameBuffer.OutFrameRemove());
+    }
 
     return;
 }
@@ -192,7 +191,7 @@ void NcpCPC::HandleSendDone(void)
 {
     mIsWriting = false;
     memset(mCpcTxBuffer, 0, sizeof(mCpcTxBuffer));
-    
+
     if(!mTxFrameBuffer.IsEmpty())
         mCpcSendTask.Post();
 }
@@ -242,7 +241,7 @@ void NcpCPC::ProcessCpc(void)
     uint16_t dataLength;
 
     HandleOpenEndpoint();
-    
+
     status = sl_cpc_read(&mUserEp,
                          &data,
                          &dataLength,

@@ -53,9 +53,10 @@ psa_status_t tfm_crypto_hash_setup(psa_invec in_vec[],
     if (status != PSA_SUCCESS) {
 #if defined(TFM_CONFIG_SL_SECURE_LIBRARY)
         if (status == PSA_ERROR_BAD_STATE) {
-            *handle_out = handle;
+            /* Invalidate the handle and abort the operation since the PSA Hash
+               setup functon never gets called to perform the proper abort operation */
             /* Release the operation context, ignore if the operation fails. */
-            (void)tfm_crypto_operation_release(handle_out);
+            (void)tfm_crypto_operation_release(handle_out, true);
         }
 #endif
         return status;
@@ -65,8 +66,9 @@ psa_status_t tfm_crypto_hash_setup(psa_invec in_vec[],
 
     status = psa_hash_setup(operation, alg);
     if (status != PSA_SUCCESS) {
-        /* Release the operation context, ignore if the operation fails. */
-        (void)tfm_crypto_operation_release(handle_out);
+        /* If the operation failed, the abort() function is called by the underlying crypto function
+           so just indicate that the operation is invalid. */
+        (void)tfm_crypto_operation_release(handle_out, false);
     }
 
     return status;
@@ -105,17 +107,17 @@ psa_status_t tfm_crypto_hash_update(psa_invec in_vec[],
                                          handle,
                                          (void **)&operation);
     if (status != PSA_SUCCESS) {
-#if defined(TFM_CONFIG_SL_SECURE_LIBRARY)
-        if (status == PSA_ERROR_BAD_STATE) {
-            *handle_out = handle;
-            /* Release the operation context, ignore if the operation fails. */
-            (void)tfm_crypto_operation_release(handle_out);
-        }
-#endif
         return status;
     }
 
-    return psa_hash_update(operation, input, input_length);
+    status = psa_hash_update(operation, input, input_length);
+    if (status != PSA_SUCCESS) {
+        /* If the operation failed, the abort() function is called by the underlying crypto function
+           so just indicate that the operation is invalid. */
+        (void)tfm_crypto_operation_release(handle_out, false);
+    }
+
+    return status;
 #endif /* TFM_CRYPTO_HASH_MODULE_DISABLED */
 }
 
@@ -154,22 +156,13 @@ psa_status_t tfm_crypto_hash_finish(psa_invec in_vec[],
                                          handle,
                                          (void **)&operation);
     if (status != PSA_SUCCESS) {
-#if defined(TFM_CONFIG_SL_SECURE_LIBRARY)
-        if (status == PSA_ERROR_BAD_STATE) {
-            *handle_out = handle;
-            /* Release the operation context, ignore if the operation fails. */
-            (void)tfm_crypto_operation_release(handle_out);
-        }
-#endif
         return status;
     }
 
     status = psa_hash_finish(operation, hash, hash_size, &out_vec[1].len);
-    if (status == PSA_SUCCESS) {
-        /* Release the operation context, ignore if the operation fails. */
-        (void)tfm_crypto_operation_release(handle_out);
-    }
-
+    /* The abort() function is called by the underlying crypto function
+       so just indicate that the operation is invalid. */
+    (void)tfm_crypto_operation_release(handle_out, false);
     return status;
 #endif /* TFM_CRYPTO_HASH_MODULE_DISABLED */
 }
@@ -210,12 +203,14 @@ psa_status_t tfm_crypto_hash_verify(psa_invec in_vec[],
     }
 
     status = psa_hash_verify(operation, hash, hash_length);
-#if !defined(TFM_CONFIG_SL_SECURE_LIBRARY)
     if (status == PSA_SUCCESS)
-#endif
     {
         /* Release the operation context, ignore if the operation fails. */
-        (void)tfm_crypto_operation_release(handle_out);
+        (void)tfm_crypto_operation_release(handle_out, true);
+    } else {
+        /* If the operation failed, the abort() function is called by the underlying crypto function
+           so just indicate that the operation is invalid. */
+        (void)tfm_crypto_operation_release(handle_out, false);
     }
 
     return status;
@@ -259,11 +254,13 @@ psa_status_t tfm_crypto_hash_abort(psa_invec in_vec[],
     status = psa_hash_abort(operation);
     if (status != PSA_SUCCESS) {
         /* Release the operation context, ignore if the operation fails. */
-        (void)tfm_crypto_operation_release(handle_out);
+        (void)tfm_crypto_operation_release(handle_out, true);
         return status;
     }
 
-    return tfm_crypto_operation_release(handle_out);
+    /* The abort() function is called by the underlying crypto function
+       so just invalidate the operation */
+    return tfm_crypto_operation_release(handle_out, false);
 #endif /* TFM_CRYPTO_HASH_MODULE_DISABLED */
 }
 
@@ -303,10 +300,23 @@ psa_status_t tfm_crypto_hash_clone(psa_invec in_vec[],
                                         target_handle,
                                         (void **)&target_operation);
     if (status != PSA_SUCCESS) {
+#if defined(TFM_CONFIG_SL_SECURE_LIBRARY)
+        if (status == PSA_ERROR_BAD_STATE) {
+            /* Invalidate the handle and abort the operation since the PSA Hash
+               clone functon never gets called to perform the proper abort operation */
+            /* Release the operation context, ignore if the operation fails. */
+            (void)tfm_crypto_operation_release(target_handle, true);
+        }
+#endif
         return status;
     }
 
-    return psa_hash_clone(source_operation, target_operation);
+    status = psa_hash_clone(source_operation, target_operation);
+    if (status != PSA_SUCCESS) {
+        /* Release the operation context, ignore if the operation fails. */
+        (void)tfm_crypto_operation_release(target_handle, false);
+    }
+    return status;
 #endif /* TFM_CRYPTO_HASH_MODULE_DISABLED */
 }
 

@@ -56,6 +56,10 @@
 #include "sl_simple_button_instances.h"
 #endif
 
+#if defined(SL_CATALOG_LEGACY_HAL_WDOG_PRESENT)
+#include "sl_legacy_hal_wdog_config.h"
+#endif
+
 #define EMBER_SUCCESS             (0x00u)
 #define EMBER_ERR_FATAL           (0x01u)
 #define EMBER_SLEEP_INTERRUPTED   (0x85u)
@@ -153,99 +157,13 @@ void halInit(void)
 
   EMU_UnlatchPinRetention();
 
-#if defined(SL_LEGACY_HAL_ENABLE_WATCHDOG) && !defined(SL_LEGACY_HAL_DISABLE_WATCHDOG)
+#if ((SL_LEGACY_HAL_ENABLE_WATCHDOG == 1) && (SL_LEGACY_HAL_DISABLE_WATCHDOG == 0))
   halInternalEnableWatchDog();
-#endif // SL_LEGACY_HAL_ENABLE_WATCHDOG && !SL_LEGACY_HAL_DISABLE_WATCHDOG
+#endif // ((SL_LEGACY_HAL_ENABLE_WATCHDOG == 1) && (SL_LEGACY_HAL_DISABLE_WATCHDOG == 0))
 
   halInternalStartSystemTimer();
 
   RAIL_InitTxPowerCurvesAlt(&RAIL_TxPowerCurvesVbat);
-}
-
-// Watchdog functions
-
-void halInternalEnableWatchDog(void)
-{
-  // Enable LE interface
-#if !defined(_SILICON_LABS_32B_SERIES_2)
-  CMU_ClockEnable(cmuClock_HFLE, true);
-  CMU_OscillatorEnable(cmuOsc_LFRCO, true, true);
-#endif
-
-#if defined(_SILICON_LABS_32B_SERIES_2) && !defined(_SILICON_LABS_32B_SERIES_2_CONFIG_1)
-  CMU_ClockEnable(cmuClock_WDOG0, true);
-#endif
-
-  // Make sure FULL reset is used on WDOG timeout
-#if defined(_RMU_CTRL_WDOGRMODE_MASK)
-  RMU_ResetControl(rmuResetWdog, rmuResetModeFull);
-#endif
-
-  WDOG_Init_TypeDef init = WDOG_INIT_DEFAULT;
-
-#if defined(_WDOG_CTRL_CLKSEL_MASK)
-  init.clkSel = wdogClkSelLFRCO;
-#else
-  // Series 2 devices select watchdog oscillator with the CMU.
-  CMU_ClockSelectSet(cmuClock_WDOG0, cmuSelect_LFRCO);
-#endif
-
-  WDOGn_Init(DEFAULT_WDOG, &init);
-}
-
-void halResetWatchdog(void)
-{
-#if defined(_CMU_HFBUSCLKEN0_LE_MASK)
-  if ((CMU->HFBUSCLKEN0 & _CMU_HFBUSCLKEN0_LE_MASK) != 0) {
-    WDOGn_Feed(DEFAULT_WDOG);
-  }
-#elif defined(_CMU_CLKEN0_WDOG0_MASK)
-  if ((CMU->CLKEN0 & _CMU_CLKEN0_WDOG0_MASK) != 0) {
-    WDOGn_Feed(DEFAULT_WDOG);
-  }
-#else
-  WDOGn_Feed(DEFAULT_WDOG);
-#endif
-}
-
-void halInternalDisableWatchDog(uint8_t magicKey)
-{
-#if defined(_CMU_HFBUSCLKEN0_LE_MASK)
-  if ((CMU->HFBUSCLKEN0 & _CMU_HFBUSCLKEN0_LE_MASK) != 0) {
-    if ( magicKey == MICRO_DISABLE_WATCH_DOG_KEY ) {
-      WDOGn_Enable(DEFAULT_WDOG, false);
-    }
-  }
-#elif defined(_CMU_CLKEN0_WDOG0_MASK)
-  if ((CMU->CLKEN0 & _CMU_CLKEN0_WDOG0_MASK) != 0) {
-    if ( magicKey == MICRO_DISABLE_WATCH_DOG_KEY ) {
-      WDOGn_Enable(DEFAULT_WDOG, false);
-    }
-  }
-#else
-  if ( magicKey == MICRO_DISABLE_WATCH_DOG_KEY ) {
-    WDOGn_Enable(DEFAULT_WDOG, false);
-  }
-#endif
-}
-
-bool halInternalWatchDogEnabled(void)
-{
-#if defined(_CMU_HFBUSCLKEN0_LE_MASK)
-  if ((CMU->HFBUSCLKEN0 & _CMU_HFBUSCLKEN0_LE_MASK) != 0) {
-    return WDOGn_IsEnabled(DEFAULT_WDOG);
-  } else {
-    return 0;
-  }
-#elif defined(_CMU_CLKEN0_WDOG0_MASK)
-  if ((CMU->CLKEN0 & _CMU_CLKEN0_WDOG0_MASK) != 0) {
-    return WDOGn_IsEnabled(DEFAULT_WDOG);
-  } else {
-    return 0;
-  }
-#else
-  return WDOGn_IsEnabled(DEFAULT_WDOG);
-#endif
 }
 
 void halReboot(void)

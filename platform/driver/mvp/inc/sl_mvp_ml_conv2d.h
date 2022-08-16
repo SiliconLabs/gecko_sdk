@@ -72,6 +72,7 @@ typedef struct {
   int             dilation_width;         /**< Dilation width factor.       */
   int             input_offset;           /**< Zero value for the input tensor. */
   int             output_offset;          /**< Zero value for the output tensor.*/
+  float16_t       *scratch_buffer;        /**< Pointer to scratch buffer */
 } sli_mvp_ml_conv2d_s8_params_t;
 
 /***************************************************************************//**
@@ -107,6 +108,19 @@ sl_status_t sli_mvp_ml_conv2d_s8(const sli_mvp_ml_conv2d_s8_params_t *params);
  *    True if Conv2D is supported, false otherwise.
  ******************************************************************************/
 bool sli_mvp_ml_conv2d_s8_is_supported(const sli_mvp_ml_conv2d_s8_params_t *params);
+
+/***************************************************************************//**
+ * @brief
+ *    Return the required scratch buffer size for the Conv2D operation
+ *
+ * @param[in] params Pointer to a data structure containing information on
+ *                   all input parameters, refer to
+ *                   @ref sli_mvp_ml_conv2d_s8_params_t.
+ *
+ * @return
+ *    Required scratch buffer size in bytes
+ ******************************************************************************/
+int sli_mvp_ml_conv2d_s8_get_scratch_buffer_size(const sli_mvp_ml_conv2d_s8_params_t *params);
 
 /** @} (end addtogroup mvp) */
 /// @endcond

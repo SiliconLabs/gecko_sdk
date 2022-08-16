@@ -44,16 +44,16 @@
 #endif
 /* Consistency check, since restoring assumes similar bit positions in */
 /* CMU OSCENCMD and STATUS regs. */
-#if (CMU_STATUS_AUXHFRCOENS != CMU_OSCENCMD_AUXHFRCOEN)
+#if defined(CMU_STATUS_AUXHFRCOENS) && (CMU_STATUS_AUXHFRCOENS != CMU_OSCENCMD_AUXHFRCOEN)
 #error Conflict in AUXHFRCOENS and AUXHFRCOEN bitpositions
 #endif
-#if (CMU_STATUS_HFXOENS != CMU_OSCENCMD_HFXOEN)
+#if defined(CMU_STATUS_HFXOENS) && (CMU_STATUS_HFXOENS != CMU_OSCENCMD_HFXOEN)
 #error Conflict in HFXOENS and HFXOEN bitpositions
 #endif
-#if (CMU_STATUS_LFRCOENS != CMU_OSCENCMD_LFRCOEN)
+#if defined(CMU_STATUS_LFRCOENS) && (CMU_STATUS_LFRCOENS != CMU_OSCENCMD_LFRCOEN)
 #error Conflict in LFRCOENS and LFRCOEN bitpositions
 #endif
-#if (CMU_STATUS_LFXOENS != CMU_OSCENCMD_LFXOEN)
+#if defined(CMU_STATUS_LFXOENS) && (CMU_STATUS_LFXOENS != CMU_OSCENCMD_LFXOEN)
 #error Conflict in LFXOENS and LFXOEN bitpositions
 #endif
 
@@ -1364,7 +1364,7 @@ void EMU_EnterEM4(void)
   }
 #endif
 
-#if (_SILICON_LABS_32B_SERIES_2_CONFIG >= 2)
+#if defined(_SILICON_LABS_32B_SERIES_2_CONFIG) && (_SILICON_LABS_32B_SERIES_2_CONFIG >= 2)
   /* Workaround for bug that may cause a Hard Fault on EM4 entry */
   CMU_ClockSelectSet(cmuClock_SYSCLK, cmuSelect_FSRCO);
   /* Switch from DCDC regulation mode to bypass mode before entering EM4. */

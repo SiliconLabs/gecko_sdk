@@ -179,53 +179,6 @@
 
 // [PTI]$
 
-// $[SERIAL]
-#define HAL_SERIAL_USART0_ENABLE              (0)
-#define BSP_SERIAL_APP_PORT                   (HAL_SERIAL_PORT_USART0)
-#define HAL_SERIAL_LEUART0_ENABLE             (0)
-#define HAL_SERIAL_USART1_ENABLE              (0)
-#define HAL_SERIAL_RXWAKE_ENABLE              (0)
-
-#define HAL_SERIAL_APP_RX_QUEUE_SIZE          (128UL)
-#define HAL_SERIAL_APP_BAUD_RATE              (115200UL)
-#define HAL_SERIAL_APP_RXSTOP                 (16UL)
-#define HAL_SERIAL_APP_RXSTART                (16UL)
-#define HAL_SERIAL_APP_TX_QUEUE_SIZE          (128UL)
-#define HAL_SERIAL_APP_FLOW_CONTROL           (HAL_USART_FLOW_CONTROL_NONE)
-
-#ifndef BSP_SERIAL_APP_TX_PIN
-#define BSP_SERIAL_APP_TX_PIN                 (8U)
-#endif
-#ifndef BSP_SERIAL_APP_TX_PORT
-#define BSP_SERIAL_APP_TX_PORT                (gpioPortA)
-#endif
-#ifndef BSP_SERIAL_APP_RX_PIN
-#define BSP_SERIAL_APP_RX_PIN                 (9U)
-#else
-#endif
-#ifndef BSP_SERIAL_APP_RX_PORT
-#define BSP_SERIAL_APP_RX_PORT                (gpioPortA)
-#endif
-#ifndef BSP_SERIAL_APP_CTS_PIN
-#define BSP_SERIAL_APP_CTS_PIN                (10U)
-#endif
-#ifndef BSP_SERIAL_APP_CTS_PORT
-#define BSP_SERIAL_APP_CTS_PORT               (gpioPortA)
-#endif
-#ifndef BSP_SERIAL_APP_CTS_LOC
-#define BSP_SERIAL_APP_CTS_LOC                (30U)
-#endif
-#ifndef BSP_SERIAL_APP_RTS_PIN
-#define BSP_SERIAL_APP_RTS_PIN                (0U)
-#endif
-#ifndef BSP_SERIAL_APP_RTS_PORT
-#define BSP_SERIAL_APP_RTS_PORT               (gpioPortA)
-#endif
-#ifndef BSP_SERIAL_APP_RTS_LOC
-#define BSP_SERIAL_APP_RTS_LOC                (30U)
-#endif
-// [SERIAL]$
-
 // $[SPIDISPLAY]
 
 #define BSP_SPIDISPLAY_CS_PIN                         (8U)
@@ -299,13 +252,6 @@
 #define HAL_USART0_TX_QUEUE_SIZE              (128UL)
 #define HAL_USART0_FLOW_CONTROL               (HAL_USART_FLOW_CONTROL_NONE)
 // [USART0]$
-
-// $[VCOM]
-#define HAL_VCOM_ENABLE                               (1)
-
-#define BSP_VCOM_ENABLE_PIN                           (0U) // in platform file this needs to be updated
-#define BSP_VCOM_ENABLE_PORT                          (gpioPortB)
-// [VCOM]$
 
 #if defined(_SILICON_LABS_MODULE)
 // Currently there is no support for ZGM23 (22q2) in sl_module.h

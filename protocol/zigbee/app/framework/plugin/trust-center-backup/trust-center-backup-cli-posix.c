@@ -97,7 +97,9 @@ static void getFilePathFromCommandLine(sl_cli_command_arg_t *arguments, uint8_t*
 void emAfTrustCenterBackupRestoreResetNodeCli(sl_cli_command_arg_t *arguments)
 {
   (void)arguments;
+#if defined EZSP_HOST
   ezspResetNode();
+#endif
 }
 
 void emAfTrustCenterBackupWriteNcpTokenToZigbeedTokensCli(sl_cli_command_arg_t *arguments)
@@ -141,5 +143,5 @@ static void getFilePathFromCommandLine(uint8_t* result)
                                            false); // leftpad?
   result[length] = '\0';
 }
-#endif
-#endif // defined(EMBER_AF_PLUGIN_POSIX_FILE_BACKUP)
+#endif // UC_BUILD
+#endif // defined(POSIX_FILE_BACKUP_SUPPORT)

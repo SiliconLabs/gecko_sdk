@@ -83,6 +83,9 @@
 #elif defined(EFR32BG24B210F1024IM48)
 #include "efr32bg24b210f1024im48.h"
 
+#elif defined(EFR32BG24B210F1536IM48)
+#include "efr32bg24b210f1536im48.h"
+
 #elif defined(EFR32BG24B220F1024IM48)
 #include "efr32bg24b220f1024im48.h"
 

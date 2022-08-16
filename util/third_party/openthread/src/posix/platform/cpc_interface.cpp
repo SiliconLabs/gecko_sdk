@@ -69,6 +69,9 @@ CpcInterface::CpcInterface(SpinelInterface::ReceiveFrameCallback aCallback,
     , mReceiveFrameBuffer(aFrameBuffer)
     , mSockFd(-1)
 {
+    memset(&mInterfaceMetrics, 0, sizeof(mInterfaceMetrics));
+    mInterfaceMetrics.mRcpInterfaceType = OT_POSIX_RCP_BUS_CPC;
+    mCpcBusSpeed = kCpcBusSpeed;
 }
 
 void CpcInterface::OnRcpReset(void)
@@ -77,7 +80,8 @@ void CpcInterface::OnRcpReset(void)
 
 otError CpcInterface::Init(const Url::Url &aRadioUrl)
 {
-    otError error = OT_ERROR_NONE;
+    otError         error = OT_ERROR_NONE;
+    const char *    value;
     OT_UNUSED_VARIABLE(aRadioUrl);
 
     VerifyOrExit(mSockFd == -1, error = OT_ERROR_ALREADY);
@@ -95,6 +99,13 @@ otError CpcInterface::Init(const Url::Url &aRadioUrl)
       otLogCritPlat("CPC endpoint open failed");
       error = OT_ERROR_FAILED;
     }
+
+    if ((value = aRadioUrl.GetValue("cpc-bus-speed")))
+    {
+        mCpcBusSpeed = static_cast<uint32_t>(atoi(value));;
+    }
+
+    otLogCritPlat("mCpcBusSpeed = %d", mCpcBusSpeed);
 
 exit:
     return error;
@@ -126,6 +137,7 @@ void CpcInterface::Read(uint64_t aTimeoutUs)
     uint8_t *ptr = buffer;
     ssize_t bytesRead;
     bool block = false;
+    int  ret = 0;
 
     if(aTimeoutUs > 0)
     {
@@ -135,12 +147,15 @@ void CpcInterface::Read(uint64_t aTimeoutUs)
         timeout.microseconds = static_cast<int>(aTimeoutUs % US_PER_S);
 
         block = true;
-        cpc_set_endpoint_option(mEndpoint, CPC_OPTION_BLOCKING, &block, sizeof(block));
-        cpc_set_endpoint_option(mEndpoint, CPC_OPTION_RX_TIMEOUT, &timeout, sizeof(timeval));
+        ret = cpc_set_endpoint_option(mEndpoint, CPC_OPTION_BLOCKING, &block, sizeof(block));
+        OT_ASSERT(ret == 0);
+        ret = cpc_set_endpoint_option(mEndpoint, CPC_OPTION_RX_TIMEOUT, &timeout, sizeof(timeout));
+        OT_ASSERT(ret == 0);
     }
     else
     {
-        cpc_set_endpoint_option(mEndpoint, CPC_OPTION_BLOCKING, &block, sizeof(block));
+        ret = cpc_set_endpoint_option(mEndpoint, CPC_OPTION_BLOCKING, &block, sizeof(block));
+        OT_ASSERT(ret == 0);
     }
 
     bytesRead = cpc_read_endpoint(mEndpoint, buffer, sizeof(buffer), mReadFlags);

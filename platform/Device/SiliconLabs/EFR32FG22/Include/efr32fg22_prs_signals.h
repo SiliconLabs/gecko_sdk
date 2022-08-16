@@ -27,6 +27,9 @@
  * 3. This notice may not be removed or altered from any source distribution.
  *
  *****************************************************************************/
+#ifndef EFR32FG22_PRS_SIGNALS_H
+#define EFR32FG22_PRS_SIGNALS_H
+
 /** Synchronous signal sources enumeration: */
 #define _PRS_SYNC_CH_CTRL_SOURCESEL_NONE                (0x00000000UL)
 #define _PRS_SYNC_CH_CTRL_SOURCESEL_TIMER0              (0x00000001UL)
@@ -843,3 +846,5 @@
 #define PRS_LFRCO_CALMEAS                               (PRS_ASYNC_LFRCO_CALMEAS)
 #define PRS_LFRCO_SDM                                   (PRS_ASYNC_LFRCO_SDM)
 #define PRS_LFRCO_TCMEAS                                (PRS_ASYNC_LFRCO_TCMEAS)
+
+#endif /* EFR32FG22_PRS_SIGNALS_H */

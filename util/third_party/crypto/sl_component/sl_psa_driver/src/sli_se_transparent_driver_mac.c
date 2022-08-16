@@ -437,8 +437,19 @@ psa_status_t sli_se_transparent_mac_sign_finish(
                    + (sizeof(operation->hmac.opad) / 2)];
     size_t olen = 0;
     psa_algorithm_t hash_alg = PSA_ALG_HMAC_GET_HASH(operation->hmac.alg);
+
+    #if (_SILICON_LABS_SECURITY_FEATURE == _SILICON_LABS_SECURITY_FEATURE_SE)
+    if (hash_alg == PSA_ALG_SHA_384 || hash_alg == PSA_ALG_SHA_512) {
+      // Could only reach here if the programmer has made some errors. Take the
+      // safe approach of checking just in case, in order to avoid certain
+      // buffer overflows.
+      return PSA_ERROR_BAD_STATE;
+    }
+    size_t blocklen = 64;
+    #else // (_SILICON_LABS_SECURITY_FEATURE == _SILICON_LABS_SECURITY_FEATURE_SE)
     size_t blocklen
       = (hash_alg == PSA_ALG_SHA_384 || hash_alg == PSA_ALG_SHA_512) ? 128 : 64;
+    #endif // (_SILICON_LABS_SECURITY_FEATURE == _SILICON_LABS_SECURITY_FEATURE_SE)
 
     // Construct outer hash input from opad and hash result
     memcpy(buffer, operation->hmac.opad, blocklen);

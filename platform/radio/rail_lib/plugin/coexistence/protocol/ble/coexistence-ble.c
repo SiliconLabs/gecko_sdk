@@ -65,7 +65,7 @@ static inline bool isCoexEnabled(void)
 }
 
 /* Update constant pwm state */
-static void sl_bt_updatepwm()
+static void sl_bt_updatepwm(void)
 {
   COEX_Req_t req;
   if (ll_coex.pwmEnable) {

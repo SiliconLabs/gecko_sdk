@@ -89,7 +89,13 @@ configuration:
   - name: SL_HEAP_SIZE
     value: 16384
   - name: SL_STACK_SIZE
+    value: 1024
+    condition:
+      - "freertos"
+  - name: SL_STACK_SIZE
     value: 512
+    condition:
+      - "micriumos_kernel"
   - name: LIB_MEM_CFG_HEAP_SIZE
     value: 0
   - name: SL_CLI_HELP_DESCRIPTION_ENABLED

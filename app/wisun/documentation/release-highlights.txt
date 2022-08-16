@@ -1,6 +1,2 @@
-Wi-SUN SDK 1.3.0.0
-- FAN 1.0 certified Router & Border Router
-- Perf throughput test tool
-- Wi-SUN Configurator 
-- CLI for certification 
-- ARIB T108 support
+Wi-SUN SDK 1.3.1.0
+- Targeted quality improvements and bug fixes

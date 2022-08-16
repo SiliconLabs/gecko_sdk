@@ -24,7 +24,6 @@ component:
 - id: rail_util_init
   instance:
   - gpdrail
-- id: psa_crypto
 #---------------- User Buttons -----------------------
 - id: simple_button
   instance:

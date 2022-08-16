@@ -31,9 +31,31 @@ int ring_push(struct ring *ring, uint8_t data)
 {
     BUG_ON(!ring->buf);
     BUG_ON((ring->size_mask + 1) & ring->size_mask);
-    if (ring_data_len(ring) > ring->size_mask)
+    if (ring_data_len(ring) + 1 > ring_buffer_size(ring))
         return -1; // Full
     ring->buf[ring->count_wr++ & ring->size_mask] = data;
+    return 0;
+}
+
+int ring_push_buf(struct ring *ring, uint8_t *data, size_t len)
+{
+    size_t remaining;
+    unsigned int count_wr;
+
+    BUG_ON(!ring->buf);
+    BUG_ON((ring->size_mask + 1) & ring->size_mask);
+    if (ring_data_len(ring) + len > ring_buffer_size(ring))
+        return -1; // Full
+
+    count_wr = ring->count_wr & ring->size_mask;
+    remaining = ring_buffer_size(ring) - count_wr;
+    if (len > remaining) {
+        memcpy(ring->buf + count_wr, data, remaining);
+        memcpy(ring->buf, data + remaining, len - remaining);
+    } else {
+        memcpy(ring->buf + count_wr, data, len);
+    }
+    ring->count_wr += len;
     return 0;
 }
 
@@ -44,6 +66,30 @@ int ring_pop(struct ring *ring)
     if (ring_is_empty(ring))
         return -1; // Empty
     return ring->buf[ring->count_rd++ & ring->size_mask];
+}
+
+int ring_pop_buf(struct ring *ring, uint8_t *data, size_t len)
+{
+    size_t remaining;
+    unsigned int count_rd;
+
+    BUG_ON(!ring->buf);
+    BUG_ON((ring->size_mask + 1) & ring->size_mask);
+    if (ring_is_empty(ring))
+        return -1; // Empty
+
+    if (len < ring_data_len(ring))
+        len = ring_data_len(ring);
+    count_rd = ring->count_rd & ring->size_mask;
+    remaining = ring_buffer_size(ring) - count_rd;
+    if (len > remaining) {
+        memcpy(data, ring->buf + count_rd, remaining);
+        memcpy(data + remaining, ring->buf, len - remaining);
+    } else {
+        memcpy(data, ring->buf + count_rd, len);
+    }
+    ring->count_rd += len;
+    return len;
 }
 
 int ring_get(struct ring *ring, unsigned int index)

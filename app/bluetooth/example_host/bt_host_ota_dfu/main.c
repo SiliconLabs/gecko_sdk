@@ -359,7 +359,7 @@ void ota_change_state(enum ota_states new_state)
     case OTA_SCAN:
     {
       addr_found = 0;
-      sl_bt_scanner_start(sl_bt_gap_1m_phy, sl_bt_scanner_discover_generic);
+      sl_bt_scanner_start(sl_bt_gap_phy_1m, sl_bt_scanner_discover_generic);
       app_log("Scanning...");
     }
     break;
@@ -380,7 +380,7 @@ void ota_change_state(enum ota_states new_state)
       }
 
       //move to connect state, connect to device address
-      sc = sl_bt_connection_open(remote_address, remote_address_type, sl_bt_gap_1m_phy, &connection);
+      sc = sl_bt_connection_open(remote_address, remote_address_type, sl_bt_gap_phy_1m, &connection);
       if (sc) {
         ERROR_EXIT("Error, open failed,0x%x", sc);
       }
@@ -502,15 +502,15 @@ void print_address(bd_addr address)
   }
 }
 
-static int parse_scan_data(uint8array *data, bd_addr *addr)
+static int parse_scan_data(uint8_t *data, uint8_t len, bd_addr *addr)
 {
   uint8_t i = 0;
-  while (i < data->len) {
-    if (data->data[i + 1] == GAP_ADDR_TYPE) {
-      memcpy(addr, &data->data[i + 3], sizeof(bd_addr));
+  while (i < len) {
+    if (data[i + 1] == GAP_ADDR_TYPE) {
+      memcpy(addr, &data[i + 3], sizeof(bd_addr));
       return 0;
     } else {
-      i += data->data[i] + 1;
+      i += data[i] + 1;
     }
   }
 
@@ -587,6 +587,33 @@ int hw_init(int argc, char* argv[])
     uartFlush(handle_ptr);
   }
   return ret;
+}
+
+static void handle_scan_event(uint8_t *address,
+                              uint8_t address_type,
+                              uint8_t *data,
+                              uint8_t data_len)
+{
+  if (!addr_found) {
+    bd_addr addr;
+    if (!memcmp(address, &remote_public_address, sizeof(bd_addr))) {
+      memcpy(&remote_address, address, sizeof(bd_addr));
+      remote_address_type = address_type;
+      addr_found = 1;
+    } else if (parse_scan_data(data, data_len, &addr) == 0) {
+      if (!memcmp(&addr, &remote_public_address, sizeof(bd_addr))) {
+        memcpy(&remote_address, address, sizeof(bd_addr));
+        remote_address_type = address_type;
+        addr_found = 1;
+      }
+    }
+    if (addr_found) {
+      sl_bt_scanner_stop();
+      app_log("OK\n");
+      app_log("Device address found, connecting.\n");
+      ota_change_state(OTA_CONNECT);
+    }
+  }
 }
 
 /**
@@ -834,26 +861,24 @@ int main(int argc, char* argv[])
 
       case OTA_SCAN:
         switch (SL_BT_MSG_ID(p->header)) {
-          case sl_bt_evt_scanner_scan_report_id:
-            if (!addr_found) {
-              bd_addr addr;
-              if (!memcmp(&p->data.evt_scanner_scan_report.address, &remote_public_address, sizeof(bd_addr))) {
-                memcpy(&remote_address, &p->data.evt_scanner_scan_report.address, sizeof(bd_addr));
-                remote_address_type = p->data.evt_scanner_scan_report.address_type;
-                addr_found = 1;
-              } else if (parse_scan_data(&p->data.evt_scanner_scan_report.data, &addr) == 0) {
-                if (!memcmp(&addr, &remote_public_address, sizeof(bd_addr))) {
-                  memcpy(&remote_address, &p->data.evt_scanner_scan_report.address, sizeof(bd_addr));
-                  remote_address_type = p->data.evt_scanner_scan_report.address_type;
-                  addr_found = 1;
-                }
-              }
-              if (addr_found) {
-                sl_bt_scanner_stop();
-                app_log("OK\n");
-                app_log("Device address found, connecting.\n");
-                ota_change_state(OTA_CONNECT);
-              }
+          case sl_bt_evt_scanner_legacy_advertisement_report_id:
+            if (p->data.evt_scanner_legacy_advertisement_report.event_flags
+                & SL_BT_SCANNER_EVENT_FLAG_CONNECTABLE) {
+              handle_scan_event(p->data.evt_scanner_legacy_advertisement_report.address.addr,
+                                p->data.evt_scanner_legacy_advertisement_report.address_type,
+                                p->data.evt_scanner_legacy_advertisement_report.data.data,
+                                p->data.evt_scanner_legacy_advertisement_report.data.len);
+            }
+            break;
+          case sl_bt_evt_scanner_extended_advertisement_report_id:
+            if ((p->data.evt_scanner_extended_advertisement_report.event_flags
+                 & SL_BT_SCANNER_EVENT_FLAG_CONNECTABLE)
+                && (p->data.evt_scanner_extended_advertisement_report.data_completeness
+                    == sl_bt_scanner_data_status_complete)) {
+              handle_scan_event(p->data.evt_scanner_extended_advertisement_report.address.addr,
+                                p->data.evt_scanner_extended_advertisement_report.address_type,
+                                p->data.evt_scanner_extended_advertisement_report.data.data,
+                                p->data.evt_scanner_extended_advertisement_report.data.len);
             }
             break;
           default:

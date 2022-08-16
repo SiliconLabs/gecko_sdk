@@ -273,6 +273,51 @@ sl_status_t sli_ml_audio_feature_generation_get_features_quantized(int8_t *buffe
                                                                    uint16_t range_min,
                                                                    uint16_t range_max);
 
+/***************************************************************************//**
+ * @brief
+ *	  Retrieve the features quantized to a dynamic range
+ *
+ *    This converts the uint16 spectrograms to int8 using dynamic scaling.
+ *    With this, the max spectrogram value is mapped to +127, and the max spectrogram value - <dynamic_range>
+ *    is mapped to -128. Anything below max spectrogram value - <dynamic_range> is mapped to -128.
+ *
+ *    The following scaling algorithm is used:
+ *
+ *    maxval = max(uint16_features_data)
+ *    minval = max(maxval - dynamic_range, 0)
+ *
+ *    FOR i IN range(num_elements):
+ *      value = uint16_features_data[i] - minval
+ *      value *= 255
+ *      value /= (maxval - minval)
+ *      value -= 128
+ *      value = min(max(value, -128), 127)
+ *      buffer[i] = (int8_t)value
+ *
+ * @param[out] buffer
+ *    Pointer to the buffer to store the feature data
+ *
+ * @param[in] num_elements
+ *    The number of elements corresponding to the size of the buffer, if this is
+ *    not large enough to store the entire feature buffer the function will return
+ *    with an error.
+ *
+ * @param[in] dynamic_range
+ *    Dynamic range of uint16 spectrogram to be mapped to int8
+ *    dynamic_range = DYNAMIC_RANGE_DB*(2^log_scale_shift)*ln(10)/20
+ *    A dynamic range of 300 corresponds to a DYNAMIC_RANGE_DB of 40 dB
+ *
+ * @note
+ *    This function overwrites the entire buffer.
+ *
+ * @return
+ *    SL_STATUS_OK for success
+ *    SL_STATUS_INVALID_PARAMETER invalid input parameters
+ ******************************************************************************/
+sl_status_t sli_ml_audio_feature_generation_get_features_dynamically_quantized(int8_t *buffer,
+                                                                               size_t num_elements,
+                                                                               uint16_t dynamic_range);
+
 #if defined(SL_CATALOG_TFLITE_MICRO_PRESENT) || defined(DOXYGEN)
 /***************************************************************************//**
  * @brief

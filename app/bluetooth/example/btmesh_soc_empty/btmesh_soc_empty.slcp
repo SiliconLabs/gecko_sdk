@@ -72,7 +72,7 @@ configuration:
     condition:
       - psa_crypto
   - name: SL_STACK_SIZE
-    value: "0x1000"
+    value: "0x1200"
 
 tag:
   - hardware:device:flash:512

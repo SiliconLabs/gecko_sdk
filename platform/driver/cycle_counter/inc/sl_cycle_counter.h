@@ -37,6 +37,10 @@
 #include "em_device.h"
 #include "sl_status.h"
 
+#ifdef __cplusplus
+extern "C" {
+#endif
+
 /***************************************************************************//**
  * @addtogroup cycle_counter Cycle Counter
  * @brief Provides an interface to the cycle counter of the DWT unit.
@@ -193,4 +197,9 @@ __INLINE uint32_t sl_cycle_counter_get_counter(void)
 }
 
 /** @} (end group cycle_counter) */
+
+#ifdef __cplusplus
+}
+#endif
+
 #endif

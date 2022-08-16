@@ -79,7 +79,7 @@ typedef uint16_t throughput_mtu_size_t;
 /// Data size type
 typedef uint16_t throughput_data_size_t;
 /// PHY type
-typedef sl_bt_gap_phy_and_coding_type_t throughput_phy_t;
+typedef sl_bt_gap_phy_coding_t throughput_phy_t;
 /// Notification/indication type
 typedef sl_bt_gatt_client_config_flag_t throughput_notification_t;
 /// Throughput type

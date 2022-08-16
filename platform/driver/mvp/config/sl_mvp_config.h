@@ -65,6 +65,13 @@
 // <i> Default: 0
 #define SL_MVP_POWER_MODE  0
 
+// <q SL_MVP_OPTIMIZE_SPEED> Enable additional speed optimizations for MVP operations
+// <i> By enabling this, the MVP will attempt to optimize select operations
+// <i> to run faster, at the expence of increased RAM usage.
+// <i> Note: This may increase RAM usage greatly.
+// <i> Default: 0
+#define SL_MVP_OPTIMIZE_SPEED  0
+
 #endif /* SL_MVP_CONFIG_H */
 
 // <<< end of configuration section >>>

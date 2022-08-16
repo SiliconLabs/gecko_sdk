@@ -68,6 +68,9 @@
 #elif defined(BGM241SB22VNA)
 #include "bgm241sb22vna.h"
 
+#elif defined(BGM241SD22VNA)
+#include "bgm241sd22vna.h"
+
 #else
 #error "em_device.h: PART NUMBER undefined"
 #endif

@@ -2966,6 +2966,12 @@ RAIL_ENUM_GENERIC(RAIL_RxOptions_t, uint32_t) {
   RAIL_RX_OPTION_ANTENNA1_SHIFT,
   /** Shift position of \ref RAIL_RX_OPTION_DISABLE_FRAME_DETECTION bit. */
   RAIL_RX_OPTION_DISABLE_FRAME_DETECTION_SHIFT,
+  #ifndef DOXYGEN_SHOULD_SKIP_THIS
+  /** Shift position of \ref RAIL_RX_OPTION_SKIP_DC_CAL bit. */
+  RAIL_RX_OPTION_SKIP_DC_CAL_SHIFT,
+  /** Shift position of \ref RAIL_RX_OPTION_SKIP_SYNTH_CAL bit. */
+  RAIL_RX_OPTION_SKIP_SYNTH_CAL_SHIFT,
+  #endif //DOXYGEN_SHOULD_SKIP_THIS
 };
 
 /** A value representing no options enabled. */
@@ -3063,6 +3069,26 @@ RAIL_ENUM_GENERIC(RAIL_RxOptions_t, uint32_t) {
  * from being received. Defaults to false.
  */
 #define RAIL_RX_OPTION_DISABLE_FRAME_DETECTION (1UL << RAIL_RX_OPTION_DISABLE_FRAME_DETECTION_SHIFT)
+
+#ifndef DOXYGEN_SHOULD_SKIP_THIS
+/**
+ * An option to skip DC calibration when transitioning from RX to RX. This can be
+ * useful for reducing the state transition time, but risks impacting
+ * receive capability. Enabling this bypasses DC calibration (like
+ * \ref RAIL_RX_CHANNEL_HOPPING_OPTION_SKIP_DC_CAL)
+ * Defaults to false.
+ */
+#define RAIL_RX_OPTION_SKIP_DC_CAL (1UL << RAIL_RX_OPTION_SKIP_DC_CAL_SHIFT)
+
+/**
+ * An option to skip synth calibration when transitioning from RX to RX. This can
+ * be useful for reducing the state transition time, but risks impacting receive
+ * capability. Enabling this bypasses synth calibration (like
+ * \ref RAIL_RX_CHANNEL_HOPPING_OPTION_SKIP_SYNTH_CAL)
+ * Defaults to false.
+ */
+#define RAIL_RX_OPTION_SKIP_SYNTH_CAL (1U << RAIL_RX_OPTION_SKIP_SYNTH_CAL_SHIFT)
+#endif //DOXYGEN_SHOULD_SKIP_THIS
 
 /** A value representing all possible options. */
 #define RAIL_RX_OPTIONS_ALL 0xFFFFFFFFUL

@@ -3,9 +3,8 @@ label: "Bootloader TrustZone Non-Secure"
 description: >
    Set up bootloader configuration to create TrustZone Non-Secure bootloader.
 package: platform
-category: Platform|Common
+category: Platform|Bootloader|TrustZone NonSecure
 quality: beta
-root_path: platform/common
 define:
   - name: BOOTLOADER_NONSECURE
     value: 1

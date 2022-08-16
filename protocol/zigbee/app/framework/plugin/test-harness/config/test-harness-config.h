@@ -23,6 +23,13 @@
 // <i> This enables or disables whether Smart Energy registration automatically starts after joining or rebooting.  Without this plugin the normal behavior is to start registration.
 #define EMBER_AF_PLUGIN_TEST_HARNESS_AUTO_REGISTRATION_START   1
 
+// <q EMBER_AF_TC_SWAP_OUT_TEST> Test configuration for trust center swap out test.
+// <i> Default: FALSE
+// <i> For testing purposes only, when set to 1, it suppresses, the normal call to emberNetworkInit() at reboot.
+// <i> This allows to call manual network initialization later and prevent the node from immediately coming back up on the network after reboot.
+// <i> This enables corresponding CLI command to initialize the network at later point in tests.
+#define EMBER_AF_TC_SWAP_OUT_TEST   0
+
 // </h>
 
 // <<< end of configuration section >>>

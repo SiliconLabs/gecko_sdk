@@ -414,6 +414,17 @@ static void _get_domain_key(const char *str_src,
                             char **domain_dst,
                             char **key_dst);
 
+/**************************************************************************//**
+ * @brief Check argument value of uint16 and uint32 
+ * @details Helper function
+ * @param[in] arg_type Argument type
+ * @param[in] val Value
+ * @return true Valid value
+ * @return false Non-valid value
+ *****************************************************************************/
+static inline bool _check_arg_uint_val(const sl_iperf_cli_arg_type_t arg_type, 
+                                       const int64_t val);
+
 // -----------------------------------------------------------------------------
 //                                Static Variables
 // -----------------------------------------------------------------------------
@@ -555,7 +566,7 @@ static sl_iperf_test_t _last_test = { 0U };
 /**************************************************************************//**
  * @brief iPerf CLI set parameter
  * @details CLI function
- * @param arguments Arguments
+ * @param[in] arguments Arguments
  *****************************************************************************/
 void sl_iperf_cli_set(sl_cli_command_arg_t *arguments)
 {
@@ -565,7 +576,7 @@ void sl_iperf_cli_set(sl_cli_command_arg_t *arguments)
   char *domain                   = NULL;
   char *key                      = NULL;
   sl_iperf_cli_property_t * prop = NULL;
-  uint32_t ui32_val              = 0U;
+  int64_t i_val                  = 0LL;
 
   arg_cnt = (uint8_t) sl_cli_get_argument_count(arguments);
 
@@ -597,7 +608,7 @@ void sl_iperf_cli_set(sl_cli_command_arg_t *arguments)
   if (key != NULL) {
     prop = _get_property(domain, key);
     if (prop == NULL) {
-      printf("[Not valid iPerf doman and key]\n");
+      printf("[Not valid iPerf domain and key]\n");
       return;
     }
   }
@@ -652,17 +663,20 @@ void sl_iperf_cli_set(sl_cli_command_arg_t *arguments)
       case SL_IPERF_CLI_ARG_TYPE_STRING:
         prop->setter((void *) arg1_str);
         break;
-      case SL_IPERF_CLI_ARG_TYPE_UINT32:
-        ui32_val = atol(arg1_str);
-        prop->setter((void *) &ui32_val);
-        break;
       case SL_IPERF_CLI_ARG_TYPE_UINT16:
-        ui32_val = atoi(arg1_str);
-        prop->setter((void *) &ui32_val);
+      case SL_IPERF_CLI_ARG_TYPE_UINT32:
+        i_val = atoll(arg1_str);
+        if (_check_arg_uint_val(prop->type, i_val)) {
+          prop->setter((void *) &i_val);
+        } else {
+          printf("[Not valid iPerf command argument value]\n");
+        }
         break;
       default:
+        printf("[Not valid iPerf command argument type]\n");
         break;
     }
+
     _print_property_val(prop);
     return;
   }
@@ -673,7 +687,7 @@ void sl_iperf_cli_set(sl_cli_command_arg_t *arguments)
 /**************************************************************************//**
  * @brief iPerf CLI get parameter
  * @details CLI function
- * @param arguments Arguments
+ * @param[in] arguments Arguments
  *****************************************************************************/
 void sl_iperf_cli_get(sl_cli_command_arg_t *arguments)
 {
@@ -714,7 +728,7 @@ void sl_iperf_cli_get(sl_cli_command_arg_t *arguments)
   if (key != NULL) {
     prop = _get_property(domain, key);
     if (prop == NULL) {
-      printf("[Not valid iPerf doman and key]\n");
+      printf("[Not valid iPerf domain and key]\n");
       return;
     }
   }
@@ -856,7 +870,12 @@ static inline const char *_opt_packet_number_getter(void)
 // buffer length
 static inline void _opt_buffer_length_setter(void *val)
 {
-  _options.buf_len = *(uint16_t*)val;
+  uint16_t value = *(uint16_t*)val;
+  if (!value || value > SL_IPERF_BUFFER_SIZE) {
+    printf("[Not valid buffer size]\n");
+    return;
+  }
+  _options.buf_len = value;
 }
 
 static inline const char *_opt_buffer_length_getter(void)
@@ -867,7 +886,13 @@ static inline const char *_opt_buffer_length_getter(void)
 // duration
 static inline void _opt_duration_setter(void *val)
 {
-  _options.duration_ms = *(uint16_t*)val * SL_IPERF_TIME_S_TO_MS_ML;
+  uint32_t val32 = 0UL;
+  val32 = *(uint32_t*) val * SL_IPERF_TIME_S_TO_MS_ML;
+  if (val32 > UINT16_MAX) {
+    printf("[Duration Time value is overflowed]\n");
+  } else {
+    _options.duration_ms = (uint16_t) val32;
+  }
 }
 
 static inline const char *_opt_duration_getter(void)
@@ -878,7 +903,13 @@ static inline const char *_opt_duration_getter(void)
 // interval
 static inline void _opt_interval_setter(void *val)
 {
-  _options.interval_ms = *(uint16_t*)val * SL_IPERF_TIME_S_TO_MS_ML;
+  uint32_t val32 = 0UL;
+  val32 = *(uint32_t*) val * SL_IPERF_TIME_S_TO_MS_ML;
+  if (val32 > UINT16_MAX) {
+    printf("[Interval Time value is overflowed]\n");
+  } else {
+    _options.interval_ms = (uint16_t) val32;
+  }
 }
 
 static inline const char *_opt_interval_getter(void)
@@ -1062,4 +1093,15 @@ static void _get_domain_key(const char *str_src,
   }
 
   domain_key_buff[SL_IPERF_CLI_MAX_STR_ARG_LEN - 1] = '\0';
+}
+
+static inline bool _check_arg_uint_val(const sl_iperf_cli_arg_type_t arg_type, 
+                                       const int64_t val)
+{
+  if (val < 0LL || 
+      (arg_type == SL_IPERF_CLI_ARG_TYPE_UINT32 && val > UINT32_MAX) || 
+      (arg_type == SL_IPERF_CLI_ARG_TYPE_UINT16 && val > UINT16_MAX))  {
+    return false;
+  }
+  return true;
 }

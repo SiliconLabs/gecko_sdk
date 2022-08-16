@@ -16,5 +16,3 @@ include:
     - path: CC_ColorSwitch.h
 provides:
   - name: zw_cc_colorswitch
-documentation:
-  url: "https://sdomembers.z-wavealliance.org/document/dl/638"

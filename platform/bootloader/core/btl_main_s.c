@@ -26,6 +26,10 @@
 
 #include "debug/btl_debug.h"
 
+#if defined(BOOTLOADER_APPLOADER)
+#include "sl_device_init_clocks.h"
+#endif
+
 #ifdef BTL_GPIO_ACTIVATION
 #include "gpio/gpio-activation/btl_gpio_activation.h"
 #endif
@@ -41,6 +45,8 @@
 
 // -----------------------------------------------------------------------------
 // Defines
+
+#define INFINITE_LOOP() while (1) {}
 
 #if defined(__GNUC__)
 #define ROM_END_SIZE 0
@@ -66,7 +72,9 @@ extern void memory_boundary_test(void);
 
 __STATIC_INLINE bool enterBootloader(void);
 SL_NORETURN static void bootToApp(uint32_t);
+#if defined(BOOTLOADER_INTERFACE_TRUSTZONE_AWARE)
 static void btl_getPeripheralList(uint32_t *ppusatd0, uint32_t *ppusatd1);
+#endif
 __STATIC_INLINE void lockBootloaderArea(void);
 
 // -----------------------------------------------------------------------------
@@ -188,36 +196,200 @@ const ApplicationProperties_t sl_app_properties = {
 
 void MemManage_Handler(void)
 {
+  #if defined(DEBUG_EFM)
+  INFINITE_LOOP();
+  #else
   reset_resetWithReason(BOOTLOADER_RESET_REASON_FATAL);
+  #endif
 }
 
 void HardFault_Handler(void)
 {
+  #if defined(DEBUG_EFM)
+  INFINITE_LOOP();
+  #else
   reset_resetWithReason(BOOTLOADER_RESET_REASON_FATAL);
+  #endif
 }
 
 #if defined(SCB_SHCSR_USGFAULTENA_Msk)
 void UsageFault_Handler(void)
 {
+  #if defined(DEBUG_EFM)
+  INFINITE_LOOP();
+  #else
   reset_resetWithReason(BOOTLOADER_RESET_REASON_FATAL);
+  #endif
 }
 #endif
 
 #if defined(SCB_SHCSR_BUSFAULTENA_Msk)
 void BusFault_Handler(void)
 {
+  #if defined(DEBUG_EFM)
+  INFINITE_LOOP();
+  #else
   reset_resetWithReason(BOOTLOADER_RESET_REASON_FATAL);
+  #endif
 }
 #endif
 
 void SMU_SECURE_IRQHandler(void)
 {
+  #if defined(DEBUG_EFM)
+  INFINITE_LOOP();
+  #else
   reset_resetWithReason(BOOTLOADER_RESET_REASON_TZ_FAULT);
+  #endif
 }
 
 void SecureFault_Handler(void)
 {
+  #if defined(DEBUG_EFM)
+  INFINITE_LOOP();
+  #else
   reset_resetWithReason(BOOTLOADER_RESET_REASON_TZ_FAULT);
+  #endif
+}
+
+#if defined(BOOTLOADER_APPLOADER)
+/**************************************************************************//**
+ * @brief Configures secure state of bus masters using the SMU.
+ *
+ * This function is device dependent. Assumes that the SMU is clocked.
+ *****************************************************************************/
+static inline void smu_configure_bus_masters(void)
+{
+  // Configure all bus-masters as secure except for the RADIOSUBSYSTEM.
+  SMU->BMPUSATD0_CLR = SMU_BMPUSATD0_RADIOSUBSYSTEM;
+}
+#endif // BOOTLOADER_APPLOADER
+
+#if defined(BOOTLOADER_APPLOADER)
+/**************************************************************************//**
+ * @brief Configures secure attributes of peripherals using the SMU.
+ *
+ * This function is device dependent. Assumes that the SMU is clocked.
+ *****************************************************************************/
+static inline void smu_configure_peripherals(void)
+{
+  #if defined(SEMAILBOX_PRESENT)
+  SMU->PPUSATD0_CLR = _SMU_PPUSATD0_MASK
+                      & ~(SMU_PPUSATD0_SYSCFG
+                          | SMU_PPUSATD0_MSC
+                          | SMU_PPUSATD0_GPCRC
+                          | SMU_PPUSATD0_LDMA
+                          | SMU_PPUSATD0_LDMAXBAR);
+  SMU->PPUSATD1_CLR = _SMU_PPUSATD1_MASK
+                      & ~(SMU_PPUSATD1_SMU
+                          | SMU_PPUSATD1_SEMAILBOX);
+  #elif defined(CRYPTOACC_PRESENT)
+  SMU->PPUSATD0_CLR = _SMU_PPUSATD0_MASK
+                      & ~(SMU_PPUSATD0_SYSCFG
+                          | SMU_PPUSATD0_MSC
+                          | SMU_PPUSATD0_GPCRC
+                          | SMU_PPUSATD0_LDMA
+                          | SMU_PPUSATD0_LDMAXBAR);
+  SMU->PPUSATD1_CLR = _SMU_PPUSATD1_MASK
+                      & ~(SMU_PPUSATD1_SMU
+                          | SMU_PPUSATD1_CRYPTOACC);
+  #endif
+}
+#endif // BOOTLOADER_APPLOADER
+
+#if defined(BOOTLOADER_APPLOADER)
+/**************************************************************************//**
+ * @brief Configure interrupt target states.
+ *
+ * Interrupts must either point at the secure or non-secure world. After reset
+ * everything points to the secure world, and this function redirects all
+ * intterupts to non-secure to better support existing applications.
+ *****************************************************************************/
+static inline void configure_interrupt_target_states(void)
+{
+  // Start by setting all Interrupt Non-Secure State (ITNS) bits. This results
+  // in all IRQs being targeted at the NS world.
+  for (size_t i = 0; i < sizeof(NVIC->ITNS) / sizeof(NVIC->ITNS[0]); i++) {
+    NVIC->ITNS[i] = 0xFFFFFFFF;
+  }
+
+  // Clear the ITNS bits corresponding to all IRQs belonging to S peripherals.
+  #if defined(SEMAILBOX_PRESENT)
+  NVIC_ClearTargetState(SEMBRX_IRQn);
+  NVIC_ClearTargetState(SEMBTX_IRQn);
+  NVIC_ClearTargetState(SMU_SECURE_IRQn);
+  #if defined(_SILICON_LABS_32B_SERIES_2_CONFIG_1)
+  NVIC_ClearTargetState(SMU_PRIVILEGED_IRQn);
+  #else
+  NVIC_ClearTargetState(SMU_S_PRIVILEGED_IRQn);
+  #endif
+  NVIC_ClearTargetState(LDMA_IRQn);
+  NVIC_ClearTargetState(SYSCFG_IRQn);
+  NVIC_ClearTargetState(MSC_IRQn);
+  #elif defined(CRYPTOACC_PRESENT)
+  NVIC_ClearTargetState(CRYPTOACC_IRQn);
+  NVIC_ClearTargetState(TRNG_IRQn);
+  NVIC_ClearTargetState(PKE_IRQn);
+  NVIC_ClearTargetState(SMU_SECURE_IRQn);
+  NVIC_ClearTargetState(SMU_S_PRIVILEGED_IRQn);
+  NVIC_ClearTargetState(LDMA_IRQn);
+  NVIC_ClearTargetState(SYSCFG_IRQn);
+  NVIC_ClearTargetState(MSC_IRQn);
+  #endif
+}
+#endif // BOOTLOADER_APPLOADER
+
+/**************************************************************************//**
+ * @brief Enable SMU security fault interrupts.
+ *
+ * Assumes that the SMU is clocked.
+ *****************************************************************************/
+static inline void smu_enable_security_fault_interrupts(void)
+{
+  NVIC_ClearPendingIRQ(SMU_SECURE_IRQn);
+  SMU->IF_CLR = SMU_IF_PPUSEC | SMU_IF_BMPUSEC;
+  NVIC_EnableIRQ(SMU_SECURE_IRQn);
+  SMU->IEN = SMU_IEN_PPUSEC | SMU_IEN_BMPUSEC;
+}
+
+/**************************************************************************//**
+ * @brief Enables SecureFault, BusFault, UsageFault, and MemFault system
+ *        exceptions.
+ *****************************************************************************/
+static inline void enable_fault_exceptions(void)
+{
+  // Enable SecureFault, BusFault, UsageFault and MemFault.
+  SCB->SHCSR |= SCB_SHCSR_SECUREFAULTENA_Msk
+                | SCB_SHCSR_BUSFAULTENA_Msk
+                | SCB_SHCSR_USGFAULTENA_Msk
+                | SCB_SHCSR_MEMFAULTENA_Msk;
+}
+
+/**************************************************************************//**
+ * @brief Enable the FPU for the non-secure app.
+ *****************************************************************************/
+static inline void enable_ns_fpu(void)
+{
+  SCB->NSACR |= (SCB_NSACR_CP10_Msk)    // enable CP10 Full Access
+                | (SCB_NSACR_CP11_Msk); // enable CP11 Full Access
+}
+
+/**************************************************************************//**
+ * @brief Prioritize the secure exceptions
+ *
+ * Modify the relative priorities of Secure and Non-secure interrupts,
+ * so that the priority range for Secure interrupts extends to higher
+ * priorities than the range for Non-secure interrupts.
+ *****************************************************************************/
+static inline void prioritise_secure_exceptions(void)
+{
+  #define AIRCR_UNLOCK_VECTKEY 0x5FAUL
+
+  uint32_t scb_AIRCR = SCB->AIRCR;
+  uint32_t scb_vectkey = AIRCR_UNLOCK_VECTKEY;
+  SCB->AIRCR = SCB_AIRCR_PRIS_Msk
+               | (scb_vectkey << SCB_AIRCR_VECTKEY_Pos)
+               | (scb_AIRCR & ~SCB_AIRCR_VECTKEY_Msk);
 }
 
 /**************************************************************************//**
@@ -284,17 +456,12 @@ static void setup_mpu(void)
  * @brief Setup TrustZone boundaries
  *
  * Sets up the static isolation boundaries which are constant throughout
- * the runtime of the system.
+ * the runtime of the system. Assumes that the SMU is clocked.
  *****************************************************************************/
 static void setup_static_boundaries(void)
 {
-#if defined(CMU_CLKEN1_SMU)
-  CMU->CLKEN1_SET = CMU_CLKEN1_SMU;
-#endif
-
   // Memory map configuration
   // Uses the SMU to split flash into S/NSC/NS, and RAM into S/NS.
-
   SMU->LOCK = SMU_LOCK_SMULOCKKEY_UNLOCK;
 
   // Flash configuration
@@ -309,53 +476,51 @@ static void setup_static_boundaries(void)
   // NSC - NS boundary
   SMU->ESAUMRB56 = (SRAM_BASE + NS_RAM_OFFSET) & _SMU_ESAUMRB56_MASK;
 
-  // Security fault interrupt
-  SMU->IF_CLR = SMU_IF_PPUSEC | SMU_IF_BMPUSEC;
-  SMU->IEN_SET = SMU_IEN_BMPUSEC;
-  SMU->IEN_SET = SMU_IEN_PPUSEC;
-  NVIC_ClearPendingIRQ(SMU_SECURE_IRQn);
-  NVIC_EnableIRQ(SMU_SECURE_IRQn);
+#if defined(BOOTLOADER_APPLOADER)
+  // Make the info page NS.
+  SMU->ESAURTYPES0 = SMU_ESAURTYPES0_ESAUR3NS;
+#endif
 
   // Lock SMU config
   SMU->LOCK = 0;
 
-  SAU->RNR = 0; // NS
+  SAU->RNR = 0; // Flash
   SAU->RBAR = ((uint32_t)&linker_sg_begin) & SAU_RBAR_BADDR_Msk;
   SAU->RLAR = ((BTL_APPLICATION_BASE - 1u) & SAU_RLAR_LADDR_Msk)
+              | (0 << SAU_RLAR_NSC_Pos)
               | SAU_RLAR_ENABLE_Msk;
-  SAU->RNR = 1; // NS
+  SAU->RNR = 1; // NS Peripherals
   SAU->RBAR = PERIPHERALS_BASE_NS_START & SAU_RBAR_BADDR_Msk;
   SAU->RLAR = ((PERIPHERALS_BASE_NS_END) &SAU_RLAR_LADDR_Msk)
+              | (0 << SAU_RLAR_NSC_Pos)
               | SAU_RLAR_ENABLE_Msk;
-  SAU->RNR = 2; // NS
+  SAU->RNR = 2; // SRAM
   SAU->RBAR = (SRAM_BASE + NS_RAM_OFFSET) & SAU_RBAR_BADDR_Msk;
   SAU->RLAR = ((SRAM_BASE + SRAM_SIZE - 1u) & SAU_RLAR_LADDR_Msk)
+              | (0 << SAU_RLAR_NSC_Pos)
               | SAU_RLAR_ENABLE_Msk;
+#if defined(BOOTLOADER_APPLOADER)
+  SAU->RNR = 3; // User Data
+  SAU->RBAR = MSC_FLASH_USERDATA_MEM_BASE & SAU_RBAR_BADDR_Msk;
+  SAU->RLAR = (MSC_FLASH_USERDATA_MEM_END & SAU_RLAR_LADDR_Msk)
+              | (0 << SAU_RLAR_NSC_Pos)
+              | SAU_RLAR_ENABLE_Msk;
+  SAU->RNR = 4; // Device Info
+  SAU->RBAR = MSC_FLASH_DEVINFO_MEM_BASE & SAU_RBAR_BADDR_Msk;
+  SAU->RLAR = (MSC_FLASH_DEVINFO_MEM_END & SAU_RLAR_LADDR_Msk)
+              | (0 << SAU_RLAR_NSC_Pos)
+              | SAU_RLAR_ENABLE_Msk;
+  SAU->RNR = 5; // Chip Config
+  SAU->RBAR = MSC_FLASH_CHIPCONFIG_MEM_BASE & SAU_RBAR_BADDR_Msk;
+  SAU->RLAR = (MSC_FLASH_CHIPCONFIG_MEM_END & SAU_RLAR_LADDR_Msk)
+              | (0 << SAU_RLAR_NSC_Pos)
+              | SAU_RLAR_ENABLE_Msk;
+#endif // BOOTLOADER_APPLOADER
   TZ_SAU_Enable();
   __DSB();
   __ISB();
 
-  // Enables BUS, MEM, USG and Secure faults
-  // Enable BusFault, UsageFault and MemFault
-  SCB->SHCSR |= 0x0
-#if defined(SCB_SHCSR_SECUREFAULTENA_Msk)
-                | SCB_SHCSR_SECUREFAULTENA_Msk
-#endif
-#if defined(SCB_SHCSR_BUSFAULTENA_Msk)
-                | SCB_SHCSR_BUSFAULTENA_Msk
-#endif
-#if defined(SCB_SHCSR_USGFAULTENA_Msk)
-                | SCB_SHCSR_USGFAULTENA_Msk
-#endif
-#if defined(SCB_SHCSR_MEMFAULTENA_Msk)
-                | SCB_SHCSR_MEMFAULTENA_Msk
-#endif
-  ;
-
-  // Enable FPU for non-secure code
-  SCB->NSACR |= ( (SCB_NSACR_CP10_Msk)      // enable CP10 Full Access
-                  | (SCB_NSACR_CP11_Msk) ); // enable CP11 Full Access
-  lockBootloaderArea();
+  enable_ns_fpu();
   setup_mpu();
 #if defined(TEST_BOOTLOADER_MEMORY_BOUNDARY)
   memory_boundary_test();
@@ -572,7 +737,18 @@ void SystemInit2(void)
 int main(void)
 {
   CHIP_Init();
+#if defined(BOOTLOADER_APPLOADER)
+  sl_device_init_clocks();
+#endif
   BTL_DEBUG_PRINTLN("BTL entry");
+
+#if defined(CMU_CLKEN1_SMU)
+  CMU->CLKEN1_SET = CMU_CLKEN1_SMU;
+#endif
+
+  enable_fault_exceptions();
+  prioritise_secure_exceptions();
+  smu_enable_security_fault_interrupts();
 
 #if defined(EMU_CMD_EM01VSCALE2) && defined(EMU_STATUS_VSCALEBUSY)
   // Device supports voltage scaling, and the bootloader may have been entered
@@ -584,9 +760,30 @@ int main(void)
     }
   }
 #endif
+#if defined(BOOTLOADER_APPLOADER)
+  // Only redirect the interrupts to non-secure for the AppLoader usecase.
+  // All the interrupts can be owned by the secure code for all the other bootloader
+  // sample apps.
+  configure_interrupt_target_states();
+  // All the peripherals as well as the busmasters are considered secure for all the
+  // bootloader sample apps except for the AppLoader.
+  smu_configure_peripherals();
+  smu_configure_bus_masters();
+#endif // BOOTLOADER_APPLOADER
+  setup_static_boundaries();
+
+  // Lock the whole bootloader flash unconditionally
+  lockBootloaderArea();
+
+#if defined(CMU_CLKEN1_SMU)
+#if defined(BOOTLOADER_APPLOADER)
+  CMU_NS->CLKEN1_CLR = CMU_CLKEN1_SMU;
+#else
+  CMU->CLKEN1_CLR = CMU_CLKEN1_SMU;
+#endif // BOOTLOADER_APPLOADER
+#endif // CMU_CLKEN1_SMU
 
   btl_init();
-  setup_static_boundaries();
   jump_to_ns();
 
   // Should never reach this point

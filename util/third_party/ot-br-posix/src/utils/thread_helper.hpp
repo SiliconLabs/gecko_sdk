@@ -67,7 +67,9 @@ public:
     using ScanHandler             = std::function<void(otError, const std::vector<otActiveScanResult> &)>;
     using EnergyScanHandler       = std::function<void(otError, const std::vector<otEnergyScanResult> &)>;
     using ResultHandler           = std::function<void(otError)>;
+    using AttachHandler           = std::function<void(otError, int64_t)>;
     using UpdateMeshCopTxtHandler = std::function<void(std::map<std::string, std::vector<uint8_t>>)>;
+    using DatasetChangeHandler    = std::function<void(const otOperationalDatasetTlvs &)>;
 
     /**
      * The constructor of a Thread helper.
@@ -85,6 +87,13 @@ public:
      *
      */
     void AddDeviceRoleHandler(DeviceRoleHandler aHandler);
+
+    /**
+     * This method adds a callback for active dataset change.
+     *
+     * @param[in]  aHandler   The active dataset change handler.
+     */
+    void AddActiveDatasetChangeHandler(DatasetChangeHandler aHandler);
 
     /**
      * This method permits unsecure join on port.
@@ -134,7 +143,7 @@ public:
                 const std::vector<uint8_t> &aNetworkKey,
                 const std::vector<uint8_t> &aPSKc,
                 uint32_t                    aChannelMask,
-                ResultHandler               aHandler);
+                AttachHandler               aHandler);
 
     /**
      * This method detaches the device from the Thread network.
@@ -153,7 +162,7 @@ public:
      * @param[in] aHandler  The attach result handler.
      *
      */
-    void Attach(ResultHandler aHandler);
+    void Attach(AttachHandler aHandler);
 
     /**
      * This method makes all nodes in the current network attach to the network specified by the dataset TLVs.
@@ -162,7 +171,7 @@ public:
      * @param[in] aHandler      The result handler.
      *
      */
-    void AttachAllNodesTo(const std::vector<uint8_t> &aDatasetTlvs, ResultHandler aHandler);
+    void AttachAllNodesTo(const std::vector<uint8_t> &aDatasetTlvs, AttachHandler aHandler);
 
     /**
      * This method resets the OpenThread stack.
@@ -264,6 +273,8 @@ private:
     void    RandomFill(void *aBuf, size_t size);
     uint8_t RandomChannelFromChannelMask(uint32_t aChannelMask);
 
+    void ActiveDatasetChangedCallback();
+
     otInstance *mInstance;
 
     otbr::Ncp::ControllerOpenThread *mNcp;
@@ -273,11 +284,13 @@ private:
     EnergyScanHandler               mEnergyScanHandler;
     std::vector<otEnergyScanResult> mEnergyScanResults;
 
-    std::vector<DeviceRoleHandler> mDeviceRoleHandlers;
+    std::vector<DeviceRoleHandler>    mDeviceRoleHandlers;
+    std::vector<DatasetChangeHandler> mActiveDatasetChangeHandlers;
 
     std::map<uint16_t, size_t> mUnsecurePortRefCounter;
 
-    ResultHandler mAttachHandler;
+    int64_t       mAttachDelayMs = 0;
+    AttachHandler mAttachHandler;
     ResultHandler mJoinerHandler;
 
     otOperationalDatasetTlvs mAttachPendingDatasetTlvs = {};

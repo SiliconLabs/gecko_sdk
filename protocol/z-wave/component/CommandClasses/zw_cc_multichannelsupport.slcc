@@ -17,5 +17,3 @@ include:
     - path: CC_MultiChan.h
 provides:
   - name: zw_cc_multichannelsupport
-documentation:
-  url: "https://sdomembers.z-wavealliance.org/document/dl/652"

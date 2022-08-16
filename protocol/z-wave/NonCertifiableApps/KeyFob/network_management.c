@@ -61,7 +61,7 @@ static sl_network_management_states_t network_management_state = NETWORK_MANAGEM
 // -----------------------------------------------------------------------------
 //                          Public Function Definitions
 // -----------------------------------------------------------------------------
-bool portable_controller_start_inclusion()
+bool key_fob_start_inclusion()
 {
   const SApplicationHandles* pAppHandle = ZAF_getAppHandle();
   EQueueNotifyingStatus status;
@@ -78,7 +78,7 @@ bool portable_controller_start_inclusion()
   return false;
 }
 
-bool portable_controller_stop_inclusion()
+bool key_fob_stop_inclusion()
 {
   const SApplicationHandles* pAppHandle = ZAF_getAppHandle();
   EQueueNotifyingStatus status;
@@ -95,7 +95,7 @@ bool portable_controller_stop_inclusion()
   return false;
 }
 
-bool portable_controller_start_exclusion()
+bool key_fob_start_exclusion()
 {
   const SApplicationHandles* pAppHandle = ZAF_getAppHandle();
   EQueueNotifyingStatus status;
@@ -112,7 +112,7 @@ bool portable_controller_start_exclusion()
   return false;
 }
 
-bool portable_controller_stop_exclusion()
+bool key_fob_stop_exclusion()
 {
   const SApplicationHandles* pAppHandle = ZAF_getAppHandle();
   EQueueNotifyingStatus status;
@@ -129,7 +129,7 @@ bool portable_controller_stop_exclusion()
   return false;
 }
 
-bool portable_controller_start_learnmode_include()
+bool key_fob_start_learnmode_include()
 {
   const SApplicationHandles* pAppHandle = ZAF_getAppHandle();
   EQueueNotifyingStatus status;
@@ -146,7 +146,7 @@ bool portable_controller_start_learnmode_include()
   return false;
 }
 
-bool portable_controller_start_learnmode_exclude()
+bool key_fob_start_learnmode_exclude()
 {
   const SApplicationHandles* pAppHandle = ZAF_getAppHandle();
   EQueueNotifyingStatus status;

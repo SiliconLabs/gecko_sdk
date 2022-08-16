@@ -38,6 +38,9 @@ include:
   - path: .
     file_list:
     - path: app.h
+  - path: ../../../../util/third_party/openthread/src/lib/platform
+    file_list:
+    - path: reset_util.h
 
 source:
   - path: main.c

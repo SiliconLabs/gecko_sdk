@@ -87,10 +87,19 @@ template_contribution:
       group: comms-hub-function
       name: send
       handler: emAfPluginCommsHubFunctionCliSend
-      help: Sends a message.
+      help: Sends a message with hex payload.
       argument:
       - type: hex
       - type: hex
+  - name: cli_command
+    value:
+      group: comms-hub-function
+      name: send_string
+      handler: emAfPluginCommsHubFunctionCliSend
+      help: Sends a message with string payload.
+      argument:
+      - type: hex
+      - type: string
   - name: cli_command
     value:
       group: comms-hub-function

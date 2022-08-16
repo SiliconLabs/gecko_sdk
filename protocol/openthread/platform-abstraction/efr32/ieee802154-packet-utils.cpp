@@ -314,3 +314,15 @@ bool efr32IsFramePending(otRadioFrame *aFrame)
 {
     return static_cast<Mac::RxFrame *>(aFrame)->GetFramePending();
 }
+
+otPanId efr32GetDstPanId(otRadioFrame *aFrame)
+{
+    otPanId aPanId = 0xFFFF;
+
+    if(static_cast<Mac::RxFrame *>(aFrame)->IsDstPanIdPresent())
+    {
+        static_cast<Mac::RxFrame *>(aFrame)->GetDstPanId(aPanId);
+    }
+
+    return aPanId;
+}

@@ -1,5 +1,5 @@
 id: bootloader_ezsp_spi_nonsecure
-label: "EZSP-SPI"
+label: "EZSP-SPI (Non-Secure)"
 package: bootloader
 description: Firmware upgrade over SPI using the EZSP protocol. Configure pinout in the SPI Peripheral component
 category: Platform|Bootloader|TrustZone NonSecure|Communication

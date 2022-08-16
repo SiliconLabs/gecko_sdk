@@ -32,6 +32,7 @@
 #include "sl_iostream_swo.h"
 #include "sl_status.h"
 #include "sl_debug_swo.h"
+#include "sl_iostream_swo_config.h"
 
 #if defined(SL_CATALOG_POWER_MANAGER_PRESENT)
 #include "sl_power_manager.h"
@@ -181,9 +182,12 @@ static sl_status_t swo_write(void *context,
                              size_t buffer_length)
 {
   sl_status_t ret = SL_STATUS_OK;
+  uint8_t *buf_8 = (uint8_t *)buffer;
+#if (SL_IOSTREAM_SWO_WRITE_BYTE_PER_BYTE == 0)
   uint32_t *buf_32 = (uint32_t*)(buffer);
   uint16_t *buf_16;
-  uint8_t *buf_8;
+#endif
+
 #if defined(SL_CATALOG_KERNEL_PRESENT)
   swo_stream_context_t *swo_context = (swo_stream_context_t *)context;
   if (osKernelGetState() == osKernelRunning) {
@@ -196,6 +200,15 @@ static sl_status_t swo_write(void *context,
   (void)context;
 #endif
 
+#if (SL_IOSTREAM_SWO_WRITE_BYTE_PER_BYTE == 1)
+  // Write buffer
+  for (size_t i = 0; i < buffer_length; i++) {
+    ret = sl_debug_swo_write_u8(0, buf_8[i]);
+    if (ret != SL_STATUS_OK) {
+      goto early_return;
+    }
+  }
+#else
   // Write the maximum number of words
   while (buffer_length >= sizeof(uint32_t)) {
     ret = sl_debug_swo_write_u32(0, *buf_32);
@@ -222,6 +235,7 @@ static sl_status_t swo_write(void *context,
   if (buffer_length == sizeof(uint8_t)) {
     ret = sl_debug_swo_write_u8(0, *buf_8);
   }
+#endif
 
   early_return:
 #if defined(SL_CATALOG_KERNEL_PRESENT)

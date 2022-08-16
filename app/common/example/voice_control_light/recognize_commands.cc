@@ -24,7 +24,7 @@
 // 1 - off
 // 2 - unknown
 // 3 - background
-const char* kCategoryLabels[kCategoryCount] = {
+const char* kCategoryLabels[kMaxCategoryCount] = {
   "on",
   "off",
   "unknown",
@@ -51,89 +51,25 @@ TfLiteStatus RecognizeCommands::ProcessLatestResults(
   const TfLiteTensor* latest_results, const int32_t current_time_ms,
   uint8_t* found_command_index, uint8_t* score, bool* is_new_command)
 {
-  if ((latest_results->dims->size != 2)
-      || (latest_results->dims->data[0] != 1)
-      || (latest_results->dims->data[1] != kCategoryCount)) {
-    TF_LITE_REPORT_ERROR(
-      error_reporter_,
-      "The results for recognition should contain %d elements, but there are "
-      "%d in an %d-dimensional shape",
-      kCategoryCount, latest_results->dims->data[1],
-      latest_results->dims->size);
-    return kTfLiteError;
-  }
 
-  if (latest_results->type != kTfLiteInt8) {
-    TF_LITE_REPORT_ERROR(
-        error_reporter_,
-        "The results for recognition should be int8_t elements, but are %d",
-        latest_results->type);
-    return kTfLiteError;
-  }
+uint8_t category_count = latest_results->dims->data[1];
+int8_t current_top_index = 0;
+int32_t current_top_score = 0;
+uint8_t converted_scores[kMaxCategoryCount];
 
-  if ((!previous_results_.empty())
-      && (current_time_ms < previous_results_.front().time_)) {
-    TF_LITE_REPORT_ERROR(
-      error_reporter_,
-      "Results must be fed in increasing time order, but received a "
-      "timestamp of %d that was earlier than the previous one of %d",
-      current_time_ms, previous_results_.front().time_);
-    return kTfLiteError;
-  }
-
-  // Add the latest results to the head of the queue.
-  previous_results_.push_back({current_time_ms, latest_results->data.int8});
-
-  // Prune any earlier results that are too old for the averaging window.
-  const int64_t time_limit = current_time_ms - average_window_duration_ms_;
-  while ((!previous_results_.empty())
-         && previous_results_.front().time_ < time_limit) {
-    previous_results_.pop_front();
-  }
-
-  // If there are too few results, assume the result will be unreliable and
-  // bail.
-  const int32_t how_many_results = previous_results_.size();
-  if ((how_many_results < minimum_count_)) {
-    *found_command_index = previous_top_label_index_;
-    *score = 0;
-    *is_new_command = false;
-    /* Don't report non-error 
-    TF_LITE_REPORT_ERROR(
-    error_reporter_,
-    "The smoothing window contains less than %d inference result(s), a "
-    "reliable keyword detection can not be made.",
-    minimum_count_);
-    */
-    return kTfLiteOk;
-  }
-
-  // Calculate the average score across all the results in the window.
-  int32_t average_scores[kCategoryCount];
-  for (int offset = 0; offset < previous_results_.size(); ++offset) {
-    // Iterates the amount of times to achieve average_window_duration
-    PreviousResultsQueue::Result previous_result =
-      previous_results_.from_front(offset);
-    const int8_t* scores = previous_result.scores;
-    for (int i = 0; i < kCategoryCount; ++i) {
-      if (offset == 0) {
-        average_scores[i] = scores[i] + 128;
-      } else {
-        average_scores[i] += scores[i] + 128;
-      }
+// Convert the model output to uint8
+if (latest_results->type == kTfLiteInt8) {
+    for(int i = 0; i < category_count; ++i) {
+      converted_scores[i] = (uint8_t)(latest_results->data.int8[i] + 128);
     }
+  } else {
+      TF_LITE_REPORT_ERROR(error_reporter_, "Unsupported output tensor data type, must be int8 or float32");
+      return kTfLiteError;
   }
 
-  for (int i = 0; i < kCategoryCount; ++i) {
-    average_scores[i] /= how_many_results;
-  }
-
-  // Find the current highest scoring category.
-  int8_t current_top_index = 0;
-  int32_t current_top_score = 0;
-  for (int i = 0; i < kCategoryCount; ++i) {
-    if (average_scores[i] > current_top_score) {
-      current_top_score = average_scores[i];
+  for (int i = 0; i < category_count; i++) {
+    if (converted_scores[i] > current_top_score) {
+      current_top_score = converted_scores[i];
       current_top_index = i;
     }
   }

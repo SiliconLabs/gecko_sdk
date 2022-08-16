@@ -169,6 +169,14 @@ static void app_on_scan_timer(sl_simple_timer_t *timer, void *data);
 *******************************************************************************/
 static void app_on_reset_timer(sl_simple_timer_t *timer, void *data);
 
+/***************************************************************************//**
+* Add user event filter via sl_bt_user_manage_event_filter
+*
+* @param[in] event_id ID of the event to be filtered
+* @return Status of the sl_bt_user_manage_event_filter command
+*******************************************************************************/
+static sl_status_t app_add_user_event_filter(const uint32_t event_id);
+
 // -----------------------------------------------------------------------------
 // Static Variables
 
@@ -381,21 +389,16 @@ void sl_bt_on_event(sl_bt_msg_t *evt)
     // Do not call any stack command before receiving this boot event!
     case sl_bt_evt_system_boot_id:
     {
-      // Filter scanner report events as it would send a message every 5 ms
-      // and clog UART while scanning for unprovisioned nodes
-      uint8_t user_data[SL_NCP_EVT_FILTER_CMD_ADD_LEN];
-      uint32_t command_id = sl_bt_evt_scanner_scan_report_id;
+      // Filter legacy and new scanner report events as it would send a message
+      // every 5 ms and clog UART while scanning for unprovisioned nodes
+      sc = app_add_user_event_filter(sl_bt_evt_scanner_scan_report_id);
+      app_assert_status_f(sc, "Failed to enable filtering on the target" APP_LOG_NEW_LINE);
 
-      user_data[0] = SL_NCP_EVT_FILTER_CMD_ADD_ID;
-      user_data[1] = (command_id >> 0);
-      user_data[2] = (command_id >> 8);
-      user_data[3] = (command_id >> 16);
-      user_data[4] = (command_id >> 24);
-      sc = sl_bt_user_manage_event_filter(SL_NCP_EVT_FILTER_CMD_ADD_LEN,
-                                          user_data);
-      app_assert(sc == SL_STATUS_OK,
-                 "[E: 0x%04x] Failed to enable filtering on the target\n",
-                 (int)sc);
+      sc = app_add_user_event_filter(sl_bt_evt_scanner_legacy_advertisement_report_id);
+      app_assert_status_f(sc, "Failed to enable filtering on the target" APP_LOG_NEW_LINE);
+
+      sc = app_add_user_event_filter(sl_bt_evt_scanner_extended_advertisement_report_id);
+      app_assert_status_f(sc, "Failed to enable filtering on the target" APP_LOG_NEW_LINE);
 
       // Print boot message.
       app_log_info("Bluetooth stack booted: v%d.%d.%d-b%d" APP_LOG_NEW_LINE,
@@ -739,6 +742,21 @@ void app_parse_address(char *input, size_t length, uint16_t *address)
     }
     sscanf(input, "%4hx", address);
   }
+}
+
+sl_status_t app_add_user_event_filter(const uint32_t event_id)
+{
+  sl_status_t sc = SL_STATUS_OK;
+  uint8_t user_data[SL_NCP_EVT_FILTER_CMD_ADD_LEN];
+
+  user_data[0] = SL_NCP_EVT_FILTER_CMD_ADD_ID;
+  user_data[1] = event_id >> 0;
+  user_data[2] = event_id >> 8;
+  user_data[3] = event_id >> 16;
+  user_data[4] = event_id >> 24;
+
+  sc = sl_bt_user_manage_event_filter(SL_NCP_EVT_FILTER_CMD_ADD_LEN, user_data);
+  return sc;
 }
 
 // -----------------------------------------------------------------------------

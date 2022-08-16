@@ -184,6 +184,8 @@ void otCRPCProcessHelp(void *aContext, uint8_t aArgsLength, char *aArgs[]);
  */
 void otCRPCSetUserCommands(const otCliCommand *aUserCommands, uint8_t aLength, void *aContext);
 
+char * otCRPCGetStaticOutputBuffer(void);
+size_t otCRPCGetStaticOutputBufferSize(void);
 /**
  * @}
  *

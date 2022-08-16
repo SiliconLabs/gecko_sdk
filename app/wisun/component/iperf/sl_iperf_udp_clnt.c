@@ -47,6 +47,9 @@
 //                              Macros and Typedefs
 // -----------------------------------------------------------------------------
 
+/// Client FinACK Receive Timeout
+#define SL_IPERF_FINACK_RECV_TIMEOUT_MS       10000UL
+
 /// Client TX parameters
 typedef struct client_tx_params {
   /// Packet count
@@ -202,7 +205,7 @@ void sl_iperf_test_udp_client(sl_iperf_test_t * test)
                                     params.packet_size,
                                     &test->conn.srv_addr);
     }
-    sl_iperf_delay_ms(100U);
+    sl_iperf_delay_ms(SL_IPERF_FINACK_RECV_TIMEOUT_MS / SL_IPERF_SERVER_UDP_TX_FINACK_COUNT);
   }
 
   if (!finack_received) {
@@ -276,14 +279,11 @@ static void _udp_client_calc_tx(sl_iperf_test_t * const test,
   }
 
   // trim buff size if it's necessary
-  if (!test->opt.buf_len) {
+  if (!test->opt.buf_len || test->opt.buf_len > test->conn.buff_size) {
     test->opt.buf_len = test->conn.buff_size;
   }
 
   tx_info->packet_size = test->opt.buf_len;
-  if (!tx_info->packet_size) {
-    return;
-  }
 
   // If packet number is explicitly set
   if (test->opt.packet_nbr) {

@@ -73,7 +73,7 @@ void app_ping(sl_cli_command_arg_t *arguments)
                      SL_WISUN_PING_PACKET_COUNT,
                      SL_WISUN_PING_PACKET_SIZE,
                      NULL, NULL)) {
-    printf("[Failed: ping was not succesful]\n");
+    printf("[Failed: ping was not successful]\n");
   }
 
   app_wisun_cli_mutex_unlock();

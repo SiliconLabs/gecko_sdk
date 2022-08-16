@@ -556,15 +556,29 @@ sl_status_t sl_se_init_otp(sl_se_command_context_t *cmd_ctx,
     uint8_t reset_threshold;
   } otp_tamper_settings;
 
+  // Check for reserved sources
+  if ((otp_init->tamper_levels[SL_SE_TAMPER_SIGNAL_RESERVED_1] != SL_SE_TAMPER_LEVEL_IGNORE)
+      || (otp_init->tamper_levels[SL_SE_TAMPER_SIGNAL_RESERVED_2] != SL_SE_TAMPER_LEVEL_IGNORE)
+      || (otp_init->tamper_levels[SL_SE_TAMPER_SIGNAL_RESERVED_3] != SL_SE_TAMPER_LEVEL_IGNORE)
+      || (otp_init->tamper_levels[SL_SE_TAMPER_SIGNAL_RESERVED_4] != SL_SE_TAMPER_LEVEL_IGNORE)) {
+    return SL_STATUS_INVALID_PARAMETER;
+  }
+
   // Combine tamper levels, two per byte
   for (size_t i = 0; i < SL_SE_TAMPER_SIGNAL_NUM_SIGNALS; i += 2) {
     // Check for reserved levels
-    EFM_ASSERT((otp_init->tamper_levels[i] != 3)
-               && (otp_init->tamper_levels[i] != 5)
-               && (otp_init->tamper_levels[i] != 6));
-    EFM_ASSERT((otp_init->tamper_levels[i + 1] != 3)
-               && (otp_init->tamper_levels[i + 1] != 5)
-               && (otp_init->tamper_levels[i + 1] != 6));
+    for (size_t offset = 0; offset < 2; ++offset) {
+      switch (otp_init->tamper_levels[i + offset]) {
+        case SL_SE_TAMPER_LEVEL_IGNORE:
+        case SL_SE_TAMPER_LEVEL_INTERRUPT:
+        case SL_SE_TAMPER_LEVEL_FILTER:
+        case SL_SE_TAMPER_LEVEL_RESET:
+        case SL_SE_TAMPER_LEVEL_PERMANENTLY_ERASE_OTP:
+          break;
+        default:
+          return SL_STATUS_INVALID_PARAMETER;
+      }
+    }
 
     otp_tamper_settings.levels[i / 2] = (otp_init->tamper_levels[i] & 0x7)
                                         | ((otp_init->tamper_levels[i + 1] & 0x7) << 4);

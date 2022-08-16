@@ -21,9 +21,7 @@ component:
   - id: gatt_configuration
   - id: bluetooth_feature_legacy_advertiser
   - id: bluetooth_feature_connection
-  - id: bluetooth_feature_gatt
   - id: bluetooth_feature_gatt_server
-  - id: bluetooth_feature_scanner
   - id: bluetooth_feature_sm
   - id: bluetooth_feature_system
   - id: in_place_ota_dfu
@@ -72,7 +70,7 @@ component:
       - btn1
   - id: simple_rgb_pwm_led
     instance:
-      - led_rgb
+      - rgb_led0
 
 source:
   - path: advertise.c
@@ -98,11 +96,6 @@ config_file:
       file_id: gatt_configuration_file_id
     path: gatt_configuration_brd4166a.btconf
     directory: btconf
-  - override:
-      component: simple_rgb_pwm_led
-      file_id: simple_rgb_pwm_led_config
-      instance: led_rgb
-    path: brd4166a/sl_simple_rgb_pwm_led_led_rgb_config.h
 
 other_file:
   - path: ../../script/create_bl_files.bat

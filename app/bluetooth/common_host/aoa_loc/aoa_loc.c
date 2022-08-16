@@ -76,7 +76,6 @@ static sl_status_t aoa_loc_run_estimation(aoa_asset_tag_t *tag,
                                           uint32_t angle_count,
                                           aoa_angle_t *angle_list,
                                           aoa_id_t *locator_list);
-static void aoa_loc_destroy_locators(void);
 
 // -----------------------------------------------------------------------------
 // Module variables
@@ -419,24 +418,22 @@ sl_status_t aoa_loc_calc_position(aoa_id_t tag_id,
 }
 
 /**************************************************************************//**
- * Destroy the module database
- *****************************************************************************/
-void aoa_loc_destroy(void)
-{
-  aoa_loc_destroy_tags();
-  aoa_loc_destroy_locators();
-  sl_rtl_loc_deinit(&loc_libitem);
-}
-
-/**************************************************************************//**
  * Reinitialize the estimator.
  *****************************************************************************/
 sl_status_t aoa_loc_reinit(void)
 {
-  sl_rtl_loc_deinit(&loc_libitem);
+  (void)aoa_loc_deinit();
+  return aoa_loc_init();
+}
+
+/**************************************************************************//**
+ * Deinitialize the estimator.
+ *****************************************************************************/
+sl_status_t aoa_loc_deinit(void)
+{
   enum sl_rtl_error_code ec;
 
-  ec = sl_rtl_loc_init(&loc_libitem);
+  ec = sl_rtl_loc_deinit(&loc_libitem);
   CHECK_ERROR(ec);
 
   return SL_STATUS_OK;
@@ -457,6 +454,22 @@ void aoa_loc_destroy_tags(void)
   }
 
   head_tag = NULL;
+}
+
+/**************************************************************************//**
+ * Destroy the locator database
+ *****************************************************************************/
+void aoa_loc_destroy_locators(void)
+{
+  aoa_locator_node_t *current;
+  aoa_locator_node_t *next;
+
+  for (current = head_locator; current != NULL; current = next) {
+    next = current->next;
+    free(current);
+  }
+
+  head_locator = NULL;
 }
 
 /**************************************************************************//**
@@ -691,20 +704,4 @@ static sl_status_t aoa_loc_run_estimation(aoa_asset_tag_t *tag,
   CHECK_ERROR(ec);
 
   return SL_STATUS_OK;
-}
-
-/**************************************************************************//**
- * Destroy the locator database
- *****************************************************************************/
-static void aoa_loc_destroy_locators(void)
-{
-  aoa_locator_node_t *current;
-  aoa_locator_node_t *next;
-
-  for (current = head_locator; current != NULL; current = next) {
-    next = current->next;
-    free(current);
-  }
-
-  head_locator = NULL;
 }

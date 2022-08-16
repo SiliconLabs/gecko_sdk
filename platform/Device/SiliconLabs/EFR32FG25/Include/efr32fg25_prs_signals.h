@@ -27,6 +27,9 @@
  * 3. This notice may not be removed or altered from any source distribution.
  *
  *****************************************************************************/
+#ifndef EFR32FG25_PRS_SIGNALS_H
+#define EFR32FG25_PRS_SIGNALS_H
+
 /** Synchronous signal sources enumeration: */
 #define _PRS_SYNC_CH_CTRL_SOURCESEL_NONE                       (0x00000000UL)
 #define _PRS_SYNC_CH_CTRL_SOURCESEL_TIMER0                     (0x00000001UL)
@@ -1220,3 +1223,5 @@
 #define PRS_SMCTRL_SOFTM9                                      (PRS_ASYNC_SMCTRL_SOFTM9)
 #define PRS_SMCTRL_SOFTM10                                     (PRS_ASYNC_SMCTRL_SOFTM10)
 #define PRS_SMCTRL_SOFTM11                                     (PRS_ASYNC_SMCTRL_SOFTM11)
+
+#endif /* EFR32FG25_PRS_SIGNALS_H */

@@ -22,6 +22,10 @@
 #include "em_gpio.h"
 #include <stdint.h>
 
+#ifdef __cplusplus
+extern "C" {
+#endif
+
 /***************************************************************************//**
  * @addtogroup led
  * @{
@@ -203,5 +207,9 @@ sl_led_state_t sl_simple_led_get_state(void *led_handle);
 ///   @endcode
 ///
 /// @} end group simple_led ********************************************************/
+
+#ifdef __cplusplus
+}
+#endif
 
 #endif // SL_SIMPLE_LED_H

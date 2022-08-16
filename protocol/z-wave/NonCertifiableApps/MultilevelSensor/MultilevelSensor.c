@@ -14,6 +14,7 @@
 
 #include "SizeOf.h"
 #include "Assert.h"
+#include <MfgTokens.h>
 #include "DebugPrintConfig.h"
 
 //#define DEBUGPRINT
@@ -196,7 +197,7 @@ static const SAppNodeInfo_t AppNodeInfo =
   .CommandClasses.SecureIncludedSecureCC.pCommandClasses = cmdClassListSecure
 };
 
-static const SRadioConfig_t RadioConfig =
+static SRadioConfig_t RadioConfig =
 {
   .iListenBeforeTalkThreshold = ELISTENBEFORETALKTRESHOLD_DEFAULT,
   .iTxPowerLevelMax = APP_MAX_TX_POWER,
@@ -659,6 +660,15 @@ ApplicationInit(EResetReason_t eResetReason)
   // Init file system
   ApplicationFileSystemInit(&pFileSystemApplication);
 
+  // Read Rf region from MFG_ZWAVE_COUNTRY_FREQ
+  zpal_radio_region_t regionMfg;
+  ZW_GetMfgTokenDataCountryFreq((void*) &regionMfg);
+  if (isRfRegionValid(regionMfg)) {
+    RadioConfig.eRegion = regionMfg;
+  } else {
+    ZW_SetMfgTokenDataCountryRegion((void*) &RadioConfig.eRegion);
+  }
+
   /* Register task function */
   /*************************************************************************************
    * CREATE USER TASKS  -  ZW_ApplicationRegisterTask() and ZW_UserTask_CreateTask()
@@ -985,7 +995,7 @@ AppStateManager(EVENT_APP event)
         ZAF_JobHelperJobEnqueue(EVENT_APP_START_TIMER_EVENTJOB_STOP);
       }
 
-      if (EVENT_APP_BUTTON_BATTERY_REPORT == event)
+      if (EVENT_APP_BUTTON_BATTERY_AND_SENSOR_REPORT == event)
       {
         /* BATTERY REPORT EVENT received. Send a battery level report */
         DPRINT("\r\nBattery Level report transmit (keypress trig)\r\n");
@@ -997,8 +1007,23 @@ AppStateManager(EVENT_APP event)
         }
 
         /*Add event's on job-queue*/
-        ZAF_JobHelperJobEnqueue(EVENT_APP_SEND_BATTERY_LEVEL_REPORT);
+        ZAF_JobHelperJobEnqueue(EVENT_APP_SEND_BATTERY_LEVEL_AND_SENSOR_REPORT);
       }      
+
+      if (EVENT_APP_BUTTON_BASIC_SET_REPORT == event)
+      {
+        /* BASIC SET EVENT received */
+        DPRINT("\r\nBasic set transmit (keypress trig)\r\n");
+        ChangeState(STATE_APP_TRANSMIT_DATA);
+
+        if (false == ZAF_EventHelperEventEnqueue(EVENT_APP_NEXT_EVENT_JOB))
+        {
+          DPRINT("\r\n** EVENT_APP_NEXT_EVENT_JOB fail\r\n");
+        }
+
+        /*Add event's on job-queue*/
+        ZAF_JobHelperJobEnqueue(EVENT_APP_SEND_BASIC_SET_REPORT);
+      }  
       break;
 
     case STATE_APP_LEARN_MODE:
@@ -1126,9 +1151,19 @@ AppStateManager(EVENT_APP event)
         AppTimerDeepSleepPersistentStart(&EventJobsTimer, BASIC_SET_TIMEOUT);
       }
 
-      if (EVENT_APP_SEND_BATTERY_LEVEL_REPORT == event)
+      if (EVENT_APP_SEND_BATTERY_LEVEL_AND_SENSOR_REPORT == event)
       {
         ReportBatteryLevel();
+        cc_multilevel_sensor_send_sensor_data();
+      }
+
+      if (EVENT_APP_SEND_BASIC_SET_REPORT == event)
+      {
+        if (JOB_STATUS_SUCCESS != CC_Basic_Set_tx( &agiTableRootDeviceGroups[0].profile, ENDPOINT_ROOT, BASIC_SET_TRIGGER_VALUE, ZCB_JobStatus))
+        {
+          /*Kick next job*/
+          ZAF_EventHelperEventEnqueue(EVENT_APP_NEXT_EVENT_JOB);
+        }
       }
 
       if (EVENT_APP_FINISH_EVENT_JOB == event)

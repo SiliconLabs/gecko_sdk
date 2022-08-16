@@ -159,7 +159,7 @@
         <channel_config_entry name="ieee802154_wisun_863_ofdm_opt4_MCS4">
           <physical_channel_offset>SAME_AS_FIRST_CHANNEL</physical_channel_offset>
           <channel_number_start>20480</channel_number_start>
-          <channel_number_end>20508</channel_number_end>
+          <channel_number_end>20514</channel_number_end>
           <max_power>RAIL_TX_POWER_MAX</max_power>
           <phy_name_override>PHY_IEEE802154_WISUN_868MHz_OFDM_OPT4_EU</phy_name_override>
           <profile_input_overrides>

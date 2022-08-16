@@ -17,14 +17,27 @@
 
 #include "af.h"
 #include "basic.h"
-
 #include "app/framework/util/attribute-storage.h"
+#if defined(SL_COMPONENT_CATALOG_PRESENT)
+#include "sl_component_catalog.h"
+#ifdef SL_CATALOG_ZIGBEE_REPORTING_PRESENT
+#include "reporting.h"
+#endif // SL_CATALOG_ZIGBEE_REPORTING_PRESENT
+#else // !SL_COMPONENT_CATALOG_PRESENT
+#ifdef EMBER_AF_PLUGIN_REPORTING
+#include "app/framework/plugin/reporting/reporting.h"
+#define SL_CATALOG_ZIGBEE_REPORTING_PRESENT
+#endif // EMBER_AF_PLUGIN_REPORTING
+#endif // SL_COMPONENT_CATALOG_PRESENT
 
 bool emberAfBasicClusterResetToFactoryDefaultsCallback(void)
 {
   emberAfBasicClusterPrintln("RX: ResetToFactoryDefaultsCallback");
   emberAfResetAttributes(emberAfCurrentEndpoint());
   emberAfPluginBasicResetToFactoryDefaultsCallback(emberAfCurrentEndpoint());
+#ifdef SL_CATALOG_ZIGBEE_REPORTING_PRESENT
+  emAfPluginReportingGetLastValueAll();
+#endif // SL_CATALOG_ZIGBEE_REPORTING_PRESENT
   emberAfSendImmediateDefaultResponse(EMBER_ZCL_STATUS_SUCCESS);
   return true;
 }

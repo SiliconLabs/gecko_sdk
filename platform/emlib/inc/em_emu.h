@@ -141,9 +141,9 @@ typedef enum {
 typedef enum {
   /** No connection. */
   emuBuBuInactPwrCon_None    = EMU_BUCTRL_BUINACTPWRCON_NONE,
-  /** Allow power from backup to main. */
-  emuBuBuInactPwrCon_MainBu  = EMU_BUCTRL_BUINACTPWRCON_MAINBU,
   /** Allow power from main to backup. */
+  emuBuBuInactPwrCon_MainBu  = EMU_BUCTRL_BUINACTPWRCON_MAINBU,
+  /** Allow power from backup to main. */
   emuBuBuInactPwrCon_BuMain  = EMU_BUCTRL_BUINACTPWRCON_BUMAIN,
   /** Backup and main power are connected. */
   emuBuBuInactPwrCon_NoDiode = EMU_BUCTRL_BUINACTPWRCON_NODIODE,
@@ -155,9 +155,9 @@ typedef enum {
 typedef enum {
   /** No connection. */
   emuBuBuActPwrCon_None    = EMU_BUCTRL_BUACTPWRCON_NONE,
-  /** Allow power from backup to main. */
-  emuBuBuActPwrCon_MainBu  = EMU_BUCTRL_BUACTPWRCON_MAINBU,
   /** Allow power from main to backup. */
+  emuBuBuActPwrCon_MainBu  = EMU_BUCTRL_BUACTPWRCON_MAINBU,
+  /** Allow power from backup to main. */
   emuBuBuActPwrCon_BuMain  = EMU_BUCTRL_BUACTPWRCON_BUMAIN,
   /** Backup and main power are connected. */
   emuBuBuActPwrCon_NoDiode = EMU_BUCTRL_BUACTPWRCON_NODIODE,
@@ -451,17 +451,16 @@ typedef enum {
 
 /** DCDC Boost EM01 peak current setting. */
 typedef enum {
-  emuDcdcBoostEM01PeakCurrent_Load36mA = _DCDC_BSTEM01CTRL_IPKVAL_Load36mA, /**< Load 36mA, peak current 90mA. */
-  emuDcdcBoostEM01PeakCurrent_Load40mA = _DCDC_BSTEM01CTRL_IPKVAL_Load40mA, /**< Load 40mA, peak current 100mA. */
-  emuDcdcBoostEM01PeakCurrent_Load44mA = _DCDC_BSTEM01CTRL_IPKVAL_Load44mA, /**< Load 44mA, peak current 110mA. */
-  emuDcdcBoostEM01PeakCurrent_Load48mA = _DCDC_BSTEM01CTRL_IPKVAL_Load48mA, /**< Load 48mA, peak current 120mA. */
-  emuDcdcBoostEM01PeakCurrent_Load52mA = _DCDC_BSTEM01CTRL_IPKVAL_Load52mA, /**< Load 52mA, peak current 130mA. */
-  emuDcdcBoostEM01PeakCurrent_Load56mA = _DCDC_BSTEM01CTRL_IPKVAL_Load56mA, /**< Load 56mA, peak current 140mA. */
-  emuDcdcBoostEM01PeakCurrent_Load60mA = _DCDC_BSTEM01CTRL_IPKVAL_Load60mA, /**< Load 60mA, peak current 150mA. */
-  emuDcdcBoostEM01PeakCurrent_Load64mA = _DCDC_BSTEM01CTRL_IPKVAL_Load64mA, /**< Load 64mA, peak current 160mA. */
-  emuDcdcBoostEM01PeakCurrent_Load68mA = _DCDC_BSTEM01CTRL_IPKVAL_Load68mA, /**< Load 68mA, peak current 170mA. */
-  emuDcdcBoostEM01PeakCurrent_Load72mA = _DCDC_BSTEM01CTRL_IPKVAL_Load72mA, /**< Load 72mA, peak current 180mA. */
-  emuDcdcBoostEM01PeakCurrent_Load80mA = _DCDC_BSTEM01CTRL_IPKVAL_Load80mA  /**< Load 80mA, peak current 200mA. */
+  emuDcdcBoostEM01PeakCurrent_Load10mA = _DCDC_BSTEM01CTRL_IPKVAL_Load10mA, /**< Load 10mA */
+  emuDcdcBoostEM01PeakCurrent_Load11mA = _DCDC_BSTEM01CTRL_IPKVAL_Load11mA, /**< Load 11mA */
+  emuDcdcBoostEM01PeakCurrent_Load13mA = _DCDC_BSTEM01CTRL_IPKVAL_Load13mA, /**< Load 13mA */
+  emuDcdcBoostEM01PeakCurrent_Load15mA = _DCDC_BSTEM01CTRL_IPKVAL_Load15mA, /**< Load 15mA */
+  emuDcdcBoostEM01PeakCurrent_Load16mA = _DCDC_BSTEM01CTRL_IPKVAL_Load16mA, /**< Load 16mA */
+  emuDcdcBoostEM01PeakCurrent_Load18mA = _DCDC_BSTEM01CTRL_IPKVAL_Load18mA, /**< Load 18mA */
+  emuDcdcBoostEM01PeakCurrent_Load20mA = _DCDC_BSTEM01CTRL_IPKVAL_Load20mA, /**< Load 20mA */
+  emuDcdcBoostEM01PeakCurrent_Load21mA = _DCDC_BSTEM01CTRL_IPKVAL_Load21mA, /**< Load 21mA */
+  emuDcdcBoostEM01PeakCurrent_Load23mA = _DCDC_BSTEM01CTRL_IPKVAL_Load23mA, /**< Load 23mA */
+  emuDcdcBoostEM01PeakCurrent_Load25mA = _DCDC_BSTEM01CTRL_IPKVAL_Load25mA, /**< Load 25mA */
 } EMU_DcdcBoostEM01PeakCurrent_TypeDef;
 
 /** DCDC Boost Toff max timeout */
@@ -490,7 +489,7 @@ typedef enum {
 
 /** DCDC Boost EM23 peak current setting. */
 typedef enum {
-  emuDcdcBoostEM23PeakCurrent_Load10mA = _DCDC_BSTEM23CTRL_IPKVAL_Load10mA, /**< Load 10mA, peak current 150mA. */
+  emuDcdcBoostEM23PeakCurrent_Load10mA = _DCDC_BSTEM23CTRL_IPKVAL_Load10mA, /**< Load 10mA */
 } EMU_DcdcBoostEM23PeakCurrent_TypeDef;
 #endif /* EMU_SERIES2_DCDC_BOOST_PRESENT) */
 
@@ -883,7 +882,7 @@ typedef struct {
     true,                                 /**< disable DCDC boost mode with BOOST_EN=0 */ \
     emuDcdcBoostDriveSpeed_Default,       /**< Default efficiency in EM0/1. */            \
     emuDcdcBoostDriveSpeed_Default,       /**< Default efficiency in EM2/3. */            \
-    emuDcdcBoostEM01PeakCurrent_Load72mA, /**< Default peak current in EM0/1. */          \
+    emuDcdcBoostEM01PeakCurrent_Load25mA, /**< Default peak current in EM0/1. */          \
     emuDcdcBoostEM23PeakCurrent_Load10mA  /**< Default peak current in EM2/3. */          \
   }
 #endif /* EMU_SERIES2_DCDC_BOOST_PRESENT */
@@ -1197,11 +1196,11 @@ void EMU_BoostExternalShutdownEnable(bool enable);
 #if defined(EMU_SERIES1_DCDC_BUCK_PRESENT) \
   || defined(EMU_SERIES2_DCDC_BUCK_PRESENT)
 bool EMU_DCDCInit(const EMU_DCDCInit_TypeDef *dcdcInit);
+bool EMU_DCDCPowerOff(void);
 #endif
 
 #if defined(EMU_SERIES2_DCDC_BUCK_PRESENT)
 void EMU_EM01PeakCurrentSet(const EMU_DcdcPeakCurrent_TypeDef peakCurrentEM01);
-bool EMU_DCDCPowerOff(void);
 #if defined(_DCDC_PFMXCTRL_IPKVAL_MASK)
 void EMU_DCDCSetPFMXModePeakCurrent(uint32_t value);
 #endif

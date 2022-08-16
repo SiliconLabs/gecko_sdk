@@ -23,7 +23,7 @@ extern "C" {
  * is also defined in an external header, so prevent its multiple
  * definition.
  */
-#ifndef PSA_SUCCESS
+#if !defined(PSA_SUCCESS) && !defined(PSA_CRYPTO_TYPES_H) 
 typedef int32_t psa_status_t;
 #endif
 

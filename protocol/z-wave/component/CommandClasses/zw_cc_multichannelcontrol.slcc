@@ -16,5 +16,3 @@ include:
     - path: multichannel.h
 provides:
   - name: zw_cc_multichannelcontrol
-documentation:
-  url: "https://sdomembers.z-wavealliance.org/document/dl/652"

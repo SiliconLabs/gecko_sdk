@@ -39,10 +39,6 @@ requires:
   - name: rail_util_pa
   - name: psa_its
     condition: [device_series_2]
-  - name: psa_crypto
-    condition: [device_series_2]
-  - name: psa_driver
-    condition: [device_series_2]
   - name: psa_crypto_ecdh
     condition: [device_series_2]
   - name: psa_crypto_cmac
@@ -51,8 +47,6 @@ requires:
     condition: [device_series_2]
   - name: psa_crypto_ecc_curve25519
     condition: [device_series_2]
-  - name: psa_builtin_key_support_se
-    condition: [device_series_2, device_has_semailbox]
 recommends:
   - id: zw_production
   - id: zw_release
@@ -111,6 +105,9 @@ include:
     file_list:
       - path: "zaf_event_helper.h"
       - path: "zaf_job_helper.h"
+  - path: "protocol/z-wave/platform/SiliconLabs/PAL/inc"
+    file_list:
+      - path: "system_startup.h"
   - path: "protocol/z-wave/platform/SiliconLabs/PAL/inc/application_properties"
     file_list:
       - path: "application_properties_config.h"
@@ -172,9 +169,6 @@ define:
   - name: SL_SE_ASSUME_FW_AT_LEAST_2_1_7
     value: 1
     condition: [device_sdid_210]
-# BUILDING_WITH_UC is used to ensure that non-UC builds still work as intended in the transition phase.
-  - name: BUILDING_WITH_UC
-    value: 1
   # TODO: Integration hooks needed in FreeRTOS wrapper to register functions for pre/post sleep hooks
   - name: configPRE_SLEEP_PROCESSING(ms)
     value: enterPowerDown(ms)

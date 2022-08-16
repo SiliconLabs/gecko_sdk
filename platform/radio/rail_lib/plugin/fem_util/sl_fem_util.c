@@ -72,7 +72,7 @@
       #define SL_FEM_UTIL_TX_LOC SL_FEM_UTIL_RX_LOC
     #endif
   #elif !defined(SL_FEM_UTIL_TX_CHANNEL)
-    #error "BSP_FEM_TX_CHANNEL must be defined."
+    #error "SL_FEM_UTIL_TX_CHANNEL must be defined."
   #endif
 #endif // SL_FEM_UTIL_TX_ENABLE == 1
 

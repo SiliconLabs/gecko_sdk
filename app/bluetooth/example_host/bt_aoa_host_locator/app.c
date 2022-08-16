@@ -81,13 +81,14 @@ static void parse_config(const char *config);
 static void on_message(mqtt_handle_t *handle,
                        const char *topic,
                        const char *payload);
+static void on_correction(aoa_id_t loc_id,
+                          aoa_id_t tag_id,
+                          char *correction);
 
 static void subscribe_correction(void);
 static void subscribe_config(void);
 
-static sl_status_t check_config_topic(const char* topic_literal,
-                                      const char* topic,
-                                      size_t topic_size);
+static sl_status_t check_config_topic(const char* topic);
 
 // report mode config
 static aoa_report_mode_t report_mode;
@@ -102,13 +103,6 @@ static char *mqtt_host = NULL;
 // Config file path
 static char *config_file = NULL;
 
-// CTE Mode strings
-static const char *cte_mode_string[] = {
-  "Silabs",
-  "connection",
-  "connectionless"
-};
-
 /**************************************************************************//**
  * Application Init.
  *****************************************************************************/
@@ -117,6 +111,7 @@ void app_init(int argc, char *argv[])
   sl_status_t sc;
   int opt;
   char *port_str;
+  char *cte_mode_string;
 
   report_mode = DEFAULT_REPORT_MODE;
 
@@ -176,8 +171,10 @@ void app_init(int argc, char *argv[])
   app_assert_status(sc);
 
   app_log_info("NCP host initialised." APP_LOG_NL);
-  app_log_info("Selected CTE mode: %s" APP_LOG_NL,
-               cte_mode_string[aoa_cte_get_mode()]);
+  sc = aoa_parse_cte_mode_to_string(aoa_cte_get_mode(), &cte_mode_string);
+  if (sc == SL_STATUS_OK) {
+    app_log_info("Selected CTE mode: %s" APP_LOG_NL, cte_mode_string);
+  }
   app_log_info("Press Crtl+C to quit" APP_LOG_NL APP_LOG_NL);
   ncp_reset();
 }
@@ -298,6 +295,9 @@ static void subscribe_config(void)
 
   sc = mqtt_subscribe(&mqtt_handle, topic);
   app_assert_status(sc);
+
+  sc = mqtt_subscribe(&mqtt_handle, AOA_TOPIC_CONFIG_BROADCAST);
+  app_assert_status(sc);
 }
 
 /**************************************************************************//**
@@ -320,19 +320,21 @@ static void subscribe_correction(void)
 /**************************************************************************//**
  * Check the received topic
  *****************************************************************************/
-static sl_status_t check_config_topic(const char* topic_literal,
-                                      const char* topic,
-                                      size_t topic_size)
+static sl_status_t check_config_topic(const char* topic)
 {
-  char topic_buffer[sizeof(topic_literal) + sizeof(aoa_id_t)];
+  aoa_id_t loc_id;
 
-  snprintf(topic_buffer, sizeof(topic_buffer), topic_literal, locator_id);
-
-  if (strncmp(topic_buffer, topic, topic_size) == 0) {
+  if (strcmp(topic, AOA_TOPIC_CONFIG_BROADCAST) == 0) {
+    // Broadcast config
     return SL_STATUS_OK;
-  } else {
-    return SL_STATUS_NOT_FOUND;
   }
+  if (sscanf(topic, AOA_TOPIC_CONFIG_SCAN, loc_id) == 1) {
+    if (aoa_id_compare(loc_id, locator_id) == 0) {
+      // Unicast config
+      return SL_STATUS_OK;
+    }
+  }
+  return SL_STATUS_NOT_FOUND;
 }
 
 /**************************************************************************//**
@@ -342,8 +344,30 @@ static void on_message(mqtt_handle_t *handle,
                        const char *topic,
                        const char *payload)
 {
-  int result;
+  (void)handle;
   aoa_id_t loc_id, tag_id;
+
+  if (check_config_topic(topic) == SL_STATUS_OK) {
+    parse_config(payload);
+    ncp_reset();
+    return;
+  }
+
+  if (sscanf(topic, AOA_TOPIC_CORRECTION_SCAN, loc_id, tag_id) == 2) {
+    on_correction(loc_id, tag_id, (char *)payload);
+    return;
+  }
+
+  app_log_error("Failed to parse topic: %s." APP_LOG_NL, topic);
+}
+
+/**************************************************************************//**
+ * Correction message arrived callback.
+ *****************************************************************************/
+static void on_correction(aoa_id_t loc_id,
+                          aoa_id_t tag_id,
+                          char *correction_str)
+{
   aoa_angle_t correction;
   bd_addr tag_addr;
   uint8_t tag_addr_type;
@@ -355,51 +379,39 @@ static void on_message(mqtt_handle_t *handle,
   sc = aoa_angle_get_config(locator_id, &angle_config);
   app_assert_status(sc);
 
-  (void)handle;
+  if (report_mode != ANGLE_REPORT) {
+    // Ignore correction messages if not in angle report mode.
+    return;
+  }
+  if (aoa_id_compare(loc_id, locator_id) != 0) {
+    // Accidentally got a wrong message.
+    return;
+  }
+  // Find asset tag in the database
+  sc = aoa_id_to_address(tag_id, tag_addr.addr, &tag_addr_type);
+  if (SL_STATUS_OK == sc) {
+    sc = aoa_db_get_tag_by_address(&tag_addr, &tag);
+  }
+  if (SL_STATUS_OK == sc) {
+    // Parse payload
+    sc = aoa_deserialize_angle(correction_str, &correction);
+    app_assert_status(sc);
 
-  if (check_config_topic(AOA_TOPIC_CONFIG_PRINT,
-                         topic,
-                         sizeof(AOA_TOPIC_CONFIG_PRINT)) == SL_STATUS_OK) {
-    parse_config(payload);
-
-    ncp_reset();
-  } else if (report_mode == ANGLE_REPORT) {
-    // Parse topic
-    result = sscanf(topic, AOA_TOPIC_CORRECTION_SCAN, loc_id, tag_id);
-    app_assert(result == 2,
-               "Failed to parse correction topic: %d." APP_LOG_NL,
-               result);
-
-    if (aoa_id_compare(loc_id, locator_id) != 0) {
-      // Accidentally got a wrong message
-      return;
-    }
-    // Find asset tag in the database
-    sc = aoa_id_to_address(tag_id, tag_addr.addr, &tag_addr_type);
-    if (SL_STATUS_OK == sc) {
-      sc = aoa_db_get_tag_by_address(&tag_addr, &tag);
-    }
-    if (SL_STATUS_OK == sc) {
-      // Parse payload
-      sc = aoa_deserialize_angle((char *)payload, &correction);
-      app_assert_status(sc);
-
-      if (aoa_sequence_compare(tag->sequence, correction.sequence)
-          <= angle_config->angle_correction_delay) {
-        app_log("Apply correction #%d for asset tag '%s'" APP_LOG_NL,
-                correction.sequence,
-                tag_id);
-        ec = aoa_set_correction((aoa_state_t *)tag->user_data,
-                                &correction,
-                                locator_id);
-        app_assert(ec == SL_RTL_ERROR_SUCCESS,
-                   "[E: %d] Failed to set correction values" APP_LOG_NL,
-                   ec);
-      } else {
-        app_log("Omit correction #%d for asset tag '%s'" APP_LOG_NL,
-                correction.sequence,
-                tag_id);
-      }
+    if (aoa_sequence_compare(tag->sequence, correction.sequence)
+        <= angle_config->angle_correction_delay) {
+      app_log("Apply correction #%d for asset tag '%s'" APP_LOG_NL,
+              correction.sequence,
+              tag_id);
+      ec = aoa_set_correction((aoa_state_t *)tag->user_data,
+                              &correction,
+                              locator_id);
+      app_assert(ec == SL_RTL_ERROR_SUCCESS,
+                 "[E: %d] Failed to set correction values" APP_LOG_NL,
+                 ec);
+    } else {
+      app_log("Omit correction #%d for asset tag '%s'" APP_LOG_NL,
+              correction.sequence,
+              tag_id);
     }
   }
 }

@@ -323,8 +323,8 @@
     override:
       component: simple_rgb_pwm_led
       file_id: simple_rgb_pwm_led_config
-      instance: inst0
-    path: brd4207a_brd4001a/sl_simple_rgb_pwm_led_inst0_config.h
+      instance: rgb_led0
+    path: brd4207a_brd4001a/sl_simple_rgb_pwm_led_rgb_led0_config.h
   - condition:
     - brd4001a
     override:
@@ -665,8 +665,8 @@
     override:
       component: simple_rgb_pwm_led
       file_id: simple_rgb_pwm_led_config
-      instance: inst0
-    path: brd4207a_brd4002a/sl_simple_rgb_pwm_led_inst0_config.h
+      instance: rgb_led0
+    path: brd4207a_brd4002a/sl_simple_rgb_pwm_led_rgb_led0_config.h
   - condition:
     - brd4002a
     override:

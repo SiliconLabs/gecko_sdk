@@ -8,6 +8,7 @@ quality: production
 
 component:
   - id: brd4001a
+  - id: ot_reference_device
   - id: ot_stack_mtd
   - id: ot_cli_source
   - id: uartdrv_usart
@@ -48,20 +49,6 @@ configuration:
     value: 1
   - name: SL_MBEDTLS_KEY_EXCHANGE_PSK_ENABLED
     value: 1
-  - name: OPENTHREAD_CONFIG_COAP_API_ENABLE
-    value: 1
-  - name: OPENTHREAD_CONFIG_COAP_OBSERVE_API_ENABLE
-    value: 1
-  - name: OPENTHREAD_CONFIG_COAP_SECURE_API_ENABLE
-    value: 1
-  - name: OPENTHREAD_CONFIG_DHCP6_CLIENT_ENABLE
-    value: 1
-  - name: OPENTHREAD_CONFIG_JOINER_ENABLE
-    value: 1
-  - name: OPENTHREAD_CONFIG_REFERENCE_DEVICE_ENABLE
-    value: 1
-  - name: OPENTHREAD_CONFIG_LOG_OUTPUT
-    value: OPENTHREAD_CONFIG_LOG_OUTPUT_APP
   - name: SL_STACK_SIZE
     value: 4608
 

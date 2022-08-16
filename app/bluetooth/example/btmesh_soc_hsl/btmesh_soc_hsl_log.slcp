@@ -140,7 +140,7 @@ configuration:
     condition:
       - psa_crypto
   - name: SL_STACK_SIZE
-    value: "0x1300"
+    value: "0x1500"
 
 template_contribution:
   - name: cli_command

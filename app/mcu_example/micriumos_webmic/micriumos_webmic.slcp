@@ -130,4 +130,3 @@ ui_hints:
   highlight: readme.md
 tag:
   - hardware:component:eth
-  - prebuilt_demo

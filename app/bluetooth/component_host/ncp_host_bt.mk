@@ -16,6 +16,21 @@ endif
 
 SECURITY ?= $(SECURITY_DEFAULT)
 
+# CPC communication is disabled per default.
+# It can be enabled by assigning a non-zero value to the CPC variable
+# e.g. via command line like 'make CPC=1'.
+# Be aware that CPC can only be enabled on Linux OS
+
+ifneq (, $(filter $(MAKECMDGOALS), export))
+# Collect CPC resources when exporting.
+CPC_DEFAULT = 1
+else
+CPC_DEFAULT = 0
+endif
+
+CPC ?= $(CPC_DEFAULT)
+CPC_DIR ?=
+
 override INCLUDEPATHS += \
 $(SDK_DIR)/app/bluetooth/common_host/app_sleep \
 $(SDK_DIR)/app/bluetooth/common_host/host_comm \
@@ -66,6 +81,33 @@ ifneq ($(SECURITY), 0)
   ifeq ($(UNAME), darwin)
     override LDFLAGS += -L/usr/local/opt/openssl/lib
   endif
+endif
+
+# CPC related settings
+ifneq ($(CPC), 0)
+  ifeq (, $(filter $(MAKECMDGOALS), export))
+    ifeq ($(OS), win)
+    $(error CPC is not supported on Windows OS!)
+    endif
+    ifeq ($(UNAME), darwin)
+    $(error CPC is not supported on MacOS!)
+    endif
+    ifeq ($(CPC_DIR), )
+      $(error Please set CPC library dir: CPC_DIR! e.g. /home/user/cpc)
+    endif
+  endif
+  override INCLUDEPATHS += $(SDK_DIR)/app/bluetooth/common_host/cpc
+  # CPCd is outside of GSDK. Therefore, add it directly as a compiler flag
+  # instead of adding it to INCLUDEPATHS.
+  override CFLAGS += -I"$(CPC_DIR)/daemon/lib"
+
+  override C_SRC += $(SDK_DIR)/app/bluetooth/common_host/cpc/cpc.c
+
+  LIBS += $(CPC_DIR)/daemon/build/libcpc.so
+
+  override CFLAGS += -DCPC
+
+  override LDFLAGS += -lpthread -lutil
 endif
 
 ifeq ($(OS), win)

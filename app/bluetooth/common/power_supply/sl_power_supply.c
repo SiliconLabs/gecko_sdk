@@ -72,9 +72,9 @@ typedef struct {
 // -----------------------------------------------------------------------------
 // Private variables
 
-static float supply_voltage;  ///< Supply voltage
-static float supply_ir;       ///< Internal resistance of the supply
-static uint8_t supply_type;   ///< Type of the connected supply
+static float supply_voltage = 0.0f;                         ///< Supply voltage
+static float supply_ir = 0.0f;                              ///< Internal resistance of the supply
+static uint8_t supply_type = SL_POWER_SUPPLY_TYPE_UNKNOWN;  ///< Type of the connected supply
 
 static batt_model_entry_t batt_model_cr2032[] =
 { { 3.0, 100 }, { 2.9, 80 }, { 2.8, 60 }, { 2.7, 40 }, { 2.6, 30 },
@@ -306,23 +306,27 @@ void sl_power_supply_probe(void)
              "[E: %#04x] Si7021 sensor not available\n",
              sc);
   sc = sl_si70xx_init(rht_sensor, SI7021_ADDR);
-  app_assert_status(sc);
 
-  // Try to measure using 9.18 mA first.
-  v = sl_power_supply_measure_voltage(16);
-  r = measure_supply_ir(0x00);
-  if ( r > 5.0 ) {
-    type = SL_POWER_SUPPLY_TYPE_CR2032;
-  } else if (r > 0.5) {
-    type = SL_POWER_SUPPLY_TYPE_AAA;
+  if (sc == SL_STATUS_OK) {
+    // Try to measure using 9.18 mA first.
+    v = sl_power_supply_measure_voltage(16);
+    r = measure_supply_ir(0x00);
+    if ( r > 5.0 ) {
+      type = SL_POWER_SUPPLY_TYPE_CR2032;
+    } else if (r > 0.5) {
+      type = SL_POWER_SUPPLY_TYPE_AAA;
+    } else {
+      type = SL_POWER_SUPPLY_TYPE_USB;
+    }
+
+    // Store measurement results in global variables.
+    supply_voltage = v;
+    supply_ir = r;
+    supply_type = type;
   } else {
-    type = SL_POWER_SUPPLY_TYPE_USB;
+    app_log_warning("Si7021 sensor initialization failed. "
+                    "Unable to detect power supply type." APP_LOG_NL);
   }
-
-  // Store measurement results in global variables.
-  supply_voltage = v;
-  supply_ir = r;
-  supply_type = type;
 }
 
 /***************************************************************************//**
@@ -348,15 +352,7 @@ uint8_t sl_power_supply_get_type(void)
  ******************************************************************************/
 bool sl_power_supply_is_low_power(void)
 {
-  bool lp;
-
-  if ( (supply_type != SL_POWER_SUPPLY_TYPE_CR2032) && (supply_type != SL_POWER_SUPPLY_TYPE_UNKNOWN) ) {
-    lp = false;
-  } else {
-    lp = true;
-  }
-
-  return lp;
+  return supply_type == SL_POWER_SUPPLY_TYPE_CR2032;
 }
 
 /***************************************************************************//**

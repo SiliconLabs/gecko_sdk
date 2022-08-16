@@ -16,5 +16,3 @@ include:
      - path: ota_util.h
 provides:
   - name: zw_cc_firmwareupdate
-documentation:
-  url: "https://sdomembers.z-wavealliance.org/document/dl/643"

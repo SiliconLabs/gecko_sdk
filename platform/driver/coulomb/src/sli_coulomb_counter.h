@@ -34,6 +34,10 @@
 #include "sl_coulomb_counter.h"
 #include "sl_slist.h"
 
+#ifdef __cplusplus
+extern "C" {
+#endif
+
 /// @cond DO_NOT_INCLUDE_WITH_DOXYGEN
 #define EMU_VSCALE0         0
 #define EMU_VSCALE1         1
@@ -304,5 +308,9 @@ float sli_coulomb_counter_hal_cal_get_load_current(int8_t ccl_level);
  *   10MHz oscillator frequency, in Hz.
  ******************************************************************************/
 float sli_coulomb_counter_hal_get_osc_frequency(void);
+
+#ifdef __cplusplus
+}
+#endif
 
 #endif /* SLI_COULOMB_COUNTER_DRIVER_H */

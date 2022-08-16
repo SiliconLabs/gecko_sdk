@@ -263,7 +263,7 @@ extern "C" {
  ******************************************************************************/
 __STATIC_INLINE uint32_t SL_CTZ(uint32_t value)
 {
-#if (__CORTEX_M >= 3)
+#if defined(__CORTEX_M) && (__CORTEX_M >= 3U)
   return __CLZ(__RBIT(value));
 
 #else
@@ -297,13 +297,13 @@ __STATIC_INLINE uint32_t SL_RBIT(uint32_t value)
 {
   uint32_t result;
 
-#if (__CORTEX_M >= 0x03U)
+#if defined(__CORTEX_M) && (__CORTEX_M >= 0x03U)
   result = __RBIT(value);
 #else
   int32_t s = 4 * 8 - 1;
 
   result = value;
-  for (value >>= 1U; value; value >>= 1U) {
+  for (value >>= 1U; value != 0U; value >>= 1U) {
     result <<= 1U;
     result |= value & 1U;
     s--;
@@ -323,9 +323,9 @@ __STATIC_INLINE uint32_t SL_RBIT(uint32_t value)
  * @return
  *   A 16-bit reversed value.
  ******************************************************************************/
-__STATIC_INLINE uint32_t SL_RBIT16(uint32_t value)
+__STATIC_INLINE uint16_t SL_RBIT16(uint16_t value)
 {
-  return SL_RBIT(value) >> 16;
+  return (uint16_t)(SL_RBIT(value) >> 16);
 }
 
 /***************************************************************************//**

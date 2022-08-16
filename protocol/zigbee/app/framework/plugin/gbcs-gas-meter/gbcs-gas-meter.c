@@ -24,6 +24,7 @@
 
 #ifdef UC_BUILD
 #include "gbcs-gas-meter-config.h"
+#include "zap-cluster-command-parser.h"
 #endif // UC_BUILD
 
 // Plugin configuration options
@@ -691,6 +692,7 @@ void emberAfPluginSimpleMeteringServerProcessNotificationFlagsCallback(EmberAfAt
   }
 }
 
+#ifndef UC_BUILD
 /** @brief Request Mirror Response
  *
  * @param endpointId   Ver.: always
@@ -742,7 +744,7 @@ bool emberAfSimpleMeteringClusterMirrorRemovedCallback(uint16_t endpointId)
   emberAfSendImmediateDefaultResponse(EMBER_ZCL_STATUS_SUCCESS);
   return true;
 }
-
+#endif  // UC_BUILD
 /** @brief Registration
  *
  * This callback is called when the device joins a network and the process of
@@ -1148,3 +1150,96 @@ static void serviceDiscoveryCallback(const EmberAfServiceDiscoveryResult* result
     emberAfAppPrintln("service discovery complete.");
   }
 }
+
+#ifdef UC_BUILD
+
+bool emberAfSimpleMeteringClusterRequestMirrorResponseCallback(EmberAfClusterCommand *cmd)
+{
+  sl_zcl_simple_metering_cluster_request_mirror_response_command_t cmd_data;
+
+  if (zcl_decode_simple_metering_cluster_request_mirror_response_command(cmd, &cmd_data)
+      != EMBER_ZCL_STATUS_SUCCESS) {
+    return false;
+  }
+
+  uint16_t endpointId = cmd_data.endpointId;
+
+  if (endpointId == 0xffff) {
+    emberAfAppPrintln("Mirror add FAILED");
+  } else {
+    if (state != MIRROR_READY) {
+      mirrorEndpoint = endpointId;
+      mirrorAddress = emberAfCurrentCommand()->source;
+      emberAfAppPrintln("Mirror ADDED on 0x%2x, 0x%x", mirrorAddress, endpointId);
+
+      uint32_t issuerEventId = emberAfGetCurrentTime();
+      emberAfFillCommandSimpleMeteringClusterConfigureMirror(issuerEventId,
+                                                             MIRROR_UPDATE_INTERVAL_SECONDS,
+                                                             true,
+                                                             EMBER_ZCL_NOTIFICATION_SCHEME_PREDEFINED_NOTIFICATION_SCHEME_B);
+      emberAfSetCommandEndpoints(GSME_ENDPOINT, mirrorEndpoint);
+      emberAfSendCommandUnicast(EMBER_OUTGOING_DIRECT, mirrorAddress);
+
+      setSleepyMeterState(MIRROR_READY);
+    } else {
+      emberAfAppPrintln("Mirror add for 0x%2x, 0x%x ignored, already mirrored on 0x%2x 0x%x.",
+                        emberAfCurrentCommand()->source, endpointId,
+                        mirrorAddress, mirrorEndpoint);
+    }
+  }
+  emberAfSendImmediateDefaultResponse(EMBER_ZCL_STATUS_SUCCESS);
+  return true;
+}
+
+bool emberAfSimpleMeteringClusterMirrorRemovedCallback(EmberAfClusterCommand *cmd)
+{
+  sl_zcl_simple_metering_cluster_mirror_removed_command_t cmd_data;
+
+  if (zcl_decode_simple_metering_cluster_mirror_removed_command(cmd, &cmd_data)
+      != EMBER_ZCL_STATUS_SUCCESS) {
+    return false;
+  }
+
+  uint16_t endpointId = cmd_data.endpointId;
+
+  // * This callback simply prints out the endpoint from which
+  // * the mirror was removed, and sets our state back to looking for
+  // * a new mirror
+  if (endpointId == 0xffff) {
+    emberAfAppPrintln("Mirror remove FAILED");
+  } else {
+    emberAfAppPrintln("Mirror REMOVED from %x", endpointId);
+    setSleepyMeterState(INITIAL_STATE);
+  }
+  emberAfSendImmediateDefaultResponse(EMBER_ZCL_STATUS_SUCCESS);
+  return true;
+}
+
+uint32_t emAfGbcsGasMeterSimpleMeteringClusterServerCommandParse(sl_service_opcode_t opcode,
+                                                                 sl_service_function_context_t *context)
+{
+  (void)opcode;
+
+  EmberAfClusterCommand *cmd = (EmberAfClusterCommand *)context->data;
+  bool wasHandled = false;
+
+  if (!cmd->mfgSpecific) {
+    switch (cmd->commandId) {
+      case ZCL_REQUEST_MIRROR_RESPONSE_COMMAND_ID:
+      {
+        wasHandled = emberAfSimpleMeteringClusterRequestMirrorResponseCallback(cmd);
+        break;
+      }
+      case ZCL_MIRROR_REMOVED_COMMAND_ID:
+      {
+        wasHandled = emberAfSimpleMeteringClusterMirrorRemovedCallback(cmd);
+        break;
+      }
+    }
+  }
+
+  return ((wasHandled)
+          ? EMBER_ZCL_STATUS_SUCCESS
+          : EMBER_ZCL_STATUS_UNSUP_COMMAND);
+}
+#endif  //UC_BUILD

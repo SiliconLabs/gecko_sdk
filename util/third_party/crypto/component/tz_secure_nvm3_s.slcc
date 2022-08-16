@@ -13,11 +13,5 @@ provides:
 
 requires:
   - name: trustzone_secure
-  - name: nvm3_lib
   - name: nvm3_default
-  - name: nvm_system
 
-define:
-  # Not used, however, needed in order to avoid IAR linker error.
-  - name: NVM3_BASE
-    value: 0

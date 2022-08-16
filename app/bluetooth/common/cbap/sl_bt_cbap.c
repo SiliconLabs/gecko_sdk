@@ -52,14 +52,19 @@
 // Defines
 
 #if defined(SL_CATALOG_APP_LOG_PRESENT) && SL_BT_CBAP_LOG
-#define app_log_cbap_info(...)            app_log_info(__VA_ARGS__)
-#define app_log_cbap_debug(...)           app_log_debug(__VA_ARGS__)
-#define app_log_cbap_hexdump(p_data, len) app_log_hexdump_debug(p_data, len)
+#define sl_bt_cbap_log_debug(...)           app_log_debug(__VA_ARGS__)
+#define sl_bt_cbap_log_info(...)            app_log_info(__VA_ARGS__)
+#define sl_bt_cbap_log_error(...)           app_log_error(__VA_ARGS__)
+#define sl_bt_cbap_log_hexdump(p_data, len) app_log_hexdump_debug(p_data, len)
 #else
-#define app_log_cbap_info(...)
-#define app_log_cbap_debug(...)
-#define app_log_cbap_hexdump(p_data, len)
+#define sl_bt_cbap_log_debug(...)
+#define sl_bt_cbap_log_info(...)
+#define sl_bt_cbap_log_error(...)
+#define sl_bt_cbap_log_hexdump(p_data, len)
 #endif
+
+#define IS_PERIPHERAL_IN_PROGRESS (cbap_peripheral_state > 0 && cbap_peripheral_state < SL_BT_CBAP_PERIPHERAL_STATE_NUM - 1)
+#define IS_CENTRAL_IN_PROGRESS    (cbap_central_state > 0 && cbap_central_state < SL_BT_CBAP_CENTRAL_STATE_NUM - 1)
 
 #define UUID_16_LEN                   2
 #define UUID_128_LEN                  16
@@ -107,8 +112,8 @@ typedef enum {
 // Device role
 static sl_bt_cbap_role_t role;
 
-// Connection handle
-static uint8_t connection;
+// Handle of the active connection.
+static uint8_t connection = SL_BT_INVALID_CONNECTION_HANDLE;
 
 // Root certificate in PEM format.
 const char *root_certificate_pem = SL_BT_CBAP_ROOT_CERT;
@@ -184,6 +189,9 @@ static void on_event_peripheral(sl_bt_msg_t *evt);
 // Peripheral device bluetooth event handler.
 static void on_event_central(sl_bt_msg_t *evt);
 
+// Reset CBAP process states, flags and timers.
+static void cbap_reset(void);
+
 // Search for a Service UUID in scan report.
 static bool find_service_in_advertisement(const uint8_t *scan_data,
                                           uint8_t scan_data_len,
@@ -206,31 +214,22 @@ void sl_bt_cbap_init(void)
                            device_certificate_der,
                            &device_certificate_der_len);
   app_assert_status(sc);
-  app_log_cbap_info("Device certificate verified." APP_LOG_NL);
+  sl_bt_cbap_log_info("Device certificate verified." APP_LOG_NL);
+
+  cbap_reset();
 }
 
 // Start CBAP procedure.
-sl_status_t sl_bt_cbap_start(sl_bt_cbap_role_t cbap_role, uint8_t connection_handle)
+sl_status_t sl_bt_cbap_start(sl_bt_cbap_role_t cbap_role,
+                             uint8_t connection_handle)
 {
   sl_status_t sc;
-  if (((cbap_central_state != 0)
-       && (cbap_central_state != SL_BT_CBAP_CENTRAL_STATE_NUM - 1))
-      || ((cbap_peripheral_state != 0)
-          && (cbap_peripheral_state != SL_BT_CBAP_PERIPHERAL_STATE_NUM - 1))) {
+  if (IS_PERIPHERAL_IN_PROGRESS || IS_CENTRAL_IN_PROGRESS) {
     return SL_STATUS_IN_PROGRESS;
   }
 
   role = cbap_role;
   connection = connection_handle;
-
-  // Reset variables
-  remote_cert_arrived = false;
-  device_cert_sent = false;
-  remote_certificate_der_len = 0;
-  dev_cert_sending_progression = 0;
-  cbap_central_state = SL_BT_CBAP_CENTRAL_SCANNING;
-  char_state = (characteristics_t)0;
-  cbap_peripheral_state = SL_BT_CBAP_PERIPHERAL_IDLE;
 
   if (role == SL_BT_CBAP_ROLE_CENTRAL) {
     // Discover CBAP service on the peripheral device
@@ -296,21 +295,21 @@ static void on_event_peripheral(sl_bt_msg_t *evt)
         break;
       }
 
-      app_log_cbap_debug("Security mode: %i" APP_LOG_NL,
-                         evt->data.evt_connection_parameters.security_mode);
+      sl_bt_cbap_log_debug("Security mode: %i" APP_LOG_NL,
+                           evt->data.evt_connection_parameters.security_mode);
       if (evt->data.evt_connection_parameters.security_mode > sl_bt_connection_mode1_level1
           && cbap_peripheral_state != SL_BT_CBAP_PERIPHERAL_CENTRAL_OOB_OK) {
-        app_log_cbap_info("The central device increased the security level with " \
-                          "no CBAP. Disconnecting." APP_LOG_NL);
-        sc = sl_bt_connection_close(connection);
-        app_assert_status(sc);
+        sl_bt_cbap_log_error("The central device increased the security level with " \
+                             "no CBAP. Disconnecting." APP_LOG_NL);
+        sl_bt_on_cbap_error();
+        cbap_reset();
         break;
       }
 
       if (evt->data.evt_connection_parameters.security_mode == sl_bt_connection_mode1_level4) {
         cbap_peripheral_state = SL_BT_CBAP_PERIPHERAL_DONE;
         sl_bt_cbap_peripheral_on_event(cbap_peripheral_state);
-        set_timeout(false); // Last state. Stop timer.
+        cbap_reset();
       }
       break;
 
@@ -332,7 +331,7 @@ static void on_event_peripheral(sl_bt_msg_t *evt)
           sc = SL_STATUS_OK;
           if (evt->data.evt_gatt_server_user_write_request.value.data[0] == 0) {
             // Last packet of the remote cert arrived
-            app_log_cbap_info("Getting certificate from central." APP_LOG_NL);
+            sl_bt_cbap_log_info("Getting certificate from central." APP_LOG_NL);
             remote_cert_arrived = true;
             sc = sl_bt_cbap_lib_process_remote_cert(remote_certificate_der,
                                                     remote_certificate_der_len);
@@ -343,10 +342,10 @@ static void on_event_peripheral(sl_bt_msg_t *evt)
               sl_bt_cbap_peripheral_on_event(cbap_peripheral_state);
               set_timeout(true);
             } else {
-              app_log_cbap_info("Remote certificate verification failed. " \
-                                "Disconnecting." APP_LOG_NL);
-              sc = sl_bt_connection_close(connection);
-              app_assert_status(sc);
+              sl_bt_cbap_log_error("Remote certificate verification failed. " \
+                                   "Disconnecting." APP_LOG_NL);
+              sl_bt_on_cbap_error();
+              cbap_reset();
               break;
             }
           }
@@ -363,7 +362,7 @@ static void on_event_peripheral(sl_bt_msg_t *evt)
       }
       // Receiving OOB data from central device
       else if (evt->data.evt_gatt_server_user_write_request.characteristic == gattdb_central_oob ) {
-        app_log_cbap_info("Getting OOB data from central." APP_LOG_NL);
+        sl_bt_cbap_log_info("Getting OOB data from central." APP_LOG_NL);
         aes_key_128 remote_random;
         aes_key_128 remote_confirm;
         uint8_t remote_oob_signature[OOB_SIGNATURE_LEN];
@@ -382,20 +381,23 @@ static void on_event_peripheral(sl_bt_msg_t *evt)
                                                         SL_STATUS_OK);
         app_assert_status(sc);
 
-        app_log_cbap_debug("Remote OOB data:" APP_LOG_NL);
-        app_log_cbap_hexdump(&remote_random, sizeof(aes_key_128));
-        app_log_cbap_debug(APP_LOG_NL);
-        app_log_cbap_hexdump(&remote_confirm, sizeof(aes_key_128));
-        app_log_cbap_debug(APP_LOG_NL);
-        app_log_cbap_debug("Remote OOB signature:" APP_LOG_NL);
-        app_log_cbap_hexdump(&remote_oob_signature, OOB_SIGNATURE_LEN);
-        app_log_cbap_debug(APP_LOG_NL);
+        sl_bt_cbap_log_debug("Remote OOB data:" APP_LOG_NL);
+        sl_bt_cbap_log_hexdump(&remote_random, sizeof(aes_key_128));
+        sl_bt_cbap_log_debug(APP_LOG_NL);
+        sl_bt_cbap_log_hexdump(&remote_confirm, sizeof(aes_key_128));
+        sl_bt_cbap_log_debug(APP_LOG_NL);
+        sl_bt_cbap_log_debug("Remote OOB signature:" APP_LOG_NL);
+        sl_bt_cbap_log_hexdump(&remote_oob_signature, OOB_SIGNATURE_LEN);
+        sl_bt_cbap_log_debug(APP_LOG_NL);
 
         sc = sl_bt_cbap_lib_verify_remote_oob_data(remote_random.data,
                                                    remote_confirm.data,
                                                    remote_oob_signature);
         app_assert_status(sc);
+        sl_bt_cbap_log_info("Remote OOB data verified." APP_LOG_NL);
         sc = sl_bt_sm_set_remote_oob(1, remote_random, remote_confirm);
+        app_assert_status(sc);
+        sc = sl_bt_cbap_destroy_key();
         app_assert_status(sc);
 
         app_assert(cbap_peripheral_state == SL_BT_CBAP_PERIPHERAL_CENTRAL_CERT_OK,
@@ -413,18 +415,17 @@ static void on_event_peripheral(sl_bt_msg_t *evt)
 
       if (gattdb_peripheral_cert == evt->data.evt_gatt_server_characteristic_status.characteristic) {
         if (sl_bt_gatt_server_client_config == (sl_bt_gatt_server_characteristic_status_flag_t)evt->data.evt_gatt_server_characteristic_status.status_flags) {
-          if (sl_bt_gatt_indication == (sl_bt_gatt_client_config_flag_t)evt->data.evt_gatt_server_characteristic_status.client_config_flags) {
-            if (device_cert_sent == false) {
-              uint8_t buff[CERT_IND_CHUNK_LEN + 1];
-              buff[0] = 1;
-              memcpy(&buff[1], device_certificate_der, CERT_IND_CHUNK_LEN);
-              sc = sl_bt_gatt_server_send_indication(connection,
-                                                     gattdb_peripheral_cert,
-                                                     CERT_IND_CHUNK_LEN + 1,
-                                                     buff);
-              app_assert_status(sc);
-              dev_cert_sending_progression += CERT_IND_CHUNK_LEN;
-            }
+          if (sl_bt_gatt_indication == (sl_bt_gatt_client_config_flag_t)evt->data.evt_gatt_server_characteristic_status.client_config_flags
+              && device_cert_sent == false) {
+            uint8_t buff[CERT_IND_CHUNK_LEN + 1];
+            buff[0] = 1;
+            memcpy(&buff[1], device_certificate_der, CERT_IND_CHUNK_LEN);
+            sc = sl_bt_gatt_server_send_indication(connection,
+                                                   gattdb_peripheral_cert,
+                                                   CERT_IND_CHUNK_LEN + 1,
+                                                   buff);
+            app_assert_status(sc);
+            dev_cert_sending_progression += CERT_IND_CHUNK_LEN;
           }
         }
         // Sending Peripheral certificate to Central device
@@ -454,38 +455,37 @@ static void on_event_peripheral(sl_bt_msg_t *evt)
       }
       // Sending Peripheral OOB data to Central device
       else if (gattdb_peripheral_oob == evt->data.evt_gatt_server_characteristic_status.characteristic ) {
-        if (sl_bt_gatt_server_client_config == (sl_bt_gatt_server_characteristic_status_flag_t)evt->data.evt_gatt_server_characteristic_status.status_flags) {
-          if (sl_bt_gatt_indication == (sl_bt_gatt_client_config_flag_t)evt->data.evt_gatt_server_characteristic_status.client_config_flags) {
-            aes_key_128 device_random;
-            aes_key_128 device_confirm;
-            // Generate device oob data and send over GATT
-            sc = sl_bt_sm_set_oob(1, &device_random, &device_confirm);
-            app_assert_status(sc);
+        if (sl_bt_gatt_server_client_config == (sl_bt_gatt_server_characteristic_status_flag_t)evt->data.evt_gatt_server_characteristic_status.status_flags
+            && sl_bt_gatt_indication == (sl_bt_gatt_client_config_flag_t)evt->data.evt_gatt_server_characteristic_status.client_config_flags) {
+          aes_key_128 device_random;
+          aes_key_128 device_confirm;
+          // Generate device oob data and send over GATT
+          sc = sl_bt_sm_set_oob(1, &device_random, &device_confirm);
+          app_assert_status(sc);
 
-            app_log_cbap_debug("Device OOB Data:" APP_LOG_NL);
-            app_log_cbap_hexdump(&device_random, OOB_RANDOM_LEN);
-            app_log_cbap_debug(APP_LOG_NL);
-            app_log_cbap_hexdump(&device_confirm, OOB_RANDOM_LEN);
-            app_log_cbap_debug(APP_LOG_NL);
+          sl_bt_cbap_log_debug("Device OOB Data:" APP_LOG_NL);
+          sl_bt_cbap_log_hexdump(&device_random, OOB_RANDOM_LEN);
+          sl_bt_cbap_log_debug(APP_LOG_NL);
+          sl_bt_cbap_log_hexdump(&device_confirm, OOB_RANDOM_LEN);
+          sl_bt_cbap_log_debug(APP_LOG_NL);
 
-            sc = sl_bt_cbap_lib_sign_device_oob_data(device_random.data,
-                                                     device_confirm.data,
-                                                     signed_device_oob_data,
-                                                     &signed_device_oob_len);
-            app_assert_status(sc);
+          sc = sl_bt_cbap_lib_sign_device_oob_data(device_random.data,
+                                                   device_confirm.data,
+                                                   signed_device_oob_data,
+                                                   &signed_device_oob_len);
+          app_assert_status(sc);
 
-            app_log_cbap_debug("Device OOB Signature:" APP_LOG_NL);
-            app_log_cbap_hexdump(&signed_device_oob_data[OOB_DATA_LEN],
+          sl_bt_cbap_log_debug("Device OOB Signature:" APP_LOG_NL);
+          sl_bt_cbap_log_hexdump(&signed_device_oob_data[OOB_DATA_LEN],
                                  OOB_SIGNATURE_LEN);
 
-            app_log_cbap_debug(APP_LOG_NL);
+          sl_bt_cbap_log_debug(APP_LOG_NL);
 
-            sc = sl_bt_gatt_server_send_indication(connection,
-                                                   gattdb_peripheral_oob,
-                                                   signed_device_oob_len,
-                                                   signed_device_oob_data);
-            app_assert_status(sc);
-          }
+          sc = sl_bt_gatt_server_send_indication(connection,
+                                                 gattdb_peripheral_oob,
+                                                 signed_device_oob_len,
+                                                 signed_device_oob_data);
+          app_assert_status(sc);
         }
       }
       break;
@@ -507,20 +507,20 @@ static void on_event_central(sl_bt_msg_t *evt)
         break;
       }
 
-      app_log_cbap_debug("Security mode: %i" APP_LOG_NL, evt->data.evt_connection_parameters.security_mode);
+      sl_bt_cbap_log_debug("Security mode: %i" APP_LOG_NL, evt->data.evt_connection_parameters.security_mode);
       if (evt->data.evt_connection_parameters.security_mode > sl_bt_connection_mode1_level1
           && cbap_central_state != SL_BT_CBAP_CENTRAL_INCREASE_SECURITY) {
-        app_log_cbap_info("Security level has been increased with no CBAP. " \
-                          "Disconnecting." APP_LOG_NL);
-        sc = sl_bt_connection_close(connection);
-        app_assert_status(sc);
+        sl_bt_cbap_log_error("Security level has been increased with no CBAP. " \
+                             "Disconnecting." APP_LOG_NL);
+        sl_bt_on_cbap_error();
+        cbap_reset();
         break;
       }
 
       if (evt->data.evt_connection_parameters.security_mode == sl_bt_connection_mode1_level4) {
         cbap_central_state = SL_BT_CBAP_CENTRAL_DONE;
         sl_bt_cbap_central_on_event(cbap_central_state);
-        set_timeout(false); // Last state. Stop timer.
+        cbap_reset();
       }
       break;
 
@@ -534,7 +534,7 @@ static void on_event_central(sl_bt_msg_t *evt)
       if (cbap_service_handle == HANDLE_NOT_INITIALIZED) {
         // Save service handle for future reference
         cbap_service_handle = evt->data.evt_gatt_service.service;
-        app_log_cbap_debug("Service handle found: %i" APP_LOG_NL, cbap_service_handle);
+        sl_bt_cbap_log_debug("Service handle found: %i" APP_LOG_NL, cbap_service_handle);
       }
       break;
 
@@ -548,8 +548,8 @@ static void on_event_central(sl_bt_msg_t *evt)
       if (cbap_characteristics[char_state].handle == HANDLE_NOT_INITIALIZED) {
         // Save characteristic handle for future reference
         cbap_characteristics[char_state].handle = evt->data.evt_gatt_characteristic.characteristic;
-        app_log_cbap_debug("Characteristic handle found: %i" APP_LOG_NL,
-                           cbap_characteristics[char_state].handle);
+        sl_bt_cbap_log_debug("Characteristic handle found: %i" APP_LOG_NL,
+                             cbap_characteristics[char_state].handle);
       }
       break;
 
@@ -563,10 +563,10 @@ static void on_event_central(sl_bt_msg_t *evt)
 
       // Check result
       if (evt->data.evt_gatt_procedure_completed.result != 0) {
-        app_log_cbap_info("GATT procedure failed [E:%i]. Disconnecting." APP_LOG_NL,
-                          evt->data.evt_gatt_procedure_completed.result);
-        sc = sl_bt_connection_close(connection);
-        app_assert_status(sc);
+        sl_bt_cbap_log_error("GATT procedure failed [E:%i]. Disconnecting." APP_LOG_NL,
+                             evt->data.evt_gatt_procedure_completed.result);
+        sl_bt_on_cbap_error();
+        cbap_reset();
         break;
       }
 
@@ -646,11 +646,11 @@ static void on_event_central(sl_bt_msg_t *evt)
             sc = sl_bt_sm_set_oob(1, &device_random, &device_confirm);
             app_assert_status(sc);
 
-            app_log_cbap_debug("Device OOB Data:" APP_LOG_NL);
-            app_log_cbap_hexdump(&device_random, OOB_RANDOM_LEN);
-            app_log_cbap_debug(APP_LOG_NL);
-            app_log_cbap_hexdump(&device_confirm, OOB_RANDOM_LEN);
-            app_log_cbap_debug(APP_LOG_NL);
+            sl_bt_cbap_log_debug("Device OOB Data:" APP_LOG_NL);
+            sl_bt_cbap_log_hexdump(&device_random, OOB_RANDOM_LEN);
+            sl_bt_cbap_log_debug(APP_LOG_NL);
+            sl_bt_cbap_log_hexdump(&device_confirm, OOB_RANDOM_LEN);
+            sl_bt_cbap_log_debug(APP_LOG_NL);
 
             sc = sl_bt_cbap_lib_sign_device_oob_data(device_random.data,
                                                      device_confirm.data,
@@ -658,10 +658,10 @@ static void on_event_central(sl_bt_msg_t *evt)
                                                      &signed_device_oob_len);
             app_assert_status(sc);
 
-            app_log_cbap_debug("Device OOB Signature:" APP_LOG_NL);
-            app_log_cbap_hexdump(&signed_device_oob_data[OOB_DATA_LEN],
-                                 OOB_SIGNATURE_LEN);
-            app_log_cbap_debug(APP_LOG_NL);
+            sl_bt_cbap_log_debug("Device OOB Signature:" APP_LOG_NL);
+            sl_bt_cbap_log_hexdump(&signed_device_oob_data[OOB_DATA_LEN],
+                                   OOB_SIGNATURE_LEN);
+            sl_bt_cbap_log_debug(APP_LOG_NL);
 
             cbap_central_state = SL_BT_CBAP_CENTRAL_GET_PERIPHERAL_OOB;
             sl_bt_cbap_central_on_event(cbap_central_state);
@@ -725,12 +725,12 @@ static void on_event_central(sl_bt_msg_t *evt)
           sc = sl_bt_cbap_lib_process_remote_cert(remote_certificate_der,
                                                   remote_certificate_der_len);
           if (sc == SL_STATUS_OK) {
-            app_log_cbap_info("Remote certificate verified." APP_LOG_NL);
+            sl_bt_cbap_log_info("Remote certificate verified." APP_LOG_NL);
           } else {
-            app_log_cbap_info("Remote certificate verification failed. " \
-                              "Disconnecting." APP_LOG_NL);
-            sc = sl_bt_connection_close(connection);
-            app_assert_status(sc);
+            sl_bt_cbap_log_error("Remote certificate verification failed. " \
+                                 "Disconnecting." APP_LOG_NL);
+            sl_bt_on_cbap_error();
+            cbap_reset();
             break;
           }
         }
@@ -757,31 +757,53 @@ static void on_event_central(sl_bt_msg_t *evt)
                                                         sl_bt_gatt_disable);
         app_assert_status(sc);
 
-        app_log_cbap_debug("Remote OOB data:" APP_LOG_NL);
-        app_log_cbap_hexdump(&remote_random, sizeof(aes_key_128));
-        app_log_cbap_debug(APP_LOG_NL);
-        app_log_cbap_hexdump(&remote_confirm, sizeof(aes_key_128));
-        app_log_cbap_debug(APP_LOG_NL);
-        app_log_cbap_debug("Remote OOB signature:" APP_LOG_NL);
-        app_log_cbap_hexdump(&remote_oob_signature, OOB_SIGNATURE_LEN);
-        app_log_cbap_debug(APP_LOG_NL);
+        sl_bt_cbap_log_debug("Remote OOB data:" APP_LOG_NL);
+        sl_bt_cbap_log_hexdump(&remote_random, sizeof(aes_key_128));
+        sl_bt_cbap_log_debug(APP_LOG_NL);
+        sl_bt_cbap_log_hexdump(&remote_confirm, sizeof(aes_key_128));
+        sl_bt_cbap_log_debug(APP_LOG_NL);
+        sl_bt_cbap_log_debug("Remote OOB signature:" APP_LOG_NL);
+        sl_bt_cbap_log_hexdump(&remote_oob_signature, OOB_SIGNATURE_LEN);
+        sl_bt_cbap_log_debug(APP_LOG_NL);
 
         sc = sl_bt_cbap_lib_verify_remote_oob_data(remote_random.data,
                                                    remote_confirm.data,
                                                    remote_oob_signature);
         app_assert_status(sc);
-        app_log_cbap_info("Remote OOB data verified." APP_LOG_NL);
+        sl_bt_cbap_log_info("Remote OOB data verified." APP_LOG_NL);
         sc = sl_bt_sm_set_remote_oob(1, remote_random, remote_confirm);
+        app_assert_status(sc);
+        sc = sl_bt_cbap_destroy_key();
         app_assert_status(sc);
       }
       break;
   }
 }
 
+/***************************************************************************//**
+ * Reset CBAP process states, flags and timers.
+ ******************************************************************************/
+static void cbap_reset(void)
+{
+  set_timeout(false); // Make sure timer is stopped
+  connection = SL_BT_INVALID_CONNECTION_HANDLE; // Clear connection handle
+  // Reset states
+  cbap_peripheral_state = (sl_bt_cbap_peripheral_state_t)0;
+  sl_bt_cbap_peripheral_on_event(cbap_peripheral_state);
+  cbap_central_state = (sl_bt_cbap_central_state_t)0;
+  sl_bt_cbap_central_on_event(cbap_central_state);
+  char_state = (characteristics_t)0;
+  // Reset flags
+  remote_cert_arrived = false;
+  device_cert_sent = false;
+  remote_certificate_der_len = 0;
+  dev_cert_sending_progression = 0;
+}
+
 /*******************************************************************************
  * Search for a Service UUID in scan report.
  *
- * @param[in] scan_data Data received in evt_scanner_scan_report
+ * @param[in] scan_data Data received in scanner advertisement report event
  * @param[in] scan_data_len Length of the scan data
  * @param[in] uuid Service UUID to search for
  * @param[in] uuid_len Service UUID length
@@ -853,11 +875,10 @@ static void state_timer_cb(sl_simple_timer_t *handle, void *data)
 {
   (void)handle;
   (void)data;
-  sl_status_t sc;
 
-  app_log_cbap_info("Timeout error. Disconnecting." APP_LOG_NL);
-  sc = sl_bt_connection_close(connection);
-  app_assert_status(sc);
+  sl_bt_cbap_log_error("Timeout error. Disconnecting." APP_LOG_NL);
+  sl_bt_on_cbap_error();
+  cbap_reset();
 }
 
 // CBAP Peripheral event handler WEAK implementation.
@@ -870,4 +891,12 @@ SL_WEAK void sl_bt_cbap_peripheral_on_event(sl_bt_cbap_peripheral_state_t status
 SL_WEAK void sl_bt_cbap_central_on_event(sl_bt_cbap_central_state_t status)
 {
   (void)status;
+}
+
+// Callback to handle CBAP process errors.
+SL_WEAK void sl_bt_on_cbap_error(void)
+{
+  sl_status_t sc;
+  sc = sl_bt_connection_close(connection);
+  app_assert_status(sc);
 }

@@ -395,7 +395,6 @@ sl_status_t sl_se_ccm_auth_decrypt(sl_se_command_context_t *cmd_ctx,
  * @return
  *   Status code, @ref sl_status.h.
  ******************************************************************************/
-#if (_SILICON_LABS_32B_SERIES_2_CONFIG > 2)
 sl_status_t sl_se_ccm_multipart_starts(sl_se_ccm_multipart_context_t *ccm_ctx,
                                        sl_se_command_context_t *cmd_ctx,
                                        const sl_se_key_descriptor_t *key,
@@ -406,7 +405,6 @@ sl_status_t sl_se_ccm_multipart_starts(sl_se_ccm_multipart_context_t *ccm_ctx,
                                        const uint8_t *add,
                                        size_t add_len,
                                        size_t tag_len);
-#endif
 
 /***************************************************************************//**
  * @brief
@@ -440,7 +438,7 @@ sl_status_t sl_se_ccm_multipart_starts(sl_se_ccm_multipart_context_t *ccm_ctx,
  * @return
  *   Status code, @ref sl_status.h.
  ******************************************************************************/
-#if (_SILICON_LABS_32B_SERIES_2_CONFIG > 2)
+
 sl_status_t sl_se_ccm_multipart_update(sl_se_ccm_multipart_context_t *ccm_ctx,
                                        sl_se_command_context_t *cmd_ctx,
                                        const sl_se_key_descriptor_t *key,
@@ -448,7 +446,6 @@ sl_status_t sl_se_ccm_multipart_update(sl_se_ccm_multipart_context_t *ccm_ctx,
                                        const uint8_t *input,
                                        uint8_t *output,
                                        size_t *output_length);
-#endif
 
 /***************************************************************************//**
  * @brief
@@ -486,7 +483,6 @@ sl_status_t sl_se_ccm_multipart_update(sl_se_ccm_multipart_context_t *ccm_ctx,
  *   Returns SL_SE_INVALID_SIGNATURE if authentication step fails.
  *   Status code, @ref sl_status.h.
  ******************************************************************************/
-#if (_SILICON_LABS_32B_SERIES_2_CONFIG > 2)
 sl_status_t sl_se_ccm_multipart_finish(sl_se_ccm_multipart_context_t *ccm_ctx,
                                        sl_se_command_context_t *cmd_ctx,
                                        const sl_se_key_descriptor_t *key,
@@ -495,7 +491,6 @@ sl_status_t sl_se_ccm_multipart_finish(sl_se_ccm_multipart_context_t *ccm_ctx,
                                        uint8_t *output,
                                        uint8_t output_size,
                                        uint8_t *output_length);
-#endif
 
 /***************************************************************************//**
  * @brief

@@ -22,6 +22,7 @@
 #ifdef UC_BUILD
 #include "meter-mirror-config.h"
 #include "sl_component_catalog.h"
+#include "zap-cluster-command-parser.h"
 #else // !UC_BUILD
 #ifdef EMBER_AF_PLUGIN_GBCS_COMPATIBILITY
 #define SL_CATALOG_ZIGBEE_GBCS_COMPATIBILITY_PRESENT
@@ -265,6 +266,7 @@ uint16_t emberAfPluginMeterMirrorRequestMirror(EmberEUI64 requestingDeviceIeeeAd
   return endpoint;
 }
 
+#ifndef UC_BUILD
 bool emberAfSimpleMeteringClusterConfigureMirrorCallback(uint32_t issuerEventId,
                                                          uint32_t reportingInterval,
                                                          uint8_t mirrorNotificationReporting,
@@ -310,6 +312,7 @@ bool emberAfSimpleMeteringClusterConfigureMirrorCallback(uint32_t issuerEventId,
   emberAfSendImmediateDefaultResponse(status);
   return true;
 }
+#endif  // UC_BUILD
 
 uint16_t emberAfPluginSimpleMeteringClientRemoveMirrorCallback(EmberEUI64 requestingDeviceIeeeAddress)
 {
@@ -543,3 +546,82 @@ static bool sendMirrorReportAttributeResponse(uint8_t endpoint, uint8_t index)
   emberAfSendResponse();
   return true;
 }
+
+#ifdef UC_BUILD
+
+bool emberAfSimpleMeteringClusterConfigureMirrorCallback(EmberAfClusterCommand *cmd)
+{
+  sl_zcl_simple_metering_cluster_configure_mirror_command_t cmd_data;
+
+  if (zcl_decode_simple_metering_cluster_configure_mirror_command(cmd, &cmd_data)
+      != EMBER_ZCL_STATUS_SUCCESS) {
+    return false;
+  }
+
+  uint32_t issuerEventId = cmd_data.issuerEventId;
+  uint32_t reportingInterval = cmd_data.reportingInterval;
+  uint8_t mirrorNotificationReporting = cmd_data.mirrorNotificationReporting;
+  uint8_t notificationScheme = cmd_data.notificationScheme;
+  EmberAfStatus status = EMBER_ZCL_STATUS_SUCCESS;
+  uint8_t endpoint = emberAfCurrentEndpoint();
+  EmberEUI64 sendersEui;
+  uint8_t index;
+
+  emberAfSimpleMeteringClusterPrintln("ConfigureMirror on endpoint 0x%x", endpoint);
+
+  if (EMBER_SUCCESS != emberLookupEui64ByNodeId(emberAfCurrentCommand()->source, sendersEui)) {
+    emberAfSimpleMeteringClusterPrintln("Error: Meter Mirror plugin cannot determine EUI64 for node ID 0x%2X",
+                                        emberAfCurrentCommand()->source);
+    status = EMBER_ZCL_STATUS_FAILURE;
+    goto kickout;
+  }
+
+  index = findMirrorIndex(sendersEui);
+  if (index == INVALID_INDEX) {
+    emberAfSimpleMeteringClusterPrint("Error: Meter mirror plugin received unknown report from ");
+    emberAfPrintBigEndianEui64(sendersEui);
+    emberAfSimpleMeteringClusterPrintln("");
+    status = EMBER_ZCL_STATUS_NOT_AUTHORIZED;
+    goto kickout;
+  }
+
+  if (mirrorList[index].issuerEventId == 0
+      || issuerEventId > mirrorList[index].issuerEventId) {
+    if (notificationScheme > 0x02) {
+      status = EMBER_ZCL_STATUS_INVALID_FIELD;
+      goto kickout;
+    }
+
+    mirrorList[index].issuerEventId = issuerEventId;
+    mirrorList[index].reportingInterval = reportingInterval;
+    mirrorList[index].mirrorNotificationReporting = mirrorNotificationReporting;
+    mirrorList[index].notificationScheme = notificationScheme;
+  }
+
+  kickout:
+  emberAfSendImmediateDefaultResponse(status);
+  return true;
+}
+
+uint32_t emAfMeterMirrorSimpleMeteringClusterClientCommandParse(sl_service_opcode_t opcode,
+                                                                sl_service_function_context_t *context)
+{
+  (void)opcode;
+
+  EmberAfClusterCommand *cmd = (EmberAfClusterCommand *)context->data;
+  bool wasHandled = false;
+
+  if (!cmd->mfgSpecific) {
+    switch (cmd->commandId) {
+      case ZCL_CONFIGURE_MIRROR_COMMAND_ID:
+      {
+        wasHandled = emberAfSimpleMeteringClusterConfigureMirrorCallback(cmd);
+        break;
+      }
+    }
+  }
+  return ((wasHandled)
+          ? EMBER_ZCL_STATUS_SUCCESS
+          : EMBER_ZCL_STATUS_UNSUP_COMMAND);
+}
+#endif  // UC_BUILD

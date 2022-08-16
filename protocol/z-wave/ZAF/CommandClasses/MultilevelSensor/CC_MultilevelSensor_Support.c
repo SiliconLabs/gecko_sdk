@@ -120,22 +120,7 @@ static tse_data_t tse_data[MULTILEVEL_SENSOR_REGISTERED_SENSOR_NUMBER_LIMIT] = {
 static void cc_multilevel_sensor_autoreport_callback(SSwTimer *pTimer)
 {
   UNUSED(pTimer);
-  /**
-  * TSE simulated RX option for local change addressed to the Root Device
-  * All applications can use this variable when triggering the TSE after
-  * a local / non Z-Wave initiated change
-  */
-  sensor_interface_iterator_t* sensor_interface_iterator;
-  cc_multilevel_sensor_init_iterator(&sensor_interface_iterator);
-  uint8_t i = 0;
-  while(sensor_interface_iterator)
-  {
-
-    tse_data[i].sensor_interface = sensor_interface_iterator;
-    ZAF_TSE_Trigger(cc_multilevel_sensor_operation_report_stx, (void*)&tse_data[i], false);
-    cc_multilevel_sensor_next_iterator(&sensor_interface_iterator);
-    i++;
-  }
+  cc_multilevel_sensor_send_sensor_data();
   AppTimerDeepSleepPersistentStart(&cc_multilevel_sensor_autoreport_timer, MULTILEVEL_SENSOR_DEFAULT_AUTOREPORT_PEDIOD_MS);
 }
 
@@ -348,6 +333,25 @@ static uint8_t lifeline_reporting(ccc_pair_t * p_ccc_pair)
   p_ccc_pair->cmdClass = COMMAND_CLASS_SENSOR_MULTILEVEL;
   p_ccc_pair->cmd      = SENSOR_MULTILEVEL_REPORT;
   return 1;
+}
+
+void cc_multilevel_sensor_send_sensor_data()
+{
+  /**
+    * TSE simulated RX option for local change addressed to the Root Device
+    * All applications can use this variable when triggering the TSE after
+    * a local / non Z-Wave initiated change
+    */
+  sensor_interface_iterator_t* sensor_interface_iterator;
+  cc_multilevel_sensor_init_iterator(&sensor_interface_iterator);
+  uint8_t i = 0;
+  while(sensor_interface_iterator)
+  {
+    tse_data[i].sensor_interface = sensor_interface_iterator;
+    ZAF_TSE_Trigger(cc_multilevel_sensor_operation_report_stx, (void*)&tse_data[i], false);
+    cc_multilevel_sensor_next_iterator(&sensor_interface_iterator);
+    i++;
+  }
 }
 
 REGISTER_CC_V3(COMMAND_CLASS_SENSOR_MULTILEVEL_V11, SENSOR_MULTILEVEL_VERSION_V11, CC_MultilevelSensor_handler, NULL, NULL, lifeline_reporting, 0);

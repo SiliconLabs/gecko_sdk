@@ -130,8 +130,7 @@ static void sensor_deinit(void);
 
 void app_init(void)
 {
-  app_log_info("Thuderboard demo initialised");
-  app_log_nl();
+  app_log_info("Thuderboard demo initialised" APP_LOG_NL);
   sl_power_supply_probe();
   shutdown_start_timer();
 #if defined(BOARD_RGBLED_COUNT) && (BOARD_RGBLED_COUNT > 0)
@@ -176,23 +175,21 @@ void sl_bt_on_event(sl_bt_msg_t *evt)
                                                    (uint8_t *)fw_rev);
       app_log_status_error(sc);
       // Print boot message.
-      app_log_info("Bluetooth stack booted: v%d.%d.%d-b%d",
+      app_log_info("Bluetooth stack booted: v%d.%d.%d-b%d" APP_LOG_NL,
                    evt->data.evt_system_boot.major,
                    evt->data.evt_system_boot.minor,
                    evt->data.evt_system_boot.patch,
                    evt->data.evt_system_boot.build);
-      app_log_nl();
       sc = sl_bt_system_get_identity_address(&address, &address_type);
       app_assert_status(sc);
       app_log_info("Bluetooth %s address: %02X:%02X:%02X:%02X:%02X:%02X",
-                   address_type ? "static random" : "public device",
+                   address_type ? "static random" : "public device" APP_LOG_NL,
                    address.addr[5],
                    address.addr[4],
                    address.addr[3],
                    address.addr[2],
                    address.addr[1],
                    address.addr[0]);
-      app_log_nl();
       unique_id = 0xFFFFFF & *((uint32_t*) address.addr);
 
       // Pad and reverse unique ID to get System ID
@@ -216,8 +213,7 @@ void sl_bt_on_event(sl_bt_msg_t *evt)
 
     // -------------------------------
     case sl_bt_evt_connection_opened_id:
-      app_log_info("Connection opened");
-      app_log_nl();
+      app_log_info("Connection opened" APP_LOG_NL);
       advertise_stop();
       shutdown_stop_timer();
       sensor_init();
@@ -225,8 +221,7 @@ void sl_bt_on_event(sl_bt_msg_t *evt)
 
     // -------------------------------
     case sl_bt_evt_connection_closed_id:
-      app_log_info("Connection closed");
-      app_log_nl();
+      app_log_info("Connection closed" APP_LOG_NL);
       shutdown_start_timer();
       sensor_deinit();
       advertise_start();
@@ -295,29 +290,25 @@ static void sensor_init(void)
 #ifdef SL_CATALOG_SENSOR_HALL_PRESENT
   sc = sl_sensor_hall_init();
   if (sc != SL_STATUS_OK) {
-    app_log_warning("Hall sensor initialization failed.");
-    app_log_nl();
+    app_log_warning("Hall sensor initialization failed." APP_LOG_NL);
   }
 #endif // SL_CATALOG_SENSOR_HALL_PRESENT
 #ifdef SL_CATALOG_SENSOR_LIGHT_PRESENT
   sc = sl_sensor_light_init();
   if (sc != SL_STATUS_OK) {
-    app_log_warning("Ambient light and UV index sensor initialization failed.");
-    app_log_nl();
+    app_log_warning("Ambient light and UV index sensor initialization failed." APP_LOG_NL);
   }
 #endif // SL_CATALOG_SENSOR_LIGHT_PRESENT
 #ifdef SL_CATALOG_SENSOR_LUX_PRESENT
   sc = sl_sensor_lux_init();
   if (sc != SL_STATUS_OK) {
-    app_log_warning("Ambient light sensor initialization failed.");
-    app_log_nl();
+    app_log_warning("Ambient light sensor initialization failed." APP_LOG_NL);
   }
 #endif // SL_CATALOG_SENSOR_LUX_PRESENT
 #ifdef SL_CATALOG_SENSOR_RHT_PRESENT
   sc = sl_sensor_rht_init();
   if (sc != SL_STATUS_OK) {
-    app_log_warning("Relative Humidity and Temperature sensor initialization failed.");
-    app_log_nl();
+    app_log_warning("Relative Humidity and Temperature sensor initialization failed." APP_LOG_NL);
   }
 #endif // SL_CATALOG_SENSOR_RHT_PRESENT
 #ifdef SL_CATALOG_SENSOR_IMU_PRESENT
@@ -326,24 +317,21 @@ static void sensor_init(void)
 #ifdef SL_CATALOG_SENSOR_PRESSURE_PRESENT
   sc = sl_sensor_pressure_init();
   if (sc != SL_STATUS_OK) {
-    app_log_warning("Air Pressure sensor initialization failed.");
-    app_log_nl();
+    app_log_warning("Air Pressure sensor initialization failed." APP_LOG_NL);
   }
 #endif // SL_CATALOG_SENSOR_PRESSURE_PRESENT
 #ifdef SL_CATALOG_SENSOR_GAS_PRESENT
   if (!sl_power_supply_is_low_power()) {
     sc = sl_sensor_gas_init();
     if (sc != SL_STATUS_OK) {
-      app_log_warning("Air quality sensor initialization failed.");
-      app_log_nl();
+      app_log_warning("Air quality sensor initialization failed." APP_LOG_NL);
     }
   }
 #endif // SL_CATALOG_SENSOR_GAS_PRESENT
 #ifdef SL_CATALOG_SENSOR_SOUND_PRESENT
   sc = sl_sensor_sound_init();
   if (sc != SL_STATUS_OK) {
-    app_log_warning("Sound level sensor initialization failed.");
-    app_log_nl();
+    app_log_warning("Sound level sensor initialization failed." APP_LOG_NL);
   }
 #endif // SL_CATALOG_SENSOR_SOUND_PRESENT
 }
@@ -389,8 +377,7 @@ uint8_t sl_gatt_service_battery_get_level(void)
 {
   uint8_t bat_level;
   bat_level = sl_power_supply_get_battery_level();
-  app_log_info("Battery level = %d %%", bat_level);
-  app_log_nl();
+  app_log_info("Battery level = %d %%" APP_LOG_NL, bat_level);
   return bat_level;
 }
 
@@ -406,14 +393,11 @@ sl_status_t sl_gatt_service_hall_get(float *field_strength, bool *alert, bool *t
   sl_status_t sc;
   sc = sl_sensor_hall_get(field_strength, alert, tamper);
   if (SL_STATUS_OK == sc) {
-    app_log_info("Magnetic Flux = %4.3f mT", *field_strength);
-    app_log_nl();
+    app_log_info("Magnetic Flux = %4.3f mT" APP_LOG_NL, *field_strength);
   } else if (SL_STATUS_NOT_INITIALIZED == sc) {
-    app_log_info("Hall sensor is not initialized.");
-    app_log_nl();
+    app_log_info("Hall sensor is not initialized." APP_LOG_NL);
   } else {
-    app_log_status_error_f(sc, "Hall sensor measurement failed");
-    app_log_nl();
+    app_log_status_error_f(sc, "Hall sensor measurement failed" APP_LOG_NL);
   }
   return sc;
 }
@@ -425,16 +409,12 @@ sl_status_t sl_gatt_service_light_get(float *lux, float *uvi)
   sl_status_t sc;
   sc = sl_sensor_light_get(lux, uvi);
   if (SL_STATUS_OK == sc) {
-    app_log_info("Amb light = %f Lux", *lux);
-    app_log_nl();
-    app_log_info("UV Index = %d", *uvi);
-    app_log_nl();
+    app_log_info("Amb light = %f Lux" APP_LOG_NL, *lux);
+    app_log_info("UV Index = %d" APP_LOG_NL, *uvi);
   } else if (SL_STATUS_NOT_INITIALIZED == sc) {
-    app_log_info("Ambient light and UV index sensor is not initialized.");
-    app_log_nl();
+    app_log_info("Ambient light and UV index sensor is not initialized." APP_LOG_NL);
   } else {
-    app_log_status_error_f(sc, "Light sensor measurement failed");
-    app_log_nl();
+    app_log_status_error_f(sc, "Light sensor measurement failed" APP_LOG_NL);
   }
   return sc;
 }
@@ -448,8 +428,7 @@ sl_status_t sl_gatt_service_lux_get(float *lux)
   if (SL_STATUS_OK == sc) {
     app_log_info("Amb light = %f Lux\r\n", *lux);
   } else if (SL_STATUS_NOT_INITIALIZED == sc) {
-    app_log_info("Ambient light sensor is not initialized.");
-    app_log_nl();
+    app_log_info("Ambient light sensor is not initialized." APP_LOG_NL);
   } else {
     app_log_status_error_f(sc, "Light sensor measurement failed\n");
   }
@@ -463,16 +442,12 @@ sl_status_t sl_gatt_service_rht_get(uint32_t *rh, int32_t *t)
   sl_status_t sc;
   sc = sl_sensor_rht_get(rh, t);
   if (SL_STATUS_OK == sc) {
-    app_log_info("Humidity = %3.2f %%RH", (float)*rh / 1000.0f);
-    app_log_nl();
-    app_log_info("Temp = %3.2f C", (float)*t / 1000.0f);
-    app_log_nl();
+    app_log_info("Humidity = %3.2f %%RH" APP_LOG_NL, (float)*rh / 1000.0f);
+    app_log_info("Temp = %3.2f C" APP_LOG_NL, (float)*t / 1000.0f);
   } else if (SL_STATUS_NOT_INITIALIZED == sc) {
-    app_log_info("Relative Humidity and Temperature sensor is not initialized.");
-    app_log_nl();
+    app_log_info("Relative Humidity and Temperature sensor is not initialized." APP_LOG_NL);
   } else {
-    app_log_status_error_f(sc, "RHT sensor measurement failed");
-    app_log_nl();
+    app_log_status_error_f(sc, "RHT sensor measurement failed" APP_LOG_NL);
   }
   return sc;
 }
@@ -484,13 +459,10 @@ sl_status_t sl_gatt_service_imu_get(int16_t ovec[3], int16_t avec[3])
   sl_status_t sc;
   sc = sl_sensor_imu_get(ovec, avec);
   if (SL_STATUS_OK == sc) {
-    app_log_info("IMU: ORI : %04d,%04d,%04d", ovec[0], ovec[1], ovec[2]);
-    app_log_nl();
-    app_log_info("IMU: ACC : %04d,%04d,%04d", avec[0], avec[1], avec[2]);
-    app_log_nl();
+    app_log_info("IMU: ORI : %04d,%04d,%04d" APP_LOG_NL, ovec[0], ovec[1], ovec[2]);
+    app_log_info("IMU: ACC : %04d,%04d,%04d" APP_LOG_NL, avec[0], avec[1], avec[2]);
   } else if (SL_STATUS_NOT_INITIALIZED == sc) {
-    app_log_info("Inertial Measurement Unit sensor is not initialized.");
-    app_log_nl();
+    app_log_info("Inertial Measurement Unit sensor is not initialized." APP_LOG_NL);
   }
   return sc;
 }
@@ -500,11 +472,9 @@ sl_status_t sl_gatt_service_imu_calibrate(void)
   sl_status_t sc;
   sc = sl_sensor_imu_calibrate();
   if (SL_STATUS_NOT_INITIALIZED == sc) {
-    app_log_info("Inertial Measurement Unit sensor is not initialized.");
-    app_log_nl();
+    app_log_info("Inertial Measurement Unit sensor is not initialized." APP_LOG_NL);
   } else {
-    app_log_info("IMU calibration status: %d", sc);
-    app_log_nl();
+    app_log_info("IMU calibration status: %d" APP_LOG_NL, sc);
   }
   return sc;
 }
@@ -512,12 +482,10 @@ sl_status_t sl_gatt_service_imu_calibrate(void)
 void sl_gatt_service_imu_enable(bool enable)
 {
   sl_status_t sc;
-  app_log_info("IMU %sable", enable ? "en" : "dis");
-  app_log_nl();
+  app_log_info("IMU %sable" APP_LOG_NL, enable ? "en" : "dis");
   sc = sl_sensor_imu_enable(enable);
   if (enable && SL_STATUS_OK != sc) {
-    app_log_warning("Inertial Measurement Unit sensor sensor initialization failed.");
-    app_log_nl();
+    app_log_warning("Inertial Measurement Unit sensor sensor initialization failed." APP_LOG_NL);
   }
 }
 #endif
@@ -527,8 +495,7 @@ void sl_gatt_service_rgb_set_led(uint8_t m, uint8_t r, uint8_t g, uint8_t b)
 {
   if (!sl_power_supply_is_low_power()) {
     rgb_led_set(m, r, g, b);
-    app_log_info("RGBLED write: m:%02x r:%02x g:%02x b:%02x", m, r, g, b);
-    app_log_nl();
+    app_log_info("RGBLED write: m:%02x r:%02x g:%02x b:%02x" APP_LOG_NL, m, r, g, b);
   }
 }
 
@@ -544,14 +511,11 @@ sl_status_t sl_gatt_service_pressure_get(float *pressure)
   sl_status_t sc;
   sc = sl_sensor_pressure_get(pressure);
   if (SL_STATUS_OK == sc) {
-    app_log_info("Pressure = %0.3f mbar", *pressure);
-    app_log_nl();
+    app_log_info("Pressure = %0.3f mbar" APP_LOG_NL, *pressure);
   } else if (SL_STATUS_NOT_INITIALIZED == sc) {
-    app_log_info("Air Pressure sensor is not initialized.");
-    app_log_nl();
+    app_log_info("Air Pressure sensor is not initialized." APP_LOG_NL);
   } else {
-    app_log_status_error_f(sc, "Pressure sensor measurement failed");
-    app_log_nl();
+    app_log_status_error_f(sc, "Pressure sensor measurement failed" APP_LOG_NL);
   }
   return sc;
 }
@@ -564,16 +528,12 @@ sl_status_t sl_gatt_service_gas_get(uint16_t *eco2, uint16_t *tvoc)
   if (!sl_power_supply_is_low_power()) {
     sc = sl_sensor_gas_get(eco2, tvoc);
     if (SL_STATUS_OK == sc) {
-      app_log_info("eCO2 = %u ppm", (uint16_t)*eco2);
-      app_log_nl();
-      app_log_info("TVOC = %u ppd", (uint16_t)*tvoc);
-      app_log_nl();
+      app_log_info("eCO2 = %u ppm" APP_LOG_NL, (uint16_t)*eco2);
+      app_log_info("TVOC = %u ppd" APP_LOG_NL, (uint16_t)*tvoc);
     } else if (SL_STATUS_NOT_INITIALIZED == sc) {
-      app_log_info("Air quality sensor is not initialized.");
-      app_log_nl();
+      app_log_info("Air quality sensor is not initialized." APP_LOG_NL);
     } else if (SL_STATUS_NOT_READY != sc) {
-      app_log_status_error_f(sc, "Air quality sensor measurement failed");
-      app_log_nl();
+      app_log_status_error_f(sc, "Air quality sensor measurement failed" APP_LOG_NL);
     }
   }
   return sc;
@@ -586,14 +546,11 @@ sl_status_t sl_gatt_service_sound_get(float *sound_level)
   sl_status_t sc;
   sc = sl_sensor_sound_get(sound_level);
   if (SL_STATUS_OK == sc) {
-    app_log_info("Sound Level = %3.2f dBA", *sound_level);
-    app_log_nl();
+    app_log_info("Sound Level = %3.2f dBA" APP_LOG_NL, *sound_level);
   } else if (SL_STATUS_NOT_INITIALIZED == sc) {
-    app_log_info("Sound level sensor is not initialized.");
-    app_log_nl();
+    app_log_info("Sound level sensor is not initialized." APP_LOG_NL);
   } else {
-    app_log_status_error_f(sc, "Sound level measurement failed");
-    app_log_nl();
+    app_log_status_error_f(sc, "Sound level measurement failed" APP_LOG_NL);
   }
   return sc;
 }

@@ -30,7 +30,20 @@
 
 #ifdef UC_BUILD
 #include "zap-cluster-command-parser.h"
-#endif
+
+extern bool emberAfSimpleMeteringClusterGetNotifiedMessageCallback(EmberAfClusterCommand *cmd);
+extern bool emberAfSimpleMeteringClusterGetSampledDataCallback(EmberAfClusterCommand *cmd);
+extern bool emberAfSimpleMeteringClusterPublishSnapshotCallback(EmberAfClusterCommand *cmd);
+extern bool emberAfSimpleMeteringClusterGetSnapshotCallback(EmberAfClusterCommand *cmd);
+extern bool emberAfSimpleMeteringClusterGetSampledDataResponseCallback(EmberAfClusterCommand *cmd);
+extern bool emberAfSimpleMeteringClusterGetSampledDataResponseCallback(EmberAfClusterCommand *cmd);
+extern bool emberAfPrepaymentClusterPublishPrepaySnapshotCallback(EmberAfClusterCommand *cmd);
+extern bool emberAfPrepaymentClusterGetPrepaySnapshotCallback(EmberAfClusterCommand *cmd);
+extern bool emberAfPrepaymentClusterPublishTopUpLogCallback(EmberAfClusterCommand *cmd);
+extern bool emberAfPrepaymentClusterGetTopUpLogCallback(EmberAfClusterCommand *cmd);
+extern bool emberAfPrepaymentClusterPublishDebtLogCallback(EmberAfClusterCommand *cmd);
+extern bool emberAfPrepaymentClusterGetDebtRepaymentLogCallback(EmberAfClusterCommand *cmd);
+#endif  // UC_BUILD
 
 // default configurations
 #define DEFAULT_TABLE_SET_INDEX (0)
@@ -59,6 +72,7 @@ static void hideEndpoint(uint8_t endpoint)
 sl_zigbee_event_t emberAfPluginGasProxyFunctionGsmeSyncEndpointEvents[FIXED_ENDPOINT_COUNT];
 sl_zigbee_event_t emberAfPluginGasProxyFunctionCatchupEvent;
 
+extern void emberAfPluginGasProxyFunctionGsmeSyncEndpointEventHandler(uint8_t endpoint);
 extern void emberAfPluginGasProxyFunctionCatchupEventHandler(sl_zigbee_event_t * event);
 
 void emberAfPluginGasProxyFunctionInitCallback(uint8_t init_level)
@@ -71,7 +85,7 @@ void emberAfPluginGasProxyFunctionInitCallback(uint8_t init_level)
 
       for (i = 0; i < FIXED_ENDPOINT_COUNT; i++) {
         sl_zigbee_endpoint_event_init(&emberAfPluginGasProxyFunctionGsmeSyncEndpointEvents[i],
-                                      emberAfPluginGasProxyFunctionCatchupEventHandler,
+                                      emberAfPluginGasProxyFunctionGsmeSyncEndpointEventHandler,
                                       endpoint_array[i]);
       }
 
@@ -2182,6 +2196,21 @@ uint32_t emAfGasProxyFunctionSimpleMeteringClusterClientCommandParse(sl_service_
         wasHandled = emberAfSimpleMeteringClusterRemoveMirrorCallback();
         break;
       }
+      case ZCL_GET_NOTIFIED_MESSAGE_COMMAND_ID:
+      {
+        wasHandled = emberAfSimpleMeteringClusterGetNotifiedMessageCallback(cmd);
+        break;
+      }
+      case ZCL_PUBLISH_SNAPSHOT_COMMAND_ID:
+      {
+        wasHandled = emberAfSimpleMeteringClusterPublishSnapshotCallback(cmd);
+        break;
+      }
+      case ZCL_GET_SAMPLED_DATA_RESPONSE_COMMAND_ID:
+      {
+        wasHandled = emberAfSimpleMeteringClusterGetSampledDataResponseCallback(cmd);
+        break;
+      }
     }
   }
 
@@ -2190,4 +2219,97 @@ uint32_t emAfGasProxyFunctionSimpleMeteringClusterClientCommandParse(sl_service_
           : EMBER_ZCL_STATUS_UNSUP_COMMAND);
 }
 
+uint32_t emAfGasProxyFunctionSimpleMeteringClusterServerCommandParse(sl_service_opcode_t opcode,
+                                                                     sl_service_function_context_t *context)
+{
+  (void)opcode;
+
+  EmberAfClusterCommand *cmd = (EmberAfClusterCommand *)context->data;
+  bool wasHandled = false;
+
+  if (!cmd->mfgSpecific) {
+    switch (cmd->commandId) {
+      case ZCL_GET_SAMPLED_DATA_COMMAND_ID:
+      {
+        wasHandled = emberAfSimpleMeteringClusterGetSampledDataCallback(cmd);
+        break;
+      }
+      case ZCL_GET_SNAPSHOT_COMMAND_ID:
+      {
+        wasHandled = emberAfSimpleMeteringClusterGetSnapshotCallback(cmd);
+        break;
+      }
+    }
+  }
+
+  return ((wasHandled)
+          ? EMBER_ZCL_STATUS_SUCCESS
+          : EMBER_ZCL_STATUS_UNSUP_COMMAND);
+}
+
+uint32_t emAfGasProxyFunctionPrepaymentClusterClientCommandParse(sl_service_opcode_t opcode,
+                                                                 sl_service_function_context_t *context)
+{
+  (void)opcode;
+
+  EmberAfClusterCommand *cmd = (EmberAfClusterCommand *)context->data;
+  bool wasHandled = false;
+
+  if (!cmd->mfgSpecific) {
+    switch (cmd->commandId) {
+      case ZCL_PUBLISH_PREPAY_SNAPSHOT_COMMAND_ID:
+      {
+        wasHandled = emberAfPrepaymentClusterPublishPrepaySnapshotCallback(cmd);
+        break;
+      }
+      case ZCL_PUBLISH_TOP_UP_LOG_COMMAND_ID:
+      {
+        wasHandled = emberAfPrepaymentClusterPublishTopUpLogCallback(cmd);
+        break;
+      }
+      case ZCL_PUBLISH_DEBT_LOG_COMMAND_ID:
+      {
+        wasHandled = emberAfPrepaymentClusterPublishDebtLogCallback(cmd);
+        break;
+      }
+    }
+  }
+
+  return ((wasHandled)
+          ? EMBER_ZCL_STATUS_SUCCESS
+          : EMBER_ZCL_STATUS_UNSUP_COMMAND);
+}
+
+uint32_t emAfGasProxyFunctionPrepaymentClusterServerCommandParse(sl_service_opcode_t opcode,
+                                                                 sl_service_function_context_t *context)
+{
+  (void)opcode;
+
+  EmberAfClusterCommand *cmd = (EmberAfClusterCommand *)context->data;
+  bool wasHandled = false;
+
+  if (!cmd->mfgSpecific) {
+    switch (cmd->commandId) {
+      case ZCL_GET_PREPAY_SNAPSHOT_COMMAND_ID:
+      {
+        wasHandled = emberAfPrepaymentClusterGetPrepaySnapshotCallback(cmd);
+        break;
+      }
+      case ZCL_GET_TOP_UP_LOG_COMMAND_ID:
+      {
+        wasHandled = emberAfPrepaymentClusterGetTopUpLogCallback(cmd);
+        break;
+      }
+      case  ZCL_GET_DEBT_REPAYMENT_LOG_COMMAND_ID:
+      {
+        wasHandled = emberAfPrepaymentClusterGetDebtRepaymentLogCallback(cmd);
+        break;
+      }
+    }
+  }
+
+  return ((wasHandled)
+          ? EMBER_ZCL_STATUS_SUCCESS
+          : EMBER_ZCL_STATUS_UNSUP_COMMAND);
+}
 #endif // UC_BUILD

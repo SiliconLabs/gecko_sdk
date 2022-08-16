@@ -83,6 +83,7 @@ static void dmpUiUpdateZigbeeStatus(DmpUiZigBeeNetworkState_t nwState,
 {
   int32_t xPosition = 2;
   char tempStr[TMP_STR_LEN] = { 0 };
+  char *pTempStr = tempStr;
 
   if (!helpMenuDisplayed) {
     EmberPanId panId = emberAfGetPanId();
@@ -117,40 +118,40 @@ static void dmpUiUpdateZigbeeStatus(DmpUiZigBeeNetworkState_t nwState,
     switch (nwState) {
       case DMP_UI_NO_NETWORK:
         dmpUiDirectDisplayStartTime = 0;
-        strncpy(tempStr, "No Nwk", TMP_STR_LEN);
+        pTempStr = "No Nwk";
         break;
       case DMP_UI_LOST_NETWORK:
         dmpUiDirectDisplayStartTime = 0;
-        strncpy(tempStr, "Lost Nwk", TMP_STR_LEN);  // (== on Nwk but No Parent)
+        pTempStr = "Lost Nwk";
         break;
       case DMP_UI_SCANNING:
-        strncpy(tempStr, "Scanning", TMP_STR_LEN);
+        pTempStr = "Scanning";
         break;
       case DMP_UI_JOINING:
-        strncpy(tempStr, "Joining", TMP_STR_LEN);
+        pTempStr = "Joining";
         break;
       case DMP_UI_FORMING:
-        strncpy(tempStr, "Forming", TMP_STR_LEN);
+        pTempStr = "Forming";
         break;
       case DMP_UI_DISCOVERING:
-        strncpy(tempStr, "Discvrng", TMP_STR_LEN);
+        pTempStr = "Discvrng";
         break;
       case DMP_UI_NETWORK_UP:
-        //Intentionally avoiding snprintf for codespace
-        strncpy(tempStr, "PAN:", TMP_STR_LEN);
-
+        tempStr[0] = 'P';
+        tempStr[1] = 'A';
+        tempStr[2] = 'N';
+        tempStr[3] = ':';
         tempStr[4] = ascii_lut[(panId & 0xF000) >> 12];
         tempStr[5] = ascii_lut[(panId & 0x0F00) >>  8];
         tempStr[6] = ascii_lut[(panId & 0x00F0) >>  4];
         tempStr[7] = ascii_lut[(panId & 0x000F)];
         tempStr[8] = '\0';
-
         break;
       default:
         break;
     }
 
-    GLIB_drawString(&glibContext, tempStr,
+    GLIB_drawString(&glibContext, pTempStr,
                     strlen(tempStr) + 1, xPosition, glibContext.pDisplayGeometry->ySize - 10, 0);
 
     if (withDisplayUpdate) {
@@ -213,9 +214,7 @@ static void dmpUiDisplayBluetoothLogo(void)
 
 static void dmpUiDisplayAppName(const char *device)
 {
-  char appName[APP_NAME_LEN];
-
-  strncpy(appName, "DMP Demo ", APP_NAME_LEN);
+  char appName[APP_NAME_LEN] = "DMP Demo ";
   strncpy(&appName[9], device, APP_NAME_LEN - 9);
 
   GLIB_drawString(&glibContext, appName,

@@ -73,6 +73,8 @@ int16_t utilsSoftSrcMatchShortFindEntry(uint8_t iid, uint16_t aShortAddress);
 int16_t utilsSoftSrcMatchExtFindEntry(uint8_t iid, const otExtAddress *aExtAddress);
 #endif // RADIO_CONFIG_SRC_MATCH_EXT_ENTRY_NUM
 
+uint8_t utilsSoftSrcMatchFindIidFromPanId(otPanId panId);
+
 #ifdef __cplusplus
 } // extern "C"
 #endif

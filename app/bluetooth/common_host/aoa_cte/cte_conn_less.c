@@ -55,19 +55,21 @@ sl_status_t cte_bt_on_event_conn_less(sl_bt_msg_t *evt)
     // Do not call any stack command before receiving this boot event!
     case sl_bt_evt_system_boot_id:
       // Set passive scanning on 1M PHY
-      sc = sl_bt_scanner_set_mode(sl_bt_gap_1m_phy, AOA_CTE_SCAN_MODE);
+      sc = sl_bt_scanner_set_mode(sl_bt_gap_phy_1m, AOA_CTE_SCAN_MODE);
       if (SL_STATUS_OK != sc) {
         break;
       }
 
       // Set scan interval and scan window
-      sc = sl_bt_scanner_set_timing(sl_bt_gap_1m_phy, AOA_CTE_SCAN_INTERVAL, AOA_CTE_SCAN_WINDOW);
+      sc = sl_bt_scanner_set_timing(sl_bt_gap_phy_1m,
+                                    AOA_CTE_SCAN_INTERVAL,
+                                    AOA_CTE_SCAN_WINDOW);
       if (SL_STATUS_OK != sc) {
         break;
       }
 
       // Start scanning - looking for tags
-      sc = sl_bt_scanner_start(sl_bt_gap_1m_phy, sl_bt_scanner_discover_generic);
+      sc = sl_bt_scanner_start(sl_bt_gap_phy_1m, sl_bt_scanner_discover_generic);
       break;
 
     // -------------------------------
@@ -151,7 +153,7 @@ sl_status_t cte_bt_on_event_conn_less(sl_bt_msg_t *evt)
       aoa_db_remove_tag(evt->data.evt_cte_receiver_connectionless_iq_report.sync);
 
       // Restart the scanner to discover new tags
-      sc = sl_bt_scanner_start(sl_bt_gap_1m_phy, sl_bt_scanner_discover_generic);
+      sc = sl_bt_scanner_start(sl_bt_gap_phy_1m, sl_bt_scanner_discover_generic);
 
       if (SL_STATUS_INVALID_STATE == sc) {
         // Scanning is already running, continue execution.

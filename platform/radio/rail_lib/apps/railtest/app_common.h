@@ -574,7 +574,7 @@ AppMode_t currentAppMode(void);
 void enableAppMode(AppMode_t appMode, bool enable, char *command);
 bool enableAppModeSync(AppMode_t appMode, bool enable, char *command);
 void setNextAppMode(AppMode_t appMode, char *command);
-void changeAppModeIfPending();
+void changeAppModeIfPending(void);
 const char *appModeNames(AppMode_t appMode);
 bool inAppMode(AppMode_t appMode, char *command);
 bool inRadioState(RAIL_RadioState_t state, char *command);

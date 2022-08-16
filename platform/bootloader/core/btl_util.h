@@ -1,6 +1,9 @@
 #ifndef BTL_UTIL_H
 #define BTL_UTIL_H
 
+#define BTL_STR_HELPER(x) #x
+#define QUOTE(x) BTL_STR_HELPER(x)
+
 #if defined(__CSTAT__)
 #define MISRAC_DISABLE _Pragma( \
     "cstat_disable=                                                                     \

@@ -39,6 +39,7 @@
 #include <openthread/link.h>
 
 #include "dbus/server/dbus_object.hpp"
+#include "mdns/mdns.hpp"
 #include "ncp/ncp_openthread.hpp"
 
 namespace otbr {
@@ -66,16 +67,23 @@ public:
      * @param[in] aConnection     The dbus connection.
      * @param[in] aInterfaceName  The dbus interface name.
      * @param[in] aNcp            The ncp controller
+     * @param[in] aPublisher      The Mdns::Publisher
      *
      */
     DBusThreadObject(DBusConnection *                 aConnection,
                      const std::string &              aInterfaceName,
-                     otbr::Ncp::ControllerOpenThread *aNcp);
+                     otbr::Ncp::ControllerOpenThread *aNcp,
+                     Mdns::Publisher *                aPublisher);
 
     otbrError Init(void) override;
 
+    void RegisterGetPropertyHandler(const std::string &        aInterfaceName,
+                                    const std::string &        aPropertyName,
+                                    const PropertyHandlerType &aHandler) override;
+
 private:
     void DeviceRoleHandler(otDeviceRole aDeviceRole);
+    void ActiveDatasetChangeHandler(const otOperationalDatasetTlvs &aDatasetTlvs);
     void NcpResetHandler(void);
 
     void ScanHandler(DBusRequest &aRequest);
@@ -94,6 +102,7 @@ private:
     void AddExternalRouteHandler(DBusRequest &aRequest);
     void RemoveExternalRouteHandler(DBusRequest &aRequest);
     void UpdateMeshCopTxtHandler(DBusRequest &aRequest);
+    void GetPropertiesHandler(DBusRequest &aRequest);
 
     void IntrospectHandler(DBusRequest &aRequest);
 
@@ -108,6 +117,7 @@ private:
     otError GetNetworkNameHandler(DBusMessageIter &aIter);
     otError GetPanIdHandler(DBusMessageIter &aIter);
     otError GetExtPanIdHandler(DBusMessageIter &aIter);
+    otError GetEui64Handler(DBusMessageIter &aIter);
     otError GetChannelHandler(DBusMessageIter &aIter);
     otError GetNetworkKeyHandler(DBusMessageIter &aIter);
     otError GetCcaFailureRateHandler(DBusMessageIter &aIter);
@@ -133,12 +143,18 @@ private:
     otError GetActiveDatasetTlvsHandler(DBusMessageIter &aIter);
     otError GetRadioRegionHandler(DBusMessageIter &aIter);
     otError GetSrpServerInfoHandler(DBusMessageIter &aIter);
+    otError GetMdnsTelemetryInfoHandler(DBusMessageIter &aIter);
     otError GetDnssdCountersHandler(DBusMessageIter &aIter);
+    otError GetOtHostVersionHandler(DBusMessageIter &aIter);
+    otError GetOtRcpVersionHandler(DBusMessageIter &aIter);
+    otError GetThreadVersionHandler(DBusMessageIter &aIter);
 
     void ReplyScanResult(DBusRequest &aRequest, otError aError, const std::vector<otActiveScanResult> &aResult);
     void ReplyEnergyScanResult(DBusRequest &aRequest, otError aError, const std::vector<otEnergyScanResult> &aResult);
 
-    otbr::Ncp::ControllerOpenThread *mNcp;
+    otbr::Ncp::ControllerOpenThread *                    mNcp;
+    std::unordered_map<std::string, PropertyHandlerType> mGetPropertyHandlers;
+    otbr::Mdns::Publisher *                              mPublisher;
 };
 
 } // namespace DBus

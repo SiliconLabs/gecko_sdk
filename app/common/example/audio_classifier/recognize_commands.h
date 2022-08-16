@@ -42,13 +42,13 @@ public:
   struct Result {
     Result() : time_(0), scores() {
     }
-    Result(int32_t time, int8_t * input_scores) : time_(time) {
+    Result(int32_t time, uint8_t * input_scores) : time_(time) {
       for (int i = 0; i < category_count; ++i) {
         scores[i] = input_scores[i];
       }
     }
     int32_t time_;
-    int8_t scores[MAX_CATEGORY_COUNT];
+    uint8_t scores[MAX_CATEGORY_COUNT];
   };
 
   int size()

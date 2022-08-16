@@ -23,6 +23,7 @@
 #include "sl_cli_config.h"
 #include "sl_cli_command.h"
 #include "sl_cli.h"
+#include "zcl-cli.h"
 #ifdef SL_CATALOG_ZIGBEE_DEBUG_PRINT_PRESENT
 #include "sl_zigbee_debug_print.h"
 #endif // SL_CATALOG_ZIGBEE_DEBUG_PRINT_PRESENT
@@ -80,7 +81,7 @@ SL_CLI_COMMAND(sli_zigbee_cli_zcl_{{cleanse_label ../clusterName}}_{{cleanse_lab
       {{/template_options}}
             "{{trim_string description}}",
             {{#zcl_command_arguments}}"{{as_spaced_lowercase label}}" SL_CLI_UNIT_SEPARATOR {{#last}},{{/last}}{{/zcl_command_arguments}}
-            {{~#if_command_args_exist id}}{{else}}"",{{/if_command_args_exist}}
+            {{~#if (is_number_greater_than commandArgCount 0)}}{{else}}"",{{/if}}
             {
               {{#zcl_command_arguments}}
                 {{zcl_command_argument_type_to_cli_data_type type struct="SL_CLI_ARG_HEX"}},
@@ -176,7 +177,7 @@ WEAK(void sli_zigbee_cli_zcl_{{cleanse_label ../clusterName}}_{{cleanse_label (a
       {{/template_options}}
       {{~#zcl_command_arguments~}}
         {{~#first~}}{{~indent 1}}uint8_t argumentTypes[{{zcl_command_arguments_count parent.id}}] =  { {{new_line 1}}{{/first}}
-                 {{~indent 2}}{{zcl_command_argument_type_to_cli_data_type type struct="SL_CLI_ARG_HEX"}}{{~#not_last~}},{{/not_last}}
+                 {{~indent 2}}{{zcl_command_argument_type_to_zcl_cli_data_type type}}{{~#not_last~}},{{/not_last}}
        {{~#last~}}{{new_line 1}}  }; {{/last}}
       {{/zcl_command_arguments}}
   {{~indent 1}}sli_zigbee_zcl_simple_command(
@@ -184,7 +185,7 @@ WEAK(void sli_zigbee_cli_zcl_{{cleanse_label ../clusterName}}_{{cleanse_label (a
     ZCL_{{clusterDefine}}_ID,                                                       \
     {{code}}, \
     arguments, \
-    {{#if_command_args_exist this.id}}argumentTypes{{else}}NULL{{/if_command_args_exist}});
+    {{#if (is_number_greater_than commandArgCount 0)}}argumentTypes{{else}}NULL{{/if}});
 }
 
 {{/all_cli_commands_for_user_enabled_clusters}}

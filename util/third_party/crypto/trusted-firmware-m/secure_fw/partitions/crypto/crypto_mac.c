@@ -55,9 +55,10 @@ psa_status_t tfm_crypto_mac_sign_setup(psa_invec in_vec[],
     if (status != PSA_SUCCESS) {
 #if defined(TFM_CONFIG_SL_SECURE_LIBRARY)
         if (status == PSA_ERROR_BAD_STATE) {
-            *handle_out = handle;
+            /* Invalidate the handle and abort the operation since the PSA Sign Mac
+               setup functon never gets called to perform the proper abort operation */
             /* Release the operation context, ignore if the operation fails. */
-            (void)tfm_crypto_operation_release(handle_out);
+            (void)tfm_crypto_operation_release(handle_out, true);
         }
 #endif
         return status;
@@ -79,7 +80,7 @@ psa_status_t tfm_crypto_mac_sign_setup(psa_invec in_vec[],
 
 exit:
     /* Release the operation context, ignore if the operation fails. */
-    (void)tfm_crypto_operation_release(handle_out);
+    (void)tfm_crypto_operation_release(handle_out, true);
     return status;
 #endif /* TFM_CRYPTO_MAC_MODULE_DISABLED */
 }
@@ -119,9 +120,10 @@ psa_status_t tfm_crypto_mac_verify_setup(psa_invec in_vec[],
     if (status != PSA_SUCCESS) {
 #if defined(TFM_CONFIG_SL_SECURE_LIBRARY)
         if (status == PSA_ERROR_BAD_STATE) {
-            *handle_out = handle;
+            /* Invalidate the handle and abort the operation since the PSA Verify Mac
+               setup functon never gets called to perform the proper abort operation */
             /* Release the operation context, ignore if the operation fails. */
-            (void)tfm_crypto_operation_release(handle_out);
+            (void)tfm_crypto_operation_release(handle_out, true);
         }
 #endif
         return status;
@@ -143,7 +145,7 @@ psa_status_t tfm_crypto_mac_verify_setup(psa_invec in_vec[],
 
 exit:
     /* Release the operation context, ignore if the operation fails. */
-    (void)tfm_crypto_operation_release(handle_out);
+    (void)tfm_crypto_operation_release(handle_out, true);
     return status;
 #endif /* TFM_CRYPTO_MAC_MODULE_DISABLED */
 }
@@ -180,17 +182,17 @@ psa_status_t tfm_crypto_mac_update(psa_invec in_vec[],
                                          handle,
                                          (void **)&operation);
     if (status != PSA_SUCCESS) {
-#if defined(TFM_CONFIG_SL_SECURE_LIBRARY)
-        if (status == PSA_ERROR_BAD_STATE) {
-            *handle_out = handle;
-            /* Release the operation context, ignore if the operation fails. */
-            (void)tfm_crypto_operation_release(handle_out);
-        }
-#endif
         return status;
     }
 
-    return psa_mac_update(operation, input, input_length);
+    status = psa_mac_update(operation, input, input_length);
+    if (status != PSA_SUCCESS) {
+        /* If the operation failed, the abort() function is called by the underlying crypto function
+           so just indicate that the operation is invalid. */
+        (void)tfm_crypto_operation_release(handle_out, false);
+    }
+
+    return status;
 #endif /* TFM_CRYPTO_MAC_MODULE_DISABLED */
 }
 
@@ -229,29 +231,13 @@ psa_status_t tfm_crypto_mac_sign_finish(psa_invec in_vec[],
                                          handle,
                                          (void **)&operation);
     if (status != PSA_SUCCESS) {
-#if defined(TFM_CONFIG_SL_SECURE_LIBRARY)
-        if (status == PSA_ERROR_BAD_STATE) {
-            *handle_out = handle;
-            /* Release the operation context, ignore if the operation fails. */
-            (void)tfm_crypto_operation_release(handle_out);
-        }
-#endif
         return status;
     }
 
     status = psa_mac_sign_finish(operation, mac, mac_size, &out_vec[1].len);
-#if !defined(TFM_CONFIG_SL_SECURE_LIBRARY)
-    /* Expected by sign_message_fail() in test_suite_psa_crypto.function:
-     * The value of *signature_length is unspecified on error, but
-     * whatever it is, it should be less than signature_size, so that
-     * if the caller tries to read *signature_length bytes without
-     * checking the error code then they don't overflow a buffer. */
-    if (status == PSA_SUCCESS)
-#endif
-    {
-        /* Release the operation context, ignore if the operation fails. */
-        (void)tfm_crypto_operation_release(handle_out);
-    }
+    /* The abort() function is called by the underlying crypto function
+       so just indicate that the operation is invalid. */
+    (void)tfm_crypto_operation_release(handle_out, false);
 
     return status;
 #endif /* TFM_CRYPTO_MAC_MODULE_DISABLED */
@@ -289,24 +275,13 @@ psa_status_t tfm_crypto_mac_verify_finish(psa_invec in_vec[],
                                          handle,
                                          (void **)&operation);
     if (status != PSA_SUCCESS) {
-#if defined(TFM_CONFIG_SL_SECURE_LIBRARY)
-        if (status == PSA_ERROR_BAD_STATE) {
-            *handle_out = handle;
-            /* Release the operation context, ignore if the operation fails. */
-            (void)tfm_crypto_operation_release(handle_out);
-        }
-#endif
         return status;
     }
 
     status = psa_mac_verify_finish(operation, mac, mac_length);
-#if !defined(TFM_CONFIG_SL_SECURE_LIBRARY)
-    if (status == PSA_SUCCESS)
-#endif
-    {
-        /* Release the operation context, ignore if the operation fails. */
-        (void)tfm_crypto_operation_release(handle_out);
-    }
+    /* The abort() function is called by the underlying crypto function
+       so just indicate that the operation is invalid. */
+    (void)tfm_crypto_operation_release(handle_out, false);
 
     return status;
 #endif /* TFM_CRYPTO_MAC_MODULE_DISABLED */
@@ -347,14 +322,15 @@ psa_status_t tfm_crypto_mac_abort(psa_invec in_vec[],
     }
 
     status = psa_mac_abort(operation);
-
     if (status != PSA_SUCCESS) {
         /* Release the operation context, ignore if the operation fails. */
-        (void)tfm_crypto_operation_release(handle_out);
+        (void)tfm_crypto_operation_release(handle_out, true);
         return status;
     }
 
-    return tfm_crypto_operation_release(handle_out);
+    /* The abort() function is called by the underlying crypto function
+       so just invalidate the operation */
+    return tfm_crypto_operation_release(handle_out, false);
 #endif /* TFM_CRYPTO_MAC_MODULE_DISABLED */
 }
 
@@ -404,7 +380,7 @@ psa_status_t tfm_crypto_mac_verify(psa_invec in_vec[],
 #else
     // No output.
     (void)out_vec;
-    
+
     psa_status_t status = PSA_SUCCESS;
 
     CRYPTO_IN_OUT_LEN_VALIDATE(in_len, 1, 3, out_len, 0, 0);

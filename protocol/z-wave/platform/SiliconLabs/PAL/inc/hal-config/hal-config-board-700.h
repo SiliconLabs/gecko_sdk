@@ -78,37 +78,6 @@
 #define HAL_PA_CURVE_HEADER                    "pa_curves_efr32.h"
 // [PA]$
 
-// $[SERIAL]
-#define HAL_SERIAL_USART0_ENABLE              (0)
-#define BSP_SERIAL_APP_PORT                   (HAL_SERIAL_PORT_USART0)
-#define HAL_SERIAL_LEUART0_ENABLE             (0)
-#define HAL_SERIAL_USART1_ENABLE              (0)
-#define HAL_SERIAL_RXWAKE_ENABLE              (0)
-#define BSP_SERIAL_APP_CTS_PIN                (2U)
-#define BSP_SERIAL_APP_CTS_PORT               (gpioPortA)
-#define BSP_SERIAL_APP_CTS_LOC                (30U)
-
-#define BSP_SERIAL_APP_RX_PIN                 (1U)
-#define BSP_SERIAL_APP_RX_PORT                (gpioPortA)
-#define BSP_SERIAL_APP_RX_LOC                 (0U)
-
-#define BSP_SERIAL_APP_TX_PIN                 (0U)
-#define BSP_SERIAL_APP_TX_PORT                (gpioPortA)
-#define BSP_SERIAL_APP_TX_LOC                 (0U)
-
-#define BSP_SERIAL_APP_RTS_PIN                (3U)
-
-#define BSP_SERIAL_APP_RTS_PORT               (gpioPortA)
-#define BSP_SERIAL_APP_RTS_LOC                (30U)
-
-#define HAL_SERIAL_APP_RX_QUEUE_SIZE          (128UL)
-#define HAL_SERIAL_APP_BAUD_RATE              (115200UL)
-#define HAL_SERIAL_APP_RXSTOP                 (16UL)
-#define HAL_SERIAL_APP_RXSTART                (16UL)
-#define HAL_SERIAL_APP_TX_QUEUE_SIZE          (128UL)
-#define HAL_SERIAL_APP_FLOW_CONTROL           (HAL_USART_FLOW_CONTROL_NONE)
-// [SERIAL]$
-
 // $[USART0]
 #define PORTIO_USART0_CTS_PIN                 (2U)
 #define PORTIO_USART0_CTS_PORT                (gpioPortA)
@@ -191,22 +160,6 @@
 #define HAL_USART1_FREQUENCY                  (1000000UL)
 
 // [USART1]$
-
-// $[VCOM]
-#define HAL_VCOM_ENABLE                               (1)
-
-#if defined(EFR32ZG13L231F512GM32) || defined(EFR32ZG13L231F512IM32) || \
-    defined(EFR32ZG13P231F512GM64) || defined(EFR32ZG13P531F512GM32) || \
-    defined(EFR32ZG13P531F512GM48) || defined(EFR32ZG13S231F512GM32) || \
-    defined(EFR32ZG14P231F256GM32) || defined(EFR32ZG14P731F256GM32)
-#define BSP_VCOM_ENABLE_PIN                           (14U)
-#define BSP_VCOM_ENABLE_PORT                          (gpioPortD)
-#else
-#define BSP_VCOM_ENABLE_PIN                           (5U)
-#define BSP_VCOM_ENABLE_PORT                          (gpioPortA)
-#endif
-// [VCOM]$
-
 
 #define BSP_ETM_TRACE              /* This board supports ETM trace. */
 #define BSP_TRACE_ETM_CLKLOC     3 /* ETM_TCLK = PC6  */

@@ -11,5 +11,3 @@ include:
   - path: protocol/z-wave/ZAF/CommandClasses/BinarySwitch
     file_list:
       - path: CC_BinarySwitch.h
-documentation:
-  url: "https://sdomembers.z-wavealliance.org/document/dl/638"

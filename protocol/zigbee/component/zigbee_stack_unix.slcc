@@ -243,11 +243,6 @@ toolchain_settings:
 template_contribution:
   - name: component_catalog
     value: zigbee_stack_unix
-  - name: event_handler
-    value:
-      event: stack_process_action
-      include: "serial_adapter.h"
-      handler: sli_serial_adapter_tick_callback
 
 documentation:
   docset: zigbee

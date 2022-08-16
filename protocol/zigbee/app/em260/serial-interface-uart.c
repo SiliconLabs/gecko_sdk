@@ -168,6 +168,12 @@ uint8_t serialGetCommandLength(void)
 void serialSetResponseLength(uint8_t data)
 {
   emberSetMessageBufferLength(ezspBuffer, data);
+
+  // emberSetMessageBufferLength has the potential effect of setting ezspBuffer
+  // to a brand new buffer. This can happen if ezspBuffer is being extended.
+  // As a result of that, we'll need to refresh ezspFrameContents, which is
+  // supposed to track the buffer contents of ezspBuffer
+  ezspFrameContents = emberMessageBufferContents(ezspBuffer);
 }
 
 bool serialCallbackResponse(void)

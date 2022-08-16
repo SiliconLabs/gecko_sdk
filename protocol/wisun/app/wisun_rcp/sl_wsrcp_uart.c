@@ -15,101 +15,161 @@
 #include <string.h>
 #include <em_cmu.h>
 #include <em_gpio.h>
+
 #include "sl_wsrcp.h"
+#include "sl_wsrcp_crc.h"
 #include "sl_wsrcp_log.h"
+#include "sl_wsrcp_utils.h"
 #include "sl_wsrcp_uart.h"
+#include "sl_wsrcp_uart_config.h"
 #include "sl_wsrcp_mac.h"
 
 // Used for debug to display the data sent/received on the bus
 static char trace_buffer[128];
 
-// width=16 poly=0x1021 init=0xffff refin=true refout=true xorout=0xffff check=0x906e residue=0xf0b8 name="CRC-16/IBM-SDLC"
-// https://reveng.sourceforge.io/crc-catalogue/16.htm#crc.cat.crc-16-ibm-sdlc
-static uint16_t crc16(const uint8_t *data, int len)
+__WEAK void uart_rx_ready(struct sl_wsrcp_uart *uart_ctxt)
 {
-    uint16_t crc = 0xFFFF;
-    // Generated from http://www.sunshine2k.de/coding/javascript/crc/crc_js.html
-    static const uint16_t crc_table[256] = {
-        0x0000, 0x1189, 0x2312, 0x329b, 0x4624, 0x57ad, 0x6536, 0x74bf, 0x8c48,
-        0x9dc1, 0xaf5a, 0xbed3, 0xca6c, 0xdbe5, 0xe97e, 0xf8f7, 0x1081, 0x0108,
-        0x3393, 0x221a, 0x56a5, 0x472c, 0x75b7, 0x643e, 0x9cc9, 0x8d40, 0xbfdb,
-        0xae52, 0xdaed, 0xcb64, 0xf9ff, 0xe876, 0x2102, 0x308b, 0x0210, 0x1399,
-        0x6726, 0x76af, 0x4434, 0x55bd, 0xad4a, 0xbcc3, 0x8e58, 0x9fd1, 0xeb6e,
-        0xfae7, 0xc87c, 0xd9f5, 0x3183, 0x200a, 0x1291, 0x0318, 0x77a7, 0x662e,
-        0x54b5, 0x453c, 0xbdcb, 0xac42, 0x9ed9, 0x8f50, 0xfbef, 0xea66, 0xd8fd,
-        0xc974, 0x4204, 0x538d, 0x6116, 0x709f, 0x0420, 0x15a9, 0x2732, 0x36bb,
-        0xce4c, 0xdfc5, 0xed5e, 0xfcd7, 0x8868, 0x99e1, 0xab7a, 0xbaf3, 0x5285,
-        0x430c, 0x7197, 0x601e, 0x14a1, 0x0528, 0x37b3, 0x263a, 0xdecd, 0xcf44,
-        0xfddf, 0xec56, 0x98e9, 0x8960, 0xbbfb, 0xaa72, 0x6306, 0x728f, 0x4014,
-        0x519d, 0x2522, 0x34ab, 0x0630, 0x17b9, 0xef4e, 0xfec7, 0xcc5c, 0xddd5,
-        0xa96a, 0xb8e3, 0x8a78, 0x9bf1, 0x7387, 0x620e, 0x5095, 0x411c, 0x35a3,
-        0x242a, 0x16b1, 0x0738, 0xffcf, 0xee46, 0xdcdd, 0xcd54, 0xb9eb, 0xa862,
-        0x9af9, 0x8b70, 0x8408, 0x9581, 0xa71a, 0xb693, 0xc22c, 0xd3a5, 0xe13e,
-        0xf0b7, 0x0840, 0x19c9, 0x2b52, 0x3adb, 0x4e64, 0x5fed, 0x6d76, 0x7cff,
-        0x9489, 0x8500, 0xb79b, 0xa612, 0xd2ad, 0xc324, 0xf1bf, 0xe036, 0x18c1,
-        0x0948, 0x3bd3, 0x2a5a, 0x5ee5, 0x4f6c, 0x7df7, 0x6c7e, 0xa50a, 0xb483,
-        0x8618, 0x9791, 0xe32e, 0xf2a7, 0xc03c, 0xd1b5, 0x2942, 0x38cb, 0x0a50,
-        0x1bd9, 0x6f66, 0x7eef, 0x4c74, 0x5dfd, 0xb58b, 0xa402, 0x9699, 0x8710,
-        0xf3af, 0xe226, 0xd0bd, 0xc134, 0x39c3, 0x284a, 0x1ad1, 0x0b58, 0x7fe7,
-        0x6e6e, 0x5cf5, 0x4d7c, 0xc60c, 0xd785, 0xe51e, 0xf497, 0x8028, 0x91a1,
-        0xa33a, 0xb2b3, 0x4a44, 0x5bcd, 0x6956, 0x78df, 0x0c60, 0x1de9, 0x2f72,
-        0x3efb, 0xd68d, 0xc704, 0xf59f, 0xe416, 0x90a9, 0x8120, 0xb3bb, 0xa232,
-        0x5ac5, 0x4b4c, 0x79d7, 0x685e, 0x1ce1, 0x0d68, 0x3ff3, 0x2e7a, 0xe70e,
-        0xf687, 0xc41c, 0xd595, 0xa12a, 0xb0a3, 0x8238, 0x93b1, 0x6b46, 0x7acf,
-        0x4854, 0x59dd, 0x2d62, 0x3ceb, 0x0e70, 0x1ff9, 0xf78f, 0xe606, 0xd49d,
-        0xc514, 0xb1ab, 0xa022, 0x92b9, 0x8330, 0x7bc7, 0x6a4e, 0x58d5, 0x495c,
-        0x3de3, 0x2c6a, 0x1ef1, 0x0f78
-    };
-
-    // See "Roll Your Own Table-Driven Implementation" from
-    // https://zlib.net/crc_v3.txt
-    while (len--)
-        crc = crc_table[(crc ^ *data++) & 0xff] ^ (crc >> 8);
-    return crc ^ 0xFFFF;
+    (void)uart_ctxt;
 }
 
-static int uart_tx_escaped_byte(struct sl_wsrcp_app *rcp_app, uint8_t byte)
+__WEAK void uart_crc_error(struct sl_wsrcp_uart *uart_ctxt, uint16_t crc, int frame_len, uint8_t header, uint8_t irq_overflow_cnt)
+{
+    (void)uart_ctxt;
+    (void)crc;
+    (void)frame_len;
+    (void)header;
+    (void)irq_overflow_cnt;
+}
+
+static bool uart_handle_rx_dma_complete(unsigned int chan, unsigned int seq_num, void *user_param)
+{
+    struct sl_wsrcp_uart *uart_ctxt = user_param;
+    int ret;
+    unsigned int i;
+
+    (void)chan;
+    (void)seq_num;
+
+    for (i = 0; i < sizeof(uart_ctxt->buf_rx[0]); i++) {
+        ret = ring_push(&uart_ctxt->rx_ring, uart_ctxt->buf_rx[uart_ctxt->descr_cnt_rx][i]);
+        BUG_ON(ret, "buffer overflow");
+    }
+    uart_ctxt->descr_cnt_rx += 1;
+    uart_ctxt->descr_cnt_rx %= ARRAY_SIZE(uart_ctxt->buf_rx);
+    uart_rx_ready(uart_ctxt);
+    return true;
+}
+
+static bool uart_handle_tx_dma_complete(unsigned int chan, unsigned int seq_num, void *user_param)
+{
+    struct sl_wsrcp_uart *uart_ctxt = user_param;
+
+    (void)chan;
+    (void)seq_num;
+
+    osSemaphoreRelease(uart_ctxt->tx_dma_lock);
+    return true;
+}
+
+void uart_handle_rx_dma_timeout(struct sl_wsrcp_uart *uart_ctxt)
+{
+    LDMA_TransferCfg_t ldma_cfg = LDMA_TRANSFER_CFG_PERIPHERAL(UART_LDMA_SIGNAL_RX);
+    int remaining, descr_cnt_rx, ret;
+    size_t i;
+
+    // Begin of realtime constrained section
+    // (with USART, we need to execute that in less than 5µs for a 2Mbps UART link)
+    // (with EUSART, thanks to it 16bytes depth fifo , we need to execute the
+    // code below in less than 40µs for a 4Mbps UART link)
+    DMADRV_StopTransfer(uart_ctxt->dma_chan_rx);
+    DMADRV_TransferRemainingCount(uart_ctxt->dma_chan_rx, &remaining);
+    descr_cnt_rx = uart_ctxt->descr_cnt_rx;
+    uart_ctxt->descr_cnt_rx += 1;
+    uart_ctxt->descr_cnt_rx %= ARRAY_SIZE(uart_ctxt->buf_rx);
+    DMADRV_LdmaStartTransfer(uart_ctxt->dma_chan_rx, &ldma_cfg,
+                             &(uart_ctxt->descr_rx[uart_ctxt->descr_cnt_rx]),
+                             uart_handle_rx_dma_complete, uart_ctxt);
+    // End of realtime constrained section
+
+    for (i = 0; i < sizeof(uart_ctxt->buf_rx[0]) - remaining; i++) {
+        ret = ring_push(&uart_ctxt->rx_ring, uart_ctxt->buf_rx[descr_cnt_rx][i]);
+        BUG_ON(ret, "buffer overflow");
+    }
+    uart_rx_ready(uart_ctxt);
+}
+
+void uart_handle_rx_overflow(struct sl_wsrcp_uart *uart_ctxt)
+{
+    WARN("IRQ overflow");
+    uart_ctxt->irq_overflow_cnt++;
+}
+
+static int append_escaped_byte(uint8_t *buffer, uint8_t byte)
 {
     if (byte == 0x7D || byte == 0x7E) {
-        uart_tx_byte(rcp_app, 0x7D);
-        uart_tx_byte(rcp_app, byte ^ 0x20);
+        buffer[0] = 0x7D;
+        buffer[1] = byte ^ 0x20;
         return 2;
     } else {
-        uart_tx_byte(rcp_app, byte);
+        buffer[0] = byte;
         return 1;
     }
 }
 
-int uart_tx(struct sl_wsrcp_app *rcp_app, const void *buf, int buf_len)
+int uart_tx(struct sl_wsrcp_uart *uart_ctxt, const void *buf, int buf_len)
 {
+    LDMA_TransferCfg_t ldma_cfg = LDMA_TRANSFER_CFG_PERIPHERAL(UART_LDMA_SIGNAL_TX);
+    LDMA_Descriptor_t *dma_descr;
     uint16_t crc = crc16(buf, buf_len);
     const uint8_t *buf8 = buf;
-    int i, frame_len;
+    uint8_t *dma_buf;
+    int buf_cnt = 0;
+    size_t xfer_cnt;
 
-    frame_len = 0;
-    for (i = 0; i < buf_len; i++)
-        frame_len += uart_tx_escaped_byte(rcp_app, buf8[i]);
-    frame_len += uart_tx_escaped_byte(rcp_app, crc & 0xFF);
-    frame_len += uart_tx_escaped_byte(rcp_app, crc >> 8);
-    uart_tx_byte(rcp_app, 0x7E);
+    // Only double buffering is supported
+    BUG_ON(ARRAY_SIZE(uart_ctxt->descr_tx) != 2);
+    BUG_ON(sizeof(uart_ctxt->buf_tx[0]) > DMADRV_MAX_XFER_COUNT);
+
+    osMutexAcquire(uart_ctxt->tx_lock, osWaitForever);
+    while (buf_cnt < buf_len) {
+        dma_buf = uart_ctxt->buf_tx[uart_ctxt->descr_cnt_tx];
+        dma_descr = &uart_ctxt->descr_tx[uart_ctxt->descr_cnt_tx];
+        xfer_cnt = 0;
+        while (buf_cnt < buf_len && xfer_cnt < sizeof(uart_ctxt->buf_tx[0]) - 7) {
+            xfer_cnt += append_escaped_byte(dma_buf + xfer_cnt, buf8[buf_cnt]);
+            buf_cnt++;
+        }
+        if (buf_cnt == buf_len) {
+            xfer_cnt += append_escaped_byte(dma_buf + xfer_cnt, crc & 0xFF);
+            xfer_cnt += append_escaped_byte(dma_buf + xfer_cnt, crc >> 8);
+            dma_buf[xfer_cnt++] = 0x7E;
+        }
+        xfer_cnt--;
+        dma_descr->xfer.xferCnt = xfer_cnt;
+        osSemaphoreAcquire(uart_ctxt->tx_dma_lock, osWaitForever);
+        DMADRV_LdmaStartTransfer(uart_ctxt->dma_chan_tx, &ldma_cfg,
+                                 dma_descr, uart_handle_tx_dma_complete, uart_ctxt);
+        uart_ctxt->descr_cnt_tx = (uart_ctxt->descr_cnt_tx + 1) % ARRAY_SIZE(uart_ctxt->descr_tx);
+    }
+    osMutexRelease(uart_ctxt->tx_lock);
+
     TRACE(TR_HDLC, "hdlc tx: %s (%d bytes)",
            bytes_str(buf, buf_len, NULL, trace_buffer, sizeof(trace_buffer), DELIM_SPACE | ELLIPSIS_STAR), buf_len);
-
-    return frame_len;
+    return buf_len;
 }
 
-int uart_rx(struct sl_wsrcp_app *rcp_app, void *buf, int buf_len)
+int uart_rx(struct sl_wsrcp_uart *uart_ctxt, void *buf, int buf_len)
 {
     uint8_t *buf8 = buf;
     uint16_t crc;
     int i, frame_len;
     int data;
 
-    while (ring_get(&rcp_app->rx_buf, 0) == 0x7E)
-        ring_pop(&rcp_app->rx_buf);
+    while (ring_get(&uart_ctxt->rx_ring, 0) == 0x7E)
+        ring_pop(&uart_ctxt->rx_ring);
 
     for (i = 0, data = 0; data != 0x7E; i++) {
-        data = ring_get(&rcp_app->rx_buf, i);
+        data = ring_get(&uart_ctxt->rx_ring, i);
         if (data < 0)
             return 0;
     }
@@ -117,10 +177,10 @@ int uart_rx(struct sl_wsrcp_app *rcp_app, void *buf, int buf_len)
     frame_len = 0;
     do {
         BUG_ON(frame_len >= buf_len);
-        data = ring_pop(&rcp_app->rx_buf);
+        data = ring_pop(&uart_ctxt->rx_ring);
         BUG_ON(data < 0);
         if (data == 0x7D)
-            buf8[frame_len++] = ring_pop(&rcp_app->rx_buf) ^ 0x20;
+            buf8[frame_len++] = ring_pop(&uart_ctxt->rx_ring) ^ 0x20;
         else if (data != 0x7E)
             buf8[frame_len++] = data;
     } while (data != 0x7E);
@@ -130,11 +190,70 @@ int uart_rx(struct sl_wsrcp_app *rcp_app, void *buf, int buf_len)
     crc = crc16(buf8, frame_len);
     if (memcmp(buf8 + frame_len, &crc, sizeof(uint16_t))) {
         WARN("bad crc, frame dropped");
-        wsmac_report_rx_crc_error(rcp_app->rcp_mac, *(uint16_t *)(buf8 + frame_len), frame_len, buf8[0], rcp_app->irq_rxof_cnt);
-        rcp_app->irq_rxof_cnt = 0;
+        uart_crc_error(uart_ctxt, *(uint16_t *)(buf8 + frame_len), frame_len, buf8[0], uart_ctxt->irq_overflow_cnt);
+        uart_ctxt->irq_overflow_cnt = 0;
         return 0;
     }
     TRACE(TR_HDLC, "hdlc rx: %s (%d bytes)",
            bytes_str(buf, frame_len, NULL, trace_buffer, sizeof(trace_buffer), DELIM_SPACE | ELLIPSIS_STAR), frame_len);
     return frame_len;
+}
+
+void uart_init(struct sl_wsrcp_uart *uart_ctxt)
+{
+    LDMA_TransferCfg_t ldma_cfg = LDMA_TRANSFER_CFG_PERIPHERAL(UART_LDMA_SIGNAL_RX);
+    unsigned int i, next;
+
+    ring_init(&uart_ctxt->rx_ring, uart_ctxt->rx_ring_data, sizeof(uart_ctxt->rx_ring_data));
+    uart_ctxt->tx_lock = osMutexNew(NULL);
+    uart_ctxt->tx_dma_lock = osSemaphoreNew(1, 1, NULL);
+    uart_ctxt->hw_regs = UART_PERIPHERAL;
+    for (i = 0; i < ARRAY_SIZE(uart_ctxt->descr_rx); i++) {
+        uart_ctxt->descr_rx[i].xfer.structType  = ldmaCtrlStructTypeXfer;
+        uart_ctxt->descr_rx[i].xfer.blockSize   = ldmaCtrlBlockSizeUnit1;
+        uart_ctxt->descr_rx[i].xfer.reqMode     = ldmaCtrlReqModeBlock;
+        uart_ctxt->descr_rx[i].xfer.doneIfs     = 1;
+
+        uart_ctxt->descr_rx[i].xfer.size        = ldmaCtrlSizeByte;
+        uart_ctxt->descr_rx[i].xfer.xferCnt     = sizeof(uart_ctxt->buf_rx[0]) - 1;
+
+        uart_ctxt->descr_rx[i].xfer.srcInc      = ldmaCtrlSrcIncNone;
+        uart_ctxt->descr_rx[i].xfer.srcAddrMode = ldmaCtrlSrcAddrModeAbs;
+        uart_ctxt->descr_rx[i].xfer.srcAddr     = (uintptr_t)&(uart_ctxt->hw_regs->RXDATA);
+
+        uart_ctxt->descr_rx[i].xfer.dstInc      = ldmaCtrlDstIncOne;
+        uart_ctxt->descr_rx[i].xfer.dstAddrMode = ldmaCtrlDstAddrModeAbs;
+        uart_ctxt->descr_rx[i].xfer.dstAddr     = (uintptr_t)&(uart_ctxt->buf_rx[i]);
+
+        uart_ctxt->descr_rx[i].xfer.linkMode    = ldmaLinkModeAbs;
+        uart_ctxt->descr_rx[i].xfer.link        = 1;
+
+        next = i + 1;
+        next %= ARRAY_SIZE(uart_ctxt->descr_rx);
+        uart_ctxt->descr_rx[i].xfer.linkAddr = ((uintptr_t)&(uart_ctxt->descr_rx[next])) >> _LDMA_CH_LINK_LINKADDR_SHIFT;
+    }
+
+    for (i = 0; i < ARRAY_SIZE(uart_ctxt->descr_tx); i++) {
+        uart_ctxt->descr_tx[i].xfer.structType  = ldmaCtrlStructTypeXfer;
+        uart_ctxt->descr_tx[i].xfer.blockSize   = ldmaCtrlBlockSizeUnit1;
+        uart_ctxt->descr_tx[i].xfer.reqMode     = ldmaCtrlReqModeBlock;
+        uart_ctxt->descr_tx[i].xfer.doneIfs     = 1;
+
+        uart_ctxt->descr_tx[i].xfer.size        = ldmaCtrlSizeByte;
+
+        uart_ctxt->descr_tx[i].xfer.srcInc      = ldmaCtrlDstIncOne;
+        uart_ctxt->descr_tx[i].xfer.srcAddrMode = ldmaCtrlDstAddrModeAbs;
+        uart_ctxt->descr_tx[i].xfer.srcAddr     = (uintptr_t)&(uart_ctxt->buf_tx[i]);
+
+        uart_ctxt->descr_tx[i].xfer.dstInc      = ldmaCtrlSrcIncNone;
+        uart_ctxt->descr_tx[i].xfer.dstAddrMode = ldmaCtrlSrcAddrModeAbs;
+        uart_ctxt->descr_tx[i].xfer.dstAddr     = (uintptr_t)&(uart_ctxt->hw_regs->TXDATA);
+    }
+    uart_hw_init(uart_ctxt);
+    DMADRV_Init();
+    DMADRV_AllocateChannel(&uart_ctxt->dma_chan_tx, NULL);
+    DMADRV_AllocateChannel(&uart_ctxt->dma_chan_rx, NULL);
+    DMADRV_LdmaStartTransfer(uart_ctxt->dma_chan_rx, &ldma_cfg,
+                             &(uart_ctxt->descr_rx[0]),
+                             uart_handle_rx_dma_complete, uart_ctxt);
 }

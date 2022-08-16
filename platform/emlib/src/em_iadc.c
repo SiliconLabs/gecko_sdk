@@ -186,7 +186,7 @@ void IADC_init(IADC_TypeDef *iadc,
 {
   uint32_t tmp;
   uint32_t config;
-  uint8_t wantedPrescale;
+  uint16_t wantedPrescale;
   uint8_t srcClkPrescale;
   uint32_t adcClkPrescale;
   uint8_t timebase;
@@ -980,7 +980,7 @@ uint32_t IADC_calcAdcClkPrescale(IADC_TypeDef *iadc,
   // Limit to max allowed register setting
   ret = SL_MIN(ret, (_IADC_SCHED_PRESCALE_MASK >> _IADC_SCHED_PRESCALE_SHIFT));
 
-  return (uint8_t)ret;
+  return (uint16_t)ret;
 }
 
 /***************************************************************************//**

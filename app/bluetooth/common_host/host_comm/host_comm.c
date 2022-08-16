@@ -43,6 +43,9 @@
 
 #if defined(POSIX) && POSIX == 1
 #include "named_socket.h"
+#if defined (CPC) && CPC == 1
+#include "cpc.h"
+#endif // defined (CPC) && CPC == 1
 #else
 #include <windows.h>
 #endif // defined(POSIX) && POSIX == 1
@@ -52,9 +55,10 @@
 #define DEFAULT_UART_BAUD_RATE        115200
 #define DEFAULT_UART_FLOW_CONTROL     1
 #define DEFAULT_UART_TIMEOUT          100
-#define DEFAUKT_TCP_ADDRESS           ""
+#define DEFAULT_TCP_ADDRESS           ""
 #define DEFAULT_TCP_PORT              "4901"
 #define MAX_OPT_LEN                   255
+#define DEFAULT_CPC_INST_NAME         "cpcd_0"
 
 #define IS_EMPTY_STRING(s)            ((s)[0] == '\0')
 #define HANDLE_VALUE_MIN              0
@@ -79,11 +83,19 @@ static uint32_t uart_baud_rate = DEFAULT_UART_BAUD_RATE;
 static uint32_t uart_flow_control = DEFAULT_UART_FLOW_CONTROL;
 
 // TCP/IP address.
-static char tcp_address[MAX_OPT_LEN] = DEFAUKT_TCP_ADDRESS;
+static char tcp_address[MAX_OPT_LEN] = DEFAULT_TCP_ADDRESS;
 
 #if defined(POSIX) && POSIX == 1
 // AF socket descriptor path
 static char named_socket_target_address[MAX_OPT_LEN];
+#if defined (CPC) && CPC == 1
+// CPCd instance name.
+static char cpc_instance_name[MAX_OPT_LEN] = DEFAULT_CPC_INST_NAME;
+
+// CPC connection
+static bool cpc_conn = false;
+#endif // defined (CPC) && CPC == 1
+
 #endif // defined(POSIX) && POSIX == 1
 
 #if defined(POSIX) && POSIX == 1
@@ -145,6 +157,15 @@ sl_status_t host_comm_init(void)
       app_log_critical("Connection to domain socket unsuccessful. Exiting.." APP_LOG_NL);
       exit(EXIT_FAILURE);
     }
+#if defined (CPC) && CPC == 1
+  } else if (cpc_conn) {
+    handle_ptr = &handle;
+    HOST_COMM_API_INITIALIZE_NONBLOCK(cpc_tx, cpc_rx, cpc_rx_peek);
+    if (cpc_open(handle_ptr, cpc_instance_name)) {
+      app_log_critical("Connection to CPCd unsuccessful. Exiting.." APP_LOG_NL);
+      exit(EXIT_FAILURE);
+    }
+#endif // defined (CPC) && CPC == 1
 #endif // defined(POSIX) && POSIX == 1
   } else {
     app_log_error("Either UART serial port or TCP/IP address is mandatory."
@@ -190,6 +211,13 @@ sl_status_t host_comm_set_option(char option, char *value)
     case 'n':
       strncpy(named_socket_target_address, value, MAX_OPT_LEN);
       break;
+#if defined (CPC) && CPC == 1
+    // CPC connection
+    case 'C':
+      strncpy(cpc_instance_name, value, MAX_OPT_LEN);
+      cpc_conn = true;
+      break;
+#endif // defined (CPC) && CPC == 1
 #endif // defined(POSIX) && POSIX == 1
     // Unknown option.
     default:

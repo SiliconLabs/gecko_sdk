@@ -41,14 +41,12 @@ extern "C" {
 #define TOKEN_MFG_ZW_PUK_ID               0x0003
 #define TOKEN_MFG_ZW_INITIALIZED_ID       0x0004
 #define TOKEN_MFG_ZW_QR_CODE_ID           0x0005
-#define TOKEN_MFG_ZW_QR_CODE_EXT_ID       0x0006
 
 #define TOKEN_MFG_ZWAVE_COUNTRY_FREQ_SIZE 1 // bytes
 #define TOKEN_MFG_ZW_PRK_SIZE 32 // bytes
 #define TOKEN_MFG_ZW_PUK_SIZE 32 // bytes
 #define TOKEN_MFG_ZW_INITIALIZED_SIZE 1 // bytes
-#define TOKEN_MFG_ZW_QR_CODE_SIZE 90 // bytes
-#define TOKEN_MFG_ZW_QR_CODE_EXT_SIZE  16  // bytes
+#define TOKEN_MFG_ZW_QR_CODE_SIZE 106 // bytes
 
 /**
  * Function for initializing manufacturing module

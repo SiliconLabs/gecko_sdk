@@ -32,7 +32,10 @@ typedef uint64_t psa_storage_uid_t;
 /* A container for metadata associated with a specific uid */
 
 struct psa_storage_info_t {
+#if !defined(TFM_CONFIG_SL_SECURE_LIBRARY)
+    // The PSA crypto implementation used internally doesn't have this member.
     size_t capacity;
+#endif
     size_t size;
     psa_storage_create_flags_t flags;
 };

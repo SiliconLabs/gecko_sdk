@@ -73,6 +73,7 @@
   - name: device
   - name: device_series_2
   - name: device_sdid_215
+  - name: device_generic_family_efr32xg24
   - name: device_family_mgm24
   - name: device_cortexm
   - name: device_arm

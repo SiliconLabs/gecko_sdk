@@ -190,7 +190,7 @@ uint32_t emberAfEncodeDate(EmberAfDate* date)
 // from that value.
 void emberAfPrintTime(uint32_t utcTime)
 {
-#ifdef EMBER_AF_PRINT_ENABLE
+#if defined(EMBER_AF_PRINT_ENABLE) || defined(SL_CATALOG_ZIGBEE_DEBUG_PRINT_PRESENT)
   EmberAfTimeStruct time;
   emberAfFillTimeStructFromUtc(utcTime, &time);
   emberAfPrintln(emberAfPrintActiveArea,
@@ -202,12 +202,12 @@ void emberAfPrintTime(uint32_t utcTime)
                  time.minutes,
                  time.seconds,
                  utcTime);
-#endif //EMBER_AF_PRINT_ENABLE
+#endif //EMBER_AF_PRINT_ENABLE || SL_CATALOG_ZIGBEE_DEBUG_PRINT_PRESENT
 }
 
 void emberAfPrintTimeIsoFormat(uint32_t utcTime)
 {
-#ifdef EMBER_AF_PRINT_ENABLE
+#if defined(EMBER_AF_PRINT_ENABLE) || defined(SL_CATALOG_ZIGBEE_DEBUG_PRINT_PRESENT)
   EmberAfTimeStruct time;
   emberAfFillTimeStructFromUtc(utcTime, &time);
   emberAfPrint(emberAfPrintActiveArea,
@@ -218,12 +218,12 @@ void emberAfPrintTimeIsoFormat(uint32_t utcTime)
                time.hours,
                time.minutes,
                time.seconds);
-#endif //EMBER_AF_PRINT_ENABLE
+#endif //EMBER_AF_PRINT_ENABLE || SL_CATALOG_ZIGBEE_DEBUG_PRINT_PRESENT
 }
 
 void emberAfPrintDate(const EmberAfDate * date)
 {
-#ifdef EMBER_AF_PRINT_ENABLE
+#if defined(EMBER_AF_PRINT_ENABLE) || defined(SL_CATALOG_ZIGBEE_DEBUG_PRINT_PRESENT)
   uint32_t zigbeeDate = ((((uint32_t)date->year) << 24)
                          + (((uint32_t)date->month) << 16)
                          + (((uint32_t)date->dayOfMonth) << 8)
@@ -237,7 +237,7 @@ void emberAfPrintDate(const EmberAfDate * date)
                date->month,
                (date->dayOfMonth < 10 ? "0" : ""),
                date->dayOfMonth);
-#endif //EMBER_AF_PRINT_ENABLE
+#endif //EMBER_AF_PRINT_ENABLE  ||  SL_CATALOG_ZIGBEE_DEBUG_PRINT_PRESENT
 }
 
 void emberAfPrintDateln(const EmberAfDate * date)

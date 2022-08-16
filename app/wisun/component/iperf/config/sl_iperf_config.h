@@ -53,7 +53,7 @@
 
 // <o SL_IPERF_BUFFER_SIZE> Server receiver buffer size
 // <i> Default value 1450 (UDPv6 size without fragmentation)
-#define SL_IPERF_BUFFER_SIZE                       1450U
+#define SL_IPERF_BUFFER_SIZE                       1234U
 
 // <o SL_IPERF_LOG_JSON_INDENT> Set json formated log indent in space count
 // <i> Default value: 2
