@@ -101,15 +101,6 @@ sl_status_t sl_wfx_host_deinit(void);
 
 /* GPIO interface */
 /**************************************************************************//**
- * @brief Implement the reset of the WFx chip
- * @returns Returns SL_STATUS_OK if successful, SL_STATUS_FAIL otherwise
- *
- * @note This function asserts the reset pin of the WFx chip for a while before
- * returning
- *****************************************************************************/
-sl_status_t sl_wfx_host_reset_chip(void);
-
-/**************************************************************************//**
  * @brief Drive the wake up pin in the requested state
  *
  * @param state to be applied to the wake up pin
@@ -248,14 +239,6 @@ sl_status_t sl_wfx_host_lock(void);
 sl_status_t sl_wfx_host_unlock(void);
 
 /* WF200 host bus API */
-/**************************************************************************//**
- * @brief Initialize the host bus
- * @returns Returns SL_STATUS_OK if successful, SL_STATUS_FAIL otherwise
- *
- * @note Called once during the driver initialization phase
- *****************************************************************************/
-sl_status_t sl_wfx_host_init_bus(void);
-
 /**************************************************************************//**
  * @brief Deinitialize the host bus
  * @returns Returns SL_STATUS_OK if successful, SL_STATUS_FAIL otherwise

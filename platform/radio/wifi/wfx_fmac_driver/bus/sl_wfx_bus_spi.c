@@ -85,11 +85,6 @@ sl_status_t sl_wfx_init_bus(void)
   sl_status_t status;
   uint32_t value32;
 
-  status = sl_wfx_host_init_bus();
-  SL_WFX_ERROR_CHECK(status);
-
-  sl_wfx_host_reset_chip();
-
   status = sl_wfx_reg_read_32(SL_WFX_CONFIG_REG_ID, &value32);
   SL_WFX_ERROR_CHECK(status);
 
