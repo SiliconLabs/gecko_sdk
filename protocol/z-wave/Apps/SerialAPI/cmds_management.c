@@ -305,9 +305,9 @@ void func_id_serial_api_setup(uint8_t inputLength,
       iTxPower = (zpal_tx_power_t)GET_16BIT_VALUE(&pInputBuffer[1]);
       iAdjust  = (zpal_tx_power_t)GET_16BIT_VALUE(&pInputBuffer[3]);
 
-      /* Only allow power level between -10dBm and 10dBm (API is in deci dBm) */
+      /* Only allow power level between -6dBm and 14dBm (API is in deci dBm) */
       if ((   iTxPower >= (zpal_radio_get_minimum_lr_tx_power() * 10) )
-          && (iTxPower <=  MAX(APP_MAX_TX_POWER, zpal_radio_get_maximum_lr_tx_power()) )
+          && (iTxPower <=  MAX(APP_MAX_TX_POWER_LR, zpal_radio_get_maximum_lr_tx_power() * 10) )
           && (iAdjust  >=  -ZW_TX_POWER_20DBM)
           && (iAdjust  <=  ZW_TX_POWER_20DBM )  /* We might not need these checks as these are made for calibration and
                                                  * we can't tell in advance how large or small the value needs to be. */
