@@ -28,7 +28,7 @@
  * 3. This notice may not be removed or altered from any source distribution.
  *
  ******************************************************************************/
-#ifdef EZSP_HOST
+#if (defined(EZSP_HOST) || defined(ZIGBEE_PRO_COMPLIANCE_ON_HOST))
 #include <assert.h>
 #include <pthread.h>
 #ifdef __APPLE__
@@ -38,6 +38,8 @@
 #include <semaphore.h>
 #endif
 #include "sl_cli.h"
+
+#define SL_CLI_THREADED_HOST_PIPE_DATA_LENGTH 2
 
 struct semaphore {
 #ifdef __APPLE__
@@ -58,4 +60,4 @@ void sli_cli_threaded_host_init(void);
 bool sli_cli_is_input_handled(void);
 
 int sli_cli_get_pipe_read_fd(void);
-#endif // EZSP_HOST
+#endif // EZSP_HOST || ZIGBEE_PRO_COMPLIANCE_ON_HOST

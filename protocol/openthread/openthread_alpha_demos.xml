@@ -6,9 +6,9 @@
     <property key="demos.blurb" value="Multiprotocol (OpenThread+Zigbee+BLE) - RCP (SPI)"/>
     <property key="core.partCompatibility" value=".*efr32mg12p432f1024gl125.*"/>
     <property key="core.boardCompatibility" value="brd4161a"/>
-    <property key="demos.imageFile" value="asset://com.silabs.sdk.stack.super_4.1.1/protocol/openthread/demos/rcp-spi-802154-blehci/rcp-spi-802154-blehci-brd4161a.s37"/>
+    <property key="demos.imageFile" value="asset://com.silabs.sdk.stack.super_4.1.2/protocol/openthread/demos/rcp-spi-802154-blehci/rcp-spi-802154-blehci-brd4161a.s37"/>
     <property key="core.readmeFiles" value="sample-apps/ot-ncp/README-MP-DMP-RCP.md"/>
-    <property key="filters" value="Capability|Multiprotocol Device\ Type|RCP Project\ Difficulty|Advanced Wireless\ Technology|Bluetooth Wireless\ Technology|Thread"/>
+    <property key="filters" value="Capability|Multiprotocol Device\ Type|RCP Project\ Difficulty|Advanced Wireless\ Technology|Bluetooth Wireless\ Technology|Thread Wireless\ Technology|Zigbee"/>
     <property key="core.quality" value="ALPHA"/>
   </demo>
   <demo name="brd4166a.demo.rcp-spi-802154-blehci" label="Multiprotocol (OpenThread+Zigbee+BLE) - RCP (SPI)">
@@ -17,9 +17,9 @@
     <property key="demos.blurb" value="Multiprotocol (OpenThread+Zigbee+BLE) - RCP (SPI)"/>
     <property key="core.partCompatibility" value=".*efr32mg12p332f1024gl125.*"/>
     <property key="core.boardCompatibility" value="brd4166a"/>
-    <property key="demos.imageFile" value="asset://com.silabs.sdk.stack.super_4.1.1/protocol/openthread/demos/rcp-spi-802154-blehci/rcp-spi-802154-blehci-brd4166a.s37"/>
+    <property key="demos.imageFile" value="asset://com.silabs.sdk.stack.super_4.1.2/protocol/openthread/demos/rcp-spi-802154-blehci/rcp-spi-802154-blehci-brd4166a.s37"/>
     <property key="core.readmeFiles" value="sample-apps/ot-ncp/README-MP-DMP-RCP.md"/>
-    <property key="filters" value="Capability|Multiprotocol Device\ Type|RCP Project\ Difficulty|Advanced Wireless\ Technology|Bluetooth Wireless\ Technology|Thread"/>
+    <property key="filters" value="Capability|Multiprotocol Device\ Type|RCP Project\ Difficulty|Advanced Wireless\ Technology|Bluetooth Wireless\ Technology|Thread Wireless\ Technology|Zigbee"/>
     <property key="core.quality" value="ALPHA"/>
   </demo>
   <demo name="brd4168a.demo.rcp-spi-802154-blehci" label="Multiprotocol (OpenThread+Zigbee+BLE) - RCP (SPI)">
@@ -28,9 +28,9 @@
     <property key="demos.blurb" value="Multiprotocol (OpenThread+Zigbee+BLE) - RCP (SPI)"/>
     <property key="core.partCompatibility" value=".*efr32mg13p732f512gm48.*"/>
     <property key="core.boardCompatibility" value="brd4168a"/>
-    <property key="demos.imageFile" value="asset://com.silabs.sdk.stack.super_4.1.1/protocol/openthread/demos/rcp-spi-802154-blehci/rcp-spi-802154-blehci-brd4168a.s37"/>
+    <property key="demos.imageFile" value="asset://com.silabs.sdk.stack.super_4.1.2/protocol/openthread/demos/rcp-spi-802154-blehci/rcp-spi-802154-blehci-brd4168a.s37"/>
     <property key="core.readmeFiles" value="sample-apps/ot-ncp/README-MP-DMP-RCP.md"/>
-    <property key="filters" value="Capability|Multiprotocol Device\ Type|RCP Project\ Difficulty|Advanced Wireless\ Technology|Bluetooth Wireless\ Technology|Thread"/>
+    <property key="filters" value="Capability|Multiprotocol Device\ Type|RCP Project\ Difficulty|Advanced Wireless\ Technology|Bluetooth Wireless\ Technology|Thread Wireless\ Technology|Zigbee"/>
     <property key="core.quality" value="ALPHA"/>
   </demo>
   <demo name="brd4180a.demo.rcp-spi-802154-blehci" label="Multiprotocol (OpenThread+Zigbee+BLE) - RCP (SPI)">
@@ -39,9 +39,9 @@
     <property key="demos.blurb" value="Multiprotocol (OpenThread+Zigbee+BLE) - RCP (SPI)"/>
     <property key="core.partCompatibility" value=".*efr32mg21a020f1024im32.*"/>
     <property key="core.boardCompatibility" value="brd4180a"/>
-    <property key="demos.imageFile" value="asset://com.silabs.sdk.stack.super_4.1.1/protocol/openthread/demos/rcp-spi-802154-blehci/rcp-spi-802154-blehci-brd4180a.s37"/>
+    <property key="demos.imageFile" value="asset://com.silabs.sdk.stack.super_4.1.2/protocol/openthread/demos/rcp-spi-802154-blehci/rcp-spi-802154-blehci-brd4180a.s37"/>
     <property key="core.readmeFiles" value="sample-apps/ot-ncp/README-MP-DMP-RCP.md"/>
-    <property key="filters" value="Capability|Multiprotocol Device\ Type|RCP Project\ Difficulty|Advanced Wireless\ Technology|Bluetooth Wireless\ Technology|Thread"/>
+    <property key="filters" value="Capability|Multiprotocol Device\ Type|RCP Project\ Difficulty|Advanced Wireless\ Technology|Bluetooth Wireless\ Technology|Thread Wireless\ Technology|Zigbee"/>
     <property key="core.quality" value="ALPHA"/>
   </demo>
   <demo name="brd4304a.demo.rcp-spi-802154-blehci" label="Multiprotocol (OpenThread+Zigbee+BLE) - RCP (SPI)">
@@ -50,9 +50,9 @@
     <property key="demos.blurb" value="Multiprotocol (OpenThread+Zigbee+BLE) - RCP (SPI)"/>
     <property key="core.partCompatibility" value=".*mgm12p32f1024ga.*"/>
     <property key="core.boardCompatibility" value="brd4304a"/>
-    <property key="demos.imageFile" value="asset://com.silabs.sdk.stack.super_4.1.1/protocol/openthread/demos/rcp-spi-802154-blehci/rcp-spi-802154-blehci-brd4304a.s37"/>
+    <property key="demos.imageFile" value="asset://com.silabs.sdk.stack.super_4.1.2/protocol/openthread/demos/rcp-spi-802154-blehci/rcp-spi-802154-blehci-brd4304a.s37"/>
     <property key="core.readmeFiles" value="sample-apps/ot-ncp/README-MP-DMP-RCP.md"/>
-    <property key="filters" value="Capability|Multiprotocol Device\ Type|RCP Project\ Difficulty|Advanced Wireless\ Technology|Bluetooth Wireless\ Technology|Thread"/>
+    <property key="filters" value="Capability|Multiprotocol Device\ Type|RCP Project\ Difficulty|Advanced Wireless\ Technology|Bluetooth Wireless\ Technology|Thread Wireless\ Technology|Zigbee"/>
     <property key="core.quality" value="ALPHA"/>
   </demo>
   <demo name="brd4161a.demo.rcp-uart-802154-blehci" label="Multiprotocol (OpenThread+Zigbee+BLE) - RCP (UART)">
@@ -61,9 +61,9 @@
     <property key="demos.blurb" value="Multiprotocol (OpenThread+Zigbee+BLE) - RCP (UART)"/>
     <property key="core.partCompatibility" value=".*efr32mg12p432f1024gl125.*"/>
     <property key="core.boardCompatibility" value="brd4161a"/>
-    <property key="demos.imageFile" value="asset://com.silabs.sdk.stack.super_4.1.1/protocol/openthread/demos/rcp-uart-802154-blehci/rcp-uart-802154-blehci-brd4161a.s37"/>
+    <property key="demos.imageFile" value="asset://com.silabs.sdk.stack.super_4.1.2/protocol/openthread/demos/rcp-uart-802154-blehci/rcp-uart-802154-blehci-brd4161a.s37"/>
     <property key="core.readmeFiles" value="sample-apps/ot-ncp/README-MP-DMP-RCP.md"/>
-    <property key="filters" value="Capability|Multiprotocol Device\ Type|RCP Project\ Difficulty|Advanced Wireless\ Technology|Bluetooth Wireless\ Technology|Thread"/>
+    <property key="filters" value="Capability|Multiprotocol Device\ Type|RCP Project\ Difficulty|Advanced Wireless\ Technology|Bluetooth Wireless\ Technology|Thread Wireless\ Technology|Zigbee"/>
     <property key="core.quality" value="ALPHA"/>
   </demo>
   <demo name="brd4166a.demo.rcp-uart-802154-blehci" label="Multiprotocol (OpenThread+Zigbee+BLE) - RCP (UART)">
@@ -72,9 +72,9 @@
     <property key="demos.blurb" value="Multiprotocol (OpenThread+Zigbee+BLE) - RCP (UART)"/>
     <property key="core.partCompatibility" value=".*efr32mg12p332f1024gl125.*"/>
     <property key="core.boardCompatibility" value="brd4166a"/>
-    <property key="demos.imageFile" value="asset://com.silabs.sdk.stack.super_4.1.1/protocol/openthread/demos/rcp-uart-802154-blehci/rcp-uart-802154-blehci-brd4166a.s37"/>
+    <property key="demos.imageFile" value="asset://com.silabs.sdk.stack.super_4.1.2/protocol/openthread/demos/rcp-uart-802154-blehci/rcp-uart-802154-blehci-brd4166a.s37"/>
     <property key="core.readmeFiles" value="sample-apps/ot-ncp/README-MP-DMP-RCP.md"/>
-    <property key="filters" value="Capability|Multiprotocol Device\ Type|RCP Project\ Difficulty|Advanced Wireless\ Technology|Bluetooth Wireless\ Technology|Thread"/>
+    <property key="filters" value="Capability|Multiprotocol Device\ Type|RCP Project\ Difficulty|Advanced Wireless\ Technology|Bluetooth Wireless\ Technology|Thread Wireless\ Technology|Zigbee"/>
     <property key="core.quality" value="ALPHA"/>
   </demo>
   <demo name="brd4168a.demo.rcp-uart-802154-blehci" label="Multiprotocol (OpenThread+Zigbee+BLE) - RCP (UART)">
@@ -83,9 +83,9 @@
     <property key="demos.blurb" value="Multiprotocol (OpenThread+Zigbee+BLE) - RCP (UART)"/>
     <property key="core.partCompatibility" value=".*efr32mg13p732f512gm48.*"/>
     <property key="core.boardCompatibility" value="brd4168a"/>
-    <property key="demos.imageFile" value="asset://com.silabs.sdk.stack.super_4.1.1/protocol/openthread/demos/rcp-uart-802154-blehci/rcp-uart-802154-blehci-brd4168a.s37"/>
+    <property key="demos.imageFile" value="asset://com.silabs.sdk.stack.super_4.1.2/protocol/openthread/demos/rcp-uart-802154-blehci/rcp-uart-802154-blehci-brd4168a.s37"/>
     <property key="core.readmeFiles" value="sample-apps/ot-ncp/README-MP-DMP-RCP.md"/>
-    <property key="filters" value="Capability|Multiprotocol Device\ Type|RCP Project\ Difficulty|Advanced Wireless\ Technology|Bluetooth Wireless\ Technology|Thread"/>
+    <property key="filters" value="Capability|Multiprotocol Device\ Type|RCP Project\ Difficulty|Advanced Wireless\ Technology|Bluetooth Wireless\ Technology|Thread Wireless\ Technology|Zigbee"/>
     <property key="core.quality" value="ALPHA"/>
   </demo>
   <demo name="brd4180a.demo.rcp-uart-802154-blehci" label="Multiprotocol (OpenThread+Zigbee+BLE) - RCP (UART)">
@@ -94,9 +94,9 @@
     <property key="demos.blurb" value="Multiprotocol (OpenThread+Zigbee+BLE) - RCP (UART)"/>
     <property key="core.partCompatibility" value=".*efr32mg21a020f1024im32.*"/>
     <property key="core.boardCompatibility" value="brd4180a"/>
-    <property key="demos.imageFile" value="asset://com.silabs.sdk.stack.super_4.1.1/protocol/openthread/demos/rcp-uart-802154-blehci/rcp-uart-802154-blehci-brd4180a.s37"/>
+    <property key="demos.imageFile" value="asset://com.silabs.sdk.stack.super_4.1.2/protocol/openthread/demos/rcp-uart-802154-blehci/rcp-uart-802154-blehci-brd4180a.s37"/>
     <property key="core.readmeFiles" value="sample-apps/ot-ncp/README-MP-DMP-RCP.md"/>
-    <property key="filters" value="Capability|Multiprotocol Device\ Type|RCP Project\ Difficulty|Advanced Wireless\ Technology|Bluetooth Wireless\ Technology|Thread"/>
+    <property key="filters" value="Capability|Multiprotocol Device\ Type|RCP Project\ Difficulty|Advanced Wireless\ Technology|Bluetooth Wireless\ Technology|Thread Wireless\ Technology|Zigbee"/>
     <property key="core.quality" value="ALPHA"/>
   </demo>
   <demo name="brd4304a.demo.rcp-uart-802154-blehci" label="Multiprotocol (OpenThread+Zigbee+BLE) - RCP (UART)">
@@ -105,9 +105,9 @@
     <property key="demos.blurb" value="Multiprotocol (OpenThread+Zigbee+BLE) - RCP (UART)"/>
     <property key="core.partCompatibility" value=".*mgm12p32f1024ga.*"/>
     <property key="core.boardCompatibility" value="brd4304a"/>
-    <property key="demos.imageFile" value="asset://com.silabs.sdk.stack.super_4.1.1/protocol/openthread/demos/rcp-uart-802154-blehci/rcp-uart-802154-blehci-brd4304a.s37"/>
+    <property key="demos.imageFile" value="asset://com.silabs.sdk.stack.super_4.1.2/protocol/openthread/demos/rcp-uart-802154-blehci/rcp-uart-802154-blehci-brd4304a.s37"/>
     <property key="core.readmeFiles" value="sample-apps/ot-ncp/README-MP-DMP-RCP.md"/>
-    <property key="filters" value="Capability|Multiprotocol Device\ Type|RCP Project\ Difficulty|Advanced Wireless\ Technology|Bluetooth Wireless\ Technology|Thread"/>
+    <property key="filters" value="Capability|Multiprotocol Device\ Type|RCP Project\ Difficulty|Advanced Wireless\ Technology|Bluetooth Wireless\ Technology|Thread Wireless\ Technology|Zigbee"/>
     <property key="core.quality" value="ALPHA"/>
   </demo>
 </demos>

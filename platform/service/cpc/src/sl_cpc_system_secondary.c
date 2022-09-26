@@ -31,6 +31,7 @@
 #include <stdbool.h>
 #include <string.h>
 
+#include "em_chip.h"
 #include "em_rmu.h"
 #include "sli_cpc.h"
 #include "sli_cpc_drv.h"
@@ -45,6 +46,12 @@
 
 #if (defined(SL_CATALOG_CPC_BOOTLOADER_INTERFACE_PRESENT))
 #include "btl_interface.h"
+#elif (defined(SL_CATALOG_EMBER_BOOTLOADER_PRESENT))
+#include "ember_btl_interface.h"
+
+#define BOOTLOADER_RESET_REASON_GO        EMBER_BOOTLOADER_RESET_REASON_GO
+#define BOOTLOADER_RESET_REASON_BOOTLOAD  EMBER_BOOTLOADER_RESET_REASON_BOOTLOAD
+#define BOOTLOADER_RESET_SIGNATURE_VALID  EMBER_BOOTLOADER_RESET_SIGNATURE_VALID
 #endif
 
 #if (defined(SL_CATALOG_CPC_SECURITY_PRESENT))
@@ -243,7 +250,7 @@ static void on_write_completed(sl_cpc_user_endpoint_id_t endpoint_id,
   }
 
   if ((uint32_t) arg == 0xDEADBEEF) {
-#if (defined(SL_CATALOG_CPC_BOOTLOADER_INTERFACE_PRESENT))
+#if (defined(SL_CATALOG_CPC_BOOTLOADER_INTERFACE_PRESENT) || defined(SL_CATALOG_EMBER_BOOTLOADER_PRESENT))
     // The reset command asked to perform a reset.
 
     BootloaderResetCause_t* resetCause = (BootloaderResetCause_t*) (RAM_MEM_BASE);
@@ -259,16 +266,15 @@ static void on_write_completed(sl_cpc_user_endpoint_id_t endpoint_id,
       default:
         return;
     }
-
     resetCause->signature = BOOTLOADER_RESET_SIGNATURE_VALID;
-#endif
+#endif // SL_CATALOG_CPC_BOOTLOADER_INTERFACE_PRESENT || SL_CATALOG_EMBER_BOOTLOADER_PRESENT
 #if defined(RMU_PRESENT)
     // Clear resetcause
     RMU->CMD = RMU_CMD_RCCLR;
     // Trigger a software system reset
     RMU->CTRL = (RMU->CTRL & ~_RMU_CTRL_SYSRMODE_MASK) | RMU_CTRL_SYSRMODE_EXTENDED;
 #endif
-    NVIC_SystemReset();
+    CHIP_Reset();
   }
 }
 
@@ -565,7 +571,7 @@ static void on_property_get_fc_validation_value(sli_cpc_system_cmd_t *tx_command
  * Property ID: PROP_BOOTLOADER_INFO
  *   Reply to the PRIMARY the bootloader infos.
  ******************************************************************************/
-#if (defined(SL_CATALOG_CPC_BOOTLOADER_INTERFACE_PRESENT))
+#if (defined(SL_CATALOG_CPC_BOOTLOADER_INTERFACE_PRESENT) || defined(SL_CATALOG_EMBER_BOOTLOADER_PRESENT))
 static void on_property_get_bootloader_info(sli_cpc_system_cmd_t *tx_command)
 {
   sli_cpc_system_property_cmd_t *tx_property;
@@ -577,14 +583,22 @@ static void on_property_get_bootloader_info(sli_cpc_system_cmd_t *tx_command)
   infos = (uint32_t*)(tx_property->payload);
 
   bootloader_getInfo(&bootloader_infos);
-
+#if (defined(SL_CATALOG_EMBER_BOOTLOADER_PRESENT))
+#if (SL_EMBER_BOOTLOADER_TYPE == SL_EMBER_BOOTLOADER_TYPE_STANDALONE)
+  infos[0] = (uint32_t)bootloader_infos.version;
+#else
+  infos[0] = (uint32_t)SL_EMBER_BOOTLOADER_TYPE;
+  infos[1] = (uint32_t)bootloader_infos.version;
+  infos[2] = (uint32_t)bootloader_infos.capabilitiesMask;
+#endif // SL_EMBER_BOOTLOADER_TYPE == SL_EMBER_BOOTLOADER_TYPE_STANDALONE
+#else
   infos[0] = (uint32_t)bootloader_infos.type;
   infos[1] = (bootloader_infos.type == SL_BOOTLOADER) ? bootloader_infos.version : 0xFFFFFFFF;
   infos[2] = bootloader_infos.capabilities;
-
+#endif // SL_CATALOG_EMBER_BOOTLOADER_PRESENT
   tx_command->header.length = sizeof(sli_cpc_property_id_t) + 3 * sizeof(uint32_t);
 }
-#endif
+#endif // SL_CATALOG_CPC_BOOTLOADER_INTERFACE_PRESENT || SL_CATALOG_EMBER_BOOTLOADER_PRESENT
 
 /***************************************************************************//**
  * Command ID:  CMD_PROPERTY_GET
@@ -880,9 +894,12 @@ static void on_reset(sli_cpc_system_cmd_t *reset,
       *reset_status = STATUS_OK;
       break;
 
-#if (defined(SL_CATALOG_CPC_BOOTLOADER_INTERFACE_PRESENT))
+#if (defined(SL_CATALOG_CPC_BOOTLOADER_INTERFACE_PRESENT) || defined(SL_CATALOG_EMBER_BOOTLOADER_PRESENT))
     case REBOOT_BOOTLOADER:
     {
+#if (defined(SL_CATALOG_EMBER_BOOTLOADER_PRESENT))
+      *reset_status = STATUS_OK;
+#else
       BootloaderInformation_t btl_info;
       bootloader_getInfo(&btl_info);
 
@@ -892,9 +909,10 @@ static void on_reset(sli_cpc_system_cmd_t *reset,
       } else {   // SL_BOOTLOADER
         *reset_status = STATUS_OK;
       }
+#endif // SL_CATALOG_EMBER_BOOTLOADER_PRESENT
       break;
     }
-#endif
+#endif // SL_CATALOG_CPC_BOOTLOADER_INTERFACE_PRESENT || SL_CATALOG_EMBER_BOOTLOADER_PRESENT
 
     default:
       EFM_ASSERT(0);
@@ -963,7 +981,7 @@ static void on_property_get(sli_cpc_system_cmd_t *rx_command,
       on_property_get_fc_validation_value(reply);
       break;
 
-#if (defined(SL_CATALOG_CPC_BOOTLOADER_INTERFACE_PRESENT))
+#if (defined(SL_CATALOG_CPC_BOOTLOADER_INTERFACE_PRESENT) || defined(SL_CATALOG_EMBER_BOOTLOADER_PRESENT))
     case PROP_BOOTLOADER_INFO:
       on_property_get_bootloader_info(reply);
       break;

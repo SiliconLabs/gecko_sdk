@@ -425,7 +425,7 @@ template_contribution:
         help: The tier
       - type: uint8
         help: The block (sets threshold between given block and next higher block)
-      - type: string
+      - type: hex
         help: The threshold (int48u entered as octet string in big endian) 
   
 documentation:

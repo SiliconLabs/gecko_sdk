@@ -27,6 +27,8 @@ requires:
   - name: gatt_configuration
     condition:
     - bluetooth_stack
+recommends:
+  - id: ot_coex
 config_file:
   - path: protocol/openthread/config/sl_openthread_rtos_config.h
     condition:

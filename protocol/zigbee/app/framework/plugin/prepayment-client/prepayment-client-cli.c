@@ -30,9 +30,9 @@ typedef uint32_t PrepaySnapshotPayloadCause;
 typedef uint8_t  PrepaySnapshotPayloadType;
 typedef uint8_t  FriendlyCredit;
 
-void emAfPrepaymentClientCliChangePaymentMode(void);
+void emAfPrepaymentClientCliChangePaymentMode(SL_CLI_COMMAND_ARG);
 
-void emAfPrepaymentClientCliChangePaymentMode()
+void emAfPrepaymentClientCliChangePaymentMode(SL_CLI_COMMAND_ARG)
 {
   EmberNodeId nodeId;
   uint8_t srcEndpoint, dstEndpoint;

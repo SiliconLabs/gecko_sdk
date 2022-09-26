@@ -1264,6 +1264,13 @@ typedef enum EZwaveCommandType
    */
   EZWAVECOMMANDTYPE_SECURE_NETWORK_MANAGEMENT_SET_SECURITY_FLAGS, // 132
 
+  /**
+   * @brief Get the maxmimum settable tx power
+   * 
+   * @param[out] GetTxPowerMaximumSupported.tx_power_max_supported maximum settable tx power in deci dBm
+   */
+  EZWAVECOMMANDTYPE_ZW_GET_TX_POWER_MAX_SUPPORTED,
+
   NUM_EZWAVECOMMANDTYPE
 } EZwaveCommandType;
 
@@ -1321,6 +1328,8 @@ typedef enum EZwaveCommandStatusType
   EZWAVECOMMANDSTATUS_SECURE_ON_NEW_SUC,                          ///< New SUC NodeID received
   EZWAVECOMMANDSTATUS_SECURE_ON_FRAME_TRANSMISSION,               ///< Frame transmission result
   EZWAVECOMMANDSTATUS_SECURE_ON_RX_FRAME_RECEIVED_INDICATOR,      ///< Frame received from NodeID indicator
+
+  EZWAVECOMMANDSTATUS_ZW_GET_TX_POWER_MAX_SUPPORTED,
 
   NUM_EZWAVECOMMANDSTATUS
 } EZwaveCommandStatusType;
@@ -1965,6 +1974,11 @@ typedef struct SZWaveGetIncludedNodesLR
   LR_NODE_MASK_TYPE node_id_list;
 } SZWaveGetIncludedNodesLR;
 
+typedef struct SZWaveTxPowerMaxSupported
+{
+  zpal_tx_power_t tx_power_max_supported;
+} SZWaveTxPowerMaxSupported;
+
 // Receive structures -----------------------------------
 
 /**
@@ -2318,6 +2332,7 @@ typedef union UCommandStatus
   SZWaveGeneric8bStatus         GetLRChannel;
   SZWaveGeneric8bStatus         GetPTIconfig;
   SZWaveGenericBoolStatus       SetTxAttenuation;
+  SZWaveTxPowerMaxSupported     GetTxPowerMaximumSupported;
 
 #ifdef HOST_SECURITY_INCLUDED
   /***************************************

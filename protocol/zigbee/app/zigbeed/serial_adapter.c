@@ -40,9 +40,14 @@
 #define DEFAULT_SERIAL_PORT "/tmp/ttyZigbeed"
 #define DEFAULT_OUT_BLOCK_LEN 1
 #define DEFAULT_IN_BLOCK_LEN 256
-#define SERIAL_PORT_NAME_MAX_LEN 40
 
 char serialPort[SERIAL_PORT_NAME_MAX_LEN] = DEFAULT_SERIAL_PORT;
+
+#ifdef ZIGBEE_PRO_COMPLIANCE_ON_HOST
+#include "sl_cli_threaded_host.h"
+extern bool sli_cli_is_input_handled(void);
+extern int sli_cli_get_pipe_read_fd(void);
+#endif // ZIGBEE_PRO_COMPLIANCE_ON_HOST
 
 static int serialFd = NULL_FILE_DESCRIPTOR;   // file descriptor for serial port
 static uint8_t outBuffer[MAX_OUT_BLOCK_LEN];  // array to buffer output
@@ -206,6 +211,15 @@ void sli_serial_adapter_tick_callback(void)
   FD_ZERO(&mainloop.mWriteFdSet);
   FD_ZERO(&mainloop.mErrorFdSet);
 
+#ifdef ZIGBEE_PRO_COMPLIANCE_ON_HOST
+  // pro-compliance on host has CLI interface
+  // need to set pipeReadFd into the mainloop file descriptor.
+  int pipeReadFd = sli_cli_get_pipe_read_fd();
+  FD_SET(pipeReadFd, &mainloop.mReadFdSet);
+  FD_SET(pipeReadFd, &mainloop.mErrorFdSet);
+  serialFd = (serialFd > pipeReadFd ? serialFd : pipeReadFd);
+#endif // ZIGBEE_PRO_COMPLIANCE_ON_HOST
+
   // Update mainloop initial FD and its timeout value
   mainloop.mMaxFd           = serialFd;
   mainloop.mTimeout.tv_sec  = timeoutMs / 1000;
@@ -218,6 +232,15 @@ void sli_serial_adapter_tick_callback(void)
 
   if (otSysMainloopPoll(&mainloop) >= 0) {
     otSysMainloopProcess(NULL, &mainloop);
+#ifdef ZIGBEE_PRO_COMPLIANCE_ON_HOST
+    // If the command is handled by the CLI component, read the data
+    // to empty the pipe so that it is ready for the next command.
+    if (sli_cli_is_input_handled()) {
+      char buff[SL_CLI_THREADED_HOST_PIPE_DATA_LENGTH];
+      assert(SL_CLI_THREADED_HOST_PIPE_DATA_LENGTH
+             == read(sli_cli_get_pipe_read_fd(), buff, SL_CLI_THREADED_HOST_PIPE_DATA_LENGTH));
+    }
+#endif // ZIGBEE_PRO_COMPLIANCE_ON_HOST
   } else if (errno != EINTR) {
     //printf("%d\n", errno);
     assert(false);

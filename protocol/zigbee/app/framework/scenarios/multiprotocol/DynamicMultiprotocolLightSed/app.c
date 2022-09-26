@@ -91,9 +91,6 @@ void buttonEventHandler(sl_zigbee_event_t *event)
   } else if (lastButton == BUTTON1) {
     EmberNetworkStatus state = emberAfNetworkState();
     if (state == EMBER_NO_NETWORK) {
-      EmberEUI64 wildcardEui64 = { 0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF, };
-      EmberKeyData centralizedKey = { { 0x5A, 0x69, 0x67, 0x42, 0x65, 0x65, 0x41, 0x6C, 0x6C, 0x69, 0x61, 0x6E, 0x63, 0x65, 0x30, 0x39 } };
-      emberAddTransientLinkKey(wildcardEui64, &centralizedKey);
       emberAfPluginNetworkSteeringStart();
       sl_dmp_ui_display_zigbee_state(DMP_UI_JOINING);
     } else {

@@ -16,6 +16,7 @@
   - name: hardware_board_from_stk
   - name: hardware_board_from_fg25-pk6012a
   - name: hardware_board_from_fg25-rb4271a
+  - name: hardware_board_from_wi-sun-pk6015a
   - name: hardware_board_has_vcom
   - name: hardware_board_has_spiflash
   - name: hardware_board_has_hfxo

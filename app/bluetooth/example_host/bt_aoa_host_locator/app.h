@@ -48,6 +48,11 @@ void app_deinit(void);
 #define SCAN_PASSIVE                  0
 #define SCAN_ACTIVE                   1
 
+// User BGAPI commands. Has to be in sync with the target: see the application
+// header of bt_aoa_ncp_locator.
+#define BOARD_CMD_ID        0x03
+#define BOARD_RSP_DATA_LEN  8
+
 // Common functions for all operating mode
 void app_on_iq_report(aoa_db_entry_t *tag, aoa_iq_report_t *iq_report);
 

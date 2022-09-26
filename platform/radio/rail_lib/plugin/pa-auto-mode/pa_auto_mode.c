@@ -245,21 +245,30 @@ RAIL_Status_t RAILCb_PaAutoModeDecision(RAIL_Handle_t railHandle,
   // the desired power.
   // Note: Code assumes there must be a catch-all entry for each band
   // else the loop will wander into uncharted RAM
+  const RAIL_PaAutoModeConfigEntry_t *trackSupportedPa = NULL;
   for (uint8_t index = 0U; RAIL_PaAutoModeConfig[index].band < RAIL_PA_BAND_COUNT; index++) {
-    RAIL_PaAutoModeConfigEntry_t entry = RAIL_PaAutoModeConfig[index];
-    bool validBand = true;
+    const RAIL_PaAutoModeConfigEntry_t *entry = &RAIL_PaAutoModeConfig[index];
+    if (RAIL_SupportsTxPowerMode(railHandle,
+                                 entry->mode,
+                                 NULL)) {
+      trackSupportedPa = entry;
+      bool validBand = true;
 #if RAIL_FEAT_DUAL_BAND_RADIO
-    validBand = (entry.band == band);
+      validBand = (entry->band == band);
 #endif
-    if (validBand && (entry.min <= *power) && (entry.max >= *power)) {
-      *mode = entry.mode;
-      break;
+      if (validBand && (entry->min <= *power) && (entry->max >= *power)) {
+        *mode = entry->mode;
+        break;
+      }
     }
   }
 
   // If we still haven't found anything, just error out.
   if (*mode == RAIL_TX_POWER_MODE_NONE) {
-    return RAIL_STATUS_INVALID_PARAMETER;
+    if (trackSupportedPa == NULL) {
+      return RAIL_STATUS_INVALID_PARAMETER;
+    }
+    *mode = trackSupportedPa->mode;
   }
 
   return RAIL_STATUS_NO_ERROR;

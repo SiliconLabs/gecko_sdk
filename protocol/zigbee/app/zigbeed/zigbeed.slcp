@@ -73,6 +73,7 @@ include:
     file_list:
       - path: zigbeed_configuration.h
       - path: openthread-config-generic.h
+      - path: serial_adapter.h
 
 source:
   - path: "main.c"

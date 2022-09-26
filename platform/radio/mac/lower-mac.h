@@ -143,6 +143,7 @@ void sli_mac_lower_mac_force_sleep(bool sleep);
 // flex only:
 
 // CSMA-CA default parameters
+#define EMBER_MAC_CSMA_ENABLE_DEFAULT                       1
 #define EMBER_MAC_MAX_CSMA_BACKOFF_DEFAULT                  4
 #define EMBER_MAC_BACKOFF_EXPONENT_MIN_DEFAULT              3
 #define EMBER_MAC_BACKOFF_EXPONENT_MAX_DEFAULT              5
@@ -185,7 +186,12 @@ void sli_mac_lower_mac_force_sleep(bool sleep);
    + EMBER_APPENDED_INFO_SYNC_TIME_LENGTH \
    + EMBER_APPENDED_INFO_FLAGS_LENGTH)
 #else
-  #define EMBER_APPENDED_INFO_TOTAL_LENGTH 8
+  #ifdef ZIGBEE_STACK_ON_HOST
+  #define EMBER_APPENED_INFO_SYNC_TIMESTAMP_LENGTH 8
+  #else
+  #define EMBER_APPENED_INFO_SYNC_TIMESTAMP_LENGTH 0
+  #endif
+  #define EMBER_APPENDED_INFO_TOTAL_LENGTH (8 + EMBER_APPENED_INFO_SYNC_TIMESTAMP_LENGTH)
   #define APPENDED_INFO_FRAME_STATUS_BYTE_1_INDEX 0 // MSByte
   #define APPENDED_INFO_FRAME_STATUS_BYTE_0_INDEX 1 // LSByte
   #define APPENDED_INFO_RSSI_BYTE_INDEX           2
@@ -194,6 +200,15 @@ void sli_mac_lower_mac_force_sleep(bool sleep);
   #define APPENDED_INFO_MAC_TIMER_BYTE_2_INDEX    5 // MSByte
   #define APPENDED_INFO_MAC_TIMER_BYTE_1_INDEX    6
   #define APPENDED_INFO_MAC_TIMER_BYTE_0_INDEX    7 // LSByte
+  #define APPENDED_INFO_SYNC_RX_TIME_BYTE_7_INDEX 8
+  #define APPENDED_INFO_SYNC_RX_TIME_BYTE_6_INDEX 9
+  #define APPENDED_INFO_SYNC_RX_TIME_BYTE_5_INDEX 10
+  #define APPENDED_INFO_SYNC_RX_TIME_BYTE_4_INDEX 11
+  #define APPENDED_INFO_SYNC_RX_TIME_BYTE_3_INDEX 12
+  #define APPENDED_INFO_SYNC_RX_TIME_BYTE_2_INDEX 13
+  #define APPENDED_INFO_SYNC_RX_TIME_BYTE_1_INDEX 14
+  #define APPENDED_INFO_SYNC_RX_TIME_BYTE_0_INDEX 15
+
 #define APPENDED_INFO_CHANNEL_OVERWRITE_BYTE_INDEX 0
 // Multi-network: we overwrite the second byte of the frame status with the
 // network index. This will make the stack aware at higher levels of the network

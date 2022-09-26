@@ -76,6 +76,9 @@ configuration:
   - name: SL_SIMPLE_LED_LED1_PIN
     value: "14"
     condition: [brd2204a]
+  - name: SL_MVP_OPTIMIZE_SPEED
+    value: 1
+    condition: [tensorflow_lite_micro_accelerated_kernels]
 toolchain_settings:
   - option: gcc_compiler_option
     value: "-Wno-unused-parameter"

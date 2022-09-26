@@ -229,6 +229,7 @@ enum sli_bt_command_id
     sli_bt_coex_set_options_command_id = 0x00,
     sli_bt_coex_set_parameters_command_id = 0x02,
     sli_bt_coex_set_directional_priority_pulse_command_id = 0x03,
+    sli_bt_coex_get_parameters_command_id = 0x04,
     sli_bt_coex_get_counters_command_id = 0x01,
     sli_bt_l2cap_open_le_channel_command_id = 0x01,
     sli_bt_l2cap_send_le_channel_open_response_command_id = 0x02,
@@ -436,6 +437,7 @@ enum sli_bt_response_id
     sli_bt_coex_set_options_response_id = 0x00,
     sli_bt_coex_set_parameters_response_id = 0x02,
     sli_bt_coex_set_directional_priority_pulse_response_id = 0x03,
+    sli_bt_coex_get_parameters_response_id = 0x04,
     sli_bt_coex_get_counters_response_id = 0x01,
     sli_bt_l2cap_open_le_channel_response_id = 0x01,
     sli_bt_l2cap_send_le_channel_open_response_response_id = 0x02,
@@ -3702,6 +3704,18 @@ PACKSTRUCT( struct sl_bt_rsp_coex_set_directional_priority_pulse_s
 typedef struct sl_bt_rsp_coex_set_directional_priority_pulse_s sl_bt_rsp_coex_set_directional_priority_pulse_t;
 
 
+PACKSTRUCT( struct sl_bt_rsp_coex_get_parameters_s
+{
+    uint16_t result;
+    uint8_t priority;
+    uint8_t request;
+    uint8_t pwm_period;
+    uint8_t pwm_dutycycle;
+});
+
+typedef struct sl_bt_rsp_coex_get_parameters_s sl_bt_rsp_coex_get_parameters_t;
+
+
 PACKSTRUCT( struct sl_bt_rsp_coex_get_counters_s
 {
     uint16_t result;
@@ -4290,6 +4304,7 @@ PACKSTRUCT( struct sl_bt_packet {
     sl_bt_rsp_coex_set_options_t                                 rsp_coex_set_options;
     sl_bt_rsp_coex_set_parameters_t                              rsp_coex_set_parameters;
     sl_bt_rsp_coex_set_directional_priority_pulse_t              rsp_coex_set_directional_priority_pulse;
+    sl_bt_rsp_coex_get_parameters_t                              rsp_coex_get_parameters;
     sl_bt_rsp_coex_get_counters_t                                rsp_coex_get_counters;
     sl_bt_rsp_l2cap_open_le_channel_t                            rsp_l2cap_open_le_channel;
     sl_bt_rsp_l2cap_send_le_channel_open_response_t              rsp_l2cap_send_le_channel_open_response;

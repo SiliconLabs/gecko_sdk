@@ -5,7 +5,8 @@ category: OpenThread
 quality: production
 description: This component provides the OpenThread stack
 provides:
-  - name: ot_stack_common
+  - name: ot_stack_source
+  - name: ot_stack_implementation
 requires:
   - name: ot_radio
   - name: ot_stack_tcp

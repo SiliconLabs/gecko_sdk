@@ -52,9 +52,9 @@
 #include "sl_sleeptimer.h"
 
 // According to EFR datasheets, HFXO is ± 40 ppm and LFXO (at least for MG12) is
-// -8 to +40 ppm.  Assuming average as worst case.
-#define HFXO_ACCURACY 40
-#define LFXO_ACCURACY 24
+// -8 to +40 ppm.
+#define HFXO_ACCURACY 80
+#define LFXO_ACCURACY 48
 
 // millisecond timer (sleeptimer)
 static sl_sleeptimer_timer_handle_t sl_handle;

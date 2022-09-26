@@ -2,6 +2,8 @@
 
 This example collects and processes sensor data from the Thunderboard Sense 2 or the Thunderboard EFR32BG22 board, and gives immediate graphical feedback through the Thunderboard iOS/Android application.
 
+> Note: some Thunderboards on the market do not have the full sensor set mounted on the board. If a sensor is missing, the sample application detects it and provides dummy data to imitate the sensor.
+
 > Note: this example expects a specific Gecko Bootloader to be present on your device. For details see the Troubleshooting section.
 
 ## Getting Started
@@ -18,7 +20,7 @@ The available sensors are different based on the board you use. For a list of th
 
 [UG309: Thunderboard Sense 2 User's Guide](https://www.silabs.com/documents/public/user-guides/ug309-sltb004a-user-guide.pdf)
 
-After flashing the demo, the board starts to advertise, and after a 30 seconds timeout it goes into sleep mode. It wakes up when the left button (BTN0) is pressed. The state diagram of the firmware is shown below.
+After flashing the demo, the board starts to advertise, and after a 30-second timeout it goes into sleep mode. It wakes up when the left button (BTN0) is pressed. The state diagram of the firmware is shown below.
 
 ![](readme_img1.png)
 
@@ -35,7 +37,7 @@ Within the I/O you can control the LEDs on the board and see the state of the pu
 
 ## Project Structure
 
-The project code is the same for both boards. The different sensor configurations are set in the automatically generated *sl_component_catalog.h*. The main application file, *app.c*, configures the project accordingly.
+The project code is the same for both boards. The different sensor configurations are set in the automatically-generated *sl_component_catalog.h*. The main application file, *app.c*, configures the project accordingly.
 
 The Bluetooth-related event handling is implemented in the function `sl_bt_on_event`.
 

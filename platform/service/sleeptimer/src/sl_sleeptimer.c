@@ -659,6 +659,7 @@ sl_status_t sl_sleeptimer_convert_time_to_date(sl_sleeptimer_timestamp_t time,
     return SL_STATUS_INVALID_PARAMETER;
   }
 
+  time += time_zone;  // add UTC offset to convert to Standard Time
   date->sec = time % 60;
   time /= 60;
   date->min = time % 60;
@@ -729,7 +730,7 @@ sl_status_t sl_sleeptimer_convert_date_to_time(sl_sleeptimer_date_t *date,
   month_days += (date->month_day - 1);                       // Add full days of the current month.
   *time += month_days * TIME_SEC_PER_DAY;
   *time += (3600 * date->hour) + (60 * date->min) + date->sec;
-  *time += date->time_zone;
+  *time -= date->time_zone;
 
   return SL_STATUS_OK;
 }

@@ -28,10 +28,9 @@ requires:
   - name: silabs_core_sl_malloc
   - name: toolchain_gcc
   - name: device_supports_thread
-    # Temporary workaround for building cert libs with Series 2 generic OPNs
-    unless: [ot_cert_build]
-  - name: ot_platform_abstraction_source
-    unless: [ot_cert_libs]
+  - name: ot_platform_abstraction_implementation
+recommends:
+  - id: ot_platform_abstraction_source
 ui_hints:
   visibility: never
 include:

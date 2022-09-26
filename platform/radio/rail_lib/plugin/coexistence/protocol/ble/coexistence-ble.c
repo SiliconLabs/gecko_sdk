@@ -127,6 +127,11 @@ void sl_bt_coex_set_config(sl_bt_ll_coex_config_t *config)
   ll_coex.config = *config; // struct copy
 }
 
+void sl_bt_coex_get_config(sl_bt_ll_coex_config_t *config)
+{
+  *config = ll_coex.config; // struct copy
+}
+
 //set request and start scanPwm if in use
 static void startRequest(bool request, uint8_t priority)
 {

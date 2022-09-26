@@ -36,4 +36,7 @@ EmberStatus emberSerialWriteString(uint8_t port, PGM_P string);
 
 void sli_serial_adapter_tick_callback(void);
 
+#define SERIAL_PORT_NAME_MAX_LEN 4096
+extern char serialPort[SERIAL_PORT_NAME_MAX_LEN];
+
 #endif // SILABS_SERIAL_ADAPTER_H

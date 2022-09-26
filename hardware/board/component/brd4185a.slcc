@@ -15,6 +15,7 @@
   - name: hardware_board_rb
   - name: hardware_board_from_stk
   - name: hardware_board_from_slwrb4185a
+  - name: hardware_board_has_rfswitch_aox
   - name: hardware_board_has_vcom
   - name: hardware_board_has_spiflash
   - name: hardware_board_has_rfswitch

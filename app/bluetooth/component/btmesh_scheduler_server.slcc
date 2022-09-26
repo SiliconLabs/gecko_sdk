@@ -23,6 +23,7 @@ provides:
 requires:
   - name: "app_btmesh_util"
   - name: "btmesh_feature_scheduler_server"
+  - name: "btmesh_time_server"
   - name: "btmesh_scene_server"
   - name: "btmesh_stack"
 

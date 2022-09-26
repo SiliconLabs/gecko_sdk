@@ -7,6 +7,8 @@ description: This component provides Co-Processor Communication (CPC) support fo
 provides:
   - name: zigbee_ncp_cpc
   - name: zigbee_ncp
+  # OPENTHREAD-2545: Temporary workaround to disable coex
+  - name: ot_coex
 
 requires:
   - name: cpc_secondary

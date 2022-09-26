@@ -365,6 +365,11 @@ sl_status_t sl_rail_util_coex_set_options(sl_rail_util_coex_options_t options)
 }
 #endif //COEX_STACK_EVENT_SUPPORT
 
+sl_rail_util_coex_options_t sl_rail_util_coex_get_constant_options(void)
+{
+  return CONST_SL_RAIL_UTIL_COEX_OPTIONS;
+}
+
 #ifdef SL_RAIL_UTIL_COEX_DP_ENABLED
 sl_status_t sl_rail_util_coex_set_directional_priority_pulse_width(uint8_t pulseWidthUs)
 {

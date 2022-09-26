@@ -11,13 +11,12 @@ requires:
   - name: ot_ncp
   - name: cpc_secondary
   - name: ot_coex
-    unless:
-      - "zigbee_ncp_cpc"
   - name: mbedtls_entropy_adc
     condition:
       - "device_family_efr32mg1"
 recommends:
   - id: ot_stack_rcp
+  - id: ot_coex
 root_path: util/third_party/openthread/src
 include:
   - path: ncp

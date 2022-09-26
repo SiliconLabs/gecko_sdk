@@ -37,7 +37,6 @@
 #include "sl_simple_com.h"
 #include "sl_ncp.h"
 #include "sl_ncp_evt_filter.h"
-#include "btl_interface.h"
 #ifdef SL_COMPONENT_CATALOG_PRESENT
 #include "sl_component_catalog.h"
 #endif // SL_COMPONENT_CATALOG_PRESENT
@@ -48,6 +47,9 @@
 #if defined(SL_CATALOG_NCP_SEC_PRESENT)
 #include "sl_ncp_sec.h"
 #endif // SL_CATALOG_NCP_SEC_PRESENT
+#if defined(SL_CATALOG_GECKO_BOOTLOADER_INTERFACE_PRESENT)
+#include "btl_interface.h"
+#endif // SL_CATALOG_GECKO_BOOTLOADER_INTERFACE_PRESENT
 
 // Command buffer
 typedef struct {
@@ -141,7 +143,7 @@ void sl_ncp_step(void)
 {
   // -------------------------------
   // Command available and NCP not busy
-  if (cmd_is_available() && !busy && !evt_is_available()) {
+  if (cmd_is_available() && !busy) {
     sl_bt_msg_t *command = (sl_bt_msg_t *)cmd.buf;
     sl_bt_msg_t *response;
 
@@ -195,8 +197,19 @@ void sl_ncp_step(void)
     sl_wake_lock_set_remote_req();
     #endif // SL_CATALOG_WAKE_LOCK_PRESENT
 
+    uint8_t *data_ptr = evt.buf;
+    uint16_t len = evt.len;
+
+    #if defined(SL_CATALOG_NCP_SEC_PRESENT)
+    // encrypt the outgoing event
+    data_ptr = (uint8_t*)sl_ncp_sec_process_event((sl_bt_msg_t*)evt.buf);
+    app_assert(data_ptr, "Error during event encryption.\n");
+    // refresh original len as encrypted msg will be longer than original
+    len = MSG_GET_LEN((sl_bt_msg_t*)data_ptr);
+    #endif // SL_CATALOG_NCP_SEC_PRESENT
+
     // Transmit events
-    sl_simple_com_transmit((uint32_t)evt.len, evt.buf);
+    sl_simple_com_transmit((uint32_t)len, data_ptr);
     // Clear event buffer
     evt_dequeue();
   }
@@ -306,7 +319,9 @@ static bool handle_user_command(uint32_t hdr, void *data)
       break;
     // -------------------------------
     case sl_bt_cmd_user_reset_to_dfu_id:
+      #if defined(SL_CATALOG_GECKO_BOOTLOADER_INTERFACE_PRESENT)
       bootloader_rebootAndInstall();
+      #endif // SL_CATALOG_GECKO_BOOTLOADER_INTERFACE_PRESENT
       break;
     // -------------------------------
     default:
@@ -588,22 +603,11 @@ static void cmd_dequeue(void)
  *****************************************************************************/
 static void evt_enqueue(uint16_t len, uint8_t *data)
 {
-  uint8_t *data_ptr;
-
-  #if defined(SL_CATALOG_NCP_SEC_PRESENT)
-  data_ptr = (uint8_t*)sl_ncp_sec_process_event((sl_bt_msg_t*)data);
-  // rewrite original len as encrypted msg will be longer than original
-  (void)len;
-  len = MSG_GET_LEN((sl_bt_msg_t*)data_ptr);
-  #else
-  data_ptr = data;
-  #endif // SL_CATALOG_NCP_SEC_PRESENT
-
   CORE_DECLARE_IRQ_STATE;
   CORE_ENTER_ATOMIC();
   // event fits into event buffer; otherwise discard it
   if (len <= (sizeof(evt.buf) - evt.len)) {
-    memcpy((void *)&evt.buf[evt.len], (void *)data_ptr, len);
+    memcpy((void *)&evt.buf[evt.len], (void *)data, len);
     evt.len += len;
     evt_set_available();
   }

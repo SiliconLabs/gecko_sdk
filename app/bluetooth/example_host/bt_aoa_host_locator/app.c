@@ -75,6 +75,7 @@
 
 #define DEFAULT_REPORT_MODE           ANGLE_REPORT
 
+static sl_status_t get_board_type(antenna_array_board_t *board_type);
 static void parse_config_file(const char *file_name);
 static void parse_config(const char *config);
 
@@ -102,6 +103,9 @@ static char *mqtt_host = NULL;
 
 // Config file path
 static char *config_file = NULL;
+
+// Connected board
+static antenna_array_board_t board = ANTENNA_ARRAY_BOARD_UNKNOWN;
 
 /**************************************************************************//**
  * Application Init.
@@ -265,6 +269,26 @@ void sl_bt_on_event(sl_bt_msg_t *evt)
 
       // Share antenna array configuration with the CTE component.
       aoa_cte_config.antenna_array = &angle_config->antenna_array;
+
+      // Get NCP target board type
+      sc = get_board_type(&board);
+      if (sc == SL_STATUS_OK) {
+        app_log_debug("Board is supported. Type: [%d]" APP_LOG_NL, (int)board);
+
+        // Overwrite the default antenna type configuration based on the board
+        uint8_t array_type;
+        sc = antenna_array_board_to_type(board, &array_type);
+        app_assert_status(sc);
+        app_log_debug("Chosen default array type: [%d]" APP_LOG_NL, array_type);
+        angle_config->antenna_array.array_type = array_type;
+        sc = aoa_angle_finalize_config(locator_id);
+        app_assert_status(sc);
+      } else if (sc == SL_STATUS_NOT_SUPPORTED) {
+        app_log_error("Board is not supported. Manual antenna type "
+                      "configuration is required." APP_LOG_NL);
+      } else {
+        app_assert_status(sc);
+      }
 
       // Parse config file if given
       if (config_file != NULL) {
@@ -480,6 +504,37 @@ void aoa_cte_on_iq_report(aoa_db_entry_t *tag, aoa_iq_report_t *iq_report)
 }
 
 /**************************************************************************//**
+ * Get the board type of the NCP target
+ *
+ * @param[out] board_type Board type defined in antenna_array_board_t
+ * @return SL_STATUS_OK if successful. Error code otherwise.
+ *****************************************************************************/
+static sl_status_t get_board_type(antenna_array_board_t *board_type)
+{
+  sl_status_t sc;
+  uint8_t command = BOARD_CMD_ID;
+  size_t response_len;
+  char board_name[BOARD_RSP_DATA_LEN + 1];
+
+  // Get the name of the NCP target board
+  sc = sl_bt_user_message_to_target(sizeof(command),
+                                    &command,
+                                    BOARD_RSP_DATA_LEN,
+                                    &response_len,
+                                    (uint8_t *)board_name);
+  (void)response_len;
+
+  if (sc == SL_STATUS_OK) {
+    board_name[BOARD_RSP_DATA_LEN] = '\0'; // Place null character at the end
+    app_log_info("Detected board: %s." APP_LOG_NL, board_name);
+
+    // Convert string to type
+    return antenna_array_string_to_board(board_name, board_type);
+  }
+  return sc;
+}
+
+/**************************************************************************//**
  * Configuration file parser
  *****************************************************************************/
 static void parse_config_file(const char *file_name)
@@ -559,6 +614,19 @@ static void parse_config(const char *config)
     sc = aoa_parse_antenna_type_from_string(str_config, &antenna_array_type);
     if (sc == SL_STATUS_OK) {
       app_log_info("Antenna mode set to: %s" APP_LOG_NL, str_config);
+
+      antenna_array_board_t compatible_board;
+      sc = antenna_array_type_to_board(antenna_array_type, &compatible_board);
+      app_assert_status(sc);
+      if (board != compatible_board) {
+        app_log_error("Antenna type [%d] is not supported by Board type [%d]." APP_LOG_NL,
+                      antenna_array_type,
+                      board);
+        // Revert change request
+        antenna_array_type = angle_config->antenna_array.array_type;
+        app_log_info("Antenna type [%d] is kept." APP_LOG_NL,
+                     angle_config->antenna_array.array_type);
+      }
     } else {
       app_log_error("Failed to set antenna mode to %s" APP_LOG_NL, str_config);
     }

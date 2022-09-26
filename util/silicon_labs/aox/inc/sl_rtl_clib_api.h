@@ -98,6 +98,8 @@ enum sl_rtl_aox_array_type{
   SL_RTL_AOX_ARRAY_TYPE_4x4_DP_URA,  ///< Silicon Labs Ref. 4x4 Uniform Dual Polarized Rectangular Array
   SL_RTL_AOX_ARRAY_TYPE_COREHW_15x15_DP,    ///< CoreHw Ref. 150 mm x 150 mm, 8 Element Dual Polarized Array
   SL_RTL_AOX_ARRAY_TYPE_COREHW_12x12_DP,    ///< CoreHw Ref. 120 mm x 120 mm, 8 Element Dual Polarized Array
+  SL_RTL_AOX_ARRAY_TYPE_COREHW_4x4_URA,     ///< CoreHw Ref. 4x4 Uniform Rectangular Array
+  SL_RTL_AOX_ARRAY_TYPE_COREHW_2x2_URA,     ///< CoreHw Ref. 2x2 Uniform Rectangular Array
 
   SL_RTL_AOX_ARRAY_TYPE_LAST ///< Placeholder
 };

@@ -61,11 +61,11 @@
         </input>
         <input>
           <key>BASE_FREQUENCY_HZ</key>
-          <value>long:450006250</value>
+          <value>long:490000000</value>
         </input>
         <input>
           <key>BAUDRATE_TOL_PPM</key>
-          <value>int:300</value>
+          <value>int:0</value>
         </input>
         <input>
           <key>BCR_CONC_BAUDRATE</key>
@@ -85,11 +85,11 @@
         </input>
         <input>
           <key>BITRATE</key>
-          <value>int:4800</value>
+          <value>int:38400</value>
         </input>
         <input>
           <key>CHANNEL_SPACING_HZ</key>
-          <value>int:12500</value>
+          <value>int:1000000</value>
         </input>
         <input>
           <key>CRC_BIT_ENDIAN</key>
@@ -97,7 +97,7 @@
         </input>
         <input>
           <key>CRC_BYTE_ENDIAN</key>
-          <value>serializableObject:EnumDataItem:1</value>
+          <value>serializableObject:EnumDataItem:0</value>
         </input>
         <input>
           <key>CRC_INPUT_ORDER</key>
@@ -105,19 +105,19 @@
         </input>
         <input>
           <key>CRC_INVERT</key>
-          <value>bool:true</value>
+          <value>bool:false</value>
         </input>
         <input>
           <key>CRC_PAD_INPUT</key>
-          <value>bool:true</value>
+          <value>bool:false</value>
         </input>
         <input>
           <key>CRC_POLY</key>
-          <value>serializableObject:EnumDataItem:7</value>
+          <value>serializableObject:EnumDataItem:2</value>
         </input>
         <input>
           <key>CRC_SEED</key>
-          <value>long:4294967295</value>
+          <value>long:0</value>
         </input>
         <input>
           <key>DEMOD_SELECT</key>
@@ -125,11 +125,11 @@
         </input>
         <input>
           <key>DEVIATION</key>
-          <value>int:2400</value>
+          <value>int:20000</value>
         </input>
         <input>
           <key>DEVIATION_TOL_PPM</key>
-          <value>int:300000</value>
+          <value>int:0</value>
         </input>
         <input>
           <key>DIFF_ENCODING_MODE</key>
@@ -169,11 +169,11 @@
         </input>
         <input>
           <key>FEC_EN</key>
-          <value>serializableObject:EnumDataItem:1</value>
+          <value>serializableObject:EnumDataItem:0</value>
         </input>
         <input>
           <key>FEC_TX_ENABLE</key>
-          <value>serializableObject:EnumDataItem:0</value>
+          <value>null</value>
         </input>
         <input>
           <key>FIRSTFRAME_BITSPERWORD</key>
@@ -181,7 +181,7 @@
         </input>
         <input>
           <key>FIXED_LENGTH_SIZE</key>
-          <value>int:1</value>
+          <value>int:16</value>
         </input>
         <input>
           <key>FPLL_BAND</key>
@@ -193,7 +193,7 @@
         </input>
         <input>
           <key>FRAME_LENGTH_TYPE</key>
-          <value>serializableObject:EnumDataItem:1</value>
+          <value>serializableObject:EnumDataItem:0</value>
         </input>
         <input>
           <key>FRAME_TYPE_0_FILTER</key>
@@ -329,7 +329,7 @@
         </input>
         <input>
           <key>HEADER_EN</key>
-          <value>bool:true</value>
+          <value>bool:false</value>
         </input>
         <input>
           <key>HEADER_EXCLUDESUBFRAMEWCNT_EN</key>
@@ -337,7 +337,7 @@
         </input>
         <input>
           <key>HEADER_SIZE</key>
-          <value>int:2</value>
+          <value>int:1</value>
         </input>
         <input>
           <key>HEADER_WHITE_EN</key>
@@ -389,7 +389,7 @@
         </input>
         <input>
           <key>PAYLOAD_WHITE_EN</key>
-          <value>bool:true</value>
+          <value>bool:false</value>
         </input>
         <input>
           <key>PREAMBLE_DETECTION_LENGTH</key>
@@ -397,7 +397,7 @@
         </input>
         <input>
           <key>PREAMBLE_LENGTH</key>
-          <value>int:64</value>
+          <value>int:40</value>
         </input>
         <input>
           <key>PREAMBLE_PATTERN</key>
@@ -413,7 +413,7 @@
         </input>
         <input>
           <key>RX_XTAL_ERROR_PPM</key>
-          <value>int:6</value>
+          <value>int:10</value>
         </input>
         <input>
           <key>SHAPING_FILTER</key>
@@ -421,7 +421,7 @@
         </input>
         <input>
           <key>SHAPING_FILTER_PARAM</key>
-          <value>float:2.0</value>
+          <value>float:0.5</value>
         </input>
         <input>
           <key>SKIP2ANT</key>
@@ -445,11 +445,11 @@
         </input>
         <input>
           <key>SYNCWORD_0</key>
-          <value>long:36942</value>
+          <value>long:63117</value>
         </input>
         <input>
           <key>SYNCWORD_1</key>
-          <value>long:36942</value>
+          <value>long:0</value>
         </input>
         <input>
           <key>SYNCWORD_LENGTH</key>
@@ -493,7 +493,7 @@
         </input>
         <input>
           <key>TX_XTAL_ERROR_PPM</key>
-          <value>int:6</value>
+          <value>int:10</value>
         </input>
         <input>
           <key>VAR_LENGTH_ADJUST</key>
@@ -501,15 +501,15 @@
         </input>
         <input>
           <key>VAR_LENGTH_BITENDIAN</key>
-          <value>serializableObject:EnumDataItem:1</value>
+          <value>serializableObject:EnumDataItem:0</value>
         </input>
         <input>
           <key>VAR_LENGTH_BYTEENDIAN</key>
-          <value>serializableObject:EnumDataItem:1</value>
+          <value>serializableObject:EnumDataItem:0</value>
         </input>
         <input>
           <key>VAR_LENGTH_INCLUDECRC</key>
-          <value>bool:true</value>
+          <value>bool:false</value>
         </input>
         <input>
           <key>VAR_LENGTH_LOC</key>
@@ -517,7 +517,7 @@
         </input>
         <input>
           <key>VAR_LENGTH_MAXLENGTH</key>
-          <value>int:2047</value>
+          <value>int:255</value>
         </input>
         <input>
           <key>VAR_LENGTH_MINLENGTH</key>
@@ -525,7 +525,7 @@
         </input>
         <input>
           <key>VAR_LENGTH_NUMBITS</key>
-          <value>int:11</value>
+          <value>int:8</value>
         </input>
         <input>
           <key>VAR_LENGTH_SHIFT</key>
@@ -533,22 +533,22 @@
         </input>
         <input>
           <key>WHITE_OUTPUT_BIT</key>
-          <value>int:8</value>
+          <value>int:0</value>
         </input>
         <input>
           <key>WHITE_POLY</key>
-          <value>serializableObject:EnumDataItem:6</value>
+          <value>serializableObject:EnumDataItem:0</value>
         </input>
         <input>
           <key>WHITE_SEED</key>
-          <value>int:255</value>
+          <value>int:65535</value>
         </input>
         <input>
           <key>XTAL_FREQUENCY_HZ</key>
           <value>int:39000000</value>
         </input>
       </profile_inputs>
-      <phy name="serializableObject:Efr32RadioConfiguratorPhy:SOL:Base:PHY_IEEE802154_SUN_FSK_450MHz_2FSK_4p8kbps"/>
+      <phy name="serializableObject:Efr32RadioConfiguratorPhy:SOL:Base:PHY_Studio_490M_2GFSK_38p4Kbps_20K"/>
       <channel_config_entries>
         <channel_config_entry name="Channel Group 1">
           <physical_channel_offset>SAME_AS_FIRST_CHANNEL</physical_channel_offset>

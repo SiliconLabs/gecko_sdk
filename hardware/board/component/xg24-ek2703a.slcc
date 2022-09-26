@@ -14,9 +14,9 @@
   - name: SL_KIT_NAME
     value: '"XG24-EK2703A"'
   - name: SL_KIT_REV
-    value: '"A00"'
+    value: '"A02"'
 - tag:
   - kit:opn:xG24-EK2703A
   - kit:pn:EK2703
   - kit:variant:A
-  - kit:revision:A00
+  - kit:revision:A02

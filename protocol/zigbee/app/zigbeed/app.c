@@ -63,6 +63,8 @@
 #include "common/logging.hpp"
 #include "lib/platform/exit_code.h"
 #include "openthread/openthread-system.h"
+#include "ember-types.h"
+#include "serial_adapter.h"
 
 #ifndef OPENTHREAD_ENABLE_COVERAGE
 #define OPENTHREAD_ENABLE_COVERAGE 0
@@ -76,8 +78,6 @@ typedef struct PosixConfig{
 
 extern jmp_buf gResetJump;
 
-#define SERIAL_PORT_NAME_MAX_LEN 40
-extern char serialPort[SERIAL_PORT_NAME_MAX_LEN];
 #define RADIO_URL_MAX_LEN 150
 char radioUrl[RADIO_URL_MAX_LEN];
 

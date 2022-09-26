@@ -6,6 +6,7 @@ quality: production
 description: This component provides the source files for the platform abstraction layer between the OpenThread stack and Silicon Labs platform
 provides:
   - name: ot_platform_abstraction_source
+  - name: ot_platform_abstraction_implementation
 ui_hints:
   visibility: never
 include:

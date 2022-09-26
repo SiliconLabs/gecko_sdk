@@ -67,9 +67,11 @@ readme:
 
 filter:
   - name: "Wireless Technology"
-    value: ["Thread"]
+    value: ["Thread", "Zigbee"]
   - name: "Device Type"
     value: ["RCP"]
+  - name: "Capability"
+    value: ["Multiprotocol"]
   - name: "Project Difficulty"
     value: ["Advanced"]
 

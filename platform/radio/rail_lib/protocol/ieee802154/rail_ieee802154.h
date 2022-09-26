@@ -1062,6 +1062,12 @@ RAIL_ENUM_GENERIC(RAIL_IEEE802154_GOptions_t, uint32_t) {
  * dual syncWord detection and specific receiver pausing.
  * Note that this feature is only available on platforms where
  * \ref RAIL_IEEE802154_SUPPORTS_G_DYNFEC is true.
+ *
+ * @note: EFR32xG12 support for 802.15.4 FEC-capable PHYs and dynamic FEC
+ *   are incompatible with 802.15.4 filtering and AutoACK.
+ *   \ref RAIL_IEEE802154_Config_t::promiscuousMode must be true and \ref
+ *   RAIL_IEEE802154_Config_t::ackConfig's \ref RAIL_AutoAckConfig_t.enable
+ *   must be false on these platforms when using a FEC-capable PHY.
  */
 #define RAIL_IEEE802154_G_OPTION_DYNFEC (1UL << RAIL_IEEE802154_G_OPTION_DYNFEC_SHIFT)
 /**
@@ -1070,7 +1076,7 @@ RAIL_ENUM_GENERIC(RAIL_IEEE802154_GOptions_t, uint32_t) {
  * by sending/receiving a specific Mode Switch packet that indicates the incoming new PHY mode.
  * The Mode Switch packet is an FSK-modulated 2-byte PHY header with no payload.
  * Because this feature relies on specific receiver pausing, note that it is only available
- * on platforms where \ref RAIL_IEEE802154_SUPPORTS_G_DYNFEC is true.
+ * on platforms where \ref RAIL_IEEE802154_SUPPORTS_G_MODESWITCH is true.
  */
 #define RAIL_IEEE802154_G_OPTION_WISUN_MODESWITCH (1UL << RAIL_IEEE802154_G_OPTION_WISUN_MODESWITCH_SHIFT)
 
@@ -1487,7 +1493,7 @@ RAIL_Status_t RAIL_IEEE802154_EnableSignalDetection(RAIL_Handle_t railHandle,
  *
  * In RAIL_IEEE802154_CCA_MODE_SIGNAL, RAIL_IEEE802154_CCA_MODE_SIGNAL_OR_RSSI and
  * RAIL_IEEE802154_CCA_MODE_SIGNAL_AND_RSSI signal identifier is enabled
- * for the duration of LBT.  If previously enabled by
+ * for the duration of LBT. If previously enabled by
  * \ref RAIL_IEEE802154_ConfigSignalIdentifier, the signal identifier will remain
  * active until triggered.
  *

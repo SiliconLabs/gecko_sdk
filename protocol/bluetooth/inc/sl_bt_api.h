@@ -408,14 +408,28 @@ typedef enum
   sl_bt_system_linklayer_config_key_set_afh_interval           = 0x7,  /**<
                                                                             (0x7)
                                                                             Set
-                                                                            afh_scan_interval
-                                                                            field
+                                                                            the
+                                                                            afh_scan_interval.
+                                                                            Value
+                                                                            is
+                                                                            in
+                                                                            units
                                                                             of
-                                                                            Link
-                                                                            Layer
-                                                                            priority
-                                                                            configuration
-                                                                            structure. */
+                                                                            10
+                                                                            ms.
+                                                                            Setting
+                                                                            the
+                                                                            interval
+                                                                            to 0
+                                                                            will
+                                                                            result
+                                                                            in
+                                                                            using
+                                                                            the
+                                                                            default
+                                                                            value
+                                                                            of 1
+                                                                            second. */
   sl_bt_system_linklayer_config_key_set_priority_table         = 0x9,  /**<
                                                                             (0x9)
                                                                             The
@@ -954,7 +968,8 @@ sl_status_t sl_bt_system_halt(uint8_t halt);
  *     - <b>sl_bt_system_linklayer_config_key_clr_flags (0x5):</b> The value is
  *       flags to clear. Flags are the same as in SET_FLAGS command.
  *     - <b>sl_bt_system_linklayer_config_key_set_afh_interval (0x7):</b> Set
- *       afh_scan_interval field of Link Layer priority configuration structure.
+ *       the afh_scan_interval. Value is in units of 10 ms. Setting the interval
+ *       to 0 will result in using the default value of 1 second.
  *     - <b>sl_bt_system_linklayer_config_key_set_priority_table (0x9):</b> The
  *       value contains a priority table to be copied over the existing table.
  *       If the value is smaller than the full table, only those values are
@@ -8814,10 +8829,12 @@ sl_status_t sl_bt_ota_set_rf_path(uint8_t enable, uint8_t antenna);
 #define sl_bt_cmd_coex_set_options_id                                0x00200020
 #define sl_bt_cmd_coex_set_parameters_id                             0x02200020
 #define sl_bt_cmd_coex_set_directional_priority_pulse_id             0x03200020
+#define sl_bt_cmd_coex_get_parameters_id                             0x04200020
 #define sl_bt_cmd_coex_get_counters_id                               0x01200020
 #define sl_bt_rsp_coex_set_options_id                                0x00200020
 #define sl_bt_rsp_coex_set_parameters_id                             0x02200020
 #define sl_bt_rsp_coex_set_directional_priority_pulse_id             0x03200020
+#define sl_bt_rsp_coex_get_parameters_id                             0x04200020
 #define sl_bt_rsp_coex_get_counters_id                               0x01200020
 
 /**
@@ -8885,6 +8902,25 @@ sl_status_t sl_bt_coex_set_parameters(uint8_t priority,
  *
  ******************************************************************************/
 sl_status_t sl_bt_coex_set_directional_priority_pulse(uint8_t pulse);
+
+/***************************************************************************//**
+ *
+ * Get the coexistence parameters.
+ *
+ * @param[out] priority Coexistence priority threshold. Coexistence priority is
+ *   toggled if priority is below this value.
+ * @param[out] request Coexistence request threshold. Coexistence request is
+ *   toggled if priority is below this value.
+ * @param[out] pwm_period PWM functionality period length in 1 ms units
+ * @param[out] pwm_dutycycle PWM functionality duty cycle in percentage
+ *
+ * @return SL_STATUS_OK if successful. Error code otherwise.
+ *
+ ******************************************************************************/
+sl_status_t sl_bt_coex_get_parameters(uint8_t *priority,
+                                      uint8_t *request,
+                                      uint8_t *pwm_period,
+                                      uint8_t *pwm_dutycycle);
 
 /***************************************************************************//**
  *

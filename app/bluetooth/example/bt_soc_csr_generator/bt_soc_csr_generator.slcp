@@ -7,7 +7,7 @@ description: >
   data. The generated data can be read out by the Central Authority.
 
 category: Bluetooth Examples
-quality: production
+quality: alpha
 
 filter:
   - name: "Wireless Technology"

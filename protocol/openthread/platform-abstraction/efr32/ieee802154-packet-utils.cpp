@@ -277,7 +277,7 @@ void TxSecurityProcessing::Finalize(void *aTag)
 
 void efr32PlatProcessTransmitAesCcm(otRadioFrame *aFrame, const otExtAddress *aExtAddress)
 {
-#if (OPENTHREAD_RADIO && (OPENTHREAD_CONFIG_THREAD_VERSION < OT_THREAD_VERSION_1_2)) || OPENTHREAD_CONFIG_PLATFORM_KEY_REFERENCES_ENABLE
+#if (OPENTHREAD_RADIO && (OPENTHREAD_CONFIG_THREAD_VERSION < OT_THREAD_VERSION_1_2))
     OT_UNUSED_VARIABLE(aFrame);
     OT_UNUSED_VARIABLE(aExtAddress);
 #else
@@ -297,7 +297,7 @@ void efr32PlatProcessTransmitAesCcm(otRadioFrame *aFrame, const otExtAddress *aE
 
     tagLength = aTxFrame->GetFooterLength() - aTxFrame->GetFcsSize();
 
-    packetSecurityHandler.SetKey((aTxFrame->GetAesKey()).GetKey().GetBytes());
+    packetSecurityHandler.SetKey(aFrame->mInfo.mTxInfo.mAesKey->mKeyMaterial.mKey.m8);
     packetSecurityHandler.Init(aTxFrame->GetHeaderLength(), aTxFrame->GetPayloadLength(), tagLength, nonce, sizeof(nonce));
     packetSecurityHandler.Header(aTxFrame->GetHeader(), aTxFrame->GetHeaderLength());
     packetSecurityHandler.Payload(aTxFrame->GetPayload(), aTxFrame->GetPayload(), aTxFrame->GetPayloadLength());
@@ -307,7 +307,7 @@ void efr32PlatProcessTransmitAesCcm(otRadioFrame *aFrame, const otExtAddress *aE
 
 exit:
     return;
-#endif // OPENTHREAD_RADIO && (OPENTHREAD_CONFIG_THREAD_VERSION < OT_THREAD_VERSION_1_2)) || OPENTHREAD_CONFIG_PLATFORM_KEY_REFERENCES_ENABLE
+#endif // OPENTHREAD_RADIO && (OPENTHREAD_CONFIG_THREAD_VERSION < OT_THREAD_VERSION_1_2))
 }
 
 bool efr32IsFramePending(otRadioFrame *aFrame)

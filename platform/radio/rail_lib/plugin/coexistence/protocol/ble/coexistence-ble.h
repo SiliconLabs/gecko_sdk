@@ -143,6 +143,12 @@ typedef struct {
  */
 void sl_bt_coex_set_config(sl_bt_ll_coex_config_t * config);
 
+/**
+ * Get coex configuration
+ *
+ */
+void sl_bt_coex_get_config(sl_bt_ll_coex_config_t * config);
+
 // Interval functions for debugging purposes
 void sl_bt_enable_coex_pull_resistor(bool enable);
 

@@ -32,12 +32,12 @@ EmberAfStatus emberAfWriteAttributeExternal(uint8_t endpoint,
                                             uint8_t* dataPtr,
                                             EmberAfAttributeType dataType);
 
-void emberAfRetrieveAttributeAndCraftResponse(uint8_t endpoint,
-                                              EmberAfClusterId clusterId,
-                                              EmberAfAttributeId attrId,
-                                              uint8_t mask,
-                                              uint16_t manufacturerCode,
-                                              uint16_t readLength);
+EmberAfStatus emberAfRetrieveAttributeAndCraftResponse(uint8_t endpoint,
+                                                       EmberAfClusterId clusterId,
+                                                       EmberAfAttributeId attrId,
+                                                       uint8_t mask,
+                                                       uint16_t manufacturerCode,
+                                                       uint16_t readLength);
 EmberAfStatus emberAfAppendAttributeReportFields(uint8_t endpoint,
                                                  EmberAfClusterId clusterId,
                                                  EmberAfAttributeId attributeId,

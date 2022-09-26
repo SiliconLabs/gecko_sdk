@@ -202,6 +202,15 @@ void applicationTick(void)
         config.mRxOnWhenIdle   = !sAllowSleep;
         config.mDeviceType     = 0;
         config.mNetworkData    = 0;
+
+        // Reattach from network if device wants to become sleepy
+        if (!config.mRxOnWhenIdle)
+        {
+            SuccessOrExit(otThreadBecomeDetached(otGetInstance()));
+        }
+
+        // Set the Link Mode
+        // NOTE: Setting the Link Mode when a device is detached also causes the device to attempt to attach
         SuccessOrExit(otThreadSetLinkMode(otGetInstance(), config));
 
 #if (defined(SL_CATALOG_KERNEL_PRESENT) && defined(SL_CATALOG_POWER_MANAGER_PRESENT))

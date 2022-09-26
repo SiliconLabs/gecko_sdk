@@ -49,6 +49,16 @@ static IRQn_Type irq_number;
 // store the maximum waiting time for a callback
 static uint32_t time_to_wait_tx_callback = 0;
 
+// store the returned values of TX callback
+typedef struct {
+  UARTDRV_Handle_t handle;
+  uint32_t         timeout;
+  sl_status_t      status;
+  bool             finished;
+} tx_cb_sig;
+
+static tx_cb_sig tx_cb_signal = { 0 };
+
 // Uart receive and transmit buffers
 static uint8_t rx_buf[SL_SIMPLE_COM_RX_BUF_SIZE] = { 0 };
 static uint8_t tx_buf[SL_SIMPLE_COM_TX_BUF_SIZE] = { 0 };
@@ -103,6 +113,28 @@ void sl_simple_com_init(void)
   time_to_wait_tx_callback = CMU_ClockFreqGet(cmuClock_CORE)
                              / USART_BaudrateGet(uartdrv_handle->peripheral.uart)
                              * 4;
+}
+
+/**************************************************************************//**
+ * Simple Comm step function
+ *****************************************************************************/
+void sl_simple_com_step(void)
+{
+  if (tx_cb_signal.finished) {
+    // wait until UART finished transfer
+    if ((!(UARTDRV_GetPeripheralStatus(tx_cb_signal.handle) & UARTDRV_STATUS_TXC))
+        && (tx_cb_signal.timeout < time_to_wait_tx_callback)) {
+      tx_cb_signal.timeout++;
+    } else {
+      // Call public callback API
+      sl_simple_com_transmit_cb(ECODE_EMDRV_UARTDRV_OK == tx_cb_signal.status
+                                ? SL_STATUS_OK : SL_STATUS_FAIL);
+      // Clear TX buffer
+      memset(tx_buf, 0, sizeof(tx_buf));
+      tx_cb_signal.timeout = 0;
+      tx_cb_signal.finished = false;
+    }
+  }
 }
 
 /**************************************************************************//**
@@ -302,20 +334,15 @@ static void transmit_cb(UARTDRV_Handle_t handle,
                         uint8_t *data,
                         UARTDRV_Count_t transferCount)
 {
-  uint16_t timeout = 0;
   (void)data;
   (void)transferCount;
 
-  // wait until UART finished transfer
-  while ((!(UARTDRV_GetPeripheralStatus(handle) & UARTDRV_STATUS_TXC))
-         && (timeout < time_to_wait_tx_callback)) {
-    timeout++;
-  }
-  // Call public callback API
-  sl_simple_com_transmit_cb(ECODE_EMDRV_UARTDRV_OK == transferStatus
-                            ? SL_STATUS_OK : SL_STATUS_FAIL);
-  // Clear TX buffer
-  memset(tx_buf, 0, sizeof(tx_buf));
+  CORE_ATOMIC_SECTION(
+    tx_cb_signal.status = transferStatus;
+    tx_cb_signal.handle = handle;
+    tx_cb_signal.timeout = 0;
+    tx_cb_signal.finished = true;
+    )
 }
 
 /**************************************************************************//**

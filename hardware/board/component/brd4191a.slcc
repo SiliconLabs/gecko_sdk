@@ -16,6 +16,7 @@
   - name: hardware_board_from_stk
   - name: hardware_board_from_bg22-pk6022a
   - name: hardware_board_from_bg22-rb4191a
+  - name: hardware_board_has_rfswitch_aox
   - name: hardware_board_has_vcom
   - name: hardware_board_has_spiflash
   - name: hardware_board_has_rfswitch

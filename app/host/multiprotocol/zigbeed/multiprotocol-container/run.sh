@@ -20,6 +20,7 @@ while [[ $# -gt 0 ]]; do
             echo -e "\t-T\tStart OTBR and ot-ctl application in the running multiprotocol container"
             echo -e "\t-Z\tStart Zigbeed and Z3GatewayHost application in the running multiprotocol container"
             echo -e "\t-C\tStart Z3GatewayCpc Host application in the running multiprotocol container"
+            echo -e "\t-P\tStart pro-compliance-posix application in the running multiprotocol container"
             echo -e "\t-L\tStart Bluetooth and bluetoothctl application in the running multiprotocol container"
             echo "By default, this script will start the multiprotocol container"
             exit
@@ -102,7 +103,12 @@ while [[ $# -gt 0 ]]; do
         -C|--zigbee-cpc-host)
             docker exec -it multiprotocol /usr/local/bin/Z3GatewayCpc
             exit
-            ;;    
+            ;;
+        -P|--pro-compliance)
+            echo "Starting pro-compliance..."
+            docker exec -it multiprotocol /usr/local/bin/pro-compliance-posix '-r spinel+cpc://cpcd_0?iid=1'
+            exit
+            ;;
         -L|--bluetoothctl)
             # stop bluetoothd on the host
             sudo service bluetooth stop

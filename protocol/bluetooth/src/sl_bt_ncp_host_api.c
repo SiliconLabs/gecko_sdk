@@ -3360,6 +3360,27 @@ sl_status_t sl_bt_coex_set_directional_priority_pulse(uint8_t pulse) {
 
 }
 
+sl_status_t sl_bt_coex_get_parameters(uint8_t *priority,
+                                      uint8_t *request,
+                                      uint8_t *pwm_period,
+                                      uint8_t *pwm_dutycycle) {
+    struct sl_bt_packet *cmd = (struct sl_bt_packet *)sl_bt_cmd_msg;
+
+    struct sl_bt_packet *rsp = (struct sl_bt_packet *)sl_bt_rsp_msg;
+
+
+    cmd->header=sl_bt_cmd_coex_get_parameters_id+(((0)&0xff)<<8)+(((0)&0x700)>>8);
+
+
+    sl_bt_host_handle_command();
+    *priority = rsp->data.rsp_coex_get_parameters.priority;
+    *request = rsp->data.rsp_coex_get_parameters.request;
+    *pwm_period = rsp->data.rsp_coex_get_parameters.pwm_period;
+    *pwm_dutycycle = rsp->data.rsp_coex_get_parameters.pwm_dutycycle;
+    return rsp->data.rsp_coex_get_parameters.result;
+
+}
+
 sl_status_t sl_bt_coex_get_counters(uint8_t reset,
                                     size_t max_counters_size,
                                     size_t *counters_len,

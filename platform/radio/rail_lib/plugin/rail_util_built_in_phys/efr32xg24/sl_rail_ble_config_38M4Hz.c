@@ -47,7 +47,7 @@ static const int32_t timingConfig_0[] = {
 };
 
 static const int32_t timingConfig_1[] = {
-  50000, 5750, 375
+  50000, 7000, 375
 };
 
 static const int32_t timingConfig_2[] = {

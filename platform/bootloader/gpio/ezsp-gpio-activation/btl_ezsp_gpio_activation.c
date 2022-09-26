@@ -34,8 +34,7 @@ bool ezsp_gpio_enterBootloader(void)
 #if defined(CMU_HFBUSCLKEN0_GPIO)
   // Enable GPIO clock
   CMU_ClockEnable(cmuClock_GPIO, true);
-#endif
-#if defined(_CMU_CLKEN0_MASK)
+#elif defined(_CMU_CLKEN0_MASK)
   // Enable GPIO clock
   CMU->CLKEN0_SET = CMU_CLKEN0_GPIO;
 #endif
@@ -58,6 +57,9 @@ bool ezsp_gpio_enterBootloader(void)
 #if defined(CMU_HFBUSCLKEN0_GPIO)
   // Disable GPIO clock
   CMU_ClockEnable(cmuClock_GPIO, false);
+#elif defined(_CMU_CLKEN0_MASK)
+  // Disable GPIO clock for Series 2
+  CMU->CLKEN0_CLR = CMU_CLKEN0_GPIO;
 #endif
 
   return pressed;

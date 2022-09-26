@@ -63,7 +63,10 @@ requires:
       - "kernel"
   - name: rail_util_ant_div
     condition:
-      - "hardware_board_has_rfswitch"
+      - "hardware_board_has_rfswitch_ant_div"
+  - name: rail_util_aox
+    condition:
+      - "hardware_board_has_rfswitch_aox"
   
 #----------------- Project files ---------------------
 source:

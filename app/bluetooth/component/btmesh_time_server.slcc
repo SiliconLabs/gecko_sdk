@@ -29,3 +29,4 @@ template_contribution:
     value:
       include: "sl_btmesh_time_server.h"
       function: "sl_btmesh_time_server_on_event"
+    priority: -10

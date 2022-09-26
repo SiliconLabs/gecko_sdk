@@ -128,8 +128,6 @@ include:
 
 tag:
   - prebuilt_demo
-  - hardware:!has:lcd
-  - hardware:shared:button:led
   - hardware:device:flash:512
   - hardware:device:ram:64  
 

@@ -520,21 +520,21 @@ void emberAfPrintAttributeTable(void)
 // 1) unsupported: [attrId:2] [status:1]
 // 2) supported:   [attrId:2] [status:1] [type:1] [data:n]
 //
-void emberAfRetrieveAttributeAndCraftResponse(uint8_t endpoint,
-                                              EmberAfClusterId clusterId,
-                                              EmberAfAttributeId attrId,
-                                              uint8_t mask,
-                                              uint16_t manufacturerCode,
-                                              uint16_t readLength)
+EmberAfStatus emberAfRetrieveAttributeAndCraftResponse(uint8_t endpoint,
+                                                       EmberAfClusterId clusterId,
+                                                       EmberAfAttributeId attrId,
+                                                       uint8_t mask,
+                                                       uint16_t manufacturerCode,
+                                                       uint16_t readLength)
 {
-  EmberAfStatus status;
+  EmberAfStatus status = EMBER_ZCL_STATUS_SUCCESS;
   uint8_t data[ATTRIBUTE_LARGEST];
   uint8_t dataType;
-  uint16_t dataLen;
+  uint16_t dataLen = 0;
 
   // account for at least one byte of data
   if (readLength < 5u) {
-    return;
+    return EMBER_ZCL_STATUS_INSUFFICIENT_SPACE;
   }
 
   emberAfAttributesPrintln("OTA READ: ep:%x cid:%2x attid:%2x msk:%x mfcode:%2x",
@@ -554,27 +554,28 @@ void emberAfRetrieveAttributeAndCraftResponse(uint8_t endpoint,
     dataLen = emberAfAttributeValueSize(dataType, data, (uint16_t) sizeof(data));
     if (dataLen == 0u || (readLength - 4u) < dataLen) {
       // Size retrieval failed or not enough space for attribute.
-      return;
+      status = EMBER_ZCL_STATUS_INSUFFICIENT_SPACE;
     }
   } else {
-    (void) emberAfPutInt16uInResp(attrId);
-    (void) emberAfPutInt8uInResp(status);
     emberAfAttributesPrintln("READ: clus %2x, attr %2x failed %x",
                              clusterId,
                              attrId,
                              status);
     emberAfAttributesFlush();
-    return;
   }
 
   // put attribute in least sig byte first
   (void) emberAfPutInt16uInResp(attrId);
 
-  // attribute is found, so copy in the status and the data type
-  (void) emberAfPutInt8uInResp(EMBER_ZCL_STATUS_SUCCESS);
-  (void) emberAfPutInt8uInResp(dataType);
+  if (status != EMBER_ZCL_STATUS_SUCCESS) {
+    (void) emberAfPutInt8uInResp(status);
+    return status;
+  }
 
-  if (dataLen < (EMBER_AF_RESPONSE_BUFFER_LEN - appResponseLength)) {
+  if ((dataLen + 2 /* status + dataType size */) < (EMBER_AF_RESPONSE_BUFFER_LEN - appResponseLength)) {
+    // attribute is found, so copy in the status and the data type
+    (void) emberAfPutInt8uInResp(status);
+    (void) emberAfPutInt8uInResp(dataType);
 #if (BIGENDIAN_CPU)
     // strings go over the air as length byte and then in human
     // readable format. These should not be flipped. Other attributes
@@ -591,6 +592,9 @@ void emberAfRetrieveAttributeAndCraftResponse(uint8_t endpoint,
     MEMMOVE(&(appResponseData[appResponseLength]), data, dataLen);
 #endif //(BIGENDIAN_CPU)
     appResponseLength += dataLen;
+  } else {
+    (void) emberAfPutInt8uInResp(EMBER_ZCL_STATUS_INSUFFICIENT_SPACE);
+    return EMBER_ZCL_STATUS_INSUFFICIENT_SPACE;
   }
 
   emberAfAttributesPrintln("READ: clus %2x, attr %2x, dataLen: %x, OK",
@@ -598,6 +602,7 @@ void emberAfRetrieveAttributeAndCraftResponse(uint8_t endpoint,
                            attrId,
                            dataLen);
   emberAfAttributesFlush();
+  return status;
 }
 
 // This function appends the attribute report fields for the given endpoint,

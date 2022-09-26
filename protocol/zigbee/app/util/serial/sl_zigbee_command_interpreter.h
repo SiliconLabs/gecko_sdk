@@ -48,7 +48,7 @@ uint8_t sl_zigbee_copy_hex_arg(sl_cli_command_arg_t *arguments,
 // TODO: doxygen
 uint8_t sl_zigbee_copy_eui64_arg(sl_cli_command_arg_t *arguments,
                                  uint8_t index,
-                                 uint8_t* dest,
+                                 uint8_t *dest,
                                  bool big_endian);
 
 // TODO: doxygen

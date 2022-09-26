@@ -299,8 +299,9 @@ EmberStatus emberAfPluginFileDescriptorDispatchWaitForEvents(uint32_t timeoutMs)
     // If the command is handled by the CLI component, read the data
     // to empty the pipe so that it is ready for the next command.
     if (sli_cli_is_input_handled()) {
-      char buff[2];
-      read(sli_cli_get_pipe_read_fd(), buff, 2);
+      char buff[SL_CLI_THREADED_HOST_PIPE_DATA_LENGTH];
+      assert(SL_CLI_THREADED_HOST_PIPE_DATA_LENGTH
+             == read(sli_cli_get_pipe_read_fd(), buff, SL_CLI_THREADED_HOST_PIPE_DATA_LENGTH));
     }
   }
   if (status < 0) {

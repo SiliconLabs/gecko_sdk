@@ -1475,6 +1475,12 @@ static void decode_packet(void)
     SLI_CPC_DEBUG_TRACE_ENDPOINT_RXD_FRAME(endpoint)
     LOCK_ENDPOINT(endpoint);
 
+    // We need to keep at least one buffer for receiving acks
+    if (type == SLI_CPC_HDLC_FRAME_TYPE_DATA && sli_cpc_drv_is_out_of_rx_buffers()) {
+      transmit_reject(endpoint, address, endpoint->ack, SL_CPC_REJECT_OUT_OF_MEMORY);
+      sli_cpc_drop_buffer_handle(rx_handle);
+    }
+
     if ((type == SLI_CPC_HDLC_FRAME_TYPE_DATA
          || type == SLI_CPC_HDLC_FRAME_TYPE_SUPERVISORY)
         && rx_handle->reason == SL_CPC_REJECT_NO_ERROR) {

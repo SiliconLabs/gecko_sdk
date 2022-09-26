@@ -12,6 +12,6 @@
   - name: hardware_board_from_stk
   - name: hardware_board_from_xg24-ek2703a
 - recommends:
-  - id: brd2703a_a01
+  - id: brd2703a_a02
 - ui_hints:
     visibility: never

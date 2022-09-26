@@ -13,6 +13,17 @@ requires:
   - name: bootloader_spi_controller_transport
 recommends:
   - id: bootloader_spi_controller_usart_driver
+    condition: [device_series_1]
+    unless:
+      - bootloader_spi_controller_transport
+  - id: bootloader_spi_controller_usart_driver
+    condition: [device_series_2]
+    unless:
+      - bootloader_spi_controller_transport
+      - device_sdid_220
+  - id: bootloader_spi_controller_eusart_driver
+    condition: [device_sdid_220]
+  - id: bootloader_spi_controller_usart_driver
     condition:
      - brd4154a
   - id: bootloader_spi_controller_usart_driver

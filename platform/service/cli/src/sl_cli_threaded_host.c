@@ -33,7 +33,7 @@
 #include "sl_cli_threaded_host.h"
 #include <unistd.h> // for pipe()
 
-#if defined(EZSP_HOST) && !defined(EMBER_TEST)
+#if (defined(EZSP_HOST) || defined(ZIGBEE_PRO_COMPLIANCE_ON_HOST)) && !defined(UNIX_SIMULATION)
 
 struct semaphore thread_event;
 
@@ -137,7 +137,8 @@ void *threaded_tick(void *ptr)
 
       if (newline) {
         // Write a new line to the pipe to wake up the host app
-        write(PIPE_DATA_WRITER, &newLineChars, 2);
+        assert(SL_CLI_THREADED_HOST_PIPE_DATA_LENGTH
+               == write(PIPE_DATA_WRITER, &newLineChars, SL_CLI_THREADED_HOST_PIPE_DATA_LENGTH));
 #ifdef PRINT_SEMA_POST_ACTIVITY
         fprintf(stderr, "[sema_post]");
 #endif // PRINT_SEMA_POST_ACTIVITY
@@ -222,4 +223,4 @@ bool sli_cli_tick(sl_cli_handle_t handle)
 void sli_cli_threaded_host_init(void)
 {
 }
-#endif // EZSP_HOST
+#endif // (EZSP_HOST || ZIGBEE_PRO_COMPLIANCE_ON_HOST) && !UNIX_SIMULATION

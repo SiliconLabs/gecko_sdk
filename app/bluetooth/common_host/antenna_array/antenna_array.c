@@ -29,6 +29,7 @@
  ******************************************************************************/
 
 #include <stdlib.h>
+#include <string.h>
 #include "antenna_array.h"
 #include "antenna_array_brd4191a.h"
 
@@ -115,6 +116,23 @@ static const uint8_t *array_list[ANTENNA_ARRAY_TYPE_LAST] = {
 static const uint8_t antenna_array_dp_vertical[] = ANT_VERTICAL;
 static const uint8_t antenna_array_dp_horizontal[] = ANT_HORIZONTAL;
 static const uint8_t reference_antenna = ANT_6_CP;
+
+static char *board_list_str[] = {
+  "BRD4185A",
+  "BRD4191A"
+};
+
+static antenna_array_board_t type_to_board[] = {
+  BRD4185A,  // ANTENNA_ARRAY_TYPE_4x4_URA
+  BRD4185A,  // ANTENNA_ARRAY_TYPE_3x3_URA
+  BRD4185A,  // ANTENNA_ARRAY_TYPE_1x4_ULA
+  BRD4191A   // ANTENNA_ARRAY_TYPE_4x4_DP_URA
+};
+
+static uint8_t board_to_type[] = {
+  ANTENNA_ARRAY_TYPE_4x4_URA,   // BRD4185A
+  ANTENNA_ARRAY_TYPE_4x4_DP_URA // BRD4191A
+};
 
 /***************************************************************************//**
  * Initialize antenna switch pattern with default values.
@@ -302,4 +320,64 @@ static uint8_t get_array_variant(uint8_t array_type, uint8_t *pattern)
     }
   }
   return variant;
+}
+
+// Assign a compatible board to an antenna array type.
+sl_status_t antenna_array_type_to_board(uint8_t array_type,
+                                        antenna_array_board_t *board)
+{
+  if (board == NULL) {
+    return SL_STATUS_NULL_POINTER;
+  } else if (array_type < 0 || array_type >= ANTENNA_ARRAY_TYPE_LAST) {
+    return SL_STATUS_INVALID_PARAMETER;
+  }
+  *board = type_to_board[array_type];
+  return SL_STATUS_OK;
+}
+
+// Assign a default antenna array type to a board.
+sl_status_t antenna_array_board_to_type(antenna_array_board_t board,
+                                        uint8_t *array_type)
+{
+  if (array_type == NULL) {
+    return SL_STATUS_NULL_POINTER;
+  } else if (board < 0 || board >= ANTENNA_ARRAY_BOARD_COUNT) {
+    return SL_STATUS_INVALID_PARAMETER;
+  } else if (board == ANTENNA_ARRAY_BOARD_UNKNOWN) {
+    return SL_STATUS_NOT_SUPPORTED;
+  }
+  *array_type = board_to_type[board];
+  return SL_STATUS_OK;
+}
+
+// Convert string to antenna array board.
+sl_status_t antenna_array_string_to_board(const char *str,
+                                          antenna_array_board_t *board)
+{
+  if (str == NULL || board == NULL) {
+    return SL_STATUS_NULL_POINTER;
+  }
+  for (int i = 0; i < ANTENNA_ARRAY_BOARD_UNKNOWN; i++) {
+    if (strcmp(board_list_str[i], str) == 0) {
+      *board = (antenna_array_board_t)i;
+      return SL_STATUS_OK;
+    }
+  }
+  return SL_STATUS_NOT_SUPPORTED;
+}
+
+// Convert antenna array board to string.
+sl_status_t antenna_array_board_to_string(antenna_array_board_t board,
+                                          char *str)
+{
+  if (str == NULL) {
+    return SL_STATUS_NULL_POINTER;
+  } else if (board < 0 || board >= ANTENNA_ARRAY_BOARD_COUNT) {
+    return SL_STATUS_INVALID_PARAMETER;
+  } else if (board == ANTENNA_ARRAY_BOARD_UNKNOWN) {
+    return SL_STATUS_NOT_SUPPORTED;
+  }
+
+  memcpy(str, board_list_str[board], strlen(board_list_str[board]) + 1);
+  return SL_STATUS_OK;
 }

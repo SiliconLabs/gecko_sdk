@@ -34,12 +34,16 @@
 #include "sl_bt_api.h"
 
 // Example: user command 1.
-#define USER_CMD_1_ID    0x01
+#define USER_CMD_1_ID       0x01
 typedef uint8_t cmd_1_t[16];
 
 // Example: user command 2.
-#define USER_CMD_2_ID    0x02
+#define USER_CMD_2_ID       0x02
 typedef uint8_t cmd_2_t[8];
+
+// Get Board Name command.
+#define BOARD_CMD_ID        0x03
+#define BOARD_RSP_DATA_LEN  8
 
 PACKSTRUCT(struct user_cmd {
   uint8_t hdr;

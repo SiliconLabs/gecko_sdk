@@ -5,7 +5,7 @@
     <property key="demos.blurb" value="Wi-SUN - CLI example"/>
     <property key="core.partCompatibility" value=".*efr32mg12p433f1024gl125.*"/>
     <property key="core.boardCompatibility" value="brd4163a"/>
-    <property key="demos.imageFile" value="asset://com.silabs.sdk.stack.super_4.1.1/app/wisun/demos/wisun_soc_cli/wisun_soc_cli-brd4163a.s37"/>
+    <property key="demos.imageFile" value="asset://com.silabs.sdk.stack.super_4.1.2/app/wisun/demos/wisun_soc_cli/wisun_soc_cli-brd4163a.s37"/>
     <property key="core.readmeFiles" value="documentation/example/wisun_cli/readme.md"/>
     <property key="filters" value="Device\ Type|SoC Project\ Difficulty|Advanced Wireless\ Technology|Wi-SUN"/>
     <property key="core.quality" value="PRODUCTION"/>
@@ -15,7 +15,7 @@
     <property key="demos.blurb" value="Wi-SUN - CLI example"/>
     <property key="core.partCompatibility" value=".*efr32mg12p433f1024gl125.*"/>
     <property key="core.boardCompatibility" value="brd4164a"/>
-    <property key="demos.imageFile" value="asset://com.silabs.sdk.stack.super_4.1.1/app/wisun/demos/wisun_soc_cli/wisun_soc_cli-brd4164a.s37"/>
+    <property key="demos.imageFile" value="asset://com.silabs.sdk.stack.super_4.1.2/app/wisun/demos/wisun_soc_cli/wisun_soc_cli-brd4164a.s37"/>
     <property key="core.readmeFiles" value="documentation/example/wisun_cli/readme.md"/>
     <property key="filters" value="Device\ Type|SoC Project\ Difficulty|Advanced Wireless\ Technology|Wi-SUN"/>
     <property key="core.quality" value="PRODUCTION"/>
@@ -25,7 +25,7 @@
     <property key="demos.blurb" value="Wi-SUN - CLI example"/>
     <property key="core.partCompatibility" value=".*efr32mg12p433f1024gm68.*"/>
     <property key="core.boardCompatibility" value="brd4170a"/>
-    <property key="demos.imageFile" value="asset://com.silabs.sdk.stack.super_4.1.1/app/wisun/demos/wisun_soc_cli/wisun_soc_cli-brd4170a.s37"/>
+    <property key="demos.imageFile" value="asset://com.silabs.sdk.stack.super_4.1.2/app/wisun/demos/wisun_soc_cli/wisun_soc_cli-brd4170a.s37"/>
     <property key="core.readmeFiles" value="documentation/example/wisun_cli/readme.md"/>
     <property key="filters" value="Device\ Type|SoC Project\ Difficulty|Advanced Wireless\ Technology|Wi-SUN"/>
     <property key="core.quality" value="PRODUCTION"/>
@@ -35,7 +35,7 @@
     <property key="demos.blurb" value="Wi-SUN - CLI example"/>
     <property key="core.partCompatibility" value=".*efr32mg12p433f1024gm48.*"/>
     <property key="core.boardCompatibility" value="brd4172a"/>
-    <property key="demos.imageFile" value="asset://com.silabs.sdk.stack.super_4.1.1/app/wisun/demos/wisun_soc_cli/wisun_soc_cli-brd4172a.s37"/>
+    <property key="demos.imageFile" value="asset://com.silabs.sdk.stack.super_4.1.2/app/wisun/demos/wisun_soc_cli/wisun_soc_cli-brd4172a.s37"/>
     <property key="core.readmeFiles" value="documentation/example/wisun_cli/readme.md"/>
     <property key="filters" value="Device\ Type|SoC Project\ Difficulty|Advanced Wireless\ Technology|Wi-SUN"/>
     <property key="core.quality" value="PRODUCTION"/>
@@ -45,7 +45,7 @@
     <property key="demos.blurb" value="Wi-SUN - CLI example"/>
     <property key="core.partCompatibility" value=".*efr32fg12p433f1024gl125.*"/>
     <property key="core.boardCompatibility" value="brd4253a"/>
-    <property key="demos.imageFile" value="asset://com.silabs.sdk.stack.super_4.1.1/app/wisun/demos/wisun_soc_cli/wisun_soc_cli-brd4253a.s37"/>
+    <property key="demos.imageFile" value="asset://com.silabs.sdk.stack.super_4.1.2/app/wisun/demos/wisun_soc_cli/wisun_soc_cli-brd4253a.s37"/>
     <property key="core.readmeFiles" value="documentation/example/wisun_cli/readme.md"/>
     <property key="filters" value="Device\ Type|SoC Project\ Difficulty|Advanced Wireless\ Technology|Wi-SUN"/>
     <property key="core.quality" value="PRODUCTION"/>
@@ -55,7 +55,7 @@
     <property key="demos.blurb" value="Wi-SUN - CLI example"/>
     <property key="core.partCompatibility" value=".*efr32fg12p433f1024gl125.*"/>
     <property key="core.boardCompatibility" value="brd4254a"/>
-    <property key="demos.imageFile" value="asset://com.silabs.sdk.stack.super_4.1.1/app/wisun/demos/wisun_soc_cli/wisun_soc_cli-brd4254a.s37"/>
+    <property key="demos.imageFile" value="asset://com.silabs.sdk.stack.super_4.1.2/app/wisun/demos/wisun_soc_cli/wisun_soc_cli-brd4254a.s37"/>
     <property key="core.readmeFiles" value="documentation/example/wisun_cli/readme.md"/>
     <property key="filters" value="Device\ Type|SoC Project\ Difficulty|Advanced Wireless\ Technology|Wi-SUN"/>
     <property key="core.quality" value="PRODUCTION"/>
@@ -65,7 +65,7 @@
     <property key="demos.blurb" value="Wi-SUN - CLI example"/>
     <property key="core.partCompatibility" value=".*efr32fg25b222f1920im56.*"/>
     <property key="core.boardCompatibility" value="brd4270a"/>
-    <property key="demos.imageFile" value="asset://com.silabs.sdk.stack.super_4.1.1/app/wisun/demos/wisun_soc_cli/wisun_soc_cli-brd4270a.s37"/>
+    <property key="demos.imageFile" value="asset://com.silabs.sdk.stack.super_4.1.2/app/wisun/demos/wisun_soc_cli/wisun_soc_cli-brd4270a.s37"/>
     <property key="core.readmeFiles" value="documentation/example/wisun_cli/readme.md"/>
     <property key="filters" value="Device\ Type|SoC Project\ Difficulty|Advanced Wireless\ Technology|Wi-SUN"/>
     <property key="core.quality" value="PRODUCTION"/>
@@ -75,7 +75,7 @@
     <property key="demos.blurb" value="Wi-SUN - CLI example"/>
     <property key="core.partCompatibility" value=".*efr32fg25b222f1920im56.*"/>
     <property key="core.boardCompatibility" value="brd4270b"/>
-    <property key="demos.imageFile" value="asset://com.silabs.sdk.stack.super_4.1.1/app/wisun/demos/wisun_soc_cli/wisun_soc_cli-brd4270b.s37"/>
+    <property key="demos.imageFile" value="asset://com.silabs.sdk.stack.super_4.1.2/app/wisun/demos/wisun_soc_cli/wisun_soc_cli-brd4270b.s37"/>
     <property key="core.readmeFiles" value="documentation/example/wisun_cli/readme.md"/>
     <property key="filters" value="Device\ Type|SoC Project\ Difficulty|Advanced Wireless\ Technology|Wi-SUN"/>
     <property key="core.quality" value="PRODUCTION"/>
@@ -85,7 +85,7 @@
     <property key="demos.blurb" value="Wi-SUN - CLI example"/>
     <property key="core.partCompatibility" value=".*efr32fg25b222f1920im56.*"/>
     <property key="core.boardCompatibility" value="brd4271a"/>
-    <property key="demos.imageFile" value="asset://com.silabs.sdk.stack.super_4.1.1/app/wisun/demos/wisun_soc_cli/wisun_soc_cli-brd4271a.s37"/>
+    <property key="demos.imageFile" value="asset://com.silabs.sdk.stack.super_4.1.2/app/wisun/demos/wisun_soc_cli/wisun_soc_cli-brd4271a.s37"/>
     <property key="core.readmeFiles" value="documentation/example/wisun_cli/readme.md"/>
     <property key="filters" value="Device\ Type|SoC Project\ Difficulty|Advanced Wireless\ Technology|Wi-SUN"/>
     <property key="core.quality" value="PRODUCTION"/>
@@ -95,7 +95,7 @@
     <property key="demos.blurb" value="Wi-SUN - CLI example"/>
     <property key="core.partCompatibility" value=".*efr32fg25b222f1920im56.*"/>
     <property key="core.boardCompatibility" value="brd4272a"/>
-    <property key="demos.imageFile" value="asset://com.silabs.sdk.stack.super_4.1.1/app/wisun/demos/wisun_soc_cli/wisun_soc_cli-brd4272a.s37"/>
+    <property key="demos.imageFile" value="asset://com.silabs.sdk.stack.super_4.1.2/app/wisun/demos/wisun_soc_cli/wisun_soc_cli-brd4272a.s37"/>
     <property key="core.readmeFiles" value="documentation/example/wisun_cli/readme.md"/>
     <property key="filters" value="Device\ Type|SoC Project\ Difficulty|Advanced Wireless\ Technology|Wi-SUN"/>
     <property key="core.quality" value="PRODUCTION"/>

@@ -485,9 +485,11 @@ extern "C" {
 
 /// Boolean to indicate whether the selected chip supports
 /// dynamic FEC
-#if (_SILICON_LABS_32B_SERIES_2_CONFIG > 1)
+/// See also runtime refinement \ref
+/// RAIL_IEEE802154_SupportsGDynFec().
+#if (_SILICON_LABS_32B_SERIES_2_CONFIG > 1) || (_SILICON_LABS_32B_SERIES_1_CONFIG == 2)
 #define RAIL_IEEE802154_SUPPORTS_G_DYNFEC \
-  RAIL_FEAT_IEEE802154_G_GB868_SUPPORTED  // limit to SUBGHZ for now
+  RAIL_IEEE802154_SUPPORTS_G_SUBSET_GB868  // limit to SUBGHZ for now
 #else
 #define RAIL_IEEE802154_SUPPORTS_G_DYNFEC 0
 #endif

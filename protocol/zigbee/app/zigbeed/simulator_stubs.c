@@ -98,8 +98,7 @@ void emberAfCounterHandler(EmberCounterType type, EmberCounterInfo info)
 
 // Referenced from stream_putchar in iostream_printf.o
 //   from putchar in iostream_printf.o
-sl_status_t sl_iostream_putchar(sl_iostream_t *stream,
-                                char c)
+WEAK(sl_status_t sl_iostream_putchar(sl_iostream_t *stream, char c))
 {
   //EmberStatus status = emberSerialWriteByte(APP_SERIAL, c);
   EmberStatus status = EMBER_SUCCESS;

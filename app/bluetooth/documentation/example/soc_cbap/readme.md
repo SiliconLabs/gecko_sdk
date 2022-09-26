@@ -2,9 +2,11 @@
 
 This example application demonstrates how to create secure connections with trusted devices, where the trust between the devices is based on device certificates instead of some classical authentication method like numeric comparison or passkey entry. This method ensures authenticated connections without any user interaction. A signed device certificate must be present on the devices.
 
+> **Note: This example project is at ALPHA quality level and is not meant to be used in production!**
+
 > Note: this example expects a specific Gecko Bootloader to be present on your device. For details see the Troubleshooting section.
 
-## Getting started
+## Getting Started
 
 To get started with Silicon Labs Bluetooth and Simplicity Studio, see [QSG169: Bluetooth® Quick-Start Guide for SDK v3.x and Higher](https://www.silabs.com/documents/public/quick-start-guides/qsg169-bluetooth-sdk-v3x-quick-start-guide.pdf).
 

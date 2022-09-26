@@ -100,7 +100,7 @@ readme:
 
 filter:
   - name: "Wireless Technology"
-    value: ["Thread", "Bluetooth"]
+    value: ["Thread", "Zigbee", "Bluetooth"]
   - name: "Device Type"
     value: ["RCP"]
   - name: "Capability"

@@ -484,7 +484,7 @@ void emAfPriceServerCliBtPut(sl_cli_command_arg_t *arguments)
   EmberAfScheduledTariff t;
   EmberAfPriceCommonInfo i;
   uint8_t *dst = NULL;
-  sl_zigbee_copy_string_arg(arguments, 3, (uint8_t *)&threshold, sizeof(emAfPriceBlockThreshold), true);
+  sl_zigbee_copy_hex_arg(arguments, 3, (uint8_t *)&threshold, sizeof(emAfPriceBlockThreshold), true);
 
   if (bt.issuerTariffId == scheduledTariff.issuerTariffId) {
     t = scheduledTariff;

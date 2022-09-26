@@ -565,6 +565,14 @@
               <value>serializableObject:EnumDataItem:1</value>
             </override>
             <override>
+              <key>MODEM_AFCADJTX_AFCSCALEE</key>
+              <value>int:0</value>
+            </override>
+            <override>
+              <key>MODEM_AFCADJTX_AFCSCALEM</key>
+              <value>int:0</value>
+            </override>
+            <override>
               <key>PREAMBLE_LENGTH</key>
               <value>int:3000</value>
             </override>

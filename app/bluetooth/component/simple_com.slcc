@@ -63,5 +63,3 @@ template_contribution:
       event: service_process_action
       include: sl_simple_com.h
       handler: sl_simple_com_step
-    condition:
-    - cpc_core

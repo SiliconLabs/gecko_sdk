@@ -6,9 +6,9 @@
     <property key="demos.blurb" value="Multiprotocol (OpenThread+Zigbee) - RCP (SPI)"/>
     <property key="core.partCompatibility" value=".*efr32mg1p232f256gm48.*"/>
     <property key="core.boardCompatibility" value="brd4151a"/>
-    <property key="demos.imageFile" value="asset://com.silabs.sdk.stack.super_4.1.1/protocol/openthread/demos/rcp-spi-802154/rcp-spi-802154-brd4151a.s37"/>
+    <property key="demos.imageFile" value="asset://com.silabs.sdk.stack.super_4.1.2/protocol/openthread/demos/rcp-spi-802154/rcp-spi-802154-brd4151a.s37"/>
     <property key="core.readmeFiles" value="sample-apps/ot-ncp/README-MP-RCP.md"/>
-    <property key="filters" value="Device\ Type|RCP Project\ Difficulty|Advanced Wireless\ Technology|Thread"/>
+    <property key="filters" value="Capability|Multiprotocol Device\ Type|RCP Project\ Difficulty|Advanced Wireless\ Technology|Thread Wireless\ Technology|Zigbee"/>
     <property key="core.quality" value="PRODUCTION"/>
   </demo>
   <demo name="brd4161a.demo.rcp-spi-802154" label="Multiprotocol (OpenThread+Zigbee) - RCP (SPI)">
@@ -17,9 +17,9 @@
     <property key="demos.blurb" value="Multiprotocol (OpenThread+Zigbee) - RCP (SPI)"/>
     <property key="core.partCompatibility" value=".*efr32mg12p432f1024gl125.*"/>
     <property key="core.boardCompatibility" value="brd4161a"/>
-    <property key="demos.imageFile" value="asset://com.silabs.sdk.stack.super_4.1.1/protocol/openthread/demos/rcp-spi-802154/rcp-spi-802154-brd4161a.s37"/>
+    <property key="demos.imageFile" value="asset://com.silabs.sdk.stack.super_4.1.2/protocol/openthread/demos/rcp-spi-802154/rcp-spi-802154-brd4161a.s37"/>
     <property key="core.readmeFiles" value="sample-apps/ot-ncp/README-MP-RCP.md"/>
-    <property key="filters" value="Device\ Type|RCP Project\ Difficulty|Advanced Wireless\ Technology|Thread"/>
+    <property key="filters" value="Capability|Multiprotocol Device\ Type|RCP Project\ Difficulty|Advanced Wireless\ Technology|Thread Wireless\ Technology|Zigbee"/>
     <property key="core.quality" value="PRODUCTION"/>
   </demo>
   <demo name="brd4166a.demo.rcp-spi-802154" label="Multiprotocol (OpenThread+Zigbee) - RCP (SPI)">
@@ -28,9 +28,9 @@
     <property key="demos.blurb" value="Multiprotocol (OpenThread+Zigbee) - RCP (SPI)"/>
     <property key="core.partCompatibility" value=".*efr32mg12p332f1024gl125.*"/>
     <property key="core.boardCompatibility" value="brd4166a"/>
-    <property key="demos.imageFile" value="asset://com.silabs.sdk.stack.super_4.1.1/protocol/openthread/demos/rcp-spi-802154/rcp-spi-802154-brd4166a.s37"/>
+    <property key="demos.imageFile" value="asset://com.silabs.sdk.stack.super_4.1.2/protocol/openthread/demos/rcp-spi-802154/rcp-spi-802154-brd4166a.s37"/>
     <property key="core.readmeFiles" value="sample-apps/ot-ncp/README-MP-RCP.md"/>
-    <property key="filters" value="Device\ Type|RCP Project\ Difficulty|Advanced Wireless\ Technology|Thread"/>
+    <property key="filters" value="Capability|Multiprotocol Device\ Type|RCP Project\ Difficulty|Advanced Wireless\ Technology|Thread Wireless\ Technology|Zigbee"/>
     <property key="core.quality" value="PRODUCTION"/>
   </demo>
   <demo name="brd4168a.demo.rcp-spi-802154" label="Multiprotocol (OpenThread+Zigbee) - RCP (SPI)">
@@ -39,9 +39,9 @@
     <property key="demos.blurb" value="Multiprotocol (OpenThread+Zigbee) - RCP (SPI)"/>
     <property key="core.partCompatibility" value=".*efr32mg13p732f512gm48.*"/>
     <property key="core.boardCompatibility" value="brd4168a"/>
-    <property key="demos.imageFile" value="asset://com.silabs.sdk.stack.super_4.1.1/protocol/openthread/demos/rcp-spi-802154/rcp-spi-802154-brd4168a.s37"/>
+    <property key="demos.imageFile" value="asset://com.silabs.sdk.stack.super_4.1.2/protocol/openthread/demos/rcp-spi-802154/rcp-spi-802154-brd4168a.s37"/>
     <property key="core.readmeFiles" value="sample-apps/ot-ncp/README-MP-RCP.md"/>
-    <property key="filters" value="Device\ Type|RCP Project\ Difficulty|Advanced Wireless\ Technology|Thread"/>
+    <property key="filters" value="Capability|Multiprotocol Device\ Type|RCP Project\ Difficulty|Advanced Wireless\ Technology|Thread Wireless\ Technology|Zigbee"/>
     <property key="core.quality" value="PRODUCTION"/>
   </demo>
   <demo name="brd4180a.demo.rcp-spi-802154" label="Multiprotocol (OpenThread+Zigbee) - RCP (SPI)">
@@ -50,9 +50,9 @@
     <property key="demos.blurb" value="Multiprotocol (OpenThread+Zigbee) - RCP (SPI)"/>
     <property key="core.partCompatibility" value=".*efr32mg21a020f1024im32.*"/>
     <property key="core.boardCompatibility" value="brd4180a"/>
-    <property key="demos.imageFile" value="asset://com.silabs.sdk.stack.super_4.1.1/protocol/openthread/demos/rcp-spi-802154/rcp-spi-802154-brd4180a.s37"/>
+    <property key="demos.imageFile" value="asset://com.silabs.sdk.stack.super_4.1.2/protocol/openthread/demos/rcp-spi-802154/rcp-spi-802154-brd4180a.s37"/>
     <property key="core.readmeFiles" value="sample-apps/ot-ncp/README-MP-RCP.md"/>
-    <property key="filters" value="Device\ Type|RCP Project\ Difficulty|Advanced Wireless\ Technology|Thread"/>
+    <property key="filters" value="Capability|Multiprotocol Device\ Type|RCP Project\ Difficulty|Advanced Wireless\ Technology|Thread Wireless\ Technology|Zigbee"/>
     <property key="core.quality" value="PRODUCTION"/>
   </demo>
   <demo name="brd4304a.demo.rcp-spi-802154" label="Multiprotocol (OpenThread+Zigbee) - RCP (SPI)">
@@ -61,9 +61,9 @@
     <property key="demos.blurb" value="Multiprotocol (OpenThread+Zigbee) - RCP (SPI)"/>
     <property key="core.partCompatibility" value=".*mgm12p32f1024ga.*"/>
     <property key="core.boardCompatibility" value="brd4304a"/>
-    <property key="demos.imageFile" value="asset://com.silabs.sdk.stack.super_4.1.1/protocol/openthread/demos/rcp-spi-802154/rcp-spi-802154-brd4304a.s37"/>
+    <property key="demos.imageFile" value="asset://com.silabs.sdk.stack.super_4.1.2/protocol/openthread/demos/rcp-spi-802154/rcp-spi-802154-brd4304a.s37"/>
     <property key="core.readmeFiles" value="sample-apps/ot-ncp/README-MP-RCP.md"/>
-    <property key="filters" value="Device\ Type|RCP Project\ Difficulty|Advanced Wireless\ Technology|Thread"/>
+    <property key="filters" value="Capability|Multiprotocol Device\ Type|RCP Project\ Difficulty|Advanced Wireless\ Technology|Thread Wireless\ Technology|Zigbee"/>
     <property key="core.quality" value="PRODUCTION"/>
   </demo>
   <demo name="brd4151a.demo.rcp-uart-802154" label="Multiprotocol (OpenThread+Zigbee) - RCP (UART)">
@@ -72,9 +72,9 @@
     <property key="demos.blurb" value="Multiprotocol (OpenThread+Zigbee) - RCP (UART)"/>
     <property key="core.partCompatibility" value=".*efr32mg1p232f256gm48.*"/>
     <property key="core.boardCompatibility" value="brd4151a"/>
-    <property key="demos.imageFile" value="asset://com.silabs.sdk.stack.super_4.1.1/protocol/openthread/demos/rcp-uart-802154/rcp-uart-802154-brd4151a.s37"/>
+    <property key="demos.imageFile" value="asset://com.silabs.sdk.stack.super_4.1.2/protocol/openthread/demos/rcp-uart-802154/rcp-uart-802154-brd4151a.s37"/>
     <property key="core.readmeFiles" value="sample-apps/ot-ncp/README-MP-RCP.md"/>
-    <property key="filters" value="Device\ Type|RCP Project\ Difficulty|Advanced Wireless\ Technology|Thread"/>
+    <property key="filters" value="Capability|Multiprotocol Device\ Type|RCP Project\ Difficulty|Advanced Wireless\ Technology|Thread Wireless\ Technology|Zigbee"/>
     <property key="core.quality" value="PRODUCTION"/>
   </demo>
   <demo name="brd4161a.demo.rcp-uart-802154" label="Multiprotocol (OpenThread+Zigbee) - RCP (UART)">
@@ -83,9 +83,9 @@
     <property key="demos.blurb" value="Multiprotocol (OpenThread+Zigbee) - RCP (UART)"/>
     <property key="core.partCompatibility" value=".*efr32mg12p432f1024gl125.*"/>
     <property key="core.boardCompatibility" value="brd4161a"/>
-    <property key="demos.imageFile" value="asset://com.silabs.sdk.stack.super_4.1.1/protocol/openthread/demos/rcp-uart-802154/rcp-uart-802154-brd4161a.s37"/>
+    <property key="demos.imageFile" value="asset://com.silabs.sdk.stack.super_4.1.2/protocol/openthread/demos/rcp-uart-802154/rcp-uart-802154-brd4161a.s37"/>
     <property key="core.readmeFiles" value="sample-apps/ot-ncp/README-MP-RCP.md"/>
-    <property key="filters" value="Device\ Type|RCP Project\ Difficulty|Advanced Wireless\ Technology|Thread"/>
+    <property key="filters" value="Capability|Multiprotocol Device\ Type|RCP Project\ Difficulty|Advanced Wireless\ Technology|Thread Wireless\ Technology|Zigbee"/>
     <property key="core.quality" value="PRODUCTION"/>
   </demo>
   <demo name="brd4166a.demo.rcp-uart-802154" label="Multiprotocol (OpenThread+Zigbee) - RCP (UART)">
@@ -94,9 +94,9 @@
     <property key="demos.blurb" value="Multiprotocol (OpenThread+Zigbee) - RCP (UART)"/>
     <property key="core.partCompatibility" value=".*efr32mg12p332f1024gl125.*"/>
     <property key="core.boardCompatibility" value="brd4166a"/>
-    <property key="demos.imageFile" value="asset://com.silabs.sdk.stack.super_4.1.1/protocol/openthread/demos/rcp-uart-802154/rcp-uart-802154-brd4166a.s37"/>
+    <property key="demos.imageFile" value="asset://com.silabs.sdk.stack.super_4.1.2/protocol/openthread/demos/rcp-uart-802154/rcp-uart-802154-brd4166a.s37"/>
     <property key="core.readmeFiles" value="sample-apps/ot-ncp/README-MP-RCP.md"/>
-    <property key="filters" value="Device\ Type|RCP Project\ Difficulty|Advanced Wireless\ Technology|Thread"/>
+    <property key="filters" value="Capability|Multiprotocol Device\ Type|RCP Project\ Difficulty|Advanced Wireless\ Technology|Thread Wireless\ Technology|Zigbee"/>
     <property key="core.quality" value="PRODUCTION"/>
   </demo>
   <demo name="brd4168a.demo.rcp-uart-802154" label="Multiprotocol (OpenThread+Zigbee) - RCP (UART)">
@@ -105,9 +105,9 @@
     <property key="demos.blurb" value="Multiprotocol (OpenThread+Zigbee) - RCP (UART)"/>
     <property key="core.partCompatibility" value=".*efr32mg13p732f512gm48.*"/>
     <property key="core.boardCompatibility" value="brd4168a"/>
-    <property key="demos.imageFile" value="asset://com.silabs.sdk.stack.super_4.1.1/protocol/openthread/demos/rcp-uart-802154/rcp-uart-802154-brd4168a.s37"/>
+    <property key="demos.imageFile" value="asset://com.silabs.sdk.stack.super_4.1.2/protocol/openthread/demos/rcp-uart-802154/rcp-uart-802154-brd4168a.s37"/>
     <property key="core.readmeFiles" value="sample-apps/ot-ncp/README-MP-RCP.md"/>
-    <property key="filters" value="Device\ Type|RCP Project\ Difficulty|Advanced Wireless\ Technology|Thread"/>
+    <property key="filters" value="Capability|Multiprotocol Device\ Type|RCP Project\ Difficulty|Advanced Wireless\ Technology|Thread Wireless\ Technology|Zigbee"/>
     <property key="core.quality" value="PRODUCTION"/>
   </demo>
   <demo name="brd4180a.demo.rcp-uart-802154" label="Multiprotocol (OpenThread+Zigbee) - RCP (UART)">
@@ -116,9 +116,9 @@
     <property key="demos.blurb" value="Multiprotocol (OpenThread+Zigbee) - RCP (UART)"/>
     <property key="core.partCompatibility" value=".*efr32mg21a020f1024im32.*"/>
     <property key="core.boardCompatibility" value="brd4180a"/>
-    <property key="demos.imageFile" value="asset://com.silabs.sdk.stack.super_4.1.1/protocol/openthread/demos/rcp-uart-802154/rcp-uart-802154-brd4180a.s37"/>
+    <property key="demos.imageFile" value="asset://com.silabs.sdk.stack.super_4.1.2/protocol/openthread/demos/rcp-uart-802154/rcp-uart-802154-brd4180a.s37"/>
     <property key="core.readmeFiles" value="sample-apps/ot-ncp/README-MP-RCP.md"/>
-    <property key="filters" value="Device\ Type|RCP Project\ Difficulty|Advanced Wireless\ Technology|Thread"/>
+    <property key="filters" value="Capability|Multiprotocol Device\ Type|RCP Project\ Difficulty|Advanced Wireless\ Technology|Thread Wireless\ Technology|Zigbee"/>
     <property key="core.quality" value="PRODUCTION"/>
   </demo>
   <demo name="brd4304a.demo.rcp-uart-802154" label="Multiprotocol (OpenThread+Zigbee) - RCP (UART)">
@@ -127,9 +127,9 @@
     <property key="demos.blurb" value="Multiprotocol (OpenThread+Zigbee) - RCP (UART)"/>
     <property key="core.partCompatibility" value=".*mgm12p32f1024ga.*"/>
     <property key="core.boardCompatibility" value="brd4304a"/>
-    <property key="demos.imageFile" value="asset://com.silabs.sdk.stack.super_4.1.1/protocol/openthread/demos/rcp-uart-802154/rcp-uart-802154-brd4304a.s37"/>
+    <property key="demos.imageFile" value="asset://com.silabs.sdk.stack.super_4.1.2/protocol/openthread/demos/rcp-uart-802154/rcp-uart-802154-brd4304a.s37"/>
     <property key="core.readmeFiles" value="sample-apps/ot-ncp/README-MP-RCP.md"/>
-    <property key="filters" value="Device\ Type|RCP Project\ Difficulty|Advanced Wireless\ Technology|Thread"/>
+    <property key="filters" value="Capability|Multiprotocol Device\ Type|RCP Project\ Difficulty|Advanced Wireless\ Technology|Thread Wireless\ Technology|Zigbee"/>
     <property key="core.quality" value="PRODUCTION"/>
   </demo>
   <demo name="brd4161a.demo.ot-ncp-ftd" label="OpenThread - NCP (FTD)">
@@ -138,7 +138,7 @@
     <property key="demos.blurb" value="OpenThread - NCP (FTD)"/>
     <property key="core.partCompatibility" value=".*efr32mg12p432f1024gl125.*"/>
     <property key="core.boardCompatibility" value="brd4161a"/>
-    <property key="demos.imageFile" value="asset://com.silabs.sdk.stack.super_4.1.1/protocol/openthread/demos/ot-ncp-ftd/ot-ncp-ftd-brd4161a.s37"/>
+    <property key="demos.imageFile" value="asset://com.silabs.sdk.stack.super_4.1.2/protocol/openthread/demos/ot-ncp-ftd/ot-ncp-ftd-brd4161a.s37"/>
     <property key="core.readmeFiles" value="sample-apps/ot-ncp/README-OT-NCP.md"/>
     <property key="filters" value="Device\ Type|NCP Project\ Difficulty|Advanced Wireless\ Technology|Thread"/>
     <property key="core.quality" value="PRODUCTION"/>
@@ -149,7 +149,7 @@
     <property key="demos.blurb" value="OpenThread - NCP (FTD)"/>
     <property key="core.partCompatibility" value=".*efr32mg12p332f1024gl125.*"/>
     <property key="core.boardCompatibility" value="brd4166a"/>
-    <property key="demos.imageFile" value="asset://com.silabs.sdk.stack.super_4.1.1/protocol/openthread/demos/ot-ncp-ftd/ot-ncp-ftd-brd4166a.s37"/>
+    <property key="demos.imageFile" value="asset://com.silabs.sdk.stack.super_4.1.2/protocol/openthread/demos/ot-ncp-ftd/ot-ncp-ftd-brd4166a.s37"/>
     <property key="core.readmeFiles" value="sample-apps/ot-ncp/README-OT-NCP.md"/>
     <property key="filters" value="Device\ Type|NCP Project\ Difficulty|Advanced Wireless\ Technology|Thread"/>
     <property key="core.quality" value="PRODUCTION"/>
@@ -160,7 +160,7 @@
     <property key="demos.blurb" value="OpenThread - NCP (FTD)"/>
     <property key="core.partCompatibility" value=".*efr32mg13p732f512gm48.*"/>
     <property key="core.boardCompatibility" value="brd4168a"/>
-    <property key="demos.imageFile" value="asset://com.silabs.sdk.stack.super_4.1.1/protocol/openthread/demos/ot-ncp-ftd/ot-ncp-ftd-brd4168a.s37"/>
+    <property key="demos.imageFile" value="asset://com.silabs.sdk.stack.super_4.1.2/protocol/openthread/demos/ot-ncp-ftd/ot-ncp-ftd-brd4168a.s37"/>
     <property key="core.readmeFiles" value="sample-apps/ot-ncp/README-OT-NCP.md"/>
     <property key="filters" value="Device\ Type|NCP Project\ Difficulty|Advanced Wireless\ Technology|Thread"/>
     <property key="core.quality" value="PRODUCTION"/>
@@ -171,7 +171,7 @@
     <property key="demos.blurb" value="OpenThread - NCP (FTD)"/>
     <property key="core.partCompatibility" value=".*efr32mg21a020f1024im32.*"/>
     <property key="core.boardCompatibility" value="brd4180a"/>
-    <property key="demos.imageFile" value="asset://com.silabs.sdk.stack.super_4.1.1/protocol/openthread/demos/ot-ncp-ftd/ot-ncp-ftd-brd4180a.s37"/>
+    <property key="demos.imageFile" value="asset://com.silabs.sdk.stack.super_4.1.2/protocol/openthread/demos/ot-ncp-ftd/ot-ncp-ftd-brd4180a.s37"/>
     <property key="core.readmeFiles" value="sample-apps/ot-ncp/README-OT-NCP.md"/>
     <property key="filters" value="Device\ Type|NCP Project\ Difficulty|Advanced Wireless\ Technology|Thread"/>
     <property key="core.quality" value="PRODUCTION"/>
@@ -182,7 +182,7 @@
     <property key="demos.blurb" value="OpenThread - NCP (FTD)"/>
     <property key="core.partCompatibility" value=".*mgm12p32f1024ga.*"/>
     <property key="core.boardCompatibility" value="brd4304a"/>
-    <property key="demos.imageFile" value="asset://com.silabs.sdk.stack.super_4.1.1/protocol/openthread/demos/ot-ncp-ftd/ot-ncp-ftd-brd4304a.s37"/>
+    <property key="demos.imageFile" value="asset://com.silabs.sdk.stack.super_4.1.2/protocol/openthread/demos/ot-ncp-ftd/ot-ncp-ftd-brd4304a.s37"/>
     <property key="core.readmeFiles" value="sample-apps/ot-ncp/README-OT-NCP.md"/>
     <property key="filters" value="Device\ Type|NCP Project\ Difficulty|Advanced Wireless\ Technology|Thread"/>
     <property key="core.quality" value="PRODUCTION"/>
@@ -193,7 +193,7 @@
     <property key="demos.blurb" value="OpenThread - NCP (MTD)"/>
     <property key="core.partCompatibility" value=".*efr32mg12p432f1024gl125.*"/>
     <property key="core.boardCompatibility" value="brd4161a"/>
-    <property key="demos.imageFile" value="asset://com.silabs.sdk.stack.super_4.1.1/protocol/openthread/demos/ot-ncp-mtd/ot-ncp-mtd-brd4161a.s37"/>
+    <property key="demos.imageFile" value="asset://com.silabs.sdk.stack.super_4.1.2/protocol/openthread/demos/ot-ncp-mtd/ot-ncp-mtd-brd4161a.s37"/>
     <property key="core.readmeFiles" value="sample-apps/ot-ncp/README-OT-NCP.md"/>
     <property key="filters" value="Device\ Type|NCP Project\ Difficulty|Advanced Wireless\ Technology|Thread"/>
     <property key="core.quality" value="PRODUCTION"/>
@@ -204,7 +204,7 @@
     <property key="demos.blurb" value="OpenThread - NCP (MTD)"/>
     <property key="core.partCompatibility" value=".*efr32mg12p332f1024gl125.*"/>
     <property key="core.boardCompatibility" value="brd4166a"/>
-    <property key="demos.imageFile" value="asset://com.silabs.sdk.stack.super_4.1.1/protocol/openthread/demos/ot-ncp-mtd/ot-ncp-mtd-brd4166a.s37"/>
+    <property key="demos.imageFile" value="asset://com.silabs.sdk.stack.super_4.1.2/protocol/openthread/demos/ot-ncp-mtd/ot-ncp-mtd-brd4166a.s37"/>
     <property key="core.readmeFiles" value="sample-apps/ot-ncp/README-OT-NCP.md"/>
     <property key="filters" value="Device\ Type|NCP Project\ Difficulty|Advanced Wireless\ Technology|Thread"/>
     <property key="core.quality" value="PRODUCTION"/>
@@ -215,7 +215,7 @@
     <property key="demos.blurb" value="OpenThread - NCP (MTD)"/>
     <property key="core.partCompatibility" value=".*efr32mg13p732f512gm48.*"/>
     <property key="core.boardCompatibility" value="brd4168a"/>
-    <property key="demos.imageFile" value="asset://com.silabs.sdk.stack.super_4.1.1/protocol/openthread/demos/ot-ncp-mtd/ot-ncp-mtd-brd4168a.s37"/>
+    <property key="demos.imageFile" value="asset://com.silabs.sdk.stack.super_4.1.2/protocol/openthread/demos/ot-ncp-mtd/ot-ncp-mtd-brd4168a.s37"/>
     <property key="core.readmeFiles" value="sample-apps/ot-ncp/README-OT-NCP.md"/>
     <property key="filters" value="Device\ Type|NCP Project\ Difficulty|Advanced Wireless\ Technology|Thread"/>
     <property key="core.quality" value="PRODUCTION"/>
@@ -226,7 +226,7 @@
     <property key="demos.blurb" value="OpenThread - NCP (MTD)"/>
     <property key="core.partCompatibility" value=".*efr32mg21a020f1024im32.*"/>
     <property key="core.boardCompatibility" value="brd4180a"/>
-    <property key="demos.imageFile" value="asset://com.silabs.sdk.stack.super_4.1.1/protocol/openthread/demos/ot-ncp-mtd/ot-ncp-mtd-brd4180a.s37"/>
+    <property key="demos.imageFile" value="asset://com.silabs.sdk.stack.super_4.1.2/protocol/openthread/demos/ot-ncp-mtd/ot-ncp-mtd-brd4180a.s37"/>
     <property key="core.readmeFiles" value="sample-apps/ot-ncp/README-OT-NCP.md"/>
     <property key="filters" value="Device\ Type|NCP Project\ Difficulty|Advanced Wireless\ Technology|Thread"/>
     <property key="core.quality" value="PRODUCTION"/>
@@ -237,7 +237,7 @@
     <property key="demos.blurb" value="OpenThread - NCP (MTD)"/>
     <property key="core.partCompatibility" value=".*mgm12p32f1024ga.*"/>
     <property key="core.boardCompatibility" value="brd4304a"/>
-    <property key="demos.imageFile" value="asset://com.silabs.sdk.stack.super_4.1.1/protocol/openthread/demos/ot-ncp-mtd/ot-ncp-mtd-brd4304a.s37"/>
+    <property key="demos.imageFile" value="asset://com.silabs.sdk.stack.super_4.1.2/protocol/openthread/demos/ot-ncp-mtd/ot-ncp-mtd-brd4304a.s37"/>
     <property key="core.readmeFiles" value="sample-apps/ot-ncp/README-OT-NCP.md"/>
     <property key="filters" value="Device\ Type|NCP Project\ Difficulty|Advanced Wireless\ Technology|Thread"/>
     <property key="core.quality" value="PRODUCTION"/>
@@ -248,7 +248,7 @@
     <property key="demos.blurb" value="OpenThread - RCP"/>
     <property key="core.partCompatibility" value=".*efr32mg12p432f1024gl125.*"/>
     <property key="core.boardCompatibility" value="brd4161a"/>
-    <property key="demos.imageFile" value="asset://com.silabs.sdk.stack.super_4.1.1/protocol/openthread/demos/ot-rcp/ot-rcp-brd4161a.s37"/>
+    <property key="demos.imageFile" value="asset://com.silabs.sdk.stack.super_4.1.2/protocol/openthread/demos/ot-rcp/ot-rcp-brd4161a.s37"/>
     <property key="core.readmeFiles" value="sample-apps/ot-ncp/README-OT-RCP.md"/>
     <property key="filters" value="Device\ Type|RCP Project\ Difficulty|Advanced Wireless\ Technology|Thread"/>
     <property key="core.quality" value="PRODUCTION"/>
@@ -259,7 +259,7 @@
     <property key="demos.blurb" value="OpenThread - RCP"/>
     <property key="core.partCompatibility" value=".*efr32mg12p332f1024gl125.*"/>
     <property key="core.boardCompatibility" value="brd4166a"/>
-    <property key="demos.imageFile" value="asset://com.silabs.sdk.stack.super_4.1.1/protocol/openthread/demos/ot-rcp/ot-rcp-brd4166a.s37"/>
+    <property key="demos.imageFile" value="asset://com.silabs.sdk.stack.super_4.1.2/protocol/openthread/demos/ot-rcp/ot-rcp-brd4166a.s37"/>
     <property key="core.readmeFiles" value="sample-apps/ot-ncp/README-OT-RCP.md"/>
     <property key="filters" value="Device\ Type|RCP Project\ Difficulty|Advanced Wireless\ Technology|Thread"/>
     <property key="core.quality" value="PRODUCTION"/>
@@ -270,7 +270,7 @@
     <property key="demos.blurb" value="OpenThread - RCP"/>
     <property key="core.partCompatibility" value=".*efr32mg13p732f512gm48.*"/>
     <property key="core.boardCompatibility" value="brd4168a"/>
-    <property key="demos.imageFile" value="asset://com.silabs.sdk.stack.super_4.1.1/protocol/openthread/demos/ot-rcp/ot-rcp-brd4168a.s37"/>
+    <property key="demos.imageFile" value="asset://com.silabs.sdk.stack.super_4.1.2/protocol/openthread/demos/ot-rcp/ot-rcp-brd4168a.s37"/>
     <property key="core.readmeFiles" value="sample-apps/ot-ncp/README-OT-RCP.md"/>
     <property key="filters" value="Device\ Type|RCP Project\ Difficulty|Advanced Wireless\ Technology|Thread"/>
     <property key="core.quality" value="PRODUCTION"/>
@@ -281,7 +281,7 @@
     <property key="demos.blurb" value="OpenThread - RCP"/>
     <property key="core.partCompatibility" value=".*efr32mg21a020f1024im32.*"/>
     <property key="core.boardCompatibility" value="brd4180a"/>
-    <property key="demos.imageFile" value="asset://com.silabs.sdk.stack.super_4.1.1/protocol/openthread/demos/ot-rcp/ot-rcp-brd4180a.s37"/>
+    <property key="demos.imageFile" value="asset://com.silabs.sdk.stack.super_4.1.2/protocol/openthread/demos/ot-rcp/ot-rcp-brd4180a.s37"/>
     <property key="core.readmeFiles" value="sample-apps/ot-ncp/README-OT-RCP.md"/>
     <property key="filters" value="Device\ Type|RCP Project\ Difficulty|Advanced Wireless\ Technology|Thread"/>
     <property key="core.quality" value="PRODUCTION"/>
@@ -292,7 +292,7 @@
     <property key="demos.blurb" value="OpenThread - RCP"/>
     <property key="core.partCompatibility" value=".*mgm12p32f1024ga.*"/>
     <property key="core.boardCompatibility" value="brd4304a"/>
-    <property key="demos.imageFile" value="asset://com.silabs.sdk.stack.super_4.1.1/protocol/openthread/demos/ot-rcp/ot-rcp-brd4304a.s37"/>
+    <property key="demos.imageFile" value="asset://com.silabs.sdk.stack.super_4.1.2/protocol/openthread/demos/ot-rcp/ot-rcp-brd4304a.s37"/>
     <property key="core.readmeFiles" value="sample-apps/ot-ncp/README-OT-RCP.md"/>
     <property key="filters" value="Device\ Type|RCP Project\ Difficulty|Advanced Wireless\ Technology|Thread"/>
     <property key="core.quality" value="PRODUCTION"/>
@@ -303,7 +303,7 @@
     <property key="demos.blurb" value="OpenThread - SoC CLI (FTD)"/>
     <property key="core.partCompatibility" value=".*efr32mg12p432f1024gl125.*"/>
     <property key="core.boardCompatibility" value="brd4161a"/>
-    <property key="demos.imageFile" value="asset://com.silabs.sdk.stack.super_4.1.1/protocol/openthread/demos/ot-cli-ftd/ot-cli-ftd-brd4161a.s37"/>
+    <property key="demos.imageFile" value="asset://com.silabs.sdk.stack.super_4.1.2/protocol/openthread/demos/ot-cli-ftd/ot-cli-ftd-brd4161a.s37"/>
     <property key="core.readmeFiles" value="sample-apps/ot-cli/README.md"/>
     <property key="filters" value="Device\ Type|SoC Project\ Difficulty|Beginner Wireless\ Technology|Thread"/>
     <property key="core.quality" value="PRODUCTION"/>
@@ -314,7 +314,7 @@
     <property key="demos.blurb" value="OpenThread - SoC CLI (FTD)"/>
     <property key="core.partCompatibility" value=".*efr32mg12p332f1024gl125.*"/>
     <property key="core.boardCompatibility" value="brd4166a"/>
-    <property key="demos.imageFile" value="asset://com.silabs.sdk.stack.super_4.1.1/protocol/openthread/demos/ot-cli-ftd/ot-cli-ftd-brd4166a.s37"/>
+    <property key="demos.imageFile" value="asset://com.silabs.sdk.stack.super_4.1.2/protocol/openthread/demos/ot-cli-ftd/ot-cli-ftd-brd4166a.s37"/>
     <property key="core.readmeFiles" value="sample-apps/ot-cli/README.md"/>
     <property key="filters" value="Device\ Type|SoC Project\ Difficulty|Beginner Wireless\ Technology|Thread"/>
     <property key="core.quality" value="PRODUCTION"/>
@@ -325,7 +325,7 @@
     <property key="demos.blurb" value="OpenThread - SoC CLI (FTD)"/>
     <property key="core.partCompatibility" value=".*efr32mg13p732f512gm48.*"/>
     <property key="core.boardCompatibility" value="brd4168a"/>
-    <property key="demos.imageFile" value="asset://com.silabs.sdk.stack.super_4.1.1/protocol/openthread/demos/ot-cli-ftd/ot-cli-ftd-brd4168a.s37"/>
+    <property key="demos.imageFile" value="asset://com.silabs.sdk.stack.super_4.1.2/protocol/openthread/demos/ot-cli-ftd/ot-cli-ftd-brd4168a.s37"/>
     <property key="core.readmeFiles" value="sample-apps/ot-cli/README.md"/>
     <property key="filters" value="Device\ Type|SoC Project\ Difficulty|Beginner Wireless\ Technology|Thread"/>
     <property key="core.quality" value="PRODUCTION"/>
@@ -336,7 +336,7 @@
     <property key="demos.blurb" value="OpenThread - SoC CLI (FTD)"/>
     <property key="core.partCompatibility" value=".*efr32mg21a020f1024im32.*"/>
     <property key="core.boardCompatibility" value="brd4180a"/>
-    <property key="demos.imageFile" value="asset://com.silabs.sdk.stack.super_4.1.1/protocol/openthread/demos/ot-cli-ftd/ot-cli-ftd-brd4180a.s37"/>
+    <property key="demos.imageFile" value="asset://com.silabs.sdk.stack.super_4.1.2/protocol/openthread/demos/ot-cli-ftd/ot-cli-ftd-brd4180a.s37"/>
     <property key="core.readmeFiles" value="sample-apps/ot-cli/README.md"/>
     <property key="filters" value="Device\ Type|SoC Project\ Difficulty|Beginner Wireless\ Technology|Thread"/>
     <property key="core.quality" value="PRODUCTION"/>
@@ -347,7 +347,7 @@
     <property key="demos.blurb" value="OpenThread - SoC CLI (FTD)"/>
     <property key="core.partCompatibility" value=".*mgm12p32f1024ga.*"/>
     <property key="core.boardCompatibility" value="brd4304a"/>
-    <property key="demos.imageFile" value="asset://com.silabs.sdk.stack.super_4.1.1/protocol/openthread/demos/ot-cli-ftd/ot-cli-ftd-brd4304a.s37"/>
+    <property key="demos.imageFile" value="asset://com.silabs.sdk.stack.super_4.1.2/protocol/openthread/demos/ot-cli-ftd/ot-cli-ftd-brd4304a.s37"/>
     <property key="core.readmeFiles" value="sample-apps/ot-cli/README.md"/>
     <property key="filters" value="Device\ Type|SoC Project\ Difficulty|Beginner Wireless\ Technology|Thread"/>
     <property key="core.quality" value="PRODUCTION"/>
@@ -358,7 +358,7 @@
     <property key="demos.blurb" value="OpenThread - SoC CLI (MTD)"/>
     <property key="core.partCompatibility" value=".*efr32mg12p432f1024gl125.*"/>
     <property key="core.boardCompatibility" value="brd4161a"/>
-    <property key="demos.imageFile" value="asset://com.silabs.sdk.stack.super_4.1.1/protocol/openthread/demos/ot-cli-mtd/ot-cli-mtd-brd4161a.s37"/>
+    <property key="demos.imageFile" value="asset://com.silabs.sdk.stack.super_4.1.2/protocol/openthread/demos/ot-cli-mtd/ot-cli-mtd-brd4161a.s37"/>
     <property key="core.readmeFiles" value="sample-apps/ot-cli/README.md"/>
     <property key="filters" value="Device\ Type|SoC Project\ Difficulty|Beginner Wireless\ Technology|Thread"/>
     <property key="core.quality" value="PRODUCTION"/>
@@ -369,7 +369,7 @@
     <property key="demos.blurb" value="OpenThread - SoC CLI (MTD)"/>
     <property key="core.partCompatibility" value=".*efr32mg12p332f1024gl125.*"/>
     <property key="core.boardCompatibility" value="brd4166a"/>
-    <property key="demos.imageFile" value="asset://com.silabs.sdk.stack.super_4.1.1/protocol/openthread/demos/ot-cli-mtd/ot-cli-mtd-brd4166a.s37"/>
+    <property key="demos.imageFile" value="asset://com.silabs.sdk.stack.super_4.1.2/protocol/openthread/demos/ot-cli-mtd/ot-cli-mtd-brd4166a.s37"/>
     <property key="core.readmeFiles" value="sample-apps/ot-cli/README.md"/>
     <property key="filters" value="Device\ Type|SoC Project\ Difficulty|Beginner Wireless\ Technology|Thread"/>
     <property key="core.quality" value="PRODUCTION"/>
@@ -380,7 +380,7 @@
     <property key="demos.blurb" value="OpenThread - SoC CLI (MTD)"/>
     <property key="core.partCompatibility" value=".*efr32mg13p732f512gm48.*"/>
     <property key="core.boardCompatibility" value="brd4168a"/>
-    <property key="demos.imageFile" value="asset://com.silabs.sdk.stack.super_4.1.1/protocol/openthread/demos/ot-cli-mtd/ot-cli-mtd-brd4168a.s37"/>
+    <property key="demos.imageFile" value="asset://com.silabs.sdk.stack.super_4.1.2/protocol/openthread/demos/ot-cli-mtd/ot-cli-mtd-brd4168a.s37"/>
     <property key="core.readmeFiles" value="sample-apps/ot-cli/README.md"/>
     <property key="filters" value="Device\ Type|SoC Project\ Difficulty|Beginner Wireless\ Technology|Thread"/>
     <property key="core.quality" value="PRODUCTION"/>
@@ -391,7 +391,7 @@
     <property key="demos.blurb" value="OpenThread - SoC CLI (MTD)"/>
     <property key="core.partCompatibility" value=".*efr32mg21a020f1024im32.*"/>
     <property key="core.boardCompatibility" value="brd4180a"/>
-    <property key="demos.imageFile" value="asset://com.silabs.sdk.stack.super_4.1.1/protocol/openthread/demos/ot-cli-mtd/ot-cli-mtd-brd4180a.s37"/>
+    <property key="demos.imageFile" value="asset://com.silabs.sdk.stack.super_4.1.2/protocol/openthread/demos/ot-cli-mtd/ot-cli-mtd-brd4180a.s37"/>
     <property key="core.readmeFiles" value="sample-apps/ot-cli/README.md"/>
     <property key="filters" value="Device\ Type|SoC Project\ Difficulty|Beginner Wireless\ Technology|Thread"/>
     <property key="core.quality" value="PRODUCTION"/>
@@ -402,7 +402,7 @@
     <property key="demos.blurb" value="OpenThread - SoC CLI (MTD)"/>
     <property key="core.partCompatibility" value=".*mgm12p32f1024ga.*"/>
     <property key="core.boardCompatibility" value="brd4304a"/>
-    <property key="demos.imageFile" value="asset://com.silabs.sdk.stack.super_4.1.1/protocol/openthread/demos/ot-cli-mtd/ot-cli-mtd-brd4304a.s37"/>
+    <property key="demos.imageFile" value="asset://com.silabs.sdk.stack.super_4.1.2/protocol/openthread/demos/ot-cli-mtd/ot-cli-mtd-brd4304a.s37"/>
     <property key="core.readmeFiles" value="sample-apps/ot-cli/README.md"/>
     <property key="filters" value="Device\ Type|SoC Project\ Difficulty|Beginner Wireless\ Technology|Thread"/>
     <property key="core.quality" value="PRODUCTION"/>
@@ -413,7 +413,7 @@
     <property key="demos.blurb" value="OpenThread - SoC Sleepy Demo (FTD)"/>
     <property key="core.partCompatibility" value=".*efr32mg12p432f1024gl125.*"/>
     <property key="core.boardCompatibility" value="brd4161a"/>
-    <property key="demos.imageFile" value="asset://com.silabs.sdk.stack.super_4.1.1/protocol/openthread/demos/sleepy-demo-ftd/sleepy-demo-ftd-brd4161a.s37"/>
+    <property key="demos.imageFile" value="asset://com.silabs.sdk.stack.super_4.1.2/protocol/openthread/demos/sleepy-demo-ftd/sleepy-demo-ftd-brd4161a.s37"/>
     <property key="core.readmeFiles" value="sample-apps/sleepy-demo/README.md"/>
     <property key="filters" value="Device\ Type|SoC Project\ Difficulty|Advanced Wireless\ Technology|Thread"/>
     <property key="core.quality" value="PRODUCTION"/>
@@ -424,7 +424,7 @@
     <property key="demos.blurb" value="OpenThread - SoC Sleepy Demo (FTD)"/>
     <property key="core.partCompatibility" value=".*efr32mg12p332f1024gl125.*"/>
     <property key="core.boardCompatibility" value="brd4166a"/>
-    <property key="demos.imageFile" value="asset://com.silabs.sdk.stack.super_4.1.1/protocol/openthread/demos/sleepy-demo-ftd/sleepy-demo-ftd-brd4166a.s37"/>
+    <property key="demos.imageFile" value="asset://com.silabs.sdk.stack.super_4.1.2/protocol/openthread/demos/sleepy-demo-ftd/sleepy-demo-ftd-brd4166a.s37"/>
     <property key="core.readmeFiles" value="sample-apps/sleepy-demo/README.md"/>
     <property key="filters" value="Device\ Type|SoC Project\ Difficulty|Advanced Wireless\ Technology|Thread"/>
     <property key="core.quality" value="PRODUCTION"/>
@@ -435,7 +435,7 @@
     <property key="demos.blurb" value="OpenThread - SoC Sleepy Demo (FTD)"/>
     <property key="core.partCompatibility" value=".*efr32mg13p732f512gm48.*"/>
     <property key="core.boardCompatibility" value="brd4168a"/>
-    <property key="demos.imageFile" value="asset://com.silabs.sdk.stack.super_4.1.1/protocol/openthread/demos/sleepy-demo-ftd/sleepy-demo-ftd-brd4168a.s37"/>
+    <property key="demos.imageFile" value="asset://com.silabs.sdk.stack.super_4.1.2/protocol/openthread/demos/sleepy-demo-ftd/sleepy-demo-ftd-brd4168a.s37"/>
     <property key="core.readmeFiles" value="sample-apps/sleepy-demo/README.md"/>
     <property key="filters" value="Device\ Type|SoC Project\ Difficulty|Advanced Wireless\ Technology|Thread"/>
     <property key="core.quality" value="PRODUCTION"/>
@@ -446,7 +446,7 @@
     <property key="demos.blurb" value="OpenThread - SoC Sleepy Demo (FTD)"/>
     <property key="core.partCompatibility" value=".*efr32mg21a020f1024im32.*"/>
     <property key="core.boardCompatibility" value="brd4180a"/>
-    <property key="demos.imageFile" value="asset://com.silabs.sdk.stack.super_4.1.1/protocol/openthread/demos/sleepy-demo-ftd/sleepy-demo-ftd-brd4180a.s37"/>
+    <property key="demos.imageFile" value="asset://com.silabs.sdk.stack.super_4.1.2/protocol/openthread/demos/sleepy-demo-ftd/sleepy-demo-ftd-brd4180a.s37"/>
     <property key="core.readmeFiles" value="sample-apps/sleepy-demo/README.md"/>
     <property key="filters" value="Device\ Type|SoC Project\ Difficulty|Advanced Wireless\ Technology|Thread"/>
     <property key="core.quality" value="PRODUCTION"/>
@@ -457,7 +457,7 @@
     <property key="demos.blurb" value="OpenThread - SoC Sleepy Demo (FTD)"/>
     <property key="core.partCompatibility" value=".*mgm12p32f1024ga.*"/>
     <property key="core.boardCompatibility" value="brd4304a"/>
-    <property key="demos.imageFile" value="asset://com.silabs.sdk.stack.super_4.1.1/protocol/openthread/demos/sleepy-demo-ftd/sleepy-demo-ftd-brd4304a.s37"/>
+    <property key="demos.imageFile" value="asset://com.silabs.sdk.stack.super_4.1.2/protocol/openthread/demos/sleepy-demo-ftd/sleepy-demo-ftd-brd4304a.s37"/>
     <property key="core.readmeFiles" value="sample-apps/sleepy-demo/README.md"/>
     <property key="filters" value="Device\ Type|SoC Project\ Difficulty|Advanced Wireless\ Technology|Thread"/>
     <property key="core.quality" value="PRODUCTION"/>
@@ -468,7 +468,7 @@
     <property key="demos.blurb" value="OpenThread - SoC Sleepy Demo (MTD)"/>
     <property key="core.partCompatibility" value=".*efr32mg12p432f1024gl125.*"/>
     <property key="core.boardCompatibility" value="brd4161a"/>
-    <property key="demos.imageFile" value="asset://com.silabs.sdk.stack.super_4.1.1/protocol/openthread/demos/sleepy-demo-mtd/sleepy-demo-mtd-brd4161a.s37"/>
+    <property key="demos.imageFile" value="asset://com.silabs.sdk.stack.super_4.1.2/protocol/openthread/demos/sleepy-demo-mtd/sleepy-demo-mtd-brd4161a.s37"/>
     <property key="core.readmeFiles" value="sample-apps/sleepy-demo/README.md"/>
     <property key="filters" value="Device\ Type|SoC Project\ Difficulty|Advanced Wireless\ Technology|Thread"/>
     <property key="core.quality" value="PRODUCTION"/>
@@ -479,7 +479,7 @@
     <property key="demos.blurb" value="OpenThread - SoC Sleepy Demo (MTD)"/>
     <property key="core.partCompatibility" value=".*efr32mg12p332f1024gl125.*"/>
     <property key="core.boardCompatibility" value="brd4166a"/>
-    <property key="demos.imageFile" value="asset://com.silabs.sdk.stack.super_4.1.1/protocol/openthread/demos/sleepy-demo-mtd/sleepy-demo-mtd-brd4166a.s37"/>
+    <property key="demos.imageFile" value="asset://com.silabs.sdk.stack.super_4.1.2/protocol/openthread/demos/sleepy-demo-mtd/sleepy-demo-mtd-brd4166a.s37"/>
     <property key="core.readmeFiles" value="sample-apps/sleepy-demo/README.md"/>
     <property key="filters" value="Device\ Type|SoC Project\ Difficulty|Advanced Wireless\ Technology|Thread"/>
     <property key="core.quality" value="PRODUCTION"/>
@@ -490,7 +490,7 @@
     <property key="demos.blurb" value="OpenThread - SoC Sleepy Demo (MTD)"/>
     <property key="core.partCompatibility" value=".*efr32mg13p732f512gm48.*"/>
     <property key="core.boardCompatibility" value="brd4168a"/>
-    <property key="demos.imageFile" value="asset://com.silabs.sdk.stack.super_4.1.1/protocol/openthread/demos/sleepy-demo-mtd/sleepy-demo-mtd-brd4168a.s37"/>
+    <property key="demos.imageFile" value="asset://com.silabs.sdk.stack.super_4.1.2/protocol/openthread/demos/sleepy-demo-mtd/sleepy-demo-mtd-brd4168a.s37"/>
     <property key="core.readmeFiles" value="sample-apps/sleepy-demo/README.md"/>
     <property key="filters" value="Device\ Type|SoC Project\ Difficulty|Advanced Wireless\ Technology|Thread"/>
     <property key="core.quality" value="PRODUCTION"/>
@@ -501,7 +501,7 @@
     <property key="demos.blurb" value="OpenThread - SoC Sleepy Demo (MTD)"/>
     <property key="core.partCompatibility" value=".*efr32mg21a020f1024im32.*"/>
     <property key="core.boardCompatibility" value="brd4180a"/>
-    <property key="demos.imageFile" value="asset://com.silabs.sdk.stack.super_4.1.1/protocol/openthread/demos/sleepy-demo-mtd/sleepy-demo-mtd-brd4180a.s37"/>
+    <property key="demos.imageFile" value="asset://com.silabs.sdk.stack.super_4.1.2/protocol/openthread/demos/sleepy-demo-mtd/sleepy-demo-mtd-brd4180a.s37"/>
     <property key="core.readmeFiles" value="sample-apps/sleepy-demo/README.md"/>
     <property key="filters" value="Device\ Type|SoC Project\ Difficulty|Advanced Wireless\ Technology|Thread"/>
     <property key="core.quality" value="PRODUCTION"/>
@@ -512,7 +512,7 @@
     <property key="demos.blurb" value="OpenThread - SoC Sleepy Demo (MTD)"/>
     <property key="core.partCompatibility" value=".*mgm12p32f1024ga.*"/>
     <property key="core.boardCompatibility" value="brd4304a"/>
-    <property key="demos.imageFile" value="asset://com.silabs.sdk.stack.super_4.1.1/protocol/openthread/demos/sleepy-demo-mtd/sleepy-demo-mtd-brd4304a.s37"/>
+    <property key="demos.imageFile" value="asset://com.silabs.sdk.stack.super_4.1.2/protocol/openthread/demos/sleepy-demo-mtd/sleepy-demo-mtd-brd4304a.s37"/>
     <property key="core.readmeFiles" value="sample-apps/sleepy-demo/README.md"/>
     <property key="filters" value="Device\ Type|SoC Project\ Difficulty|Advanced Wireless\ Technology|Thread"/>
     <property key="core.quality" value="PRODUCTION"/>
@@ -523,7 +523,7 @@
     <property key="demos.blurb" value="OpenThread BLE DMP - SoC FreeRTOS"/>
     <property key="core.partCompatibility" value=".*efr32mg12p432f1024gl125.*"/>
     <property key="core.boardCompatibility" value="brd4161a"/>
-    <property key="demos.imageFile" value="asset://com.silabs.sdk.stack.super_4.1.1/protocol/openthread/demos/ot-ble-dmp/ot-ble-dmp-brd4161a.s37"/>
+    <property key="demos.imageFile" value="asset://com.silabs.sdk.stack.super_4.1.2/protocol/openthread/demos/ot-ble-dmp/ot-ble-dmp-brd4161a.s37"/>
     <property key="core.readmeFiles" value="sample-apps/ot-ble-dmp/README.md"/>
     <property key="filters" value="Capability|Multiprotocol Device\ Type|SoC Project\ Difficulty|Advanced Wireless\ Technology|Bluetooth Wireless\ Technology|Thread"/>
     <property key="core.quality" value="PRODUCTION"/>
@@ -534,7 +534,7 @@
     <property key="demos.blurb" value="OpenThread BLE DMP - SoC FreeRTOS"/>
     <property key="core.partCompatibility" value=".*efr32mg12p332f1024gl125.*"/>
     <property key="core.boardCompatibility" value="brd4166a"/>
-    <property key="demos.imageFile" value="asset://com.silabs.sdk.stack.super_4.1.1/protocol/openthread/demos/ot-ble-dmp/ot-ble-dmp-brd4166a.s37"/>
+    <property key="demos.imageFile" value="asset://com.silabs.sdk.stack.super_4.1.2/protocol/openthread/demos/ot-ble-dmp/ot-ble-dmp-brd4166a.s37"/>
     <property key="core.readmeFiles" value="sample-apps/ot-ble-dmp/README.md"/>
     <property key="filters" value="Capability|Multiprotocol Device\ Type|SoC Project\ Difficulty|Advanced Wireless\ Technology|Bluetooth Wireless\ Technology|Thread"/>
     <property key="core.quality" value="PRODUCTION"/>
@@ -545,7 +545,7 @@
     <property key="demos.blurb" value="OpenThread BLE DMP - SoC FreeRTOS"/>
     <property key="core.partCompatibility" value=".*efr32mg13p732f512gm48.*"/>
     <property key="core.boardCompatibility" value="brd4168a"/>
-    <property key="demos.imageFile" value="asset://com.silabs.sdk.stack.super_4.1.1/protocol/openthread/demos/ot-ble-dmp/ot-ble-dmp-brd4168a.s37"/>
+    <property key="demos.imageFile" value="asset://com.silabs.sdk.stack.super_4.1.2/protocol/openthread/demos/ot-ble-dmp/ot-ble-dmp-brd4168a.s37"/>
     <property key="core.readmeFiles" value="sample-apps/ot-ble-dmp/README.md"/>
     <property key="filters" value="Capability|Multiprotocol Device\ Type|SoC Project\ Difficulty|Advanced Wireless\ Technology|Bluetooth Wireless\ Technology|Thread"/>
     <property key="core.quality" value="PRODUCTION"/>
@@ -556,7 +556,7 @@
     <property key="demos.blurb" value="OpenThread BLE DMP - SoC FreeRTOS"/>
     <property key="core.partCompatibility" value=".*efr32mg21a020f1024im32.*"/>
     <property key="core.boardCompatibility" value="brd4180a"/>
-    <property key="demos.imageFile" value="asset://com.silabs.sdk.stack.super_4.1.1/protocol/openthread/demos/ot-ble-dmp/ot-ble-dmp-brd4180a.s37"/>
+    <property key="demos.imageFile" value="asset://com.silabs.sdk.stack.super_4.1.2/protocol/openthread/demos/ot-ble-dmp/ot-ble-dmp-brd4180a.s37"/>
     <property key="core.readmeFiles" value="sample-apps/ot-ble-dmp/README.md"/>
     <property key="filters" value="Capability|Multiprotocol Device\ Type|SoC Project\ Difficulty|Advanced Wireless\ Technology|Bluetooth Wireless\ Technology|Thread"/>
     <property key="core.quality" value="PRODUCTION"/>
@@ -567,7 +567,7 @@
     <property key="demos.blurb" value="OpenThread BLE DMP - SoC FreeRTOS"/>
     <property key="core.partCompatibility" value=".*mgm12p32f1024ga.*"/>
     <property key="core.boardCompatibility" value="brd4304a"/>
-    <property key="demos.imageFile" value="asset://com.silabs.sdk.stack.super_4.1.1/protocol/openthread/demos/ot-ble-dmp/ot-ble-dmp-brd4304a.s37"/>
+    <property key="demos.imageFile" value="asset://com.silabs.sdk.stack.super_4.1.2/protocol/openthread/demos/ot-ble-dmp/ot-ble-dmp-brd4304a.s37"/>
     <property key="core.readmeFiles" value="sample-apps/ot-ble-dmp/README.md"/>
     <property key="filters" value="Capability|Multiprotocol Device\ Type|SoC Project\ Difficulty|Advanced Wireless\ Technology|Bluetooth Wireless\ Technology|Thread"/>
     <property key="core.quality" value="PRODUCTION"/>

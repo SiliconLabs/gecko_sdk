@@ -291,8 +291,18 @@ static void setPtaOptionsCommand(void *context, uint8_t argc, char *argv[])
     VerifyOrExit(argc == 1, error = OT_ERROR_INVALID_ARGS);
 
     uint32_t ptaOptions = (uint32_t)strtoul(argv[0], NULL, 16);
-    sl_rail_util_coex_set_options(ptaOptions);
-    otCliOutputFormat("\r\n");
+
+    sl_status_t status = sl_rail_util_coex_set_options(ptaOptions);
+    if (status == SL_STATUS_INVALID_PARAMETER)
+    {
+        uint32_t constant_options = sl_rail_util_coex_get_constant_options();
+        uint32_t current_options = sl_rail_util_coex_get_options();
+        otCliOutputFormat("Error: SL_STATUS_INVALID_PARAMETER\r\n");
+        otCliOutputFormat("Constant options: 0x%08x\r\n", constant_options);
+        otCliOutputFormat("Desired  options: 0x%08x\r\n", ptaOptions);
+        otCliOutputFormat("Invalid  options: 0x%08x\r\n", ((current_options & constant_options) ^ (ptaOptions & constant_options)));
+    }
+
 exit:
     if (error != OT_ERROR_NONE) {
         otCliSetUserCommandError(error);

@@ -17,6 +17,7 @@
   - name: hardware_board_from_slwrb4200a
   - name: hardware_board_has_si70xx
   - name: hardware_board_has_tempsensor
+  - name: hardware_board_has_rfswitch_zwave
   - name: hardware_board_has_vcom
   - name: hardware_board_has_rfswitch
   - name: hardware_board_supports_rf_band_868

@@ -98,6 +98,20 @@ void sl_ncp_user_cmd_message_to_target_cb(void *data)
       break;
 
     // -------------------------------
+    case BOARD_CMD_ID:
+#ifdef SL_BOARD_NAME
+      // Send board name to NCP host.
+      sl_ncp_user_cmd_message_to_target_rsp(SL_STATUS_OK,
+                                            BOARD_RSP_DATA_LEN,
+                                            (uint8_t *)SL_BOARD_NAME);
+#else
+      sl_ncp_user_cmd_message_to_target_rsp(SL_STATUS_NOT_SUPPORTED,
+                                            0,
+                                            (uint8_t *)"");
+#endif
+      break;
+
+    // -------------------------------
     // Unknown user command.
     default:
       // Send error response to NCP host.

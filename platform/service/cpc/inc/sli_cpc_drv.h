@@ -123,6 +123,11 @@ void sli_cpc_drv_notify_tx_complete(sl_cpc_buffer_handle_t *buffer_handle);
  ******************************************************************************/
 void sli_cpc_drv_notify_rx_data(void);
 
+/***************************************************************************/ /**
+ * Check if the driver is out of RX buffers
+ ******************************************************************************/
+bool sli_cpc_drv_is_out_of_rx_buffers(void);
+
 /** @} (end addtogroup cpc) */
 
 #ifdef __cplusplus

@@ -58,7 +58,6 @@
 /*******************************************************************************
  ********************************   DATATYPE   *********************************
  ******************************************************************************/
-
 typedef struct {
   sl_slist_node_t node;
   sl_cpc_buffer_handle_t *handle;
@@ -112,7 +111,6 @@ typedef struct {
 /*******************************************************************************
  ***************************  LOCAL VARIABLES   ********************************
  ******************************************************************************/
-
 static unsigned int read_channel;
 static unsigned int write_channel;
 
@@ -153,10 +151,8 @@ static uint16_t next_rx_payload_len = 0;
 
 static uint16_t nb_desc_free = 0u;
 
-static uint8_t rx_synch_header[SLI_CPC_HDLC_HEADER_RAW_SIZE];
-static uint16_t rx_synch_byte_cnt = 0;
 static bool rx_need_desc = false;
-static bool rx_need_rx_entry = false;
+static volatile bool rx_need_rx_entry = false;
 
 static volatile uint16_t already_recvd_cnt_worst = 0;
 
@@ -164,6 +160,7 @@ static volatile uint16_t already_recvd_cnt_worst = 0;
 static bool restart_dma = false;
 #endif
 
+static volatile bool resync_completed = false;
 /*******************************************************************************
  **************************   LOCAL FUNCTIONS   ********************************
  ******************************************************************************/
@@ -174,8 +171,6 @@ static sl_status_t prepare_next_tx(void);
 static bool rx_dma_complete(unsigned int channel,
                             unsigned int sequenceNo,
                             void *userParam);
-
-static void force_current_rx_dma_length(uint16_t new_length);
 
 static sl_status_t update_current_rx_dma_length(uint16_t new_length);
 
@@ -384,10 +379,26 @@ sl_status_t sli_cpc_drv_init(void)
 #if defined(SL_CATALOG_POWER_MANAGER_PRESENT)
   sl_power_manager_add_em_requirement(SL_POWER_MANAGER_EM1);
 #endif
-
   return SL_STATUS_OK;
 }
 
+/***************************************************************************/ /**
+ * Check if the driver is out of RX buffers
+ ******************************************************************************/
+bool sli_cpc_drv_is_out_of_rx_buffers(void)
+{
+  CORE_DECLARE_IRQ_STATE;
+
+  CORE_ENTER_ATOMIC();
+
+  if (rx_free_list_head && !rx_free_list_head->node) {
+    CORE_EXIT_ATOMIC();
+    return true;
+  }
+  CORE_EXIT_ATOMIC();
+
+  return false;
+}
 /***************************************************************************/ /**
  * Gets CPC driver capabilities.
  ******************************************************************************/
@@ -428,6 +439,7 @@ sl_status_t sli_cpc_drv_read_data(sl_cpc_buffer_handle_t **buffer_handle, uint16
     sli_cpc_push_buffer_handle(&rx_free_list_head, &entry->node, entry->handle);
     if (rx_need_rx_entry) {
       rx_need_rx_entry = false;
+      DMADRV_StopTransfer(read_channel);
       EUSART_IntEnable(SL_CPC_DRV_UART_PERIPHERAL, EUSART_IEN_RXFL);
     }
   } else {
@@ -606,6 +618,11 @@ void sli_cpc_memory_on_rx_buffer_free(void)
     if (status == SL_STATUS_OK) {
       (void)sl_slist_pop(&rx_free_no_buf_list_head);
       sli_cpc_push_buffer_handle(&rx_free_list_head, &entry->node, entry->handle);
+      if (rx_need_rx_entry) {
+        rx_need_rx_entry = false;
+        DMADRV_StopTransfer(read_channel);
+        EUSART_IntEnable(SL_CPC_DRV_UART_PERIPHERAL, EUSART_IEN_RXFL);
+      }
     }
   } while (status == SL_STATUS_OK && rx_free_no_buf_list_head != NULL);
 
@@ -633,7 +650,8 @@ void sli_cpc_memory_on_rx_buffer_free(void)
       && (LDMA->CHEN & (1 << read_channel)) == 0
       && resource_allocation_flag) {
     rx_need_desc = false;
-    EUSART_IntEnable(SL_CPC_DRV_UART_PERIPHERAL, EUSART_IEN_RXFL);
+    DMADRV_StopTransfer(read_channel);
+    start_re_synch();
   }
 #else
   bool dma;
@@ -655,78 +673,54 @@ void sli_cpc_memory_on_rx_buffer_free(void)
  ******************************************************************************/
 void SL_CPC_ISR_RX_HANDLER(SL_CPC_DRV_UART_PERIPHERAL_NO)(void)
 {
+  CORE_DECLARE_IRQ_STATE;
+  CORE_ENTER_ATOMIC();
+
+  if ((EUSART_IntGetEnabled(SL_CPC_DRV_UART_PERIPHERAL) & EUSART_IF_RXFL) != EUSART_IF_RXFL) {
+    CORE_EXIT_ATOMIC();
+    return; // Interrupt was disabled but not serviced, ignore it
+  }
+
   uint32_t flag = EUSART_IntGet(SL_CPC_DRV_UART_PERIPHERAL);
 
-  EUSART_IntClear(SL_CPC_DRV_UART_PERIPHERAL, flag & EUSART_IEN_RXFL);
-  EFM_ASSERT(header_expected_next == true); // Can't resync when waiting for a payload
+  EUSART_IntClear(SL_CPC_DRV_UART_PERIPHERAL, flag & EUSART_IF_RXFL);
 
-  if (flag & EUSART_IEN_RXFL) {
-    uint8_t data = SL_CPC_DRV_UART_PERIPHERAL->RXDATA;
+  if (rx_need_desc == true) {
+    EUSART_IntDisable(SL_CPC_DRV_UART_PERIPHERAL, EUSART_IF_RXFL);
+    CORE_EXIT_ATOMIC();
+    return;
+  }
 
-    if (((rx_synch_byte_cnt < SLI_CPC_HDLC_HEADER_RAW_SIZE)
-         && (rx_synch_byte_cnt > 0))
-        || (data == SLI_CPC_HDLC_FLAG_VAL)) {
-      rx_synch_header[rx_synch_byte_cnt++] = data;
-    }
+  uint8_t data = SL_CPC_DRV_UART_PERIPHERAL->RXDATA;
 
-    if (rx_synch_byte_cnt == SLI_CPC_HDLC_HEADER_RAW_SIZE) {
-      // Validate HCS
-      uint16_t hcs = sli_cpc_hdlc_get_hcs(rx_synch_header);
-      if (!sli_cpc_validate_crc_sw(rx_synch_header, SLI_CPC_HDLC_HEADER_SIZE, hcs)) {
-        uint8_t i;
-        bool valid_byte = false;
-        for (i = 1; i < SLI_CPC_HDLC_HEADER_RAW_SIZE; i++) {
-          if (rx_synch_header[i] == SLI_CPC_HDLC_FLAG_VAL) {
-            memmove(&rx_synch_header[0], &rx_synch_header[i], SLI_CPC_HDLC_HEADER_RAW_SIZE - i);
-            valid_byte = true;
-            break;
-          }
-        }
+  if (flag & EUSART_IF_RXFL) {
+    EFM_ASSERT(header_expected_next == true); // Can't resync when waiting for a payload
 
-        if (valid_byte) {
-          rx_synch_byte_cnt = SLI_CPC_HDLC_HEADER_RAW_SIZE - i;
-        } else {
-          rx_synch_byte_cnt = 0;
-        }
-
-        return;
-      }
-
-      rx_synch_byte_cnt = 0;
-
+    if (data == SLI_CPC_HDLC_FLAG_VAL) {
+      // Get rid of any pending IRQ, we're done with the resync
       EUSART_IntDisable(SL_CPC_DRV_UART_PERIPHERAL, EUSART_IEN_RXFL);
 
-      uint16_t payload_len = sli_cpc_hdlc_get_length(rx_synch_header);
+      // Already received first byte (HDLC FLAG) and RXCOUNT needs to be expected value -1
+      EFM_ASSERT(rx_need_desc == false);
+      EFM_ASSERT(rx_descriptor_head != NULL);
+      rx_descriptor_head->xfer.xferCnt = SLI_CPC_HDLC_HEADER_RAW_SIZE - 2u;
 
-      if (payload_len > 0) {
-        header_expected_next = false;
-      }
+      // Start read channel
+      Ecode_t ecode = DMADRV_LdmaStartTransfer(read_channel,
+                                               &rx_config,
+                                               rx_descriptor_head,
+                                               rx_dma_complete,
+                                               0);
+      EFM_ASSERT(ecode == ECODE_OK);
 
-      if (current_rx_entry == NULL) {
-        current_rx_entry = (sli_buf_entry_t *)SLI_CPC_POP_BUFFER_HANDLE_LIST(&rx_free_list_head, sli_buf_entry_t);
-        if (current_rx_entry == NULL) {
-          rx_need_rx_entry = true;
-          return;
-          // Need to wait for a available buffer and re-synch
-        }
-      }
+      resync_completed = true;
 
-      force_current_rx_dma_length(header_expected_next ? SLI_CPC_HDLC_HEADER_RAW_SIZE : payload_len);
-
-      // Copy useful fields of header. Unfortunately with this method the header must always be copied
-      memcpy(current_rx_entry->handle->hdlc_header, rx_synch_header, SLI_CPC_HDLC_HEADER_RAW_SIZE);
-      current_rx_entry->handle->data_length = payload_len;
-
-      next_rx_payload_len = payload_len;
-
-      if (payload_len == 0) {
-        // Push rx_entry to pending list
-        sli_cpc_push_back_buffer_handle(&rx_pending_list_head, &current_rx_entry->node, current_rx_entry->handle);
-        // Notify core
-        sli_cpc_drv_notify_rx_data();
+      if (NVIC_GetPendingIRQ(SL_CPC_RX_IRQn(SL_CPC_DRV_UART_PERIPHERAL_NO)) != 0) {
+        NVIC_ClearPendingIRQ(SL_CPC_RX_IRQn(SL_CPC_DRV_UART_PERIPHERAL_NO));
       }
     }
   }
+  CORE_EXIT_ATOMIC();
 }
 
 /***************************************************************************//**
@@ -773,25 +767,46 @@ static bool rx_dma_complete(unsigned int channel,
                             unsigned int sequenceNo,
                             void *userParam)
 {
+  CORE_DECLARE_IRQ_STATE;
+
   sl_status_t update_success = SL_STATUS_FAIL;
   LDMA_Descriptor_t *completed_desc = NULL;
   uint8_t *rx_buffer;
   uint16_t current_rx_buffer_offset;
   uint16_t current_rx_buf_tot_len;
-  bool rx_buf_free = true;
-  bool manually_reload_dma = false;
+  bool rx_buf_free;
+  bool dma_stopped = false;
 
   (void)channel;
   (void)sequenceNo;
   (void)userParam;
 
+  CORE_ENTER_ATOMIC();
+
   do {
+    rx_buf_free = true;
+
+    // If we looped it means that we stopped the DMA and the contents are in the current buffer
+    if (update_success == SL_STATUS_ALREADY_EXISTS) {
+      dma_stopped = true;
+    }
     update_success = SL_STATUS_FAIL;
 
+    EFM_ASSERT(rx_descriptor_head != NULL);
+
     completed_desc = rx_descriptor_head;
-    EFM_ASSERT(completed_desc != NULL);
 
     rx_buffer = (uint8_t *)(completed_desc->xfer.dstAddr);
+
+    if (resync_completed) {
+      resync_completed = false;
+      EFM_ASSERT(header_expected_next == true);
+      next_rx_buf_tot_len = SLI_CPC_HDLC_HEADER_RAW_SIZE;
+      memmove(rx_buffer + 1, rx_buffer, SLI_CPC_HDLC_HEADER_RAW_SIZE);
+      rx_buffer[0] = SLI_CPC_HDLC_FLAG_VAL;
+    }
+
+    EFM_ASSERT(completed_desc != NULL);
 
     // Load the next DMA descriptor, specified in the LINK register
 #if (SL_CPC_DRV_UART_FLOW_CONTROL_TYPE == usartHwFlowControlNone_D)
@@ -809,6 +824,7 @@ static bool rx_dma_complete(unsigned int channel,
     current_rx_buffer_offset = 0;
 
     while (current_rx_buf_tot_len > 0) {
+      EFM_ASSERT(completed_desc != NULL);
       uint8_t *current_rx_buffer = &rx_buffer[current_rx_buffer_offset];
 
       if (header_expected_next) {
@@ -820,6 +836,12 @@ static bool rx_dma_complete(unsigned int channel,
         if (current_rx_entry == NULL) {
           rx_need_rx_entry = true;
           DMADRV_StopTransfer(read_channel);
+#if (SL_CPC_DRV_UART_FLOW_CONTROL_TYPE == usartHwFlowControlNone_D)
+          push_back_new_rx_dma_desc(completed_desc, rx_buffer);
+#endif
+          rx_need_desc = false; // We can re-use the descriptor
+
+          CORE_EXIT_ATOMIC();
           return false;
         }
 
@@ -828,25 +850,18 @@ static bool rx_dma_complete(unsigned int channel,
         if (!sli_cpc_validate_crc_sw(current_rx_buffer, SLI_CPC_HDLC_HEADER_SIZE, hcs)) {
           DMADRV_StopTransfer(read_channel);
 
-          uint32_t dest = LDMA->CH[read_channel].DST;
-          // Rewind the DMA destination to discard previously received bytes
-#if (SL_CPC_DRV_UART_FLOW_CONTROL_TYPE == usartHwFlowControlNone_D)
-          uint16_t already_recvd_cnt;
-          uint32_t ctrl;
-
-          ctrl = LDMA->CH[read_channel].CTRL;
-          already_recvd_cnt = (((SLI_CPC_RX_DATA_MAX_LENGTH < DMA_MAX_XFER_LEN) ? SLI_CPC_RX_DATA_MAX_LENGTH : DMA_MAX_XFER_LEN) - 1) - ((ctrl & _LDMA_CH_CTRL_XFERCNT_MASK) >> _LDMA_CH_CTRL_XFERCNT_SHIFT);
-          LDMA->CH[read_channel].DST = (dest - already_recvd_cnt);
-#else
-          LDMA->CH[read_channel].DST = (dest - SLI_CPC_HDLC_HEADER_RAW_SIZE);
-#endif
-          // No need to reload the DMA
-          manually_reload_dma = false;
-
-          EUSART_IntEnable(SL_CPC_DRV_UART_PERIPHERAL, EUSART_IEN_RXFL);
           SLI_CPC_DEBUG_TRACE_CORE_DRIVER_PACKET_DROPPED();
           SLI_CPC_DEBUG_TRACE_CORE_INVALID_HEADER_CHECKSUM();
-          break;
+
+          // We did not use the RX buffer
+#if (SL_CPC_DRV_UART_FLOW_CONTROL_TYPE == usartHwFlowControlNone_D)
+          push_back_new_rx_dma_desc(completed_desc, rx_buffer);
+          rx_need_desc = false; // We can re-use the descriptor attached to that buffer
+#endif
+          start_re_synch();
+
+          CORE_EXIT_ATOMIC();
+          return false;
         }
 
         next_rx_payload_len = sli_cpc_hdlc_get_length(current_rx_buffer);
@@ -858,13 +873,14 @@ static bool rx_dma_complete(unsigned int channel,
           rx_descriptor_head = completed_desc;
 #if (SL_CPC_DRV_UART_FLOW_CONTROL_TYPE == usartHwFlowControlNone_D)
           rx_descriptor_tail = completed_desc;
+          push_back_new_rx_dma_desc(completed_desc, rx_buffer);
+          rx_need_desc = false;       // We can re-use the descriptor attached to that buffer
 #endif
 
-          // Rewind rx buffer to re-use it
-          uint32_t dest = LDMA->CH[read_channel].DST;
-          LDMA->CH[read_channel].DST = (dest - SLI_CPC_HDLC_HEADER_RAW_SIZE);
+          header_expected_next = true;
 
-          EUSART_IntEnable(SL_CPC_DRV_UART_PERIPHERAL, EUSART_IEN_RXFL);
+          start_re_synch();
+          CORE_EXIT_ATOMIC();
           return false;
         }
 
@@ -877,35 +893,27 @@ static bool rx_dma_complete(unsigned int channel,
         (void)rx_buf_free;
 #else
         if (current_rx_buf_tot_len == 0) {
+          EFM_ASSERT(completed_desc != NULL);
           if ((next_rx_payload_len > 0)
               && (next_rx_payload_len <= DMA_MAX_XFER_LEN)) {
             update_success = update_current_rx_dma_length(next_rx_payload_len);
             if (update_success == SL_STATUS_FAIL) {
               // If we fall here, it's because we received more than the expected payload.
               // In that case, we need to re-synch on the next valid header.
-              update_success = update_current_rx_dma_length(next_rx_payload_len + SLI_CPC_HDLC_HEADER_RAW_SIZE);
-              if (update_success == SL_STATUS_FAIL) {
-                start_re_synch();
-                return false;
-              } else if (update_success == SL_STATUS_ALREADY_EXISTS) {
-                DMADRV_StopTransfer(read_channel);
-                // Now that the DMA is stopped, re-check the condition where the amount of bytes received is already what we requested.
-                update_success = update_current_rx_dma_length(next_rx_payload_len + SLI_CPC_HDLC_HEADER_RAW_SIZE);
-                if (update_success == SL_STATUS_FAIL) {
-                  start_re_synch();
-                  return false;
-                } else if (update_success == SL_STATUS_ALREADY_EXISTS) {
-                  next_rx_buf_tot_len = next_rx_payload_len + SLI_CPC_HDLC_HEADER_RAW_SIZE;
-                } else {
-                  EFM_ASSERT(0);
-                }
-              }
+              push_back_new_rx_dma_desc(completed_desc, rx_buffer);
+              rx_need_desc = false; // We can re-use the descriptor attached to that buffer
+              start_re_synch();
+              CORE_EXIT_ATOMIC();
+              return false;
             } else if (update_success == SL_STATUS_ALREADY_EXISTS) {
               DMADRV_StopTransfer(read_channel);
               // Now that the DMA is stopped, re-check the condition where the amount of bytes received is already what we requested.
               update_success = update_current_rx_dma_length(next_rx_payload_len);
               if (update_success == SL_STATUS_FAIL) {
+                push_back_new_rx_dma_desc(completed_desc, rx_buffer);
+                rx_need_desc = false; // We can re-use the descriptor attached to that buffer
                 start_re_synch();
+                CORE_EXIT_ATOMIC();
                 return false;
               } else if (update_success == SL_STATUS_ALREADY_EXISTS) {
                 next_rx_buf_tot_len = next_rx_payload_len;
@@ -918,14 +926,20 @@ static bool rx_dma_complete(unsigned int channel,
                      && (next_rx_payload_len <= SLI_CPC_RX_DATA_MAX_LENGTH)) {
             update_success = update_current_rx_dma_large_payload_length(next_rx_payload_len);
             if (update_success == SL_STATUS_FAIL) {
+              push_back_new_rx_dma_desc(completed_desc, rx_buffer);
+              rx_need_desc = false; // We can re-use the descriptor attached to that buffer
               start_re_synch();
+              CORE_EXIT_ATOMIC();
               return false;
             } else if (update_success == SL_STATUS_ALREADY_EXISTS) {
               DMADRV_StopTransfer(read_channel);
               // Now that the DMA is stopped, re-check the condition where the amount of bytes received is already what we requested.
               update_success = update_current_rx_dma_length(next_rx_payload_len);
               if (update_success == SL_STATUS_FAIL) {
+                push_back_new_rx_dma_desc(completed_desc, rx_buffer);
+                rx_need_desc = false; // We can re-use the descriptor attached to that buffer
                 start_re_synch();
+                CORE_EXIT_ATOMIC();
                 return false;
               } else if (update_success == SL_STATUS_ALREADY_EXISTS) {
                 next_rx_buf_tot_len = next_rx_payload_len;
@@ -934,16 +948,24 @@ static bool rx_dma_complete(unsigned int channel,
               }
             }
           } else if (!rx_need_desc) {
+            EFM_ASSERT(completed_desc != NULL);
             update_success = update_current_rx_dma_length(SLI_CPC_HDLC_HEADER_RAW_SIZE);
             if (update_success == SL_STATUS_FAIL) {
+              EFM_ASSERT(completed_desc != NULL);
+              push_back_new_rx_dma_desc(completed_desc, rx_buffer);
+              rx_need_desc = false;   // We can re-use the descriptor attached to that buffer
               start_re_synch();
+              CORE_EXIT_ATOMIC();
               return false;
             } else if (update_success == SL_STATUS_ALREADY_EXISTS) {
               DMADRV_StopTransfer(read_channel);
               // Now that the DMA is stopped, re-check the condition where the amount of bytes received is already what we requested.
               update_success = update_current_rx_dma_length(SLI_CPC_HDLC_HEADER_RAW_SIZE);
               if (update_success == SL_STATUS_FAIL) {
+                push_back_new_rx_dma_desc(completed_desc, rx_buffer);
+                rx_need_desc = false; // We can re-use the descriptor attached to that buffer
                 start_re_synch();
+                CORE_EXIT_ATOMIC();
                 return false;
               } else if (update_success == SL_STATUS_ALREADY_EXISTS) {
                 next_rx_buf_tot_len = SLI_CPC_HDLC_HEADER_RAW_SIZE;
@@ -951,6 +973,10 @@ static bool rx_dma_complete(unsigned int channel,
                 EFM_ASSERT(0);
               }
             }
+          } else if (rx_need_desc) {
+            DMADRV_StopTransfer(read_channel);
+            CORE_EXIT_ATOMIC();
+            return false;
           } else {
             EFM_ASSERT(0); // Not handled;
           }
@@ -983,21 +1009,34 @@ static bool rx_dma_complete(unsigned int channel,
 
         current_rx_buffer_offset += SLI_CPC_HDLC_HEADER_RAW_SIZE;
       } else {
+        // Add to current rx handle
+        EFM_ASSERT(current_rx_entry != NULL);
+
         current_rx_buf_tot_len -= next_rx_payload_len;
 
-        if (manually_reload_dma) {
+        if (dma_stopped) {
           next_rx_buf_tot_len = SLI_CPC_HDLC_HEADER_RAW_SIZE;
         } else if (current_rx_buf_tot_len == 0 && !rx_need_desc) {
           update_success = update_current_rx_dma_length(SLI_CPC_HDLC_HEADER_RAW_SIZE);
           if (update_success == SL_STATUS_FAIL) {
+#if (SL_CPC_DRV_UART_FLOW_CONTROL_TYPE == usartHwFlowControlNone_D)
+            push_back_new_rx_dma_desc(completed_desc, rx_buffer);
+            rx_need_desc = false;     // We can re-use the descriptor attached to that buffer
+#endif
             start_re_synch();
+            CORE_EXIT_ATOMIC();
             return false;
           } else if (update_success == SL_STATUS_ALREADY_EXISTS) {
             DMADRV_StopTransfer(read_channel);
             // Now that the DMA is stopped, re-check the condition where the amount of bytes received is already what we requested.
             update_success = update_current_rx_dma_length(SLI_CPC_HDLC_HEADER_RAW_SIZE);
             if (update_success == SL_STATUS_FAIL) {
+#if (SL_CPC_DRV_UART_FLOW_CONTROL_TYPE == usartHwFlowControlNone_D)
+              push_back_new_rx_dma_desc(completed_desc, rx_buffer);
+              rx_need_desc = false;   // We can re-use the descriptor attached to that buffer
+#endif
               start_re_synch();
+              CORE_EXIT_ATOMIC();
               return false;
             } else if (update_success == SL_STATUS_ALREADY_EXISTS) {
               next_rx_buf_tot_len = SLI_CPC_HDLC_HEADER_RAW_SIZE;
@@ -1005,12 +1044,19 @@ static bool rx_dma_complete(unsigned int channel,
               EFM_ASSERT(0);
             }
           }
+        } else if (rx_need_desc) {
+          // Drop the packet and wait for a descriptor
+          DMADRV_StopTransfer(read_channel);
+          CORE_EXIT_ATOMIC();
+          return false;
         } else {
-          EFM_ASSERT(0); // Not handled
+#if (SL_CPC_DRV_UART_FLOW_CONTROL_TYPE == usartHwFlowControlNone_D)
+          push_back_new_rx_dma_desc(completed_desc, rx_buffer);
+#endif
+          start_re_synch();
+          CORE_EXIT_ATOMIC();
+          return false;
         }
-
-        // Add to current rx handle
-        EFM_ASSERT(current_rx_entry != NULL);
 
         if (current_rx_buffer_offset) {
           // With the current implementation limitations, we should never get here.
@@ -1033,39 +1079,35 @@ static bool rx_dma_complete(unsigned int channel,
         rx_buf_free = false;
         next_rx_payload_len = 0;
       }
-
+    }
 #if (SL_CPC_DRV_UART_FLOW_CONTROL_TYPE == usartHwFlowControlNone_D)
-      if (rx_buf_free) {
-        // We end up in that case when we received a header with no payload. Since the buffer has not
-        // been pushed to the core, we can re-use it right away.
 
-        push_back_new_rx_dma_desc(completed_desc, rx_buffer);
-      } else {
-        LDMA_Descriptor_t *desc = (LDMA_Descriptor_t *)(completed_desc->xfer.linkAddr << _LDMA_CH_LINK_LINKADDR_SHIFT);
-        sli_mem_pool_free(&mempool_rx_dma_desc, (void *)completed_desc);
-        completed_desc = NULL;
+    if (rx_buf_free) {
+      // We end up in that case when we received a header with no payload. Since the buffer has not
+      // been pushed to the core, we can re-use it right away.
 
-        for (uint16_t i = 1u; i < nb_desc_free; i++) {
-          LDMA_Descriptor_t *temp_desc = desc;
-          sli_mem_pool_free(&mempool_rx_dma_desc, (void *)desc);
-          desc = (LDMA_Descriptor_t *)(temp_desc->xfer.linkAddr << _LDMA_CH_LINK_LINKADDR_SHIFT);
-          rx_descriptor_head = desc;
-        }
+      push_back_new_rx_dma_desc(completed_desc, rx_buffer);
+      rx_need_desc = false;   // We can re-use the descriptor attached to that buffer
+    } else {
+      LDMA_Descriptor_t *desc = (LDMA_Descriptor_t *)(completed_desc->xfer.linkAddr << _LDMA_CH_LINK_LINKADDR_SHIFT);
+      sli_mem_pool_free(&mempool_rx_dma_desc, (void *)completed_desc);
+      completed_desc = NULL;
 
-        nb_desc_free = 0u;
-
-        rx_buffer_free_from_isr();
+      for (uint16_t i = 1u; i < nb_desc_free; i++) {
+        LDMA_Descriptor_t *temp_desc = desc;
+        sli_mem_pool_free(&mempool_rx_dma_desc, (void *)desc);
+        desc = (LDMA_Descriptor_t *)(temp_desc->xfer.linkAddr << _LDMA_CH_LINK_LINKADDR_SHIFT);
+        rx_descriptor_head = desc;
       }
 
+      nb_desc_free = 0u;
+
+      rx_buffer_free_from_isr();
+    }
 #endif
-    }
+  } while (update_success == SL_STATUS_ALREADY_EXISTS && dma_stopped == false);
 
-    if (update_success == SL_STATUS_ALREADY_EXISTS) {
-      manually_reload_dma = true;
-    }
-  } while (update_success == SL_STATUS_ALREADY_EXISTS);
-
-  if (manually_reload_dma) {
+  if (dma_stopped) {
     bool active;
     Ecode_t ecode;
 
@@ -1078,55 +1120,25 @@ static bool rx_dma_complete(unsigned int channel,
 
     rx_descriptor_head->xfer.xferCnt = next_rx_buf_tot_len - 1u;
 
-    LDMA->IEN |= (1 << read_channel);
-    LDMA->CHEN |= (1 << read_channel);
-
     // Start read channel
     ecode = DMADRV_LdmaStartTransfer(read_channel,
                                      &rx_config,
                                      rx_descriptor_head,
                                      rx_dma_complete,
                                      0);
+    DMADRV_TransferActive(read_channel, &active);
+
+    if (header_expected_next) {
+      EFM_ASSERT(next_rx_buf_tot_len == 7);
+    }
+
+    EFM_ASSERT(active == true);
+    EFM_ASSERT(LDMA->IEN & (1 << read_channel));
     EFM_ASSERT(ecode == ECODE_OK);
   }
+
+  CORE_EXIT_ATOMIC();
   return false;
-}
-
-/***************************************************************************/ /**
- * Force a new XferCnt of the current DMA xfer with the length passed as argument.
- * This function also restart the DMA transfer.
- *
- * @param new_length Total length of next transfer.
- *
- * @return true if new length successfully applied.
- *         false if the DMA already transferred more than requested.
- ******************************************************************************/
-static void force_current_rx_dma_length(uint16_t new_length)
-{
-  uint32_t ctrl;
-
-  ctrl = LDMA->CH[read_channel].CTRL;
-
-#if (SL_CPC_DRV_UART_FLOW_CONTROL_TYPE == usartHwFlowControlNone_D)
-  uint32_t dest;
-  uint16_t already_recvd_cnt;
-
-  // Rewind the DMA destination to discard previously received bytes
-  dest = LDMA->CH[read_channel].DST;
-  already_recvd_cnt = (((SLI_CPC_RX_DATA_MAX_LENGTH < DMA_MAX_XFER_LEN) ? SLI_CPC_RX_DATA_MAX_LENGTH : DMA_MAX_XFER_LEN) - 1) - ((ctrl & _LDMA_CH_CTRL_XFERCNT_MASK) >> _LDMA_CH_CTRL_XFERCNT_SHIFT);
-  LDMA->CH[read_channel].DST = (dest - already_recvd_cnt);
-#endif
-
-  ctrl &= ~_LDMA_CH_CTRL_XFERCNT_MASK;
-  ctrl |= ((new_length - 1) << _LDMA_CH_CTRL_XFERCNT_SHIFT) & _LDMA_CH_CTRL_XFERCNT_MASK;
-
-  LDMA->CH[read_channel].CTRL = ctrl;
-
-  LDMA->IEN |= (1 << read_channel);
-
-  LDMA->CHEN |= (1 << read_channel);
-
-  next_rx_buf_tot_len = new_length;
 }
 
 /***************************************************************************/ /**
@@ -1190,10 +1202,18 @@ static sl_status_t update_current_rx_dma_length(uint16_t new_length)
   ctrl = LDMA->CH[read_channel].CTRL;
   already_recvd_cnt = (((SLI_CPC_RX_DATA_MAX_LENGTH < DMA_MAX_XFER_LEN) ? SLI_CPC_RX_DATA_MAX_LENGTH : DMA_MAX_XFER_LEN) - 1) - ((ctrl & _LDMA_CH_CTRL_XFERCNT_MASK) >> _LDMA_CH_CTRL_XFERCNT_SHIFT);
 
+  //TODO: CPC-273
+  if (((ctrl & _LDMA_CH_CTRL_XFERCNT_MASK) >> _LDMA_CH_CTRL_XFERCNT_SHIFT) == 0) {
+    DMADRV_ResumeTransfer(read_channel);
+    return SL_STATUS_FAIL;
+  }
+
   // For analysis purposes
   if (already_recvd_cnt > already_recvd_cnt_worst) {
     already_recvd_cnt_worst = already_recvd_cnt;
   }
+
+  EFM_ASSERT(rx_need_desc == false);
 
   if (already_recvd_cnt == new_length) {
     DMADRV_ResumeTransfer(read_channel);
@@ -1381,7 +1401,6 @@ static void rx_buffer_free_from_isr(void)
       sli_mem_pool_free(&mempool_rx_dma_desc, (void *)current_desc);
       break;
     }
-
     push_back_new_rx_dma_desc(current_desc, buffer_ptr);
   } while (true);
 }
@@ -1410,12 +1429,17 @@ static void start_re_synch(void)
 {
   DMADRV_StopTransfer(read_channel);
 
+  EFM_ASSERT(rx_need_desc == false);
+
   SLI_CPC_DEBUG_TRACE_CORE_DRIVER_PACKET_DROPPED();
 
   // A header is expected next
   header_expected_next = true;
 
-  sli_cpc_push_back_buffer_handle(&rx_free_list_head, &current_rx_entry->node, current_rx_entry->handle);
+  if (current_rx_entry != NULL) {
+    sli_cpc_push_back_buffer_handle(&rx_free_list_head, &current_rx_entry->node, current_rx_entry->handle);
+  }
   current_rx_entry = NULL;
+
   EUSART_IntEnable(SL_CPC_DRV_UART_PERIPHERAL, EUSART_IEN_RXFL);
 }

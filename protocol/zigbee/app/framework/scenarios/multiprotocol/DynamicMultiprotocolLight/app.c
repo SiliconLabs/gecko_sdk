@@ -72,10 +72,11 @@ static EmberEUI64 SwitchEUI;
 //---------------------
 // Forward declarations
 
-static void startIdentifyOnAllChildNodes(uint16_t identifyTime);
 static void setDefaultReportEntry(void);
-static bool startPjoinAndIdentifying(uint16_t identifyTime);
+
 #if defined(SL_CATALOG_SIMPLE_BUTTON_PRESENT)
+static void startIdentifyOnAllChildNodes(uint16_t identifyTime);
+static bool startPjoinAndIdentifying(uint16_t identifyTime);
 static void toggleOnoffAttribute(void);
 #endif // SL_CATALOG_SIMPLE_BUTTON_PRESENT
 
@@ -144,10 +145,6 @@ void emberAfStackStatusCallback(EmberStatus status)
     case EMBER_NETWORK_UP:
       setDefaultReportEntry();
       sl_dmp_ui_display_zigbee_state(DMP_UI_NETWORK_UP);
-      if (startPjoinAndIdentifying(180)) {
-        sl_dmp_ui_zigbee_permit_join(true);
-        sl_zigbee_app_debug_print("%s network %s: 0x%02X\n", "Open", "for joining", status);
-      }
       break;
     case EMBER_NETWORK_DOWN:
       sl_dmp_ui_display_zigbee_state(DMP_UI_NO_NETWORK);
@@ -390,7 +387,7 @@ static void setDefaultReportEntry(void)
   reportingEntry.data.reported.reportableChange = 0; //onoff is bool type so it is unused
   emberAfPluginReportingConfigureReportedAttribute(&reportingEntry);
 }
-
+#if defined(SL_CATALOG_SIMPLE_BUTTON_PRESENT)
 static bool startPjoinAndIdentifying(uint16_t identifyTime)
 {
   EmberStatus status;
@@ -412,7 +409,6 @@ static bool startPjoinAndIdentifying(uint16_t identifyTime)
 
   return (status == EMBER_SUCCESS);
 }
-
 static void startIdentifyOnAllChildNodes(uint16_t identifyTime)
 {
   // Attempt to start Identify on all connected child nodes.
@@ -451,3 +447,4 @@ static void startIdentifyOnAllChildNodes(uint16_t identifyTime)
     }
   }
 }
+#endif //SL_CATALOG_SIMPLE_BUTTON_PRESENT

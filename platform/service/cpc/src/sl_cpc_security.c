@@ -265,6 +265,7 @@ void sli_cpc_security_process(void)
     if (status == SL_STATUS_OK) {
       rx_security_cmd = (sli_cpc_security_protocol_cmd_t *)read_buffer;
       process_security_command_rx(rx_security_cmd);
+      sl_cpc_free_rx_buffer(read_buffer);
     } else if (status == SL_STATUS_EMPTY) {
       if (security_request_pending) {
         send_request(&security_protocol_request);

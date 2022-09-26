@@ -24,7 +24,6 @@
 #include "sl_zigbee_command_interpreter.h"
 
 #define EUI64_SIZE 8
-typedef uint8_t EmberEUI64[EUI64_SIZE];
 
 // We want to use this component without being dependent on platform headers/UP,
 // this could be a valid usecase e.g. in case of GPD
@@ -88,7 +87,7 @@ uint8_t sl_zigbee_copy_hex_arg(sl_cli_command_arg_t *arguments,
 
 uint8_t sl_zigbee_copy_eui64_arg(sl_cli_command_arg_t *arguments,
                                  uint8_t index,
-                                 EmberEUI64 dest,
+                                 uint8_t *dest,
                                  bool big_endian)
 {
   size_t len = 0;

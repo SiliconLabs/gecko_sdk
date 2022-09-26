@@ -62,6 +62,14 @@ typedef struct antenna_array_s {
   uint8_t array_type;
 } antenna_array_t;
 
+/// List of supported boards.
+typedef enum {
+  BRD4185A,
+  BRD4191A,
+  ANTENNA_ARRAY_BOARD_UNKNOWN,
+  ANTENNA_ARRAY_BOARD_COUNT
+} antenna_array_board_t;
+
 /***************************************************************************//**
  * Initialize antenna switch pattern with default values.
  *
@@ -121,6 +129,46 @@ sl_status_t antenna_array_get_continuous_pattern(antenna_array_t *antenna_array,
  ******************************************************************************/
 sl_status_t antenna_array_shuffle_pattern(antenna_array_t *antenna_array,
                                           int(random)(void));
+
+/***************************************************************************//**
+ * Assign a compatible board to an antenna array type.
+ *
+ * @param[in] array_type One of the supported antenna array types.
+ * @param[out] board Antenna array board that matches the array type.
+ * @return SL_STATUS_OK if successful. Error code otherwise.
+ ******************************************************************************/
+sl_status_t antenna_array_type_to_board(uint8_t array_type,
+                                        antenna_array_board_t *board);
+
+/***************************************************************************//**
+ * Assign a default antenna array type to a board.
+ *
+ * @param[in] board One of the supported antenna array boards.
+ * @param[out] array_type Default antenna array type that matches the board.
+ * @return SL_STATUS_OK if successful. Error code otherwise.
+ ******************************************************************************/
+sl_status_t antenna_array_board_to_type(antenna_array_board_t board,
+                                        uint8_t *array_type);
+
+/***************************************************************************//**
+ * Convert string to antenna array board.
+ *
+ * @param[in] str Input string.
+ * @param[out] board Antenna array board.
+ * @return SL_STATUS_OK if successful. Error code otherwise.
+ ******************************************************************************/
+sl_status_t antenna_array_string_to_board(const char *str,
+                                          antenna_array_board_t *board);
+
+/***************************************************************************//**
+ * Convert antenna array board to string.
+ *
+ * @param[in] board Antenna array board.
+ * @param[out] str Output string.
+ * @return SL_STATUS_OK if successful. Error code otherwise.
+ ******************************************************************************/
+sl_status_t antenna_array_board_to_string(antenna_array_board_t board,
+                                          char *str);
 
 #ifdef __cplusplus
 };

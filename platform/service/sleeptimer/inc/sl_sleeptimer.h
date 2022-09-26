@@ -301,6 +301,8 @@ uint32_t sl_sleeptimer_get_timer_frequency(void);
  * @param time_zone Offset from UTC in second.
  * @param date Pointer to converted date.
  *
+ * @note Time is in Standard Time.
+ *
  * @return 0 if successful. Error code otherwise.
  ******************************************************************************/
 sl_status_t sl_sleeptimer_convert_time_to_date(sl_sleeptimer_timestamp_t time,
@@ -374,6 +376,8 @@ sl_status_t sl_sleeptimer_set_time(sl_sleeptimer_timestamp_t time);
  * Gets current date.
  *
  * @param date Pointer to a sl_sleeptimer_date_t structure.
+ *
+ * @note Time is in Standard Time.
  *
  * @return 0 if successful. Error code otherwise.
  ******************************************************************************/

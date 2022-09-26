@@ -51,6 +51,9 @@ void bootloader_ezsp_init(void)
 #if defined(CMU_CTRL_HFPERCLKEN)
   CMU->CTRL |= CMU_CTRL_HFPERCLKEN;
   CMU_ClockEnable(cmuClock_GPIO, true);
+#elif defined(_CMU_CLKEN0_MASK)
+  // Enable GPIO clock
+  CMU->CLKEN0_SET = CMU_CLKEN0_GPIO;
 #endif
 
   GPIO_PinModeSet(SL_EZSPSPI_HOST_INT_PORT,

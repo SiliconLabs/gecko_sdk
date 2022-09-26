@@ -117,6 +117,10 @@ typedef struct {
   uint8_t channel;
   // The value of the MAC timer when the SFD was received for this packet
   uint32_t timestamp;
+#ifdef ZIGBEE_STACK_ON_HOST
+  // The value of the RAIL timer when the SFD was received for this packet
+  uint64_t sync_rx_timestamp;
+#endif
 } sl_mac_in_memory_queue_info_t;
 
 // When in shortIndirectPool or longIndirectPool (in indirect-queue.c).
@@ -168,6 +172,10 @@ uint8_t sl_mac_lqi(PacketHeader header);
 int8_t sl_mac_rssi(PacketHeader header);
 uint8_t sl_mac_channel(PacketHeader header);
 uint32_t sl_mac_timestamp(PacketHeader header);
+
+#ifdef ZIGBEE_STACK_ON_HOST
+uint64_t sl_mac_sync_rx_timestamp(PacketHeader header);
+#endif
 
 void sl_mac_set_lqi(PacketHeader header, uint8_t lqi);
 void sl_mac_set_rssi(PacketHeader header, int8_t rssi);

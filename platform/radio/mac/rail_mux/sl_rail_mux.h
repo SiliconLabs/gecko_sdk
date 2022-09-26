@@ -247,7 +247,9 @@ RAIL_Status_t sl_rail_mux_GetTxPowerConfig(RAIL_Handle_t railHandle,
                                            RAIL_TxPowerConfig_t *config);
 
 RAIL_TxPower_t sl_rail_mux_GetTxPowerDbm(RAIL_Handle_t railHandle);
-
+RAIL_TxPower_t sl_rail_mux_GetTxPower(RAIL_Handle_t railHandle);
+RAIL_Status_t sl_rail_mux_SetTxPower(RAIL_Handle_t railHandle,
+                                     RAIL_TxPowerLevel_t powerLevel);
 RAIL_Status_t sl_rail_mux_ConfigTxPower(RAIL_Handle_t railHandle,
                                         const RAIL_TxPowerConfig_t *config);
 

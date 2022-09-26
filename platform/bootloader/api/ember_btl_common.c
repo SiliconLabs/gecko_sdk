@@ -112,6 +112,7 @@ extern uint32_t __HeapBase, __HeapLimit;
 #endif // __ICCARM__
 
 const BootloaderAddressTable_t *bootloaderAddressTable = (BootloaderAddressTable_t*)(FLASH_BASE);
+extern const tVectorEntry __VECTOR_TABLE[];
 
 VAR_AT_SEGMENT(NO_STRIPPING const AppAddressTable_t appAddressTable, __AAT__) = {
   { _STACK_SEGMENT_END,
@@ -120,7 +121,7 @@ VAR_AT_SEGMENT(NO_STRIPPING const AppAddressTable_t appAddressTable, __AAT__) = 
     HardFault_Handler,
     APP_ADDRESS_TABLE_TYPE,
     AAT_VERSION,
-    __Vectors },
+    __VECTOR_TABLE },
   SL_PLAT,
   SL_MICRO,
   SL_PHY,

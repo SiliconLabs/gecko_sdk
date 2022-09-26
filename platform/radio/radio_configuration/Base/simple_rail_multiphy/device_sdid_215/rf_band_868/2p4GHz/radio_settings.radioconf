@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<multi_phy_configuration part_family="sol" part_revision="A0" rail_adapter_version="rail_api_2.x" status_code="0" xsd_version="0.0.20">
+<multi_phy_configuration part_family="bobcat" part_revision="A0" rail_adapter_version="rail_api_2.x" status_code="0" xsd_version="0.0.20">
   <base_channel_configurations>
-    <base_channel_configuration name="Protocol Configuration" profile="serializableObject:Efr32RadioConfiguratorProfile:SOL:Base">
+    <base_channel_configuration name="simpletrx_multiphy" profile="serializableObject:Efr32RadioConfiguratorProfile:BOBCAT:Base">
       <profile_inputs>
         <input>
           <key>ADC_CLOCK_MODE</key>
@@ -52,6 +52,30 @@
           <value>null</value>
         </input>
         <input>
+          <key>ANTDIV_ADPCSIGAMPTHR</key>
+          <value>null</value>
+        </input>
+        <input>
+          <key>ANTDIV_ADPRETHRESH_SCALE</key>
+          <value>null</value>
+        </input>
+        <input>
+          <key>ANTDIV_ENABLE_PARALLEL_CORRELATION</key>
+          <value>null</value>
+        </input>
+        <input>
+          <key>ANTDIV_SWITCH_DELAY_US</key>
+          <value>null</value>
+        </input>
+        <input>
+          <key>ANTDIV_SWITCH_SKIP_US</key>
+          <value>null</value>
+        </input>
+        <input>
+          <key>AOX_ENABLE</key>
+          <value>null</value>
+        </input>
+        <input>
           <key>ASYNCHRONOUS_RX_ENABLE</key>
           <value>bool:false</value>
         </input>
@@ -61,23 +85,11 @@
         </input>
         <input>
           <key>BASE_FREQUENCY_HZ</key>
-          <value>long:450006250</value>
+          <value>long:2450000000</value>
         </input>
         <input>
           <key>BAUDRATE_TOL_PPM</key>
-          <value>int:300</value>
-        </input>
-        <input>
-          <key>BCR_CONC_BAUDRATE</key>
-          <value>null</value>
-        </input>
-        <input>
-          <key>BCR_CONC_DEVIATION</key>
-          <value>null</value>
-        </input>
-        <input>
-          <key>BCR_CONC_MANCHESTER</key>
-          <value>null</value>
+          <value>int:0</value>
         </input>
         <input>
           <key>BCR_DEMOD_EN</key>
@@ -85,11 +97,11 @@
         </input>
         <input>
           <key>BITRATE</key>
-          <value>int:4800</value>
+          <value>int:1000000</value>
         </input>
         <input>
           <key>CHANNEL_SPACING_HZ</key>
-          <value>int:12500</value>
+          <value>int:1000000</value>
         </input>
         <input>
           <key>CRC_BIT_ENDIAN</key>
@@ -97,7 +109,7 @@
         </input>
         <input>
           <key>CRC_BYTE_ENDIAN</key>
-          <value>serializableObject:EnumDataItem:1</value>
+          <value>serializableObject:EnumDataItem:0</value>
         </input>
         <input>
           <key>CRC_INPUT_ORDER</key>
@@ -105,19 +117,19 @@
         </input>
         <input>
           <key>CRC_INVERT</key>
-          <value>bool:true</value>
+          <value>bool:false</value>
         </input>
         <input>
           <key>CRC_PAD_INPUT</key>
-          <value>bool:true</value>
+          <value>bool:false</value>
         </input>
         <input>
           <key>CRC_POLY</key>
-          <value>serializableObject:EnumDataItem:7</value>
+          <value>serializableObject:EnumDataItem:2</value>
         </input>
         <input>
           <key>CRC_SEED</key>
-          <value>long:4294967295</value>
+          <value>long:0</value>
         </input>
         <input>
           <key>DEMOD_SELECT</key>
@@ -125,11 +137,11 @@
         </input>
         <input>
           <key>DEVIATION</key>
-          <value>int:2400</value>
+          <value>int:500000</value>
         </input>
         <input>
           <key>DEVIATION_TOL_PPM</key>
-          <value>int:300000</value>
+          <value>int:0</value>
         </input>
         <input>
           <key>DIFF_ENCODING_MODE</key>
@@ -152,10 +164,6 @@
           <value>int:0</value>
         </input>
         <input>
-          <key>DUAL_FEFILT</key>
-          <value>null</value>
-        </input>
-        <input>
           <key>ERRORS_IN_TIMING_WINDOW</key>
           <value>null</value>
         </input>
@@ -169,11 +177,11 @@
         </input>
         <input>
           <key>FEC_EN</key>
-          <value>serializableObject:EnumDataItem:1</value>
+          <value>serializableObject:EnumDataItem:0</value>
         </input>
         <input>
           <key>FEC_TX_ENABLE</key>
-          <value>serializableObject:EnumDataItem:0</value>
+          <value>null</value>
         </input>
         <input>
           <key>FIRSTFRAME_BITSPERWORD</key>
@@ -181,11 +189,7 @@
         </input>
         <input>
           <key>FIXED_LENGTH_SIZE</key>
-          <value>int:1</value>
-        </input>
-        <input>
-          <key>FPLL_BAND</key>
-          <value>null</value>
+          <value>int:16</value>
         </input>
         <input>
           <key>FRAME_BITENDIAN</key>
@@ -193,7 +197,7 @@
         </input>
         <input>
           <key>FRAME_LENGTH_TYPE</key>
-          <value>serializableObject:EnumDataItem:1</value>
+          <value>serializableObject:EnumDataItem:0</value>
         </input>
         <input>
           <key>FRAME_TYPE_0_FILTER</key>
@@ -329,7 +333,7 @@
         </input>
         <input>
           <key>HEADER_EN</key>
-          <value>bool:true</value>
+          <value>bool:false</value>
         </input>
         <input>
           <key>HEADER_EXCLUDESUBFRAMEWCNT_EN</key>
@@ -337,7 +341,7 @@
         </input>
         <input>
           <key>HEADER_SIZE</key>
-          <value>int:2</value>
+          <value>int:1</value>
         </input>
         <input>
           <key>HEADER_WHITE_EN</key>
@@ -389,7 +393,7 @@
         </input>
         <input>
           <key>PAYLOAD_WHITE_EN</key>
-          <value>bool:true</value>
+          <value>bool:false</value>
         </input>
         <input>
           <key>PREAMBLE_DETECTION_LENGTH</key>
@@ -397,7 +401,7 @@
         </input>
         <input>
           <key>PREAMBLE_LENGTH</key>
-          <value>int:64</value>
+          <value>int:40</value>
         </input>
         <input>
           <key>PREAMBLE_PATTERN</key>
@@ -413,7 +417,7 @@
         </input>
         <input>
           <key>RX_XTAL_ERROR_PPM</key>
-          <value>int:6</value>
+          <value>int:10</value>
         </input>
         <input>
           <key>SHAPING_FILTER</key>
@@ -421,7 +425,7 @@
         </input>
         <input>
           <key>SHAPING_FILTER_PARAM</key>
-          <value>float:2.0</value>
+          <value>float:0.5</value>
         </input>
         <input>
           <key>SKIP2ANT</key>
@@ -445,11 +449,11 @@
         </input>
         <input>
           <key>SYNCWORD_0</key>
-          <value>long:36942</value>
+          <value>long:63117</value>
         </input>
         <input>
           <key>SYNCWORD_1</key>
-          <value>long:36942</value>
+          <value>long:0</value>
         </input>
         <input>
           <key>SYNCWORD_LENGTH</key>
@@ -493,7 +497,7 @@
         </input>
         <input>
           <key>TX_XTAL_ERROR_PPM</key>
-          <value>int:6</value>
+          <value>int:10</value>
         </input>
         <input>
           <key>VAR_LENGTH_ADJUST</key>
@@ -501,15 +505,15 @@
         </input>
         <input>
           <key>VAR_LENGTH_BITENDIAN</key>
-          <value>serializableObject:EnumDataItem:1</value>
+          <value>serializableObject:EnumDataItem:0</value>
         </input>
         <input>
           <key>VAR_LENGTH_BYTEENDIAN</key>
-          <value>serializableObject:EnumDataItem:1</value>
+          <value>serializableObject:EnumDataItem:0</value>
         </input>
         <input>
           <key>VAR_LENGTH_INCLUDECRC</key>
-          <value>bool:true</value>
+          <value>bool:false</value>
         </input>
         <input>
           <key>VAR_LENGTH_LOC</key>
@@ -517,7 +521,7 @@
         </input>
         <input>
           <key>VAR_LENGTH_MAXLENGTH</key>
-          <value>int:2047</value>
+          <value>int:255</value>
         </input>
         <input>
           <key>VAR_LENGTH_MINLENGTH</key>
@@ -525,7 +529,7 @@
         </input>
         <input>
           <key>VAR_LENGTH_NUMBITS</key>
-          <value>int:11</value>
+          <value>int:8</value>
         </input>
         <input>
           <key>VAR_LENGTH_SHIFT</key>
@@ -533,28 +537,65 @@
         </input>
         <input>
           <key>WHITE_OUTPUT_BIT</key>
-          <value>int:8</value>
+          <value>int:0</value>
         </input>
         <input>
           <key>WHITE_POLY</key>
-          <value>serializableObject:EnumDataItem:6</value>
+          <value>serializableObject:EnumDataItem:0</value>
         </input>
         <input>
           <key>WHITE_SEED</key>
-          <value>int:255</value>
+          <value>int:65535</value>
         </input>
         <input>
           <key>XTAL_FREQUENCY_HZ</key>
           <value>int:39000000</value>
         </input>
       </profile_inputs>
-      <phy name="serializableObject:Efr32RadioConfiguratorPhy:SOL:Base:PHY_IEEE802154_SUN_FSK_450MHz_2FSK_4p8kbps"/>
       <channel_config_entries>
-        <channel_config_entry name="Channel Group 1">
-          <physical_channel_offset>SAME_AS_FIRST_CHANNEL</physical_channel_offset>
+        <channel_config_entry name="channel2p4">
+          <base_frequency>2450000000</base_frequency>
+          <channel_spacing>0</channel_spacing>
+          <physical_channel_offset>0</physical_channel_offset>
           <channel_number_start>0</channel_number_start>
-          <channel_number_end>20</channel_number_end>
+          <channel_number_end>0</channel_number_end>
           <max_power>RAIL_TX_POWER_MAX</max_power>
+          <profile_input_overrides>
+            <override>
+              <key>BITRATE</key>
+              <value>int:250000</value>
+            </override>
+            <override>
+              <key>DEVIATION</key>
+              <value>int:125000</value>
+            </override>
+            <override>
+              <key>PREAMBLE_LENGTH</key>
+              <value>int:400</value>
+            </override>
+          </profile_input_overrides>
+        </channel_config_entry>
+        <channel_config_entry name="channelSubGHz">
+          <base_frequency>868000000</base_frequency>
+          <channel_spacing>0</channel_spacing>
+          <physical_channel_offset>1</physical_channel_offset>
+          <channel_number_start>1</channel_number_start>
+          <channel_number_end>1</channel_number_end>
+          <max_power>RAIL_TX_POWER_MAX</max_power>
+          <profile_input_overrides>
+            <override>
+              <key>BITRATE</key>
+              <value>int:100000</value>
+            </override>
+            <override>
+              <key>DEVIATION</key>
+              <value>int:50000</value>
+            </override>
+            <override>
+              <key>PREAMBLE_LENGTH</key>
+              <value>int:160</value>
+            </override>
+          </profile_input_overrides>
         </channel_config_entry>
       </channel_config_entries>
     </base_channel_configuration>

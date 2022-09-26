@@ -16,6 +16,7 @@ template_contribution:
   value: radio_config_simple_connect_singlephy
 config_file:
 - path: platform/radio/radio_configuration/Connect/simple_connect_singlephy/device_sdid_205/rf_band_2400/radio_settings.radioconf
+  file_id: radio_configuration_settings
   directory: rail
   condition:
   - device_has_radio_2g4hz
@@ -29,6 +30,7 @@ config_file:
   - device_is_module
   - device_sdid_200
 - path: platform/radio/radio_configuration/Connect/simple_connect_singlephy/device_sdid_210/rf_band_868/radio_settings.radioconf
+  file_id: radio_configuration_settings
   directory: rail
   condition:
   - device_has_radio_subghz
@@ -41,20 +43,8 @@ config_file:
   - hardware_board_stk
   - device_is_module
   - device_sdid_200
-- path: platform/radio/radio_configuration/Connect/simple_connect_singlephy/device_sdid_215/rf_band_2400/radio_settings.radioconf
-  directory: rail
-  condition:
-  - device_has_radio_2g4hz
-  - device_sdid_215
-  unless:
-  - device_has_radio_subghz
-  - device_has_radio_dualband
-  - hardware_board_rb
-  - hardware_board_tb
-  - hardware_board_stk
-  - device_is_module
-  - device_sdid_200
 - path: platform/radio/radio_configuration/Connect/simple_connect_singlephy/device_sdid_220/rf_band_868/radio_settings.radioconf
+  file_id: radio_configuration_settings
   directory: rail
   condition:
   - device_has_radio_subghz
@@ -68,6 +58,7 @@ config_file:
   - device_is_module
   - device_sdid_200
 - path: platform/radio/radio_configuration/Connect/simple_connect_singlephy/device_sdid_80/rf_band_2400/radio_settings.radioconf
+  file_id: radio_configuration_settings
   directory: rail
   condition:
   - device_has_radio_2g4hz
@@ -81,6 +72,7 @@ config_file:
   - device_is_module
   - device_sdid_200
 - path: platform/radio/radio_configuration/Connect/simple_connect_singlephy/device_sdid_80/rf_band_868/radio_settings.radioconf
+  file_id: radio_configuration_settings
   directory: rail
   condition:
   - device_has_radio_subghz
@@ -94,6 +86,7 @@ config_file:
   - device_is_module
   - device_sdid_200
 - path: platform/radio/radio_configuration/Connect/simple_connect_singlephy/device_sdid_80/rf_band_868/radio_settings.radioconf
+  file_id: radio_configuration_settings
   directory: rail
   condition:
   - device_has_radio_dualband
@@ -105,6 +98,7 @@ config_file:
   - device_is_module
   - device_sdid_200
 - path: platform/radio/radio_configuration/Connect/simple_connect_singlephy/device_sdid_84/rf_band_2400/radio_settings.radioconf
+  file_id: radio_configuration_settings
   directory: rail
   condition:
   - device_has_radio_2g4hz
@@ -118,6 +112,7 @@ config_file:
   - device_is_module
   - device_sdid_200
 - path: platform/radio/radio_configuration/Connect/simple_connect_singlephy/device_sdid_84/rf_band_868/radio_settings.radioconf
+  file_id: radio_configuration_settings
   directory: rail
   condition:
   - device_has_radio_subghz
@@ -131,6 +126,7 @@ config_file:
   - device_is_module
   - device_sdid_200
 - path: platform/radio/radio_configuration/Connect/simple_connect_singlephy/device_sdid_84/rf_band_868/radio_settings.radioconf
+  file_id: radio_configuration_settings
   directory: rail
   condition:
   - device_has_radio_dualband
@@ -142,6 +138,7 @@ config_file:
   - device_is_module
   - device_sdid_200
 - path: platform/radio/radio_configuration/Connect/simple_connect_singlephy/device_sdid_89/rf_band_2400/radio_settings.radioconf
+  file_id: radio_configuration_settings
   directory: rail
   condition:
   - device_has_radio_2g4hz
@@ -155,6 +152,7 @@ config_file:
   - device_is_module
   - device_sdid_200
 - path: platform/radio/radio_configuration/Connect/simple_connect_singlephy/device_sdid_89/rf_band_868/radio_settings.radioconf
+  file_id: radio_configuration_settings
   directory: rail
   condition:
   - device_has_radio_subghz
@@ -168,6 +166,7 @@ config_file:
   - device_is_module
   - device_sdid_200
 - path: platform/radio/radio_configuration/Connect/simple_connect_singlephy/device_sdid_89/rf_band_868/radio_settings.radioconf
+  file_id: radio_configuration_settings
   directory: rail
   condition:
   - device_has_radio_dualband
@@ -179,6 +178,7 @@ config_file:
   - device_is_module
   - device_sdid_200
 - path: platform/radio/radio_configuration/Connect/simple_connect_singlephy/device_sdid_95/rf_band_2400/radio_settings.radioconf
+  file_id: radio_configuration_settings
   directory: rail
   condition:
   - device_has_radio_2g4hz
@@ -192,6 +192,7 @@ config_file:
   - device_is_module
   - device_sdid_200
 - path: platform/radio/radio_configuration/Connect/simple_connect_singlephy/device_sdid_95/rf_band_868/radio_settings.radioconf
+  file_id: radio_configuration_settings
   directory: rail
   condition:
   - device_has_radio_subghz
@@ -205,6 +206,7 @@ config_file:
   - device_is_module
   - device_sdid_200
 - path: platform/radio/radio_configuration/Connect/simple_connect_singlephy/device_sdid_95/rf_band_868/radio_settings.radioconf
+  file_id: radio_configuration_settings
   directory: rail
   condition:
   - device_has_radio_dualband
@@ -216,6 +218,7 @@ config_file:
   - device_is_module
   - device_sdid_200
 - path: platform/radio/radio_configuration/Connect/simple_connect_singlephy/device_sdid_205/rf_band_2400/radio_settings.radioconf
+  file_id: radio_configuration_settings
   directory: rail
   condition:
   - hardware_board_default_rf_band_2400
@@ -224,6 +227,7 @@ config_file:
   - device_is_module
   - device_sdid_200
 - path: platform/radio/radio_configuration/Connect/simple_connect_singlephy/device_sdid_210/rf_band_169/radio_settings.radioconf
+  file_id: radio_configuration_settings
   directory: rail
   condition:
   - hardware_board_default_rf_band_169
@@ -232,6 +236,7 @@ config_file:
   - device_is_module
   - device_sdid_200
 - path: platform/radio/radio_configuration/Connect/simple_connect_singlephy/device_sdid_210/rf_band_434/radio_settings.radioconf
+  file_id: radio_configuration_settings
   directory: rail
   condition:
   - hardware_board_default_rf_band_434
@@ -240,6 +245,7 @@ config_file:
   - device_is_module
   - device_sdid_200
 - path: platform/radio/radio_configuration/Connect/simple_connect_singlephy/device_sdid_210/rf_band_470/radio_settings.radioconf
+  file_id: radio_configuration_settings
   directory: rail
   condition:
   - hardware_board_default_rf_band_470
@@ -248,6 +254,7 @@ config_file:
   - device_is_module
   - device_sdid_200
 - path: platform/radio/radio_configuration/Connect/simple_connect_singlephy/device_sdid_210/rf_band_868/radio_settings.radioconf
+  file_id: radio_configuration_settings
   directory: rail
   condition:
   - hardware_board_default_rf_band_868
@@ -256,6 +263,7 @@ config_file:
   - device_is_module
   - device_sdid_200
 - path: platform/radio/radio_configuration/Connect/simple_connect_singlephy/device_sdid_215/rf_band_2400/radio_settings.radioconf
+  file_id: radio_configuration_settings
   directory: rail
   condition:
   - hardware_board_default_rf_band_2400
@@ -263,15 +271,17 @@ config_file:
   unless:
   - device_is_module
   - device_sdid_200
-- path: platform/radio/radio_configuration/Connect/simple_connect_singlephy/device_sdid_220/rf_band_434/radio_settings.radioconf
+- path: platform/radio/radio_configuration/Connect/simple_connect_singlephy/device_sdid_220/rf_band_470/radio_settings.radioconf
+  file_id: radio_configuration_settings
   directory: rail
   condition:
-  - hardware_board_default_rf_band_434
+  - hardware_board_default_rf_band_470
   - device_sdid_220
   unless:
   - device_is_module
   - device_sdid_200
 - path: platform/radio/radio_configuration/Connect/simple_connect_singlephy/device_sdid_220/rf_band_868/radio_settings.radioconf
+  file_id: radio_configuration_settings
   directory: rail
   condition:
   - hardware_board_default_rf_band_868
@@ -280,6 +290,7 @@ config_file:
   - device_is_module
   - device_sdid_200
 - path: platform/radio/radio_configuration/Connect/simple_connect_singlephy/device_sdid_220/rf_band_915/radio_settings.radioconf
+  file_id: radio_configuration_settings
   directory: rail
   condition:
   - hardware_board_default_rf_band_915
@@ -288,6 +299,7 @@ config_file:
   - device_is_module
   - device_sdid_200
 - path: platform/radio/radio_configuration/Connect/simple_connect_singlephy/device_sdid_80/rf_band_169/radio_settings.radioconf
+  file_id: radio_configuration_settings
   directory: rail
   condition:
   - hardware_board_default_rf_band_169
@@ -296,6 +308,7 @@ config_file:
   - device_is_module
   - device_sdid_200
 - path: platform/radio/radio_configuration/Connect/simple_connect_singlephy/device_sdid_80/rf_band_2400/radio_settings.radioconf
+  file_id: radio_configuration_settings
   directory: rail
   condition:
   - hardware_board_default_rf_band_2400
@@ -304,6 +317,7 @@ config_file:
   - device_is_module
   - device_sdid_200
 - path: platform/radio/radio_configuration/Connect/simple_connect_singlephy/device_sdid_80/rf_band_434/radio_settings.radioconf
+  file_id: radio_configuration_settings
   directory: rail
   condition:
   - hardware_board_default_rf_band_434
@@ -312,6 +326,7 @@ config_file:
   - device_is_module
   - device_sdid_200
 - path: platform/radio/radio_configuration/Connect/simple_connect_singlephy/device_sdid_80/rf_band_490/radio_settings.radioconf
+  file_id: radio_configuration_settings
   directory: rail
   condition:
   - hardware_board_default_rf_band_490
@@ -320,6 +335,7 @@ config_file:
   - device_is_module
   - device_sdid_200
 - path: platform/radio/radio_configuration/Connect/simple_connect_singlephy/device_sdid_80/rf_band_868/radio_settings.radioconf
+  file_id: radio_configuration_settings
   directory: rail
   condition:
   - hardware_board_default_rf_band_868
@@ -328,6 +344,7 @@ config_file:
   - device_is_module
   - device_sdid_200
 - path: platform/radio/radio_configuration/Connect/simple_connect_singlephy/device_sdid_80/rf_band_915/radio_settings.radioconf
+  file_id: radio_configuration_settings
   directory: rail
   condition:
   - hardware_board_default_rf_band_915
@@ -336,6 +353,7 @@ config_file:
   - device_is_module
   - device_sdid_200
 - path: platform/radio/radio_configuration/Connect/simple_connect_singlephy/device_sdid_84/rf_band_169/radio_settings.radioconf
+  file_id: radio_configuration_settings
   directory: rail
   condition:
   - hardware_board_default_rf_band_169
@@ -344,6 +362,7 @@ config_file:
   - device_is_module
   - device_sdid_200
 - path: platform/radio/radio_configuration/Connect/simple_connect_singlephy/device_sdid_84/rf_band_2400/radio_settings.radioconf
+  file_id: radio_configuration_settings
   directory: rail
   condition:
   - hardware_board_default_rf_band_2400
@@ -352,6 +371,7 @@ config_file:
   - device_is_module
   - device_sdid_200
 - path: platform/radio/radio_configuration/Connect/simple_connect_singlephy/device_sdid_84/rf_band_434/radio_settings.radioconf
+  file_id: radio_configuration_settings
   directory: rail
   condition:
   - hardware_board_default_rf_band_434
@@ -360,6 +380,7 @@ config_file:
   - device_is_module
   - device_sdid_200
 - path: platform/radio/radio_configuration/Connect/simple_connect_singlephy/device_sdid_84/rf_band_490/radio_settings.radioconf
+  file_id: radio_configuration_settings
   directory: rail
   condition:
   - hardware_board_default_rf_band_490
@@ -368,6 +389,7 @@ config_file:
   - device_is_module
   - device_sdid_200
 - path: platform/radio/radio_configuration/Connect/simple_connect_singlephy/device_sdid_84/rf_band_868/radio_settings.radioconf
+  file_id: radio_configuration_settings
   directory: rail
   condition:
   - hardware_board_default_rf_band_868
@@ -376,6 +398,7 @@ config_file:
   - device_is_module
   - device_sdid_200
 - path: platform/radio/radio_configuration/Connect/simple_connect_singlephy/device_sdid_84/rf_band_915/radio_settings.radioconf
+  file_id: radio_configuration_settings
   directory: rail
   condition:
   - hardware_board_default_rf_band_915
@@ -384,6 +407,7 @@ config_file:
   - device_is_module
   - device_sdid_200
 - path: platform/radio/radio_configuration/Connect/simple_connect_singlephy/device_sdid_89/rf_band_169/radio_settings.radioconf
+  file_id: radio_configuration_settings
   directory: rail
   condition:
   - hardware_board_default_rf_band_169
@@ -392,6 +416,7 @@ config_file:
   - device_is_module
   - device_sdid_200
 - path: platform/radio/radio_configuration/Connect/simple_connect_singlephy/device_sdid_89/rf_band_2400/radio_settings.radioconf
+  file_id: radio_configuration_settings
   directory: rail
   condition:
   - hardware_board_default_rf_band_2400
@@ -400,6 +425,7 @@ config_file:
   - device_is_module
   - device_sdid_200
 - path: platform/radio/radio_configuration/Connect/simple_connect_singlephy/device_sdid_89/rf_band_434/radio_settings.radioconf
+  file_id: radio_configuration_settings
   directory: rail
   condition:
   - hardware_board_default_rf_band_434
@@ -408,6 +434,7 @@ config_file:
   - device_is_module
   - device_sdid_200
 - path: platform/radio/radio_configuration/Connect/simple_connect_singlephy/device_sdid_89/rf_band_490/radio_settings.radioconf
+  file_id: radio_configuration_settings
   directory: rail
   condition:
   - hardware_board_default_rf_band_490
@@ -416,6 +443,7 @@ config_file:
   - device_is_module
   - device_sdid_200
 - path: platform/radio/radio_configuration/Connect/simple_connect_singlephy/device_sdid_89/rf_band_868/radio_settings.radioconf
+  file_id: radio_configuration_settings
   directory: rail
   condition:
   - hardware_board_default_rf_band_868
@@ -424,6 +452,7 @@ config_file:
   - device_is_module
   - device_sdid_200
 - path: platform/radio/radio_configuration/Connect/simple_connect_singlephy/device_sdid_89/rf_band_915/radio_settings.radioconf
+  file_id: radio_configuration_settings
   directory: rail
   condition:
   - hardware_board_default_rf_band_915
@@ -432,6 +461,7 @@ config_file:
   - device_is_module
   - device_sdid_200
 - path: platform/radio/radio_configuration/Connect/simple_connect_singlephy/device_sdid_95/rf_band_169/radio_settings.radioconf
+  file_id: radio_configuration_settings
   directory: rail
   condition:
   - hardware_board_default_rf_band_169
@@ -440,6 +470,7 @@ config_file:
   - device_is_module
   - device_sdid_200
 - path: platform/radio/radio_configuration/Connect/simple_connect_singlephy/device_sdid_95/rf_band_2400/radio_settings.radioconf
+  file_id: radio_configuration_settings
   directory: rail
   condition:
   - hardware_board_default_rf_band_2400
@@ -448,6 +479,7 @@ config_file:
   - device_is_module
   - device_sdid_200
 - path: platform/radio/radio_configuration/Connect/simple_connect_singlephy/device_sdid_95/rf_band_434/radio_settings.radioconf
+  file_id: radio_configuration_settings
   directory: rail
   condition:
   - hardware_board_default_rf_band_434
@@ -456,6 +488,7 @@ config_file:
   - device_is_module
   - device_sdid_200
 - path: platform/radio/radio_configuration/Connect/simple_connect_singlephy/device_sdid_95/rf_band_490/radio_settings.radioconf
+  file_id: radio_configuration_settings
   directory: rail
   condition:
   - hardware_board_default_rf_band_490
@@ -464,6 +497,7 @@ config_file:
   - device_is_module
   - device_sdid_200
 - path: platform/radio/radio_configuration/Connect/simple_connect_singlephy/device_sdid_95/rf_band_868/radio_settings.radioconf
+  file_id: radio_configuration_settings
   directory: rail
   condition:
   - hardware_board_default_rf_band_868
@@ -472,6 +506,7 @@ config_file:
   - device_is_module
   - device_sdid_200
 - path: platform/radio/radio_configuration/Connect/simple_connect_singlephy/device_sdid_95/rf_band_915/radio_settings.radioconf
+  file_id: radio_configuration_settings
   directory: rail
   condition:
   - hardware_board_default_rf_band_915

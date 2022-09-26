@@ -22,9 +22,6 @@ include:
   # TODO: temporary, clean this up
   - path: "platform/radio/rail_lib/plugin"
   - path: platform/radio/rail_lib/plugin/coexistence/protocol/ieee802154_uc
-  - path: platform/radio/rail_lib/common
-    file_list:
-      - path: "rail_module.h"
 
 source:
   - path: "platform/radio/mac/rail_mux/sl_rail_mux.c"

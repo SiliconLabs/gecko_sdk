@@ -171,11 +171,12 @@ template_contribution:
     value:
       group: price-client
       name: consol-bill
+      id: console-bill-1
       help: consol-bill related commands.
   - name: cli_command
     value:
-      group: consol-bill
-      name: print-bill
+      group: console-bill-1
+      name: print
       handler: emAfPriceClientCliConsolidatedBillTablePrint
       help: Prints the entry of the consolidated bill table.
       argument:
@@ -185,7 +186,7 @@ template_contribution:
         help: The index of the consolidated bill table that should be printed
   - name: cli_command
     value:
-      group: consol-bill
+      group: console-bill-1
       name: printCurrent
       handler: emAfPriceClientCliConsolidatedBillPrintCurrentEntry
       help: Prints the entry of the active consolidated bill in the consolidated bills table.
@@ -194,7 +195,7 @@ template_contribution:
         help: The relevant endpoint
   - name: cli_command
     value:
-      group: consol-bill
+      group: console-bill-1
       name: printEvent
       handler: emAfPriceClientCliConsolidatedBillPrintEntryByEventId
       help: Prints the entry of the consolidated bill table with a matching event ID.
@@ -207,10 +208,11 @@ template_contribution:
     value:
       group: price-client
       name: cpp-event
+      id: cpp-event-1
       help: cpp-event related commands
   - name: cli_command
     value:
-      group: cpp-event
+      group: cpp-event-1
       name: setAuth
       handler: emAfPriceClientCliSetCppEventAuth
       help: Sets the authorization status for future CPP events.
@@ -219,8 +221,8 @@ template_contribution:
         help: The authorization status for future CPP events
   - name: cli_command
     value:
-      group: cpp-event
-      name: print-event
+      group: cpp-event-1
+      name: print
       handler: emAfPriceClientCliCppEventPrint
       help: Prints the entry of the CPP event table.
       argument:

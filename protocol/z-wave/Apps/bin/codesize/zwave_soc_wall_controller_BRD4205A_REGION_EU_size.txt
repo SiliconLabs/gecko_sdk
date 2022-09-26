@@ -5,36 +5,36 @@ The output of the size tool: (e.g. arm-none-ambi-size.exe)
 
 zwave_soc_wall_controller.out  :
 section                            size         addr
-.text                           0x34a74    0x8006000
-_cc_handlers_v3                   0x1d4    0x803aa74
-_zw_protocol_cmd_handlers          0x70    0x803ac48
-_zw_protocol_cmd_handlers_lr       0x30    0x803acb8
-.ARM.exidx                          0x8    0x803ace8
-.copy.table                         0xc    0x803acf0
-.zero.table                         0x0    0x803acfc
+.text                           0x34aa4    0x8006000
+_cc_handlers_v3                   0x1d4    0x803aaa4
+_zw_protocol_cmd_handlers          0x70    0x803ac78
+_zw_protocol_cmd_handlers_lr       0x30    0x803ace8
+.ARM.exidx                          0x8    0x803ad18
+.copy.table                         0xc    0x803ad20
+.zero.table                         0x0    0x803ad2c
 .stack                           0x1000   0x20000000
 .data                             0x68c   0x20001000
 .bss                             0xace8   0x2000168c
 .heap                            0x3c88   0x2000c378
-.internal_storage               0x2c000    0x803acfc
-.zwave_nvm                       0x6000    0x8066cfc
-.nvm                             0x8000    0x806ccfc
+.internal_storage               0x2c000    0x803ad2c
+.zwave_nvm                       0x6000    0x8066d2c
+.nvm                             0x8000    0x806cd2c
 .ARM.attributes                    0x36          0x0
 .comment                           0x49          0x0
 .debug_frame                     0x9908          0x0
-.debug_info                    0x9ae447          0x0
+.debug_info                    0x9ae562          0x0
 .debug_abbrev                   0x154dc          0x0
 .debug_loc                      0x3faa3          0x0
 .debug_aranges                   0x3608          0x0
 .debug_ranges                    0x69e0          0x0
 .debug_line                     0x3ee8c          0x0
-.debug_str                      0x78963          0x0
-Total                          0xb4d21c
+.debug_str                      0x78a11          0x0
+Total                          0xb4d415
 
 The calculated FLASH and SRAM usage summary:
 ============================================
 FLASH used as program memory:  (Including only the sections: .text, .ARM.exidx, .data, _cc_handlers_v3)
-   217992
+   218040
 FLASH used for storage: (Including only the sections: .zwavenvm, .simee, .nvm, .zwave_nvm)
    57344
 SRAM usage:             (Including only the sections: .data, .bss, .heap (limited to 2048 per sl_memory_config.h), .stack_dummy, .reset_info)

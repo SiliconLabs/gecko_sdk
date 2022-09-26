@@ -750,6 +750,13 @@ bool zpal_radio_is_transmit_allowed(uint8_t channel, uint8_t frame_length, uint8
 bool zpal_radio_attenuate(uint8_t adjust_tx_power);
 
 /**
+ * @brief Return the maximum board supported tx power for classic z-wave.
+ *
+ * @return The maximum board supported tx power in deci dBm.
+ */
+zpal_tx_power_t zpal_radio_get_maximum_tx_power(void);
+
+/**
  * @brief Function to radio calibration.
  *
  * @param[in] forced  If true, radio calibration is performed regardless if it is required.

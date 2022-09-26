@@ -8,21 +8,34 @@ provides:
   - name: ot_stack
   - name: ot_stack_mtd
 requires:
-  - name: ot_stack_common
-    unless: [ot_cert_libs]
+  - name: ot_stack_implementation
   - name: ot_headers
   - name: ot_platform_abstraction
   - name: ot_thirdparty
   - name: ot_psa_crypto
+recommends:
+  - id: ot_stack_source
 config_file:
   - path: protocol/openthread/config/sl_openthread_features_config.h
     file_id: openthread_features
     unless: [ot_cert_libs,ot_reference_device]
+  - path: protocol/openthread/config/sl_openthread_features_mtd_cert_config.h
+    file_id: openthread_features
+    condition: [ot_cert_libs]
+  - path: protocol/openthread/config/sl_openthread_reference_device_config.h
+    file_id: openthread_features
+    condition: [ot_reference_device]
   - path: protocol/openthread/config/sl_openthread_generic_config.h
 define:
   - name: SL_OPENTHREAD_STACK_FEATURES_CONFIG_FILE
     value: "\"sl_openthread_features_config.h\""
     unless: [ot_cert_libs,ot_reference_device]
+  - name: SL_OPENTHREAD_STACK_FEATURES_CONFIG_FILE
+    value: "\"sl_openthread_features_mtd_cert_config.h\""
+    condition: [ot_cert_libs]
+  - name: SL_OPENTHREAD_STACK_FEATURES_CONFIG_FILE
+    value: "\"sl_openthread_reference_device_config.h\""
+    condition: [ot_reference_device]
   - name: OPENTHREAD_CONFIG_FILE
     value: "\"sl_openthread_generic_config.h\""
   - name: OPENTHREAD_MTD

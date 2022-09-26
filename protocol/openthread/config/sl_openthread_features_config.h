@@ -2,7 +2,7 @@
 #define _SL_OPENTHREAD_FEATURES_CONFIG_H
 //-------- <<< Use Configuration Wizard in Context Menu >>> -----------------
 //
-// <h> OpenThread Stack Configurations
+// <h> Default OpenThread Stack Configuration
 
 // <h>  Thread Stack Protocol Version
 // <o   OPENTHREAD_CONFIG_THREAD_VERSION>

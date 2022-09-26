@@ -205,6 +205,8 @@ sl_rail_util_coex_options_t sl_rail_util_coex_get_options(void);
 // Initialize coexistence
 void sl_rail_util_coex_init(void);
 
+sl_rail_util_coex_options_t sl_rail_util_coex_get_constant_options(void);
+
 sl_status_t sl_rail_util_coex_set_options(sl_rail_util_coex_options_t options);
 
 sl_status_t sl_rail_util_coex_set_bool(sl_rail_util_coex_options_t option, bool value);

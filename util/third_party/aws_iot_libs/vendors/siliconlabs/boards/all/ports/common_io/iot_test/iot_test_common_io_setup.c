@@ -136,7 +136,7 @@ void SET_TEST_IOT_FLASH_CONFIG(int testSet)
   ltestIotFlashInstance = testSet;
 
   /* set flash test address */
-  ultestIotFlashStartOffset = testSet ? 0 : FLASH_SIZE-2*FLASH_PAGE_SIZE;
+  ultestIotFlashStartOffset = testSet ? 0 : FLASH_BASE+FLASH_SIZE-2*FLASH_PAGE_SIZE;
 }
 #endif
 

@@ -548,3 +548,11 @@ void SL_CPC_ISR_TX_RHANDLER(SL_CPC_DRV_SPI_PERIPHERAL_NO)(void)
     GPIO_PinOutSet(SL_CPC_DRV_SPI_RX_IRQ_PORT, SL_CPC_DRV_SPI_RX_IRQ_PIN);
   }
 }
+
+/***************************************************************************/ /**
+ * Check if the driver is out of RX buffers
+ ******************************************************************************/
+bool sli_cpc_drv_is_out_of_rx_buffers(void)
+{
+  return false;
+}

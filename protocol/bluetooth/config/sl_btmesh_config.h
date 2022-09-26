@@ -107,12 +107,12 @@
 // <o SL_BTMESH_CONFIG_FRIEND_MAX_TOTAL_CACHE> Maximum size of Total Friend Cache
 // <i> Default: 4
 // <i> Define the Maximum size of Total Friend Cache. Only applicable for friend node.
-#define SL_BTMESH_CONFIG_FRIEND_MAX_TOTAL_CACHE       (4)
+#define SL_BTMESH_CONFIG_FRIEND_MAX_TOTAL_CACHE       (16)
 
 // <o SL_BTMESH_CONFIG_FRIEND_MAX_SINGLE_CACHE> Maximum size of Cache for a single Friendship
 // <i> Default: 4
 // <i> Define the Maximum size of Cache for a single Friendship. Only applicable for friend node.
-#define SL_BTMESH_CONFIG_FRIEND_MAX_SINGLE_CACHE       (4)
+#define SL_BTMESH_CONFIG_FRIEND_MAX_SINGLE_CACHE       (16)
 
 // <o SL_BTMESH_CONFIG_APP_TXQ_SIZE> Access Layer TX Queue Size
 // <i> Default: 5

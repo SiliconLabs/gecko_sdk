@@ -23,6 +23,7 @@
 
 #ifndef INDIRECT_QUEUE_H
 #define INDIRECT_QUEUE_H
+#include "upper-mac.h"
 
 void sl_mac_indirect_queue_init(uint16_t timeoutMs);
 
@@ -34,6 +35,10 @@ void sl_mac_set_indirect_transmission_timeout (uint16_t newTimeoutMs);
 // Submit a message to the indirect transmit queue.  This message will be sent
 // to the device when the device polls for the data.
 sl_status_t sl_mac_indirect_submit(PacketHeader header);
+
+// Submit a message to the indirect transmit queue with a priority.  This message will be sent
+// to the device when the device polls for the data.
+sl_status_t sl_mac_indirect_submit_with_priority(PacketHeader header, sl_mac_transmit_priority_t priority);
 
 // Returns true if there is an indirect message in the queue with a matching
 // address.

@@ -14,14 +14,15 @@
   - name: hardware_board
   - name: hardware_board_rb
   - name: hardware_board_from_stk
+  - name: hardware_board_from_fg25-rb4272a
   - name: hardware_board_has_vcom
   - name: hardware_board_has_spiflash
   - name: hardware_board_has_hfxo
   - name: hardware_board_has_lfxo
-  - name: hardware_board_supports_rf_band_434
+  - name: hardware_board_supports_rf_band_470
   - name: hardware_board_supports_1_rf_band
   - name: hardware_board_default_rf_band
-  - name: hardware_board_default_rf_band_434
+  - name: hardware_board_default_rf_band_470
 - recommends:
   - id: brd4002a
   - id: iostream_eusart
@@ -49,11 +50,11 @@
   - name: SL_BOARD_NAME
     value: '"BRD4272A"'
   - name: SL_BOARD_REV
-    value: '"A01"'
+    value: '"A02"'
 - tag:
   - board:pn:BRD4272
   - board:variant:A
-  - board:revision:A01
+  - board:revision:A02
   - board:device:efr32fg25b222f1920im56
   - hardware:has:vcom
   - hardware:has:pti

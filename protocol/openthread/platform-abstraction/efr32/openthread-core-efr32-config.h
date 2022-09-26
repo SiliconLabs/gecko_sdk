@@ -50,17 +50,17 @@
 #include "em_msc.h"
 
 /**
- * @def OPENTHREAD_CONFIG_CLI_MAX_LINE_LENGTH
+ * @def OPENTHREAD_CONFIG_PLATFORM_MAC_KEYS_EXPORTABLE_ENABLE
  *
- * The maximum size of the CLI line in bytes including the null terminator.
+ * Calling crypto functions in interrupt context when another operation is running
+ * causes issues in Series-2 devices.  To safeguard enhanced ACK encryption, it is
+ * better to use RADIOAES and not rely on SE.  For series-2 devices, this means we
+ * make MAC keys exportable and copy the literal keys in radio.c (instead of using
+ * key references)
  *
  */
-#ifndef OPENTHREAD_CONFIG_CLI_MAX_LINE_LENGTH
-#if OPENTHREAD_CONFIG_REFERENCE_DEVICE_ENABLE
-#define OPENTHREAD_CONFIG_CLI_MAX_LINE_LENGTH 640 // Default for Test Harness certification
-#else
-#define OPENTHREAD_CONFIG_CLI_MAX_LINE_LENGTH 384 // Stack default
-#endif
+#if defined(_SILICON_LABS_32B_SERIES_2)
+#define OPENTHREAD_CONFIG_PLATFORM_MAC_KEYS_EXPORTABLE_ENABLE 1
 #endif
 
 /*
@@ -162,36 +162,6 @@
  */
 #ifndef OPENTHREAD_CONFIG_PLATFORM_INFO
 #define OPENTHREAD_CONFIG_PLATFORM_INFO "EFR32"
-#endif
-
-/**
-  * @def OPENTHREAD_CONFIG_SRP_CLIENT_BUFFERS_MAX_SERVICES
-  *
-  * Specifies number of service entries in the SRP client service pool.
-  *
-  * This config is applicable only when `OPENTHREAD_CONFIG_SRP_CLIENT_BUFFERS_ENABLE` is enabled.
-  *
-  */
-#ifndef OPENTHREAD_CONFIG_SRP_CLIENT_BUFFERS_MAX_SERVICES
-#if OPENTHREAD_CONFIG_REFERENCE_DEVICE_ENABLE
-#define OPENTHREAD_CONFIG_SRP_CLIENT_BUFFERS_MAX_SERVICES 10
-#else
-#define OPENTHREAD_CONFIG_SRP_CLIENT_BUFFERS_MAX_SERVICES 2
-#endif
-#endif
-
-/**
- * @def OPENTHREAD_CONFIG_MAC_CSL_AUTO_SYNC_ENABLE
- *
- * This setting configures CSL auto synchronization based on data poll mechanism in Thread 1.2.
- *
- */
-#ifndef OPENTHREAD_CONFIG_MAC_CSL_AUTO_SYNC_ENABLE
-#if OPENTHREAD_CONFIG_REFERENCE_DEVICE_ENABLE
-#define OPENTHREAD_CONFIG_MAC_CSL_AUTO_SYNC_ENABLE 0
-#else
-#define OPENTHREAD_CONFIG_MAC_CSL_AUTO_SYNC_ENABLE 1
-#endif
 #endif
 
 /**

@@ -23,8 +23,17 @@
 #define SL_CPC_DRV_SPI_RX_PORT                      SL_CPC_DRV_SPI_{{ instance | upper }}_RX_PORT
 #define SL_CPC_DRV_SPI_RX_PIN                       SL_CPC_DRV_SPI_{{ instance | upper }}_RX_PIN
 
+#if defined(SL_CPC_DRV_SPI_{{ instance | upper }}_CLK_PORT)
 #define SL_CPC_DRV_SPI_CLK_PORT                     SL_CPC_DRV_SPI_{{ instance | upper }}_CLK_PORT
+#else
+#define SL_CPC_DRV_SPI_CLK_PORT                     SL_CPC_DRV_SPI_{{ instance | upper }}_SCLK_PORT
+#endif
+
+#if defined(SL_CPC_DRV_SPI_{{ instance | upper }}_CLK_PIN)
 #define SL_CPC_DRV_SPI_CLK_PIN                      SL_CPC_DRV_SPI_{{ instance | upper }}_CLK_PIN
+#else
+#define SL_CPC_DRV_SPI_CLK_PIN                      SL_CPC_DRV_SPI_{{ instance | upper }}_SCLK_PIN
+#endif
 
 #define SL_CPC_DRV_SPI_CS_PORT                      SL_CPC_DRV_SPI_{{ instance | upper }}_CS_PORT
 #define SL_CPC_DRV_SPI_CS_PIN                       SL_CPC_DRV_SPI_{{ instance | upper }}_CS_PIN

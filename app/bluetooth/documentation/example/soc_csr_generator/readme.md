@@ -2,7 +2,9 @@
 
 This is a certificate generator application used to generate the device elliptical curve (EC) key pair, the signing request for the device certificate, and other related data. The generated data can be read out by the Central Authority for signing. The signed certificate is then stored on the device and can be used by other applications like Certificate-Based Authentication and Pairing.
 
-## Getting started
+> **Note: This example project is at ALPHA quality level and is not meant to be used in production!**
+
+## Getting Started
 
 To get started with Silicon Labs Bluetooth and Simplicity Studio, see [QSG169: Bluetooth SDK v3.x Quick Start Guide](https://www.silabs.com/documents/public/quick-start-guides/qsg169-bluetooth-sdk-v3x-quick-start-guide.pdf).
 

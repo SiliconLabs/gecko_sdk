@@ -1,5 +1,5 @@
 <?xml version="1.0" ?>
-<api device_id="4" device_name="bt" version="4.1.0">
+<api device_id="4" device_name="bt" version="4.2.0">
     <datatypes>
         <datatype base="uint16" name="errorcode" length="2"/>
         <datatype base="int16" name="int16" length="2"/>
@@ -2382,6 +2382,16 @@
             </params>
             <returns>
                 <param datatype="errorcode" name="result" type="uint16"/>
+            </returns>
+        </command>
+        <command index="4" name="get_parameters" >
+            <params/>
+            <returns>
+                <param datatype="errorcode" name="result" type="uint16"/>
+                <param datatype="uint8" name="priority" type="uint8"/>
+                <param datatype="uint8" name="request" type="uint8"/>
+                <param datatype="uint8" name="pwm_period" type="uint8"/>
+                <param datatype="uint8" name="pwm_dutycycle" type="uint8"/>
             </returns>
         </command>
         <command index="1" name="get_counters" >

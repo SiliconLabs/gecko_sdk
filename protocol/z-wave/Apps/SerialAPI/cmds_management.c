@@ -130,6 +130,26 @@ void func_id_serial_api_get_LR_nodes(uint8_t inputLength,
 
 extern bool bTxStatusReportEnabled;
 
+zpal_tx_power_t
+GetMaxSupportedTxPower(void)
+{
+  const SApplicationHandles *pAppHandles = ZAF_getAppHandle();
+  SZwaveCommandPackage CommandPackage;
+  CommandPackage.eCommandType = EZWAVECOMMANDTYPE_ZW_GET_TX_POWER_MAX_SUPPORTED;
+
+  // Put the Command on queue (and dont wait for it, queue must be empty)
+  if (EQUEUENOTIFYING_STATUS_SUCCESS == QueueNotifyingSendToBack(pAppHandles->pZwCommandQueue, (uint8_t *)&CommandPackage, 0))
+  {
+    // Wait for protocol to handle command
+    SZwaveCommandStatusPackage result;
+    if (GetCommandResponse(&result, EZWAVECOMMANDSTATUS_ZW_GET_TX_POWER_MAX_SUPPORTED))
+    {
+      return result.Content.GetTxPowerMaximumSupported.tx_power_max_supported;
+    }
+  }
+  return ZW_TX_POWER_14DBM;
+}
+
 void func_id_serial_api_setup(uint8_t inputLength,
                               const uint8_t *pInputBuffer,
                               uint8_t *pOutputBuffer,
@@ -296,6 +316,7 @@ void func_id_serial_api_setup(uint8_t inputLength,
   case SERIAL_API_SETUP_CMD_TX_POWERLEVEL_SET_16_BIT:
   {
     zpal_tx_power_t iTxPower, iAdjust;
+    zpal_tx_power_t iTxPowerMaxSupported;
     /**
      *  HOST->ZW: SERIAL_API_SETUP_CMD_TX_POWER_SET | NormalTxPowerLevel (MSB) |NormalTxPowerLevel (LSB) | Measured0dBmPower (MSB)| Measured0dBmPower (LSB)
      *  ZW->HOST: SERIAL_API_SETUP_CMD_TX_POWER_SET | cmdRes
@@ -304,14 +325,17 @@ void func_id_serial_api_setup(uint8_t inputLength,
     {
       iTxPower = (zpal_tx_power_t)GET_16BIT_VALUE(&pInputBuffer[1]);
       iAdjust  = (zpal_tx_power_t)GET_16BIT_VALUE(&pInputBuffer[3]);
+      iTxPowerMaxSupported = GetMaxSupportedTxPower();
 
-      /* Only allow power level between -10dBm and 10dBm (API is in deci dBm) */
-      if ((   iTxPower >= (zpal_radio_get_minimum_lr_tx_power() * 10) )
-          && (iTxPower <=  MAX(APP_MAX_TX_POWER, zpal_radio_get_maximum_lr_tx_power()) )
-          && (iAdjust  >=  -ZW_TX_POWER_20DBM)
-          && (iAdjust  <=  ZW_TX_POWER_20DBM )  /* We might not need these checks as these are made for calibration and
-                                                 * we can't tell in advance how large or small the value needs to be. */
-          )
+      /**
+       * Only allow power level between -10dBm and 14 or 20dBm if 20dBm OPN used (API is in deci dBm) 
+       * Only allow measured0dBmPower level between -10dBm and 10dBm
+       */
+      if ((   iTxPower >= -ZW_TX_POWER_10DBM)
+          && (iTxPower <=  iTxPowerMaxSupported)
+          && (iAdjust  >= -ZW_TX_POWER_10DBM)
+          && (iAdjust  <=  ZW_TX_POWER_10DBM)
+         )
       {
         cmdRes = SaveApplicationTxPowerlevel(iTxPower, iAdjust);
       }

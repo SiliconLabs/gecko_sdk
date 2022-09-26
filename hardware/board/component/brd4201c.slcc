@@ -15,6 +15,7 @@
   - name: hardware_board_rb
   - name: hardware_board_from_stk
   - name: hardware_board_from_slwrb4201c
+  - name: hardware_board_has_rfswitch_zwave
   - name: hardware_board_has_vcom
   - name: hardware_board_has_rfswitch
   - name: hardware_board_has_hfxo

@@ -68,7 +68,7 @@
 #define PACKAGE_NAME "SL-OPENTHREAD"
 
 /* Define to the full name and version of this package. */
-#define PACKAGE_STRING "SL-OPENTHREAD/2.1.1.0_GitHub-2ce3d3bf0"
+#define PACKAGE_STRING "SL-OPENTHREAD/2.1.2.0_GitHub-2ce3d3bf0"
 
 /* Define to the one symbol short name of this package. */
 #define PACKAGE_TARNAME "openthread"
@@ -80,13 +80,13 @@
  * Note: When adding the label below with OpenThread version, please make
  * sure it is a valid GitHub version.  Avoid merge or local commit hashes.
  */
-#define PACKAGE_VERSION "2.1.1.0_GitHub-2ce3d3bf0"
+#define PACKAGE_VERSION "2.1.2.0_GitHub-2ce3d3bf0"
 
 /* Define to 1 if you have the ANSI C header files. */
 #define STDC_HEADERS 1
 
 /* Version number of package */
-#define VERSION "2.1.1.0_GitHub-2ce3d3bf0"
+#define VERSION "2.1.2.0_GitHub-2ce3d3bf0"
 
 /* Define WORDS_BIGENDIAN to 1 if your processor stores words with the most
    significant byte first (like Motorola and SPARC, unlike Intel). */

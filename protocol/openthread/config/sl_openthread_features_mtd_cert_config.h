@@ -2,7 +2,18 @@
 #define _SL_OPENTHREAD_FEATURES_CONFIG_H
 //-------- <<< Use Configuration Wizard in Context Menu >>> -----------------
 //
-// <h> OpenThread Stack Configurations
+// <h> OpenThread Stack Configuration for MTD Certification
+
+// <h> WARNING:
+// </h>
+// <h> Changing configuration values here will have ramifications on inheriting Thread certification using pre-built MTD certification libraries. If you must change any of these values, note that it requires rebuilding the MTD certification libraries.
+// </h>
+// <h>
+// </h>
+// <h> Note: If you have selected the "OpenThread CoAP Certification configuration" component, then please turn on CoAP API options if you require CoAP API CLI.
+// </h>
+// <h>
+// </h>
 
 // <h>  Thread Stack Protocol Version
 // <o   OPENTHREAD_CONFIG_THREAD_VERSION>
@@ -109,7 +120,7 @@
 // </e>
 // <e>  COAP API
 #ifndef OPENTHREAD_CONFIG_COAP_API_ENABLE
-#define OPENTHREAD_CONFIG_COAP_API_ENABLE           1
+#define OPENTHREAD_CONFIG_COAP_API_ENABLE           0
 #endif
 // </e>
 // <e>  COAP Observe (RFC7641) API
@@ -258,6 +269,12 @@
 // <e>  Enable Mac beacon payload parsing support
 #ifndef OPENTHREAD_CONFIG_MAC_BEACON_PAYLOAD_PARSING_ENABLE
 #define OPENTHREAD_CONFIG_MAC_BEACON_PAYLOAD_PARSING_ENABLE      1
+#endif
+// </e>
+// <e>  Stay awake between fragments
+// <i>  Required for Matter SVE use cases
+#ifndef OPENTHREAD_CONFIG_MAC_STAY_AWAKE_BETWEEN_FRAGMENTS
+#define OPENTHREAD_CONFIG_MAC_STAY_AWAKE_BETWEEN_FRAGMENTS 1
 #endif
 // </e>
 // </h>

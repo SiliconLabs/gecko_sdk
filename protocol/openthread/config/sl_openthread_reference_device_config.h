@@ -2,7 +2,7 @@
 #define _SL_OPENTHREAD_FEATURES_CONFIG_H
 //-------- <<< Use Configuration Wizard in Context Menu >>> -----------------
 //
-// <h> OpenThread Stack Configurations
+// <h> OpenThread Stack Configuration for Reference Devices in Thread test harness
 
 // <h>  Thread Stack Protocol Version
 // <o   OPENTHREAD_CONFIG_THREAD_VERSION>
@@ -24,11 +24,11 @@
 #endif
 // <q> CSL Auto Synchronization using data polling
 #ifndef OPENTHREAD_CONFIG_MAC_CSL_AUTO_SYNC_ENABLE
-#define OPENTHREAD_CONFIG_MAC_CSL_AUTO_SYNC_ENABLE  1
+#define OPENTHREAD_CONFIG_MAC_CSL_AUTO_SYNC_ENABLE  0
 #endif
 // <q>  CSL (Coordinated Sampled Listening) Debug
 #ifndef OPENTHREAD_CONFIG_MAC_CSL_DEBUG_ENABLE
-#define OPENTHREAD_CONFIG_MAC_CSL_DEBUG_ENABLE      0
+#define OPENTHREAD_CONFIG_MAC_CSL_DEBUG_ENABLE      1
 #endif
 // <q>  CSL (Coordinated Sampled Listening) Receiver
 #ifndef OPENTHREAD_CONFIG_MAC_CSL_RECEIVER_ENABLE
@@ -61,6 +61,10 @@
 // <q>  Service Registration Protocol (SRP) Client (Thread 1.3)
 #ifndef OPENTHREAD_CONFIG_SRP_CLIENT_ENABLE
 #define OPENTHREAD_CONFIG_SRP_CLIENT_ENABLE         1
+#endif
+// <q>  Number of SRP Client Buffers (Thread 1.3)
+#ifndef OPENTHREAD_CONFIG_SRP_CLIENT_BUFFERS_MAX_SERVICES
+#define OPENTHREAD_CONFIG_SRP_CLIENT_BUFFERS_MAX_SERVICES 10
 #endif
 // <q>  Service Registration Protocol (SRP) Server (Thread 1.3)
 #ifndef OPENTHREAD_CONFIG_SRP_SERVER_ENABLE
@@ -102,6 +106,16 @@
 #define OPENTHREAD_CONFIG_CHILD_SUPERVISION_ENABLE  0
 #endif
 // </e>
+// <e>  Maximum size of the CLI line (in bytes), including null terminator
+#ifndef OPENTHREAD_CONFIG_CLI_MAX_LINE_LENGTH
+#define OPENTHREAD_CONFIG_CLI_MAX_LINE_LENGTH       640
+#endif
+// </e>
+// <e>  CLI UART RX Buffer size in bytes (should be atleast maximum size of the CLI line)
+#ifndef OPENTHREAD_CONFIG_CLI_UART_RX_BUFFER_SIZE
+#define OPENTHREAD_CONFIG_CLI_UART_RX_BUFFER_SIZE   640
+#endif
+// </e>
 // <e>  Commissioner
 #ifndef OPENTHREAD_CONFIG_COMMISSIONER_ENABLE
 #define OPENTHREAD_CONFIG_COMMISSIONER_ENABLE       1
@@ -134,7 +148,7 @@
 // </e>
 // <e>  Diagnostic
 #ifndef OPENTHREAD_CONFIG_DIAG_ENABLE
-#define OPENTHREAD_CONFIG_DIAG_ENABLE               0
+#define OPENTHREAD_CONFIG_DIAG_ENABLE               1
 #endif
 // </e>
 // <e>  ECDSA (Elliptic Curve Digital Signature Algorithm) (Required for Matter support)
@@ -273,11 +287,11 @@
 
 // <q>  DYNAMIC_LOG_LEVEL
 #ifndef OPENTHREAD_CONFIG_LOG_LEVEL_DYNAMIC_ENABLE
-#define OPENTHREAD_CONFIG_LOG_LEVEL_DYNAMIC_ENABLE  0
+#define OPENTHREAD_CONFIG_LOG_LEVEL_DYNAMIC_ENABLE  1
 #endif
 
 // <e>  Enable Logging
-#define OPENTHREAD_FULL_LOGS_ENABLE                 0
+#define OPENTHREAD_FULL_LOGS_ENABLE                 1
 #if     OPENTHREAD_FULL_LOGS_ENABLE
 
 // <h>  Note: Enabling higher log levels, which include logging packet details, can cause delays which may result in join failures.
@@ -290,7 +304,7 @@
 //      <OT_LOG_LEVEL_DEBG       => DEBG
 // <i>  Default: OT_LOG_LEVEL_DEBG
 #ifndef OPENTHREAD_CONFIG_LOG_LEVEL
-#define OPENTHREAD_CONFIG_LOG_LEVEL OT_LOG_LEVEL_DEBG
+#define OPENTHREAD_CONFIG_LOG_LEVEL OT_LOG_LEVEL_NOTE
 #endif
 // <q>  CLI
 #ifndef OPENTHREAD_CONFIG_LOG_CLI

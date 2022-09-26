@@ -41,7 +41,7 @@
 void sli_zigbee_debug_print(uint32_t group_type, const char* format, ...);
 #endif
 
-#ifdef EMBER_TEST
+#if defined(EMBER_TEST) && !defined(ZIGBEE_PRO_COMPLIANCE_ON_HOST)
 #include <stdint.h>
 #include "printf-sim.h"
 #define local_printf printf_sim

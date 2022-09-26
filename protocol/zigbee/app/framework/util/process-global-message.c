@@ -209,6 +209,7 @@ bool emAfProcessGlobalCommand(EmberAfClusterCommand *cmd)
     // ([attr ID:2] [status:1] [data type:0/1] [data:0/N]) * N
     case ZCL_READ_ATTRIBUTES_COMMAND_ID:
     {
+      EmberAfStatus status;
       emberAfAttributesPrintln("%p: clus %2x", "READ_ATTR", clusterId);
       // Set the cmd byte - this is byte 3 index 2, but since we have
       // already incremented past the 3 byte ZCL header (our index is at 3),
@@ -273,13 +274,16 @@ bool emAfProcessGlobalCommand(EmberAfClusterCommand *cmd)
                                                    cmd->mfgCode,
                                                    (EMBER_AF_RESPONSE_BUFFER_LEN
                                                     - appResponseLength))) {
-          emberAfRetrieveAttributeAndCraftResponse(cmd->apsFrame->destinationEndpoint,
-                                                   clusterId,
-                                                   attrId,
-                                                   clientServerMask,
-                                                   cmd->mfgCode,
-                                                   (EMBER_AF_RESPONSE_BUFFER_LEN
-                                                    - appResponseLength));
+          status = emberAfRetrieveAttributeAndCraftResponse(cmd->apsFrame->destinationEndpoint,
+                                                            clusterId,
+                                                            attrId,
+                                                            clientServerMask,
+                                                            cmd->mfgCode,
+                                                            (EMBER_AF_RESPONSE_BUFFER_LEN
+                                                             - appResponseLength));
+          if (status == EMBER_ZCL_STATUS_INSUFFICIENT_SPACE) {
+            break;
+          }
         }
 
         // Go to next attrID

@@ -4,7 +4,7 @@ label: Bluetooth - SoC Certificate Based Authentication and Pairing
 description: >
   Demonstrates Certificate Based Authentication and Pairing over BLE.
 category: Bluetooth Examples
-quality: production
+quality: alpha
 
 filter:
   - name: "Wireless Technology"
