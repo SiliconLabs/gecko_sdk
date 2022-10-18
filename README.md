@@ -48,9 +48,9 @@ GSDK releases are packaged as an archive that may be downloaded from the [Releas
 
 #### Toolchain
 
-This release of GSDK supports the Arm Embedded Toolchain version 10.2 (10-2020-q4-major) and IAR Embedded Workbench v8.50.9. One of these toolchains must be installed.
+This release of GSDK supports the Arm Embedded Toolchain version 10.3 (10.3-2021.10) and IAR Embedded Workbench v9.20.4. One of these toolchains must be installed.
 
-- [GNU Arm Embedded Toolchain](https://developer.arm.com/tools-and-software/open-source-software/developer-tools/gnu-toolchain/gnu-rm/downloads) - Download and install v10.2 for your host operating system
+- [GNU Arm Embedded Toolchain](https://developer.arm.com/tools-and-software/open-source-software/developer-tools/gnu-toolchain/gnu-rm/downloads) - Download and install v10.3 for your host operating system
 - [IAR Embedded Workbench for Arm](https://www.iar.com/downloads) - Only the latest version is available in Downloads; for older versions you must log-in to your "My Pages".
 
 #### Silicon Labs Configurator (SLC) Command-line Interface (CLI)
