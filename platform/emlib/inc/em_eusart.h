@@ -35,6 +35,10 @@
 #include "em_eusart_compat.h"
 #include <stdbool.h>
 
+#ifdef __cplusplus
+extern "C" {
+#endif
+
 /* *INDENT-OFF* */
 // *****************************************************************************
 /// @addtogroup eusart EUSART - Extended USART
@@ -1154,6 +1158,10 @@ __STATIC_INLINE void EUSART_IntSet(EUSART_TypeDef *eusart, uint32_t flags)
 {
   eusart->IF_SET = flags;
 }
+
+#ifdef __cplusplus
+}
+#endif
 
 /** @} (end addtogroup eusart) */
 #endif /* defined(EUART_PRESENT) || defined(EUSART_PRESENT) */
