@@ -1,0 +1,25 @@
+id: "sl_mempool"
+label: "Memory Pool"
+package: "wisun"
+description: "The component provides a memory pool implementation for bare metal and RTOS application too."
+category: "Wi-SUN|Application"
+quality: "production"
+root_path: "app/wisun/component/mempool"
+provides:
+  - name: sl_mempool
+
+source:
+  - path: "sl_mempool.c"
+
+include:
+  - path: "."
+    file_list:
+    - "path": "sl_mempool.h"
+
+ui_hints:
+  visibility: never
+#-------------- Template Contribution ----------------
+template_contribution:
+#---------------- Component Catalog ------------------
+  - name: component_catalog
+    value: mempool

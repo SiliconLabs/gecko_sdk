@@ -1,0 +1,14 @@
+Zigbee EmberZNet SDK 7.2.0.0
+- Zigbee
+  - Secure key storage support for MG2x parts that support Secure Vault-High
+  - MG24+Si4468 Dual-PHY Zigbee Smart Energy support
+  - MG12 Dual-Band 2.4GHz + SubGHz Zigbee Smart Energy support
+  - MGM240S SiP Module Support
+  - Zigbee on Host (ZigbeeD) support for 32 bit and 64 bit x86 architecture - experimental
+- Multiprotocol
+  - Dynamic Multiprotocol Bluetooth and multi-PAN 802.15.4 in RCP mode
+  - Dynamic Multiprotocol Bluetooth and Zigbee NCP - experimental
+  - Manufacturing Library (MfgLib) support for Concurrent Multiprotocol RCP
+  - Zigbee + OpenThread Concurrent Listening on MG24 parts - experimental
+
+

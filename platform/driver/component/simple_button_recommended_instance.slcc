@@ -1,0 +1,12 @@
+id: simple_button_recommended_instance
+label: Simple Button Recommended Instance(s)
+package: platform
+description: Simple Button Recommended Instance(s)
+category: Platform|Driver|Button
+quality: production
+ui_hints:
+  visibility: never
+provides:
+  - name: simple_button_recommended_instance
+requires:
+  - name: simple_button

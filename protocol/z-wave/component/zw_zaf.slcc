@@ -1,0 +1,32 @@
+id: zw_zaf
+label: Z-Wave ZAF Component
+category: Z-Wave
+description: >
+  This component includes the configuration files that are needed for the Z-Wave Application
+  Framework. This component is mandatory for all applications. The Product ID can be defined, with
+  a default value of 0 which is invalid in the context of Silicon Labs Z-Wave applications. The
+  bootloader upgrade can be switched on or off. The icon type and security keys can also be defined.
+package: Z-Wave
+quality: production
+config_file:
+  # For series 1
+  - path: protocol/z-wave/platform/SiliconLabs/PAL/config/zw_zaf/zaf_config.h
+    file_id: zaf_config
+    condition: [device_series_1]
+  # For series 2
+  - path: protocol/z-wave/platform/SiliconLabs/PAL/config/zw_zaf/s2/zaf_config.h
+    file_id: zaf_config
+    condition: [device_series_2]
+include:
+  - path: "protocol/z-wave/ZAF/configuration/inc/"
+    file_list:
+      - path: "zaf_config_api.h"
+      - path: "zaf_config_security.h"
+source:
+  - path: "protocol/z-wave/ZAF/configuration/src/zaf_config_api.c"
+requires:
+  - name: zw_cc
+  - name: zw_role_type
+  - name: zw_apputilities
+provides:
+  - name: zw_zaf

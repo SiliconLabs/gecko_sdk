@@ -1,0 +1,43 @@
+zw_cc_multilevel_sensor:
+  sensors:
+    air_temperature:
+      name: SENSOR_NAME_AIR_TEMPERATURE
+      scales:
+        - SENSOR_SCALE_CELSIUS
+        - SENSOR_SCALE_FAHRENHEIT
+    humidity:
+      name: SENSOR_NAME_HUMIDITY
+      scales:
+        - SENSOR_SCALE_PERCENTAGE
+zw_cc_configuration:
+  configurations:
+    - name: "Minimum temperature limit"
+      info: "Minimum temperature limit celsius"
+      size: CC_CONFIG_PARAMETER_SIZE_32_BIT
+      format: CC_CONFIG_PARAMETER_FORMAT_SIGNED_INTEGER
+      min_value: -100
+      max_value: 50
+      default_value: 10
+      altering_capabilities: 0
+      read_only: 0
+      advanced: 0
+    - name: "Maximum temperature limit"
+      info: "Maximum temperature limit celsius"
+      size: CC_CONFIG_PARAMETER_SIZE_32_BIT
+      format: CC_CONFIG_PARAMETER_FORMAT_SIGNED_INTEGER
+      min_value: 10
+      max_value: 100
+      default_value: 35
+      altering_capabilities: 0
+      read_only: 0
+      advanced: 0
+zw_cc_agi:
+  endpoints:
+    - endpoint: 0
+      groups:
+        - name: Basic Set
+          profile_msb: ASSOCIATION_GROUP_INFO_REPORT_PROFILE_NOTIFICATION
+          profile_lsb: NOTIFICATION_REPORT_HOME_SECURITY_V4
+          commands:
+            - command_class: COMMAND_CLASS_BASIC
+              command: BASIC_SET

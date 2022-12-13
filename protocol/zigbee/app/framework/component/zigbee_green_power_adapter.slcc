@@ -1,0 +1,137 @@
+package: "Zigbee"
+id: "zigbee_green_power_adapter"
+label: "Green Power Adapter"
+category: Zigbee|Green Power
+quality: "production"
+description: "This component provides the green power cluster user with all the in/out function interfaces. The customer should be able to use their framework."
+provides:
+  - name: "zigbee_green_power_adapter"
+
+requires:
+  - name: "zigbee_signature_decode"
+  - name: "zigbee_cluster_service"
+
+config_file:
+  - path: protocol/zigbee/app/framework/plugin/green-power-adapter/config/green-power-adapter-config.h
+source:
+  - path: protocol/zigbee/app/framework/plugin/green-power-adapter/zigbee_zcl_callback_dispatcher.c
+    unless:
+    - zigbee_zcl_framework_core
+  - path: protocol/zigbee/app/framework/plugin/green-power-adapter/green-power-zap-cluster-command-parser.c
+    unless:
+    - zigbee_zcl_framework_core
+  - path: protocol/zigbee/app/framework/plugin/green-power-adapter/green-power-af-wrapper.c
+    unless:
+    - zigbee_zcl_framework_core
+  - path: protocol/zigbee/app/framework/plugin/green-power-adapter/green-power-stack-wrapper.c
+    unless:
+    - zigbee_zcl_framework_core
+  - path: protocol/zigbee/app/framework/plugin/green-power-adapter/green-power-print-wrapper.c
+    unless:
+    - zigbee_zcl_framework_core
+  - path: protocol/zigbee/app/framework/plugin/green-power-adapter/green-power-token-wrapper.c
+    unless:
+    - zigbee_zcl_framework_core
+  - path: protocol/zigbee/app/framework/plugin/green-power-adapter/green-power-event-wrapper.c
+    unless:
+    - zigbee_zcl_framework_core
+  - path: protocol/zigbee/app/framework/util/attribute-storage.c
+  - path: protocol/zigbee/app/framework/util/attribute-table.c
+  - path: protocol/zigbee/app/framework/util/attribute-size.c
+  - path: protocol/zigbee/app/framework/util/message.c
+  - path: protocol/zigbee/app/framework/util/process-cluster-message.c
+  - path: protocol/zigbee/app/framework/util/process-global-message.c
+  - path: protocol/zigbee/app/framework/util/global-callback.c
+  - path: protocol/zigbee/app/framework/security/crypto-state.c
+  - path: protocol/zigbee/app/framework/util/af-common.c
+  - path: protocol/zigbee/app/framework/util/client-api.c
+  - path: protocol/zigbee/app/framework/util/multi-network.c
+  - path: protocol/zigbee/app/framework/util/time-util.c
+  - path: protocol/zigbee/app/framework/util/util.c
+  - path: protocol/zigbee/app/framework/util/af-event.c
+
+include:
+  - path: protocol/zigbee/app/framework/plugin/green-power-adapter
+    file_list:
+      - path: green-power-adapter.h
+      - path: zigbee_zcl_callback_dispatcher.h
+        unless:
+         - zigbee_zcl_framework_core
+      - path: zigbee_af_cluster_functions.h
+        unless:
+         - zigbee_zcl_framework_core
+  - path: protocol/zigbee/app/framework/plugin/green-power-adapter
+    file_list:
+      - path: generated/zap-cluster-command-parser.h
+        unless:
+         - zigbee_zcl_framework_core
+      - path: generated/zap-command-structs.h
+        unless:
+         - zigbee_zcl_framework_core
+      - path: generated/zap-command.h
+        unless:
+         - zigbee_zcl_framework_core
+      - path: generated/zap-config.h
+        unless:
+         - zigbee_zcl_framework_core
+      - path: generated/zap-enabled-incoming-commands.h
+        unless:
+         - zigbee_zcl_framework_core
+      - path: generated/zap-event.h
+        unless:
+         - zigbee_zcl_framework_core
+      - path: generated/zap-id.h
+        unless:
+         - zigbee_zcl_framework_core
+      - path: generated/zap-print.h
+        unless:
+         - zigbee_zcl_framework_core
+      - path: generated/zap-tokens.h
+        unless:
+         - zigbee_zcl_framework_core
+      - path: generated/zap-type.h
+        unless:
+         - zigbee_zcl_framework_core
+  - path: protocol/zigbee/app/framework/plugin/green-power-adapter
+    unless:
+      - zigbee_zcl_framework_core
+  - path: protocol/zigbee/app/framework/plugin/green-power-adapter/generated
+    unless:
+      - zigbee_zcl_framework_core
+  - path: protocol/zigbee/app/framework/include
+    file_list:
+      - path: af.h
+      - path: af-types.h
+      - path: af-storage.h
+      - path: plugin-component-mappings.h
+  - path: protocol/zigbee/app/framework/util
+    file_list:
+      - path: af-event.h
+      - path: af-main.h
+      - path: af-token.h
+      - path: attribute-storage.h
+      - path: attribute-table.h
+      - path: client-api.h
+      - path: common.h
+      - path: config.h
+      - path: global-callback.h
+      - path: global-other-callback.h
+      - path: print.h
+      - path: service-discovery.h
+      - path: time-util.h
+      - path: tokens.h
+      - path: util.h
+      - path: zcl-debug-print.h
+  - path: protocol/zigbee/app/framework/security
+    file_list:
+      - path: crypto-state.h
+  - path: protocol/zigbee/app/framework/service-function
+    file_list:
+      - path: sl_service_function.h
+  - path: protocol/zigbee/app/framework/signature-decode
+    file_list:
+      - path: sl_signature_decode.h
+
+template_contribution:
+  - name: component_catalog
+    value: zigbee_green_power_adapter

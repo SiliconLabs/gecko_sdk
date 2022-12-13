@@ -1,0 +1,18 @@
+id: zw_series
+label: Z-Wave Series
+category: Z-Wave
+description: >
+  This component describes the processor series and provide the relevant defines, such as ZWAVE_SERIES_700.
+package: Z-Wave
+quality: production
+define:
+  - name: ZWAVE_SERIES_700
+    condition: [device_sdid_89]
+  - name: ZWAVE_SERIES_700
+    condition: [device_sdid_95]
+  - name: ZWAVE_SERIES_800
+    condition: [device_sdid_210]
+  - name: ZWAVE_SERIES_800
+    condition: [device_sdid_235]
+provides:
+  - name: zw_series

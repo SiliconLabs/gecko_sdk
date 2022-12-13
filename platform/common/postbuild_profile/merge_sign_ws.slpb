@@ -1,0 +1,44 @@
+parameters: []
+
+constants:
+  - name: workspace_name
+    value: my_workspace
+  - name: application_signed_binary
+    value: "./artifact/application_signed.s37"
+  - name: bootloader_signed_binary
+    value: "./artifact/bootloader_signed.s37"
+  - name: signing_key
+    value: "./autogen/example_signing_key.pem"
+
+steps:
+  # Sign application for secureboot
+  - task: convert
+    input: "{{application_binary}}"
+    output: "{{application_signed_binary}}"
+    keyfile: "{{signing_key}}"
+  
+  # Sign bootloader for secureboot  
+  - task: convert
+    input: "{{bootloader_binary}}"
+    output: "{{bootloader_signed_binary}}"
+    keyfile: "{{signing_key}}"
+
+  # Create production image
+  - task: convert
+    input:
+      - "{{bootloader_signed_binary}}"
+      - "{{application_signed_binary}}"
+    output: artifact/{{workspace_name}}-signed-full.s37
+
+  # Create signed upgrade image (application + bootloader)
+  - task: create_gbl
+    bootloader: "{{bootloader_signed_binary}}"
+    app: "{{application_signed_binary}}"
+    sign: "{{signing_key}}"
+    output: artifact/{{workspace_name}}-signed-full.gbl
+    
+  # Create signed upgrade image (application only)  
+  - task: create_gbl
+    app: "{{application_signed_binary}}"
+    sign: "{{signing_key}}"
+    output: artifact/{{workspace_name}}-app-only.gbl

@@ -1,0 +1,10 @@
+id: ot_coap_cert_libs
+label: OpenThread CoAP Certification Libraries
+package: OpenThread
+category: OpenThread
+quality: production
+description: Includes OpenThread certification libraries with default certification configuration and CoAP support (Stack and PAL)
+provides:
+  - name: ot_coap_cert_libs
+requires:
+  - name: ot_cert_libs

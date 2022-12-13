@@ -1,0 +1,48 @@
+/**
+ * @file
+ * Command Class Zwave Plusinfo Configuration
+ * @remarks This file is auto generated
+ * @copyright 2022 Silicon Laboratories Inc.
+ */ 
+
+#include <cc_zwave_plus_info_config_api.h>
+#include <ZW_product_id_enum.h>
+#include "SizeOf.h"
+#include "zaf_config.h"
+#include "Assert.h"
+#include "DebugPrint.h"
+
+
+{% if endpoints is defined %}
+zw_plus_info_config_icons_t endpoint_configs[] = {
+  {% for _instance in endpoints %}
+  {
+    .installer_icon_type = {{_instance['installer_icon_type']}},
+    .user_icon_type = {{_instance['user_icon_type']}},
+    .endpoint = {{_instance['endpoint']}}
+  },
+  {% endfor %}
+};
+{% endif %}
+
+/* These functions override the weak functions in CC_Zwaveplusinfo.c */
+
+uint8_t cc_zwave_plus_info_config_get_endpoint_count(void)
+{
+  return {{endpoints|length}};
+}
+
+zw_plus_info_config_icons_t * cc_zwave_plus_info_config_get_endpoint_entry(uint8_t endpoint)
+{
+  for (uint8_t i = 0; i < sizeof_array(endpoint_configs); i++)
+  {
+    if (endpoint == endpoint_configs[endpoint - 1].endpoint)
+    {
+      return &endpoint_configs[endpoint - 1];
+    }
+  }
+  DPRINTF("Missing CC Z-Wave Plus Info Configuration for the given endpoint: %d\n", endpoint);
+  ASSERT(0);
+  return NULL;
+}
+

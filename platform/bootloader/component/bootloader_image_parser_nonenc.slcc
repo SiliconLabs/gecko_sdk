@@ -1,0 +1,23 @@
+id: bootloader_image_parser_nonenc
+label: >
+  Image Parser without encryption support.
+package: bootloader
+description: >
+  The Image parser without encryption component provides an image parser that doesn't parse encrypted GBL files.
+category: Platform|Bootloader|Core
+quality: production
+source:
+  - path: platform/bootloader/core/btl_bootload.c
+  - path: platform/bootloader/parser/gbl/btl_gbl_custom_tags.c
+  - path: platform/bootloader/parser/gbl/btl_gbl_parser.c
+  - path: platform/bootloader/parser/gbl/btl_gbl_format.c
+define:
+  - name: BTL_PARSER_NO_SUPPORT_ENCRYPTION
+    value: 1
+provides:
+  - name: bootloader_image_parser_nonenc
+requires:
+  - name: bootloader_crc
+  - name: bootloader_aes_sha_ecdsa
+  - name: bootloader_token_management
+  - name: bootloader_include_parser

@@ -1,0 +1,12 @@
+id: zw_debug
+label: Z-Wave Debug
+category: Z-Wave
+description: >
+  This component provides zw_debug and zw_build_mode. Enabling debug mode will cause higher flash
+  memory usage.
+package: Z-Wave
+quality: production
+provides:
+- name: zw_debug
+- name: zw_build_mode
+

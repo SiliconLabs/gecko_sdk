@@ -1,0 +1,20 @@
+id: coulomb_counter_efp
+package: platform
+label: Coulomb Counter EFP
+description: Coulomb Counter EFP driver.
+category: Platform|Driver
+quality: production
+root_path: platform/driver/coulomb
+source:
+  - path: src/sl_coulomb_counter_hal_efp.c
+requires:
+  - name: efp_driver
+provides:
+  - name: coulomb_counter_driver_implementation
+  - name: coulomb_counter_efp
+config_file:
+  - path: config/efp/sl_coulomb_counter_config.h
+    file_id: sl_coulomb_counter_config
+documentation:
+    docset: gecko-platform
+    document: driver/api/group-coulomb-counter

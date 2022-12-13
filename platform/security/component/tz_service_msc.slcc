@@ -1,0 +1,101 @@
+id: tz_service_msc
+package: platform
+label: MSC Service for TrustZone Secure Key Library
+description: >-
+  This component provides an interface for the TZ Non-Secure application to
+  access a subset of the MSC's functionality.
+category: Platform|Security|TrustZone
+quality: evaluation
+component_root_path: platform/security/sl_component/sl_trustzone/
+
+provides:
+  - name: tz_service_msc
+
+requires:
+  - name: tz_service_config
+  - name: tz_service_common
+    condition: [trustzone_secure]
+  - name: emlib_msc
+    condition: [trustzone_secure]
+  - name: emlib_core
+    condition: [trustzone_secure]
+
+include:
+  - path: inc/common
+    file_list:
+      - path: sli_tz_service_msc.h
+
+source:
+  - path: src/sli_tz_service_msc_ns.c
+    condition: [trustzone_nonsecure]
+  - path: src/sli_tz_service_msc_s.c
+    condition: [trustzone_secure]
+
+template_contribution:
+  - name: tz_service_config
+    value: TZ_SERVICE_MSC_PRESENT
+    condition: [trustzone_nonsecure]
+
+  - name: tz_msc_sid_func_mapping
+    value:
+      sid:  SLI_TZ_SERVICE_MSC_WRITEWORD_SID
+      func: sli_tz_msc_write_word
+    condition: [trustzone_nonsecure]
+
+  - name: tz_msc_sid_func_mapping
+    value:
+      sid: SLI_TZ_SERVICE_MSC_WRITEWORDDMA_SID
+      func: sli_tz_msc_write_word_dma
+    condition: [trustzone_nonsecure]
+
+  - name: simple_func_mapping_no_args
+    value: sli_tz_msc_get_locked
+    condition: [trustzone_nonsecure]
+
+  - name: simple_func_mapping_no_args
+    value: sli_tz_msc_set_locked
+    condition: [trustzone_nonsecure]
+
+  - name: simple_func_mapping_no_args
+    value: sli_tz_msc_set_unlocked
+    condition: [trustzone_nonsecure]
+
+  - name: simple_func_mapping_no_args
+    value: sli_tz_msc_get_readctrl
+    condition: [trustzone_nonsecure]
+
+  - name: simple_func_mapping_with_args
+    value: sli_tz_msc_set_readctrl
+    condition: [trustzone_nonsecure]
+
+  - name: simple_func_mapping_with_args
+    value: sli_tz_msc_set_pagelock
+    condition: [trustzone_nonsecure]
+
+  - name: simple_func_mapping_with_args
+    value: sli_tz_msc_get_pagelock
+    condition: [trustzone_nonsecure]
+
+  - name: simple_func_mapping_no_args
+    value: sli_tz_msc_get_userdata_size
+    condition: [trustzone_nonsecure]
+
+  - name: simple_func_mapping_no_args
+    value: sli_tz_msc_get_misclockword
+    condition: [trustzone_nonsecure]
+
+  - name: simple_func_mapping_with_args
+    value: sli_tz_msc_set_misclockword
+    condition: [trustzone_nonsecure]
+
+  - name: simple_func_mapping_no_args
+    value: sli_tz_msc_init
+    condition: [trustzone_nonsecure]
+
+  - name: simple_func_mapping_no_args
+    value: sli_tz_msc_deinit
+    condition: [trustzone_nonsecure]
+
+  - name: simple_func_mapping_with_args
+    value: sli_tz_msc_erase_page
+    condition: [trustzone_nonsecure]

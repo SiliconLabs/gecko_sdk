@@ -1,0 +1,32 @@
+id: psa_crypto_sha512
+package: platform
+label: SHA-512
+description: >-
+  This component provides support for the SHA-512 hash algorithm in PSA Crypto.
+category: Platform|Security|PSA Crypto|Hashing
+quality: production
+provides:
+  - name: psa_crypto_sha512
+  - name: psa_hash_function
+    allow_multiple: true
+requires:
+  - name: psa_crypto_hash
+  - name: mbedtls_sha512
+    condition: [device_series_0]
+  - name: mbedtls_sha512
+    condition: [device_series_1]
+  - name: mbedtls_sha512
+    condition: [device_security_se]
+  - name: mbedtls_sha512
+    condition: [device_security_rot]
+template_contribution:
+  - name: psa_crypto_config
+    value: PSA_WANT_ALG_SHA_512
+  - name: psa_crypto_config
+    value: "MBEDTLS_PSA_BUILTIN_ALG_SHA_512 1"
+    condition: [mbedtls_sha512]
+  - name: mbedtls_config
+    value: MBEDTLS_SHA512_C
+    condition: [mbedtls_uses_psa_crypto]
+documentation:
+  url: https://armmbed.github.io/mbed-crypto/html/api/ops/hashes.html#c.PSA_ALG_SHA_512

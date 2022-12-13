@@ -1,0 +1,26 @@
+id: zigbee_watchdog_periodic_refresh
+package: Zigbee
+label: Watchdog periodic refresh sample implementation
+category: Zigbee|Utility
+quality: production
+
+description: Sample watchdog handler to reset watchdog timer periodically
+
+provides:
+  - name: zigbee_watchdog_periodic_refresh
+
+config_file:
+  - path: protocol/zigbee/app/framework/common/config/zigbee_watchdog_periodic_refresh_config.h
+
+source:
+  - path: "protocol/zigbee/app/framework/common/sl_zigbee_watchdog_periodic_refresh.c"
+    project:
+      transfer_ownership: true
+
+template_contribution:
+  - name: component_catalog
+    value: zigbee_watchdog_periodic_refresh
+  - name: zigbee_af_callback
+    value:
+      callback_type: event_init
+      function_name: sli_zigbee_watchdog_refresh_handler_init

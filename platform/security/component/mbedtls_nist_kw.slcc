@@ -1,0 +1,28 @@
+id: mbedtls_nist_kw
+package: platform
+quality: production
+label: NIST AES Key Wrap
+description: >-
+  This component enables the implementation of NIST's KW and KWP modes of
+  operation for deterministic authenticated encryption using AES.
+category: Platform|Security|Mbed TLS|Authenticated Encryption
+
+provides:
+  - name: mbedtls_nist_kw
+
+requires:
+  - name: mbedtls_core
+  - name: mbedtls_cipher
+  - name: mbedtls_aes
+
+# This module uses the Cipher abstraction layer, which has not been 'Use PSA' 
+# enabled.
+conflicts:
+  - name: tz_secure_key_library_ns
+
+source:
+  - path: util/third_party/mbedtls/library/nist_kw.c
+
+template_contribution:
+  - name: mbedtls_config
+    value: MBEDTLS_NIST_KW_C

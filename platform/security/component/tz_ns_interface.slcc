@@ -1,0 +1,44 @@
+id: tz_ns_interface
+package: platform
+label: Non-secure interface for TrustZone secure library or other applications.
+description: >-
+  This component includes Non-Secure interface files.
+category: Platform|Security|TrustZone
+ui_hints:
+  visibility: never
+quality: evaluation
+component_root_path: platform/security
+
+provides:
+  - name: tz_ns_interface
+
+include:
+  - path: sl_component/sl_trustzone/inc/nonsecure
+    file_list:
+      - path: sli_tz_ns_interface.h
+
+  # Interface
+  - path: ../../util/third_party/trusted-firmware-m/interface/include
+    file_list:
+      - path: psa/client.h
+      - path: psa/crypto_types.h
+      - path: psa_config.h
+      - path: psa/error.h
+      - path: psa/crypto.h
+      - path: psa/crypto_values.h
+      - path: psa/crypto_client_struct.h
+      - path: psa/crypto_compat.h
+      - path: psa/crypto_extra.h
+      - path: psa/crypto_sizes.h
+      - path: psa/crypto_struct.h
+      - path: tfm_api.h
+      - path: tfm_crypto_defs.h
+      - path: tfm_ns_interface.h
+      - path: psa/storage_common.h
+
+  - path: sl_component/sl_psa_driver/inc
+    file_list:
+      - path: psa/internal_trusted_storage.h
+      - path: psa/sli_internal_trusted_storage.h
+source:
+  - path: sl_component/sl_trustzone/src/sli_tz_ns_interface.c

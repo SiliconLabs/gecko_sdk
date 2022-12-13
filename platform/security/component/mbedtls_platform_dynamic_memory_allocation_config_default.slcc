@@ -1,0 +1,31 @@
+id: mbedtls_platform_dynamic_memory_allocation_config_default
+package: platform
+label: Default dynamic memory allocation macros for mbedtls
+
+description: >-
+  This component provides the default dynamic memory allocation macros for
+  mbedtls on Silicon Labs devices.
+
+category: Platform|Security|Mbed TLS
+
+quality: production
+
+ui_hints:
+  visibility: never
+
+provides:
+  - name: mbedtls_platform_dynamic_memory_allocation_config
+  - name: mbedtls_platform_dynamic_memory_allocation_config_default
+
+requires:
+  - name: silabs_core_sl_malloc
+
+template_contribution:
+  - name: mbedtls_config
+    value: MBEDTLS_PLATFORM_C
+  - name: mbedtls_config
+    value: MBEDTLS_PLATFORM_MEMORY
+  - name: mbedtls_config
+    value: MBEDTLS_PLATFORM_CALLOC_MACRO sl_calloc
+  - name: mbedtls_config
+    value: MBEDTLS_PLATFORM_FREE_MACRO   sl_free

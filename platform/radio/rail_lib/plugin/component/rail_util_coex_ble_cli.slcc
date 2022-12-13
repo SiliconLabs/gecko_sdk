@@ -1,0 +1,94 @@
+id : rail_util_coex_ble_cli
+label: RAIL Utility, Bluetooth Coexistence CLI
+description: Bluetooth Coexistence CLI
+package: platform
+category: Platform|Radio
+quality: production
+requires:
+  - name: cli
+  - name: rail_util_coex
+  - name: silabs_core_response_print
+provides:
+  - name: rail_util_coex_ble_cli
+source:
+  - path: platform/radio/rail_lib/plugin/coexistence/protocol/ble/rail_util_coex_ble_cli.c
+template_contribution:
+  - name: cli_command
+    value:
+      name: coex_ble_set_request
+      handler: cli_coex_ble_set_request
+      help: " Set BLE coexistence request"
+      argument:
+      - type: uint8
+        help: "request(bool)"
+      - type: uint8
+        help: "scanPwmActive(bool)"
+      - type: uint8
+        help: "priority(integer priority level)"
+      - type: uint32opt
+        help: "request delay(us)"
+  - name: cli_command
+    value:
+      name: coex_ble_set_pri_threshold
+      handler: cli_coex_ble_set_pri_threshold
+      help: " Set BLE coexistence priority threshold"
+      argument:
+        - type: uint8
+          help: "priority threshold"
+  - name: cli_command
+    value:
+      name: coex_ble_set_req_threshold
+      handler: cli_coex_ble_set_req_threshold
+      help: " Set BLE coexistence request threshold"
+      argument:
+        - type: uint8
+          help: "request threshold"
+  - name: cli_command
+    value:
+      name: coex_ble_set_pwm_period
+      handler: cli_coex_ble_set_pwm_period
+      help: " Set BLE coexistence PWM period"
+      argument:
+        - type: uint8
+          help: "pwm period(ms)"
+  - name: cli_command
+    value:
+      name: coex_ble_pwm_set_dutycycle
+      handler: cli_coex_ble_set_pwm_dutycycle
+      help: " Set BLE coexistence PWM dutycycle"
+      argument:
+        - type: uint8
+          help: "pwm dutycycle(0-100)"
+  - name: cli_command
+    value:
+      name: coex_ble_get_config
+      handler: cli_coex_ble_get_config
+      help: " Get BLE coexistence config"
+  - name: cli_command
+    value:
+      name: coex_ble_set_options
+      handler: cli_coex_ble_set_options
+      help: " Set BLE coexistence options"
+      argument:
+        - type: uint32
+          help: "mask"
+        - type: uint32
+          help: "options"
+  - name: cli_command
+    value:
+      name: coex_ble_set_request_window
+      handler: cli_coex_ble_set_request_window
+      help: " Set BLE coexistence request window"
+      argument:
+        - type: uint16
+          help: "request window"
+  - name: cli_command
+    value:
+      name: coex_ble_print_counters
+      handler: cli_coex_ble_print_counters
+      help: " Print coexistence specific counters"
+  - name: cli_command
+    value:
+      name: coex_ble_clear_counters
+      handler: cli_coex_ble_clear_counters
+      help: " Reset coexistence specific counters"

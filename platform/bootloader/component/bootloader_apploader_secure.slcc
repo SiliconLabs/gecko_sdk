@@ -1,0 +1,17 @@
+id: bootloader_apploader_secure
+label: "Bluetooth AppLoader OTA DFU (Secure)"
+package: bootloader
+description: >
+  The Bluetooth AppLoader OTA DFU (Secure) component provides the Bluetooth OTA (over-the-air) device firmware upgrade
+  (DFU) protocol for applications. Before doing an update it checks for the current version of the bootloader.
+  If the current version is not the latest, then only the bootloader is upgraded.
+category: Platform|Bootloader|TrustZone Secure|Communication
+quality: evaluation
+define:
+  - name: BOOTLOADER_SUPPORT_COMMUNICATION
+    value: 1
+  - name: BOOTLOADER_APPLOADER
+    value: 1
+provides:
+  - name: bootloader_apploader
+  - name: bootloader_apploader_secure

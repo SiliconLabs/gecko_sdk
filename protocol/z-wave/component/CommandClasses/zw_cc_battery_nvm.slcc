@@ -1,0 +1,19 @@
+id: zw_cc_battery_nvm
+label: Battery Command Class - NVM
+category: Z-Wave|Command Classes
+description: >
+  This component provides the non-volatile memory implementation of the IO Interface for the
+  Battery Command Class.
+  
+  It can be used to ensure that the sate of the Command Class persists across resets by
+  saving the state of the battery into the NVM.
+package: Z-Wave
+quality: production
+source:
+  - path: protocol/z-wave/ZAF/CommandClasses/Battery/cc_battery_nvm.c
+provides:
+  - name: zw_cc_battery_nvm
+requires:
+  - name: zw_core
+  - name: zw_cc_battery
+  - name: nvm3_default

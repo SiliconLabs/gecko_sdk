@@ -1,0 +1,18 @@
+id: bluetooth_feature_phy_support_config
+label: Restrict PHYs supported by the chip
+package: Bluetooth
+description: >
+  Select which PHYs the chip software supports.
+  Selecting fewer PHYs than the radio supports implies a smaller flash footprint.
+  Note that this component won't allow using PHYs which the device radio does not support.
+
+category: Bluetooth|Controller
+quality: production
+root_path: "protocol/bluetooth/bgstack/ll"
+config_file:
+  - path: config/sl_btctrl_phy_support_config.h
+provides:
+  - name: bluetooth_feature_phy_support_config
+template_contribution:
+  - name: component_catalog
+    value: bluetooth_feature_phy_support_config

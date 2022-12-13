@@ -1,0 +1,24 @@
+#include "em_device.h"
+#include "em_cmu.h"
+#include "em_gpio.h"
+#include "em_prs.h"
+
+// Include instance(s) config(s) {# Include instance config #}
+{% for instance in radioprs_instances %} #include "sl_radioprs_{{ instance }}_config.h"
+{% endfor %}
+
+{# Init function #}
+void sl_radioprs_init_instances(void)
+{
+  CMU_ClockEnable(cmuClock_PRS, true);
+  CMU_ClockEnable(cmuClock_GPIO, true);
+
+  // radioprs instance(s) init(s) {# Initialize radioprs instance(s) #}
+  {% for instance in radioprs_instances %}
+  //begin radioprs_init_{{ instance }}();
+  PRS_ConnectSignal(RADIOPRS_{{ instance | upper }}_CHANNEL, prsTypeAsync, RADIOPRS_{{ instance | upper }}_SOURCESEL);
+  PRS_PinOutput(RADIOPRS_{{ instance | upper }}_CHANNEL, prsTypeAsync, RADIOPRS_{{ instance | upper }}_PORT, RADIOPRS_{{ instance | upper }}_PIN);
+  GPIO_PinModeSet(RADIOPRS_{{ instance | upper }}_PORT, RADIOPRS_{{ instance | upper }}_PIN, gpioModePushPullAlternate, 0);
+  //end radioprs_init_{{ instance }}();
+  {% endfor %}
+}

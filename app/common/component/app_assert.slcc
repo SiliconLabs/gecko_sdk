@@ -1,0 +1,24 @@
+id: app_assert
+label: Assert
+package: platform
+description: >
+  The Assert component aborts the program if assertion is false, which helps
+  to find bugs in the programs or abort the program with or without logs.
+  Assert log contains the assertion text.
+category: Application|Utility
+quality: production
+root_path: app/common/util/app_assert
+config_file:
+  - path: config/app_assert_config.h
+include:
+  - path: .
+    file_list:
+      - path: app_assert.h
+      - path: sl_app_assert.h
+provides:
+  - name: app_assert
+requires:
+  - name: component_catalog
+template_contribution:
+  - name: component_catalog
+    value: app_assert

@@ -1,0 +1,21 @@
+id: bootloader_debug_nonsecure
+label: Debug (Non-Secure)
+package: bootloader
+description: >
+  The Bootloader Debug (Non-Secure) component provides build debug instrumentation into the bootloader.
+  This component implements two types of debugging functionalities:
+  1) Defining SL_DEBUG_ASSERT enables assertions on compile-time configurable parameters
+  2) Defining SL_DEBUG_PRINT enables debug prints at strategic points in the code
+category: Platform|Bootloader|TrustZone NonSecure|Utils
+quality: evaluation
+source:
+  - path: platform/bootloader/debug/btl_debug_ns.c
+include:
+  - path: platform/bootloader/debug
+    file_list:
+    - path: btl_debug.h
+provides:
+  - name: bootloader_debug
+  - name: bootloader_debug_nonsecure
+config_file:
+  - path: platform/bootloader/debug/config/s2/btl_debug_cfg.h

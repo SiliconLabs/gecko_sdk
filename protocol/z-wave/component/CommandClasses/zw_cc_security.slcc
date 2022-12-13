@@ -1,0 +1,16 @@
+id: zw_cc_security
+label: Security Command Class
+category: Z-Wave|Command Classes
+description: >
+  Z-Wave security is provided by the Security Command Class, which provides end-to-end application-layer security.
+  The Security Command Class is a framework for allowing nodes to communicate
+  securely in a Z-Wave network.
+  
+  The supported security levels are: NONE, S0, S2_ACCESS, S2_AUTHENTICATED, S2_UNAUTHENTICATED
+package: Z-Wave
+quality: production
+source:
+  - path: protocol/z-wave/ZAF/CommandClasses/Security/CC_Security.c
+provides:
+  - name: zw_cc_security
+

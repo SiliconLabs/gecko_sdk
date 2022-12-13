@@ -1,0 +1,48 @@
+/**
+ * @file
+ * Command Class Multilevel Switch Configuration
+ * @remarks This file is auto generated
+ * @copyright 2022 Silicon Laboratories Inc.
+ */
+#include <cc_multilevel_switch_support_config.h>
+
+#include <cc_multilevel_switch_support_config_api.h>
+
+#include <ZW_typedefs.h>
+#include <SizeOf.h>
+#include <Assert.h>
+
+static cc_multilevel_switch_t s_switches[] = {
+{% for _switch in switches %}
+  {
+    .endpoint = {{_switch['end_point']}},
+  },
+{% endfor %}
+};
+
+STATIC_ASSERT((sizeof_array(s_switches) > 0), STATIC_ASSERT_FAILED_size_mismatch);
+
+cc_multilevel_switch_t *cc_multilevel_switch_support_get_switches()
+{
+  return s_switches;
+}
+
+uint8_t cc_multilevel_switch_support_get_length_switches()
+{
+  return sizeof_array(s_switches);
+}
+
+uint8_t cc_multilevel_switch_support_get_default_duration()
+{
+  return CC_MULTILEVEL_SWITCH_CONFIG_DEFAULT_DURATION_SEC;
+}
+
+ZW_WEAK void cc_multilevel_switch_support_cb(struct cc_multilevel_switch_t * p_switch)
+{
+  UNUSED(p_switch);
+}
+
+{% for _ in switches %}
+ZAF_CC_REGISTER_CONFIG(COMMAND_CLASS_SWITCH_MULTILEVEL, &s_switches[{{loop.index - 1}}], {{loop.index - 1}});
+{% endfor %}
+

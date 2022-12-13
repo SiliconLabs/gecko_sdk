@@ -1,0 +1,20 @@
+id: "bluetooth_feature_external_bonding_database"
+label: "External Bluetooth bonding database"
+package: "Bluetooth"
+description: >
+  Configures the Bluetooth stack to operate with an external bonding database.
+  In this configuration the user application takes care of storing the
+  persistent data required for Bluetooth bondings. The Bluetooth stack sends
+  events to the application to store bonding data and to request the application
+  to pass required bonding data to the Bluetooth stack when relevant.
+category: "Bluetooth|Feature"
+quality: "production"
+root_path: "protocol/bluetooth"
+provides:
+  - name: "bluetooth_feature_external_bonding_database"
+  - name: "bluetooth_feature_bonding_database"
+conflicts:
+  - name: "bluetooth_feature_builtin_bonding_database"
+template_contribution:
+  - name: component_catalog
+    value: bluetooth_feature_external_bonding_database

@@ -1,0 +1,9 @@
+Flex SDK 3.5.0.0
+
+- RAIL Apps and Library:
+  - FG25 Flex-RAIL GA support
+  - New Long Range PHYs support for 490 MHz and 915 MHz
+  - xG12 dynamic mode switching support in RAIL
+  - xG22 extended band support
+- Connect Apps and Stack:
+  - xG24 Connect support

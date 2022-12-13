@@ -1,0 +1,31 @@
+id: bootloader_spi_peripheral_driver
+label: Bootloader SPI Peripheral Driver
+package: bootloader
+description: >
+  The Bootloader SPI Peripheral Driver component provides a DMA-driven SPI Peripheral driver.
+  This driver will support both blocking and non-blocking operations.
+category: Platform|Bootloader|Drivers
+quality: production
+recommends:
+  - id: bootloader_spi_peripheral_usart_driver
+    condition: [device_series_1]
+    unless:
+      - bootloader_spi_peripheral_transport
+  - id: bootloader_spi_peripheral_usart_driver
+    condition: [device_series_2]
+    unless:
+      - bootloader_spi_peripheral_transport
+      - device_sdid_220
+  - id: bootloader_spi_peripheral_eusart_driver
+    condition: [device_sdid_220]
+source:
+  - path: platform/bootloader/driver/btl_driver_spi_peripheral_veneers.c
+    condition: [bootloader_core_secure]
+provides:
+  - name: bootloader_spi_peripheral_driver
+  - name: bootloader_nonsecure_incompatible
+    condition: [bootloader_core_nonsecure]
+requires:
+  - name: bootloader_spi_peripheral_transport
+ui_hints:
+  visibility: never

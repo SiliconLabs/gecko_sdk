@@ -1,0 +1,43 @@
+id: coulomb_counter
+package: platform
+label: Coulomb Counter
+description: >
+  DCDC converters use pulse-frequency modulation (PFM) to drive outputs. The Coulomb
+  counter counts the number of PFM pulses delivered to each output. In order to get the
+  total charge from an output, the charge-per-pulse (CPP) must be determined, then the
+  total charge is computed like so: total_charge = CPP * Num_pulses.
+
+  Currently, only EFP's DCDC are supported by this driver. The Coulomb counter driver
+  provides an abstraction on top of the EFP registers to make the calibration and reading
+  the counters easier.
+
+category: Platform|Driver|Coulomb Counter
+quality: production
+root_path: platform/driver/coulomb
+include:
+  - path: inc
+    file_list:
+      - path: sl_coulomb_counter.h
+source:
+  - path: src/sl_coulomb_counter.c
+  - path: src/sli_coulomb_counter_hal.h
+requires:
+  - name: emlib_emu
+  - name: coulomb_counter_driver_implementation
+  - name: slist
+  - name: status
+provides:
+  - name: coulomb_counter
+template_contribution:
+  - name: event_handler
+    value:
+      event: driver_init
+      include: "sl_coulomb_counter.h"
+      handler: sl_coulomb_counter_init
+    priority: 5000
+  - name: component_catalog
+    value: coulomb_counter
+    priority: 5000
+documentation:
+    docset: gecko-platform
+    document: driver/api/group-coulomb-counter

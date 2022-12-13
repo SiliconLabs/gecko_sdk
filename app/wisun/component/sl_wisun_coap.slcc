@@ -1,0 +1,67 @@
+id: "sl_wisun_coap"
+label: "CoAP"
+package: "wisun"
+description: >
+  The Wi-SUN CoAP component provides an application layer implementation on top of the Wi-SUN stack and its socket API.
+  The CoAP protocol is designed as a specialized Internet Application Protocol for constrained devices in lossy networks (see RFC 7252 for additional information). 
+  Wi-SUN FAN networks fit this definition. The CoAP implementation relies on the UDP transport layer to send and receive packets.
+  A number of helper functions are part of the component to help build CoAP payloads, parse CoAP packets, free CoAP packets, and more.
+  CoAP Resource Handler service handles registered resources. 
+  Resource Discovery request provides an interface to get information about available resources. Resource has more attributes over URI (Uniform Resource Identifier) path, which can be filtered by particular Resource Discovery request.
+  To use the CoAP component in your application, add it to your project and initialize it with sl_wisun_coap_init().
+category: "Wi-SUN|Wi-SUN Services"
+quality: "production"
+root_path: "app/wisun/component/coap"
+
+requires:
+  - name: sl_wisun_ns_list
+  - name: sl_mempool
+provides:
+  - name: sl_wisun_coap
+
+source:
+  - path: "sl_wisun_coap.c"
+  - path: "sli_wisun_coap_mem.c"
+  - path: "sl_wisun_coap_rhnd.c"
+  - path: "sli_wisun_coap_rd.c"
+  - path: "mbed-coap/sn_coap_protocol.c"
+  - path: "mbed-coap/sn_coap_parser.c"
+  - path: "mbed-coap/sn_coap_header_check.c"
+  - path: "mbed-coap/sn_coap_builder.c"
+
+include:
+  - path: "."
+    file_list:
+    - "path": "sl_wisun_coap.h"
+    - "path": "sli_wisun_coap_mem.h"
+    - "path": "sl_wisun_coap_rhnd.h"
+    - "path": "sli_wisun_coap_rd.h"
+  - path: "./mbed-coap"
+    file_list:
+    - "path": "sn_config.h"
+    - "path": "sn_coap_protocol.h"
+    - "path": "sn_coap_header.h"
+  - path: "./mbed-trace"
+    file_list:
+    - "path": "mbed_trace.h"
+  - path: "./mbed-client-randlib"
+    file_list:
+    - "path": "randLIB.h"
+
+  - path: "./mbed-coap/include"
+    file_list:
+    - "path": "sn_coap_protocol_internal.h"
+    - "path": "sn_coap_header_internal.h"
+
+config_file:
+  - path: "config/sl_wisun_coap_config.h"
+
+#-------------- Template Contribution ----------------
+template_contribution:
+#---------------- Component Catalog ------------------
+  - name: component_catalog
+    value: wisun_coap
+
+documentation:
+  docset: wisun
+  document: wisun-stack-api/sl-wisun-coap-api

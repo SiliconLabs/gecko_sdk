@@ -1,0 +1,74 @@
+id: "lower_mac_spinel"
+label: "Implements lower mac using a SPINEL RCP"
+package: platform
+category: Radio|Mac
+quality: "production"
+description: "Implements the lower mac portion of the silabs 802.15.4 unified 
+mac using SPINEL talking to an OpenThread 15.4 RCP. Used for running 15.4
+stacks such as Zigbee on a posix host connected to an RCP."
+provides:
+  - name: "lower_mac_spinel"
+
+requires:
+  - name: "mbedtls_random"
+  - name: "spinel_host_interface_implementation"
+  - name: "lower_mac_spinel_implementation"
+    condition:
+      - zigbee_pro_stack_source
+  - name: "ot_headers"
+
+recommends:
+  - id: "spinel_host_interface_cpc"
+
+include:
+# Required OT includes (separate from ot_headers component above)
+  - path: "util/third_party/openthread/src"
+    file_list:
+      - path: lib/platform/exit_code.h
+      - path: lib/url/url.hpp
+      - path: lib/spinel/spinel_interface.hpp
+      - path: lib/hdlc/hdlc.hpp
+      - path: lib/spinel/radio_spinel_metrics.h
+      - path: lib/spinel/spinel.h
+      - path: lib/spinel/spinel_platform.h
+  - path: "util/third_party/openthread/src/lib/spinel"
+  - path: "util/third_party/openthread/src/posix/platform/include"
+    file_list:
+      - path: openthread/openthread-system.h
+  - path: "util/third_party/openthread/src/posix/platform"
+    file_list:
+      - path: openthread-core-posix-config.h
+      - path: openthread-posix-config.h
+      - path: cpc_interface.hpp
+      - path: platform-posix.h
+
+# used by util/third_party/openthread/src/core/common/random.cpp
+  - path: "util/third_party/mbedtls/include"
+
+# ensure this file gets packaged
+  - path: "platform/radio/mac"
+    file_list:
+    - path: lower-mac-spinel.h
+
+source:
+
+# OT Core files
+  - path: "util/third_party/openthread/src/core/crypto/mbedtls.cpp"
+ 
+# OT Logging files
+  - path: "util/third_party/openthread/src/core/common/log.cpp"
+
+template_contribution:
+  - name: component_catalog
+    value: lower_mac_spinel
+
+config_file:
+  - path: "platform/radio/mac/config/lower-mac-spinel-config.h"
+
+toolchain_settings:
+  - option: preinclude
+    value: lower-mac-spinel-config.h
+
+define:
+  - name: "SPINEL_PLATFORM_HEADER"
+    value: "\"spinel_platform.h\""

@@ -1,0 +1,18 @@
+zw_cc_notification:
+  notifications:
+    - type: NOTIFICATION_TYPE_HOME_SECURITY
+      agi_profile:
+        - profile_MS: ASSOCIATION_GROUP_INFO_REPORT_PROFILE_GENERAL
+        - profile_LS: ASSOCIATION_GROUP_INFO_REPORT_PROFILE_GENERAL_LIFELINE
+      state_events:
+        - state_event: NOTIFICATION_EVENT_HOME_SECURITY_MOTION_DETECTION_UNKNOWN_LOCATION
+zw_cc_agi:
+  endpoints:
+    - endpoint: 0
+      groups:
+        - name: Basic Set
+          profile_msb: ASSOCIATION_GROUP_INFO_REPORT_PROFILE_NOTIFICATION
+          profile_lsb: NOTIFICATION_REPORT_HOME_SECURITY_V4
+          commands:
+            - command_class: COMMAND_CLASS_BASIC
+              command: BASIC_SET

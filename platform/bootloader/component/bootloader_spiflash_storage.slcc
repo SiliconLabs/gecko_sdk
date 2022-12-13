@@ -1,0 +1,36 @@
+id: bootloader_spiflash_storage
+label: SPI Flash Storage
+package: bootloader
+description: >
+  The Bootloader SPI Flash Storage component provides storage using SPI flash. The SPI Flash storage implementation 
+  supports a variety of SPI Flash parts like Spansion S25FL208K (8Mbit), Winbond W25X20BV (2Mbit),
+  W25Q80BV (8Mbit), Macronix MX25L2006E (2Mbit), MX25L4006E (4Mbit), MX25L8006E (8Mbit), MX25R8035F (8Mbit low power),
+  MX25L1606E (16Mbit) and many other. The supported devices can be configured using the component editor.
+category: Platform|Bootloader|Storage
+quality: production
+source:
+  - path: platform/bootloader/storage/spiflash/btl_storage_spiflash.c
+  - path: platform/bootloader/storage/btl_callbacks_stub.c
+include:
+  - path: platform/bootloader/storage/spiflash
+    file_list:
+    - path: btl_storage_spiflash.h
+    - path: btl_storage_spiflash_configs.h
+define:
+  - name: BOOTLOADER_SUPPORT_STORAGE
+    value: 1
+  - name: BOOTLOADER_SUPPORT_EXTERNAL_STORAGE
+    value : 1
+provides:
+  - name: bootloader_spiflash_storage
+  - name: bootloader_nonsecure_incompatible
+    condition: [bootloader_core_nonsecure]
+requires:
+  - name: bootloader_crc
+  - name: bootloader_spi_controller_driver
+  - name: bootloader_storage_slots
+config_file:
+  - path: platform/bootloader/config/btl_spiflash_storage_cfg.h
+    file_id: btl_spiflash_storage_cfg
+validation_helper:
+  - path: platform/bootloader/component/scripts/bootloader_spiflash_validation.lua

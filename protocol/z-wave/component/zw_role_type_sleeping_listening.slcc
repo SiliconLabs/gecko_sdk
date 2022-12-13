@@ -1,0 +1,23 @@
+id: zw_role_type_sleeping_listening
+label: Z-Wave Role Type Listening Sleeping
+category: Z-Wave|Role Types
+description: >
+  The Listening Sleeping End Device Role Type (LSS) is intended for battery-operated devices
+  that can be reached even though they are sleeping thanks to Beaming (FLiRS devices).
+  Examples include Door Locks and Battery-Operated Thermostats.
+  
+  Defines ZAF_CONFIG_DEVICE_OPTION_MASK and ZAF_CONFIG_APP_ROLE_TYPE are automatically set by this
+  component.
+package: Z-Wave
+quality: production
+config_file:
+  - path: protocol/z-wave/platform/SiliconLabs/PAL/config/zaf_config_flirs.h
+    file_id: zaf_config_flirs
+define:
+  - name: ZAF_CONFIG_APP_ROLE_TYPE
+    value: ZWAVEPLUS_INFO_REPORT_ROLE_TYPE_SLAVE_SLEEPING_LISTENING
+requires:
+  - name: zw_end_device
+provides:
+  - name: zw_role_type_sleeping_listening
+  - name: zw_role_type

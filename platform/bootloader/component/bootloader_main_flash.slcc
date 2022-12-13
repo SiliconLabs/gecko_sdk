@@ -1,0 +1,17 @@
+id: bootloader_in_main_flash
+label: Bootloader in Main flash
+package: bootloader
+description: >
+  The Bootloader in Main Flash component is for the xG13 and xG14 device families to place the bootloader in
+  main flash. For these families, xG13 and xG14, the entire main stage bootloader might not fit into the
+  bootloader flash if other components are installed. In such scenarios, with this component the main
+  stage bootloader can be placed in the main flash.
+category: Platform|Bootloader|Core
+quality: production
+define:
+  - name: MAIN_BOOTLOADER_IN_MAIN_FLASH
+    value: 1
+provides:
+  - name: bootloader_in_main_flash
+  - name: bootloader_nonsecure_incompatible
+    condition: [bootloader_core_nonsecure]

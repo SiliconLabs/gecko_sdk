@@ -1,0 +1,34 @@
+id: lwip_app_http
+label: "LWIP http High Layer Application"
+package: platform
+description: >
+    The LWIP http high layer application component can be used for LWIP http high layer application specifically
+    programmed with the lwIP low-level raw API, this httpd supports for a rudimentary server-side-include
+    facility which will replace tags of the form in any file whose extension is .shtml, .shtm or .ssi with
+    strings provided by an include handler whose pointer is provided to the module via function http_set_ssi_handler().
+    Additionally, a simple common gateway interface (CGI) handling mechanism has been added to allow clients to
+    hook functions to particular request URIs.
+category: Third Party|LwIP|apps
+quality: production
+provides:
+  - name: lwip_apps
+    allow_multiple: true
+  - name: lwip_app_http
+requires:
+  - name: lwip_core
+source:
+  - path: util/third_party/lwip/lwip/src/apps/http/altcp_proxyconnect.c
+  - path: util/third_party/lwip/lwip/src/apps/http/fs.c
+  - path: util/third_party/lwip/lwip/src/apps/http/http_client.c
+  - path: util/third_party/lwip/lwip/src/apps/http/httpd.c
+include:
+  - path: util/third_party/lwip/lwip/src/include
+    file_list:
+    - path: lwip/apps/http_client.h
+    - path: lwip/apps/httpd.h
+    - path: lwip/apps/httpd_opts.h
+    - path: lwip/apps/altcp_proxyconnect.h
+  - path: util/third_party/lwip/lwip/src/apps/http
+    file_list:
+    - path: fsdata.h
+    - path: httpd_structs.h

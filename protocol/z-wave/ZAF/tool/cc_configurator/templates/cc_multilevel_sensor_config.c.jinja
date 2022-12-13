@@ -1,0 +1,55 @@
+/**
+ * @file
+ * Command Class Color Switch Configuration
+ * @remarks This file is auto generated
+ * @copyright 2022 Silicon Laboratories Inc.
+ */
+#include <cc_multilevel_sensor_config.h>
+
+#include <cc_multilevel_sensor_config_api.h>
+#include <CC_MultilevelSensor_SensorHandler.h>
+#include <CC_MultilevelSensor_SensorHandlerTypes.h>
+#include <ZW_typedefs.h>
+{% for _instance in sensors %}
+  {% set _sensor = sensors[_instance] %}
+
+static sensor_interface_t cc_multilevel_sensor_{{_instance}};
+
+ZW_WEAK bool
+cc_multilevel_sensor_{{_instance}}_interface_init(void)
+{
+  return true;
+}
+
+ZW_WEAK bool
+cc_multilevel_sensor_{{_instance}}_interface_deinit(void)
+{
+  return true;
+}
+
+ZW_WEAK bool
+cc_multilevel_sensor_{{_instance}}_interface_read_value(sensor_read_result_t* o_result, uint8_t i_scale)
+{
+  UNUSED(o_result);
+  UNUSED(i_scale);
+  return true;
+}
+{% endfor %}
+
+void
+cc_multilevel_sensor_config_register_instances(void)
+{
+{% for _instance in sensors %}
+  {% set _sensor = sensors[_instance] %}
+  cc_multilevel_sensor_init_interface(&cc_multilevel_sensor_{{_instance}}, {{_sensor["name"]}});
+  {% for scale in _sensor["scales"] %}
+  cc_multilevel_sensor_add_supported_scale_interface(&cc_multilevel_sensor_{{_instance}}, {{scale}});
+  {% endfor %}
+  cc_multilevel_sensor_{{_instance}}.init = cc_multilevel_sensor_{{_instance}}_interface_init;
+  cc_multilevel_sensor_{{_instance}}.deinit = cc_multilevel_sensor_{{_instance}}_interface_deinit;
+  cc_multilevel_sensor_{{_instance}}.read_value = cc_multilevel_sensor_{{_instance}}_interface_read_value;
+
+  cc_multilevel_sensor_registration(&cc_multilevel_sensor_{{_instance}});
+{% endfor %}
+}
+

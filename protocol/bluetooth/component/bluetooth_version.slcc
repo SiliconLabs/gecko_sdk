@@ -1,0 +1,16 @@
+id: "bluetooth_version"
+label: "Bluetooth Version"
+package: "Bluetooth"
+description: >
+  Bluetooth Low Energy stack and controller version information
+category: "Bluetooth|Stack"
+quality: "production"
+root_path: "protocol/bluetooth"
+include:
+  - path: "inc/"
+    file_list:
+      - path: "sl_bt_version.h"
+provides:
+  - name: "bluetooth_version"
+ui_hints:
+  visibility: never

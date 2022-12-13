@@ -1,0 +1,21 @@
+id: lwip_app_lwiperf
+label: "LWIP lightweight iPerf High Layer Application"
+package: platform
+description: >
+    The LWIP lightweight iperf high layer application specifically programmed with the lwIP low-level raw API,
+    this is a simple performance measuring client/server to check your bandwidth using iPerf2 on a PC as
+    server/client. It is currently a minimal implementation providing a TCP client/server only.
+category: Third Party|LwIP|apps
+quality: production
+provides:
+  - name: lwip_apps
+    allow_multiple: true
+  - name: lwip_app_iperf
+requires:
+  - name: lwip_core
+source:
+  - path: util/third_party/lwip/lwip/src/apps/lwiperf/lwiperf.c
+include:  
+  - path: util/third_party/lwip/lwip/src/include
+    file_list:
+    - path: lwip/apps/lwiperf.h

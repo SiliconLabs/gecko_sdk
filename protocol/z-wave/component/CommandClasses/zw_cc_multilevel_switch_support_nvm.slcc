@@ -1,0 +1,17 @@
+id: zw_cc_multilevel_switch_support_nvm
+label: Multilevel Switch Command Class - NVM
+category: Z-Wave|Command Classes
+description: >
+  This component provides the NVM implementation of the IO Interface for the Multilevel Switch
+  Command Class. It can be used in case the state of the Command Class should be persisted across
+  resets by storing the state into the NVM.
+package: Z-Wave
+quality: production
+source:
+  - path: protocol/z-wave/ZAF/CommandClasses/MultilevelSwitch/cc_multilevel_switch_support_nvm.c
+provides:
+  - name: zw_cc_multilevel_switch_support_nvm
+requires:
+  - name: zw_core
+  - name: zw_cc_multilevel_switch_support
+  - name: nvm3_default

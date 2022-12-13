@@ -1,0 +1,30 @@
+id: mbedtls_pkcs12
+package: platform
+quality: production
+label: PKCS #12
+description: >-
+  This component enables the implementation of Password-Based Encryption (PBE)
+  and derivation algorithms from RSA Labratories' PKCS #12 specification.
+category: Platform|Security|Mbed TLS|Password-Based Cryptography
+
+provides:
+  - name: mbedtls_pkcs12
+
+requires:
+  - name: mbedtls_core
+  - name: mbedtls_error
+  - name: mbedtls_cipher
+  - name: mbedtls_hash
+  - name: mbedtls_asn1
+
+# This module uses the MD and Cipher abstraction layers that have not been 'Use
+# PSA' enabled.
+conflicts:
+  - name: tz_secure_key_library_ns
+
+source:
+  - path: util/third_party/mbedtls/library/pkcs12.c
+
+template_contribution:
+  - name: mbedtls_config
+    value: MBEDTLS_PKCS12_C

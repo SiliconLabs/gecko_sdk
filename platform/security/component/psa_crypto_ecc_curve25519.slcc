@@ -1,0 +1,40 @@
+id: psa_crypto_ecc_curve25519
+package: platform
+label: Curve25519
+description: >-
+  This component adds support for the curve25519 elliptic curve,
+  a 255-bit Montgomery curve, in PSA Crypto.
+category: Platform|Security|PSA Crypto|Elliptic Curves
+quality: production
+provides:
+  - name: psa_crypto_ecc_curve25519
+  - name: psa_crypto_ecc_curve
+    allow_multiple: true
+requires:
+  - name: psa_crypto_ecc
+  - name: mbedtls_ecc_curve25519
+    condition: [device_series_0]
+  - name: mbedtls_ecc_curve25519
+    condition: [device_series_1]
+  - name: mbedtls_ecc_curve25519
+    condition: [device_security_rot]
+template_contribution:
+  - name: psa_crypto_config
+    value: PSA_WANT_ECC_MONTGOMERY_255
+  - name: psa_crypto_config
+    value: "MBEDTLS_PSA_BUILTIN_ECC_MONTGOMERY_255 1"
+    condition: [mbedtls_ecc_curve25519]
+  - name: psa_crypto_config
+    value: "MBEDTLS_PSA_BUILTIN_KEY_TYPE_ECC_KEY_PAIR 1"
+    condition: [mbedtls_ecc_curve25519]
+  - name: psa_crypto_config
+    value: "MBEDTLS_PSA_BUILTIN_KEY_TYPE_ECC_PUBLIC_KEY 1"
+    condition: [mbedtls_ecc_curve25519]
+  - name: mbedtls_config
+    value: MBEDTLS_ECP_DP_CURVE25519_ENABLED
+    condition: [mbedtls_uses_psa_crypto]
+  - name: mbedtls_mpi_max
+    value: 32
+    condition: [mbedtls_uses_psa_crypto]
+documentation:
+  url: https://armmbed.github.io/mbed-crypto/html/api/keys/types.html#c.PSA_ECC_FAMILY_MONTGOMERY

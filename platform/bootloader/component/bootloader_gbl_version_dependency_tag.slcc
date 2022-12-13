@@ -1,0 +1,23 @@
+id: bootloader_gbl_version_dependency_tag
+label: GBL Version Dependency Tag
+package: bootloader
+description: >
+  The Bootloader GBL Version Dependency Tag component supports version-dependency tags in the GBL parser.
+  To avoid mishaps and foot-shooting, the GBL format needs to be updated with a new tag describing version dependencies 
+  for the image it contains.
+  This tag would encode:
+  Applying GBL requires presence of previous application version > / >= / < / <= application x.y.z
+  Applying GBL requires presence of bootloader version > / >= / < / <= bootloader x.y.z
+  Applying GBL requires presence of SE version > / >= / < / <= SE x.y.z
+
+  Note:
+  This support is available to series 2 devices only.
+category: Platform|Bootloader|Core
+quality: production
+define:
+  - name: BTL_PARSER_SUPPORT_VERSION_DEPENDENCY_TAG
+    value: 1
+requires:
+  - name: device_series_2
+provides:
+  - name: bootloader_gbl_version_dependency_tag

@@ -1,0 +1,39 @@
+id: tz_iovec_check
+package: platform
+description: >-
+  This component provides functionality for checking that iovec objects
+  reside in memory that is read- and writeable from the non-secure domain.
+category: Platform|Security|TrustZone
+ui_hints:
+  visibility: never
+quality: evaluation
+component_root_path: platform/security/sl_component
+
+requires:
+  - name: sl_assert
+
+provides:
+  - name: tz_iovec_check
+
+include:
+  - path: ../../../util/third_party/
+  
+  - path: ../../../util/third_party/trusted-firmware-m/interface/include
+    file_list:
+      - path: psa/client.h
+
+  - path: ../../../util/third_party/mbedtls/include
+    file_list:
+      - path: psa/crypto.h
+
+  - path: sl_trustzone/inc/common
+    file_list:
+      - path: sli_tz_iovec.h
+
+  - path: sl_trustzone/inc/secure
+    file_list:
+      - path: sli_tz_iovec_check.h
+
+source:
+  - path: sl_trustzone/src/sli_tz_iovec_check.c
+    condition: [trustzone_secure]

@@ -1,0 +1,28 @@
+id: zw_cc_door_lock
+label: DoorLock Command Class
+category: Z-Wave|Command Classes
+description: >
+  The Door Lock Command Class is used to operate and configure a door lock device. Using this
+  command class, it is possible to get information about the current state of the door lock, or
+  to set a new door lock mode or timeouts.
+  The Door Lock configuration is available using the Z-Wave Command Class Configurator.
+  Note that this Command Class supports advanced configuration.
+  To use it, please make sure that configuration related to your project is added to cc_config file located in
+  <app_location>/config/cc_config/<app_name>.cc_config.
+  See protocol/z-wave/ZAF/tool/cc_configurator/README.md for more details.
+package: Z-Wave
+quality: production
+source:
+  - path: protocol/z-wave/ZAF/CommandClasses/DoorLock/cc_door_lock_config_api.c
+  - path: protocol/z-wave/ZAF/CommandClasses/DoorLock/cc_door_lock_io_weak.c
+  - path: protocol/z-wave/ZAF/CommandClasses/DoorLock/CC_DoorLock.c
+include:
+  - path: protocol/z-wave/ZAF/CommandClasses/DoorLock/
+    file_list:
+     - path: CC_DoorLock.h
+     - path: cc_door_lock_config_api.h
+     - path: cc_door_lock_io.h
+provides:
+  - name: zw_cc_door_lock
+requires:
+  - name: zw_core

@@ -1,0 +1,43 @@
+
+==========================================================
+The output of the size tool: (e.g. arm-none-ambi-size.exe)
+==========================================================
+
+zwave_soc_power_strip.out  :
+section                            size         addr
+.text                           0x2c5d8          0x0
+_cc_handlers_v3                   0x2ac      0x2c5d8
+_zaf_cc_config                     0x28      0x2c884
+_zw_protocol_cmd_handlers          0x70      0x2c8ac
+_zw_protocol_cmd_handlers_lr       0x30      0x2c91c
+.ARM.exidx                          0x8      0x2c94c
+.copy.table                         0xc      0x2c954
+.zero.table                         0x0      0x2c960
+.stack                           0x1000   0x20000000
+.data                             0x57c   0x20001000
+.bss                             0x9ce8   0x2000157c
+.heap                            0x4d98   0x2000b268
+.internal_storage               0x3a000      0x2c960
+.zwave_nvm                       0x3000      0x66960
+.nvm                             0x9000      0x69960
+.ARM.attributes                    0x2e          0x0
+.comment                           0x49          0x0
+.debug_frame                     0x6700          0x0
+.debug_info                    0xdf2833          0x0
+.debug_abbrev                   0x15434          0x0
+.debug_loc                      0x3b902          0x0
+.debug_aranges                     0x90          0x0
+.debug_ranges                    0x9ea0          0x0
+.debug_line                     0x4db10          0x0
+.debug_str                      0x85c29          0x0
+Total                          0xfa9ca5
+
+The calculated FLASH and SRAM usage summary:
+============================================
+FLASH used as program memory:  (Including only the sections: .text, .ARM.exidx, .data, _cc_handlers_v3)
+   184028
+FLASH used for storage: (Including only the sections: .zwavenvm, .simee, .nvm, .zwave_nvm)
+   49152
+SRAM usage:             (Including only the sections: .data, .bss, .heap (limited to 2048 per sl_memory_config.h), .stack_dummy, .reset_info)
+   47716
+

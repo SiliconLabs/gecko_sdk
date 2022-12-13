@@ -1,0 +1,18 @@
+id: tz_sl_interface_crypto_rng_funcs
+package: platform
+description: >-
+  This component provides a TrustZone secure library interface crypto rng functions
+category: Platform|Security|TrustZone
+quality: evaluation
+ui_hints:
+  visibility: never
+provides:
+  - name: tz_sl_interface_crypto_rng_funcs
+requires:
+  - name: trustzone_nonsecure
+template_contribution:
+  - name: tfm_interface_func
+    value: tfm_crypto_generate_random
+
+  - name: tfm_interface_func
+    value: tfm_crypto_generate_key

@@ -1,0 +1,21 @@
+id: lwip_app_smtp
+label: "LWIP SMTP High Layer Application"
+package: platform
+description: >
+    The LWIP smtp high layer application specifically programmed with the lwIP low-level raw API,
+    this is simple SMTP client for raw API. It is a minimal implementation of SMTP as specified in RFC 5321.
+category: Third Party|LwIP|apps
+quality: production
+provides:
+  - name: lwip_apps
+    allow_multiple: true
+  - name: lwip_app_smtp
+requires:
+  - name: lwip_core
+source:
+  - path: util/third_party/lwip/lwip/src/apps/smtp/smtp.c
+include:  
+  - path: util/third_party/lwip/lwip/src/include
+    file_list:
+    - path: lwip/apps/smtp.h
+    - path: lwip/apps/smtp_opts.h

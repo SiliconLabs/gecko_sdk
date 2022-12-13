@@ -1,0 +1,78 @@
+id: "sl_iperf_cli"
+label: "Wi-SUN iPerf CLI module"
+package: "wisun"
+description: "CLI implementation for Wi-SUN iperf."
+category: "Wi-SUN|Application"
+quality: "production"
+root_path: "app/wisun/component/iperf_cli"
+provides:
+  - name: sl_iperf_cli
+
+source:
+  - path: "sl_iperf_cli.c"
+
+requires:
+  - name: "sl_iperf"
+  - name: "cli"
+
+ui_hints:
+  visibility: never
+#-------------- Template Contribution ----------------
+template_contribution:
+  - name: "cli_group"
+    value:
+      name: "iperf"
+      help: "iPerf2 commands"
+      shortcuts:
+        - name: "i"
+
+  - name: "cli_command"
+    value:
+      group: "iperf"
+      name: "get"
+      handler: "sl_iperf_cli_get"
+      help: "Get configuration parameters"
+      argument:
+        - type: wildcard
+          help: "empty | [string] Key"
+      shortcuts:
+        - name: "g"
+
+  - name: "cli_command"
+    value:
+      group: "iperf"
+      name: "set"
+      handler: "sl_iperf_cli_set"
+      help: "Set configuration parameters"
+      argument:
+        - type: wildcard
+          help: "empty | [string] Key [string] Value"
+      shortcuts:
+        - name: "s"
+
+  - name: "cli_command"
+    value:
+      group: "iperf"
+      name: "server"
+      handler: "sl_iperf_cli_exec_server"
+      help: "Start preconfigured iPerf Server test"
+      argument:
+        - type: wildcard
+          help: "help"
+      shortcuts:
+        - name: "-s"
+  - name: "cli_command"
+    value:
+      group: "iperf"
+      name: "client"
+      handler: "sl_iperf_cli_exec_client"
+      help: "Start preconfigured iPerf Client test"
+      argument:
+        - type: wildcard
+          help: "help"
+      shortcuts:
+        - name: "-c"
+#---------------- Component Catalog ------------------
+  - name: component_catalog
+    value: iperf_wisun_cli
+  

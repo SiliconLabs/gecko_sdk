@@ -1,0 +1,93 @@
+id: device_init_dcdc
+label: "DC-DC Converter"
+package: platform
+description: >
+  Instantiate the component for DC-DC converter initialization based on the 
+  provided component configuration.
+category: Services|Device Initialization|Peripherals
+quality: production
+root_path: platform/service/device_init/
+config_file:
+  - path: config/s2/sdid210/14dbm/sl_device_init_dcdc_config.h
+    file_id: device_init_dcdc_config
+    condition: [device_sdid_210, device_pa_14dbm]
+  - path: config/s2/sdid210/20dbm/sl_device_init_dcdc_config.h
+    file_id: device_init_dcdc_config
+    condition: [device_sdid_210, device_pa_20dbm]
+  - path: config/s2/sl_device_init_dcdc_config.h
+    file_id: device_init_dcdc_config
+    condition: [device_sdid_210]
+    unless: [device_pa_14dbm, device_pa_20dbm]
+  - path: config/s2/sdid215/10dbm/sl_device_init_dcdc_config.h
+    file_id: device_init_dcdc_config
+    condition: [device_sdid_215, device_pa_10dbm]
+  - path: config/s2/sdid215/20dbm/sl_device_init_dcdc_config.h
+    file_id: device_init_dcdc_config
+    condition: [device_sdid_215, device_pa_20dbm]
+  - path: config/s2/sl_device_init_dcdc_config.h
+    file_id: device_init_dcdc_config
+    condition: [device_sdid_215]
+    unless: [device_pa_10dbm, device_pa_20dbm]
+  - path: config/s2/sdid220/14dbm/sl_device_init_dcdc_config.h
+    file_id: device_init_dcdc_config
+    condition: [device_sdid_220, device_pa_14dbm]
+  - path: config/s2/sl_device_init_dcdc_config.h
+    file_id: device_init_dcdc_config
+    condition: [device_sdid_220]
+    unless: [device_pa_14dbm]
+  - path: config/s2/sdid230/buck/sl_device_init_dcdc_config.h
+    file_id: device_init_dcdc_config
+    condition: [device_sdid_230, device_dcdc_buck]
+  - path: config/s2/sdid230/boost/sl_device_init_dcdc_config.h
+    file_id: device_init_dcdc_config
+    condition: [device_sdid_230, device_dcdc_boost]
+    unless: [device_dcdc_buck]
+
+  - path: config/s2/sdid235/14dbm/sl_device_init_dcdc_config.h
+    file_id: device_init_dcdc_config
+    condition: [device_sdid_235, device_pa_14dbm]
+
+  - path: config/s2/sdid235/20dbm/sl_device_init_dcdc_config.h
+    file_id: device_init_dcdc_config
+    condition: [device_sdid_235, device_pa_20dbm]
+
+  - path: config/s2/sl_device_init_dcdc_config.h
+    file_id: device_init_dcdc_config
+    condition: [device_sdid_235]
+    unless: [device_pa_14dbm, device_pa_20dbm]
+
+  - path: config/s2/sl_device_init_dcdc_config.h
+    file_id: device_init_dcdc_config
+    unless:
+      [
+        device_sdid_210,
+        device_sdid_215,
+        device_sdid_220,
+        device_sdid_230,
+        device_sdid_235,
+      ]
+include:
+  - path: inc
+    file_list:
+      - path: sl_device_init_dcdc.h
+source:
+  - path: src/sl_device_init_dcdc_s1.c
+    condition: [device_series_1]
+  - path: src/sl_device_init_dcdc_s2.c
+    condition: [device_series_2]
+provides:
+  - name: device_init_dcdc
+requires:
+  - name: emlib_emu
+  - name: device_has_dcdc
+  - name: status
+template_contribution:
+  - name: event_handler
+    value:
+      event: platform_init
+      include: sl_device_init_dcdc.h
+      handler: sl_device_init_dcdc
+    priority: -9800
+documentation:
+  docset: gecko-platform
+  document: service/api/group-device-init-dcdc

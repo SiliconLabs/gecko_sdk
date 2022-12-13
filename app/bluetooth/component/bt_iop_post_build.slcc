@@ -1,0 +1,21 @@
+id: bt_iop_post_build
+package: Bluetooth
+label: BLE Interoperability Test Post Build
+description: Post build scripts for BLE Interoperability Test.
+category: Bluetooth|Application
+quality: production
+ui_hints:
+  visibility: never
+root_path: app/bluetooth/common/bt_iop_post_build
+requires:
+  - name: bootloader_app_properties
+  - name: bt_post_build
+other_file:
+  - path: iop_create_bl_files.ps1
+    project:
+      transfer_ownership: true
+  - path: iop_create_bl_files.sh
+    project:
+      transfer_ownership: true
+provides:
+  - name: bt_iop_post_build

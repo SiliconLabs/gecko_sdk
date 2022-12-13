@@ -1,0 +1,35 @@
+id: "sl_radioprs"
+label: "Flex - RAIL PRS Support"
+package: Flex
+description: "Helper for setting Radio debug PRS signals."
+category: "Flex|RAIL|Utility"
+quality: "experimental"
+instantiable:
+  prefix: inst
+root_path: app/flex/component/rail/sl_radioprs
+config_file:
+  - path: "config/s1/sl_radioprs_{{instance}}_config.h"
+    condition: [ 'device_series_1' ]
+  - path: "config/s2/sl_radioprs_{{instance}}_config.h"
+    condition: [ 'device_series_2' ]
+template_file:
+  - path: template/s1/sl_radioprs_init_instances.c.jinja
+    condition: [ 'device_series_1' ]
+  - path: template/s2/sl_radioprs_init_instances.c.jinja
+    condition: [ 'device_series_2' ]
+  - path: template/sl_radioprs_init_instances.h.jinja
+template_contribution:
+  - name: radioprs_instances
+    value: "{{instance}}"
+  - name: event_handler
+    value:
+      event: platform_init
+      include: sl_radioprs_init_instances.h
+      handler: sl_radioprs_init_instances
+    priority: -9800
+provides:
+  - name: sl_radioprs
+    allow_multiple: true
+requires:
+  - name: "emlib_prs"
+  - name: "emlib_gpio"

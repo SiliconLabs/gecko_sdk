@@ -1,0 +1,61 @@
+id: zigbee_security_manager
+package: Zigbee
+label: Zigbee Security Manager
+description: |-
+  The Zigbee Security Manager utility handles Zigbee-specific security functions, which include key management and certain security operations.
+category: Zigbee|Utility
+quality: production
+
+provides:
+  - name: zigbee_security_manager
+
+requires:
+  - name: zigbee_key_storage
+
+# We recommend secure key storage on parts that support Secure Vault High
+# On all other parts, store keys the old way
+
+recommends:
+  - id: zigbee_secure_key_storage
+    condition:
+      - device_security_vault
+  - id: zigbee_classic_key_storage
+    condition:
+      - device_security_se
+  - id: zigbee_classic_key_storage
+    condition:
+      - device_security_rot
+  - id: zigbee_classic_key_storage
+    condition:
+      - device_series_1
+  - id: zigbee_classic_key_storage
+    condition:
+      - operating_system
+  - id: zigbee_classic_key_storage
+    condition:
+      - native
+  - id: zigbee_classic_key_storage
+    condition:
+      - zigbee_simulation_or_zigbee_stack_unix
+
+include:
+  - path: protocol/zigbee/stack/include
+    file_list:
+      - path: zigbee-security-manager.h
+      - path: security.h
+      - path: aes-mmo.h
+  - path: protocol/zigbee/stack/security/
+    file_list:
+      - path: zigbee-security-manager-internal.h
+      - path: zigbee-security-manager-vault-support.h    
+
+source:
+  - path: protocol/zigbee/stack/security/zigbee-security-manager.c
+
+template_contribution:
+  - name: component_catalog
+    value: zigbee_security_manager
+
+documentation:
+  docset: zigbee
+  document: zigbee-af-api/zigbee-security-manager

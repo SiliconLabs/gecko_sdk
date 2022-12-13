@@ -1,0 +1,27 @@
+id: cli_delay
+label: "Non-blocking Delay"
+package: platform
+description: CLI Extension to add non-blocking delays between commands when running command sequences from storage.
+category: Services|Command Line Interface
+quality: production
+ui_hints:
+  visibility: never   #hide it to the customer; but can be used by Silab's component
+root_path: platform/service/cli/
+include:
+  - path: inc
+    file_list:
+      - path: sl_cli_delay.h
+source:
+  - path: src/sl_cli_delay.c
+provides:
+  - name: cli_delay
+requires:
+  - name: cli
+  - name: sleeptimer
+  - name: status
+template_contribution:
+  - name: component_catalog
+    value: cli_delay
+documentation:
+    docset: gecko-platform
+    document: service/api/group-cli-delay

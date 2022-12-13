@@ -1,0 +1,19 @@
+id: "bluetooth_feature_high_power"
+label:  "Unrestricted High Power Feature"
+package: "Bluetooth"
+description: >
+  The Bluetooth high power component allows the device to use a transmission power that is higher than the limit,
+  which is 10dBm by default.
+  If the selected power is higher than the limit then the device is going to use it only if there are 15 channels
+  or more available.
+category: "Bluetooth|Feature"
+quality: "production"
+root_path: "protocol/bluetooth"
+requires:
+  - name: "bluetooth_controller"
+provides:
+  - name: "bluetooth_feature_high_power"
+template_contribution:
+  - name: component_catalog
+    value: bluetooth_feature_high_power
+

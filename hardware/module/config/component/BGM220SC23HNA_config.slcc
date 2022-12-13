@@ -1,0 +1,28 @@
+!!omap
+- id: BGM220SC23HNA_config
+- label: BGM220SC23HNA config
+- description: Configuration files for BGM220SC23HNA
+- package: platform
+- category: Platform|Device|BGM22|Config
+- quality: production
+- ui_hints:
+    visibility: never
+- root_path: hardware/module/config
+- requires:
+  - name: bgm220sc23hna
+- provides:
+  - name: BGM220SC23HNA_config
+- config_file:
+  - override:
+      component: device_init_hfxo
+      file_id: device_init_hfxo_config
+    path: BGM220SC23HNA/sl_device_init_hfxo_config.h
+  - override:
+      component: iot_flash
+      file_id: iot_flash_cfg
+      instance: msc
+    path: BGM220SC23HNA/iot_flash_cfg_msc.h
+  - override:
+      component: rail_util_pa
+      file_id: rail_util_pa_config
+    path: BGM220SC23HNA/sl_rail_util_pa_config.h

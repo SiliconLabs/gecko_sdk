@@ -1,0 +1,20 @@
+id: segger_systemview_micriumos
+label: SEGGER SystemView for Micrium OS
+package: platform
+description: SEGGER SystemView sample for Micrium OS
+category: Third Party|Segger|System View
+quality: production
+ui_hints:
+  visibility: never
+config_file:
+  - path: util/third_party/segger/systemview/profiles/micrium_os/config/os_cfg_trace.h
+source:
+  - path: util/third_party/segger/systemview/profiles/micrium_os/SEGGER_SYSVIEW_MicriumOSKernel.c
+include:
+  - path: util/third_party/segger/systemview/profiles/micrium_os
+    file_list:
+      - path: os_trace_events.h
+provides:
+  - name: segger_systemview_micriumos
+validation_helper:
+  - path: util/third_party/segger/systemview/profiles/micrium_os/systemview_micriumos_validation.lua

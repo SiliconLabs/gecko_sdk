@@ -1,0 +1,31 @@
+id: bootloader_apploader_nonsecure
+label: "Bluetooth AppLoader OTA DFU (Non-Secure)"
+package: bootloader
+description: >
+  The Bluetooth AppLoader OTA DFU (Non-Secure) component provides the Bluetooth OTA (over-the-air) device
+  firmware upgrade (DFU) protocol for applications. Before doing an update it checks for the current version 
+  of the bootloader. If the current version is not the latest, then only the bootloader is upgraded.
+category: Platform|Bootloader|TrustZone NonSecure|Communication
+quality: evaluation
+source:
+  - path: platform/bootloader/communication/apploader/btl_apploader_ns.c
+  - path: platform/bootloader/communication/apploader/btl_apploader_common.c
+include:
+  - path: platform/bootloader/communication
+    file_list:
+    - path: apploader/btl_apploader.h
+    - path: apploader/btl_apploader_callback.h
+    - path: btl_communication.h
+requires:
+  - name: status
+  - name: apploader_lib
+  - name: device_series_2
+  - name: device_supports_bluetooth
+define:
+  - name: BOOTLOADER_SUPPORT_COMMUNICATION
+    value: 1
+  - name: BOOTLOADER_APPLOADER
+    value: 1
+provides:
+  - name: bootloader_apploader
+  - name: bootloader_apploader_nonsecure

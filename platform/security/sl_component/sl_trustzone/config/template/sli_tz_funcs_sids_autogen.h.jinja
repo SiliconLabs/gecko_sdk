@@ -1,0 +1,101 @@
+#ifndef SLI_TZ_FUNCS_SIDS_AUTOGEN_H
+#define SLI_TZ_FUNCS_SIDS_AUTOGEN_H
+
+#ifdef __cplusplus
+extern "C" {
+#endif
+
+//------------------------------------------------------------------------------
+// Service function identifiers
+
+/**
+ * \brief Define a progressive numerical value for each SID which can be used
+ *        when dispatching the requests to the service
+ */
+
+ /**
+ * \brief nvm3 service identifiers
+ */
+ enum {
+{% for m in tz_nvm3_sid_func_mapping_default|unique -%}
+  {{ m.sid }},
+{% endfor %}
+{% for m in tz_nvm3_sid_func_mapping|unique -%}
+  {{ m.sid }},
+{% endfor %}
+  SLI_TZ_SERVICE_NVM3_MAX_SID,
+};
+
+ /**
+ * \brief se manager service identifiers
+ */
+
+enum {
+{% for m in tz_se_manager_mapping|unique -%}
+  {{ m.sid }},
+{% endfor %}
+  SLI_TZ_SERVICE_SE_MANAGER_MAX_SID,
+};
+
+ /**
+ * \brief attestation service identifiers
+ */
+
+enum {
+{% for m in tz_attestation_mapping|unique -%}
+  {{ m.sid }},
+{% endfor %}
+  SLI_TZ_SERVICE_ATTESTATION_MAX_SID,
+};
+
+ /**
+ * \brief its service identifiers
+ */
+
+enum {
+{% for m in tz_its_sid_func_mapping|unique -%}
+  {{ m.sid }},
+{% endfor %}
+  SLI_TZ_SERVICE_ITS_MAX_SID,
+};
+
+ /**
+ * \brief msc service identifiers
+ */
+enum {
+{% for m in tz_msc_sid_func_mapping|unique -%}
+  {{ m.sid }},
+{% endfor %}
+  SLI_TZ_SERVICE_MSC_MAX_SID,
+};
+
+ /**
+ * \brief crypto service identifiers
+ */
+
+enum {
+    TFM_CRYPTO_SID_MIN = -1,
+  {% for fp in tfm_interface_func|unique -%}
+    {{ fp|upper }}_SID,
+  {% endfor %}
+    TFM_CRYPTO_SID_MAX,
+};
+
+enum {
+  {% for m in simple_func_mapping_no_args|unique -%}
+    {{ m|upper }}_SID,
+  {% endfor %}
+    SLI_TZ_SIMPLE_NO_ARGS_MAX_SID,
+};
+
+enum {
+  {% for m in simple_func_mapping_with_args|unique -%}
+    {{ m|upper }}_SID,
+  {% endfor %}
+    SLI_TZ_SIMPLE_MAX_SID,
+};
+#ifdef __cplusplus
+}
+#endif
+
+#endif /* SLI_TZ_FUNCS_SIDS_AUTOGEN_H */

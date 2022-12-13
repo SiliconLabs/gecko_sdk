@@ -1,0 +1,221 @@
+id: ot_cert_libs
+label: OpenThread Certification Libraries
+package: OpenThread
+category: OpenThread
+quality: production
+description: Includes OpenThread certification libraries with default certification configuration (Stack and PAL)
+provides:
+  - name: ot_cert_libs
+  - name: ot_stack_implementation
+  - name: ot_stack_configuration
+  - name: ot_platform_abstraction_implementation
+
+library:
+  - path: protocol/openthread/libs/libsl_ot_stack_ftd_efr32mg12_gcc.a
+    condition:
+      - toolchain_gcc
+      - device_sdid_84
+      - ot_stack_ftd
+    unless:
+      - ot_coap_cert_libs
+  - path: protocol/openthread/libs/libsl_ot_stack_mtd_efr32mg12_gcc.a
+    condition:
+      - toolchain_gcc
+      - device_sdid_84
+      - ot_stack_mtd
+    unless:
+      - ot_coap_cert_libs
+  - path: protocol/openthread/libs/libsl_ot_stack_ftd_coap_efr32mg12_gcc.a
+    condition:
+      - toolchain_gcc
+      - device_sdid_84
+      - ot_stack_ftd
+      - ot_coap_cert_libs
+  - path: protocol/openthread/libs/libsl_ot_stack_mtd_coap_efr32mg12_gcc.a
+    condition:
+      - toolchain_gcc
+      - device_sdid_84
+      - ot_stack_mtd
+      - ot_coap_cert_libs
+  - path: protocol/openthread/libs/libsl_platform_ftd_efr32mg12_gcc.a
+    condition:
+      - toolchain_gcc
+      - device_sdid_84
+      - ot_stack_ftd
+    unless:
+      - rail_lib_multiprotocol
+  - path: protocol/openthread/libs/libsl_platform_mtd_efr32mg12_gcc.a
+    condition:
+      - toolchain_gcc
+      - device_sdid_84
+      - ot_stack_mtd
+    unless:
+      - rail_lib_multiprotocol
+  - path: protocol/openthread/libs/libsl_platform_ftd_dmp_efr32mg12_gcc.a
+    condition:
+      - toolchain_gcc
+      - device_sdid_84
+      - ot_stack_ftd
+      - rail_lib_multiprotocol
+  - path: protocol/openthread/libs/libsl_platform_mtd_dmp_efr32mg12_gcc.a
+    condition:
+      - toolchain_gcc
+      - device_sdid_84
+      - ot_stack_mtd
+      - rail_lib_multiprotocol
+  - path: protocol/openthread/libs/libsl_ot_stack_ftd_efr32mg13_gcc.a
+    condition:
+      - toolchain_gcc
+      - device_sdid_89
+      - ot_stack_ftd
+    unless:
+      - ot_coap_cert_libs
+  - path: protocol/openthread/libs/libsl_ot_stack_mtd_efr32mg13_gcc.a
+    condition:
+      - toolchain_gcc
+      - device_sdid_89
+      - ot_stack_mtd
+    unless:
+      - ot_coap_cert_libs
+  - path: protocol/openthread/libs/libsl_ot_stack_ftd_coap_efr32mg13_gcc.a
+    condition:
+      - toolchain_gcc
+      - device_sdid_89
+      - ot_stack_ftd
+      - ot_coap_cert_libs
+  - path: protocol/openthread/libs/libsl_ot_stack_mtd_coap_efr32mg13_gcc.a
+    condition:
+      - toolchain_gcc
+      - device_sdid_89
+      - ot_stack_mtd
+      - ot_coap_cert_libs
+  - path: protocol/openthread/libs/libsl_platform_ftd_efr32mg13_gcc.a
+    condition:
+      - toolchain_gcc
+      - device_sdid_89
+      - ot_stack_ftd
+    unless:
+      - rail_lib_multiprotocol
+  - path: protocol/openthread/libs/libsl_platform_mtd_efr32mg13_gcc.a
+    condition:
+      - toolchain_gcc
+      - device_sdid_89
+      - ot_stack_mtd
+    unless:
+      - rail_lib_multiprotocol
+  - path: protocol/openthread/libs/libsl_platform_ftd_dmp_efr32mg13_gcc.a
+    condition:
+      - toolchain_gcc
+      - device_sdid_89
+      - ot_stack_ftd
+      - rail_lib_multiprotocol
+  - path: protocol/openthread/libs/libsl_platform_mtd_dmp_efr32mg13_gcc.a
+    condition:
+      - toolchain_gcc
+      - device_sdid_89
+      - ot_stack_mtd
+      - rail_lib_multiprotocol
+  - path: protocol/openthread/libs/libsl_ot_stack_ftd_efr32mg21_gcc.a
+    condition:
+      - toolchain_gcc
+      - device_sdid_200
+      - ot_stack_ftd
+    unless:
+      - ot_coap_cert_libs
+  - path: protocol/openthread/libs/libsl_ot_stack_mtd_efr32mg21_gcc.a
+    condition:
+      - toolchain_gcc
+      - device_sdid_200
+      - ot_stack_mtd
+    unless:
+      - ot_coap_cert_libs
+  - path: protocol/openthread/libs/libsl_ot_stack_ftd_coap_efr32mg21_gcc.a
+    condition:
+      - toolchain_gcc
+      - device_sdid_200
+      - ot_stack_ftd
+      - ot_coap_cert_libs
+  - path: protocol/openthread/libs/libsl_ot_stack_mtd_coap_efr32mg21_gcc.a
+    condition:
+      - toolchain_gcc
+      - device_sdid_200
+      - ot_stack_mtd
+      - ot_coap_cert_libs
+  - path: protocol/openthread/libs/libsl_platform_ftd_efr32mg21_gcc.a
+    condition:
+      - toolchain_gcc
+      - device_sdid_200
+      - ot_stack_ftd
+    unless:
+      - rail_lib_multiprotocol
+  - path: protocol/openthread/libs/libsl_platform_mtd_efr32mg21_gcc.a
+    condition:
+      - toolchain_gcc
+      - device_sdid_200
+      - ot_stack_mtd
+    unless:
+      - rail_lib_multiprotocol
+  - path: protocol/openthread/libs/libsl_platform_ftd_dmp_efr32mg21_gcc.a
+    condition:
+      - toolchain_gcc
+      - device_sdid_200
+      - ot_stack_ftd
+      - rail_lib_multiprotocol
+  - path: protocol/openthread/libs/libsl_platform_mtd_dmp_efr32mg21_gcc.a
+    condition:
+      - toolchain_gcc
+      - device_sdid_200
+      - ot_stack_mtd
+      - rail_lib_multiprotocol
+  - path: protocol/openthread/libs/libsl_ot_stack_ftd_efr32mg24_gcc.a
+    condition:
+      - toolchain_gcc
+      - device_sdid_215
+      - ot_stack_ftd
+    unless:
+      - ot_coap_cert_libs
+  - path: protocol/openthread/libs/libsl_ot_stack_mtd_efr32mg24_gcc.a
+    condition:
+      - toolchain_gcc
+      - device_sdid_215
+      - ot_stack_mtd
+    unless:
+      - ot_coap_cert_libs
+  - path: protocol/openthread/libs/libsl_ot_stack_ftd_coap_efr32mg24_gcc.a
+    condition:
+      - toolchain_gcc
+      - device_sdid_215
+      - ot_stack_ftd
+      - ot_coap_cert_libs
+  - path: protocol/openthread/libs/libsl_ot_stack_mtd_coap_efr32mg24_gcc.a
+    condition:
+      - toolchain_gcc
+      - device_sdid_215
+      - ot_stack_mtd
+      - ot_coap_cert_libs
+  - path: protocol/openthread/libs/libsl_platform_ftd_efr32mg24_gcc.a
+    condition:
+      - toolchain_gcc
+      - device_sdid_215
+      - ot_stack_ftd
+    unless:
+      - rail_lib_multiprotocol
+  - path: protocol/openthread/libs/libsl_platform_mtd_efr32mg24_gcc.a
+    condition:
+      - toolchain_gcc
+      - device_sdid_215
+      - ot_stack_mtd
+    unless:
+      - rail_lib_multiprotocol
+  - path: protocol/openthread/libs/libsl_platform_ftd_dmp_efr32mg24_gcc.a
+    condition:
+      - toolchain_gcc
+      - device_sdid_215
+      - ot_stack_ftd
+      - rail_lib_multiprotocol
+  - path: protocol/openthread/libs/libsl_platform_mtd_dmp_efr32mg24_gcc.a
+    condition:
+      - toolchain_gcc
+      - device_sdid_215
+      - ot_stack_mtd
+      - rail_lib_multiprotocol

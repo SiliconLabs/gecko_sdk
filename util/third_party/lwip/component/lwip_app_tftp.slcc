@@ -1,0 +1,22 @@
+id: lwip_app_tftp
+label: "LWIP TFTP High Layer Application"
+package: platform
+description: >
+    The LWIP tftp high layer application specifically programmed with the lwIP low-level raw API.
+    Trivial File Transfer Protocol, is a simple high-level protocol for transferring data servers
+    use to boot diskless workstations, X-terminals, and routers by using User Data Protocol (UDP).
+category: Third Party|LwIP|apps
+quality: production
+provides:
+  - name: lwip_apps
+    allow_multiple: true
+  - name: lwip_app_tftp
+requires:
+  - name: lwip_core
+source:
+  - path: util/third_party/lwip/lwip/src/apps/tftp/tftp_server.c
+include:  
+  - path: util/third_party/lwip/lwip/src/include
+    file_list:
+    - path: lwip/apps/tftp_opts.h
+    - path: lwip/apps/tftp_server.h

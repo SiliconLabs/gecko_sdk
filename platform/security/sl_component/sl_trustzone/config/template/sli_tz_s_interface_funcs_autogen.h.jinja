@@ -1,0 +1,98 @@
+#ifndef SLI_TZ_S_INTERFACE_FUNCS_AUTOGEN_H
+#define SLI_TZ_S_INTERFACE_FUNCS_AUTOGEN_H
+
+#ifdef __cplusplus
+extern "C" {
+#endif
+
+//------------------------------------------------------------------------------
+// Local typedefs
+
+// Function pointer conforming to the PSA Crypto secure function signature.
+typedef int32_t (*iovec_fn) (psa_invec *in_vec,
+                             size_t in_len,
+                             psa_outvec *out_vec,
+                             size_t out_len);
+
+
+//Function pointer conforming to syscfg simple function signature.
+typedef uint32_t (*sli_tz_simple_fn) (uint32_t arg);
+
+//Function pointer conforming to syscfg simple function signature with no args.
+typedef uint32_t (*sli_tz_simple_fn_no_args) (void);
+
+//------------------------------------------------------------------------------
+// Secure service function tables
+
+#if defined(TZ_SERVICE_PSA_CRYPTO_PRESENT)
+static const iovec_fn crypto_function_table[] = {
+{% for fp in tfm_interface_func|unique -%}
+   (iovec_fn){{ fp }},
+{% endfor %}
+};
+#endif // TZ_SERVICE_PSA_CRYPTO_PRESENT
+
+#if defined(TZ_SERVICE_MSC_PRESENT)
+static const iovec_fn msc_function_table[] = {
+{% for msc_m in tz_msc_sid_func_mapping|unique -%}
+   (iovec_fn){{ msc_m.func }},
+{% endfor %}
+};
+#endif // TZ_SERVICE_MSC_PRESENT
+
+#if defined(TZ_SERVICE_PSA_ITS_PRESENT) \
+  || defined(TZ_SERVICE_NVM3_PRESENT)
+static const iovec_fn nvm3_function_table[] = {
+{% for m in tz_nvm3_sid_func_mapping_default|unique -%}
+   (iovec_fn){{ m.func }},
+{% endfor %}
+{% for m in tz_nvm3_sid_func_mapping|unique -%}
+   (iovec_fn){{ m.func }},
+{% endfor %}
+};
+#endif
+
+#if defined(TZ_SERVICE_PSA_ITS_PRESENT)
+static const iovec_fn its_function_table[] = {
+{% for m in tz_its_sid_func_mapping|unique -%}
+   (iovec_fn){{ m.func }},
+{% endfor %}
+};
+#endif // TZ_SERVICE_PSA_ITS_PRESENT
+
+#if defined(TZ_SERVICE_SE_MANAGER_PRESENT)
+static const iovec_fn se_manager_function_table[] = {
+{% for m in tz_se_manager_mapping|unique -%}
+   (iovec_fn){{ m.func }},
+{% endfor %}
+};
+#endif // TZ_SERVICE_SE_MANAGER_PRESENT
+
+#if defined(TZ_SERVICE_ATTESTATION_PRESENT)
+static const iovec_fn attestation_function_table[] = {
+  {% for m in tz_attestation_mapping|unique -%}
+   (iovec_fn){{ m.func }},
+{% endfor %}
+};
+#endif // TZ_SERVICE_ATTESTATION_PRESENT
+
+#if defined(TZ_SERVICE_SYSCFG_PRESENT) \
+  || defined(TZ_SERVICE_MSC_PRESENT)
+static const sli_tz_simple_fn simple_function_table[] = {
+  {% for m in simple_func_mapping_with_args|unique -%}
+   (sli_tz_simple_fn){{ m }},
+{% endfor %}
+};
+
+static const sli_tz_simple_fn_no_args simple_function_table_no_args[] = {
+  {% for m in simple_func_mapping_no_args|unique -%}
+   (sli_tz_simple_fn_no_args){{ m }},
+{% endfor %}
+};
+#endif //TZ_SERVICE_SYSCFG_PRESENT || TZ_SERVICE_MSC_PRESENT
+
+#ifdef __cplusplus
+}
+#endif
+
+#endif // SLI_TZ_S_INTERFACE_FUNCS_AUTOGEN_H

@@ -1,0 +1,25 @@
+id: lwip_app_mqtt
+label: "LWIP MQTT High Layer Application"
+package: platform
+description: >
+    The LWIP mqtt high layer application specifically programmed with the lwIP low-level raw API,
+    MQTT is a MQ Telemetry Transport is a lightweight publish-subscribe machine to machine network protocol.
+    It is designed for connections with remote locations that have devices with resource constraints or
+    limited network bandwidth. It must run over a transport protocol that provides ordered, lossless,
+    bi-directional connections typically, TCP/IP. It is an open OASIS standard and an ISO recommendation (ISO/IEC 20922).
+category: Third Party|LwIP|apps
+quality: production
+provides:
+  - name: lwip_apps
+    allow_multiple: true
+  - name: lwip_app_mqtt
+requires:
+  - name: lwip_core
+source:
+  - path: util/third_party/lwip/lwip/src/apps/mqtt/mqtt.c
+include:  
+  - path: util/third_party/lwip/lwip/src/include
+    file_list:
+    - path: lwip/apps/mqtt.h
+    - path: lwip/apps/mqtt_opts.h
+    - path: lwip/apps/mqtt_priv.h

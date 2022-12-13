@@ -1,0 +1,92 @@
+id: ots_server_core
+label: Object Server Core
+package: Bluetooth
+description: >
+  The Object Transfer Service (OTS) Object Server Core provides an API for
+  managing the Object Server instances.
+
+
+  This component includes only the core functionality. To configure and create
+  instances of OTS Object Server, add one of the Object Server components to
+  the project: Dynamic, Static or Single.
+category: Bluetooth|Middleware|OTS
+quality: experimental
+root_path:  app/bluetooth/common/ots
+source:
+  - path: src/sl_bt_ots_server.c
+  - path: src/sl_bt_ots_common.c
+  - path: src/sl_bt_ots_server_bm.c
+    unless:
+      - "kernel"
+  - path: src/sl_bt_ots_server_freertos.c
+    condition:
+      - "freertos"
+  - path: src/sl_bt_ots_server_micriumos.c
+    condition:
+      - "micriumos_kernel"
+include:
+  - path: inc
+    file_list:
+      - path: sl_bt_ots_server.h
+      - path: sl_bt_ots_datatypes.h
+      - path: sli_bt_ots_datatypes.h
+      - path: sli_bt_ots_server_adaptation.h
+config_file:
+  - path: config/sl_bt_ots_server_config.h
+  - path: config/sl_bt_ots_server_freertos_config.h
+    condition:
+      - "freertos"
+  - path: config/sl_bt_ots_server_micriumos_config.h
+    condition:
+      - "micriumos_kernel"
+provides:
+  - name: ots_server_core
+requires:
+  - name: power_manager
+  - name: simple_timer
+  - name: bluetooth_stack
+  - name: bluetooth_feature_gatt_server
+  - name: bluetooth_feature_connection
+  - name: bluetooth_feature_sm
+  - name: l2cap_transfer
+  - name: slist
+  - name: app_queue
+recommends:
+  - id: ots_server_single
+  - id: simple_timer
+template_file:
+  - path: inst/sl_bt_ots_server_instances.c.jinja
+  - path: inst/sl_bt_ots_server_instances.h.jinja
+template_contribution:
+  - name: bluetooth_on_event
+    value:
+      include: sl_bt_ots_server.h
+      function: sli_bt_ots_server_on_bt_event
+    priority: 0
+  - name: event_handler
+    value:
+      event: internal_app_process_action
+      include: sl_bt_ots_server.h
+      handler: sli_bt_ots_server_step
+  - name: event_handler
+    value:
+      event: internal_app_init
+      include: sl_bt_ots_server.h
+      handler: sli_bt_ots_server_init
+  - name: power_manager_handler
+    value:
+      event: is_ok_to_sleep
+      include: sl_bt_ots_server.h
+      handler: sli_bt_ots_server_is_ok_to_sleep
+    unless:
+      - "kernel"
+  - name: power_manager_handler
+    value:
+      event: sleep_on_isr_exit
+      include: sl_bt_ots_server.h
+      handler: sli_bt_ots_server_sleep_on_isr_exit
+    unless:
+      - "kernel"
+
+ui_hints:
+  visibility: never

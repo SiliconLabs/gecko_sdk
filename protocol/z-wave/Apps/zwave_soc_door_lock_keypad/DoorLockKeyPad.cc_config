@@ -1,0 +1,10 @@
+zw_cc_door_lock:
+  configuration:
+    operation_type: DOOR_OPERATION_CONST
+    # Using cc_config because supported_inside_handles and 
+    # supported_outside_handles are bit masks
+    supported_inside_handles: 0
+    supported_outside_handles: DOOR_HANDLE_1
+    options_flags: 0x00
+    max_auto_relock_time: 0
+    max_hold_and_release_time: 0

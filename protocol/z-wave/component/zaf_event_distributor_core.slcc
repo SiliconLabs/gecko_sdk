@@ -1,0 +1,25 @@
+id: zaf_event_distributor_core
+label: ZAF Event Distributor Core Component
+category: Z-Wave|ZAF|Event Distributor
+description: >
+  Every sample application uses the event distributor component. It contains the core code shared
+  between the Event Distributor types (NCP, SOC).
+
+  Both the NCP and SOC variations must implement their own event distributor table; the only
+  difference in the usage is whether the application allows for polling the event distributor
+  table, or is fully event-driven.
+package: Z-Wave
+quality: production
+config_file:
+  - path: protocol/z-wave/platform/SiliconLabs/PAL/config/zaf_event_distributor_core/zaf_event_distributor_core_config.h
+    file_id: zaf_event_distributor_core
+include:
+  - path: "protocol/z-wave/ZAF/ApplicationUtilities/EventHandling"
+    file_list:
+      - path: "zaf_event_distributor.h"
+source:
+  - path: "protocol/z-wave/ZAF/ApplicationUtilities/EventHandling/zaf_event_distributor.c"
+provides:
+  - name: zaf_event_distributor_core
+requires:
+  - name: zaf_event_distributor_type

@@ -1,0 +1,11 @@
+id: toolchain_gcc_lto
+label: Enable Link time optimization
+package: platform
+description: Enable Link time optimization
+category: Platform|Toolchain
+quality: production
+provides:
+  - name: toolchain_lto
+toolchain_settings:
+  - option: link_time_optimization
+    value: "enabled"

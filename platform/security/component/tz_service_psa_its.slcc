@@ -1,0 +1,89 @@
+id: tz_service_psa_its
+package: platform
+label: PSA ITS Service for TrustZone Secure Key Library
+description: >-
+  This component includes the PSA Internal Trusted Storage support for TrustZone secure library.
+category: Platform|Security|TrustZone
+quality: evaluation
+component_root_path: platform/security/sl_component
+
+provides:
+  - name: tz_service_psa_its
+
+requires:
+  - name: tz_service_config
+  - name: tz_service_nvm3_common
+  - name: tz_service_common
+    condition: [trustzone_secure]
+  - name: psa_its
+    condition: [trustzone_secure]
+
+include:
+  - path: sl_psa_driver/inc
+    condition: [trustzone_secure]
+    file_list:
+      - path: psa/internal_trusted_storage.h
+      - path: psa/sli_internal_trusted_storage.h
+
+  - path: sl_trustzone/inc/common
+    file_list:
+      - path: sli_tz_service_its.h
+
+  - path: ../../../util/third_party/trusted-firmware-m/interface/include
+    condition: [trustzone_secure]
+    file_list:
+      - path: psa/storage_common.h
+
+  - path: ../../../util/third_party/trusted-firmware-m/secure_fw/partitions/internal_trusted_storage
+    condition: [trustzone_secure]
+    file_list:
+      - path: tfm_its_req_mngr.h
+
+source:
+  - path: sl_trustzone/src/sli_tz_service_its_s.c
+    condition: [trustzone_secure]
+  - path: ../../../util/third_party/trusted-firmware-m/interface/src/tfm_its_func_api.c
+    condition: [trustzone_nonsecure]
+
+template_contribution:
+  - name: tz_service_config
+    value: TZ_SERVICE_PSA_ITS_PRESENT
+    condition: [trustzone_nonsecure]
+
+  - name: event_handler
+    value:
+      event: platform_init
+      include: nvm3_default.h
+      handler: nvm3_initDefault
+    condition: [trustzone_nonsecure]
+    unless: [nvm3_default]
+
+  - name: tz_its_sid_func_mapping
+    value:
+      sid:  SLI_TZ_SERVICE_ITS_SET_SID
+      func: tfm_its_set_req
+    condition: [trustzone_nonsecure]
+
+  - name: tz_its_sid_func_mapping
+    value:
+      sid: SLI_TZ_SERVICE_ITS_GET_SID
+      func: tfm_its_get_req
+    condition: [trustzone_nonsecure]
+
+  - name: tz_its_sid_func_mapping
+    value:
+      sid: SLI_TZ_SERVICE_ITS_GETINFO_SID
+      func: tfm_its_get_info_req
+    condition: [tz_service_psa_its]
+
+  - name: tz_its_sid_func_mapping
+    value:
+      sid: SLI_TZ_SERVICE_ITS_REMOVE_SID
+      func: tfm_its_remove_req
+    condition: [trustzone_nonsecure]
+
+  - name: tz_its_sid_func_mapping
+    value:
+      sid: SLI_TZ_SERVICE_ITS_ENCRYPTED_SID
+      func: sli_psa_its_encrypted_req
+    condition: [trustzone_nonsecure]

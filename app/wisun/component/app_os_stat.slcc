@@ -1,0 +1,39 @@
+id: "app_os_stat"
+label: "Application memory statistic"
+package: "wisun"
+description: "The service collect heap and stack usage about active threads."
+category: "Wi-SUN|Application"
+quality: "production"
+root_path: "app/wisun/component/app_os_stat"
+provides:
+  - name: app_os_stat
+
+requires:
+  - name: "segger_rtt"
+  - name: "segger_rtt_printf"
+  - name: "cmsis_rtos2"
+  - name: "sl_mempool"
+
+source:
+  - path: "app_os_stat.c"
+
+include:
+  - path: "."
+    file_list:
+    - "path": "app_os_stat.h"
+config_file:
+  - path: "config/app_os_stat_config.h"
+
+ui_hints:
+  visibility: never
+#-------------- Template Contribution ----------------
+template_contribution:
+  - name: "event_handler"
+    value:
+      event: "internal_app_init"
+      include: "app_os_stat.h"
+      handler: "app_os_stat_init"
+#---------------- Component Catalog ------------------
+  - name: component_catalog
+    value: app_os_stat
+  

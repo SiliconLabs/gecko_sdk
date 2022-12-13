@@ -1,0 +1,16 @@
+id: "zigbee_arm64"
+label: "Zigbee ARM64"
+package: "Zigbee"
+category: "Zigbee"
+quality: "production"
+description: "This plugin contains defines to build Zigbee apps against ARM64."
+
+provides:
+  - name: "zigbee_arm64"
+
+requires:
+  - name: "linux_arch_64"
+
+documentation:
+  docset: zigbee
+  document: zigbee-af-api/arm64

@@ -1,0 +1,11 @@
+Gecko Platform 4.2.0.0
+- Support for EFR32xG25 devices
+- Support for MGM240Dx modules
+- Support for BGM24x modules
+- Improved CPC UART drivers reliability
+- Many CPC improvements
+- Android support for CPCd
+- Security:
+  - Updates the Mbed TLS library to version 3.2.1, with support for CBAP
+  - Updated ITS driver (version 3) for optimised key look up time
+  - Updated software support for TrustZone, Evaluation quality

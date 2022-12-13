@@ -1,0 +1,31 @@
+id: mbedtls_pkcs5
+package: platform
+quality: production
+label: PKCS #5
+description: >-
+  This component enables the implementation of PBES2- and PBKDF2 algorithms from
+  RSA Labratories' PKCS #5 specification.
+category: Platform|Security|Mbed TLS|Password-Based Cryptography
+
+provides:
+  - name: mbedtls_pkcs5
+
+requires:
+  - name: mbedtls_core
+  - name: mbedtls_error
+  - name: mbedtls_cipher
+  - name: mbedtls_hmac
+  - name: mbedtls_asn1
+  - name: mbedtls_oid
+
+# This module uses the MD and Cipher abstraction layers that have not been 'Use
+# PSA' enabled.
+conflicts:
+  - name: tz_secure_key_library_ns
+
+source:
+  - path: util/third_party/mbedtls/library/pkcs5.c
+
+template_contribution:
+  - name: mbedtls_config
+    value: MBEDTLS_PKCS5_C

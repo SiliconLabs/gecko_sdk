@@ -1,0 +1,42 @@
+
+==========================================================
+The output of the size tool: (e.g. arm-none-ambi-size.exe)
+==========================================================
+
+zwave_soc_switch_on_off.out  :
+section                            size         addr
+.text                           0x2a950          0x0
+_cc_handlers_v3                   0x1f8      0x2a950
+_zw_protocol_cmd_handlers          0x70      0x2ab48
+_zw_protocol_cmd_handlers_lr       0x30      0x2abb8
+.ARM.exidx                          0x8      0x2abe8
+.copy.table                         0xc      0x2abf0
+.zero.table                         0x0      0x2abfc
+.stack                           0x1000   0x20000000
+.data                             0x458   0x20001000
+.bss                             0x9b34   0x20001458
+.heap                            0x5070   0x2000af90
+.internal_storage               0x3a000      0x2abfc
+.zwave_nvm                       0x3000      0x64bfc
+.nvm                             0x9000      0x67bfc
+.ARM.attributes                    0x2e          0x0
+.comment                           0x49          0x0
+.debug_frame                     0x615c          0x0
+.debug_info                    0xc54a07          0x0
+.debug_abbrev                   0x13b4b          0x0
+.debug_loc                      0x37eb1          0x0
+.debug_aranges                     0x90          0x0
+.debug_ranges                    0x96e8          0x0
+.debug_line                     0x489f7          0x0
+.debug_str                      0x83b0b          0x0
+Total                          0xdfce48
+
+The calculated FLASH and SRAM usage summary:
+============================================
+FLASH used as program memory:  (Including only the sections: .text, .ARM.exidx, .data, _cc_handlers_v3)
+   176212
+FLASH used for storage: (Including only the sections: .zwavenvm, .simee, .nvm, .zwave_nvm)
+   49152
+SRAM usage:             (Including only the sections: .data, .bss, .heap (limited to 2048 per sl_memory_config.h), .stack_dummy, .reset_info)
+   46988
+

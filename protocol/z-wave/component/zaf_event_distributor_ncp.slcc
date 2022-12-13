@@ -1,0 +1,21 @@
+id: zaf_event_distributor_ncp
+label: ZAF Event Distributor NCP Component
+category: Z-Wave|ZAF|Event Distributor
+description: >
+  This component implements the event distributor needed by NCP (Network Co-Processor)
+  Applications. It can handle invalid states, such as maximum node inclusion reached, as well as
+  different process flows such as learn mode or reset. It initializes some subsystems at system
+  start, such as the EventQueue.
+package: Z-Wave
+quality: production
+include:
+  - path: "protocol/z-wave/ZAF/ApplicationUtilities/EventHandling"
+    file_list:
+      - path: "zaf_event_distributor_ncp.h"
+source:
+  - path: "protocol/z-wave/ZAF/ApplicationUtilities/EventHandling/zaf_event_distributor_ncp.c"
+provides:
+  - name: zaf_event_distributor_ncp
+  - name: zaf_event_distributor_type
+requires:
+  - name: zaf_event_distributor_core

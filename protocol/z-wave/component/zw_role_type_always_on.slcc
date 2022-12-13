@@ -1,0 +1,22 @@
+id: zw_role_type_always_on
+label: Z-Wave Role Type Always On
+category: Z-Wave|Role Types
+description: >
+  The Z-Wave Always On End Device (AOS) Role Type is intended for mains powered devices
+  that are always reachable, for example light switches. Always On End Devices are capable of
+  repeat routing the z-wave messages.
+  
+  Defines ZAF_CONFIG_DEVICE_OPTION_MASK and ZAF_CONFIG_APP_ROLE_TYPE are automatically set by this component.
+  
+package: Z-Wave
+quality: production
+define:
+  - name: ZAF_CONFIG_DEVICE_OPTION_MASK
+    value: APPLICATION_NODEINFO_LISTENING
+  - name: ZAF_CONFIG_APP_ROLE_TYPE
+    value: ZWAVEPLUS_INFO_REPORT_ROLE_TYPE_SLAVE_ALWAYS_ON
+requires:
+  - name: zw_end_device
+provides:
+  - name: zw_role_type_always_on
+  - name: zw_role_type

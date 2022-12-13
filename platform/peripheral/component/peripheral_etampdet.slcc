@@ -1,0 +1,26 @@
+id: peripheral_etampdet
+label: ETAMPDET
+package: platform
+description: >
+  External Tamper Detection (ETAMPDET) peripheral API
+category: Platform|Peripheral
+quality: production
+component_root_path: "platform/peripheral"
+source:
+  - path: "src/peripheral_etampdet.c"
+include:
+  - path: "inc"
+    file_list:
+    - path: "peripheral_etampdet.h"
+provides:
+  - name: peripheral_etampdet
+requires:
+  - name: device_has_etampdet
+
+documentation:
+  docset: gecko-platform
+  document:
+    - page: emlib/api/efr32xg27/group-etampdet
+      condition: [device_sdid_230]
+    - page: emlib/api/efr32xg25/group-etampdet
+      condition: [device_sdid_220]

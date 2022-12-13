@@ -1,0 +1,20 @@
+id: mbedtls_asn1
+package: platform
+label: ASN.1 Parsing
+description: >-
+  This component provides support for ASN.1 parsing and writing using Mbed TLS.
+category: Platform|Security|Mbed TLS|Upper Layer
+quality: production
+source:
+  - path: util/third_party/mbedtls/library/asn1parse.c
+  - path: util/third_party/mbedtls/library/asn1write.c
+provides:
+  - name: mbedtls_asn1
+requires:
+  - name: mbedtls_core
+  - name: mbedtls_mpi
+template_contribution:
+  - name: mbedtls_config
+    value: MBEDTLS_ASN1_PARSE_C
+  - name: mbedtls_config
+    value: MBEDTLS_ASN1_WRITE_C

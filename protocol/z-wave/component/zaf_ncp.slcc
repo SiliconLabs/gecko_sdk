@@ -1,0 +1,18 @@
+id: zaf_ncp
+label: ZAF NCP Component
+category: Z-Wave|ZAF|Application Type
+description: >
+  It includes the event distributor needed by NCP Applications.
+
+  Every sample application uses the event distributor component. It contains the core code shared
+  between the Event Distributor types (NCP, SOC).
+  
+  Both the NCP and SOC variations must implement their own event distributor table; the only
+  difference in the usage is whether the application allows for polling the event distributor
+  table, or is fully event-driven.
+package: Z-Wave
+quality: production
+provides:
+  - name: zaf_ncp
+requires:
+  - name: zaf_event_distributor_ncp

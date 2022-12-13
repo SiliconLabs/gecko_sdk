@@ -1,0 +1,59 @@
+id: gatt_service_cte
+label: Constant Tone Extension GATT Service (Connection)
+package: Bluetooth
+description: >
+  Constant Tone Extension GATT Service reference implementation for ACL connection.
+
+  The CTE mode (AoA or AoD) depends on the presence of the AoD Transmitter Bluetooth stack feature.
+
+  Limitations:
+
+  - The Bluetooth SIG specifies bit 1 of the Constant Tone Extension Enable characteristic
+  to enable/disable AoD Constant Tone Extension in advertising packets. This runtime configuration
+  is not supported by this component. If any of the advertising CTE components are added to
+  the project, the CTE in the advertising packets is enabled automatically upon system boot. 
+
+  - The AoD mode parameters are configured globally in this component.
+category: Bluetooth|GATT
+quality: production
+root_path: app/bluetooth/common/gatt_service_cte
+source:
+  - path: sl_gatt_service_cte.c
+include:
+  - path: .
+    file_list:
+      - path: sl_gatt_service_cte.h
+config_file:
+  - path: config/aoa/sl_gatt_service_cte_config.h
+    unless:
+      - bluetooth_feature_aod_transmitter
+  - path: config/aod/sl_gatt_service_cte_config.h
+    condition:
+      - bluetooth_feature_aod_transmitter
+    unless:
+      - brd4185a
+      - brd4191a
+  - path: config/aod_brd4185a/sl_gatt_service_cte_config.h
+    condition:
+      - bluetooth_feature_aod_transmitter
+      - brd4185a
+  - path: config/aod_brd4191a/sl_gatt_service_cte_config.h
+    condition:
+      - bluetooth_feature_aod_transmitter
+      - brd4191a
+  - path: gatt_service_cte.xml
+    directory: btconf
+provides:
+  - name: gatt_service_cte
+requires:
+  - name: bluetooth_stack
+  - name: gatt_configuration
+  - name: bluetooth_feature_gatt_server
+  - name: bluetooth_feature_cte_transmitter
+template_contribution:
+  - name: bluetooth_on_event
+    value:
+      include: sl_gatt_service_cte.h
+      function: sl_gatt_service_cte_on_event
+  - name: component_catalog
+    value: gatt_service_cte

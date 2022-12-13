@@ -1,0 +1,25 @@
+id: zw_cc_user_code
+label: User Code Command Class
+category: Z-Wave|Command Classes
+description: >
+  The User Code Command Class is used to manage User Codes in access control systems. A node
+  supporting the Door Lock Command Class SHOULD reflect user code inputs in the door lock
+  status when relevant. For example, when the door becomes unlocked by a User Code input, the Door Lock
+  Mode is also updated to unlocked. This Command Class can be used in conjunction with Schedule
+  Entry Lock Command Class in order to schedule access for users.
+package: Z-Wave
+quality: production
+config_file:
+  - path: protocol/z-wave/platform/SiliconLabs/PAL/config/cc_user_code/cc_user_code_config.h
+    file_id: cc_user_code_config
+source:
+  - path: protocol/z-wave/ZAF/CommandClasses/UserCode/CC_UserCode.c
+include:
+  - path: protocol/z-wave/ZAF/CommandClasses/UserCode/
+    file_list:
+     - path: CC_UserCode.h
+     - path: cc_user_code_io.h
+provides:
+  - name: zw_cc_user_code
+requires:
+  - name: zw_core

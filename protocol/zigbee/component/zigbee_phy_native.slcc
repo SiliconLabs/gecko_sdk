@@ -1,0 +1,26 @@
+id: zigbee_phy_native
+label: GB868 Dual-MAC Native Radio PHY
+package: Zigbee
+category: Zigbee|Stack
+quality: production
+ui_hints:
+  visibility: never
+
+description: Provides GB868 Dual-MAC Native Radio PHY
+
+provides:
+  - name: zigbee_phy_native
+
+requires:
+  - name: zigbee_phy_native_implementation
+  - name: zigbee_phy_native_library
+    condition:
+     - zigbee_force_libraries
+  - name: device_has_radio_2g4hz
+
+recommends:
+  - id: zigbee_phy_native_source
+
+template_contribution:
+  - name: component_catalog
+    value: zigbee_phy_native

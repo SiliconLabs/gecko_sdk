@@ -1,0 +1,20 @@
+id: coulomb_counter_dcdc
+package: platform
+label: Coulomb Counter DCDC
+description: Coulomb Counter DCDC driver.
+category: Platform|Driver
+quality: production
+root_path: platform/driver/coulomb
+source:
+  - path: src/sl_coulomb_counter_hal_dcdc.c
+requires:
+  - name: peripheral_dcdc_coulomb_counter
+provides:
+  - name: coulomb_counter_driver_implementation
+  - name: coulomb_counter_dcdc
+config_file:
+  - path: config/dcdc/sl_coulomb_counter_config.h
+    file_id: sl_coulomb_counter_config
+documentation:
+    docset: gecko-platform
+    document: driver/api/group-coulomb-counter

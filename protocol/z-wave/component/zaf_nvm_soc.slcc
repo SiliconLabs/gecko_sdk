@@ -1,0 +1,18 @@
+id: zaf_nvm_soc
+label: ZAF NVM SOC Component
+category: Z-Wave|ZAF|NVM
+description: >
+  This component implements the non-volatile memory handling needed by SoC applications. This type
+  of memory can preserve the stored information even in EM4 (the lowest power energy mode) or in
+  case of shutdown.
+
+package: Z-Wave
+quality: production
+include:
+  - path: "protocol/z-wave/ZAF/ApplicationUtilities/nvm"
+    file_list:
+      - path: "zaf_nvm_soc.h"
+source:
+  - path: "protocol/z-wave/ZAF/ApplicationUtilities/nvm/zaf_nvm_soc.c"
+provides:
+  - name: zaf_nvm_soc

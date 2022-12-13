@@ -1,0 +1,20 @@
+id: psa_crypto_ecc_curve448
+package: platform
+label: Curve448
+description: >-
+  This component adds support for the Montgomery 448 bit elliptic curve
+  in PSA Crypto. This curve is only supported on Vault High devices.
+category: Platform|Security|PSA Crypto|Elliptic Curves
+quality: evaluation
+provides:
+  - name: psa_crypto_ecc_curve448
+  - name: psa_crypto_ecc_curve
+    allow_multiple: true
+requires:
+  - name: psa_crypto_ecc
+template_contribution:
+  - name: psa_crypto_config
+    value: PSA_WANT_ECC_MONTGOMERY_448
+    condition: [device_security_vault]
+documentation:
+  url: https://armmbed.github.io/mbed-crypto/html/api/keys/types.html#c.PSA_ECC_FAMILY_MONTGOMERY

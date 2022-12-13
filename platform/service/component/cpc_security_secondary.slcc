@@ -1,0 +1,46 @@
+id: cpc_security_secondary
+label: CPC SECURITY
+package: platform
+description: > 
+  Enable Co-Processor Communication (CPC) security endpoint. The security endpoint
+  is used to encrypt and decrypt the data exchanged between the Primary and Secondary
+  device.
+category: Services|Co-Processor Communication|Secondary Device
+quality: production
+root_path: platform/service/cpc
+config_file:
+  - path: config/sl_cpc_security_config.h
+source:
+  - path: src/sl_cpc_security.c
+include:
+  - path: inc
+    file_list:
+      - path: sl_cpc_security.h
+      - path: sli_cpc_security.h
+provides:
+  - name: cpc_security_secondary
+requires:
+  - name: cpc_core
+  - name: psa_its
+  - name: psa_crypto
+  - name: psa_crypto_aes
+  - name: psa_crypto_gcm
+  - name: psa_crypto_sha256
+  - name: psa_crypto_ecdh
+  - name: psa_crypto_ecc_curve25519
+  - name: mbedtls_mpi
+# Work around broken TRNG on MG1, MG13, and MG14 parts
+  - name: mbedtls_entropy_adc
+    condition:
+      - "device_sdid_80"
+  - name: mbedtls_entropy_adc
+    condition:
+      - "device_sdid_89"
+  - name: mbedtls_entropy_adc
+    condition:
+      - "device_sdid_95"
+template_contribution:
+  - name: component_catalog
+    value: cpc_security
+validation_helper:
+  - path: cpc_configuration_security_validation.lua

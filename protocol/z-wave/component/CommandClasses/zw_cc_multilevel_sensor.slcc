@@ -1,0 +1,29 @@
+id: zw_cc_multilevel_sensor
+label: Multilevel sensor Command Class
+category: Z-Wave|Command Classes
+description: >
+  The Multilevel Sensor Command Class is used to advertize numerical sensor readings. The
+  Multilevel Sensor Get Supported Sensor Command is used to request the supported Sensor Types
+  from a supporting node. The Multilevel Sensor Supported Sensor Report Command is used to
+  advertize the supported Sensor Types by a supporting node. A controlling node MUST always show
+  the sensor reading values even if the Sensor Type and/or Scale is unknown.
+  Note that this Command Class supports advanced configuration.
+  To use it, please make sure that configuration related to your project is added to cc_config file located in
+  <app_location>/config/cc_config/<app_name>.cc_config.
+  See protocol/z-wave/ZAF/tool/cc_configurator/README.md for more details.
+package: Z-Wave
+quality: production
+source:
+  - path: protocol/z-wave/ZAF/CommandClasses/MultilevelSensor/CC_MultilevelSensor_Support.c
+  - path: protocol/z-wave/ZAF/CommandClasses/MultilevelSensor/CC_MultilevelSensor_SensorHandlerTypes.c
+  - path: protocol/z-wave/ZAF/CommandClasses/MultilevelSensor/CC_MultilevelSensor_SensorHandler.c
+include:
+  - path: protocol/z-wave/ZAF/CommandClasses/MultilevelSensor/
+    file_list:
+     - path: CC_MultilevelSensor_Support.h
+     - path: CC_MultilevelSensor_SensorHandlerTypes.h
+     - path: CC_MultilevelSensor_SensorHandler.h
+     - path: CC_MultilevelSensor_Configuration.h
+     - path: cc_multilevel_sensor_config_api.h
+provides:
+  - name: zw_cc_multilevel_sensor

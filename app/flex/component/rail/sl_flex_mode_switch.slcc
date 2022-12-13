@@ -1,0 +1,58 @@
+id: "sl_flex_mode_switch"
+label: "RAIL Wi-SUN Mode Switch"
+package: "Flex"
+description: "Adds RAIL a set of Wi-SUN specific Mode Switch functions and CLIs."
+category: "Flex|RAIL|Utility"
+quality: "production"
+root_path: "app/flex/component/rail/sl_flex_mode_switch"
+
+provides:
+  - name: "sl_flex_mode_switch"
+requires:
+  - name: "cli"
+  - name: "sl_flex_rail_packet_asm"
+  - name: "sleeptimer"
+source:
+  - path: "sl_flex_mode_switch.c"
+  - path: "sl_flex_mode_switch_cli.c"
+include:
+  - path: "."
+    file_list:
+    - "path": "sl_flex_mode_switch.h"
+
+template_contribution:
+  - name: cli_command
+    value:
+      name: set_channel
+      handler: cli_set_channel
+      help: Set the next channel to be used
+      argument:
+      - type: uint16
+        help: The channel number to switch next
+  - name: cli_command
+    value:
+      name: get_available_channels
+      handler: cli_get_available_channels
+      help: Get the list of available channels
+  - name: cli_command
+    value:
+      name: trig_mode_switch
+      handler: cli_trig_mode_switch
+      help: "Trigger mode switching and depending on the duration parameter the device either stays on the new PHY or returns to the base PHY"
+      argument:
+        - type: uint8
+          help: "New PhyModeId, i.e. ID of the PHYMode to switch to"
+        - type: uint32opt
+          help: "Number of seconds in the new phy; if not given or 0 = forever"
+  - name: cli_command
+    value:
+      name: end_mode_switch
+      handler: cli_end_mode_switch
+      help: "Sending end mode switch packet"
+#---------------- Component Catalog ------------------
+  - name: component_catalog
+    value: sl_flex_mode_switch
+
+#---------------- UI Settings ------------------
+ui_hints:
+  visibility: never

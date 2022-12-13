@@ -1,0 +1,18 @@
+id: zw_cc_central_scene_nvm
+label: Central Scene Command Class - NVM
+category: Z-Wave|Command Classes
+description: >
+  This component provides the non-volatile memory implementation of the IO Interface
+  for the Central Scene Command Class.
+  It can be used to ensure that the state of the Command Class persists across resets
+  by saving the state into the NVM.
+package: Z-Wave
+quality: production
+source:
+  - path: protocol/z-wave/ZAF/CommandClasses/CentralScene/cc_central_scene_nvm.c
+provides:
+  - name: zw_cc_central_scene_nvm
+requires:
+  - name: zw_core
+  - name: zw_cc_central_scene
+  - name: nvm3_default

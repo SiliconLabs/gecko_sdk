@@ -1,0 +1,24 @@
+id: psa_crypto_hash
+label: Hashing
+category: Platform|Security|PSA Crypto|Hashing
+package: platform
+quality: production
+ui_hints:
+  visibility: never
+description: >-
+  This component makes sure that there is at least one hash function included.
+
+provides:
+  - name: psa_crypto_hash
+
+requires:
+  - name: psa_crypto
+  - name: psa_hash_function
+
+recommends:
+  - id: psa_crypto_sha256
+
+template_contribution:
+  - name: mbedtls_config
+    value: MBEDTLS_MD_C
+    condition: [mbedtls_uses_psa_crypto]

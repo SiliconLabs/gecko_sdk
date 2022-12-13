@@ -1,0 +1,21 @@
+id: mbedtls_platform_dynamic_memory_allocation_config_init_runtime
+package: platform
+label: Runtime initialisation of dynamic memory allocation functions for Mbed TLS.
+
+description: >-
+  This component allows for runtime initialisation of the dynamic memory
+  allocation functions for Mbed TLS.
+
+category: Platform|Security|Mbed TLS
+
+quality: production
+
+provides:
+  - name: mbedtls_platform_dynamic_memory_allocation_config
+  - name: mbedtls_platform_dynamic_memory_allocation_config_init_runtime
+
+template_contribution:
+  - name: mbedtls_config
+    value: MBEDTLS_PLATFORM_C
+  - name: mbedtls_config
+    value: MBEDTLS_PLATFORM_MEMORY

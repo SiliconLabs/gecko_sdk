@@ -1,0 +1,46 @@
+id: tz_sl_interface_crypto_key_derivation_funcs
+package: platform
+description: >-
+  This component provides a TrustZone secure library interface crypto key derivation functions
+category: Platform|Security|TrustZone
+quality: evaluation
+ui_hints:
+  visibility: never
+provides:
+  - name: tz_sl_interface_crypto_key_derivation_funcs
+requires:
+  - name: trustzone_nonsecure
+template_contribution:
+  - name: tfm_interface_func
+    value: tfm_crypto_key_derivation_setup
+
+  - name: tfm_interface_func
+    value: tfm_crypto_key_derivation_get_capacity
+
+  - name: tfm_interface_func
+    value: tfm_crypto_key_derivation_set_capacity
+
+  - name: tfm_interface_func
+    value: tfm_crypto_key_derivation_input_bytes
+
+  - name: tfm_interface_func
+    value: tfm_crypto_key_derivation_input_key
+
+  - name: tfm_interface_func
+    value: tfm_crypto_key_derivation_key_agreement
+
+  - name: tfm_interface_func
+    value: tfm_crypto_key_derivation_output_bytes
+
+  - name: tfm_interface_func
+    value: tfm_crypto_key_derivation_output_key
+
+  - name: tfm_interface_func
+    value: tfm_crypto_key_derivation_abort
+
+  - name: tfm_interface_func
+    value: tfm_sl_psa_key_derivation_single_shot
+
+  - name: tfm_interface_func
+    value: tfm_crypto_raw_key_agreement
+

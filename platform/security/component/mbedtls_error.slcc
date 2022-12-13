@@ -1,0 +1,17 @@
+id: mbedtls_error
+package: platform
+label: Error Helpers
+description: >-
+  This component provides support for the error APIs in Mbed TLS, provided
+  by the error.h file.
+category: Platform|Security|Mbed TLS|Utilities
+quality: production
+source:
+  - path: platform/security/sl_component/sl_mbedtls_support/src/error.c
+provides:
+  - name: mbedtls_error
+requires:
+  - name: mbedtls_core
+template_contribution:
+  - name: mbedtls_config
+    value: MBEDTLS_ERROR_C

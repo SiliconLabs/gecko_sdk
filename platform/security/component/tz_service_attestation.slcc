@@ -1,0 +1,182 @@
+id: tz_service_attestation
+package: platform
+label: PSA Attestation Service for TrustZone Secure Key Library
+description: >-
+  This component includes the attestation support for TrustZone secure library.
+category: Platform|Security|TrustZone
+quality: evaluation
+component_root_path: platform/security
+
+provides:
+  - name: tz_service_attestation
+
+requires:
+  - name: tz_service_config
+  - name: tz_service_common
+    condition: [trustzone_secure]
+
+  - name: psa_builtin_key_support_se
+    condition: [device_security_vault, trustzone_nonsecure]
+
+  - name: psa_crypto_ecdsa
+    condition: [device_security_se, trustzone_nonsecure]
+  - name: psa_crypto_ecdsa
+    condition: [device_security_rot, trustzone_nonsecure]
+
+  - name: psa_crypto_ecc_secp256r1
+    condition: [device_security_se, trustzone_nonsecure]
+  - name: psa_crypto_ecc_secp256r1
+    condition: [device_security_rot, trustzone_nonsecure]
+
+  - name: psa_crypto_sha256
+    condition: [device_security_se, trustzone_nonsecure]
+  - name: psa_crypto_sha256
+    condition: [device_security_rot, trustzone_nonsecure]
+
+  - name: psa_its
+    condition: [device_security_se, trustzone_nonsecure]
+  - name: psa_its
+    condition: [device_security_rot, trustzone_nonsecure]
+include:
+    # Common
+  - path: sl_component/sl_trustzone/inc/common
+    file_list:
+      - path: sli_tz_service_attestation.h
+  - path: ../../util/third_party/trusted-firmware-m/interface/include
+    file_list:
+      - path: psa/initial_attestation.h
+
+    # Non Secure
+  - path: sl_component/sl_trustzone/inc/nonsecure
+    condition: [trustzone_nonsecure]
+    file_list:
+      - path: sl_tz_attestation.h
+
+    # Secure
+  - path: ../../util/third_party/trusted-firmware-m/secure_fw/spm/include
+    condition: [trustzone_secure]
+    unless: [device_security_vault]
+    file_list:
+      - path: tfm_boot_status.h
+
+  - path: ../../util/third_party/trusted-firmware-m/secure_fw/partitions/initial_attestation
+    condition: [trustzone_secure]
+    unless: [device_security_vault]
+    file_list:
+      - path: attest.h
+      - path: attest_key.h
+      - path: attest_token.h
+      - path: attest_eat_defines.h
+
+  - path: ../../util/third_party/trusted-firmware-m/platform/include
+    condition: [trustzone_secure]
+    unless: [device_security_vault]
+    file_list:
+      - path: tfm_plat_crypto_keys.h
+      - path: tfm_plat_defs.h
+      - path: tfm_plat_device_id.h
+      - path: tfm_plat_boot_seed.h
+      - path: tfm_attest_hal.h
+
+    # QCBOR
+  - path: ../../util/third_party/trusted-firmware-m/lib/ext/qcbor/inc
+    condition: [trustzone_secure]
+    unless: [device_security_vault]
+    file_list:
+      - path: qcbor.h
+      - path: q_useful_buf.h
+      - path: UsefulBuf.h
+  - path: ../../util/third_party/trusted-firmware-m/lib/ext/qcbor/src
+    condition: [trustzone_secure]
+    file_list:
+      - path: ieee754.h
+
+    # t_cose
+  - path: ../../util/third_party/trusted-firmware-m/lib/ext/t_cose/inc
+    condition: [trustzone_secure]
+    unless: [device_security_vault]
+    file_list:
+      - path: t_cose_common.h
+      - path: t_cose_sign1_sign.h
+  - path: ../../util/third_party/trusted-firmware-m/lib/ext/t_cose/src
+    condition: [trustzone_secure]
+    file_list:
+      - path: t_cose_standard_constants.h
+      - path: t_cose_crypto.h
+      - path: t_cose_util.h
+      - path: t_cose_parameters.h
+
+source:
+    # Non Secure
+  - path: sl_component/sl_trustzone/src/sl_tz_service_attestation.c
+    condition: [trustzone_nonsecure]
+
+    # Secure
+  - path: sl_component/sl_trustzone/src/sli_tz_service_attestation.c
+    condition: [trustzone_secure]
+
+    # TF-M
+  - path: ../../util/third_party/trusted-firmware-m/secure_fw/partitions/initial_attestation/attest_core.c
+    condition: [trustzone_secure]
+    unless: [device_security_vault]
+  - path: ../../util/third_party/trusted-firmware-m/secure_fw/partitions/initial_attestation/attest_token_encode.c
+    condition: [trustzone_secure]
+    unless: [device_security_vault]
+  - path: ../../util/third_party/trusted-firmware-m/secure_fw/partitions/initial_attestation/attest_asymmetric_key.c
+    condition: [trustzone_secure]
+    unless: [device_security_vault]
+
+    # QCBOR
+  - path: ../../util/third_party/trusted-firmware-m/lib/ext/qcbor/src/ieee754.c
+    condition: [trustzone_secure]
+    unless: [device_security_vault]
+  - path: ../../util/third_party/trusted-firmware-m/lib/ext/qcbor/src/qcbor_decode.c
+    condition: [trustzone_secure]
+    unless: [device_security_vault]
+  - path: ../../util/third_party/trusted-firmware-m/lib/ext/qcbor/src/qcbor_encode.c
+    condition: [trustzone_secure]
+    unless: [device_security_vault]
+  - path: ../../util/third_party/trusted-firmware-m/lib/ext/qcbor/src/UsefulBuf.c
+    condition: [trustzone_secure]
+    unless: [device_security_vault]
+
+    # t_cose
+  - path: ../../util/third_party/trusted-firmware-m/lib/ext/t_cose/src/t_cose_sign1_sign.c
+    condition: [trustzone_secure]
+    unless: [device_security_vault]
+  - path: ../../util/third_party/trusted-firmware-m/lib/ext/t_cose/src/t_cose_parameters.c
+    condition: [trustzone_secure]
+    unless: [device_security_vault]
+  - path: ../../util/third_party/trusted-firmware-m/lib/ext/t_cose/src/t_cose_util.c
+    condition: [trustzone_secure]
+    unless: [device_security_vault]
+  - path: ../../util/third_party/trusted-firmware-m/lib/ext/t_cose/crypto_adapters/t_cose_psa_crypto.c
+    condition: [trustzone_secure]
+    unless: [device_security_vault]
+
+define:
+  - name: T_COSE_USE_PSA_CRYPTO
+    unless: [device_security_vault]
+
+template_contribution:
+  - name: tz_service_config
+    value: TZ_SERVICE_ATTESTATION_PRESENT
+    condition: [trustzone_nonsecure]
+
+  - name: tz_attestation_mapping
+    value:
+      sid:  SLI_TZ_SERVICE_ATTESTATION_GET_PUBLIC_KEY_SID
+      func: sli_tz_attestation_get_public_key
+      condition: [trustzone_nonsecure]
+
+  - name: tz_attestation_mapping
+    value:
+      sid: INITIAL_ATTEST_GET_TOKEN_SID
+      func: sli_initial_attest_get_token
+      condition: [trustzone_nonsecure]
+
+  - name: tz_attestation_mapping
+    value:
+      sid: INITIAL_ATTEST_GET_TOKEN_SIZE_SID
+      func: sli_initial_attest_get_token_size
+      condition: [trustzone_nonsecure]

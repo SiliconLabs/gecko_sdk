@@ -1,0 +1,13 @@
+parameters:
+  - name: build_dir
+
+constants:
+  - name: project_name
+    value: my_project
+
+steps:
+  # Copy binary artifact
+  - task: copy
+    input: "{{build_dir}}/{{project_name}}.s37"
+    output: "artifact/{{project_name}}.s37"
+    export: application_binary

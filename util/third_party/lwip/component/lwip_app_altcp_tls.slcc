@@ -1,0 +1,27 @@
+id: lwip_app_altcp_tls
+label: "LWIP ALTCP TLS High Layer Application"
+package: platform
+description: >
+    The LWIP altcp TLS high layer application component implements the LWIP altcp TLS high layer application
+    specifically programmed with the lwIP low-level raw API, altcp (application layered TCP connection API
+    to be used from TCPIP thread) is an abstraction layer that prevents applications linking hard against the
+    tcp.h functions while providing the same functionality.
+    It is used to e.g. add SSL/TLS (see LWIP_ALTCP_TLS) or proxy-connect support to an application written for
+    the tcp callback API without that application knowing the protocol details.
+category: Third Party|LwIP|apps
+quality: production
+provides:
+  - name: lwip_apps
+    allow_multiple: true
+  - name: lwip_app_altcp_tls
+requires:
+  - name: lwip_core
+source:
+  - path: util/third_party/lwip/lwip/src/apps/altcp_tls/altcp_tls_mbedtls.c
+  - path: util/third_party/lwip/lwip/src/apps/altcp_tls/altcp_tls_mbedtls_mem.c
+  - path: util/third_party/lwip/lwip/src/apps/altcp_tls/altcp_tls_mbedtls_mem.h
+  - path: util/third_party/lwip/lwip/src/apps/altcp_tls/altcp_tls_mbedtls_structs.h
+include:  
+  - path: util/third_party/lwip/lwip/src/include
+    file_list:
+    - path: lwip/apps/altcp_tls_mbedtls_opts.h

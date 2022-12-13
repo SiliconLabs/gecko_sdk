@@ -1,0 +1,75 @@
+id: zw_target_boards
+label: Z-Wave Target Boards
+category: Z-Wave
+description: >
+  This component lists the support board headers. It creates some definitions that are necessary
+  for controlling the hardware.
+  The ports used for the LEDs and the buttons are defined in the supported board headers.
+package: Z-Wave
+quality: production
+include:
+  - path: "protocol/z-wave/platform/SiliconLabs/AppsHw/inc"
+    file_list:
+      - path: "target_boards.h"
+      - path: "extension_board_8029a.h"
+      - path: "radio_board_efr32zg14.h"
+        condition: [device_sdid_95]
+      - path: "radio_board_efr32zg23.h"
+        condition: [device_sdid_210, device_security_vault]
+        unless: [zgm230sa27hnn, zgm230sa27hgn, zgm230sb27hgn]
+config_file:
+    # Series 1 basic peripheral description files (Pintool compatible)
+  - path: "protocol/z-wave/platform/SiliconLabs/AppsHw/config/extension_board_8029a_efr32xg13.h"
+    condition: [device_series_1, hardware_board_rb]
+  - path: "protocol/z-wave/platform/SiliconLabs/AppsHw/config/extension_board_8029a_efr32xg13_button.h"
+    condition: [device_series_1, hardware_board_rb]
+  - path: "protocol/z-wave/platform/SiliconLabs/AppsHw/config/extension_board_8029a_efr32xg13_led.h"
+    condition: [device_series_1, hardware_board_rb]
+  - path: "protocol/z-wave/platform/SiliconLabs/AppsHw/config/extension_board_8029a_efr32xg13_slider.h"
+    condition: [device_series_1, hardware_board_rb]
+
+    # Series 2 basic peripheral description files (Pintool compatible)
+  - path: "protocol/z-wave/platform/SiliconLabs/AppsHw/config/extension_board_8029a_efr32zg23.h"
+    condition: [device_sdid_210, hardware_board_rb]
+  - path: "protocol/z-wave/platform/SiliconLabs/AppsHw/config/extension_board_8029a_efr32zg23_button.h"
+    condition: [device_sdid_210, hardware_board_rb]
+  - path: "protocol/z-wave/platform/SiliconLabs/AppsHw/config/extension_board_8029a_efr32zg23_led.h"
+    condition: [device_sdid_210, hardware_board_rb]
+  - path: "protocol/z-wave/platform/SiliconLabs/AppsHw/config/extension_board_8029a_efr32zg23_slider.h"
+    condition: [device_sdid_210, hardware_board_rb]
+
+    # Series 2 800 DevKit basic peripheral description files (Pintool compatible)
+  - path: "protocol/z-wave/platform/SiliconLabs/AppsHw/config/radio_board_brd2603a.h"
+    condition: [brd2603a]
+  - path: "protocol/z-wave/platform/SiliconLabs/AppsHw/config/radio_board_brd2603a_button.h"
+    condition: [brd2603a]
+  - path: "protocol/z-wave/platform/SiliconLabs/AppsHw/config/radio_board_brd2603a_led.h"
+    condition: [brd2603a]
+
+    # Margay basic peripheral description files (Pintool compatible)
+  - path: "protocol/z-wave/platform/SiliconLabs/AppsHw/config/extension_board_8029a_efr32zg28.h"
+    condition: [device_sdid_235, hardware_board_rb]
+  - path: "protocol/z-wave/platform/SiliconLabs/AppsHw/config/extension_board_8029a_efr32zg28_button.h"
+    condition: [device_sdid_235, hardware_board_rb]
+  - path: "protocol/z-wave/platform/SiliconLabs/AppsHw/config/extension_board_8029a_efr32zg28_led.h"
+    condition: [device_sdid_235, hardware_board_rb]
+  - path: "protocol/z-wave/platform/SiliconLabs/AppsHw/config/extension_board_8029a_efr32zg28_slider.h"
+    condition: [device_sdid_235, hardware_board_rb]
+
+define:
+  - name: RADIO_BOARD_EFR32ZG14
+    value: 1
+    condition: [device_sdid_95]
+  - name: RADIO_BOARD_EFR32ZG23
+    value: 1
+    condition: [device_sdid_210, device_security_vault]
+    unless: [zgm230sa27hnn, zgm230sa27hgn, zgm230sb27hgn]
+  - name: RADIO_BOARD_BRD2603A
+    condition: [brd2603a]
+  - name: EXT_BOARD_8029A
+    value: 1
+    unless: [brd2603a]
+provides:
+  - name: zw_target_boards
+requires:
+  - name: zw_series

@@ -1,0 +1,42 @@
+upgrade:
+  - sdk:
+      id: gecko_sdk
+      version: "4.0.2"
+    component:
+      - trigger: zigbee_multi_network_stub
+        description: >
+          The zigbee_multi_network_stub component has been deprecated. No action is needed.
+        remove:
+          - zigbee_multi_network_stub
+      - trigger: zigbee_multi_pan_stub
+        description: >
+          The zigbee_multi_pan_stub component has been deprecated. No action is needed.
+        remove:
+          - zigbee_multi_pan_stub
+  - sdk:
+      id: gecko_sdk
+      version: "4.1.1"
+    configuration:
+      - script: scripts/upgrade_zigbee_rtos_stack_size.lua
+
+  - sdk:
+      id: gecko_sdk
+      version: "4.2.0"
+    component:
+      - trigger: zigbee_aes_psa
+        description: >
+          The zigbee_aes_psa component has been deprecated. No action is needed.
+        remove:
+          - zigbee_aes_psa
+      - trigger: zigbee_ccm_psa
+        description: >
+          The zigbee_ccm_psa component has been deprecated. No action is needed.
+        remove:
+          - zigbee_ccm_psa
+      - trigger: zigbee_security_link_keys_library
+        description: >
+          The Zigbee Security Link Keys Library component has been removed. The Zigbee Security Link Keys component has been added in its place.
+        remove:
+          - zigbee_security_link_keys_library
+        add:
+          - zigbee_security_link_keys

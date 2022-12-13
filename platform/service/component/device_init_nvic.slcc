@@ -1,0 +1,34 @@
+id: device_init_nvic
+label: "Nested Vector Interrupt Controller (NVIC)"
+package: platform
+description: >
+  Initialize the ARM Cortex-M Nested Vector Interrupt Controller (NVIC) by 
+  setting all interrupts to the default priority level, except for Fault 
+  exceptions. For more details on the NVIC, refer to the ARM Cortex-M 
+  documentation.
+category: Services|Device Initialization|Peripherals
+quality: production
+root_path: platform/service/device_init
+include:
+  - path: inc
+    file_list:
+      - path: sl_device_init_nvic.h
+source:
+  - path: src/sl_device_init_nvic.c
+provides:
+  - name: device_init_nvic
+requires:
+  - name: status
+  - name: emlib_core
+template_contribution:
+  - name: event_handler
+    value:
+      event: platform_init
+      include: sl_device_init_nvic.h
+      handler: sl_device_init_nvic
+    priority: -9998
+  - name: component_catalog
+    value: device_init_nvic
+documentation:
+  docset: gecko-platform
+  document: service/api/group-device-init-nvic

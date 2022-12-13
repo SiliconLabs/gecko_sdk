@@ -1,0 +1,6 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project id="com.silabs.sdk.exx32.common.se_manager" label="SE Manager" contentRoot="$(sdkInstallationPath:default())/platform/security/sl_component/se_manager">
+  <property key="category" value="efm32|Common"/>
+  <folder name="se_manager" uri="src" includeAllFiles="true" />
+  <includePath uri="inc" />
+</project>

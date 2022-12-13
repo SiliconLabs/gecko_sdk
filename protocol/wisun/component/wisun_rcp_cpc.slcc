@@ -1,0 +1,38 @@
+id: wisun_rcp_cpc
+label: Wi-SUN Border Router RCP - CPC interface
+description: "Provide Wi-SUN Border Router RCP CPC interface. UART and CPC
+interfaces are mutually exclusives. It installs CPC secondary UART driver
+by default.
+
+Can only be used in Wi-SUN Border Router RCP application"
+package: wisun
+category: "Wi-SUN|Application|Wi-SUN RCP"
+quality: production
+root_path: protocol/wisun/app/wisun_rcp
+
+provides:
+  - name: wisun_rcp_cpc
+  - name: wisun_rcp_interface
+
+requires:
+  - name: cpc_secondary
+
+recommends:
+  - id: cpc_secondary_driver_uart_eusart
+    instance: [vcom]
+    unless: [device_has_usart]
+  - id: cpc_secondary_driver_uart_usart
+    instance: [vcom]
+    condition: [device_has_usart]
+
+define:
+  - name: DEBUG_EFM_USER
+  - name: WISUN_RCP_USE_CPC
+
+source:
+  - path: sl_wsrcp_cpc.h
+  - path: sl_wsrcp_cpc.c
+
+template_contribution:
+  - name: component_catalog
+    value: wisun_rcp_uart

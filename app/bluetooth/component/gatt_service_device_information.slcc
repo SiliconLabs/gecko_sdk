@@ -1,0 +1,29 @@
+id: gatt_service_device_information
+label: Device Information GATT Service
+package: Bluetooth
+description: >
+  This component provides the default values for the characteristics under the
+  Device Information service upon boot event.
+category: Bluetooth|GATT
+quality: production
+root_path: app/bluetooth/common/gatt_service_device_information
+source:
+  - path: sl_gatt_service_device_information.c
+    project:
+      transfer_ownership: true
+include:
+  - path: .
+    file_list:
+      - path: sl_gatt_service_device_information.h
+provides:
+  - name: gatt_service_device_information
+requires:
+  - name: gsdk_version
+  - name: bluetooth_stack
+  - name: gatt_configuration
+  - name: app_assert
+template_contribution:
+  - name: bluetooth_on_event
+    value:
+      include: sl_gatt_service_device_information.h
+      function: sl_gatt_service_device_information_on_event

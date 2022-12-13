@@ -1,0 +1,14 @@
+!!omap
+- id: cli_recommends
+- label: cli_recommends
+- description: CLI recommend
+- package: platform
+- category: Services|Command Line Interface
+- quality: production
+- ui_hints:
+    visibility: never     #should not be used directly; required by cli_recommended_instance
+- provides:
+  - name: cli_recommends
+- recommends:
+  - id: cli
+    instance: [inst0]

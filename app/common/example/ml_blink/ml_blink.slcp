@@ -1,0 +1,69 @@
+project_name: ml_blink
+package: platform
+quality: production
+label: Machine Learning - Blink
+description: >
+  This application demonstrates a model trained to replicate a sine function. 
+  The model is continuously fed with values ranging from 0 to 2pi, and the 
+  output of the model is used to control the intensity of an LED. 
+category: Example|Machine Learning
+filter:
+  - name: "Device Type"
+    value: ["SoC"]
+  - name: "MCU"
+    value: ["32-bit MCU"]
+  - name: "Project Difficulty"
+    value: ["Advanced"]
+  - name: "Capability"
+    value: ["Machine Learning"]
+include:
+  - path: .
+    file_list:
+      - path: app.h
+      - path: timestamp.h
+source:
+  - path: main.c
+  - path: app.cc
+config_file:
+  - path: "tflite_models/tflite/blink.tflite"
+    file_id: flatbuffer_file_id
+    directory: "tflite"
+component:
+  - id: sl_system
+  - id: device_init
+  - id: tensorflow_lite_micro
+  - id: iostream_recommended_stream
+  - id: iostream_retarget_stdio
+  - id: pwm
+    instance:
+      - led0
+  - id: sleeptimer
+define:
+  - name: DEBUG_EFM
+  - name: TF_LITE_STATIC_MEMORY
+configuration:
+  - name: SL_BOARD_ENABLE_VCOM
+    value: 1
+  - name: SL_IOSTREAM_USART_VCOM_CONVERT_BY_DEFAULT_LF_TO_CRLF
+    value: 1
+  - name: SL_IOSTREAM_UART_VCOM_CONVERT_BY_DEFAULT_LF_TO_CRLF
+    value: 1
+  - name: SL_IOSTREAM_EUSART_VCOM_CONVERT_BY_DEFAULT_LF_TO_CRLF
+    value: 1
+  - name: SL_TFLITE_MICRO_ARENA_SIZE
+    value: 2048
+toolchain_settings:
+  - option: gcc_compiler_option
+    value: "-Wno-unused-parameter"
+  - option: gcc_compiler_option
+    value: "-Wno-missing-field-initializers"
+  - option: gcc_linker_option
+    value: "-u _printf_float"
+readme:
+  - path: readme.md
+ui_hints:
+  highlight: readme.md
+tag:
+  - hardware:component:led:1+
+  - hardware:device:ram:16
+  - hardware:device:flash:160

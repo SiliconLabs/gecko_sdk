@@ -1,0 +1,26 @@
+parameters: []
+
+constants:
+  - name: workspace_name
+    value: my_workspace
+
+steps:
+  # Create production image
+  - task: convert
+    input:
+      - "{{bootloader_binary}}"
+      - "{{application_binary}}"
+    output: artifact/{{workspace_name}}-full.s37
+
+  # Create upgrade image (application + bootloader)
+  - task: create_gbl
+    bootloader: "{{bootloader_binary}}"
+    app: "{{application_binary}}"
+    compress: lzma
+    output: artifact/{{workspace_name}}-full.gbl
+  
+  # Create upgrade image (application only)
+  - task: create_gbl
+    app: "{{application_binary}}"
+    compress: lzma
+    output: artifact/{{workspace_name}}-app-only.gbl

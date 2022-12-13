@@ -1,0 +1,20 @@
+id: bt_post_build
+package: Bluetooth
+label: BLE Post Build
+description: Post build scripts for BLE applications.
+category: Bluetooth|Application
+quality: production
+root_path: app/bluetooth/script
+other_file:
+  - path: create_bl_files.bat
+    condition:
+      - bootloader_app_properties
+    project:
+      transfer_ownership: true
+  - path: create_bl_files.sh
+    condition:
+      - bootloader_app_properties
+    project:
+      transfer_ownership: true
+provides:
+  - name: bt_post_build

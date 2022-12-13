@@ -1,0 +1,20 @@
+id: lwip_port_freertos
+label: "LwIP FreeRTOS port "
+package: platform
+description: >
+  The LwIP FreeRTOS port component can be used for LwIP port contribution for FreeRTOS.
+category: Third Party|LwIP|OS
+quality: production
+provides:
+  - name: lwip_port_freertos
+requires:
+  - name: lwip_core
+source:
+  - path: util/third_party/lwip/lwip-contrib/ports/freertos/sys_arch.c
+include:
+  - path: util/third_party/lwip/lwip-contrib/ports/freertos/include
+    file_list:
+    - path: arch/sys_arch.h
+    - path: arch/cc.h
+    - path: arch/bpstruct.h
+    - path: arch/epstruct.h

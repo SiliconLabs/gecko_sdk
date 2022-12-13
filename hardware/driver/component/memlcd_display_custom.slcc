@@ -1,0 +1,25 @@
+id: memlcd_display_custom
+package: platform
+label: Custom Memory LCD
+description: >
+  This component represents any custom memory LCD display
+  that doesn't already have a component associated.
+category: Platform|Board Drivers|Memory LCD|Display Driver
+quality: production
+root_path: hardware/driver/memlcd
+config_file:
+  - path: config/memlcd_custom/sl_memlcd_display_custom_config.h
+    unless: 
+      - memlcd_custom
+    file_id: sl_memlcd_custom_config
+  - path: config/memlcd_custom/sl_memlcd_custom_config.h
+    condition: 
+      - memlcd_custom
+    file_id: sl_memlcd_custom_config
+include:
+  - path: src/memlcd_display_custom
+    file_list:
+      - path: sl_memlcd_display.h
+provides:
+  - name: memlcd_display_custom
+  - name: memlcd_screen

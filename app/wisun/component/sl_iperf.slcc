@@ -1,0 +1,54 @@
+id: "sl_iperf"
+label: "iPerf2"
+package: "wisun"
+description: > 
+  The iPerf component provides an iPerf2 (https://sourceforge.net/projects/iperf2/)-compatible solution to measure UDP throughput. 
+  It has a full UDP support, and implements a server and client modes, which are capable of sending and receiving packets to measure the bandwidth performance, the inter-arrival jitter, and packet loss.
+  The component relies on different functions to help configure and run your iPerf test. 
+  It allows you to set up your server and client port, your preferred bandwidth, number of packets, remote peer address, and so on. 
+  At the end of every iPerf test, an iPerf report is output. 
+  The component can be used with any network stack because it has a portable custom network interface.
+  To use the iPerf component in your application, add it to your project and initialize it with sl_iperf_service_init().
+category: "Wi-SUN|Wi-SUN Services"
+quality: "production"
+root_path: "app/wisun/component/iperf"
+provides:
+  - name: sl_iperf
+
+source:
+  - path: "sl_iperf_network_interface.c"
+  - path: "sl_iperf.c"
+  - path: "sl_iperf_log.c"
+  - path: "sl_iperf_util.c"
+  - path: "sl_iperf_udp_srv.c"
+  - path: "sl_iperf_udp_clnt.c"
+
+include:
+  - path: "."
+    file_list:
+    - "path": "sl_iperf_types.h"
+    - "path": "sl_iperf_network_interface.h"
+    - "path": "sl_iperf.h"
+    - "path": "sl_iperf_log.h"
+    - "path": "sl_iperf_util.h"
+    - "path": "sl_iperf_udp_srv.h"
+    - "path": "sl_iperf_udp_clnt.h"
+config_file:
+  - path: "config/sl_iperf_config.h"
+
+#-------------- Template Contribution ----------------
+template_contribution:
+  - name: "event_handler"
+    value:
+      event: "internal_app_init"
+      include: "sl_iperf.h"
+      handler: "sl_iperf_service_init"
+  
+
+#---------------- Component Catalog ------------------
+  - name: component_catalog
+    value: iperf
+
+documentation:
+  docset: wisun
+  document: wisun-stack-api/sl-iperf

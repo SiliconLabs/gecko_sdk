@@ -1,0 +1,20 @@
+id: tz_secure_key_library
+package: platform
+label: TrustZone Secure Key Library
+description: >-
+  This component enables TrustZone secure library and its Non-Secure interface.
+category: Platform|Security|TrustZone
+quality: evaluation
+component_root_path: platform/security/sl_component/sl_trustzone
+
+provides:
+  - name: tz_secure_key_library
+
+requires:
+  - name: tz_secure_key_library_s
+    condition: [trustzone_secure]
+  - name: tz_secure_key_library_ns
+    condition: [trustzone_nonsecure]
+
+conflicts:
+  - name: trustzone_unaware

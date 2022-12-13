@@ -1,0 +1,59 @@
+id: iot_crypto
+
+category: Third Party|Amazon FreeRTOS - AWS Libraries|FreeRTOS Plus
+label: IoT Crypto
+description: FreeRTOS Plus Crypto Tools.
+
+package: amazon_platform
+quality: production
+
+provides:
+  - name: iot_crypto
+  - name: mbedtls_platform_dynamic_memory_allocation_config
+  - name: mbedtls_threading_alt
+
+requires:
+  - name: core_pkcs11
+
+root_path: util/third_party/aws_iot_libs
+
+source:
+  - path: libraries/freertos_plus/standard/crypto/src/iot_crypto.c
+  - path: libraries/freertos_plus/standard/crypto/test/iot_test_crypto.c
+    condition: ["aws_tests_defs"]
+
+include:
+  - path: libraries/freertos_plus/standard/crypto/include
+    file_list:
+      - path: iot_crypto.h
+  - path: libraries/3rdparty/mbedtls_config
+    file_list:
+      - path: threading_alt.h
+
+template_contribution:
+  # Mbed TLS Dynamic memory allocation support
+  - name: mbedtls_config
+    value: MBEDTLS_PLATFORM_C
+  - name: mbedtls_config
+    value: MBEDTLS_PLATFORM_MEMORY
+  - name: mbedtls_config
+    value: MBEDTLS_PLATFORM_CALLOC_MACRO pvCalloc
+  - name: mbedtls_config
+    value: MBEDTLS_PLATFORM_FREE_MACRO   vPortFree
+
+  # Mbed TLS threading support
+  - name: mbedtls_config
+    value: MBEDTLS_THREADING_C
+  - name: mbedtls_config
+    value: MBEDTLS_THREADING_ALT
+  - name: mbedtls_config
+    value: THREADING_InitMutex mbedtls_mutex_init
+  - name: mbedtls_config
+    value: THREADING_FreeMutex mbedtls_mutex_free
+  - name: mbedtls_config
+    value: THREADING_TakeMutexBlocking mbedtls_mutex_lock
+  - name: mbedtls_config
+    value: THREADING_GiveMutex mbedtls_mutex_unlock
+
+define:
+  - name: CONFIG_MBEDTLS_USE_FREERTOS_PVCALLOC

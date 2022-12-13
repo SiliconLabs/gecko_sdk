@@ -1,0 +1,60 @@
+id: tz_secure_key_library_ns
+package: platform
+description: >-
+  This component provides the NS interface files of the Secure Key library.
+category: Platform|Security|TrustZone
+quality: evaluation
+component_root_path: platform/security
+ui_hints:
+  visibility: never
+
+provides:
+  - name: tz_secure_key_library_ns
+
+requires:
+  - name: trustzone_nonsecure
+  - name: tz_ns_interface
+
+  # The Secure Key Library will always make use of PSA Crypto.
+  - name: psa_crypto
+
+  # NVM3 requirements.
+  - name: ecode
+  - name: sl_assert
+
+  - name: tz_common
+  # Service interfaces.
+  - name: tz_service_psa_crypto
+  - name: tz_service_syscfg
+    condition: [emlib_syscfg]
+  - name: tz_service_msc
+    condition: [emlib_msc]
+  - name: tz_service_nvm3
+    condition: [nvm3]
+  - name: tz_service_psa_its
+    condition: [psa_its]
+  - name: tz_service_se_manager
+    condition: [se_manager]
+  - name: tz_sl_interface_crypto
+  - name: tz_sl_interface
+
+source:
+  - path: ../../util/third_party/trusted-firmware-m/platform/ext/target/siliconlabs/common/tfm_ns_interface.c
+  - path: sl_component/sl_trustzone/src/sli_tz_ns_interface.c
+
+define:
+  # Use Silabs Secure Library configuration of TF-M (interface).
+  - name: TFM_CONFIG_SL_SECURE_LIBRARY
+  # We do not want to enable alt-plugins on the NS side of the application.
+  - name: SL_MBEDTLS_NO_CRYPTO_ACCELERATION
+
+template_contribution:
+  - name: component_catalog
+    value: tz_secure_key_library_ns
+  - name: event_handler
+    value:
+      event: service_init
+      include: sli_tz_ns_interface.h
+      handler: sli_tz_ns_interface_init
+
+

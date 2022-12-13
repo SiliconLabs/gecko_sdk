@@ -1,0 +1,31 @@
+id: tz_sl_interface_crypto_asym_sign_funcs
+package: platform
+description: >-
+  This component provides a TrustZone secure library interface crypto asym sign functions
+category: Platform|Security|TrustZone
+quality: evaluation
+ui_hints:
+  visibility: never
+provides:
+  - name: tz_sl_interface_crypto_asym_sign_funcs
+requires:
+  - name: trustzone_nonsecure
+template_contribution:
+  - name: tfm_interface_func
+    value: tfm_crypto_sign_message
+
+  - name: tfm_interface_func
+    value: tfm_crypto_verify_message
+
+  - name: tfm_interface_func
+    value: tfm_crypto_sign_hash
+
+  - name: tfm_interface_func
+    value: tfm_crypto_verify_hash
+
+  - name: tfm_interface_func
+    value: tfm_crypto_asymmetric_encrypt
+
+  - name: tfm_interface_func
+    value: tfm_crypto_asymmetric_decrypt
+

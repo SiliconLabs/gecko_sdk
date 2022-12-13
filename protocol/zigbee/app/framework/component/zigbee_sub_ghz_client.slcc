@@ -1,0 +1,70 @@
+package: Zigbee
+description: The Smart Energy Sub-GHz client suspends the transmission of any ZCL
+  messages for a given period when instructed so by the Sub-GHz server.
+id: zigbee_sub_ghz_client
+label: Sub-GHz Client
+category: Zigbee|Cluster Library|Smart Energy
+quality: production
+provides:
+   - name: "zigbee_sub_ghz_client"
+source:
+  - path: protocol/zigbee/app/framework/plugin/sub-ghz-client/sub-ghz-client.c
+  - path: protocol/zigbee/app/framework/plugin/sub-ghz-client/sub-ghz-client-cli.c
+    condition:
+      - "cli"
+  - path: protocol/zigbee/app/framework/plugin/sub-ghz-client/sub-ghz-client-cb.c
+include:
+  - path: protocol/zigbee/app/framework/plugin/sub-ghz-client
+    file_list:
+      - path: sub-ghz-client.h
+template_contribution:
+  - name: component_catalog
+    value: zigbee_sub_ghz_client
+  - name: cluster_service
+    value:
+       cluster_id: "0x070B"
+       mfg_id: "NOT_MFG_SPECIFIC"
+       side: "CLIENT"       
+       service_function: "emberAfSubGhzClusterClientCommandParse"
+  - name: cli_group
+    value:
+      group: plugin
+      name: sub-ghz
+      help: sub-ghz related commands
+  - name: cli_command
+    value:
+      group: sub-ghz
+      name: get-suspend-status
+      handler: emAfSubGhzClientCliGetSuspendStatus
+      help: Send the GetSuspendZCLMessagesStatus command to the Sub-GHz server.
+      argument:
+      - type: uint16
+        help: Servers node ID
+      - type: uint8
+        help: Servers endpoint
+  - name: cli_command
+    value:
+      group: sub-ghz
+      name: ignore-suspend-status
+      handler: emAfSubGhzClientCliIgnoreSuspendStatus
+      help: Ignore the suspend status when sending ZCL messages (for testing purposes only).
+      argument:
+      - type: int8
+        help: Whether or not the suspend status should be ignored
+  - name: cli_command
+    value:
+      group: sub-ghz
+      name: request-channel-change
+      handler: emAfSubGhzClientCliRequestChannelChange
+      help: Send the Mgmt_NWK_Unsolicited_Enhanced_Update_notify command to the Sub-GHz server.
+      argument:
+      - type: uint16
+        help: Servers node ID
+      - type: uint8
+        help: Current channel page
+      - type: uint8
+        help: Current channel
+      - type: uint16
+documentation:
+  docset: zigbee
+  document: zigbee-af-api/sub-ghz-client

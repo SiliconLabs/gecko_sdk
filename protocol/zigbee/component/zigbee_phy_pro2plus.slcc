@@ -1,0 +1,26 @@
+id: zigbee_phy_pro2plus
+label: GB868 Dual-MAC Si446x PRO2+ Radio PHY
+package: Zigbee
+category: Zigbee|Stack
+quality: production
+ui_hints:
+  visibility: never
+
+description: Provides GB868 Dual-MAC Si446x PRO2+ Radio PHY
+
+provides:
+  - name: zigbee_phy_pro2plus
+
+requires:
+  - name: zigbee_phy_pro2plus_implementation
+  - name: zigbee_phy_pro2plus_library
+    condition:
+     - zigbee_force_libraries
+  - name: si446x_radio_driver
+
+recommends:
+  - id: zigbee_phy_pro2plus_source
+
+template_contribution:
+  - name: component_catalog
+    value: zigbee_phy_pro2plus

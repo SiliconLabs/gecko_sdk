@@ -1,0 +1,13 @@
+# Adapter Pack Configurator for Z-Wave Command Class Definition
+
+# Is used for SetupId
+id=cc_configurator
+label=Adapter Pack Configurator for Z-Wave Command Class
+
+# Trigger file extension. No period.
+uc.triggerExtension=cc_config
+
+# Standard generation function
+function(uc_generate) {
+  cmd=$(python) cc_configurator.py -i ${contentFolder} -o ${generationOutput} generate
+}

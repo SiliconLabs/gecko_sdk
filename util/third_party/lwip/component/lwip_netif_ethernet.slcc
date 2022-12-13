@@ -1,0 +1,20 @@
+id: lwip_netif_ethernet
+label: "LWIP generic network interface device drivers for ethernet"
+package: platform
+description: >
+    The LWIP generic network interface device drivers for ethernet. Shared code for Ethernet based interfaces.
+category: Third Party|LwIP|netif
+quality: production
+provides:
+  - name: lwip_netif
+    allow_multiple: true
+  - name: lwip_netif_ethernet
+requires:
+  - name: lwip_core
+source:
+  - path: util/third_party/lwip/lwip/src/netif/ethernet.c
+include:  
+  - path: util/third_party/lwip/lwip/src/include
+    file_list:
+    - path: netif/etharp.h
+    - path: netif/ethernet.h

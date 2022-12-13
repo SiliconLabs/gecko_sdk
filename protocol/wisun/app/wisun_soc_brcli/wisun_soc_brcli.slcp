@@ -1,0 +1,241 @@
+project_name: "wisun_soc_brcli"
+label: "Wi-SUN - SoC Border Router CLI example"
+description: "This demo is an out-of-the-box Wi-SUN border router demo. It provides a command line interface to control basic configurations."
+package: "wisun"
+category: "Wi-SUN Examples"
+quality: "production"
+
+component:
+  - id: "segger_rtt"
+  - id: "wisun_br_stack"
+  - id: "wisun_rb_detection"
+  - id: "wisun_default_phy"
+  - id: "wisun_stack_debug"
+  - id: "wisun_stack_lfn"
+  - id: "sl_system"
+  - id: "device_init"
+  - id: "slist"
+  - id: "micriumos_kernel"
+  - id: "sleeptimer"
+  - id: "nvm3_default"
+  - id: "iostream_retarget_stdio"
+  - id: "iostream_stdlib_config"
+  - id: "silabs_core_sl_malloc"
+  - id: "sl_wisun_cli_util"
+  - id: "wisun_full_radioconf"
+  - id: "cli"
+    instance:
+      - vcom
+  - id: "iostream_recommended_stream"
+  - id: "rail_util_pa"
+  - id: "wisun_test_certificates"
+
+requires:
+  - name: "wisun_radioconf"
+  - name: "wisun_br_mode_switch_cli"
+    condition: [device_sdid_220]
+  - name: "rail_util_eff"
+    condition: [hardware_board_has_eff]
+
+source:
+  - path: "app.c"
+  - path: "app_settings.c"
+  - path: "app_certificate.c"
+  - path: "app_certificate_store.c"
+  - path: "main.c"
+include:
+  - path: "."
+    file_list:
+    - path: "app.h"
+    - path: "app_settings.h"
+    - path: "app_certificate.h"
+    - path: "app_certificate_store.h"
+define:
+  - name: "DEBUG_EFM_USER"
+configuration:
+  - name: "SL_BOARD_ENABLE_VCOM"
+    value: "1"
+  - name: "SL_IOSTREAM_USART_VCOM_FLOW_CONTROL_TYPE"
+    value: "usartHwFlowControlCtsAndRts"
+    condition: [iostream_usart]
+  - name: "SL_IOSTREAM_USART_VCOM_CONVERT_BY_DEFAULT_LF_TO_CRLF"
+    value: "1"
+    condition: [iostream_usart]
+  - name: SL_IOSTREAM_EUSART_VCOM_CONVERT_BY_DEFAULT_LF_TO_CRLF
+    value: "true"
+    condition: [iostream_eusart]
+  - name: SL_IOSTREAM_EUSART_VCOM_RESTRICT_ENERGY_MODE_TO_ALLOW_RECEPTION
+    value: "false" # Disable this so that the chip can enter EM2/3/4
+                   # and be woken by other wake sources, setting this
+                   # to true adds an EM1 requirement to the Power Manager.
+    condition: [iostream_eusart]
+  - name: SL_IOSTREAM_EUSART_VCOM_RX_BUFFER_SIZE
+    value: "128" # Increase from default 32 to account for automated command
+                 # storage entry and for when long command strings are
+                 # interrupted by chip interrupts.
+    condition: [iostream_eusart]
+  - name: SL_IOSTREAM_EUSART_VCOM_FLOW_CONTROL_TYPE
+    value: "eusartHwFlowControlCtsAndRts"
+    condition: [iostream_eusart]
+  - name: CPU_CFG_TS_32_EN
+    value: "1"
+  - name: OS_CFG_DBG_EN
+    value: "1"
+  - name: OS_CFG_TS_EN
+    value: "1"
+  - name: OS_CFG_SCHED_ROUND_ROBIN_EN
+    value: "1"
+  - name: OS_CFG_STAT_TASK_EN
+    value: "1"
+  - name: OS_CFG_TASK_PROFILE_EN
+    value: "1"
+  - name: "OS_CFG_APP_HOOKS_EN"
+    value: "1"
+    condition: [micriumos_kernel]
+  - name: "WISUN_CLI_AUTO_SAVE"
+    value: "0"
+  - name: "NVM3_DEFAULT_MAX_OBJECT_SIZE"
+    value: "1900"
+  - name: SL_RAIL_UTIL_PA_SELECTION_SUBGHZ
+    value: "RAIL_TX_POWER_MODE_SUBGIG_EFF_20DBM"
+    condition: [hardware_board_has_eff]
+  - name: RAIL_UTIL_EFF_MAX_TX_CONTINUOUS_POWER_DBM
+    value: 20
+    condition: [hardware_board_has_eff]
+  - name: RAIL_UTIL_EFF_MAX_TX_DUTY_CYCLE
+    value: 100
+    condition: [hardware_board_has_eff]
+  - name: SL_RAIL_UTIL_PTI_BAUD_RATE_HZ
+    value: "3200000"
+  - name: SL_DEVICE_INIT_RFFPLL_BAND
+    value: "1"
+    condition: [device_sdid_220, hardware_board_default_rf_band_470]
+
+template_contribution:
+  - name: "cli_command"
+    value:
+      name: "reboot"
+      handler: "app_reboot"
+      help: "Reboot board"
+      shortcuts:
+        - name: "r"
+  - name: "cli_command"
+    value:
+      name: "about"
+      handler: "app_about"
+      help: "Get info about the running app"
+      shortcuts:
+        - name: "a"
+# -------------------------------
+  - name: "cli_group"
+    value:
+      name: "wisun"
+      help: "Wi-SUN commands"
+      shortcuts:
+        - name: "w"
+  - name: "cli_command"
+    value:
+      group: "wisun"
+      name: "start_fan10"
+      handler: "app_start_fan10"
+      help: "Start the border router using FAN1.0 settings: w st10"
+      shortcuts:
+        - name: "st10"
+  - name: "cli_command"
+    value:
+      group: "wisun"
+      name: "start_fan11"
+      handler: "app_start_fan11"
+      help: "Start the border router using FAN1.1 settings: w st11"
+      shortcuts:
+        - name: "st11"
+  - name: "cli_command"
+    value:
+      group: "wisun"
+      name: "start_explicit"
+      handler: "app_start_explicit"
+      help: "Start the border router using explicit PHY settings: w ste"
+      shortcuts:
+        - name: "ste"
+  - name: "cli_command"
+    value:
+      group: "wisun"
+      name: "certificate_store"
+      handler: "app_certificate_store"
+      help: "Store a certificate: w cs"
+      shortcuts:
+        - name: "cs"
+      argument:
+        - type: uint8
+          help: "Certificate index"
+
+  - name: "cli_command"
+    value:
+      group: "wisun"
+      name: "certificate_remove"
+      handler: "app_certificate_remove"
+      help: "Remove a certificate: w cr"
+      shortcuts:
+        - name: "cr"
+      argument:
+        - type: string
+          help: "Certificate index"
+  - name: "cli_command"
+    value:
+      group: "wisun"
+      name: "certificate_list"
+      handler: "app_certificate_list"
+      help: "List installed certificates: w cl"
+      shortcuts:
+        - name: "cl"
+  - name: "cli_command"
+    value:
+      group: "wisun"
+      name: "set_trace_level"
+      handler: "app_set_trace_level"
+      help: "Set the trace level: w tl"
+      shortcuts:
+        - name: "tl"
+      argument:
+        - type: string
+          help: "List of ID,level; such as 1,none;4,info to configure group ID 1 with no log and group ID 4 with INFO level. Can also use all,info to set all group to INFO level"
+
+  - name: "cli_command"
+    value:
+      group: "wisun"
+      name: "reset_statistics"
+      handler: "app_reset_statistics"
+      help: "Reset the statistics: w rs"
+      shortcuts:
+        - name: "rs"
+  - name: "cli_command"
+    value:
+      group: "wisun"
+      name: "set_unicast_tx_mode"
+      handler: "app_set_unicast_tx_mode"
+      help: "configure unicast tx mode:"
+      argument:
+        - type: uint8
+          help: "mode: 0=default, 1=slot"
+
+readme:
+  - path: ../../../../app/wisun/documentation/example/wisun_br/readme.md
+
+other_file:
+  - path: ../../../../app/wisun/documentation/example/wisun_br/readme_img0.png
+
+ui_hints:
+  highlight:
+    - path: readme.md
+      focus: true
+
+tag:
+  - prebuilt_demo
+
+filter:
+  - name: "Wireless Technology"
+    value: ["Wi-SUN"]
+  - name: "Device Type"
+    value: ["SoC"]
+  - name: "Project Difficulty"
+    value: ["Advanced"]

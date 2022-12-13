@@ -1,0 +1,82 @@
+project_name: wisun_rcp
+label: Wi-SUN - RCP
+description: >-
+  The Wi-SUN RCP (radio coprocessor) application provides a radio interface to a
+  Linux host. It is meant to be paired with wsbrd (Wi-SUN Network
+  implementation for Linux) to run as a Linux border router device.
+package: wisun
+category: Wi-SUN Examples
+quality: production
+
+
+component:
+  - id: iostream_rtt
+  - id: iostream_retarget_stdio
+  - id: iostream_stdlib_config
+  - id: cpc_security_secondary_none
+  - id: wisun_full_radioconf
+  - id: wisun_rcp_app
+
+requires:
+  - name: rail_util_eff
+    condition: [hardware_board_has_eff]
+
+configuration:
+  - name: SL_CPC_DRV_UART_VCOM_BAUDRATE
+    value: 115200
+    condition: [cpc_secondary]
+  - name: SL_CPC_DRV_UART_VCOM_FLOW_CONTROL_TYPE
+    value: usartHwFlowControlCtsAndRts
+    condition: [cpc_secondary, device_has_usart]
+  - name: SL_CPC_DRV_UART_VCOM_FLOW_CONTROL_TYPE
+    value: eusartHwFlowControlCtsAndRts
+    condition: [cpc_secondary, device_has_eusart]
+  - name: SL_CPC_RX_PAYLOAD_MAX_LENGTH
+    value: 2038
+  - name: SL_BOARD_ENABLE_VCOM
+    value: 1
+  - name: SL_HEAP_SIZE
+    value: 0xD000
+  - name: OS_CFG_APP_HOOKS_EN
+    value: 1
+    condition: [micriumos_kernel]
+  - name: OS_CFG_DBG_EN
+    value: 1
+    condition: [micriumos_kernel]
+  - name: SL_RAIL_UTIL_PA_SELECTION_SUBGHZ
+    value: "RAIL_TX_POWER_MODE_SUBGIG_EFF_20DBM"
+    condition: [hardware_board_has_eff]
+  - name: RAIL_UTIL_EFF_MAX_TX_CONTINUOUS_POWER_DBM
+    value: 20
+    condition: [hardware_board_has_eff]
+  - name: RAIL_UTIL_EFF_MAX_TX_DUTY_CYCLE
+    value: 100
+    condition: [hardware_board_has_eff]
+  - name: SL_RAIL_UTIL_PTI_BAUD_RATE_HZ
+    value: "3200000"
+  - name: SL_DEVICE_INIT_RFFPLL_BAND
+    value: "1"
+    condition: [device_sdid_220, hardware_board_default_rf_band_470]
+
+readme:
+  - path: ../../../../app/wisun/documentation/example/wisun_rcp/readme.md
+
+other_file:
+  - path: ../../../../app/wisun/documentation/example/wisun_rcp/readme_img0.png
+  - path: ../../../../app/wisun/documentation/example/wisun_rcp/readme_img1.png
+
+ui_hints:
+  highlight:
+    - path: readme.md
+      focus: true
+
+tag:
+  - prebuilt_demo
+
+filter:
+  - name: Wireless Technology
+    value: [Wi-SUN]
+  - name: Device Type
+    value: [RCP]
+  - name: Project Difficulty
+    value: [Advanced]

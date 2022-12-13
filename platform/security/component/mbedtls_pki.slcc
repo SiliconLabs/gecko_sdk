@@ -1,0 +1,50 @@
+id: mbedtls_pki
+package: platform
+label: Public-Key Abstraction Layer
+description: >-
+  This component provides support for the Public Key (PK) abstraction layer in
+  Mbed TLS. This layer provides indirect support for public-key
+  encryption/decryption as well signature generation/verification.
+category: Platform|Security|Mbed TLS|Upper Layer
+quality: production
+source:
+  # The group of source files below contain code that is required for the PK
+  # abstraction layer to function. Normally, these would be included through
+  # their corresponding mbedtls_ components. We can't rely on those being
+  # included now that the PK layer uses PSA Crypto APIs. 
+  - path: util/third_party/mbedtls/library/md.c
+  - path: util/third_party/mbedtls/library/ecp.c
+  - path: util/third_party/mbedtls/library/ecp_curves.c
+  - path: util/third_party/mbedtls/library/ecdsa.c
+  
+  - path: util/third_party/mbedtls/library/pk.c
+  - path: util/third_party/mbedtls/library/pkparse.c
+  - path: util/third_party/mbedtls/library/pkwrite.c
+  - path: util/third_party/mbedtls/library/pk_wrap.c
+provides:
+  - name: mbedtls_pki
+  - name: mbedtls_uses_psa_crypto
+    allow_multiple: true
+requires:
+  - name: mbedtls_core
+  - name: mbedtls_asn1
+  - name: mbedtls_mpi
+  - name: mbedtls_oid
+
+  # Always needed.
+  - name: psa_crypto_hash
+
+  # We need either RSA or ECDSA to be enabled.
+  - name: mbedtls_pk_backend
+
+# ECDSA is the most likely backend for PK signatures.
+recommends:
+  - id: psa_crypto_ecdsa
+
+template_contribution:
+  - name: mbedtls_config
+    value: MBEDTLS_PK_C
+  - name: mbedtls_config
+    value: MBEDTLS_PK_PARSE_C
+  - name: mbedtls_config
+    value: MBEDTLS_PK_WRITE_C

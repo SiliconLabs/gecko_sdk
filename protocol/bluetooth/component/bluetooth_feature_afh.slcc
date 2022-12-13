@@ -1,0 +1,17 @@
+id: "bluetooth_feature_afh"
+label:  "AFH"
+package: "Bluetooth"
+description: >
+  Bluetooth Adaptive Frequency Hopping (AFH) feature
+category: "Bluetooth|Feature"
+quality: "production"
+root_path: "protocol/bluetooth"
+requires:
+  - name: "bluetooth_controller"
+  - name: "bluetooth_feature_high_power"
+provides:
+  - name: "bluetooth_feature_afh"
+template_contribution:
+  - name: component_catalog
+    value: bluetooth_feature_afh
+

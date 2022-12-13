@@ -1,0 +1,21 @@
+id: zw_cc_zwaveplusinfo
+label: ZWavePlusInfo Command Class
+category: Z-Wave|Command Classes
+description: >
+  The Z-Wave Plus Info Command Class is used to differentiate between Z-Wave Plus, Z-Wave for IP
+  and Z-Wave devices. Furthermore this command class provides additional information about the
+  Z-Wave Plus device in question. The Z-Wave Plus Info Command Class defines two icon types. Icon
+  types allow for a meaningful, homogeneous representation in user and installer Graphical User
+  Interfaces (GUI), respectively.
+package: Z-Wave
+quality: production
+source:
+  - path: protocol/z-wave/ZAF/CommandClasses/ZWavePlusInfo/CC_ZWavePlusInfo.c
+  - path: protocol/z-wave/ZAF/CommandClasses/ZWavePlusInfo/cc_zwave_plus_info_config_api.c
+include:
+  - path: protocol/z-wave/ZAF/CommandClasses/ZWavePlusInfo/
+    file_list:
+     - path: cc_zwave_plus_info_config_api.h
+     - path: ZW_plus_version.h
+provides:
+  - name: zw_cc_zwaveplusinfo

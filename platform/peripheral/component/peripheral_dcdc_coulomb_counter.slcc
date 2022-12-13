@@ -1,0 +1,30 @@
+id: peripheral_dcdc_coulomb_counter
+label: DCDC_COULOMB_COUNTER
+package: platform
+description: >
+  DCDC COULOMB COUNTER Peripheral API
+category: Platform|Peripheral
+quality: production
+component_root_path: "platform/peripheral"
+source:
+  - path: "src/peripheral_dcdc_coulomb_counter.c"
+include:
+  - path: "inc"
+    file_list:
+    - path: "peripheral_dcdc_coulomb_counter.h"
+provides:
+  - name: peripheral_dcdc_coulomb_counter
+requires:
+  - name: device
+  - name: device_sdid_230
+  - name: device_has_dcdc
+  - name: emlib_common
+  - name: emlib_cmu
+  - name: emlib_emu
+  - name: emlib_prs
+  - name: cmsis_core
+documentation:
+  docset: gecko-platform
+  document:
+    - page: emlib/api/efr32xg27/group-dcdccoulombcounter
+      condition: [device_sdid_230]

@@ -1,0 +1,8 @@
+All image files are generated from files saved in Highstage:
+\\highstage.sdesigns.com\files\7120\SDS\SDS13795\SDS13795
+
+Z-Wave plus icons:
+\\highstage.sdesigns.com\files\7089\PSP\PSP11973\PSP11973\PSP11973 - Z-Wave plus - Device Type and Command Class Icons.pptx
+
+wall_controller_association_nodes.png:
+\\highstage.sdesigns.com\files\7120\INS\INS13477\INS13477-3

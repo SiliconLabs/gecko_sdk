@@ -1,0 +1,29 @@
+id: app_scheduler_memory_dynamic
+category: Application|Utility
+label:       Dynamic memory management implementation for Application Scheduler
+description: >
+  The Dynamic memory management component implements dynamic memory management for Application Scheduler.
+  If memory is free, it is allocated. Otherwise the component returns 'No more resources'.
+
+  Note:
+  Allocated resource must be freed to avoid memory leakages.
+package: platform
+quality: experimental
+
+provides:
+  - name: app_scheduler_memory
+  - name: app_scheduler_memory_dynamic
+
+requires:
+  - name: silabs_core_sl_malloc
+  - name: app_scheduler
+
+root_path: app/common/util/app_scheduler
+
+include:
+  - path: .
+    file_list: 
+      - path: app_scheduler_memory.h
+
+source:
+  - path: app_scheduler_memory_dynamic.c

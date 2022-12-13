@@ -1,0 +1,39 @@
+id: tz_sl_interface_crypto_hash_funcs
+package: platform
+description: >-
+  This component provides a TrustZone secure library interface crypto hash functions
+category: Platform|Security|TrustZone
+quality: evaluation
+ui_hints:
+  visibility: never
+provides:
+  - name: tz_sl_interface_crypto_hash_funcs
+requires:
+  - name: trustzone_nonsecure
+template_contribution:
+  - name: tfm_interface_func
+    value: tfm_crypto_hash_compute
+
+  - name: tfm_interface_func
+    value: tfm_crypto_hash_compare
+
+  - name: tfm_interface_func
+    value: tfm_crypto_hash_setup
+
+  - name: tfm_interface_func
+    value: tfm_crypto_hash_update
+
+  - name: tfm_interface_func
+    value: tfm_crypto_hash_finish
+
+  - name: tfm_interface_func
+    value: tfm_crypto_hash_compute
+
+  - name: tfm_interface_func
+    value: tfm_crypto_hash_verify
+
+  - name: tfm_interface_func
+    value: tfm_crypto_hash_abort
+
+  - name: tfm_interface_func
+    value: tfm_crypto_hash_clone

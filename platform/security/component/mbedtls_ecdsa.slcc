@@ -1,0 +1,22 @@
+id: mbedtls_ecdsa
+package: platform
+label: ECDSA
+description: >-
+  This component provides support for signature generation and verification with
+  ECDSA using Mbed TLS.
+category: Platform|Security|Mbed TLS|Signatures
+quality: production
+provides:
+  - name: mbedtls_ecdsa
+requires:
+  - name: mbedtls_ecc
+  - name: mbedtls_asn1
+  - name: psa_crypto_ecdsa
+    condition: [psa_crypto]
+source:
+  - path: util/third_party/mbedtls/library/ecdsa.c
+recommends:
+  - id: mbedtls_sha256
+template_contribution:
+  - name: mbedtls_config
+    value: MBEDTLS_ECDSA_C

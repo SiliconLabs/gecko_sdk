@@ -1,0 +1,29 @@
+id: psa_crypto_sha224
+package: platform
+label: SHA-224
+description: >-
+  This component provides support for the SHA-224 hash algorithm in PSA Crypto.
+category: Platform|Security|PSA Crypto|Hashing
+quality: production
+provides:
+  - name: psa_crypto_sha224
+  - name: psa_hash_function
+    allow_multiple: true
+requires:
+  - name: psa_crypto_hash
+  - name: mbedtls_sha256
+    condition: [device_series_0]
+template_contribution:
+  - name: psa_crypto_config
+    value: PSA_WANT_ALG_SHA_224
+  - name: psa_crypto_config
+    value: "MBEDTLS_PSA_BUILTIN_ALG_SHA_224 1"
+    condition: [mbedtls_sha256]
+  - name: mbedtls_config
+    value: MBEDTLS_SHA224_C
+    condition: [mbedtls_uses_psa_crypto]
+  - name: mbedtls_config
+    value: MBEDTLS_SHA256_C
+    condition: [mbedtls_uses_psa_crypto]
+documentation:
+  url: https://armmbed.github.io/mbed-crypto/html/api/ops/hashes.html#c.PSA_ALG_SHA_224

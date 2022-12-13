@@ -1,0 +1,122 @@
+#!/bin/bash
+#
+#  Copyright (c) 2022, The OpenThread Authors.
+#  All rights reserved.
+#
+#  Redistribution and use in source and binary forms, with or without
+#  modification, are permitted provided that the following conditions are met:
+#  1. Redistributions of source code must retain the above copyright
+#     notice, this list of conditions and the following disclaimer.
+#  2. Redistributions in binary form must reproduce the above copyright
+#     notice, this list of conditions and the following disclaimer in the
+#     documentation and/or other materials provided with the distribution.
+#  3. Neither the name of the copyright holder nor the
+#     names of its contributors may be used to endorse or promote products
+#     derived from this software without specific prior written permission.
+#
+#  THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS"
+#  AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE
+#  IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE
+#  ARE DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT HOLDER OR CONTRIBUTORS BE
+#  LIABLE FOR ANY DIRECT, INDIRECT, INCIDENTAL, SPECIAL, EXEMPLARY, OR
+#  CONSEQUENTIAL DAMAGES (INCLUDING, BUT NOT LIMITED TO, PROCUREMENT OF
+#  SUBSTITUTE GOODS OR SERVICES; LOSS OF USE, DATA, OR PROFITS; OR BUSINESS
+#  INTERRUPTION) HOWEVER CAUSED AND ON ANY THEORY OF LIABILITY, WHETHER IN
+#  CONTRACT, STRICT LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE)
+#  ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
+#  POSSIBILITY OF SUCH DAMAGE.
+#
+
+#
+#  This script calls cmake and ninja to compile otbr-agent.
+#
+#  Compile with default build options:
+#
+#      script/cmake-build-android
+#
+#  Compile with the specified build option enabled:
+#
+#      script/cmake-build-android -D${option}=ON
+#
+#  Compile with the specified ninja build target:
+#
+#      OTBR_TARGET="${target}" script/cmake-build-android
+#
+#  Compile with the specified build directory:
+#
+#      OTBR_BUILD_DIR="./build/temp" script/cmake-build-android
+#
+#  Examples:
+#
+#      script/cmake-build-android
+#
+#      script/cmake-build-android -DOTBR_DBUS=ON
+#
+#      OTBR_BUILD_DIR="./build/temp" OTBR_TARGET="otbr-agent" script/cmake-build-android -DOTBR_DBUS=ON
+#
+
+set -euxo pipefail
+
+if [[ -n ${BASH_SOURCE[0]} ]]; then
+    script_path="${BASH_SOURCE[0]}"
+else
+    script_path="$0"
+fi
+
+script_dir="$(dirname "$(realpath "$script_path")")"
+repo_dir="$(dirname "$script_dir")"
+gsdk_dir="$(realpath "$repo_dir/../../../")"
+
+# shellcheck source=script/_initrc
+. "$(dirname "$0")"/_initrc
+
+readonly OTBR_TOP_SRCDIR="$PWD"
+readonly OTBR_TOP_BUILD_DIR="${BUILD_DIR}/otbr"
+
+OTBR_TARGET=${OTBR_TARGET:-}
+
+
+main()
+{
+    # build configuration
+    OTBR_TARGET="ot-ctl otbr-agent ot-daemon"
+    OTBR_MDNS=mDNSResponder
+
+
+    OTBR_OPTIONS="-DOT_MULTIPAN_RCP=ON -DOT_POSIX_CONFIG_RCP_BUS=CPC -DCPCD_SOURCE_DIR=${gsdk_dir}/platform/service/cpc/daemon"
+
+    # Create builddir
+    builddir="${OTBR_BUILD_DIR:-${OTBR_TOP_BUILD_DIR}}"
+    mkdir -p "${builddir}"
+
+    [ -z "${NDK+x}" ] && echo "Please set the 'NDK' environment variable" && exit 1
+
+    (
+        cd "${builddir}" || die "Failed to enter ${builddir}"
+
+        REFERENCE_DEVICE=1 BACKBONE_ROUTER=1 OT_BACKBONE_CI=1 \
+            cmake \
+                -DCMAKE_TOOLCHAIN_FILE=$NDK/build/cmake/android.toolchain.cmake \
+                -DANDROID_ABI=arm64-v8a \
+                -DANDROID_PLATFORM=android-26 \
+                -DOT_ANDROID_NDK=1 \
+                -DOTBR_DBUS=OFF \
+                -DOTBR_MDNS=mDNSResponder \
+                -DBUILD_TESTING=OFF \
+                -DOT_DAEMON=ON \
+                -DOT_APP_CLI=ON \
+                -DOT_PLATFORM=posix \
+                ${OTBR_OPTIONS[@]} \
+                -GNinja \
+                "${OTBR_TOP_SRCDIR}" \
+                "$@"
+
+        if [[ -n ${OTBR_TARGET[*]} ]]; then
+            ninja ${OTBR_TARGET[@]}
+        else
+            ninja
+        fi
+    )
+}
+
+main "$@"

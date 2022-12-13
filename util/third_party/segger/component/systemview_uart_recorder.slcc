@@ -1,0 +1,48 @@
+id: segger_systemview_uart_recorder
+label: SEGGER SystemView UART Recorder
+package: platform
+description: SEGGER SystemView UART Recorder. Allows to record events via UART when RTT cannot be used (that is when an application sleeps to EM2 or EM3 energy mode).
+category: Third Party|Segger|System View
+quality: internal
+config_file:
+  - path: util/third_party/segger/systemview/uart_recorder/config/sl_uart_recorder_config.h
+source:
+  - path: util/third_party/segger/systemview/uart_recorder/src/sl_uart_recorder.c
+  - path: util/third_party/segger/systemview/uart_recorder/src/sl_uart_recorder_init.c
+include:
+  - path: util/third_party/segger/systemview/uart_recorder/inc
+    file_list:
+      - path: sl_uart_recorder.h
+      - path: sli_uart_recorder.h
+      - path: sl_uart_recorder_init.h
+provides:
+  - name: segger_systemview_uart_recorder
+requires:
+  - name: iostream_uart_common
+  - name: sleeptimer
+  - name: segger_systemview
+  - name: status
+validation_helper:
+  - path: util/third_party/segger/systemview/uart_recorder/iostream_instance_validation.lua
+template_contribution:
+  - name: component_catalog
+    value: systemview_uart_recorder
+  - name: event_handler
+    value:
+      event: service_process_action
+      include: sl_uart_recorder.h
+      handler: sl_uart_recorder_process_action
+  - name: event_handler
+    value:
+      event: service_init
+      include: sl_uart_recorder_init.h
+      handler: sl_uart_recorder_init_helper
+      priority: 100
+  - name: power_manager_handler
+    value:
+      event: is_ok_to_sleep
+      include: sl_uart_recorder.h
+      handler: sl_uart_recorder_is_ok_to_sleep
+documentation:
+    docset: gecko-platform
+    document: service/api/group-uart_recorder

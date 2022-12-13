@@ -1,0 +1,18 @@
+id: zaf_cc_list_generator
+label: ZAF Command Class List Generator Component
+category: Z-Wave|ZAF|CC List Generator
+description: >
+  This component contains the functionality to generate the Command Class lists from the linked
+  Command Classes. It can collect all endpoints and is used during the ZAF initialization phase.
+  It also collects the secure and not secure command classes. It is possible to get the list
+  through the get function.
+package: Z-Wave
+quality: production
+include:
+  - path: "protocol/z-wave/ZAF/ApplicationUtilities/CCListGenerator"
+    file_list:
+      - path: "zaf_cc_list_generator.h"
+source:
+  - path: "protocol/z-wave/ZAF/ApplicationUtilities/CCListGenerator/zaf_cc_list_generator.c"
+provides:
+  - name: zaf_cc_list_generator

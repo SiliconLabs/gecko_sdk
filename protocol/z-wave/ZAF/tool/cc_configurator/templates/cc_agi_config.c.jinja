@@ -1,0 +1,118 @@
+/**
+ * @file
+ * Command Class Association Group Information
+ * @remarks This file is auto generated
+ * @copyright 2022 Silicon Laboratories Inc.
+ */
+
+#include <stdint.h>
+#include <stdbool.h>
+#include <SizeOf.h>
+#include <Assert.h>
+#include <cc_association_config.h>
+#include <ZAF_types.h>
+#include <ZW_TransportEndpoint.h>
+#include <agi.h>
+#include <SizeOf.h>
+#include <cc_agi_config_api.h>
+
+{% if endpoints | length == 1 %}
+{% if endpoints[0].endpoint == 0 %}
+static const AGI_GROUP AGI_TABLE_ROOT_DEVICE_GROUPS[] = 
+{
+{% for endpoint_index in endpoints %}
+{% for group_index in endpoint_index['groups'] %}
+  { 
+    .profile    = { .profile_MS = {{group_index['profile_msb']}}, .profile_LS = {{group_index['profile_lsb']}} }, 
+    .cmdGrpSize = {{group_index['commands'] | length }}, 
+    .cmdGrp     = { 
+                  {% for command_pair in group_index['commands'] %}
+                    [{{ loop.index0 }}] = { .cmdClass = {{command_pair['command_class']}}, .cmd = {{command_pair['command']}} }, 
+                  {% endfor %}
+                  }, 
+    .groupName  = "{{group_index['name']}}" 
+  }, 
+{% endfor %}
+{% endfor %}
+};
+{% endif %}
+{% else %}
+
+static const AGI_GROUP AGI_TABLE_ROOT_DEVICE_GROUPS[] = 
+{
+{% for endpoint_index in endpoints %}
+{% for group_index in endpoint_index['groups'] %}
+  { 
+    .profile    = { .profile_MS = {{group_index['profile_msb']}}, .profile_LS = {{group_index['profile_lsb']}} }, 
+    .cmdGrpSize = {{group_index['commands'] | length }}, 
+    .cmdGrp     = { 
+                  {% for command_pair in group_index['commands'] %}
+                    [{{ loop.index0 }}] = { .cmdClass = {{command_pair['command_class']}}, .cmd = {{command_pair['command']}} }, 
+                  {% endfor %}
+                  }, 
+    .groupName  = "{{group_index['name']}}" 
+  }, 
+{% endfor %}
+{% endfor %}
+};
+
+{% for endpoint_index in endpoints %}
+static const AGI_GROUP AGI_TABLE_ENDPOINT_{{ endpoint_index['endpoint'] }}_GROUPS[] = 
+{
+{% for group_index in endpoint_index['groups'] %}
+  { 
+    .profile    = { .profile_MS = {{group_index['profile_msb']}}, .profile_LS = {{group_index['profile_lsb']}} }, 
+    .cmdGrpSize = {{group_index['commands'] | length }}, 
+    .cmdGrp     = { 
+                  {% for command_pair in group_index['commands'] %}
+                    [{{ loop.index0 }}] = { .cmdClass = {{command_pair['command_class']}}, .cmd = {{command_pair['command']}} }, 
+                  {% endfor %}
+                  }, 
+    .groupName  = "{{group_index['name']}}" 
+  }, 
+{% endfor %}
+};
+{% endfor %}
+
+{% endif %}
+
+{% set gns = namespace() %}
+{% set gns.counter = 0  %}
+{% for endpoint_index in endpoints %}
+{% for group_index in endpoint_index['groups'] %}
+    {%  set gns.counter = gns.counter + 1 %}
+{% endfor %}
+{% endfor %}
+
+static const AGI_TABLE myAgi = 
+{
+  .tableEndpoint = {
+                    [0] = {
+                            .pTable = AGI_TABLE_ROOT_DEVICE_GROUPS,
+{% if endpoints[0].endpoint == 0  %}
+                            .tableSize = {{gns.counter }} 
+                          },
+{% else %}
+                            .tableSize = {{gns.counter}}
+                          },
+                  {% for endpoint_index in endpoints %}
+                    [{{endpoint_index['endpoint']}}] = {
+                            .pTable = AGI_TABLE_ENDPOINT_{{ endpoint_index['endpoint'] }}_GROUPS,
+                            .tableSize = {{ endpoint_index['groups'] | length }}
+                          },
+                  {% endfor %}
+{% endif %}
+                   },
+};
+
+
+const AGI_TABLE* cc_agi_get_config(void)
+{
+  return &myAgi;
+}
+
+const AGI_GROUP* cc_agi_get_rootdevice_groups(void)
+{
+  return (AGI_GROUP*)&AGI_TABLE_ROOT_DEVICE_GROUPS;
+}
+

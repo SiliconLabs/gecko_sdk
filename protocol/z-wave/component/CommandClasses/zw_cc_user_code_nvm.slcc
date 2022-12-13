@@ -1,0 +1,26 @@
+id: zw_cc_user_code_nvm
+label: User Code Command Class
+category: Z-Wave|Command Classes
+description: >
+  This component provides support for using the non-volatile memory in relation with User Code
+  Command Class.
+  
+  User Code Command Class is used to manage User Codes in access control systems.
+  
+  Besides the Read and Write functionalities, a migration API is also present. This aids the
+  migration process, which requires updating the NVM, when coming from an SDK version that is
+  older than 7.19.0.
+package: Z-Wave
+quality: production
+source:
+  - path: protocol/z-wave/ZAF/CommandClasses/UserCode/cc_user_code_nvm.c
+include:
+  - path: protocol/z-wave/ZAF/CommandClasses/UserCode/
+    file_list:
+     - path: CC_UserCode.h
+provides:
+  - name: zw_cc_user_code_nvm
+requires:
+  - name: zw_core
+  - name: zw_cc_user_code
+  - name: nvm3_default

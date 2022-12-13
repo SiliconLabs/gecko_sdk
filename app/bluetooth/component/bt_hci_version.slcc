@@ -1,0 +1,29 @@
+id: "bt_hci_version"
+label: "HCI Get Version Vendor Specific Command"
+package: "Bluetooth"
+description: >
+  Provides vendor specific commands to HCI to read version information.
+  Version information by default is the Bluetooth software version, this can be customized in sl_bt_hci_version_config.h file.
+category: "Bluetooth|Controller"
+quality: "production"
+root_path: "app/bluetooth/common/hci_version"
+config_file:
+  - path: "config/sl_bt_hci_version_config.h"
+include:
+  - path: "inc/"
+    file_list:
+      - path: "sli_bt_hci_version.h"
+source:
+  - path: "src/sli_bt_hci_version.c"
+requires:
+  - name: bluetooth_hci
+  - name: bluetooth_version
+template_contribution:
+  - name: event_handler
+    value:
+      event: internal_app_init
+      include: "sli_bt_hci_version.h"
+      handler: "sli_bt_hci_init_version"
+    priority: 100
+provides:
+  - name: "bluetooth_hci_version"

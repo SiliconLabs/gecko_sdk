@@ -1,0 +1,33 @@
+id: security_manager
+package: platform
+label: Security Manager
+description: |-
+  The 15.4 Security Manager utility handles general security functions (key management and crypto operations) through PSA Crypto API. Encryption keys are securely stored on parts that support the Vault feature.
+category: Platform|Utilities
+quality: production
+
+provides:
+  - name: security_manager
+
+requires:
+  - name: "psa_crypto"
+  - name: "psa_its"
+  # ZB uses AES-CCM. For OT, we don't need to waste code space
+  - name: psa_crypto_aes
+    condition:
+      - zigbee_pro_stack_support
+  - name: psa_crypto_ccm
+    condition:
+      - zigbee_pro_stack_support
+
+include:
+  - path: util/plugin/security_manager 
+    file_list:
+      - path: security_manager.h
+
+source:
+  - path: util/plugin/security_manager/security_manager.c
+
+template_contribution:
+  - name: component_catalog
+    value: security_manager

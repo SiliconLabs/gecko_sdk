@@ -1,0 +1,55 @@
+id: mbedtls_config
+package: platform
+label: Configuration
+description: >-
+  This component includes the Mbed TLS configuration.
+category: Platform|Security|Mbed TLS
+quality: production
+component_root_path: platform/security/sl_component/sl_mbedtls_support
+
+provides:
+  - name: mbedtls_config
+
+include:
+  - path: config
+    file_list:
+      - path: config-device-acceleration.h
+
+template_file:
+  - path: config/template/mbedtls_config_autogen.h.jinja
+    # Use the unless condition since secure projects might also require the config files
+    unless: [tz_secure_key_library_s, trustzone_nonsecure]
+  - path: config/template/mbedtls_config_autogen.h.jinja
+    export: true
+    condition: [trustzone_nonsecure]
+  - path: config/template/sl_mbedtls_config_transform_autogen.h.jinja
+    unless: [tz_secure_key_library_s, trustzone_nonsecure]
+  - path: config/template/sl_mbedtls_config_transform_autogen.h.jinja
+    export: true
+    condition: [trustzone_nonsecure]
+
+config_file:
+  - path: config/template/sl_mbedtls_config.h
+    file_id: mbedtls_config
+    # Use the unless condition since secure projects might also require the config files
+    unless: [tz_secure_key_library_s, trustzone_nonsecure]
+  - path: config/template/sl_mbedtls_config.h
+    file_id: mbedtls_config
+    export: true
+    condition: [trustzone_nonsecure]
+
+define:
+  - name: MBEDTLS_CONFIG_FILE
+    value: "<sl_mbedtls_config.h>"
+    # Uses a custom test config.
+    unless: [test_mbedtls_classic_common]
+
+requires:
+  - name: emlib_se
+    condition: [device_has_semailbox]
+  - name: mbedtls_platform_dynamic_memory_allocation_config
+    condition: [device_cortexm]
+
+recommends:
+  - id: mbedtls_platform_dynamic_memory_allocation_config_default
+    condition: [device_cortexm]

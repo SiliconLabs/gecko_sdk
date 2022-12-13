@@ -1,0 +1,21 @@
+id: "wisun_stack_lfn"
+label: "Stack LFN Support Plugin"
+description: "Add LFN and LFN Parenting functionalities to Wi-SUN stack. Evaluation only."
+package: "wisun"
+category: "Wi-SUN|Wi-SUN Plugin"
+quality: "evaluation"
+root_path: "protocol/wisun/stack"
+
+requires:
+  - name: "device_supports_wisun"
+
+provides:
+  - name: "wisun_stack_lfn"
+
+define:
+  - name: "HAVE_LFN_PARENT"
+  - name: "HAVE_LFN"
+
+documentation:
+  docset: wisun
+  document: wisun-stack-api/sl-wisun-lfn-api

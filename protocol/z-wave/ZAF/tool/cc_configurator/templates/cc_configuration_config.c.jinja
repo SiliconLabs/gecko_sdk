@@ -1,0 +1,119 @@
+/*******************************************************************************
+ * @file
+ * Command Class Configuration Parameter
+ * @remarks This file is auto generated
+ * @copyright 2022 Silicon Laboratories Inc.
+ *******************************************************************************
+ * # License
+ * <b>Copyright 2022 Silicon Laboratories Inc. www.silabs.com</b>
+ *******************************************************************************
+ *
+ * The licensor of this software is Silicon Laboratories Inc. Your use of this
+ * software is governed by the terms of Silicon Labs Master Software License
+ * Agreement (MSLA) available at
+ * www.silabs.com/about-us/legal/master-software-license-agreement. This
+ * software is distributed to you in Source Code format and is governed by the
+ * sections of the MSLA applicable to Source Code.
+ *
+ ******************************************************************************/
+// -----------------------------------------------------------------------------
+//                   Includes
+// -----------------------------------------------------------------------------
+#include <string.h>
+#include <stdbool.h>
+#include <ZW_typedefs.h>
+#include <SizeOf.h>
+#include <ZAF_file_ids.h>
+#include <CC_Configuration.h>
+#include <cc_configuration_config_api.h>
+
+// -----------------------------------------------------------------------------
+//                Macros and Typedefs
+// -----------------------------------------------------------------------------
+#define ZAF_FILE_ID_CC_CONFIGURATION_WITH_OFFSET(x) (ZAF_FILE_ID_CC_CONFIGURATION_BASE + x)
+
+// -----------------------------------------------------------------------------
+//                Static Variables
+// -----------------------------------------------------------------------------
+static const cc_config_parameter_metadata_t parameter_pool[] = {
+{% set _offset = namespace(value=0) %}
+{% set _number = namespace(value=1) %}
+{% set _next_number = namespace(value=2) %}
+{% for _configuration in configurations %}
+  {% if _next_number.value > configurations|length %}
+  {% set _next_number.value = 0 %}
+  {% endif %}
+  {
+    .number            = {{_number.value}},
+    .next_number       = {{_next_number.value}},
+    .file_id           = ZAF_FILE_ID_CC_CONFIGURATION_WITH_OFFSET({{_offset.value}}),
+    .migration_handler = NULL,
+
+    .attributes = {
+      .name = "{{_configuration.name}}",
+      .info = "{{_configuration.info}}",
+      .format = {{_configuration.format}},
+      .size = {{_configuration.size}},
+      {% if _configuration.format == "CC_CONFIG_PARAMETER_FORMAT_SIGNED_INTEGER" %}
+      {% if _configuration.size == "CC_CONFIG_PARAMETER_SIZE_8_BIT" %}
+      .min_value.as_int8 = {{_configuration.min_value}},
+      .max_value.as_int8 = {{_configuration.max_value}},
+      .default_value.as_int8 = {{_configuration.default_value}},
+      {% endif %}
+      {% if _configuration.size == "CC_CONFIG_PARAMETER_SIZE_16_BIT" %}
+      .min_value.as_int16 = {{_configuration.min_value}},
+      .max_value.as_int16 = {{_configuration.max_value}},
+      .default_value.as_int16 = {{_configuration.default_value}},
+      {% endif %}
+      {% if _configuration.size == "CC_CONFIG_PARAMETER_SIZE_32_BIT" %}
+      .min_value.as_int32 = {{_configuration.min_value}},
+      .max_value.as_int32 = {{_configuration.max_value}},
+      .default_value.as_int32 = {{_configuration.default_value}},
+      {% endif %}
+      {% endif %}
+      {% if _configuration.format == "CC_CONFIG_PARAMETER_FORMAT_UNSIGNED_INTEGER" %}
+      {% if _configuration.size == "CC_CONFIG_PARAMETER_SIZE_8_BIT" %}
+      .min_value.as_uint8 = {{_configuration.min_value}},
+      .max_value.as_uint8 = {{_configuration.max_value}},
+      .default_value.as_uint8 = {{_configuration.default_value}},
+      {% endif %}
+      {% if _configuration.size == "CC_CONFIG_PARAMETER_SIZE_16_BIT" %}
+      .min_value.as_uint16 = {{_configuration.min_value}},
+      .max_value.as_uint16 = {{_configuration.max_value}},
+      .default_value.as_uint16 = {{_configuration.default_value}},
+      {% endif %}
+      {% if _configuration.size == "CC_CONFIG_PARAMETER_SIZE_32_BIT" %}
+      .min_value.as_uint32 = {{_configuration.min_value}},
+      .max_value.as_uint32 = {{_configuration.max_value}},
+      .default_value.as_uint32 = {{_configuration.default_value}},
+      {% endif %}
+      {% endif %}
+      .flags.read_only = {{_configuration.read_only}},
+      .flags.altering_capabilities = {{_configuration.altering_capabilities}},
+      .flags.advanced = {{_configuration.advanced}},
+    },
+  },
+  {% set _offset.value = _offset.value + 1 %}
+  {% set _number.value = _number.value + 1 %}
+  {% set _next_number.value = _next_number.value + 1 %}
+{% endfor %}
+};
+
+static const cc_configuration_t default_configuration = {
+  .numberOfParameters = sizeof_array(parameter_pool),
+  .parameters         = parameter_pool
+};
+
+// -----------------------------------------------------------------------------
+//              Public Function Definitions
+// -----------------------------------------------------------------------------
+
+cc_configuration_t const*
+cc_configuration_get_configuration(void)
+{
+  return &default_configuration;
+}
+// -----------------------------------------------------------------------------
+//              Static Function Definitions
+// -----------------------------------------------------------------------------
+

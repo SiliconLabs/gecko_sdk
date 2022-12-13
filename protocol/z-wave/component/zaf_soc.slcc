@@ -1,0 +1,18 @@
+id: zaf_soc
+label: ZAF SOC Component
+category: Z-Wave|ZAF|Application Type
+description: >
+  It includes the event distributor and NVM handling needed by SOC Applications.
+  Every sample application uses the event distributor component. It contains the core code shared
+  between the Event Distributor types (NCP, SOC).  
+  Both the NCP and SOC variations must implement their own event distributor table; the only
+  difference in usage is whether the application allows for polling the event distributor table,
+  or is fully event-driven.
+package: Z-Wave
+quality: production
+provides:
+  - name: zaf_soc
+requires:
+  - name: zaf_event_distributor_soc
+  - name: zaf_nvm_soc
+  - name: zaf_cc_list_generator

@@ -1,0 +1,60 @@
+id: device_init_dpll
+label: "Digital Phase-Locked Loop (DPLL)"
+package: platform
+description: >
+  Instantiate the component for Digital Phase-Locked Loop (DPLL) initialization
+  and lock for the main High Frequency RC Oscillator (HFRCO), based on the 
+  provided component configuration. The reference clock, target oscillator 
+  frequency as well as other settings can be specified via the component 
+  configuration.
+category: Services|Device Initialization|Peripherals
+quality: production
+root_path: platform/service/device_init/
+config_file:
+  - path: config/s2/sdid200/sl_device_init_dpll_config.h
+    file_id: device_init_dpll_config
+    condition: [device_sdid_200]
+  - path: config/s2/sdid205/sl_device_init_dpll_config.h
+    file_id: device_init_dpll_config
+    condition: [device_sdid_205]
+  - path: config/s2/sdid210/sl_device_init_dpll_config.h
+    file_id: device_init_dpll_config
+    condition: [device_sdid_210]
+  - path: config/s2/sdid215/sl_device_init_dpll_config.h
+    file_id: device_init_dpll_config
+    condition: [device_sdid_215]
+  - path: config/s2/sdid220/sl_device_init_dpll_config.h
+    file_id: device_init_dpll_config
+    condition: [device_sdid_220]
+  - path: config/s2/sdid230/sl_device_init_dpll_config.h
+    file_id: device_init_dpll_config
+    condition: [device_sdid_230]
+  - path: config/s2/sdid235/sl_device_init_dpll_config.h
+    file_id: device_init_dpll_config
+    condition: [device_sdid_235]
+include:
+  - path: inc
+    file_list:
+      - path: sl_device_init_dpll.h
+source:
+  - path: src/sl_device_init_dpll_s2.c
+    condition: [device_series_2]
+provides:
+  - name: device_init_dpll
+  - name: device_init_hfrco
+requires:
+  - name: emlib_cmu
+  - name: status
+  - name: device_series_2
+template_contribution:
+  - name: event_handler
+    value:
+      event: platform_init
+      include: sl_device_init_dpll.h
+      handler: sl_device_init_dpll
+    priority: -9550
+  - name: device_init_clocks_present
+    value: dpll
+documentation:
+  docset: gecko-platform
+  document: service/api/group-device-init-dpll

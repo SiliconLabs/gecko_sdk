@@ -1,0 +1,22 @@
+!!omap
+- id: bg27_rb4111a
+- label: BG27-RB4111A
+- package: platform
+- description: Kit BSP support for the BG27 2.4 GHz 4 dBm DCDC Boost CSP Radio Board.
+- category: Platform|Board|Kit|Radio Board
+- quality: production
+- requires:
+  - name: hardware_board_from_bg27-rb4111a
+- provides:
+  - name: hardware_kit
+  - name: hardware_kit_rb
+- define:
+  - name: SL_KIT_NAME
+    value: '"BG27-RB4111A"'
+  - name: SL_KIT_REV
+    value: '"A00"'
+- tag:
+  - kit:opn:BG27-RB4111A
+  - kit:pn:RB4111
+  - kit:variant:A
+  - kit:revision:A00

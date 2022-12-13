@@ -1,0 +1,19 @@
+id: bootloader_tz_utils
+label: Bootloader TZ utilities
+package: bootloader
+description: >
+  The Bootloader TZ utilities component provides the trustzone utilities. This component provides TrustZone utilities,
+  such as handling fatal errors with TrustZone, and validating that the address of the memory is actually non-secure as
+  expected.
+category: Platform|Bootloader|TrustZone Secure|Utils
+quality: production
+source:
+  - path: platform/bootloader/core/btl_tz_utils.c
+include:
+  - path: platform/bootloader
+    file_list:
+      - path: core/btl_tz_utils.h
+provides:
+  - name: bootloader_tz_utils
+  - name: bootloader_nonsecure_incompatible
+    condition: [bootloader_core_nonsecure]

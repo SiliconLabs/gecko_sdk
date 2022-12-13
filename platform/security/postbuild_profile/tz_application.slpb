@@ -1,0 +1,7 @@
+steps:
+  # Create combined S+NS app
+  - task: convert
+    input:
+      - "{{trustzone_secure_binary}}"
+      - "{{trustzone_nonsecure_binary}}"
+    output: artifact/{{workspace_name}}-combined.s37

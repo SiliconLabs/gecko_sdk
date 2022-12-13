@@ -1,0 +1,105 @@
+id: "zigbee_network_test"
+label: "Zigbee Network Test"
+package: "Zigbee"
+category: "Zigbee|Utility|Testing"
+quality: production
+description: "Utility component that provides useful CLI commands and application code to perform zigbee throughput testing for DMP and large network testing"
+ui_hints:
+  visibility: never
+
+
+provides:
+  - name: "zigbee_network_test"
+config_file:
+  - path: protocol/zigbee/app/framework/plugin/network_test/config/network_test_config.h
+requires:
+  - name: "zigbee_app_framework_common"
+  - name: "zigbee_zcl_framework_core"
+
+source:  
+  - path: "protocol/zigbee/app/test/zigbee_network_test.c"
+
+template_contribution:
+  - name: component_catalog
+    value: zigbee_network_test
+
+  - name: zigbee_af_callback
+    value:
+      callback_type: event_init
+      function_name: sli_zigbee_network_test_init
+  - name: zigbee_af_callback
+    value:
+      callback_type: local_data_init
+      function_name: sli_zigbee_network_test_init
+
+  - name: zigbee_stack_callback
+    value:
+      callback_type: message_sent
+      function_name: sli_zigbee_network_test_message_sent_callback
+
+  - name: cli_group
+    value:
+      name: network_test
+      help: "Utility commands for testing DMP"
+
+  - name: cli_command
+    value:
+      group: network_test
+      name: start_zigbee_test
+      handler: zigbee_tx_test_start_command
+      help: "Start the Zigbee throughput test"
+      argument:
+      - type: uint8
+        help: "Message length"
+      - type: uint16
+        help: "Number of messages"
+      - type: uint16
+        help: "Delay between messages in ms"
+      - type: uint8
+        help: "Number of in flight messages"
+      - type: uint16
+        help: "Destination short ID"
+      - type: uint16
+        help: "Zigbee APS options"
+
+  - name: cli_command
+    value:
+      group: network_test
+      name: stop_zigbee_test
+      handler: zigbee_tx_test_stop_command
+      help: "Stop the Zigbee throughput test"
+
+  - name: cli_command
+    value:
+      group: network_test
+      name: passive_ack_config
+      handler: zigbee_set_passive_ack_config
+      help: "Configures the broadcast passive ACKs behavior"
+      argument:
+      - type: uint8
+        help: "config"
+      - type: uint8
+        help: "minimum ACKs needed"
+    unless:
+     - zigbee_ezsp
+  
+  - name: cli_command
+    value:
+      name: test_random
+      handler: zigbee_tx_test_start_random
+      help: "Sends messages (fragmented messages are permitted) to destination, keeping a limit on those in-fight and fills payload for the sender"
+      argument:
+      - type: uint8
+        help: "0:length"
+      - type: uint16
+        help: "1:Num messages"
+      - type: uint8
+        help: "2:Num in flight"
+      - type: uint16
+        help: "3:Dest"
+      - type: uint16
+        help: "4:start seq ctr"
+
+documentation:
+  docset: zigbee
+  document: zigbee-af-api/dmp-test

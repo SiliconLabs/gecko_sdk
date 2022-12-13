@@ -1,0 +1,27 @@
+id: bootloader_bgapi_uartdfu_nonsecure
+label: "BGAPI UART DFU (Non-Secure)"
+package: bootloader
+description: >
+  The BGAPI UART DFU (Non-Secure) component provides DFU (device firmware upgrade) for Bluetooth applications
+  using the BGAPI protocol. A GBL image containing the new firmware is written to the target device using UART as
+  the physical interface and BGAPI protocol. The BGAPI UART DFU bootloader is a standalone bootloader, so no
+  storage area needs to be configured. During UART DFU upgrade the bootloader writes the new firmware image
+  directly on top of the old firmware image and therefore no temporary download area is needed.
+category: Platform|Bootloader|TrustZone NonSecure|Communication
+quality: evaluation
+source:
+  - path: platform/bootloader/communication/bgapi-uart-dfu/btl_comm_bgapi_ns.c
+  - path: platform/bootloader/communication/bgapi-uart-dfu/btl_comm_bgapi_common.c
+include:
+  - path: platform/bootloader/communication
+    file_list:
+    - path: bgapi-uart-dfu/btl_comm_bgapi.h
+    - path: btl_communication.h
+requires:
+  - name: status
+define:
+  - name: BOOTLOADER_SUPPORT_COMMUNICATION
+    value: 1
+provides:
+  - name: bootloader_bgapi_uartdfu
+  - name: bootloader_bgapi_uartdfu_nonsecure

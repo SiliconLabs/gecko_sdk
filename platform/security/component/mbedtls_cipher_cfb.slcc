@@ -1,0 +1,18 @@
+id: mbedtls_cipher_cfb
+package: platform
+label: CFB Mode
+description: >-
+  This component provides support for CFB cipher modes in mbed TLS.
+category: Platform|Security|Mbed TLS|Encryption
+quality: production
+provides:
+  - name: mbedtls_cipher_cfb
+requires:
+  - name: mbedtls_block_cipher
+  - name: psa_crypto_cipher_cfb
+    condition: [psa_crypto]
+recommends:
+  - id: mbedtls_aes
+template_contribution:
+  - name: mbedtls_config
+    value: MBEDTLS_CIPHER_MODE_CFB

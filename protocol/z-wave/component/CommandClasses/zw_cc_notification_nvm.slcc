@@ -1,0 +1,23 @@
+id: zw_cc_notification_nvm
+label: Notification - NVM
+category: Z-Wave|Command Classes
+description: >
+  This component provides the NVM implementation of the IO Interface for the Notification Command
+  Class.
+
+  The Notification Command Class is used to advertize events or states, such as movement detection,
+  door open/close or system failure. Notifications are categorized into logical groups called
+  Notification Types. A Notification is denoted with its type and event/state.
+
+  It can be used if the state of the Command Class should persist across resets by
+  storing the state into the NVM.
+package: Z-Wave
+quality: production
+source:
+  - path: protocol/z-wave/ZAF/CommandClasses/Notification/cc_notification_nvm.c
+provides:
+  - name: zw_cc_notification_nvm
+requires:
+  - name: zw_core
+  - name: zw_cc_notification
+  - name: nvm3_default

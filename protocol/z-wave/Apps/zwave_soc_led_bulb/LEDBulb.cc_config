@@ -1,0 +1,11 @@
+zw_cc_color_switch:
+  colors:
+    - id: ECOLORCOMPONENT_RED
+      end_point: 0
+    - id: ECOLORCOMPONENT_GREEN
+      end_point: 0
+    - id: ECOLORCOMPONENT_BLUE
+      end_point: 0
+zw_cc_multilevel_switch_support:
+  switches:
+    - end_point: 0

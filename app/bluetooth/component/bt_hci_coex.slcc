@@ -1,0 +1,28 @@
+id: "bt_hci_coex"
+label: "HCI Coex Vendor Specific Commands"
+package: "Bluetooth"
+description: >
+  Provides vendor specific commands to HCI to control coexistence RAIL plugin
+category: "Bluetooth|Controller"
+quality: "production"
+root_path: "app/bluetooth/common/hci_coex"
+config_file:
+  - path: "config/sl_bt_hci_coex_config.h"
+include:
+  - path: "inc/"
+    file_list:
+      - path: "sli_bt_hci_coex.h"
+source:
+  - path: "src/sli_bt_hci_coex.c"
+requires:
+  - name: bluetooth_hci
+  - name: rail_util_coex
+template_contribution:
+  - name: event_handler
+    value:
+      event: internal_app_init
+      include: "sli_bt_hci_coex.h"
+      handler: "sli_bt_hci_init_coex"
+    priority: 100
+provides:
+  - name: "bluetooth_hci_coex"

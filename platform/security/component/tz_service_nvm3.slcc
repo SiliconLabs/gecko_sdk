@@ -1,0 +1,132 @@
+id: tz_service_nvm3
+package: platform
+label: NVM3 Service for TrustZone Secure Key Library
+description: >-
+  This component includes the NVM3 support for TrustZone secure library.
+category: Platform|Security|TrustZone
+quality: evaluation
+component_root_path: util/third_party/trusted-firmware-m
+
+provides:
+  - name: tz_service_nvm3
+
+requires:
+  - name: tz_service_config
+  - name: tz_service_nvm3_common
+  - name: tz_secure_nvm3_s
+    condition: [trustzone_secure]
+  - name: nvm3_default_config
+    condition: [trustzone_nonsecure]
+
+template_contribution:
+  - name: tz_service_config
+    value: TZ_SERVICE_NVM3_PRESENT
+    condition: [trustzone_nonsecure]
+
+  - name: tz_nvm3_sid_func_mapping
+    value:
+      sid: SLI_TZ_SERVICE_NVM3_READPARTIALDATA_SID
+      func: tfm_nvm3_read_partial_data
+    condition: [trustzone_nonsecure]
+
+  - name: tz_nvm3_sid_func_mapping
+    value:
+      sid: SLI_TZ_SERVICE_NVM3_READDATA_SID
+      func: tfm_nvm3_read_data
+    condition: [trustzone_nonsecure]
+
+  - name: tz_nvm3_sid_func_mapping
+    value:
+      sid: SLI_TZ_SERVICE_NVM3_WRITEDATA_SID
+      func: tfm_nvm3_write_data
+    condition: [trustzone_nonsecure]
+
+  - name: tz_nvm3_sid_func_mapping
+    value:
+      sid: SLI_TZ_SERVICE_NVM3_DELETEOBJECT_SID
+      func: tfm_nvm3_delete_object
+    condition: [trustzone_nonsecure]
+
+  - name: tz_nvm3_sid_func_mapping
+    value:
+      sid: SLI_TZ_SERVICE_NVM3_OPEN_SID
+      func: tfm_nvm3_open
+    condition: [trustzone_nonsecure]
+
+  - name: tz_nvm3_sid_func_mapping
+    value:
+      sid: SLI_TZ_SERVICE_NVM3_CLOSE_SID
+      func: tfm_nvm3_close
+    condition: [trustzone_nonsecure]
+
+  - name: tz_nvm3_sid_func_mapping
+    value:
+      sid: SLI_TZ_SERVICE_NVM3_GETOBJECTINFO_SID
+      func: tfm_nvm3_get_object_info
+    condition: [trustzone_nonsecure]
+
+  - name: tz_nvm3_sid_func_mapping
+    value:
+      sid: SLI_TZ_SERVICE_NVM3_WRITECOUNTER_SID
+      func: tfm_nvm3_write_counter
+    condition: [trustzone_nonsecure]
+
+  - name: tz_nvm3_sid_func_mapping
+    value:
+      sid: SLI_TZ_SERVICE_NVM3_READCOUNTER_SID
+      func: tfm_nvm3_read_counter
+    condition: [trustzone_nonsecure]
+
+  - name: tz_nvm3_sid_func_mapping
+    value:
+      sid: SLI_TZ_SERVICE_NVM3_INCREMENTCOUNTER_SID
+      func: tfm_nvm3_increment_counter
+    condition: [trustzone_nonsecure]
+
+  - name: tz_nvm3_sid_func_mapping
+    value:
+      sid: SLI_TZ_SERVICE_NVM3_ERASEALL_SID
+      func: tfm_nvm3_erase_all
+    condition: [trustzone_nonsecure]
+
+  - name: tz_nvm3_sid_func_mapping
+    value:
+      sid: SLI_TZ_SERVICE_NVM3_GETERASECOUNT_SID
+      func: tfm_nvm3_get_erase_count
+    condition: [trustzone_nonsecure]
+
+  - name: tz_nvm3_sid_func_mapping
+    value:
+      sid: SLI_TZ_SERVICE_NVM3_SETERASECOUNT_SID
+      func: tfm_nvm3_set_erase_count
+    condition: [trustzone_nonsecure]
+
+  - name: tz_nvm3_sid_func_mapping
+    value:
+      sid: SLI_TZ_SERVICE_NVM3_REPACK_SID
+      func: tfm_nvm3_repack
+    condition: [trustzone_nonsecure]
+
+  - name: tz_nvm3_sid_func_mapping
+    value:
+      sid: SLI_TZ_SERVICE_NVM3_REPACKNEEDED_SID
+      func: tfm_nvm3_repack_needed
+    condition: [trustzone_nonsecure]
+
+  - name: tz_nvm3_sid_func_mapping
+    value:
+      sid: SLI_TZ_SERVICE_NVM3_RESIZE_SID
+      func: tfm_nvm3_resize
+    condition: [trustzone_nonsecure]
+
+  - name: tz_nvm3_sid_func_mapping
+    value:
+      sid: SLI_TZ_SERVICE_NVM3_ENUMOBJECTS_SID
+      func: tfm_nvm3_enum_objects
+    condition: [trustzone_nonsecure]
+
+  - name: tz_nvm3_sid_func_mapping
+    value:
+      sid: SLI_TZ_SERVICE_NVM3_ENUMDELETEDOBJECTS_SID
+      func: tfm_nvm3_enum_deleted_objects
+    condition: [trustzone_nonsecure]

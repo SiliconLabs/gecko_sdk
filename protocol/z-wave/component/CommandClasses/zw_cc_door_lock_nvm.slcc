@@ -1,0 +1,18 @@
+id: zw_cc_door_lock_nvm
+label: DoorLock Command Class - NVM
+category: Z-Wave|Command Classes
+description: >
+  This component provides the non-volatile memory interface for the Door Lock Command Class. 
+  Besides the Read and Write functionalities, a migration API is also present. This aids
+  the migration process - which requires updating the NVM - when coming from an SDK version that is
+  older than 7.19.0.
+package: Z-Wave
+quality: production
+source:
+  - path: protocol/z-wave/ZAF/CommandClasses/DoorLock/cc_door_lock_nvm.c
+provides:
+  - name: zw_cc_door_lock_nvm
+requires:
+  - name: zw_core
+  - name: zw_cc_door_lock
+  - name: nvm3_default

@@ -1,0 +1,21 @@
+id: lwip_addons_tcp_isn
+label: "TCP Initial Sequence Numbers"
+package: platform
+description: >
+  The TCP Initial Sequence Numbers component can be used to generate Initial Sequence Numbers add-on for a new
+  TCP connection. Initial sequence numbers (ISN) refers to the unique 32-bit sequence number
+  assigned to each new connection on a Transmission Control Protocol (TCP)-based data communication.
+  It helps with the allocation of a sequence number that does not conflict with other data bytes
+  transmitted over a TCP connection.
+category: Third Party|LwIP|Addons
+quality: production
+provides:
+  - name: lwip_addons_tcp_isn
+requires:
+  - name: lwip_core
+source:
+  - path: util/third_party/lwip/lwip-contrib/addons/tcp_isn/tcp_isn.c
+include:
+  - path: util/third_party/lwip/lwip-contrib/addons/tcp_isn
+    file_list:
+    - path: tcp_isn.h

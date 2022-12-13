@@ -1,0 +1,26 @@
+id: power_manager
+label: Power Manager
+package: platform
+description: >
+  Instantiate the Power Manager (PM) component for managing the power
+  consumption of the MCU. The PM will shut down the high-frequency clock and put
+  the system in lower Energy Modes (EM) when possible. The PM also allows the
+  user to register certain callback that will be executed when going into/out of
+  certain EM. This allows the user to carry out any bookkeeping following EM
+  transition events.
+category: Services|Power Manager
+quality: production
+config_file:
+  - path: platform/service/power_manager/config/sl_power_manager_config.h
+provides:
+  - name: power_manager
+requires:
+  - name: power_manager_core
+  - name: power_manager_handler
+recommends:
+  - id: power_manager_handler_implementation
+validation_helper:
+  - path: platform/service/power_manager/power_manager_validation.lua
+documentation:
+  docset: gecko-platform
+  document: service/power_manager/overview

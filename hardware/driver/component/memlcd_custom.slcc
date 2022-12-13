@@ -1,0 +1,36 @@
+id: memlcd_custom
+package: platform
+label: Custom Memory LCD Driver
+description: >
+  This component contains functions that can be redefined to implement a 
+  custom memory LCD interface manually. The "Custom Memory LCD Display" 
+  component is required and automatically installed with this component.
+  This component replaces the "Memory LCD  with usart SPI driver" and "Memory 
+  LCD with eusart SPI driver" components that are already fully implemented 
+  and functionnal.
+category: Platform|Board Drivers|Memory LCD|Peripheral Driver
+quality: production
+root_path: hardware/driver/memlcd
+include:
+  - path: inc
+    file_list:
+      - path: sl_memlcd.h
+source:
+  - path: src/memlcd_custom/sl_memlcd_custom.c
+requires:
+  - name: sleeptimer
+  - name: udelay
+  - name: status
+  - name: memlcd_display_custom
+provides:
+  - name: memlcd_custom
+  - name: memlcd_driver
+define:
+  - name: MEMLCD_CUSTOM_DRIVER
+    value: 1
+template_contribution:
+  - name: component_catalog
+    value: memlcd_custom
+documentation:
+    docset: gecko-platform
+    document: hardware-driver/api/group-memlcd_custom

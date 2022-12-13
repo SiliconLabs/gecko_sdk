@@ -1,0 +1,68 @@
+id: tz_sl_interface_crypto
+package: platform
+description: >-
+  This component provides a TrustZone secure library interface
+category: Platform|Security|TrustZone
+quality: evaluation
+component_root_path: platform/security
+ui_hints:
+  visibility: never
+provides:
+  - name: tz_sl_interface_crypto
+    condition: [trustzone_nonsecure]
+requires:
+  - name: trustzone_nonsecure
+   # Crypto interface
+  - name: tz_sl_interface_crypto_key_funcs
+
+  - name: tz_sl_interface_crypto_hash_funcs
+    condition: [psa_crypto_hash]
+
+  - name: tz_sl_interface_crypto_mac_funcs
+    condition: [psa_crypto_hmac]
+  - name: tz_sl_interface_crypto_mac_funcs
+    condition: [psa_crypto_cmac]
+
+  - name: tz_sl_interface_crypto_cipher_funcs
+    condition: [psa_crypto_cipher_cfb]
+  - name: tz_sl_interface_crypto_cipher_funcs
+    condition: [psa_crypto_cipher_ctr]
+  - name: tz_sl_interface_crypto_cipher_funcs
+    condition: [psa_crypto_cipher_cbc]
+  - name: tz_sl_interface_crypto_cipher_funcs
+    condition: [psa_crypto_cipher_cbc_pkcs7]
+  - name: tz_sl_interface_crypto_cipher_funcs
+    condition: [psa_crypto_cipher_ecb]
+  - name: tz_sl_interface_crypto_cipher_funcs
+    condition: [psa_crypto_cipher_xts]
+  - name: tz_sl_interface_crypto_cipher_funcs
+    condition: [psa_crypto_cipher_ofb]
+  - name: tz_sl_interface_crypto_cipher_funcs
+    condition: [psa_crypto_cipher_chacha20]
+  - name: tz_sl_interface_crypto_cipher_funcs
+    condition: [psa_crypto_aes]
+
+  - name: tz_sl_interface_crypto_aead_funcs
+    condition: [psa_crypto_ccm]
+  - name: tz_sl_interface_crypto_aead_funcs
+    condition: [psa_crypto_gcm]
+  - name: tz_sl_interface_crypto_aead_funcs
+    condition: [psa_crypto_chachapoly]
+
+  - name: tz_sl_interface_crypto_asym_sign_funcs
+    condition: [psa_crypto_ecdsa]
+  - name: tz_sl_interface_crypto_asym_sign_funcs
+    condition: [psa_crypto_eddsa]
+
+  - name: tz_sl_interface_crypto_key_derivation_funcs
+    condition: [psa_crypto_pbkdf2]
+  - name: tz_sl_interface_crypto_key_derivation_funcs
+    condition: [psa_crypto_hkdf]
+  - name: tz_sl_interface_crypto_key_derivation_funcs
+    condition: [psa_crypto_tls12_prf]
+  - name: tz_sl_interface_crypto_key_derivation_funcs
+    condition: [psa_crypto_tls12_psk_to_ms]
+  - name: tz_sl_interface_crypto_key_derivation_funcs
+    condition: [psa_crypto_ecdh]
+
+  - name: tz_sl_interface_crypto_rng_funcs

@@ -1,0 +1,24 @@
+id: lwip_app_netbiosns
+label: "LWIP NetBIOS-NS High Layer Application"
+package: platform
+description: >
+    The LWIP NetBIOS-NS high layer application specifically programmed with the lwIP low-level raw API,
+    this is an example implementation of a NetBIOS name server. It responds to name queries for a
+    configurable name. Name resolving is not supported.
+    Note:
+    Device doesn't broadcast it's own name so can't detect duplicate names.
+category: Third Party|LwIP|apps
+quality: production
+provides:
+  - name: lwip_apps
+    allow_multiple: true
+  - name: lwip_app_netbiosns
+requires:
+  - name: lwip_core
+source:
+  - path: util/third_party/lwip/lwip/src/apps/netbiosns/netbiosns.c
+include:  
+  - path: util/third_party/lwip/lwip/src/include
+    file_list:
+    - path: lwip/apps/netbiosns.h
+    - path: lwip/apps/netbiosns_opts.h

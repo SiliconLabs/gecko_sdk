@@ -1,0 +1,43 @@
+
+==========================================================
+The output of the size tool: (e.g. arm-none-ambi-size.exe)
+==========================================================
+
+zwave_soc_power_strip.out  :
+section                             size         addr
+.text                            0x3189c    0x8006000
+_cc_handlers_v3                    0x2ac    0x803789c
+_zaf_cc_config                      0x28    0x8037b48
+_zw_protocol_cmd_handlers           0x70    0x8037b70
+_zw_protocol_cmd_handlers_lr        0x30    0x8037be0
+.ARM.exidx                           0x8    0x8037c10
+.copy.table                          0xc    0x8037c18
+.zero.table                          0x0    0x8037c24
+.stack                            0x1000   0x20000000
+.data                              0x668   0x20001000
+.bss                              0xaa24   0x20001668
+.heap                             0x3f70   0x2000c090
+.internal_storage                0x30000    0x8037c24
+.zwave_nvm                           0x0    0x8067c24
+.nvm                              0x8000    0x8067c24
+.ARM.attributes                     0x36          0x0
+.comment                            0x49          0x0
+.debug_frame                      0x6ffc          0x0
+.debug_info                     0xe3696f          0x0
+.debug_abbrev                    0x18087          0x0
+.debug_loc                       0x49086          0x0
+.debug_aranges                     0x100          0x0
+.debug_ranges                     0xbc28          0x0
+.debug_line                      0x57ec0          0x0
+.debug_str                       0x91de7          0x0
+Total                          0x100e0e6
+
+The calculated FLASH and SRAM usage summary:
+============================================
+FLASH used as program memory:  (Including only the sections: .text, .ARM.exidx, .data, _cc_handlers_v3)
+   205452
+FLASH used for storage: (Including only the sections: .zwavenvm, .simee, .nvm, .zwave_nvm)
+   32768
+SRAM usage:             (Including only the sections: .data, .bss, .heap (limited to 2048 per sl_memory_config.h), .stack_dummy, .reset_info)
+   51340
+
