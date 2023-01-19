@@ -409,6 +409,13 @@ else()
     message(FATAL_ERROR "Invalid max RCP restoration count: ${OT_RCP_RESTORATION_MAX_COUNT}")
 endif()
 
+set(OT_RCP_TX_WAIT_TIME_SECS "5" CACHE STRING "set RCP TX wait TIME in seconds")
+if(OT_RCP_TX_WAIT_TIME_SECS MATCHES "^[0-9]+$")
+    target_compile_definitions(ot-config INTERFACE "OPENTHREAD_SPINEL_CONFIG_RCP_TX_WAIT_TIME_SECS=${OT_RCP_TX_WAIT_TIME_SECS}")
+else()
+    message(FATAL_ERROR "Invalid RCP Tx Time: ${OT_RCP_TX_WAIT_TIME_SECS}")
+endif()
+
 option(OT_EXCLUDE_TCPLP_LIB "exclude TCPlp library from build")
 
 # Checks

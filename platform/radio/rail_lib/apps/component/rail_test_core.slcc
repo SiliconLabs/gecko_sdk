@@ -34,14 +34,6 @@ requires:
   - name: emlib_core
   - name: emlib_gpio
   - name: emlib_cmu
-  - name: emlib_usart
-    condition:
-      - device_has_uart
-  - name: emlib_eusart
-    condition:
-      - device_has_eusart
-    unless:
-      - device_has_uart
   - name: emlib_prs
   - name: emlib_system
 

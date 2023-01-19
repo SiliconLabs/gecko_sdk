@@ -952,22 +952,17 @@ WEAK(EmberPacketAction emberPacketHandoffOutgoingHandler(EmberZigbeePacketType p
 
 #if (defined(EMBER_AF_NCP) || defined(SL_CATALOG_ZIGBEE_NCP_FRAMEWORK_PRESENT) || defined(EMBER_TEST))
 // The buffer to host tag map needs to keep track of messages that we send
-// from the host. In handleSendCommand(), there are four different types of
+// from the host. In handleSendCommand(), there are three different types of
 // messages that consume a emBufferToHostTagMap entry:
 // a) unicasts, which are limited by emMaxApsUnicastMessages
 // b) broadcasts, which are limited by emBroadcastTableSize
 // c) multicasts, which are limited by emBroadcastTableSize
-// d) raw messages, which have no network-imposed limit, as they are sent
-// straight to the upper mac queue
+//
 // To give enough space for all message types, we size the
 // emBufferToHostTagMap buffer to be of size emMaxApsUnicastMessages +
-// emBroadcastTableSize + TAG_MAP_EXTRA_ENTRIES, the last of which accounts
-// for any raw messages the user wishes to send
-#define TAG_MAP_EXTRA_ENTRIES 5
-
-#define BUFFER_TO_HOST_TAG_MAP_SIZE  (EMBER_APS_UNICAST_MESSAGE_COUNT                    \
-                                      + EMBER_BROADCAST_TABLE_SIZE * NUM_MULTI_PAN_FORKS \
-                                      + TAG_MAP_EXTRA_ENTRIES)
+// emBroadcastTableSize.
+#define BUFFER_TO_HOST_TAG_MAP_SIZE  (EMBER_APS_UNICAST_MESSAGE_COUNT \
+                                      + EMBER_BROADCAST_TABLE_SIZE * NUM_MULTI_PAN_FORKS)
 EmberTagMapEntry emBufferToHostTagMap[BUFFER_TO_HOST_TAG_MAP_SIZE]; //XXXJAR temp
 uint8_t emBufferToHostTagMapSize = BUFFER_TO_HOST_TAG_MAP_SIZE;
 

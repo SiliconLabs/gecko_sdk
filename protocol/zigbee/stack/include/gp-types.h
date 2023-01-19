@@ -153,11 +153,16 @@ typedef struct {
 } EmberGpAddress;
 
 typedef enum {
+  // Sink Type is Full Unicast
   EMBER_GP_SINK_TYPE_FULL_UNICAST,
+  // Sink Type is Derived groupcast, the group Id is derived from the GpdId during commissioning.
+  // The sink is added to the APS group with that groupId.
   EMBER_GP_SINK_TYPE_D_GROUPCAST,
+  // Sink type EMBER_GP_SINK_TYPE_GROUPCAST, the groupId can
+  // be obtained from the APS group table or from the sink table.
   EMBER_GP_SINK_TYPE_GROUPCAST,
+  // Sink Type is Light Weight Unicast.
   EMBER_GP_SINK_TYPE_LW_UNICAST,
-  EMBER_GP_SINK_TYPE_SINK_GROUPLIST,    // Sink Group List
 
   EMBER_GP_SINK_TYPE_UNUSED = 0xFF
 } EmberGpSinkType;

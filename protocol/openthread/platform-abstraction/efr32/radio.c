@@ -87,6 +87,10 @@
 #ifdef SL_CATALOG_RAIL_UTIL_IEEE802154_PHY_SELECT_PRESENT
 #include "sl_rail_util_ieee802154_phy_select.h"
 #endif // #ifdef SL_CATALOG_RAIL_UTIL_IEEE802154_PHY_SELECT_PRESENT
+
+#ifdef SL_CATALOG_OT_RCP_GP_INTERFACE_PRESENT
+#include "sl_rcp_gp_interface.h"
+#endif
 //------------------------------------------------------------------------------
 // Enums, macros and static variables
 
@@ -235,6 +239,24 @@ RAIL_Handle_t gRailHandle;
 RAIL_Handle_t emPhyRailHandle;
 #endif //SL_CATALOG_RAIL_MULTIPLEXER_PRESENT
 
+static const RAIL_StateTiming_t cTimings = {
+    100,      // timings.idleToRx
+    192 - 10, // timings.txToRx
+    100,      // timings.idleToTx
+#if OPENTHREAD_CONFIG_THREAD_VERSION >= OT_THREAD_VERSION_1_2
+    256,      // timings.rxToTx - accommodate enhanced ACKs
+#else
+    192,      // timings.rxToTx
+#endif
+    0,        // timings.rxSearchTimeout
+    0,        // timings.txToRxSearchTimeout
+    0         // timings.txToTx
+};
+
+#ifdef NONCOMPLIANT_ACK_TIMING_WORKAROUND
+static RAIL_StateTiming_t gTimings = cTimings;
+#endif
+
 static const RAIL_IEEE802154_Config_t sRailIeee802154Config = {
     NULL, // addresses
     {
@@ -252,20 +274,7 @@ static const RAIL_IEEE802154_Config_t sRailIeee802154Config = {
             RAIL_RF_STATE_RX, // ackConfig.txTransitions.error
         },
     },
-    {
-        // timings
-        100,      // timings.idleToRx
-        192 - 10, // timings.txToRx
-        100,      // timings.idleToTx
-#if OPENTHREAD_CONFIG_THREAD_VERSION >= OT_THREAD_VERSION_1_2
-        256,      // timings.rxToTx - accommodate enhanced ACKs
-#else
-        192,      // timings.rxToTx
-#endif
-        0,        // timings.rxSearchTimeout
-        0,        // timings.txToRxSearchTimeout
-        0,        // timings.txToTx
-    },
+    cTimings,
     RAIL_IEEE802154_ACCEPT_STANDARD_FRAMES, // framesMask
     false,                                  // promiscuousMode
     false,                                  // isPanCoordinator
@@ -1274,7 +1283,9 @@ otError otPlatRadioReceive(otInstance *aInstance, uint8_t aChannel)
     efr32BandConfig *config;
 
     OT_UNUSED_VARIABLE(aInstance);
-    otEXPECT_ACTION(sState != OT_RADIO_STATE_DISABLED, error = OT_ERROR_INVALID_STATE);
+    otEXPECT_ACTION((sState != OT_RADIO_STATE_DISABLED && 
+                     sState != OT_RADIO_STATE_TRANSMIT &&
+                     sEnergyScanStatus != ENERGY_SCAN_STATUS_IN_PROGRESS), error = OT_ERROR_INVALID_STATE);
 
     config = efr32RadioGetBandConfig(aChannel);
     otEXPECT_ACTION(config != NULL, error = OT_ERROR_INVALID_ARGS);
@@ -1332,50 +1343,60 @@ otError otPlatRadioTransmit(otInstance *aInstance, otRadioFrame *aFrame)
     otError error = OT_ERROR_NONE;
     efr32BandConfig * config;
 
-    otEXPECT_ACTION((sState != OT_RADIO_STATE_DISABLED) && (sState != OT_RADIO_STATE_TRANSMIT),
-                    error = OT_ERROR_INVALID_STATE);
-
-    config = efr32RadioGetBandConfig(aFrame->mChannel);
-    otEXPECT_ACTION(config != NULL, error = OT_ERROR_INVALID_ARGS);
-    if (sCurrentBandConfig != config)
+#if OPENTHREAD_RADIO && OPENTHREAD_CONFIG_MULTIPAN_RCP_ENABLE == 1 && (defined SL_CATALOG_OT_RCP_GP_INTERFACE_PRESENT)
+    //Accept GP packets even if radio is not in required state.
+    if((sl_gp_intf_get_state() != SL_GP_STATE_SEND_RESPONSE) && sl_gp_intf_is_gp_pkt(aFrame, false))
     {
-        RAIL_Idle(gRailHandle, RAIL_IDLE, true);
-        efr32RailConfigLoad(config);
-        sCurrentBandConfig = config;
+        sl_gp_intf_buffer_pkt(aFrame);
     }
+    else
+#endif
+    {
+        otEXPECT_ACTION((sState != OT_RADIO_STATE_DISABLED) && (sState != OT_RADIO_STATE_TRANSMIT),
+                        error = OT_ERROR_INVALID_STATE);
 
-    assert(sTransmitBusy == false);
-    sState         = OT_RADIO_STATE_TRANSMIT;
-    sTransmitError = OT_ERROR_NONE;
-    sTransmitBusy  = true;
-    sTxFrame       = aFrame;
+        config = efr32RadioGetBandConfig(aFrame->mChannel);
+        otEXPECT_ACTION(config != NULL, error = OT_ERROR_INVALID_ARGS);
+        if (sCurrentBandConfig != config)
+        {
+            RAIL_Idle(gRailHandle, RAIL_IDLE, true);
+            efr32RailConfigLoad(config);
+            sCurrentBandConfig = config;
+        }
+
+        assert(sTransmitBusy == false);
+        sState         = OT_RADIO_STATE_TRANSMIT;
+        sTransmitError = OT_ERROR_NONE;
+        sTransmitBusy  = true;
+        sTxFrame       = aFrame;
 
 #if OPENTHREAD_CONFIG_THREAD_VERSION >= OT_THREAD_VERSION_1_2
-    uint8_t iid = 0;
+        uint8_t iid = 0;
 #endif
 
 #if OPENTHREAD_RADIO && OPENTHREAD_CONFIG_MULTIPAN_RCP_ENABLE == 1
-    iid            = aFrame->mIid;
+        iid            = aFrame->mIid;
 #endif
 
-    setInternalFlag(FLAG_CURRENT_TX_USE_CSMA, aFrame->mInfo.mTxInfo.mCsmaCaEnabled);
+        setInternalFlag(FLAG_CURRENT_TX_USE_CSMA, aFrame->mInfo.mTxInfo.mCsmaCaEnabled);
 
 #if OPENTHREAD_CONFIG_THREAD_VERSION >= OT_THREAD_VERSION_1_2
-    updateIeInfoTxFrame();
-    // Note - we need to call this outside of txCurrentPacket as for Series 2,
-    // this results in calling the SE interface from a critical section which is not permitted.
-    otEXPECT_ACTION(radioProcessTransmitSecurity(sTxFrame, iid) == OT_ERROR_NONE,
-                    error = OT_ERROR_INVALID_STATE);
+        updateIeInfoTxFrame();
+        // Note - we need to call this outside of txCurrentPacket as for Series 2,
+        // this results in calling the SE interface from a critical section which is not permitted.
+        otEXPECT_ACTION(radioProcessTransmitSecurity(sTxFrame, iid) == OT_ERROR_NONE,
+                        error = OT_ERROR_INVALID_STATE);
 #endif // OPENTHREAD_CONFIG_THREAD_VERSION >= OT_THREAD_VERSION_1_2
 
-    CORE_DECLARE_IRQ_STATE;
-    CORE_ENTER_ATOMIC();
-    setInternalFlag(FLAG_ONGOING_TX_DATA, true);
-    tryTxCurrentPacket();
-    CORE_EXIT_ATOMIC();
+        CORE_DECLARE_IRQ_STATE;
+        CORE_ENTER_ATOMIC();
+        setInternalFlag(FLAG_ONGOING_TX_DATA, true);
+        tryTxCurrentPacket();
+        CORE_EXIT_ATOMIC();
 
-    if (sTransmitError == OT_ERROR_NONE) {
-        otPlatRadioTxStarted(aInstance, aFrame);
+        if (sTransmitError == OT_ERROR_NONE) {
+            otPlatRadioTxStarted(aInstance, aFrame);
+        }
     }
 exit:
     return error;
@@ -1962,7 +1983,15 @@ static bool writeIeee802154EnhancedAck( RAIL_Handle_t       aRailHandle,
     receivedFrame.mLength   = *initialPktReadBytes - PHY_HEADER_SIZE;
     enhAckFrame.mPsdu       = enhAckPsdu + PHY_HEADER_SIZE;
 
-    if (! otMacFrameIsVersion2015(&receivedFrame))
+    bool is2015 = otMacFrameIsVersion2015(&receivedFrame);
+#ifdef NONCOMPLIANT_ACK_TIMING_WORKAROUND
+    uint16_t rxToTx = is2015 ? 256 : 192;
+    if (gTimings.rxToTx != rxToTx) {
+        gTimings.rxToTx = rxToTx;
+        RAIL_SetStateTiming(aRailHandle, &gTimings);
+    }
+#endif
+    if (!is2015)
     {
         return false;
     }
@@ -2789,6 +2818,9 @@ exit:
         else
 #endif
         {
+#if OPENTHREAD_RADIO && OPENTHREAD_CONFIG_MULTIPAN_RCP_ENABLE == 1 && (defined SL_CATALOG_OT_RCP_GP_INTERFACE_PRESENT)
+            (void) sl_gp_intf_is_gp_pkt(&sReceiveFrame, true);
+#endif
             otLogInfoPlat("Received %d bytes", sReceiveFrame.mLength);
             otPlatRadioReceiveDone(aInstance, &sReceiveFrame, sReceiveError);
 #if RADIO_CONFIG_DEBUG_COUNTERS_SUPPORT
@@ -3169,5 +3201,5 @@ otError otPlatDiagTxStreamAutoAck(uint8_t autoAckEnabled)
 
     return status;
 }
-
 #endif // OPENTHREAD_CONFIG_DIAG_ENABLE
+

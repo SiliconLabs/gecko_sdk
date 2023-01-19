@@ -22,9 +22,11 @@ requires:
   - name: "btmesh_core"
 provides:
   - name: "btmesh_generic_server"
-    condition: btmesh_feature_generic_server
+    condition:
+      - btmesh_feature_generic_server
   - name: "btmesh_generic_client"
-    condition: btmesh_feature_generic_client
+    condition:
+      - btmesh_feature_generic_client
   - name: "btmesh_generic_model"
     allow_multiple: true
 

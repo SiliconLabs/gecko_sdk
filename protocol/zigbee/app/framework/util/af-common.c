@@ -873,15 +873,6 @@ void emAfInitializeMessageSentCallbackArray(void)
   }
 }
 
-void emMarkMessageSentTagBuffers(void)
-{
-#ifndef EZSP_HOST
-  for (uint8_t i = 0; i < EMBER_AF_MESSAGE_SENT_CALLBACK_TABLE_SIZE; i++) {
-    emMarkBuffer(&(messageSentCallbacks[i].tag));
-  }
-#endif
-}
-
 // Old API that doesn't restrict prevent permit joining forever (255)
 EmberStatus emAfPermitJoin(uint8_t duration,
                            bool broadcastMgmtPermitJoin)

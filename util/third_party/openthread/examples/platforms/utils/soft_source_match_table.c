@@ -198,6 +198,12 @@ otError otPlatRadioAddSrcMatchShortEntry(otInstance *aInstance, uint16_t aShortA
     int16_t entry = -1;
 
     iid   = otNcpPlatGetCurCommandIid();
+#if OPENTHREAD_RADIO && OPENTHREAD_CONFIG_MULTIPAN_RCP_ENABLE == 1
+    // Prevent duplicate entries in multipan use case.
+    entry = utilsSoftSrcMatchShortFindEntry(iid, aShortAddress);
+    otEXPECT( !(entry >=0 && entry < RADIO_CONFIG_SRC_MATCH_SHORT_ENTRY_NUM) );
+#endif
+
     entry = findSrcMatchShortAvailEntry(iid);
 
     otLogDebgPlat("Add ShortAddr: iid=%d, entry=%d, addr=0x%04x", iid, entry, aShortAddress);
@@ -367,6 +373,12 @@ otError otPlatRadioAddSrcMatchExtEntry(otInstance *aInstance, const otExtAddress
     int16_t entry = -1;
 
     uint8_t iid = otNcpPlatGetCurCommandIid();
+#if OPENTHREAD_RADIO && OPENTHREAD_CONFIG_MULTIPAN_RCP_ENABLE == 1
+    // Prevent duplicate entries in multipan use case.
+    entry = utilsSoftSrcMatchExtFindEntry(iid, aExtAddress);
+    otEXPECT( !(entry >=0 && entry < RADIO_CONFIG_SRC_MATCH_EXT_ENTRY_NUM) );
+#endif
+
     entry       = findSrcMatchExtAvailEntry(iid);
 
     otLogDebgPlat("Add ExtAddr: iid=%d, entry=%d, addr 0x%016x", iid, entry, aExtAddress->m8);

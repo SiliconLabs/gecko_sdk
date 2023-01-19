@@ -71,6 +71,15 @@ bool efr32IsFramePending(otRadioFrame *aFrame);
  */
 otPanId efr32GetDstPanId(otRadioFrame *aFrame);
 
+/**
+ * This function returns the start of payload pointer.
+ *
+ * @param[in]  aFrame       A pointer to the MAC frame buffer.
+ *
+ * @retval  Pointer to start of 802.15.4 payload.
+ */
+uint8_t* efr32GetPayload(otRadioFrame *aFrame);
+
 #ifdef __cplusplus
 } // extern "C"
 #endif

@@ -27,11 +27,11 @@ provides:
   - name: emlib_core
 requires:
   - name: device
-    unless: [device_host]
+    condition: [device_cortexm]
   - name: emlib_common
-    unless: [device_host]
+    condition: [device_cortexm]
   - name: cmsis_core
-    unless: [device_host]
+    condition: [device_cortexm]
 template_contribution:
   - name: component_catalog
     value: emlib_core_debug_config

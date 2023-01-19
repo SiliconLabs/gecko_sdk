@@ -243,30 +243,15 @@ typedef struct {
   uint8_t relay_interval_max; /**< Maximum relay delay */
 } mesh_net_config_t;
 
-/** SAR Transmitter Configuration */
-typedef struct mesh_sar_transmitter_config {
-  uint32_t segment_interval_step; /**< Segment Interval Step */
-  uint32_t unicast_retrans_count; /**< Unicast Retransmissions Count */
-  uint32_t unicast_retrans_wo_progress_count; /**< Unicast Retransmissions Count Without Progress */
-  uint32_t unicast_retrans_interval_step; /**< Unicast Retransmission Interval Step */
-  uint32_t unicast_retrans_interval_increment; /**< Unicast Retransmission Interval Increment */
-  uint32_t multicast_retrans_count; /**< Multicast Retransmissions Count */
-  uint32_t multicast_retrans_interval_step; /**< Multicast Retransmission Interval Step */
-} mesh_sar_transmitter_config_t;
-
-/** SAR Receiver Configuration */
-typedef struct mesh_sar_receiver_config {
-  uint32_t segments_threshold; /**< Segments Threshold */
-  uint32_t ack_delay_increment; /**< Acknowledgement Delay Increment */
-  uint32_t discard_timeout; /**< Discard Timeout */
-  uint32_t segment_interval_step; /**< Segment Interval Step */
-  uint32_t ack_retrans_count; /**< Acknowledgement Retransmissions Count */
-} mesh_sar_receiver_config_t;
-
 /** Segmentation and reassembly configuration structure */
 typedef struct {
-  mesh_sar_transmitter_config_t transmitter; /**< SAR Transmitter Configuration */
-  mesh_sar_receiver_config_t receiver;/**< SAR Receiver Configuration */
+  uint32_t incomplete_timer_ms; /**< Incomplete timer */
+  uint32_t pending_ack_base_ms; /**< Acknowledgement timer base */
+  uint32_t pending_ack_mul_ms; /**< Acknowledgement timer multiplier */
+  uint32_t wait_for_ack_base_ms; /**< Waiting for acknowledgement timer base */
+  uint32_t wait_for_ack_mul_ms; /**< Waiting for acknowledgement timer multiplier */
+  uint8_t max_send_rounds; /**< Tx iterations */
+  uint8_t wait_between_segments_ms; /**< Inter-segment delay */
 } mesh_trans_sar_config_t;
 
 /**
@@ -971,9 +956,6 @@ typedef enum {
   mesh_stack_diag_event_replay_protection_list_set_entry,
   mesh_stack_diag_event_replay_protection_list_clear_entry,
   mesh_stack_diag_event_replay_protection_list_full,
-
-  mesh_stack_diag_event_sar_config_server_transmitter_set,
-  mesh_stack_diag_event_sar_config_server_receiver_set,
 } mesh_stack_diag_event_type_t;
 
 /** Diagnostic event for configuration server change */
@@ -1020,19 +1002,12 @@ typedef union {
   // Nothing for full
 } mesh_stack_diag_event_replay_protection_list_t;
 
-/** Diagnostic event for SAR configuration server change */
-typedef union {
-  mesh_sar_transmitter_config_t transmitter; /**< SAR Transmitter configuration value after set request */
-  mesh_sar_receiver_config_t receiver; /**< SAR Receiver configuration value after set request */
-} mesh_stack_diag_event_sar_config_server_t;
-
 /** Stack diagnostic event */
 typedef struct {
   mesh_stack_diag_event_type_t type; /**< Event type */
   union {
     mesh_stack_diag_event_config_server_t config_server; /**< Config server event */
     mesh_stack_diag_event_replay_protection_list_t replay_protection_list; /**< Replay protection list event */
-    mesh_stack_diag_event_sar_config_server_t sar_config_server; /**< SAR Config server event */
   };
 } mesh_stack_diag_event_t;
 

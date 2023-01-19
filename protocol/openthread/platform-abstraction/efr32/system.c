@@ -55,6 +55,13 @@
 #include "platform-efr32.h"
 #include "sl_openthread.h"
 
+#ifdef SL_COMPONENT_CATALOG_PRESENT
+#include "sl_component_catalog.h"
+#endif // SL_COMPONENT_CATALOG_PRESENT
+#ifdef SL_CATALOG_OT_RCP_GP_INTERFACE_PRESENT
+#include "sl_rcp_gp_interface.h"
+#endif // SL_CATALOG_OT_RCP_GP_INTERFACE_PRESENT
+
 #define USE_EFR32_LOG (OPENTHREAD_CONFIG_LOG_OUTPUT == OPENTHREAD_CONFIG_LOG_OUTPUT_PLATFORM_DEFINED)
 
 otInstance *sInstance;
@@ -104,6 +111,9 @@ void otSysProcessDrivers(otInstance *aInstance)
     sInstance = aInstance;
 
     // should sleep and wait for interrupts here
+#if (defined SL_CATALOG_OT_RCP_GP_INTERFACE_PRESENT)
+    efr32GpProcess();
+#endif
 
 #if OPENTHREAD_CONFIG_NCP_HDLC_ENABLE
     efr32UartProcess();

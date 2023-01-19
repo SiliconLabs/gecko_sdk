@@ -2102,6 +2102,7 @@ static sl_status_t re_transmit_frame(sl_cpc_endpoint_t* endpoint)
 {
   sl_cpc_transmit_queue_item_t *item;
   sl_slist_node_t *item_node;
+  bool free_hdlc_header = true;
 
   CORE_ATOMIC_SECTION(item_node = SLI_CPC_POP_BUFFER_HANDLE_LIST(&endpoint->re_transmit_queue, sl_cpc_transmit_queue_item_t); );
   if (item_node == NULL) {
@@ -2111,8 +2112,20 @@ static sl_status_t re_transmit_frame(sl_cpc_endpoint_t* endpoint)
   item = SL_SLIST_ENTRY(item_node, sl_cpc_transmit_queue_item_t, node);
   sli_cpc_on_frame_retransmit(item);
 
+#if (SL_CPC_ENDPOINT_SECURITY_ENABLED >= 1)
+  // If a frame is encrypted, the header is part of the authenticated data
+  // (they are in plaintext but signed), meaning that the header must *NOT*
+  // change once it has been used to generate a security tag.
+  if (item->handle->security_tag) {
+    free_hdlc_header = false;
+  }
+#endif
+
   // Free the header buffer
-  sli_cpc_free_hdlc_header(item->handle->hdlc_header);
+  if (free_hdlc_header) {
+    sli_cpc_free_hdlc_header(item->handle->hdlc_header);
+    item->handle->hdlc_header = NULL;
+  }
 
   //Put frame in Tx Q so that it can be transmitted by CPC Core later
   CORE_ATOMIC_SECTION(sli_cpc_push_buffer_handle(&transmit_queue, &item->node, item->handle); );
@@ -2226,6 +2239,7 @@ static sl_status_t process_tx_queue(void)
   uint8_t frame_type;
   uint16_t data_length;
   sl_slist_node_t *tx_queue;
+  bool free_hdlc_header = true;
 #if (SL_CPC_ENDPOINT_SECURITY_ENABLED >= 1)
   bool encrypt;
 #endif
@@ -2264,9 +2278,21 @@ static sl_status_t process_tx_queue(void)
   item = SL_SLIST_ENTRY(node, sl_cpc_transmit_queue_item_t, node);
   frame = item->handle;
 
+  // set frame_type as it's used further down in the function
+  frame_type = sli_cpc_hdlc_get_frame_type(frame->control);
+
+#if (SL_CPC_ENDPOINT_SECURITY_ENABLED >= 1)
+  // if frame is already ready to be transmitted
+  if (frame->security_tag) {
+    free_hdlc_header = false;
+
+    // skip header allocation and encryption
+    goto transmit_data;
+  }
+#endif
+
   // Get buffer for HDLC header
   status = sli_cpc_get_hdlc_header_buffer(&frame->hdlc_header);
-
   if (status != SL_STATUS_OK) {
     // Retry later on
     CORE_ATOMIC_SECTION(sli_cpc_push_buffer_handle(&transmit_queue, &item->node, frame); );
@@ -2275,8 +2301,6 @@ static sl_status_t process_tx_queue(void)
 
   // Form the HDLC header
   data_length = (frame->data_length != 0) ? frame->data_length + 2 : 0;
-
-  frame_type = sli_cpc_hdlc_get_frame_type(frame->control);
 
   if (frame_type == SLI_CPC_HDLC_FRAME_TYPE_DATA) {
     // Update ACK cnt with latest
@@ -2346,9 +2370,13 @@ static sl_status_t process_tx_queue(void)
 
     frame->fcs[0] = (uint8_t)fcs;
     frame->fcs[1] = (uint8_t)(fcs >> 8);
-  }
-#endif
 
+    free_hdlc_header = false;
+  }
+
+  // label to skip header allocation and encryption
+  transmit_data:
+#endif
   // Pass frame to driver for transmission
   CORE_ENTER_ATOMIC();
   status = sli_cpc_drv_transmit_data(frame, frame->data_length);
@@ -2357,10 +2385,16 @@ static sl_status_t process_tx_queue(void)
     sli_cpc_push_buffer_handle(&transmit_queue, &item->node, frame);
 
     // In case the driver returns an error we will wait for driver
-    // notification before resuming transmission
-    // free HDLC header
-    sli_cpc_free_hdlc_header(frame->hdlc_header);
-    frame->hdlc_header = NULL;
+    // notification before resuming transmission. If the security
+    // is used, the HDLC header must not be freed as it's part of
+    // the security tag (it's authenticated data), meaning that if
+    // the header changes on a subsequent retransmit, the security
+    // tag will be invalid and the other end will fail to decrypt.
+    if (free_hdlc_header) {
+      // free HDLC header
+      sli_cpc_free_hdlc_header(frame->hdlc_header);
+      frame->hdlc_header = NULL;
+    }
 
     CORE_EXIT_ATOMIC();
     return status;

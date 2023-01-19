@@ -66,6 +66,8 @@
 #include "ember-types.h"
 #include "serial_adapter.h"
 
+#include "stack/include/ember-types.h"
+
 #ifndef OPENTHREAD_ENABLE_COVERAGE
 #define OPENTHREAD_ENABLE_COVERAGE 0
 #endif
@@ -287,4 +289,10 @@ void app_process_args(int argc, char *argv[])
   IgnoreError(otLoggingSetLevel(config.mLogLevel));
   syslog(LOG_INFO, "Zigbeed started");
   syslog(LOG_INFO, "RCP version: %s", otPlatRadioGetVersionString(instance));
+  syslog(LOG_INFO, "Zigbeed Version: GSDK %d.%d.%d - %s - %s",
+         emberVersion.major,
+         emberVersion.minor,
+         emberVersion.patch,
+         emberStackBuildDateTime.date,
+         emberStackBuildDateTime.time);
 }

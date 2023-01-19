@@ -19,8 +19,8 @@ requires:
     condition:
       - device_host
   - name: legacy_hal_soc
-    unless:
-      - device_host
+    condition:
+      - device_cortexm
   - name: component_catalog
 template_contribution:
   - name: component_catalog

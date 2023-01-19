@@ -129,7 +129,7 @@ template_contribution:
       include: sl_legacy_hal_integration_hooks.h
       handler: sl_legacy_hal_sleep_on_isr_exit
   - name: component_catalog
-    value: legacy_hal
+    value: legacy_hal_soc
 documentation:
     docset: gecko-platform
     document: service/api/group-legacyhal

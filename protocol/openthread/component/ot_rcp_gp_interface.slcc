@@ -1,0 +1,20 @@
+id: ot_rcp_gp_interface
+label: Green Power Interface (RCP)
+package: OpenThread
+category: OpenThread
+quality: production
+description: This component provides outgoing transmit queue for zigbee green power on rcp.
+provides:
+  - name: ot_rcp_gp_interface
+config_file:
+  - path: protocol/openthread/config/sl_rcp_gp_interface_config.h
+include:
+  - path: protocol/openthread/platform-abstraction/efr32
+    file_list:
+      - path: sl_rcp_gp_interface.h
+source:
+      - path: protocol/openthread/platform-abstraction/efr32/sl_rcp_gp_interface.c
+
+template_contribution:
+  - name: component_catalog
+    value: ot_rcp_gp_interface

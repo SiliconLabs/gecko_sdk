@@ -1092,14 +1092,10 @@ uint32_t IADC_getReferenceVoltage(IADC_CfgReference_t reference)
   switch (reference) {
     case iadcCfgReferenceInt1V2:
 #if defined(_SILICON_LABS_32B_SERIES_2_CONFIG_1)
-      if (chipRev.major == 2UL) {
-        if (chipRev.minor == 0UL) {
-          refVoltage = 1232;
-        } else {
-          refVoltage = 1180;
-        }
-      } else {
+      if (chipRev.major == 1UL) {
         refVoltage = 1210;
+      } else {
+        refVoltage = 1180;
       }
 #else
       refVoltage = 1210;

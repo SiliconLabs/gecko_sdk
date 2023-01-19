@@ -26,6 +26,7 @@ component:
       - vcom
   - id: rail_util_pti
   - id: bootloader_interface
+  - id: ot_rcp_gp_interface
 
 include:
   - path: .

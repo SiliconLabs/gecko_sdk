@@ -114,6 +114,23 @@ typedef struct {
  */
 extern const EmberVersion emberVersion;
 
+#ifdef ZIGBEE_STACK_ON_HOST
+
+/**
+ * @brief A structure for storing build date and time.
+ */
+typedef struct {
+  const char * date;
+  const char * time;
+} EmberStackBuildDateTime;
+
+/**
+ * @brief A structure containing the build date and time information.
+ */
+extern const EmberStackBuildDateTime emberStackBuildDateTime;
+
+#endif //ZIGBEE_STACK_ON_HOST
+
 /**
  * @brief Size of EUI64 (an IEEE address) in bytes (8).
  */
@@ -3283,7 +3300,7 @@ enum
 };
 
 typedef struct {
-  Buffer message;
+  uint8_t message_id;
   uint8_t tag;
 } EmberTagMapEntry;
 

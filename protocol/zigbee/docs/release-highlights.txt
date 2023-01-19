@@ -1,2 +1,2 @@
-Zigbee EmberZNet SDK 7.1.3.0
-- Early access part support
+Zigbee EmberZNet SDK 7.1.4.0
+- Targeted quality improvements and bug fixes
