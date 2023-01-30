@@ -285,6 +285,11 @@ SECTIONS
     KEEP(*(.fini_array))
     PROVIDE_HIDDEN (__fini_array_end = .);
 
+{%- if rtt == 1 %}
+    . = ALIGN(4);
+    *(SEGGER_RTT)
+{%- endif %}
+
     . = ALIGN(4);
     /* All data end */
     __data_end__ = .;
@@ -299,9 +304,6 @@ SECTIONS
   {
     . = ALIGN(4);
     __bss_start__ = .;
-{%- if rtt == 1 %}
-    *(SEGGER_RTT)
-{%- endif %}
     *(SORT_BY_ALIGNMENT(.bss*))
     *(COMMON)
     . = ALIGN(4);

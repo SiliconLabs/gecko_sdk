@@ -101,7 +101,7 @@ void emberAfIncomingMessageCallback(EmberIncomingMessage *message)
   humidity_decimal = humidity -  (humidity / 1000) * 1000;
   humidity = humidity / 1000;
 
-  app_log_info(" Temperature: %s%d.%dC Humidity: %d.%d%%\n", (temperature_is_negative ? "-" : "+"), temperature, temperature_decimal, humidity, humidity_decimal);
+  app_log_info(" Temperature: %s%d.%03dC Humidity: %d.%03d%%\n", (temperature_is_negative ? "-" : "+"), temperature, temperature_decimal, humidity, humidity_decimal);
 }
 
 /**************************************************************************//**

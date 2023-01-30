@@ -1,4 +1,4 @@
-/***************************************************************************/ /**
+/*
  * @file
  * @brief This file contains definitions for a CPC based NCP interface to the OpenThread stack.
  *******************************************************************************
@@ -26,7 +26,7 @@
  *    misrepresented as being the original software.
  * 3. This notice may not be removed or altered from any source distribution.
  *
- ******************************************************************************/
+ */
 
 #ifndef NCP_CPC_HPP_
 #define NCP_CPC_HPP_
@@ -60,7 +60,8 @@ public:
     void ProcessCpc(void);
 
 private:
-    enum{
+    enum
+    {
         kCpcTxBufferSize = OPENTHREAD_CONFIG_NCP_CPC_TX_CHUNK_SIZE
     };
 
@@ -70,29 +71,25 @@ private:
                                             Spinel::Buffer::FrameTag aTag,
                                             Spinel::Buffer::Priority aPriority,
                                             Spinel::Buffer *         aBuffer);
-    
-    void SendToCPC(void);
+
+    void        SendToCPC(void);
     static void SendToCPC(Tasklet &aTasklet);
-    static void HandleCPCSendDone(sl_cpc_user_endpoint_id_t endpoint_id,
-                                  void *                    buffer,
-                                  void *                    arg,
-                                  sl_status_t               status);
-    void HandleSendDone(void);
-    static void HandleCPCReceive(sl_cpc_user_endpoint_id_t endpoint_id,
-                                 void *                    arg);
+    static void HandleCPCSendDone(sl_cpc_user_endpoint_id_t endpoint_id, void *buffer, void *arg, sl_status_t status);
+    void        HandleSendDone(void);
+    static void HandleCPCReceive(sl_cpc_user_endpoint_id_t endpoint_id, void *arg);
     static void HandleCPCEndpointError(uint8_t endpoint_id, void *arg);
     static void HandleEndpointError(Tasklet &aTasklet);
-    void HandleEndpointError(void);
+    void        HandleEndpointError(void);
     static void HandleOpenEndpoint(Tasklet &aTasklet);
-    void HandleOpenEndpoint(void);
+    void        HandleOpenEndpoint(void);
 
-    uint8_t mCpcTxBuffer[kCpcTxBufferSize];
-    bool mIsReady;
-    bool mIsWriting;
+    uint8_t                  mCpcTxBuffer[kCpcTxBufferSize];
+    bool                     mIsReady;
+    bool                     mIsWriting;
     sl_cpc_endpoint_handle_t mUserEp;
-    Tasklet mCpcSendTask;
-    Tasklet mCpcEndpointErrorTask;
-    Tasklet mCpcOpenEndpointTask;
+    Tasklet                  mCpcSendTask;
+    Tasklet                  mCpcEndpointErrorTask;
+    Tasklet                  mCpcOpenEndpointTask;
 };
 
 } // namespace Ncp

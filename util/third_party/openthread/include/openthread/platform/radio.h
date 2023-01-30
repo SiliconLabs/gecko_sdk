@@ -1143,7 +1143,6 @@ otError otPlatRadioConfigureEnhAckProbing(otInstance *        aInstance,
                                           otShortAddress      aShortAddress,
                                           const otExtAddress *aExtAddress);
 
-
 #if OPENTHREAD_CONFIG_DIAG_ENABLE
 
 /**
@@ -1167,8 +1166,23 @@ otError otPlatDiagTxStreamStop(void);
 otError otPlatDiagTxStreamAddrMatch(uint8_t enable);
 otError otPlatDiagTxStreamAutoAck(uint8_t autoAckEnabled);
 
-#endif // #if OPENTHREAD_CONFIG_DIAG_ENABLE
+// coex
+otError otPlatDiagCoexSetPriorityPulseWidth(uint8_t pulseWidthUs);
 
+otError otPlatDiagCoexSetRadioHoldoff(bool enabled);
+
+otError otPlatDiagCoexSetRequestPwm(uint8_t ptaReq, void *ptaCb, uint8_t dutyCycle, uint8_t periodHalfMs);
+
+otError otPlatDiagCoexSetOptions(uint32_t options);
+
+otError otPlatDiagCoexSetPhySelectTimeout(uint8_t timeoutMs);
+
+otError otPlatDiagCoexGetOptions(uint32_t *options);
+otError otPlatDiagCoexGetPhySelectTimeout(uint8_t *timeoutMs);
+otError otPlatDiagCoexGetPriorityPulseWidth(uint8_t *pulseWidthUs);
+otError otPlatDiagCoexGetRequestPwmArgs(uint8_t *req, uint8_t *dutyCycle, uint8_t *periodHalfMs);
+
+#endif // #if OPENTHREAD_CONFIG_DIAG_ENABLE
 
 /**
  * @}

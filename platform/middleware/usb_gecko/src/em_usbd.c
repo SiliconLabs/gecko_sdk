@@ -253,7 +253,7 @@ int USBD_Init(const USBD_Init_TypeDef *p)
 
   /* HFXO is the only possible core/usb oscillator. */
   if (CMU_ClockSelectGet(cmuClock_HF) != cmuSelect_HFXO) {
-    CMU_ClockSelectSet(cmuClock_HF, cmuSelect_HFXO);
+    CMU_CLOCK_SELECT_SET(HF, HFXO);
   }
 
 #elif defined(_EFM32_HAPPY_FAMILY)
@@ -265,7 +265,7 @@ int USBD_Init(const USBD_Init_TypeDef *p)
 
   #if !defined(USB_CORECLK_HFRCO)
   if ( CMU_ClockSelectGet(cmuClock_HF) != cmuSelect_HFXO ) {
-    CMU_ClockSelectSet(cmuClock_HF, cmuSelect_HFXO);
+    CMU_CLOCK_SELECT_SET(HF, HFXO);
   }
   #endif
 
@@ -273,9 +273,9 @@ int USBD_Init(const USBD_Init_TypeDef *p)
   CMU_ClockEnable(cmuClock_CORELE, true);
   #if (USB_USBC_32kHz_CLK == USB_USBC_32kHz_CLK_LFXO) \
   || (USB_USBLEM_CLK == USB_USBLEM_CLK_LFXO)
-  CMU_ClockSelectSet(cmuClock_LFC, cmuSelect_LFXO);
+  CMU_CLOCK_SELECT_SET(LFC, LFXO);
   #else
-  CMU_ClockSelectSet(cmuClock_LFC, cmuSelect_LFRCO);
+  CMU_CLOCK_SELECT_SET(LFC, LFRCO);
   #endif
   CMU_ClockEnable(cmuClock_USBLE, true);
 
@@ -290,11 +290,11 @@ int USBD_Init(const USBD_Init_TypeDef *p)
     EFM_ASSERT(false);
     return USB_STATUS_ILLEGAL;
   }
-  CMU_ClockSelectSet(cmuClock_USBR, cmuSelect_HFXO);
+  CMU_CLOCK_SELECT_SET(USBR, HFXO);
 
   #elif defined(USB_CLKSRC_USHFRCO)
   CMU_USHFRCOBandSet(cmuUSHFRCOFreq_48M0Hz);
-  CMU_ClockSelectSet(cmuClock_USBR, cmuSelect_USHFRCO);
+  CMU_CLOCK_SELECT_SET(USBR, USHFRCO);
   /* Enable USHFRCO Clock Recovery mode. */
   CMU->USBCRCTRL |= CMU_USBCRCTRL_USBCREN;
 
@@ -311,7 +311,7 @@ int USBD_Init(const USBD_Init_TypeDef *p)
   init.refClk = cmuDPLLClkSel_Hfxo;
   CMU_OscillatorEnable(cmuOsc_HFXO, true, true);
   #endif
-  CMU_ClockSelectSet(cmuClock_USBR, cmuSelect_HFRCO);
+  CMU_CLOCK_SELECT_SET(USBR, HFRCO);
   if (!CMU_DPLLLock(&init)) {
     DEBUG_USB_API_PUTS("\nUSBD_Init(), DPLL could not lock");
     EFM_ASSERT(false);
@@ -324,9 +324,9 @@ int USBD_Init(const USBD_Init_TypeDef *p)
 
   /* LFC clock is needed to detect USB suspend when LEMIDLE is activated. */
   #if (USB_USBLEM_CLK == USB_USBLEM_CLK_LFXO)
-  CMU_ClockSelectSet(cmuClock_LFC, cmuSelect_LFXO);
+  CMU_CLOCK_SELECT_SET(LFC, LFXO);
   #else /* (USB_USBLEM_CLK == USB_USBLEM_CLK_LFRCO) */
-  CMU_ClockSelectSet(cmuClock_LFC, cmuSelect_LFRCO);
+  CMU_CLOCK_SELECT_SET(LFC, LFRCO);
   #endif
   CMU_ClockEnable(cmuClock_USBLE, true);
 #endif
@@ -535,10 +535,10 @@ int USBD_Init(const USBD_Init_TypeDef *p)
 
   /* Perform final USB clock selection. */
 #if defined(_SILICON_LABS_32B_SERIES_0) && !defined(_EFM32_HAPPY_FAMILY)
-  CMU_ClockSelectSet(cmuClock_USBC, cmuSelect_HFCLK);
+  CMU_CLOCK_SELECT_SET(USBC, HFCLK);
 #elif defined(_EFM32_HAPPY_FAMILY)
   CMU_USHFRCOBandSet(cmuUSHFRCOBand_48MHz);
-  CMU_ClockSelectSet(cmuClock_USBC, cmuSelect_USHFRCO);
+  CMU_CLOCK_SELECT_SET(USBC, USHFRCO);
   /* Enable USHFRCO Clock Recovery mode. */
   CMU->USBCRCTRL |= CMU_USBCRCTRL_EN;
 #endif
@@ -1340,7 +1340,7 @@ In usbconfig.h:
 int main( void )
 {
   BSP_Init(BSP_INIT_DEFAULT); // Initialize DK board register access
-  CMU_ClockSelectSet(cmuClock_HF, cmuSelect_HFXO);
+  CMU_CLOCK_SELECT_SET(HF, HFXO);
   BSP_LedsSet(0);             // Turn off all LED's
 
   ConsoleDebugInit();         // Initialize UART for debug diagnostics

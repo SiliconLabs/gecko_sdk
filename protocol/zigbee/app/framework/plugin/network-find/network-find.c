@@ -635,18 +635,18 @@ EmberStatus emberAfSetFormAndJoinChannelMask(uint8_t page, uint32_t mask)
   return EMBER_SUCCESS;
 }
 
-uint32_t emberAfGetFormAndJoinChannelMask(uint8_t page)
+uint32_t emberAfFormAndJoinGetChannelMask(uint8_t page, bool allChannels)
 {
   switch (page) {
     case 0:
-      return page0mask;
+      return allChannels ? EMBER_ALL_802_15_4_CHANNELS_MASK : page0mask;
       break;
 #ifdef SL_CATALOG_ZIGBEE_NETWORK_FIND_SUB_GHZ_PRESENT
     case 28:
     case 29:
     case 30:
     case 31:
-      return page28to31mask[page - EMBER_MIN_SUGBHZ_PAGE_NUMBER];
+      return allChannels ? page28to31maskAllChannels[page - EMBER_MIN_SUGBHZ_PAGE_NUMBER] : page28to31mask[page - EMBER_MIN_SUGBHZ_PAGE_NUMBER];
       break;
 #endif
     default:
@@ -699,30 +699,17 @@ bool emAfIsCurrentSearchForUnusedNetworkScanningAllChannels(void)
 }
 
 /** @brief Returns the channel mask for the current scan.
- * Similar to emberAfGetFormAndJoinChannelMask(), but may return the configured
+ * This function  may return the configured
  * channel mask or all channels mask, depending on the current scan state.
  */
 uint32_t emAfGetSearchForUnusedNetworkChannelMask(uint8_t page)
 {
+  bool allChannels = false;
   if (emAfIsCurrentSearchForUnusedNetworkScanningAllChannels()) {
-    switch (page) {
-      case 0:
-        return EMBER_ALL_802_15_4_CHANNELS_MASK;
-        break;
-#ifdef SL_CATALOG_ZIGBEE_NETWORK_FIND_SUB_GHZ_PRESENT
-      case 28:
-      case 29:
-      case 30:
-      case 31:
-        return page28to31maskAllChannels[page - EMBER_MIN_SUGBHZ_PAGE_NUMBER];
-        break;
-#endif
-      default:
-        return 0xFFFFFFFFU;
-    }
+    allChannels = true;
   }
 
-  return emberAfGetFormAndJoinChannelMask(page);
+  return emberAfFormAndJoinGetChannelMask(page, allChannels);
 }
 
 #ifdef SL_CATALOG_ZIGBEE_NETWORK_FIND_SUB_GHZ_PRESENT

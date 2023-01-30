@@ -38,6 +38,7 @@
 #include <stdint.h>
 #include <stdio.h>
 
+#include "sl_iperf_types.h"
 #include "sl_iperf_network_interface.h"
 #include "sl_iperf.h"
 #include "sl_iperf_util.h"
@@ -95,7 +96,7 @@ static void _parse_srv_finack(sl_iperf_test_t * const test);
  * @param[in] low Low 32 bit word
  * @return uint64_t 64 bit value
  *****************************************************************************/
-static inline uint64_t _get_u64_val_from_hl(const uint32_t high, const uint32_t low);
+__STATIC_INLINE uint64_t _get_u64_val_from_hl(const uint32_t high, const uint32_t low);
 
 // -----------------------------------------------------------------------------
 //                                Static Variables
@@ -309,7 +310,7 @@ static void _udp_client_calc_tx(sl_iperf_test_t * const test,
   }
 }
 
-static inline uint64_t _get_u64_val_from_hl(const uint32_t high, const uint32_t low)
+__STATIC_INLINE uint64_t _get_u64_val_from_hl(const uint32_t high, const uint32_t low)
 {
   return ((uint64_t) sl_iperf_network_ntohl(high) << 32U)
          | (uint64_t) sl_iperf_network_ntohl(low);

@@ -28,6 +28,19 @@
 sl_status_t sl_iostream_uart_init_{{ instance }}(void);
 {% endfor %}
 
+#if defined(SL_CATALOG_POWER_MANAGER_PRESENT)
+// EM Events
+#define SLEEP_EM_EVENT_MASK      (SL_POWER_MANAGER_EVENT_TRANSITION_LEAVING_EM0)
+static void events_handler(sl_power_manager_em_t from,
+                           sl_power_manager_em_t to);
+static sl_power_manager_em_transition_event_info_t events_info =
+{
+  .event_mask = SLEEP_EM_EVENT_MASK,
+  .on_event = events_handler,
+};
+static sl_power_manager_em_transition_event_handle_t events_handle;
+#endif // SL_CATALOG_POWER_MANAGER_PRESENT
+
 // Instance(s) handle and context variable {# Generate iostream handle and context variable(s) #}
 {% for instance in iostream_uart_instances %}static sl_iostream_uart_t sl_iostream_{{ instance }};
 sl_iostream_t *sl_iostream_{{ instance }}_handle = &sl_iostream_{{ instance }}.stream;
@@ -76,8 +89,7 @@ sl_status_t sl_iostream_uart_init_{{ instance }}(void)
   };
 
   sl_iostream_dma_config_t dma_config_{{ instance }} = {.src = (uint8_t *)&SL_IOSTREAM_UART_{{ instance | upper }}_PERIPHERAL->RXDATA,
-                                                        .peripheral_signal = SL_IOSTREAM_UART_RX_DMA_SIGNAL(SL_IOSTREAM_UART_{{ instance | upper }}_PERIPHERAL_NO),
-                                                        .size = dmadrvDataSize1};
+                                                        .peripheral_signal = SL_IOSTREAM_UART_RX_DMA_SIGNAL(SL_IOSTREAM_UART_{{ instance | upper }}_PERIPHERAL_NO)};
 
   sl_iostream_uart_config_t uart_config_{{ instance }} = {
     .dma_cfg = dma_config_{{ instance }},
@@ -111,6 +123,10 @@ sl_status_t sl_iostream_uart_init_{{ instance }}(void)
 void sl_iostream_uart_init_instances(void)
 {
   sl_status_t status;
+  #if defined(SL_CATALOG_POWER_MANAGER_PRESENT)
+  // Enable power manager notifications
+  sl_power_manager_subscribe_em_transition_event(&events_handle, &events_info);
+  #endif  
   // Instantiate uart instance(s) {# Initialize uart instance(s) #}
   {% for instance in iostream_uart_instances %}
   status = sl_iostream_uart_init_{{ instance }}();
@@ -131,15 +147,25 @@ void SL_IOSTREAM_UART_RX_IRQ_HANDLER(SL_IOSTREAM_UART_{{ instance | upper }}_PER
 }
 {% endfor %}
 
-#if defined(SL_CATALOG_POWER_MANAGER_PRESENT) && !defined(SL_CATALOG_KERNEL_PRESENT)
+#if defined(SL_CATALOG_POWER_MANAGER_PRESENT)
+#if !defined(SL_CATALOG_KERNEL_PRESENT)
 {% for instance in iostream_uart_instances %} {# Create IRQ Handler(s) #}
 sl_power_manager_on_isr_exit_t sl_iostream_uart_{{ instance }}_sleep_on_isr_exit(void)
 {
   return sl_iostream_uart_sleep_on_isr_exit(&sl_iostream_{{ instance }});
 }
-bool sl_iostream_uart_{{ instance }}_is_ok_to_sleep(void)
-{
-  return sl_iostream_uart_is_ok_to_sleep(&sl_iostream_{{ instance }});
-}
 {% endfor %}
-#endif
+#endif // SL_CATALOG_KERNEL_PRESENT
+static void events_handler(sl_power_manager_em_t from,
+                           sl_power_manager_em_t to)
+{
+  (void) from;
+  // Enable next byte detect to wake from sleep
+  if (to < SL_POWER_MANAGER_EM2){
+    {% for instance in iostream_uart_instances %} 
+    // Enable next byte detection to wakeup from sleep on next byte
+    context_{{ instance }}.context.set_next_byte_detect(sl_iostream_{{ instance }}_handle->context, true);
+    {% endfor %}
+  }
+}
+#endif // SL_CATALOG_POWER_MANAGER_PRESENT

@@ -83,7 +83,7 @@ static void app_wisun_event_mgr_mutex_unlock(void);
  * @param[in] ind Indication event ID
  * @return lookup index, if decoded, otherwise -1
  *****************************************************************************/
-static inline app_wisun_event_id_t _decode_ind(const sl_wisun_msg_ind_id_t ind);
+__STATIC_INLINE app_wisun_event_id_t _decode_ind(const sl_wisun_msg_ind_id_t ind);
 
 // -----------------------------------------------------------------------------
 //                                Global Variables
@@ -248,7 +248,7 @@ static void app_wisun_event_mgr_mutex_unlock(void)
 }
 
 /* Decode wisun event id to lookup index */
-static inline app_wisun_event_id_t _decode_ind(const sl_wisun_msg_ind_id_t ind)
+__STATIC_INLINE app_wisun_event_id_t _decode_ind(const sl_wisun_msg_ind_id_t ind)
 {
   switch (ind) {
     case SL_WISUN_MSG_NETWORK_UPDATE_IND_ID:                return EVENT_IDX_NETWORK_UPDATE;

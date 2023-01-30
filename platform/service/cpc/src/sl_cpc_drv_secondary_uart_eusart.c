@@ -1311,9 +1311,7 @@ static bool update_current_rx_dma_large_payload_length(uint16_t new_length)
 
 #ifdef _LDMA_CH_CTRL_DONEIFSEN_MASK
   LDMA->CH[read_channel].CTRL &= ~_LDMA_CH_CTRL_DONEIFSEN_MASK;
-#elif _LDMA_CH_CTRL_DONESET_MASK
-  LDMA->CH[read_channel].CTRL &= ~_LDMA_CH_CTRL_DONESET_MASK;
-#else
+#elif _LDMA_CH_CTRL_DONEIEN_MASK
   LDMA->CH[read_channel].CTRL &= ~_LDMA_CH_CTRL_DONEIEN_MASK;
 #endif
 

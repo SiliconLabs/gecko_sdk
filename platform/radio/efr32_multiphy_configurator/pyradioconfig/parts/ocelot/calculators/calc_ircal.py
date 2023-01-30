@@ -1,8 +1,14 @@
 from pyradioconfig.parts.common.calculators.calc_ircal import CALC_IrCal
 from pyradioconfig.calculator_model_framework.Utils.CustomExceptions import CalculationException
+from pycalcmodel.core.variable import ModelVariableFormat
 from py_2_and_3_compatibility import *
 
 class CALC_IrCal_Ocelot(CALC_IrCal):
+
+    def buildVariables(self, model):
+        super().buildVariables(model)
+        self._addModelVariable(model, 'ircal_murshf', int, ModelVariableFormat.DECIMAL)
+        self._addModelVariable(model, 'ircal_muishf', int, ModelVariableFormat.DECIMAL)
 
     def calc_ircal_auxpll_dividers(self, model):
         auxdividers = {2419000000: (1, 63),  # For Lodiv = 1 Not currently used by the IRCal algorithm.
@@ -63,3 +69,9 @@ class CALC_IrCal_Ocelot(CALC_IrCal):
                 # a minimum value of 100MHz.
                 raise CalculationException(
                     "Unexpected frequency band found.  Unable to calculate IR calibration values.")
+
+    def calc_ircal_murshf_muishf(self, model):
+
+        #Hard coded for Ocelot
+        model.vars.ircal_murshf.value = 24
+        model.vars.ircal_muishf.value = 34

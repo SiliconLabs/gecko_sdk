@@ -325,11 +325,11 @@ sl_status_t disable_device_erase(void)
  ******************************************************************************/
 sl_status_t set_debug_option(void)
 {
-  // Configure debug options
-  debug_lock_status_buf.options_config.non_secure_invasive_debug = true;
-  debug_lock_status_buf.options_config.non_secure_non_invasive_debug = true;
-  debug_lock_status_buf.options_config.secure_invasive_debug = true;
-  debug_lock_status_buf.options_config.secure_non_invasive_debug = true;
+  // Configure debug options: 0 = Locked, 1 = Unlocked (reverse)
+  debug_lock_status_buf.options_config.non_secure_invasive_debug = ~(DEBUG_OPTIONS >> 0) & 0x01;
+  debug_lock_status_buf.options_config.non_secure_non_invasive_debug = ~(DEBUG_OPTIONS >> 1) & 0x01;
+  debug_lock_status_buf.options_config.secure_invasive_debug = ~(DEBUG_OPTIONS >> 2) & 0x01;
+  debug_lock_status_buf.options_config.secure_non_invasive_debug = ~(DEBUG_OPTIONS >> 3) & 0x01;
 
   print_error_cycle(sl_se_set_debug_options(&cmd_ctx,
                                             &debug_lock_status_buf.options_config),
@@ -395,7 +395,7 @@ sl_status_t sign_challenge_response(void)
 {
   // Initialize the challenge response
   challenge_response.command_value = DEBUG_ACCESS_CMD;
-  challenge_response.parameter = DEBUG_AUTHORIZATION;
+  challenge_response.parameter = DEBUG_MODE_REQUEST;
 
   // Set up a key descriptor for private certificate key
   sl_se_key_descriptor_t priv_key = {
@@ -430,10 +430,16 @@ sl_status_t sign_challenge_response(void)
  ******************************************************************************/
 sl_status_t create_unlock_token(void)
 {
+  // Use debug mode request to reset debug options: 0 = No action, 1 = Reset
+  debug_lock_status_buf.options_config.non_secure_invasive_debug = (DEBUG_MODE_REQUEST >> 2) & 0x01;
+  debug_lock_status_buf.options_config.non_secure_non_invasive_debug = (DEBUG_MODE_REQUEST >> 3) & 0x01;
+  debug_lock_status_buf.options_config.secure_invasive_debug = (DEBUG_MODE_REQUEST >> 4) & 0x01;
+  debug_lock_status_buf.options_config.secure_non_invasive_debug = (DEBUG_MODE_REQUEST >> 5) & 0x01;
+
   // Initialize the unlock token
   unlock_token.certificate = access_certificate;
 
-  // Unlock the device with current debug options
+  // Unlock the device
   print_error_cycle(sl_se_open_debug(&cmd_ctx,
                                      &unlock_token,
                                      sizeof(unlock_token),

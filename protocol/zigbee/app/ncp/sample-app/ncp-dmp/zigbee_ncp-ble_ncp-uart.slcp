@@ -1,0 +1,172 @@
+project_name: "zigbee_ncp-ble_ncp-uart"
+label: "Zigbee - NCP + Bluetooth - NCP zigbee_ncp-ble_ncp-uart"
+package: "Zigbee"
+category: "Zigbee + Bluetooth NCP Application"
+quality: "production"
+
+description: >
+  This dynamic multiprotocol (DMP) application runs the Zigbee NCP
+  simultaneously with the Bluetooth NCP. Communication with Zigbee and
+  Bluetooth host applications is enabled using the Co-Processor Communication
+  Protocol, which acts as a protocol multiplexer and serial transport layer.
+  The host applications connect to the CPC daemon, which in turn connects to
+  the EFR via a UART link. The Zigbee NCP part of this application can be built
+  as configured, or can optionally be augmented with customized extensions for
+  initialization, main loop processing, event definition/handling, and messaging
+  with the host.
+
+author: "Silicon Laboratories, Inc." 
+
+component:
+  - id: "cpc_secondary_driver_uart_usart"
+    instance:
+      - vcom
+  - id: "zigbee_debug_basic"
+  - id: "zigbee_debug_print"
+  - id: "token_manager"
+  - id: "zigbee_pro_stack"
+  - id: "zigbee_source_route"
+  - id: "zigbee_binding_table"
+  - id: "zigbee_end_device_bind"
+  - id: "zigbee_packet_validate"
+  - id: "zigbee_gp"
+  - id: "zigbee_r22_support"
+  - id: "zigbee_security_link_keys"
+  - id: "zigbee_zll"
+  - id: "zigbee_install_code"
+  - id: "zigbee_app_framework_common"
+  - id: "zigbee_ncp_cpc"
+  - id: "bluetooth_stack"
+  - id: "bluetooth_feature_legacy_advertiser"
+  - id: "bluetooth_feature_extended_advertiser"
+  - id: "bluetooth_feature_periodic_advertiser"
+  - id: "bluetooth_feature_connection"
+  - id: "bluetooth_feature_dfu"
+  - id: "bluetooth_feature_gap"
+  - id: "bluetooth_feature_gatt"
+  - id: "bluetooth_feature_gatt_server"
+  - id: "bluetooth_feature_nvm"
+  - id: "bluetooth_feature_legacy_scanner"
+  - id: "bluetooth_feature_extended_scanner"
+  - id: "bluetooth_feature_sm"
+  - id: "bluetooth_feature_sync"
+  - id: "bluetooth_feature_system"
+  - id: "bluetooth_feature_dynamic_gattdb"
+  - id: "bluetooth_feature_test"
+  - id: "toolchain_gcc"
+  - id: "ncp"
+  - id: "cpc_secondary"
+  - id: "cpc_security_secondary"
+  - id: "rail_util_pti"
+  - id: "rail_util_coex"
+  - id: "bootloader_interface"
+
+configuration:
+  - name: SL_BOARD_ENABLE_VCOM
+    value: 1
+  - name: EMBER_BINDING_TABLE_SIZE
+    value: 32
+  - name: EMBER_MAX_END_DEVICE_CHILDREN
+    value: 32
+  - name: EMBER_PACKET_BUFFER_COUNT
+    value: 55
+    condition:
+      - device_family_efr32mg13
+  - name: EMBER_PACKET_BUFFER_COUNT
+    value: 255
+    unless:
+      - device_family_efr32mg13
+  - name: EMBER_AF_PLUGIN_ZIGBEE_PRO_STACK_CHILD_TABLE_SIZE
+    value: 32
+  - name:  EMBER_KEY_TABLE_SIZE
+    value: 12
+  - name: SL_ZIGBEE_OS_STACK_TASK_PRIORITY
+    value: osPriorityNormal1
+  - name: NVM3_DEFAULT_NVM_SIZE
+    value: 36864
+    condition:
+      - device_series_1
+  - name: NVM3_DEFAULT_NVM_SIZE
+    value: 32768
+    condition:
+      - device_series_2
+  # If using zigbee_secure_key_storage we do not need to support backwards
+  # compatibility because we have never deployed images with keys in PSA
+  # As a result, these lines end up saving some code space
+  - name: SL_PSA_ITS_SUPPORT_V1_DRIVER
+    value: 0
+  - name: SL_PSA_ITS_SUPPORT_V2_DRIVER
+    value: 0
+  - name: SL_PSA_ITS_SUPPORT_V3_DRIVER
+    value: 1
+  - name: SL_HEAP_SIZE
+    value: 0x3500
+    condition:
+      - device_family_efr32mg13
+  - name: SL_HEAP_SIZE
+    value: 0x3800
+    unless:
+      - device_family_efr32mg13
+  - name: SL_BT_CONFIG_BUFFER_SIZE
+    value: 3280
+  - name: SL_NCP_EVT_BUF_SIZE
+    value: 768
+  - name: SL_PSA_KEY_USER_SLOT_COUNT
+    value: 0
+    condition:
+      - psa_crypto
+  - name: SL_SIMPLE_COM_TX_BUF_SIZE
+    value: 768
+  - name: SL_STACK_SIZE
+    value: 0x400
+    condition:
+      - device_family_efr32mg13
+  - name: SL_STACK_SIZE
+    value: 0xE00
+    unless:
+      - device_family_efr32mg13
+  - name: SL_LEGACY_HAL_WDOG_PERIOD
+    value: wdogPeriod_256k
+  - name: LIB_MEM_CFG_HEAP_SIZE
+    value: 0
+  - name: SL_CPC_RX_BUFFER_MAX_COUNT
+    value: 20
+    condition:
+      - device_family_efr32mg13
+  - name: SL_CPC_TX_QUEUE_ITEM_MAX_COUNT
+    value: 20
+    condition:
+      - device_family_efr32mg13
+  - name: SL_BT_CONFIG_USER_ADVERTISERS
+    value: 1
+  - name: SL_BT_CONFIG_MAX_CONNECTIONS
+    value: 1
+  - name: SL_CPC_USER_ENDPOINT_MAX_COUNT
+    value: 0
+
+source:
+  - path: "main.c"
+  - path: "app.c"
+  
+define:
+  - name: EMBER_CUSTOM_MAC_FILTER_TABLE_SIZE
+    value: 15
+  - name: "OS_CFG_COMPAT_INIT"
+
+readme:
+  - path: ./readme-zigbee_ncp-ble_ncp-uart.html
+
+ui_hints:
+  highlight:
+    - path: readme-zigbee_ncp-ble_ncp-uart.html
+      focus: false
+
+filter:
+  - name: "Wireless Technology"
+    value: ["Zigbee", "Bluetooth"]
+  - name: "Device Type"
+    value: ["NCP"]
+  - name: "Capability"
+    value: ["Multiprotocol"]
+  - name: "Project Difficulty"
+    value: ["Advanced"]

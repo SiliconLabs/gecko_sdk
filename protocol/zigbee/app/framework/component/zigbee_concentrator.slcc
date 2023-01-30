@@ -18,7 +18,6 @@ source:
   - path: protocol/zigbee/app/framework/plugin/concentrator/concentrator-support-cli.c
     condition:
       - "cli"
-  - path: protocol/zigbee/app/framework/plugin/concentrator/concentrator-cb.c
 include:
   - path: protocol/zigbee/app/framework/plugin/concentrator
     file_list:

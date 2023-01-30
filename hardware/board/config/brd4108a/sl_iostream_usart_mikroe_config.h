@@ -95,7 +95,13 @@
 #define SL_IOSTREAM_USART_MIKROE_RX_PORT         gpioPortB
 #define SL_IOSTREAM_USART_MIKROE_RX_PIN          2
 
+// USART0 CTS on PA08
+#define SL_IOSTREAM_USART_MIKROE_CTS_PORT        gpioPortA
+#define SL_IOSTREAM_USART_MIKROE_CTS_PIN         8
 
+// USART0 RTS on PA07
+#define SL_IOSTREAM_USART_MIKROE_RTS_PORT        gpioPortA
+#define SL_IOSTREAM_USART_MIKROE_RTS_PIN         7
 
 // [USART_SL_IOSTREAM_USART_MIKROE]$
 // <<< sl:end pin_tool >>>

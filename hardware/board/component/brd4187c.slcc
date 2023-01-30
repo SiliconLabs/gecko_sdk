@@ -14,6 +14,7 @@
   - name: hardware_board
   - name: hardware_board_rb
   - name: hardware_board_from_stk
+  - name: hardware_board_from_kg100s-pk6130a
   - name: hardware_board_from_xg24-pk6010a
   - name: hardware_board_from_xg24-rb4187c
   - name: hardware_board_has_si70xx

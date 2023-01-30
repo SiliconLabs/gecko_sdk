@@ -73,6 +73,19 @@ sl_status_t iot_flash_drv_driver_deinit(void *pvHndl)
   }
 }
 
+/************************ iot_flash_drv_get_flash_base ************************/
+
+static inline
+sl_status_t iot_flash_drv_get_flash_base(void *pvHndl, uint32_t *ulFlashBase)
+{
+  IotFlashDescriptor_t *pvDesc = pvHndl;
+  if (pvDesc->lInstType == 0) {
+    return iot_flash_drv_msc_get_flash_base(ulFlashBase);
+  } else {
+    return iot_flash_drv_spi_get_flash_base(ulFlashBase);
+  }
+}
+
 /************************ iot_flash_drv_get_flash_size ************************/
 
 static inline

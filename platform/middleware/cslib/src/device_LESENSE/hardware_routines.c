@@ -57,11 +57,11 @@ void CAPLESENSE_setupCMU(void)
   SystemCoreClockUpdate();
 
   // Select clock source for HF clock.
-  CMU_ClockSelectSet(cmuClock_HF, cmuSelect_HFRCO);
+  CMU_CLOCK_SELECT_SET(HF, HFRCO);
   // Select clock source for LFA clock.
-  CMU_ClockSelectSet(cmuClock_LFA, cmuSelect_LFRCO);
+  CMU_CLOCK_SELECT_SET(LFA, LFRCO);
   // Select clock source for LFB clock.
-  CMU_ClockSelectSet(cmuClock_LFB, cmuSelect_Disabled);
+  CMU_CLOCK_SELECT_SET(LFB, DISABLED);
 
   // Enable HF peripheral clock.
   CMU_ClockEnable(cmuClock_HFPER, 1);

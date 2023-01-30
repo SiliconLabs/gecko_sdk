@@ -33,6 +33,14 @@ RUN sed -i '$ d' /app/etc/docker/docker_entrypoint.sh
 # Fix 'pam_env' issue with unset locale
 RUN locale >/etc/default/locale
 
+# EMZIGBEE-9638: remove this RUN command when we are able to replace silabs-prereq
+# with Zig-Dock to build all MP apps in the CI job.
+RUN if [ "$SYSTEM_ARCH" = "arm32v7" ]; then \
+        ln -s /lib/arm-linux-gnueabihf/libreadline.so.8.1 /lib/arm-linux-gnueabihf/libreadline.so.7; \
+    elif [ "$SYSTEM_ARCH" = "arm64v8" ]; then \
+        ln -s /lib/aarch64-linux-gnu/libreadline.so.8.1 /lib/aarch64-linux-gnu/libreadline.so.7; \
+    fi
+
 # Add in systemd files
 COPY _artifacts/systemd/* /etc/systemd/system/
 RUN systemctl enable cpcd.service

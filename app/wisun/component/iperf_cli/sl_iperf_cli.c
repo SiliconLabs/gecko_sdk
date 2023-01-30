@@ -226,128 +226,128 @@ typedef struct sl_iperf_cli_setting {
  * @brief Port setter
  * @param[in] val value
  *****************************************************************************/
-static inline void _opt_port_setter(void *val);
+__STATIC_INLINE void _opt_port_setter(void *val);
 
 /**************************************************************************//**
  * @brief Port getter
  * @return string buffer ptr
  *****************************************************************************/
-static inline const char *_opt_port_getter(void);
+__STATIC_INLINE const char *_opt_port_getter(void);
 
 // remote address
 /**************************************************************************//**
  * @brief Remote address setter
  * @param[in] val value
  *****************************************************************************/
-static inline void _opt_remote_address_setter(void *val);
+__STATIC_INLINE void _opt_remote_address_setter(void *val);
 
 /**************************************************************************//**
  * @brief Remote address getter
  * @return string buffer ptr
  *****************************************************************************/
-static inline const char *_opt_remote_address_getter(void);
+__STATIC_INLINE const char *_opt_remote_address_getter(void);
 
 // bandwidth
 /**************************************************************************//**
  * @brief Remote address setter
  * @param[in] val value
  *****************************************************************************/
-static inline void _opt_bandwidth_setter(void *val);
+__STATIC_INLINE void _opt_bandwidth_setter(void *val);
 
 /**************************************************************************//**
  * @brief Remote address getter
  * @return string buffer ptr
  *****************************************************************************/
-static inline const char *_opt_bandwidth_getter(void);
+__STATIC_INLINE const char *_opt_bandwidth_getter(void);
 
 // bytes number
 /**************************************************************************//**
  * @brief Byte number setter
  * @param[in] val value
  *****************************************************************************/
-static inline void _opt_packet_number_setter(void *val);
+__STATIC_INLINE void _opt_packet_number_setter(void *val);
 
 /**************************************************************************//**
  * @brief Byte number getter
  * @return string buffer ptr
  *****************************************************************************/
-static inline const char *_opt_packet_number_getter(void);
+__STATIC_INLINE const char *_opt_packet_number_getter(void);
 
 // buffer length
 /**************************************************************************//**
  * @brief Buffer length setter
  * @param[in] val value
  *****************************************************************************/
-static inline void _opt_buffer_length_setter(void *val);
+__STATIC_INLINE void _opt_buffer_length_setter(void *val);
 /**************************************************************************//**
  * @brief Buffer length getter
  * @return string buffer ptr
  *****************************************************************************/
-static inline const char *_opt_buffer_length_getter(void);
+__STATIC_INLINE const char *_opt_buffer_length_getter(void);
 
 // duration
 /**************************************************************************//**
  * @brief Duration setter
  * @param[in] val value
  *****************************************************************************/
-static inline void _opt_duration_setter(void *val);
+__STATIC_INLINE void _opt_duration_setter(void *val);
 /**************************************************************************//**
  * @brief Duration getter
  * @return string buffer ptr
  *****************************************************************************/
-static inline const char *_opt_duration_getter(void);
+__STATIC_INLINE const char *_opt_duration_getter(void);
 
 // interval
 /**************************************************************************//**
  * @brief Interval setter
  * @param[in] val value
  *****************************************************************************/
-static inline void _opt_interval_setter(void *val);
+__STATIC_INLINE void _opt_interval_setter(void *val);
 
 /**************************************************************************//**
  * @brief Interval getter
  * @return string buffer ptr
  *****************************************************************************/
-static inline const char *_opt_interval_getter(void);
+__STATIC_INLINE const char *_opt_interval_getter(void);
 
 // bandwidth format
 /**************************************************************************//**
  * @brief Bandwith format setter
  * @param[in] val value
  *****************************************************************************/
-static inline void _opt_bw_format_setter(void *val);
+__STATIC_INLINE void _opt_bw_format_setter(void *val);
 
 /**************************************************************************//**
  * @brief Bandwith format getter
  * @return string buffer ptr
  *****************************************************************************/
-static inline const char *_opt_bw_format_getter(void);
+__STATIC_INLINE const char *_opt_bw_format_getter(void);
 
 /**************************************************************************//**
  * @brief Test result getter
  * @return Always NULL
  *****************************************************************************/
-static inline const char *_results_json_getter(void);
+__STATIC_INLINE const char *_results_json_getter(void);
 
 /**************************************************************************//**
  * @brief Test result getter
  * @return Always NULL
  *****************************************************************************/
-static inline const char *_results_text_getter(void);
+__STATIC_INLINE const char *_results_text_getter(void);
 
 /**************************************************************************//**
  * @brief Print property value
  * @details Helper function
  * @param[in] setting CLI setting
  *****************************************************************************/
-static inline void _print_property_val(const sl_iperf_cli_property_t * const setting);
+__STATIC_INLINE void _print_property_val(const sl_iperf_cli_property_t * const setting);
 
 /**************************************************************************//**
  * @brief Print property help
  * @details Helper function
  * @param[in] setting
  *****************************************************************************/
-static inline void _print_property_help(const sl_iperf_cli_property_t * const setting);
+__STATIC_INLINE void _print_property_help(const sl_iperf_cli_property_t * const setting);
 
 /**************************************************************************//**
  * @brief Print properties in domain with their values
@@ -383,7 +383,7 @@ static void _exec_test(const sl_iperf_mode_t mode,
  * @return true Help string key
  * @return false Not help string key
  *****************************************************************************/
-static inline bool _is_argument_help(const char * arg);
+__STATIC_INLINE bool _is_argument_help(const char * arg);
 
 /**************************************************************************//**
  * @brief Convert flags to string
@@ -400,7 +400,7 @@ static const char *_flags_to_str(const sl_iperf_cli_opt_flags_t flags);
  * @param[in] key Key
  * @return sl_iperf_cli_property_t* Property ptr if it's found or NULL
  *****************************************************************************/
-static inline sl_iperf_cli_property_t * _get_property(const char *domain,
+__STATIC_INLINE sl_iperf_cli_property_t * _get_property(const char *domain,
                                                       const char *key);
 
 /**************************************************************************//**
@@ -422,7 +422,7 @@ static void _get_domain_key(const char *str_src,
  * @return true Valid value
  * @return false Non-valid value
  *****************************************************************************/
-static inline bool _check_arg_uint_val(const sl_iperf_cli_arg_type_t arg_type,
+__STATIC_INLINE bool _check_arg_uint_val(const sl_iperf_cli_arg_type_t arg_type,
                                        const int64_t val);
 
 // -----------------------------------------------------------------------------
@@ -824,51 +824,51 @@ void sl_iperf_cli_exec_client(sl_cli_command_arg_t *arguments)
 // -----------------------------------------------------------------------------
 
 // port
-static inline void _opt_port_setter(void *val)
+__STATIC_INLINE void _opt_port_setter(void *val)
 {
   _options.port = *(uint16_t*)val;
 }
 
-static inline const char *_opt_port_getter(void)
+__STATIC_INLINE const char *_opt_port_getter(void)
 {
   __prepare_getter_buff("%u", _options.port);
 }
 
 // remote address
-static inline void _opt_remote_address_setter(void *val)
+__STATIC_INLINE void _opt_remote_address_setter(void *val)
 {
   (void)strncpy(_options.remote_addr, val, SL_IPERF_IP_STR_BUFF_LEN);
 }
 
-static inline const char *_opt_remote_address_getter(void)
+__STATIC_INLINE const char *_opt_remote_address_getter(void)
 {
   __prepare_getter_buff("\"%s\"", _options.remote_addr);
 }
 
 // bandwidth
-static inline void _opt_bandwidth_setter(void *val)
+__STATIC_INLINE void _opt_bandwidth_setter(void *val)
 {
   _options.bandwidth =  *(uint32_t*)val;
 }
 
-static inline const char *_opt_bandwidth_getter(void)
+__STATIC_INLINE const char *_opt_bandwidth_getter(void)
 {
   __prepare_getter_buff("%lu", _options.bandwidth);
 }
 
 // packet number
-static inline void _opt_packet_number_setter(void *val)
+__STATIC_INLINE void _opt_packet_number_setter(void *val)
 {
   _options.packet_nbr = *(uint16_t*)val;
 }
 
-static inline const char *_opt_packet_number_getter(void)
+__STATIC_INLINE const char *_opt_packet_number_getter(void)
 {
   __prepare_getter_buff("%u", _options.packet_nbr);
 }
 
 // buffer length
-static inline void _opt_buffer_length_setter(void *val)
+__STATIC_INLINE void _opt_buffer_length_setter(void *val)
 {
   uint16_t value = *(uint16_t*)val;
   if (!value || value > SL_IPERF_BUFFER_SIZE) {
@@ -878,13 +878,13 @@ static inline void _opt_buffer_length_setter(void *val)
   _options.buf_len = value;
 }
 
-static inline const char *_opt_buffer_length_getter(void)
+__STATIC_INLINE const char *_opt_buffer_length_getter(void)
 {
   __prepare_getter_buff("%u bytes", _options.buf_len);
 }
 
 // duration
-static inline void _opt_duration_setter(void *val)
+__STATIC_INLINE void _opt_duration_setter(void *val)
 {
   uint32_t val32 = 0UL;
   val32 = *(uint32_t*) val * SL_IPERF_TIME_S_TO_MS_ML;
@@ -895,13 +895,13 @@ static inline void _opt_duration_setter(void *val)
   }
 }
 
-static inline const char *_opt_duration_getter(void)
+__STATIC_INLINE const char *_opt_duration_getter(void)
 {
   __prepare_getter_buff("%u s", _options.duration_ms  / SL_IPERF_TIME_S_TO_MS_ML);
 }
 
 // interval
-static inline void _opt_interval_setter(void *val)
+__STATIC_INLINE void _opt_interval_setter(void *val)
 {
   uint32_t val32 = 0UL;
   val32 = *(uint32_t*) val * SL_IPERF_TIME_S_TO_MS_ML;
@@ -912,20 +912,20 @@ static inline void _opt_interval_setter(void *val)
   }
 }
 
-static inline const char *_opt_interval_getter(void)
+__STATIC_INLINE const char *_opt_interval_getter(void)
 {
   __prepare_getter_buff("%u s", _options.interval_ms / SL_IPERF_TIME_S_TO_MS_ML);
 }
 
 // bandwidth format
-static inline void _opt_bw_format_setter(void *val)
+__STATIC_INLINE void _opt_bw_format_setter(void *val)
 {
   if (!sl_iperf_opt_bw_format_from_str(val, &_options.bw_format)) {
     printf("[Wrong bandwidth format added]\n");
   }
 }
 
-static inline sl_iperf_cli_property_t * _get_property(const char *domain, const char *key)
+__STATIC_INLINE sl_iperf_cli_property_t * _get_property(const char *domain, const char *key)
 {
   for (size_t i = 0U; i < _iperf_properties_size; ++i) {
     if (!strncmp(domain, _iperf_properties[i].domain, SL_IPERF_CLI_MAX_STR_ARG_LEN)
@@ -936,7 +936,7 @@ static inline sl_iperf_cli_property_t * _get_property(const char *domain, const 
   return NULL;
 }
 
-static inline void _print_property_val(const sl_iperf_cli_property_t * const setting)
+__STATIC_INLINE void _print_property_val(const sl_iperf_cli_property_t * const setting)
 {
   const char * res = NULL;
   if (setting->getter != NULL) {
@@ -947,7 +947,7 @@ static inline void _print_property_val(const sl_iperf_cli_property_t * const set
   }
 }
 
-static inline void _print_property_help(const sl_iperf_cli_property_t * const setting)
+__STATIC_INLINE void _print_property_help(const sl_iperf_cli_property_t * const setting)
 {
   printf("%s %s.%-24s %s\n",
          _flags_to_str(setting->flags),
@@ -1000,13 +1000,13 @@ static bool _print_properties_with_help(const char *domain)
   return res;
 }
 
-static inline const char *_results_json_getter(void)
+__STATIC_INLINE const char *_results_json_getter(void)
 {
   sl_iperf_print_test_log_json(&_last_test);
   return NULL;
 }
 
-static inline const char *_results_text_getter(void)
+__STATIC_INLINE const char *_results_text_getter(void)
 {
   // print connection string with addresses
   sl_iperf_test_print_udp_conn_str(&_last_test);
@@ -1022,7 +1022,7 @@ static inline const char *_results_text_getter(void)
   return NULL;
 }
 
-static inline const char *_opt_bw_format_getter(void)
+__STATIC_INLINE const char *_opt_bw_format_getter(void)
 {
   __prepare_getter_buff("%s", sl_iperf_opt_bw_format_to_str(_options.bw_format));
 }
@@ -1052,7 +1052,7 @@ static void _exec_test(const sl_iperf_mode_t mode,
   }
 }
 
-static inline bool _is_argument_help(const char * arg)
+__STATIC_INLINE bool _is_argument_help(const char * arg)
 {
   return (bool)(!strncmp(arg, SL_IPERF_CLI_HELP_ARG_LABEL,
                          SL_IPERF_CLI_MAX_STR_ARG_LEN));
@@ -1095,7 +1095,7 @@ static void _get_domain_key(const char *str_src,
   domain_key_buff[SL_IPERF_CLI_MAX_STR_ARG_LEN - 1] = '\0';
 }
 
-static inline bool _check_arg_uint_val(const sl_iperf_cli_arg_type_t arg_type,
+__STATIC_INLINE bool _check_arg_uint_val(const sl_iperf_cli_arg_type_t arg_type,
                                        const int64_t val)
 {
   if (val < 0LL

@@ -34,21 +34,21 @@
 
 // <e>Override default acknowledge timeout
 // <i> The default timeout value is derived from the UART baud rate.
-#define SL_HCI_PACKET_3WIRE_OVERRIDE_ACK_TIMEOUT 0
+#define SL_HCI_PACKET_3WIRE_OVERRIDE_ACK_TIMEOUT 1
 
 // <o>Acknowledgment packet is sent after a reliable packet in this amount of time if there is no other packet to be sent [ms]
-// <i> Default: 710
-#define SL_HCI_PACKET_3WIRE_ACK_TIMEOUT_MS 710
+// <i> Default: 150
+#define SL_HCI_PACKET_3WIRE_ACK_TIMEOUT_MS 150
 
 // </e>
 
 // <e>Override default resending timeout
 // <i> The default timeout value is derived from the UART baud rate.
-#define SL_HCI_PACKET_3WIRE_OVERRIDE_RESEND_TIMEOUT 0
+#define SL_HCI_PACKET_3WIRE_OVERRIDE_RESEND_TIMEOUT 1
 
 // <o>A reliable packet is resent if it is not acknowledged by the remote end in this amount of time [ms]
-// <i> Default: 1065
-#define SL_HCI_PACKET_3WIRE_RESEND_TIMEOUT_MS 1065
+// <i> Default: 250
+#define SL_HCI_PACKET_3WIRE_RESEND_TIMEOUT_MS 250
 
 // </e>
 

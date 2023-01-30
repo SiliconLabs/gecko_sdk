@@ -47,6 +47,11 @@ class sw_profile_outputs_common_ocelot(object):
                                            readable_name='IRCAL delayusbetweenswrssi'))
         profile.outputs.append(ModelOutput(model.vars.ircal_bestconfig, '', ModelOutputType.SW_VAR,
                                            readable_name='IRCAL bestconfig'))
+        profile.outputs.append(ModelOutput(model.vars.ircal_murshf, '', ModelOutputType.SW_VAR,
+                                           readable_name='IRCAL MURSHF'))
+        profile.outputs.append(ModelOutput(model.vars.ircal_muishf, '', ModelOutputType.SW_VAR,
+                                           readable_name='IRCAL MUISHF'))
+
         # All but one (agcrssiperiod) of these were created for backwards compatibility with RAIL 1.x - remove in RAIL 2.x
         profile.outputs.append(ModelOutput(model.vars.ircal_agcrssiperiod, '', ModelOutputType.SW_VAR,
                                            readable_name='IRCAL agcrssiperiod'))

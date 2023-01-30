@@ -63,16 +63,16 @@ static void commissioning_event_handler(sl_zigbee_event_t *event)
       emberAfFillCommandLevelControlClusterMoveToLevel(nextLevel, TRANSITION_TIME_DS, 0, 0);
     }
     status = emberAfSendCommandUnicastToBindings();
-    sl_zigbee_app_debug_print("%s: 0x%02X\n", "Send to bindings", status);
+    sl_zigbee_app_debug_println("%s: 0x%02X", "Send to bindings", status);
   } else {
     bool touchlink = (lastButton == BUTTON1);
     status = (touchlink
               ? emberAfZllInitiateTouchLink()
               : emberAfPluginNetworkSteeringStart());
-    sl_zigbee_app_debug_print("%s network %s: 0x%02X\n",
-                              (touchlink ? "Touchlink" : "Join"),
-                              "start",
-                              status);
+    sl_zigbee_app_debug_println("%s network %s: 0x%02X",
+                                (touchlink ? "Touchlink" : "Join"),
+                                "start",
+                                status);
 
     sl_zigbee_event_set_active(&led_event);
 
@@ -97,7 +97,7 @@ static void led_event_handler(sl_zigbee_event_t *event)
 static void finding_and_binding_event_handler(sl_zigbee_event_t *event)
 {
   EmberStatus status = emberAfPluginFindAndBindInitiatorStart(SWITCH_ENDPOINT);
-  sl_zigbee_app_debug_print("Find and bind initiator %s: 0x%02X\n", "start", status);
+  sl_zigbee_app_debug_println("Find and bind initiator %s: 0x%02X", "start", status);
 }
 
 //----------------------
@@ -148,7 +148,7 @@ void emberAfPluginNetworkSteeringCompleteCallback(EmberStatus status,
                                                   uint8_t joinAttempts,
                                                   uint8_t finalState)
 {
-  sl_zigbee_app_debug_print("%s network %s: 0x%02X\n", "Join", "complete", status);
+  sl_zigbee_app_debug_println("%s network %s: 0x%02X", "Join", "complete", status);
 
   if (status != EMBER_SUCCESS) {
     commissioning = false;
@@ -174,10 +174,10 @@ void emberAfPluginZllCommissioningCommonTouchLinkCompleteCallback(const EmberZll
                                                                   uint8_t deviceInformationRecordCount,
                                                                   const EmberZllDeviceInfoRecord *deviceInformationRecordList)
 {
-  sl_zigbee_app_debug_print("%s network %s: 0x%02X\n",
-                            "Touchlink",
-                            "complete",
-                            EMBER_SUCCESS);
+  sl_zigbee_app_debug_println("%s network %s: 0x%02X",
+                              "Touchlink",
+                              "complete",
+                              EMBER_SUCCESS);
 
   sl_zigbee_event_set_delay_ms(&finding_and_binding_event,
                                FINDING_AND_BINDING_DELAY_MS);
@@ -192,10 +192,10 @@ void emberAfPluginZllCommissioningCommonTouchLinkCompleteCallback(const EmberZll
  */
 void emberAfPluginZllCommissioningClientTouchLinkFailedCallback(EmberAfZllCommissioningStatus status)
 {
-  sl_zigbee_app_debug_print("%s network %s: 0x%02X\n",
-                            "Touchlink",
-                            "complete",
-                            EMBER_ERR_FATAL);
+  sl_zigbee_app_debug_println("%s network %s: 0x%02X",
+                              "Touchlink",
+                              "complete",
+                              EMBER_ERR_FATAL);
 
   commissioning = false;
 }
@@ -210,7 +210,7 @@ void emberAfPluginZllCommissioningClientTouchLinkFailedCallback(EmberAfZllCommis
  */
 void emberAfPluginFindAndBindInitiatorCompleteCallback(EmberStatus status)
 {
-  sl_zigbee_app_debug_print("Find and bind initiator %s: 0x%02X\n", "complete", status);
+  sl_zigbee_app_debug_println("Find and bind initiator %s: 0x%02X", "complete", status);
 
   commissioning = false;
 }

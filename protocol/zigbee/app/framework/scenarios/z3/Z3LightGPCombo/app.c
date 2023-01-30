@@ -74,15 +74,15 @@ void commissioning_led_event_handler(sl_zigbee_event_t *event)
     }
   } else {
     EmberStatus status = emberAfPluginNetworkSteeringStart();
-    sl_zigbee_app_debug_print("%s network %s: 0x%02X\n", "Join", "start", status);
+    sl_zigbee_app_debug_println("%s network %s: 0x%02X", "Join", "start", status);
   }
 }
 
 void finding_and_binding_event_handler(sl_zigbee_event_t *event)
 {
   if (emberAfNetworkState() == EMBER_JOINED_NETWORK) {
-    sl_zigbee_app_debug_print("Find and bind target start: 0x%02X\n",
-                              emberAfPluginFindAndBindTargetStart(LIGHT_ENDPOINT));
+    sl_zigbee_app_debug_println("Find and bind target start: 0x%02X",
+                                emberAfPluginFindAndBindTargetStart(LIGHT_ENDPOINT));
   }
 }
 
@@ -180,11 +180,11 @@ void emberAfPluginNetworkSteeringCompleteCallback(EmberStatus status,
                                                   uint8_t joinAttempts,
                                                   uint8_t finalState)
 {
-  sl_zigbee_app_debug_print("%s network %s: 0x%02X\n", "Join", "complete", status);
+  sl_zigbee_app_debug_println("%s network %s: 0x%02X", "Join", "complete", status);
 
   if (status != EMBER_SUCCESS) {
     status = emberAfPluginNetworkCreatorStart(false); // distributed
-    sl_zigbee_app_debug_print("%s network %s: 0x%02X\n", "Form", "start", status);
+    sl_zigbee_app_debug_println("%s network %s: 0x%02X", "Form", "start", status);
   }
 }
 
@@ -202,10 +202,10 @@ void emberAfPluginNetworkSteeringCompleteCallback(EmberStatus status,
 void emberAfPluginNetworkCreatorCompleteCallback(const EmberNetworkParameters *network,
                                                  bool usedSecondaryChannels)
 {
-  sl_zigbee_app_debug_print("%s network %s: 0x%02X\n",
-                            "Form distributed",
-                            "complete",
-                            EMBER_SUCCESS);
+  sl_zigbee_app_debug_println("%s network %s: 0x%02X",
+                              "Form distributed",
+                              "complete",
+                              EMBER_SUCCESS);
 }
 
 /** @brief Post Attribute Change
@@ -300,7 +300,7 @@ void emberAfGreenPowerServerPairingCompleteCallback(uint8_t numberOfEndpoints,
                             __FUNCTION__,
                             numberOfEndpoints);
   sl_zigbee_app_debug_print_buffer(endpoints, numberOfEndpoints, true);
-  sl_zigbee_app_debug_print("]\n");
+  sl_zigbee_app_debug_println("]");
   led_turn_off(COMMISSIONING_STATUS_LED);
 }
 
@@ -410,7 +410,7 @@ void gpAppGpTxQueueInit(sl_cli_command_arg_t *arguments)
                                                    0,
                                                    0xFFFF,
                                                    NULL);
-  sl_zigbee_app_debug_print("Additional RAIL handle %sinitialized\n", h ? "" : "not ");
+  sl_zigbee_app_debug_println("Additional RAIL handle %sinitialized", h ? "" : "not ");
 }
 
 void gpAppGpTxQueueSet(sl_cli_command_arg_t *arguments)
@@ -419,7 +419,7 @@ void gpAppGpTxQueueSet(sl_cli_command_arg_t *arguments)
 
   addr.applicationId = sl_cli_get_argument_uint8(arguments, 0);
   if (addr.applicationId != EMBER_GP_APPLICATION_SOURCE_ID) {
-    sl_zigbee_app_debug_print("Invalid application ID\n");
+    sl_zigbee_app_debug_println("Invalid application ID");
     return;
   }
   addr.id.sourceId = sl_cli_get_argument_uint32(arguments, 1);
@@ -438,7 +438,7 @@ void gpAppGpTxQueueSet(sl_cli_command_arg_t *arguments)
                    gpdAsdu,
                    0,
                    0) != EMBER_SUCCESS) {
-    sl_zigbee_app_debug_print("Failed to add entry\n");
+    sl_zigbee_app_debug_println("Failed to add entry");
   }
 }
 
@@ -447,7 +447,7 @@ void gpAppGpTxQueueGet(sl_cli_command_arg_t *arguments)
   EmberGpTxQueueEntry txQueue;
   txQueue.addr.applicationId = sl_cli_get_argument_uint8(arguments, 0);
   if (txQueue.addr.applicationId != EMBER_GP_APPLICATION_SOURCE_ID) {
-    sl_zigbee_app_debug_print("Invalid application ID\n");
+    sl_zigbee_app_debug_println("Invalid application ID");
     return;
   }
   txQueue.addr.id.sourceId = sl_cli_get_argument_uint32(arguments, 1);
@@ -459,11 +459,11 @@ void gpAppGpTxQueueGet(sl_cli_command_arg_t *arguments)
                                       buffer,
                                       &length,
                                       128) != EMBER_NULL_MESSAGE_BUFFER) {
-    sl_zigbee_app_debug_print("\n");
+    sl_zigbee_app_debug_println("");
     sl_zigbee_app_debug_print_buffer(buffer, length, true);
-    sl_zigbee_app_debug_print("\n");
+    sl_zigbee_app_debug_println("");
   } else {
-    sl_zigbee_app_debug_print("No entry found\n");
+    sl_zigbee_app_debug_println("No entry found");
   }
 }
 
@@ -473,7 +473,7 @@ void gpAppGpTxQueueRemove(sl_cli_command_arg_t *arguments)
 
   addr.applicationId = sl_cli_get_argument_uint8(arguments, 0);
   if (addr.applicationId != EMBER_GP_APPLICATION_SOURCE_ID) {
-    sl_zigbee_app_debug_print("Invalid application ID\n");
+    sl_zigbee_app_debug_println("Invalid application ID");
     return;
   }
   addr.id.sourceId = sl_cli_get_argument_uint32(arguments, 1);
@@ -486,7 +486,7 @@ void gpAppGpTxQueueRemove(sl_cli_command_arg_t *arguments)
                    EMBER_NULL_MESSAGE_BUFFER,
                    0,
                    0) != EMBER_SUCCESS) {
-    sl_zigbee_app_debug_print("No entry found\n");
+    sl_zigbee_app_debug_println("No entry found");
   }
 }
 
@@ -500,7 +500,7 @@ void gpAppGpGetTxQueueSize(sl_cli_command_arg_t *arguments)
 {
   (void)arguments;
 
-  sl_zigbee_app_debug_print("Max Tx Queue Size = %d\n", emberGetGpMaxTxQListCount());
+  sl_zigbee_app_debug_println("Max Tx Queue Size = %d", emberGetGpMaxTxQListCount());
 }
 
 void gpAppGpGetTxQueueCount(sl_cli_command_arg_t *arguments)
@@ -515,21 +515,22 @@ void gpAppGpPrintTxQueue(sl_cli_command_arg_t *arguments)
   (void)arguments;
 
   uint16_t listCount = emberGetGpTxQListCount();
-  sl_zigbee_app_debug_print("\nNumber of Gp Tx Queue entries : %d\n", listCount);
+  sl_zigbee_app_debug_println("");
+  sl_zigbee_app_debug_println("Number of Gp Tx Queue entries : %d", listCount);
   int i = 0;
   if (listCount != 0) {
     Buffer finger = emBufferQueueHead(emberGpGetTxQueueHead());
     while (finger != NULL_BUFFER) {
-      sl_zigbee_app_debug_print("Entry [%d] :\n", i++);
+      sl_zigbee_app_debug_println("Entry [%d] :", i++);
       EmberGpTxQueueEntry *entry = (EmberGpTxQueueEntry *)emberMessageBufferContents(finger);
-      sl_zigbee_app_debug_print("  App Id =  %d\n", entry->addr.applicationId);
-      sl_zigbee_app_debug_print("  Src Id = 0x%04X\n", entry->addr.id.sourceId);
+      sl_zigbee_app_debug_println("  App Id =  %d", entry->addr.applicationId);
+      sl_zigbee_app_debug_println("  Src Id = 0x%04X", entry->addr.id.sourceId);
       uint8_t *data = (uint8_t *) (emberMessageBufferContents(finger) + sizeof(EmberGpTxQueueEntry));
       uint16_t dataLength = emberMessageBufferLength(finger) - sizeof(EmberGpTxQueueEntry);
-      sl_zigbee_app_debug_print("  Data Length = %d\n", dataLength);
+      sl_zigbee_app_debug_println("  Data Length = %d", dataLength);
       sl_zigbee_app_debug_print("  Data = [");
       sl_zigbee_app_debug_print_buffer(data, dataLength, true);
-      sl_zigbee_app_debug_print("]\n");
+      sl_zigbee_app_debug_println("]");
       finger = emBufferQueueNext(emberGpGetTxQueueHead(), finger);
     }
   }

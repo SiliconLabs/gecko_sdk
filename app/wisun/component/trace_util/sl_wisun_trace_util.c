@@ -35,7 +35,6 @@
 #include <string.h>
 #include "sl_wisun_trace_util.h"
 #include "sl_wisun_types.h"
-#include "sl_component_catalog.h"
 #include "rail_config.h"
 
 #if defined(SL_CATALOG_FREERTOS_KERNEL_PRESENT)
@@ -149,7 +148,7 @@ static sl_status_t _get_phy_cfg_from_ch_cfg_entry(const RAIL_ChannelConfigEntry_
  * @param[in] phy_mode_id PHY mode ID
  * @return uint8_t PHY type
  *****************************************************************************/
-static inline uint8_t _get_phy_type(const uint8_t phy_mode_id);
+__STATIC_INLINE uint8_t _get_phy_type(const uint8_t phy_mode_id);
 
 /**************************************************************************//**
  * @brief Get PHY mode
@@ -157,7 +156,7 @@ static inline uint8_t _get_phy_type(const uint8_t phy_mode_id);
  * @param[in] phy_mode_id PHY mode ID
  * @return uint8_t PHY mode
  *****************************************************************************/
-static inline uint8_t _get_phy_mode(const uint8_t phy_mode_id);
+__STATIC_INLINE uint8_t _get_phy_mode(const uint8_t phy_mode_id);
 
 /**************************************************************************//**
  * @brief Is FSK PHY
@@ -165,7 +164,7 @@ static inline uint8_t _get_phy_mode(const uint8_t phy_mode_id);
  * @param[in] phy_mode_id PHY mode ID
  * @return bool true ift it's FSK PHY, otherwise false
  *****************************************************************************/
-static inline bool _is_fsk(const uint8_t phy_mode_id);
+__STATIC_INLINE bool _is_fsk(const uint8_t phy_mode_id);
 
 /**************************************************************************//**
  * @brief Is OFDM PHY
@@ -173,7 +172,7 @@ static inline bool _is_fsk(const uint8_t phy_mode_id);
  * @param[in] phy_mode_id PHY mode ID
  * @return bool true ift it's OFDM PHY, otherwise false
  *****************************************************************************/
-static inline bool _is_ofdm(const uint8_t phy_mode_id);
+__STATIC_INLINE bool _is_ofdm(const uint8_t phy_mode_id);
 
 /**************************************************************************//**
  * @brief Check PHY mode ID
@@ -181,7 +180,7 @@ static inline bool _is_ofdm(const uint8_t phy_mode_id);
  * @param[in] phy_mode_id PHY mode ID
  * @return bool true ift it's valid value, otherwise false
  *****************************************************************************/
-static inline bool _check_phy_mode(const uint8_t phy_mode);
+__STATIC_INLINE bool _check_phy_mode(const uint8_t phy_mode);
 
 // -----------------------------------------------------------------------------
 //                                Global Variables
@@ -464,6 +463,33 @@ const char *app_wisun_phy_to_str(sl_wisun_phy_config_t *phy_cfg)
   return (const char *) str;
 }
 
+#if !defined(SL_CATALOG_WISUN_NCP_PRESENT)
+const sl_wisun_connection_params_t *sl_wisun_get_conn_param_by_nw_size(const sl_wisun_network_size_t nw_size)
+{
+  switch(nw_size) {
+    // Small  
+    case SL_WISUN_NETWORK_SIZE_SMALL:
+      return &SL_WISUN_PARAMS_PROFILE_SMALL;
+    
+    // Medium
+    case SL_WISUN_NETWORK_SIZE_MEDIUM:
+      return &SL_WISUN_PARAMS_PROFILE_MEDIUM;
+    
+    // Large 
+    case SL_WISUN_NETWORK_SIZE_LARGE:
+      return &SL_WISUN_PARAMS_PROFILE_LARGE;
+    
+    // Test
+    case SL_WISUN_NETWORK_SIZE_TEST:
+      return &SL_WISUN_PARAMS_PROFILE_TEST;
+
+    // Certifacete and automatic size are not supported
+    default:
+      return NULL;
+  }
+}
+#endif
+
 // -----------------------------------------------------------------------------
 //                          Static Function Definitions
 // -----------------------------------------------------------------------------
@@ -549,29 +575,29 @@ static sl_status_t _get_phy_cfg_from_ch_cfg_entry(const RAIL_ChannelConfigEntry_
   return SL_STATUS_OK;
 }
 
-static inline uint8_t _get_phy_type(const uint8_t phy_mode_id)
+__STATIC_INLINE uint8_t _get_phy_type(const uint8_t phy_mode_id)
 {
   return (phy_mode_id >> 4U) & 0x0FU;
 }
 
-static inline uint8_t _get_phy_mode(const uint8_t phy_mode_id)
+__STATIC_INLINE uint8_t _get_phy_mode(const uint8_t phy_mode_id)
 {
   return phy_mode_id & 0x0FU;
 }
 
-static inline bool _is_fsk(const uint8_t phy_mode_id)
+__STATIC_INLINE bool _is_fsk(const uint8_t phy_mode_id)
 {
   return (bool)((_get_phy_type(phy_mode_id) == PHY_TYPE_FSK)
                 || (_get_phy_type(phy_mode_id) == PHY_TYPE_FSK_FEC));
 }
 
-static inline bool _is_ofdm(const uint8_t phy_mode_id)
+__STATIC_INLINE bool _is_ofdm(const uint8_t phy_mode_id)
 {
   return (bool)((_get_phy_type(phy_mode_id) >= PHY_TYPE_OFDM1)
                 && (_get_phy_type(phy_mode_id) <= PHY_TYPE_OFDM4));
 }
 
-static inline bool _check_phy_mode(const uint8_t phy_mode)
+__STATIC_INLINE bool _check_phy_mode(const uint8_t phy_mode)
 {
   return (bool)(phy_mode >= PHY_MODE_MIN_VAL && phy_mode <= PHY_MODE_MAX_VAL);
 }

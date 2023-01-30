@@ -153,6 +153,16 @@ EzspStatus ezspSetValue(
   // The new value.
   uint8_t *value);
 
+// Allows the Host to control the broadcast behaviour of a routing device used
+// by the NCP.
+// Return: An EmberStatus value indicating success or the reason for failure.
+EmberStatus ezspSetPassiveAckConfig(
+  // Passive ack config enum.
+  uint8_t config,
+  // The minimum number of acknowledgments (re-broadcasts) to wait for until
+  // deeming the broadcast transmission complete.
+  uint8_t minAcksNeeded);
+
 //------------------------------------------------------------------------------
 // Utilities Frames
 //------------------------------------------------------------------------------
@@ -645,6 +655,20 @@ EmberStatus ezspSetChildData(
   uint8_t index,
   // The data of the child.
   EmberChildData *childData);
+
+// Convert a child index to a node ID
+// Return: The node ID of the child or EMBER_NULL_NODE_ID if there isn't a child
+// at the childIndex specified
+EmberNodeId ezspChildId(
+  // The index of the child of interest in the child table. Possible indexes
+  // range from zero to EMBER_CHILD_TABLE_SIZE.
+  uint8_t childIndex);
+
+// Convert a node ID to a child index
+// Return: The child index or 0xFF if the node ID doesn't belong to a child
+uint8_t ezspChildIndex(
+  // The node ID of the child
+  EmberNodeId childId);
 
 // Returns the source route table total size.
 // Return: Total size of source route table.

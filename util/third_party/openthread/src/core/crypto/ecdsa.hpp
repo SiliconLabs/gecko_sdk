@@ -117,7 +117,7 @@ public:
          * Max buffer size (in bytes) for representing the key-pair in DER format.
          *
          */
-        static constexpr uint8_t kMaxDerSize = OT_CRYPTO_ECDSA_MAX_DER_SIZE;      
+        static constexpr uint8_t kMaxDerSize = OT_CRYPTO_ECDSA_MAX_DER_SIZE;
 
         /**
          * This constructor initializes a `KeyPair` as empty (no key).
@@ -134,16 +134,16 @@ public:
          * @retval kErrorFailed       Failed to generate key.
          *
          */
-        Error Generate(void) 
+        Error Generate(void)
         {
 #if OPENTHREAD_CONFIG_PLATFORM_KEY_REFERENCES_ENABLE
-            mKeyRef = ot::Crypto::Storage::kEcdsaKeyRef;
+            mKeyRef   = ot::Crypto::Storage::kEcdsaKeyRef;
             mDerBytes = nullptr;
 #else
-            mKeyRef = 0;
-            mDerBytes = reinterpret_cast<uint8_t *> (mContextStorage);
+            mKeyRef   = 0;
+            mDerBytes = reinterpret_cast<uint8_t *>(mContextStorage);
 #endif
-            return otPlatCryptoEcdsaGenerateKey(this); 
+            return otPlatCryptoEcdsaGenerateKey(this);
         }
 
         /**
@@ -213,8 +213,9 @@ public:
         {
             return otPlatCryptoEcdsaSign(this, &aHash, &aSignature);
         }
+
     private:
-            OT_DEFINE_ALIGNED_VAR(mContextStorage, kMaxDerSize, uint64_t);
+        OT_DEFINE_ALIGNED_VAR(mContextStorage, kMaxDerSize, uint64_t);
     };
 
     /**

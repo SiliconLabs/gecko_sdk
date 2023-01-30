@@ -10,6 +10,3 @@ provides:
   - name: pressure_driver
 requires:
   - name: pressure_device_driver
-documentation:
-    docset: gecko-platform
-    document: hardware-driver/api/group-pressure

@@ -35,7 +35,6 @@
 #include "sl_mvp_math.h"
 #include "sl_mvp_program_area.h"
 #include "sl_common.h"
-#include <stdbool.h>
 
 /// @cond DO_NOT_INCLUDE_WITH_DOXYGEN
 
@@ -47,6 +46,8 @@
   } while (0)
 
 static sl_status_t conv2d(const sli_mvp_ml_conv2d_s8_params_t *params, bool execute);
+static sl_status_t conv1d(const sli_mvp_ml_conv2d_s8_params_t *params);
+static sl_status_t conv1d_one_column(const sli_mvp_ml_conv2d_s8_params_t *params, int out_x);
 
 __STATIC_FORCEINLINE int sli_div_floor_int(const int dividend, const int divisor)
 {
@@ -65,7 +66,23 @@ __STATIC_FORCEINLINE int sli_div_ceil_int(const int dividend, const int divisor)
  ******************************************************************************/
 sl_status_t sli_mvp_ml_conv2d_s8(const sli_mvp_ml_conv2d_s8_params_t *params)
 {
-  return conv2d(params, true);
+  sl_status_t status = SL_STATUS_INVALID_PARAMETER;
+
+  // Check if we must operate on wide (out of MVP bounds) Conv1D tensors.
+  if ((((params->input_width * params->in_channels) > (int)SLI_MVP_MAX_VECTOR_STRIDE)
+      || ((params->output_width * params->out_channels) > (int)SLI_MVP_MAX_VECTOR_STRIDE))
+      && (params->input_height == 1)
+      && (params->filter_height == 1)
+      && (params->output_height == 1)) {
+    status = conv1d(params);
+  }
+
+  if ( status != SL_STATUS_OK) {
+    // Normal Conv2D handling and possible fallback if above failed.
+    status = conv2d(params, true);
+  }
+
+  return status;
 }
 
 /***************************************************************************//**
@@ -75,7 +92,15 @@ sl_status_t sli_mvp_ml_conv2d_s8(const sli_mvp_ml_conv2d_s8_params_t *params)
  ******************************************************************************/
 bool sli_mvp_ml_conv2d_s8_is_supported(const sli_mvp_ml_conv2d_s8_params_t *params)
 {
-  return conv2d(params, false) == SL_STATUS_OK;
+  if ((((params->input_width * params->in_channels) > (int)SLI_MVP_MAX_VECTOR_STRIDE)
+      || ((params->output_width * params->out_channels) > (int)SLI_MVP_MAX_VECTOR_STRIDE))
+      && (params->input_height == 1)
+      && (params->filter_height == 1)
+      && (params->output_height == 1)) {
+    return true;
+  } else {
+    return conv2d(params, false) == SL_STATUS_OK;
+  }
 }
 
 /***************************************************************************//**
@@ -98,6 +123,85 @@ int sli_mvp_ml_conv2d_s8_get_scratch_buffer_size(const sli_mvp_ml_conv2d_s8_para
   #endif
 
   return scratch_buffer_size;
+}
+
+static sl_status_t conv1d(const sli_mvp_ml_conv2d_s8_params_t *params)
+{
+  // This is a special case for Conv1D where we are able to process very
+  // wide input/output tensors by splitting the computations into chunks
+  // that fit on MVP hardware.
+
+  sl_status_t status = SL_STATUS_OK;
+  sli_mvp_ml_conv2d_s8_params_t par = *params;
+  int column, pad_left, pad_right, pad_along_width;
+  int chunk_input_width, chunk_output_width;
+  const bool padding          = par.padding;
+  const int input_width       = par.input_width;
+  const int filter_width      = par.filter_width;
+  const int stride_width      = par.stride_width;
+  const int in_channels       = par.in_channels;
+  const int out_width         = par.output_width;
+  const int out_channels      = par.out_channels;
+  const int input_width_max   = SLI_MVP_MAX_VECTOR_STRIDE / in_channels;
+  const int output_width_max  = SLI_MVP_MAX_VECTOR_STRIDE / out_channels;
+  int remaining_input_width   = input_width;
+
+  if (padding) {              // True if "SAME" padding
+    // Calculate "left" padding width.
+    pad_along_width = SL_MAX((out_width - 1) * stride_width + filter_width - input_width, 0);
+    pad_left        = sli_div_floor_int(pad_along_width, 2);
+    column          = 0;
+    while ((pad_left > 0) && (status == SL_STATUS_OK)) {
+      // Calculate one output column. Compute with host CPU.
+      status      = conv1d_one_column(params, column);
+      column     += 1;
+      pad_left   -= stride_width;
+      par.output += out_channels;
+    }
+
+    // Calculate "right" padding width.
+    pad_right = pad_along_width - sli_div_floor_int(pad_along_width, 2);
+    column = out_width - 1;
+    while ((pad_right > 0) && (status == SL_STATUS_OK)) {
+      // Calculate one output column. Compute with host CPU.
+      status     = conv1d_one_column(params, column);
+      column    -= 1;
+      pad_right -= stride_width;
+    }
+
+    remaining_input_width += pad_left;
+    par.input             -= pad_left * in_channels;
+    par.padding            = false;
+    par.pad_width          = 0;
+  }
+
+  // Do Conv1D on MVP in chunks within MVP hardware limits.
+  while ((remaining_input_width >= filter_width) && (status == SL_STATUS_OK)) {
+    if (input_width_max <= output_width_max) {
+      // Calculate max chunk width with input width as limiting factor.
+      chunk_input_width  = SL_MIN(remaining_input_width, input_width_max);
+      chunk_input_width  = sli_div_floor_int(chunk_input_width - filter_width, stride_width);
+      chunk_input_width  = (chunk_input_width * stride_width) + filter_width;
+      chunk_output_width = sli_div_floor_int(chunk_input_width - filter_width, stride_width) + 1;
+    } else {
+      // Calculate max chunk width with output width as limiting factor.
+      chunk_output_width = SL_MIN(par.output_width, output_width_max);
+      chunk_input_width  = ((chunk_output_width - 1) * stride_width) + filter_width;
+    }
+    par.input_width  = chunk_input_width;
+    par.output_width = chunk_output_width;
+
+    // Do one Conv1D.
+    status = conv2d(&par, true);
+
+    // Advance tensor pointers.
+    chunk_input_width      = chunk_input_width - filter_width + stride_width;
+    remaining_input_width -= chunk_input_width;
+    par.input             += chunk_input_width * in_channels;
+    par.output            += chunk_output_width * out_channels;
+  }
+
+  return status;
 }
 
 static sl_status_t conv2d(const sli_mvp_ml_conv2d_s8_params_t *params, bool execute)
@@ -154,24 +258,23 @@ static sl_status_t conv2d(const sli_mvp_ml_conv2d_s8_params_t *params, bool exec
     return status;
   }
 
-  sli_mvp_pb_init_program(p);
-
-  const int batches           = params->batches;
   const int input_depth       = params->in_channels;
   const int output_depth      = params->out_channels;
   const int input_height      = params->input_height;
-  const int input_width       = params->input_width;
   const int filter_height     = params->filter_height;
-  const int filter_width      = params->filter_width;
   const int output_height     = params->output_height;
+  const int batches           = params->batches;
+  const int input_width       = params->input_width;
+  const int filter_width      = params->filter_width;
   const int output_width      = params->output_width;
   const int32_t output_offset = params->output_offset;
 
+  sli_mvp_pb_init_program(p);
 
 #if (SL_MVP_OPTIMIZE_SPEED == 1)
 
   // If SL_MVP_OPTIMIZE_SPEED is enabled, calculate the input accumulator scaler
-  // in a separate program. The scaled inputs are stored in a temporary array 
+  // in a separate program. The scaled inputs are stored in a temporary array
   // and used directly by the conv2D algorithm.
   for (int batch = 0; batch < batches; ++batch) {
     int input_stride_dim2 = 1;
@@ -780,6 +883,65 @@ static sl_status_t conv2d(const sli_mvp_ml_conv2d_s8_params_t *params, bool exec
                           params->output_activation_max);
   }
 
+  return SL_STATUS_OK;
+}
+
+static sl_status_t conv1d_one_column(const sli_mvp_ml_conv2d_s8_params_t *params, int out_x)
+{
+  // Consume input parameters.
+  const int batches                   = params->batches;
+  const int input_width               = params->input_width;
+  const int stride_width              = params->stride_width;
+  const int filter_width              = params->filter_width;
+  const int output_depth              = params->out_channels;
+  const int input_depth               = params->in_channels;
+  const int32_t output_activation_min = params->output_activation_min;
+  const int32_t output_activation_max = params->output_activation_max;
+  const float16_t *bias               = params->bias;
+  const float16_t *output_scaler      = params->output_scaler;
+  const int32_t output_offset         = params->output_offset;
+  const int32_t input_offset          = params->input_offset;
+  int8_t *output                      = params->output;
+  const int8_t *input                 = params->input;
+  const int8_t *filter                = params->filter;
+  const int pad_width                 = params->pad_width;
+
+  float16_t scaler, acc;
+  int input_index, filter_index, output_index;
+
+  for (int batch = 0; batch < batches; ++batch) {
+    const int in_x_origin = (out_x * stride_width) - pad_width;
+    const int filter_x_start = SL_MAX(0, -in_x_origin);
+    const int filter_x_end   = SL_MIN(filter_width, input_width - in_x_origin);
+
+    for (int out_channel = 0; out_channel < output_depth; ++out_channel) {
+      acc = 0;
+      for (int filter_x = filter_x_start; filter_x < filter_x_end; ++filter_x) {
+        const int in_x = in_x_origin + filter_x;
+        for (int in_channel = 0; in_channel < input_depth; ++in_channel) {
+          input_index = sli_mvp_util_offset_nhwc(1, input_width, input_depth, batch, 0, in_x, in_channel);
+          const int8_t input_value = input[input_index];
+          filter_index = sli_mvp_util_offset_nhwc(1, filter_width, input_depth, out_channel, 0, filter_x, in_channel);
+          const int8_t filter_value = filter[filter_index];
+          acc += (input_value + input_offset) * filter_value * SLI_MVP_ACCUMULATOR_SCALER;
+        }
+      }
+
+      if (bias) {
+        acc += bias[out_channel];
+      }
+      scaler = output_scaler[out_channel];
+      acc = acc * scaler;
+
+      int32_t acc_int32 = (int32_t)acc + output_offset;
+      acc_int32 = SL_MAX(acc_int32, output_activation_min);
+      acc_int32 = SL_MIN(acc_int32, output_activation_max);
+      acc = (float16_t)acc_int32;
+
+      output_index = sli_mvp_util_offset_nhwc(1, 1, output_depth, batch, 0, out_x, out_channel);
+      output[output_index] = (int8_t)acc;
+    }
+  }
   return SL_STATUS_OK;
 }
 

@@ -164,25 +164,25 @@ void app_test(bool start)
   sl_status_t sc;
   if (start) {
     // Start test
-    app_log_info("Starting test..." APP_LOG_NEW_LINE);
+    app_log_info("Starting test..." APP_LOG_NL);
     if (role == THROUGHPUT_ROLE_PERIPHERAL) {
       sc = throughput_peripheral_start(type);
       if (sc != SL_STATUS_OK) {
-        app_log_warning("Failed to start test." APP_LOG_NEW_LINE);
+        app_log_warning("Failed to start test." APP_LOG_NL);
         if (sc == SL_STATUS_INVALID_STATE) {
-          app_log_warning("Not in subscribed state!" APP_LOG_NEW_LINE);
+          app_log_warning("Not in subscribed state!" APP_LOG_NL);
         }
       }
     } else {
       sc = throughput_central_set_type(type);
       if (sc != SL_STATUS_OK) {
-        app_log_warning("Failed to set test type." APP_LOG_NEW_LINE);
+        app_log_warning("Failed to set test type." APP_LOG_NL);
       } else {
         sc = throughput_central_start();
         if (sc != SL_STATUS_OK) {
-          app_log_warning("Failed to start test." APP_LOG_NEW_LINE);
+          app_log_warning("Failed to start test." APP_LOG_NL);
           if (sc == SL_STATUS_INVALID_STATE) {
-            app_log_warning("Not in subscribed state!" APP_LOG_NEW_LINE);
+            app_log_warning("Not in subscribed state!" APP_LOG_NL);
           }
         }
       }
@@ -192,16 +192,16 @@ void app_test(bool start)
     if (role == THROUGHPUT_ROLE_PERIPHERAL) {
       sc = throughput_peripheral_stop();
       if (sc != SL_STATUS_OK) {
-        app_log_warning("Failed to stop test." APP_LOG_NEW_LINE);
+        app_log_warning("Failed to stop test." APP_LOG_NL);
       } else {
-        app_log_info("Test Stopped." APP_LOG_NEW_LINE);
+        app_log_info("Test Stopped." APP_LOG_NL);
       }
     } else {
       sc = throughput_central_stop();
       if (sc != SL_STATUS_OK) {
-        app_log_warning("Failed to stop test." APP_LOG_NEW_LINE);
+        app_log_warning("Failed to stop test." APP_LOG_NL);
       } else {
-        app_log_info("Test Stopped." APP_LOG_NEW_LINE);
+        app_log_info("Test Stopped." APP_LOG_NL);
       }
     }
   }
@@ -289,17 +289,17 @@ void sl_bt_on_event(sl_bt_msg_t *evt)
     // This event indicates the device has started and the radio is ready.
     // Do not call any stack command before receiving this boot event!
     case sl_bt_evt_system_boot_id:
-      app_log("Throughput Test initialized" APP_LOG_NEW_LINE);
+      app_log("Throughput Test initialized" APP_LOG_NL);
       if (app_check_buttons()) {
         // Enable throughput test in Central mode if button is pressed
-        app_log_info("Button is pressed on start: Central mode set." APP_LOG_NEW_LINE);
+        app_log_info("Button is pressed on start: Central mode set." APP_LOG_NL);
         role = THROUGHPUT_ROLE_CENTRAL;
         throughput_central_enable();
         // Mask first button release
         mask_release = true;
       } else {
         // Enable throughput test in Peripheral mode
-        app_log_info("Peripheral mode set." APP_LOG_NEW_LINE);
+        app_log_info("Peripheral mode set." APP_LOG_NL);
         role = THROUGHPUT_ROLE_PERIPHERAL;
         throughput_peripheral_enable();
       }
@@ -308,13 +308,13 @@ void sl_bt_on_event(sl_bt_msg_t *evt)
     // -------------------------------
     // This event indicates that a new connection was opened.
     case sl_bt_evt_connection_opened_id:
-      app_log_info("Connection opened" APP_LOG_NEW_LINE);
+      app_log_info("Connection opened" APP_LOG_NL);
       break;
 
     // -------------------------------
     // This event indicates that a connection was closed.
     case sl_bt_evt_connection_closed_id:
-      app_log_info("Connection closed" APP_LOG_NEW_LINE);
+      app_log_info("Connection closed" APP_LOG_NL);
       break;
 
     ///////////////////////////////////////////////////////////////////////////
@@ -349,7 +349,7 @@ void throughput_peripheral_on_start(void)
 void throughput_peripheral_on_finish(throughput_value_t throughput,
                                      throughput_count_t count)
 {
-  app_log_info("Throughput test finished: %d bps, %u packets",
+  app_log_info("Throughput test finished: %lu bps, %lu packets",
                throughput,
                count);
   app_log_nl();
@@ -381,12 +381,12 @@ void throughput_central_on_finish(throughput_value_t throughput,
                                   throughput_count_t error,
                                   throughput_time_t time)
 {
-  app_log_info("Throughput test: reception finished " APP_LOG_NEW_LINE
-               "%d bps" APP_LOG_NEW_LINE
-               "%u packets" APP_LOG_NEW_LINE
-               "%u lost" APP_LOG_NEW_LINE
-               "%u error" APP_LOG_NEW_LINE
-               "in %d sec" APP_LOG_NEW_LINE,
+  app_log_info("Throughput test: reception finished " APP_LOG_NL
+               "%lu bps" APP_LOG_NL
+               "%lu packets" APP_LOG_NL
+               "%lu lost" APP_LOG_NL
+               "%lu error" APP_LOG_NL
+               "in %lu sec" APP_LOG_NL,
                throughput,
                count,
                lost,

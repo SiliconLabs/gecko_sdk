@@ -8,7 +8,7 @@
     <properties key="readmeFiles" value="app/framework/scenarios/multipan/MpZ3TcCustomTcHost/readme.html"/>
     <properties key="boardCompatibility" value="com.silabs.board.none"/>
     <properties key="partCompatibility" value=".*host.*"/>
-    <properties key="ideCompatibility" value="makefile-ide simplicity-ide visual-studio-code"/>
+    <properties key="ideCompatibility" value="makefile-ide simplicity-ide"/>
     <properties key="toolchainCompatibility" value="gcc"/>
     <properties key="category" value="Zigbee Host Application"/>
     <properties key="quality" value="PRODUCTION"/>
@@ -22,7 +22,7 @@
     <properties key="projectFilePaths" value="app/framework/scenarios/multiprotocol/DynamicMultiprotocolLight/DynamicMultiprotocolLight.slcp"/>
     <properties key="readmeFiles" value="app/framework/scenarios/multiprotocol/DynamicMultiprotocolLight/readme.html"/>
     <properties key="boardCompatibility" value="brd4158a brd4159a brd4161a brd4162a brd4163a brd4164a brd4165b brd4167a brd4168a brd4170a brd4171a brd4172a brd4172b brd4173a brd4174a brd4174b brd4175a brd4176a brd4180a brd4180b brd4181a brd4181b brd4181c brd4186a brd4186b brd4186c brd4187a brd4187b brd4187c brd4190a brd4195a brd4196a brd4197a brd4198a brd4305d brd4305e brd4318a com.silabs.board.none"/>
-    <properties key="partCompatibility" value=".*efr32mg12p.* .*efr32mg13p.* .*efr32mg21.* .*efr32mg22.* .*efr32mg24.* .*efr32mg27.* .*efr32mr21.* .*mgm12.* .*mgm13.* .*mgm21.* .*mgm22.* .*mgm24.* .*rm21.*"/>
+    <properties key="partCompatibility" value=".*efr32mg1[23]p.* .*efr32mg2[1247].* .*efr32mr21.* .*mgm1[23].* .*mgm2[124].* .*rm21.*"/>
     <properties key="ideCompatibility" value="iar-embedded-workbench makefile-ide simplicity-ide visual-studio-code"/>
     <properties key="toolchainCompatibility" value="gcc iar segger"/>
     <properties key="category" value="Zigbee Application"/>
@@ -36,8 +36,8 @@
     <properties key="solutionReferenceId" value="protocol.zigbee.app.framework.scenarios.multiprotocol.DynamicMultiprotocolLight.DynamicMultiprotocolLightMinimal.slcp"/>
     <properties key="projectFilePaths" value="app/framework/scenarios/multiprotocol/DynamicMultiprotocolLight/DynamicMultiprotocolLightMinimal.slcp"/>
     <properties key="readmeFiles" value="app/framework/scenarios/multiprotocol/DynamicMultiprotocolLight/readme.html"/>
-    <properties key="boardCompatibility" value="brd2601a brd2601b brd2703a brd4158a brd4159a brd4161a brd4162a brd4163a brd4164a brd4165b brd4166a brd4166c brd4167a brd4168a brd4170a brd4171a brd4172a brd4172b brd4173a brd4174a brd4174b brd4175a brd4176a brd4179b brd4180a brd4180b brd4181a brd4181b brd4181c brd4186a brd4186b brd4186c brd4187a brd4187b brd4187c brd4188a brd4188b brd4190a brd4194a brd4195a brd4196a brd4197a brd4198a brd4304a brd4305d brd4305e brd4306c brd4306d brd4308a brd4308b brd4308c brd4308d brd4309a brd4309b brd4316a brd4317a brd4318a brd4319a brd4329a com.silabs.board.none"/>
-    <properties key="partCompatibility" value=".*efr32mg12p.* .*efr32mg13p.* .*efr32mg21.* .*efr32mg22.* .*efr32mg24.* .*efr32mg27.* .*efr32mr21.* .*mgm12.* .*mgm13.* .*mgm21.* .*mgm22.* .*mgm24.*"/>
+    <properties key="boardCompatibility" value="brd2601a brd2601b brd2703a brd2704a brd4158a brd4159a brd4161a brd4162a brd4163a brd4164a brd4165b brd4166a brd4166c brd4167a brd4168a brd4170a brd4171a brd4172a brd4172b brd4173a brd4174a brd4174b brd4175a brd4176a brd4179b brd4180a brd4180b brd4181a brd4181b brd4181c brd4186a brd4186b brd4186c brd4187a brd4187b brd4187c brd4188a brd4188b brd4190a brd4194a brd4195a brd4196a brd4197a brd4198a brd4304a brd4305d brd4305e brd4306c brd4306d brd4308a brd4308b brd4308c brd4308d brd4309a brd4309b brd4316a brd4317a brd4318a brd4319a brd4329a com.silabs.board.none"/>
+    <properties key="partCompatibility" value=".*efr32mg1[23]p.* .*efr32mg2[1247].* .*efr32mr21.* .*mgm1[23].* .*mgm2[124].* .*rm21.*"/>
     <properties key="ideCompatibility" value="iar-embedded-workbench makefile-ide simplicity-ide visual-studio-code"/>
     <properties key="toolchainCompatibility" value="gcc iar segger"/>
     <properties key="category" value="Zigbee Application"/>
@@ -52,7 +52,7 @@
     <properties key="projectFilePaths" value="app/framework/scenarios/multiprotocol/DynamicMultiprotocolLightSed/DynamicMultiprotocolLightSed.slcp"/>
     <properties key="readmeFiles" value="app/framework/scenarios/multiprotocol/DynamicMultiprotocolLightSed/readme.html"/>
     <properties key="boardCompatibility" value="brd4158a brd4159a brd4161a brd4162a brd4163a brd4164a brd4165b brd4167a brd4168a brd4170a brd4171a brd4172a brd4172b brd4173a brd4174a brd4174b brd4175a brd4176a brd4180a brd4180b brd4181a brd4181b brd4181c brd4186a brd4186b brd4186c brd4187a brd4187b brd4187c brd4190a brd4195a brd4196a brd4197a brd4198a brd4305d brd4305e brd4318a com.silabs.board.none"/>
-    <properties key="partCompatibility" value=".*efr32mg12p.* .*efr32mg13p.* .*efr32mg21.* .*efr32mg22.* .*efr32mg24.* .*efr32mg27.* .*efr32mr21.* .*mgm12.* .*mgm13.* .*mgm21.* .*mgm22.* .*mgm24.* .*rm21.*"/>
+    <properties key="partCompatibility" value=".*efr32mg1[23]p.* .*efr32mg2[1247].* .*efr32mr21.* .*mgm1[23].* .*mgm2[124].* .*rm21.*"/>
     <properties key="ideCompatibility" value="iar-embedded-workbench makefile-ide simplicity-ide visual-studio-code"/>
     <properties key="toolchainCompatibility" value="gcc iar segger"/>
     <properties key="category" value="Zigbee Application"/>
@@ -66,8 +66,8 @@
     <properties key="solutionReferenceId" value="protocol.zigbee.app.framework.scenarios.multiprotocol.DynamicMultiprotocolLightSed.DynamicMultiprotocolLightSedMinimal.slcp"/>
     <properties key="projectFilePaths" value="app/framework/scenarios/multiprotocol/DynamicMultiprotocolLightSed/DynamicMultiprotocolLightSedMinimal.slcp"/>
     <properties key="readmeFiles" value="app/framework/scenarios/multiprotocol/DynamicMultiprotocolLightSed/readme.html"/>
-    <properties key="boardCompatibility" value="brd2601a brd2601b brd2703a brd4158a brd4159a brd4161a brd4162a brd4163a brd4164a brd4165b brd4166a brd4166c brd4167a brd4168a brd4170a brd4171a brd4172a brd4172b brd4173a brd4174a brd4174b brd4175a brd4176a brd4179b brd4180a brd4180b brd4181a brd4181b brd4181c brd4186a brd4186b brd4186c brd4187a brd4187b brd4187c brd4188a brd4188b brd4190a brd4194a brd4195a brd4196a brd4197a brd4198a brd4304a brd4305d brd4305e brd4306c brd4306d brd4308a brd4308b brd4308c brd4308d brd4309a brd4309b brd4316a brd4317a brd4318a brd4319a brd4329a com.silabs.board.none"/>
-    <properties key="partCompatibility" value=".*efr32mg12p.* .*efr32mg13p.* .*efr32mg21.* .*efr32mg22.* .*efr32mg24.* .*efr32mg27.* .*efr32mr21.* .*mgm12.* .*mgm13.* .*mgm21.* .*mgm22.* .*mgm24.*"/>
+    <properties key="boardCompatibility" value="brd2601a brd2601b brd2703a brd2704a brd4158a brd4159a brd4161a brd4162a brd4163a brd4164a brd4165b brd4166a brd4166c brd4167a brd4168a brd4170a brd4171a brd4172a brd4172b brd4173a brd4174a brd4174b brd4175a brd4176a brd4179b brd4180a brd4180b brd4181a brd4181b brd4181c brd4186a brd4186b brd4186c brd4187a brd4187b brd4187c brd4188a brd4188b brd4190a brd4194a brd4195a brd4196a brd4197a brd4198a brd4304a brd4305d brd4305e brd4306c brd4306d brd4308a brd4308b brd4308c brd4308d brd4309a brd4309b brd4316a brd4317a brd4318a brd4319a brd4329a com.silabs.board.none"/>
+    <properties key="partCompatibility" value=".*efr32mg1[23]p.* .*efr32mg2[1247].* .*efr32mr21.* .*mgm1[23].* .*mgm2[124].* .*rm21.*"/>
     <properties key="ideCompatibility" value="iar-embedded-workbench makefile-ide simplicity-ide visual-studio-code"/>
     <properties key="toolchainCompatibility" value="gcc iar segger"/>
     <properties key="category" value="Zigbee Application"/>
@@ -83,7 +83,7 @@
     <properties key="readmeFiles" value="app/framework/scenarios/xncp/XncpLed/readme.html"/>
     <properties key="boardCompatibility" value="com.silabs.board.none"/>
     <properties key="partCompatibility" value=".*host.*"/>
-    <properties key="ideCompatibility" value="makefile-ide simplicity-ide visual-studio-code"/>
+    <properties key="ideCompatibility" value="makefile-ide simplicity-ide"/>
     <properties key="toolchainCompatibility" value="gcc"/>
     <properties key="category" value="Zigbee Host Application"/>
     <properties key="quality" value="PRODUCTION"/>
@@ -98,7 +98,7 @@
     <properties key="readmeFiles" value="app/framework/scenarios/z3/Z3Gateway/readme.html"/>
     <properties key="boardCompatibility" value="com.silabs.board.none"/>
     <properties key="partCompatibility" value=".*host.*"/>
-    <properties key="ideCompatibility" value="makefile-ide simplicity-ide visual-studio-code"/>
+    <properties key="ideCompatibility" value="makefile-ide simplicity-ide"/>
     <properties key="toolchainCompatibility" value="gcc"/>
     <properties key="category" value="Zigbee Host Application"/>
     <properties key="quality" value="PRODUCTION"/>
@@ -113,7 +113,7 @@
     <properties key="readmeFiles" value="app/framework/scenarios/z3/Z3GatewayGPCombo/readme.html"/>
     <properties key="boardCompatibility" value="com.silabs.board.none"/>
     <properties key="partCompatibility" value=".*host.*"/>
-    <properties key="ideCompatibility" value="makefile-ide simplicity-ide visual-studio-code"/>
+    <properties key="ideCompatibility" value="makefile-ide simplicity-ide"/>
     <properties key="toolchainCompatibility" value="gcc"/>
     <properties key="category" value="Zigbee Host Application"/>
     <properties key="quality" value="PRODUCTION"/>
@@ -126,8 +126,8 @@
     <properties key="solutionReferenceId" value="protocol.zigbee.app.framework.scenarios.z3.Z3Light.Z3Light.slcp"/>
     <properties key="projectFilePaths" value="app/framework/scenarios/z3/Z3Light/Z3Light.slcp"/>
     <properties key="readmeFiles" value="app/framework/scenarios/z3/Z3Light/readme.html"/>
-    <properties key="boardCompatibility" value="brd2601a brd2601b brd2703a brd4158a brd4159a brd4161a brd4162a brd4163a brd4164a brd4165b brd4166a brd4166c brd4167a brd4168a brd4170a brd4171a brd4172a brd4172b brd4173a brd4174a brd4174b brd4175a brd4176a brd4179b brd4180a brd4180b brd4181a brd4181b brd4181c brd4182a brd4183a brd4186a brd4186b brd4186c brd4187a brd4187b brd4187c brd4188a brd4188b brd4190a brd4194a brd4195a brd4196a brd4197a brd4198a brd4304a brd4305d brd4305e brd4306c brd4306d brd4308a brd4308b brd4308c brd4308d brd4309a brd4309b brd4311b brd4316a brd4317a brd4318a brd4319a brd4329a com.silabs.board.none"/>
-    <properties key="partCompatibility" value=".*efr32mg12p.* .*efr32mg13p.* .*efr32mg21.* .*efr32mg22.* .*efr32mg24.* .*efr32mg27.* .*efr32mr21.* .*mgm12.* .*mgm13.* .*mgm21.* .*mgm22.* .*mgm24.* .*rm21.*"/>
+    <properties key="boardCompatibility" value="brd2601a brd2601b brd2703a brd2704a brd4158a brd4159a brd4161a brd4162a brd4163a brd4164a brd4165b brd4166a brd4166c brd4167a brd4168a brd4170a brd4171a brd4172a brd4172b brd4173a brd4174a brd4174b brd4175a brd4176a brd4179b brd4180a brd4180b brd4181a brd4181b brd4181c brd4182a brd4183a brd4186a brd4186b brd4186c brd4187a brd4187b brd4187c brd4188a brd4188b brd4190a brd4194a brd4195a brd4196a brd4197a brd4198a brd4304a brd4305d brd4305e brd4306c brd4306d brd4308a brd4308b brd4308c brd4308d brd4309a brd4309b brd4311b brd4316a brd4317a brd4318a brd4319a brd4329a com.silabs.board.none"/>
+    <properties key="partCompatibility" value=".*efr32mg1[23]p.* .*efr32mg2[1247].* .*efr32mr21.* .*mgm1[23].* .*mgm2[124].* .*rm21.*"/>
     <properties key="ideCompatibility" value="iar-embedded-workbench makefile-ide simplicity-ide visual-studio-code"/>
     <properties key="toolchainCompatibility" value="gcc iar segger"/>
     <properties key="category" value="Zigbee Application"/>
@@ -141,8 +141,8 @@
     <properties key="solutionReferenceId" value="protocol.zigbee.app.framework.scenarios.z3.Z3LightGPCombo.Z3LightGPCombo.slcp"/>
     <properties key="projectFilePaths" value="app/framework/scenarios/z3/Z3LightGPCombo/Z3LightGPCombo.slcp"/>
     <properties key="readmeFiles" value="app/framework/scenarios/z3/Z3LightGPCombo/readme.html"/>
-    <properties key="boardCompatibility" value="brd2601a brd2601b brd2703a brd4158a brd4159a brd4161a brd4162a brd4163a brd4164a brd4165b brd4166a brd4166c brd4167a brd4168a brd4170a brd4171a brd4172a brd4172b brd4173a brd4174a brd4174b brd4175a brd4176a brd4179b brd4180a brd4180b brd4181a brd4181b brd4181c brd4182a brd4183a brd4186a brd4186b brd4186c brd4187a brd4187b brd4187c brd4188b brd4190a brd4194a brd4195a brd4196a brd4197a brd4198a brd4304a brd4305d brd4305e brd4306d brd4308a brd4308c brd4308d brd4309a brd4309b brd4311b brd4316a brd4317a brd4318a brd4329a com.silabs.board.none"/>
-    <properties key="partCompatibility" value=".*efr32mg12p.* .*efr32mg13p.* .*efr32mg21.* .*efr32mg22.* .*efr32mg24.* .*efr32mg27.* .*efr32mr21.* .*mgm12.* .*mgm13.* .*mgm21.* .*mgm22.* .*mgm24.*"/>
+    <properties key="boardCompatibility" value="brd2601a brd2601b brd2703a brd2704a brd4158a brd4159a brd4161a brd4162a brd4163a brd4164a brd4165b brd4166a brd4166c brd4167a brd4168a brd4170a brd4171a brd4172a brd4172b brd4173a brd4174a brd4174b brd4175a brd4176a brd4179b brd4180a brd4180b brd4181a brd4181b brd4181c brd4182a brd4183a brd4186a brd4186b brd4186c brd4187a brd4187b brd4187c brd4188b brd4190a brd4194a brd4195a brd4196a brd4197a brd4198a brd4304a brd4305d brd4305e brd4306d brd4308a brd4308c brd4308d brd4309a brd4309b brd4311b brd4316a brd4317a brd4318a brd4329a com.silabs.board.none"/>
+    <properties key="partCompatibility" value=".*efr32mg1[23]p.* .*efr32mg2[1247].* .*efr32mr21.* .*mgm1[23].* .*mgm2[124].* .*rm21.*"/>
     <properties key="ideCompatibility" value="iar-embedded-workbench makefile-ide simplicity-ide visual-studio-code"/>
     <properties key="toolchainCompatibility" value="gcc iar segger"/>
     <properties key="category" value="Zigbee Application"/>
@@ -156,8 +156,8 @@
     <properties key="solutionReferenceId" value="protocol.zigbee.app.framework.scenarios.z3.Z3Switch.Z3Switch.slcp"/>
     <properties key="projectFilePaths" value="app/framework/scenarios/z3/Z3Switch/Z3Switch.slcp"/>
     <properties key="readmeFiles" value="app/framework/scenarios/z3/Z3Switch/readme.html"/>
-    <properties key="boardCompatibility" value="brd2601a brd2601b brd2703a brd4158a brd4159a brd4161a brd4162a brd4163a brd4164a brd4165b brd4166a brd4166c brd4167a brd4168a brd4170a brd4171a brd4172a brd4172b brd4173a brd4174a brd4174b brd4175a brd4176a brd4179b brd4180a brd4180b brd4181a brd4181b brd4181c brd4182a brd4183a brd4186a brd4186b brd4186c brd4187a brd4187b brd4187c brd4188a brd4188b brd4190a brd4194a brd4195a brd4196a brd4197a brd4198a brd4304a brd4305d brd4305e brd4306c brd4306d brd4308a brd4308b brd4308c brd4308d brd4309a brd4309b brd4311b brd4316a brd4317a brd4318a brd4319a brd4329a com.silabs.board.none"/>
-    <properties key="partCompatibility" value=".*efr32mg12p.* .*efr32mg13p.* .*efr32mg21.* .*efr32mg22.* .*efr32mg24.* .*efr32mg27.* .*efr32mr21.* .*mgm12.* .*mgm13.* .*mgm21.* .*mgm22.* .*mgm24.* .*rm21.*"/>
+    <properties key="boardCompatibility" value="brd2601a brd2601b brd2703a brd2704a brd4158a brd4159a brd4161a brd4162a brd4163a brd4164a brd4165b brd4166a brd4166c brd4167a brd4168a brd4170a brd4171a brd4172a brd4172b brd4173a brd4174a brd4174b brd4175a brd4176a brd4179b brd4180a brd4180b brd4181a brd4181b brd4181c brd4182a brd4183a brd4186a brd4186b brd4186c brd4187a brd4187b brd4187c brd4188a brd4188b brd4190a brd4194a brd4195a brd4196a brd4197a brd4198a brd4304a brd4305d brd4305e brd4306c brd4306d brd4308a brd4308b brd4308c brd4308d brd4309a brd4309b brd4311b brd4316a brd4317a brd4318a brd4319a brd4329a com.silabs.board.none"/>
+    <properties key="partCompatibility" value=".*efr32mg1[23]p.* .*efr32mg2[1247].* .*efr32mr21.* .*mgm1[23].* .*mgm2[124].* .*rm21.*"/>
     <properties key="ideCompatibility" value="iar-embedded-workbench makefile-ide simplicity-ide visual-studio-code"/>
     <properties key="toolchainCompatibility" value="gcc iar segger"/>
     <properties key="category" value="Zigbee Application"/>
@@ -173,7 +173,7 @@
     <properties key="readmeFiles" value="app/framework/scenarios/z3/Z3SwitchWithVoice/readme.html"/>
     <properties key="boardCompatibility" value="brd2601b com.silabs.board.none"/>
     <properties key="partCompatibility" value=".*efr32mg24.*"/>
-    <properties key="ideCompatibility" value="makefile-ide simplicity-ide visual-studio-code"/>
+    <properties key="ideCompatibility" value="makefile-ide simplicity-ide"/>
     <properties key="toolchainCompatibility" value="gcc"/>
     <properties key="category" value="Zigbee Application"/>
     <properties key="quality" value="PRODUCTION"/>
@@ -186,8 +186,8 @@
     <properties key="solutionReferenceId" value="protocol.zigbee.app.framework.scenarios.z3.ZigbeeMinimal.ZigbeeMinimal.slcp"/>
     <properties key="projectFilePaths" value="app/framework/scenarios/z3/ZigbeeMinimal/ZigbeeMinimal.slcp"/>
     <properties key="readmeFiles" value="app/framework/scenarios/z3/ZigbeeMinimal/readme.html"/>
-    <properties key="boardCompatibility" value="brd2601a brd2601b brd2703a brd4158a brd4159a brd4161a brd4162a brd4163a brd4164a brd4165b brd4166a brd4166c brd4167a brd4168a brd4170a brd4171a brd4172a brd4172b brd4173a brd4174a brd4174b brd4175a brd4176a brd4179b brd4180a brd4180b brd4181a brd4181b brd4181c brd4182a brd4183a brd4183c brd4186a brd4186b brd4186c brd4187a brd4187b brd4187c brd4188a brd4188b brd4190a brd4194a brd4195a brd4196a brd4197a brd4198a brd4304a brd4305d brd4305e brd4306c brd4306d brd4308a brd4308b brd4308c brd4308d brd4309a brd4309b brd4311b brd4316a brd4317a brd4318a brd4319a brd4329a com.silabs.board.none"/>
-    <properties key="partCompatibility" value=".*efr32mg12p.* .*efr32mg13p.* .*efr32mg21.* .*efr32mg22.* .*efr32mg24.* .*efr32mg27.* .*efr32mr21.* .*mgm12.* .*mgm13.* .*mgm21.* .*mgm22.* .*mgm24.*"/>
+    <properties key="boardCompatibility" value="brd2601a brd2601b brd2703a brd2704a brd4158a brd4159a brd4161a brd4162a brd4163a brd4164a brd4165b brd4166a brd4166c brd4167a brd4168a brd4170a brd4171a brd4172a brd4172b brd4173a brd4174a brd4174b brd4175a brd4176a brd4179b brd4180a brd4180b brd4181a brd4181b brd4181c brd4182a brd4183a brd4183c brd4186a brd4186b brd4186c brd4187a brd4187b brd4187c brd4188a brd4188b brd4190a brd4194a brd4195a brd4196a brd4197a brd4198a brd4304a brd4305d brd4305e brd4306c brd4306d brd4308a brd4308b brd4308c brd4308d brd4309a brd4309b brd4311b brd4316a brd4317a brd4318a brd4319a brd4329a com.silabs.board.none"/>
+    <properties key="partCompatibility" value=".*efr32mg1[23]p.* .*efr32mg2[1247].* .*efr32mr21.* .*mgm1[23].* .*mgm2[124].* .*rm21.*"/>
     <properties key="ideCompatibility" value="iar-embedded-workbench makefile-ide simplicity-ide visual-studio-code"/>
     <properties key="toolchainCompatibility" value="gcc iar segger"/>
     <properties key="category" value="Zigbee Application"/>
@@ -203,7 +203,7 @@
     <properties key="readmeFiles" value="app/framework/scenarios/z3/ZigbeeMinimalHost/readme.html"/>
     <properties key="boardCompatibility" value="com.silabs.board.none"/>
     <properties key="partCompatibility" value=".*host.*"/>
-    <properties key="ideCompatibility" value="makefile-ide simplicity-ide visual-studio-code"/>
+    <properties key="ideCompatibility" value="makefile-ide simplicity-ide"/>
     <properties key="toolchainCompatibility" value="gcc"/>
     <properties key="category" value="Zigbee Application"/>
     <properties key="quality" value="PRODUCTION"/>
@@ -216,8 +216,8 @@
     <properties key="solutionReferenceId" value="protocol.zigbee.app.framework.scenarios.zha.StandardizedRfTesting.StandardizedRfTesting.slcp"/>
     <properties key="projectFilePaths" value="app/framework/scenarios/zha/StandardizedRfTesting/StandardizedRfTesting.slcp"/>
     <properties key="readmeFiles" value="app/framework/scenarios/zha/StandardizedRfTesting/readme.html"/>
-    <properties key="boardCompatibility" value="brd2601a brd2601b brd2703a brd4158a brd4159a brd4161a brd4162a brd4163a brd4164a brd4165b brd4166a brd4166c brd4167a brd4168a brd4170a brd4171a brd4172a brd4172b brd4173a brd4174a brd4174b brd4175a brd4176a brd4179b brd4180a brd4180b brd4181a brd4181b brd4181c brd4182a brd4183a brd4183c brd4186a brd4186b brd4186c brd4187a brd4187b brd4187c brd4188a brd4188b brd4190a brd4194a brd4195a brd4196a brd4197a brd4198a brd4304a brd4305d brd4305e brd4306c brd4306d brd4308a brd4308b brd4308c brd4308d brd4309a brd4309b brd4311b brd4316a brd4317a brd4318a brd4319a brd4329a com.silabs.board.none"/>
-    <properties key="partCompatibility" value=".*efr32mg12p.* .*efr32mg13p.* .*efr32mg21.* .*efr32mg22.* .*efr32mg24.* .*efr32mg27.* .*efr32mr21.* .*mgm12.* .*mgm13.* .*mgm21.* .*mgm22.* .*mgm24.*"/>
+    <properties key="boardCompatibility" value="brd2601a brd2601b brd2703a brd2704a brd4158a brd4159a brd4161a brd4162a brd4163a brd4164a brd4165b brd4166a brd4166c brd4167a brd4168a brd4170a brd4171a brd4172a brd4172b brd4173a brd4174a brd4174b brd4175a brd4176a brd4179b brd4180a brd4180b brd4181a brd4181b brd4181c brd4182a brd4183a brd4183c brd4186a brd4186b brd4186c brd4187a brd4187b brd4187c brd4188a brd4188b brd4190a brd4194a brd4195a brd4196a brd4197a brd4198a brd4304a brd4305d brd4305e brd4306c brd4306d brd4308a brd4308b brd4308c brd4308d brd4309a brd4309b brd4311b brd4316a brd4317a brd4318a brd4319a brd4329a com.silabs.board.none"/>
+    <properties key="partCompatibility" value=".*efr32mg1[23]p.* .*efr32mg2[1247].* .*efr32mr21.* .*mgm1[23].* .*mgm2[124].* .*rm21.*"/>
     <properties key="ideCompatibility" value="iar-embedded-workbench makefile-ide simplicity-ide visual-studio-code"/>
     <properties key="toolchainCompatibility" value="gcc iar segger"/>
     <properties key="category" value="Zigbee Application"/>
@@ -228,11 +228,41 @@
   <descriptors name="gpd-sensor" label="Zigbee - SoC GPD Sensor" description="This is a Green Power Sensor Device that pairs with a GP Combo or Sink device and sends gpd reports periodically.&#xA;">
     <properties key="namespace" value="template.uc"/>
     <properties key="keywords" value="universal\ configurator"/>
+    <properties key="solutionReferenceId" value="protocol.zigbee.app.gpd.sample-app.gpd-sensor.gpd-sensor-single-btn-led.slcp"/>
+    <properties key="projectFilePaths" value="app/gpd/sample-app/gpd-sensor/gpd-sensor-single-btn-led.slcp"/>
+    <properties key="readmeFiles" value="app/gpd/sample-app/gpd-sensor/readme.html"/>
+    <properties key="boardCompatibility" value="brd4183a com.silabs.board.none"/>
+    <properties key="partCompatibility" value=".*efr32mg1[23]p.* .*efr32mg2[1247].* .*efr32mr21.* .*rm21.*"/>
+    <properties key="ideCompatibility" value="iar-embedded-workbench makefile-ide simplicity-ide visual-studio-code"/>
+    <properties key="toolchainCompatibility" value="gcc iar segger"/>
+    <properties key="category" value="Zigbee Application"/>
+    <properties key="quality" value="PRODUCTION"/>
+    <properties key="stockConfigCompatibility" value="com.silabs.ss.framework.project.toolchain.core.default"/>
+    <properties key="filters" value="Device\ Type|SoC Project\ Difficulty|Advanced Wireless\ Technology|Zigbee"/>
+  </descriptors>
+  <descriptors name="gpd-sensor" label="Zigbee - SoC GPD Sensor" description="This is a Green Power Sensor Device that pairs with a GP Combo or Sink device and sends gpd reports periodically.&#xA;">
+    <properties key="namespace" value="template.uc"/>
+    <properties key="keywords" value="universal\ configurator"/>
     <properties key="solutionReferenceId" value="protocol.zigbee.app.gpd.sample-app.gpd-sensor.gpd-sensor.slcp"/>
     <properties key="projectFilePaths" value="app/gpd/sample-app/gpd-sensor/gpd-sensor.slcp"/>
     <properties key="readmeFiles" value="app/gpd/sample-app/gpd-sensor/readme.html"/>
-    <properties key="boardCompatibility" value="brd2601a brd2601b brd2703a brd4158a brd4159a brd4161a brd4162a brd4163a brd4164a brd4165b brd4166a brd4166c brd4167a brd4168a brd4170a brd4171a brd4172a brd4172b brd4173a brd4174a brd4174b brd4175a brd4176a brd4179b brd4180a brd4180b brd4181a brd4181b brd4181c brd4182a brd4183a brd4186a brd4186b brd4186c brd4187a brd4187b brd4187c brd4188a brd4188b brd4190a brd4194a brd4195a brd4196a brd4197a brd4198a com.silabs.board.none"/>
-    <properties key="partCompatibility" value=".*efr32mg12p.* .*efr32mg13p.* .*efr32mg21.* .*efr32mg22.* .*efr32mg24.* .*efr32mg27.* .*efr32mr21.*"/>
+    <properties key="boardCompatibility" value="brd2703a brd4158a brd4159a brd4161a brd4162a brd4163a brd4164a brd4165b brd4166a brd4166c brd4167a brd4168a brd4170a brd4171a brd4172a brd4172b brd4173a brd4174a brd4174b brd4175a brd4176a brd4179b brd4180a brd4180b brd4181a brd4181b brd4181c brd4182a brd4186a brd4186b brd4186c brd4187a brd4187b brd4187c brd4188a brd4188b brd4190a brd4194a brd4195a brd4196a brd4197a brd4198a com.silabs.board.none"/>
+    <properties key="partCompatibility" value=".*efr32mg1[23]p.* .*efr32mg2[1247].* .*efr32mr21.* .*rm21.*"/>
+    <properties key="ideCompatibility" value="iar-embedded-workbench makefile-ide simplicity-ide visual-studio-code"/>
+    <properties key="toolchainCompatibility" value="gcc iar segger"/>
+    <properties key="category" value="Zigbee Application"/>
+    <properties key="quality" value="PRODUCTION"/>
+    <properties key="stockConfigCompatibility" value="com.silabs.ss.framework.project.toolchain.core.default"/>
+    <properties key="filters" value="Device\ Type|SoC Project\ Difficulty|Advanced Wireless\ Technology|Zigbee"/>
+  </descriptors>
+  <descriptors name="gpd-switch" label="Zigbee - SoC GPD Switch" description="This is a Green Power On/Off Switch Device that pairs with a GP Combo or Sink Light and controls its operation.&#xA;">
+    <properties key="namespace" value="template.uc"/>
+    <properties key="keywords" value="universal\ configurator"/>
+    <properties key="solutionReferenceId" value="protocol.zigbee.app.gpd.sample-app.gpd-switch.gpd-switch-single-btn-led.slcp"/>
+    <properties key="projectFilePaths" value="app/gpd/sample-app/gpd-switch/gpd-switch-single-btn-led.slcp"/>
+    <properties key="readmeFiles" value="app/gpd/sample-app/gpd-switch/readme.html"/>
+    <properties key="boardCompatibility" value="brd4183a com.silabs.board.none"/>
+    <properties key="partCompatibility" value=".*efr32mg1[23]p.* .*efr32mg2[1247].* .*efr32mr21.* .*rm21.*"/>
     <properties key="ideCompatibility" value="iar-embedded-workbench makefile-ide simplicity-ide visual-studio-code"/>
     <properties key="toolchainCompatibility" value="gcc iar segger"/>
     <properties key="category" value="Zigbee Application"/>
@@ -246,8 +276,8 @@
     <properties key="solutionReferenceId" value="protocol.zigbee.app.gpd.sample-app.gpd-switch.gpd-switch.slcp"/>
     <properties key="projectFilePaths" value="app/gpd/sample-app/gpd-switch/gpd-switch.slcp"/>
     <properties key="readmeFiles" value="app/gpd/sample-app/gpd-switch/readme.html"/>
-    <properties key="boardCompatibility" value="brd2601a brd2601b brd2703a brd4158a brd4159a brd4161a brd4162a brd4163a brd4164a brd4165b brd4166a brd4166c brd4167a brd4168a brd4170a brd4171a brd4172a brd4172b brd4173a brd4174a brd4174b brd4175a brd4176a brd4179b brd4180a brd4180b brd4181a brd4181b brd4181c brd4182a brd4183a brd4186a brd4186b brd4186c brd4187a brd4187b brd4187c brd4188a brd4188b brd4190a brd4194a brd4195a brd4196a brd4197a brd4198a com.silabs.board.none"/>
-    <properties key="partCompatibility" value=".*efr32mg12p.* .*efr32mg13p.* .*efr32mg21.* .*efr32mg22.* .*efr32mg24.* .*efr32mg27.* .*efr32mr21.*"/>
+    <properties key="boardCompatibility" value="brd2703a brd4158a brd4159a brd4161a brd4162a brd4163a brd4164a brd4165b brd4166a brd4166c brd4167a brd4168a brd4170a brd4171a brd4172a brd4172b brd4173a brd4174a brd4174b brd4175a brd4176a brd4179b brd4180a brd4180b brd4181a brd4181b brd4181c brd4182a brd4186a brd4186b brd4186c brd4187a brd4187b brd4187c brd4188a brd4188b brd4190a brd4194a brd4195a brd4196a brd4197a brd4198a com.silabs.board.none"/>
+    <properties key="partCompatibility" value=".*efr32mg1[23]p.* .*efr32mg2[1247].* .*efr32mr21.* .*rm21.*"/>
     <properties key="ideCompatibility" value="iar-embedded-workbench makefile-ide simplicity-ide visual-studio-code"/>
     <properties key="toolchainCompatibility" value="gcc iar segger"/>
     <properties key="category" value="Zigbee Application"/>
@@ -255,44 +285,14 @@
     <properties key="stockConfigCompatibility" value="com.silabs.ss.framework.project.toolchain.core.default"/>
     <properties key="filters" value="Device\ Type|SoC Project\ Difficulty|Advanced Wireless\ Technology|Zigbee"/>
   </descriptors>
-  <descriptors name="zigbee_ncp-ble_ncp-spi" label="Zigbee - NCP + Bluetooth - NCP zigbee_ncp-ble_ncp-spi" description="This dynamic multiprotocol (DMP) application runs the Zigbee NCP simultaneously with the Bluetooth NCP. Communication with Zigbee and Bluetooth host applications is enabled using the Co-Processor Communication Protocol, which acts as a protocol multiplexer and serial transport layer. The host applications connect to the CPC daemon, which in turn connects to the EFR via a SPI link. The Zigbee NCP part of this application can be built as configured, or can optionally be augmented with customized extensions for initialization, main loop processing, event definition/handling, and messaging with the host.&#xA;">
-    <properties key="namespace" value="template.uc"/>
-    <properties key="keywords" value="universal\ configurator"/>
-    <properties key="solutionReferenceId" value="protocol.zigbee.app.ncp.sample-app.dmp-ncp.zigbee_ncp-ble_ncp-spi.slcp"/>
-    <properties key="projectFilePaths" value="app/ncp/sample-app/dmp-ncp/zigbee_ncp-ble_ncp-spi.slcp"/>
-    <properties key="readmeFiles" value="app/ncp/sample-app/dmp-ncp/readme-zigbee_ncp-ble_ncp-spi.html"/>
-    <properties key="boardCompatibility" value="brd2601a brd2601b brd2703a brd4158a brd4159a brd4161a brd4162a brd4163a brd4164a brd4165b brd4166a brd4166c brd4167a brd4168a brd4170a brd4171a brd4172a brd4172b brd4173a brd4174a brd4174b brd4175a brd4176a brd4179b brd4180a brd4180b brd4181a brd4181b brd4181c brd4182a brd4183a brd4183c brd4186a brd4186b brd4186c brd4187a brd4187b brd4187c brd4188a brd4188b brd4190a brd4194a brd4195a brd4196a brd4197a brd4198a brd4304a brd4305d brd4305e brd4306c brd4306d brd4308a brd4308b brd4308c brd4308d brd4309a brd4309b brd4311b brd4316a brd4317a brd4318a brd4319a brd4329a com.silabs.board.none"/>
-    <properties key="partCompatibility" value=".*efr32mg12p.* .*efr32mg13p.* .*efr32mg21.* .*efr32mg22.* .*efr32mg24.* .*efr32mg27.* .*efr32mr21.* .*mgm12.* .*mgm13.* .*mgm21.* .*mgm22.* .*mgm24.*"/>
-    <properties key="ideCompatibility" value="makefile-ide simplicity-ide visual-studio-code"/>
-    <properties key="toolchainCompatibility" value="gcc"/>
-    <properties key="category" value="Zigbee + Bluetooth NCP Application"/>
-    <properties key="quality" value="PRODUCTION"/>
-    <properties key="stockConfigCompatibility" value="com.silabs.ss.framework.project.toolchain.core.default"/>
-    <properties key="filters" value="Capability|Multiprotocol Device\ Type|NCP Project\ Difficulty|Advanced Wireless\ Technology|Bluetooth Wireless\ Technology|Zigbee"/>
-  </descriptors>
-  <descriptors name="zigbee_ncp-ble_ncp-uart" label="Zigbee - NCP + Bluetooth - NCP zigbee_ncp-ble_ncp-uart" description="This dynamic multiprotocol (DMP) application runs the Zigbee NCP simultaneously with the Bluetooth NCP. Communication with Zigbee and Bluetooth host applications is enabled using the Co-Processor Communication Protocol, which acts as a protocol multiplexer and serial transport layer. The host applications connect to the CPC daemon, which in turn connects to the EFR via a UART link. The Zigbee NCP part of this application can be built as configured, or can optionally be augmented with customized extensions for initialization, main loop processing, event definition/handling, and messaging with the host.&#xA;">
-    <properties key="namespace" value="template.uc"/>
-    <properties key="keywords" value="universal\ configurator"/>
-    <properties key="solutionReferenceId" value="protocol.zigbee.app.ncp.sample-app.dmp-ncp.zigbee_ncp-ble_ncp-uart.slcp"/>
-    <properties key="projectFilePaths" value="app/ncp/sample-app/dmp-ncp/zigbee_ncp-ble_ncp-uart.slcp"/>
-    <properties key="readmeFiles" value="app/ncp/sample-app/dmp-ncp/readme-zigbee_ncp-ble_ncp-uart.html"/>
-    <properties key="boardCompatibility" value="brd2601a brd2601b brd2703a brd4158a brd4159a brd4161a brd4162a brd4163a brd4164a brd4165b brd4166a brd4166c brd4167a brd4168a brd4170a brd4171a brd4172a brd4172b brd4173a brd4174a brd4174b brd4175a brd4176a brd4179b brd4180a brd4180b brd4181a brd4181b brd4181c brd4182a brd4183a brd4183c brd4186a brd4186b brd4186c brd4187a brd4187b brd4187c brd4188a brd4188b brd4190a brd4194a brd4195a brd4196a brd4197a brd4198a brd4304a brd4305d brd4305e brd4306c brd4306d brd4308a brd4308b brd4308c brd4308d brd4309a brd4309b brd4311b brd4316a brd4317a brd4318a brd4319a brd4329a com.silabs.board.none"/>
-    <properties key="partCompatibility" value=".*efr32mg12p.* .*efr32mg13p.* .*efr32mg21.* .*efr32mg22.* .*efr32mg24.* .*efr32mg27.* .*efr32mr21.* .*mgm12.* .*mgm13.* .*mgm21.* .*mgm22.* .*mgm24.*"/>
-    <properties key="ideCompatibility" value="makefile-ide simplicity-ide visual-studio-code"/>
-    <properties key="toolchainCompatibility" value="gcc"/>
-    <properties key="category" value="Zigbee + Bluetooth NCP Application"/>
-    <properties key="quality" value="PRODUCTION"/>
-    <properties key="stockConfigCompatibility" value="com.silabs.ss.framework.project.toolchain.core.default"/>
-    <properties key="filters" value="Capability|Multiprotocol Device\ Type|NCP Project\ Difficulty|Advanced Wireless\ Technology|Bluetooth Wireless\ Technology|Zigbee"/>
-  </descriptors>
   <descriptors name="mp-ncp-spi" label="Zigbee - NCP mp-ncp-spi" description="The multi-PAN application provides support to form two personal area networks  on same channel on single radio. This multi-PAN network coprocessor (NCP)  application supports communication with a host application over a SPI interface.  This NCP application can be built as configured, or optionally can be augmented  with customized extensions for initialization, main loop processing, event  definition/handling, and messaging with the host.&#xA;">
     <properties key="namespace" value="template.uc"/>
     <properties key="keywords" value="universal\ configurator"/>
     <properties key="solutionReferenceId" value="protocol.zigbee.app.ncp.sample-app.mp-ncp-spi.mp-ncp-spi.slcp"/>
     <properties key="projectFilePaths" value="app/ncp/sample-app/mp-ncp-spi/mp-ncp-spi.slcp"/>
     <properties key="readmeFiles" value="app/ncp/sample-app/mp-ncp-spi/readme.html"/>
-    <properties key="boardCompatibility" value="brd2601a brd2601b brd2703a brd4158a brd4159a brd4161a brd4162a brd4163a brd4164a brd4165b brd4166a brd4166c brd4167a brd4168a brd4170a brd4171a brd4172a brd4172b brd4173a brd4174a brd4174b brd4175a brd4176a brd4179b brd4180a brd4180b brd4181a brd4181b brd4181c brd4182a brd4183a brd4183c brd4186a brd4186b brd4186c brd4187a brd4187b brd4187c brd4188a brd4188b brd4190a brd4194a brd4195a brd4196a brd4197a brd4198a brd4304a brd4305d brd4305e brd4306c brd4306d brd4308a brd4308b brd4308c brd4308d brd4309a brd4309b brd4311b brd4316a brd4317a brd4318a brd4329a com.silabs.board.none"/>
-    <properties key="partCompatibility" value=".*efr32mg12p.* .*efr32mg13p.* .*efr32mg21.* .*efr32mg22.* .*efr32mg24.* .*efr32mg27.* .*efr32mr21.* .*mgm12.* .*mgm13.* .*mgm21.* .*mgm22.* .*mgm24.*"/>
+    <properties key="boardCompatibility" value="brd2601a brd2601b brd2703a brd2704a brd4158a brd4159a brd4161a brd4162a brd4163a brd4164a brd4165b brd4166a brd4166c brd4167a brd4168a brd4170a brd4171a brd4172a brd4172b brd4173a brd4174a brd4174b brd4175a brd4176a brd4179b brd4180a brd4180b brd4181a brd4181b brd4181c brd4182a brd4183a brd4183c brd4186a brd4186b brd4186c brd4187a brd4187b brd4187c brd4188a brd4188b brd4190a brd4194a brd4195a brd4196a brd4197a brd4198a brd4304a brd4305d brd4305e brd4306c brd4306d brd4308a brd4308b brd4308c brd4308d brd4309a brd4309b brd4311b brd4316a brd4317a brd4318a brd4329a com.silabs.board.none"/>
+    <properties key="partCompatibility" value=".*efr32mg1[23]p.* .*efr32mg2[1247].* .*efr32mr21.* .*mgm1[23].* .*mgm2[124].* .*rm21.*"/>
     <properties key="ideCompatibility" value="iar-embedded-workbench makefile-ide simplicity-ide visual-studio-code"/>
     <properties key="toolchainCompatibility" value="gcc iar segger"/>
     <properties key="category" value="Zigbee Application"/>
@@ -306,8 +306,8 @@
     <properties key="solutionReferenceId" value="protocol.zigbee.app.ncp.sample-app.mp-ncp-uart-hw.mp-ncp-uart-hw.slcp"/>
     <properties key="projectFilePaths" value="app/ncp/sample-app/mp-ncp-uart-hw/mp-ncp-uart-hw.slcp"/>
     <properties key="readmeFiles" value="app/ncp/sample-app/mp-ncp-uart-hw/readme.html"/>
-    <properties key="boardCompatibility" value="brd2601a brd2601b brd2703a brd4158a brd4159a brd4161a brd4162a brd4163a brd4164a brd4165b brd4166a brd4166c brd4167a brd4168a brd4170a brd4171a brd4172a brd4172b brd4173a brd4174a brd4174b brd4175a brd4176a brd4179b brd4180a brd4180b brd4181a brd4181b brd4181c brd4182a brd4183a brd4183c brd4186a brd4186b brd4186c brd4187a brd4187b brd4187c brd4188a brd4188b brd4190a brd4194a brd4195a brd4196a brd4197a brd4198a brd4304a brd4305d brd4305e brd4306c brd4306d brd4308a brd4308b brd4308c brd4308d brd4309a brd4309b brd4311b brd4316a brd4317a brd4318a brd4319a brd4329a com.silabs.board.none"/>
-    <properties key="partCompatibility" value=".*efr32mg12p.* .*efr32mg13p.* .*efr32mg21.* .*efr32mg22.* .*efr32mg24.* .*efr32mg27.* .*efr32mr21.* .*mgm12.* .*mgm13.* .*mgm21.* .*mgm22.* .*mgm24.*"/>
+    <properties key="boardCompatibility" value="brd2601a brd2601b brd2703a brd2704a brd4158a brd4159a brd4161a brd4162a brd4163a brd4164a brd4165b brd4166a brd4166c brd4167a brd4168a brd4170a brd4171a brd4172a brd4172b brd4173a brd4174a brd4174b brd4175a brd4176a brd4179b brd4180a brd4180b brd4181a brd4181b brd4181c brd4182a brd4183a brd4183c brd4186a brd4186b brd4186c brd4187a brd4187b brd4187c brd4188a brd4188b brd4190a brd4194a brd4195a brd4196a brd4197a brd4198a brd4304a brd4305d brd4305e brd4306c brd4306d brd4308a brd4308b brd4308c brd4308d brd4309a brd4309b brd4311b brd4316a brd4317a brd4318a brd4319a brd4329a com.silabs.board.none"/>
+    <properties key="partCompatibility" value=".*efr32mg1[23]p.* .*efr32mg2[1247].* .*efr32mr21.* .*mgm1[23].* .*mgm2[124].* .*rm21.*"/>
     <properties key="ideCompatibility" value="iar-embedded-workbench makefile-ide simplicity-ide visual-studio-code"/>
     <properties key="toolchainCompatibility" value="gcc iar segger"/>
     <properties key="category" value="Zigbee Application"/>
@@ -315,14 +315,44 @@
     <properties key="stockConfigCompatibility" value="com.silabs.ss.framework.project.toolchain.core.default"/>
     <properties key="filters" value="Device\ Type|NCP Project\ Difficulty|Advanced Wireless\ Technology|Zigbee"/>
   </descriptors>
+  <descriptors name="zigbee_ncp-ble_ncp-spi" label="Zigbee - NCP + Bluetooth - NCP zigbee_ncp-ble_ncp-spi" description="This dynamic multiprotocol (DMP) application runs the Zigbee NCP simultaneously with the Bluetooth NCP. Communication with Zigbee and Bluetooth host applications is enabled using the Co-Processor Communication Protocol, which acts as a protocol multiplexer and serial transport layer. The host applications connect to the CPC daemon, which in turn connects to the EFR via a SPI link. The Zigbee NCP part of this application can be built as configured, or can optionally be augmented with customized extensions for initialization, main loop processing, event definition/handling, and messaging with the host.&#xA;">
+    <properties key="namespace" value="template.uc"/>
+    <properties key="keywords" value="universal\ configurator"/>
+    <properties key="solutionReferenceId" value="protocol.zigbee.app.ncp.sample-app.ncp-dmp.zigbee_ncp-ble_ncp-spi.slcp"/>
+    <properties key="projectFilePaths" value="app/ncp/sample-app/ncp-dmp/zigbee_ncp-ble_ncp-spi.slcp"/>
+    <properties key="readmeFiles" value="app/ncp/sample-app/ncp-dmp/readme-zigbee_ncp-ble_ncp-spi.html"/>
+    <properties key="boardCompatibility" value="brd2601a brd2601b brd2703a brd2704a brd4158a brd4159a brd4161a brd4162a brd4163a brd4164a brd4165b brd4166a brd4166c brd4167a brd4168a brd4170a brd4171a brd4172a brd4172b brd4173a brd4174a brd4174b brd4175a brd4176a brd4179b brd4180a brd4180b brd4181a brd4181b brd4181c brd4186a brd4186b brd4186c brd4187a brd4187b brd4187c brd4188a brd4188b brd4190a brd4194a brd4195a brd4196a brd4197a brd4198a brd4304a brd4305d brd4305e brd4306c brd4306d brd4308a brd4308b brd4308c brd4308d brd4309a brd4309b brd4316a brd4317a brd4318a brd4319a brd4329a com.silabs.board.none"/>
+    <properties key="partCompatibility" value=".*efr32mg1[23]p.* .*efr32mg2[147].* .*mgm1[23].* .*mgm2[14].* .*rm21.*"/>
+    <properties key="ideCompatibility" value="makefile-ide simplicity-ide"/>
+    <properties key="toolchainCompatibility" value="gcc"/>
+    <properties key="category" value="Zigbee + Bluetooth NCP Application"/>
+    <properties key="quality" value="PRODUCTION"/>
+    <properties key="stockConfigCompatibility" value="com.silabs.ss.framework.project.toolchain.core.default"/>
+    <properties key="filters" value="Capability|Multiprotocol Device\ Type|NCP Project\ Difficulty|Advanced Wireless\ Technology|Bluetooth Wireless\ Technology|Zigbee"/>
+  </descriptors>
+  <descriptors name="zigbee_ncp-ble_ncp-uart" label="Zigbee - NCP + Bluetooth - NCP zigbee_ncp-ble_ncp-uart" description="This dynamic multiprotocol (DMP) application runs the Zigbee NCP simultaneously with the Bluetooth NCP. Communication with Zigbee and Bluetooth host applications is enabled using the Co-Processor Communication Protocol, which acts as a protocol multiplexer and serial transport layer. The host applications connect to the CPC daemon, which in turn connects to the EFR via a UART link. The Zigbee NCP part of this application can be built as configured, or can optionally be augmented with customized extensions for initialization, main loop processing, event definition/handling, and messaging with the host.&#xA;">
+    <properties key="namespace" value="template.uc"/>
+    <properties key="keywords" value="universal\ configurator"/>
+    <properties key="solutionReferenceId" value="protocol.zigbee.app.ncp.sample-app.ncp-dmp.zigbee_ncp-ble_ncp-uart.slcp"/>
+    <properties key="projectFilePaths" value="app/ncp/sample-app/ncp-dmp/zigbee_ncp-ble_ncp-uart.slcp"/>
+    <properties key="readmeFiles" value="app/ncp/sample-app/ncp-dmp/readme-zigbee_ncp-ble_ncp-uart.html"/>
+    <properties key="boardCompatibility" value="brd2601a brd2601b brd2703a brd2704a brd4158a brd4159a brd4161a brd4162a brd4163a brd4164a brd4165b brd4166a brd4166c brd4167a brd4168a brd4170a brd4171a brd4172a brd4172b brd4173a brd4174a brd4174b brd4175a brd4176a brd4179b brd4180a brd4180b brd4181a brd4181b brd4181c brd4186a brd4186b brd4186c brd4187a brd4187b brd4187c brd4188a brd4188b brd4190a brd4194a brd4195a brd4196a brd4197a brd4198a brd4304a brd4305d brd4305e brd4306c brd4306d brd4308a brd4308b brd4308c brd4308d brd4309a brd4309b brd4316a brd4317a brd4318a brd4319a brd4329a com.silabs.board.none"/>
+    <properties key="partCompatibility" value=".*efr32mg1[23]p.* .*efr32mg2[147].* .*mgm1[23].* .*mgm2[14].* .*rm21.*"/>
+    <properties key="ideCompatibility" value="makefile-ide simplicity-ide"/>
+    <properties key="toolchainCompatibility" value="gcc"/>
+    <properties key="category" value="Zigbee + Bluetooth NCP Application"/>
+    <properties key="quality" value="PRODUCTION"/>
+    <properties key="stockConfigCompatibility" value="com.silabs.ss.framework.project.toolchain.core.default"/>
+    <properties key="filters" value="Capability|Multiprotocol Device\ Type|NCP Project\ Difficulty|Advanced Wireless\ Technology|Bluetooth Wireless\ Technology|Zigbee"/>
+  </descriptors>
   <descriptors name="ncp-spi" label="Zigbee - NCP ncp-spi" description="This network coprocessor (NCP) application supports communication with a host application over a SPI interface.  This NCP application can be built as configured, or optionally can be augmented with customized extensions for initialization, main loop processing, event definition/handling, and messaging with the host.&#xA;">
     <properties key="namespace" value="template.uc"/>
     <properties key="keywords" value="universal\ configurator"/>
     <properties key="solutionReferenceId" value="protocol.zigbee.app.ncp.sample-app.ncp-spi.ncp-spi.slcp"/>
     <properties key="projectFilePaths" value="app/ncp/sample-app/ncp-spi/ncp-spi.slcp"/>
     <properties key="readmeFiles" value="app/ncp/sample-app/ncp-spi/readme.html"/>
-    <properties key="boardCompatibility" value="brd2601a brd2601b brd2703a brd4158a brd4159a brd4161a brd4162a brd4163a brd4164a brd4165b brd4166a brd4166c brd4167a brd4168a brd4170a brd4171a brd4172a brd4172b brd4173a brd4174a brd4174b brd4175a brd4176a brd4179b brd4180a brd4180b brd4181a brd4181b brd4181c brd4182a brd4183a brd4183c brd4186a brd4186b brd4186c brd4187a brd4187b brd4187c brd4188a brd4188b brd4190a brd4194a brd4195a brd4196a brd4197a brd4198a brd4304a brd4305d brd4305e brd4306c brd4306d brd4308a brd4308b brd4308c brd4308d brd4309a brd4309b brd4311b brd4316a brd4317a brd4318a brd4329a com.silabs.board.none"/>
-    <properties key="partCompatibility" value=".*efr32mg12p.* .*efr32mg13p.* .*efr32mg21.* .*efr32mg22.* .*efr32mg24.* .*efr32mg27.* .*efr32mr21.* .*mgm12.* .*mgm13.* .*mgm21.* .*mgm22.* .*mgm24.*"/>
+    <properties key="boardCompatibility" value="brd2601a brd2601b brd2703a brd2704a brd4158a brd4159a brd4161a brd4162a brd4163a brd4164a brd4165b brd4166a brd4166c brd4167a brd4168a brd4170a brd4171a brd4172a brd4172b brd4173a brd4174a brd4174b brd4175a brd4176a brd4179b brd4180a brd4180b brd4181a brd4181b brd4181c brd4182a brd4183a brd4183c brd4186a brd4186b brd4186c brd4187a brd4187b brd4187c brd4188a brd4188b brd4190a brd4194a brd4195a brd4196a brd4197a brd4198a brd4304a brd4305d brd4305e brd4306c brd4306d brd4308a brd4308b brd4308c brd4308d brd4309a brd4309b brd4311b brd4316a brd4317a brd4318a brd4329a com.silabs.board.none"/>
+    <properties key="partCompatibility" value=".*efr32mg1[23]p.* .*efr32mg2[1247].* .*efr32mr21.* .*mgm1[23].* .*mgm2[124].* .*rm21.*"/>
     <properties key="ideCompatibility" value="iar-embedded-workbench makefile-ide simplicity-ide visual-studio-code"/>
     <properties key="toolchainCompatibility" value="gcc iar segger"/>
     <properties key="category" value="Zigbee Application"/>
@@ -336,8 +366,8 @@
     <properties key="solutionReferenceId" value="protocol.zigbee.app.ncp.sample-app.ncp-uart-hw-gp-multi-rail.ncp-uart-hw-gp-multi-rail.slcp"/>
     <properties key="projectFilePaths" value="app/ncp/sample-app/ncp-uart-hw-gp-multi-rail/ncp-uart-hw-gp-multi-rail.slcp"/>
     <properties key="readmeFiles" value="app/ncp/sample-app/ncp-uart-hw-gp-multi-rail/readme.html"/>
-    <properties key="boardCompatibility" value="brd2601a brd2601b brd2703a brd4158a brd4159a brd4161a brd4162a brd4163a brd4164a brd4165b brd4166a brd4166c brd4167a brd4168a brd4170a brd4171a brd4172a brd4172b brd4173a brd4174a brd4174b brd4175a brd4176a brd4179b brd4180a brd4180b brd4181a brd4181b brd4181c brd4182a brd4183a brd4183c brd4186a brd4186b brd4186c brd4187a brd4187b brd4187c brd4188a brd4188b brd4190a brd4194a brd4195a brd4196a brd4197a brd4198a brd4304a brd4305d brd4305e brd4306c brd4306d brd4308a brd4308b brd4308c brd4308d brd4309a brd4309b brd4311b brd4316a brd4317a brd4318a brd4319a brd4329a com.silabs.board.none"/>
-    <properties key="partCompatibility" value=".*efr32mg12p.* .*efr32mg13p.* .*efr32mg21.* .*efr32mg22.* .*efr32mg24.* .*efr32mg27.* .*efr32mr21.* .*mgm12.* .*mgm13.* .*mgm21.* .*mgm22.* .*mgm24.*"/>
+    <properties key="boardCompatibility" value="brd2601a brd2601b brd2703a brd2704a brd4158a brd4159a brd4161a brd4162a brd4163a brd4164a brd4165b brd4166a brd4166c brd4167a brd4168a brd4170a brd4171a brd4172a brd4172b brd4173a brd4174a brd4174b brd4175a brd4176a brd4179b brd4180a brd4180b brd4181a brd4181b brd4181c brd4182a brd4183a brd4183c brd4186a brd4186b brd4186c brd4187a brd4187b brd4187c brd4188a brd4188b brd4190a brd4194a brd4195a brd4196a brd4197a brd4198a brd4304a brd4305d brd4305e brd4306c brd4306d brd4308a brd4308b brd4308c brd4308d brd4309a brd4309b brd4311b brd4316a brd4317a brd4318a brd4319a brd4329a com.silabs.board.none"/>
+    <properties key="partCompatibility" value=".*efr32mg1[23]p.* .*efr32mg2[1247].* .*efr32mr21.* .*mgm1[23].* .*mgm2[124].* .*rm21.*"/>
     <properties key="ideCompatibility" value="iar-embedded-workbench makefile-ide simplicity-ide visual-studio-code"/>
     <properties key="toolchainCompatibility" value="gcc iar segger"/>
     <properties key="category" value="Zigbee Application"/>
@@ -351,8 +381,8 @@
     <properties key="solutionReferenceId" value="protocol.zigbee.app.ncp.sample-app.ncp-uart-hw.ncp-uart-hw.slcp"/>
     <properties key="projectFilePaths" value="app/ncp/sample-app/ncp-uart-hw/ncp-uart-hw.slcp"/>
     <properties key="readmeFiles" value="app/ncp/sample-app/ncp-uart-hw/readme.html"/>
-    <properties key="boardCompatibility" value="brd2601a brd2601b brd2703a brd4158a brd4159a brd4161a brd4162a brd4163a brd4164a brd4165b brd4166a brd4166c brd4167a brd4168a brd4170a brd4171a brd4172a brd4172b brd4173a brd4174a brd4174b brd4175a brd4176a brd4179b brd4180a brd4180b brd4181a brd4181b brd4181c brd4182a brd4183a brd4183c brd4186a brd4186b brd4186c brd4187a brd4187b brd4187c brd4188a brd4188b brd4190a brd4194a brd4195a brd4196a brd4197a brd4198a brd4304a brd4305d brd4305e brd4306c brd4306d brd4308a brd4308b brd4308c brd4308d brd4309a brd4309b brd4311b brd4316a brd4317a brd4318a brd4319a brd4329a com.silabs.board.none"/>
-    <properties key="partCompatibility" value=".*efr32mg12p.* .*efr32mg13p.* .*efr32mg21.* .*efr32mg22.* .*efr32mg24.* .*efr32mg27.* .*efr32mr21.* .*mgm12.* .*mgm13.* .*mgm21.* .*mgm22.* .*mgm24.*"/>
+    <properties key="boardCompatibility" value="brd2601a brd2601b brd2703a brd2704a brd4158a brd4159a brd4161a brd4162a brd4163a brd4164a brd4165b brd4166a brd4166c brd4167a brd4168a brd4170a brd4171a brd4172a brd4172b brd4173a brd4174a brd4174b brd4175a brd4176a brd4179b brd4180a brd4180b brd4181a brd4181b brd4181c brd4182a brd4183a brd4183c brd4186a brd4186b brd4186c brd4187a brd4187b brd4187c brd4188a brd4188b brd4190a brd4194a brd4195a brd4196a brd4197a brd4198a brd4304a brd4305d brd4305e brd4306c brd4306d brd4308a brd4308b brd4308c brd4308d brd4309a brd4309b brd4311b brd4316a brd4317a brd4318a brd4319a brd4329a com.silabs.board.none"/>
+    <properties key="partCompatibility" value=".*efr32mg1[23]p.* .*efr32mg2[1247].* .*efr32mr21.* .*mgm1[23].* .*mgm2[124].* .*rm21.*"/>
     <properties key="ideCompatibility" value="iar-embedded-workbench makefile-ide simplicity-ide visual-studio-code"/>
     <properties key="toolchainCompatibility" value="gcc iar segger"/>
     <properties key="category" value="Zigbee Application"/>
@@ -366,8 +396,8 @@
     <properties key="solutionReferenceId" value="protocol.zigbee.app.ncp.sample-app.xncp-led.xncp-led-ncp.slcp"/>
     <properties key="projectFilePaths" value="app/ncp/sample-app/xncp-led/xncp-led-ncp.slcp"/>
     <properties key="readmeFiles" value="app/ncp/sample-app/xncp-led/readme.html"/>
-    <properties key="boardCompatibility" value="brd2601a brd2601b brd2703a brd4158a brd4159a brd4161a brd4162a brd4163a brd4164a brd4165b brd4166a brd4166c brd4167a brd4168a brd4170a brd4171a brd4172a brd4172b brd4173a brd4174a brd4174b brd4175a brd4176a brd4179b brd4180a brd4180b brd4181a brd4181b brd4181c brd4182a brd4183a brd4183c brd4186a brd4186b brd4186c brd4187a brd4187b brd4187c brd4188a brd4188b brd4190a brd4194a brd4195a brd4196a brd4197a brd4198a brd4304a brd4305d brd4305e brd4306c brd4306d brd4308a brd4308b brd4308c brd4308d brd4309a brd4309b brd4311b brd4316a brd4317a brd4318a brd4319a brd4329a com.silabs.board.none"/>
-    <properties key="partCompatibility" value=".*efr32mg12p.* .*efr32mg13p.* .*efr32mg21.* .*efr32mg22.* .*efr32mg24.* .*efr32mg27.* .*efr32mr21.* .*mgm12.* .*mgm13.* .*mgm21.* .*mgm22.* .*mgm24.*"/>
+    <properties key="boardCompatibility" value="brd2601a brd2601b brd2703a brd2704a brd4158a brd4159a brd4161a brd4162a brd4163a brd4164a brd4165b brd4166a brd4166c brd4167a brd4168a brd4170a brd4171a brd4172a brd4172b brd4173a brd4174a brd4174b brd4175a brd4176a brd4179b brd4180a brd4180b brd4181a brd4181b brd4181c brd4182a brd4183a brd4183c brd4186a brd4186b brd4186c brd4187a brd4187b brd4187c brd4188a brd4188b brd4190a brd4194a brd4195a brd4196a brd4197a brd4198a brd4304a brd4305d brd4305e brd4306c brd4306d brd4308a brd4308b brd4308c brd4308d brd4309a brd4309b brd4311b brd4316a brd4317a brd4318a brd4319a brd4329a com.silabs.board.none"/>
+    <properties key="partCompatibility" value=".*efr32mg1[23]p.* .*efr32mg2[1247].* .*efr32mr21.* .*mgm1[23].* .*mgm2[124].* .*rm21.*"/>
     <properties key="ideCompatibility" value="iar-embedded-workbench makefile-ide simplicity-ide visual-studio-code"/>
     <properties key="toolchainCompatibility" value="gcc iar segger"/>
     <properties key="category" value="Zigbee Application"/>
@@ -383,7 +413,7 @@
     <properties key="readmeFiles" value="app/zigbeed/readme.html"/>
     <properties key="boardCompatibility" value="com.silabs.board.none"/>
     <properties key="partCompatibility" value=".*host.*"/>
-    <properties key="ideCompatibility" value="makefile-ide simplicity-ide visual-studio-code"/>
+    <properties key="ideCompatibility" value="makefile-ide simplicity-ide"/>
     <properties key="toolchainCompatibility" value="gcc"/>
     <properties key="category" value="Zigbee Host Application"/>
     <properties key="quality" value="PRODUCTION"/>

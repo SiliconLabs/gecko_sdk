@@ -1855,3 +1855,16 @@ static bool is_valid_date_64(sl_sleeptimer_date_t *date)
   return true;
 }
 #endif
+
+/*******************************************************************************
+ * @brief
+ *   Gets the precision (in PPM) of the sleeptimer's clock.
+ *
+ * @return
+ *   Clock accuracy, in PPM.
+ *
+ ******************************************************************************/
+uint16_t sl_sleeptimer_get_clock_accuracy(void)
+{
+  return sleeptimer_hal_get_clock_accuracy();
+}

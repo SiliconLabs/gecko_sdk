@@ -37,6 +37,8 @@ void sl_btctrl_hci_packet_step(void)
   if (false == sl_hci_is_cpc_connected()) {
     if (sl_hci_is_ep_free()) {
       sl_hci_cpc_init();
+      // Allow message transmission
+      hci_common_transport_transmit_reconnected();
     } else {
       return;
     }

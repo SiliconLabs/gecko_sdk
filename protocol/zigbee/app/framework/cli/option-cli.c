@@ -78,7 +78,7 @@ void optionBindingTablePrintCommand(sl_cli_command_arg_t *arguments)
   };
   uint8_t bindings = 0;
 
-  sl_zigbee_core_debug_print("#  type   nwk  loc   rem   clus   node   eui\n");
+  sl_zigbee_core_debug_println("#  type   nwk  loc   rem   clus   node   eui");
   for (i = 0; i < emberAfGetBindingTableSize(); i++) {
     EmberStatus status = emberGetBinding(i, &result);
     if (status == EMBER_SUCCESS) {
@@ -104,9 +104,9 @@ void optionBindingTablePrintCommand(sl_cli_command_arg_t *arguments)
     }
     emberAfAppFlush();
   }
-  sl_zigbee_core_debug_print("%d of %d bindings used\n",
-                             bindings,
-                             emberAfGetBindingTableSize());
+  sl_zigbee_core_debug_println("%d of %d bindings used",
+                               bindings,
+                               emberAfGetBindingTableSize());
 }
 
 // option binding-table clear
@@ -124,10 +124,10 @@ void optionPrintRxCommand(sl_cli_command_arg_t *arguments)
 
   if (command_first_character == 'e') {
     emberAfPrintReceivedMessages = true;
-    sl_zigbee_core_debug_print("enabled print\n");
+    sl_zigbee_core_debug_println("enabled print");
   } else {
     emberAfPrintReceivedMessages = false;
-    sl_zigbee_core_debug_print("disabled print\n");
+    sl_zigbee_core_debug_println("disabled print");
   }
 }
 

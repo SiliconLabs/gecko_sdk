@@ -111,6 +111,26 @@ static sl_sleeptimer_timer_handle_t mode_switch_timer;
 static RAIL_TxPowerConfig_t *txPowerConfigPtr = NULL;
 /// Radio power
 static RAIL_TxPower_t power = 140U;
+/// WiSUN FSK packet FCS is on/off
+static uint8_t fsk_fcs_type = 0U;
+/// WiSUN FSK packet whitening is on/off
+static uint8_t fsk_whitening = 1U;
+/// WiSUN OFDM, rate specifies the data rate of the payload and is equal to the numerical value of the MCS
+static uint8_t ofdm_rate = 0x00;
+// rate: 5 bits wide,
+//  The Rate field (RA4-RA0) specifies the data rate of the payload
+//  and is equal to the numerical value of the MCS
+// 0x0 BPSK, coding rate 1/2, 4 x frequency repetition
+// 0x1 BPSK, coding rate 1/2, 2 x frequency repetition
+// 0x2 QPSK, coding rate 1/2, 2 x frequency repetition
+// 0x3 QPSK, coding rate 1/2
+// 0x4 QPSK, coding rate 3/4
+// 0x5 16-QAM, coding rate 1/2
+// 0x6 16-QAM, coding rate 3/4
+/// WiSUN OFDM, the scrambler field specifies the scrambling seed
+static uint8_t ofdm_scrambler = 0x00;
+/// Enable to print extra information about the received or sent packets
+static bool print_packet_details = true;
 
 /// A configuration structure for IEEE 802.15.4 in RAIL.
 static const RAIL_IEEE802154_Config_t config = {
@@ -157,6 +177,102 @@ static void ms_timer_callback(sl_sleeptimer_timer_handle_t *handle, void *data);
 // -----------------------------------------------------------------------------
 //                          Public Function Definitions
 // -----------------------------------------------------------------------------
+/******************************************************************************
+ * This function gets the static fcs_type value.
+ *****************************************************************************/
+uint8_t get_fsk_fcs_type(void)
+{
+  return fsk_fcs_type;
+}
+
+/******************************************************************************
+ * This function sets the static fcs_type value.
+ *****************************************************************************/
+void set_fsk_fcs_type(uint8_t new_fsk_fcs_type)
+{
+  if (new_fsk_fcs_type < 2) {
+    fsk_fcs_type = new_fsk_fcs_type;
+  } else {
+    app_log_warning("Set FSK type: %d is higher then 0x01\n", new_fsk_fcs_type);
+  }
+}
+
+/******************************************************************************
+ * This function gets the static whitening value.
+ *****************************************************************************/
+uint8_t get_fsk_whitening(void)
+{
+  return fsk_whitening;
+}
+
+/******************************************************************************
+ * This function sets the static fsk_whitening value.
+ *****************************************************************************/
+void set_fsk_whitening(uint8_t new_fsk_whitening)
+{
+  if (new_fsk_whitening < 2) {
+    fsk_whitening = new_fsk_whitening;
+  } else {
+    app_log_warning("Set FSK whitening: %d is higher then 0x01\n", new_fsk_whitening);
+  }
+}
+
+/******************************************************************************
+ * This function gets the static rate value.
+ *****************************************************************************/
+uint8_t get_ofdm_rate(void)
+{
+  return ofdm_rate;
+}
+
+/******************************************************************************
+ * This function sets the static rate value.
+ *****************************************************************************/
+void set_ofdm_rate(uint8_t new_ofdm_rate)
+{
+  if (new_ofdm_rate < 7) {
+    ofdm_rate = new_ofdm_rate;
+    if (get_phy_modulation_from_channel(current_channel) == M_OFDM) {
+      ms_new_phy_mode_id = get_phy_mode_id_from_channel(current_channel);
+      ms_new_phy_mode_id = ms_new_phy_mode_id + ofdm_rate;
+    }
+  } else {
+    app_log_warning("Set OFDM rate: %d is higher then 0x06\n", new_ofdm_rate);
+  }
+}
+
+/******************************************************************************
+ * This function gets the static scrambler value.
+ *****************************************************************************/
+uint8_t get_ofdm_scrambler(void)
+{
+  return ofdm_scrambler;
+}
+
+/******************************************************************************
+ * This function sets the static scrambler value.
+ *****************************************************************************/
+void set_ofdm_scrambler(uint8_t new_ofdm_scrambler)
+{
+  ofdm_scrambler = new_ofdm_scrambler;
+}
+
+/******************************************************************************
+ * This function gets the static print_packet_details value.
+ *****************************************************************************/
+bool get_print_packet_details(void)
+{
+  return print_packet_details;
+}
+
+/******************************************************************************
+ * This function sets the static print_packet_details value.
+ *****************************************************************************/
+void set_print_packet_details(bool new_print_packet_details)
+{
+  print_packet_details = new_print_packet_details;
+}
+
 /******************************************************************************
  * This function calibrates the radio.
  *****************************************************************************/
@@ -362,6 +478,7 @@ void init_mode_switch(RAIL_Handle_t rail_handle)
 
   base_channel = channelConfigs[0]->configs[0].channelNumberStart;
   current_channel = base_channel;
+  set_new_phy_mode_id(radio_info.channel_list[0].phy_mode_id);
 
   RAIL_StartRx(rail_handle, current_channel, NULL);
 
@@ -460,10 +577,18 @@ void print_channel_list(void)
   app_log_info("Found %d channels\n",
                radio_info.mode_switch_capable_channels);
   for (uint8_t i = 0; i < radio_info.mode_switch_capable_channels; i++) {
-    app_log_info("  Ch number: %5d phyModeId: %3d modulation: %s\n",
-                 radio_info.channel_list[i].channel_number,
-                 radio_info.channel_list[i].phy_mode_id,
-                 phy_modulation_strings[(uint8_t)radio_info.channel_list[i].modulation]);
+    if (radio_info.channel_list[i].modulation == M_OFDM) {
+      app_log_info("  Ch number: %5d phyModeId: %3d modulation: %s rate: %1d\n",
+                   radio_info.channel_list[i].channel_number,
+                   radio_info.channel_list[i].phy_mode_id,
+                   phy_modulation_strings[(uint8_t)radio_info.channel_list[i].modulation],
+                   (radio_info.channel_list[i].phy_mode_id & 0x0F));
+    } else {
+      app_log_info("  Ch number: %5d phyModeId: %3d modulation: %s\n",
+                   radio_info.channel_list[i].channel_number,
+                   radio_info.channel_list[i].phy_mode_id,
+                   phy_modulation_strings[(uint8_t)radio_info.channel_list[i].modulation]);
+    }
   }
   app_log_info("NOTE: Although multiple channel configs may be available,\n"
                "      Config 0 is assumed for use.\n");
@@ -518,6 +643,9 @@ sl_status_t trig_mode_switch_tx(RAIL_Handle_t rail_handle)
 
   if (status == SL_STATUS_OK) {
     ms_state = MS_INITED;
+    if (radio_info.channel_list[i].modulation ==  M_OFDM) {
+      ofdm_rate = phy_mode_id & 0x0F;
+    }
   } else {
     ms_state = MS_IDLE;
   }
@@ -543,25 +671,26 @@ uint16_t unpack_packet(uint8_t *rx_destination,
 
   RAIL_CopyRxPacket(rx_destination, packet_information);
   if (modulation == M_2FSK) {
-    uint8_t fcsType = 0U;
-    uint8_t whitening = 0U;
     *start_of_payload
       = sl_flex_802154_packet_unpack_sunfsk_2byte_data_frame(packet_information,
-                                                             &fcsType,
-                                                             &whitening,
+                                                             &fsk_fcs_type,
+                                                             &fsk_whitening,
                                                              &payload_size,
                                                              rx_destination);
   } else if (modulation == M_OFDM) {
-    uint8_t rate = 0x00;
-    uint8_t scrambler = 0x00;
     *start_of_payload
       = sl_flex_802154_packet_unpack_ofdm_data_frame(packet_information,
-                                                     &rate,
-                                                     &scrambler,
+                                                     &ofdm_rate,
+                                                     &ofdm_scrambler,
                                                      &payload_size,
                                                      rx_destination);
   } else {
     app_log_warning("Unkown modulation\n");
+  }
+
+  ms_new_phy_mode_id = get_phy_mode_id_from_channel(current_channel);
+  if (modulation == M_OFDM) {
+    ms_new_phy_mode_id += ofdm_rate;
   }
 
   return payload_size;
@@ -590,29 +719,15 @@ void prepare_package(RAIL_Handle_t rail_handle,
     packet_size = MS_PACKET_LENGTH;
   } else {
     if (modulation == M_2FSK) {
-      uint8_t fcsType = 0U;
-      uint8_t whitening = 1U;
-      sl_flex_802154_packet_pack_sunfsk_2bytes_data_frame(fcsType,
-                                                          whitening,
+      sl_flex_802154_packet_pack_sunfsk_2bytes_data_frame(fsk_fcs_type,
+                                                          fsk_whitening,
                                                           length,
                                                           out_data,
                                                           &packet_size,
                                                           tx_frame_buffer);
     } else if (modulation == M_OFDM) {
-      // rate: 5 bits wide,
-      //  The Rate field (RA4-RA0) specifies the data rate of the payload
-      //  and is equal to the numerical value of the MCS
-      // 0x0 BPSK, coding rate 1/2, 4 x frequency repetition
-      // 0x1 BPSK, coding rate 1/2, 2 x frequency repetition
-      // 0x2 QPSK, coding rate 1/2, 2 x frequency repetition
-      // 0x3 QPSK, coding rate 1/2
-      // 0x4 QPSK, coding rate 3/4
-      // 0x5 16-QAM, coding rate 1/2
-      // 0x6 16-QAM, coding rate 3/4
-      uint8_t rate = 0x00;
-      uint8_t scrambler = 0;
-      sl_flex_802154_packet_pack_ofdm_data_frame(rate,
-                                                 scrambler,
+      sl_flex_802154_packet_pack_ofdm_data_frame(ofdm_rate,
+                                                 ofdm_scrambler,
                                                  length,
                                                  out_data,
                                                  &packet_size,
@@ -735,11 +850,11 @@ sl_status_t set_new_phy_mode_id(const uint8_t new_phy_mode_id)
 }
 
 /******************************************************************************
- * API to get the currently usd phy mode id.
+ * API to get the currently used phy mode id.
  *****************************************************************************/
 uint8_t get_phy_mode_id(void)
 {
-  uint8_t phy_mode_id = get_phy_mode_id_from_channel(current_channel);
+  uint8_t phy_mode_id = ms_new_phy_mode_id;
 
   return phy_mode_id;
 }
@@ -771,6 +886,11 @@ RAIL_Status_t set_channel(const uint16_t new_channel)
   if (status == RAIL_STATUS_NO_ERROR) {
     current_channel = new_channel;
     app_log_info("Channel is set to %d\n", current_channel);
+  }
+
+  ms_new_phy_mode_id = get_phy_mode_id_from_channel(current_channel);
+  if (get_phy_modulation_from_channel(current_channel) == M_OFDM) {
+    ms_new_phy_mode_id = ms_new_phy_mode_id + ofdm_rate;
   }
 
   return status;
@@ -830,6 +950,7 @@ RAIL_Status_t return_to_base_channel(void)
   if (status == RAIL_STATUS_NO_ERROR) {
     ms_state = MS_IDLE;
   }
+  ms_new_phy_mode_id = get_phy_mode_id_from_channel(current_channel);
 
   return status;
 }

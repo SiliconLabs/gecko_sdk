@@ -1,0 +1,43 @@
+!!omap
+- id: brd2704a
+- label: BRD2704A
+- package: platform
+- description: Board support for BRD2704A.
+- category: Platform|Board|Starter Kit
+- quality: production
+- requires:
+  - name: mgm240pb32vna
+  - name: brd2704a_config
+- provides:
+  - name: brd2704a
+  - name: hardware_board
+  - name: hardware_board_stk
+  - name: hardware_board_from_stk
+  - name: hardware_board_has_vcom
+  - name: hardware_board_supports_rf_band_2400
+  - name: hardware_board_supports_1_rf_band
+  - name: hardware_board_default_rf_band
+  - name: hardware_board_default_rf_band_2400
+- recommends:
+  - id: iostream_eusart
+    instance:
+    - vcom
+  - id: bootloader_uart_driver
+  - id: simple_led
+    instance:
+    - led0
+- template_contribution: []
+- define:
+  - name: SL_BOARD_NAME
+    value: '"BRD2704A"'
+  - name: SL_BOARD_REV
+    value: '"A00"'
+- tag:
+  - board:pn:BRD2704
+  - board:variant:A
+  - board:revision:A00
+  - board:device:mgm240pb32vna
+  - hardware:has:vcom
+  - hardware:has:pti
+  - hardware:has:led:1
+  - hardware:has:button:0

@@ -69,9 +69,14 @@ void emberAfPluginAddressTableNcpInitCallback(bool memoryAllocation)
   // stored in RAM). We re-add all the non-empty entries at the NCP.
   for (index = 0; index < EMBER_AF_PLUGIN_ADDRESS_TABLE_SIZE; index++) {
     if (MEMCOMPARE(addressTable[index], freeEui, EUI64_SIZE) != 0) {
-      if (emberSetAddressTableRemoteEui64(index, addressTable[index])
-          != EMBER_SUCCESS) {
-        assert(0);  // We expect the host and the NCP table to always match, so
+      EmberStatus status = emberSetAddressTableRemoteEui64(index, addressTable[index]);
+      if (status != EMBER_SUCCESS) {
+      #ifdef EZSP_HOST
+        ezspErrorHandler(status);
+        return;
+      #else // !EZSP_HOST
+        assert(0);
+      #endif //EZSP_HOST
       }
       // we should always be able to add an entry at the NCP here.
     }

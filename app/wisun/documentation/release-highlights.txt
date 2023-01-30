@@ -1,13 +1,4 @@
-Wi-SUN SDK 1.4.0.0
-- Wi-SUN Stack
-  - Added minimal support for FAN1.1 LFN (Limited Functional Node), including an API to configure the device role, and a new st of libraries supporting both LFN and FFN device types
-  - Added support for FAN 1.1 PHY mode switch 
-  - Added support for FSK FEC
-  - Added support for EFR32FG25 - it supports all FAN1.1 OFDM  modulation schemes and all FAN1.0 FSK configurations
-  - Added support for EFF01
-- Wi-SUN Applications
-  - Added support for EFR32FG25
-  - Added FAN 1.1 PHY support (settings and CLI)
-  - Added a CoAP Advanced Resource Handler
-  - Added support for iPerf multicast
-  - Added support for CPC in Wi-SUN RCP
+Wi-SUN SDK 1.5.0.0
+- EFR32FG25 launch support
+- Enhancements to the Border Router RCP
+- Other targeted improvements and bug fixes

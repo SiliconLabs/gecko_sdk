@@ -87,7 +87,7 @@ const RPC::Command RPC::sCommands[] = {
     {"help-crpc", otCRPCProcessHelp},
 };
 
-char     RPC::mStaticOutputBuffer[RPC::kMaxStaticOutputBufferSize];
+char RPC::mStaticOutputBuffer[RPC::kMaxStaticOutputBufferSize];
 
 #else
 
@@ -134,8 +134,7 @@ void RPC::Initialize(Instance &aInstance)
                                     RPC::sRPC->mCachedCommandsBuffer, sizeof(RPC::sRPC->mCachedCommandsBuffer)));
 
     // Parse response string into mCachedCommands to make it iterable
-    SuccessOrExit(Utils::CmdLineParser::ParseCmd(RPC::sRPC->mCachedCommandsBuffer,
-                                                 RPC::sRPC->mCachedCommands,
+    SuccessOrExit(Utils::CmdLineParser::ParseCmd(RPC::sRPC->mCachedCommandsBuffer, RPC::sRPC->mCachedCommands,
                                                  OT_ARRAY_LENGTH(RPC::sRPC->mCachedCommands)));
 
     // Get the number of supported commands
@@ -157,7 +156,7 @@ void RPC::ProcessLine(const char *aString, char *aOutput, size_t aOutputMaxLen)
     strcpy(temp_command_buffer, aString);
     argCount = kMaxArgs;
     // Parse the argCount and arguments
-    error    = ParseCmd(temp_command_buffer, argCount, args);
+    error = ParseCmd(temp_command_buffer, argCount, args);
 
 exit:
 
@@ -261,7 +260,6 @@ Error RPC::HandleCommand(void *        aContext,
                          uint8_t       aCommandsLength,
                          const Command aCommands[])
 {
-
     return otCRPCHandleCommand(aContext, aArgsLength, aArgs, aCommandsLength, aCommands);
 }
 
@@ -313,7 +311,7 @@ void RPC::OutputFormat(uint8_t aIndentSize, const char *aFormat, ...)
 
 int RPC::OutputFormatV(const char *aFormat, va_list aArguments)
 {
-    int rval = 0;
+    int rval      = 0;
     int remaining = mOutputBufferMaxLen - mOutputBufferCount;
 
     VerifyOrExit(mOutputBuffer && (remaining > 0));
@@ -326,7 +324,8 @@ int RPC::OutputFormatV(const char *aFormat, va_list aArguments)
         //       It does NOT return the actual number of bytes written.
         //
         //       Because of this, we need to set mOutputBufferCount to a maximum value of mOutputBufferMaxLen
-        if (mOutputBufferCount > mOutputBufferMaxLen) {
+        if (mOutputBufferCount > mOutputBufferMaxLen)
+        {
             mOutputBufferCount = mOutputBufferMaxLen;
         }
     }
@@ -399,7 +398,7 @@ Error RPC::ProcessHelp(void *aContext, uint8_t aArgsLength, char *aArgs[])
 
     OutputCommands(sCommands, OT_ARRAY_LENGTH(sCommands));
     OutputCommands(mUserCommands, mUserCommandsLength);
-    
+
     return kErrorNone;
 }
 

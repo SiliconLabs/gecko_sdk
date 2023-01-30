@@ -35,14 +35,15 @@
 // <<< sl:start pin_tool >>>
 // <gpio> SL_EZSPSPI_HOST_INT
 // $[GPIO_SL_EZSPSPI_HOST_INT]
-#define SL_EZSPSPI_HOST_INT_PORT             gpioPortD
-#define SL_EZSPSPI_HOST_INT_PIN              10
+#warning "EZSP GPIO activation port not configured"
+//#define SL_EZSPSPI_HOST_INT_PORT             gpioPortD
+//#define SL_EZSPSPI_HOST_INT_PIN              10
 // [GPIO_SL_EZSPSPI_HOST_INT]$
 
 // <gpio> SL_EZSPSPI_WAKE_INT
 // $[GPIO_SL_EZSPSPI_WAKE_INT]
-#define SL_EZSPSPI_WAKE_INT_PORT               gpioPortD
-#define SL_EZSPSPI_WAKE_INT_PIN                8
+//#define SL_EZSPSPI_WAKE_INT_PORT               gpioPortD
+//#define SL_EZSPSPI_WAKE_INT_PIN                8
 // [GPIO_SL_EZSPSPI_WAKE_INT]$
 
 // <<< sl:end pin_tool >>>

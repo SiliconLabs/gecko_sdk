@@ -34,7 +34,7 @@
  * @return The node ID of the child or ::EMBER_NULL_NODE_ID if there isn't a
  *         child at the childIndex specified.
  */
-EmberNodeId emberChildId(uint8_t childIndex);
+#define emberChildId(childIndex) sl_mac_child_short_id(childIndex)
 
 /** @brief Return radio power value of the child from the given
  * childIndex.
@@ -59,7 +59,7 @@ void emberSetChildPower(uint8_t childIndex, int8_t newPower);
  *
  * @return The child index or 0xFF if the node ID does not belong to a child.
  */
-uint8_t emberChildIndex(EmberNodeId childId);
+#define emberChildIndex(childId) sl_mac_child_index(childId)
 
 /** @brief Get the EUI64 and node type of the child at the provided index.
  * If there is no child at 'index', it returns ::EMBER_NOT_JOINED.

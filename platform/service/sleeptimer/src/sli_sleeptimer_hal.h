@@ -117,6 +117,13 @@ void sleeptimer_hal_disable_int(uint8_t local_flag);
 void sleeptimer_hal_set_int(uint8_t local_flag);
 
 /*******************************************************************************
+ * Hardware Abstraction Layer to get the sleeptimer's clock accuracy.
+ *
+ * @return Clock accuracy in PPM.
+ ******************************************************************************/
+uint16_t sleeptimer_hal_get_clock_accuracy(void);
+
+/*******************************************************************************
  * Process the timer interrupt.
  *
  * @param flags Internal interrupt flag.

@@ -601,17 +601,15 @@ static void hci_3wire_rx_complete(void)
       hci_3wire.ack_pending = false;
     }
     if (hci_3wire.ack_pending) {
-      // (Re)start acknowledge timeout after successfully receiving a reliable
-      // packet. If the timer was already running it means that the sliding
-      // window is bigger than 1 and the timeout restarts. If the (re)start
-      // operation fails and the peer doesn't get the ack, it retransmits the
-      // packet. Therefore, the return status can be ignored.
-      (void)sl_sleeptimer_restart_timer_ms(&hci_3wire.ack_timer,
-                                           ACK_TIMEOUT_MS,
-                                           ack_timeout,
-                                           NULL,
-                                           0,
-                                           0);
+      // Start acknowledge timeout after successfully receiving a reliable
+      // packet. If the start operation fails and the peer doesn't get the ack,
+      // it retransmits the packet. Therefore, the return status can be ignored.
+      (void)sl_sleeptimer_start_timer_ms(&hci_3wire.ack_timer,
+                                         ACK_TIMEOUT_MS,
+                                         ack_timeout,
+                                         NULL,
+                                         0,
+                                         0);
     }
   }
   hci_3wire_rx_reset();

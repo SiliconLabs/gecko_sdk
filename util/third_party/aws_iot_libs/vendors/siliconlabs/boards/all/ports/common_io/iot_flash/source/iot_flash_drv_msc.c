@@ -54,7 +54,7 @@
 
 /* flash memory base address */
 #ifndef IOT_FLASH_DRV_MSC_MEMORY_BASE
-#define IOT_FLASH_DRV_MSC_MEMORY_BASE   0x00000000UL
+#define IOT_FLASH_DRV_MSC_MEMORY_BASE   FLASH_BASE
 #endif
 
 /* flash memory total size */
@@ -288,6 +288,19 @@ sl_status_t iot_flash_drv_msc_driver_deinit(void *pvHndl)
 {
   /* unused parameter */
   (void) pvHndl;
+
+  /* done */
+  return SL_STATUS_OK;
+}
+
+/*******************************************************************************
+ *                   iot_flash_drv_msc_get_flash_base()
+ ******************************************************************************/
+
+sl_status_t iot_flash_drv_msc_get_flash_base(uint32_t *ulFlashBase)
+{
+  /* return flash base address */
+  *ulFlashBase =  IOT_FLASH_DRV_MSC_MEMORY_BASE;
 
   /* done */
   return SL_STATUS_OK;

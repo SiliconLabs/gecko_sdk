@@ -65,11 +65,6 @@
   - override:
       component: iostream_usart
       file_id: iostream_usart_config
-      instance: vcom
-    path: brd2201b/sl_iostream_usart_vcom_config.h
-  - override:
-      component: iostream_usart
-      file_id: iostream_usart_config
       instance: exp
     path: brd2201b/sl_iostream_usart_exp_config.h
   - override:

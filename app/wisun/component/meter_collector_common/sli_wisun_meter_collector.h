@@ -163,7 +163,7 @@ typedef struct sl_wisun_meter_packet {
   uint16_t light;
 } sl_wisun_meter_packet_t;
 
-#pragma pack(1)
+SL_PACK_START(1)
 /// Packed meter packet structure for byte stream conversion
 typedef struct sl_wisun_meter_packet_packed {
   /// ID
@@ -175,7 +175,7 @@ typedef struct sl_wisun_meter_packet_packed {
   /// Light       [Lux]
   uint16_t light;
 } sl_wisun_meter_packet_packed_t;
-#pragma pack()
+SL_PACK_END()
 
 // -----------------------------------------------------------------------------
 //                                Global Variables

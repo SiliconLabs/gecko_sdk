@@ -64,12 +64,23 @@
  */
 EmberStatus emberAfSetFormAndJoinChannelMask(uint8_t page, uint32_t mask);
 
-/** @brief Return the channel mask for a given page.
+/** @brief Return the preferred channel mask for a given page.
  * Only the bottom 27 bits can be set. The top 5 bits are reserved for the page
  * number and are always zero in a returned channel mask. That leaves the value
  * 0xFFFFFFFF free to indicate an invalid page error.
  */
-uint32_t emberAfGetFormAndJoinChannelMask(uint8_t page);
+#define emberAfGetFormAndJoinChannelMask(page) emberAfFormAndJoinGetChannelMask(page, false);
+
+/** @brief Return All or preferred channel mask for a given page.
+ *
+ * Only the bottom 27 bits can be set. The top 5 bits are reserved for the page
+ * number and are always zero in a returned channel mask. That leaves the value
+ * 0xFFFFFFFF free to indicate an invalid page error.
+ *
+ * @param page The page to retrieve channel mask
+ * @param allChannels All or preferred channel mask
+ */
+uint32_t emberAfFormAndJoinGetChannelMask(uint8_t page, bool allChannels);
 
 /** @brief Set the search mode for "find unused" and "find joinable".
  * Mode is a bitmask. Permitted values are set by the FIND_AND_JOIN_MODE_...

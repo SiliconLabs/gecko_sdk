@@ -112,6 +112,7 @@ static void messageSentCommandHandler(uint8_t *callbackParams)
                                          &message.length,
                                          message.payload,
                                          &message.length,
+                                         127,
                                          &message.ackRssi,
                                          &message.timestamp);
 
@@ -149,6 +150,7 @@ static void incomingMessageCommandHandler(uint8_t *callbackParams)
                                          &message.length,
                                          message.payload,
                                          &message.length,
+                                         127,
                                          &message.timestamp,
                                          &message.lqi);
 
@@ -193,10 +195,12 @@ static void incomingMacMessageCommandHandler(uint8_t *callbackParams)
                                          &message.macFrame.srcAddress.addr.shortAddress,
                                          message.macFrame.srcAddress.addr.longAddress,
                                          &eui64Size,
+                                         EUI64_SIZE,
                                          &message.macFrame.srcAddress.mode,
                                          &message.macFrame.dstAddress.addr.shortAddress,
                                          message.macFrame.dstAddress.addr.longAddress,
                                          &eui64Size,
+                                         EUI64_SIZE,
                                          &message.macFrame.dstAddress.mode,
                                          &message.macFrame.srcPanId,
                                          &message.macFrame.dstPanId,
@@ -208,6 +212,7 @@ static void incomingMacMessageCommandHandler(uint8_t *callbackParams)
                                          &message.length,
                                          message.payload,
                                          &message.length,
+                                         127,
                                          &message.timestamp);
 
   emberAfIncomingMacMessageCallback(&message);
@@ -255,10 +260,12 @@ static void macMessageSentCommandHandler(uint8_t *callbackParams)
                                          &message.macFrame.srcAddress.addr.shortAddress,
                                          message.macFrame.srcAddress.addr.longAddress,
                                          &eui64Size,
+                                         EUI64_SIZE,
                                          &message.macFrame.srcAddress.mode,
                                          &message.macFrame.dstAddress.addr.shortAddress,
                                          message.macFrame.dstAddress.addr.longAddress,
                                          &eui64Size,
+                                         EUI64_SIZE,
                                          &message.macFrame.dstAddress.mode,
                                          &message.macFrame.srcPanId,
                                          &message.macFrame.dstPanId,
@@ -269,6 +276,7 @@ static void macMessageSentCommandHandler(uint8_t *callbackParams)
                                          &message.length,
                                          message.payload,
                                          &message.length,
+                                         127,
                                          &message.ackRssi,
                                          &message.timestamp);
 
@@ -320,15 +328,18 @@ static void incomingBeaconCommandHandler(uint8_t *callbackParams)
                                          &source.addr.shortAddress,
                                          source.addr.longAddress,
                                          &eui64Size,
+                                         EUI64_SIZE,
                                          &source.mode,
                                          &rssi,
                                          &permitJoining,
                                          &beaconFieldsLength,
                                          beaconFields,
                                          &beaconFieldsLength,
+                                         EMBER_MAC_MAX_BEACON_FIELDS_LENGTH,
                                          &beaconPayloadLength,
                                          beaconPayload,
-                                         &beaconPayloadLength);
+                                         &beaconPayloadLength,
+                                         EMBER_MAC_MAX_APP_BEACON_PAYLOAD_LENGTH);
 
   emberAfIncomingBeaconCallback(panId,
                                 &source,

@@ -45,6 +45,8 @@ template_contribution:
       help: "Connect to a Wi-SUN network using FAN1.0 settings"
       shortcuts:
         - name: "j10"
+    condition:
+      - "sl_wisun_app_core"
 
   - name: "cli_command"
     value:
@@ -54,6 +56,8 @@ template_contribution:
       help: "Connect to a Wi-SUN network using FAN1.1 settings"
       shortcuts:
         - name: "j11"
+    condition:
+      - "sl_wisun_app_core"
 
   - name: "cli_command"
     value:
@@ -63,7 +67,9 @@ template_contribution:
       help: "Connect to a Wi-SUN network using explicit PHY settings"
       shortcuts:
         - name: "je"
-    condition: [wisun_full_radioconf]
+    condition: 
+      - "wisun_full_radioconf"
+      - "sl_wisun_app_core"
 
   - name: "cli_command"
     value:
@@ -73,6 +79,8 @@ template_contribution:
       help: "Disconnect from the Wi-SUN network"
       shortcuts:
         - name: "d"
+    condition:
+      - "sl_wisun_app_core"
 
   - name: "cli_command"
     value:
@@ -81,5 +89,7 @@ template_contribution:
       help: "Get info about the running app"
       shortcuts:
         - name: "a"
+    condition:
+      - "app_project_info"
 
 

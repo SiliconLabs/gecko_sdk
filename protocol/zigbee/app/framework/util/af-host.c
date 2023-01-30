@@ -372,7 +372,14 @@ EzspStatus emberAfSetEzspConfigValue(EzspConfigId configId,
                                      uint16_t value,
                                      const char * configIdName)
 {
-  EzspStatus ezspStatus = ezspSetConfigurationValue(configId, value);
+  uint16_t old_value;
+  // Some configuration values cannot be written past a certain point
+  // Check to see if the old config value is the same as the new so it doesnt
+  // print a bunch of errors when the host is restarted without the NCP undergoing a reset
+  EzspStatus ezspStatus = ezspGetConfigurationValue(configId, &old_value);
+  if (ezspStatus == EZSP_SUCCESS && old_value != value ) {
+    ezspStatus = ezspSetConfigurationValue(configId, value);
+  }
   emberAfAppFlush();
   emberAfAppPrint("Ezsp Config: set %p to 0x%2x:", configIdName, value);
 
@@ -618,7 +625,16 @@ void emAfResetAndInitNCP(void)
 
   // create endpoints
   for ( ep = 0; ep < emberAfEndpointCount(); ep++ ) {
-    createEndpoint(ep);
+    EzspEndpointFlags flags;
+    uint8_t endpoint = emberAfEndpointFromIndex(ep);;
+
+    // check to see if ezspAddEndpoint needs to be called
+    // if ezspInit is called without NCP reset, ezspAddEndpoint is not necessary and will return an error
+    if ( ezspGetEndpointFlags(endpoint, &flags) != EZSP_SUCCESS ) {
+      createEndpoint(ep);
+    } else {
+      emberAfAppPrintln("Ezsp Endpoint %d previously added", endpoint);
+    }
   }
 
   MEMSET(cachedConfigIdValues, 0xFF, ((EZSP_CONFIG_ID_MAX + 1) * sizeof(uint16_t)));
@@ -635,7 +651,11 @@ void emAfResetAndInitNCP(void)
   emberAfGreenPowerServerSinkTableInit();
 #endif // SL_CATALOG_ZIGBEE_GREEN_POWER_SERVER_PRESENT
 }
-
+#ifdef EZSP_CPC
+extern bool in_ncp_reset(void);
+#else
+#define in_ncp_reset() false
+#endif
 void emAfHostFrameworkTick(void)
 {
   do {
@@ -649,7 +669,7 @@ void emAfHostFrameworkTick(void)
     }
 
     // check if we have hit an EZSP Error and need to reset and init the NCP
-    if (ncpNeedsResetAndInit) {
+    if (ncpNeedsResetAndInit || in_ncp_reset() ) {
       ncpNeedsResetAndInit = false;
       // re-initialize the NCP
       emAfResetAndInitNCP();

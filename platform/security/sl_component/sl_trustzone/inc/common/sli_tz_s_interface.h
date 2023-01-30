@@ -71,9 +71,9 @@ int32_t sli_tz_s_interface_dispatch_its(psa_invec in_vec[],
                                         size_t out_len);
 
 SLI_TZ_CMSE_NONSECURE_ENTRY
-int32_t sli_tz_s_interface_dispatch_se_manager(psa_invec in_vec[],
+int32_t sli_tz_s_interface_dispatch_se_manager(sli_tz_invec in_vec[],
                                                size_t in_len,
-                                               psa_outvec out_vec[],
+                                               sli_tz_outvec out_vec[],
                                                size_t out_len);
 
 SLI_TZ_CMSE_NONSECURE_ENTRY

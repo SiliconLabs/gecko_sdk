@@ -384,13 +384,12 @@ sl_status_t sl_cli_instance_init(sl_cli_handle_t handle,
   handle->start_delay_tick = ((uint64_t)osKernelGetTickFreq() * parameters->start_delay_ms) / 1000;
   handle->loop_delay_tick = ((uint64_t)osKernelGetTickFreq() * parameters->loop_delay_ms) / 1000;
   status = create_task(handle, parameters);
-#else
-  handle->input_char = EOF;
-#endif
-
   if (status != SL_STATUS_OK) {
     return status;
   }
+#else
+  handle->input_char = EOF;
+#endif
 
   status = sli_cli_session_init(handle);
   if (status != SL_STATUS_OK) {

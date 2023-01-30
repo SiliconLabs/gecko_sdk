@@ -121,7 +121,8 @@ EmberStatus emberGetExtendedSecurityBitmask(EmberExtendedSecurityBitmask* mask);
    | EMBER_REQUIRE_ENCRYPTED_KEY)
 
 /** @brief Get the security state that is used by a device joined
- *  into the Network.
+ *  into the Network. We can still get current security state by calling this
+ *  function and the return value can be EMBER_NOT_JOINED or EMBER_SUCCESS.
  *
  * @param state A pointer to an ::EmberCurrentSecurityState value into which
  * the security configuration will be copied.

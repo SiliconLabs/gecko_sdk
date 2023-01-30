@@ -122,7 +122,8 @@ static void GetSecurityKeyCommandHandler(void)
   uint8_t emberEncryptionKeySize = EMBER_ENCRYPTION_KEY_SIZE;
   emAfPluginCmsisRtosFetchApiParams("b",
                                     &key.contents,
-                                    &emberEncryptionKeySize);
+                                    &emberEncryptionKeySize,
+                                    EMBER_ENCRYPTION_KEY_SIZE);
   EmberStatus status = emApiGetSecurityKey(&key);
   emAfPluginCmsisRtosSendResponse(EMBER_GET_SECURITY_KEY_IPC_COMMAND_ID,
                                   "ub",
@@ -453,6 +454,7 @@ static void macGetParentAddressCommandHandler(void)
                                     &parentAddress.addr.shortAddress,
                                     &parentAddress.addr.longAddress,
                                     &eui64Size,
+                                    EUI64_SIZE,
                                     &parentAddress.mode);
   EmberStatus status = emApiMacGetParentAddress(&parentAddress);
   emAfPluginCmsisRtosSendResponse(EMBER_MAC_GET_PARENT_ADDRESS_IPC_COMMAND_ID,
@@ -820,6 +822,7 @@ static void setPollDestinationAddressCommandHandler(void)
                                     &destination.addr.shortAddress,
                                     &destination.addr.longAddress,
                                     &eui64Size,
+                                    EUI64_SIZE,
                                     &destination.mode);
   EmberStatus status = emApiSetPollDestinationAddress(&destination);
   emAfPluginCmsisRtosSendResponse(EMBER_SET_POLL_DESTINATION_ADDRESS_IPC_COMMAND_ID,
@@ -852,6 +855,7 @@ static void removeChildCommandHandler(void)
                                     &address.addr.shortAddress,
                                     &address.addr.longAddress,
                                     &eui64Size,
+                                    EUI64_SIZE,
                                     &address.mode);
   EmberStatus status = emApiRemoveChild(&address);
   emAfPluginCmsisRtosSendResponse(EMBER_REMOVE_CHILD_IPC_COMMAND_ID,
@@ -888,6 +892,7 @@ static void getChildFlagsCommandHandler(void)
                                     &address.addr.shortAddress,
                                     &address.addr.longAddress,
                                     &eui64Size,
+                                    EUI64_SIZE,
                                     &address.mode);
   EmberStatus status = emApiGetChildFlags(&address,
                                           &flags);
@@ -934,6 +939,7 @@ static void getChildInfoCommandHandler(void)
                                     &address.addr.shortAddress,
                                     &address.addr.longAddress,
                                     &eui64Size,
+                                    EUI64_SIZE,
                                     &address.mode);
   EmberStatus status = emApiGetChildInfo(&address,
                                          &addressResp,

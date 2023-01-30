@@ -37,6 +37,8 @@ requires:
     condition: [freertos]
   - name: "rail_util_eff"
     condition: [hardware_board_has_eff]
+  - name: "sl_wisun_app_cli"
+    condition: [sl_wisun_app_setting]
 source:
   - path: "app.c"
   - path: "app_init.c"

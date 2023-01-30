@@ -261,10 +261,10 @@
 #define  GRXSTSx_PKTSTS_SETUP_COMPL    _USB_GRXSTSR_PKTSTS_SETUPCOMPL
 #define  GRXSTSx_PKTSTS_SETUP_RX       _USB_GRXSTSR_PKTSTS_SETUPRCV
 #define  GRXSTSx_PKTSTS_MASK           _USB_GRXSTSR_PKTSTS_MASK
-#define  GRXSTSx_EPNUM_MASK            _USB_GRXSTSR_CHNUM_MASK 
+#define  GRXSTSx_EPNUM_MASK            _USB_GRXSTSR_CHNUM_MASK
 #define  GRXSTSx_BCNT_MASK             _USB_GRXSTSR_BCNT_MASK
 #elif defined(_SILICON_LABS_32B_SERIES_2)
-#define  GRXSTSx_PKTSTS_OUT_NAK        0x00000001UL 
+#define  GRXSTSx_PKTSTS_OUT_NAK        0x00000001UL
 #define  GRXSTSx_PKTSTS_OUT_RX         0x00000002UL
 #define  GRXSTSx_PKTSTS_OUT_COMPL      0x00000003UL
 #define  GRXSTSx_PKTSTS_SETUP_COMPL    0x00000004UL
@@ -532,7 +532,7 @@ sl_status_t sli_usbd_driver_init(void)
 #if defined(USBC_MEM_BASE)
   // GG
   CMU->HFCORECLKEN0 |= CMU_HFCORECLKEN0_USB | CMU_HFCORECLKEN0_USBC;
-  CMU_ClockSelectSet(cmuClock_USBC, cmuSelect_HFCLK);
+  CMU_CLOCK_SELECT_SET(USBC, HFCLK);
 #else
   // GG11
   {
@@ -540,16 +540,16 @@ sl_status_t sli_usbd_driver_init(void)
 
     // Configure high frequency used by USB
     CMU_USHFRCOBandSet(cmuUSHFRCOFreq_48M0Hz);
-    CMU_ClockSelectSet(cmuClock_USBR, cmuSelect_USHFRCO);
+    CMU_CLOCK_SELECT_SET(USBR, USHFRCO);
     CMU_ClockEnable(cmuClock_USBR, true);
 
     // Configure low frequency used by the USB LEM feature
 #if defined(BSP_LF_CLK_SEL) && (BSP_LF_CLK_SEL == BSP_LF_CLK_LFXO)
-    CMU_ClockSelectSet(cmuClock_USBLE, cmuSelect_LFXO);
+    CMU_CLOCK_SELECT_SET(LFC, LFXO);
 #elif defined(BSP_LF_CLK_SEL) && (BSP_LF_CLK_SEL == BSP_LF_CLK_ULFRCO)
-    CMU_ClockSelectSet(cmuClock_USBLE, cmuSelect_ULFRCO);
+    CMU_CLOCK_SELECT_SET(LFC, ULFRCO);
 #else
-    CMU_ClockSelectSet(cmuClock_USBLE, cmuSelect_LFRCO);
+    CMU_CLOCK_SELECT_SET(LFC, LFRCO);
 #endif
     CMU_ClockEnable(cmuClock_USBLE, true);
 

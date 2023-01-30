@@ -114,13 +114,13 @@ typedef struct _display_hnd {
  * @brief Mutex acquire
  * @details Helper function
  *****************************************************************************/
-static inline void _display_mutex_acquire(void);
+__STATIC_INLINE void _display_mutex_acquire(void);
 
 /**************************************************************************//**
  * @brief Mutex release
  * @details Helper function
  *****************************************************************************/
-static inline void _display_mutex_release(void);
+__STATIC_INLINE void _display_mutex_release(void);
 
 /**************************************************************************//**
  * @brief Display renderer task
@@ -463,13 +463,13 @@ void sl_display_renderer(sl_renderer_callback_t callback, sl_renderer_callback_a
 
 #if defined(SL_CATALOG_KERNEL_PRESENT)
 /* Mutex acquire */
-static inline void _display_mutex_acquire(void)
+__STATIC_INLINE void _display_mutex_acquire(void)
 {
   assert(osMutexAcquire(_display_mtx, osWaitForever) == osOK);
 }
 
 /* Mutex release */
-static inline void _display_mutex_release(void)
+__STATIC_INLINE void _display_mutex_release(void)
 {
   assert(osMutexRelease(_display_mtx) == osOK);
 }

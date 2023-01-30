@@ -86,7 +86,9 @@
 #include "sl_rail_util_ieee802154_phy_select.h"
 #endif // #ifdef SL_CATALOG_RAIL_UTIL_IEEE802154_PHY_SELECT_PRESENT
 
+#ifdef SL_CATALOG_OT_RCP_GP_INTERFACE_PRESENT
 #include "sl_rcp_gp_interface.h"
+#endif
 //------------------------------------------------------------------------------
 // Enums, macros and static variables
 
@@ -281,6 +283,24 @@ RAIL_Handle_t gRailHandle;
 RAIL_Handle_t emPhyRailHandle;
 #endif //SL_CATALOG_RAIL_MULTIPLEXER_PRESENT
 
+static const RAIL_StateTiming_t cTimings = {
+    100,      // timings.idleToRx
+    192 - 10, // timings.txToRx
+    100,      // timings.idleToTx
+#if OPENTHREAD_CONFIG_THREAD_VERSION >= OT_THREAD_VERSION_1_2
+    256,      // timings.rxToTx - accommodate enhanced ACKs
+#else
+    192,      // timings.rxToTx
+#endif
+    0,        // timings.rxSearchTimeout
+    0,        // timings.txToRxSearchTimeout
+    0         // timings.txToTx
+};
+
+#ifdef NONCOMPLIANT_ACK_TIMING_WORKAROUND
+static RAIL_StateTiming_t gTimings = cTimings;
+#endif
+
 static const RAIL_IEEE802154_Config_t sRailIeee802154Config = {
     NULL, // addresses
     {
@@ -298,20 +318,7 @@ static const RAIL_IEEE802154_Config_t sRailIeee802154Config = {
             RAIL_RF_STATE_RX, // ackConfig.txTransitions.error
         },
     },
-    {
-        // timings
-        100,      // timings.idleToRx
-        192 - 10, // timings.txToRx
-        100,      // timings.idleToTx
-#if OPENTHREAD_CONFIG_THREAD_VERSION >= OT_THREAD_VERSION_1_2
-        256,      // timings.rxToTx - accommodate enhanced ACKs
-#else
-        192,      // timings.rxToTx
-#endif
-        0,        // timings.rxSearchTimeout
-        0,        // timings.txToRxSearchTimeout
-        0,        // timings.txToTx
-    },
+    cTimings,
     RAIL_IEEE802154_ACCEPT_STANDARD_FRAMES, // framesMask
     false,                                  // promiscuousMode
     false,                                  // isPanCoordinator
@@ -1429,7 +1436,7 @@ otError otPlatRadioTransmit(otInstance *aInstance, otRadioFrame *aFrame)
     otError error = OT_ERROR_NONE;
     efr32BandConfig * config;
 
-#if OPENTHREAD_RADIO && OPENTHREAD_CONFIG_MULTIPAN_RCP_ENABLE == 1 && SL_GP_RCP_INTERFACE_ENABLED == 1
+#if OPENTHREAD_RADIO && OPENTHREAD_CONFIG_MULTIPAN_RCP_ENABLE == 1 && (defined SL_CATALOG_OT_RCP_GP_INTERFACE_PRESENT)
     //Accept GP packets even if radio is not in required state.
     if((sl_gp_intf_get_state() != SL_GP_STATE_SEND_RESPONSE) && sl_gp_intf_is_gp_pkt(aFrame, false))
     {
@@ -2001,13 +2008,13 @@ otError otPlatRadioConfigureEnhAckProbing(otInstance *         aInstance,
 otError otPlatRadioSetCoexEnabled(otInstance *aInstance, bool aEnabled)
 {
     OT_UNUSED_VARIABLE(aInstance);
-
+    sl_status_t status = sl_rail_util_coex_set_enable(aEnabled); 
     if (aEnabled && !sl_rail_util_coex_is_enabled()) {
         otLogInfoPlat("Coexistence GPIO configurations not set");
         return OT_ERROR_FAILED;
     }
     sRadioCoexEnabled = aEnabled;
-    return OT_ERROR_NONE;
+    return (status != SL_STATUS_OK) ? OT_ERROR_FAILED : OT_ERROR_NONE;
 }
 
 bool otPlatRadioIsCoexEnabled(otInstance *aInstance)
@@ -2079,7 +2086,15 @@ static bool writeIeee802154EnhancedAck( RAIL_Handle_t       aRailHandle,
     receivedFrame.mLength   = *initialPktReadBytes - PHY_HEADER_SIZE;
     enhAckFrame.mPsdu       = enhAckPsdu + PHY_HEADER_SIZE;
 
-    if (! otMacFrameIsVersion2015(&receivedFrame))
+    bool is2015 = otMacFrameIsVersion2015(&receivedFrame);
+#ifdef NONCOMPLIANT_ACK_TIMING_WORKAROUND
+    uint16_t rxToTx = is2015 ? 256 : 192;
+    if (gTimings.rxToTx != rxToTx) {
+        gTimings.rxToTx = rxToTx;
+        RAIL_SetStateTiming(aRailHandle, &gTimings);
+    }
+#endif
+    if (!is2015)
     {
         return false;
     }
@@ -2908,7 +2923,7 @@ exit:
         else
 #endif
         {
-#if OPENTHREAD_RADIO && OPENTHREAD_CONFIG_MULTIPAN_RCP_ENABLE == 1 && SL_GP_RCP_INTERFACE_ENABLED == 1
+#if OPENTHREAD_RADIO && OPENTHREAD_CONFIG_MULTIPAN_RCP_ENABLE == 1 && (defined SL_CATALOG_OT_RCP_GP_INTERFACE_PRESENT)
             (void) sl_gp_intf_is_gp_pkt(&sReceiveFrame, true);
 #endif
             otLogInfoPlat("Received %d bytes", sReceiveFrame.mLength);
@@ -3120,8 +3135,12 @@ static void efr32CoexInit(void)
 {
     sl_rail_util_coex_options_t coexOptions = sl_rail_util_coex_get_options();
 
-#if SL_OPENTHREAD_COEX_MAC_HOLDOFF_ENABLE
+#if SL_OPENTHREAD_COEX_MAC_HOLDOFF_ENABLE 
     coexOptions |= SL_RAIL_UTIL_COEX_OPT_MAC_HOLDOFF;
+#else    
+    if(sl_rail_util_coex_get_radio_holdoff()){
+        coexOptions |= SL_RAIL_UTIL_COEX_OPT_MAC_HOLDOFF;
+    }
 #endif // SL_OPENTHREAD_COEX_MAC_HOLDOFF_ENABLE
 
     sl_rail_util_coex_set_options(coexOptions);
@@ -3292,28 +3311,4 @@ otError otPlatDiagTxStreamAutoAck(uint8_t autoAckEnabled)
     return status;
 }
 #endif // OPENTHREAD_CONFIG_DIAG_ENABLE
-
-// Weak functions when the gp interface is not present.
-SL_WEAK void efr32GpProcess()
-{
-    return;
-}
-
-SL_WEAK sl_gp_state_t sl_gp_intf_get_state(void)
-{
-    return SL_GP_STATE_MAX;
-}
-
-SL_WEAK void sl_gp_intf_buffer_pkt(otRadioFrame *aFrame)
-{
-    OT_UNUSED_VARIABLE(aFrame);
-    return;
-}
-
-SL_WEAK bool sl_gp_intf_is_gp_pkt(otRadioFrame *aFrame, bool isRxFrame)
-{
-    OT_UNUSED_VARIABLE(aFrame);
-    OT_UNUSED_VARIABLE(isRxFrame);
-    return false;
-}
 

@@ -82,7 +82,7 @@ static bool _get_next_led_state(sl_wisun_led_signal_t *led_signal,
  * @brief Turn off LED0 and LED1
  * @details
  *****************************************************************************/
-static inline void _turn_off_leds(void);
+__STATIC_INLINE void _turn_off_leds(void);
 
 /**************************************************************************//**
  * @brief Set LED instance by state
@@ -90,20 +90,20 @@ static inline void _turn_off_leds(void);
  * @param[in] led_sate LED state
  * @param[in,out] led_instance LED instance
  *****************************************************************************/
-static inline void _set_led_instance(const bool led_sate,
+__STATIC_INLINE void _set_led_instance(const bool led_sate,
                                      const sl_led_t *led_instance);
 
 /**************************************************************************//**
  * @brief LED mutex acquire
  * @details Helper function
  *****************************************************************************/
-static inline void _led_mutex_acquire(void);
+__STATIC_INLINE void _led_mutex_acquire(void);
 
 /**************************************************************************//**
  * @brief LED mutex release
  * @details Helper function
  *****************************************************************************/
-static inline void _led_mutex_release(void);
+__STATIC_INLINE void _led_mutex_release(void);
 
 /**************************************************************************//**
  * @brief Get LED signal internal pointer
@@ -111,7 +111,7 @@ static inline void _led_mutex_release(void);
  * @param[in] led_id
  * @return sl_wisun_led_signal_t*
  *****************************************************************************/
-static inline sl_wisun_led_signal_t *_get_led_signal_ptr(const sl_wisun_led_id_t led_id);
+__STATIC_INLINE sl_wisun_led_signal_t *_get_led_signal_ptr(const sl_wisun_led_id_t led_id);
 
 // -----------------------------------------------------------------------------
 //                                Global Variables
@@ -357,14 +357,14 @@ static void _led_task(void *arg)
 }
 
 /* Turn off LEDs */
-static inline void _turn_off_leds(void)
+__STATIC_INLINE void _turn_off_leds(void)
 {
   sl_led_turn_off(&sl_led_led0);
   sl_led_turn_off(&sl_led_led1);
 }
 
 /* Set LED instance */
-static inline void _set_led_instance(const bool led_sate,
+__STATIC_INLINE void _set_led_instance(const bool led_sate,
                                      const sl_led_t *led_instance)
 {
   if (led_sate) {
@@ -375,18 +375,18 @@ static inline void _set_led_instance(const bool led_sate,
 }
 
 /* Mutex acquire */
-static inline void _led_mutex_acquire(void)
+__STATIC_INLINE void _led_mutex_acquire(void)
 {
   assert(osMutexAcquire(_led_mtx, osWaitForever) == osOK);
 }
 
 /* Mutex release */
-static inline void _led_mutex_release(void)
+__STATIC_INLINE void _led_mutex_release(void)
 {
   assert(osMutexRelease(_led_mtx) == osOK);
 }
 
-static inline sl_wisun_led_signal_t *_get_led_signal_ptr(const sl_wisun_led_id_t led_id)
+__STATIC_INLINE sl_wisun_led_signal_t *_get_led_signal_ptr(const sl_wisun_led_id_t led_id)
 {
   switch (led_id) {
     case SL_WISUN_LED0_ID: return &_led0;

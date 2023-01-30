@@ -42,6 +42,7 @@ extern "C" {
 #include <stddef.h>
 #include <stdint.h>
 #include <stdbool.h>
+#include "sl_common.h"
 
 #include "app_project_info_config.h"
 
@@ -167,7 +168,7 @@ void app_project_info_print_version(const app_project_info_version_t * const ver
  * @param[in] version Version instance
  * @param[in] printer Printer function pointer
  *****************************************************************************/
-static inline void app_project_info_print_version_pretty(const app_project_info_version_t * const version,
+__STATIC_INLINE void app_project_info_print_version_pretty(const app_project_info_version_t * const version,
                                                          app_project_info_printer_t printer)
 {
   app_project_info_print_version(version, printer, NULL, true);

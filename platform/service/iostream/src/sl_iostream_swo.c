@@ -181,6 +181,9 @@ static sl_status_t swo_write(void *context,
                              const void *buffer,
                              size_t buffer_length)
 {
+#if defined(SL_CATALOG_KERNEL_PRESENT)
+  osStatus_t os_status = osError;
+#endif
   sl_status_t ret = SL_STATUS_OK;
   uint8_t *buf_8 = (uint8_t *)buffer;
 #if (SL_IOSTREAM_SWO_WRITE_BYTE_PER_BYTE == 0)
@@ -191,8 +194,9 @@ static sl_status_t swo_write(void *context,
 #if defined(SL_CATALOG_KERNEL_PRESENT)
   swo_stream_context_t *swo_context = (swo_stream_context_t *)context;
   if (osKernelGetState() == osKernelRunning) {
-    // Bypass lock if we print before the kernel is running
-    if (osMutexAcquire(swo_context->lock, osWaitForever) != osOK) {
+    // Bypass lock if we print before the kernel is running or if in an ISR
+    os_status = osMutexAcquire(swo_context->lock, osWaitForever);
+    if (os_status != osOK && os_status != osErrorISR) {
       return SL_STATUS_FAIL;
     }
   }
@@ -241,7 +245,8 @@ static sl_status_t swo_write(void *context,
 #if defined(SL_CATALOG_KERNEL_PRESENT)
   if (osKernelGetState() == osKernelRunning) {
     // Bypass lock if we print before the kernel is running
-    EFM_ASSERT(osMutexRelease(swo_context->lock) == osOK);
+    os_status = osMutexRelease(swo_context->lock);
+    EFM_ASSERT(os_status == osOK || os_status == osErrorISR);
   }
 #endif
 

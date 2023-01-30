@@ -30,3 +30,6 @@ provides:
   - name: bootloader_apploader
   - name: bootloader_nonsecure_incompatible
     condition: [bootloader_core_nonsecure]
+config_file:
+  - path: platform/bootloader/config/btl_apploader_config.h
+    file_id: btl_apploader_config

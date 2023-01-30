@@ -39,9 +39,13 @@
 #ifndef __PSA_ERROR__
 #define __PSA_ERROR__
 
+#if defined(SL_TRUSTZONE_SECURE)
+#include "trusted-firmware-m/interface/include/psa/error.h"
+#else
 #define PSA_ERROR_PROGRAMMER_ERROR      ((psa_status_t)-129)
 #define PSA_ERROR_CONNECTION_REFUSED    ((psa_status_t)-130)
 #define PSA_ERROR_CONNECTION_BUSY       ((psa_status_t)-131)
 #define PSA_ERROR_SERVICE_FAILURE       ((psa_status_t)-144)
+#endif
 
 #endif // __PSA_ERROR__

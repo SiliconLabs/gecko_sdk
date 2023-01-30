@@ -47,52 +47,52 @@ const sl_iperf_socket_in6addr_t sl_iperf_socket_inaddr_any = { 0 };
 // -----------------------------------------------------------------------------
 //                          Public Function Definitions
 // -----------------------------------------------------------------------------
-__attribute__((weak)) void sl_iperf_nw_interface_init(void)
+SL_WEAK void sl_iperf_nw_interface_init(void)
 {
   (void) 0;
 }
 
-__attribute__((weak)) int32_t sl_iperf_socket_create(sl_iperf_protocol_t protocol)
+SL_WEAK int32_t sl_iperf_socket_create(sl_iperf_protocol_t protocol)
 {
   (void) protocol;
   return SL_IPERF_NW_API_ERROR;
 }
 
-__attribute__((weak)) int32_t sl_iperf_socket_close(int32_t sockid)
+SL_WEAK int32_t sl_iperf_socket_close(int32_t sockid)
 {
   (void) sockid;
   return SL_IPERF_NW_API_ERROR;
 }
 
-__attribute__((weak)) int32_t sl_iperf_socket_bind(int32_t sockid, const sl_iperf_socket_addr_t *addr)
+SL_WEAK int32_t sl_iperf_socket_bind(int32_t sockid, const sl_iperf_socket_addr_t *addr)
 {
   (void) sockid;
   (void) addr;
   return SL_IPERF_NW_API_ERROR;
 }
 
-__attribute__((weak)) int32_t sl_iperf_socket_listen(int32_t sockid, int32_t backlog)
+SL_WEAK int32_t sl_iperf_socket_listen(int32_t sockid, int32_t backlog)
 {
   (void) sockid;
   (void) backlog;
   return SL_IPERF_NW_API_ERROR;
 }
 
-__attribute__((weak)) int32_t sl_iperf_socket_accept(int32_t sockid, sl_iperf_socket_addr_t *addr)
+SL_WEAK int32_t sl_iperf_socket_accept(int32_t sockid, sl_iperf_socket_addr_t *addr)
 {
   (void) sockid;
   (void) addr;
   return SL_IPERF_NW_API_ERROR;
 }
 
-__attribute__((weak)) int32_t sl_iperf_socket_connect(int32_t sockid, const sl_iperf_socket_addr_t *addr)
+SL_WEAK int32_t sl_iperf_socket_connect(int32_t sockid, const sl_iperf_socket_addr_t *addr)
 {
   (void) sockid;
   (void) addr;
   return SL_IPERF_NW_API_ERROR;
 }
 
-__attribute__((weak)) int32_t sl_iperf_socket_send(int32_t sockid, const void *buff, size_t len)
+SL_WEAK int32_t sl_iperf_socket_send(int32_t sockid, const void *buff, size_t len)
 {
   (void) sockid;
   (void) buff;
@@ -100,7 +100,7 @@ __attribute__((weak)) int32_t sl_iperf_socket_send(int32_t sockid, const void *b
   return SL_IPERF_NW_API_ERROR;
 }
 
-__attribute__((weak)) int32_t sl_iperf_socket_sendto(int32_t sockid, const void *buff, uint32_t len, const sl_iperf_socket_addr_t *dest_addr)
+SL_WEAK int32_t sl_iperf_socket_sendto(int32_t sockid, const void *buff, uint32_t len, const sl_iperf_socket_addr_t *dest_addr)
 {
   (void) sockid;
   (void) buff;
@@ -109,7 +109,7 @@ __attribute__((weak)) int32_t sl_iperf_socket_sendto(int32_t sockid, const void 
   return SL_IPERF_NW_API_ERROR;
 }
 
-__attribute__((weak)) int32_t sl_iperf_socket_recv(int32_t sockid, void *buff, size_t len)
+SL_WEAK int32_t sl_iperf_socket_recv(int32_t sockid, void *buff, size_t len)
 {
   (void) sockid;
   (void) buff;
@@ -117,7 +117,7 @@ __attribute__((weak)) int32_t sl_iperf_socket_recv(int32_t sockid, void *buff, s
   return SL_IPERF_NW_API_ERROR;
 }
 
-__attribute__((weak)) int32_t sl_iperf_socket_recvfrom(int32_t sockid, void *buff, uint32_t len,
+SL_WEAK int32_t sl_iperf_socket_recvfrom(int32_t sockid, void *buff, uint32_t len,
                                                        sl_iperf_socket_addr_t *src_addr)
 {
   (void) sockid;
@@ -127,7 +127,7 @@ __attribute__((weak)) int32_t sl_iperf_socket_recvfrom(int32_t sockid, void *buf
   return SL_IPERF_NW_API_ERROR;
 }
 
-__attribute__((weak)) int32_t sl_iperf_socket_setsockopt(int32_t sockid, int32_t level, int32_t optname,
+SL_WEAK int32_t sl_iperf_socket_setsockopt(int32_t sockid, int32_t level, int32_t optname,
                                                          const void *optval, size_t optlen)
 {
   (void) sockid;
@@ -138,7 +138,7 @@ __attribute__((weak)) int32_t sl_iperf_socket_setsockopt(int32_t sockid, int32_t
   return SL_IPERF_NW_API_ERROR;
 }
 
-__attribute__((weak)) int32_t sl_iperf_socket_getsockopt(int32_t sockid, int32_t level, int32_t optname,
+SL_WEAK int32_t sl_iperf_socket_getsockopt(int32_t sockid, int32_t level, int32_t optname,
                                                          void *optval, size_t *optlen)
 {
   (void) sockid;
@@ -149,61 +149,61 @@ __attribute__((weak)) int32_t sl_iperf_socket_getsockopt(int32_t sockid, int32_t
   return SL_IPERF_NW_API_ERROR;
 }
 
-__attribute__((weak)) void sl_iperf_set_socket_addr_family(sl_iperf_socket_addr_t * const addr)
+SL_WEAK void sl_iperf_set_socket_addr_family(sl_iperf_socket_addr_t * const addr)
 {
   (void) addr;
 }
 
-__attribute__((weak)) void sl_iperf_set_socket_addr_port(sl_iperf_socket_addr_t * const addr, const uint16_t port)
+SL_WEAK void sl_iperf_set_socket_addr_port(sl_iperf_socket_addr_t * const addr, const uint16_t port)
 {
   (void) addr;
   (void) port;
 }
 
-__attribute__((weak)) uint16_t sl_iperf_get_socket_addr_port(const sl_iperf_socket_addr_t * const addr)
+SL_WEAK uint16_t sl_iperf_get_socket_addr_port(const sl_iperf_socket_addr_t * const addr)
 {
   (void) addr;
   return 0;
 }
 
-__attribute__((weak)) void sl_iperf_set_socket_addr_ip(sl_iperf_socket_addr_t * const addr, const void * const ip)
+SL_WEAK void sl_iperf_set_socket_addr_ip(sl_iperf_socket_addr_t * const addr, const void * const ip)
 {
   (void) addr;
   (void) ip;
 }
 
-__attribute__((weak)) void sl_iperf_get_socket_addr_ip(const sl_iperf_socket_addr_t * const addr, void * const ip)
+SL_WEAK void sl_iperf_get_socket_addr_ip(const sl_iperf_socket_addr_t * const addr, void * const ip)
 {
   (void) addr;
   (void) ip;
 }
 
-__attribute__((weak)) bool sl_iperf_network_is_connected(void)
+SL_WEAK bool sl_iperf_network_is_connected(void)
 {
   return false;
 }
 
-__attribute__((weak)) uint16_t sl_iperf_network_htons(uint16_t val)
+SL_WEAK uint16_t sl_iperf_network_htons(uint16_t val)
 {
   return val;
 }
 
-__attribute__((weak)) uint16_t sl_iperf_network_ntohs(uint16_t val)
+SL_WEAK uint16_t sl_iperf_network_ntohs(uint16_t val)
 {
   return val;
 }
 
-__attribute__((weak)) uint32_t sl_iperf_network_htonl(uint32_t val)
+SL_WEAK uint32_t sl_iperf_network_htonl(uint32_t val)
 {
   return val;
 }
 
-__attribute__((weak)) uint32_t sl_iperf_network_ntohl(uint32_t val)
+SL_WEAK uint32_t sl_iperf_network_ntohl(uint32_t val)
 {
   return val;
 }
 
-__attribute__((weak)) int32_t sl_iperf_inet_pton(const char *src_str,
+SL_WEAK int32_t sl_iperf_inet_pton(const char *src_str,
                                                  sl_iperf_socket_addr_t * const dst_addr)
 {
   (void) src_str;
@@ -211,7 +211,7 @@ __attribute__((weak)) int32_t sl_iperf_inet_pton(const char *src_str,
   return SL_IPERF_NW_API_ERROR;
 }
 
-__attribute__((weak)) const char *sl_iperf_inet_ntop(const  sl_iperf_socket_addr_t * const src_addr,
+SL_WEAK const char *sl_iperf_inet_ntop(const  sl_iperf_socket_addr_t * const src_addr,
                                                      char * const dst_str,
                                                      const size_t size)
 {
@@ -221,7 +221,7 @@ __attribute__((weak)) const char *sl_iperf_inet_ntop(const  sl_iperf_socket_addr
   return NULL;
 }
 
-__attribute__((weak)) int32_t sl_iperf_join_multicast_group(const int32_t sockid,
+SL_WEAK int32_t sl_iperf_join_multicast_group(const int32_t sockid,
                                                             const sl_iperf_socket_addr_t * const multicast_addr)
 {
   (void) sockid;
@@ -229,7 +229,7 @@ __attribute__((weak)) int32_t sl_iperf_join_multicast_group(const int32_t sockid
   return SL_IPERF_NW_API_ERROR;
 }
 
-__attribute__((weak)) int32_t sl_iperf_leave_multicast_group(const int32_t sockid,
+SL_WEAK int32_t sl_iperf_leave_multicast_group(const int32_t sockid,
                                                              const sl_iperf_socket_addr_t * const multicast_addr)
 {
   (void) sockid;
@@ -237,12 +237,12 @@ __attribute__((weak)) int32_t sl_iperf_leave_multicast_group(const int32_t socki
   return SL_IPERF_NW_API_ERROR;
 }
 
-__attribute__((weak)) void sl_iperf_delay_ms(const uint32_t ms)
+SL_WEAK void sl_iperf_delay_ms(const uint32_t ms)
 {
   (void) ms;
 }
 
-__attribute__((weak)) sl_iperf_ts_ms_t sl_iperf_get_timestamp_ms(void)
+SL_WEAK sl_iperf_ts_ms_t sl_iperf_get_timestamp_ms(void)
 {
   return (sl_iperf_ts_ms_t)0U;
 }

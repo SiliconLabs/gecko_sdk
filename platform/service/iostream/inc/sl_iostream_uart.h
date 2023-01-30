@@ -94,7 +94,6 @@ typedef struct {
   bool (*get_rx_energy_mode_restriction)(void *context);              ///< get_rx_energy_mode_restriction. Available only when Power Manager present.
 #if !defined(SL_CATALOG_KERNEL_PRESENT) || defined(DOXYGEN)
   sl_power_manager_on_isr_exit_t (*sleep_on_isr_exit)(void *context); ///< sleep_on_isr_exit. Available only when Power Manager present and kernel not present.
-  bool (*is_ok_to_sleep)(void *context);                              ///< is_ok_to_sleep. Available only when Power Manager present and kernel not present.
 #endif
 #endif
 #if defined(SL_CATALOG_KERNEL_PRESENT)
@@ -103,24 +102,16 @@ typedef struct {
 #endif
 } sl_iostream_uart_t;
 
-typedef struct {
-  size_t count;                 ///< Number of byte to be received
-  uint8_t *dst;                 ///< Pointer to the next byte to be written in rx_buffer
-} sl_iostream_descriptor_t;
-
-/// @brief I/O Stream LDMA Config
+/// @brief I/O Stream (L)DMA Config
 typedef struct {
   DMADRV_PeripheralSignal_t peripheral_signal;  ///< Peripheral signal to trigger a DMA transfer on
   uint8_t *src;                                 ///< Pointer to IO Stream peripheral data register
-  DMADRV_DataSize_t size;                       ///< DMA Transfer size (byte, half-word, work)
 } sl_iostream_dma_config_t;
 
-/// @brief I/O Steam LDMA Context
+/// @brief I/O Steam (L)DMA Context
 typedef struct {
   sl_iostream_dma_config_t cfg;                       ///< DMA Configuration
-  volatile sl_iostream_descriptor_t active_desc;      ///< Active descriptor in the DMA
-  volatile bool data_available;                       ///< Indicates wether or not data is available in the active DMA descriptor.
-  uint32_t channel;                                   ///< DMA Channel
+  uint8_t channel;                                    ///< DMA Channel
 } sl_iostream_dma_context_t;
 
 /// @brief I/O Stream UART config
@@ -139,11 +130,13 @@ typedef struct {
 typedef struct {
   sl_iostream_dma_context_t dma;            ///< DMA Context
   uint8_t *rx_buffer;                       ///< UART Rx Buffer
-  size_t rx_buffer_len;                     ///< UART Rx buffer length
-  uint8_t *read_ptr;                        ///< Address of the next byte to be read
+  size_t rx_buffer_len;                     ///< UART Rx Buffer length
+  uint8_t *rx_read_ptr;                     ///< Address of the next byte to be read
+  volatile bool rx_data_available;          ///< UART Rx Buffer data available to be read
+  volatile bool rx_buffer_full;             ///< UART Rx Buffer full
   sl_status_t (*tx)(void *context, char c); ///< Tx function pointer
   void (*tx_completed)(void *context, bool enable); ///< Pointer to a function handling the Tx Completed event
-  void (*enable_rx)(void *context);         ///< Pointer to a function determining whether rx is enabled
+  void (*set_next_byte_detect)(void *context, bool enable);///< Pointer to a function to enable/disable detection of next byte on stream
   sl_status_t (*deinit)(void *context);     ///< DeInit function pointer
   bool lf_to_crlf;                          ///< lf_to_crlf
   bool sw_flow_control;                     ///< software flow control
@@ -283,18 +276,6 @@ __STATIC_INLINE bool sl_iostream_uart_get_read_block(sl_iostream_uart_t *iostrea
 __STATIC_INLINE sl_power_manager_on_isr_exit_t sl_iostream_uart_sleep_on_isr_exit(sl_iostream_uart_t *iostream_uart)
 {
   return iostream_uart->sleep_on_isr_exit(iostream_uart->stream.context);
-}
-
-/***************************************************************************//**
- * Check if the IOStream UART context is ready to sleep.
- *
- * @param[in] iostream_uart  UART context.
- *
- * @return bool True if ready to sleep, false if not.
- ******************************************************************************/
-__STATIC_INLINE bool sl_iostream_uart_is_ok_to_sleep(sl_iostream_uart_t *iostream_uart)
-{
-  return iostream_uart->is_ok_to_sleep(iostream_uart->stream.context);
 }
 
 #endif

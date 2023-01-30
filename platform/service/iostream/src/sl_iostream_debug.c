@@ -129,7 +129,14 @@ static sl_status_t debug_write(void *context,
                                const void *buffer,
                                size_t buffer_length)
 {
+  sl_status_t status;
   sl_iostream_swo_itm_8_msg_type_t type;
+
   sl_atomic_load(type, debug_type);
-  return sli_iostream_swo_itm_8_write(context, buffer, buffer_length, type, &seq_number);
+  status = sli_iostream_swo_itm_8_write(context, buffer, buffer_length, type, seq_number);
+  if (status == SL_STATUS_OK) {
+    seq_number++; // Wrap arround/overflow on the usigned int is expected to reset the sequence number
+  }
+
+  return status;
 }

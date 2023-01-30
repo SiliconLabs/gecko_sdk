@@ -120,7 +120,7 @@ extern "C" void otCRPCSetUserCommands(const otCliCommand *aUserCommands, uint8_t
     RPC::GetRPC().SetUserCommands(aUserCommands, aLength, aContext);
 }
 
-extern "C" char* otCRPCGetStaticOutputBuffer(void)
+extern "C" char *otCRPCGetStaticOutputBuffer(void)
 {
     return RPC::GetRPC().GetStaticOutputBuffer();
 }

@@ -3,7 +3,7 @@
  * @brief EFR32FG25 LDMA register and bit field definitions
  ******************************************************************************
  * # License
- * <b>Copyright 2022 Silicon Laboratories, Inc. www.silabs.com</b>
+ * <b>Copyright 2023 Silicon Laboratories, Inc. www.silabs.com</b>
  ******************************************************************************
  *
  * SPDX-License-Identifier: Zlib
@@ -775,11 +775,11 @@ typedef struct {
 #define LDMA_CH_CTRL_BLOCKSIZE_UNIT512          (_LDMA_CH_CTRL_BLOCKSIZE_UNIT512 << 16)     /**< Shifted mode UNIT512 for LDMA_CH_CTRL       */
 #define LDMA_CH_CTRL_BLOCKSIZE_UNIT1024         (_LDMA_CH_CTRL_BLOCKSIZE_UNIT1024 << 16)    /**< Shifted mode UNIT1024 for LDMA_CH_CTRL      */
 #define LDMA_CH_CTRL_BLOCKSIZE_ALL              (_LDMA_CH_CTRL_BLOCKSIZE_ALL << 16)         /**< Shifted mode ALL for LDMA_CH_CTRL           */
-#define LDMA_CH_CTRL_DONESET                    (0x1UL << 20)                               /**< DMA Operation Done Interrupt Flag Set       */
-#define _LDMA_CH_CTRL_DONESET_SHIFT             20                                          /**< Shift value for LDMA_DONESET                */
-#define _LDMA_CH_CTRL_DONESET_MASK              0x100000UL                                  /**< Bit mask for LDMA_DONESET                   */
-#define _LDMA_CH_CTRL_DONESET_DEFAULT           0x00000000UL                                /**< Mode DEFAULT for LDMA_CH_CTRL               */
-#define LDMA_CH_CTRL_DONESET_DEFAULT            (_LDMA_CH_CTRL_DONESET_DEFAULT << 20)       /**< Shifted mode DEFAULT for LDMA_CH_CTRL       */
+#define LDMA_CH_CTRL_DONEIEN                    (0x1UL << 20)                               /**< DMA Operation Done Interrupt Flag Set       */
+#define _LDMA_CH_CTRL_DONEIEN_SHIFT             20                                          /**< Shift value for LDMA_DONEIEN                */
+#define _LDMA_CH_CTRL_DONEIEN_MASK              0x100000UL                                  /**< Bit mask for LDMA_DONEIEN                   */
+#define _LDMA_CH_CTRL_DONEIEN_DEFAULT           0x00000000UL                                /**< Mode DEFAULT for LDMA_CH_CTRL               */
+#define LDMA_CH_CTRL_DONEIEN_DEFAULT            (_LDMA_CH_CTRL_DONEIEN_DEFAULT << 20)       /**< Shifted mode DEFAULT for LDMA_CH_CTRL       */
 #define LDMA_CH_CTRL_REQMODE                    (0x1UL << 21)                               /**< DMA Request Transfer Mode Select            */
 #define _LDMA_CH_CTRL_REQMODE_SHIFT             21                                          /**< Shift value for LDMA_REQMODE                */
 #define _LDMA_CH_CTRL_REQMODE_MASK              0x200000UL                                  /**< Bit mask for LDMA_REQMODE                   */

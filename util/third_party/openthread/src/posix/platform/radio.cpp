@@ -88,13 +88,13 @@ Radio::Radio(const char *aUrl)
 
 void Radio::Init(void)
 {
-    bool          resetRadio             = (mRadioUrl.GetValue("no-reset") == nullptr);
-    bool          restoreDataset         = (mRadioUrl.GetValue("ncp-dataset") != nullptr);
-    bool          skipCompatibilityCheck = (mRadioUrl.GetValue("skip-rcp-compatibility-check") != nullptr);
-    spinel_iid_t  iid                    = 0;
-    const char *  iidString              = (mRadioUrl.GetValue("iid"));
-    const char *  parameterValue;
-    const char *  region;
+    bool         resetRadio             = (mRadioUrl.GetValue("no-reset") == nullptr);
+    bool         restoreDataset         = (mRadioUrl.GetValue("ncp-dataset") != nullptr);
+    bool         skipCompatibilityCheck = (mRadioUrl.GetValue("skip-rcp-compatibility-check") != nullptr);
+    spinel_iid_t iid                    = 0;
+    const char * iidString              = (mRadioUrl.GetValue("iid"));
+    const char * parameterValue;
+    const char * region;
 #if OPENTHREAD_POSIX_CONFIG_MAX_POWER_TABLE_ENABLE
     const char *maxPowerTable;
 #endif
@@ -652,14 +652,14 @@ otError otPlatDiagTxStreamStop(void)
 
 otError otPlatDiagTxStreamAddrMatch(uint8_t enable)
 {
-   char cmd[OPENTHREAD_CONFIG_DIAG_CMD_LINE_BUFFER_SIZE];
+    char cmd[OPENTHREAD_CONFIG_DIAG_CMD_LINE_BUFFER_SIZE];
 
     snprintf(cmd, sizeof(cmd), "stream addrMatch %d", enable);
     return (sRadioSpinel.PlatDiagProcess(cmd, nullptr, 0));
 }
 otError otPlatDiagTxStreamAutoAck(uint8_t autoAckEnabled)
 {
-   char cmd[OPENTHREAD_CONFIG_DIAG_CMD_LINE_BUFFER_SIZE];
+    char cmd[OPENTHREAD_CONFIG_DIAG_CMD_LINE_BUFFER_SIZE];
 
     snprintf(cmd, sizeof(cmd), "stream autoAck %d", autoAckEnabled);
     return (sRadioSpinel.PlatDiagProcess(cmd, nullptr, 0));
@@ -669,6 +669,134 @@ void otPlatDiagAlarmCallback(otInstance *aInstance)
 {
     OT_UNUSED_VARIABLE(aInstance);
 }
+
+// instead of this whole thing for the particular coex enable
+// we should use spinel implemented otPlatRadioIsCoexEnabled
+otError otPlatDiagCoexSetPriorityPulseWidth(uint8_t pulseWidthUs)
+{
+    char cmd[OPENTHREAD_CONFIG_DIAG_CMD_LINE_BUFFER_SIZE];
+
+    snprintf(cmd, sizeof(cmd), "coex set-priority-pulse-width %d", pulseWidthUs);
+    return (sRadioSpinel.PlatDiagProcess(cmd, nullptr, 0));
+}
+
+otError otPlatDiagCoexSetRadioHoldoff(bool enabled)
+{
+    char cmd[OPENTHREAD_CONFIG_DIAG_CMD_LINE_BUFFER_SIZE];
+
+    snprintf(cmd, sizeof(cmd), "coex set-radio-holdoff %d", enabled);
+    return (sRadioSpinel.PlatDiagProcess(cmd, nullptr, 0));
+}
+
+otError otPlatDiagCoexSetRequestPwm(uint8_t ptaReq, void *ptaCb, uint8_t dutyCycle, uint8_t periodHalfMs)
+{
+    OT_UNUSED_VARIABLE(ptaCb);
+    char cmd[OPENTHREAD_CONFIG_DIAG_CMD_LINE_BUFFER_SIZE];
+
+    snprintf(cmd, sizeof(cmd), "coex set-request-pwm %d %d %d", ptaReq, dutyCycle, periodHalfMs);
+    return (sRadioSpinel.PlatDiagProcess(cmd, nullptr, 0));
+}
+
+otError otPlatDiagCoexSetOptions(uint32_t options)
+{
+    char cmd[OPENTHREAD_CONFIG_DIAG_CMD_LINE_BUFFER_SIZE];
+
+    snprintf(cmd, sizeof(cmd), "coex set-options %d", options);
+    return (sRadioSpinel.PlatDiagProcess(cmd, nullptr, 0));
+}
+
+otError otPlatDiagCoexSetPhySelectTimeout(uint8_t timeoutMs)
+{
+    char cmd[OPENTHREAD_CONFIG_DIAG_CMD_LINE_BUFFER_SIZE];
+
+    snprintf(cmd, sizeof(cmd), "coex set-phy-select-timeout %d", timeoutMs);
+    return (sRadioSpinel.PlatDiagProcess(cmd, nullptr, 0));
+}
+
+otError otPlatDiagCoexGetOptions(uint32_t *aValue)
+{
+    otError error;
+    char    cmd[OPENTHREAD_CONFIG_DIAG_CMD_LINE_BUFFER_SIZE];
+    char    output[OPENTHREAD_CONFIG_DIAG_OUTPUT_BUFFER_SIZE];
+    char *  str;
+    int     i = 0;
+    snprintf(cmd, sizeof(cmd), "coex get-options");
+    SuccessOrExit(error = sRadioSpinel.PlatDiagProcess(cmd, output, sizeof(output)));
+    uint8_t b[4];
+
+    VerifyOrExit((str = strtok(output, "\r")) != nullptr, error = OT_ERROR_FAILED);
+    while (str != NULL && i < 5)
+    {
+        b[i] = static_cast<uint8_t>(atoi(str));
+        str  = strtok(NULL, "\r");
+        i++;
+    }
+
+    *aValue = ((((uint32_t)((((uint16_t)b[0]) << 8) | ((uint16_t)b[1]))) << 16) |
+               (uint32_t)((((uint16_t)b[2]) << 8) | ((uint16_t)b[3])));
+
+exit:
+    return error;
+}
+
+otError otPlatDiagCoexGetPhySelectTimeout(uint8_t *aValue)
+{
+    otError error;
+    char    cmd[OPENTHREAD_CONFIG_DIAG_CMD_LINE_BUFFER_SIZE];
+    char    output[OPENTHREAD_CONFIG_DIAG_OUTPUT_BUFFER_SIZE];
+    char *  str;
+
+    snprintf(cmd, sizeof(cmd), "coex get-phy-select-timeout");
+    SuccessOrExit(error = sRadioSpinel.PlatDiagProcess(cmd, output, sizeof(output)));
+    VerifyOrExit((str = strtok(output, "\r")) != nullptr, error = OT_ERROR_FAILED);
+    *aValue = static_cast<uint8_t>(atoi(str));
+
+exit:
+    return error;
+}
+
+otError otPlatDiagCoexGetPriorityPulseWidth(uint8_t *aValue)
+{
+    otError error;
+    char    cmd[OPENTHREAD_CONFIG_DIAG_CMD_LINE_BUFFER_SIZE];
+    char    output[OPENTHREAD_CONFIG_DIAG_OUTPUT_BUFFER_SIZE];
+    char *  str;
+
+    snprintf(cmd, sizeof(cmd), "coex get-priority-pulse-width");
+    SuccessOrExit(error = sRadioSpinel.PlatDiagProcess(cmd, output, sizeof(output)));
+    VerifyOrExit((str = strtok(output, "\r")) != nullptr, error = OT_ERROR_FAILED);
+    *aValue = static_cast<uint8_t>(atoi(str));
+exit:
+    return error;
+}
+
+otError otPlatDiagCoexGetRequestPwmArgs(uint8_t *req, uint8_t *dutyCycle, uint8_t *periodHalfMs)
+{
+    otError error;
+    char    cmd[OPENTHREAD_CONFIG_DIAG_CMD_LINE_BUFFER_SIZE];
+    char    output[OPENTHREAD_CONFIG_DIAG_OUTPUT_BUFFER_SIZE];
+    char *  str;
+    int     i = 0;
+    snprintf(cmd, sizeof(cmd), "coex get-request-pwm");
+    SuccessOrExit(error = sRadioSpinel.PlatDiagProcess(cmd, output, sizeof(output)));
+    uint8_t b[3];
+
+    VerifyOrExit((str = strtok(output, "\r")) != nullptr, error = OT_ERROR_FAILED);
+    while (str != NULL && i < 4)
+    {
+        b[i] = static_cast<uint8_t>(atoi(str));
+        str  = strtok(NULL, "\r");
+        i++;
+    }
+
+    *req          = b[0];
+    *dutyCycle    = b[1];
+    *periodHalfMs = b[2];
+
+exit:
+    return error;
+}
+
 #endif // OPENTHREAD_CONFIG_DIAG_ENABLE
 
 uint32_t otPlatRadioGetSupportedChannelMask(otInstance *aInstance)

@@ -80,6 +80,14 @@
 
 #define EMBER_AF_GREEN_POWER_SERVER_GPDF_SCENE_DERIVED_GROUP_ID (0xFFFF)
 
+// Reserved GPD addresses
+#define IS_RESERVED_GPD_SRC_ID(srcId)       (((srcId) >=  GP_GPD_SRC_ID_RESERVED_FFFFFF9) \
+                                             && ((srcId) <= GP_GPD_SRC_ID_RESERVED_FFFFFFE))
+
+// If the GPD Src Id is 0
+#define IS_GPD_SRC_ID_ZERO(appId, srcId) (((appId) == EMBER_GP_APPLICATION_SOURCE_ID) \
+                                          && ((srcId) == GP_GPD_SRC_ID_RESERVED_0))
+
 // TT, Option byte : additional information block present or not
 #define emberAfGreenPowerTTGetAdditionalInfoBlockPresent(options) ((uint8_t) (options & 0x08))
 // TT update cmd, Option byte :

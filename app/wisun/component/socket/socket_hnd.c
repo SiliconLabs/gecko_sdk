@@ -78,28 +78,28 @@ static void __memcpy(void *dest, const void *src, const uint32_t len);
  * @details Set socket handler ptr to NULL and reset content
  * @param[in,out] socket_hnd socket handler ptr
  *****************************************************************************/
-static inline void _destroy_socket_hnd(_socket_handler_t *socket_hnd);
+__STATIC_INLINE void _destroy_socket_hnd(_socket_handler_t *socket_hnd);
 
 /**************************************************************************//**
  * @brief Mutex lock
  * @details Lock socket handler mutex
  * @param[in,out] socket_hnd socket handler ptr
  *****************************************************************************/
-static inline void _lock(void);
+__STATIC_INLINE void _lock(void);
 
 /**************************************************************************//**
  * @brief Mutex unlock
  * @details Release socket handler mutex
  * @param[in,out] socket_hnd socket handler ptr
  *****************************************************************************/
-static inline void _unlock(void);
+__STATIC_INLINE void _unlock(void);
 
 /**************************************************************************//**
  * @brief Destroy the socket handler (internal)
  * @details Set socket handler values to default without mutex lock/unlock
  * @param[in,out] socket_hnd socket handler
  *****************************************************************************/
-static inline void _destroy_socket_hnd(_socket_handler_t *socket_hnd);
+__STATIC_INLINE void _destroy_socket_hnd(_socket_handler_t *socket_hnd);
 
 /**************************************************************************//**
  * @brief Init fifo (internal)
@@ -108,13 +108,13 @@ static inline void _destroy_socket_hnd(_socket_handler_t *socket_hnd);
  * @param buff_ptr buff ptr
  * @param size size of the fifo
  *****************************************************************************/
-static inline void _init_fifo(_socket_handler_t *hnd, uint8_t *buff_ptr, const uint32_t size);
+__STATIC_INLINE void _init_fifo(_socket_handler_t *hnd, uint8_t *buff_ptr, const uint32_t size);
 
 /**************************************************************************//**
  * @brief Reset fifo buffer pointers and flags
  * @param hnd
  *****************************************************************************/
-static inline void _reset_fifo(_socket_handler_t *hnd);
+__STATIC_INLINE void _reset_fifo(_socket_handler_t *hnd);
 
 /**************************************************************************//**
  * @brief Set socket storage
@@ -125,7 +125,7 @@ static inline void _reset_fifo(_socket_handler_t *hnd);
  * @param[in] socket_addr_struct socket address structure pointer
  * @param[in] socket_addr_len length of socket address structure
  *****************************************************************************/
-static inline void _set_socket_storage(const uint8_t idx, const uint16_t domain, const int32_t socket_id, void *socket_addr_struct, const uint8_t socket_addr_len);
+__STATIC_INLINE void _set_socket_storage(const uint8_t idx, const uint16_t domain, const int32_t socket_id, void *socket_addr_struct, const uint8_t socket_addr_len);
 
 // -----------------------------------------------------------------------------
 //                                Global Variables
@@ -561,7 +561,7 @@ SL_WEAK void socket_fifo_overflow_handler(const int32_t socketid,
 // -----------------------------------------------------------------------------
 
 /* Set socket storage */
-static inline void _set_socket_storage(const uint8_t idx, const uint16_t domain, const int32_t socket_id, void *socket_addr_struct, const uint8_t socket_addr_len)
+__STATIC_INLINE void _set_socket_storage(const uint8_t idx, const uint16_t domain, const int32_t socket_id, void *socket_addr_struct, const uint8_t socket_addr_len)
 {
   _sockets[idx] = &_socket_storage[idx]; // Gluing storage element to the pointer
   _sockets[idx]->_socket_id = socket_id;
@@ -592,19 +592,19 @@ static void __memcpy(void *dest, const void *src, const uint32_t len)
 }
 
 /* lock mutex*/
-static inline void _lock()
+__STATIC_INLINE void _lock()
 {
   assert(osMutexAcquire(_socket_hnd_mtx, osWaitForever) == osOK);
 }
 
 /* unlock mutex */
-static inline void _unlock()
+__STATIC_INLINE void _unlock()
 {
   assert(osMutexRelease(_socket_hnd_mtx) == osOK);
 }
 
 /* Destroy socket handler */
-static inline void _destroy_socket_hnd(_socket_handler_t *socket_hnd)
+__STATIC_INLINE void _destroy_socket_hnd(_socket_handler_t *socket_hnd)
 {
   socket_hnd->_domain = SOCKET_DOMAIN_NOT_SET;
   socket_hnd->_socket_id = SOCKET_INVALID_ID;
@@ -628,7 +628,7 @@ static inline void _destroy_socket_hnd(_socket_handler_t *socket_hnd)
 }
 
 /* init fifo internal */
-static inline void _init_fifo(_socket_handler_t *hnd, uint8_t *buff_ptr, const uint32_t size)
+__STATIC_INLINE void _init_fifo(_socket_handler_t *hnd, uint8_t *buff_ptr, const uint32_t size)
 {
   hnd->_state._fifo_overflow = false; // reset states
   hnd->_state._fifo_underflow = false;
@@ -638,7 +638,7 @@ static inline void _init_fifo(_socket_handler_t *hnd, uint8_t *buff_ptr, const u
 }
 
 /* reset fifo */
-static inline void _reset_fifo(_socket_handler_t *hnd)
+__STATIC_INLINE void _reset_fifo(_socket_handler_t *hnd)
 {
   hnd->_state._fifo_overflow = false;
   hnd->_state._fifo_underflow = false;

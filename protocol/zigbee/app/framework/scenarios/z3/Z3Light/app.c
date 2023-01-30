@@ -71,7 +71,7 @@ static void commissioning_led_event_handler(sl_zigbee_event_t *event)
     }
   } else {
     EmberStatus status = emberAfPluginNetworkSteeringStart();
-    sl_zigbee_app_debug_print("%s network %s: 0x%02X\n", "Join", "start", status);
+    sl_zigbee_app_debug_println("%s network %s: 0x%02X", "Join", "start", status);
   }
 }
 
@@ -80,8 +80,8 @@ static void finding_and_binding_event_handler(sl_zigbee_event_t *event)
   if (emberAfNetworkState() == EMBER_JOINED_NETWORK) {
     sl_zigbee_event_set_inactive(&finding_and_binding_event);
 
-    sl_zigbee_app_debug_print("Find and bind target start: 0x%02X\n",
-                              emberAfPluginFindAndBindTargetStart(LIGHT_ENDPOINT));
+    sl_zigbee_app_debug_println("Find and bind target start: 0x%02X",
+                                emberAfPluginFindAndBindTargetStart(LIGHT_ENDPOINT));
   }
 }
 
@@ -140,18 +140,18 @@ void emberAfPluginNetworkSteeringCompleteCallback(EmberStatus status,
                                                   uint8_t joinAttempts,
                                                   uint8_t finalState)
 {
-  sl_zigbee_app_debug_print("Join network complete: 0x%02X\n", status);
+  sl_zigbee_app_debug_println("Join network complete: 0x%02X", status);
 
   if (status != EMBER_SUCCESS) {
     // Initialize our ZLL security now so that we are ready to be a touchlink
     // target at any point.
     status = emberAfZllSetInitialSecurityState();
     if (status != EMBER_SUCCESS) {
-      sl_zigbee_app_debug_print("Error: cannot initialize ZLL security: 0x%02X\n", status);
+      sl_zigbee_app_debug_println("Error: cannot initialize ZLL security: 0x%02X", status);
     }
 
     status = emberAfPluginNetworkCreatorStart(false); // distributed
-    sl_zigbee_app_debug_print("Form network start: 0x%02X\n", status);
+    sl_zigbee_app_debug_println("Form network start: 0x%02X", status);
   }
 }
 
@@ -169,8 +169,8 @@ void emberAfPluginNetworkSteeringCompleteCallback(EmberStatus status,
 void emberAfPluginNetworkCreatorCompleteCallback(const EmberNetworkParameters *network,
                                                  bool usedSecondaryChannels)
 {
-  sl_zigbee_app_debug_print("Form Network Complete: 0x%02X\n",
-                            EMBER_SUCCESS);
+  sl_zigbee_app_debug_println("Form Network Complete: 0x%02X",
+                              EMBER_SUCCESS);
 }
 
 /** @brief Post Attribute Change

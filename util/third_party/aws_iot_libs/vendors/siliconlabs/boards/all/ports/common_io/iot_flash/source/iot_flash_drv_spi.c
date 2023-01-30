@@ -796,6 +796,19 @@ sl_status_t iot_flash_drv_spi_driver_deinit(void *pvHndl)
 }
 
 /*******************************************************************************
+ *                   iot_flash_drv_spi_get_flash_base()
+ ******************************************************************************/
+
+sl_status_t iot_flash_drv_spi_get_flash_base(uint32_t *ulFlashBase)                                            
+{
+  /* return flash base address */
+  *ulFlashBase =  iot_flash_desc_get_external_flash_base();
+
+  /* done */
+  return SL_STATUS_OK;
+}
+
+/*******************************************************************************
  *                   iot_flash_drv_spi_get_flash_size()
  ******************************************************************************/
 

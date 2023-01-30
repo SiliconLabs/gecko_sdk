@@ -1,5 +1,5 @@
-#ifndef SL_BT_RTOS_CONFIG_H
-#define SL_BT_RTOS_CONFIG_H
+#ifndef SL_BTCTRL_CONFIG_H
+#define SL_BTCTRL_CONFIG_H
 
 // <<< Use Configuration Wizard in Context Menu >>>
 
@@ -29,4 +29,4 @@
 
 // <<< end of configuration section >>>
 
-#endif // SL_BT_RTOS_CONFIG_H
+#endif // SL_BTCTRL_CONFIG_H

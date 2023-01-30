@@ -41,6 +41,7 @@ extern "C" {
 
 #include "sl_widget.h"
 #include "sl_status.h"
+#include "sl_wisun_types.h"
 
 // -----------------------------------------------------------------------------
 //                              Macros and Typedefs
@@ -78,7 +79,7 @@ void sl_gui_init_all_widget(void);
  * @brief Reset all of widgets
  * @details Call init all
  *****************************************************************************/
-static inline void sl_gui_reset_all_widget(void)
+__STATIC_INLINE void sl_gui_reset_all_widget(void)
 {
   sl_gui_init_all_widget();
 }
@@ -268,7 +269,7 @@ sl_status_t sl_gui_textbox_scroll_up(void);
  * @brief Update all GUI widget
  * @details Update title, buttons, optionlist, progressbar and textbox in one step.
  *****************************************************************************/
-static inline void sl_gui_update_all_widget(void)
+__STATIC_INLINE void sl_gui_update_all_widget(void)
 {
   sl_gui_title_update();
   sl_gui_button_update(SL_GUI_BUTTON0);

@@ -312,7 +312,7 @@ Purge indirect success
 
 ### Beacons
 
-By issuing the `active_scan` command the device transmits a *beacon request* to
+By issuing the `start_active_scan` command the device transmits a *beacon request* to
 the surrounding devices and they will respond with a *beacon*. By default, the
 beacon payload is an empty string but it can be set to any desired value to
 differentiate between devices:
@@ -327,7 +327,7 @@ To request and gather the beacons of the devices in range issue the following
 command:
 
 ```txt
-> active_scan 0
+> start_active_scan 0
 Start active scanning: channel 0, status=0x00
 > BEACON: panId 0xCCDD source 0x2022 payload {01234567}
 Active scan complete

@@ -55,7 +55,7 @@
  * @param[in] errno_val errno number value if there is any error
  * @return return value by status check
  *****************************************************************************/
-static inline int32_t _check_status(sl_status_t status, int32_t retval, int32_t errno_val);
+__STATIC_INLINE int32_t _check_status(sl_status_t status, int32_t retval, int32_t errno_val);
 
 /**************************************************************************//**
  * @brief Convert POSIX protocol ID to Wi-SUN eqvivalent
@@ -66,7 +66,7 @@ static inline int32_t _check_status(sl_status_t status, int32_t retval, int32_t 
  *                 IPPROTO_UDP
  * @return Wi-SUN protocol id
  *****************************************************************************/
-static inline sl_wisun_socket_protocol_t _proto2wisun(proto_type_t protocol);
+__STATIC_INLINE sl_wisun_socket_protocol_t _proto2wisun(proto_type_t protocol);
 
 /**************************************************************************//**
  * @brief Socket type to Wi-SUN.
@@ -78,7 +78,7 @@ static inline sl_wisun_socket_protocol_t _proto2wisun(proto_type_t protocol);
  * @param[in] protocol Protocol ID
  * @return Converted protocol. Default is SL_WISUN_SOCKET_PROTOCOL_UDP
  *****************************************************************************/
-static inline sl_wisun_socket_protocol_t _socktype2wisun(sock_type_t type, proto_type_t protocol);
+__STATIC_INLINE sl_wisun_socket_protocol_t _socktype2wisun(sock_type_t type, proto_type_t protocol);
 
 /**************************************************************************//**
  * @brief Set special Wi-SUN socket options for socket handler
@@ -653,7 +653,7 @@ static int32_t _get_socket_handler_opt(const _socket_handler_t * const hnd,
   }
 }
 
-static inline int32_t _check_status(sl_status_t status, int32_t retval, int32_t errno_val)
+__STATIC_INLINE int32_t _check_status(sl_status_t status, int32_t retval, int32_t errno_val)
 {
   if (status == SL_STATUS_OK) {
     return retval;
@@ -662,7 +662,7 @@ static inline int32_t _check_status(sl_status_t status, int32_t retval, int32_t 
   return RETVAL_ERROR;
 }
 
-static inline sl_wisun_socket_protocol_t _proto2wisun(proto_type_t protocol)
+__STATIC_INLINE sl_wisun_socket_protocol_t _proto2wisun(proto_type_t protocol)
 {
   switch (protocol) {
     case IPPROTO_ICMP: return SL_WISUN_SOCKET_PROTOCOL_ICMP;
@@ -672,7 +672,7 @@ static inline sl_wisun_socket_protocol_t _proto2wisun(proto_type_t protocol)
   }
 }
 
-static inline sl_wisun_socket_protocol_t _socktype2wisun(sock_type_t type, proto_type_t protocol)
+__STATIC_INLINE sl_wisun_socket_protocol_t _socktype2wisun(sock_type_t type, proto_type_t protocol)
 {
   // Wi-SUN domain only
   switch (type) {

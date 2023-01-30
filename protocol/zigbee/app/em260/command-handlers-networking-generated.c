@@ -233,6 +233,24 @@ bool emAfProcessEzspCommandNetworking(uint16_t commandId)
       break;
     }
 
+    case EZSP_CHILD_ID: {
+      EmberNodeId childId;
+      uint8_t childIndex;
+      childIndex = fetchInt8u();
+      childId = emberChildId(childIndex);
+      appendInt16u(childId);
+      break;
+    }
+
+    case EZSP_CHILD_INDEX: {
+      uint8_t childIndex;
+      EmberNodeId childId;
+      childId = fetchInt16u();
+      childIndex = emberChildIndex(childId);
+      appendInt8u(childIndex);
+      break;
+    }
+
     case EZSP_GET_SOURCE_ROUTE_TABLE_TOTAL_SIZE: {
       uint8_t sourceRouteTableTotalSize;
       sourceRouteTableTotalSize = emberAfEzspGetSourceRouteTableTotalSizeCommandCallback();

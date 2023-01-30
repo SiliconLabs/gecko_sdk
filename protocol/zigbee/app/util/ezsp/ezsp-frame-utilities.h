@@ -200,6 +200,7 @@ void fetchEmberKeyStruct(EmberKeyStruct *value);
     appendInt8u((value)->phy);                    \
     appendInt8u((value)->power);                  \
     appendInt8u((value)->timeout);                \
+    appendInt32u((value)->remainingTimeout);      \
   } while (0)
 
 void fetchEmberChildData(EmberChildData *value);

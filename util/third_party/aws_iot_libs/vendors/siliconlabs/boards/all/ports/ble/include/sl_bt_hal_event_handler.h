@@ -28,4 +28,9 @@
  */
 void sl_bt_hal_on_event(sl_bt_msg_t* evt);
 
+/**
+ * @brief Function called by platform init when the RTOS kernel is started
+ */
+void sl_bt_hal_on_kernel_start(void);
+
 #endif /* SL_BT_HAL_EVENT_HANDLER_H */

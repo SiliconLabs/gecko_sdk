@@ -61,9 +61,9 @@ static psa_key_id_t security_key_id = 0;
 //                          Public Function Definitions
 // -----------------------------------------------------------------------------
 /******************************************************************************
- * CLI - active_scan message: Start active scanning on selected channel
+ * CLI - start_active_scan message: Start active scanning on selected channel
  *****************************************************************************/
-void cli_active_scan(sl_cli_command_arg_t *arguments)
+void cli_start_active_scan(sl_cli_command_arg_t *arguments)
 {
   EmberStatus status;
   uint8_t channel_to_scan = sl_cli_get_argument_uint8(arguments, 0);
@@ -102,7 +102,7 @@ void cli_commission(sl_cli_command_arg_t *arguments)
 /******************************************************************************
  * CLI - start_energy_scan message: Start energy scanning on the given channel with samples (num)
  *****************************************************************************/
-void cli_energy_scan(sl_cli_command_arg_t *arguments)
+void cli_start_energy_scan(sl_cli_command_arg_t *arguments)
 {
   EmberStatus status;
   uint8_t channel_to_scan = sl_cli_get_argument_uint8(arguments, 0);

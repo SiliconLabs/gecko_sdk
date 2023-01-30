@@ -174,6 +174,6 @@ void emberAfEnergyScanCompleteCallback(int8_t mean,
                                        int8_t max,
                                        uint16_t variance)
 {
-  app_log_info("Energy scan complete, mean=%d min=%d max=%d var=%d",
+  app_log_info("Energy scan complete, mean=%d min=%d max=%d var=%d\n",
                mean, min, max, variance);
 }

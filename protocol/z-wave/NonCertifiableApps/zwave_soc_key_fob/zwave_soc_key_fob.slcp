@@ -130,6 +130,12 @@ configuration:
     condition: ["device_series_2"]
   - name: SL_STACK_SIZE
     value: 1024
+  - name: SL_PSA_ITS_SUPPORT_V1_DRIVER
+    value: 1
+  - name: SL_PSA_ITS_SUPPORT_V2_DRIVER
+    value: 1
+  - name: SL_PSA_ITS_SUPPORT_V3_DRIVER
+    value: 1
 
 define:
   - name: APP_PROPERTIES_CONFIG_FILE

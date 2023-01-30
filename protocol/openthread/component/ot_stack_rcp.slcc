@@ -11,8 +11,10 @@ requires:
   - name: ot_ncp
   - name: ot_radio
   - name: ot_headers
-  - name: ot_platform_abstraction_efr32
+  - name: ot_platform_abstraction
   - name: ot_thirdparty
+recommends:
+  - id: ot_platform_abstraction
 config_file:
   - path: protocol/openthread/config/sl_openthread_features_config.h
   - path: protocol/openthread/config/sl_openthread_generic_config.h

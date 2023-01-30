@@ -190,10 +190,12 @@ int sl_hci_uart_rx_buffered_length()
 static void tx_callback(UARTDRV_Handle_t handle, Ecode_t status, uint8_t *buffer, UARTDRV_Count_t count)
 {
   (void)handle;
+  (void)status;
   (void)buffer;
   (void)count;
   if (tx_complete != NULL) {
-    tx_complete(status);
+    // Ignore UART callback status
+    tx_complete(SL_STATUS_OK);
   }
 }
 

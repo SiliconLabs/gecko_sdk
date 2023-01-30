@@ -77,6 +77,10 @@ configuration:
     value: "usartHwFlowControlNone"
   - name: SL_IOSTREAM_EUSART_VCOM_FLOW_CONTROL_TYPE
     value: "eusartHwFlowControlNone"
+  - name: SL_IOSTREAM_USART_VCOM_CONVERT_BY_DEFAULT_LF_TO_CRLF
+    value: "(1)"
+  - name: SL_IOSTREAM_EUSART_VCOM_CONVERT_BY_DEFAULT_LF_TO_CRLF
+    value: "(1)"
 #----------------- Watchdog  -------------------------
   - name: SL_LEGACY_HAL_DISABLE_WATCHDOG
     value: "1"

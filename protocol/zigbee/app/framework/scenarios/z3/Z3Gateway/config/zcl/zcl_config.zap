@@ -7697,6 +7697,38 @@
               "reportableChange": 0
             },
             {
+              "name": "gp shared security key type",
+              "code": 32,
+              "mfgCode": null,
+              "side": "client",
+              "type": "bitmap8",
+              "included": 1,
+              "storageOption": "RAM",
+              "singleton": 0,
+              "bounded": 0,
+              "defaultValue": "0x00",
+              "reportable": 0,
+              "minInterval": 1,
+              "maxInterval": 65534,
+              "reportableChange": 0
+            },
+            {
+              "name": "gp shared security key",
+              "code": 33,
+              "mfgCode": null,
+              "side": "client",
+              "type": "security_key",
+              "included": 1,
+              "storageOption": "RAM",
+              "singleton": 0,
+              "bounded": 0,
+              "defaultValue": "0x00000000000000000000000000000000",
+              "reportable": 0,
+              "minInterval": 1,
+              "maxInterval": 65534,
+              "reportableChange": 0
+            },
+            {
               "name": "gp link key",
               "code": 34,
               "mfgCode": null,

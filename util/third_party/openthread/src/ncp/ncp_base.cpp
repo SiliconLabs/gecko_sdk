@@ -1511,10 +1511,10 @@ exit:
 #if OPENTHREAD_CONFIG_COPROCESSOR_RPC_ENABLE
 otError NcpBase::HandlePropertySet_SPINEL_PROP_COPROCESSOR_RPC(uint8_t aHeader)
 {
-    const char *string = nullptr;
-    char       *output = otCRPCGetStaticOutputBuffer();
+    const char *string             = nullptr;
+    char *      output             = otCRPCGetStaticOutputBuffer();
     size_t      output_buffer_size = otCRPCGetStaticOutputBufferSize();
-    otError     error = OT_ERROR_NONE;
+    otError     error              = OT_ERROR_NONE;
 
     error = mDecoder.ReadUtf8(string);
 

@@ -29,6 +29,19 @@
 #define SL_IOSTREAM_EUSART_CLOCK_REF(periph_nbr)         SL_IOSTREAM_EUSART_CONCAT_PASTER(cmuClock_, EUSART, periph_nbr)  {# Create clock reference #}
 #endif
 
+#if defined(SL_CATALOG_POWER_MANAGER_PRESENT)
+// EM Events
+#define SLEEP_EM_EVENT_MASK      (SL_POWER_MANAGER_EVENT_TRANSITION_LEAVING_EM0)
+static void events_handler(sl_power_manager_em_t from,
+                           sl_power_manager_em_t to);
+static sl_power_manager_em_transition_event_info_t events_info =
+{
+  .event_mask = SLEEP_EM_EVENT_MASK,
+  .on_event = events_handler,
+};
+static sl_power_manager_em_transition_event_handle_t events_handle;
+#endif // SL_CATALOG_POWER_MANAGER_PRESENT
+
 {% for instance in iostream_eusart_instances %}
 sl_status_t sl_iostream_eusart_init_{{ instance }}(void);
 {% endfor %}
@@ -84,12 +97,10 @@ sl_status_t sl_iostream_eusart_init_{{ instance }}(void)
   config_{{ instance }}.flow_control = SL_IOSTREAM_EUSART_{{ instance | upper }}_FLOW_CONTROL_TYPE != uartFlowControlSoftware ? SL_IOSTREAM_EUSART_{{ instance | upper }}_FLOW_CONTROL_TYPE : eusartHwFlowControlNone;
 #if defined(LDMAXBAR_CH_REQSEL_SIGSEL_EUART0RXFL) && (SL_IOSTREAM_EUSART_{{ instance | upper }}_PERIPHERAL_NO == 0)
   sl_iostream_dma_config_t dma_config_{{ instance }} = {.src = (uint8_t *)&SL_IOSTREAM_EUSART_{{ instance | upper }}_PERIPHERAL->RXDATA,
-                                                        .peripheral_signal = SL_IOSTREAM_EUART_RX_DMA_SIGNAL,
-                                                        .size = dmadrvDataSize1};
+                                                        .peripheral_signal = SL_IOSTREAM_EUART_RX_DMA_SIGNAL};
 #else
   sl_iostream_dma_config_t dma_config_{{ instance }} = {.src = (uint8_t *)&SL_IOSTREAM_EUSART_{{ instance | upper }}_PERIPHERAL->RXDATA,
-                                                        .peripheral_signal = SL_IOSTREAM_EUSART_RX_DMA_SIGNAL(SL_IOSTREAM_EUSART_{{ instance | upper }}_PERIPHERAL_NO),
-                                                        .size = dmadrvDataSize1};
+                                                        .peripheral_signal = SL_IOSTREAM_EUSART_RX_DMA_SIGNAL(SL_IOSTREAM_EUSART_{{ instance | upper }}_PERIPHERAL_NO)};
 #endif 
   sl_iostream_uart_config_t uart_config_{{ instance }} = {
     .dma_cfg = dma_config_{{ instance }},
@@ -116,6 +127,10 @@ sl_status_t sl_iostream_eusart_init_{{ instance }}(void)
 {# Init function #}
 void sl_iostream_eusart_init_instances(void)
 {
+  #if defined(SL_CATALOG_POWER_MANAGER_PRESENT)
+  // Enable power manager notifications
+  sl_power_manager_subscribe_em_transition_event(&events_handle, &events_info);
+  #endif
   // Instantiate eusart instance(s) {# Initialize eusart instance(s) #}
   {% for instance in iostream_eusart_instances %}
   sl_iostream_eusart_init_{{ instance }}();
@@ -133,15 +148,24 @@ void SL_IOSTREAM_EUSART_RX_IRQ_HANDLER(SL_IOSTREAM_EUSART_{{ instance | upper }}
   sl_iostream_eusart_irq_handler(&sl_iostream_{{ instance }});
 }{% endfor %}
 
-#if defined(SL_CATALOG_POWER_MANAGER_PRESENT) && !defined(SL_CATALOG_KERNEL_PRESENT)
+#if defined(SL_CATALOG_POWER_MANAGER_PRESENT)
+#if !defined(SL_CATALOG_KERNEL_PRESENT)
 {% for instance in iostream_eusart_instances %} {# Create IRQ Handler(s) #}
 sl_power_manager_on_isr_exit_t sl_iostream_eusart_{{ instance }}_sleep_on_isr_exit(void)
 {
   return sl_iostream_uart_sleep_on_isr_exit(&sl_iostream_{{ instance }});
 }
-bool sl_iostream_eusart_{{ instance }}_is_ok_to_sleep(void)
-{
-  return sl_iostream_uart_is_ok_to_sleep(&sl_iostream_{{ instance }});
-}
 {% endfor %}
-#endif
+#endif // SL_CATALOG_KERNEL_PRESENT
+static void events_handler(sl_power_manager_em_t from,
+                           sl_power_manager_em_t to)
+{
+  (void) from;
+  // Enable next byte detect to wake from sleep
+  if (to < SL_POWER_MANAGER_EM3){
+    {% for instance in iostream_eusart_instances %}  
+    context_{{ instance }}.context.set_next_byte_detect(sl_iostream_{{ instance }}_handle->context, true);
+    {% endfor %}
+  }
+}
+#endif // SL_CATALOG_POWER_MANAGER_PRESENT

@@ -156,7 +156,6 @@ source:
 
 # Posix Stubs
   - path: "protocol/zigbee/app/zigbeed/simulator_stubs.c"
-  - path: "protocol/zigbee/app/zigbeed/coexistence-802154-stubs.c"
   - path: "protocol/zigbee/app/zigbeed/micro-stubs.c"
 # implements emberSerial* functions for a posix target, opening a tty
 # possibly move file to something like:
@@ -219,11 +218,6 @@ define:
     value:  "\"../../../zigbeed/zigbeed_configuration.h\""
     unless:
       - "zigbee_pro_compliance"
-
-# For some reason ember-configuration.c allocates 800 bytes too little memory.
-# Work around with this define that adds more available memory.  Add a lot more.
-  - name: RESERVED_AVAILABLE_MEMORY
-    value: 8000
 
 # TODO: Need to turn off optimizations to make it work on Linux
 toolchain_settings:

@@ -72,12 +72,92 @@ namespace FactoryDiags {
 const struct Diags::Command Diags::sCommands[] = {
     {"channel", &Diags::ProcessChannel}, {"echo", &Diags::ProcessEcho},   {"gpio", &Diags::ProcessGpio},
     {"power", &Diags::ProcessPower},     {"start", &Diags::ProcessStart}, {"stop", &Diags::ProcessStop},
-    {"stream", &Diags::ProcessStream},
+    {"stream", &Diags::ProcessStream},   {"coex", &Diags::ProcessCoex},
 };
 
 Diags::Diags(Instance &aInstance)
     : InstanceLocator(aInstance)
 {
+}
+
+Error Diags::ProcessCoex(uint8_t aArgsLength, char *aArgs[], char *aOutput, size_t aOutputMaxLen)
+{
+    Error error = kErrorNone;
+
+    VerifyOrExit(aArgsLength > 0, error = kErrorInvalidArgs);
+
+    if (strcmp(aArgs[0], "set-priority-pulse-width") == 0)
+    {
+        long value;
+        SuccessOrExit(error = ParseLong(aArgs[1], value));
+        SuccessOrExit(error = otPlatDiagCoexSetPriorityPulseWidth(static_cast<uint8_t>(value)));
+    }
+    else if (strcmp(aArgs[0], "set-radio-holdoff") == 0)
+    {
+        long value;
+        SuccessOrExit(error = ParseLong(aArgs[1], value));
+        SuccessOrExit(error = otPlatDiagCoexSetRadioHoldoff(static_cast<uint8_t>(value)));
+    }
+    else if (strcmp(aArgs[0], "set-request-pwm") == 0)
+    {
+        long value1, value2, value3;
+        SuccessOrExit(error = ParseLong(aArgs[1], value1));
+        SuccessOrExit(error = ParseLong(aArgs[2], value2));
+        SuccessOrExit(error = ParseLong(aArgs[3], value3));
+        SuccessOrExit(error = otPlatDiagCoexSetRequestPwm(static_cast<uint8_t>(value1), NULL,
+                                                          static_cast<uint8_t>(value2), static_cast<uint8_t>(value3)));
+    }
+    else if (strcmp(aArgs[0], "set-phy-select-timeout") == 0)
+    {
+        long value;
+        SuccessOrExit(error = ParseLong(aArgs[1], value));
+        SuccessOrExit(error = otPlatDiagCoexSetPhySelectTimeout(static_cast<uint8_t>(value)));
+    }
+    else if (strcmp(aArgs[0], "set-options") == 0)
+    {
+        long value;
+        SuccessOrExit(error = ParseLong(aArgs[1], value));
+        SuccessOrExit(error = otPlatDiagCoexSetOptions(static_cast<uint32_t>(value)));
+    }
+    else if (strcmp(aArgs[0], "get-phy-select-timeout") == 0)
+    {
+        uint8_t value;
+        SuccessOrExit(error = otPlatDiagCoexGetPhySelectTimeout(&value));
+
+        snprintf(aOutput, aOutputMaxLen, "%d\r\n", value);
+    }
+    else if (strcmp(aArgs[0], "get-options") == 0)
+    {
+        uint32_t ptaOptions;
+        SuccessOrExit(error = otPlatDiagCoexGetOptions(&ptaOptions));
+
+        uint8_t b[4];
+        b[3] = (uint8_t)(ptaOptions & 0xff);
+        b[2] = (uint8_t)(ptaOptions >> 8) & 0xff;
+        b[1] = (uint8_t)(ptaOptions >> 16) & 0xff;
+        b[0] = (uint8_t)(ptaOptions >> 24);
+        snprintf(aOutput, aOutputMaxLen, "%d\r%d\r%d\r%d\r\n", b[0], b[1], b[2], b[3]);
+    }
+    else if (strcmp(aArgs[0], "get-priority-pulse-width") == 0)
+    {
+        uint8_t value;
+        SuccessOrExit(error = otPlatDiagCoexGetPriorityPulseWidth(&value));
+
+        snprintf(aOutput, aOutputMaxLen, "%d\r\n", value);
+    }
+    else if (strcmp(aArgs[0], "get-request-pwm") == 0)
+    {
+        uint8_t req;
+        uint8_t dutyCycle;
+        uint8_t periodHalfMs;
+        SuccessOrExit(error = otPlatDiagCoexGetRequestPwmArgs(&req, &dutyCycle, &periodHalfMs));
+
+        snprintf(aOutput, aOutputMaxLen, "%d\r%d\r%d\r\n", req, dutyCycle, periodHalfMs);
+    }
+
+exit:
+    AppendErrorResult(error, aOutput, aOutputMaxLen);
+    return error;
 }
 
 Error Diags::ProcessStream(uint8_t aArgsLength, char *aArgs[], char *aOutput, size_t aOutputMaxLen)
@@ -88,29 +168,28 @@ Error Diags::ProcessStream(uint8_t aArgsLength, char *aArgs[], char *aOutput, si
 
     if (strcmp(aArgs[0], "stop") == 0)
     {
-        otPlatDiagTxStreamStop();
+        SuccessOrExit(error = otPlatDiagTxStreamStop());
     }
     else if (strcmp(aArgs[0], "tone") == 0)
     {
-        otPlatDiagTxStreamTone();
+        SuccessOrExit(error = otPlatDiagTxStreamTone());
     }
     else if (strcmp(aArgs[0], "random") == 0)
     {
-        otPlatDiagTxStreamRandom();
+        SuccessOrExit(error = otPlatDiagTxStreamRandom());
     }
     else if (strcmp(aArgs[0], "addrMatch") == 0)
     {
-        long  value;
-        SuccessOrExit(ParseLong(aArgs[1], value));
+        long value;
+        SuccessOrExit(error = ParseLong(aArgs[1], value));
 
-        otPlatDiagTxStreamAddrMatch(static_cast<uint8_t>(value));
+        SuccessOrExit(error = otPlatDiagTxStreamAddrMatch(static_cast<uint8_t>(value)));
     }
     else if (strcmp(aArgs[0], "autoAck") == 0)
     {
-        long  value;
-        SuccessOrExit(ParseLong(aArgs[1], value));
-
-        otPlatDiagTxStreamAutoAck(static_cast<uint8_t>(value));
+        long value;
+        SuccessOrExit(error = ParseLong(aArgs[1], value));
+        SuccessOrExit(error = otPlatDiagTxStreamAutoAck(static_cast<uint8_t>(value)));
     }
 
 exit:
@@ -223,7 +302,7 @@ const struct Diags::Command Diags::sCommands[] = {
     {"channel", &Diags::ProcessChannel}, {"gpio", &Diags::ProcessGpio},     {"power", &Diags::ProcessPower},
     {"radio", &Diags::ProcessRadio},     {"repeat", &Diags::ProcessRepeat}, {"send", &Diags::ProcessSend},
     {"start", &Diags::ProcessStart},     {"stats", &Diags::ProcessStats},   {"stop", &Diags::ProcessStop},
-    {"stream", &Diags::ProcessStream},
+    {"stream", &Diags::ProcessStream},   {"coex", &Diags::ProcessCoex},
 };
 
 Diags::Diags(Instance &aInstance)
@@ -240,6 +319,90 @@ Diags::Diags(Instance &aInstance)
     mStats.Clear();
 }
 
+Error Diags::ProcessCoex(uint8_t aArgsLength, char *aArgs[], char *aOutput, size_t aOutputMaxLen)
+{
+    Error error = kErrorNone;
+
+    VerifyOrExit(otPlatDiagModeGet(), error = kErrorInvalidState);
+    VerifyOrExit(aArgsLength > 0, error = kErrorInvalidArgs);
+
+    SuccessOrExit(error = Get<Radio>().Sleep());
+
+    if (strcmp(aArgs[0], "set-priority-pulse-width") == 0)
+    {
+        long value;
+        SuccessOrExit(error = ParseLong(aArgs[1], value));
+        SuccessOrExit(error = Get<Radio>().CoexSetPriorityPulseWidth(static_cast<uint8_t>(value)));
+    }
+    else if (strcmp(aArgs[0], "set-radio-holdoff") == 0)
+    {
+        long value;
+        SuccessOrExit(error = ParseLong(aArgs[1], value));
+        SuccessOrExit(error = Get<Radio>().CoexSetRadioHoldoff(static_cast<uint8_t>(value)));
+    }
+    else if (strcmp(aArgs[0], "set-request-pwm") == 0)
+    {
+        long value1, value2, value3;
+        SuccessOrExit(error = ParseLong(aArgs[1], value1));
+        SuccessOrExit(error = ParseLong(aArgs[2], value2));
+        SuccessOrExit(error = ParseLong(aArgs[3], value3));
+        SuccessOrExit(error =
+                          Get<Radio>().CoexSetRequestPwm(static_cast<uint8_t>(value1), nullptr,
+                                                         static_cast<uint8_t>(value2), static_cast<uint8_t>(value3)));
+    }
+    else if (strcmp(aArgs[0], "set-phy-select-timeout") == 0)
+    {
+        long value;
+        SuccessOrExit(error = ParseLong(aArgs[1], value));
+        SuccessOrExit(error = Get<Radio>().CoexSetPhySelectTimeout(static_cast<uint8_t>(value)));
+    }
+    else if (strcmp(aArgs[0], "set-options") == 0)
+    {
+        long value;
+        SuccessOrExit(error = ParseLong(aArgs[1], value));
+        SuccessOrExit(error = Get<Radio>().CoexSetOptions(static_cast<uint32_t>(value)));
+    }
+    else if (strcmp(aArgs[0], "get-phy-select-timeout") == 0)
+    {
+        uint8_t value;
+        SuccessOrExit(error = Get<Radio>().CoexGetPhySelectTimeout(&value));
+
+        snprintf(aOutput, aOutputMaxLen, "%d\r\n", value);
+    }
+    else if (strcmp(aArgs[0], "get-options") == 0)
+    {
+        uint32_t ptaOptions;
+        SuccessOrExit(error = Get<Radio>().CoexGetOptions(&ptaOptions));
+
+        uint8_t b[4];
+        b[3] = static_cast<uint8_t>(ptaOptions & 0xff);
+        b[2] = static_cast<uint8_t>(ptaOptions >> 8) & 0xff;
+        b[1] = static_cast<uint8_t>(ptaOptions >> 16) & 0xff;
+        b[0] = static_cast<uint8_t>(ptaOptions >> 24);
+        snprintf(aOutput, aOutputMaxLen, "%d\r%d\r%d\r%d\r\n", b[0], b[1], b[2], b[3]);
+    }
+    else if (strcmp(aArgs[0], "get-priority-pulse-width") == 0)
+    {
+        uint8_t value;
+        SuccessOrExit(error = Get<Radio>().CoexGetPriorityPulseWidth(&value));
+
+        snprintf(aOutput, aOutputMaxLen, "%d\r\n", value);
+    }
+    else if (strcmp(aArgs[0], "get-request-pwm") == 0)
+    {
+        uint8_t req;
+
+        uint8_t dutyCycle;
+        uint8_t periodHalfMs;
+
+        SuccessOrExit(error = Get<Radio>().CoexGetRequestPwmArgs(&req, &dutyCycle, &periodHalfMs));
+        snprintf(aOutput, aOutputMaxLen, "%d\r%d\r%d\r\n", req, dutyCycle, periodHalfMs);
+    }
+
+exit:
+    AppendErrorResult(error, aOutput, aOutputMaxLen);
+    return error;
+}
 
 Error Diags::ProcessStream(uint8_t aArgsLength, char *aArgs[], char *aOutput, size_t aOutputMaxLen)
 {
@@ -267,15 +430,15 @@ Error Diags::ProcessStream(uint8_t aArgsLength, char *aArgs[], char *aOutput, si
     }
     else if (strcmp(aArgs[0], "addrMatch") == 0)
     {
-        long  value;
-        SuccessOrExit(ParseLong(aArgs[1], value));
+        long value;
+        SuccessOrExit(error = ParseLong(aArgs[1], value));
         SuccessOrExit(error = Get<Radio>().TxStreamAddrMatch(static_cast<uint8_t>(value)));
         snprintf(aOutput, aOutputMaxLen, "Toggle stream AddrMatch\r\nstatus 0x%02x\r\n", error);
     }
     else if (strcmp(aArgs[0], "autoAck") == 0)
     {
-        long  value;
-        SuccessOrExit(ParseLong(aArgs[1], value));
+        long value;
+        SuccessOrExit(error = ParseLong(aArgs[1], value));
         SuccessOrExit(error = Get<Radio>().TxStreamAutoAck(static_cast<uint8_t>(value)));
         snprintf(aOutput, aOutputMaxLen, "Toggle stream AutoAck\r\nstatus 0x%02x\r\n", error);
     }
@@ -284,7 +447,6 @@ exit:
     AppendErrorResult(error, aOutput, aOutputMaxLen);
     return error;
 }
-
 
 Error Diags::ProcessChannel(uint8_t aArgsLength, char *aArgs[], char *aOutput, size_t aOutputMaxLen)
 {

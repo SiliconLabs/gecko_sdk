@@ -17,10 +17,13 @@ provides:
 
 include:
   - path: ../../../util/third_party/
-  
+
   - path: ../../../util/third_party/trusted-firmware-m/interface/include
+    unless: [tz_service_common]
     file_list:
       - path: psa/client.h
+      - path: psa_config.h
+      - path: psa/error.h
 
   - path: ../../../util/third_party/mbedtls/include
     file_list:

@@ -33,9 +33,9 @@
 #include "coexistence-hal.h"
 #include "sl_rail_util_coex_config.h"
 #endif // SL_CATALOG_RAIL_UTIL_COEX_PRESENT
-
+#if (!defined(PHY_NULL) && !defined(ZIGBEE_STACK_ON_HOST))
 #include "rail_util_ieee802154/sl_rail_util_ieee802154_stack_event.h"
-
+#endif
 #ifdef __cplusplus
 extern "C" {
 #endif
@@ -232,11 +232,12 @@ sl_rail_util_coex_req_t sl_rail_util_coex_frame_detect_req(void);
 // Which RX request options should be sent on filter pass
 sl_rail_util_coex_req_t sl_rail_util_coex_filter_pass_req(void);
 
+#ifndef EMBER_TEST
 // The Stack reports PTA events via this function
 sl_rail_util_ieee802154_stack_status_t sl_rail_util_coex_on_event(
   sl_rail_util_ieee802154_stack_event_t stack_event,
   uint32_t supplement);
-
+#endif
 sl_status_t sl_rail_util_coex_set_directional_priority_pulse_width(uint8_t pulseWidthUs);
 uint8_t sl_rail_util_coex_get_directional_priority_pulse_width(void);
 

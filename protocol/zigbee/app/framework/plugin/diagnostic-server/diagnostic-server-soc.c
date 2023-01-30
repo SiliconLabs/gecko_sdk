@@ -229,8 +229,7 @@ bool emberAfPreMessageReceivedCallback(EmberAfIncomingMessage* incomingMessage)
   || defined (ZCL_USING_DIAGNOSTICS_CLUSTER_AVERAGE_MAC_RETRY_PER_APS_MSG_SENT_ATTRIBUTE)
 
   EmberAfStatus afStatus;
-  uint8_t fixedEndpoints[] = FIXED_ENDPOINT_ARRAY;
-  uint8_t endpoint = fixedEndpoints[0];
+  uint8_t endpoint = incomingMessage->apsFrame->destinationEndpoint;
 
   // Write values to the framework's implemented optional cluster attributes.
 #if defined (ZCL_USING_DIAGNOSTICS_CLUSTER_LAST_MESSAGE_LQI_ATTRIBUTE)

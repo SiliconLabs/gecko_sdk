@@ -239,7 +239,14 @@ void palClockSetup(CMU_Clock_TypeDef clock)
   CMU_ClockEnable(cmuClock_CORELE, true);
 
   // Enable LF(A|E)CLK in CMU (will also enable LFRCO oscillator if not enabled)
-  CMU_ClockSelectSet(clock, cmuSelect_LFRCO);
+  if (clock == cmuClock_LFA) {
+    CMU_CLOCK_SELECT_SET(LFA, LFRCO);
+  } else if (clock == cmuClock_LFE) {
+    CMU_CLOCK_SELECT_SET(LFE, LFRCO);
+  } else {
+    // Clock not supported
+    EFM_ASSERT(false);
+  }
 }
 /**************************************************************************//**
  * @brief Enables LFECLK and selects clock source for RTCC
@@ -292,7 +299,14 @@ static void palClockSetup(CMU_Clock_TypeDef clock)
   CMU_ClockEnable(cmuClock_CORELE, true);
 
   // Enable LF(A|E)CLK in CMU (will also enable LFRCO oscillator if not enabled)
-  CMU_ClockSelectSet(clock, cmuSelect_LFRCO);
+  if (clock == cmuClock_LFA) {
+    CMU_CLOCK_SELECT_SET(LFA, LFRCO);
+  } else if (clock == cmuClock_LFE) {
+    CMU_CLOCK_SELECT_SET(LFE, LFRCO);
+  } else {
+    // Clock not supported
+    EFM_ASSERT(false);
+  }
 }
 /**************************************************************************//**
  * @brief Enables LFACLK and selects LFXO as clock source for RTC

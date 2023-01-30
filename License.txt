@@ -14,6 +14,9 @@ terms of the MSLA, with the following exceptions:
 * Files under platform/radio/rail_lib/autogen/librail_release are distributed
   under the terms of the Zlib license.
 
+* Files under protocol/bluetooth/bgstack/ll are distributed under the terms 
+  of the Zlib license.
+
 Some code from third parties have been included in this SDK under a separate
 license. An example can be found in the subdirectory "util/third_party". 
 However, licensed third-party code is not limited to this directory.

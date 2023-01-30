@@ -484,15 +484,6 @@ bool emGpCalculateIncomingCommandDecrypt(EmberGpAddress * gpdAddr,
                                          uint32_t gpdSecurityFrameCounter,
                                          uint8_t payloadLength,
                                          uint8_t * payload);
-uint8_t emGpOutgoingCommandEncrypt(EmberGpAddress * gpdAddr,
-                                   uint32_t gpdSecurityFrameCounter,
-                                   uint8_t keyType,
-                                   EmberKeyData * key,
-                                   uint8_t securityLevel,
-                                   uint8_t gpdCommandId,
-                                   uint8_t * gpdCommandPayload,
-                                   uint8_t * securedOutgoingGpdf,
-                                   uint8_t securedOutgoingGpdfMaxLength);
 // gp security test function
 void emGpTestSecurity(void);
 

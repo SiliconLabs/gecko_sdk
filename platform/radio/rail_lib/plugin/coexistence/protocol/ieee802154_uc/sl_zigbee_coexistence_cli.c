@@ -32,9 +32,12 @@
 #include "sl_zigbee_debug_print.h"
 #include "stack/include/ember-types.h"
 #include "counters.h"
+
 #ifdef EZSP_HOST
 #include "app/util/ezsp/ezsp-protocol.h"
 #include "app/util/ezsp/ezsp.h"
+typedef uint32_t sl_rail_util_coex_options_t;
+#define SL_RAIL_UTIL_COEX_OPT_DISABLED             0u
 #ifdef RAIL_SIM_EZSP
 #include "af_main.h"
 #include "coexistence-hal.h"
@@ -61,7 +64,7 @@ void emberAfPluginCoexistenceGetPtaState(sl_cli_command_arg_t *arguments)
 #else //!EZSP_HOST
   ptaState = (uint8_t)sl_rail_util_coex_is_enabled();
 #endif //EZSP_HOST
-  sl_zigbee_app_debug_print("PTA is %s", ((ptaState != 0U) ? "ENABLED" : "DISABLED"));
+  sl_zigbee_app_debug_print("PTA is %s\n", ((ptaState != 0U) ? "ENABLED" : "DISABLED"));
 }
 
 //-----------------------------------------------------------------------------
@@ -133,18 +136,18 @@ void emberAfPluginCoexistenceGetPtaOptions(sl_cli_command_arg_t *arguments)
   ptaOptions = (uint32_t)sl_rail_util_coex_get_options();
 #endif //EZSP_HOST
 
-  sl_zigbee_app_debug_print("PTA Configuration Option: 0x%4x", ptaOptions);
+  sl_zigbee_app_debug_print("PTA Configuration Option: 0x%04x\n", ptaOptions);
 
-  sl_zigbee_app_debug_print("%s", ptaHelp[0]);
+  sl_zigbee_app_debug_print("%s\n", ptaHelp[0]);
   for (i = 0; i < PTA_OPTION_FIELDS; i++) {
     value = (ptaOptions >> ptaBitShift[i]) & ptaBitMask[i];
-    sl_zigbee_app_debug_print("%s %02d            %d          %d",
+    sl_zigbee_app_debug_print("%s %02d            %d          %d\n",
                               ptaHelp[i + 1],
                               ptaBitShift[i],
                               (ptaBitShift[i + 1] - ptaBitShift[i]),
                               value);
   }
-  sl_zigbee_app_debug_print("");
+  sl_zigbee_app_debug_print("\n");
 }
 
 //-----------------------------------------------------------------------------
@@ -163,7 +166,15 @@ void emberAfPluginCoexistenceSetPtaOptions(sl_cli_command_arg_t *arguments)
                       (uint8_t*)&ptaOptions,
                       "pta options");
 #else //!EZSP_HOST
-  sl_rail_util_coex_set_options((sl_rail_util_coex_options_t)ptaOptions);
+  sl_status_t status = sl_rail_util_coex_set_options(ptaOptions);
+  if (status == SL_STATUS_INVALID_PARAMETER) {
+    uint32_t constant_options = sl_rail_util_coex_get_constant_options();
+    uint32_t current_options = sl_rail_util_coex_get_options();
+    sl_zigbee_app_debug_print("Error: SL_STATUS_INVALID_PARAMETER");
+    sl_zigbee_app_debug_print("Constant options: 0x%08x", constant_options);
+    sl_zigbee_app_debug_print("Desired  options: 0x%08x", ptaOptions);
+    sl_zigbee_app_debug_print("Invalid  options: 0x%08x", ((current_options & constant_options) ^ (ptaOptions & constant_options)));
+  }
 #endif //EZSP_HOST
   emberAfPluginCoexistenceGetPtaOptions(arguments);
 }
@@ -188,9 +199,16 @@ void emberAfPluginCoexistenceGetPwmState(sl_cli_command_arg_t *arguments)
                &valueLength,
                getPwmStateVariable);
 #else //!EZSP_HOST
-  getPwmStateVariable[0] = (uint8_t)sl_rail_util_coex_get_request_pwm_args()->req;
-  getPwmStateVariable[1] = sl_rail_util_coex_get_request_pwm_args()->dutyCycle;
-  getPwmStateVariable[2] = sl_rail_util_coex_get_request_pwm_args()->periodHalfMs;
+  const sl_rail_util_coex_pwm_args_t *pwm_args = sl_rail_util_coex_get_request_pwm_args();
+  if (pwm_args == NULL) {
+    getPwmStateVariable[0] = 0;
+    getPwmStateVariable[1] = 0;
+    getPwmStateVariable[2] = 0;
+  } else {
+    getPwmStateVariable[0] = (uint8_t)pwm_args->req;
+    getPwmStateVariable[1] = pwm_args->dutyCycle;
+    getPwmStateVariable[2] = pwm_args->periodHalfMs;
+  }
 #endif //EZSP_HOST
 
   switch (getPwmStateVariable[0]) {
@@ -215,7 +233,7 @@ void emberAfPluginCoexistenceGetPwmState(sl_cli_command_arg_t *arguments)
   }
   pwmPeriodHalfMs = getPwmStateVariable[2];
 
-  sl_zigbee_app_debug_print("PTA PWM (%s): %u (PERIOD in 0.5ms), %u (%%DC), %u (%s PRIORITY)",
+  sl_zigbee_app_debug_print("PTA PWM (%s): %u (PERIOD in 0.5ms), %u (%%DC), %u (%s PRIORITY)\n",
                             ((pwmPulseDc > 0u) ? "ENABLED" : "DISABLED"),
                             pwmPeriodHalfMs,
                             pwmPulseDc,
@@ -276,22 +294,22 @@ void emberAfPluginCoexistenceGetDpState(sl_cli_command_arg_t *arguments)
                         &valueLength,
                         &dpPulse);
   if (status == EZSP_SUCCESS) {
-    sl_zigbee_app_debug_print("Directional PRIORITY: %s, %u (us)",
+    sl_zigbee_app_debug_print("Directional PRIORITY: %s, %u (us)\n",
                               (dpPulse > 0u) ? "ENABLED" : "DISABLED",
                               dpPulse);
   } else {
-    sl_zigbee_app_debug_print("Error code: %x", status);
-    sl_zigbee_app_debug_print("Error getting Directional PRIORITY information from NCP!");
+    sl_zigbee_app_debug_print("Error code: %x\n", status);
+    sl_zigbee_app_debug_print("Error getting Directional PRIORITY information from NCP!\n");
   }
 
 #elif SL_RAIL_UTIL_COEX_DP_ENABLED
   uint8_t dpPulse = sl_rail_util_coex_get_directional_priority_pulse_width();
 
-  sl_zigbee_app_debug_print("Directional PRIORITY: %s, %u (us)",
+  sl_zigbee_app_debug_print("Directional PRIORITY: %s, %u (us)\n",
                             (dpPulse > 0u) ? "ENABLED" : "DISABLED",
                             dpPulse);
 #else //!SL_RAIL_UTIL_COEX_DP_ENABLED
-  sl_zigbee_app_debug_print("Directional PRIORITY not included in build!");
+  sl_zigbee_app_debug_print("Directional PRIORITY not included in build!\n");
 #endif //SL_RAIL_UTIL_COEX_DP_ENABLED
 }
 
@@ -305,6 +323,7 @@ void emberAfPluginCoexistenceSetDpState(sl_cli_command_arg_t *arguments)
 // 1. Enabled = pulse-width!=0, Disabled = pulse-width==0
 // 2. Pulse-width is adjustable in us resolution (1-255)
   uint8_t dpPulse = sl_cli_get_argument_uint8(arguments, 0);
+  (void)dpPulse;
 #ifdef EZSP_HOST
   uint8_t valueLength = sizeof(dpPulse);
 
@@ -316,13 +335,13 @@ void emberAfPluginCoexistenceSetDpState(sl_cli_command_arg_t *arguments)
                                "configure Directional Priority pulse width");
 
   if (status != EZSP_SUCCESS) {
-    sl_zigbee_app_debug_print("Error code: %x", status);
-    sl_zigbee_app_debug_print("Error getting Directional PRIORITY information from NCP!");
+    sl_zigbee_app_debug_print("Error code: %x\n", status);
+    sl_zigbee_app_debug_print("Error getting Directional PRIORITY information from NCP!\n");
   }
 #elif SL_RAIL_UTIL_COEX_DP_ENABLED
   sl_rail_util_coex_set_directional_priority_pulse_width(dpPulse);
 #else //!SL_RAIL_UTIL_COEX_DP_ENABLED
-  sl_zigbee_app_debug_print("Directional PRIORITY not included in build!");
+  sl_zigbee_app_debug_print("Directional PRIORITY not included in build!\n");
 #endif //SL_RAIL_UTIL_COEX_DP_ENABLED
   emberAfPluginCoexistenceGetDpState(arguments);
 }
@@ -332,7 +351,7 @@ void emberAfPluginCoexistenceSetDpState(sl_cli_command_arg_t *arguments)
 void emberAfPluginCoexistenceClearCounters(sl_cli_command_arg_t *arguments)
 {
   (void)arguments;
-  sl_zigbee_app_debug_print("Clearing counters");
+  sl_zigbee_app_debug_print("Clearing counters\n");
   emberAfPluginCountersClear();
 }
 
@@ -357,21 +376,21 @@ void emberAfPluginCoexistenceGetPhyState(sl_cli_command_arg_t *arguments)
                         &valueLength,
                         &timeout);
   if (status == EZSP_SUCCESS) {
-    sl_zigbee_app_debug_print("PHY Select: %s, %u (ms)",
+    sl_zigbee_app_debug_print("PHY Select: %s, %u (ms)\n",
                               (timeout > 0u) ? "ENABLED" : "DISABLED",
                               timeout);
   } else {
-    sl_zigbee_app_debug_print("Error code: %x", status);
-    sl_zigbee_app_debug_print("Error getting PHY Select information from NCP!");
+    sl_zigbee_app_debug_print("Error code: %x\n", status);
+    sl_zigbee_app_debug_print("Error getting PHY Select information from NCP!\n");
   }
 #elif SL_RAIL_UTIL_COEX_RUNTIME_PHY_SELECT
   uint8_t timeout = sl_rail_util_coex_get_phy_select_timeout();
 
-  sl_zigbee_app_debug_print("PHY Select: %s, %u (ms)",
+  sl_zigbee_app_debug_print("PHY Select: %s, %u (ms)\n",
                             (timeout > 0u) ? "ENABLED" : "DISABLED",
                             timeout);
 #else //!SL_RAIL_UTIL_COEX_RUNTIME_PHY_SELECT
-  sl_zigbee_app_debug_print("PHY Select not included in build!");
+  sl_zigbee_app_debug_print("PHY Select not included in build!\n");
 #endif //SL_RAIL_UTIL_COEX_RUNTIME_PHY_SELECT
 }
 
@@ -398,15 +417,15 @@ void emberAfPluginCoexistenceSetPhyState(sl_cli_command_arg_t *arguments)
                                "configure PHY select timeout");
 
   if (status != EZSP_SUCCESS) {
-    sl_zigbee_app_debug_print("Error code: %x", status);
-    sl_zigbee_app_debug_print("Error getting PHY Select information from NCP!");
+    sl_zigbee_app_debug_print("Error code: %x\n", status);
+    sl_zigbee_app_debug_print("Error getting PHY Select information from NCP!\n");
   }
 #elif SL_RAIL_UTIL_COEX_RUNTIME_PHY_SELECT
   sl_rail_util_coex_set_phy_select_timeout(timeout);
   emberAfPluginCoexistenceGetPhyState(arguments);
 #else //!SL_RAIL_UTIL_COEX_RUNTIME_PHY_SELECT
   (void)timeout;
-  sl_zigbee_app_debug_print("PHY Select not included in build!");
+  sl_zigbee_app_debug_print("PHY Select not included in build!\n");
 #endif //SL_RAIL_UTIL_COEX_RUNTIME_PHY_SELECT
 }
 
@@ -432,15 +451,15 @@ void emberAfPluginCoexistenceGetGpioInputOverride(sl_cli_command_arg_t *argument
   sl_rail_util_coex_gpio_index_t gpioIndex = (sl_rail_util_coex_gpio_index_t)sl_cli_get_argument_uint8(arguments, 0);
   if (gpioIndex < (COEX_GPIO_INDEX_COUNT - 1)) {
     bool enabled = sl_rail_util_coex_get_gpio_input_override(gpioIndex);
-    sl_zigbee_app_debug_print("%s GPIO: %s",
+    sl_zigbee_app_debug_print("%s GPIO: %s\n",
                               gpioNames[gpioIndex],
                               enabled ? "ENABLED" : "DISABLED");
   } else {
-    sl_zigbee_app_debug_print("COEX GPIO index out of bounds!");
+    sl_zigbee_app_debug_print("COEX GPIO index out of bounds!\n");
   }
 #else //!SL_RAIL_UTIL_COEX_OVERRIDE_GPIO_INPUT
   (void)arguments;
-  sl_zigbee_app_debug_print("COEX GPIO input override not included in build!");
+  sl_zigbee_app_debug_print("COEX GPIO input override not included in build!\n");
 #endif //SL_RAIL_UTIL_COEX_OVERRIDE_GPIO_INPUT
 }
 
@@ -458,11 +477,11 @@ void emberAfPluginCoexistenceSetGpioInputOverride(sl_cli_command_arg_t *argument
     sl_rail_util_coex_set_gpio_input_override(gpioIndex, enabled);
     emberAfPluginCoexistenceGetGpioInputOverride(arguments);
   } else {
-    sl_zigbee_app_debug_print("COEX GPIO index out of bounds!");
+    sl_zigbee_app_debug_print("COEX GPIO index out of bounds!\n");
   }
 #else //!SL_RAIL_UTIL_COEX_OVERRIDE_GPIO_INPUT
   (void)arguments;
-  sl_zigbee_app_debug_print("COEX GPIO input override not included in build!");
+  sl_zigbee_app_debug_print("COEX GPIO input override not included in build!\n");
 #endif //SL_RAIL_UTIL_COEX_OVERRIDE_GPIO_INPUT
 }
 
@@ -472,7 +491,7 @@ extern const char * titleStrings[];
 //------------------------------------------------------------------------------
 static void printCounter(uint8_t id)
 {
-  sl_zigbee_app_debug_print("%s: %u", titleStrings[id], emberCounters[id]);
+  sl_zigbee_app_debug_print("%s: %u\n", titleStrings[id], emberCounters[id]);
 }
 
 //------------------------------------------------------------------------------
@@ -483,7 +502,7 @@ void emberAfPluginCoexistencePrintCounters(sl_cli_command_arg_t *arguments)
   #ifdef EZSP_HOST
   ezspReadCounters(emberCounters);
   #endif //EZSP_HOST
-  sl_zigbee_app_debug_print("COUNTERS");
+  sl_zigbee_app_debug_print("COUNTERS\n");
   printCounter(EMBER_COUNTER_PTA_LO_PRI_REQUESTED);
   printCounter(EMBER_COUNTER_PTA_HI_PRI_REQUESTED);
   printCounter(EMBER_COUNTER_PTA_LO_PRI_DENIED);

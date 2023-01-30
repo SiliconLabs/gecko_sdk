@@ -101,7 +101,7 @@ static void _set_phy(void *args);
  * @return true PHY is matched
  * @return false PHY is not matched
  *****************************************************************************/
-static inline bool filter_profile(sl_wisun_phy_config_t *phy_cfg);
+__STATIC_INLINE bool filter_profile(sl_wisun_phy_config_t *phy_cfg);
 
 /**************************************************************************//**
  * @brief Full clean-up
@@ -289,7 +289,7 @@ static void _set_phy(void *args)
   app_wisun_network_connect();
 }
 
-static inline bool filter_profile(sl_wisun_phy_config_t *phy_cfg)
+__STATIC_INLINE bool filter_profile(sl_wisun_phy_config_t *phy_cfg)
 {
   switch (filter_params.profile) {
     case SL_WISUN_PHY_CONFIG_FAN10:

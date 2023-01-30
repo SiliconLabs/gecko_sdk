@@ -11,7 +11,7 @@ from enum import IntEnum
 import itertools
 
 # Update kRAILVersion to be used in phyInfoData.
-kRAILVersion = 14
+kRAILVersion = 15
 
 class ConcPhyEnum(IntEnum):
   CONC_PHY_NONE = 0
@@ -456,7 +456,7 @@ class RAILAdapter_MultiPhy(RAILAdapter):
       # if there are any present, exclude the write if false
       dynamicSlicerTableEntry = phyConfigEntry.dynamicSlicerTableEntry.value
       if dynamicSlicerTableEntry and len(dynamicSlicerTableEntry._elements) > 0 and \
-         self.partFamily in ["dumbo", "jumbo", "nerio", "nixi", "bobcat"]:
+         self.partFamily in ["dumbo", "jumbo", "nerio", "nixi", "bobcat","caracal"]:
           address = self._getRegAddress("SEQ","DYNAMIC_CHPWR_TABLE")
           regs.append((address, phyConfigEntry.dynamicSlicerTableEntry.value.lastElement, "SEQ.DYNAMIC_CHPWR_TABLE"))
 
@@ -716,16 +716,16 @@ class RAILAdapter_MultiPhy(RAILAdapter):
       agcMangainReg.MANGAINLNA.io = 1
       agcMangainReg.MANGAINPN.io = 1
 
+      #Find the correct IRCAL register to use
       if (self.partFamily.lower() in ["sol"]):
         modemIrcalReg = self.rm.FEFILT1.IRCAL if self.rm.SEQ.MODEMINFO.SOFTMODEM_DEMOD_EN else self.rm.FEFILT0.IRCAL
-        modemIrcalReg.io = 0
-        modemIrcalReg.MURSHF.io = 28
-        modemIrcalReg.MUISHF.io = 38
       else:
         modemIrcalReg = self.rm.MODEM.IRCAL
-        modemIrcalReg.io = 0
-        modemIrcalReg.MURSHF.io = 24
-        modemIrcalReg.MUISHF.io = 34
+
+      #Get MURSHF and MUISHF values from Radio Configurator Profile Outputs
+      modemIrcalReg.io = 0
+      modemIrcalReg.MURSHF.io = outputs.get_output('ircal_murshf').var_value
+      modemIrcalReg.MUISHF.io = outputs.get_output('ircal_muishf').var_value
 
       modemIrcalReg.IRCALEN.io = 1
 

@@ -25,6 +25,10 @@
 /* FreeRTOS BLE HAL includes */
 #include "bt_hal_manager.h"
 
+/* FreeRTOS includes */
+#include "FreeRTOS.h"
+#include "task.h"
+
 /* Silicon Labs includes */
 #include "sl_bt_hal_manager.h"
 #include "sl_bt_hal_manager_adapter_ble.h"
@@ -160,6 +164,31 @@ static const BTCallbacks_t * pxBtManagerCallbacks = NULL;
 #define SL_BT_MAX_DEVICE_NAME_LENGTH ((size_t) 40)
 #endif /* SL_BT_MAX_DEVICE_NAME_LENGTH */
 
+/**
+ * @brief Time to delay between attempts to start the BLuetooth stack.
+ *
+ * Starting the Bluetooth stack will be retried in pxEnable() if the stack
+ * cannot start yet because a previous stop request is still being serviced.
+ * This constant specifies the number of milliseconds to wait between attempts
+ * to start the stack.
+ */
+#ifndef SL_BT_STACK_START_RETRY_DELAY_MS
+#define SL_BT_STACK_START_RETRY_DELAY_MS (100)
+#endif /* SL_BT_STACK_START_RETRY_DELAY_MS */
+
+/**
+ * @brief Maximum amount of time to attempt to start the BLuetooth stack.
+ *
+ * Starting the Bluetooth stack will be retried in pxEnable() if the stack
+ * cannot start yet because a previous stop request is still being serviced.
+ * This constant specifies the maximum number of time in milliseconds for trying
+ * to start the stack. If the stack has not started successfully within this
+ * time, pxEnable() returns an error.
+ */
+#ifndef SL_BT_STACK_START_TIMEOUT_MS
+#define SL_BT_STACK_START_TIMEOUT_MS (5000)
+#endif /* SL_BT_MAX_STACK_START_TIMEOUT_MS */
+
 /** @brief Properties of the device */
 SlBtHalManager_t xSlBtHalManager = { 0 };
 
@@ -221,7 +250,7 @@ static BTStatus_t prvInitBluetoothState( void )
                                                   &xSlBtHalManager.usMaxMtu );
   if( sl_status != SL_STATUS_OK )
   {
-    SILABS_BLE_LOG_FUNC_EXIT_ERROR( "sl_bt_gatt_set_max_mtu(usMaxMtu=%"PRIu16") failed, sl_status=0x%x",
+    SILABS_BLE_LOG_FUNC_EXIT_ERROR( "sl_bt_gatt_set_max_mtu(usMaxMtu=%"PRIu16") failed, sl_status=0x%"PRIx32,
                                     xSlBtHalManager.usMaxMtu, sl_status );
     return prvSlStatusToBTStatus( sl_status );
   }
@@ -232,7 +261,7 @@ static BTStatus_t prvInitBluetoothState( void )
   sl_status = sl_bt_sm_set_bondable_mode( xSlBtHalManager.ucBondable );
   if( sl_status != SL_STATUS_OK )
   {
-    SILABS_BLE_LOG_FUNC_EXIT_ERROR( "sl_bt_sm_set_bondable_mode(ucBondable=%d) failed, sl_status=0x%x",
+    SILABS_BLE_LOG_FUNC_EXIT_ERROR( "sl_bt_sm_set_bondable_mode(ucBondable=%d) failed, sl_status=0x%"PRIx32,
                                     ( int ) xSlBtHalManager.ucBondable, sl_status );
     return prvSlStatusToBTStatus( sl_status );
   }
@@ -246,7 +275,7 @@ static BTStatus_t prvInitBluetoothState( void )
   if( sl_status != SL_STATUS_OK )
   {
     SILABS_BLE_LOG_FUNC_EXIT_ERROR(
-      "sl_bt_sm_configure(ucSmConfigureFlags=0x%x, ucIoCapabilities=0x%x) failed, sl_status=0x%x",
+      "sl_bt_sm_configure(ucSmConfigureFlags=0x%x, ucIoCapabilities=0x%x) failed, sl_status=0x%"PRIx32,
       ( unsigned ) xSlBtHalManager.ucSmConfigureFlags,
       ( unsigned ) xSlBtHalManager.ucIoCapabilities,
       sl_status );
@@ -263,7 +292,7 @@ static BTStatus_t prvInitBluetoothState( void )
   if( sl_status != SL_STATUS_OK )
   {
     SILABS_BLE_LOG_FUNC_EXIT_ERROR(
-      "sl_bt_sm_store_bonding_configuration(ucMaxBondingCount=%u, ucPolicyFlags=0x%x) failed, sl_status=0x%x",
+      "sl_bt_sm_store_bonding_configuration(ucMaxBondingCount=%u, ucPolicyFlags=0x%x) failed, sl_status=0x%"PRIx32,
       ( unsigned ) ucMaxBondingCount, ( unsigned ) ucPolicyFlags, sl_status );
     return prvSlStatusToBTStatus( sl_status );
   }
@@ -289,7 +318,7 @@ static BTStatus_t prvInitBluetoothState( void )
   if( sl_status != SL_STATUS_OK )
   {
     SILABS_BLE_LOG_FUNC_EXIT_ERROR(
-      "sl_bt_system_set_tx_power(sRequestedMinPower=%"PRId16", sRequestedMaxPower=%"PRId16") failed, sl_status=0x%x",
+      "sl_bt_system_set_tx_power(sRequestedMinPower=%"PRId16", sRequestedMaxPower=%"PRId16") failed, sl_status=0x%"PRIx32,
       sRequestedMinPower, sRequestedMaxPower, sl_status );
     return prvSlStatusToBTStatus( sl_status );
   }
@@ -297,6 +326,54 @@ static BTStatus_t prvInitBluetoothState( void )
 
   SILABS_BLE_LOG_FUNC_EXIT_DEBUG( "status=%d", eBTStatusSuccess );
   return eBTStatusSuccess;
+}
+
+/**
+ * @brief Called when starting the Bluetooth stack has finished.
+ *
+ * This function will set the initial Bluetooth configuration and update the BLE
+ * HAL state accordingly. The state change callback to the application is made
+ * if relevant.
+ */
+static BTStatus_t prvOnStartingFinished( )
+{
+  SILABS_BLE_LOG_FUNC_ENTRY_DEBUG( "eBtState=%d", ( int ) xSlBtHalManager.eBtState );
+
+  /* Initialize to the configuration that the BLE HAL uses */
+  BTState_t eBtState = eBTstateOn;
+  BTStatus_t status = prvInitBluetoothState( );
+  bool bGiveStateChangeCallback = false;
+  if( status != eBTStatusSuccess )
+  {
+    /* When failed, stop the Bluetooth stack to avoid getting into a partially
+    initialized state */
+    SILABS_BLE_LOG_FUNC_EXIT_ERROR( "prvInitBluetoothState() failed, status=%d", status );
+    sl_bt_system_stop_bluetooth( );
+    eBtState = eBTstateOff;
+
+    /* When failed, the state change callback is given only if the starting was
+    asynchronous. When starting is synchronous, the return code of pxEnable()
+    will directly indicate the error and the callback is redundant. */
+    bGiveStateChangeCallback = (xSlBtHalManager.eBtState == eSlBtHalBluetoothStartingAsync);
+    xSlBtHalManager.eBtState = eSlBtHalBluetoothStopped;
+  }
+  else
+  {
+    /* Successfully started. The state change callback is given always. */
+    bGiveStateChangeCallback = true;
+    xSlBtHalManager.eBtState = eSlBtHalBluetoothStarted;
+  }
+
+  /* Give the application the state change callback if relevant */
+  if( bGiveStateChangeCallback && pxBtManagerCallbacks && pxBtManagerCallbacks->pxDeviceStateChangedCb )
+  {
+    SILABS_BLE_LOG_CB_CALL_INFO( "pxDeviceStateChangedCb", "state=%d", ( int ) eBtState );
+    pxBtManagerCallbacks->pxDeviceStateChangedCb( eBtState );
+    SILABS_BLE_LOG_CB_RETURN_INFO( "pxDeviceStateChangedCb" );
+  }
+
+  SILABS_BLE_LOG_FUNC_EXIT_DEBUG( "status=%d", status );
+  return status;
 }
 
 /**
@@ -326,21 +403,117 @@ static BTStatus_t prvEnable( uint8_t ucGuestMode )
     return eBTStatusSuccess;
   }
 
-  /* Commit to the starting state and start the Bluetooth stack */
-  xSlBtHalManager.eBtState = eSlBtHalBluetoothStarting;
-  sl_status_t sl_status = sl_bt_system_start_bluetooth( );
-  if( sl_status != SL_STATUS_OK )
+  /* If the Bluetooth stack is already starting asynchronously, this is a
+  redundant call. Keep the current state and let the asynchronous starting make
+  the state change callback when it's ready. */
+  if( xSlBtHalManager.eBtState == eSlBtHalBluetoothStartingAsync )
   {
-    xSlBtHalManager.eBtState = eSlBtHalBluetoothStopped;
-    SILABS_BLE_LOG_FUNC_EXIT_ERROR( "sl_bt_system_start_bluetooth() failed, sl_status=0x%x",
-                                    sl_status );
-    return prvSlStatusToBTStatus( sl_status );
+    SILABS_BLE_LOG_FUNC_EXIT_INFO( "already starting asynchronously, status=%d", eBTStatusSuccess );
+    return eBTStatusSuccess;
   }
 
-  /* The Bluetooth stack is now starting up. We'll get either the boot event or
-  the system error event to indicate the result later. */
+  /* Commit to the right starting state. */
+  BTStatus_t status = eBTStatusFail;
+  if( xSlBtHalManager.bKernelStarted )
+  {
+    /** Kernel has been started. Start synchronously. */
+    SILABS_BLE_LOG_PRINT_DEBUG( "  start synchronously" );
+    xSlBtHalManager.eBtState = eSlBtHalBluetoothStartingSync;
+  }
+  else
+  {
+    /** Kernel has been not started. Start asynchronously. */
+    SILABS_BLE_LOG_PRINT_DEBUG( "  start asynchronously" );
+    xSlBtHalManager.eBtState = eSlBtHalBluetoothStartingAsync;
+  }
 
-  SILABS_BLE_LOG_FUNC_EXIT_INFO( "status=%d", eBTStatusSuccess );
+  /* Start the Bluetooth stack. If the stack is still stopping after a previous
+  request to stop the stack, we'll get a benign failure and need to retry. We
+  loop retrying if we can (the kernel has already been started). */
+  TickType_t xTicksAtStart = xTaskGetTickCount( );
+  while( 1 )
+  {
+    /* Request the stack to start. */
+    sl_status_t sl_status = sl_bt_system_start_bluetooth( );
+    SILABS_BLE_LOG_PRINT_DEBUG( "  sl_bt_system_start_bluetooth() returned sl_status=0x%"PRIx32, sl_status );
+
+    /* If the kernel has not been started, we cannot retry or wait, as no
+    progress on the start can be made until the kernel has been started. We must
+    break the loop immediately in both failure and success cases. The status is
+    checked in the code after the loop. */
+    if( !xSlBtHalManager.bKernelStarted )
+    {
+      status = prvSlStatusToBTStatus( sl_status );
+      break;
+    }
+
+    /* The kernel has been started and we can handle the Bluetooth start
+    synchronously. If the start request was successful, we use
+    sl_bt_system_get_random_data() to check for readiness. */
+    uint8_t ucDummyData = 0;
+    size_t xOutputDataLen = 0;
+    if( sl_status == SL_STATUS_OK )
+    {
+      sl_status = sl_bt_system_get_random_data(sizeof(ucDummyData), sizeof(ucDummyData),
+                                               &xOutputDataLen, &ucDummyData);
+      SILABS_BLE_LOG_PRINT_DEBUG( "  sl_bt_system_get_random_data() returned sl_status=0x%"PRIx32, sl_status );
+    }
+
+    /* If successful, the Bluetooth stack has started up */
+    if( sl_status == SL_STATUS_OK )
+    {
+      /* Call the function that handles the finished start */
+      status = prvOnStartingFinished( );
+      break;
+    }
+
+    /* The SL_STATUS_INVALID_STATE error is expected, as that can occur when the
+    stack is still busy stopping. Any other error is unexpected and considered
+    fatal. */
+    if( sl_status != SL_STATUS_INVALID_STATE )
+    {
+      status = prvSlStatusToBTStatus( sl_status );
+      break;
+    }
+
+    /* Starting the stack has failed due to wrong state. This means in practice
+    that the stack was still busy processing a previous request to stop. Wait
+    for a moment and retry unless we've reached the timeout already. */
+    TickType_t xTicks = xTaskGetTickCount( );
+    uint32_t ulMillisecondsElapsed = (xTicks - xTicksAtStart) * 1000 / (configTICK_RATE_HZ);
+    if( ulMillisecondsElapsed > (SL_BT_STACK_START_TIMEOUT_MS) )
+    {
+      /* Timed out. Break the loop with the error. */
+      SILABS_BLE_LOG_PRINT_DEBUG( "  stack start attempts have timed out" );
+      status = prvSlStatusToBTStatus( sl_status );
+      break;
+    }
+
+    /* Wait for the specified delay time. */
+    SILABS_BLE_LOG_PRINT_DEBUG( "  stack has not started yet, wait for the retry time" );
+    TickType_t xDelay = (SL_BT_STACK_START_RETRY_DELAY_MS) * (configTICK_RATE_HZ) / 1000;
+    vTaskDelay(xDelay);
+  }
+
+  /* If we failed, go back to the stopped state and return an error. */
+  if( status != eBTStatusSuccess )
+  {
+    xSlBtHalManager.eBtState = eSlBtHalBluetoothStopped;
+    SILABS_BLE_LOG_FUNC_EXIT_ERROR( "failed to start the Bluetooth stack, status=%d", status );
+    return status;
+  }
+
+  /* The Bluetooth stack has either successfully started up already or it will
+  start asynchronously. When asynchronous, the success will be detected later by
+  getting either the system boot event or the system error event. */
+  if( xSlBtHalManager.eBtState == eSlBtHalBluetoothStarted )
+  {
+    SILABS_BLE_LOG_FUNC_EXIT_INFO( "status=%d, started synchronously", eBTStatusSuccess );
+  }
+  else
+  {
+    SILABS_BLE_LOG_FUNC_EXIT_INFO( "status=%d, will start asynchronously", eBTStatusSuccess );
+  }
   return eBTStatusSuccess;
 }
 
@@ -366,7 +539,7 @@ static BTStatus_t prvDisable()
 
   /* Stop the Bluetooth stack */
   sl_status_t sl_status = sl_bt_system_stop_bluetooth( );
-  SILABS_BLE_LOG_PRINT_DEBUG( "  sl_bt_system_stop_bluetooth() returned sl_status=0x%x", sl_status );
+  SILABS_BLE_LOG_PRINT_DEBUG( "  sl_bt_system_stop_bluetooth() returned sl_status=0x%"PRIx32, sl_status );
 
   /* We ignore any errors, as there's nothing we could or should do if an error
   is returned. The command commits to shutting down as much as it can, and the
@@ -457,7 +630,7 @@ static BTStatus_t prvGetDeviceProperty( BTPropertyType_t xType )
    * associated callback */
   if( !pxBtManagerCallbacks || !pxBtManagerCallbacks->pxAdapterPropertiesCb )
   {
-    SILABS_BLE_LOG_FUNC_EXIT_ERROR( "no callback provided, status%=d", eBTStatusParamInvalid );
+    SILABS_BLE_LOG_FUNC_EXIT_ERROR( "no callback provided, status=%d", eBTStatusParamInvalid );
     return eBTStatusParamInvalid;
   }
 
@@ -632,7 +805,7 @@ static BTStatus_t prvSetLocalMtuSize( const BTProperty_t * pxProperty )
   if( sl_status != SL_STATUS_OK )
   {
     /* Nothing was set, so simply return an error */
-    SILABS_BLE_LOG_FUNC_EXIT_ERROR( "sl_bt_gatt_set_max_mtu() failed, sl_status=0x%x", sl_status );
+    SILABS_BLE_LOG_FUNC_EXIT_ERROR( "sl_bt_gatt_set_max_mtu() failed, sl_status=0x%"PRIx32, sl_status );
     return prvSlStatusToBTStatus( sl_status );
   }
 
@@ -682,7 +855,7 @@ static BTStatus_t prvSetBondableMode( const BTProperty_t * pxProperty )
   sl_status_t sl_status = sl_bt_sm_set_bondable_mode( ucBondable );
   if( sl_status != SL_STATUS_OK )
   {
-    SILABS_BLE_LOG_FUNC_EXIT_ERROR( "sl_bt_sm_set_bondable_mode() failed, sl_status=0x%x",
+    SILABS_BLE_LOG_FUNC_EXIT_ERROR( "sl_bt_sm_set_bondable_mode() failed, sl_status=0x%"PRIx32,
                                     sl_status );
     return prvSlStatusToBTStatus( sl_status );
   }
@@ -750,7 +923,7 @@ static BTStatus_t prvSetIoCapabilities( const BTProperty_t * pxProperty )
                                               ucIoCapabilities );
   if( sl_status != SL_STATUS_OK )
   {
-    SILABS_BLE_LOG_FUNC_EXIT_ERROR( "sl_bt_sm_configure() failed, sl_status=0x%x",
+    SILABS_BLE_LOG_FUNC_EXIT_ERROR( "sl_bt_sm_configure() failed, sl_status=0x%"PRIx32,
                                     sl_status );
     return prvSlStatusToBTStatus( sl_status );
   }
@@ -795,7 +968,7 @@ static BTStatus_t prvSetSecureConnectionOnly( const BTProperty_t * pxProperty )
                                               xSlBtHalManager.ucIoCapabilities );
   if( sl_status != SL_STATUS_OK )
   {
-    SILABS_BLE_LOG_FUNC_EXIT_ERROR( "sl_bt_sm_configure(ucSmConfigureFlags=0x%x, ucIoCapabilities=%d) failed, sl_status=0x%x",
+    SILABS_BLE_LOG_FUNC_EXIT_ERROR( "sl_bt_sm_configure(ucSmConfigureFlags=0x%x, ucIoCapabilities=%d) failed, sl_status=0x%"PRIx32,
                                     ucSmConfigureFlags, xSlBtHalManager.ucIoCapabilities, sl_status );
     return prvSlStatusToBTStatus( sl_status );
   }
@@ -996,7 +1169,7 @@ static BTStatus_t prvRemoveBond( const BTBdaddr_t * pxBdAddr )
                                   &ucBondingHandles[0] );
   if( sl_status != SL_STATUS_OK )
   {
-    SILABS_BLE_LOG_FUNC_EXIT_ERROR( "sl_bt_sm_get_bonding_handles() failed, sl_status=0x%x",
+    SILABS_BLE_LOG_FUNC_EXIT_ERROR( "sl_bt_sm_get_bonding_handles() failed, sl_status=0x%"PRIx32,
                                     sl_status );
     return prvSlStatusToBTStatus( sl_status );
   }
@@ -1057,7 +1230,7 @@ static BTStatus_t prvGetBondings()
                                   &ucBondingHandles[0] );
   if( sl_status != SL_STATUS_OK )
   {
-    SILABS_BLE_LOG_FUNC_EXIT_ERROR( "sl_bt_sm_get_bonding_handles() failed, sl_status=0x%x",
+    SILABS_BLE_LOG_FUNC_EXIT_ERROR( "sl_bt_sm_get_bonding_handles() failed, sl_status=0x%"PRIx32,
                                     sl_status );
     return prvSlStatusToBTStatus( sl_status );
   }
@@ -1389,41 +1562,22 @@ const BTInterface_t * BTGetBluetoothInterface()
  */
 static void prvOnSystemBoot( sl_bt_evt_system_boot_t * pxEvent )
 {
-  SILABS_BLE_LOG_FUNC_ENTRY_INFO( "eBtState=%d, pxEvent->version=%"PRIu16".%"PRIu16".%"PRIu16,
+  SILABS_BLE_LOG_FUNC_ENTRY_INFO( "eBtState=%d, pxEvent->version=%"PRId16".%"PRIu16".%"PRIu16,
                                   ( int ) xSlBtHalManager.eBtState,
                                   pxEvent->major, pxEvent->minor, pxEvent->patch );
 
   /* Unused parameter */
   ( void ) pxEvent;
 
-  /* If the Bluetooth stack was in the starting state, it has now started */
-  if( xSlBtHalManager.eBtState == eSlBtHalBluetoothStarting )
+  /* If the Bluetooth stack was starting asynchronously, we handle the initial
+  configuration and mark the stack as started. If the starting was synchronous,
+  prvEnable() will take care of the initial configuration. */
+  if( xSlBtHalManager.eBtState == eSlBtHalBluetoothStartingAsync )
   {
-    /* Initialize to the configuration that the BLE HAL uses */
-    BTState_t eBtState = eBTstateOn;
-    BTStatus_t status = prvInitBluetoothState( );
-    if( status != eBTStatusSuccess )
-    {
-      /* When failed, stop the Bluetooth stack to avoid getting into a partially
-      initialized state */
-      SILABS_BLE_LOG_FUNC_EXIT_ERROR( "prvInitBluetoothState() failed, status=%d", status );
-      sl_bt_system_stop_bluetooth( );
-      eBtState = eBTstateOff;
-      xSlBtHalManager.eBtState = eSlBtHalBluetoothStopped;
-    }
-    else
-    {
-      /* Successfully started */
-      xSlBtHalManager.eBtState = eSlBtHalBluetoothStarted;
-    }
-
-    /* Give the application the state change callback */
-    if( pxBtManagerCallbacks && pxBtManagerCallbacks->pxDeviceStateChangedCb )
-    {
-      SILABS_BLE_LOG_CB_CALL_INFO( "pxDeviceStateChangedCb", "state=%d", ( int ) eBtState );
-      pxBtManagerCallbacks->pxDeviceStateChangedCb( eBtState );
-      SILABS_BLE_LOG_CB_RETURN_INFO( "pxDeviceStateChangedCb" );
-    }
+    /* Call the function that handles the finished start. The return status is
+    ignored, as the function reports errors via a state change callback. */
+    BTStatus_t status = prvOnStartingFinished( );
+    ( void ) status;
   }
 
   SILABS_BLE_LOG_FUNC_EXIT_INFO( "%s", "" );
@@ -1440,12 +1594,13 @@ static void prvOnSystemError( sl_bt_evt_system_error_t * pxEvent )
   /* Unused parameter if logs are disabled */
   ( void ) pxEvent;
 
-  /* If the Bluetooth stack was in the starting state, the system error event
+  /* If the Bluetooth stack was starting asynchronously, the system error event
   indicates an error to start the stack */
-  if( xSlBtHalManager.eBtState == eSlBtHalBluetoothStarting )
+  if( xSlBtHalManager.eBtState == eSlBtHalBluetoothStartingAsync )
   {
     /* Give the application the state change callback to inform Bluetooth is still off */
     BTState_t eBtState = eBTstateOff;
+    xSlBtHalManager.eBtState = eSlBtHalBluetoothStopped;
     if( pxBtManagerCallbacks && pxBtManagerCallbacks->pxDeviceStateChangedCb )
     {
       SILABS_BLE_LOG_CB_CALL_INFO( "pxDeviceStateChangedCb", "state=%d", ( int ) eBtState );
@@ -1588,6 +1743,13 @@ void sl_bt_hal_on_event(sl_bt_msg_t *evt)
 
   /* Handle events in GATT server */
   prvGattServerOnSlBtEvent( evt );
+}
+
+/* Function called by platform init when the RTOS kernel is started */
+void sl_bt_hal_on_kernel_start(void)
+{
+  SILABS_BLE_LOG_PRINT_INFO( "sl_bt_hal_on_kernel_start()");
+  xSlBtHalManager.bKernelStarted = true;
 }
 
 void prvBtHalManagerOnNewPairingEvent( uint8_t ucBondingHandle,

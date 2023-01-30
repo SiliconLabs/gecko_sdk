@@ -28,11 +28,10 @@
  *
  ******************************************************************************/
 
-#include "psa/error.h"
-
 #include "sli_tz_ns_interface.h"
 #include "sli_tz_s_interface.h"
 
+#include "sli_tz_util.h"
 #include "sli_tz_service_se_manager.h"
 #include "sl_se_manager.h"
 #include "sl_se_manager_util.h"
@@ -64,31 +63,18 @@ sl_status_t sl_se_deinit(void)
 sl_status_t sl_se_check_se_image(sl_se_command_context_t *cmd_ctx,
                                  void *image_addr)
 {
-  sl_status_t sl_status;
   sli_tz_fn_id fn_id = SLI_TZ_SERVICE_SE_MANAGER_CHECKSEIMAGE_SID;
-  psa_invec in_vec[] = {
+  sli_tz_invec in_vec[] = {
     { .base = &fn_id, .len = sizeof(sli_tz_fn_id) },
     { cmd_ctx, sizeof(sl_se_command_context_t) },
     { image_addr, sizeof(image_addr) },
   };
-  psa_outvec out_vec[] = {
-    { &sl_status, sizeof(sl_status_t) },
-  };
 
-  psa_status_t psa_status =
-    sli_tz_ns_interface_dispatch((sli_tz_veneer_fn)sli_tz_s_interface_dispatch_se_manager,
-                                 (uint32_t)in_vec,
-                                 IOVEC_LEN(in_vec),
-                                 (uint32_t)out_vec,
-                                 IOVEC_LEN(out_vec));
-
-  // A PSA error is returned if parameter validation failed. Otherwise the
-  // return status will be in the sl_status.
-  if (psa_status != PSA_SUCCESS) {
-    return SL_STATUS_INVALID_PARAMETER;
-  }
-
-  return sl_status;
+  return (sl_status_t)sli_tz_ns_interface_dispatch((sli_tz_veneer_fn)sli_tz_s_interface_dispatch_se_manager,
+                                                   (uint32_t)in_vec,
+                                                   IOVEC_LEN(in_vec),
+                                                   (uint32_t)NULL,
+                                                   0);
 }
 
 /***************************************************************************//**
@@ -97,31 +83,18 @@ sl_status_t sl_se_check_se_image(sl_se_command_context_t *cmd_ctx,
 sl_status_t sl_se_apply_se_image(sl_se_command_context_t *cmd_ctx,
                                  void *image_addr)
 {
-  sl_status_t sl_status;
   sli_tz_fn_id fn_id = SLI_TZ_SERVICE_SE_MANAGER_APPLYSEIMAGE_SID;
-  psa_invec in_vec[] = {
+  sli_tz_invec in_vec[] = {
     { .base = &fn_id, .len = sizeof(sli_tz_fn_id) },
     { cmd_ctx, sizeof(sl_se_command_context_t) },
     { image_addr, sizeof(image_addr) },
   };
-  psa_outvec out_vec[] = {
-    { &sl_status, sizeof(sl_status_t) },
-  };
 
-  psa_status_t psa_status =
-    sli_tz_ns_interface_dispatch((sli_tz_veneer_fn)sli_tz_s_interface_dispatch_se_manager,
-                                 (uint32_t)in_vec,
-                                 IOVEC_LEN(in_vec),
-                                 (uint32_t)out_vec,
-                                 IOVEC_LEN(out_vec));
-
-  // A PSA error is returned if parameter validation failed. Otherwise the
-  // return status will be in the sl_status.
-  if (psa_status != PSA_SUCCESS) {
-    return SL_STATUS_INVALID_PARAMETER;
-  }
-
-  return sl_status;
+  return (sl_status_t)sli_tz_ns_interface_dispatch((sli_tz_veneer_fn)sli_tz_s_interface_dispatch_se_manager,
+                                                   (uint32_t)in_vec,
+                                                   IOVEC_LEN(in_vec),
+                                                   (uint32_t)NULL,
+                                                   0);
 }
 
 /***************************************************************************//**
@@ -131,32 +104,19 @@ sl_status_t sl_se_get_upgrade_status_se_image(sl_se_command_context_t *cmd_ctx,
                                               uint32_t *status,
                                               uint32_t *prev_version)
 {
-  sl_status_t sl_status;
   sli_tz_fn_id fn_id = SLI_TZ_SERVICE_SE_MANAGER_GETUPGRADESTATUSSEIMAGE_SID;
-  psa_invec in_vec[] = {
+  sli_tz_invec in_vec[] = {
     { .base = &fn_id, .len = sizeof(sli_tz_fn_id) },
     { cmd_ctx, sizeof(sl_se_command_context_t) },
     { status, sizeof(uint32_t) },
     { prev_version, sizeof(uint32_t) },
   };
-  psa_outvec out_vec[] = {
-    { &sl_status, sizeof(sl_status_t) },
-  };
 
-  psa_status_t psa_status =
-    sli_tz_ns_interface_dispatch((sli_tz_veneer_fn)sli_tz_s_interface_dispatch_se_manager,
-                                 (uint32_t)in_vec,
-                                 IOVEC_LEN(in_vec),
-                                 (uint32_t)out_vec,
-                                 IOVEC_LEN(out_vec));
-
-  // A PSA error is returned if parameter validation failed. Otherwise the
-  // return status will be in the sl_status.
-  if (psa_status != PSA_SUCCESS) {
-    return SL_STATUS_INVALID_PARAMETER;
-  }
-
-  return sl_status;
+  return (sl_status_t)sli_tz_ns_interface_dispatch((sli_tz_veneer_fn)sli_tz_s_interface_dispatch_se_manager,
+                                                   (uint32_t)in_vec,
+                                                   IOVEC_LEN(in_vec),
+                                                   (uint32_t)NULL,
+                                                   0);
 }
 
 /***************************************************************************//**
@@ -166,31 +126,18 @@ sl_status_t sl_se_check_host_image(sl_se_command_context_t *cmd_ctx,
                                    void *image_addr,
                                    uint32_t size)
 {
-  sl_status_t sl_status;
   sli_tz_fn_id fn_id = SLI_TZ_SERVICE_SE_MANAGER_CHECKHOSTIMAGE_SID;
-  psa_invec in_vec[] = {
+  sli_tz_invec in_vec[] = {
     { .base = &fn_id, .len = sizeof(sli_tz_fn_id) },
     { cmd_ctx, sizeof(sl_se_command_context_t) },
     { image_addr, size },
   };
-  psa_outvec out_vec[] = {
-    { &sl_status, sizeof(sl_status_t) },
-  };
 
-  psa_status_t psa_status =
-    sli_tz_ns_interface_dispatch((sli_tz_veneer_fn)sli_tz_s_interface_dispatch_se_manager,
-                                 (uint32_t)in_vec,
-                                 IOVEC_LEN(in_vec),
-                                 (uint32_t)out_vec,
-                                 IOVEC_LEN(out_vec));
-
-  // A PSA error is returned if parameter validation failed. Otherwise the
-  // return status will be in the sl_status.
-  if (psa_status != PSA_SUCCESS) {
-    return SL_STATUS_INVALID_PARAMETER;
-  }
-
-  return sl_status;
+  return (sl_status_t)sli_tz_ns_interface_dispatch((sli_tz_veneer_fn)sli_tz_s_interface_dispatch_se_manager,
+                                                   (uint32_t)in_vec,
+                                                   IOVEC_LEN(in_vec),
+                                                   (uint32_t)NULL,
+                                                   0);
 }
 
 /***************************************************************************//**
@@ -200,31 +147,18 @@ sl_status_t sl_se_apply_host_image(sl_se_command_context_t *cmd_ctx,
                                    void *image_addr,
                                    uint32_t size)
 {
-  sl_status_t sl_status;
   sli_tz_fn_id fn_id = SLI_TZ_SERVICE_SE_MANAGER_APPLYHOSTIMAGE_SID;
-  psa_invec in_vec[] = {
+  sli_tz_invec in_vec[] = {
     { .base = &fn_id, .len = sizeof(sli_tz_fn_id) },
     { cmd_ctx, sizeof(sl_se_command_context_t) },
     { image_addr, size },
   };
-  psa_outvec out_vec[] = {
-    { &sl_status, sizeof(sl_status_t) },
-  };
 
-  psa_status_t psa_status =
-    sli_tz_ns_interface_dispatch((sli_tz_veneer_fn)sli_tz_s_interface_dispatch_se_manager,
-                                 (uint32_t)in_vec,
-                                 IOVEC_LEN(in_vec),
-                                 (uint32_t)out_vec,
-                                 IOVEC_LEN(out_vec));
-
-  // A PSA error is returned if parameter validation failed. Otherwise the
-  // return status will be in the sl_status.
-  if (psa_status != PSA_SUCCESS) {
-    return SL_STATUS_INVALID_PARAMETER;
-  }
-
-  return sl_status;
+  return (sl_status_t)sli_tz_ns_interface_dispatch((sli_tz_veneer_fn)sli_tz_s_interface_dispatch_se_manager,
+                                                   (uint32_t)in_vec,
+                                                   IOVEC_LEN(in_vec),
+                                                   (uint32_t)NULL,
+                                                   0);
 }
 
 /***************************************************************************//**
@@ -234,32 +168,19 @@ sl_status_t sl_se_get_upgrade_status_host_image(sl_se_command_context_t *cmd_ctx
                                                 uint32_t *status,
                                                 uint32_t *prev_version)
 {
-  sl_status_t sl_status;
   sli_tz_fn_id fn_id = SLI_TZ_SERVICE_SE_MANAGER_GETUPGRADESTATUSHOSTIMAGE_SID;
-  psa_invec in_vec[] = {
+  sli_tz_invec in_vec[] = {
     { .base = &fn_id, .len = sizeof(sli_tz_fn_id) },
     { cmd_ctx, sizeof(sl_se_command_context_t) },
     { status, sizeof(uint32_t) },
     { prev_version, sizeof(uint32_t) },
   };
-  psa_outvec out_vec[] = {
-    { &sl_status, sizeof(sl_status_t) },
-  };
 
-  psa_status_t psa_status =
-    sli_tz_ns_interface_dispatch((sli_tz_veneer_fn)sli_tz_s_interface_dispatch_se_manager,
-                                 (uint32_t)in_vec,
-                                 IOVEC_LEN(in_vec),
-                                 (uint32_t)out_vec,
-                                 IOVEC_LEN(out_vec));
-
-  // A PSA error is returned if parameter validation failed. Otherwise the
-  // return status will be in the sl_status.
-  if (psa_status != PSA_SUCCESS) {
-    return SL_STATUS_INVALID_PARAMETER;
-  }
-
-  return sl_status;
+  return (sl_status_t)sli_tz_ns_interface_dispatch((sli_tz_veneer_fn)sli_tz_s_interface_dispatch_se_manager,
+                                                   (uint32_t)in_vec,
+                                                   IOVEC_LEN(in_vec),
+                                                   (uint32_t)NULL,
+                                                   0);
 }
 
 /***************************************************************************//**
@@ -270,32 +191,19 @@ sl_status_t sl_se_init_otp_key(sl_se_command_context_t *cmd_ctx,
                                void *key,
                                uint32_t num_bytes)
 {
-  sl_status_t sl_status;
   sli_tz_fn_id fn_id = SLI_TZ_SERVICE_SE_MANAGER_INITOTPKEY_SID;
-  psa_invec in_vec[] = {
+  sli_tz_invec in_vec[] = {
     { .base = &fn_id, .len = sizeof(sli_tz_fn_id) },
     { cmd_ctx, sizeof(sl_se_command_context_t) },
     { &key_type, sizeof(sl_se_device_key_type_t) },
     { key, num_bytes },
   };
-  psa_outvec out_vec[] = {
-    { &sl_status, sizeof(sl_status_t) },
-  };
 
-  psa_status_t psa_status =
-    sli_tz_ns_interface_dispatch((sli_tz_veneer_fn)sli_tz_s_interface_dispatch_se_manager,
-                                 (uint32_t)in_vec,
-                                 IOVEC_LEN(in_vec),
-                                 (uint32_t)out_vec,
-                                 IOVEC_LEN(out_vec));
-
-  // A PSA error is returned if parameter validation failed. Otherwise the
-  // return status will be in the sl_status.
-  if (psa_status != PSA_SUCCESS) {
-    return SL_STATUS_INVALID_PARAMETER;
-  }
-
-  return sl_status;
+  return (sl_status_t)sli_tz_ns_interface_dispatch((sli_tz_veneer_fn)sli_tz_s_interface_dispatch_se_manager,
+                                                   (uint32_t)in_vec,
+                                                   IOVEC_LEN(in_vec),
+                                                   (uint32_t)NULL,
+                                                   0);
 }
 
 /***************************************************************************//**
@@ -306,32 +214,21 @@ sl_status_t sl_se_read_pubkey(sl_se_command_context_t *cmd_ctx,
                               void *key,
                               uint32_t num_bytes)
 {
-  sl_status_t sl_status;
   sli_tz_fn_id fn_id = SLI_TZ_SERVICE_SE_MANAGER_READPUBKEY_SID;
-  psa_invec in_vec[] = {
+  sli_tz_invec in_vec[] = {
     { .base = &fn_id, .len = sizeof(sli_tz_fn_id) },
     { cmd_ctx, sizeof(sl_se_command_context_t) },
     { &key_type, sizeof(sl_se_device_key_type_t) },
   };
-  psa_outvec out_vec[] = {
-    { &sl_status, sizeof(sl_status_t) },
+  sli_tz_outvec out_vec[] = {
     { key, num_bytes },
   };
 
-  psa_status_t psa_status =
-    sli_tz_ns_interface_dispatch((sli_tz_veneer_fn)sli_tz_s_interface_dispatch_se_manager,
-                                 (uint32_t)in_vec,
-                                 IOVEC_LEN(in_vec),
-                                 (uint32_t)out_vec,
-                                 IOVEC_LEN(out_vec));
-
-  // A PSA error is returned if parameter validation failed. Otherwise the
-  // return status will be in the sl_status.
-  if (psa_status != PSA_SUCCESS) {
-    return SL_STATUS_INVALID_PARAMETER;
-  }
-
-  return sl_status;
+  return (sl_status_t)sli_tz_ns_interface_dispatch((sli_tz_veneer_fn)sli_tz_s_interface_dispatch_se_manager,
+                                                   (uint32_t)in_vec,
+                                                   IOVEC_LEN(in_vec),
+                                                   (uint32_t)out_vec,
+                                                   IOVEC_LEN(out_vec));
 }
 
 /***************************************************************************//**
@@ -340,31 +237,18 @@ sl_status_t sl_se_read_pubkey(sl_se_command_context_t *cmd_ctx,
 sl_status_t sl_se_init_otp(sl_se_command_context_t *cmd_ctx,
                            sl_se_otp_init_t *otp_init)
 {
-  sl_status_t sl_status;
   sli_tz_fn_id fn_id = SLI_TZ_SERVICE_SE_MANAGER_INITOTP_SID;
-  psa_invec in_vec[] = {
+  sli_tz_invec in_vec[] = {
     { .base = &fn_id, .len = sizeof(sli_tz_fn_id) },
     { cmd_ctx, sizeof(sl_se_command_context_t) },
     { otp_init, sizeof(sl_se_otp_init_t) },
   };
-  psa_outvec out_vec[] = {
-    { &sl_status, sizeof(sl_status_t) },
-  };
 
-  psa_status_t psa_status =
-    sli_tz_ns_interface_dispatch((sli_tz_veneer_fn)sli_tz_s_interface_dispatch_se_manager,
-                                 (uint32_t)in_vec,
-                                 IOVEC_LEN(in_vec),
-                                 (uint32_t)out_vec,
-                                 IOVEC_LEN(out_vec));
-
-  // A PSA error is returned if parameter validation failed. Otherwise the
-  // return status will be in the sl_status.
-  if (psa_status != PSA_SUCCESS) {
-    return SL_STATUS_INVALID_PARAMETER;
-  }
-
-  return sl_status;
+  return (sl_status_t)sli_tz_ns_interface_dispatch((sli_tz_veneer_fn)sli_tz_s_interface_dispatch_se_manager,
+                                                   (uint32_t)in_vec,
+                                                   IOVEC_LEN(in_vec),
+                                                   (uint32_t)NULL,
+                                                   0);
 }
 
 /***************************************************************************//**
@@ -373,31 +257,20 @@ sl_status_t sl_se_init_otp(sl_se_command_context_t *cmd_ctx,
 sl_status_t sl_se_read_otp(sl_se_command_context_t *cmd_ctx,
                            sl_se_otp_init_t *otp_settings)
 {
-  sl_status_t sl_status;
   sli_tz_fn_id fn_id = SLI_TZ_SERVICE_SE_MANAGER_READOTP_SID;
-  psa_invec in_vec[] = {
+  sli_tz_invec in_vec[] = {
     { .base = &fn_id, .len = sizeof(sli_tz_fn_id) },
     { cmd_ctx, sizeof(sl_se_command_context_t) },
   };
-  psa_outvec out_vec[] = {
-    { &sl_status, sizeof(sl_status_t) },
+  sli_tz_outvec out_vec[] = {
     { otp_settings, sizeof(sl_se_otp_init_t) },
   };
 
-  psa_status_t psa_status =
-    sli_tz_ns_interface_dispatch((sli_tz_veneer_fn)sli_tz_s_interface_dispatch_se_manager,
-                                 (uint32_t)in_vec,
-                                 IOVEC_LEN(in_vec),
-                                 (uint32_t)out_vec,
-                                 IOVEC_LEN(out_vec));
-
-  // A PSA error is returned if parameter validation failed. Otherwise the
-  // return status will be in the sl_status.
-  if (psa_status != PSA_SUCCESS) {
-    return SL_STATUS_INVALID_PARAMETER;
-  }
-
-  return sl_status;
+  return (sl_status_t)sli_tz_ns_interface_dispatch((sli_tz_veneer_fn)sli_tz_s_interface_dispatch_se_manager,
+                                                   (uint32_t)in_vec,
+                                                   IOVEC_LEN(in_vec),
+                                                   (uint32_t)out_vec,
+                                                   IOVEC_LEN(out_vec));
 }
 
 /***************************************************************************//**
@@ -406,31 +279,20 @@ sl_status_t sl_se_read_otp(sl_se_command_context_t *cmd_ctx,
 sl_status_t sl_se_get_se_version(sl_se_command_context_t *cmd_ctx,
                                  uint32_t *version)
 {
-  sl_status_t sl_status;
   sli_tz_fn_id fn_id = SLI_TZ_SERVICE_SE_MANAGER_GETSEVERSION_SID;
-  psa_invec in_vec[] = {
+  sli_tz_invec in_vec[] = {
     { .base = &fn_id, .len = sizeof(sli_tz_fn_id) },
     { cmd_ctx, sizeof(sl_se_command_context_t) },
   };
-  psa_outvec out_vec[] = {
-    { &sl_status, sizeof(sl_status_t) },
+  sli_tz_outvec out_vec[] = {
     { version, sizeof(uint32_t) },
   };
 
-  psa_status_t psa_status =
-    sli_tz_ns_interface_dispatch((sli_tz_veneer_fn)sli_tz_s_interface_dispatch_se_manager,
-                                 (uint32_t)in_vec,
-                                 IOVEC_LEN(in_vec),
-                                 (uint32_t)out_vec,
-                                 IOVEC_LEN(out_vec));
-
-  // A PSA error is returned if parameter validation failed. Otherwise the
-  // return status will be in the sl_status.
-  if (psa_status != PSA_SUCCESS) {
-    return SL_STATUS_INVALID_PARAMETER;
-  }
-
-  return sl_status;
+  return (sl_status_t)sli_tz_ns_interface_dispatch((sli_tz_veneer_fn)sli_tz_s_interface_dispatch_se_manager,
+                                                   (uint32_t)in_vec,
+                                                   IOVEC_LEN(in_vec),
+                                                   (uint32_t)out_vec,
+                                                   IOVEC_LEN(out_vec));
 }
 
 /***************************************************************************//**
@@ -439,31 +301,20 @@ sl_status_t sl_se_get_se_version(sl_se_command_context_t *cmd_ctx,
 sl_status_t sl_se_get_debug_lock_status(sl_se_command_context_t *cmd_ctx,
                                         sl_se_debug_status_t *debug_status)
 {
-  sl_status_t sl_status;
   sli_tz_fn_id fn_id = SLI_TZ_SERVICE_SE_MANAGER_GETDEBUGLOCKSTATUS_SID;
-  psa_invec in_vec[] = {
+  sli_tz_invec in_vec[] = {
     { .base = &fn_id, .len = sizeof(sli_tz_fn_id) },
     { cmd_ctx, sizeof(sl_se_command_context_t) },
   };
-  psa_outvec out_vec[] = {
-    { &sl_status, sizeof(sl_status_t) },
+  sli_tz_outvec out_vec[] = {
     { debug_status, sizeof(sl_se_debug_status_t) },
   };
 
-  psa_status_t psa_status =
-    sli_tz_ns_interface_dispatch((sli_tz_veneer_fn)sli_tz_s_interface_dispatch_se_manager,
-                                 (uint32_t)in_vec,
-                                 IOVEC_LEN(in_vec),
-                                 (uint32_t)out_vec,
-                                 IOVEC_LEN(out_vec));
-
-  // A PSA error is returned if parameter validation failed. Otherwise the
-  // return status will be in the sl_status.
-  if (psa_status != PSA_SUCCESS) {
-    return SL_STATUS_INVALID_PARAMETER;
-  }
-
-  return sl_status;
+  return (sl_status_t)sli_tz_ns_interface_dispatch((sli_tz_veneer_fn)sli_tz_s_interface_dispatch_se_manager,
+                                                   (uint32_t)in_vec,
+                                                   IOVEC_LEN(in_vec),
+                                                   (uint32_t)out_vec,
+                                                   IOVEC_LEN(out_vec));
 }
 
 /***************************************************************************//**
@@ -471,30 +322,17 @@ sl_status_t sl_se_get_debug_lock_status(sl_se_command_context_t *cmd_ctx,
  ******************************************************************************/
 sl_status_t sl_se_apply_debug_lock(sl_se_command_context_t *cmd_ctx)
 {
-  sl_status_t sl_status;
   sli_tz_fn_id fn_id = SLI_TZ_SERVICE_SE_MANAGER_APPLYDEBUGLOCK_SID;
-  psa_invec in_vec[] = {
+  sli_tz_invec in_vec[] = {
     { .base = &fn_id, .len = sizeof(sli_tz_fn_id) },
     { cmd_ctx, sizeof(sl_se_command_context_t) },
   };
-  psa_outvec out_vec[] = {
-    { &sl_status, sizeof(sl_status_t) },
-  };
 
-  psa_status_t psa_status =
-    sli_tz_ns_interface_dispatch((sli_tz_veneer_fn)sli_tz_s_interface_dispatch_se_manager,
-                                 (uint32_t)in_vec,
-                                 IOVEC_LEN(in_vec),
-                                 (uint32_t)out_vec,
-                                 IOVEC_LEN(out_vec));
-
-  // A PSA error is returned if parameter validation failed. Otherwise the
-  // return status will be in the sl_status.
-  if (psa_status != PSA_SUCCESS) {
-    return SL_STATUS_INVALID_PARAMETER;
-  }
-
-  return sl_status;
+  return (sl_status_t)sli_tz_ns_interface_dispatch((sli_tz_veneer_fn)sli_tz_s_interface_dispatch_se_manager,
+                                                   (uint32_t)in_vec,
+                                                   IOVEC_LEN(in_vec),
+                                                   (uint32_t)NULL,
+                                                   0);
 }
 
 /***************************************************************************//**
@@ -503,31 +341,20 @@ sl_status_t sl_se_apply_debug_lock(sl_se_command_context_t *cmd_ctx)
 sl_status_t sl_se_get_otp_version(sl_se_command_context_t *cmd_ctx,
                                   uint32_t *version)
 {
-  sl_status_t sl_status;
   sli_tz_fn_id fn_id = SLI_TZ_SERVICE_SE_MANAGER_GETOTPVERSION_SID;
-  psa_invec in_vec[] = {
+  sli_tz_invec in_vec[] = {
     { .base = &fn_id, .len = sizeof(sli_tz_fn_id) },
     { cmd_ctx, sizeof(sl_se_command_context_t) },
   };
-  psa_outvec out_vec[] = {
-    { &sl_status, sizeof(sl_status_t) },
+  sli_tz_outvec out_vec[] = {
     { version, sizeof(uint32_t) },
   };
 
-  psa_status_t psa_status =
-    sli_tz_ns_interface_dispatch((sli_tz_veneer_fn)sli_tz_s_interface_dispatch_se_manager,
-                                 (uint32_t)in_vec,
-                                 IOVEC_LEN(in_vec),
-                                 (uint32_t)out_vec,
-                                 IOVEC_LEN(out_vec));
-
-  // A PSA error is returned if parameter validation failed. Otherwise the
-  // return status will be in the sl_status.
-  if (psa_status != PSA_SUCCESS) {
-    return SL_STATUS_INVALID_PARAMETER;
-  }
-
-  return sl_status;
+  return (sl_status_t)sli_tz_ns_interface_dispatch((sli_tz_veneer_fn)sli_tz_s_interface_dispatch_se_manager,
+                                                   (uint32_t)in_vec,
+                                                   IOVEC_LEN(in_vec),
+                                                   (uint32_t)out_vec,
+                                                   IOVEC_LEN(out_vec));
 }
 
 #if defined(CRYPTOACC_PRESENT)
@@ -537,30 +364,17 @@ sl_status_t sl_se_get_otp_version(sl_se_command_context_t *cmd_ctx,
  ******************************************************************************/
 sl_status_t sl_se_read_executed_command(sl_se_command_context_t *cmd_ctx)
 {
-  sl_status_t sl_status;
   sli_tz_fn_id fn_id = SLI_TZ_SERVICE_SE_MANAGER_READEXECUTEDCOMMAND_SID;
-  psa_invec in_vec[] = {
+  sli_tz_invec in_vec[] = {
     { .base = &fn_id, .len = sizeof(sli_tz_fn_id) },
     { cmd_ctx, sizeof(sl_se_command_context_t) },
   };
-  psa_outvec out_vec[] = {
-    { &sl_status, sizeof(sl_status_t) },
-  };
 
-  psa_status_t psa_status =
-    sli_tz_ns_interface_dispatch((sli_tz_veneer_fn)sli_tz_s_interface_dispatch_se_manager,
-                                 (uint32_t)in_vec,
-                                 IOVEC_LEN(in_vec),
-                                 (uint32_t)out_vec,
-                                 IOVEC_LEN(out_vec));
-
-  // A PSA error is returned if parameter validation failed. Otherwise the
-  // return status will be in the sl_status.
-  if (psa_status != PSA_SUCCESS) {
-    return SL_STATUS_INVALID_PARAMETER;
-  }
-
-  return sl_status;
+  return (sl_status_t)sli_tz_ns_interface_dispatch((sli_tz_veneer_fn)sli_tz_s_interface_dispatch_se_manager,
+                                                   (uint32_t)in_vec,
+                                                   IOVEC_LEN(in_vec),
+                                                   (uint32_t)NULL,
+                                                   0);
 }
 
 /***************************************************************************//**
@@ -568,30 +382,17 @@ sl_status_t sl_se_read_executed_command(sl_se_command_context_t *cmd_ctx)
  ******************************************************************************/
 sl_status_t sl_se_ack_command(sl_se_command_context_t *cmd_ctx)
 {
-  sl_status_t sl_status;
   sli_tz_fn_id fn_id = SLI_TZ_SERVICE_SE_MANAGER_ACKCOMMAND_SID;
-  psa_invec in_vec[] = {
+  sli_tz_invec in_vec[] = {
     { .base = &fn_id, .len = sizeof(sli_tz_fn_id) },
     { cmd_ctx, sizeof(sl_se_command_context_t) },
   };
-  psa_outvec out_vec[] = {
-    { &sl_status, sizeof(sl_status_t) },
-  };
 
-  psa_status_t psa_status =
-    sli_tz_ns_interface_dispatch((sli_tz_veneer_fn)sli_tz_s_interface_dispatch_se_manager,
-                                 (uint32_t)in_vec,
-                                 IOVEC_LEN(in_vec),
-                                 (uint32_t)out_vec,
-                                 IOVEC_LEN(out_vec));
-
-  // A PSA error is returned if parameter validation failed. Otherwise the
-  // return status will be in the sl_status.
-  if (psa_status != PSA_SUCCESS) {
-    return SL_STATUS_INVALID_PARAMETER;
-  }
-
-  return sl_status;
+  return (sl_status_t)sli_tz_ns_interface_dispatch((sli_tz_veneer_fn)sli_tz_s_interface_dispatch_se_manager,
+                                                   (uint32_t)in_vec,
+                                                   IOVEC_LEN(in_vec),
+                                                   (uint32_t)NULL,
+                                                   0);
 }
 
 #endif //defined(CRYPTOACC_PRESENT)
@@ -604,31 +405,20 @@ sl_status_t sl_se_ack_command(sl_se_command_context_t *cmd_ctx)
 sl_status_t sl_se_get_status(sl_se_command_context_t *cmd_ctx,
                              sl_se_status_t *status)
 {
-  sl_status_t sl_status;
   sli_tz_fn_id fn_id = SLI_TZ_SERVICE_SE_MANAGER_GETSTATUS_SID;
-  psa_invec in_vec[] = {
+  sli_tz_invec in_vec[] = {
     { .base = &fn_id, .len = sizeof(sli_tz_fn_id) },
     { cmd_ctx, sizeof(sl_se_command_context_t) },
   };
-  psa_outvec out_vec[] = {
-    { &sl_status, sizeof(sl_status_t) },
+  sli_tz_outvec out_vec[] = {
     { status, sizeof(sl_se_status_t) },
   };
 
-  psa_status_t psa_status =
-    sli_tz_ns_interface_dispatch((sli_tz_veneer_fn)sli_tz_s_interface_dispatch_se_manager,
-                                 (uint32_t)in_vec,
-                                 IOVEC_LEN(in_vec),
-                                 (uint32_t)out_vec,
-                                 IOVEC_LEN(out_vec));
-
-  // A PSA error is returned if parameter validation failed. Otherwise the
-  // return status will be in the sl_status.
-  if (psa_status != PSA_SUCCESS) {
-    return SL_STATUS_INVALID_PARAMETER;
-  }
-
-  return sl_status;
+  return (sl_status_t)sli_tz_ns_interface_dispatch((sli_tz_veneer_fn)sli_tz_s_interface_dispatch_se_manager,
+                                                   (uint32_t)in_vec,
+                                                   IOVEC_LEN(in_vec),
+                                                   (uint32_t)out_vec,
+                                                   IOVEC_LEN(out_vec));
 }
 
 /***************************************************************************//**
@@ -637,32 +427,21 @@ sl_status_t sl_se_get_status(sl_se_command_context_t *cmd_ctx,
 sl_status_t sl_se_get_serialnumber(sl_se_command_context_t *cmd_ctx,
                                    void *serial)
 {
-  sl_status_t sl_status;
   sli_tz_fn_id fn_id = SLI_TZ_SERVICE_SE_MANAGER_GETSERIALNUMBER_SID;
-  psa_invec in_vec[] = {
+  sli_tz_invec in_vec[] = {
     { .base = &fn_id, .len = sizeof(sli_tz_fn_id) },
     { cmd_ctx, sizeof(sl_se_command_context_t) },
   };
-  psa_outvec out_vec[] = {
-    { &sl_status, sizeof(sl_status_t) },
+  sli_tz_outvec out_vec[] = {
     // Based on the function API, we know that the serial buffer should be 16 b.
     { serial, 16 },
   };
 
-  psa_status_t psa_status =
-    sli_tz_ns_interface_dispatch((sli_tz_veneer_fn)sli_tz_s_interface_dispatch_se_manager,
-                                 (uint32_t)in_vec,
-                                 IOVEC_LEN(in_vec),
-                                 (uint32_t)out_vec,
-                                 IOVEC_LEN(out_vec));
-
-  // A PSA error is returned if parameter validation failed. Otherwise the
-  // return status will be in the sl_status.
-  if (psa_status != PSA_SUCCESS) {
-    return SL_STATUS_INVALID_PARAMETER;
-  }
-
-  return sl_status;
+  return (sl_status_t)sli_tz_ns_interface_dispatch((sli_tz_veneer_fn)sli_tz_s_interface_dispatch_se_manager,
+                                                   (uint32_t)in_vec,
+                                                   IOVEC_LEN(in_vec),
+                                                   (uint32_t)out_vec,
+                                                   IOVEC_LEN(out_vec));
 }
 
 /***************************************************************************//**
@@ -670,30 +449,17 @@ sl_status_t sl_se_get_serialnumber(sl_se_command_context_t *cmd_ctx,
  ******************************************************************************/
 sl_status_t sl_se_enable_secure_debug(sl_se_command_context_t *cmd_ctx)
 {
-  sl_status_t sl_status;
   sli_tz_fn_id fn_id = SLI_TZ_SERVICE_SE_MANAGER_ENABLESECUREDEBUG_SID;
-  psa_invec in_vec[] = {
+  sli_tz_invec in_vec[] = {
     { .base = &fn_id, .len = sizeof(sli_tz_fn_id) },
     { cmd_ctx, sizeof(sl_se_command_context_t) },
   };
-  psa_outvec out_vec[] = {
-    { &sl_status, sizeof(sl_status_t) },
-  };
 
-  psa_status_t psa_status =
-    sli_tz_ns_interface_dispatch((sli_tz_veneer_fn)sli_tz_s_interface_dispatch_se_manager,
-                                 (uint32_t)in_vec,
-                                 IOVEC_LEN(in_vec),
-                                 (uint32_t)out_vec,
-                                 IOVEC_LEN(out_vec));
-
-  // A PSA error is returned if parameter validation failed. Otherwise the
-  // return status will be in the sl_status.
-  if (psa_status != PSA_SUCCESS) {
-    return SL_STATUS_INVALID_PARAMETER;
-  }
-
-  return sl_status;
+  return (sl_status_t)sli_tz_ns_interface_dispatch((sli_tz_veneer_fn)sli_tz_s_interface_dispatch_se_manager,
+                                                   (uint32_t)in_vec,
+                                                   IOVEC_LEN(in_vec),
+                                                   (uint32_t)NULL,
+                                                   0);
 }
 
 /***************************************************************************//**
@@ -701,30 +467,17 @@ sl_status_t sl_se_enable_secure_debug(sl_se_command_context_t *cmd_ctx)
  ******************************************************************************/
 sl_status_t sl_se_disable_secure_debug(sl_se_command_context_t *cmd_ctx)
 {
-  sl_status_t sl_status;
   sli_tz_fn_id fn_id = SLI_TZ_SERVICE_SE_MANAGER_DISABLESECUREDEBUG_SID;
-  psa_invec in_vec[] = {
+  sli_tz_invec in_vec[] = {
     { .base = &fn_id, .len = sizeof(sli_tz_fn_id) },
     { cmd_ctx, sizeof(sl_se_command_context_t) },
   };
-  psa_outvec out_vec[] = {
-    { &sl_status, sizeof(sl_status_t) },
-  };
 
-  psa_status_t psa_status =
-    sli_tz_ns_interface_dispatch((sli_tz_veneer_fn)sli_tz_s_interface_dispatch_se_manager,
-                                 (uint32_t)in_vec,
-                                 IOVEC_LEN(in_vec),
-                                 (uint32_t)out_vec,
-                                 IOVEC_LEN(out_vec));
-
-  // A PSA error is returned if parameter validation failed. Otherwise the
-  // return status will be in the sl_status.
-  if (psa_status != PSA_SUCCESS) {
-    return SL_STATUS_INVALID_PARAMETER;
-  }
-
-  return sl_status;
+  return (sl_status_t)sli_tz_ns_interface_dispatch((sli_tz_veneer_fn)sli_tz_s_interface_dispatch_se_manager,
+                                                   (uint32_t)in_vec,
+                                                   IOVEC_LEN(in_vec),
+                                                   (uint32_t)NULL,
+                                                   0);
 }
 
 /***************************************************************************//**
@@ -733,31 +486,18 @@ sl_status_t sl_se_disable_secure_debug(sl_se_command_context_t *cmd_ctx)
 sl_status_t sl_se_set_debug_options(sl_se_command_context_t *cmd_ctx,
                                     const sl_se_debug_options_t *debug_options)
 {
-  sl_status_t sl_status;
   sli_tz_fn_id fn_id = SLI_TZ_SERVICE_SE_MANAGER_SETDEBUGOPTIONS_SID;
-  psa_invec in_vec[] = {
+  sli_tz_invec in_vec[] = {
     { .base = &fn_id, .len = sizeof(sli_tz_fn_id) },
     { cmd_ctx, sizeof(sl_se_command_context_t) },
     { debug_options, sizeof(sl_se_debug_options_t) },
   };
-  psa_outvec out_vec[] = {
-    { &sl_status, sizeof(sl_status_t) },
-  };
 
-  psa_status_t psa_status =
-    sli_tz_ns_interface_dispatch((sli_tz_veneer_fn)sli_tz_s_interface_dispatch_se_manager,
-                                 (uint32_t)in_vec,
-                                 IOVEC_LEN(in_vec),
-                                 (uint32_t)out_vec,
-                                 IOVEC_LEN(out_vec));
-
-  // A PSA error is returned if parameter validation failed. Otherwise the
-  // return status will be in the sl_status.
-  if (psa_status != PSA_SUCCESS) {
-    return SL_STATUS_INVALID_PARAMETER;
-  }
-
-  return sl_status;
+  return (sl_status_t)sli_tz_ns_interface_dispatch((sli_tz_veneer_fn)sli_tz_s_interface_dispatch_se_manager,
+                                                   (uint32_t)in_vec,
+                                                   IOVEC_LEN(in_vec),
+                                                   (uint32_t)NULL,
+                                                   0);
 }
 
 /***************************************************************************//**
@@ -765,30 +505,16 @@ sl_status_t sl_se_set_debug_options(sl_se_command_context_t *cmd_ctx,
  ******************************************************************************/
 sl_status_t sl_se_erase_device(sl_se_command_context_t *cmd_ctx)
 {
-  sl_status_t sl_status;
   sli_tz_fn_id fn_id = SLI_TZ_SERVICE_SE_MANAGER_ERASEDEVICE_SID;
-  psa_invec in_vec[] = {
+  sli_tz_invec in_vec[] = {
     { .base = &fn_id, .len = sizeof(sli_tz_fn_id) },
     { cmd_ctx, sizeof(sl_se_command_context_t) },
   };
-  psa_outvec out_vec[] = {
-    { &sl_status, sizeof(sl_status_t) },
-  };
-
-  psa_status_t psa_status =
-    sli_tz_ns_interface_dispatch((sli_tz_veneer_fn)sli_tz_s_interface_dispatch_se_manager,
-                                 (uint32_t)in_vec,
-                                 IOVEC_LEN(in_vec),
-                                 (uint32_t)out_vec,
-                                 IOVEC_LEN(out_vec));
-
-  // A PSA error is returned if parameter validation failed. Otherwise the
-  // return status will be in the sl_status.
-  if (psa_status != PSA_SUCCESS) {
-    return SL_STATUS_INVALID_PARAMETER;
-  }
-
-  return sl_status;
+  return (sl_status_t)sli_tz_ns_interface_dispatch((sli_tz_veneer_fn)sli_tz_s_interface_dispatch_se_manager,
+                                                   (uint32_t)in_vec,
+                                                   IOVEC_LEN(in_vec),
+                                                   (uint32_t)NULL,
+                                                   0);
 }
 
 /***************************************************************************//**
@@ -796,30 +522,17 @@ sl_status_t sl_se_erase_device(sl_se_command_context_t *cmd_ctx)
  ******************************************************************************/
 sl_status_t sl_se_disable_device_erase(sl_se_command_context_t *cmd_ctx)
 {
-  sl_status_t sl_status;
   sli_tz_fn_id fn_id = SLI_TZ_SERVICE_SE_MANAGER_DISABLEDEVICEERASE_SID;
-  psa_invec in_vec[] = {
+  sli_tz_invec in_vec[] = {
     { .base = &fn_id, .len = sizeof(sli_tz_fn_id) },
     { cmd_ctx, sizeof(sl_se_command_context_t) },
   };
-  psa_outvec out_vec[] = {
-    { &sl_status, sizeof(sl_status_t) },
-  };
 
-  psa_status_t psa_status =
-    sli_tz_ns_interface_dispatch((sli_tz_veneer_fn)sli_tz_s_interface_dispatch_se_manager,
-                                 (uint32_t)in_vec,
-                                 IOVEC_LEN(in_vec),
-                                 (uint32_t)out_vec,
-                                 IOVEC_LEN(out_vec));
-
-  // A PSA error is returned if parameter validation failed. Otherwise the
-  // return status will be in the sl_status.
-  if (psa_status != PSA_SUCCESS) {
-    return SL_STATUS_INVALID_PARAMETER;
-  }
-
-  return sl_status;
+  return (sl_status_t)sli_tz_ns_interface_dispatch((sli_tz_veneer_fn)sli_tz_s_interface_dispatch_se_manager,
+                                                   (uint32_t)in_vec,
+                                                   IOVEC_LEN(in_vec),
+                                                   (uint32_t)NULL,
+                                                   0);
 }
 
 /***************************************************************************//**
@@ -828,31 +541,20 @@ sl_status_t sl_se_disable_device_erase(sl_se_command_context_t *cmd_ctx)
 sl_status_t sl_se_get_challenge(sl_se_command_context_t *cmd_ctx,
                                 sl_se_challenge_t challenge)
 {
-  sl_status_t sl_status;
   sli_tz_fn_id fn_id = SLI_TZ_SERVICE_SE_MANAGER_GETCHALLENGE_SID;
-  psa_invec in_vec[] = {
+  sli_tz_invec in_vec[] = {
     { .base = &fn_id, .len = sizeof(sli_tz_fn_id) },
     { cmd_ctx, sizeof(sl_se_command_context_t) },
   };
-  psa_outvec out_vec[] = {
-    { &sl_status, sizeof(sl_status_t) },
+  sli_tz_outvec out_vec[] = {
     { challenge, sizeof(sl_se_challenge_t) },
   };
 
-  psa_status_t psa_status =
-    sli_tz_ns_interface_dispatch((sli_tz_veneer_fn)sli_tz_s_interface_dispatch_se_manager,
-                                 (uint32_t)in_vec,
-                                 IOVEC_LEN(in_vec),
-                                 (uint32_t)out_vec,
-                                 IOVEC_LEN(out_vec));
-
-  // A PSA error is returned if parameter validation failed. Otherwise the
-  // return status will be in the sl_status.
-  if (psa_status != PSA_SUCCESS) {
-    return SL_STATUS_INVALID_PARAMETER;
-  }
-
-  return sl_status;
+  return (sl_status_t)sli_tz_ns_interface_dispatch((sli_tz_veneer_fn)sli_tz_s_interface_dispatch_se_manager,
+                                                   (uint32_t)in_vec,
+                                                   IOVEC_LEN(in_vec),
+                                                   (uint32_t)out_vec,
+                                                   IOVEC_LEN(out_vec));
 }
 
 /***************************************************************************//**
@@ -860,30 +562,17 @@ sl_status_t sl_se_get_challenge(sl_se_command_context_t *cmd_ctx,
  ******************************************************************************/
 sl_status_t sl_se_roll_challenge(sl_se_command_context_t *cmd_ctx)
 {
-  sl_status_t sl_status;
   sli_tz_fn_id fn_id = SLI_TZ_SERVICE_SE_MANAGER_ROLLCHALLENGE_SID;
-  psa_invec in_vec[] = {
+  sli_tz_invec in_vec[] = {
     { .base = &fn_id, .len = sizeof(sli_tz_fn_id) },
     { cmd_ctx, sizeof(sl_se_command_context_t) },
   };
-  psa_outvec out_vec[] = {
-    { &sl_status, sizeof(sl_status_t) },
-  };
 
-  psa_status_t psa_status =
-    sli_tz_ns_interface_dispatch((sli_tz_veneer_fn)sli_tz_s_interface_dispatch_se_manager,
-                                 (uint32_t)in_vec,
-                                 IOVEC_LEN(in_vec),
-                                 (uint32_t)out_vec,
-                                 IOVEC_LEN(out_vec));
-
-  // A PSA error is returned if parameter validation failed. Otherwise the
-  // return status will be in the sl_status.
-  if (psa_status != PSA_SUCCESS) {
-    return SL_STATUS_INVALID_PARAMETER;
-  }
-
-  return sl_status;
+  return (sl_status_t)sli_tz_ns_interface_dispatch((sli_tz_veneer_fn)sli_tz_s_interface_dispatch_se_manager,
+                                                   (uint32_t)in_vec,
+                                                   IOVEC_LEN(in_vec),
+                                                   (uint32_t)NULL,
+                                                   0);
 }
 
 /***************************************************************************//**
@@ -893,32 +582,19 @@ sl_status_t sl_se_open_debug(sl_se_command_context_t *cmd_ctx,
                              void *cert, uint32_t len,
                              const sl_se_debug_options_t *debug_options)
 {
-  sl_status_t sl_status;
   sli_tz_fn_id fn_id = SLI_TZ_SERVICE_SE_MANAGER_OPENDEBUG_SID;
-  psa_invec in_vec[] = {
+  sli_tz_invec in_vec[] = {
     { .base = &fn_id, .len = sizeof(sli_tz_fn_id) },
     { cmd_ctx, sizeof(sl_se_command_context_t) },
     { cert, len },
     { debug_options, sizeof(sl_se_debug_options_t) },
   };
-  psa_outvec out_vec[] = {
-    { &sl_status, sizeof(sl_status_t) },
-  };
 
-  psa_status_t psa_status =
-    sli_tz_ns_interface_dispatch((sli_tz_veneer_fn)sli_tz_s_interface_dispatch_se_manager,
-                                 (uint32_t)in_vec,
-                                 IOVEC_LEN(in_vec),
-                                 (uint32_t)out_vec,
-                                 IOVEC_LEN(out_vec));
-
-  // A PSA error is returned if parameter validation failed. Otherwise the
-  // return status will be in the sl_status.
-  if (psa_status != PSA_SUCCESS) {
-    return SL_STATUS_INVALID_PARAMETER;
-  }
-
-  return sl_status;
+  return (sl_status_t)sli_tz_ns_interface_dispatch((sli_tz_veneer_fn)sli_tz_s_interface_dispatch_se_manager,
+                                                   (uint32_t)in_vec,
+                                                   IOVEC_LEN(in_vec),
+                                                   (uint32_t)NULL,
+                                                   0);
 }
 
 #if defined(_SILICON_LABS_32B_SERIES_2_CONFIG_1)
@@ -932,32 +608,19 @@ sl_status_t sl_se_write_user_data(sl_se_command_context_t *cmd_ctx,
                                   void *data,
                                   uint32_t num_bytes)
 {
-  sl_status_t sl_status;
   sli_tz_fn_id fn_id = SLI_TZ_SERVICE_SE_MANAGER_WRITEUSERDATA_SID;
-  psa_invec in_vec[] = {
+  sli_tz_invec in_vec[] = {
     { .base = &fn_id, .len = sizeof(sli_tz_fn_id) },
     { cmd_ctx, sizeof(sl_se_command_context_t) },
     { &offset, sizeof(uint32_t) },
     { data, num_bytes },
   };
-  psa_outvec out_vec[] = {
-    { &sl_status, sizeof(sl_status_t) },
-  };
 
-  psa_status_t psa_status =
-    sli_tz_ns_interface_dispatch((sli_tz_veneer_fn)sli_tz_s_interface_dispatch_se_manager,
-                                 (uint32_t)in_vec,
-                                 IOVEC_LEN(in_vec),
-                                 (uint32_t)out_vec,
-                                 IOVEC_LEN(out_vec));
-
-  // A PSA error is returned if parameter validation failed. Otherwise the
-  // return status will be in the sl_status.
-  if (psa_status != PSA_SUCCESS) {
-    return SL_STATUS_INVALID_PARAMETER;
-  }
-
-  return sl_status;
+  return (sl_status_t)sli_tz_ns_interface_dispatch((sli_tz_veneer_fn)sli_tz_s_interface_dispatch_se_manager,
+                                                   (uint32_t)in_vec,
+                                                   IOVEC_LEN(in_vec),
+                                                   (uint32_t)NULL,
+                                                   0);
 }
 
 /***************************************************************************//**
@@ -965,30 +628,17 @@ sl_status_t sl_se_write_user_data(sl_se_command_context_t *cmd_ctx,
  ******************************************************************************/
 sl_status_t sl_se_erase_user_data(sl_se_command_context_t *cmd_ctx)
 {
-  sl_status_t sl_status;
   sli_tz_fn_id fn_id = SLI_TZ_SERVICE_SE_MANAGER_ERASEUSERDATA_SID;
-  psa_invec in_vec[] = {
+  sli_tz_invec in_vec[] = {
     { .base = &fn_id, .len = sizeof(sli_tz_fn_id) },
     { cmd_ctx, sizeof(sl_se_command_context_t) },
   };
-  psa_outvec out_vec[] = {
-    { &sl_status, sizeof(sl_status_t) },
-  };
 
-  psa_status_t psa_status =
-    sli_tz_ns_interface_dispatch((sli_tz_veneer_fn)sli_tz_s_interface_dispatch_se_manager,
-                                 (uint32_t)in_vec,
-                                 IOVEC_LEN(in_vec),
-                                 (uint32_t)out_vec,
-                                 IOVEC_LEN(out_vec));
-
-  // A PSA error is returned if parameter validation failed. Otherwise the
-  // return status will be in the sl_status.
-  if (psa_status != PSA_SUCCESS) {
-    return SL_STATUS_INVALID_PARAMETER;
-  }
-
-  return sl_status;
+  return (sl_status_t)sli_tz_ns_interface_dispatch((sli_tz_veneer_fn)sli_tz_s_interface_dispatch_se_manager,
+                                                   (uint32_t)in_vec,
+                                                   IOVEC_LEN(in_vec),
+                                                   (uint32_t)NULL,
+                                                   0);
 }
 
 /***************************************************************************//**
@@ -998,31 +648,20 @@ sl_status_t sl_se_erase_user_data(sl_se_command_context_t *cmd_ctx)
 sl_status_t sl_se_get_reset_cause(sl_se_command_context_t *cmd_ctx,
                                   uint32_t* reset_cause)
 {
-  sl_status_t sl_status;
   sli_tz_fn_id fn_id = SLI_TZ_SERVICE_SE_MANAGER_GETRESETCAUSE_SID;
-  psa_invec in_vec[] = {
+  sli_tz_invec in_vec[] = {
     { .base = &fn_id, .len = sizeof(sli_tz_fn_id) },
     { cmd_ctx, sizeof(sl_se_command_context_t) },
   };
-  psa_outvec out_vec[] = {
-    { &sl_status, sizeof(sl_status_t) },
+  sli_tz_outvec out_vec[] = {
     { reset_cause, sizeof(uint32_t) },
   };
 
-  psa_status_t psa_status =
-    sli_tz_ns_interface_dispatch((sli_tz_veneer_fn)sli_tz_s_interface_dispatch_se_manager,
-                                 (uint32_t)in_vec,
-                                 IOVEC_LEN(in_vec),
-                                 (uint32_t)out_vec,
-                                 IOVEC_LEN(out_vec));
-
-  // A PSA error is returned if parameter validation failed. Otherwise the
-  // return status will be in the sl_status.
-  if (psa_status != PSA_SUCCESS) {
-    return SL_STATUS_INVALID_PARAMETER;
-  }
-
-  return sl_status;
+  return (sl_status_t)sli_tz_ns_interface_dispatch((sli_tz_veneer_fn)sli_tz_s_interface_dispatch_se_manager,
+                                                   (uint32_t)in_vec,
+                                                   IOVEC_LEN(in_vec),
+                                                   (uint32_t)out_vec,
+                                                   IOVEC_LEN(out_vec));
 }
 
 #endif // _SILICON_LABS_32B_SERIES_2_CONFIG_1
@@ -1033,31 +672,20 @@ sl_status_t sl_se_get_reset_cause(sl_se_command_context_t *cmd_ctx,
 sl_status_t sl_se_read_cert_size(sl_se_command_context_t *cmd_ctx,
                                  sl_se_cert_size_type_t *cert_size)
 {
-  sl_status_t sl_status;
   sli_tz_fn_id fn_id = SLI_TZ_SERVICE_SE_MANAGER_READCERTSIZE_SID;
-  psa_invec in_vec[] = {
+  sli_tz_invec in_vec[] = {
     { .base = &fn_id, .len = sizeof(sli_tz_fn_id) },
     { cmd_ctx, sizeof(sl_se_command_context_t) },
   };
-  psa_outvec out_vec[] = {
-    { &sl_status, sizeof(sl_status_t) },
+  sli_tz_outvec out_vec[] = {
     { cert_size, sizeof(sl_se_cert_size_type_t) },
   };
 
-  psa_status_t psa_status =
-    sli_tz_ns_interface_dispatch((sli_tz_veneer_fn)sli_tz_s_interface_dispatch_se_manager,
-                                 (uint32_t)in_vec,
-                                 IOVEC_LEN(in_vec),
-                                 (uint32_t)out_vec,
-                                 IOVEC_LEN(out_vec));
-
-  // A PSA error is returned if parameter validation failed. Otherwise the
-  // return status will be in the sl_status.
-  if (psa_status != PSA_SUCCESS) {
-    return SL_STATUS_INVALID_PARAMETER;
-  }
-
-  return sl_status;
+  return (sl_status_t)sli_tz_ns_interface_dispatch((sli_tz_veneer_fn)sli_tz_s_interface_dispatch_se_manager,
+                                                   (uint32_t)in_vec,
+                                                   IOVEC_LEN(in_vec),
+                                                   (uint32_t)out_vec,
+                                                   IOVEC_LEN(out_vec));
 }
 
 /***************************************************************************//**
@@ -1068,32 +696,21 @@ sl_status_t sl_se_read_cert(sl_se_command_context_t *cmd_ctx,
                             void *cert,
                             uint32_t num_bytes)
 {
-  sl_status_t sl_status;
   sli_tz_fn_id fn_id = SLI_TZ_SERVICE_SE_MANAGER_READCERT_SID;
-  psa_invec in_vec[] = {
+  sli_tz_invec in_vec[] = {
     { .base = &fn_id, .len = sizeof(sli_tz_fn_id) },
     { cmd_ctx, sizeof(sl_se_command_context_t) },
     { &cert_type, sizeof(sl_se_cert_type_t) },
   };
-  psa_outvec out_vec[] = {
-    { &sl_status, sizeof(sl_status_t) },
+  sli_tz_outvec out_vec[] = {
     { cert, num_bytes },
   };
 
-  psa_status_t psa_status =
-    sli_tz_ns_interface_dispatch((sli_tz_veneer_fn)sli_tz_s_interface_dispatch_se_manager,
-                                 (uint32_t)in_vec,
-                                 IOVEC_LEN(in_vec),
-                                 (uint32_t)out_vec,
-                                 IOVEC_LEN(out_vec));
-
-  // A PSA error is returned if parameter validation failed. Otherwise the
-  // return status will be in the sl_status.
-  if (psa_status != PSA_SUCCESS) {
-    return SL_STATUS_INVALID_PARAMETER;
-  }
-
-  return sl_status;
+  return (sl_status_t)sli_tz_ns_interface_dispatch((sli_tz_veneer_fn)sli_tz_s_interface_dispatch_se_manager,
+                                                   (uint32_t)in_vec,
+                                                   IOVEC_LEN(in_vec),
+                                                   (uint32_t)out_vec,
+                                                   IOVEC_LEN(out_vec));
 }
 
 #if (_SILICON_LABS_SECURITY_FEATURE == _SILICON_LABS_SECURITY_FEATURE_VAULT)
@@ -1107,32 +724,19 @@ sl_status_t sl_se_disable_tamper(sl_se_command_context_t *cmd_ctx,
                                  uint32_t len,
                                  sl_se_tamper_signals_t tamper_signals)
 {
-  sl_status_t sl_status;
   sli_tz_fn_id fn_id = SLI_TZ_SERVICE_SE_MANAGER_DISABLETAMPER_SID;
-  psa_invec in_vec[] = {
+  sli_tz_invec in_vec[] = {
     { .base = &fn_id, .len = sizeof(sli_tz_fn_id) },
     { cmd_ctx, sizeof(sl_se_command_context_t) },
     { cert, len },
     { &tamper_signals, sizeof(sl_se_tamper_signals_t) },
   };
-  psa_outvec out_vec[] = {
-    { &sl_status, sizeof(sl_status_t) },
-  };
 
-  psa_status_t psa_status =
-    sli_tz_ns_interface_dispatch((sli_tz_veneer_fn)sli_tz_s_interface_dispatch_se_manager,
-                                 (uint32_t)in_vec,
-                                 IOVEC_LEN(in_vec),
-                                 (uint32_t)out_vec,
-                                 IOVEC_LEN(out_vec));
-
-  // A PSA error is returned if parameter validation failed. Otherwise the
-  // return status will be in the sl_status.
-  if (psa_status != PSA_SUCCESS) {
-    return SL_STATUS_INVALID_PARAMETER;
-  }
-
-  return sl_status;
+  return (sl_status_t)sli_tz_ns_interface_dispatch((sli_tz_veneer_fn)sli_tz_s_interface_dispatch_se_manager,
+                                                   (uint32_t)in_vec,
+                                                   IOVEC_LEN(in_vec),
+                                                   (uint32_t)NULL,
+                                                   0);
 }
 
 #if (_SILICON_LABS_32B_SERIES_2_CONFIG >= 3)
@@ -1146,32 +750,19 @@ sl_status_t sl_se_get_tamper_reset_cause(sl_se_command_context_t *cmd_ctx,
                                          bool *was_tamper_reset,
                                          uint32_t *reset_cause)
 {
-  sl_status_t sl_status;
   sli_tz_fn_id fn_id = SLI_TZ_SERVICE_SE_MANAGER_GETTAMPERRESETCAUSE_SID;
-  psa_invec in_vec[] = {
+  sli_tz_invec in_vec[] = {
     { .base = &fn_id, .len = sizeof(sli_tz_fn_id) },
     { cmd_ctx, sizeof(sl_se_command_context_t) },
     { was_tamper_reset, sizeof(bool*) },
     { reset_cause, sizeof(uint32_t*) },
   };
-  psa_outvec out_vec[] = {
-    { &sl_status, sizeof(sl_status_t) },
-  };
 
-  psa_status_t psa_status =
-    sli_tz_ns_interface_dispatch((sli_tz_veneer_fn)sli_tz_s_interface_dispatch_se_manager,
-                                 (uint32_t)in_vec,
-                                 IOVEC_LEN(in_vec),
-                                 (uint32_t)out_vec,
-                                 IOVEC_LEN(out_vec));
-
-  // A PSA error is returned if parameter validation failed. Otherwise the
-  // return status will be in the sl_status.
-  if (psa_status != PSA_SUCCESS) {
-    return SL_STATUS_INVALID_PARAMETER;
-  }
-
-  return sl_status;
+  return (sl_status_t)sli_tz_ns_interface_dispatch((sli_tz_veneer_fn)sli_tz_s_interface_dispatch_se_manager,
+                                                   (uint32_t)in_vec,
+                                                   IOVEC_LEN(in_vec),
+                                                   (uint32_t)NULL,
+                                                   0);
 }
 
 #endif // _SILICON_LABS_32B_SERIES_2_CONFIG >= 3

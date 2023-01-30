@@ -152,7 +152,7 @@ static char *_sc_to_str(const str_cache_t * const sc);
  * @details Helper function, free heap
  * @param[in] str String ptr
  *****************************************************************************/
-static inline void _destroy_str(const char *str);
+__STATIC_INLINE void _destroy_str(const char *str);
 
 /**************************************************************************//**
  * @brief Get attribute by type
@@ -170,7 +170,7 @@ static const coap_rd_attribute_t *_get_attr_by_type(const coap_rd_attribute_type
  * @param[in] c_ptr Pointer to check
  * @return true if the c_ptr is in the buffer, otherwise false
  *****************************************************************************/
-static inline bool _check_str_buff_ptr(const char *str,
+__STATIC_INLINE bool _check_str_buff_ptr(const char *str,
                                        const size_t str_len,
                                        const char *c_ptr);
 
@@ -180,7 +180,7 @@ static inline bool _check_str_buff_ptr(const char *str,
  * @param[in] str
  * @return true if the str is not NULL, otherwise false
  *****************************************************************************/
-static inline bool _check_str_cache(str_cache_t *str);
+__STATIC_INLINE bool _check_str_cache(str_cache_t *str);
 
 /**************************************************************************//**
  * @brief Get querry
@@ -198,7 +198,7 @@ static sl_status_t _get_querry(const char *uri_querry_request,
  * @param[in] uri_path_str URI path string
  * @return true if it's a discovery request, otherwise false
  *****************************************************************************/
-static inline bool _is_discovery_request(const char *uri_path_str);
+__STATIC_INLINE bool _is_discovery_request(const char *uri_path_str);
 
 /**************************************************************************//**
  * @brief Is URI querry
@@ -206,7 +206,7 @@ static inline bool _is_discovery_request(const char *uri_path_str);
  * @param[in] packet Packet
  * @return true if it's a URI querry, otherwise false
  *****************************************************************************/
-static inline bool _is_uri_querry(const sl_wisun_coap_packet_t * const packet);
+__STATIC_INLINE bool _is_uri_querry(const sl_wisun_coap_packet_t * const packet);
 
 /**************************************************************************//**
  * @brief Get resource attribute
@@ -215,7 +215,7 @@ static inline bool _is_uri_querry(const sl_wisun_coap_packet_t * const packet);
  * @param[in] attr Attribute
  * @return const char* Attribute value of resource
  *****************************************************************************/
-static inline const char * _get_resource_attr(const sl_wisun_coap_rhnd_resource_t * const resource,
+__STATIC_INLINE const char * _get_resource_attr(const sl_wisun_coap_rhnd_resource_t * const resource,
                                               const coap_rd_attribute_t *const attr);
 
 /**************************************************************************//**
@@ -547,7 +547,7 @@ static char *_sc_to_str(const str_cache_t * const sc)
   return str;
 }
 
-static inline void _destroy_str(const char *str)
+__STATIC_INLINE void _destroy_str(const char *str)
 {
   sl_wisun_coap_free((void *)str);
 }
@@ -562,14 +562,14 @@ static const coap_rd_attribute_t *_get_attr_by_type(const coap_rd_attribute_type
   return NULL;
 }
 
-static inline bool _check_str_buff_ptr(const char *str,
+__STATIC_INLINE bool _check_str_buff_ptr(const char *str,
                                        const size_t str_len,
                                        const char *c_ptr)
 {
   return (bool) (c_ptr >= str && c_ptr < (str + str_len));
 }
 
-static inline bool _check_str_cache(str_cache_t *str)
+__STATIC_INLINE bool _check_str_cache(str_cache_t *str)
 {
   return (bool) (str != NULL && str->len && str->str != NULL);
 }
@@ -604,19 +604,19 @@ static sl_status_t _get_querry(const char *uri_querry_request, coap_rd_querry_pa
   return stat;
 }
 
-static inline bool _is_discovery_request(const char *uri_path_str)
+__STATIC_INLINE bool _is_discovery_request(const char *uri_path_str)
 {
   return (bool) (!strncmp(uri_path_str, SLI_WISUN_COAP_RD_CORE_STR, SL_WISUN_COAP_URI_PATH_MAX_SIZE));
 }
 
-static inline bool _is_uri_querry(const sl_wisun_coap_packet_t * const packet)
+__STATIC_INLINE bool _is_uri_querry(const sl_wisun_coap_packet_t * const packet)
 {
   return (bool) (packet->options_list_ptr != NULL
                  && packet->options_list_ptr->uri_query_ptr != NULL
                  && packet->options_list_ptr->uri_query_len);
 }
 
-static inline const char * _get_resource_attr(const sl_wisun_coap_rhnd_resource_t * const resource,
+__STATIC_INLINE const char * _get_resource_attr(const sl_wisun_coap_rhnd_resource_t * const resource,
                                               const coap_rd_attribute_t * const attr)
 {
   switch (attr->type) {

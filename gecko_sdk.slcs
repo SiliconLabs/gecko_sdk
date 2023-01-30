@@ -2,7 +2,7 @@ id: "gecko_sdk"
 label: "Gecko SDK Suite"
 description: |-
   Gecko SDK Suite for EM3xx, EFM32, EZR32 and EFR32 microcontrollers and radios.
-sdk_version: "4.2.0"
+sdk_version: "4.2.1"
 specification_version: 10
 component_path:
   - path: "app/amazon/component"
@@ -102,7 +102,7 @@ documentation:
   - docset: wifi/wf200/rtos
     version: "3.6"
   - docset: wisun
-    version: "1.4"
+    version: "1.5"
   - docset: zigbee
     version: "7.2"
 upgrade_manifest:
@@ -111,6 +111,7 @@ upgrade_manifest:
   - path: "platform/service/component/upgrade.slcu"
   - path: "protocol/zigbee/component/upgrade.slcu"
   - path: "app/btmesh/upgrade.slcu"
+  - path: "platform/security/component/upgrade.slcu"
 post_build_profile:
   - path: "platform/common/postbuild_profile/"
   - path: "platform/security/postbuild_profile/"

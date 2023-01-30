@@ -322,8 +322,8 @@ public:
      */
     bool IsTransmittingOrScanning(void) const
     {
-        return ((mState == kStateTransmit) || (mState == kStateEnergyScan) ||
-                (mState == kStateCsmaBackoff) || (mState == kStateDelayBeforeRetx));
+        return ((mState == kStateTransmit) || (mState == kStateEnergyScan) || (mState == kStateCsmaBackoff) ||
+                (mState == kStateDelayBeforeRetx));
     }
 
     /**

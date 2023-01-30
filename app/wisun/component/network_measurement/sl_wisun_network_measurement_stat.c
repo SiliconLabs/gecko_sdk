@@ -40,7 +40,6 @@
 #include "sl_wisun_app_core.h"
 #include "sl_wisun_network_measurement_stat.h"
 #include "sl_wisun_api.h"
-#include "sl_wisun_types.h"
 
 // -----------------------------------------------------------------------------
 //                              Macros and Typedefs
@@ -98,13 +97,13 @@ static bool _get_neighbor_stat_by_id(const sl_wisun_nwm_node_type_t neighbor_typ
  * @brief Mutex Acquire
  * @details Helper function
  *****************************************************************************/
-static inline void _nwm_stat_mutex_acquire(void);
+__STATIC_INLINE void _nwm_stat_mutex_acquire(void);
 
 /**************************************************************************//**
  * @brief Mutex Release
  * @details Helper function
  *****************************************************************************/
-static inline void _nwm_stat_mutex_release(void);
+__STATIC_INLINE void _nwm_stat_mutex_release(void);
 
 // -----------------------------------------------------------------------------
 //                                Static Variables
@@ -339,13 +338,13 @@ void sl_wisun_nwm_get_children_stat(sl_wisun_nwm_node_stat_t * const dest,
 // -----------------------------------------------------------------------------
 
 /* Mutex acquire */
-static inline void _nwm_stat_mutex_acquire(void)
+__STATIC_INLINE void _nwm_stat_mutex_acquire(void)
 {
   assert(osMutexAcquire(_nwm_stat_mtx, osWaitForever) == osOK);
 }
 
 /* Mutex release */
-static inline void _nwm_stat_mutex_release(void)
+__STATIC_INLINE void _nwm_stat_mutex_release(void)
 {
   assert(osMutexRelease(_nwm_stat_mtx) == osOK);
 }

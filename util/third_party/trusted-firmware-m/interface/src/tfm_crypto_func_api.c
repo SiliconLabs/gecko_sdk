@@ -42,6 +42,14 @@
 
 #endif
 
+#if !defined(MBEDTLS_ERR_ENTROPY_SOURCE_FAILED)
+/* Repeat declaration of MBEDTLS_ERR_ENTROPY_SOURCE_FAILED since the full entropy.h
+ * header is not always a clean include. I.e. when mbedtls_hardware_poll is used
+ * without having the full entropy module (with collector) present, the header will
+ * potentially complain about missing a SHA256/SHA512 context structure definition. */
+#define MBEDTLS_ERR_ENTROPY_SOURCE_FAILED -0x003C
+#endif
+
 psa_status_t psa_crypto_init(void)
 {
     /* Service init is performed during TFM boot up,
@@ -56,6 +64,39 @@ void mbedtls_psa_crypto_free( void )
      * so application level deinitialisation is empty.
      */
 }
+
+#if defined (MBEDTLS_PSA_CRYPTO_EXTERNAL_RNG) && defined(SL_TRUSTZONE_NONSECURE)
+/* Wrapper function allowing the classic API to use the PSA RNG.
+ *
+ * `mbedtls_psa_get_random(MBEDTLS_PSA_RANDOM_STATE, ...)` calls
+ * `psa_generate_random(...)`. The state parameter is ignored since the
+ * PSA API doesn't support passing an explicit state.
+ *
+ * In the non-external case, psa_generate_random() calls an
+ * `mbedtls_xxx_drbg_random` function which has exactly the same signature
+ * and semantics as mbedtls_psa_get_random(). As an optimization,
+ * instead of doing this back-and-forth between the PSA API and the
+ * classic API, psa_crypto_random_impl.h defines `mbedtls_psa_get_random`
+ * as a constant function pointer to `mbedtls_xxx_drbg_random`.
+ */
+int mbedtls_psa_get_random(void *p_rng,
+                           unsigned char *output,
+                           size_t output_size)
+{
+  /* This function takes a pointer to the RNG state because that's what
+   * classic mbedtls functions using an RNG expect. The PSA RNG manages
+   * its own state internally and doesn't let the caller access that state.
+   * So we just ignore the state parameter, and in practice we'll pass
+   * NULL. */
+  (void) p_rng;
+  psa_status_t status = psa_generate_random(output, output_size);
+  if ( status == PSA_SUCCESS ) {
+    return(0);
+  } else {
+    return(MBEDTLS_ERR_ENTROPY_SOURCE_FAILED);
+  }
+}
+#endif // defined (MBEDTLS_PSA_CRYPTO_EXTERNAL_RNG) && defined(SL_TRUSTZONE_NONSECURE)
 
 psa_status_t psa_open_key(psa_key_id_t id,
                           psa_key_id_t *key)

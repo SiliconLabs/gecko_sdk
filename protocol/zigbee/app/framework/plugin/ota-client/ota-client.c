@@ -1000,6 +1000,7 @@ static EmberAfStatus commandParse(bool defaultResponse,
   uint8_t commandId = (message->buffer[(ZCL_COMMAND_ID_INDEX
                                         + (uint8_t)defaultResponse)]);
   uint8_t index = EMBER_AF_ZCL_OVERHEAD;
+  EmberStatus sendStatus = EMBER_ERR_FATAL;
 
   if (commandId > EM_AF_OTA_MAX_COMMAND_ID) {
     otaPrintln("Bad OTA command: 0x%X", commandId);
@@ -1051,11 +1052,32 @@ static EmberAfStatus commandParse(bool defaultResponse,
           otaPrintln("Got unexpected %p.  Start discovery.",
                      "Image Notify");
           startServerDiscovery();
+          if (!broadcast) {
+            sendStatus = emberAfSendDefaultResponse(message, EMBER_ZCL_STATUS_SUCCESS);
+            if (EMBER_SUCCESS != sendStatus) {
+              otaPrintln("OTA: failed to send %s response: 0x%x",
+                         "default",
+                         sendStatus);
+            }
+          }
           return EMBER_ZCL_STATUS_SUCCESS;
         } else {
           otaPrintln("Got unexpected %p.  Ignored.",
                      "Image notify");
           return EMBER_ZCL_STATUS_FAILURE;
+        }
+      }
+      if (!broadcast) {
+        sendStatus = emberAfSendDefaultResponse(message, EMBER_ZCL_STATUS_SUCCESS);
+        if (EMBER_SUCCESS != sendStatus) {
+          otaPrintln("OTA: failed to send %s response: 0x%x",
+                     "default",
+                     sendStatus);
+        } else if (!(message->buffer[0] & ZCL_DISABLE_DEFAULT_RESPONSE_MASK)) {
+          otaPrintln("OTA: Default response for Image notify, status 0x%X",
+                     sendStatus);
+        } else {
+          // Do nothing
         }
       }
       return imageNotifyParse(broadcast, message->buffer, index, message->bufLen);

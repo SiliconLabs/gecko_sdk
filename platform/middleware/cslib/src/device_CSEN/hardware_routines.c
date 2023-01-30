@@ -265,7 +265,7 @@ void setupCSLIBClock(uint32_t clock_period, CSEN_Init_TypeDef* csen_init)
 
   if (CMU_ClockSelectGet(cmuClock_LFB) == cmuSelect_Disabled) {
     CMU_OscillatorEnable(cmuOsc_LFRCO, true, true);
-    CMU_ClockSelectSet(cmuClock_LFB, cmuSelect_LFRCO);
+    CMU_CLOCK_SELECT_SET(LFB, LFRCO);
   }
 
   CMU_ClockEnable(cmuClock_CSEN_LF, true);

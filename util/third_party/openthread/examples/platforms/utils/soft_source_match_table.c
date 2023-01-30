@@ -121,7 +121,7 @@ int16_t utilsSoftSrcMatchShortFindEntry(uint8_t iid, uint16_t aShortAddress)
 {
     OT_UNUSED_VARIABLE(iid);
 
-    int16_t entry    = -1;
+    int16_t entry = -1;
 
 #if OPENTHREAD_RADIO && OPENTHREAD_CONFIG_MULTIPAN_RCP_ENABLE == 1
     if (iid == 0)
@@ -197,7 +197,13 @@ otError otPlatRadioAddSrcMatchShortEntry(otInstance *aInstance, uint16_t aShortA
     int8_t  iid   = -1;
     int16_t entry = -1;
 
-    iid   = otNcpPlatGetCurCommandIid();
+    iid = otNcpPlatGetCurCommandIid();
+#if OPENTHREAD_RADIO && OPENTHREAD_CONFIG_MULTIPAN_RCP_ENABLE == 1
+    // Prevent duplicate entries in multipan use case.
+    entry = utilsSoftSrcMatchShortFindEntry(iid, aShortAddress);
+    otEXPECT(!(entry >= 0 && entry < RADIO_CONFIG_SRC_MATCH_SHORT_ENTRY_NUM));
+#endif
+
     entry = findSrcMatchShortAvailEntry(iid);
 
     otLogDebgPlat("Add ShortAddr: iid=%d, entry=%d, addr=0x%04x", iid, entry, aShortAddress);
@@ -281,7 +287,7 @@ int16_t utilsSoftSrcMatchExtFindEntry(uint8_t iid, const otExtAddress *aExtAddre
 {
     OT_UNUSED_VARIABLE(iid);
 
-    int16_t entry    = -1;
+    int16_t entry = -1;
 
 #if OPENTHREAD_RADIO && OPENTHREAD_CONFIG_MULTIPAN_RCP_ENABLE == 1
     if (iid == 0)
@@ -289,7 +295,7 @@ int16_t utilsSoftSrcMatchExtFindEntry(uint8_t iid, const otExtAddress *aExtAddre
         return entry;
     }
 #endif
-    
+
     const uint8_t panIndex = getPanIndex(iid);
     uint16_t      checksum = sPanId[panIndex];
 
@@ -367,9 +373,15 @@ otError otPlatRadioAddSrcMatchExtEntry(otInstance *aInstance, const otExtAddress
     int16_t entry = -1;
 
     uint8_t iid = otNcpPlatGetCurCommandIid();
-    entry       = findSrcMatchExtAvailEntry(iid);
+#if OPENTHREAD_RADIO && OPENTHREAD_CONFIG_MULTIPAN_RCP_ENABLE == 1
+    // Prevent duplicate entries in multipan use case.
+    entry = utilsSoftSrcMatchExtFindEntry(iid, aExtAddress);
+    otEXPECT(!(entry >= 0 && entry < RADIO_CONFIG_SRC_MATCH_EXT_ENTRY_NUM));
+#endif
 
-    otLogDebgPlat("Add ExtAddr: iid=%d, entry=%d, addr %p", iid, entry, (void *) aExtAddress->m8);
+    entry = findSrcMatchExtAvailEntry(iid);
+
+    otLogDebgPlat("Add ExtAddr: iid=%d, entry=%d, addr %p", iid, entry, (void *)aExtAddress->m8);
 
     otEXPECT_ACTION(entry >= 0 && entry < RADIO_CONFIG_SRC_MATCH_EXT_ENTRY_NUM, error = OT_ERROR_NO_BUFS);
 
@@ -414,14 +426,13 @@ void otPlatRadioClearSrcMatchExtEntries(otInstance *aInstance)
 }
 #endif // RADIO_CONFIG_SRC_MATCH_EXT_ENTRY_NUM
 
-
 uint8_t utilsSoftSrcMatchFindIidFromPanId(otPanId panId)
 {
     uint8_t iid = 0xFF;
 
-    for(uint8_t index = 0; index < RADIO_CONFIG_SRC_MATCH_PANID_NUM; index++)
+    for (uint8_t index = 0; index < RADIO_CONFIG_SRC_MATCH_PANID_NUM; index++)
     {
-        if(sPanId[index] == panId)
+        if (sPanId[index] == panId)
         {
             iid = index + 1;
             break;

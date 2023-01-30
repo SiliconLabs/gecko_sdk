@@ -859,7 +859,7 @@ static BTStatus_t prvSendIndication( uint8_t ucServerIf,
                                      uint8_t * pucValue,
                                      bool bConfirm )
 {
-  SILABS_BLE_LOG_FUNC_ENTRY_INFO( "ucServerIf = %d, usAttributeHandle = %d, usConnId = %d, bConfirm = % ",
+  SILABS_BLE_LOG_FUNC_ENTRY_INFO( "ucServerIf = %d, usAttributeHandle = %d, usConnId = %d, bConfirm = %d",
                                    ucServerIf, usAttributeHandle, usConnId, bConfirm );
   /* Check parameters */
   if( !pucValue || !prvCheckServerInterface( ucServerIf ) )
@@ -916,7 +916,7 @@ static BTStatus_t prvSendResponse( uint16_t usConnId,
                                    BTStatus_t xStatus,
                                    BTGattResponse_t * pxResponse )
 {
-  SILABS_BLE_LOG_FUNC_ENTRY_INFO( "usConnId = %d, ulTransId = %d, xStatus = %d",
+  SILABS_BLE_LOG_FUNC_ENTRY_INFO( "usConnId = %d, ulTransId = %lu, xStatus = %d",
                                    usConnId, ulTransId, xStatus );
   BTStatus_t xRetStatus = eBTStatusSuccess;
   sl_status_t xSlStatus = SL_STATUS_OK;
@@ -939,7 +939,7 @@ static BTStatus_t prvSendResponse( uint16_t usConnId,
                                                                     pxResponse->usHandle,
                                                                     ucAttErrorCode );
 
-            SILABS_BLE_LOG_PRINT_DEBUG( "send_user_write_response( xSlStatus = 0x%X, usConnId = %d, usHandle = %d, ucAttErrorCode = %d",
+            SILABS_BLE_LOG_PRINT_DEBUG( "send_user_write_response( xSlStatus = 0x%"PRIx32", usConnId = %d, usHandle = %d, ucAttErrorCode = %d",
                                         xSlStatus, usConnId, pxResponse->usHandle, ucAttErrorCode );
             if (xSlStatus != SL_STATUS_OK)
               xRetStatus = eBTStatusFail;
@@ -962,7 +962,7 @@ static BTStatus_t prvSendResponse( uint16_t usConnId,
             if (xSlStatus != SL_STATUS_OK)
               xRetStatus = eBTStatusFail;
 
-            SILABS_BLE_LOG_PRINT_DEBUG( "send_user_prepare_write_response( xSlStatus = 0x%X, usConnId = %d, usHandle = %d, ucAttErrorCode = %d, offset = %d, Sent Length = %d ",
+            SILABS_BLE_LOG_PRINT_DEBUG( "send_user_prepare_write_response( xSlStatus = 0x%"PRIx32", usConnId = %d, usHandle = %d, ucAttErrorCode = %d, offset = %d, Sent Length = %d ",
                                         xSlStatus, usConnId, pxResponse->usHandle, ucAttErrorCode, pxResponse->xAttrValue.usOffset, pxResponse->xAttrValue.xLen );
           }
           break;
@@ -978,7 +978,7 @@ static BTStatus_t prvSendResponse( uint16_t usConnId,
             uint16_t rspValLen;
             xSlStatus = sl_bt_gatt_server_get_mtu( usConnId, &rspValLen );
 
-            SILABS_BLE_LOG_PRINT_DEBUG( "get_mtu( xSlStatus = 0x%X, usConnId = %d, MTU = %d",
+            SILABS_BLE_LOG_PRINT_DEBUG( "get_mtu( xSlStatus = 0x%"PRIx32", usConnId = %d, MTU = %d",
                                         xSlStatus, usConnId, rspValLen );
             if (xSlStatus != SL_STATUS_OK)
             {
@@ -1001,7 +1001,7 @@ static BTStatus_t prvSendResponse( uint16_t usConnId,
             if (xSlStatus != SL_STATUS_OK)
               xRetStatus = eBTStatusFail;
 
-            SILABS_BLE_LOG_PRINT_DEBUG( "send_user_read_response( xSlStatus = 0x%X, usConnId = %d, \
+            SILABS_BLE_LOG_PRINT_DEBUG( "send_user_read_response( xSlStatus = 0x%"PRIx32", usConnId = %d, \
                                         usHandle = %d, ucAttErrorCode = %d, Sent Length = %d",
                                         xSlStatus, usConnId, pxResponse->usHandle, ucAttErrorCode, usSentLen );
           }
@@ -1291,7 +1291,7 @@ void prvGattServerOpenConnectionEventCb( uint8_t ucConnectionHandle, BTBdaddr_t 
   if( pxGattServerCallbacks->pxConnectionCb )
   {
     SlBtGattServerIf_t * gattServerIfContext = &xGattServerIfContext;
-    SILABS_BLE_LOG_CB_CALL_DEBUG( "pxConnectionCb", "usConnId = 0x%x, bConnected = %b", ucConnectionHandle, true );
+    SILABS_BLE_LOG_CB_CALL_DEBUG( "pxConnectionCb", "usConnId = 0x%x, bConnected = %d", ucConnectionHandle, true );
     pxGattServerCallbacks->pxConnectionCb( ucConnectionHandle,
                                            gattServerIfContext->ucServerIf,
                                            true,
@@ -1305,7 +1305,7 @@ void prvGattServerCloseConnectionEventCb( uint8_t ucConnectionHandle, BTBdaddr_t
   if( pxGattServerCallbacks->pxConnectionCb )
   {
     SlBtGattServerIf_t * gattServerIfContext = &xGattServerIfContext;
-    SILABS_BLE_LOG_CB_CALL_DEBUG( "pxConnectionCb", "usConnId = 0x%x, bConnected = %b", ucConnectionHandle, false );
+    SILABS_BLE_LOG_CB_CALL_DEBUG( "pxConnectionCb", "usConnId = 0x%x, bConnected = %d", ucConnectionHandle, false );
     pxGattServerCallbacks->pxConnectionCb( ucConnectionHandle,
                                            gattServerIfContext->ucServerIf,
                                            false,

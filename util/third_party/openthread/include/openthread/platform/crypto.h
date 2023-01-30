@@ -172,7 +172,7 @@ typedef struct otPlatCryptoEcdsaKeyPair
 {
     uint32_t mKeyRef;
     uint8_t *mDerBytes;
-    uint8_t mDerLength;
+    uint8_t  mDerLength;
 } otPlatCryptoEcdsaKeyPair;
 
 /**

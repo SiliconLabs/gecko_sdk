@@ -23,7 +23,7 @@ constexpr int kOutputTensor = 0;
 // https://www.tensorflow.org/lite/performance/quantization_spec
 constexpr int kConvQuantizedDimension = 0;
 
-enum op_support { kMvp, kCmsisNN, kTFLMrefF32, kTFLMrefI8 };
+enum op_support { kMvp, kCmsisNN, kTFLMrefF32 };
 
 struct OpData {
   op_support  supported;
@@ -197,40 +197,36 @@ TfLiteStatus Prepare(TfLiteContext* context, TfLiteNode* node)
         data->per_channel_output_multiplier, data->per_channel_output_shift,
         num_channels));
 
-      if (data->op_params.dilation_height == 1 && data->op_params.dilation_width == 1) {
-        data->supported = kCmsisNN;
-        cmsis_nn_conv_params       conv_params;
-        conv_params.input_offset   = data->op_params.input_offset;
-        conv_params.output_offset  = data->op_params.output_offset;
-        conv_params.stride.h       = data->op_params.stride_height;
-        conv_params.stride.w       = data->op_params.stride_width;
-        conv_params.dilation.h     = 1;
-        conv_params.dilation.w     = 1;
-        conv_params.padding.h      = data->op_params.pad_height;
-        conv_params.padding.w      = data->op_params.pad_width;
-        conv_params.activation.min = data->op_params.output_activation_min;
-        conv_params.activation.max = data->op_params.output_activation_max;
+      data->supported = kCmsisNN;
+      cmsis_nn_conv_params       conv_params;
+      conv_params.input_offset   = data->op_params.input_offset;
+      conv_params.output_offset  = data->op_params.output_offset;
+      conv_params.stride.h       = data->op_params.stride_height;
+      conv_params.stride.w       = data->op_params.stride_width;
+      conv_params.dilation.h     = data->op_params.dilation_height;
+      conv_params.dilation.w     = data->op_params.dilation_width;
+      conv_params.padding.h      = data->op_params.pad_height;
+      conv_params.padding.w      = data->op_params.pad_width;
+      conv_params.activation.min = data->op_params.output_activation_min;
+      conv_params.activation.max = data->op_params.output_activation_max;
 
-        cmsis_nn_dims input_dims;
-        input_dims.n = data->op_params.batches;
-        input_dims.h = data->op_params.input_height;
-        input_dims.w = data->op_params.input_width;
-        input_dims.c = data->op_params.in_channels;
+      cmsis_nn_dims input_dims;
+      input_dims.n = data->op_params.batches;
+      input_dims.h = data->op_params.input_height;
+      input_dims.w = data->op_params.input_width;
+      input_dims.c = data->op_params.in_channels;
 
-        cmsis_nn_dims filter_dims;
-        filter_dims.h = data->op_params.filter_height;
-        filter_dims.w = data->op_params.filter_width;
+      cmsis_nn_dims filter_dims;
+      filter_dims.h = data->op_params.filter_height;
+      filter_dims.w = data->op_params.filter_width;
 
-        cmsis_nn_dims output_dims;
-        output_dims.h = data->op_params.output_height;
-        output_dims.w = data->op_params.output_width;
-        output_dims.c = data->op_params.out_channels;
+      cmsis_nn_dims output_dims;
+      output_dims.h = data->op_params.output_height;
+      output_dims.w = data->op_params.output_width;
+      output_dims.c = data->op_params.out_channels;
 
-        scratch_buffer_size = arm_convolve_wrapper_s8_get_buffer_size(
-                              &conv_params, &input_dims, &filter_dims, &output_dims);
-      } else {
-        data->supported = kTFLMrefI8;
-      }
+      scratch_buffer_size = arm_convolve_wrapper_s8_get_buffer_size(
+                            &conv_params, &input_dims, &filter_dims, &output_dims);
     }
 
   } else if (input->type == kTfLiteFloat32) {
@@ -259,7 +255,7 @@ TfLiteStatus Prepare(TfLiteContext* context, TfLiteNode* node)
   if (bias != nullptr) {
     micro_context->DeallocateTempTfLiteTensor(bias);
   }
-  
+
   return kTfLiteOk;
 }
 
@@ -323,8 +319,8 @@ TfLiteStatus eval_cmsis_int8(TfLiteContext* context,
   conv_params.output_offset  = data->op_params.output_offset;
   conv_params.stride.h       = data->op_params.stride_height;
   conv_params.stride.w       = data->op_params.stride_width;
-  conv_params.dilation.h     = 1;
-  conv_params.dilation.w     = 1;
+  conv_params.dilation.h     = data->op_params.dilation_height;
+  conv_params.dilation.w     = data->op_params.dilation_width;
   conv_params.padding.h      = data->op_params.pad_height;
   conv_params.padding.w      = data->op_params.pad_width;
   conv_params.activation.min = data->op_params.output_activation_min;
@@ -344,41 +340,6 @@ TfLiteStatus eval_cmsis_int8(TfLiteContext* context,
                      &filter_dims, tflite::micro::GetTensorData<int8_t>(filter),
                      &bias_dims,   bias == nullptr ? NULL : tflite::micro::GetTensorData<int32_t>(bias),
                      &output_dims, tflite::micro::GetTensorData<int8_t>(output)));
-
-  return kTfLiteOk;
-}
-
-TfLiteStatus eval_tflm_int8(OpData* data,
-                            const TfLiteEvalTensor* input,
-                            const TfLiteEvalTensor* filter,
-                            const TfLiteEvalTensor* bias,
-                            TfLiteEvalTensor* output)
-{
-  ConvParams op_params;
-
-  op_params.input_offset             = data->op_params.input_offset;
-  op_params.output_offset            = data->op_params.output_offset;
-  op_params.stride_height            = data->op_params.stride_height;
-  op_params.stride_width             = data->op_params.stride_width;
-  op_params.dilation_height_factor   = data->op_params.dilation_height;
-  op_params.dilation_width_factor    = data->op_params.dilation_width;
-  op_params.padding_values.height    = data->op_params.pad_height;
-  op_params.padding_values.width     = data->op_params.pad_width;
-  op_params.quantized_activation_min = data->op_params.output_activation_min;
-  op_params.quantized_activation_max = data->op_params.output_activation_max;
-
-  reference_integer_ops::ConvPerChannel(
-    op_params,
-    data->per_channel_output_multiplier,
-    data->per_channel_output_shift,
-    tflite::micro::GetTensorShape(input),
-    tflite::micro::GetTensorData<int8_t>(input),
-    tflite::micro::GetTensorShape(filter),
-    tflite::micro::GetTensorData<int8_t>(filter),
-    tflite::micro::GetTensorShape(bias),
-    bias == nullptr ? nullptr : tflite::micro::GetTensorData<int32_t>(bias),
-    tflite::micro::GetTensorShape(output),
-    tflite::micro::GetTensorData<int8_t>(output));
 
   return kTfLiteOk;
 }
@@ -437,9 +398,6 @@ TfLiteStatus Invoke(TfLiteContext* context, TfLiteNode* node)
 
   } else if (data->supported == kCmsisNN) {
     status = eval_cmsis_int8(context, data, input, filter, bias, output);
-
-  } else if (data->supported == kTFLMrefI8) {
-    status = eval_tflm_int8(data, input, filter, bias, output);
 
   } else if (data->supported == kTFLMrefF32) {
     status = eval_float(params, data, input, filter, bias, output);

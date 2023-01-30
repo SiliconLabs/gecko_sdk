@@ -366,23 +366,20 @@ __STATIC_INLINE void CHIP_Init(void)
     while (DCDC->SYNCBUSY & DCDC_SYNCBUSY_CTRL) {
       /* Wait for previous synchronization to finish */
     }
+
     DCDC->CTRL_CLR = DCDC_CTRL_MODE;
     while ((DCDC->STATUS & DCDC_STATUS_BYPSW) == 0U) {
       /* Wait for BYPASS switch enable. */
     }
 
-#if (!defined(SL_TRUSTZONE_NONSECURE) && !defined(SL_TRUSTZONE_SECURE))
-    if ((SYSCFG->ROOTLOCKSTATUS & SYSCFG_ROOTLOCKSTATUS_REGLOCK) == 0) {
-      *(volatile uint32_t *)(DCDC_BASE + 0x205CUL) = (0x1UL << 18);
-    }
-#endif // (!defined(SL_TRUSTZONE_NONSECURE) && !defined(SL_TRUSTZONE_SECURE))
-
     if (dcdcIsLock) {
       DCDC->LOCK = ~DCDC_LOCK_LOCKKEY_UNLOCKKEY;
     }
+
     if (dcdcClkIsOff) {
       CMU->CLKEN0_CLR = CMU_CLKEN0_DCDC;
     }
+
     if (syscfgClkIsOff) {
       CMU->CLKEN0_CLR = CMU_CLKEN0_SYSCFG;
     }

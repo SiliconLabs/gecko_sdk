@@ -19,12 +19,14 @@
 #include "sl_component_catalog.h"
 #ifdef SL_CATALOG_ZIGBEE_ZCL_FRAMEWORK_CORE_PRESENT
 #include "app/framework/include/af.h"
+#include "app/framework/util/af-main.h"
 #include "app/framework/util/common.h"
 #else // !SL_CATALOG_ZIGBEE_ZCL_FRAMEWORK_CORE_PRESENT
 #include "green-power-adapter.h"
 #endif //SL_CATALOG_ZIGBEE_ZCL_FRAMEWORK_CORE_PRESENT
 #else //!UC_BUILD
 #include "app/framework/include/af.h"
+#include "app/framework/util/af-main.h"
 #include "app/framework/util/common.h"
 #endif //UC_BUILD
 
@@ -820,15 +822,24 @@ bool emGpMakeAddr(EmberGpAddress *addr,
                   uint8_t *gpdIeee,
                   uint8_t endpoint)
 {
-  addr->applicationId = appId;
+  if (addr == NULL) {
+    return false;
+  }
   if (appId == EMBER_GP_APPLICATION_SOURCE_ID) {
+    if (IS_RESERVED_GPD_SRC_ID(srcId)) {
+      return false;
+    }
     addr->id.sourceId = srcId;
   } else if (appId == EMBER_GP_APPLICATION_IEEE_ADDRESS
              && gpdIeee != NULL) {
+    if (((emberAfMemoryByteCompare(gpdIeee, EUI64_SIZE, 0)))) {
+      return false;
+    }
     MEMCOPY(addr->id.gpdIeeeAddress, gpdIeee, EUI64_SIZE);
     addr->endpoint = endpoint;
   } else {
     return false;
   }
+  addr->applicationId = appId;
   return true;
 }

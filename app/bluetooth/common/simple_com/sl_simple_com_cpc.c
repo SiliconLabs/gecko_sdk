@@ -38,6 +38,7 @@ static uint8_t rx_buf[SL_SIMPLE_COM_RX_BUF_SIZE] = { 0 };
 static uint8_t tx_buf[SL_SIMPLE_COM_TX_BUF_SIZE] = { 0 };
 
 static sl_cpc_endpoint_handle_t endpoint_handle;
+static bool cpc_connected = false;
 
 // Write completed signal
 typedef struct {
@@ -58,6 +59,8 @@ void cpc_tx_cb(sl_cpc_user_endpoint_id_t endpoint_id,
                void *arg,
                sl_status_t status);
 void cpc_rx_cb(uint8_t endpoint_id, void *arg);
+void cpc_error_cb(uint8_t endpoint_id, void *arg);
+bool cpc_is_ep_free(void);
 
 // -----------------------------------------------------------------------------
 // Public functions (API implementation)
@@ -86,6 +89,12 @@ void sl_simple_com_init(void)
                                       SL_CPC_ENDPOINT_ON_IFRAME_RECEIVE,
                                       (void *)cpc_rx_cb);
   EFM_ASSERT(status == SL_STATUS_OK);
+  status = sl_cpc_set_endpoint_option(&endpoint_handle,
+                                      SL_CPC_ENDPOINT_ON_ERROR,
+                                      (void*)cpc_error_cb);
+  EFM_ASSERT(status == SL_STATUS_OK);
+
+  cpc_connected = true;
 }
 
 /**************************************************************************//**
@@ -95,6 +104,16 @@ void sl_simple_com_step(void)
 {
   sl_status_t status;
   uint16_t len;
+
+  // Check if the endpoint is open. If not, we need to reopen it,
+  // but first we need to check if it has been freed by CPC
+  if (!cpc_connected) {
+    if (cpc_is_ep_free()) {
+      sl_simple_com_init();
+    } else {
+      return;
+    }
+  }
 
   // If something is in tx buffer, and initial handshake was done, transmit it
   if ((signal_write > 0) && !signal_init) {
@@ -235,6 +254,32 @@ void cpc_tx_cb(sl_cpc_user_endpoint_id_t endpoint_id,
     signal_wr_comp.write_completed++;
     )
   sl_simple_com_os_task_proceed();
+}
+
+/**************************************************************************//**
+ * CPC error callback
+ *****************************************************************************/
+void cpc_error_cb(uint8_t endpoint_id, void *arg)
+{
+  (void)endpoint_id;
+  (void)arg;
+  uint8_t state = sl_cpc_get_endpoint_state(&endpoint_handle);
+  if (state == SL_CPC_STATE_ERROR_DESTINATION_UNREACHABLE) {
+    sl_status_t status = sl_cpc_close_endpoint(&endpoint_handle);
+    EFM_ASSERT(status == SL_STATUS_OK);
+    cpc_connected = false;
+  }
+}
+
+/**************************************************************************//**
+ * Returns whether the CPC endpoint has been freed
+ *****************************************************************************/
+bool cpc_is_ep_free(void)
+{
+  if (sl_cpc_get_endpoint_state(&endpoint_handle) == SL_CPC_STATE_FREED) {
+    return true;
+  }
+  return false;
 }
 
 /**************************************************************************//**

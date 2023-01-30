@@ -56,6 +56,14 @@ config_file:
   - path: "protocol/z-wave/platform/SiliconLabs/AppsHw/config/extension_board_8029a_efr32zg28_slider.h"
     condition: [device_sdid_235, hardware_board_rb]
 
+    # No board basic peripheral description files (Pintool compatible)
+  - path: "protocol/z-wave/platform/SiliconLabs/AppsHw/config/radio_no_board.h"
+    unless: [hardware_board_stk, hardware_board_rb]
+  - path: "protocol/z-wave/platform/SiliconLabs/AppsHw/config/radio_no_board_button.h"
+    unless: [hardware_board_stk, hardware_board_rb]
+  - path: "protocol/z-wave/platform/SiliconLabs/AppsHw/config/radio_no_board_led.h"
+    unless: [hardware_board_stk, hardware_board_rb]
+
 define:
   - name: RADIO_BOARD_EFR32ZG14
     value: 1
@@ -67,8 +75,9 @@ define:
   - name: RADIO_BOARD_BRD2603A
     condition: [brd2603a]
   - name: EXT_BOARD_8029A
-    value: 1
-    unless: [brd2603a]
+    condition: [hardware_board_rb]
+  - name: RADIO_NO_BOARD
+    unless: [hardware_board_stk, hardware_board_rb]
 provides:
   - name: zw_target_boards
 requires:

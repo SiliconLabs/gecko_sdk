@@ -537,7 +537,7 @@ extern RAIL_FrequencyOffset_t rxFreqOffset;
 extern RAIL_FemProtectionConfig_t femConfig;
 #endif
 
-// Variable tracking the compensation mode
+// Variables tracking the compensation mode
 extern bool isHFXOCompensationSystematic;
 
 /**

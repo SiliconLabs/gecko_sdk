@@ -36,8 +36,8 @@
 
 #include "openthread-posix-config.h"
 #include "platform-posix.h"
-#include "lib/spinel/spinel_interface.hpp"
 #include "sl_cpc.h"
+#include "lib/spinel/spinel_interface.hpp"
 
 #if OPENTHREAD_POSIX_CONFIG_RCP_BUS == OT_POSIX_RCP_BUS_CPC
 
@@ -79,7 +79,7 @@ public:
      *
      * @retval OT_ERROR_NONE          The interface is initialized successfully
      * @retval OT_ERROR_FAILED        The interface initialization was unsuccessful
-     * 
+     *
      */
     otError Init(const Url::Url &aRadioUrl);
 
@@ -143,24 +143,24 @@ public:
     void OnRcpReset(void);
 
     /**
-      * This method is called when RCP is reset to recreate the connection with it.
-      * Intentionally empty.
-      *
-      */
+     * This method is called when RCP is reset to recreate the connection with it.
+     * Intentionally empty.
+     *
+     */
     otError ResetConnection(void) { return OT_ERROR_NONE; }
 
     /**
-      * This method returns the RCP interface metrics.
-      *
-      * @returns The RCP interface metrics.
-      *
-      */
+     * This method returns the RCP interface metrics.
+     *
+     * @returns The RCP interface metrics.
+     *
+     */
     const otRcpInterfaceMetrics *GetRcpInterfaceMetrics(void) const { return &mInterfaceMetrics; }
 
     /**
-      * This method is called reinitialise the CPC interface if sCpcResetReq indicates that a restart
-      * is required.
-      */
+     * This method is called reinitialise the CPC interface if sCpcResetReq indicates that a restart
+     * is required.
+     */
     void CheckAndReInitCpc(void);
 
 private:
@@ -200,7 +200,7 @@ private:
     /**
      * This method generates and sends a reset response back to OT.
      *
-     * This method is called after the CPC layer catches the SPINEL reset command. This is done so that 
+     * This method is called after the CPC layer catches the SPINEL reset command. This is done so that
      * CPC can handle resets of the RCP and OT is tricked into thinking it handles resets.
      *
      */
@@ -208,9 +208,9 @@ private:
 
     enum
     {
-        kMaxFrameSize       = SL_CPC_READ_MINIMUM_SIZE,
-        kMaxWaitTime        = 2000, ///< Maximum wait time in Milliseconds for socket to become writable (see `SendFrame`).
-        kMaxSleepDuration   = 100000,  ///< Sleep duration in micro seconds before restarting cpc connection.
+        kMaxFrameSize = SL_CPC_READ_MINIMUM_SIZE,
+        kMaxWaitTime  = 2000, ///< Maximum wait time in Milliseconds for socket to become writable (see `SendFrame`).
+        kMaxSleepDuration   = 100000, ///< Sleep duration in micro seconds before restarting cpc connection.
         kMaxRestartAttempts = 300,
         kResetCMDSize       = 4,
         kCpcBusSpeed        = 115200,
@@ -220,10 +220,10 @@ private:
     void *                                        mReceiveFrameContext;
     Spinel::SpinelInterface::RxFrameBuffer &      mReceiveFrameBuffer;
 
-    int                 mSockFd;
-    cpc_handle_t        mHandle;
-    cpc_endpoint_t      mEndpoint;
-    uint32_t            mCpcBusSpeed;
+    int            mSockFd;
+    cpc_handle_t   mHandle;
+    cpc_endpoint_t mEndpoint;
+    uint32_t       mCpcBusSpeed;
 
     static void HandleSecondaryReset(void);
     static void SetCpcResetReq(bool state) { sCpcResetReq = state; }
@@ -232,9 +232,9 @@ private:
     // 0x72 -> STATUS_RESET_SOFTWARE
     uint8_t mResetResponse[kResetCMDSize] = {0x80, 0x06, 0x00, 0x72};
 
-    const   uint8_t     mId = SL_CPC_ENDPOINT_15_4;
-    typedef uint8_t     cpcError;
-    static  bool        sCpcResetReq;
+    const uint8_t   mId = SL_CPC_ENDPOINT_15_4;
+    typedef uint8_t cpcError;
+    static bool     sCpcResetReq;
 
     otRcpInterfaceMetrics mInterfaceMetrics;
 

@@ -29,12 +29,13 @@
 #include <sys/time.h>
 #include <errno.h>
 #include <stdio.h>
-
+#include <time.h>
+#include <signal.h>
+#include <unistd.h>
 #define elapsedTimeInt16u(oldTime, newTime) \
   ((uint16_t) ((uint16_t)(newTime) - (uint16_t)(oldTime)))
 
 #define ZIGBEE_CPC_TRANSMIT_WINDOW 1
-
 #define WAIT_FOR_RESPONSE_TIMEOUT_S 5
 
 static uint8_t ezspFrameLength;
@@ -45,6 +46,7 @@ static bool waitingForResponse = false;
 
 static cpc_handle_t zigbee_cpc_handle;
 static bool cpc_initialized = false;
+volatile sig_atomic_t cpc_secondary_has_reset = false;
 char *zigbee_cpc_instance_name = NULL;
 static cpc_endpoint_t zigbee_cpc_endpoint;
 static uint8_t zigbee_cpc_rx_buffer[SL_CPC_READ_MINIMUM_SIZE];
@@ -56,51 +58,88 @@ static uint8_t zigbee_cpc_rx_buffer[SL_CPC_READ_MINIMUM_SIZE];
 #else // CPC_TEST_CODE
  #define test_print(...)
 #endif // CPC_TEST_CODE
-
+bool endpoint_was_opened = false;
 static int max_restart_attempts = 3;
+bool in_ncp_reset(void);
 /******************************************************************************
  * Callback to register reset from other end.
  *****************************************************************************/
+bool in_ncp_reset(void)
+{
+  return cpc_secondary_has_reset;
+}
+
 static void reset_crash_callback(void)
 {
-  int ret = 0;
-  int attempts = 0;
-  // Reset cpc communication if daemon signals
-  do {
-    //Try to restart CPC
-    ret = cpc_restart(&zigbee_cpc_handle);
-    //Mark how many times the restart was attempted
-    attempts++;
-    //Continue to try and restore CPC communication until we
-    //have exhausted the retries or restart was successful
-  }   while ((ret != 0) && (attempts < max_restart_attempts));
-
-  if (ret < 0) {
-    perror("reset error");
-    exit(EXIT_FAILURE);
-  }
+  // This code is invoked from within a signal handler
+  // do not call functions here
+  cpc_secondary_has_reset = true;
 }
 
 EzspStatus ezspInit(void)
 {
   int ret;
-  ret = cpc_init(&zigbee_cpc_handle,
-                 zigbee_cpc_instance_name, // if NULL, uses default instance name (cpcd_0)
-                 false, // no debug traces in stderr
-                 reset_crash_callback);
+  int attempts;
 
-  if (ret) {
-    printf("Failed to connect to %s\n",
-           zigbee_cpc_instance_name
-           ? zigbee_cpc_instance_name
-           : "default CPCd instance");
-    return EZSP_CPC_ERROR_INIT;
+  // 1A. Init or restart CPC
+  if ( !cpc_initialized ) {
+    // INITIALIZE CPC - Once per reset
+    attempts = 0;
+    do {
+      ret = cpc_init(&zigbee_cpc_handle,
+                     zigbee_cpc_instance_name, // if NULL, uses default instance name (cpcd_0)
+                     false, // no debug traces in stderr
+                     reset_crash_callback);
+
+      attempts++;
+      if ( ret < 0 ) {
+        sleep(1);
+      }
+    } while ((ret != 0) && (attempts < max_restart_attempts));
+
+    if (ret) {
+      printf("Failed to connect to %s\n",
+             zigbee_cpc_instance_name
+             ? zigbee_cpc_instance_name
+             : "default CPCd instance");
+      return EZSP_CPC_ERROR_INIT;
+    }
+  } else {
+    // 1B. RESTART CPC -CPC was previously initialized, comm failure/ NCP reset called ezsp reset
+    attempts = 0;
+    cpc_secondary_has_reset = false;
+
+    if (endpoint_was_opened) {
+      ret =  cpc_close_endpoint(&zigbee_cpc_endpoint);
+      assert(ret == 0);
+      endpoint_was_opened = false;
+    }
+    do {
+      ret = cpc_restart(&zigbee_cpc_handle);
+      attempts++;
+      if ( ret < 0 ) {
+        sleep(1);
+      }
+    } while ((ret != 0) && (attempts < max_restart_attempts));
+
+    if (ret < 0) {
+      printf("cpc_restart error: 0x%0X", ret);
+      return EZSP_CPC_ERROR_INIT;
+    }
   }
 
-  ret = cpc_open_endpoint(zigbee_cpc_handle,
-                          &zigbee_cpc_endpoint,
-                          SL_CPC_ENDPOINT_ZIGBEE,
-                          ZIGBEE_CPC_TRANSMIT_WINDOW);
+  // 2. Open end point
+  attempts = 0;
+  do {
+    ret = cpc_open_endpoint(zigbee_cpc_handle,
+                            &zigbee_cpc_endpoint,
+                            SL_CPC_ENDPOINT_ZIGBEE,
+                            ZIGBEE_CPC_TRANSMIT_WINDOW);
+    attempts++;
+    if ( ret < 0 ) {
+      sleep(1);
+    }
+  } while ((ret != 0) && (attempts < max_restart_attempts));
 
   printf("Connected to CPC daemon, endpoint %d: %s (errno %d)\n",
          SL_CPC_ENDPOINT_ZIGBEE,
@@ -110,11 +149,9 @@ EzspStatus ezspInit(void)
   if (ret < 0) {
     return EZSP_CPC_ERROR_INIT;
   }
-
-  cpc_initialized = true;
-
-  // Initialize host queue
+  endpoint_was_opened = true;
   ezspInitQueues();
+  cpc_initialized = true;
 
   return EZSP_SUCCESS;
 }
@@ -143,7 +180,7 @@ uint8_t serialPendingResponseCount(void)
 
 WEAK_TEST EzspStatus serialResponseReceived(void)
 {
-  if (!cpc_initialized) {
+  if (!cpc_initialized || cpc_secondary_has_reset) {
     return EZSP_NOT_CONNECTED;
   }
   int  ret = 0;
@@ -238,7 +275,7 @@ WEAK_TEST EzspStatus serialResponseReceived(void)
 
 WEAK_TEST EzspStatus serialSendCommand(void)
 {
-  if (!cpc_initialized) {
+  if (!cpc_initialized || cpc_secondary_has_reset) {
     return EZSP_NOT_CONNECTED;
   }
 

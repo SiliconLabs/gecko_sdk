@@ -49,6 +49,71 @@ template_contribution:
       name: end_mode_switch
       handler: cli_end_mode_switch
       help: "Sending end mode switch packet"
+  - name: cli_command
+    value:
+      name: get_fsk_fcs_type
+      handler: cli_get_fsk_fcs_type
+      help: Get FSK FCS Type setting
+  - name: cli_command
+    value:
+      name: get_fsk_whitening
+      handler: cli_get_fsk_whitening
+      help: Get FSK Whitening setting
+  - name: cli_command
+    value:
+      name: get_ofdm_rate
+      handler: cli_get_ofdm_rate
+      help: Get OFDM Rate setting
+  - name: cli_command
+    value:
+      name: get_ofdm_scrambler
+      handler: cli_get_ofdm_scrambler
+      help: Get OFDM Scrambler setting
+  - name: cli_command
+    value:
+      name: set_fsk_fcs_type
+      handler: cli_set_fsk_fcs_type
+      help: Set FSK FCS Type setting
+      argument:
+      - type: uint8
+        help: fcs_type
+  - name: cli_command
+    value:
+      name: set_fsk_whitening
+      handler: cli_set_fsk_whitening
+      help: Set FSK Whitening setting
+      argument:
+      - type: uint8
+        help: fsk_whitening
+  - name: cli_command
+    value:
+      name: set_ofdm_rate
+      handler: cli_set_ofdm_rate
+      help: Set OFDM Rate setting
+      argument:
+      - type: uint8
+        help: ofdm_rate
+  - name: cli_command
+    value:
+      name: set_ofdm_scrambler
+      handler: cli_set_ofdm_scrambler
+      help: Set OFDM Scrambler setting
+      argument:
+      - type: uint8
+        help: ofdm_scrambler
+  - name: cli_command
+    value:
+      name: get_print_packet_details
+      handler: cli_get_print_packet_details
+      help: State of packet details print enable
+  - name: cli_command
+    value:
+      name: set_print_packet_details
+      handler: cli_set_print_packet_details
+      help: Set packet details print enable
+      argument:
+      - type: uint8
+        help: ON/OFF
 #---------------- Component Catalog ------------------
   - name: component_catalog
     value: sl_flex_mode_switch

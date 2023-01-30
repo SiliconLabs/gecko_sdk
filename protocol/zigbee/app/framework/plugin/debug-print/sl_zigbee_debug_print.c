@@ -72,7 +72,7 @@ sl_status_t sl_zigbee_debug_print_enable_group(uint32_t group_type, bool enable)
 //------------------------------------------------------------------------------
 // Internal APIs
 
-void sli_zigbee_debug_print(uint32_t group_type, const char* format, ...)
+void sli_zigbee_debug_print(uint32_t group_type, bool new_line, const char* format, ...)
 {
   sl_status_t status = check_group_type(group_type);
   va_list args;
@@ -84,6 +84,9 @@ void sli_zigbee_debug_print(uint32_t group_type, const char* format, ...)
 
   va_start(args, format);
   local_vprintf(format, args);
+  if (new_line) {
+    local_vprintf("\r\n", args);
+  }
   va_end(args);
 }
 
@@ -96,9 +99,9 @@ void sli_zigbee_debug_print_buffer(uint32_t group_type,
   uint16_t i;
 
   for (i = 0; i < buffer_length; i++) {
-    sli_zigbee_debug_print(group_type, format_string, buffer[i]);
+    sli_zigbee_debug_print(group_type, false, format_string, buffer[i]);
     if (with_space) {
-      sli_zigbee_debug_print(group_type, " ");
+      sli_zigbee_debug_print(group_type, false, " ");
     }
   }
 }

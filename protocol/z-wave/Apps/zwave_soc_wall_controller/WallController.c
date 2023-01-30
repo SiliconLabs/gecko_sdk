@@ -163,6 +163,9 @@ static uint8_t buttonStates[NUMBER_OF_KEYS] = {0, 0, 0};
 static key_id_t m_button;
 static NEXT_JOB_Q nextJob;
 
+static bool isTxInProgress = false;
+static bool isThereCentralScenePendingJob = false;
+
 #ifdef DEBUGPRINT
 static uint8_t m_aDebugPrintBuffer[96];
 #endif
@@ -226,7 +229,8 @@ ApplicationInit(EResetReason_t eResetReason)
           ZAF_BUILD_NO);
 
   DPRINTF("ApplicationInit eResetReason = %d\n", eResetReason);
-
+  isTxInProgress = false;
+  isThereCentralScenePendingJob = false;
   // Read Rf region from MFG_ZWAVE_COUNTRY_FREQ
   zpal_radio_region_t regionMfg;
   ZW_GetMfgTokenDataCountryFreq((void*) &regionMfg);
@@ -453,8 +457,13 @@ zaf_event_distributor_app_event_manager(const uint8_t event)
           centralSceneHoldTimerStatus = ESWTIMER_STATUS_FAILED;
         }
       }
-
-      InitiateCentralSceneTX(centralSceneKeyAttributeHold, centralSceneNumberHold);
+      if (true == isTxInProgress) {
+        isThereCentralScenePendingJob = true;
+      } else {
+        isTxInProgress = true;
+        isThereCentralScenePendingJob = false;
+        InitiateCentralSceneTX(centralSceneKeyAttributeHold, centralSceneNumberHold);
+      }
       break;
 
     case EVENT_APP_CC_BASIC_JOB:
@@ -630,9 +639,11 @@ void
 ZCB_TransmitCallback(TRANSMISSION_RESULT * pTransmissionResult)
 {
   DPRINTF("\r\nTX CB for N %d: %d", pTransmissionResult->nodeId, pTransmissionResult->status);
-//  if (EVENT_APP_CC_NO_JOB != pendingKeyPressEvent) {
-//    ZAF_EventHelperEventEnqueue(EVENT_APP_FINISH_EVENT_JOB);
-//  } else
+  isTxInProgress = false;
+  if(true == isThereCentralScenePendingJob)
+  {
+    ZAF_JobHelperJobEnqueue(EVENT_APP_CENTRAL_SCENE_JOB);
+  }
     if (TRANSMISSION_RESULT_FINISHED == pTransmissionResult->isFinished) {
     ZAF_EventHelperEventEnqueue(EVENT_APP_NEXT_EVENT_JOB);
   }

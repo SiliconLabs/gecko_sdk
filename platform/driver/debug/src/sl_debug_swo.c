@@ -99,6 +99,12 @@ sl_status_t sl_debug_swo_init(void)
               | (1UL << ITM_TCR_DWTENA_Pos)
               | (1UL << ITM_TCR_ITMENA_Pos));
 
+  // Send data on the SWO channel. This avoids corrupting data
+  // sent on the SWO channel shortly after initialization.
+  ITM->TER |= (1UL << 8);
+  ITM->PORT[8].u8 = 0xFF;
+  ITM->TER &= ~(1UL << 8);
+
   return SL_STATUS_OK;
 }
 

@@ -213,21 +213,21 @@ static const char * _meas_type_to_str(sl_wisun_nwm_target_type_t meas_type);
  * @details Helper function
  * @param[in] opt Option item
  *****************************************************************************/
-static inline void _add_packet_length_opt(const app_enum_t *opt);
+__STATIC_INLINE void _add_packet_length_opt(const app_enum_t *opt);
 
 /**************************************************************************//**
  * @brief Add packet count option
  * @details Helper function
  * @param[in] opt Option item
  *****************************************************************************/
-static inline void _add_packet_count_opt(const app_enum_t *opt);
+__STATIC_INLINE void _add_packet_count_opt(const app_enum_t *opt);
 
 /**************************************************************************//**
  * @brief Add measurement type option
  * @details Helper function
  * @param[in] opt Option item
  *****************************************************************************/
-static inline void _add_meas_type_opt(const app_enum_t *opt);
+__STATIC_INLINE void _add_meas_type_opt(const app_enum_t *opt);
 
 /**************************************************************************//**
  * @brief Start test form
@@ -250,7 +250,7 @@ static void _renderer_test_form(void *args);
  * @param[in] stat
  * @return uint8_t packet loss in % value
  *****************************************************************************/
-static inline uint8_t _calc_packet_loss_percent(const sl_wisun_nwm_node_stat_t *stat);
+__STATIC_INLINE uint8_t _calc_packet_loss_percent(const sl_wisun_nwm_node_stat_t *stat);
 
 /**************************************************************************//**
  * @brief Set reult textbox
@@ -472,17 +472,17 @@ static void _packet_count_form(void *args)
   sl_display_update();
 }
 
-static inline void _add_packet_count_opt(const app_enum_t *opt)
+__STATIC_INLINE void _add_packet_count_opt(const app_enum_t *opt)
 {
   sl_gui_optionlist_add_item(opt->value_str, _set_packet_count, (void *)opt);
 }
 
-static inline void _add_meas_type_opt(const app_enum_t *opt)
+__STATIC_INLINE void _add_meas_type_opt(const app_enum_t *opt)
 {
   sl_gui_optionlist_add_item(opt->value_str, _set_meas_type, (void *)opt);
 }
 
-static inline void _add_packet_length_opt(const app_enum_t *opt)
+__STATIC_INLINE void _add_packet_length_opt(const app_enum_t *opt)
 {
   if (opt->value < SL_WISUN_PING_MAX_PACKET_LENGTH) {
     sl_gui_optionlist_add_item(opt->value_str, _set_packet_length, (void *)opt);
@@ -551,7 +551,7 @@ static void _target_type_form(void *args)
 
   sl_display_update();
 }
-static inline uint8_t _calc_packet_loss_percent(const sl_wisun_nwm_node_stat_t *stat)
+__STATIC_INLINE uint8_t _calc_packet_loss_percent(const sl_wisun_nwm_node_stat_t *stat)
 {
   return stat->ping_stat.packet_count ? (stat->ping_stat.lost * 100) / stat->ping_stat.packet_count : 0xFF;
 }

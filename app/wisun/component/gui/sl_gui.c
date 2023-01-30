@@ -192,13 +192,13 @@
  * @brief Mutex acquire
  * @details Helper function
  *****************************************************************************/
-static inline void _gui_mutex_acquire(void);
+__STATIC_INLINE void _gui_mutex_acquire(void);
 
 /**************************************************************************//**
  * @brief Mutex release
  * @details Helper function
  *****************************************************************************/
-static inline void _gui_mutex_release(void);
+__STATIC_INLINE void _gui_mutex_release(void);
 
 /**************************************************************************//**
  * @brief GUI event task function
@@ -214,7 +214,7 @@ static void _gui_event_task(void *args);
  * @param[in] id Button ID
  * @return sl_widget_button_t* Button instance
  *****************************************************************************/
-static inline sl_widget_button_t * _get_button_by_id(const sl_gui_button_id_t id);
+__STATIC_INLINE sl_widget_button_t * _get_button_by_id(const sl_gui_button_id_t id);
 
 // -----------------------------------------------------------------------------
 //                                Static Variables
@@ -563,20 +563,20 @@ void sl_gui_init_all_widget(void)
   sl_gui_textbox_init();
 }
 
-static inline sl_widget_button_t * _get_button_by_id(const sl_gui_button_id_t id)
+__STATIC_INLINE sl_widget_button_t * _get_button_by_id(const sl_gui_button_id_t id)
 {
   return id == SL_GUI_BUTTON0 ? &_gui_btn0 : &_gui_btn1;
 }
 
 #if defined(SL_CATALOG_KERNEL_PRESENT)
 /* Mutex acquire */
-static inline void _gui_mutex_acquire(void)
+__STATIC_INLINE void _gui_mutex_acquire(void)
 {
   assert(osMutexAcquire(_gui_mtx, osWaitForever) == osOK);
 }
 
 /* Mutex release */
-static inline void _gui_mutex_release(void)
+__STATIC_INLINE void _gui_mutex_release(void)
 {
   assert(osMutexRelease(_gui_mtx) == osOK);
 }

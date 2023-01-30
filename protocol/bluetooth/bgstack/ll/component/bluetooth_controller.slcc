@@ -67,6 +67,7 @@ requires:
   - name: emlib
   - name: rail_lib
   - name: rail_util_pa
+  - name: rail_util_built_in_phys
   - name: bluetooth_controller_rtos_adaptation
     condition:
       - kernel

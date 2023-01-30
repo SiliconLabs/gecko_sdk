@@ -14,7 +14,6 @@ root_path: "protocol/bluetooth"
 requires:
   - name: "bluetooth_controller"
   - name: "bluetooth_feature_sync"
-  - name: "bluetooth_feature_periodic_sync"
   - name: "bluetooth_feature_connection"
   - name: "device_supports_bluetooth_advertising_extensions"
 provides:

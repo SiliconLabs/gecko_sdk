@@ -183,6 +183,8 @@ PROTECTED_FIELDS_SOL = {
     ],
 }
 
+PROTECTED_FIELDS_CARACAL = PROTECTED_FIELDS_BOBCAT.copy()
+
 def mergeDictionaries(dict1, dict2):
     dict1Copy = copy.deepcopy(dict1)
     # Merge the keys in dict2 into the copy of dict1
@@ -208,6 +210,7 @@ PROTECTED_FIELDS = {
     'sol': mergeDictionaries(PROTECTED_FIELDS_BASE, PROTECTED_FIELDS_SOL),
     'leopard': mergeDictionaries(PROTECTED_FIELDS_BASE, None),
     'margay': mergeDictionaries(PROTECTED_FIELDS_BASE, PROTECTED_FIELDS_OCELOT),
+    'caracal': mergeDictionaries(PROTECTED_FIELDS_BASE, PROTECTED_FIELDS_CARACAL),
 }
 
 # Radio config action "enum"

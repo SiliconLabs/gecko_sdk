@@ -417,13 +417,14 @@ bool emberAfGreenPowerClusterGpPairingCallback(EmberAfClusterCommand *cmd)
   if (cmd->type == EMBER_INCOMING_BROADCAST) {
     broadcast = true;
   }
-
+  EmberGpApplicationId appId = (cmd_data.options & EMBER_AF_GP_PAIRING_OPTION_APPLICATION_ID);
   if (!emGpMakeAddr(&addr,
-                    cmd_data.options & EMBER_AF_GP_PAIRING_OPTION_APPLICATION_ID,
+                    appId,
                     cmd_data.gpdSrcId,
                     cmd_data.gpdIeee,
-                    cmd_data.endpoint)) {
-    // GPD Address is invalid, so drop the command
+                    cmd_data.endpoint)
+      || IS_GPD_SRC_ID_ZERO(appId, cmd_data.gpdSrcId)) {
+    // GPD Address or App Id are invalid, so drop the command
     return true;
   }
 
@@ -432,14 +433,6 @@ bool emberAfGreenPowerClusterGpPairingCallback(EmberAfClusterCommand *cmd)
   // Commissioning: Step 21a: Proxy finalizes commissioning
   if (emberAfCurrentEndpoint() != GP_ENDPOINT) {
   } else if (securityLevel == EMBER_GP_SECURITY_LEVEL_RESERVED) {
-  } else if ((addr.applicationId != EMBER_GP_APPLICATION_SOURCE_ID)
-             && (addr.applicationId != EMBER_GP_APPLICATION_IEEE_ADDRESS)) {
-  } else if ((addr.applicationId == EMBER_GP_APPLICATION_SOURCE_ID)
-             && ((addr.id.sourceId == GP_GPD_SRC_ID_RESERVED_0)
-                 || ((addr.id.sourceId >= GP_GPD_SRC_ID_RESERVED_FFFFFF9)
-                     && (addr.id.sourceId <= GP_GPD_SRC_ID_RESERVED_FFFFFFE)))) {
-  } else if ((addr.applicationId == EMBER_GP_APPLICATION_IEEE_ADDRESS)
-             && ((emberAfMemoryByteCompare(addr.id.gpdIeeeAddress, EUI64_SIZE, 0)))) {
   } else if ((cmd_data.options & EMBER_AF_GP_PAIRING_OPTION_ADD_SINK)
              && (cmd_data.options & EMBER_AF_GP_PAIRING_OPTION_REMOVE_GPD)) {
   } else if ((securityKeyType > EMBER_GP_SECURITY_KEY_GPD_OOB)
@@ -514,7 +507,6 @@ bool emberAfGreenPowerClusterGpPairingCallback(EmberAfClusterCommand *cmd)
 bool emberAfGreenPowerClusterGpResponseCallback(EmberAfClusterCommand *cmd)
 {
   sl_zcl_green_power_cluster_gp_response_command_t cmd_data;
-  EmberGpAddress addr;
 
   if (zcl_decode_green_power_cluster_gp_response_command(cmd, &cmd_data)
       != EMBER_ZCL_STATUS_SUCCESS) {
@@ -526,14 +518,25 @@ bool emberAfGreenPowerClusterGpResponseCallback(EmberAfClusterCommand *cmd)
   }
   emberAfGreenPowerClusterPrintln("GpResponse cmd: %1x", cmd_data.gpdCommandId);
 
+  EmberGpApplicationId appId = (cmd_data.options & EMBER_AF_GP_RESPONSE_OPTION_APPLICATION_ID);
+  EmberGpAddress addr;
+  if (!emGpMakeAddr(&addr,
+                    appId,
+                    cmd_data.gpdSrcId,
+                    cmd_data.gpdIeee,
+                    cmd_data.endpoint)
+      || (IS_GPD_SRC_ID_ZERO(appId, cmd_data.gpdSrcId)
+          && cmd_data.gpdCommandId != EMBER_ZCL_GP_GPDF_CHANNEL_CONFIGURATION)
+      || (!IS_GPD_SRC_ID_ZERO(appId, cmd_data.gpdSrcId)
+          && cmd_data.gpdCommandId == EMBER_ZCL_GP_GPDF_CHANNEL_CONFIGURATION)) {
+    // GPD Address or App Id are invalid and
+    // SrcId is only 0 for Channel configuration, else drop
+    return true;
+  }
+  EmberStatus result;
   switch (cmd_data.gpdCommandId) {
     case EMBER_ZCL_GP_GPDF_CHANNEL_CONFIGURATION:
-      addr.applicationId = EMBER_GP_APPLICATION_SOURCE_ID;
-      addr.id.sourceId = 0x00000000;
-      if (cmd_data.gpdSrcId != 0x00000000) {
-        return true;
-      }
-
+    {
       if (cmd_data.tempMasterShortAddress == emberGetNodeId()) {
         if (!slxu_zigbee_event_is_active(channelEvent)
             || (commissioningState.channelStatus & GP_CLIENT_TRANSMIT_SAME_AS_OPERATIONAL_CHANNEL_MASK)) {
@@ -574,20 +577,10 @@ bool emberAfGreenPowerClusterGpResponseCallback(EmberAfClusterCommand *cmd)
         //emberDGpSend(false, false, &addr, 0, 0, NULL, 0, 0);
       }
       break;
+    }
     case EMBER_ZCL_GP_GPDF_COMMISSIONING_REPLY:
       //TODO IEEE GPD
     {
-      EmberStatus result;
-      EmberGpAddress addr;
-      addr.applicationId = cmd_data.options & EMBER_AF_GP_RESPONSE_OPTION_APPLICATION_ID;
-      if (addr.applicationId == EMBER_GP_APPLICATION_SOURCE_ID) {
-        addr.id.sourceId = cmd_data.gpdSrcId;
-      } else {
-        addr.applicationId = EMBER_GP_APPLICATION_IEEE_ADDRESS;
-        addr.endpoint = cmd_data.endpoint;
-        // addr.id is a union so it is fine to dereference it in this was
-        MEMCOPY(addr.id.gpdIeeeAddress, cmd_data.gpdIeee, 8);
-      }
       if (cmd_data.tempMasterShortAddress == emberGetNodeId()) {
         emberAfGreenPowerClusterPrintln("dgpsend comm reply %s", "A");
         result = emberDGpSend(true, //add
@@ -607,24 +600,13 @@ bool emberAfGreenPowerClusterGpResponseCallback(EmberAfClusterCommand *cmd)
         emberAfGreenPowerClusterPrintln("Flush GP TX");
         emberDGpSend(false, false, &addr, 0, 0, NULL, 0, 0);
       }
+      break;
     }
-
-    break;
     default:
+    {
       if ((cmd_data.gpdCommandId >= EMBER_ZCL_GP_GPDF_RESERVED_MIN) //and implicitly check gpdCommandId <= EMBER_ZCL_GP_GPDF_RESERVED_MAX
           || (cmd_data.gpdCommandId >= EMBER_ZCL_GP_GPDF_MFR_DEF_GPD_CMD0
               && cmd_data.gpdCommandId <= EMBER_ZCL_GP_GPDF_MFR_DEF_GPD_CMD_F)) {
-        EmberStatus result;
-        EmberGpAddress addr;
-        addr.applicationId = cmd_data.options & EMBER_GP_APPLICATION_ID_MASK;
-        if (addr.applicationId == EMBER_GP_APPLICATION_SOURCE_ID) {
-          addr.id.sourceId = cmd_data.gpdSrcId;
-        } else {
-          addr.applicationId = EMBER_GP_APPLICATION_IEEE_ADDRESS;
-          addr.endpoint = cmd_data.endpoint;
-          MEMCOPY(addr.id.gpdIeeeAddress, cmd_data.gpdIeee, 8);
-        }
-
         emberAfGreenPowerClusterPrintln("dgpsend comm reply %s", "B");
         result = emberDGpSend(true,   //add
                               false,   //skip cca
@@ -641,6 +623,7 @@ bool emberAfGreenPowerClusterGpResponseCallback(EmberAfClusterCommand *cmd)
         }
       }
       break;
+    }
   }
   kickout: return false;
 }
@@ -693,15 +676,21 @@ bool emberAfGreenPowerClusterGpProxyTableRequestCallback(EmberAfClusterCommand *
                       appId,
                       cmd_data.gpdSrcId,
                       cmd_data.gpdIeee,
-                      cmd_data.endpoint)) {
-      // Malformed GPD address
+                      cmd_data.endpoint)
+        || IS_GPD_SRC_ID_ZERO(appId, cmd_data.gpdSrcId)) {
+      // Invalid app Id or reserved address, just respond back as not found.
+      emberAfFillCommandGreenPowerClusterGpProxyTableResponseSmart(EMBER_ZCL_GP_PROXY_TABLE_RESPONSE_STATUS_NOT_FOUND,
+                                                                   validEntriesCount,
+                                                                   0xff,
+                                                                   0);
+      emberAfSendResponse();
       goto kickout;
     }
     entryIndex = emberGpProxyTableLookup(&addr);
     if (entryIndex == 0xFF) {
       emberAfFillCommandGreenPowerClusterGpProxyTableResponseSmart(EMBER_ZCL_GP_PROXY_TABLE_RESPONSE_STATUS_NOT_FOUND,
                                                                    validEntriesCount,
-                                                                   cmd_data.index,
+                                                                   0xff,
                                                                    0);
       emberAfSendResponse();
       goto kickout;
@@ -1399,30 +1388,14 @@ bool emberAfGreenPowerClusterCommissioningGpdfCallback(GP_PARAMS)
   // Commissioning: Step 12a: Proxy receives commissioning command
   // If applicationId == 0b0000 and srcId == 0 or reserved range 0xfffffff9 - 0xffffffffe
   // OR applicationId == 0b0010 and srcId == 0, drop frame.
-  if ((addr->applicationId == EMBER_GP_APPLICATION_SOURCE_ID)
-      && (addr->id.sourceId == GP_GPD_SRC_ID_RESERVED_0)) {
-    // silently drop frame
+  if (!emGpMakeAddr(addr,
+                    addr->applicationId,
+                    addr->id.sourceId,
+                    addr->id.gpdIeeeAddress,
+                    addr->endpoint)
+      || IS_GPD_SRC_ID_ZERO(addr->applicationId, addr->id.sourceId)) {
+    // GPD Address or App Id are invalid, so drop the command
     goto kickout;
-  }
-
-  if ((addr->applicationId == EMBER_GP_APPLICATION_SOURCE_ID)
-      && (addr->id.sourceId >=  GP_GPD_SRC_ID_RESERVED_FFFFFF9)
-      && (addr->id.sourceId <=  GP_GPD_SRC_ID_RESERVED_FFFFFFE)) {
-    // silently drop frame as in reserved range
-    goto kickout;
-  }
-
-  if (addr->applicationId == EMBER_GP_APPLICATION_IEEE_ADDRESS) {
-    uint8_t i;
-    for (i = 0; i < EUI64_SIZE; i++) {
-      if (addr->id.gpdIeeeAddress[i]) {
-        break;
-      }
-    }
-    if (i == EUI64_SIZE) {
-      // silently drop frame if EUI is all zeros
-      goto kickout;
-    }
   }
 
   if (autoCommissioning) {
@@ -2064,7 +2037,8 @@ void emberGpepIncomingMessageHandler(GP_PARAMS)
 
   if (status == EMBER_SUCCESS
       || status == EMBER_NO_SECURITY
-      || (status == EMBER_UNPROCESSED && commissioningState.inCommissioningMode)) {
+      || (status == EMBER_UNPROCESSED && commissioningState.inCommissioningMode)
+      || (status == EMBER_AUTH_FAILURE  && commissioningState.inCommissioningMode)) {
     // duplicate filter
     if (emGpMessageChecking(addr, sequenceNumber)) {
       if (commissioningState.inCommissioningMode) {
@@ -2074,7 +2048,7 @@ void emberGpepIncomingMessageHandler(GP_PARAMS)
         // If status is unprocessed and security is level 3, then gpdCommandId with its payload are encrypted
         // and can not be interpreated by proxy, hence forward it as a GP Commissioning Notification with security
         // processing failed bit set, so that sink can process the commissioning notification.
-        if (status == EMBER_UNPROCESSED
+        if ((status == EMBER_UNPROCESSED || status == EMBER_AUTH_FAILURE)
             && gpdfSecurityLevel == EMBER_GP_SECURITY_LEVEL_FC_MIC_ENCRYPTED) {
           status = EMBER_AUTH_FAILURE;
           emberAfGreenPowerClusterCommissioningGpdfCallback(GP_ARGS);
@@ -2185,7 +2159,6 @@ void emberAfPluginGreenPowerClientStackStatusCallback(EmberStatus status)
 }
 
 #ifdef UC_BUILD
-
 uint32_t emberAfGreenPowerClusterClientCommandParse(sl_service_opcode_t opcode,
                                                     sl_service_function_context_t *context)
 {
@@ -2223,5 +2196,4 @@ uint32_t emberAfGreenPowerClusterClientCommandParse(sl_service_opcode_t opcode,
           ? EMBER_ZCL_STATUS_SUCCESS
           : EMBER_ZCL_STATUS_UNSUP_COMMAND);
 }
-
 #endif // UC_BUILD

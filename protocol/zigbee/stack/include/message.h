@@ -953,17 +953,10 @@ extern uint8_t emberMulticastTableSize;
  *  @param minAcksNeeded  The minimum number of acknowledgments (re-broadcasts)
  * to wait for until deeming the broadcast transmission complete.
  *
- * @return None.
+ * @return ::EMBER_SUCCESS if set passive ack success; EMBER_BAD_ARGUMENT when
+ * pass wrong config argument
  */
-typedef enum {
-  SL_PASSIVE_ACK_DEFAULT_CONFIG,
-  SL_PASSIVE_ACK_DISABLE,
-  SL_PASSIVE_ACK_THRESHOLD_WITH_REBROADCAST,
-  SL_PASSIVE_ACK_THRESHOLD_NO_REBROADCAST,
-  SL_PASSIVE_ACK_THRESHOLD_WITH_REBROADCAST_ALL_NODES
-} sl_passive_ack_config_enum_t;
-
-void sl_set_passive_ack_config(sl_passive_ack_config_enum_t config, uint8_t minAcksNeeded);
+EmberStatus sl_zigbee_set_passive_ack_config(sl_passive_ack_config_enum_t config, uint8_t minAcksNeeded);
 
 /** @brief Set the number of broadcast passive acknowledgments required before
  * terminating a broadcast transmission. A value of 0xFF causes the node to wait
@@ -974,10 +967,11 @@ void sl_set_passive_ack_config(sl_passive_ack_config_enum_t config, uint8_t minA
  * @param minAcksNeeded  The minimum number of acknowledgments (re-broadcasts)
  * to wait for until deeming the broadcast transmission complete.
  *
- * @return None.
+ * @return ::EMBER_SUCCESS if set passive ack success; EMBER_BAD_ARGUMENT when
+ * pass wrong config argument
  */
 #define emberBroadcastSetMinAcksNeeded(minAcksNeeded) \
-  sl_set_passive_ack_config(SL_PASSIVE_ACK_THRESHOLD_WITH_REBROADCAST, minAcksNeeded)
+  sl_zigbee_set_passive_ack_config(SL_PASSIVE_ACK_THRESHOLD_WITH_REBROADCAST, minAcksNeeded)
 
 /** @brief Intercept an incoming packet from the stack and hands off to a plugin
  * for further processing

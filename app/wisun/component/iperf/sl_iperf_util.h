@@ -195,7 +195,7 @@ const char * sl_iperf_opt_bw_format_to_str(const sl_iperf_opt_bw_format format);
  * @param[in] err Error value
  * @param[in] status Status value
  *****************************************************************************/
-static inline void sl_iperf_test_set_err_and_stat(sl_iperf_test_t * const test,
+__STATIC_INLINE void sl_iperf_test_set_err_and_stat(sl_iperf_test_t * const test,
                                                   sl_iperf_error_t err,
                                                   sl_iperf_status_t status)
 {
@@ -209,7 +209,7 @@ static inline void sl_iperf_test_set_err_and_stat(sl_iperf_test_t * const test,
  * @param[in] test Test descriptor
  * @return uint32_t Time duration in seconds
  *****************************************************************************/
-static inline uint32_t sl_iperf_test_calc_time_duration_sec(const sl_iperf_test_t * const test)
+__STATIC_INLINE uint32_t sl_iperf_test_calc_time_duration_sec(const sl_iperf_test_t * const test)
 {
   return (test->statistic.ts_end_ms - test->statistic.ts_start_ms) / SL_IPERF_TIME_S_TO_MS_ML;
 }
@@ -220,7 +220,7 @@ static inline uint32_t sl_iperf_test_calc_time_duration_sec(const sl_iperf_test_
  * @param[in] test Test descriptor
  * @return uint32_t Time duration in miliseconds
  *****************************************************************************/
-static inline uint32_t sl_iperf_test_calc_time_duration_ms(const sl_iperf_test_t * const test)
+__STATIC_INLINE uint32_t sl_iperf_test_calc_time_duration_ms(const sl_iperf_test_t * const test)
 {
   return (test->statistic.ts_end_ms - test->statistic.ts_start_ms);
 }
@@ -231,7 +231,7 @@ static inline uint32_t sl_iperf_test_calc_time_duration_ms(const sl_iperf_test_t
  * @param[out] dst_time Time data structure
  * @param[in] ms Miliseconds
  *****************************************************************************/
-static inline void sl_iperf_calc_time_from_ms(sl_iperf_time_t * const dst_time, const sl_iperf_ts_ms_t ms)
+__STATIC_INLINE void sl_iperf_calc_time_from_ms(sl_iperf_time_t * const dst_time, const sl_iperf_ts_ms_t ms)
 {
   dst_time->sec = ms / SL_IPERF_TIME_S_TO_MS_ML;
   dst_time->usec = (ms - (dst_time->sec * SL_IPERF_TIME_S_TO_MS_ML)) * SL_IPERF_TIME_MS_TO_US_ML;
@@ -243,7 +243,7 @@ static inline void sl_iperf_calc_time_from_ms(sl_iperf_time_t * const dst_time, 
  * @param[in] time Time data
  * @return sl_iperf_ts_ms_t Time in miliseconds
  *****************************************************************************/
-static inline sl_iperf_ts_ms_t sl_iperf_calc_ms_from_time(const sl_iperf_time_t * const time)
+__STATIC_INLINE sl_iperf_ts_ms_t sl_iperf_calc_ms_from_time(const sl_iperf_time_t * const time)
 {
   return (sl_iperf_ts_ms_t)time->sec * SL_IPERF_TIME_S_TO_MS_ML + time->usec / SL_IPERF_TIME_MS_TO_US_ML;
 }
@@ -255,7 +255,7 @@ static inline sl_iperf_ts_ms_t sl_iperf_calc_ms_from_time(const sl_iperf_time_t 
  * @return true UDP Server mode
  * @return false Not UDP Server mode
  *****************************************************************************/
-static inline bool sl_iperf_test_is_udp_srv(const sl_iperf_test_t * const test)
+__STATIC_INLINE bool sl_iperf_test_is_udp_srv(const sl_iperf_test_t * const test)
 {
   return (bool)((test->opt.protocol == SL_IPERF_IPROTOV6_UDP
                  || test->opt.protocol == SL_IPERF_IPROTOV4_UDP)
@@ -269,7 +269,7 @@ static inline bool sl_iperf_test_is_udp_srv(const sl_iperf_test_t * const test)
  * @return true UDP Client mode
  * @return false Not UDP Client mode
  *****************************************************************************/
-static inline bool sl_iperf_test_is_udp_clnt(const sl_iperf_test_t * const test)
+__STATIC_INLINE bool sl_iperf_test_is_udp_clnt(const sl_iperf_test_t * const test)
 {
   return (bool)((test->opt.protocol == SL_IPERF_IPROTOV6_UDP
                  || test->opt.protocol == SL_IPERF_IPROTOV4_UDP)
@@ -283,7 +283,7 @@ static inline bool sl_iperf_test_is_udp_clnt(const sl_iperf_test_t * const test)
  * @return true TCP Server mode
  * @return false Not TCP Server mode
  *****************************************************************************/
-static inline bool sl_iperf_test_is_tcp_srv(const sl_iperf_test_t * const test)
+__STATIC_INLINE bool sl_iperf_test_is_tcp_srv(const sl_iperf_test_t * const test)
 {
   return (bool)((test->opt.protocol == SL_IPERF_IPROTOV6_TCP
                  || test->opt.protocol == SL_IPERF_IPROTOV4_TCP)
@@ -297,7 +297,7 @@ static inline bool sl_iperf_test_is_tcp_srv(const sl_iperf_test_t * const test)
  * @return true TCP Client mode
  * @return false Not TCP Client mode
  *****************************************************************************/
-static inline bool sl_iperf_test_is_tcp_clnt(const sl_iperf_test_t * const test)
+__STATIC_INLINE bool sl_iperf_test_is_tcp_clnt(const sl_iperf_test_t * const test)
 {
   return (bool)((test->opt.protocol == SL_IPERF_IPROTOV6_TCP
                  || test->opt.protocol == SL_IPERF_IPROTOV4_TCP)
@@ -348,7 +348,7 @@ uint32_t sl_iperf_bytes_from_formatted_bandwidth(const sl_iperf_opt_bw_format fo
  * @return true On Success
  * @return false On Failure
  *****************************************************************************/
-static inline bool sl_iperf_check_test_logger(const sl_iperf_test_t * const test)
+__STATIC_INLINE bool sl_iperf_check_test_logger(const sl_iperf_test_t * const test)
 {
   return (bool) (test != NULL && test->log != NULL && test->log->print != NULL);
 }

@@ -52,9 +52,9 @@
 #define SL_CPC_RX_BUFFER_MAX_COUNT        (20)
 
 // <o SL_CPC_USER_ENDPOINT_MAX_COUNT>Max Number of User Endpoints<0-10>
-// <i> Default: 10
+// <i> Default: 1
 // <i> Maximum number of CPC user endpoints that can be opened at once.
-#define SL_CPC_USER_ENDPOINT_MAX_COUNT    (10)
+#define SL_CPC_USER_ENDPOINT_MAX_COUNT    (1)
 
 // <q SL_CPC_DEBUG_SYSTEM_VIEW_LOG_CORE_EVENT> Enable debug core tracing with system view
 // <i> Default: 0

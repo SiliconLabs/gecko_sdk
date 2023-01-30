@@ -241,4 +241,17 @@ __STATIC_INLINE uint32_t get_time_diff(uint32_t a,
   return (a - b);
 }
 
+/*******************************************************************************
+ * @brief
+ *   Gets the precision (in PPM) of the sleeptimer's clock.
+ *
+ * @return
+ *   Clock accuracy, in PPM.
+ *
+ ******************************************************************************/
+uint16_t sleeptimer_hal_get_clock_accuracy(void)
+{
+  return CMU_LF_ClockPrecisionGet(cmuClock_SYSRTC);
+}
+
 #endif

@@ -27,7 +27,6 @@ include:
       - path: platform-band.h
       - path: rail_config.h
       - path: sl_packet_utils.h
-      - path: sl_rcp_gp_interface.h
       - path: sl_openthread.h
 source:
       - path: util/third_party/openthread/examples/platforms/utils/debug_uart.c
@@ -48,6 +47,5 @@ source:
       - path: protocol/openthread/platform-abstraction/efr32/crypto.c
       - path: protocol/openthread/platform-abstraction/efr32/ieee802154-packet-utils.cpp
       - path: protocol/openthread/platform-abstraction/efr32/radio.c
-      - path: protocol/openthread/platform-abstraction/efr32/sl_rcp_gp_interface.c
       - path: protocol/openthread/platform-abstraction/efr32/startup-gcc.c
       - path: protocol/openthread/platform-abstraction/efr32/system.c

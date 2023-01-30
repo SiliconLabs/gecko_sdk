@@ -43,6 +43,7 @@ __WEAK void uart_crc_error(struct sl_wsrcp_uart *uart_ctxt, uint16_t crc, int fr
 
 static bool uart_handle_rx_dma_complete(unsigned int chan, unsigned int seq_num, void *user_param)
 {
+    CORE_DECLARE_IRQ_STATE;
     struct sl_wsrcp_uart *uart_ctxt = user_param;
     int ret;
     unsigned int i;
@@ -50,6 +51,8 @@ static bool uart_handle_rx_dma_complete(unsigned int chan, unsigned int seq_num,
     (void)chan;
     (void)seq_num;
 
+    // Protect descr_cnt_rx and rx_ring against uart_handle_rx_dma_timeout()
+    CORE_ENTER_CRITICAL();
     for (i = 0; i < sizeof(uart_ctxt->buf_rx[0]); i++) {
         ret = ring_push(&uart_ctxt->rx_ring, uart_ctxt->buf_rx[uart_ctxt->descr_cnt_rx][i]);
         BUG_ON(ret, "buffer overflow");
@@ -57,6 +60,7 @@ static bool uart_handle_rx_dma_complete(unsigned int chan, unsigned int seq_num,
     uart_ctxt->descr_cnt_rx += 1;
     uart_ctxt->descr_cnt_rx %= ARRAY_SIZE(uart_ctxt->buf_rx);
     uart_rx_ready(uart_ctxt);
+    CORE_EXIT_CRITICAL();
     return true;
 }
 
@@ -73,10 +77,13 @@ static bool uart_handle_tx_dma_complete(unsigned int chan, unsigned int seq_num,
 
 void uart_handle_rx_dma_timeout(struct sl_wsrcp_uart *uart_ctxt)
 {
+    CORE_DECLARE_IRQ_STATE;
     LDMA_TransferCfg_t ldma_cfg = LDMA_TRANSFER_CFG_PERIPHERAL(UART_LDMA_SIGNAL_RX);
     int remaining, descr_cnt_rx, ret;
     size_t i;
 
+    // Protect descr_cnt_rx and rx_ring against uart_handle_rx_dma_complete()
+    CORE_ENTER_CRITICAL();
     // Begin of realtime constrained section
     // (with USART, we need to execute that in less than 5µs for a 2Mbps UART link)
     // (with EUSART, thanks to it 16bytes depth fifo , we need to execute the
@@ -96,6 +103,7 @@ void uart_handle_rx_dma_timeout(struct sl_wsrcp_uart *uart_ctxt)
         BUG_ON(ret, "buffer overflow");
     }
     uart_rx_ready(uart_ctxt);
+    CORE_EXIT_CRITICAL();
 }
 
 void uart_handle_rx_overflow(struct sl_wsrcp_uart *uart_ctxt)

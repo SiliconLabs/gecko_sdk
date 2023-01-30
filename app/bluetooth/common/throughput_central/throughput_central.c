@@ -412,7 +412,7 @@ static void handle_scan_event(bd_addr *address,
 
     // Handle if the default PHY is not supported
     if (sc == SL_STATUS_INVALID_PARAMETER) {
-      app_log_status_warning_f(sc, "Connection PHY is not supported and set to 1M PHY" APP_LOG_NEW_LINE);
+      app_log_status_warning_f(sc, "Connection PHY is not supported and set to 1M PHY" APP_LOG_NL);
 
       central_state.phy = sl_bt_gap_phy_coding_1m_uncoded;
       sc = sl_bt_connection_open(*address,
@@ -740,7 +740,7 @@ void throughput_central_scanning_start(void)
                                         (uint8_t *)&afh_bit);
   app_assert_status(sc);
 
-  app_log_info("Scanning started..." APP_LOG_NEW_LINE);
+  app_log_info("Scanning started..." APP_LOG_NL);
 
   // Reset found characteristics
   characteristic_found.all = 0;
@@ -775,7 +775,7 @@ void throughput_central_scanning_start(void)
   sc = sl_bt_scanner_start(central_state.scan_phy, sl_bt_scanner_discover_generic);
   if (sc != SL_STATUS_OK) {
     central_state.scan_phy = sl_bt_scanner_scan_phy_1m;
-    app_log_warning("Requested scanning PHY is not supported and set to 1M PHY" APP_LOG_NEW_LINE);
+    app_log_warning("Requested scanning PHY is not supported and set to 1M PHY" APP_LOG_NL);
     // Start scanning with the modified PHY
     sc = sl_bt_scanner_start(central_state.scan_phy, sl_bt_scanner_discover_generic);
   }
@@ -1409,12 +1409,12 @@ SL_WEAK void throughput_central_on_finish(throughput_value_t throughput,
   throughput_ui_set_count(count);
   throughput_ui_update();
   #else
-  app_log_info(THROUGHPUT_UI_TH_FORMAT APP_LOG_NEW_LINE, ((int)throughput));
-  app_log_info(THROUGHPUT_UI_CNT_FORMAT APP_LOG_NEW_LINE, ((int)count));
+  app_log_info(THROUGHPUT_UI_TH_FORMAT APP_LOG_NL, ((int)throughput));
+  app_log_info(THROUGHPUT_UI_CNT_FORMAT APP_LOG_NL, ((int)count));
   #endif
-  app_log_info(THROUGHPUT_UI_LOST_FORMAT APP_LOG_NEW_LINE, ((int)lost));
-  app_log_info(THROUGHPUT_UI_ERROR_FORMAT APP_LOG_NEW_LINE, ((int)error));
-  app_log_info(THROUGHPUT_UI_TIME_FORMAT APP_LOG_NEW_LINE, ((int)time));
+  app_log_info(THROUGHPUT_UI_LOST_FORMAT APP_LOG_NL, ((int)lost));
+  app_log_info(THROUGHPUT_UI_ERROR_FORMAT APP_LOG_NL, ((int)error));
+  app_log_info(THROUGHPUT_UI_TIME_FORMAT APP_LOG_NL, ((int)time));
 }
 
 /**************************************************************************//**
@@ -1426,7 +1426,7 @@ SL_WEAK void throughput_central_on_transmit_power_change(throughput_tx_power_t p
   throughput_ui_set_tx_power(power);
   throughput_ui_update();
   #else
-  app_log_info(THROUGHPUT_UI_TX_POWER_FORMAT APP_LOG_NEW_LINE, ((int)power));
+  app_log_info(THROUGHPUT_UI_TX_POWER_FORMAT APP_LOG_NL, ((int)power));
   #endif
 }
 
@@ -1439,7 +1439,7 @@ SL_WEAK void throughput_central_on_rssi_change(throughput_rssi_t rssi)
   throughput_ui_set_rssi(rssi);
   throughput_ui_update();
   #else
-  app_log_info(THROUGHPUT_UI_RSSI_FORMAT APP_LOG_NEW_LINE, ((int)rssi));
+  app_log_info(THROUGHPUT_UI_RSSI_FORMAT APP_LOG_NL, ((int)rssi));
   #endif
 }
 
@@ -1544,7 +1544,7 @@ SL_WEAK void throughput_central_on_data_size_change(throughput_pdu_size_t data_s
   #ifdef SL_CATALOG_THROUGHPUT_UI_PRESENT
   throughput_ui_set_data_size(data_size);
   #else
-  app_log_info(THROUGHPUT_UI_DATA_SIZE_FORMAT APP_LOG_NEW_LINE, (int)data_size);
+  app_log_info(THROUGHPUT_UI_DATA_SIZE_FORMAT APP_LOG_NL, (int)data_size);
   #endif
 }
 
@@ -1559,8 +1559,8 @@ SL_WEAK void throughput_central_on_connection_settings_change(throughput_pdu_siz
   throughput_ui_set_mtu_size(mtu);
   throughput_ui_update();
   #else
-  app_log_info(THROUGHPUT_UI_PDU_SIZE_FORMAT APP_LOG_NEW_LINE, (int)pdu);
-  app_log_info(THROUGHPUT_UI_MTU_SIZE_FORMAT APP_LOG_NEW_LINE, (int)mtu);
+  app_log_info(THROUGHPUT_UI_PDU_SIZE_FORMAT APP_LOG_NL, (int)pdu);
+  app_log_info(THROUGHPUT_UI_MTU_SIZE_FORMAT APP_LOG_NL, (int)mtu);
   #endif
 }
 /**************************************************************************//**
@@ -1574,10 +1574,10 @@ SL_WEAK void throughput_central_on_connection_timings_change(throughput_time_t i
   throughput_ui_set_connection_interval(interval);
   throughput_ui_update();
   #else
-  app_log_info(THROUGHPUT_UI_INTERVAL_FORMAT APP_LOG_NEW_LINE, (int)((float)interval * 1.25));
+  app_log_info(THROUGHPUT_UI_INTERVAL_FORMAT APP_LOG_NL, (int)((float)interval * 1.25));
   #endif
-  app_log_info(THROUGHPUT_UI_LATENCY_FORMAT APP_LOG_NEW_LINE, (int)latency);
-  app_log_info(THROUGHPUT_UI_TIMEOUT_FORMAT APP_LOG_NEW_LINE, (int)timeout);
+  app_log_info(THROUGHPUT_UI_LATENCY_FORMAT APP_LOG_NL, (int)latency);
+  app_log_info(THROUGHPUT_UI_TIMEOUT_FORMAT APP_LOG_NL, (int)timeout);
 }
 
 /**************************************************************************//**
@@ -1586,7 +1586,7 @@ SL_WEAK void throughput_central_on_connection_timings_change(throughput_time_t i
 SL_WEAK void throughput_central_on_characteristics_found(
   throughput_central_characteristic_found_t characteristics)
 {
-  app_log_info(THROUGHPUT_UI_CHARACTERISTICS_FOUND_FORMAT APP_LOG_NEW_LINE,
+  app_log_info(THROUGHPUT_UI_CHARACTERISTICS_FOUND_FORMAT APP_LOG_NL,
                THROUGHPUT_UI_YESNO(characteristics.characteristic.notification),
                THROUGHPUT_UI_YESNO(characteristics.characteristic.indication),
                THROUGHPUT_UI_YESNO(characteristics.characteristic.transmission_on),
@@ -1708,14 +1708,14 @@ void cli_throughput_central_status(sl_cli_command_arg_t *arguments)
       CLI_RESPONSE(THROUGHPUT_UI_STATE_UNKNOWN_TEXT);
       break;
   }
-  CLI_RESPONSE(APP_LOG_NEW_LINE);
+  CLI_RESPONSE(APP_LOG_NL);
 
   if (central_state.role == THROUGHPUT_ROLE_PERIPHERAL) {
     CLI_RESPONSE(THROUGHPUT_UI_ROLE_PERIPHERAL_TEXT);
   } else {
     CLI_RESPONSE(THROUGHPUT_UI_ROLE_CENTRAL_TEXT);
   }
-  CLI_RESPONSE(APP_LOG_NEW_LINE);
+  CLI_RESPONSE(APP_LOG_NL);
 
   CLI_RESPONSE(CLI_OK);
 }
@@ -1962,7 +1962,7 @@ void cli_throughput_central_connection_get(sl_cli_command_arg_t *arguments)
     return;
   }
   CLI_RESPONSE("connection settings\n");
-  CLI_RESPONSE("%u %u %u %u\n",
+  CLI_RESPONSE("%lu %lu %lu %lu\n",
                (uint32_t)central_state.connection_interval_min,
                (uint32_t)central_state.connection_interval_max,
                (uint32_t)central_state.connection_responder_latency,
@@ -2033,11 +2033,11 @@ void cli_throughput_central_allowlist_get(sl_cli_command_arg_t *arguments)
   }
   CLI_RESPONSE("allowlist\n");
   throughput_allowlist_t *allowlist = &central_state.allowlist;
-  CLI_RESPONSE("---------------------" APP_LOG_NEW_LINE);
-  CLI_RESPONSE("|      ADDRESS      |" APP_LOG_NEW_LINE);
-  CLI_RESPONSE("---------------------" APP_LOG_NEW_LINE);
+  CLI_RESPONSE("---------------------" APP_LOG_NL);
+  CLI_RESPONSE("|      ADDRESS      |" APP_LOG_NL);
+  CLI_RESPONSE("---------------------" APP_LOG_NL);
   while (allowlist->next != NULL) {
-    CLI_RESPONSE("| %02X:%02X:%02X:%02X:%02X:%02X |" APP_LOG_NEW_LINE,
+    CLI_RESPONSE("| %02X:%02X:%02X:%02X:%02X:%02X |" APP_LOG_NL,
                  allowlist->address.addr[5],
                  allowlist->address.addr[4],
                  allowlist->address.addr[3],
@@ -2046,7 +2046,7 @@ void cli_throughput_central_allowlist_get(sl_cli_command_arg_t *arguments)
                  allowlist->address.addr[0]);
     allowlist = allowlist->next;
   }
-  CLI_RESPONSE("---------------------" APP_LOG_NEW_LINE);
+  CLI_RESPONSE("---------------------" APP_LOG_NL);
 }
 
 #endif // SL_CATALOG_CLI_PRESENT

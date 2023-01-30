@@ -44,7 +44,7 @@ sl_status_t sli_iostream_swo_itm_8_write(void *context,
                                          const void *buffer,
                                          size_t buffer_length,
                                          sl_iostream_swo_itm_8_msg_type_t type,
-                                         uint8_t *seq_nbr);
+                                         uint8_t seq_nbr);
 
 #ifdef __cplusplus
 }

@@ -1316,6 +1316,7 @@ void                       CMU_HFXOCTuneDeltaSet(int32_t delta);
 int32_t                    CMU_HFXOCTuneDeltaGet(void);
 void                       CMU_LFXOInit(const CMU_LFXOInit_TypeDef *lfxoInit);
 void                       CMU_LFXOPrecisionSet(uint16_t precision);
+uint16_t                   CMU_LFXOPrecisionGet(void);
 #if defined(PLFRCO_PRESENT)
 void                       CMU_LFRCOSetPrecision(CMU_Precision_TypeDef precision);
 #endif
@@ -3308,6 +3309,7 @@ uint32_t              CMU_LCDClkFDIVGet(void);
 void                  CMU_LCDClkFDIVSet(uint32_t div);
 void                  CMU_LFXOInit(const CMU_LFXOInit_TypeDef *lfxoInit);
 void                  CMU_LFXOPrecisionSet(uint16_t precision);
+uint16_t              CMU_LFXOPrecisionGet(void);
 
 void                  CMU_OscillatorEnable(CMU_Osc_TypeDef osc, bool enable, bool wait);
 uint32_t              CMU_OscillatorTuningGet(CMU_Osc_TypeDef osc);

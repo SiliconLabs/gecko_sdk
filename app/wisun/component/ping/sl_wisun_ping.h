@@ -82,7 +82,7 @@ extern "C" {
 /// Dedicated port for ICMPv6 echo messages
 #define SL_WISUN_PING_ICMP_PORT                     (0U)
 
-#pragma pack(1)
+SL_PACK_START(1)
 /// Ping echo request packed structure type definitions
 typedef struct sl_wisun_ping_echo_request {
   /// type
@@ -98,7 +98,7 @@ typedef struct sl_wisun_ping_echo_request {
   /// Payload array
   uint8_t payload[SL_WISUN_PING_MAX_PAYLOAD_LENGTH];
 } sl_wisun_ping_echo_request_t;
-#pragma pack()
+SL_PACK_END()
 
 /// Ping response type definition
 typedef sl_wisun_ping_echo_request_t sl_wisun_ping_echo_response_t;

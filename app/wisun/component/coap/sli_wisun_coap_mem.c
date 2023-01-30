@@ -33,6 +33,7 @@
 // -----------------------------------------------------------------------------
 
 #include "sli_wisun_coap_mem.h"
+#include "sl_wisun_types.h"
 #include <assert.h>
 
 // -----------------------------------------------------------------------------
@@ -146,21 +147,21 @@ void *sl_mempool_not_enough_runtime_block_handler(sl_mempool_t *memp)
  * @param size size
  * @return void* allocated memory ptr, on failure NULL
  *****************************************************************************/
-static inline void* __os_malloc(size_t size);
+__STATIC_INLINE void* __os_malloc(size_t size);
 
 /**************************************************************************//**
  * @brief OS free
  * @details based on the OS (FreeRTOS or Micrium OS)
  * @param addr address to set free
  *****************************************************************************/
-static inline void  __os_free(void *addr);
+__STATIC_INLINE void  __os_free(void *addr);
 
 // -----------------------------------------------------------------------------
 //                          Static Function Definitions
 // -----------------------------------------------------------------------------
 
 /* os malloc */
-static inline void* __os_malloc(size_t size)
+__STATIC_INLINE void* __os_malloc(size_t size)
 {
 #if defined(SL_CATALOG_FREERTOS_KERNEL_PRESENT)
   // FreeRTOS
@@ -172,7 +173,7 @@ static inline void* __os_malloc(size_t size)
 }
 
 /* os free */
-static inline void __os_free(void *addr)
+__STATIC_INLINE void __os_free(void *addr)
 {
 #if defined(SL_CATALOG_FREERTOS_KERNEL_PRESENT)
   // FreeRTOS

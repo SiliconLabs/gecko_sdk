@@ -519,7 +519,7 @@ bool COEX_SetGpioInputOverride(COEX_GpioIndex_t gpioIndex, bool enable)
   uint8_t gpioMask = (1U << gpioIndex);
 
   bool oldValue = ((gpioInputOverride & gpioMask) != 0U);
-  if ((gpioIndex == 0U) || (gpioIndex >= COEX_GPIO_INDEX_COUNT)) {
+  if ((coexHalCallbacks == NULL) || (gpioIndex == 0U) || (gpioIndex >= COEX_GPIO_INDEX_COUNT)) {
     return false;
   }
   if (oldValue != enable) {
@@ -631,18 +631,18 @@ bool COEX_ConfigRequest(COEX_GpioHandle_t gpioHandle)
 bool COEX_SetOptions(COEX_Options_t options)
 {
   COEX_Options_t changedOptions = (COEX_Options_t)(coexCfg.options ^ options);
+  bool rhoChanged = (changedOptions & COEX_OPTION_RHO_ENABLED) != 0U;
+  bool coexChanged = (changedOptions & COEX_OPTION_COEX_ENABLED) != 0U;
 
   coexCfg.options = options;
-  if ((changedOptions & COEX_OPTION_RHO_ENABLED) != 0U) {
-    if (enableRadioHoldOffCb == NULL) {
-      return false;
-    }
+  if ((rhoChanged && (enableRadioHoldOffCb == NULL))
+      || (coexChanged && (enableCoexistenceCb == NULL))) {
+    return false;
+  }
+  if (rhoChanged) {
     enableRadioHoldOffCb();
   }
-  if ((changedOptions & COEX_OPTION_COEX_ENABLED) != 0U) {
-    if (enableCoexistenceCb == NULL) {
-      return false;
-    }
+  if (coexChanged) {
     enableCoexistenceCb();
   }
   return true;
@@ -856,7 +856,9 @@ __STATIC_INLINE void coexUpdateReqIsr(void)
       COEX_Events_t coexEvents = COEX_EVENT_REQUEST_RELEASED;
       if (coexCfg.requestDenied) {
         coexCfg.requestDenied = false;
-        coexEvents |= COEX_EVENT_REQUEST_DENIED;
+        if (COEX_EVENT_REQUEST_RELEASED != 0U) {
+          coexEvents |= COEX_EVENT_REQUEST_DENIED;
+        }
       }
       coexEventCallback(coexEvents);
     }

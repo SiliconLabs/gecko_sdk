@@ -74,7 +74,7 @@ void emberAfPluginAddressTablePrintCommand(sl_cli_command_arg_t *arguments)
 {
   uint8_t i;
   uint8_t used = 0;
-  sl_zigbee_core_debug_print("#  node   eui\n");
+  sl_zigbee_core_debug_println("#  node   eui");
   for (i = 0; i < emberAfGetAddressTableSize(); i++) {
     EmberNodeId nodeId = emberGetAddressTableRemoteNodeId(i);
     if (nodeId != EMBER_TABLE_ENTRY_UNUSED_NODE_ID) {
@@ -83,13 +83,13 @@ void emberAfPluginAddressTablePrintCommand(sl_cli_command_arg_t *arguments)
       sl_zigbee_core_debug_print("%d: 0x%04X ", i, nodeId);
       emberGetAddressTableRemoteEui64(i, eui64);
       emberAfAppDebugExec(emberAfPrintBigEndianEui64(eui64));
-      sl_zigbee_core_debug_print("\n");
+      sl_zigbee_core_debug_println("");
       emberAfAppFlush();
     }
   }
-  sl_zigbee_core_debug_print("%d of %d entries used.\n",
-                             used,
-                             emberAfGetAddressTableSize());
+  sl_zigbee_core_debug_println("%d of %d entries used.",
+                               used,
+                               emberAfGetAddressTableSize());
 }
 
 void emberAfPluginAddressTableSetCommand(sl_cli_command_arg_t *arguments)
@@ -101,7 +101,7 @@ void emberAfPluginAddressTableSetCommand(sl_cli_command_arg_t *arguments)
   sl_zigbee_copy_eui64_arg(arguments, 1, eui64, true);
   status = emberAfSetAddressTableEntry(index, eui64, nodeId);
   UNUSED_VAR(status);
-  sl_zigbee_core_debug_print("set address %d: 0x%02X\n", index, status);
+  sl_zigbee_core_debug_println("set address %d: 0x%02X", index, status);
 }
 
 #else

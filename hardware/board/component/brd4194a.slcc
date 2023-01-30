@@ -54,11 +54,11 @@
   - name: SL_BOARD_NAME
     value: '"BRD4194A"'
   - name: SL_BOARD_REV
-    value: '"A05"'
+    value: '"A06"'
 - tag:
   - board:pn:BRD4194
   - board:variant:A
-  - board:revision:A05
+  - board:revision:A06
   - board:device:efr32mg27c140f768im40
   - hardware:has:vcom
   - hardware:has:pti

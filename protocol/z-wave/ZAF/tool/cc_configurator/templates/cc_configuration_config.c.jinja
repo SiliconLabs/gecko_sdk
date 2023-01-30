@@ -35,18 +35,22 @@
 // -----------------------------------------------------------------------------
 //                Static Variables
 // -----------------------------------------------------------------------------
+
+/*
+ * This array must be sorted by "number". The Z-Wave Command Class Configurator (Z3C) will sort
+ * the array, but if modified manually after generation, make sure to keep it sorted by "number".
+ */
 static const cc_config_parameter_metadata_t parameter_pool[] = {
-{% set _offset = namespace(value=0) %}
-{% set _number = namespace(value=1) %}
-{% set _next_number = namespace(value=2) %}
-{% for _configuration in configurations %}
-  {% if _next_number.value > configurations|length %}
-  {% set _next_number.value = 0 %}
-  {% endif %}
+{% set configurations_sorted = configurations|sort(attribute='number') %}
+{% for _configuration in configurations_sorted %}
   {
-    .number            = {{_number.value}},
-    .next_number       = {{_next_number.value}},
-    .file_id           = ZAF_FILE_ID_CC_CONFIGURATION_WITH_OFFSET({{_offset.value}}),
+    .number            = {{_configuration.number}},
+    {% if loop.index < configurations|length %}
+    .next_number       = {{configurations_sorted[loop.index].number}},
+    {% else %}
+    .next_number       = 0,
+    {% endif %}
+    .file_id           = ZAF_FILE_ID_CC_CONFIGURATION_WITH_OFFSET({{_configuration.file_id}}),
     .migration_handler = NULL,
 
     .attributes = {
@@ -93,9 +97,6 @@ static const cc_config_parameter_metadata_t parameter_pool[] = {
       .flags.advanced = {{_configuration.advanced}},
     },
   },
-  {% set _offset.value = _offset.value + 1 %}
-  {% set _number.value = _number.value + 1 %}
-  {% set _next_number.value = _next_number.value + 1 %}
 {% endfor %}
 };
 

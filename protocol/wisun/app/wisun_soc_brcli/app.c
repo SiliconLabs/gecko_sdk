@@ -76,6 +76,7 @@ static void app_start(sl_wisun_phy_config_type_t phy_config_type)
   int i;
   sl_wisun_channel_mask_t channel_mask;
   sl_wisun_phy_config_t phy_config;
+  sl_wisun_br_connection_params_t params;
 
   app_wisun_cli_mutex_lock();
 
@@ -84,8 +85,25 @@ static void app_start(sl_wisun_phy_config_type_t phy_config_type)
     goto cleanup;
   }
 
-  if (sl_wisun_br_set_network_size(app_settings_wisun.network_size) != SL_STATUS_OK) {
-    printf("Fail to set network size!\r\n");
+  switch (app_settings_wisun.network_size) {
+    case SL_WISUN_NETWORK_SIZE_SMALL:
+      params = SL_WISUN_BR_PARAMS_PROFILE_SMALL;
+      break;
+    case SL_WISUN_NETWORK_SIZE_MEDIUM:
+      params = SL_WISUN_BR_PARAMS_PROFILE_MEDIUM;
+      break;
+    case SL_WISUN_NETWORK_SIZE_LARGE:
+      params = SL_WISUN_BR_PARAMS_PROFILE_LARGE;
+      break;
+    case SL_WISUN_NETWORK_SIZE_TEST:
+      params = SL_WISUN_BR_PARAMS_PROFILE_TEST;
+      break;
+    default:
+      printf("[Failed: unsupported network size]\r\n");
+      goto cleanup;
+  }
+  if (sl_wisun_br_set_connection_parameters(&params) != SL_STATUS_OK) {
+    printf("[Failed to set network size!]\r\n");
     goto cleanup;
   }
 
@@ -166,6 +184,10 @@ static void app_start(sl_wisun_phy_config_type_t phy_config_type)
         phy_config.config.explicit.channel_spacing = app_settings_wisun.channel_spacing;
         phy_config.config.explicit.phy_mode_id = app_settings_wisun.phy_mode_id;
         break;
+      case SL_WISUN_PHY_CONFIG_IDS:
+        phy_config.config.ids.protocol_id = app_settings_wisun.protocol_id;
+        phy_config.config.ids.channel_id  = app_settings_wisun.channel_id;
+        break;
       default:
         printf("[Failed: unsupported PHY configuration type: %u]\r\n", phy_config_type);
         goto cleanup;
@@ -216,6 +238,12 @@ void app_start_explicit(sl_cli_command_arg_t *arguments)
   app_start(SL_WISUN_PHY_CONFIG_EXPLICIT);
 }
 
+void app_start_ids(sl_cli_command_arg_t *arguments)
+{
+  (void)arguments;
+
+  app_start(SL_WISUN_PHY_CONFIG_IDS);
+}
 
 void app_about(void)
 {

@@ -68,7 +68,6 @@ OT_SRCDIR="$(cd "$(dirname "$0")"/.. && pwd)"
 
 readonly OT_SRCDIR
 readonly OT_PLATFORMS=(simulation posix)
-readonly OT_POSIX_BUILD_TYPES=(multipan_rcp)
 readonly OT_POSIX_SIM_COMMON_OPTIONS=(
     "-DOT_ANYCAST_LOCATOR=ON"
     "-DOT_BORDER_AGENT=ON"
@@ -105,12 +104,14 @@ readonly OT_POSIX_SIM_COMMON_OPTIONS=(
     "-DOT_LOG_LEVEL_DYNAMIC=ON"
     "-DOT_COMPILE_WARNING_AS_ERROR=ON"
     "-DOT_RCP_RESTORATION_MAX_COUNT=2"
+    "-DOT_RCP_TX_WAIT_TIME_SECS=5"
     "-DOT_UPTIME=ON"
 )
 
 readonly OT_POSIX_MULTIPAN_RCP_OPTIONS=(
     "-DOT_MULTIPAN_RCP=ON"
     "-DOT_RCP_RESTORATION_MAX_COUNT=100"
+    "-DOT_RCP_TX_WAIT_TIME_SECS=6"
     "-DOT_POSIX_MAX_POWER_TABLE=OFF"
     "-DOT_CHANNEL_MANAGER=OFF"
     "-DOT_CHANNEL_MONITOR=OFF"
@@ -154,9 +155,8 @@ main()
     echo "${OT_PLATFORMS[@]}" | grep -wq "${platform}" || die "${platform}"
 
     local posix_build_type=""
-    if [[ ${platform} == posix* ]] && [ "$#" -ge 2 ]; then
+    if [[ ${platform} == posix* ]] && [[ "$#" -ge 2 ]] && [[ "$2" == multipan_rcp* ]]; then
         posix_build_type="$2"
-        echo "${OT_POSIX_BUILD_TYPES[@]}" | grep -wq "${posix_build_type}" || die "${posix_build_type}"
         shift
     fi
 

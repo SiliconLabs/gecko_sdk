@@ -40,6 +40,10 @@ include:
   # These complicated conditions are required in order to avoid conflicts with
   # TF-M, which also contains these exact header files (with slightly different
   # content).
+  - path: ../../util/third_party/mbedtls/library
+    condition: [trustzone_unaware]
+    file_list:
+      - path: psa_crypto_its.h
   - path: sl_component/sl_psa_driver/inc
     condition: [trustzone_unaware]
     file_list:
@@ -50,9 +54,17 @@ include:
     condition: [trustzone_secure]
     unless: [tz_service_psa_its]
     file_list:
-      - path: psa/internal_trusted_storage.h
       - path: psa/sli_internal_trusted_storage.h
+  - path: ../../util/third_party/trusted-firmware-m/interface/include
+    condition: [trustzone_secure]
+    unless: [tz_service_psa_its]
+    file_list:
+      - path: psa/internal_trusted_storage.h
       - path: psa/error.h
+  - path: ../../util/third_party/trusted-firmware-m/interface/include
+    condition: [trustzone_secure]
+    file_list:
+      - path: psa/storage_common.h
 
 source:
   - path: sl_component/sl_psa_driver/src/sl_psa_its_nvm3.c

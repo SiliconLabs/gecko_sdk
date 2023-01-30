@@ -115,8 +115,8 @@ source:
   - path: "app.c"
   
 define:
-  - name: "RESERVED_AVAILABLE_MEMORY"
-    value: "1000"
+  - name: EMBER_CUSTOM_MAC_FILTER_TABLE_SIZE
+    value: 15
 
 readme:
   - path: ./readme-zigbee_ncp-ot_rcp-spi.html

@@ -4,11 +4,13 @@
 {% block content -%}
 #include "em_device.h"
 #include "{{filename}}.h"
+{%- if not rail_secondary_config %}
 {%- if multiPhyConfig.commonStructures.convDecodeBufferSize > 0 %}
 
 __ALIGNED(4) uint8_t convDecodeBuffer[{{multiPhyConfig.commonStructures.convDecodeBufferSize}}];
 {%- endif %}
-{%- if not rail_secondary_config %}
+{%- endif %}
+{%- if not rail_internal %}
 
 uint32_t RAILCb_CalcSymbolRate(RAIL_Handle_t railHandle)
 {
@@ -22,7 +24,7 @@ uint32_t RAILCb_CalcBitRate(RAIL_Handle_t railHandle)
   return 0U;
 }
 {%- endif %}
-{% set ns = namespace(renderRAILCb_ConfigFrameTypeLength = not rail_secondary_config) -%}
+{% set ns = namespace(renderRAILCb_ConfigFrameTypeLength = not rail_internal) -%}
 {% for frameLengthListEntryName, frameLengthListEntry in multiPhyConfig.commonStructures.frameLengthEntries.items() %}
 static uint16_t {{frameLengthListEntryName}}[] = { {{""}}
   {%- for value in frameLengthListEntry[:-1] -%}
@@ -70,6 +72,7 @@ static const uint8_t {{txIrCalConfigEntryName}}[{{txIrCalConfigEntry|length + 1}
   {{-txIrCalConfigEntry|last}}
 };
 {% endfor %}
+{%- if multiPhyConfig.commonStructures.rffpllConfigEntries.items() %}
 {%- for rffpllConfigEntryName, rffpllConfigEntry in multiPhyConfig.commonStructures.rffpllConfigEntries.items() %}
 static const uint32_t {{rffpllConfigEntryName}}[] = {
   {% for value in rffpllConfigEntry[:-1] -%}
@@ -78,6 +81,11 @@ static const uint32_t {{rffpllConfigEntryName}}[] = {
   {{rffpllConfigEntry|last}}
 };
 {% endfor %}
+{% if not rail_internal -%}
+const RAIL_RffpllConfig_t *radioConfigRffpllConfig = (RAIL_RffpllConfig_t *) {{(multiPhyConfig.commonStructures.rffpllConfigEntries.items()|list)[0][0]}};
+{%- endif %}
+{% endif %}
+
 {%- if multiPhyConfig.commonStructures.modemTxCompensationEntries.items() %}
 #if RAIL_SUPPORTS_HFXO_COMPENSATION
 {%- for modemTxCompensationName, modemTxCompensationEntry in multiPhyConfig.commonStructures.modemTxCompensationEntries.items() %}
@@ -254,7 +262,7 @@ const uint32_t {{modemConfigName}}[] = {
   {%- set firstValue = entry.encodedValues|first %}
   {%- set remainingValues = entry.encodedValues[1:] %}
   {{"0x{:08X}UL, ".format(entry.encodedAction)}}
-  {%- if rail_internal -%}
+  {%- if rail_internal and not rail_secondary_config -%}
     {{- "0x{:08X}UL,".format(firstValue) if firstValue is number else "(uint32_t) &{},".format(firstValue.value|default(firstValue._uniqueName|default(firstValue.name|default(firstValue))))}}
     {{- " /* {} */".format(entry.encodedRegNames[0])}}
     {%- for value in remainingValues %}
@@ -277,7 +285,7 @@ const uint32_t {{modemConfigName}}[] = {
   {%- set firstValue = entry.encodedValues|first %}
   {%- set remainingValues = entry.encodedValues[1:] %}
   {{"0x{:08X}UL, ".format(entry.encodedAction)}}
-  {%- if rail_internal -%}
+  {%- if rail_internal and not rail_secondary_config -%}
     {{- "0x{:08X}UL,".format(firstValue) if firstValue is number else "(uint32_t) &{},".format(firstValue.value|default(firstValue._uniqueName|default(firstValue.name|default(firstValue))))}}
     {{- " /* {} */".format(entry.encodedRegNames[0])}}
     {%- for value in remainingValues %}
@@ -300,7 +308,7 @@ const uint32_t {{modemConfigName}}[] = {
   {%- set firstValue = entry.encodedValues|first %}
   {%- set remainingValues = entry.encodedValues[1:] %}
   {{"0x{:08X}UL, ".format(entry.encodedAction)}}
-  {%- if rail_internal -%}
+  {%- if rail_internal and not rail_secondary_config -%}
     {{- "0x{:08X}UL,".format(firstValue) if firstValue is number else "(uint32_t) &{},".format(firstValue.value|default(firstValue._uniqueName|default(firstValue.name|default(firstValue))))}}
     {{- " /* {} */".format(entry.encodedRegNames[0])}}
     {%- for value in remainingValues %}
@@ -351,7 +359,7 @@ const RAIL_ChannelConfig_t {{multiPhyConfigEntryName}}_channelConfig = {
   .signature = {{multiPhyConfigEntry.channelConfig.signature}}UL,
 };
 {% endfor %}
-{%- if not rail_secondary_config %}
+{%- if not rail_internal %}
 const RAIL_ChannelConfig_t *channelConfigs[] = {
 {%- for multiPhyConfigEntryName, multiPhyConfigEntry in multiPhyConfig.multiPhyConfigEntries.items() %}
   &{{multiPhyConfigEntryName}}_channelConfig,
@@ -371,8 +379,9 @@ const RAIL_IEEE802154_ModeSwitchPhr_t wisun_modeSwitchPhrs[WISUN_MODESWITCHPHRS_
   },
 {%- endfor %}
 };
-{%- endif %}
-{% if multiPhyConfig.commonStructures.stackInfoEntries.items() %}
+{% endif %}
+
+{%- if multiPhyConfig.commonStructures.stackInfoEntries.items() %}
 #ifdef RADIO_CONFIG_ENABLE_STACK_INFO
 {%- for stackInfoName, stackInfoEntry in multiPhyConfig.commonStructures.stackInfoEntries.items() %}
 const uint8_t {{stackInfoName}}[{{stackInfoEntry|length}}] = {
@@ -383,10 +392,11 @@ const uint8_t {{stackInfoName}}[{{stackInfoEntry|length}}] = {
 };
 {%- endfor %}
 #endif // RADIO_CONFIG_ENABLE_STACK_INFO
+{% endif %}
 
-{% endif -%}
-{% if accelerationBufferSize > 0 -%}
+{%- if not rail_secondary_config %}
+{%- if accelerationBufferSize > 0 %}
 uint32_t {{protocol}}AccelerationBuffer[{{accelerationBufferSize}}];
 {%- endif %}
-{% raw %}{% endraw %}
+{% endif %}
 {%- endblock %}

@@ -14,7 +14,6 @@ include:
       - path: sl_btctrl_hci_handler.h
   - path: src/hci
     file_list:
-      - path: hci_reset_interface.h
       - path: hci_reset.h
 provides:
   - name: "bluetooth_hci"

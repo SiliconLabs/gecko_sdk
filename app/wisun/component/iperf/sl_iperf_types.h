@@ -294,7 +294,7 @@ typedef struct sl_iperf_test {
 typedef void (* sl_iperf_test_callback_t)     (sl_iperf_test_t *);
 
 // UDP packed structure definitions
-#pragma pack(4)
+SL_PACK_START(4)
 
 /// iPerf UDP datagram structure type definition
 typedef struct sl_iperf_udp_datagram {
@@ -445,8 +445,7 @@ typedef struct sl_iperf_udp_clnt_hdr {
   /// Isochronus settings
   sl_iperf_clnt_hdr_ext_isoch_settings_t isoch_settings;
 } sl_iperf_udp_clnt_hdr_t;
-
-#pragma pack()
+SL_PACK_END()
 
 /** @} (end SL_IPERF_TYPES) */
 

@@ -621,6 +621,7 @@ sl_status_t sli_bt_init_controller_features()
 #endif
 
 #if defined(SL_CATALOG_BLUETOOTH_FEATURE_PHY_SUPPORT_CONFIG_PRESENT)
+#include "sl_btctrl_phy_support_config.h"
 #if SL_BT_CONTROLLER_2M_PHY_SUPPORT == 0
   sl_btctrl_disable_2m_phy();
 #endif

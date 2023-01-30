@@ -117,6 +117,18 @@ CC_Basic_handler(
   {
       //Must be ignored to avoid unintentional operation. Cannot be mapped to another command class.
     case BASIC_SET:
+    {
+      /*
+       * CC:0000.00.00.11.021:
+       * The outgoing frame's encapsulation must match the incoming frame's.
+       * Create a copy of the received frame's properties, so that it can be
+       * passed to the CC mapped to the Basic CC with the mirrored End Point.
+       * The original received frame's destination End Point must not be
+       * modified if it was the Root Device, as this would incorrectly trigger
+       * Multichannel encapsulation.
+       */
+      RECEIVE_OPTIONS_TYPE_EX rxOptMirrored = *rxOpt;
+
       if ((0x63 < pCmd->ZW_BasicSetV2Frame.value) && (0xFF != pCmd->ZW_BasicSetV2Frame.value))
       {
         return RECEIVED_FRAME_STATUS_FAIL;
@@ -128,7 +140,7 @@ CC_Basic_handler(
        */
       if ((zaf_config_get_number_of_endpoints() > 0) && (0 == rxOpt->destNode.endpoint))
       {
-        rxOpt->destNode.endpoint = 1;
+        rxOptMirrored.destNode.endpoint = 1;
       }
 
       /*
@@ -136,7 +148,7 @@ CC_Basic_handler(
        * take care of the mapping. If not, the weak implementation will return no support and the
        * CC linker section will be searched.
        */
-      e_cmd_handler_return_code_t return_code = CC_Basic_Set_handler(pCmd->ZW_BasicSetFrame.value, rxOpt->destNode.endpoint);
+      e_cmd_handler_return_code_t return_code = CC_Basic_Set_handler(pCmd->ZW_BasicSetFrame.value, rxOptMirrored.destNode.endpoint);
 
       if (E_CMD_HANDLER_RETURN_CODE_WORKING == return_code)
       {
@@ -153,7 +165,7 @@ CC_Basic_handler(
         return RECEIVED_FRAME_STATUS_SUCCESS;
       }
 
-      CC_handler_map_latest_t const * const cc_Handler_Iter = get_cc_handler_map(rxOpt);
+      CC_handler_map_latest_t const * const cc_Handler_Iter = get_cc_handler_map(&rxOptMirrored);
 
       if ((NULL != cc_Handler_Iter) && (NULL != cc_Handler_Iter->basic_set_mapper)) {
         cc_Handler_Iter->basic_set_mapper(pCmd);
@@ -162,7 +174,7 @@ CC_Basic_handler(
          * Invoke the corresponding handler. Since we know this is a set command, the output
          * parameters can be set to NULL.
          */
-        return ZAF_CC_invoke_specific(cc_Handler_Iter, rxOpt, pCmd, cmdLength, NULL, NULL);
+        return ZAF_CC_invoke_specific(cc_Handler_Iter, &rxOptMirrored, pCmd, cmdLength, NULL, NULL);
       }
 
       /*
@@ -170,6 +182,7 @@ CC_Basic_handler(
        * found in the CC section.
        */
       return RECEIVED_FRAME_STATUS_NO_SUPPORT;
+    }
       break;
 
     case BASIC_GET:

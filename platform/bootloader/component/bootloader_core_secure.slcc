@@ -82,6 +82,8 @@ requires:
     condition: [bootloader_apploader]
   - name: tz_iovec_check
     condition: [bootloader_apploader]
+  - name: tz_common
+    condition: [bootloader_apploader]
   - name: emlib
   - name: tz_service_syscfg
   - name: bootloader_tz_secure

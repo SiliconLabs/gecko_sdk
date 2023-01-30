@@ -37,13 +37,17 @@
 #include <stdint.h>
 #include <stddef.h>
 #include <stdio.h>
-#include "sl_status.h"
-#include "sl_wisun_ip6string.h"
-#include "sl_string.h"
 #include "cmsis_os2.h"
 #include "sl_cmsis_os2_common.h"
+#include "sl_component_catalog.h"
+#include "sl_status.h"
+#include "sl_wisun_ip6string.h"
 #include "sl_wisun_types.h"
+#include "sl_string.h"
 
+#if !defined(SL_CATALOG_WISUN_NCP_PRESENT)
+#include "sl_wisun_connection_params_api.h"
+#endif
 // -----------------------------------------------------------------------------
 //                              Macros and Typedefs
 // -----------------------------------------------------------------------------
@@ -126,7 +130,7 @@ const char* app_wisun_trace_util_get_ip_str(const void *const addr);
  * @details Wrapper function of free
  * @param str String buffer ptr
  *****************************************************************************/
-static inline void app_wisun_trace_util_destroy_ip_str(const char * const str)
+__STATIC_INLINE void app_wisun_trace_util_destroy_ip_str(const char * const str)
 {
   app_wisun_free((void *) str);
 }
@@ -177,7 +181,7 @@ const char * app_wisun_trace_util_ch_spacing_to_str(const uint32_t val);
  * @param[in] num The swappng number
  * @return uint16_t integer
  *****************************************************************************/
-static inline uint16_t app_wisun_trace_swap_u16(uint16_t num)
+__STATIC_INLINE uint16_t app_wisun_trace_swap_u16(uint16_t num)
 {
   return (((num & 0xFF) << 8) | ((num & 0xFF00) >> 8));
 }
@@ -220,10 +224,22 @@ const char *app_wisun_phy_to_str(sl_wisun_phy_config_t *phy_cfg);
  * @details It free the allocated PHY name.
  * @param[in] str is a pointer of the list
  *****************************************************************************/
-static inline void app_wisun_destroy_phy_str(const char *str)
+__STATIC_INLINE void app_wisun_destroy_phy_str(const char *str)
 {
   app_wisun_free((void *)str);
 }
+
+#if !defined(SL_CATALOG_WISUN_NCP_PRESENT)
+/**************************************************************************//**
+ * @brief Get connection parameters by network size
+ * @details Certificate and Auto network sizes are not supported
+ * @param[in] nw_size Network size
+ * @return const sl_wisun_connection_params_t* constant pointer of connection 
+ *                                             parameters on success, 
+ *                                             otherwise NULL 
+ *****************************************************************************/
+const sl_wisun_connection_params_t *sl_wisun_get_conn_param_by_nw_size(const sl_wisun_network_size_t nw_size);
+#endif
 
 /**************************************************************************//**
  * @brief Macro to check a status and print a message if the state is not OK

@@ -80,7 +80,7 @@ enum
  */
 typedef struct {
   EmberVersionType typeNum;
-  const char * typeString;
+  const char *typeString;
 } EmberReleaseTypeStruct;
 
 /**
@@ -120,8 +120,8 @@ extern const EmberVersion emberVersion;
  * @brief A structure for storing build date and time.
  */
 typedef struct {
-  const char * date;
-  const char * time;
+  const char *date;
+  const char *time;
 } EmberStackBuildDateTime;
 
 /**
@@ -1308,6 +1308,7 @@ typedef struct {
   uint8_t phy;
   uint8_t power;
   uint8_t timeout;
+  uint32_t remainingTimeout;
 } EmberChildData;
 
 /** @brief Defines an entry in the binding table.
@@ -1652,13 +1653,13 @@ typedef struct {
 
 typedef struct {
   uint8_t data;   // For now, might be number of retries or other values that previously were assigned to data.
-  void* otherFields;  // For now, this might be destination nodeId, or phyIndex or both(extraCounterInfo).
+  void *otherFields;  // For now, this might be destination nodeId, or phyIndex or both(extraCounterInfo).
 } EmberCounterInfo;
 
 typedef struct {
   uint8_t phy_index;
   EmberNodeId destinationNodeId;
-  void* otherExtraFields;   //For now, this is NULL.
+  void *otherExtraFields;   //For now, this is NULL.
 } EmberExtraCounterInfo;
 
 /** brief An identifier for a task. */
@@ -2032,7 +2033,14 @@ enum
 
   // Bit 10 is reserved for future use (stored in TOKEN).
   // Bit 11 is reserved for future use(stored in RAM).
-  // Bits 12-15 are unused.
+
+#ifndef DOXYGEN_SHOULD_SKIP_THIS
+  // Bit 12 - This denotes whether an end device should discard or accept ZDO Leave
+  // from a network node other than its parent.
+  EMBER_ZDO_LEAVE_FROM_NON_PARENT_NOT_ALLOWED = 0x1000,
+#endif
+
+  // Bits 13-15 are unused.
 };
 
 /** @brief This is the legacy name for the Distributed Trust Center Mode.
@@ -2348,7 +2356,7 @@ enum
  * @return uint8_t* Returns a pointer to the first byte of the Key data.
  */
 #if defined DOXYGEN_SHOULD_SKIP_THIS
-uint8_t* emberKeyContents(EmberKeyData* key);
+uint8_t* emberKeyContents(EmberKeyData *key);
 #else
 #define emberKeyContents(key) ((key)->contents)
 #endif
@@ -2361,7 +2369,7 @@ uint8_t* emberKeyContents(EmberKeyData* key);
  * @return uint8_t* Returns a pointer to the first byte of the certificate data.
  */
 #if defined DOXYGEN_SHOULD_SKIP_THIS
-uint8_t* emberCertificateContents(EmberCertificateData* cert);
+uint8_t* emberCertificateContents(EmberCertificateData *cert);
 #else
 #define emberCertificateContents(cert) ((cert)->contents)
 #endif
@@ -2374,7 +2382,7 @@ uint8_t* emberCertificateContents(EmberCertificateData* cert);
  * @return uint8_t* Returns a pointer to the first byte of the public key data.
  */
 #if defined DOXYGEN_SHOULD_SKIP_THIS
-uint8_t* emberPublicKeyContents(EmberPublicKeyData* key);
+uint8_t* emberPublicKeyContents(EmberPublicKeyData *key);
 #else
 #define emberPublicKeyContents(key) ((key)->contents)
 #endif
@@ -2387,7 +2395,7 @@ uint8_t* emberPublicKeyContents(EmberPublicKeyData* key);
  * @return uint8_t* Returns a pointer to the first byte of the private key data.
  */
 #if defined DOXYGEN_SHOULD_SKIP_THIS
-uint8_t* emberPrivateKeyContents(EmberPrivateKeyData* key);
+uint8_t* emberPrivateKeyContents(EmberPrivateKeyData *key);
 #else
 #define emberPrivateKeyContents(key) ((key)->contents)
 #endif
@@ -2397,7 +2405,7 @@ uint8_t* emberPrivateKeyContents(EmberPrivateKeyData* key);
  *  EmberSmacData structure.
  */
 #if defined DOXYGEN_SHOULD_SKIP_THIS
-uint8_t* emberSmacContents(EmberSmacData* key);
+uint8_t* emberSmacContents(EmberSmacData *key);
 #else
 #define emberSmacContents(key) ((key)->contents)
 #endif
@@ -2406,7 +2414,7 @@ uint8_t* emberSmacContents(EmberSmacData* key);
  *  actual ECDSA signature data of the EmberSignatureData structure.
  */
 #if defined DOXYGEN_SHOULD_SKIP_THIS
-uint8_t* emberSignatureContents(EmberSignatureData* sig);
+uint8_t* emberSignatureContents(EmberSignatureData *sig);
 #else
 #define emberSignatureContents(sig) ((sig)->contents)
 #endif
@@ -2419,7 +2427,7 @@ uint8_t* emberSignatureContents(EmberSignatureData* sig);
  * @return uint8_t* Returns a pointer to the first byte of the certificate data.
  */
 #if defined DOXYGEN_SHOULD_SKIP_THIS
-uint8_t* emberCertificate283k1Contents(EmberCertificate283k1Data* cert);
+uint8_t* emberCertificate283k1Contents(EmberCertificate283k1Data *cert);
 #else
 #define emberCertificate283k1Contents(cert) ((cert)->contents)
 #endif
@@ -2432,7 +2440,7 @@ uint8_t* emberCertificate283k1Contents(EmberCertificate283k1Data* cert);
  * @return uint8_t* Returns a pointer to the first byte of the public key data.
  */
 #if defined DOXYGEN_SHOULD_SKIP_THIS
-uint8_t* emberPublicKey283k1Contents(EmberPublicKey283k1Data* key);
+uint8_t* emberPublicKey283k1Contents(EmberPublicKey283k1Data *key);
 #else
 #define emberPublicKey283k1Contents(key) ((key)->contents)
 #endif
@@ -2445,7 +2453,7 @@ uint8_t* emberPublicKey283k1Contents(EmberPublicKey283k1Data* key);
  * @return uint8_t* Returns a pointer to the first byte of the private key data.
  */
 #if defined DOXYGEN_SHOULD_SKIP_THIS
-uint8_t* emberPrivateKey283k1Contents(EmberPrivateKey283k1Data* key);
+uint8_t* emberPrivateKey283k1Contents(EmberPrivateKey283k1Data *key);
 #else
 #define emberPrivateKey283k1Contents(key) ((key)->contents)
 #endif
@@ -2454,7 +2462,7 @@ uint8_t* emberPrivateKey283k1Contents(EmberPrivateKey283k1Data* key);
  *  actual ECDSA signature data of the EmberSignature283k1Data structure.
  */
 #if defined DOXYGEN_SHOULD_SKIP_THIS
-uint8_t* ember283k1SignatureContents(EmberSignature283k1Data* sig);
+uint8_t* ember283k1SignatureContents(EmberSignature283k1Data *sig);
 #else
 #define ember283k1SignatureContents(sig) ((sig)->contents)
 #endif
@@ -3260,7 +3268,7 @@ typedef struct {
   /** The size of the token data in number of bytes. */
   uint32_t size;
   /** A data pointer pointing to the storage for the token data of above size. */
-  void * data;
+  void *data;
 } EmberTokenData;
 
 /** @} END addtogroup
@@ -3373,6 +3381,24 @@ enum
    * A high RAM concentrator will be sent a route record ahead of any unicast
    * (Note: Non-compliant) */
   ROUTE_RECORD_POLICY_NO_ACK_REQUIRED = 2,
+};
+
+/**
+ * @brief Passive ack config enum
+ *
+ */
+#ifdef DOXYGEN_SHOULD_SKIP_THIS
+enum sl_passive_ack_config_enum_t
+#else
+typedef uint8_t sl_passive_ack_config_enum_t;
+enum
+#endif
+{
+  SL_PASSIVE_ACK_DEFAULT_CONFIG = 0,
+  SL_PASSIVE_ACK_DISABLE,
+  SL_PASSIVE_ACK_THRESHOLD_WITH_REBROADCAST,
+  SL_PASSIVE_ACK_THRESHOLD_NO_REBROADCAST,
+  SL_PASSIVE_ACK_THRESHOLD_WITH_REBROADCAST_ALL_NODES
 };
 
 /** @} END addtogroup

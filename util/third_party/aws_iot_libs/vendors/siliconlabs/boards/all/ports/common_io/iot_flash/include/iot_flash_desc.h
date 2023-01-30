@@ -118,6 +118,8 @@ typedef struct IotFlashDescriptor {
 
 IotFlashDescriptor_t *iot_flash_desc_get(int32_t lInstNum);
 
+uint32_t iot_flash_desc_get_external_flash_base(void);
+
 /*******************************************************************************
  *                              SAFE GUARD
  ******************************************************************************/

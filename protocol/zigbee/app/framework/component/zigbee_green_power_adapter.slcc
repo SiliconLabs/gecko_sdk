@@ -54,6 +54,11 @@ include:
   - path: protocol/zigbee/app/framework/plugin/green-power-adapter
     file_list:
       - path: green-power-adapter.h
+      - path: green-power-af-wrapper.h
+      - path: green-power-stack-wrapper.h
+      - path: green-power-print-wrapper.h
+      - path: green-power-token-wrapper.h
+      - path: green-power-event-wrapper.h
       - path: zigbee_zcl_callback_dispatcher.h
         unless:
          - zigbee_zcl_framework_core

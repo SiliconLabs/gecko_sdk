@@ -401,7 +401,7 @@ static BTStatus_t prvGetAdapterIfWithAdvSet( uint8_t ucAdapterIf,
     sl_status_t sl_status = sl_bt_advertiser_create_set( &pxAdapterIf->ucAdvSetHandle );
     if( sl_status != SL_STATUS_OK )
     {
-      SILABS_BLE_LOG_FUNC_EXIT_ERROR( "failed to create advertiser, sl_status=0x%x", sl_status );
+      SILABS_BLE_LOG_FUNC_EXIT_ERROR( "failed to create advertiser, sl_status=0x%"PRIx32, sl_status );
       return prvSlStatusToBTStatus( sl_status );
     }
 
@@ -737,7 +737,7 @@ static BTStatus_t prvScan( bool bStart )
     {
       sl_free( pxScanContext );
       pxScanContext = NULL;
-      SILABS_BLE_LOG_FUNC_EXIT_ERROR( "failed to start, sl_status=0x%x", sl_status );
+      SILABS_BLE_LOG_FUNC_EXIT_ERROR( "failed to start, sl_status=0x%"PRIx32, sl_status );
       return prvSlStatusToBTStatus( sl_status );
     }
   }
@@ -756,7 +756,7 @@ static BTStatus_t prvScan( bool bStart )
     sl_status = sl_bt_scanner_stop( );
     if( sl_status != SL_STATUS_OK )
     {
-      SILABS_BLE_LOG_FUNC_EXIT_ERROR( "failed to stop, sl_status=0x%x", sl_status );
+      SILABS_BLE_LOG_FUNC_EXIT_ERROR( "failed to stop, sl_status=0x%"PRIx32, sl_status );
       return prvSlStatusToBTStatus( sl_status );
     }
   }
@@ -793,7 +793,7 @@ static BTStatus_t prvDisconnect( uint8_t ucAdapterIf,
                                  const BTBdaddr_t * pxBdAddr,
                                  uint16_t usConnId )
 {
-  SILABS_BLE_LOG_FUNC_ENTRY_INFO( "ucAdapterIf=%d, usConnId=%PRIu16",
+  SILABS_BLE_LOG_FUNC_ENTRY_INFO( "ucAdapterIf=%d, usConnId=%"PRIu16,
                                   (int) ucAdapterIf, usConnId );
 
   (void) pxBdAddr;
@@ -886,7 +886,7 @@ static BTStatus_t prvStopAdv( uint8_t ucAdapterIf )
     sl_status_t sl_status = sl_bt_advertiser_stop( pxAdapterIf->ucAdvSetHandle );
     if( sl_status != SL_STATUS_OK )
     {
-      SILABS_BLE_LOG_PRINT_ERROR( "failed to stop advertiser, sl_status=0x%x", sl_status );
+      SILABS_BLE_LOG_PRINT_ERROR( "failed to stop advertiser, sl_status=0x%"PRIx32, sl_status );
       status = prvSlStatusToBTStatus( sl_status );
     }
   }
@@ -1159,7 +1159,7 @@ static BTStatus_t prvSaveBondedDeviceAddress( uint8_t ucBondingHandle,
                                           ( uint8_t * ) pxBdAddr );
   if( sl_status != SL_STATUS_OK )
   {
-    SILABS_BLE_LOG_FUNC_EXIT_ERROR( "sl_bt_nvm_save failed, sl_status=0x%x", sl_status );
+    SILABS_BLE_LOG_FUNC_EXIT_ERROR( "sl_bt_nvm_save failed, sl_status=0x%"PRIx32, sl_status );
     return prvSlStatusToBTStatus( sl_status );
   }
 
@@ -1181,7 +1181,7 @@ BTStatus_t prvLoadBondedDeviceAddress( uint8_t ucBondingHandle,
                                           ( uint8_t * ) pxBdAddr );
   if( sl_status != SL_STATUS_OK )
   {
-    SILABS_BLE_LOG_FUNC_EXIT_ERROR( "sl_bt_nvm_load failed, sl_status=0x%x", sl_status );
+    SILABS_BLE_LOG_FUNC_EXIT_ERROR( "sl_bt_nvm_load failed, sl_status=0x%"PRIx32, sl_status );
     return prvSlStatusToBTStatus( sl_status );
   }
   if( xValueLen < xExpectedLen )
@@ -1663,7 +1663,7 @@ static sl_status_t prvGenerateRandomAddress(bd_addr * pxAddress,
   /* Make sure we got all the bytes we requested */
   if( sl_status != SL_STATUS_OK )
   {
-    SILABS_BLE_LOG_FUNC_EXIT_ERROR( "failed to get random data, sl_status=0x%x", sl_status );
+    SILABS_BLE_LOG_FUNC_EXIT_ERROR( "failed to get random data, sl_status=0x%"PRIx32, sl_status );
     return sl_status;
   }
   if( dataLen < sizeof( pxAddress->addr ) )
@@ -1720,7 +1720,7 @@ static sl_status_t prvSlBtSetAdvParams( uint8_t ucAdvSetHandle,
     sl_status = sl_bt_advertiser_clear_random_address( ucAdvSetHandle );
     if( sl_status != SL_STATUS_OK )
     {
-      SILABS_BLE_LOG_FUNC_EXIT_ERROR( "sl_bt_advertiser_clear_random_address() failed, sl_status=0x%x",
+      SILABS_BLE_LOG_FUNC_EXIT_ERROR( "sl_bt_advertiser_clear_random_address() failed, sl_status=0x%"PRIx32,
                                       sl_status );
       return sl_status;
     }
@@ -1738,7 +1738,7 @@ static sl_status_t prvSlBtSetAdvParams( uint8_t ucAdvSetHandle,
         sl_status = prvGenerateRandomAddress(&xAdvStaticRandomAddr, sl_bt_gap_static_address);
         if( sl_status != SL_STATUS_OK )
         {
-          SILABS_BLE_LOG_FUNC_EXIT_ERROR( "failed to generate static random address, sl_status=0x%x",
+          SILABS_BLE_LOG_FUNC_EXIT_ERROR( "failed to generate static random address, sl_status=0x%"PRIx32,
                                           sl_status );
           return sl_status;
         }
@@ -1757,7 +1757,7 @@ static sl_status_t prvSlBtSetAdvParams( uint8_t ucAdvSetHandle,
       sl_status = prvGenerateRandomAddress(&address, sl_bt_gap_random_nonresolvable_address);
       if( sl_status != SL_STATUS_OK )
       {
-        SILABS_BLE_LOG_FUNC_EXIT_ERROR( "failed to generate non-resolvable random address, sl_status=0x%x",
+        SILABS_BLE_LOG_FUNC_EXIT_ERROR( "failed to generate non-resolvable random address, sl_status=0x%"PRIx32,
                                         sl_status );
         return sl_status;
       }
@@ -1778,7 +1778,7 @@ static sl_status_t prvSlBtSetAdvParams( uint8_t ucAdvSetHandle,
                                                      address, &addressOut);
     if( sl_status != SL_STATUS_OK )
     {
-      SILABS_BLE_LOG_FUNC_EXIT_ERROR( "sl_bt_advertiser_set_random_address() failed, sl_status=0x%x",
+      SILABS_BLE_LOG_FUNC_EXIT_ERROR( "sl_bt_advertiser_set_random_address() failed, sl_status=0x%"PRIx32,
                                       sl_status );
       return sl_status;
     }
@@ -1794,7 +1794,7 @@ static sl_status_t prvSlBtSetAdvParams( uint8_t ucAdvSetHandle,
                                            pxSlBtAdvParams->usTimeout, 0 );
   if( sl_status != SL_STATUS_OK )
   {
-    SILABS_BLE_LOG_FUNC_EXIT_ERROR( "sl_bt_advertiser_set_timing() failed, sl_status=0x%x",
+    SILABS_BLE_LOG_FUNC_EXIT_ERROR( "sl_bt_advertiser_set_timing() failed, sl_status=0x%"PRIx32,
                                     sl_status );
     return sl_status;
   }
@@ -1805,7 +1805,7 @@ static sl_status_t prvSlBtSetAdvParams( uint8_t ucAdvSetHandle,
                                         pxSlBtAdvParams->ucSecondaryPhy );
   if( sl_status != SL_STATUS_OK )
   {
-    SILABS_BLE_LOG_FUNC_EXIT_ERROR( "sl_bt_advertiser_set_phy() failed, sl_status=0x%x",
+    SILABS_BLE_LOG_FUNC_EXIT_ERROR( "sl_bt_advertiser_set_phy() failed, sl_status=0x%"PRIx32,
                                     sl_status );
     return sl_status;
   }
@@ -1815,7 +1815,7 @@ static sl_status_t prvSlBtSetAdvParams( uint8_t ucAdvSetHandle,
                                                 pxSlBtAdvParams->ucChannelMap );
   if( sl_status != SL_STATUS_OK )
   {
-    SILABS_BLE_LOG_FUNC_EXIT_ERROR( "sl_bt_advertiser_set_channel_map() failed, sl_status=0x%x",
+    SILABS_BLE_LOG_FUNC_EXIT_ERROR( "sl_bt_advertiser_set_channel_map() failed, sl_status=0x%"PRIx32,
                                     sl_status );
     return sl_status;
   }
@@ -1826,7 +1826,7 @@ static sl_status_t prvSlBtSetAdvParams( uint8_t ucAdvSetHandle,
                                              psSetTxPower );
   if( sl_status != SL_STATUS_OK )
   {
-    SILABS_BLE_LOG_FUNC_EXIT_ERROR( "sl_bt_advertiser_set_tx_power() failed, sl_status=0x%x",
+    SILABS_BLE_LOG_FUNC_EXIT_ERROR( "sl_bt_advertiser_set_tx_power() failed, sl_status=0x%"PRIx32,
                                     sl_status );
     return sl_status;
   }
@@ -2190,7 +2190,7 @@ static BTStatus_t prvConfigureAdapterAdvertiser( SlBtAdapterIf_t * pxAdapterIf,
                                                &pxAdapterIf->sSetAdvPower );
   if( sl_status != SL_STATUS_OK )
   {
-    SILABS_BLE_LOG_FUNC_EXIT_ERROR( "failed to set advertisement params, sl_status=0x%x", sl_status );
+    SILABS_BLE_LOG_FUNC_EXIT_ERROR( "failed to set advertisement params, sl_status=0x%"PRIx32, sl_status );
     return prvSlStatusToBTStatus( sl_status );
   }
 
@@ -2234,7 +2234,7 @@ static BTStatus_t prvSetAdvertisementData( uint8_t ucAdvSetHandle,
   sl_status_t sl_status = sl_bt_advertiser_set_data( ucAdvSetHandle, ucPacketType, advDataLen, advBuf );
   if( sl_status != SL_STATUS_OK )
   {
-    SILABS_BLE_LOG_FUNC_EXIT_ERROR( "sl_bt_advertiser_set_data() failed, sl_status=0x%x", sl_status );
+    SILABS_BLE_LOG_FUNC_EXIT_ERROR( "sl_bt_advertiser_set_data() failed, sl_status=0x%"PRIx32, sl_status );
     return prvSlStatusToBTStatus( sl_status );
   }
 
@@ -2394,7 +2394,7 @@ static BTStatus_t prvConnParameterUpdateRequest( const BTBdaddr_t * pxBdAddr,
     pxConnection->usMinInterval = 0;
     pxConnection->usMaxInterval = 0;
 
-    SILABS_BLE_LOG_FUNC_EXIT_ERROR( "sl_bt_connection_set_parameters() failed, sl_status=0x%x",
+    SILABS_BLE_LOG_FUNC_EXIT_ERROR( "sl_bt_connection_set_parameters() failed, sl_status=0x%"PRIx32,
                                     sl_status);
     return prvSlStatusToBTStatus( sl_status );
   }
@@ -2439,7 +2439,7 @@ static BTStatus_t prvSetScanParameters( uint8_t ucAdapterIf,
                                                     (uint16_t) ulScanWindow );
   if( sl_status != SL_STATUS_OK )
   {
-    SILABS_BLE_LOG_FUNC_EXIT_ERROR( "failed to set timing, sl_status=0x%x", sl_status);
+    SILABS_BLE_LOG_FUNC_EXIT_ERROR( "failed to set timing, sl_status=0x%"PRIx32, sl_status);
     return prvSlStatusToBTStatus( sl_status );
   }
 
@@ -2592,7 +2592,7 @@ static BTStatus_t prvMultiAdvSetInstRawData( uint8_t ucAdapterIf,
                                                      ucPacketType, xDataLen, pucData );
   if( sl_status != SL_STATUS_OK )
   {
-    SILABS_BLE_LOG_FUNC_EXIT_ERROR( "failed to set data, sl_status=0x%x", sl_status );
+    SILABS_BLE_LOG_FUNC_EXIT_ERROR( "failed to set data, sl_status=0x%"PRIx32, sl_status );
     return prvSlStatusToBTStatus( sl_status );
   }
 
@@ -2609,7 +2609,7 @@ static BTStatus_t prvMultiAdvSetInstRawData( uint8_t ucAdapterIf,
                                         pxAdapterIf->ucAdvConnectableMode );
     if( sl_status != SL_STATUS_OK )
     {
-      SILABS_BLE_LOG_FUNC_EXIT_ERROR( "failed to start advertising, sl_status=0x%x",
+      SILABS_BLE_LOG_FUNC_EXIT_ERROR( "failed to start advertising, sl_status=0x%"PRIx32,
                                 sl_status );
       return prvSlStatusToBTStatus( sl_status );
     }

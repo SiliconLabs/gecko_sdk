@@ -62,7 +62,11 @@ COEX_Events_t sli_bt_coex_event_filter = ~COEX_EVENT_REQUEST_EVENTS;
 
 static inline bool isCoexEnabled(void)
 {
+#if SL_RAIL_UTIL_COEX_REQ_ENABLED
   return COEX_GetOptions() & COEX_OPTION_COEX_ENABLED;
+#else
+  return false;
+#endif
 }
 
 /* Update constant pwm state */
@@ -84,6 +88,9 @@ static void setCoexOptions(COEX_Options_t mask, COEX_Options_t values)
 {
   //No bits outside mask must be set
   EFM_ASSERT((~mask & values) == 0);
+#if !SL_RAIL_UTIL_COEX_GNT_ENABLED && !SL_RAIL_UTIL_COEX_REQ_ENABLED
+  mask &= ~COEX_OPTION_COEX_ENABLED;
+#endif
   //Get existing options, mask out enable bit
   COEX_Options_t options = COEX_GetOptions() & ~mask;
   COEX_SetOptions(options | values);

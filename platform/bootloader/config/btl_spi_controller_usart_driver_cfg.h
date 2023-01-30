@@ -32,40 +32,41 @@
 // <<< sl:start pin_tool >>>
 // <usart signal=TX,RX,CLK,(CS)> SL_USART_EXTFLASH
 // $[USART_SL_USART_EXTFLASH]
-#define SL_USART_EXTFLASH_PERIPHERAL                   USART0
-#define SL_USART_EXTFLASH_PERIPHERAL_NO                0
+#warning "Bootloader SPI Controller USART peripheral not configured"
+//#define SL_USART_EXTFLASH_PERIPHERAL                   USART0
+//#define SL_USART_EXTFLASH_PERIPHERAL_NO                0
 
 // USART0 TX on PE7
-#define SL_USART_EXTFLASH_TX_PORT                      gpioPortE
-#define SL_USART_EXTFLASH_TX_PIN                       7
-#define SL_USART_EXTFLASH_TX_LOC                       1
+//#define SL_USART_EXTFLASH_TX_PORT                      gpioPortE
+//#define SL_USART_EXTFLASH_TX_PIN                       7
+//#define SL_USART_EXTFLASH_TX_LOC                       1
 
 // USART0 RX on PB8
-#define SL_USART_EXTFLASH_RX_PORT                      gpioPortB
-#define SL_USART_EXTFLASH_RX_PIN                       8
-#define SL_USART_EXTFLASH_RX_LOC                       4
+//#define SL_USART_EXTFLASH_RX_PORT                      gpioPortB
+//#define SL_USART_EXTFLASH_RX_PIN                       8
+//#define SL_USART_EXTFLASH_RX_LOC                       4
 
 // USART0 CLK on PE12
-#define SL_USART_EXTFLASH_CLK_PORT                     gpioPortE
-#define SL_USART_EXTFLASH_CLK_PIN                      12
-#define SL_USART_EXTFLASH_CLK_LOC                      0
+//#define SL_USART_EXTFLASH_CLK_PORT                     gpioPortE
+//#define SL_USART_EXTFLASH_CLK_PIN                      12
+//#define SL_USART_EXTFLASH_CLK_LOC                      0
 
 // USART0 CS on PE13
-#define SL_USART_EXTFLASH_CS_PORT                      gpioPortE
-#define SL_USART_EXTFLASH_CS_PIN                       13
-#define SL_USART_EXTFLASH_CS_LOC                       0
+//#define SL_USART_EXTFLASH_CS_PORT                      gpioPortE
+//#define SL_USART_EXTFLASH_CS_PIN                       13
+//#define SL_USART_EXTFLASH_CS_LOC                       0
 // [USART_SL_USART_EXTFLASH]$
 
 // <gpio> SL_EXTFLASH_WP
 // $[GPIO_SL_EXTFLASH_WP]
-#define SL_EXTFLASH_WP_PORT                     gpioPortA
-#define SL_EXTFLASH_WP_PIN                      7
+//#define SL_EXTFLASH_WP_PORT                     gpioPortA
+//#define SL_EXTFLASH_WP_PIN                      7
 // [GPIO_SL_EXTFLASH_WP]$
 
 // <gpio> SL_EXTFLASH_HOLD
 // $[GPIO_SL_EXTFLASH_HOLD]
-#define SL_EXTFLASH_HOLD_PORT                   gpioPortC
-#define SL_EXTFLASH_HOLD_PIN                    6
+//#define SL_EXTFLASH_HOLD_PORT                   gpioPortC
+//#define SL_EXTFLASH_HOLD_PIN                    6
 // [GPIO_SL_EXTFLASH_HOLD]$
 
 // <<< sl:end pin_tool >>>

@@ -651,6 +651,7 @@ static void app_join(sl_wisun_phy_config_type_t phy_config_type)
   const uint8_t *client_key;
   sl_wisun_channel_mask_t channel_mask;
   sl_wisun_phy_config_t phy_config;
+  sl_wisun_connection_params_t params;
 
   app_wisun_cli_mutex_lock();
 
@@ -677,6 +678,10 @@ static void app_join(sl_wisun_phy_config_type_t phy_config_type)
         phy_config.config.explicit.channel_spacing = app_settings_wisun.channel_spacing;
         phy_config.config.explicit.phy_mode_id = app_settings_wisun.phy_mode_id;
         break;
+      case SL_WISUN_PHY_CONFIG_IDS:
+        phy_config.config.ids.protocol_id = app_settings_wisun.protocol_id;
+        phy_config.config.ids.channel_id  = app_settings_wisun.channel_id;
+        break;
       default:
         printf("[Failed: unsupported PHY configuration type: %u]\r\n", phy_config_type);
         goto cleanup;
@@ -693,7 +698,32 @@ static void app_join(sl_wisun_phy_config_type_t phy_config_type)
     goto cleanup;
   }
 
+#ifdef WISUN_FAN_CERTIFICATION
+  (void)params;
   ret = sl_wisun_set_network_size((sl_wisun_network_size_t)app_settings_wisun.network_size);
+#else
+  switch (app_settings_wisun.network_size) {
+    case SL_WISUN_NETWORK_SIZE_SMALL:
+      params = SL_WISUN_PARAMS_PROFILE_SMALL;
+      break;
+    case SL_WISUN_NETWORK_SIZE_MEDIUM:
+      params = SL_WISUN_PARAMS_PROFILE_MEDIUM;
+      break;
+    case SL_WISUN_NETWORK_SIZE_LARGE:
+      params = SL_WISUN_PARAMS_PROFILE_LARGE;
+      break;
+    case SL_WISUN_NETWORK_SIZE_TEST:
+      params = SL_WISUN_PARAMS_PROFILE_TEST;
+      break;
+    case SL_WISUN_NETWORK_SIZE_CERTIFICATION:
+      params = SL_WISUN_PARAMS_PROFILE_CERTIF;
+      break;
+    default:
+      printf("[Failed: unsupported network size]\r\n");
+      goto cleanup;
+  }
+  ret = sl_wisun_set_connection_parameters(&params);
+#endif
   if (ret != SL_STATUS_OK) {
     printf("[Failed: unable to set network size: %lu]\r\n", ret);
     goto cleanup;
@@ -808,6 +838,13 @@ void app_join_explicit(sl_cli_command_arg_t *arguments)
   (void)arguments;
 
   app_join(SL_WISUN_PHY_CONFIG_EXPLICIT);
+}
+
+void app_join_ids(sl_cli_command_arg_t *arguments)
+{
+  (void)arguments;
+
+  app_join(SL_WISUN_PHY_CONFIG_IDS);
 }
 
 void app_disconnect(sl_cli_command_arg_t *arguments)

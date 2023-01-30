@@ -98,14 +98,14 @@ SL_WEAK void app_process_action(void)
 static void app_ota_dfu_display_progress(uint16_t elapsed_time)
 {
   if (app_ota_dfu_status == SL_BT_APP_OTA_DFU_DOWNLOAD_BEGIN) {
-    app_log_info("Received packets: %u, storage used: %u%%.(%u kbps)" \
-                 APP_LOG_NEW_LINE,
+    app_log_info("Received packets: %u, storage used: %u%%.(%lu kbps)" \
+                 APP_LOG_NL,
                  datablock_idx,
                  GET_DATA_PERCENTAGE(slot_size, write_position),
                  GET_TRANSFER_SPEED_KBPS(write_position, elapsed_time));
   } else {
     app_log_info("Verified %u%% of the new image.(%u block)" \
-                 APP_LOG_NEW_LINE,
+                 APP_LOG_NL,
                  GET_DATA_PERCENTAGE(write_position, verif_position),
                  datablock_idx);
   }
@@ -168,7 +168,7 @@ void sl_bt_on_event(sl_bt_msg_t *evt)
     case sl_bt_evt_connection_opened_id:
       // Get connection handle for further checking.
       connected_handle = evt->data.evt_connection_opened.connection;
-      app_log_info("Connection opened." APP_LOG_NEW_LINE);
+      app_log_info("Connection opened." APP_LOG_NL);
       break;
 
     ///////////////////////////////////////////////////////////////////////////
@@ -260,10 +260,10 @@ static void app_ota_dfu_bootloader_api_error_handler(int32_t btl_errcode)
 
     // Everything else displayed as bootloader API error.
     default:
-      app_log_error("Bootloader API error!" APP_LOG_NEW_LINE);
+      app_log_error("Bootloader API error!" APP_LOG_NL);
       break;
   }
-  app_log_error("Error code: 0x%x ." APP_LOG_NEW_LINE, btl_errcode);
+  app_log_error("Error code: 0x%lx ." APP_LOG_NL, btl_errcode);
 }
 
 /***************************************************************************//**
@@ -283,24 +283,24 @@ static void app_ota_dfu_error_handler(sl_bt_app_ota_dfu_status_t last_state,
       break;
 
     case SL_BT_APP_OTA_DFU_ERR_UNEXPECTED_TRANSFER:
-      app_log_error("Unexpected OTA transfer rejected!" APP_LOG_NEW_LINE);
-      app_log_error("Wait until OTA function is ready!" APP_LOG_NEW_LINE);
+      app_log_error("Unexpected OTA transfer rejected!" APP_LOG_NL);
+      app_log_error("Wait until OTA function is ready!" APP_LOG_NL);
       break;
 
     case SL_BT_APP_OTA_DFU_ERR_UNEXPECTED_CLOSE:
-      app_log_error("Unexpected connection close!" APP_LOG_NEW_LINE);
-      app_log_error("Hdl: 0x%x | Write req. hdl: 0x%x." APP_LOG_NEW_LINE,
+      app_log_error("Unexpected connection close!" APP_LOG_NL);
+      app_log_error("Hdl: 0x%x | Write req. hdl: 0x%x." APP_LOG_NL,
                     connected_handle,
                     write_request_handle);
       break;
 
     case SL_BT_APP_OTA_DFU_ERR_STORAGE_FULL:
-      app_log_error("Storage full!" APP_LOG_NEW_LINE);
-      app_log_error("Consecutive packets will be ignored!" APP_LOG_NEW_LINE);
+      app_log_error("Storage full!" APP_LOG_NL);
+      app_log_error("Consecutive packets will be ignored!" APP_LOG_NL);
       break;
 
     case SL_BT_APP_OTA_DFU_NO_ERROR:
-      app_log_debug("State transition to: %u." APP_LOG_NEW_LINE, last_state);
+      app_log_debug("State transition to: %u." APP_LOG_NL, last_state);
       break;
   }
 }
@@ -318,10 +318,10 @@ void sl_button_on_change(const sl_button_t *handle)
         // This way the user application may continue in foreground, while
         // application OTA DFU progress restart in the background.
         app_log_info("Reinitialize application OTA DFU progress..." \
-                     APP_LOG_NEW_LINE);
+                     APP_LOG_NL);
         sl_bt_app_ota_dfu_restart_progress();
       } else if (app_ota_dfu_status == SL_BT_APP_OTA_DFU_WAIT_FOR_REBOOT) {
-        app_log_info("Reboot..." APP_LOG_NEW_LINE);
+        app_log_info("Reboot..." APP_LOG_NL);
         sl_bt_app_ota_dfu_reboot();
       }
     }
@@ -361,28 +361,28 @@ static void app_ota_dfu_on_status_change(sl_bt_app_ota_dfu_status_t curr_sts,
     case SL_BT_APP_OTA_DFU_INIT:
       // Disable button by default.
       sl_button_disable(SL_SIMPLE_BUTTON_INSTANCE(0));
-      app_log_info("Bootloader initialized." APP_LOG_NEW_LINE);
+      app_log_info("Bootloader initialized." APP_LOG_NL);
       break;
 
     case SL_BT_APP_OTA_DFU_ERASE:
-      app_log_info("Erase storage slot..." APP_LOG_NEW_LINE);
+      app_log_info("Erase storage slot..." APP_LOG_NL);
       break;
 
     case SL_BT_APP_OTA_DFU_READY:
-      app_log_info("Erase done." APP_LOG_NEW_LINE);
-      app_log_info("Application OTA DFU ready." APP_LOG_NEW_LINE);
+      app_log_info("Erase done." APP_LOG_NL);
+      app_log_info("Application OTA DFU ready." APP_LOG_NL);
       break;
 
     case SL_BT_APP_OTA_DFU_DISCONNECT:
       // Indicates that disconnect from current device initiated.
       // Happens in case of write request or transfer issues.
-      app_log_error("Disconnected by the target device." APP_LOG_NEW_LINE);
+      app_log_error("Disconnected by the target device." APP_LOG_NL);
       break;
 
     case SL_BT_APP_OTA_DFU_DOWNLOAD_BEGIN:
       datablock_idx = 0;
       time_elapsed = 0;
-      app_log_info("Download started." APP_LOG_NEW_LINE);
+      app_log_info("Download started." APP_LOG_NL);
       sc = sl_simple_timer_start(&progress_timer,
                                  DOWNLOAD_TIMER_CYCLE,
                                  app_ota_dfu_progress_timer_cb,
@@ -395,15 +395,15 @@ static void app_ota_dfu_on_status_change(sl_bt_app_ota_dfu_status_t curr_sts,
       sc = sl_simple_timer_stop(&progress_timer);
       time_elapsed = 0;
       app_assert_status(sc);
-      app_log_info("Download finished. Received %u bytes." APP_LOG_NEW_LINE,
+      app_log_info("Download finished. Received %lu bytes." APP_LOG_NL,
                    write_position);
-      app_log_info("Press END button in EFR Connect app!" APP_LOG_NEW_LINE);
+      app_log_info("Press END button in EFR Connect app!" APP_LOG_NL);
       break;
 
     case SL_BT_APP_OTA_DFU_VERIFY:
       datablock_idx = 0u;
-      app_log_info("Connection closed." APP_LOG_NEW_LINE);
-      app_log_info("Verify downloaded image..." APP_LOG_NEW_LINE);
+      app_log_info("Connection closed." APP_LOG_NL);
+      app_log_info("Verify downloaded image..." APP_LOG_NL);
       sc = sl_simple_timer_start(&progress_timer,
                                  VERIFICATION_TIMER_CYCLE,
                                  app_ota_dfu_progress_timer_cb,
@@ -413,14 +413,13 @@ static void app_ota_dfu_on_status_change(sl_bt_app_ota_dfu_status_t curr_sts,
 
     case SL_BT_APP_OTA_DFU_FINALIZE:
       sc = sl_simple_timer_stop(&progress_timer);
-      app_log_info("Verified %u%% of the new image." APP_LOG_NEW_LINE,
-                   GET_DATA_PERCENTAGE(write_position, verif_position),
-                   datablock_idx);
-      app_log_info("Set image to bootload." APP_LOG_NEW_LINE);
+      app_log_info("Verified %u%% of the new image." APP_LOG_NL,
+                   GET_DATA_PERCENTAGE(write_position, verif_position));
+      app_log_info("Set image to bootload." APP_LOG_NL);
       break;
 
     case SL_BT_APP_OTA_DFU_WAIT_FOR_REBOOT:
-      app_log_info("Press button 0 to reboot!" APP_LOG_NEW_LINE);
+      app_log_info("Press button 0 to reboot!" APP_LOG_NL);
       sl_button_enable(SL_SIMPLE_BUTTON_INSTANCE(0));
       break;
 
@@ -430,7 +429,7 @@ static void app_ota_dfu_on_status_change(sl_bt_app_ota_dfu_status_t curr_sts,
       time_elapsed = 0;
       app_ota_dfu_error_handler(prev_sts, app_ota_dfu_error_code, boot_api_err_code);
       app_log_error("Press button 0 to reinitialize progress, without reboot." \
-                    APP_LOG_NEW_LINE);
+                    APP_LOG_NL);
       break;
   }
 }
@@ -454,10 +453,10 @@ void sl_bt_app_ota_dfu_on_status_event(sl_bt_app_ota_dfu_status_evt_t* evt)
       slot_startaddr = evt->evt_info.btl_storage.storage_start_addr;
       slot_size = evt->evt_info.btl_storage.storage_size_bytes;
 
-      app_log_info("Gecko bootloader version: %u.%u ." APP_LOG_NEW_LINE,
+      app_log_info("Gecko bootloader version: %lu.%lu ." APP_LOG_NL,
                    (btl_version & 0xFF000000) >> 24,
                    (btl_version & 0x00FF0000) >> 16);
-      app_log_info("Slot %d starts @ 0x%8.8x, size %u bytes ." APP_LOG_NEW_LINE,
+      app_log_info("Slot %d starts @ 0x%8.8lx, size %lu bytes ." APP_LOG_NL,
                    SL_BT_APP_OTA_DFU_USED_SLOT,
                    slot_startaddr,
                    slot_size);

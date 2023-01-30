@@ -811,6 +811,15 @@ sl_status_t sl_sleeptimer_restart_periodic_timer_ms(sl_sleeptimer_timer_handle_t
                                                     uint8_t priority,
                                                     uint16_t option_flags);
 
+/***************************************************************************//**
+ * @brief
+ *   Gets the precision (in PPM) of the sleeptimer's clock.
+ *
+ * @return
+ *   Clock accuracy, in PPM.
+ ******************************************************************************/
+uint16_t sl_sleeptimer_get_clock_accuracy(void);
+
 #ifdef __cplusplus
 }
 #endif

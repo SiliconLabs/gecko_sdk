@@ -59,6 +59,8 @@
 static sl_status_t leuart_tx(void *context,
                              char c);
 
+static void leuart_set_next_byte_detect(void *context, bool enable);
+
 #if defined(SL_CATALOG_POWER_MANAGER_PRESENT) && !defined(SL_IOSTREAM_UART_FLUSH_TX_BUFFER)
 static void leuart_tx_completed(void *context, bool enable);
 #endif
@@ -89,6 +91,7 @@ sl_status_t sl_iostream_leuart_init(sl_iostream_uart_t *iostream_uart,
 #else
                                           NULL,
 #endif
+                                          leuart_set_next_byte_detect,
                                           leuart_deinit,
                                           2,
                                           2);
@@ -140,10 +143,8 @@ sl_status_t sl_iostream_leuart_init(sl_iostream_uart_t *iostream_uart,
   LEUART_RxDmaInEM2Enable(leuart_context->leuart, true);
 #endif
 
-  if (uart_config->sw_flow_control == true) {
-    // Enable RX interrupts
-    LEUART_IntEnable(leuart_config->leuart, LEUART_IF_RXOF);
-  }
+  // Enable RX interrupts
+  LEUART_IntEnable(leuart_context->leuart, LEUART_IF_RXDATAV);
 
   // Finally enable it
   LEUART_Enable(leuart_context->leuart, leuartEnable);
@@ -158,17 +159,8 @@ void sl_iostream_leuart_irq_handler(sl_iostream_uart_t *iostream_uart)
 {
   sl_iostream_leuart_context_t *leuart_context = (sl_iostream_leuart_context_t *)iostream_uart->stream.context;
 
-  // Handle RX FIFO Overflow Event
-  if (leuart_context->leuart->IF & LEUART_IF_RXOF) {
-    // Clear the interrupt flag
-    LEUART_IntClear(leuart_context->leuart, LEUART_IF_RXOF);
-    if (leuart_context->context.sw_flow_control == true) {
-      sl_atomic_store(leuart_context->context.remote_xon, false);
-      LEUART_Tx(leuart_context->leuart, UARTXOFF);
-    }
-  }
-
-#if defined(SL_CATALOG_POWER_MANAGER_PRESENT) && !defined(SL_IOSTREAM_UART_FLUSH_TX_BUFFER)
+  #if defined(SL_CATALOG_POWER_MANAGER_PRESENT) && !defined(SL_IOSTREAM_UART_FLUSH_TX_BUFFER)
+  // Handle Transmit Complete Events
   if (leuart_context->leuart->IF & LEUART_IF_TXC) {
     LEUART_IntClear(leuart_context->leuart, LEUART_IF_TXC);
     // Check if the Status register has the TXC flag as well since the flag will clean itself
@@ -176,10 +168,76 @@ void sl_iostream_leuart_irq_handler(sl_iostream_uart_t *iostream_uart)
     if ((LEUART_StatusGet(leuart_context->leuart) & _LEUART_STATUS_TXC_MASK) != 0) {
       sli_uart_txc(&leuart_context->context);
     }
+    // mandatory return to avoid going into rx_data_available == false when TXC,
+    // since we can't read RXDATAV flag because DMA consumes it immediately when armed.
+    return;
   }
 #endif
-}
 
+  // When this point is reached, new data was received
+  #if !defined(SL_CATALOG_KERNEL_PRESENT) && defined(SL_CATALOG_POWER_MANAGER_PRESENT)
+  // Always wakeup the core up from IRQ
+  leuart_context->context.sleep = SL_POWER_MANAGER_WAKEUP;
+  #endif
+
+  // Detected new byte, signal the core
+  if (leuart_context->context.rx_data_available == false) {
+    // Disable the IRQ until the RX Buffer is emptied, or becomes full
+    LEUART_IntDisable(leuart_context->leuart, LEUART_IF_RXDATAV);
+    sl_atomic_store(leuart_context->context.rx_data_available, true);
+    #if defined(SL_CATALOG_KERNEL_PRESENT)
+    // Unlock the read thread
+    if (leuart_context->context.block) {
+      if (osSemaphoreGetCount(leuart_context->context.read_signal) == 0) {
+        osStatus_t status = osSemaphoreRelease(leuart_context->context.read_signal);
+        EFM_ASSERT(status == osOK);
+      }
+    }
+    #endif // SL_CATALOG_KERNEL_PRESENT
+    return;
+  }
+
+  // Rx Buffer full, check if last byte is control character
+  if (leuart_context->context.rx_buffer_full == true) {
+    // Check if most recent byte is flow control (we will lose this data)
+    if (leuart_context->context.sw_flow_control == true) {
+      // Send XOFF to indicate RX buffer is full
+      sl_atomic_store(leuart_context->context.remote_xon, false);
+      LEUART_Tx(leuart_context->leuart, UARTXOFF);
+
+      // Make sure RXDATAV stays enabled to avoid deadlock if both sides are full
+      LEUART_IntEnable(leuart_context->leuart, LEUART_IF_RXDATAV);
+
+      // Check if received byte is control char
+      char dropped_byte;
+      dropped_byte = (char)leuart_context->leuart->RXDATA;
+
+      if (dropped_byte == UARTXON) {
+        sl_atomic_store(leuart_context->context.xon, true);
+      } else if (dropped_byte == UARTXOFF) {
+        sl_atomic_store(leuart_context->context.xon, false);
+      }
+
+      // Found most recent control character, set the scan pointer to the end of the received data
+      if (dropped_byte == UARTXON || dropped_byte == UARTXOFF) {
+        #if defined(LDMA_PRESENT)
+        leuart_context->context.ctrl_char_scan_ptr = (uint8_t*)LDMA->CH[leuart_context->context.dma.channel].DST - 1;
+        #elif defined(DMA_PRESENT)
+        DMA_DESCRIPTOR_TypeDef* desc = ((DMA_DESCRIPTOR_TypeDef *)(DMA->CTRLBASE)) + leuart_context->context.dma.channel;
+        leuart_context->context.ctrl_char_scan_ptr = (uint8_t*)desc->DSTEND - 1;
+        #else
+        #error Missing (L)DMA peripheral
+        #endif
+      }
+      // The byte is now lost...
+      return;
+    }
+  }
+
+  // Can reach here if data was available and next byte detect was enabled (e.g. for sleep).
+  // Disable RXDATAV IRQ to avoid looping in IRQ forever.
+  LEUART_IntDisable(leuart_context->leuart, LEUART_IF_RXDATAV);
+}
 /*******************************************************************************
  **************************   LOCAL FUNCTIONS   ********************************
  ******************************************************************************/
@@ -200,6 +258,20 @@ static sl_status_t leuart_tx(void *context,
 #endif
 
   return SL_STATUS_OK;
+}
+
+/***************************************************************************//**
+ * Enable LEUART Rx Data Valid (RXDATAV) Interrupt
+ ******************************************************************************/
+static void leuart_set_next_byte_detect(void *context, bool enable)
+{
+  sl_iostream_leuart_context_t *leuart_context = (sl_iostream_leuart_context_t *)context;
+
+  if (enable) {
+    LEUART_IntEnable(leuart_context->leuart, LEUART_IF_RXDATAV);
+  } else {
+    LEUART_IntDisable(leuart_context->leuart, LEUART_IF_RXDATAV);
+  }
 }
 
 #if defined(SL_CATALOG_POWER_MANAGER_PRESENT) && !defined(SL_IOSTREAM_UART_FLUSH_TX_BUFFER)
@@ -236,10 +308,10 @@ static sl_status_t leuart_deinit(void *context)
   GPIO_PinModeSet(leuart_context->tx_port, leuart_context->tx_pin, gpioModeDisabled, 0);
   GPIO_PinModeSet(leuart_context->rx_port, leuart_context->rx_pin, gpioModeDisabled, 0);
 
-  // Disable USART peripheral
+  // Disable LEUART peripheral
   LEUART_Enable(leuart_context->leuart, leuartDisable);
 
-  // Disable USART Clock
+  // Disable LEUART Clock
   CMU_ClockEnable(leuart_context->clock, false);
 
   return SL_STATUS_OK;

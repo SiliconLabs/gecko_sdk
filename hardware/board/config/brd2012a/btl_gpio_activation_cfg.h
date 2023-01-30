@@ -21,7 +21,6 @@
 
 // <h>Properties of Bootloader Entry
 
-
 // <o SL_GPIO_ACTIVATION_POLARITY> Active state
 // <LOW=> Low
 // <HIGH=> High
@@ -44,6 +43,5 @@
 // [GPIO_SL_BTL_BUTTON]$
 
 // <<< sl:end pin_tool >>>
-
 
 #endif // BTL_GPIO_ACTIVATION_CONFIG_H

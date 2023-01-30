@@ -26,25 +26,32 @@
 #include "sl_simple_button_instances.h"
 #include "sl_simple_led_instances.h"
 #include "nvm3.h"
-#include "sl_simple_button_btn0_config.h"
-#include "sl_simple_button_btn1_config.h"
 #ifdef SL_CATALOG_ZIGBEE_DEBUG_PRINT_PRESENT
 #include "sl_zigbee_debug_print.h"
 #endif // SL_CATALOG_ZIGBEE_DEBUG_PRINT_PRESENT
-
+#ifdef SL_CATALOG_SIMPLE_BUTTON_BTN0_PRESENT
+#include "sl_simple_button_btn0_config.h"
+#define BUTTON_INSTANCE_0 sl_button_btn0
+#endif
+#ifdef SL_CATALOG_SIMPLE_BUTTON_BTN1_PRESENT
+#include "sl_simple_button_btn1_config.h"
+#define BUTTON_INSTANCE_1 sl_button_btn1
+#endif
 // -----------------------------------------------------------------------------
 //                              Macros and Typedefs
 // -----------------------------------------------------------------------------
 
 #define EMBER_GPD_NV_DATA_TAG 0xA9A1
 
-#define GPD_BUTTON_COUNT 2
-#define BUTTON_INSTANCE_0 sl_button_btn0
-#define BUTTON_INSTANCE_1 sl_button_btn1
+#define GPD_BUTTON_COUNT SL_SIMPLE_BUTTON_COUNT
 
 // LED Indication
-#define ACTIVITY_LED sl_led_led0 //BOARDLED1
-#define COMMISSIONING_STATE_LED sl_led_led1 //BOARDLED0
+#define ACTIVITY_LED sl_led_led0 //BOARDLED0
+#ifdef SL_CATALOG_SIMPLE_LED_LED1_PRESENT
+#define COMMISSIONING_STATE_LED sl_led_led1 //BOARDLED1
+#else
+#define COMMISSIONING_STATE_LED sl_led_led0 //BOARDLED0
+#endif
 
 #define BOARD_LED_ON(led) sl_led_turn_on(&led)
 #define BOARD_LED_OFF(led) sl_led_turn_off(&led)
@@ -196,6 +203,7 @@ bool emberGpdAfPluginIncomingCommandCallback(uint8_t gpdCommand,
     }
   }
   gpdDebugPrintf("]\n");
+  // Unused variable warning suppression when print is not available.
   (void)gpdCommand;
   (void)length;
   (void)commandPayload;
@@ -388,6 +396,7 @@ void sl_button_on_change(const sl_button_t *handle)
 static sl_sleeptimer_timer_handle_t button_release_timer_handle;
 static void buttonReleaseTimeout(sl_sleeptimer_timer_handle_t *handle, void *contextData)
 {
+  (void)contextData;
   sl_sleeptimer_stop_timer(handle);
   appAction = APP_EVENT_ACTION_SEND_DECOMMISSION;
 }

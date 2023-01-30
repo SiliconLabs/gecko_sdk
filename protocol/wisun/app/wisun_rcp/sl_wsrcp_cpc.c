@@ -86,15 +86,15 @@ void cpc_init(sl_cpc_endpoint_handle_t *cpc_ep)
     ret = sli_cpc_open_service_endpoint(cpc_ep, SL_CPC_ENDPOINT_WISUN, 0, 1);
     BUG_ON(ret);
     ret = sl_cpc_set_endpoint_option(cpc_ep, SL_CPC_ENDPOINT_ON_IFRAME_RECEIVE,
-                                     cpc_rx_ready);
+                                     (void *)cpc_rx_ready);
     BUG_ON(ret);
     ret = sl_cpc_set_endpoint_option(cpc_ep, SL_CPC_ENDPOINT_ON_IFRAME_RECEIVE_ARG,
                                      cpc_ep);
     BUG_ON(ret);
     ret = sl_cpc_set_endpoint_option(cpc_ep, SL_CPC_ENDPOINT_ON_IFRAME_WRITE_COMPLETED,
-                                     cpc_tx_complete);
+                                     (void *)cpc_tx_complete);
     BUG_ON(ret);
     ret = sl_cpc_set_endpoint_option(cpc_ep, SL_CPC_ENDPOINT_ON_ERROR,
-                                     cpc_on_error);
+                                     (void *)cpc_on_error);
     BUG_ON(ret);
 }

@@ -67,7 +67,6 @@
 
 // [EUSART_SL_SERIAL_EUART]$
 
-
 // <gpio optional=true> SL_VCOM_ENABLE
 
 // $[GPIO_SL_VCOM_ENABLE]
@@ -75,7 +74,6 @@
 #define SL_VCOM_ENABLE_PIN                       1
 
 // [GPIO_SL_VCOM_ENABLE]$
-
 
 // <<< sl:end pin_tool >>>
 

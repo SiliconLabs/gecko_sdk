@@ -38,6 +38,7 @@ extern "C" {
 // -----------------------------------------------------------------------------
 //                                   Includes
 // -----------------------------------------------------------------------------
+#include "sl_common.h"
 #include "ip6string.h"
 
 // -----------------------------------------------------------------------------
@@ -63,7 +64,7 @@ extern "C" {
  * @return        length of generated string excluding the terminating null
  *                character
  *****************************************************************************/
-static inline uint8_t sl_wisun_ip6tos(const void *ip6addr, char *p)
+__STATIC_INLINE uint8_t sl_wisun_ip6tos(const void *ip6addr, char *p)
 {
   return (uint8_t)ip6tos(ip6addr, p);
 }
@@ -83,7 +84,7 @@ static inline uint8_t sl_wisun_ip6tos(const void *ip6addr, char *p)
  * @return  length of generated string excluding the terminating null character,
  *          or 0 for an error, such as 'prefix_len' > 128
  *****************************************************************************/
-static inline uint8_t sl_wisun_ip6_prefix_tos(const void *prefix,
+__STATIC_INLINE uint8_t sl_wisun_ip6_prefix_tos(const void *prefix,
                                               uint8_t prefix_len,
                                               char *p)
 {
@@ -100,7 +101,7 @@ static inline uint8_t sl_wisun_ip6_prefix_tos(const void *prefix,
  * @param[out]    dest buffer for address. MUST be 16 bytes. Filled with 0 on error.
  * @return boolean set to true if conversion succeed, false if it didn't
  *****************************************************************************/
-static inline bool sl_wisun_stoip6(const char *ip6addr, size_t len, void *dest)
+__STATIC_INLINE bool sl_wisun_stoip6(const char *ip6addr, size_t len, void *dest)
 {
   return stoip6(ip6addr, len, dest);
 }
@@ -111,7 +112,7 @@ static inline bool sl_wisun_stoip6(const char *ip6addr, size_t len, void *dest)
  * @param         ip6addr  IPv6 address in string format
  * @return        prefix length or 0 if it not given
  *****************************************************************************/
-static inline char sl_wisun_sipv6_prefixlength(const char *ip6addr)
+__STATIC_INLINE char sl_wisun_sipv6_prefixlength(const char *ip6addr)
 {
   return sipv6_prefixlength(ip6addr);
 }
@@ -128,9 +129,9 @@ static inline char sl_wisun_sipv6_prefixlength(const char *ip6addr)
  * @return        0 on success, negative value otherwise. prefix_len_out
  *                contains prefix length.
  *****************************************************************************/
-static inline int sl_wisun_stoip6_prefix(const char *ip6addr,
-                                         void *dest,
-                                         int16_t *prefix_len_out)
+__STATIC_INLINE int sl_wisun_stoip6_prefix(const char *ip6addr,
+                                           void *dest,
+                                           int16_t *prefix_len_out)
 {
   return stoip6_prefix(ip6addr, dest, (int_fast16_t*)prefix_len_out);
 }

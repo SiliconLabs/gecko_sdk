@@ -36,9 +36,5 @@ include:
       - path: tfm_ns_interface.h
       - path: psa/storage_common.h
 
-  - path: sl_component/sl_psa_driver/inc
-    file_list:
-      - path: psa/internal_trusted_storage.h
-      - path: psa/sli_internal_trusted_storage.h
 source:
   - path: sl_component/sl_trustzone/src/sli_tz_ns_interface.c

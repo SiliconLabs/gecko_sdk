@@ -29,10 +29,15 @@
 #include <cc_configuration_config_api.h>
 #include <cc_configuration_io.h>
 
+//#define DEBUGPRINT
+#include "DebugPrint.h"
+
 // -----------------------------------------------------------------------------
 //                Macros and Typedefs
 // -----------------------------------------------------------------------------
 #define SLI_CC_CONFIGURATION_MAX_STR_LENGTH (256)
+#define DEFAULT_FLAG (0x80)
+#define HANDSHAKE_FLAG (0x40)
 // -----------------------------------------------------------------------------
 //              Static Function Declarations
 // -----------------------------------------------------------------------------
@@ -126,7 +131,6 @@ cc_configuration_command_bulk_set( RECEIVE_OPTIONS_TYPE_EX *pRxOpt,
  * @param[in] pRxOpt Receive options.
  * @param[in] parameter_offset offset from the first parameter's number
  * @param[in] stop number where the bulk report should end
- * @param[in] size of the configuration values
  * @param[in] flag_handshake if true the function call is a result of handshake request
  * @return Result of command parsing.
 */
@@ -134,7 +138,6 @@ static received_frame_status_t
 cc_configuration_command_send_bulk_report( RECEIVE_OPTIONS_TYPE_EX *pRxOpt,
                                               const uint16_t parameter_offset,
                                               const uint16_t stop_number,
-                                              const uint8_t  size,
                                               const bool flag_handshake);
 
 /**
@@ -294,19 +297,6 @@ cc_configuration_get_first_parameter(cc_config_parameter_buffer_t* parameter_buf
 static uint8_t
 cc_configuration_calc_reports_to_follow(size_t data_length, size_t payload_limit);
 
-/**
- * Calculates the total length of the report and how many parameters will be included
- * @param[in] start_parameter_buffer The first parameter which will be included in the report
- * @param[in] required_parameter_num Max number of required parameters
- * @param[out] sum_report_size Total length of the report in bytes
- * @param[out] continous_parameter_count Number of the parameters included
- * @return number of maximum reports to follow
-*/
-static bool
-cc_configuration_command_send_bulk_report_calc_report_size(const cc_config_parameter_buffer_t* start_parameter_buffer,
-                                                              const uint16_t required_parameter_num,
-                                                              uint16_t* sum_report_size,
-                                                              uint16_t* continous_parameter_count );
 /**
  * Determine the first parameter number
  *
@@ -695,19 +685,21 @@ cc_configuration_command_info(   RECEIVE_OPTIONS_TYPE_EX *pRxOpt,
   pTxBuf->ZW_ConfigurationInfoReport4byteV4Frame.parameterNumber2 = pCfgNameGetFrame->parameterNumber2;
   pTxBuf->ZW_ConfigurationInfoReport4byteV4Frame.reportsToFollow  = reports_to_follow_count;
   RxToTxOptions(pRxOpt, &pTxOptionsEx);
-  
+
   if(is_io_transaction_success != false)
   {
     size_t str_pointer = 0;
     info_str_length = cc_configuration_strnlen(parameter_buffer.metadata->attributes.info,
                                                   SLI_CC_CONFIGURATION_MAX_STR_LENGTH);
-    reports_to_follow_count = cc_configuration_calc_reports_to_follow(info_str_length, payload_limit);
+    // maximum supported length of an info field per frame
+    uint16_t info_field_limit = payload_limit - info1_offset_in_struct;
+    reports_to_follow_count = cc_configuration_calc_reports_to_follow(info_str_length, info_field_limit);
     pTxBuf->ZW_ConfigurationInfoReport4byteV4Frame.reportsToFollow  = reports_to_follow_count;
 
     while(str_pointer < info_str_length)
     {
       size_t remaining_byte_count = info_str_length - str_pointer;
-      size_t byte_count_to_send   = (remaining_byte_count >= payload_limit) ? payload_limit : remaining_byte_count;
+      size_t byte_count_to_send   = (remaining_byte_count >= info_field_limit) ? info_field_limit : remaining_byte_count;
       size_t frame_size_bytes     = info1_offset_in_struct /*header size*/
                                     + byte_count_to_send;
 
@@ -1019,33 +1011,56 @@ cc_configuration_command_properties_get(  RECEIVE_OPTIONS_TYPE_EX *pRxOpt,
   }
   else
   {
-    memset(&pTxBuf->ZW_ConfigurationPropertiesReport4byteV4Frame,
-          0,
-          sizeof(pTxBuf->ZW_ConfigurationPropertiesReport4byteV4Frame));
+    typedef struct
+    {
+      uint8_t command_class;
+      uint8_t command;
+      uint8_t parameter_number_msb;
+      uint8_t parameter_number_lsb;
 
-    pTxBuf->ZW_ConfigurationPropertiesReport4byteV4Frame.cmdClass         = COMMAND_CLASS_CONFIGURATION_V4;
-    pTxBuf->ZW_ConfigurationPropertiesReport4byteV4Frame.cmd              = CONFIGURATION_PROPERTIES_REPORT_V4;
-    pTxBuf->ZW_ConfigurationPropertiesReport4byteV4Frame.parameterNumber1 = pCfgNameGetFrame->parameterNumber1;
-    pTxBuf->ZW_ConfigurationPropertiesReport4byteV4Frame.parameterNumber2 = pCfgNameGetFrame->parameterNumber2;
-    
-    pTxBuf->ZW_ConfigurationPropertiesReport4byteV4Frame.properties1 =  (uint8_t)(parameter_buffer.metadata->attributes.format<<3) |
-                                                                        (uint8_t)(parameter_buffer.metadata->attributes.size);
-    pTxBuf->ZW_ConfigurationPropertiesReport4byteV4Frame.nextParameterNumber1 = (uint8_t)((parameter_buffer.metadata->next_number >> 8) & 0xFF);
-    pTxBuf->ZW_ConfigurationPropertiesReport4byteV4Frame.nextParameterNumber2 = (uint8_t)((parameter_buffer.metadata->next_number) & 0xFF);
-  
+      uint8_t size : 3;
+      uint8_t format : 3;
+      uint8_t read_only : 1;
+      uint8_t altering_capabilities : 1;
 
-    cc_configuration_copyToFrame((cc_config_parameter_value_t *)&pTxBuf->ZW_ConfigurationPropertiesReport4byteV4Frame.minValue1,
-                                      &parameter_buffer,
-                                      &parameter_buffer.metadata->attributes.min_value);
-    cc_configuration_copyToFrame((cc_config_parameter_value_t *)&pTxBuf->ZW_ConfigurationPropertiesReport4byteV4Frame.maxValue1,
-                                      &parameter_buffer,
-                                      &parameter_buffer.metadata->attributes.max_value);
-    cc_configuration_copyToFrame((cc_config_parameter_value_t *)&pTxBuf->ZW_ConfigurationPropertiesReport4byteV4Frame.defaultValue1,
-                                      &parameter_buffer,
-                                      &parameter_buffer.metadata->attributes.default_value);
+      uint8_t variable_info[12 + 2 + 1]; // Min, max & default (1,2,4 bytes), next param & flags
+    }
+    frame_t;
+    frame_t * p_frame = (frame_t *)pTxBuf;
+    p_frame->command_class          = COMMAND_CLASS_CONFIGURATION_V4;
+    p_frame->command                = CONFIGURATION_PROPERTIES_REPORT_V4;
+    p_frame->parameter_number_msb   = pCfgNameGetFrame->parameterNumber1;
+    p_frame->parameter_number_lsb   = pCfgNameGetFrame->parameterNumber2;
+    p_frame->altering_capabilities  = parameter_buffer.metadata->attributes.flags.altering_capabilities;
+    p_frame->read_only              = parameter_buffer.metadata->attributes.flags.read_only;
+    p_frame->format                 = parameter_buffer.metadata->attributes.format;
+    p_frame->size                   = parameter_buffer.metadata->attributes.size;
 
-    enqueue_status = Transport_SendResponseEP((uint8_t *)pTxBuf,
-                                            sizeof(pTxBuf->ZW_ConfigurationPropertiesReport4byteV4Frame),
+    uint8_t i = 0;
+    cc_configuration_copyToFrame((cc_config_parameter_value_t *)&p_frame->variable_info[i],
+                                 &parameter_buffer,
+                                 &parameter_buffer.metadata->attributes.min_value);
+    i += parameter_buffer.metadata->attributes.size;
+
+    cc_configuration_copyToFrame((cc_config_parameter_value_t *)&p_frame->variable_info[i],
+                                 &parameter_buffer,
+                                 &parameter_buffer.metadata->attributes.max_value);
+    i += parameter_buffer.metadata->attributes.size;
+
+    cc_configuration_copyToFrame((cc_config_parameter_value_t *)&p_frame->variable_info[i],
+                                 &parameter_buffer,
+                                 &parameter_buffer.metadata->attributes.default_value);
+    i += parameter_buffer.metadata->attributes.size;
+
+    // Set next parameter number
+    p_frame->variable_info[i++] = (uint8_t)(parameter_buffer.metadata->next_number >> 8);
+    p_frame->variable_info[i++] = (uint8_t)(parameter_buffer.metadata->next_number);
+
+    // Hardcode "No Bulk Support" to 0 and add "Advanced" flag.
+    p_frame->variable_info[i++] = parameter_buffer.metadata->attributes.flags.advanced & 0x01;
+
+    enqueue_status = Transport_SendResponseEP((uint8_t *)p_frame,
+                                            offsetof(ZW_CONFIGURATION_PROPERTIES_REPORT_4BYTE_V4_FRAME , minValue1) + i,
                                             pTxOptionsEx,
                                             NULL);
   }
@@ -1072,10 +1087,13 @@ cc_configuration_command_bulk_get( RECEIVE_OPTIONS_TYPE_EX *pRxOpt,
     return RECEIVED_FRAME_STATUS_FAIL;
   }
 
+  /*
+   * Invoke cc_configuration_command_send_bulk_report() with CC_CONFIG_PARAMETER_SIZE_NOT_SPECIFIED
+   * as the Configuration Bulk Get doesn't contain a size.
+   */
   return cc_configuration_command_send_bulk_report(pRxOpt,
                                                       parameter_offset,
                                                       parameter_offset + number_of_parameters,
-                                                      CC_CONFIG_PARAMETER_SIZE_NOT_SPECIFIED,
                                                       false);
 }
 
@@ -1195,7 +1213,6 @@ cc_configuration_command_bulk_set( RECEIVE_OPTIONS_TYPE_EX *pRxOpt,
     frame_status = cc_configuration_command_send_bulk_report(pRxOpt,
                                                                 parameter_offset,
                                                                 parameter_offset + number_of_parameters,
-                                                                (uint8_t)size,
                                                                 handshake);
   }
 
@@ -1206,120 +1223,166 @@ static received_frame_status_t
 cc_configuration_command_send_bulk_report( RECEIVE_OPTIONS_TYPE_EX *pRxOpt,
                                               const uint16_t parameter_offset,
                                               const uint16_t stop_number,
-                                              const uint8_t size,
                                               const bool flag_handshake)
 {
   EZAF_EnqueueStatus_t enqueue_status = ZAF_ENQUEUE_STATUS_SUCCESS;
 
-  const uint16_t payload_limit = ZAF_getAppHandle()->pNetworkInfo->MaxPayloadSize;
-  bool status = true;
-  ZAF_TRANSPORT_TX_BUFFER  TxBuf;
-  ZW_APPLICATION_TX_BUFFER *pTxBuf = &(TxBuf.appTxBuf);
   TRANSMIT_OPTIONS_TYPE_SINGLE_EX *pTxOptionsEx;
-  cc_config_parameter_buffer_t parameter_buffer;
-  uint8_t* p_payload = &pTxBuf->ZW_ConfigurationBulkReport4byteV4Frame.variantgroup1.parameter1;
-  uint16_t required_parameter_count = stop_number - parameter_offset;
-  uint16_t first_parameter_number   = parameter_offset; 
-
   RxToTxOptions(pRxOpt, &pTxOptionsEx);
 
-  uint16_t sum_size_to_report      = 0;
-  uint16_t continous_parater_count = 0;
-  uint8_t reports_to_follow_count  = 0;
-
-
+  bool status = true;
+  cc_config_parameter_buffer_t parameter_buffer;
   status = cc_configuration_get_first_parameter(&parameter_buffer);
+  uint16_t first_parameter_number = parameter_buffer.metadata->number;
 
-  if(status == true)
-  {
-    first_parameter_number   += parameter_buffer.metadata->number;
-    status = cc_configuration_get(first_parameter_number,
-                                                        &parameter_buffer);
+  /*
+   * Create the first part of the report.
+   */
+  ZW_APPLICATION_TX_BUFFER frame;
+  uint8_t * p_frame = (uint8_t *)&frame;
+  *(p_frame + 0) = COMMAND_CLASS_CONFIGURATION_V4;
+  *(p_frame + 1) = CONFIGURATION_BULK_REPORT_V4;
+  *(p_frame + 2) = (uint8_t)(parameter_offset >> 8);
+  *(p_frame + 3) = (uint8_t)parameter_offset;
+  *(p_frame + 4) = 0; // Number of parameters will be filled out later.
+  *(p_frame + 5) = 0; // Reports to follow will be filled out later.
+
+  // Set default flag initially. Will be cleared later, if required.
+  *(p_frame + 6) = DEFAULT_FLAG;
+
+  if (true == flag_handshake) {
+    *(p_frame + 6) |= HANDSHAKE_FLAG;
   }
 
-  if(status == true)
+  uint32_t count = 0;
+  cc_config_parameter_size_t parameter_size = 0;
+  cc_config_parameter_size_t first_parameter_size = CC_CONFIG_PARAMETER_SIZE_NOT_SPECIFIED;
+
+  // Calculate parameter number for the first parameter to report.
+  uint16_t parameter_number = parameter_offset + first_parameter_number;
+
+  /*
+   * Calculate the number of consecutive parameters to be reported.
+   *
+   * The loop breaks on a change in size as the reported parameters must have the same size.
+   *
+   * This number is required to calculate the total number of reports.
+   */
+  uint16_t requested_parameter_count = stop_number - parameter_offset;
+  for (; count < requested_parameter_count; count++)
   {
-    cc_configuration_command_send_bulk_report_calc_report_size(&parameter_buffer,
-                                                                  required_parameter_count,
-                                                                  &sum_size_to_report,
-                                                                  &continous_parater_count);
+    // Get the parameter
+    status = cc_configuration_get(parameter_number, &parameter_buffer);
 
-    reports_to_follow_count = cc_configuration_calc_reports_to_follow(sum_size_to_report, payload_limit);
-
-    pTxBuf->ZW_ConfigurationBulkReport4byteV4Frame.cmdClass = COMMAND_CLASS_CONFIGURATION_V4;
-    pTxBuf->ZW_ConfigurationBulkReport4byteV4Frame.cmd      = CONFIGURATION_BULK_REPORT_V4;
-    pTxBuf->ZW_ConfigurationBulkReport4byteV4Frame.parameterOffset1   = (uint8_t)((parameter_offset >> 8)&0xFF);
-    pTxBuf->ZW_ConfigurationBulkReport4byteV4Frame.parameterOffset2   = (uint8_t)(parameter_offset & 0xFF);
-    pTxBuf->ZW_ConfigurationBulkReport4byteV4Frame.reportsToFollow    = reports_to_follow_count;
-    pTxBuf->ZW_ConfigurationBulkReport4byteV4Frame.numberOfParameters = 0;
-
-    if(size == CC_CONFIG_PARAMETER_SIZE_NOT_SPECIFIED)
+    if (true != status)
     {
-      pTxBuf->ZW_ConfigurationBulkReport4byteV4Frame.properties1 = (uint8_t)parameter_buffer.metadata->attributes.size;
-    }
-    else
-    {
-      pTxBuf->ZW_ConfigurationBulkReport4byteV4Frame.properties1 = size;
+      break;
     }
 
-    if(flag_handshake == true)
+    parameter_size = parameter_buffer.metadata->attributes.size;
+
+    if (CC_CONFIG_PARAMETER_SIZE_NOT_SPECIFIED == first_parameter_size)
     {
-      pTxBuf->ZW_ConfigurationBulkReport4byteV4Frame.properties1 |= (1<<6);/*Handshake*/
+      // Set first_parameter_size to a valid value if it hasn't been set already.
+      first_parameter_size = parameter_size;
     }
 
-    pTxBuf->ZW_ConfigurationBulkReport4byteV4Frame.properties1 |= (1<<7); /*Default*/
-
-    uint16_t sent_parameter_count = 0;
-    size_t  current_payload_size = 0;
-    status = true;
-    cc_configuration_get(first_parameter_number, &parameter_buffer);
-
-    while(status == true)
+    if (parameter_size != first_parameter_size)
     {
-      p_payload += current_payload_size;
-      cc_configuration_copyToFrame(  (cc_config_parameter_value_t *)p_payload,
-                                        &parameter_buffer,
-                                        &parameter_buffer.data_buffer);
+      // Only parameters of the same size are allowed in a bulk report. Hence, break on different size.
+      break;
+    }
 
-      if(0 != memcmp( (void*)parameter_buffer.data_buffer.as_uint8_array,
-                      (const void*)parameter_buffer.metadata->attributes.default_value.as_uint8_array,
-                      sizeof(cc_config_parameter_value_t)))
-      {
-        /*This configuration is not the default*/
-        pTxBuf->ZW_ConfigurationBulkReport4byteV4Frame.properties1 &= (uint8_t)(~(1<<7));
-      }
-      pTxBuf->ZW_ConfigurationBulkReport4byteV4Frame.numberOfParameters++;
+    parameter_number = parameter_buffer.metadata->next_number;
+  }
 
-      current_payload_size += parameter_buffer.metadata->attributes.size;
-      sent_parameter_count++;
+  // Set the size
+  *(p_frame + 6) |= ((uint8_t)parameter_size & 0x07);
 
-      if((current_payload_size == payload_limit)               ||
-         (parameter_buffer.metadata->next_number == 0x0000)    ||
-         (sent_parameter_count == continous_parater_count))
-      {
-        size_t frame_size_bytes = offsetof(ZW_CONFIGURATION_BULK_REPORT_4BYTE_V4_FRAME , variantgroup1) /*header size*/
-                                  + current_payload_size;
+  // Calculate parameter number for the first parameter to report.
+  parameter_number = parameter_offset + first_parameter_number;
 
-        enqueue_status = Transport_SendResponseEP((uint8_t *)pTxBuf,
-                                                   frame_size_bytes,
-                                                   pTxOptionsEx,
-                                                   NULL);
-        current_payload_size = 0;
-        pTxBuf->ZW_ConfigurationBulkReport4byteV4Frame.numberOfParameters = 0;
-        pTxBuf->ZW_ConfigurationBulkReport4byteV4Frame.properties1 |= (1<<7); /*Default*/
-        pTxBuf->ZW_ConfigurationBulkReport4byteV4Frame.reportsToFollow--;
-      }
+  const uint8_t REPORT_BASE_LENGTH = 7; // Report contains 7 bytes without any parameters.
 
-      if((sent_parameter_count == continous_parater_count)   ||
-         (enqueue_status != ZAF_ENQUEUE_STATUS_SUCCESS))
-      {break;}
+  uint8_t generated_report_length = REPORT_BASE_LENGTH; // Initial length of report.
 
-      status = cc_configuration_get(parameter_buffer.metadata->next_number, &parameter_buffer);
+  // Increase p_frame_parameter by initial report size so it's ready for the first parameter.
+  uint8_t * p_frame_parameter = p_frame + generated_report_length;
+
+  uint16_t offset_to_report = parameter_offset;
+
+  /*
+   * Calculate the remaining number of reports.
+   *
+   * This number is used as an initial value to report the number of remaining (following) reports.
+   */
+  uint8_t remaining_number_of_reports  = 0;
+  uint8_t required_payload_size = count * parameter_buffer.metadata->attributes.size;
+  const uint16_t payload_limit = ZAF_getAppHandle()->pNetworkInfo->MaxPayloadSize;
+  uint8_t available_payload = payload_limit - 7;
+  if (available_payload < required_payload_size) {
+    remaining_number_of_reports = required_payload_size / available_payload;
+    if (required_payload_size % available_payload) {
+      remaining_number_of_reports++;
     }
   }
-  else
+
+  uint8_t parameter_count_to_report = 0;
+
+  for (uint32_t i = 0; i < count; i++)
   {
-    enqueue_status = ZAF_ENQUEUE_STATUS_TIMEOUT;
+    parameter_count_to_report++;
+
+    // Get the parameter
+    status = cc_configuration_get(parameter_number, &parameter_buffer);
+
+    if (false != status) {
+      // TODO: Handle this case.
+    }
+
+    /*
+     * CC:0070.02.09.11.007: Set the default flag to 1 unless one or more of the parameters are
+     * set to a non-default value.
+     */
+    if (parameter_buffer.data_buffer.as_uint32 != parameter_buffer.metadata->attributes.default_value.as_uint32) {
+      *(p_frame + 6) &= ~DEFAULT_FLAG; // Clear default flag.
+    }
+
+    generated_report_length += parameter_buffer.metadata->attributes.size;
+
+    cc_configuration_copyToFrame(  (cc_config_parameter_value_t *)p_frame_parameter,
+                                      &parameter_buffer,
+                                      &parameter_buffer.data_buffer);
+
+    if ((generated_report_length + parameter_buffer.metadata->attributes.size > payload_limit) ||
+        ((i + 1) == requested_parameter_count)) {
+      // No room for the next parameter or we reach the total number of parameters => Transmit now.
+
+      *(p_frame + 2) = (uint8_t)(offset_to_report >> 8);
+      *(p_frame + 3) = (uint8_t)offset_to_report;
+
+      *(p_frame + 4) = parameter_count_to_report; // Number of parameters.
+
+      if (remaining_number_of_reports) {
+        remaining_number_of_reports--;
+      }
+      *(p_frame + 5) = remaining_number_of_reports; // Reports to follow
+
+      enqueue_status = Transport_SendResponseEP(p_frame,
+                                                generated_report_length,
+                                                pTxOptionsEx,
+                                                NULL);
+
+      generated_report_length = REPORT_BASE_LENGTH; // Reset generated report length to initial value.
+      p_frame_parameter = p_frame + generated_report_length; // Reset pointer to first parameter in report.
+      offset_to_report += i + 1; // Increase offset by the number of parameters included in this report.
+      parameter_count_to_report = 0;
+      *(p_frame + 6) |= DEFAULT_FLAG; // Reset default flag to initial value.
+    } else {
+      // Increase frame pointer for next parameter
+      p_frame_parameter += parameter_buffer.metadata->attributes.size;
+    }
+    parameter_number = parameter_buffer.metadata->next_number;
   }
 
   return cc_configuration_convert_enquestatus_to_framestatus(enqueue_status);
@@ -1520,42 +1583,6 @@ cc_configuration_calc_reports_to_follow(size_t data_length, size_t payload_limit
   reports_to_follow_count-=1; /*If the data fits in payload it should be zero*/
 
   return (uint8_t)reports_to_follow_count;
-}
-static bool
-cc_configuration_command_send_bulk_report_calc_report_size(const cc_config_parameter_buffer_t* start_parameter_buffer,
-                                                              const uint16_t required_parameter_num,
-                                                              uint16_t* sum_report_size,
-                                                              uint16_t* continous_parameter_count )
-{
-  bool status = false;
-  uint16_t report_size     = 0;
-  uint16_t parameter_count = 0;
-  cc_config_parameter_buffer_t parameter_buffer;
-
-  if((start_parameter_buffer != NULL) && (sum_report_size != NULL) && (continous_parameter_count != NULL))
-  {
-    status = true;
-    memcpy( (void*)&parameter_buffer,
-            (const void*)start_parameter_buffer,
-            sizeof(cc_config_parameter_buffer_t));
-
-    while(status == true)
-    {
-      report_size += parameter_buffer.metadata->attributes.size;
-      parameter_count++;
-      if(parameter_count == required_parameter_num)
-      {
-        // We are done, found all of the parameters
-        break;
-      }
-
-      status = cc_configuration_get(parameter_buffer.metadata->next_number, &parameter_buffer);
-    }
-
-    *sum_report_size           = report_size;
-    *continous_parameter_count = parameter_count;
-  }
-  return status;
 }
 
 static size_t

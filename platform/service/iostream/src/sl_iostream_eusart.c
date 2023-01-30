@@ -81,6 +81,8 @@ sl_slist_node_t *eusart_stream_list = NULL;
 static sl_status_t eusart_tx(void *context,
                              char c);
 
+static void eusart_set_next_byte_detect(void *context, bool enable);
+
 #if defined(SL_CATALOG_POWER_MANAGER_PRESENT) && !defined(SL_IOSTREAM_UART_FLUSH_TX_BUFFER)
 static void eusart_tx_completed(void *context, bool enable);
 #endif
@@ -110,6 +112,7 @@ sl_status_t sl_iostream_eusart_init(sl_iostream_uart_t *iostream_uart,
   if (eusart_config->flow_control != eusartHwFlowControlNone) {
     advanced_init.hwFlowControl = eusart_config->flow_control;
   }
+  advanced_init.dmaWakeUpOnRx = true;
   init->advancedSettings = &advanced_init;
 
   if (eusart_config->enable_high_frequency) {
@@ -127,6 +130,7 @@ sl_status_t sl_iostream_eusart_init(sl_iostream_uart_t *iostream_uart,
 #else
                                           NULL,
 #endif
+                                          eusart_set_next_byte_detect,
                                           eusart_deinit,
                                           em_req,
                                           em_req);
@@ -166,6 +170,8 @@ sl_status_t sl_iostream_eusart_init(sl_iostream_uart_t *iostream_uart,
     CMU_CLOCK_SELECT_SET(EUART0CLK, EM23GRPACLK);
 #elif defined(EUSART_PRESENT)
     CMU_CLOCK_SELECT_SET(EUSART0CLK, EM23GRPACLK);
+#else
+#error Missing EU(S)ART peripheral
 #endif
 #elif (_SILICON_LABS_32B_SERIES_2_CONFIG >= 3)
     CMU_ClockEnable(cmuClock_LFRCO, true);
@@ -174,7 +180,7 @@ sl_status_t sl_iostream_eusart_init(sl_iostream_uart_t *iostream_uart,
       CMU_CLOCK_SELECT_SET(EUSART0CLK, LFRCO);
     }
 #else
-    EFM_ASSERT(false);
+#error Unsupported board configuration
 #endif
     EUSART_UartInitLf(eusart_config->eusart, init);
   } else {
@@ -185,6 +191,8 @@ sl_status_t sl_iostream_eusart_init(sl_iostream_uart_t *iostream_uart,
     CMU_CLOCK_SELECT_SET(EUART0CLK, EM01GRPACLK);
 #elif defined(EUSART_PRESENT)
     CMU_CLOCK_SELECT_SET(EUSART0CLK, EM01GRPACLK);
+#else
+#error Missing EU(S)ART peripheral
 #endif
 #elif (_SILICON_LABS_32B_SERIES_2_CONFIG >= 3)
     CMU_CLOCK_SELECT_SET(EM01GRPCCLK, HFRCODPLL);
@@ -193,7 +201,7 @@ sl_status_t sl_iostream_eusart_init(sl_iostream_uart_t *iostream_uart,
       CMU_CLOCK_SELECT_SET(EUSART0CLK, EM01GRPCCLK);
     }
 #else
-    EFM_ASSERT(false);
+#error Unsupported board configuration
 #endif
 
     EUSART_UartInitHf(eusart_config->eusart, init);
@@ -260,11 +268,8 @@ sl_status_t sl_iostream_eusart_init(sl_iostream_uart_t *iostream_uart,
 #endif
   }
 
-  if (uart_config->sw_flow_control == true) {
-    // Enable RX interrupts
-    EUSART_IntEnable(eusart_config->eusart, EUSART_IF_RXFL);
-    EUSART_IntEnable(eusart_config->eusart, EUSART_IF_RXOF);
-  }
+  // Enable RX interrupts
+  EUSART_IntEnable(eusart_config->eusart, EUSART_IF_RXFL);
 
   // Finally enable EUSART
   EUSART_Enable(eusart_config->eusart, eusartEnable);
@@ -287,27 +292,8 @@ void sl_iostream_eusart_irq_handler(sl_iostream_uart_t *iostream_uart)
 {
   sl_iostream_eusart_context_t *eusart_context = (sl_iostream_eusart_context_t *) iostream_uart->stream.context;
 
-  // Handler RX FIFO Full Event
-  if ( eusart_context->eusart->IF & EUSART_IF_RXFL ) {
-    // Clear the interrupt flag
-    EUSART_IntClear(eusart_context->eusart, EUSART_IF_RXFL);
-    if (eusart_context->context.sw_flow_control == true) {
-      sl_atomic_store(eusart_context->context.remote_xon, false);
-      EUSART_Tx(eusart_context->eusart, UARTXOFF);
-    }
-  }
-
-  // Handle RX FIFO Overflow Event
-  if (eusart_context->eusart->IF & EUSART_IF_RXOF) {
-    // Clear the interrupt flag
-    EUSART_IntClear(eusart_context->eusart, EUSART_IF_RXOF);
-    if (eusart_context->context.sw_flow_control == true) {
-      sl_atomic_store(eusart_context->context.remote_xon, false);
-      EUSART_Tx(eusart_context->eusart, UARTXOFF);
-    }
-  }
-
-#if defined(SL_CATALOG_POWER_MANAGER_PRESENT) && !defined(SL_IOSTREAM_UART_FLUSH_TX_BUFFER)
+  #if defined(SL_CATALOG_POWER_MANAGER_PRESENT) && !defined(SL_IOSTREAM_UART_FLUSH_TX_BUFFER)
+  // Handle Transmit Complete Events
   if (eusart_context->eusart->IF & EUSART_IF_TXC) {
     EUSART_IntClear(eusart_context->eusart, EUSART_IF_TXC);
     // Check if the Status register has the TXC flag as well since the flag will clean itself
@@ -316,7 +302,67 @@ void sl_iostream_eusart_irq_handler(sl_iostream_uart_t *iostream_uart)
       sli_uart_txc(&eusart_context->context);
     }
   }
-#endif
+  #endif
+
+  // Handle RXFL events
+  if (eusart_context->eusart->IF & EUSART_IF_RXFL) {
+  #if !defined(SL_CATALOG_KERNEL_PRESENT) && defined(SL_CATALOG_POWER_MANAGER_PRESENT)
+    // Always wakeup the core up from RX IRQ
+    eusart_context->context.sleep = SL_POWER_MANAGER_WAKEUP;
+  #endif
+
+    // Clear the IF
+    eusart_context->eusart->IF_CLR = EUSART_IF_RXFL;
+    // Detected new byte, signal the core
+    if (eusart_context->context.rx_data_available == false) {
+      // Disable the IRQ until the RX Buffer is emptied, or becomes full
+      EUSART_IntDisable(eusart_context->eusart, EUSART_IF_RXFL);
+      sl_atomic_store(eusart_context->context.rx_data_available, true);
+      #if defined(SL_CATALOG_KERNEL_PRESENT)
+      // Unlock the read thread
+      if (eusart_context->context.block) {
+        if (osSemaphoreGetCount(eusart_context->context.read_signal) == 0) {
+          osStatus_t status = osSemaphoreRelease(eusart_context->context.read_signal);
+          EFM_ASSERT(status == osOK);
+        }
+      }
+      #endif // SL_CATALOG_KERNEL_PRESENT
+      return;
+    }
+
+    // Rx Buffer full, check if last byte is control character
+    if (eusart_context->context.rx_buffer_full == true) {
+      // Check if most recent byte is flow control (we will lose this data)
+      if (eusart_context->context.sw_flow_control == true) {
+        // Send XOFF to indicate RX buffer is full
+        sl_atomic_store(eusart_context->context.remote_xon, false);
+        EUSART_Tx(eusart_context->eusart, UARTXOFF);
+
+        // Make sure RXFL stays enabled to avoid deadlock if both sides are full
+        EUSART_IntEnable(eusart_context->eusart, EUSART_IF_RXFL);
+
+        // Check if received byte is control char
+        char dropped_byte;
+        dropped_byte = (char)eusart_context->eusart->RXDATA;
+
+        if (dropped_byte == UARTXON) {
+          sl_atomic_store(eusart_context->context.xon, true);
+        } else if (dropped_byte == UARTXOFF) {
+          sl_atomic_store(eusart_context->context.xon, false);
+        }
+
+        // Found most recent control character, set the scan pointer to the end of the received data
+        if (dropped_byte == UARTXON || dropped_byte == UARTXOFF) {
+          eusart_context->context.ctrl_char_scan_ptr = (uint8_t*)LDMA->CH[eusart_context->context.dma.channel].DST - 1;
+        }
+        // The byte is now lost...
+        return;
+      }
+      // Can reach here if data was available and next byte detect was enabled (e.g. for sleep).
+      // Disable RXFL IRQ to avoid looping in IRQ forever.
+      EUSART_IntDisable(eusart_context->eusart, EUSART_IF_RXFL);
+    }
+  }
 }
 
 /*******************************************************************************
@@ -339,6 +385,31 @@ static sl_status_t eusart_tx(void *context,
 #endif
 
   return SL_STATUS_OK;
+}
+
+/***************************************************************************//**
+ * Enable EUSART Rx Data Valid (RXFL) Interrupt and set the RXFL IF to reflect
+ * the current status of the RX FIFO.
+ * Make sure the DMA is not running when calling this function.
+ ******************************************************************************/
+static void eusart_set_next_byte_detect(void *context, bool enable)
+{
+  sl_iostream_eusart_context_t *eusart_context = (sl_iostream_eusart_context_t *)context;
+  CORE_DECLARE_IRQ_STATE;
+  CORE_ENTER_CRITICAL();
+  if (enable) {
+    // Update the IF to reflect the STATUS register (IF is not updated automatically by hardware)
+    if (eusart_context->eusart->STATUS & EUSART_STATUS_RXFL) {
+      EUSART_IntSet(eusart_context->eusart, EUSART_IF_RXFL);
+    } else {
+      EUSART_IntClear(eusart_context->eusart, EUSART_IF_RXFL);
+    }
+    // Enable the IRQ handler
+    EUSART_IntEnable(eusart_context->eusart, EUSART_IF_RXFL);
+  } else {
+    EUSART_IntDisable(eusart_context->eusart, EUSART_IF_RXFL);
+  }
+  CORE_EXIT_CRITICAL();
 }
 
 #if defined(SL_CATALOG_POWER_MANAGER_PRESENT) && !defined(SL_IOSTREAM_UART_FLUSH_TX_BUFFER)

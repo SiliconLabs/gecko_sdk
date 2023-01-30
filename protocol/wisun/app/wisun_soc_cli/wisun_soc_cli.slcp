@@ -163,6 +163,14 @@ template_contribution:
       help: "Connect to a Wi-SUN network using explicit PHY settings: w je"
       shortcuts:
         - name: "je"
+  - name: "cli_command"
+    value:
+      group: "wisun"
+      name: "join_ids"
+      handler: "app_join_ids"
+      help: "Connect to a Wi-SUN network using radio conf ids: w ji"
+      shortcuts:
+        - name: "ji"
 
   - name: "cli_command"
     value:

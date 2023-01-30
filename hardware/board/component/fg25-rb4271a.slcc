@@ -14,9 +14,9 @@
   - name: SL_KIT_NAME
     value: '"FG25-RB4271A"'
   - name: SL_KIT_REV
-    value: '"A02"'
+    value: '"A03"'
 - tag:
   - kit:opn:FG25-RB4271A
   - kit:pn:RB4271
   - kit:variant:A
-  - kit:revision:A02
+  - kit:revision:A03

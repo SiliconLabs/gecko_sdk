@@ -23,9 +23,6 @@
 #ifdef UC_BUILD
 #include "end-device-support.h"
 #include "sl_component_catalog.h"
-#ifdef SL_CATALOG_ZIGBEE_FORM_AND_JOIN_PRESENT
-#include "form-and-join.h"
-#endif // SL_CATALOG_ZIGBEE_FORM_AND_JOIN_PRESENT
 #ifdef SL_CATALOG_ZIGBEE_NETWORK_FIND_SUB_GHZ_PRESENT
 #include "network-find.h"
 #endif
@@ -35,14 +32,13 @@
 sl_zigbee_event_t emberAfPluginEndDeviceSupportMoveNetworkEvents[EMBER_SUPPORTED_NETWORKS];
 void emberAfPluginEndDeviceSupportMoveNetworkEventHandler(SLXU_UC_EVENT);
 #else // !UC_BUILD
-#ifdef EMBER_AF_PLUGIN_FORM_AND_JOIN
-#include "form-and-join.h"
-#define SL_CATALOG_ZIGBEE_FORM_AND_JOIN_PRESENT
-#endif // EMBER_AF_PLUGIN_FORM_AND_JOIN
 #ifdef EMBER_AF_PLUGIN_NETWORK_FIND_SUB_GHZ
   #include "app/framework/plugin/network-find/network-find.h"
   #define SL_CATALOG_ZIGBEE_NETWORK_FIND_SUB_GHZ_PRESENT
 #endif
+#ifdef EMBER_AF_PLUGIN_NETWORK_FIND
+  #define SL_CATALOG_ZIGBEE_NETWORK_FIND_PRESENT
+#endif // EMBER_AF_PLUGIN_NETWORK_FIND
 #ifdef EMBER_AF_PLUGIN_ZLL_COMMISSIONING_COMMON
   #include "app/framework/plugin/zll-commissioning-common/zll-commissioning-common.h"
   #define SL_CATALOG_ZIGBEE_ZLL_COMMISSIONING_COMMON_PRESENT
@@ -50,11 +46,22 @@ void emberAfPluginEndDeviceSupportMoveNetworkEventHandler(SLXU_UC_EVENT);
 extern EmberEventControl emberAfPluginEndDeviceSupportMoveNetworkEventControls[];
 #endif // UC_BUILD
 
+#if defined(SL_CATALOG_ZIGBEE_NETWORK_FIND_PRESENT) || defined(SL_CATALOG_ZIGBEE_NETWORK_FIND_SUB_GHZ_PRESENT)
+#ifdef UC_BUILD
+extern sl_zigbee_event_t emberAfPluginNetworkFindTickEvent;
+#define networkFindTickEventControl (&emberAfPluginNetworkFindTickEvent)
+#else // !UC_BUILD
+extern EmberEventControl emberAfPluginNetworkFindTickEventControl;
+#define networkFindTickEventControl emberAfPluginNetworkFindTickEventControl
+#endif // UC_BUILD
+extern void emberAfPluginNetworkFindTickEventHandler(SLXU_UC_EVENT);
+#endif // defined(SL_CATALOG_ZIGBEE_NETWORK_FIND_PRESENT) || defined(SL_CATALOG_ZIGBEE_NETWORK_FIND_SUB_GHZ_PRESENT)
+
 // *****************************************************************************
 // Globals
 
 #if defined(EMBER_SCRIPTED_TEST)
-uint8_t emAfRejoinAttemptsMax = 3;
+uint8_t emAfRejoinAttemptsMax = 4;
   #define EMBER_AF_REJOIN_ATTEMPTS_MAX emAfRejoinAttemptsMax
 #endif
 
@@ -65,20 +72,27 @@ typedef struct {
   // Depending on the find mode setting in the Network Find (Sub-GHz) plugin,
   // this may be limited to 2.4 GHz only, sub-GHz only or both.
   // The rejoining sequence uses a sliding scale:
-  // * moveAttempts == 0 ... the current channel only
-  // * moveAttempts == 1 ... the current page only
-  // * moveAttempts > 1 .... all pages (subject to find mode setting)
-  // NOTE 1: 'page' is needed *only* if sub-GHz support is enabled, as otherwise
-  // "moveAttempts == 1" and "moveAttempts > 1" are functionally identical.
+  // * moveAttempts == 0 ... the current channel on current page only
+  // * moveAttempts == 1 ... preferred channels on current page only
+  // * moveAttempts == 2 ... all channels on current page only
+  // * moveAttempts > 2 .... all pages (subject to find mode setting)
+  // NOTE 1: 'page' is needed *only* if sub-GHz support is enabled,
+  // "moveAttempts > 2" is not used for 2.4 GHz.
   // NOTE 2: if EMBER_AF_REJOIN_ATTEMPTS_MAX is 2 or less, we skip rejoining
-  // on the current page and go from the current channel straight to all pages.
+  // on the preferred channels and all channels of current page and
+  // go from the current channel straight to all pages.
+  // NOTE 3: if EMBER_AF_REJOIN_ATTEMPTS_MAX is 3, we skip rejoining
+  // on all channels of current page and
+  // go from the preferred channel of current page straight to all pages.
   uint8_t page;
 #endif // SL_CATALOG_ZIGBEE_NETWORK_FIND_SUB_GHZ_PRESENT
 } State;
 static State states[EMBER_SUPPORTED_NETWORKS];
 
 #ifdef SL_CATALOG_ZIGBEE_NETWORK_FIND_SUB_GHZ_PRESENT
-  #if EMBER_AF_REJOIN_ATTEMPTS_MAX > 2
+  #if EMBER_AF_REJOIN_ATTEMPTS_MAX > 3
+    #define MOVE_ATTEMPTS_BEFORE_TRYING_ALL_PAGES 3
+  #elif EMBER_AF_REJOIN_ATTEMPTS_MAX > 2
     #define MOVE_ATTEMPTS_BEFORE_TRYING_ALL_PAGES 2
   #else
     #define MOVE_ATTEMPTS_BEFORE_TRYING_ALL_PAGES 1
@@ -90,9 +104,6 @@ static State states[EMBER_SUPPORTED_NETWORKS];
 
 // *****************************************************************************
 // Functions
-#ifdef SL_CATALOG_ZIGBEE_FORM_AND_JOIN_PRESENT
-extern void formAndJoinSetCleanupTimeout(void);
-#endif // SL_CATALOG_ZIGBEE_FORM_AND_JOIN_PRESENT
 
 static void scheduleMoveEvent(void)
 {
@@ -269,6 +280,7 @@ static uint32_t getChannelMask(const State *state)
 {
   PgChan pgChan;
   uint32_t pageMask;
+  bool allChannels = true;
 
   switch (state->moveAttempts) {
     case 0:
@@ -277,10 +289,17 @@ static uint32_t getChannelMask(const State *state)
       return EMBER_PAGE_CHANNEL_MASK_FROM_CHANNEL_NUMBER(pgChan.page, pgChan.channel);
 #if MOVE_ATTEMPTS_BEFORE_TRYING_ALL_PAGES > 1
     case 1:
-      // The second attempt. Try rejoining on the current page.
+      // The second attempt. Try rejoining on preferred channels of current page.
+      allChannels = false;
       pgChan = getNetworkParamsForChannelMask();
       break;
-#endif
+#if MOVE_ATTEMPTS_BEFORE_TRYING_ALL_PAGES > 2
+    case 2:
+      // The third attempt. Try rejoining on all channels of current page.
+      pgChan = getNetworkParamsForChannelMask();
+      break;
+#endif // MOVE_ATTEMPTS_BEFORE_TRYING_ALL_PAGES > 2
+#endif // MOVE_ATTEMPTS_BEFORE_TRYING_ALL_PAGES > 1
     default:
       // Any further attempt. Try rejoining on all pages in turn.
       // The state machine determines the page for this round.
@@ -291,9 +310,9 @@ static uint32_t getChannelMask(const State *state)
   // Ask the Network Find plugin what the channel mask is for the current page.
   // This code is conditionally included only if Network Find (Sub-GHz) exists
   // so this functionality is guaranteed to be present.
-  pageMask = emberAfGetFormAndJoinChannelMask(pgChan.page);
+  pageMask = emberAfFormAndJoinGetChannelMask(pgChan.page, allChannels);
   if (pageMask == 0xFFFFFFFFU) {
-    // emberAfGetFormAndJoinChannelMask() returned an invalid page mask.
+    // emberAfFormAndJoinGetChannelMask() returned an invalid page mask.
     // Return 0 for the current channel only. Rejoin will probably fail,
     // especially on sub-GHz, but since this is an impossible case anyway,
     // it does not really matter. Case included only for MISRA compliance.
@@ -346,15 +365,17 @@ void emberAfPluginEndDeviceSupportMoveNetworkEventHandler(SLXU_UC_EVENT)
                              : EMBER_ALL_802_15_4_CHANNELS_MASK);
 #endif // SL_CATALOG_ZIGBEE_NETWORK_FIND_SUB_GHZ_PRESENT
 
-#ifdef SL_CATALOG_ZIGBEE_FORM_AND_JOIN_PRESENT
-  if (emberFormAndJoinIsScanning()) {
-    // Need to reset the cleanup timeout when initiating a new scan
-    // since a previous scan process may have concluded before the cleanup event
-    // timer ran out, and we don't want it triggering in the middle of our rejoining.
-    formAndJoinSetCleanupTimeout();
-    emberFormAndJoinCleanup(EMBER_SUCCESS);
+#if defined(SL_CATALOG_ZIGBEE_NETWORK_FIND_PRESENT) || defined(SL_CATALOG_ZIGBEE_NETWORK_FIND_SUB_GHZ_PRESENT)
+  if (slxu_zigbee_event_is_active(networkFindTickEventControl)) {
+    // if network find plugin hasn't finished yet then we need to
+    // force it to stop searching for joinable networks.
+    #ifdef UC_BUILD
+    emberAfPluginNetworkFindTickEventHandler(networkFindTickEventControl);
+    #else // !UC_BUILD
+    emberAfPluginNetworkFindTickEventHandler();
+    #endif // UC_BUILD
   }
-#endif // SL_CATALOG_ZIGBEE_FORM_AND_JOIN_PRESENT
+#endif // defined(SL_CATALOG_ZIGBEE_NETWORK_FIND_PRESENT) || defined(SL_CATALOG_ZIGBEE_NETWORK_FIND_SUB_GHZ_PRESENT)
   status = emberFindAndRejoinNetworkWithReason(secure,
                                                channels,
                                                EMBER_AF_REJOIN_DUE_TO_END_DEVICE_MOVE);
@@ -378,6 +399,7 @@ void emberAfPluginEndDeviceSupportMoveNetworkEventHandler(SLXU_UC_EVENT)
     } else if (state->page == 0) {
       // on new GBCS v4.2 specification, chapter 10.6.3 Sub GHz End Devices - functional requirements,
       // we should not try to rejoin on subghz interface if the device has joined on 2.4 interface
+      state->moveAttempts++;
     } else {
       state->page++;
     }

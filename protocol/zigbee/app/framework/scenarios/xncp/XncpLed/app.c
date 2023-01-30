@@ -51,19 +51,19 @@ static void sendLedProtocolCommand(uint8_t command, uint32_t possibleParam)
                            commandPayload,
                            &replyLength,
                            replyPayload);
-  sl_zigbee_app_debug_print("Send custom frame: 0x%02X\n", status);
+  sl_zigbee_app_debug_println("Send custom frame: 0x%02X", status);
 
   // If we were expecting a response, display it.
   if (command == LED_PROTOCOL_COMMAND_GET_FREQ) {
-    sl_zigbee_app_debug_print(" Response (frequency): %d\n",
-                              emberAfGetInt32u(replyPayload,
-                                               LED_PROTOCOL_RESPONSE_INDEX,
-                                               replyLength));
+    sl_zigbee_app_debug_println(" Response (frequency): %d",
+                                emberAfGetInt32u(replyPayload,
+                                                 LED_PROTOCOL_RESPONSE_INDEX,
+                                                 replyLength));
   } else if (command == LED_PROTOCOL_COMMAND_GET_LED) {
     uint8_t ledState = replyPayload[LED_PROTOCOL_RESPONSE_INDEX];
-    sl_zigbee_app_debug_print("  Response (state): %d (%s)\n",
-                              ledState,
-                              ledStateNames[ledState]);
+    sl_zigbee_app_debug_println("  Response (state): %d (%s)",
+                                ledState,
+                                ledStateNames[ledState]);
   }
 }
 
@@ -87,7 +87,7 @@ void setLedCommand(sl_cli_command_arg_t *arguments)
 {
   uint8_t command = sl_cli_get_argument_uint8(arguments, 0);
   if (command > LED_PROTOCOL_COMMAND_STROBE_LED) {
-    sl_zigbee_app_debug_print("Invalid LED command: 0x%02X\n", command);
+    sl_zigbee_app_debug_println("Invalid LED command: 0x%02X", command);
   } else {
     sendLedProtocolCommand(command, 0); // no param
   }
@@ -100,7 +100,7 @@ void getInfoCommand(sl_cli_command_arg_t *arguments)
 
   status = ezspGetXncpInfo(&manufacturerId, &version);
 
-  sl_zigbee_app_debug_print("Get XNCP info: status: 0x%02X\n", status);
-  sl_zigbee_app_debug_print("  manufacturerId: 0x%02X, version: 0x%02X\n",
-                            manufacturerId, version);
+  sl_zigbee_app_debug_println("Get XNCP info: status: 0x%02X", status);
+  sl_zigbee_app_debug_println("  manufacturerId: 0x%02X, version: 0x%02X",
+                              manufacturerId, version);
 }

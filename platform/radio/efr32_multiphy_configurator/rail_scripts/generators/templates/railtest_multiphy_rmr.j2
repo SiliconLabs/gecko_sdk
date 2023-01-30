@@ -171,7 +171,7 @@
   {%- for byte in (entry.maxPower|uint16ToBytes) -%}
     {{" "}}{{byte|int}}
   {%- endfor -%}
-{{"\n"}}writeRmrStructure {{ rmr_structs.channelConfigEntry }} 24 4 {{entry.entryType|int}} 0 0 0 {{"\n"}}
+{{"\n"}}writeRmrStructure {{ rmr_structs.channelConfigEntry }} 24 4 {{entry.entryType|int}} 0 0 0{{"\n"}}
   {%- if len(modemConfigRefs) > 0 -%}
     {%- for reference in modemConfigRefs -%}
       updateConfigurationPointer

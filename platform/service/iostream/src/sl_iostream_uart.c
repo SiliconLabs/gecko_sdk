@@ -81,7 +81,6 @@ static bool get_auto_cr_lf(void *context);
 #if defined(SL_CATALOG_POWER_MANAGER_PRESENT)
 #if !defined(SL_CATALOG_KERNEL_PRESENT)
 static sl_power_manager_on_isr_exit_t sleep_on_isr_exit(void *context);
-static bool is_ok_to_sleep(void *context);
 #endif
 
 static void set_rx_energy_mode_restriction(void *context,
@@ -101,12 +100,15 @@ static void scan_for_ctrl_char(sl_iostream_uart_context_t * uart_context);
 
 static sl_status_t nolock_uart_write(void *context,
                                      const void *buffer,
-                                     size_t buffer_length,
-                                     bool no_wait);
+                                     size_t buffer_length);
 
-static bool uart_handle_rx_dma_complete(unsigned int chan,
-                                        unsigned int seq,
-                                        void* user_param);
+static bool dma_irq_handler(unsigned int chan,
+                            unsigned int seq,
+                            void* user_param);
+
+__STATIC_INLINE uint8_t* get_write_ptr(const sl_iostream_uart_context_t* uart_context);
+
+static void update_ring_buffer(sl_iostream_uart_context_t *uart_context);
 
 static size_t read_rx_buffer(sl_iostream_uart_context_t * uart_context,
                              uint8_t * buffer,
@@ -124,6 +126,7 @@ sl_status_t sli_iostream_uart_context_init(sl_iostream_uart_t *uart,
                                            sl_iostream_uart_config_t *config,
                                            sl_status_t (*tx)(void *context, char c),
                                            void (*tx_completed)(void *context, bool enable),
+                                           void (*set_next_byte_detect)(void *context, bool enable),
                                            sl_status_t (*deinit)(void *context),
                                            uint8_t rx_em_req,
                                            uint8_t tx_em_req)
@@ -135,17 +138,18 @@ sl_status_t sli_iostream_uart_context_init(sl_iostream_uart_t *uart,
   // Configure iostream struct and context
   memset(context, 0, sizeof(*context));
   context->dma.cfg = config->dma_cfg;
-  context->dma.data_available = false;
+  context->rx_data_available = false;
   context->rx_buffer = config->rx_buffer;
   context->rx_buffer_len = config->rx_buffer_length;
-  context->read_ptr = context->rx_buffer;
+  context->rx_read_ptr = context->rx_buffer;
   context->lf_to_crlf = config->lf_to_crlf;
   context->sw_flow_control = config->sw_flow_control;
-  context->ctrl_char_scan_ptr = context->read_ptr;
+  context->ctrl_char_scan_ptr = context->rx_read_ptr;
   context->xon = true;
   context->remote_xon = true;
   context->tx = tx;
   context->tx_completed = tx_completed;
+  context->set_next_byte_detect = set_next_byte_detect;
   context->deinit = deinit;
   context->rx_irq_number = config->rx_irq_number;
   #if defined(SL_CATALOG_POWER_MANAGER_PRESENT)
@@ -201,11 +205,11 @@ sl_status_t sli_iostream_uart_context_init(sl_iostream_uart_t *uart,
 #endif
 
 #if defined(SL_CATALOG_POWER_MANAGER_PRESENT)
-#if !defined(SL_CATALOG_KERNEL_PRESENT)
+  #if !defined(SL_CATALOG_KERNEL_PRESENT)
   uart->sleep_on_isr_exit = sleep_on_isr_exit;
-  uart->is_ok_to_sleep = is_ok_to_sleep;
   context->sleep = SL_POWER_MANAGER_IGNORE;
-#endif
+  #endif // SL_CATALOG_KERNEL_PRESENT
+
   uart->set_rx_energy_mode_restriction = set_rx_energy_mode_restriction;
   uart->get_rx_energy_mode_restriction = get_rx_energy_mode_restriction;
   context->tx_em = (sl_power_manager_em_t)tx_em_req;
@@ -215,20 +219,17 @@ sl_status_t sli_iostream_uart_context_init(sl_iostream_uart_t *uart,
   set_rx_energy_mode_restriction(context, config->rx_when_sleeping);
   NVIC_ClearPendingIRQ(config->tx_irq_number);
   NVIC_EnableIRQ(config->tx_irq_number);
-#endif
+#endif // SL_CATALOG_POWER_MANAGER_PRESENT
 
-  //Enable the DMA for 1 byte to detect if data is available
-  context->dma.active_desc.dst = context->rx_buffer;
-  context->dma.active_desc.count = 1;
-  context->read_ptr = context->rx_buffer;
+  // Start the (L)DMA to handle RXDATAV
   ecode = DMADRV_PeripheralMemory(context->dma.channel,
                                   context->dma.cfg.peripheral_signal,
-                                  context->dma.active_desc.dst,
+                                  context->rx_buffer,
                                   context->dma.cfg.src,
                                   true,
-                                  1,
-                                  context->dma.cfg.size,
-                                  uart_handle_rx_dma_complete,
+                                  context->rx_buffer_len,
+                                  dmadrvDataSize1,
+                                  dma_irq_handler,
                                   context);
 
   if (ecode != ECODE_OK) {
@@ -263,76 +264,6 @@ static sl_power_manager_on_isr_exit_t sleep_on_isr_exit(void *context)
     return SL_POWER_MANAGER_IGNORE;
   }
 }
-
-/**************************************************************************//**
- * @brief   Checks if IOStream is ready for sleep.
- *****************************************************************************/
-static bool is_ok_to_sleep(void *context)
-{
-  bool dma_active;
-  Ecode_t ecode;
-  size_t xfercnt;
-  sl_iostream_uart_context_t *uart_context = (sl_iostream_uart_context_t *)context;
-  unsigned int channel = uart_context->dma.channel;
-
-  // Pause transfer for safety when checking DMA status
-  ecode = DMADRV_PauseTransfer(channel);
-  EFM_ASSERT(ecode == ECODE_OK);
-  ecode = DMADRV_TransferActive(channel, &dma_active);
-  EFM_ASSERT(ecode == ECODE_OK);
-
-  {
-    // DMA is stopped, need to read data from IOStream or data will be dropped and new data will not
-    // wakeup the core.
-    if (dma_active == false) {
-      // Call resume transfer even if the DMA is inactive, or else it won't be resumed
-      // at the next start.
-      ecode = DMADRV_ResumeTransfer(channel);
-      EFM_ASSERT(ecode == ECODE_OK);
-      return false;
-    }
-  }
-
-  // DMA is active. Arm it for a single byte to be able to detect new data.
-  {
-    // Stop the DMA
-    ecode = DMADRV_StopTransfer(channel);
-    EFM_ASSERT(ecode == ECODE_OK);
-
-    #if defined(LDMA_PRESENT)
-    xfercnt = 1 + ((LDMA->CH[channel].CTRL & _LDMA_CH_CTRL_XFERCNT_MASK) >> _LDMA_CH_CTRL_XFERCNT_SHIFT);
-    #elif defined(DMA_PRESENT)
-    xfercnt = 1 + ((DMA->CH[channel].CTRL & _DMA_CTRL_N_MINUS_1_MASK) >> _DMA_CTRL_N_MINUS_1_SHIFT);
-    #endif
-
-    // Advance the DMA by the number of bytes already received
-    EFM_ASSERT(xfercnt <= uart_context->dma.active_desc.count);
-    xfercnt = (uart_context->dma.active_desc.count - xfercnt);
-    uart_context->dma.active_desc.dst += xfercnt;
-
-    // Arm for a single byte tranfer to detect next byte
-    uart_context->dma.active_desc.count = 1;
-    xfercnt = uart_context->dma.active_desc.count; // Needed to avoid volatile access warning with IAR
-
-    // Prep the DMA
-    ecode = DMADRV_PeripheralMemory(channel,
-                                    uart_context->dma.cfg.peripheral_signal,
-                                    uart_context->dma.active_desc.dst,
-                                    uart_context->dma.cfg.src,
-                                    true,
-                                    xfercnt,
-                                    uart_context->dma.cfg.size,
-                                    uart_handle_rx_dma_complete,
-                                    uart_context
-                                    );
-    EFM_ASSERT(ecode == ECODE_OK);
-  }
-  // Resume the transfer
-  ecode = DMADRV_ResumeTransfer(channel);
-  EFM_ASSERT(ecode == ECODE_OK);
-  return true;
-}
-
 #endif
 
 /**************************************************************************//**
@@ -426,7 +357,7 @@ static void set_read_block(void *context,
       EFM_ASSERT(uart_context->read_signal != NULL);
 
       // Set the semaphore to reflect the current state
-      if (uart_context->dma.data_available == true) {
+      if (uart_context->rx_data_available == true) {
         status = osSemaphoreRelease(uart_context->read_signal);
         EFM_ASSERT(status == osOK);
       }
@@ -539,7 +470,8 @@ static sl_status_t uart_deinit(void *stream)
   EFM_ASSERT(ecode == ECODE_OK);
 
   // Try to deinit the DMADRV
-  DMADRV_DeInit();
+  ecode = DMADRV_DeInit();
+  EFM_ASSERT(ecode == ECODE_OK || ecode == ECODE_EMDRV_DMADRV_IN_USE);
 
   // Clear iostream struct and context
   uart->stream.context = NULL;
@@ -558,96 +490,51 @@ static sl_status_t uart_deinit(void *stream)
  ******************************************************************************/
 static void scan_for_ctrl_char(sl_iostream_uart_context_t * uart_context)
 {
-  uint8_t *write_ptr;
-  int remaining;
-  Ecode_t ecode;
-  size_t len;
+  uint8_t *newest_byte, *current_byte;
 
-  char *control_char = NULL;
-  char *xon = NULL;
-  char *xoff = NULL;
-
-  if (uart_context->dma.data_available == false) {
-    EFM_ASSERT(uart_context->ctrl_char_scan_ptr == uart_context->read_ptr);
+  // No data to be scanned
+  if (uart_context->rx_data_available == false) {
+    EFM_ASSERT(uart_context->ctrl_char_scan_ptr == uart_context->rx_read_ptr);
     return;
   }
 
-  ecode = DMADRV_TransferRemainingCount(uart_context->dma.channel, &remaining);
+  #if defined(DMA_PRESENT)
+  Ecode_t ecode = DMADRV_PauseTransfer(uart_context->dma.channel);
   EFM_ASSERT(ecode == ECODE_OK);
+  #endif // DMA_PRESENT
 
-  // When DMA is full, check only the newest character for a ctrl char.
-  if (uart_context->dma.active_desc.count == 0) {
-    // The newest character is the one just behind the write_ptr
-    uint8_t *newest_byte;
-    write_ptr = uart_context->dma.active_desc.dst;
-    if (write_ptr == uart_context->rx_buffer) {
-      newest_byte = uart_context->rx_buffer + uart_context->rx_buffer_len;
-    } else {
-      newest_byte = write_ptr - 1;
-    }
+  // Get the newest byte received
+  newest_byte = get_write_ptr(uart_context) - 1;
 
-    if (*newest_byte == UARTXON) {
-      uart_context->xon = true;
-    } else if (*newest_byte == UARTXOFF) {
-      uart_context->xon = false;
-    }
+  #if defined(DMA_PRESENT)
+  ecode = DMADRV_ResumeTransfer(uart_context->dma.channel);
+  EFM_ASSERT(ecode == ECODE_OK);
+  #endif // DMA_PRESENT
+
+  // Wrap newest byte ptr around the ring buffer
+  if (newest_byte < uart_context->rx_buffer) {
+    newest_byte = uart_context->rx_buffer + (uart_context->rx_buffer_len - 1);
   }
-  // When DMA is not full, scan all data between the write_ptr and the scan_ptr
-  else {
-    write_ptr = uart_context->dma.active_desc.dst;
-    write_ptr += (uart_context->dma.active_desc.count - remaining);
 
-    while (write_ptr != uart_context->ctrl_char_scan_ptr) {
-      if (write_ptr > uart_context->ctrl_char_scan_ptr) {
-        // [   RX Data |  ]
-        //    ^         ^
-        // scan_ptr   write_ptr
-        // Scan between write_ptr and scan_ptr
-        len = write_ptr - uart_context->ctrl_char_scan_ptr;
-        xon = (char*) sl_memrchr(uart_context->ctrl_char_scan_ptr, (char) UARTXON, len);
-        xoff = (char*) sl_memrchr(uart_context->ctrl_char_scan_ptr, (char) UARTXOFF, len);
-        write_ptr = uart_context->ctrl_char_scan_ptr;
-      } else {
-        // [Newest Data  | Oldest Data ]
-        //            ^            ^
-        //    write_ptr     scan_ptr
-        // Scan between write_ptr and rx_buffer origin
-        len = write_ptr - uart_context->rx_buffer;
-        xon = (char*) sl_memrchr(uart_context->rx_buffer, (char) UARTXON, len);
-        xoff = (char*) sl_memrchr(uart_context->rx_buffer, (char) UARTXOFF, len);
-        write_ptr = uart_context->rx_buffer + uart_context->rx_buffer_len;
-      }
+  // Scan the entire buffer until we reach the position of the last scan,
+  // or until we find the newest control character
+  current_byte = newest_byte;
+  while (current_byte != uart_context->ctrl_char_scan_ptr) {
+    // Found XOFF character
+    if (*current_byte == UARTXON || *current_byte == UARTXOFF) {
+      sl_atomic_store(uart_context->xon, (*current_byte == UARTXON));
+      break;
+    }
 
-      // Process the ctrl char if found
-      if (xon != NULL) {
-        control_char = xon;
-      }
-      if (xoff != NULL) {
-        if (xon != NULL) {
-          // Found two ctrl characters, get the more recent one
-          control_char = xon > xoff ? xon : xoff;
-        } else {
-          control_char = xoff;
-        }
-      }
-
-      if (control_char != NULL) {
-        // Make the most recent control character active
-        uart_context->xon = control_char == xon ? true : false;
-        break;
-      }
+    // Decrement and wrap current byte ptr around the ring buffer
+    current_byte -= 1;
+    if (current_byte < uart_context->rx_buffer) {
+      current_byte = uart_context->rx_buffer + (uart_context->rx_buffer_len - 1);
     }
   }
 
-  // Set ctrl_char_scan_end_ptr to the most recent received byte, to avoid
-  // re-scanning the same area on subsequent call
-  uart_context->ctrl_char_scan_ptr = uart_context->dma.active_desc.dst;
-  uart_context->ctrl_char_scan_ptr += (uart_context->dma.active_desc.count - remaining);
-  // Wrap the ctrl_char_scan_ptr around
-  if (uart_context->ctrl_char_scan_ptr >= (uart_context->rx_buffer + uart_context->rx_buffer_len)) {
-    uart_context->ctrl_char_scan_ptr = uart_context->rx_buffer + (uart_context->ctrl_char_scan_ptr
-                                                                  - (uart_context->rx_buffer + uart_context->rx_buffer_len));
-  }
+  // Update scan pointer
+  uart_context->ctrl_char_scan_ptr = newest_byte;
 }
 
 /***************************************************************************//**
@@ -655,8 +542,7 @@ static void scan_for_ctrl_char(sl_iostream_uart_context_t * uart_context)
  ******************************************************************************/
 static sl_status_t nolock_uart_write(void *context,
                                      const void *buffer,
-                                     size_t buffer_length,
-                                     bool no_wait)
+                                     size_t buffer_length)
 {
   sl_iostream_uart_context_t *uart_context = (sl_iostream_uart_context_t *)context;
   char *c = (char *)buffer;
@@ -679,7 +565,14 @@ static sl_status_t nolock_uart_write(void *context,
 
   uint32_t i = 0;
   while (i < buffer_length) {
-    if (no_wait) {
+    bool xon = false;
+    if (uart_context->sw_flow_control == true) {
+      CORE_ENTER_ATOMIC();
+      scan_for_ctrl_char(uart_context);
+      CORE_EXIT_ATOMIC();
+    }
+    sl_atomic_load(xon, uart_context->xon);
+    if (xon) {
       if (lf_to_crlf == true) {
         if (*c == '\n') {
           status = uart_context->tx(uart_context, '\r');
@@ -691,28 +584,7 @@ static sl_status_t nolock_uart_write(void *context,
       }
       c++;
       i++;
-    } else {
-      bool xon = false;
-      if (uart_context->sw_flow_control == true) {
-        CORE_ENTER_ATOMIC();
-        scan_for_ctrl_char(uart_context);
-        CORE_EXIT_ATOMIC();
-      }
-      sl_atomic_load(xon, uart_context->xon);
-      if (xon || no_wait) {
-        if (lf_to_crlf == true) {
-          if (*c == '\n') {
-            status = uart_context->tx(uart_context, '\r');
-          }
-        }
-        status = uart_context->tx(uart_context, *c);
-        if (status != SL_STATUS_OK) {
-          return status;
-        }
-        c++;
-        i++;
-      }       // Active wait if xon is false
-    }
+    }         // Active wait if xon is false
   }
 
 #if defined(SL_CATALOG_POWER_MANAGER_PRESENT) && !defined(SL_IOSTREAM_UART_FLUSH_TX_BUFFER)
@@ -742,7 +614,7 @@ static sl_status_t uart_write(void *context,
   }
 #endif
 
-  nolock_uart_write(context, buffer, buffer_length, false);
+  nolock_uart_write(context, buffer, buffer_length);
 
 #if (defined(SL_CATALOG_KERNEL_PRESENT))
   if (osKernelGetState() == osKernelRunning) {
@@ -772,7 +644,7 @@ static sl_status_t uart_read(void *context,
     status = osMutexAcquire(uart_context->read_lock, osWaitForever);
 
     if (status != osOK) {
-      return SL_STATUS_INVALID_STATE; // Can happen if a task deinit and another try to read at sametime
+      return SL_STATUS_INVALID_STATE;   // Can happen if a task deinit and another try to read at sametime
     }
 
     if (uart_context->block) {
@@ -780,16 +652,17 @@ static sl_status_t uart_read(void *context,
     }
   }
   #endif
+
   CORE_ENTER_ATOMIC();
   *bytes_read = read_rx_buffer(uart_context, (uint8_t *) buffer, (size_t)buffer_length);
   CORE_EXIT_ATOMIC();
 
-   #if (defined(SL_CATALOG_KERNEL_PRESENT))
+  #if (defined(SL_CATALOG_KERNEL_PRESENT))
   if (osKernelGetState() == osKernelRunning) {
     // Bypass lock if we print before the kernel is running
     EFM_ASSERT(osMutexRelease(uart_context->read_lock) == osOK);
   }
-   #endif
+  #endif
 
   if (*bytes_read == 0) {
     return SL_STATUS_EMPTY;
@@ -799,153 +672,177 @@ static sl_status_t uart_read(void *context,
 }
 
 /***************************************************************************//**
- * DMA complete interrupt handle.
+ * Updates the (L)DMA to re-use whatever space is in the ring buffer.
+ * Always returns false (no loop, check DMADRV IRQ callbacks documentation
+ * for more details).
  ******************************************************************************/
-static bool uart_handle_rx_dma_complete(unsigned int chan, unsigned int seq, void* user_param)
+static bool dma_irq_handler(unsigned int chan, unsigned int seq, void* user_param)
 {
-  // Finished the Periph->mem xfer, re-arm the dma for the next available descriptor
   (void) seq;
-  Ecode_t ecode;
+  sl_iostream_uart_context_t *uart_context = (sl_iostream_uart_context_t *)user_param;
   uint8_t *write_ptr;
-  uint8_t *dst;
-  size_t count;
+  Ecode_t ecode;
+  size_t available_space;
 
-  sl_iostream_uart_context_t *uart_context = (sl_iostream_uart_context_t*)user_param;
-  #if defined(SL_CATALOG_KERNEL_PRESENT)
-  bool unlock_read = false;
-  #elif defined(SL_CATALOG_POWER_MANAGER_PRESENT)
-  // Wakeup from sleep to give a chance to the system to read the available data. If the
-  // data isn't entirely read, the system will go back to sleep.
-  uart_context->sleep = SL_POWER_MANAGER_WAKEUP;
+  // Compute next write position
+  {
+    // DMA is stopped, no need to pause before calling get_write_ptr()
+    write_ptr = get_write_ptr(uart_context);
+
+    // Wrap the DMA write pointer around the rx_buffer
+    if (write_ptr == (uart_context->rx_buffer + uart_context->rx_buffer_len)) {
+      write_ptr = uart_context->rx_buffer;
+    }
+  }
+
+  // Compute available space
+  if (uart_context->rx_read_ptr >= write_ptr) {
+    available_space = (size_t)(uart_context->rx_read_ptr - write_ptr);
+  } else {
+    available_space = (size_t)(write_ptr - (uart_context->rx_buffer + uart_context->rx_buffer_len));
+  }
+
+  // Space available in the RX buffer
+  if (available_space > 0) {
+    // Start the DMA transfer
+    ecode = DMADRV_PeripheralMemory(chan,
+                                    uart_context->dma.cfg.peripheral_signal,
+                                    write_ptr,
+                                    uart_context->dma.cfg.src,
+                                    true,
+                                    available_space,
+                                    dmadrvDataSize1,
+                                    dma_irq_handler,
+                                    uart_context);
+    EFM_ASSERT(ecode == ECODE_OK);
+  }
+  // RX buffer is full
+  else {
+    uart_context->rx_buffer_full = true;
+
+    // Send first XOFF. Subsequent XOFFs will be sent by the stream's IRQ handler.
+    if (uart_context->sw_flow_control) {
+      sl_atomic_store(uart_context->remote_xon, false);
+      uart_context->tx(uart_context, UARTXOFF);
+      // Enable the RXDATAV IRQ to check if we receive a control character when buffer is full
+      uart_context->set_next_byte_detect(uart_context, true);
+    }
+  }
+  return false;
+}
+
+/***************************************************************************//**
+ * Get the next byte to be written to by the (L)DMA.
+ * When using a non-linked DMA, you should pause the DMA before calling to ensure
+ * the validity of the result.
+ ******************************************************************************/
+__STATIC_INLINE uint8_t* get_write_ptr(const sl_iostream_uart_context_t * uart_context)
+{
+  uint8_t* dst;
+
+  #if defined(DMA_PRESENT)
+  int remaining;
+  Ecode_t ecode;
+
+  ecode = DMADRV_TransferRemainingCount(uart_context->dma.channel, &remaining);
+  EFM_ASSERT(ecode == ECODE_OK);
+
+  DMA_DESCRIPTOR_TypeDef* desc = ((DMA_DESCRIPTOR_TypeDef *)(DMA->CTRLBASE)) + uart_context->dma.channel;
+  dst = (uint8_t*)desc->DSTEND - remaining;
+
+  #elif defined(LDMA_PRESENT)
+  dst = (uint8_t *)LDMA->CH[uart_context->dma.channel].DST;
+
+  #else
+  #error Missing (L)DMA peripheral
   #endif
 
-  // Check that active descriptor was valid
-  EFM_ASSERT((uart_context->dma.active_desc.dst >= uart_context->rx_buffer)
-             && (uart_context->dma.active_desc.dst < (uart_context->rx_buffer + uart_context->rx_buffer_len)));
+  // Check for buffer over/underflow
+  EFM_ASSERT(dst <= (uart_context->rx_buffer + uart_context->rx_buffer_len)
+             && dst >= uart_context->rx_buffer);
 
-  // Check if this is the first byte detection descriptor
-  if (uart_context->dma.data_available == false) {
-    // Detected first byte, go to next byte
-    uart_context->dma.active_desc.dst += 1;
-    uart_context->dma.active_desc.count -= 1;
+  return dst;
+}
 
-    // Set the data_available flag
-    uart_context->dma.data_available = true;
-    #if defined(SL_CATALOG_KERNEL_PRESENT)
-    unlock_read = true;
-    #endif
-  }
-  // Reached the end of the active descriptor, check for available space from the read_ptr
-  // Calculate write_ptr
-  write_ptr = uart_context->dma.active_desc.dst;
-  write_ptr += uart_context->dma.active_desc.count;
+/***************************************************************************//**
+ * Update ring buffer pointers and DMA descriptor.
+ ******************************************************************************/
+static void update_ring_buffer(sl_iostream_uart_context_t * uart_context)
+{
+  Ecode_t ecode;
+  bool dma_done, irq_pending;
+  uint8_t *write_ptr;
 
-  // Check for overflow
-  EFM_ASSERT(write_ptr >= uart_context->rx_buffer
-             && write_ptr <= (uart_context->rx_buffer + uart_context->rx_buffer_len));
+  // Made space in the buffer
+  uart_context->rx_buffer_full = false;
 
-  if (write_ptr == (uart_context->rx_buffer + uart_context->rx_buffer_len)) {
-    // DMA Reached the end of the UART RX Buffer
-    // [Obselte data | Oldest data ]
-    //                ^             ^
-    //         read_ptr     write_ptr
-    // Start a transfer from rx_buffer to read_ptr
-    uart_context->dma.active_desc.dst = uart_context->rx_buffer;
-    uart_context->dma.active_desc.count = (size_t)(uart_context->read_ptr - uart_context->rx_buffer);
-  } else if (write_ptr <= uart_context->read_ptr) {
-    // DMA stopped while behind the read_ptr
-    // [Newest Data | Oldest Data]
-    //            ---^
-    //       write_ptr
-    //        read_ptr
-    // Start a tranfer from write_ptr to read_ptr
-    uart_context->dma.active_desc.dst = write_ptr;
-    uart_context->dma.active_desc.count = uart_context->read_ptr - write_ptr;
-  } else {
-    // DMA stopped while ahead of read_ptr
-    // [Valid Data | Obselete Data]
-    //  ^           ^
-    //  read_ptr    write_ptr
-    // Start a tranfer from write_ptr to the end of the rx_buffer
-    uart_context->dma.active_desc.dst = write_ptr;
-    uart_context->dma.active_desc.count = (uart_context->rx_buffer + uart_context->rx_buffer_len) - write_ptr;
-  }
-  write_ptr = uart_context->dma.active_desc.dst;
-  write_ptr += uart_context->dma.active_desc.count;
-  EFM_ASSERT(write_ptr >=  uart_context->rx_buffer
-             && write_ptr <= (uart_context->rx_buffer + uart_context->rx_buffer_len));
+  // Pause the DMA to update
+  ecode = DMADRV_PauseTransfer(uart_context->dma.channel);
+  EFM_ASSERT(ecode == ECODE_OK);
 
-  // This means we just filled up the DMA. In SWFlowControl, make sure there is always at least one
-  // byte available in the DMA to detect any SWFlowControl characters received from the remote.
-  if (uart_context->sw_flow_control == true && uart_context->dma.active_desc.count == 0) {
-    // DMA is full, send the first UARTXOFF.
-    // If more data is received and the peripheral's FIFO overflows, additionnal
-    // UARTXOFFs will be sent in the peripheral's IRQ handler
-    sl_atomic_store(uart_context->remote_xon, false);
-    char c = UARTXOFF;
-    nolock_uart_write(uart_context, &c, sizeof(c), true);
+  // Get next byte to be written by DMA
+  write_ptr = get_write_ptr(uart_context);
 
-    // Set the DMA to overwrite the last received character, so that we can always
-    // receive a control character
-    if (uart_context->dma.active_desc.dst == uart_context->rx_buffer) {
-      // dst just wrapped around the buffer
-      dst = uart_context->rx_buffer + (uart_context->rx_buffer_len - 1);
-    } else {
-      dst = uart_context->dma.active_desc.dst - 1;
+  // All data has been read, reset the DMA to re-use all the buffer
+  if (write_ptr == uart_context->rx_read_ptr) {
+    // Reset DMA to the start of the UART Rx Buffer and all control pointers
+    uart_context->rx_data_available = false;
+    write_ptr = uart_context->rx_buffer;
+    uart_context->rx_read_ptr = write_ptr;
+    if (uart_context->sw_flow_control) {
+      uart_context->ctrl_char_scan_ptr = uart_context->rx_read_ptr;
     }
 
-    count = 1;
-    ecode = DMADRV_PeripheralMemory(chan,
+    // Enable RXDATAV IRQ to signal next incoming byte
+    uart_context->set_next_byte_detect(uart_context, true);
+
+    // Start new transfer for all rx_buffer
+    ecode = DMADRV_PeripheralMemory(uart_context->dma.channel,
                                     uart_context->dma.cfg.peripheral_signal,
-                                    dst,
+                                    write_ptr,
                                     uart_context->dma.cfg.src,
                                     true,
-                                    count,
-                                    uart_context->dma.cfg.size,
-                                    uart_handle_rx_dma_complete,
-                                    uart_context
-                                    );
+                                    uart_context->rx_buffer_len,
+                                    dmadrvDataSize1,
+                                    dma_irq_handler,
+                                    uart_context);
     EFM_ASSERT(ecode == ECODE_OK);
   }
-  // Start the next transfer, if available
-  else if (uart_context->dma.active_desc.count > 0) {
-    dst = uart_context->dma.active_desc.dst;
-    count = uart_context->dma.active_desc.count;
-    ecode = DMADRV_PeripheralMemory(chan,
-                                    uart_context->dma.cfg.peripheral_signal,
-                                    dst,
-                                    uart_context->dma.cfg.src,
-                                    true,
-                                    count,
-                                    uart_context->dma.cfg.size,
-                                    uart_handle_rx_dma_complete,
-                                    uart_context
-                                    );
+  // Data still available in buffer
+  else {
+    uart_context->rx_data_available = true;
+
+    // Unlock read (only in Kernel)
+    #if defined(SL_CATALOG_KERNEL_PRESENT)
+    if (uart_context->block) {
+      EFM_ASSERT(uart_context->rx_data_available);     // Should always be data available here
+      if (osSemaphoreGetCount(uart_context->read_signal) == 0) {
+        osStatus_t status = osSemaphoreRelease(uart_context->read_signal);
+        EFM_ASSERT(status == osOK);
+      }
+    }
+    #endif // SL_CATALOG_KERNEL_PRESENT
+
+    // Check if DMA is still active
+    ecode = DMADRV_TransferDone(uart_context->dma.channel, &dma_done);
     EFM_ASSERT(ecode == ECODE_OK);
 
-    if (uart_context->sw_flow_control == true) {
-      if (uart_context->remote_xon == false) {
-        // UART was in UARTXOFF state, send UARTXON
-        sl_atomic_store(uart_context->remote_xon, true);
-        char c = UARTXON;
-        nolock_uart_write(uart_context, &c, sizeof(c), true);
+    // DMA stopped because it was full
+    if (dma_done) {
+      // Check if IRQ is pending
+      ecode = DMADRV_TransferCompletePending(uart_context->dma.channel, &irq_pending);
+      EFM_ASSERT(ecode == ECODE_OK);
+
+      // No IRQ pending
+      if (irq_pending == false) {
+        // Call IRQ handler to start a new transfer over available space
+        dma_irq_handler(uart_context->dma.channel, 0, uart_context);
       }
     }
   }
-
-  #if defined(SL_CATALOG_KERNEL_PRESENT)
-  // Release the semaphore to unlock the read_thread.
-  if (uart_context->block == true && unlock_read == true) {
-    osKernelState_t state = osKernelGetState();
-    osStatus_t status;
-    if ((state == osKernelRunning) || (state == osKernelLocked)) {
-      status = osSemaphoreRelease(uart_context->read_signal);
-      EFM_ASSERT(status == osOK);
-    }
-  }
-  #endif
-
-  return true;
+  // Resume DMA
+  ecode = DMADRV_ResumeTransfer(uart_context->dma.channel);
+  EFM_ASSERT(ecode == ECODE_OK);
 }
 
 /***************************************************************************//**
@@ -960,248 +857,108 @@ static size_t read_rx_buffer(sl_iostream_uart_context_t * uart_context,
     return 0;
   }
 
-  if (uart_context->dma.data_available == false) {
+  if (uart_context->rx_data_available == false) {
     #if defined(SL_CATALOG_KERNEL_PRESENT)
     if (uart_context->block) {
-      EFM_ASSERT(false); // Should always have data in blocking mode
+      EFM_ASSERT(false);     // Should always have data in blocking mode
     }
     #endif
     return 0;
   }
 
-  uint8_t *write_ptr;
-  bool dma_inactive;
-  int remaining;
+  uint8_t *write_ptr;     // Pointer to the next byte to be written by the (L)DMA
   Ecode_t ecode;
-  uint8_t *dst;
-  size_t count;
+  bool dma_done;          // Is the (L)DMA done
+  size_t read_size = 0;     // Number of bytes processed from the Rx Buffer
+  size_t ret_val = 0;     // Number of bytes written to the user buffer
 
-  unsigned int channel = uart_context->dma.channel;
-  size_t read_size = 0;
-  size_t num_bytes_available = 0;
+  // Compute the read_size
+  {
+    #if defined(DMA_PRESENT)
+    ecode = DMADRV_PauseTransfer(uart_context->dma.channel);
+    EFM_ASSERT(ecode == ECODE_OK);
+    #endif // DMA_PRESENT
 
-  uint8_t *read_start = uart_context->read_ptr;
-  // Get tranfer remaining from DMADRV
-  ecode = DMADRV_PauseTransfer(channel);   // Pause for safety
-  EFM_ASSERT(ecode == ECODE_OK);
-  ecode = DMADRV_TransferRemainingCount(channel, &remaining);
-  EFM_ASSERT(ecode == ECODE_OK);
-  ecode = DMADRV_TransferDone(channel, &dma_inactive);
-  EFM_ASSERT(ecode == ECODE_OK);
+    write_ptr = get_write_ptr(uart_context);
 
-  // Calculate write_ptr
-  write_ptr = uart_context->dma.active_desc.dst;
-  write_ptr += (uart_context->dma.active_desc.count - remaining);
+    #if defined(DMA_PRESENT)
+    ecode = DMADRV_ResumeTransfer(uart_context->dma.channel);
+    EFM_ASSERT(ecode == ECODE_OK);
+    #endif // DMA_PRESENT
 
-  // Calculate the number of bytes available for read
-  if (write_ptr > read_start) {
-    num_bytes_available = write_ptr - read_start;
-  } else {
-    num_bytes_available = (uart_context->rx_buffer + uart_context->rx_buffer_len) - read_start;
-  }
+    if (write_ptr == uart_context->rx_read_ptr) {
+      // (L)DMA is wrapped over rx_read_ptr, make sure it is stopped
+      ecode = DMADRV_TransferDone(uart_context->dma.channel, &dma_done);
+      EFM_ASSERT(ecode == ECODE_OK);
 
-  EFM_ASSERT(num_bytes_available > 0);
-
-  // Calculate size of read in this iteration
-  if (num_bytes_available > buffer_len) {
-    // User buffer not big enough to read all data, data will still be available after read
-    read_size = buffer_len;
-  } else {
-    // User buffer big enough to read all data in this iteration
-    read_size = num_bytes_available;
-  }
-
-  // Update the DMA to reuse the available space
-  if (dma_inactive) {
-    if (write_ptr == (uart_context->rx_buffer + uart_context->rx_buffer_len)) {
-      // DMA stopped at the end of the buffer
-      // [Obselete data | Newest Data]
-      //                 ^           ^
-      //          read_start   write_ptr
-      // Start a transfer over the obselete data
-      uart_context->dma.active_desc.dst = uart_context->rx_buffer;
-      uart_context->dma.active_desc.count = (size_t)(read_start - uart_context->rx_buffer) + read_size;
-      write_ptr = uart_context->dma.active_desc.dst;
-    } else if (write_ptr <= read_start) {
-      // DMA stopped while writing behind the read_start.
-      // [Newest Data | Oldest Data]
-      //             ^ ^
-      //     write_ptr read_start
-      // Start a transfer from the write_ptr to the read_start
-      uart_context->dma.active_desc.dst = write_ptr;
-      uart_context->dma.active_desc.count = read_size;
-      write_ptr = uart_context->dma.active_desc.dst;
-    } else if (write_ptr > read_start
-               && write_ptr < (uart_context->rx_buffer + uart_context->rx_buffer_len)) {
-      // DMA stopped while writing ahead the read_start.
-      // [Newest Data|Obselete data]
-      //  ^           ^
-      //  read_start  write_ptr
-      // Start a transfer from the write_ptr to the end of the rx_buffer
-      uart_context->dma.active_desc.dst = write_ptr;
-      uart_context->dma.active_desc.count = (uart_context->rx_buffer + uart_context->rx_buffer_len)
-                                            - write_ptr;
-      write_ptr = uart_context->dma.active_desc.dst;
-    } else {
-      // DMA stopped in an unkown location
-      EFM_ASSERT(0);
+      EFM_ASSERT(dma_done);
     }
 
-    // Just read data, should always have at least 1 byte available
-    EFM_ASSERT(uart_context->dma.active_desc.count > 0);
+    // (L)DMA ahead of read ptr, read data in between the (L)DMA and the read ptr
+    if (write_ptr > uart_context->rx_read_ptr) {
+      read_size = write_ptr - uart_context->rx_read_ptr;
+    }
+    // (L)DMA wrapped around RX buffer, read data between read ptr and end of RX buffer
+    else {
+      read_size = (uart_context->rx_buffer + uart_context->rx_buffer_len) - uart_context->rx_read_ptr;
+    }
 
-    // Prepare the next transfer
-    dst = uart_context->dma.active_desc.dst;
-    count = uart_context->dma.active_desc.count;
-    ecode = DMADRV_PeripheralMemory(channel,
-                                    uart_context->dma.cfg.peripheral_signal,
-                                    dst,
-                                    uart_context->dma.cfg.src,
-                                    true,
-                                    count,
-                                    uart_context->dma.cfg.size,
-                                    uart_handle_rx_dma_complete,
-                                    uart_context
-                                    );
-    EFM_ASSERT(ecode == ECODE_OK);
+    // read the smallest amount between the data available and the size of the user buffer
+    read_size = buffer_len < read_size ? buffer_len : read_size;
+  }
 
+  // Number of bytes written to user buffer can be different if control character are present
+  ret_val = read_size;
+
+  // Read data
+  {
+    // Handle control character and copy data to the user buffer
     if (uart_context->sw_flow_control == true) {
-      if (uart_context->remote_xon == false) {
-        sl_atomic_store(uart_context->remote_xon, true);
-        char c = UARTXON;
-        nolock_uart_write(uart_context, &c, sizeof(c), true);
-      }
-    }
-  } else {
-    // DMA is active.
-    if (write_ptr < read_start) {
-      // DMA is active and behind the read_start
-      // [ Newest Data | Oldest Data]
-      //              ^ ^
-      //      write_ptr read_start
-      // Update the DMA registers and active_descriptor to use the new space
-      uart_context->dma.active_desc.count += read_size;
+      for (size_t bytes_read = 0; bytes_read < read_size; bytes_read++) {
+        // Found control character, update xon
+        if (*uart_context->rx_read_ptr == (uint8_t)UARTXON || *uart_context->rx_read_ptr == (uint8_t)UARTXOFF) {
+          // Current byte is the most recent scanned byte. Apply control character
+          if (uart_context->rx_read_ptr == uart_context->ctrl_char_scan_ptr) {
+            sl_atomic_store(uart_context->xon, (*uart_context->rx_read_ptr == (uint8_t)UARTXON));
+          }
+          ret_val--;
+        }
+        // No control character, read data and increment user buffer
+        else {
+          *buffer++ = *uart_context->rx_read_ptr;
+        }
 
-      size_t xfercnt;
-    #if defined(LDMA_PRESENT)
-      xfercnt = (LDMA->CH[channel].CTRL & _LDMA_CH_CTRL_XFERCNT_MASK) >> _LDMA_CH_CTRL_XFERCNT_SHIFT;
-      xfercnt += read_size;
-      // Check for overflow
-      EFM_ASSERT((uintptr_t)(LDMA->CH[channel].DST + xfercnt)
-                 < (uintptr_t)(uart_context->rx_buffer + uart_context->rx_buffer_len));
-      LDMA->CH[channel].CTRL &= ~_LDMA_CH_CTRL_XFERCNT_MASK;
-      LDMA->CH[channel].CTRL |= xfercnt << _LDMA_CH_CTRL_XFERCNT_SHIFT;
-    #elif defined(DMA_PRESENT)
-      xfercnt = (DMA->CH[channel].CTRL & _DMA_CTRL_N_MINUS_1_MASK) >> _DMA_CTRL_N_MINUS_1_SHIFT;
-      xfercnt += read_size;
-      DMA->CH[channel].CTRL &= ~_DMA_CTRL_N_MINUS_1_MASK;
-      DMA->CH[channel].CTRL |= xfercnt << _DMA_CTRL_N_MINUS_1_SHIFT;
-    #endif
-    } else if (write_ptr == read_start) {
-      // This means the DMA should have been stopped
-      EFM_ASSERT(0);
-    } // else, nothing to do since the DMA is already primed.
+        // Caught up to most recent scanned byte, increment the scan ptr
+        if (uart_context->rx_read_ptr == uart_context->ctrl_char_scan_ptr) {
+          uart_context->ctrl_char_scan_ptr++;
+        }
+
+        // Go to next byte
+        uart_context->rx_read_ptr++;
+      }
+
+      // Wrap ctrl_char_scan_ptr around the rx_buffer
+      if (uart_context->ctrl_char_scan_ptr == (uart_context->rx_buffer + uart_context->rx_buffer_len)) {
+        uart_context->ctrl_char_scan_ptr = uart_context->rx_buffer;
+      }
+
+      EFM_ASSERT(uart_context->ctrl_char_scan_ptr >= uart_context->rx_buffer
+                 && uart_context->ctrl_char_scan_ptr < (uart_context->rx_buffer + uart_context->rx_buffer_len));
+    }
+    // Copy the data to the output buffer
+    else {
+      memcpy(buffer, uart_context->rx_read_ptr, read_size);
+      // Increment rx read ptr
+      uart_context->rx_read_ptr += read_size;
+    }
   }
 
-  // Move read_ptr to the end of the current read
-  if ((read_start + read_size) >= (uart_context->rx_buffer + uart_context->rx_buffer_len)) {
-    uart_context->read_ptr = (read_start + read_size) - uart_context->rx_buffer_len;
-  } else {
-    uart_context->read_ptr += read_size;
-  }
+  // Update the ring buffer after read
+  update_ring_buffer(uart_context);
 
-  // This means all of the data has been read from the rx_buffer
-  if (uart_context->read_ptr == write_ptr) {
-    // Reset first byte detection.
-    uart_context->dma.data_available = false;
+  // Wrap rx_read_ptr around the rx_buffer
+  uart_context->rx_read_ptr = (uart_context->rx_read_ptr < (uart_context->rx_buffer + uart_context->rx_buffer_len))
+                              ? uart_context->rx_read_ptr : uart_context->rx_buffer;
 
-    // Update the active descriptor to use the available space
-    uart_context->dma.active_desc.dst = write_ptr;
-
-    // Start a single byte tranfer to detect first byte
-    uart_context->dma.active_desc.count = 1;
-    ecode = DMADRV_StopTransfer(channel);
-    EFM_ASSERT(ecode == ECODE_OK);
-    dst = uart_context->dma.active_desc.dst;
-    count = uart_context->dma.active_desc.count;
-    ecode = DMADRV_PeripheralMemory(channel,
-                                    uart_context->dma.cfg.peripheral_signal,
-                                    dst,
-                                    uart_context->dma.cfg.src,
-                                    true,
-                                    count,
-                                    uart_context->dma.cfg.size,
-                                    uart_handle_rx_dma_complete,
-                                    uart_context
-                                    );
-    EFM_ASSERT(ecode == ECODE_OK);
-    if (uart_context->sw_flow_control == true) {
-      if (uart_context->remote_xon == false) {
-        sl_atomic_store(uart_context->remote_xon, true);
-        char c = UARTXON;
-        nolock_uart_write(uart_context, &c, sizeof(c), true);
-      }
-    }
-  } else {
-    // This means there is still data to be served to the user from rx_buffer
-    uart_context->dma.data_available = true;
-
-    #if defined(SL_CATALOG_KERNEL_PRESENT)
-    // Release the semaphore to unlock the next read
-    if (uart_context->block == true) {
-      osKernelState_t state = osKernelGetState();
-      osStatus_t status;
-      if ((state == osKernelRunning) || (state == osKernelLocked)) {
-        status = osSemaphoreRelease(uart_context->read_signal);
-        EFM_ASSERT(status == osOK);
-      }
-    }
-    #endif
-  }
-
-  // Scan for control characters in the read data
-  if (uart_context->sw_flow_control == true) {
-    uint8_t* ctrl_char = NULL;
-    size_t num_ctrl_char = 0;
-
-    for (size_t i = 0; i < read_size; i++) {
-      // Check if the character at read_ptr[i] is a ctrl_char
-      ctrl_char = read_start[i] == UARTXON ? &read_start[i] : NULL;
-      ctrl_char = read_start[i] == UARTXOFF ? &read_start[i] : ctrl_char;
-
-      if (ctrl_char != NULL) {
-        num_ctrl_char++;
-        // Control char found. Check if it is the newest.
-        if (read_start <= uart_context->ctrl_char_scan_ptr
-            && ctrl_char >= uart_context->ctrl_char_scan_ptr) {
-          // Newest control character found, make it active
-          uart_context->xon = (*ctrl_char == UARTXON);
-        } // Else, the control character was already processed in a scan_for_ctrl_char call,
-          // since the ctrl_scan_ptr was wrapped behind the read_start or it was farther than
-          // the detected ctrl_char.
-      } else {
-        // No control character found, write data to user buffer
-        buffer[i] = read_start[i];
-      }
-    }
-
-    // Check if ctrl_char_scan_ptr was passed in this scan
-    if (read_start <= uart_context->ctrl_char_scan_ptr
-        && (read_start + read_size) > uart_context->ctrl_char_scan_ptr) {
-      // Update the ctrl_char_scan to the end the section that was just read
-      uart_context->ctrl_char_scan_ptr = uart_context->read_ptr;
-    }
-
-    // Decrease read_size since the control characters are not written to user buffer
-    read_size -= num_ctrl_char;
-  } else {
-    // Write RX Data to the user buffer
-    memcpy(buffer, read_start, read_size);
-  }
-
-  // Finished updating the descriptor, resume the transfer
-  ecode = DMADRV_ResumeTransfer(channel);
-  EFM_ASSERT(ecode == ECODE_OK);
-
-  return read_size;
+  return ret_val;
 }

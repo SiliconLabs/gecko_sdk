@@ -143,7 +143,7 @@ sl_status_t sli_iostream_swo_itm_8_write(void *context,
                                          const void *buffer,
                                          size_t buffer_length,
                                          sl_iostream_swo_itm_8_msg_type_t type,
-                                         uint8_t *seq_nbr)
+                                         uint8_t seq_nbr)
 {
   uint8_t *buf = (uint8_t *)buffer;
   uint32_t packet_length;
@@ -182,7 +182,7 @@ sl_status_t sli_iostream_swo_itm_8_write(void *context,
       output_byte = HIGH_BYTE((uint16_t)type);
     } else if ( i == 5 ) {
       // Sequence number
-      output_byte = *seq_nbr++;
+      output_byte = seq_nbr;
     } else if ( i == packet_length - 3 ) {
       // CRC first byte
       // Ignored by FW - so we also skip it

@@ -80,6 +80,16 @@ bool zpal_radio_region_is_long_range_end_device(zpal_radio_region_t region);
 bool zpal_radio_region_has_long_range_support(zpal_radio_region_t region);
 
 /**
+ * @brief Function to get valid region value.
+ *
+ * If region is not specified (default value), it would return region set as default.
+ *
+ * @param[in] region Describe where radio is located.
+ * @return The valid region value
+ */
+zpal_radio_region_t zpal_radio_get_valid_region(zpal_radio_region_t region);
+
+/**
  * @} //zpal-radio-utils
  * @} //zpal
  */

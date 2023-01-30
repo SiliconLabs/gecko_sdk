@@ -19,6 +19,7 @@ requires:
   - name: emlib
   - name: rail_lib
   - name: rail_util_pa
+  - name: rail_util_built_in_phys
   - name: device_init
   - name: device_init_hfxo
 

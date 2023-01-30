@@ -304,7 +304,7 @@ EmberStatus emberAfPluginFileDescriptorDispatchWaitForEvents(uint32_t timeoutMs)
              == read(sli_cli_get_pipe_read_fd(), buff, SL_CLI_THREADED_HOST_PIPE_DATA_LENGTH));
     }
   }
-  if (status < 0) {
+  if (status < 0 && errno != EINTR) {
     emberAfCorePrintln("%p select() failed: %p", PLUGIN_NAME, strerror(errno));
 
     // EMZIGBEE-2126 Try to isolate the bad file descriptor,

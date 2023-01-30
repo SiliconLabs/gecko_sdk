@@ -50,6 +50,8 @@ sl_status_t iot_flash_drv_msc_driver_init(void *pvHndl);
 sl_status_t iot_flash_drv_msc_driver_deinit(void *pvHndl);
 
 /* flash memory attributes */
+sl_status_t iot_flash_drv_msc_get_flash_base(uint32_t *ulFlashBase);
+											 
 sl_status_t iot_flash_drv_msc_get_flash_size(void *pvHndl,
                                              uint32_t *ulFlashSize);
 sl_status_t iot_flash_drv_msc_get_block_size(void *pvHndl,

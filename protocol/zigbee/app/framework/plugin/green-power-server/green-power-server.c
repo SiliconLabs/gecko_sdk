@@ -621,7 +621,7 @@ static void decommissionGpd(uint8_t secLvl,
         && (sinkFunctionalitySupported(EMBER_AF_GP_GPS_FUNCTIONALITY_SINK_TABLE_BASED_GROUPCAST_FORWARDING)
             || sinkFunctionalitySupported(EMBER_AF_GP_GPS_FUNCTIONALITY_PRE_COMMISSIONED_GROUPCAST_COMMUNICATION))) {
       emberAfFillCommandGreenPowerClusterGpPairingConfigurationSmart(EMBER_ZCL_GP_PAIRING_CONFIGURATION_ACTION_REMOVE_GPD,
-                                                                     0,
+                                                                     gpdAddr->applicationId,
                                                                      gpdAddr->id.sourceId,
                                                                      gpdAddr->id.gpdIeeeAddress,
                                                                      gpdAddr->endpoint,
@@ -659,6 +659,25 @@ static void decommissionGpd(uint8_t secLvl,
     if (emberAfPluginGreenPowerServerSinkTableAccessNotificationCallback(gpdAddr,
                                                                          GREEN_POWER_SERVER_SINK_TABLE_ACCESS_TYPE_REMOVE_GPD)) {
       emberGpSinkTableRemoveEntry(sinkEntryIndex);
+      if (gpdAddr->applicationId == EMBER_GP_APPLICATION_IEEE_ADDRESS
+          && gpdAddr->endpoint == 0xFF) {
+        // Search and remove all the endpoints.
+        do {
+          sinkEntryIndex = emberGpSinkTableLookup(gpdAddr);
+          if (sinkEntryIndex != 0xFF) {
+            EmberGpSinkTableEntry entry = { 0 };
+            if (emberGpSinkTableGetEntry(sinkEntryIndex, &entry) != EMBER_SUCCESS) {
+              return;
+            }
+            // Delet the entry in TT
+            #ifdef SL_CATALOG_ZIGBEE_GREEN_POWER_TRANSLATION_TABLE_PRESENT
+            // Delete custom Translation table entry for this GPD
+            (void) emGpTransTableDeletePairedDevicefromTranslationTableEntry(&(entry.gpd));
+            #endif // SL_CATALOG_ZIGBEE_GREEN_POWER_TRANSLATION_TABLE_PRESENT
+            emberGpSinkTableRemoveEntry(sinkEntryIndex);
+          }
+        } while (sinkEntryIndex != 0xff);
+      }
     }
   }
 }
@@ -1345,8 +1364,14 @@ static void sendCommissioningReply(GpCommDataSaved *commissioningGpd)
                                    ? true : false);
   uint8_t sendSecurityKeyType = 0;
   bool sendKeyinReply = false;
-  if (gpsSecurityKeyTypeAtrribute == 0
-      && ((commissioningGpd->gpdfOptions) & EMBER_AF_GP_GPD_COMMISSIONING_OPTIONS_GP_SECURITY_KEY_REQUEST)) {
+  if ((gpsSecurityKeyTypeAtrribute == 0
+       && ((commissioningGpd->gpdfOptions) & EMBER_AF_GP_GPD_COMMISSIONING_OPTIONS_GP_SECURITY_KEY_REQUEST))
+      || !((commissioningGpd->gpdfOptions) & EMBER_AF_GP_GPD_COMMISSIONING_OPTIONS_GP_SECURITY_KEY_REQUEST)
+      || (incomingGpdKeyType == (gpsSecurityKeyTypeAtrribute & GPS_ATTRIBUTE_KEY_TYPE_MASK)
+          && 0 == MEMCOMPARE(commissioningGpd->key.contents,
+                             gpsKeyAttribute.contents,
+                             EMBER_ENCRYPTION_KEY_SIZE)
+          && gpsSecurityKeyTypeAtrribute != 0)) {
     // Use the proposed key, that has come in the commissioning gfdf and saved in commissioningGpd
     sendKeyinReply = false;
     sendSecurityKeyType = incomingGpdKeyType;
@@ -1355,7 +1380,8 @@ static void sendCommissioningReply(GpCommDataSaved *commissioningGpd)
   bool sendKeyEncryption = false;
   if (status == EMBER_ZCL_STATUS_SUCCESS
       && ((commissioningGpd->gpdfOptions) & EMBER_AF_GP_GPD_COMMISSIONING_OPTIONS_GP_SECURITY_KEY_REQUEST)
-      && gpsSecurityKeyTypeAtrribute != incomingGpdKeyType) {
+      && gpsSecurityKeyTypeAtrribute != incomingGpdKeyType
+      && gpsSecurityKeyTypeAtrribute != 0) {
     sendSecurityKeyType = gpsSecurityKeyTypeAtrribute;
     MEMCOPY(sendKey.contents, gpsKeyAttribute.contents, EMBER_ENCRYPTION_KEY_SIZE);
     sendKeyEncryption = incomingGpdKeyEncryption;
@@ -1363,22 +1389,6 @@ static void sendCommissioningReply(GpCommDataSaved *commissioningGpd)
     // Set up same key and key type for the Gp Pairing
     commissioningGpd->securityKeyType = sendSecurityKeyType;
     MEMCOPY(commissioningGpd->key.contents, sendKey.contents, EMBER_ENCRYPTION_KEY_SIZE);
-  }
-  // If the GPD proposes a OOB key, and the key request is `false`, it means the commissioning
-  // is expected to use that OOB only. No need to send the key back.
-  if (!((commissioningGpd->gpdfOptions) & EMBER_AF_GP_GPD_COMMISSIONING_OPTIONS_GP_SECURITY_KEY_REQUEST)) {
-    sendSecurityKeyType = incomingGpdKeyType;
-    sendKeyinReply = false;
-  }
-  if (incomingGpdKeyType == (gpsSecurityKeyTypeAtrribute & GPS_ATTRIBUTE_KEY_TYPE_MASK)
-      && 0 == MEMCOMPARE(commissioningGpd->key.contents,
-                         gpsKeyAttribute.contents,
-                         EMBER_ENCRYPTION_KEY_SIZE)
-      && ((commissioningGpd->gpdfOptions) & EMBER_AF_GP_GPD_COMMISSIONING_OPTIONS_GP_SECURITY_KEY_REQUEST)
-      && gpsSecurityKeyTypeAtrribute != 0) {
-    sendSecurityKeyType = gpsSecurityKeyTypeAtrribute;
-    sendKeyinReply = false;
-    sendKeyEncryption = false;
   }
 
   uint8_t commReplyOptions = 0;
@@ -2071,9 +2081,6 @@ static uint16_t storeSinkTableEntryInBuffer(EmberGpSinkTableEntry *entry,
 {
   uint8_t *finger = buffer;
   uint8_t securityLevel = (entry->securityOptions & EMBER_AF_GP_SINK_TABLE_ENTRY_SECURITY_OPTIONS_SECURITY_LEVEL);
-  uint8_t securityKeyType = (entry->securityOptions
-                             & EMBER_AF_GP_SINK_TABLE_ENTRY_SECURITY_OPTIONS_SECURITY_KEY_TYPE)
-                            >> EMBER_AF_GP_SINK_TABLE_ENTRY_SECURITY_OPTIONS_SECURITY_KEY_TYPE_OFFSET;
 
   emberAfGreenPowerClusterPrintln("GP SERVER - STORE SINK TABLE ENTRY into a buffer");
   // copy options field
@@ -2144,46 +2151,9 @@ static uint16_t storeSinkTableEntryInBuffer(EmberGpSinkTableEntry *entry,
       emberAfGreenPowerClusterPrintln("security frame counter %4x", entry->gpdSecurityFrameCounter);
       emberAfCopyInt32u(finger, 0, entry->gpdSecurityFrameCounter);
       finger += sizeof(uint32_t);
-
-      // If SecurityLevel is 0b00 or if the SecurityKeyType has value:
-      // - 0b001 (NWK key),
-      // - 0b010 (GPD group key)
-      // - 0b111 (derived individual GPD key),
-      // the GPDkey parameter MAY be omitted and the key MAY be stored in the
-      // gpSharedSecurityKey parameter instead.
-      // If SecurityLevel has value other than 0b00 and the SecurityKeyType has
-      // value 0b111 (derived individual GPD key), the sink table GPDkey parameter MAY be
-      // omitted and the key MAY calculated on the fly, based on the value stored
-      // in the gpSharedSecurityKey parameter (=groupKey).
       if ( !(securityLevel == EMBER_GP_SECURITY_LEVEL_NONE) ) {
-        if ( !(securityKeyType == EMBER_ZCL_GP_SECURITY_KEY_TYPE_ZIGBEE_NETWORK_KEY)
-             && !(securityKeyType == EMBER_ZCL_GP_SECURITY_KEY_TYPE_GPD_GROUP_KEY)
-             && !(securityKeyType == EMBER_ZCL_GP_SECURITY_KEY_TYPE_DERIVED_INDIVIDUAL_GPD_KEY) ) {
-          // if keyType is OOB and NK, else it is possible to use "gpsSharedSecurityKey" attribut
-          // to save space in the sink table
-          MEMMOVE(finger, entry->gpdKey.contents, EMBER_ENCRYPTION_KEY_SIZE);
-          finger += EMBER_ENCRYPTION_KEY_SIZE;
-        } else {
-          // key is present in the reponse message but not store in the sink table but in
-          // the gpSharedSecurityKey attribut, so read "gpSharedSecurityKey" attribut
-          EmberKeyData gpSharedSecurityKey;
-          EmberAfAttributeType type;
-          EmberAfStatus status = emberAfReadAttribute(GP_ENDPOINT,
-                                                      ZCL_GREEN_POWER_CLUSTER_ID,
-                                                      ZCL_GP_SERVER_GP_SHARED_SECURITY_KEY_ATTRIBUTE_ID,
-                                                      CLUSTER_MASK_SERVER,
-                                                      gpSharedSecurityKey.contents,
-                                                      EMBER_ENCRYPTION_KEY_SIZE,
-                                                      &type);
-          if (status == EMBER_ZCL_STATUS_SUCCESS) {
-            MEMMOVE(finger, gpSharedSecurityKey.contents, EMBER_ENCRYPTION_KEY_SIZE);
-          } else {
-            // optional "gpsSharedSecurityKey" attribut is not supported
-            // thus key is always into the sink table even if it is shared
-            MEMMOVE(finger, entry->gpdKey.contents, EMBER_ENCRYPTION_KEY_SIZE);
-          }
-          finger += EMBER_ENCRYPTION_KEY_SIZE;
-        }
+        MEMMOVE(finger, entry->gpdKey.contents, EMBER_ENCRYPTION_KEY_SIZE);
+        finger += EMBER_ENCRYPTION_KEY_SIZE;
       }
     }
   } else if (entry->options & EMBER_AF_GP_SINK_TABLE_ENTRY_OPTIONS_SEQUENCE_NUM_CAPABILITIES) {
@@ -2681,7 +2651,13 @@ bool emberAfGreenPowerClusterGpNotificationCallback(EmberAfClusterCommand *cmd)
                     cmd_data.gpdEndpoint)) {
     return true; // Handled, but dropped because of the bad GPD addressing
   }
-
+  if ((gpdAddrZero(&gpdAddr)
+       && (cmd_data.gpdCommandId != EMBER_ZCL_GP_GPDF_CHANNEL_REQUEST))
+      || (!gpdAddrZero(&gpdAddr)
+          && (cmd_data.gpdCommandId == EMBER_ZCL_GP_GPDF_CHANNEL_REQUEST))) {
+    // Address 0 only for channel request command.
+    return true;
+  }
   emberAfGreenPowerClusterPrintln("command %d", cmd_data.gpdCommandId);
   //if (cmd_data.gpdCommandPayload != NULL) { // Ensure gpdCommandPayload is not NULL to print the payload
   //  emberAfGreenPowerClusterPrint("payload: ");
@@ -2784,9 +2760,11 @@ bool emberAfGreenPowerClusterGpCommissioningNotificationCallback(EmberAfClusterC
     return true;
   }
 
-  if (gpdAddrZero(&gpdAddr)
-      && (cmd_data.gpdCommandId != EMBER_ZCL_GP_GPDF_CHANNEL_REQUEST)) {
-    // Address 0 for all other GPDF commands except the channel request.
+  if ((gpdAddrZero(&gpdAddr)
+       && (cmd_data.gpdCommandId != EMBER_ZCL_GP_GPDF_CHANNEL_REQUEST))
+      || (!gpdAddrZero(&gpdAddr)
+          && (cmd_data.gpdCommandId == EMBER_ZCL_GP_GPDF_CHANNEL_REQUEST))) {
+    // Address 0 only for channel request command.
     return true;
   }
   GpCommDataSaved *commissioningGpd = emberAfGreenPowerServerFindCommissioningGpdInstance(&gpdAddr);
@@ -2926,7 +2904,11 @@ bool emberAfGreenPowerClusterGpPairingConfigurationCallback(EmberAfClusterComman
 
   uint8_t gpdAppId = (cmd_data.options & EMBER_AF_GP_PAIRING_CONFIGURATION_OPTION_APPLICATION_ID);
   EmberGpAddress gpdAddr;
-  if (!emGpMakeAddr(&gpdAddr, gpdAppId, cmd_data.gpdSrcId, cmd_data.gpdIeee, cmd_data.endpoint)) {
+  if (!emGpMakeAddr(&gpdAddr,
+                    gpdAppId,
+                    cmd_data.gpdSrcId,
+                    cmd_data.gpdIeee,
+                    cmd_data.endpoint)) {
     return true; // Silent Drop : Address not valid.
   }
   // Silent Drop for the gpd addr = 0
@@ -2968,22 +2950,7 @@ bool emberAfGreenPowerClusterGpPairingConfigurationCallback(EmberAfClusterComman
       return true;
     }
     if (emberGpSinkTableLookup(&gpdAddr) != 0xFF) {
-      #ifdef SL_CATALOG_ZIGBEE_GREEN_POWER_TRANSLATION_TABLE_PRESENT
-      // Search and delete the GPD Id if it matches provided information
-      uint8_t outIndex = GP_TRANSLATION_TABLE_ENTRY_INVALID_INDEX;
-      uint8_t status = emGpTransTableFindMatchingTranslationTableEntry(GP_TRANSLATION_TABLE_SCAN_LEVEL_GPD_ID, //levelOfScan
-                                                                       false, //infoBlockPresent
-                                                                       &gpdAddr, //gpAddr
-                                                                       0,  // gpdCommandId
-                                                                       0,  // zbEndpoint
-                                                                       NULL, //gpdCmdPayload
-                                                                       NULL, // addInfoBlock
-                                                                       &outIndex,
-                                                                       0);
-      if (status == GP_TRANSLATION_TABLE_STATUS_SUCCESS) {
-        decommissionGpd(0, 0, &gpdAddr, false);
-      }
-      #endif // SL_CATALOG_ZIGBEE_GREEN_POWER_TRANSLATION_TABLE_PRESENT
+      decommissionGpd(0, 0, &gpdAddr, false);
     }
     return true;
   }
@@ -3260,7 +3227,27 @@ bool emberAfGreenPowerClusterGpSinkTableRequestCallback(EmberAfClusterCommand *c
     // Valid Entries are present!
     if (requestType == EMBER_ZCL_GP_SINK_TABLE_REQUEST_OPTIONS_REQUEST_TABLE_ENTRIES_BY_GPD_ID) {
       EmberGpAddress gpdAddr;
-      emGpMakeAddr(&gpdAddr, appId, cmd_data.gpdSrcId, cmd_data.gpdIeee, cmd_data.endpoint);
+      if (!emGpMakeAddr(&gpdAddr,
+                        appId,
+                        cmd_data.gpdSrcId,
+                        cmd_data.gpdIeee,
+                        cmd_data.endpoint)) {
+        emberAfFillCommandGreenPowerClusterGpSinkTableResponseSmart(EMBER_ZCL_GP_SINK_TABLE_RESPONSE_STATUS_NOT_FOUND,
+                                                                    validEntriesCount,
+                                                                    0xFF,
+                                                                    0);
+        emberAfSendResponse();
+        return true;
+      }
+      // Check for gpd addr = 0
+      if (gpdAddrZero(&gpdAddr)) {
+        emberAfFillCommandGreenPowerClusterGpSinkTableResponseSmart(EMBER_ZCL_GP_SINK_TABLE_RESPONSE_STATUS_NOT_FOUND,
+                                                                    validEntriesCount,
+                                                                    0xFF,
+                                                                    0);
+        emberAfSendResponse();
+        return true;
+      }
       entryIndex = emberGpSinkTableLookup(&gpdAddr);
       if (entryIndex == 0xFF) {
         // Valid entries present but none for this gpdAddr - Send NOT FOUND sesponse.
@@ -4194,7 +4181,15 @@ EmberAfStatus emberAfGreenPowerServerDeriveSharedKeyFromSinkAttribute(uint8_t *g
         return EMBER_ZCL_STATUS_SUCCESS;
       }
     } else {
-      //any other key type is not valid that the shared key type attribute can hold.
+      // Any other key type is not valid that the shared key type attribute can hold,
+      // so just read and return the contents in such case.
+      return emberAfReadAttribute(GP_ENDPOINT,
+                                  ZCL_GREEN_POWER_CLUSTER_ID,
+                                  ZCL_GP_SERVER_GP_SHARED_SECURITY_KEY_ATTRIBUTE_ID,
+                                  CLUSTER_MASK_SERVER,
+                                  gpSharedKeyAttribute->contents,
+                                  EMBER_ENCRYPTION_KEY_SIZE,
+                                  &type);
     }
   }
   return EMBER_ZCL_STATUS_FAILURE;

@@ -17,7 +17,7 @@
 ; *
 ; *****************************************************************************/
 ;/*
-; * <b>Copyright 2009-2022 ARM Limited. All rights reserved.
+; * <b>Copyright 2009-2023 ARM Limited. All rights reserved.
 ; *
 ; * SPDX-License-Identifier: Apache-2.0
 ; *
@@ -60,7 +60,6 @@
                 #endif // __ARM_FEATURE_CMSE
                 #endif // SL_TRUSTZONE_SECURE
 
-
                 SECTION  .intvec:CODE:NOROOT(9)
 
                 EXTERN   __iar_program_start
@@ -70,11 +69,11 @@
                 PUBLIC   __Vectors
                 PUBLIC   __Vectors_End
                 PUBLIC   __Vectors_Size
-                #define __INITIAL_SP     sfe(CSTACK)
-                #define __STACK_LIMIT    sfb(CSTACK)
+#define __INITIAL_SP     sfe(CSTACK)
+#define __STACK_LIMIT    sfb(CSTACK)
                 #if defined (SL_TRUSTZONE_SECURE)
                 #if defined (__ARM_FEATURE_CMSE) && (__ARM_FEATURE_CMSE == 3U)
-                #define __STACK_SEAL     sfb(STACKSEAL)
+#define __STACK_SEAL     sfb(STACKSEAL)
                 #endif // __ARM_FEATURE_CMSE
                 #endif // SL_TRUSTZONE_SECURE
 
@@ -167,7 +166,6 @@ __Vectors_End
 __Vectors       EQU      __vector_table
 __Vectors_Size  EQU      __Vectors_End - __Vectors
 
-
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 ;;
 ;; Default interrupt handlers.
@@ -193,7 +191,6 @@ Reset_Handler
                 BLX      R0
                 LDR      R0, =__iar_program_start
                 BX       R0
-
 
                 PUBWEAK NMI_Handler
                 PUBWEAK HardFault_Handler
@@ -464,6 +461,5 @@ M33CTI1_IRQHandler
 
 Default_Handler
                 B        .
-
 
                 END

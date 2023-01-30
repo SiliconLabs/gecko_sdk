@@ -814,6 +814,25 @@ void CRYPTO_DDataRead(CRYPTO_DDataReg_TypeDef  ddataReg,
 
 /***************************************************************************//**
  * @brief
+ *   Read 256 bits of data from a DDATAX register in the CRYPTO module to an
+ *   unaligned pointer.
+ *
+ * @details
+ *   Read 256 bits from a DDATAX register in the CRYPTO module. The output
+ *   buffer pointer does not have to be word-aligned, but an unaligned pointer
+ *   might incur a performance penalty.
+ *
+ * @param[in]  ddataReg   The 256 bit DDATA register.
+ * @param[out] val        Location where to store the value in memory.
+ *                        Can be unaligned.
+ ******************************************************************************/
+CRYPTO_WARNINGS_NO_CAST_ALIGN
+void CRYPTO_DDataReadUnaligned(CRYPTO_DDataReg_TypeDef ddataReg,
+                               uint8_t * val);
+CRYPTO_WARNINGS_RESET
+
+/***************************************************************************//**
+ * @brief
  *   Write 512 bits of data to a QDATAX register in the CRYPTO module.
  *
  * @details
@@ -826,6 +845,24 @@ void CRYPTO_DDataRead(CRYPTO_DDataReg_TypeDef  ddataReg,
  ******************************************************************************/
 void CRYPTO_QDataWrite(CRYPTO_QDataReg_TypeDef qdataReg,
                        const CRYPTO_QData_TypeDef val);
+
+/***************************************************************************//**
+ * @brief
+ *   Write 512 bits of unaligned data to a QDATAX register in the CRYPTO module.
+ *
+ * @details
+ *   Write 512 bits of unaligned data to a QDATAX register in the CRYPTO module.
+ *   The data pointer does not have to be word-aligned, but an unaligned pointer
+ *   might incur a performance hit.
+ *
+ * @param[in]  qdataReg   The 512 bits QDATA register.
+ * @param[in]  val        Pointer to value to write to the QDATA register.
+ *                        Can be unaligned.
+ ******************************************************************************/
+CRYPTO_WARNINGS_NO_CAST_ALIGN
+void CRYPTO_QDataWriteUnaligned(CRYPTO_QDataReg_TypeDef qdataReg,
+                                const uint8_t * val);
+CRYPTO_WARNINGS_RESET
 
 /***************************************************************************//**
  * @brief

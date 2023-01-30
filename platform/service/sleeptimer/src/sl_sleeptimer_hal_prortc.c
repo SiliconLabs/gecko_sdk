@@ -420,4 +420,60 @@ static uint32_t get_time_diff(uint32_t a, uint32_t b)
   return (a - b);
 }
 
+/*******************************************************************************
+ * @brief
+ *   Gets the precision (in PPM) of the sleeptimer's clock.
+ *
+ * @return
+ *   Clock accuracy, in PPM.
+ *
+ * @note
+ *  The CMU_LF_ClockPrecisionGet function usally used to retrieve
+ *  the clock accuracy can't be used for PRORTC as it isn't public,
+ *  so this function works in the same way.
+ ******************************************************************************/
+uint16_t sleeptimer_hal_get_clock_accuracy(void)
+{
+  uint16_t precision = 0xFFFF;
+
+#if defined(_SILICON_LABS_32B_SERIES_2)
+  if (CMU->PRORTCCLKCTRL == CMU_PRORTCCLKCTRL_CLKSEL_LFXO) {
+    precision = CMU_LFXOPrecisionGet();
+
+#if defined(LFRCO_CFG_HIGHPRECEN) && defined(PLFRCO_PRESENT)
+  } else {
+    CMU->CLKEN0_SET = CMU_CLKEN0_LFRCO;
+
+    if (LFRCO->CFG & _LFRCO_CFG_HIGHPRECEN_MASK) {
+      precision = 500;
+    } else {
+      precision = 0xFFFF;
+    }
+#endif
+  }
+
+#else
+  uint32_t lfr_clk_sel = (CMU->LFRCLKSEL & _CMU_LFRCLKSEL_LFR_MASK) << _CMU_LFRCLKSEL_LFR_SHIFT;
+
+  switch (lfr_clk_sel) {
+    case _CMU_LFRCLKSEL_LFR_LFXO:
+      precision = CMU_LFXOPrecisionGet();
+      break;
+
+#if defined(_SILICON_LABS_32B_SERIES_1) && defined(PLFRCO_PRESENT)
+    case _CMU_LFRCLKSEL_LFR_PLFRCO:
+      precision = 500;
+      break;
+#endif
+
+    default:
+      precision = 0xFFFF;
+      break;
+  }
+
+#endif
+
+  return precision;
+}
+
 #endif

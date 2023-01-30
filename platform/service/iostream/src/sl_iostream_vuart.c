@@ -155,7 +155,12 @@ static sl_status_t vuart_write(void *context,
                                const void *buffer,
                                size_t buffer_length)
 {
-  return sli_iostream_swo_itm_8_write(context, buffer, buffer_length, EM_DEBUG_VIRTUAL_UART_TX, &seq_number);
+  sl_status_t status = sli_iostream_swo_itm_8_write(context, buffer, buffer_length, EM_DEBUG_VIRTUAL_UART_TX, seq_number);
+  if (status == SL_STATUS_OK) {
+    seq_number++;   // Wrap arround/overflow on the usigned int is expected to reset the sequence number
+  }
+
+  return status;
 }
 
 /***************************************************************************//**

@@ -90,8 +90,8 @@ template_contribution:
 #------------------ CLI commands ---------------------
   - name: cli_command
     value:
-      name: active_scan
-      handler: cli_active_scan
+      name: start_active_scan
+      handler: cli_start_active_scan
       help: "Start active scanning on selected channel"
       argument:
       - type: uint8
@@ -117,7 +117,7 @@ template_contribution:
   - name: cli_command
     value:
       name: start_energy_scan
-      handler: cli_energy_scan
+      handler: cli_start_energy_scan
       help: "Start energy scanning on the given channel with samples (num)"
       argument:
       - type: uint8

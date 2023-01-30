@@ -288,6 +288,9 @@ static sl_status_t app_settings_get_fan11_phy_config(char *value_str,
 static sl_status_t app_settings_get_explicit_phy_config(char *value_str,
                                                         const char *key_str,
                                                         const app_settings_entry_t *entry);
+static sl_status_t app_settings_get_ids_phy_config(char *value_str,
+                                                   const char *key_str,
+                                                   const app_settings_entry_t *entry);
 static sl_status_t app_settings_get_fan10_and_fan11_phy_config(char *value_str,
                                                                const char *key_str,
                                                                const app_settings_entry_t *entry);
@@ -495,6 +498,32 @@ const app_settings_entry_t app_settings_entries[] =
     .set_handler = app_settings_set_integer,
     .get_handler = app_settings_get_explicit_phy_config,
     .description = "Channel spacing [string] (100kHz|200kHz|400kHz|600kHz|250kHz|800kHz|1200kHz)"
+  },
+  {
+    .key = "protocol_id",
+    .domain = app_settings_domain_wisun,
+    .value_size = APP_SETTINGS_VALUE_SIZE_UINT16,
+    .input = APP_SETTINGS_INPUT_FLAG_DEFAULT,
+    .output = APP_SETTINGS_OUTPUT_FLAG_DEFAULT,
+    .value = &app_settings_wisun.protocol_id,
+    .input_enum_list = NULL,
+    .output_enum_list = NULL,
+    .set_handler = app_settings_set_integer,
+    .get_handler = app_settings_get_ids_phy_config,
+    .description = "Radioconf protocol ID [uint16]"
+  },
+  {
+    .key = "channel_id",
+    .domain = app_settings_domain_wisun,
+    .value_size = APP_SETTINGS_VALUE_SIZE_UINT16,
+    .input = APP_SETTINGS_INPUT_FLAG_DEFAULT,
+    .output = APP_SETTINGS_OUTPUT_FLAG_DEFAULT,
+    .value = &app_settings_wisun.channel_id,
+    .input_enum_list = NULL,
+    .output_enum_list = NULL,
+    .set_handler = app_settings_set_integer,
+    .get_handler = app_settings_get_ids_phy_config,
+    .description = "Radioconf channel ID [uint16]"
   },
   {
     .key = "network_size",
@@ -1733,6 +1762,14 @@ static sl_status_t app_settings_get_explicit_phy_config(char *value_str,
   return app_settings_get_phy_config(value_str, key_str, entry, !used);
 }
 
+static sl_status_t app_settings_get_ids_phy_config(char *value_str,
+                                                   const char *key_str,
+                                                   const app_settings_entry_t *entry)
+{
+  bool used = app_settings_wisun.phy_config_type == SL_WISUN_PHY_CONFIG_IDS;
+  return app_settings_get_phy_config(value_str, key_str, entry, !used);
+}
+
 static sl_status_t app_settings_get_fan10_and_fan11_phy_config(char *value_str,
                                                                const char *key_str,
                                                                const app_settings_entry_t *entry)
@@ -2306,7 +2343,6 @@ static sl_status_t app_settings_get_rx_phy_mode_ids(char *value_str,
     if (sl_wisun_get_pom_ie(&phy_mode_id_count, phy_mode_id, &is_mdr_command_capable) == SL_STATUS_OK) {
       phy_mode_id_p = phy_mode_id;
       phy_mode_id_count_p = &phy_mode_id_count;
-      app_settings_wisun.rx_phy_mode_ids_count = phy_mode_id_count;
     } else {
       ret = SL_STATUS_FAIL;
     }

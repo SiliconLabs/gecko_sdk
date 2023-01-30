@@ -17,7 +17,7 @@ upgrade:
       id: gecko_sdk
       version: "4.1.1"
     configuration:
-      - script: scripts/upgrade_zigbee_rtos_stack_size.lua
+      - script: protocol/zigbee/component/scripts/upgrade_zigbee_rtos_stack_size.lua
 
   - sdk:
       id: gecko_sdk

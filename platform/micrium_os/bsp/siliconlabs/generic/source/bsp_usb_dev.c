@@ -306,7 +306,7 @@ static void BSP_USBD_EFM32_STK_Init(USBD_DRV *p_drv)
 #if defined(USBC_MEM_BASE)
   //                                                               GG
   CMU->HFCORECLKEN0 |= CMU_HFCORECLKEN0_USB | CMU_HFCORECLKEN0_USBC;
-  CMU_ClockSelectSet(cmuClock_USBC, cmuSelect_HFCLK);
+  CMU_CLOCK_SELECT_SET(USBC, HFCLK);
 
   USB->ROUTE = USB_ROUTE_VBUSENPEN | USB_ROUTE_PHYPEN;
 
@@ -317,16 +317,16 @@ static void BSP_USBD_EFM32_STK_Init(USBD_DRV *p_drv)
 
     //                                                             Configure high frequency used by USB
     CMU_USHFRCOBandSet(cmuUSHFRCOFreq_48M0Hz);
-    CMU_ClockSelectSet(cmuClock_USBR, cmuSelect_USHFRCO);
+    CMU_CLOCK_SELECT_SET(USBR, USHFRCO);
     CMU_ClockEnable(cmuClock_USBR, true);
 
     //                                                             Configure low frequency used by the USB LEM feature
 #if (BSP_LF_CLK_SEL == BSP_LF_CLK_LFXO)
-    CMU_ClockSelectSet(cmuClock_USBLE, cmuSelect_LFXO);
+    CMU_CLOCK_SELECT_SET(LFC, LFXO);
 #elif (BSP_LF_CLK_SEL == BSP_LF_CLK_ULFRCO)
-    CMU_ClockSelectSet(cmuClock_USBLE, cmuSelect_ULFRCO);
+    CMU_CLOCK_SELECT_SET(LFC, ULFRCO);
 #else
-    CMU_ClockSelectSet(cmuClock_USBLE, cmuSelect_LFRCO);
+    CMU_CLOCK_SELECT_SET(LFC, LFRCO);
 #endif
     CMU_ClockEnable(cmuClock_USBLE, true);
 

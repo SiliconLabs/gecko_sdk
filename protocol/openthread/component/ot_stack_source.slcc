@@ -25,6 +25,7 @@ source:
       - path: api/coap_api.cpp
       - path: api/coap_secure_api.cpp
       - path: api/commissioner_api.cpp
+      - path: api/coprocessor_rpc_api.cpp
       - path: api/crypto_api.cpp
       - path: api/dataset_api.cpp
       - path: api/dataset_ftd_api.cpp
@@ -32,15 +33,20 @@ source:
       - path: api/diags_api.cpp
       - path: api/dns_api.cpp
       - path: api/dns_server_api.cpp
+      - path: api/error_api.cpp
       - path: api/heap_api.cpp
       - path: api/history_tracker_api.cpp
       - path: api/icmp6_api.cpp
+      - path: api/instance_api.cpp
       - path: api/ip6_api.cpp
       - path: api/jam_detection_api.cpp
       - path: api/joiner_api.cpp
       - path: api/link_api.cpp
       - path: api/link_metrics_api.cpp
+      - path: api/link_raw_api.cpp
+      - path: api/logging_api.cpp
       - path: api/message_api.cpp
+      - path: api/multi_radio_api.cpp
       - path: api/nat64_api.cpp
       - path: api/netdata_api.cpp
       - path: api/netdata_publisher_api.cpp
@@ -48,15 +54,17 @@ source:
       - path: api/network_time_api.cpp
       - path: api/ping_sender_api.cpp
       - path: api/random_crypto_api.cpp
+      - path: api/random_noncrypto_api.cpp
       - path: api/server_api.cpp
       - path: api/sntp_api.cpp
       - path: api/srp_client_api.cpp
       - path: api/srp_client_buffers_api.cpp
       - path: api/srp_server_api.cpp
-      - path: api/thread_api.cpp
-      - path: api/thread_ftd_api.cpp
+      - path: api/tasklet_api.cpp
       - path: api/tcp_api.cpp
       - path: api/tcp_ext_api.cpp
+      - path: api/thread_api.cpp
+      - path: api/thread_ftd_api.cpp
       - path: api/trel_api.cpp
       - path: api/udp_api.cpp
       - path: backbone_router/backbone_tmf.cpp
@@ -70,32 +78,52 @@ source:
       - path: coap/coap.cpp
       - path: coap/coap_message.cpp
       - path: coap/coap_secure.cpp
+      - path: common/appender.cpp
+      - path: common/binary_search.cpp
       - path: common/crc16.cpp
+      - path: common/data.cpp
+      - path: common/error.cpp
       - path: common/frame_builder.cpp
       - path: common/frame_data.cpp
       - path: common/heap.cpp
       - path: common/heap_data.cpp
       - path: common/heap_string.cpp
+      - path: common/instance.cpp
+      - path: common/log.cpp
       - path: common/message.cpp
       - path: common/notifier.cpp
+      - path: common/random.cpp
       - path: common/settings.cpp
+      - path: common/string.cpp
+      - path: common/tasklet.cpp
       - path: common/time_ticker.cpp
+      - path: common/timer.cpp
       - path: common/tlvs.cpp
       - path: common/trickle_timer.cpp
+      - path: common/uptime.cpp
+      - path: coprocessor/rpc.cpp
       - path: crypto/aes_ccm.cpp
       - path: crypto/aes_ecb.cpp
+      - path: crypto/crypto_platform.cpp
       - path: crypto/ecdsa.cpp
       - path: crypto/hkdf_sha256.cpp
       - path: crypto/hmac_sha256.cpp
       - path: crypto/mbedtls.cpp
       - path: crypto/pbkdf2_cmac.cpp
       - path: crypto/sha256.cpp
+      - path: crypto/storage.cpp
+      - path: diags/factory_diags.cpp
       - path: mac/channel_mask.cpp
       - path: mac/data_poll_handler.cpp
       - path: mac/data_poll_sender.cpp
+      - path: mac/link_raw.cpp
       - path: mac/mac.cpp
       - path: mac/mac_filter.cpp
+      - path: mac/mac_frame.cpp
       - path: mac/mac_links.cpp
+      - path: mac/mac_types.cpp
+      - path: mac/sub_mac.cpp
+      - path: mac/sub_mac_callbacks.cpp
       - path: meshcop/announce_begin_client.cpp
       - path: meshcop/border_agent.cpp
       - path: meshcop/commissioner.cpp
@@ -130,16 +158,22 @@ source:
       - path: net/ip6_headers.cpp
       - path: net/ip6_mpl.cpp
       - path: net/nat64_translator.cpp
-      - path: net/nd_agent.cpp
       - path: net/nd6.cpp
+      - path: net/nd_agent.cpp
       - path: net/netif.cpp
       - path: net/sntp_client.cpp
       - path: net/socket.cpp
       - path: net/srp_client.cpp
       - path: net/srp_server.cpp
-      - path: net/tcp6_ext.cpp
       - path: net/tcp6.cpp
+      - path: net/tcp6_ext.cpp
       - path: net/udp6.cpp
+      - path: radio/radio.cpp
+      - path: radio/radio_callbacks.cpp
+      - path: radio/radio_platform.cpp
+      - path: radio/trel_interface.cpp
+      - path: radio/trel_link.cpp
+      - path: radio/trel_packet.cpp
       - path: thread/address_resolver.cpp
       - path: thread/announce_begin_server.cpp
       - path: thread/announce_sender.cpp
@@ -153,6 +187,7 @@ source:
       - path: thread/key_manager.cpp
       - path: thread/link_metrics.cpp
       - path: thread/link_metrics_types.cpp
+      - path: thread/link_quality.cpp
       - path: thread/lowpan.cpp
       - path: thread/mesh_forwarder.cpp
       - path: thread/mesh_forwarder_ftd.cpp
@@ -173,6 +208,7 @@ source:
       - path: thread/network_data_types.cpp
       - path: thread/network_diagnostic.cpp
       - path: thread/panid_query_server.cpp
+      - path: thread/radio_selector.cpp
       - path: thread/router_table.cpp
       - path: thread/src_match_controller.cpp
       - path: thread/thread_netif.cpp
@@ -188,6 +224,7 @@ source:
       - path: utils/history_tracker.cpp
       - path: utils/jam_detector.cpp
       - path: utils/otns.cpp
+      - path: utils/parse_cmdline.cpp
       - path: utils/ping_sender.cpp
       - path: utils/slaac_address.cpp
       - path: utils/srp_client_buffers.cpp

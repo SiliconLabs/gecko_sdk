@@ -1918,7 +1918,7 @@ template_contribution:
     value:
       name: startThermistor
       handler: startThermistorMeasurement
-      help: "Starts a thermistor measurement."
+      help: "Starts a thermistor measurement.\\n                    Triggers the HFXO temperature compensation if enabled."
       shortcuts:
         - name: startThermistorMeasurement
     condition:
@@ -1946,10 +1946,10 @@ template_contribution:
     value:
       name: compensateHFXO
       handler: compensateHFXO
-      help: "Starts the compensation process on the HFXO.\\n                    Must be called after a complete thermistor measurement\\n                    ie after getThermistor."
+      help: "Apply the temperature compensation using latest thermistor measurement\\n                    if no parameter is given."
       argument:
-        - type: uint8opt
-          help: "1=restore the initial frequency not compensated"
+        - type: int8opt
+          help: "The amount of ppm to compensate"
     condition:
       - device_sdid_220
 

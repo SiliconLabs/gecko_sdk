@@ -360,7 +360,7 @@ public:
      */
     void SetPromiscuous(bool aEnable);
 
-    #if OPENTHREAD_CONFIG_DIAG_ENABLE
+#if OPENTHREAD_CONFIG_DIAG_ENABLE
     /**
      * This method enables transmitting stream random character mode.
      *
@@ -381,6 +381,20 @@ public:
 
     Error TxStreamAutoAck(uint8_t autoAckEnabled);
     Error TxStreamAddrMatch(uint8_t enable);
+
+    // coex
+    Error CoexSetPriorityPulseWidth(uint8_t pulseWidthUs);
+    Error CoexSetRadioHoldoff(bool enabled);
+    Error CoexSetRequestPwm(uint8_t ptaReq, void *ptaCb, uint8_t dutyCycle, uint8_t periodHalfMs);
+
+    Error CoexSetOptions(uint32_t options);
+
+    Error CoexSetPhySelectTimeout(uint8_t timeoutMs);
+
+    Error CoexGetPhySelectTimeout(uint8_t *timeoutMs);
+    Error CoexGetPriorityPulseWidth(uint8_t *pulseWidthUs);
+    Error CoexGetOptions(uint32_t *options);
+    Error CoexGetRequestPwmArgs(uint8_t *req, uint8_t *dutyCycle, uint8_t *periodHalfMs);
 #endif // OPENTHREAD_CONFIG_DIAG_ENABLE
 
     /**
@@ -795,12 +809,58 @@ inline Error Radio::TxStreamStop(void)
 
 inline Error Radio::TxStreamAddrMatch(uint8_t enable)
 {
-    return otPlatDiagTxStreamAddrMatch( enable);
+    return otPlatDiagTxStreamAddrMatch(enable);
 }
 
 inline Error Radio::TxStreamAutoAck(uint8_t autoAckEnabled)
 {
-    return otPlatDiagTxStreamAutoAck( autoAckEnabled);
+    return otPlatDiagTxStreamAutoAck(autoAckEnabled);
+}
+
+inline Error Radio::CoexSetPriorityPulseWidth(uint8_t pulseWidthUs)
+{
+    return otPlatDiagCoexSetPriorityPulseWidth(pulseWidthUs);
+}
+
+inline Error Radio::CoexSetRadioHoldoff(bool enabled)
+{
+    return otPlatDiagCoexSetRadioHoldoff(enabled);
+}
+
+inline Error Radio::CoexSetRequestPwm(uint8_t ptaReq, void *ptaCb, uint8_t dutyCycle, uint8_t periodHalfMs)
+{
+    OT_UNUSED_VARIABLE(ptaCb);
+    return otPlatDiagCoexSetRequestPwm(ptaReq, nullptr, dutyCycle, periodHalfMs);
+}
+
+inline Error Radio::CoexSetPhySelectTimeout(uint8_t timeoutMs)
+{
+    return otPlatDiagCoexSetPhySelectTimeout(timeoutMs);
+}
+
+inline Error Radio::CoexSetOptions(uint32_t options)
+{
+    return otPlatDiagCoexSetOptions(options);
+}
+
+inline Error Radio::CoexGetPhySelectTimeout(uint8_t *timeoutMs)
+{
+    return otPlatDiagCoexGetPhySelectTimeout(timeoutMs);
+}
+
+inline Error Radio::CoexGetOptions(uint32_t *options)
+{
+    return otPlatDiagCoexGetOptions(options);
+}
+
+inline Error Radio::CoexGetPriorityPulseWidth(uint8_t *pulseWidthUs)
+{
+    return otPlatDiagCoexGetPriorityPulseWidth(pulseWidthUs);
+}
+
+inline Error Radio::CoexGetRequestPwmArgs(uint8_t *req, uint8_t *dutyCycle, uint8_t *periodHalfMs)
+{
+    return otPlatDiagCoexGetRequestPwmArgs(req, dutyCycle, periodHalfMs);
 }
 
 #endif // OPENTHREAD_CONFIG_DIAG_ENABLE
@@ -1004,7 +1064,6 @@ inline Error Radio::TxStreamAutoAck(uint8_t autoAckEnabled)
     return kErrorNone;
 }
 #endif // OPENTHREAD_CONFIG_DIAG_ENABLE
-
 
 inline otRadioState Radio::GetState(void)
 {

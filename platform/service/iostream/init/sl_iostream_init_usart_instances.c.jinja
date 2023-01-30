@@ -33,16 +33,17 @@
 #define SL_IOSTREAM_USART_RX_DMA_SIGNAL(periph_nbr)     SL_IOSTREAM_USART_CONCAT_PASTER(dmadrvPeripheralSignal_USART, periph_nbr, _RXDATAV)  {# Create DMA RX Signal name#}
 
 #define SL_IOSTREAM_USART_CLOCK_REF(periph_nbr)         SL_IOSTREAM_USART_CONCAT_PASTER(cmuClock_, USART, periph_nbr)       {# Create clock reference #}
-
-#if defined(SL_CATALOG_POWER_MANAGER_PRESENT) &&  defined(_SILICON_LABS_32B_SERIES_2)
 // EM Events
+#if defined(SL_CATALOG_POWER_MANAGER_PRESENT) 
+#if defined(_SILICON_LABS_32B_SERIES_2)
 #define SLEEP_EM_EVENT_MASK      ( SL_POWER_MANAGER_EVENT_TRANSITION_ENTERING_EM2  \
                                   | SL_POWER_MANAGER_EVENT_TRANSITION_LEAVING_EM2  \
                                   | SL_POWER_MANAGER_EVENT_TRANSITION_ENTERING_EM3 \
-                                  | SL_POWER_MANAGER_EVENT_TRANSITION_LEAVING_EM3)
-#endif
-
-#if defined(SL_CATALOG_POWER_MANAGER_PRESENT) &&  defined(_SILICON_LABS_32B_SERIES_2)
+                                  | SL_POWER_MANAGER_EVENT_TRANSITION_LEAVING_EM3  \
+                                  | SL_POWER_MANAGER_EVENT_TRANSITION_LEAVING_EM0)
+#else 
+#define SLEEP_EM_EVENT_MASK      (SL_POWER_MANAGER_EVENT_TRANSITION_LEAVING_EM0)
+#endif // _SILICON_LABS_32B_SERIES_2
 static void events_handler(sl_power_manager_em_t from,
                            sl_power_manager_em_t to);
 static sl_power_manager_em_transition_event_info_t events_info =
@@ -51,7 +52,7 @@ static sl_power_manager_em_transition_event_info_t events_info =
   .on_event = events_handler,
 };
 static sl_power_manager_em_transition_event_handle_t events_handle;
-#endif
+#endif // SL_CATALOG_POWER_MANAGER_PRESENT
 
 {% for instance in iostream_usart_instances %}
 sl_status_t sl_iostream_usart_init_{{ instance }}(void);
@@ -118,8 +119,7 @@ sl_status_t sl_iostream_usart_init_{{ instance }}(void)
   };
 
   sl_iostream_dma_config_t dma_config_{{ instance }} = {.src = (uint8_t *)&SL_IOSTREAM_USART_{{ instance | upper }}_PERIPHERAL->RXDATA,
-                                                        .peripheral_signal = SL_IOSTREAM_USART_RX_DMA_SIGNAL(SL_IOSTREAM_USART_{{ instance | upper }}_PERIPHERAL_NO),
-                                                        .size = dmadrvDataSize1};
+                                                        .peripheral_signal = SL_IOSTREAM_USART_RX_DMA_SIGNAL(SL_IOSTREAM_USART_{{ instance | upper }}_PERIPHERAL_NO)};
 
   sl_iostream_uart_config_t uart_config_{{ instance }} = {
     .dma_cfg = dma_config_{{ instance }},
@@ -147,7 +147,7 @@ sl_status_t sl_iostream_usart_init_{{ instance }}(void)
 void sl_iostream_usart_init_instances(void)
 {
   sl_status_t status;
-#if defined(SL_CATALOG_POWER_MANAGER_PRESENT) &&  defined(_SILICON_LABS_32B_SERIES_2)
+#if defined(SL_CATALOG_POWER_MANAGER_PRESENT)
   // Enable power manager notifications
   sl_power_manager_subscribe_em_transition_event(&events_handle, &events_info);
 #endif
@@ -180,23 +180,20 @@ void SL_IOSTREAM_USART_RX_IRQ_HANDLER(SL_IOSTREAM_USART_{{ instance | upper }}_P
 
 {% endfor %}
 
-#if defined(SL_CATALOG_POWER_MANAGER_PRESENT) && !defined(SL_CATALOG_KERNEL_PRESENT)
+#if defined(SL_CATALOG_POWER_MANAGER_PRESENT) 
+#if !defined(SL_CATALOG_KERNEL_PRESENT)
 {% for instance in iostream_usart_instances %} {# Create IRQ Handler(s) #}
 sl_power_manager_on_isr_exit_t sl_iostream_usart_{{ instance }}_sleep_on_isr_exit(void)
 {
   return sl_iostream_uart_sleep_on_isr_exit(&sl_iostream_{{ instance }});
 }
-bool sl_iostream_usart_{{ instance }}_is_ok_to_sleep(void)
-{
-  return sl_iostream_uart_is_ok_to_sleep(&sl_iostream_{{ instance }});
-}
 {% endfor %}
-#endif
-
-#if defined(SL_CATALOG_POWER_MANAGER_PRESENT) &&  defined(_SILICON_LABS_32B_SERIES_2)
+#endif // SL_CATALOG_KERNEL_PRESENT
 static void events_handler(sl_power_manager_em_t from,
                            sl_power_manager_em_t to)
 {
+  (void) from;
+  #if defined(_SILICON_LABS_32B_SERIES_2)
   uint32_t out;
   if (((from == SL_POWER_MANAGER_EM2) 
       || (from == SL_POWER_MANAGER_EM3)) 
@@ -215,7 +212,15 @@ static void events_handler(sl_power_manager_em_t from,
 	  // Sleep the USART Tx pin on series 2 devices to save energy
       out = GPIO_PinOutGet(SL_IOSTREAM_USART_{{ instance | upper }}_TX_PORT, SL_IOSTREAM_USART_{{ instance | upper }}_TX_PIN);
       GPIO_PinModeSet(SL_IOSTREAM_USART_{{ instance | upper }}_TX_PORT, SL_IOSTREAM_USART_{{ instance | upper }}_TX_PIN, gpioModeDisabled, out);
-      {% endfor %}
+    {% endfor %}
+  }
+  #endif // _SILICON_LABS_32B_SERIES_2
+  // Enable next byte detect to wake from sleep
+  if (to < SL_POWER_MANAGER_EM2){
+    {% for instance in iostream_usart_instances %} 
+    // Enable next byte detection to wakeup from sleep on next byte
+    context_{{ instance }}.context.set_next_byte_detect(sl_iostream_{{ instance }}_handle->context, true);
+    {% endfor %}
   }
 }
-#endif
+#endif // SL_CATALOG_POWER_MANAGER_PRESENT

@@ -309,7 +309,8 @@ typedef enum {
 typedef enum {
   SL_WISUN_PHY_CONFIG_FAN10    = 0,
   SL_WISUN_PHY_CONFIG_FAN11    = 1,
-  SL_WISUN_PHY_CONFIG_EXPLICIT = 2
+  SL_WISUN_PHY_CONFIG_EXPLICIT = 2,
+  SL_WISUN_PHY_CONFIG_IDS      = 3
 } sl_wisun_phy_config_type_t;
 
 /// Wi-SUN Message API common header
@@ -522,7 +523,14 @@ typedef struct {
       uint8_t channel_spacing;
       /// PHY mode ID
       uint8_t phy_mode_id;
-     } explicit;
+    } explicit;
+    /// Use direct IDs to point a specific RAIL configuration
+    struct {
+      /// Protocol ID
+      uint16_t protocol_id;
+      /// Channel ID
+      uint16_t channel_id;
+    } ids;
   } config;
 } sl_wisun_phy_config_t;
 SL_PACK_END()

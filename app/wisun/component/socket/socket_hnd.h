@@ -41,6 +41,7 @@ extern "C" {
 #include <inttypes.h>
 #include <stdbool.h>
 #include <assert.h>
+#include "sl_wisun_types.h"
 #include "cmsis_os2.h"
 #include "errno.h"
 #include "socket_config.h"
@@ -223,7 +224,7 @@ int32_t socket_handler_add(uint16_t domain,
  * @param[in] socket_id socket id
  * @return count of sockets if successful, -1 otherwise
  *****************************************************************************/
-static inline int32_t socket_handler_add_sockid(uint16_t domain,
+__STATIC_INLINE int32_t socket_handler_add_sockid(uint16_t domain,
                                                 const int32_t socket_id)
 {
   return socket_handler_add(domain, socket_id, NULL, 0);
@@ -244,7 +245,7 @@ int32_t socket_handler_set_custom_info(const int32_t socket_id, custom_info_t *i
  * @param[in] socket_id socket id
  * @return 0 if successful, -1 otherwise
  *****************************************************************************/
-static inline int32_t socket_handler_reset_custom_info(const int32_t socket_id)
+__STATIC_INLINE int32_t socket_handler_reset_custom_info(const int32_t socket_id)
 {
   return socket_handler_set_custom_info(socket_id, NULL);
 }
@@ -263,7 +264,7 @@ _socket_handler_t *socket_handler_get(const int32_t socket_id);
  * @param[in] socket_id socket id
  * @return true if socket id is in the storage already, false otherwise
  *****************************************************************************/
-static inline bool socket_handler_is_exist(const int32_t socket_id)
+__STATIC_INLINE bool socket_handler_is_exist(const int32_t socket_id)
 {
   return (socket_handler_get(socket_id) == NULL) ? false : true;
 }
@@ -288,7 +289,7 @@ uint8_t socket_handler_get_cnt(void);
  * @details
  * @return count of free socket slots in the storage if successful, 0 otherwise
  *****************************************************************************/
-static inline uint8_t socket_handler_get_available_cnt(void)
+__STATIC_INLINE uint8_t socket_handler_get_available_cnt(void)
 {
   return (SOCKET_HND_MAX_SOCKET_NUMBER - socket_handler_get_cnt());
 }
@@ -382,7 +383,7 @@ int32_t socket_handler_fifo_read(_socket_handler_t *hnd, uint8_t *data, uint32_t
  * @details Set pointers to NULL
  * @param[in,out] hnd socket handler ptr
  *****************************************************************************/
-static inline void socket_fifo_destroy(_socket_handler_t *hnd)
+__STATIC_INLINE void socket_fifo_destroy(_socket_handler_t *hnd)
 {
   socket_handler_fifo_init(hnd, NULL, 0);
 }

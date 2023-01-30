@@ -45,28 +45,29 @@
 // <eusart signal=TX,RX,CS,SCLK> SL_EUSART_SPINCP
 
 // $[EUSART_SL_EUSART_SPINCP]
-#define SL_EUSART_SPINCP_PERIPHERAL                     EUSART1
-#define SL_EUSART_SPINCP_PERIPHERAL_NO                  1
+#warning "Bootloader SPI Peripheral Eusart Driver not configured"
+//#define SL_EUSART_SPINCP_PERIPHERAL                     EUSART1
+//#define SL_EUSART_SPINCP_PERIPHERAL_NO                  1
 
 // EUSART1 TX on PC0
-#define SL_EUSART_SPINCP_TX_PORT                        gpioPortC
-#define SL_EUSART_SPINCP_TX_PIN                         0
-#define SL_EUSART_SPINCP_TX_LOC                         1
+//#define SL_EUSART_SPINCP_TX_PORT                        gpioPortC
+//#define SL_EUSART_SPINCP_TX_PIN                         0
+//#define SL_EUSART_SPINCP_TX_LOC                         1
 
 // EUSART1 RX on PC1
-#define SL_EUSART_SPINCP_RX_PORT                        gpioPortC
-#define SL_EUSART_SPINCP_RX_PIN                         1
-#define SL_EUSART_SPINCP_RX_LOC                         0
+//#define SL_EUSART_SPINCP_RX_PORT                        gpioPortC
+//#define SL_EUSART_SPINCP_RX_PIN                         1
+//#define SL_EUSART_SPINCP_RX_LOC                         0
 
 // EUSART1 CS on PC3
-#define SL_EUSART_SPINCP_CS_PORT                        gpioPortC
-#define SL_EUSART_SPINCP_CS_PIN                         3
-#define SL_EUSART_SPINCP_CS_LOC                         1
+//#define SL_EUSART_SPINCP_CS_PORT                        gpioPortC
+//#define SL_EUSART_SPINCP_CS_PIN                         3
+//#define SL_EUSART_SPINCP_CS_LOC                         1
 
 // EUSART1 SCLK on PC2
-#define SL_EUSART_SPINCP_SCLK_PORT                      gpioPortC
-#define SL_EUSART_SPINCP_SCLK_PIN                       2
-#define SL_EUSART_SPINCP_SCLK_LOC                       4
+//#define SL_EUSART_SPINCP_SCLK_PORT                      gpioPortC
+//#define SL_EUSART_SPINCP_SCLK_PIN                       2
+//#define SL_EUSART_SPINCP_SCLK_LOC                       4
 // [EUSART_SL_EUSART_SPINCP]$
 
 // <<< sl:end pin_tool >>>

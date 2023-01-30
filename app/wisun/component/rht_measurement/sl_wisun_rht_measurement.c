@@ -32,6 +32,7 @@
 //                                   Includes
 // -----------------------------------------------------------------------------
 
+#include "sl_wisun_types.h"
 #include "sl_wisun_rht_measurement.h"
 #include "sl_si70xx.h"
 #include "sl_i2cspm_instances.h"
@@ -76,13 +77,13 @@ static sl_i2cspm_t *_rht_sensor = NULL;
  * @brief RHT sensor mutex lock
  * @details
  *****************************************************************************/
-static inline void _rht_mutex_acquire(void);
+__STATIC_INLINE void _rht_mutex_acquire(void);
 
 /**************************************************************************//**
  * @brief RHT sensor mutex unlock
  * @details
  *****************************************************************************/
-static inline void _rht_mutex_release(void);
+__STATIC_INLINE void _rht_mutex_release(void);
 
 // -----------------------------------------------------------------------------
 //                                Static Variables
@@ -107,13 +108,13 @@ static const osMutexAttr_t _rht_sensor_mtx_attr = {
 // -----------------------------------------------------------------------------
 
 /* Mutex acquire */
-static inline void _rht_mutex_acquire(void)
+__STATIC_INLINE void _rht_mutex_acquire(void)
 {
   assert(osMutexAcquire(_rht_sensor_mtx, osWaitForever) == osOK);
 }
 
 /* Mutex release */
-static inline void _rht_mutex_release(void)
+__STATIC_INLINE void _rht_mutex_release(void)
 {
   assert(osMutexRelease(_rht_sensor_mtx) == osOK);
 }

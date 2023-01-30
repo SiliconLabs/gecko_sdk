@@ -266,6 +266,24 @@ void CRYPTO_DDataRead(CRYPTO_DDataReg_TypeDef  ddataReg,
   CRYPTO_BurstFromCrypto(ddataReg, &val[4]);
 }
 
+void CRYPTO_DDataReadUnaligned(CRYPTO_DDataReg_TypeDef ddataReg,
+                               uint8_t * val)
+{
+  /* Check if the buffer pointer is 32-bit aligned, if not read the data into a
+     temporary 32-bit aligned buffer then copy the data to the output buffer.*/
+  if ((uintptr_t)val & 0x3) {
+    CRYPTO_DData_TypeDef temp;
+    CRYPTO_DDataRead(ddataReg, temp);
+    memcpy(val, temp, sizeof(temp));
+  } else {
+    // Avoid casting val directly to uint32_t pointer as this can lead to the
+    // compiler making incorrect assumptions in the case where val is un-
+    // aligned.
+    uint8_t * volatile tmp_val_ptr = val;
+    CRYPTO_DDataRead(ddataReg, (uint32_t*) tmp_val_ptr);
+  }
+}
+
 void CRYPTO_QDataRead(CRYPTO_QDataReg_TypeDef qdataReg,
                       CRYPTO_QData_TypeDef    val)
 {
@@ -282,6 +300,24 @@ void CRYPTO_QDataWrite(CRYPTO_QDataReg_TypeDef qdataReg,
   CRYPTO_BurstToCrypto(qdataReg, &val[4]);
   CRYPTO_BurstToCrypto(qdataReg, &val[8]);
   CRYPTO_BurstToCrypto(qdataReg, &val[12]);
+}
+
+void CRYPTO_QDataWriteUnaligned(CRYPTO_QDataReg_TypeDef qdataReg,
+                                const uint8_t * val)
+{
+  /* Check data is 32-bit aligned,
+     if not move to temporary 32-bit aligned buffer before writing. */
+  if ((uintptr_t)val & 0x3) {
+    CRYPTO_QData_TypeDef temp;
+    memcpy(temp, val, sizeof(temp));
+    CRYPTO_QDataWrite(qdataReg, temp);
+  } else {
+    // Avoid casting val directly to uint32_t pointer as this can lead to the
+    // compiler making incorrect assumptions in the case where val is un-
+    // aligned.
+    const uint8_t * volatile tmp_val_ptr = val;
+    CRYPTO_QDataWrite(qdataReg, (const uint32_t*) tmp_val_ptr);
+  }
 }
 
 void CRYPTO_KeyBufWrite(CRYPTO_TypeDef          *crypto,
@@ -494,7 +530,7 @@ void CRYPTO_SHA_1(CRYPTO_TypeDef *             crypto,
   while (len >= CRYPTO_SHA1_BLOCK_SIZE_IN_BYTES) {
     /* Write block to QDATA1.  */
     CRYPTO_InstructionSequenceWait(crypto);
-    CRYPTO_QDataWrite(&crypto->QDATA1BIG, (uint32_t *) msg);
+    CRYPTO_QDataWriteUnaligned(&crypto->QDATA1BIG, msg);
 
     /* Execute SHA. */
     CRYPTO_EXECUTE_3(crypto,
@@ -563,14 +599,23 @@ void CRYPTO_SHA_1(CRYPTO_TypeDef *             crypto,
 
   /* Read the resulting message digest from DDATA0BIG.  */
   CRYPTO_InstructionSequenceWait(crypto);
-  ((uint32_t*)msgDigest)[0] = crypto->DDATA0BIG;
-  ((uint32_t*)msgDigest)[1] = crypto->DDATA0BIG;
-  ((uint32_t*)msgDigest)[2] = crypto->DDATA0BIG;
-  ((uint32_t*)msgDigest)[3] = crypto->DDATA0BIG;
-  ((uint32_t*)msgDigest)[4] = crypto->DDATA0BIG;
-  crypto->DDATA0BIG;
-  crypto->DDATA0BIG;
-  crypto->DDATA0BIG;
+
+  /* Check if the buffer pointer is 32-bit aligned, if not read the data into a
+     temporary 32-bit aligned buffer then copy the data to the output buffer.*/
+  if ((uintptr_t)msgDigest & 0x3) {
+    CRYPTO_DData_TypeDef temp;
+    CRYPTO_DDataRead(&crypto->DDATA0BIG, temp);
+    memcpy(msgDigest, temp, sizeof(CRYPTO_SHA1_Digest_TypeDef));
+  } else {
+    ((uint32_t*)msgDigest)[0] = crypto->DDATA0BIG;
+    ((uint32_t*)msgDigest)[1] = crypto->DDATA0BIG;
+    ((uint32_t*)msgDigest)[2] = crypto->DDATA0BIG;
+    ((uint32_t*)msgDigest)[3] = crypto->DDATA0BIG;
+    ((uint32_t*)msgDigest)[4] = crypto->DDATA0BIG;
+    crypto->DDATA0BIG;
+    crypto->DDATA0BIG;
+    crypto->DDATA0BIG;
+  }
 }
 
 /***************************************************************************//**
@@ -634,7 +679,7 @@ void CRYPTO_SHA_256(CRYPTO_TypeDef *             crypto,
   while (len >= CRYPTO_SHA256_BLOCK_SIZE_IN_BYTES) {
     /* Write block to QDATA1BIG.  */
     CRYPTO_InstructionSequenceWait(crypto);
-    CRYPTO_QDataWrite(&crypto->QDATA1BIG, (uint32_t *) msg);
+    CRYPTO_QDataWriteUnaligned(&crypto->QDATA1BIG, msg);
 
     /* Execute SHA. */
     CRYPTO_EXECUTE_3(crypto,
@@ -703,7 +748,7 @@ void CRYPTO_SHA_256(CRYPTO_TypeDef *             crypto,
 
   /* Read the resulting message digest from DDATA0BIG.  */
   CRYPTO_InstructionSequenceWait(crypto);
-  CRYPTO_DDataRead(&crypto->DDATA0BIG, (uint32_t *)msgDigest);
+  CRYPTO_DDataReadUnaligned(&crypto->DDATA0BIG, msgDigest);
 }
 
 /***************************************************************************//**

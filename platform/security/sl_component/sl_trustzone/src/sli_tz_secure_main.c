@@ -44,7 +44,6 @@
   #include "sl_se_manager_util.h"
 #if !defined(SEMAILBOX_PRESENT)
   #include "psa/internal_trusted_storage.h"
-  #include "psa/sli_internal_trusted_storage.h"
   #include "sli_psa_driver_common.h"
 #endif
 

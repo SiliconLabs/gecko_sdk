@@ -174,23 +174,32 @@ target_include_directories(openthread-posix PRIVATE
 
 if(OT_POSIX_CONFIG_RCP_BUS MATCHES "CPC")
     set(CPCD_SOURCE_DIR "" CACHE STRING "Location of cpc daemon project")
-    CHECK_INCLUDE_FILE(sl_cpc.h CPC_HEADER_FOUND)
-    if (NOT CPC_HEADER_FOUND)
-        message(STATUS "CPC is not installed.")
-        if (NOT CPCD_SOURCE_DIR)
+
+    if (NOT CPCD_SOURCE_DIR)
+        CHECK_INCLUDE_FILE(sl_cpc.h CPC_HEADER_FOUND)
+        if (NOT CPC_HEADER_FOUND)
+            message(STATUS "CPC is not installed.")
             message(FATAL_ERROR "Could not locate CPC daemon sources.\n"
                                 "Please define the CMake variable 'CPCD_SOURCE_DIR'.\n"
                                 "'CPCD_SOURCE_DIR' is an absolute path to the CPC Daemon sources")
+        else()
+            message(STATUS "Using installed CPC header")
         endif()
 
-        message(STATUS  "Building cpc library from source...\n"
-                        "    CPCD_SOURCE_DIR = ${CPCD_SOURCE_DIR}")
+    else()
+        message(STATUS  "Including specified CPC daemon source...\n"
+                            "    CPCD_SOURCE_DIR = ${CPCD_SOURCE_DIR}")
         if (NOT IS_ABSOLUTE ${CPCD_SOURCE_DIR})
             message(FATAL_ERROR "'CPCD_SOURCE_DIR' must be an absolute path.\nCPCD_SOURCE_DIR=\"${CPCD_SOURCE_DIR}\"")
         endif()
 
-        # Add cpcd to the build tree
-        add_subdirectory(${CPCD_SOURCE_DIR} ${CPCD_SOURCE_DIR}/build)
+        if (NOT TARGET cpc)
+            # Add cpcd to the build tree
+            message(STATUS  "Building cpc library from source...")
+            add_subdirectory(${CPCD_SOURCE_DIR} ${CPCD_SOURCE_DIR}/build)
+        else()
+            message(STATUS "CPC targets already defined - not adding subdirectory ${CPCD_SOURCE_DIR}")
+        endif()
         target_include_directories(openthread-posix PRIVATE
             ${CPCD_SOURCE_DIR}/lib
         )

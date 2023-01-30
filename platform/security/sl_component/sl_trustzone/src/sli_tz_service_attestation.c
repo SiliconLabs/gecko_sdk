@@ -31,6 +31,7 @@
 #include <string.h>
 #include "em_device.h"
 #include "sli_tz_iovec_check.h"
+#include "psa/storage_common.h"
 
 #if (_SILICON_LABS_SECURITY_FEATURE != _SILICON_LABS_SECURITY_FEATURE_VAULT)
   #include "tz_secure_memory_autogen.h"
@@ -45,7 +46,6 @@
   #include "psa/crypto_types.h"
   #include "psa/crypto_values.h"
   #include "psa/internal_trusted_storage.h"
-  #include "psa/sli_internal_trusted_storage.h"
 
 // TF-M
   #include "attest.h"

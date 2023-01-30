@@ -28,9 +28,8 @@
  *
  ******************************************************************************/
 
-#include <math.h>
-
 #include "em_iadc.h"
+
 #if defined(IADC_COUNT) && (IADC_COUNT > 0)
 
 #include "sl_assert.h"
@@ -455,7 +454,8 @@ void IADC_init(IADC_TypeDef *iadc,
         // Get offset from DEVINFO
         offsetAnaBase = (int16_t)(DEVINFO->IADC0OFFSETCAL0 & _DEVINFO_IADC0OFFSETCAL0_OFFSETANABASE_MASK)
                         >> _DEVINFO_IADC0OFFSETCAL0_OFFSETANABASE_SHIFT;
-        offsetAna = offsetAnaBase + (offsetAna1HiAccInt) / pow(2, osrValue);
+        // 1 << osrValue is the same as pow(2, osrValue)
+        offsetAna = offsetAnaBase + (offsetAna1HiAccInt) / (1 << osrValue);
 
         // 3. Reference voltage adjustment
         offsetAna = (offsetAna) * (1.25f / refVoltage);

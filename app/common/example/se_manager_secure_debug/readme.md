@@ -81,8 +81,9 @@ The following SE Manager APIs are used in this example:
 
 1. The hard-coded private command key is an insecure method so the user should find a way to import the signed access certificate for secure debug unlock.
 2. The device should disconnect from the debugger when locking or unlocking the debug interface.
-3. **Warning:** Loading a public command key into the SE and disable the device erase are a **ONE-TIME-ONLY** process. Both of these assignment operations are irrevocable and persist for the life of the device.
-4. The default optimization level is `Optimize for debugging (-Og)` on Simplicity IDE and `None` on IAR Embedded Workbench.
+3. For TrustZone-aware debugging, use the `DEBUG_OPTIONS` (default `0x0c`) and `DEBUG_MODE_REQUEST` (default `0x3e`) defined in `app_se_manager_secure_debug.h` to unlock the debug and trace features on Secure and Non-secure applications (refer to [AN1190](https://www.silabs.com/documents/public/application-notes/an1190-efr32-secure-debug.pdf) for details).
+4. **Warning:** Loading a public command key into the Secure Engine and disable the device erase are a **ONE-TIME-ONLY** process. Both of these assignment operations are irrevocable and persist for the life of the device.
+5. The default optimization level is `Optimize for debugging (-Og)` on Simplicity IDE and `None` on IAR Embedded Workbench.
 
 
 ## Resources

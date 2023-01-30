@@ -62,8 +62,8 @@ namespace Posix {
 bool CpcInterface::sCpcResetReq = false;
 
 CpcInterface::CpcInterface(SpinelInterface::ReceiveFrameCallback aCallback,
-                             void *                                aCallbackContext,
-                             SpinelInterface::RxFrameBuffer &      aFrameBuffer)
+                           void *                                aCallbackContext,
+                           SpinelInterface::RxFrameBuffer &      aFrameBuffer)
     : mReceiveFrameCallback(aCallback)
     , mReceiveFrameContext(aCallbackContext)
     , mReceiveFrameBuffer(aFrameBuffer)
@@ -71,7 +71,7 @@ CpcInterface::CpcInterface(SpinelInterface::ReceiveFrameCallback aCallback,
 {
     memset(&mInterfaceMetrics, 0, sizeof(mInterfaceMetrics));
     mInterfaceMetrics.mRcpInterfaceType = OT_POSIX_RCP_BUS_CPC;
-    mCpcBusSpeed = kCpcBusSpeed;
+    mCpcBusSpeed                        = kCpcBusSpeed;
 }
 
 void CpcInterface::OnRcpReset(void)
@@ -80,29 +80,29 @@ void CpcInterface::OnRcpReset(void)
 
 otError CpcInterface::Init(const Url::Url &aRadioUrl)
 {
-    otError         error = OT_ERROR_NONE;
-    const char *    value;
+    otError     error = OT_ERROR_NONE;
+    const char *value;
     OT_UNUSED_VARIABLE(aRadioUrl);
 
     VerifyOrExit(mSockFd == -1, error = OT_ERROR_ALREADY);
 
     if (cpc_init(&mHandle, aRadioUrl.GetPath(), false, HandleSecondaryReset) != 0)
     {
-      otLogCritPlat("CPC init failed. Ensure radio-url argument has the form 'spinel+cpc://cpcd_0?iid=<1..3>'");
-      DieNow(OT_EXIT_FAILURE);
+        otLogCritPlat("CPC init failed. Ensure radio-url argument has the form 'spinel+cpc://cpcd_0?iid=<1..3>'");
+        DieNow(OT_EXIT_FAILURE);
     }
 
     mSockFd = cpc_open_endpoint(mHandle, &mEndpoint, mId, 1);
 
     if (mSockFd < 0)
     {
-      otLogCritPlat("CPC endpoint open failed");
-      error = OT_ERROR_FAILED;
+        otLogCritPlat("CPC endpoint open failed");
+        error = OT_ERROR_FAILED;
     }
 
     if ((value = aRadioUrl.GetValue("cpc-bus-speed")))
     {
-        mCpcBusSpeed = static_cast<uint32_t>(atoi(value));;
+        mCpcBusSpeed = static_cast<uint32_t>(atoi(value));
     }
 
     otLogCritPlat("mCpcBusSpeed = %d", mCpcBusSpeed);
@@ -133,21 +133,21 @@ exit:
 
 void CpcInterface::Read(uint64_t aTimeoutUs)
 {
-    uint8_t buffer[kMaxFrameSize];
+    uint8_t  buffer[kMaxFrameSize];
     uint8_t *ptr = buffer;
-    ssize_t bytesRead;
-    bool block = false;
-    int  ret = 0;
+    ssize_t  bytesRead;
+    bool     block = false;
+    int      ret   = 0;
 
-    if(aTimeoutUs > 0)
+    if (aTimeoutUs > 0)
     {
         cpc_timeval_t timeout;
 
-        timeout.seconds = static_cast<int>(aTimeoutUs / US_PER_S);
+        timeout.seconds      = static_cast<int>(aTimeoutUs / US_PER_S);
         timeout.microseconds = static_cast<int>(aTimeoutUs % US_PER_S);
 
         block = true;
-        ret = cpc_set_endpoint_option(mEndpoint, CPC_OPTION_BLOCKING, &block, sizeof(block));
+        ret   = cpc_set_endpoint_option(mEndpoint, CPC_OPTION_BLOCKING, &block, sizeof(block));
         OT_ASSERT(ret == 0);
         ret = cpc_set_endpoint_option(mEndpoint, CPC_OPTION_RX_TIMEOUT, &timeout, sizeof(timeout));
         OT_ASSERT(ret == 0);
@@ -162,16 +162,15 @@ void CpcInterface::Read(uint64_t aTimeoutUs)
 
     if (bytesRead > 0)
     {
-        while(bytesRead--)
+        while (bytesRead--)
         {
-            if(mReceiveFrameBuffer.CanWrite(sizeof(uint8_t)))
+            if (mReceiveFrameBuffer.CanWrite(sizeof(uint8_t)))
             {
                 IgnoreError(mReceiveFrameBuffer.WriteByte(*(ptr++)));
             }
         }
 
         mReceiveFrameCallback(mReceiveFrameContext);
-
     }
     else if (bytesRead == -ECONNRESET)
     {
@@ -198,8 +197,7 @@ otError CpcInterface::Write(const uint8_t *aFrame, uint16_t aLength)
 
     // We are catching the SPINEL reset command and returning
     // a SPINEL reset response immediately
-    if(SPINEL_HEADER_GET_TID(*aFrame) == 0 &&
-        *(aFrame + 1) == SPINEL_CMD_RESET)
+    if (SPINEL_HEADER_GET_TID(*aFrame) == 0 && *(aFrame + 1) == SPINEL_CMD_RESET)
     {
         SendResetResponse();
         return error;
@@ -221,9 +219,9 @@ otError CpcInterface::Write(const uint8_t *aFrame, uint16_t aLength)
         else if (bytesWritten < 0)
         {
             VerifyOrExit((bytesWritten == -EPIPE), SetCpcResetReq(true));
-            VerifyOrDie((bytesWritten == -EAGAIN) || (bytesWritten == -EWOULDBLOCK) || (bytesWritten == -EINTR), OT_EXIT_ERROR_ERRNO);
+            VerifyOrDie((bytesWritten == -EAGAIN) || (bytesWritten == -EWOULDBLOCK) || (bytesWritten == -EINTR),
+                        OT_EXIT_ERROR_ERRNO);
         }
-
     }
 
 exit:
@@ -232,7 +230,7 @@ exit:
 
 otError CpcInterface::WaitForFrame(uint64_t aTimeoutUs)
 {
-    otError        error = OT_ERROR_NONE;
+    otError error = OT_ERROR_NONE;
 
     CheckAndReInitCpc();
     Read(aTimeoutUs);
@@ -264,34 +262,34 @@ void CpcInterface::CheckAndReInitCpc(void)
 {
     int result;
     int attempts = 0;
-    
-    //Check if CPC needs to be restarted
+
+    // Check if CPC needs to be restarted
     VerifyOrExit(sCpcResetReq);
-    
+
     do
     {
-        //Add some delay before attempting to restart
+        // Add some delay before attempting to restart
         usleep(kMaxSleepDuration);
-        //Try to restart CPC
+        // Try to restart CPC
         result = cpc_restart(&mHandle);
-        //Mark how many times the restart was attempted
+        // Mark how many times the restart was attempted
         attempts++;
-        //Continue to try and restore CPC communication until we
-        //have exhausted the retries or restart was successful
-    }   while ((result != 0) && (attempts < kMaxRestartAttempts));
+        // Continue to try and restore CPC communication until we
+        // have exhausted the retries or restart was successful
+    } while ((result != 0) && (attempts < kMaxRestartAttempts));
 
-    //If the restart failed, exit.
+    // If the restart failed, exit.
     VerifyOrDie(result == 0, OT_EXIT_ERROR_ERRNO);
 
-    //Reopen the endpoint for communication
+    // Reopen the endpoint for communication
     mSockFd = cpc_open_endpoint(mHandle, &mEndpoint, mId, 1);
 
-    //If the restart failed, exit.
+    // If the restart failed, exit.
     VerifyOrDie(mSockFd >= 0, OT_EXIT_ERROR_ERRNO);
 
     otLogCritPlat("Restarted CPC successfully");
 
-    //Clear the flag
+    // Clear the flag
     SetCpcResetReq(false);
 
 exit:
@@ -300,12 +298,11 @@ exit:
 
 void CpcInterface::SendResetResponse(void)
 {
-
     // Put CPC Reset call here
 
-    for(int i=0; i<kResetCMDSize; ++i)
+    for (int i = 0; i < kResetCMDSize; ++i)
     {
-        if(mReceiveFrameBuffer.CanWrite(sizeof(uint8_t)))
+        if (mReceiveFrameBuffer.CanWrite(sizeof(uint8_t)))
         {
             IgnoreError(mReceiveFrameBuffer.WriteByte(mResetResponse[i]));
         }

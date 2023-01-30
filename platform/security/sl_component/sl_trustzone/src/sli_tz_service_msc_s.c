@@ -44,6 +44,21 @@
   (((LDMA_NS->STATUS & LDMA_STATUS_ANYBUSY) != 0) \
    || ((LDMA_NS->STATUS & LDMA_STATUS_ANYREQ) != 0))
 
+// Devices with Memory Mapped LDMA (MMLDMA) IP have two AHB bus masters that are
+// called LDMA0 and LDMA1, replacing the LDMA bus master in devices with earlier
+// LDMA IP versions. The bus master to use is configured in the LDMA_CH_CFG
+// register. However the sli_tz_msc_write_word_dma() function below calls the
+// MSC_WriteWordDma() function which just applies the reset value of the CFG
+// register (_LDMA_CH_CFG_RESETVALUE) which corresponds to LDMA0. Therefore
+// we can translate SMU_BMPUSATD0_LDMA to SMU_BMPUSATD0_LDMA0 here:
+#if !defined(SMU_BMPUSATD0_LDMA)
+  #if defined(SMU_BMPUSATD0_LDMA0)
+    #define SMU_BMPUSATD0_LDMA SMU_BMPUSATD0_LDMA0
+  #else
+    #error Unsupported LDMA configuration.
+  #endif
+#endif
+
 //------------------------------------------------------------------------------
 // Function definitions
 

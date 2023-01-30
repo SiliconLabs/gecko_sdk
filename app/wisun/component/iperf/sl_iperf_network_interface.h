@@ -47,6 +47,31 @@ extern "C" {
 
 #include "sl_iperf_config.h"
 
+#if !defined(__STATIC_INLINE)
+  #define __STATIC_INLINE             static inline
+#endif
+#if !defined(__GNUC__)
+  // IAR
+  #if !defined(SL_WEAK)
+    #define SL_WEAK                   __weak
+  #endif
+  #if !defined(SL_PACK_START)
+    #define STRINGIZE(X)              #X
+    #define SL_PACK_START(X)          _Pragma(STRINGIZE(pack(X)))
+    #define SL_PACK_END()             _Pragma("pack()")
+  #endif
+#else
+  // GCC
+  #if !defined(SL_WEAK) && defined(__GNUC__)
+    #define SL_WEAK                   __attribute__ ((weak))
+  #endif
+  #if !defined(SL_PACK_START)
+    // GCC always uses 1 byte maximum aligment
+    #define SL_PACK_START(x)
+    #define SL_PACK_END()
+  #endif
+#endif
+
 /**************************************************************************//**
  * @addtogroup SL_IPERF_NETWORK_INTERFACE_API iPerf - Network interface
  * @ingroup SL_IPERF
@@ -403,7 +428,7 @@ int32_t sl_iperf_leave_multicast_group(const int32_t sockid,
  * @param[in,out] dest_addr Destination address (custom type)
  * @param[in] src_addr Source address (iPerf type)
  *****************************************************************************/
-static inline void sl_iperf_set_socket_addr(sl_iperf_socket_addr_t * const dest_addr, const void * const src_addr)
+__STATIC_INLINE void sl_iperf_set_socket_addr(sl_iperf_socket_addr_t * const dest_addr, const void * const src_addr)
 {
   memcpy(dest_addr, src_addr, sizeof(sl_iperf_socket_addr_t));
 }
@@ -414,7 +439,7 @@ static inline void sl_iperf_set_socket_addr(sl_iperf_socket_addr_t * const dest_
  * @param[in] src_addr Source address (iPerf type)
  * @param[in, out] dest_addr Destination address (custom type)
  *****************************************************************************/
-static inline void sl_iperf_get_socket_addr(const sl_iperf_socket_addr_t * const src_addr, void * const dest_addr)
+__STATIC_INLINE void sl_iperf_get_socket_addr(const sl_iperf_socket_addr_t * const src_addr, void * const dest_addr)
 {
   memcpy(dest_addr, src_addr, sizeof(sl_iperf_socket_addr_t));
 }

@@ -32,7 +32,7 @@
 #endif //defined(DEBUG_PTA) || defined(RHO_GPIO) || defined(SL_RAIL_UTIL_COEX_RHO_PORT)
 
 #if defined(DEBUG_PTA) || defined(SL_RAIL_UTIL_COEX_REQ_GPIO) || defined(SL_RAIL_UTIL_COEX_REQ_PORT) \
-  || defined(SL_RAIL_UTIL_COEX_GNT_GPIO) || defined(SL_RAIL_UTIL_COEX_GNT_PORT) || defined(SL_RAIL_UTIL_COEX_RUNTIME_PHY_SELECT)
+  || defined(SL_RAIL_UTIL_COEX_GNT_GPIO) || defined(SL_RAIL_UTIL_COEX_GNT_PORT) || SL_RAIL_UTIL_COEX_RUNTIME_PHY_SELECT
 #define COEX_SUPPORT 1
 #endif //defined(DEBUG_PTA) || defined(SL_RAIL_UTIL_COEX_REQ_GPIO) || defined(SL_RAIL_UTIL_COEX_REQ_PORT)
 //|| defined(SL_RAIL_UTIL_COEX_GNT_GPIO) || defined(SL_RAIL_UTIL_COEX_GNT_PORT) || defined(SL_RAIL_UTIL_COEX_RUNTIME_PHY_SELECT)
@@ -283,7 +283,8 @@ void sli_rail_util_ieee802154_coex_on_event(COEX_Events_t events)
     emRadioHoldOffIsr((COEX_GetOptions() & COEX_OPTION_HOLDOFF_ACTIVE) != 0U);
   }
  #if     SL_RAIL_UTIL_COEX_RUNTIME_PHY_SELECT
-  if ((events & COEX_EVENT_PHY_SELECT_CHANGED) != 0U) {
+  if (((events & COEX_EVENT_PHY_SELECT_CHANGED) != 0U)
+      && (phySelectTimeoutMs != 0U)) {
     phySelectIsr();
   }
  #endif//SL_RAIL_UTIL_COEX_RUNTIME_PHY_SELECT
@@ -532,9 +533,11 @@ static void phySelectTick(void)
 #define MICROSECONDS_PER_MILLISECOND (1000U)
 static void phySelectIsr(void)
 {
-  coexNewPhySelectedCoex = true;
-  if (phySelectInitialized) {
-    setTimer(&ptaPhySelectTimer, phySelectTimeoutMs * MICROSECONDS_PER_MILLISECOND, &ptaPhySelectTimerCb);
+  if (phySelectTimeoutMs != 0U) {
+    coexNewPhySelectedCoex = true;
+    if (phySelectInitialized && phySelectTimeoutMs != 255U) {
+      setTimer(&ptaPhySelectTimer, phySelectTimeoutMs * MICROSECONDS_PER_MILLISECOND, &ptaPhySelectTimerCb);
+    }
   }
 }
 #endif //SL_RAIL_UTIL_COEX_RUNTIME_PHY_SELECT
@@ -918,7 +921,7 @@ sl_status_t sl_rail_util_coex_set_request_pwm(sl_rail_util_coex_req_t ptaReq,
          ? SL_STATUS_OK : SL_STATUS_NOT_SUPPORTED;
 }
 
-#else//!COEX_SUPPORT
+#else //!COEX_SUPPORT
 
 sl_status_t sl_rail_util_coex_set_request_pwm(sl_rail_util_coex_req_t ptaReq,
                                               sl_rail_util_coex_cb_t ptaCb,

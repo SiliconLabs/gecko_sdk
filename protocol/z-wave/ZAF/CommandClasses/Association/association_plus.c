@@ -206,9 +206,10 @@ handleAssociationGetnodeList(
   AssGroupMappingLookUp(&ep, &groupId);
 
   *ppList = GetNode(ep, groupId, 0); // Get a pointer to the first node
-  *pListLen = CC_ASSOCIATION_MAX_NODES_IN_GROUP; /*default set to max*/
+  uint8_t max_nodes_in_group = handleGetMaxNodesInGroup(groupId, ep);
+  *pListLen = max_nodes_in_group;
 
-  for (uint8_t indx = 0; indx < CC_ASSOCIATION_MAX_NODES_IN_GROUP; indx++)
+  for (uint8_t indx = 0; indx < max_nodes_in_group; indx++)
   {
     if (IsFree(*ppList + indx))
     {
@@ -371,8 +372,9 @@ AssociationAddNode(
     uint8_t ListLen = 0;
     handleAssociationGetnodeList(groupID, endpoint, &pList, &ListLen);
 
-    if (ListLen > 0) {
-      // The controller is probably already included, and this one must be a classic node trying to be added to association.
+    if (ListLen > 0 && !((1 == ListLen) && 1 == pList[0].node.nodeId)) {
+      // NodeId 1 is a valid value and represents controller.
+      // If that is not the case, then it must be a classic node trying to be added to association.
       return false;
     }
 

@@ -399,8 +399,8 @@ bool emGpCalculateIncomingCommandMic(EmberGpAddress * gpdAddr,
                         authenticationLength,
                         authenticationLength + encryptionLength,
                         temp);
-  MEMMOVE(mic, &temp[totalLength], 4);
   #endif
+  MEMMOVE(mic, &temp[totalLength], 4);
   return true;
 }
 

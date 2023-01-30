@@ -22,6 +22,7 @@ while [[ $# -gt 0 ]]; do
             echo -e "\t-T\tStart OTBR and ot-ctl application in the running multiprotocol container"
             echo -e "\t-Z\tStart Zigbeed and Z3GatewayHost application in the running multiprotocol container"
             echo -e "\t-C\tStart Z3GatewayCpc Host application in the running multiprotocol container"
+            echo -e "\t-B\tStart BT Host Empty Host application in the running multiprotocol container"
             echo -e "\t-P\tStart pro-compliance-posix application in the running multiprotocol container"
             echo -e "\t-L\tStart Bluetooth and bluetoothctl application in the running multiprotocol container"
             echo "By default, this script will start the multiprotocol container"
@@ -104,6 +105,10 @@ while [[ $# -gt 0 ]]; do
             ;;
         -C|--zigbee-cpc-host)
             docker exec -it multiprotocol /usr/local/bin/Z3GatewayCpc
+            exit
+            ;;
+        -B|--bt_host_empty)
+            docker exec -it multiprotocol /usr/local/bin/bt_host_empty -C cpcd_0 -R
             exit
             ;;
         -P|--pro-compliance)

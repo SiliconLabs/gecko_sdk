@@ -357,7 +357,7 @@ int cpc_poll_fds(void)
       // Write data to pty
       write(pty_m, &data_from_cpc[0], size);
       memset(&data_from_cpc[0], 0, FROM_CPC_BUF_SIZE);
-    } else if (errno != EAGAIN && errno != ECONNRESET) {
+    } else if ((int)size != -EAGAIN && (int)size != -ECONNRESET) {
       perror("pty operation failed");
       return FAILURE;
     }

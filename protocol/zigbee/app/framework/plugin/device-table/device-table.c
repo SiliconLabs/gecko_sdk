@@ -590,15 +590,14 @@ void emberAfDeviceTableCliIndexSendWithEndpoint(uint16_t index,
                                                 uint8_t endpoint)
 {
   EmberNodeId nodeId;
-  EmberStatus status;
 
   nodeId = emberAfDeviceTableGetNodeIdFromIndex(index);
   emAfApsFrameEndpointSetup(emberAfPrimaryEndpoint(), endpoint);
-  status = emberAfSendUnicast(EMBER_OUTGOING_DIRECT,
-                              nodeId,
-                              &globalApsFrame,
-                              appZclBufferLen,
-                              appZclBuffer);
+  (void)emberAfSendUnicast(EMBER_OUTGOING_DIRECT,
+                           nodeId,
+                           &globalApsFrame,
+                           appZclBufferLen,
+                           appZclBuffer);
 
   zclCmdIsBuilt = false;
 }
@@ -622,7 +621,6 @@ void emberAfDeviceTableCommandIndexSendWithEndpoint(uint16_t index,
                                                     uint8_t endpoint)
 {
   EmberNodeId nodeId;
-  EmberStatus status;
 
   nodeId = emberAfDeviceTableGetNodeIdFromIndex(index);
 
@@ -636,7 +634,7 @@ void emberAfDeviceTableCommandIndexSendWithEndpoint(uint16_t index,
   emberAfCorePrintln("device table send with ep: 0x%2X, %d",
                      nodeId,
                      endpoint);
-  status = emberAfSendCommandUnicast(EMBER_OUTGOING_DIRECT, nodeId);
+  (void)emberAfSendCommandUnicast(EMBER_OUTGOING_DIRECT, nodeId);
 
   zclCmdIsBuilt = false;
 }

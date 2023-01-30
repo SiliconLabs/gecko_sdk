@@ -44,6 +44,10 @@
 #include <openthread/platform/radio.h>
 #include "platform-efr32.h"
 
+#ifdef SL_CATALOG_RAIL_UTIL_COEX_PRESENT
+#include "coexistence-802154.h"
+#endif // SL_CATALOG_RAIL_UTIL_COEX_PRESENT
+
 #if OPENTHREAD_CONFIG_DIAG_ENABLE
 
 /**
@@ -84,4 +88,110 @@ void otPlatDiagAlarmCallback(otInstance *aInstance)
     OT_UNUSED_VARIABLE(aInstance);
 }
 
+//coex
+otError otPlatDiagCoexSetPriorityPulseWidth(uint8_t pulseWidthUs)
+{   
+  #ifdef SL_CATALOG_RAIL_UTIL_COEX_PRESENT  
+  //Actual call on rcp side
+  sl_status_t status = sl_rail_util_coex_set_directional_priority_pulse_width(pulseWidthUs);
+
+  return (status != SL_STATUS_OK) ? OT_ERROR_FAILED : OT_ERROR_NONE;
+  #endif //SL_CATALOG_RAIL_UTIL_COEX_PRESENT
+  return OT_ERROR_FAILED; 
+}
+
+otError otPlatDiagCoexSetRadioHoldoff(bool enabled)
+{
+  #ifdef SL_CATALOG_RAIL_UTIL_COEX_PRESENT  
+        //Actual call on rcp side
+  sl_status_t status = sl_rail_util_coex_set_radio_holdoff(enabled);
+
+  return (status != SL_STATUS_OK) ? OT_ERROR_FAILED : OT_ERROR_NONE;
+  #endif //SL_CATALOG_RAIL_UTIL_COEX_PRESENT
+  return OT_ERROR_FAILED;        
+}
+
+otError otPlatDiagCoexSetRequestPwm(uint8_t ptaReq,
+                                              void* ptaCb,
+                                              uint8_t dutyCycle,
+                                              uint8_t periodHalfMs)
+{
+  OT_UNUSED_VARIABLE(ptaCb);
+  #ifdef SL_CATALOG_RAIL_UTIL_COEX_PRESENT  
+  sl_status_t status = sl_rail_util_coex_set_request_pwm(ptaReq,
+                                            NULL,
+                                            dutyCycle,
+                                            periodHalfMs);
+  return (status != SL_STATUS_OK) ? OT_ERROR_FAILED : OT_ERROR_NONE;   
+  #endif //SL_CATALOG_RAIL_UTIL_COEX_PRESENT
+  return OT_ERROR_FAILED;        
+}
+otError otPlatDiagCoexSetPhySelectTimeout(uint8_t timeoutMs) 
+{
+  #ifdef SL_CATALOG_RAIL_UTIL_COEX_PRESENT    
+  sl_status_t status = sl_rail_util_coex_set_phy_select_timeout(timeoutMs);
+  return (status != SL_STATUS_OK) ? OT_ERROR_FAILED : OT_ERROR_NONE;
+  #endif //SL_CATALOG_RAIL_UTIL_COEX_PRESENT
+  return OT_ERROR_FAILED;
+}  
+
+otError otPlatDiagCoexSetOptions(uint32_t options)
+{
+  #ifdef SL_CATALOG_RAIL_UTIL_COEX_PRESENT  
+  sl_status_t status = sl_rail_util_coex_set_options(options);
+  return (status != SL_STATUS_OK) ? OT_ERROR_FAILED : OT_ERROR_NONE;
+  #endif //SL_CATALOG_RAIL_UTIL_COEX_PRESENT
+  return OT_ERROR_FAILED;
+}
+
+otError otPlatDiagCoexGetPhySelectTimeout(uint8_t* timeoutMs) 
+{
+  #ifdef SL_CATALOG_RAIL_UTIL_COEX_PRESENT
+  if(timeoutMs != NULL){ 
+    *timeoutMs = sl_rail_util_coex_get_phy_select_timeout();
+    return OT_ERROR_NONE; 
+  }
+  #endif //SL_CATALOG_RAIL_UTIL_COEX_PRESENT
+  return OT_ERROR_FAILED;
+}  
+
+otError otPlatDiagCoexGetOptions(uint32_t* options)
+{
+  #ifdef SL_CATALOG_RAIL_UTIL_COEX_PRESENT
+  if(options != NULL){ 
+    *options = sl_rail_util_coex_get_options();
+    return OT_ERROR_NONE; 
+  }
+  #endif //SL_CATALOG_RAIL_UTIL_COEX_PRESENT
+  return OT_ERROR_FAILED;
+}
+
+otError otPlatDiagCoexGetPriorityPulseWidth(uint8_t* pulseWidthUs)
+{
+    #ifdef SL_CATALOG_RAIL_UTIL_COEX_PRESENT
+    if(pulseWidthUs != NULL){ 
+      *pulseWidthUs = sl_rail_util_coex_get_directional_priority_pulse_width();
+      return OT_ERROR_NONE;
+    }
+    #endif //SL_CATALOG_RAIL_UTIL_COEX_PRESENT
+    return OT_ERROR_FAILED;
+}
+
+otError otPlatDiagCoexGetRequestPwmArgs(  uint8_t* req,
+  uint8_t* dutyCycle,
+  uint8_t* periodHalfMs)
+{
+  #ifdef SL_CATALOG_RAIL_UTIL_COEX_PRESENT
+  if(req != NULL
+     && dutyCycle != NULL 
+     && periodHalfMs != NULL){ 
+    const sl_rail_util_coex_pwm_args_t *p = sl_rail_util_coex_get_request_pwm_args();
+    *req = p->req ;
+    *dutyCycle = p->dutyCycle ;
+    *periodHalfMs = p->periodHalfMs ;
+    return OT_ERROR_NONE;
+  } 
+  #endif //SL_CATALOG_RAIL_UTIL_COEX_PRESENT
+  return OT_ERROR_FAILED;
+}
 #endif // #if OPENTHREAD_CONFIG_DIAG_ENABLE

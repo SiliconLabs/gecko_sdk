@@ -51,6 +51,16 @@
 #define emberGetChildData                   ezspGetChildData
 #define emberSetChildData                   ezspSetChildData
 
+#ifdef emberChildId
+#undef emberChildId
+#endif // emberChildId
+#define emberChildId                        ezspChildId
+
+#ifdef emberChildIndex
+#undef emberChildIndex
+#endif // emberChildIndex
+#define emberChildIndex                     ezspChildIndex
+
 #define emberSetConcentrator                ezspSetConcentrator
 #define emberSetSourceRouteDiscoveryMode    ezspSetSourceRouteDiscoveryMode
 // pro-compliance

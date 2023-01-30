@@ -48,6 +48,8 @@ typedef struct {
   uint8_t fec;
   uint8_t rx_phy_mode_ids[SL_WISUN_MAX_PHY_MODE_ID_COUNT];
   uint8_t rx_phy_mode_ids_count;
+  uint16_t protocol_id;
+  uint16_t channel_id;
 } app_settings_wisun_t;
 
 typedef struct {

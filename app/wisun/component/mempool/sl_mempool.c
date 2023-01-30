@@ -57,7 +57,7 @@
  * @details Helper function
  * @param[out] block Block handler pointer
  *****************************************************************************/
-static inline void _init_block(sl_mempool_block_hnd_t * const block);
+__STATIC_INLINE void _init_block(sl_mempool_block_hnd_t * const block);
 
 /**************************************************************************//**
  * @brief Allocate block handler
@@ -189,7 +189,7 @@ void sl_mempool_free(sl_mempool_t * const memp, const void * const addr)
 //                          Static Function Definitions
 // -----------------------------------------------------------------------------
 
-static inline void _init_block(sl_mempool_block_hnd_t * const block)
+__STATIC_INLINE void _init_block(sl_mempool_block_hnd_t * const block)
 {
   block->next = NULL;
   block->start_addr = NULL;

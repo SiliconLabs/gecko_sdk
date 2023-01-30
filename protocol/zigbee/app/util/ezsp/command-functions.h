@@ -201,6 +201,22 @@ EzspStatus ezspSetValue(
   return sendStatus;
 }
 
+EmberStatus ezspSetPassiveAckConfig(
+  uint8_t config,
+  uint8_t minAcksNeeded)
+{
+  EmberStatus status;
+  startCommand(EZSP_SET_PASSIVE_ACK_CONFIG);
+  appendInt8u(config);
+  appendInt8u(minAcksNeeded);
+  EzspStatus sendStatus = sendCommand();
+  if (sendStatus == EZSP_SUCCESS) {
+    status = fetchInt8u();
+    return status;
+  }
+  return sendStatus;
+}
+
 //------------------------------------------------------------------------------
 // Utilities Frames
 //------------------------------------------------------------------------------
@@ -839,6 +855,34 @@ EmberStatus ezspSetChildData(
     return status;
   }
   return sendStatus;
+}
+
+EmberNodeId ezspChildId(
+  uint8_t childIndex)
+{
+  EmberNodeId childId;
+  startCommand(EZSP_CHILD_ID);
+  appendInt8u(childIndex);
+  EzspStatus sendStatus = sendCommand();
+  if (sendStatus == EZSP_SUCCESS) {
+    childId = fetchInt16u();
+    return childId;
+  }
+  return 0xFFFF;
+}
+
+uint8_t ezspChildIndex(
+  EmberNodeId childId)
+{
+  uint8_t childIndex;
+  startCommand(EZSP_CHILD_INDEX);
+  appendInt16u(childId);
+  EzspStatus sendStatus = sendCommand();
+  if (sendStatus == EZSP_SUCCESS) {
+    childIndex = fetchInt8u();
+    return childIndex;
+  }
+  return 255;
 }
 
 uint8_t ezspGetSourceRouteTableTotalSize(void)

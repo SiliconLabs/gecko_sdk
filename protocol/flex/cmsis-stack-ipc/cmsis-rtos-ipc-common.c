@@ -387,11 +387,20 @@ static void fetchParams(uint8_t *readPointer, PGM_P format, va_list args)
         uint8_t *lengthPointer = (uint8_t *)va_arg(args, void*);
         *lengthPointer = *readPointer;
         readPointer++;
+        uint8_t bufferSize = (uint8_t)va_arg(args, int);
 
         if (ptr) {
-          MEMMOVE(realArray, readPointer, *lengthPointer);
+          if (*lengthPointer < bufferSize) {
+            MEMMOVE(realArray, readPointer, *lengthPointer);
+          } else {
+            MEMMOVE(realArray, readPointer, bufferSize);
+          }
         }
         readPointer += *lengthPointer;
+        // Propagate correct length value in calling function
+        *lengthPointer = (*lengthPointer > bufferSize
+                          ? bufferSize
+                          : *lengthPointer);
       }
       break;
       case 'p': {

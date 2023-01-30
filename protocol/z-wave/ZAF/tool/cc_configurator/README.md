@@ -95,6 +95,8 @@ The Command Class Configuration configurator is defined as follows:
 zw_cc_configuration:
   configurations:
     - name: <String>
+      number: <1-65535>
+      file_id: <0-99>
       info: <String>
       size: <cc_config_parameter_size_t>
       format: <cc_config_parameter_format_t>
@@ -106,6 +108,8 @@ zw_cc_configuration:
       advanced: <Bit>
     ...
     - name: <String>
+      number: <1-65535>
+      file_id: <0-99>
       info: <String>
       size: <cc_config_parameter_size_t>
       format: <cc_config_parameter_format_t>

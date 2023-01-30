@@ -205,7 +205,8 @@ void mfgappTokenDump(sl_cli_command_arg_t *arguments)
     // Print out the token data
     for (i = 0; i < tokenLength; i++) {
       if ((i != 0) && ((i % 8) == 0)) {
-        sl_zigbee_app_debug_print("\n                                    :");
+        sl_zigbee_app_debug_println("");
+        sl_zigbee_app_debug_print("                                    :");
       }
       sl_zigbee_app_debug_print(" %02X", tokenData[i]);
     }

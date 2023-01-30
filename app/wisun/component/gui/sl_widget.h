@@ -40,6 +40,7 @@ extern "C" {
 
 #include "sl_display.h"
 #include "sl_status.h"
+#include "sl_wisun_types.h"
 
 // -----------------------------------------------------------------------------
 //                              Macros and Typedefs
@@ -184,7 +185,7 @@ sl_status_t sl_widget_title_init(sl_widget_title_t * const title);
  * @param[in,out] title Title
  * @return sl_status_t SL_STATUS_OK on success, SL_STATUS_FAIL on error
  *****************************************************************************/
-static inline sl_status_t sl_widget_title_reset(sl_widget_title_t
+__STATIC_INLINE sl_status_t sl_widget_title_reset(sl_widget_title_t
                                                 *const title)
 {
   return sl_widget_title_init(title);
@@ -212,7 +213,7 @@ sl_status_t sl_widget_button_init(sl_widget_button_t * const button);
  * @param[in,out] button Button
  * @return sl_status_t SL_STATUS_OK on success, SL_STATUS_FAIL on error
  *****************************************************************************/
-static inline sl_status_t sl_widget_button_reset(sl_widget_button_t
+__STATIC_INLINE sl_status_t sl_widget_button_reset(sl_widget_button_t
                                                  *const button)
 {
   return sl_widget_button_init(button);
@@ -249,7 +250,7 @@ sl_status_t sl_widget_optionlist_init(sl_widget_option_list_t * const optionlist
  * @param[in,out] optionlist Optionlist
  * @return sl_status_t SL_STATUS_OK on success, SL_STATUS_FAIL on error
  *****************************************************************************/
-static inline sl_status_t sl_widget_optionlist_reset(sl_widget_option_list_t *
+__STATIC_INLINE sl_status_t sl_widget_optionlist_reset(sl_widget_option_list_t *
                                                      const optionlist)
 {
   return sl_widget_optionlist_init(optionlist);
@@ -321,7 +322,7 @@ sl_status_t sl_widget_progressbar_init(sl_widget_progressbar_t
  * @param[in,out] progressbar Progressbar
  * @return sl_status_t SL_STATUS_OK on success, SL_STATUS_FAIL on error
  *****************************************************************************/
-static inline sl_status_t sl_widget_progressbar_reset(sl_widget_progressbar_t
+__STATIC_INLINE sl_status_t sl_widget_progressbar_reset(sl_widget_progressbar_t
                                                       *const progressbar)
 {
   return sl_widget_progressbar_init(progressbar);
@@ -384,7 +385,7 @@ sl_status_t sl_widget_textbox_init(sl_widget_textbox_t * const textbox);
  * @param[in,out] textbox Textbox
  * @return sl_status_t SL_STATUS_OK on success, SL_STATUS_FAIL on error
  *****************************************************************************/
-static inline sl_status_t sl_widget_textbox_reset(sl_widget_textbox_t
+__STATIC_INLINE sl_status_t sl_widget_textbox_reset(sl_widget_textbox_t
                                                   *const textbox)
 {
   return sl_widget_textbox_init(textbox);

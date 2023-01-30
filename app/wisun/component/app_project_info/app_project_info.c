@@ -151,7 +151,7 @@
  * @param[in] indent Indent
  * @param[in] printer Printer ptr
  *****************************************************************************/
-static inline void _print_indent(const uint8_t indent, app_project_info_printer_t printer);
+__STATIC_INLINE void _print_indent(const uint8_t indent, app_project_info_printer_t printer);
 
 /**************************************************************************//**
  * @brief Bool to json format
@@ -159,7 +159,7 @@ static inline void _print_indent(const uint8_t indent, app_project_info_printer_
  * @param[in] bval bool value
  * @return const char* json format
  *****************************************************************************/
-static inline const char * _bool_to_json(const bool bval);
+__STATIC_INLINE const char * _bool_to_json(const bool bval);
 
 #if APP_PROJECT_INFO_RAIL_VERSION_ENABLED
 /**************************************************************************//**
@@ -498,12 +498,12 @@ void app_project_info_print_json(const app_project_info_t * const info,
 //                          Static Function Definitions
 // -----------------------------------------------------------------------------
 
-static inline const char * _bool_to_json(const bool bval)
+__STATIC_INLINE const char * _bool_to_json(const bool bval)
 {
   return bval ? "true" : "false";
 }
 
-static inline void _print_indent(const uint8_t indent, app_project_info_printer_t printer)
+__STATIC_INLINE void _print_indent(const uint8_t indent, app_project_info_printer_t printer)
 {
   for (uint8_t i = 0; i < indent * app_project_info_DEFAULT_JSON_INDENT_SIZE; ++i) {
     printer(" ");

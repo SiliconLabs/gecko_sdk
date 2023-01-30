@@ -48,6 +48,11 @@
 // <i> Default: 0
 #define IOT_FLASH_CFG_EXP_INST_NUM              0
 
+// <o IOT_FLASH_CFG_EXP_EXTERNAL_FLASH_BASE> External Flash Base Address <f.h>
+// <i> Hex value of the base address of the external flash used.
+// <i> Default: 0x0
+#define IOT_FLASH_CFG_EXP_EXTERNAL_FLASH_BASE   0x0
+
 // <o IOT_FLASH_CFG_EXP_INST_TYPE> Instance type
 // <0=> Internal Flash (MSC)
 // <1=> External Flash (SPI)

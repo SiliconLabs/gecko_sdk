@@ -220,9 +220,9 @@ int32_t sli_tz_s_interface_dispatch_its(psa_invec in_vec[],
 #endif // TZ_SERVICE_PSA_ITS_PRESENT
 
 #if defined(TZ_SERVICE_SE_MANAGER_PRESENT)
-int32_t sli_tz_s_interface_dispatch_se_manager(psa_invec in_vec[],
+int32_t sli_tz_s_interface_dispatch_se_manager(sli_tz_invec in_vec[],
                                                size_t in_len,
-                                               psa_outvec out_vec[],
+                                               sli_tz_outvec out_vec[],
                                                size_t out_len)
 {
   EFM_ASSERT(sizeof(se_manager_function_table) / sizeof(se_manager_function_table[0])
@@ -235,14 +235,14 @@ int32_t sli_tz_s_interface_dispatch_se_manager(psa_invec in_vec[],
                                              out_len,
                                              &iovec_copy);
   if (status != SLI_TZ_IOVEC_OK) {
-    return PSA_ERROR_INVALID_ARGUMENT;
+    return SL_STATUS_INVALID_PARAMETER;
   }
 
   SLI_TZ_IOVEC_ASSERT_STRUCT_SIZE(iovec_copy.in_vec[0], sli_tz_fn_id);
 
   sli_tz_fn_id function_id = *((sli_tz_fn_id *)iovec_copy.in_vec[0].base);
   if (function_id >= SLI_TZ_SERVICE_SE_MANAGER_MAX_SID) {
-    return PSA_ERROR_INVALID_ARGUMENT;
+    return SL_STATUS_INVALID_PARAMETER;
   }
   iovec_fn fn = se_manager_function_table[function_id];
 

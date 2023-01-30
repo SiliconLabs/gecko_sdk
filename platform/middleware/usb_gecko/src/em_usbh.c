@@ -868,7 +868,7 @@ int USBH_Init(const USBH_Init_TypeDef *p)
   }
   USBH_initData = *p;
 
-  CMU_ClockSelectSet(cmuClock_HF, cmuSelect_HFXO);
+  CMU_CLOCK_SELECT_SET(HF, HFXO);
   USBTIMER_Init();
   USBH_portStatus = H_PORT_DISCONNECTED;
 
@@ -887,11 +887,11 @@ int USBH_Init(const USBH_Init_TypeDef *p)
     EFM_ASSERT(false);
     return USB_STATUS_ILLEGAL;
   }
-  CMU_ClockSelectSet(cmuClock_USBR, cmuSelect_HFXO);
+  CMU_CLOCK_SELECT_SET(USBR, HFXO);
 
   #elif defined(USB_CLKSRC_USHFRCO)
   CMU_USHFRCOBandSet(cmuUSHFRCOFreq_48M0Hz);
-  CMU_ClockSelectSet(cmuClock_USBR, cmuSelect_USHFRCO);
+  CMU_CLOCK_SELECT_SET(USBR, USHFRCO);
 
   #elif defined(USB_CLKSRC_HFRCODPLL)
   CMU_DPLLInit_TypeDef init = CMU_DPLL_LFXO_TO_40MHZ;
@@ -906,7 +906,7 @@ int USBH_Init(const USBH_Init_TypeDef *p)
   init.refClk = cmuDPLLClkSel_Hfxo;
   CMU_OscillatorEnable(cmuOsc_HFXO, true, true);
   #endif
-  CMU_ClockSelectSet(cmuClock_USBR, cmuSelect_HFRCO);
+  CMU_CLOCK_SELECT_SET(USBR, HFRCO);
   if (!CMU_DPLLLock(&init)) {
     DEBUG_USB_API_PUTS("\nUSBH_Init(), DPLL could not lock");
     EFM_ASSERT(false);

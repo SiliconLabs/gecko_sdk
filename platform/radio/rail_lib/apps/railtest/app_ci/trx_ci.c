@@ -486,7 +486,7 @@ void setTxStream(sl_cli_command_arg_t *args)
     /* If configured power is higher than RAIL_UTIL_EFF_MAX_TX_CONTINUOUS_POWER_DBM
        then it is limited to that latter */
     responsePrint("Warning",
-                  "FEM used so power is limited to %d dBm",
+                  "Messsage:FEM used so power is limited to %d dBm",
                   femConfig.PMaxContinuousTx);
   }
 #endif

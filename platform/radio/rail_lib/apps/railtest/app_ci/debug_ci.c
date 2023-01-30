@@ -57,6 +57,8 @@
 
 uint32_t rxOverflowDelay = 10 * 1000000; // 10 seconds
 uint32_t thermistorResistance = 0;
+
+static int8_t crystalPPMError = RAIL_INVALID_PPM_VALUE;
 bool isHFXOCompensationSystematic = false;
 
 #define MAX_DEBUG_BYTES (128)
@@ -234,7 +236,6 @@ void configHFXOThermistor(sl_cli_command_arg_t *args)
 #else
   responsePrintError(sl_cli_get_command_string(args, 0), 0xFF, "Feature not supported in this target.");
 #endif
-  return;
 }
 
 void startThermistorMeasurement(sl_cli_command_arg_t *args)
@@ -250,7 +251,6 @@ void startThermistorMeasurement(sl_cli_command_arg_t *args)
 #else
   responsePrintError(sl_cli_get_command_string(args, 0), 0xFF, "Feature not supported in this target.");
 #endif
-  return;
 }
 
 void getThermistorImpedance(sl_cli_command_arg_t *args)
@@ -271,10 +271,10 @@ void getThermistorImpedance(sl_cli_command_arg_t *args)
                       "Ohms:%u,DegreesC:%d",
                       thermistorResistance, thermistorTemperatureC / 8);
       } else {
-        responsePrintError(sl_cli_get_command_string(args, 0), 0xFF, "Ohms:%u,DegreesC:255", thermistorResistance);
+        responsePrintError(sl_cli_get_command_string(args, 0), 0xFF, "Conversion error.");
       }
     } else {
-      responsePrintError(sl_cli_get_command_string(args, 0), 0xFF, "Ohms:%u", thermistorResistance);
+      responsePrintError(sl_cli_get_command_string(args, 0), 0xFF, "Thermistor measurement error.");
     }
   } else {
     responsePrintError(sl_cli_get_command_string(args, 0), 0xFF, "Thermistor measurement not done yet.");
@@ -282,7 +282,6 @@ void getThermistorImpedance(sl_cli_command_arg_t *args)
 #else
   responsePrintError(sl_cli_get_command_string(args, 0), 0xFF, "Feature not supported in this target.");
 #endif
-  return;
 }
 
 void getHFXOPPMError(sl_cli_command_arg_t *args)
@@ -296,20 +295,18 @@ void getHFXOPPMError(sl_cli_command_arg_t *args)
     status = RAIL_ConvertThermistorImpedance(railHandle, thermistorResistance, &thermistorTemperatureC);
 
     if (status == RAIL_STATUS_NO_ERROR) {
-      int8_t crystalPPMError = RAIL_INVALID_PPM_VALUE;
       // Temperature is in eighth of celsius degrees
       (void) RAIL_ComputeHFXOPPMError(railHandle, thermistorTemperatureC / 8, &crystalPPMError);
       responsePrint(sl_cli_get_command_string(args, 0), "ErrorPpm:%d", crystalPPMError);
     } else {
-      responsePrintError(sl_cli_get_command_string(args, 0), 0xFF, "Ohms:%u,DegreesC:255", thermistorResistance);
+      responsePrintError(sl_cli_get_command_string(args, 0), 0xFF, "Conversion error.");
     }
   } else {
-    responsePrintError(sl_cli_get_command_string(args, 0), 0xFF, "Ohms:%u", thermistorResistance);
+    responsePrintError(sl_cli_get_command_string(args, 0), 0xFF, "Thermistor measurement error.");
   }
 #else
   responsePrintError(sl_cli_get_command_string(args, 0), 0xFF, "Feature not supported in this target.");
 #endif
-  return;
 }
 
 #if RAIL_SUPPORTS_HFXO_COMPENSATION
@@ -384,47 +381,38 @@ void compensateHFXO(sl_cli_command_arg_t *args)
     return;
   }
 
-  if ((thermistorResistance != 0U) && (thermistorResistance != RAIL_INVALID_THERMISTOR_VALUE)) {
-    bool reset = false;
+  if (sl_cli_get_argument_count(args) > 0) {
+    // When specificed, the 1st argument indicates the correction to set,
+    // then use - sign to translate correction to error
+    // To correct the error, 0 must be given as argument.
+    crystalPPMError = -sl_cli_get_argument_int8(args, 0);
+  } else if ((thermistorResistance != 0U) && (thermistorResistance != RAIL_INVALID_THERMISTOR_VALUE)) {
     int16_t thermistorTemperatureC;
-
-    if (sl_cli_get_argument_count(args) > 0) {
-      // When reset is true, crystalPPMError is forced to 0
-      reset = sl_cli_get_argument_uint8(args, 0);
-    }
     status = RAIL_ConvertThermistorImpedance(railHandle, thermistorResistance, &thermistorTemperatureC);
 
     if (status == RAIL_STATUS_NO_ERROR) {
-      int8_t crystalPPMError = RAIL_INVALID_PPM_VALUE;
-      if (!reset) {
-        // Temperature is in eighth of celsius degrees
-        (void) RAIL_ComputeHFXOPPMError(railHandle, thermistorTemperatureC / 8, &crystalPPMError);
-      } else {
-        crystalPPMError = 0; // This will restore the default frequency settings
-      }
-
-      // Get current config
-      RAIL_HFXOCompensationConfig_t localCompensationConfig;
-      RAIL_GetHFXOCompensationConfig(railHandle, &localCompensationConfig);
-
-      if (localCompensationConfig.enableCompensation) {
-        status = RAIL_CompensateHFXO(railHandle, crystalPPMError);
-        if (status != RAIL_STATUS_NO_ERROR) {
-          responsePrintError(sl_cli_get_command_string(args, 0), 0xFF, "Compensation:Failed,Error:Radio is not Idle");
-        } else {
-          responsePrint(sl_cli_get_command_string(args, 0),
-                        "Compensation:Success,ErrorPpm:%d", crystalPPMError);
-        }
-      } else {
-        responsePrintError(sl_cli_get_command_string(args, 0), 0xFF, "Compensation:Disabled");
-      }
+      // Temperature is in eighth of celsius degrees
+      (void) RAIL_ComputeHFXOPPMError(railHandle, thermistorTemperatureC / 8, &crystalPPMError);
     } else {
-      responsePrintError(sl_cli_get_command_string(args, 0), 0xFF, "Ohms:%u,DegreesC:255", thermistorResistance);
+      responsePrintError(sl_cli_get_command_string(args, 0), 0xFF, "Conversion error");
+    }
+  }
+
+  // Get current config
+  RAIL_HFXOCompensationConfig_t localCompensationConfig;
+  RAIL_GetHFXOCompensationConfig(railHandle, &localCompensationConfig);
+
+  if (localCompensationConfig.enableCompensation) {
+    status = RAIL_CompensateHFXO(railHandle, crystalPPMError);
+    if (status != RAIL_STATUS_NO_ERROR) {
+      responsePrintError(sl_cli_get_command_string(args, 0), 0xFF, "Compensation:Failed");
+    } else {
+      responsePrint(sl_cli_get_command_string(args, 0),
+                    "Compensation:Success,ErrorPpm:%d", crystalPPMError);
     }
   } else {
-    responsePrintError(sl_cli_get_command_string(args, 0), 0xFF, "Ohms:%u", thermistorResistance);
+    responsePrintError(sl_cli_get_command_string(args, 0), 0xFF, "Compensation:Disabled");
   }
-  return;
 }
 #endif
 

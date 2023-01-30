@@ -38,6 +38,7 @@
 #include <stdint.h>
 #include <stdio.h>
 
+#include "sl_iperf_types.h"
 #include "sl_iperf_network_interface.h"
 #include "sl_iperf.h"
 #include "sl_iperf_util.h"
@@ -64,7 +65,7 @@ static void _iperf_udp_finack(sl_iperf_test_t * const test);
  * @param[in] dtg Datagram header
  * @return sl_iperf_ts_ms_t Converted timestamp in ms
  *****************************************************************************/
-static inline sl_iperf_ts_ms_t _get_ms_ts_from_clnt_header(const sl_iperf_udp_clnt_hdr_t
+__STATIC_INLINE sl_iperf_ts_ms_t _get_ms_ts_from_clnt_header(const sl_iperf_udp_clnt_hdr_t
                                                            * const hdr);
 
 /**************************************************************************//**
@@ -322,7 +323,7 @@ static void _iperf_udp_finack(sl_iperf_test_t * const test)
   sl_iperf_test_log_verbose(test, "UDP Server: FINACK has been sent.\n");
 }
 
-static inline sl_iperf_ts_ms_t _get_ms_ts_from_clnt_header(const sl_iperf_udp_clnt_hdr_t * const hdr)
+__STATIC_INLINE sl_iperf_ts_ms_t _get_ms_ts_from_clnt_header(const sl_iperf_udp_clnt_hdr_t * const hdr)
 {
   return sl_iperf_network_ntohl(hdr->dtg.time_var_sec) * SL_IPERF_TIME_S_TO_MS_ML
          + sl_iperf_network_ntohl(hdr->dtg.time_var_usec) / SL_IPERF_TIME_MS_TO_US_ML;

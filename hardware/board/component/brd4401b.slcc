@@ -55,11 +55,11 @@
   - name: SL_BOARD_NAME
     value: '"BRD4401B"'
   - name: SL_BOARD_REV
-    value: '"A00"'
+    value: '"A01"'
 - tag:
   - board:pn:BRD4401
   - board:variant:B
-  - board:revision:A00
+  - board:revision:A01
   - board:device:efr32zg28b322f1024im68
   - hardware:has:vcom
   - hardware:has:pti

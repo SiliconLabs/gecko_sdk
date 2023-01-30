@@ -37,6 +37,7 @@
 #include "tfm_api.h"
 #include "tfm_its_req_mngr.h"
 #include "psa/internal_trusted_storage.h"
+#include "psa/sli_internal_trusted_storage.h"
 
 /**
  * \brief Indicates whether ITS has been initialised.

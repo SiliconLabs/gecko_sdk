@@ -42,7 +42,6 @@ extern "C" {
 #include <inttypes.h>
 #include "sl_status.h"
 #include "sl_wisun_api.h"
-#include "sl_wisun_types.h"
 #include "errno.h"
 
 /**************************************************************************//**
@@ -383,7 +382,7 @@ int32_t getsockopt(int32_t sockid, int32_t level, int32_t optname,
  * @param[in] hostlong Long host integer
  * @return Long network integer
  *****************************************************************************/
-static inline uint32_t htonl(uint32_t hostlong)
+__STATIC_INLINE uint32_t htonl(uint32_t hostlong)
 {
   return hostlong;
 }
@@ -395,7 +394,7 @@ static inline uint32_t htonl(uint32_t hostlong)
  * @param[in] hostshort Short host integer
  * @return Short network integer
  *****************************************************************************/
-static inline uint16_t htons(uint16_t hostshort)
+__STATIC_INLINE uint16_t htons(uint16_t hostshort)
 {
   return hostshort;
 }
@@ -407,7 +406,7 @@ static inline uint16_t htons(uint16_t hostshort)
  *  @param[in] netlong Long network integer
  * @return Long host integer
  *****************************************************************************/
-static inline uint32_t ntohl(uint32_t netlong)
+__STATIC_INLINE uint32_t ntohl(uint32_t netlong)
 {
   return netlong;
 }
@@ -419,7 +418,7 @@ static inline uint32_t ntohl(uint32_t netlong)
  * @param[in] netshort
  * @return Short host integer
  *****************************************************************************/
-static inline uint16_t ntohs(uint16_t netshort)
+__STATIC_INLINE uint16_t ntohs(uint16_t netshort)
 {
   return netshort;
 }

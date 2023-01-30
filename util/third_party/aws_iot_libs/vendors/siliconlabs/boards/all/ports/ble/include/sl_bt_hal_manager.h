@@ -33,10 +33,12 @@
  */
 typedef enum
 {
-  eSlBtHalBluetoothStopped  = 0, /**< Bluetooth stack is stopped */
-  eSlBtHalBluetoothStarting = 1, /**< Bluetooth stack has been requested to start
-                                      but has not completed yet */
-  eSlBtHalBluetoothStarted  = 2, /**< Bluetooth stack has been successfully started  */
+  eSlBtHalBluetoothStopped       = 0, /**< Bluetooth stack is stopped */
+  eSlBtHalBluetoothStartingSync  = 1, /**< Bluetooth stack has been requested to start
+                                           and prvEnable will handle it synchronously */
+  eSlBtHalBluetoothStartingAsync = 2, /**< Bluetooth stack has been requested to start
+                                           and it will finish asynchronously */
+  eSlBtHalBluetoothStarted       = 3, /**< Bluetooth stack has been successfully started  */
 } SlBtHalState_t;
 
 /**
@@ -53,6 +55,7 @@ typedef struct
   uint8_t        ucSmConfigureFlags; /**< Flags configured in a call to sl_bt_sm_configure() */
   uint8_t        ucIoCapabilities;   /**< I/O capabilities configured to the Bluetooth stack */
   SlBtHalState_t eBtState;           /**< State of the Bluetooth stack */
+  bool           bKernelStarted;     /**< Set to true when the kernel has been started */
 } SlBtHalManager_t;
 
 extern SlBtHalManager_t xSlBtHalManager;

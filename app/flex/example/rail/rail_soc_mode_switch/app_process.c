@@ -432,7 +432,17 @@ static void handle_state_packet_sent(RAIL_Handle_t rail_handle)
                       rail_status);
     }
   }
-
+  if (get_print_packet_details()) {
+    if (get_phy_modulation_from_channel(get_channel()) == M_OFDM) {
+      app_log_info("With rate %d and scramble: %d\n",
+                   get_ofdm_rate(),
+                   get_ofdm_scrambler());
+    } else {
+      app_log_info("With fcs type %d and whitening %d:\n",
+                   get_fsk_fcs_type(),
+                   get_fsk_whitening());
+    }
+  }
 #if defined(SL_CATALOG_LED1_PRESENT)
   sl_led_toggle(&sl_led_led1);
 #else
@@ -591,6 +601,17 @@ static void printf_rx_packet(const uint8_t * const rx_buffer, uint16_t length)
       app_log_info(", ");
     } else {
       app_log_info("\n");
+    }
+  }
+  if (get_print_packet_details()) {
+    if (get_phy_modulation_from_channel(get_channel()) == M_OFDM) {
+      app_log_info("With rate %d and scramble: %d\n",
+                   get_ofdm_rate(),
+                   get_ofdm_scrambler());
+    } else {
+      app_log_info("With fcs type %d and whitening %d:\n",
+                   get_fsk_fcs_type(),
+                   get_fsk_whitening());
     }
   }
 }

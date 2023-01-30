@@ -907,6 +907,7 @@ bool emberAfDetermineIfLinkSecurityIsRequired(uint8_t commandId,
     switch (clusterId) {
       case ZCL_TIME_CLUSTER_ID:
       case ZCL_COMMISSIONING_CLUSTER_ID:
+      case ZCL_KEEPALIVE_CLUSTER_ID:
       case ZCL_PRICE_CLUSTER_ID:
       case ZCL_DEMAND_RESPONSE_LOAD_CONTROL_CLUSTER_ID:
       case ZCL_SIMPLE_METERING_CLUSTER_ID:

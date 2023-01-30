@@ -34,6 +34,7 @@
 #include <string.h>
 #include <assert.h>
 #include "sl_string.h"
+#include "sl_wisun_types.h"
 #include "sl_wisun_coap_rhnd.h"
 #include "sli_wisun_coap_mem.h"
 #include "sl_wisun_coap.h"
@@ -72,25 +73,25 @@
  * @brief Resource mutex lock and return
  * @return none
  *****************************************************************************/
-static inline void _coap_resource_mutex_check_acquire(void);
+__STATIC_INLINE void _coap_resource_mutex_check_acquire(void);
 
 /**************************************************************************//**
  * @brief Resouce mutex unlock and return
  * @return none
  *****************************************************************************/
-static inline void _coap_resource_mutex_check_release(void);
+__STATIC_INLINE void _coap_resource_mutex_check_release(void);
 
 /**************************************************************************//**
  * @brief Resource mutex lock
  * @return none
  *****************************************************************************/
-static inline void _coap_resource_mutex_acquire(void);
+__STATIC_INLINE void _coap_resource_mutex_acquire(void);
 
 /**************************************************************************//**
  * @brief Resource mutex unlock
  * @return none
  *****************************************************************************/
-static inline void _coap_resource_mutex_release(void);
+__STATIC_INLINE void _coap_resource_mutex_release(void);
 
 /**************************************************************************//**
  * @brief Get resource ptr
@@ -109,7 +110,7 @@ static sl_wisun_coap_rhnd_resource_t *  _get_resource(const char * const uri_pat
  * @return true Request packet
  * @return false Response or Empty packet
  *****************************************************************************/
-static inline bool _is_request_packet(const sl_wisun_coap_packet_t * const packet);
+__STATIC_INLINE bool _is_request_packet(const sl_wisun_coap_packet_t * const packet);
 
 /**************************************************************************//**
  * @brief Thread function of Resource Handler Service
@@ -401,7 +402,7 @@ SL_WEAK void sl_wisun_coap_rhnd_service_resp_send_error_hnd(sl_wisun_coap_packet
 // -----------------------------------------------------------------------------
 
 /* Mutex acquire with check if OS is running */
-static inline void _coap_resource_mutex_check_acquire(void)
+__STATIC_INLINE void _coap_resource_mutex_check_acquire(void)
 {
   if (osKernelGetState() == osKernelRunning) {
     assert(osMutexAcquire(_wisun_coap_resource_mtx, osWaitForever) == osOK);
@@ -409,7 +410,7 @@ static inline void _coap_resource_mutex_check_acquire(void)
 }
 
 /* Mutex release with check if OS is running */
-static inline void _coap_resource_mutex_check_release(void)
+__STATIC_INLINE void _coap_resource_mutex_check_release(void)
 {
   if (osKernelGetState() == osKernelRunning) {
     assert(osMutexRelease(_wisun_coap_resource_mtx) == osOK);
@@ -417,13 +418,13 @@ static inline void _coap_resource_mutex_check_release(void)
 }
 
 /* Mutex acquire */
-static inline void _coap_resource_mutex_acquire(void)
+__STATIC_INLINE void _coap_resource_mutex_acquire(void)
 {
   assert(osMutexAcquire(_wisun_coap_resource_mtx, osWaitForever) == osOK);
 }
 
 /* Mutex release */
-static inline void _coap_resource_mutex_release(void)
+__STATIC_INLINE void _coap_resource_mutex_release(void)
 {
   assert(osMutexRelease(_wisun_coap_resource_mtx) == osOK);
 }
@@ -445,7 +446,7 @@ static sl_wisun_coap_rhnd_resource_t *  _get_resource(const char * const uri_pat
 }
 
 #if SL_WISUN_COAP_RESOURCE_HND_SERVICE_ENABLE
-static inline bool _is_request_packet(const sl_wisun_coap_packet_t * const packet)
+__STATIC_INLINE bool _is_request_packet(const sl_wisun_coap_packet_t * const packet)
 {
   return (bool)(packet->msg_code == COAP_MSG_CODE_REQUEST_GET
                 || packet->msg_code == COAP_MSG_CODE_REQUEST_POST

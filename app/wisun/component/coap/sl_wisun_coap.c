@@ -91,13 +91,13 @@ static int8_t _default_coap_rx_callback(sn_coap_hdr_s *header,
  * @brief Internal Mutex acquire
  * @details Simple inline function with assert
  *****************************************************************************/
-static inline void _wisun_coap_mutex_acquire(void);
+__STATIC_INLINE void _wisun_coap_mutex_acquire(void);
 
 /**************************************************************************//**
  * @brief Internal Mutex release
  * @details Simple inline function with assert
  *****************************************************************************/
-static inline void _wisun_coap_mutex_release(void);
+__STATIC_INLINE void _wisun_coap_mutex_release(void);
 
 /**************************************************************************//**
  * @brief Internal pretty buffer printer
@@ -106,7 +106,7 @@ static inline void _wisun_coap_mutex_release(void);
  * @param[in] len size of the buffer
  * @param[in] hex_format enable or disable hex format
  *****************************************************************************/
-static inline void _pretty_buff_print(const uint8_t *buff_ptr,
+__STATIC_INLINE void _pretty_buff_print(const uint8_t *buff_ptr,
                                       const uint16_t len,
                                       const bool hex_format);
 // -----------------------------------------------------------------------------
@@ -403,19 +403,19 @@ static int8_t _default_coap_rx_callback(sn_coap_hdr_s *header, sn_nsdl_addr_s *a
 }
 
 /* Mutex acquire */
-static inline void _wisun_coap_mutex_acquire(void)
+__STATIC_INLINE void _wisun_coap_mutex_acquire(void)
 {
   assert(osMutexAcquire(_wisun_coap_mtx, osWaitForever) == osOK);
 }
 
 /* Mutex release */
-static inline void _wisun_coap_mutex_release(void)
+__STATIC_INLINE void _wisun_coap_mutex_release(void)
 {
   assert(osMutexRelease(_wisun_coap_mtx) == osOK);
 }
 
 /* Pretty buffer printer */
-static inline void _pretty_buff_print(const uint8_t *buff_ptr, const uint16_t len, const bool hex_format)
+__STATIC_INLINE void _pretty_buff_print(const uint8_t *buff_ptr, const uint16_t len, const bool hex_format)
 {
   if (buff_ptr == NULL || len == 0) {
     return;

@@ -279,6 +279,10 @@ void app_process_action(void)
       if (enter_press) {
         enter_press = false;
         app_state = SE_MANAGER_EXIT;
+        printf("  + Setting the debug options (%#x)... ", DEBUG_OPTIONS);
+        if (set_debug_option() != SL_STATUS_OK) {
+          break;
+        }
         printf("  + Locking the device... ");
         if (enable_debug_lock() == SL_STATUS_OK) {
           if (get_se_status_buf_ptr()->debug_status.device_erase_enabled) {
@@ -387,12 +391,6 @@ static void print_se_status(void)
   } else {
     printf("Disabled\n");
   }
-  printf("  + Debug lock state: ");
-  if (get_se_status_buf_ptr()->debug_status.debug_port_lock_state) {
-    printf("True\n");
-  } else {
-    printf("False\n");
-  }
   printf("  + Device Erase: ");
   if (get_se_status_buf_ptr()->debug_status.device_erase_enabled) {
     printf("Enabled\n");
@@ -410,6 +408,63 @@ static void print_se_status(void)
     printf("Enabled\n");
   } else {
     printf("Disabled\n");
+  }
+
+  printf("\n  + Debug lock state: ");
+  if (get_se_status_buf_ptr()->debug_status.debug_port_lock_state) {
+    printf("Locked\n");
+  } else {
+    printf("Unlocked\n");
+  }
+
+  printf("\n  + Non-secure, Invasive debug lock (DBGLOCK) configuration: ");
+  if (get_se_status_buf_ptr()->debug_status.options_config.non_secure_invasive_debug) {
+    printf("Unlocked\n");
+  } else {
+    printf("Locked\n");
+  }
+  printf("  + Non-secure, Non-invasive debug lock (NIDLOCK) configuration: ");
+  if (get_se_status_buf_ptr()->debug_status.options_config.non_secure_non_invasive_debug) {
+    printf("Unlocked\n");
+  } else {
+    printf("Locked\n");
+  }
+  printf("  + Secure, Invasive debug lock (SPIDLOCK) configuration: ");
+  if (get_se_status_buf_ptr()->debug_status.options_config.secure_invasive_debug) {
+    printf("Unlocked\n");
+  } else {
+    printf("Locked\n");
+  }
+  printf("  + Secure, Non-invasive debug lock (SPNIDLOCK) configuration: ");
+  if (get_se_status_buf_ptr()->debug_status.options_config.secure_non_invasive_debug) {
+    printf("Unlocked\n");
+  } else {
+    printf("Locked\n");
+  }
+
+  printf("\n  + Non-secure, Invasive debug lock (DBGLOCK) current state: ");
+  if (get_se_status_buf_ptr()->debug_status.options_state.non_secure_invasive_debug) {
+    printf("Unlocked\n");
+  } else {
+    printf("Locked\n");
+  }
+  printf("  + Non-secure, Non-invasive debug lock (NIDLOCK) current state: ");
+  if (get_se_status_buf_ptr()->debug_status.options_state.non_secure_non_invasive_debug) {
+    printf("Unlocked\n");
+  } else {
+    printf("Locked\n");
+  }
+  printf("  + Secure, Invasive debug lock (SPIDLOCK) current state: ");
+  if (get_se_status_buf_ptr()->debug_status.options_state.secure_invasive_debug) {
+    printf("Unlocked\n");
+  } else {
+    printf("Locked\n");
+  }
+  printf("  + Secure, Non-invasive debug lock (SPNIDLOCK) current state: ");
+  if (get_se_status_buf_ptr()->debug_status.options_state.secure_non_invasive_debug) {
+    printf("Unlocked\n");
+  } else {
+    printf("Locked\n");
   }
   app_state = CHECK_SE_STATUS;
 }
@@ -545,12 +600,8 @@ static void issue_secure_debug_unlock(void)
     return;
   }
 
-  printf("  + Setting the debug options... ");
-  if (set_debug_option() != SL_STATUS_OK) {
-    return;
-  }
-
-  printf("  + Creating an unlock token to unlock the device... ");
+  printf("  + Creating an unlock token (DEBUG_MODE_REQUEST = %#x) to unlock "
+         "the device... ", DEBUG_MODE_REQUEST);
   if (create_unlock_token() != SL_STATUS_OK) {
     return;
   }

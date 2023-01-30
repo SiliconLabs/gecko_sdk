@@ -21,6 +21,8 @@ source:
   - path: util/plugin/plugin-common/eeprom/eeprom.c
   - path: util/plugin/plugin-common/eeprom/eeprom-cb.c
   - path: util/plugin/plugin-common/eeprom/eeprom-cli.c
+    condition:
+      - "cli"
 template_contribution:
   - name: component_catalog
     value: util_eeprom

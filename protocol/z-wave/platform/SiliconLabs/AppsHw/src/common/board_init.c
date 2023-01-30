@@ -18,7 +18,8 @@ void Board_Init(void)
 
   Board_Initialize();
 
-  rfRegion = ZW_REGION;
+  rfRegion = zpal_radio_get_valid_region(ZW_REGION);
+
   ZW_GetMfgTokenDataCountryFreq(&tokenRegion);
   if (ZPAL_RADIO_PROTOCOL_MODE_UNDEFINED != zpal_radio_region_get_protocol_mode(tokenRegion))
   {

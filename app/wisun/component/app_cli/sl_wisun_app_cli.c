@@ -42,8 +42,10 @@
 #include "sl_wisun_app_setting.h"
 #include "sl_wisun_cli_util.h"
 #include "sl_wisun_cli_core.h"
-#include "sl_wisun_app_core.h"
-#include "sl_wisun_app_core_util_config.h"
+#if defined(SL_CATALOG_WISUN_APP_CORE_PRESENT)
+  #include "sl_wisun_app_core.h"
+  #include "sl_wisun_app_core_util_config.h"
+#endif
 
 // -----------------------------------------------------------------------------
 //                              Macros and Typedefs
@@ -279,7 +281,7 @@ static bool _is_param_used(const char *param_str);
  * @details Helper function to get string representation of parameter usage
  * @return const char*
  *****************************************************************************/
-static inline const char *_param_used_flag_str(const char *param_str);
+__STATIC_INLINE const char *_param_used_flag_str(const char *param_str);
 
 /**************************************************************************//**
  * @brief Helper to get wisun phy for getter
@@ -319,6 +321,7 @@ static sl_status_t _app_cli_set_phy(const char *value_str,
                                     const char *key_str,
                                     const app_settings_entry_t *entry);
 
+#if defined(SL_CATALOG_WISUN_APP_CORE_PRESENT)
 /**************************************************************************//**
  * @brief Helper to set regulation for setter
  * @param[out] *value_str is the desired value string
@@ -390,7 +393,7 @@ static sl_status_t _app_get_regulation_warning_threshold(char *value_str,
 static sl_status_t _app_get_regulation_alert_threshold(char *value_str,
                                                        const char *key_str,
                                                        const app_cli_entry_t *entry);
-
+#endif
 /**************************************************************************//**
  * @brief Connect to Wi-SUN network by PHY configuration type
  * @details CLI callback helper function
@@ -402,8 +405,10 @@ static void _app_connect(const sl_wisun_phy_config_type_t config_type);
 //                                Static Variables
 // -----------------------------------------------------------------------------
 
+#if defined(SL_CATALOG_WISUN_APP_CORE_PRESENT)
 /// Wi-SUN application regulation
 static sl_wisun_regulation_t app_regulation = (sl_wisun_regulation_t)WISUN_APP_REGULATION;
+#endif
 
 /// Common PHY parameters for CLI setter/getter
 static app_cli_phy_common_params_t _phy_common_params = { 0U };
@@ -727,6 +732,7 @@ const app_cli_entry_t app_settings_entries[] =
     .description = "Mode Switch Rx failed count"
   },
 #endif
+#if defined(SL_CATALOG_WISUN_APP_CORE_PRESENT)
   {
     .key = "regulation",
     .domain = APP_CLI_WISUN_DOMAIN_ID,
@@ -766,6 +772,7 @@ const app_cli_entry_t app_settings_entries[] =
     .get_handler = _app_get_regulation_alert_threshold,
     .description = "Transmission alert threshold in percent (-1 to disable) [int8]"
   },
+#endif
   {
     .key = NULL,
     .domain = 0,
@@ -785,17 +792,14 @@ const app_cli_entry_t app_settings_entries[] =
 //                          Public Function Definitions
 // -----------------------------------------------------------------------------
 
+#if defined(SL_CATALOG_APP_PROJECT_INFO_PRESENT)
 void app_about(void)
 {
   app_wisun_project_info_print(false);
 }
+#endif
 
-/* Weak function for app_wisun_network_connect() if the app_core is not added. */
-SL_WEAK void app_wisun_network_connect(void)
-{
-  assert("app_wisun_network_connect() is not implemented" == NULL);
-}
-
+#if defined(SL_CATALOG_WISUN_APP_CORE_PRESENT)
 static void _app_connect(const sl_wisun_phy_config_type_t config_type)
 {
   sl_status_t stat = SL_STATUS_FAIL;
@@ -885,6 +889,7 @@ void app_disconnect(sl_cli_command_arg_t *arguments)
 
   app_wisun_cli_mutex_unlock();
 }
+#endif
 
 // -----------------------------------------------------------------------------
 //                          Static Function Definitions
@@ -1166,7 +1171,7 @@ static bool _is_param_used(const char *param_str)
   return false;
 }
 
-static inline const char *_param_used_flag_str(const char *param_str)
+__STATIC_INLINE const char *_param_used_flag_str(const char *param_str)
 {
   return _is_param_used(param_str) ? "" : "(unused)";
 }
@@ -1364,6 +1369,7 @@ static sl_status_t _app_ms_get_counters(char *value_str,
 }
 #endif
 
+#if defined(SL_CATALOG_WISUN_APP_CORE_PRESENT)
 static sl_status_t _app_set_regulation(const char *value_str,
                                        const char *key_str,
                                        const app_settings_entry_t *entry)
@@ -1607,3 +1613,4 @@ static sl_status_t _app_get_regulation_alert_threshold(char *value_str,
 
   return SL_STATUS_OK;
 }
+#endif

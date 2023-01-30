@@ -111,7 +111,7 @@ extern "C" {
  * @brief The EFR32XG25 series size needed for
  *   \ref RAIL_StateBufferEntry_t::bufferBytes.
  */
-#define RAIL_EFR32XG25_STATE_BUFFER_BYTES 584
+#define RAIL_EFR32XG25_STATE_BUFFER_BYTES 616
 
 /**
  * @def RAIL_EFR32XG27_STATE_BUFFER_BYTES
@@ -252,6 +252,55 @@ RAIL_ENUM(RAIL_RadioStateEfr32_t) {
 #define RAIL_RAC_STATE_NONE         ((RAIL_RadioStateEfr32_t) RAIL_RAC_STATE_NONE)
 #endif//DOXYGEN_SHOULD_SKIP_THIS
 
+#ifndef DOXYGEN_SHOULD_SKIP_THIS
+/**
+ * @struct RAIL_RffpllConfig_t
+ * @brief Stores information relevant to the Radio-Friendly Frequency
+ *   Phase-Locked Loop (RFFPLL) for the PHY configuration currently loaded in
+ *   memory.
+ */
+typedef struct {
+  uint32_t dividers;      // Divider X (Modem Clock), Divider Y (M33 System Clock), and Divider N (Feedback)  values
+  uint32_t radioFreqHz;   // Radio clock frequency in Hz
+  uint32_t sysclkFreqHz;  // System clock frequency in Hz
+} RAIL_RffpllConfig_t;
+
+/**
+ * @def RAIL_RFFPLL_DIVIDERX_MASK
+ * @brief Bit mask for RFFPLL DIVX in \ref RAIL_RffpllConfig_t::dividers.
+ */
+#define RAIL_RFFPLL_DIVIDERX_MASK   0x000000FFUL
+
+/**
+ * @def RAIL_RFFPLL_DIVIDERX_SHIFT
+ * @brief Shift value for RFFPLL DIVX in \ref RAIL_RffpllConfig_t::dividers.
+ */
+#define RAIL_RFFPLL_DIVIDERX_SHIFT  0
+
+/**
+ * @def RAIL_RFFPLL_DIVIDERY_MASK
+ * @brief Bit mask for RFFPLL DIVY in \ref RAIL_RffpllConfig_t::dividers.
+ */
+#define RAIL_RFFPLL_DIVIDERY_MASK   0x0000FF00UL
+
+/**
+ * @def RAIL_RFFPLL_DIVIDERY_SHIFT
+ * @brief Shift value for RFFPLL DIVY in \ref RAIL_RffpllConfig_t::dividers.
+ */
+#define RAIL_RFFPLL_DIVIDERY_SHIFT  8
+
+/**
+ * @def RAIL_RFFPLL_DIVIDERN_MASK
+ * @brief Bit mask for RFFPLL DIVN in \ref RAIL_RffpllConfig_t::dividers.
+ */
+#define RAIL_RFFPLL_DIVIDERN_MASK   0x00FF0000UL
+
+/**
+ * @def RAIL_RFFPLL_DIVIDERN_SHIFT
+ * @brief Shift value for RFFPLL DIVN in \ref RAIL_RffpllConfig_t::dividers.
+ */
+#define RAIL_RFFPLL_DIVIDERN_SHIFT  16
+#endif//DOXYGEN_SHOULD_SKIP_THIS
 /** @} */ // end of group General_EFR32XG2
 
 // -----------------------------------------------------------------------------
@@ -1116,17 +1165,11 @@ typedef uint32_t RAIL_PaPowerSetting_t;
 
 #if RAIL_SUPPORTS_OFDM_PA
 #if _SILICON_LABS_32B_SERIES_2_CONFIG == 5
-/**
- * With RAIL_LIB-6495 the OFDM PA power output will not
- * be modified at this time for gain control.  Instead the PA will be kept at 191 slices
- * active and TXFRONT_TXGAIN_GAINDIG will vary between 65-1020. The raw power level
- * will be multiplied by 5 to get the GAINDIG value.
- */
 #define RAIL_OFDM_PA_MAX      204U
-#define RAIL_OFDM_PA_EFF_MAX  120U
+#define RAIL_OFDM_PA_EFF_MAX  204U
 #define RAIL_OFDM_PA_MULT     5U
-#define RAIL_OFDM_PA_MIN      13U
-#define RAIL_OFDM_PA_EFF_MIN  40U
+#define RAIL_OFDM_PA_MIN      0U
+#define RAIL_OFDM_PA_EFF_MIN  0U
 #endif
 /**
  * The maximum valid value for the \ref RAIL_TxPowerLevel_t when in \ref

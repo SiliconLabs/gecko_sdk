@@ -17,14 +17,13 @@
 
 #ifndef SL_RCP_GP_INTERFACE_H_
 #define SL_RCP_GP_INTERFACE_H_
-
+#include "utils/mac_frame.h"
 // GP state-machine states
 typedef enum {
     SL_GP_STATE_INIT,
     SL_GP_STATE_IDLE,
     SL_GP_STATE_WAITING_FOR_PKT,
     SL_GP_STATE_SEND_RESPONSE,
-    SL_GP_STATE_SENDING_RESPONSE,
     SL_GP_STATE_MAX
 } sl_gp_state_t;
 
@@ -54,4 +53,9 @@ void sl_gp_intf_buffer_pkt(otRadioFrame *aFrame);
  */
 sl_gp_state_t sl_gp_intf_get_state(void);
 
+/**
+ * This function performs GP RCP processing.
+ *
+ */
+void efr32GpProcess(void);
 #endif

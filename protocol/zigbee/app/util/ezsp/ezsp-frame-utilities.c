@@ -223,6 +223,7 @@ void fetchEmberChildData(EmberChildData *value)
   value->phy = fetchInt8u();
   value->power = fetchInt8u();
   value->timeout = fetchInt8u();
+  value->remainingTimeout = fetchInt32u();
 }
 
 void fetchEmberZigbeeNetwork(EmberZigbeeNetwork *value)

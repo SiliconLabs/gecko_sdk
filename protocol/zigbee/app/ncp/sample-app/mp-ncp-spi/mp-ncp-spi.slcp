@@ -73,8 +73,8 @@ configuration:
     value: 1
 
 define:
-  - name: "RESERVED_AVAILABLE_MEMORY"
-    value: "1000"
+  - name: EMBER_CUSTOM_MAC_FILTER_TABLE_SIZE
+    value: 15
 include:
   - path: "./"
 

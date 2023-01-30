@@ -439,9 +439,12 @@ void emAfEepromTest(void)
 #endif // !READ_MODIFY_WRITE_SUPPORT
 
 #ifdef UC_BUILD
+#include "sl_component_catalog.h"
+#ifdef SL_CATALOG_CLI_PRESENT
 #include "sl_cli.h"
 void emAfOtaWipeStorageDeviceCommand(sl_cli_command_arg_t *arguments)
 {
   emberAfOtaStorageDriverInvalidateImageCallback();
 }
-#endif
+#endif // SL_CATALOG_CLI_PRESENT
+#endif // UC_BUILD

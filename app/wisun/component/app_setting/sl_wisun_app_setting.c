@@ -75,13 +75,13 @@ typedef struct app_setting_notif_dsc {
  * @brief Acquire application mutex
  * @details Internal mutex lock
  *****************************************************************************/
-static inline void _app_wisun_mutex_acquire(void);
+__STATIC_INLINE void _app_wisun_mutex_acquire(void);
 
 /**************************************************************************//**
  * @brief Release application mutex
  * @details Internal mutex release
  *****************************************************************************/
-static inline void _app_wisun_mutex_release(void);
+__STATIC_INLINE void _app_wisun_mutex_release(void);
 
 /**************************************************************************//**
  * @brief Helper function for checking the name of the Wi-SUN network
@@ -503,13 +503,13 @@ static sl_status_t _setting_notify(const app_setting_notification_t type)
 // -----------------------------------------------------------------------------
 
 /* Mutex acquire */
-static inline void _app_wisun_mutex_acquire(void)
+__STATIC_INLINE void _app_wisun_mutex_acquire(void)
 {
   assert(osMutexAcquire(_app_wisun_setting_mtx, osWaitForever) == osOK);
 }
 
 /* Mutex release */
-static inline void _app_wisun_mutex_release(void)
+__STATIC_INLINE void _app_wisun_mutex_release(void)
 {
   assert(osMutexRelease(_app_wisun_setting_mtx) == osOK);
 }

@@ -388,10 +388,27 @@ void EUSART_Enable(EUSART_TypeDef *eusart, EUSART_Enable_TypeDef enable)
 
 /***************************************************************************//**
  * Receives one 8 bit frame, (or part of 9 bit frame).
+ *
+ * @note (1) Handles the case where the RX Fifo Watermark has been set to N frames,
+ *       and when N is greater than one. Attempt to read a frame from the RX Fifo.
+ *       If the read is unsuccessful (i.e. no frames in the RX fifo), the RXFU
+ *       interrupt flag is set. If the flag is set, wait to read again until the RXFL
+ *       status flag is set, indicating there are N frames in the RX Fifo, where N
+ *       is equal to the RX watermark level. Once there are N frames in the Fifo,
+ *       read and return one frame. For consecutive N-1 reads there will be data available
+ *       in the Fifo. Therefore, the RXUF interrupt will not be triggered eliminating
+ *       delays between reads and sending N data frames in "bursts".
  ******************************************************************************/
 uint8_t EUSART_Rx(EUSART_TypeDef *eusart)
 {
-  // Attempt to read data from Rx fifo
+  // If RX watermark has not been configured.
+  if ((eusart->CFG1 & _EUSART_CFG1_RXFIW_MASK) == EUSART_CFG1_RXFIW_DEFAULT) {
+    while (!(eusart->STATUS & EUSART_STATUS_RXFL)) {
+    } // Wait for incoming data.
+    return (uint8_t)eusart->RXDATA;
+  }
+
+  // See Note #1.
   uint8_t rx_data = eusart->RXDATA;
   // If there is underflow i.e Rx data read was unsuccessful
   if (eusart->IF & EUSART_IF_RXUF) {

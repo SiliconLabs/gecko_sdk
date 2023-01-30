@@ -18,7 +18,11 @@ requires:
   - name: wisun_rcp
 
 library:
-  - path: stack/libwisun_rcp_efr32xg1x.a
+  - path: stack/libwisun_rcp_efr32xg1x_gcc.a
     condition: [device_has_usart, toolchain_gcc]
-  - path: stack/libwisun_rcp_efr32xg2x.a
+  - path: stack/libwisun_rcp_efr32xg2x_gcc.a
     condition: [device_has_eusart, toolchain_gcc]
+  - path: stack/libwisun_rcp_efr32xg1x_iar.a
+    condition: [device_has_usart, toolchain_iar]
+  - path: stack/libwisun_rcp_efr32xg2x_iar.a
+    condition: [device_has_eusart, toolchain_iar]

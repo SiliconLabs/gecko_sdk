@@ -197,7 +197,7 @@ static void _set_nbinfo_txtbox(void *args);
  * @brief Get the tx remaining budget string
  * @param[in] tx_remaining_budget TX remianing budget
  *****************************************************************************/
-static inline const char* _tx_remaining_budget(const uint32_t tx_remaining_budget);
+__STATIC_INLINE const char* _tx_remaining_budget(const uint32_t tx_remaining_budget);
 
 // -----------------------------------------------------------------------------
 //                                Static Variables
@@ -480,7 +480,7 @@ static void _set_nbinfo_txtbox(void *args)
   app_wisun_trace_util_destroy_ip_str(ip_str);
 }
 
-static inline const char* _tx_remaining_budget(const uint32_t tx_remaining_budget)
+__STATIC_INLINE const char* _tx_remaining_budget(const uint32_t tx_remaining_budget)
 {
   if (tx_remaining_budget == 0UL) {
     return TX_REMAINING_EXCEEDED_STR;

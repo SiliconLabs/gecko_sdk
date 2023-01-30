@@ -139,7 +139,7 @@ void printChildTable(sl_cli_command_arg_t *arguments)
   uint32_t returnFrameCounter = 0;
 
   emberAfAppPrintln("");
-  emberAfAppPrintln("#  type    id     eui64               timeout         framecounter");
+  emberAfAppPrintln("#  type    id     eui64               timeout         remaining         framecounter");
   for (i = 0; i < size; i++) {
     EmberChildData childData;
     EmberStatus status = emberAfGetChildData(i, &childData);
@@ -157,6 +157,11 @@ void printChildTable(sl_cli_command_arg_t *arguments)
       emberAfAppPrint("10 sec");
     } else {
       emberAfAppPrint("%d min", (2 << (childData.timeout - 1)));
+    }
+    if (childData.remainingTimeout >= 60) {
+      emberAfAppPrint("         %d min", (childData.remainingTimeout / 60));
+    } else {
+      emberAfAppPrint("         %d sec", childData.remainingTimeout);
     }
 
     //Add in the Frame Counter information

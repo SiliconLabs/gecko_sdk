@@ -30,7 +30,7 @@
 //------------------------------------------------------------------------------
 // Protocol Definitions
 
-#define EZSP_PROTOCOL_VERSION     0x09
+#define EZSP_PROTOCOL_VERSION     0x0A
 
 // EZSP max length + Frame Control extra byte +
 // Secure EZSP autentication header + Frame ID extra byte + Secure EZSP MIC

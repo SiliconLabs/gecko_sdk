@@ -12,6 +12,8 @@ zw_cc_multilevel_sensor:
 zw_cc_configuration:
   configurations:
     - name: "Minimum temperature limit"
+      number: 1
+      file_id: 0
       info: "Minimum temperature limit celsius"
       size: CC_CONFIG_PARAMETER_SIZE_32_BIT
       format: CC_CONFIG_PARAMETER_FORMAT_SIGNED_INTEGER
@@ -22,6 +24,8 @@ zw_cc_configuration:
       read_only: 0
       advanced: 0
     - name: "Maximum temperature limit"
+      number: 2
+      file_id: 1
       info: "Maximum temperature limit celsius"
       size: CC_CONFIG_PARAMETER_SIZE_32_BIT
       format: CC_CONFIG_PARAMETER_FORMAT_SIGNED_INTEGER

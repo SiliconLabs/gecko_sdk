@@ -163,21 +163,21 @@ static void print_zigbee_tx_test_stats(void)
   throughput = throughput * 1000;
   throughput = throughput / total_send_time_ms;
 
-  sl_zigbee_app_debug_print("ZigBee TX done\n");
-  sl_zigbee_app_debug_print("Total time %lums\n", total_send_time_ms);
-  sl_zigbee_app_debug_print("Success messages: %d out of %d\n",
-                            zigbee_tx_test_info.message_success_count,
-                            zigbee_tx_test_info.message_total_count);
-  sl_zigbee_app_debug_print("Throughput: %llu bits/s\n", throughput);
+  sl_zigbee_app_debug_println("ZigBee TX done");
+  sl_zigbee_app_debug_println("Total time %lums", total_send_time_ms);
+  sl_zigbee_app_debug_println("Success messages: %d out of %d",
+                              zigbee_tx_test_info.message_success_count,
+                              zigbee_tx_test_info.message_total_count);
+  sl_zigbee_app_debug_println("Throughput: %llu bits/s", throughput);
 
   if (zigbee_tx_test_info.message_success_count > 0) {
-    sl_zigbee_app_debug_print("Min packet send time: %lu ms\n",
-                              zigbee_tx_test_info.min_send_time_ms);
-    sl_zigbee_app_debug_print("Max packet send time: %lu ms\n",
-                              zigbee_tx_test_info.max_send_time_ms);
-    sl_zigbee_app_debug_print("Avg packet send time: %lu ms\n",
-                              (zigbee_tx_test_info.sum_send_time_ms
-                               / zigbee_tx_test_info.message_success_count));
+    sl_zigbee_app_debug_println("Min packet send time: %lu ms",
+                                zigbee_tx_test_info.min_send_time_ms);
+    sl_zigbee_app_debug_println("Max packet send time: %lu ms",
+                                zigbee_tx_test_info.max_send_time_ms);
+    sl_zigbee_app_debug_println("Avg packet send time: %lu ms",
+                                (zigbee_tx_test_info.sum_send_time_ms
+                                 / zigbee_tx_test_info.message_success_count));
   }
 }
 
@@ -185,7 +185,7 @@ void zigbee_tx_test_start_random(sl_cli_command_arg_t *arguments)
 {
   // If a test is already in progress, do not corrupt the ongoing test data
   if (sl_zigbee_event_is_scheduled(&zigbee_large_network_event)) {
-    sl_zigbee_app_debug_print("Test is in progress. Exiting\n");
+    sl_zigbee_app_debug_println("Test is in progress. Exiting");
     return;
   }
 
@@ -197,14 +197,14 @@ void zigbee_tx_test_start_random(sl_cli_command_arg_t *arguments)
   sequence_counter = sl_cli_get_argument_uint16(arguments, 4);
 
   if (zigbee_tx_test_info.max_in_flight > ZIGBEE_TX_TEST_MAX_INFLIGHT) {
-    sl_zigbee_app_debug_print("Error: max allowed in flight is %d\n",
-                              ZIGBEE_TX_TEST_MAX_INFLIGHT);
+    sl_zigbee_app_debug_println("Error: max allowed in flight is %d",
+                                ZIGBEE_TX_TEST_MAX_INFLIGHT);
     return;
   }
 
   if (zigbee_tx_test_info.message_total_count == 0
       || zigbee_tx_test_info.message_total_count == 0xFFFF) {
-    sl_zigbee_app_debug_print("Error: invalid message count\n");
+    sl_zigbee_app_debug_println("Error: invalid message count");
     return;
   }
 
@@ -231,7 +231,7 @@ void zigbee_tx_test_start_random(sl_cli_command_arg_t *arguments)
     zigbee_tx_test_info.in_flight_info_table[i].in_use = false;
   }
 
-  sl_zigbee_app_debug_print("ZigBee TX test started\n");
+  sl_zigbee_app_debug_println("ZigBee TX test started");
 
   // Set event to active - do not call handler from here since this is run
   // from the CLI task context. sli_cli_post_cmd_hook will post a flag that
@@ -361,23 +361,23 @@ void zigbee_tx_test_start_command(sl_cli_command_arg_t *arguments)
 
   // If a test is already in progress, do not corrupt the ongoing test data
   if (sl_zigbee_event_is_scheduled(&zigbee_tx_test_event)) {
-    sl_zigbee_app_debug_print("Test is in progress. Exiting\n");
+    sl_zigbee_app_debug_println("Test is in progress. Exiting");
     return;
   }
 
   zigbee_tx_test_info.message_length = sl_cli_get_argument_uint8(arguments, 0);
 
   if (zigbee_tx_test_info.message_length > MAX_ZIGBEE_TX_TEST_MESSAGE_LENGTH) {
-    sl_zigbee_app_debug_print("Error: max allowed message payload is %d\n",
-                              MAX_ZIGBEE_TX_TEST_MESSAGE_LENGTH);
+    sl_zigbee_app_debug_println("Error: max allowed message payload is %d",
+                                MAX_ZIGBEE_TX_TEST_MESSAGE_LENGTH);
     return;
   }
 
   zigbee_tx_test_info.max_in_flight = sl_cli_get_argument_uint8(arguments, 3);
 
   if (zigbee_tx_test_info.max_in_flight > ZIGBEE_TX_TEST_MAX_INFLIGHT) {
-    sl_zigbee_app_debug_print("Error: max allowed in flight is %d\n",
-                              ZIGBEE_TX_TEST_MAX_INFLIGHT);
+    sl_zigbee_app_debug_println("Error: max allowed in flight is %d",
+                                ZIGBEE_TX_TEST_MAX_INFLIGHT);
     return;
   }
 
@@ -385,7 +385,7 @@ void zigbee_tx_test_start_command(sl_cli_command_arg_t *arguments)
 
   if (zigbee_tx_test_info.message_total_count == 0
       || zigbee_tx_test_info.message_total_count == 0xFFFF) {
-    sl_zigbee_app_debug_print("Error: invalid message count\n");
+    sl_zigbee_app_debug_println("Error: invalid message count");
     return;
   }
 
@@ -409,7 +409,7 @@ void zigbee_tx_test_start_command(sl_cli_command_arg_t *arguments)
     zigbee_tx_test_info.in_flight_info_table[i].in_use = false;
   }
 
-  sl_zigbee_app_debug_print("ZigBee TX test started\n");
+  sl_zigbee_app_debug_println("ZigBee TX test started");
 
   // Set event to active - do not call handler from here since this is run
   // from the CLI task context. sli_cli_post_cmd_hook will post a flag that
@@ -433,15 +433,14 @@ void zigbee_set_passive_ack_config(sl_cli_command_arg_t *arguments)
   uint8_t config = sl_cli_get_argument_uint8(arguments, 0);
   uint8_t min_acks_needed = sl_cli_get_argument_uint8(arguments, 1);
 
-  if (config > SL_PASSIVE_ACK_THRESHOLD_WITH_REBROADCAST_ALL_NODES) {
-    sl_zigbee_app_debug_print("Invalid config\n");
+  if (EMBER_SUCCESS != sl_zigbee_set_passive_ack_config((sl_passive_ack_config_enum_t)config,
+                                                        min_acks_needed)) {
+    sl_zigbee_app_debug_println("Error: Invalid value passive");
     return;
   }
 
-  sl_set_passive_ack_config((sl_passive_ack_config_enum_t)config, min_acks_needed);
-
-  sl_zigbee_app_debug_print("Passive ACKs configured: config=%d, min_acks=%d\n",
-                            config, min_acks_needed);
+  sl_zigbee_app_debug_println("Passive ACKs configured: config=%d, min_acks=%d",
+                              config, min_acks_needed);
 }
 
 #endif // EZSP_HOST
@@ -487,7 +486,7 @@ bool emberAfPreCommandReceivedCallback(EmberAfClusterCommand* cmd)
 
     sl_zigbee_app_debug_print("\nPing returned [");
     sl_zigbee_app_debug_print("%02X %02X", cmd->buffer[INDEX_OF_SEQ_NUM_START], cmd->buffer[INDEX_OF_SEQ_NUM_END]);
-    sl_zigbee_app_debug_print("]\n");
+    sl_zigbee_app_debug_println("]");
     return true;
   }
   return false;

@@ -34,19 +34,19 @@ void emberAfPluginIdleSleepStatusCommand(sl_cli_command_arg_t *arguments)
 {
   (void)arguments;
 
-  sl_zigbee_core_debug_print("Stay awake when not joined: %s\n",
-                             (emAfStayAwakeWhenNotJoined ? "yes" : "no"));
-  sl_zigbee_core_debug_print("Forced stay awake:          %s\n",
-                             (emAfForceEndDeviceToStayAwake ? "yes" : "no"));
+  sl_zigbee_core_debug_println("Stay awake when not joined: %s",
+                               (emAfStayAwakeWhenNotJoined ? "yes" : "no"));
+  sl_zigbee_core_debug_println("Forced stay awake:          %s",
+                               (emAfForceEndDeviceToStayAwake ? "yes" : "no"));
 }
 
 void emberAfPluginIdleSleepStayAwakeCommand(sl_cli_command_arg_t *arguments)
 {
   bool stayAwake = (bool)sl_cli_get_argument_uint8(arguments, 0);
   if (stayAwake) {
-    sl_zigbee_core_debug_print("Forcing device to stay awake\n");
+    sl_zigbee_core_debug_println("Forcing device to stay awake");
   } else {
-    sl_zigbee_core_debug_print("Allowing device to go to sleep\n");
+    sl_zigbee_core_debug_println("Allowing device to go to sleep");
   }
   emberAfForceEndDeviceToStayAwake(stayAwake);
 }

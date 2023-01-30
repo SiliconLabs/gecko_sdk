@@ -245,8 +245,8 @@ void emberOverrideIncomingRouteRecordHandler(
 }
 
 // -----------------------------------------------------------------------------
-// Weak implementation of emAfOverrideAppendSourceRouteCallback
-WEAK(uint8_t emAfOverrideAppendSourceRouteCallback(
+// Weak implementation of emberAfOverrideAppendSourceRouteCallback
+WEAK(uint8_t emberAfOverrideAppendSourceRouteCallback(
        EmberNodeId destination,
        // Return:
        EmberMessageBuffer *header,
@@ -271,7 +271,7 @@ uint8_t emberOverrideAppendSourceRouteHandler(
 {
   uint8_t ret;
   emberAfPushCallbackNetworkIndex();
-  ret = emAfOverrideAppendSourceRouteCallback(destination, header, consumed);
+  ret = emberAfOverrideAppendSourceRouteCallback(destination, header, consumed);
   emAfOverrideAppendSourceRoute(destination, header, consumed);
   emberAfPopNetworkIndex();
   return ret;

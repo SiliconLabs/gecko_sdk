@@ -43,11 +43,6 @@ template_contribution:
       event: sleep_on_isr_exit
       include: sl_iostream_init_leuart_instances.h
       handler: "sl_iostream_leuart_{{instance}}_sleep_on_isr_exit"
-  - name: power_manager_handler
-    value:
-      event: is_ok_to_sleep
-      include: sl_iostream_init_leuart_instances.h
-      handler: "sl_iostream_leuart_{{instance}}_is_ok_to_sleep"
 documentation:
   docset: gecko-platform
   document: service/api/group-iostream-leuart

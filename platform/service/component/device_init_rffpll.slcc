@@ -26,6 +26,13 @@ requires:
   - name: status
   - name: device_series_2
   - name: device_has_rffpll
+define:
+  # The Auto-Band feature requires the existence of a radio configuration file.
+  # If this symbol is not defined, Auto-Band will be ignored and 9xx band used.
+  - name: SL_DEVICE_INIT_AUTO_BAND_VALID
+    value: '1'
+    condition:
+    - a_radio_config
 template_contribution:
   - name: event_handler
     value:

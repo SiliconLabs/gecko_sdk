@@ -85,7 +85,7 @@ static void _interrupt_ping(void *args);
  * @return true Must be measured
  * @return false Not requested
  *****************************************************************************/
-static inline bool _is_measurable(const sl_wisun_nwm_target_type_t meas_type,
+__STATIC_INLINE bool _is_measurable(const sl_wisun_nwm_target_type_t meas_type,
                                   const sl_wisun_nwm_node_type_t node_type);
 
 /**************************************************************************//**
@@ -215,7 +215,7 @@ static void _interrupt_ping(void *args)
   sl_display_renderer(sl_wisun_nwm_main_form, NULL, 0);
 }
 
-static inline bool _is_measurable(const sl_wisun_nwm_target_type_t meas_type,
+__STATIC_INLINE bool _is_measurable(const sl_wisun_nwm_target_type_t meas_type,
                                   const sl_wisun_nwm_node_type_t node_type)
 {
   if (meas_type == SL_WISUN_NWM_TARGET_TYPE_ALL ||

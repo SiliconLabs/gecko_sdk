@@ -85,6 +85,47 @@ static inline psa_algorithm_t psa_get_key_enrollment_algorithm(
  */
 void mbedtls_psa_crypto_free( void );
 
+#if defined (MBEDTLS_PSA_CRYPTO_EXTERNAL_RNG) && defined(SL_TRUSTZONE_NONSECURE)
+/** The random generator function for the PSA subsystem.
+ *
+ * This function is suitable as the `f_rng` random generator function
+ * parameter of many `mbedtls_xxx` functions. Use #MBEDTLS_PSA_RANDOM_STATE
+ * to obtain the \p p_rng parameter.
+ *
+ * The implementation of this function depends on the configuration of the
+ * library.
+ *
+ * \note Depending on the configuration, this may be a function or
+ *       a pointer to a function.
+ *
+ * \note This function may only be used if the PSA crypto subsystem is active.
+ *       This means that you must call psa_crypto_init() before any call to
+ *       this function, and you must not call this function after calling
+ *       mbedtls_psa_crypto_free().
+ *
+ * \param p_rng         The random generator context. This must be
+ *                      #MBEDTLS_PSA_RANDOM_STATE. No other state is
+ *                      supported.
+ * \param output        The buffer to fill. It must have room for
+ *                      \c output_size bytes.
+ * \param output_size   The number of bytes to write to \p output.
+ *                      This function may fail if \p output_size is too
+ *                      large. It is guaranteed to accept any output size
+ *                      requested by Mbed TLS library functions. The
+ *                      maximum request size depends on the library
+ *                      configuration.
+ *
+ * \return              \c 0 on success.
+ * \return              An `MBEDTLS_ERR_ENTROPY_xxx`,
+ *                      `MBEDTLS_ERR_PLATFORM_xxx,
+ *                      `MBEDTLS_ERR_CTR_DRBG_xxx` or
+ *                      `MBEDTLS_ERR_HMAC_DRBG_xxx` on error.
+ */
+int mbedtls_psa_get_random(void *p_rng,
+                           unsigned char *output,
+                           size_t output_size);
+#endif // defined (MBEDTLS_PSA_CRYPTO_EXTERNAL_RNG) && defined(SL_TRUSTZONE_NONSECURE)
+
 /** \addtogroup crypto_types
  * @{
  */

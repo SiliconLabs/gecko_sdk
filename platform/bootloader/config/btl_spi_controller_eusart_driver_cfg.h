@@ -32,40 +32,41 @@
 // <<< sl:start pin_tool >>>
 // <eusart signal=TX,RX,SCLK,CS> SL_EUSART_EXTFLASH
 // $[EUSART_SL_EUSART_EXTFLASH]
-#define SL_EUSART_EXTFLASH_PERIPHERAL                   EUSART1
-#define SL_EUSART_EXTFLASH_PERIPHERAL_NO                1
+#warning "Bootloader SPI Controller EUSART peripheral not configured"
+//#define SL_EUSART_EXTFLASH_PERIPHERAL                   EUSART1
+//#define SL_EUSART_EXTFLASH_PERIPHERAL_NO                1
 
 // EUSART1 TX on PC0
-#define SL_EUSART_EXTFLASH_TX_PORT                      gpioPortC
-#define SL_EUSART_EXTFLASH_TX_PIN                       0
-#define SL_EUSART_EXTFLASH_TX_LOC                       1
+//#define SL_EUSART_EXTFLASH_TX_PORT                      gpioPortC
+//#define SL_EUSART_EXTFLASH_TX_PIN                       0
+//#define SL_EUSART_EXTFLASH_TX_LOC                       1
 
 // EUSART1 RX on PC1
-#define SL_EUSART_EXTFLASH_RX_PORT                      gpioPortC
-#define SL_EUSART_EXTFLASH_RX_PIN                       1
-#define SL_EUSART_EXTFLASH_RX_LOC                       4
+//#define SL_EUSART_EXTFLASH_RX_PORT                      gpioPortC
+//#define SL_EUSART_EXTFLASH_RX_PIN                       1
+//#define SL_EUSART_EXTFLASH_RX_LOC                       4
 
 // EUSART1 SCLK on PC2
-#define SL_EUSART_EXTFLASH_SCLK_PORT                    gpioPortC
-#define SL_EUSART_EXTFLASH_SCLK_PIN                     2
-#define SL_EUSART_EXTFLASH_SCLK_LOC                     0
+//#define SL_EUSART_EXTFLASH_SCLK_PORT                    gpioPortC
+//#define SL_EUSART_EXTFLASH_SCLK_PIN                     2
+//#define SL_EUSART_EXTFLASH_SCLK_LOC                     0
 
 // EUSART1 CS on PC3
-#define SL_EUSART_EXTFLASH_CS_PORT                      gpioPortC
-#define SL_EUSART_EXTFLASH_CS_PIN                       3
-#define SL_EUSART_EXTFLASH_CS_LOC                       0
+//#define SL_EUSART_EXTFLASH_CS_PORT                      gpioPortC
+//#define SL_EUSART_EXTFLASH_CS_PIN                       3
+//#define SL_EUSART_EXTFLASH_CS_LOC                       0
 // [EUSART_SL_EUSART_EXTFLASH]$
 
 // <gpio> SL_EXTFLASH_WP
 // $[GPIO_SL_EXTFLASH_WP]
-#define SL_EXTFLASH_WP_PORT                     gpioPortA
-#define SL_EXTFLASH_WP_PIN                      7
+//#define SL_EXTFLASH_WP_PORT                     gpioPortA
+//#define SL_EXTFLASH_WP_PIN                      7
 // [GPIO_SL_EXTFLASH_WP]$
 
 // <gpio> SL_EXTFLASH_HOLD
 // $[GPIO_SL_EXTFLASH_HOLD]
-#define SL_EXTFLASH_HOLD_PORT                   gpioPortC
-#define SL_EXTFLASH_HOLD_PIN                    6
+//#define SL_EXTFLASH_HOLD_PORT                   gpioPortC
+//#define SL_EXTFLASH_HOLD_PIN                    6
 // [GPIO_SL_EXTFLASH_HOLD]$
 
 // <<< sl:end pin_tool >>>

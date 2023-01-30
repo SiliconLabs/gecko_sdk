@@ -175,7 +175,7 @@ static void send_ping_event_handler(sl_zigbee_event_t *event)
   txCmdBuff[4] = BYTE_COMMAND_PING;
 
   status = mfglibSendPacket(txCmdBuff, 0);
-  sl_zigbee_app_debug_print("ping (st 0x%02X)\r\n", status);
+  sl_zigbee_app_debug_println("ping (st 0x%02X)", status);
 }
 
 static void send_ack_event_handler(sl_zigbee_event_t *event)
@@ -189,7 +189,7 @@ static void send_ack_event_handler(sl_zigbee_event_t *event)
   txCmdBuff[4] = BYTE_COMMAND_ACK;
 
   status = mfglibSendPacket(txCmdBuff, 0);
-  sl_zigbee_app_debug_print("ack (st 0x%02X)\r\n", status);
+  sl_zigbee_app_debug_println("ack (st 0x%02X)", status);
 }
 
 static void send_set_channel_event_handler(sl_zigbee_event_t *event)
@@ -212,7 +212,7 @@ static void send_get_channel_response_event_handler(sl_zigbee_event_t *event)
   txCmdBuff[8] = globalChannelMaskByte3;
 
   status = mfglibSendPacket(txCmdBuff, 0);
-  sl_zigbee_app_debug_print("get ch resp (st 0x%02X)\r\n", status);
+  sl_zigbee_app_debug_println("get ch resp (st 0x%02X)", status);
 }
 
 static void send_set_power_event_handler(sl_zigbee_event_t *event)
@@ -227,7 +227,7 @@ static void send_set_power_event_handler(sl_zigbee_event_t *event)
   txCmdBuff[5] = globalPower;
 
   status = mfglibSendPacket(txCmdBuff, 0);
-  sl_zigbee_app_debug_print("set pow (st 0x%02X)\r\n", status);
+  sl_zigbee_app_debug_println("set pow (st 0x%02X)", status);
 }
 
 static void send_get_power_event_handler(sl_zigbee_event_t *event)
@@ -241,7 +241,7 @@ static void send_get_power_event_handler(sl_zigbee_event_t *event)
   txCmdBuff[4] = BYTE_COMMAND_GET_POWER;
 
   status = mfglibSendPacket(txCmdBuff, 0);
-  sl_zigbee_app_debug_print("get pow (st 0x%02X)\r\n", status);
+  sl_zigbee_app_debug_println("get pow (st 0x%02X)", status);
 }
 
 static void send_get_power_response_event_handler(sl_zigbee_event_t *event)
@@ -256,7 +256,7 @@ static void send_get_power_response_event_handler(sl_zigbee_event_t *event)
   txCmdBuff[5] = globalPower;
 
   status = mfglibSendPacket(txCmdBuff, 0);
-  sl_zigbee_app_debug_print("get pow resp (st 0x%02X)\r\n", status);
+  sl_zigbee_app_debug_println("get pow resp (st 0x%02X)", status);
 }
 
 static void send_stream_event_handler(sl_zigbee_event_t *event)
@@ -272,7 +272,7 @@ static void send_stream_event_handler(sl_zigbee_event_t *event)
   txCmdBuff[6] = globalDuration1;
 
   status = mfglibSendPacket(txCmdBuff, 0);
-  sl_zigbee_app_debug_print("stream (st 0x%02X)\r\n", status);
+  sl_zigbee_app_debug_println("stream (st 0x%02X)", status);
 }
 
 static void send_start_rx_test_event_handler(sl_zigbee_event_t *event)
@@ -286,7 +286,7 @@ static void send_start_rx_test_event_handler(sl_zigbee_event_t *event)
   txCmdBuff[4] = BYTE_COMMAND_START_RX_TEST;
 
   status = mfglibSendPacket(txCmdBuff, 0);
-  sl_zigbee_app_debug_print("start rx test (st 0x%02X)\r\n", status);
+  sl_zigbee_app_debug_println("start rx test (st 0x%02X)", status);
 }
 
 static void send_end_rx_test_event_handler(sl_zigbee_event_t *event)
@@ -300,7 +300,7 @@ static void send_end_rx_test_event_handler(sl_zigbee_event_t *event)
   txCmdBuff[4] = BYTE_COMMAND_END_RX_TEST;
 
   status = mfglibSendPacket(txCmdBuff, 0);
-  sl_zigbee_app_debug_print("end rx test (st 0x%02X)\r\n", status);
+  sl_zigbee_app_debug_println("end rx test (st 0x%02X)", status);
 }
 
 static void send_report_event_handler(sl_zigbee_event_t *event)
@@ -330,7 +330,7 @@ static void send_report_event_handler(sl_zigbee_event_t *event)
   txCmdBuff[20] = BYTE_0(totalRssi);
 
   status = mfglibSendPacket(txCmdBuff, 0);
-  sl_zigbee_app_debug_print("report (st 0x%02X)\r\n", status);
+  sl_zigbee_app_debug_println("report (st 0x%02X)", status);
 
   //clear after sending report
   helper_init();
@@ -347,7 +347,7 @@ static void send_reboot_event_handler(sl_zigbee_event_t *event)
   txCmdBuff[4] = BYTE_COMMAND_REBOOT;
 
   status = mfglibSendPacket(txCmdBuff, 0);
-  sl_zigbee_app_debug_print("reboot (st 0x%02X)\r\n", status);
+  sl_zigbee_app_debug_println("reboot (st 0x%02X)", status);
 }
 
 static void send_get_reboot_byte_response_event_handler(sl_zigbee_event_t *event)
@@ -362,7 +362,7 @@ static void send_get_reboot_byte_response_event_handler(sl_zigbee_event_t *event
   txCmdBuff[5] = globalRebootByte;
 
   status = mfglibSendPacket(txCmdBuff, 0);
-  sl_zigbee_app_debug_print("get reboot byte (st 0x%02X)\r\n", status);
+  sl_zigbee_app_debug_println("get reboot byte (st 0x%02X)", status);
 }
 
 static void send_get_hardware_version_event_handler(sl_zigbee_event_t *event)
@@ -376,7 +376,7 @@ static void send_get_hardware_version_event_handler(sl_zigbee_event_t *event)
   txCmdBuff[4] = BYTE_GET_HARDWARE_VERSION;
 
   status = mfglibSendPacket(txCmdBuff, 0);
-  sl_zigbee_app_debug_print("get hw ver (st 0x%02X)\r\n", status);
+  sl_zigbee_app_debug_println("get hw ver (st 0x%02X)", status);
 }
 
 static void send_get_hardware_version_response_event_handler(sl_zigbee_event_t *event)
@@ -393,7 +393,7 @@ static void send_get_hardware_version_response_event_handler(sl_zigbee_event_t *
   txCmdBuff[5] = SL_SRFT_DEVICE_HW_VERSION;
 
   status = mfglibSendPacket(txCmdBuff, 0);
-  sl_zigbee_app_debug_print("get hw ver resp (st 0x%02X)\r\n", status);
+  sl_zigbee_app_debug_println("get hw ver resp (st 0x%02X)", status);
 }
 
 static void send_get_software_version_event_handler(sl_zigbee_event_t *event)
@@ -409,7 +409,7 @@ static void send_get_software_version_event_handler(sl_zigbee_event_t *event)
   txCmdBuff[4] = BYTE_GET_SOFTWARE_VERSION;
 
   status = mfglibSendPacket(txCmdBuff, 0);
-  sl_zigbee_app_debug_print("get sw ver (st 0x%02X)\r\n", status);
+  sl_zigbee_app_debug_println("get sw ver (st 0x%02X)", status);
 }
 
 static void send_get_software_version_response_event_handler(sl_zigbee_event_t *event)
@@ -424,13 +424,13 @@ static void send_get_software_version_response_event_handler(sl_zigbee_event_t *
   txCmdBuff[5] = SL_SRFT_DEVICE_SW_VERSION;
 
   status = mfglibSendPacket(txCmdBuff, 0);
-  sl_zigbee_app_debug_print("get sw ver resp (st 0x%02X)\r\n", status);
+  sl_zigbee_app_debug_println("get sw ver resp (st 0x%02X)", status);
 }
 
 static void ping_timer_event_handler(sl_zigbee_event_t *event)
 {
   deviceState = STATE_LOCAL_INIT;
-  sl_zigbee_app_debug_print("NO PING ACK\r\n");
+  sl_zigbee_app_debug_println("NO PING ACK");
 }
 
 static void set_channel_event_handler(sl_zigbee_event_t *event)
@@ -477,7 +477,7 @@ static void stream_timer_event_handler(sl_zigbee_event_t *event)
   EmberStatus status;
   deviceState = STATE_LOCAL_INIT;
   status = mfglibStopStream();
-  sl_zigbee_app_debug_print("stop stream (st 0x%02X)\r\n", status);
+  sl_zigbee_app_debug_println("stop stream (st 0x%02X)", status);
 }
 
 static void custom_1_event_handler(sl_zigbee_event_t *event)
@@ -513,14 +513,14 @@ static void custom_2_event_handler(sl_zigbee_event_t *event)
   /* Check for error */
   if (status != EMBER_SUCCESS) {
     /* If error, print status and don't arm event */
-    sl_zigbee_app_debug_print("mfglib TX failure, status=0x%02X\r\n", status);
+    sl_zigbee_app_debug_println("mfglib TX failure, status=0x%02X", status);
     return;
   }
 
   globalNumPackets++;
 
   if (globalNumPackets >= globalTotalNumPackets) {
-    sl_zigbee_app_debug_print("TX complete, 0x%x packets sent\r\n", globalNumPackets);
+    sl_zigbee_app_debug_println("TX complete, 0x%x packets sent", globalNumPackets);
   } else {
     sl_zigbee_event_set_delay_ms(&custom_2_event, 100);
   }
@@ -561,12 +561,12 @@ static void helper_app_init(void)
   int8_t txPower;
 
   status = mfglibStart(mfglibRxHandler);
-  sl_zigbee_app_debug_print("INIT: mfglib start (st 0x%02X)\r\n", status);
+  sl_zigbee_app_debug_println("INIT: mfglib start (st 0x%02X)", status);
   helper_local_channel_with_power(SL_SRFT_DEFAULT_CHANNEL);
   channel = mfglibGetChannel();
-  sl_zigbee_app_debug_print("INIT: ch 0x%02X\r\n", channel);
+  sl_zigbee_app_debug_println("INIT: ch 0x%02X", channel);
   txPower = mfglibGetPower();
-  sl_zigbee_app_debug_print("INIT: pow 0x%02x\r\n", txPower);
+  sl_zigbee_app_debug_println("INIT: pow 0x%02x", txPower);
 
   deviceState = STATE_LOCAL_INIT;
 }
@@ -644,10 +644,10 @@ static void helper_local_channel_with_power(uint8_t channel)
   int8_t txPower = helper_get_tx_power(channel);
 
   status = mfglibSetChannel(channel);
-  sl_zigbee_app_debug_print("ch %x (st 0x%02X)\r\n", channel, status);
+  sl_zigbee_app_debug_println("ch %x (st 0x%02X)", channel, status);
 
   status = mfglibSetPower(SL_SRFT_TX_POWER_MODE, txPower);
-  sl_zigbee_app_debug_print("pow %d (st 0x%02X)\r\n", txPower, status);
+  sl_zigbee_app_debug_println("pow %d (st 0x%02X)", txPower, status);
 }
 
 // the index of a set bit within the channelMask correspond
@@ -662,7 +662,7 @@ static uint8_t helper_from_channel_mask_to_channel(uint32_t channelMask)
     }
   }
 
-  sl_zigbee_app_debug_print("invalid channel mask\r\n");
+  sl_zigbee_app_debug_println("invalid channel mask");
   return 0; /* No channels in mask */
 }
 
@@ -671,7 +671,7 @@ static uint32_t helper_from_channel_to_channel_mask(uint8_t channel)
   if (SL_SRFT_LOW_CHANNEL <= channel && channel <= SL_SRFT_HIGH_CHANNEL) {
     return 1 << channel;
   } else {
-    sl_zigbee_app_debug_print("invalid channel\r\n");
+    sl_zigbee_app_debug_println("invalid channel");
     return 0; /* No channels in mask */
   }
 }
@@ -705,7 +705,7 @@ static void helper_send_set_channel(void)
   txCmdBuff[8] = globalChannelMaskByte3;
 
   status = mfglibSendPacket(txCmdBuff, 0);
-  sl_zigbee_app_debug_print("set channel (st 0x%02X)\r\n", status);
+  sl_zigbee_app_debug_println("set channel (st 0x%02X)", status);
 }
 
 static void helper_stream(uint16_t timeout)
@@ -715,7 +715,7 @@ static void helper_stream(uint16_t timeout)
   deviceState = STATE_LOCAL_STREAMING;
 
   status = mfglibStartStream();
-  sl_zigbee_app_debug_print("stream (st 0x%02X)\r\n", status);
+  sl_zigbee_app_debug_println("stream (st 0x%02X)", status);
 
   // infinity if timeout is equal to 0
   if (timeout != 0) {
@@ -736,7 +736,7 @@ static void helper_set_power(void)
   EmberStatus status;
 
   status = mfglibSetPower(SL_SRFT_TX_POWER_MODE, globalPower);
-  sl_zigbee_app_debug_print("pow (st 0x%02XX)\r\n", status);
+  sl_zigbee_app_debug_println("pow (st 0x%02XX)", status);
 }
 
 static void helper_local_reboot(void)
@@ -1172,9 +1172,9 @@ void sli_srft_cli_customLpingtimeout(sl_cli_command_arg_t *arguments)
 
   globalRpingTimeout = (byte0 << 8) + byte1;
 
-  sl_zigbee_app_debug_print("globalRpingTimeout 0x%02X (%d)\r\n",
-                            globalRpingTimeout,
-                            globalRpingTimeout);
+  sl_zigbee_app_debug_println("globalRpingTimeout 0x%02X (%d)",
+                              globalRpingTimeout,
+                              globalRpingTimeout);
 }
 
 void sli_srft_cli_customSetchannel(sl_cli_command_arg_t *arguments)
@@ -1214,8 +1214,8 @@ void sli_srft_cli_customLgetchannel(sl_cli_command_arg_t *arguments)
   uint32_t channelMask = helper_from_channel_to_channel_mask(localChannel);
   helper_from_channel_mask_to_global_channel_mask_bytes(channelMask);
 
-  sl_zigbee_app_debug_print("channel 0x%02X%02X%02X%02X\r\n",
-                            globalChannelMaskByte0, globalChannelMaskByte1, globalChannelMaskByte2, globalChannelMaskByte3);
+  sl_zigbee_app_debug_println("channel 0x%02X%02X%02X%02X",
+                              globalChannelMaskByte0, globalChannelMaskByte1, globalChannelMaskByte2, globalChannelMaskByte3);
 }
 
 void sli_srft_cli_customLsetpower(sl_cli_command_arg_t *arguments)
@@ -1226,7 +1226,7 @@ void sli_srft_cli_customLsetpower(sl_cli_command_arg_t *arguments)
   // ignoring the <mode:1-0> params in CLI arguments 0-1
   int8_t pow = sl_cli_get_argument_int8(arguments, 2);
   status = mfglibSetPower(SL_SRFT_TX_POWER_MODE, pow);
-  sl_zigbee_app_debug_print("pow (st 0x%02X)\r\n", status);
+  sl_zigbee_app_debug_println("pow (st 0x%02X)", status);
 }
 
 void sli_srft_cli_customRsetpower(sl_cli_command_arg_t *arguments)
@@ -1239,7 +1239,7 @@ void sli_srft_cli_customRsetpower(sl_cli_command_arg_t *arguments)
 void sli_srft_cli_customLgetpower(sl_cli_command_arg_t *arguments)
 {
   int8_t pow = mfglibGetPower();
-  sl_zigbee_app_debug_print("power 0x%x\r\n", pow);
+  sl_zigbee_app_debug_println("power 0x%x\r\n", pow);
 }
 
 void sli_srft_cli_customRgetpower(sl_cli_command_arg_t *arguments)
@@ -1357,14 +1357,14 @@ void sli_srft_cli_customRsoftwareversion(sl_cli_command_arg_t *arguments)
 
 void sli_srft_cli_customSilabsTest(sl_cli_command_arg_t *arguments)
 {
-  sl_zigbee_app_debug_print("test1\r\n");
+  sl_zigbee_app_debug_println("test1");
 }
 
 void sli_srft_cli_customSilabsGetLocalVersion(sl_cli_command_arg_t *arguments)
 {
-  sl_zigbee_app_debug_print("Local RF Application Version 0x%x%x\r\n",
-                            SL_SRFT_APP_VERSION_MAJOR,
-                            SL_SRFT_APP_VERSION_MINOR);
+  sl_zigbee_app_debug_println("Local RF Application Version 0x%x%x",
+                              SL_SRFT_APP_VERSION_MAJOR,
+                              SL_SRFT_APP_VERSION_MINOR);
 }
 
 void sli_srft_cli_customSilabsTest16(sl_cli_command_arg_t *arguments)
@@ -1373,8 +1373,8 @@ void sli_srft_cli_customSilabsTest16(sl_cli_command_arg_t *arguments)
   uint8_t byte1 = sl_cli_get_argument_uint8(arguments, 1);
   uint16_t result = (byte0 << 8) + byte1;
 
-  sl_zigbee_app_debug_print("customSilabsTest16 0x%02X 0x%02X 0x%04X %d\r\n",
-                            byte0, byte1, result, result);
+  sl_zigbee_app_debug_println("customSilabsTest16 0x%02X 0x%02X 0x%04X %d",
+                              byte0, byte1, result, result);
 }
 
 void sli_srft_cli_customSilabsTest32(sl_cli_command_arg_t *arguments)
@@ -1398,13 +1398,13 @@ void sli_srft_cli_customSilabsSetChannel(sl_cli_command_arg_t *arguments)
 void sli_srft_cli_customSilabsGetChannel(sl_cli_command_arg_t *arguments)
 {
   uint8_t channel = mfglibGetChannel();
-  sl_zigbee_app_debug_print("ch 0x%x\r\n", channel);
+  sl_zigbee_app_debug_println("ch 0x%x", channel);
 }
 
 void sli_srft_cli_customSilabsGetPower(sl_cli_command_arg_t *arguments)
 {
   int8_t txPower = mfglibGetPower();
-  sl_zigbee_app_debug_print("pow 0x%x\r\n", txPower);
+  sl_zigbee_app_debug_println("pow 0x%x", txPower);
 }
 
 void sli_srft_cli_customSilabsTx(sl_cli_command_arg_t *arguments)
@@ -1420,11 +1420,11 @@ void sli_srft_cli_customSilabsListChannelPower(sl_cli_command_arg_t *arguments)
   uint8_t channel;
   int8_t txPower;
 
-  sl_zigbee_app_debug_print("\r\n");
+  sl_zigbee_app_debug_println("");
   /* List default power value for all channels */
   for (channel = SL_SRFT_LOW_CHANNEL; channel <= SL_SRFT_HIGH_CHANNEL; channel++) {
     txPower = helper_get_tx_power(channel);
-    sl_zigbee_app_debug_print("Default power level for channel %d is %d\r\n", channel, txPower);
+    sl_zigbee_app_debug_println("Default power level for channel %d is %d", channel, txPower);
   }
 }
 
@@ -1432,8 +1432,8 @@ void sli_srft_cli_customSilabsListChannelPower(sl_cli_command_arg_t *arguments)
 void sli_srft_cli_customSilabsLocalReport(sl_cli_command_arg_t *arguments)
 {
   /* Print report */
-  sl_zigbee_app_debug_print("Local Report: [total]0x%x [protocol]0x%x [totalLqi]0x%x [totalRssiMgnitude]0x%x\r\n",
-                            numPackets, numProtocolPackets, totalLqi, totalRssi);
+  sl_zigbee_app_debug_println("Local Report: [total]0x%x [protocol]0x%x [totalLqi]0x%x [totalRssiMgnitude]0x%x",
+                              numPackets, numProtocolPackets, totalLqi, totalRssi);
 
   //clear values after printing report
   helper_init();
@@ -1494,22 +1494,22 @@ static void mfglibRxHandler(uint8_t *packet, uint8_t linkQuality, int8_t rssi)
       if (deviceState == STATE_LOCAL_PINGING) {
         deviceState = STATE_LOCAL_INIT;
         sl_zigbee_event_set_inactive(&ping_timer_event);
-        sl_zigbee_app_debug_print("PING ACK\r\n");
+        sl_zigbee_app_debug_println("PING ACK");
       }
       if (deviceState == STATE_LOCAL_CHANGING_CHANNEL_PINGING) {
         deviceState = STATE_LOCAL_INIT;
         sl_zigbee_event_set_inactive(&ping_timer_event);
-        sl_zigbee_app_debug_print("CHANNEL ACK\r\n");
+        sl_zigbee_app_debug_println("CHANNEL ACK");
       }
       if (deviceState == STATE_LOCAL_REBOOTING_PINGING) {
         deviceState = STATE_LOCAL_INIT;
         sl_zigbee_event_set_inactive(&ping_timer_event);
-        sl_zigbee_app_debug_print("REBOOT ACK\r\n");
+        sl_zigbee_app_debug_println("REBOOT ACK");
       }
       if (deviceState == STATE_LOCAL_FINDING_DUT_PINGING) {
         deviceState = STATE_LOCAL_INIT;
         sl_zigbee_event_set_inactive(&ping_timer_event);
-        sl_zigbee_app_debug_print("FIND ACK\r\n");
+        sl_zigbee_app_debug_println("FIND ACK");
       }
     } else if (packet[4] == BYTE_COMMAND_SET_CHANNEL) {
       globalChannelMaskByte0 = packet[5];
@@ -1527,7 +1527,7 @@ static void mfglibRxHandler(uint8_t *packet, uint8_t linkQuality, int8_t rssi)
       globalPower = mfglibGetPower();
       sl_zigbee_event_set_active(&send_get_power_response_event);
     } else if (packet[4] == BYTE_COMMAND_GET_POWER_RESPONSE) {
-      sl_zigbee_app_debug_print("POW 0x%02X\r\n", packet[5]);
+      sl_zigbee_app_debug_println("POW 0x%02X", packet[5]);
     } else if (packet[4] == BYTE_COMMAND_STREAM) {
       uint16_t timeout = HIGH_LOW_TO_INT((uint8_t)packet[5], (uint8_t)packet[6]);
       helper_stream(timeout);
@@ -1536,9 +1536,9 @@ static void mfglibRxHandler(uint8_t *packet, uint8_t linkQuality, int8_t rssi)
     } else if (packet[4] == BYTE_COMMAND_END_RX_TEST) {
       sl_zigbee_event_set_active(&send_report_event);
     } else if (packet[4] == BYTE_COMMAND_REPORT) {
-      sl_zigbee_app_debug_print("[total]0x%02X%02X%02X%02X [protocol]0x%02X%02X%02X%02X [totalLqi]0x%02X%02X%02X%02X [totalRssiMgnitude]0x%02X%02X%02X%02X\r\n",
-                                packet[5], packet[6], packet[7], packet[8], packet[9], packet[10], packet[11], packet[12],
-                                packet[13], packet[14], packet[15], packet[16], packet[17], packet[18], packet[19], packet[20]);
+      sl_zigbee_app_debug_println("[total]0x%02X%02X%02X%02X [protocol]0x%02X%02X%02X%02X [totalLqi]0x%02X%02X%02X%02X [totalRssiMgnitude]0x%02X%02X%02X%02X",
+                                  packet[5], packet[6], packet[7], packet[8], packet[9], packet[10], packet[11], packet[12],
+                                  packet[13], packet[14], packet[15], packet[16], packet[17], packet[18], packet[19], packet[20]);
     } else if (packet[4] == BYTE_COMMAND_REBOOT) {
       helper_local_reboot();
     } else if (packet[4] == BYTE_COMMAND_GET_REBOOT_BYTE_RESPONSE) {
@@ -1547,13 +1547,13 @@ static void mfglibRxHandler(uint8_t *packet, uint8_t linkQuality, int8_t rssi)
       sl_zigbee_event_set_active(&send_get_hardware_version_response_event);
     } else if (packet[4] == BYTE_GET_HARDWARE_VERSION_RESPONSE) {
       deviceState = STATE_LOCAL_INIT;
-      sl_zigbee_app_debug_print("HW VER 0x%02X\r\n", packet[5]);
+      sl_zigbee_app_debug_println("HW VER 0x%02X", packet[5]);
     } else if (packet[4] == BYTE_GET_SOFTWARE_VERSION) {
       deviceState = STATE_LOCAL_SENDING_SW_VERSION;
       sl_zigbee_event_set_active(&send_get_software_version_response_event);
     } else if (packet[4] == BYTE_GET_SOFTWARE_VERSION_RESPONSE) {
       deviceState = STATE_LOCAL_INIT;
-      sl_zigbee_app_debug_print("SW VER 0x%02X\r\n", packet[5]);
+      sl_zigbee_app_debug_println("SW VER 0x%02X", packet[5]);
     }
   } else {
     uint8_t rssiMagnitude;

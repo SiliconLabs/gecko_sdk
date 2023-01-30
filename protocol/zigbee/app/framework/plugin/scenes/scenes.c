@@ -906,38 +906,36 @@ bool emberAfPluginScenesServerParseAddScene(const EmberAfClusterCommand *cmd,
   emberAfCopyString(entry.name, sceneName, ZCL_SCENES_CLUSTER_MAXIMUM_NAME_LENGTH);
 #endif
 
-  // When adding a new scene, wipe out all of the extensions before parsing the
+  // When adding a scene, always wipe out all of the extensions before parsing the
   // extension field sets data.
-  if (i != index) {
 #ifdef ZCL_USING_ON_OFF_CLUSTER_SERVER
-    entry.hasOnOffValue = false;
+  entry.hasOnOffValue = false;
 #endif
 #ifdef ZCL_USING_LEVEL_CONTROL_CLUSTER_SERVER
-    entry.hasCurrentLevelValue = false;
+  entry.hasCurrentLevelValue = false;
 #endif
 #ifdef ZCL_USING_THERMOSTAT_CLUSTER_SERVER
-    entry.hasOccupiedCoolingSetpointValue = false;
-    entry.hasOccupiedHeatingSetpointValue = false;
-    entry.hasSystemModeValue = false;
+  entry.hasOccupiedCoolingSetpointValue = false;
+  entry.hasOccupiedHeatingSetpointValue = false;
+  entry.hasSystemModeValue = false;
 #endif
 #ifdef ZCL_USING_COLOR_CONTROL_CLUSTER_SERVER
-    entry.hasCurrentXValue = false;
-    entry.hasCurrentYValue = false;
-    entry.hasEnhancedCurrentHueValue = false;
-    entry.hasCurrentSaturationValue = false;
-    entry.hasColorLoopActiveValue = false;
-    entry.hasColorLoopDirectionValue = false;
-    entry.hasColorLoopTimeValue = false;
-    entry.hasColorTemperatureMiredsValue = false;
+  entry.hasCurrentXValue = false;
+  entry.hasCurrentYValue = false;
+  entry.hasEnhancedCurrentHueValue = false;
+  entry.hasCurrentSaturationValue = false;
+  entry.hasColorLoopActiveValue = false;
+  entry.hasColorLoopDirectionValue = false;
+  entry.hasColorLoopTimeValue = false;
+  entry.hasColorTemperatureMiredsValue = false;
 #endif //ZCL_USING_COLOR_CONTROL_CLUSTER_SERVER
 #ifdef ZCL_USING_DOOR_LOCK_CLUSTER_SERVER
-    entry.hasLockStateValue = false;
+  entry.hasLockStateValue = false;
 #endif
 #ifdef ZCL_USING_WINDOW_COVERING_CLUSTER_SERVER
-    entry.hasCurrentPositionLiftPercentageValue = false;
-    entry.hasCurrentPositionTiltPercentageValue = false;
+  entry.hasCurrentPositionLiftPercentageValue = false;
+  entry.hasCurrentPositionTiltPercentageValue = false;
 #endif
-  }
 
   while (extensionFieldSetsIndex < extensionFieldSetsLen) {
     EmberAfClusterId clusterId;
@@ -1236,32 +1234,48 @@ bool emberAfPluginScenesServerParseViewScene(const EmberAfClusterCommand *cmd,
 #endif
 #ifdef ZCL_USING_COLOR_CONTROL_CLUSTER_SERVER
     {
-      uint8_t *length;
-      (void) emberAfPutInt16uInResp(ZCL_COLOR_CONTROL_CLUSTER_ID);
-      length = &appResponseData[appResponseLength];
-      (void) emberAfPutInt8uInResp(0); // temporary length
-      // Color Control defines three color modes, a device might not support all of them.
-      // Populate all attribute fields, substitute placeholder value for those not supported.
-      // Attribute IDs are not encoded in the scene extension; identity of attribute values are
-      // determined by position in the sequence of concatentated values. Extension fields
-      // corresponding to unused attributes (say, Current X and Y) must be populated to allow
-      // correct positioning and parsing of subsequent ones (say, colorTemperatureMireds).
-      (void) emberAfPutInt16uInResp(entry.hasCurrentXValue ? entry.currentXValue : 0xFFFF);
-      *length += 2;
-      (void) emberAfPutInt16uInResp(entry.hasCurrentYValue ? entry.currentYValue : 0xFFFF);
-      *length += 2;
-      (void) emberAfPutInt16uInResp(entry.hasEnhancedCurrentHueValue ? entry.enhancedCurrentHueValue : 0xFFFF);
-      *length += 2;
-      (void) emberAfPutInt8uInResp(entry.hasCurrentSaturationValue ? entry.currentSaturationValue : 0xFF);
-      (*length)++;
-      (void) emberAfPutInt8uInResp(entry.hasColorLoopActiveValue ? entry.colorLoopActiveValue : 0x00);
-      (*length)++;
-      (void) emberAfPutInt8uInResp(entry.hasColorLoopDirectionValue ? entry.colorLoopDirectionValue : 0x00);
-      (*length)++;
-      (void) emberAfPutInt16uInResp(entry.hasColorLoopTimeValue ? entry.colorLoopTimeValue : 0x0000);
-      *length += 2;
-      (void) emberAfPutInt16uInResp(entry.hasColorTemperatureMiredsValue ? entry.colorTemperatureMiredsValue : 0xFFFF);
-      *length += 2;
+      if (entry.hasCurrentXValue) {
+        uint8_t *length;
+        (void) emberAfPutInt16uInResp(ZCL_COLOR_CONTROL_CLUSTER_ID);
+        length = &appResponseData[appResponseLength];
+        (void) emberAfPutInt8uInResp(0); // temporary length
+        // Color Control defines three color modes, a device might not support all of them.
+        // Populate all attribute fields, substitute placeholder value for those not supported.
+        // Attribute IDs are not encoded in the scene extension; identity of attribute values are
+        // determined by position in the sequence of concatentated values. Extension fields
+        // corresponding to unused attributes (say, Current X and Y) must be populated to allow
+        // correct positioning and parsing of subsequent ones (say, colorTemperatureMireds).
+        (void) emberAfPutInt16uInResp(entry.hasCurrentXValue ? entry.currentXValue : 0xFFFF);
+        *length += 2;
+        if (entry.hasCurrentYValue) {
+          (void) emberAfPutInt16uInResp(entry.hasCurrentYValue ? entry.currentYValue : 0xFFFF);
+          *length += 2;
+        }
+        if (entry.hasEnhancedCurrentHueValue) {
+          (void) emberAfPutInt16uInResp(entry.hasEnhancedCurrentHueValue ? entry.enhancedCurrentHueValue : 0xFFFF);
+          *length += 2;
+        }
+        if (entry.hasCurrentSaturationValue) {
+          (void) emberAfPutInt8uInResp(entry.hasCurrentSaturationValue ? entry.currentSaturationValue : 0xFF);
+          (*length)++;
+        }
+        if (entry.hasColorLoopActiveValue) {
+          (void) emberAfPutInt8uInResp(entry.hasColorLoopActiveValue ? entry.colorLoopActiveValue : 0x00);
+          (*length)++;
+        }
+        if (entry.hasColorLoopDirectionValue) {
+          (void) emberAfPutInt8uInResp(entry.hasColorLoopDirectionValue ? entry.colorLoopDirectionValue : 0x00);
+          (*length)++;
+        }
+        if (entry.colorLoopTimeValue) {
+          (void) emberAfPutInt16uInResp(entry.hasColorLoopTimeValue ? entry.colorLoopTimeValue : 0x0000);
+          *length += 2;
+        }
+        if (entry.hasColorTemperatureMiredsValue) {
+          (void) emberAfPutInt16uInResp(entry.hasColorTemperatureMiredsValue ? entry.colorTemperatureMiredsValue : 0xFFFF);
+          *length += 2;
+        }
+      }
     }
 #endif //ZCL_USING_COLOR_CONTROL_CLUSTER_SERVER
 #ifdef ZCL_USING_DOOR_LOCK_CLUSTER_SERVER

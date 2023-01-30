@@ -386,7 +386,7 @@ static Ecode_t SPIDRV_InitUsart(SPIDRV_Handle_t handle, SPIDRV_Init_t *initData)
 
   if (initData->type == spidrvSlave) {
     usartInit.master = false;
-    usartInit.baudrate = 1000;      // Dummy value needed by USART_InitSync()
+    usartInit.baudrate = 115200;      // Dummy value needed by USART_InitSync()
   } else {
     usartInit.baudrate = initData->bitRate;
   }

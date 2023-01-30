@@ -84,14 +84,24 @@ void cli_info(sl_cli_command_arg_t *arguments)
   const char* ms_state_str = get_ms_state_str();
   const char* fw_rf_packet = (rx_requested == true) ? ON : OFF;
 
+  const phy_modulation_e modulation = get_phy_modulation_from_channel(current_channel);
+
   app_log_info("Info:\n");
   app_log_info("         MCU Id: 0x%016llX\n", mcu_id);
   app_log_info("Current channel: %d\n", current_channel);
   app_log_info("   Base channel: %d\n", base_channel);
   app_log_info("    PHY mode id: %d\n", phy_mode_id);
   app_log_info(" PHY modulation: %s\n", phy_modulation_str);
+  if (modulation == M_OFDM) {
+    app_log_info("  PHY OFDM rate: %d\n", get_ofdm_rate());
+    app_log_info("  PHY scrambler: %d\n", get_ofdm_scrambler());
+  } else {
+    app_log_info("    PHY fcsType: %d\n", get_fsk_fcs_type());
+    app_log_info("  PHY whitening: %d\n", get_fsk_whitening());
+  }
   app_log_info("       Ms state: %s\n", ms_state_str);
   app_log_info("   Fw RX Packet: %s\n", fw_rf_packet);
+  app_log_info(" Packet details: %s\n", get_print_packet_details() ? "ON" : "OFF");
 }
 
 /******************************************************************************

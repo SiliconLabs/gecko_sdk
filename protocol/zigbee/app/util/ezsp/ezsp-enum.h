@@ -761,6 +761,7 @@ enum {
   EZSP_GET_VALUE                                = 0x00AA,
   EZSP_GET_EXTENDED_VALUE                       = 0x0003,
   EZSP_SET_VALUE                                = 0x00AB,
+  EZSP_SET_PASSIVE_ACK_CONFIG                   = 0x0105,
 
 // Utilities Frames
   EZSP_NOP                                      = 0x0005,
@@ -817,6 +818,8 @@ enum {
   EZSP_GET_PARENT_CHILD_PARAMETERS              = 0x0029,
   EZSP_GET_CHILD_DATA                           = 0x004A,
   EZSP_SET_CHILD_DATA                           = 0x00AC,
+  EZSP_CHILD_ID                                 = 0x0106,
+  EZSP_CHILD_INDEX                              = 0x0107,
   EZSP_GET_SOURCE_ROUTE_TABLE_TOTAL_SIZE        = 0x00C3,
   EZSP_GET_SOURCE_ROUTE_TABLE_FILLED_SIZE       = 0x00C2,
   EZSP_GET_SOURCE_ROUTE_TABLE_ENTRY             = 0x00C1,

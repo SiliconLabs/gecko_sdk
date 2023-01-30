@@ -1,0 +1,12 @@
+upgrade:
+  - sdk:
+      id: gecko_sdk
+      version: "4.2.0"
+    configuration:
+      - script: platform/security/component/scripts/upgrade.lua
+    component:
+      - trigger: psa_its
+        description: >
+          Disabled the V3 ITS driver by default. See 'SL_PSA_ITS_SUPPORT_V3_DRIVER' 'psa_crypto_config.h' and consider opting in manually.
+        add:
+          - psa_its

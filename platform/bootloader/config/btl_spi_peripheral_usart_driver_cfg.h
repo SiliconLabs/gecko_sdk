@@ -45,28 +45,29 @@
 // <usart signal=TX,RX,CS,CLK> SL_USART_SPINCP
 
 // $[USART_SL_USART_SPINCP]
-#define SL_USART_SPINCP_PERIPHERAL                     USART0
-#define SL_USART_SPINCP_PERIPHERAL_NO                  0
+#warning "Bootloader SPI Peripheral Usart Driver not configured"
+//#define SL_USART_SPINCP_PERIPHERAL                     USART0
+//#define SL_USART_SPINCP_PERIPHERAL_NO                  0
 
 // USART0 TX on PE7
-#define SL_USART_SPINCP_TX_PORT                        gpioPortE
-#define SL_USART_SPINCP_TX_PIN                         7
-#define SL_USART_SPINCP_TX_LOC                         1
+//#define SL_USART_SPINCP_TX_PORT                        gpioPortE
+//#define SL_USART_SPINCP_TX_PIN                         7
+//#define SL_USART_SPINCP_TX_LOC                         1
 
 // USART0 RX on PE11
-#define SL_USART_SPINCP_RX_PORT                        gpioPortE
-#define SL_USART_SPINCP_RX_PIN                         11
-#define SL_USART_SPINCP_RX_LOC                         0
+//#define SL_USART_SPINCP_RX_PORT                        gpioPortE
+//#define SL_USART_SPINCP_RX_PIN                         11
+//#define SL_USART_SPINCP_RX_LOC                         0
 
 // USART0 CS on PE4
-#define SL_USART_SPINCP_CS_PORT                        gpioPortE
-#define SL_USART_SPINCP_CS_PIN                         4
-#define SL_USART_SPINCP_CS_LOC                         1
+//#define SL_USART_SPINCP_CS_PORT                        gpioPortE
+//#define SL_USART_SPINCP_CS_PIN                         4
+//#define SL_USART_SPINCP_CS_LOC                         1
 
 // USART0 CLK on PB13
-#define SL_USART_SPINCP_CLK_PORT                       gpioPortB
-#define SL_USART_SPINCP_CLK_PIN                        13
-#define SL_USART_SPINCP_CLK_LOC                        4
+//#define SL_USART_SPINCP_CLK_PORT                       gpioPortB
+//#define SL_USART_SPINCP_CLK_PIN                        13
+//#define SL_USART_SPINCP_CLK_LOC                        4
 // [USART_SL_USART_SPINCP]$
 
 // <<< sl:end pin_tool >>>

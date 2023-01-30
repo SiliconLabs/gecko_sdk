@@ -67,8 +67,6 @@
 
 // [USART_SL_SERIAL_UART]$
 
-
-
 // <gpio optional=true> SL_VCOM_ENABLE
 
 // $[GPIO_SL_VCOM_ENABLE]
@@ -76,7 +74,6 @@
 #define SL_VCOM_ENABLE_PIN                       4
 
 // [GPIO_SL_VCOM_ENABLE]$
-
 
 // <<< sl:end pin_tool >>>
 

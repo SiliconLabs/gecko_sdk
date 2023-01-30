@@ -36,8 +36,8 @@
 #define OPENTHREAD_COPROCESSOR_RPC_H_
 
 #include <openthread/cli.h>
-#include <openthread/ip6.h>
 #include <openthread/instance.h>
+#include <openthread/ip6.h>
 
 #ifdef __cplusplus
 extern "C" {

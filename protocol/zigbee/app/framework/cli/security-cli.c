@@ -55,7 +55,7 @@ uint8_t printTransientKeyTable(void)
   EmberTransientKeyData transientKeyData;
   uint8_t index = 0;
 
-  sl_zigbee_core_debug_print("Index IEEE Address         NWKIndex  In FC     TTL(s) Flag    Key    \n");
+  sl_zigbee_core_debug_println("Index IEEE Address         NWKIndex  In FC     TTL(s) Flag    Key    ");
 
   status = getTransientKeyTableEntry(index, &transientKeyData);
 
@@ -67,7 +67,7 @@ uint8_t printTransientKeyTable(void)
     sl_zigbee_core_debug_print("0x%04X", transientKeyData.remainingTimeSeconds);
     sl_zigbee_core_debug_print(" 0x%04X  ", transientKeyData.bitmask);
     emberAfPrintZigbeeKey(emberKeyContents(&(transientKeyData.keyData)));
-    sl_zigbee_core_debug_print("\n");
+    sl_zigbee_core_debug_println("");
     emberAfCoreFlush();
 
     index += 1;
@@ -83,7 +83,7 @@ uint8_t printKeyTable(bool preconfiguredKey)
   uint8_t entriesUsed = 0;
   uint8_t loopCount = (preconfiguredKey ? 1 : emberAfGetKeyTableSize());
 
-  sl_zigbee_core_debug_print("Index IEEE Address         In FC     Type  Auth  Key\n");
+  sl_zigbee_core_debug_println("Index IEEE Address         In FC     Type  Auth  Key");
 
   for (i = 0; i < loopCount; i++) {
     EmberKeyStruct entry;
@@ -133,7 +133,10 @@ void printKeyInfo(void)
     EmberMfgSecurityStruct config;
     if (EMBER_SUCCESS == emberGetMfgSecurityConfig(&config)) {
       if (!(config.keySettings & EMBER_KEY_PERMISSIONS_READING_ALLOWED)) {
-        sl_zigbee_core_debug_print("\nWARNING:  READING OF KEY VALUES DISABLED BY MFG TOKEN\n\n");
+        sl_zigbee_core_debug_println("");
+        sl_zigbee_core_debug_print("WARNING:  READING OF KEY VALUES DISABLED BY MFG TOKEN");
+        sl_zigbee_core_debug_println("");
+        sl_zigbee_core_debug_println("");
         emberAfCoreFlush();
       }
     }
@@ -144,44 +147,44 @@ void printKeyInfo(void)
                                     &nwkKey)) {
     MEMSET((uint8_t*)&nwkKey, 0xFF, sizeof(EmberKeyStruct));
   }
-  sl_zigbee_core_debug_print("%s out FC: %08X\n",
-                             "NWK Key",
-                             nwkKey.outgoingFrameCounter);
-  sl_zigbee_core_debug_print("%s seq num: 0x%x\n",
-                             "NWK Key",
-                             nwkKey.sequenceNumber);
+  sl_zigbee_core_debug_println("%s out FC: %08X",
+                               "NWK Key",
+                               nwkKey.outgoingFrameCounter);
+  sl_zigbee_core_debug_println("%s seq num: 0x%x",
+                               "NWK Key",
+                               nwkKey.sequenceNumber);
   sl_zigbee_core_debug_print("%s: ", "NWK Key");
   emberAfPrintZigbeeKey(emberKeyContents(&nwkKey.key));
 
-  sl_zigbee_core_debug_print("%s out FC: %08x\n",
-                             "Link Key",
-                             getOutgoingApsFrameCounter());
+  sl_zigbee_core_debug_println("%s out FC: %08x",
+                               "Link Key",
+                               getOutgoingApsFrameCounter());
 
-  sl_zigbee_core_debug_print("TC %s \n", "Link Key");
+  sl_zigbee_core_debug_println("TC %s ", "Link Key");
   emberAfCoreFlush();
   printKeyTable(true);
 
-  sl_zigbee_core_debug_print("%s Table\n", "Link Key");
+  sl_zigbee_core_debug_println("%s Table", "Link Key");
   emberAfCoreFlush();
   entriesUsed = printKeyTable(false);
   UNUSED_VAR(entriesUsed);
 
-  sl_zigbee_core_debug_print("%d/%d entries used.\n",
-                             entriesUsed,
-                             emberAfGetKeyTableSize());
+  sl_zigbee_core_debug_println("%d/%d entries used.",
+                               entriesUsed,
+                               emberAfGetKeyTableSize());
   emberAfCoreFlush();
 
-  sl_zigbee_core_debug_print("%s Table\n", "Transient Key");
+  sl_zigbee_core_debug_println("%s Table", "Transient Key");
   emberAfCoreFlush();
 
   entriesUsed = printTransientKeyTable();
   UNUSED_VAR(entriesUsed);
 
-  sl_zigbee_core_debug_print("%d entr%s consuming %d packet buffer%s.\n",
-                             entriesUsed,
-                             entriesUsed > 1 ? "ies" : "y",
-                             entriesUsed,
-                             entriesUsed > 1 ? "s" : "");
+  sl_zigbee_core_debug_println("%d entr%s consuming %d packet buffer%s.",
+                               entriesUsed,
+                               entriesUsed > 1 ? "ies" : "y",
+                               entriesUsed,
+                               entriesUsed > 1 ? "s" : "");
   emberAfCoreFlush();
 }
 

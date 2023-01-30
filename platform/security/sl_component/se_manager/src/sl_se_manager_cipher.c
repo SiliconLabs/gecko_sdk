@@ -1928,8 +1928,6 @@ sl_status_t sl_se_gcm_multipart_starts(sl_se_gcm_multipart_context_t *gcm_ctx,
   gcm_ctx->len = 0;
   gcm_ctx->add_len = add_len;
 
-  SE_Command_t *se_cmd = &cmd_ctx->command;
-
   // The start context requires some data, either additional data or input data.
   // Case add_len > 0: Run start command with additonal data to create ctx_out.
   // Case add_len = 0: Store iv in gcm_ctx and run start function with input data
@@ -1937,51 +1935,22 @@ sl_status_t sl_se_gcm_multipart_starts(sl_se_gcm_multipart_context_t *gcm_ctx,
   // input data < 16 run sl_se_gcm_auth_decrypt()/sl_se_gcm_crypt_and_tag() in
   // sl_se_gcm_multipart_finish.
   if ( add_len > 0 ) {
-    {
-      // Encrypt: Compute tag and store it in context and output tag in finish.
-      // Decrypt: Compute tag and store it in context and compare it to the
-      // input tag in finish to verify it.
+    // Encrypt: Compute tag and store it in context and output tag in finish.
+    // Decrypt: Compute tag and store it in context and compare it to the
+    // input tag in finish to verify it.
 
-      // Explanation:The end-context in finish is currently not supporting 0 input data
-      // for this config. For add_len = 0 and input_length = 0 we can run
-      // sl_se_gcm_auth_decrypt()/sl_se_gcm_crypt_and_tag() in finish, so this is only
-      // an issue for 0 input data and add_len != 0.
-      SE_Command_t *se_cmd = &cmd_ctx->command;
-      SE_DataTransfer_t iv_in = SE_DATATRANSFER_DEFAULT(iv, iv_len);
-      SE_DataTransfer_t add_in = SE_DATATRANSFER_DEFAULT(add, add_len);
-      SE_DataTransfer_t tag_out = SE_DATATRANSFER_DEFAULT(gcm_ctx->tagbuf,
-                                                          sizeof(gcm_ctx->tagbuf));
-
-      sli_se_command_init(cmd_ctx,
-                          SLI_SE_COMMAND_AES_GCM_ENCRYPT
-                          | SLI_SE_COMMAND_OPTION_CONTEXT_WHOLE);
-
-      sli_add_key_parameters(cmd_ctx, key, status);
-      SE_addParameter(se_cmd, add_len);
-      SE_addParameter(se_cmd, 0);
-
-      sli_add_key_metadata(cmd_ctx, key, status);
-      sli_add_key_input(cmd_ctx, key, status);
-
-      SE_addDataInput(se_cmd, &iv_in);
-      SE_addDataInput(se_cmd, &add_in);
-      SE_addDataOutput(se_cmd, &tag_out);
-
-      status = sli_se_execute_and_wait(cmd_ctx);
-      if (status != SL_STATUS_OK) {
-        memset(gcm_ctx->tagbuf, 0, sizeof(gcm_ctx->tagbuf));
-        return status;
-      }
-    }
+    // Explanation:The end-context in finish is currently not supporting 0 input data
+    // for this config. For add_len = 0 and input_length = 0 we can run
+    // sl_se_gcm_auth_decrypt()/sl_se_gcm_crypt_and_tag() in finish, so this is only
+    // an issue for 0 input data and add_len != 0.
+    SE_Command_t *se_cmd = &cmd_ctx->command;
     SE_DataTransfer_t iv_in = SE_DATATRANSFER_DEFAULT(iv, iv_len);
     SE_DataTransfer_t add_in = SE_DATATRANSFER_DEFAULT(add, add_len);
-    SE_DataTransfer_t ctx_out =
-      SE_DATATRANSFER_DEFAULT(gcm_ctx->se_ctx, sizeof(gcm_ctx->se_ctx));
-
+    SE_DataTransfer_t tag_out = SE_DATATRANSFER_DEFAULT(gcm_ctx->tagbuf,
+                                                        sizeof(gcm_ctx->tagbuf));
     sli_se_command_init(cmd_ctx,
-                        (gcm_ctx->mode == SL_SE_DECRYPT ? SLI_SE_COMMAND_AES_GCM_DECRYPT
-                         : SLI_SE_COMMAND_AES_GCM_ENCRYPT)
-                        | SLI_SE_COMMAND_OPTION_CONTEXT_START);
+                        SLI_SE_COMMAND_AES_GCM_ENCRYPT
+                        | SLI_SE_COMMAND_OPTION_CONTEXT_WHOLE);
 
     sli_add_key_parameters(cmd_ctx, key, status);
     SE_addParameter(se_cmd, add_len);
@@ -1992,7 +1961,25 @@ sl_status_t sl_se_gcm_multipart_starts(sl_se_gcm_multipart_context_t *gcm_ctx,
 
     SE_addDataInput(se_cmd, &iv_in);
     SE_addDataInput(se_cmd, &add_in);
-    SE_addDataOutput(se_cmd, &ctx_out);
+    SE_addDataOutput(se_cmd, &tag_out);
+
+    status = sli_se_execute_and_wait(cmd_ctx);
+    if (status != SL_STATUS_OK) {
+      memset(gcm_ctx->tagbuf, 0, sizeof(gcm_ctx->tagbuf));
+      return status;
+    }
+
+    SE_DataTransfer_t ctx_out =
+      SE_DATATRANSFER_DEFAULT(gcm_ctx->se_ctx, sizeof(gcm_ctx->se_ctx));
+
+    // Reuse the values of the command context object from the previous
+    // operation, and only update the command word and the output data pointer.
+    cmd_ctx->command.command =
+      (gcm_ctx->mode == SL_SE_DECRYPT ? SLI_SE_COMMAND_AES_GCM_DECRYPT
+       : SLI_SE_COMMAND_AES_GCM_ENCRYPT)
+      | SLI_SE_COMMAND_OPTION_CONTEXT_START;
+
+    cmd_ctx->command.data_out = &ctx_out;
 
     status = sli_se_execute_and_wait(cmd_ctx);
     if (status != SL_STATUS_OK) {

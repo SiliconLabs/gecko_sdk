@@ -1226,7 +1226,7 @@ class Calc_Demodulator_Sol(CALC_Demodulator_ocelot):
             rssi_rf_adjust_db = -12.84
         else:
             #Value TBD based on char data
-            rssi_rf_adjust_db = 0.0
+            rssi_rf_adjust_db = -18.02
 
         model.vars.rssi_rf_adjust_db.value = rssi_rf_adjust_db
 

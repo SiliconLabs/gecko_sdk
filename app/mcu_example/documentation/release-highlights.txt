@@ -1,4 +1,4 @@
-32-Bit MCU SDK 6.3.2.0
+32-Bit MCU SDK 6.4.1.0
 - Underlying platform changes only
 
 

@@ -32,10 +32,10 @@ void emAfPluginNetworkCreatorSecurityOpenOrCloseNetworkCommand(sl_cli_command_ar
             ? emberAfPluginNetworkCreatorSecurityOpenNetwork()
             : emberAfPluginNetworkCreatorSecurityCloseNetwork());
 
-  sl_zigbee_core_debug_print("%s: %s network: 0x%02X\n",
-                             EMBER_AF_PLUGIN_NETWORK_CREATOR_SECURITY_PLUGIN_NAME,
-                             (open ? "Open" : "Close"),
-                             status);
+  sl_zigbee_core_debug_println("%s: %s network: 0x%02X",
+                               EMBER_AF_PLUGIN_NETWORK_CREATOR_SECURITY_PLUGIN_NAME,
+                               (open ? "Open" : "Close"),
+                               status);
 }
 
 extern EmberKeyData distributedKey;

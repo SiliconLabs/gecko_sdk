@@ -76,13 +76,13 @@ static void _iperf_thr_fnc (void * args);
  * @brief iperf UDP Server mutex acquire
  * @details Helper function
  *****************************************************************************/
-static inline void _iperf_mutex_acquire(void);
+__STATIC_INLINE void _iperf_mutex_acquire(void);
 
 /**************************************************************************//**
  * @brief iperf UDP Server mutex release
  * @details Helper function
  *****************************************************************************/
-static inline void _iperf_mutex_release(void);
+__STATIC_INLINE void _iperf_mutex_release(void);
 
 /**************************************************************************//**
  * @brief Convert OS status to bool value
@@ -91,7 +91,7 @@ static inline void _iperf_mutex_release(void);
  * @return true if status is osOK
  * @return false if status is NOT osOK
  *****************************************************************************/
-static inline bool _os_status_to_bool(const osStatus_t status);
+__STATIC_INLINE bool _os_status_to_bool(const osStatus_t status);
 
 /// Thread ID
 static osThreadId_t _iperf_thr = NULL;
@@ -249,12 +249,12 @@ bool sl_iperf_test_get(sl_iperf_test_t * const test)
   return _os_status_to_bool(status);
 }
 
-static inline void _iperf_mutex_acquire(void)
+__STATIC_INLINE void _iperf_mutex_acquire(void)
 {
   assert(osMutexAcquire(_iperf_mtx, osWaitForever) == osOK);
 }
 
-static inline void _iperf_mutex_release(void)
+__STATIC_INLINE void _iperf_mutex_release(void)
 {
   assert(osMutexRelease(_iperf_mtx) == osOK);
 }
@@ -336,7 +336,7 @@ static void _iperf_thr_fnc(void * args)
   }
 }
 
-static inline bool _os_status_to_bool(const osStatus_t status)
+__STATIC_INLINE bool _os_status_to_bool(const osStatus_t status)
 {
   return status == osOK ? true : false;
 }

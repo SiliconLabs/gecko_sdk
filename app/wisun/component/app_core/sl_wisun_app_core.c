@@ -88,14 +88,14 @@ typedef struct app_setting_wisun{
  * @param[in] setting setting structure that contains basic configuration
  * @return sl_status_t SL_STATUS_OK if it is successful.
  *****************************************************************************/
-static inline sl_status_t _app_wisun_application_setting(const app_setting_wisun_t * const setting);
+__STATIC_INLINE sl_status_t _app_wisun_application_setting(const app_setting_wisun_t * const setting);
 
 /**************************************************************************//**
  * @brief Security setting
  * @details It setup Wi-SUN with security related configuration.
  * @return sl_status_t SL_STATUS_OK if it is successful.
  *****************************************************************************/
-static inline sl_status_t _app_wisun_security_setting(void);
+__STATIC_INLINE sl_status_t _app_wisun_security_setting(void);
 
 #if (WISUN_APP_REGULATION != REGULATION_NONE)
 /**************************************************************************//**
@@ -103,20 +103,20 @@ static inline sl_status_t _app_wisun_security_setting(void);
  * @details It setup Wi-SUN with regulation related parameters.
  * @return sl_status_t SL_STATUS_OK if it is successful.
  *****************************************************************************/
-static inline sl_status_t _app_wisun_regulation_setting(void);
+__STATIC_INLINE sl_status_t _app_wisun_regulation_setting(void);
 #endif
 
 /**************************************************************************//**
  * @brief Acquire application mutex
  * @details Internal mutex lock
  *****************************************************************************/
-static inline void _app_wisun_mutex_acquire(void);
+__STATIC_INLINE void _app_wisun_mutex_acquire(void);
 
 /**************************************************************************//**
  * @brief Release application mutex
  * @details Internal mutex release
  *****************************************************************************/
-static inline void _app_wisun_mutex_release(void);
+__STATIC_INLINE void _app_wisun_mutex_release(void);
 
 /**************************************************************************//**
  * @brief Storing address to the current address
@@ -125,7 +125,7 @@ static inline void _app_wisun_mutex_release(void);
  * @param[in] addr_type address type
  * @param[in] addr address
  *****************************************************************************/
-static inline void _store_address(const char *addr_name,
+__STATIC_INLINE void _store_address(const char *addr_name,
                                   const sl_wisun_ip_address_type_t addr_type,
                                   sl_wisun_ip_address_t *addr);
 
@@ -134,7 +134,7 @@ static inline void _store_address(const char *addr_name,
  * @details It sets the error by a flag
  * @param[in] flag is a flag bit
  *****************************************************************************/
-static inline void _app_wisun_core_set_error(app_core_error_state_flag_t flag);
+__STATIC_INLINE void _app_wisun_core_set_error(app_core_error_state_flag_t flag);
 
 /**************************************************************************//**
  * @brief Storing the current address
@@ -468,12 +468,15 @@ sl_wisun_join_state_t app_wisun_get_join_state(void)
 //                          Static Function Definitions
 // -----------------------------------------------------------------------------
 
-static inline sl_status_t _app_wisun_application_setting(const app_setting_wisun_t * const setting)
+__STATIC_INLINE sl_status_t _app_wisun_application_setting(const app_setting_wisun_t * const setting)
 {
   sl_status_t ret = SL_STATUS_FAIL;
+  const sl_wisun_connection_params_t *conn_param = NULL;
+
+  conn_param = sl_wisun_get_conn_param_by_nw_size((sl_wisun_network_size_t) setting->network_size);
 
   // sets the network name
-  ret = sl_wisun_set_network_size((sl_wisun_network_size_t)setting->network_size);
+  ret = sl_wisun_set_connection_parameters(conn_param);
   if (ret != SL_STATUS_OK) {
     printf("[Failed: unable to set network size: %lu]\n", ret);
     _app_wisun_core_set_error(SET_NETWORK_SIZE_ERROR_FLAG_BIT);
@@ -535,7 +538,7 @@ static inline sl_status_t _app_wisun_application_setting(const app_setting_wisun
   return ret;
 }
 
-static inline sl_status_t _app_wisun_security_setting(void)
+__STATIC_INLINE sl_status_t _app_wisun_security_setting(void)
 {
   sl_status_t ret = SL_STATUS_FAIL;
   const uint32_t max_cert_str_len = 2048U;
@@ -576,7 +579,7 @@ static inline sl_status_t _app_wisun_security_setting(void)
 }
 
 #if (WISUN_APP_REGULATION != REGULATION_NONE)
-static inline sl_status_t _app_wisun_regulation_setting(void)
+__STATIC_INLINE sl_status_t _app_wisun_regulation_setting(void)
 {
   sl_status_t ret = SL_STATUS_FAIL;
 
@@ -610,19 +613,19 @@ static inline sl_status_t _app_wisun_regulation_setting(void)
 #endif
 
 /* Mutex acquire */
-static inline void _app_wisun_mutex_acquire(void)
+__STATIC_INLINE void _app_wisun_mutex_acquire(void)
 {
   assert(osMutexAcquire(_app_wisun_network_mtx, osWaitForever) == osOK);
 }
 
 /* Mutex release */
-static inline void _app_wisun_mutex_release(void)
+__STATIC_INLINE void _app_wisun_mutex_release(void)
 {
   assert(osMutexRelease(_app_wisun_network_mtx) == osOK);
 }
 
 /* Storing address */
-static inline void _store_address(const char *addr_name,
+__STATIC_INLINE void _store_address(const char *addr_name,
                                   const sl_wisun_ip_address_type_t addr_type,
                                   sl_wisun_ip_address_t *addr)
 {
@@ -644,7 +647,7 @@ static inline void _store_address(const char *addr_name,
 }
 
 /* Setting error */
-static inline void _app_wisun_core_set_error(app_core_error_state_flag_t flag)
+__STATIC_INLINE void _app_wisun_core_set_error(app_core_error_state_flag_t flag)
 {
   _error_flag |= (1 << flag);
 }

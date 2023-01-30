@@ -18,12 +18,9 @@ source:
       - path: api/instance_api.cpp
       - path: api/link_raw_api.cpp
       - path: api/logging_api.cpp
-      - path: api/multi_radio_api.cpp
       - path: api/random_noncrypto_api.cpp
       - path: api/tasklet_api.cpp
-      - path: common/appender.cpp
       - path: common/binary_search.cpp
-      - path: common/data.cpp
       - path: common/error.cpp
       - path: common/instance.cpp
       - path: common/log.cpp
@@ -46,11 +43,7 @@ source:
       - path: radio/radio.cpp
       - path: radio/radio_callbacks.cpp
       - path: radio/radio_platform.cpp
-      - path: radio/trel_interface.cpp
-      - path: radio/trel_link.cpp
-      - path: radio/trel_packet.cpp
       - path: thread/link_quality.cpp
-      - path: thread/radio_selector.cpp
       - path: utils/parse_cmdline.cpp
 template_contribution:
   - name: application_type

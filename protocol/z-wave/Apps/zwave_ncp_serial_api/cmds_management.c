@@ -28,9 +28,9 @@
 #define HW_VER_SIZE   1
 
 /** Find the byte in which SERIAL_API_SETUP command will be written */
-#define BYTE_INDEX(x) ((x) / 8)
+#define BYTE_INDEX(x) ((x - 1) / 8)
 /** Find the offset in the byte of SERIAL_API_SETUP command */
-#define BYTE_OFFSET(x) (1 << ((x) % 8))
+#define BYTE_OFFSET(x) (1 << ((x - 1) % 8))
 /** Add the SERIAL_API_SETUP command to the bitmask array */
 #define BITMASK_ADD_CMD(bitmask, cmd) (bitmask[BYTE_INDEX(cmd)] |= BYTE_OFFSET(cmd))
 
@@ -182,12 +182,11 @@ void func_id_serial_api_setup(uint8_t inputLength,
      *               SERIAL_API_SETUP_CMD_TX_POWERLEVEL_SET + SERIAL_API_SETUP_CMD_TX_POWERLEVEL_GET +
      *               SERIAL_API_SETUP_CMD_TX_GET_MAX_PAYLOAD_SIZE + SERIAL_API_SETUP_CMD_NODEID_BASETYPE_SET) | */
     /*               supportedBitmask */
-    /* Report supported commands (expect SERIAL_API_SETUP_CMD_SUPPORTED) in one byte as flags, for backward compatibility.
-     * Any newer command whose value != 2^N, is not included here */
+
     BYTE_IN_AR(pOutputBuffer, i++) = SERIAL_API_SETUP_CMD_TX_STATUS_REPORT | SERIAL_API_SETUP_CMD_RF_REGION_GET |
                                      SERIAL_API_SETUP_CMD_RF_REGION_SET | SERIAL_API_SETUP_CMD_TX_POWERLEVEL_SET |
                                      SERIAL_API_SETUP_CMD_TX_POWERLEVEL_GET | SERIAL_API_SETUP_CMD_TX_GET_MAX_PAYLOAD_SIZE |
-                                     SERIAL_API_SETUP_CMD_NODEID_BASETYPE_SET;
+                                     SERIAL_API_SETUP_CMD_NODEID_BASETYPE_SET | SERIAL_API_SETUP_CMD_SUPPORTED;
 
     /* Report all supported commands as bitmask of their values */
     uint8_t supportedBitmask[32];

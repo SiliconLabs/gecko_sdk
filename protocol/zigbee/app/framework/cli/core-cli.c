@@ -114,9 +114,9 @@ static void printMfgString(void)
 
 static void printPacketBuffers(void)
 {
-  sl_zigbee_core_debug_print("Buffs: %d / %d\n",
-                             emAfGetPacketBufferFreeCount(),
-                             emAfGetPacketBufferTotalCount());
+  sl_zigbee_core_debug_println("Buffs: %d / %d",
+                               emAfGetPacketBufferFreeCount(),
+                               emAfGetPacketBufferTotalCount());
 }
 
 static bool printSmartEnergySecurityInfo(void)
@@ -158,7 +158,7 @@ static bool printSmartEnergySecurityInfo(void)
         // MISRA requires ..else if.. to have a terminating else.
       }
     }
-    sl_zigbee_core_debug_print("]\n");
+    sl_zigbee_core_debug_println("]");
   }
   emberAfAppFlush();
   return securityGood;
@@ -208,7 +208,7 @@ static bool printSmartEnergySecurityInfo283k1(void)
         // MISRA requires ..else if.. to have a terminating else.
       }
     }
-    sl_zigbee_core_debug_print("]\n");
+    sl_zigbee_core_debug_println("]");
   }
   emberAfAppFlush();
   return securityGood;
@@ -235,15 +235,15 @@ void emAfCliInfoCommand(sl_cli_command_arg_t *arguments)
   uint8_t numPhyInterfaces;
 
   printMfgString();
-  sl_zigbee_core_debug_print("AppBuilder MFG Code: 0x%04X\n", EMBER_AF_MANUFACTURER_CODE);
+  sl_zigbee_core_debug_println("AppBuilder MFG Code: 0x%04X", EMBER_AF_MANUFACTURER_CODE);
   emberAfGetEui64(myEui64);
   emberAfGetNetworkParameters(&nodeTypeResult, &networkParams);
   sl_zigbee_core_debug_print("node [");
   emberAfAppDebugExec(emberAfPrintBigEndianEui64(myEui64));
   emberAfAppFlush();
-  sl_zigbee_core_debug_print("] chan [%d] pwr [%d]\n",
-                             networkParams.radioChannel,
-                             networkParams.radioTxPower);
+  sl_zigbee_core_debug_println("] chan [%d] pwr [%d]",
+                               networkParams.radioChannel,
+                               networkParams.radioTxPower);
 
   numPhyInterfaces = emberGetPhyInterfaceCount();
 
@@ -252,23 +252,23 @@ void emAfCliInfoCommand(sl_cli_command_arg_t *arguments)
     uint8_t i;
     EmberStatus status;
 
-    sl_zigbee_core_debug_print("Additional interfaces\n");
+    sl_zigbee_core_debug_println("Additional interfaces");
     for (i = 1; i < numPhyInterfaces; ++i) {
       sl_zigbee_core_debug_print("  %d: ", i);
       status = emberGetRadioParameters(i, &multiPhyRadioParams);
       switch (status) {
         case EMBER_SUCCESS:
-          sl_zigbee_core_debug_print("page [%d] chan [%d] pwr [%d]\n",
-                                     multiPhyRadioParams.radioPage,
-                                     multiPhyRadioParams.radioChannel,
-                                     multiPhyRadioParams.radioTxPower);
+          sl_zigbee_core_debug_println("page [%d] chan [%d] pwr [%d]",
+                                       multiPhyRadioParams.radioPage,
+                                       multiPhyRadioParams.radioChannel,
+                                       multiPhyRadioParams.radioTxPower);
           break;
         case EMBER_NETWORK_DOWN:
         case EMBER_NOT_JOINED:
-          sl_zigbee_core_debug_print("not active\n");
+          sl_zigbee_core_debug_println("not active");
           break;
         default:
-          sl_zigbee_core_debug_print("error 0x%2X\n", status);
+          sl_zigbee_core_debug_println("error 0x%2X", status);
           break;
       }
     }
@@ -280,11 +280,11 @@ void emAfCliInfoCommand(sl_cli_command_arg_t *arguments)
   emberAfAppFlush();
   sl_zigbee_core_debug_print("xpan [0x");
   emberAfAppDebugExec(emberAfPrintBigEndianEui64(networkParams.extendedPanId));
-  sl_zigbee_core_debug_print("]\n");
+  sl_zigbee_core_debug_println("]");
   emberAfAppFlush();
 
   #ifndef EZSP_HOST
-  sl_zigbee_core_debug_print("parentID [0x%04X] parentRssi [%d]\n", emberGetParentId(), emberGetAvgParentRssi());
+  sl_zigbee_core_debug_println("parentID [0x%04X] parentRssi [%d]", emberGetParentId(), emberGetAvgParentRssi());
   emberAfAppFlush();
   #endif // EZSP_HOST
 
@@ -296,10 +296,10 @@ void emAfCliInfoCommand(sl_cli_command_arg_t *arguments)
   } else {
     sl_zigbee_core_debug_print("unknown");
   }
-  sl_zigbee_core_debug_print("]\n");
+  sl_zigbee_core_debug_println("]");
   emberAfAppFlush();
 
-  sl_zigbee_core_debug_print("Security level [%x]\n", emberAfGetSecurityLevel());
+  sl_zigbee_core_debug_println("Security level [%x]", emberAfGetSecurityLevel());
 
   printSmartEnergySecurityInfo();
   printSmartEnergySecurityInfo283k1();
@@ -312,7 +312,7 @@ void emAfCliInfoCommand(sl_cli_command_arg_t *arguments)
   // Print the endpoint information.
   {
     uint8_t i, j;
-    sl_zigbee_core_debug_print("Ep cnt: %d\n", emberAfEndpointCount());
+    sl_zigbee_core_debug_println("Ep cnt: %d", emberAfEndpointCount());
     // Loop for each endpoint.
     for (i = 0; i < emberAfEndpointCount(); i++) {
       EmberAfEndpointType *et = emAfEndpoints[i].endpointType;
@@ -324,11 +324,11 @@ void emAfCliInfoCommand(sl_cli_command_arg_t *arguments)
                                  (emberAfIsDeviceEnabled(emberAfEndpointFromIndex(i))
                                   ? "enabled"
                                   : "disabled"));
-      sl_zigbee_core_debug_print("nwk [%d] profile [0x%04X] devId [0x%04X] ver [0x%x]\n",
-                                 emberAfNetworkIndexFromEndpointIndex(i),
-                                 emberAfProfileIdFromIndex(i),
-                                 emberAfDeviceIdFromIndex(i),
-                                 emberAfDeviceVersionFromIndex(i));
+      sl_zigbee_core_debug_println("nwk [%d] profile [0x%04X] devId [0x%04X] ver [0x%x]",
+                                   emberAfNetworkIndexFromEndpointIndex(i),
+                                   emberAfProfileIdFromIndex(i),
+                                   emberAfDeviceIdFromIndex(i),
+                                   emberAfDeviceVersionFromIndex(i));
       // Loop for the clusters within the endpoint.
       for (j = 0; j < et->clusterCount; j++) {
         EmberAfCluster *zc = &(et->cluster[j]);
@@ -338,7 +338,7 @@ void emAfCliInfoCommand(sl_cli_command_arg_t *arguments)
                                     : "in (server)"),
                                    zc->clusterId);
         emberAfAppDebugExec(emberAfDecodeAndPrintClusterWithMfgCode(zc->clusterId, emAfGetManufacturerCodeForCluster(zc)));
-        sl_zigbee_core_debug_print("\n");
+        sl_zigbee_core_debug_println("");
         emberAfAppFlush();
       }
       emberAfAppFlush();
@@ -354,15 +354,15 @@ void emAfCliInfoCommand(sl_cli_command_arg_t *arguments)
       EM_AF_GENERATED_NETWORK_STRINGS
     };
     uint8_t i;
-    sl_zigbee_core_debug_print("Nwk cnt: %d\n", EMBER_SUPPORTED_NETWORKS);
+    sl_zigbee_core_debug_println("Nwk cnt: %d", EMBER_SUPPORTED_NETWORKS);
     for (i = 0; i < EMBER_SUPPORTED_NETWORKS; i++) {
       emberAfPushNetworkIndex(i);
-      sl_zigbee_core_debug_print("nwk %d [%s]\n", i, names[i]);
+      sl_zigbee_core_debug_println("nwk %d [%s]", i, names[i]);
       if (emAfProIsCurrentNetwork()) {
-        sl_zigbee_core_debug_print("  nodeType [0x%02X]\n",
-                                   emAfCurrentZigbeeProNetwork->nodeType);
-        sl_zigbee_core_debug_print("  securityProfile [0x%02X]\n",
-                                   emAfCurrentZigbeeProNetwork->securityProfile);
+        sl_zigbee_core_debug_println("  nodeType [0x%02X]",
+                                     emAfCurrentZigbeeProNetwork->nodeType);
+        sl_zigbee_core_debug_println("  securityProfile [0x%02X]",
+                                     emAfCurrentZigbeeProNetwork->securityProfile);
       }
       emberAfPopNetworkIndex();
     }
@@ -393,7 +393,7 @@ void endpointPrint(sl_cli_command_arg_t *arguments)
                                 ? "Enabled"
                                 : "Disabled"));
     emAfPrintEzspEndpointFlags(emAfEndpoints[i].endpoint);
-    sl_zigbee_core_debug_print("\n");
+    sl_zigbee_core_debug_println("");
   }
 }
 
@@ -405,7 +405,7 @@ void enableDisableEndpoint(sl_cli_command_arg_t *arguments)
                  : false);
   if (!emberAfEndpointEnableDisable(endpoint,
                                     enable)) {
-    sl_zigbee_core_debug_print("Error:  Unknown endpoint.\n");
+    sl_zigbee_core_debug_println("Error:  Unknown endpoint.");
   }
 }
 
@@ -437,7 +437,7 @@ void printEvents(sl_cli_command_arg_t *arguments)
     }
 
     // Get Remaining Time
-    sl_zigbee_core_debug_print("%d ms\n", sl_zigbee_event_get_remaining_ms(finger));
+    sl_zigbee_core_debug_println("%d ms", sl_zigbee_event_get_remaining_ms(finger));
     finger = finger->next;
   }
 #else

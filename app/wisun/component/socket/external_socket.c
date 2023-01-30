@@ -51,7 +51,7 @@
 // -----------------------------------------------------------------------------
 //                          Public Function Definitions
 // -----------------------------------------------------------------------------
-#include "em_common.h"
+#include "sl_common.h"
 #include "external_socket.h"
 
 SL_WEAK int32_t _external_socket(sock_domain_t domain, sock_type_t type, int32_t protocol)

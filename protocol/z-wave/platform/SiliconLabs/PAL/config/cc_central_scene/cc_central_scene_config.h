@@ -1,6 +1,6 @@
 /**
  * @file
- * @copyright 2022 Silicon Laboratories Inc.
+ * @copyright 2023 Silicon Laboratories Inc.
  */
 
 #ifndef _CC_CENTRAL_SCENE_CONFIG_H_
@@ -19,10 +19,15 @@
 // <i> Default: 7
 #define CC_CENTRAL_SCENE_SUPPORTED_SCENES_SCENE_1  7
 
+// <o> Size of supported scenes <1..3:1> <f.d>
+// <i> This field advertises the size of each "Supported Key Attributes" field measured in bytes
+// <i> Default: 1
+#define CC_CENTRAL_SCENE_SIZE_OF_SUPPORTED_SCENES_ATTRIBUTES  1
+
 // <q> Supported key attributes
 // <i> True indicates that all keys are identical, False if different key attributes supported
 // <i> Default: 1
-#define CC_CENTRAL_SCENE_PROPERTIES  1
+#define CC_CENTRAL_SCENE_IDENTICAL  1
 
 // </h>
 

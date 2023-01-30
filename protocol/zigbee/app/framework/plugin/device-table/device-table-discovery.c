@@ -73,8 +73,6 @@
 #define CLUSTER_OUT              1
 #define NUMBER_OF_CLUSTER_IN_OUT 2
 
-#define EMBER_AF_ZDO_RESPONSE_OVERHEAD 2
-
 //for simple descriptor response
 #define SIMPLE_DESCRIPTOR_RESPONSE_ENDPOINT_OFFSET                           \
   (EMBER_AF_ZDO_RESPONSE_OVERHEAD                                            \
@@ -129,7 +127,6 @@ EmberEventControl emberAfPluginDeviceTableNewDeviceEventControl;
 #define newDeviceEventControl emberAfPluginDeviceTableNewDeviceEventControl
 #endif // UC_BUILD
 
-static void resetRetry(EmberNodeId nodeId);
 enum {
   DEVICE_DISCOVERY_STATE_ENDPOINTS_SEND = 0x00,
   DEVICE_DISCOVERY_STATE_ENDPOINTS_WAITING = 0x01,
@@ -148,7 +145,6 @@ static const char * const statusStrings[] =
 
 DeviceTableQueueEntry taskQueue[MAX_QUEUE_SIZE];
 static uint8_t queueSize;
-static uint32_t tick;
 
 void emberAfPluginDeviceTableIndexAddedCallback(uint16_t index);
 
@@ -296,10 +292,7 @@ static void newEndpointDiscovered(EmberAfPluginDeviceTableEntry *p_entry)
 
 void emberAfPluginDeviceTableNewDeviceEventHandler(SLXU_UC_EVENT)
 {
-  EmberAfPluginDeviceTableEntry *deviceTable = emberAfDeviceTablePointer();
   DeviceTableQueueEntry * currentEntryPtr = &taskQueue[0];
-  EmberStatus status;
-  uint16_t newEndpoint;
   uint8_t taskQueueIndex, nextState, delay;
 
   if ((currentEntryPtr->delay == 0) && (queueSize > 0)) {
@@ -310,8 +303,8 @@ void emberAfPluginDeviceTableNewDeviceEventHandler(SLXU_UC_EVENT)
     switch (currentEntryPtr->state) {
       case DEVICE_DISCOVERY_STATE_ENDPOINTS_SEND:
         // send out active endpoints request.
-        status = emberActiveEndpointsRequest(currentEntryPtr->nodeId,
-                                             APS_OPTION_DISCOVER);
+        (void)emberActiveEndpointsRequest(currentEntryPtr->nodeId,
+                                          APS_OPTION_DISCOVER);
         nextState = DEVICE_DISCOVERY_STATE_ENDPOINTS_WAITING;
         delay = DEVICE_DISCOVERY_ENDPOINT_RETRY_TICKS;
         break;

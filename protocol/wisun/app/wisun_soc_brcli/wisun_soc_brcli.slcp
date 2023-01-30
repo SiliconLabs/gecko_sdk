@@ -160,6 +160,14 @@ template_contribution:
   - name: "cli_command"
     value:
       group: "wisun"
+      name: "start_ids"
+      handler: "app_start_ids"
+      help: "Start the border router using radio conf ids: w sti"
+      shortcuts:
+        - name: "sti"
+  - name: "cli_command"
+    value:
+      group: "wisun"
       name: "certificate_store"
       handler: "app_certificate_store"
       help: "Store a certificate: w cs"

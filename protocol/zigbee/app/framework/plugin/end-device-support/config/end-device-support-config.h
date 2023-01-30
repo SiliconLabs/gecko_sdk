@@ -44,9 +44,11 @@
 #define EMBER_AF_PLUGIN_END_DEVICE_SUPPORT_MAX_MISSED_POLLS   3
 
 // <o EMBER_AF_REJOIN_ATTEMPTS_MAX> Max Number of Sequential Rejoin (move) attempts <0-255>
-// <i> Default: 3
+// <i> Default: 4
 // <i> This is the maximum number of sequential attempts that will be made to rejoin the ZigBee network and find a new parent the device will make before giving up.  If this is set to 255, then the device will never stop attempting to rejoin when it has lost its parent.  A successful rejoin resets the number of attempts to 0.
-#define EMBER_AF_REJOIN_ATTEMPTS_MAX   3
+// <i> By default, the sequence of rejoin should be try on current channel of current page -> preferred channels of current page -> all channels of current page -> all pages (on SubGhz).
+// <i> On 2.4 Ghz, the end device will not try to rejoin on all pages.
+#define EMBER_AF_REJOIN_ATTEMPTS_MAX   4
 
 // <q EMBER_AF_PLUGIN_END_DEVICE_SUPPORT_ENABLE_POLL_COMPLETED_CALLBACK> Enable Poll Completed Callback
 // <i> Default: FALSE

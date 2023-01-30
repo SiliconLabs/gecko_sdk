@@ -95,7 +95,13 @@
 #define SL_IOSTREAM_USART_EXP_RX_PORT            gpioPortA
 #define SL_IOSTREAM_USART_EXP_RX_PIN             6
 
+// USART0 CTS on PA04
+#define SL_IOSTREAM_USART_EXP_CTS_PORT           gpioPortA
+#define SL_IOSTREAM_USART_EXP_CTS_PIN            4
 
+// USART0 RTS on PA00
+#define SL_IOSTREAM_USART_EXP_RTS_PORT           gpioPortA
+#define SL_IOSTREAM_USART_EXP_RTS_PIN            0
 
 // [USART_SL_IOSTREAM_USART_EXP]$
 // <<< sl:end pin_tool >>>

@@ -13,6 +13,12 @@ provides:
 source:
   - path: src/sli_tz_s_interface.c
     condition: [trustzone_secure]
+include:
+  - path: ../../../../util/third_party/trusted-firmware-m/interface/include
+    unless: [tz_service_common]
+    file_list:
+      - path: tfm_crypto_defs.h
+      - path: tfm_api.h
 template_file:
   - path: config/template/sli_tz_s_interface_funcs_autogen.h.jinja
     export: true

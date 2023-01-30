@@ -42,12 +42,20 @@
  * The bellow stack size for protocol necessary for initializing security,
  * The mainloop(unsigned int work[64], const unsigned char e[32]) in smul.c consume about 3256 bytes of stack
  * when this implementation changes then we can reduce the protocol stack usage further
+ *
  */
 
-#ifdef ZWAVE_PSA_SECURE_VAULT
-#define TASK_STACK_SIZE_Z_WAVE_STACK            ( 5632 / sizeof(StackType_t) )  // 5632 bytes (security library requires this)
-#else
+/*
+ * The security code increases the stack usage.
+ * Board BRD4201A (EFR32FG14) has only 32kb of RAM and we can't increase the stack size for it.
+ * Also this board is only used for SerialAPI.
+ * SerialAPI is based on the controller_static library which doesn't have built-in security code.
+ * Thus, we don't need to increase the stack size for the controller_static library
+*/
+#ifdef ZW_CONTROLLER_STATIC
 #define TASK_STACK_SIZE_Z_WAVE_STACK            ( 4608 / sizeof(StackType_t) )  // 4608 bytes (security library requires this)
+#else
+#define TASK_STACK_SIZE_Z_WAVE_STACK            ( 5632 / sizeof(StackType_t) )  // 5632 bytes (security library requires this)
 #endif
 #define TASK_STACK_SIZE_FREERTOS_TIMER          TASK_STACK_SIZE_MINIMUM
 

@@ -46,6 +46,8 @@ source:
   - path: sl_ring.h
   - path: sl_ring.c
   - path: sl_wsrcp_os_main.c
+  - path: sl_wsrcp_btl_interface.h
+  - path: sl_wsrcp_btl_interface.c
 
 template_contribution:
   - name: event_handler

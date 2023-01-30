@@ -25,6 +25,10 @@
 #include <stdbool.h>
 #include <stdint.h>
 
+#ifdef __cplusplus
+extern "C" {
+#endif
+
 //******************************************************************************
 
 /**
@@ -53,5 +57,9 @@ void sl_debug_printf(const char *formatString, ...);
  * @}
  *
  */
+
+#ifdef __cplusplus
+} // extern "C"
+#endif
 
 #endif //__DEBUG_CHANNEL_H__

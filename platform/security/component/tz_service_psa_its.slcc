@@ -19,10 +19,14 @@ requires:
     condition: [trustzone_secure]
 
 include:
+  - path: ../../../util/third_party/mbedtls/library
+    unless: [trustzone_secure]
+    file_list:
+      - path: psa_crypto_its.h
+
   - path: sl_psa_driver/inc
     condition: [trustzone_secure]
     file_list:
-      - path: psa/internal_trusted_storage.h
       - path: psa/sli_internal_trusted_storage.h
 
   - path: sl_trustzone/inc/common
@@ -33,6 +37,14 @@ include:
     condition: [trustzone_secure]
     file_list:
       - path: psa/storage_common.h
+      - path: psa/internal_trusted_storage.h
+      - path: psa/error.h
+
+  - path: sl_psa_driver/inc
+    condition: [trustzone_nonsecure]
+    file_list:
+      - path: psa/internal_trusted_storage.h
+      - path: psa/sli_internal_trusted_storage.h
 
   - path: ../../../util/third_party/trusted-firmware-m/secure_fw/partitions/internal_trusted_storage
     condition: [trustzone_secure]

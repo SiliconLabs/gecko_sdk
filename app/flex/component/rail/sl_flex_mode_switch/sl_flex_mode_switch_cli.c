@@ -128,7 +128,8 @@ void cli_end_mode_switch(sl_cli_command_arg_t *arguments)
     set_ms_state(MS_RETURN_TO_BASE_PHY);
   } else {
     app_log_info("The application must be in MS_ON_NEW_PHY state.\n"
-                 "Current state is %s\n", ms_state_str);
+                 "Current state is %s\n",
+                 ms_state_str);
   }
 }
 
@@ -152,7 +153,8 @@ void cli_set_channel(sl_cli_command_arg_t *arguments)
   ch_index = get_channel_index(new_channel);
 
   if (ch_index != CHANNEL_DOES_NOT_EXIST) {
-    RAIL_Handle_t rail_handle = sl_rail_util_get_handle(SL_RAIL_UTIL_HANDLE_INST0);
+    RAIL_Handle_t rail_handle
+      = sl_rail_util_get_handle(SL_RAIL_UTIL_HANDLE_INST0);
     set_channel(new_channel);
     set_ms_state(MS_IDLE);
     app_log_info("New channel: %d Previous channel: %d\n",
@@ -165,13 +167,153 @@ void cli_set_channel(sl_cli_command_arg_t *arguments)
 }
 
 /******************************************************************************
- * CLI - cli_get_available_channels: API to print available radio channels.
+ * CLI - get_available_channels: API to print available radio channels.
  *****************************************************************************/
 void cli_get_available_channels(sl_cli_command_arg_t *arguments)
 {
   (void) arguments;
 
   print_channel_list();
+}
+
+/******************************************************************************
+ * CLI - get_fsk_fcs_type: API to print WiSUN FSK FCS type.
+ *****************************************************************************/
+void cli_get_fsk_fcs_type(sl_cli_command_arg_t *arguments)
+{
+  (void) arguments;
+
+  app_log_info("Current FSK FCS Type: %d\n", get_fsk_fcs_type());
+}
+
+/******************************************************************************
+ * CLI - set_fsk_fcs_type: API to set WiSUN FSK FCS type.
+ *****************************************************************************/
+void cli_set_fsk_fcs_type(sl_cli_command_arg_t *arguments)
+{
+  if ((arguments == NULL)
+      || (arguments->argv == NULL)
+      || (arguments->argv[arguments->arg_ofs + 0] == NULL)) {
+    app_log_error("cli_set_fsk_fcs_type error: Wrong argument\n");
+    return;
+  }
+
+  uint8_t fsk_fcs_type = sl_cli_get_argument_uint8(arguments, 0);
+
+  set_fsk_fcs_type(fsk_fcs_type);
+  app_log_info("Current FSK FCS Type: %d\n", get_fsk_fcs_type());
+}
+
+/******************************************************************************
+ * CLI - get_fsk_whitening: API to print WiSUN FSK whitening.
+ *****************************************************************************/
+void cli_get_fsk_whitening(sl_cli_command_arg_t *arguments)
+{
+  (void) arguments;
+
+  app_log_info("Current FSK whitening: %d\n", get_fsk_whitening());
+}
+
+/******************************************************************************
+ * CLI - set_fsk_whitening: API to set WiSUN FSK whitening.
+ *****************************************************************************/
+void cli_set_fsk_whitening(sl_cli_command_arg_t *arguments)
+{
+  if ((arguments == NULL)
+      || (arguments->argv == NULL)
+      || (arguments->argv[arguments->arg_ofs + 0] == NULL)) {
+    app_log_error("cli_set_fsk_whitening error: Wrong argument\n");
+    return;
+  }
+
+  uint8_t fsk_whitening = sl_cli_get_argument_uint8(arguments, 0);
+
+  set_fsk_whitening(fsk_whitening);
+  app_log_info("Current FSK whitening: %d\n", get_fsk_whitening());
+}
+
+/******************************************************************************
+ * CLI - get_ofdm_rate: API to print WiSUN OFDM rate.
+ *****************************************************************************/
+void cli_get_ofdm_rate(sl_cli_command_arg_t *arguments)
+{
+  (void) arguments;
+
+  app_log_info("Current OFDM rate: %d\n", get_ofdm_rate());
+}
+
+/******************************************************************************
+ * CLI - set_ofdm_rate: API to set WiSUN OFDM rate.
+ *****************************************************************************/
+void cli_set_ofdm_rate(sl_cli_command_arg_t *arguments)
+{
+  if ((arguments == NULL)
+      || (arguments->argv == NULL)
+      || (arguments->argv[arguments->arg_ofs + 0] == NULL)) {
+    app_log_error("cli_set_ofdm_rate error: Wrong argument\n");
+    return;
+  }
+
+  uint8_t ofdm_rate = sl_cli_get_argument_uint8(arguments, 0);
+
+  set_ofdm_rate(ofdm_rate);
+  app_log_info("Current OFDM rate: %d\n", get_ofdm_rate());
+}
+
+/******************************************************************************
+ * CLI - get_ofdm_scrambler: API to print WiSUN OFDM scrambler.
+ *****************************************************************************/
+void cli_get_ofdm_scrambler(sl_cli_command_arg_t *arguments)
+{
+  (void) arguments;
+
+  app_log_info("Current OFDM scrambler: %d\n", get_ofdm_scrambler());
+}
+
+/******************************************************************************
+ * CLI - set_ofdm_scrambler: API to set WiSUN OFDM scrambler.
+ *****************************************************************************/
+void cli_set_ofdm_scrambler(sl_cli_command_arg_t *arguments)
+{
+  if ((arguments == NULL)
+      || (arguments->argv == NULL)
+      || (arguments->argv[arguments->arg_ofs + 0] == NULL)) {
+    app_log_error("cli_set_ofdm_scrambler error: Wrong argument\n");
+    return;
+  }
+
+  uint8_t ofdm_scrambler = sl_cli_get_argument_uint8(arguments, 0);
+
+  set_ofdm_scrambler(ofdm_scrambler);
+  app_log_info("Current OFDM scrambler: %d\n", get_ofdm_scrambler());
+}
+
+/******************************************************************************
+ * CLI - get_print_packet_details: API to get extra packet info settings state.
+ *****************************************************************************/
+void cli_get_print_packet_details(sl_cli_command_arg_t *arguments)
+{
+  (void) arguments;
+  app_log_info("Packet details is %s\n",
+               get_print_packet_details() ? "ON" : "OFF");
+}
+
+/******************************************************************************
+ * CLI - set_print_packet_details: API to enable/disable extra packet info.
+ *****************************************************************************/
+void cli_set_print_packet_details(sl_cli_command_arg_t *arguments)
+{
+  if ((arguments == NULL)
+      || (arguments->argv == NULL)
+      || (arguments->argv[arguments->arg_ofs + 0] == NULL)) {
+    app_log_error("cli_set_print_packet_details error: Wrong argument\n");
+    return;
+  }
+  bool print_packet_details = (bool) sl_cli_get_argument_uint8(arguments, 0);
+
+  set_print_packet_details(print_packet_details);
+  app_log_info("Packet details is %s\n",
+               get_print_packet_details() ? "ON" : "OFF");
 }
 
 // -----------------------------------------------------------------------------

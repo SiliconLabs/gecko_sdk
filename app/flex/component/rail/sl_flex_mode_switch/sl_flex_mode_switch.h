@@ -87,6 +87,86 @@ typedef struct radio_info {
 //                          Public Function Declarations
 // -----------------------------------------------------------------------------
 /**************************************************************************//**
+ * API to get the PHY's FCS setting of the given channel.
+ *
+ * @param None
+ * @returns PHY's FCS setting of the given channel
+ *****************************************************************************/
+uint8_t get_fsk_fcs_type(void);
+
+/**************************************************************************//**
+ * API to set the WiSUN FSK FCS type field of the packet header.
+ *
+ * @param new_fsk_fcs_type New fcs_type to set
+ * @returns None
+ *****************************************************************************/
+void set_fsk_fcs_type(uint8_t new_fsk_fcs_type);
+
+/**************************************************************************//**
+ * API to get the PHY's whitening setting of the given channel.
+ *
+ * @param None
+ * @returns PHY's whitening setting of the given channel
+ *****************************************************************************/
+uint8_t get_fsk_whitening(void);
+
+/**************************************************************************//**
+ * API to set the WiSUN FSK whitening field of the packet header.
+ *
+ * @param new_fsk_whitening New whitening to set
+ * @returns None
+ *****************************************************************************/
+void set_fsk_whitening(uint8_t new_fsk_whitening);
+
+/**************************************************************************//**
+ * API to get the PHY's OFDM rate setting of the given channel.
+ *
+ * @param None
+ * @returns PHY's OFDM rate setting of the given channel
+ *****************************************************************************/
+uint8_t get_ofdm_rate(void);
+
+/**************************************************************************//**
+ * API to set the WiSUN OFDM rate field of the packet header.
+ *
+ * @param new_ofdm_rate New rate to set
+ * @returns None
+ *****************************************************************************/
+void set_ofdm_rate(uint8_t new_ofdm_rate);
+
+/**************************************************************************//**
+ * API to get the PHY's OFDM scrambler setting of the given channel.
+ *
+ * @param None
+ * @returns PHY's OFDM scrambler setting of the given channel
+ *****************************************************************************/
+uint8_t get_ofdm_scrambler(void);
+
+/**************************************************************************//**
+ * API to set the WiSUN OFDM scrambler field of the packet header.
+ *
+ * @param new_ofdm_scrambler New scrambler to set
+ * @returns None
+ *****************************************************************************/
+void set_ofdm_scrambler(uint8_t new_ofdm_scrambler);
+
+/**************************************************************************//**
+ * API to get the extra print setting of the TX and RX packets.
+ *
+ * @param None
+ * @returns Extra print setting of the TX and RX packets is ON/OFF
+ *****************************************************************************/
+bool get_print_packet_details(void);
+
+/**************************************************************************//**
+ * API to set the the extra print setting of the TX and RX packets.
+ *
+ * @param new_print_packet_details New print settings
+ * @returns None
+ *****************************************************************************/
+void set_print_packet_details(bool new_print_packet_details);
+
+/**************************************************************************//**
  * This function calibrates the radio.
  *
  * @param rail_handle A RAIL insance handle
@@ -290,10 +370,10 @@ uint16_t get_channel_index(const uint16_t new_channel);
 sl_status_t set_new_phy_mode_id(const uint8_t new_phy_mode_id);
 
 /**************************************************************************//**
- * API to get the currently usd phy mode id.
+ * API to get the currently used phy mode id.
  *
  * @param None
- * @returns Currently usd phy mode id
+ * @returns Currently used phy mode id
  *****************************************************************************/
 uint8_t get_phy_mode_id(void);
 
@@ -364,7 +444,7 @@ RAIL_Status_t return_to_base_channel(void);
 uint8_t get_phy_mode_id_from_channel(const uint16_t channel);
 
 /**************************************************************************//**
- * API to get the PHY mode id of the given channel.
+ * API to get the PHY modulation of the given channel.
  *
  * @param channel Radio channel
  * @returns PHY modulation of the given channel

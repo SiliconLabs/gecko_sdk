@@ -46,6 +46,12 @@
 /// Command to open the Cortex-M33 debug port
 #define DEBUG_ACCESS_CMD        (0xfd010001)
 
+/// Debug options to lock SPNIDLOCK and SPIDLOCK (0 = Unlocked, 1 = locked)
+#define DEBUG_OPTIONS           (0x0c)
+
+/// Debug mode request to reset all debug options (0 = No action, 1 = Reset)
+#define DEBUG_MODE_REQUEST      (0x3e)
+
 /// Secure debug ECC curve
 #define SECURE_DEBUG_ECC_ID     (SL_SE_KEY_TYPE_ECC_P256)
 

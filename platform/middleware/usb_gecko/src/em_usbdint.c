@@ -705,11 +705,34 @@ static bool UsbPowerUp(void)
 #if defined(_SILICON_LABS_32B_SERIES_0)
   #if !defined(USB_CORECLK_HFRCO) || !defined(CMU_OSCENCMD_USHFRCOEN)
     /* Switch HFCLK from HFRCO to HFXO. */
-    CMU_ClockSelectSet(cmuClock_HF, cmuSelect_HFXO);
+    CMU_CLOCK_SELECT_SET(HF, HFXO);
   #endif
 #else /* Series 1 */
     /* Switch to correct HFCLK. */
-    CMU_ClockSelectSet(cmuClock_HF, clkSelectMap[cmuHfclkStatus]);
+    switch (clkSelectMap[cmuHfclkStatus]) {
+      case cmuSelect_Disabled:
+        CMU_CLOCK_SELECT_SET(HF, DISABLED);
+        break;
+      case cmuSelect_HFRCO:
+        CMU_CLOCK_SELECT_SET(HF, HFRCO);
+        break;
+      case cmuSelect_HFXO:
+        CMU_CLOCK_SELECT_SET(HF, HFXO);
+        break;
+      case cmuSelect_LFRCO:
+        CMU_CLOCK_SELECT_SET(HF, LFRCO);
+        break;
+      case cmuSelect_LFXO:
+        CMU_CLOCK_SELECT_SET(HF, LFXO);
+        break;
+      case cmuSelect_USHFRCO:
+        CMU_CLOCK_SELECT_SET(HF, USHFRCO);
+        break;
+      default:
+        // Unsupported clock source
+        EFM_ASSERT(false);
+        break;
+    }
 #endif
 
     /* Turn off HFRCO when not needed. */
@@ -821,11 +844,34 @@ void USBDINT_RemoteWakeup(void)
 #if defined(_SILICON_LABS_32B_SERIES_0)
   #if !defined(USB_CORECLK_HFRCO) || !defined(CMU_OSCENCMD_USHFRCOEN)
     /* Switch HFCLK from HFRCO to HFXO. */
-    CMU_ClockSelectSet(cmuClock_HF, cmuSelect_HFXO);
+    CMU_CLOCK_SELECT_SET(HF, HFXO);
   #endif
 #else /* Series 1 */
     /* Switch to correct HFCLK. */
-    CMU_ClockSelectSet(cmuClock_HF, clkSelectMap[cmuHfclkStatus]);
+    switch (clkSelectMap[cmuHfclkStatus]) {
+      case cmuSelect_Disabled:
+        CMU_CLOCK_SELECT_SET(HF, DISABLED);
+        break;
+      case cmuSelect_HFRCO:
+        CMU_CLOCK_SELECT_SET(HF, HFRCO);
+        break;
+      case cmuSelect_HFXO:
+        CMU_CLOCK_SELECT_SET(HF, HFXO);
+        break;
+      case cmuSelect_LFRCO:
+        CMU_CLOCK_SELECT_SET(HF, LFRCO);
+        break;
+      case cmuSelect_LFXO:
+        CMU_CLOCK_SELECT_SET(HF, LFXO);
+        break;
+      case cmuSelect_USHFRCO:
+        CMU_CLOCK_SELECT_SET(HF, USHFRCO);
+        break;
+      default:
+        // Unsupported clock source
+        EFM_ASSERT(false);
+        break;
+    }
 #endif
 
     /* Turn off HFRCO when not needed. */

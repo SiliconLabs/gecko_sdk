@@ -1,6 +1,6 @@
 /**
  * @file
- * @copyright 2022 Silicon Laboratories Inc.
+ * @copyright 2023 Silicon Laboratories Inc.
  */
 
 #ifndef _CC_MULTILEVEL_SWITCH_SUPPORT_CONFIG_H_

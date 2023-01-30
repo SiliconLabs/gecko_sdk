@@ -2320,12 +2320,6 @@ uint16_t CMU_LF_ClockPrecisionGet(CMU_Clock_TypeDef clock)
       break;
 
 #if defined(PLFRCO_PRESENT)
-#if defined(_SILICON_LABS_32B_SERIES_1)
-    case cmuSelect_PLFRCO:
-      precision = 500;
-      break;
-#endif
-
 #if defined(LFRCO_CFG_HIGHPRECEN)
     case cmuSelect_LFRCO:
     case cmuSelect_PLFRCO:
@@ -3322,6 +3316,18 @@ void CMU_LFXOInit(const CMU_LFXOInit_TypeDef *lfxoInit)
 void CMU_LFXOPrecisionSet(uint16_t precision)
 {
   lfxo_precision = precision;
+}
+
+/**************************************************************************//**
+ * @brief
+ *   Gets LFXO's crystal precision, in PPM.
+ *
+ * @param[in] precision
+ *    LFXO's crystal precision, in PPM.
+ *****************************************************************************/
+uint16_t CMU_LFXOPrecisionGet(void)
+{
+  return lfxo_precision;
 }
 
 #if defined(PLFRCO_PRESENT)
@@ -9775,24 +9781,10 @@ uint16_t CMU_LF_ClockPrecisionGet(CMU_Clock_TypeDef clock)
       precision = lfxo_precision;
       break;
 
-#if defined(PLFRCO_PRESENT)
-#if defined(_SILICON_LABS_32B_SERIES_1)
+#if defined(_SILICON_LABS_32B_SERIES_1) && defined(PLFRCO_PRESENT)
     case cmuSelect_PLFRCO:
       precision = 500;
       break;
-#endif
-
-#if defined(LFRCO_CFG_HIGHPRECEN)
-    case cmuSelect_LFRCO:
-      CMU->CLKEN0_SET = CMU_CLKEN0_LFRCO;
-
-      if (LFRCO->CFG & _LFRCO_CFG_HIGHPRECEN_MASK) {
-        precision = 500;
-      } else {
-        precision = 0xFFFF;
-      }
-      break;
-#endif
 #endif
 
     default:
@@ -10731,6 +10723,18 @@ void CMU_LFXOInit(const CMU_LFXOInit_TypeDef *lfxoInit)
 void CMU_LFXOPrecisionSet(uint16_t precision)
 {
   lfxo_precision = precision;
+}
+
+/**************************************************************************//**
+ * @brief
+ *   Gets LFXO's crystal precision, in PPM.
+ *
+ * @param[in] precision
+ *    LFXO's crystal precision, in PPM.
+ *****************************************************************************/
+uint16_t CMU_LFXOPrecisionGet(void)
+{
+  return lfxo_precision;
 }
 
 /***************************************************************************//**

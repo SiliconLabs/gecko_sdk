@@ -52,7 +52,7 @@
  * @details Helper function
  * @param[in] region Region
  *****************************************************************************/
-static inline void _reset_region(sl_display_rectangle_t * region);
+__STATIC_INLINE void _reset_region(sl_display_rectangle_t * region);
 
 /**************************************************************************//**
  * @brief Get max line count on widget
@@ -60,7 +60,7 @@ static inline void _reset_region(sl_display_rectangle_t * region);
  * @param[in] frame Frame
  * @return uint8_t Line count
  *****************************************************************************/
-static inline uint8_t _get_max_lines_on_widget(const sl_display_rectangle_t
+__STATIC_INLINE uint8_t _get_max_lines_on_widget(const sl_display_rectangle_t
                                                *const frame);
 
 /**************************************************************************//**
@@ -69,7 +69,7 @@ static inline uint8_t _get_max_lines_on_widget(const sl_display_rectangle_t
  * @param[in,out] sum Sum destination
  * @param[in] stat Status to summarize
  *****************************************************************************/
-static inline void _sum_status(sl_status_t * const sum, const sl_status_t stat);
+__STATIC_INLINE void _sum_status(sl_status_t * const sum, const sl_status_t stat);
 
 /**************************************************************************//**
  * @brief Scroll optionlist
@@ -84,7 +84,7 @@ static void _optionlist_scroll(sl_widget_option_list_t * const optionlist);
  * @param[in] frame Frame
  * @return uint8_t X size (width)
  *****************************************************************************/
-static inline uint8_t _get_widget_x_size(const sl_display_rectangle_t
+__STATIC_INLINE uint8_t _get_widget_x_size(const sl_display_rectangle_t
                                          *const frame);
 
 /**************************************************************************//**
@@ -93,7 +93,7 @@ static inline uint8_t _get_widget_x_size(const sl_display_rectangle_t
  * @param[in] frame Frame
  * @return uint8_t Y size (width)
  *****************************************************************************/
-static inline uint8_t _get_widget_y_size(const sl_display_rectangle_t
+__STATIC_INLINE uint8_t _get_widget_y_size(const sl_display_rectangle_t
                                          *const frame);
 
 /**************************************************************************//**
@@ -103,7 +103,7 @@ static inline uint8_t _get_widget_y_size(const sl_display_rectangle_t
  * @param[in] str
  * @return uint8_t Offset value
  *****************************************************************************/
-static inline uint8_t _get_str_offset_to_align_center(const sl_display_rectangle_t
+__STATIC_INLINE uint8_t _get_str_offset_to_align_center(const sl_display_rectangle_t
                                                       *const frame, const char *str);
 
 // -----------------------------------------------------------------------------
@@ -518,21 +518,21 @@ sl_status_t sl_widget_textbox_scroll_up(sl_widget_textbox_t * const textbox)
 //                          Static Function Definitions
 // -----------------------------------------------------------------------------
 
-static inline void _reset_region(sl_display_rectangle_t * region)
+__STATIC_INLINE void _reset_region(sl_display_rectangle_t * region)
 {
   sl_display_set_clipping_region(region);
   sl_display_clear_region();
   sl_display_reset_clipping_region();
 }
 
-static inline void _sum_status(sl_status_t * const sum, const sl_status_t stat)
+__STATIC_INLINE void _sum_status(sl_status_t * const sum, const sl_status_t stat)
 {
   if (*sum != SL_STATUS_FAIL) {
     *sum = stat;
   }
 }
 
-static inline uint8_t _get_max_lines_on_widget(const sl_display_rectangle_t * const frame)
+__STATIC_INLINE uint8_t _get_max_lines_on_widget(const sl_display_rectangle_t * const frame)
 {
   return (frame->yMax - frame->yMin) / (sl_widget_default_font.fontHeight + SL_WIDGET_FRAME_WIDTH);
 }
@@ -548,17 +548,17 @@ static void _optionlist_scroll(sl_widget_option_list_t * const optionlist)
   }
 }
 
-static inline uint8_t _get_widget_x_size(const sl_display_rectangle_t *const frame)
+__STATIC_INLINE uint8_t _get_widget_x_size(const sl_display_rectangle_t *const frame)
 {
   return frame->xMax - frame->xMin;
 }
 
-static inline uint8_t _get_widget_y_size(const sl_display_rectangle_t *const frame)
+__STATIC_INLINE uint8_t _get_widget_y_size(const sl_display_rectangle_t *const frame)
 {
   return frame->yMax - frame->yMin;
 }
 
-static inline uint8_t _get_str_offset_to_align_center(const sl_display_rectangle_t *const frame,
+__STATIC_INLINE uint8_t _get_str_offset_to_align_center(const sl_display_rectangle_t *const frame,
                                                       const char *str)
 {
   return ((_get_widget_x_size(frame) - (SL_WIDGET_FRAME_WIDTH * 2))

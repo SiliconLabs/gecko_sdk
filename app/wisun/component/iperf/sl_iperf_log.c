@@ -39,6 +39,7 @@
 #include <string.h>
 #include <stdarg.h>
 
+#include "sl_iperf_types.h"
 #include "sl_iperf_log.h"
 #include "sl_iperf_config.h"
 
@@ -53,7 +54,7 @@
  * @param[in] buff Buffer pointer
  * @param[in] size Size of buffer
  *****************************************************************************/
-static inline void _set_log_buff(sl_iperf_log_t * const log,
+__STATIC_INLINE void _set_log_buff(sl_iperf_log_t * const log,
                                  char * const buff,
                                  const size_t size);
 
@@ -179,7 +180,7 @@ static int32_t _def_log_print(sl_iperf_log_t * const log, const char * format, .
 //                          Static Function Definitions
 // -----------------------------------------------------------------------------
 
-static inline void _set_log_buff(sl_iperf_log_t * const log, char * const buff, const size_t size)
+__STATIC_INLINE void _set_log_buff(sl_iperf_log_t * const log, char * const buff, const size_t size)
 {
   // Enable buffered mode
   log->buffered = true;

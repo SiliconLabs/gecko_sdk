@@ -21,7 +21,6 @@
 
 // <h>Properties of Bootloader Entry
 
-
 // <o SL_GPIO_ACTIVATION_POLARITY> Active state
 // <LOW=> Low
 // <HIGH=> High
@@ -38,11 +37,11 @@
 // <gpio> SL_BTL_BUTTON
 
 // $[GPIO_SL_BTL_BUTTON]
-#define SL_BTL_BUTTON_PORT                      gpioPortB
-#define SL_BTL_BUTTON_PIN                       0
+#warning "GPIO activation port not configured"
+//#define SL_BTL_BUTTON_PORT                      gpioPortB
+//#define SL_BTL_BUTTON_PIN                       0
 // [GPIO_SL_BTL_BUTTON]$
 
 // <<< sl:end pin_tool >>>
-
 
 #endif // BTL_GPIO_ACTIVATION_CONFIG_H

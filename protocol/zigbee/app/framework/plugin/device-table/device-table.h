@@ -329,6 +329,21 @@ bool emberAfDeviceTableMatchEui64(EmberEUI64 a, EmberEUI64 b);
  */
 void emberAfDeviceTableClear(void);
 
+/** @brief Called when a device has been removed from the device table
+ *
+ * Called when the device has been removed from the table.
+ *
+ * @param currentIndex  Index of the removed device.
+ */
+void emberAfPluginDeviceTableIndexRemovedCallback(uint16_t currentIndex);
+
+/** @brief Called when the device table has been initialized
+ *
+ * Called when the device table has been initialized
+ *
+ */
+void emberAfPluginDeviceTableInitialized(void);
+
 /** @} */ // end of name API
 
 // ZigBee device IDs

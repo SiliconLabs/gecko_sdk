@@ -42,6 +42,7 @@ extern "C" {
 #include "sn_config.h"
 #include "sn_coap_protocol.h"
 #include "sn_coap_header.h"
+#include "sl_wisun_types.h"
 #include "sli_wisun_coap_mem.h"
 
 /**************************************************************************//**
@@ -150,7 +151,7 @@ bool sl_wisun_coap_init(const sl_wisun_coap_tx_callback tx_callback,
  * @return true Proper initialization
  * @return false Error
  *****************************************************************************/
-static inline bool sl_wisun_coap_init_default(void)
+__STATIC_INLINE bool sl_wisun_coap_init_default(void)
 {
   return sl_wisun_coap_init(NULL, NULL, COAP_VERSION_1);
 }
@@ -240,7 +241,7 @@ char * sl_wisun_coap_get_uri_path_str(const sl_wisun_coap_packet_t * const packe
  * @details Call free on allocated pointer
  * @param[in] uri_str URI string ptr
  *****************************************************************************/
-static inline void sl_wisun_coap_destroy_uri_path_str(char *uri_str)
+__STATIC_INLINE void sl_wisun_coap_destroy_uri_path_str(char *uri_str)
 {
   sl_wisun_coap_free((void *) uri_str);
 }
@@ -273,7 +274,7 @@ char * sl_wisun_coap_get_payload_str(const sl_wisun_coap_packet_t * const packet
  * @details '\0' terminated string in the heap, it must be freed
  * @param[in] str String
  *****************************************************************************/
-static inline void sl_wisun_coap_destroy_payload_str(char *str)
+__STATIC_INLINE void sl_wisun_coap_destroy_payload_str(char *str)
 {
   sl_wisun_coap_free((void *) str);
 }

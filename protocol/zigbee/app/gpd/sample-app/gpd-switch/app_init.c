@@ -47,7 +47,7 @@ void emberGpdLeTimerInit(void)
 #elif defined _SILICON_LABS_32B_SERIES_1
   // Turn on the clock for the RTCC
   CMU_ClockEnable(cmuClock_HFLE, true);
-  CMU_ClockSelectSet(cmuClock_LFE, cmuSelect_LFRCO);
+  CMU_CLOCK_SELECT_SET(LFE, LFRCO);
 #endif
   CMU_ClockEnable(cmuClock_RTCC, true);
 }

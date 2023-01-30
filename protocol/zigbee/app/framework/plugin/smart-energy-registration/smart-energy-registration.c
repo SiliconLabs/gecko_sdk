@@ -1136,8 +1136,9 @@ static void discoveryCallback(const EmberAfServiceDiscoveryResult *result)
     EmberNodeId nodeId;
     uint8_t ep; // retrieveNextNodeFor... needs it, otherwise ignored
     retrieveNodeForDiscoveryOrPartnerKeyExchange(state, &nodeId, &ep);
-    assert(nodeId != EMBER_NULL_NODE_ID && nodeId == result->matchAddress);
-    if (result->status == EMBER_AF_UNICAST_SERVICE_DISCOVERY_COMPLETE_WITH_RESPONSE) {
+    if (nodeId != EMBER_NULL_NODE_ID
+        && nodeId == result->matchAddress
+        && result->status == EMBER_AF_UNICAST_SERVICE_DISCOVERY_COMPLETE_WITH_RESPONSE) {
       emberAfRegistrationPrintln("%p IEEE address for node 0x%2x",
                                  "Discovered",
                                  nodeId);

@@ -162,3 +162,8 @@ filter:
     value: ["SoC"]
   - name: "Project Difficulty"
     value: ["Advanced"]
+
+tag:
+  - hardware:component:led:2
+  - hardware:component:button:2
+  - hardware:component:pti

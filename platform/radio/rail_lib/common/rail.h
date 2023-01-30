@@ -4058,6 +4058,12 @@ int16_t RAIL_GetAverageRssi(RAIL_Handle_t railHandle);
  *  underflow. If that happens, the RSSI value returned by
  *  \ref RAIL_GetRssi, \ref RAIL_GetAverageRssi,
  *  \ref RAIL_GetChannelHoppingRssi etc. will be \ref RAIL_RSSI_LOWEST
+ *
+ * @note: During \ref Rx_Channel_Hopping this API will not update the
+ * RSSI offset immediately if channel hopping has already been configured.
+ * A subsequent call to \ref RAIL_ZWAVE_ConfigRxChannelHopping or
+ * \ref RAIL_ConfigRxChannelHopping is required for the new RSSI offset to
+ * take effect.
  */
 RAIL_Status_t RAIL_SetRssiOffset(RAIL_Handle_t railHandle, int8_t rssiOffset);
 

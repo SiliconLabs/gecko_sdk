@@ -44,8 +44,9 @@
 // <4=> Band 896 MHz
 // <5=> Band 928 MHz
 // <6=> Band 9xx MHz
-// <i> Default: 6
-#define SL_DEVICE_INIT_RFFPLL_BAND                6
+// <7=> AUTO BAND
+// <i> Default: 7
+#define SL_DEVICE_INIT_RFFPLL_BAND                7
 
 // <e SL_DEVICE_INIT_RFFPLL_CUSTOM_BAND> Use custom band (overrides Target RF band)
 // <i> Default: 0

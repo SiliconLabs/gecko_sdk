@@ -21,6 +21,7 @@
 #include "core/btl_util.h"
 #include "sl_status.h"
 #include "api/btl_interface.h"
+#include "sl_apploader_lib_api.h"
 
 #if defined(BOOTLOADER_NONSECURE)
   #include "parser/gbl/btl_gbl_parser_ns.h"
@@ -72,6 +73,16 @@ int32_t bootloader_apploader_communication_main(ImageProperties_t *imageProps,
                                                 void *decryptContext,
                                                 void *authContext,
                                                 const BootloaderParserCallbacks_t *parseCb);
+
+/***************************************************************************//**
+ * Get custom device address. The address must be set in little endian format
+ * Default implementation of this function reads the address from MFG_CUSTOM_EUI_64
+ * manufacturing token stored in user data page. The function can be overridden
+ * if custom implementation is wanted.
+ *
+ * @param address     Device address
+ ******************************************************************************/
+void bootloader_apploader_get_custom_device_address(sl_apploader_address_t *btAddress);
 
 /** @} addtogroup Communication */
 /** @} addtogroup Components */

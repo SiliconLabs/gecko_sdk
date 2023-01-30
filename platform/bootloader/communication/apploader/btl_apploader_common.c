@@ -19,6 +19,7 @@
 // Includes
 
 #include "btl_apploader.h"
+#include "btl_apploader_config.h"
 #include "btl_apploader_callback.h"
 #include "sl_apploader_lib_api.h"
 
@@ -48,17 +49,8 @@
 // -----------------------------------------------------------------------------
 // Defines
 
-#define USE_RANDOM_ADDRESS 0
-#define USE_CUSTOM_ADDRESS 0
-#define CUSTOM_ADDRESS "\x00\x11\x22\x33\x44\x55"
-#define SET_RF_PATH 0
-#define RF_PATH 255
-#define TX_POWER 0
-
 // Advertising data
-#define DEVICE_NAME                   "OTA"
-#define DEVICE_NAME_LENGTH            3
-#define DEVICE_NAME_LENGTH_MAX        17
+#define DEVICE_NAME_LENGTH_MAX        18
 #define ADV_DATA                      "\x02\x01\x06" "\x04" "\x09"
 #define ADV_DATA_LENGTH               5
 #define ADV_DATA_SIZE_MAX             32
@@ -87,6 +79,31 @@ static void *apploader_authContext;
 
 // -----------------------------------------------------------------------------
 // Global Functions
+
+#define MFG_CUSTOM_EUI_64_OFFSET 0x0002
+SL_WEAK void bootloader_apploader_get_custom_device_address(sl_apploader_address_t *btAddress)
+{
+  uint8_t *mfgToken = (uint8_t*)USERDATA_BASE + MFG_CUSTOM_EUI_64_OFFSET;
+  // The 8-byte token consists of the address type at byte index 1 and the address
+  // itself starting from byte index 2
+  uint8_t mfgAddressType = mfgToken[1];
+  uint8_t *mfgAddress = &mfgToken[2];
+  uint8_t mfgAddressLen = sizeof(btAddress->address);
+
+  //Adjust token byte Endianness
+  for (uint8_t i = 0; i < mfgAddressLen; i++) {
+    btAddress->address[i] = mfgAddress[(mfgAddressLen - 1) - i];
+  }
+
+  if (mfgAddressType == 0) {
+    btAddress->type = sl_apploader_address_type_public;
+  } else if (mfgAddressType == 1) {
+    btAddress->type = sl_apploader_address_type_random;
+  } else {
+    // if invalid address type assume public
+    btAddress->type = sl_apploader_address_type_public;
+  }
+}
 
 // -----------------------------------------------------------------------------
 // Callback functions called from AppLoader OTA DFU library
@@ -202,24 +219,22 @@ void bootloader_apploader_communication_init(void)
 
   // Configure Bluetooth
   static sl_apploader_config_t btConfig = {
-    .txPower = TX_POWER,
+    .txPower = BTL_APPLOADER_TX_POWER,
     .address = NULL,
   };
 
   sl_apploader_address_t btAddress;
-  if (USE_RANDOM_ADDRESS) {
+  if (BTL_APPLOADER_USE_RANDOM_ADDRESS) {
     sl_apploader_get_static_random_device_address(&btAddress);
     btConfig.address = &btAddress;
-  }
-  if (USE_CUSTOM_ADDRESS) {
-    memcpy(btAddress.address, CUSTOM_ADDRESS, 6);
-    btAddress.type = sl_apploader_address_type_public;
+  } else if (BTL_APPLOADER_USE_CUSTOM_ADDRESS) {
+    bootloader_apploader_get_custom_device_address(&btAddress);
     btConfig.address = &btAddress;
   }
   sl_apploader_init(&btConfig);
 
-  if (SET_RF_PATH) {
-    uint8_t rfPath = RF_PATH;
+  if (BTL_APPLOADER_SET_RF_PATH) {
+    uint8_t rfPath = BTL_APPLOADER_RF_PATH;
     sl_apploader_select_rf_path(rfPath);
   }
 }
@@ -231,14 +246,22 @@ int32_t bootloader_apploader_communication_start(void)
   //set advertising data
   uint8_t advData[ADV_DATA_SIZE_MAX];
   uint8_t advDataLen = 0;
+  uint8_t devNameLen = strlen(BTL_APPLOADER_DEVICE_NAME);
+  if (devNameLen > DEVICE_NAME_LENGTH_MAX) {
+    devNameLen = DEVICE_NAME_LENGTH_MAX;
+  }
   memcpy(advData, ADV_DATA, ADV_DATA_LENGTH);
-  advData[3] = DEVICE_NAME_LENGTH + 1;
-  memcpy(advData + ADV_DATA_LENGTH, DEVICE_NAME, DEVICE_NAME_LENGTH);
-  advDataLen = ADV_DATA_LENGTH + DEVICE_NAME_LENGTH;
+  advData[3] = devNameLen + 1;
+  memcpy(advData + ADV_DATA_LENGTH, BTL_APPLOADER_DEVICE_NAME, devNameLen);
+  advDataLen = ADV_DATA_LENGTH + devNameLen;
 
   //Set public device address to advertisement data
   sl_apploader_address_t deviceAddr;
-  sl_apploader_get_device_address(&deviceAddr);
+  if (BTL_APPLOADER_USE_CUSTOM_ADDRESS) {
+    bootloader_apploader_get_custom_device_address(&deviceAddr);
+  } else {
+    sl_apploader_get_device_address(&deviceAddr);
+  }
   memcpy(advData + advDataLen, ADV_DATA_DEVICE_ADDR, ADV_DATA_DEVICE_ADDR_LENGTH);
   advDataLen += ADV_DATA_DEVICE_ADDR_LENGTH;
   sl_apploader_address_type_t addrType = deviceAddr.type;
@@ -249,14 +272,14 @@ int32_t bootloader_apploader_communication_start(void)
   //set scan response data
   uint8_t scanRspData[ADV_DATA_SIZE_MAX];
   uint8_t scanRspDataLen = ADV_DATA_SIZE_MAX;
-  memcpy(scanRspData, SCAN_RSP_DATA, SCAN_RSP_DATA_LENGTH);
-  scanRspData[SCAN_RSP_DATA_LENGTH] = TX_POWER;
+  memcpy(scanRspData, SCAN_RSP_DATA, SCAN_RSP_DATA_LENGTH - 1);
+  scanRspData[SCAN_RSP_DATA_LENGTH - 1] = BTL_APPLOADER_TX_POWER / 10;
   scanRspDataLen = SCAN_RSP_DATA_LENGTH;
 
   //Create GATT DB
   sl_apploader_reset_database();
   sl_apploader_database_add_gatt_service();
-  sl_apploader_database_add_gap_service(DEVICE_NAME, DEVICE_NAME_LENGTH);
+  sl_apploader_database_add_gap_service(BTL_APPLOADER_DEVICE_NAME, devNameLen);
   sl_apploader_database_add_ota_service();
   sl_apploader_set_database();
 

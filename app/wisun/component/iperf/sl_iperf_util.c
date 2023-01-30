@@ -143,7 +143,7 @@ typedef struct stat_update_params {
  * @param[in] val Value
  * @return const char* String json value
  *****************************************************************************/
-static inline const char * _bool_to_json(const bool val);
+__STATIC_INLINE const char * _bool_to_json(const bool val);
 
 /**************************************************************************//**
  * @brief Calculate json indent
@@ -151,7 +151,7 @@ static inline const char * _bool_to_json(const bool val);
  * @param[in] val Indent value
  * @return uint8_t Space count
  *****************************************************************************/
-static inline uint8_t _calc_ind(const uint8_t val);
+__STATIC_INLINE uint8_t _calc_ind(const uint8_t val);
 
 /**************************************************************************//**
  * @brief Calculate formatted bandwidth
@@ -665,7 +665,7 @@ void sl_iperf_test_calculate_average_bandwidth(sl_iperf_test_t * const test)
 //                          Static Function Definitions
 // -----------------------------------------------------------------------------
 
-static inline const char *_bool_to_json(const bool val)
+__STATIC_INLINE const char *_bool_to_json(const bool val)
 {
   return val ? "true" : "false";
 }
@@ -747,7 +747,7 @@ static void _calculate_formatted_bw(const sl_iperf_opt_bw_format bw_format,
   }
 }
 
-static inline uint8_t _calc_ind(const uint8_t val)
+__STATIC_INLINE uint8_t _calc_ind(const uint8_t val)
 {
   return (uint8_t)(val * SL_IPERF_LOG_JSON_INDENT);
 }

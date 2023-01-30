@@ -26,6 +26,39 @@
 #ifdef __cplusplus
 extern "C" {
 #endif
+#if defined(TFM_CONFIG_SL_SECURE_LIBRARY)
+#define PSA_STORAGE_FLAG_WRITE_ONCE_SECURE_ACCESSIBLE (1 << 3)
+#endif // TFM_CONFIG_SL_SECURE_LIBRARY
+
+psa_status_t sli_psa_its_change_key_id(mbedtls_svc_key_id_t old_id,
+                                       mbedtls_svc_key_id_t new_id);
+
+/**
+ * \brief Check if the ITS encryption is enabled
+ *
+ * \details The function is added in order to support runtime checking
+ *          needed by trustzone-agnostic libraries
+ *
+ * \retval      PSA_SUCCESS                 ITS encryption is enabled
+ * \retval      PSA_ERROR_NOT_SUPPORTED     ITS encryption is not supported
+ */
+psa_status_t sli_psa_its_encrypted(void);
+
+#if defined(SLI_PSA_ITS_ENCRYPTED) && !defined(SEMAILBOX_PRESENT)
+/**
+ * \brief Set the root key to be used when deriving session keys for ITS encryption.
+ *
+ * \param[in] root_key        Buffer containing the root key.
+ * \param[in] root_key_size   Size of the root key in bytes. Must be 32 (256 bits).
+ *
+ * \return  A status indicating the success/failure of the operation
+ *
+ * \retval      PSA_SUCCESS                  The key was successfully set.
+ * \retval      PSA_ERROR_INVALID_ARGUMENT   The root key was NULL or had an invalid size.
+ * \retval      PSA_ERROR_ALREADY_EXISTS     The root key has already been initialized.
+ */
+psa_status_t sli_psa_its_set_root_key(uint8_t *root_key, size_t root_key_size);
+#endif // defined(SLI_PSA_ITS_ENCRYPTED) && !defined(SEMAILBOX_PRESENT)
 
 #if (SL_PSA_ITS_SUPPORT_V3_DRIVER)
 

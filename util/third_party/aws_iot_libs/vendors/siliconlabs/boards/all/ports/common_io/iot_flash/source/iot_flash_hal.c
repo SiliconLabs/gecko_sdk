@@ -371,6 +371,7 @@ int32_t iot_flash_erase_sectors(IotFlashHandle_t const pxFlashHandle,
 {
   /* local variables */
   uint32_t    ulFlashSize    = 0;
+  uint32_t    ulFlashBase    = 0;
   uint32_t    ulSectorSize   = 0;
   uint32_t    ulCurAddress   = 0;
   uint32_t    ulEndAddress   = 0;
@@ -381,6 +382,16 @@ int32_t iot_flash_erase_sectors(IotFlashHandle_t const pxFlashHandle,
   if (pxFlashHandle == NULL) {
     return IOT_FLASH_INVALID_VALUE;
   }
+  
+  /* fetching the base address of flash */
+  xSlStatus = iot_flash_drv_get_flash_base(pxFlashHandle, &ulFlashBase);
+  
+  if (xSlStatus == SL_STATUS_FAIL) {
+    lStatus = IOT_FLASH_ERASE_FAILED;
+  }
+  
+  /* fetching the start address starting from where the erase is requested */
+  ulStartAddress = ulStartAddress + ulFlashBase;
 
   /* make sure pxFlashHandle is open */
   if (pxFlashHandle->ucIsOpen == pdFALSE) {
@@ -403,11 +414,12 @@ int32_t iot_flash_erase_sectors(IotFlashHandle_t const pxFlashHandle,
     }
   }
 
-  /* make sure ulStartAddress is within range */
+  /* make sure ulStartAddress and read request is within flash range */
   if (lStatus == IOT_FLASH_SUCCESS) {
-    if (ulStartAddress >= ulFlashSize) {
+	if ((ulStartAddress < ulFlashBase) || (ulStartAddress > (ulFlashBase + ulFlashSize)) || (ulStartAddress + xSize - 1) > (ulFlashBase + ulFlashSize - 1))
+	{
       lStatus = IOT_FLASH_INVALID_VALUE;
-    }
+	}
   }
 
   /* ulStartAddress must be multiple of sector size */
@@ -530,6 +542,7 @@ int32_t iot_flash_write_sync(IotFlashHandle_t const pxFlashHandle,
 {
   /* local variables */
   uint32_t     ulFlashSize    = 0;
+  uint32_t     ulFlashBase    = 0;
   uint32_t     ulPageSize     = 0;
   uint32_t     ulCurAddress   = 0;
   uint32_t     ulCurSize      = 0;
@@ -542,6 +555,17 @@ int32_t iot_flash_write_sync(IotFlashHandle_t const pxFlashHandle,
   if (pxFlashHandle == NULL) {
     return IOT_FLASH_INVALID_VALUE;
   }
+  
+  /* fetching the base address of flash */
+  xSlStatus = iot_flash_drv_get_flash_base(pxFlashHandle, &ulFlashBase);
+  
+  if (xSlStatus == SL_STATUS_FAIL) {
+    lStatus = IOT_FLASH_ERASE_FAILED;
+  }
+  
+  
+  /* fetching the start address starting from where the write is requested */
+  ulAddress = ulAddress + ulFlashBase;
 
   /* pvBuffer can't be null */
   if (pvBuffer == NULL) {
@@ -568,12 +592,13 @@ int32_t iot_flash_write_sync(IotFlashHandle_t const pxFlashHandle,
       lStatus = IOT_FLASH_ERASE_FAILED;
     }
   }
-
-  /* make sure ulAddress is within range */
+  
+  /* make sure ulAddress and read request is within flash range */
   if (lStatus == IOT_FLASH_SUCCESS) {
-    if (ulAddress >= ulFlashSize) {
+	if ((ulAddress < ulFlashBase) || (ulAddress > (ulFlashBase + ulFlashSize)) || (ulAddress + xBytes - 1) > (ulFlashBase + ulFlashSize - 1))
+	{
       lStatus = IOT_FLASH_INVALID_VALUE;
-    }
+	}
   }
 
   /* write pages one page at a time */
@@ -649,6 +674,7 @@ int32_t iot_flash_read_sync(IotFlashHandle_t const pxFlashHandle,
 {
   /* local variables */
   uint32_t    ulFlashSize    = 0;
+  uint32_t    ulFlashBase    = 0;
   sl_status_t xSlStatus      = SL_STATUS_OK;
   int32_t     lStatus        = IOT_FLASH_SUCCESS;
 
@@ -656,6 +682,16 @@ int32_t iot_flash_read_sync(IotFlashHandle_t const pxFlashHandle,
   if (pxFlashHandle == NULL) {
     return IOT_FLASH_INVALID_VALUE;
   }
+  
+  /* fetching the base address of flash */
+  xSlStatus = iot_flash_drv_get_flash_base(pxFlashHandle, &ulFlashBase);
+  
+  if (xSlStatus == SL_STATUS_FAIL) {
+    lStatus = IOT_FLASH_ERASE_FAILED;
+  }
+  
+  /* fetching the start address starting from where the erase is requested */
+  ulAddress = ulAddress + ulFlashBase; 
 
   /* pvBuffer can't be null */
   if (pvBuffer == NULL) {
@@ -675,11 +711,12 @@ int32_t iot_flash_read_sync(IotFlashHandle_t const pxFlashHandle,
     }
   }
 
-  /* make sure ulAddress is within range */
+  /* make sure ulAddress and read request is within flash range */
   if (lStatus == IOT_FLASH_SUCCESS) {
-    if (ulAddress >= ulFlashSize) {
+	if ((ulAddress < ulFlashBase) || (ulAddress > (ulFlashBase + ulFlashSize)) || (ulAddress + xBytes - 1) > (ulFlashBase + ulFlashSize - 1))
+	{
       lStatus = IOT_FLASH_INVALID_VALUE;
-    }
+	}
   }
 
   /* read data */

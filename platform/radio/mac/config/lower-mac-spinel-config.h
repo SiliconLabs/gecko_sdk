@@ -58,6 +58,7 @@
 #define OPENTHREAD_FTD 1
 #define OPENTHREAD_CONFIG_HEAP_EXTERNAL_ENABLE 1
 #define OPENTHREAD_SPINEL_CONFIG_RCP_RESTORATION_MAX_COUNT 100
+#define OPENTHREAD_SPINEL_CONFIG_TX_WAIT_TIME_SECS 6
 
 // This is a workaround for a Mac OS X specific problem in hdlc_interface.cpp,
 // in which an include of <util.h> accidentally includes app/framework/util.h.
@@ -100,8 +101,16 @@
 //Dont use PSA for multiPAN builds.
 #define OPENTHREAD_CONFIG_PLATFORM_KEY_REFERENCES_ENABLE 0
 
-// for mfglib commands
+// for mfglib and some of the coex commands
 #define OPENTHREAD_CONFIG_DIAG_ENABLE 1
+
+/**
+ * @def OPENTHREAD_CONFIG_PLATFORM_RADIO_COEX_ENABLE
+ *
+ * Define to 1 if you want to enable radio coexistence implemented in platform.
+ *
+ */
+#define OPENTHREAD_CONFIG_PLATFORM_RADIO_COEX_ENABLE 1
 
 // <<< end of configuration section >>>
 

@@ -42,6 +42,7 @@ extern "C" {
 #include <stddef.h>
 #include <stdbool.h>
 #include "sl_status.h"
+#include "sl_common.h"
 
 // -----------------------------------------------------------------------------
 //                              Macros and Typedefs
@@ -119,7 +120,7 @@ void sl_mempool_free(sl_mempool_t * const memp, const void * const addr);
  * @return true Address is in the buffer
  * @return false Address is not in the buffer
  *****************************************************************************/
-static inline bool sl_mempool_is_addr_in_buff(const sl_mempool_t * const memp,
+__STATIC_INLINE bool sl_mempool_is_addr_in_buff(const sl_mempool_t * const memp,
                                               const void * const addr)
 {
   return (const uint8_t *)addr >= (const uint8_t *)memp->buff
@@ -132,7 +133,7 @@ static inline bool sl_mempool_is_addr_in_buff(const sl_mempool_t * const memp,
  * @param[in] memp Memory Pool object
  * @return size_t Count of free blocks
  *****************************************************************************/
-static inline size_t sl_mempool_get_free_block_count(const sl_mempool_t * const memp)
+__STATIC_INLINE size_t sl_mempool_get_free_block_count(const sl_mempool_t * const memp)
 {
   return memp->block_count - memp->used_block_count;
 }

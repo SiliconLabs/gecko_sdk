@@ -49,26 +49,31 @@ uint32_t sli_zigbee_app_framework_set_pm_requirements_and_get_ms_to_next_wakeup(
 
 #ifndef SL_CATALOG_ZIGBEE_DEBUG_PRINT_PRESENT
 #define sl_zigbee_stack_debug_print(...)
+#define sl_zigbee_stack_debug_println(...)
 #define sl_zigbee_stack_debug_print_buffer(...)
 #define sl_zigbee_stack_debug_print_string(...)
 #define sl_zigbee_stack_debug_print_long_string(...)
 
 #define sl_zigbee_core_debug_print(...)
+#define sl_zigbee_core_debug_println(...)
 #define sl_zigbee_core_debug_print_buffer(...)
 #define sl_zigbee_core_debug_print_string(...)
-#define sl_zigbee_debug_print_long_string(...)
+#define sl_zigbee_core_debug_print_long_string(...)
 
 #define sl_zigbee_app_debug_print(...)
+#define sl_zigbee_app_debug_println(...)
 #define sl_zigbee_app_debug_print_buffer(...)
 #define sl_zigbee_app_debug_print_string(...)
 #define sl_zigbee_app_debug_print_long_string(...)
 
 #define sl_zigbee_zcl_debug_print(...)
+#define sl_zigbee_zcl_debug_println(...)
 #define sl_zigbee_zcl_debug_print_buffer(...)
 #define sl_zigbee_zcl_debug_print_string(...)
 #define sl_zigbee_zcl_debug_print_long_string(...)
 
 #define sl_zigbee_legacy_af_debug_print(...)
+#define sl_zigbee_legacy_af_debug_println(...)
 #define sl_zigbee_legacy_af_debug_print_buffer(...)
 #define sl_zigbee_legacy_af_debug_print_string(...)
 #define sl_zigbee_legacy_af_debug_print_long_string(...)

@@ -48,6 +48,7 @@
 
 #if defined(TFM_CONFIG_SL_SECURE_LIBRARY)
   #include <arm_cmse.h>
+  #include "psa/storage_common.h"
 #endif // TFM_CONFIG_SL_SECURE_LIBRARY
 
 #if defined(SLI_PSA_ITS_ENCRYPTED)
@@ -1640,6 +1641,7 @@ static inline void set_tomb(nvm3_ObjectKey_t key)
   }
 }
 
+#if SL_PSA_ITS_SUPPORT_V2_DRIVER
 static inline psa_status_t write_driver_v3()
 {
   uint8_t driver_verison = SLI_PSA_ITS_V3_DRIVER;
@@ -1652,6 +1654,7 @@ static inline psa_status_t write_driver_v3()
   }
   return PSA_SUCCESS;
 }
+#endif
 
 #if defined(TFM_CONFIG_SL_SECURE_LIBRARY)
 // If an object of given size is fully encapsulated in a region of
