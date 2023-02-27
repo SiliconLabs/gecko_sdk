@@ -91,7 +91,7 @@
 ///    //Configure the SPI ports
 ///    GPIO_PinModeSet(sclk_port, sclk_pin, gpioModePushPull, 0);
 ///    GPIO_PinModeSet(mosi_port, mosi_pin, gpioModePushPull, 0);
-///    GPIO_PinModeSet(mosi_port, miso_pin, gpioModeInput, 0);
+///    GPIO_PinModeSet(miso_port, miso_pin, gpioModeInput, 0);
 ///
 ///    // Connect EUSART to ports
 ///    GPIO->EUSARTROUTE[EUSART_NUM(EUSART1)].TXROUTE = (mosi_port << _GPIO_EUSART_TXROUTE_PORT_SHIFT)
