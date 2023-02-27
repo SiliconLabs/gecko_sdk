@@ -100,7 +100,7 @@
 ///                                                     | (miso_pin << _GPIO_EUSART_RXROUTE_PIN_SHIFT);
 ///    GPIO->EUSARTROUTE[EUSART_NUM(EUSART1)].SCLKROUTE = (sclk_port << _GPIO_EUSART_SCLKROUTE_PORT_SHIFT)
 ///                                                     | (sclk_pin << _GPIO_EUSART_SCLKROUTE_PIN_SHIFT);
-///    GPIO->EUSARTROUTE[EUSART_NUM(EUSART1)].ROUTEEN = GPIO_EUSART_ROUTEEN_TXPEN | GPIO_EUSART_ROUTEEN_SCLKPEN;
+///    GPIO->EUSARTROUTE[EUSART_NUM(EUSART1)].ROUTEEN = GPIO_EUSART_ROUTEEN_RXPEN | GPIO_EUSART_ROUTEEN_TXPEN | GPIO_EUSART_ROUTEEN_SCLKPEN;
 ///
 ///    // Initialize the EUSART
 ///    EUSART_SpiInit(EUSART1, &init_master);
