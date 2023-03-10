@@ -32,6 +32,7 @@
 
 #if defined(CRYPTOACC_PRESENT)
 
+#include "sli_psa_driver_common.h"   // sli_psa_zeroize
 #include "sli_cryptoacc_transparent_types.h"
 #include "sli_cryptoacc_transparent_functions.h"
 #include "cryptoacc_management.h"
@@ -173,7 +174,7 @@ psa_status_t sli_cryptoacc_transparent_key_agreement(psa_algorithm_t alg,
   }
 
   memcpy(output, tmp_output_buf, PSA_BITS_TO_BYTES(key_bits));
-  memset(tmp_output_buf, 0, sizeof(tmp_output_buf));
+  sli_psa_zeroize(tmp_output_buf, sizeof(tmp_output_buf));
   *output_length = PSA_BITS_TO_BYTES(key_bits);
 
   return PSA_SUCCESS;

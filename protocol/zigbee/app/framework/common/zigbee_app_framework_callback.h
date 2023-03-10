@@ -53,6 +53,19 @@ void emberAfIncomingMfgTestMessageCallback(
   uint8_t *data);
 
 /** @brief
+ * Allow the application to decide if it wants to append a source route to
+ * packet header itself
+ *
+ * @return Added bytes
+ */
+uint8_t emberAfOverrideAppendSourceRouteCallback(
+  EmberNodeId destination,
+  // Return:
+  EmberMessageBuffer *header,
+  // Return:
+  bool *consumed);
+
+/** @brief
  * A callback invoked when the status of the stack changes. If the status
  * parameter equals EMBER_NETWORK_UP, then the getNetworkParameters command can
  * be called to obtain the new network parameters. If any of the parameters are
@@ -149,23 +162,27 @@ void emberAfDutyCycleCallback(
  * The NCP used the external binding modification policy to decide how to handle
  * a remote set binding request. The Host cannot change the current decision, but
  * it can change the policy for future decisions using the setPolicy command.
- *
- * @return ZDO response status.
+ * @param entry The contents of the binding entry.
+ * @param status ZDO status.
  */
-EmberZdoStatus emberAfRemoteSetBindingCallback(
-  // Return: The contents of the binding entry.
-  EmberBindingTableEntry *entry);
+void emberAfRemoteSetBindingCallback(
+  // The contents of the binding entry.
+  EmberBindingTableEntry *entry,
+  // ZDO status.
+  EmberZdoStatus status);
 
 /** @brief
  * The NCP used the external binding modification policy to decide how to handle
  * a remote delete binding request. The Host cannot change the current decision,
  * but it can change the policy for future decisions using the setPolicy command.
- *
- * @return ZDO response status
+ * @param index The index of the binding whose deletion was requested.
+ * @param status ZDO status
  */
-EmberZdoStatus emberAfRemoteDeleteBindingCallback(
+void emberAfRemoteDeleteBindingCallback(
   // The index of the binding whose deletion was requested.
-  uint8_t index);
+  uint8_t index,
+  // ZDO status
+  EmberZdoStatus status);
 
 /** @brief
  * Indicates the result of a data poll to the parent of the local node.
@@ -196,15 +213,18 @@ void emberAfPollCallback(
 
 /** @brief
  * debugHandler
- * @param message debug message
+ * @param messageLength debug message length
+ * @param messageContents debug message
  */
 void emberAfDebugCallback(
+  // debug message length
+  uint8_t messageLength,
   // debug message
-  EmberMessageBuffer message);
+  uint8_t *messageContents);
 
 /** @brief
  * A callback indicating that a many-to-one route to the concentrator with the
- * given short and long id is available for use.
+ * given short and long ID is available for use.
  * @param source The short id of the concentrator.
  * @param longId The EUI64 of the concentrator.
  * @param cost The path cost to the concentrator. The cost may decrease as
@@ -282,13 +302,22 @@ void emberAfIdConflictCallback(
  * A callback invoked by the EmberZNet stack when a MAC passthrough message is
  * received.
  * @param messageType The type of MAC passthrough message received.
- * @param message The raw message that was received.
+ * @param lastHopLqi last hop LQI.
+ * @param lastHopRssi last hop RSSI.
+ * @param messageLength message length.
+ * @param messageContents The raw message that was received.
  */
 void emberAfMacPassthroughMessageCallback(
   // The type of MAC passthrough message received.
   EmberMacPassthroughType messageType,
+  // last hop LQI.
+  uint8_t lastHopLqi,
+  // last hop RSSI.
+  int8_t lastHopRssi,
+  // message length.
+  uint8_t messageLength,
   // The raw message that was received.
-  EmberMessageBuffer message);
+  uint8_t *messageContents);
 
 /** @brief
  * A callback invoked to inform the application that a stack token has changed.
@@ -317,12 +346,13 @@ void emberAfCounterRolloverCallback(
 /** @brief
  * A callback invoked by the EmberZNet stack when the MAC has finished
  * transmitting a raw message.
- * @param message message
+ * @param message message, message always returns EMBER_NULL_MESSAGE_BUFFER on
+   host
  * @param status EMBER_SUCCESS if the transmission was successful, or
    EMBER_DELIVERY_FAILED if not
  */
 void emberAfRawTransmitCompleteCallback(
-  // message
+  // message, message always returns EMBER_NULL_MESSAGE_BUFFER on host
   EmberMessageBuffer message,
   // EMBER_SUCCESS if the transmission was successful, or
   // EMBER_DELIVERY_FAILED if not
@@ -391,15 +421,18 @@ void emberAfCalculateSmacsCallback(
  * type indicator that replaced the startIndex field for the signing) and both
  * are returned via this callback.
  * @param status The result of the DSA signing operation.
- * @param signedMessage The message and attached which includes the original
+ * @param messageLength The length of message.
+ * @param messageContents The message and attached which includes the original
    message and the appended signature.
  */
 void emberAfDsaSignCallback(
   // The result of the DSA signing operation.
   EmberStatus status,
+  // The length of message.
+  uint8_t messageLength,
   // The message and attached which includes the original message and the
   // appended signature.
-  EmberMessageBuffer signedMessage);
+  uint8_t *messageContents);
 
 /** @brief
  * This callback is executed by the stack when the DSA verification has completed
@@ -416,41 +449,64 @@ void emberAfDsaVerifyCallback(
 /** @brief
  * A callback invoked by the EmberZNet stack when a bootload message is received.
  * @param longId The EUI64 of the sending node.
- * @param message The bootload message that was sent.
+ * @param lastHopLqi last hop LQI.
+ * @param lastHopRssi last hop RSSI.
+ * @param messageLength message length.
+ * @param messageContents The bootload message that was sent.
  */
 void emberAfIncomingBootloadMessageCallback(
   // The EUI64 of the sending node.
   EmberEUI64 longId,
+  // last hop LQI.
+  uint8_t lastHopLqi,
+  // last hop RSSI.
+  int8_t lastHopRssi,
+  // message length.
+  uint8_t messageLength,
   // The bootload message that was sent.
-  EmberMessageBuffer message);
+  uint8_t *messageContents);
 
 /** @brief
  * A callback invoked by the EmberZNet stack when the MAC has finished
  * transmitting a bootload message.
- * @param message The bootload message that was sent.
  * @param status An EmberStatus value of EMBER_SUCCESS if an ACK was received
    from the destination or EMBER_DELIVERY_FAILED if no ACK was received.
+ * @param messageLength message length.
+ * @param messageContents The bootload message that was sent.
  */
 void emberAfBootloadTransmitCompleteCallback(
-  // The bootload message that was sent.
-  EmberMessageBuffer message,
   // An EmberStatus value of EMBER_SUCCESS if an ACK was received from the
   // destination or EMBER_DELIVERY_FAILED if no ACK was received.
-  EmberStatus status);
+  EmberStatus status,
+  // message length.
+  uint8_t messageLength,
+  // The bootload message that was sent.
+  uint8_t *messageContents);
 
 /** @brief
- * This call is fired when a ZLL network scan finds a ZLL network.
+ * This callback is invoked when a ZLL network scan finds a ZLL network.
+ * @param isDeviceInfoNull Used to interpret deviceInfo field.
+ * @param lastHopLqi The link quality from the node that last relayed the
+   message.
+ * @param lastHopRssi The energy level (in units of dBm) observed during
+   reception.
  * @return networkInfo Information about the network.
  * @return deviceInfo Device specific information.
  */
 void emberAfZllNetworkFoundCallback(
+  // Used to interpret deviceInfo field.
+  bool isDeviceInfoNull,
+  // The link quality from the node that last relayed the message.
+  uint8_t lastHopLqi,
+  // The energy level (in units of dBm) observed during reception.
+  int8_t lastHopRssi,
   // Return: Information about the network.
   const EmberZllNetwork *networkInfo,
   // Return: Device specific information.
   const EmberZllDeviceInfoRecord *deviceInfo);
 
 /** @brief
- * This call is fired when a ZLL network scan is complete.
+ * This callback is invoked when a ZLL network scan is complete.
  * @param status Status of the operation.
  */
 void emberAfZllScanCompleteCallback(
@@ -458,16 +514,24 @@ void emberAfZllScanCompleteCallback(
   EmberStatus status);
 
 /** @brief
- * This call is fired when network and group addresses are assigned to a remote
+ * This callback is invoked when network and group addresses are assigned to a remote
  * mode in a network start or network join request.
+ * @param lastHopLqi The link quality from the node that last relayed the
+   message.
+ * @param lastHopRssi The energy level (in units of dBm) observed during
+   reception.
  * @return addressInfo Address assignment information.
  */
 void emberAfZllAddressAssignmentCallback(
+  // The link quality from the node that last relayed the message.
+  uint8_t lastHopLqi,
+  // The energy level (in units of dBm) observed during reception.
+  int8_t lastHopRssi,
   // Return: Address assignment information.
   const EmberZllAddressAssignment *addressInfo);
 
 /** @brief
- * This call is fired when the device is a target of a touch link.
+ * This callback is invoked when the device is a target of a touch link.
  * @return networkInfo Information about the network.
  */
 void emberAfZllTouchLinkTargetCallback(
@@ -477,11 +541,26 @@ void emberAfZllTouchLinkTargetCallback(
 /** @brief
  * A callback invoked by the EmberZNet stack when a raw MAC message that has
  * matched one of the application's configured MAC filters.
- * @return macFilterMatchStruct macFilterMatchStruct.
+ * @param filterIndexMatch filter index match.
+ * @param messageType message type.
+ * @param lastHopLqi last hop LQI.
+ * @param lastHopRssi last hop RSSI.
+ * @param messageLength message length.
+ * @param messageContents message contents.
  */
 void emberAfMacFilterMatchMessageCallback(
-  // Return: macFilterMatchStruct.
-  const EmberMacFilterMatchStruct *macFilterMatchStruct);
+  // filter index match.
+  uint8_t filterIndexMatch,
+  // message type.
+  EmberMacPassthroughType messageType,
+  // last hop LQI.
+  uint8_t lastHopLqi,
+  // last hop RSSI.
+  int8_t lastHopRssi,
+  // message length.
+  uint8_t messageLength,
+  // message contents.
+  uint8_t *messageContents);
 
 /** @brief
  * A callback to the GP endpoint to indicate the result of the GPDF transmission.

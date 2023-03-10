@@ -1,0 +1,19 @@
+id: "btmesh_stack_solicitation_config_client"
+label: "Solicitation PDU RPL Configuration Client Model"
+package: "Btmesh"
+description: "Provides Bluetooth mesh Solicitation PDU RPL Configuration Client model.
+  It is used to support the functionality of removing addresses from the solicitation replay protection list of a node that supports the Solicitation PDU RPL Configuration Server model."
+category: "Bluetooth Mesh|Stack|Models|Core"
+quality: "evaluation"
+root_path: "protocol/bluetooth"
+
+requires:
+  - name: "btmesh_stack"
+  - name: "btmesh_core"
+provides:
+  - name: "btmesh_stack_solicitation_config_client"
+template_contribution:
+  - name: btmesh_bgapi_class
+    value:
+      class: "solicitation_config_client"
+    priority: 1

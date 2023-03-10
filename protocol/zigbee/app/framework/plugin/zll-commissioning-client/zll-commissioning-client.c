@@ -904,11 +904,20 @@ void emberAfZllAbortTouchLink(void)
   }
 }
 
+#ifdef EZSP_HOST
+#ifdef UC_BUILD
+void emAfZllNetworkFoundCallback(EmberZllNetwork *networkInfo,
+                                 bool isDeviceInfoNull,
+                                 EmberZllDeviceInfoRecord *deviceInfo,
+                                 uint8_t lastHopLqi,
+                                 int8_t lastHopRssi)
+#else // !UC_BUILD
 void ezspZllNetworkFoundHandler(EmberZllNetwork *networkInfo,
                                 bool isDeviceInfoNull,
                                 EmberZllDeviceInfoRecord *deviceInfo,
                                 uint8_t lastHopLqi,
                                 int8_t lastHopRssi)
+#endif // UC_BUILD
 {
   debugPrintln("ezspZllNwkFound: node type = %d, flags = %0x2X", networkInfo->nodeType, emAfZllFlags);
   if (touchLinkInProgress()) {
@@ -929,8 +938,7 @@ void ezspZllNetworkFoundHandler(EmberZllNetwork *networkInfo,
     }
   }
 }
-
-#ifndef EZSP_HOST
+#else // !EZSP_HOST
 #ifdef UC_BUILD
 void emAfZllNetworkFoundCallback(const EmberZllNetwork *networkInfo,
                                  const EmberZllDeviceInfoRecord *deviceInfo)
@@ -966,17 +974,22 @@ void emberZllNetworkFoundHandler(const EmberZllNetwork *networkInfo,
 }
 #endif // EZSP_HOST
 
+#ifdef EZSP_HOST
+#ifdef UC_BUILD
+void emAfZllScanCompleteCallback(EmberStatus scanStatus)
+#else // !UC_BUILD
 void ezspZllScanCompleteHandler(EmberStatus scanStatus)
+#endif // UC_BUILD
 {
   debugPrintln("%p: scan complete", PLUGIN_NAME);
   processScanComplete(scanStatus);
 }
-
+#else // !EZSP_HOST
 #ifdef UC_BUILD
 void emAfZllScanCompleteCallback(EmberStatus scanStatus)
-#else
+#else // !UC_BUILD
 void emberZllScanCompleteHandler(EmberStatus scanStatus)
-#endif
+#endif // UC_BUILD
 {
   debugPrintln("%p: scan complete", PLUGIN_NAME);
   processScanComplete(scanStatus);
@@ -985,16 +998,24 @@ void emberZllScanCompleteHandler(EmberStatus scanStatus)
   emAfPluginTestHarnessZ3ZllScanCompleteCallback(scanStatus);
 #endif
 }
+#endif // EZSP_HOST
 
+#ifdef EZSP_HOST
+#ifdef UC_BUILD
+void emAfZllAddressAssignmentCallback(EmberZllAddressAssignment *addressInfo,
+                                      uint8_t lastHopLqi,
+                                      int8_t lastHopRssi)
+#else // !UC_BUILD
 void ezspZllAddressAssignmentHandler(EmberZllAddressAssignment *addressInfo,
                                      uint8_t lastHopLqi,
                                      int8_t lastHopRssi)
+#endif // UC_BUILD
 {
   if (touchLinkInProgress()) {
     emAfZllNetwork.nodeId = addressInfo->nodeId;
   }
 }
-
+#else // !EZSP_HOST
 #ifdef UC_BUILD
 void emAfZllAddressAssignmentCallback(const EmberZllAddressAssignment *addressInfo)
 #else
@@ -1006,6 +1027,7 @@ void emberZllAddressAssignmentHandler(const EmberZllAddressAssignment *addressIn
     emAfZllNetwork.nodeId = addressInfo->nodeId;
   }
 }
+#endif // EZSP_HOST
 
 void emberAfPluginZllCommissioningClientTouchLinkEventHandler(SLXU_UC_EVENT)
 {

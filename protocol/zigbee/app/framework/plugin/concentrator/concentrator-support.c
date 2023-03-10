@@ -35,7 +35,11 @@
 
 #ifdef UC_BUILD
 #include "concentrator-config.h"
+#ifdef EZSP_HOST
+#define ezspIncomingRouteErrorHandler emAfPluginConcentratorIncomingRouteErrorCallback
+#else // !EZSP_HOST
 #define emberIncomingRouteErrorHandler emAfPluginConcentratorIncomingRouteErrorCallback
+#endif // EZSP_HOST
 // TODO: It appears that the "update" event is not used at all in the code.
 // Once we clean up the UC_BUILD we should just remove it completely.
 #else // !UC_BUILD

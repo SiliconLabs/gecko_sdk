@@ -1,0 +1,63 @@
+id: "btmesh_self_provisioning_cli"
+label: "Self Provisioning CLI"
+package: "Btmesh"
+description: >
+ The Self Provisioning CLI is an application-level software component that provides
+ a self provisioning functionality trough CLI. The goal of this component is to 
+ provide this function for the users who want to run their devices directly in
+ a Bluetooth Mesh network without using a provisioner. This component is mainly used
+ for development and testing purposes and is not recommended to run on final products. 
+
+category: "Bluetooth Mesh|Utility"
+quality: "production"
+root_path: "app/btmesh/common/btmesh_self_provisioning_cli"
+config_file:
+  - path: "config/sl_btmesh_self_provisioning_cli_config.h" 
+source:
+  - path: "sl_btmesh_self_provisioning_cli.c"
+provides:
+  - name: "btmesh_self_provisioning_cli"
+requires:
+  - name: "app_btmesh_util"
+  - name: "btmesh_stack"
+  - name: "btmesh_stack_test"
+  - name: "cli"
+
+template_contribution: 
+  - name: cli_command
+    value:
+      name: self_provisioning
+      handler: sl_btmesh_self_provisioning_from_cli
+      shortcuts:
+        - name: sp
+      help: "Triggers an unprovisioned device self provisioning"
+      argument:
+        - type: hex
+          help: "Device key 16 bytes in hex format (e.g. {000102030405060708090A0B0C0D0E0F})"
+        - type: hex
+          help: "Network key 16 bytes in hex format (e.g. {000102030405060708090A0B0C0D0E0F})"
+        - type: hex
+          help: "Primary element address 2 bytes in hex format (e.g. {200A})"
+    condition:
+      - "cli"
+  - name: cli_command
+    value:
+      name: system_reset
+      handler: sl_btmesh_system_reset_from_cli
+      shortcuts:
+        - name: sr
+      help: "Triggers a device system reset"
+    condition:
+      - "cli"
+  - name: cli_command
+    value:
+      name: add_app_key
+      handler: sl_btmesh_add_app_key_from_cli
+      shortcuts:
+        - name: ak
+      help: "Add application key locally"
+      argument:
+        - type: hex
+          help: "Application key 16 bytes in hex format (e.g. {000102030405060708090A0B0C0D0E0F})"
+    condition:
+      - "cli"

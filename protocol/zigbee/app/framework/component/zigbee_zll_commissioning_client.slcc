@@ -31,20 +31,14 @@ template_contribution:
     value: 
       callback_type: zll_address_assignment
       function_name: emAfZllAddressAssignmentCallback
-    unless:
-      - zigbee_ezsp
   - name: zigbee_stack_callback
     value: 
       callback_type: zll_network_found
       function_name: emAfZllNetworkFoundCallback
-    unless:
-      - zigbee_ezsp
   - name: zigbee_stack_callback
     value: 
       callback_type: zll_scan_complete
       function_name: emAfZllScanCompleteCallback
-    unless:
-      - zigbee_ezsp
 documentation:
   docset: zigbee
   document: zigbee-af-api/zll-commissioning-client

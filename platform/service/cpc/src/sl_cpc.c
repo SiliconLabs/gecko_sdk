@@ -2235,15 +2235,45 @@ static sl_status_t re_transmit_frame(sl_cpc_endpoint_t* endpoint)
   sl_cpc_transmit_queue_item_t *item;
   sl_slist_node_t *item_node;
   bool free_hdlc_header = true;
+  MCU_DECLARE_IRQ_STATE;
 
   EFM_ASSERT(endpoint != NULL);
 
-  MCU_ATOMIC_SECTION(item_node = SLI_CPC_POP_BUFFER_HANDLE_LIST(&endpoint->re_transmit_queue, sl_cpc_transmit_queue_item_t); );
+  MCU_ENTER_ATOMIC();
+  item_node = SLI_CPC_POP_BUFFER_HANDLE_LIST(&endpoint->re_transmit_queue, sl_cpc_transmit_queue_item_t);
   if (item_node == NULL) {
+    MCU_EXIT_ATOMIC();
+
     return SL_STATUS_NOT_AVAILABLE;
   }
 
   item = SL_SLIST_ENTRY(item_node, sl_cpc_transmit_queue_item_t, node);
+  if (item->handle->ref_count > 0) {
+    // If ref_count is greater than 0, it means that the buffer is still
+    // currently owned by the SPI/UART driver. This is possible for instance
+    // with the following scenario:
+    //  1. buffer handle is transmitted
+    //  2. tx complete callback is called, timeout timer is armed
+    //  3. host sends a reject CRC error, re_transmit_frame is called
+    //     immediately and the packet is put in the transmit_queue
+    //  4. process_tx_queue is called, buffer handle is sent to the driver for
+    //     transmission, and the core moves the buffer handle from the global
+    //     transmit_queue to endpoint's re_transmit_queue for bookkeeping
+    //  5. timeout callback, from timer armed during step 2, calls this
+    //     function.
+    //
+    // Step 5 can happen before the tx complete callback of retransmission
+    // done at step 4 is called, so it's necessary to check if the buffer
+    // handle is still owned by the driver before going forward.
+
+    // if that happened, put back buffer handle at the front of the retransmit queue
+    sli_cpc_push_buffer_handle(&endpoint->re_transmit_queue, &item->node, item->handle);
+    MCU_EXIT_ATOMIC();
+
+    return SL_STATUS_NOT_AVAILABLE;
+  }
+  MCU_EXIT_ATOMIC();
+
 #if defined(SLI_CPC_ENABLE_TEST_FEATURES)
   sli_cpc_on_frame_retransmit(item);
 #endif
@@ -2263,11 +2293,13 @@ static sl_status_t re_transmit_frame(sl_cpc_endpoint_t* endpoint)
     item->handle->hdlc_header = NULL;
   }
 
-  //Put frame in Tx Q so that it can be transmitted by CPC Core later
-  MCU_ATOMIC_SECTION(sli_cpc_push_buffer_handle(&transmit_queue, &item->node, item->handle); );
+  // Put frame in Tx Q so that it can be transmitted by CPC Core later
+  MCU_ENTER_ATOMIC();
+  sli_cpc_push_buffer_handle(&transmit_queue, &item->node, item->handle);
 
   endpoint->packet_re_transmit_count++;
   endpoint->frames_count_re_transmit_queue--;
+  MCU_EXIT_ATOMIC();
 
   // Signal task/process_action that frame is in Tx Queue
   sli_cpc_signal_event(SL_CPC_SIGNAL_TX);

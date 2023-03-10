@@ -39,9 +39,11 @@
   #include "em_system.h"
 
 // SE Manager
+  #include "sl_se_manager.h"  // sl_se_init(),,,
   #include "sl_se_manager_util.h"
 
 // PSA Crypto
+  #include "psa/client.h"  // psa_invec, psa_outvec
   #include "psa/crypto.h"
   #include "psa/crypto_types.h"
   #include "psa/crypto_values.h"
@@ -65,10 +67,12 @@
   #include "api/application_properties.h"
 #else
 // PSA Crypto
+  #include "psa/client.h"  // psa_invec, psa_outvec
   #include "psa/crypto_types.h"
   #include "psa/crypto_values.h"
 
 // SE Manager
+  #include "sl_se_manager.h"  // sl_se_init(),,,
   #include "sl_se_manager_util.h"
   #include "sl_se_manager_attestation.h"
 #endif // (_SILICON_LABS_SECURITY_FEATURE != _SILICON_LABS_SECURITY_FEATURE_VAULT)

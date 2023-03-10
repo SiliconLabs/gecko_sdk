@@ -73,13 +73,13 @@ configuration:
   - name: BUFFER_POOL_ALLOCATOR_POOL_SIZE
     value: "5"
   - name: BUFFER_POOL_ALLOCATOR_BUFFER_SIZE_MAX
-    value: "2098" # SL_RAIL_TEST_MAX_PACKET_LENGTH==2058
-                  # + sizeof(RailAppEvent_t)==40
+    value: "2102" # SL_RAIL_TEST_MAX_PACKET_LENGTH==2058
+                  # + sizeof(RailAppEvent_t)==44
     condition:
       - device_sdid_220
   - name: BUFFER_POOL_ALLOCATOR_BUFFER_SIZE_MAX
-    value: "1064" # SL_RAIL_TEST_MAX_PACKET_LENGTH==1024
-                  # + sizeof(RailAppEvent_t)==40
+    value: "1068" # SL_RAIL_TEST_MAX_PACKET_LENGTH==1024
+                  # + sizeof(RailAppEvent_t)==44
     unless:
       - device_sdid_220
   # stdio

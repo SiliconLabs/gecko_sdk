@@ -5,7 +5,7 @@
 * @copyright 2018 Silicon Laboratories Inc.
 */
 
-
+#include <string.h>
 /* Z-Wave includes */
 #include <AppTimer.h>
 #include <SizeOf.h>
@@ -22,9 +22,19 @@
 * AppTimer is a singleton, thus containing own object.
 */
 SAppTimer g_AppTimer;
+/**
+ * Variable used by the AppTimerDeepSleep
+ * 
+ * It indicates if the timers have been loaded thus allowing the retention
+ * registers to be modified
+ */
+bool g_deepSleepTimersLoaded;
 
 void AppTimerInit(uint8_t iTaskNotificationBitNumber, void * ReceiverTask)
 {
+  memset(&g_AppTimer, 0, sizeof(g_AppTimer));
+  g_deepSleepTimersLoaded = false;
+
   TimerLiaisonInit(    
                     &g_AppTimer.TimerLiaison,
                     sizeof_array(g_AppTimer.aTimerPointerArray),

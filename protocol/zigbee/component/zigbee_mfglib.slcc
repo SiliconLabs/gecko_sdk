@@ -32,6 +32,14 @@ source:
 template_contribution:
   - name: component_catalog
     value: zigbee_mfglib
+  - name: zigbee_ncp_callback
+    value:
+      callback_type: set_value
+      function_name: emberAfPluginEzspMfglibSetValueCommandCallback
+  - name: zigbee_ncp_callback
+    value:
+      callback_type: get_value
+      function_name: emberAfPluginEzspMfglibGetValueCommandCallback
 
 documentation:
   docset: zigbee

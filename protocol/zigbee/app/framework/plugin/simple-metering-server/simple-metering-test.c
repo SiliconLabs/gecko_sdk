@@ -99,89 +99,6 @@ static void addToByteArrayHighLow(uint8_t *data,
 }
 #endif // BIGENDIAN_CPU
 
-static uint32_t getMeteringConsumptionRate(uint8_t endpoint)
-{
-  uint8_t multiplierArray[] = { 0, 0, 0 };
-  uint8_t divisorArray[] = { 0, 0, 0 };
-  EmberAfAttributeType dataType;
-  uint32_t multiplier;
-  uint32_t divisor;
-  uint32_t returnValue;
-
-  // Now let's adjust the summation
-  (void)emberAfReadAttribute(endpoint,
-                             ZCL_SIMPLE_METERING_CLUSTER_ID,
-                             ZCL_MULTIPLIER_ATTRIBUTE_ID,
-                             CLUSTER_MASK_SERVER,
-                             multiplierArray,
-                             3,
-                             &dataType);
-
-  (void)emberAfReadAttribute(endpoint,
-                             ZCL_SIMPLE_METERING_CLUSTER_ID,
-                             ZCL_DIVISOR_ATTRIBUTE_ID,
-                             CLUSTER_MASK_SERVER,
-                             divisorArray,
-                             3,
-                             &dataType);
-
-  multiplier = multiplierArray[2] << 16 | multiplierArray[1] << 8 | multiplierArray[0];
-  divisor = divisorArray[2] << 16 | divisorArray[1] << 8 | divisorArray[0];
-  returnValue = divisor > 0 ? multiplier / divisor : 0;
-  return returnValue;
-}
-
-#if 0
-//TODO: Review why this code is unused
-static void setMeteringConsumptionRate(uint16_t rate, uint8_t endpoint)
-{
-  uint8_t dataType;
-  EmberStatus status;
-  uint32_t multiplier;
-  uint32_t divisor;
-
-  uint8_t multiplierArray[] = { 0, 0, 0 };
-  uint8_t divisorArray[] = { 1, 0, 0 };
-  multiplierArray[0] = rate & 0x00FF;
-  multiplierArray[1] = rate & 0xFF00 >> 8;
-
-  // Now let's adjust the summation
-  status = emberAfWriteAttribute(endpoint,
-                                 ZCL_SIMPLE_METERING_CLUSTER_ID,
-                                 ZCL_MULTIPLIER_ATTRIBUTE_ID,
-                                 CLUSTER_MASK_SERVER,
-                                 multiplierArray,
-                                 ZCL_INT24U_ATTRIBUTE_TYPE);
-
-  status = emberAfReadAttribute(endpoint,
-                                ZCL_SIMPLE_METERING_CLUSTER_ID,
-                                ZCL_MULTIPLIER_ATTRIBUTE_ID,
-                                CLUSTER_MASK_SERVER,
-                                multiplierArray,
-                                3,
-                                &dataType);
-
-  multiplier = multiplierArray[2] << 16 | multiplierArray[1] << 8 | multiplierArray[0];
-
-  status = emberAfWriteAttribute(endpoint,
-                                 ZCL_SIMPLE_METERING_CLUSTER_ID,
-                                 ZCL_DIVISOR_ATTRIBUTE_ID,
-                                 CLUSTER_MASK_SERVER,
-                                 divisorArray,
-                                 ZCL_INT24U_ATTRIBUTE_TYPE);
-
-  status = emberAfReadAttribute(endpoint,
-                                ZCL_SIMPLE_METERING_CLUSTER_ID,
-                                ZCL_DIVISOR_ATTRIBUTE_ID,
-                                CLUSTER_MASK_SERVER,
-                                divisorArray,
-                                3,
-                                &dataType);
-  divisor = divisorArray[2] << 16 | divisorArray[1] << 8 | divisorArray[0];
-  emberAfCorePrintln("divisor %u", divisor);
-}
-#endif // 0
-
 void afTestMeterPrint(void)
 {
   emberAfSimpleMeteringClusterPrintln("TM:\r\n"
@@ -411,7 +328,6 @@ void emAfTestMeterTick(uint8_t endpoint)
   uint32_t diff, currentTime;
   uint8_t status, dataType;
   uint8_t summation[] = { 0, 0, 0, 0, 0, 0 };
-  uint32_t formatting;
 
 #if (EMBER_AF_PLUGIN_SIMPLE_METERING_SERVER_TEST_METER_PROFILES != 0)
   uint8_t intervalSummation[] = { 0, 0, 0 };
@@ -449,7 +365,6 @@ void emAfTestMeterTick(uint8_t endpoint)
     return;
   }
 
-  //diff = getMeteringConsumptionRate(endpoint);
   diff = (uint32_t)meterConsumptionRate;
   if ( meterConsumptionVariance > 0 ) {
     diff += (uint32_t)(emberGetPseudoRandomNumber() % meterConsumptionVariance);
@@ -470,8 +385,6 @@ void emAfTestMeterTick(uint8_t endpoint)
     //                                     summation[4],
     //                                     summation[5]);
   }
-
-  formatting = getMeteringConsumptionRate(endpoint);
 
   (void) emberAfWriteAttribute(endpoint,
                                ZCL_SIMPLE_METERING_CLUSTER_ID,

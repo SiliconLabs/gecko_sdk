@@ -11,13 +11,15 @@
 
 #define SL_BTCTRL_HCI_SLEEP_EXCLUDE_WEAKS
 #include "sl_btctrl_hci_sleep.h"
-#include "sl_hci_uart.h"
+#include "sl_btctrl_hci_transport.h"
 
 static bool sleep_requested;
 static bool em1_required = false;
 static bool send_sleep_command_complete = false;
+#if (!defined(SL_CATALOG_CPC_SECONDARY_PRESENT))
 static uint8_t pin;
 static uint8_t port;
+#endif // (!defined(SL_CATALOG_CPC_SECONDARY_PRESENT))
 
 static void sl_btctrl_hci_clear_sleep_request(void)
 {
@@ -26,6 +28,11 @@ static void sl_btctrl_hci_clear_sleep_request(void)
 
 bool sl_btctrl_hci_sleep_request()
 {
+// Vendor specific sleep command not supported for CPC
+#if defined(SL_CATALOG_CPC_SECONDARY_PRESENT)
+  return false;
+#endif
+
   if (sleep_requested) {
     return false;
   }
@@ -34,10 +41,11 @@ bool sl_btctrl_hci_sleep_request()
   CORE_ENTER_ATOMIC();
 
   sleep_requested = true;
-
+#if (!defined(SL_CATALOG_CPC_SECONDARY_PRESENT))
   uint32_t mask = 1 << pin;
   GPIO_IntClear(mask);
   GPIO_IntEnable(mask);
+#endif // (!defined(SL_CATALOG_CPC_SECONDARY_PRESENT))
 
   sli_power_manager_update_em_requirement(SL_POWER_MANAGER_EM1, false);
 
@@ -62,6 +70,7 @@ void sl_btctrl_hci_sleep_require_em1(bool req)
   CORE_EXIT_ATOMIC();
 }
 
+#if (!defined(SL_CATALOG_CPC_SECONDARY_PRESENT))
 static void wakeup_interrupt(uint8_t intNo)
 {
   uint32_t mask = 1 << pin;
@@ -73,6 +82,7 @@ static void wakeup_interrupt(uint8_t intNo)
     sli_power_manager_update_em_requirement(SL_POWER_MANAGER_EM1, true);
   }
 }
+#endif // (!defined(SL_CATALOG_CPC_SECONDARY_PRESENT))
 
 void sl_btctrl_hci_sleep_sleep(void)
 {
@@ -86,9 +96,11 @@ void sl_btctrl_hci_sleep_sleep(void)
 void sl_btctrl_hci_sleep_init(void)
 {
   GPIOINT_Init();
-  sl_hci_uart_get_port_pin(&port, &pin);
+#if (!defined(SL_CATALOG_CPC_SECONDARY_PRESENT))
+  sl_btctrl_hci_transport_get_port_pin(&port, &pin);
   GPIO_ExtIntConfig(port, pin, pin, true, false, false);
   GPIOINT_CallbackRegister(pin, wakeup_interrupt);
+#endif // (!defined(SL_CATALOG_CPC_SECONDARY_PRESENT))
   sl_btctrl_hci_clear_sleep_request();
   sli_power_manager_update_em_requirement(SL_POWER_MANAGER_EM1, true);
   sli_power_manager_update_em_requirement(SL_POWER_MANAGER_EM2, true);

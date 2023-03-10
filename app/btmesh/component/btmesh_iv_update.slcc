@@ -1,0 +1,42 @@
+id: "btmesh_iv_update"
+label: "Btmesh Automatic IV update"
+package: "Btmesh"
+description: >
+  This component provides 3 optional functionalities:
+   - periodic IV Update age backup. Restore on reset.
+   - automatic IV Update request, if a sequence number exceeds a threshold.
+   - automatic IV Update request, after a configured time in Normal operation.
+  Turning on this component may increase power consumption.
+category: "Bluetooth Mesh"
+quality: "production"
+root_path: "app/btmesh/common/btmesh_iv_update"
+config_file:
+  - path: "config/sl_btmesh_iv_update_config.h"
+source:
+  - path: "sl_btmesh_iv_update.c"
+  - path: "sl_btmesh_iv_update_age_backup.c"
+  - path: "sl_btmesh_iv_update_by_age.c"
+  - path: "sl_btmesh_iv_update_by_seq_num.c"
+include:
+  - path: ""
+    file_list:
+      - path: "sl_btmesh_iv_update.h"
+      - path: "sl_btmesh_iv_update_age_backup.h"
+      - path: "sl_btmesh_iv_update_by_age.h"
+      - path: "sl_btmesh_iv_update_by_seq_num.h"
+provides:
+  - name: "btmesh_iv_update"
+requires:
+  - name: "app_assert"
+  - name: "app_btmesh_util"
+  - name: "btmesh_stack_node"
+  - name: "btmesh_stack"
+  - name: "simple_timer"
+recommends:
+  - id: "simple_timer"
+  
+template_contribution:
+  - name: "btmesh_on_event"
+    value:
+      include: "sl_btmesh_iv_update.h"
+      function: "sl_btmesh_iv_update_on_event"

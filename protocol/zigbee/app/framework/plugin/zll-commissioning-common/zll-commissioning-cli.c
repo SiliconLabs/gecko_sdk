@@ -176,7 +176,7 @@ void endpointInformation(sl_cli_command_arg_t *arguments)
   EmberStatus status = EMBER_INVALID_ENDPOINT;
   uint8_t endpoint = sl_cli_get_argument_uint8(arguments, 1);
   uint8_t index = emberAfIndexFromEndpoint(endpoint);
-  if (index != 0xFF) {
+  if (index != 0xFF && index < FIXED_ENDPOINT_COUNT) {
     // If the profile interop bit in the ZllInformation bitmask is cleared,
     // then we set the profile ID in our response to the ZLL profile ID.
     // If the bit is set, then we use the profile ID specified for the endpoint.

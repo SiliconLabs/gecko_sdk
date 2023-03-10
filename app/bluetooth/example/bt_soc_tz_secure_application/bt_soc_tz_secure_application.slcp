@@ -1,0 +1,81 @@
+project_name: bt_soc_tz_secure_application
+package: Bluetooth
+label: Sample project for TrustZone Secure Key Library
+description: >-
+  This project can be used as a reference implementation
+  for creating secure applications with TrustZone for bluetooth products.
+
+  This project makes a TrustZone secure library for running PSA libraries
+  in the secure world.
+category: Bluetooth Examples
+quality: experimental
+
+filter:
+  - name: "Wireless Technology"
+    value: ["Bluetooth"]
+  - name: "Device Type"
+    value: ["SoC"]
+  - name: "Project Difficulty"
+    value: ["Advanced"]
+
+provides:
+  - name: bt_soc_tz_secure_application
+
+requires:
+  - name: tz_secure_key_library_s
+  - name: armv8m.main  # Armv8-M Supports TrustZone
+
+conflicts:
+  - name: device_security_vault  # Don't use TrustZone with secure devices
+
+define:
+  # PSA Crypto configuration:
+  - name: TFM_CRYPTO_CONC_OPER_NUM
+    value: 2
+
+template_contribution:
+  - name: application_type
+    value: "APPLICATION_TYPE_MCU"
+    condition:
+      - bootloader_app_properties
+
+  # Offset flash after bootloader
+  - name: memory_flash_start
+    value: 0x14000
+    condition: [device_sdid_200]
+  - name: memory_flash_start
+    value: 0x14000
+    condition: [device_sdid_205]
+  - name: memory_flash_start
+    value: 0x8014000
+    unless: [device_sdid_200, device_sdid_205]
+
+  - name: memory_flash_size
+    value: 0x18000  # 96k
+
+  - name: memory_ram_start
+    value: 0x20000000
+  - name: memory_ram_size
+    value: 0x3000  # 12k
+
+configuration:
+  - name: SL_STACK_SIZE
+    value: '3072'
+  - name: SL_HEAP_SIZE
+    value: '3072'
+  - name: BOOTLOADER_DISABLE_OLD_BOOTLOADER_MITIGATION
+    value: '1'
+
+tag:
+  - companion:nonsecure_app  # Needs a companion app and cannot be built alone
+
+import:
+  # Import the config files from the TZ Non-Secure application
+  - id: bt_soc_tz_nonsecure_application
+
+export:
+  library:
+    - path: artifact/trustzone_secure_library.o
+
+post_build:
+  profile: tz_secure_application

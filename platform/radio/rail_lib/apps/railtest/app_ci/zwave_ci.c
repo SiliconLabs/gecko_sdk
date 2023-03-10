@@ -135,11 +135,14 @@ void zwaveStatus(sl_cli_command_arg_t *args)
   responsePrint(sl_cli_get_command_string(args, 0),
                 "ZWAVE:%s,"
                 "Promiscuous:%s,"
-                "BeamDetect:%s",
+                "BeamDetect:%s,"
+                "PromiscuousBeam:%s",
                 enabled ? "Enabled" : "Disabled",
                 ((config.options & RAIL_ZWAVE_OPTION_PROMISCUOUS_MODE) != 0U)
                 ? "Enabled" : "Disabled",
                 ((config.options & RAIL_ZWAVE_OPTION_DETECT_BEAM_FRAMES) != 0U)
+                ? "Enabled" : "Disabled",
+                ((config.options & RAIL_ZWAVE_OPTION_PROMISCUOUS_BEAM_MODE) != 0U)
                 ? "Enabled" : "Disabled");
 }
 
@@ -191,7 +194,8 @@ void zwaveConfigureOptions(sl_cli_command_arg_t *args)
                 "Promiscuous:%s,"
                 "BeamDetect:%s,"
                 "NodeIDFiltering:%s,"
-                "AutoAck:%s",
+                "AutoAck:%s,"
+                "PromiscuousBeam:%s",
                 ((config.options & RAIL_ZWAVE_OPTION_PROMISCUOUS_MODE) != 0U)
                 ? "Enabled" : "Disabled",
                 ((config.options & RAIL_ZWAVE_OPTION_DETECT_BEAM_FRAMES) != 0U)
@@ -200,6 +204,8 @@ void zwaveConfigureOptions(sl_cli_command_arg_t *args)
                 ? "Enabled" : "Disabled",
                 (config.ackConfig.enable
                  && (config.options & RAIL_ZWAVE_OPTION_NODE_ID_FILTERING) != 0U)
+                ? "Enabled" : "Disabled",
+                ((config.options & RAIL_ZWAVE_OPTION_PROMISCUOUS_BEAM_MODE) != 0U)
                 ? "Enabled" : "Disabled");
 }
 
@@ -364,7 +370,7 @@ void RAILCb_ZWAVE_BeamFrame(RAIL_Handle_t railHandle)
        != RAIL_STATUS_NO_ERROR)) {
     return;
   }
-
+  (void)RAIL_ZWAVE_GetBeamHomeIdHash(railHandle, &beamPacket->beamPacket.beamHomeIdHash);
   (void)RAIL_ZWAVE_GetLrBeamTxPower(railHandle, &beamPacket->beamPacket.lrBeamTxPower);
   (void)RAIL_ZWAVE_GetBeamChannelIndex(railHandle, &beamPacket->beamPacket.channelIndex);
   (void)RAIL_ZWAVE_GetBeamRssi(railHandle, &beamPacket->beamPacket.beamRssi);

@@ -59,7 +59,7 @@ using ot::Spinel::SpinelInterface;
 namespace ot {
 namespace Posix {
 
-bool CpcInterface::sCpcResetReq = false;
+volatile sig_atomic_t CpcInterface::sCpcResetReq = false;
 
 CpcInterface::CpcInterface(SpinelInterface::ReceiveFrameCallback aCallback,
                            void *                                aCallbackContext,
@@ -123,9 +123,10 @@ CpcInterface::~CpcInterface(void)
 
 void CpcInterface::Deinit(void)
 {
-    VerifyOrExit(mEndpoint.ptr != nullptr);
-
     VerifyOrExit(0 == cpc_close_endpoint(&mEndpoint), perror("close cpc endpoint"));
+
+    // Invalidate file descriptor
+    mSockFd = -1;
 
 exit:
     return;
@@ -261,11 +262,27 @@ void CpcInterface::Process(const RadioProcessContext &aContext)
 void CpcInterface::CheckAndReInitCpc(void)
 {
     int result;
-    int attempts = 0;
+    int attempts;
 
     // Check if CPC needs to be restarted
     VerifyOrExit(sCpcResetReq);
 
+    // Clear the flag
+    SetCpcResetReq(false);
+
+    // Check if the endpoint was previously opened
+    if (mSockFd > 0)
+    {
+      // Close endpoint
+      result = cpc_close_endpoint(&mEndpoint);
+      // If the close failed, exit
+      VerifyOrDie(result == 0, OT_EXIT_ERROR_ERRNO);
+      // Invalidate file descriptor
+      mSockFd = -1;
+    }
+
+    // Restart communication with cpcd
+    attempts = 0;
     do
     {
         // Add some delay before attempting to restart
@@ -278,19 +295,27 @@ void CpcInterface::CheckAndReInitCpc(void)
         // have exhausted the retries or restart was successful
     } while ((result != 0) && (attempts < kMaxRestartAttempts));
 
-    // If the restart failed, exit.
+    // If the restart failed, exit
     VerifyOrDie(result == 0, OT_EXIT_ERROR_ERRNO);
 
-    // Reopen the endpoint for communication
-    mSockFd = cpc_open_endpoint(mHandle, &mEndpoint, mId, 1);
+    // Reopen the endpoint
+    attempts = 0;
+    do
+    {
+        // Add some delay before attempting to open the endpoint
+        usleep(kMaxSleepDuration);
+        // Try to open the endpoint
+        mSockFd = cpc_open_endpoint(mHandle, &mEndpoint, mId, 1);
+        // Mark how many times the open was attempted
+        attempts++;
+        // Continue to try and open the endpoint until we
+        // have exhausted the retries or open was successful
+    } while ((mSockFd <= 0) && (attempts < kMaxRestartAttempts));
 
-    // If the restart failed, exit.
-    VerifyOrDie(mSockFd >= 0, OT_EXIT_ERROR_ERRNO);
+    // If the open failed, exit
+    VerifyOrDie(mSockFd > 0, OT_EXIT_ERROR_ERRNO);
 
     otLogCritPlat("Restarted CPC successfully");
-
-    // Clear the flag
-    SetCpcResetReq(false);
 
 exit:
     return;

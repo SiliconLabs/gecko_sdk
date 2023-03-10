@@ -1,0 +1,30 @@
+id: "btmesh_stack_remote_provisioning_client"
+label: "Remote Provisioning Client Model"
+package: "Btmesh"
+description: "Provides Bluetooth mesh Remote Provisioning Client model. 
+  Remote provisioning allows a provisioner to provision devices located outside of the provisioner's radio range.
+  This model is used to manage provisioning devices into a mesh network by interacting with a mesh node that supports the Remote Provisioning Server model."
+category: "Bluetooth Mesh|Stack|Models|Core"
+quality: "evaluation"
+root_path: "protocol/bluetooth"
+include:
+  - path: "inc"
+    file_list:
+      - path: "sl_btmesh_model_specification_v1_1_defs.h"
+
+requires:
+  - name: "btmesh_stack"
+  - name: "btmesh_core"
+  - name: "btmesh_stack_node"
+  
+provides:
+  - name: "btmesh_stack_remote_provisioning_client"  
+
+template_contribution:
+  - name: btmesh_bgapi_class
+    value:
+      class: "remote_provisioning_client"
+    priority: 1
+  - name: component_catalog
+    value: btmesh_stack_rpr_client
+

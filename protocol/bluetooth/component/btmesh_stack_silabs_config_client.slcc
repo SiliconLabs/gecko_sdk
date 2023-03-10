@@ -1,0 +1,19 @@
+id: "btmesh_stack_silabs_config_client"
+label: "Silicon Labs Configuration Client Model"
+package: "Btmesh"
+description: "Provides Bluetooth mesh Silicon Labs Configuration Client vendor model.
+  It is used to configure global and per-model specific settings of nodes such as Tx-PHY for long packets, usage of advertising extensions on per-model basis."
+category: "Bluetooth Mesh|Stack|Models|Proprietary"
+quality: "production"
+root_path: "protocol/bluetooth"
+
+requires:
+  - name: "btmesh_stack"
+  - name: "btmesh_core"
+provides:
+  - name: "btmesh_stack_silabs_config_client"
+template_contribution:
+  - name: btmesh_bgapi_class
+    value:
+      class: "silabs_config_client"
+    priority: 1

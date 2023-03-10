@@ -454,6 +454,12 @@ static sl_status_t eusart_deinit(void *context)
     GPIO_PinModeSet(eusart_context->rts_port, eusart_context->rts_pin, gpioModeDisabled, 0);
   }
 
+  // Disable EUSART IRQ
+  #if defined(SL_CATALOG_POWER_MANAGER_PRESENT) && !defined(SL_IOSTREAM_UART_FLUSH_TX_BUFFER)
+  EUSART_IntDisable(eusart_context->eusart, EUSART_IF_TXC);
+  #endif
+  EUSART_IntDisable(eusart_context->eusart, EUSART_IF_RXFL);
+
   // Disable EUSART peripheral
   EUSART_Enable(eusart_context->eusart, eusartDisable);
 

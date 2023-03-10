@@ -502,7 +502,7 @@ extern "C" {
 /// IEEE 802.15.4G-2012 feature subset needed for Zigbee R22 GB868.
 /// See also runtime refinement \ref
 /// RAIL_IEEE802154_SupportsGSubsetGB868().
-#if 1
+#if (_SILICON_LABS_32B_SERIES_2_CONFIG != 3)
 #define RAIL_IEEE802154_SUPPORTS_G_SUBSET_GB868 \
   ((RAIL_SUPPORTS_PROTOCOL_IEEE802154 != 0) && (RAIL_SUPPORTS_SUBGHZ_BAND != 0))
 #else

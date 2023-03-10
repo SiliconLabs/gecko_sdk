@@ -1,0 +1,18 @@
+id: "btmesh_stack_health_server"
+label: "Health Server Model"
+package: "Btmesh"
+description: "Provides Bluetooth mesh Health Server model. The model is used to indicate fault states, such as a low battery or other operational problem. The model also provides an interface to its Attention Timer, which can be used to provide a visual or audio cue about the node's location to the user. It is mandatory to have a Health Server on each element of the node."
+category: "Bluetooth Mesh|Stack|Models|Core"
+quality: "production"
+root_path: "protocol/bluetooth"
+
+requires:
+  - name: "btmesh_stack"
+  - name: "btmesh_stack_node"
+provides:
+  - name: "btmesh_stack_health_server"
+template_contribution:
+  - name: btmesh_bgapi_class
+    value:
+      class: "health_server"
+    priority: 1

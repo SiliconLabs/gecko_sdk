@@ -37,7 +37,7 @@
 #include "psa/crypto.h"
 #include "sli_se_opaque_types.h"
 #include "sli_se_driver_key_management.h"
-#include "sli_psa_driver_common.h"
+#include "sli_psa_driver_common.h"  // sli_psa_zeroize()
 #include "sli_se_version_dependencies.h"
 
 #include "sl_se_manager_key_derivation.h"
@@ -947,7 +947,7 @@ psa_status_t sli_se_opaque_import_key(const psa_key_attributes_t *attributes,
   }
   exit:
   #if defined(SLI_SE_KEY_PADDING_REQUIRED)
-  memset(temp_buffer, 0, sizeof(temp_buffer));
+  sli_psa_zeroize(temp_buffer, sizeof(temp_buffer));
   #endif
   return psa_status;
 }

@@ -44,11 +44,15 @@
 // $[GPIO_SL_DEBUG]
 /// SWO Debug Peripheral.
 #define SL_DEBUG_PERIPHERAL                     GPIO
-
+#if defined(SL_DEBUG_PRINT) && (SL_DEBUG_PRINT == 1)
 /// SWO Debug Port.
 #define SL_DEBUG_SWV_PORT                       gpioPortA
 /// SWO Debug Pin.
 #define SL_DEBUG_SWV_PIN                        3
+#else
+/// SWO Debug Port.
+#define SL_DEBUG_SWV_PORT                       0
+#endif
 // [GPIO_SL_DEBUG]$
 // <<< sl:end pin_tool >>>
 

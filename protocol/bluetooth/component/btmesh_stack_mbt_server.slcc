@@ -1,0 +1,21 @@
+id: "btmesh_stack_mbt_server"
+label: "BLOB Transfer Server Model"
+package: "Btmesh"
+description: "Provides Bluetooth mesh BLOB Transfer Server model. It is used to receive large binary objects from other nodes in the network."
+category: "Bluetooth Mesh|Stack|Models|DFU"
+quality: "evaluation"
+root_path: "protocol/bluetooth"
+
+requires:
+ - name: "btmesh_stack"
+ - name: "btmesh_core"
+ - name: "btmesh_stack_mbt_model"
+provides:
+ - name: "btmesh_stack_mbt_server"
+template_contribution:
+ - name: btmesh_bgapi_class
+   value:
+     class: "mbt_server"
+   priority: 1
+ - name: component_catalog
+   value: btmesh_stack_mbt_server

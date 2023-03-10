@@ -1,0 +1,19 @@
+id: "btmesh_stack_node"
+label: "Node"
+package: "Btmesh"
+description: "Provides the Bluetooth Mesh stack API for unprovisioned devices and provisioned nodes. Provisioning is the process of adding a new, unprovisioned device to a Bluetooth mesh network. This API is the bedrock for building Bluetooth mesh applications."
+category: "Bluetooth Mesh|Stack"
+quality: "production"
+root_path: "protocol/bluetooth"
+
+requires:
+  - name: "btmesh_stack"
+provides:
+  - name: "btmesh_stack_node"
+  - name: "btmesh_core"
+    allow_multiple: true
+template_contribution:
+  - name: btmesh_bgapi_class
+    value:
+      class: "node"
+    priority: 3

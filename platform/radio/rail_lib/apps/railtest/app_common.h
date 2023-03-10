@@ -146,6 +146,9 @@ extern "C" {
     "IEEE802154_MODESWITCH_END",                                        \
     "DETECT_RSSI_THRESHOLD",                                            \
     "THERMISTOR_DONE",                                                  \
+    "TX_BLOCKED_TOO_HOT",                                               \
+    "TEMPERATURE_TOO_HOT",                                              \
+    "TEMPERATURE_COOL_DOWN",                                            \
   }
 
 // Since channel hopping is pretty space intensive, put some limitations on it
@@ -256,6 +259,10 @@ typedef struct ZWaveBeamData {
    * RSSI at which the beam was received.
    */
   int8_t beamRssi;
+  /**
+   * The HomeIdhash contained in the received beam.
+   */
+  uint8_t beamHomeIdHash;
 } ZWaveBeamData_t;
 
 typedef struct RxPacketData {
@@ -531,11 +538,6 @@ extern uint32_t* channelHoppingBuffer;
 
 // Variable containing current receive frequency offset
 extern RAIL_FrequencyOffset_t rxFreqOffset;
-
-#ifdef SL_RAIL_UTIL_EFF_DEVICE
-// Variable tracking FEM configuration
-extern RAIL_FemProtectionConfig_t femConfig;
-#endif
 
 // Variables tracking the compensation mode
 extern bool isHFXOCompensationSystematic;

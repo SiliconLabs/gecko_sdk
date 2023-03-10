@@ -450,26 +450,6 @@ static void keyEstablishStateMachine(KeyEstablishEvent newEvent,
           return;
         }
       }
-    } else if (!isCbkeKeyEstablishmentSuiteValid() || (lastEvent != NO_KEY_ESTABLISHMENT_EVENT)) {
-      KeyEstablishmentPartner tmpPartner;
-      emberAfKeyEstablishmentClusterPrintln("emAfAvailableCbkeSuite %u last event %u", emAfAvailableCbkeSuite, lastEvent);
-      // If we have not successfully initialized or we are already in doing
-      // key establishment with another partner, tell this new partner to go
-      // away and maybe try again later.  The sendTerminateMessage function
-      // assumes it is sending to the current partner, so we have to temporarily
-      // switch to the new partner, send the terminate, and then switch back to
-      // our real partner.
-      MEMCOPY(&tmpPartner, &keyEstPartner, sizeof(KeyEstablishmentPartner));
-      emberAfKeyEstablishmentClusterPrintln(isCbkeKeyEstablishmentSuiteValid()
-                                            ? "Second Key estabishment not supported, terminating it."
-                                            : "Key Est. FAILED INITIALIZATION, terminating");
-      if (setPartnerFromCommand(cmd)) {
-        keyEstPartner.sequenceNumber = cmd->seqNum;
-        sendTerminateMessage(EMBER_ZCL_AMI_KEY_ESTABLISHMENT_STATUS_NO_RESOURCES,
-                             BACK_OFF_TIME_REPORTED_TO_PARTNER);
-      }
-      MEMMOVE(&keyEstPartner, &tmpPartner, sizeof(KeyEstablishmentPartner));
-      return;
     } else {
       // MISRA requires ..else if.. to have terminating else.
     }
@@ -1519,7 +1499,12 @@ bool emberAfKeyEstablishmentClusterInitiateKeyEstablishmentRequestCallback(uint1
   EmberAfClusterCommand *cmd = emberAfCurrentCommand();
   emberAfKeyEstablishmentClusterPrintln("Suite %u\r\n", keyEstablishmentSuite);
   emAfKeyEstablishmentSelectCurve(keyEstablishmentSuite);
-  if (checkMalformed283k1Command(true)) {
+  if (cmd != NULL && setPartnerFromCommand(cmd)) {
+    keyEstPartner.sequenceNumber = cmd->seqNum;
+    if (checkMalformed283k1Command(true)) {
+      return true;
+    }
+  } else {
     return true;
   }
   keyEstablishStateMachine(BEGIN_KEY_ESTABLISHMENT,
@@ -1824,7 +1809,28 @@ uint32_t emberAfKeyEstablishmentClusterServerCommandParse(sl_service_opcode_t op
   EmberAfClusterCommand *cmd = (EmberAfClusterCommand *)context->data;
   EmberAfStatus zclStatus = EMBER_ZCL_STATUS_UNSUP_COMMAND;
 
-  if (!cmd->mfgSpecific) {
+  if (((!commandIsFromOurPartner(cmd)) && (lastEvent != NO_KEY_ESTABLISHMENT_EVENT)) \
+      || (!isCbkeKeyEstablishmentSuiteValid())) {
+    KeyEstablishmentPartner tmpPartner;
+    emberAfKeyEstablishmentClusterPrintln("emAfAvailableCbkeSuite %u last event %u", emAfAvailableCbkeSuite, lastEvent);
+    // If we have not successfully initialized or we are already in doing
+    // key establishment with another partner, tell this new partner to go
+    // away and maybe try again later.  The sendTerminateMessage function
+    // assumes it is sending to the current partner, so we have to temporarily
+    // switch to the new partner, send the terminate, and then switch back to
+    // our real partner.
+    MEMCOPY(&tmpPartner, &keyEstPartner, sizeof(KeyEstablishmentPartner));
+    emberAfKeyEstablishmentClusterPrintln(isCbkeKeyEstablishmentSuiteValid()
+                                          ? "Second Key estabishment not supported, terminating it."
+                                          : "Key Est. FAILED INITIALIZATION, terminating");
+    if (setPartnerFromCommand(cmd)) {
+      keyEstPartner.sequenceNumber = cmd->seqNum;
+      sendTerminateMessage(EMBER_ZCL_AMI_KEY_ESTABLISHMENT_STATUS_NO_RESOURCES,
+                           BACK_OFF_TIME_REPORTED_TO_PARTNER);
+    }
+    MEMMOVE(&keyEstPartner, &tmpPartner, sizeof(KeyEstablishmentPartner));
+    return EMBER_ZCL_STATUS_SUCCESS;
+  } else if (!cmd->mfgSpecific) {
     switch (cmd->commandId) {
       case ZCL_INITIATE_KEY_ESTABLISHMENT_REQUEST_COMMAND_ID:
       {
@@ -1993,6 +1999,29 @@ uint32_t emberAfKeyEstablishmentClusterClientCommandParse(sl_service_opcode_t op
 static bool commandReceivedHandler(EmberAfClusterCommand *cmd)
 {
 //  EmberAfStatus status = keyEstablishmentClusterCommandParse(cmd);
+  if ((cmd->direction == ZCL_DIRECTION_CLIENT_TO_SERVER)                                 \
+      && (((!commandIsFromOurPartner(cmd)) && (lastEvent != NO_KEY_ESTABLISHMENT_EVENT)) \
+          || (!isCbkeKeyEstablishmentSuiteValid()))) {
+    KeyEstablishmentPartner tmpPartner;
+    emberAfKeyEstablishmentClusterPrintln("emAfAvailableCbkeSuite %u last event %u", emAfAvailableCbkeSuite, lastEvent);
+    // If we have not successfully initialized or we are already in doing
+    // key establishment with another partner, tell this new partner to go
+    // away and maybe try again later.  The sendTerminateMessage function
+    // assumes it is sending to the current partner, so we have to temporarily
+    // switch to the new partner, send the terminate, and then switch back to
+    // our real partner.
+    MEMCOPY(&tmpPartner, &keyEstPartner, sizeof(KeyEstablishmentPartner));
+    emberAfKeyEstablishmentClusterPrintln(isCbkeKeyEstablishmentSuiteValid()
+                                          ? "Second Key estabishment not supported, terminating it."
+                                          : "Key Est. FAILED INITIALIZATION, terminating");
+    if (setPartnerFromCommand(cmd)) {
+      keyEstPartner.sequenceNumber = cmd->seqNum;
+      sendTerminateMessage(EMBER_ZCL_AMI_KEY_ESTABLISHMENT_STATUS_NO_RESOURCES,
+                           BACK_OFF_TIME_REPORTED_TO_PARTNER);
+    }
+    MEMMOVE(&keyEstPartner, &tmpPartner, sizeof(KeyEstablishmentPartner));
+    return true;
+  }
   EmberAfStatus status = (cmd->direction == ZCL_DIRECTION_CLIENT_TO_SERVER
                           ? emberAfKeyEstablishmentClusterServerCommandParse(cmd)
                           : emberAfKeyEstablishmentClusterClientCommandParse(cmd));

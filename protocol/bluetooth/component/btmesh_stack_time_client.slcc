@@ -1,0 +1,18 @@
+id: "btmesh_stack_time_client"
+label: "Time Client Model"
+package: "Btmesh"
+description: "Provides Bluetooth mesh Time Client model. It is used to support the functionality of a node that can configure the timekeeping of another node."
+category: "Bluetooth Mesh|Stack|Models|Time and Scenes"
+quality: "production"
+root_path: "protocol/bluetooth"
+
+requires:
+  - name: "btmesh_stack"
+  - name: "btmesh_core"
+provides:
+  - name: "btmesh_stack_time_client"
+template_contribution:
+  - name: btmesh_bgapi_class
+    value:
+      class: "time_client"
+    priority: 1

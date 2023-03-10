@@ -56,7 +56,7 @@
 #define SL_WISUN_PING_STATUS_SEND_ERROR             (1LU << 3LU)
 
 /// Ping interrupt requested mask
-#define SL_WISUN_PING_STATUS_INTERRUPT_REQUESTED    (1LU << 4LU)
+#define SL_WISUN_PING_STATUS_ABORT_REQUESTED        (1LU << 4LU)
 
 /// Ping transaction finished mask
 #define SL_WISUN_PING_STATUS_TRANSACTION_END        (1LU << 5LU)
@@ -292,12 +292,12 @@ sl_status_t sl_wisun_ping(const wisun_addr_t *const remote_addr,
 
     flags = osEventFlagsWait(_ping_evt,
                              SL_WISUN_PING_STATUS_TRANSACTION_END
-                             | SL_WISUN_PING_STATUS_INTERRUPT_REQUESTED,
-                             osFlagsWaitAny, osWaitForever);
+                             | SL_WISUN_PING_STATUS_ABORT_REQUESTED,
+                             osFlagsWaitAny, SL_WISUN_PING_TIMEOUT_MS);
 
-    if (_is_ping_evt_error(flags)
-        || flags & SL_WISUN_PING_STATUS_INTERRUPT_REQUESTED) {
-      return SL_STATUS_FAIL;
+    if ((!_is_ping_evt_error(flags)) && 
+        (flags & SL_WISUN_PING_STATUS_ABORT_REQUESTED)) {
+      return SL_STATUS_ABORT;
     }
 
     // Get count of queued messages
@@ -385,7 +385,7 @@ sl_status_t sl_wisun_ping(const wisun_addr_t *const remote_addr,
 
 void sl_wisun_ping_stop(void)
 {
-  (void) osEventFlagsSet(_ping_evt, SL_WISUN_PING_STATUS_INTERRUPT_REQUESTED);
+  (void) osEventFlagsSet(_ping_evt, SL_WISUN_PING_STATUS_ABORT_REQUESTED);
   osThreadSuspend(_ping_thr_id);
   osMessageQueueReset(_ping_req_msg_queue);
   osMessageQueueReset(_ping_resp_msg_queue);
@@ -431,9 +431,9 @@ static void _ping_task_fnc(void *args)
 
     status = osEventFlagsGet(_ping_evt);
 
-    if (_is_ping_evt_error(status) || status & SL_WISUN_PING_STATUS_INTERRUPT_REQUESTED) {
+    if (_is_ping_evt_error(status) || status & SL_WISUN_PING_STATUS_ABORT_REQUESTED) {
       osMessageQueueReset(_ping_req_msg_queue);
-      _prepare_and_push_failed_response(&resp, SL_WISUN_PING_STATUS_INTERRUPT_REQUESTED);
+      _prepare_and_push_failed_response(&resp, SL_WISUN_PING_STATUS_ABORT_REQUESTED);
       continue;
     }
 

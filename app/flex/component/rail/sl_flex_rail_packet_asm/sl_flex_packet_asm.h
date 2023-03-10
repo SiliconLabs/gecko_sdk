@@ -542,6 +542,44 @@ void sl_flex_ble_copy_payload(sl_flex_ble_advertising_packet_t *packet,
                               const sl_flex_ble_packet_size_t payload_length);
 
 /**************************************************************************//**
+ * This function packs the IEEE 802.15.4 SideWalk FSK with 2byte PHR frame.
+ *
+ * @param[in] fcsType             FCS is on/off
+ * @param[in] whitening           Whitening is on/off
+ * @param[in] payload_size        payload size
+ * @param[in] *payload            payload
+ * @param[out] *frame_size        frame_size that is calculated
+ * @param[out] *frame_buffer      buffer of packed frame
+ *
+ * @retval SL_FLEX_802154_PACKET_OK if the process has been successful.
+ * @retval SL_FLEX_802154_PACKET_ERROR if the process has been failed.
+ *****************************************************************************/
+int16_t sl_flex_802154_packet_pack_sidewalk_data_frame(uint8_t fcsType,
+                                                       uint8_t whitening,
+                                                       uint16_t payload_size,
+                                                       const uint8_t *payload,
+                                                       uint16_t *frame_size,
+                                                       uint8_t *frame_buffer);
+
+/**************************************************************************//**
+ * This function unpacks the received packet to get IEEE 802.15.4 SideWalk FSK with 2byte PHR frame.
+ *
+ * @param[in] *packet_information   packet information
+ * @param[out] *fcsType             FCS is on/off
+ * @param[out] *whitening           whitening is on/off
+ * @param[out] *payload_size        payload size
+ * @param[in] *frame_buffer         buffer of packed frame
+ *
+ * @return pointer of the payload
+ * @return NULL on error
+ *****************************************************************************/
+uint8_t *sl_flex_802154_packet_unpack_sidewalk_data_frame(const RAIL_RxPacketInfo_t *packet_information,
+                                                          uint8_t *fcsType,
+                                                          uint8_t *whitening,
+                                                          uint16_t *payload_size,
+                                                          uint8_t *frame_buffer);
+
+/**************************************************************************//**
  * Get Payload pointer
  *
  * @param[in] *packet             BLE packet frame

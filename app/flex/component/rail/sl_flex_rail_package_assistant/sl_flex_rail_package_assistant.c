@@ -240,6 +240,62 @@ void prepare_package(RAIL_Handle_t rail_handle, uint8_t *out_data, uint16_t leng
     #endif
   }
 }
+#elif defined(RAIL0_CHANNEL_GROUP_1_PROFILE_BASE) && (defined(RAIL0_CHANNEL_GROUP_1_PHY_SIDEWALK_2GFSK_50KBPS) || defined(RAIL0_CHANNEL_GROUP_1_PHY_SIDEWALK_2GFSK_150KBPS) || defined(RAIL0_CHANNEL_GROUP_1_PHY_SIDEWALK_2GFSK_250KBPS))
+/******************************************************************************
+ * The API helps to unpack the received packet, point to the payload and returns the length.
+ *****************************************************************************/
+uint16_t unpack_packet(uint8_t *rx_destination, const RAIL_RxPacketInfo_t *packet_information, uint8_t **start_of_payload)
+{
+  uint16_t payload_size = 0;
+
+  RAIL_CopyRxPacket(rx_destination, packet_information);
+  uint8_t fcsType = 0U;
+  uint8_t whitening = 0U;
+  *start_of_payload
+    = sl_flex_802154_packet_unpack_sidewalk_data_frame(packet_information,
+                                                       &fcsType,
+                                                       &whitening,
+                                                       &payload_size,
+                                                       rx_destination);
+  if (print_packet_info) {
+    #if defined(SL_CATALOG_APP_LOG_PRESENT)
+    app_log_info("SideWalk Package is ready, %d bytes payload read with %d fcsType and %d whitening\n ", payload_size, fcsType, whitening);
+    #endif
+  }
+  return payload_size;
+}
+
+/******************************************************************************
+ * The API prepares the packet for sending and load it in the RAIL TX FIFO
+ *****************************************************************************/
+void prepare_package(RAIL_Handle_t rail_handle, uint8_t *out_data, uint16_t length)
+{
+  // Check if write fifo has written all bytes
+  uint16_t bytes_writen_in_fifo = 0;
+  uint16_t packet_size = 0U;
+  uint8_t tx_frame_buffer[256];
+  uint8_t fcsType = SIDEWALK_FSK_FCS_TYPE;
+  uint8_t whitening = SIDEWALK_FSK_WHITENING;
+  sl_flex_802154_packet_pack_sidewalk_data_frame(fcsType,
+                                                 whitening,
+                                                 length,
+                                                 out_data,
+                                                 &packet_size,
+                                                 tx_frame_buffer);
+  bytes_writen_in_fifo = RAIL_WriteTxFifo(rail_handle, tx_frame_buffer, packet_size, true);
+  #if defined(SL_CATALOG_APP_ASSERT_PRESENT)
+  app_assert(bytes_writen_in_fifo == packet_size,
+             "RAIL_WriteTxFifo() failed to write in fifo (%d bytes instead of %d bytes)\n",
+             bytes_writen_in_fifo,
+             packet_size);
+  #endif
+  if (print_packet_info) {
+    #if defined(SL_CATALOG_APP_LOG_PRESENT)
+    app_log_info("SideWalk Package is ready, %d bytes written with %d fcsType and %d whitening\n ", bytes_writen_in_fifo, fcsType, whitening);
+    #endif
+  }
+}
+
 #else
 /******************************************************************************
  * The API helps to unpack the received packet, point to the payload and returns the length.

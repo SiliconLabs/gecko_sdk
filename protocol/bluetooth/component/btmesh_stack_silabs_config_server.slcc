@@ -1,0 +1,21 @@
+id: "btmesh_stack_silabs_config_server"
+label: "Silicon Labs Configuration Server Model"
+package: "Btmesh"
+description: "Provides Bluetooth mesh Silicon Labs Configuration Server model.
+  It provides the functionality of configuration of global and per-model specific settings of a node."
+category: "Bluetooth Mesh|Stack|Models|Proprietary"
+quality: "production"
+root_path: "protocol/bluetooth"
+
+requires:
+ - name: "btmesh_stack"
+ - name: "btmesh_core"
+provides:
+ - name: "btmesh_stack_silabs_config_server"
+template_contribution:
+ - name: btmesh_bgapi_class
+   value:
+     class: "silabs_config_server"
+   priority: 1
+ - name: component_catalog
+   value: btmesh_stack_silabs_config_server

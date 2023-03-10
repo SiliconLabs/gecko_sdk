@@ -1,0 +1,32 @@
+id: "btmesh_ae_client"
+label: "Advertisement Extension Client"
+package: "Btmesh"
+description: >
+  Advertisement Extension Client component enables the Silabs Configuration Client vendor model for the node. 
+  Silabs Configuration Client can setup other nodes with Silabs Configuration Server Feature enabled (e.g. by the
+  Advertisement Extension Server component).
+  This is a proprietary feature which breaks compliance with AE in BT Mesh 1.1 specification.
+category: "Bluetooth Mesh|Models|Proprietary"
+quality: "production"
+root_path: "app/btmesh/common/btmesh_ae_client"
+config_file:
+  - path: btmesh_ae_client.dcd
+    directory: btmeshconf
+source:
+  - path: "sl_btmesh_ae_client.c"
+include:
+  - path: ""
+    file_list:
+      - path: "sl_btmesh_ae_client.h"
+provides:
+  - name: "btmesh_ae_client"
+requires:
+  - name: "app_assert"
+  - name: "btmesh_stack_advertiser_extended"
+  - name: "btmesh_stack_silabs_config_client"
+  
+template_contribution:
+  - name: "btmesh_on_event"
+    value:
+      include: "sl_btmesh_ae_client.h"
+      function: "sl_btmesh_ae_client_on_event"

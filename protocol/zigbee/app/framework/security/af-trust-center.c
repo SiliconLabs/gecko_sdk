@@ -361,7 +361,7 @@ EmberJoinDecision emberTrustCenterJoinHandler(EmberNodeId newNodeId,
     if ((EMBER_STANDARD_SECURITY_UNSECURED_JOIN == status)
         && (EMBER_SUCCESS != emberGetTransientLinkKey(newNodeEui64,
                                                       &transientKeyData))) {
-      joinDecision = EMBER_NO_ACTION;
+      joinDecision = EMBER_DENY_JOIN;
     }
   }
 #endif

@@ -1,0 +1,57 @@
+id: btmesh_fw_distribution_server
+label: Firmware Distribution Server
+package: Btmesh
+description: >
+  Provides BT Mesh Firmware Distribution Server functionality, defined in mesh
+  specification.
+
+  This model is used by the Distributor to receive from the Initiator the
+  firmware update parameters, the set of Updating nodes to update, and the
+  firmware image to transfer. This model uses the Firmware Update Client model
+  and the BLOB Transfer Client model to manage the firmware update. The Firmware
+  Distribution Server can transfer one firmware image at a time.
+category: "Bluetooth Mesh|Models|Firmware Update"
+quality: production
+root_path: app/btmesh/common/btmesh_fw_distribution_server
+config_file:
+  - path: btmesh_fw_distribution_server.dcd
+    directory: btmeshconf
+  - path: config/sl_btmesh_fw_distribution_server_config.h
+source:
+  - path: sl_btmesh_fw_distribution_server.c
+include:
+  - path: ""
+    file_list:
+      - path: sl_btmesh_fw_distribution_server.h
+      - path: sli_btmesh_fw_distribution_server.h
+provides:
+  - name: btmesh_fw_distribution_server
+requires:
+  - name: app_assert
+  - name: app_btmesh_util
+  - name: btmesh_blob_storage
+  - name: btmesh_blob_transfer_client
+  - name: btmesh_blob_transfer_server
+  - name: btmesh_core
+  - name: btmesh_stack_fw_distribution_server
+  - name: btmesh_firmware_update_client
+  - name: btmesh_stack
+  - name: nvm3_lib
+  - name: silabs_core_sl_malloc
+  - name: simple_timer
+recommends:
+  - id: simple_timer
+
+template_contribution:
+  - name: btmesh_on_event
+    value:
+      include: sl_btmesh_fw_distribution_server.h
+      function: sl_btmesh_fw_distribution_server_on_event
+      priority: -1001
+  - name: event_handler
+    value:
+      event: internal_app_process_action
+      include: sl_btmesh_fw_distribution_server.h
+      handler: sl_btmesh_fw_distribution_server_delete_step_handle
+  - name: component_catalog
+    value: btmesh_fw_distribution_server

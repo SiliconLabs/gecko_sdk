@@ -535,6 +535,7 @@ void bootloader_ppusatdnSaveReconfigureState(Bootloader_PPUSATDnCLKENnState_t *c
   // Store the PPUSATDn states
   ctx->PPUSATD0 = SMU->PPUSATD0;
   ctx->PPUSATD1 = SMU->PPUSATD1;
+  ctx->BMPUSATD0 = SMU->BMPUSATD0;
 
 #if defined(SMU_NS_CFGNS_BASE)
   // Store the PPUPATDn states
@@ -592,6 +593,7 @@ void bootloader_ppusatdnSaveReconfigureState(Bootloader_PPUSATDnCLKENnState_t *c
       && bootloader_getAllocatedDMAChannel() != BOOTLOADER_ERROR_INIT_STORAGE) {
     SMU->PPUSATD0_SET = SMU_PPUSATD0_LDMA;
     SMU->PPUSATD0_SET = SMU_PPUSATD0_LDMAXBAR;
+    SMU->BMPUSATD0_SET = SMU_BMPUSATD0_LDMA;
   }
 
   SMU->PPUSATD0_SET = SMU_PPUSATD0_HFRCO0;
@@ -605,6 +607,13 @@ void bootloader_ppusatdnSaveReconfigureState(Bootloader_PPUSATDnCLKENnState_t *c
 #if defined(SMU_PPUSATD1_SEMAILBOX)
   SMU->PPUSATD1_SET = SMU_PPUSATD1_SEMAILBOX;
 #endif // SMU_PPUSATD1_SEMAILBOX
+#elif defined(SL_TRUSTZONE_SECURE)
+  #if defined(_SILICON_LABS_32B_SERIES_2_CONFIG_5)
+  SMU->BMPUSATD0_SET = SMU_BMPUSATD0_LDMA0;
+  SMU->BMPUSATD0_SET = SMU_BMPUSATD0_LDMA1;
+  #else
+  SMU->BMPUSATD0_SET = SMU_BMPUSATD0_LDMA;
+  #endif
 #endif // BOOTLOADER_DISABLE_MULTI_TIERED_FALLBACK
 
   bootloader_getPeripheralList(&ppusatd0, &ppusatd1);
@@ -659,6 +668,7 @@ void bootloader_ppusatdnRestoreState(Bootloader_PPUSATDnCLKENnState_t *ctx)
 
   SMU->PPUSATD0 = ctx->PPUSATD0;
   SMU->PPUSATD1 = ctx->PPUSATD1;
+  SMU->BMPUSATD0 = ctx->BMPUSATD0;
 #if defined(SMU_NS_CFGNS_BASE)
   SMU->PPUPATD0 = ctx->PPUPATD0;
   SMU->PPUPATD1 = ctx->PPUPATD1;

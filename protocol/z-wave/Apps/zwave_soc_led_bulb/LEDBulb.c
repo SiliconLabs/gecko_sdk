@@ -28,6 +28,7 @@
 #include "zw_build_no.h"
 #include "ZAF_ApplicationEvents.h"
 #include <zaf_event_distributor_soc.h>
+#include <zpal_misc.h>
 
 /**
 * Set up security keys to request when joining a network.

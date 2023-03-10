@@ -1,0 +1,10 @@
+id: btmesh_distributor
+label: DFU distributor
+package: Btmesh
+description: >
+  Wrapper software component for DFU distributor role in Bluetooth Mesh applications.
+category: "Bluetooth Mesh|DFU Roles"
+quality: production
+root_path: app/bluetooth
+requires:
+  - name: btmesh_fw_distribution_server

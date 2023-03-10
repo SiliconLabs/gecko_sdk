@@ -26,3 +26,5 @@ config_file:
     condition: [device_series_1]
   - path: platform/bootloader/debug/config/s2/btl_debug_cfg.h
     condition: [device_series_2]
+validation_helper:
+  - path: platform/bootloader/component/scripts/bootloader_debug_validation.lua

@@ -65,14 +65,14 @@ void emAfPrepaymentServerCliWriteAttribute(sl_cli_command_arg_t *arguments)
   uint16_t attributeId;
   uint8_t  status;
   uint8_t  endpoint;
-  uint8_t  numBytes;
   uint8_t  attributeType;
   uint32_t value;
 
   endpoint      = sl_cli_get_argument_uint8(arguments, 0);
   attributeId   = sl_cli_get_argument_uint16(arguments, 1);
   attributeType = sl_cli_get_argument_uint8(arguments, 2);
-  numBytes      = sl_cli_get_argument_uint8(arguments, 3);
+  // NOTE unused cli argument
+  // uint8_t numBytes      = sl_cli_get_argument_uint8(arguments, 3);
   value         = sl_cli_get_argument_uint32(arguments, 4);
 
   status = emberAfWriteAttribute(endpoint, ZCL_PREPAYMENT_CLUSTER_ID, attributeId,

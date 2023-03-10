@@ -34,7 +34,7 @@
     instance:
     - sensor
   - id: ls013b7dh03
-  - id: memlcd_eusart
+  - id: memlcd_usart
   - id: simple_led
     instance:
     - led0

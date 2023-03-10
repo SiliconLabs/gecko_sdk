@@ -14,6 +14,7 @@
   - name: hardware_board
   - name: hardware_board_rb
   - name: hardware_board_from_stk
+  - name: hardware_board_from_fg25-pk6013a
   - name: hardware_board_from_fg25-rb4273a
   - name: hardware_board_has_vcom
   - name: hardware_board_has_spiflash
@@ -52,11 +53,11 @@
   - name: SL_BOARD_NAME
     value: '"BRD4273A"'
   - name: SL_BOARD_REV
-    value: '"A08"'
+    value: '"A10"'
 - tag:
   - board:pn:BRD4273
   - board:variant:A
-  - board:revision:A08
+  - board:revision:A10
   - board:device:efr32fg25b222f1920im56
   - hardware:has:vcom
   - hardware:has:pti

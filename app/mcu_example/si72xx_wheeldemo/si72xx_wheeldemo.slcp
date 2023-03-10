@@ -1,7 +1,7 @@
 project_name: si72xx_wheeldemo
 package: mcu
 quality: production
-label: MCU Example - Si72xx Wheeldemo
+label: Platform - Si72xx Wheeldemo
 description: Hall effect demo code for the Si72xx-WD-Kit using a Silicon Labs
   SLSTK3400A-EFM32HG Starter Kit.
 

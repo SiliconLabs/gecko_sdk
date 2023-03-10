@@ -79,14 +79,6 @@ bool rxFifoManual = false;
 // To enable power manager sleep from the main loop.
 extern volatile bool allowPowerManagerSleep;
 
-// Used to track the FEM protection configuration
-#ifdef SL_RAIL_UTIL_EFF_DEVICE
-RAIL_FemProtectionConfig_t femConfig = {
-  .PMaxContinuousTx = RAIL_UTIL_EFF_MAX_TX_CONTINUOUS_POWER_DBM,
-  .txDutyCycle = RAIL_UTIL_EFF_MAX_TX_DUTY_CYCLE
-};
-#endif
-
 /******************************************************************************
  * Static
  *****************************************************************************/

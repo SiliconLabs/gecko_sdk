@@ -58,7 +58,9 @@
 uint32_t rxOverflowDelay = 10 * 1000000; // 10 seconds
 uint32_t thermistorResistance = 0;
 
+#if RAIL_SUPPORTS_HFXO_COMPENSATION
 static int8_t crystalPPMError = RAIL_INVALID_PPM_VALUE;
+#endif
 bool isHFXOCompensationSystematic = false;
 
 #define MAX_DEBUG_BYTES (128)
@@ -66,7 +68,7 @@ static char debugPrintBuffer[MAX_DEBUG_BYTES];
 static uint8_t debugDataBuffer[MAX_DEBUG_BYTES];
 
 #ifdef SL_RAIL_UTIL_EFF_DEVICE
-static const char *effCalNames[] = RAIL_EFF_CAL_ENUM_NAMES;
+static const char *effModeSensorNames[] = RAIL_EFF_MODE_SENSOR_ENUM_NAMES;
 #endif
 
 /*
@@ -284,9 +286,9 @@ void getThermistorImpedance(sl_cli_command_arg_t *args)
 #endif
 }
 
+#if RAIL_SUPPORTS_HFXO_COMPENSATION
 void getHFXOPPMError(sl_cli_command_arg_t *args)
 {
-#if RAIL_SUPPORTS_EXTERNAL_THERMISTOR
   RAIL_Status_t status;
   CHECK_RAIL_HANDLE(sl_cli_get_command_string(args, 0));
 
@@ -304,12 +306,8 @@ void getHFXOPPMError(sl_cli_command_arg_t *args)
   } else {
     responsePrintError(sl_cli_get_command_string(args, 0), 0xFF, "Thermistor measurement error.");
   }
-#else
-  responsePrintError(sl_cli_get_command_string(args, 0), 0xFF, "Feature not supported in this target.");
-#endif
 }
 
-#if RAIL_SUPPORTS_HFXO_COMPENSATION
 void configHFXOCompensation(sl_cli_command_arg_t *args)
 {
   // Get current config
@@ -414,7 +412,7 @@ void compensateHFXO(sl_cli_command_arg_t *args)
     responsePrintError(sl_cli_get_command_string(args, 0), 0xFF, "Compensation:Disabled");
   }
 }
-#endif
+#endif // RAIL_SUPPORTS_HFXO_COMPENSATION
 
 void configThermalProtection(sl_cli_command_arg_t *args)
 {
@@ -514,47 +512,6 @@ void getTemperature(sl_cli_command_arg_t *args)
 #else
   responsePrintError(sl_cli_get_command_string(args, 0), 0xFF, "Feature not supported in this target.");
 #endif
-}
-
-void getSetFemProtectionConfig(sl_cli_command_arg_t *args)
-{
-#ifdef SL_RAIL_UTIL_EFF_DEVICE
-  if (SL_RAIL_UTIL_EFF_DEVICE != RAIL_EFF_DEVICE_NONE) {
-    RAIL_Status_t status = RAIL_STATUS_NO_ERROR;
-
-    // Only update protection configuration if an argument is given,
-    // otherwise print the current configuration
-    if (sl_cli_get_argument_count(args) > 0) {
-      femConfig.txDutyCycle = sl_cli_get_argument_uint32(args, 0);
-
-      if (sl_cli_get_argument_count(args) > 1) {
-        femConfig.PMaxContinuousTx = sl_cli_get_argument_uint32(args, 1);
-      }
-
-      if (sl_cli_get_argument_count(args) > 2) {
-        // Reset the configuration
-        (void) RAIL_SetFemProtectionConfig(railHandle, NULL);
-      } else {
-        // Check and possibly apply the configuration
-        (void) RAIL_SetFemProtectionConfig(railHandle, &femConfig);
-      }
-    }
-
-    // Get FEM parameters after update
-    status = RAIL_GetFemProtectionConfig(railHandle, &femConfig);
-
-    if (status == RAIL_STATUS_NO_ERROR) {
-      responsePrint(sl_cli_get_command_string(args, 0),
-                    "TxDutyCycle:%u,PMaxContinuousTx:%d",
-                    femConfig.txDutyCycle, femConfig.PMaxContinuousTx);
-    } else {
-      responsePrintError(sl_cli_get_command_string(args, 0), 31,
-                         "Incorrect configuration");
-    }
-  }
-#else
-  responsePrintError(sl_cli_get_command_string(args, 0), 0xFF, "Feature not supported in this target.");
-#endif // SL_RAIL_UTIL_EFF_DEVICE
 }
 
 void getSetEffControl(sl_cli_command_arg_t *args)
@@ -779,32 +736,32 @@ void getSetClpcFastLoop(sl_cli_command_arg_t *args)
 #ifdef SL_RAIL_UTIL_EFF_DEVICE
   if (SL_RAIL_UTIL_EFF_DEVICE != RAIL_EFF_DEVICE_NONE) {
     bool changeValues = false;
-    uint16_t newTargetFsk;
-    uint16_t newSlopeFsk;
-    uint16_t newTargetOfdm;
-    uint16_t newSlopeOfdm;
+    RAIL_EffModeSensor_t modeSensorIndex = RAIL_EFF_MODE_SENSOR_FSK_ANTV;
+    uint16_t newTargetMv = 0;
+    uint16_t newSlopeMvPerPaLevel = 0;
 
-    if (sl_cli_get_argument_count(args) > 3) {
+    if (sl_cli_get_argument_count(args) > 2) {
+      modeSensorIndex = sl_cli_get_argument_int16(args, 0);
       changeValues = true;
-      newTargetFsk = sl_cli_get_argument_uint16(args, 0);
-      newSlopeFsk = sl_cli_get_argument_uint16(args, 1);
-      newTargetOfdm = sl_cli_get_argument_uint16(args, 2);
-      newSlopeOfdm = sl_cli_get_argument_uint16(args, 3);
+      newTargetMv = sl_cli_get_argument_uint16(args, 1);
+      newSlopeMvPerPaLevel = sl_cli_get_argument_uint16(args, 2);
+    } else if (sl_cli_get_argument_count(args) > 0) {
+      modeSensorIndex = sl_cli_get_argument_int16(args, 0);
+    } else {
+      // MISRA compliance
     }
 
     CHECK_RAIL_HANDLE(sl_cli_get_command_string(args, 0));
-    RAIL_Status_t status = RAIL_GetSetClpcFastLoop(railHandle, &newTargetFsk, &newSlopeFsk, &newTargetOfdm, &newSlopeOfdm, changeValues);
+    RAIL_Status_t status = RAIL_GetSetClpcFastLoop(railHandle, modeSensorIndex, &newTargetMv, &newSlopeMvPerPaLevel, changeValues);
 
     if (status == RAIL_STATUS_NO_ERROR) {
       responsePrintStart(sl_cli_get_command_string(args, 0));
-      responsePrintEnd("EFF CLPC FSK fast loop target (millivolts):%d,"
-                       "EFF CLPC FSK fast loop slope (millivolts/raw level):%d,"
-                       "EFF CLPC OFDM fast loop target (millivolts):%d,"
-                       "EFF CLPC OFDM fast loop slope (millivolts/raw level):%d",
-                       newTargetFsk,
-                       newSlopeFsk,
-                       newTargetOfdm,
-                       newSlopeOfdm
+      responsePrintEnd("Mode Sensor Index:%s,"
+                       "EFF CLPC target (millivolts):%d,"
+                       "EFF CLPC slope (millivolts/raw level):%d",
+                       effModeSensorNames[modeSensorIndex],
+                       newTargetMv,
+                       newSlopeMvPerPaLevel
                        );
     } else {
       responsePrintError(sl_cli_get_command_string(args, 0), 0xFF, "Could not get CLPC fast loop values.");
@@ -820,38 +777,40 @@ void getSetClpcFastLoopCal(sl_cli_command_arg_t *args)
 #ifdef SL_RAIL_UTIL_EFF_DEVICE
   if (SL_RAIL_UTIL_EFF_DEVICE != RAIL_EFF_DEVICE_NONE) {
     bool changeValues = false;
-    RAIL_EffCalConfigEnum_t calibrationIndex = RAIL_EFF_CAL_FSK_1;
+    RAIL_EffModeSensor_t modeSensorIndex = RAIL_EFF_MODE_SENSOR_FSK_ANTV;
     RAIL_EffCalConfig_t calibrationEntry;
 
     if (sl_cli_get_argument_count(args) > 4) {
       changeValues = true;
-      calibrationIndex = sl_cli_get_argument_int16(args, 0);
+      modeSensorIndex = sl_cli_get_argument_int16(args, 0);
       calibrationEntry.cal1Ddbm = sl_cli_get_argument_int16(args, 1);
-      calibrationEntry.cal1 = sl_cli_get_argument_int16(args, 2);
+      calibrationEntry.cal1Mv = sl_cli_get_argument_int16(args, 2);
       calibrationEntry.cal2Ddbm = sl_cli_get_argument_int16(args, 3);
-      calibrationEntry.cal2 = sl_cli_get_argument_int16(args, 4);
+      calibrationEntry.cal2Mv = sl_cli_get_argument_int16(args, 4);
     } else if (sl_cli_get_argument_count(args) > 0) {
-      calibrationIndex = sl_cli_get_argument_int16(args, 0);
+      modeSensorIndex = sl_cli_get_argument_int16(args, 0);
+    } else {
+      // MISRA compliance
     }
 
     CHECK_RAIL_HANDLE(sl_cli_get_command_string(args, 0));
     RAIL_Status_t status = RAIL_GetSetClpcFastLoopCal(railHandle,
-                                                      calibrationIndex,
+                                                      modeSensorIndex,
                                                       &calibrationEntry,
                                                       changeValues);
 
     if (status == RAIL_STATUS_NO_ERROR) {
       responsePrintStart(sl_cli_get_command_string(args, 0));
-      responsePrintEnd("Cal Index:%s,"
+      responsePrintEnd("Mode Sensor Index:%s,"
                        "Cal 1 ddBm:%d,"
                        "Cal 1 millivolts:%d,"
                        "Cal 2 ddBm:%d,"
-                       "Cal 2 AUXADC counts:%d",
-                       effCalNames[calibrationIndex],
+                       "Cal 2 millivolts:%d",
+                       effModeSensorNames[modeSensorIndex],
                        calibrationEntry.cal1Ddbm,
-                       calibrationEntry.cal1,
+                       calibrationEntry.cal1Mv,
                        calibrationEntry.cal2Ddbm,
-                       calibrationEntry.cal2
+                       calibrationEntry.cal2Mv
                        );
     } else {
       responsePrintError(sl_cli_get_command_string(args, 0), 0xFF, "Could not get CLPC fast loop cal values.");
@@ -866,34 +825,36 @@ void getSetClpcFastLoopCalSlp(sl_cli_command_arg_t *args)
 {
 #ifdef SL_RAIL_UTIL_EFF_DEVICE
   if (SL_RAIL_UTIL_EFF_DEVICE != RAIL_EFF_DEVICE_NONE) {
-    RAIL_EffCalConfigEnum_t calibrationIndex = RAIL_EFF_CAL_FSK_1;
-    int16_t newSlope1e1;
-    int16_t newoffset290Ddbm;
     bool changeValues = false;
+    RAIL_EffModeSensor_t modeSensorIndex = RAIL_EFF_MODE_SENSOR_FSK_ANTV;
+    int16_t newSlope1e1MvPerDdbm;
+    int16_t newoffset290Ddbm;
 
     if (sl_cli_get_argument_count(args) > 2) {
       changeValues = true;
-      calibrationIndex = sl_cli_get_argument_int16(args, 0);
-      newSlope1e1 = sl_cli_get_argument_int16(args, 1);
+      modeSensorIndex = sl_cli_get_argument_int16(args, 0);
+      newSlope1e1MvPerDdbm = sl_cli_get_argument_int16(args, 1);
       newoffset290Ddbm = sl_cli_get_argument_int16(args, 2);
     } else if (sl_cli_get_argument_count(args) > 0) {
-      calibrationIndex = sl_cli_get_argument_int16(args, 0);
+      modeSensorIndex = sl_cli_get_argument_int16(args, 0);
+    } else {
+      // MISRA compliance
     }
 
     CHECK_RAIL_HANDLE(sl_cli_get_command_string(args, 0));
     RAIL_Status_t status = RAIL_GetSetClpcFastLoopCalSlp(railHandle,
-                                                         calibrationIndex,
-                                                         &newSlope1e1,
+                                                         modeSensorIndex,
+                                                         &newSlope1e1MvPerDdbm,
                                                          &newoffset290Ddbm,
                                                          changeValues);
 
     if (status == RAIL_STATUS_NO_ERROR) {
       responsePrintStart(sl_cli_get_command_string(args, 0));
-      responsePrintEnd("Cal Index:%s,"
+      responsePrintEnd("Mode Sensor Index:%s,"
                        "Cal Slope * 10:%d,"
                        "Cal Offset at 290 ddBm:%d",
-                       effCalNames[calibrationIndex],
-                       newSlope1e1,
+                       effModeSensorNames[modeSensorIndex],
+                       newSlope1e1MvPerDdbm,
                        newoffset290Ddbm
                        );
     } else {
@@ -927,6 +888,36 @@ void getSetClpcEnable(sl_cli_command_arg_t *args)
                        );
     } else {
       responsePrintError(sl_cli_get_command_string(args, 0), 0xFF, "Could not get CLPC Enable.");
+    }
+  }
+#else
+  responsePrintError(sl_cli_get_command_string(args, 0), 0xFF, "Feature not supported in this target.");
+#endif // SL_RAIL_UTIL_EFF_DEVICE
+}
+
+void getSetEffClpcFlags(sl_cli_command_arg_t *args)
+{
+#ifdef SL_RAIL_UTIL_EFF_DEVICE
+  if (SL_RAIL_UTIL_EFF_DEVICE != RAIL_EFF_DEVICE_NONE) {
+    uint8_t flags;
+    bool change = false;
+
+    // Only update flags if argument is given,
+    // otherwise print the current configuration
+    if (sl_cli_get_argument_count(args) == 1) {
+      // Set flags to first argument
+      flags = sl_cli_get_argument_uint8(args, 0);
+      change = true;
+    }
+    RAIL_Status_t status = RAIL_GetSetEffClpcFlags(railHandle, &flags, change);
+
+    if (status == RAIL_STATUS_NO_ERROR) {
+      responsePrintStart(sl_cli_get_command_string(args, 0));
+      responsePrintEnd("EFF Flags:0x%x",
+                       flags
+                       );
+    } else {
+      responsePrintError(sl_cli_get_command_string(args, 0), 0xFF, "Could not get EFF flags.");
     }
   }
 #else
@@ -1170,6 +1161,10 @@ static void setOfdmPrsSignal(uint8_t *signal, uint32_t ofdmSignalIndex, char *pi
       break;
 
     default:
+      // RAIL_LIB-9407: we can't end up here because ofdmSignalIndex is
+      // provided by getAvailableOfdmPrsSignalIndex(), so it is between 0 and
+      // OFDM_PRS_SIGNAL_COUNT. Return to prevent build warnings.
+      return;
       break;
   }
   *prsmuxlsbSetAddress = (*signal << (ofdmSignal * PRSMUXLSB_FIELD_SIZE));
@@ -1206,6 +1201,9 @@ static void clearOfdmPrsSignal(char *pinName)
         break;
 
       default:
+        // RAIL_LIB-9407: we can't end up here because i is between 0 and
+        // OFDM_PRS_SIGNAL_COUNT. Return to prevent build warnings.
+        return;
         break;
     }
     *prsmuxlsbClrAddress = (PRSMUXLSB_FIELD_MASK << (ofdmSignal * PRSMUXLSB_FIELD_SIZE));

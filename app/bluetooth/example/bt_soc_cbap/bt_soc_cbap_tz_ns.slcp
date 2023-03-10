@@ -39,7 +39,8 @@ component:
       - led0
   - id: simple_timer
   - id: cbap
-  - id: bt_post_build
+  - id: trustzone_nonsecure
+  - id: tz_secure_key_library
 
 source:
   - path: main.c
@@ -66,6 +67,10 @@ other_file:
   - path: image/readme_img1.png
   - path: image/readme_img2.png
 
+import:
+  # Import the config files from the TZ Secure application
+  - id: bt_soc_tz_secure_application
+
 configuration:
   - name: SL_STACK_SIZE
     value: "6200"
@@ -82,17 +87,41 @@ configuration:
   - name: APP_LOG_LEVEL_FILTER_THRESHOLD
     value: APP_LOG_LEVEL_INFO
 
+template_contribution:
+  # Offset secure application if bootloader is used
+  - name: memory_flash_start
+    value: 0x2C000
+    condition: [device_sdid_200]
+  - name: memory_flash_start
+    value: 0x2C000
+    condition: [device_sdid_205]
+  - name: memory_flash_start
+    value: 0x802C000
+    unless: [device_sdid_200, device_sdid_205]
+
+  - name: memory_flash_size
+    value: 0x64000  # 400k
+
+  - name: memory_ram_start
+    value: 0x20003000
+  - name: memory_ram_size
+    value: 0x8000  # 32k
+
 requires:
   - name: armv8m.main  # Armv8-M Supports TrustZone
+
+post_build:
+  profile: tz_nonsecure_application
 
 conflicts:
   - name: device_security_vault  # For secure devices use the other slcp variant
 
 tag:
   - hardware:rf:band:2400
-  - hardware:device:flash:512
-  - hardware:device:ram:32
+  - hardware:device:flash:576
+  - hardware:device:ram:64
   - hardware:component:led:1+
+  - companion:secure_app  # Needs a companion app and cannot be built alone
 
 ui_hints:
   highlight:

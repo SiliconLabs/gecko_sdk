@@ -93,7 +93,7 @@
 
 #if defined(RETARGET_VCOM)
   #define RETARGET_PERIPHERAL_ENABLE() \
-  GPIO_PinModeSet(gpioPortB, 4, gpioModePushPull, 1);
+  GPIO_PinModeSet(gpioPortB, 0, gpioModePushPull, 1);
 #else
   #define RETARGET_PERIPHERAL_ENABLE()
 #endif

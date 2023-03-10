@@ -19,6 +19,7 @@ include:
   - path: inc
     file_list:
       - path: sl_btctrl_hci_packet.h
+      - path: sl_btctrl_hci_transport.h
   - path: uart/inc
     file_list:
       - path: sl_btctrl_hci_uart_rtos.h

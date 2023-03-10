@@ -24,6 +24,19 @@
 #define emberAfPopNetworkIndex()
 #endif
 
+#if defined(EMBER_AF_PRINT_SECURITY)  || defined(SL_CATALOG_ZIGBEE_DEBUG_PRINT_PRESENT)
+// Corresponds to the EmberJoinDecision status codes
+static const char * joinDecisionText[] = {
+  EMBER_JOIN_DECISION_STRINGS
+};
+
+// Corresponds to the EmberDeviceUpdate status codes
+static const char * deviceUpdateText[] = {
+  EMBER_DEVICE_UPDATE_STRINGS
+};
+
+#endif // EMBER_AF_PRINT_APP
+
 // -----------------------------------------------------------------------------
 // A callback invoked when receiving a message.
 void ezspIncomingMessageHandler(
@@ -526,6 +539,24 @@ void ezspPollCompleteHandler(
 }
 
 // -----------------------------------------------------------------------------
+// Weak implementation of public callback emberAfDsaSignCallback
+// The handler that returns the results of the signing operation. On success,
+// the signature will be appended to the original message (including the
+// signature type indicator that replaced the startIndex field for the signing)
+// and both are returned via this callback.
+WEAK(void emberAfDsaSignCallback(
+       // The result of the DSA signing operation.
+       EmberStatus status,
+       // The length of message.
+       uint8_t messageLength,
+       // The message and attached which includes the original message and the
+       // appended signature.
+       uint8_t *messageContents))
+{
+  (void)status;
+  (void)messageLength;
+  (void)messageContents;
+}
 
 // Indicates the completion of a DSA signature operation.
 void ezspDsaSignHandler(
@@ -538,6 +569,7 @@ void ezspDsaSignHandler(
 {
   emberAfPushCallbackNetworkIndex();
   emAfDsaSign(status, messageLength, message);
+  emberAfDsaSignCallback(status, messageLength, message);
   emberAfPopNetworkIndex();
 }
 
@@ -561,5 +593,603 @@ void ezspTrustCenterJoinHandler(EmberNodeId newNodeId,
                                  parentOfNewNode,
                                  status,
                                  policyDecision);
+#if defined(EMBER_AF_PRINT_SECURITY) || defined(UC_BUILD)
+  emberAfSecurityPrintln("Trust Center Join Handler: status = %p, decision = %p (%x), shortid 0x%2x",
+                         deviceUpdateText[status],
+                         joinDecisionText[policyDecision],
+                         policyDecision,
+                         newNodeId);
+  emberAfSecurityFlush();
+#endif
+  emberAfPopNetworkIndex();
+}
+
+// -----------------------------------------------------------------------------
+// Weak implementation of public Callback emberAfZllTouchLinkTargetCallback
+WEAK(void emberAfZllTouchLinkTargetCallback(
+       // Return: Information about the network.
+       const EmberZllNetwork *networkInfo))
+{
+  (void)networkInfo;
+}
+
+// This call is fired when the device is a target of a touch link.
+void ezspZllTouchLinkTargetHandler(
+  // Return: Information about the network.
+  EmberZllNetwork *networkInfo)
+{
+  emberAfPushCallbackNetworkIndex();
+  emAfZllTouchLinkTarget(networkInfo);
+  emberAfZllTouchLinkTargetCallback(networkInfo);
+  emberAfPopNetworkIndex();
+}
+
+// -----------------------------------------------------------------------------
+// Weak implementation of public Callback emberAfStackTokenChangedCallback
+WEAK(void emberAfStackTokenChangedCallback(
+       // The address of the stack token that has changed.
+       uint16_t tokenAddress))
+{
+  (void)tokenAddress;
+}
+
+void ezspStackTokenChangedHandler(uint16_t tokenAddress)
+{
+  emberAfPushCallbackNetworkIndex();
+  emAfStackTokenChanged(tokenAddress);
+  emberAfStackTokenChangedCallback(tokenAddress);
+  emberAfPopNetworkIndex();
+}
+
+// -----------------------------------------------------------------------------
+// Weak implementation of public Callback emberAfDsaVerifyCallback
+WEAK(void emberAfDsaVerifyCallback(
+       // The result of the DSA verification operation.
+       EmberStatus status))
+{
+  (void)status;
+}
+
+void ezspDsaVerifyHandler(EmberStatus status)
+{
+  emberAfPushCallbackNetworkIndex();
+  emAfDsaVerify(status);
+  emberAfDsaVerifyCallback(status);
+  emberAfPopNetworkIndex();
+}
+
+// -----------------------------------------------------------------------------
+// Weak implementation of public Callback emberAfIncomingNetworkStatusCallback
+WEAK(void emberAfIncomingNetworkStatusCallback(
+       // One byte over-the-air error code from network status message
+       uint8_t errorCode,
+       // The short ID of the remote node
+       EmberNodeId target))
+{
+  (void)errorCode;
+  (void)target;
+}
+
+void ezspIncomingNetworkStatusHandler(uint8_t errorCode, EmberNodeId target)
+{
+  emberAfPushCallbackNetworkIndex();
+  emAfIncomingNetworkStatus(errorCode, target);
+  emberAfIncomingNetworkStatusCallback(errorCode, target);
+  emberAfPopNetworkIndex();
+}
+
+// -----------------------------------------------------------------------------
+// Weak implementation of public Callback emberAfIncomingRouteErrorCallback
+WEAK(void emberAfIncomingRouteErrorCallback(
+       // EMBER_SOURCE_ROUTE_FAILURE or EMBER_MANY_TO_ONE_ROUTE_FAILURE.
+       EmberStatus status,
+       // The short id of the remote node.
+       EmberNodeId target))
+{
+  (void)status;
+  (void)target;
+}
+
+void ezspIncomingRouteErrorHandler(EmberStatus status, EmberNodeId target)
+{
+  emberAfPushCallbackNetworkIndex();
+  emAfIncomingRouteError(status, target);
+  emberAfIncomingRouteErrorCallback(status, target);
+  emberAfPopNetworkIndex();
+}
+
+// -----------------------------------------------------------------------------
+//emberAfIncomingManyToOneRouteRequestCallback
+WEAK(void emberAfIncomingManyToOneRouteRequestCallback(
+       // The short id of the concentrator.
+       EmberNodeId source,
+       // The EUI64 of the concentrator.
+       EmberEUI64 longId,
+       // The path cost to the concentrator. The cost may decrease as additional
+       // route request packets for this discovery arrive, but the callback is
+       // made only once.
+       uint8_t cost))
+{
+  (void)source;
+  (void)longId;
+  (void)cost;
+}
+
+void ezspIncomingManyToOneRouteRequestHandler(EmberNodeId source,
+                                              EmberEUI64 longId,
+                                              uint8_t cost)
+{
+  emberAfPushCallbackNetworkIndex();
+  emAfIncomingManyToOneRouteRequest(source, longId, cost);
+  emberAfIncomingManyToOneRouteRequestCallback(source, longId, cost);
+  emberAfPopNetworkIndex();
+}
+
+// -----------------------------------------------------------------------------
+// Weak implementation of public Callback emberAfIdConflictCallback
+WEAK(void emberAfIdConflictCallback(
+       // The short id for which a conflict was detected
+       EmberNodeId conflictingId))
+{
+  (void)conflictingId;
+}
+
+void ezspIdConflictHandler(EmberNodeId id)
+{
+  emberAfPushCallbackNetworkIndex();
+  emAfIdConflict(id);
+  emberAfIdConflictCallback(id);
+  emberAfPopNetworkIndex();
+}
+
+// -----------------------------------------------------------------------------
+// Weak implementation of public Callback emberAfTimerCallback
+WEAK(void emberAfTimerCallback(
+       // Which timer generated the callback (0 or 1).
+       uint8_t timerId))
+{
+  (void)timerId;
+}
+
+void ezspTimerHandler(uint8_t timerId)
+{
+  emberAfPushCallbackNetworkIndex();
+  emAfTimer(timerId);
+  emberAfTimerCallback(timerId);
+  emberAfPopNetworkIndex();
+}
+
+// -----------------------------------------------------------------------------
+// Weak implementation of public Callback emberAfCounterRolloverCallback
+WEAK(void emberAfCounterRolloverCallback(
+       // Type of Counter
+       EmberCounterType type))
+{
+  (void)type;
+}
+
+void ezspCounterRolloverHandler(EmberCounterType type)
+{
+  emberAfPushCallbackNetworkIndex();
+  emAfCounterRollover(type);
+  emberAfCounterRolloverCallback(type);
+  emberAfPopNetworkIndex();
+}
+
+// -----------------------------------------------------------------------------
+// Weak implementation of public Callback emberAfZllAddressAssignmentCallback
+WEAK(void emberAfZllAddressAssignmentCallback(
+       // The link quality from the node that last relayed the message.
+       uint8_t lastHopLqi,
+       // The energy level (in units of dBm) observed during reception.
+       int8_t lastHopRssi,
+       // Return: Address assignment information.
+       const EmberZllAddressAssignment *addressInfo))
+{
+  (void)lastHopLqi;
+  (void)lastHopRssi;
+  (void)addressInfo;
+}
+
+// This call is fired when network and group addresses are assigned to a remote
+// mode in a network start or network join request.
+void ezspZllAddressAssignmentHandler(
+  // Address assignment information.
+  EmberZllAddressAssignment *addressInfo,
+  // The link quality from the node that last relayed the message.
+  uint8_t lastHopLqi,
+  // The energy level (in units of dBm) observed during reception.
+  int8_t lastHopRssi)
+{
+  emberAfPushCallbackNetworkIndex();
+  emAfZllAddressAssignment(addressInfo, lastHopLqi, lastHopRssi);
+  emberAfZllAddressAssignmentCallback(lastHopLqi, lastHopRssi, addressInfo);
+  emberAfPopNetworkIndex();
+}
+
+// -----------------------------------------------------------------------------
+// Weak implementation of public Callback emberAfZllScanCompleteCallback
+WEAK(void emberAfZllScanCompleteCallback(
+       // Status of the operation.
+       EmberStatus status))
+{
+  (void)status;
+}
+
+// This call is fired when a ZLL network scan is complete.
+void ezspZllScanCompleteHandler(
+  // Status of the operation.
+  EmberStatus status)
+{
+  emberAfPushCallbackNetworkIndex();
+  emAfZllScanComplete(status);
+  emberAfZllScanCompleteCallback(status);
+  emberAfPopNetworkIndex();
+}
+
+// -----------------------------------------------------------------------------
+// Weak implementation of public Callback emberAfZllNetworkFoundCallback
+WEAK(void emberAfZllNetworkFoundCallback(
+       // Used to interpret deviceInfo field.
+       bool isDeviceInfoNull,
+       // The link quality from the node that last relayed the message.
+       uint8_t lastHopLqi,
+       // The energy level (in units of dBm) observed during reception.
+       int8_t lastHopRssi,
+       // Return: Information about the network.
+       const EmberZllNetwork *networkInfo,
+       // Return: Device specific information.
+       const EmberZllDeviceInfoRecord *deviceInfo))
+{
+  (void)networkInfo;
+  (void)isDeviceInfoNull;
+  (void)deviceInfo;
+  (void)lastHopLqi;
+  (void)lastHopRssi;
+}
+
+// This call is fired when a ZLL network scan finds a ZLL network.
+void ezspZllNetworkFoundHandler(
+  // Information about the network.
+  EmberZllNetwork *networkInfo,
+  // Used to interpret deviceInfo field.
+  bool isDeviceInfoNull,
+  // Device specific information.
+  EmberZllDeviceInfoRecord *deviceInfo,
+  // The link quality from the node that last relayed the message.
+  uint8_t lastHopLqi,
+  // The energy level (in units of dBm) observed during reception.
+  int8_t lastHopRssi)
+{
+  emberAfPushCallbackNetworkIndex();
+  emAfZllNetworkFound(networkInfo, isDeviceInfoNull, deviceInfo, lastHopLqi, lastHopRssi);
+  emberAfZllNetworkFoundCallback(isDeviceInfoNull, lastHopLqi, lastHopRssi, networkInfo, deviceInfo);
+  emberAfPopNetworkIndex();
+}
+
+// -----------------------------------------------------------------------------
+WEAK(void emberAfDebugCallback(
+       // debug message length
+       uint8_t messageLength,
+       // debug message
+       uint8_t *messageContents))
+{
+  (void)messageLength;
+  (void)messageContents;
+}
+
+void ezspDebugHandler(uint8_t messageLength,
+                      uint8_t *messageContents)
+{
+  emberAfPushCallbackNetworkIndex();
+  emAfDebug(messageLength, messageContents);
+  emberAfDebugCallback(messageLength, messageContents);
+  emberAfPopNetworkIndex();
+}
+
+// -----------------------------------------------------------------------------
+// Weak implementation of public Callback emberAfRawTransmitCompleteCallback
+WEAK(void emberAfRawTransmitCompleteCallback(
+       // message
+       EmberMessageBuffer message,
+       // EMBER_SUCCESS if the transmission was successful, or
+       // EMBER_DELIVERY_FAILED if not
+       EmberStatus status))
+{
+  (void)message;
+  (void)status;
+}
+
+void ezspRawTransmitCompleteHandler(EmberStatus status)
+{
+  emberAfPushCallbackNetworkIndex();
+  emAfRawTransmitComplete(0, status);
+  emberAfRawTransmitCompleteCallback(0, status);
+  emberAfPopNetworkIndex();
+}
+
+// -----------------------------------------------------------------------------
+// Weak implementation of public Callback emberAfMacFilterMatchMessageCallback
+WEAK(void emberAfMacFilterMatchMessageCallback(
+       // filter index match.
+       uint8_t filterIndexMatch,
+       // message type.
+       EmberMacPassthroughType messageType,
+       // last hop lqi.
+       uint8_t lastHopLqi,
+       // last hop rssi.
+       int8_t lastHopRssi,
+       // message length.
+       uint8_t messageLength,
+       // message contents.
+       uint8_t *messageContents))
+{
+  (void)filterIndexMatch;
+  (void)messageType;
+  (void)lastHopLqi;
+  (void)lastHopRssi;
+  (void)messageLength;
+  (void)messageContents;
+}
+
+void ezspMacFilterMatchMessageHandler(uint8_t filterIndexMatch,
+                                      uint8_t legacyPassthroughType,
+                                      uint8_t lastHopLqi,
+                                      int8_t lastHopRssi,
+                                      uint8_t messageLength,
+                                      uint8_t *messageContents)
+{
+  emberAfPushCallbackNetworkIndex();
+  emAfMacFilterMatchMessage(filterIndexMatch, legacyPassthroughType, lastHopLqi, lastHopRssi, messageLength, messageContents);
+  emberAfMacFilterMatchMessageCallback(filterIndexMatch, legacyPassthroughType, lastHopLqi, lastHopRssi, messageLength, messageContents);
+  emberAfPopNetworkIndex();
+}
+
+// -----------------------------------------------------------------------------
+WEAK(void emberAfMacPassthroughMessageCallback(
+       // The type of MAC passthrough message received.
+       EmberMacPassthroughType messageType,
+       // last hop lqi.
+       uint8_t lastHopLqi,
+       // last hop rssi.
+       int8_t lastHopRssi,
+       // message length.
+       uint8_t messageLength,
+       // The raw message that was received.
+       uint8_t *messageContents))
+{
+  (void)messageType;
+  (void)lastHopLqi;
+  (void)lastHopRssi;
+  (void)messageLength;
+  (void)messageContents;
+}
+
+void ezspMacPassthroughMessageHandler(uint8_t messageType,
+                                      uint8_t lastHopLqi,
+                                      int8_t lastHopRssi,
+                                      uint8_t messageLength,
+                                      uint8_t *messageContents)
+{
+  emberAfPushCallbackNetworkIndex();
+  emAfMacPassthroughMessage(messageType, lastHopLqi, lastHopRssi, messageLength, messageContents);
+  emberAfMacPassthroughMessageCallback(messageType, lastHopLqi, lastHopRssi, messageLength, messageContents);
+  emberAfPopNetworkIndex();
+}
+
+// -----------------------------------------------------------------------------
+WEAK(void emberAfBootloadTransmitCompleteCallback(
+       // An EmberStatus value of EMBER_SUCCESS if an ACK was received from the
+       // destination or EMBER_DELIVERY_FAILED if no ACK was received.
+       EmberStatus status,
+       // message length.
+       uint8_t messageLength,
+       // The bootload message that was sent.
+       uint8_t *messageContents))
+{
+  (void)status;
+  (void)messageLength;
+  (void)messageContents;
+}
+
+void ezspBootloadTransmitCompleteHandler(EmberStatus status,
+                                         uint8_t messageLength,
+                                         uint8_t *messageContents)
+{
+  emberAfPushCallbackNetworkIndex();
+  emAfBootloadTransmitComplete(status, messageLength, messageContents);
+  emberAfBootloadTransmitCompleteCallback(status, messageLength, messageContents);
+  emberAfPopNetworkIndex();
+}
+
+// -----------------------------------------------------------------------------
+// Weak implementation of public Callback emberAfIncomingBootloadMessageCallback
+WEAK(void emberAfIncomingBootloadMessageCallback(
+       // The EUI64 of the sending node.
+       EmberEUI64 longId,
+       // last hop lqi.
+       uint8_t lastHopLqi,
+       // last hop rssi.
+       int8_t lastHopRssi,
+       // message length.
+       uint8_t messageLength,
+       // The bootload message that was sent.
+       uint8_t *messageContents))
+{
+  (void)longId;
+  (void)lastHopLqi;
+  (void)lastHopRssi;
+  (void)messageLength;
+  (void)messageContents;
+}
+
+void ezspIncomingBootloadMessageHandler(EmberEUI64 longId,
+                                        uint8_t lastHopLqi,
+                                        int8_t lastHopRssi,
+                                        uint8_t messageLength,
+                                        uint8_t *messageContents)
+{
+  emberAfPushCallbackNetworkIndex();
+  emAfIncomingBootloadMessage(longId, lastHopLqi, lastHopRssi, messageLength, messageContents);
+  emberAfIncomingBootloadMessageCallback(longId, lastHopLqi, lastHopRssi, messageLength, messageContents);
+  emberAfPopNetworkIndex();
+}
+
+// -----------------------------------------------------------------------------
+// Weak implementation of public Callback emberAfPollCallback
+WEAK(void emberAfPollCallback(
+       // The node ID of the child that is requesting data.
+       EmberNodeId childId,
+       // True if transmit expected, false otherwise.
+       bool transmitExpected))
+{
+  (void)childId;
+  (void)transmitExpected;
+}
+
+void ezspPollHandler(EmberNodeId childId, bool transmitExpected)
+{
+  emberAfPushCallbackNetworkIndex();
+  emAfPoll(childId, transmitExpected);
+  emberAfPollCallback(childId, transmitExpected);
+  emberAfPopNetworkIndex();
+}
+
+// -----------------------------------------------------------------------------
+// Weak implementation of public Callback emberAfRemoteDeleteBindingCallback
+WEAK(void emberAfRemoteDeleteBindingCallback(
+       // The index of the binding whose deletion was requested.
+       uint8_t index,
+       // ZDO response status
+       EmberZdoStatus status))
+{
+  (void)index;
+  (void)status;
+  return;
+}
+
+void ezspRemoteDeleteBindingHandler(uint8_t index,
+                                    EmberStatus policyDecision)
+{
+  emberAfPushCallbackNetworkIndex();
+  emAfRemoteDeleteBinding(index);
+  emberAfRemoteDeleteBindingCallback(index, policyDecision);
+  emberAfPopNetworkIndex();
+}
+
+// -----------------------------------------------------------------------------
+// Weak implementation of public Callback emberAfRemoteSetBindingCallback
+WEAK(void emberAfRemoteSetBindingCallback(
+       // The contents of the binding entry.
+       EmberBindingTableEntry *entry,
+       // ZDO status.
+       EmberZdoStatus status))
+{
+  (void)entry;
+  (void)status;
+  return;
+}
+
+void ezspRemoteSetBindingHandler(EmberBindingTableEntry *entry,
+                                 uint8_t index,
+                                 EmberStatus policyDecision)
+{
+  emberAfPushCallbackNetworkIndex();
+  emAfRemoteSetBinding(entry);
+  emberAfRemoteSetBindingCallback(entry, policyDecision);
+  emberAfPopNetworkIndex();
+}
+
+// -----------------------------------------------------------------------------
+// Weak implementation of public Callback
+//emberAfCalculateSmacsHandler283k1Callback
+WEAK(void emberAfCalculateSmacsHandler283k1Callback(
+       // The Result of the CBKE operation.
+       EmberStatus status,
+       // Return: The calculated value of the initiator's SMAC
+       EmberSmacData *initiatorSmac,
+       // Return: The calculated value of the responder's SMAC
+       EmberSmacData *responderSmac))
+{
+  (void)status;
+  (void)initiatorSmac;
+  (void)responderSmac;
+}
+
+void ezspCalculateSmacsHandler283k1(EmberStatus status,
+                                    EmberSmacData* initiatorSmac,
+                                    EmberSmacData* responderSmac)
+{
+  emberAfPushCallbackNetworkIndex();
+  emAfCalculateSmacsHandler283k1(status, initiatorSmac, responderSmac);
+  emberAfCalculateSmacsHandler283k1Callback(status, initiatorSmac, responderSmac);
+  emberAfPopNetworkIndex();
+}
+
+// -----------------------------------------------------------------------------
+// Weak implementation of public Callback
+//emberAfGenerateCbkeKeysHandler283k1Callback
+WEAK(void emberAfGenerateCbkeKeysHandler283k1Callback(
+       // The result of the CBKE operation.
+       EmberStatus status,
+       // Return: The generated ephemeral public key.
+       EmberPublicKey283k1Data *ephemeralPublicKey))
+{
+  (void)status;
+  (void)ephemeralPublicKey;
+}
+
+void ezspGenerateCbkeKeysHandler283k1(EmberStatus status,
+                                      EmberPublicKey283k1Data* ephemeralPublicKey)
+{
+  emberAfPushCallbackNetworkIndex();
+  emAfGenerateCbkeKeysHandler283k1(status, ephemeralPublicKey);
+  emberAfGenerateCbkeKeysHandler283k1Callback(status, ephemeralPublicKey);
+  emberAfPopNetworkIndex();
+}
+
+// -----------------------------------------------------------------------------
+// Weak implementation of public Callback emberAfCalculateSmacsCallback
+WEAK(void emberAfCalculateSmacsCallback(
+       // The Result of the CBKE operation.
+       EmberStatus status,
+       // Return: The calculated value of the initiator's SMAC
+       EmberSmacData *initiatorSmac,
+       // Return: The calculated value of the responder's SMAC
+       EmberSmacData *responderSmac))
+{
+  (void)status;
+  (void)initiatorSmac;
+  (void)responderSmac;
+}
+
+void ezspCalculateSmacsHandler(EmberStatus status,
+                               EmberSmacData* initiatorSmac,
+                               EmberSmacData* responderSmac)
+{
+  emberAfPushCallbackNetworkIndex();
+  emAfCalculateSmacs(status, initiatorSmac, responderSmac);
+  emberAfCalculateSmacsCallback(status, initiatorSmac, responderSmac);
+  emberAfPopNetworkIndex();
+}
+
+// -----------------------------------------------------------------------------
+// Weak implementation of public Callback emberAfGenerateCbkeKeysCallback
+WEAK(void emberAfGenerateCbkeKeysCallback(
+       // The result of the CBKE operation.
+       EmberStatus status,
+       // Return: The generated ephemeral public key.
+       EmberPublicKeyData *ephemeralPublicKey))
+{
+  (void)status;
+  (void)ephemeralPublicKey;
+}
+
+void ezspGenerateCbkeKeysHandler(EmberStatus status,
+                                 EmberPublicKeyData* ephemeralPublicKey)
+{
+  emberAfPushCallbackNetworkIndex();
+  emAfGenerateCbkeKeys(status, ephemeralPublicKey);
+  emberAfGenerateCbkeKeysCallback(status, ephemeralPublicKey);
   emberAfPopNetworkIndex();
 }

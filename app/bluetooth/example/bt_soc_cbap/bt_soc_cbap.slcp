@@ -88,7 +88,7 @@ requires:
 tag:
   - hardware:rf:band:2400
   - hardware:device:flash:512
-  - hardware:device:ram:32
+  - hardware:device:ram:64
   - hardware:component:led:1+
 
 ui_hints:

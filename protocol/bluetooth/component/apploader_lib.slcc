@@ -77,11 +77,11 @@ library:
     condition: ["toolchain_gcc", "device_family_efr32mg24"]
   - path: "lib/EFR32MG24/IAR/libapploader.a"
     condition: ["toolchain_iar", "device_family_efr32mg24"]
-#EFR32xG24
+#EFR32BG24
   - path: "lib/EFR32BG24/GCC/libapploader.a"
-    condition: ["toolchain_gcc", "device_family_efr32xg24"]
+    condition: ["toolchain_gcc", "device_family_efr32bg24"]
   - path: "lib/EFR32BG24/IAR/libapploader.a"
-    condition: ["toolchain_iar", "device_family_efr32xg24"]
+    condition: ["toolchain_iar", "device_family_efr32bg24"]
 #MGM24
   - path: "lib/EFR32MG24/GCC/libapploader.a"
     condition: ["toolchain_gcc", "device_family_mgm24"]

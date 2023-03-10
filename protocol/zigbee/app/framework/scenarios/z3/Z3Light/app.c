@@ -23,7 +23,9 @@
 #endif //SL_CATALOG_ZIGBEE_NETWORK_TEST_PRESENT
 
 #if (LARGE_NETWORK_TESTING == 0)
-#include "zigbee_sleep_config.h"
+#ifndef EZSP_HOST
+#include "config/zigbee_sleep_config.h"
+#endif // EZSP_HOST
 #include "network-creator.h"
 #include "network-creator-security.h"
 #include "network-steering.h"
@@ -234,7 +236,9 @@ void emberAfPluginOnOffClusterServerPostInitCallback(uint8_t endpoint)
  */
 void emberAfRadioNeedsCalibratingCallback(void)
 {
+  #ifndef EZSP_HOST
   sl_mac_calibrate_current_channel();
+  #endif
 }
 
 #if defined(SL_CATALOG_SIMPLE_BUTTON_PRESENT) && (SL_ZIGBEE_APP_FRAMEWORK_USE_BUTTON_TO_STAY_AWAKE == 0)

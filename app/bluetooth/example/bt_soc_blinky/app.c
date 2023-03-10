@@ -166,7 +166,7 @@ void sl_bt_on_event(sl_bt_msg_t *evt)
     // database was changed by a remote GATT client.
     case sl_bt_evt_gatt_server_attribute_value_id:
       // The value of the gattdb_led_control characteristic was changed.
-      if (gattdb_led_control == evt->data.evt_gatt_server_characteristic_status.characteristic) {
+      if (gattdb_led_control == evt->data.evt_gatt_server_attribute_value.attribute) {
         uint8_t data_recv;
         size_t data_recv_len;
 

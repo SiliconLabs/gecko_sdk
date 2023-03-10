@@ -1,0 +1,9 @@
+[
+      {
+        "name": "Main",
+        "location": "0x0000",
+        "vendor_models" : [
+          {"cid": "0x02ff", "mid": "0xfffc", "name": "Silabs Configuration Client"}
+        ]
+      }
+]

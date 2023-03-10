@@ -525,15 +525,18 @@ static void dsaVerifyHandler(EmberStatus status)
 }
 
 #if defined (EZSP_HOST)
-
+#ifdef UC_BUILD
+void emAfDsaVerifyCallback(EmberStatus status)
+#else // !UC_BUILD
 void ezspDsaVerifyHandler(EmberStatus status)
+#endif // UC_BUILD
 {
   dsaVerifyHandler(status);
 }
 
 #else
 #ifdef UC_BUILD
-void emberAfDsaVerifyCallback(EmberStatus status)
+void emAfDsaVerifyCallback(EmberStatus status)
 #else // !UC_BUILD
 void emberDsaVerifyHandler(EmberStatus status)
 #endif  // UC_BUILD
@@ -552,6 +555,13 @@ EmberAfImageVerifyStatus emAfOtaImageSignatureVerify(uint16_t maxHashCalculation
 {
   return EMBER_AF_NO_IMAGE_VERIFY_SUPPORT;
 }
+
+#ifdef UC_BUILD
+void emAfDsaVerifyCallback(EmberStatus status)
+{
+  (void)status;
+}
+#endif // UC_BUILD
 
 #endif
 

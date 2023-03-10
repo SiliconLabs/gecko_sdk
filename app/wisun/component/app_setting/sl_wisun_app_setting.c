@@ -143,6 +143,7 @@ static const app_setting_wisun_t wisun_app_settings_default = {
 #else
   .tx_power = 20U,
 #endif
+  .is_default_phy = true,
 #if defined(WISUN_CONFIG_DEFAULT_PHY_FAN10)
   .phy = {
     .type = WISUN_CONFIG_DEFAULT_PHY_FAN10,
@@ -313,6 +314,7 @@ sl_status_t app_wisun_setting_set_phy(const sl_wisun_phy_config_t *const phy)
   }
 
   _app_wisun_mutex_acquire();
+  _wisun_app_settings.is_default_phy = false;
   memcpy(&_wisun_app_settings.phy, phy, sizeof(sl_wisun_phy_config_t));
 
   // Set notifiication
@@ -392,17 +394,10 @@ sl_status_t app_wisun_setting_get_phy(sl_wisun_phy_config_t *const phy)
 sl_status_t app_wisun_setting_init_phy_cfg(void)
 {
   sl_status_t stat = SL_STATUS_OK;
-  static bool initialized = false;
 
-  if (initialized) {
-    return stat;
-  }
-
-  // Full radio config: create a copy of already prepared phy config with default settings
-  memcpy(&_wisun_app_settings.phy, &wisun_app_settings_default.phy, sizeof(sl_wisun_phy_config_t));
-
-  if (stat == SL_STATUS_OK) {
-    initialized = true;
+  if (_wisun_app_settings.is_default_phy) {
+    // Full radio config: create a copy of already prepared phy config with default settings
+    memcpy(&_wisun_app_settings.phy, &wisun_app_settings_default.phy, sizeof(sl_wisun_phy_config_t));
   }
 
   // Set notifiications

@@ -79,6 +79,8 @@ typedef struct {
   uint8_t network_size;
   /// TX Power
   int8_t tx_power;
+  /// default flag
+  bool is_default_phy;
   /// PHY settings
   sl_wisun_phy_config_t phy;
 }app_setting_wisun_t;

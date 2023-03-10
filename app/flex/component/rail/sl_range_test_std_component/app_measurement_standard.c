@@ -352,7 +352,11 @@ void init_ranget_test_standard_phys(uint8_t* number_of_phys)
     // Please ensure your configuration is valid for the selected part.
     app_assert(status == RAIL_STATUS_NO_ERROR, "RAIL_ConfigTxPower faild");
     //The IEEE802154 and the BLE setting requires 2.4GHz base-frequency
-    status = RAIL_SetTxPowerDbm(rail_handles[i], power_amplifier_value->maxPower);
+    if (power_amplifier_value == NULL) {
+      status = RAIL_SetTxPowerDbm(rail_handles[i], 100);
+    } else {
+      status = RAIL_SetTxPowerDbm(rail_handles[i], power_amplifier_value->maxPower);
+    }
     app_assert(status == RAIL_STATUS_NO_ERROR, "RAIL_SetTxPower failed");
   }
 

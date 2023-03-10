@@ -144,6 +144,22 @@ template_contribution:
        cluster_id: 0x800
        cluster_type: server
        attribute_changed_function: emberAfKeyEstablishmentClusterServerAttributeChangedCallback       
+  - name: zigbee_stack_callback
+    value:
+      callback_type: generate_cbke_keys
+      function_name: emAfGenerateCbkeKeysCallback
+  - name: zigbee_stack_callback
+    value:
+      callback_type: calculate_smacs
+      function_name: emAfCalculateSmacsCallback
+  - name: zigbee_stack_callback
+    value:
+      callback_type: generate_cbke_keys_handler283k1
+      function_name: emAfGenerateCbkeKeysCallback283k1
+  - name: zigbee_stack_callback
+    value:
+      callback_type: calculate_smacs_handler283k1
+      function_name: emAfCalculateSmacsCallback283k1
 
 documentation:
   docset: zigbee

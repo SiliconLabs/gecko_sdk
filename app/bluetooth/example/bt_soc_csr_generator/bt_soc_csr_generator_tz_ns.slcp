@@ -33,6 +33,8 @@ component:
   - id: mpu
   - id: nvm3_lib
   - id: nvm3_default
+  - id: trustzone_nonsecure
+  - id: tz_secure_key_library
   - id: psa_crypto
   - id: psa_crypto_cmac
   - id: psa_crypto_ccm
@@ -46,7 +48,6 @@ component:
   - id: psa_crypto_sha1
   - id: sl_system
   - id: sleeptimer
-  - id: bt_post_build
 
 source:
   - path: app.c
@@ -71,6 +72,10 @@ other_file:
   - path: image/readme_img0.png
   - path: image/readme_img1.png
   - path: image/readme_img2.png
+
+import:
+  # Import the config files from the TZ Secure application
+  - id: bt_soc_tz_secure_application
 
 configuration:
   - name: SL_STACK_SIZE
@@ -98,16 +103,40 @@ configuration:
     condition:
       - psa_crypto
 
+template_contribution:
+  # Offset flash after bootloader and secure app
+  - name: memory_flash_start
+    value: 0x2C000
+    condition: [device_sdid_200]
+  - name: memory_flash_start
+    value: 0x2C000
+    condition: [device_sdid_205]
+  - name: memory_flash_start
+    value: 0x802C000
+    unless: [device_sdid_200, device_sdid_205]
+
+  - name: memory_flash_size
+    value: 0x64000  # 400k
+
+  - name: memory_ram_start
+    value: 0x20003000
+  - name: memory_ram_size
+    value: 0x8000  # 32k
+
 requires:
   - name: device_supports_bluetooth
   - name: armv8m.main  # Armv8-M Supports TrustZone
+
+post_build:
+  profile: tz_nonsecure_application
 
 conflicts:
   - name: device_security_vault  # For secure devices use the other slcp variant
 
 tag:
-  - hardware:device:flash:512
-  - hardware:device:ram:32
+  - hardware:device:flash:576
+  - hardware:device:ram:64
+  - companion:secure_app  # Needs a companion app and cannot be built alone
 
 ui_hints:
   highlight:

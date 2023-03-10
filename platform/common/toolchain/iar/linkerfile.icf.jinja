@@ -93,7 +93,6 @@
 {%- endif %}
 
 /**** End of ICF editor section. ###ICF###*/
-
 define memory mem with size = 4G;
 define region ROM_region   = mem:[from __ICFEDIT_region_ROM_start__   to __ICFEDIT_region_ROM_end__];
 define region RAM_region   = mem:[from __ICFEDIT_region_RAM_start__   to __ICFEDIT_region_RAM_end__];
@@ -101,6 +100,13 @@ define region MAIN_FLASH_region   = mem:[from 0x{{ '%0x' % app_flash_start }}   
 
 {%- if trustzone_secure %}
 define symbol STACK_SEAL_SIZE = 8;
+{%- endif %}
+
+{%- if bootloader_enable %}
+define block BOOTLOADER_RESET_REASON with size = 4, alignment = 4
+{
+  section .reset_reason
+};
 {%- endif %}
 
 define block CSTACK with alignment = 8
@@ -174,6 +180,9 @@ define block application with fixed order
 
 define block application_ram with fixed order
 {
+{%- if bootloader_enable %}
+  block BOOTLOADER_RESET_REASON,
+{%- endif %}
   block CSTACK,
 {%- if trustzone_secure %}
   block STACKSEAL,
@@ -186,6 +195,9 @@ initialize by copy { readwrite };
 
 do not initialize
 {
+{%- if bootloader_enable %}
+  section .reset_reason,
+{%- endif %}
  section .noinit,
  section .stack,
 {%- if trustzone_secure %}

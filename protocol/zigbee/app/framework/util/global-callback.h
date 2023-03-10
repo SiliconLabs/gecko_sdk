@@ -1769,4 +1769,28 @@ void emberAfTrustCenterKeepaliveUpdateCallback(bool registrationComplete);
 bool emberAfWriteAttributesResponseCallback(EmberAfClusterId clusterId,
                                             int8u *buffer,
                                             int16u bufLen);
+/** @brief Retrieves the difference between the two passed values.
+ *
+ * This function assumes that the two values have the same endianness.
+ * Currently only single precision floats are supported. Semi/Double-precision requires a special
+ * method to convert to the corresponding data type, calculate the distance and return it as
+ * EmberAfDifferenceType.
+ *
+ * @param value1 The 1st floating-point value. Ver.: always
+ * @param value2 The 2nd floating-point value. Ver.: always
+ * @param dataType The ZCL data type.  Ver.: always
+ */
+EmberAfDifferenceType emberAfGetDiffCallback(EmberAfDifferenceType value1,
+                                             EmberAfDifferenceType value2,
+                                             EmberAfAttributeType dataType);
+/** @brief Detect a reportable change that could trigger report generation.
+ *
+ * @param threshold The reportable change threshold for reference. Ver.: always
+ * @param diff The emberAf difference value to indicate the triggering point when it exceeds
+ * provided threshold. Ver.: always
+ * @param dataType The ZCL data type.  Ver.: always
+ */
+bool emberAfDetectReportChangedCallback(EmberAfDifferenceType threshold,
+                                        EmberAfDifferenceType diff,
+                                        EmberAfAttributeType dataType);
 /** @} */ // end of global_callback

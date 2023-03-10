@@ -1,0 +1,20 @@
+id: "btmesh_stack_scheduler_server"
+label: "Scheduler Server Model"
+package: "Btmesh"
+description: "Provides Bluetooth mesh Scheduler Server model.
+  It is used to support the control and reporting functionality of a node that can store a schedule."
+category: "Bluetooth Mesh|Stack|Models|Time and Scenes"
+quality: "production"
+root_path: "protocol/bluetooth"
+
+requires:
+  - name: "btmesh_stack"
+  - name: "btmesh_core"
+  - name: "btmesh_stack_time_server"
+provides:
+  - name: "btmesh_stack_scheduler_server"
+template_contribution:
+  - name: btmesh_bgapi_class
+    value:
+      class: "scheduler_server"
+    priority: 1

@@ -383,6 +383,12 @@ static sl_status_t usart_deinit(void *context)
   }
 #endif
 
+  // Disable USART IRQ
+  #if defined(SL_CATALOG_POWER_MANAGER_PRESENT) && !defined(SL_IOSTREAM_UART_FLUSH_TX_BUFFER)
+  USART_IntDisable(usart_context->usart, USART_IF_TXC);
+  #endif
+  USART_IntDisable(usart_context->usart, USART_IF_RXDATAV);
+
   // Disable USART peripheral
   USART_Enable(usart_context->usart, usartDisable);
 

@@ -42,6 +42,10 @@ template_contribution:
     value:
       callback_type: stack_status
       function_name: emberAfPluginOtaClientStackStatusCallback
+  - name: zigbee_stack_callback
+    value:
+      callback_type: dsa_verify
+      function_name: emAfDsaVerifyCallback
   - name: cluster_functions
     value:
        cluster_name: OtaBootload

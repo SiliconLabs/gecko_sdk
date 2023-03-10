@@ -489,12 +489,10 @@ sl_status_t sl_zb_sec_man_load_key_context(sl_zb_sec_man_context_t* context);
  *
  * @param output [OUT] Hashed data.
  *
- * @return sl_status_t SL_STATUS_OK.
- *
  */
-sl_status_t sl_zb_sec_man_hmac_aes_mmo(const uint8_t* input,
-                                       const uint8_t data_length,
-                                       uint8_t* output);
+void sl_zb_sec_man_hmac_aes_mmo(const uint8_t* input,
+                                const uint8_t data_length,
+                                uint8_t* output);
 
 /**
  * @brief Encrypt the specified data using AES-CCM with AES-128 and a 32-bit MIC.

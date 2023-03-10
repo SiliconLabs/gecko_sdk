@@ -1,0 +1,10 @@
+id: btmesh_updating_node
+label: DFU updating node
+package: Btmesh
+description: >
+  Wrapper software component for DFU updating node role in Bluetooth Mesh applications.
+category: "Bluetooth Mesh|DFU Roles"
+quality: production
+root_path: app/bluetooth
+requires:
+  - name: btmesh_firmware_update_server

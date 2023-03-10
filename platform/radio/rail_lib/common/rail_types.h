@@ -366,6 +366,13 @@ typedef struct RAIL_PacketTimeStamp {
    * value filled in by a call using this structure.
    */
   RAIL_PacketTimePosition_t timePosition;
+  /**
+   * A value specifying the on-air duration of the data packet,
+   * starting with the first bit of the PHR (i.e. end of sync word).
+   * Preamble and sync word duration are hence excluded.
+   * Only valid for receive packets at the present time on EFR32xG25 only.
+   */
+  RAIL_Time_t packetDurationUs;
 } RAIL_PacketTimeStamp_t;
 
 /** @} */ // end of group System_Timing
@@ -842,6 +849,12 @@ RAIL_ENUM_GENERIC(RAIL_Events_t, uint64_t) {
   RAIL_EVENT_DETECT_RSSI_THRESHOLD_SHIFT,
   /** Shift position of \ref RAIL_EVENT_THERMISTOR_DONE bit */
   RAIL_EVENT_THERMISTOR_DONE_SHIFT,
+  /** Shift position of \ref RAIL_EVENT_TX_BLOCKED_TOO_HOT bit */
+  RAIL_EVENT_TX_BLOCKED_TOO_HOT_SHIFT,
+  /** Shift position of \ref RAIL_EVENT_TEMPERATURE_TOO_HOT bit */
+  RAIL_EVENT_TEMPERATURE_TOO_HOT_SHIFT,
+  /** Shift position of \ref RAIL_EVENT_TEMPERATURE_COOL_DOWN bit */
+  RAIL_EVENT_TEMPERATURE_COOL_DOWN_SHIFT,
 };
 
 /** Shift position of \ref RAIL_EVENT_SCHEDULED_TX_STARTED bit */
@@ -1519,6 +1532,34 @@ RAIL_ENUM_GENERIC(RAIL_Events_t, uint64_t) {
  * \ref RAIL_StartThermistorMeasurement().
  */
 #define RAIL_EVENT_THERMISTOR_DONE (1ULL << RAIL_EVENT_THERMISTOR_DONE_SHIFT)
+
+/**
+ * Occurs when a Tx has been blocked because of temperature exceeding
+ * the safety threshold.
+ *
+ * Only occurs on platforms where \ref RAIL_SUPPORTS_EFF is true.
+ */
+#define RAIL_EVENT_TX_BLOCKED_TOO_HOT (1ULL << RAIL_EVENT_TX_BLOCKED_TOO_HOT_SHIFT)
+
+/**
+ * Occurs when die internal temperature exceeds the temperature threshold subtracted
+ * by the cool down parameter from \ref RAIL_ChipTempConfig_t.
+ * Transmits are blocked until temperature has cooled enough, indicated by
+ * \ref RAIL_EVENT_TEMPERATURE_COOL_DOWN.
+ *
+ * Only occurs on platforms where \ref RAIL_SUPPORTS_THERMAL_PROTECTION is true.
+ */
+#define RAIL_EVENT_TEMPERATURE_TOO_HOT (1ULL << RAIL_EVENT_TEMPERATURE_TOO_HOT_SHIFT)
+
+/**
+ * Occurs when die internal temperature falls below the temperature threshold subtracted
+ * by the cool down parameter from \ref RAIL_ChipTempConfig_t.
+ * Transmits are no longer blocked by temperature limitation, indicated by
+ * \ref RAIL_EVENT_TEMPERATURE_TOO_HOT.
+ *
+ * Only occurs on platforms where \ref RAIL_SUPPORTS_THERMAL_PROTECTION is true.
+ */
+#define RAIL_EVENT_TEMPERATURE_COOL_DOWN (1ULL << RAIL_EVENT_TEMPERATURE_COOL_DOWN_SHIFT)
 
 /** A value representing all possible events */
 #define RAIL_EVENTS_ALL 0xFFFFFFFFFFFFFFFFULL
@@ -4442,16 +4483,10 @@ RAIL_ENUM(RAIL_EffDevice_t) {
                                        || ((x) == RAIL_EFF_DEVICE_EFF01B11IMFB0) \
                                        )
 
-/** Maximum ambient temperature in Kelvin, allowing transmissions when
+/** Maximum EFF internal temperature in Kelvin, allowing transmissions when
  * \ref RAIL_SUPPORTS_EFF is enabled.
  */
-#define RAIL_EFF_TEMP_THRESHOLD_MAX  (393U)
-
-/**
- * Default number of Kelvin degrees below threshold needed to unblock transmissions
- * blocked because the temperature threshold was exceeded.
- */
-#define RAIL_EFF_TEMP_COOLDOWN_DEFAULT   (13U)
+#define RAIL_EFF_TEMP_THRESHOLD_MAX  (383U)
 
 /**
  * @enum RAIL_EffLnaMode_t
@@ -4512,45 +4547,38 @@ RAIL_ENUM(RAIL_ClpcEnable_t) {
 #endif//DOXYGEN_SHOULD_SKIP_THIS
 
 /**
- * @enum RAIL_EffCalConfigEnum_t
- * @brief EFF Closed Loop Power Control (CLPC) Calibration Indices
+ * @enum RAIL_EffModeSensor_t
+ * @brief EFF Closed Loop Power Control (CLPC) Mode Sensor Indices
  *
- * The calibration indices point to entries into the calibration array.
- * FSK is always the first entry. OFDM is the rest.
+ * The mode sensor indices are used to access specific settings with CLPC.
  */
-RAIL_ENUM(RAIL_EffCalConfigEnum_t) {
-  RAIL_EFF_CAL_FSK_1 = 0,                      /**< CLPC FSK power calibration entry 1. */
-  RAIL_EFF_CAL_OFDM_1 = 1,                     /**< CLPC OFDM power calibration entry 1. */
-  RAIL_EFF_CAL_COUNT = 2                       /**< A count of the choices in this enumeration. Must be last. */
+RAIL_ENUM(RAIL_EffModeSensor_t) {
+  RAIL_EFF_MODE_SENSOR_FSK_ANTV = 0,                      /**< CLPC FSK ANTV Sensor. */
+  RAIL_EFF_MODE_SENSOR_FSK_SAW2 = 1,                      /**< CLPC FSK SAW2 Sensor. */
+  RAIL_EFF_MODE_SENSOR_OFDM_ANTV = 2,                     /**< CLPC OFDM ANTV power calibration entry 1. */
+  RAIL_EFF_MODE_SENSOR_OFDM_SAW2 = 3,                     /**< CLPC OFDM SAW2 power calibration entry 1. */
+  RAIL_EFF_MODE_SENSOR_COUNT                              /**< A count of the choices in this enumeration. Must be last. */
 };
 
 #ifndef DOXYGEN_SHOULD_SKIP_THIS
 // Self-referencing defines minimize compiler complaints when using RAIL_ENUM
-#define RAIL_EFF_CAL_FSK_1 ((RAIL_EffCalConfigEnum_t) RAIL_EFF_CAL_FSK_1)
-#define RAIL_EFF_CAL_OFDM_1 ((RAIL_EffCalConfigEnum_t) RAIL_EFF_CAL_OFDM_1)
-#define RAIL_EFF_CAL_COUNT ((RAIL_EffCalConfigEnum_t) RAIL_EFF_CAL_COUNT)
+#define RAIL_EFF_MODE_SENSOR_FSK_ANTV ((RAIL_EffModeSensor_t) RAIL_EFF_MODE_SENSOR_FSK_ANTV)
+#define RAIL_EFF_MODE_SENSOR_FSK_SAW2 ((RAIL_EffModeSensor_t) RAIL_EFF_MODE_SENSOR_FSK_SAW2)
+#define RAIL_EFF_MODE_SENSOR_OFDM_ANTV ((RAIL_EffModeSensor_t) RAIL_EFF_MODE_SENSOR_OFDM_ANTV)
+#define RAIL_EFF_MODE_SENSOR_OFDM_SAW2 ((RAIL_EffModeSensor_t) RAIL_EFF_MODE_SENSOR_OFDM_SAW2)
+#define RAIL_EFF_MODE_SENSOR_COUNT ((RAIL_EffModeSensor_t) RAIL_EFF_CAL_COUNT)
 #endif//DOXYGEN_SHOULD_SKIP_THIS
 
 /**
- * @def RAIL_EFF_CAL_ENUM_NAMES
+ * @def RAIL_EFF_MODE_SENSOR_ENUM_NAMES
  * @brief A macro that is string versions of the calibration enums.
  */
-#define RAIL_EFF_CAL_ENUM_NAMES { \
-    "RAIL_EFF_CAL_FSK_1",         \
-    "RAIL_EFF_CAL_OFDM_1",        \
+#define RAIL_EFF_MODE_SENSOR_ENUM_NAMES { \
+    "RAIL_EFF_MODE_SENSOR_FSK_ANTV",      \
+    "RAIL_EFF_MODE_SENSOR_FSK_SAW2",      \
+    "RAIL_EFF_MODE_SENSOR_OFDM_ANTV",     \
+    "RAIL_EFF_MODE_SENSOR_OFDM_SAW2",     \
 }
-
-/**
- * @struct RAIL_FemProtectionConfig_t
- *
- * @brief Temperature protection configuration for the attached FEM.
- */
-typedef struct RAIL_FemProtectionConfig {
-  RAIL_TxPower_t PMaxContinuousTx;  /**< Power limit at FEM output, in deci-dBm */
-  uint8_t txDutyCycle;              /**< TX duty cycle limit, in percentage */
-  uint8_t reserved_padding1;        /**< Padding for 32 bit alignment */
-  uint32_t reserved[2];             /**< Reserved. Values ignored. */
-} RAIL_FemProtectionConfig_t;
 
 /** @struct RAIL_EffCalConfig_t
  *
@@ -4558,25 +4586,36 @@ typedef struct RAIL_FemProtectionConfig {
  */
 typedef struct RAIL_EffCalConfig {
   RAIL_TxPower_t cal1Ddbm;     /**< Measured Output Power for CAL1 (nominally 270 ddBm) */
-  uint16_t cal1;                /**< Measured Output Voltage using sensor at CAL1 ddBm */
+  uint16_t cal1Mv;             /**< Measured Output Voltage using sensor at CAL1 ddBm */
   RAIL_TxPower_t cal2Ddbm;     /**< Measured Output Power for CAL2 (nominally at 290 ddBm) */
-  uint16_t cal2;                /**< Measured Output Voltage using sensor at CAL2 ddBm */
+  uint16_t cal2Mv;             /**< Measured Output Voltage using sensor at CAL2 ddBm */
 } RAIL_EffCalConfig_t;
+
+/** @struct RAIL_EffClpcSensorConfig_t
+ *
+ * @brief Configuration data for a CLPC sensor.
+ *
+ * A structure of type \ref RAIL_EffClpcSensorConfig_t stores curve and calibration information for a CLPC sensor.
+ */
+typedef struct RAIL_EffClpcSensorConfig {
+  int64_t coefA;                   /**< Coefficient A for Sensor Voltage curve. Multiplied by 1e7. */
+  int64_t coefB;                   /**< Coefficient B for Sensor Voltage curve. Multiplied by 1e7. */
+  int64_t coefC;                   /**< Coefficient C for Sensor Voltage curve. Multiplied by 1e7. */
+  int64_t coefD;                   /**< Coefficient D for Sensor Voltage curve. Multiplied by 1e7. */
+  RAIL_EffCalConfig_t calData;     /**< Calibration data for Sensor for this mode */
+  int16_t slope1e1MvPerDdbm;       /**< Calculated slope * 10 for Sensor calibration, measured in mV/ddBm */
+  int16_t offset290Ddbm;           /**< Calculated effective offset at 290 ddBm for Sensor calibration */
+} RAIL_EffClpcSensorConfig_t;
 
 /** @struct RAIL_EffClpcConfig_t
  *
  * @brief Configuration data for CLPC in a specific mode.
  *
- * A structure of type \ref RAIL_EffClpcConfig_t stores calibration information for each mode.
+ * A structure of type \ref RAIL_EffClpcConfig_t stores calibration information for each sensor in a specific mode.
  */
 typedef struct RAIL_EffClpcConfig {
-  int64_t antvA;                   /**< Coefficient A for Sensor Voltage curve. Multiplied by 1e7. */
-  int64_t antvB;                   /**< Coefficient B for Sensor Voltage curve. Multiplied by 1e7. */
-  int64_t antvC;                   /**< Coefficient C for Sensor Voltage curve. Multiplied by 1e7. */
-  int64_t antvD;                   /**< Coefficient D for Sensor Voltage curve. Multiplied by 1e7. */
-  RAIL_EffCalConfig_t calData;     /**< Calibration data for this mode */
-  int16_t slope1e1;                /**< Calculated slope * 10 for calibration */
-  int16_t offset290Ddbm;           /**< Calculated effective offset at 290 ddBm for calibration */
+  RAIL_EffClpcSensorConfig_t antv; /**< ANTV sensor configuration */
+  RAIL_EffClpcSensorConfig_t saw2; /**< SAW2 sensor configuration */
 } RAIL_EffClpcConfig_t;
 
 /**
@@ -4600,9 +4639,8 @@ typedef struct RAIL_EffConfig {
   RAIL_EffClpcConfig_t ofdmClpcConfig;/**< Config Structure for OFDM CLPC settings */
   uint8_t  clpcReserved;              /**< Reserved for future use */
   RAIL_ClpcEnable_t clpcEnable;       /**< Select CLPC mode */
-  uint8_t maxTxContinuousPowerDbm;    /**< Maximum continuous power (in dBm) */
-  uint8_t maxTxDutyCycle;             /**< Maximum transmit duty cycle (as a
-                                           percentage) */
+  bool advProtectionEnable;           /**< Indicates whether the advanced thermal protection is enabled */
+  uint8_t reservedByte;               /**< Word alignment */
   uint16_t tempThresholdK;            /**< Temperature of EFF above which transmit
                                            is not allowed, in degrees Kelvin */
 } RAIL_EffConfig_t;
@@ -4617,16 +4655,15 @@ typedef struct RAIL_EffConfig {
  * @{
  */
 
-/** Maximum ambient temperature in Kelvin, allowing transmissions when
+/** Maximum junction temperature in Kelvin. A margin is subtracted before using it when
  * \ref RAIL_SUPPORTS_THERMAL_PROTECTION is enabled.
  */
-#define RAIL_CHIP_TEMP_THRESHOLD_MAX      (393U)
+#define RAIL_CHIP_TEMP_THRESHOLD_MAX      (398U)
 
 /**
- * Default number of Kelvin degrees below threshold needed to unblock transmissions
- * blocked because the temperature threshold was exceeded.
+ * Default number of Kelvin degrees below threshold needed to allow transmissions.
  */
-#define RAIL_CHIP_TEMP_COOLDOWN_DEFAULT   (13U)
+#define RAIL_CHIP_TEMP_COOLDOWN_DEFAULT   (7U)
 
 /**
  * @struct RAIL_ChipTempConfig_t

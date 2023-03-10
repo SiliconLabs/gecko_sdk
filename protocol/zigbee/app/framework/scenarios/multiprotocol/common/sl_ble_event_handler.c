@@ -249,9 +249,9 @@ uint8_t ascii_lut[] = { '0', '1', '2', '3', '4', '5', '6', '7', '8', '9', 'A', '
 
 void zb_ble_dmp_print_ble_address(uint8_t *address)
 {
-  emberAfCorePrint("\nBLE address: [%X %X %X %X %X %X]\n",
-                   address[5], address[4], address[3],
-                   address[2], address[1], address[0]);
+  sl_zigbee_app_debug_print("\nBLE address: [%02X %02X %02X %02X %02X %02X]\n",
+                            address[5], address[4], address[3],
+                            address[2], address[1], address[0]);
 }
 
 void bleConnectionInfoTableInit(void)
@@ -300,24 +300,24 @@ void bleConnectionInfoTablePrintEntry(uint8_t index)
 {
   assert(index < SL_BT_CONFIG_MAX_CONNECTIONS
          && bleConnectionTable[index].inUse);
-  emberAfCorePrintln("**** Connection Info index[%d]****", index);
-  emberAfCorePrintln("connection handle 0x%x",
-                     bleConnectionTable[index].connectionHandle);
-  emberAfCorePrintln("bonding handle = 0x%x",
-                     bleConnectionTable[index].bondingHandle);
-  emberAfCorePrintln("local node is %s",
-                     (bleConnectionTable[index].isMaster) ? "master" : "slave");
-  emberAfCorePrint("remote address: ");
+  sl_zigbee_app_debug_println("**** Connection Info index[%d]****", index);
+  sl_zigbee_app_debug_println("connection handle 0x%x",
+                              bleConnectionTable[index].connectionHandle);
+  sl_zigbee_app_debug_println("bonding handle = 0x%x",
+                              bleConnectionTable[index].bondingHandle);
+  sl_zigbee_app_debug_println("local node is %s",
+                              (bleConnectionTable[index].isMaster) ? "master" : "slave");
+  sl_zigbee_app_debug_print("remote address: ");
   zb_ble_dmp_print_ble_address(bleConnectionTable[index].remoteAddress);
-  emberAfCorePrintln("");
-  emberAfCorePrintln("*************************");
+  sl_zigbee_app_debug_println("");
+  sl_zigbee_app_debug_println("*************************");
 }
 
 /* Characteristic read / write / notify handler functions */
 void zb_ble_dmp_read_light_state(uint8_t connection)
 {
   uint16_t sent_data_len;
-  emberAfCorePrintln("Light state = %d\r\n", ble_lightState);
+  sl_zigbee_app_debug_println("Light state = %d\r\n", ble_lightState);
   /* Send response to read request */
   sl_status_t status =  sl_bt_gatt_server_send_user_read_response(connection,
                                                                   gattdb_light_state,
@@ -327,14 +327,14 @@ void zb_ble_dmp_read_light_state(uint8_t connection)
                                                                   &sent_data_len);
 
   if (status != SL_STATUS_OK) {
-    emberAfCorePrintln("Failed to zb_ble_dmp_read_light_state");
+    sl_zigbee_app_debug_println("Failed to zb_ble_dmp_read_light_state");
   }
 }
 
 void zb_ble_dmp_read_trigger_source(uint8_t connection)
 {
   uint16_t sent_data_len;
-  emberAfCorePrintln("Last event = %d\r\n", ble_lastEvent);
+  sl_zigbee_app_debug_println("Last event = %d\r\n", ble_lastEvent);
 
   /* Send response to read request */
   sl_status_t status =  sl_bt_gatt_server_send_user_read_response(connection,
@@ -344,14 +344,14 @@ void zb_ble_dmp_read_trigger_source(uint8_t connection)
                                                                   &ble_lastEvent,
                                                                   &sent_data_len);
   if (status != SL_STATUS_OK) {
-    emberAfCorePrintln("Failed to zb_ble_dmp_read_trigger_source");
+    sl_zigbee_app_debug_println("Failed to zb_ble_dmp_read_trigger_source");
   }
 }
 
 void zb_ble_dmp_read_source_address(uint8_t connection)
 {
   uint16_t sent_data_len;
-  emberAfCorePrintln("zb_ble_dmp_read_source_address");
+  sl_zigbee_app_debug_println("zb_ble_dmp_read_source_address");
 
   /* Send response to read request */
   sl_status_t status =  sl_bt_gatt_server_send_user_read_response(connection,
@@ -362,13 +362,13 @@ void zb_ble_dmp_read_source_address(uint8_t connection)
                                                                   &sent_data_len);
 
   if (status != SL_STATUS_OK) {
-    emberAfCorePrintln("Failed to zb_ble_dmp_read_source_address");
+    sl_zigbee_app_debug_println("Failed to zb_ble_dmp_read_source_address");
   }
 }
 
 void zb_ble_dmp_write_light_state(uint8_t connection, uint8array *writeValue)
 {
-  emberAfCorePrintln("Light state write; %d\r\n", writeValue->data[0]);
+  sl_zigbee_app_debug_println("Light state write; %d\r\n", writeValue->data[0]);
 
   sl_dmp_ui_set_light_direction(DMP_UI_DIRECTION_BLUETOOTH);
   ble_lightState = writeValue->data[0];
@@ -381,7 +381,7 @@ void zb_ble_dmp_write_light_state(uint8_t connection, uint8array *writeValue)
                                                                   SL_STATUS_OK);
 
   if (status != SL_STATUS_OK) {
-    emberAfCorePrintln("Failed to zb_ble_dmp_write_light_state");
+    sl_zigbee_app_debug_println("Failed to zb_ble_dmp_write_light_state");
     return;
   }
 
@@ -402,7 +402,7 @@ void zb_ble_dmp_notify_light(uint8_t lightState)
   sl_status_t status;
 
   if (ble_lightState_config == gatt_indication) {
-    emberAfCorePrintln("zb_ble_dmp_notify_light: Light state = %d\r\n", lightState);
+    sl_zigbee_app_debug_println("zb_ble_dmp_notify_light: Light state = %d\r\n", lightState);
     /* Send notification/indication data */
     for (int i = 0; i < SL_BT_CONFIG_MAX_CONNECTIONS; i++) {
       if (bleConnectionTable[i].inUse
@@ -413,7 +413,7 @@ void zb_ble_dmp_notify_light(uint8_t lightState)
                                                    &lightState);
 
         if (status != SL_STATUS_OK) {
-          emberAfCorePrintln("Failed to zb_ble_dmp_notify_light error : 0x%x", status);
+          sl_zigbee_app_debug_println("Failed to zb_ble_dmp_notify_light error : 0x%x", status);
           return;
         }
       }
@@ -426,8 +426,8 @@ void zb_ble_dmp_notify_trigger_source(uint8_t connection, uint8_t triggerSource)
   sl_status_t status;
 
   if (ble_triggerSrc_config == gatt_indication) {
-    emberAfCorePrintln("zb_ble_dmp_notify_trigger_source :Last event = %d\r\n",
-                       triggerSource);
+    sl_zigbee_app_debug_println("zb_ble_dmp_notify_trigger_source :Last event = %d\r\n",
+                                triggerSource);
     /* Send notification/indication data */
     status = sl_bt_gatt_server_send_indication(connection,
                                                gattdb_trigger_source,
@@ -435,7 +435,7 @@ void zb_ble_dmp_notify_trigger_source(uint8_t connection, uint8_t triggerSource)
                                                &triggerSource);
 
     if (status != SL_STATUS_OK) {
-      emberAfCorePrintln("Failed to zb_ble_dmp_notify_trigger_source");
+      sl_zigbee_app_debug_println("Failed to zb_ble_dmp_notify_trigger_source");
       return;
     }
   }
@@ -451,7 +451,7 @@ void zb_ble_dmp_notify_source_address(uint8_t connection)
                                                sizeof(SourceAddress),
                                                SourceAddress);
     if (status != SL_STATUS_OK) {
-      emberAfCorePrintln("Failed to zb_ble_dmp_notify_source_address");
+      sl_zigbee_app_debug_println("Failed to zb_ble_dmp_notify_source_address");
       return;
     }
   }
@@ -478,7 +478,7 @@ void BeaconAdvertisements(uint16_t devId)
   /* Set custom advertising data */
   status = sl_bt_legacy_advertiser_set_data(adv_handle[HANDLE_IBEACON], 0, advDataLen, advData);
   if (status != SL_STATUS_OK) {
-    emberAfCorePrintln("Error sl_bt_legacy_advertiser_set_data code: 0x%0x", status);
+    sl_zigbee_app_debug_println("Error sl_bt_legacy_advertiser_set_data code: 0x%0x", status);
     return;
   }
 
@@ -488,20 +488,20 @@ void BeaconAdvertisements(uint16_t devId)
                                        0,   // duration : continue advertisement until stopped
                                        0);   // max_events :continue advertisement until stopped
   if (status != SL_STATUS_OK) {
-    emberAfCorePrintln("Error iBeacon sl_bt_advertiser_set_timing code: 0x%0x", status);
+    sl_zigbee_app_debug_println("Error iBeacon sl_bt_advertiser_set_timing code: 0x%0x", status);
     return;
   }
 
   status = sl_bt_advertiser_configure(adv_handle[HANDLE_IBEACON], LE_GAP_NON_RESOLVABLE);
   if (status != SL_STATUS_OK) {
-    emberAfCorePrintln("Error iBeacon sl_bt_advertiser_configure code: 0x%0x", status);
+    sl_zigbee_app_debug_println("Error iBeacon sl_bt_advertiser_configure code: 0x%0x", status);
     return;
   }
 
   status = sl_bt_legacy_advertiser_start(adv_handle[HANDLE_IBEACON],
                                          advertiser_non_connectable);
   if (status != SL_STATUS_OK) {
-    emberAfCorePrintln("Error iBeacon sl_bt_legacy_advertiser_start code: 0x%0x", status);
+    sl_zigbee_app_debug_println("Error iBeacon sl_bt_legacy_advertiser_start code: 0x%0x", status);
     return;
   }
 
@@ -510,7 +510,7 @@ void BeaconAdvertisements(uint16_t devId)
   /* Set custom advertising data */
   status = sl_bt_legacy_advertiser_set_data(adv_handle[HANDLE_EDDYSTONE], 0, advDataLen, advData);
   if (status != SL_STATUS_OK) {
-    emberAfCorePrintln("Error eddystone sl_bt_legacy_advertiser_set_data code: 0x%0x", status);
+    sl_zigbee_app_debug_println("Error eddystone sl_bt_legacy_advertiser_set_data code: 0x%0x", status);
     return;
   }
 
@@ -520,20 +520,20 @@ void BeaconAdvertisements(uint16_t devId)
                                        0,   // duration : continue advertisement until stopped
                                        0);   // max_events :continue advertisement until stopped
   if (status != SL_STATUS_OK) {
-    emberAfCorePrintln("Error eddystone sl_bt_advertiser_set_timing code: 0x%0x", status);
+    sl_zigbee_app_debug_println("Error eddystone sl_bt_advertiser_set_timing code: 0x%0x", status);
     return;
   }
 
   status = sl_bt_advertiser_configure(adv_handle[HANDLE_EDDYSTONE], LE_GAP_NON_RESOLVABLE);
   if (status != SL_STATUS_OK) {
-    emberAfCorePrintln("Error eddystone sl_bt_advertiser_configure code: 0x%0x", status);
+    sl_zigbee_app_debug_println("Error eddystone sl_bt_advertiser_configure code: 0x%0x", status);
     return;
   }
 
   status = sl_bt_legacy_advertiser_start(adv_handle[HANDLE_EDDYSTONE],
                                          advertiser_non_connectable);
   if (status != SL_STATUS_OK) {
-    emberAfCorePrintln("Error eddystone sl_bt_legacy_advertiser_start code: 0x%0x", status);
+    sl_zigbee_app_debug_println("Error eddystone sl_bt_legacy_advertiser_start code: 0x%0x", status);
     return;
   }
 }
@@ -552,7 +552,7 @@ void enableBleAdvertisements(void)
 
   status = sl_bt_system_get_identity_address(&ble_address, &type);
   if ( status != SL_STATUS_OK ) {
-    emberAfCorePrintln("Unable to get BLE address. Errorcode: 0x%x", status);
+    sl_zigbee_app_debug_println("Unable to get BLE address. Errorcode: 0x%x", status);
     return;
   }
   uint16_t devId = ((uint16_t)ble_address.addr[1] << 8) + (uint16_t)ble_address.addr[0];
@@ -566,14 +566,14 @@ void enableBleAdvertisements(void)
   devName[6] = ascii_lut[(ble_address.addr[0] & 0x0F)];
   devName[7] = '\0';
 
-  emberAfCorePrintln("devName = %s", devName);
+  sl_zigbee_app_debug_println("devName = %s", devName);
   status = sl_bt_gatt_server_write_attribute_value(gattdb_device_name,
                                                    0,
                                                    strlen(devName),
                                                    (uint8_t *)devName);
 
   if ( status != SL_STATUS_OK ) {
-    emberAfCorePrintln("Unable to sl_bt_gatt_server_write_attribute_value device name. Errorcode: 0x%x", status);
+    sl_zigbee_app_debug_println("Unable to sl_bt_gatt_server_write_attribute_value device name. Errorcode: 0x%x", status);
     return;
   }
 
@@ -592,7 +592,7 @@ void enableBleAdvertisements(void)
                                             (uint8_t*) &responseData);
 
   if (status != SL_STATUS_OK) {
-    emberAfCorePrintln("Unable to set adv data sl_bt_legacy_advertiser_set_data. Errorcode: 0x%x", status);
+    sl_zigbee_app_debug_println("Unable to set adv data sl_bt_legacy_advertiser_set_data. Errorcode: 0x%x", status);
     return;
   }
 
@@ -602,7 +602,7 @@ void enableBleAdvertisements(void)
                                             (uint8_t*) &responseData);
 
   if (status != SL_STATUS_OK) {
-    emberAfCorePrintln("Unable to set scan response data sl_bt_legacy_advertiser_set_data. Errorcode: 0x%x", status);
+    sl_zigbee_app_debug_println("Unable to set scan response data sl_bt_legacy_advertiser_set_data. Errorcode: 0x%x", status);
     return;
   }
 
@@ -622,9 +622,9 @@ void enableBleAdvertisements(void)
   status = sl_bt_legacy_advertiser_start(adv_handle[HANDLE_DEMO],
                                          advertiser_connectable_scannable);
   if ( status ) {
-    emberAfCorePrintln("sl_bt_legacy_advertiser_start ERROR : status = 0x%0X", status);
+    sl_zigbee_app_debug_println("sl_bt_legacy_advertiser_start ERROR : status = 0x%0X", status);
   } else {
-    emberAfCorePrintln("BLE custom advertisements enabled");
+    sl_zigbee_app_debug_println("BLE custom advertisements enabled");
   }
   if (SL_BT_CONFIG_USER_ADVERTISERS >= 3) {
     BeaconAdvertisements(devId);
@@ -674,25 +674,25 @@ void sl_bt_on_event(sl_bt_msg_t* evt)
       bd_addr ble_address;
       uint8_t type;
       sl_status_t status = sl_bt_system_hello();
-      emberAfCorePrintln("BLE hello: %s",
-                         (status == SL_STATUS_OK) ? "success" : "error");
+      sl_zigbee_app_debug_println("BLE hello: %s",
+                                  (status == SL_STATUS_OK) ? "success" : "error");
 
       status = sl_bt_system_get_identity_address(&ble_address, &type);
       zb_ble_dmp_print_ble_address(ble_address.addr);
 
       status = sl_bt_advertiser_create_set(&adv_handle[HANDLE_DEMO]);
       if (status) {
-        emberAfCorePrintln("sl_bt_advertiser_create_set status 0x%x", status);
+        sl_zigbee_app_debug_println("sl_bt_advertiser_create_set status 0x%x", status);
       }
 
       status = sl_bt_advertiser_create_set(&adv_handle[HANDLE_IBEACON]);
       if (status) {
-        emberAfCorePrintln("sl_bt_advertiser_create_set status 0x%x", status);
+        sl_zigbee_app_debug_println("sl_bt_advertiser_create_set status 0x%x", status);
       }
 
       status = sl_bt_advertiser_create_set(&adv_handle[HANDLE_EDDYSTONE]);
       if (status) {
-        emberAfCorePrintln("sl_bt_advertiser_create_set status 0x%x", status);
+        sl_zigbee_app_debug_println("sl_bt_advertiser_create_set status 0x%x", status);
       }
 
       // start advertising
@@ -703,7 +703,7 @@ void sl_bt_on_event(sl_bt_msg_t* evt)
       sl_bt_evt_gatt_server_characteristic_status_t *StatusEvt =
         (sl_bt_evt_gatt_server_characteristic_status_t*) &(evt->data);
       if (StatusEvt->status_flags == gatt_server_confirmation) {
-        emberAfCorePrintln(
+        sl_zigbee_app_debug_println(
           "characteristic= %d , GAT_SERVER_CLIENT_CONFIG_FLAG = %d\r\n",
           StatusEvt->characteristic, StatusEvt->client_config_flags);
         if (StatusEvt->characteristic == gattdb_light_state) {
@@ -719,7 +719,7 @@ void sl_bt_on_event(sl_bt_msg_t* evt)
         } else if (StatusEvt->characteristic == gattdb_source_address) {
           ble_bleSrc_config = (gatt_client_config_flag_t)StatusEvt->client_config_flags;
         }
-        emberAfCorePrintln(
+        sl_zigbee_app_debug_println(
           "SERVER : ble_lightState_config= %d , ble_triggerSrc_config = %d , ble_bleSrc_config = %d\r\n",
           ble_lightState_config,
           ble_triggerSrc_config,
@@ -728,12 +728,12 @@ void sl_bt_on_event(sl_bt_msg_t* evt)
     }
     break;
     case sl_bt_evt_connection_opened_id: {
-      emberAfCorePrintln("sl_bt_evt_connection_opened_id \n");
+      sl_zigbee_app_debug_println("sl_bt_evt_connection_opened_id \n");
       sl_bt_evt_connection_opened_t *conn_evt =
         (sl_bt_evt_connection_opened_t*) &(evt->data);
       uint8_t index = bleConnectionInfoTableFindUnused();
       if (index == 0xFF) {
-        emberAfCorePrintln("MAX active BLE connections");
+        sl_zigbee_app_debug_println("MAX active BLE connections");
         assert(index < 0xFF);
       } else {
         bleConnectionTable[index].inUse = true;
@@ -748,10 +748,10 @@ void sl_bt_on_event(sl_bt_msg_t* evt)
         //accepted phy 1: 1M phy, 2: 2M phy, 4: coded phy, ff: any
         sl_bt_connection_set_preferred_phy(conn_evt->connection, test_phy_1m, 0xff);
         enableBleAdvertisements();
-        emberAfCorePrintln("BLE connection opened");
+        sl_zigbee_app_debug_println("BLE connection opened");
         bleConnectionInfoTablePrintEntry(index);
-        emberAfCorePrintln("%d active BLE connection",
-                           activeBleConnections);
+        sl_zigbee_app_debug_println("%d active BLE connection",
+                                    activeBleConnections);
       }
     }
     break;
@@ -759,8 +759,8 @@ void sl_bt_on_event(sl_bt_msg_t* evt)
       sl_bt_evt_connection_phy_status_t *conn_evt =
         (sl_bt_evt_connection_phy_status_t *)&(evt->data);
       // indicate the PHY that has been selected
-      emberAfCorePrintln("now using the %dMPHY\r\n",
-                         conn_evt->phy);
+      sl_zigbee_app_debug_println("now using the %dMPHY\r\n",
+                                  conn_evt->phy);
     }
     break;
     case sl_bt_evt_connection_closed_id: {
@@ -778,25 +778,35 @@ void sl_bt_on_event(sl_bt_msg_t* evt)
       if (bleConnectionInfoTableIsEmpty()) {
         sl_dmp_ui_bluetooth_connected(false);
       }
-      emberAfCorePrintln(
+      sl_zigbee_app_debug_println(
         "BLE connection closed, handle=0x%x, reason=0x%2x : [%d] active BLE connection",
         conn_evt->connection, conn_evt->reason, activeBleConnections);
     }
     break;
+#ifndef SL_CATALOG_BLUETOOTH_FEATURE_LEGACY_SCANNER_PRESENT
     case sl_bt_evt_scanner_scan_report_id: {
       sl_bt_evt_scanner_scan_report_t *scan_evt =
         (sl_bt_evt_scanner_scan_report_t*) &(evt->data);
-      emberAfCorePrint("Scan response, address type=0x%x, address: ",
-                       scan_evt->address_type);
+      sl_zigbee_app_debug_print("Scan response, address type=0x%02x, address: ",
+                                scan_evt->address_type);
       zb_ble_dmp_print_ble_address(scan_evt->address.addr);
-      emberAfCorePrintln("");
+      sl_zigbee_app_debug_println("");
     }
     break;
+#else
+    case sl_bt_evt_scanner_legacy_advertisement_report_id: {
+      sl_zigbee_app_debug_print("Scan response, address type=0x%02x, address: ",
+                                evt->data.evt_scanner_legacy_advertisement_report.address_type);
+      zb_ble_dmp_print_ble_address(evt->data.evt_scanner_legacy_advertisement_report.address.addr);
+      sl_zigbee_app_debug_println("");
+    }
+    break;
+#endif //SL_CATALOG_BLUETOOTH_FEATURE_LEGACY_SCANNER_PRESENT
     case sl_bt_evt_connection_parameters_id: {
       sl_bt_evt_connection_parameters_t* param_evt =
         (sl_bt_evt_connection_parameters_t*) &(evt->data);
-      emberAfCorePrintln(
-        "BLE connection parameters are updated, handle=0x%x, interval=0x%2x, latency=0x%2x, timeout=0x%2x, security=0x%x, txsize=0x%2x",
+      sl_zigbee_app_debug_println(
+        "BLE connection parameters are updated, handle=0x%02x, interval=0x%04x, latency=0x%04x, timeout=0x%04x, security=0x%02x, txsize=0x%04x",
         param_evt->connection,
         param_evt->interval,
         param_evt->latency,
@@ -811,14 +821,14 @@ void sl_bt_on_event(sl_bt_msg_t* evt)
       sl_bt_evt_gatt_service_t* service_evt =
         (sl_bt_evt_gatt_service_t*) &(evt->data);
       uint8_t i;
-      emberAfCorePrintln(
-        "GATT service, conn_handle=0x%x, service_handle=0x%4x",
+      sl_zigbee_app_debug_println(
+        "GATT service, conn_handle=0x%02x, service_handle=0x%04x",
         service_evt->connection, service_evt->service);
-      emberAfCorePrint("UUID=[");
+      sl_zigbee_app_debug_print("UUID=[");
       for (i = 0; i < service_evt->uuid.len; i++) {
-        emberAfCorePrint("0x%x ", service_evt->uuid.data[i]);
+        sl_zigbee_app_debug_print("%02X", service_evt->uuid.data[i]);
       }
-      emberAfCorePrintln("]");
+      sl_zigbee_app_debug_println("]");
     }
     break;
 

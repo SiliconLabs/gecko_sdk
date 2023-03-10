@@ -485,12 +485,15 @@ void emberDutyCycleHandler(
 
 // -----------------------------------------------------------------------------
 // Weak implementation of public Callback emberAfRemoteSetBindingCallback
-WEAK(EmberZdoStatus emberAfRemoteSetBindingCallback(
-       // Return: The contents of the binding entry.
-       EmberBindingTableEntry *entry))
+WEAK(void emberAfRemoteSetBindingCallback(
+       // The contents of the binding entry.
+       EmberBindingTableEntry *entry,
+       // ZDO status.
+       EmberZdoStatus status))
 {
   (void)entry;
-  return EMBER_ZDP_TABLE_FULL;
+  (void)status;
+  return;
 }
 
 // Weak implementation of emAfRemoteSetBindingCallback
@@ -515,19 +518,22 @@ EmberZdoStatus emberRemoteSetBindingHandler(
   emberAfPushCallbackNetworkIndex();
   ret = emAfRemoteSetBindingCallback(entry);
   emAfRemoteSetBinding(entry);
-  emberAfRemoteSetBindingCallback(entry);
+  emberAfRemoteSetBindingCallback(entry, ret);
   emberAfPopNetworkIndex();
   return ret;
 }
 
 // -----------------------------------------------------------------------------
 // Weak implementation of public Callback emberAfRemoteDeleteBindingCallback
-WEAK(EmberZdoStatus emberAfRemoteDeleteBindingCallback(
+WEAK(void emberAfRemoteDeleteBindingCallback(
        // The index of the binding whose deletion was requested.
-       uint8_t index))
+       uint8_t index,
+       // ZDO response status
+       EmberZdoStatus status))
 {
   (void)index;
-  return EMBER_ZDP_TABLE_FULL;
+  (void)status;
+  return;
 }
 
 // Weak implementation of emAfRemoteDeleteBindingCallback
@@ -552,7 +558,7 @@ EmberZdoStatus emberRemoteDeleteBindingHandler(
   emberAfPushCallbackNetworkIndex();
   ret = emAfRemoteDeleteBindingCallback(index);
   emAfRemoteDeleteBinding(index);
-  emberAfRemoteDeleteBindingCallback(index);
+  emberAfRemoteDeleteBindingCallback(index, ret);
   emberAfPopNetworkIndex();
   return ret;
 }
@@ -613,10 +619,13 @@ void emberPollHandler(
 // -----------------------------------------------------------------------------
 // Weak implementation of public Callback emberAfDebugCallback
 WEAK(void emberAfDebugCallback(
+       // debug message length
+       uint8_t messageLength,
        // debug message
-       EmberMessageBuffer message))
+       uint8_t *messageContents))
 {
-  (void)message;
+  (void)messageLength;
+  (void)messageContents;
 }
 
 // debugHandler
@@ -626,7 +635,9 @@ void emberDebugHandler(
 {
   emberAfPushCallbackNetworkIndex();
   emAfDebug(message);
-  emberAfDebugCallback(message);
+  uint8_t messageLength = emGetBufferLength(message);
+  uint8_t *messageContents = emGetBufferPointer(message);
+  emberAfDebugCallback(messageLength, messageContents);
   emberAfPopNetworkIndex();
 }
 
@@ -788,11 +799,20 @@ void emberIdConflictHandler(
 WEAK(void emberAfMacPassthroughMessageCallback(
        // The type of MAC passthrough message received.
        EmberMacPassthroughType messageType,
+       // last hop lqi.
+       uint8_t lastHopLqi,
+       // last hop rssi.
+       int8_t lastHopRssi,
+       // message length.
+       uint8_t messageLength,
        // The raw message that was received.
-       EmberMessageBuffer message))
+       uint8_t *messageContents))
 {
   (void)messageType;
-  (void)message;
+  (void)lastHopLqi;
+  (void)lastHopRssi;
+  (void)messageLength;
+  (void)messageContents;
 }
 
 // A callback invoked by the EmberZNet stack when a MAC passthrough message is
@@ -803,9 +823,15 @@ void emberMacPassthroughMessageHandler(
   // The raw message that was received.
   EmberMessageBuffer message)
 {
+  int8_t lastHopRssi = 0;
+  uint8_t lastHopLqi = 0;
   emberAfPushCallbackNetworkIndex();
   emAfMacPassthroughMessage(messageType, message);
-  emberAfMacPassthroughMessageCallback(messageType, message);
+  emberGetLastHopRssi(&lastHopRssi);
+  emberGetLastHopLqi(&lastHopLqi);
+  uint8_t messageLength = emGetBufferLength(message);
+  uint8_t *messageContents = emGetBufferPointer(message);
+  emberAfMacPassthroughMessageCallback(messageType, lastHopLqi, lastHopRssi, messageLength, messageContents);
   emberAfPopNetworkIndex();
 }
 
@@ -1015,12 +1041,15 @@ void emberCalculateSmacsHandler(
 WEAK(void emberAfDsaSignCallback(
        // The result of the DSA signing operation.
        EmberStatus status,
+       // The length of message.
+       uint8_t messageLength,
        // The message and attached which includes the original message and the
        // appended signature.
-       EmberMessageBuffer signedMessage))
+       uint8_t *messageContents))
 {
   (void)status;
-  (void)signedMessage;
+  (void)messageLength;
+  (void)messageContents;
 }
 
 // The handler that returns the results of the signing operation. On success,
@@ -1036,7 +1065,9 @@ void emberDsaSignHandler(
 {
   emberAfPushCallbackNetworkIndex();
   emAfDsaSign(status, signedMessage);
-  emberAfDsaSignCallback(status, signedMessage);
+  uint8_t messageLength = emGetBufferLength(signedMessage);
+  uint8_t *messageContents = emGetBufferPointer(signedMessage);
+  emberAfDsaSignCallback(status, messageLength, messageContents);
   emberAfPopNetworkIndex();
 }
 
@@ -1069,11 +1100,20 @@ void emberDsaVerifyHandler(
 WEAK(void emberAfIncomingBootloadMessageCallback(
        // The EUI64 of the sending node.
        EmberEUI64 longId,
+       // last hop lqi.
+       uint8_t lastHopLqi,
+       // last hop rssi.
+       int8_t lastHopRssi,
+       // message length.
+       uint8_t messageLength,
        // The bootload message that was sent.
-       EmberMessageBuffer message))
+       uint8_t *messageContents))
 {
   (void)longId;
-  (void)message;
+  (void)lastHopLqi;
+  (void)lastHopRssi;
+  (void)messageLength;
+  (void)messageContents;
 }
 
 // A callback invoked by the EmberZNet stack when a bootload message is
@@ -1086,7 +1126,13 @@ void emberIncomingBootloadMessageHandler(
 {
   emberAfPushCallbackNetworkIndex();
   emAfIncomingBootloadMessage(longId, message);
-  emberAfIncomingBootloadMessageCallback(longId, message);
+  uint8_t lastHopLqi = 0;
+  int8_t lastHopRssi = 0;
+  emberGetLastHopRssi(&lastHopRssi);
+  emberGetLastHopLqi(&lastHopLqi);
+  uint8_t messageLength = emGetBufferLength(message);
+  uint8_t *messageContents = emGetBufferPointer(message);
+  emberAfIncomingBootloadMessageCallback(longId, lastHopLqi, lastHopRssi, messageLength, messageContents);
   emberAfPopNetworkIndex();
 }
 
@@ -1094,14 +1140,17 @@ void emberIncomingBootloadMessageHandler(
 // Weak implementation of public Callback
 //emberAfBootloadTransmitCompleteCallback
 WEAK(void emberAfBootloadTransmitCompleteCallback(
-       // The bootload message that was sent.
-       EmberMessageBuffer message,
        // An EmberStatus value of EMBER_SUCCESS if an ACK was received from the
        // destination or EMBER_DELIVERY_FAILED if no ACK was received.
-       EmberStatus status))
+       EmberStatus status,
+       // message length.
+       uint8_t messageLength,
+       // The bootload message that was sent.
+       uint8_t *messageContents))
 {
-  (void)message;
   (void)status;
+  (void)messageLength;
+  (void)messageContents;
 }
 
 // A callback invoked by the EmberZNet stack when the MAC has finished
@@ -1115,20 +1164,31 @@ void emberBootloadTransmitCompleteHandler(
 {
   emberAfPushCallbackNetworkIndex();
   emAfBootloadTransmitComplete(message, status);
-  emberAfBootloadTransmitCompleteCallback(message, status);
+  uint8_t messageLength = emGetBufferLength(message);
+  uint8_t *messageContents = emGetBufferPointer(message);
+  emberAfBootloadTransmitCompleteCallback(status, messageLength, messageContents);
   emberAfPopNetworkIndex();
 }
 
 // -----------------------------------------------------------------------------
 // Weak implementation of public Callback emberAfZllNetworkFoundCallback
 WEAK(void emberAfZllNetworkFoundCallback(
+       // Used to interpret deviceInfo field.
+       bool isDeviceInfoNull,
+       // The link quality from the node that last relayed the message.
+       uint8_t lastHopLqi,
+       // The energy level (in units of dBm) observed during reception.
+       int8_t lastHopRssi,
        // Return: Information about the network.
        const EmberZllNetwork *networkInfo,
        // Return: Device specific information.
        const EmberZllDeviceInfoRecord *deviceInfo))
 {
   (void)networkInfo;
+  (void)isDeviceInfoNull;
   (void)deviceInfo;
+  (void)lastHopLqi;
+  (void)lastHopRssi;
 }
 
 // This call is fired when a ZLL network scan finds a ZLL network.
@@ -1138,9 +1198,13 @@ void emberZllNetworkFoundHandler(
   // Return: Device specific information.
   const EmberZllDeviceInfoRecord *deviceInfo)
 {
+  int8_t lastHopRssi = 0;
+  uint8_t lastHopLqi = 0;
   emberAfPushCallbackNetworkIndex();
   emAfZllNetworkFound(networkInfo, deviceInfo);
-  emberAfZllNetworkFoundCallback(networkInfo, deviceInfo);
+  emberGetLastHopRssi(&lastHopRssi);
+  emberGetLastHopLqi(&lastHopLqi);
+  emberAfZllNetworkFoundCallback(deviceInfo ? true : false, lastHopLqi, lastHopRssi, networkInfo, deviceInfo);
   emberAfPopNetworkIndex();
 }
 
@@ -1167,9 +1231,15 @@ void emberZllScanCompleteHandler(
 // -----------------------------------------------------------------------------
 // Weak implementation of public Callback emberAfZllAddressAssignmentCallback
 WEAK(void emberAfZllAddressAssignmentCallback(
+       // The link quality from the node that last relayed the message.
+       uint8_t lastHopLqi,
+       // The energy level (in units of dBm) observed during reception.
+       int8_t lastHopRssi,
        // Return: Address assignment information.
        const EmberZllAddressAssignment *addressInfo))
 {
+  (void)lastHopLqi;
+  (void)lastHopRssi;
   (void)addressInfo;
 }
 
@@ -1179,9 +1249,13 @@ void emberZllAddressAssignmentHandler(
   // Return: Address assignment information.
   const EmberZllAddressAssignment *addressInfo)
 {
+  int8_t lastHopRssi = 0;
+  uint8_t lastHopLqi = 0;
   emberAfPushCallbackNetworkIndex();
   emAfZllAddressAssignment(addressInfo);
-  emberAfZllAddressAssignmentCallback(addressInfo);
+  emberGetLastHopRssi(&lastHopRssi);
+  emberGetLastHopLqi(&lastHopLqi);
+  emberAfZllAddressAssignmentCallback(lastHopLqi, lastHopRssi, addressInfo);
   emberAfPopNetworkIndex();
 }
 
@@ -1208,10 +1282,25 @@ void emberZllTouchLinkTargetHandler(
 // -----------------------------------------------------------------------------
 // Weak implementation of public Callback emberAfMacFilterMatchMessageCallback
 WEAK(void emberAfMacFilterMatchMessageCallback(
-       // Return: macFilterMatchStruct.
-       const EmberMacFilterMatchStruct *macFilterMatchStruct))
+       // filter index match.
+       uint8_t filterIndexMatch,
+       // message type.
+       EmberMacPassthroughType messageType,
+       // last hop lqi.
+       uint8_t lastHopLqi,
+       // last hop rssi.
+       int8_t lastHopRssi,
+       // message length.
+       uint8_t messageLength,
+       // message contents.
+       uint8_t *messageContents))
 {
-  (void)macFilterMatchStruct;
+  (void)filterIndexMatch;
+  (void)messageType;
+  (void)lastHopLqi;
+  (void)lastHopRssi;
+  (void)messageLength;
+  (void)messageContents;
 }
 
 // A callback invoked by the EmberZNet stack when a raw MAC message that has
@@ -1222,7 +1311,16 @@ void emberMacFilterMatchMessageHandler(
 {
   emberAfPushCallbackNetworkIndex();
   emAfMacFilterMatchMessage(macFilterMatchStruct);
-  emberAfMacFilterMatchMessageCallback(macFilterMatchStruct);
+  uint8_t lastHopLqi = 0;
+  int8_t lastHopRssi = 0;
+  emberGetLastHopRssi(&lastHopRssi);
+  emberGetLastHopLqi(&lastHopLqi);
+  uint8_t messageLength = emGetBufferLength(macFilterMatchStruct->message);
+  uint8_t *messageContents = emGetBufferPointer(macFilterMatchStruct->message);
+  emberAfMacFilterMatchMessageCallback(macFilterMatchStruct->filterIndexMatch,
+                                       macFilterMatchStruct->legacyPassthroughType,
+                                       lastHopLqi, lastHopRssi,
+                                       messageLength, messageContents);
   emberAfPopNetworkIndex();
 }
 

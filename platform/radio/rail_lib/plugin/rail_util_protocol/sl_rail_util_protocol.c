@@ -255,7 +255,9 @@ static RAIL_Status_t sl_rail_util_protocol_config_zwave(RAIL_Handle_t handle,
                | (SL_RAIL_UTIL_PROTOCOL_ZWAVE_DETECT_BEAM_FRAME_ENABLE
                   ? RAIL_ZWAVE_OPTION_DETECT_BEAM_FRAMES : 0U)
                | (SL_RAIL_UTIL_PROTOCOL_ZWAVE_NODE_ID_FILTERING_ENABLE
-                  ? RAIL_ZWAVE_OPTION_NODE_ID_FILTERING : 0U),
+                  ? RAIL_ZWAVE_OPTION_NODE_ID_FILTERING : 0U)
+               | (SL_RAIL_UTIL_PROTOCOL_ZWAVE_PROMISCUOUS_BEAM_MODE_ENABLE
+                  ? RAIL_ZWAVE_OPTION_PROMISCUOUS_BEAM_MODE : 0U),
     .ackConfig = {
       .enable = SL_RAIL_UTIL_PROTOCOL_ZWAVE_AUTO_ACK_ENABLE,
       .ackTimeout = SL_RAIL_UTIL_PROTOCOL_ZWAVE_AUTO_ACK_TIMEOUT_US,

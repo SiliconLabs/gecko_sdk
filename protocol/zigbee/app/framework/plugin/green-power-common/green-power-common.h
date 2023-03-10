@@ -80,6 +80,8 @@
 
 #define EMBER_AF_GREEN_POWER_SERVER_GPDF_SCENE_DERIVED_GROUP_ID (0xFFFF)
 
+#define GP_DEVICE_ANNOUNCE_SPOOF_MSG_SIZE 12
+
 // Reserved GPD addresses
 #define IS_RESERVED_GPD_SRC_ID(srcId)       (((srcId) >=  GP_GPD_SRC_ID_RESERVED_FFFFFF9) \
                                              && ((srcId) <= GP_GPD_SRC_ID_RESERVED_FFFFFFE))
@@ -585,4 +587,7 @@ bool emGpMakeAddr(EmberGpAddress *addr,
 uint16_t emCopyAdditionalInfoBlockStructureToArray(uint8_t commandId,
                                                    EmberGpTranslationTableAdditionalInfoBlockOptionRecordField *additionalInfoBlockIn,
                                                    uint8_t *additionalInfoBlockOut);
+void emGpSpoofDeviceAnnce(uint16_t nodeId,
+                          EmberEUI64 eui64,
+                          uint8_t capabilities);
 #endif //_GREEN_POWER_COMMON_H_

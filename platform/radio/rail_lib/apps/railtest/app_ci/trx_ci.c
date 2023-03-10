@@ -479,17 +479,6 @@ void setTxStream(sl_cli_command_arg_t *args)
   }
   streamMode = stream;
   enableAppMode(TX_STREAM, enable, sl_cli_get_command_string(args, 0));
-
-#ifdef SL_RAIL_UTIL_EFF_DEVICE
-  // Check if EFF supports Tx
-  if (RAIL_EFF_SUPPORTS_TRANSMIT(SL_RAIL_UTIL_EFF_DEVICE)) {
-    /* If configured power is higher than RAIL_UTIL_EFF_MAX_TX_CONTINUOUS_POWER_DBM
-       then it is limited to that latter */
-    responsePrint("Warning",
-                  "Messsage:FEM used so power is limited to %d dBm",
-                  femConfig.PMaxContinuousTx);
-  }
-#endif
 }
 
 void configDirectMode(sl_cli_command_arg_t *args)

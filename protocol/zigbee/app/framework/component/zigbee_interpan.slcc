@@ -32,8 +32,6 @@ template_contribution:
     value:
       callback_type: mac_filter_match_message
       function_name: emAfPluginInterpanMacFilterMatchMessageCallback
-    unless:
-      - zigbee_ezsp
   - name: zigbee_af_callback
     value:
       callback_type: event_init

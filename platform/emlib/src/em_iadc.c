@@ -38,6 +38,11 @@
 #include <stddef.h>
 
 /***************************************************************************//**
+ * @addtogroup emlib
+ * @{
+ ******************************************************************************/
+
+/***************************************************************************//**
  * @addtogroup iadc IADC - Incremental ADC
  * @brief Incremental Analog to Digital Converter (IADC) Peripheral API
  * @details
@@ -1151,4 +1156,5 @@ uint32_t IADC_getReferenceVoltage(IADC_CfgReference_t reference)
 }
 
 /** @} (end addtogroup iadc) */
+/** @} (end addtogroup emlib) */
 #endif /* defined(IADC_COUNT) && (IADC_COUNT > 0) */

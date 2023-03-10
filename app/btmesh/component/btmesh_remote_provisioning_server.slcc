@@ -1,0 +1,36 @@
+id: "btmesh_remote_provisioning_server"
+label: "Remote Provisioning Server"
+package: "Btmesh"
+description: >
+  Used to support remote provisioning server functionality of provisioning 
+  a remote device over the mesh network and to perform the Node Provisioning 
+  Protocol Interface procedures.
+category: "Bluetooth Mesh|Models|Remote Provisioning"
+quality: "production"
+root_path: "app/btmesh/common/btmesh_remote_provisioning_server"
+config_file:
+  - path: "config/sl_btmesh_remote_provisioning_server_config.h"
+  - path: btmesh_remote_provisioning_server.dcd
+    directory: btmeshconf
+source:
+  - path: "sl_btmesh_remote_provisioning_server.c"
+include:
+  - path: ""
+    file_list:
+      - path: "sl_btmesh_remote_provisioning_server.h"
+provides:
+  - name: "btmesh_remote_provisioning_server"
+requires:
+  - name: "app_assert"
+  - name: "app_btmesh_util"
+  - name: "btmesh_stack_node"
+  - name: "btmesh_stack_remote_provisioning_server"
+  - name: "btmesh_stack"
+
+template_contribution:
+  - name: "btmesh_on_event"
+    value:
+      include: "sl_btmesh_remote_provisioning_server.h"
+      function: "sli_btmesh_handle_remote_provisioning_server_on_event"
+validation_helper:
+    - path: "../../script/validation/remote_provisioning_validation.lua"

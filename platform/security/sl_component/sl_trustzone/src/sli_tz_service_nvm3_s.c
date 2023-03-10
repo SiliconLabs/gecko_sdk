@@ -28,8 +28,6 @@
  *
  ******************************************************************************/
 
-// TODO: add IPC mode code
-
 #include <stddef.h>
 #include <stdint.h>
 
@@ -37,25 +35,26 @@
 
 #include "tfm_nvm3_include.h"
 
-#if defined(TFM_CONFIG_SL_SECURE_LIBRARY)
 #include "psa/crypto_types.h"
 #include "psa/client.h"
+
+#include "mbedtls/platform.h"
+
 #include "sli_tz_service_nvm3.h"
 #include "sli_tz_iovec_check.h"
-#else // defined(TFM_CONFIG_SL_SECURE_LIBRARY)
-#ifndef TFM_PSA_API
-#include "tfm_secure_api.h"
-#endif
-#endif // defined(TFM_CONFIG_SL_SECURE_LIBRARY)
+
+//------------------------------------------------------------------------------
+// Global variables
 
 nvm3_Handle_t  nvm3_defaultHandleData;
 nvm3_Handle_t *nvm3_defaultHandle = &nvm3_defaultHandleData;
 
-psa_status_t tfm_nvm3_init(void)
-{
-  // This init function is required by TFM and not used otherwise.
-  return PSA_SUCCESS;
-}
+// Pointers to caches allocated for different NVM3 instances. Index 0 is used by
+// the default instance -- SLI_TZ_SERVICE_NVM3_INSTANCE_CACHE_START_INDEX.
+nvm3_CacheEntry_t *sli_tz_nvm3_caches[SLI_TZ_SERVICE_NVM3_MAX_INSTANCES] = { 0 };
+
+//------------------------------------------------------------------------------
+// Common (ITS and NVM3) service functions
 
 psa_status_t tfm_nvm3_init_default(psa_invec in_vec[],
                                    size_t in_len,
@@ -67,25 +66,51 @@ psa_status_t tfm_nvm3_init_default(psa_invec in_vec[],
   SLI_TZ_IOVEC_ASSERT_STRUCT_SIZE(in_vec[1], nvm3_Init_t);
   SLI_TZ_IOVEC_ASSERT_STRUCT_SIZE(out_vec[0], Ecode_t);
 
-  // Copy the provided init data into a new struct, such that the hal handle can be
-  // modified without changing the original struct.
+  // Copy the provided init data into a new struct, such that the original
+  // remains untouched (which is expected since it's a const parameter).
   nvm3_Init_t init_data = *((nvm3_Init_t *)in_vec[1].base);
-  if (init_data.halHandle != NULL) {
-    // The flash handle must explicitly be set to NULL by NS to make it clear that
-    // that the Secure-side flash handle will be used instead. We don't want to
-    // make the NS side believe it can provide its own flash handle.
+
+  if (init_data.halHandle != NULL
+      || init_data.cachePtr != NULL) {
+    // The flash handle- and cache pointers must explicitly be set to NULL by NS
+    // to make it clear that it allow the secure application to manage these
+    // aspects of NVM3. We don't want to make the NS side believe it can provide
+    // its own pointers for these parameters.
     return PSA_ERROR_PROGRAMMER_ERROR;
   }
 
-  // Overwrite NULL pointer with actual flash handle defined in nvm3_hal_flash.c
+  // Overwrite NULL pointer with actual flash handle defined in nvm3_hal_flash.c.
   extern const nvm3_HalHandle_t nvm3_halFlashHandle;
   init_data.halHandle = &nvm3_halFlashHandle;
 
+  // Install a pointer to the cache (either a newly allocated one, or the
+  // existing one if we're reopening the instance).
+  if (nvm3_defaultHandle->hasBeenOpened) {
+    if (sli_tz_nvm3_caches[0] == NULL) {
+      return PSA_ERROR_BAD_STATE;
+    }
+  } else {
+    // Allocate a new cache for the default instance.
+    sli_tz_nvm3_caches[0] =
+      (nvm3_CacheEntry_t *)mbedtls_calloc(init_data.cacheEntryCount,
+                                          sizeof(nvm3_CacheEntry_t));
+    if (sli_tz_nvm3_caches[0] == NULL) {
+      return PSA_ERROR_INSUFFICIENT_MEMORY;
+    }
+  }
+  init_data.cachePtr = sli_tz_nvm3_caches[0];
+
   Ecode_t *nvm3_status = out_vec[0].base;
 
-  // We use nvm3_open() instead of nvm3_initDefault() in order to be able to provide
-  // the updated default init data.
+  // We use nvm3_open() instead of nvm3_initDefault() in order to be able to
+  // provide the updated default init data.
   *nvm3_status = nvm3_open(nvm3_defaultHandle, &init_data);
+
+  if (*nvm3_status != ECODE_NVM3_OK
+      && *nvm3_status != ECODE_NVM3_ERR_OPENED_WITH_OTHER_PARAMETERS) {
+    mbedtls_free(sli_tz_nvm3_caches[0]);
+    sli_tz_nvm3_caches[0] = NULL;
+  }
 
   return PSA_SUCCESS;
 }
@@ -104,10 +129,17 @@ psa_status_t tfm_nvm3_deinit_default(psa_invec in_vec[],
 
   *nvm3_status = nvm3_close(nvm3_defaultHandle);
 
+  mbedtls_free(sli_tz_nvm3_caches[0]);
+  sli_tz_nvm3_caches[0] = NULL;
+
   return PSA_SUCCESS;
 }
 
+//------------------------------------------------------------------------------
+// NVM3-exclusive service functions
+
 #if defined(TZ_SERVICE_NVM3_PRESENT)
+
 psa_status_t tfm_nvm3_read_partial_data(psa_invec in_vec[],
                                         size_t in_len,
                                         psa_outvec out_vec[],
@@ -129,10 +161,6 @@ psa_status_t tfm_nvm3_read_partial_data(psa_invec in_vec[],
   Ecode_t *nvm3_status = out_vec[0].base;
   void *value = out_vec[1].base;
   size_t len = out_vec[1].len;
-
-  if (h->nvmAdr == NULL) {
-    h = nvm3_defaultHandle;
-  }
 
   *nvm3_status = nvm3_readPartialData(h, key, value, ofs, len);
 
@@ -159,10 +187,6 @@ psa_status_t tfm_nvm3_read_data(psa_invec in_vec[],
   void *value = out_vec[1].base;
   size_t len = out_vec[1].len;
 
-  if (h->nvmAdr == NULL) {
-    h = nvm3_defaultHandle;
-  }
-
   *nvm3_status = nvm3_readData(h, key, value, len);
 
   return PSA_SUCCESS;
@@ -188,10 +212,6 @@ psa_status_t tfm_nvm3_write_data(psa_invec in_vec[],
   // Output arguments
   Ecode_t *nvm3_status = out_vec[0].base;
 
-  if (h->nvmAdr == NULL) {
-    h = nvm3_defaultHandle;
-  }
-
   *nvm3_status = nvm3_writeData(h, key, value, len);
 
   return PSA_SUCCESS;
@@ -215,10 +235,6 @@ psa_status_t tfm_nvm3_delete_object(psa_invec in_vec[],
   // Output arguments
   Ecode_t *nvm3_status = out_vec[0].base;
 
-  if (h->nvmAdr == NULL) {
-    h = nvm3_defaultHandle;
-  }
-
   *nvm3_status = nvm3_deleteObject(h, key);
 
   return PSA_SUCCESS;
@@ -236,26 +252,68 @@ psa_status_t tfm_nvm3_open(psa_invec in_vec[],
   SLI_TZ_IOVEC_ASSERT_STRUCT_SIZE(out_vec[1], nvm3_Handle_t);
 
   // Input arguments
-  nvm3_Init_t *i = (nvm3_Init_t *)in_vec[1].base;
+  // Copy the provided init data into a new struct, such that the original
+  // remains untouched (which is expected since it's a const parameter).
+  nvm3_Init_t init_data = *((nvm3_Init_t *)in_vec[1].base);
 
   // Output arguments
   Ecode_t *nvm3_status = out_vec[0].base;
-  nvm3_Handle_t *h = (nvm3_Handle_t *)out_vec[1].base;
+  nvm3_Handle_t *handle = (nvm3_Handle_t *)out_vec[1].base;
 
-  if (i->halHandle != NULL) {
-    // The flash handle must explicitly be set to NULL by NS to make it clear that
-    // that the Secure-side flash handle will be used instead. We don't want to
-    // make the NS side believe it can provide its own flash handle.
+  if (init_data.halHandle != NULL
+      || init_data.cachePtr != NULL) {
+    // The flash handle- and cache pointers must explicitly be set to NULL by NS
+    // to make it clear that it allow the secure application to manage these
+    // aspects of NVM3. We don't want to make the NS side believe it can provide
+    // its own pointers for these parameters.
     return PSA_ERROR_PROGRAMMER_ERROR;
   }
 
-  // Overwrite NULL pointer with actual flash handle defined in nvm3_hal_flash.c
+  // Overwrite NULL pointer with actual flash handle defined in nvm3_hal_flash.c.
   extern const nvm3_HalHandle_t nvm3_halFlashHandle;
-  i->halHandle = &nvm3_halFlashHandle;
+  init_data.halHandle = &nvm3_halFlashHandle;
 
-  /* check if base is in NS */
+  // Install a pointer to the cache (either a newly allocated one, or the
+  // existing one if we're reopening the instance).
+  nvm3_CacheEntry_t **cache = NULL;
+  if (handle->hasBeenOpened) {
+    for (size_t i = SLI_TZ_SERVICE_NVM3_NON_DEFAULT_INSTANCE_CACHE_START_INDEX;
+         i < SLI_TZ_SERVICE_NVM3_MAX_INSTANCES;
+         ++i) {
+      if (sli_tz_nvm3_caches[i] == handle->cache.entryPtr) {
+        init_data.cachePtr = sli_tz_nvm3_caches[i];
+        cache = &sli_tz_nvm3_caches[i];
+        break;
+      }
+    }
+  } else {
+    for (size_t i = SLI_TZ_SERVICE_NVM3_NON_DEFAULT_INSTANCE_CACHE_START_INDEX;
+         i < SLI_TZ_SERVICE_NVM3_MAX_INSTANCES;
+         ++i) {
+      if (sli_tz_nvm3_caches[i] == NULL) {
+        init_data.cachePtr =
+          (nvm3_CacheEntry_t *)mbedtls_calloc(init_data.cacheEntryCount,
+                                              sizeof(nvm3_CacheEntry_t));
+        if (init_data.cachePtr == NULL) {
+          return PSA_ERROR_INSUFFICIENT_MEMORY;
+        }
+        sli_tz_nvm3_caches[i] = init_data.cachePtr;
+        cache = &sli_tz_nvm3_caches[i];
+        break;
+      }
+    }
+  }
+  if (init_data.cachePtr == NULL) {
+    return PSA_ERROR_BAD_STATE;
+  }
 
-  *nvm3_status = nvm3_open(h, i);
+  *nvm3_status = nvm3_open(handle, &init_data);
+
+  if (*nvm3_status != ECODE_NVM3_OK
+      && *nvm3_status != ECODE_NVM3_ERR_OPENED_WITH_OTHER_PARAMETERS) {
+    mbedtls_free(*cache);
+    *cache = NULL;
+  }
 
   return PSA_SUCCESS;
 }
@@ -276,11 +334,20 @@ psa_status_t tfm_nvm3_close(psa_invec in_vec[],
   // Output arguments
   Ecode_t *nvm3_status = out_vec[0].base;
 
-  if (h->nvmAdr == NULL) {
-    h = nvm3_defaultHandle;
+  nvm3_CacheEntry_t **cache = NULL;
+  for (size_t i = SLI_TZ_SERVICE_NVM3_NON_DEFAULT_INSTANCE_CACHE_START_INDEX;
+       i < SLI_TZ_SERVICE_NVM3_MAX_INSTANCES;
+       ++i) {
+    if (sli_tz_nvm3_caches[i] == h->cache.entryPtr) {
+      cache = &sli_tz_nvm3_caches[i];
+      break;
+    }
   }
 
   *nvm3_status = nvm3_close(h);
+
+  mbedtls_free(*cache);
+  *cache = NULL;
 
   return PSA_SUCCESS;
 }
@@ -307,10 +374,6 @@ psa_status_t tfm_nvm3_get_object_info(psa_invec in_vec[],
   uint32_t *type = (uint32_t *)out_vec[1].base;
   size_t *len = (size_t *)out_vec[2].base;
 
-  if (h->nvmAdr == NULL) {
-    h = nvm3_defaultHandle;
-  }
-
   *nvm3_status = nvm3_getObjectInfo(h, key, type, len);
 
   return PSA_SUCCESS;
@@ -336,10 +399,6 @@ psa_status_t tfm_nvm3_write_counter(psa_invec in_vec[],
   // Output arguments
   Ecode_t *nvm3_status = out_vec[0].base;
 
-  if (h->nvmAdr == NULL) {
-    h = nvm3_defaultHandle;
-  }
-
   *nvm3_status = nvm3_writeCounter(h, key, value);
 
   return PSA_SUCCESS;
@@ -364,10 +423,6 @@ psa_status_t tfm_nvm3_read_counter(psa_invec in_vec[],
   // Output arguments
   Ecode_t *nvm3_status = out_vec[0].base;
   uint32_t *value = (uint32_t *)out_vec[1].base;
-
-  if (h->nvmAdr == NULL) {
-    h = nvm3_defaultHandle;
-  }
 
   *nvm3_status = nvm3_readCounter(h, key, value);
 
@@ -400,10 +455,6 @@ psa_status_t tfm_nvm3_increment_counter(psa_invec in_vec[],
   Ecode_t *nvm3_status = out_vec[0].base;
   uint32_t *new_value = (uint32_t *)out_vec[1].base;
 
-  if (h->nvmAdr == NULL) {
-    h = nvm3_defaultHandle;
-  }
-
   *nvm3_status = nvm3_incrementCounter(h, key, new_value);
 
   return PSA_SUCCESS;
@@ -424,10 +475,6 @@ psa_status_t tfm_nvm3_erase_all(psa_invec in_vec[],
 
   // Output arguments
   Ecode_t *nvm3_status = out_vec[0].base;
-
-  if (h->nvmAdr == NULL) {
-    h = nvm3_defaultHandle;
-  }
 
   *nvm3_status = nvm3_eraseAll(h);
 
@@ -451,10 +498,6 @@ psa_status_t tfm_nvm3_get_erase_count(psa_invec in_vec[],
   // Output arguments
   Ecode_t *nvm3_status = out_vec[0].base;
   uint32_t *erase_cnt = (uint32_t *)out_vec[1].base;
-
-  if (h->nvmAdr == NULL) {
-    h = nvm3_defaultHandle;
-  }
 
   *nvm3_status = nvm3_getEraseCount(h, erase_cnt);
 
@@ -482,8 +525,6 @@ psa_status_t tfm_nvm3_set_erase_count(psa_invec in_vec[],
   return PSA_SUCCESS;
 }
 
-/* Ecode_t nvm3_repack(nvm3_Handle_t *h); */
-
 psa_status_t tfm_nvm3_repack(psa_invec in_vec[],
                              size_t in_len,
                              psa_outvec out_vec[],
@@ -499,10 +540,6 @@ psa_status_t tfm_nvm3_repack(psa_invec in_vec[],
 
   // Output arguments
   Ecode_t *nvm3_status = out_vec[0].base;
-
-  if (h->nvmAdr == NULL) {
-    h = nvm3_defaultHandle;
-  }
 
   *nvm3_status = nvm3_repack(h);
 
@@ -524,10 +561,6 @@ psa_status_t tfm_nvm3_repack_needed(psa_invec in_vec[],
 
   // Output arguments
   bool *nvm3_status = out_vec[0].base;
-
-  if (h->nvmAdr == NULL) {
-    h = nvm3_defaultHandle;
-  }
 
   *nvm3_status = nvm3_repackNeeded(h);
 
@@ -553,10 +586,6 @@ psa_status_t tfm_nvm3_resize(psa_invec in_vec[],
 
   // Output arguments
   Ecode_t *nvm3_status = out_vec[0].base;
-
-  if (h->nvmAdr == NULL) {
-    h = nvm3_defaultHandle;
-  }
 
   *nvm3_status = nvm3_resize(h, new_addr, new_size);
 
@@ -593,10 +622,6 @@ psa_status_t tfm_nvm3_enum_objects(psa_invec in_vec[],
   size_t *ret_val = out_vec[0].base;
   nvm3_ObjectKey_t *key_list_ptr = (nvm3_ObjectKey_t *)out_vec[1].base;
 
-  if (h->nvmAdr == NULL) {
-    h = nvm3_defaultHandle;
-  }
-
   *ret_val = nvm3_enumObjects(h, key_list_ptr, key_list_size, key_min, key_max);
 
   return PSA_SUCCESS;
@@ -632,12 +657,9 @@ psa_status_t tfm_nvm3_enum_deleted_objects(psa_invec in_vec[],
   size_t *ret_val = out_vec[0].base;
   nvm3_ObjectKey_t *key_list_ptr = (nvm3_ObjectKey_t *)out_vec[1].base;
 
-  if (h->nvmAdr == NULL) {
-    h = nvm3_defaultHandle;
-  }
-
   *ret_val = nvm3_enumDeletedObjects(h, key_list_ptr, key_list_size, key_min, key_max);
 
   return PSA_SUCCESS;
 }
-#endif // defined(TZ_SERVICE_NVM3_PRESENT)
+
+#endif // TZ_SERVICE_NVM3_PRESENT

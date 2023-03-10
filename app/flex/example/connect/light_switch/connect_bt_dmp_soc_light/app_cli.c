@@ -149,7 +149,7 @@ void cli_set_tx_option(sl_cli_command_arg_t *arguments)
   char* is_security = ((tx_options & EMBER_OPTIONS_SECURITY_ENABLED) ? ENABLED : DISABLED);
   char* is_high_prio = ((tx_options & EMBER_OPTIONS_HIGH_PRIORITY) ? ENABLED : DISABLED);
 
-  app_log_info("TX options set: MAC acks %s, security %s, priority %s", is_ack, is_security, is_high_prio);
+  app_log_info("TX options set: MAC acks %s, security %s, priority %s\n", is_ack, is_security, is_high_prio);
 }
 
 /******************************************************************************

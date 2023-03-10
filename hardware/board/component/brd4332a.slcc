@@ -1,0 +1,60 @@
+!!omap
+- id: brd4332a
+- label: BRD4332A
+- package: platform
+- description: Board support for BRD4332A.
+- category: Platform|Board|Radio Board
+- quality: production
+- requires:
+  - name: efr32bg21b010f1024im32
+  - name: brd4332a_config
+  - name: hardware_board_mainboard
+- provides:
+  - name: brd4332a
+  - name: hardware_board
+  - name: hardware_board_rb
+  - name: hardware_board_from_stk
+  - name: hardware_board_from_kg100s-pk6130a
+  - name: hardware_board_from_kg100s-rb4332a
+  - name: hardware_board_has_vcom
+  - name: hardware_board_supports_rf_band_2400
+  - name: hardware_board_supports_rf_band_868
+  - name: hardware_board_supports_rf_band_915
+  - name: hardware_board_supports_rf_band_924
+  - name: hardware_board_supports_4_rf_bands
+  - name: hardware_board_default_rf_band
+  - name: hardware_board_default_rf_band_868
+- recommends:
+  - id: brd4001a
+  - id: iostream_usart
+    instance:
+    - vcom
+  - id: bootloader_uart_driver
+  - id: simple_led
+    instance:
+    - led0
+    - led1
+  - id: simple_button
+    instance:
+    - btn0
+    - btn1
+  - id: bootloader_spi_peripheral_usart_driver
+- template_contribution:
+  - name: board_default_init
+    value: sl_board_disable_vcom()
+- define:
+  - name: SL_BOARD_NAME
+    value: '"BRD4332A"'
+  - name: SL_BOARD_REV
+    value: '"A03"'
+- tag:
+  - board:pn:BRD4332
+  - board:variant:A
+  - board:revision:A03
+  - board:device:efr32bg21b010f1024im32
+  - hardware:has:vcom
+  - hardware:has:pti
+  - hardware:has:led:2
+  - hardware:has:button:2
+  - hardware:has:exp_header:i2c
+  - hardware:shares:button:led

@@ -250,6 +250,10 @@ sl_status_t sli_iostream_uart_context_init(sl_iostream_uart_t *uart,
 #if defined(SL_CATALOG_POWER_MANAGER_PRESENT) && !defined(SL_CATALOG_KERNEL_PRESENT)
 static sl_power_manager_on_isr_exit_t sleep_on_isr_exit(void *context)
 {
+  if (context == NULL) {
+    return SL_POWER_MANAGER_IGNORE;
+  }
+
   sl_iostream_uart_context_t *uart_context = (sl_iostream_uart_context_t *)context;
 
   if ((uart_context->tx_idle) && (uart_context->sleep == SL_POWER_MANAGER_SLEEP)) {
@@ -699,7 +703,7 @@ static bool dma_irq_handler(unsigned int chan, unsigned int seq, void* user_para
   if (uart_context->rx_read_ptr >= write_ptr) {
     available_space = (size_t)(uart_context->rx_read_ptr - write_ptr);
   } else {
-    available_space = (size_t)(write_ptr - (uart_context->rx_buffer + uart_context->rx_buffer_len));
+    available_space = (size_t)((uart_context->rx_buffer + uart_context->rx_buffer_len) - write_ptr);
   }
 
   // Space available in the RX buffer

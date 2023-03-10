@@ -212,7 +212,7 @@ Ecode_t sl_hci_uart_write(uint8_t *data, uint16_t len, void (*callback)(uint32_t
   return status;
 }
 
-void sl_hci_uart_get_port_pin(uint8_t *port, uint8_t *pin)
+void sl_btctrl_hci_transport_get_port_pin(uint8_t *port, uint8_t *pin)
 {
   *port = SL_UARTDRV_USART_VCOM_RX_PORT;
   *pin = SL_UARTDRV_USART_VCOM_RX_PIN;

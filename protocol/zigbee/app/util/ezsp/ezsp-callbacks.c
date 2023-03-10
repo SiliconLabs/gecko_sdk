@@ -36,14 +36,14 @@ void ezspNoCallbacks(void)
 #endif
 
 #ifndef EZSP_APPLICATION_HAS_TIMER_HANDLER
-void ezspTimerHandler(uint8_t timerId)
+WEAK(void ezspTimerHandler(uint8_t timerId))
 {
 }
 #endif
 
 #ifndef EZSP_APPLICATION_HAS_DEBUG_HANDLER
-void ezspDebugHandler(uint8_t messageLength,
-                      uint8_t *messageContents)
+WEAK(void ezspDebugHandler(uint8_t messageLength,
+                           uint8_t *messageContents))
 {
 }
 #endif
@@ -87,14 +87,14 @@ void ezspSwitchNetworkKeyHandler(uint8_t sequenceNumber)
 #endif // UC_BUILD
 
 #ifndef EZSP_APPLICATION_HAS_REMOTE_BINDING_HANDLER
-void ezspRemoteSetBindingHandler(EmberBindingTableEntry *entry,
-                                 uint8_t index,
-                                 EmberStatus policyDecision)
+WEAK(void ezspRemoteSetBindingHandler(EmberBindingTableEntry *entry,
+                                      uint8_t index,
+                                      EmberStatus policyDecision))
 {
 }
 
-void ezspRemoteDeleteBindingHandler(uint8_t index,
-                                    EmberStatus policyDecision)
+WEAK(void ezspRemoteDeleteBindingHandler(uint8_t index,
+                                         EmberStatus policyDecision))
 {
 }
 #endif
@@ -104,7 +104,7 @@ WEAK(void ezspPollCompleteHandler(EmberStatus status))
 }
 
 #ifndef EZSP_APPLICATION_HAS_POLL_HANDLER
-void ezspPollHandler(EmberNodeId childId)
+WEAK(void ezspPollHandler(EmberNodeId childId, bool transmitExpected))
 {
 }
 #endif
@@ -128,15 +128,15 @@ void ezspIncomingSenderEui64Handler(EmberEUI64 senderEui64)
 #endif
 
 #ifndef EZSP_APPLICATION_HAS_ID_CONFLICT_HANDLER
-void ezspIdConflictHandler(EmberNodeId id)
+WEAK(void ezspIdConflictHandler(EmberNodeId id))
 {
 }
 #endif
 
 #ifndef EZSP_APPLICATION_HAS_INCOMING_MANY_TO_ONE_ROUTE_REQUEST_HANDLER
-void ezspIncomingManyToOneRouteRequestHandler(EmberNodeId source,
-                                              EmberEUI64 longId,
-                                              uint8_t cost)
+WEAK(void ezspIncomingManyToOneRouteRequestHandler(EmberNodeId source,
+                                                   EmberEUI64 longId,
+                                                   uint8_t cost))
 {
 }
 #endif
@@ -146,44 +146,44 @@ WEAK(void ezspIncomingRouteErrorHandler(EmberStatus status, EmberNodeId target))
 }
 
 #ifndef EZSP_APPLICATION_HAS_INCOMING_NETWORK_STATUS_HANDLER
-void ezspIncomingNetworkStatusHandler(uint8_t errorCode, EmberNodeId target)
+WEAK(void ezspIncomingNetworkStatusHandler(uint8_t errorCode, EmberNodeId target))
 {
 }
 #endif
 
 #ifndef EZSP_APPLICATION_HAS_ROUTE_RECORD_HANDLER
-void ezspIncomingRouteRecordHandler(EmberNodeId source,
-                                    EmberEUI64 sourceEui,
-                                    uint8_t lastHopLqi,
-                                    int8_t lastHopRssi,
-                                    uint8_t relayCount,
-                                    uint8_t *relayList)
+WEAK(void ezspIncomingRouteRecordHandler(EmberNodeId source,
+                                         EmberEUI64 sourceEui,
+                                         uint8_t lastHopLqi,
+                                         int8_t lastHopRssi,
+                                         uint8_t relayCount,
+                                         uint8_t *relayList))
 {
 }
 #endif
 
 #ifndef EZSP_APPLICATION_HAS_BOOTLOADER_HANDLER
-void ezspIncomingBootloadMessageHandler(EmberEUI64 longId,
-                                        uint8_t lastHopLqi,
-                                        int8_t lastHopRssi,
-                                        uint8_t messageLength,
-                                        uint8_t *messageContents)
+WEAK(void ezspIncomingBootloadMessageHandler(EmberEUI64 longId,
+                                             uint8_t lastHopLqi,
+                                             int8_t lastHopRssi,
+                                             uint8_t messageLength,
+                                             uint8_t *messageContents))
 {
 }
 
-void ezspBootloadTransmitCompleteHandler(EmberStatus status,
-                                         uint8_t messageLength,
-                                         uint8_t *messageContents)
+WEAK(void ezspBootloadTransmitCompleteHandler(EmberStatus status,
+                                              uint8_t messageLength,
+                                              uint8_t *messageContents))
 {
 }
 #endif
 
 #ifndef EZSP_APPLICATION_HAS_MAC_PASSTHROUGH_HANDLER
-void ezspMacPassthroughMessageHandler(uint8_t messageType,
-                                      uint8_t lastHopLqi,
-                                      int8_t lastHopRssi,
-                                      uint8_t messageLength,
-                                      uint8_t *messageContents)
+WEAK(void ezspMacPassthroughMessageHandler(uint8_t messageType,
+                                           uint8_t lastHopLqi,
+                                           int8_t lastHopRssi,
+                                           uint8_t messageLength,
+                                           uint8_t *messageContents))
 {
 }
 #endif
@@ -213,7 +213,7 @@ void ezspMfglibRxHandler(
 #endif
 
 #ifndef EZSP_APPLICATION_HAS_RAW_HANDLER
-void ezspRawTransmitCompleteHandler(EmberStatus status)
+WEAK(void ezspRawTransmitCompleteHandler(EmberStatus status))
 {
 }
 #endif
@@ -252,7 +252,7 @@ void ezspDsaSignHandler(EmberStatus status,
 #endif // UC_BUILD
 // Elliptical Cryptography Digital Signature Verification
 #ifndef EZSP_APPLICATION_HAS_DSA_VERIFY_HANDLER
-void ezspDsaVerifyHandler(EmberStatus status)
+WEAK(void ezspDsaVerifyHandler(EmberStatus status))
 {
 }
 #endif
@@ -269,13 +269,23 @@ WEAK(void ezspCustomFrameHandler(uint8_t payloadLength, uint8_t* payload))
 }
 
 #ifndef EZSP_APPLICATION_HAS_STACK_TOKEN_CHANGED_HANDLER
-void ezspStackTokenChangedHandler(uint16_t tokenAddress)
+WEAK(void ezspStackTokenChangedHandler(uint16_t tokenAddress))
 {
 }
 #endif
 
-WEAK(void ezspZllNetworkFoundHandler(const EmberZllNetwork* networkInfo,
-                                     const EmberZllDeviceInfoRecord* deviceInfo))
+// This call is fired when a ZLL network scan finds a ZLL network.
+WEAK(void ezspZllNetworkFoundHandler(
+       // Information about the network.
+       EmberZllNetwork *networkInfo,
+       // Used to interpret deviceInfo field.
+       bool isDeviceInfoNull,
+       // Device specific information.
+       EmberZllDeviceInfoRecord *deviceInfo,
+       // The link quality from the node that last relayed the message.
+       uint8_t lastHopLqi,
+       // The energy level (in units of dBm) observed during reception.
+       int8_t lastHopRssi))
 {
 }
 
@@ -283,11 +293,17 @@ WEAK(void ezspZllScanCompleteHandler(EmberStatus status))
 {
 }
 
-WEAK(void ezspZllAddressAssignmentHandler(const EmberZllAddressAssignment* addressInfo))
+WEAK(void ezspZllAddressAssignmentHandler(
+       // Address assignment information.
+       EmberZllAddressAssignment *addressInfo,
+       // The link quality from the node that last relayed the message.
+       uint8_t lastHopLqi,
+       // The energy level (in units of dBm) observed during reception.
+       int8_t lastHopRssi))
 {
 }
 
-WEAK(void ezspZllTouchLinkTargetHandler(const EmberZllNetwork* networkInfo))
+WEAK(void ezspZllTouchLinkTargetHandler(EmberZllNetwork* networkInfo))
 {
 }
 

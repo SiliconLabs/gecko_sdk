@@ -1,0 +1,122 @@
+{
+  "folders": [
+		{
+			"name": "btmesh_host_provisioner",
+			"path": "."
+		},
+		{
+			"name": "btmesh/common_host",
+			"path": "../../common_host"
+		},
+		{
+			"name": "bluetooth/common_host",
+			"path": "../../../bluetooth/common_host"
+		},
+	],
+	"extensions": {
+		"recommendations": [
+			"ms-vscode.cpptools-extension-pack",
+		]
+	},
+  "settings": {
+		"MSYS2_PATH": "c:/msys64/",
+		"SDK_PATH": "../../../../",
+		"C_Cpp.default.includePath": [
+			"${workspaceFolder:btmesh_host_provisioner}/**",
+			"${config:SDK_PATH}/app/common/util/**",
+			"${config:SDK_PATH}/app/btmesh/common_host/**",
+			"${config:SDK_PATH}/app/bluetooth/common_host/**",
+			"${config:SDK_PATH}/app/bluetooth/common/**",
+			"${config:SDK_PATH}/protocol/bluetooth/inc",
+			"${config:SDK_PATH}/platform/common/inc",
+			"${config:MSYS2_PATH}/mingw64/**"
+		],
+		"C_Cpp.default.cStandard": "c11",
+		"C_Cpp.default.cppStandard": "c++14",
+		"C_Cpp.default.intelliSenseMode": "gcc-x64",
+		"C_Cpp.default.compilerPath": "gcc",
+		"terminal.integrated.profiles.windows":{
+				"Msys MinGW64": {
+						"env": {
+								"CHERE_INVOKING":"1",
+								"MSYSTEM": "MINGW64",
+								"MSYS2_PATH_TYPE": "inherit"
+						},
+						"path": "${config:MSYS2_PATH}/usr/bin/bash.exe",
+						"args": [ "-login", "-i" ]
+				}
+		},
+		"terminal.integrated.defaultProfile.windows": "Msys MinGW64",
+		"files.associations": {
+			"*.slcp": "yaml",
+			"*.slcc": "yaml",
+			"*.h": "c",
+			"*.c": "c"
+		}
+	},
+	"tasks": {
+		"version": "2.0.0",
+		"tasks": [
+			{
+				"label": "make debug",
+				"type": "shell",
+				"command": "make",
+				"args": ["debug"],
+				"options": {
+					"cwd": "${workspaceFolder:btmesh_host_provisioner}"
+				},
+				"group": "build",
+				"presentation": {
+					"reveal": "always"
+				},
+				"problemMatcher": "$gcc"
+			},
+			{
+				"label": "make clean",
+				"type": "shell",
+				"command": "make",
+				"args": ["clean"],
+				"options": {
+					"cwd": "${workspaceFolder:btmesh_host_provisioner}"
+				},
+				"group": "build",
+				"presentation": {
+					"reveal": "always"
+				},
+				"problemMatcher": "$gcc"
+			}
+		]
+	},
+	"launch": {
+		"version": "0.2.0",
+		"configurations": [
+			{
+				"name": "(gdb) Launch",
+				"type": "cppdbg",
+				"request": "launch",
+				"program": "${workspaceFolder:btmesh_host_provisioner}/exe/btmesh_host_provisioner",
+				"args": ["${input:debugArgs}"],
+				"stopAtEntry": true,
+				"cwd": "${workspaceFolder:btmesh_host_provisioner}",
+				"environment": [],
+				"externalConsole": false,
+				"MIMode": "gdb",
+				"setupCommands": [
+						{
+								"description": "Enable pretty-printing for gdb",
+								"text": "-enable-pretty-printing",
+								"ignoreFailures": true
+						}
+				],
+				"preLaunchTask": "make debug"
+			}
+		],
+		"inputs": [
+			{
+				"id": "debugArgs",
+				"type": "promptString",
+				"description": "Arguments for btmesh_host_provisioner"
+			}
+		]
+	}
+}

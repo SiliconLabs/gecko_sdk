@@ -50,8 +50,8 @@
 #define SL_WISUN_PING_PACKET_SIZE                40U
 
 // <o SL_WISUN_PING_STACK_SIZE_WORD> Ping thread stack size in word
-// <i> Default: 120
-#define SL_WISUN_PING_STACK_SIZE_WORD            120U
+// <i> Default: 208
+#define SL_WISUN_PING_STACK_SIZE_WORD            208U
 
 // </h>
 

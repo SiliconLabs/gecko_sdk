@@ -397,4 +397,24 @@
 #define SL_OPENTHREAD_RADIO_CCA_MODE RAIL_IEEE802154_CCA_MODE_RSSI
 #endif
 
+/**
+ * @def SL_OPENTHREAD_RADIO_RX_BUFFER_COUNT
+ *
+ * Max number of RX buffers to use in the rdio driver
+ *
+ */
+#ifndef SL_OPENTHREAD_RADIO_RX_BUFFER_COUNT
+#define SL_OPENTHREAD_RADIO_RX_BUFFER_COUNT 4
+#endif
+
+/**
+ * @def SL_ENABLE_MULTI_RX_BUFFER_SUPPORT
+ *
+ * Enable Multi buffer Rx feature (experimental)
+ *
+ */
+#ifndef SL_ENABLE_MULTI_RX_BUFFER_SUPPORT
+#define SL_ENABLE_MULTI_RX_BUFFER_SUPPORT 0
+#endif
+
 #endif // OPENTHREAD_CORE_EFR32_CONFIG_H_

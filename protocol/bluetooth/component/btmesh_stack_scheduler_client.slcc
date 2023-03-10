@@ -1,0 +1,20 @@
+id: "btmesh_stack_scheduler_client"
+label: "Scheduler Client Model"
+package: "Btmesh"
+description: "Provides Bluetooth mesh Scheduler Client model.
+  It is used to support the functionality of a node that can configure the schedule on another node.
+  Schedule being the occurrence of an event and the type of event to be triggered."
+category: "Bluetooth Mesh|Stack|Models|Time and Scenes"
+quality: "production"
+root_path: "protocol/bluetooth"
+
+requires:
+  - name: "btmesh_stack"
+  - name: "btmesh_core"
+provides:
+  - name: "btmesh_stack_scheduler_client"
+template_contribution:
+  - name: btmesh_bgapi_class
+    value:
+      class: "scheduler_client"
+    priority: 1

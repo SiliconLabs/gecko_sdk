@@ -172,7 +172,10 @@ static void init_and_reset(void)
 
 ZW_WEAK void cc_supervision_get_received_handler(SUPERVISION_GET_RECEIVED_HANDLER_ARGS * pArgs)
 {
-  UNUSED(pArgs);
+  // The More status updates field should be false by default.
+  // If an application wants to send more status updates, it should set the more status updates field to true.
+  const uint8_t more_status_update_this_is_last = 1;
+  pArgs->properties1 &= ~(CC_SUPERVISION_ADD_MORE_STATUS_UPDATE(more_status_update_this_is_last)); //The 7th bit (more status update) needs to be 0 of the property field
 }
 
 ZW_WEAK void cc_supervision_report_recived_handler(cc_supervision_status_t status, uint8_t duration)
@@ -355,10 +358,6 @@ static received_frame_status_t CC_Supervision_handler(
         args.cmdClass = *(((uint8_t *)pCmd) + sizeof(ZW_SUPERVISION_GET_FRAME));
         args.cmd      = *(((uint8_t *)pCmd) + sizeof(ZW_SUPERVISION_GET_FRAME) + 1);
         args.properties1 = pCmd->ZW_SupervisionGetFrame.properties1;
-        // The More status updates field should be false by default.
-        // If an application needs to advertise more Supervision Reports, the cc_supervision_get_received_handler weak function needs to be implemented.
-        const uint8_t more_status_update_this_is_last = 1;
-        args.properties1 &= ~(CC_SUPERVISION_ADD_MORE_STATUS_UPDATE(more_status_update_this_is_last)); //The 7th bit (more status update) needs to be 0 of the property field
         args.rxOpt = rxOpt;
         args.status = status;
         args.duration = 0;

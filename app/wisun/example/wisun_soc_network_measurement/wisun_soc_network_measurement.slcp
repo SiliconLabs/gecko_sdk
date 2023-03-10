@@ -71,6 +71,12 @@ configuration:
     value: "eusartHwFlowControlNone"
   - name: "SL_IOSTREAM_EUSART_VCOM_CONVERT_BY_DEFAULT_LF_TO_CRLF"
     value: "1"
+  - name: "SL_IOSTREAM_USART_VCOM_RX_BUFFER_SIZE"
+    value: "128"
+    condition: [iostream_usart]
+  - name: "SL_IOSTREAM_EUSART_VCOM_RX_BUFFER_SIZE"
+    value: "128"
+    condition: [iostream_eusart]
   - name: "OS_CFG_APP_HOOKS_EN"
     value: "1"
     condition: [micriumos_kernel]
@@ -115,21 +121,19 @@ configuration:
     
 #--------------------- SDK memory configuration ------------------------
   - name: "SL_HEAP_SIZE"
-    value: "0x16000"
+    value: "0x17000"
   - name: "SL_WISUN_COAP_RESOURCE_HND_SOCK_BUFF_SIZE"
     value: "2048"
   - name: "SL_WISUN_COAP_RESOURCE_HND_STACK_SIZE_WORD"
-    value: "288"
+    value: "512"
   - name: "SL_GUI_STACK_SIZE_WORD"
-    value: "236"
+    value: "256"
   - name: "SL_DISPLAY_STACK_SIZE_WORD"
-    value: "264"
+    value: "384"
   - name: "SL_WISUN_PING_STACK_SIZE_WORD"
-    value: "120"
+    value: "512"
   - name: "SL_IPERF_STACK_SIZE_WORD"
-    value: "310"
-  - name: "APP_MAIN_STACK_SIZE_WORD"
-    value: "200"
+    value: "512"
 
 readme:
   - path: ../../documentation/example/wisun_soc_network_measurement/readme.md

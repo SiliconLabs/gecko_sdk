@@ -50,6 +50,7 @@
 #include "em_gpio.h"
 #include "em_chip.h"
 
+#include "fih.h"
 // -----------------------------------------------------------------------------
 // Defines
 
@@ -507,8 +508,9 @@ static void setup_mpu(void)
  * Sets up the static isolation boundaries which are constant throughout
  * the runtime of the system. Assumes that the SMU is clocked.
  *****************************************************************************/
-static void setup_static_boundaries(void)
+static fih_int setup_static_boundaries(void)
 {
+  fih_int fih_rc = FIH_FAILURE;
   // Memory map configuration
   // Uses the SMU to split flash into S/NSC/NS, and RAM into S/NS.
   SMU->LOCK = SMU_LOCK_SMULOCKKEY_UNLOCK;
@@ -574,6 +576,8 @@ static void setup_static_boundaries(void)
 #if defined(TEST_BOOTLOADER_MEMORY_BOUNDARY)
   memory_boundary_test();
 #endif
+  fih_rc = FIH_SUCCESS;
+  FIH_RET(fih_rc);
 }
 
 __STATIC_INLINE void lockBootloaderArea(void)
@@ -699,9 +703,13 @@ void SystemInit2(void)
     enterApp = false;
     verifyApp = false;
   }
-
+#if defined(CRYPTOACC_PRESENT)
+  // fih_delay_init is applicable for vse devices
+  fih_delay_init();
+#endif
   // App should be verified
   if (verifyApp) {
+    fih_delay();
     // If app verification fails, enter bootloader instead
     enterApp = bootload_verifyApplication(startOfAppSpace);
     if (!enterApp) {
@@ -754,6 +762,7 @@ void SystemInit2(void)
 // Main Bootloader implementation
 int main(void)
 {
+  fih_int fih_rc = FIH_FAILURE;
   CHIP_Init();
 #if defined(BOOTLOADER_APPLOADER)
   sl_device_init_clocks();
@@ -796,7 +805,7 @@ int main(void)
   smu_configure_peripherals();
   smu_configure_bus_masters();
 #endif // BOOTLOADER_APPLOADER
-  setup_static_boundaries();
+  FIH_CALL(setup_static_boundaries, fih_rc);
 
   // Lock the whole bootloader flash unconditionally
   lockBootloaderArea();
@@ -816,7 +825,7 @@ int main(void)
 #endif
   // We might have been through a softreset triggered by the application,
   // do not leave any traces of the secure application before jumping into the NS bootloader
-  cleanUpRAM(SRAM_BASE + NS_RAM_OFFSET, SRAM_BASE + SRAM_SIZE);
+  FIH_CALL(cleanUpRAM, fih_rc, (SRAM_BASE + NS_RAM_OFFSET), (SRAM_BASE + SRAM_SIZE));
   jump_to_ns();
 
   // Should never reach this point

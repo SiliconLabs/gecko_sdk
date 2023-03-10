@@ -48,6 +48,16 @@ extern "C" {
 #endif
 
 //------------------------------------------------------------------------------
+// Defines and macros
+
+#define SLI_TZ_SERVICE_NVM3_MAX_INSTANCES                           (5)
+#define SLI_TZ_SERVICE_NVM3_NON_DEFAULT_INSTANCE_CACHE_START_INDEX  (1)
+#define SLI_TZ_SERVICE_NVM3_DEFAULT_HANDLE_MAGIC                    (0xBADC0C0A)
+
+#define SLI_TZ_SERVICE_NVM3_HANDLE_IS_DEFAULT(handle) \
+  (handle->nvmAdr == (nvm3_HalPtr_t)SLI_TZ_SERVICE_NVM3_DEFAULT_HANDLE_MAGIC)
+
+//------------------------------------------------------------------------------
 // Function declarations
 
 psa_status_t tfm_nvm3_init_default(sli_tz_invec *in_vec, size_t in_len, sli_tz_outvec *out_vec, size_t out_len);

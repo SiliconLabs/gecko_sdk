@@ -32,7 +32,11 @@ void emberAfPluginCountersInitCallback(SLXU_INIT_ARG)
   emberAfPluginCountersResetThresholds();
 }
 
+#ifdef UC_BUILD
+void emAfCounterRolloverCallback(EmberCounterType type)
+#else // !UC_BUILD
 void ezspCounterRolloverHandler(EmberCounterType type)
+#endif // UC_BUILD
 {
   emberAfPluginCountersRolloverCallback(type);
 }

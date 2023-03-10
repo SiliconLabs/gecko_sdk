@@ -48,7 +48,6 @@
 // <i> Enable assertions in the source code
 /// Enable Assert in source code.
 #define SL_DEBUG_ASSERT                    0
-
 // </h>
 // <<< end of configuration section >>>
 
@@ -57,13 +56,17 @@
 // $[DBG_SL_DEBUG]
 /// SWO Debug Peripheral.
 #define SL_DEBUG_PERIPHERAL                     DBG
-
+#if defined(SL_DEBUG_PRINT) && (SL_DEBUG_PRINT == 1)
 /// SWO Debug Port.
 #define SL_DEBUG_SWV_PORT                       gpioPortF
 /// SWO Debug Pin.
 #define SL_DEBUG_SWV_PIN                        2
 /// SWO Debug Location
 #define SL_DEBUG_SWV_LOC                        0
+#else
+/// SWO Debug Port.
+#define SL_DEBUG_SWV_PORT                       0
+#endif
 // [DBG_SL_DEBUG]$
 // <<< sl:end pin_tool >>>
 

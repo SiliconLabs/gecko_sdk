@@ -51,6 +51,7 @@ sl_status_t sli_mvp_util_memclr_f16(sli_mvp_program_context_t *p,
   int depth = vecs;
   int height = rows;
   int width = cols;
+  int8_t *dest = dst;
   bool parallel = false;
   sl_status_t status = SL_STATUS_OK;
   unsigned batch_size = 2 * vecs * rows * cols;
@@ -72,7 +73,7 @@ sl_status_t sli_mvp_util_memclr_f16(sli_mvp_program_context_t *p,
     sli_mvp_prog_set_reg_f16c(p->p, SLI_MVP_R0, 0, 0);
     sli_mvp_pb_config_array_nhwc(p->p,
                                  SLI_MVP_ARRAY(0),
-                                 dst,
+                                 dest,
                                  parallel == true
                                  ? SLI_MVP_DATATYPE_COMPLEX_BINARY16
                                  : SLI_MVP_DATATYPE_BINARY16,
@@ -100,7 +101,7 @@ sl_status_t sli_mvp_util_memclr_f16(sli_mvp_program_context_t *p,
     } else {
       return status;
     }
-    dst += batch_size;
+    dest += batch_size;
   }
   return status;
 }

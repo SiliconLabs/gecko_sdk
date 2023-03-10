@@ -306,13 +306,23 @@
 // <i> Default: 0
 #define SL_RAIL_UTIL_INIT_EVENT_DETECT_RSSI_THRESHOLD_INSTANCE_ENABLE 0
 // </h>
-// </e>
-
 // <h> Thermistor Events
 // <q SL_RAIL_UTIL_INIT_EVENT_THERMISTOR_DONE_INSTANCE_ENABLE> End of thermistor measurement
 // <i> Default: 0
 #define SL_RAIL_UTIL_INIT_EVENT_THERMISTOR_DONE_INSTANCE_ENABLE 0
 // </h>
+// <h> Temperature Events
+// <q SL_RAIL_UTIL_INIT_EVENT_TX_BLOCKED_TOO_HOT_INSTANCE_ENABLE> Transmit blocked because of temperature limitation
+// <i> Default: 0
+#define SL_RAIL_UTIL_INIT_EVENT_TX_BLOCKED_TOO_HOT_INSTANCE_ENABLE 0
+// <q SL_RAIL_UTIL_INIT_EVENT_TEMPERATURE_TOO_HOT_INSTANCE_ENABLE> Temperature is too hot for Tx operation
+// <i> Default: 0
+#define SL_RAIL_UTIL_INIT_EVENT_TEMPERATURE_TOO_HOT_INSTANCE_ENABLE 0
+// <q SL_RAIL_UTIL_INIT_EVENT_TEMPERATURE_COOL_DOWN_INSTANCE_ENABLE> Temperature has cooled enough for Tx operation
+// <i> Default: 0
+#define SL_RAIL_UTIL_INIT_EVENT_TEMPERATURE_COOL_DOWN_INSTANCE_ENABLE 0
+// </h>
+// </e>
 
 // </e>
 // </h>

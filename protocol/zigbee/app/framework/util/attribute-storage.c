@@ -832,7 +832,7 @@ EmberAfCluster *emberAfFindClusterWithMfgCode(uint8_t endpoint,
                                               uint16_t manufacturerCode)
 {
   uint8_t ep = emberAfIndexFromEndpoint(endpoint);
-  if ( ep == 0xFF ) {
+  if ((ep >= FIXED_ENDPOINT_COUNT) || ep == 0xFF ) {
     return NULL;
   } else {
     return emberAfFindClusterInTypeWithMfgCode(emAfEndpoints[ep].endpointType, clusterId, mask, manufacturerCode);
@@ -1175,7 +1175,7 @@ uint8_t emberAfClusterCount(uint8_t endpoint, bool server)
   uint8_t clusterData;
 #endif //EMBER_SCRIPTED_TEST
 #endif //EMBER_AF_PLUGIN_ZCL_CLUSTER_ENABLE_DISABLE_RUN_TIME
-  if ( index == 0xFF ) {
+  if ( index == 0xFF || (index >= MAX_ENDPOINT_COUNT)) {
     return 0;
   }
   de = &(emAfEndpoints[index]);
@@ -1212,7 +1212,7 @@ uint8_t emberAfClusterCount(uint8_t endpoint, bool server)
 uint8_t emberAfGetClusterCountForEndpoint(uint8_t endpoint)
 {
   uint8_t index = emberAfIndexFromEndpoint(endpoint);
-  if ( index == 0xFF) {
+  if ( index == 0xFF || (index >= MAX_ENDPOINT_COUNT)) {
     return 0;
   }
   return emAfEndpoints[index].endpointType->clusterCount;
@@ -1232,7 +1232,7 @@ EmberAfCluster* emberAfGetClusterByIndex(uint8_t endpoint, uint8_t clusterIndex)
   uint8_t endpointIndex = emberAfIndexFromEndpoint(endpoint);
   EmberAfDefinedEndpoint* definedEndpoint;
 
-  if (endpointIndex == 0xFF) {
+  if (endpointIndex == 0xFF || (endpointIndex >= MAX_ENDPOINT_COUNT)) {
     return NULL;
   }
   definedEndpoint = &(emAfEndpoints[endpointIndex]);
@@ -1246,7 +1246,7 @@ EmberAfCluster* emberAfGetClusterByIndex(uint8_t endpoint, uint8_t clusterIndex)
 EmberAfProfileId emberAfGetProfileIdForEndpoint(uint8_t endpoint)
 {
   uint8_t endpointIndex = emberAfIndexFromEndpoint(endpoint);
-  if (endpointIndex == 0xFF) {
+  if (endpointIndex == 0xFF || (endpointIndex >= MAX_ENDPOINT_COUNT)) {
     return EMBER_AF_INVALID_PROFILE_ID;
   }
   return emAfEndpoints[endpointIndex].profileId;
@@ -1255,7 +1255,7 @@ EmberAfProfileId emberAfGetProfileIdForEndpoint(uint8_t endpoint)
 uint16_t emberAfGetDeviceIdForEndpoint(uint8_t endpoint)
 {
   uint8_t endpointIndex = emberAfIndexFromEndpoint(endpoint);
-  if (endpointIndex == 0xFF) {
+  if (endpointIndex == 0xFF || (endpointIndex >= MAX_ENDPOINT_COUNT)) {
     return EMBER_AF_INVALID_PROFILE_ID;
   }
   return emAfEndpoints[endpointIndex].deviceId;
@@ -1276,7 +1276,7 @@ EmberAfCluster *emberAfGetNthCluster(uint8_t endpoint, uint8_t n, bool server)
 #endif //EMBER_SCRIPTED_TEST
 #endif //EMBER_AF_PLUGIN_ZCL_CLUSTER_ENABLE_DISABLE_RUN_TIME
 
-  if ( index == 0xFF ) {
+  if ( index == 0xFF || (index >= MAX_ENDPOINT_COUNT)) {
     return NULL;
   }
   de = &(emAfEndpoints[index]);
@@ -1349,7 +1349,7 @@ void emAfLoadAttributeDefaults(uint8_t endpoint, bool writeTokens)
     EmberAfDefinedEndpoint *de;
     if (endpoint != EMBER_BROADCAST_ENDPOINT) {
       ep = emberAfIndexFromEndpoint(endpoint);
-      if (ep == 0xFF) {
+      if (ep == 0xFF || (ep >= FIXED_ENDPOINT_COUNT)) {
         return;
       }
     }

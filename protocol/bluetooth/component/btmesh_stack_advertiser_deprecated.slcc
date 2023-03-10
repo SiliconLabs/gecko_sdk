@@ -1,0 +1,217 @@
+id: "btmesh_stack_advertiser_deprecated"
+label: "Deprecated Advertiser"
+package: "Btmesh"
+description: >
+  This component implements an "old-fashioned" way of advertising, where both types of advertisings
+  (legacy and extended) are mixed up. It uses deprecated Bluetooth advertiser API.
+  This component is provided for backward compatibility. It will be deprecated soon.
+  It is recommended to use either <btmesh_stack_advertiser_legacy> or <btmesh_stack_advertiser_extended>.
+
+category: "Bluetooth Mesh|Advertiser Types"
+quality: "production"
+root_path: "protocol/bluetooth"
+
+requires:
+  - name: "bluetooth_feature_advertiser"
+provides:
+  - name: "btmesh_stack_advertiser_deprecated"
+  - name: "btmesh_advertiser"
+template_contribution:
+  - name: btmesh_advertisers
+    value:
+      name: mesh_data
+      count: 1
+  - name: btmesh_advertisers
+    value:
+      name: provisioning_advertisers
+      count: 2
+library:
+#EFR32BG12P
+  - path: "lib/EFR32BG12P/GCC/libbtmesh_advertiser_deprecated.a"
+    condition:
+      - "toolchain_gcc"
+      - "device_family_efr32bg12p"
+  - path: "lib/EFR32BG12P/IAR/libbtmesh_advertiser_deprecated.a"
+    condition:
+      - "toolchain_iar"
+      - "device_family_efr32bg12p"
+#EFR32MG12P
+  - path: "lib/EFR32MG12P/GCC/libbtmesh_advertiser_deprecated.a"
+    condition:
+      - "toolchain_gcc"
+      - "device_family_efr32mg12p"
+  - path: "lib/EFR32MG12P/IAR/libbtmesh_advertiser_deprecated.a"
+    condition:
+      - "toolchain_iar"
+      - "device_family_efr32mg12p"
+#MGM12
+  - path: "lib/EFR32MG12P/GCC/libbtmesh_advertiser_deprecated.a"
+    condition:
+      - "toolchain_gcc"
+      - "device_family_mgm12"
+  - path: "lib/EFR32MG12P/IAR/libbtmesh_advertiser_deprecated.a"
+    condition:
+      - "toolchain_iar"
+      - "device_family_mgm12"
+#EFR32BG13P
+  - path: "lib/EFR32BG13P/GCC/libbtmesh_advertiser_deprecated.a"
+    condition:
+      - "toolchain_gcc"
+      - "device_family_efr32bg13p"
+  - path: "lib/EFR32BG13P/IAR/libbtmesh_advertiser_deprecated.a"
+    condition:
+      - "toolchain_iar"
+      - "device_family_efr32bg13p"
+#BGM13
+  - path: "lib/EFR32BG13P/GCC/libbtmesh_advertiser_deprecated.a"
+    condition:
+      - "toolchain_gcc"
+      - "device_family_bgm13"
+  - path: "lib/EFR32BG13P/IAR/libbtmesh_advertiser_deprecated.a"
+    condition:
+      - "toolchain_iar"
+      - "device_family_bgm13"
+#EFR32MG13P
+  - path: "lib/EFR32MG13P/GCC/libbtmesh_advertiser_deprecated.a"
+    condition:
+      - "toolchain_gcc"
+      - "device_family_efr32mg13p"
+  - path: "lib/EFR32MG13P/IAR/libbtmesh_advertiser_deprecated.a"
+    condition:
+      - "toolchain_iar"
+      - "device_family_efr32mg13p"
+#MGM13
+  - path: "lib/EFR32MG13P/GCC/libbtmesh_advertiser_deprecated.a"
+    condition:
+      - "toolchain_gcc"
+      - "device_family_mgm13"
+  - path: "lib/EFR32MG13P/IAR/libbtmesh_advertiser_deprecated.a"
+    condition:
+      - "toolchain_iar"
+      - "device_family_mgm13"
+#EFR32BG21
+  - path: "lib/EFR32BG21/GCC/libbtmesh_advertiser_deprecated.a"
+    condition:
+      - "toolchain_gcc"
+      - "device_family_efr32bg21"
+  - path: "lib/EFR32BG21/IAR/libbtmesh_advertiser_deprecated.a"
+    condition:
+      - "toolchain_iar"
+      - "device_family_efr32bg21"
+#BGM21
+  - path: "lib/EFR32BG21/GCC/libbtmesh_advertiser_deprecated.a"
+    condition:
+      - "toolchain_gcc"
+      - "device_family_bgm21"
+  - path: "lib/EFR32BG21/IAR/libbtmesh_advertiser_deprecated.a"
+    condition:
+      - "toolchain_iar"
+      - "device_family_bgm21"
+#EFR32MG21
+  - path: "lib/EFR32MG21/GCC/libbtmesh_advertiser_deprecated.a"
+    condition:
+      - "toolchain_gcc"
+      - "device_family_efr32mg21"
+  - path: "lib/EFR32MG21/IAR/libbtmesh_advertiser_deprecated.a"
+    condition:
+      - "toolchain_iar"
+      - "device_family_efr32mg21"
+#MGM21
+  - path: "lib/EFR32MG21/GCC/libbtmesh_advertiser_deprecated.a"
+    condition:
+      - "toolchain_gcc"
+      - "device_family_mgm21"
+  - path: "lib/EFR32MG21/IAR/libbtmesh_advertiser_deprecated.a"
+    condition:
+      - "toolchain_iar"
+      - "device_family_mgm21"
+#EFR32BG22
+  - path: "lib/EFR32BG22/GCC/libbtmesh_advertiser_deprecated.a"
+    condition:
+      - "toolchain_gcc"
+      - "device_family_efr32bg22"
+  - path: "lib/EFR32BG22/IAR/libbtmesh_advertiser_deprecated.a"
+    condition:
+      - "toolchain_iar"
+      - "device_family_efr32bg22"
+#BGM22
+  - path: "lib/EFR32BG22/GCC/libbtmesh_advertiser_deprecated.a"
+    condition:
+      - "toolchain_gcc"
+      - "device_family_bgm22"
+  - path: "lib/EFR32BG22/IAR/libbtmesh_advertiser_deprecated.a"
+    condition:
+      - "toolchain_iar"
+      - "device_family_bgm22"
+#EFR32MG22
+  - path: "lib/EFR32MG22/GCC/libbtmesh_advertiser_deprecated.a"
+    condition:
+      - "toolchain_gcc"
+      - "device_family_efr32mg22"
+  - path: "lib/EFR32MG22/IAR/libbtmesh_advertiser_deprecated.a"
+    condition:
+      - "toolchain_iar"
+      - "device_family_efr32mg22"
+#MGM22
+  - path: "lib/EFR32MG22/GCC/libbtmesh_advertiser_deprecated.a"
+    condition:
+      - "toolchain_gcc"
+      - "device_family_mgm22"
+  - path: "lib/EFR32MG22/IAR/libbtmesh_advertiser_deprecated.a"
+    condition:
+      - "toolchain_iar"
+      - "device_family_mgm22"
+#EFR32MG24
+  - path: "lib/EFR32MG24/GCC/libbtmesh_advertiser_deprecated.a"
+    condition:
+      - "toolchain_gcc"
+      - "device_family_efr32mg24"
+  - path: "lib/EFR32MG24/IAR/libbtmesh_advertiser_deprecated.a"
+    condition:
+      - "toolchain_iar"
+      - "device_family_efr32mg24"
+#EFR32BG24
+  - path: "lib/EFR32BG24/GCC/libbtmesh_advertiser_deprecated.a"
+    condition:
+      - "toolchain_gcc"
+      - "device_family_efr32bg24"
+  - path: "lib/EFR32BG24/IAR/libbtmesh_advertiser_deprecated.a"
+    condition:
+      - "toolchain_iar"
+      - "device_family_efr32bg24"
+#MGM24
+  - path: "lib/EFR32MG24/GCC/libbtmesh_advertiser_deprecated.a"
+    condition:
+      - "toolchain_gcc"
+      - "device_family_mgm24"
+  - path: "lib/EFR32MG24/IAR/libbtmesh_advertiser_deprecated.a"
+    condition:
+      - "toolchain_iar"
+      - "device_family_mgm24"
+#BGM24
+  - path: "lib/EFR32BG24/GCC/libbtmesh_advertiser_deprecated.a"
+    condition:
+      - "toolchain_gcc"
+      - "device_family_bgm24"
+  - path: "lib/EFR32BG24/IAR/libbtmesh_advertiser_deprecated.a"
+    condition:
+      - "toolchain_iar"
+      - "device_family_bgm24"
+#EFR32MG27
+  - path: "lib/EFR32MG27/GCC/libbtmesh_advertiser_deprecated.a"
+    condition:
+      - "toolchain_gcc"
+      - "device_family_efr32mg27"
+  - path: "lib/EFR32MG27/IAR/libbtmesh_advertiser_deprecated.a"
+    condition:
+      - "toolchain_iar"
+      - "device_family_efr32mg27"
+#EFR32BG27
+  - path: "lib/EFR32BG27/GCC/libbtmesh_advertiser_deprecated.a"
+    condition:
+      - "toolchain_gcc"
+      - "device_family_efr32bg27"
+  - path: "lib/EFR32BG27/IAR/libbtmesh_advertiser_deprecated.a"
+    condition:
+      - "toolchain_iar"
+      - "device_family_efr32bg27"

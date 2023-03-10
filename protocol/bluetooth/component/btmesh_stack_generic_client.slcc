@@ -1,0 +1,20 @@
+id: "btmesh_stack_generic_client"
+label: "Generic Client Models"
+package: "Btmesh"
+description: "Provides the Bluetooth mesh Generic Client models. The libraries are structured so that only the specific categories of models that are enabled with their respective BGAPI init calls are included in the application binary. For example, an application that wishes to use Generic On/Off and Generic Level must call sl_btmesh_cmd_generic_client_init_on_off() and sl_btmesh_cmd_generic_client_init_level()."
+category: "Bluetooth Mesh|Stack|Models"
+quality: "production"
+root_path: "protocol/bluetooth"
+
+requires:
+  - name: "btmesh_stack"
+  - name: "btmesh_core"
+provides:
+  - name: "btmesh_stack_generic_client"
+  - name: "btmesh_generic_model"
+    allow_multiple: true
+template_contribution:
+  - name: btmesh_bgapi_class
+    value:
+      class: "generic_client"
+    priority: 1

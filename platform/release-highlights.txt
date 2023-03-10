@@ -1,2 +1,4 @@
-Gecko Platform 4.2.1.0
-- Targeted quality improvements and bug fixes
+Gecko Platform 4.2.2.0
+- Security
+  - Released software support for TrustZone, GA quality
+- Other targeted quality improvements and bug fixes

@@ -176,6 +176,40 @@ RAIL_Status_t RAIL_InitTxPowerCurvesAlt(const RAIL_TxPowerCurvesConfigAlt_t *con
 #ifdef RAIL_PA_CONVERSIONS_WEAK
 __WEAK
 #endif
+const RAIL_PaPowerSetting_t *RAIL_GetPowerSettingTable(RAIL_Handle_t railHandle, RAIL_TxPowerMode_t mode,
+                                                       RAIL_TxPower_t *minPower, RAIL_TxPower_t *maxPower,
+                                                       RAIL_TxPowerLevel_t *step)
+{
+  (void)railHandle;
+#if RAIL_SUPPORTS_DBM_POWERSETTING_MAPPING_TABLE
+  // Check for an invalid Tx power mode
+  if ((mode >= RAIL_NUM_PA)
+   #ifdef RAIL_TX_POWER_MODE_2P4GIG_HIGHEST
+      || (mode == RAIL_TX_POWER_MODE_2P4GIG_HIGHEST)
+   #endif
+   #ifdef RAIL_TX_POWER_MODE_SUBGIG_HIGHEST
+      || (mode == RAIL_TX_POWER_MODE_SUBGIG_HIGHEST)
+   #endif
+      ) {
+    return NULL;
+  }
+  RAIL_PaDescriptor_t *modeInfo = &powerCurvesState.curves[mode];
+  *minPower = modeInfo->minPowerDbm;
+  *maxPower = modeInfo->maxPowerDbm;
+  *step = modeInfo->step;
+  return (RAIL_PaPowerSetting_t*)(modeInfo->conversion.mappingTable);
+#else
+  (void)mode;
+  (void)minPower;
+  (void)maxPower;
+  (void)step;
+  return NULL;
+#endif
+}
+
+#ifdef RAIL_PA_CONVERSIONS_WEAK
+__WEAK
+#endif
 RAIL_TxPowerLevel_t RAIL_ConvertDbmToRaw(RAIL_Handle_t railHandle,
                                          RAIL_TxPowerMode_t mode,
                                          RAIL_TxPower_t power)
@@ -201,7 +235,14 @@ RAIL_TxPowerLevel_t RAIL_ConvertDbmToRaw(RAIL_Handle_t railHandle,
   }
 
   // Check for an invalid Tx power mode
-  if (mode >= RAIL_TX_POWER_MODE_NONE) {
+  if ((mode >= RAIL_NUM_PA)
+   #ifdef RAIL_TX_POWER_MODE_2P4GIG_HIGHEST
+      || (mode == RAIL_TX_POWER_MODE_2P4GIG_HIGHEST)
+   #endif
+   #ifdef RAIL_TX_POWER_MODE_SUBGIG_HIGHEST
+      || (mode == RAIL_TX_POWER_MODE_SUBGIG_HIGHEST)
+   #endif
+      ) {
     return 0U;
   }
 
@@ -223,7 +264,7 @@ RAIL_TxPowerLevel_t RAIL_ConvertDbmToRaw(RAIL_Handle_t railHandle,
       // Power level is within bounds (MISRA required else)
     }
 
-    uint32_t powerIndex = (power - minPower) * step;
+    uint32_t powerIndex = (power - minPower) / step;
     RAIL_SetPaPowerSetting(railHandle, modeInfo->conversion.mappingTable[powerIndex], minPower, maxPower, power);
     return 0U;
   }
@@ -339,7 +380,14 @@ RAIL_TxPower_t RAIL_ConvertRawToDbm(RAIL_Handle_t railHandle,
   (void)railHandle;
 
   // Check for an invalid Tx power mode
-  if (mode >= RAIL_TX_POWER_MODE_NONE) {
+  if ((mode >= RAIL_NUM_PA)
+   #ifdef RAIL_TX_POWER_MODE_2P4GIG_HIGHEST
+      || (mode == RAIL_TX_POWER_MODE_2P4GIG_HIGHEST)
+   #endif
+   #ifdef RAIL_TX_POWER_MODE_SUBGIG_HIGHEST
+      || (mode == RAIL_TX_POWER_MODE_SUBGIG_HIGHEST)
+   #endif
+      ) {
     return RAIL_TX_POWER_MIN;
   }
 
@@ -433,7 +481,14 @@ RAIL_Status_t RAIL_GetTxPowerCurveLimits(RAIL_Handle_t railHandle,
 {
   (void)railHandle;
   // Check for an invalid Tx power mode
-  if (mode >= RAIL_TX_POWER_MODE_NONE) {
+  if ((mode >= RAIL_NUM_PA)
+   #ifdef RAIL_TX_POWER_MODE_2P4GIG_HIGHEST
+      || (mode == RAIL_TX_POWER_MODE_2P4GIG_HIGHEST)
+   #endif
+   #ifdef RAIL_TX_POWER_MODE_SUBGIG_HIGHEST
+      || (mode == RAIL_TX_POWER_MODE_SUBGIG_HIGHEST)
+   #endif
+      ) {
     return RAIL_STATUS_INVALID_PARAMETER;
   }
   RAIL_PaDescriptor_t const *modeInfo = &powerCurvesState.curves[mode];

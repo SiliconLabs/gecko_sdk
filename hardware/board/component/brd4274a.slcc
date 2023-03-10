@@ -14,6 +14,7 @@
   - name: hardware_board
   - name: hardware_board_rb
   - name: hardware_board_from_stk
+  - name: hardware_board_from_fg25-pk6014a
   - name: hardware_board_from_fg25-rb4274a
   - name: hardware_board_has_vcom
   - name: hardware_board_has_spiflash
@@ -52,11 +53,11 @@
   - name: SL_BOARD_NAME
     value: '"BRD4274A"'
   - name: SL_BOARD_REV
-    value: '"A04"'
+    value: '"A06"'
 - tag:
   - board:pn:BRD4274
   - board:variant:A
-  - board:revision:A04
+  - board:revision:A06
   - board:device:efr32fg25b222f1920im56
   - hardware:has:vcom
   - hardware:has:pti

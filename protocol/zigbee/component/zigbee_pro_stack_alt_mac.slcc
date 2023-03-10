@@ -40,7 +40,6 @@ template_contribution:
   - name: component_catalog
     value: zigbee_pro_stack_alt_mac
 
-
 documentation:
   docset: zigbee
   document: zigbee-af-api/pro-stack-alt-mac

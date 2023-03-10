@@ -147,6 +147,7 @@ static bool restart_dma = false;
 #endif
 
 static volatile bool resync_completed = false;
+static volatile uint16_t ignore_hdlc_flag_during_resync_count = 0;
 /*******************************************************************************
  **************************   LOCAL FUNCTIONS   ********************************
  ******************************************************************************/
@@ -375,15 +376,7 @@ sl_status_t sli_cpc_drv_init(void)
   rx_descriptor_head = current_desc;
 
   // Start read channel
-  ecode = DMADRV_LdmaStartTransfer(read_channel,
-                                   &rx_config,
-                                   current_desc,
-                                   rx_dma_complete,
-                                   0);
-  if (ecode != ECODE_OK) {
-    EFM_ASSERT(false);
-    return SL_STATUS_FAIL;
-  }
+  start_re_synch();
 
 #if defined(SL_CATALOG_POWER_MANAGER_PRESENT)
   sl_power_manager_add_em_requirement(SL_POWER_MANAGER_EM1);
@@ -695,6 +688,8 @@ void sli_cpc_memory_on_rx_buffer_free(void)
  ******************************************************************************/
 void SL_CPC_ISR_RX_HANDLER(SL_CPC_DRV_UART_PERIPHERAL_NO)(void)
 {
+  static uint16_t hdlc_header_flag_received = 0;
+
   CORE_DECLARE_IRQ_STATE;
   CORE_ENTER_ATOMIC();
 
@@ -719,26 +714,37 @@ void SL_CPC_ISR_RX_HANDLER(SL_CPC_DRV_UART_PERIPHERAL_NO)(void)
     EFM_ASSERT(header_expected_next == true); // Can't resync when waiting for a payload
 
     if (data == SLI_CPC_HDLC_FLAG_VAL) {
-      // Get rid of any pending IRQ, we're done with the resync
-      USART_IntDisable(SL_CPC_DRV_UART_PERIPHERAL, USART_IF_RXDATAV);
+      hdlc_header_flag_received++;
 
-      // Already received first byte (HDLC FLAG) and RXCOUNT needs to be expected value -1
-      EFM_ASSERT(rx_need_desc == false);
-      EFM_ASSERT(rx_descriptor_head != NULL);
-      rx_descriptor_head->xfer.xferCnt = SLI_CPC_HDLC_HEADER_RAW_SIZE - 2u;
+      // It's possible that we tried to resync on the end of a payload that contained
+      // a HDLC header flag. While this method is less than ideal, it allows us to
+      // ignore that byte and attemp to resync on the next HDLC header flag
+      if (hdlc_header_flag_received > ignore_hdlc_flag_during_resync_count) {
+        hdlc_header_flag_received = 0;
+        // Get rid of any pending IRQ, we're done with the resync
+        USART_IntDisable(SL_CPC_DRV_UART_PERIPHERAL, USART_IF_RXDATAV);
 
-      // Start read channel
-      Ecode_t ecode = DMADRV_LdmaStartTransfer(read_channel,
-                                               &rx_config,
-                                               rx_descriptor_head,
-                                               rx_dma_complete,
-                                               0);
-      EFM_ASSERT(ecode == ECODE_OK);
+        // Already received first byte (HDLC FLAG) and RXCOUNT needs to be expected value -1
+        EFM_ASSERT(rx_need_desc == false);
+        EFM_ASSERT(rx_descriptor_head != NULL);
+        rx_descriptor_head->xfer.xferCnt = SLI_CPC_HDLC_HEADER_RAW_SIZE - 2u;
 
-      resync_completed = true;
+        // Start read channel
+        Ecode_t ecode = DMADRV_LdmaStartTransfer(read_channel,
+                                                 &rx_config,
+                                                 rx_descriptor_head,
+                                                 rx_dma_complete,
+                                                 0);
+        EFM_ASSERT(ecode == ECODE_OK);
 
-      if (NVIC_GetPendingIRQ(SL_CPC_RX_IRQn(SL_CPC_DRV_UART_PERIPHERAL_NO)) != 0) {
-        NVIC_ClearPendingIRQ(SL_CPC_RX_IRQn(SL_CPC_DRV_UART_PERIPHERAL_NO));
+        // Restore XferCnt
+        rx_descriptor_head->xfer.xferCnt = ((SLI_CPC_RX_DATA_MAX_LENGTH < DMA_MAX_XFER_LEN) ? SLI_CPC_RX_DATA_MAX_LENGTH : DMA_MAX_XFER_LEN) - 1;
+
+        resync_completed = true;
+
+        if (NVIC_GetPendingIRQ(SL_CPC_RX_IRQn(SL_CPC_DRV_UART_PERIPHERAL_NO)) != 0) {
+          NVIC_ClearPendingIRQ(SL_CPC_RX_IRQn(SL_CPC_DRV_UART_PERIPHERAL_NO));
+        }
       }
     }
   }
@@ -798,6 +804,7 @@ static bool rx_dma_complete(unsigned int channel,
   uint16_t current_rx_buf_tot_len;
   bool rx_buf_free;
   bool dma_stopped = false;
+  bool resync_occured = false;
 
   (void)channel;
   (void)sequenceNo;
@@ -826,6 +833,7 @@ static bool rx_dma_complete(unsigned int channel,
       next_rx_buf_tot_len = SLI_CPC_HDLC_HEADER_RAW_SIZE;
       memmove(rx_buffer + 1, rx_buffer, SLI_CPC_HDLC_HEADER_RAW_SIZE);
       rx_buffer[0] = SLI_CPC_HDLC_FLAG_VAL;
+      resync_occured = true;
     }
 
     EFM_ASSERT(completed_desc != NULL);
@@ -871,6 +879,9 @@ static bool rx_dma_complete(unsigned int channel,
         // Validate HCS
         hcs = sli_cpc_hdlc_get_hcs(current_rx_buffer);
         if (!sli_cpc_validate_crc_sw(current_rx_buffer, SLI_CPC_HDLC_HEADER_SIZE, hcs)) {
+          if (resync_occured) {
+            ignore_hdlc_flag_during_resync_count++;
+          }
           DMADRV_StopTransfer(read_channel);
 
           SLI_CPC_DEBUG_TRACE_CORE_DRIVER_PACKET_DROPPED();
@@ -887,6 +898,7 @@ static bool rx_dma_complete(unsigned int channel,
           return false;
         }
 
+        ignore_hdlc_flag_during_resync_count = 0;
         next_rx_payload_len = sli_cpc_hdlc_get_length(current_rx_buffer);
 
         if (rx_need_desc

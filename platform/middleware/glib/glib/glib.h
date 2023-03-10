@@ -49,7 +49,7 @@
  *   DMD (Dot Matrix Display). So in order to draw something on a physical
  *   display the user application needs to provide GLIB with a single
  *   implementation of the DMD interface. Sample DMD implementations are
- *   provided for the displays that are connected to the Silion Labs Starter
+ *   provided for the displays that are connected to the Silicon Labs Starter
  *   Kits and the Silicon Labs Development Kits.
  *
  * @n @section glib_init Initialization
@@ -64,7 +64,7 @@
  *   structure is initialized using the @ref GLIB_contextInit() function.
  *
  *   Every GLIB drawing function will require a @ref GLIB_Context_t as one of
- *   the functions arguments. The GBLI context contains important configuration
+ *   the functions arguments. The GLIB context contains important configuration
  *   values that all the drawing functions use. It contains the foreground and
  *   background color, and it also contains information on what font to use
  *   when rendering text on the display.
@@ -126,7 +126,7 @@
  *
  *   GLIB provides these fonts for the user
  *
- *   @li @ref GLIB_FontNormal8x8 A normal 8x8 pixel font which is the defaul font
+ *   @li @ref GLIB_FontNormal8x8 A normal 8x8 pixel font which is the default font
  *     if nothing else is configured.
  *   @li @ref GLIB_FontNarrow6x8 A narrow 6x8 pixel font which can be used if
  *     the default font is to wide.
@@ -385,6 +385,8 @@ EMSTATUS GLIB_drawPixelColor(GLIB_Context_t *pContext, int32_t x, int32_t y,
 /* Fonts included in the library */
 #if (SL_GLIB_FONTNORMAL_8X8 == 1)
 extern const GLIB_Font_t GLIB_FontNormal8x8; /* Default */
+#else
+#define GLIB_NO_DEFAULT_FONT
 #endif
 
 #if (SL_GLIB_FONTNARROW_6X8 == 1)

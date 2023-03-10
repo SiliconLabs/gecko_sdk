@@ -77,7 +77,11 @@ static bool restart_flag = false;
 static uint32_t enter_irq_end_ms;
 static sli_cpc_timer_handle_t enter_irq_timer;
 
+#ifdef CPC_TEST_HEADER_SYNC
+static bool process_uframes_flag = true;
+#else
 static bool process_uframes_flag = false;
+#endif
 
 static uint32_t fc_validation_value;
 

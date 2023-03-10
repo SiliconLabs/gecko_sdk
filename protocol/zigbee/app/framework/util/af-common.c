@@ -1050,7 +1050,7 @@ static EmberStatus send(EmberOutgoingMessageType type,
     }
   } else {
     index = emberAfIndexFromEndpoint(apsFrame->sourceEndpoint);
-    if (index == 0xFF) {
+    if (index == 0xFF || (index >= MAX_ENDPOINT_COUNT)) {
       return EMBER_INVALID_ENDPOINT;
     }
     status = emberAfPushEndpointNetworkIndex(apsFrame->sourceEndpoint);

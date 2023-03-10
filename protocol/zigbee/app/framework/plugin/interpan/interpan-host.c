@@ -22,12 +22,21 @@
 
 //------------------------------------------------------------------------------
 
+#ifdef UC_BUILD
+void emAfPluginInterpanMacFilterMatchMessageCallback(uint8_t filterIndexMatch,
+                                                     EmberMacPassthroughType legacyPassthroughType,
+                                                     uint8_t lastHopLqi,
+                                                     int8_t lastHopRssi,
+                                                     uint8_t messageLength,
+                                                     uint8_t *messageContents)
+#else // !UC_BUILD
 void ezspMacFilterMatchMessageHandler(uint8_t filterIndexMatch,
                                       EmberMacPassthroughType legacyPassthroughType,
                                       uint8_t lastHopLqi,
                                       int8_t lastHopRssi,
                                       uint8_t messageLength,
                                       uint8_t *messageContents)
+#endif
 {
   emAfPluginInterpanProcessMessage(messageLength,
                                    messageContents);

@@ -32,6 +32,7 @@
 
 #if defined(SEMAILBOX_PRESENT)
 
+#include "sli_psa_driver_common.h"  // sli_psa_zeroize()
 #include "psa/crypto.h"
 #include "mbedtls/platform.h"
 
@@ -139,11 +140,12 @@ psa_status_t sli_se_driver_mac_compute(sl_se_key_descriptor_t *key_desc,
     uint8_t *temp_key_buf = NULL;
     uint32_t key_buffer_size = key_desc->storage.location.buffer.size;
     size_t padding = sli_se_get_padding(key_buffer_size);
+    size_t word_aligned_buffer_size = 0;
 
     if (padding > 0u) {
       // We can only manipulate the transparent keys.
       if (key_desc->storage.method == SL_SE_KEY_STORAGE_EXTERNAL_PLAINTEXT) {
-        size_t word_aligned_buffer_size
+        word_aligned_buffer_size
           = sli_se_word_align(key_desc->storage.location.buffer.size);
         temp_key_buf = mbedtls_calloc(1, word_aligned_buffer_size);
         if (temp_key_buf == NULL) {
@@ -171,6 +173,7 @@ psa_status_t sli_se_driver_mac_compute(sl_se_key_descriptor_t *key_desc,
 
     #if defined(SLI_SE_KEY_PADDING_REQUIRED)
     if (padding > 0u) {
+      sli_psa_zeroize(temp_key_buf, word_aligned_buffer_size);
       mbedtls_free(temp_key_buf);
     }
     #endif // SLI_SE_KEY_PADDING_REQUIRED
@@ -182,7 +185,7 @@ psa_status_t sli_se_driver_mac_compute(sl_se_key_descriptor_t *key_desc,
       *mac_length = 0;
     }
 
-    memset(tmp_hmac, 0, sizeof(tmp_hmac));
+    sli_psa_zeroize(tmp_hmac, sizeof(tmp_hmac));
 
     goto exit;
   }

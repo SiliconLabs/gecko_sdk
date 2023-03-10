@@ -79,7 +79,7 @@
 #include "sl_rail_util_timing_test.h"
 #endif
 
-_Static_assert(sizeof(RailAppEvent_t) <= 40,
+_Static_assert(sizeof(RailAppEvent_t) <= 44,
                "Adjust BUFFER_POOL_ALLOCATOR_BUFFER_SIZE_MAX per sizeof(RailAppEvent_t) growth");
 
 // Includes for Silicon Labs-only, internal testing
@@ -187,7 +187,11 @@ static volatile bool     calibrateRadio = false;
 bool volatile newTxError = false;
 static volatile bool     rxAckTimeout = false;
 static volatile uint32_t ackTimeoutDuration = 0;
+#ifdef SL_CATALOG_RAIL_UTIL_EFF_PRESENT
+RAIL_Events_t enablePrintEvents = RAIL_EVENT_TX_BLOCKED_TOO_HOT;
+#else
 RAIL_Events_t enablePrintEvents = RAIL_EVENTS_NONE;
+#endif
 bool printRxErrorPackets = false;
 bool printRxFreqOffsetData = false;
 bool printingEnabled = RAIL_PRINTING_DEFAULT_BOOL;
@@ -937,6 +941,15 @@ void sl_rail_util_on_event(RAIL_Handle_t railHandle, RAIL_Events_t events)
     sl_bt_ll_coex_handle_events(events);
   }
 #endif //SL_CATALOG_RAIL_UTIL_COEX_PRESENT
+#ifdef SL_CATALOG_RAIL_UTIL_EFF_PRESENT
+  if (events & RAIL_EVENT_TX_BLOCKED_TOO_HOT) {
+    if (currentAppMode() == TX_STREAM) {
+      // If this event is triggered when app is in stream mode, it needs to be stopped
+      // Then make app transition to idle
+      enableAppMode(TX_STREAM, false, NULL);
+    }
+  }
+#endif
 }
 
 volatile bool allowPowerManagerSleep = false;
@@ -1324,15 +1337,17 @@ void printPacket(char *cmdName,
   responsePrintStart(cmdName);
   if (packetData != NULL) {
     responsePrintContinue(
-      "len:%d,timeUs:%u,timePos:%u,crc:%s,filterMask:0x%x,rssi:%d,lqi:%d,phy:%d",
+      "len:%d,timeUs:%u,timePos:%u,DurationUs:%u,crc:%s,filterMask:0x%x,rssi:%d,lqi:%d,phy:%d",
       packetData->dataLength,
       packetData->appendedInfo.timeReceived.packetTime,
       packetData->appendedInfo.timeReceived.timePosition,
+      packetData->appendedInfo.timeReceived.packetDurationUs,
       (packetData->appendedInfo.crcPassed) ? "Pass" : "Fail",
       packetData->filterMask,
       packetData->appendedInfo.rssi,
       packetData->appendedInfo.lqi,
       packetData->appendedInfo.subPhyId);
+
     responsePrintContinue(
       "isAck:%s,syncWordId:%d,antenna:%d,channelHopIdx:%d,channel:%u",
       packetData->appendedInfo.isAck ? "True" : "False",

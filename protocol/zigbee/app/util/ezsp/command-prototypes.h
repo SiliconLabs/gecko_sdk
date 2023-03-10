@@ -1353,7 +1353,9 @@ void ezspPollCompleteHandler(
 // Indicates that the local node received a data poll from a child.
 void ezspPollHandler(
   // The node ID of the child that is requesting data.
-  EmberNodeId childId);
+  EmberNodeId childId,
+  // True if transmit is expected, false otherwise.
+  bool transmitExpected);
 
 // Callback
 // A callback indicating a message has been received containing the EUI64 of the

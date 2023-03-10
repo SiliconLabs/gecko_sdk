@@ -1,0 +1,21 @@
+id: "btmesh_stack_sensor_client"
+label: "Sensor Client Model"
+package: "Btmesh"
+description: "Provides Bluetooth mesh Sensor Client model.
+  It is used to support the functionality of a node that can monitor sensor data and configure a set of sensors on another node."
+category: "Bluetooth Mesh|Stack|Models|Sensors"
+quality: "production"
+root_path: "protocol/bluetooth"
+
+requires:
+  - name: "btmesh_stack"
+  - name: "btmesh_core"
+provides:
+  - name: "btmesh_stack_sensor_client"
+  - name: "btmesh_sensor_model"
+    allow_multiple: true
+template_contribution:
+  - name: btmesh_bgapi_class
+    value:
+      class: "sensor_client"
+    priority: 1

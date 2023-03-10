@@ -264,6 +264,17 @@ EmberStatus emberAfZllNoResetForNFN(void)
   return status;
 }
 
+#ifdef UC_BUILD
+void emAfZllTouchLinkTargetCallback(EmberZllNetwork *networkInfo)
+{
+  debugPrintln("%s: touchlink target handler", PLUGIN_NAME);
+  MEMMOVE(&emAfZllNetwork, networkInfo, sizeof(EmberZllNetwork));
+#ifdef ZLL_COMMISSIONING_CLIENT_PRESENT
+  emAfZllSubDeviceCount = 0;
+#endif
+  emAfZllFlags = TOUCH_LINK_TARGET;
+}
+#else // !UC_BUILD
 void ezspZllTouchLinkTargetHandler(EmberZllNetwork *networkInfo)
 {
   debugPrintln("%p: touchlink target handler", PLUGIN_NAME);
@@ -274,11 +285,7 @@ void ezspZllTouchLinkTargetHandler(EmberZllNetwork *networkInfo)
   emAfZllFlags = TOUCH_LINK_TARGET;
 }
 
-#ifdef UC_BUILD
-void emAfPluginZllCommissioningServerZllTouchLinkTargetCallback(const EmberZllNetwork *networkInfo)
-#else
 void emberZllTouchLinkTargetHandler(const EmberZllNetwork *networkInfo)
-#endif // UC_BUILD
 {
   debugPrintln("%p: touchlink target handler", PLUGIN_NAME);
   MEMMOVE(&emAfZllNetwork, networkInfo, sizeof(EmberZllNetwork));
@@ -287,3 +294,4 @@ void emberZllTouchLinkTargetHandler(const EmberZllNetwork *networkInfo)
 #endif
   emAfZllFlags = TOUCH_LINK_TARGET;
 }
+#endif // UC_BUILD

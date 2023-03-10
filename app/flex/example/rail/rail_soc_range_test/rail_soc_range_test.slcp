@@ -195,14 +195,22 @@ configuration:
     value: "1"
 #------------- RAIL init, PA for EFF ---------------
   - name: SL_RAIL_UTIL_PA_SELECTION_SUBGHZ
-    value: "RAIL_TX_POWER_MODE_SUBGIG_EFF_25DBM"
+    value: "RAIL_TX_POWER_MODE_SUBGIG_EFF_POWERSETTING_TABLE"
     condition: [hardware_board_has_eff]
   - name: SL_RAIL_UTIL_PA_SELECTION_OFDM
-    value: "RAIL_TX_POWER_MODE_OFDM_PA_EFF_25DBM"
+    value: "RAIL_TX_POWER_MODE_OFDM_PA_EFF_POWERSETTING_TABLE"
     condition: [hardware_board_has_eff]
+  - name: SL_RAIL_UTIL_PA_SELECTION_SUBGHZ
+    value: "RAIL_TX_POWER_MODE_SUBGIG_POWERSETTING_TABLE"
+    condition: [device_sdid_220]
+    unless: [hardware_board_has_eff]
+  - name: SL_RAIL_UTIL_PA_SELECTION_OFDM
+    condition: [device_sdid_220]
+    value: "RAIL_TX_POWER_MODE_OFDM_PA_POWERSETTING_TABLE"
+    unless: [hardware_board_has_eff]
   - name: SL_RAIL_UTIL_PA_CALIBRATION_ENABLE
     value: "1"
-    condition: [hardware_board_has_eff] 
+    condition: [hardware_board_has_eff]
 #------------- USART settings ----------------
   - name: SL_BOARD_ENABLE_VCOM
     value: "1"

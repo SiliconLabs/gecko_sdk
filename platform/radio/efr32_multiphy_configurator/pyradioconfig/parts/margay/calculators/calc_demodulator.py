@@ -1,4 +1,5 @@
 from pyradioconfig.parts.ocelot.calculators.calc_demodulator import CALC_Demodulator_ocelot
+from pyradioconfig.calculator_model_framework.Utils.LogMgr import LogMgr
 from math import *
 
 
@@ -59,3 +60,28 @@ class CALC_Demodulator_Margay(CALC_Demodulator_ocelot):
 
         # Write the model var
         model.vars.log2x4_actual.value = log2x4_actual
+
+    def calc_rssi_rf_adjust_db(self, model):
+
+        #Read in model vars
+        rf_band = model.vars.rf_band.value
+
+        #Calculate rf adjustment based on band
+        if rf_band == model.vars.rf_band.var_enum.BAND_169:
+            rssi_rf_adjust_db = -19.03
+        elif rf_band == model.vars.rf_band.var_enum.BAND_315:
+            rssi_rf_adjust_db = -17.13
+        elif rf_band == model.vars.rf_band.var_enum.BAND_434:
+            rssi_rf_adjust_db = -15.98
+        elif rf_band == model.vars.rf_band.var_enum.BAND_490:
+            rssi_rf_adjust_db = -14.90
+        elif rf_band == model.vars.rf_band.var_enum.BAND_868:
+            rssi_rf_adjust_db = -11.02
+        elif rf_band == model.vars.rf_band.var_enum.BAND_915:
+            rssi_rf_adjust_db = -10.10
+        else:
+            LogMgr.Warning("Warning: No RSSI adjustment available for this band")
+            rssi_rf_adjust_db = -11.0 #This was the default in early RAIL for Margay and so won't impact customers for now
+
+        #Write the model var
+        model.vars.rssi_rf_adjust_db.value = rssi_rf_adjust_db

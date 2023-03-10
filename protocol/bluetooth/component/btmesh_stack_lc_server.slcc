@@ -1,0 +1,22 @@
+id: "btmesh_stack_lc_server"
+label: "Light Control Server Model"
+package: "Btmesh"
+description: "Provides Bluetooth mesh LC Server model. This model provides automatic lighting control, either via occupancy and ambient light sensors, or manual switches, or a combination of both. Turning the lights on and off, and whether to use automatic light control and occupancy sensor can be configured via this model. The control loop parameters and state transition times used by the LC Server are managed by an LC Client via the LC Setup Server's interface."
+category: "Bluetooth Mesh|Stack|Models"
+quality: "production"
+root_path: "protocol/bluetooth"
+
+requires:
+  - name: "btmesh_stack"
+  - name: "btmesh_stack_lc_setup_server"
+  - name: "btmesh_stack_generic_server"
+  - name: "btmesh_core"
+provides:
+  - name: "btmesh_stack_lc_server"
+  - name: "btmesh_lighting_model"
+    allow_multiple: true
+template_contribution:
+  - name: btmesh_bgapi_class
+    value:
+      class: "lc_server"
+    priority: 1

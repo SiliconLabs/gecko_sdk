@@ -66,10 +66,7 @@ extern char defaultStorageDirectory[OTA_FILE_STORAGE_DIR_LENGTH];
 bool ezspInternalProcessCommandOptions(int argc, char *argv[], char *errStr)
 {
   int c;
-  char port[SPI_PORT_LEN];
-  char devport[SPI_PORT_LEN];
   uint8_t trace;
-  uint8_t portnum;
   int optionCount = 0;
 
   while (true) {

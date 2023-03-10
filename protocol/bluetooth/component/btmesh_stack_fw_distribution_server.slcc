@@ -1,0 +1,24 @@
+id: "btmesh_stack_fw_distribution_server"
+label: "Firmware Distribution Server Model"
+package: "Btmesh"
+description: "Provides Bluetooth mesh Firmware Distribution Server model. It is required for the Distributor role. The model receives and stores firmware images as instructed by a Firmware Distribution Client. When instructed by the Client, the Firmware Distribution Server will distribute a firmware image to a set of nodes chosen by the Client. This model uses the BLOB Transfer Server model to receive firmware images; the Firmware Update Client model to manage updating the nodes; and the BLOB Transfer Client model to send the firmware image data to the nodes."
+category: "Bluetooth Mesh|Stack|Models|DFU"
+quality: "evaluation"
+root_path: "protocol/bluetooth"
+
+requires:
+ - name: "btmesh_stack"
+ - name: "btmesh_core"
+ - name: "btmesh_stack_dfu_model"
+ - name: "btmesh_stack_mbt_client"
+ - name: "btmesh_stack_mbt_server"
+ - name: "btmesh_stack_fw_update_client"
+provides:
+ - name: "btmesh_stack_fw_distribution_server"
+template_contribution:
+ - name: btmesh_bgapi_class
+   value:
+     class: "fw_dist_server"
+   priority: 1
+ - name: component_catalog
+   value: btmesh_stack_fw_distribution_server

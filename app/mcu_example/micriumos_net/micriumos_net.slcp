@@ -1,7 +1,7 @@
 project_name: micriumos_net
 package: mcu
 quality: production
-label: MCU Example - Micrium OS Network
+label: Platform - Micrium OS Network
 description: >
   MicriumOS Network example.
 

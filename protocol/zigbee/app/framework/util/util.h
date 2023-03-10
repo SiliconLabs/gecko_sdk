@@ -151,7 +151,8 @@ bool emberAfProcessMessageIntoZclCmd(EmberApsFrame* apsFrame,
  */
 EmberAfDifferenceType emberAfGetDifference(uint8_t* pData,
                                            EmberAfDifferenceType value,
-                                           uint8_t dataSize);
+                                           uint8_t dataSize,
+                                           EmberAfAttributeType dataType);
 
 /**
  * Retrieves an uint32_t from the given Zigbee payload. The integer retrieved

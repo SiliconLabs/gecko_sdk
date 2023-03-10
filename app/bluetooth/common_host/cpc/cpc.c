@@ -49,6 +49,9 @@
 static cpc_handle_t lib_handle;
 static cpc_endpoint_t endpoint;
 
+// cpc endpoint fd
+static int ep_sock_fd;
+
 // temporary rx buffer
 typedef struct {
   int32_t len;
@@ -62,7 +65,7 @@ static uint8_t handshake_msg[4] = { 0x20, 0x00, 0x01, 0x00 };
 // end the receiving loop if signal is received.
 static volatile bool run = true;
 // signal if the controller was reset
-static volatile bool has_reset = false;
+static volatile sig_atomic_t has_reset = false;
 
 // two worker threads
 static pthread_t sv;
@@ -80,52 +83,71 @@ static void reset_callback(void);
 
 int32_t cpc_open(void *handle, char *cpc_instance, bool reset_on_start)
 {
+  (void)handle;
   int ret;
-  uint8_t retry = 0;
+  ssize_t size;
+  uint8_t retry;
 
   // Initialize CPC communication
+  retry = 0;
   do {
     ret = cpc_init(&lib_handle, cpc_instance, false, reset_callback);
     if (ret == 0) {
-      // speed up boot process if everything seems ok
       break;
     }
     nanosleep((const struct timespec[]){ { 0, CPC_RETRY_SLEEP_NS } }, NULL);
     retry++;
-  } while ((ret != 0) && (retry < RETRY_COUNT));
+  } while (retry < RETRY_COUNT);
 
   if (ret < 0) {
-    perror("cpc_init: ");
+    perror("Failed to cpc_init ");
     return ret;
   }
 
-  // Start Bluetooth endpoint
-  ret = cpc_open_endpoint(lib_handle,
-                          &endpoint,
-                          SL_CPC_ENDPOINT_BLUETOOTH,
-                          CPC_TRANSMIT_WINDOW);
+  // Open Bluetooth endpoint
+  retry = 0;
+  do {
+    ret = cpc_open_endpoint(lib_handle,
+                            &endpoint,
+                            SL_CPC_ENDPOINT_BLUETOOTH,
+                            CPC_TRANSMIT_WINDOW);
+    if (ret > 0) {
+      ep_sock_fd = ret;
+      break;
+    }
+    nanosleep((const struct timespec[]){ { 0, CPC_RETRY_SLEEP_NS } }, NULL);
+    retry++;
+  } while (retry < RETRY_COUNT);
+
   if (ret < 0) {
-    perror("cpc_open_endpoint ");
+    perror("Failed to cpc_open_endpoint ");
     return ret;
   }
 
   // Create supervisory thread
   ret = pthread_create(&sv, NULL, supervisor, NULL);
   if (ret) {
-    perror("Couldn't create thread ");
+    perror("Failed to create thread ");
     return ret;
   }
 
-  handle = endpoint.ptr;
-
   // Send handshake msg
-  (void)cpc_write_endpoint(endpoint, &handshake_msg[0], 4, CPC_ENDPOINT_WRITE_FLAG_NONE);
+  size = cpc_write_endpoint(endpoint, &handshake_msg[0], 4, CPC_ENDPOINT_WRITE_FLAG_NONE);
+  if (size < 0) {
+    perror("Failed to send handshake msg ");
+    return (int)size;
+  }
 
   if (reset_on_start) {
     // Discard response
-    (void)cpc_read_endpoint(endpoint, &buf_rx.buf, FROM_CPC_BUF_SIZE, CPC_ENDPOINT_READ_FLAG_NONE);
-    buf_rx.len = 0;
-    memset(buf_rx.buf, 0, FROM_CPC_BUF_SIZE);
+    size = cpc_read_endpoint(endpoint, &buf_rx.buf, FROM_CPC_BUF_SIZE, CPC_ENDPOINT_READ_FLAG_NONE);
+    if (size < 0) {
+      perror("Failed to discard response msg ");
+      return (int)size;
+    } else {
+      buf_rx.len = 0;
+      memset(buf_rx.buf, 0, FROM_CPC_BUF_SIZE);
+    }
   }
 
   return ret;
@@ -138,6 +160,9 @@ int32_t cpc_tx(void *handle, uint32_t data_length, uint8_t *data)
 
   if (!has_reset) {
     size = cpc_write_endpoint(endpoint, &data[0], data_length, CPC_ENDPOINT_WRITE_FLAG_NONE);
+    if (size < 0) {
+      perror("Failed to cpc_write_endpoint ");
+    }
   } else {
     // In case of reset we don't care if send was succesfull or not
     size = data_length;
@@ -149,6 +174,7 @@ int32_t cpc_tx(void *handle, uint32_t data_length, uint8_t *data)
 int32_t cpc_rx(void *handle, uint32_t data_length, uint8_t *data)
 {
   (void)handle;
+  (void)data_length;
 
   if (buf_rx.len > 0) {
     memcpy(data, buf_rx.buf, buf_rx.len);
@@ -160,24 +186,48 @@ int32_t cpc_rx(void *handle, uint32_t data_length, uint8_t *data)
 int32_t cpc_rx_peek(void *handle)
 {
   (void)handle;
+  ssize_t size;
 
   if (!has_reset) {
+    // Return if the endpoint has not been reopened after the reset
+    if (ep_sock_fd <= 0) {
+      return 0;
+    }
+
     // Make read blocking - possible because threaded structure in host_comm
-    buf_rx.len = (int32_t)cpc_read_endpoint(endpoint, &buf_rx.buf,
-                                            FROM_CPC_BUF_SIZE, CPC_ENDPOINT_READ_FLAG_NONE);
+    size = cpc_read_endpoint(endpoint, &buf_rx.buf,
+                             FROM_CPC_BUF_SIZE, CPC_ENDPOINT_READ_FLAG_NONE);
+
+    if (size < 0) {
+      // Swallow EBADF and ECONNRESET because the fd will be invalid while the device is starting up after the reset
+      if (size != -EBADF && size != -ECONNRESET) {
+        perror("Failed to cpc_read_endpoint ");
+      }
+      buf_rx.len = 0;
+    } else {
+      buf_rx.len = (int32_t)size;
+    }
   } else {
     // If in reset, don't try to read
     buf_rx.len = 0;
   }
-  if (buf_rx.len < 0) {
-    buf_rx.len = 0;
-  }
+
   return buf_rx.len;
 }
 
 int32_t cpc_close(void *handle)
 {
-  return cpc_close_endpoint(&endpoint);
+  (void)handle;
+  int ret;
+
+  ret = cpc_close_endpoint(&endpoint);
+  if (ret == 0) {
+    ep_sock_fd = -1;
+  } else {
+    perror("Failed to cpc_close_endpoint ");
+  }
+
+  return ret;
 }
 
 // -----------------------------------------------------------------------------
@@ -197,39 +247,65 @@ static void reset_callback(void)
 int reset_cpc(void)
 {
   int ret;
-  uint8_t retry = 0;
+  uint8_t retry;
+  ssize_t size;
 
   app_log_debug("RESET" APP_LOG_NL);
 
-  // Restart cpp communication
+  // Close previously opened Bluetooth endpoint
+  if (ep_sock_fd > 0) {
+    ret = cpc_close_endpoint(&endpoint);
+    if (ret == 0) {
+      ep_sock_fd = -1;
+    } else {
+      perror("Failed to cpc_close_endpoint ");
+      return ret;
+    }
+  }
+
+  // Restart connection to CPCd
+  retry = 0;
   do {
     ret = cpc_restart(&lib_handle);
     if (ret == 0) {
-      // speed up boot process if everything seems ok
       break;
     }
     nanosleep((const struct timespec[]){ { 0, CPC_RETRY_SLEEP_NS } }, NULL);
     retry++;
-  } while ((ret != 0) && (retry < RETRY_COUNT));
+  } while (retry < RETRY_COUNT);
 
   if (ret < 0) {
-    perror("cpc restart ");
+    perror("Failed to cpc_restart ");
     return ret;
   }
 
   // Open Bluetooth endpoint
-  ret = cpc_open_endpoint(lib_handle,
-                          &endpoint,
-                          SL_CPC_ENDPOINT_BLUETOOTH,
-                          CPC_TRANSMIT_WINDOW);
+  retry = 0;
+  do {
+    ret = cpc_open_endpoint(lib_handle,
+                            &endpoint,
+                            SL_CPC_ENDPOINT_BLUETOOTH,
+                            CPC_TRANSMIT_WINDOW);
+    if (ret > 0) {
+      ep_sock_fd = ret;
+      break;
+    }
+    nanosleep((const struct timespec[]){ { 0, CPC_RETRY_SLEEP_NS } }, NULL);
+    retry++;
+  } while (retry < RETRY_COUNT);
+
   if (ret < 0) {
-    perror(" open endpoint ");
+    perror("Failed to cpc_open_endpoint ");
     return ret;
   }
 
   // Send handshake msg, but don't discard the answer, as upper layers need it.
-  cpc_write_endpoint(endpoint, &handshake_msg[0], 4, CPC_ENDPOINT_WRITE_FLAG_NONE);
-  has_reset = false;
+  size = cpc_write_endpoint(endpoint, &handshake_msg[0], 4, CPC_ENDPOINT_WRITE_FLAG_NONE);
+  if (size < 0) {
+    perror("Failed to send handshake msg ");
+    return (int)size;
+  }
+
   return ret;
 }
 
@@ -238,19 +314,20 @@ int reset_cpc(void)
  *****************************************************************************/
 void *supervisor(void *ptr)
 {
-  // unused variable
   (void)ptr;
   int ret;
 
   while (run) {
     if (has_reset) {
+      has_reset = false;
       ret = reset_cpc();
       if (ret < 0) {
-        perror("reset ");
-        // better to die here than continue to work falsely
+        perror("Failed to reset_cpc ");
+        // Better to die here than continue to work falsely
         exit(EXIT_FAILURE);
       }
     }
+
     nanosleep((const struct timespec[]){ { 0, CPC_RESET_SLEEP_NS } }, NULL);
   }
   return NULL;

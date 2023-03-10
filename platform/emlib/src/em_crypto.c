@@ -76,6 +76,24 @@
  ***********************   STATIC FUNCTIONS   **********************************
  ******************************************************************************/
 
+#ifdef USE_VARIABLE_SIZED_DATA_LOADS
+__STATIC_INLINE void CRYPTO_DataWriteVariableSize(CRYPTO_DataReg_TypeDef dataReg,
+                                                  const CRYPTO_Data_TypeDef val,
+                                                  int valSize);
+#endif // USE_VARIABLE_SIZED_DATA_LOADS
+
+__STATIC_INLINE void cryptoBurstToCryptoAndZeroize(volatile uint32_t * reg,
+                                                   const uint32_t * val);
+
+__STATIC_INLINE void cryptoBurstFromCryptoAndZeroize(volatile uint32_t * reg,
+                                                     uint32_t * val);
+
+__STATIC_INLINE void cryptoBigintZeroize(uint32_t * words32bits,
+                                         unsigned   num32bitWords);
+
+__STATIC_INLINE void cryptoBigintIncrement(uint32_t * words32bits,
+                                           unsigned   num32bitWords);
+
 __STATIC_INLINE void CRYPTO_AES_ProcessLoop(CRYPTO_TypeDef *crypto,
                                             unsigned int len,
                                             CRYPTO_DataReg_TypeDef inReg,
@@ -320,6 +338,49 @@ void CRYPTO_QDataWriteUnaligned(CRYPTO_QDataReg_TypeDef qdataReg,
   }
 }
 
+// Write sensitive value (typically key) to CRYPTO and zeroize local registers.
+// Sensitive values in local registers may leak to stack or read directly by
+// malicious software.
+__STATIC_INLINE void cryptoBurstToCryptoAndZeroize(volatile uint32_t * reg,
+                                                   const uint32_t * val)
+{
+  /* Load data from memory into local registers. */
+  register volatile uint32_t v0 = val[0];
+  register volatile uint32_t v1 = val[1];
+  register volatile uint32_t v2 = val[2];
+  register volatile uint32_t v3 = val[3];
+  /* Store data to CRYPTO */
+  *reg = v0;
+  *reg = v1;
+  *reg = v2;
+  *reg = v3;
+  v0 = 0;
+  v1 = 0;
+  v2 = 0;
+  v3 = 0;
+}
+
+// Read sensitive value (typically key) from CRYPTO and zeroize local registers.
+// Sensitive values in local registers may leak to stack or read directly by
+// malicious software.
+__STATIC_INLINE void cryptoBurstFromCryptoAndZeroize(volatile uint32_t * reg, uint32_t * val)
+{
+  /* Load data from CRYPTO into local registers. */
+  register volatile uint32_t v0 = *reg;
+  register volatile uint32_t v1 = *reg;
+  register volatile uint32_t v2 = *reg;
+  register volatile uint32_t v3 = *reg;
+  /* Store data to memory */
+  val[0] = v0;
+  val[1] = v1;
+  val[2] = v2;
+  val[3] = v3;
+  v0 = 0;
+  v1 = 0;
+  v2 = 0;
+  v3 = 0;
+}
+
 void CRYPTO_KeyBufWrite(CRYPTO_TypeDef          *crypto,
                         CRYPTO_KeyBuf_TypeDef    val,
                         CRYPTO_KeyWidth_TypeDef  keyWidth)
@@ -328,11 +389,12 @@ void CRYPTO_KeyBufWrite(CRYPTO_TypeDef          *crypto,
     /* Set AES-256 mode */
     BUS_RegBitWrite(&crypto->CTRL, _CRYPTO_CTRL_AES_SHIFT, _CRYPTO_CTRL_AES_AES256);
     /* Load key in KEYBUF register (= DDATA4) */
-    CRYPTO_DDataWrite(&crypto->DDATA4, val);
+    cryptoBurstToCryptoAndZeroize(&crypto->DDATA4, &val[0]);
+    cryptoBurstToCryptoAndZeroize(&crypto->DDATA4, &val[4]);
   } else {
     /* Set AES-128 mode */
     BUS_RegBitWrite(&crypto->CTRL, _CRYPTO_CTRL_AES_SHIFT, _CRYPTO_CTRL_AES_AES128);
-    CRYPTO_BurstToCrypto(&crypto->KEYBUF, &val[0]);
+    cryptoBurstToCryptoAndZeroize(&crypto->KEYBUF, &val[0]);
   }
 }
 
@@ -350,6 +412,11 @@ void CRYPTO_KeyBufWriteUnaligned(CRYPTO_TypeDef          *crypto,
       memcpy(temp, val, 32);
     }
     CRYPTO_KeyBufWrite(crypto, temp, keyWidth);
+    // Wipe out the plaintext key from the temp buffer on stack.
+    cryptoBigintZeroize(temp,
+                        keyWidth == cryptoKey128Bits
+                        ? CRYPTO_DATA_SIZE_IN_32BIT_WORDS
+                        : CRYPTO_DDATA_SIZE_IN_32BIT_WORDS);
   } else {
     // Avoid casting val directly to uint32_t pointer as this can lead to the
     // compiler making incorrect assumptions in the case where val is un-
@@ -425,9 +492,9 @@ void CRYPTO_KeyRead(CRYPTO_TypeDef *         crypto,
 {
   EFM_ASSERT(&val[0] != NULL);
 
-  CRYPTO_BurstFromCrypto(&crypto->KEY, &val[0]);
+  cryptoBurstFromCryptoAndZeroize(&crypto->KEY, &val[0]);
   if (keyWidth == cryptoKey256Bits) {
-    CRYPTO_BurstFromCrypto(&crypto->KEY, &val[4]);
+    cryptoBurstFromCryptoAndZeroize(&crypto->KEY, &val[4]);
   }
 }
 
@@ -462,6 +529,11 @@ void CRYPTO_KeyReadUnaligned(CRYPTO_TypeDef *         crypto,
     } else {
       memcpy(val, temp, 32);
     }
+    // Wipe out the plaintext key from the temp buffer on stack.
+    cryptoBigintZeroize(temp,
+                        keyWidth == cryptoKey128Bits
+                        ? CRYPTO_DATA_SIZE_IN_32BIT_WORDS
+                        : CRYPTO_DDATA_SIZE_IN_32BIT_WORDS);
   } else {
     // Avoid casting val directly to uint32_t pointer as this can lead to the
     // compiler making incorrect assumptions in the case where val is un-
@@ -761,9 +833,9 @@ void CRYPTO_SHA_256(CRYPTO_TypeDef *             crypto,
 __STATIC_INLINE void cryptoBigintZeroize(uint32_t * words32bits,
                                          unsigned   num32bitWords)
 {
-  while (num32bitWords > 0UL) {
-    num32bitWords--;
-    *words32bits++ = 0;
+  volatile uint32_t *p = words32bits;
+  while (num32bitWords--) {
+    *p++ = 0;
   }
 }
 

@@ -1,0 +1,18 @@
+id: "btmesh_stack_time_server"
+label: "Time Server Model"
+package: "Btmesh"
+description: "Provides Bluetooth mesh Time Server model. It is is used to support the control and reporting functionality of a node that tracks time."
+category: "Bluetooth Mesh|Stack|Models|Time and Scenes"
+quality: "production"
+root_path: "protocol/bluetooth"
+
+requires:
+  - name: "btmesh_stack"
+  - name: "btmesh_core"
+provides:
+  - name: "btmesh_stack_time_server"
+template_contribution:
+  - name: btmesh_bgapi_class
+    value:
+      class: "time_server"
+    priority: 1

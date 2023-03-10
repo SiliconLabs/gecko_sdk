@@ -48,7 +48,9 @@
 #include "em_cmu.h"
 #include "em_gpio.h"
 #include "em_chip.h"
-
+#if defined(_SILICON_LABS_32B_SERIES_2)
+#include "fih.h"
+#endif
 #if defined(__GNUC__)
 #define ROM_END_SIZE 0
 extern const size_t __rom_end__;
@@ -112,9 +114,13 @@ __STATIC_INLINE void configureSMUToDefault(void)
   SMU->PPUSATD1_SET = _SMU_PPUSATD1_MASK;
 
   // SAU treats all access as secure
+#if defined(__ARM_FEATURE_CMSE) && (__ARM_FEATURE_CMSE == 3U)
   SAU->CTRL = 0;
   __DSB();
   __ISB();
+#else
+  #error "The startup code requires access to the CMSE toolchain extension to set proper SAU settings."
+#endif // __ARM_FEATURE_CMSE
 
   // Clear and disable the SMU PPUSEC and BMPUSEC interrupt.
   NVIC_DisableIRQ(SMU_SECURE_IRQn);
@@ -433,9 +439,15 @@ void SystemInit2(void)
     enterApp = false;
     verifyApp = false;
   }
-
+#if defined(_SILICON_LABS_32B_SERIES_2) && defined(CRYPTOACC_PRESENT)
+  // fih_delay_init is applicable for vse devices
+  fih_delay_init();
+#endif
   // App should be verified
   if (verifyApp) {
+#if defined(_SILICON_LABS_32B_SERIES_2)
+    fih_delay();
+#endif
     // If app verification fails, enter bootloader instead
     enterApp = bootload_verifyApplication(startOfAppSpace);
     if (!enterApp) {

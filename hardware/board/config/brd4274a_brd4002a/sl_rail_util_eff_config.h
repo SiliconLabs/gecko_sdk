@@ -69,71 +69,138 @@
 // <1..105000:1>
 // <i> Default: 30000
 #define SL_RAIL_UTIL_EFF_BYPASS_DWELL_TIME_MS 30000
-// <o SL_RAIL_UTIL_EFF_CLPC_FSK_A> Coefficient A for FSK sensor voltage curve. Multiplied by 1e7.
-// <-2147483647..2147483647:1>
-// <i> Default: 844
-#define SL_RAIL_UTIL_EFF_CLPC_FSK_A 844
-// <o SL_RAIL_UTIL_EFF_CLPC_FSK_B> Coefficient B for FSK sensor voltage curve. Multiplied by 1e7.
-// <-2147483647..2147483647:1>
-// <i> Default: -437473
-#define SL_RAIL_UTIL_EFF_CLPC_FSK_B -437473
-// <o SL_RAIL_UTIL_EFF_CLPC_FSK_C> Coefficient C for FSK sensor voltage curve. Multiplied by 1e7.
-// <-2147483647..2147483647:1>
-// <i> Default: 87928015
-#define SL_RAIL_UTIL_EFF_CLPC_FSK_C 87928015
-// <o SL_RAIL_UTIL_EFF_CLPC_FSK_D> Coefficient D for FSK sensor voltage curve. Multiplied by 1e7.
-// <-2147483647..2147483647:1>
-// <i> Default: -5063115821
-#define SL_RAIL_UTIL_EFF_CLPC_FSK_D -5063115821L
-// <o SL_RAIL_UTIL_EFF_CLPC_FSK_1_CAL1_DDBM> Entry 1 measured FSK Output Power for CAL1 (nominally 270 ddBm).
-// <180..350:1>
-// <i> Default: 270
-#define SL_RAIL_UTIL_EFF_CLPC_FSK_1_CAL1_DDBM 270
-// <o SL_RAIL_UTIL_EFF_CLPC_FSK_1_CAL1> Entry 1 measured FSK sensor voltage at CAL1 ddBm, in millivolts.
-// <1..65535:1>
-// <i> Default: 340
-#define SL_RAIL_UTIL_EFF_CLPC_FSK_1_CAL1 340
-// <o SL_RAIL_UTIL_EFF_CLPC_FSK_1_CAL2_DDBM> Entry 1 measured FSK Output Power for CAL2 (nominally 290 ddBm).
-// <180..350:1>
-// <i> Default: 290
-#define SL_RAIL_UTIL_EFF_CLPC_FSK_1_CAL2_DDBM 290
-// <o SL_RAIL_UTIL_EFF_CLPC_FSK_1_CAL2> Entry 1 measured FSK sensor voltage at CAL2 ddBm, in millivolts.
-// <1..65535:1>
-// <i> Default: 423
-#define SL_RAIL_UTIL_EFF_CLPC_FSK_1_CAL2 423
 
-// <o SL_RAIL_UTIL_EFF_CLPC_OFDM_A> Coefficient A for OFDM sensor voltage curve. Multiplied by 1e7.
+// <o SL_RAIL_UTIL_EFF_CLPC_FSK_ANTV_A> Coefficient A for FSK ANTV sensor voltage curve. Multiplied by 1e7.
 // <-2147483647..2147483647:1>
-// <i> Default: 844
-#define SL_RAIL_UTIL_EFF_CLPC_OFDM_A 844
-// <o SL_RAIL_UTIL_EFF_CLPC_OFDM_B> Coefficient B for OFDM sensor voltage curve. Multiplied by 1e7.
+// <i> Default: 574
+#define SL_RAIL_UTIL_EFF_CLPC_FSK_ANTV_A 574
+// <o SL_RAIL_UTIL_EFF_CLPC_FSK_ANTV_B> Coefficient B for FSK ANTV sensor voltage curve. Multiplied by 1e7.
 // <-2147483647..2147483647:1>
-// <i> Default: -437473
-#define SL_RAIL_UTIL_EFF_CLPC_OFDM_B -437473
-// <o SL_RAIL_UTIL_EFF_CLPC_OFDM_C> Coefficient C for OFDM sensor voltage curve. Multiplied by 1e7.
+// <i> Default: -235763
+#define SL_RAIL_UTIL_EFF_CLPC_FSK_ANTV_B -235763
+// <o SL_RAIL_UTIL_EFF_CLPC_FSK_ANTV_C> Coefficient C for FSK ANTV sensor voltage curve. Multiplied by 1e7.
 // <-2147483647..2147483647:1>
-// <i> Default: 87928015
-#define SL_RAIL_UTIL_EFF_CLPC_OFDM_C 87928015
-// <o SL_RAIL_UTIL_EFF_CLPC_OFDM_D> Coefficient D for OFDM sensor voltage curve. Multiplied by 1e7.
+// <i> Default: 38562724
+#define SL_RAIL_UTIL_EFF_CLPC_FSK_ANTV_C 38562724
+// <o SL_RAIL_UTIL_EFF_CLPC_FSK_ANTV_D> Coefficient D for FSK ANTV sensor voltage curve. Multiplied by 1e7.
 // <-2147483647..2147483647:1>
-// <i> Default: -5063115821
-#define SL_RAIL_UTIL_EFF_CLPC_OFDM_D -5063115821L
-// <o SL_RAIL_UTIL_EFF_CLPC_OFDM_1_CAL1_DDBM> Entry 1 measured OFDM Output Power for CAL1 (nominally 270 ddBm).
+// <i> Default: -1115923360
+#define SL_RAIL_UTIL_EFF_CLPC_FSK_ANTV_D -1115923360L
+// <o SL_RAIL_UTIL_EFF_CLPC_FSK_ANTV_1_CAL1_DDBM> Entry 1 measured FSK ANTV Output Power for CAL1 (nominally 270 ddBm).
 // <180..350:1>
-// <i> Default: 270
-#define SL_RAIL_UTIL_EFF_CLPC_OFDM_1_CAL1_DDBM 270
-// <o SL_RAIL_UTIL_EFF_CLPC_OFDM_1_CAL1> Entry 1 measured OFDM sensor voltage at CAL1 ddBm, in millivolts.
+// <i> Default: 241
+#define SL_RAIL_UTIL_EFF_CLPC_FSK_ANTV_1_CAL1_DDBM 241
+// <o SL_RAIL_UTIL_EFF_CLPC_FSK_ANTV_1_CAL1_MV> Entry 1 measured FSK ANTV sensor voltage at CAL1 ddBm, in millivolts.
 // <1..65535:1>
-// <i> Default: 450
-#define SL_RAIL_UTIL_EFF_CLPC_OFDM_1_CAL1 450
-// <o SL_RAIL_UTIL_EFF_CLPC_OFDM_1_CAL2_DDBM> Entry 1 measured OFDM Output Power for CAL2 (nominally 290 ddBm).
+// <i> Default: 264
+#define SL_RAIL_UTIL_EFF_CLPC_FSK_ANTV_1_CAL1_MV 264
+// <o SL_RAIL_UTIL_EFF_CLPC_FSK_ANTV_1_CAL2_DDBM> Entry 1 measured FSK ANTV Output Power for CAL2 (nominally 290 ddBm).
+// <180..350:1>
+// <i> Default: 291
+#define SL_RAIL_UTIL_EFF_CLPC_FSK_ANTV_1_CAL2_DDBM 291
+// <o SL_RAIL_UTIL_EFF_CLPC_FSK_ANTV_1_CAL2_MV> Entry 1 measured FSK ANTV sensor voltage at CAL2 ddBm, in millivolts.
+// <1..65535:1>
+// <i> Default: 451
+#define SL_RAIL_UTIL_EFF_CLPC_FSK_ANTV_1_CAL2_MV 451
+
+// <o SL_RAIL_UTIL_EFF_CLPC_FSK_SAW2_A> Coefficient A for FSK SAW2 sensor voltage curve. Multiplied by 1e7.
+// <-2147483647..2147483647:1>
+// <i> Default: 392
+#define SL_RAIL_UTIL_EFF_CLPC_FSK_SAW2_A 392
+// <o SL_RAIL_UTIL_EFF_CLPC_FSK_SAW2_B> Coefficient B for FSK SAW2 sensor voltage curve. Multiplied by 1e7.
+// <-2147483647..2147483647:1>
+// <i> Default: -180237
+#define SL_RAIL_UTIL_EFF_CLPC_FSK_SAW2_B -180237
+// <o SL_RAIL_UTIL_EFF_CLPC_FSK_SAW2_C> Coefficient C for FSK SAW2 sensor voltage curve. Multiplied by 1e7.
+// <-2147483647..2147483647:1>
+// <i> Default: 32942736
+#define SL_RAIL_UTIL_EFF_CLPC_FSK_SAW2_C 32942736
+// <o SL_RAIL_UTIL_EFF_CLPC_FSK_SAW2_D> Coefficient D for FSK SAW2 sensor voltage curve. Multiplied by 1e7.
+// <-2147483647..2147483647:1>
+// <i> Default: -1097941542
+#define SL_RAIL_UTIL_EFF_CLPC_FSK_SAW2_D -1097941542L
+// <o SL_RAIL_UTIL_EFF_CLPC_FSK_SAW2_1_CAL1_DDBM> Entry 1 measured FSK SAW2 Output Power for CAL1 (nominally 270 ddBm).
+// <180..350:1>
+// <i> Default: 200
+#define SL_RAIL_UTIL_EFF_CLPC_FSK_SAW2_1_CAL1_DDBM 200
+// <o SL_RAIL_UTIL_EFF_CLPC_FSK_SAW2_1_CAL1_MV> Entry 1 measured FSK SAW2 sensor voltage at CAL1 ddBm, in millivolts.
+// <1..65535:1>
+// <i> Default: 127
+#define SL_RAIL_UTIL_EFF_CLPC_FSK_SAW2_1_CAL1_MV 127
+// <o SL_RAIL_UTIL_EFF_CLPC_FSK_SAW2_1_CAL2_DDBM> Entry 1 measured FSK SAW2 Output Power for CAL2 (nominally 290 ddBm).
+// <180..350:1>
+// <i> Default: 241
+#define SL_RAIL_UTIL_EFF_CLPC_FSK_SAW2_1_CAL2_DDBM 241
+// <o SL_RAIL_UTIL_EFF_CLPC_FSK_SAW2_1_CAL2_MV> Entry 1 measured FSK SAW2 sensor voltage at CAL2 ddBm, in millivolts.
+// <1..65535:1>
+// <i> Default: 170
+#define SL_RAIL_UTIL_EFF_CLPC_FSK_SAW2_1_CAL2_MV 170
+
+// <o SL_RAIL_UTIL_EFF_CLPC_OFDM_ANTV_A> Coefficient A for OFDM ANTV sensor voltage curve. Multiplied by 1e7.
+// <-2147483647..2147483647:1>
+// <i> Default: 574
+#define SL_RAIL_UTIL_EFF_CLPC_OFDM_ANTV_A 574
+// <o SL_RAIL_UTIL_EFF_CLPC_OFDM_ANTV_B> Coefficient B for OFDM ANTV sensor voltage curve. Multiplied by 1e7.
+// <-2147483647..2147483647:1>
+// <i> Default: -235763
+#define SL_RAIL_UTIL_EFF_CLPC_OFDM_ANTV_B -235763
+// <o SL_RAIL_UTIL_EFF_CLPC_OFDM_ANTV_C> Coefficient C for OFDM ANTV sensor voltage curve. Multiplied by 1e7.
+// <-2147483647..2147483647:1>
+// <i> Default: 38562724
+#define SL_RAIL_UTIL_EFF_CLPC_OFDM_ANTV_C 38562724
+// <o SL_RAIL_UTIL_EFF_CLPC_OFDM_ANTV_D> Coefficient D for OFDM ANTV sensor voltage curve. Multiplied by 1e7.
+// <-2147483647..2147483647:1>
+// <i> Default: -1115923360
+#define SL_RAIL_UTIL_EFF_CLPC_OFDM_ANTV_D -1115923360L
+// <o SL_RAIL_UTIL_EFF_CLPC_OFDM_ANTV_1_CAL1_DDBM> Entry 1 measured OFDM ANTV Output Power for CAL1 (nominally 270 ddBm).
+// <180..350:1>
+// <i> Default: 222
+#define SL_RAIL_UTIL_EFF_CLPC_OFDM_ANTV_1_CAL1_DDBM 222
+// <o SL_RAIL_UTIL_EFF_CLPC_OFDM_ANTV_1_CAL1_MV> Entry 1 measured OFDM ANTV sensor voltage at CAL1 ddBm, in millivolts.
+// <1..65535:1>
+// <i> Default: 249
+#define SL_RAIL_UTIL_EFF_CLPC_OFDM_ANTV_1_CAL1_MV 249
+// <o SL_RAIL_UTIL_EFF_CLPC_OFDM_ANTV_1_CAL2_DDBM> Entry 2 measured OFDM ANTV Output Power for CAL2 (nominally 290 ddBm).
 // <180..350:1>
 // <i> Default: 290
-#define SL_RAIL_UTIL_EFF_CLPC_OFDM_1_CAL2_DDBM 290
-// <o SL_RAIL_UTIL_EFF_CLPC_OFDM_1_CAL2> Entry 1 measured OFDM sensor voltage at CAL2 ddBm, in millivolts.
+#define SL_RAIL_UTIL_EFF_CLPC_OFDM_ANTV_1_CAL2_DDBM 290
+// <o SL_RAIL_UTIL_EFF_CLPC_OFDM_ANTV_1_CAL2_MV> Entry 2 measured OFDM ANTV sensor voltage at CAL2 ddBm, in millivolts.
 // <1..65535:1>
-// <i> Default: 544
-#define SL_RAIL_UTIL_EFF_CLPC_OFDM_1_CAL2 544
+// <i> Default: 507
+#define SL_RAIL_UTIL_EFF_CLPC_OFDM_ANTV_1_CAL2_MV 507
+
+// <o SL_RAIL_UTIL_EFF_CLPC_OFDM_SAW2_A> Coefficient A for OFDM SAW2 sensor voltage curve. Multiplied by 1e7.
+// <-2147483647..2147483647:1>
+// <i> Default: 2178
+#define SL_RAIL_UTIL_EFF_CLPC_OFDM_SAW2_A 2178
+// <o SL_RAIL_UTIL_EFF_CLPC_OFDM_SAW2_B> Coefficient B for OFDM SAW2 sensor voltage curve. Multiplied by 1e7.
+// <-2147483647..2147483647:1>
+// <i> Default: -1312415
+#define SL_RAIL_UTIL_EFF_CLPC_OFDM_SAW2_B -1312415
+// <o SL_RAIL_UTIL_EFF_CLPC_OFDM_SAW2_C> Coefficient C for OFDM SAW2 sensor voltage curve. Multiplied by 1e7.
+// <-2147483647..2147483647:1>
+// <i> Default: 271823274
+#define SL_RAIL_UTIL_EFF_CLPC_OFDM_SAW2_C 271823274
+// <o SL_RAIL_UTIL_EFF_CLPC_OFDM_SAW2_D> Coefficient D for OFDM SAW2 sensor voltage curve. Multiplied by 1e7.
+// <-20000000000..20000000000:1>
+// <i> Default: -17876500819
+#define SL_RAIL_UTIL_EFF_CLPC_OFDM_SAW2_D -17876500819L
+// <o SL_RAIL_UTIL_EFF_CLPC_OFDM_SAW2_1_CAL1_DDBM> Entry 1 measured OFDM SAW2 Output Power for CAL1 (nominally 270 ddBm).
+// <180..350:1>
+// <i> Default: 250
+#define SL_RAIL_UTIL_EFF_CLPC_OFDM_SAW2_1_CAL1_DDBM 250
+// <o SL_RAIL_UTIL_EFF_CLPC_OFDM_SAW2_1_CAL1_MV> Entry 1 measured OFDM SAW2 sensor voltage at CAL1 ddBm, in millivolts.
+// <1..65535:1>
+// <i> Default: 208
+#define SL_RAIL_UTIL_EFF_CLPC_OFDM_SAW2_1_CAL1_MV 208
+// <o SL_RAIL_UTIL_EFF_CLPC_OFDM_SAW2_1_CAL2_DDBM> Entry 1 measured OFDM SAW2 Output Power for CAL2 (nominally 290 ddBm).
+// <180..350:1>
+// <i> Default: 289
+#define SL_RAIL_UTIL_EFF_CLPC_OFDM_SAW2_1_CAL2_DDBM 289
+// <o SL_RAIL_UTIL_EFF_CLPC_OFDM_SAW2_1_CAL2_MV> Entry 1 measured OFDM SAW2 sensor voltage at CAL2 ddBm, in millivolts.
+// <1..65535:1>
+// <i> Default: 366
+#define SL_RAIL_UTIL_EFF_CLPC_OFDM_SAW2_1_CAL2_MV 366
 
 // <o SL_RAIL_UTIL_EFF_CLPC_ENABLE> Select CLPC mode
 // <RAIL_EFF_CLPC_DISABLED=> Disable CLPC power control. Flare modes will only be transmit/receive.
@@ -143,18 +210,10 @@
 // <RAIL_EFF_CLPC_POWER_BOTH=> Allow full power control
 // <i> Default: RAIL_EFF_CLPC_MODE_CHANGE
 #define SL_RAIL_UTIL_EFF_CLPC_ENABLE RAIL_EFF_CLPC_MODE_CHANGE
-// <o RAIL_UTIL_EFF_MAX_TX_CONTINUOUS_POWER_DBM> Maximum continuous transfer power in dBm
-// <20..30:1>
-// <i> Default: 20
-#define RAIL_UTIL_EFF_MAX_TX_CONTINUOUS_POWER_DBM 20
-// <o RAIL_UTIL_EFF_MAX_TX_DUTY_CYCLE> Maximum transmit duty cycle as a percentage
-// <10..100:1>
-// <i> Default: 50
-#define RAIL_UTIL_EFF_MAX_TX_DUTY_CYCLE   50
-// <o SL_RAIL_UTIL_EFF_TEMPERATURE_THRESHOLD_EFF_DEGREES_K> Temperature of EFF above which transmit is not allowed, in degrees Kelvin
-// <1..398:1>
-// <i> Default: 373
-#define SL_RAIL_UTIL_EFF_TEMPERATURE_THRESHOLD_EFF_DEGREES_K 373
+// <o SL_RAIL_UTIL_EFF_TEMPERATURE_THRESHOLD_EFF_DEGREES_K> Temperature of EFF above which transmit is not allowed, in degrees Kelvin. A security margin is subtracted before using it.
+// <1..383:1>
+// <i> Default: 383
+#define SL_RAIL_UTIL_EFF_TEMPERATURE_THRESHOLD_EFF_DEGREES_K 383
 // </h>
 
 // <<< end of configuration section >>>

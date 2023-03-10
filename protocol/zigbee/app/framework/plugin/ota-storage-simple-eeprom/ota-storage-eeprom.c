@@ -270,6 +270,12 @@ static bool readWritePrimitive(bool read,
                                uint32_t length,
                                uint8_t* readData)
 {
+  // Because the EEPROM code only handles the length as a 16-bit number,
+  // we catch that error case.
+  if (length > 65535) {
+    return false;
+  }
+
   uint8_t count = 1;
   uint8_t i;
   uint32_t realLength = length;
@@ -280,12 +286,6 @@ static bool readWritePrimitive(bool read,
   bool spansBreak = emAfOtaStorageDriverGetRealOffset(&realOffset, &realLength);
   if (spansBreak) {
     count = 2;
-  }
-
-  // Because the EEPROM code only handles the length as a 16-bit number,
-  // we catch that error case.
-  if (length > 65535) {
-    return false;
   }
 
   for (i = 0; i < count; i++) {

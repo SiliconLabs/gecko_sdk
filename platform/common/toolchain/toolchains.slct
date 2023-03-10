@@ -68,6 +68,9 @@ schema:
     type: str
   trustzone_library:
     type: str
+    enum:
+      - enabled
+      - disabled
   cmse:
     type: str
     enum:
@@ -326,9 +329,11 @@ exporter:
           action: append
           value: "{{value}}"
       trustzone_library:
-        - tool: linker
-          option: generate_trustzone_lib
-          value: "{{value}}"
+        enabled:
+          - tool: linker
+            option: generate_trustzone_lib
+            value: "trustzone_secure_library.o"
+        disabled: []
       architecture: []
       gcc_compiler_option:
         - tool: makefile.arm.gcc.compiler

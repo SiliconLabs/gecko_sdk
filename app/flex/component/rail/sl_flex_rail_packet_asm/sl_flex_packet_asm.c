@@ -270,7 +270,6 @@ int16_t sl_flex_802154_packet_pack_ofdm_data_frame(uint8_t rate,
   uint32_t phr = 0U;
   uint16_t frameLength = 0U;
   uint8_t phr_size = 4U;
-  uint8_t fcs_size = 4U;
 
   // Checking input parameters
   if ((rate & 0xE0)
@@ -285,9 +284,14 @@ int16_t sl_flex_802154_packet_pack_ofdm_data_frame(uint8_t rate,
     return SL_FLEX_802154_PACKET_ERROR;
   }
 
+  // Add payload bytes
+  *frame_size = payload_size + phr_size;
+
   // The Frame Length field (L10-L0) specifies the total number of octets contained in the PSDU (prior to FEC encoding). The PSDU field carries the data of the PHY packet.
-  frameLength = ((payload_size + phr_size) - phr_size) + fcs_size;
+  frameLength = (*frame_size - phr_size) & 0x7FF; // FrameLength in byte
+  frameLength = frameLength + 4; // last 4 bytes will be overwritten before the Tx with the FCS.
   phr = (rate << 19) | (frameLength << 7) | (scrambler << 3);
+
   // Flip the 32 bits for all SUN modulations
   phr = __RBIT(phr);
 
@@ -295,11 +299,16 @@ int16_t sl_flex_802154_packet_pack_ofdm_data_frame(uint8_t rate,
   for (uint8_t index = 0; index < phr_size; index++) {
     frame_buffer[index] = (uint8_t)((phr & (0xFF << index * 8)) >> index * 8);
   }
-  // Add payload bytes
-  *frame_size = payload_size + phr_size;
+
   for (uint8_t index = phr_size; index < *frame_size; index++) {
     frame_buffer[index] = payload[index - phr_size];
   }
+
+  for (uint8_t index = *frame_size; index < (*frame_size + 4); index++) {
+    frame_buffer[index] = 0x00;
+  }
+
+  *frame_size = *frame_size + 4;
 
   // return SL_FLEX_802154_PACKET_OK if the frame is ready
   return SL_FLEX_802154_PACKET_OK;
@@ -315,6 +324,7 @@ int16_t sl_flex_802154_packet_pack_sunfsk_2bytes_data_frame(uint8_t fcsType,
   uint16_t frameLength = 0;
   uint8_t fcsSizeByte = 0;
   uint32_t phr = 0;
+  uint8_t phr_size = 2;
 
   // Checking input parameters
   if ((fcsType > 1)
@@ -329,10 +339,13 @@ int16_t sl_flex_802154_packet_pack_sunfsk_2bytes_data_frame(uint8_t fcsType,
     return SL_FLEX_802154_PACKET_ERROR;
   }
 
-  uint8_t phr_size = 2;
+  *frame_size = payload_size + phr_size;
   fcsSizeByte = fcsType ? 2 : 4; //FCS type = 0 => fcsSizeByte = 4
-  frameLength = ((payload_size + phr_size) - phr_size + fcsSizeByte) & 0x7FF;
-  phr = (((fcsType << 12) | (whitening << 11) | frameLength)) & 0x0FFFF;
+  frameLength = (*frame_size - phr_size + fcsSizeByte) & 0x7FF;
+  if (fcsType == 1) {
+    frameLength = frameLength + 2;
+  }
+  phr = ((fcsType << 12) | (whitening << 11) | frameLength);
 
   // Flip bits of the 2 bytes PHR as it is a SUN modulation
   phr = (uint16_t) (__RBIT(phr) >> 16);
@@ -342,10 +355,11 @@ int16_t sl_flex_802154_packet_pack_sunfsk_2bytes_data_frame(uint8_t fcsType,
     frame_buffer[index] = (uint8_t)((phr & (0xFF << index * 8)) >> index * 8);
   }
   // Add payload bytes
-  *frame_size = payload_size + phr_size;
+
   for (uint8_t index = phr_size; index < *frame_size; index++) {
     frame_buffer[index] = payload[index - phr_size];
   }
+
   // return SL_FLEX_802154_PACKET_OK if the frame is ready
   return SL_FLEX_802154_PACKET_OK;
 }
@@ -359,6 +373,7 @@ int16_t sl_flex_802154_packet_pack_sunfsk_4bytes_data_frame(uint8_t fcsType,
 {
   uint16_t frameLength = 0;
   uint32_t phr = 0;
+  uint8_t phr_size = 4;
 
   // Checking input parameters
   if ((fcsType > 1)
@@ -372,10 +387,13 @@ int16_t sl_flex_802154_packet_pack_sunfsk_4bytes_data_frame(uint8_t fcsType,
 #endif
     return SL_FLEX_802154_PACKET_ERROR;
   }
+  // Add payload bytes
+  *frame_size = payload_size + phr_size;
 
-  uint8_t phr_size = 4;
-  frameLength = ((payload_size + phr_size) - phr_size) & 0x7FF; // FrameLength in byte
+  frameLength = (*frame_size - phr_size) & 0x7FF; // FrameLength in byte
+  frameLength = frameLength + 4;
   phr = (fcsType << 12) | (whitening << 11) | frameLength;
+
   // Flip bits of the 2 bytes PHR as it is a SUN modulation
   phr =  __RBIT(phr);
 
@@ -383,11 +401,16 @@ int16_t sl_flex_802154_packet_pack_sunfsk_4bytes_data_frame(uint8_t fcsType,
   for (uint8_t index = 0; index < phr_size; index++) {
     frame_buffer[index] = (uint8_t)((phr & (0xFF << index * 8)) >> index * 8);
   }
-  // Add payload bytes
-  *frame_size = payload_size + phr_size;
+
   for (uint8_t index = phr_size; index < *frame_size; index++) {
     frame_buffer[index] = payload[index - phr_size];
   }
+
+  for (uint8_t index = *frame_size; index < (*frame_size + 4); index++) {
+    frame_buffer[index] = 0x00;
+  }
+
+  *frame_size = *frame_size + 4;
   // return SL_FLEX_802154_PACKET_OK if the frame is ready
   return SL_FLEX_802154_PACKET_OK;
 }
@@ -402,7 +425,6 @@ int16_t sl_flex_802154_packet_pack_oqpsk_data_frame(bool spreadingMode,
   uint32_t phr = 0U;
   uint16_t frameLength = 0U;
   uint8_t phr_size = 4U;
-  uint8_t fcs_size = 4U;
 
   // Checking input parameters
   if ((rateMode & 0xFC)
@@ -416,8 +438,12 @@ int16_t sl_flex_802154_packet_pack_oqpsk_data_frame(bool spreadingMode,
     return SL_FLEX_802154_PACKET_ERROR;
   }
 
+  // Add payload bytes
+  *frame_size = payload_size + phr_size;
+
   // The Frame Length field (L10-L0) specifies the total number of octets contained in the PSDU (prior to FEC encoding). The PSDU field carries the data of the PHY packet.
-  frameLength = ((payload_size + phr_size) - phr_size) + fcs_size;
+  frameLength = (*frame_size - phr_size) & 0x7FF;
+  frameLength = frameLength + 4;
   phr = ((uint8_t)spreadingMode << 15) | (rateMode << 13) | frameLength;
   // Flip the 32 bits for all SUN modulations
   phr = __RBIT(phr);
@@ -426,11 +452,16 @@ int16_t sl_flex_802154_packet_pack_oqpsk_data_frame(bool spreadingMode,
   for (uint8_t index = 0; index < phr_size; index++) {
     frame_buffer[index] = (uint8_t)((phr & (0xFF << index * 8)) >> index * 8);
   }
-  // Add payload bytes
-  *frame_size = payload_size + phr_size;
+
   for (uint8_t index = phr_size; index < *frame_size; index++) {
     frame_buffer[index] = payload[index - phr_size];
   }
+
+  for (uint8_t index = *frame_size; index < (*frame_size + 4); index++) {
+    frame_buffer[index] = 0x00;
+  }
+
+  *frame_size = *frame_size + 4;
 
   // return SL_FLEX_802154_PACKET_OK if the frame is ready
   return SL_FLEX_802154_PACKET_OK;
@@ -551,7 +582,7 @@ uint8_t *sl_flex_802154_packet_unpack_sunfsk_2byte_data_frame(const RAIL_RxPacke
   uint32_t phr = 0U;
   uint8_t *tmp = frame_buffer;
   uint8_t phr_size = 2U;
-  uint8_t soft_modem_trailing_bytes = 0U;
+  uint8_t fcsSizeByte = 0U;
 
   if ((packet_information == NULL) || (fcsType == NULL) || (whitening == NULL) || (frame_buffer == NULL) || (payload_size == NULL)) {
 #if defined(SL_CATALOG_APP_LOG_PRESENT)
@@ -568,7 +599,10 @@ uint8_t *sl_flex_802154_packet_unpack_sunfsk_2byte_data_frame(const RAIL_RxPacke
   *fcsType = (phr >> 12) & 0x01;
   *whitening = (phr >> 11) & 0x01;
 
-  *payload_size = (packet_information->packetBytes - phr_size - soft_modem_trailing_bytes);
+  fcsSizeByte = *fcsType ? 2 : 4;
+
+  *payload_size = (phr & 0x7FF) - 4;
+
   tmp += phr_size;
 
   return tmp;
@@ -583,7 +617,6 @@ uint8_t *sl_flex_802154_packet_unpack_sunfsk_4byte_data_frame(const RAIL_RxPacke
   uint32_t phr = 0U;
   uint8_t *tmp = frame_buffer;
   uint8_t phr_size = 4U;
-  uint8_t soft_modem_trailing_bytes = 0U;
 
   if ((packet_information == NULL) || (fcsType == NULL) || (whitening == NULL) || (frame_buffer == NULL) || (payload_size == NULL)) {
 #if defined(SL_CATALOG_APP_LOG_PRESENT)
@@ -600,7 +633,7 @@ uint8_t *sl_flex_802154_packet_unpack_sunfsk_4byte_data_frame(const RAIL_RxPacke
   *fcsType = (phr >> 12) & 0x01;
   *whitening = (phr >> 11) & 0x01;
 
-  *payload_size = (packet_information->packetBytes - phr_size - soft_modem_trailing_bytes);
+  *payload_size = (phr & 0x7FF) - 4;
   tmp += phr_size;
 
   return tmp;
@@ -615,7 +648,6 @@ uint8_t *sl_flex_802154_packet_unpack_ofdm_data_frame(const RAIL_RxPacketInfo_t 
   uint32_t phr = 0U;
   uint8_t *tmp = frame_buffer;
   uint8_t phr_size = 4U;
-  uint8_t soft_modem_trailing_bytes = 6U;
 
   if ((packet_information == NULL)
       || (rate == NULL)
@@ -636,7 +668,7 @@ uint8_t *sl_flex_802154_packet_unpack_ofdm_data_frame(const RAIL_RxPacketInfo_t 
   *rate = (phr >> 19) & 0x1F;
   *scrambler = (phr >> 3) & 0x03;
 
-  *payload_size = (packet_information->packetBytes - phr_size - soft_modem_trailing_bytes);
+  *payload_size = ((phr >> 7) & 0x7FF) - 4;
   tmp += phr_size;
 
   return tmp;
@@ -651,7 +683,6 @@ uint8_t *sl_flex_802154_packet_unpack_oqpsk_data_frame(const RAIL_RxPacketInfo_t
   uint32_t phr = 0U;
   uint8_t *tmp = frame_buffer;
   uint8_t phr_size = 4U;
-  uint8_t soft_modem_trailing_bytes = 6U;
 
   if ((packet_information == NULL)
       || (spreadingMode == NULL)
@@ -672,7 +703,89 @@ uint8_t *sl_flex_802154_packet_unpack_oqpsk_data_frame(const RAIL_RxPacketInfo_t
   *spreadingMode = (bool)((phr >> 15) & 0x01);
   *rateMode = (phr >> 13) & 0x03;
 
-  *payload_size = (packet_information->packetBytes - phr_size - soft_modem_trailing_bytes);
+  *payload_size = (phr & 0x7FF) - 4;
+  tmp += phr_size;
+
+  return tmp;
+}
+
+int16_t sl_flex_802154_packet_pack_sidewalk_data_frame(uint8_t fcsType,
+                                                       uint8_t whitening,
+                                                       uint16_t payload_size,
+                                                       const uint8_t *payload,
+                                                       uint16_t *frame_size,
+                                                       uint8_t *frame_buffer)
+{
+  uint16_t frameLength = 0;
+  uint8_t fcsSizeByte = 0;
+  uint32_t phr = 0;
+  uint8_t phr_size = 2;
+
+  // Checking input parameters
+  if ((fcsType > 1)
+      || (whitening > 1)
+      || (payload_size == 0)
+      || (payload == NULL)
+      || (frame_size == NULL)
+      || (frame_buffer == NULL)
+      || (payload_size > 255)) {
+#if defined(SL_CATALOG_APP_LOG_PRESENT)
+    app_log_warning("sl_flex_802154_packet_pack_sidewalk_data_frame ERR: parameter\r\n");
+#endif
+    return SL_FLEX_802154_PACKET_ERROR;
+  }
+
+  *frame_size = payload_size + phr_size;
+  fcsSizeByte = fcsType ? 2 : 4; //FCS type = 0 => fcsSizeByte = 4
+  frameLength = (*frame_size - phr_size + fcsSizeByte) & 0x7FF;
+  phr = (((fcsType << 12) | (whitening << 11) | frameLength)) & 0x0FFFF;
+
+  // Flip bits of the 2 bytes PHR as it is a SUN modulation
+  phr = (uint16_t) (__RBIT(phr) >> 16);
+
+  // Write the phr in the payload
+  for (uint8_t index = 0; index < phr_size; index++) {
+    frame_buffer[index] = (uint8_t)((phr & (0xFF << index * 8)) >> index * 8);
+  }
+
+  for (uint8_t index = phr_size; index < *frame_size; index++) {
+    frame_buffer[index] = payload[index - phr_size];
+  }
+
+  *frame_size = frameLength;
+  // return SL_FLEX_802154_PACKET_OK if the frame is ready
+  return SL_FLEX_802154_PACKET_OK;
+}
+
+uint8_t *sl_flex_802154_packet_unpack_sidewalk_data_frame(const RAIL_RxPacketInfo_t *packet_information,
+                                                          uint8_t *fcsType,
+                                                          uint8_t *whitening,
+                                                          uint16_t *payload_size,
+                                                          uint8_t *frame_buffer)
+{
+  uint32_t phr = 0U;
+  uint8_t *tmp = frame_buffer;
+  uint8_t phr_size = 2U;
+  uint8_t fcsSizeByte = 0U;
+
+  if ((packet_information == NULL) || (fcsType == NULL) || (whitening == NULL) || (frame_buffer == NULL) || (payload_size == NULL)) {
+#if defined(SL_CATALOG_APP_LOG_PRESENT)
+    app_log_warning("sl_flex_802154_packet_unpack_sidewalk_data_frame ERR: parameter\r\n");
+#endif
+    return NULL;
+  }
+
+  for (uint8_t index = 0; index < phr_size; index++) {
+    phr |= frame_buffer[index] << (index * 8);
+  }
+  phr = (uint16_t) (__RBIT(phr) >> 16);
+
+  *fcsType = (phr >> 12) & 0x01;
+  *whitening = (phr >> 11) & 0x01;
+
+  fcsSizeByte = *fcsType ? 2 : 4;
+
+  *payload_size = (phr & 0x7FF) - fcsSizeByte;
   tmp += phr_size;
 
   return tmp;

@@ -1,0 +1,19 @@
+id: "btmesh_stack_provisioner"
+label: "Provisioner"
+package: "Btmesh"
+description: "Provides Bluetooth mesh Provisioner functionality. Provisioning is the process of adding a new, unprovisioned device to a Bluetooth mesh network, such as a light bulb. The process is managed by a provisioner."
+category: "Bluetooth Mesh|Stack"
+quality: "production"
+root_path: "protocol/bluetooth"
+
+requires:
+  - name: "btmesh_stack"
+provides:
+  - name: "btmesh_stack_provisioner"
+  - name: "btmesh_core"
+    allow_multiple: true
+template_contribution:
+  - name: btmesh_bgapi_class
+    value:
+      class: "prov"
+    priority: 1

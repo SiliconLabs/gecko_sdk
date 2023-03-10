@@ -420,16 +420,16 @@ void update_rail_pa_settings(RAIL_Handle_t rail_handle, uint16_t channel)
 
 #if defined(SL_CATALOG_RAIL_UTIL_EFF_PRESENT)
   if (modulation == M_OFDM) {
-    if (txPowerConfigPtr->mode != RAIL_TX_POWER_MODE_OFDM_PA_EFF_25DBM) {
-      txPowerConfigPtr->mode = RAIL_TX_POWER_MODE_OFDM_PA_EFF_25DBM;
+    if (txPowerConfigPtr->mode != RAIL_TX_POWER_MODE_OFDM_PA_EFF_POWERSETTING_TABLE) {
+      txPowerConfigPtr->mode = RAIL_TX_POWER_MODE_OFDM_PA_EFF_POWERSETTING_TABLE;
       status = RAIL_ConfigTxPower(rail_handle, txPowerConfigPtr);
       app_assert(status == RAIL_STATUS_NO_ERROR, "PA setting failed");
       status = RAIL_SetTxPowerDbm(rail_handle, power);
       app_assert(status == RAIL_STATUS_NO_ERROR, "PA setting failed");
     }
   } else if (modulation == M_2FSK) {
-    if (txPowerConfigPtr->mode != RAIL_TX_POWER_MODE_SUBGIG_EFF_25DBM) {
-      txPowerConfigPtr->mode = RAIL_TX_POWER_MODE_SUBGIG_EFF_25DBM;
+    if (txPowerConfigPtr->mode != RAIL_TX_POWER_MODE_SUBGIG_EFF_POWERSETTING_TABLE) {
+      txPowerConfigPtr->mode = RAIL_TX_POWER_MODE_SUBGIG_EFF_POWERSETTING_TABLE;
       status = RAIL_ConfigTxPower(rail_handle, txPowerConfigPtr);
       app_assert(status == RAIL_STATUS_NO_ERROR, "PA setting failed");
       status = RAIL_SetTxPowerDbm(rail_handle, power);
@@ -438,16 +438,16 @@ void update_rail_pa_settings(RAIL_Handle_t rail_handle, uint16_t channel)
   }
 #else
   if (modulation == M_OFDM) {
-    if (txPowerConfigPtr->mode != RAIL_TX_POWER_MODE_OFDM_PA) {
-      txPowerConfigPtr->mode = RAIL_TX_POWER_MODE_OFDM_PA;
+    if (txPowerConfigPtr->mode != RAIL_TX_POWER_MODE_OFDM_PA_POWERSETTING_TABLE) {
+      txPowerConfigPtr->mode = RAIL_TX_POWER_MODE_OFDM_PA_POWERSETTING_TABLE;
       status = RAIL_ConfigTxPower(rail_handle, txPowerConfigPtr);
       app_assert(status == RAIL_STATUS_NO_ERROR, "PA setting failed");
       status = RAIL_SetTxPowerDbm(rail_handle, power);
       app_assert(status == RAIL_STATUS_NO_ERROR, "PA setting failed");
     }
   } else if (modulation == M_2FSK) {
-    if (txPowerConfigPtr->mode != RAIL_TX_POWER_MODE_SUBGIG_HIGHEST) {
-      txPowerConfigPtr->mode = RAIL_TX_POWER_MODE_SUBGIG_HIGHEST;
+    if (txPowerConfigPtr->mode != RAIL_TX_POWER_MODE_SUBGIG_POWERSETTING_TABLE) {
+      txPowerConfigPtr->mode = RAIL_TX_POWER_MODE_SUBGIG_POWERSETTING_TABLE;
       status = RAIL_ConfigTxPower(rail_handle, txPowerConfigPtr);
       app_assert(status == RAIL_STATUS_NO_ERROR, "PA setting failed");
       status = RAIL_SetTxPowerDbm(rail_handle, power);

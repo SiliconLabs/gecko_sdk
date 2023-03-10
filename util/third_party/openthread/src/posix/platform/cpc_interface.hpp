@@ -34,6 +34,8 @@
 #ifndef POSIX_APP_CPC_INTERFACE_HPP_
 #define POSIX_APP_CPC_INTERFACE_HPP_
 
+#include <signal.h>
+
 #include "openthread-posix-config.h"
 #include "platform-posix.h"
 #include "sl_cpc.h"
@@ -210,7 +212,7 @@ private:
     {
         kMaxFrameSize = SL_CPC_READ_MINIMUM_SIZE,
         kMaxWaitTime  = 2000, ///< Maximum wait time in Milliseconds for socket to become writable (see `SendFrame`).
-        kMaxSleepDuration   = 100000, ///< Sleep duration in micro seconds before restarting cpc connection.
+        kMaxSleepDuration   = 100000, ///< Sleep duration in micro seconds before restarting cpc connection/endpoint.
         kMaxRestartAttempts = 300,
         kResetCMDSize       = 4,
         kCpcBusSpeed        = 115200,
@@ -232,9 +234,9 @@ private:
     // 0x72 -> STATUS_RESET_SOFTWARE
     uint8_t mResetResponse[kResetCMDSize] = {0x80, 0x06, 0x00, 0x72};
 
-    const uint8_t   mId = SL_CPC_ENDPOINT_15_4;
-    typedef uint8_t cpcError;
-    static bool     sCpcResetReq;
+    const uint8_t       mId = SL_CPC_ENDPOINT_15_4;
+    typedef uint8_t     cpcError;
+    static volatile sig_atomic_t sCpcResetReq;
 
     otRcpInterfaceMetrics mInterfaceMetrics;
 

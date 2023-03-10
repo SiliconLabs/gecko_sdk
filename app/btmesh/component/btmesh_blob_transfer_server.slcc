@@ -1,0 +1,50 @@
+id: btmesh_blob_transfer_server
+label: BLOB Transfer Server
+package: Btmesh
+description: >
+  Provides BT Mesh BLOB (binary large object) Transfer Server functionality,
+  defined in mesh specification.
+
+  The BLOB Transfer Server model is used to receive a BLOB from a BLOB Transfer
+  Client. The BLOB is delivered to a higher-layer application for further
+  processing once the transfer is complete.
+category: "Bluetooth Mesh|Models|Transport"
+quality: production
+root_path: app/btmesh/common/btmesh_blob_transfer_server
+config_file:
+  - path: btmesh_blob_transfer_server.dcd
+    directory: btmeshconf
+  - path: config/sl_btmesh_blob_transfer_server_config.h
+source:
+  - path: sl_btmesh_blob_transfer_server.c
+  - path: sl_btmesh_blob_transfer_server_api.c
+include:
+  - path: ""
+    file_list:
+      - path: sl_btmesh_blob_transfer_server.h
+      - path: sl_btmesh_blob_transfer_server_api.h
+requires:
+  - name: app_assert
+  - name: app_btmesh_util
+  - name: btmesh_stack
+  - name: btmesh_core
+  - name: btmesh_blob_storage
+  - name: btmesh_stack_mbt_server
+  - name: silabs_core_sl_malloc
+provides:
+  - name: btmesh_blob_transfer_server
+
+template_contribution:
+  - name: btmesh_on_event
+    value:
+      include: sl_btmesh_blob_transfer_server.h
+      function: sl_btmesh_blob_transfer_server_on_event
+  - name: component_catalog
+    value: blob_transfer_server
+  - name: event_handler
+    value:
+      event: internal_app_process_action
+      include: sl_btmesh_blob_transfer_server.h
+      handler: sl_btmesh_blob_transfer_server_step_handle
+validation_helper:
+  - path: btmesh_blob_transfer_server_validation.lua

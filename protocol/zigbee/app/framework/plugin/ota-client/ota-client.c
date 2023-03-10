@@ -827,7 +827,7 @@ static void startServerDiscovery(void)
 
   // Figure out the right app profile ID based on the endpoint descriptor
   index = emberAfIndexFromEndpoint(myEndpoint);
-  if (0xFF == index) {
+  if (0xFF == index || (index >= MAX_ENDPOINT_COUNT)) {
     otaPrintln("Invalid EP %d when trying to send OTA message.", myEndpoint);
     return;
   }
@@ -1433,7 +1433,7 @@ static void sendMessage(uint8_t cmdId, uint8_t upgradeEndStatus, uint32_t timer)
 
   // Figure out the right app profile ID based on the endpoint descriptor
   index = emberAfIndexFromEndpoint(myEndpoint);
-  if (0xFF == index) {
+  if (0xFF == index || (index >= MAX_ENDPOINT_COUNT)) {
     otaPrintln("Invalid EP %d when trying to send OTA message.", myEndpoint);
     return;
   }

@@ -539,6 +539,9 @@ typedef struct {
 
 //@} \\END GP Types
 
+#define GP_GPD_SRC_ID_FOR_CAHNNEL_CONFIG 0x00000000
+#define GP_GPD_SRC_ID_WILDCARD           0xFFFFFFFF
+
 // GPD SrcID reserved values
 #define GP_GPD_SRC_ID_RESERVED_0 0x00000000
 #define GP_GPD_SRC_ID_RESERVED_FFFFFF9 0xFFFFFFF9

@@ -1,0 +1,16 @@
+parameters:
+  - name: build_dir
+steps:
+  - task: copy
+    input: "{{build_dir}}/{{project_name}}.s37"
+    output: "artifact/{{project_name}}.s37"
+    export: trustzone_secure_binary
+
+  - task: copy
+    input: "./autogen/example_signing_key.pem"
+    output: "artifact/sign_key.pem"
+    export: private_sign_key
+
+  - task: "copy"
+    output: "artifact/trustzone_secure_library.o"
+    input: "{{build_dir}}/trustzone_secure_library.o"

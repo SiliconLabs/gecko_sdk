@@ -300,9 +300,11 @@ static bool messageSentHandler(EmberOutgoingMessageType type,
       }
     }
 
+    #ifdef EMBER_TEST
     assert(packetSendTimeMs != 0xFFFFFFFF);
+    #endif
 
-    if (status == EMBER_SUCCESS) {
+    if ((status == EMBER_SUCCESS) && (packetSendTimeMs != 0xFFFFFFFF)) {
       testParams.messageSuccessCount++;
       testParams.sumSendTimeMs += packetSendTimeMs;
 

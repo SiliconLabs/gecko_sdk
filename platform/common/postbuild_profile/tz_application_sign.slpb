@@ -1,0 +1,13 @@
+steps:
+  # Create combined S+NS app
+  - task: convert
+    input:
+      - "{{trustzone_secure_binary}}"
+      - "{{trustzone_nonsecure_binary}}"
+    output: artifact/{{workspace_name}}-combined.s37
+
+  # Sign combined S+NS app
+  - task: convert
+    input: "artifact/{{workspace_name}}-combined.s37"
+    output: artifact/{{workspace_name}}-combined-signed.s37
+    keyfile: "{{private_sign_key}}"

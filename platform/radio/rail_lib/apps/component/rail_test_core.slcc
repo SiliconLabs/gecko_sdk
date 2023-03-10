@@ -1940,7 +1940,7 @@ template_contribution:
       handler: getHFXOPPMError
       help: "Compute the HFXO PPM deviation.\\n                    Must be called after a complete thermistor measurement\\n                    ie after getThermistor."
     condition:
-      - device_series_2
+      - device_sdid_220
 
   - name: cli_command
     value:
@@ -1974,18 +1974,6 @@ template_contribution:
           help: "1=reset temperature values after reading"
     condition:
       - device_sdid_220
-
-  - name: cli_command
-    value:
-      name: getSetFemProtectionConfig
-      handler: getSetFemProtectionConfig
-      help: "Show/Configure the FEM protection configuration."
-      argument:
-        - type: uint16opt
-          help: "Arg1: Tx duty cycle in percentage\\n                               Arg2: Power in deci-dBm at FEM output\\n                               Arg3: If present, reset to defaults"
-    condition:
-      - device_sdid_220
-      - rail_util_eff
 
   - name: cli_command
     value:
@@ -2063,10 +2051,10 @@ template_contribution:
     value:
       name: getSetClpcFastLoop
       handler: getSetClpcFastLoop
-      help: "Returns the target and slope for FSK and OFDM"
+      help: "Returns the target and slope for a specific mode and sensor"
       argument:
         - type: uint16opt
-          help: "TargetFSK: Sets the target, in millivolts\\n                    [uint16opt] SlopeFSK: Sets the delta millivolts/raw levels\\n                    [uint16opt] TargetOFDM: Sets the target, in millivolts\\n                    [uint16opt] SlopeOFDM: Sets the delta millivolts/raw levels\\n"
+          help: "ModeSensorIndex: Choose a mode&sensor\\n                    [uint16opt] TargetMv: Sets the target, in millivolts\\n                    [uint16opt] Slope: Sets the delta millivolts/PA power level\\n"
     condition:
       - device_sdid_220
       - rail_util_eff
@@ -2075,10 +2063,10 @@ template_contribution:
     value:
       name: getSetClpcFastLoopCal
       handler: getSetClpcFastLoopCal
-      help: " Returns the CAL1 and CAL2 points for requested \\n  calibration index. Index 0 = FSK_1, Index 1 = OFDM_1"
+      help: " Returns the CAL1 and CAL2 points for a specific mode\\n                    and sensor"
       argument:
         - type: int16opt
-          help: "CalIndex: Calibration Index\\n                    [int16opt] Cal1Ddbm: Cal 1 Output Power\\n                    [int16opt] Cal1: Cal 1 millivolts\\n                    [int16opt] Cal2Ddbm: Cal 2 Output Power\\n                    [int16opt] Cal2: Cal 2 millivolts counts\\n"
+          help: "ModeSensorIndex: Choose a mode&sensor\\n                    [int16opt] Cal1Ddbm: Cal 1 Output Power\\n                    [int16opt] Cal1Mv: Cal 1 millivolts\\n                    [int16opt] Cal2Ddbm: Cal 2 Output Power\\n                    [int16opt] Cal2Mv: Cal 2 millivolts\\n"
     condition:
       - device_sdid_220
       - rail_util_eff
@@ -2087,10 +2075,10 @@ template_contribution:
     value:
       name: getSetClpcFastLoopCalSlp
       handler: getSetClpcFastLoopCalSlp
-      help: " Returns Calibration slope equation. Index 0 = FSK_1, Index 1 = OFDM_1"
+      help: " Returns Calibration slope equation for a specific mode\\n                    and sensor"
       argument:
         - type: int16opt
-          help: "CalIndex: Calibration Index\\n                    [int16opt] Slope1e1: Cal slope * 10\\n                    [int16opt] Offset290Ddbm: Offset at 29 dBm"
+          help: "ModeSensorIndex: Choose a mode&sensor\\n                    [int16opt] Slope1e1: Cal slope * 10 in mV/ddBm\\n                    [int16opt] Offset290Ddbm: Offset at 29 dBm"
     condition:
       - device_sdid_220
       - rail_util_eff
@@ -2103,6 +2091,18 @@ template_contribution:
       argument:
         - type: uint8opt
           help: "ClpcEnable: Sets the EFF CLPC Enable"
+    condition:
+      - device_sdid_220
+      - rail_util_eff
+
+  - name: cli_command
+    value:
+      name: getSetEffClpcFlags
+      handler: getSetEffClpcFlags
+      help: "No parameters, returns the current EFF CLPC Flags\\n                    Bit 0: (1) = ANTV sensor first, 0 = SAW2 sensor first"
+      argument:
+        - type: uint8opt
+          help: "Arg1: Flags"
     condition:
       - device_sdid_220
       - rail_util_eff

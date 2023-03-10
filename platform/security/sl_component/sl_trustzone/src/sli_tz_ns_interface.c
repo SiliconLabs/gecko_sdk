@@ -108,7 +108,7 @@ int32_t sli_tz_ns_interface_dispatch(sli_tz_veneer_fn fn,
   }
   #endif // RTOS_KERNEL_PRESENT
 
-  int32_t result = fn((psa_invec *)arg0, arg1, (psa_outvec *)arg2, arg3);
+  int32_t result = fn((sli_tz_invec *)arg0, arg1, (sli_tz_outvec *)arg2, arg3);
 
   #if defined(RTOS_KERNEL_PRESENT)
   if (osKernelGetState() == osKernelRunning) {

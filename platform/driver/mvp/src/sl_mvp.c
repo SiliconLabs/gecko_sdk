@@ -310,6 +310,7 @@ void sli_mvp_prog_set_loop(sli_mvp_program_t *prog,
   // Program Loop Iterations and increment bit masks
   prog->LOOP[index].CFG = ((count - 1) << _MVP_LOOPCFG_NUMITERS_SHIFT)
                           | (incrarray << _MVP_LOOPCFG_ARRAY0INCRDIM0_SHIFT);
+  prog->LOOP[index].RST = 0;
 
   // Update instruction field with loop information
   // This is done with a read-modify-write since it overlays fields set by the instruction call

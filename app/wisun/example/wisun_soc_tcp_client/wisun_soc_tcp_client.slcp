@@ -67,6 +67,12 @@ configuration:
     value: "eusartHwFlowControlNone"
   - name: "SL_IOSTREAM_EUSART_VCOM_CONVERT_BY_DEFAULT_LF_TO_CRLF"
     value: "1"
+  - name: "SL_IOSTREAM_USART_VCOM_RX_BUFFER_SIZE"
+    value: "128"
+    condition: [iostream_usart]
+  - name: "SL_IOSTREAM_EUSART_VCOM_RX_BUFFER_SIZE"
+    value: "128"
+    condition: [iostream_eusart]
   - name: "OS_CFG_APP_HOOKS_EN"
     value: "1"
     condition: [micriumos_kernel]
@@ -102,8 +108,6 @@ configuration:
 #--------------------- SDK memory configuration ------------------------
   - name: "SL_HEAP_SIZE"
     value: "0x13000"
-  - name: "APP_MAIN_STACK_SIZE_WORD"
-    value: "256"
     
 readme:
   - path: ../../documentation/example/wisun_soc_tcp_client/readme.md

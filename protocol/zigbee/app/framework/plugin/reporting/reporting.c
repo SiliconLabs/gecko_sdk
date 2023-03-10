@@ -63,6 +63,9 @@ sl_zigbee_event_t emberAfPluginReportingTickEvent;
 #define tickEvent (&emberAfPluginReportingTickEvent)
 void emberAfPluginReportingTickEventHandler(SLXU_UC_EVENT);
 #else
+#ifdef EMBER_TEST
+#define emberAfDetectReportChangedCallback(value1, value2, dataType) 0
+#endif
 EmberEventControl emberAfPluginReportingTickEventControl;
 #define tickEvent emberAfPluginReportingTickEventControl
 #endif // UC_BUILD
@@ -760,11 +763,29 @@ static void markReportTableChange(uint8_t *dataRef,
   EmberAfDifferenceType difference
     = emberAfGetDifference(dataRef,
                            emAfPluginReportVolatileData[entryIndex].lastReportValue,
-                           dataSize);
+                           dataSize,
+                           dataType);
   uint8_t analogOrDiscrete = emberAfGetAttributeAnalogOrDiscreteType(dataType);
+  bool changed = false;
+
+  if (dataType == ZCL_FLOAT_SEMI_ATTRIBUTE_TYPE
+      || dataType == ZCL_FLOAT_DOUBLE_ATTRIBUTE_TYPE) {
+    changed = emberAfDetectReportChangedCallback(entry->data.reported.reportableChange,
+                                                 difference,
+                                                 dataType);
+  } else if (dataType == ZCL_FLOAT_SINGLE_ATTRIBUTE_TYPE) {
+    float reportableChange = 0, diffFloat = 0;
+
+    memcpy(&reportableChange, &entry->data.reported.reportableChange, sizeof(float));
+    memcpy(&diffFloat, &difference, sizeof(float));
+
+    changed = reportableChange <= diffFloat;
+  } else {
+    changed = entry->data.reported.reportableChange <= difference;
+  }
+
   if ((analogOrDiscrete == EMBER_AF_DATA_TYPE_DISCRETE && difference != 0)
-      || (analogOrDiscrete == EMBER_AF_DATA_TYPE_ANALOG
-          && entry->data.reported.reportableChange <= difference)) {
+      || (analogOrDiscrete == EMBER_AF_DATA_TYPE_ANALOG && changed)) {
     emAfPluginReportVolatileData[entryIndex].reportableChange = true;
     scheduleTick();
   }
@@ -1268,3 +1289,12 @@ WEAK(bool emberAfPluginReportingGetDefaultReportingConfigCallback(EmberAfPluginR
   entry->direction = EMBER_ZCL_REPORTING_DIRECTION_REPORTED;
   return true;
 }
+
+#ifdef UC_BUILD
+WEAK(bool emberAfDetectReportChangedCallback(EmberAfDifferenceType threshold,
+                                             EmberAfDifferenceType diff,
+                                             EmberAfAttributeType dataType))
+{
+  return false;
+}
+#endif

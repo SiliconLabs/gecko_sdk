@@ -1,0 +1,18 @@
+id: "btmesh_stack_on_demand_private_proxy_client"
+label: "On-Demand Private Proxy Client Model"
+package: "Btmesh"
+description: "Provides the Bluetooth mesh On-Demand Private Proxy Client model. It is used to support the functionality of a node that can configure the advertising with Private Network Identity type functionality of another node."
+category: "Bluetooth Mesh|Stack|Models|Core"
+quality: "evaluation"
+root_path: "protocol/bluetooth"
+
+requires:
+  - name: "btmesh_stack"
+  - name: "btmesh_core"
+provides:
+  - name: "btmesh_stack_on_demand_private_proxy_client"
+template_contribution:
+  - name: btmesh_bgapi_class
+    value:
+      class: "on_demand_private_proxy_client"
+    priority: 1

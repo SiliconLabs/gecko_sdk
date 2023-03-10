@@ -19,7 +19,6 @@ void sl_iostream_leuart_init_instances(void);
 #if defined(SL_CATALOG_POWER_MANAGER_PRESENT)
 {% for instance in iostream_leuart_instances %}
 sl_power_manager_on_isr_exit_t sl_iostream_leuart_{{ instance }}_sleep_on_isr_exit(void);
-bool sl_iostream_leuart_{{ instance }}_is_ok_to_sleep(void);
 {% endfor %}
 #endif
 

@@ -4,7 +4,7 @@ label: PSA ITS Service for TrustZone Secure Key Library
 description: >-
   This component includes the PSA Internal Trusted Storage support for TrustZone secure library.
 category: Platform|Security|TrustZone
-quality: evaluation
+quality: production
 component_root_path: platform/security/sl_component
 
 provides:

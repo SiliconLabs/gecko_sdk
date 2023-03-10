@@ -88,7 +88,7 @@ EMSTATUS GLIB_contextInit(GLIB_Context_t *pContext)
   }
 
   /* Configure font. Default to NORMAL 8x8 if included in project. */
-#ifndef GLIB_NO_DEFAULT_FONT
+#ifdef GLIB_DEFAULT_FONT
   GLIB_setFont(pContext, GLIB_DEFAULT_FONT);
 #endif
 

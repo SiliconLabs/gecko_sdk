@@ -122,11 +122,11 @@ SPIDRV_Init_t sl_spidrv_eusart_init_{{instance}} = {
 void sl_spidrv_init_instances(void) {
 {%- for instance in spidrv_usart_instances %}
 #if !defined(SL_SPIDRV_USART_{{instance | upper}}_CS_PIN)
-  EFM_ASSERT(sl_spidrv_usart_init_{{instance}}.csControl == spidrvCsControlAuto);
+  EFM_ASSERT(sl_spidrv_usart_init_{{instance}}.csControl == spidrvCsControlApplication);
 #endif{% endfor %}
 {%- for instance in spidrv_eusart_instances %}
 #if !defined(SL_SPIDRV_EUSART_{{instance | upper}}_CS_PIN)
-  EFM_ASSERT(sl_spidrv_eusart_init_{{instance}}.csControl == spidrvCsControlAuto);
+  EFM_ASSERT(sl_spidrv_eusart_init_{{instance}}.csControl == spidrvCsControlApplication);
 #endif {% endfor %}
 
 {%- for instance in spidrv_instances %}

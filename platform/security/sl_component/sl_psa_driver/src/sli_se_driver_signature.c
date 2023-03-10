@@ -32,6 +32,7 @@
 
 #if defined(SEMAILBOX_PRESENT)
 
+#include "sli_psa_driver_common.h"  // sli_psa_zeroize()
 #include "psa/crypto.h"
 #include "sli_se_transparent_types.h"
 #include "sli_se_transparent_functions.h"
@@ -320,7 +321,7 @@ psa_status_t sli_se_sign_message(const psa_key_attributes_t *attributes,
   && defined(PSA_WANT_ALG_ECDSA) && defined(PSA_WANT_ECC_SECP_R1_521)        \
   && defined(SLI_SE_KEY_PADDING_REQUIRED)
   if (offset > 0) {
-    memset(temp_key_buf, 0, sizeof(temp_key_buf));
+    sli_psa_zeroize(temp_key_buf, sizeof(temp_key_buf));
     // Copy over from temp signature
     sli_se_unpad_curve_point(temp_signature_buffer, signature, key_size);
   }
@@ -838,7 +839,7 @@ psa_status_t sli_se_sign_hash(const psa_key_attributes_t *attributes,
 #if (_SILICON_LABS_SECURITY_FEATURE == _SILICON_LABS_SECURITY_FEATURE_VAULT) \
   && defined(PSA_WANT_ECC_SECP_R1_521) && defined(SLI_SE_KEY_PADDING_REQUIRED)
   if (offset > 0) {
-    memset(temp_key_buf, 0, sizeof(temp_key_buf));
+    sli_psa_zeroize(temp_key_buf, sizeof(temp_key_buf));
     // Copy over from temp signature
     sli_se_unpad_curve_point(temp_signature_buffer, signature, key_size);
   }

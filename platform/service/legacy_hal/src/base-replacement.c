@@ -624,61 +624,12 @@ bool halInternalUartFlowControlRxIsEnabled(uint8_t port)
 
 void halInternalSetCtune(uint16_t tune)
 {
-  #if defined(_CMU_HFXOSTEADYSTATECTRL_CTUNE_MASK) // series 1
-  CMU_CLOCK_SELECT_SET(HF, HFRCO);
-
-  CMU_OscillatorEnable(cmuOsc_HFXO, false, false);
-  CMU->HFXOSTEADYSTATECTRL &= ~_CMU_HFXOSTEADYSTATECTRL_CTUNE_MASK;
-  CMU->HFXOSTEADYSTATECTRL |= (tune << _CMU_HFXOSTEADYSTATECTRL_CTUNE_SHIFT)
-                              & _CMU_HFXOSTEADYSTATECTRL_CTUNE_MASK;
-  CMU_OscillatorEnable(cmuOsc_HFXO, true, true);
-
-  CMU_CLOCK_SELECT_SET(HF, HFXO);
-
-  #elif defined(_HFXO_XTALCTRL_CTUNEXIANA_MASK) // series 2
-  CMU_CLOCK_SELECT_SET(SYSCLK, FSRCO);
-
-  // clear FORCEEN bit and set DISONDEMAND bit to enable writing of ctune values
-  HFXO0->CTRL &= ~_HFXO_CTRL_FORCEEN_MASK;
-  HFXO0->CTRL |= _HFXO_CTRL_DISONDEMAND_MASK;
-
-  // FSMLOCK only on series 2 config 1 and 2
-  #if defined(_SILICON_LABS_32B_SERIES_2_CONFIG_1) || defined(_SILICON_LABS_32B_SERIES_2_CONFIG_2)
-  // wait until FSMLOCK becomes 0
-  while ((HFXO0->STATUS & _HFXO_STATUS_FSMLOCK_MASK) == HFXO_STATUS_FSMLOCK) {
-  }
-  #endif
-
-  // check that the HFXO is off
-  if ((HFXO0->STATUS & _HFXO_STATUS_ENS_MASK) != HFXO_STATUS_ENS) {
-    HFXO0->XTALCTRL &= ~_HFXO_XTALCTRL_CTUNEXIANA_MASK;
-    HFXO0->XTALCTRL |= (tune << _HFXO_XTALCTRL_CTUNEXIANA_SHIFT)
-                       & _HFXO_XTALCTRL_CTUNEXIANA_MASK;
-    HFXO0->XTALCTRL &= ~_HFXO_XTALCTRL_CTUNEXOANA_MASK;
-    HFXO0->XTALCTRL |= (tune << _HFXO_XTALCTRL_CTUNEXOANA_SHIFT)
-                       & _HFXO_XTALCTRL_CTUNEXOANA_MASK;
-  }
-
-  // clear DISONDEMAND and set FORCEEN to reenable HFXO
-  HFXO0->CTRL &= ~_HFXO_CTRL_DISONDEMAND_MASK;
-  HFXO0->CTRL |= _HFXO_CTRL_FORCEEN_MASK;
-
-  CMU_CLOCK_SELECT_SET(SYSCLK, HFXO);
-
-  #endif // _CMU_HFXOSTARTUPCTRL_CTUNE_MASK
+  (void)RAIL_SetTune(RAIL_EFR32_HANDLE, tune);
 }
 
 uint16_t halInternalGetCtune(void)
 {
-  #if defined(_CMU_HFXOSTARTUPCTRL_CTUNE_MASK) // series 1
-  return (CMU->HFXOSTEADYSTATECTRL & _CMU_HFXOSTEADYSTATECTRL_CTUNE_MASK)
-         >> _CMU_HFXOSTEADYSTATECTRL_CTUNE_SHIFT;
-  #elif defined(_HFXO_XTALCTRL_CTUNEXIANA_MASK) // series 2
-  return (HFXO0->XTALCTRL & _HFXO_XTALCTRL_CTUNEXIANA_MASK)
-         >> _HFXO_XTALCTRL_CTUNEXIANA_SHIFT;
-  #else //!_CMU_HFXOSTEADYSTATECTRL_CTUNE_MASK
-  return 0U;
-  #endif //_CMU_HFXOSTEADYSTATECTRL_CTUNE_MASK
+  return (uint16_t)RAIL_GetTune(RAIL_EFR32_HANDLE);
 }
 
 #if defined(SL_CATALOG_SIMPLE_BUTTON_PRESENT)

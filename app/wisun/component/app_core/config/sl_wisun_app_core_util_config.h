@@ -90,8 +90,8 @@
 
 // <h> Wi-SUN Application thread setup
 // <o APP_MAIN_STACK_SIZE_WORD> Recommended Application thread stack size
-// <i> Default: 120 word
-#define APP_MAIN_STACK_SIZE_WORD                    120
+// <i> Default: 256 word
+#define APP_MAIN_STACK_SIZE_WORD                    256
 // </h> Wi-SUN Application thread setup
 
 // <<< end of configuration section >>>

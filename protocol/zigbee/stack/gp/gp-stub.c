@@ -191,6 +191,12 @@ bool emIsGpIdConflict(EmberNodeId shortId)
   return false;
 }
 
+void emDetectGpIdConflictAndResolve(EmberNodeId shortId,
+                                    uint8_t *longId)
+{
+  (void)shortId;
+  (void)longId;
+}
 void emUpdateGpProxyTable(uint8_t *longId, EmberNodeId shortId)
 {
   (void)longId;

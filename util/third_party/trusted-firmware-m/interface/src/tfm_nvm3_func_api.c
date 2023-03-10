@@ -57,14 +57,14 @@
 
 #endif // defined(TFM_CONFIG_SL_SECURE_LIBRARY)
 
-// The default handles are located in S together with the rest of the NVM3 code. However, the
-// NVM3 api requires the handle pointer to be sent in explicitly, which NS does not know. We
-// therefore use NULL as a special value, which makes the NVM3 service in TFM use its internal
-// default handles.
-//
-// TODO: Use a non-NULL macro instead?
-
-nvm3_Handle_t placeholder_default_handle = { NULL };
+// The default handles are located in S together with the rest of the NVM3 code.
+// However, the NVM3 API requires the handle pointer to be sent in explicitly,
+// which NS does not know. We therefore use a magic value in the nvmAdr member,
+// which makes the NVM3 service in the secure library use its internal default
+// handle.
+nvm3_Handle_t placeholder_default_handle = {
+  .nvmAdr = (nvm3_HalPtr_t)SLI_TZ_SERVICE_NVM3_DEFAULT_HANDLE_MAGIC
+};
 nvm3_Handle_t *nvm3_defaultHandle = &placeholder_default_handle;
 
 #if defined(NVM3_BASE)
@@ -80,19 +80,18 @@ __attribute__((used)) uint8_t nvm3_default_storage[NVM3_DEFAULT_NVM_SIZE] __attr
   #error "Unsupported toolchain"
 #endif
 
-static nvm3_CacheEntry_t defaultCache[NVM3_DEFAULT_CACHE_SIZE];
-
 nvm3_Init_t nvm3_defaultInitData =
 {
   .nvmAdr = (nvm3_HalPtr_t)NVM3_BASE,
   .nvmSize = NVM3_DEFAULT_NVM_SIZE,
-  .cachePtr = defaultCache,
+  // The secure library owns the NVM3 cache. Setting the cache pointer to NULL
+  // here indicates that the cache on the secure side should be used.
+  .cachePtr = NULL,
   .cacheEntryCount = NVM3_DEFAULT_CACHE_SIZE,
   .maxObjectSize = NVM3_DEFAULT_MAX_OBJECT_SIZE,
   .repackHeadroom = NVM3_DEFAULT_REPACK_HEADROOM,
-  // In TrustZone Secure Key Library solutions, the Secure Library owns the flash handle.
-  // Setting the flash handle to NULL here indicates that the flash handle on the secure
-  // side should be used.
+  // The secure library owns the flash handle. Setting the flash handle to NULL
+  // here indicates that the flash handle on the secure side should be used.
   .halHandle = NULL,
 };
 

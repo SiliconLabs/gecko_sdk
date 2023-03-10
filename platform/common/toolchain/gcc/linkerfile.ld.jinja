@@ -36,6 +36,7 @@
 {%- set flash_addr = device_flash_addr | first | default(0, true) %}
 {%- set flash_size = device_flash_size | first %}
 {%- set flash_page_size = device_flash_page_size | first %}
+{%- set bootloader_reset_cause_size = 4 %}
 
 {%- if bootloader_enable %}
 {%-   if memory_flash_start is defined %}
@@ -64,6 +65,12 @@
 {%-   set app_ram_size = memory_ram_size | first %}
 {%- else %}
 {%-   set app_ram_size = sram_size %}
+{%- endif %}
+
+{%- if bootloader_enable %}
+{%-   set bootloader_reset_region_start = app_ram_start %}
+{%-   set app_ram_start = app_ram_start + bootloader_reset_cause_size %}
+{%-   set app_ram_size = app_ram_size - bootloader_reset_cause_size %}
 {%- endif %}
 
 {%- if memory_flash_start is defined %}
@@ -109,6 +116,7 @@
  {
    FLASH   (rx)  : ORIGIN = 0x{{ '%0x' % bootloader_flash_startaddr }}, LENGTH = 0x{{ '%0x' % bootloader_flash_size }}
    RAM     (rwx) : ORIGIN = 0x{{ '%0x' % app_ram_start }}, LENGTH = 0x{{ '%0x' % app_ram_size }}
+   BOOTLOADER_RESET_REGION (rwx) : ORIGIN = 0x{{ '%0x' % bootloader_reset_region_start }}, LENGTH = 0x{{ '%0x' % bootloader_reset_cause_size }}
  }
 {%- else %}
  MEMORY
@@ -221,6 +229,18 @@ SECTIONS
   } > FLASH
 
   __etext = .;
+
+  {%- if bootloader_enable %}
+
+  . = ORIGIN(BOOTLOADER_RESET_REGION);
+
+  .bootloader_reset_section (NOLOAD):
+  {
+    __ResetReasonStart__ = .;
+    KEEP(*(.bootloader_reset_section))
+  } > BOOTLOADER_RESET_REGION
+
+{%- endif %}
 
   /* Start placing output sections which are loaded into RAM */
   . = ORIGIN(RAM);

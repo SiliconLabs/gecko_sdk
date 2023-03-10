@@ -44,11 +44,19 @@ EmberStatus emAfSendBootloadMessage(bool isBroadcast,
                                  message);
 }
 
+#ifdef UC_BUILD
+void emAfPluginStandaloneBootloaderCommonIncomingBootloadMessageCallback(EmberEUI64 longId,
+                                                                         uint8_t lastHopLqi,
+                                                                         int8_t lastHopRssi,
+                                                                         uint8_t messageLength,
+                                                                         uint8_t* messageContents)
+#else // !UC_BUILD
 void ezspIncomingBootloadMessageHandler(EmberEUI64 longId,
                                         uint8_t lastHopLqi,
                                         int8_t lastHopRssi,
                                         uint8_t messageLength,
                                         uint8_t* messageContents)
+#endif // UC_BUILD
 {
   if (messageLength > MAX_BOOTLOAD_MESSAGE_SIZE) {
     bootloadPrintln("Bootload message too long (%d > %d), dropping!",
@@ -62,9 +70,15 @@ void ezspIncomingBootloadMessageHandler(EmberEUI64 longId,
                                                                  messageContents);
 }
 
+#ifdef UC_BUILD
+void emAfPluginStandaloneBootloaderCommonBootloadTransmitCompleteCallback(EmberStatus status,
+                                                                          uint8_t messageLength,
+                                                                          uint8_t *messageContents)
+#else // !UC_BUILD
 void ezspBootloadTransmitCompleteHandler(EmberStatus status,
                                          uint8_t messageLength,
                                          uint8_t *messageContents)
+#endif // UC_BUILD
 {
   if (status != EMBER_SUCCESS) {
     uint8_t commandId = 0xFF;

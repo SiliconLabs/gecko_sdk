@@ -36,7 +36,7 @@ define:
 
 export:
   library:
-    - path: bootloader_secure_lib.o
+    - path: artifact/trustzone_secure_library.o
 tag:
   - "companion:bootloader-spi-ezsp-nonsecure.slcp"
 readme:

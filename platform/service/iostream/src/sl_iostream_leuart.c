@@ -308,6 +308,12 @@ static sl_status_t leuart_deinit(void *context)
   GPIO_PinModeSet(leuart_context->tx_port, leuart_context->tx_pin, gpioModeDisabled, 0);
   GPIO_PinModeSet(leuart_context->rx_port, leuart_context->rx_pin, gpioModeDisabled, 0);
 
+  // Disable LEUART IRQ
+  #if defined(SL_CATALOG_POWER_MANAGER_PRESENT) && !defined(SL_IOSTREAM_UART_FLUSH_TX_BUFFER)
+  LEUART_IntDisable(leuart_context->leuart, LEUART_IF_TXC);
+  #endif
+  LEUART_IntDisable(leuart_context->leuart, LEUART_IF_RXDATAV);
+
   // Disable LEUART peripheral
   LEUART_Enable(leuart_context->leuart, leuartDisable);
 

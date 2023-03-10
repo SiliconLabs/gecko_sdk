@@ -50,6 +50,8 @@ requires:
     condition: [trustzone_secure]
   - name: tz_sl_interface
     condition: [trustzone_nonsecure]
+  - name: sl_fault_injection_hardening
+    condition: [trustzone_secure]
 
 define:
   - name: BOOTLOADER_APPLOADER

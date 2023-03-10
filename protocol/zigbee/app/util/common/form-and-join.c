@@ -64,6 +64,8 @@
 #include "form-and-join.h"
 #include "form-and-join-adapter.h"
 
+#include "sl_common.h" // for SL_FALLTHROUGH
+
 #if defined RADIO_TX_CALLBACK
   #define GET_PRO2PLUS_RADIO_TX_POWER(chanPg)   emberAfPluginNetworkFindGetRadioPowerForChannelCallback(chanPg)
 #elif defined SL_CATALOG_ZIGBEE_NETWORK_FIND_SUB_GHZ_PRESENT
@@ -289,8 +291,7 @@ static void energyScanComplete(void)
           currentPage = EMBER_MIN_SUGBHZ_PAGE_NUMBER - 1;
         }
       }
-    // Deliberately fall through...
-
+      SL_FALLTHROUGH
     case FIND_AND_JOIN_MODE_ALLOW_SUB_GHZ:
       // Finished scanning the current page, try the next page if available
       if (currentPage < EMBER_MAX_SUGBHZ_PAGE_NUMBER) {

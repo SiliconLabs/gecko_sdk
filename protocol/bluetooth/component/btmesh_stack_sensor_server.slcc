@@ -1,0 +1,22 @@
+id: "btmesh_stack_sensor_server"
+label: "Sensor Server Model"
+package: "Btmesh"
+description: "Provides Bluetooth mesh Sensor Server model.
+  It is used to support the reporting functionality of a node with a set of sensors whose data is available on the network."
+category: "Bluetooth Mesh|Stack|Models|Sensors"
+quality: "production"
+root_path: "protocol/bluetooth"
+
+requires:
+  - name: "btmesh_stack"
+  - name: "btmesh_stack_sensor_setup_server"
+  - name: "btmesh_core"
+provides:
+  - name: "btmesh_stack_sensor_server"
+  - name: "btmesh_sensor_model"
+    allow_multiple: true
+template_contribution:
+  - name: btmesh_bgapi_class
+    value:
+      class: "sensor_server"
+    priority: 1

@@ -356,7 +356,8 @@ psa_status_t sli_crypto_transparent_aead_encrypt_tag(const psa_key_attributes_t 
     case PSA_ALG_AEAD_WITH_SHORTENED_TAG(PSA_ALG_CCM, 0):
       // Verify key type
       if (psa_get_key_type(attributes) != PSA_KEY_TYPE_AES) {
-        return PSA_ERROR_NOT_SUPPORTED;
+        psa_status = PSA_ERROR_NOT_SUPPORTED;
+        goto exit;
       }
 
       psa_status = sli_ccm_crypt_and_tag(&operation,
@@ -376,7 +377,8 @@ psa_status_t sli_crypto_transparent_aead_encrypt_tag(const psa_key_attributes_t 
     case PSA_ALG_AEAD_WITH_SHORTENED_TAG(PSA_ALG_GCM, 0): {
       // Verify key type
       if (psa_get_key_type(attributes) != PSA_KEY_TYPE_AES) {
-        return PSA_ERROR_NOT_SUPPORTED;
+        psa_status = PSA_ERROR_NOT_SUPPORTED;
+        goto exit;
       }
 
       sli_gcm_crypt_and_tag(&operation,
@@ -391,14 +393,13 @@ psa_status_t sli_crypto_transparent_aead_encrypt_tag(const psa_key_attributes_t 
                             *tag_length,
                             tag);
 
-      sli_psa_zeroize(&operation, sizeof(operation));
-
       psa_status = PSA_SUCCESS;
       break;
     }
 #endif // PSA_WANT_ALG_GCM
     default:
-      return PSA_ERROR_NOT_SUPPORTED;
+      psa_status = PSA_ERROR_NOT_SUPPORTED;
+      goto exit;
   }
 
   if (psa_status == PSA_SUCCESS) {
@@ -407,6 +408,11 @@ psa_status_t sli_crypto_transparent_aead_encrypt_tag(const psa_key_attributes_t 
     *ciphertext_length = 0;
     *tag_length = 0;
   }
+
+  exit:
+  // Wipe out potential sensitive info from the operation structure,
+  // including the plaintext key.
+  sli_psa_zeroize(&operation, sizeof(operation));
 
   return psa_status;
 
@@ -503,7 +509,8 @@ psa_status_t sli_crypto_transparent_aead_decrypt_tag(const psa_key_attributes_t 
     case PSA_ALG_AEAD_WITH_SHORTENED_TAG(PSA_ALG_CCM, 0):
       // Verify key type
       if (psa_get_key_type(attributes) != PSA_KEY_TYPE_AES) {
-        return PSA_ERROR_NOT_SUPPORTED;
+        psa_status = PSA_ERROR_NOT_SUPPORTED;
+        goto exit;
       }
 
       psa_status = sli_ccm_crypt_and_tag(&operation,
@@ -519,7 +526,8 @@ psa_status_t sli_crypto_transparent_aead_decrypt_tag(const psa_key_attributes_t 
                                          tag_length);
 
       if (psa_status != PSA_SUCCESS) {
-        return psa_status;
+        sli_psa_zeroize(calc_tag, tag_length);
+        goto exit;
       }
 
       // Check that the provided tag equals the calculated one
@@ -543,7 +551,8 @@ psa_status_t sli_crypto_transparent_aead_decrypt_tag(const psa_key_attributes_t 
     case PSA_ALG_AEAD_WITH_SHORTENED_TAG(PSA_ALG_GCM, 0): {
       // Verify key type
       if (psa_get_key_type(attributes) != PSA_KEY_TYPE_AES) {
-        return PSA_ERROR_NOT_SUPPORTED;
+        psa_status = PSA_ERROR_NOT_SUPPORTED;
+        goto exit;
       }
 
       sli_gcm_crypt_and_tag(&operation,
@@ -558,8 +567,6 @@ psa_status_t sli_crypto_transparent_aead_decrypt_tag(const psa_key_attributes_t 
                             tag_length,
                             calc_tag);
 
-      sli_psa_zeroize(&operation, sizeof(operation));
-
       // Check that the provided tag equals the calculated one
       // (in constant time). Note that the tag computed
       // is encrypted, so we don't have to decrypt check_tag.
@@ -570,6 +577,7 @@ psa_status_t sli_crypto_transparent_aead_decrypt_tag(const psa_key_attributes_t 
         *plaintext_length = 0;
         sli_psa_zeroize(plaintext, ciphertext_length);
         psa_status = PSA_ERROR_INVALID_SIGNATURE;
+        goto exit;
       } else {
         *plaintext_length = ciphertext_length;
         psa_status = PSA_SUCCESS;
@@ -579,8 +587,14 @@ psa_status_t sli_crypto_transparent_aead_decrypt_tag(const psa_key_attributes_t 
     }
 #endif // PSA_WANT_ALG_GCM
     default:
-      return PSA_ERROR_NOT_SUPPORTED;
+      psa_status = PSA_ERROR_NOT_SUPPORTED;
+      goto exit;
   }
+
+  exit:
+  // Wipe out potential sensitive info from the operation structure,
+  // including the plaintext key.
+  sli_psa_zeroize(&operation, sizeof(operation));
 
   return psa_status;
 

@@ -1,0 +1,49 @@
+id: btmesh_firmware_update_client
+label: Firmware Update Client
+package: Btmesh
+description: >
+  Provides BT Mesh Firmware Update Client functionality, defined in mesh
+  specification.
+
+  The Firmware Update Client model is used by the Distributor and Initiator.
+
+  The Initiator uses this model to retrieve the information about the firmware
+  subsystems installed on the Updating node, and to get the location of the new
+  firmware images. The Initiator receives the list of Updating nodes from the
+  higher-layer application.
+
+  The Distributor uses this model to start a firmware image transfer to the
+  Updating nodes. The Distributor receives the list of Updating nodes from the
+  Initiator. The Distributor uses the procedures on the Firmware Update Client
+  model with the inputs to these procedures being chosen by the Firmware
+  Distribution Server.
+category: "Bluetooth Mesh|Models|Firmware Update"
+quality: production
+root_path: app/btmesh/common/btmesh_firmware_update_client
+config_file:
+  - path: btmesh_firmware_update_client.dcd
+    directory: btmeshconf
+source:
+  - path: sl_btmesh_firmware_update_client.c
+include:
+  - path: ""
+    file_list:
+      - path: sl_btmesh_firmware_update_client.h
+provides:
+  - name: btmesh_firmware_update_client
+requires:
+  - name: app_assert
+  - name: app_btmesh_util
+  - name: btmesh_core
+  - name: btmesh_blob_transfer_client
+  - name: btmesh_stack_fw_update_client
+  - name: btmesh_stack
+
+template_contribution:
+  - name: btmesh_on_event
+    value:
+      include: sl_btmesh_firmware_update_client.h
+      function: sl_btmesh_firmware_update_client_on_event
+    priority: -1002
+  - name: component_catalog
+    value: btmesh_firmware_update_client

@@ -1,0 +1,37 @@
+id: "btmesh_ae_server"
+label: "Advertisement Extension Server"
+package: "Btmesh"
+description: >
+  Advertisement Extension Server component enables the Silabs Configuration Server vendor model for the node to allow data
+  transfer over Advertisement Extension. This is a proprietary feature which breaks compliance with AE in
+  BT Mesh 1.1 specification.
+  Mesh data over Advertisement Extension can be used in message-heavy applications (e.g. Device Firmware Update) to
+  speed up data transfer between nodes. All nodes must have the Silabs Configuration Server vendor model enabled, and a
+  Silabs Configuration Client (enabled by e.g. the Advertisement Extension Client component) must configure the clients
+  to use Advertisement Extension.
+category: "Bluetooth Mesh|Models|Proprietary"
+quality: "production"
+root_path: "app/btmesh/common/btmesh_ae_server"
+config_file:
+  - path: btmesh_ae_server.dcd
+    directory: btmeshconf
+source:
+  - path: "sl_btmesh_ae_server.c"
+include:
+  - path: ""
+    file_list:
+      - path: "sl_btmesh_ae_server.h"
+provides:
+  - name: "btmesh_ae_server"
+requires:
+  - name: "app_assert"
+  - name: "btmesh_stack_advertiser_extended"
+  - name: "btmesh_stack_silabs_config_server"
+
+template_contribution:
+  - name: "btmesh_on_event"
+    value:
+      include: "sl_btmesh_ae_server.h"
+      function: "sl_btmesh_ae_server_on_event"
+  - name: component_catalog
+    value: btmesh_ae_server

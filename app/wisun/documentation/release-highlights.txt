@@ -1,4 +1,2 @@
-Wi-SUN SDK 1.5.0.0
-- EFR32FG25 launch support
-- Enhancements to the Border Router RCP
-- Other targeted improvements and bug fixes
+Wi-SUN SDK 1.5.1.0
+- Targeted quality improvements and bug fixes

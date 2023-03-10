@@ -1,0 +1,65 @@
+id: btmesh_firmware_update_server
+label: "Firmware Update Server"
+package: Btmesh
+description: >
+  Provides BT Mesh Firmware Update Server functionality, defined in mesh
+  specification.
+
+  This model is used by the Updating node to report the firmware images
+  installed on the node and the location of new firmware images, and to initiate
+  a firmware update in order to receive a new firmware. The firmware image will
+  be transferred using the BLOB Transfer Server model.
+category: "Bluetooth Mesh|Models|Firmware Update"
+quality: production
+root_path: app/btmesh/common/btmesh_firmware_update_server
+config_file:
+  - path: btmesh_firmware_update_server.dcd
+    directory: btmeshconf
+  - path: config/sl_btmesh_firmware_update_server_config.h
+source:
+  - path: sl_btmesh_firmware_update_server.c
+  - path: sl_btmesh_firmware_update_server_api.c
+include:
+  - path: ""
+    file_list:
+      - path: sl_btmesh_firmware_update_server.h
+      - path: sl_btmesh_firmware_update_server_api.h
+requires:
+  - name: app_assert
+  - name: app_btmesh_util
+  - name: btmesh_core
+  - name: btmesh_stack
+  - name: btmesh_blob_transfer_server
+  - name: btmesh_stack_fw_update_server
+  - name: power_manager
+  - name: simple_timer
+  - name: silabs_core_sl_malloc
+provides:
+  - name: btmesh_firmware_update_server
+recommends:
+  - id: simple_timer
+
+template_contribution:
+  - name: btmesh_on_event
+    value:
+      include: sl_btmesh_firmware_update_server.h
+      function: sl_btmesh_firmware_update_server_on_event
+  - name: component_catalog
+    value: firmware_update_server
+  - name: event_handler
+    value:
+      event: internal_app_process_action
+      include: sl_btmesh_firmware_update_server.h
+      handler: sl_btmesh_firmware_update_server_verify_step_handle
+  - name: event_handler
+    value:
+      event: internal_app_process_action
+      include: sl_btmesh_firmware_update_server.h
+      handler: sl_btmesh_firmware_update_server_metadata_check_step_handle
+  - name: power_manager_handler
+    value:
+      event: is_ok_to_sleep
+      include: sl_btmesh_firmware_update_server.h
+      handler: sl_btmesh_firmware_update_server_is_ok_to_sleep
+validation_helper:
+  - path: btmesh_firmware_update_server_validation.lua

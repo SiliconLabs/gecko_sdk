@@ -28,7 +28,9 @@ bool emberAf11073ProtocolTunnelClusterConnectRequestCallback(EmberAfClusterComma
   sl_zcl_11073_protocol_tunnel_cluster_connect_request_command_t cmd_data;
   bool connected = false;
   bool preemptible = false;
+  // NOTE status set never checked.
   EmberAfStatus status;
+  (void) status;
 
   if (zcl_decode_11073_protocol_tunnel_cluster_connect_request_command(cmd, &cmd_data)
       != EMBER_ZCL_STATUS_SUCCESS) {
@@ -100,8 +102,10 @@ bool emberAf11073ProtocolTunnelClusterDisconnectRequestCallback(EmberAfClusterCo
   sl_zcl_11073_protocol_tunnel_cluster_disconnect_request_command_t cmd_data;
   bool connected = false;
   EmberEUI64 currentManager;
-  bool preemptible;
+  bool preemptible = false;
+  // NOTE status set never checked.
   EmberAfStatus status;
+  (void) status;
 
   if (zcl_decode_11073_protocol_tunnel_cluster_disconnect_request_command(cmd, &cmd_data)
       != EMBER_ZCL_STATUS_SUCCESS) {

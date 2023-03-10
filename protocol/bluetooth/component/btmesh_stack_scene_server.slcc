@@ -1,0 +1,21 @@
+id: "btmesh_stack_scene_server"
+label: "Scene Server Model"
+package: "Btmesh"
+description: "Provides Bluetooth mesh Scene Server model.
+  This model holds a list of scenes, and exposes the functionality for storing and recalling the state of these scenes.
+  It is used to support the control and reporting functionality of a node that can participate in a scene."
+category: "Bluetooth Mesh|Stack|Models|Time and Scenes"
+quality: "production"
+root_path: "protocol/bluetooth"
+
+requires:
+  - name: "btmesh_stack"
+  - name: "btmesh_stack_scene_setup_server"
+  - name: "btmesh_core"
+provides:
+  - name: "btmesh_stack_scene_server"
+template_contribution:
+  - name: btmesh_bgapi_class
+    value:
+      class: "scene_server"
+    priority: 1

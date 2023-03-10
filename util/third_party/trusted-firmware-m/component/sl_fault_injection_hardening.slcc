@@ -1,0 +1,57 @@
+id: sl_fault_injection_hardening
+label: Fault Injection Hardening
+package: platform
+description: >
+  Fault injection hardening library provides support for different measures, which can either be enabled/disabled by selecting one of the TFM_FIH_PROFILEs
+category: Platform|Security
+quality: production
+component_root_path: util/third_party/trusted-firmware-m
+source:
+  - path: lib/fih/src/fih.c
+  - path: platform/ext/target/siliconlabs/vse/sli_cryptoacc.c
+    condition:
+      - device_has_cryptoacc
+    unless:
+      - trustzone_nonsecure
+  - path: platform/ext/target/siliconlabs/hse/sli_se.c
+    condition:
+      - device_has_semailbox
+    unless:
+      - trustzone_nonsecure
+
+include:
+  - path: lib/fih/inc
+    file_list:
+      - path: fih.h
+  - path: platform/include
+    file_list:
+      - path: tfm_hal_defs.h
+      - path: tfm_hal_platform.h
+
+requires:
+  - name: device_series_2
+  - name: se_manager
+    condition: [trustzone_secure]
+  - name: cryptoacc_library
+    condition: [device_has_cryptoacc,trustzone_secure]
+  - name: psa_driver
+    condition: [device_has_cryptoacc]
+  - name: mbedtls_config
+    condition: [device_has_cryptoacc]
+  - name: mbedtls_slcrypto_driver
+    condition: [device_has_cryptoacc]
+
+config_file:
+  - path: config/sl_fault_injection_hardening_cfg.h
+    file_id: sl_fault_injection_hardening_cfg
+
+toolchain_settings:
+  - option: gcc_compiler_option
+    value: -Wno-ignored-qualifiers
+  - option: gcc_compiler_option
+    value: -Wno-sign-compare
+# Suppress IAR warning for ignored qualifiers:
+  - option: iar_compiler_option
+    value: --diag_suppress Pa082
+provides:
+  - name: sl_fault_injection_hardening

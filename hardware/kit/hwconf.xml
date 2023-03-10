@@ -421,6 +421,26 @@
     <property key="installationPath" value="./EFR32MG21_BRD4196A/config/brd4196a.hwconf"/>
   </contentItemData>
   <contentItemData>
+    <property key="partCompatibility" value="mcu.arm.efr32.mg21.efr32mg21b010f1024im32"/>
+    <property key="boardCompatibility" value="brd4195a"/>
+    <property key="installationPath" value="./EFR32MG21_BRD4195A/config/brd4195a.hwconf"/>
+  </contentItemData>
+  <contentItemData>
+    <property key="partCompatibility" value="mcu.arm.efr32.mg21.efr32mg21b020f1024im32"/>
+    <property key="boardCompatibility" value="brd4196a"/>
+    <property key="installationPath" value="./EFR32MG21_BRD4196A/config/brd4196a.hwconf"/>
+  </contentItemData>
+  <contentItemData>
+    <property key="partCompatibility" value="mcu.arm.efr32.mg21.efr32mg21b010f1024im32"/>
+    <property key="boardCompatibility" value="brd4195a"/>
+    <property key="installationPath" value="./EFR32MG21_BRD4195A/config/brd4195a.hwconf"/>
+  </contentItemData>
+  <contentItemData>
+    <property key="partCompatibility" value="mcu.arm.efr32.mg21.efr32mg21b020f1024im32"/>
+    <property key="boardCompatibility" value="brd4196a"/>
+    <property key="installationPath" value="./EFR32MG21_BRD4196A/config/brd4196a.hwconf"/>
+  </contentItemData>
+  <contentItemData>
     <property key="partCompatibility" value="mcu.arm.efr32.mg22.efr32mg22a224f512im40"/>
     <property key="boardCompatibility" value="brd4182a.*B02"/>
     <property key="installationPath" value="./EFR32MG22_BRD4182A/config/brd4182arevB02.hwconf"/>

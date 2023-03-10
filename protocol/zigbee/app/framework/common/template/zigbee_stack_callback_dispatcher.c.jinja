@@ -598,6 +598,24 @@ void emAfPoll(
 
 
 {# DEBUG #}
+#ifdef EZSP_HOST
+// Debug
+void emAfDebug(
+      // debug message length
+      uint8_t messageLength,
+      // debug message
+      uint8_t *messageContents)
+{
+(void)messageLength;
+(void)messageContents;
+
+{% for cb in zigbee_stack_callback -%}
+{% if cb['callback_type'] == "debug" -%}
+{{ cb['function_name'] }}(messageLength, messageContents);
+{% endif -%}
+{% endfor -%}
+}
+#else // !EZSP_HOST
 // Debug
 void emAfDebug(
       // debug message
@@ -611,6 +629,7 @@ void emAfDebug(
 {% endif -%}
 {% endfor -%}
 }
+#endif // EZSP_HOST
 
 
 {# INCOMING_MANY_TO_ONE_ROUTE_REQUEST #}
@@ -720,6 +739,33 @@ void emAfIdConflict(
 
 
 {# MAC_PASSTHROUGH_MESSAGE #}
+#ifdef EZSP_HOST
+// Mac Passthrough Message
+void emAfMacPassthroughMessage(
+      // The type of MAC passthrough message received.
+      EmberMacPassthroughType messageType,
+      // last hop lqi.
+      uint8_t lastHopLqi,
+      // last hop rssi.
+      int8_t lastHopRssi,
+      // message length.
+      uint8_t messageLength,
+      // The raw message that was received.
+      uint8_t *messageContents)
+{
+(void)messageType;
+(void)lastHopLqi;
+(void)lastHopRssi;
+(void)messageLength;
+(void)messageContents;
+
+{% for cb in zigbee_stack_callback -%}
+{% if cb['callback_type'] == "mac_passthrough_message" -%}
+{{ cb['function_name'] }}(messageType, lastHopLqi, lastHopRssi, messageLength, messageContents);
+{% endif -%}
+{% endfor -%}
+}
+#else // !EZSP_HOST
 // Mac Passthrough Message
 void emAfMacPassthroughMessage(
       // The type of MAC passthrough message received.
@@ -736,6 +782,7 @@ void emAfMacPassthroughMessage(
 {% endif -%}
 {% endfor -%}
 }
+#endif // EZSP_HOST
 
 
 {# STACK_TOKEN_CHANGED #}
@@ -944,6 +991,33 @@ void emAfDsaVerify(
 
 
 {# INCOMING_BOOTLOAD_MESSAGE #}
+#ifdef EZSP_HOST
+// Incoming Bootload Message
+void emAfIncomingBootloadMessage(
+      // The EUI64 of the sending node.
+      EmberEUI64 longId,
+      // last hop lqi.
+      uint8_t lastHopLqi,
+      // last hop rssi.
+      int8_t lastHopRssi,
+      // message length.
+      uint8_t messageLength,
+      // The bootload message that was sent.
+      uint8_t *messageContents)
+{
+(void)longId;
+(void)lastHopLqi;
+(void)lastHopRssi;
+(void)messageLength;
+(void)messageContents;
+
+{% for cb in zigbee_stack_callback -%}
+{% if cb['callback_type'] == "incoming_bootload_message" -%}
+{{ cb['function_name'] }}(longId, lastHopLqi, lastHopRssi, messageLength, messageContents);
+{% endif -%}
+{% endfor -%}
+}
+#else // !EZSP_HOST
 // Incoming Bootload Message
 void emAfIncomingBootloadMessage(
       // The EUI64 of the sending node.
@@ -960,9 +1034,32 @@ void emAfIncomingBootloadMessage(
 {% endif -%}
 {% endfor -%}
 }
+#endif // EZSP_HOST
 
 
 {# BOOTLOAD_TRANSMIT_COMPLETE #}
+#ifdef EZSP_HOST
+// Bootload Transmit Complete
+void emAfBootloadTransmitComplete(
+      // An EmberStatus value of EMBER_SUCCESS if an ACK was received from the
+      // destination or EMBER_DELIVERY_FAILED if no ACK was received.
+      EmberStatus status,
+      // message length.
+      uint8_t messageLength,
+      // The bootload message that was sent.
+      uint8_t *messageContents)
+{
+(void)status;
+(void)messageLength;
+(void)messageContents;
+
+{% for cb in zigbee_stack_callback -%}
+{% if cb['callback_type'] == "bootload_transmit_complete" -%}
+{{ cb['function_name'] }}(status, messageLength, messageContents);
+{% endif -%}
+{% endfor -%}
+}
+#else // !EZSP_HOST
 // Bootload Transmit Complete
 void emAfBootloadTransmitComplete(
       // The bootload message that was sent.
@@ -980,9 +1077,36 @@ void emAfBootloadTransmitComplete(
 {% endif -%}
 {% endfor -%}
 }
+#endif // EZSP_HOST
 
 
 {# ZLL_NETWORK_FOUND #}
+#ifdef EZSP_HOST
+void emAfZllNetworkFound(
+      // Information about the network.
+      EmberZllNetwork *networkInfo,
+      // Used to interpret deviceInfo field.
+      bool isDeviceInfoNull,
+      // Device specific information.
+      EmberZllDeviceInfoRecord *deviceInfo,
+      // The link quality from the node that last relayed the message.
+      uint8_t lastHopLqi,
+      // The energy level (in units of dBm) observed during reception.
+      int8_t lastHopRssi)
+{
+(void)networkInfo;
+(void)isDeviceInfoNull;
+(void)deviceInfo;
+(void)lastHopLqi;
+(void)lastHopRssi;
+
+{% for cb in zigbee_stack_callback -%}
+{% if cb['callback_type'] == "zll_network_found" -%}
+{{ cb['function_name'] }}(networkInfo, isDeviceInfoNull, deviceInfo, lastHopLqi, lastHopRssi);
+{% endif -%}
+{% endfor -%}
+}
+#else // !EZSP_HOST
 // Zll Network Found
 void emAfZllNetworkFound(
       // Return: Information about the network.
@@ -999,6 +1123,7 @@ void emAfZllNetworkFound(
 {% endif -%}
 {% endfor -%}
 }
+#endif // EZSP_HOST
 
 
 {# ZLL_SCAN_COMPLETE #}
@@ -1018,6 +1143,27 @@ void emAfZllScanComplete(
 
 
 {# ZLL_ADDRESS_ASSIGNMENT #}
+#ifdef EZSP_HOST
+// Zll Address Assignment
+void emAfZllAddressAssignment(
+      // Address assignment information.
+      EmberZllAddressAssignment *addressInfo,
+      // The link quality from the node that last relayed the message.
+      uint8_t lastHopLqi,
+      // The energy level (in units of dBm) observed during reception.
+      int8_t lastHopRssi)
+{
+(void)addressInfo;
+(void)lastHopLqi;
+(void)lastHopRssi;
+
+{% for cb in zigbee_stack_callback -%}
+{% if cb['callback_type'] == "zll_address_assignment" -%}
+{{ cb['function_name'] }}(addressInfo, lastHopLqi, lastHopRssi);
+{% endif -%}
+{% endfor -%}
+}
+#else // !EZSP_HOST
 // Zll Address Assignment
 void emAfZllAddressAssignment(
       // Return: Address assignment information.
@@ -1031,6 +1177,7 @@ void emAfZllAddressAssignment(
 {% endif -%}
 {% endfor -%}
 }
+#endif // EZSP_HOST
 
 
 {# ZLL_TOUCH_LINK_TARGET #}
@@ -1050,6 +1197,36 @@ void emAfZllTouchLinkTarget(
 
 
 {# MAC_FILTER_MATCH_MESSAGE #}
+#ifdef EZSP_HOST
+// Mac Filter Match Message
+void emAfMacFilterMatchMessage(
+      // filter index match.
+      uint8_t filterIndexMatch,
+      // message type.
+      EmberMacPassthroughType messageType,
+      // last hop lqi.
+      uint8_t lastHopLqi,
+      // last hop rssi.
+      int8_t lastHopRssi,
+      // message length.
+      uint8_t messageLength,
+      // message contents.
+      uint8_t *messageContents)
+{
+(void)filterIndexMatch;
+(void)messageType;
+(void)lastHopLqi;
+(void)lastHopRssi;
+(void)messageLength;
+(void)messageContents;
+
+{% for cb in zigbee_stack_callback -%}
+{% if cb['callback_type'] == "mac_filter_match_message" -%}
+{{ cb['function_name'] }} (filterIndexMatch, messageType, lastHopLqi, lastHopRssi, messageLength, messageContents);
+{% endif -%}
+{% endfor -%}
+}
+#else // !EZSP_HOST
 // Mac Filter Match Message
 void emAfMacFilterMatchMessage(
       // Return: macFilterMatchStruct.
@@ -1063,6 +1240,7 @@ void emAfMacFilterMatchMessage(
 {% endif -%}
 {% endfor -%}
 }
+#endif // EZSP_HOST
 
 
 {# D_GP_SENT #}

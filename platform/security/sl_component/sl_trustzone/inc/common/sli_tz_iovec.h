@@ -31,9 +31,22 @@
 #ifndef __SLI_TZ_IOVEC_H__
 #define __SLI_TZ_IOVEC_H__
 
-#include "psa/crypto.h"
+#include <stddef.h>   // size_t
+
 #ifdef __cplusplus
 extern "C" {
+#endif
+
+/**
+ * \brief Maximum number of input and output vectors for a call from NS to S.
+ */
+#define SLI_TZ_MAX_IOVEC     (6u)
+
+/**
+ * \brief Number of elements in array.
+ */
+#if !defined(IOVEC_LEN)
+  #define IOVEC_LEN(arr) ((uint32_t)(sizeof(arr) / sizeof(arr[0])))
 #endif
 
 /**

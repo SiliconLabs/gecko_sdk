@@ -220,7 +220,7 @@ void optionSecuritySetKeyRequestPolicy(sl_cli_command_arg_t *arguments)
   appPolicy += EZSP_DENY_APP_KEY_REQUESTS;
 
   (void)ezspSetPolicy(EZSP_TC_KEY_REQUEST_POLICY, tcPolicy);
-  (void)ezspSetPolicy(EZSP_APP_KEY_REQUEST_POLICY, tcPolicy);
+  (void)ezspSetPolicy(EZSP_APP_KEY_REQUEST_POLICY, appPolicy);
 #else // EZSP_HOST
   emberTrustCenterLinkKeyRequestPolicy = sl_cli_get_argument_uint8(arguments, 0);
   emberAppLinkKeyRequestPolicy = sl_cli_get_argument_uint8(arguments, 1);

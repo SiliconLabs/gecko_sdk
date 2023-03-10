@@ -1,0 +1,13 @@
+label: tz_psa_attestation_ws 
+description: >
+  This example workspace demonstrates TrustZone for PSA Attestation.
+quality: production
+project:
+  - path: tz_psa_attestation_s.slcp
+    id: trustzone_secure_application
+    output: tz_psa_attestation_s
+  - path: tz_psa_attestation_ns/tz_psa_attestation_ns.slcp
+    id: trustzone_nonsecure_application
+    output: tz_psa_attestation_ns
+post_build:
+  profile: tz_application_sign

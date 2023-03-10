@@ -23,7 +23,7 @@
   #include "app/util/ezsp/ezsp-protocol.h"
   #include "app/util/ezsp/ezsp.h"
   #include "app/util/ezsp/serial-interface.h"
-  #include "app/util/zigbee-framework/zigbee-device-common.h"
+  #include "app/util/zigbee-framework/zigbee-device-host.h"
 #else
   #include "stack/include/ember.h"
 #endif
@@ -31,10 +31,11 @@
 #include "hal/hal.h"
 #include "app/util/serial/sl_zigbee_command_interpreter.h"
 #include "af.h"
-#include "app/util/zigbee-framework/zigbee-device-host.h"
+
 #include <stdlib.h>
 #include "app/framework/plugin/device-table/device-table.h"
 #include "app/framework/plugin/device-table/device-table-internal.h"
+#include "app/util/zigbee-framework/zigbee-device-common.h"
 
 // Device tracking declarations
 static void optionallyChangeState(EmberNodeId nodeId,

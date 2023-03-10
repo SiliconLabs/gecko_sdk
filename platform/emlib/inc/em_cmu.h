@@ -1314,6 +1314,7 @@ void                       CMU_HFXOCTuneSet(uint32_t ctune);
 uint32_t                   CMU_HFXOCTuneGet(void);
 void                       CMU_HFXOCTuneDeltaSet(int32_t delta);
 int32_t                    CMU_HFXOCTuneDeltaGet(void);
+void                       CMU_HFXOCoreBiasCurrentCalibrate(void);
 void                       CMU_LFXOInit(const CMU_LFXOInit_TypeDef *lfxoInit);
 void                       CMU_LFXOPrecisionSet(uint16_t precision);
 uint16_t                   CMU_LFXOPrecisionGet(void);

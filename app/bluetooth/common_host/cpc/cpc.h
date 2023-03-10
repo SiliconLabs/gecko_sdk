@@ -38,7 +38,7 @@
  * @param[out]  handle eventually it's a socket handle
  * @param[in]  cpc_instance Instance name of CPCd
  * @param[in]  reset_on_start Indicates if a reset should be performed on start
- * @return  0 on success, -1 on failure.
+ * @return  0 on success, negative value on failure.
  *****************************************************************************/
 int32_t cpc_open(void *handle, char *cpc_instance, bool reset_on_start);
 
@@ -48,7 +48,7 @@ int32_t cpc_open(void *handle, char *cpc_instance, bool reset_on_start);
  * @param[in]  handle Socket handle
  * @param[in]  data_length The amount of bytes to write.
  * @param[in]  data Buffer used for storing the data.
- * @return  The amount of bytes written or -1 on failure.
+ * @return  The amount of bytes written or negative value on failure.
  *****************************************************************************/
 int32_t cpc_tx(void *handle, uint32_t data_length, uint8_t *data);
 
@@ -58,7 +58,7 @@ int32_t cpc_tx(void *handle, uint32_t data_length, uint8_t *data);
  * @param[in]  handle Socket handle
  * @param[in]  data_length The amount of bytes to read.
  * @param[out]  data Buffer used for storing the data.
- * @return  The amount of bytes read or -1 on failure.
+ * @return  The amount of bytes read or negative value on failure.
  *****************************************************************************/
 int32_t cpc_rx(void *handle, uint32_t data_length, uint8_t *data);
 
@@ -66,14 +66,14 @@ int32_t cpc_rx(void *handle, uint32_t data_length, uint8_t *data);
  * Return the number of bytes in the input buffer. This call will block until
  *          there's data in the buffer.
  * @param[in]  handle Socket handle
- * @return  The number of bytes in the input buffer or -1 on failure.
+ * @return  The number of bytes in the input buffer or negative value on failure.
  *****************************************************************************/
 int32_t cpc_rx_peek(void *handle);
 
 /**************************************************************************//**
  * Close the CPC connection.
  * @param[in]  handle Socket handle
- * @return  0 on success, -1 on failure.
+ * @return  0 on success, negative value on failure.
  *****************************************************************************/
 int32_t cpc_close(void *handle);
 

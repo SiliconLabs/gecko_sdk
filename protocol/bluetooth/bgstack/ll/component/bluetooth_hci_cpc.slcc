@@ -16,6 +16,7 @@ include:
   - path: inc
     file_list:
       - path: sl_btctrl_hci_packet.h
+      - path: sl_btctrl_hci_transport.h
   - path: cpc/inc
     file_list:
       - path: sl_btctrl_hci_cpc_rtos.h

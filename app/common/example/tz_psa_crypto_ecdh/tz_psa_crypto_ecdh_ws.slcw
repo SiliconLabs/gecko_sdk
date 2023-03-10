@@ -1,0 +1,13 @@
+label: tz_psa_crypto_ecdh_ws 
+description: >
+  This example workspace demonstrates TrustZone for ECDH key agreement.
+quality: production
+project:
+  - path: tz_psa_crypto_ecdh_s.slcp
+    id: trustzone_secure_application
+    output: tz_psa_crypto_ecdh_s
+  - path: tz_psa_crypto_ecdh_ns/tz_psa_crypto_ecdh_ns.slcp
+    id: trustzone_nonsecure_application
+    output: tz_psa_crypto_ecdh_ns
+post_build:
+  profile: tz_application

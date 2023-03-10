@@ -61,8 +61,8 @@ void sl_dcdc_coulomb_counter_init(const sl_dcdc_coulomb_counter_config_t *p_conf
   /* Set configuration. */
   /* The counter thresholds can be used be used to establish a service  */
   /* interval for the coulomb counter hardware. */
-  DCDC->CCTHR = ((p_config->counter_threshold_em0) << _DCDC_CCTHR_EM0CNT_SHIFT)
-                | ((p_config->counter_threshold_em2) << _DCDC_CCTHR_EM2CNT_SHIFT);
+  DCDC->CCTHR = ((uint32_t)(p_config->counter_threshold_em0) << _DCDC_CCTHR_EM0CNT_SHIFT)
+                | ((uint32_t)(p_config->counter_threshold_em2) << _DCDC_CCTHR_EM2CNT_SHIFT);
 }
 
 /***************************************************************************//**

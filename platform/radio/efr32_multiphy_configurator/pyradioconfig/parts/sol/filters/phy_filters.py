@@ -23,6 +23,7 @@ class PhyFilters_Sol(IPhyFilter):
     # Studio white list (these PHYs show in Studio as proprietary starting points)
     simplicity_studio_phy_groups = ['Phys_Studio_Base',
                                     'Phys_Studio_Base_Standard_SUNFSK',
+                                    'Phys_Studio_Base_Sidewalk',
                                     'Phys_Studio_Connect',
                                     'Phys_Studio_SUN_OQPSK',
                                     'phys_studio_wisun_fan_1_0',

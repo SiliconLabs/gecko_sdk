@@ -128,16 +128,15 @@ psa_status_t sli_psa_validate_ecc_weierstrass_privkey(const void *privkey,
  *   Number of bytes to clear.
  ******************************************************************************/
 __STATIC_INLINE
-void sli_psa_zeroize(void *v, size_t n)
+psa_status_t sli_psa_zeroize(void *v, size_t n)
 {
-  if (n == 0) {
-    return;
+  if (n > 0) {
+    volatile unsigned char *p = v;
+    while (n--) {
+      *p++ = 0;
+    }
   }
-
-  volatile unsigned char *p = v;
-  while (n--) {
-    *p++ = 0;
-  }
+  return PSA_SUCCESS;
 }
 
 /***************************************************************************//**

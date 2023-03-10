@@ -24,9 +24,27 @@
 /// Mask for accessing the counter signature
 #define BOOTLOADER_RESET_COUNTER_SIGNATURE_MASK 0xFFF0u
 
+#if defined BOOTLOADER_ENABLE
+#if defined(__GNUC__)
+BootloaderResetCause_t rcause __attribute__((section(".bootloader_reset_section")));
+extern const BootloaderResetCause_t __ResetReasonStart__;
+#elif defined(__ICCARM__)
+#pragma section = "BOOTLOADER_RESET_REASON"
+#endif
+#endif
+
 void reset_setResetReason(uint16_t resetReason)
 {
-  BootloaderResetCause_t *cause = (BootloaderResetCause_t *) (SRAM_BASE);
+#if defined BOOTLOADER_ENABLE
+#if defined(__GNUC__)
+  uint32_t resetReasonBase = (uint32_t)&__ResetReasonStart__;
+#elif defined(__ICCARM__)
+  void *resetReasonBase =   __section_begin("BOOTLOADER_RESET_REASON");
+#endif
+#else
+  uint32_t resetReasonBase = SRAM_BASE;
+#endif
+  BootloaderResetCause_t *cause = (BootloaderResetCause_t *) (resetReasonBase);
 
   cause->reason = resetReason;
 
@@ -38,14 +56,32 @@ void reset_setResetReason(uint16_t resetReason)
 
 void reset_invalidateResetReason(void)
 {
-  BootloaderResetCause_t *cause = (BootloaderResetCause_t *) (SRAM_BASE);
+#if defined BOOTLOADER_ENABLE
+#if defined(__GNUC__)
+  uint32_t resetReasonBase = (uint32_t)&__ResetReasonStart__;
+#elif defined(__ICCARM__)
+  void *resetReasonBase =   __section_begin("BOOTLOADER_RESET_REASON");
+#endif
+#else
+  uint32_t resetReasonBase = SRAM_BASE;
+#endif
+  BootloaderResetCause_t *cause = (BootloaderResetCause_t *) (resetReasonBase);
 
   cause->signature = BOOTLOADER_RESET_SIGNATURE_INVALID;
 }
 
 void reset_enableResetCounter(void)
 {
-  BootloaderResetCause_t *cause = (BootloaderResetCause_t *) (SRAM_BASE);
+#if defined BOOTLOADER_ENABLE
+#if defined(__GNUC__)
+  uint32_t resetReasonBase = (uint32_t)&__ResetReasonStart__;
+#elif defined(__ICCARM__)
+  void *resetReasonBase =   __section_begin("BOOTLOADER_RESET_REASON");
+#endif
+#else
+  uint32_t resetReasonBase = SRAM_BASE;
+#endif
+  BootloaderResetCause_t *cause = (BootloaderResetCause_t *) (resetReasonBase);
 
   // Set the upper 12 bits to a shorter signature and use the lower 4 bits
   // for the counter value (starts at 0).
@@ -55,14 +91,32 @@ void reset_enableResetCounter(void)
 
 void reset_disableResetCounter(void)
 {
-  BootloaderResetCause_t *cause = (BootloaderResetCause_t *) (SRAM_BASE);
+#if defined BOOTLOADER_ENABLE
+#if defined(__GNUC__)
+  uint32_t resetReasonBase = (uint32_t)&__ResetReasonStart__;
+#elif defined(__ICCARM__)
+  void *resetReasonBase =   __section_begin("BOOTLOADER_RESET_REASON");
+#endif
+#else
+  uint32_t resetReasonBase = SRAM_BASE;
+#endif
+  BootloaderResetCause_t *cause = (BootloaderResetCause_t *) (resetReasonBase);
 
   cause->signature = BOOTLOADER_RESET_SIGNATURE_VALID;
 }
 
 bool reset_resetCounterEnabled(void)
 {
-  BootloaderResetCause_t *cause = (BootloaderResetCause_t *) (SRAM_BASE);
+#if defined BOOTLOADER_ENABLE
+#if defined(__GNUC__)
+  uint32_t resetReasonBase = (uint32_t)&__ResetReasonStart__;
+#elif defined(__ICCARM__)
+  void *resetReasonBase =   __section_begin("BOOTLOADER_RESET_REASON");
+#endif
+#else
+  uint32_t resetReasonBase = SRAM_BASE;
+#endif
+  BootloaderResetCause_t *cause = (BootloaderResetCause_t *) (resetReasonBase);
 
   if ((cause->signature & BOOTLOADER_RESET_COUNTER_SIGNATURE_MASK)
       == BOOTLOADER_RESET_COUNTER_SIGNATURE) {
@@ -74,7 +128,16 @@ bool reset_resetCounterEnabled(void)
 
 uint8_t reset_getResetCounter(void)
 {
-  BootloaderResetCause_t *cause = (BootloaderResetCause_t *) (SRAM_BASE);
+#if defined BOOTLOADER_ENABLE
+#if defined(__GNUC__)
+  uint32_t resetReasonBase = (uint32_t)&__ResetReasonStart__;
+#elif defined(__ICCARM__)
+  void *resetReasonBase =   __section_begin("BOOTLOADER_RESET_REASON");
+#endif
+#else
+  uint32_t resetReasonBase = SRAM_BASE;
+#endif
+  BootloaderResetCause_t *cause = (BootloaderResetCause_t *) (resetReasonBase);
 
   // Return 0 if the reset counter is not enabled
   return (uint8_t)(reset_resetCounterEnabled() ? cause->signature & 0xFu : 0u);
@@ -82,7 +145,16 @@ uint8_t reset_getResetCounter(void)
 
 void reset_incrementResetCounter(void)
 {
-  BootloaderResetCause_t *cause = (BootloaderResetCause_t *) (SRAM_BASE);
+#if defined BOOTLOADER_ENABLE
+#if defined(__GNUC__)
+  uint32_t resetReasonBase = (uint32_t)&__ResetReasonStart__;
+#elif defined(__ICCARM__)
+  void *resetReasonBase =   __section_begin("BOOTLOADER_RESET_REASON");
+#endif
+#else
+  uint32_t resetReasonBase = SRAM_BASE;
+#endif
+  BootloaderResetCause_t *cause = (BootloaderResetCause_t *) (resetReasonBase);
 
   // Only increment when the counter signature is set
   if (reset_resetCounterEnabled()) {
@@ -109,12 +181,21 @@ void reset_resetWithReason(uint16_t resetReason)
 
 uint16_t reset_classifyReset(void)
 {
-  BootloaderResetCause_t* resetCause = (BootloaderResetCause_t*) (SRAM_BASE);
+#if defined BOOTLOADER_ENABLE
+#if defined(__GNUC__)
+  uint32_t resetReasonBase = (uint32_t)&__ResetReasonStart__;
+#elif defined(__ICCARM__)
+  void *resetReasonBase =   __section_begin("BOOTLOADER_RESET_REASON");
+#endif
+#else
+  uint32_t resetReasonBase = SRAM_BASE;
+#endif
+  BootloaderResetCause_t* cause = (BootloaderResetCause_t*) (resetReasonBase);
 
-  if (resetCause->signature == BOOTLOADER_RESET_SIGNATURE_VALID) {
+  if (cause->signature == BOOTLOADER_RESET_SIGNATURE_VALID) {
     return reset_getResetReason();
-  } else if ((resetCause->signature == 0x0000u)
-             && (resetCause->reason == 0x0001u)) {
+  } else if ((cause->signature == 0x0000u)
+             && (cause->reason == 0x0001u)) {
     // BLE reset cause
     return BOOTLOADER_RESET_REASON_BOOTLOAD;
   } else {
@@ -124,6 +205,15 @@ uint16_t reset_classifyReset(void)
 
 uint16_t reset_getResetReason(void)
 {
-  BootloaderResetCause_t* resetCause = (BootloaderResetCause_t*) (SRAM_BASE);
-  return resetCause->reason;
+#if defined BOOTLOADER_ENABLE
+#if defined(__GNUC__)
+  uint32_t resetReasonBase = (uint32_t)&__ResetReasonStart__;
+#elif defined(__ICCARM__)
+  void *resetReasonBase =   __section_begin("BOOTLOADER_RESET_REASON");
+#endif
+#else
+  uint32_t resetReasonBase = SRAM_BASE;
+#endif
+  BootloaderResetCause_t* cause = (BootloaderResetCause_t*) (resetReasonBase);
+  return cause->reason;
 }

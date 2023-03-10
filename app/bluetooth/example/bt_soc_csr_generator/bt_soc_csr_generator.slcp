@@ -104,7 +104,7 @@ requires:
 
 tag:
   - hardware:device:flash:512
-  - hardware:device:ram:32
+  - hardware:device:ram:64
 
 ui_hints:
   highlight:

@@ -299,51 +299,6 @@ static void updateInvolveTC(EmberStatus status)
   }
 }
 
-// Send device announcement
-static void sendDeviceAnncement(uint16_t nodeId)
-{
-  EmberApsFrame apsFrameDevAnnce;
-  apsFrameDevAnnce.sourceEndpoint = EMBER_ZDO_ENDPOINT;
-  apsFrameDevAnnce.destinationEndpoint = EMBER_ZDO_ENDPOINT;
-  apsFrameDevAnnce.clusterId = END_DEVICE_ANNOUNCE;
-  apsFrameDevAnnce.profileId = EMBER_ZDO_PROFILE_ID;
-  apsFrameDevAnnce.options = EMBER_APS_OPTION_SOURCE_EUI64;
-  apsFrameDevAnnce.options |= EMBER_APS_OPTION_USE_ALIAS_SEQUENCE_NUMBER;
-  apsFrameDevAnnce.groupId = 0;
-  uint8_t messageContents[GP_DEVICE_ANNOUNCE_SIZE];
-  uint8_t apsSequence = 0;
-  // Form the APS message for Bcast
-  messageContents[0] = apsSequence; //Sequence
-  messageContents[1] = (uint8_t)nodeId; //NodeId
-  messageContents[2] = (uint8_t)(nodeId >> 8); //NodeId
-  MEMSET(&messageContents[3], 0xFF, 8); //IEEE Address
-  messageContents[11] = 0; // Capability
-  uint8_t length = GP_DEVICE_ANNOUNCE_SIZE;
-#ifndef EZSP_HOST
-  EmberMessageBuffer message = emberFillLinkedBuffers(messageContents, length);
-  if (message == EMBER_NULL_MESSAGE_BUFFER) {
-    return;
-  }
-  emberProxyBroadcast(nodeId, //EmberNodeId source,
-                      0xFFFD, //EmberNodeId destination,
-                      0, //uint8_t nwkSequence,
-                      &apsFrameDevAnnce, //EmberApsFrame *apsFrame,
-                      0xFF,     // use maximum radius
-                      message);
-  emberReleaseMessageBuffer(message);
-#else
-  ezspProxyBroadcast(nodeId,//EmberNodeId source,
-                     0xFFFD,//EmberNodeId destination,
-                     0,//uint8_t nwkSequence,
-                     &apsFrameDevAnnce,//EmberApsFrame *apsFrame,
-                     0xFF,//uint8_t radius,
-                     0xFF,// Tag Id
-                     length,//uint8_t messageLength,
-                     messageContents,//uint8_t *messageContents,
-                     &apsSequence);
-#endif
-}
-
 // Internal functions used to maintain the group table within the context
 // of the binding table.
 //
@@ -524,34 +479,36 @@ static EmberStatus sendGpPairingMessage(EmberOutgoingMessageType type,
                                         uint32_t gpdSecurityFrameCounter,
                                         uint8_t *gpdKey,
                                         uint16_t assignedAlias,
-                                        uint8_t groupcastRadius)
+                                        uint8_t groupcastRadius,
+                                        bool sendGpPairing)
 {
+  EmberStatus status = EMBER_ERR_FATAL;
   EmberEUI64 ourEUI;
   emberAfGetEui64(ourEUI);
-  emberAfFillCommandGreenPowerClusterGpPairingSmart(options,
-                                                    gpdAddr->id.sourceId,
-                                                    gpdAddr->id.gpdIeeeAddress,
-                                                    gpdAddr->endpoint,
-                                                    ourEUI,
-                                                    emberGetNodeId(),
-                                                    sinkGroupId,
-                                                    deviceId,
-                                                    gpdSecurityFrameCounter,
-                                                    gpdKey,
-                                                    assignedAlias,
-                                                    groupcastRadius);
-  EmberApsFrame *apsFrame;
-  apsFrame = emberAfGetCommandApsFrame();
-  apsFrame->sourceEndpoint = GP_ENDPOINT;
-  apsFrame->destinationEndpoint = GP_ENDPOINT;
+  if (sendGpPairing) {
+    emberAfFillCommandGreenPowerClusterGpPairingSmart(options,
+                                                      gpdAddr->id.sourceId,
+                                                      gpdAddr->id.gpdIeeeAddress,
+                                                      gpdAddr->endpoint,
+                                                      ourEUI,
+                                                      emberGetNodeId(),
+                                                      sinkGroupId,
+                                                      deviceId,
+                                                      gpdSecurityFrameCounter,
+                                                      gpdKey,
+                                                      assignedAlias,
+                                                      groupcastRadius);
+    EmberApsFrame *apsFrame;
+    apsFrame = emberAfGetCommandApsFrame();
+    apsFrame->sourceEndpoint = GP_ENDPOINT;
+    apsFrame->destinationEndpoint = GP_ENDPOINT;
 
-  EmberStatus status = EMBER_ERR_FATAL;
-  if (type == EMBER_OUTGOING_BROADCAST) {
-    status = emberAfSendCommandBroadcast(EMBER_RX_ON_WHEN_IDLE_BROADCAST_ADDRESS);
-  } else if (type == EMBER_OUTGOING_DIRECT) {
-    status = emberAfSendCommandUnicast(EMBER_OUTGOING_DIRECT, indexOrDestination);
+    if (type == EMBER_OUTGOING_BROADCAST) {
+      status = emberAfSendCommandBroadcast(EMBER_RX_ON_WHEN_IDLE_BROADCAST_ADDRESS);
+    } else if (type == EMBER_OUTGOING_DIRECT) {
+      status = emberAfSendCommandUnicast(EMBER_OUTGOING_DIRECT, indexOrDestination);
+    }
   }
-
   #if (defined SL_CATALOG_ZIGBEE_GREEN_POWER_CLIENT_PRESENT && !defined EZSP_HOST)
   if (type == EMBER_OUTGOING_DIRECT
       && indexOrDestination != emberGetNodeId()) {
@@ -578,7 +535,8 @@ static EmberStatus sendGpPairingMessage(EmberOutgoingMessageType type,
 static void decommissionGpd(uint8_t secLvl,
                             uint8_t keyType,
                             EmberGpAddress *gpdAddr,
-                            bool setRemoveGpdflag)
+                            bool setRemoveGpdflag,
+                            bool sendGpPairing)
 {
   uint8_t sinkEntryIndex = emberGpSinkTableLookup(gpdAddr);
   if (sinkEntryIndex != 0xFF) {
@@ -595,8 +553,8 @@ static void decommissionGpd(uint8_t secLvl,
     uint8_t gpsCommunicationMode = (entry.options & EMBER_AF_GP_SINK_TABLE_ENTRY_OPTIONS_COMMUNICATION_MODE)
                                    >> EMBER_AF_GP_SINK_TABLE_ENTRY_OPTIONS_COMMUNICATION_MODE_OFFSET;
     uint16_t dGroupId = 0xFFFF;
-    uint32_t pairingOptions = (setRemoveGpdflag ? EMBER_AF_GP_PAIRING_OPTION_REMOVE_GPD : 0)
-                              | (gpdAddr->applicationId & EMBER_AF_GP_NOTIFICATION_OPTION_APPLICATION_ID)
+    uint32_t pairingOptions = (gpdAddr->applicationId & EMBER_AF_GP_PAIRING_OPTION_APPLICATION_ID)
+                              | (setRemoveGpdflag << EMBER_AF_GP_PAIRING_OPTION_REMOVE_GPD_OFFSET)
                               | (gpsCommunicationMode << EMBER_AF_GP_PAIRING_OPTION_COMMUNICATION_MODE_OFFSET)
                               | (secLvl << EMBER_AF_GP_PAIRING_OPTION_SECURITY_LEVEL_OFFSET)
                               | (keyType << EMBER_AF_GP_PAIRING_OPTION_SECURITY_KEY_TYPE_OFFSET);
@@ -613,7 +571,8 @@ static void decommissionGpd(uint8_t secLvl,
                                               0xFFFFFFFF,
                                               NULL,
                                               0xFFFF,
-                                              0xFF);
+                                              0xFF,
+                                              sendGpPairing);
     emberAfGreenPowerClusterPrintln("Gp Pairing for Decommissing send returned %d", retval);
 
     // In case of Sink was supporting groupcast for the GPD, then send a Gp Pairing config.
@@ -934,7 +893,8 @@ static bool emGpCheckCommunicationModeSupport(uint8_t communicationModeToCheck)
 }
 
 static void sendGpPairingFromSinkEntry(EmberGpSinkTableEntry *sinkEntry,
-                                       uint16_t gppShortAddress)
+                                       uint16_t gppShortAddress,
+                                       bool sendGpPairing)
 {
   uint8_t appId = (sinkEntry->options & EMBER_AF_GP_SINK_TABLE_ENTRY_OPTIONS_APPLICATION_ID);
   uint8_t sinkCommunicationMode = (sinkEntry->options & EMBER_AF_GP_SINK_TABLE_ENTRY_OPTIONS_COMMUNICATION_MODE)
@@ -983,11 +943,22 @@ static void sendGpPairingFromSinkEntry(EmberGpSinkTableEntry *sinkEntry,
                                             sinkEntry->gpdSecurityFrameCounter,
                                             sinkEntry->gpdKey.contents,
                                             sinkEntry->assignedAlias,
-                                            sinkEntry->groupcastRadius);
+                                            sinkEntry->groupcastRadius,
+                                            sendGpPairing);
   emberAfGreenPowerClusterPrintln("pairing send returned %d", retval);
+  // If a pairing was added, the sink SHALL send a Device_annce command
+  // for the alias (with the exception of lightweight unicast communication mode).
+  if (sendGpPairing
+      && (sinkCommunicationMode != EMBER_GP_SINK_TYPE_LW_UNICAST)) {
+    EmberEUI64 eui64 = { 0xff, 0xff, 0xff, 0xff, 0xff, 0xff, 0xff, 0xff };
+    emGpSpoofDeviceAnnce(sinkEntry->assignedAlias, // Short Id
+                         eui64, // Eui64
+                         0); // capabilities
+  }
 }
 
-static void sendGpPairingLookingUpAddressInSinkEntry(EmberGpAddress *gpdAddr)
+static void sendGpPairingLookingUpAddressInSinkEntry(EmberGpAddress *gpdAddr,
+                                                     bool sendGpPairing)
 {
   if (gpdAddr == NULL) {
     return;
@@ -1002,7 +973,8 @@ static void sendGpPairingLookingUpAddressInSinkEntry(EmberGpAddress *gpdAddr)
     return;
   }
   sendGpPairingFromSinkEntry(&sinkEntry,
-                             EMBER_RX_ON_WHEN_IDLE_BROADCAST_ADDRESS);
+                             EMBER_RX_ON_WHEN_IDLE_BROADCAST_ADDRESS,
+                             sendGpPairing);
 }
 
 // Builds a list of all the gpd commands from incoming commissioning req
@@ -1576,21 +1548,17 @@ static void handleSinkEntryAndPairing(GpCommDataSaved *commissioningGpd)
   }
   // End of Sink Table Update
 
+  sendGpPairingFromSinkEntry(&sinkEntry,
+                             commissioningGpd->gppShortAddress,
+                             !(commissioningGpd->doNotSendGpPairing));
+
   if (commissioningGpd->doNotSendGpPairing) {
     commissioningGpd->doNotSendGpPairing = false;
     return;
   }
 
-  sendGpPairingFromSinkEntry(&sinkEntry,
-                             commissioningGpd->gppShortAddress);
-
   // Send GpPairing Configuration Based on Sink Communication mode
   sendGpPairingConfigBasedOnSinkCommunicationMode(commissioningGpd);
-  // If a pairing was added, the sink SHALL send a Device_annce command
-  // for the alias (with the exception of lightweight unicast communication mode).
-  if (sinkCommunicationMode != EMBER_GP_SINK_TYPE_LW_UNICAST) {
-    sendDeviceAnncement(sinkEntry.assignedAlias);
-  }
 }
 
 static void handleClosingCommissioningSessionOnFirstPairing(GpCommDataSaved *commissioningGpd)
@@ -2032,7 +2000,7 @@ static bool gpCommissioningNotificationDecommissioningGpdf(uint16_t commNotifica
                     >> EMBER_AF_GP_COMMISSIONING_NOTIFICATION_OPTION_SECURITY_LEVEL_OFFSET);
   uint8_t keyType = ((commNotificationOptions & EMBER_AF_GP_COMMISSIONING_NOTIFICATION_OPTION_SECURITY_KEY_TYPE)
                      >> EMBER_AF_GP_COMMISSIONING_NOTIFICATION_OPTION_SECURITY_KEY_TYPE_OFFSET);
-  decommissionGpd(secLvl, keyType, gpdAddr, true);
+  decommissionGpd(secLvl, keyType, gpdAddr, true, true);
   return true;
 }
 
@@ -2465,6 +2433,9 @@ WEAK(void emberAfPluginGreenPowerServerStackStatusCallback(EmberStatus status))
   if (!emberAfGreenPowerServerUpdateInvolveTCCallback(status)) {
     updateInvolveTC(status);
   }
+  if (status == EMBER_NETWORK_UP) {
+    emberAfGreenPowerServerSinkTableInit();
+  }
 }
 
 //////////////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -2658,6 +2629,24 @@ bool emberAfGreenPowerClusterGpNotificationCallback(EmberAfClusterCommand *cmd)
     // Address 0 only for channel request command.
     return true;
   }
+  if (cmd_data.gpdCommandId == EMBER_ZCL_GP_GPDF_COMMISSIONING) {
+    return true; // Drop Commissioning Command - Test 4.4.2.8 Step 5
+  }
+  if (cmd_data.gpdCommandId == EMBER_ZCL_GP_GPDF_DECOMMISSIONING) {
+    decommissionGpd(((cmd_data.options & EMBER_AF_GP_NOTIFICATION_OPTION_SECURITY_LEVEL) >> EMBER_AF_GP_NOTIFICATION_OPTION_SECURITY_LEVEL_OFFSET),
+                    ((cmd_data.options & EMBER_AF_GP_NOTIFICATION_OPTION_SECURITY_KEY_TYPE) >> EMBER_AF_GP_NOTIFICATION_OPTION_SECURITY_KEY_TYPE_OFFSET),
+                    &gpdAddr,
+                    true,
+                    true);
+    return true;
+  }
+  if (cmd_data.gpdCommandId == EMBER_ZCL_GP_GPDF_CHANNEL_REQUEST) {
+    handleChannelRequest(cmd_data.options,
+                         cmd_data.gppShortAddress,
+                         ((cmd_data.options & EMBER_AF_GP_NOTIFICATION_OPTION_RX_AFTER_TX) ? true : false),
+                         cmd_data.gpdCommandPayload);
+    return true;
+  }
   emberAfGreenPowerClusterPrintln("command %d", cmd_data.gpdCommandId);
   //if (cmd_data.gpdCommandPayload != NULL) { // Ensure gpdCommandPayload is not NULL to print the payload
   //  emberAfGreenPowerClusterPrint("payload: ");
@@ -2693,39 +2682,27 @@ bool emberAfGreenPowerClusterGpNotificationCallback(EmberAfClusterCommand *cmd)
     }
     emberGpSinkTableSetSecurityFrameCounter(sinkIndex, cmd_data.gpdSecurityFrameCounter);
   }
-  if (cmd_data.gpdCommandId == EMBER_ZCL_GP_GPDF_DECOMMISSIONING) {
-    decommissionGpd(((cmd_data.options & EMBER_AF_GP_NOTIFICATION_OPTION_SECURITY_LEVEL) >> EMBER_AF_GP_NOTIFICATION_OPTION_SECURITY_LEVEL_OFFSET),
-                    ((cmd_data.options & EMBER_AF_GP_NOTIFICATION_OPTION_SECURITY_KEY_TYPE) >> EMBER_AF_GP_NOTIFICATION_OPTION_SECURITY_KEY_TYPE_OFFSET),
-                    &gpdAddr,
-                    true);
-  } else if (cmd_data.gpdCommandId == EMBER_ZCL_GP_GPDF_CHANNEL_REQUEST) {
-    handleChannelRequest(cmd_data.options,
-                         cmd_data.gppShortAddress,
-                         ((cmd_data.options & EMBER_AF_GP_NOTIFICATION_OPTION_RX_AFTER_TX) ? true : false),
-                         cmd_data.gpdCommandPayload);
-  } else {
-    // Call user first to give a chance to handle the notification.
-    if (emberAfGreenPowerClusterGpNotificationForwardCallback(cmd_data.options,
-                                                              &gpdAddr,
-                                                              cmd_data.gpdSecurityFrameCounter,
-                                                              cmd_data.gpdCommandId,
-                                                              cmd_data.gpdCommandPayload,
-                                                              cmd_data.gppShortAddress,
-                                                              cmd_data.gppDistance)) {
-      return true;
-    }
-    // Check if sink has the translation table support in the gpsFunctionality attribute?
-    if (sinkFunctionalitySupported(EMBER_AF_GP_GPS_FUNCTIONALITY_TRANSLATION_TABLE)) {
-      #ifdef SL_CATALOG_ZIGBEE_GREEN_POWER_TRANSLATION_TABLE_PRESENT
-      emGpForwardGpdCommandBasedOnTranslationTable(&gpdAddr,
-                                                   cmd_data.gpdCommandId,
-                                                   cmd_data.gpdCommandPayload);
-      #else
-      emGpForwardGpdCommandDefault(&gpdAddr,
-                                   cmd_data.gpdCommandId,
-                                   cmd_data.gpdCommandPayload);
-      #endif // SL_CATALOG_ZIGBEE_GREEN_POWER_TRANSLATION_TABLE_PRESENT
-    }
+  // Call user first to give a chance to handle the notification.
+  if (emberAfGreenPowerClusterGpNotificationForwardCallback(cmd_data.options,
+                                                            &gpdAddr,
+                                                            cmd_data.gpdSecurityFrameCounter,
+                                                            cmd_data.gpdCommandId,
+                                                            cmd_data.gpdCommandPayload,
+                                                            cmd_data.gppShortAddress,
+                                                            cmd_data.gppDistance)) {
+    return true;
+  }
+  // Check if sink has the translation table support in the gpsFunctionality attribute?
+  if (sinkFunctionalitySupported(EMBER_AF_GP_GPS_FUNCTIONALITY_TRANSLATION_TABLE)) {
+    #ifdef SL_CATALOG_ZIGBEE_GREEN_POWER_TRANSLATION_TABLE_PRESENT
+    emGpForwardGpdCommandBasedOnTranslationTable(&gpdAddr,
+                                                 cmd_data.gpdCommandId,
+                                                 cmd_data.gpdCommandPayload);
+    #else
+    emGpForwardGpdCommandDefault(&gpdAddr,
+                                 cmd_data.gpdCommandId,
+                                 cmd_data.gpdCommandPayload);
+    #endif // SL_CATALOG_ZIGBEE_GREEN_POWER_TRANSLATION_TABLE_PRESENT
   }
   return true;
 }
@@ -2927,15 +2904,14 @@ bool emberAfGreenPowerClusterGpPairingConfigurationCallback(EmberAfClusterComman
   // Action 0b000 (No Action)
   // Input(s) - SendGpPairingBit , Gpd Address
   if (gpConfigAtion == EMBER_ZCL_GP_PAIRING_CONFIGURATION_ACTION_NO_ACTION) {
-    if (cmd_data.actions & EMBER_AF_GP_PAIRING_CONFIGURATION_ACTIONS_SEND_GP_PAIRING) {
-      sendGpPairingLookingUpAddressInSinkEntry(&gpdAddr);
-    }
+    sendGpPairingLookingUpAddressInSinkEntry(&gpdAddr,
+                                             (cmd_data.actions & EMBER_AF_GP_PAIRING_CONFIGURATION_ACTIONS_SEND_GP_PAIRING));
     return true;
   }
   // Action = 0b100 (Remove GPD)
   // Input(s) - Gpd Address
   if (gpConfigAtion == EMBER_ZCL_GP_PAIRING_CONFIGURATION_ACTION_REMOVE_GPD) {
-    decommissionGpd(0, 0, &gpdAddr, true);
+    decommissionGpd(0, 0, &gpdAddr, true, cmd_data.actions & EMBER_AF_GP_PAIRING_CONFIGURATION_ACTIONS_SEND_GP_PAIRING);
     return true;
   }
   // Action = 0b011 (Remove Pairing)
@@ -2950,7 +2926,7 @@ bool emberAfGreenPowerClusterGpPairingConfigurationCallback(EmberAfClusterComman
       return true;
     }
     if (emberGpSinkTableLookup(&gpdAddr) != 0xFF) {
-      decommissionGpd(0, 0, &gpdAddr, false);
+      decommissionGpd(0, 0, &gpdAddr, false, cmd_data.actions & EMBER_AF_GP_PAIRING_CONFIGURATION_ACTIONS_SEND_GP_PAIRING);
     }
     return true;
   }
@@ -3414,6 +3390,7 @@ bool emberAfGreenPowerClusterGpNotificationCallback(uint16_t options,
     decommissionGpd(((options & EMBER_AF_GP_NOTIFICATION_OPTION_SECURITY_LEVEL) >> EMBER_AF_GP_NOTIFICATION_OPTION_SECURITY_LEVEL_OFFSET),
                     ((options & EMBER_AF_GP_NOTIFICATION_OPTION_SECURITY_KEY_TYPE) >> EMBER_AF_GP_NOTIFICATION_OPTION_SECURITY_KEY_TYPE_OFFSET),
                     &gpdAddr,
+                    true,
                     true);
   } else if (gpdCommandId == EMBER_ZCL_GP_GPDF_CHANNEL_REQUEST) {
     handleChannelRequest(options,

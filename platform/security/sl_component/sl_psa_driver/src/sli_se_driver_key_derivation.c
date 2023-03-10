@@ -32,18 +32,19 @@
 
 #if defined(SEMAILBOX_PRESENT)
 
-#include <string.h>
-
-#include "psa/crypto.h"
+#include "sli_psa_driver_common.h"  // sli_psa_zeroize()
 #include "sli_se_opaque_functions.h"
 #include "sli_se_driver_key_management.h"
 #include "sli_se_driver_key_derivation.h"
 #include "sli_se_version_dependencies.h"
+#include "psa/crypto.h"
 
 #include "sl_se_manager.h"
 #include "sl_se_manager_key_derivation.h"
 #include "sl_se_manager_util.h"
 #include "sli_se_manager_internal.h"
+
+#include <string.h>
 
 // -----------------------------------------------------------------------------
 // Function Definitions
@@ -557,14 +558,14 @@ psa_status_t sli_se_driver_key_agreement(psa_algorithm_t alg,
     sli_se_unpad_curve_point(tmp_output_buf,
                              tmp_output_buf,
                              PSA_BITS_TO_BYTES(key_bits));
-    memset(tmp_priv_padded_buf, 0, sizeof(tmp_priv_padded_buf));
+    sli_psa_zeroize(tmp_priv_padded_buf, sizeof(tmp_priv_padded_buf));
   }
   #endif // VAULT padding
 
   // Montgomery curve computations do not require the temporary buffer to store the y-coord.
   if (key_type == PSA_KEY_TYPE_ECC_KEY_PAIR(PSA_ECC_FAMILY_SECP_R1)) {
     memcpy(output, tmp_output_buf, PSA_BITS_TO_BYTES(key_bits));
-    memset(tmp_output_buf, 0, sizeof(tmp_output_buf));
+    sli_psa_zeroize(tmp_output_buf, sizeof(tmp_output_buf));
   }
 
   *output_length = PSA_BITS_TO_BYTES(key_bits);

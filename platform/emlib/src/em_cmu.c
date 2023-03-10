@@ -3159,17 +3159,14 @@ void CMU_HFXOCrystalSharingFollowerInit(CMU_PRS_Status_Output_Select_TypeDef prs
  *****************************************************************************/
 void CMU_HFXOCTuneSet(uint32_t ctune)
 {
-  uint32_t hfxoCtrlBkup;
+  uint32_t hfxoCtrlBkup = HFXO0->CTRL;
 
   // Make sure the given CTUNE value is within the allowable range
   EFM_ASSERT(ctune <= (_HFXO_XTALCTRL_CTUNEXIANA_MASK >> _HFXO_XTALCTRL_CTUNEXIANA_SHIFT));
 
-  hfxoCtrlBkup = HFXO0->CTRL;
-
-  // These two bits need to be set to allow writing the ctune register
-  HFXO0->CTRL_SET = HFXO_CTRL_FORCEEN;
-  while ((HFXO0->STATUS & HFXO_STATUS_COREBIASOPTRDY) == 0) {
-    // Wait for crystal to startup
+  // Keep oscillator running, if it is enabled
+  if (HFXO0->STATUS & _HFXO_STATUS_ENS_MASK) {
+    HFXO0->CTRL_SET = HFXO_CTRL_FORCEEN;
   }
 
   HFXO0->CTRL_SET = HFXO_CTRL_DISONDEMAND;
@@ -3195,7 +3192,12 @@ void CMU_HFXOCTuneSet(uint32_t ctune)
                      | ((uint32_t)ctuneXoana << _HFXO_XTALCTRL_CTUNEXOANA_SHIFT)
                      | ((ctune << _HFXO_XTALCTRL_CTUNEXIANA_SHIFT) & _HFXO_XTALCTRL_CTUNEXIANA_MASK));
 
-  HFXO0->CTRL = hfxoCtrlBkup;
+  BUS_RegMaskedWrite(&HFXO0->CTRL, _HFXO_CTRL_DISONDEMAND_MASK, hfxoCtrlBkup);
+
+  // Unforce to return control to hardware request
+  if (HFXO0->STATUS & _HFXO_STATUS_ENS_MASK) {
+    BUS_RegMaskedWrite(&HFXO0->CTRL, _HFXO_CTRL_FORCEEN_MASK, hfxoCtrlBkup);
+  }
 }
 
 /**************************************************************************//**
@@ -3212,8 +3214,37 @@ void CMU_HFXOCTuneSet(uint32_t ctune)
  *****************************************************************************/
 uint32_t CMU_HFXOCTuneGet(void)
 {
-  return ((HFXO0->XTALCTRL & _HFXO_XTALCTRL_CTUNEXIANA_MASK)
-          >> _HFXO_XTALCTRL_CTUNEXIANA_SHIFT);
+  uint32_t ctune = 0;
+  uint32_t hfxoCtrlBkup = HFXO0->CTRL;
+
+  // Keep oscillator running, if it is enabled
+  if (HFXO0->STATUS & _HFXO_STATUS_ENS_MASK) {
+    HFXO0->CTRL_SET = HFXO_CTRL_FORCEEN;
+  }
+
+  HFXO0->CTRL_SET = HFXO_CTRL_DISONDEMAND;
+
+#if defined(HFXO_CMD_MANUALOVERRIDE)
+  HFXO0->CMD_SET = HFXO_CMD_MANUALOVERRIDE;
+#endif
+
+#if defined(HFXO_STATUS_FSMLOCK)
+  while ((HFXO0->STATUS & HFXO_STATUS_FSMLOCK) != 0) {
+    // Wait for crystal to switch modes.
+  }
+#endif
+
+  ctune = ((HFXO0->XTALCTRL & _HFXO_XTALCTRL_CTUNEXIANA_MASK)
+           >> _HFXO_XTALCTRL_CTUNEXIANA_SHIFT);
+
+  BUS_RegMaskedWrite(&HFXO0->CTRL, _HFXO_CTRL_DISONDEMAND_MASK, hfxoCtrlBkup);
+
+  // Unforce to return control to hardware request
+  if (HFXO0->STATUS & _HFXO_STATUS_ENS_MASK) {
+    BUS_RegMaskedWrite(&HFXO0->CTRL, _HFXO_CTRL_FORCEEN_MASK, hfxoCtrlBkup);
+  }
+
+  return ctune;
 }
 
 /**************************************************************************//**
@@ -3242,6 +3273,62 @@ void CMU_HFXOCTuneDeltaSet(int32_t delta)
 int32_t CMU_HFXOCTuneDeltaGet(void)
 {
   return (int32_t)ctuneDelta;
+}
+
+/**************************************************************************//**
+ * @brief
+ *   Recalibrate the HFXO's Core Bias Current.
+ *
+ * @note
+ *   Care should be taken when using this function as it can cause disturbance
+ *   on the HFXO frequency while the optimization is underway. It's recommended
+ *   to only use this function when HFXO isn't being used. It's also a blocking
+ *   function that can be time consuming.
+ *****************************************************************************/
+void CMU_HFXOCoreBiasCurrentCalibrate(void)
+{
+  uint32_t hfxoCtrlBkup = HFXO0->CTRL;
+
+  // These two bits need to be set to allow writing the registers
+  HFXO0->CTRL_SET = HFXO_CTRL_FORCEEN;
+  while ((HFXO0->STATUS & (HFXO_STATUS_COREBIASOPTRDY | HFXO_STATUS_RDY)) != (HFXO_STATUS_COREBIASOPTRDY | HFXO_STATUS_RDY)) {
+    // Wait for crystal to startup
+  }
+
+  HFXO0->CTRL_SET = HFXO_CTRL_DISONDEMAND;
+
+#if defined(HFXO_CMD_MANUALOVERRIDE)
+  HFXO0->CMD_SET = HFXO_CMD_MANUALOVERRIDE;
+#endif
+
+#if defined(HFXO_STATUS_FSMLOCK)
+  while ((HFXO0->STATUS & HFXO_STATUS_FSMLOCK) != 0) {
+    // Wait for crystal to switch modes.
+  }
+#endif
+
+  // Making sure HFXO is in steady state
+  EFM_ASSERT((HFXO0->STATUS & (HFXO_STATUS_COREBIASOPTRDY | HFXO_STATUS_RDY | HFXO_STATUS_ENS)) == (HFXO_STATUS_COREBIASOPTRDY | HFXO_STATUS_RDY | HFXO_STATUS_ENS));
+
+  // Start core bias optimization
+  HFXO0->CMD_SET = HFXO_CMD_COREBIASOPT;
+  while ((HFXO0->STATUS & HFXO_STATUS_COREBIASOPTRDY) == HFXO_STATUS_COREBIASOPTRDY) {
+    // Wait for core bias optimization to start
+  }
+  while ((HFXO0->STATUS & HFXO_STATUS_COREBIASOPTRDY) == 0) {
+    // Wait for core bias optimization to finish
+  }
+
+  // Force COREBIASANA bitfields modification
+#if defined(HFXO_CMD_MANUALOVERRIDE)
+  HFXO0->CMD_SET = HFXO_CMD_MANUALOVERRIDE;
+#endif
+
+  while ((HFXO0->STATUS & HFXO_STATUS_COREBIASOPTRDY) == 0) {
+    // Wait for core bias current value to be written in COREBIASANA bitfields
+  }
+
+  BUS_RegMaskedWrite(&HFXO0->CTRL, (_HFXO_CTRL_DISONDEMAND_MASK | _HFXO_CTRL_FORCEEN_MASK), hfxoCtrlBkup);
 }
 
 /**************************************************************************//**

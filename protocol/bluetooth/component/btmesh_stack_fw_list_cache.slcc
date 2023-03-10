@@ -1,0 +1,226 @@
+id: "btmesh_stack_fw_list_cache"
+label: "Firmware List Cache for Distribution Server Model"
+package: "Btmesh"
+description: "This component provides a simplistic implementation of the Firmware Distribution Server's Firmware List -related platform APIs. The cache stores the Firmware ID's and metadata of received images, but does not actually store any image data, and is not persistent across resets. This component should be used for testing purposes only. The Distributor example provides a proper reference implementation of the Firmware List."
+category: "Bluetooth Mesh|Stack|Models|DFU"
+quality: "evaluation"
+root_path: "protocol/bluetooth"
+
+requires:
+ - name: "btmesh_stack_fw_distribution_server"
+template_contribution:
+ - name: btmesh_bgapi_class
+   value:
+     class: "ncp_fw_list"
+   priority: 1
+ - name: component_catalog
+   value: btmesh_stack_fw_list_cache
+
+library:
+#EFR32BG12P
+  - path: "lib/EFR32BG12P/GCC/libbtmesh_dfu_ncp_fw_list.a"
+    condition:
+      - "toolchain_gcc"
+      - "device_family_efr32bg12p"
+  - path: "lib/EFR32BG12P/IAR/libbtmesh_dfu_ncp_fw_list.a"
+    condition:
+      - "toolchain_iar"
+      - "device_family_efr32bg12p"
+#EFR32MG12P
+  - path: "lib/EFR32MG12P/GCC/libbtmesh_dfu_ncp_fw_list.a"
+    condition:
+      - "toolchain_gcc"
+      - "device_family_efr32mg12p"
+  - path: "lib/EFR32MG12P/IAR/libbtmesh_dfu_ncp_fw_list.a"
+    condition:
+      - "toolchain_iar"
+      - "device_family_efr32mg12p"
+#MGM12
+  - path: "lib/EFR32MG12P/GCC/libbtmesh_dfu_ncp_fw_list.a"
+    condition:
+      - "toolchain_gcc"
+      - "device_family_mgm12"
+  - path: "lib/EFR32MG12P/IAR/libbtmesh_dfu_ncp_fw_list.a"
+    condition:
+      - "toolchain_iar"
+      - "device_family_mgm12"
+#EFR32BG13P
+  - path: "lib/EFR32BG13P/GCC/libbtmesh_dfu_ncp_fw_list.a"
+    condition:
+      - "toolchain_gcc"
+      - "device_family_efr32bg13p"
+  - path: "lib/EFR32BG13P/IAR/libbtmesh_dfu_ncp_fw_list.a"
+    condition:
+      - "toolchain_iar"
+      - "device_family_efr32bg13p"
+#BGM13
+  - path: "lib/EFR32BG13P/GCC/libbtmesh_dfu_ncp_fw_list.a"
+    condition:
+      - "toolchain_gcc"
+      - "device_family_bgm13"
+  - path: "lib/EFR32BG13P/IAR/libbtmesh_dfu_ncp_fw_list.a"
+    condition:
+      - "toolchain_iar"
+      - "device_family_bgm13"
+#EFR32MG13P
+  - path: "lib/EFR32MG13P/GCC/libbtmesh_dfu_ncp_fw_list.a"
+    condition:
+      - "toolchain_gcc"
+      - "device_family_efr32mg13p"
+  - path: "lib/EFR32MG13P/IAR/libbtmesh_dfu_ncp_fw_list.a"
+    condition:
+      - "toolchain_iar"
+      - "device_family_efr32mg13p"
+#MGM13
+  - path: "lib/EFR32MG13P/GCC/libbtmesh_dfu_ncp_fw_list.a"
+    condition:
+      - "toolchain_gcc"
+      - "device_family_mgm13"
+  - path: "lib/EFR32MG13P/IAR/libbtmesh_dfu_ncp_fw_list.a"
+    condition:
+      - "toolchain_iar"
+      - "device_family_mgm13"
+#EFR32BG21
+  - path: "lib/EFR32BG21/GCC/libbtmesh_dfu_ncp_fw_list.a"
+    condition:
+      - "toolchain_gcc"
+      - "device_family_efr32bg21"
+  - path: "lib/EFR32BG21/IAR/libbtmesh_dfu_ncp_fw_list.a"
+    condition:
+      - "toolchain_iar"
+      - "device_family_efr32bg21"
+#BGM21
+  - path: "lib/EFR32BG21/GCC/libbtmesh_dfu_ncp_fw_list.a"
+    condition:
+      - "toolchain_gcc"
+      - "device_family_bgm21"
+  - path: "lib/EFR32BG21/IAR/libbtmesh_dfu_ncp_fw_list.a"
+    condition:
+      - "toolchain_iar"
+      - "device_family_bgm21"
+#EFR32MG21
+  - path: "lib/EFR32MG21/GCC/libbtmesh_dfu_ncp_fw_list.a"
+    condition:
+      - "toolchain_gcc"
+      - "device_family_efr32mg21"
+  - path: "lib/EFR32MG21/IAR/libbtmesh_dfu_ncp_fw_list.a"
+    condition:
+      - "toolchain_iar"
+      - "device_family_efr32mg21"
+#MGM21
+  - path: "lib/EFR32MG21/GCC/libbtmesh_dfu_ncp_fw_list.a"
+    condition:
+      - "toolchain_gcc"
+      - "device_family_mgm21"
+  - path: "lib/EFR32MG21/IAR/libbtmesh_dfu_ncp_fw_list.a"
+    condition:
+      - "toolchain_iar"
+      - "device_family_mgm21"
+#EFR32BG22
+  - path: "lib/EFR32BG22/GCC/libbtmesh_dfu_ncp_fw_list.a"
+    condition:
+      - "toolchain_gcc"
+      - "device_family_efr32bg22"
+  - path: "lib/EFR32BG22/IAR/libbtmesh_dfu_ncp_fw_list.a"
+    condition:
+      - "toolchain_iar"
+      - "device_family_efr32bg22"
+#BGM22
+  - path: "lib/EFR32BG22/GCC/libbtmesh_dfu_ncp_fw_list.a"
+    condition:
+      - "toolchain_gcc"
+      - "device_family_bgm22"
+  - path: "lib/EFR32BG22/IAR/libbtmesh_dfu_ncp_fw_list.a"
+    condition:
+      - "toolchain_iar"
+      - "device_family_bgm22"
+#EFR32MG22
+  - path: "lib/EFR32MG22/GCC/libbtmesh_dfu_ncp_fw_list.a"
+    condition:
+      - "toolchain_gcc"
+      - "device_family_efr32mg22"
+  - path: "lib/EFR32MG22/IAR/libbtmesh_dfu_ncp_fw_list.a"
+    condition:
+      - "toolchain_iar"
+      - "device_family_efr32mg22"
+#EFR32MG22
+  - path: "lib/EFR32MG22/GCC/libbtmesh_dfu_ncp_fw_list.a"
+    condition:
+      - "toolchain_gcc"
+      - "device_family_mgm22"
+  - path: "lib/EFR32MG22/IAR/libbtmesh_dfu_ncp_fw_list.a"
+    condition:
+      - "toolchain_iar"
+      - "device_family_mgm22"
+#MGM24
+  - path: "lib/EFR32MG24/GCC/libbtmesh_dfu_ncp_fw_list.a"
+    condition:
+      - "toolchain_gcc"
+      - "device_family_mgm24"
+  - path: "lib/EFR32MG24/IAR/libbtmesh_dfu_ncp_fw_list.a"
+    condition:
+      - "toolchain_iar"
+      - "device_family_mgm24"
+#BGM24
+  - path: "lib/EFR32BG24/GCC/libbtmesh_dfu_ncp_fw_list.a"
+    condition:
+      - "toolchain_gcc"
+      - "device_family_bgm24"
+  - path: "lib/EFR32BG24/IAR/libbtmesh_dfu_ncp_fw_list.a"
+    condition:
+      - "toolchain_iar"
+      - "device_family_bgm24"
+#EFR32BG24
+  - path: "lib/EFR32BG24/GCC/libbtmesh_dfu_ncp_fw_list.a"
+    condition:
+      - "toolchain_gcc"
+      - "device_family_efr32bg24"
+  - path: "lib/EFR32BG24/IAR/libbtmesh_dfu_ncp_fw_list.a"
+    condition:
+      - "toolchain_iar"
+      - "device_family_efr32bg24"
+#EFR32MG24
+  - path: "lib/EFR32MG24/GCC/libbtmesh_dfu_ncp_fw_list.a"
+    condition:
+      - "toolchain_gcc"
+      - "device_family_efr32mg24"
+  - path: "lib/EFR32MG24/IAR/libbtmesh_dfu_ncp_fw_list.a"
+    condition:
+      - "toolchain_iar"
+      - "device_family_efr32mg24"
+#MGM27
+  - path: "lib/EFR32MG27/GCC/libbtmesh_dfu_ncp_fw_list.a"
+    condition:
+      - "toolchain_gcc"
+      - "device_family_mgm27"
+  - path: "lib/EFR32MG27/IAR/libbtmesh_dfu_ncp_fw_list.a"
+    condition:
+      - "toolchain_iar"
+      - "device_family_mgm27"
+#BGM27
+  - path: "lib/EFR32BG27/GCC/libbtmesh_dfu_ncp_fw_list.a"
+    condition:
+      - "toolchain_gcc"
+      - "device_family_bgm27"
+  - path: "lib/EFR32BG27/IAR/libbtmesh_dfu_ncp_fw_list.a"
+    condition:
+      - "toolchain_iar"
+      - "device_family_bgm27"
+#EFR32MG27
+  - path: "lib/EFR32MG27/GCC/libbtmesh_dfu_ncp_fw_list.a"
+    condition:
+      - "toolchain_gcc"
+      - "device_family_efr32mg27"
+  - path: "lib/EFR32MG27/IAR/libbtmesh_dfu_ncp_fw_list.a"
+    condition:
+      - "toolchain_iar"
+      - "device_family_efr32mg27"
+#EFR32BG27
+  - path: "lib/EFR32BG27/GCC/libbtmesh_dfu_ncp_fw_list.a"
+    condition:
+      - "toolchain_gcc"
+      - "device_family_efr32bg27"
+  - path: "lib/EFR32BG27/IAR/libbtmesh_dfu_ncp_fw_list.a"
+    condition:
+      - "toolchain_iar"
+      - "device_family_efr32bg27"

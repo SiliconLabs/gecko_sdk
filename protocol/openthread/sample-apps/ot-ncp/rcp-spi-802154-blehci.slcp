@@ -86,6 +86,9 @@ configuration:
   - name: OPENTHREAD_CONFIG_PLATFORM_KEY_REFERENCES_ENABLE
     value: 0
 
+define:
+  - name: NONCOMPLIANT_ACK_TIMING_WORKAROUND
+
 template_contribution:
   - name: component_catalog
     value: bluetooth_ncp

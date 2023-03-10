@@ -80,17 +80,19 @@ void emAfPluginReportingCliRemove(sl_cli_command_arg_t *arguments)
 void emAfPluginReportingCliAdd(sl_cli_command_arg_t *arguments)
 {
   EmberAfStatus status = EMBER_ZCL_STATUS_SUCCESS;
-  EmberAfPluginReportingEntry entry;
-  entry.endpoint = sl_cli_get_argument_uint8(arguments, 0);
-  entry.clusterId = sl_cli_get_argument_uint16(arguments, 1);
-  entry.attributeId = sl_cli_get_argument_uint16(arguments, 2);
-  entry.mask = (uint8_t)(sl_cli_get_argument_uint8(arguments, 3) == 0
-                         ? CLUSTER_MASK_CLIENT
-                         : CLUSTER_MASK_SERVER);
-  entry.manufacturerCode = EMBER_AF_NULL_MANUFACTURER_CODE;
-  entry.data.reported.minInterval = sl_cli_get_argument_uint16(arguments, 4);
-  entry.data.reported.maxInterval = sl_cli_get_argument_uint16(arguments, 5);
-  entry.data.reported.reportableChange = sl_cli_get_argument_uint32(arguments, 6);
+  EmberAfPluginReportingEntry entry = {
+    .endpoint = (int8u)sl_cli_get_argument_uint8(arguments, 0),
+    .clusterId = (EmberAfClusterId)sl_cli_get_argument_uint16(arguments, 1),
+    .attributeId = (EmberAfAttributeId)sl_cli_get_argument_uint16(arguments, 2),
+    .mask = (int8u)(sl_cli_get_argument_uint8(arguments, 3) == 0
+                    ? CLUSTER_MASK_CLIENT
+                    : CLUSTER_MASK_SERVER),
+    .manufacturerCode = EMBER_AF_NULL_MANUFACTURER_CODE,
+    .data.reported.minInterval = (int16u)sl_cli_get_argument_uint16(arguments, 4),
+    .data.reported.maxInterval = (int16u)sl_cli_get_argument_uint16(arguments, 5),
+    .data.reported.reportableChange = (int32u)sl_cli_get_argument_uint32(arguments, 6),
+    .direction = EMBER_ZCL_REPORTING_DIRECTION_REPORTED,
+  };
   UNUSED_VAR(status);
   status = emberAfPluginReportingConfigureReportedAttribute(&entry);
 

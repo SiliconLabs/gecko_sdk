@@ -31,10 +31,9 @@
 #ifndef __SLI_TZ_NS_INTERFACE_H__
 #define __SLI_TZ_NS_INTERFACE_H__
 
-#include <stdint.h>
-#include "psa/crypto_types.h"
-#include "psa/client.h"
+#include "sli_tz_iovec.h"
 #include "sl_status.h"
+#include <stdint.h>
 
 #ifdef __cplusplus
 extern "C" {
@@ -43,8 +42,8 @@ extern "C" {
 //------------------------------------------------------------------------------
 // Typedefs
 
-typedef int32_t (*sli_tz_veneer_fn) (psa_invec *in_vec, size_t in_len,
-                                     psa_outvec *out_vec, size_t out_len);
+typedef int32_t (*sli_tz_veneer_fn) (sli_tz_invec *in_vec, size_t in_len,
+                                     sli_tz_outvec *out_vec, size_t out_len);
 
 typedef uint32_t (*sli_tz_veneer_simple_fn) (uint32_t sid,
                                              uint32_t arg);

@@ -1,0 +1,7 @@
+parameters:
+  - name: build_dir
+steps:
+  - task: copy
+    input: "{{build_dir}}/{{project_name}}.s37"
+    output: "artifact/{{project_name}}.s37"
+    export: tz_secure_binary

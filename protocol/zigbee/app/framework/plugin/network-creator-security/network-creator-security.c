@@ -304,6 +304,10 @@ EmberStatus emberAfPluginNetworkCreatorSecurityStart(bool centralizedNetwork)
 
 EmberStatus emberAfPluginNetworkCreatorSecurityOpenNetwork(void)
 {
+#if defined(BDB_JOIN_USES_INSTALL_CODE_KEY)
+  emberAfCorePrintln("open-network not permitted when install code joins are required");
+  return EMBER_INVALID_CALL;
+#endif //BDB_JOIN_USES_INSTALL_CODE_KEY
   EmberStatus status = EMBER_SUCCESS;
   EmberCurrentSecurityState securityState;
 
@@ -432,7 +436,18 @@ void emberAfPluginNetworkCreatorSecurityOpenNetworkNetworkEventHandler(SLXU_UC_E
   }
 
   if (status == EMBER_SUCCESS) {
+#if defined(EZSP_HOST)
+    EzspDecisionBitmask policy = (EZSP_DECISION_ALLOW_JOINS | EZSP_DECISION_ALLOW_UNSECURED_REJOINS);
+#if defined(BDB_JOIN_USES_INSTALL_CODE_KEY)
+    policy |= EZSP_DECISION_JOINS_USE_INSTALL_CODE_KEY;
+#endif // BDB_JOIN_USES_INSTALL_CODE_KEY
+    emberAfSetEzspPolicy(EZSP_TRUST_CENTER_POLICY,
+                         policy,
+                         "Trust Center Policy",
+                         "Allow preconfigured key joins");
+#else // !EZSP_HOST
     zaTrustCenterSetJoinPolicy(EMBER_USE_PRECONFIGURED_KEY);
+#endif // EZSP_HOST
     status = emberAfPermitJoin(permitJoinTime, true); // broadcast permit join
   }
 

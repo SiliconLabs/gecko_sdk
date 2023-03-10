@@ -1,0 +1,20 @@
+id: "btmesh_stack_lc_client"
+label: "Light Control Client Model"
+package: "Btmesh"
+description: "Provides Bluetooth mesh LC Client model. This model is used to manage the settings of lighting controller nodes. It is used to configure whether a node should use an occupancy sensor to automatically adjust lighting, or only work via a manual switch. The feedback loop coefficients of the controller, timings between state transitions, and ambient light threshold levels can also be adjusted via this model."
+category: "Bluetooth Mesh|Stack|Models"
+quality: "production"
+root_path: "protocol/bluetooth"
+
+requires:
+  - name: "btmesh_stack"
+  - name: "btmesh_core"
+provides:
+  - name: "btmesh_stack_lc_client"
+  - name: "btmesh_lighting_model"
+    allow_multiple: true
+template_contribution:
+  - name: btmesh_bgapi_class
+    value:
+      class: "lc_client"
+    priority: 1

@@ -187,7 +187,7 @@ void sl_wisun_ping_response(sl_wisun_ping_info_t * const ping_response);
  * @param[in] packet_length ICMPv6 packet length including header
  * @param[in] stat_hnd Custom statistic handler function
  * @param[in] req_resp_sent_hnd Request/Response sent handler function
- * @return sl_status_t SL_STATUS_OK on success, otherwise SL_STATUS_FAIL
+ * @return sl_status_t SL_STATUS_OK on success, otherwise SL_STATUS_FAIL or SL_STATUS_ABORT
  *****************************************************************************/
 sl_status_t sl_wisun_ping(const wisun_addr_t *const remote_addr,
                           const uint16_t packet_count,

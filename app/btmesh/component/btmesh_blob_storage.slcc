@@ -1,0 +1,50 @@
+id: btmesh_blob_storage
+label: BLOB Storage
+package: Btmesh
+description: >
+  Provides an API for storing binary large objects (BLOB) via the bootloader.
+
+  The number and size of the bootloader slots determines the number and maximum
+  size of BLOBs that can be stored on the device. Please check the bootloader
+  configuration.
+category: "Bluetooth Mesh|Utility"
+quality: production
+root_path: app/btmesh/common/btmesh_blob_storage
+config_file:
+  - path: config/sl_btmesh_blob_storage_config.h
+source:
+  - path: sl_btmesh_blob_storage.c
+  - path: sl_btmesh_blob_storage_erase.c
+include:
+  - path: ""
+    file_list:
+      - path: sl_btmesh_blob_storage.h
+      - path: sli_btmesh_blob_storage.h
+      - path: sl_btmesh_blob_storage_app_id.h
+provides:
+  - name: btmesh_blob_storage
+requires:
+  - name: bootloader_interface
+  - name: silabs_core_sl_malloc
+  - name: simple_timer
+  - name: status
+recommends:
+  - id: simple_timer
+template_contribution:
+  - name: component_catalog
+    value: btmesh_blob_storage
+  - name: event_handler
+    value:
+      event: internal_app_init
+      include: sl_btmesh_blob_storage.h
+      handler: sl_btmesh_blob_storage_init
+  - name: event_handler
+    value:
+      event: internal_app_process_action
+      include: sl_btmesh_blob_storage.h
+      handler: sl_btmesh_blob_storage_delete_step_handle
+  - name: power_manager_handler
+    value:
+      event: is_ok_to_sleep
+      include: sl_btmesh_blob_storage.h
+      handler: sl_btmesh_blob_storage_is_ok_to_sleep

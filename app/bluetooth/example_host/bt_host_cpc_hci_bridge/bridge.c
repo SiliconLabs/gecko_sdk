@@ -81,7 +81,7 @@ static int ep_sock_fd;
 // end the receiving loop if signal is received.
 static volatile bool run = true;
 // signal if the controller was reset
-static volatile bool has_reset = false;
+static volatile sig_atomic_t has_reset = false;
 
 static void reset_callback(void);
 static int cpc_poll_fds(void);
@@ -101,34 +101,43 @@ static void signal_handler(int sig)
 uint32_t startup(void)
 {
   int ret;
-  uint8_t retry = 0;
+  uint8_t retry;
 
   // Initialize CPC communication
+  retry = 0;
   do {
     ret = cpc_init(&lib_handle, cpc_instance, false, reset_callback);
     if (ret == 0) {
-      // speed up boot process if everything seems ok
       break;
     }
     nanosleep((const struct timespec[]){ { 0, CPC_RETRY_SLEEP_NS } }, NULL);
     retry++;
-  } while ((ret != 0) && (retry < RETRY_COUNT));
+  } while (retry < RETRY_COUNT);
 
   if (ret < 0) {
-    perror("cpc_init: ");
-    return ret;
+    perror("Failed to cpc_init ");
+    return (uint32_t)ret;
   }
 
-  // Start Bluetooth endpoint
-  ret = cpc_open_endpoint(lib_handle,
-                          &endpoint,
-                          SL_CPC_ENDPOINT_BLUETOOTH_RCP,
-                          CPC_TRANSMIT_WINDOW);
+  // Open Bluetooth endpoint
+  retry = 0;
+  do {
+    ret = cpc_open_endpoint(lib_handle,
+                            &endpoint,
+                            SL_CPC_ENDPOINT_BLUETOOTH_RCP,
+                            CPC_TRANSMIT_WINDOW);
+    if (ret > 0) {
+      ep_sock_fd = ret;
+      break;
+    }
+    nanosleep((const struct timespec[]){ { 0, CPC_RETRY_SLEEP_NS } }, NULL);
+    retry++;
+  } while (retry < RETRY_COUNT);
+
   if (ret < 0) {
-    perror("cpc_open_endpoint ");
-    return ret;
+    perror("Failed to cpc_open_endpoint ");
+    return (uint32_t)ret;
   }
-  ep_sock_fd = ret;
 
   // Open virtual UART device
   ret = openpty(&pty_m, &pty_s, NULL, NULL, NULL);
@@ -146,7 +155,8 @@ uint32_t startup(void)
               strerror(errno));
     }
   }
-  return ret;
+
+  return (uint32_t)ret;
 }
 
 /**************************************************************************//**
@@ -163,40 +173,58 @@ static void reset_callback(void)
 int reset_cpc(void)
 {
   int ret;
-  uint8_t retry = 0;
+  uint8_t retry;
 
   if (DEBUG) {
     printf("\n\nRESET\n\n");
   }
 
-  // Restart cpp communication
+  // Close previously opened Bluetooth endpoint
+  if (ep_sock_fd > 0) {
+    ret = cpc_close_endpoint(&endpoint);
+    if (ret == 0) {
+      ep_sock_fd = -1;
+    } else {
+      perror("Failed to cpc_close_endpoint ");
+      return ret;
+    }
+  }
+
+  // Restart connection to CPCd
+  retry = 0;
   do {
     ret = cpc_restart(&lib_handle);
     if (ret == 0) {
-      // speed up boot process if everything seems ok
       break;
     }
     nanosleep((const struct timespec[]){ { 0, CPC_RETRY_SLEEP_NS } }, NULL);
     retry++;
-  } while ((ret != 0) && (retry < RETRY_COUNT));
-  has_reset = false;
+  } while (retry < RETRY_COUNT);
 
   if (ret < 0) {
-    perror("cpc restart ");
+    perror("Failed to cpc_restart ");
     return ret;
   }
 
   // Open Bluetooth endpoint
-  ret = cpc_open_endpoint(lib_handle,
-                          &endpoint,
-                          SL_CPC_ENDPOINT_BLUETOOTH_RCP,
-                          CPC_TRANSMIT_WINDOW);
+  retry = 0;
+  do {
+    ret = cpc_open_endpoint(lib_handle,
+                            &endpoint,
+                            SL_CPC_ENDPOINT_BLUETOOTH_RCP,
+                            CPC_TRANSMIT_WINDOW);
+    if (ret > 0) {
+      ep_sock_fd = ret;
+      break;
+    }
+    nanosleep((const struct timespec[]){ { 0, CPC_RETRY_SLEEP_NS } }, NULL);
+    retry++;
+  } while (retry < RETRY_COUNT);
 
   if (ret < 0) {
-    perror(" open endpoint ");
+    perror("Failed to cpc_open_endpoint ");
   }
 
-  ep_sock_fd = ret;
   return ret;
 }
 
@@ -226,9 +254,10 @@ int main(int argc, char *argv[])
   // Reset cpc communication if daemon signals
   while (run) {
     if (has_reset) {
+      has_reset = false;
       ret = reset_cpc();
       if (ret < 0) {
-        perror("reset ");
+        perror("Failed to reset_cpc ");
         exit(EXIT_FAILURE);
       }
     } else {
@@ -301,6 +330,7 @@ int cpc_poll_fds(void)
   int ret;
   int max_fd;
   ssize_t size = 0;
+  ssize_t size2 = 0;
   uint8_t *hci_packet_buf;
   ssize_t hci_packet_len;
   struct timeval tv;
@@ -332,8 +362,11 @@ int cpc_poll_fds(void)
           printf("data_to_cpc=");
           print_buffer(data_to_cpc, hci_packet_len);
         }
-        cpc_write_endpoint(endpoint, hci_packet_buf, hci_packet_len, 0);
-
+        size2 = cpc_write_endpoint(endpoint, hci_packet_buf, hci_packet_len, 0);
+        if (size2 < 0) {
+          perror("Failed to cpc_write_endpoint");
+          return FAILURE;
+        }
         size -= hci_packet_len;
         hci_packet_buf += hci_packet_len;
       } while (size >= hci_packet_len);

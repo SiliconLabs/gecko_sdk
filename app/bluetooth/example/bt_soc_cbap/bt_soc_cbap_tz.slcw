@@ -1,0 +1,20 @@
+label: bt_soc_cbap_tz_workspace
+description: >
+  Demonstrates Certificate Based Authentication and Pairing over BLE.
+  This example utilizes TrustZone for storing keys.
+quality: experimental
+project:
+  - path: ../bt_soc_tz_secure_application/bt_soc_tz_secure_application.slcp
+    id: bt_soc_tz_secure_application
+    output: bt_soc_tz_secure_application
+  - path: bt_soc_cbap_tz_ns.slcp
+    id: bt_soc_tz_nonsecure_application
+    output: bt_soc_cbap_tz_ns
+  - path: ../../../../platform/bootloader/sample-apps/workspaces/bootloader-apploader/bootloader-apploader-secure.slcp
+    id: bootloader-apploader-secure
+    output: bootloader-apploader-secure
+  - path: ../../../../platform/bootloader/sample-apps/workspaces/bootloader-apploader/bootloader-apploader-nonsecure.slcp
+    id: bootloader-apploader-nonsecure
+    output: bootloader-apploader-nonsecure
+post_build:
+  profile: bt_tz_workspace

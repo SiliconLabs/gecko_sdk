@@ -19,6 +19,7 @@
 #include "../include/af.h"
 #include "af-main.h"
 #include "common.h"
+#include "global-callback.h"
 #include "app/framework/util/af-event.h"
 #include "app/framework/util/time-util.h"
 
@@ -34,6 +35,9 @@
 
 #ifndef UC_BUILD
 #include "hal/micro/crc.h"
+#ifdef EMBER_TEST
+#define emberAfGetDiffCallback(value1, value2, dataType) 0
+#endif
 #endif
 
 #ifndef ZCL_SL_WWAH_CLUSTER_ID
@@ -174,11 +178,30 @@ bool emberAfIsDeviceIdentifying(uint8_t endpoint)
 #endif
 }
 
+static EmberAfDifferenceType getDiffFloat(EmberAfDifferenceType value1,
+                                          EmberAfDifferenceType value2)
+{
+  float valueFloat = 0, value2Float = 0, diffFloat = 0;
+  EmberAfDifferenceType diff = 0;
+
+  memcpy(&valueFloat, &value1, sizeof(float));
+  memcpy(&value2Float, &value2, sizeof(float));
+
+  if (valueFloat > value2Float) {
+    diffFloat = valueFloat - value2Float;
+  } else {
+    diffFloat = value2Float - valueFloat;
+  }
+  memcpy(&diff, &diffFloat, sizeof(float));
+  return diff;
+}
+
 // Calculates difference. See EmberAfDifferenceType for the maximum data size
 // that this function will support.
 EmberAfDifferenceType emberAfGetDifference(uint8_t *pData,
                                            EmberAfDifferenceType value,
-                                           uint8_t dataSize)
+                                           uint8_t dataSize,
+                                           EmberAfAttributeType dataType)
 {
   EmberAfDifferenceType value2 = 0, diff;
   uint8_t i;
@@ -198,13 +221,23 @@ EmberAfDifferenceType emberAfGetDifference(uint8_t *pData,
 #endif //BIGENDIAN
   }
 
-  if (value > value2) {
-    diff = value - value2;
+  // For semi-/double-precision users must provide their own callback to convert between precisions
+  // and calculate the difference
+  if (dataType == ZCL_FLOAT_SEMI_ATTRIBUTE_TYPE
+      || dataType == ZCL_FLOAT_DOUBLE_ATTRIBUTE_TYPE) {
+    return emberAfGetDiffCallback(value, value2, dataType);
+  } else if (dataType == ZCL_FLOAT_SINGLE_ATTRIBUTE_TYPE) {
+    // If the attribute data is single-float
+    return getDiffFloat(value, value2);
   } else {
-    diff = value2 - value;
-  }
+    if (value > value2) {
+      diff = value - value2;
+    } else {
+      diff = value2 - value;
+    }
 
-  return diff;
+    return diff;
+  }
 }
 
 // --------------------------------------------------
@@ -418,7 +451,7 @@ static void printIncomingZclMessage(const EmberAfClusterCommand *cmd)
 static bool dispatchZclMessage(EmberAfClusterCommand *cmd)
 {
   uint8_t index = emberAfIndexFromEndpoint(cmd->apsFrame->destinationEndpoint);
-  if (index == 0xFFu) {
+  if (index == 0xFFu || (index >= MAX_ENDPOINT_COUNT)) {
     emberAfDebugPrint("Drop cluster 0x%2x command 0x%x",
                       cmd->apsFrame->clusterId,
                       cmd->commandId);
@@ -1380,3 +1413,12 @@ uint8_t emberAfMake8bitEncodedChanPg(uint8_t page, uint8_t channel)
       return channel | ENCODED_8BIT_CHANPG_PAGE_MASK_PAGE_0;
   }
 }
+
+#ifdef UC_BUILD
+WEAK(EmberAfDifferenceType emberAfGetDiffCallback(EmberAfDifferenceType value1,
+                                                  EmberAfDifferenceType value2,
+                                                  EmberAfAttributeType dataType))
+{
+  return 0;
+}
+#endif

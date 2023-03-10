@@ -1,0 +1,20 @@
+id: "btmesh_stack_scene_client"
+label: "Scene Client Model"
+package: "Btmesh"
+description: "Provides Bluetooth mesh Scene Client model.
+  This model is used to to send and receive messages to/from the Scene Server and Scene Setup Server models.
+  It is used to support the functionality of a node that can configure scenes on a network and trigger a state transition to a scene on another node."
+category: "Bluetooth Mesh|Stack|Models|Time and Scenes"
+quality: "production"
+root_path: "protocol/bluetooth"
+
+requires:
+  - name: "btmesh_stack"
+  - name: "btmesh_core"
+provides:
+  - name: "btmesh_stack_scene_client"
+template_contribution:
+  - name: btmesh_bgapi_class
+    value:
+      class: "scene_client"
+    priority: 1

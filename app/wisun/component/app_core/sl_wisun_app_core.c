@@ -75,6 +75,7 @@ typedef struct app_setting_wisun{
   char network_name[SL_WISUN_NETWORK_NAME_SIZE + 1];
   uint8_t network_size;
   int8_t tx_power;
+  bool is_default_phy;
   sl_wisun_phy_config_t phy;
 } app_setting_wisun_t;
 #endif
@@ -165,6 +166,7 @@ static const app_setting_wisun_t _app_default_settings = {
 #else
   .tx_power = 20U,
 #endif
+  .is_default_phy = true,
 #if defined(WISUN_CONFIG_DEFAULT_PHY_FAN10)
   .phy = {
     .type = WISUN_CONFIG_DEFAULT_PHY_FAN10,

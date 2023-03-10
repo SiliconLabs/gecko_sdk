@@ -828,11 +828,10 @@ static void xorKeyWithByte(const uint8_t key[ENCRYPTION_BLOCK_SIZE],
 //This is still handled through software on Vault-supported parts,
 //as the AES-MMO algorithm used for hashing is not supported by
 //the Vault hardware needed for internal crypto operations.
-sl_status_t sl_zb_sec_man_hmac_aes_mmo(const uint8_t* input,
-                                       const uint8_t data_length,
-                                       uint8_t* output)
+void sl_zb_sec_man_hmac_aes_mmo(const uint8_t* input,
+                                const uint8_t data_length,
+                                uint8_t* output)
 {
-  sl_status_t status;
   //export referenced key from Vault; store it locally so it isn't
   //kept around for longer than necessary
   uint8_t zb_sec_man_hmac_key[EMBER_ENCRYPTION_KEY_SIZE];
@@ -866,9 +865,6 @@ sl_status_t sl_zb_sec_man_hmac_aes_mmo(const uint8_t* input,
                           : output));
     MEMMOVE(output, context.result, ENCRYPTION_BLOCK_SIZE);
   }
-
-  status = SL_STATUS_OK;
-  return status;
 }
 
 sl_status_t sl_zb_sec_man_aes_ccm(uint8_t* nonce,

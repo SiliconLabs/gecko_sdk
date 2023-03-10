@@ -1,0 +1,24 @@
+id: "btmesh_stack_lpn"
+label: "LPN"
+package: "Btmesh"
+description: "Provides Bluetooth mesh Low Power Node feature. When the LPN feature is initialized by the node, it will stop scanning for messages in the background. To receive messages from the network, the application will need to establish a Friendship, where a Friend node will cache mesh messages and beacons on the LPN's behalf. The application should then periodically poll its Friend to retrieve any messages the Friend may have cached for the LPN."
+category: "Bluetooth Mesh|Stack|Features"
+quality: "production"
+root_path: "protocol/bluetooth/component"
+
+requires:
+  - name: "btmesh_stack"
+  - name: "btmesh_stack_node"
+  - name: component_catalog
+provides:
+  - name: "btmesh_stack_lpn"
+template_contribution:
+  - name: btmesh_bgapi_class
+    value:
+      class: "lpn"
+    priority: 1
+  - name: btmesh_feature_bitmask
+    value:
+      count: 8
+  - name: component_catalog
+    value: btmesh_stack_lpn

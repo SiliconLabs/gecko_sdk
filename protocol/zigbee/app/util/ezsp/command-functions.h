@@ -3561,8 +3561,10 @@ static void callbackDispatch(void)
 
     case EZSP_POLL_HANDLER: {
       EmberNodeId childId;
+      bool transmitExpected;
       childId = fetchInt16u();
-      ezspPollHandler(childId);
+      transmitExpected = fetchInt8u();
+      ezspPollHandler(childId, transmitExpected);
       break;
     }
 

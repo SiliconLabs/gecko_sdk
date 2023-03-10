@@ -34,45 +34,45 @@ extern "C" {
  * of the radio APIs to execute radio related paradigm for instance
  * - zpal_radio_transmit shall be used to transmit a Z-Wave frame on radio
  * - zpal_radio_start_receive shall be used to enable the reception of Z-Wave frame
- * 
- * The radio API assumes that the radio will return to receive mode with channel 
+ *
+ * The radio API assumes that the radio will return to receive mode with channel
  * hopping enabled after transmitting a frame.
- * 
+ *
  * Initialization of the radio
  * ---------------------------
- * 
+ *
  * \code{.c}
- * 
+ *
  * void
  * RXHandlerFromISR(zpal_radio_event_t rxStatus)
  * {
  *    // Rx handle in ISR context
  * }
- * 
+ *
  * void
  * TXHandlerFromISR(zpal_radio_event_t txStatus)
  * {
  *   // Tx complete handle in ISR context
  * }
- * 
+ *
  * void
  * RegionChangeHandler(zpal_radio_event_t regionChangeStatus)
  * {
  *   // Region changed, make sure region specific data and statistics are cleared
  * }
- * 
+ *
  * void
  * RadioAssertHandler(zpal_radio_event_t assertVal)
  * {
  *   // Radio driver or hardware asserted, handle it
  * }
- * 
+ *
  * initialize_radio()
  * {
  *   static zpal_radio_profile_t RfProfile;
  *   static zpal_radio_network_stats_t sNetworkStatistic = {0};
  *   static uint8_t network_homeid[4] = {0xDE, 0xAD, 0xBE, 0xEF};
- *   
+ *
  *   // Set radio for US always on mode
  *   static zpal_radio_profile_t RfProfile = {.region = REGION_US,
  *                                     .wakeup = ZPAL_RADIO_WAKEUP_ALWAYS_LISTEN,
@@ -88,36 +88,36 @@ extern "C" {
  *                                     .network_stats = &sNetworkStatistic,
  *                                     .radio_debug_enable = false,
  *                                     .primary_lr_channel = ZPAL_RADIO_LR_CHANNEL_A};
- *   
+ *
  *   zpal_radio_init(RfProfile);
  * }
- * 
+ *
  * \endcode
- * 
+ *
  * Transmitting a frame
  * --------------------
- * 
+ *
  * \code{.c}
- * 
+ *
  * #define TX_FAILED          0
  * #define TX_FRAME_SUCCESS   1
  * #define TX_BEAM_SUCCESS    2
- * 
- * static const zpal_radio_transmit_parameter_t TxParameter100kCh1 = {.speed = ZPAL_RADIO_SPEED_100K, 
- *                                                                    .channel_id = 0, 
+ *
+ * static const zpal_radio_transmit_parameter_t TxParameter100kCh1 = {.speed = ZPAL_RADIO_SPEED_100K,
+ *                                                                    .channel_id = 0,
  *                                                                    .crc = ZPAL_RADIO_CRC_16_BIT_CCITT,
- *                                                                    .preamble = 0x55, 
- *                                                                    .preamble_length = 40, 
- *                                                                    .start_of_frame = 0xF0, 
+ *                                                                    .preamble = 0x55,
+ *                                                                    .preamble_length = 40,
+ *                                                                    .start_of_frame = 0xF0,
  *                                                                    .repeats = 0};
- * 
+ *
  * zpal_status_t transmit_frame()
  * {
  *   // Singlecast MAC header from node 1 to node 2
  *   uint8_t header_buffer[9] = {0xDE, 0xAD, 0xBE, 0xEF, 0x01, 0x41, 0x01, 14, 0x02};
  *   // Basic set On frame
  *   uint8_t payload_buffer[3] = {0x20, 0x01, 0xFF};
- *   
+ *
  *   return zpal_radio_transmit(&TxParameter100kCh1,         // use 100kbps FSK profile
  *                              9,
  *                              (uint8_t *)&header_buffer,
@@ -126,7 +126,7 @@ extern "C" {
  *                              true,                        // Do LBT before transmit
  *                              0);                          // Transmit power 0dBm
  * }
- * 
+ *
  * void
  * TXHandlerFromISR(zpal_radio_event_t txStatus)
  * {
@@ -147,14 +147,14 @@ extern "C" {
  *   / Get out of ISR context and handle transmit complete
  *   HandleTransmitComplete(status);
  * }
- * 
- * \endcode 
+ *
+ * \endcode
  *
  * Receiving a frame
  * -----------------
  *
  * \code{.c}
- * 
+ *
  * #define RX_ABORT                 0
  * #define RX_BEAM                  1
  * #define RX_FRAME                 2
@@ -188,12 +188,12 @@ extern "C" {
  *   / Get out of ISR context and handle frame
  *   HandleFrame(status);
  * }
- * 
- * \endcode 
- * 
+ *
+ * \endcode
+ *
  * @{
  */
-   
+
 /**
  * @brief RSSI value is invalid or not measured
  */
@@ -265,12 +265,12 @@ typedef enum
   ZPAL_RADIO_LR_CHANNEL_A,             ///< Long Range Channel A.
   ZPAL_RADIO_LR_CHANNEL_B,             ///< Long Range Channel B.
   ZPAL_RADIO_LR_CHANNEL_UNKNOWN,       ///< Long Range Channel Unknown.
-  ZPAL_RADIO_LR_CHANNEL_AUTO = 255,   ///< Long Range automatically selected Channel.  
+  ZPAL_RADIO_LR_CHANNEL_AUTO = 255,   ///< Long Range automatically selected Channel.
 } zpal_radio_lr_channel_t;
 
 /**
  * @brief Enumeration containing Z-Wave channels.
- * 
+ *
  */
 typedef enum
 {
@@ -325,18 +325,18 @@ typedef enum
 typedef enum
 {
   TF_REGION_866 = 64,
-  TF_REGION_870, 
-  TF_REGION_906, 
+  TF_REGION_870,
+  TF_REGION_906,
   TF_REGION_910,
   TF_REGION_878,
   TF_REGION_882,
-  TF_REGION_886, 
+  TF_REGION_886,
   TF_REGION_2CH_NUM = (TF_REGION_886 - TF_REGION_866) + 1,
   TF_REGION_932_3CH = 96,
   TF_REGION_940_3CH,
   TF_REGION_835_3CH,
   TF_REGION_840_3CH,
-  TF_REGION_850_3CH, 
+  TF_REGION_850_3CH,
   TF_REGION_3CH_NUM = (TF_REGION_850_3CH - TF_REGION_932_3CH) + 1,
 } zpal_radio_region_tf_t;
 
@@ -408,11 +408,12 @@ typedef enum
   ZPAL_RADIO_EVENT_RX_ABORT,                    ///< Receive was aborted
   ZPAL_RADIO_EVENT_TX_FAIL,                     ///< Transmit failed
   ZPAL_RADIO_EVENT_TX_FAIL_LBT,                 ///< Transmit failed because of an LBT failure
-  ZPAL_RADIO_EVENT_RXTX_CALIBRATE,			    ///< Radio needs calibration 
+  ZPAL_RADIO_EVENT_RXTX_CALIBRATE,			    ///< Radio needs calibration
   ZPAL_RADIO_EVENT_MASK = 0x1F,
   ZPAL_RADIO_EVENT_FLAG_PACKET = 0x20,          ///< The frmae was a normal package
   ZPAL_RADIO_EVENT_FLAG_BEAM = 0x40,            ///< The frame was a wakeup beam
-  ZPAL_RADIO_EVENT_FLAG_SUCCESS = 0x80          ///< Indicates a successful event
+  ZPAL_RADIO_EVENT_FLAG_SUCCESS = 0x80,         ///< Indicates a successful event
+  ZPAL_RADIO_EVENT_RX_TIMEOUT = 255             ///< Indicates Rx event started but never completed after 10 secs
 } zpal_radio_event_t;
 
 typedef void (*zpal_radio_callback_t)(zpal_radio_event_t event);
@@ -460,7 +461,7 @@ typedef struct
 
 /**
  * @brief rf channel statistics structure
- * 
+ *
  */
 typedef struct
 {
@@ -564,9 +565,10 @@ zpal_status_t zpal_radio_transmit_beam(zpal_radio_transmit_parameter_t const *co
 
 /**
  * @brief Starts the receiver and enables reception of frames.
+ * @param[in]   force_rx  bool will force RAIL to RX mode..
  * If the receiver is already started, nothing will happen.
  */
-void zpal_radio_start_receive(void);
+void zpal_radio_start_receive(bool force_rx);
 
 /**
  * @brief Function to get last received frame.
@@ -630,14 +632,14 @@ void zpal_radio_clear_network_stats(void);
 
 /**
  * @brief Function for clearing specified rf channel statistics.
- * 
+ *
  * @param zwavechannel rf channel for which statistics will be cleared.
  */
 void zpal_radio_rf_channel_statistic_clear(zpal_radio_zwave_channel_t zwavechannel);
 
 /**
- * @brief 
- * 
+ * @brief
+ *
  * @param zwavechannel zwave channel for which statistics will be returned.
  * @param p_radio_channel_statistic pointer to structure where statistics for specified zwave channel should be copied.
  * @return true  If delivered structure has been filled with current statistic for specified zwavechannel.
@@ -646,42 +648,42 @@ void zpal_radio_rf_channel_statistic_clear(zpal_radio_zwave_channel_t zwavechann
 bool zpal_radio_rf_channel_statistic_get(zpal_radio_zwave_channel_t zwavechannel, zpal_radio_rf_channel_statistic_t* p_radio_channel_statistic);
 
 /**
- * @brief Function for setting the zwavechannel used when calling zpal_radio_rf_channel_statistic_tx_frames, 
+ * @brief Function for setting the zwavechannel used when calling zpal_radio_rf_channel_statistic_tx_frames,
  *        zpal_radio_rf_channel_statistic_tx_retries and zpal_radio_rf_channel_statistic_tx_lbt_failures.
- * 
+ *
  * @param zwavechannel Z-Wave channel current rf channel statistic 'tx channel' should be set to.
  */
 void zpal_radio_rf_channel_statistic_tx_channel_set(zpal_radio_zwave_channel_t zwavechannel);
 
 /**
  * @brief Function for incrementing the rf channel tx frame statistic.
- * 
+ *
  */
 void zpal_radio_rf_channel_statistic_tx_frames(void);
 
 /**
  * @brief Function for incrementing the rf channel tx retries statistic.
- * 
+ *
  */
 void zpal_radio_rf_channel_statistic_tx_retries(void);
 
 /**
  * @brief Function for incrementing the rf channel tx lbt failures.
- * 
+ *
  */
 void zpal_radio_rf_channel_statistic_tx_lbt_failures(void);
 
 /**
  * @brief Function for updating the rf channel background noise rssi average statistic.
- * 
- * @param zwavechannel Z-Wave channel on which background noise rssi average should be updated. 
+ *
+ * @param zwavechannel Z-Wave channel on which background noise rssi average should be updated.
  * @param rssi rssi to add to sampleset used for calculating average background noise rssi on specified Z-Wave channel.
  */
 void zpal_radio_rf_channel_statistic_background_rssi_average_update(zpal_radio_zwave_channel_t zwavechannel, int8_t rssi);
 
 /**
  * @brief Function for updating the rf channel end device noise rssi average statistic.
- * 
+ *
  * @param zwavechannel Z-Wave channel on which end device noise rssi average should be updated.
  * @param rssi rssi to add to sampleset used for calculating average end device noise rssi on specified Z-Wave channel.
  */

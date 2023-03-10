@@ -367,6 +367,7 @@ bool emberGetEndpointDescription(uint8_t endpoint,
   }
   uint8_t endpointIndex = emberAfIndexFromEndpoint(endpoint);
   if (endpointIndex == 0xFF
+      || (endpointIndex >= MAX_ENDPOINT_COUNT)
       || (emberAfNetworkIndexFromEndpointIndex(endpointIndex)
           != emberGetCallbackNetwork())) {
     return false;
@@ -388,6 +389,7 @@ uint16_t emberGetEndpointCluster(uint8_t endpoint,
   EmberAfCluster *cluster = NULL;
   uint8_t endpointIndex = emberAfIndexFromEndpoint(endpoint);
   if (endpointIndex == 0xFF
+      || (endpointIndex >= MAX_ENDPOINT_COUNT)
       || (emberAfNetworkIndexFromEndpointIndex(endpointIndex)
           != emberGetCallbackNetwork())) {
     return 0xFFFF;

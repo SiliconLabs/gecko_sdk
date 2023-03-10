@@ -1,0 +1,28 @@
+id: "btmesh_stack_proxy"
+label: "Proxy"
+package: "Btmesh"
+description: "Provides Bluetooth mesh GATT Proxy functionality. It is mainly used by devices such as mobile phones to communicate with the rest of the Bluetooth mesh network through a proxy device. The proxy protocol is designed to enable nodes to send and receive the Bluetooth Mesh network packets over a connection-oriented bearer."
+category: "Bluetooth Mesh|Stack|Features"
+quality: "production"
+root_path: "protocol/bluetooth/component"
+
+requires:
+  - name: "btmesh_stack"
+  - name: "btmesh_core"
+  - name: component_catalog
+provides:
+  - name: "btmesh_stack_proxy"
+template_contribution:
+  - name: btmesh_bgapi_class
+    value:
+      class: "proxy"
+    priority: 1
+  - name: btmesh_feature_bitmask
+    value:
+      count: 2
+  - name: btmesh_stack_proxy
+    value: 1
+  - name: component_catalog
+    value: btmesh_stack_proxy
+validation_helper:
+  - path: proxy_validation.lua

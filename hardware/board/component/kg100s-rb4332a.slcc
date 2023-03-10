@@ -1,0 +1,22 @@
+!!omap
+- id: kg100s_rb4332a
+- label: KG100S-RB4332A
+- package: platform
+- description: Kit BSP support for the KG100S Radio Board for Amazon Sidewalk.
+- category: Platform|Board|Kit|Radio Board
+- quality: production
+- requires:
+  - name: hardware_board_from_kg100s-rb4332a
+- provides:
+  - name: hardware_kit
+  - name: hardware_kit_rb
+- define:
+  - name: SL_KIT_NAME
+    value: '"KG100S-RB4332A"'
+  - name: SL_KIT_REV
+    value: '"A01"'
+- tag:
+  - kit:opn:KG100S-RB4332A
+  - kit:pn:RB4332
+  - kit:variant:A
+  - kit:revision:A01

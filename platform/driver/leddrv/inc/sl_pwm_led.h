@@ -36,7 +36,7 @@ typedef struct {
 #if defined(_SILICON_LABS_32B_SERIES_0) || defined(_SILICON_LABS_32B_SERIES_1)
   uint8_t           location;     /**< GPIO location */
 #endif
-  uint8_t           level;        /**< PWM duty cycle [0-65535] */
+  uint16_t          level;        /**< PWM duty cycle [0-65535] */
   uint8_t           polarity;     /**< GPIO polarity (active high/low) */
   sl_led_state_t    state;        /**< Current state (ON/OFF) */
   TIMER_TypeDef     *timer;       /**< TIMER instance */

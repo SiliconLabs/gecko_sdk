@@ -411,3 +411,18 @@ sl_status_t zb_sec_man_fetch_link_key_table_key_info(sl_zb_sec_man_context_t* co
 
   return SL_STATUS_OK;
 }
+
+//Defined here to support code that still calls this; sl_zb_sec_man_hmac_aes_mmo
+//is designed to replace it.
+void emberHmacAesHash(const uint8_t *key,
+                      const uint8_t *data,
+                      uint8_t dataLength,
+                      uint8_t *result)
+{
+  sl_zb_sec_man_context_t context;
+  sl_zb_sec_man_init_context(&context);
+  context.core_key_type = SL_ZB_SEC_MAN_KEY_TYPE_INTERNAL;
+  (void) sl_zb_sec_man_import_key(&context, (sl_zb_sec_man_key_t *)key);
+  (void) sl_zb_sec_man_load_key_context(&context);
+  sl_zb_sec_man_hmac_aes_mmo(data, dataLength, result);
+}

@@ -8,7 +8,6 @@ class PhyFilters(IPhyFilter):
 
     customer_phy_groups = [
                             'Phys_Acuity',
-                            'Phys_Amazon',
                             'Phys_ATnT',
                             'Phys_Bluetooth_LE',
                             'Phys_Deprecated',

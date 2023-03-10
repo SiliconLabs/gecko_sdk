@@ -3,7 +3,7 @@ package: platform
 description: >-
   This component provides a TrustZone secure library interface crypto rng functions
 category: Platform|Security|TrustZone
-quality: evaluation
+quality: production
 ui_hints:
   visibility: never
 provides:

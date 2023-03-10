@@ -79,6 +79,19 @@
 
 // </h> WISUN OQPSK header settings
 
+// <h> SideWalk FSK header settings
+// <o  SIDEWALK_FSK_FCS_TYPE> FCS is on/off
+// <i> Default: 0
+// <i> FCS is on/off.
+#define SIDEWALK_FSK_FCS_TYPE      (1)
+
+// <o  SIDEWALK_FSK_WHITENING> Whitening is on/off
+// <i> Default: 1
+// <i> Whitening is on/off
+#define  SIDEWALK_FSK_WHITENING      (1)
+
+// </h> SideWalk FSK header settings
+
 // <<< end of configuration section >>>
 
 #endif // SL_FLEX_RAIL_PACKAGE_ASSISTANT_CONFIG_H_

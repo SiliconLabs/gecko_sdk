@@ -21,6 +21,7 @@
 #include "em_cmu.h"
 #include "btl_debug_cfg.h"
 
+#if defined (SL_DEBUG_PRINT) && (SL_DEBUG_PRINT == 1)
 void btl_debugInit(void)
 {
 //Below variable is supported for Cortex-M4,M33
@@ -126,7 +127,7 @@ void btl_debugInit(void)
   ITM->TER |= (1UL << 0);
 #endif
 }
-
+#endif
 void btl_debugWriteChar(char c)
 {
   (void) ITM_SendChar((uint32_t)c);

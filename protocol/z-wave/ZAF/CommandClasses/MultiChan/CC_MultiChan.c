@@ -252,6 +252,17 @@ static void CmdClassMultiChannelEncapsulateCmd(
   {
     /*BitAdress = 0 -> Destination address 1-127 */
     /*BitAdress = 1 -> Destination address is mask for End-point 1-7 */
+    
+    /*
+     * When bit addressing is used, a Command Class handler could overwrite
+     * the Command Class byte of the incoming frame.
+     * In this case, the command would only be executed for the first End Point.
+     * To ensure that all subsequent End Points also receive the incoming
+     * command, a copy of the encapsulated frame must be used for each iteration
+     * of the loop.
+     */
+    ZW_APPLICATION_TX_BUFFER encapsulatedFrame = *(ZW_APPLICATION_TX_BUFFER*)&pCmd->encapFrame;
+
     if(0 == (pCmd->properties2 & 0x80))/**End-point address**/
     {
       bitNo = 7;
@@ -275,13 +286,13 @@ static void CmdClassMultiChannelEncapsulateCmd(
       rxOpt->destNode.BitAddress = 1; /*Tell Command Class that it is bit-addres. Get do not support bit-address!!*/
     }
 
-    if (true == ZAF_CC_MultiChannel_IsCCSupported(rxOpt, (ZW_APPLICATION_TX_BUFFER*)&pCmd->encapFrame))
+    if (true == ZAF_CC_MultiChannel_IsCCSupported(rxOpt, &encapsulatedFrame))
     {
       /* Command class supported */
       received_frame_status_t status;
-      status = invoke_cc_handler(rxOpt, (ZW_APPLICATION_TX_BUFFER*)&pCmd->encapFrame, cmdLength - 4, pFrameOut, pLengthOut);
+      status = invoke_cc_handler(rxOpt, &encapsulatedFrame, cmdLength - 4, pFrameOut, pLengthOut);
       if (RECEIVED_FRAME_STATUS_CC_NOT_FOUND == status) {
-        Transport_ApplicationCommandHandlerEx(rxOpt, (ZW_APPLICATION_TX_BUFFER*)&pCmd->encapFrame, cmdLength - 4);
+        Transport_ApplicationCommandHandlerEx(rxOpt, &encapsulatedFrame, cmdLength - 4);
       }
     }
     if (0 == rxOpt->destNode.endpoint)

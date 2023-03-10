@@ -31,13 +31,12 @@
 #ifndef __SLI_TZ_MSC_VENEERS_H__
 #define __SLI_TZ_MSC_VENEERS_H__
 
+#include "sli_tz_iovec.h"
+#include "sli_tz_util.h"
+#include "sli_tz_funcs_sids_autogen.h"
+
 #include <stdint.h>
 #include <stdbool.h>
-
-#include "sli_tz_util.h"
-#include "psa/crypto_types.h"
-#include "psa/client.h"
-#include "sli_tz_funcs_sids_autogen.h"
 
 #ifdef __cplusplus
 extern "C" {
@@ -65,25 +64,6 @@ uint32_t sli_tz_msc_get_userdata_size(void);
 uint32_t sli_tz_msc_get_misclockword(void);
 
 uint32_t sli_tz_msc_set_misclockword(uint32_t value);
-
-uint32_t sli_tz_msc_init(void);
-
-uint32_t sli_tz_msc_deinit(void);
-
-uint32_t sli_tz_msc_erase_page(uint32_t startAddress);
-
-//-------------------------------------
-// Full services (IOVEC usage)
-
-int32_t sli_tz_msc_write_word(sli_tz_invec in_vec[],
-                              size_t in_len,
-                              sli_tz_outvec out_vec[],
-                              size_t out_len);
-
-int32_t sli_tz_msc_write_word_dma(sli_tz_invec in_vec[],
-                                  size_t in_len,
-                                  sli_tz_outvec out_vec[],
-                                  size_t out_len);
 
 #ifdef __cplusplus
 }

@@ -24,6 +24,7 @@
 #include "sli_tz_iovec_check.h"
 
 #include "sl_common.h"
+#include "fih.h"
 
 // -----------------------------------------------------------------------------
 // Defines
@@ -75,10 +76,11 @@ static void bl_fatal_assert_action(void)
   __builtin_unreachable();
 }
 
-static void bl_assert_tz_iovecs_in_ns(psa_invec *in_vec, size_t in_len,
-                                      psa_outvec *out_vec, size_t out_len,
-                                      sli_tz_iovec_params_t *iovec_copy_ptr)
+static fih_int bl_assert_tz_iovecs_in_ns(sli_tz_invec *in_vec, size_t in_len,
+                                         sli_tz_outvec *out_vec, size_t out_len,
+                                         sli_tz_iovec_params_t *iovec_copy_ptr)
 {
+  fih_int fih_rc = FIH_FAILURE;
   uint32_t status = sli_tz_iovecs_live_in_ns(in_vec,
                                              in_len,
                                              out_vec,
@@ -87,6 +89,8 @@ static void bl_assert_tz_iovecs_in_ns(psa_invec *in_vec, size_t in_len,
   if (status != SLI_TZ_IOVEC_OK) {
     bl_fatal_assert_action();
   }
+  fih_rc = FIH_SUCCESS;
+  FIH_RET(fih_rc);
 }
 
 // -----------------------------------------------------------------------------
@@ -101,15 +105,17 @@ uint32_t bootloader_nsc_getResetReason(void)
 }
 
 __attribute__((cmse_nonsecure_entry))
-int32_t bootloader_nsc_getInfo(psa_invec *in_vec, size_t in_len,
-                               psa_outvec *out_vec, size_t out_len)
+int32_t bootloader_nsc_getInfo(sli_tz_invec *in_vec, size_t in_len,
+                               sli_tz_outvec *out_vec, size_t out_len)
 {
+  fih_int fih_rc = FIH_FAILURE;
+  (void) fih_rc;
   if (out_vec[0].len != sizeof(BootloaderInformation_t)) {
     bl_fatal_assert_action();
   }
 
   sli_tz_iovec_params_t iovec_copy = { 0 };
-  bl_assert_tz_iovecs_in_ns(in_vec, in_len, out_vec, out_len, &iovec_copy);
+  FIH_CALL(bl_assert_tz_iovecs_in_ns, fih_rc, in_vec, in_len, out_vec, out_len, &iovec_copy);
 
   BootloaderInformation_t *info = (BootloaderInformation_t *) iovec_copy.out_vec[0].base;
 
@@ -141,16 +147,18 @@ int32_t bootloader_nsc_rebootAndInstall(void)
 }
 
 __attribute__((cmse_nonsecure_entry))
-int32_t bootloader_nsc_parseImageInfo(psa_invec *in_vec, size_t in_len,
-                                      psa_outvec *out_vec, size_t out_len)
+int32_t bootloader_nsc_parseImageInfo(sli_tz_invec *in_vec, size_t in_len,
+                                      sli_tz_outvec *out_vec, size_t out_len)
 {
+  fih_int fih_rc = FIH_FAILURE;
+  (void) fih_rc;
   if ((out_vec[0].len != sizeof(ApplicationData_t))
       || (out_vec[1].len != sizeof(uint32_t))) {
     bl_fatal_assert_action();
   }
 
   sli_tz_iovec_params_t iovec_copy = { 0 };
-  bl_assert_tz_iovecs_in_ns(in_vec, in_len, out_vec, out_len, &iovec_copy);
+  FIH_CALL(bl_assert_tz_iovecs_in_ns, fih_rc, in_vec, in_len, out_vec, out_len, &iovec_copy);
 
   uint8_t *data               = (uint8_t *) iovec_copy.in_vec[0].base;
   size_t numBytes             = iovec_copy.in_vec[0].len;
@@ -206,15 +214,17 @@ int32_t bootloader_nsc_secureBootEnforced(void)
 }
 
 __attribute__((cmse_nonsecure_entry))
-int32_t bootloader_nsc_getUpgradeLocation(psa_invec *in_vec, size_t in_len,
-                                          psa_outvec *out_vec, size_t out_len)
+int32_t bootloader_nsc_getUpgradeLocation(sli_tz_invec *in_vec, size_t in_len,
+                                          sli_tz_outvec *out_vec, size_t out_len)
 {
+  fih_int fih_rc = FIH_FAILURE;
+  (void) fih_rc;
   if (out_vec[0].len != sizeof(uint32_t)) {
     bl_fatal_assert_action();
   }
 
   sli_tz_iovec_params_t iovec_copy = { 0 };
-  bl_assert_tz_iovecs_in_ns(in_vec, in_len, out_vec, out_len, &iovec_copy);
+  FIH_CALL(bl_assert_tz_iovecs_in_ns, fih_rc, in_vec, in_len, out_vec, out_len, &iovec_copy);
 
   uint32_t *location = (uint32_t *) iovec_copy.out_vec[0].base;
 
@@ -232,15 +242,17 @@ uint32_t bootloader_nsc_remainingApplicationUpgrades(void)
 }
 
 __attribute__((cmse_nonsecure_entry))
-int32_t bootloader_nsc_getCertificateVersion(psa_invec *in_vec, size_t in_len,
-                                             psa_outvec *out_vec, size_t out_len)
+int32_t bootloader_nsc_getCertificateVersion(sli_tz_invec *in_vec, size_t in_len,
+                                             sli_tz_outvec *out_vec, size_t out_len)
 {
+  fih_int fih_rc = FIH_FAILURE;
+  (void) fih_rc;
   if (out_vec[0].len != sizeof(uint32_t)) {
     bl_fatal_assert_action();
   }
 
   sli_tz_iovec_params_t iovec_copy = { 0 };
-  bl_assert_tz_iovecs_in_ns(in_vec, in_len, out_vec, out_len, &iovec_copy);
+  FIH_CALL(bl_assert_tz_iovecs_in_ns, fih_rc, in_vec, in_len, out_vec, out_len, &iovec_copy);
 
   uint32_t *version = (uint32_t *) iovec_copy.out_vec[0].base;
 
@@ -250,15 +262,17 @@ int32_t bootloader_nsc_getCertificateVersion(psa_invec *in_vec, size_t in_len,
 }
 
 __attribute__((cmse_nonsecure_entry))
-int32_t bootloader_nsc_getStorageInfo(psa_invec *in_vec, size_t in_len,
-                                      psa_outvec *out_vec, size_t out_len)
+int32_t bootloader_nsc_getStorageInfo(sli_tz_invec *in_vec, size_t in_len,
+                                      sli_tz_outvec *out_vec, size_t out_len)
 {
+  fih_int fih_rc = FIH_FAILURE;
+  (void) fih_rc;
   if (out_vec[0].len != sizeof(BootloaderStorageInformation_t)) {
     bl_fatal_assert_action();
   }
 
   sli_tz_iovec_params_t iovec_copy = { 0 };
-  bl_assert_tz_iovecs_in_ns(in_vec, in_len, out_vec, out_len, &iovec_copy);
+  FIH_CALL(bl_assert_tz_iovecs_in_ns, fih_rc, in_vec, in_len, out_vec, out_len, &iovec_copy);
 
   BootloaderStorageInformation_t *info = (BootloaderStorageInformation_t *) iovec_copy.out_vec[0].base;
 
@@ -267,16 +281,18 @@ int32_t bootloader_nsc_getStorageInfo(psa_invec *in_vec, size_t in_len,
 }
 
 __attribute__((cmse_nonsecure_entry))
-int32_t bootloader_nsc_getStorageSlotInfo(psa_invec *in_vec, size_t in_len,
-                                          psa_outvec *out_vec, size_t out_len)
+int32_t bootloader_nsc_getStorageSlotInfo(sli_tz_invec *in_vec, size_t in_len,
+                                          sli_tz_outvec *out_vec, size_t out_len)
 {
+  fih_int fih_rc = FIH_FAILURE;
+  (void) fih_rc;
   if ((in_vec[0].len != sizeof(uint32_t))
       || (out_vec[0].len != sizeof(BootloaderStorageSlot_t))) {
     bl_fatal_assert_action();
   }
 
   sli_tz_iovec_params_t iovec_copy = { 0 };
-  bl_assert_tz_iovecs_in_ns(in_vec, in_len, out_vec, out_len, &iovec_copy);
+  FIH_CALL(bl_assert_tz_iovecs_in_ns, fih_rc, in_vec, in_len, out_vec, out_len, &iovec_copy);
 
   uint32_t slotId               = *((uint32_t *) iovec_copy.in_vec[0].base);
   BootloaderStorageSlot_t *slot = (BootloaderStorageSlot_t *) iovec_copy.out_vec[0].base;
@@ -287,16 +303,18 @@ int32_t bootloader_nsc_getStorageSlotInfo(psa_invec *in_vec, size_t in_len,
 }
 
 __attribute__((cmse_nonsecure_entry))
-int32_t bootloader_nsc_readStorage(psa_invec *in_vec, size_t in_len,
-                                   psa_outvec *out_vec, size_t out_len)
+int32_t bootloader_nsc_readStorage(sli_tz_invec *in_vec, size_t in_len,
+                                   sli_tz_outvec *out_vec, size_t out_len)
 {
+  fih_int fih_rc = FIH_FAILURE;
+  (void) fih_rc;
   if ((in_vec[0].len != sizeof(uint32_t))
       || (in_vec[1].len != sizeof(uint32_t))) {
     bl_fatal_assert_action();
   }
 
   sli_tz_iovec_params_t iovec_copy = { 0 };
-  bl_assert_tz_iovecs_in_ns(in_vec, in_len, out_vec, out_len, &iovec_copy);
+  FIH_CALL(bl_assert_tz_iovecs_in_ns, fih_rc, in_vec, in_len, out_vec, out_len, &iovec_copy);
 
   uint32_t slotId  = *((uint32_t *) iovec_copy.in_vec[0].base);
   uint32_t offset  = *((uint32_t *) iovec_copy.in_vec[1].base);
@@ -309,16 +327,18 @@ int32_t bootloader_nsc_readStorage(psa_invec *in_vec, size_t in_len,
 }
 
 __attribute__((cmse_nonsecure_entry))
-int32_t bootloader_nsc_writeStorage(psa_invec *in_vec, size_t in_len,
-                                    psa_outvec *out_vec, size_t out_len)
+int32_t bootloader_nsc_writeStorage(sli_tz_invec *in_vec, size_t in_len,
+                                    sli_tz_outvec *out_vec, size_t out_len)
 {
+  fih_int fih_rc = FIH_FAILURE;
+  (void) fih_rc;
   if ((in_vec[0].len != sizeof(uint32_t))
       || (in_vec[1].len != sizeof(uint32_t))) {
     bl_fatal_assert_action();
   }
 
   sli_tz_iovec_params_t iovec_copy = { 0 };
-  bl_assert_tz_iovecs_in_ns(in_vec, in_len, out_vec, out_len, &iovec_copy);
+  FIH_CALL(bl_assert_tz_iovecs_in_ns, fih_rc, in_vec, in_len, out_vec, out_len, &iovec_copy);
 
   uint32_t slotId  = *((uint32_t *) iovec_copy.in_vec[0].base);
   uint32_t offset  = *((uint32_t *) iovec_copy.in_vec[1].base);
@@ -331,16 +351,18 @@ int32_t bootloader_nsc_writeStorage(psa_invec *in_vec, size_t in_len,
 }
 
 __attribute__((cmse_nonsecure_entry))
-int32_t bootloader_nsc_eraseWriteStorage(psa_invec *in_vec, size_t in_len,
-                                         psa_outvec *out_vec, size_t out_len)
+int32_t bootloader_nsc_eraseWriteStorage(sli_tz_invec *in_vec, size_t in_len,
+                                         sli_tz_outvec *out_vec, size_t out_len)
 {
+  fih_int fih_rc = FIH_FAILURE;
+  (void) fih_rc;
   if ((in_vec[0].len != sizeof(uint32_t))
       || (in_vec[1].len != sizeof(uint32_t))) {
     bl_fatal_assert_action();
   }
 
   sli_tz_iovec_params_t iovec_copy = { 0 };
-  bl_assert_tz_iovecs_in_ns(in_vec, in_len, out_vec, out_len, &iovec_copy);
+  FIH_CALL(bl_assert_tz_iovecs_in_ns, fih_rc, in_vec, in_len, out_vec, out_len, &iovec_copy);
 
   uint32_t slotId  = *((uint32_t *) iovec_copy.in_vec[0].base);
   uint32_t offset  = *((uint32_t *) iovec_copy.in_vec[1].base);
@@ -362,16 +384,18 @@ int32_t bootloader_nsc_eraseStorageSlot(uint32_t slotId, uint32_t notUsed)
 }
 
 __attribute__((cmse_nonsecure_entry))
-int32_t bootloader_nsc_initChunkedEraseStorageSlot(psa_invec *in_vec, size_t in_len,
-                                                   psa_outvec *out_vec, size_t out_len)
+int32_t bootloader_nsc_initChunkedEraseStorageSlot(sli_tz_invec *in_vec, size_t in_len,
+                                                   sli_tz_outvec *out_vec, size_t out_len)
 {
+  fih_int fih_rc = FIH_FAILURE;
+  (void) fih_rc;
   if ((in_vec[0].len != sizeof(uint32_t))
       || (out_vec[0].len != sizeof(BootloaderEraseStatus_t))) {
     bl_fatal_assert_action();
   }
 
   sli_tz_iovec_params_t iovec_copy = { 0 };
-  bl_assert_tz_iovecs_in_ns(in_vec, in_len, out_vec, out_len, &iovec_copy);
+  FIH_CALL(bl_assert_tz_iovecs_in_ns, fih_rc, in_vec, in_len, out_vec, out_len, &iovec_copy);
 
   uint32_t slotId                    = *((uint32_t *) iovec_copy.in_vec[0].base);
   BootloaderEraseStatus_t *eraseStat = (BootloaderEraseStatus_t *) iovec_copy.out_vec[0].base;
@@ -382,15 +406,17 @@ int32_t bootloader_nsc_initChunkedEraseStorageSlot(psa_invec *in_vec, size_t in_
 }
 
 __attribute__((cmse_nonsecure_entry))
-int32_t bootloader_nsc_chunkedEraseStorageSlot(psa_invec *in_vec, size_t in_len,
-                                               psa_outvec *out_vec, size_t out_len)
+int32_t bootloader_nsc_chunkedEraseStorageSlot(sli_tz_invec *in_vec, size_t in_len,
+                                               sli_tz_outvec *out_vec, size_t out_len)
 {
+  fih_int fih_rc = FIH_FAILURE;
+  (void) fih_rc;
   if (out_vec[0].len != sizeof(BootloaderEraseStatus_t)) {
     bl_fatal_assert_action();
   }
 
   sli_tz_iovec_params_t iovec_copy = { 0 };
-  bl_assert_tz_iovecs_in_ns(in_vec, in_len, out_vec, out_len, &iovec_copy);
+  FIH_CALL(bl_assert_tz_iovecs_in_ns, fih_rc, in_vec, in_len, out_vec, out_len, &iovec_copy);
 
   uint32_t currentPageAddrChecked    = (uint32_t) iovec_copy.in_vec[0].base;
   size_t pageSizeChecked             = iovec_copy.in_vec[0].len;
@@ -419,11 +445,13 @@ int32_t bootloader_nsc_setImageToBootload(int32_t slotId, uint32_t notUsed)
 }
 
 __attribute__((cmse_nonsecure_entry))
-int32_t bootloader_nsc_setImagesToBootload(psa_invec *in_vec, size_t in_len,
-                                           psa_outvec *out_vec, size_t out_len)
+int32_t bootloader_nsc_setImagesToBootload(sli_tz_invec *in_vec, size_t in_len,
+                                           sli_tz_outvec *out_vec, size_t out_len)
 {
+  fih_int fih_rc = FIH_FAILURE;
+  (void) fih_rc;
   sli_tz_iovec_params_t iovec_copy = { 0 };
-  bl_assert_tz_iovecs_in_ns(in_vec, in_len, out_vec, out_len, &iovec_copy);
+  FIH_CALL(bl_assert_tz_iovecs_in_ns, fih_rc, in_vec, in_len, out_vec, out_len, &iovec_copy);
 
   int32_t *slotIds = (int32_t *) iovec_copy.in_vec[0].base;
   size_t length    = iovec_copy.in_vec[0].len / sizeof(slotIds[0]);
@@ -434,11 +462,13 @@ int32_t bootloader_nsc_setImagesToBootload(psa_invec *in_vec, size_t in_len,
 }
 
 __attribute__((cmse_nonsecure_entry))
-int32_t bootloader_nsc_getImagesToBootload(psa_invec *in_vec, size_t in_len,
-                                           psa_outvec *out_vec, size_t out_len)
+int32_t bootloader_nsc_getImagesToBootload(sli_tz_invec *in_vec, size_t in_len,
+                                           sli_tz_outvec *out_vec, size_t out_len)
 {
+  fih_int fih_rc = FIH_FAILURE;
+  (void) fih_rc;
   sli_tz_iovec_params_t iovec_copy = { 0 };
-  bl_assert_tz_iovecs_in_ns(in_vec, in_len, out_vec, out_len, &iovec_copy);
+  FIH_CALL(bl_assert_tz_iovecs_in_ns, fih_rc, in_vec, in_len, out_vec, out_len, &iovec_copy);
 
   int32_t *slotIds = (int32_t *) iovec_copy.out_vec[0].base;
   size_t length    = iovec_copy.out_vec[0].len / sizeof(slotIds[0]);
@@ -494,9 +524,11 @@ int32_t bootloader_nsc_verifyImage(uint32_t slotId, uint32_t notUsed)
 }
 
 __attribute__((cmse_nonsecure_entry))
-int32_t bootloader_nsc_getImageInfo(psa_invec *in_vec, size_t in_len,
-                                    psa_outvec *out_vec, size_t out_len)
+int32_t bootloader_nsc_getImageInfo(sli_tz_invec *in_vec, size_t in_len,
+                                    sli_tz_outvec *out_vec, size_t out_len)
 {
+  fih_int fih_rc = FIH_FAILURE;
+  (void) fih_rc;
   if ((in_vec[0].len != sizeof(uint32_t))
       || (out_vec[0].len != sizeof(ApplicationData_t))
       || (out_vec[1].len != sizeof(uint32_t))) {
@@ -504,7 +536,7 @@ int32_t bootloader_nsc_getImageInfo(psa_invec *in_vec, size_t in_len,
   }
 
   sli_tz_iovec_params_t iovec_copy = { 0 };
-  bl_assert_tz_iovecs_in_ns(in_vec, in_len, out_vec, out_len, &iovec_copy);
+  FIH_CALL(bl_assert_tz_iovecs_in_ns, fih_rc, in_vec, in_len, out_vec, out_len, &iovec_copy);
 
   uint32_t slotId             = *((uint32_t *) iovec_copy.in_vec[0].base);
   ApplicationData_t *appInfo  = (ApplicationData_t *) iovec_copy.out_vec[0].base;

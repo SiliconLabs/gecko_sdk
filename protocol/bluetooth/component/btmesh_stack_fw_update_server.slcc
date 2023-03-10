@@ -1,0 +1,22 @@
+id: "btmesh_stack_fw_update_server"
+label: "Firmware Update Server Model"
+package: "Btmesh"
+description: "Provides Bluetooth mesh Firmware Update Server model. It is used by the Updating Node role to provide information about the current firmware on the node and where to find firmware updates; it also provides an interface for a Distributor or Standalone Updater to manage updating the node. The BLOB Transfer Server model is used to receive firmware image data."
+category: "Bluetooth Mesh|Stack|Models|DFU"
+quality: "evaluation"
+root_path: "protocol/bluetooth"
+
+requires:
+ - name: "btmesh_stack"
+ - name: "btmesh_core"
+ - name: "btmesh_stack_dfu_model"
+ - name: "btmesh_stack_mbt_server"
+provides:
+ - name: "btmesh_stack_fw_update_server"
+template_contribution:
+ - name: btmesh_bgapi_class
+   value:
+     class: "fw_update_server"
+   priority: 1
+ - name: component_catalog
+   value: btmesh_stack_fw_update_server

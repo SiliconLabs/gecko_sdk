@@ -55,7 +55,7 @@ extern "C" {
 /// // Main RAIL_EVENT callback
 /// static void RAILCb_Event(RAIL_Handle_t railHandle, RAIL_Events_t events)
 /// {
-///   // Get beamNodeId and channel index from Beam Packet
+///   // Get beamNodeId and channel index from beam packet
 ///   if (events & RAIL_EVENT_ZWAVE_BEAM) {
 ///     if (RAIL_ZWAVE_IsEnabled(railHandle)) {
 ///       if ((RAIL_ZWAVE_GetBeamNodeId(railHandle, &gRecentBeamNodeId)
@@ -105,6 +105,8 @@ RAIL_ENUM_GENERIC(RAIL_ZWAVE_Options_t, uint32_t) {
   RAIL_ZWAVE_OPTION_DETECT_BEAM_FRAMES_SHIFT,
   /** Shift position of \ref RAIL_ZWAVE_OPTION_NODE_ID_FILTERING bit */
   RAIL_ZWAVE_OPTION_NODE_ID_FILTERING_SHIFT,
+  /** Shift position of \ref RAIL_ZWAVE_OPTION_PROMISCUOUS_BEAM_MODE bit */
+  RAIL_ZWAVE_OPTION_PROMISCUOUS_BEAM_MODE_SHIFT,
 };
 
 // RAIL_ZWAVE_Options_t bitmasks
@@ -116,40 +118,59 @@ RAIL_ENUM_GENERIC(RAIL_ZWAVE_Options_t, uint32_t) {
 #define RAIL_ZWAVE_OPTIONS_DEFAULT RAIL_ZWAVE_OPTIONS_NONE
 
 /**
- * An option to configure promiscuous mode, accepting packets regardless
- * of HomeId. Defaults to false, filtering packets based on the HomeId.
+ * An option to configure promiscuous mode, accepting non-beam packets
+ * regardless of their HomeId. By default packets are filtered by their HomeId.
  * When true, such filtering is disabled.
  */
 #define RAIL_ZWAVE_OPTION_PROMISCUOUS_MODE \
   (1u << RAIL_ZWAVE_OPTION_PROMISCUOUS_MODE_SHIFT)
+
 /**
- * An option to configure Beam frame recognition. Defaults to false.
- * When true, Beam frames that are broadcast or match the NodeId and
- * HomeIdHash values will trigger \ref RAIL_EVENT_ZWAVE_BEAM event,
- * in addition to \ref RAIL_EVENT_RX_PACKET_ABORTED which occurs for
- * every received Beam frame.
+ * An option to filter non-beam packets based on their NodeId when
+ * \ref RAIL_ZWAVE_OPTION_PROMISCUOUS_MODE is disabled.
  *
- * @note This option takes precedence over \ref
- *   RAIL_ZWAVE_OPTION_PROMISCUOUS_MODE when receiving a beam frame.
- *   If this option is false, beam frames are not considered special
- *   and will be received as if they were normal Z-Wave frames, assuredly
- *   triggering \ref RAIL_EVENT_RX_FRAME_ERROR.
- */
-#define RAIL_ZWAVE_OPTION_DETECT_BEAM_FRAMES \
-  (1u << RAIL_ZWAVE_OPTION_DETECT_BEAM_FRAMES_SHIFT)
-/**
- * An option to filter packets based on Node ID when not
- * promiscuous.
+ * @note This option has no effect when
+ *   \ref RAIL_ZWAVE_OPTION_PROMISCUOUS_MODE is enabled.
  */
 #define RAIL_ZWAVE_OPTION_NODE_ID_FILTERING \
   (1u << RAIL_ZWAVE_OPTION_NODE_ID_FILTERING_SHIFT)
+
+/**
+ * An option to configure beam frame recognition. By default beams are not
+ * considered special and will be received as if they were normal Z-Wave
+ * frames, assuredly triggering \ref RAIL_EVENT_RX_FRAME_ERROR.
+ * When true, beam frames that are broadcast or match the NodeId and
+ * HomeIdHash values will trigger \ref RAIL_EVENT_ZWAVE_BEAM event.
+ * (All beams additionally trigger \ref RAIL_EVENT_RX_PACKET_ABORTED
+ * regardless of NodeId / HomeIdHash values.)
+ *
+ * @note This option takes precedence over \ref
+ *   RAIL_ZWAVE_OPTION_PROMISCUOUS_MODE when receiving a beam frame.
+ *   For promiscuous beam handling see related
+ *   \ref RAIL_ZWAVE_OPTION_PROMISCUOUS_BEAM_MODE option.
+ */
+#define RAIL_ZWAVE_OPTION_DETECT_BEAM_FRAMES \
+  (1u << RAIL_ZWAVE_OPTION_DETECT_BEAM_FRAMES_SHIFT)
+
+/**
+ * An option to receive all beams promiscuously when \ref
+ * RAIL_ZWAVE_OPTION_DETECT_BEAM_FRAMES is enabled.
+ * When true, beam frames are received regardless of their NodeId or HomeIdHash
+ * resulting in \ref RAIL_EVENT_ZWAVE_BEAM (and also \ref
+ * RAIL_EVENT_RX_PACKET_ABORTED) for each beam frame.
+ *
+ * @note This option has no effect when
+ *   \ref RAIL_ZWAVE_OPTION_DETECT_BEAM_FRAMES is disabled.
+ */
+#define RAIL_ZWAVE_OPTION_PROMISCUOUS_BEAM_MODE \
+  (1u << RAIL_ZWAVE_OPTION_PROMISCUOUS_BEAM_MODE_SHIFT)
 
 /** A value representing all options */
 #define RAIL_ZWAVE_OPTIONS_ALL 0xFFFFFFFFU
 
 /**
  * @enum RAIL_ZWAVE_NodeId_t
- * @brief A Z-Wave Node Id.
+ * @brief A Z-Wave Node ID.
  *
  * This data type is 12 bits wide when using the ZWave Long Range PHY, and
  * 8 bits wide otherwise.
@@ -206,7 +227,7 @@ RAIL_ENUM_GENERIC(RAIL_ZWAVE_HomeId_t, uint32_t) {
 
 /**
  * @enum RAIL_ZWAVE_HomeIdHash_t
- * @brief A Z-Wave Home Id hash.
+ * @brief A Z-Wave Home ID hash.
  *
  * @note Certain values (as shown) are illegal.
  */
@@ -216,7 +237,7 @@ RAIL_ENUM(RAIL_ZWAVE_HomeIdHash_t) {
   RAIL_ZWAVE_HOME_ID_HASH_ILLEGAL_3 = 0x55U, /**< An illegal HomeIdHash value. */
   RAIL_ZWAVE_HOME_ID_HASH_DONT_CARE = 0x55U, /**< Illegal HomeIdHash value that
                                                   suppresses checking the
-                                                  HomeIdHash field of Beam
+                                                  HomeIdHash field of beam
                                                   packets. */
   RAIL_ZWAVE_HOME_ID_HASH_DEFAULT
     = RAIL_ZWAVE_HOME_ID_HASH_DONT_CARE, /**< Default to don't care. */
@@ -337,8 +358,8 @@ RAIL_ENUM(RAIL_ZWAVE_RegionId_t) {
 #endif//DOXYGEN_SHOULD_SKIP_THIS
 
 /**
- * Invalid Beam TX power value returned when \ref RAIL_ZWAVE_GetLrBeamTxPower
- * is called after receiving a regular non long range beam.
+ * Invalid beam TX power value returned when \ref RAIL_ZWAVE_GetLrBeamTxPower
+ * is called after receiving a regular non-long-range beam.
  */
 #define RAIL_ZWAVE_LR_BEAM_TX_POWER_INVALID  (0xFFU)
 
@@ -357,7 +378,7 @@ typedef struct RAIL_ZWAVE_LrAckData {
 
 /**
  * @struct RAIL_ZWAVE_BeamRxConfig_t
- * @brief Configuration structure for Z-Wave Beam Detection.
+ * @brief Configuration structure for Z-Wave beam detection.
  * This structure should not be used without direct instruction
  * by Silicon Labs. Appropriate defaults for this are built into
  * the RAIL library.
@@ -509,12 +530,12 @@ RAIL_Status_t RAIL_ZWAVE_SetNodeId(RAIL_Handle_t railHandle,
  * Inform RAIL of the Z-Wave node's HomeId and its hash for receive filtering
  *
  * @param[in] railHandle A handle of RAIL instance.
- * @param[in] homeId A Z-Wave Home ID.
- * @param[in] homeIdHash The hash of the Home Id expected in Beam frames.
- *   If this is \ref RAIL_ZWAVE_HOME_ID_HASH_DONT_CARE, Beam frame detection
- *   will not check the HomeIdHash in a received Beam frame at all, and
- *   \ref RAIL_EVENT_ZWAVE_BEAM will trigger based solely on the nodeId
- *   in the Beam frame.
+ * @param[in] homeId A Z-Wave HomeId.
+ * @param[in] homeIdHash The hash of the HomeId expected in beam frames.
+ *   If this is \ref RAIL_ZWAVE_HOME_ID_HASH_DONT_CARE, beam frame detection
+ *   will not check the HomeIdHash in a received beam frame at all, and
+ *   \ref RAIL_EVENT_ZWAVE_BEAM will trigger based solely on the NodeId
+ *   in the beam frame.
  * @return Status code indicating success of the function call.
  *
  * @note Until this API is called, RAIL will assume the HomeId is an
@@ -526,8 +547,8 @@ RAIL_Status_t RAIL_ZWAVE_SetHomeId(RAIL_Handle_t railHandle,
                                    RAIL_ZWAVE_HomeIdHash_t homeIdHash);
 
 /**
- * Get the NodeId of the most recently seen Beam frame that targeted this
- * node.
+ * Get the NodeId of the most recently seen beam frame that triggered
+ * \ref RAIL_EVENT_ZWAVE_BEAM.
  *
  * @param[in] railHandle A handle of RAIL instance.
  * @param[out] pNodeId A pointer to \ref RAIL_ZWAVE_NodeId_t to populate.
@@ -541,8 +562,23 @@ RAIL_Status_t RAIL_ZWAVE_GetBeamNodeId(RAIL_Handle_t railHandle,
                                        RAIL_ZWAVE_NodeId_t *pNodeId);
 
 /**
+ * Get the HomeIdHash of the most recently seen beam frame that triggered
+ * \ref RAIL_EVENT_ZWAVE_BEAM.
+ *
+ * @param[in] railHandle A handle of RAIL instance.
+ * @param[out] pBeamHomeIdHash A pointer to \ref RAIL_ZWAVE_HomeIdHash_t to populate.
+ * @return Status code indicating success of the function call.
+ *
+ * @note This is best called while handling the \ref RAIL_EVENT_ZWAVE_BEAM
+ *   event; if multiple beams are received only the most recent beam's HomeIdHash
+ *   is provided.
+ */
+RAIL_Status_t RAIL_ZWAVE_GetBeamHomeIdHash(RAIL_Handle_t railHandle,
+                                           RAIL_ZWAVE_HomeIdHash_t *pBeamHomeIdHash);
+
+/**
  * Get the channel hopping index of the most recently seen beam frame that
- * targeted this node.
+ * triggered \ref RAIL_EVENT_ZWAVE_BEAM.
  *
  * @param[in] railHandle A handle of RAIL instance.
  * @param[out] pChannelIndex A pointer to a uint8_t to populate with
@@ -559,16 +595,17 @@ RAIL_Status_t RAIL_ZWAVE_GetBeamChannelIndex(RAIL_Handle_t railHandle,
                                              uint8_t *pChannelIndex);
 
 /**
- * Get the TX power used to transmit the long range beam frame.
+ * Get the TX power used by the transmitter of the most recently seen
+ * long range beam frame that triggered \ref RAIL_EVENT_ZWAVE_BEAM.
  *
  * @param[in] railHandle A handle of RAIL instance.
  * @param[out] pLrBeamTxPower An application provided pointer to a uint8_t to
  *   be populated with the TX power of the latest long range beam. This will
  *   be set to \ref RAIL_ZWAVE_LR_BEAM_TX_POWER_INVALID if this API is called
- *   after receiving a regular non long range beam.
+ *   after receiving a regular non-long-range beam.
  * @return Status code indicating success of the function call. This function
  *   will return \ref RAIL_STATUS_INVALID_STATE if called after receiving a
- *   regular non long range beam.
+ *   regular (non-long-range) beam.
  *
  * @note This is best called while handling the \ref RAIL_EVENT_ZWAVE_BEAM
  *   event; if multiple beams are received only the most recent long range
@@ -718,7 +755,7 @@ RAIL_TxPower_t RAIL_ZWAVE_GetTxLowPowerDbm(RAIL_Handle_t railHandle);
  *
  * @return status indicating whether or not the radio was able to configure
  * beam packet detection/reception. Reasons for failure include an un-idled
- * radio or a non Japan or Korea region configured before calling this function.
+ * radio or a non-Japan non-Korea region configured before calling this function.
  */
 RAIL_Status_t RAIL_ZWAVE_ReceiveBeam(RAIL_Handle_t railHandle,
                                      uint8_t *beamDetectIndex,

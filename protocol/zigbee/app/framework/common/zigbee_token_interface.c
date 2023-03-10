@@ -177,4 +177,29 @@ EmberStatus emberSetTokenData(uint32_t token,
   }
   return EMBER_ERR_FATAL;
 }
-#endif
+
+// Strong implementation to restore the EUI64 for zigbeed in case backup/restore
+void emberGetRestoredEui64(EmberEUI64 eui64)
+{
+  uint8_t blank[] = { 0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF };
+  uint8_t restoredEui64[] = { 0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF };
+  EmberTokenData tokenData;
+  tokenData.size = 0;
+  tokenData.data = (void *)restoredEui64;
+  EmberStatus status = emberGetTokenData(CREATOR_STACK_RESTORED_EUI64,
+                                         0,
+                                         &tokenData);
+  if (status == EMBER_SUCCESS
+      && tokenData.size == sizeof(EmberEUI64)) {
+    if (0 == MEMCOMPARE(blank,
+                        restoredEui64,
+                        sizeof(EmberEUI64))) {
+      // There is no restored EUI64, no action
+    } else {
+      // There is a restored EUI available, so use that.
+      MEMCOPY(eui64, restoredEui64, sizeof(EmberEUI64));
+    }
+  }
+}
+
+#endif // SL_CATALOG_ZIGBEE_STACK_UNIX_PRESENT

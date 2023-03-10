@@ -82,6 +82,32 @@ EmberEventControl emberAfPluginGreenPowerClientChannelEventControl;
 #endif
 #endif // UC_BUILD
 
+static void flushGpTxQueue(void)
+{
+  EmberGpAddress addr;
+  // Use 0xFFFFFFFF wildcard to clear out the gpTxQueue
+  addr.applicationId = EMBER_GP_APPLICATION_SOURCE_ID;
+  addr.id.sourceId = GP_GPD_SRC_ID_WILDCARD;
+  emberDGpSend(false, false, &addr, 0, 0, NULL, 0, 0);
+}
+
+static void sendChannelConfigToGpStub(void)
+{
+  uint8_t payload = (emberAfGetRadioChannel() - 11) // The channel is coded as : Operational Channel - 11
+                    | 0x10; //basic
+  EmberGpAddress addr;
+  addr.id.sourceId = GP_GPD_SRC_ID_FOR_CAHNNEL_CONFIG;
+  addr.applicationId = EMBER_GP_APPLICATION_SOURCE_ID;
+  emberDGpSend(true, //add
+               false,//no CCA
+               &addr,
+               EMBER_ZCL_GP_GPDF_CHANNEL_CONFIGURATION,
+               sizeof(payload), //length
+               &(payload),
+               0, //gpepHandle
+               0); //entryLifetimeMs
+}
+
 #ifdef UC_BUILD
 
 void emberAfPluginGreenPowerClientInitCallback(uint8_t init_level)
@@ -148,28 +174,24 @@ void emberAfPluginGreenPowerClientInitCallback(void)
 
 void emberAfGreenPowerClusterExitCommissioningMode(void)
 {
-  EmberGpAddress addr;
   commissioningState.inCommissioningMode = false;
   emberAfGreenPowerClusterPrintln("Exit comm for sink %2x", commissioningState.commissioningSink);
 
-  // Use 0xFFFFFFFF wildcard to clear out the gpTxQueue
-  addr.applicationId = EMBER_GP_APPLICATION_SOURCE_ID;
-  addr.id.sourceId = 0xFFFFFFFF;
-  emberDGpSend(false, false, &addr, 0, 0, NULL, 0, 0);
-  //  TODO:  remove sender information in stack.
+  flushGpTxQueue();
 }
 
 void emberAfPluginGreenPowerClientChannelEventHandler(SLXU_UC_EVENT)
 {
   if (commissioningState.channelStatus & GP_CLIENT_ON_TRANSMIT_CHANNEL_MASK) {
-    EmberGpAddress addr;
-    addr.id.sourceId = 0xFFFFFFFF;
-    addr.applicationId = 0;
+    if (commissioningState.channelStatus & GP_CLIENT_ADDITIONAL_CHANNEL_REQUEST_PENDING) {
+      commissioningState.channelStatus &= ~GP_CLIENT_ADDITIONAL_CHANNEL_REQUEST_PENDING;
+      sendChannelConfigToGpStub();
+      return;
+    }
     emberAfGreenPowerClusterPrintln("return to chan %d", emberAfGetRadioChannel());
     emberStopScan();
     commissioningState.channelStatus = 0;
-    //clear the gpTxQueue
-    emberDGpSend(false, false, &addr, 0, 0, NULL, 0, 0);
+    flushGpTxQueue();
   }
 
   slxu_zigbee_event_set_inactive(channelEvent);
@@ -540,20 +562,8 @@ bool emberAfGreenPowerClusterGpResponseCallback(EmberAfClusterCommand *cmd)
       if (cmd_data.tempMasterShortAddress == emberGetNodeId()) {
         if (!slxu_zigbee_event_is_active(channelEvent)
             || (commissioningState.channelStatus & GP_CLIENT_TRANSMIT_SAME_AS_OPERATIONAL_CHANNEL_MASK)) {
-          //Look at me, I'm the tempMaster now
-          //TODO set firstToForward
-
-          uint8_t payload = (emberAfGetRadioChannel() - 11) //channel ID
-                            | 0x10;//basic
-          emberDGpSend(true, //add
-                       false,//no CCA
-                       &addr,
-                       EMBER_ZCL_GP_GPDF_CHANNEL_CONFIGURATION,
-                       1, //length
-                       &(payload),
-                       0, //gpepHandle
-                       0); //entryLifetimeMs
-          commissioningState.channelStatus = GP_CLIENT_ON_TRANSMIT_CHANNEL_MASK;
+          sendChannelConfigToGpStub();
+          commissioningState.channelStatus |= GP_CLIENT_ON_TRANSMIT_CHANNEL_MASK;
           // based on figure 88 of GP proxy basic spec V1.0 page 191
           // the following condition seems neccessary
           if (emberAfGetRadioChannel() != (cmd_data.tempMasterTxChannel + 11) ) {
@@ -561,6 +571,9 @@ bool emberAfGreenPowerClusterGpResponseCallback(EmberAfClusterCommand *cmd)
             emberStartScan(EMBER_STACK_GP_CHANNEL_DELIVERY_SCAN, (1 << (cmd_data.tempMasterTxChannel + 11)), 0 /*duration*/);
             commissioningState.channelStatus &= ~GP_CLIENT_TRANSMIT_SAME_AS_OPERATIONAL_CHANNEL_MASK;
           } else {
+            if (commissioningState.channelStatus & GP_CLIENT_TRANSMIT_SAME_AS_OPERATIONAL_CHANNEL_MASK) {
+              commissioningState.channelStatus |= GP_CLIENT_ADDITIONAL_CHANNEL_REQUEST_PENDING;
+            }
             commissioningState.channelStatus |= GP_CLIENT_TRANSMIT_SAME_AS_OPERATIONAL_CHANNEL_MASK;
           }
           // Stared timeout to clear the Tx Queue if the packet is not delivered,

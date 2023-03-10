@@ -3,10 +3,14 @@ package: platform
 label: MSC Service for TrustZone Secure Key Library
 description: >-
   This component provides an interface for the TZ Non-Secure application to
-  access a subset of the MSC's functionality.
+  access a very limited subset of the MSC's functionality. The functionality
+  provided is mainly used by the CMU module for configuring flash access wait
+  states.
 category: Platform|Security|TrustZone
-quality: evaluation
+quality: production
 component_root_path: platform/security/sl_component/sl_trustzone/
+ui_hints:
+  visibility: never
 
 provides:
   - name: tz_service_msc
@@ -26,26 +30,12 @@ include:
       - path: sli_tz_service_msc.h
 
 source:
-  - path: src/sli_tz_service_msc_ns.c
-    condition: [trustzone_nonsecure]
   - path: src/sli_tz_service_msc_s.c
     condition: [trustzone_secure]
 
 template_contribution:
   - name: tz_service_config
     value: TZ_SERVICE_MSC_PRESENT
-    condition: [trustzone_nonsecure]
-
-  - name: tz_msc_sid_func_mapping
-    value:
-      sid:  SLI_TZ_SERVICE_MSC_WRITEWORD_SID
-      func: sli_tz_msc_write_word
-    condition: [trustzone_nonsecure]
-
-  - name: tz_msc_sid_func_mapping
-    value:
-      sid: SLI_TZ_SERVICE_MSC_WRITEWORDDMA_SID
-      func: sli_tz_msc_write_word_dma
     condition: [trustzone_nonsecure]
 
   - name: simple_func_mapping_no_args
@@ -86,16 +76,4 @@ template_contribution:
 
   - name: simple_func_mapping_with_args
     value: sli_tz_msc_set_misclockword
-    condition: [trustzone_nonsecure]
-
-  - name: simple_func_mapping_no_args
-    value: sli_tz_msc_init
-    condition: [trustzone_nonsecure]
-
-  - name: simple_func_mapping_no_args
-    value: sli_tz_msc_deinit
-    condition: [trustzone_nonsecure]
-
-  - name: simple_func_mapping_with_args
-    value: sli_tz_msc_erase_page
     condition: [trustzone_nonsecure]

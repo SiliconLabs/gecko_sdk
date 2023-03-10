@@ -27,7 +27,7 @@
 
 #include "stack/gp/gp-proxy-table.h"
 #include "green-power-client.h"
-
+#include "app/framework/plugin/green-power-common/green-power-common.h"
 #include "app/util/serial/sl_zigbee_command_interpreter.h"
 
 #ifndef EMBER_AF_GENERATE_CLI
@@ -205,4 +205,15 @@ void emberAfPluginGreenPowerClientSetKey(SL_CLI_COMMAND_ARG)
   emberCopyKeyArgument(1, &keyData);
   emGpProxyTableSetKey(index, (keyData.contents), 0 /*key type TODO*/);
 #endif
+}
+
+void emberAfPluginGreenPowerClientSpoofDevAnnce(SL_CLI_COMMAND_ARG)
+{
+  uint16_t nodeId = (uint16_t)emberUnsignedCommandArgument(0);
+  EmberEUI64 eui64;
+  emberCopyBigEndianEui64Argument(1, eui64);
+  uint8_t capabilities = (uint8_t)emberUnsignedCommandArgument(2);
+  emGpSpoofDeviceAnnce(nodeId,
+                       eui64,
+                       capabilities);
 }

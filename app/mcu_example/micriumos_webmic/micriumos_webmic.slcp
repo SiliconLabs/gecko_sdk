@@ -1,7 +1,7 @@
 project_name: micriumos_webmic
 package: mcu
 quality: production
-label: MCU Example - Micrium OS Webmic
+label: Platform - Micrium OS Webmic
 description: >
   Example usage of microphones and MicriumOS HTTP server
 

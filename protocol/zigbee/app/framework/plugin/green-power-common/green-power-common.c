@@ -33,6 +33,10 @@
 #include "green-power-common.h"
 
 extern bool emGpAddressMatch(const EmberGpAddress *a1, const EmberGpAddress *a2);
+extern void emSpoofDeviceAnnouncement(uint16_t shortId,
+                                      uint8_t *sourceEUI64,
+                                      EmberEUI64 deviceAnnounceEui,
+                                      uint8_t capabilities);
 
 uint16_t emCopyAdditionalInfoBlockStructureToArray(uint8_t commandId,
                                                    EmberGpTranslationTableAdditionalInfoBlockOptionRecordField *additionalInfoBlockIn,
@@ -842,4 +846,43 @@ bool emGpMakeAddr(EmberGpAddress *addr,
   }
   addr->applicationId = appId;
   return true;
+}
+
+void emGpSpoofDeviceAnnce(uint16_t nodeId,
+                          EmberEUI64 eui64,
+                          uint8_t capabilities)
+{
+#ifdef EZSP_HOST
+  EmberApsFrame apsFrameDevAnnce;
+  apsFrameDevAnnce.sourceEndpoint = EMBER_ZDO_ENDPOINT;
+  apsFrameDevAnnce.destinationEndpoint = EMBER_ZDO_ENDPOINT;
+  apsFrameDevAnnce.clusterId = END_DEVICE_ANNOUNCE;
+  apsFrameDevAnnce.profileId = EMBER_ZDO_PROFILE_ID;
+  apsFrameDevAnnce.options = EMBER_APS_OPTION_SOURCE_EUI64;
+  apsFrameDevAnnce.options |= EMBER_APS_OPTION_USE_ALIAS_SEQUENCE_NUMBER;
+  apsFrameDevAnnce.groupId = 0;
+  uint8_t messageContents[GP_DEVICE_ANNOUNCE_SPOOF_MSG_SIZE];
+  uint8_t apsSequence = 0;
+  // Form the APS message for Bcast
+  messageContents[0] = apsSequence; //Sequence
+  messageContents[1] = (uint8_t)nodeId; //NodeId
+  messageContents[2] = (uint8_t)(nodeId >> 8); //NodeId
+  MEMCOPY(&messageContents[3], eui64, EUI64_SIZE); //IEEE Address
+  messageContents[11] = capabilities; // Capability
+  ezspProxyBroadcast(nodeId,//EmberNodeId source,
+                     0xFFFD,//EmberNodeId destination,
+                     0,//uint8_t nwkSequence,
+                     &apsFrameDevAnnce,//EmberApsFrame *apsFrame,
+                     0xFF,//uint8_t radius,
+                     0xFF,// Tag Id
+                     sizeof(messageContents),//uint8_t messageLength,
+                     messageContents,//uint8_t *messageContents,
+                     &apsSequence);
+#else // !EZSP_HOST
+  // Use the stack private function to save code space in case of SoC.
+  emSpoofDeviceAnnouncement(nodeId,
+                            NULL,
+                            eui64,
+                            capabilities);
+#endif // EZSP_HOST
 }

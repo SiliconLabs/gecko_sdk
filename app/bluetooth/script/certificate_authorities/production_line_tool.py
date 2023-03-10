@@ -89,7 +89,7 @@ def main(level, validity, serial, ip, protocol):
     if 'xg22' in family.lower():
         ram_start = 0x20000000 # The CSR allocation is different for xG22 devices.
     else:
-        ram_start = 0x20010000
+        ram_start = 0x2000FC00
     
     # Paths
     if level == 0:

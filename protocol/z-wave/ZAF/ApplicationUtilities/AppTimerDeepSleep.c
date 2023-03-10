@@ -51,6 +51,8 @@
 
 // Using AppTimer singleton
 extern SAppTimer g_AppTimer;
+// Using state variable from AppTimer
+extern bool g_deepSleepTimersLoaded;
 
 /* This function will be called in the correct task context */
 void AppTimerDeepSleepCallbackWrapper(SSwTimer* pTimer)
@@ -183,6 +185,11 @@ void AppTimerDeepSleepPersistentSaveAll(void)
 {
   uint32_t reg = TIMER_VALUES_BEGIN_RETENTION_REGISTER;
 
+  // Don't touch the retention registers until they are loaded
+  if(!g_deepSleepTimersLoaded) {
+    return;
+  }
+
   uint32_t taskTickCount = xTaskGetTickCount();
   zpal_retention_register_write(TASKTICK_AT_SAVETIMERS_RETENTION_REGISTER, taskTickCount);
 
@@ -217,11 +224,14 @@ void AppTimerDeepSleepPersistentLoadAll(EResetReason_t resetReason)
   uint32_t elapsedMsFromSaveTimerValuesToSleep = 0;
   uint32_t elapsedMsFromTimerValueSave         = 0;
   uint32_t durationDiffMs = 0;
-  bool deepSleepTimersStarted   = false;
+
+  g_deepSleepTimersLoaded = true;
 
   /* Do nothing if we did not wake up from Deep Sleep */
   if (ERESETREASON_DEEP_SLEEP_EXT_INT != resetReason && ERESETREASON_DEEP_SLEEP_WUT != resetReason)
   {
+    // It is safe to persist the registers now
+    AppTimerDeepSleepPersistentSaveAll();
     return;
   }
 
@@ -327,7 +337,6 @@ void AppTimerDeepSleepPersistentLoadAll(EResetReason_t resetReason)
              * all (if needed) outside the loop */
             ESwTimerStatus timerStatus = TimerStart(pTimer, newTimerValue);
             ASSERT(ESWTIMER_STATUS_SUCCESS == timerStatus);
-            deepSleepTimersStarted = true;
           }
         }
       }
@@ -335,13 +344,8 @@ void AppTimerDeepSleepPersistentLoadAll(EResetReason_t resetReason)
     }
   }
 
-  if (true == deepSleepTimersStarted)
-  {
-    /* One or more Deep Sleep persistent timers were started. Update the retention
-     * registers.
-     */
-    AppTimerDeepSleepPersistentSaveAll();
-  }
+  // Always update the retention registers when done loading
+  AppTimerDeepSleepPersistentSaveAll();
 }
 
 uint32_t AppTimerDeepSleepGetFirstRetentionRegister(void)

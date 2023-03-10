@@ -34,6 +34,7 @@
 #include "sli_cli_input.h"
 #include "sl_cli_command.h"
 #include "sli_cli_io.h"
+#include "sl_string.h"
 #include <stdint.h>
 #include <stdbool.h>
 #include <stdio.h>
@@ -314,7 +315,7 @@ void sl_cli_input_autocomplete(sl_cli_handle_t handle)
 #if SL_CLI_NUM_HISTORY_BYTES
 void sli_cli_input_update_history(sl_cli_handle_t handle)
 {
-  while ((strlen(handle->input_buffer) + 1) > (sizeof(handle->history_buf) - strlen(handle->history_buf))) {
+  while ((sl_strnlen(handle->input_buffer, sizeof(handle->input_buffer)) + 1) > (sizeof(handle->history_buf) - sl_strnlen(handle->history_buf, sizeof(handle->history_buf)))) {
     // Remove the oldest history string(s) to make space for the last
     size_t history_cnt = history_get_count(handle);
     size_t ofs_begin, ofs_end;

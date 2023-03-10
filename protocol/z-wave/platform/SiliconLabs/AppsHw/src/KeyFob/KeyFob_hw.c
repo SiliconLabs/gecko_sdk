@@ -1,7 +1,7 @@
 /**
  * @file
  * Platform abstraction for KeyFob application
- * 
+ *
  * @copyright 2021 Silicon Laboratories Inc.
  */
 #include <KeyFob_hw.h>
@@ -46,7 +46,7 @@ static void button_handler(BUTTON_EVENT event, bool is_called_from_isr)
 
   if (BTN_EVENT_LONG_PRESS(BUTTON_NETWORK_ADD_REMOVE) == event)
   {
-    app_event = EVENT_APP_BUTTON_RESET;
+    app_event = EVENT_SYSTEM_RESET;
   }
   if (BTN_EVENT_HOLD(BUTTON_NETWORK_ADD_REMOVE) == event)
   {
@@ -157,7 +157,7 @@ void KeyFob_hw_init(EResetReason_t reset_reason)
   }
 }
 
-uint8_t 
+uint8_t
 CC_Battery_BatteryGet_handler(uint8_t endpoint)
 {
   uint32_t VBattery;

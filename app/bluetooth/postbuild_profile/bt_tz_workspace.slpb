@@ -1,0 +1,20 @@
+parameters: []
+constants:
+  - name: workspace_name
+    value: bt_soc_trustzone_workspace
+steps:
+  - task: convert
+    input:
+      - "{{trustzone_secure_binary}}"
+      - "{{trustzone_nonsecure_binary}}"
+    output: artifact/{{workspace_name}}-app-only.s37
+  - task: convert
+    input:
+      - "{{bootloader_secure_app}}"
+      - "{{bootloader_nonsecure_app}}"
+      - "{{trustzone_secure_binary}}"
+      - "{{trustzone_nonsecure_binary}}"
+    output: artifact/{{workspace_name}}-full.s37
+  - task: create_gbl
+    app: "artifact/{{workspace_name}}-app-only.s37"
+    output: artifact/{{workspace_name}}-app-only.gbl

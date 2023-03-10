@@ -194,6 +194,7 @@ typedef struct {
 typedef struct {
   uint32_t PPUSATD0;
   uint32_t PPUSATD1;
+  uint32_t BMPUSATD0;
 #if defined(SMU_NS_CFGNS_BASE)
   uint32_t PPUPATD0;
   uint32_t PPUPATD1;

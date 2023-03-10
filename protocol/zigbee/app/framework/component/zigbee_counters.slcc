@@ -41,6 +41,12 @@ template_contribution:
       function_name: emAfPluginCountersCounterCallback
     unless:
       - zigbee_ezsp
+  - name: zigbee_stack_callback
+    value:
+      callback_type: counter_rollover
+      function_name: emAfCounterRolloverCallback
+    condition:
+      - zigbee_ezsp
   - name: zigbee_af_callback
     value:
       callback_type: local_data_init

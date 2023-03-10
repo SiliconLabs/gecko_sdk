@@ -40,6 +40,7 @@ bool emberAfReadAttributesResponseCallback(EmberAfClusterId clusterId,
   // variable-length data.
   while (bufIndex + 3 <= bufLen) {
     EmberAfAttributeId attributeId;
+    (void) attributeId;
     EmberAfStatus status;
     attributeId = (EmberAfAttributeId)emberAfGetInt16u(buffer,
                                                        bufIndex,
@@ -341,10 +342,15 @@ bool emberAfDiscoverAttributesResponseCallback(EmberAfClusterId clusterId,
 
   // Each record in the response has a two-byte attribute id and a one-byte
   // type.
+  // NOTE if printing is not enabled then this loop doesn't do anything
   while (bufIndex + 3 <= bufLen) {
     EmberAfAttributeId attributeId;
     uint8_t dataType;
     uint8_t accessControl;
+    // NOTE silence unused but set variable (when printing is not enabled)
+    (void) attributeId;
+    (void) dataType;
+    (void) accessControl;
     attributeId = (EmberAfAttributeId)emberAfGetInt16u(buffer,
                                                        bufIndex,
                                                        bufLen);

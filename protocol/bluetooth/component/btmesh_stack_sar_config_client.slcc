@@ -1,0 +1,19 @@
+id: "btmesh_stack_sar_config_client"
+label: "SAR Configuration Client Model"
+package: "Btmesh"
+description: "Provides Bluetooth mesh SAR Configuration Client model. 
+  This model is used to support the functionality of configuring the behavior of the lower transport layer of a node that supports the SAR Configuration Server model"
+category: "Bluetooth Mesh|Stack|Models|Core"
+quality: "evaluation"
+root_path: "protocol/bluetooth"
+
+requires:
+  - name: "btmesh_stack"
+  - name: "btmesh_core"
+provides:
+  - name: "btmesh_stack_sar_config_client"
+template_contribution:
+  - name: btmesh_bgapi_class
+    value:
+      class: "sar_config_client"
+    priority: 1

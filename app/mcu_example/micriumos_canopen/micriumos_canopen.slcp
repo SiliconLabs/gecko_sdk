@@ -1,7 +1,7 @@
 project_name: micriumos_canopen
 package: mcu
 quality: production
-label: MCU Example - Micrium OS CANopen
+label: Platform - Micrium OS CANopen
 description: >
   This example shows how to use the Micrium OS CANopen stack. It uses the
   EFM32GG11B starter kit's two CAN peripherals in external loopback mode. 

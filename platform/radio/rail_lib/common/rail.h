@@ -2637,6 +2637,25 @@ RAIL_Status_t RAIL_SetTxPowerDbm(RAIL_Handle_t railHandle,
 RAIL_TxPower_t RAIL_GetTxPowerDbm(RAIL_Handle_t railHandle);
 
 /**
+ * Get the TX PA power setting table and related values.
+ *
+ * @param[in] railHandle A RAIL instance handle.
+ * @param[in] mode PA mode for which to get the powersetting table
+ * @param[out] minPower A pointer to a \ref RAIL_TxPower_t
+ * @param[out] maxPower A pointer to a \ref RAIL_TxPower_t
+ * @param[out] step In deci-dBm increments. A pointer to a \ref RAIL_TxPowerLevel_t
+ * @return Power setting table start address. When NULL is returned all out params
+ *   above won't be set.
+ *
+ * The number of entries in the table can be calculated based on the minPower, maxPower,
+ * and step parameters. For example, for minPower = 115 (11.5 dBm), maxPower = 300 (30 dBm),
+ * and step = 1, the number of entries in table would be 186
+ */
+const RAIL_PaPowerSetting_t *RAIL_GetPowerSettingTable(RAIL_Handle_t railHandle, RAIL_TxPowerMode_t mode,
+                                                       RAIL_TxPower_t *minPower, RAIL_TxPower_t *maxPower,
+                                                       RAIL_TxPowerLevel_t *step);
+
+/**
  * Set the TX PA power setting used to configure the PA hardware for the PA output
  * power determined by \ref RAIL_SetTxPowerDbm().
  *
@@ -3500,7 +3519,7 @@ RAIL_Status_t RAIL_ScheduleRx(RAIL_Handle_t railHandle,
  * This function can be used in any RX mode. It does not free up any
  * internal resources. If used in RX \ref RAIL_DataMethod_t::FIFO_MODE, the
  * value in \ref RAIL_RxPacketInfo_t::packetBytes will only return the data
- * remaining in the FIFO. Any data read via earlier earlier calls to
+ * remaining in the FIFO. Any data read via earlier calls to
  * \ref RAIL_ReadRxFifo() is not included.
  *
  * @note When getting information about an arriving packet that is not yet complete,
@@ -5682,8 +5701,8 @@ RAIL_RadioStateEfr32_t RAIL_GetRadioStateAlt(RAIL_Handle_t railHandle);
  */
 
 /** Minimum power for CLPC usage in deci-dBm.  Below this power CLPC will not activate.
- * Recommend staying above 22 dBm for best performance. Signed unit, do not add U. */
-#define RAIL_CLPC_MINIMUM_POWER          200
+ * Recommend staying above 19 dBm for best performance. Signed unit, do not add U. */
+#define RAIL_CLPC_MINIMUM_POWER          180
 
 /**
  * Configure the attached EFF device.
@@ -5698,13 +5717,16 @@ RAIL_Status_t RAIL_ConfigEff(RAIL_Handle_t genericRailHandle,
                              const RAIL_EffConfig_t *config);
 
 /** Number of temperature values provided for the EFF thermal protection */
-#define RAIL_EFF_TEMP_MEASURE_COUNT       (8U)
+#define RAIL_EFF_TEMP_MEASURE_COUNT               (6U)
+/** Number of deprecated temperature values in EFF thermal protection */
+#define RAIL_EFF_TEMP_MEASURE_DEPRECATED_COUNT    (2U)
 /** Number of temperature values provided for HFXO metrics */
-#define RAIL_HFXO_TEMP_MEASURE_COUNT      (1U)
+#define RAIL_HFXO_TEMP_MEASURE_COUNT              (1U)
 
 /** Total number of temperature values provided by \ref RAIL_GetTemperature(). */
-#define RAIL_TEMP_MEASURE_COUNT  (RAIL_CHIP_TEMP_MEASURE_COUNT  \
-                                  + RAIL_EFF_TEMP_MEASURE_COUNT \
+#define RAIL_TEMP_MEASURE_COUNT  (RAIL_CHIP_TEMP_MEASURE_COUNT             \
+                                  + RAIL_EFF_TEMP_MEASURE_COUNT            \
+                                  + RAIL_EFF_TEMP_MEASURE_DEPRECATED_COUNT \
                                   + RAIL_HFXO_TEMP_MEASURE_COUNT)
 
 /**
@@ -5723,8 +5745,8 @@ RAIL_Status_t RAIL_ConfigEff(RAIL_Handle_t genericRailHandle,
  * tempBuffer[6] is the minimal EFF temperature value after Tx
  * tempBuffer[7] is the maximal EFF temperature value before Tx
  * tempBuffer[8] is the maximal EFF temperature value after Tx
- * tempBuffer[9] is the average EFF temperature value before Tx
- * tempBuffer[10] is the average EFF temperature value after Tx
+ * tempBuffer[9] is not used
+ * tempBuffer[10] is not used
  *
  * If \ref RAIL_SUPPORTS_HFXO_COMPENSATION
  * tempBuffer[11] is the HFXO temperature
@@ -5738,34 +5760,6 @@ RAIL_Status_t RAIL_ConfigEff(RAIL_Handle_t genericRailHandle,
 RAIL_Status_t RAIL_GetTemperature(RAIL_Handle_t railHandle,
                                   int16_t tempBuffer[RAIL_TEMP_MEASURE_COUNT],
                                   bool reset);
-
-/**
- * Set the FEM maximum power for continuous TX and the duty cycle for TX operations
- * from \ref RAIL_FemProtectionConfig_t.
- * Default continuous TX power is defined at 200 deci-dBm and can be set to a
- * maximum of 300 deci-dBm.
- * Default duty cycle is defined at 50 percent and can be set to a maximum of
- * 100 percent.
- *
- * @param[in] railHandle A RAIL instance handle.
- * @param[in] newFemConfig Pointer to the new limits to use for the FEM protection configuration
- * @return Status code indicating success of the function call.
- *
- * @note Setting the power for continuous TX to 0 will apply the default value. Setting
- * duty cycle to 0 will disable duty cycle protection. Passing a NULL for newFemConfig will reset
- * to defaults.
- * For an ambient temperature above 70 degrees Celsius, it is recommended to use the default configuration.
- */
-RAIL_Status_t RAIL_SetFemProtectionConfig(RAIL_Handle_t railHandle, const RAIL_FemProtectionConfig_t *newFemConfig);
-
-/**
- * Get the FEM protection configuration.
- *
- * @param[in] railHandle A RAIL instance handle.
- * @param[out] femConfig Current FEM protection configuration written to this pointer.
- * @return Status code indicating success of the function call.
- */
-RAIL_Status_t RAIL_GetFemProtectionConfig(RAIL_Handle_t railHandle, RAIL_FemProtectionConfig_t *femConfig);
 
 /** Number of bytes provided by \ref RAIL_GetSetEffControl(). */
 #define RAIL_EFF_CONTROL_SIZE (52U)
@@ -5856,13 +5850,13 @@ RAIL_Status_t RAIL_GetSetEffBypassDwellTimeMs(RAIL_Handle_t railHandle,
  * Fast Loop calibration values into new variables.
  *
  * @param[in] railHandle A RAIL instance handle
- * @param[in] calibrationIndex Which calibration entry in the array to update
+ * @param[in] modeSensorIndex The mode sensor to use for this operation.
  * @param[in,out] calibrationEntry The calibration entry to retrieve or update
  * @param[in] changeValues If true, use new values to update the CLPC fast loop calibration
  * @return Status code indicating success of the function call.
  */
 RAIL_Status_t RAIL_GetSetClpcFastLoopCal(RAIL_Handle_t railHandle,
-                                         RAIL_EffCalConfigEnum_t calibrationIndex,
+                                         RAIL_EffModeSensor_t modeSensorIndex,
                                          RAIL_EffCalConfig_t *calibrationEntry,
                                          bool changeValues);
 
@@ -5872,36 +5866,34 @@ RAIL_Status_t RAIL_GetSetClpcFastLoopCal(RAIL_Handle_t railHandle,
  * Fast Loop calibration equations into new variables.
  *
  * @param[in] railHandle A RAIL instance handle
- * @param[in] calibrationIndex Which calibration entry in the array to update
- * @param[in,out] newSlope1e1  A pointer to a uint16_t that will contain the CLPC Cal slope
+ * @param[in] modeSensorIndex The mode sensor to use for this operation.
+ * @param[in,out] newSlope1e1MvPerDdbm  A pointer to a uint16_t that will contain the CLPC Cal slope, in mV/ddBm * 10
  * @param[in,out] newoffset290Ddbm  A pointer to a uint16_t that will contain the CLPC Cal offset from 29 dB
  * @param[in] changeValues If true, use new values to update the CLPC fast loop calibration equations
  * @return Status code indicating success of the function call.
  */
 RAIL_Status_t RAIL_GetSetClpcFastLoopCalSlp(RAIL_Handle_t railHandle,
-                                            RAIL_EffCalConfigEnum_t calibrationIndex,
-                                            int16_t *newSlope1e1,
+                                            RAIL_EffModeSensor_t modeSensorIndex,
+                                            int16_t *newSlope1e1MvPerDdbm,
                                             int16_t *newoffset290Ddbm,
                                             bool changeValues);
 
 /**
  * If changeValues is true, update current CLPC Fast Loop Target and
- * Slope first for FSK and OFDM. If false, copy the current CLPC Fast
- * Loop values into newTarget and newSlope for FSK and OFDM.
+ * Slope. If false, copy the current CLPC Fast Loop values into
+ * newTarget and newSlope.
  *
  * @param[in] railHandle A RAIL instance handle
- * @param[in,out] newTargetFsk A pointer to a uint16_t that will contain the CLPC Fast Loop Target for FSK
- * @param[in,out] newSlopeFsk A pointer to a uint16_t that will contain the CLPC Fast Loop Slope for FSK
- * @param[in,out] newTargetOfdm A pointer to a uint16_t that will contain the CLPC Fast Loop Target for OFDM
- * @param[in,out] newSlopeOfdm A pointer to a uint16_t that will contain the CLPC Fast Loop Slope for OFDM
- * @param[in] changeValues If true, use newTarget and newGain to update the CLPC Fast Loop values
+ * @param[in] modeSensorIndex The mode sensor to use for this operation.
+ * @param[in,out] newTargetMv A pointer to a uint16_t that will contain the CLPC Fast Loop Target in mV
+ * @param[in,out] newSlopeMvPerPaLevel A pointer to a uint16_t that will contain the CLPC Fast Loop Slope in mV/(PA power level)
+ * @param[in] changeValues If true, use newTargetMv and newSlopeMvPerPaLevel to update the CLPC Fast Loop values
  * @return Status code indicating success of the function call.
  */
 RAIL_Status_t RAIL_GetSetClpcFastLoop(RAIL_Handle_t railHandle,
-                                      uint16_t *newTargetFsk,
-                                      uint16_t *newSlopeFsk,
-                                      uint16_t *newTargetOfdm,
-                                      uint16_t *newSlopeOfdm,
+                                      RAIL_EffModeSensor_t modeSensorIndex,
+                                      uint16_t *newTargetMv,
+                                      uint16_t *newSlopeMvPerPaLevel,
                                       bool changeValues);
 
 /**
@@ -5916,6 +5908,21 @@ RAIL_Status_t RAIL_GetSetClpcFastLoop(RAIL_Handle_t railHandle,
 RAIL_Status_t RAIL_GetSetClpcEnable(RAIL_Handle_t railHandle,
                                     uint8_t *newClpcEnable,
                                     bool changeClpcEnable);
+
+#ifndef DOXYGEN_SHOULD_SKIP_THIS
+/**
+ * Get or set the EFF CLPC control flags for internal developer control.
+ * This interface may change at any time.
+ *
+ * @param[in] railHandle A RAIL instance handle
+ * @param[in] flags Pointer to the location of a single uint8_t containing flag values
+ * @param[in] change If true, use flags to update current EFF CLPC flags
+ * @return RAIL_Status_t indicating success or failure of the function
+ */
+RAIL_Status_t RAIL_GetSetEffClpcFlags(RAIL_Handle_t railHandle,
+                                      uint8_t *flags,
+                                      bool change);
+#endif
 
 /**
  * Get and set the EFF temperature threshold.
@@ -5949,9 +5956,12 @@ RAIL_Status_t RAIL_GetSetEffTempThreshold(RAIL_Handle_t railHandle,
 /**
  * Enable or disable the thermal protection if \ref RAIL_SUPPORTS_THERMAL_PROTECTION
  * is defined and update the temperature threshold and cool down hysteresis preventing or
- * allowing transmissions. When the temperature threshold is exceeded,
- * any transmission is blocked until the temperature decreases by a precise number
- * of degrees specified by the cool down hysteresis parameter.
+ * allowing transmissions.
+ *
+ * When the temperature threshold minus a precise number of degrees
+ * specified by the cool down hysteresis parameter is exceeded,
+ * any future transmits are blocked until the temperature decreases below that limit.
+ * Besides, if the temperature threshold is exceeded, any active transmit is aborted.
  *
  * By default the threshold is set to \ref RAIL_CHIP_TEMP_THRESHOLD_MAX and
  * the cool down hysteresis is set to \ref RAIL_CHIP_TEMP_COOLDOWN_DEFAULT.

@@ -163,8 +163,10 @@ static void events_handler(sl_power_manager_em_t from,
   (void) from;
   // Enable next byte detect to wake from sleep
   if (to < SL_POWER_MANAGER_EM3){
-    {% for instance in iostream_eusart_instances %}  
-    context_{{ instance }}.context.set_next_byte_detect(sl_iostream_{{ instance }}_handle->context, true);
+    {% for instance in iostream_eusart_instances %}
+    if (sl_iostream_{{ instance }}_handle->context != NULL) {
+        context_{{ instance }}.context.set_next_byte_detect(sl_iostream_{{ instance }}_handle->context, true);
+    }
     {% endfor %}
   }
 }

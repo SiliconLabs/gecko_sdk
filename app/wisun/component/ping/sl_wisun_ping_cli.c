@@ -73,7 +73,7 @@ void app_ping(sl_cli_command_arg_t *arguments)
   if (sl_wisun_ping(&remote_addr,
                     SL_WISUN_PING_PACKET_COUNT,
                     SL_WISUN_PING_PACKET_SIZE,
-                    NULL, NULL) == SL_STATUS_FAIL) {
+                    NULL, NULL) != SL_STATUS_OK) {
     printf("[Failed: ping was not successful]\n");
   }
 

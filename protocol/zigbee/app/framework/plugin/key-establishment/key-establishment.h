@@ -19,6 +19,7 @@
 
 #ifdef UC_BUILD
 #include "zigbee_app_framework_callback.h"
+#include "zigbee_stack_callback_dispatcher.h"
 #endif  // UC_BUILD
 
 /**
@@ -80,17 +81,10 @@
 extern const uint8_t emAfKeyEstablishMessageToDataSize[];
 
 #ifdef UC_BUILD
-#ifdef EZSP_HOST
-  #define emAfPluginKeyEstablishmentGenerateCbkeKeysHandler          ezspGenerateCbkeKeysHandler
-  #define emAfPluginKeyEstablishmentCalculateSmacsHandler            ezspCalculateSmacsHandler
-  #define emAfPluginKeyEstablishmentGenerateCbkeKeysHandler283k1     ezspGenerateCbkeKeysHandler283k1
-  #define emAfPluginKeyEstablishmentCalculateSmacsHandler283k1       ezspCalculateSmacsHandler283k1
-#else // !EZSP_HOST
-  #define emAfPluginKeyEstablishmentGenerateCbkeKeysHandler          emberAfGenerateCbkeKeysCallback
-  #define emAfPluginKeyEstablishmentCalculateSmacsHandler            emberAfCalculateSmacsCallback
-  #define emAfPluginKeyEstablishmentGenerateCbkeKeysHandler283k1     emberAfGenerateCbkeKeysHandler283k1Callback
-  #define emAfPluginKeyEstablishmentCalculateSmacsHandler283k1       emberAfCalculateSmacsHandler283k1Callback
-#endif  // EZSP_HOST
+  #define emAfPluginKeyEstablishmentGenerateCbkeKeysHandler          emAfGenerateCbkeKeysCallback
+  #define emAfPluginKeyEstablishmentCalculateSmacsHandler            emAfCalculateSmacsCallback
+  #define emAfPluginKeyEstablishmentGenerateCbkeKeysHandler283k1     emAfGenerateCbkeKeysCallback283k1
+  #define emAfPluginKeyEstablishmentCalculateSmacsHandler283k1       emAfCalculateSmacsCallback283k1
 #else // !UC_BUILD
 #ifdef EZSP_HOST
   #define emAfPluginKeyEstablishmentGenerateCbkeKeysHandler          ezspGenerateCbkeKeysHandler

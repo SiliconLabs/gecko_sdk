@@ -396,11 +396,10 @@ static void xorKeyWithByte(const uint8_t key[ENCRYPTION_BLOCK_SIZE],
 //Code ported over from emberHmacAesHash; has Zigbee security manager
 //handle key loading instead of taking in key data as an argument.
 
-sl_status_t sl_zb_sec_man_hmac_aes_mmo(const uint8_t* input,
-                                       const uint8_t data_length,
-                                       uint8_t* output)
+void sl_zb_sec_man_hmac_aes_mmo(const uint8_t* input,
+                                const uint8_t data_length,
+                                uint8_t* output)
 {
-  sl_status_t status;
   //load key from other function calls first
   emGetKeyFromCore((uint8_t*) &zb_sec_man_context_key);
 
@@ -426,9 +425,6 @@ sl_status_t sl_zb_sec_man_hmac_aes_mmo(const uint8_t* input,
                           : output));
     MEMMOVE(output, context.result, ENCRYPTION_BLOCK_SIZE);
   }
-
-  status = SL_STATUS_OK;
-  return status;
 }
 
 #if defined(MBEDTLS_PSA_ACCEL_KEY_TYPE_AES) && defined(MBEDTLS_PSA_ACCEL_ALG_CCM) && defined(PSA_WANT_ALG_CCM) && defined(MBEDTLS_PSA_CRYPTO_DRIVERS)
