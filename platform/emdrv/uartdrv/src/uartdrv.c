@@ -2142,7 +2142,7 @@ Ecode_t UARTDRV_Abort(UARTDRV_Handle_t handle, UARTDRV_AbortType_t type)
           txBuffer->callback(handle,
                              ECODE_EMDRV_UARTDRV_ABORTED,
                              NULL,
-                             txBuffer->itemsRemaining);
+                             txBuffer->transferCount - txBuffer->itemsRemaining);
         }
       }
     }
@@ -2173,7 +2173,7 @@ Ecode_t UARTDRV_Abort(UARTDRV_Handle_t handle, UARTDRV_AbortType_t type)
           rxBuffer->callback(handle,
                              ECODE_EMDRV_UARTDRV_ABORTED,
                              NULL,
-                             rxBuffer->itemsRemaining);
+                             rxBuffer->transferCount - rxBuffer->itemsRemaining);
         }
       }
     }
