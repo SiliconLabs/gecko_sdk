@@ -55,6 +55,9 @@
     value: '"BRD4265B"'
   - name: SL_BOARD_REV
     value: '"A01"'
+  - name: HARDWARE_BOARD_SUPPORTS_RF_BAND_434
+  - name: HARDWARE_BOARD_SUPPORTS_1_RF_BAND
+  - name: HARDWARE_BOARD_DEFAULT_RF_BAND_434
 - tag:
   - board:pn:BRD4265
   - board:variant:B

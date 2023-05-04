@@ -60,7 +60,7 @@
 static sl_status_t usart_tx(void *context,
                             char c);
 
-static void usart_set_next_byte_detect(void *context, bool enable);
+static void usart_set_next_byte_detect(void *context);
 
 #if defined(SL_CATALOG_POWER_MANAGER_PRESENT) && !defined(SL_IOSTREAM_UART_FLUSH_TX_BUFFER)
 static void usart_tx_completed(void *context, bool enable);
@@ -211,7 +211,7 @@ sl_status_t sl_iostream_usart_init(sl_iostream_uart_t *iostream_uart,
  #endif
 
   // Enable RX interrupts
-  USART_IntEnable(config->usart, USART_IF_RXDATAV);
+  USART_IntEnable(usart_context->usart, USART_IF_RXDATAV);
 
   // Finally enable USART
   USART_Enable(config->usart, usartEnable);
@@ -331,15 +331,11 @@ static sl_status_t usart_tx(void *context,
 /***************************************************************************//**
  * Enable USART Rx Data Valid (RXDATAV) Interrupt
  ******************************************************************************/
-static void usart_set_next_byte_detect(void *context, bool enable)
+static void usart_set_next_byte_detect(void *context)
 {
   sl_iostream_usart_context_t *usart_context = (sl_iostream_usart_context_t *)context;
 
-  if (enable) {
-    USART_IntEnable(usart_context->usart, USART_IF_RXDATAV);
-  } else {
-    USART_IntDisable(usart_context->usart, USART_IF_RXDATAV);
-  }
+  USART_IntEnable(usart_context->usart, USART_IF_RXDATAV);
 }
 
 #if defined(SL_CATALOG_POWER_MANAGER_PRESENT) && !defined(SL_IOSTREAM_UART_FLUSH_TX_BUFFER)

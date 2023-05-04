@@ -347,6 +347,7 @@ void Instance::Finalize(void)
     IgnoreError(otIp6SetEnabled(this, false));
     IgnoreError(otLinkSetEnabled(this, false));
 
+    Get<KeyManager>().DeleteSecurityKeys();
     Get<Settings>().Deinit();
 #endif
 
@@ -370,6 +371,7 @@ exit:
 
 void Instance::FactoryReset(void)
 {
+    Get<KeyManager>().DeleteSecurityKeys();
     Get<Settings>().Wipe();
     otPlatReset(this);
 }
@@ -379,6 +381,7 @@ Error Instance::ErasePersistentInfo(void)
     Error error = kErrorNone;
 
     VerifyOrExit(Get<Mle::MleRouter>().IsDisabled(), error = kErrorInvalidState);
+    Get<KeyManager>().DeleteSecurityKeys();
     Get<Settings>().Wipe();
 
 exit:

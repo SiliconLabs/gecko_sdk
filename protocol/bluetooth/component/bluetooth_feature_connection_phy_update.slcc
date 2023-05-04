@@ -12,6 +12,7 @@ provides:
   - name: bluetooth_feature_connection_phy_update
 requires:
   - name: bluetooth_controller
+  - name: bluetooth_feature_connection
   - name: device_supports_bluetooth_connection_phy_update
 
 template_contribution:

@@ -39,6 +39,9 @@
     value: '"BRD2703A"'
   - name: SL_BOARD_REV
     value: '"A02"'
+  - name: HARDWARE_BOARD_SUPPORTS_RF_BAND_2400
+  - name: HARDWARE_BOARD_SUPPORTS_1_RF_BAND
+  - name: HARDWARE_BOARD_DEFAULT_RF_BAND_2400
 - tag:
   - board:pn:BRD2703
   - board:variant:A

@@ -76,7 +76,8 @@ EmberStatus emberSetSecurityKey(EmberKeyData *key)
   emAfPluginCmsisRtosAcquireCommandMutex();
   emAfPluginCmsisRtosSendBlockingCommand(EMBER_SET_SECURITY_KEY_IPC_COMMAND_ID,
                                          "b",
-                                         key, sizeof(EmberKeyData));
+                                         key,
+                                         EMBER_ENCRYPTION_KEY_SIZE);
 
   EmberStatus status;
   emAfPluginCmsisRtosFetchApiParams("u",
@@ -87,10 +88,11 @@ EmberStatus emberSetSecurityKey(EmberKeyData *key)
 static void setSecurityKeyCommandHandler(void)
 {
   EmberKeyData key;
-  uint8_t length;
+  uint8_t emberEncryptionKeySize = EMBER_ENCRYPTION_KEY_SIZE;
   emAfPluginCmsisRtosFetchApiParams("b",
                                     &key,
-                                    &length);
+                                    &emberEncryptionKeySize,
+                                    EMBER_ENCRYPTION_KEY_SIZE);
   EmberStatus status = emApiSetSecurityKey(&key);
   emAfPluginCmsisRtosSendResponse(EMBER_SET_SECURITY_KEY_IPC_COMMAND_ID,
                                   "u",
@@ -112,7 +114,8 @@ EmberStatus emberGetSecurityKey(EmberKeyData *key)
   emAfPluginCmsisRtosFetchApiParams("ub",
                                     &status,
                                     key->contents,
-                                    &Size);
+                                    &Size,
+                                    EMBER_ENCRYPTION_KEY_SIZE);
   emAfPluginCmsisRtosReleaseCommandMutex();
   return status;
 }
@@ -442,6 +445,7 @@ EmberStatus emberMacGetParentAddress(EmberMacAddress *parentAddress)
                                     &parentAddress->addr.shortAddress,
                                     parentAddress->addr.longAddress,
                                     &longAddressSize,
+                                    EUI64_SIZE,
                                     &parentAddress->mode);
   emAfPluginCmsisRtosReleaseCommandMutex();
   return status;
@@ -748,10 +752,12 @@ static void macMessageSendCommandHandler(void)
                                     &macFrame.srcAddress.addr.shortAddress,
                                     &macFrame.srcAddress.addr.longAddress,
                                     &eui64Size,
+                                    EUI64_SIZE,
                                     &macFrame.srcAddress.mode,
                                     &macFrame.dstAddress.addr.shortAddress,
                                     &macFrame.dstAddress.addr.longAddress,
                                     &eui64Size,
+                                    EUI64_SIZE,
                                     &macFrame.dstAddress.mode,
                                     &macFrame.srcPanId,
                                     &macFrame.dstPanId,
@@ -924,6 +930,7 @@ EmberStatus emberGetChildInfo(EmberMacAddress *address,
                                     &addressResp->addr.shortAddress,
                                     addressResp->addr.longAddress,
                                     &longAddressSize,
+                                    EUI64_SIZE,
                                     &addressResp->mode,
                                     flags);
   emAfPluginCmsisRtosReleaseCommandMutex();
@@ -983,7 +990,8 @@ EmberStatus emberMacAddShortToLongAddressMapping(EmberNodeId shortId,
   emAfPluginCmsisRtosSendBlockingCommand(EMBER_MAC_ADD_SHORT_TO_LONG_ADDRESS_MAPPING_IPC_COMMAND_ID,
                                          "vb",
                                          shortId,
-                                         longId, EUI64_SIZE);
+                                         longId,
+                                         EUI64_SIZE);
 
   EmberStatus status;
   emAfPluginCmsisRtosFetchApiParams("u",
@@ -994,12 +1002,13 @@ EmberStatus emberMacAddShortToLongAddressMapping(EmberNodeId shortId,
 static void macAddShortToLongAddressMappingCommandHandler(void)
 {
   EmberNodeId shortId;
-  uint8_t longIdLength;
   uint8_t longId[EUI64_SIZE];
+  uint8_t eui64Size = EUI64_SIZE;
   emAfPluginCmsisRtosFetchApiParams("vb",
                                     &shortId,
                                     &longId,
-                                    &longIdLength);
+                                    &eui64Size,
+                                    EUI64_SIZE);
   EmberStatus status = emApiMacAddShortToLongAddressMapping(shortId,
                                                             longId);
   emAfPluginCmsisRtosSendResponse(EMBER_MAC_ADD_SHORT_TO_LONG_ADDRESS_MAPPING_IPC_COMMAND_ID,

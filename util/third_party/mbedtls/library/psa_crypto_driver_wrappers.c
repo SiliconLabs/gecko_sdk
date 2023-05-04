@@ -3278,7 +3278,7 @@ psa_status_t psa_driver_wrapper_mac_compute(
 #if defined(CRYPTOACC_PRESENT) && defined(SEPUF_PRESENT) && \
     defined(MBEDTLS_PSA_CRYPTO_BUILTIN_KEYS)
         case PSA_KEY_LOCATION_SLI_CRYPTOACC_OPAQUE:
-            return ( sli_se_opaque_mac_compute(
+            return ( sli_cryptoacc_opaque_mac_compute(
                         attributes, key_buffer, key_buffer_size, alg,
                         input, input_length,
                         mac, mac_size, mac_length ) );

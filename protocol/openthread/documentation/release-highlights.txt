@@ -1,2 +1,2 @@
-Silicon Labs OpenThread SDK 2.2.2.0
-- Includes targeted quality improvements and bug fixes
+Silicon Labs OpenThread SDK 2.2.3.0
+- Targeted quality improvements and bug fixes

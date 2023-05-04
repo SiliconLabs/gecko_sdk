@@ -33,6 +33,8 @@
 
 #include "em_device.h"
 
+#define PSA_KEY_LOCATION_SLI_CRYPTOACC_OPAQUE  PSA_KEY_LOCATION_SL_CRYPTOACC_OPAQUE
+
 #if defined(CRYPTOACC_PRESENT) && defined(SEPUF_PRESENT)
 
 #include "sl_psa_values.h"

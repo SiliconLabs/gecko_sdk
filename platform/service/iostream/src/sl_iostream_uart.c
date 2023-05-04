@@ -59,6 +59,10 @@
 #include "em_core.h"
 #include "em_gpio.h"
 
+#if !defined(DMA_PRESENT) && !defined(LDMA_PRESENT)
+#error Missing (L)DMA peripheral
+#endif
+
 /*******************************************************************************
  *********************   LOCAL FUNCTION PROTOTYPES   ***************************
  ******************************************************************************/
@@ -126,7 +130,7 @@ sl_status_t sli_iostream_uart_context_init(sl_iostream_uart_t *uart,
                                            sl_iostream_uart_config_t *config,
                                            sl_status_t (*tx)(void *context, char c),
                                            void (*tx_completed)(void *context, bool enable),
-                                           void (*set_next_byte_detect)(void *context, bool enable),
+                                           void (*set_next_byte_detect)(void *context),
                                            sl_status_t (*deinit)(void *context),
                                            uint8_t rx_em_req,
                                            uint8_t tx_em_req)
@@ -531,7 +535,7 @@ static void scan_for_ctrl_char(sl_iostream_uart_context_t * uart_context)
     }
 
     // Decrement and wrap current byte ptr around the ring buffer
-    current_byte -= 1;
+    current_byte--;
     if (current_byte < uart_context->rx_buffer) {
       current_byte = uart_context->rx_buffer + (uart_context->rx_buffer_len - 1);
     }
@@ -692,11 +696,6 @@ static bool dma_irq_handler(unsigned int chan, unsigned int seq, void* user_para
   {
     // DMA is stopped, no need to pause before calling get_write_ptr()
     write_ptr = get_write_ptr(uart_context);
-
-    // Wrap the DMA write pointer around the rx_buffer
-    if (write_ptr == (uart_context->rx_buffer + uart_context->rx_buffer_len)) {
-      write_ptr = uart_context->rx_buffer;
-    }
   }
 
   // Compute available space
@@ -729,7 +728,7 @@ static bool dma_irq_handler(unsigned int chan, unsigned int seq, void* user_para
       sl_atomic_store(uart_context->remote_xon, false);
       uart_context->tx(uart_context, UARTXOFF);
       // Enable the RXDATAV IRQ to check if we receive a control character when buffer is full
-      uart_context->set_next_byte_detect(uart_context, true);
+      uart_context->set_next_byte_detect(uart_context);
     }
   }
   return false;
@@ -747,7 +746,6 @@ __STATIC_INLINE uint8_t* get_write_ptr(const sl_iostream_uart_context_t * uart_c
   #if defined(DMA_PRESENT)
   int remaining;
   Ecode_t ecode;
-
   ecode = DMADRV_TransferRemainingCount(uart_context->dma.channel, &remaining);
   EFM_ASSERT(ecode == ECODE_OK);
 
@@ -756,14 +754,16 @@ __STATIC_INLINE uint8_t* get_write_ptr(const sl_iostream_uart_context_t * uart_c
 
   #elif defined(LDMA_PRESENT)
   dst = (uint8_t *)LDMA->CH[uart_context->dma.channel].DST;
-
-  #else
-  #error Missing (L)DMA peripheral
   #endif
 
   // Check for buffer over/underflow
   EFM_ASSERT(dst <= (uart_context->rx_buffer + uart_context->rx_buffer_len)
              && dst >= uart_context->rx_buffer);
+
+  // Wrap dst around
+  if (dst == (uart_context->rx_buffer + uart_context->rx_buffer_len)) {
+    dst = uart_context->rx_buffer;
+  }
 
   return dst;
 }
@@ -777,7 +777,7 @@ static void update_ring_buffer(sl_iostream_uart_context_t * uart_context)
   bool dma_done, irq_pending;
   uint8_t *write_ptr;
 
-  // Made space in the buffer
+  // Made space in the buffer by reading
   uart_context->rx_buffer_full = false;
 
   // Pause the DMA to update
@@ -798,7 +798,7 @@ static void update_ring_buffer(sl_iostream_uart_context_t * uart_context)
     }
 
     // Enable RXDATAV IRQ to signal next incoming byte
-    uart_context->set_next_byte_detect(uart_context, true);
+    uart_context->set_next_byte_detect(uart_context);
 
     // Start new transfer for all rx_buffer
     ecode = DMADRV_PeripheralMemory(uart_context->dma.channel,
@@ -869,16 +869,16 @@ static size_t read_rx_buffer(sl_iostream_uart_context_t * uart_context,
     #endif
     return 0;
   }
+  CORE_DECLARE_IRQ_STATE;
 
   uint8_t *write_ptr;     // Pointer to the next byte to be written by the (L)DMA
-  Ecode_t ecode;
-  bool dma_done;          // Is the (L)DMA done
   size_t read_size = 0;     // Number of bytes processed from the Rx Buffer
   size_t ret_val = 0;     // Number of bytes written to the user buffer
 
   // Compute the read_size
   {
     #if defined(DMA_PRESENT)
+    Ecode_t ecode;
     ecode = DMADRV_PauseTransfer(uart_context->dma.channel);
     EFM_ASSERT(ecode == ECODE_OK);
     #endif // DMA_PRESENT
@@ -892,10 +892,7 @@ static size_t read_rx_buffer(sl_iostream_uart_context_t * uart_context,
 
     if (write_ptr == uart_context->rx_read_ptr) {
       // (L)DMA is wrapped over rx_read_ptr, make sure it is stopped
-      ecode = DMADRV_TransferDone(uart_context->dma.channel, &dma_done);
-      EFM_ASSERT(ecode == ECODE_OK);
-
-      EFM_ASSERT(dma_done);
+      EFM_ASSERT(uart_context->rx_buffer_full == true);
     }
 
     // (L)DMA ahead of read ptr, read data in between the (L)DMA and the read ptr
@@ -916,6 +913,8 @@ static size_t read_rx_buffer(sl_iostream_uart_context_t * uart_context,
 
   // Read data
   {
+    CORE_ENTER_ATOMIC();
+
     // Handle control character and copy data to the user buffer
     if (uart_context->sw_flow_control == true) {
       for (size_t bytes_read = 0; bytes_read < read_size; bytes_read++) {
@@ -955,14 +954,20 @@ static size_t read_rx_buffer(sl_iostream_uart_context_t * uart_context,
       // Increment rx read ptr
       uart_context->rx_read_ptr += read_size;
     }
+
+    // Wrap rx_read_ptr around
+    if (uart_context->rx_read_ptr == (uart_context->rx_buffer + uart_context->rx_buffer_len)) {
+      uart_context->rx_read_ptr = uart_context->rx_buffer;
+    }
+
+    // Sanity check
+    EFM_ASSERT(uart_context->rx_read_ptr >= uart_context->rx_buffer
+               && uart_context->rx_read_ptr < (uart_context->rx_buffer + uart_context->rx_buffer_len));
   }
 
   // Update the ring buffer after read
   update_ring_buffer(uart_context);
-
-  // Wrap rx_read_ptr around the rx_buffer
-  uart_context->rx_read_ptr = (uart_context->rx_read_ptr < (uart_context->rx_buffer + uart_context->rx_buffer_len))
-                              ? uart_context->rx_read_ptr : uart_context->rx_buffer;
+  CORE_EXIT_ATOMIC();
 
   return ret_val;
 }

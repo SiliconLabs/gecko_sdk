@@ -1,10 +1,4 @@
-Bluetooth Mesh SDK 4.2.0.0
-- Support for Mesh draft specification 1.1
-  - Mesh Protocol
-  - Mesh Binary Large Object Transfer Model (MBT)
-  - Mesh Device Firmware Update Model (DFU)
-- Reduced project flash consumption by optimizing Mesh stack code size
-- Support added for xGM240P PCB Modules and BG22/BGM220 Explorer Kits
-- Support added for GCC version 10.3-2021.10 and IAR version 9.20.4
+Bluetooth Mesh SDK 4.2.1.0
+- Targeted quality improvements and bugfixes
 
 

@@ -55,6 +55,9 @@
     value: '"BRD4270A"'
   - name: SL_BOARD_REV
     value: '"A03"'
+  - name: HARDWARE_BOARD_SUPPORTS_RF_BAND_915
+  - name: HARDWARE_BOARD_SUPPORTS_1_RF_BAND
+  - name: HARDWARE_BOARD_DEFAULT_RF_BAND_915
 - tag:
   - board:pn:BRD4270
   - board:variant:A

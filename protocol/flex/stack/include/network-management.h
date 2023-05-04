@@ -42,6 +42,10 @@
 /** @brief The maximum length in bytes of the application beacon payload.
  */
 #define EMBER_MAC_MAX_APP_BEACON_PAYLOAD_LENGTH     16
+#define EMBER_MAC_STACK_BEACON_PAYLOAD              "silabs-connect"
+/** @brief The length in bytes of the stack beacon payload.
+ */
+#define EMBER_MAC_STACK_BEACON_PAYLOAD_LENGTH       14
 
 /** @brief The maximum length in bytes of the beacon fields (superframe, GTS,
  *   pending address) as per 802.15.4 specs.

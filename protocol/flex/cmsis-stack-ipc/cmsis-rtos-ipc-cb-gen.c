@@ -321,7 +321,7 @@ static void incomingBeaconCommandHandler(uint8_t *callbackParams)
   uint8_t beaconPayloadLength;
   uint8_t eui64Size = EUI64_SIZE;
   static uint8_t beaconFields[EMBER_MAC_MAX_BEACON_FIELDS_LENGTH];
-  static uint8_t beaconPayload[EMBER_MAC_MAX_APP_BEACON_PAYLOAD_LENGTH];
+  static uint8_t beaconPayload[EMBER_MAC_STACK_BEACON_PAYLOAD_LENGTH + EMBER_MAC_MAX_APP_BEACON_PAYLOAD_LENGTH];
   emAfPluginCmsisRtosFetchCallbackParams(callbackParams,
                                          "vvbuuuubub",
                                          &panId,
@@ -339,7 +339,7 @@ static void incomingBeaconCommandHandler(uint8_t *callbackParams)
                                          &beaconPayloadLength,
                                          beaconPayload,
                                          &beaconPayloadLength,
-                                         EMBER_MAC_MAX_APP_BEACON_PAYLOAD_LENGTH);
+                                         EMBER_MAC_STACK_BEACON_PAYLOAD_LENGTH + EMBER_MAC_MAX_APP_BEACON_PAYLOAD_LENGTH);
 
   emberAfIncomingBeaconCallback(panId,
                                 &source,

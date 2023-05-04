@@ -39,3 +39,8 @@ size_t sl_bt_get_mbedtls_mpi_size()
 {
   return sizeof(mbedtls_mpi);
 }
+
+size_t sl_bt_get_mbedtls_sha1_size()
+{
+  return sizeof(mbedtls_sha1_context);
+}

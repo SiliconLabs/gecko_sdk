@@ -112,7 +112,7 @@ typedef struct {
  *****************************************************************************/
 
 /* Bit fields for DEVINFO INFO */
-#define _DEVINFO_INFO_RESETVALUE                                 0x05000000UL                             /**< Default value for DEVINFO_INFO              */
+#define _DEVINFO_INFO_RESETVALUE                                 0x13000000UL                             /**< Default value for DEVINFO_INFO              */
 #define _DEVINFO_INFO_MASK                                       0xFFFFFFFFUL                             /**< Mask for DEVINFO_INFO                       */
 #define _DEVINFO_INFO_CRC_SHIFT                                  0                                        /**< Shift value for DEVINFO_CRC                 */
 #define _DEVINFO_INFO_CRC_MASK                                   0xFFFFUL                                 /**< Bit mask for DEVINFO_CRC                    */
@@ -124,7 +124,7 @@ typedef struct {
 #define DEVINFO_INFO_PRODREV_DEFAULT                             (_DEVINFO_INFO_PRODREV_DEFAULT << 16)    /**< Shifted mode DEFAULT for DEVINFO_INFO       */
 #define _DEVINFO_INFO_DEVINFOREV_SHIFT                           24                                       /**< Shift value for DEVINFO_DEVINFOREV          */
 #define _DEVINFO_INFO_DEVINFOREV_MASK                            0xFF000000UL                             /**< Bit mask for DEVINFO_DEVINFOREV             */
-#define _DEVINFO_INFO_DEVINFOREV_DEFAULT                         0x00000005UL                             /**< Mode DEFAULT for DEVINFO_INFO               */
+#define _DEVINFO_INFO_DEVINFOREV_DEFAULT                         0x00000013UL                             /**< Mode DEFAULT for DEVINFO_INFO               */
 #define DEVINFO_INFO_DEVINFOREV_DEFAULT                          (_DEVINFO_INFO_DEVINFOREV_DEFAULT << 24) /**< Shifted mode DEFAULT for DEVINFO_INFO       */
 
 /* Bit fields for DEVINFO PART */

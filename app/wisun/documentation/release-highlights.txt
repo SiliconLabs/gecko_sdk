@@ -1,2 +1,2 @@
-Wi-SUN SDK 1.5.1.0
-- Targeted quality improvements and bug fixes
+Wi-SUN SDK 1.5.2.0
+-Targeted quality improvements and bug fixes

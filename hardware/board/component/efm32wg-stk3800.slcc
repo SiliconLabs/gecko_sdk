@@ -14,9 +14,9 @@
   - name: SL_KIT_NAME
     value: '"EFM32WG-STK3800"'
   - name: SL_KIT_REV
-    value: '"C01"'
+    value: '"D00"'
 - tag:
   - kit:opn:EFM32WG-STK3800
   - kit:pn:STK3800
   - kit:variant:A
-  - kit:revision:C01
+  - kit:revision:D00

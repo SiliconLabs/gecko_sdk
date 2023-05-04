@@ -19,6 +19,7 @@ provides:
   - name: iostream_transport
     allow_multiple: true
 requires:
+  - name: dmadrv
   - name: iostream_eusart_core
 template_contribution:
   - name: iostream_eusart_instances

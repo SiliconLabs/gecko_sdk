@@ -14,9 +14,9 @@
   - name: SL_KIT_NAME
     value: '"EFM32GG-STK3700"'
   - name: SL_KIT_REV
-    value: '"C01"'
+    value: '"D00"'
 - tag:
   - kit:opn:EFM32GG-STK3700
   - kit:pn:STK3700
   - kit:variant:A
-  - kit:revision:C01
+  - kit:revision:D00

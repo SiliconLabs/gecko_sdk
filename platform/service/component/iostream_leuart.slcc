@@ -25,6 +25,7 @@ provides:
   - name: iostream_transport
     allow_multiple: true
 requires:
+  - name: dmadrv
   - name: iostream_leuart_core
 template_contribution:
   - name: iostream_leuart_instances

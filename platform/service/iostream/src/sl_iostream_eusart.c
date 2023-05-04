@@ -81,7 +81,7 @@ sl_slist_node_t *eusart_stream_list = NULL;
 static sl_status_t eusart_tx(void *context,
                              char c);
 
-static void eusart_set_next_byte_detect(void *context, bool enable);
+static void eusart_set_next_byte_detect(void *context);
 
 #if defined(SL_CATALOG_POWER_MANAGER_PRESENT) && !defined(SL_IOSTREAM_UART_FLUSH_TX_BUFFER)
 static void eusart_tx_completed(void *context, bool enable);
@@ -269,7 +269,7 @@ sl_status_t sl_iostream_eusart_init(sl_iostream_uart_t *iostream_uart,
   }
 
   // Enable RX interrupts
-  EUSART_IntEnable(eusart_config->eusart, EUSART_IF_RXFL);
+  EUSART_IntEnable(eusart_context->eusart, EUSART_IF_RXFL);
 
   // Finally enable EUSART
   EUSART_Enable(eusart_config->eusart, eusartEnable);
@@ -392,23 +392,19 @@ static sl_status_t eusart_tx(void *context,
  * the current status of the RX FIFO.
  * Make sure the DMA is not running when calling this function.
  ******************************************************************************/
-static void eusart_set_next_byte_detect(void *context, bool enable)
+static void eusart_set_next_byte_detect(void *context)
 {
   sl_iostream_eusart_context_t *eusart_context = (sl_iostream_eusart_context_t *)context;
   CORE_DECLARE_IRQ_STATE;
   CORE_ENTER_CRITICAL();
-  if (enable) {
-    // Update the IF to reflect the STATUS register (IF is not updated automatically by hardware)
-    if (eusart_context->eusart->STATUS & EUSART_STATUS_RXFL) {
-      EUSART_IntSet(eusart_context->eusart, EUSART_IF_RXFL);
-    } else {
-      EUSART_IntClear(eusart_context->eusart, EUSART_IF_RXFL);
-    }
-    // Enable the IRQ handler
-    EUSART_IntEnable(eusart_context->eusart, EUSART_IF_RXFL);
+  // Update the IF to reflect the STATUS register (IF is not updated automatically by hardware)
+  if (eusart_context->eusart->STATUS & EUSART_STATUS_RXFL) {
+    EUSART_IntSet(eusart_context->eusart, EUSART_IF_RXFL);
   } else {
-    EUSART_IntDisable(eusart_context->eusart, EUSART_IF_RXFL);
+    EUSART_IntClear(eusart_context->eusart, EUSART_IF_RXFL);
   }
+  // Enable the IRQ handler
+  EUSART_IntEnable(eusart_context->eusart, EUSART_IF_RXFL);
   CORE_EXIT_CRITICAL();
 }
 

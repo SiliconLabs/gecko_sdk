@@ -154,7 +154,10 @@ void NcpCPC::SendToCPC(void)
     bufferLen = txFrameBuffer.OutFrameGetLength();
 
     txFrameBuffer.OutFrameRead(bufferLen, mCpcTxBuffer);
-    sl_cpc_write(&mUserEp, mCpcTxBuffer, bufferLen, 0, NULL);
+    if (sl_cpc_write(&mUserEp, mCpcTxBuffer, bufferLen, 0, NULL) != SL_STATUS_OK)
+    {
+        mIsWriting = false;
+    }
     IgnoreError(txFrameBuffer.OutFrameRemove());
 
 exit:

@@ -65,6 +65,11 @@
 #define TIME_64_TO_32_EPOCH_OFFSET_SEC          TIME_NTP_EPOCH_OFFSET_SEC
 #define TIME_UNIX_TO_NTP_MAX                    (0xFFFFFFFF - TIME_NTP_EPOCH_OFFSET_SEC)
 
+// Minimum count difference used when evaluating if a timer expired or not after an interrupt
+// by comparing the current count value and the expected expiration count value.
+// The difference should be null or of few ticks since the counter never stop.
+#define MIN_DIFF_BETWEEN_COUNT_AND_EXPIRATION  2
+
 /// @brief Time Format.
 SLEEPTIMER_ENUM(sl_sleeptimer_time_format_t) {
   TIME_FORMAT_UNIX = 0,           ///< Number of seconds since January 1, 1970, 00:00. Type is signed, so represented on 31 bit.
@@ -572,13 +577,28 @@ sl_status_t sl_sleeptimer_get_remaining_time_of_first_timer(uint16_t option_flag
  * Determines if next timer to expire has the option flag
  * "SL_SLEEPTIMER_POWER_MANAGER_EARLY_WAKEUP_TIMER_FLAG".
  *
- * This function is for internal use only.
+ * @note This function is for internal use only.
+ *
+ * @note A check to validate that the Power Manager Sleeptimer is expired on
+ *       top of being the next timer was added. This is because
+ *       this function is called when coming back from EM2 sleep to validate
+ *       that the system woke up because of this precise timer expiration.
+ *       Some race conditions, seen with FreeRTOS, could create invalid RTC
+ *       interrupt leading to believe that the power manager timer was expired
+ *       when it was not.
  *****************************************************************************/
 bool sli_sleeptimer_is_power_manager_timer_next_to_expire(void)
 {
   bool next_timer_is_power_manager;
 
   sl_atomic_load(next_timer_is_power_manager, next_timer_to_expire_is_power_manager);
+
+  // Make sure that the Power Manager Sleeptimer is actually expired in addition
+  // to being the next timer.
+  if ((next_timer_is_power_manager)
+      && ((sl_sleeptimer_get_tick_count() - timer_head->timeout_expected_tc) > MIN_DIFF_BETWEEN_COUNT_AND_EXPIRATION)) {
+    next_timer_is_power_manager = false;
+  }
 
   return next_timer_is_power_manager;
 }
@@ -1530,7 +1550,11 @@ static sl_status_t create_timer(sl_sleeptimer_timer_handle_t *handle,
   handle->timeout_periodic = timeout_periodic;
   handle->callback = callback;
   handle->option_flags = option_flags;
-  handle->timeout_expected_tc = sleeptimer_hal_get_counter() + timeout_periodic;
+  if (timeout_periodic == 0) {
+    handle->timeout_expected_tc = sleeptimer_hal_get_counter() + timeout_initial;
+  } else {
+    handle->timeout_expected_tc = sleeptimer_hal_get_counter() + timeout_periodic;
+  }
 
   if (timeout_initial == 0) {
     handle->delta = 0;

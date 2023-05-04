@@ -56,6 +56,11 @@
     value: '"BRD4204B"'
   - name: SL_BOARD_REV
     value: '"A00"'
+  - name: HARDWARE_BOARD_SUPPORTS_RF_BAND_868
+  - name: HARDWARE_BOARD_SUPPORTS_RF_BAND_914
+  - name: HARDWARE_BOARD_SUPPORTS_RF_BAND_924
+  - name: HARDWARE_BOARD_SUPPORTS_3_RF_BANDS
+  - name: HARDWARE_BOARD_DEFAULT_RF_BAND_868
 - tag:
   - board:pn:BRD4204
   - board:variant:B

@@ -586,6 +586,8 @@ public:
      */
     bool IsEnabled(void) const { return mEnabled; }
 
+    void DeleteMacKeys(void) { mMode2KeyMaterial.Clear(); }
+
 #if OPENTHREAD_CONFIG_MAC_CSL_RECEIVER_ENABLE
     /**
      * This method gets the CSL channel.

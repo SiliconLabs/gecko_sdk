@@ -57,6 +57,10 @@
     value: '"BRD4253A"'
   - name: SL_BOARD_REV
     value: '"A03"'
+  - name: HARDWARE_BOARD_SUPPORTS_RF_BAND_2400
+  - name: HARDWARE_BOARD_SUPPORTS_RF_BAND_915
+  - name: HARDWARE_BOARD_SUPPORTS_2_RF_BANDS
+  - name: HARDWARE_BOARD_DEFAULT_RF_BAND_915
 - tag:
   - board:pn:BRD4253
   - board:variant:A

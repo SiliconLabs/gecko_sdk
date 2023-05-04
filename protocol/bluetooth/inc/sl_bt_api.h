@@ -8190,7 +8190,9 @@ typedef enum
  * notified by @ref sl_bt_evt_sm_confirm_bonding. */
 #define SL_BT_SM_CONFIGURATION_BONDING_REQUEST_REQUIRED             0x8       
 
-/** Allow connections only from bonded devices. */
+/** Allow connections only from bonded devices. This option is ignored when the
+ * application includes the bluetooth_feature_external_bonding_database feature.
+ * */
 #define SL_BT_SM_CONFIGURATION_CONNECTIONS_FROM_BONDED_DEVICES_ONLY 0x10      
 
 /** Prefer authenticated pairing when both options are possible based on the
@@ -8403,7 +8405,8 @@ typedef struct sl_bt_evt_sm_confirm_bonding_s sl_bt_evt_sm_confirm_bonding_t;
  *     - <b>1:</b> Bonding requests need to be confirmed. Received bonding
  *       requests are notified by @ref sl_bt_evt_sm_confirm_bonding
  *
- *   Bit 4:
+ *   Bit 4: This option is ignored when the application includes the
+ *   bluetooth_feature_external_bonding_database feature.
  *     - <b>0:</b> Allow all connections
  *     - <b>1:</b> Allow connections only from bonded devices
  *

@@ -35,6 +35,7 @@
 #include "sl_bluetooth.h"
 #include "sl_simple_button_instances.h"
 #include "btl_errorcode.h"
+#include "btl_interface.h"
 #ifdef SL_COMPONENT_CATALOG_PRESENT
 #include "sl_component_catalog.h"
 #endif // SL_COMPONENT_CATALOG_PRESENT
@@ -155,6 +156,7 @@ void sl_bt_on_event(sl_bt_msg_t *evt)
     // This event indicates that a connection was closed.
     case sl_bt_evt_connection_closed_id:
       // Generate data for advertising
+      app_log_info("Connection closed." APP_LOG_NL);
       sc = sl_bt_legacy_advertiser_generate_data(advertising_set_handle,
                                                  sl_bt_advertiser_general_discoverable);
       app_assert_status(sc);
@@ -163,6 +165,7 @@ void sl_bt_on_event(sl_bt_msg_t *evt)
       sc = sl_bt_legacy_advertiser_start(advertising_set_handle,
                                          sl_bt_advertiser_connectable_scannable);
       app_assert_status(sc);
+      app_log_info("Start advertisement." APP_LOG_NL);
       break;
 
     case sl_bt_evt_connection_opened_id:
@@ -453,13 +456,32 @@ void sl_bt_app_ota_dfu_on_status_event(sl_bt_app_ota_dfu_status_evt_t* evt)
       slot_startaddr = evt->evt_info.btl_storage.storage_start_addr;
       slot_size = evt->evt_info.btl_storage.storage_size_bytes;
 
-      app_log_info("Gecko bootloader version: %lu.%lu ." APP_LOG_NL,
-                   (btl_version & 0xFF000000) >> 24,
-                   (btl_version & 0x00FF0000) >> 16);
-      app_log_info("Slot %d starts @ 0x%8.8lx, size %lu bytes ." APP_LOG_NL,
-                   SL_BT_APP_OTA_DFU_USED_SLOT,
-                   slot_startaddr,
-                   slot_size);
+      app_log_info("Checking bootloader type:" APP_LOG_NL);
+
+      switch (btl_type) {
+        case NO_BOOTLOADER:
+          app_log_error("Error: no bootloader detected!" APP_LOG_NL);
+          app_log_error("Application OTA will not work ");
+          app_log_error("without an OTA-capable bootloader!" APP_LOG_NL);
+          break;
+        case SL_BOOTLOADER:
+          app_log_info("Silicon Labs bootloader detected." APP_LOG_NL);
+          app_log_info("Version: v%lu.%lu." APP_LOG_NL,
+                       (btl_version & 0xFF000000) >> 24,
+                       (btl_version & 0x00FF0000) >> 16);
+          app_log_info("Slot %d starts @ 0x%8.8lx, size %lu bytes ." APP_LOG_NL,
+                       SL_BT_APP_OTA_DFU_USED_SLOT,
+                       slot_startaddr,
+                       slot_size);
+          break;
+        default:
+          app_log_error("Unknown bootloader! Raw ID: 0x%x." APP_LOG_NL,
+                        btl_type);
+          app_log_error("Application OTA function may not work!" APP_LOG_NL);
+          app_log_error("Please use a Silicon Labs Gecko bootloader,");
+          app_log_error("for Application OTA functionality!" APP_LOG_NL);
+          break;
+      }
       break;
 
     case SL_BT_APP_OTA_DFU_EVT_STATE_CHANGE_ID:

@@ -59,6 +59,11 @@
     value: '"BRD4197A"'
   - name: SL_BOARD_REV
     value: '"A00"'
+  - name: HARDWARE_BOARD_SUPPORTS_RF_BAND_2400
+  - name: HARDWARE_BOARD_SUPPORTS_RF_BAND_868
+  - name: HARDWARE_BOARD_SUPPORTS_RF_BAND_915
+  - name: HARDWARE_BOARD_SUPPORTS_3_RF_BANDS
+  - name: HARDWARE_BOARD_DEFAULT_RF_BAND_2400
 - tag:
   - board:pn:BRD4197
   - board:variant:A

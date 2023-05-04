@@ -13,7 +13,9 @@
   - name: hardware_board
   - name: hardware_board_stk
   - name: hardware_board_from_stk
+  - name: hardware_board_from_slwstk6050c
   - name: hardware_board_from_zgm230-dk2603a
+  - name: hardware_board_from_zwave-pk800b
   - name: hardware_board_has_si70xx
   - name: hardware_board_has_tempsensor
   - name: hardware_board_has_vcom

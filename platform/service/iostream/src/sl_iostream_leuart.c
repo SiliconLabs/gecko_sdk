@@ -59,7 +59,7 @@
 static sl_status_t leuart_tx(void *context,
                              char c);
 
-static void leuart_set_next_byte_detect(void *context, bool enable);
+static void leuart_set_next_byte_detect(void *context);
 
 #if defined(SL_CATALOG_POWER_MANAGER_PRESENT) && !defined(SL_IOSTREAM_UART_FLUSH_TX_BUFFER)
 static void leuart_tx_completed(void *context, bool enable);
@@ -263,15 +263,11 @@ static sl_status_t leuart_tx(void *context,
 /***************************************************************************//**
  * Enable LEUART Rx Data Valid (RXDATAV) Interrupt
  ******************************************************************************/
-static void leuart_set_next_byte_detect(void *context, bool enable)
+static void leuart_set_next_byte_detect(void *context)
 {
   sl_iostream_leuart_context_t *leuart_context = (sl_iostream_leuart_context_t *)context;
 
-  if (enable) {
-    LEUART_IntEnable(leuart_context->leuart, LEUART_IF_RXDATAV);
-  } else {
-    LEUART_IntDisable(leuart_context->leuart, LEUART_IF_RXDATAV);
-  }
+  LEUART_IntEnable(leuart_context->leuart, LEUART_IF_RXDATAV);
 }
 
 #if defined(SL_CATALOG_POWER_MANAGER_PRESENT) && !defined(SL_IOSTREAM_UART_FLUSH_TX_BUFFER)

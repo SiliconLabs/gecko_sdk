@@ -45,6 +45,9 @@
     value: '"BRD4183B"'
   - name: SL_BOARD_REV
     value: '"A00"'
+  - name: HARDWARE_BOARD_SUPPORTS_RF_BAND_2400
+  - name: HARDWARE_BOARD_SUPPORTS_1_RF_BAND
+  - name: HARDWARE_BOARD_DEFAULT_RF_BAND_2400
 - tag:
   - board:pn:BRD4183
   - board:variant:B

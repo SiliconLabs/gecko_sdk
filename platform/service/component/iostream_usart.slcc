@@ -25,6 +25,7 @@ provides:
   - name: iostream_transport
     allow_multiple: true
 requires:
+  - name: dmadrv
   - name: iostream_usart_core
   - name: device_has_usart
 template_contribution:

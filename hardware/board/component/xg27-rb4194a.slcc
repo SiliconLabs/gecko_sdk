@@ -1,0 +1,22 @@
+!!omap
+- id: xg27_rb4194a
+- label: XG27-RB4194A
+- package: platform
+- description: Kit BSP support for the EFR32xG27 2.4 GHz 8 dBm Radio Board.
+- category: Platform|Board|Kit|Radio Board
+- quality: production
+- requires:
+  - name: hardware_board_from_xg27-rb4194a
+- provides:
+  - name: hardware_kit
+  - name: hardware_kit_rb
+- define:
+  - name: SL_KIT_NAME
+    value: '"XG27-RB4194A"'
+  - name: SL_KIT_REV
+    value: '"A02"'
+- tag:
+  - kit:opn:XG27-RB4194A
+  - kit:pn:RB4194
+  - kit:variant:A
+  - kit:revision:A02

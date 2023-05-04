@@ -1,0 +1,22 @@
+!!omap
+- id: xg21_rb4196b
+- label: XG21-RB4196B
+- package: platform
+- description: Kit BSP support for the xG21 2.4 GHz 20 dBm Radio Board.
+- category: Platform|Board|Kit|Radio Board
+- quality: production
+- requires:
+  - name: hardware_board_from_xg21-rb4196b
+- provides:
+  - name: hardware_kit
+  - name: hardware_kit_rb
+- define:
+  - name: SL_KIT_NAME
+    value: '"XG21-RB4196B"'
+  - name: SL_KIT_REV
+    value: '"A00"'
+- tag:
+  - kit:opn:xG21-RB4196B
+  - kit:pn:RB4196
+  - kit:variant:B
+  - kit:revision:A00

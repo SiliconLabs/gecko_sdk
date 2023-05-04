@@ -57,6 +57,10 @@
     value: '"BRD4257B"'
   - name: SL_BOARD_REV
     value: '"A01"'
+  - name: HARDWARE_BOARD_SUPPORTS_RF_BAND_2400
+  - name: HARDWARE_BOARD_SUPPORTS_RF_BAND_868
+  - name: HARDWARE_BOARD_SUPPORTS_2_RF_BANDS
+  - name: HARDWARE_BOARD_DEFAULT_RF_BAND_868
 - tag:
   - board:pn:BRD4257
   - board:variant:B

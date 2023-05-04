@@ -1,2 +1,2 @@
-Zigbee EmberZNet SDK 7.2.2.0
+Zigbee EmberZNet SDK 7.2.3.0
 - Targeted quality improvements and bug fixes

@@ -548,6 +548,12 @@ public:
      */
     void MacFrameCounterUsed(uint32_t aMacFrameCounter);
 
+    /**
+     * This method deletes all the volatile mle and mac keys dtored in PSA ITS.
+     *
+     */
+    void DeleteSecurityKeys(void);
+
 private:
     static constexpr uint32_t kDefaultKeySwitchGuardTime = 624;
     static constexpr uint32_t kOneHourIntervalInMsec     = 3600u * 1000u;

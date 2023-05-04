@@ -693,15 +693,7 @@ __STATIC_INLINE void COEX_SetPriorityAndRequest(bool request, bool priority)
   // same port, all GPIOs can be set simultaneously.
   if (request) {
     if (priority) {
-#ifdef COEX_HAL_CONFIG_DP_PRS
-      //Setup PRS priority config before enabling request
-      COEX_HAL_SetPriority();
-#endif //COEX_HAL_CONFIG_DP_PRS
-      COEX_HAL_SetPwmRequest();
-      COEX_HAL_SetRequest();
-#ifndef COEX_HAL_CONFIG_DP_PRS
-      COEX_HAL_SetPriority();
-#endif //COEX_HAL_CONFIG_DP_PRS
+      COEX_HAL_SetPwmRequestAndRequestAndPriority();
     } else {
       COEX_HAL_SetPwmRequest();
       COEX_HAL_SetRequest();
@@ -709,9 +701,8 @@ __STATIC_INLINE void COEX_SetPriorityAndRequest(bool request, bool priority)
     }
   } else {
     if (priority) {
-      COEX_HAL_SetPwmRequest();
+      COEX_HAL_SetPriorityAndPwmRequest();
       COEX_HAL_ClearRequest();
-      COEX_HAL_SetPriority();
     } else {
       COEX_HAL_SetPwmRequest();
       COEX_HAL_ClearRequest();

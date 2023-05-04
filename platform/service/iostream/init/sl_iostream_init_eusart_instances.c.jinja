@@ -161,11 +161,11 @@ static void events_handler(sl_power_manager_em_t from,
                            sl_power_manager_em_t to)
 {
   (void) from;
-  // Enable next byte detect to wake from sleep
   if (to < SL_POWER_MANAGER_EM3){
+    // Only prepare for wakeup from EM2 or less, since EUSART doesn't run in EM3
     {% for instance in iostream_eusart_instances %}
-    if (sl_iostream_{{ instance }}_handle->context != NULL) {
-        context_{{ instance }}.context.set_next_byte_detect(sl_iostream_{{ instance }}_handle->context, true);
+    if (sl_iostream_uart_{{ instance }}_handle->stream.context != NULL) {
+      sl_iostream_uart_prepare_for_sleep(sl_iostream_uart_{{ instance }}_handle);
     }
     {% endfor %}
   }

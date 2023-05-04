@@ -57,6 +57,10 @@
     value: '"BRD4210A"'
   - name: SL_BOARD_REV
     value: '"A01"'
+  - name: HARDWARE_BOARD_SUPPORTS_RF_BAND_868
+  - name: HARDWARE_BOARD_SUPPORTS_RF_BAND_915
+  - name: HARDWARE_BOARD_SUPPORTS_2_RF_BANDS
+  - name: HARDWARE_BOARD_DEFAULT_RF_BAND_868
 - tag:
   - board:pn:BRD4210
   - board:variant:A

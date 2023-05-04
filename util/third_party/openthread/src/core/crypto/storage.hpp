@@ -193,6 +193,12 @@ inline bool HasKey(KeyRef aKeyRef)
     return otPlatCryptoHasKey(aKeyRef);
 }
 
+/**
+ * Delete all the persistent keys stored n PSA ITS.
+ *
+ */
+void DeletePersistentKeys(void);
+
 } // namespace Storage
 
 #endif // OPENTHREAD_CONFIG_PLATFORM_KEY_REFERENCES_ENABLE

@@ -636,7 +636,18 @@ void KeyManager::SetNetworkKeyRef(otNetworkKeyRef aKeyRef)
 exit:
     return;
 }
-
 #endif // OPENTHREAD_CONFIG_PLATFORM_KEY_REFERENCES_ENABLE
+
+void KeyManager::DeleteSecurityKeys(void)
+{
+    mMleKey.Clear();
+    mKek.Clear();
+    Get<Mac::SubMac>().DeleteMacKeys();
+    Get<Mac::Mac>().DeleteMacKeys();
+
+#if OPENTHREAD_CONFIG_PLATFORM_KEY_REFERENCES_ENABLE
+    Crypto::Storage::DeletePersistentKeys();
+#endif
+}
 
 } // namespace ot

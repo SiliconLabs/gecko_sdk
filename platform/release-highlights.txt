@@ -1,4 +1,4 @@
-Gecko Platform 4.2.2.0
-- Security
-  - Released software support for TrustZone, GA quality
-- Other targeted quality improvements and bug fixes
+Gecko Platform 4.2.3.0
+- CMSIS Device: Added support for EFR32xG21 Rev. C and Rev. D devices
+- Boards and External Devices: Additional boards supported
+- RAIL library: Targeted quality improvements and bug fixes

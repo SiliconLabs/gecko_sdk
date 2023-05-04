@@ -5,7 +5,7 @@
     <property key="demos.blurb" value="RAIL - SoC Range Test"/>
     <property key="core.partCompatibility" value=".*efr32zg23a010f512gm48.*"/>
     <property key="core.boardCompatibility" value="brd4204a"/>
-    <property key="demos.imageFile" value="asset://com.silabs.sdk.stack.super_4.2.2/app/flex/demos/rail_soc_range_test/rail_soc_range_test-brd4204a.s37"/>
+    <property key="demos.imageFile" value="asset://com.silabs.sdk.stack.super_4.2.3/app/flex/demos/rail_soc_range_test/rail_soc_range_test-brd4204a.s37"/>
     <property key="core.readmeFiles" value="documentation/example/rail/rail_soc_range_test/readme.md"/>
     <property key="filters" value="Device\ Type|SoC Project\ Difficulty|Advanced Wireless\ Technology|RAIL"/>
     <property key="core.quality" value="PRODUCTION"/>
@@ -15,7 +15,7 @@
     <property key="demos.blurb" value="RAIL - SoC Range Test"/>
     <property key="core.partCompatibility" value=".*efr32zg23a010f512gm48.*"/>
     <property key="core.boardCompatibility" value="brd4204b"/>
-    <property key="demos.imageFile" value="asset://com.silabs.sdk.stack.super_4.2.2/app/flex/demos/rail_soc_range_test/rail_soc_range_test-brd4204b.s37"/>
+    <property key="demos.imageFile" value="asset://com.silabs.sdk.stack.super_4.2.3/app/flex/demos/rail_soc_range_test/rail_soc_range_test-brd4204b.s37"/>
     <property key="core.readmeFiles" value="documentation/example/rail/rail_soc_range_test/readme.md"/>
     <property key="filters" value="Device\ Type|SoC Project\ Difficulty|Advanced Wireless\ Technology|RAIL"/>
     <property key="core.quality" value="PRODUCTION"/>
@@ -25,7 +25,7 @@
     <property key="demos.blurb" value="RAIL - SoC Range Test"/>
     <property key="core.partCompatibility" value=".*efr32zg23b010f512im48.*"/>
     <property key="core.boardCompatibility" value="brd4204c"/>
-    <property key="demos.imageFile" value="asset://com.silabs.sdk.stack.super_4.2.2/app/flex/demos/rail_soc_range_test/rail_soc_range_test-brd4204c.s37"/>
+    <property key="demos.imageFile" value="asset://com.silabs.sdk.stack.super_4.2.3/app/flex/demos/rail_soc_range_test/rail_soc_range_test-brd4204c.s37"/>
     <property key="core.readmeFiles" value="documentation/example/rail/rail_soc_range_test/readme.md"/>
     <property key="filters" value="Device\ Type|SoC Project\ Difficulty|Advanced Wireless\ Technology|RAIL"/>
     <property key="core.quality" value="PRODUCTION"/>
@@ -35,7 +35,7 @@
     <property key="demos.blurb" value="RAIL - SoC Range Test"/>
     <property key="core.partCompatibility" value=".*efr32zg23b010f512im48.*"/>
     <property key="core.boardCompatibility" value="brd4204d"/>
-    <property key="demos.imageFile" value="asset://com.silabs.sdk.stack.super_4.2.2/app/flex/demos/rail_soc_range_test/rail_soc_range_test-brd4204d.s37"/>
+    <property key="demos.imageFile" value="asset://com.silabs.sdk.stack.super_4.2.3/app/flex/demos/rail_soc_range_test/rail_soc_range_test-brd4204d.s37"/>
     <property key="core.readmeFiles" value="documentation/example/rail/rail_soc_range_test/readme.md"/>
     <property key="filters" value="Device\ Type|SoC Project\ Difficulty|Advanced Wireless\ Technology|RAIL"/>
     <property key="core.quality" value="PRODUCTION"/>
@@ -45,7 +45,7 @@
     <property key="demos.blurb" value="RAIL - SoC Range Test"/>
     <property key="core.partCompatibility" value=".*efr32zg23b020f512im48.*"/>
     <property key="core.boardCompatibility" value="brd4210a"/>
-    <property key="demos.imageFile" value="asset://com.silabs.sdk.stack.super_4.2.2/app/flex/demos/rail_soc_range_test/rail_soc_range_test-brd4210a.s37"/>
+    <property key="demos.imageFile" value="asset://com.silabs.sdk.stack.super_4.2.3/app/flex/demos/rail_soc_range_test/rail_soc_range_test-brd4210a.s37"/>
     <property key="core.readmeFiles" value="documentation/example/rail/rail_soc_range_test/readme.md"/>
     <property key="filters" value="Device\ Type|SoC Project\ Difficulty|Advanced Wireless\ Technology|RAIL"/>
     <property key="core.quality" value="PRODUCTION"/>
@@ -55,7 +55,7 @@
     <property key="demos.blurb" value="RAIL - SoC Range Test"/>
     <property key="core.partCompatibility" value=".*efr32fg23a010f512gm48.*"/>
     <property key="core.boardCompatibility" value="brd4263a"/>
-    <property key="demos.imageFile" value="asset://com.silabs.sdk.stack.super_4.2.2/app/flex/demos/rail_soc_range_test/rail_soc_range_test-brd4263a.s37"/>
+    <property key="demos.imageFile" value="asset://com.silabs.sdk.stack.super_4.2.3/app/flex/demos/rail_soc_range_test/rail_soc_range_test-brd4263a.s37"/>
     <property key="core.readmeFiles" value="documentation/example/rail/rail_soc_range_test/readme.md"/>
     <property key="filters" value="Device\ Type|SoC Project\ Difficulty|Advanced Wireless\ Technology|RAIL"/>
     <property key="core.quality" value="PRODUCTION"/>
@@ -65,7 +65,7 @@
     <property key="demos.blurb" value="RAIL - SoC Range Test"/>
     <property key="core.partCompatibility" value=".*efr32fg23a010f512gm48.*"/>
     <property key="core.boardCompatibility" value="brd4263b"/>
-    <property key="demos.imageFile" value="asset://com.silabs.sdk.stack.super_4.2.2/app/flex/demos/rail_soc_range_test/rail_soc_range_test-brd4263b.s37"/>
+    <property key="demos.imageFile" value="asset://com.silabs.sdk.stack.super_4.2.3/app/flex/demos/rail_soc_range_test/rail_soc_range_test-brd4263b.s37"/>
     <property key="core.readmeFiles" value="documentation/example/rail/rail_soc_range_test/readme.md"/>
     <property key="filters" value="Device\ Type|SoC Project\ Difficulty|Advanced Wireless\ Technology|RAIL"/>
     <property key="core.quality" value="PRODUCTION"/>
@@ -75,7 +75,7 @@
     <property key="demos.blurb" value="RAIL - SoC Range Test"/>
     <property key="core.partCompatibility" value=".*efr32fg23b010f512im48.*"/>
     <property key="core.boardCompatibility" value="brd4263c"/>
-    <property key="demos.imageFile" value="asset://com.silabs.sdk.stack.super_4.2.2/app/flex/demos/rail_soc_range_test/rail_soc_range_test-brd4263c.s37"/>
+    <property key="demos.imageFile" value="asset://com.silabs.sdk.stack.super_4.2.3/app/flex/demos/rail_soc_range_test/rail_soc_range_test-brd4263c.s37"/>
     <property key="core.readmeFiles" value="documentation/example/rail/rail_soc_range_test/readme.md"/>
     <property key="filters" value="Device\ Type|SoC Project\ Difficulty|Advanced Wireless\ Technology|RAIL"/>
     <property key="core.quality" value="PRODUCTION"/>
@@ -85,7 +85,7 @@
     <property key="demos.blurb" value="RAIL - SoC Range Test"/>
     <property key="core.partCompatibility" value=".*efr32fg23a020f512gm48.*"/>
     <property key="core.boardCompatibility" value="brd4264a"/>
-    <property key="demos.imageFile" value="asset://com.silabs.sdk.stack.super_4.2.2/app/flex/demos/rail_soc_range_test/rail_soc_range_test-brd4264a.s37"/>
+    <property key="demos.imageFile" value="asset://com.silabs.sdk.stack.super_4.2.3/app/flex/demos/rail_soc_range_test/rail_soc_range_test-brd4264a.s37"/>
     <property key="core.readmeFiles" value="documentation/example/rail/rail_soc_range_test/readme.md"/>
     <property key="filters" value="Device\ Type|SoC Project\ Difficulty|Advanced Wireless\ Technology|RAIL"/>
     <property key="core.quality" value="PRODUCTION"/>
@@ -95,7 +95,7 @@
     <property key="demos.blurb" value="RAIL - SoC Range Test"/>
     <property key="core.partCompatibility" value=".*efr32fg23a020f512gm48.*"/>
     <property key="core.boardCompatibility" value="brd4264b"/>
-    <property key="demos.imageFile" value="asset://com.silabs.sdk.stack.super_4.2.2/app/flex/demos/rail_soc_range_test/rail_soc_range_test-brd4264b.s37"/>
+    <property key="demos.imageFile" value="asset://com.silabs.sdk.stack.super_4.2.3/app/flex/demos/rail_soc_range_test/rail_soc_range_test-brd4264b.s37"/>
     <property key="core.readmeFiles" value="documentation/example/rail/rail_soc_range_test/readme.md"/>
     <property key="filters" value="Device\ Type|SoC Project\ Difficulty|Advanced Wireless\ Technology|RAIL"/>
     <property key="core.quality" value="PRODUCTION"/>
@@ -105,7 +105,7 @@
     <property key="demos.blurb" value="RAIL - SoC Range Test"/>
     <property key="core.partCompatibility" value=".*efr32fg23b020f512im48.*"/>
     <property key="core.boardCompatibility" value="brd4264c"/>
-    <property key="demos.imageFile" value="asset://com.silabs.sdk.stack.super_4.2.2/app/flex/demos/rail_soc_range_test/rail_soc_range_test-brd4264c.s37"/>
+    <property key="demos.imageFile" value="asset://com.silabs.sdk.stack.super_4.2.3/app/flex/demos/rail_soc_range_test/rail_soc_range_test-brd4264c.s37"/>
     <property key="core.readmeFiles" value="documentation/example/rail/rail_soc_range_test/readme.md"/>
     <property key="filters" value="Device\ Type|SoC Project\ Difficulty|Advanced Wireless\ Technology|RAIL"/>
     <property key="core.quality" value="PRODUCTION"/>
@@ -115,7 +115,7 @@
     <property key="demos.blurb" value="RAIL - SoC Range Test"/>
     <property key="core.partCompatibility" value=".*efr32fg23b010f512im48.*"/>
     <property key="core.boardCompatibility" value="brd2600a"/>
-    <property key="demos.imageFile" value="asset://com.silabs.sdk.stack.super_4.2.2/app/flex/demos/rail_soc_range_test_cli/rail_soc_range_test_cli-brd2600a.s37"/>
+    <property key="demos.imageFile" value="asset://com.silabs.sdk.stack.super_4.2.3/app/flex/demos/rail_soc_range_test_cli/rail_soc_range_test_cli-brd2600a.s37"/>
     <property key="core.readmeFiles" value="documentation/example/rail/rail_soc_range_test/readme.md"/>
     <property key="filters" value="Device\ Type|SoC Project\ Difficulty|Advanced Wireless\ Technology|RAIL"/>
     <property key="core.quality" value="PRODUCTION"/>
@@ -125,7 +125,7 @@
     <property key="demos.blurb" value="RAIL - SoC Range Test"/>
     <property key="core.partCompatibility" value=".*efr32mg24b110f1536gm48.*"/>
     <property key="core.boardCompatibility" value="brd2601a"/>
-    <property key="demos.imageFile" value="asset://com.silabs.sdk.stack.super_4.2.2/app/flex/demos/rail_soc_range_test_cli/rail_soc_range_test_cli-brd2601a.s37"/>
+    <property key="demos.imageFile" value="asset://com.silabs.sdk.stack.super_4.2.3/app/flex/demos/rail_soc_range_test_cli/rail_soc_range_test_cli-brd2601a.s37"/>
     <property key="core.readmeFiles" value="documentation/example/rail/rail_soc_range_test/readme.md"/>
     <property key="filters" value="Device\ Type|SoC Project\ Difficulty|Advanced Wireless\ Technology|RAIL"/>
     <property key="core.quality" value="PRODUCTION"/>
@@ -135,7 +135,7 @@
     <property key="demos.blurb" value="RAIL - SoC Range Test"/>
     <property key="core.partCompatibility" value=".*efr32mg24b310f1536im48.*"/>
     <property key="core.boardCompatibility" value="brd2601b"/>
-    <property key="demos.imageFile" value="asset://com.silabs.sdk.stack.super_4.2.2/app/flex/demos/rail_soc_range_test_cli/rail_soc_range_test_cli-brd2601b.s37"/>
+    <property key="demos.imageFile" value="asset://com.silabs.sdk.stack.super_4.2.3/app/flex/demos/rail_soc_range_test_cli/rail_soc_range_test_cli-brd2601b.s37"/>
     <property key="core.readmeFiles" value="documentation/example/rail/rail_soc_range_test/readme.md"/>
     <property key="filters" value="Device\ Type|SoC Project\ Difficulty|Advanced Wireless\ Technology|RAIL"/>
     <property key="core.quality" value="PRODUCTION"/>
@@ -145,7 +145,7 @@
     <property key="demos.blurb" value="RAIL - SoC Range Test"/>
     <property key="core.partCompatibility" value=".*efr32mg24b210f1536im48.*"/>
     <property key="core.boardCompatibility" value="brd2703a"/>
-    <property key="demos.imageFile" value="asset://com.silabs.sdk.stack.super_4.2.2/app/flex/demos/rail_soc_range_test_cli/rail_soc_range_test_cli-brd2703a.s37"/>
+    <property key="demos.imageFile" value="asset://com.silabs.sdk.stack.super_4.2.3/app/flex/demos/rail_soc_range_test_cli/rail_soc_range_test_cli-brd2703a.s37"/>
     <property key="core.readmeFiles" value="documentation/example/rail/rail_soc_range_test/readme.md"/>
     <property key="filters" value="Device\ Type|SoC Project\ Difficulty|Advanced Wireless\ Technology|RAIL"/>
     <property key="core.quality" value="PRODUCTION"/>
@@ -155,7 +155,7 @@
     <property key="demos.blurb" value="RAIL - SoC Range Test"/>
     <property key="core.partCompatibility" value=".*efr32bg22c224f512im40.*"/>
     <property key="core.boardCompatibility" value="brd4108a"/>
-    <property key="demos.imageFile" value="asset://com.silabs.sdk.stack.super_4.2.2/app/flex/demos/rail_soc_range_test_cli/rail_soc_range_test_cli-brd4108a.s37"/>
+    <property key="demos.imageFile" value="asset://com.silabs.sdk.stack.super_4.2.3/app/flex/demos/rail_soc_range_test_cli/rail_soc_range_test_cli-brd4108a.s37"/>
     <property key="core.readmeFiles" value="documentation/example/rail/rail_soc_range_test/readme.md"/>
     <property key="filters" value="Device\ Type|SoC Project\ Difficulty|Advanced Wireless\ Technology|RAIL"/>
     <property key="core.quality" value="PRODUCTION"/>
@@ -165,7 +165,7 @@
     <property key="demos.blurb" value="RAIL - SoC Range Test"/>
     <property key="core.partCompatibility" value=".*efr32bg24b410f1536ij42.*"/>
     <property key="core.boardCompatibility" value="brd4115a"/>
-    <property key="demos.imageFile" value="asset://com.silabs.sdk.stack.super_4.2.2/app/flex/demos/rail_soc_range_test_cli/rail_soc_range_test_cli-brd4115a.s37"/>
+    <property key="demos.imageFile" value="asset://com.silabs.sdk.stack.super_4.2.3/app/flex/demos/rail_soc_range_test_cli/rail_soc_range_test_cli-brd4115a.s37"/>
     <property key="core.readmeFiles" value="documentation/example/rail/rail_soc_range_test/readme.md"/>
     <property key="filters" value="Device\ Type|SoC Project\ Difficulty|Advanced Wireless\ Technology|RAIL"/>
     <property key="core.quality" value="PRODUCTION"/>
@@ -175,7 +175,7 @@
     <property key="demos.blurb" value="RAIL - SoC Range Test"/>
     <property key="core.partCompatibility" value=".*efr32mg12p332f1024gl125.*"/>
     <property key="core.boardCompatibility" value="brd4166a"/>
-    <property key="demos.imageFile" value="asset://com.silabs.sdk.stack.super_4.2.2/app/flex/demos/rail_soc_range_test_cli/rail_soc_range_test_cli-brd4166a.s37"/>
+    <property key="demos.imageFile" value="asset://com.silabs.sdk.stack.super_4.2.3/app/flex/demos/rail_soc_range_test_cli/rail_soc_range_test_cli-brd4166a.s37"/>
     <property key="core.readmeFiles" value="documentation/example/rail/rail_soc_range_test/readme.md"/>
     <property key="filters" value="Device\ Type|SoC Project\ Difficulty|Advanced Wireless\ Technology|RAIL"/>
     <property key="core.quality" value="PRODUCTION"/>
@@ -185,7 +185,7 @@
     <property key="demos.blurb" value="RAIL - SoC Range Test"/>
     <property key="core.partCompatibility" value=".*efr32mg12p332f1024gl125.*"/>
     <property key="core.boardCompatibility" value="brd4166c"/>
-    <property key="demos.imageFile" value="asset://com.silabs.sdk.stack.super_4.2.2/app/flex/demos/rail_soc_range_test_cli/rail_soc_range_test_cli-brd4166c.s37"/>
+    <property key="demos.imageFile" value="asset://com.silabs.sdk.stack.super_4.2.3/app/flex/demos/rail_soc_range_test_cli/rail_soc_range_test_cli-brd4166c.s37"/>
     <property key="core.readmeFiles" value="documentation/example/rail/rail_soc_range_test/readme.md"/>
     <property key="filters" value="Device\ Type|SoC Project\ Difficulty|Advanced Wireless\ Technology|RAIL"/>
     <property key="core.quality" value="PRODUCTION"/>
@@ -195,7 +195,7 @@
     <property key="demos.blurb" value="RAIL - SoC Range Test"/>
     <property key="core.partCompatibility" value=".*efr32mg22c224f512im32.*"/>
     <property key="core.boardCompatibility" value="brd4183a"/>
-    <property key="demos.imageFile" value="asset://com.silabs.sdk.stack.super_4.2.2/app/flex/demos/rail_soc_range_test_cli/rail_soc_range_test_cli-brd4183a.s37"/>
+    <property key="demos.imageFile" value="asset://com.silabs.sdk.stack.super_4.2.3/app/flex/demos/rail_soc_range_test_cli/rail_soc_range_test_cli-brd4183a.s37"/>
     <property key="core.readmeFiles" value="documentation/example/rail/rail_soc_range_test/readme.md"/>
     <property key="filters" value="Device\ Type|SoC Project\ Difficulty|Advanced Wireless\ Technology|RAIL"/>
     <property key="core.quality" value="PRODUCTION"/>
@@ -205,7 +205,7 @@
     <property key="demos.blurb" value="RAIL - SoC Range Test"/>
     <property key="core.partCompatibility" value=".*efr32mg22c224f512im32.*"/>
     <property key="core.boardCompatibility" value="brd4183c"/>
-    <property key="demos.imageFile" value="asset://com.silabs.sdk.stack.super_4.2.2/app/flex/demos/rail_soc_range_test_cli/rail_soc_range_test_cli-brd4183c.s37"/>
+    <property key="demos.imageFile" value="asset://com.silabs.sdk.stack.super_4.2.3/app/flex/demos/rail_soc_range_test_cli/rail_soc_range_test_cli-brd4183c.s37"/>
     <property key="core.readmeFiles" value="documentation/example/rail/rail_soc_range_test/readme.md"/>
     <property key="filters" value="Device\ Type|SoC Project\ Difficulty|Advanced Wireless\ Technology|RAIL"/>
     <property key="core.quality" value="PRODUCTION"/>
@@ -215,7 +215,7 @@
     <property key="demos.blurb" value="RAIL - SoC Range Test"/>
     <property key="core.partCompatibility" value=".*efr32bg22c224f512im40.*"/>
     <property key="core.boardCompatibility" value="brd4184a"/>
-    <property key="demos.imageFile" value="asset://com.silabs.sdk.stack.super_4.2.2/app/flex/demos/rail_soc_range_test_cli/rail_soc_range_test_cli-brd4184a.s37"/>
+    <property key="demos.imageFile" value="asset://com.silabs.sdk.stack.super_4.2.3/app/flex/demos/rail_soc_range_test_cli/rail_soc_range_test_cli-brd4184a.s37"/>
     <property key="core.readmeFiles" value="documentation/example/rail/rail_soc_range_test/readme.md"/>
     <property key="filters" value="Device\ Type|SoC Project\ Difficulty|Advanced Wireless\ Technology|RAIL"/>
     <property key="core.quality" value="PRODUCTION"/>
@@ -225,7 +225,7 @@
     <property key="demos.blurb" value="RAIL - SoC Range Test"/>
     <property key="core.partCompatibility" value=".*efr32bg22c224f512im40.*"/>
     <property key="core.boardCompatibility" value="brd4184b"/>
-    <property key="demos.imageFile" value="asset://com.silabs.sdk.stack.super_4.2.2/app/flex/demos/rail_soc_range_test_cli/rail_soc_range_test_cli-brd4184b.s37"/>
+    <property key="demos.imageFile" value="asset://com.silabs.sdk.stack.super_4.2.3/app/flex/demos/rail_soc_range_test_cli/rail_soc_range_test_cli-brd4184b.s37"/>
     <property key="core.readmeFiles" value="documentation/example/rail/rail_soc_range_test/readme.md"/>
     <property key="filters" value="Device\ Type|SoC Project\ Difficulty|Advanced Wireless\ Technology|RAIL"/>
     <property key="core.quality" value="PRODUCTION"/>
@@ -235,7 +235,7 @@
     <property key="demos.blurb" value="RAIL - SoC Range Test"/>
     <property key="core.partCompatibility" value=".*efr32bg22c224f512im40.*"/>
     <property key="core.boardCompatibility" value="brd4191a"/>
-    <property key="demos.imageFile" value="asset://com.silabs.sdk.stack.super_4.2.2/app/flex/demos/rail_soc_range_test_cli/rail_soc_range_test_cli-brd4191a.s37"/>
+    <property key="demos.imageFile" value="asset://com.silabs.sdk.stack.super_4.2.3/app/flex/demos/rail_soc_range_test_cli/rail_soc_range_test_cli-brd4191a.s37"/>
     <property key="core.readmeFiles" value="documentation/example/rail/rail_soc_range_test/readme.md"/>
     <property key="filters" value="Device\ Type|SoC Project\ Difficulty|Advanced Wireless\ Technology|RAIL"/>
     <property key="core.quality" value="PRODUCTION"/>
@@ -245,18 +245,18 @@
     <property key="demos.blurb" value="RAIL - SoC Switch"/>
     <property key="core.partCompatibility" value=".*efr32mg12p433f1024gl125.*"/>
     <property key="core.boardCompatibility" value="brd4164a"/>
-    <property key="demos.imageFile" value="asset://com.silabs.sdk.stack.super_4.2.2/app/flex/demos/rail_soc_switch/rail_soc_switch-brd4164a.s37"/>
+    <property key="demos.imageFile" value="asset://com.silabs.sdk.stack.super_4.2.3/app/flex/demos/rail_soc_switch/rail_soc_switch-brd4164a.s37"/>
     <property key="core.readmeFiles" value="documentation/example/rail/rail_soc_switch/readme.md"/>
     <property key="filters" value="Device\ Type|SoC Project\ Difficulty|Beginner Wireless\ Technology|RAIL"/>
     <property key="core.quality" value="PRODUCTION"/>
-    <property key="demos.bootloaderFile" value="asset://com.silabs.sdk.stack.super_4.2.2/platform/bootloader/demos/bootloader-storage-internal-single/bootloader-storage-internal-single-brd4164a-combined.s37"/>
+    <property key="demos.bootloaderFile" value="asset://com.silabs.sdk.stack.super_4.2.3/platform/bootloader/demos/bootloader-storage-internal-single/bootloader-storage-internal-single-brd4164a-combined.s37"/>
   </demo>
   <demo name="brd4180a.demo.rail_bt_dmp_soc_range_test_std" label="RAIL Bluetooth DMP - SoC Range Test BLE and IEEE802.15.4">
     <model:description>Range Test BLE and IEEE802.15.4 with Bluetooth connectivity. It runs on top of Micrium OS RTOS and multiprotocol RAIL. This application demonstrates over the air range of the Silicon Labs boards. 5 predefined PHYs can be used for this: BLE: 125kbps, BLE: 500kbps, BLE: 1Mbps, BLE: 2Mbps, IEEE80215.4: 250kbps. This sample app can act as a Transmitter and a Receiver. The role can be selected in the LCD menu. Flashing this app into two separate boards makes it possible to test the features and specification of the radio. The sample also provides an example how the RAIL API can be used. A menu is displayed in the LCD, which allows the user to see the most important information about the settings and also change some of them. The left button navigates in the menu and the right button selects or changes options. The bottom line always shows what the buttons do in the particular context. In Tx Mode, the user can send packets. Packet length defined by the PHY and the number of packets to transmit (from 500 up to continuous) can be set. Output power can be set in the LCD menu, in 0.5dBm steps (power setpoint), between -15..+20dBm. Actual minimum and maximum power may vary in different frequencies as well as the power that is actually set by RAIL. The LCD menu informs the user about the setpoint and the actual power. In the LCD menu, the Power item displays the setpoint first, then actual value. In Rx Mode, the radio listens on the given predefined PHY and inspects the packets received. Packet Error Rate, Bit Error Rate and RSSI of the packets is displayed to inform about the quality of the transmission. Radio related events can be logged on UART on demand. CLI can be used to set and get configuration of the app, and to start and stop it. To get started with CLI send 'help' with a terminal. Wireless Gecko mobile app can also be used to control this application over Bluetooth. Currently MicriumOS and FreeRTOS is supported by this sample app. NOTE: Due to the higher current consumption of the continuous radio usage (especially in Rx Mode), it is not recommended to power the boards from a coin cell. Instead, a USB power bank can be used if portability is needed.</model:description>
     <property key="demos.blurb" value="RAIL Bluetooth DMP - SoC Range Test BLE and IEEE802.15.4"/>
     <property key="core.partCompatibility" value=".*efr32mg21a020f1024im32.*"/>
     <property key="core.boardCompatibility" value="brd4180a"/>
-    <property key="demos.imageFile" value="asset://com.silabs.sdk.stack.super_4.2.2/app/flex/demos/rail_bt_dmp_soc_range_test_std/rail_bt_dmp_soc_range_test_std-brd4180a.s37"/>
+    <property key="demos.imageFile" value="asset://com.silabs.sdk.stack.super_4.2.3/app/flex/demos/rail_bt_dmp_soc_range_test_std/rail_bt_dmp_soc_range_test_std-brd4180a.s37"/>
     <property key="core.readmeFiles" value="documentation/example/rail/rail_soc_range_test/readme.md"/>
     <property key="filters" value="Capability|Multiprotocol Device\ Type|SoC Project\ Difficulty|Advanced Wireless\ Technology|Bluetooth Wireless\ Technology|RAIL"/>
     <property key="core.quality" value="PRODUCTION"/>
@@ -266,7 +266,7 @@
     <property key="demos.blurb" value="RAIL Bluetooth DMP - SoC Range Test BLE and IEEE802.15.4"/>
     <property key="core.partCompatibility" value=".*efr32mg21a010f1024im32.*"/>
     <property key="core.boardCompatibility" value="brd4181a"/>
-    <property key="demos.imageFile" value="asset://com.silabs.sdk.stack.super_4.2.2/app/flex/demos/rail_bt_dmp_soc_range_test_std/rail_bt_dmp_soc_range_test_std-brd4181a.s37"/>
+    <property key="demos.imageFile" value="asset://com.silabs.sdk.stack.super_4.2.3/app/flex/demos/rail_bt_dmp_soc_range_test_std/rail_bt_dmp_soc_range_test_std-brd4181a.s37"/>
     <property key="core.readmeFiles" value="documentation/example/rail/rail_soc_range_test/readme.md"/>
     <property key="filters" value="Capability|Multiprotocol Device\ Type|SoC Project\ Difficulty|Advanced Wireless\ Technology|Bluetooth Wireless\ Technology|RAIL"/>
     <property key="core.quality" value="PRODUCTION"/>
@@ -276,7 +276,7 @@
     <property key="demos.blurb" value="RAIL Bluetooth DMP - SoC Range Test BLE and IEEE802.15.4"/>
     <property key="core.partCompatibility" value=".*efr32mg24a010f1536gm48.*"/>
     <property key="core.boardCompatibility" value="brd4186a"/>
-    <property key="demos.imageFile" value="asset://com.silabs.sdk.stack.super_4.2.2/app/flex/demos/rail_bt_dmp_soc_range_test_std/rail_bt_dmp_soc_range_test_std-brd4186a.s37"/>
+    <property key="demos.imageFile" value="asset://com.silabs.sdk.stack.super_4.2.3/app/flex/demos/rail_bt_dmp_soc_range_test_std/rail_bt_dmp_soc_range_test_std-brd4186a.s37"/>
     <property key="core.readmeFiles" value="documentation/example/rail/rail_soc_range_test/readme.md"/>
     <property key="filters" value="Capability|Multiprotocol Device\ Type|SoC Project\ Difficulty|Advanced Wireless\ Technology|Bluetooth Wireless\ Technology|RAIL"/>
     <property key="core.quality" value="PRODUCTION"/>
@@ -286,7 +286,7 @@
     <property key="demos.blurb" value="RAIL Bluetooth DMP - SoC Range Test BLE and IEEE802.15.4"/>
     <property key="core.partCompatibility" value=".*efr32mg24b010f1536im48.*"/>
     <property key="core.boardCompatibility" value="brd4186b"/>
-    <property key="demos.imageFile" value="asset://com.silabs.sdk.stack.super_4.2.2/app/flex/demos/rail_bt_dmp_soc_range_test_std/rail_bt_dmp_soc_range_test_std-brd4186b.s37"/>
+    <property key="demos.imageFile" value="asset://com.silabs.sdk.stack.super_4.2.3/app/flex/demos/rail_bt_dmp_soc_range_test_std/rail_bt_dmp_soc_range_test_std-brd4186b.s37"/>
     <property key="core.readmeFiles" value="documentation/example/rail/rail_soc_range_test/readme.md"/>
     <property key="filters" value="Capability|Multiprotocol Device\ Type|SoC Project\ Difficulty|Advanced Wireless\ Technology|Bluetooth Wireless\ Technology|RAIL"/>
     <property key="core.quality" value="PRODUCTION"/>
@@ -296,7 +296,7 @@
     <property key="demos.blurb" value="RAIL Bluetooth DMP - SoC Range Test BLE and IEEE802.15.4"/>
     <property key="core.partCompatibility" value=".*efr32mg24b210f1536im48.*"/>
     <property key="core.boardCompatibility" value="brd4186c"/>
-    <property key="demos.imageFile" value="asset://com.silabs.sdk.stack.super_4.2.2/app/flex/demos/rail_bt_dmp_soc_range_test_std/rail_bt_dmp_soc_range_test_std-brd4186c.s37"/>
+    <property key="demos.imageFile" value="asset://com.silabs.sdk.stack.super_4.2.3/app/flex/demos/rail_bt_dmp_soc_range_test_std/rail_bt_dmp_soc_range_test_std-brd4186c.s37"/>
     <property key="core.readmeFiles" value="documentation/example/rail/rail_soc_range_test/readme.md"/>
     <property key="filters" value="Capability|Multiprotocol Device\ Type|SoC Project\ Difficulty|Advanced Wireless\ Technology|Bluetooth Wireless\ Technology|RAIL"/>
     <property key="core.quality" value="PRODUCTION"/>
@@ -306,7 +306,7 @@
     <property key="demos.blurb" value="RAIL Bluetooth DMP - SoC Range Test BLE and IEEE802.15.4"/>
     <property key="core.partCompatibility" value=".*efr32mg24a020f1536gm48.*"/>
     <property key="core.boardCompatibility" value="brd4187a"/>
-    <property key="demos.imageFile" value="asset://com.silabs.sdk.stack.super_4.2.2/app/flex/demos/rail_bt_dmp_soc_range_test_std/rail_bt_dmp_soc_range_test_std-brd4187a.s37"/>
+    <property key="demos.imageFile" value="asset://com.silabs.sdk.stack.super_4.2.3/app/flex/demos/rail_bt_dmp_soc_range_test_std/rail_bt_dmp_soc_range_test_std-brd4187a.s37"/>
     <property key="core.readmeFiles" value="documentation/example/rail/rail_soc_range_test/readme.md"/>
     <property key="filters" value="Capability|Multiprotocol Device\ Type|SoC Project\ Difficulty|Advanced Wireless\ Technology|Bluetooth Wireless\ Technology|RAIL"/>
     <property key="core.quality" value="PRODUCTION"/>
@@ -316,7 +316,7 @@
     <property key="demos.blurb" value="RAIL Bluetooth DMP - SoC Range Test BLE and IEEE802.15.4"/>
     <property key="core.partCompatibility" value=".*efr32mg24b020f1536im48.*"/>
     <property key="core.boardCompatibility" value="brd4187b"/>
-    <property key="demos.imageFile" value="asset://com.silabs.sdk.stack.super_4.2.2/app/flex/demos/rail_bt_dmp_soc_range_test_std/rail_bt_dmp_soc_range_test_std-brd4187b.s37"/>
+    <property key="demos.imageFile" value="asset://com.silabs.sdk.stack.super_4.2.3/app/flex/demos/rail_bt_dmp_soc_range_test_std/rail_bt_dmp_soc_range_test_std-brd4187b.s37"/>
     <property key="core.readmeFiles" value="documentation/example/rail/rail_soc_range_test/readme.md"/>
     <property key="filters" value="Capability|Multiprotocol Device\ Type|SoC Project\ Difficulty|Advanced Wireless\ Technology|Bluetooth Wireless\ Technology|RAIL"/>
     <property key="core.quality" value="PRODUCTION"/>
@@ -326,7 +326,7 @@
     <property key="demos.blurb" value="RAIL Bluetooth DMP - SoC Range Test BLE and IEEE802.15.4"/>
     <property key="core.partCompatibility" value=".*efr32mg24b220f1536im48.*"/>
     <property key="core.boardCompatibility" value="brd4187c"/>
-    <property key="demos.imageFile" value="asset://com.silabs.sdk.stack.super_4.2.2/app/flex/demos/rail_bt_dmp_soc_range_test_std/rail_bt_dmp_soc_range_test_std-brd4187c.s37"/>
+    <property key="demos.imageFile" value="asset://com.silabs.sdk.stack.super_4.2.3/app/flex/demos/rail_bt_dmp_soc_range_test_std/rail_bt_dmp_soc_range_test_std-brd4187c.s37"/>
     <property key="core.readmeFiles" value="documentation/example/rail/rail_soc_range_test/readme.md"/>
     <property key="filters" value="Capability|Multiprotocol Device\ Type|SoC Project\ Difficulty|Advanced Wireless\ Technology|Bluetooth Wireless\ Technology|RAIL"/>
     <property key="core.quality" value="PRODUCTION"/>
@@ -336,7 +336,7 @@
     <property key="demos.blurb" value="RAIL Bluetooth DMP - SoC Range Test BLE and IEEE802.15.4"/>
     <property key="core.partCompatibility" value=".*efr32mg24b020f1536im48.*"/>
     <property key="core.boardCompatibility" value="brd4188a"/>
-    <property key="demos.imageFile" value="asset://com.silabs.sdk.stack.super_4.2.2/app/flex/demos/rail_bt_dmp_soc_range_test_std/rail_bt_dmp_soc_range_test_std-brd4188a.s37"/>
+    <property key="demos.imageFile" value="asset://com.silabs.sdk.stack.super_4.2.3/app/flex/demos/rail_bt_dmp_soc_range_test_std/rail_bt_dmp_soc_range_test_std-brd4188a.s37"/>
     <property key="core.readmeFiles" value="documentation/example/rail/rail_soc_range_test/readme.md"/>
     <property key="filters" value="Capability|Multiprotocol Device\ Type|SoC Project\ Difficulty|Advanced Wireless\ Technology|Bluetooth Wireless\ Technology|RAIL"/>
     <property key="core.quality" value="PRODUCTION"/>
@@ -346,7 +346,7 @@
     <property key="demos.blurb" value="RAIL Bluetooth DMP - SoC Range Test BLE and IEEE802.15.4"/>
     <property key="core.partCompatibility" value=".*efr32mg24b110f1536gm48.*"/>
     <property key="core.boardCompatibility" value="brd2601a"/>
-    <property key="demos.imageFile" value="asset://com.silabs.sdk.stack.super_4.2.2/app/flex/demos/rail_bt_dmp_soc_range_test_std_cli/rail_bt_dmp_soc_range_test_std_cli-brd2601a.s37"/>
+    <property key="demos.imageFile" value="asset://com.silabs.sdk.stack.super_4.2.3/app/flex/demos/rail_bt_dmp_soc_range_test_std_cli/rail_bt_dmp_soc_range_test_std_cli-brd2601a.s37"/>
     <property key="core.readmeFiles" value="documentation/example/rail/rail_soc_range_test/readme.md"/>
     <property key="filters" value="Capability|Multiprotocol Device\ Type|SoC Project\ Difficulty|Advanced Wireless\ Technology|Bluetooth Wireless\ Technology|RAIL"/>
     <property key="core.quality" value="PRODUCTION"/>
@@ -356,7 +356,7 @@
     <property key="demos.blurb" value="RAIL Bluetooth DMP - SoC Range Test BLE and IEEE802.15.4"/>
     <property key="core.partCompatibility" value=".*efr32mg24b310f1536im48.*"/>
     <property key="core.boardCompatibility" value="brd2601b"/>
-    <property key="demos.imageFile" value="asset://com.silabs.sdk.stack.super_4.2.2/app/flex/demos/rail_bt_dmp_soc_range_test_std_cli/rail_bt_dmp_soc_range_test_std_cli-brd2601b.s37"/>
+    <property key="demos.imageFile" value="asset://com.silabs.sdk.stack.super_4.2.3/app/flex/demos/rail_bt_dmp_soc_range_test_std_cli/rail_bt_dmp_soc_range_test_std_cli-brd2601b.s37"/>
     <property key="core.readmeFiles" value="documentation/example/rail/rail_soc_range_test/readme.md"/>
     <property key="filters" value="Capability|Multiprotocol Device\ Type|SoC Project\ Difficulty|Advanced Wireless\ Technology|Bluetooth Wireless\ Technology|RAIL"/>
     <property key="core.quality" value="PRODUCTION"/>
@@ -366,7 +366,7 @@
     <property key="demos.blurb" value="RAIL Bluetooth DMP - SoC Range Test BLE and IEEE802.15.4"/>
     <property key="core.partCompatibility" value=".*efr32mg24b210f1536im48.*"/>
     <property key="core.boardCompatibility" value="brd2703a"/>
-    <property key="demos.imageFile" value="asset://com.silabs.sdk.stack.super_4.2.2/app/flex/demos/rail_bt_dmp_soc_range_test_std_cli/rail_bt_dmp_soc_range_test_std_cli-brd2703a.s37"/>
+    <property key="demos.imageFile" value="asset://com.silabs.sdk.stack.super_4.2.3/app/flex/demos/rail_bt_dmp_soc_range_test_std_cli/rail_bt_dmp_soc_range_test_std_cli-brd2703a.s37"/>
     <property key="core.readmeFiles" value="documentation/example/rail/rail_soc_range_test/readme.md"/>
     <property key="filters" value="Capability|Multiprotocol Device\ Type|SoC Project\ Difficulty|Advanced Wireless\ Technology|Bluetooth Wireless\ Technology|RAIL"/>
     <property key="core.quality" value="PRODUCTION"/>
@@ -376,7 +376,7 @@
     <property key="demos.blurb" value="RAIL Bluetooth DMP - SoC Range Test BLE and IEEE802.15.4"/>
     <property key="core.partCompatibility" value=".*efr32bg24b410f1536ij42.*"/>
     <property key="core.boardCompatibility" value="brd4115a"/>
-    <property key="demos.imageFile" value="asset://com.silabs.sdk.stack.super_4.2.2/app/flex/demos/rail_bt_dmp_soc_range_test_std_cli/rail_bt_dmp_soc_range_test_std_cli-brd4115a.s37"/>
+    <property key="demos.imageFile" value="asset://com.silabs.sdk.stack.super_4.2.3/app/flex/demos/rail_bt_dmp_soc_range_test_std_cli/rail_bt_dmp_soc_range_test_std_cli-brd4115a.s37"/>
     <property key="core.readmeFiles" value="documentation/example/rail/rail_soc_range_test/readme.md"/>
     <property key="filters" value="Capability|Multiprotocol Device\ Type|SoC Project\ Difficulty|Advanced Wireless\ Technology|Bluetooth Wireless\ Technology|RAIL"/>
     <property key="core.quality" value="PRODUCTION"/>
@@ -386,7 +386,7 @@
     <property key="demos.blurb" value="RAIL Bluetooth DMP - SoC Range Test BLE and IEEE802.15.4"/>
     <property key="core.partCompatibility" value=".*efr32mg12p332f1024gl125.*"/>
     <property key="core.boardCompatibility" value="brd4166a"/>
-    <property key="demos.imageFile" value="asset://com.silabs.sdk.stack.super_4.2.2/app/flex/demos/rail_bt_dmp_soc_range_test_std_cli/rail_bt_dmp_soc_range_test_std_cli-brd4166a.s37"/>
+    <property key="demos.imageFile" value="asset://com.silabs.sdk.stack.super_4.2.3/app/flex/demos/rail_bt_dmp_soc_range_test_std_cli/rail_bt_dmp_soc_range_test_std_cli-brd4166a.s37"/>
     <property key="core.readmeFiles" value="documentation/example/rail/rail_soc_range_test/readme.md"/>
     <property key="filters" value="Capability|Multiprotocol Device\ Type|SoC Project\ Difficulty|Advanced Wireless\ Technology|Bluetooth Wireless\ Technology|RAIL"/>
     <property key="core.quality" value="PRODUCTION"/>
@@ -396,7 +396,7 @@
     <property key="demos.blurb" value="RAIL Bluetooth DMP - SoC Range Test BLE and IEEE802.15.4"/>
     <property key="core.partCompatibility" value=".*efr32mg12p332f1024gl125.*"/>
     <property key="core.boardCompatibility" value="brd4166c"/>
-    <property key="demos.imageFile" value="asset://com.silabs.sdk.stack.super_4.2.2/app/flex/demos/rail_bt_dmp_soc_range_test_std_cli/rail_bt_dmp_soc_range_test_std_cli-brd4166c.s37"/>
+    <property key="demos.imageFile" value="asset://com.silabs.sdk.stack.super_4.2.3/app/flex/demos/rail_bt_dmp_soc_range_test_std_cli/rail_bt_dmp_soc_range_test_std_cli-brd4166c.s37"/>
     <property key="core.readmeFiles" value="documentation/example/rail/rail_soc_range_test/readme.md"/>
     <property key="filters" value="Capability|Multiprotocol Device\ Type|SoC Project\ Difficulty|Advanced Wireless\ Technology|Bluetooth Wireless\ Technology|RAIL"/>
     <property key="core.quality" value="PRODUCTION"/>
@@ -406,7 +406,17 @@
     <property key="demos.blurb" value="RAIL Bluetooth DMP - SoC Range Test BLE and IEEE802.15.4"/>
     <property key="core.partCompatibility" value=".*efr32mg21a010f1024im32.*"/>
     <property key="core.boardCompatibility" value="brd4179b"/>
-    <property key="demos.imageFile" value="asset://com.silabs.sdk.stack.super_4.2.2/app/flex/demos/rail_bt_dmp_soc_range_test_std_cli/rail_bt_dmp_soc_range_test_std_cli-brd4179b.s37"/>
+    <property key="demos.imageFile" value="asset://com.silabs.sdk.stack.super_4.2.3/app/flex/demos/rail_bt_dmp_soc_range_test_std_cli/rail_bt_dmp_soc_range_test_std_cli-brd4179b.s37"/>
+    <property key="core.readmeFiles" value="documentation/example/rail/rail_soc_range_test/readme.md"/>
+    <property key="filters" value="Capability|Multiprotocol Device\ Type|SoC Project\ Difficulty|Advanced Wireless\ Technology|Bluetooth Wireless\ Technology|RAIL"/>
+    <property key="core.quality" value="PRODUCTION"/>
+  </demo>
+  <demo name="brd4332a.demo.rail_bt_dmp_soc_range_test_std_cli" label="RAIL Bluetooth DMP - SoC Range Test BLE and IEEE802.15.4">
+    <model:description>Range Test BLE and IEEE802.15.4 with Bluetooth connectivity. It runs on top of Micrium OS RTOS and multiprotocol RAIL. This application demonstrates over the air range of the Silicon Labs boards. 5 predefined PHYs can be used for this: BLE: 125kbps, BLE: 500kbps, BLE: 1Mbps, BLE: 2Mbps, IEEE80215.4: 250kbps. This sample app can act as a Transmitter and a Receiver. Flashing this app into two separate boards makes it possible to test the features and specification of the radio. The sample also provides an example how the RAIL API can be used. In Tx Mode, the user can send packets. Packet length defined by the PHY and the number of packets to transmit (from 500 up to continuous) can be set. Output power can be set in 0.5dBm steps (power setpoint), between -15..+20dBm. Actual minimum and maximum power may vary in different frequencies as well as the power that is actually set by RAIL. The get_power command displays the setpoint first, then actual value. In Rx Mode, the radio listens on the given predefined PHY and inspects the packets received. Packet Error Rate, Bit Error Rate and RSSI of the packets is displayed to inform about the quality of the transmission. Radio related events can be logged on UART on demand. CLI can be used to set and get configuration of the app, and to start and stop it. To get started with CLI send 'help' with a terminal. Wireless Gecko mobile app can also be used to control this application over Bluetooth. Currently MicriumOS and FreeRTOS is supported by this sample app. NOTE: Due to the higher current consumption of the continuous radio usage (especially in Rx Mode), it is not recommended to power the boards from a coin cell. Instead, a USB power bank can be used if portability is needed.</model:description>
+    <property key="demos.blurb" value="RAIL Bluetooth DMP - SoC Range Test BLE and IEEE802.15.4"/>
+    <property key="core.partCompatibility" value=".*efr32bg21b010f1024im32.*"/>
+    <property key="core.boardCompatibility" value="brd4332a"/>
+    <property key="demos.imageFile" value="asset://com.silabs.sdk.stack.super_4.2.3/app/flex/demos/rail_bt_dmp_soc_range_test_std_cli/rail_bt_dmp_soc_range_test_std_cli-brd4332a.s37"/>
     <property key="core.readmeFiles" value="documentation/example/rail/rail_soc_range_test/readme.md"/>
     <property key="filters" value="Capability|Multiprotocol Device\ Type|SoC Project\ Difficulty|Advanced Wireless\ Technology|Bluetooth Wireless\ Technology|RAIL"/>
     <property key="core.quality" value="PRODUCTION"/>
@@ -416,7 +426,7 @@
     <property key="demos.blurb" value="RAIL Bluetooth DMP - SoC Range Test"/>
     <property key="core.partCompatibility" value=".*efr32bg12p332f1024gl125.*"/>
     <property key="core.boardCompatibility" value="brd4103a"/>
-    <property key="demos.imageFile" value="asset://com.silabs.sdk.stack.super_4.2.2/app/flex/demos/rail_bt_dmp_soc_range_test/rail_bt_dmp_soc_range_test-brd4103a.s37"/>
+    <property key="demos.imageFile" value="asset://com.silabs.sdk.stack.super_4.2.3/app/flex/demos/rail_bt_dmp_soc_range_test/rail_bt_dmp_soc_range_test-brd4103a.s37"/>
     <property key="core.readmeFiles" value="documentation/example/rail/rail_soc_range_test/readme.md"/>
     <property key="filters" value="Capability|Multiprotocol Device\ Type|SoC Project\ Difficulty|Advanced Wireless\ Technology|Bluetooth Wireless\ Technology|RAIL"/>
     <property key="core.quality" value="PRODUCTION"/>
@@ -426,7 +436,7 @@
     <property key="demos.blurb" value="RAIL Bluetooth DMP - SoC Range Test"/>
     <property key="core.partCompatibility" value=".*efr32bg13p632f512gm48.*"/>
     <property key="core.boardCompatibility" value="brd4104a"/>
-    <property key="demos.imageFile" value="asset://com.silabs.sdk.stack.super_4.2.2/app/flex/demos/rail_bt_dmp_soc_range_test/rail_bt_dmp_soc_range_test-brd4104a.s37"/>
+    <property key="demos.imageFile" value="asset://com.silabs.sdk.stack.super_4.2.3/app/flex/demos/rail_bt_dmp_soc_range_test/rail_bt_dmp_soc_range_test-brd4104a.s37"/>
     <property key="core.readmeFiles" value="documentation/example/rail/rail_soc_range_test/readme.md"/>
     <property key="filters" value="Capability|Multiprotocol Device\ Type|SoC Project\ Difficulty|Advanced Wireless\ Technology|Bluetooth Wireless\ Technology|RAIL"/>
     <property key="core.quality" value="PRODUCTION"/>
@@ -436,7 +446,7 @@
     <property key="demos.blurb" value="RAIL Bluetooth DMP - SoC Range Test"/>
     <property key="core.partCompatibility" value=".*efr32mg13p733f512gm48.*"/>
     <property key="core.boardCompatibility" value="brd4158a"/>
-    <property key="demos.imageFile" value="asset://com.silabs.sdk.stack.super_4.2.2/app/flex/demos/rail_bt_dmp_soc_range_test/rail_bt_dmp_soc_range_test-brd4158a.s37"/>
+    <property key="demos.imageFile" value="asset://com.silabs.sdk.stack.super_4.2.3/app/flex/demos/rail_bt_dmp_soc_range_test/rail_bt_dmp_soc_range_test-brd4158a.s37"/>
     <property key="core.readmeFiles" value="documentation/example/rail/rail_soc_range_test/readme.md"/>
     <property key="filters" value="Capability|Multiprotocol Device\ Type|SoC Project\ Difficulty|Advanced Wireless\ Technology|Bluetooth Wireless\ Technology|RAIL"/>
     <property key="core.quality" value="PRODUCTION"/>
@@ -446,7 +456,7 @@
     <property key="demos.blurb" value="RAIL Bluetooth DMP - SoC Range Test"/>
     <property key="core.partCompatibility" value=".*efr32mg13p632f512gm48.*"/>
     <property key="core.boardCompatibility" value="brd4159a"/>
-    <property key="demos.imageFile" value="asset://com.silabs.sdk.stack.super_4.2.2/app/flex/demos/rail_bt_dmp_soc_range_test/rail_bt_dmp_soc_range_test-brd4159a.s37"/>
+    <property key="demos.imageFile" value="asset://com.silabs.sdk.stack.super_4.2.3/app/flex/demos/rail_bt_dmp_soc_range_test/rail_bt_dmp_soc_range_test-brd4159a.s37"/>
     <property key="core.readmeFiles" value="documentation/example/rail/rail_soc_range_test/readme.md"/>
     <property key="filters" value="Capability|Multiprotocol Device\ Type|SoC Project\ Difficulty|Advanced Wireless\ Technology|Bluetooth Wireless\ Technology|RAIL"/>
     <property key="core.quality" value="PRODUCTION"/>
@@ -456,7 +466,7 @@
     <property key="demos.blurb" value="RAIL Bluetooth DMP - SoC Range Test"/>
     <property key="core.partCompatibility" value=".*efr32mg12p432f1024gl125.*"/>
     <property key="core.boardCompatibility" value="brd4161a"/>
-    <property key="demos.imageFile" value="asset://com.silabs.sdk.stack.super_4.2.2/app/flex/demos/rail_bt_dmp_soc_range_test/rail_bt_dmp_soc_range_test-brd4161a.s37"/>
+    <property key="demos.imageFile" value="asset://com.silabs.sdk.stack.super_4.2.3/app/flex/demos/rail_bt_dmp_soc_range_test/rail_bt_dmp_soc_range_test-brd4161a.s37"/>
     <property key="core.readmeFiles" value="documentation/example/rail/rail_soc_range_test/readme.md"/>
     <property key="filters" value="Capability|Multiprotocol Device\ Type|SoC Project\ Difficulty|Advanced Wireless\ Technology|Bluetooth Wireless\ Technology|RAIL"/>
     <property key="core.quality" value="PRODUCTION"/>
@@ -466,7 +476,7 @@
     <property key="demos.blurb" value="RAIL Bluetooth DMP - SoC Range Test"/>
     <property key="core.partCompatibility" value=".*efr32mg12p332f1024gl125.*"/>
     <property key="core.boardCompatibility" value="brd4162a"/>
-    <property key="demos.imageFile" value="asset://com.silabs.sdk.stack.super_4.2.2/app/flex/demos/rail_bt_dmp_soc_range_test/rail_bt_dmp_soc_range_test-brd4162a.s37"/>
+    <property key="demos.imageFile" value="asset://com.silabs.sdk.stack.super_4.2.3/app/flex/demos/rail_bt_dmp_soc_range_test/rail_bt_dmp_soc_range_test-brd4162a.s37"/>
     <property key="core.readmeFiles" value="documentation/example/rail/rail_soc_range_test/readme.md"/>
     <property key="filters" value="Capability|Multiprotocol Device\ Type|SoC Project\ Difficulty|Advanced Wireless\ Technology|Bluetooth Wireless\ Technology|RAIL"/>
     <property key="core.quality" value="PRODUCTION"/>
@@ -476,7 +486,7 @@
     <property key="demos.blurb" value="RAIL Bluetooth DMP - SoC Range Test"/>
     <property key="core.partCompatibility" value=".*efr32mg12p433f1024gl125.*"/>
     <property key="core.boardCompatibility" value="brd4163a"/>
-    <property key="demos.imageFile" value="asset://com.silabs.sdk.stack.super_4.2.2/app/flex/demos/rail_bt_dmp_soc_range_test/rail_bt_dmp_soc_range_test-brd4163a.s37"/>
+    <property key="demos.imageFile" value="asset://com.silabs.sdk.stack.super_4.2.3/app/flex/demos/rail_bt_dmp_soc_range_test/rail_bt_dmp_soc_range_test-brd4163a.s37"/>
     <property key="core.readmeFiles" value="documentation/example/rail/rail_soc_range_test/readme.md"/>
     <property key="filters" value="Capability|Multiprotocol Device\ Type|SoC Project\ Difficulty|Advanced Wireless\ Technology|Bluetooth Wireless\ Technology|RAIL"/>
     <property key="core.quality" value="PRODUCTION"/>
@@ -486,7 +496,7 @@
     <property key="demos.blurb" value="RAIL Bluetooth DMP - SoC Range Test"/>
     <property key="core.partCompatibility" value=".*efr32mg12p433f1024gl125.*"/>
     <property key="core.boardCompatibility" value="brd4164a"/>
-    <property key="demos.imageFile" value="asset://com.silabs.sdk.stack.super_4.2.2/app/flex/demos/rail_bt_dmp_soc_range_test/rail_bt_dmp_soc_range_test-brd4164a.s37"/>
+    <property key="demos.imageFile" value="asset://com.silabs.sdk.stack.super_4.2.3/app/flex/demos/rail_bt_dmp_soc_range_test/rail_bt_dmp_soc_range_test-brd4164a.s37"/>
     <property key="core.readmeFiles" value="documentation/example/rail/rail_soc_range_test/readme.md"/>
     <property key="filters" value="Capability|Multiprotocol Device\ Type|SoC Project\ Difficulty|Advanced Wireless\ Technology|Bluetooth Wireless\ Technology|RAIL"/>
     <property key="core.quality" value="PRODUCTION"/>
@@ -496,7 +506,7 @@
     <property key="demos.blurb" value="RAIL Bluetooth DMP - SoC Range Test"/>
     <property key="core.partCompatibility" value=".*efr32mg13p832f512im48.*"/>
     <property key="core.boardCompatibility" value="brd4165b"/>
-    <property key="demos.imageFile" value="asset://com.silabs.sdk.stack.super_4.2.2/app/flex/demos/rail_bt_dmp_soc_range_test/rail_bt_dmp_soc_range_test-brd4165b.s37"/>
+    <property key="demos.imageFile" value="asset://com.silabs.sdk.stack.super_4.2.3/app/flex/demos/rail_bt_dmp_soc_range_test/rail_bt_dmp_soc_range_test-brd4165b.s37"/>
     <property key="core.readmeFiles" value="documentation/example/rail/rail_soc_range_test/readme.md"/>
     <property key="filters" value="Capability|Multiprotocol Device\ Type|SoC Project\ Difficulty|Advanced Wireless\ Technology|Bluetooth Wireless\ Technology|RAIL"/>
     <property key="core.quality" value="PRODUCTION"/>
@@ -506,7 +516,7 @@
     <property key="demos.blurb" value="RAIL Bluetooth DMP - SoC Range Test"/>
     <property key="core.partCompatibility" value=".*efr32mg13p733f512gm48.*"/>
     <property key="core.boardCompatibility" value="brd4167a"/>
-    <property key="demos.imageFile" value="asset://com.silabs.sdk.stack.super_4.2.2/app/flex/demos/rail_bt_dmp_soc_range_test/rail_bt_dmp_soc_range_test-brd4167a.s37"/>
+    <property key="demos.imageFile" value="asset://com.silabs.sdk.stack.super_4.2.3/app/flex/demos/rail_bt_dmp_soc_range_test/rail_bt_dmp_soc_range_test-brd4167a.s37"/>
     <property key="core.readmeFiles" value="documentation/example/rail/rail_soc_range_test/readme.md"/>
     <property key="filters" value="Capability|Multiprotocol Device\ Type|SoC Project\ Difficulty|Advanced Wireless\ Technology|Bluetooth Wireless\ Technology|RAIL"/>
     <property key="core.quality" value="PRODUCTION"/>
@@ -516,7 +526,7 @@
     <property key="demos.blurb" value="RAIL Bluetooth DMP - SoC Range Test"/>
     <property key="core.partCompatibility" value=".*efr32mg13p732f512gm48.*"/>
     <property key="core.boardCompatibility" value="brd4168a"/>
-    <property key="demos.imageFile" value="asset://com.silabs.sdk.stack.super_4.2.2/app/flex/demos/rail_bt_dmp_soc_range_test/rail_bt_dmp_soc_range_test-brd4168a.s37"/>
+    <property key="demos.imageFile" value="asset://com.silabs.sdk.stack.super_4.2.3/app/flex/demos/rail_bt_dmp_soc_range_test/rail_bt_dmp_soc_range_test-brd4168a.s37"/>
     <property key="core.readmeFiles" value="documentation/example/rail/rail_soc_range_test/readme.md"/>
     <property key="filters" value="Capability|Multiprotocol Device\ Type|SoC Project\ Difficulty|Advanced Wireless\ Technology|Bluetooth Wireless\ Technology|RAIL"/>
     <property key="core.quality" value="PRODUCTION"/>
@@ -526,7 +536,7 @@
     <property key="demos.blurb" value="RAIL Bluetooth DMP - SoC Range Test"/>
     <property key="core.partCompatibility" value=".*efr32mg12p433f1024gm68.*"/>
     <property key="core.boardCompatibility" value="brd4170a"/>
-    <property key="demos.imageFile" value="asset://com.silabs.sdk.stack.super_4.2.2/app/flex/demos/rail_bt_dmp_soc_range_test/rail_bt_dmp_soc_range_test-brd4170a.s37"/>
+    <property key="demos.imageFile" value="asset://com.silabs.sdk.stack.super_4.2.3/app/flex/demos/rail_bt_dmp_soc_range_test/rail_bt_dmp_soc_range_test-brd4170a.s37"/>
     <property key="core.readmeFiles" value="documentation/example/rail/rail_soc_range_test/readme.md"/>
     <property key="filters" value="Capability|Multiprotocol Device\ Type|SoC Project\ Difficulty|Advanced Wireless\ Technology|Bluetooth Wireless\ Technology|RAIL"/>
     <property key="core.quality" value="PRODUCTION"/>
@@ -536,7 +546,7 @@
     <property key="demos.blurb" value="RAIL Bluetooth DMP - SoC Range Test"/>
     <property key="core.partCompatibility" value=".*efr32mg12p433f1024gm48.*"/>
     <property key="core.boardCompatibility" value="brd4172a"/>
-    <property key="demos.imageFile" value="asset://com.silabs.sdk.stack.super_4.2.2/app/flex/demos/rail_bt_dmp_soc_range_test/rail_bt_dmp_soc_range_test-brd4172a.s37"/>
+    <property key="demos.imageFile" value="asset://com.silabs.sdk.stack.super_4.2.3/app/flex/demos/rail_bt_dmp_soc_range_test/rail_bt_dmp_soc_range_test-brd4172a.s37"/>
     <property key="core.readmeFiles" value="documentation/example/rail/rail_soc_range_test/readme.md"/>
     <property key="filters" value="Capability|Multiprotocol Device\ Type|SoC Project\ Difficulty|Advanced Wireless\ Technology|Bluetooth Wireless\ Technology|RAIL"/>
     <property key="core.quality" value="PRODUCTION"/>
@@ -546,7 +556,7 @@
     <property key="demos.blurb" value="RAIL Bluetooth DMP - SoC Range Test"/>
     <property key="core.partCompatibility" value=".*efr32mg12p433f1024gm48.*"/>
     <property key="core.boardCompatibility" value="brd4172b"/>
-    <property key="demos.imageFile" value="asset://com.silabs.sdk.stack.super_4.2.2/app/flex/demos/rail_bt_dmp_soc_range_test/rail_bt_dmp_soc_range_test-brd4172b.s37"/>
+    <property key="demos.imageFile" value="asset://com.silabs.sdk.stack.super_4.2.3/app/flex/demos/rail_bt_dmp_soc_range_test/rail_bt_dmp_soc_range_test-brd4172b.s37"/>
     <property key="core.readmeFiles" value="documentation/example/rail/rail_soc_range_test/readme.md"/>
     <property key="filters" value="Capability|Multiprotocol Device\ Type|SoC Project\ Difficulty|Advanced Wireless\ Technology|Bluetooth Wireless\ Technology|RAIL"/>
     <property key="core.quality" value="PRODUCTION"/>
@@ -556,7 +566,7 @@
     <property key="demos.blurb" value="RAIL Bluetooth DMP - SoC Range Test"/>
     <property key="core.partCompatibility" value=".*efr32mg12p433f1024gm48.*"/>
     <property key="core.boardCompatibility" value="brd4173a"/>
-    <property key="demos.imageFile" value="asset://com.silabs.sdk.stack.super_4.2.2/app/flex/demos/rail_bt_dmp_soc_range_test/rail_bt_dmp_soc_range_test-brd4173a.s37"/>
+    <property key="demos.imageFile" value="asset://com.silabs.sdk.stack.super_4.2.3/app/flex/demos/rail_bt_dmp_soc_range_test/rail_bt_dmp_soc_range_test-brd4173a.s37"/>
     <property key="core.readmeFiles" value="documentation/example/rail/rail_soc_range_test/readme.md"/>
     <property key="filters" value="Capability|Multiprotocol Device\ Type|SoC Project\ Difficulty|Advanced Wireless\ Technology|Bluetooth Wireless\ Technology|RAIL"/>
     <property key="core.quality" value="PRODUCTION"/>
@@ -566,7 +576,7 @@
     <property key="demos.blurb" value="RAIL Bluetooth DMP - SoC Range Test"/>
     <property key="core.partCompatibility" value=".*efr32mg13p733f512gm48.*"/>
     <property key="core.boardCompatibility" value="brd4174a"/>
-    <property key="demos.imageFile" value="asset://com.silabs.sdk.stack.super_4.2.2/app/flex/demos/rail_bt_dmp_soc_range_test/rail_bt_dmp_soc_range_test-brd4174a.s37"/>
+    <property key="demos.imageFile" value="asset://com.silabs.sdk.stack.super_4.2.3/app/flex/demos/rail_bt_dmp_soc_range_test/rail_bt_dmp_soc_range_test-brd4174a.s37"/>
     <property key="core.readmeFiles" value="documentation/example/rail/rail_soc_range_test/readme.md"/>
     <property key="filters" value="Capability|Multiprotocol Device\ Type|SoC Project\ Difficulty|Advanced Wireless\ Technology|Bluetooth Wireless\ Technology|RAIL"/>
     <property key="core.quality" value="PRODUCTION"/>
@@ -576,7 +586,7 @@
     <property key="demos.blurb" value="RAIL Bluetooth DMP - SoC Range Test"/>
     <property key="core.partCompatibility" value=".*efr32mg13p733f512gm48.*"/>
     <property key="core.boardCompatibility" value="brd4174b"/>
-    <property key="demos.imageFile" value="asset://com.silabs.sdk.stack.super_4.2.2/app/flex/demos/rail_bt_dmp_soc_range_test/rail_bt_dmp_soc_range_test-brd4174b.s37"/>
+    <property key="demos.imageFile" value="asset://com.silabs.sdk.stack.super_4.2.3/app/flex/demos/rail_bt_dmp_soc_range_test/rail_bt_dmp_soc_range_test-brd4174b.s37"/>
     <property key="core.readmeFiles" value="documentation/example/rail/rail_soc_range_test/readme.md"/>
     <property key="filters" value="Capability|Multiprotocol Device\ Type|SoC Project\ Difficulty|Advanced Wireless\ Technology|Bluetooth Wireless\ Technology|RAIL"/>
     <property key="core.quality" value="PRODUCTION"/>
@@ -586,7 +596,7 @@
     <property key="demos.blurb" value="RAIL Bluetooth DMP - SoC Range Test"/>
     <property key="core.partCompatibility" value=".*efr32mg13p733f512gm48.*"/>
     <property key="core.boardCompatibility" value="brd4175a"/>
-    <property key="demos.imageFile" value="asset://com.silabs.sdk.stack.super_4.2.2/app/flex/demos/rail_bt_dmp_soc_range_test/rail_bt_dmp_soc_range_test-brd4175a.s37"/>
+    <property key="demos.imageFile" value="asset://com.silabs.sdk.stack.super_4.2.3/app/flex/demos/rail_bt_dmp_soc_range_test/rail_bt_dmp_soc_range_test-brd4175a.s37"/>
     <property key="core.readmeFiles" value="documentation/example/rail/rail_soc_range_test/readme.md"/>
     <property key="filters" value="Capability|Multiprotocol Device\ Type|SoC Project\ Difficulty|Advanced Wireless\ Technology|Bluetooth Wireless\ Technology|RAIL"/>
     <property key="core.quality" value="PRODUCTION"/>
@@ -596,7 +606,7 @@
     <property key="demos.blurb" value="RAIL Bluetooth DMP - SoC Range Test"/>
     <property key="core.partCompatibility" value=".*efr32mg24a010f1536gm48.*"/>
     <property key="core.boardCompatibility" value="brd4186a"/>
-    <property key="demos.imageFile" value="asset://com.silabs.sdk.stack.super_4.2.2/app/flex/demos/rail_bt_dmp_soc_range_test/rail_bt_dmp_soc_range_test-brd4186a.s37"/>
+    <property key="demos.imageFile" value="asset://com.silabs.sdk.stack.super_4.2.3/app/flex/demos/rail_bt_dmp_soc_range_test/rail_bt_dmp_soc_range_test-brd4186a.s37"/>
     <property key="core.readmeFiles" value="documentation/example/rail/rail_soc_range_test/readme.md"/>
     <property key="filters" value="Capability|Multiprotocol Device\ Type|SoC Project\ Difficulty|Advanced Wireless\ Technology|Bluetooth Wireless\ Technology|RAIL"/>
     <property key="core.quality" value="PRODUCTION"/>
@@ -606,7 +616,7 @@
     <property key="demos.blurb" value="RAIL Bluetooth DMP - SoC Range Test"/>
     <property key="core.partCompatibility" value=".*efr32mg24b010f1536im48.*"/>
     <property key="core.boardCompatibility" value="brd4186b"/>
-    <property key="demos.imageFile" value="asset://com.silabs.sdk.stack.super_4.2.2/app/flex/demos/rail_bt_dmp_soc_range_test/rail_bt_dmp_soc_range_test-brd4186b.s37"/>
+    <property key="demos.imageFile" value="asset://com.silabs.sdk.stack.super_4.2.3/app/flex/demos/rail_bt_dmp_soc_range_test/rail_bt_dmp_soc_range_test-brd4186b.s37"/>
     <property key="core.readmeFiles" value="documentation/example/rail/rail_soc_range_test/readme.md"/>
     <property key="filters" value="Capability|Multiprotocol Device\ Type|SoC Project\ Difficulty|Advanced Wireless\ Technology|Bluetooth Wireless\ Technology|RAIL"/>
     <property key="core.quality" value="PRODUCTION"/>
@@ -616,7 +626,7 @@
     <property key="demos.blurb" value="RAIL Bluetooth DMP - SoC Range Test"/>
     <property key="core.partCompatibility" value=".*efr32mg24b210f1536im48.*"/>
     <property key="core.boardCompatibility" value="brd4186c"/>
-    <property key="demos.imageFile" value="asset://com.silabs.sdk.stack.super_4.2.2/app/flex/demos/rail_bt_dmp_soc_range_test/rail_bt_dmp_soc_range_test-brd4186c.s37"/>
+    <property key="demos.imageFile" value="asset://com.silabs.sdk.stack.super_4.2.3/app/flex/demos/rail_bt_dmp_soc_range_test/rail_bt_dmp_soc_range_test-brd4186c.s37"/>
     <property key="core.readmeFiles" value="documentation/example/rail/rail_soc_range_test/readme.md"/>
     <property key="filters" value="Capability|Multiprotocol Device\ Type|SoC Project\ Difficulty|Advanced Wireless\ Technology|Bluetooth Wireless\ Technology|RAIL"/>
     <property key="core.quality" value="PRODUCTION"/>
@@ -626,7 +636,7 @@
     <property key="demos.blurb" value="RAIL Bluetooth DMP - SoC Range Test"/>
     <property key="core.partCompatibility" value=".*efr32mg24a020f1536gm48.*"/>
     <property key="core.boardCompatibility" value="brd4187a"/>
-    <property key="demos.imageFile" value="asset://com.silabs.sdk.stack.super_4.2.2/app/flex/demos/rail_bt_dmp_soc_range_test/rail_bt_dmp_soc_range_test-brd4187a.s37"/>
+    <property key="demos.imageFile" value="asset://com.silabs.sdk.stack.super_4.2.3/app/flex/demos/rail_bt_dmp_soc_range_test/rail_bt_dmp_soc_range_test-brd4187a.s37"/>
     <property key="core.readmeFiles" value="documentation/example/rail/rail_soc_range_test/readme.md"/>
     <property key="filters" value="Capability|Multiprotocol Device\ Type|SoC Project\ Difficulty|Advanced Wireless\ Technology|Bluetooth Wireless\ Technology|RAIL"/>
     <property key="core.quality" value="PRODUCTION"/>
@@ -636,7 +646,7 @@
     <property key="demos.blurb" value="RAIL Bluetooth DMP - SoC Range Test"/>
     <property key="core.partCompatibility" value=".*efr32mg24b020f1536im48.*"/>
     <property key="core.boardCompatibility" value="brd4187b"/>
-    <property key="demos.imageFile" value="asset://com.silabs.sdk.stack.super_4.2.2/app/flex/demos/rail_bt_dmp_soc_range_test/rail_bt_dmp_soc_range_test-brd4187b.s37"/>
+    <property key="demos.imageFile" value="asset://com.silabs.sdk.stack.super_4.2.3/app/flex/demos/rail_bt_dmp_soc_range_test/rail_bt_dmp_soc_range_test-brd4187b.s37"/>
     <property key="core.readmeFiles" value="documentation/example/rail/rail_soc_range_test/readme.md"/>
     <property key="filters" value="Capability|Multiprotocol Device\ Type|SoC Project\ Difficulty|Advanced Wireless\ Technology|Bluetooth Wireless\ Technology|RAIL"/>
     <property key="core.quality" value="PRODUCTION"/>
@@ -646,7 +656,7 @@
     <property key="demos.blurb" value="RAIL Bluetooth DMP - SoC Range Test"/>
     <property key="core.partCompatibility" value=".*efr32mg24b220f1536im48.*"/>
     <property key="core.boardCompatibility" value="brd4187c"/>
-    <property key="demos.imageFile" value="asset://com.silabs.sdk.stack.super_4.2.2/app/flex/demos/rail_bt_dmp_soc_range_test/rail_bt_dmp_soc_range_test-brd4187c.s37"/>
+    <property key="demos.imageFile" value="asset://com.silabs.sdk.stack.super_4.2.3/app/flex/demos/rail_bt_dmp_soc_range_test/rail_bt_dmp_soc_range_test-brd4187c.s37"/>
     <property key="core.readmeFiles" value="documentation/example/rail/rail_soc_range_test/readme.md"/>
     <property key="filters" value="Capability|Multiprotocol Device\ Type|SoC Project\ Difficulty|Advanced Wireless\ Technology|Bluetooth Wireless\ Technology|RAIL"/>
     <property key="core.quality" value="PRODUCTION"/>
@@ -656,7 +666,7 @@
     <property key="demos.blurb" value="RAIL Bluetooth DMP - SoC Range Test"/>
     <property key="core.partCompatibility" value=".*efr32mg24b020f1536im48.*"/>
     <property key="core.boardCompatibility" value="brd4188a"/>
-    <property key="demos.imageFile" value="asset://com.silabs.sdk.stack.super_4.2.2/app/flex/demos/rail_bt_dmp_soc_range_test/rail_bt_dmp_soc_range_test-brd4188a.s37"/>
+    <property key="demos.imageFile" value="asset://com.silabs.sdk.stack.super_4.2.3/app/flex/demos/rail_bt_dmp_soc_range_test/rail_bt_dmp_soc_range_test-brd4188a.s37"/>
     <property key="core.readmeFiles" value="documentation/example/rail/rail_soc_range_test/readme.md"/>
     <property key="filters" value="Capability|Multiprotocol Device\ Type|SoC Project\ Difficulty|Advanced Wireless\ Technology|Bluetooth Wireless\ Technology|RAIL"/>
     <property key="core.quality" value="PRODUCTION"/>
@@ -666,7 +676,7 @@
     <property key="demos.blurb" value="RAIL Bluetooth DMP - SoC Range Test"/>
     <property key="core.partCompatibility" value=".*efr32mg24b220f1536im48.*"/>
     <property key="core.boardCompatibility" value="brd4188b"/>
-    <property key="demos.imageFile" value="asset://com.silabs.sdk.stack.super_4.2.2/app/flex/demos/rail_bt_dmp_soc_range_test/rail_bt_dmp_soc_range_test-brd4188b.s37"/>
+    <property key="demos.imageFile" value="asset://com.silabs.sdk.stack.super_4.2.3/app/flex/demos/rail_bt_dmp_soc_range_test/rail_bt_dmp_soc_range_test-brd4188b.s37"/>
     <property key="core.readmeFiles" value="documentation/example/rail/rail_soc_range_test/readme.md"/>
     <property key="filters" value="Capability|Multiprotocol Device\ Type|SoC Project\ Difficulty|Advanced Wireless\ Technology|Bluetooth Wireless\ Technology|RAIL"/>
     <property key="core.quality" value="PRODUCTION"/>
@@ -676,7 +686,7 @@
     <property key="demos.blurb" value="RAIL Bluetooth DMP - SoC Range Test"/>
     <property key="core.partCompatibility" value=".*efr32mg12p232f1024gm48.*"/>
     <property key="core.boardCompatibility" value="brd4190a"/>
-    <property key="demos.imageFile" value="asset://com.silabs.sdk.stack.super_4.2.2/app/flex/demos/rail_bt_dmp_soc_range_test/rail_bt_dmp_soc_range_test-brd4190a.s37"/>
+    <property key="demos.imageFile" value="asset://com.silabs.sdk.stack.super_4.2.3/app/flex/demos/rail_bt_dmp_soc_range_test/rail_bt_dmp_soc_range_test-brd4190a.s37"/>
     <property key="core.readmeFiles" value="documentation/example/rail/rail_soc_range_test/readme.md"/>
     <property key="filters" value="Capability|Multiprotocol Device\ Type|SoC Project\ Difficulty|Advanced Wireless\ Technology|Bluetooth Wireless\ Technology|RAIL"/>
     <property key="core.quality" value="PRODUCTION"/>
@@ -686,7 +696,7 @@
     <property key="demos.blurb" value="RAIL Bluetooth DMP - SoC Range Test"/>
     <property key="core.partCompatibility" value=".*efr32mg24b220f1536im48.*"/>
     <property key="core.boardCompatibility" value="brd4197a"/>
-    <property key="demos.imageFile" value="asset://com.silabs.sdk.stack.super_4.2.2/app/flex/demos/rail_bt_dmp_soc_range_test/rail_bt_dmp_soc_range_test-brd4197a.s37"/>
+    <property key="demos.imageFile" value="asset://com.silabs.sdk.stack.super_4.2.3/app/flex/demos/rail_bt_dmp_soc_range_test/rail_bt_dmp_soc_range_test-brd4197a.s37"/>
     <property key="core.readmeFiles" value="documentation/example/rail/rail_soc_range_test/readme.md"/>
     <property key="filters" value="Capability|Multiprotocol Device\ Type|SoC Project\ Difficulty|Advanced Wireless\ Technology|Bluetooth Wireless\ Technology|RAIL"/>
     <property key="core.quality" value="PRODUCTION"/>
@@ -696,7 +706,7 @@
     <property key="demos.blurb" value="RAIL Bluetooth DMP - SoC Range Test"/>
     <property key="core.partCompatibility" value=".*efr32mg24b210f1536im48.*"/>
     <property key="core.boardCompatibility" value="brd4198a"/>
-    <property key="demos.imageFile" value="asset://com.silabs.sdk.stack.super_4.2.2/app/flex/demos/rail_bt_dmp_soc_range_test/rail_bt_dmp_soc_range_test-brd4198a.s37"/>
+    <property key="demos.imageFile" value="asset://com.silabs.sdk.stack.super_4.2.3/app/flex/demos/rail_bt_dmp_soc_range_test/rail_bt_dmp_soc_range_test-brd4198a.s37"/>
     <property key="core.readmeFiles" value="documentation/example/rail/rail_soc_range_test/readme.md"/>
     <property key="filters" value="Capability|Multiprotocol Device\ Type|SoC Project\ Difficulty|Advanced Wireless\ Technology|Bluetooth Wireless\ Technology|RAIL"/>
     <property key="core.quality" value="PRODUCTION"/>
@@ -706,7 +716,7 @@
     <property key="demos.blurb" value="RAIL Bluetooth DMP - SoC Range Test"/>
     <property key="core.partCompatibility" value=".*efr32mg24b110f1536gm48.*"/>
     <property key="core.boardCompatibility" value="brd2601a"/>
-    <property key="demos.imageFile" value="asset://com.silabs.sdk.stack.super_4.2.2/app/flex/demos/rail_bt_dmp_soc_range_test_cli/rail_bt_dmp_soc_range_test_cli-brd2601a.s37"/>
+    <property key="demos.imageFile" value="asset://com.silabs.sdk.stack.super_4.2.3/app/flex/demos/rail_bt_dmp_soc_range_test_cli/rail_bt_dmp_soc_range_test_cli-brd2601a.s37"/>
     <property key="core.readmeFiles" value="documentation/example/rail/rail_soc_range_test/readme.md"/>
     <property key="filters" value="Capability|Multiprotocol Device\ Type|SoC Project\ Difficulty|Advanced Wireless\ Technology|Bluetooth Wireless\ Technology|RAIL"/>
     <property key="core.quality" value="PRODUCTION"/>
@@ -716,7 +726,7 @@
     <property key="demos.blurb" value="RAIL Bluetooth DMP - SoC Range Test"/>
     <property key="core.partCompatibility" value=".*efr32mg24b310f1536im48.*"/>
     <property key="core.boardCompatibility" value="brd2601b"/>
-    <property key="demos.imageFile" value="asset://com.silabs.sdk.stack.super_4.2.2/app/flex/demos/rail_bt_dmp_soc_range_test_cli/rail_bt_dmp_soc_range_test_cli-brd2601b.s37"/>
+    <property key="demos.imageFile" value="asset://com.silabs.sdk.stack.super_4.2.3/app/flex/demos/rail_bt_dmp_soc_range_test_cli/rail_bt_dmp_soc_range_test_cli-brd2601b.s37"/>
     <property key="core.readmeFiles" value="documentation/example/rail/rail_soc_range_test/readme.md"/>
     <property key="filters" value="Capability|Multiprotocol Device\ Type|SoC Project\ Difficulty|Advanced Wireless\ Technology|Bluetooth Wireless\ Technology|RAIL"/>
     <property key="core.quality" value="PRODUCTION"/>
@@ -726,7 +736,7 @@
     <property key="demos.blurb" value="RAIL Bluetooth DMP - SoC Range Test"/>
     <property key="core.partCompatibility" value=".*efr32mg24b210f1536im48.*"/>
     <property key="core.boardCompatibility" value="brd2703a"/>
-    <property key="demos.imageFile" value="asset://com.silabs.sdk.stack.super_4.2.2/app/flex/demos/rail_bt_dmp_soc_range_test_cli/rail_bt_dmp_soc_range_test_cli-brd2703a.s37"/>
+    <property key="demos.imageFile" value="asset://com.silabs.sdk.stack.super_4.2.3/app/flex/demos/rail_bt_dmp_soc_range_test_cli/rail_bt_dmp_soc_range_test_cli-brd2703a.s37"/>
     <property key="core.readmeFiles" value="documentation/example/rail/rail_soc_range_test/readme.md"/>
     <property key="filters" value="Capability|Multiprotocol Device\ Type|SoC Project\ Difficulty|Advanced Wireless\ Technology|Bluetooth Wireless\ Technology|RAIL"/>
     <property key="core.quality" value="PRODUCTION"/>
@@ -736,7 +746,7 @@
     <property key="demos.blurb" value="RAIL Bluetooth DMP - SoC Range Test"/>
     <property key="core.partCompatibility" value=".*efr32bg24b410f1536ij42.*"/>
     <property key="core.boardCompatibility" value="brd4115a"/>
-    <property key="demos.imageFile" value="asset://com.silabs.sdk.stack.super_4.2.2/app/flex/demos/rail_bt_dmp_soc_range_test_cli/rail_bt_dmp_soc_range_test_cli-brd4115a.s37"/>
+    <property key="demos.imageFile" value="asset://com.silabs.sdk.stack.super_4.2.3/app/flex/demos/rail_bt_dmp_soc_range_test_cli/rail_bt_dmp_soc_range_test_cli-brd4115a.s37"/>
     <property key="core.readmeFiles" value="documentation/example/rail/rail_soc_range_test/readme.md"/>
     <property key="filters" value="Capability|Multiprotocol Device\ Type|SoC Project\ Difficulty|Advanced Wireless\ Technology|Bluetooth Wireless\ Technology|RAIL"/>
     <property key="core.quality" value="PRODUCTION"/>
@@ -746,7 +756,7 @@
     <property key="demos.blurb" value="RAIL Bluetooth DMP - SoC Range Test"/>
     <property key="core.partCompatibility" value=".*efr32mg12p332f1024gl125.*"/>
     <property key="core.boardCompatibility" value="brd4166a"/>
-    <property key="demos.imageFile" value="asset://com.silabs.sdk.stack.super_4.2.2/app/flex/demos/rail_bt_dmp_soc_range_test_cli/rail_bt_dmp_soc_range_test_cli-brd4166a.s37"/>
+    <property key="demos.imageFile" value="asset://com.silabs.sdk.stack.super_4.2.3/app/flex/demos/rail_bt_dmp_soc_range_test_cli/rail_bt_dmp_soc_range_test_cli-brd4166a.s37"/>
     <property key="core.readmeFiles" value="documentation/example/rail/rail_soc_range_test/readme.md"/>
     <property key="filters" value="Capability|Multiprotocol Device\ Type|SoC Project\ Difficulty|Advanced Wireless\ Technology|Bluetooth Wireless\ Technology|RAIL"/>
     <property key="core.quality" value="PRODUCTION"/>
@@ -756,7 +766,7 @@
     <property key="demos.blurb" value="RAIL Bluetooth DMP - SoC Range Test"/>
     <property key="core.partCompatibility" value=".*efr32mg12p332f1024gl125.*"/>
     <property key="core.boardCompatibility" value="brd4166c"/>
-    <property key="demos.imageFile" value="asset://com.silabs.sdk.stack.super_4.2.2/app/flex/demos/rail_bt_dmp_soc_range_test_cli/rail_bt_dmp_soc_range_test_cli-brd4166c.s37"/>
+    <property key="demos.imageFile" value="asset://com.silabs.sdk.stack.super_4.2.3/app/flex/demos/rail_bt_dmp_soc_range_test_cli/rail_bt_dmp_soc_range_test_cli-brd4166c.s37"/>
     <property key="core.readmeFiles" value="documentation/example/rail/rail_soc_range_test/readme.md"/>
     <property key="filters" value="Capability|Multiprotocol Device\ Type|SoC Project\ Difficulty|Advanced Wireless\ Technology|Bluetooth Wireless\ Technology|RAIL"/>
     <property key="core.quality" value="PRODUCTION"/>

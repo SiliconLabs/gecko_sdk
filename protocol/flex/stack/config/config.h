@@ -63,7 +63,7 @@
 /**
  * @brief Build number of the release. Should be stored on 2 bytes.
  */
-#define EMBER_BUILD_NUMBER   190
+#define EMBER_BUILD_NUMBER   215
 
 /**
  * @brief Full version number stored on 2 bytes, with each of the four digits

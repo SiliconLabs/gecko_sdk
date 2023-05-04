@@ -52,6 +52,9 @@
     value: '"BRD4272A"'
   - name: SL_BOARD_REV
     value: '"A03"'
+  - name: HARDWARE_BOARD_SUPPORTS_RF_BAND_470
+  - name: HARDWARE_BOARD_SUPPORTS_1_RF_BAND
+  - name: HARDWARE_BOARD_DEFAULT_RF_BAND_470
 - tag:
   - board:pn:BRD4272
   - board:variant:A

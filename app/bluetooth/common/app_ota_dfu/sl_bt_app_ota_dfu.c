@@ -49,6 +49,9 @@
 #define ATT_ERR_STORAGE_FULL                   0x82u
 #define ATT_ERR_PACKAGE_LOST                   0x83u
 
+#define SL_BT_APP_OTA_DFU_FLASH_VERIFICATION_CONTEXT_SIZE \
+  (uint16_t)(BOOTLOADER_STORAGE_VERIFICATION_CONTEXT_SIZE >> 2)
+
 #ifndef SL_BT_INVALID_CONNECTION_HANDLE
 #define SL_BT_INVALID_CONNECTION_HANDLE ((uint8_t) 0xFF)
 #endif // SL_BT_INVALID_CONNECTION_HANDLE
@@ -65,7 +68,7 @@ static uint32_t ota_img_pos = 0u;
 
 static sl_bt_app_ota_dfu_status_evt_t ota_event;
 
-static uint8_t ota_buff[BOOTLOADER_STORAGE_VERIFICATION_CONTEXT_SIZE];
+static uint32_t ota_buff[SL_BT_APP_OTA_DFU_FLASH_VERIFICATION_CONTEXT_SIZE];
 
 /**************************************************************************/ /**
  * Weak Application OTA DFU initialization.
@@ -177,7 +180,7 @@ void sli_bt_app_ota_dfu_on_event(sl_bt_msg_t *evt)
             btl_ret_val =
               bootloader_writeStorage(SL_BT_APP_OTA_DFU_USED_SLOT,
                                       ota_img_pos,
-                                      ota_buff,
+                                      (uint8_t *)ota_buff,
                                       evt->data.evt_gatt_server_user_write_request.value.len);
             // Check write storage results
             if (btl_ret_val != BOOTLOADER_OK) {
@@ -407,7 +410,7 @@ void sli_bt_app_ota_dfu_step(void)
         btl_ret_val =
           bootloader_readStorage(SL_BT_APP_OTA_DFU_USED_SLOT,
                                  offset,
-                                 ota_buff,
+                                 (uint8_t *)ota_buff,
                                  SL_BT_APP_OTA_DFU_READ_STORAGE_CONTEXT_SIZE);
 
         if (btl_ret_val == BOOTLOADER_OK) {

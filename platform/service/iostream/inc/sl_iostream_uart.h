@@ -72,6 +72,7 @@ extern "C" {
  * ## Initialization
  *
  *   Each UART stream type provides its initalization with parameters specific to them.
+ * @note  Each UART stream requires a dedicated (L)DMA channel through DMADRV.
  * @{
  ******************************************************************************/
 
@@ -136,7 +137,7 @@ typedef struct {
   volatile bool rx_buffer_full;             ///< UART Rx Buffer full
   sl_status_t (*tx)(void *context, char c); ///< Tx function pointer
   void (*tx_completed)(void *context, bool enable); ///< Pointer to a function handling the Tx Completed event
-  void (*set_next_byte_detect)(void *context, bool enable);///< Pointer to a function to enable/disable detection of next byte on stream
+  void (*set_next_byte_detect)(void *context);///< Pointer to a function to enable detection of next byte on stream
   sl_status_t (*deinit)(void *context);     ///< DeInit function pointer
   bool lf_to_crlf;                          ///< lf_to_crlf
   bool sw_flow_control;                     ///< software flow control
@@ -202,6 +203,16 @@ __STATIC_INLINE void sl_iostream_uart_set_auto_cr_lf(sl_iostream_uart_t *iostrea
 __STATIC_INLINE bool sl_iostream_uart_get_auto_cr_lf(sl_iostream_uart_t *iostream_uart)
 {
   return iostream_uart->get_auto_cr_lf(iostream_uart->stream.context);
+}
+
+/***************************************************************************//**
+ * UART Set next byte detect IRQ.
+ *
+ * @param[in] iostream_uart  UART stream object.
+ ******************************************************************************/
+__STATIC_INLINE void sl_iostream_uart_prepare_for_sleep(sl_iostream_uart_t *iostream_uart)
+{
+  ((sl_iostream_uart_context_t*)iostream_uart->stream.context)->set_next_byte_detect(iostream_uart->stream.context);
 }
 
 #if defined(SL_CATALOG_POWER_MANAGER_PRESENT)
